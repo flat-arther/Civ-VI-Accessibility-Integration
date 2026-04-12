@@ -1813,6 +1813,7 @@ local mgr = ExposedMembers.CAI_UIManager
 local MainPanel = nil ---@type UIWidget
 local MenuList = nil ---@type UIWidget
 local m_SubmenuList = nil ---@type UIWidget
+local m_submenuLabel = "" ---Current submenu parent label
 
 
 -- Wrap the 'Initialize' function so we can set the input handler
@@ -1839,7 +1840,10 @@ BuildMenu = WrapFunc(BuildMenu, function(orig, menuOptions)
     if not m_currentOptions or #m_currentOptions == 0 then return end
 
     if not MainPanel then
-        MainPanel = mgr:CreateUIWidget("Panel")
+        MainPanel = mgr:CreateUIWidget("Panel", {
+            GetLabel = function() return Locale.Lookup("LOC_CAI_MAIN_MENU") end,
+            SpeechSettings = { Role = false }
+        })
     end
 
     if not MenuList then
@@ -1853,8 +1857,7 @@ BuildMenu = WrapFunc(BuildMenu, function(orig, menuOptions)
         local controlRef = menuOption.control
         
         if dataEntry then
-            local widgetType = "Button"
-            local widget = mgr:CreateUIWidget(widgetType, {
+            local widget = mgr:CreateUIWidget("MenuItem", {
                 GetLabel = function() return controlRef.ButtonLabel:GetText() end,
                 GetTooltip = function() return controlRef.Top:GetToolTipString() end,
                 IsHidden = function() return controlRef.Top:IsHidden() end,
@@ -1913,13 +1916,22 @@ function ClearSubmenuHighlights()
     end
 end
 
+ToggleOption = WrapFunc(ToggleOption, function(orig, optionIndex, submenu)
+    if m_currentOptions[optionIndex] then
+        m_submenuLabel = m_currentOptions[optionIndex].control.ButtonLabel:GetText()
+    end
+    orig(optionIndex, submenu)
+end)
+
 BuildSubMenu = WrapFunc(BuildSubMenu, function(orig, menuOptions)
     orig(menuOptions)
     local controls = m_subOptionIM and m_subOptionIM.m_AllocatedInstances
     if not controls or #controls == 0 then return end
 
 	if not m_SubmenuList then
-		m_SubmenuList = mgr:CreateUIWidget("List")
+		m_SubmenuList = mgr:CreateUIWidget("List", {
+			GetLabel = function() return m_submenuLabel end,
+		})
 		m_SubmenuList:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function(w)
 			mgr:Pop()
 			for i, option in ipairs(m_currentOptions) do
@@ -1943,17 +1955,17 @@ BuildSubMenu = WrapFunc(BuildSubMenu, function(orig, menuOptions)
             local hasHelpElement = data.helpCallback ~= nil
 
             if hasHelpElement then
-                local helpGroup = mgr:CreateUIWidget("HorizontalList", {
+                local helpGroup = mgr:CreateUIWidget("SubMenu", {
                     GetLabel = function() return mainLabel end,
                     OnFocusEnter = function()
                         HighlightSubmenuInstance(control)
                     end
                 })
 
-                local playButton = mgr:CreateUIWidget("Button", {
-                    GetLabel = function() return "Play Now" end,
+                local playButton = mgr:CreateUIWidget("MenuItem", {
+                    GetLabel = function() return Locale.Lookup("LOC_CAI_PLAY_NOW") end,
                     GetTooltip = function() return control.Top:GetToolTipString() end,
-					IsHidden = function() return control.Top:IsDisabled() end,
+                    IsHidden = function() return control.Top:IsDisabled() end,
                     IsDisabled = function() return control.OptionButton:IsDisabled() end,
                     OnClick = function() data.callback() end,
                     OnFocusEnter = function()
@@ -1961,15 +1973,15 @@ BuildSubMenu = WrapFunc(BuildSubMenu, function(orig, menuOptions)
                     end
                 })
 
-                local helpButton = mgr:CreateUIWidget("Button", {
-                    GetLabel = function() return "Help" end,
+                local helpButton = mgr:CreateUIWidget("MenuItem", {
+                    GetLabel = function() return Locale.Lookup("LOC_CAI_HELP") end,
                     GetTooltip = function() return control.HelpButton:GetToolTipString() end,
                     IsDisabled = function() return control.HelpButton:IsDisabled() end,
                     IsHidden = function() return control.HelpButton:IsHidden() end,
-                    OnClick = function() 
-                        if data.helpCallback then 
-                            data.helpCallback() 
-                        end 
+                    OnClick = function()
+                        if data.helpCallback then
+                            data.helpCallback()
+                        end
                     end
                 })
 
@@ -1977,7 +1989,7 @@ BuildSubMenu = WrapFunc(BuildSubMenu, function(orig, menuOptions)
                 helpGroup:AddChild(helpButton)
                 m_SubmenuList:AddChild(helpGroup)
             else
-                local standardButton = mgr:CreateUIWidget("Button", {
+                local standardButton = mgr:CreateUIWidget("MenuItem", {
                     GetLabel = function() return mainLabel end,
                     GetTooltip = function() return control.Top:GetToolTipString() end,
                     IsDisabled = function() return control.OptionButton:IsDisabled() end,

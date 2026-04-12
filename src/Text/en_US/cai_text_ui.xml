@@ -2,7 +2,74 @@
 <GameData>
   <LocalizedText>
     <!-- ENGLISH -->
+
+    <!-- Widget roles -->
+    <Row Tag="LOC_UIWidget_Role_Button" Language="en_US">
+      <Text>Button</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_DropdownMenu" Language="en_US">
+      <Text>Dropdown Menu</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_Edit" Language="en_US">
+      <Text>Edit</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_List" Language="en_US">
+      <Text>List</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_Panel" Language="en_US">
+      <Text>Panel</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_Dialog" Language="en_US">
+      <Text>Dialog</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_Checkbox" Language="en_US">
+      <Text>Checkbox</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_HorizontalList" Language="en_US">
+      <Text>Horizontal List</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_SubMenu" Language="en_US">
+      <Text>Sub Menu</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_Slider" Language="en_US">
+      <Text>Slider</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_Tab" Language="en_US">
+      <Text>Tab</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_TabBar" Language="en_US">
+      <Text>Tab Bar</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_MenuItem" Language="en_US">
+      <Text>Menu Item</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_StaticText" Language="en_US">
+      <Text>Text</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_GameView" Language="en_US">
+      <Text>Game View</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_InterfaceMode" Language="en_US">
+      <Text>Interface Mode</Text>
+    </Row>
+
+    <!-- Widget position -->
+    <Row Tag="LOC_UIWidget_Element_Pos" Language="en_US">
+      <Text>{1} of {2}</Text>
+    </Row>
+
+    <!-- Widget states -->
+    <Row Tag="LOC_CAI_STATE_DISABLED" Language="en_US">
+      <Text>Disabled</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STATE_SELECTED" Language="en_US">
+      <Text>Selected</Text>
+    </Row>
+
     <!-- Options screen -->
+    <Row Tag="LOC_CAI_OPTIONS_DIALOG" Language="en_US">
+      <Text>Options</Text>
+    </Row>
     <Row Tag="LOC_CAI_OPTIONS_TABS" Language="en_US">
       <Text>Tabs</Text>
     </Row>
@@ -28,37 +95,45 @@
       <Text>Press a key combination for {1_ActionName}, or Escape to cancel</Text>
     </Row>
 
-    <!-- Widget roles -->
-    <Row Tag="LOC_UIWidget_Role_Button" Language="en_US">
-      <Text>Button</Text>
+    <!-- Main menu -->
+    <Row Tag="LOC_CAI_MAIN_MENU" Language="en_US">
+      <Text>Main Menu</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SUBMENU" Language="en_US">
+      <Text>Sub Menu</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLAY_NOW" Language="en_US">
+      <Text>Play Now</Text>
+    </Row>
+    <Row Tag="LOC_CAI_HELP" Language="en_US">
+      <Text>Help</Text>
     </Row>
 
-<Row Tag="LOC_UIWidget_Role_List" Language="en_US">
-      <Text>List</Text>
+    <!-- Advisor popup -->
+    <Row Tag="LOC_CAI_ADVISOR_POPUP" Language="en_US">
+      <Text>Advisor</Text>
     </Row>
 
-    <Row Tag="LOC_UIWidget_Role_Panel" Language="en_US">
-      <Text>Panel</Text>
+    <!-- In-game -->
+    <Row Tag="LOC_CAI_LOADED_IN_GAME" Language="en_US">
+      <Text>Loaded in game</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GAME_CONTAINER" Language="en_US">
+      <Text>Game</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ROLE_GAME_VIEW" Language="en_US">
+      <Text>Map</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_MODE" Language="en_US">
+      <Text>Movement mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EXITED_MOVEMENT_MODE" Language="en_US">
+      <Text>Exited movement mode</Text>
     </Row>
 
-    <Row Tag="LOC_UIWidget_Role_Checkbox" Language="en_US">
-      <Text>Checkbox</Text>
-    </Row>
-
-    <Row Tag="LOC_UIWidget_Role_HorizontalList" Language="en_US">
-      <Text>Horizontal list</Text>
-    </Row>
-
-    <Row Tag="LOC_UIWidget_Role_SubMenu" Language="en_US">
-      <Text>subMenu</Text>
-    </Row>
-
-    <Row Tag="LOC_UIWidget_Role_Slider" Language="en_US">
-      <Text>Slider</Text>
-    </Row>
-
-    <Row Tag="LOC_UIWidget_Element_Pos" Language="en_US">
-      <Text>{1} of {2}</Text>
+    <!-- UI manager -->
+    <Row Tag="LOC_CAI_CREATING_UI_MANAGER" Language="en_US">
+      <Text>Accessibility initialized</Text>
     </Row>
 
   </LocalizedText>

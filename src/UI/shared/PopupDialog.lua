@@ -570,13 +570,12 @@ PopupDialog.Open = WrapFunc(PopupDialog.Open, function(orig, self, optionalID)
 local mgr = ExposedMembers.CAI_UIManager
 
     MainPanel = nil
-        MainPanel = mgr:CreateUIWidget("Panel", {GetLabel = function() return self.Controls.PopupTitle:GetText()end})
+        MainPanel = mgr:CreateUIWidget("Dialog", {GetLabel = function() return self.Controls.PopupTitle:GetText() end})
 
 
     for _, item in ipairs(self.PopupControls) do
         if item.Type == "Text" then
-            -- Description text is a focusable dummy button for now
-            local textWidget = mgr:CreateUIWidget("Button", {
+            local textWidget = mgr:CreateUIWidget("StaticText", {
                 GetLabel = function() return item.Control:GetText() end,
             })
             MainPanel:AddChild(textWidget)

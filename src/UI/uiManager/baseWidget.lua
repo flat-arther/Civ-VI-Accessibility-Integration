@@ -1,16 +1,19 @@
----@alias UIWidgetCallbackTypes "OnFocusLeave"|"OnFocusEnter"|"OnFocus"|"OnClick"|"OnAltClick|"OnToggleChecked"|"OnToggleExpand"
+---@alias UIWidgetCallbackTypes "OnFocusLeave"|"OnFocusEnter"|"OnFocus"|"OnClick"|"OnAltClick"|"OnToggleChecked"|"OnToggleExpand"|"OnValueChanged"
 ---@class UIWidget
 ---@field FocusedChild? UIWidget
 ---@field Children? UIWidget[]
 ---@field DefaultIndex? integer
 ---@field Type? string
+---@field Role? string
 ---@field InputMap? InputBinding[]
 ---@field Manager? UIScreenManager
 ---@field Parent? UIWidget
+---@field SpeechSettings? table<string, boolean>
 ---@field GetLabel? fun():string
+---@field GetValue? fun():string
 ---@field GetState? fun():string
 ---@field GetTooltip? fun():string
----@field 
+---@field OnValueChanged? fun(w:UIWidget, value:string)
 ---@field Callbacks table<UIWidgetCallbackTypes, fun(w):boolean[]>
 UIWidget = {
     Callbacks = {}
@@ -22,7 +25,7 @@ UIWidget = {
 ---@field IsShift? boolean
 ---@field IsControl? boolean
 ---@field MSG? KeyEvents
-local baseInputBinding = {IsShift = false, IsControl = false, MSG = KeyEvents.KeyDown}
+local baseInputBinding = {IsShift = false, IsControl = false, MSG = KeyEvents.KeyUp}
 
 
 --#Base methods
@@ -180,30 +183,95 @@ end
         return false
     end
 
+    ---Sets the widget's value and triggers OnValueChanged callback + speaks the new value
+    ---@param value string
+    function UIWidget:SetValue(value)
+        if self.OnValueChanged then
+            self:OnValueChanged(value)
+        end
+        self:SpeakElements({"value"})
+    end
+
     ---Speaks the currently focused widget's info
+    ---@param elements? string[] -- Optional list of element keys to speak. Empty or nil = speak all available elements
+    function UIWidget:SpeakElements(elements)
+        local info = self:GetInfoStrings()
+        local settings = self.SpeechSettings or {}
+        local globalSettings = self.Manager and self.Manager.CAISettings or {}
+
+        -- Define the canonical order
+        local allKeys = {"label", "role", "value", "position", "state", "tooltip"}
+        local keysToSpeak = (elements and #elements > 0) and elements or allKeys
+
+        local parts = {}
+        for _, key in ipairs(keysToSpeak) do
+            -- Check per-widget SpeechSettings (key names use capitalized form)
+            local settingKey = key:sub(1,1):upper() .. key:sub(2)
+            if settings[settingKey] == false then
+                -- Widget-level override: skip this element
+            else
+                -- Check global settings
+                local globalKey = "speak" .. settingKey
+                local globalAllowed = globalSettings[globalKey] == nil or globalSettings[globalKey] == true
+                if globalAllowed and info[key] then
+                    table.insert(parts, info[key])
+                end
+            end
+        end
+
+        if #parts > 0 then
+            Speak(table.concat(parts, ", "))
+        end
+    end
+
+    ---Speaks the currently focused widget's info (legacy shortcut, speaks all elements)
     function UIWidget:SpeakFocus()
-        SpeakWidget(self)
-end
+        self:SpeakElements()
+    end
 
 --#Helpers
+
+---Returns the visible index and visible total among siblings, skipping hidden elements
+---@return integer|nil, integer
+function UIWidget:GetVisiblePosition()
+    local parent = self.Parent
+    if not parent or not parent.Children then return nil, 0 end
+
+    local visibleIndex = 0
+    local visibleTotal = 0
+    for _, child in ipairs(parent.Children) do
+        local isHidden = child.IsHidden and child:IsHidden()
+        if not isHidden then
+            visibleTotal = visibleTotal + 1
+            if child == self then
+                visibleIndex = visibleTotal
+            end
+        end
+    end
+    return (visibleIndex > 0) and visibleIndex or nil, visibleTotal
+end
 
 ---Returns a table of descriptive strings for the widget
 ---@return table
 function UIWidget:GetInfoStrings()
     local label = self.GetLabel and self:GetLabel() or ""
-    local role = Locale.Lookup("LOC_UIWidget_Role_"..self.Type) or ""
-    
-    local pos = self:GetIndexInParent()
-    local children = (self.Parent and self.Parent.Children)
-    local total = children and #children or 0
-    local posText = (pos and total > 1) and Locale.Lookup("LOC_UIWidget_Element_Pos", pos, total) or ""
-    
-    local state = self.GetState and self:GetState() or ""
+    local roleName = self.Role or self.Type or ""
+    local role = roleName ~= "" and Locale.Lookup("LOC_UIWidget_Role_" .. roleName) or ""
+
+    local visIdx, visTotal = self:GetVisiblePosition()
+    local posText = (visIdx and visTotal > 1) and Locale.Lookup("LOC_UIWidget_Element_Pos", visIdx, visTotal) or ""
+
+    local value = self.GetValue and self:GetValue() or ""
+    local state = ""
+    if self.IsDisabled and self:IsDisabled() then
+        state = Locale.Lookup("LOC_CAI_STATE_DISABLED")
+    end
     local tooltip = self.GetTooltip and self:GetTooltip() or ""
 
     return {
         label = label ~= "" and label or nil,
-        meta = role ~= "" and role or nil,
+        role = role ~= "" and role or nil,
+        value = value ~= "" and value or nil,
         position = posText ~= "" and posText or nil,
         state = state ~= "" and state or nil,
         tooltip = tooltip ~= "" and tooltip or nil

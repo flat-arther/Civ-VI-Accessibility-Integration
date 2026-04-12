@@ -24,8 +24,8 @@ local gCurrentModeWidget = nil
 interfaceWidgets = {
 	[InterfaceModeTypes.MOVE_TO] = {
 		Properties = {
-			GetLabel = function() return "Movement mode" end,
-			OnDestroy = function(w) Speak("Exited movement mode") end,
+			GetLabel = function() return Locale.Lookup("LOC_CAI_MOVEMENT_MODE") end,
+			OnDestroy = function(w) Speak(Locale.Lookup("LOC_CAI_EXITED_MOVEMENT_MODE")) end,
 			RegisterInputs = {
 				{ Key = Keys.VK_ESCAPE, Action = function(w)
 					OnMouseMoveToCancel()
@@ -106,7 +106,7 @@ function InitGameview()
 	end
 	gamePanel = mgr:CreateUIWidget("Panel",
 		{
-			GetLabel = function() return "Main game container" end
+			GetLabel = function() return Locale.Lookup("LOC_CAI_GAME_CONTAINER") end
 		})
 	if not gamePanel then
 		print("Failed to create main game panel")

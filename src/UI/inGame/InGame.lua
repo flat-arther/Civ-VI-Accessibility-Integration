@@ -386,4 +386,4 @@ function Initialize()
 end
 
 Initialize();
-Speak("Loaded in game")
+Speak(Locale.Lookup("LOC_CAI_LOADED_IN_GAME"))

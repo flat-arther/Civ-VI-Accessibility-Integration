@@ -27,7 +27,7 @@ ShowAdvisorPopup = WrapFunc(ShowAdvisorPopup, function(orig, advisorData)
     end
 
     -- Portrait branch: CalloutHeader is the popup title; meta branch has no equivalent
-    m_tutorialPanel = mgr:CreateUIWidget("Panel", {
+    m_tutorialPanel = mgr:CreateUIWidget("Dialog", {
         GetLabel = function()
             if isPortrait and advisorData.CalloutHeader and advisorData.CalloutHeader ~= "" then
                 return Locale.Lookup(advisorData.CalloutHeader)
@@ -38,7 +38,7 @@ ShowAdvisorPopup = WrapFunc(ShowAdvisorPopup, function(orig, advisorData)
 
     -- Main message text — visible in both branches
     if advisorData.Message then
-        local bodyWidget = mgr:CreateUIWidget("Button", {
+        local bodyWidget = mgr:CreateUIWidget("StaticText", {
             GetLabel = function() return Locale.Lookup(advisorData.Message) end
         })
         m_tutorialPanel:AddChild(bodyWidget)
@@ -49,7 +49,7 @@ ShowAdvisorPopup = WrapFunc(ShowAdvisorPopup, function(orig, advisorData)
             and advisorData.CalloutBody
             and advisorData.CalloutBody ~= ""
             and advisorData.CalloutBody ~= advisorData.Message then
-        local calloutWidget = mgr:CreateUIWidget("Button", {
+        local calloutWidget = mgr:CreateUIWidget("StaticText", {
             GetLabel = function() return Locale.Lookup(advisorData.CalloutBody) end
         })
         m_tutorialPanel:AddChild(calloutWidget)

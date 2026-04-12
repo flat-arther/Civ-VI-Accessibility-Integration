@@ -27,4 +27,9 @@ if ($LASTEXITCODE -ge 8) {
     exit 1
 } else {
     Write-Host "Deploy complete. (robocopy exit code: $LASTEXITCODE)" -ForegroundColor Green
+
+    # Launch Civ VI directly
+    $exePath = "C:\Program Files (x86)\Steam\steamapps\common\Sid-Meiers-Civilization-VI\Base\Binaries\Win64Steam\CivilizationVI.exe"
+    Write-Host "Launching Civilization VI..." -ForegroundColor Cyan
+    Start-Process $exePath
 }

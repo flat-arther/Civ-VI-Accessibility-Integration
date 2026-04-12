@@ -8,15 +8,18 @@ include("widgetTemplates")
 ---@field CAISettings table<string, any>
 local UIScreenManager = {
     CAISettings = {
-        speakLabels = true,
-    speakMeta = true,
-    speakPosition = true
+        speakLabel = true,
+        speakRole = true,
+        speakValue = true,
+        speakPosition = true,
+        speakState = true,
+        speakTooltip = true
     }
 }
 
 --#Constructer
 function CreateScreenManager()
-    Speak("Creating UI manager")
+    Speak(Locale.Lookup("LOC_CAI_CREATING_UI_MANAGER"))
     local mgr = setmetatable({}, {__index = UIScreenManager})
     mgr.Stack = {}
     return mgr
@@ -95,32 +98,33 @@ end
 ---@return string[]
 function UIScreenManager:BuildAnnouncement(path, diverge)
     local announcements = {}
-    
-    -- This defines the exact order info is gathered. Should be static, but don't know if we want to make it a setting for some reason
-    local dataOrder = {"label", "meta", "position", "state", "tooltip"}
-    
 
-    local settingMap = {
-        label = "speakLabels",
-        meta = "speakMeta",
-        position = "speakPosition",
-        state = "speakState",
-        tooltip = "speakTooltip"
-    }
+    -- Canonical order of speech elements
+    local dataOrder = {"label", "role", "value", "position", "state", "tooltip"}
 
     for i = diverge, #path do
         local current = path[i]
-        
+
         if current.GetInfoStrings then
             local info = current:GetInfoStrings()
+            local widgetSettings = current.SpeechSettings or {}
             local widgetParts = {}
 
             for _, key in ipairs(dataOrder) do
-                local settingName = settingMap[key]
-                local canSpeak = self.CAISettings[settingName] == nil or self.CAISettings[settingName] == true
-                
-                if info[key] and canSpeak then
-                    table.insert(widgetParts, info[key])
+                -- Per-widget SpeechSettings override (capitalized key: Label, Role, Value, etc.)
+                local settingKey = key:sub(1,1):upper() .. key:sub(2)
+                local widgetAllowed = widgetSettings[settingKey]
+
+                if widgetAllowed == false then
+                    -- Explicitly disabled at widget level — skip
+                else
+                    -- Check global setting (e.g. speakLabel, speakRole, speakValue)
+                    local globalKey = "speak" .. settingKey
+                    local globalAllowed = self.CAISettings[globalKey] == nil or self.CAISettings[globalKey] == true
+
+                    if info[key] and globalAllowed then
+                        table.insert(widgetParts, info[key])
+                    end
                 end
             end
 
