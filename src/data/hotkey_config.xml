@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameInfo>
+  <InputCategories>
+    <Row CategoryId="CAI" Name="LOC_OPTIONS_HOTKEY_CATEGORY_CAI" Visible="1" SortIndex="0" />
+  </InputCategories>
+
+  <InputActions>
+    <Row ActionId="PlotInfo1" Name="LOC_CAI_PLOTINFO1" Description="LOC_CAI_PLOTINFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotInfo2" Name="LOC_CAI_PLOTINFO2" Description="LOC_CAI_PLOTINFO2_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotInfo3" Name="LOC_CAI_PLOTINFO3" Description="LOC_CAI_PLOTINFO3_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotInfo4" Name="LOC_CAI_PLOTINFO4" Description="LOC_CAI_PLOTINFO4_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotInfo5" Name="LOC_CAI_PLOTINFO5" Description="LOC_CAI_PLOTINFO5_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotInfo6" Name="LOC_CAI_PLOTINFO6" Description="LOC_CAI_PLOTINFO6_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotInfo7" Name="LOC_CAI_PLOTINFO7" Description="LOC_CAI_PLOTINFO7_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotInfo8" Name="LOC_CAI_PLOTINFO8" Description="LOC_CAI_PLOTINFO8_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotInfo9" Name="LOC_CAI_PLOTINFO9" Description="LOC_CAI_PLOTINFO9_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotInfo10" Name="LOC_CAI_PLOTINFO10" Description="LOC_CAI_PLOTINFO10_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="InterfaceWidgetPrimaryAction" Name="LOC_CAI_INTERFACE_PRIMARY_ACTION" Description="LOC_CAI_INTERFACE_PRIMARY_ACTION_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SharedEndTurn" Name="LOC_CAI_END_TURN" Description="LOC_CAI_END_TURN_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+  </InputActions>
+
+  <InputActionDefaultGestures>
+  <Row ActionId="InterfaceWidgetPrimaryAction" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_RETURN" />
+  <Row ActionId="SharedEndTurn" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SPACE" />
+    <Row ActionId="PlotInfo1" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_1" />
+    <Row ActionId="PlotInfo2" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_2" />
+    <Row ActionId="PlotInfo3" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_3" />
+    <Row ActionId="PlotInfo4" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_4" />
+    <Row ActionId="PlotInfo5" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_5" />
+    <Row ActionId="PlotInfo6" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_6" />
+    <Row ActionId="PlotInfo7" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_7" />
+    <Row ActionId="PlotInfo8" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_8" />
+    <Row ActionId="PlotInfo9" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_9" />
+    <Row ActionId="PlotInfo10" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_0" />
+  </InputActionDefaultGestures>
+</GameInfo>

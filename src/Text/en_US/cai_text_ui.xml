@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+  <LocalizedText>
+    <!-- ENGLISH -->
+    <!-- Options screen -->
+    <Row Tag="LOC_CAI_OPTIONS_TABS" Language="en_US">
+      <Text>Tabs</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDING_UNBOUND" Language="en_US">
+      <Text>Unbound</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDING_ALT" Language="en_US">
+      <Text>Alt</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDING_SET_PRIMARY" Language="en_US">
+      <Text>Set Primary Binding</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDING_SET_ALT" Language="en_US">
+      <Text>Set Alternative Binding</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDING_CLEAR_PRIMARY" Language="en_US">
+      <Text>Clear Primary Binding</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDING_CLEAR_ALT" Language="en_US">
+      <Text>Clear Alternative Binding</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDING_PRESS_KEY" Language="en_US">
+      <Text>Press a key combination for {1_ActionName}, or Escape to cancel</Text>
+    </Row>
+
+    <!-- Widget roles -->
+    <Row Tag="LOC_UIWidget_Role_Button" Language="en_US">
+      <Text>Button</Text>
+    </Row>
+
+<Row Tag="LOC_UIWidget_Role_List" Language="en_US">
+      <Text>List</Text>
+    </Row>
+
+    <Row Tag="LOC_UIWidget_Role_Panel" Language="en_US">
+      <Text>Panel</Text>
+    </Row>
+
+    <Row Tag="LOC_UIWidget_Role_Checkbox" Language="en_US">
+      <Text>Checkbox</Text>
+    </Row>
+
+    <Row Tag="LOC_UIWidget_Role_HorizontalList" Language="en_US">
+      <Text>Horizontal list</Text>
+    </Row>
+
+    <Row Tag="LOC_UIWidget_Role_SubMenu" Language="en_US">
+      <Text>subMenu</Text>
+    </Row>
+
+    <Row Tag="LOC_UIWidget_Role_Slider" Language="en_US">
+      <Text>Slider</Text>
+    </Row>
+
+    <Row Tag="LOC_UIWidget_Element_Pos" Language="en_US">
+      <Text>{1} of {2}</Text>
+    </Row>
+
+  </LocalizedText>
+</GameData>

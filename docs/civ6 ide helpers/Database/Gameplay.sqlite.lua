@@ -1,0 +1,4436 @@
+---@meta
+
+
+---@class Gameplay.NavigationProperties
+---@field BaseTable TEXT
+---@field PropertyName TEXT
+---@field TargetTable TEXT
+---@field IsCollection INTEGER
+---@field Query TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Adjacency_YieldChanges
+---@field ID TEXT
+---@field Description TEXT
+---@field YieldType TEXT
+---@field YieldChange INTEGER
+---@field TilesRequired INTEGER
+---@field OtherDistrictAdjacent BOOLEAN
+---@field AdjacentSeaResource BOOLEAN
+---@field AdjacentTerrain TEXT
+---@field AdjacentFeature TEXT
+---@field AdjacentRiver BOOLEAN
+---@field AdjacentWonder BOOLEAN
+---@field AdjacentNaturalWonder BOOLEAN
+---@field AdjacentImprovement TEXT
+---@field AdjacentDistrict TEXT
+---@field PrereqCivic TEXT
+---@field PrereqTech TEXT
+---@field ObsoleteCivic TEXT
+---@field ObsoleteTech TEXT
+---@field AdjacentResource BOOLEAN
+---@field AdjacentResourceClass TEXT
+---@field Self BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Adjacent_AppealYieldChanges
+---@field DistrictType TEXT
+---@field YieldType TEXT
+---@field MaximumValue INTEGER
+---@field BuildingType TEXT
+---@field MinimumValue INTEGER
+---@field YieldChange INTEGER
+---@field Description TEXT
+---@field Unimproved BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Agendas
+---@field AgendaType TEXT
+---@field OperationList TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AgendaPreferredLeaders
+---@field AgendaType TEXT
+---@field LeaderType TEXT
+---@field PercentageChance INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AgendaTraits
+---@field AgendaType TEXT
+---@field TraitType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AiBuildSpecializations
+---@field SpecializationType TEXT
+---@field BuildingYield TEXT
+---@field IncludePopulation BOOLEAN
+---@field IncludeDefense BOOLEAN
+---@field IncludeMilitaryUnits BOOLEAN
+---@field IncludeTradeUnits BOOLEAN
+---@field PrioritizationYield TEXT
+---@field PriorityOffset INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AiEvents
+---@field EventType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AiFavoredItems
+---@field ListType TEXT
+---@field Item TEXT
+---@field Favored BOOLEAN
+---@field Value INTEGER
+---@field StringVal TEXT
+---@field MinDifficulty TEXT
+---@field MaxDifficulty TEXT
+---@field TooltipString TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AiLists
+---@field ListType TEXT
+---@field LeaderType TEXT
+---@field AgendaType TEXT
+---@field System TEXT
+---@field MinDifficulty TEXT
+---@field MaxDifficulty TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AiListTypes
+---@field ListType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AiOperationDefs
+---@field OperationName TEXT
+---@field TargetType TEXT
+---@field TargetParameter INTEGER
+---@field EnemyType TEXT
+---@field BehaviorTree TEXT
+---@field Priority INTEGER
+---@field MaxTargetDistInRegion INTEGER
+---@field MaxTargetDistInArea INTEGER
+---@field MaxTargetDistInWorld INTEGER
+---@field MaxTargetStrength INTEGER
+---@field MaxTargetDefense INTEGER
+---@field MinOddsOfSuccess REAL
+---@field SelfStart BOOLEAN
+---@field MustBeAtWar BOOLEAN
+---@field MustHaveNukes BOOLEAN
+---@field MustHaveUnits INTEGER
+---@field OperationType TEXT
+---@field AllowTargetUpdate BOOLEAN
+---@field TargetLuaScript TEXT
+---@field ActiveEmergency TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AiOperationLimits
+---@field ListType TEXT
+---@field OperationType TEXT
+---@field BaseValue INTEGER
+---@field DeltaValue INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AiOperationLists
+---@field ListType TEXT
+---@field BaseList TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AiOperationTeams
+---@field TeamName TEXT
+---@field OperationName TEXT
+---@field MinUnits INTEGER
+---@field MaxUnits INTEGER
+---@field InitialStrengthAdvantage REAL
+---@field OngoingStrengthAdvantage REAL
+---@field SafeRallyPoint BOOLEAN
+---@field Condition TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AiOperationTypes
+---@field OperationType TEXT
+---@field Value INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AiScoutUses
+---@field ScoutUseType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AiTeams
+---@field TeamName TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AllowedMoves
+---@field AllowedMoveType TEXT
+---@field Value INTEGER
+---@field IsHomeland BOOLEAN
+---@field IsTactical BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AllowedOperations
+---@field ListType TEXT
+---@field OperationDef TEXT
+---@field RemoveRef BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AppealHousingChanges
+---@field DistrictType TEXT
+---@field MinimumValue INTEGER
+---@field AppealChange INTEGER
+---@field Description TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BarbarianAttackForces
+---@field AttackForceType TEXT
+---@field MinTargetDifficulty TEXT
+---@field MaxTargetDifficulty TEXT
+---@field SpawnRate INTEGER
+---@field MeleeTag TEXT
+---@field NumMeleeUnits INTEGER
+---@field RangeTag TEXT
+---@field NumRangeUnits INTEGER
+---@field SiegeTag TEXT
+---@field NumSiegeUnits INTEGER
+---@field SupportTag TEXT
+---@field NumSupportUnits INTEGER
+---@field RaidingForce BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BarbarianTribes
+---@field TribeType TEXT
+---@field IsCoastal BOOLEAN
+---@field RequiredResource TEXT
+---@field ResourceRange INTEGER
+---@field PercentRangedUnits INTEGER
+---@field TurnsToWarriorSpawn INTEGER
+---@field ScoutTag TEXT
+---@field MeleeTag TEXT
+---@field RangedTag TEXT
+---@field SiegeTag TEXT
+---@field DefenderTag TEXT
+---@field SupportTag TEXT
+---@field ScoutingBehaviorTree TEXT
+---@field RaidingBehaviorTree TEXT
+---@field RaidingBoldness INTEGER
+---@field CityAttackOperation TEXT
+---@field CityAttackBoldness INTEGER
+---@field Name TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BarbarianTribe_ExtraUnits
+---@field TribeType TEXT
+---@field UnitType TEXT
+---@field Number INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BarbarianTribe_MapConditions
+---@field MapConditionSetType TEXT
+---@field TerrainType TEXT
+---@field FeatureType TEXT
+---@field ResourceType TEXT
+---@field Range INTEGER
+---@field Invert BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BarbarianTribe_MapConditionSets
+---@field MapConditionSetType TEXT
+---@field TribeType TEXT
+---@field Test TEXT
+---@field Priority INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BarbarianTribe_UnitConditions
+---@field TribeType TEXT
+---@field UnitType TEXT
+---@field ReplacesUnitType TEXT
+---@field MaxPerTribe INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BarbarianTribeForces
+---@field AttackForceType TEXT
+---@field TribeType TEXT
+---@field SpecificTribeType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BarbarianTribeNames
+---@field TribeNameType TEXT
+---@field TribeType TEXT
+---@field NumMilitary INTEGER
+---@field NumScouts INTEGER
+---@field PercentRangedUnits INTEGER
+---@field TurnsToWarriorSpawn INTEGER
+---@field TribeDisplayName TEXT
+---@field ScoutingBehaviorTree TEXT
+---@field RaidingBehaviorTree TEXT
+---@field RaidingBoldness INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BehaviorTrees
+---@field TreeName TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BehaviorTreeNodes
+---@field TreeName TEXT
+---@field NodeId INTEGER
+---@field JumpTo INTEGER
+---@field NodeType TEXT
+---@field PrimaryKey INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Beliefs
+---@field BeliefType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field BeliefClassType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BeliefClasses
+---@field BeliefClassType TEXT
+---@field Name TEXT
+---@field MaxInReligion INTEGER
+---@field AdoptionOrder INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BeliefModifiers
+---@field BeliefType TEXT
+---@field ModifierID TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BonusMinorStartingUnits
+---@field Unit TEXT
+---@field Era TEXT
+---@field Quantity INTEGER
+---@field OnDistrictCreated BOOLEAN
+---@field District TEXT
+---@field MinDifficulty TEXT
+---@field DifficultyDelta REAL
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Boosts
+---@field BoostID INTEGER
+---@field TechnologyType TEXT
+---@field CivicType TEXT
+---@field Boost INTEGER
+---@field TriggerId INTEGER
+---@field TriggerDescription TEXT
+---@field TriggerLongDescription TEXT
+---@field Unit1Type TEXT
+---@field BoostClass TEXT
+---@field Unit2Type TEXT
+---@field BuildingType TEXT
+---@field ImprovementType TEXT
+---@field BoostingTechType TEXT
+---@field ResourceType TEXT
+---@field NumItems INTEGER
+---@field DistrictType TEXT
+---@field RequiresResource BOOLEAN
+---@field RequirementSetId TEXT
+---@field GovernmentSlotType TEXT
+---@field BoostingCivicType TEXT
+---@field GovernmentTierType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BoostHandlers
+---@field HandlerId TEXT
+---@field TechBoostType TEXT
+---@field BehaviorTree TEXT
+---@field OperationName TEXT
+---@field LuaScript TEXT
+---@field UniquenessTag TEXT
+---@field WinnowFunction TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BoostNames
+---@field BoostType TEXT
+---@field BoostValue INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Buildings
+---@field BuildingType TEXT
+---@field Name TEXT
+---@field PrereqTech TEXT
+---@field PrereqCivic TEXT
+---@field Cost INTEGER
+---@field MaxPlayerInstances INTEGER
+---@field MaxWorldInstances INTEGER
+---@field Capital BOOLEAN
+---@field PrereqDistrict TEXT
+---@field AdjacentDistrict TEXT
+---@field Description TEXT
+---@field RequiresPlacement BOOLEAN
+---@field RequiresRiver BOOLEAN
+---@field OuterDefenseHitPoints INTEGER
+---@field Housing INTEGER
+---@field Entertainment INTEGER
+---@field AdjacentResource TEXT
+---@field Coast BOOLEAN
+---@field EnabledByReligion BOOLEAN
+---@field AllowsHolyCity BOOLEAN
+---@field PurchaseYield TEXT
+---@field MustPurchase BOOLEAN
+---@field Maintenance INTEGER
+---@field IsWonder BOOLEAN
+---@field TraitType TEXT
+---@field OuterDefenseStrength INTEGER
+---@field CitizenSlots INTEGER
+---@field MustBeLake BOOLEAN
+---@field MustNotBeLake BOOLEAN
+---@field RegionalRange INTEGER
+---@field AdjacentToMountain BOOLEAN
+---@field ObsoleteEra TEXT
+---@field RequiresReligion BOOLEAN
+---@field GrantFortification INTEGER
+---@field DefenseModifier INTEGER
+---@field InternalOnly BOOLEAN
+---@field RequiresAdjacentRiver BOOLEAN
+---@field Quote TEXT
+---@field QuoteAudio TEXT
+---@field MustBeAdjacentLand BOOLEAN
+---@field AdvisorType TEXT
+---@field AdjacentCapital BOOLEAN
+---@field AdjacentImprovement TEXT
+---@field CityAdjacentTerrain TEXT
+---@field UnlocksGovernmentPolicy BOOLEAN
+---@field GovernmentTierRequirement TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Building_CitizenYieldChanges
+---@field BuildingType TEXT
+---@field YieldType TEXT
+---@field YieldChange INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Building_GreatPersonPoints
+---@field BuildingType TEXT
+---@field GreatPersonClassType TEXT
+---@field PointsPerTurn INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Building_GreatWorks
+---@field BuildingType TEXT
+---@field GreatWorkSlotType TEXT
+---@field NumSlots INTEGER
+---@field ThemingUniquePerson BOOLEAN
+---@field ThemingSameObjectType BOOLEAN
+---@field ThemingUniqueCivs BOOLEAN
+---@field ThemingSameEras BOOLEAN
+---@field ThemingYieldMultiplier INTEGER
+---@field ThemingTourismMultiplier INTEGER
+---@field NonUniquePersonYield INTEGER
+---@field NonUniquePersonTourism INTEGER
+---@field ThemingBonusDescription TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Building_RequiredFeatures
+---@field BuildingType TEXT
+---@field FeatureType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Building_ValidFeatures
+---@field BuildingType TEXT
+---@field FeatureType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Building_ValidTerrains
+---@field BuildingType TEXT
+---@field TerrainType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Building_YieldChanges
+---@field BuildingType TEXT
+---@field YieldType TEXT
+---@field YieldChange INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Building_YieldDistrictCopies
+---@field BuildingType TEXT
+---@field OldYieldType TEXT
+---@field NewYieldType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Building_YieldsPerEra
+---@field BuildingType TEXT
+---@field YieldType TEXT
+---@field YieldChange INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BuildingConditions
+---@field BuildingType TEXT
+---@field UnlocksFromEffect BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BuildingModifiers
+---@field BuildingType TEXT
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BuildingPrereqs
+---@field Building TEXT
+---@field PrereqBuilding TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.BuildingReplaces
+---@field CivUniqueBuildingType TEXT
+---@field ReplacesBuildingType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Calendars
+---@field CalendarType TEXT
+---@field Description TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CityEvents
+---@field EventType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CityNames
+---@field ID INTEGER
+---@field CivilizationType TEXT
+---@field LeaderType TEXT
+---@field ContinentType TEXT
+---@field CityName TEXT
+---@field SortIndex INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Civics
+---@field CivicType TEXT
+---@field Name TEXT
+---@field Cost INTEGER
+---@field Repeatable BOOLEAN
+---@field Description TEXT
+---@field EraType TEXT
+---@field BarbarianFree BOOLEAN
+---@field UITreeRow INTEGER
+---@field AdvisorType TEXT
+---@field EmbarkAll BOOLEAN
+---@field EmbarkUnitType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Civics_XP2
+---@field CivicType TEXT
+---@field RandomPrereqs BOOLEAN
+---@field HiddenUntilPrereqComplete BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivicModifiers
+---@field CivicType TEXT
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivicPrereqs
+---@field Civic TEXT
+---@field PrereqCivic TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivicQuotes
+---@field CivicType TEXT
+---@field Quote TEXT
+---@field QuoteAudio TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivicRandomCosts
+---@field CivicType TEXT
+---@field Cost INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Civilizations
+---@field CivilizationType TEXT
+---@field Name LocalizedText
+---@field Description TEXT
+---@field Adjective TEXT
+---@field RandomCityNameDepth INTEGER
+---@field StartingCivilizationLevelType TEXT
+---@field Ethnicity TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilizationAudioTags
+---@field CivilizationType TEXT
+---@field MusicOverride BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilizationCitizenNames
+---@field CivilizationType TEXT
+---@field CitizenName TEXT
+---@field Female BOOLEAN
+---@field Modern BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilizationInfo
+---@field CivilizationType TEXT
+---@field Header TEXT
+---@field Caption TEXT
+---@field SortIndex INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilizationLeaders
+---@field LeaderType TEXT
+---@field CivilizationType TEXT
+---@field CapitalName TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilizationLevels
+---@field CivilizationLevelType TEXT
+---@field CanFoundCities BOOLEAN
+---@field CanAnnexTilesWithCulture BOOLEAN
+---@field CanAnnexTilesWithGold BOOLEAN
+---@field CanAnnexTilesWithReceivedInfluence BOOLEAN
+---@field CanEarnGreatPeople BOOLEAN
+---@field CanGiveInfluence BOOLEAN
+---@field CanReceiveInfluence BOOLEAN
+---@field StartingTilesForCity INTEGER
+---@field CanBuildWonders BOOLEAN
+---@field IgnoresUnitStrategicResourceRequirements BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilizationTraits
+---@field CivilizationType TEXT
+---@field TraitType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilopediaPages
+---@field SectionId TEXT
+---@field PageId TEXT
+---@field PageGroupId TEXT
+---@field PageLayoutId TEXT
+---@field Name TEXT
+---@field Tooltip TEXT
+---@field SortIndex INTEGER
+---@field TextKeyPrefix TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilopediaPageChapterHeaders
+---@field SectionId TEXT
+---@field PageId TEXT
+---@field ChapterId TEXT
+---@field Header LocalizedText
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilopediaPageChapterParagraphs
+---@field SectionId TEXT
+---@field PageId TEXT
+---@field ChapterId TEXT
+---@field Paragraph LocalizedText
+---@field SortIndex INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilopediaPageExcludes
+---@field SectionId TEXT
+---@field PageId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilopediaPageGroups
+---@field SectionId TEXT
+---@field PageGroupId TEXT
+---@field Name TEXT
+---@field Tooltip TEXT
+---@field VisibleIfEmpty BOOLEAN
+---@field SortIndex INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilopediaPageGroupExcludes
+---@field SectionId TEXT
+---@field PageGroupId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilopediaPageGroupQueries
+---@field RowId INTEGER
+---@field SectionId TEXT
+---@field SQL TEXT
+---@field PageGroupIdColumn TEXT
+---@field NameColumn TEXT
+---@field TooltipColumn TEXT
+---@field VisibleIfEmptyColumn TEXT
+---@field SortIndexColumn TEXT
+---@field SortIndex INTEGER
+---@field Index INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilopediaPageLayouts
+---@field PageLayoutId TEXT
+---@field ScriptTemplate TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilopediaPageLayoutChapters
+---@field PageLayoutId TEXT
+---@field ChapterId TEXT
+---@field SortIndex INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilopediaPageQueries
+---@field RowId INTEGER
+---@field SectionId TEXT
+---@field SQL TEXT
+---@field PageIdColumn TEXT
+---@field PageGroupIdColumn TEXT
+---@field PageLayoutIdColumn TEXT
+---@field NameColumn TEXT
+---@field TooltipColumn TEXT
+---@field TextKeyPrefixColumn TEXT
+---@field SortIndexColumn TEXT
+---@field SortIndex INTEGER
+---@field Index INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilopediaPageSearchTerms
+---@field SectionId TEXT
+---@field PageId TEXT
+---@field Term LocalizedText
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilopediaPageSearchTermQueries
+---@field RowId INTEGER
+---@field SQL TEXT
+---@field SectionIdColumn TEXT
+---@field PageIdColumn TEXT
+---@field SearchTermColumn TEXT
+---@field Index INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilopediaSections
+---@field SectionId TEXT
+---@field Name TEXT
+---@field Icon TEXT
+---@field SortIndex INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilopediaSectionExcludes
+---@field SectionId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CivilopediaTranslateCharacters
+---@field RowID INTEGER
+---@field Character TEXT
+---@field TranslateCharacter TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Continents
+---@field ContinentType TEXT
+---@field Description TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CorporationNames
+---@field ID INTEGER
+---@field NameType TEXT
+---@field TextKey TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DataTypes
+---@field TypeName TEXT
+---@field DataId INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DealItems
+---@field DealItemType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field AllowDurationTrade BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Defeats
+---@field DefeatType TEXT
+---@field Name TEXT
+---@field Blurb TEXT
+---@field RequirementSetId TEXT
+---@field EnabledByDefault BOOLEAN
+---@field OneMoreTurn BOOLEAN
+---@field Global BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Difficulties
+---@field DifficultyType TEXT
+---@field Name TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomacyInfo
+---@field Type TEXT
+---@field BackgroundImage TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomaticActions
+---@field DiplomaticActionType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field CivilopediaKey TEXT
+---@field InitiatorPrereqCivic TEXT
+---@field InitiatorPrereqTech TEXT
+---@field TargetPrereqCivic TEXT
+---@field TargetPrereqTech TEXT
+---@field InitiatorObsoleteCivic TEXT
+---@field Cost INTEGER
+---@field RequiresCapitalPath BOOLEAN
+---@field RequiresConvertedCity BOOLEAN
+---@field RequiresOccupiedCity BOOLEAN
+---@field RequiresOccupiedFriendlyCity BOOLEAN
+---@field RequiresWarOnAlliedCityState BOOLEAN
+---@field RequiresLeadXEras INTEGER
+---@field RequiresArchaeologyIntrusion BOOLEAN
+---@field RequiresAdjacentEmpires BOOLEAN
+---@field RequiresEspionageIntrusion BOOLEAN
+---@field NoCurrentDelegation BOOLEAN
+---@field NoCurrentEmbassy BOOLEAN
+---@field NoCurrentOpenBorders BOOLEAN
+---@field NoCurrentDenunciation BOOLEAN
+---@field NoCurrentDOF BOOLEAN
+---@field NoCurrentResearchAgreement BOOLEAN
+---@field NoCurrentDefensivePact BOOLEAN
+---@field Agreement BOOLEAN
+---@field WarmongerPercent INTEGER
+---@field CaptureWarmongerPercent INTEGER
+---@field RazeWarmongerPercent INTEGER
+---@field UIGroup TEXT
+---@field DenouncementTurnsRequired INTEGER
+---@field RequiresAlliance BOOLEAN
+---@field RequiresTeamMembership BOOLEAN
+---@field Duration INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomaticStartStates
+---@field PlayerCivLevel TEXT
+---@field OpponentCivLevel TEXT
+---@field DiplomaticStateType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomaticStates
+---@field StateType TEXT
+---@field Name TEXT
+---@field DiplomaticYieldBonus INTEGER
+---@field RelationshipLevel INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomaticStateActions
+---@field StateType INTEGER
+---@field DiplomaticActionType INTEGER
+---@field AiAllowed BOOLEAN
+---@field Worth INTEGER
+---@field Cost INTEGER
+---@field TransitionToState TEXT
+---@field TeamOnly BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomaticStateTransitions
+---@field BaseState TEXT
+---@field TransitionState TEXT
+---@field RequireTransitionMax INTEGER
+---@field ThrottleTurns INTEGER
+---@field AllowTransitionMin INTEGER
+---@field RequireTransitionMin INTEGER
+---@field AllowTransitionMax INTEGER
+---@field AllowTransitionCheck TEXT
+---@field OnTransitionAction TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomaticTriggers
+---@field TriggerType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomaticTriggeredTransitions
+---@field TriggerType TEXT
+---@field CivilizationLevel TEXT
+---@field OpponentCivilizationLevel TEXT
+---@field TransitionState TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomaticTriggers_RequiredStates
+---@field TriggerType TEXT
+---@field RequiredState TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomaticVisibilitySources
+---@field VisibilitySourceType TEXT
+---@field Description TEXT
+---@field ActionDescription TEXT
+---@field GossipString TEXT
+---@field Trader BOOLEAN
+---@field Delegate BOOLEAN
+---@field Ally BOOLEAN
+---@field Spy BOOLEAN
+---@field PrereqTech TEXT
+---@field TraitType TEXT
+---@field GreatPersonIndividualType TEXT
+---@field FromCitizen BOOLEAN
+---@field LevelRequired INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Districts
+---@field DistrictType TEXT
+---@field Name TEXT
+---@field PrereqTech TEXT
+---@field PrereqCivic TEXT
+---@field Coast BOOLEAN
+---@field Description TEXT
+---@field Cost INTEGER
+---@field RequiresPlacement BOOLEAN
+---@field RequiresPopulation BOOLEAN
+---@field NoAdjacentCity BOOLEAN
+---@field CityCenter BOOLEAN
+---@field Aqueduct BOOLEAN
+---@field InternalOnly BOOLEAN
+---@field ZOC BOOLEAN
+---@field FreeEmbark BOOLEAN
+---@field HitPoints INTEGER
+---@field CaptureRemovesBuildings BOOLEAN
+---@field CaptureRemovesCityDefenses BOOLEAN
+---@field PlunderType TEXT
+---@field PlunderAmount INTEGER
+---@field TradeEmbark BOOLEAN
+---@field MilitaryDomain TEXT
+---@field CostProgressionModel TEXT
+---@field CostProgressionParam1 INTEGER
+---@field TraitType TEXT
+---@field Appeal INTEGER
+---@field Housing INTEGER
+---@field Entertainment INTEGER
+---@field OnePerCity BOOLEAN
+---@field AllowsHolyCity BOOLEAN
+---@field Maintenance INTEGER
+---@field AirSlots INTEGER
+---@field CitizenSlots INTEGER
+---@field TravelTime INTEGER
+---@field CityStrengthModifier INTEGER
+---@field AdjacentToLand BOOLEAN
+---@field CanAttack BOOLEAN
+---@field AdvisorType TEXT
+---@field CaptureRemovesDistrict BOOLEAN
+---@field MaxPerPlayer REAL
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.District_Adjacencies
+---@field DistrictType TEXT
+---@field YieldChangeId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.District_CitizenGreatPersonPoints
+---@field DistrictType TEXT
+---@field GreatPersonClassType TEXT
+---@field PointsPerTurn INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.District_CitizenYieldChanges
+---@field DistrictType TEXT
+---@field YieldType TEXT
+---@field YieldChange INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.District_GreatPersonPoints
+---@field DistrictType TEXT
+---@field GreatPersonClassType TEXT
+---@field PointsPerTurn INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.District_RequiredFeatures
+---@field DistrictType TEXT
+---@field FeatureType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.District_TradeRouteYields
+---@field DistrictType TEXT
+---@field YieldType TEXT
+---@field YieldChangeAsOrigin REAL
+---@field YieldChangeAsDomesticDestination REAL
+---@field YieldChangeAsInternationalDestination REAL
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.District_ValidTerrains
+---@field DistrictType TEXT
+---@field TerrainType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DistrictModifiers
+---@field DistrictType TEXT
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DistrictReplaces
+---@field CivUniqueDistrictType TEXT
+---@field ReplacesDistrictType TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DuplicateCivilizations
+---@field CivilizationType TEXT
+---@field OtherCivilizationType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DuplicateLeaders
+---@field LeaderType TEXT
+---@field OtherLeaderType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DynamicModifiers
+---@field ModifierType TEXT
+---@field CollectionType TEXT
+---@field EffectType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Eras
+---@field EraType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field ChronologyIndex INTEGER
+---@field WarmongerPoints INTEGER
+---@field GreatPersonBaseCost INTEGER
+---@field EraTechBackgroundTexture TEXT
+---@field EraCivicBackgroundTexture TEXT
+---@field WarmongerLevelDescription TEXT
+---@field EmbarkedUnitStrength INTEGER
+---@field EraTechBackgroundTextureOffsetX INTEGER
+---@field EraCivicBackgroundTextureOffsetX INTEGER
+---@field TechTreeLayoutMethod INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.EventPopupData
+---@field Type TEXT
+---@field Title TEXT
+---@field Description TEXT
+---@field BackgroundImage TEXT
+---@field ForegroundImage TEXT
+---@field Effects TEXT
+---@field ImageText TEXT
+---@field FilterCondition TEXT
+---@field EffectType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ExcludedAdjacencies
+---@field TraitType TEXT
+---@field YieldChangeId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ExcludedDistricts
+---@field DistrictType TEXT
+---@field TraitType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ExcludedGreatPersonClasses
+---@field GreatPersonClassType TEXT
+---@field TraitType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ExclusiveAgendas
+---@field AgendaOne TEXT
+---@field AgendaTwo TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.FavoredReligions
+---@field LeaderType TEXT
+---@field CivilizationType TEXT
+---@field ReligionType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Features
+---@field FeatureType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field Quote TEXT
+---@field Coast BOOLEAN
+---@field NoCoast BOOLEAN
+---@field NoRiver BOOLEAN
+---@field NoAdjacentFeatures BOOLEAN
+---@field RequiresRiver BOOLEAN
+---@field MovementChange INTEGER
+---@field SightThroughModifier INTEGER
+---@field Impassable BOOLEAN
+---@field NaturalWonder BOOLEAN
+---@field RemoveTech TEXT
+---@field Removable BOOLEAN
+---@field AddCivic TEXT
+---@field DefenseModifier INTEGER
+---@field AddsFreshWater BOOLEAN
+---@field Appeal INTEGER
+---@field MinDistanceLand INTEGER
+---@field MaxDistanceLand INTEGER
+---@field NotNearFeature BOOLEAN
+---@field Lake BOOLEAN
+---@field Tiles INTEGER
+---@field Adjacent BOOLEAN
+---@field NoResource BOOLEAN
+---@field DoubleAdjacentTerrainYield BOOLEAN
+---@field NotCliff BOOLEAN
+---@field MinDistanceNW INTEGER
+---@field CustomPlacement TEXT
+---@field Forest BOOLEAN
+---@field AntiquityPriority INTEGER
+---@field QuoteAudio TEXT
+---@field Settlement BOOLEAN
+---@field FollowRulesInWB BOOLEAN
+---@field DangerValue INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Feature_AdjacentFeatures
+---@field FeatureType TEXT
+---@field FeatureTypeAdjacent TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Feature_AdjacentTerrains
+---@field FeatureType TEXT
+---@field TerrainType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Feature_AdjacentYields
+---@field FeatureType TEXT
+---@field YieldType TEXT
+---@field YieldChange INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Feature_NotAdjacentTerrains
+---@field FeatureType TEXT
+---@field TerrainType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Feature_NotNearFeatures
+---@field FeatureType TEXT
+---@field FeatureTypeAvoid TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Feature_Removes
+---@field FeatureType TEXT
+---@field YieldType TEXT
+---@field Yield INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Feature_UnitMovements
+---@field FeatureType TEXT
+---@field AllowPassthrough BOOLEAN
+---@field AllowDestination BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Feature_ValidTerrains
+---@field FeatureType TEXT
+---@field TerrainType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Feature_YieldChanges
+---@field FeatureType TEXT
+---@field YieldType TEXT
+---@field YieldChange INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Flavors
+---@field FlavorType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GameCapabilities
+---@field GameCapability TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GameCapabilityDependencies
+---@field ID INTEGER
+---@field GameCapability INTEGER
+---@field DependsOnCapability TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GameEffects
+---@field Type TEXT
+---@field CommonName TEXT
+---@field Description TEXT
+---@field Tags TEXT
+---@field GameCapabilities TEXT
+---@field ContextInterfaces TEXT
+---@field SubjectInterfaces TEXT
+---@field SupportsRemove BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GameEffectArguments
+---@field Type TEXT
+---@field Name TEXT
+---@field CommonName TEXT
+---@field Description TEXT
+---@field ArgumentType TEXT
+---@field DefaultValue TEXT
+---@field Required BOOLEAN
+---@field MinValue TEXT
+---@field MaxValue TEXT
+---@field DatabaseKind TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GameModifiers
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GameSpeeds
+---@field GameSpeedType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field CostMultiplier INTEGER
+---@field CivicUnlockMaxCost INTEGER
+---@field CivicUnlockPerTurnDrop INTEGER
+---@field CivicUnlockMinCost INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GameSpeed_Durations
+---@field GameSpeedScalingType TEXT
+---@field NumberOfTurnsOnStandard INTEGER
+---@field NumberOfTurnsScaled INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GameSpeed_Scalings
+---@field GameSpeedScalingType TEXT
+---@field GameSpeedType TEXT
+---@field ScalingType TEXT
+---@field DefaultCostMultiplier INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GameSpeed_Turns
+---@field GameSpeedType TEXT
+---@field MonthIncrement INTEGER
+---@field TurnsPerIncrement INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GlobalParameters
+---@field Name TEXT
+---@field Value TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GoodyHuts
+---@field GoodyHutType TEXT
+---@field ImprovementType TEXT
+---@field Weight INTEGER
+---@field ShowMoment BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GoodyHutSubTypes
+---@field GoodyHut TEXT
+---@field SubTypeGoodyHut TEXT
+---@field Description TEXT
+---@field Weight INTEGER
+---@field ModifierID TEXT
+---@field UpgradeUnit BOOLEAN
+---@field Turn INTEGER
+---@field Experience BOOLEAN
+---@field Heal INTEGER
+---@field Relic BOOLEAN
+---@field Trader BOOLEAN
+---@field MinOneCity BOOLEAN
+---@field RequiresUnit BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Gossips
+---@field GossipType TEXT
+---@field VisibilityLevel INTEGER
+---@field Description TEXT
+---@field Message TEXT
+---@field Filter BOOLEAN
+---@field ErasUntilObsolete INTEGER
+---@field LevelRequired INTEGER
+---@field GroupType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Governments
+---@field GovernmentType TEXT
+---@field Name TEXT
+---@field PrereqCivic TEXT
+---@field InherentBonusDesc TEXT
+---@field AccumulatedBonusShortDesc TEXT
+---@field AccumulatedBonusDesc TEXT
+---@field OtherGovernmentIntolerance INTEGER
+---@field InfluencePointsPerTurn INTEGER
+---@field InfluencePointsThreshold INTEGER
+---@field InfluenceTokensPerThreshold INTEGER
+---@field BonusType TEXT
+---@field PolicyToUnlock TEXT
+---@field Tier TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Government_SlotCounts
+---@field GovernmentType TEXT
+---@field GovernmentSlotType TEXT
+---@field NumSlots INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GovernmentBonusNames
+---@field GovernmentBonusType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GovernmentModifiers
+---@field GovernmentType TEXT
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GovernmentSlots
+---@field GovernmentSlotType TEXT
+---@field Name TEXT
+---@field AllowsAnyPolicy BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GovernmentTiers
+---@field TierType TEXT
+---@field Sorting INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GreatPersonClasses
+---@field GreatPersonClassType TEXT
+---@field Name TEXT
+---@field UnitType TEXT
+---@field DistrictType TEXT
+---@field MaxPlayerInstances INTEGER
+---@field PseudoYieldType TEXT
+---@field IconString TEXT
+---@field ActionIcon TEXT
+---@field AvailableInTimeline BOOLEAN
+---@field GenerateDuplicateIndividuals BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GreatPersonIndividuals
+---@field GreatPersonIndividualType TEXT
+---@field Name TEXT
+---@field GreatPersonClassType TEXT
+---@field EraType TEXT
+---@field ActionCharges INTEGER
+---@field ActionRequiresOwnedTile BOOLEAN
+---@field ActionRequiresUnownedTile BOOLEAN
+---@field ActionRequiresAdjacentMountain BOOLEAN
+---@field ActionRequiresAdjacentOwnedTile BOOLEAN
+---@field ActionRequiresAdjacentBarbarianUnit BOOLEAN
+---@field ActionRequiresOnOrAdjacentNaturalWonder BOOLEAN
+---@field ActionRequiresOnOrAdjacentFeatureType TEXT
+---@field ActionRequiresIncompleteWonder BOOLEAN
+---@field ActionRequiresIncompleteSpaceRaceProject BOOLEAN
+---@field ActionRequiresVisibleLuxury BOOLEAN
+---@field ActionRequiresNoMilitaryUnit BOOLEAN
+---@field ActionRequiresPlayerRelicSlot BOOLEAN
+---@field ActionRequiresMilitaryUnitDomain TEXT
+---@field ActionRequiresUnitMilitaryFormation TEXT
+---@field ActionRequiresNearbyUnitWithTagA TEXT
+---@field ActionRequiresNearbyUnitWithTagB TEXT
+---@field ActionRequiresLandMilitaryUnitWithinXTiles INTEGER
+---@field ActionRequiresEnemyMilitaryUnitWithinXTiles INTEGER
+---@field ActionRequiresCityGreatWorkObjectType TEXT
+---@field ActionRequiresCompletedDistrictType TEXT
+---@field ActionRequiresMissingBuildingType TEXT
+---@field ActionRequiresGoldCost INTEGER
+---@field ActionNameTextOverride TEXT
+---@field ActionEffectTextOverride TEXT
+---@field ActionEffectTileHighlighting BOOLEAN
+---@field BirthNameTextOverride TEXT
+---@field BirthEffectTextOverride TEXT
+---@field AreaHighlightRadius INTEGER
+---@field Gender TEXT
+---@field ActionRequiresEnemyTerritory BOOLEAN
+---@field ActionRequiresCityStateTerritory BOOLEAN
+---@field ActionRequiresNonHostileTerritory BOOLEAN
+---@field ActionRequiresSuzerainTerritory BOOLEAN
+---@field ActionRequiresUnitCanGainExperience BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GreatPersonIndividualActionModifiers
+---@field GreatPersonIndividualType TEXT
+---@field ModifierId TEXT
+---@field AttachmentTargetType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GreatPersonIndividualBirthModifiers
+---@field GreatPersonIndividualType TEXT
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GreatPersonIndividualIconModifiers
+---@field GreatPersonIndividualType TEXT
+---@field OverrideUnitIcon TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GreatWorks
+---@field GreatWorkType TEXT
+---@field GreatWorkObjectType TEXT
+---@field GreatPersonIndividualType TEXT
+---@field Name TEXT
+---@field Audio TEXT
+---@field Image TEXT
+---@field Quote TEXT
+---@field Tourism INTEGER
+---@field EraType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GreatWorks_ImprovementType
+---@field GreatWorkType TEXT
+---@field ImprovementType TEXT
+---@field ResourceType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GreatWork_ValidSubTypes
+---@field GreatWorkSlotType TEXT
+---@field GreatWorkObjectType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GreatWork_YieldChanges
+---@field GreatWorkType TEXT
+---@field YieldType TEXT
+---@field YieldChange INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GreatWorkModifiers
+---@field GreatWorkType TEXT
+---@field ModifierID TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GreatWorkObjectTypes
+---@field GreatWorkObjectType TEXT
+---@field Value INTEGER
+---@field PseudoYieldType TEXT
+---@field Name TEXT
+---@field IconString TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GreatWorkSlotTypes
+---@field GreatWorkSlotType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Happinesses
+---@field HappinessType TEXT
+---@field Name TEXT
+---@field MinimumAmenityScore INTEGER
+---@field MaximumAmenityScore INTEGER
+---@field GrowthModifier REAL
+---@field NonFoodYieldModifier REAL
+---@field RebellionPoints INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.HeroClasses
+---@field HeroClassType TEXT
+---@field Name LocalizedText
+---@field Description LocalizedText
+---@field UnitType TEXT
+---@field CreationProjectType TEXT
+---@field ArtifactGreatWorkType TEXT
+---@field EpicGreatWorkType TEXT
+---@field DiscoveryMinEraType TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.HeroClassProgressions
+---@field HeroClassType TEXT
+---@field EraType TEXT
+---@field CombatStrength INTEGER
+---@field RangedCombatStrength INTEGER
+---@field AbilityCharges INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.HeroClassUnitCommands
+---@field HeroClassType TEXT
+---@field UnitCommandType TEXT
+---@field Passive BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.HistoricalAgendas
+---@field LeaderType TEXT
+---@field AgendaType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.HistoricRankings
+---@field HistoricLeader TEXT
+---@field Quote TEXT
+---@field Score INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Improvements
+---@field ImprovementType TEXT
+---@field Name TEXT
+---@field BarbarianCamp BOOLEAN
+---@field PrereqTech TEXT
+---@field PrereqCivic TEXT
+---@field Buildable BOOLEAN
+---@field Description TEXT
+---@field RemoveOnEntry BOOLEAN
+---@field DispersalGold INTEGER
+---@field PlunderType TEXT
+---@field PlunderAmount INTEGER
+---@field Goody BOOLEAN
+---@field TilesPerGoody INTEGER
+---@field GoodyRange INTEGER
+---@field Icon TEXT
+---@field TraitType TEXT
+---@field Housing INTEGER
+---@field TilesRequired INTEGER
+---@field SameAdjacentValid BOOLEAN
+---@field RequiresRiver INTEGER
+---@field EnforceTerrain BOOLEAN
+---@field BuildInLine BOOLEAN
+---@field CanBuildOutsideTerritory BOOLEAN
+---@field BuildOnFrontier BOOLEAN
+---@field AirSlots INTEGER
+---@field DefenseModifier INTEGER
+---@field GrantFortification INTEGER
+---@field MinimumAppeal INTEGER
+---@field Coast BOOLEAN
+---@field YieldFromAppeal TEXT
+---@field WeaponSlots INTEGER
+---@field ReligiousUnitHealRate INTEGER
+---@field Appeal INTEGER
+---@field OnePerCity BOOLEAN
+---@field YieldFromAppealPercent INTEGER
+---@field ValidAdjacentTerrainAmount INTEGER
+---@field Domain TEXT
+---@field AdjacentSeaResource BOOLEAN
+---@field RequiresAdjacentBonusOrLuxury BOOLEAN
+---@field MovementChange INTEGER
+---@field Workable BOOLEAN
+---@field ImprovementOnRemove TEXT
+---@field GoodyNotify BOOLEAN
+---@field NoAdjacentSpecialtyDistrict BOOLEAN
+---@field RequiresAdjacentLuxury BOOLEAN
+---@field AdjacentToLand BOOLEAN
+---@field Removable BOOLEAN
+---@field OnlyOpenBorders BOOLEAN
+---@field Capturable BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Improvement_Adjacencies
+---@field ImprovementType TEXT
+---@field YieldChangeId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Improvement_BonusYieldChanges
+---@field Id INTEGER
+---@field ImprovementType TEXT
+---@field YieldType TEXT
+---@field BonusYieldChange INTEGER
+---@field PrereqTech TEXT
+---@field PrereqCivic TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Improvement_InvalidAdjacentFeatures
+---@field ImprovementType TEXT
+---@field FeatureType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Improvements_MODE
+---@field ImprovementType TEXT
+---@field Industry BOOLEAN
+---@field Corporation BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Improvement_Tourism
+---@field ImprovementType TEXT
+---@field TourismSource TEXT
+---@field PrereqCivic TEXT
+---@field PrereqTech TEXT
+---@field ScalingFactor INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Improvement_ValidAdjacentResources
+---@field ImprovementType TEXT
+---@field ResourceType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Improvement_ValidAdjacentTerrains
+---@field ImprovementType TEXT
+---@field TerrainType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Improvement_ValidBuildUnits
+---@field ImprovementType TEXT
+---@field UnitType TEXT
+---@field ConsumesCharge BOOLEAN
+---@field ValidRepairOnly BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Improvement_ValidFeatures
+---@field ImprovementType TEXT
+---@field FeatureType TEXT
+---@field PrereqTech TEXT
+---@field PrereqCivic TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Improvement_ValidResources
+---@field ImprovementType TEXT
+---@field ResourceType TEXT
+---@field MustRemoveFeature BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Improvement_ValidTerrains
+---@field ImprovementType TEXT
+---@field TerrainType TEXT
+---@field PrereqTech TEXT
+---@field PrereqCivic TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Improvement_YieldChanges
+---@field ImprovementType TEXT
+---@field YieldType TEXT
+---@field YieldChange INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Improvement_YieldsOutsideTerritories
+---@field ImprovementType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ImprovementModifiers
+---@field ImprovementType TEXT
+---@field ModifierID TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.InterfaceModes
+---@field ModeType TEXT
+---@field Description TEXT
+---@field Help TEXT
+---@field DisabledHelp TEXT
+---@field Icon TEXT
+---@field VisibleInUI BOOLEAN
+---@field CursorType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Kinds
+---@field Kind TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Leaders
+---@field LeaderType TEXT
+---@field Name TEXT
+---@field OperationList TEXT
+---@field IsBarbarianLeader BOOLEAN
+---@field InheritFrom TEXT
+---@field SceneLayers INTEGER
+---@field Sex TEXT
+---@field SameSexPercentage INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.LeaderInfo
+---@field LeaderType TEXT
+---@field Header TEXT
+---@field Caption TEXT
+---@field SortIndex INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.LeaderQuotes
+---@field LeaderType TEXT
+---@field Quote TEXT
+---@field QuoteAudio TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.LeaderTraits
+---@field LeaderType TEXT
+---@field TraitType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.LoadingInfo
+---@field LeaderType TEXT
+---@field ForegroundImage TEXT
+---@field BackgroundImage TEXT
+---@field EraText TEXT
+---@field LeaderText TEXT
+---@field PlayDawnOfManAudio BOOLEAN
+---@field DawnOfManLeaderId TEXT
+---@field DawnOfManEraId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.MajorStartingUnits
+---@field Unit TEXT
+---@field Era TEXT
+---@field District TEXT
+---@field Quantity INTEGER
+---@field NotStartTile BOOLEAN
+---@field OnDistrictCreated BOOLEAN
+---@field AiOnly BOOLEAN
+---@field MinDifficulty TEXT
+---@field DifficultyDelta REAL
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Maps
+---@field MapSizeType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field DefaultPlayers INTEGER
+---@field FogTilesPerBarbarianCamp INTEGER
+---@field NumNaturalWonders INTEGER
+---@field UnitNameModifier INTEGER
+---@field TargetNumCities INTEGER
+---@field GridWidth INTEGER
+---@field GridHeight INTEGER
+---@field TerrainGrainChange INTEGER
+---@field FeatureGrainChange INTEGER
+---@field ResearchPercent INTEGER
+---@field NumCitiesUnhealthPercent INTEGER
+---@field NumCitiesPolicyCostMod INTEGER
+---@field NumCitiesTechCostMod INTEGER
+---@field EstimatedNumCities INTEGER
+---@field PlateValue INTEGER
+---@field Continents INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Map_GreatPersonClasses
+---@field MapSizeType TEXT
+---@field GreatPersonClassType TEXT
+---@field MaxWorldInstances INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.MapRainfalls
+---@field MapRainfallType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field AverageAmountPerYear INTEGER
+---@field Scale REAL
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.MapResourceDistributions
+---@field MapResourceDistributionType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field Scale REAL
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.MapSeaLevels
+---@field MapSeaLevelType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field Scale REAL
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.MapStartPositions
+---@field Map TEXT
+---@field Plot INTEGER
+---@field Type TEXT
+---@field Value TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.MapTemperatures
+---@field MapTemperatureType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field AverageStartingTemperature REAL
+---@field Scale REAL
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.MapWorldAges
+---@field MapWorldAgeType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field YearsOld REAL
+---@field Scale REAL
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Modifiers
+---@field ModifierId TEXT
+---@field ModifierType TEXT
+---@field RunOnce BOOLEAN
+---@field NewOnly BOOLEAN
+---@field Permanent BOOLEAN
+---@field Repeatable BOOLEAN
+---@field OwnerRequirementSetId TEXT
+---@field SubjectRequirementSetId TEXT
+---@field OwnerStackLimit INTEGER
+---@field SubjectStackLimit INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ModifierArguments
+---@field ModifierId TEXT
+---@field Name TEXT
+---@field Type TEXT
+---@field Value TEXT
+---@field Extra TEXT
+---@field SecondExtra TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ModifierStrings
+---@field ModifierId TEXT
+---@field Context TEXT
+---@field Text TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Months
+---@field MonthType TEXT
+---@field Description TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.MutuallyExclusiveBuildings
+---@field Building TEXT
+---@field MutuallyExclusiveBuilding TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.MutuallyExclusiveDistricts
+---@field District TEXT
+---@field MutuallyExclusiveDistrict TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.NodeDataDefinitions
+---@field DataName TEXT
+---@field DefnId INTEGER
+---@field DataType TEXT
+---@field NodeType TEXT
+---@field Required BOOLEAN
+---@field RequiredGroup BOOLEAN
+---@field Output BOOLEAN
+---@field Modified BOOLEAN
+---@field UserData BOOLEAN
+---@field Automatic BOOLEAN
+---@field Tagged BOOLEAN
+---@field EnumList TEXT
+---@field UniqueId INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.NodeDefinitions
+---@field NodeType TEXT
+---@field NodeId INTEGER
+---@field ShapeId INTEGER
+---@field Description TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Notifications
+---@field NotificationType TEXT
+---@field Message TEXT
+---@field Summary TEXT
+---@field SeverityType TEXT
+---@field ExpiresEndOfTurn BOOLEAN
+---@field ExpiresEndOfNextTurn BOOLEAN
+---@field SubType TEXT
+---@field AutoNotify BOOLEAN
+---@field GroupType TEXT
+---@field Icon TEXT
+---@field AutoActivate BOOLEAN
+---@field VisibleInUI BOOLEAN
+---@field ShowIconSinglePlayer BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ObsoletePolicies
+---@field PolicyType TEXT
+---@field ObsoletePolicy TEXT
+---@field RequiresAvailableGreatPersonClass TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.OpTeamRequirements
+---@field TeamName TEXT
+---@field AiType TEXT
+---@field MinNumber INTEGER
+---@field MaxNumber INTEGER
+---@field MinPercentage REAL
+---@field MaxPercentage REAL
+---@field ReconsiderWhilePreparing BOOLEAN
+---@field AiTypeDependence TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.PlotEvalConditions
+---@field ConditionType TEXT
+---@field Value INTEGER
+---@field PoorValue INTEGER
+---@field PoorTooltipString TEXT
+---@field GoodValue INTEGER
+---@field GoodTooltipString TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Policies
+---@field PolicyType TEXT
+---@field Description TEXT
+---@field PrereqCivic TEXT
+---@field PrereqTech TEXT
+---@field Name TEXT
+---@field GovernmentSlotType TEXT
+---@field RequiresGovernmentUnlock BOOLEAN
+---@field ExplicitUnlock BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.PolicyModifiers
+---@field PolicyType TEXT
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Projects
+---@field ProjectType TEXT
+---@field Name TEXT
+---@field ShortName TEXT
+---@field Description TEXT
+---@field PopupText TEXT
+---@field Cost INTEGER
+---@field CostProgressionModel TEXT
+---@field CostProgressionParam1 INTEGER
+---@field PrereqTech TEXT
+---@field PrereqCivic TEXT
+---@field PrereqDistrict TEXT
+---@field RequiredBuilding TEXT
+---@field VisualBuildingType TEXT
+---@field SpaceRace BOOLEAN
+---@field OuterDefenseRepair BOOLEAN
+---@field MaxPlayerInstances INTEGER
+---@field AmenitiesWhileActive INTEGER
+---@field PrereqResource TEXT
+---@field AdvisorType TEXT
+---@field WMD BOOLEAN
+---@field UnlocksFromEffect BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Project_GreatPersonPoints
+---@field ProjectType TEXT
+---@field GreatPersonClassType TEXT
+---@field Points INTEGER
+---@field PointProgressionModel TEXT
+---@field PointProgressionParam1 INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Projects_MODE
+---@field ProjectType TEXT
+---@field PrereqImprovement TEXT
+---@field ResourceType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Project_YieldConversions
+---@field ProjectType TEXT
+---@field YieldType TEXT
+---@field PercentOfProductionRate INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ProjectCompletionModifiers
+---@field ProjectType TEXT
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ProjectPrereqs
+---@field ProjectType TEXT
+---@field PrereqProjectType TEXT
+---@field MinimumPlayerInstances INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.PseudoYields
+---@field PseudoYieldType TEXT
+---@field DefaultValue REAL
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Quests
+---@field QuestType TEXT
+---@field Name TEXT
+---@field InstanceName TEXT
+---@field Description TEXT
+---@field InstanceDescription TEXT
+---@field Reward TEXT
+---@field InstanceReward TEXT
+---@field IconString TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomAgendas
+---@field AgendaType TEXT
+---@field GameLimit INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Religions
+---@field ReligionType TEXT
+---@field Name TEXT
+---@field IconString TEXT
+---@field Pantheon BOOLEAN
+---@field RequiresCustomName BOOLEAN
+---@field Color TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Requirements
+---@field RequirementId TEXT
+---@field RequirementType TEXT
+---@field Likeliness INTEGER
+---@field Impact INTEGER
+---@field Inverse BOOLEAN
+---@field Reverse BOOLEAN
+---@field Persistent BOOLEAN
+---@field ProgressWeight INTEGER
+---@field Triggered BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RequirementArguments
+---@field RequirementId TEXT
+---@field Name TEXT
+---@field Type TEXT
+---@field Value TEXT
+---@field Extra TEXT
+---@field SecondExtra TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RequirementSetRequirements
+---@field RequirementSetId TEXT
+---@field RequirementId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RequirementSets
+---@field RequirementSetId TEXT
+---@field RequirementSetType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RequirementStrings
+---@field RequirementId TEXT
+---@field Context TEXT
+---@field Text TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Resources
+---@field ResourceType TEXT
+---@field Name TEXT
+---@field ResourceClassType TEXT
+---@field Happiness INTEGER
+---@field NoRiver BOOLEAN
+---@field RequiresRiver BOOLEAN
+---@field Frequency INTEGER
+---@field Clumped BOOLEAN
+---@field PrereqTech TEXT
+---@field PrereqCivic TEXT
+---@field PeakEra TEXT
+---@field RevealedEra INTEGER
+---@field LakeEligible BOOLEAN
+---@field AdjacentToLand BOOLEAN
+---@field SeaFrequency INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Resource_Conditions
+---@field ResourceType TEXT
+---@field UnlocksFromEffect BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Resource_Distribution
+---@field Continents INTEGER
+---@field Scarce INTEGER
+---@field Average INTEGER
+---@field Plentiful INTEGER
+---@field PercentAdjusted INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Resource_Harvests
+---@field ResourceType TEXT
+---@field YieldType TEXT
+---@field Amount INTEGER
+---@field PrereqTech TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Resource_SeaLuxuries
+---@field MapArgument INTEGER
+---@field Duel INTEGER
+---@field Tiny INTEGER
+---@field Small INTEGER
+---@field Standard INTEGER
+---@field Large INTEGER
+---@field Huge INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Resource_SeaStrategics
+---@field MapArgument INTEGER
+---@field Duel INTEGER
+---@field Tiny INTEGER
+---@field Small INTEGER
+---@field Standard INTEGER
+---@field Large INTEGER
+---@field Huge INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Resource_TradeRouteYields
+---@field ResourceType TEXT
+---@field YieldType TEXT
+---@field YieldChange INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Resource_ValidFeatures
+---@field ResourceType TEXT
+---@field FeatureType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Resource_ValidTerrains
+---@field ResourceType TEXT
+---@field TerrainType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Resource_YieldChanges
+---@field ResourceType TEXT
+---@field YieldType TEXT
+---@field YieldChange INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ResourceCorporations
+---@field ResourceType TEXT
+---@field ResourceEffect TEXT
+---@field ResourceEffectTExt TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ResourceIndustries
+---@field ResourceType TEXT
+---@field ResourceEffect TEXT
+---@field ResourceEffectTExt TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Routes
+---@field RouteType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field MovementCost REAL
+---@field SupportsBridges BOOLEAN
+---@field PlacementValue INTEGER
+---@field PlacementRequiresRoutePresent BOOLEAN
+---@field PlacementRequiresOwnedTile BOOLEAN
+---@field PrereqEra TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Route_ValidBuildUnits
+---@field RouteType TEXT
+---@field UnitType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.SavingTypes
+---@field SavingType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ScenarioSpecificCommand
+---@field TraitName TEXT
+---@field CommandName TEXT
+---@field TargetHeuristic TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ScoringCategories
+---@field CategoryType TEXT
+---@field Name TEXT
+---@field Multiplier REAL
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ScoringLineItems
+---@field LineItemType TEXT
+---@field Name TEXT
+---@field Category TEXT
+---@field Multiplier REAL
+---@field ScaleByCost BOOLEAN
+---@field Civics BOOLEAN
+---@field Cities BOOLEAN
+---@field Districts BOOLEAN
+---@field Population BOOLEAN
+---@field GreatPeople BOOLEAN
+---@field Techs BOOLEAN
+---@field Wonders BOOLEAN
+---@field Religion BOOLEAN
+---@field Pillage BOOLEAN
+---@field Trade BOOLEAN
+---@field GoldPerTurn BOOLEAN
+---@field TieBreakerPriority INTEGER
+---@field ScoringScenario1 BOOLEAN
+---@field ScoringScenario2 BOOLEAN
+---@field ScoringScenario3 BOOLEAN
+---@field EraScore BOOLEAN
+---@field Converted BOOLEAN
+---@field Buildings BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Seasons
+---@field SeasonType TEXT
+---@field Description TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.SettlementPreferences
+---@field PreferenceType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ShapeDefinitions
+---@field ShapeName TEXT
+---@field ShapeId INTEGER
+---@field MinChildren INTEGER
+---@field MaxChildren INTEGER
+---@field Description TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.StartBiasFeatures
+---@field CivilizationType TEXT
+---@field FeatureType TEXT
+---@field Tier INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.StartBiasResources
+---@field CivilizationType TEXT
+---@field ResourceType TEXT
+---@field Tier INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.StartBiasRivers
+---@field CivilizationType TEXT
+---@field Tier INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.StartBiasTerrains
+---@field CivilizationType TEXT
+---@field TerrainType TEXT
+---@field Tier INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.StartEras
+---@field EraType TEXT
+---@field Gold INTEGER
+---@field Faith INTEGER
+---@field FirstTurnCivicChange BOOLEAN
+---@field StartingPopulationCapital INTEGER
+---@field StartingPopulationOtherCities INTEGER
+---@field GrowthRate INTEGER
+---@field ProductionRate INTEGER
+---@field DistrictProductionRate INTEGER
+---@field StartingMeleeStrengthMajor INTEGER
+---@field StartingMeleeStrengthMinor INTEGER
+---@field ObsoleteReligion BOOLEAN
+---@field Tiles INTEGER
+---@field Year INTEGER
+---@field IgnoreGoodyHutTurn BOOLEAN
+---@field StartingRangedStrengthMajor INTEGER
+---@field StartingRangedStrengthMinor INTEGER
+---@field StartingAmenitiesCapital INTEGER
+---@field StartingHousingCapital INTEGER
+---@field StartingAmenitiesOtherCities INTEGER
+---@field StartingHousingOtherCities INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.StartingBoostedCivics
+---@field Civic TEXT
+---@field Era TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.StartingBoostedTechnologies
+---@field Technology TEXT
+---@field Era TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.StartingBuildings
+---@field Building TEXT
+---@field Era TEXT
+---@field District TEXT
+---@field MinorOnly BOOLEAN
+---@field MinDifficulty TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.StartingCivics
+---@field Civic TEXT
+---@field Era TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.StartingGovernments
+---@field Government TEXT
+---@field Era TEXT
+---@field Change BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Strategies
+---@field StrategyType TEXT
+---@field VictoryType TEXT
+---@field NumConditionsNeeded INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Strategy_Priorities
+---@field StrategyType TEXT
+---@field ListType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Strategy_YieldPriorities
+---@field StrategyType TEXT
+---@field YieldType TEXT
+---@field PseudoYieldType TEXT
+---@field PercentageDelta INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.StrategyConditions
+---@field StrategyType TEXT
+---@field ConditionFunction TEXT
+---@field StringValue TEXT
+---@field ThresholdValue INTEGER
+---@field Forbidden BOOLEAN
+---@field Disqualifier BOOLEAN
+---@field Exclusive BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Tags
+---@field Tag TEXT
+---@field Vocabulary TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.TargetTypes
+---@field TargetType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Technologies
+---@field TechnologyType TEXT
+---@field Name TEXT
+---@field Cost INTEGER
+---@field Repeatable BOOLEAN
+---@field EmbarkUnitType TEXT
+---@field EmbarkAll BOOLEAN
+---@field Description TEXT
+---@field EraType TEXT
+---@field Critical BOOLEAN
+---@field BarbarianFree BOOLEAN
+---@field UITreeRow INTEGER
+---@field AdvisorType TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Technologies_XP2
+---@field TechnologyType TEXT
+---@field RandomPrereqs BOOLEAN
+---@field HiddenUntilPrereqComplete BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.TechnologyModifiers
+---@field TechnologyType TEXT
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.TechnologyPrereqs
+---@field Technology TEXT
+---@field PrereqTech TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.TechnologyQuotes
+---@field TechnologyType TEXT
+---@field Quote TEXT
+---@field QuoteAudio TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.TechnologyRandomCosts
+---@field TechnologyType TEXT
+---@field Cost INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Terrains
+---@field TerrainType TEXT
+---@field Name TEXT
+---@field Mountain BOOLEAN
+---@field Hills BOOLEAN
+---@field Water BOOLEAN
+---@field InfluenceCost INTEGER
+---@field MovementCost INTEGER
+---@field ShallowWater BOOLEAN
+---@field SightModifier INTEGER
+---@field SightThroughModifier INTEGER
+---@field Impassable BOOLEAN
+---@field DefenseModifier INTEGER
+---@field Appeal INTEGER
+---@field AntiquityPriority INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Terrain_YieldChanges
+---@field TerrainType TEXT
+---@field YieldType TEXT
+---@field YieldChange INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.TerrainClasses
+---@field TerrainClassType TEXT
+---@field Name TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.TerrainClass_Terrains
+---@field TerrainClassType TEXT
+---@field TerrainType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Traits
+---@field TraitType TEXT
+---@field Name LocalizedText
+---@field Description LocalizedText
+---@field InternalOnly BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.TraitModifiers
+---@field TraitType TEXT
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.TreeData
+---@field DefnId INTEGER
+---@field NodeId INTEGER
+---@field TreeName TEXT
+---@field Tag TEXT
+---@field DefaultData TEXT
+---@field ParentTag TEXT
+---@field UniqueId INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.TriggeredBehaviorTrees
+---@field TriggerType TEXT
+---@field TreeName TEXT
+---@field OperationName TEXT
+---@field AIEvent TEXT
+---@field Priority INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.TurnPhases
+---@field ID INTEGER
+---@field TurnPhaseType TEXT
+---@field PhaseOrder INTEGER
+---@field TurnMode TEXT
+---@field ActiveSegmentType TEXT
+---@field InactiveSegmentType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.TurnSegments
+---@field TurnSegmentType TEXT
+---@field Name TEXT
+---@field Sound TEXT
+---@field AllowStrategicCommands BOOLEAN
+---@field AllowTacticalCommands BOOLEAN
+---@field TimeLimit_Base INTEGER
+---@field TimeLimit_PerCity INTEGER
+---@field TimeLimit_PerUnit INTEGER
+---@field AllowTurnUnready BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.TurnTimers
+---@field TurnTimerType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Types
+---@field Type TEXT
+---@field Hash INTEGER
+---@field Kind TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.TypeProperties
+---@field Type TEXT
+---@field Name TEXT
+---@field Value TEXT
+---@field PropertyType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.TypeTags
+---@field Type TEXT
+---@field Tag TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Units
+---@field UnitType TEXT
+---@field Name TEXT
+---@field BaseSightRange INTEGER
+---@field BaseMoves INTEGER
+---@field Combat INTEGER
+---@field RangedCombat INTEGER
+---@field Range INTEGER
+---@field Bombard INTEGER
+---@field Domain TEXT
+---@field FormationClass TEXT
+---@field Cost INTEGER
+---@field PopulationCost INTEGER
+---@field FoundCity BOOLEAN
+---@field FoundReligion BOOLEAN
+---@field MakeTradeRoute BOOLEAN
+---@field EvangelizeBelief BOOLEAN
+---@field LaunchInquisition BOOLEAN
+---@field RequiresInquisition BOOLEAN
+---@field BuildCharges INTEGER
+---@field ReligiousStrength INTEGER
+---@field ReligionEvictPercent INTEGER
+---@field SpreadCharges INTEGER
+---@field ReligiousHealCharges INTEGER
+---@field ExtractsArtifacts BOOLEAN
+---@field Description TEXT
+---@field Flavor TEXT
+---@field CanCapture BOOLEAN
+---@field CanRetreatWhenCaptured BOOLEAN
+---@field TraitType TEXT
+---@field AllowBarbarians BOOLEAN
+---@field CostProgressionModel TEXT
+---@field CostProgressionParam1 INTEGER
+---@field PromotionClass TEXT
+---@field InitialLevel INTEGER
+---@field NumRandomChoices INTEGER
+---@field PrereqTech TEXT
+---@field PrereqCivic TEXT
+---@field PrereqDistrict TEXT
+---@field PrereqPopulation INTEGER
+---@field LeaderType TEXT
+---@field CanTrain BOOLEAN
+---@field StrategicResource TEXT
+---@field PurchaseYield TEXT
+---@field MustPurchase BOOLEAN
+---@field Maintenance INTEGER
+---@field Stackable BOOLEAN
+---@field AirSlots INTEGER
+---@field CanTargetAir BOOLEAN
+---@field PseudoYieldType TEXT
+---@field ZoneOfControl BOOLEAN
+---@field AntiAirCombat INTEGER
+---@field Spy BOOLEAN
+---@field WMDCapable BOOLEAN
+---@field ParkCharges INTEGER
+---@field IgnoreMoves BOOLEAN
+---@field TeamVisibility BOOLEAN
+---@field ObsoleteTech TEXT
+---@field ObsoleteCivic TEXT
+---@field MandatoryObsoleteTech TEXT
+---@field MandatoryObsoleteCivic TEXT
+---@field AdvisorType TEXT
+---@field EnabledByReligion BOOLEAN
+---@field TrackReligion BOOLEAN
+---@field DisasterCharges INTEGER
+---@field UseMaxMeleeTrainedStrength BOOLEAN
+---@field ImmediatelyName BOOLEAN
+---@field CanEarnExperience BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Unit_BuildingPrereqs
+---@field Unit TEXT
+---@field PrereqBuilding TEXT
+---@field NumSupported INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Units_MODE
+---@field UnitType TEXT
+---@field ActionCharges INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Unit_RebellionTags
+---@field Tag TEXT
+---@field RebellionLevel INTEGER
+---@field NumCreated INTEGER
+---@field ForbiddenTag TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitAbilities
+---@field UnitAbilityType TEXT
+---@field Name LocalizedText
+---@field Description LocalizedText
+---@field Inactive BOOLEAN
+---@field ShowFloatTextWhenEarned BOOLEAN
+---@field Permanent BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitAbilityModifiers
+---@field UnitAbilityType TEXT
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitAiInfos
+---@field UnitType TEXT
+---@field AiType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitAiTypes
+---@field AiType TEXT
+---@field TypeValue INTEGER
+---@field Priority BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitCaptures
+---@field CapturedUnitType TEXT
+---@field BecomesUnitType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitCommands
+---@field CommandType TEXT
+---@field Description TEXT
+---@field Help TEXT
+---@field DisabledHelp TEXT
+---@field Icon TEXT
+---@field Sound TEXT
+---@field VisibleInUI BOOLEAN
+---@field HoldCycling BOOLEAN
+---@field CategoryInUI TEXT
+---@field InterfaceMode TEXT
+---@field PrereqTech TEXT
+---@field PrereqCivic TEXT
+---@field MaxEra INTEGER
+---@field HotkeyId TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitFormationClasses
+---@field FormationClassType TEXT
+---@field Name TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitNames
+---@field ID INTEGER
+---@field NameType TEXT
+---@field TextKey TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitOperations
+---@field OperationType TEXT
+---@field Description TEXT
+---@field Help TEXT
+---@field DisabledHelp TEXT
+---@field Icon TEXT
+---@field Sound TEXT
+---@field VisibleInUI BOOLEAN
+---@field HoldCycling BOOLEAN
+---@field CategoryInUI TEXT
+---@field InterfaceMode TEXT
+---@field PrereqTech TEXT
+---@field PrereqCivic TEXT
+---@field Turns INTEGER
+---@field BaseProbability INTEGER
+---@field LevelProbChange INTEGER
+---@field EnemyProbChange INTEGER
+---@field EnemyLevelProbChange INTEGER
+---@field TargetDistrict TEXT
+---@field HotkeyId TEXT
+---@field Offensive BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitPromotions
+---@field UnitPromotionType TEXT
+---@field Name LocalizedText
+---@field Description LocalizedText
+---@field Level INTEGER
+---@field Specialization TEXT
+---@field PromotionClass TEXT
+---@field Column INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitPromotionClasses
+---@field PromotionClassType TEXT
+---@field Name LocalizedText
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitPromotionModifiers
+---@field UnitPromotionType INTEGER
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitPromotionPrereqs
+---@field UnitPromotion TEXT
+---@field PrereqUnitPromotion TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitReplaces
+---@field CivUniqueUnitType TEXT
+---@field ReplacesUnitType TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Units_Presentation
+---@field UnitType TEXT
+---@field UIFlagOffset INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitUpgrades
+---@field Unit TEXT
+---@field UpgradeUnit TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Victories
+---@field VictoryType TEXT
+---@field Name TEXT
+---@field Blurb TEXT
+---@field RequirementSetId TEXT
+---@field EnabledByDefault BOOLEAN
+---@field Description TEXT
+---@field Icon TEXT
+---@field OneMoreTurn BOOLEAN
+---@field CriticalPercentage INTEGER
+---@field RequiresMultipleTeams BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Visibilities
+---@field VisibilityType TEXT
+---@field Name TEXT
+---@field RevealAgendas BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Vocabularies
+---@field Vocabulary TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Wars
+---@field WarType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.WMDs
+---@field WeaponType TEXT
+---@field Name TEXT
+---@field BlastRadius INTEGER
+---@field FalloutDuration INTEGER
+---@field AffectPopulation BOOLEAN
+---@field AffectImprovements BOOLEAN
+---@field AffectBuildings BOOLEAN
+---@field AffectUnits BOOLEAN
+---@field AffectResources BOOLEAN
+---@field AffectRoutes BOOLEAN
+---@field ICBMStrikeRange INTEGER
+---@field Maintenance INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Yields
+---@field YieldType TEXT
+---@field Name TEXT
+---@field IconString TEXT
+---@field OccupiedCityChange REAL
+---@field DefaultValue REAL
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Colors
+---@field Type TEXT
+---@field Color TEXT
+---@field Red float
+---@field Green float
+---@field Blue float
+---@field Alpha float
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.PlayerColors
+---@field Type TEXT
+---@field Usage TEXT
+---@field PrimaryColor TEXT
+---@field SecondaryColor TEXT
+---@field TextColor TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomacyStatements
+---@field Type TEXT
+---@field SubType TEXT
+---@field Initiator TEXT
+---@field Leader TEXT
+---@field Mood TEXT
+---@field StatementText TEXT
+---@field ReasonText TEXT
+---@field LeaderAnimation TEXT
+---@field SceneEffect TEXT
+---@field Selections TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomacySelections
+---@field Type TEXT
+---@field Leader TEXT
+---@field Mood TEXT
+---@field Sort INTEGER
+---@field Key TEXT
+---@field Text TEXT
+---@field Tooltip TEXT
+---@field DiplomaticActionType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomacyMoodTypes
+---@field Type TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomacyStatementTypes
+---@field Type TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomacyStatementSubTypes
+---@field Type TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.LeaderAnimations
+---@field Leader TEXT
+---@field Name TEXT
+---@field Sequence TEXT
+---@field Initial TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AgendaTags
+---@field AgendaTagType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Alliances
+---@field AllianceType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.AllianceEffects
+---@field LevelRequirement INTEGER
+---@field AllianceType TEXT
+---@field ModifierID TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Building_BuildChargeProductions
+---@field BuildingType TEXT
+---@field UnitType TEXT
+---@field PercentProductionPerCharge INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Building_ResourceCosts
+---@field BuildingType TEXT
+---@field ResourceType TEXT
+---@field StartProductionCost INTEGER
+---@field PerTurnMaintenanceCost INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Building_TourismBombs_XP2
+---@field BuildingType TEXT
+---@field TourismBombValue INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Buildings_XP2
+---@field BuildingType TEXT
+---@field RequiredPower INTEGER
+---@field ResourceTypeConvertedToPower TEXT
+---@field PreventsFloods BOOLEAN
+---@field PreventsDrought BOOLEAN
+---@field BlocksCoastalFlooding BOOLEAN
+---@field CostMultiplierPerTile INTEGER
+---@field CostMultiplierPerSeaLevel INTEGER
+---@field Bridge BOOLEAN
+---@field CanalWonder BOOLEAN
+---@field EntertainmentBonusWithPower INTEGER
+---@field NuclearReactor BOOLEAN
+---@field Pillage BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Building_YieldChangesBonusWithPower
+---@field BuildingType TEXT
+---@field YieldType TEXT
+---@field YieldChange INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CoastalLowlands
+---@field CoastalLowlandType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field FloodedEvent TEXT
+---@field SubmergedEvent TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CommemorationModifiers
+---@field CommemorationType TEXT
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CommemorationTypes
+---@field CommemorationType TEXT
+---@field CategoryDescription LocalizedText
+---@field GoldenAgeBonusDescription LocalizedText
+---@field NormalAgeBonusDescription LocalizedText
+---@field DarkAgeBonusDescription LocalizedText
+---@field MinimumGameEra TEXT
+---@field MaximumGameEra TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ComplimentModifiers
+---@field CommemorationType TEXT
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.CongressAiChanges
+---@field ResolutionType TEXT
+---@field DiscussionType TEXT
+---@field YieldType TEXT
+---@field PseudoYieldType TEXT
+---@field Value INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DeforestationEffects
+---@field DeforestationEffectType TEXT
+---@field Name TEXT
+---@field MaxAverageDeforestation REAL
+---@field CO2PercentModifier INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DeforestationLevels
+---@field DeforestationType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field MaxDeforestationPercent INTEGER
+---@field DeforestationPointsPerTurn INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomaticActions_XP1
+---@field DiplomaticActionType TEXT
+---@field RequiresGoldenAgeCommemorationType TEXT
+---@field AllianceType TEXT
+---@field RequiresBrokenPromise BOOLEAN
+---@field RequiresDifferentLateGovernment BOOLEAN
+---@field RequiresAllianceSoonToEnd BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomaticActions_XP2
+---@field DiplomaticActionType TEXT
+---@field FavorCost INTEGER
+---@field GrievanceCost INTEGER
+---@field PromiseType TEXT
+---@field RequiredPromise TEXT
+---@field GrievancesForRefusal INTEGER
+---@field GrievancesPerIncursion INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.DiplomaticVisibilitySources_XP1
+---@field VisibilitySourceType TEXT
+---@field TradePostTrait TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Discussions
+---@field DiscussionType TEXT
+---@field ProposalType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field EmergencyType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.District_BuildChargeProductions
+---@field DistrictType TEXT
+---@field UnitType TEXT
+---@field PercentProductionPerCharge INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Districts_XP2
+---@field DistrictType TEXT
+---@field OnePerRiver BOOLEAN
+---@field PreventsFloods BOOLEAN
+---@field PreventsDrought BOOLEAN
+---@field Canal BOOLEAN
+---@field AttackRange INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.EmergencyAlliances
+---@field EmergencyType TEXT
+---@field Trigger TEXT
+---@field TargetRequirementSet TEXT
+---@field GoalTrigger TEXT
+---@field MemberRequirementSet TEXT
+---@field Duration INTEGER
+---@field RemovesWarState BOOLEAN
+---@field ShareVis BOOLEAN
+---@field OpenBorders BOOLEAN
+---@field KillFriendship BOOLEAN
+---@field WarOnTarget BOOLEAN
+---@field InformTarget BOOLEAN
+---@field LockoutTime INTEGER
+---@field EmergencyText TEXT
+---@field GoalText TEXT
+---@field Name TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Emergencies_XP2
+---@field EmergencyType TEXT
+---@field Hostile BOOLEAN
+---@field NoTarget BOOLEAN
+---@field UIType TEXT
+---@field UIBackgroundPrefix TEXT
+---@field NoCongress BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.EmergencyBuffs
+---@field ModifierID TEXT
+---@field EmergencyType TEXT
+---@field Description TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.EmergencyGoalTexts
+---@field GoalType TEXT
+---@field GoalDescription TEXT
+---@field ShortGoalDescription TEXT
+---@field TentativeGoalDescription TEXT
+---@field ShortTargetGoalDescription TEXT
+---@field ListGoal TEXT
+---@field TargetListGoal TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.EmergencyRewards
+---@field ModifierID TEXT
+---@field EmergencyType TEXT
+---@field OnSuccess BOOLEAN
+---@field Description TEXT
+---@field FirstPlace BOOLEAN
+---@field TopTier BOOLEAN
+---@field BottomTier BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.EmergencyScoreSources
+---@field ScoreSourceType TEXT
+---@field EmergencyType TEXT
+---@field Description TEXT
+---@field ScoreAmount INTEGER
+---@field FromProject TEXT
+---@field MilitaryInEnemyTerritory BOOLEAN
+---@field ReligiousInEnemyTerritory BOOLEAN
+---@field AttackedEnemyCity BOOLEAN
+---@field FromGold BOOLEAN
+---@field KilledEnemyUnit BOOLEAN
+---@field SpreadReligion BOOLEAN
+---@field ReligionAttackedEnemy BOOLEAN
+---@field ReligiousUnitsInEnemyTerritory BOOLEAN
+---@field FromGreatPerson TEXT
+---@field FromFavor BOOLEAN
+---@field FromBuilding TEXT
+---@field FromDistrict TEXT
+---@field FromCO2Footprint BOOLEAN
+---@field FromAtWar BOOLEAN
+---@field FromBadCO2Footprint BOOLEAN
+---@field FromSacrificedUnitStrength BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.EmergencyTexts
+---@field Type TEXT
+---@field Flavor TEXT
+---@field Description TEXT
+---@field ExtraEffects TEXT
+---@field ExtraRewards TEXT
+---@field ExtraFailureRewards TEXT
+---@field DescriptionShorter TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Eras_XP1
+---@field EraType TEXT
+---@field GameEraMinimumTurns INTEGER
+---@field GameEraMaximumTurns INTEGER
+---@field LiberatedEnvoys INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Eras_XP2
+---@field EraType TEXT
+---@field GrievanceDecayRate INTEGER
+---@field TensionDecayRate INTEGER
+---@field TradeRouteMinimumEndTurnChange INTEGER
+---@field EraScoreThresholdShift INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Feature_Floodplains
+---@field FeatureType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Features_XP2
+---@field FeatureType TEXT
+---@field Volcano BOOLEAN
+---@field ValidWonderPlacement BOOLEAN
+---@field ValidDistrictPlacement BOOLEAN
+---@field Eruptable BOOLEAN
+---@field ValidForReplacement BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GoodyHutSubTypes_XP2
+---@field SubTypeGoodyHut TEXT
+---@field CityState BOOLEAN
+---@field StrategicResources BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Governments_XP2
+---@field GovernmentType TEXT
+---@field Favor INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Governors
+---@field GovernorType TEXT
+---@field Name LocalizedText
+---@field Description LocalizedText
+---@field IdentityPressure INTEGER
+---@field Title LocalizedText
+---@field ShortTitle LocalizedText
+---@field TransitionStrength INTEGER
+---@field AssignCityState BOOLEAN
+---@field Image TEXT
+---@field PortraitImage TEXT
+---@field PortraitImageSelected TEXT
+---@field TraitType TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Governors_XP2
+---@field GovernorType TEXT
+---@field AssignToMajor BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GovernorsCannotAssign
+---@field GovernorType TEXT
+---@field CannotAssign BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GovernorModifiers
+---@field GovernorType TEXT
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GovernorPromotions
+---@field GovernorPromotionType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field Level INTEGER
+---@field Column INTEGER
+---@field BaseAbility BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GovernorPromotionConditions
+---@field GovernorPromotionType TEXT
+---@field HiddenWithoutPrereqs BOOLEAN
+---@field EarliestGameEra TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GovernorPromotionModifiers
+---@field GovernorPromotionType TEXT
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GovernorPromotionPrereqs
+---@field GovernorPromotionType TEXT
+---@field PrereqGovernorPromotion TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GovernorPromotionSets
+---@field GovernorType TEXT
+---@field GovernorPromotion TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GovernorReplaces
+---@field UniqueGovernorType TEXT
+---@field ReplacesGovernorType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.GreatWorks_MODE
+---@field GreatWorkType TEXT
+---@field RequiredGovernor TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Happinesses_XP1
+---@field HappinessType TEXT
+---@field IdentityPerTurnChange INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Improvements_XP2
+---@field ImprovementType TEXT
+---@field AllowImpassableMovement BOOLEAN
+---@field BuildOnAdjacentPlot BOOLEAN
+---@field PreventsDrought BOOLEAN
+---@field DisasterResistant BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Leaders_XP2
+---@field LeaderType TEXT
+---@field OceanStart BOOLEAN
+---@field MinorCivBonusType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.LoyaltyLevels
+---@field LoyaltyLevelType TEXT
+---@field YieldChange REAL
+---@field GrowthChange REAL
+---@field Name TEXT
+---@field Description TEXT
+---@field LoyaltyMax INTEGER
+---@field LoyaltyMin INTEGER
+---@field IdentityChange REAL
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Maps_XP2
+---@field MapSizeType TEXT
+---@field CO2For1DegreeTempRise INTEGER
+---@field DesertPlotCountToLabel INTEGER
+---@field MountainPlotCountToLabel INTEGER
+---@field SeaPlotCountToLabel INTEGER
+---@field LakePlotCountToLabel INTEGER
+---@field OceanPlotCountToLabel INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.MinorCivBonuses
+---@field MinorCivBonusType TEXT
+---@field Name LocalizedText
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Moments
+---@field MomentType TEXT
+---@field Name LocalizedText
+---@field Description LocalizedText
+---@field InstanceDescription LocalizedText
+---@field InterestLevel INTEGER
+---@field EraScore INTEGER
+---@field RepeatTurnCooldown INTEGER
+---@field CommemorationType TEXT
+---@field MinimumGameEra TEXT
+---@field MaximumGameEra TEXT
+---@field BackgroundTexture TEXT
+---@field IconTexture TEXT
+---@field MomentIllustrationType TEXT
+---@field ObsoleteEra TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.MomentDataTypes
+---@field MomentDataType TEXT
+---@field Name INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.MomentIllustrations
+---@field MomentIllustrationType TEXT
+---@field MomentDataType TEXT
+---@field GameDataType TEXT
+---@field Texture TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.MomentIllustrationTypes
+---@field MomentIllustrationType TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.NamedDeserts
+---@field NamedDesertType TEXT
+---@field Name TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.NamedDesertCivilizations
+---@field NamedDesertType TEXT
+---@field CivilizationType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.NamedLakes
+---@field NamedLakeType TEXT
+---@field Name TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.NamedLakeCivilizations
+---@field NamedLakeType TEXT
+---@field CivilizationType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.NamedMountains
+---@field NamedMountainType TEXT
+---@field Name TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.NamedMountainCivilizations
+---@field NamedMountainType TEXT
+---@field CivilizationType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.NamedOceans
+---@field NamedOceanType TEXT
+---@field Name TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.NamedOceanCivilizations
+---@field NamedOceanType TEXT
+---@field CivilizationType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.NamedRivers
+---@field NamedRiverType TEXT
+---@field Name TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.NamedRiverCivilizations
+---@field NamedRiverType TEXT
+---@field CivilizationType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.NamedSeas
+---@field NamedSeaType TEXT
+---@field Name TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.NamedSeaCivilizations
+---@field NamedSeaType TEXT
+---@field CivilizationType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.NamedVolcanoes
+---@field NamedVolcanoType TEXT
+---@field Name TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.NamedVolcanoCivilizations
+---@field NamedVolcanoType TEXT
+---@field CivilizationType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Policy_GovernmentExclusives_XP2
+---@field PolicyType TEXT
+---@field GovernmentType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Policies_XP1
+---@field PolicyType TEXT
+---@field MinimumGameEra TEXT
+---@field MaximumGameEra TEXT
+---@field RequiresDarkAge BOOLEAN
+---@field RequiresGoldenAge BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.PrevailingWinds
+---@field MinimumLatitude INTEGER
+---@field MaximumLatitude INTEGER
+---@field DirectionType TEXT
+---@field Weight INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Project_BuildingCosts
+---@field ProjectType TEXT
+---@field ConsumedBuildingType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Project_ResourceCosts
+---@field ProjectType TEXT
+---@field ResourceType TEXT
+---@field StartProductionCost INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Projects_XP1
+---@field ProjectType TEXT
+---@field IdentityPerCitizenChange REAL
+---@field UnlocksFromEffect BOOLEAN
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Projects_XP2
+---@field ProjectType TEXT
+---@field RequiredPowerWhileActive INTEGER
+---@field ReligiousPressureModifier INTEGER
+---@field UnlocksFromEffect BOOLEAN
+---@field RequiredBuilding TEXT
+---@field CreateBuilding TEXT
+---@field FullyPoweredWhileActive BOOLEAN
+---@field MaxSimultaneousInstances INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ProposalBlockers
+---@field ProposalBlockerType TEXT
+---@field Description TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ProposalTypes
+---@field ProposalType TEXT
+---@field Icon INTEGER
+---@field Name TEXT
+---@field Description TEXT
+---@field BigVersion BOOLEAN
+---@field Sort INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomAgendas_XP2
+---@field AgendaType TEXT
+---@field AgendaTag TEXT
+---@field RequiresReligion BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomAgendaCivicTags
+---@field CivicType TEXT
+---@field AgendaTag TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomAgendaEraTags
+---@field EraType TEXT
+---@field AgendaTag TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomAgendasForCivic
+---@field CivicType TEXT
+---@field NumAgendas INTEGER
+---@field VisibilityType TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomAgendasInEra
+---@field EraType TEXT
+---@field NumAgendas INTEGER
+---@field VisibilityType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomEvents
+---@field RandomEventType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field LongDescription TEXT
+---@field EffectString TEXT
+---@field Severity INTEGER
+---@field NaturalWonder TEXT
+---@field IceLoss INTEGER
+---@field HaltsStormFertility BOOLEAN
+---@field HaltsFloodFertility BOOLEAN
+---@field FertilityRemovalChance INTEGER
+---@field ClimateChangePoints INTEGER
+---@field ChanceIncreasePerDegree INTEGER
+---@field Hexes INTEGER
+---@field Movement INTEGER
+---@field Duration INTEGER
+---@field Spacing INTEGER
+---@field IconLarge TEXT
+---@field IconSmall TEXT
+---@field MinTurnAtRisk INTEGER
+---@field MitigatedYieldReduction INTEGER
+---@field EffectOperatorType TEXT
+---@field UnitTriggered BOOLEAN
+---@field Global BOOLEAN
+---@field AvoidTerritory BOOLEAN
+---@field TargetCities BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomEvent_Damages
+---@field RandomEventType TEXT
+---@field DamageType TEXT
+---@field Percentage INTEGER
+---@field MinHP INTEGER
+---@field MaxHP INTEGER
+---@field CoastalLowlandPercentage INTEGER
+---@field FalloutDuration INTEGER
+---@field ExtraRangePercentage INTEGER
+---@field MinTurn INTEGER
+---@field MaxTurn INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomEvent_DamagedUnits
+---@field RandomEventType TEXT
+---@field UnitType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomEvent_Features
+---@field RandomEventType TEXT
+---@field FeatureType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomEvent_Frequencies
+---@field RandomEventType TEXT
+---@field RealismSettingType TEXT
+---@field OccurrencesPerGame REAL
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomEvent_Improvement_Placements
+---@field RandomEventType TEXT
+---@field ImprovementType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomEvent_Notifications
+---@field RandomEventType TEXT
+---@field Summary TEXT
+---@field MinTurn INTEGER
+---@field MaxTurn INTEGER
+---@field Title TEXT
+---@field CompilationRadius INTEGER
+---@field NotificationType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomEvent_PillagedBuildings
+---@field RandomEventType TEXT
+---@field BuildingType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomEvent_PillagedDistricts
+---@field RandomEventType TEXT
+---@field DistrictType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomEvent_PillagedImprovements
+---@field RandomEventType TEXT
+---@field ImprovementType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomEvent_Presentation
+---@field RandomEventType TEXT
+---@field Animation TEXT
+---@field Sound TEXT
+---@field Callback TEXT
+---@field VFX TEXT
+---@field ForceShowVFX TEXT
+---@field MFX TEXT
+---@field SequenceType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomEvent_Terrains
+---@field RandomEventType TEXT
+---@field TerrainType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RandomEvent_Yields
+---@field RandomEventType TEXT
+---@field YieldType TEXT
+---@field FeatureType TEXT
+---@field Percentage INTEGER
+---@field ReplaceFeature BOOLEAN
+---@field Amount INTEGER
+---@field Turn INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.RealismSettings
+---@field RealismSettingType TEXT
+---@field Name TEXT
+---@field PercentVolcanoesActive INTEGER
+---@field ExtraRange BOOLEAN
+---@field ClimateChangePoints INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Resolutions
+---@field ResolutionType TEXT
+---@field TargetKind TEXT
+---@field Name TEXT
+---@field Effect1Description TEXT
+---@field Effect2Description TEXT
+---@field ValidationLua TEXT
+---@field AITargetChooser TEXT
+---@field AILuaTargetChooser TEXT
+---@field InjectionOnly BOOLEAN
+---@field EarliestEra TEXT
+---@field LatestEra TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.ResolutionEffects
+---@field ResolutionEffectId INTEGER
+---@field ResolutionType TEXT
+---@field WhichEffect INTEGER
+---@field ModifierId TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Resource_Consumption
+---@field ResourceType TEXT
+---@field Accumulate BOOLEAN
+---@field PowerProvided INTEGER
+---@field CO2perkWh INTEGER
+---@field BaseExtractionRate INTEGER
+---@field ImprovedExtractionRate INTEGER
+---@field ObsoleteTech TEXT
+---@field StockpileCap INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Route_ResourceCosts
+---@field RouteType TEXT
+---@field ResourceType TEXT
+---@field BuildWithUnitCost INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Routes_XP2
+---@field RouteType TEXT
+---@field BuildOnlyWithUnit BOOLEAN
+---@field BuildWithUnitChargeCost INTEGER
+---@field PrereqTech TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.SecretSocieties
+---@field SecretSocietyType TEXT
+---@field Name LocalizedText
+---@field Description LocalizedText
+---@field DiscoveryText LocalizedText
+---@field MembershipText LocalizedText
+---@field GovernorType TEXT
+---@field DiscoverAtBarbarianCampBaseChance INTEGER
+---@field DiscoverAtCityStateBaseChance INTEGER
+---@field DiscoverAtGoodyHutBaseChance INTEGER
+---@field DiscoverAtNaturalWonderBaseChance INTEGER
+---@field SmallIcon TEXT
+---@field IconString TEXT
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.StartEras_XP2
+---@field EraType TEXT
+---@field DiploVP INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Unit_RockbandResults_XP2
+---@field ResultType TEXT
+---@field Name TEXT
+---@field Description TEXT
+---@field AlbumSales INTEGER
+---@field TourismBomb INTEGER
+---@field ExtraPromotion BOOLEAN
+---@field Dies BOOLEAN
+---@field GainsLevel BOOLEAN
+---@field BaseProbability INTEGER
+---@field PerformanceStars INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Units_XP2
+---@field UnitType TEXT
+---@field ResourceMaintenanceAmount INTEGER
+---@field ResourceCost INTEGER
+---@field ResourceMaintenanceType TEXT
+---@field TourismBomb INTEGER
+---@field CanEarnExperience BOOLEAN
+---@field TourismBombPossible BOOLEAN
+---@field CanFormMilitaryFormation BOOLEAN
+---@field MajorCivOnly BOOLEAN
+---@field CanCauseDisasters BOOLEAN
+---@field CanSacrificeUnits BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitOperations_XP2
+---@field OperationType TEXT
+---@field IsDisabled BOOLEAN
+---@field CO2Production INTEGER
+---@field Hash INTEGER
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.UnitRetreats_XP1
+---@field UnitRetreatType TEXT
+---@field BuildingType TEXT
+---@field UnitType TEXT
+---@field ImprovementType TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.Visibilities_XP2
+---@field VisibilityType TEXT
+---@field EspionageViewCapital BOOLEAN
+---@field EspionageViewAll BOOLEAN
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER
+
+---@class Gameplay.VotingBlockers
+---@field VotingBlockerType TEXT
+---@field NoUpvote BOOLEAN
+---@field NoDownvote BOOLEAN
+---@field Description TEXT
+---@field Index INTEGER
+---@field RowId INTEGER
+---@field rowid INTEGER

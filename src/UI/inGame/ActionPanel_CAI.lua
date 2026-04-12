@@ -1,0 +1,5 @@
+include("ActionPanel")
+ContextPtr:SetInputHandler(nil, true)
+LuaEvents.CAIEndTurn.Add(function()
+    OnInputActionTriggered(Input.GetActionId("EndTurn"))
+end)

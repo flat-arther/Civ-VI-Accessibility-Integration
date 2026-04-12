@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Mod id="9f4b5c2e-1a2b-4c3d-8e9f-123456789abc" version="1">
+  <Properties>
+    <Name>Civ VI Accessibility Integration</Name>
+    <Description>Adds blind accessibility to civ VI via text to speech</Description>
+    <Teaser>Accessibility mod</Teaser>
+    <Authors>FlatArther and Hamada</Authors>
+    <AffectsSavedGames>0</AffectsSavedGames>
+    <CompatibleVersions>2.0</CompatibleVersions>
+  </Properties>
+
+<Files>
+  <File>caiUtils.lua</File>
+  <File>UI/uiManager/baseWidget.lua</File>
+  <File>UI/uiManager/widgetTemplates.lua</File>
+  <File>UI/uiManager/UIScreenManager.lua</File>
+  <File>UI/inGame/caiIngame.lua</File>
+  <File>UI/inGame/worldInfo.lua</File>
+    <File>UI/inGame/navCursor.lua</File>
+    <File>UI/frontEnd/FrontEnd.lua</File>
+    <File>UI/frontEnd/IntroScreen.lua</File>
+    <File>UI/frontEnd/FrontEndPopup.lua</File>
+    <File>UI/frontEnd/MainMenu.lua</File>
+    <File>UI/shared/PopupDialog.lua</File>
+    <File>UI/shared/Options.lua</File>
+    <File>UI/inGame/InGame.lua</File>
+    <File>UI/inGame/ActionPanel_CAI.lua</File>
+    <File>UI/inGame/AdvisorPopup_CAI.lua</File>
+    <File>UI/inGame/InGameTopOptionsMenu_CAI.lua</File>
+    <File>UI/inGame/WorldInput_CAI.lua</File>
+    <File>data/hotkey_config.xml</File>
+    <File>Text/en_US/cai_text_ui.xml</File>
+  </Files>
+  <!-- FRONTEND -->
+  <FrontEndActions>
+  <UpdateText id="CAI_LOC_FrontEnd">
+  <File>Text/en_US/cai_text_ui.xml</File>
+  </UpdateText>
+
+  <UpdateDatabase id="CAI_WORLD_INPUTS">
+            <File>data/hotkey_config.xml</File>
+        </UpdateDatabase>
+    <ImportFiles id="CAIFrontEnd">
+      <Properties>
+        <LoadOrder>1</LoadOrder>
+      </Properties>
+      <File>caiUtils.lua</File>
+      <File>UI/uiManager/UIScreenManager.lua</File>
+      <File>UI/uiManager/baseWidget.lua</File>
+      <File>UI/uiManager/widgetTemplates.lua</File>
+      <File>UI/frontEnd/IntroScreen.lua</File>
+      <File>UI/frontEnd/FrontEndPopup.lua</File>
+      <File>UI/frontEnd/FrontEnd.lua</File>
+      <File>UI/frontEnd/MainMenu.lua</File>
+      <File>UI/shared/PopupDialog.lua</File>
+      <File>UI/shared/Options.lua</File>
+    </ImportFiles>
+  </FrontEndActions>
+
+  <InGameActions>
+  <UpdateText id="CAI_LOC_Ingame">
+  <File>Text/en_US/cai_text_ui.xml</File>
+  </UpdateText>
+    <ImportFiles id="CAIInGame">
+      <Properties>
+        <LoadOrder>50</LoadOrder>
+      </Properties>
+      <File>UI/inGame/InGame.lua</File>
+      <File>caiUtils.lua</File>
+      <File>UI/uiManager/UIScreenManager.lua</File>
+      <File>UI/uiManager/baseWidget.lua</File>
+      <File>UI/uiManager/widgetTemplates.lua</File>
+      <File>UI/inGame/worldInfo.lua</File>
+      <File>UI/inGame/navCursor.lua</File>
+      <File>UI/inGame/caiIngame.lua</File>
+      <File>UI/shared/PopupDialog.lua</File>
+      <File>UI/shared/Options.lua</File>
+      </ImportFiles>
+
+      <ReplaceUIScript id="CAI_WorldInput">
+            <Properties>
+            <LoadOrder>100</LoadOrder>
+                <LuaContext>WorldInput</LuaContext>
+                <LuaReplace>UI/inGame/WorldInput_CAI.lua</LuaReplace>
+            </Properties>
+        </ReplaceUIScript>
+
+<ReplaceUIScript id="CAI_ActionPanel">
+            <Properties>
+            <LoadOrder>100</LoadOrder>
+                <LuaContext>ActionPanel</LuaContext>
+                <LuaReplace>UI/inGame/ActionPanel_CAI.lua</LuaReplace>
+            </Properties>
+        </ReplaceUIScript>
+
+<ReplaceUIScript id="CAI_AdvisorPopup">
+            <Properties>
+            <LoadOrder>100</LoadOrder>
+                <LuaContext>AdvisorPopup</LuaContext>
+                <LuaReplace>UI/inGame/AdvisorPopup_CAI.lua</LuaReplace>
+            </Properties>
+        </ReplaceUIScript>
+
+        <ReplaceUIScript id="CAI_InGameTopOptionsMenu">
+            <Properties>
+            <LoadOrder>100</LoadOrder>
+                <LuaContext>InGameTopOptionsMenu</LuaContext>
+                <LuaReplace>UI/inGame/InGameTopOptionsMenu_CAI.lua</LuaReplace>
+            </Properties>
+        </ReplaceUIScript>
+  </InGameActions>
+
+</Mod>
