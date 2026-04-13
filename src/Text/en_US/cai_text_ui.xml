@@ -131,6 +131,38 @@
       <Text>Exited movement mode</Text>
     </Row>
 
+    <!-- Edit box -->
+    <Row Tag="LOC_CAI_EDIT_EDITING" Language="en_US">
+      <Text>{1_Label}, Edit, {2_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_COMMITTED" Language="en_US">
+      <Text>Committed: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_CANCELLED" Language="en_US">
+      <Text>Cancelled</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_BLANK" Language="en_US">
+      <Text>Blank</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_ACTIVATE_SELECTED" Language="en_US">
+      <Text>Editing {1_Label}: {2_Text} selected</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_ACTIVATE" Language="en_US">
+      <Text>Editing {1_Label}: {2_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_SELECTED" Language="en_US">
+      <Text>{1_Text} selected</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_PASTED" Language="en_US">
+      <Text>Pasted {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_UNSELECTED" Language="en_US">
+      <Text>{1_Text} unselected</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_COPIED" Language="en_US">
+      <Text>Copied {1_Text}</Text>
+    </Row>
+
     <!-- UI manager -->
     <Row Tag="LOC_CAI_CREATING_UI_MANAGER" Language="en_US">
       <Text>Accessibility initialized</Text>

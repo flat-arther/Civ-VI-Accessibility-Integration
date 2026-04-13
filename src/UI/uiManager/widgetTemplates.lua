@@ -111,6 +111,484 @@ function GetContainerDefChild(w)
     return FindFirstVisibleChild(w)
 end
 
+--#EditBox helpers
+
+---Returns the selection range as (low, high) or nil if no selection
+---@param w UIWidget
+---@return integer|nil, integer|nil
+function EditBox_GetSelectionRange(w)
+    if not w.EditSelStart then return nil, nil end
+    local a, b = w.EditSelStart, w.EditCursor
+    if a > b then a, b = b, a end
+    return a, b
+end
+
+---Returns the currently selected text, or empty string
+---@param w UIWidget
+---@return string
+function EditBox_GetSelectedText(w)
+    local a, b = EditBox_GetSelectionRange(w)
+    if not a then return "" end
+    return string.sub(w.EditBuffer, a + 1, b)
+end
+
+---Activates the edit box for text input
+---@param w UIWidget
+function EditBox_Activate(w)
+    local text = w.GetValue and w:GetValue() or ""
+    text = string.gsub(text, "\r\n", "\n")
+    w.EditBuffer = text
+    w.EditActive = true
+    w.EditOriginal = text
+    local label = w.GetLabel and w:GetLabel() or ""
+    if w.HighlightOnEdit and #text > 0 then
+        w.EditSelStart = 0
+        w.EditCursor = #text
+        Speak(Locale.Lookup("LOC_CAI_EDIT_ACTIVATE_SELECTED", label, text), true)
+    else
+        w.EditCursor = #text
+        w.EditSelStart = nil
+        local displayText = #text > 0 and text or Locale.Lookup("LOC_CAI_EDIT_BLANK")
+        Speak(Locale.Lookup("LOC_CAI_EDIT_ACTIVATE", label, displayText), true)
+    end
+end
+
+---Commits the current buffer and deactivates
+---@param w UIWidget
+function EditBox_Commit(w)
+    w.EditActive = false
+    w.EditSelStart = nil
+    local text = w.EditBuffer or ""
+    if w.OnSetText then w:OnSetText(text) end
+    if w.OnCommit then w:OnCommit(text) end
+    Speak(Locale.Lookup("LOC_CAI_EDIT_COMMITTED", text))
+end
+
+---Cancels editing, restores original text, deactivates
+---@param w UIWidget
+function EditBox_Cancel(w)
+    w.EditActive = false
+    w.EditSelStart = nil
+    w.EditBuffer = w.EditOriginal or ""
+    w.EditCursor = 0
+    if w.OnSetText then w:OnSetText(w.EditBuffer) end
+    Speak(Locale.Lookup("LOC_CAI_EDIT_CANCELLED"))
+end
+
+---Syncs the buffer to the game control via OnSetText
+---@param w UIWidget
+function EditBox_SyncAndSpeak(w)
+    if w.OnSetText then w:OnSetText(w.EditBuffer) end
+end
+
+---Deletes the selected text, collapsing the selection. Returns deleted text.
+---@param w UIWidget
+---@return string -- the deleted text
+function EditBox_DeleteSelection(w)
+    local a, b = EditBox_GetSelectionRange(w)
+    if not a then return "" end
+    local deleted = string.sub(w.EditBuffer, a + 1, b)
+    w.EditBuffer = string.sub(w.EditBuffer, 1, a) .. string.sub(w.EditBuffer, b + 1)
+    w.EditCursor = a
+    w.EditSelStart = nil
+    return deleted
+end
+
+---Inserts text at cursor, replacing any selection
+---@param w UIWidget
+---@param text string
+function EditBox_InsertText(w, text)
+    text = string.gsub(text, "\r\n", "\n")
+    if w.EditSelStart then
+        EditBox_DeleteSelection(w)
+    end
+    local buf = w.EditBuffer or ""
+    local pos = w.EditCursor or 0
+    w.EditBuffer = string.sub(buf, 1, pos) .. text .. string.sub(buf, pos + 1)
+    w.EditCursor = pos + #text
+end
+
+---Deletes the character before the cursor
+---@param w UIWidget
+function EditBox_BackspaceChar(w)
+    local pos = w.EditCursor or 0
+    if pos <= 0 then return end
+    local buf = w.EditBuffer or ""
+    local deleted = string.sub(buf, pos, pos)
+    w.EditBuffer = string.sub(buf, 1, pos - 1) .. string.sub(buf, pos + 1)
+    w.EditCursor = pos - 1
+    Speak(deleted, true)
+end
+
+---Deletes the character after the cursor
+---@param w UIWidget
+function EditBox_DeleteChar(w)
+    local pos = w.EditCursor or 0
+    local buf = w.EditBuffer or ""
+    if pos >= #buf then return end
+    local deleted = string.sub(buf, pos + 1, pos + 1)
+    w.EditBuffer = string.sub(buf, 1, pos) .. string.sub(buf, pos + 2)
+    Speak(deleted, true)
+end
+
+---Finds the word boundary to the left of pos for navigation (Ctrl+Left).
+---Lands at the start of the current/previous word.
+---Returns true if the character is a word boundary (whitespace or newline)
+---@param ch string
+---@return boolean
+local function IsWordBoundary(ch)
+    return ch == " " or ch == "\n" or ch == "\t"
+end
+
+---@param buf string
+---@param pos integer -- 0-based cursor position
+---@return integer -- 0-based position
+function EditBox_FindWordLeft(buf, pos)
+    if pos <= 0 then return 0 end
+    local i = pos
+    -- Skip whitespace before cursor (but stop at newlines)
+    while i > 0 and string.sub(buf, i, i) == " " do
+        i = i - 1
+    end
+    -- Stop at newline boundary
+    if i > 0 and string.sub(buf, i, i) == "\n" then return i end
+    -- Skip word chars to find start of word
+    while i > 0 and not IsWordBoundary(string.sub(buf, i, i)) do
+        i = i - 1
+    end
+    return i
+end
+
+---Finds the delete boundary to the left of pos for Ctrl+Backspace.
+---Deletes the word AND any whitespace between it and the previous word,
+---so no orphan spaces are left behind. Stops at newline boundaries.
+---@param buf string
+---@param pos integer -- 0-based cursor position
+---@return integer -- 0-based position
+function EditBox_FindDeleteLeft(buf, pos)
+    if pos <= 0 then return 0 end
+    local i = pos
+    -- Skip spaces immediately before cursor (stop at newlines)
+    local skippedSpace = false
+    while i > 0 and string.sub(buf, i, i) == " " do
+        i = i - 1
+        skippedSpace = true
+    end
+    -- If we hit a newline, stop here (delete just the spaces + newline)
+    if i > 0 and string.sub(buf, i, i) == "\n" then
+        return i - 1
+    end
+    -- Skip word chars (stop at any boundary)
+    while i > 0 and not IsWordBoundary(string.sub(buf, i, i)) do
+        i = i - 1
+    end
+    -- If we didn't skip whitespace initially (cursor was right after a word),
+    -- also consume spaces before the word so we don't leave orphan spaces
+    if not skippedSpace then
+        while i > 0 and string.sub(buf, i, i) == " " do
+            i = i - 1
+        end
+    end
+    return i
+end
+
+---Finds the word boundary to the right of pos (start of next word, or end of string)
+---@param buf string
+---@param pos integer -- 0-based
+---@return integer -- 0-based position
+function EditBox_FindWordRight(buf, pos)
+    local len = #buf
+    if pos >= len then return len end
+    local i = pos + 1
+    -- Stop at newline boundary
+    if string.sub(buf, i, i) == "\n" then return pos + 1 end
+    -- Skip current word chars
+    while i <= len and not IsWordBoundary(string.sub(buf, i, i)) do
+        i = i + 1
+    end
+    -- Skip spaces after word (but stop at newlines)
+    while i <= len and string.sub(buf, i, i) == " " do
+        i = i + 1
+    end
+    return i - 1
+end
+
+---Deletes the word before the cursor (including adjacent whitespace)
+---@param w UIWidget
+function EditBox_BackspaceWord(w)
+    local pos = w.EditCursor or 0
+    if pos <= 0 then return end
+    local buf = w.EditBuffer or ""
+    local deleteStart = EditBox_FindDeleteLeft(buf, pos)
+    local deleted = string.sub(buf, deleteStart + 1, pos)
+    w.EditBuffer = string.sub(buf, 1, deleteStart) .. string.sub(buf, pos + 1)
+    w.EditCursor = deleteStart
+    Speak(deleted, true)
+end
+
+---Deletes the word after the cursor
+---@param w UIWidget
+function EditBox_DeleteWordForward(w)
+    local pos = w.EditCursor or 0
+    local buf = w.EditBuffer or ""
+    if pos >= #buf then return end
+    local wordEnd = EditBox_FindWordRight(buf, pos)
+    local deleted = string.sub(buf, pos + 1, wordEnd)
+    w.EditBuffer = string.sub(buf, 1, pos) .. string.sub(buf, wordEnd + 1)
+    Speak(deleted, true)
+end
+
+--#Line helpers for edit box
+
+---Returns the start position (0-based) of the line containing pos
+---@param buf string
+---@param pos integer -- 0-based cursor position
+---@return integer
+function EditBox_LineStart(buf, pos)
+    if pos <= 0 then return 0 end
+    local i = pos
+    while i > 0 and string.sub(buf, i, i) ~= "\n" do
+        i = i - 1
+    end
+    -- If we stopped on a newline, line starts one past it
+    if i > 0 then return i end
+    return 0
+end
+
+---Returns the end position (0-based, after last char) of the line containing pos
+---@param buf string
+---@param pos integer -- 0-based cursor position
+---@return integer
+function EditBox_LineEnd(buf, pos)
+    local len = #buf
+    local i = pos + 1
+    while i <= len and string.sub(buf, i, i) ~= "\n" do
+        i = i + 1
+    end
+    return i - 1
+end
+
+---Returns the text of the line containing pos
+---@param buf string
+---@param pos integer -- 0-based cursor position
+---@return string
+function EditBox_GetCurrentLine(buf, pos)
+    local ls = EditBox_LineStart(buf, pos)
+    local le = EditBox_LineEnd(buf, pos)
+    return string.sub(buf, ls + 1, le)
+end
+
+---Speaks the line at pos, saying "Blank" for empty lines
+---@param buf string
+---@param pos integer -- 0-based cursor position
+local function SpeakLine(buf, pos)
+    local line = EditBox_GetCurrentLine(buf, pos)
+    Speak(#line > 0 and line or Locale.Lookup("LOC_CAI_EDIT_BLANK"), true)
+end
+
+---Moves cursor to the previous line, keeping column offset. Returns new pos or nil if no prev line.
+---@param buf string
+---@param pos integer -- 0-based
+---@return integer|nil
+function EditBox_PrevLinePos(buf, pos)
+    local ls = EditBox_LineStart(buf, pos)
+    if ls <= 0 then return nil end -- already on first line
+    local col = pos - ls
+    -- Previous line ends at ls - 1 (the newline char), previous line content is before that
+    local prevLineEnd = ls - 1 -- position of \n
+    local prevLineStart = EditBox_LineStart(buf, prevLineEnd - 1)
+    local prevLineLen = prevLineEnd - prevLineStart - 1
+    local newCol = math.min(col, prevLineLen)
+    return prevLineStart + newCol
+end
+
+---Moves cursor to the next line, keeping column offset. Returns new pos or nil if no next line.
+---@param buf string
+---@param pos integer -- 0-based
+---@return integer|nil
+function EditBox_NextLinePos(buf, pos)
+    local le = EditBox_LineEnd(buf, pos)
+    local len = #buf
+    if le >= len then return nil end -- already on last line
+    -- Next line starts at le + 1 (skip the \n)
+    local nextLineStart = le + 1
+    local nextLineEnd = EditBox_LineEnd(buf, nextLineStart)
+    local col = pos - EditBox_LineStart(buf, pos)
+    local nextLineLen = nextLineEnd - nextLineStart
+    local newCol = math.min(col, nextLineLen)
+    return nextLineStart + newCol
+end
+
+---Speaks selection changes: newly selected chars say "X selected",
+---lost selection says "X unselected"
+---@param w UIWidget
+---@param oldSelStart integer|nil
+---@param oldCursor integer
+local function SpeakSelectionChange(w, oldSelStart, oldCursor)
+    local buf = w.EditBuffer or ""
+
+    -- Determine old and new selected ranges
+    local oldA, oldB
+    if oldSelStart then
+        oldA, oldB = oldSelStart, oldCursor
+        if oldA > oldB then oldA, oldB = oldB, oldA end
+    end
+    local newA, newB = EditBox_GetSelectionRange(w)
+
+    -- Selection was removed entirely
+    if oldA and not newA then
+        local deselected = string.sub(buf, oldA + 1, oldB)
+        if deselected ~= "" then
+            Speak(Locale.Lookup("LOC_CAI_EDIT_UNSELECTED", deselected), true)
+        end
+        return
+    end
+
+    -- No selection before or after
+    if not newA then
+        local charAtCursor = string.sub(buf, w.EditCursor + 1, w.EditCursor + 1)
+        if charAtCursor == "" then charAtCursor = Locale.Lookup("LOC_CAI_EDIT_BLANK") end
+        Speak(charAtCursor, true)
+        return
+    end
+
+    -- Selection grew or shrank — find the delta
+    if not oldA then
+        -- Fresh selection from no selection
+        local sel = string.sub(buf, newA + 1, newB)
+        if sel ~= "" then
+            Speak(Locale.Lookup("LOC_CAI_EDIT_SELECTED", sel), true)
+        end
+        return
+    end
+
+    -- Both old and new selection exist — find what changed
+    -- The anchor stays the same; only the cursor moved
+    local oldEdge = oldCursor
+    local newEdge = w.EditCursor
+    if oldEdge == newEdge then return end
+
+    local anchor = w.EditSelStart
+    -- Determine if selection grew or shrank
+    local oldDist = math.abs(oldEdge - anchor)
+    local newDist = math.abs(newEdge - anchor)
+
+    if newDist > oldDist then
+        -- Selection grew: speak newly selected chars
+        local lo = math.min(oldEdge, newEdge)
+        local hi = math.max(oldEdge, newEdge)
+        local added = string.sub(buf, lo + 1, hi)
+        if added ~= "" then
+            Speak(Locale.Lookup("LOC_CAI_EDIT_SELECTED", added), true)
+        end
+    else
+        -- Selection shrank: speak deselected chars
+        local lo = math.min(oldEdge, newEdge)
+        local hi = math.max(oldEdge, newEdge)
+        local removed = string.sub(buf, lo + 1, hi)
+        if removed ~= "" then
+            Speak(Locale.Lookup("LOC_CAI_EDIT_UNSELECTED", removed), true)
+        end
+    end
+end
+
+---Moves the cursor by direction (char or word), optionally extending selection
+---@param w UIWidget
+---@param direction 1|-1
+---@param shift boolean -- extend selection
+---@param ctrl boolean -- word-level movement
+function EditBox_MoveCursor(w, direction, shift, ctrl)
+    local buf = w.EditBuffer or ""
+    local pos = w.EditCursor or 0
+    local oldSelStart = w.EditSelStart
+    local oldCursor = pos
+
+    -- If there is a selection and no shift, collapse to the appropriate edge
+    if w.EditSelStart and not shift then
+        local a, b = EditBox_GetSelectionRange(w)
+        local deselected = EditBox_GetSelectedText(w)
+        w.EditCursor = (direction < 0) and a or b
+        w.EditSelStart = nil
+        if deselected ~= "" then
+            Speak(Locale.Lookup("LOC_CAI_EDIT_UNSELECTED", deselected), true)
+        end
+        return
+    end
+
+    -- Start selection anchor if shift is held and we don't have one
+    if shift and not w.EditSelStart then
+        w.EditSelStart = pos
+    end
+
+    local newPos
+    if ctrl then
+        if direction < 0 then
+            newPos = EditBox_FindWordLeft(buf, pos)
+        else
+            newPos = EditBox_FindWordRight(buf, pos)
+        end
+    else
+        newPos = pos + direction
+    end
+
+    -- Clamp
+    if newPos < 0 then newPos = 0 end
+    if newPos > #buf then newPos = #buf end
+    w.EditCursor = newPos
+
+    -- Clear selection if not shift
+    if not shift then
+        w.EditSelStart = nil
+    end
+
+    -- When shift is held, speak selection change; otherwise speak char at cursor
+    if shift then
+        SpeakSelectionChange(w, oldSelStart, oldCursor)
+    else
+        local charAtCursor = string.sub(buf, newPos + 1, newPos + 1)
+        if charAtCursor == "" or charAtCursor == "\n" then
+            charAtCursor = Locale.Lookup("LOC_CAI_EDIT_BLANK")
+        end
+        Speak(charAtCursor, true)
+    end
+end
+
+---Moves the cursor to a specific position (for Home/End)
+---@param w UIWidget
+---@param targetPos integer -- 0-based
+---@param shift boolean -- extend selection
+function EditBox_MoveToEdge(w, targetPos, shift)
+    local buf = w.EditBuffer or ""
+    local pos = w.EditCursor or 0
+    local oldSelStart = w.EditSelStart
+    local oldCursor = pos
+
+    if shift and not w.EditSelStart then
+        w.EditSelStart = pos
+    end
+
+    w.EditCursor = targetPos
+
+    if not shift then
+        w.EditSelStart = nil
+    end
+
+    SpeakSelectionChange(w, oldSelStart, oldCursor)
+end
+
+---Selects all text in the edit box (Ctrl+A)
+---@param w UIWidget
+function EditBox_SelectAll(w)
+    local buf = w.EditBuffer or ""
+    if #buf == 0 then
+        Speak(Locale.Lookup("LOC_CAI_EDIT_BLANK"), true)
+        return
+    end
+    w.EditSelStart = 0
+    w.EditCursor = #buf
+    Speak(Locale.Lookup("LOC_CAI_EDIT_SELECTED", buf), true)
+end
+
 ---@type table<string, WidgetTemplate>
 WidgetTemplates = {
     Panel = {
@@ -259,12 +737,293 @@ WidgetTemplates = {
     },
     Edit = {
         Role = "Edit",
+        -- EditBox state fields (set by W_EditBox or consumer):
+        --   w.EditBuffer    : string    — current text being edited
+        --   w.EditCursor    : integer   — 0-based position before which chars are inserted
+        --   w.EditSelStart  : integer|nil — 0-based selection anchor (nil = no selection)
+        --   w.EditActive    : boolean   — whether we are inside the edit box
+        --   w.EditOriginal  : string    — text when editing started (for cancel)
+        --   w.OnSetText     : function(w, text) — callback to sync text to the game control
+        --   w.OnCommit      : function(w, text) — callback when Enter commits
+        --   w.HighlightOnEdit : boolean — select all text on activation (default true)
+        IsExpanded = false,
+        HighlightOnEdit = true,
         RegisterInputs = {
+            -- Enter: if not active, activate; if active, commit
             { Key = Keys.VK_RETURN, Action = function(w)
-                if w.OnClick then w:OnClick() end
+                if not w.EditActive then
+                    EditBox_Activate(w)
+                else
+                    EditBox_Commit(w)
+                end
                 return true
-             end },
+            end },
+            -- Escape: cancel editing
+            { Key = Keys.VK_ESCAPE, Action = function(w)
+                if w.EditActive then
+                    EditBox_Cancel(w)
+                    return true
+                end
+                return false
+            end },
+            -- Backspace: delete char before cursor (or selection)
+            { Key = Keys.VK_BACK, MSG = KeyEvents.KeyDown, Action = function(w)
+                if not w.EditActive then return false end
+                if w.EditSelStart then
+                    local deleted = EditBox_DeleteSelection(w)
+                    if deleted ~= "" then Speak(deleted, true) end
+                else
+                    EditBox_BackspaceChar(w)
+                end
+                EditBox_SyncAndSpeak(w)
+                return true
+            end },
+            -- Ctrl+Backspace: delete word before cursor (or selection)
+            { Key = Keys.VK_BACK, MSG = KeyEvents.KeyDown, IsControl = true, Action = function(w)
+                if not w.EditActive then return false end
+                if w.EditSelStart then
+                    local deleted = EditBox_DeleteSelection(w)
+                    if deleted ~= "" then Speak(deleted, true) end
+                else
+                    EditBox_BackspaceWord(w)
+                end
+                EditBox_SyncAndSpeak(w)
+                return true
+            end },
+            -- Delete: delete char after cursor (or selection)
+            { Key = Keys.VK_DELETE, MSG = KeyEvents.KeyDown, Action = function(w)
+                if not w.EditActive then return false end
+                if w.EditSelStart then
+                    local deleted = EditBox_DeleteSelection(w)
+                    if deleted ~= "" then Speak(deleted, true) end
+                else
+                    EditBox_DeleteChar(w)
+                end
+                EditBox_SyncAndSpeak(w)
+                return true
+            end },
+            -- Ctrl+Delete: delete word after cursor (or selection)
+            { Key = Keys.VK_DELETE, MSG = KeyEvents.KeyDown, IsControl = true, Action = function(w)
+                if not w.EditActive then return false end
+                if w.EditSelStart then
+                    local deleted = EditBox_DeleteSelection(w)
+                    if deleted ~= "" then Speak(deleted, true) end
+                else
+                    EditBox_DeleteWordForward(w)
+                end
+                EditBox_SyncAndSpeak(w)
+                return true
+            end },
+            -- Left arrow: move cursor left
+            { Key = Keys.VK_LEFT, MSG = KeyEvents.KeyDown, Action = function(w)
+                if not w.EditActive then return false end
+                EditBox_MoveCursor(w, -1, false, false)
+                return true
+            end },
+            -- Shift+Left: extend selection left
+            { Key = Keys.VK_LEFT, MSG = KeyEvents.KeyDown, IsShift = true, Action = function(w)
+                if not w.EditActive then return false end
+                EditBox_MoveCursor(w, -1, true, false)
+                return true
+            end },
+            -- Ctrl+Left: move cursor word left
+            { Key = Keys.VK_LEFT, MSG = KeyEvents.KeyDown, IsControl = true, Action = function(w)
+                if not w.EditActive then return false end
+                EditBox_MoveCursor(w, -1, false, true)
+                return true
+            end },
+            -- Right arrow: move cursor right
+            { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown, Action = function(w)
+                if not w.EditActive then return false end
+                EditBox_MoveCursor(w, 1, false, false)
+                return true
+            end },
+            -- Shift+Right: extend selection right
+            { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown, IsShift = true, Action = function(w)
+                if not w.EditActive then return false end
+                EditBox_MoveCursor(w, 1, true, false)
+                return true
+            end },
+            -- Ctrl+Right: move cursor word right
+            { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown, IsControl = true, Action = function(w)
+                if not w.EditActive then return false end
+                EditBox_MoveCursor(w, 1, false, true)
+                return true
+            end },
+            -- Home: move to start of line
+            { Key = Keys.VK_HOME, MSG = KeyEvents.KeyDown, Action = function(w)
+                if not w.EditActive then return false end
+                local buf = w.EditBuffer or ""
+                local pos = w.EditCursor or 0
+                EditBox_MoveToEdge(w, EditBox_LineStart(buf, pos), false)
+                return true
+            end },
+            -- Shift+Home: select to start of line
+            { Key = Keys.VK_HOME, MSG = KeyEvents.KeyDown, IsShift = true, Action = function(w)
+                if not w.EditActive then return false end
+                local buf = w.EditBuffer or ""
+                local pos = w.EditCursor or 0
+                EditBox_MoveToEdge(w, EditBox_LineStart(buf, pos), true)
+                return true
+            end },
+            -- End: move to end of line
+            { Key = Keys.VK_END, MSG = KeyEvents.KeyDown, Action = function(w)
+                if not w.EditActive then return false end
+                local buf = w.EditBuffer or ""
+                local pos = w.EditCursor or 0
+                EditBox_MoveToEdge(w, EditBox_LineEnd(buf, pos), false)
+                return true
+            end },
+            -- Shift+End: select to end of line
+            { Key = Keys.VK_END, MSG = KeyEvents.KeyDown, IsShift = true, Action = function(w)
+                if not w.EditActive then return false end
+                local buf = w.EditBuffer or ""
+                local pos = w.EditCursor or 0
+                EditBox_MoveToEdge(w, EditBox_LineEnd(buf, pos), true)
+                return true
+            end },
+            -- Up: move to previous line, speak it; if on first line, speak current line
+            { Key = Keys.VK_UP, MSG = KeyEvents.KeyDown, Action = function(w)
+                if not w.EditActive then return false end
+                local buf = w.EditBuffer or ""
+                local pos = w.EditCursor or 0
+                local newPos = EditBox_PrevLinePos(buf, pos)
+                if not newPos then
+                    SpeakLine(buf, pos)
+                    return true
+                end
+                w.EditSelStart = nil
+                w.EditCursor = newPos
+                SpeakLine(buf, newPos)
+                return true
+            end },
+            -- Down: move to next line, speak it; if on last line, speak current line
+            { Key = Keys.VK_DOWN, MSG = KeyEvents.KeyDown, Action = function(w)
+                if not w.EditActive then return false end
+                local buf = w.EditBuffer or ""
+                local pos = w.EditCursor or 0
+                local newPos = EditBox_NextLinePos(buf, pos)
+                if not newPos then
+                    SpeakLine(buf, pos)
+                    return true
+                end
+                w.EditSelStart = nil
+                w.EditCursor = newPos
+                SpeakLine(buf, newPos)
+                return true
+            end },
+            -- Shift+Up: extend selection to previous line
+            { Key = Keys.VK_UP, MSG = KeyEvents.KeyDown, IsShift = true, Action = function(w)
+                if not w.EditActive then return false end
+                local buf = w.EditBuffer or ""
+                local oldSelStart = w.EditSelStart
+                local oldCursor = w.EditCursor or 0
+                local newPos = EditBox_PrevLinePos(buf, oldCursor)
+                if not newPos then return true end
+                if not w.EditSelStart then w.EditSelStart = oldCursor end
+                w.EditCursor = newPos
+                SpeakSelectionChange(w, oldSelStart, oldCursor)
+                return true
+            end },
+            -- Shift+Down: extend selection to next line
+            { Key = Keys.VK_DOWN, MSG = KeyEvents.KeyDown, IsShift = true, Action = function(w)
+                if not w.EditActive then return false end
+                local buf = w.EditBuffer or ""
+                local oldSelStart = w.EditSelStart
+                local oldCursor = w.EditCursor or 0
+                local newPos = EditBox_NextLinePos(buf, oldCursor)
+                if not newPos then return true end
+                if not w.EditSelStart then w.EditSelStart = oldCursor end
+                w.EditCursor = newPos
+                SpeakSelectionChange(w, oldSelStart, oldCursor)
+                return true
+            end },
+            -- Ctrl+Home: move to start, speak the line landed on
+            { Key = Keys.VK_HOME, MSG = KeyEvents.KeyDown, IsControl = true, Action = function(w)
+                if not w.EditActive then return false end
+                w.EditCursor = 0
+                w.EditSelStart = nil
+                SpeakLine(w.EditBuffer or "", 0)
+                return true
+            end },
+            -- Ctrl+End: move to end, speak the line landed on
+            { Key = Keys.VK_END, MSG = KeyEvents.KeyDown, IsControl = true, Action = function(w)
+                if not w.EditActive then return false end
+                local buf = w.EditBuffer or ""
+                w.EditCursor = #buf
+                w.EditSelStart = nil
+                SpeakLine(buf, #buf)
+                return true
+            end },
+            -- Ctrl+Shift+Home: select to start
+            { Key = Keys.VK_HOME, MSG = KeyEvents.KeyDown, IsControl = true, IsShift = true, Action = function(w)
+                if not w.EditActive then return false end
+                EditBox_MoveToEdge(w, 0, true)
+                return true
+            end },
+            -- Ctrl+Shift+End: select to end
+            { Key = Keys.VK_END, MSG = KeyEvents.KeyDown, IsControl = true, IsShift = true, Action = function(w)
+                if not w.EditActive then return false end
+                local len = w.EditBuffer and #w.EditBuffer or 0
+                EditBox_MoveToEdge(w, len, true)
+                return true
+            end },
+            -- Ctrl+C: copy to clipboard
+            { Key = Keys.C, MSG = KeyEvents.KeyDown, IsControl = true, Action = function(w)
+                if not w.EditActive then return false end
+                local sel = EditBox_GetSelectedText(w)
+                if sel ~= "" then
+                    UIManager:SetClipboardString(sel)
+                    Speak(Locale.Lookup("LOC_CAI_EDIT_COPIED", sel), true)
+                else
+                    local buf = w.EditBuffer or ""
+                    local pos = w.EditCursor or 0
+                    local ch = string.sub(buf, pos + 1, pos + 1)
+                    if ch ~= "" then
+                        UIManager:SetClipboardString(ch)
+                        Speak(Locale.Lookup("LOC_CAI_EDIT_COPIED", ch), true)
+                    end
+                end
+                return true
+            end },
+            -- Ctrl+V: paste from clipboard
+            { Key = Keys.V, MSG = KeyEvents.KeyDown, IsControl = true, Action = function(w)
+                if not w.EditActive then return false end
+                local text = CAI.GetClipboardText()
+                if text and text ~= "" then
+                    EditBox_InsertText(w, text)
+                    EditBox_SyncAndSpeak(w)
+                    Speak(Locale.Lookup("LOC_CAI_EDIT_PASTED", text), true)
+                end
+                return true
+            end },
+            -- Ctrl+A: select all
+            { Key = Keys.A, MSG = KeyEvents.KeyDown, IsControl = true, Action = function(w)
+                if not w.EditActive then return false end
+                EditBox_SelectAll(w)
+                return true
+            end },
+            -- Ctrl+Shift+Left: extend selection word left
+            { Key = Keys.VK_LEFT, MSG = KeyEvents.KeyDown, IsControl = true, IsShift = true, Action = function(w)
+                if not w.EditActive then return false end
+                EditBox_MoveCursor(w, -1, true, true)
+                return true
+            end },
+            -- Ctrl+Shift+Right: extend selection word right
+            { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown, IsControl = true, IsShift = true, Action = function(w)
+                if not w.EditActive then return false end
+                EditBox_MoveCursor(w, 1, true, true)
+                return true
+            end },
         },
+        OnCharInput = function(w, char)
+            if not w.EditActive then return false end
+            EditBox_InsertText(w, char)
+            EditBox_SyncAndSpeak(w)
+            Speak(char, true)
+            return true
+        end,
+        GetDefaultChild = nil,
     },
     Dialog = {
         Role = "Dialog",
