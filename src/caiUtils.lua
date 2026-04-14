@@ -1,9 +1,9 @@
+CAI = ExposedMembers.CAI
 ---Utility wrapper for 'CAI.output'
 ---@param text string -- the text to speak
 ---@param interrupt boolean -- whether to interrupt any currently speaking text. False by default
 function Speak(text, interrupt)
-    --print("Speaking "..text)
-    if CAI and CAI.output then CAI.output(tostring(text), interrupt) end
+    if CAI and CAI.Output then CAI.Output(tostring(text), interrupt) end
 end
 
 ---Prints a table to the lua log. Do not use with recursives

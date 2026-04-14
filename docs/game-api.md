@@ -13,6 +13,7 @@ Keys confirmed safe to bind in mods without conflicting with game defaults:
 - `Keys.VK_SPACE` — safe for checkbox toggle (game uses for other contexts)
 - `Keys.VK_RETURN` — safe for button activation
 - `Keys.VK_ESCAPE` — standard cancel/close
+- `Keys.A` through `Keys.Z` — letter keys (use with IsControl for shortcuts like Ctrl+A)
 
 ## Input System
 
@@ -108,6 +109,10 @@ These are methods on Civ VI's native XML-backed UI controls:
 - `Mouse.eLClick` — left click
 - `Mouse.eMouseEnter` — hover enter
 
+## UIManager (global)
+
+- `UIManager:SetClipboardString(str)` — copies text to the system clipboard
+
 ## InstanceManager
 
 Used to create dynamic UI instances from XML templates:
@@ -158,6 +163,8 @@ Shared global table for cross-context communication:
 ### CAI (C++ bridge)
 
 - `CAI.output(text, interrupt)` — sends text to screen reader. Always use `Speak()` wrapper instead.
+- `CAI.onCharInput` — callback property. Assign a `function(char)` to receive raw character input. Called by the engine when a character key is pressed (operates alongside the regular input system). Return true to consume.
+- `CAI.enableCharInput(bool)` — enables or disables the character input callback.
 
 ### Speak(text, interrupt)
 

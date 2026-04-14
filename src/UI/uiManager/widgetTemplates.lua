@@ -111,6 +111,62 @@ function GetContainerDefChild(w)
     return FindFirstVisibleChild(w)
 end
 
+--#Search helpers
+---Finds next match to query, starting from given root and stopping at maxDepth
+---@param root UIWidget
+---@param query string
+---@param maxDepth integer
+---@return UIWidget|nil
+local function FindNextMatch(root, query, maxDepth)
+    local children = root.Children
+    if not children or #children == 0 then return nil end
+
+    local startIdx = root:GetChildIndex(root.FocusedChild) or 0
+    local count = #children
+
+    -- Scan siblings in wrap-around order
+    for i = 1, count do
+        local idx = ((startIdx + i - 1) % count) + 1
+        local candidate = children[idx]
+
+        local found = FindMatchDFS(candidate, query, 0, maxDepth)
+        if found then
+            return found
+        end
+    end
+
+    return nil
+end
+
+---@param w UIWidget
+---@param query string
+---@param depth integer
+---@param maxDepth integer
+---@return UIWidget|nil
+function FindMatchDFS(w, query, depth, maxDepth)
+    if not w then return nil end
+
+    if w.IsHidden and w:IsHidden() then return nil end
+
+    if w.GetLabel then
+        local label = w:GetLabel()
+        if label and label:lower():find(query, 1, true) == 1 then
+            return w
+        end
+    end
+
+    if depth >= maxDepth then return nil end
+
+    if w.Children then
+        for _, child in ipairs(w.Children) do
+            local found = FindMatchDFS(child, query, depth + 1, maxDepth)
+            if found then return found end
+        end
+    end
+
+    return nil
+end
+
 --#EditBox helpers
 
 ---Returns the selection range as (low, high) or nil if no selection
@@ -612,7 +668,22 @@ WidgetTemplates = {
             { Key = Keys.VK_END, MSG = KeyEvents.KeyDown, Action = function(w) return NavigateToLast(w) end },
         },
         Navigate = NavigateSimpleList,
-        GetDefaultChild = GetContainerDefChild
+        GetDefaultChild = GetContainerDefChild,
+        OnCharInput = function(w, char)
+    local mgr = w.Manager
+
+    mgr:AppendSearchChar(char)
+    local query = mgr.SearchBuffer
+
+    local maxDepth = w.SearchDepth or 2
+    local match = FindNextMatch(w, query, maxDepth)
+    if match then
+        mgr:SetFocus(match)
+        return true
+    end
+    Speak(Locale.Lookup("LOC_CAI_SEARCH_NO_MATCH"))
+    return false
+end
     },
     HorizontalList = {
         DefaultIndex = 1,

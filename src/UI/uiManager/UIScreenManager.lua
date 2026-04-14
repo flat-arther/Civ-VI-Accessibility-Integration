@@ -5,6 +5,8 @@ include("widgetTemplates")
 ---@class UIScreenManager
 ---@field Stack UIWidget[]
 ---@field CurrentPath UIWidget[]
+---@field SearchBuffer string
+---@field LastTypeTime number
 ---@field CAISettings table<string, any>
 local UIScreenManager = {
     CAISettings = {
@@ -13,7 +15,8 @@ local UIScreenManager = {
         speakValue = true,
         speakPosition = true,
         speakState = true,
-        speakTooltip = true
+        speakTooltip = true,
+        SearchTimeout = 1.0
     }
 }
 
@@ -239,6 +242,26 @@ function UIScreenManager:HandleInput(input)
     return false
 end
 
+---Handles character input (text input), bubbling from focused widget upward
+---@param char string
+---@return boolean -- true if handled
+function UIScreenManager:HandleCharInput(char)
+    local current = self:GetFocusedWidget()
+
+    while current do
+        if current.OnCharInput then
+            local handled = current:OnCharInput(char)
+            if handled then
+                return true
+            end
+        end
+
+        current = current.Parent
+    end
+
+    return false
+end
+
 ---Clears the manager's widget stack. Also destroys all widgets
 function UIScreenManager:Clear()
     local root = self:GetTop()
@@ -262,21 +285,27 @@ function UIScreenManager:HasWidget(w)
     return false
 end
 
----Refreshes the context's input handler
-function UIScreenManager:RefreshInputHandler()
-    if #self.Stack > 0 then
-        ContextPtr:SetInputHandler(function(input)
-            return self:HandleInput(input)
-end, true)
-    else
-        ContextPtr:SetInputHandler(nil, true)
+---Adds a char to the search buffer
+---@param c string
+function UIScreenManager:AppendSearchChar(c)
+    local now = os.clock()
+    if not self.LastTypeTime or (now - self.LastTypeTime) > self.CAISettings.SearchTimeout then
+        self.SearchBuffer = ""
     end
-end
 
+    self.LastTypeTime = now
+    self.SearchBuffer = (self.SearchBuffer or "") .. c:lower()
+end
 
 --#Initialization
 function InitUIScreenManager()
-ExposedMembers.CAI_UIManager = CreateScreenManager()
+    ExposedMembers.CAI_UIManager = CreateScreenManager()
+    local mgr = ExposedMembers.CAI_UIManager
+    CAI.RegisterGlobalCharInputHandler(function(char)
+        return mgr:HandleCharInput(char)
+    end)
 end
-
+for k, v in pairs(CAI) do
+    print(k)
+end
 InitUIScreenManager()

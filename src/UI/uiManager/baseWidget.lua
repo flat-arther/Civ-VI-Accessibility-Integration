@@ -41,6 +41,15 @@ function UIWidget:AddChild(w, focus)
     end
 end
 
+---Inserts a child widget at a specific index
+---@param index integer
+---@param w UIWidget
+function UIWidget:InsertChild(index, w)
+    if not w then return end
+    w.Parent = self
+    table.insert(self.Children, index, w)
+end
+
 ---Returns the widget's index in it's parrent
 ---@return integer|nil
 function UIWidget:GetIndexInParent()

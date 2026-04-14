@@ -109,6 +109,20 @@
       <Text>Help</Text>
     </Row>
 
+    <!-- Carousel -->
+    <Row Tag="LOC_CAI_CAROUSEL" Language="en_US">
+      <Text>Challenges</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CAROUSEL_ENTRY" Language="en_US">
+      <Text>{1_Type} {2_Current} of {3_Total}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CAROUSEL_CHALLENGE" Language="en_US">
+      <Text>Challenge</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CAROUSEL_LINK" Language="en_US">
+      <Text>Link</Text>
+    </Row>
+
     <!-- Advisor popup -->
     <Row Tag="LOC_CAI_ADVISOR_POPUP" Language="en_US">
       <Text>Advisor</Text>
@@ -161,6 +175,14 @@
     </Row>
     <Row Tag="LOC_CAI_EDIT_COPIED" Language="en_US">
       <Text>Copied {1_Text}</Text>
+    </Row>
+
+    <!-- Create Game (Advanced Setup) -->
+    <Row Tag="LOC_CAI_COLOR" Language="en_US">
+      <Text>Color</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLAYER" Language="en_US">
+      <Text>Player</Text>
     </Row>
 
     <!-- UI manager -->

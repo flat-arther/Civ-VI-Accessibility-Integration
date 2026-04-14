@@ -66,7 +66,6 @@ function OnInputAction(actionId)
 	local interface = UI.GetInterfaceMode()
 	local data = interfaceWidgets[interface]
 	local action = SharedInputActions[actionId]
-	Speak(action)
 	if data and data.InputActions then
 		action = data.InputActions[actionId]
 	end

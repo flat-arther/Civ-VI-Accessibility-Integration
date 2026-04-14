@@ -2229,7 +2229,11 @@ local function W_EditBox(labelText, ctrl)
         IsDisabled = function() return ctrl:IsDisabled() end,
         OnSetText  = function(w, text)
             ctrl:SetText(text)
+        end,
+        OnCommit   = function(w, text)
+            ctrl:SetText(text)
             if data.handler then data.handler(text) end
+            Controls.ConfirmButton:SetDisabled(false)
         end,
     })
 end

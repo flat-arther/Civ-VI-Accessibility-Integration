@@ -13,7 +13,6 @@ All notable changes to the CAI (Civ VI Accessibility Integration) mod.
 - Empty lines are now announced as "Blank" instead of being silent
 - Newlines are now treated as word boundaries during word deletion (Ctrl+Backspace / Ctrl+Delete), preventing entire text from being deleted
 - Home and End keys now move to start/end of the current line instead of the entire text
-- Double "blank" being spoken at line breaks in character-by-character navigation
 
 ## 2026-04-12 — UI Manager Production-Readiness Overhaul
 

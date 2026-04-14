@@ -13,7 +13,7 @@ Lua accessibility mod for Civilization VI. Adds TTS/screen reader support for bl
 ### Core Infrastructure (complete)
 - `caiUtils.lua` — `Speak()`, `WrapFunc()`, `HijackTable()`, utility helpers
 - `UIScreenManager.lua` — widget stack, focus tracking, divergence-aware speech, input routing, global CAISettings for speech element control
-- `baseWidget.lua` — `UIWidget` base class with child/parent/input management, `SetValue()` with `OnValueChanged` callback, `SpeakElements()` with per-widget SpeechSettings, `GetVisiblePosition()` for hidden-aware positioning, `GetInfoStrings()` returning label/role/value/position/state/tooltip
+- `baseWidget.lua` — `UIWidget` base class with child/parent/input management, `SetValue()` with `OnValueChanged` callback, `SpeakElements()` with per-widget SpeechSettings, `GetVisiblePosition()` for hidden-aware positioning, `GetInfoStrings()` returning label/role/value/position/state/tooltip, `InsertChild(index, widget)` for positional child insertion
 - `widgetTemplates.lua` — widget templates: Panel, List, HorizontalList, SubMenu, Button, DropdownMenu, Slider, Checkbox, Edit, Dialog, Tab, TabBar, MenuItem, StaticText, GameView, InterfaceMode. Global nav helpers: `FindVisibleChild`, `FindFirstVisibleChild`, `FindLastVisibleChild`
 - `ideHelpers.lua` — Lua type annotations for IDE
 
@@ -30,6 +30,7 @@ Lua accessibility mod for Civilization VI. Adds TTS/screen reader support for bl
 ### Frontend (partial)
 - `IntroScreen.lua` — intro screen (content unknown)
 - `MainMenu.lua` — main menu with full accessibility: MenuItem widgets, SubMenu groups for Help/Play Now, localized labels
+- `AdvancedSetup.lua` — Create Game screen with tab bar (Basic/Advanced views), static pulldowns, leader selection, dynamic game parameters, player management. See "Current Work" below
 - `FrontEndPopup.lua` — frontend popup (content unknown)
 
 ### Shared
@@ -48,21 +49,35 @@ Lua accessibility mod for Civilization VI. Adds TTS/screen reader support for bl
 
 ---
 
-## Recent Session Work (2026-04-12)
+## Current Work (2026-04-14): AdvancedSetup.lua — Create Game Screen
 
-Production-readiness overhaul of the UI manager system:
+### What's done
+- Basic view: Tab bar (Basic/Advanced tabs), flat settings list with static pulldowns (Ruleset, Leader, Difficulty, Speed, Map Size), Map Select button, dynamic params (game modes, booleans, pulldowns, sliders)
+- Advanced view: Player management (local player leader/color, AI player submenus with leader selection and delete, Add AI button), parameter sections (Primary, GameModes, Victories, Advanced)
+- Tab switching: OnFocusEnter on tabs triggers SwitchToTab, ESC/Back always closes from either tab
+- Action buttons: Start, Default, Back (always visible), LoadConfig/SaveConfig (visible only on Advanced tab)
+- Forward-declared `SwitchToTab` to fix Lua upvalue scoping bug
 
-1. **Widget roles and types** — proper role labeling (DropdownMenu, Edit, Dialog, Tab, TabBar, MenuItem, StaticText). MenuItem/StaticText suppress role in speech
-2. **Value/state separation** — GetValue as function (sliders, checkboxes, dropdowns), GetState limited to disabled only
-3. **SpeechSettings system** — per-widget overrides (e.g. `{Role = false}`) with global CAISettings fallback
-4. **SetValue + SpeakElements** — value changes instantly announced, SpeakElements accepts element array
-5. **Hidden-aware navigation** — FindVisibleChild/FindFirstVisibleChild/FindLastVisibleChild extracted globally, position announcements skip hidden elements
-6. **Navigation improvements** — Home/End for lists, default MSG=KeyUp with KeyDown for navigation, slider PageUp/PageDown for 10x stepping
-7. **Options restructuring** — TabBar as first child of OptionsPanel, tab-switch-aware list rebuilding, keybinding capture popup using engine gesture recording
-8. **MainMenu** — SubMenu groups replacing HorizontalLists
-9. **Localization** — all hardcoded strings replaced with locale tags
-10. **Deploy script** — updated to launch game after deploy
-11. **game-api.md** — created comprehensive API reference
+### Just deployed — needs testing
+- **Restructured advanced view layout**: sections (Players, Primary, GameModes, Victories, Advanced) are now direct children of `CAI_Panel` (Dialog) instead of nested inside `CAI_SettingsList`
+- Tab/Shift-Tab jumps between sections; Up/Down navigates within each section
+- `RemoveAdvancedSections()` helper removes advanced sections from panel when switching back to basic
+- `PopulateBasicView()` restores `CAI_SettingsList` to panel
+- `GetDefaultChild` on panel returns appropriate first section based on active tab
+- `InsertChild(index, widget)` added to baseWidget.lua
+
+### What to test
+1. Basic view unchanged — one list, Up/Down through settings
+2. Switch to Advanced tab, Tab forward — should land on Players section, then Primary, GameModes, Victories, Advanced, then action buttons
+3. Up/Down wraps within each section
+4. Tab/Shift-Tab jumps between sections
+5. ESC closes from either view
+6. Empty sections still appear (not skipped)
+7. Switch back to Basic — flat list restored
+
+### Potential issues
+- `RemoveFromParent()` calls `RemoveChild()` which checks focused widget and may call `SetFocus` — should be fine since tab is focused during switch, not the sections
+- If `GetChildIndex` on `CAI_Panel` doesn't find `CAI_SettingsList` correctly, basic view restoration could fail
 
 ---
 
@@ -73,8 +88,9 @@ Production-readiness overhaul of the UI manager system:
 - [ ] Hotkey config (`data/hotkey_config.xml`) needs review for completeness
 - [ ] No tests or test harness
 - [ ] In-game UI screens beyond WorldInput/ActionPanel/AdvisorPopup need accessibility work
+- [ ] MapSelect.lua — map picker popup (file exists but status unknown)
 
 ---
 
 ## Pending Questions / Notes
-*(none — all requested work complete)*
+- Awaiting test results for advanced view section restructuring (deployed 2026-04-14)
