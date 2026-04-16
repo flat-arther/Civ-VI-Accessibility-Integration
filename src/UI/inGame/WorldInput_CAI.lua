@@ -1,8 +1,14 @@
 include("caiUtils")
+include ("worldInfo")
+include("UIScreenManager")
 include ("caiIngame");
 include("WorldInput")
-include("UIScreenManager")
 local mgr = ExposedMembers.CAI_UIManager
+local gamePanel           = nil
+local mainArea            = nil
+local cursor              = nil
+local caiInfo = ExposedMembers.CAIInfo
+
 --# Global input actions
 --- Input actions that are common to all interface widgets should go here. Action functions are passed the game view widget. You can use that to decide when the action should execute, or when to restrict certain actions
 --- Most actions should only execute when the game view widget is focused; however, there might be exceptions
@@ -11,12 +17,20 @@ local SharedInputActions = {
 	[Input.GetActionId("SharedEndTurn")] = function(w)
 		LuaEvents.CAIEndTurn()
 	end,
+	[Input.GetActionId("UnitPathInfo")] = function(w)
+		local unit = UI.GetHeadSelectedUnit()
+		if not unit then return end
+		local plot = cursor:GetPlotId()
+		if not Map.IsPlot(plot) then return end
+		local info = caiInfo.BuildMovementPathInfo(unit, plot, true)
+		if not info then return end
+		local lines = caiInfo.BuildMovementSpeech(info)
+		local str
+		if lines and #lines > 0 then str = table.concat(lines, ", ") end
+		Speak(str)
+	end,
 }
 
-
-local gamePanel           = nil
-local mainArea            = nil
-local cursor              = nil
 
 
 --# Interface mode widgets

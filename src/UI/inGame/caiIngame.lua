@@ -1,5 +1,4 @@
 include ("caiUtils")
-include ("worldInfo")
 include ("navCursor")
 
 --# Event listeners
@@ -11,7 +10,7 @@ include ("navCursor")
 function OnCAICursorMove(x, y, plot, cursor)
 	-- For now we just speak everything
 	local pos = tostring(x)..", "..tostring(y)
-	local pInfo = ExposedMembers.CAIPlotInfo:RequestPlotInfo(plot)
+	local pInfo = ExposedMembers.CAIInfo:RequestPlotInfo(plot)
 	table.insert(pInfo, 1, pos)
 	Speak(table.concat(pInfo, "\n"))
 end

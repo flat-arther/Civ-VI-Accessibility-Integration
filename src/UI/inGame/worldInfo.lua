@@ -1,11 +1,377 @@
 local info = {}
 
+
+---@class MovementPathInfo
+---@field kind string
+---@field turns number[]
+---@field plots number[]
+---@field steps PathStep[]        -- annotated per plot-to-plot move
+---@field segments PathSegment[]  -- compressed for speech
+---@field obstacles number[]
+---@field isRestricted boolean
+---@field restrictedPlotId number|nil
+---@field isPathInFog boolean
+---@field enemyAtEnd boolean
+---@field isQueued boolean
+---@field destPlot integer
+---@field isImplicitRangedAttack boolean
+---@field isSamePlot boolean
+---@field entrancePortals number[]
+---@field exitPortals number[]
+
+---@class PathStep
+---@field fromPlotId number
+---@field toPlotId number
+---@field fromX number
+---@field fromY number
+---@field toX number
+---@field toY number
+---@field dir string|nil
+---@field turn number
+---@field isTurnBreak boolean
+---@field crossesObstacle boolean
+---@field isFog boolean
+---@field isRestricted boolean
+---@field isDestination boolean
+
+--- Helper to get a direction given delta x and y
+local function GetSquareDirection(dx, dy)
+    if dx == 0 and dy > 0 then return "north" end
+    if dx == 0 and dy < 0 then return "south" end
+    if dx > 0 and dy == 0 then return "east" end
+    if dx < 0 and dy == 0 then return "west" end
+
+    if dx > 0 and dy > 0 then return "northeast" end
+    if dx < 0 and dy > 0 then return "northwest" end
+    if dx > 0 and dy < 0 then return "southeast" end
+    if dx < 0 and dy < 0 then return "southwest" end
+
+    return nil
+end
+
+--- Helper to annotate individual path steps
+local function BuildAnnotatedSteps(pathInfo, unit)
+    local steps = {}
+    if not pathInfo or not pathInfo.plots or #pathInfo.plots < 2 then
+        return steps
+    end
+
+    local vis = PlayersVisibility[Game.GetLocalPlayer()]
+    local obstacleSet = {}
+    for _, pid in ipairs(pathInfo.obstacles or {}) do
+        obstacleSet[pid] = true
+    end
+
+    for i = 2, #pathInfo.plots do
+        local fromId = pathInfo.plots[i - 1]
+        local toId = pathInfo.plots[i]
+        local a = Map.GetPlotByIndex(fromId)
+        local b = Map.GetPlotByIndex(toId)
+
+        local dx = b:GetX() - a:GetX()
+        local dy = b:GetY() - a:GetY()
+
+        steps[#steps + 1] = {
+            fromPlotId = fromId,
+            toPlotId = toId,
+            fromX = a:GetX(),
+            fromY = a:GetY(),
+            toX = b:GetX(),
+            toY = b:GetY(),
+            dir = GetSquareDirection(dx, dy),
+            turn = (pathInfo.turns and pathInfo.turns[i]) or 1,
+            isTurnBreak = (i > 2 and pathInfo.turns and pathInfo.turns[i] ~= pathInfo.turns[i - 1]) or false,
+            crossesObstacle = obstacleSet[fromId] or obstacleSet[toId] or false,
+            isFog = vis and not vis:IsVisible(toId) or false,
+            isRestricted = pathInfo.restrictedPlotId == toId,
+            isDestination = (i == #pathInfo.plots),
+        }
+    end
+
+    return steps
+end
+
+local function CompressPathSteps(steps)
+    local segments = {}
+    if not steps or #steps == 0 then
+        return segments
+    end
+
+    local current = {
+        dir = steps[1].dir,
+        count = 1,
+        startIndex = 1,
+        endIndex = 1,
+        hasTurnBreak = steps[1].isTurnBreak,
+        hasObstacle = steps[1].crossesObstacle,
+        hasFog = steps[1].isFog,
+        hasRestriction = steps[1].isRestricted,
+    }
+
+    local function sameBucket(a, b)
+        return a.dir == b.dir
+            and a.isTurnBreak == b.isTurnBreak
+            and a.crossesObstacle == b.crossesObstacle
+            and a.isFog == b.isFog
+            and a.isRestricted == b.isRestricted
+    end
+
+    for i = 2, #steps do
+        local s = steps[i]
+        local bucket = {
+            dir = s.dir,
+            isTurnBreak = s.isTurnBreak,
+            crossesObstacle = s.crossesObstacle,
+            isFog = s.isFog,
+            isRestricted = s.isRestricted,
+        }
+
+        local currentBucket = {
+            dir = current.dir,
+            isTurnBreak = current.hasTurnBreak,
+            crossesObstacle = current.hasObstacle,
+            isFog = current.hasFog,
+            isRestricted = current.hasRestriction,
+        }
+
+        if sameBucket(bucket, currentBucket) then
+            current.count = current.count + 1
+            current.endIndex = i
+        else
+            segments[#segments + 1] = current
+            current = {
+                dir = s.dir,
+                count = 1,
+                startIndex = i,
+                endIndex = i,
+                hasTurnBreak = s.isTurnBreak,
+                hasObstacle = s.crossesObstacle,
+                hasFog = s.isFog,
+                hasRestriction = s.isRestricted,
+            }
+        end
+    end
+
+    segments[#segments + 1] = current
+    return segments
+end
+
+---@param unit table
+---@param endPlotId number
+---@param showQueuedPath boolean
+---@param showDetails boolean
+---@return MovementPathInfo|nil
+function info.BuildMovementPathInfo(unit, endPlotId, showQueuedPath, showDetails)
+    if not unit or not Map.IsPlot(endPlotId) then return nil end
+
+    local result = {
+        kind = "move",
+        turns = {},
+        plots = {},
+        steps = nil,          -- annotated edge-by-edge path
+        segments = nil,       -- compressed speech segments
+        obstacles = {},
+        isRestricted = false,
+        restrictedPlotId = nil,
+        isPathInFog = false,
+        enemyAtEnd = false,
+        isQueued = false,
+        destPlot = -1,
+        isImplicitRangedAttack = false,
+        isSamePlot = false,
+        entrancePortals = {},
+        exitPortals = {}
+    }
+
+    local eLocalPlayer = Game.GetLocalPlayer()
+    local startPlotId = unit:GetPlotId()
+
+    if showQueuedPath then
+        local queued = UnitManager.GetQueuedDestination(unit)
+        if queued then
+            endPlotId = queued
+            result.isQueued = true
+        end
+    end
+
+    result.destPlot = endPlotId
+
+    if startPlotId == endPlotId then
+        result.kind = "same"
+        result.isSamePlot = true
+        return result
+    end
+
+    local plot = Map.GetPlotByIndex(endPlotId)
+    if not plot then
+        result.kind = "bad"
+        return result
+    end
+
+    local tParams = {
+        [UnitOperationTypes.PARAM_X] = plot:GetX(),
+        [UnitOperationTypes.PARAM_Y] = plot:GetY()
+    }
+
+    if UnitManager.CanStartOperation(unit, UnitOperationTypes.SWAP_UNITS, nil, tParams) then
+        result.kind = "swap"
+        result.turns = {1}
+        result.plots = { startPlotId, endPlotId }
+        return result
+    end
+
+    local pathInfo = UnitManager.GetMoveToPathEx(unit, endPlotId)
+    if not pathInfo or not pathInfo.plots then
+        result.kind = "bad"
+        return result
+    end
+
+    result.plots = pathInfo.plots
+    result.turns = pathInfo.turns
+    result.obstacles = pathInfo.obstacles or {}
+    result.entrancePortals = pathInfo.entrancePortals or {}
+    result.exitPortals = pathInfo.exitPortals or {}
+
+    if #result.plots <= 1 then
+        result.kind = "bad"
+        return result
+    end
+
+    local vis = PlayersVisibility[eLocalPlayer]
+    if vis then
+        for _, pid in ipairs(result.plots) do
+            if not vis:IsVisible(pid) then
+                result.isPathInFog = true
+                break
+            end
+        end
+    end
+
+    local restricted, restrictedId = IsPlotPathRestrictedForUnit(result.plots, result.turns, unit)
+    if restricted then
+        result.isRestricted = true
+        result.restrictedPlotId = restrictedId
+    end
+
+    if unit:GetMovesRemaining() > 0 then
+        local results = UnitManager.GetOperationTargets(unit, UnitOperationTypes.RANGE_ATTACK)
+        if results and results[UnitOperationResults.PLOTS] then
+            for i, modifier in ipairs(results[UnitOperationResults.MODIFIERS]) do
+                if modifier == UnitOperationResults.MODIFIER_IS_TARGET then
+                    if results[UnitOperationResults.PLOTS][i] == endPlotId then
+                        result.kind = "attack"
+                        result.isImplicitRangedAttack = true
+                        return result
+                    end
+                end
+            end
+        end
+    end
+
+    if result.isQueued then
+        result.kind = "queue"
+    elseif result.isRestricted then
+        result.kind = "bad"
+    elseif result.isPathInFog then
+        result.kind = "fow"
+    else
+        result.kind = "move"
+    end
+
+    local endPlot = Map.GetPlotByIndex(endPlotId)
+    if endPlot and vis then
+        local units = Units.GetUnitsInPlotLayerID(endPlot:GetX(), endPlot:GetY(), MapLayers.ANY)
+        for _, u in ipairs(units) do
+            if u:GetOwner() ~= eLocalPlayer and vis:IsUnitVisible(u) then
+                result.enemyAtEnd = true
+                break
+            end
+        end
+    end
+
+    if showDetails and (result.plots and #result.plots > 1 and not result.isImplicitRangedAttack) then
+        result.steps = BuildAnnotatedSteps(result, unit)
+        result.segments = CompressPathSteps(result.steps)
+    end
+
+    return result
+end
+
+---@param pathInfo MovementPathInfo?
+---@return string[]
+function info.BuildMovementSpeech(pathInfo)
+    local out = {}
+    if not pathInfo then return out end
+
+    if pathInfo.kind == "same" then
+        return { "Current tile." }
+    end
+    if pathInfo.kind == "swap" then
+        return { "Swap with unit. 1 turn." }
+    end
+    if pathInfo.kind == "attack" then
+        return { "Ranged attack." }
+    end
+
+    if pathInfo.kind == "bad" then
+        table.insert(out, "Cannot move there.")
+    elseif pathInfo.kind == "fow" then
+        table.insert(out, "Path enters fog of war.")
+    elseif pathInfo.kind == "queue" then
+        table.insert(out, "Queued path.")
+    else
+        table.insert(out, "Valid move.")
+    end
+
+    if pathInfo.obstacles and #pathInfo.obstacles > 0 then
+        table.insert(out, "Crosses "..#pathInfo.obstacles.." "..(#pathInfo.obstacles > 1 and "obstacles" or "obstacle"))
+    end
+
+    if pathInfo.turns and #pathInfo.turns > 0 then
+        table.insert(out, #pathInfo.turns .. " turns.")
+    end
+
+    if pathInfo.enemyAtEnd then
+        table.insert(out, "Enemy at destination.")
+    end
+
+    if pathInfo.isRestricted then
+        table.insert(out, "Movement blocked.")
+    end
+
+    if pathInfo.segments and #pathInfo.segments > 0 then
+        local parts = {}
+        for _, seg in ipairs(pathInfo.segments) do
+            local text = (seg.count == 1) and seg.dir or (seg.count .. " " .. seg.dir)
+            if seg.hasTurnBreak then
+                text = text .. ", turn break"
+            end
+            if seg.hasObstacle then
+                text = text .. ", obstacle"
+            end
+            if seg.hasFog then
+                text = text .. ", fog"
+            end
+            if seg.hasRestriction then
+                text = text .. ", blocked"
+            end
+            parts[#parts + 1] = text
+        end
+        if #parts > 0 then
+            table.insert(out, table.concat(parts, ", then "))
+        end
+    end
+
+    return out
+end
+
 --# Plot info
 -- Default used to sort plot info when 'RequestPlotInfo' is called
 local INFO_PRIORITY = {
     "plotName",
     "TileType",
     "Feature",
+    "MovementInfo",
     "NaturalWonder",
     "Resources",
     "Buildings",
@@ -25,56 +391,56 @@ local INFO_PRIORITY = {
 --# Copied variables
 -- This is horrible, i'm sorry.
 --- Yep, it sure is
-local TerrainTypeMap :table = {};
+local TerrainTypeMap = {};
 do
 	for row in GameInfo.Terrains() do
 		TerrainTypeMap[row.Index] = row.TerrainType;
 	end
 end
 
-local FeatureTypeMap :table = {};
+local FeatureTypeMap = {};
 do
 	for row in GameInfo.Features() do
 		FeatureTypeMap[row.Index] = row.FeatureType;
 	end
 end
 
-local ImprovementTypeMap :table = {};
+local ImprovementTypeMap = {};
 do
 	for row in GameInfo.Improvements() do
 		ImprovementTypeMap[row.Index] = row.ImprovementType;
 	end
 end
 
-local ResourceTypeMap :table = {};
+local ResourceTypeMap = {};
 do
 	for row in GameInfo.Resources() do
 		ResourceTypeMap[row.Index] = row.ResourceType;
 	end
 end
 
-local UnitTypeMap :table = {};
+local UnitTypeMap = {};
 do
 	for row in GameInfo.Units() do
 		UnitTypeMap[row.Index] = row.UnitType;
 	end
 end
 
-local BuildingTypeMap :table = {};
+local BuildingTypeMap = {};
 do
 	for row in GameInfo.Buildings() do
 		BuildingTypeMap[row.Index] = row.BuildingType;
 	end
 end
 
-local DistrictTypeMap :table = {};
+local DistrictTypeMap = {};
 do
 	for row in GameInfo.Districts() do
 		DistrictTypeMap[row.Index] = row.DistrictType;
 	end
 end
 
-local ContinentTypeMap :table = {};
+local ContinentTypeMap = {};
 do
 	for row in GameInfo.Continents() do
 		ContinentTypeMap[row.Index] = row.ContinentType;
@@ -85,7 +451,7 @@ end
 -- ===========================================================================
 -- Collect plot data and return it as a table
 -- ===========================================================================
-function FetchData( plot:table )
+function FetchData( plot )
 
 	local kFalloutManager = Game.GetFalloutManager();
 
@@ -142,7 +508,7 @@ end
 -- ===========================================================================
 -- TODO: Fix this up as it's a bit aribtrary as to what is "data" and what is "additional data"
 -- ===========================================================================
-function FetchAdditionalData( pPlot:table, kPlotData:table )
+function FetchAdditionalData( pPlot, kPlotData )
 
 	if pPlot:IsNationalPark() then
 		kPlotData.NationalPark = pPlot:GetNationalParkName();
@@ -237,6 +603,9 @@ end
 ---@type table<string, fun(data:table):string[]|string|nil>
 info.PlotInfoHelpers = {
     plotName = function(data)
+        if not data.IsVisible then
+            return Locale.Lookup("LOC_MINIMAP_FOG_OF_WAR_TOOLTIP")
+        end
         if data.IsLake then
             return Locale.Lookup("LOC_TOOLTIP_LAKE")
         end
@@ -246,7 +615,16 @@ info.PlotInfoHelpers = {
         return Locale.Lookup(data.TerrainTypeName)
     end,
 
+    MovementInfo = function(data)
+        if UI.GetInterfaceMode() ~= InterfaceModeTypes.MOVE_TO then return end
+        local unit = UI.GetHeadSelectedUnit()
+        if not unit then return end
+        local plot = data.Index
+        return info.BuildMovementSpeech(info.BuildMovementPathInfo(unit, plot, false, false))
+    end,
+
 Owner = function(data)
+    if not data.IsVisible then return nil end
     if data.Owner == nil then return nil end
 
     local szOwnerString
@@ -269,6 +647,7 @@ Owner = function(data)
 end,
 
 Feature = function(data)
+    if not data.IsVisible then return nil end
     if data.FeatureType == nil then return nil end
 
     local szFeatureString = Locale.Lookup(GameInfo.Features[data.FeatureType].Name)
@@ -292,6 +671,7 @@ Feature = function(data)
 end,
 
 NationalPark = function(data)
+    if not data.IsVisible then return nil end
     if data.NationalPark ~= "" then
         return data.NationalPark
     end
@@ -299,6 +679,7 @@ NationalPark = function(data)
 end,
 
 Resources = function(data)
+    if not data.IsVisible then return nil end
     if data.ResourceType == nil then
         return ""
     end
@@ -425,6 +806,7 @@ Resources = function(data)
 end,
 
 Geography = function(data)
+    if not data.IsVisible then return nil end
     local results = {}
 
     if data.IsRiver then
@@ -439,6 +821,7 @@ Geography = function(data)
 end,
 
 Movement = function(data)
+    if not data.IsVisible then return nil end
     local results = {}
 
     if not data.Impassable and data.MovementCost > 0 then
@@ -460,6 +843,7 @@ Movement = function(data)
 end,
 
 Defense = function(data)
+    if not data.IsVisible then return nil end
     if data.DefenseModifier ~= 0 then
         return Locale.Lookup("LOC_TOOLTIP_DEFENSE_MODIFIER", data.DefenseModifier)
     end
@@ -467,6 +851,7 @@ Defense = function(data)
 end,
 
 Appeal = function(data)
+    if not data.IsVisible then return nil end
     local feature = nil
     if data.FeatureType ~= nil then
         feature = GameInfo.Features[data.FeatureType]
@@ -486,6 +871,7 @@ Appeal = function(data)
 end,
 
 Continent = function(data)
+    if not data.IsVisible then return nil end
     if data.Continent ~= nil then
         return Locale.Lookup("LOC_TOOLTIP_CONTINENT", GameInfo.Continents[data.Continent].Description)
     end
@@ -493,6 +879,7 @@ Continent = function(data)
 end,
 
 TileType = function(data)
+    if not data.IsVisible then return nil end
     local results = {}
 
     if data.WonderType ~= nil then
@@ -566,6 +953,7 @@ TileType = function(data)
 end,
 
 NaturalWonder = function(data)
+    if not data.IsVisible then return nil end
     if data.FeatureType ~= nil then
         local feature = GameInfo.Features[data.FeatureType]
         if feature ~= nil and feature.NaturalWonder then
@@ -576,6 +964,7 @@ NaturalWonder = function(data)
 end,
 
 Buildings = function(data)
+    if not data.IsVisible then return nil end
     if not (data.IsCity or data.WonderType ~= nil or data.DistrictID ~= -1) then return nil end
     if data.BuildingNames == nil or table.count(data.BuildingNames) == 0 then return nil end
 
@@ -617,6 +1006,7 @@ Buildings = function(data)
 end,
 
 Status = function(data)
+    if not data.IsVisible then return nil end
     local results = {}
 
     if data.Owner == Game.GetLocalPlayer() and data.Workers > 0 then
@@ -632,7 +1022,7 @@ end
 }
 --# New functions
 --- Checks whether or not a plot is visible to the local player
----@param plot Plot
+---@param plot integer
 ---@return boolean
 function info.IsPlotVisible(plot)
     if not plot then 
@@ -646,7 +1036,7 @@ function info.IsPlotVisible(plot)
     if not vis then
         return false;
     else
-        return vis:IsRevealed(plot:GetIndex());
+        return vis:IsRevealed(plot);
     end
     end
 end
@@ -656,16 +1046,16 @@ end
 ---@return table Array of localized strings
 function info:RequestPlotInfo(plot, requestedKeys)
     if not plot then return {"No plot"} end
-    if not self.IsPlotVisible(plot) then return {"Unexplored"} end
 requestedKeys = requestedKeys or INFO_PRIORITY
+local vis = self.IsPlotVisible(plot:GetIndex())
     local data = FetchData(plot)
     FetchAdditionalData(plot, data)
+    data.IsVisible = vis
     local results = {}
     for _, key in ipairs(requestedKeys) do
         local helper = self.PlotInfoHelpers[key]
         if helper then
             local output = helper(data)
-print("Key: " .. key .. " Type: " .. type(output)) 
             if type(output) == "table" then
                 if #output > 0 then
     for _, s in ipairs(output) do
@@ -683,4 +1073,4 @@ end
 end
 
 -- Expose this table so it can be used anywhere if needed
-ExposedMembers.CAIPlotInfo = info
+ExposedMembers.CAIInfo = info

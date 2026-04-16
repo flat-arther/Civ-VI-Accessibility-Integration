@@ -17,11 +17,13 @@
     <Row ActionId="PlotInfo10" Name="LOC_CAI_PLOTINFO10" Description="LOC_CAI_PLOTINFO10_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="InterfaceWidgetPrimaryAction" Name="LOC_CAI_INTERFACE_PRIMARY_ACTION" Description="LOC_CAI_INTERFACE_PRIMARY_ACTION_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SharedEndTurn" Name="LOC_CAI_END_TURN" Description="LOC_CAI_END_TURN_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitPathInfo" Name="LOC_CAI_MOVE_INFO" Description="LOC_CAI_MOVE_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
   </InputActions>
 
   <InputActionDefaultGestures>
   <Row ActionId="InterfaceWidgetPrimaryAction" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_RETURN" />
   <Row ActionId="SharedEndTurn" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SPACE" />
+  <Row ActionId="UnitPathInfo" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_D" />
     <Row ActionId="PlotInfo1" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_1" />
     <Row ActionId="PlotInfo2" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_2" />
     <Row ActionId="PlotInfo3" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_3" />
