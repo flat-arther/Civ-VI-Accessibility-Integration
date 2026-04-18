@@ -1186,6 +1186,45 @@ local function BuildPanel()
 	})
 	CAI_Panel:AddChild(CAI_InspectorList)
 
+	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+		GetLabel = function()
+			return Controls.ActionButton:GetText()
+		end,
+		GetTooltip = function()
+			return SafeTooltip(Controls.ActionButton)
+		end,
+		IsDisabled = function()
+			return Controls.ActionButton:IsDisabled()
+		end,
+		IsHidden = function()
+			return Controls.ActionButton:IsHidden()
+		end,
+		OnFocusEnter = function()
+			UI.PlaySound("Main_Menu_Mouse_Over")
+		end,
+		OnClick = function()
+			OnActionButton()
+		end,
+	}))
+
+	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+		GetLabel = function()
+			return Controls.Delete:GetText()
+		end,
+		IsHidden = function()
+			return Controls.Delete:IsHidden()
+		end,
+		IsDisabled = function()
+			return Controls.Delete and Controls.Delete:IsDisabled()
+		end,
+		OnFocusEnter = function()
+			UI.PlaySound("Main_Menu_Mouse_Over")
+		end,
+		OnClick = function()
+			OnDelete()
+		end,
+	}))
+
 	CAI_Panel.FocusedChild = autoSaveCheckbox
 end
 
