@@ -1,35 +1,39 @@
 # Deploy-Mod.ps1
-# Copies src/ contents to the Civ VI mods folder, preserving directory structure.
-# Run from anywhere; script resolves its own location.
 
-$srcDir  = Join-Path $PSScriptRoot "..\src"
-$destDir = "C:\Users\amine\OneDrive\Documents\My Games\Sid Meier's Civilization VI\Mods\CivVi-Accessibility-Integration"
+$srcDir = Join-Path $PSScriptRoot "..\src"
+
+# Resolve Documents → Civ VI Mods
+$documents = [Environment]::GetFolderPath("MyDocuments")
+$modsRoot  = Join-Path $documents "My Games\Sid Meier's Civilization VI\Mods"
+$destDir   = Join-Path $modsRoot "CivVi-Accessibility-Integration"
 
 Write-Host "Source : $srcDir"
 Write-Host "Dest   : $destDir"
 Write-Host ""
 
-# Create destination if it doesn't exist
+# Ensure destination exists
 if (-not (Test-Path $destDir)) {
     New-Item -ItemType Directory -Path $destDir -Force | Out-Null
     Write-Host "Created mod folder."
 }
 
-# Robocopy mirrors src/ to dest/, excluding .git
-# /MIR  = mirror (adds, updates, removes)
-# /XD   = exclude .git directory
-# /NJH /NJS /NDL = suppress summary headers, less noise
+# Mirror files
 $result = robocopy $srcDir $destDir /MIR /XD ".git" /NJH /NJS
 
-# Robocopy exit codes: 0-7 = success (8+ = errors)
 if ($LASTEXITCODE -ge 8) {
     Write-Host "ERROR: robocopy failed with exit code $LASTEXITCODE" -ForegroundColor Red
     exit 1
-} else {
-    Write-Host "Deploy complete. (robocopy exit code: $LASTEXITCODE)" -ForegroundColor Green
+}
 
-    # Launch Civ VI directly
-    $exePath = "C:\Program Files (x86)\Steam\steamapps\common\Sid-Meiers-Civilization-VI\Base\Binaries\Win64Steam\CivilizationVI.exe"
+Write-Host "Deploy complete. (robocopy exit code: $LASTEXITCODE)" -ForegroundColor Green
+
+# Resolve Steam install
+$steamPath = (Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\Valve\Steam").InstallPath
+$exePath   = Join-Path $steamPath "steamapps\common\Sid Meier's Civilization VI\Base\Binaries\Win64Steam\CivilizationVI.exe"
+
+if (Test-Path $exePath) {
     Write-Host "Launching Civilization VI..." -ForegroundColor Cyan
     Start-Process $exePath
+} else {
+    Write-Host "Could not find Civilization VI executable." -ForegroundColor Yellow
 }
