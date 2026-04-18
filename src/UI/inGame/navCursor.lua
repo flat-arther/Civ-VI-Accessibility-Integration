@@ -30,6 +30,25 @@ function CAICursor:SnapToUnit(unit)
     self:SetCoords(x, y)
 end
 
+function CAICursor:SnapToStartPlot()
+    local playerID = Game.GetLocalPlayer()
+    if not playerID then
+        print("CAI cursor unable to find local player")
+        return
+        end
+        local location = PlayerConfigurations[playerID]:GetStartingPosition()
+        if location then
+            self:SetCoords(location.x, location.y)
+        end
+end
+
+function CAICursor:SnapToPlot(plot)
+    if not plot then
+        print("CAI cursor attempting to snap to nil plot")
+        return
+    end
+    self:SetCoords(plot:GetX(), plot:GetY())
+end
 function CAICursor:GetPlotId()
     local plot = Map.GetPlot(self.curX, self.curY)
     if not plot then return -1 end

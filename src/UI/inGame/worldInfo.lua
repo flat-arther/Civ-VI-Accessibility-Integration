@@ -1,6 +1,161 @@
 local info = {}
 
+--# Unit info
+local UnitInfoPriority = { "Name", "Health", "Movement", "Status", "Charges", "Promotions", "Combat"}
+---Helper to get the owner civ adjective prefix for a unit
+---@param unit Unit
+---@return string
+local function GetUnitOwnershipPrefix(unit)
+    local playerID = unit:GetOwner()
+    local pConfig = PlayerConfigurations[playerID]
+    if pConfig then
+        -- There is probably an easier way to get this, but I've yet to figure it out
+        local civName = pConfig:GetCivilizationShortDescription():gsub("_NAME", "_ADJECTIVE")
+        if civName and civName ~= "" then
+            return Locale.Lookup(civName)
+        end
+    end
+    return "Unknown"
+end
+---@type table<string, fun(unit:Unit):string|nil>
+local UnitInfoHelpers = {
+["Name"] = function(unit)
+    local prefix = GetUnitOwnershipPrefix(unit)
+    local unitName = Locale.Lookup(unit:GetName())
+    local formation = unit:GetMilitaryFormation()
+    local unitInfo = GameInfo.Units[unit:GetType()]
+    local formationSuffix = ""
+    if formation == MilitaryFormationTypes.CORPS_FORMATION then
+        local key = (unitInfo.Domain == "DOMAIN_SEA") and "LOC_HUD_UNIT_PANEL_FLEET_SUFFIX" or "LOC_HUD_UNIT_PANEL_CORPS_SUFFIX"
+        formationSuffix = " " .. Locale.Lookup(key)
+    elseif formation == MilitaryFormationTypes.ARMY_FORMATION then
+        local key = (unitInfo.Domain == "DOMAIN_SEA") and "LOC_HUD_UNIT_PANEL_ARMADA_SUFFIX" or "LOC_HUD_UNIT_PANEL_ARMY_SUFFIX"
+        Speak(unitName)
+        formationSuffix = " " .. Locale.Lookup(key)
+    end
+    return prefix .. " " .. unitName .. formationSuffix
+end,
 
+["Health"] = function(unit)
+    local maxHP = unit:GetMaxDamage()
+    local damage = unit:GetDamage()
+    
+    local currentHP = maxHP - damage
+    if currentHP <= 0 then return nil end
+    return Locale.Lookup("LOC_HUD_UNIT_PANEL_HEALTH_TOOLTIP", currentHP, maxHP)
+end,
+
+["Movement"] = function(unit)
+    local moves = unit:GetMovesRemaining()
+    if moves <= 0 then return Locale.Lookup("LOC_UNITFLAG_ACTIVITY_NO_ACTIVITY") end
+    return moves .. " " .. Locale.Lookup("LOC_HUD_UNIT_PANEL_MOVES", moves)
+end,
+
+["Charges"] = function(unit)
+    local unitInfo = GameInfo.Units[unit:GetType()]
+    local unitBuilds = unitInfo.BuildCharges
+    
+    if unit:GetReligionType() ~= -1 then
+        local charges = unitInfo.SpreadCharges
+        if charges > 0 then
+            return charges .. " " .. Locale.Lookup("LOC_HUD_UNIT_PANEL_SPREADS")
+        end
+    elseif unitBuilds > 0 then
+        return unitBuilds .. " " .. Locale.Lookup("LOC_HUD_UNIT_PANEL_BUILDS")
+    end
+    
+    return nil
+end,
+
+["Status"] = function(unit)
+    local activity = UnitManager.GetActivityType(unit)
+    
+    if activity == ActivityTypes.ACTIVITY_HEAL then 
+        return Locale.Lookup("LOC_UNITFLAG_ACTIVITY_HEALING") 
+    elseif activity == ActivityTypes.ACTIVITY_SLEEP then 
+        return Locale.Lookup("LOC_UNITFLAG_ACTIVITY_SLEEP") 
+    elseif activity == ActivityTypes.ACTIVITY_HOLD then 
+        return Locale.Lookup("LOC_UNITFLAG_ACTIVITY_HOLD")
+    elseif activity == ActivityTypes.ACTIVITY_SENTRY then
+        return Locale.Lookup("LOC_UNITFLAG_ACTIVITY_ON_SENTRY")
+    elseif activity == ActivityTypes.ACTIVITY_INTERCEPT then
+        return Locale.Lookup("LOC_UNITFLAG_ACTIVITY_ON_INTERCEPT")
+    end
+    
+    if unit:GetFortifyTurns() > 0 then 
+        local fortStr = Locale.Lookup("LOC_COMBAT_PREVIEW_FORTIFIED_DEFENSE_DESC", 0)
+        return fortStr:gsub("%+%d+ ", "")
+    end
+    
+    return nil
+end,
+
+["Promotions"] = function(unit)
+    local experience = unit:GetExperience()
+    local currentXP = experience:GetExperiencePoints()
+    local nextXP = experience:GetExperienceForNextLevel()
+    local level = experience:GetLevel()
+
+    if currentXP >= nextXP then
+        return Locale.Lookup("LOC_HUD_UNIT_CHOOSE_PROMOTION_TEXT")
+    end
+    
+    local levelStr = Locale.Lookup("LOC_HUD_UNIT_PANEL_LEVEL_ABBREVIATION") .. " " .. level
+    local xpStr = Locale.Lookup("LOC_HUD_UNIT_PANEL_XP_TT", currentXP, nextXP, level + 1)
+    
+    return levelStr .. ", " .. xpStr
+end,
+
+["Combat"] = function(unit)
+    local melee = unit:GetCombat()
+    local ranged = unit:GetRangedCombat()
+    local bombard = unit:GetBombardCombat()
+    local religious = unit:GetReligiousStrength()
+    local antiAir = unit:GetAntiAirCombat()
+    
+    local parts = {}
+    if melee > 0 then 
+        table.insert(parts, Locale.Lookup("LOC_HUD_UNIT_PANEL_STRENGTH") .. " " .. melee) 
+    end
+    if ranged > 0 then 
+        table.insert(parts, Locale.Lookup("LOC_HUD_UNIT_PANEL_RANGED_STRENGTH") .. " " .. ranged) 
+    end
+    if bombard > 0 then 
+        table.insert(parts, Locale.Lookup("LOC_HUD_UNIT_PANEL_BOMBARD_STRENGTH") .. " " .. bombard) 
+    end
+    if religious > 0 then
+        table.insert(parts, Locale.Lookup("LOC_HUD_UNIT_PANEL_RELIGIOUS_STRENGTH") .. " " .. religious)
+    end
+    if antiAir > 0 then
+        table.insert(parts, Locale.Lookup("LOC_HUD_UNIT_PANEL_ANTI_AIR_STRENGTH") .. " " .. antiAir)
+    end
+    
+    return #parts > 0 and table.concat(parts, ", ") or nil
+end,
+}
+
+info.UnitInfoHelpers = UnitInfoHelpers
+---@param unit Unit
+---@param requestedKeys string[]
+---@return string[]
+function info:RequestUnitInfo(unit, requestedKeys)
+    if not unit then return {"No unit selected"} end
+    local keys = requestedKeys or UnitInfoPriority
+    local results = {}
+    for _, key in ipairs(keys) do
+        local helper = UnitInfoHelpers[key]
+        if helper then
+            local output = helper(unit)
+            if output and output ~= "" then
+                table.insert(results, output)
+            end
+        end
+    end
+    
+    return results
+end
+
+--#Unit movement info
 ---@class MovementPathInfo
 ---@field kind string
 ---@field turns number[]
@@ -371,6 +526,7 @@ local INFO_PRIORITY = {
     "plotName",
     "TileType",
     "Feature",
+    "Units",
     "MovementInfo",
     "NaturalWonder",
     "Resources",
@@ -622,6 +778,30 @@ info.PlotInfoHelpers = {
         local plot = data.Index
         return info.BuildMovementSpeech(info.BuildMovementPathInfo(unit, plot, false, false))
     end,
+
+Units = function(data)
+    local units = data.Units
+    if not units or #units == 0 then return nil end
+
+    local summary = {}
+    local appearanceOrder = {}
+    for _, unit in ipairs(units) do
+        local displayName = table.concat(info:RequestUnitInfo(unit, {"Name"}))
+        if summary[displayName] == nil then
+            summary[displayName] = 1
+            table.insert(appearanceOrder, displayName)
+        else
+            summary[displayName] = summary[displayName] + 1
+        end
+    end
+
+    local finalStrings = {}
+    for _, name in ipairs(appearanceOrder) do
+        table.insert(finalStrings, summary[name] .. " " .. name)
+    end
+
+    return table.concat(finalStrings, ", ")
+end,
 
 Owner = function(data)
     if not data.IsVisible then return nil end
@@ -1048,9 +1228,11 @@ function info:RequestPlotInfo(plot, requestedKeys)
     if not plot then return {"No plot"} end
 requestedKeys = requestedKeys or INFO_PRIORITY
 local vis = self.IsPlotVisible(plot:GetIndex())
+local units = Units.GetUnitsInPlotLayerID(plot:GetX(), plot:GetY(), MapLayers.ANY)
     local data = FetchData(plot)
     FetchAdditionalData(plot, data)
     data.IsVisible = vis
+    data.Units = units
     local results = {}
     for _, key in ipairs(requestedKeys) do
         local helper = self.PlotInfoHelpers[key]

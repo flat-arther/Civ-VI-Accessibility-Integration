@@ -99,4 +99,8 @@ function Startup()
 	-- Manually call OnShow because SetActiveContext does not appear to call it normally.
 	OnShow();
 end
+function OnShutdown()
+	mgr:ShutDown()
+end
+ContextPtr:SetShutdown( OnShutdown );
 AcceptEULA();

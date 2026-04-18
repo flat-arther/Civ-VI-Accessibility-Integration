@@ -2120,6 +2120,6 @@ end
 	end
 end)
 
-OnShutdown = WrapFunc(OnShutdown, function() mgr:Clear() end)
+OnShutdown = WrapFunc(OnShutdown, function() mgr:ShutDown() end)
 
 Initialize();

@@ -20,15 +20,16 @@ local UIScreenManager = {
     }
 }
 
---#Constructer
-function CreateScreenManager()
+--#Methods
+---Creates a new instance of the UI manager
+---@return UIScreenManager
+function UIScreenManager:New()
     Speak(Locale.Lookup("LOC_CAI_CREATING_UI_MANAGER"))
     local mgr = setmetatable({}, {__index = UIScreenManager})
     mgr.Stack = {}
     return mgr
 end
 
---#Methods
 ---Creates a UI widget given a type and an optional properties table
 ---@param type string ---The type of widget to create. This should correspond to a key in 'WidgetTemplates'. If not, the props table must not be nil or empty
 ---@param props? table ---A table of properties to override the widget template's defaults. This is optional if you use a template
@@ -297,15 +298,21 @@ function UIScreenManager:AppendSearchChar(c)
     self.SearchBuffer = (self.SearchBuffer or "") .. c:lower()
 end
 
---#Initialization
-function InitUIScreenManager()
-    ExposedMembers.CAI_UIManager = CreateScreenManager()
+--#Life cycle
+function UIScreenManager:Init()
+    if not ExposedMembers.CAI_UIManager then
+    ExposedMembers.CAI_UIManager = self:New()
+    end
     local mgr = ExposedMembers.CAI_UIManager
     CAI.RegisterGlobalCharInputHandler(function(char)
         return mgr:HandleCharInput(char)
     end)
 end
-for k, v in pairs(CAI) do
-    print(k)
+
+function UIScreenManager:ShutDown()
+    ExposedMembers.CAI_UIManager = nil
+    CAI.UnregisterGlobalCharInputHandler()
+    Speak("Shutting down manager")
 end
-InitUIScreenManager()
+
+UIScreenManager:Init()

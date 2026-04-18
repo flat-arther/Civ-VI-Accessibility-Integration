@@ -30,7 +30,12 @@ function OnSelectedUnit(playerID, unitID, hexI, hexJ, hexK, bSelected, bEditable
     local y = unit:GetY()
     
     if bSelected then
-    Speak(Locale.Lookup(unit:GetName()).. " at "..x..", "..y, true)
+        local uInfo = ExposedMembers.CAIInfo:RequestUnitInfo(unit)
+        local str = "No info"
+        if #uInfo > 0 then
+            str = table.concat(uInfo, ", ")
+        end
+    Speak(str)
     end
 end
 end

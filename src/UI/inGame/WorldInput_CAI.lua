@@ -80,7 +80,7 @@ function OnInputAction(actionId)
 	local interface = UI.GetInterfaceMode()
 	local data = interfaceWidgets[interface]
 	local action = SharedInputActions[actionId]
-	if data and data.InputActions then
+	if data and data.InputActions and data.InputActions[actionId] then
 		action = data.InputActions[actionId]
 	end
 	if action then
@@ -146,5 +146,10 @@ OnLoadScreenClose = WrapFunc(OnLoadScreenClose, function(orig)
 	end
 	if unit then
 		cursor:SnapToUnit(unit)
+	else
+		--cursor:SnapToStartPlot()
 	end
 end)
+
+OnShutdown = WrapFunc(OnShutdown, function() mgr:ShutDown() end)
+ContextPtr:SetShutdown( OnShutdown );
