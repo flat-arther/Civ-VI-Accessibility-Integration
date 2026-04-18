@@ -25,6 +25,7 @@
     <File>UI/frontEnd/MapSelect.lua</File>
     <File>UI/frontEnd/LeaderPicker.lua</File>
     <File>UI/frontEnd/MultiSelectWindow.lua</File>
+        <File>UI/frontEnd/LoadGameMenu.lua</File>
     <File>UI/shared/PopupDialog.lua</File>
     <File>UI/shared/Options.lua</File>
     <File>UI/inGame/InGame.lua</File>
@@ -60,6 +61,7 @@
       <File>UI/frontEnd/MapSelect.lua</File>
       <File>UI/frontEnd/MultiSelectWindow.lua</File>
       <File>UI/frontEnd/LeaderPicker.lua</File>
+          <File>UI/frontEnd/LoadGameMenu.lua</File>
       <File>UI/shared/PopupDialog.lua</File>
       <File>UI/shared/Options.lua</File>
     </ImportFiles>
