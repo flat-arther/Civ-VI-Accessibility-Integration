@@ -29,7 +29,7 @@ Write-Host "Deploy complete. (robocopy exit code: $LASTEXITCODE)" -ForegroundCol
 
 # Resolve Steam install
 $steamPath = (Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\Valve\Steam").InstallPath
-$exePath   = Join-Path $steamPath "steamapps\common\Sid Meier's Civilization VI\Base\Binaries\Win64Steam\CivilizationVI.exe"
+$exePath   = Join-Path $steamPath "steamapps\common\Sid-Meiers-Civilization-VI\Base\Binaries\Win64Steam\CivilizationVI.exe"
 
 if (Test-Path $exePath) {
     Write-Host "Launching Civilization VI..." -ForegroundColor Cyan
