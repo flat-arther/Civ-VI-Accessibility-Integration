@@ -229,7 +229,6 @@ end
 local function PushPausePanel()
     if not mgr then return end
 
-    PopPausePanel()
     BuildPanel()
     if CAI_Panel then
         mgr:Push(CAI_Panel)
@@ -238,15 +237,15 @@ local function PushPausePanel()
 end
 
 OnInput = WrapFunc(OnInput, function(orig, input)
-    if mgr then
-        mgr:HandleInput(input)
+    if mgr and mgr:HandleInput(input) then
+        return true
     end
     return orig(input)
 end)
 
 OnShow = WrapFunc(OnShow, function(orig)
     orig()
-    if Controls.PauseWindow and not Controls.PauseWindow:IsHidden() then
+    if mgr and not mgr:HasWidget(CAI_Panel) then
         PushPausePanel()
     end
 end)
@@ -260,5 +259,3 @@ end)
 
 ContextPtr:SetInputHandler(OnInput, true)
 ContextPtr:SetShowHandler(OnShow)
--- Note(Hamada): for safety where the menu is  hidden and not closed
-ContextPtr:SetHideHandler(PopPausePanel)
