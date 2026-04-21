@@ -1,13 +1,11 @@
 --- The entry point for the entire UI manager system
-include ("caiUtils")
-include("baseWidget")
-include("widgetTemplates")
 ---@class UIScreenManager
 ---@field Stack UIWidget[]
 ---@field CurrentPath UIWidget[]
 ---@field SearchBuffer string
 ---@field LastTypeTime number
 ---@field CAISettings table<string, any>
+---@field WidgetTemplateHelpers WidgetTemplateHelpers
 local UIScreenManager = {
     CAISettings = {
         speakLabel = true,
@@ -20,6 +18,11 @@ local UIScreenManager = {
     }
 }
 
+--#Includes
+include ("caiUtils")
+include("baseWidget")
+include("widgetTemplates")
+include("widgetTemplateHelpers")
 --#Methods
 ---Creates a new instance of the UI manager
 ---@return UIScreenManager
@@ -27,6 +30,8 @@ function UIScreenManager:New()
     Speak(Locale.Lookup("LOC_CAI_CREATING_UI_MANAGER"))
     local mgr = setmetatable({}, {__index = UIScreenManager})
     mgr.Stack = {}
+    mgr.WidgetTemplateHelpers = WidgetTemplateHelpers
+    mgr.WidgetTemplateHelpers.Manager = mgr
     return mgr
 end
 
@@ -35,15 +40,15 @@ end
 ---@param props? table ---A table of properties to override the widget template's defaults. This is optional if you use a template
 ---@return UIWidget|nil --The created widget, or nil if the type was invalid
 function UIScreenManager:CreateUIWidget(type, props)
-    print("Trying to create widget")
-    local template = WidgetTemplates[type]
-    if not template and (not props or #props == 0) then return end
+        local template = WidgetTemplates[type]
+    if not template and not props then return end
     local w = setmetatable({}, {__index = UIWidget}) ---@type UIWidget
 
     w.Manager = self
     w.Type = type
     w.Children = {}
     w.InputMap = {}
+    w.SpeechSettings = {}
     w.FocusedChild = nil
         
     for k, v in pairs(template) do
@@ -57,6 +62,7 @@ function UIScreenManager:CreateUIWidget(type, props)
         if w.RegisterInputs then
             w:AddInputBindings(w.RegisterInputs)
         end
+        if w.OnCreate then w:OnCreate() end
     return w
 end
 
@@ -103,38 +109,11 @@ end
 function UIScreenManager:BuildAnnouncement(path, diverge)
     local announcements = {}
 
-    -- Canonical order of speech elements
-    local dataOrder = {"label", "role", "value", "position", "state", "tooltip"}
-
     for i = diverge, #path do
         local current = path[i]
-
-        if current.GetInfoStrings then
-            local info = current:GetInfoStrings()
-            local widgetSettings = current.SpeechSettings or {}
-            local widgetParts = {}
-
-            for _, key in ipairs(dataOrder) do
-                -- Per-widget SpeechSettings override (capitalized key: Label, Role, Value, etc.)
-                local settingKey = key:sub(1,1):upper() .. key:sub(2)
-                local widgetAllowed = widgetSettings[settingKey]
-
-                if widgetAllowed == false then
-                    -- Explicitly disabled at widget level — skip
-                else
-                    -- Check global setting (e.g. speakLabel, speakRole, speakValue)
-                    local globalKey = "speak" .. settingKey
-                    local globalAllowed = self.CAISettings[globalKey] == nil or self.CAISettings[globalKey] == true
-
-                    if info[key] and globalAllowed then
-                        table.insert(widgetParts, info[key])
-                    end
-                end
-            end
-
-            if #widgetParts > 0 then
-                table.insert(announcements, table.concat(widgetParts, ", "))
-            end
+        if current.BuildSpeech then
+            local speech = current:BuildSpeech()
+            if speech then table.insert(announcements, speech) end
         end
     end
 

@@ -70,7 +70,7 @@ end
 local function NavigateSimpleList(w, direction)
     local children = w.Children
     if not children or #children == 0 then return false end
-    local startIdx = w:GetChildIndex(w.FocusedChild) or 0
+    local startIdx = w:GetChildIndex(w.FocusedChild) or w.DefaultIndex or 0
     local candidate = FindVisibleChild(w, startIdx, direction, w.WrapAround)
     if candidate then
         w.Manager:SetFocus(candidate)
@@ -237,6 +237,21 @@ function EditBox_SyncAndSpeak(w)
     if w.OnSetText then w:OnSetText(w.EditBuffer) end
 end
 
+---Sets the text of an Edit widget, normalizing [NEWLINE] tokens into real newlines
+---@param w UIWidget
+---@param text string|nil
+function EditBox_SetText(w, text)
+    if not w then return end
+    text = text or ""
+    text = string.gsub(text, "%[NEWLINE%]", "\n")
+    text = string.gsub(text, "\r\n", "\n")
+    w.EditBuffer = text
+    w.EditCursor = 0
+    w.EditSelStart = nil
+    if w.EditActive then w.EditOriginal = text end
+    if w.OnSetText then w:OnSetText(text) end
+end
+
 ---Deletes the selected text, collapsing the selection. Returns deleted text.
 ---@param w UIWidget
 ---@return string -- the deleted text
@@ -348,6 +363,25 @@ function EditBox_FindDeleteLeft(buf, pos)
     return i
 end
 
+---Returns the word starting at/after pos, skipping any leading whitespace.
+---Used when speaking after Ctrl+Left/Right so the user hears the full word, not just its first char.
+---@param buf string
+---@param pos integer -- 0-based cursor position
+---@return string
+function EditBox_GetWordAt(buf, pos)
+    local len = #buf
+    if pos >= len then return "" end
+    local i = pos + 1
+    while i <= len and IsWordBoundary(string.sub(buf, i, i)) do
+        i = i + 1
+    end
+    local start = i
+    while i <= len and not IsWordBoundary(string.sub(buf, i, i)) do
+        i = i + 1
+    end
+    return string.sub(buf, start, i - 1)
+end
+
 ---Finds the word boundary to the right of pos (start of next word, or end of string)
 ---@param buf string
 ---@param pos integer -- 0-based
@@ -450,10 +484,17 @@ function EditBox_PrevLinePos(buf, pos)
     local ls = EditBox_LineStart(buf, pos)
     if ls <= 0 then return nil end -- already on first line
     local col = pos - ls
-    -- Previous line ends at ls - 1 (the newline char), previous line content is before that
-    local prevLineEnd = ls - 1 -- position of \n
+    -- prevLineEnd is the 0-based exclusive end of the previous line (the position
+    -- just before the \n that starts the current line).
+    local prevLineEnd = ls - 1
+    -- Empty previous line: the char at 1-based position prevLineEnd is itself a \n
+    -- (i.e., two \n's back-to-back). LineStart from prevLineEnd-1 would land on the
+    -- line BEFORE the empty one and skip it, so handle this case explicitly.
+    if prevLineEnd > 0 and string.sub(buf, prevLineEnd, prevLineEnd) == "\n" then
+        return prevLineEnd
+    end
     local prevLineStart = EditBox_LineStart(buf, prevLineEnd - 1)
-    local prevLineLen = prevLineEnd - prevLineStart - 1
+    local prevLineLen = prevLineEnd - prevLineStart
     local newCol = math.min(col, prevLineLen)
     return prevLineStart + newCol
 end
@@ -597,9 +638,14 @@ function EditBox_MoveCursor(w, direction, shift, ctrl)
         w.EditSelStart = nil
     end
 
-    -- When shift is held, speak selection change; otherwise speak char at cursor
+    -- When shift is held, speak selection change; when ctrl (word move), speak the
+    -- word at the new cursor position; otherwise speak the single char at cursor.
     if shift then
         SpeakSelectionChange(w, oldSelStart, oldCursor)
+    elseif ctrl then
+        local word = EditBox_GetWordAt(buf, newPos)
+        if word == "" then word = Locale.Lookup("LOC_CAI_EDIT_BLANK") end
+        Speak(word, true)
     else
         local charAtCursor = string.sub(buf, newPos + 1, newPos + 1)
         if charAtCursor == "" or charAtCursor == "\n" then
@@ -717,15 +763,8 @@ end
                 end
                 return false
             end },
-            { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown, Action = function(w)
-                if not w.IsExpanded and w.Children and #w.Children > 0 then
-                    w.IsExpanded = true
-                    if w.OnToggleExpanded then w:OnToggleExpanded(w.IsExpanded) end
-                    w:Navigate(1)
-                    return true
-                end
-                return false
-            end },
+            { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyDown, Action = function(w) return w:Expand() end},
+            { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown, Action = function(w) return w:Expand() end},
             { Key = Keys.VK_LEFT, MSG = KeyEvents.KeyDown, Action = function(w)
                 if w.IsExpanded then
                     w.IsExpanded = false
@@ -746,19 +785,36 @@ end
             end },
         },
         Navigate = NavigateSimpleList,
+        Expand = function(w)
+                if not w.IsExpanded and w.Children and #w.Children > 0 then
+                    w.IsExpanded = true
+                    if w.OnToggleExpanded then w:OnToggleExpanded(w.IsExpanded) end
+                    w:Navigate(0)
+                    return true
+                end
+                return false
+            end,
         GetDefaultChild = function(w)
             if w.IsExpanded and w.FocusedChild then return w.FocusedChild end
             return nil
         end,
-        OnFocus = nil, --No auto expanding for you
     },
     Button = {
         RegisterInputs = {
             { Key = Keys.VK_RETURN, Action = function(w)
-                if w.OnClick then w:OnClick() end
-                return true
+                return w:Click(w)
              end },
-        },
+        {Key = Keys.VK_SPACE, Action = function(w)
+            return w:Click(w)
+                end},
+            },
+                Click = function(w)
+                    if w.IsDisabled and w:IsDisabled() then return true end
+                if w.OnClick then
+                    w:OnClick()
+                    end
+                return true
+                end
     },
     DropdownMenu = {
         Role = "DropdownMenu",
@@ -825,13 +881,15 @@ end
                 if not w.EditActive then
                     EditBox_Activate(w)
                 else
+                    if not w.EditReadOnly then
                     EditBox_Commit(w)
+                    end
                 end
                 return true
             end },
             -- Escape: cancel editing
             { Key = Keys.VK_ESCAPE, Action = function(w)
-                if w.EditActive then
+                if w.EditActive and not w.AlwaysEdit then
                     EditBox_Cancel(w)
                     return true
                 end
@@ -839,7 +897,7 @@ end
             end },
             -- Backspace: delete char before cursor (or selection)
             { Key = Keys.VK_BACK, MSG = KeyEvents.KeyDown, Action = function(w)
-                if not w.EditActive then return false end
+                if w.EditReadOnly or not w.EditActive then return false end
                 if w.EditSelStart then
                     local deleted = EditBox_DeleteSelection(w)
                     if deleted ~= "" then Speak(deleted, true) end
@@ -851,7 +909,7 @@ end
             end },
             -- Ctrl+Backspace: delete word before cursor (or selection)
             { Key = Keys.VK_BACK, MSG = KeyEvents.KeyDown, IsControl = true, Action = function(w)
-                if not w.EditActive then return false end
+                if not w.EditActive or w.EditReadOnly then return false end
                 if w.EditSelStart then
                     local deleted = EditBox_DeleteSelection(w)
                     if deleted ~= "" then Speak(deleted, true) end
@@ -863,7 +921,7 @@ end
             end },
             -- Delete: delete char after cursor (or selection)
             { Key = Keys.VK_DELETE, MSG = KeyEvents.KeyDown, Action = function(w)
-                if not w.EditActive then return false end
+                if not w.EditActive or w.EditReadOnly then return false end
                 if w.EditSelStart then
                     local deleted = EditBox_DeleteSelection(w)
                     if deleted ~= "" then Speak(deleted, true) end
@@ -875,7 +933,7 @@ end
             end },
             -- Ctrl+Delete: delete word after cursor (or selection)
             { Key = Keys.VK_DELETE, MSG = KeyEvents.KeyDown, IsControl = true, Action = function(w)
-                if not w.EditActive then return false end
+                if not w.EditActive or w.EditReadOnly then return false end
                 if w.EditSelStart then
                     local deleted = EditBox_DeleteSelection(w)
                     if deleted ~= "" then Speak(deleted, true) end
@@ -1059,7 +1117,7 @@ end
             end },
             -- Ctrl+V: paste from clipboard
             { Key = Keys.V, MSG = KeyEvents.KeyDown, IsControl = true, Action = function(w)
-                if not w.EditActive then return false end
+                if not w.EditActive or w.EditReadOnly then return false end
                 local text = CAI.GetClipboardText()
                 if text and text ~= "" then
                     EditBox_InsertText(w, text)
@@ -1088,13 +1146,14 @@ end
             end },
         },
         OnCharInput = function(w, char)
-            if not w.EditActive then return false end
+            if not w.EditActive or w.EditReadOnly then return false end
             EditBox_InsertText(w, char)
             EditBox_SyncAndSpeak(w)
             Speak(char, true)
             return true
         end,
         GetDefaultChild = nil,
+        OnFocusEnter = function(w) if w.AlwaysEdit and not w.EditActive then EditBox_Activate(w) end end
     },
     Dialog = {
         Role = "Dialog",
@@ -1143,7 +1202,35 @@ end
     StaticText = {
         Role = "StaticText",
         SpeechSettings = { Role = false },
-        RegisterInputs = {},
+        RegisterInputs = {
+            {Key = Keys.VK_RETURN, Action = function(w)
+                if w.Children and #w.Children > 0 and not w.FocusedChild then
+                    local edit = w.Children[1]
+                    if w.GetValue then
+                        edit.GetValue = w.GetValue
+                    end
+                w.Manager:SetFocus(w.Children[1])
+                return true
+                end
+                return false
+                end},
+                {Key = Keys.VK_ESCAPE, Action = function(w)
+                 if w.FocusedChild then
+                        w.Manager:SetFocus(w)
+                        w.FocusedChild = nil
+                        return true
+                    end
+                    return false
+                end}
+        },
+        OnCreate = function(w)
+            local edit = w.Manager:CreateUIWidget("Edit")
+            edit.AlwaysEdit = true
+            edit.EditReadOnly = true
+            edit.HighlightOnEdit = false
+            w:AddChild(edit)
+        end,
+        OnFocusLeave = function(w) if w.FocusedChild then w.FocusedChild = nil end end
     },
     GameView = {
         GetLabel = function() return Locale.Lookup("LOC_CAI_ROLE_GAME_VIEW") end,

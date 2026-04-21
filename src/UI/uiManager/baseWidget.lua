@@ -16,7 +16,6 @@
 ---@field OnValueChanged? fun(w:UIWidget, value:string)
 ---@field Callbacks table<UIWidgetCallbackTypes, fun(w):boolean[]>
 UIWidget = {
-    Callbacks = {}
 }
 
 ---@class InputBinding
@@ -41,6 +40,13 @@ function UIWidget:AddChild(w, focus)
     end
 end
 
+function UIWidget:AddChildren(children, focusIndex)
+    if not children or #children == 0 then return end
+    for i, child in ipairs(children) do
+        local focus = i == focusIndex or false
+        self:AddChild(child, focus)
+end
+end
 ---Inserts a child widget at a specific index
 ---@param index integer
 ---@param w UIWidget
@@ -201,25 +207,24 @@ end
         self:SpeakElements({"value"})
     end
 
-    ---Speaks the currently focused widget's info
-    ---@param elements? string[] -- Optional list of element keys to speak. Empty or nil = speak all available elements
-    function UIWidget:SpeakElements(elements)
+    ---Builds the widget's speech string honoring per-widget and global SpeechSettings
+    ---@param elements? string[] -- Optional list of element keys. Empty or nil = all canonical elements
+    ---@return string|nil -- Comma-joined speech string, or nil if nothing to speak
+    function UIWidget:BuildSpeech(elements)
         local info = self:GetInfoStrings()
         local settings = self.SpeechSettings or {}
         local globalSettings = self.Manager and self.Manager.CAISettings or {}
 
-        -- Define the canonical order
+        -- Canonical order of speech elements
         local allKeys = {"label", "role", "value", "position", "state", "tooltip"}
         local keysToSpeak = (elements and #elements > 0) and elements or allKeys
 
         local parts = {}
         for _, key in ipairs(keysToSpeak) do
-            -- Check per-widget SpeechSettings (key names use capitalized form)
             local settingKey = key:sub(1,1):upper() .. key:sub(2)
             if settings[settingKey] == false then
-                -- Widget-level override: skip this element
+                -- Widget-level override: skip
             else
-                -- Check global settings
                 local globalKey = "speak" .. settingKey
                 local globalAllowed = globalSettings[globalKey] == nil or globalSettings[globalKey] == true
                 if globalAllowed and info[key] then
@@ -228,9 +233,15 @@ end
             end
         end
 
-        if #parts > 0 then
-            Speak(table.concat(parts, ", "))
-        end
+        if #parts == 0 then return nil end
+        return table.concat(parts, ", ")
+    end
+
+    ---Speaks the widget's info
+    ---@param elements? string[] -- Optional list of element keys to speak. Empty or nil = speak all available elements
+    function UIWidget:SpeakElements(elements)
+        local speech = self:BuildSpeech(elements)
+        if speech then Speak(speech) end
     end
 
     ---Speaks the currently focused widget's info (legacy shortcut, speaks all elements)
@@ -268,7 +279,7 @@ function UIWidget:GetInfoStrings()
     local role = roleName ~= "" and Locale.Lookup("LOC_UIWidget_Role_" .. roleName) or ""
 
     local visIdx, visTotal = self:GetVisiblePosition()
-    local posText = (visIdx and visTotal > 1) and Locale.Lookup("LOC_UIWidget_Element_Pos", visIdx, visTotal) or ""
+    local posText = (visIdx and visTotal > 0) and Locale.Lookup("LOC_UIWidget_Element_Pos", visIdx, visTotal) or ""
 
     local value = self.GetValue and self:GetValue() or ""
     local state = ""

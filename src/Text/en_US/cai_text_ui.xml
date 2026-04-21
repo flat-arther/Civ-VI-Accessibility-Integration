@@ -60,7 +60,7 @@
 
     <!-- Widget states -->
     <Row Tag="LOC_CAI_STATE_DISABLED" Language="en_US">
-      <Text>Disabled</Text>
+      <Text>Unavailable</Text>
     </Row>
     <Row Tag="LOC_CAI_STATE_SELECTED" Language="en_US">
       <Text>Selected</Text>
@@ -188,6 +188,38 @@
     <!-- UI manager -->
     <Row Tag="LOC_CAI_CREATING_UI_MANAGER" Language="en_US">
       <Text>Accessibility initialized</Text>
+    </Row>
+
+    <!-- Research chooser -->
+    <Row Tag="LOC_CAI_RESEARCH_CURRENT" Language="en_US">
+      <Text>Researching: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_JUST_COMPLETED" Language="en_US">
+      <Text>Just completed: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_PROGRESS" Language="en_US">
+      <Text>{1_Percent} percent</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_QUEUE_POSITION" Language="en_US">
+      <Text>Queue position {1_Position}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_DETAILS" Language="en_US">
+      <Text>Details</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_CURRENT_STATUS" Language="en_US">
+      <Text>Researching</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_AVAILABLE_LIST" Language="en_US">
+      <Text>Available research</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_QUEUE_LIST" Language="en_US">
+      <Text>Research queue</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_AVAILABLE_DETAILS" Language="en_US">
+      <Text>Available research details</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_QUEUE_DETAILS" Language="en_US">
+      <Text>Queued research details</Text>
     </Row>
 
   </LocalizedText>

@@ -30,7 +30,12 @@ User:
 - Logs/comments: English
 - Localization: ALL user-facing strings through `Locale.Lookup()`. No hardcoded strings.
 - TTS output: always through `Speak()` in `caiUtils.lua`, never call `CAI.output` directly.
-- Deploy: copy `src/` contents to `%USERPROFILE%\Documents\My Games\Sid Meier's Civilization VI\Mods\CivVi-Accessibility-Integration\`
+- Deploy: `src/` is symlinked into the game's mod folder — no copy/deploy step needed.
+
+# Accessibility Widget Rules
+
+- **Avoid manual `Locale.Lookup()` for widget text** — prefer `control:GetText()` and `control:GetToolTipString()` on existing controls; they usually already hold the localized string. Only fall back to `Locale.Lookup()` when no control exposes the text.
+- **Never wire widgets one-by-one for list/grid items** — wrap the existing init/populate function (where controls or items are created) and attach widgets there. Reference implementations: `src/UI/frontEnd/LeaderPicker.lua` and `src/UI/frontEnd/CityStatePicker.lua`.
 
 # Coding Principles
 

@@ -2,6 +2,33 @@
 
 All notable changes to the CAI (Civ VI Accessibility Integration) mod.
 
+## 2026-04-21 — ResearchChooser Split into Available + Queue lists
+
+### Changed
+- `UI/inGame/ResearchChooser_CAI.lua` — the single research list is now split into two lists on the CAI panel: an interactive **Available Research** list and a view-only **Research Queue** list. Each list has its own read-only detail Edit field that updates on row focus. Queue list sorts current research first, then queued techs by ascending `ResearchQueuePosition`.
+- The standalone current-research progress StaticText is removed; current research now lives as the first row of the queue list. `FormatRowLabel` prefixes that row with "Researching: {Name}" and includes the progress percentage so the row replaces what the old summary widget used to announce.
+- Queue list is view-only: Enter is a no-op, no Shift+Enter binding. Rows otherwise use the same label formatting as available rows, so focus/arrow navigation and detail announcement work identically.
+- Tutorial reorder now applies to the available list only (queued/current techs keep their queue-order placement).
+
+### Fixed
+- Queue position no longer requires queuing a tech twice to appear. Root cause: `UI.RequestPlayerOperation(..., VALUE_APPEND)` commits asynchronously, so the synchronous `Refresh()` called immediately after ran against stale queue state. Fix: drop the synchronous `Refresh` and hook `Events.ResearchQueueChanged` (missing from vanilla's chooser listeners — only `TechTree.lua` listens). The event fires once the engine commits the queue mutation; our handler calls the vanilla `Refresh()` which does `GetData()` → `View(kData)` with the live queue. This also catches queue edits made from the tech tree while the chooser panel is open.
+
+### Added
+- Loc keys `LOC_CAI_RESEARCH_AVAILABLE_LIST`, `LOC_CAI_RESEARCH_QUEUE_LIST`, `LOC_CAI_RESEARCH_AVAILABLE_DETAILS`, `LOC_CAI_RESEARCH_QUEUE_DETAILS` in `src/Text/en_US/cai_text_ui.xml`.
+
+## 2026-04-19 — ResearchChooser Accessibility
+
+### Added
+- `UI/inGame/ResearchChooser_CAI.lua` — sidecar partial replacement for the tech research chooser panel
+- CAI Panel + List exposing every available research; each row announces name, turns left, queue position, recommended/boost flags via tooltip
+- Enter on a row chooses the research via the same `OnChooseResearch` entry point the native click uses
+- **Shift+Enter on a row queues the research** (mirrors TechTree.lua's shift-click path: `GetResearchPath` + `VALUE_APPEND`)
+- Open Tech Tree and Close buttons exposed as sibling widgets
+- `ReplaceUIScript id="CAI_ResearchChooser"` registered in `CivViAccess.modinfo`
+
+### Fixed
+- ResearchChooser navigation no longer jumps focus twice per Up/Down/Tab. Wrapped `OnInputHandler` now returns true when `mgr:HandleInput` consumes the event, preventing the input from bubbling to `WorldInput_CAI`'s own input handler (which would call `mgr:HandleInput` a second time). When a CAI input causes the panel to pop, the native slide animator is also closed so visual and accessibility state stay in sync.
+
 ## 2026-04-13 — Edit Box Improvements
 
 ### Added

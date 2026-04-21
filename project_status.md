@@ -25,6 +25,7 @@ Lua accessibility mod for Civilization VI. Adds TTS/screen reader support for bl
 - `ActionPanel_CAI.lua` — replaces `ActionPanel`; hooks `CAIEndTurn` event to trigger end turn
 - `AdvisorPopup_CAI.lua` — replaces `AdvisorPopup`; uses Dialog type for main panel, StaticText for body
 - `InGameTopOptionsMenu_CAI.lua` — replaces `InGameTopOptionsMenu` (content unknown, needs review)
+- `ResearchChooser_CAI.lua` — partial replacement for `ResearchChooser`; wraps `View` / `AddAvailableResearch` / `RealizeCurrentResearch`. Panel is split into two lists — an interactive **Available Research** list (Enter chooses; **Shift+Enter queues** via `GetResearchPath` + `VALUE_APPEND`) and a view-only **Research Queue** list sorted current-first then ascending `ResearchQueuePosition` — each with its own read-only detail Edit. Current research is the first row of the queue list (prefixed "Researching:" with inline progress %), not a standalone summary widget. Push/pops via `LuaEvents.ResearchChooser_ForceHideWorldTracker` / `RestoreWorldTracker`. Adds a missing `Events.ResearchQueueChanged` listener (vanilla's chooser only listens to `ResearchChanged`/`ResearchCompleted`, which don't fire on queue append/reorder) that calls `Refresh()` — fixes the "queue position appears only on the second queue" bug, since `RequestPlayerOperation(VALUE_APPEND)` commits async and any synchronous refresh immediately after sees stale queue state.
 - `InGame.lua` — root in-game context (modified from vanilla). All strings localized
 
 ### Frontend (partial)
@@ -45,7 +46,7 @@ Lua accessibility mod for Civilization VI. Adds TTS/screen reader support for bl
 - `docs/game-api.md` — comprehensive API reference: Input system, Locale, Options, UI Controls, InstanceManager, Events, ExposedMembers, CAI custom API, Interface Modes, Sound, Modding, Game State, Network
 
 ### Scripts
-- `scripts/Deploy-Mod.ps1` — copies src/ to Mods folder via robocopy, launches Civ VI via Steam on success
+- `scripts/Deploy-Mod.ps1` — copies src/ to Mods folder via robocopy, launches Civ VI via Steam on success (legacy — `src/` is now symlinked into the mod folder, no copy step required)
 
 ---
 
