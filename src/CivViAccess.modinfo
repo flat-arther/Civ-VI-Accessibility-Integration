@@ -36,10 +36,11 @@
     <File>UI/frontEnd/CityStatePicker.lua</File>
     <File>UI/frontEnd/vanilla/MultiSelectWindow_Base.lua</File>
     <File>UI/frontEnd/MultiSelectWindow.lua</File>
-    <File>UI/frontEnd/vanilla/LoadGameMenu_Base.lua</File>
-        <File>UI/frontEnd/LoadGameMenu.lua</File>
+    <File>UI/shared/vanilla/LoadGameMenu_Base.lua</File>
+          <File>UI/shared/LoadGameMenu.lua</File>
         <File>UI/shared/vanilla/PopupDialog_Base.lua</File>
     <File>UI/shared/PopupDialog.lua</File>
+    <File>UI/shared/vanilla/Options_Base.lua</File>
     <File>UI/shared/Options.lua</File>
     <File>UI/inGame/InGame.lua</File>
     <File>UI/inGame/ActionPanel_CAI.lua</File>
@@ -86,10 +87,11 @@
       <File>UI/frontEnd/LeaderPicker.lua</File>
       <File>UI/frontEnd/vanilla/CityStatePicker_Base.lua</File>
       <File>UI/frontEnd/CityStatePicker.lua</File>
-      <File>UI/frontEnd/vanilla/LoadGameMenu_Base.lua</File>
-          <File>UI/frontEnd/LoadGameMenu.lua</File>
+      <File>UI/shared/vanilla/LoadGameMenu_Base.lua</File>
+          <File>UI/shared/LoadGameMenu.lua</File>
           <File>UI/shared/vanilla/PopupDialog_Base.lua</File>
       <File>UI/shared/PopupDialog.lua</File>
+      <File>UI/shared/vanilla/Options_Base.lua</File>
       <File>UI/shared/Options.lua</File>
     </ImportFiles>
   </FrontEndActions>
@@ -113,6 +115,9 @@
       <File>UI/inGame/caiIngame.lua</File>
       <File>UI/shared/vanilla/PopupDialog_Base.lua</File>
       <File>UI/shared/PopupDialog.lua</File>
+      <File>UI/shared/vanilla/LoadGameMenu_Base.lua</File>
+          <File>UI/shared/LoadGameMenu.lua</File>
+      <File>UI/shared/vanilla/Options_Base.lua</File>
       <File>UI/shared/Options.lua</File>
       </ImportFiles>
 
