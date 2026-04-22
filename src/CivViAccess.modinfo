@@ -18,29 +18,17 @@
   <File>UI/inGame/caiIngame.lua</File>
   <File>UI/inGame/worldInfo.lua</File>
     <File>UI/inGame/navCursor.lua</File>
-    <File>UI/frontEnd/vanilla/FrontEnd_Base.lua</File>
     <File>UI/frontEnd/FrontEnd.lua</File>
-    <File>UI/frontEnd/vanilla/IntroScreen_Base.lua</File>
     <File>UI/frontEnd/IntroScreen.lua</File>
-    <File>UI/frontEnd/vanilla/FrontEndPopup_Base.lua</File>
     <File>UI/frontEnd/FrontEndPopup.lua</File>
-    <File>UI/frontEnd/vanilla/MainMenu_Base.lua</File>
     <File>UI/frontEnd/MainMenu.lua</File>
-    <File>UI/frontEnd/vanilla/AdvancedSetup_Base.lua</File>
     <File>UI/frontEnd/AdvancedSetup.lua</File>
-    <File>UI/frontEnd/vanilla/MapSelect_Base.lua</File>
     <File>UI/frontEnd/MapSelect.lua</File>
-    <File>UI/frontEnd/vanilla/LeaderPicker_Base.lua</File>
     <File>UI/frontEnd/LeaderPicker.lua</File>
-    <File>UI/frontEnd/vanilla/CityStatePicker_Base.lua</File>
     <File>UI/frontEnd/CityStatePicker.lua</File>
-    <File>UI/frontEnd/vanilla/MultiSelectWindow_Base.lua</File>
     <File>UI/frontEnd/MultiSelectWindow.lua</File>
-    <File>UI/shared/vanilla/LoadGameMenu_Base.lua</File>
-          <File>UI/shared/LoadGameMenu.lua</File>
-        <File>UI/shared/vanilla/PopupDialog_Base.lua</File>
+    <File>UI/shared/LoadGameMenu.lua</File>
     <File>UI/shared/PopupDialog.lua</File>
-    <File>UI/shared/vanilla/Options_Base.lua</File>
     <File>UI/shared/Options.lua</File>
     <File>UI/inGame/InGame.lua</File>
     <File>UI/inGame/ActionPanel_CAI.lua</File>
@@ -69,29 +57,17 @@
       <File>UI/uiManager/baseWidget.lua</File>
       <File>UI/uiManager/widgetTemplateHelpers.lua</File>
       <File>UI/uiManager/widgetTemplates.lua</File>
-      <File>UI/frontEnd/vanilla/IntroScreen_Base.lua</File>
       <File>UI/frontEnd/IntroScreen.lua</File>
-      <File>UI/frontEnd/vanilla/FrontEndPopup_Base.lua</File>
       <File>UI/frontEnd/FrontEndPopup.lua</File>
-      <File>UI/frontEnd/vanilla/FrontEnd_Base.lua</File>
       <File>UI/frontEnd/FrontEnd.lua</File>
-      <File>UI/frontEnd/vanilla/MainMenu_Base.lua</File>
       <File>UI/frontEnd/MainMenu.lua</File>
-      <File>UI/frontEnd/vanilla/AdvancedSetup_Base.lua</File>
       <File>UI/frontEnd/AdvancedSetup.lua</File>
-      <File>UI/frontEnd/vanilla/MapSelect_Base.lua</File>
       <File>UI/frontEnd/MapSelect.lua</File>
-      <File>UI/frontEnd/vanilla/MultiSelectWindow_Base.lua</File>
       <File>UI/frontEnd/MultiSelectWindow.lua</File>
-      <File>UI/frontEnd/vanilla/LeaderPicker_Base.lua</File>
       <File>UI/frontEnd/LeaderPicker.lua</File>
-      <File>UI/frontEnd/vanilla/CityStatePicker_Base.lua</File>
       <File>UI/frontEnd/CityStatePicker.lua</File>
-      <File>UI/shared/vanilla/LoadGameMenu_Base.lua</File>
-          <File>UI/shared/LoadGameMenu.lua</File>
-          <File>UI/shared/vanilla/PopupDialog_Base.lua</File>
+      <File>UI/shared/LoadGameMenu.lua</File>
       <File>UI/shared/PopupDialog.lua</File>
-      <File>UI/shared/vanilla/Options_Base.lua</File>
       <File>UI/shared/Options.lua</File>
     </ImportFiles>
   </FrontEndActions>
@@ -113,11 +89,8 @@
       <File>UI/inGame/worldInfo.lua</File>
       <File>UI/inGame/navCursor.lua</File>
       <File>UI/inGame/caiIngame.lua</File>
-      <File>UI/shared/vanilla/PopupDialog_Base.lua</File>
       <File>UI/shared/PopupDialog.lua</File>
-      <File>UI/shared/vanilla/LoadGameMenu_Base.lua</File>
-          <File>UI/shared/LoadGameMenu.lua</File>
-      <File>UI/shared/vanilla/Options_Base.lua</File>
+      <File>UI/shared/LoadGameMenu.lua</File>
       <File>UI/shared/Options.lua</File>
       </ImportFiles>
 

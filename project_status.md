@@ -84,6 +84,7 @@ Lua accessibility mod for Civilization VI. Adds TTS/screen reader support for bl
 
 ## Known Gaps / Next Steps
 
+- [ ] Test frontend/shared inline patch layout: fresh base files in `src/UI/frontEnd` and `src/UI/shared` now contain CAI code directly inside marked accessibility regions before startup
 - [ ] Review `InGameTopOptionsMenu_CAI.lua` — unclear what CAI additions exist
 - [ ] Review `IntroScreen.lua`, `FrontEndPopup.lua` — unclear what CAI additions exist
 - [ ] Hotkey config (`data/hotkey_config.xml`) needs review for completeness
