@@ -19,7 +19,7 @@ local UIScreenManager = {
 }
 
 --#Includes
-include ("caiUtils")
+include("caiUtils")
 include("baseWidget")
 include("widgetTemplates")
 include("widgetTemplateHelpers")
@@ -28,7 +28,7 @@ include("widgetTemplateHelpers")
 ---@return UIScreenManager
 function UIScreenManager:New()
     Speak(Locale.Lookup("LOC_CAI_CREATING_UI_MANAGER"))
-    local mgr = setmetatable({}, {__index = UIScreenManager})
+    local mgr = setmetatable({}, { __index = UIScreenManager })
     mgr.Stack = {}
     mgr.WidgetTemplateHelpers = WidgetTemplateHelpers
     mgr.WidgetTemplateHelpers.Manager = mgr
@@ -40,9 +40,9 @@ end
 ---@param props? table ---A table of properties to override the widget template's defaults. This is optional if you use a template
 ---@return UIWidget|nil --The created widget, or nil if the type was invalid
 function UIScreenManager:CreateUIWidget(type, props)
-        local template = WidgetTemplates[type]
+    local template = WidgetTemplates[type]
     if not template and not props then return end
-    local w = setmetatable({}, {__index = UIWidget}) ---@type UIWidget
+    local w = setmetatable({}, { __index = UIWidget }) ---@type UIWidget
 
     w.Manager = self
     w.Type = type
@@ -50,7 +50,7 @@ function UIScreenManager:CreateUIWidget(type, props)
     w.InputMap = {}
     w.SpeechSettings = {}
     w.FocusedChild = nil
-        
+
     for k, v in pairs(template) do
         w[k] = v
     end
@@ -59,25 +59,29 @@ function UIScreenManager:CreateUIWidget(type, props)
             w[k] = v
         end
     end
-        if w.RegisterInputs then
-            w:AddInputBindings(w.RegisterInputs)
-        end
-        if w.OnCreate then w:OnCreate() end
+    if w.RegisterInputs then
+        w:AddInputBindings(w.RegisterInputs)
+    end
+    if w.OnCreate then w:OnCreate() end
     return w
 end
 
 ---Adds a UI widget to the top of the stack.
 ---@param w UIWidget
-function UIScreenManager:Push(w)
+---@param shouldFocus? boolean
+function UIScreenManager:Push(w, shouldFocus)
     table.insert(self.Stack, w)
-    self:SetFocus(w)
+    if shouldFocus == nil then shouldFocus = true end
+    if shouldFocus then
+        self:SetFocus(w)
+    end
 end
 
 ---Removes the top UI widget
 function UIScreenManager:Pop()
     if #self.Stack > 0 then
-    local w = table.remove(self.Stack)
-    w:Destroy()
+        local w = table.remove(self.Stack)
+        w:Destroy()
     end
     if #self.Stack == 0 then return end
     self:SetFocus(self.Stack[#self.Stack])
@@ -86,7 +90,7 @@ end
 ---Returns the top widget in the stack
 ---@return UIWidget
 function UIScreenManager:GetTop()
-return self.Stack[#self.Stack]
+    return self.Stack[#self.Stack]
 end
 
 ---Recursively searches and returns the deepest focused widget
@@ -280,7 +284,7 @@ end
 --#Life cycle
 function UIScreenManager:Init()
     if not ExposedMembers.CAI_UIManager then
-    ExposedMembers.CAI_UIManager = self:New()
+        ExposedMembers.CAI_UIManager = self:New()
     end
     local mgr = ExposedMembers.CAI_UIManager
     CAI.RegisterGlobalCharInputHandler(function(char)
