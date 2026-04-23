@@ -1,13 +1,13 @@
 include("caiUtils")
-include ("worldInfo")
+include("worldInfo")
 include("UIScreenManager")
-include ("caiIngame");
+include("caiIngame");
 include("WorldInput")
-local mgr = ExposedMembers.CAI_UIManager
-local gamePanel           = nil
-local mainArea            = nil
-local cursor              = nil
-local caiInfo = ExposedMembers.CAIInfo
+local mgr                = ExposedMembers.CAI_UIManager
+local gamePanel          = nil
+local mainArea           = nil
+local cursor             = nil
+local caiInfo            = ExposedMembers.CAIInfo
 
 --# Global input actions
 --- Input actions that are common to all interface widgets should go here. Action functions are passed the game view widget. You can use that to decide when the action should execute, or when to restrict certain actions
@@ -41,10 +41,14 @@ interfaceWidgets = {
 			GetLabel = function() return Locale.Lookup("LOC_CAI_MOVEMENT_MODE") end,
 			OnDestroy = function(w) Speak(Locale.Lookup("LOC_CAI_EXITED_MOVEMENT_MODE")) end,
 			RegisterInputs = {
-				{ Key = Keys.VK_ESCAPE, Action = function(w)
-					OnMouseMoveToCancel()
-					return true
-				end, MSG = KeyEvents.KeyUp }
+				{
+					Key = Keys.VK_ESCAPE,
+					Action = function(w)
+						OnMouseMoveToCancel()
+						return true
+					end,
+					MSG = KeyEvents.KeyUp
+				}
 			},
 		},
 		InputActions = {
@@ -131,6 +135,7 @@ function InitGameview()
 	end
 	gamePanel:AddChild(mainArea)
 	mgr:Push(gamePanel)
+	ExposedMembers.CAI_MainGamePanel = gamePanel
 	UI = HijackTable(UI, cursorOverrides)
 end
 
@@ -152,4 +157,4 @@ OnLoadScreenClose = WrapFunc(OnLoadScreenClose, function(orig)
 end)
 
 OnShutdown = WrapFunc(OnShutdown, function() mgr:ShutDown() end)
-ContextPtr:SetShutdown( OnShutdown );
+ContextPtr:SetShutdown(OnShutdown);

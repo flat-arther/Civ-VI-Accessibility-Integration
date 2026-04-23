@@ -170,6 +170,11 @@ Shared global table for cross-context communication:
 
 Wrapper for `CAI.output`. Use this for all TTS output.
 
+## Lua Context Notes
+
+- Included Civ VI Lua panel files expose their top-level functions directly in the current chunk after `include("...")`, so wrappers can usually reassign names like `PopulateWonders = WrapFunc(PopulateWonders, ...)`.
+- Do not rely on `_G` or `rawget(_G, ...)` for panel helper discovery in Civ VI UI contexts. These globals are not consistently available/mod-safe in this project; prefer explicit one-by-one capture/wrapping of the functions you need.
+
 ## Interface Modes
 
 - `InterfaceModeTypes.MOVE_TO` — unit movement mode

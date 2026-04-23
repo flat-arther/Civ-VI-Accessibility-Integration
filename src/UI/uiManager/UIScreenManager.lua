@@ -21,8 +21,8 @@ local UIScreenManager = {
 --#Includes
 include("caiUtils")
 include("baseWidget")
-include("widgetTemplates")
 include("widgetTemplateHelpers")
+include("widgetTemplates")
 --#Methods
 ---Creates a new instance of the UI manager
 ---@return UIScreenManager

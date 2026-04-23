@@ -46,6 +46,12 @@
     <Row Tag="LOC_UIWidget_Role_StaticText" Language="en_US">
       <Text>Text</Text>
     </Row>
+    <Row Tag="LOC_UIWidget_Role_Treeview" Language="en_US">
+      <Text>Tree View</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_TreeviewItem" Language="en_US">
+      <Text>Tree Item</Text>
+    </Row>
     <Row Tag="LOC_UIWidget_Role_GameView" Language="en_US">
       <Text>Game View</Text>
     </Row>
@@ -176,6 +182,9 @@
     <Row Tag="LOC_CAI_EDIT_COPIED" Language="en_US">
       <Text>Copied {1_Text}</Text>
     </Row>
+    <Row Tag="LOC_CAI_SEARCH_NO_MATCH" Language="en_US">
+      <Text>No match</Text>
+    </Row>
 
     <!-- Create Game (Advanced Setup) -->
     <Row Tag="LOC_CAI_COLOR" Language="en_US">
@@ -220,6 +229,26 @@
     </Row>
     <Row Tag="LOC_CAI_RESEARCH_QUEUE_DETAILS" Language="en_US">
       <Text>Queued research details</Text>
+    </Row>
+
+    <!-- Production panel -->
+    <Row Tag="LOC_CAI_PRODUCTION_CURRENT" Language="en_US">
+      <Text>Current production: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_QUEUE_LIST" Language="en_US">
+      <Text>Production queue</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_DETAIL_LABEL" Language="en_US">
+      <Text>Production details</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CHOSEN" Language="en_US">
+      <Text>Chose: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_PURCHASED" Language="en_US">
+      <Text>Purchased: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_QUEUE_REMOVED" Language="en_US">
+      <Text>Removed from queue: {1_Name}</Text>
     </Row>
 
   </LocalizedText>
