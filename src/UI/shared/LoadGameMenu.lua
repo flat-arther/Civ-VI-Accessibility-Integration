@@ -386,34 +386,6 @@ function KeyHandler( key:number )
             return true;
         end
 	end
-	if key == Keys.VK_UP or key == Keys.VK_DOWN then
-		if #g_FileList > 0 then
-			local newIndex = g_iSelectedFileEntry;
-			if g_iSelectedFileEntry == -1 then
-				newIndex = 1;
-			elseif key == Keys.VK_UP then
-				newIndex = newIndex - 1;
-				if newIndex < 1 then
-					newIndex = #g_FileList;
-				end
-			elseif key == Keys.VK_DOWN then
-				newIndex = newIndex + 1;
-				if newIndex > #g_FileList then
-					newIndex = 1;
-				end
-			end
-			if newIndex ~= g_iSelectedFileEntry then
-				SetSelected(newIndex);
-			end
-		end
-		return true;
-	end
-	if key == Keys.VK_DELETE then
-		if g_iSelectedFileEntry ~= -1 then
-			OnDelete();
-		end
-		return true;
-	end
 	return false;
 end
 function OnInputHandler( pInputStruct:table )
@@ -1298,4 +1270,3 @@ ContextPtr:SetInputHandler(function(input)
 end, true)
 --#End of accessibility integration
 Initialize();
-

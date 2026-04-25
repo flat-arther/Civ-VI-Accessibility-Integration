@@ -70,6 +70,5 @@ end)
 OnHideAdvisorDialog = WrapFunc(OnHideAdvisorDialog, function(orig)
     orig()
     mgr:Pop()
-    -- Tutorials tend to set input context to 'Tutorial' which does not allow world input to execute, Meaning no keyboard input. Yeah, screw that
     Input.SetActiveContext(InputContext.World)
 end)

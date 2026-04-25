@@ -1912,7 +1912,6 @@ function OnShow()
 	else
 		Controls.GameSetupContainer:SetHide(true);
 	end
-
 end
 
 -------------------------------------------------------------------------------
@@ -2111,6 +2110,7 @@ function Initialize()
 
 	Resize();
 end
+
 --#Accessibility integration
 include("caiUtils")
 local mgr                 = ExposedMembers.CAI_UIManager
@@ -2874,8 +2874,3 @@ OnCancel = WrapFunc(OnCancel, function(orig)
 end)
 --#End of accessibility integration
 Initialize();
-
-
-
-
-

@@ -217,3 +217,83 @@ Lua accessibility mod for Civilization VI. Adds TTS/screen reader support for bl
 9. Bind `SelectionActions` and verify it opens the city action list with only currently available actions, using each action name as the spoken label and its description as the tooltip
 10. Verify the spoken city summary now says city name, coordinates, and labeled population in that order
 11. Verify selecting a city triggers the CAI `OnCitySelectionChanged` listener and speaks the summary once without duplicating vanilla announcements unexpectedly
+
+## Current Work (2026-04-25): Frontend/shared vanilla Lua refresh
+
+### What's done
+- Refreshed full replacement frontend/shared Lua files from the current Steam install at `C:\Program Files (x86)\Steam\steamapps\common\Sid Meier's Civilization VI\Base\Assets\UI`
+- Reinserted each marked CAI accessibility block (`--#Accessibility integration` through `--#End of accessibility integration`) above the final startup call:
+  - `src/UI/frontEnd/AdvancedSetup.lua`
+  - `src/UI/frontEnd/CityStatePicker.lua`
+  - `src/UI/frontEnd/FrontEnd.lua`
+  - `src/UI/frontEnd/FrontEndPopup.lua`
+  - `src/UI/frontEnd/IntroScreen.lua` before `Startup();`
+  - `src/UI/frontEnd/LeaderPicker.lua`
+  - `src/UI/frontEnd/MainMenu.lua`
+  - `src/UI/frontEnd/MapSelect.lua`
+  - `src/UI/frontEnd/MultiSelectWindow.lua`
+  - `src/UI/frontEnd/TutorialSetup.lua`
+  - `src/UI/shared/LoadGameMenu.lua`
+  - `src/UI/shared/Options.lua`
+  - `src/UI/shared/PopupDialog.lua` at end of file because vanilla has no final `Initialize();`
+- Confirmed each refreshed file has exactly one CAI accessibility block
+- Did not touch `src/UI/inGame` partial replacement files
+- Restored accessibility-related code that lived outside the marked CAI blocks:
+  - `src/UI/shared/Options.lua` keeps the top-level `include("UIScreenManager")`
+  - `src/UI/frontEnd/IntroScreen.lua` keeps the accessibility-oriented `AcceptEULA();` startup bypass
+- `src/UI/shared/LoadGameMenu.lua` intentionally matches the updated vanilla `KeyHandler`; the old outside-block arrow-key file-list navigation and Delete handling were not kept
+- Left the old hardcoded `Speak("Multiplayer popup")` out intentionally
+
+### Needs testing
+1. Launch to frontend and verify main menu, popups, setup screens, load game, options, leader/city-state/map/multiselect pickers, and tutorial setup still open without Lua errors
+2. Verify `IntroScreen.lua` still skips the inaccessible startup/EULA screen as intended
+3. Verify `LoadGameMenu.lua` keyboard behavior with the updated vanilla `KeyHandler` plus the CAI block
+
+## Current Work (2026-04-25): My2K frontend accessibility
+
+### What's done
+- Added `src/UI/FiraxisLive/My2K.lua` as a full frontend replacement copied from the Steam install at `C:\Program Files (x86)\Steam\steamapps\Sid-Meiers-Civilization-VI\Base\Assets\UI\FiraxisLive\My2K.lua`
+- Registered `UI/FiraxisLive/My2K.lua` in `src/CivViAccess.modinfo` under `<Files>` and the frontend `ImportFiles` action
+- Added a marked CAI accessibility block to My2K before `FiraxisLive.SetUIReady()`
+- My2K now replaces the legacy 3-argument input handler with a CAI `InputStruct` handler while preserving vanilla Escape behavior through `m_bESCEnabled` and `m_cancelFunction`
+- My2K accessible dialogs are built through `WidgetTemplateHelpers:MakeGeneralDialog(...)`
+- Added accessible dialog coverage for:
+  - main My2K account menu
+  - unlink confirmation
+  - login
+  - new-user email
+  - username/email
+  - legal document list
+  - legal document detail
+  - message dialog
+  - logout confirmation
+- Dialog content uses live vanilla control text and edit-box values; action buttons read live disabled state from the vanilla buttons
+- Documented the My2K/FiraxisLive frontend popup pattern in `docs/game-api.md`
+
+### Needs testing
+1. Open My2K from the frontend main menu and verify no Lua errors
+2. Verify Tab/Shift+Tab moves through dialog rows and action buttons, Up/Down moves dialog rows, and Left/Right moves within the action row
+3. Verify Escape cancels only where vanilla allows it, and does not cancel the legal consent screen
+4. Verify login email/password entry works with CAI edit controls, including typing, backspace, cursor movement, and Enter commit
+5. Verify invalid email keeps submit buttons disabled and valid email enables them
+6. Verify legal document list exposes every document and opens the selected document
+7. Verify legal document detail can be read and OK returns to the legal list
+8. Verify pending login/sign-up/unlink actions speak disabled state after activation
+9. Verify successful My2K activation/link events close the popup and return safely to the main menu
+
+## Investigation (2026-04-25): Tutorial native access violation at TURN_BASED_B
+
+### Findings
+- User reports a deterministic native access violation, not a Lua crash, when clicking OK during `item_turnBasedB` in `TutorialScenarioBase.lua`
+- `Lua.log` from the latest checked run had no Lua traceback; it ended after tutorial startup and city selection
+- Windows Application logs show repeated `CivilizationVI.exe` crashes with exception `0xc0000005` at fault offset `0x0000000000078abb`
+- `TURN_BASED_B` OK calls `LuaEvents.AdvisorPopup_ShowDetails(advisorInfo)`
+- `TutorialUIRoot.OnAdvisorPopupShowDetails()` calls `RaiseDetailedTutorial(item)`
+- Because `TURN_BASED_B` has no `UITriggers`, `RaiseDetailedTutorial()` immediately deactivates it and chains to `TURN_BASED_C`
+- `TURN_BASED_C` enables the ActionPanel tutorial target (`ActionPanel`, `TutorialSelectEndTurn`) and disables `ChangeProductionCheck`
+- Documented this flow in `docs/game-api.md`
+
+### Next debug steps
+1. Reproduce once with `CAI_AdvisorPopup` replacement disabled in `src/CivViAccess.modinfo`
+2. If it still crashes, reproduce with `CAI_ActionPanel` replacement disabled
+3. If disabling one replacement fixes the crash, instrument only that file around advisor hide/show or ActionPanel tutorial activation

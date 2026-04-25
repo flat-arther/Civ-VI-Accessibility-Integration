@@ -28,6 +28,7 @@
     <File>UI/frontEnd/CityStatePicker.lua</File>
     <File>UI/frontEnd/MultiSelectWindow.lua</File>
     <File>UI/frontEnd/TutorialSetup.lua</File>
+    <File>UI/FiraxisLive/My2K.lua</File>
     <File>UI/shared/LoadGameMenu.lua</File>
     <File>UI/shared/PopupDialog.lua</File>
     <File>UI/shared/Options.lua</File>
@@ -70,6 +71,7 @@
       <File>UI/frontEnd/LeaderPicker.lua</File>
       <File>UI/frontEnd/CityStatePicker.lua</File>
       <File>UI/frontEnd/TutorialSetup.lua</File>
+      <File>UI/FiraxisLive/My2K.lua</File>
       <File>UI/shared/LoadGameMenu.lua</File>
       <File>UI/shared/PopupDialog.lua</File>
       <File>UI/shared/Options.lua</File>

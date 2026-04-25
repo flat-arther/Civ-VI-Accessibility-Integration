@@ -13,7 +13,6 @@ function OnFrontEndPopup(popupText :string, popupTitle :string)
 	m_kPopupDialog:AddText(Locale.Lookup(popupText));
 	m_kPopupDialog:AddButton(Locale.Lookup("LOC_CLOSE"), OnPopupClose);
 	m_kPopupDialog:Open();
-	Speak("Multiplayer popup")
 end
 
 -- ===========================================================================

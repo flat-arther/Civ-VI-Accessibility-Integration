@@ -110,7 +110,6 @@ function TeardownParameters()
 	end
 end
 
-
 ------------------------------------------------------------------    
 function OnShow()
 	EnsureTutorialIsEnabled();
