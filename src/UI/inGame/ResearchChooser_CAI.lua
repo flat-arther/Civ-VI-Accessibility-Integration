@@ -146,30 +146,6 @@ local function FormatRowLabel(kData, inlineUnlocks)
 end
 
 -- ===========================================================================
--- Append the tech to the research queue (Shift+Enter). Mirrors TechTree.lua's
--- shift-click path: queueing requires the full dependency chain via
--- GetResearchPath, plus PARAM_INSERT_MODE = VALUE_APPEND.
--- ===========================================================================
-local function OnQueueResearch(techHash)
-    if techHash == nil then return end
-    local localPlayer = Game.GetLocalPlayer()
-    if localPlayer < 0 then return end
-
-    local pPlayerTechs = Players[localPlayer]:GetTechs()
-    local pathToTech = pPlayerTechs:GetResearchPath(techHash)
-
-    local tParameters = {}
-    tParameters[PlayerOperations.PARAM_TECH_TYPE] = pathToTech
-    tParameters[PlayerOperations.PARAM_INSERT_MODE] = PlayerOperations.VALUE_APPEND
-    UI.RequestPlayerOperation(localPlayer, PlayerOperations.RESEARCH, tParameters)
-    UI.PlaySound("Confirm_Tech")
-    -- RequestPlayerOperation commits through the net/engine pipeline, so
-    -- GetResearchQueue may not reflect the append on this frame. The
-    -- Events.ResearchQueueChanged listener registered below fires after the
-    -- update lands and calls Refresh() to repopulate kData + View.
-end
-
--- ===========================================================================
 -- Compose the detail text for the Edit widget. Sections are joined with blank
 -- lines so arrow-through landings match sighted breaks. Sources:
 --   1. kData.ToolTip (name, cost, description, unlocks) from ToolTipHelper.
@@ -225,9 +201,9 @@ local function IsQueuedOrCurrent(kData)
 end
 
 -- ===========================================================================
--- Row factory. `interactive` true = available list: Enter chooses research,
--- Shift+Enter queues. `interactive` false = queue list: Enter is a no-op (the
--- queue is view-only). OnFocusEnter always updates the companion detail Edit.
+-- Row factory. `interactive` true = available list: Enter chooses research.
+-- `interactive` false = queue list: Enter is a no-op (the queue is view-only).
+-- OnFocusEnter always updates the companion detail Edit.
 -- ===========================================================================
 local function CreateRowWidget(kData, detailEdit, interactive)
     local captured = kData
@@ -246,32 +222,15 @@ local function CreateRowWidget(kData, detailEdit, interactive)
         end,
     })
     row._caiHash = captured.Hash
-    if interactive then
-        row:AddInputBindings({
-            {
-                Key = Keys.VK_RETURN,
-                MSG = KeyEvents.KeyDown,
-                IsShift = true,
-                Action = function()
-                    OnQueueResearch(captured.Hash)
-                    Speak(Locale.Lookup("LOC_HUD_RESEARCH_QUEUED", captured.Name) or (captured.Name .. " queued"))
-                    return true
-                end,
-            },
-        })
-    end
     return row
 end
 
 -- ===========================================================================
 -- Rebuild one list's children from its row table and seed the companion
--- detail Edit with the first row's details. Null the list's FocusedChild
--- before ClearChildren — otherwise RemoveChild re-focuses a sibling per
--- removed row, producing a speech burst during the rebuild.
+-- detail Edit with the first row's details.
 -- ===========================================================================
 local function RebuildOneList(listWidget, rows, detailEdit, interactive)
     if not listWidget then return end
-    listWidget.FocusedChild = nil
     listWidget:ClearChildren()
     for _, kData in ipairs(rows) do
         listWidget:AddChild(CreateRowWidget(kData, detailEdit, interactive))
@@ -287,9 +246,7 @@ end
 -- the available list only, sorts queue by (IsCurrent first, then
 -- ResearchQueuePosition asc), splices m_caiCurrentData in at the head of the
 -- queue list (vanilla View doesn't route non-Repeatable current research
--- through AddAvailableResearch), rebuilds both lists, and restores focus by
--- hash — within the originally focused list only, so Shift+Enter queueing
--- doesn't yank focus across to the queue list mid-browse.
+-- through AddAvailableResearch), and rebuilds both lists.
 -- ===========================================================================
 local function RebuildCAIPanel()
     m_caiAvailableRows = {}
@@ -321,40 +278,8 @@ local function RebuildCAIPanel()
         end
     end
 
-    -- Capture previous focus: hash for identity, list for original ownership.
-    local focusedHash, focusedInList
-    local node = mgr and mgr:GetFocusedWidget() or nil
-    while node do
-        if node._caiHash and not focusedHash then focusedHash = node._caiHash end
-        if node == m_caiAvailableList then focusedInList = m_caiAvailableList end
-        if node == m_caiQueueList     then focusedInList = m_caiQueueList end
-        node = node.Parent
-    end
-
     RebuildOneList(m_caiAvailableList, m_caiAvailableRows, m_caiAvailableDetail, true)
     RebuildOneList(m_caiQueueList,     m_caiQueueRows,     m_caiQueueDetail,     false)
-
-    local function findByHash(listWidget, hash)
-        if not listWidget or not hash or not listWidget.Children then return nil end
-        for _, child in ipairs(listWidget.Children) do
-            if child._caiHash == hash then return child end
-        end
-        return nil
-    end
-
-    local firstInOriginal = focusedInList and focusedInList.Children and focusedInList.Children[1] or nil
-    local firstAvailable  = m_caiAvailableList and m_caiAvailableList.Children and m_caiAvailableList.Children[1] or nil
-    local firstQueue      = m_caiQueueList     and m_caiQueueList.Children     and m_caiQueueList.Children[1]     or nil
-
-    -- Only restore focus within the originally focused list. If the hash
-    -- moved across lists (e.g. Shift+Enter queued it), fall back to the
-    -- first row of the original list so focus doesn't jump to the queue —
-    -- that's disorienting mid-navigation.
-    local target = findByHash(focusedInList, focusedHash)
-                or firstInOriginal
-                or firstAvailable
-                or firstQueue
-    if target and mgr then mgr:SetFocus(target) end
 end
 
 -- ===========================================================================
@@ -469,8 +394,8 @@ View = WrapFunc(View, function(orig, playerID, kData)
     orig(playerID, kData)
     RebuildCAIPanel()
     -- Initial open: OnPanelOpenedCAI set m_caiOpenPending but deferred the
-    -- Push. Now that the list has its real rows, push the panel; SetFocus
-    -- will walk down to the first row in a single speech burst.
+    -- Push. Now that the list has its real rows, let the UI screen manager
+    -- choose the initial focus path.
     if m_caiOpenPending and m_caiPanel and mgr and not mgr:HasWidget(m_caiPanel) then
         m_caiOpenPending = false
         mgr:Push(m_caiPanel)
@@ -531,8 +456,8 @@ end)
 LuaEvents.ResearchChooser_ForceHideWorldTracker.Add(OnPanelOpenedCAI)
 LuaEvents.ResearchChooser_RestoreWorldTracker.Add(OnPanelClosedCAI)
 
--- Queue changes (our own Shift+Enter append, tech tree queue edits, anything
--- that doesn't also change the active research) don't fire
+-- Queue changes from vanilla surfaces (for example Tech Tree queue edits) that
+-- don't also change the active research don't fire
 -- Events.ResearchChanged, so the native Refresh/FlushChanges pipeline misses
 -- them. Hook ResearchQueueChanged and call Refresh() — that calls GetData()
 -- (which re-reads pPlayerTechs:GetResearchQueue()) and View(kData), which

@@ -25,7 +25,7 @@ Lua accessibility mod for Civilization VI. Adds TTS/screen reader support for bl
 - `ActionPanel_CAI.lua` - replaces `ActionPanel`; hooks `CAIEndTurn` event to trigger end turn
 - `AdvisorPopup_CAI.lua` - replaces `AdvisorPopup`; uses Dialog type for main panel, StaticText for body
 - `InGameTopOptionsMenu_CAI.lua` - replaces `InGameTopOptionsMenu` (content unknown, needs review)
-- `ResearchChooser_CAI.lua` - partial replacement for `ResearchChooser`; wraps `View` / `AddAvailableResearch` / `RealizeCurrentResearch`. Panel is split into two lists - an interactive available research list (Enter chooses; Shift+Enter queues) and a view-only queue list with its own detail edit
+- `ResearchChooser_CAI.lua` - partial replacement for `ResearchChooser`; wraps `View` / `AddAvailableResearch` / `RealizeCurrentResearch`. Panel is split into two lists - an interactive available research list (Enter chooses) and a view-only queue list with its own detail edit
 - `ProductionPanel_CAI.lua` - in active development; Treeview-based accessibility layer added, but still needs in-game verification
 - `InGame.lua` - root in-game context (modified from vanilla). All strings localized
 
@@ -297,3 +297,17 @@ Lua accessibility mod for Civilization VI. Adds TTS/screen reader support for bl
 1. Reproduce once with `CAI_AdvisorPopup` replacement disabled in `src/CivViAccess.modinfo`
 2. If it still crashes, reproduce with `CAI_ActionPanel` replacement disabled
 3. If disabling one replacement fixes the crash, instrument only that file around advisor hide/show or ActionPanel tutorial activation
+
+## Current Work (2026-04-25): ResearchChooser vanilla alignment
+
+### What's done
+- Removed CAI's custom Shift+Enter research queueing from `src/UI/inGame/ResearchChooser_CAI.lua`
+- Kept the view-only research queue list/detail so queued items remain inspectable when vanilla exposes them
+- Removed manual ResearchChooser focus preservation/restoration (`FocusedChild` clearing, hash-based refocus, and `mgr:SetFocus(...)`) so UIScreenManager owns focus behavior
+- Updated stale comments that described the removed queue and focus behavior
+
+### Needs testing
+1. Open ResearchChooser and verify Enter still chooses the focused available research item
+2. Verify Shift+Enter no longer queues research from the chooser
+3. Verify queued/current research remains visible in the read-only queue list
+4. Verify opening and refreshing ResearchChooser uses the normal UIScreenManager focus behavior without stray focus jumps
