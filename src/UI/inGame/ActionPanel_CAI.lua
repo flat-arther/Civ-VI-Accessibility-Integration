@@ -1,5 +1,11 @@
 include("ActionPanel")
+local endturnAction = Input.GetActionId("EndTurn")
+local caiEndTurnAction = Input.GetActionId("SharedEndTurn")
 ContextPtr:SetInputHandler(nil, true)
-LuaEvents.CAIEndTurn.Add(function()
-    OnInputActionTriggered(Input.GetActionId("EndTurn"))
-end)
+function InputActionTriggered(id)
+    if id == caiEndTurnAction then
+        OnInputActionTriggered(endturnAction)
+    end
+end
+
+Events.InputActionTriggered.Add(InputActionTriggered)

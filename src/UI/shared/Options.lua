@@ -1,6 +1,7 @@
 -- ===========================================================================
 --	Options
 -- ===========================================================================
+include("UIScreenManager")
 include("Civ6Common");
 include("InstanceManager");
 include("PopupDialog");
@@ -2112,7 +2113,6 @@ function Initialize()
 end
 --#Accessibility integration
 include("caiUtils")
-include("UIScreenManager")
 local mgr                 = ExposedMembers.CAI_UIManager
 local OptionsPanel        = nil ---@type UIWidget
 local OptionsList         = nil ---@type UIWidget

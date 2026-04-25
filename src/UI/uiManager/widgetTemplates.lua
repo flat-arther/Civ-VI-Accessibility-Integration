@@ -160,6 +160,21 @@ WidgetTemplates = {
             end },
         },
     },
+    TriStateToggle = {
+        Role = "Checkbox",
+        RegisterInputs = {
+            { Key = Keys.VK_RETURN, Action = function(w)
+                if w.AdvanceState then w:AdvanceState() end
+                w:SpeakElements({ "label", "value", "state", "tooltip" })
+                return true
+            end },
+            { Key = Keys.VK_SPACE, Action = function(w)
+                if w.AdvanceState then w:AdvanceState() end
+                w:SpeakElements({ "label", "value", "state", "tooltip" })
+                return true
+            end },
+        },
+    },
     Edit = {
         Role = "Edit",
         -- EditBox state fields (set by W_EditBox or consumer):

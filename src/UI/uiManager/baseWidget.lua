@@ -24,7 +24,7 @@ UIWidget = {
 ---@field IsShift? boolean
 ---@field IsControl? boolean
 ---@field MSG? KeyEvents
-local baseInputBinding = {IsShift = false, IsControl = false, MSG = KeyEvents.KeyUp}
+local baseInputBinding = { IsShift = false, IsControl = false, MSG = KeyEvents.KeyUp }
 
 
 --#Base methods
@@ -35,7 +35,7 @@ function UIWidget:AddChild(w, focus)
     focus = focus or false
     w.Parent = self
     table.insert(self.Children, w)
-    if focus then 
+    if focus then
         self.Manager:SetFocus(w)
     end
 end
@@ -45,8 +45,9 @@ function UIWidget:AddChildren(children, focusIndex)
     for i, child in ipairs(children) do
         local focus = i == focusIndex or false
         self:AddChild(child, focus)
+    end
 end
-end
+
 ---Inserts a child widget at a specific index
 ---@param index integer
 ---@param w UIWidget
@@ -97,15 +98,7 @@ end
 ---@param index integer
 function UIWidget:RemoveChild(index)
     local w = table.remove(self.Children, index)
-    if w.Manager:GetFocusedWidget() == w then
-        if #self.Children > 0 then
-            -- todo: have this get next valid sibling when ever you get to separating the child search portion from navigate
-            w.Manager:SetFocus(self.Children[1])
-        else
-    w.Manager:SetFocus(self)
-    end
-end
-    if w.Parent then w.Parent.FocusedChild = nil end
+    if self.FocusedChild == w then self.FocusedChild = nil end
 end
 
 ---Removes the widget from its parent if it has any
@@ -113,7 +106,7 @@ function UIWidget:RemoveFromParent()
     if not self.Parent then return end
     local pos = self:GetIndexInParent()
     if pos then
-    self.Parent:RemoveChild(pos)
+        self.Parent:RemoveChild(pos)
     end
 end
 
@@ -121,8 +114,10 @@ end
 function UIWidget:Destroy()
     if self.OnDestroy then self:OnDestroy() end
     self:RemoveFromParent()
-        if self.Children and #self.Children > 0 then
-        for _, child in ipairs(self.Children) do
+    if self.Children and #self.Children > 0 then
+        while #self.Children > 0 do
+            local child = self.Children[#self.Children]
+            if not child then break end
             child:Destroy()
         end
     end
@@ -134,120 +129,121 @@ end
 ---Clears and destroys all children of a widget
 function UIWidget:ClearChildren()
     if self.Children and #self.Children > 0 then
-        for _, child in ipairs(self.Children) do
+        while #self.Children > 0 do
+            local child = self.Children[#self.Children]
+            if not child then break end
             child:Destroy()
         end
     end
+    self.FocusedChild = nil
     self.Children = {}
 end
 
 ---Focuses a child of this widget given its index
 ---@param pos integer
----@return boolean
 function UIWidget:SetFocusedChild(pos)
-    if not self.Children or not self.Children[pos] then return false end
-    local child = self.Children[pos]
-    self.Manager:SetFocus(child)
-    return true
+    if not self.Children or #self.Children == 0 then return end
+    if not self.Manager then return end
+    self.Manager:SetFocusIndexPath(self, { pos })
 end
 
-    ---Checks if the widget is currently focused
-    ---@return boolean
-    function UIWidget:IsFocused()
-        return self.Manager:GetFocusedWidget() == self
-    end
-
-    ---Adds an input binding to the widget's input map table. Best to use this as a base for new bindings to avoid issues with missing fields
-    ---@param binding InputBinding -- This inherits from 'baseInputBinding', so 'IsShift' and 'IsControl' are false by default. 'MSG' is set to 'KeyEvents.KeyDown'
-    function UIWidget:AddInputBinding(binding)
-        setmetatable(binding, {__index = baseInputBinding})
-        table.insert(self.InputMap, binding)
-    end
-
-    ---Adds a table of input bindings to the widget's input map
-    ---@param bindings InputBinding[]
-    function UIWidget:AddInputBindings(bindings)
-        for _, binding in ipairs(bindings) do
-if binding.Action then
-    self:AddInputBinding(binding)
+---Checks if the widget is currently focused
+---@return boolean
+function UIWidget:IsFocused()
+    return self.Manager:GetFocusedWidget() == self
 end
+
+---Adds an input binding to the widget's input map table. Best to use this as a base for new bindings to avoid issues with missing fields
+---@param binding InputBinding -- This inherits from 'baseInputBinding', so 'IsShift' and 'IsControl' are false by default. 'MSG' is set to 'KeyEvents.KeyDown'
+function UIWidget:AddInputBinding(binding)
+    setmetatable(binding, { __index = baseInputBinding })
+    table.insert(self.InputMap, binding)
 end
-    end
 
-    ---Base input handler for widgets. Checks the widget's input map for matches
-    ---@param input InputStruct
-    ---@return boolean -- Returns true on success, there by consuming input. On false, input bubbles up until it finds a match
-    function UIWidget:OnHandleInput(input)
-        local key = input:GetKey()
-        
-        for _, binding in ipairs(self.InputMap) do
-            if binding.Action and binding.Key then
-                local msg = input:GetMessageType()
-        if msg == binding.MSG then
-            local key = input:GetKey()
-            if key == binding.Key then
-                local isShift = input:IsShiftDown()
-        local isControl = input:IsControlDown()
-        if isShift == binding.IsShift and isControl == binding.IsControl then
-        return binding.Action(self)
+---Adds a table of input bindings to the widget's input map
+---@param bindings InputBinding[]
+function UIWidget:AddInputBindings(bindings)
+    for _, binding in ipairs(bindings) do
+        if binding.Action then
+            self:AddInputBinding(binding)
         end
     end
-    end
-        end
-    end
-        return false
-    end
+end
 
-    ---Sets the widget's value and triggers OnValueChanged callback + speaks the new value
-    ---@param value string
-    function UIWidget:SetValue(value)
-        if self.OnValueChanged then
-            self:OnValueChanged(value)
-        end
-        self:SpeakElements({"value"})
-    end
+---Base input handler for widgets. Checks the widget's input map for matches
+---@param input InputStruct
+---@return boolean -- Returns true on success, there by consuming input. On false, input bubbles up until it finds a match
+function UIWidget:OnHandleInput(input)
+    local key = input:GetKey()
 
-    ---Builds the widget's speech string honoring per-widget and global SpeechSettings
-    ---@param elements? string[] -- Optional list of element keys. Empty or nil = all canonical elements
-    ---@return string|nil -- Comma-joined speech string, or nil if nothing to speak
-    function UIWidget:BuildSpeech(elements)
-        local info = self:GetInfoStrings()
-        local settings = self.SpeechSettings or {}
-        local globalSettings = self.Manager and self.Manager.CAISettings or {}
-
-        -- Canonical order of speech elements
-        local allKeys = {"label", "role", "value", "position", "state", "tooltip"}
-        local keysToSpeak = (elements and #elements > 0) and elements or allKeys
-
-        local parts = {}
-        for _, key in ipairs(keysToSpeak) do
-            local settingKey = key:sub(1,1):upper() .. key:sub(2)
-            if settings[settingKey] == false then
-                -- Widget-level override: skip
-            else
-                local globalKey = "speak" .. settingKey
-                local globalAllowed = globalSettings[globalKey] == nil or globalSettings[globalKey] == true
-                if globalAllowed and info[key] then
-                    table.insert(parts, info[key])
+    for _, binding in ipairs(self.InputMap) do
+        if binding.Action and binding.Key then
+            local msg = input:GetMessageType()
+            if msg == binding.MSG then
+                local key = input:GetKey()
+                if key == binding.Key then
+                    local isShift = input:IsShiftDown()
+                    local isControl = input:IsControlDown()
+                    if isShift == binding.IsShift and isControl == binding.IsControl then
+                        return binding.Action(self)
+                    end
                 end
             end
         end
+    end
+    return false
+end
 
-        if #parts == 0 then return nil end
-        return table.concat(parts, ", ")
+---Sets the widget's value and triggers OnValueChanged callback + speaks the new value
+---@param value string
+function UIWidget:SetValue(value)
+    if self.OnValueChanged then
+        self:OnValueChanged(value)
+    end
+    self:SpeakElements({ "value" })
+end
+
+---Builds the widget's speech string honoring per-widget and global SpeechSettings
+---@param elements? string[] -- Optional list of element keys. Empty or nil = all canonical elements
+---@return string|nil -- Comma-joined speech string, or nil if nothing to speak
+function UIWidget:BuildSpeech(elements)
+    local info = self:GetInfoStrings()
+    local settings = self.SpeechSettings or {}
+    local globalSettings = self.Manager and self.Manager.CAISettings or {}
+
+    -- Canonical order of speech elements
+    local allKeys = { "label", "role", "value", "position", "state", "tooltip" }
+    local keysToSpeak = (elements and #elements > 0) and elements or allKeys
+
+    local parts = {}
+    for _, key in ipairs(keysToSpeak) do
+        local settingKey = key:sub(1, 1):upper() .. key:sub(2)
+        if settings[settingKey] == false then
+            -- Widget-level override: skip
+        else
+            local globalKey = "speak" .. settingKey
+            local globalAllowed = globalSettings[globalKey] == nil or globalSettings[globalKey] == true
+            if globalAllowed and info[key] then
+                table.insert(parts, info[key])
+            end
+        end
     end
 
-    ---Speaks the widget's info
-    ---@param elements? string[] -- Optional list of element keys to speak. Empty or nil = speak all available elements
-    function UIWidget:SpeakElements(elements)
-        local speech = self:BuildSpeech(elements)
-        if speech then Speak(speech) end
-    end
+    if #parts == 0 then return nil end
+    return table.concat(parts, ", ")
+end
 
-    ---Speaks the currently focused widget's info (legacy shortcut, speaks all elements)
-    function UIWidget:SpeakFocus()
-        self:SpeakElements()
-    end
+---Speaks the widget's info
+---@param elements? string[] -- Optional list of element keys to speak. Empty or nil = speak all available elements
+function UIWidget:SpeakElements(elements)
+    local speech = self:BuildSpeech(elements)
+    if speech then Speak(speech) end
+end
+
+---Speaks the currently focused widget's info (legacy shortcut, speaks all elements)
+function UIWidget:SpeakFocus()
+    self:SpeakElements()
+end
 
 --#Helpers
 

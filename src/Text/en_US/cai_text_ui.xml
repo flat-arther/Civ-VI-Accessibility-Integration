@@ -150,6 +150,129 @@
     <Row Tag="LOC_CAI_EXITED_MOVEMENT_MODE" Language="en_US">
       <Text>Exited movement mode</Text>
     </Row>
+    <Row Tag="LOC_CAI_CITY_PANEL" Language="en_US">
+      <Text>City</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_SUMMARY" Language="en_US">
+      <Text>City summary</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_DETAILS" Language="en_US">
+      <Text>City details</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_ACTIONS" Language="en_US">
+      <Text>City actions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_YIELDS" Language="en_US">
+      <Text>Yield preferences</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_PREVIOUS" Language="en_US">
+      <Text>Previous city</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_NEXT" Language="en_US">
+      <Text>Next city</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_MANAGE_CITIZENS" Language="en_US">
+      <Text>Manage citizens</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_PURCHASE_TILE" Language="en_US">
+      <Text>Purchase tile</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_PURCHASE_GOLD" Language="en_US">
+      <Text>Purchase with gold</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_PURCHASE_FAITH" Language="en_US">
+      <Text>Purchase with faith</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_CHANGE_PRODUCTION" Language="en_US">
+      <Text>Change production</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_STATUS_CAPITAL" Language="en_US">
+      <Text>Capital</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_STATUS_OCCUPIED" Language="en_US">
+      <Text>Occupied</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_POPULATION" Language="en_US">
+      <Text>Population: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COORDS_STRING" Language="en_US">
+      <Text>at {1_X}, {2_Y}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_HEALTH" Language="en_US">
+      <Text>Health: {1_Current} of {2_Total}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_WALLS" Language="en_US">
+      <Text>Walls: {1_Current} of {2_Total}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_NO_WALLS" Language="en_US">
+      <Text>No walls</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_GROWTH_IN_TURNS" Language="en_US">
+      <Text>Growth in {1_Turns} turns</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_STARVING_IN_TURNS" Language="en_US">
+      <Text>Starvation in {1_Turns} turns</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_GROWTH_OCCUPIED" Language="en_US">
+      <Text>No growth while occupied</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_GROWTH_STAGNANT" Language="en_US">
+      <Text>No growth</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_GROWTH_LINE" Language="en_US">
+      <Text>Growth: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_NO_PRODUCTION" Language="en_US">
+      <Text>No current production</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_CURRENT_PRODUCTION" Language="en_US">
+      <Text>{1_Name}, {2_Turns} turns remaining</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_PRODUCTION_LINE" Language="en_US">
+      <Text>Production: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_SECTION_BUILDINGS" Language="en_US">
+      <Text>Buildings</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_SECTION_RELIGION" Language="en_US">
+      <Text>Religion</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_SECTION_AMENITIES" Language="en_US">
+      <Text>Amenities</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_SECTION_HOUSING" Language="en_US">
+      <Text>Housing</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_SECTION_GROWTH" Language="en_US">
+      <Text>Growth</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_SECTION_PRODUCTION" Language="en_US">
+      <Text>Production</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BUILDINGS_COUNT" Language="en_US">
+      <Text>{1_Num} buildings</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_RELIGION_FOLLOWERS" Language="en_US">
+      <Text>{1_Num} followers</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_AMENITIES_SUMMARY" Language="en_US">
+      <Text>{1_Total} total, {2_Net} net, happiness {3_Happiness}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_HOUSING_SUMMARY" Language="en_US">
+      <Text>{1_Population} citizens, {2_Housing} housing</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_PRODUCTION_STATS" Language="en_US">
+      <Text>Production stats: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_YIELD_STATE_NORMAL" Language="en_US">
+      <Text>Normal</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_YIELD_STATE_FAVORED" Language="en_US">
+      <Text>Favored</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_YIELD_STATE_IGNORED" Language="en_US">
+      <Text>Ignored</Text>
+    </Row>
 
     <!-- Edit box -->
     <Row Tag="LOC_CAI_EDIT_EDITING" Language="en_US">
@@ -247,8 +370,144 @@
     <Row Tag="LOC_CAI_PRODUCTION_PURCHASED" Language="en_US">
       <Text>Purchased: {1_Name}</Text>
     </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_QUEUED" Language="en_US">
+      <Text>Queued: {1_Name}</Text>
+    </Row>
     <Row Tag="LOC_CAI_PRODUCTION_QUEUE_REMOVED" Language="en_US">
       <Text>Removed from queue: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_QUEUE_SELECTED" Language="en_US">
+      <Text>Selected queue item: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_QUEUE_UNSELECTED" Language="en_US">
+      <Text>Unselected queue item: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_QUEUE_MOVED_UP" Language="en_US">
+      <Text>Moved up in queue: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_QUEUE_MOVED_DOWN" Language="en_US">
+      <Text>Moved down in queue: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_QUEUE_ALREADY_FIRST" Language="en_US">
+      <Text>Already first in queue: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_QUEUE_ALREADY_LAST" Language="en_US">
+      <Text>Already last in queue: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CURRENT_REMOVED" Language="en_US">
+      <Text>Removed current production: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CURRENT_PROGRESS" Language="en_US">
+      <Text>Current progress</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NEXT_TURN_PROGRESS" Language="en_US">
+      <Text>Next turn progress</Text>
+    </Row>
+
+    <!-- City hotkeys -->
+    <Row Tag="LOC_OPTIONS_HOTKEY_CATEGORY_CITY" Language="en_US">
+      <Text>City</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_ACTION_CITIZENS_GROWTH" Language="en_US">
+      <Text>Citizens and growth</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_TOGGLE_OVERVIEW_TOOLTIP" Language="en_US">
+      <Text>Opens or closes the city overview panel</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OPEN_BUILDINGS_TOOLTIP" Language="en_US">
+      <Text>Opens the buildings breakdown tab</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OPEN_RELIGION_TOOLTIP" Language="en_US">
+      <Text>Opens the religion tab</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OPEN_AMENITIES_TOOLTIP" Language="en_US">
+      <Text>Opens the amenities tab</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OPEN_HOUSING_TOOLTIP" Language="en_US">
+      <Text>Opens the housing tab</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OPEN_CITIZENS_TOOLTIP" Language="en_US">
+      <Text>Opens the citizens and growth tab</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_CHANGE_CITIZEN_YIELD_FOCUS" Language="en_US">
+      <Text>Change citizen yield focus</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_CHANGE_CITIZEN_YIELD_FOCUS_TOOLTIP" Language="en_US">
+      <Text>Opens the citizen yield focus controls</Text>
+    </Row>
+
+    <!-- Selection info hotkeys -->
+    <Row Tag="LOC_CAI_READ_SELECTION_SUMMARY" Language="en_US">
+      <Text>Read selection summary</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_SUMMARY_TOOLTIP" Language="en_US">
+      <Text>Reads the summary for the current selection</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO1" Language="en_US">
+      <Text>Read selection info 1</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO1_TOOLTIP" Language="en_US">
+      <Text>Reads selection info slot 1</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO2" Language="en_US">
+      <Text>Read selection info 2</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO2_TOOLTIP" Language="en_US">
+      <Text>Reads selection info slot 2</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO3" Language="en_US">
+      <Text>Read selection info 3</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO3_TOOLTIP" Language="en_US">
+      <Text>Reads selection info slot 3</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO4" Language="en_US">
+      <Text>Read selection info 4</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO4_TOOLTIP" Language="en_US">
+      <Text>Reads selection info slot 4</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO5" Language="en_US">
+      <Text>Read selection info 5</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO5_TOOLTIP" Language="en_US">
+      <Text>Reads selection info slot 5</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO6" Language="en_US">
+      <Text>Read selection info 6</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO6_TOOLTIP" Language="en_US">
+      <Text>Reads selection info slot 6</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO7" Language="en_US">
+      <Text>Read selection info 7</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO7_TOOLTIP" Language="en_US">
+      <Text>Reads selection info slot 7</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO8" Language="en_US">
+      <Text>Read selection info 8</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO8_TOOLTIP" Language="en_US">
+      <Text>Reads selection info slot 8</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO9" Language="en_US">
+      <Text>Read selection info 9</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO9_TOOLTIP" Language="en_US">
+      <Text>Reads selection info slot 9</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO10" Language="en_US">
+      <Text>Read selection info 10</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READ_SELECTION_INFO10_TOOLTIP" Language="en_US">
+      <Text>Reads selection info slot 10</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SELECTION_ACTIONS" Language="en_US">
+      <Text>Selection actions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SELECTION_ACTIONS_TOOLTIP" Language="en_US">
+      <Text>Opens a list of actions for the current selection</Text>
     </Row>
 
   </LocalizedText>

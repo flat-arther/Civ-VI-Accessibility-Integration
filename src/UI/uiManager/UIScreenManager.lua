@@ -203,7 +203,90 @@ end
 ---@param widget UIWidget
 function UIScreenManager:SetFocus(widget)
     local path = self.BuildFocusPath(widget)
+    self:SetFocusPath(path)
+end
+
+---Applies a prebuilt focus path directly.
+---@param path UIWidget[]|nil
+---@return boolean
+function UIScreenManager:SetFocusPath(path)
+    if not path or #path == 0 then return false end
     self:ApplyFocus(path)
+    return true
+end
+
+---Capture the focused child-index path from a container root down to the
+---current focused descendant.
+---@param root UIWidget
+---@return integer[]|nil
+function UIScreenManager:CaptureFocusIndexPath(root)
+    if not root then return nil end
+
+    local focused = self:GetFocusedWidget()
+    if not focused then return nil end
+
+    local path = {}
+    local node = focused
+    while node and node ~= root do
+        local parent = node.Parent
+        if not parent then return nil end
+        local idx = parent:GetChildIndex(node)
+        if not idx then return nil end
+        table.insert(path, 1, idx)
+        node = parent
+    end
+
+    if node ~= root or #path == 0 then return nil end
+    return path
+end
+
+---Build a full widget focus path from a container root plus child indexes.
+---@param root UIWidget
+---@param indexPath integer[]|nil
+---@return UIWidget[]|nil
+function UIScreenManager:BuildFocusPathFromIndexPath(root, indexPath)
+    if not root or not indexPath or #indexPath == 0 then return nil end
+
+    local path = {}
+    local current = root
+    while current do
+        table.insert(path, 1, current)
+        current = current.Parent
+    end
+
+    local node = root
+    for _, rawIdx in ipairs(indexPath) do
+        if not node.Children or #node.Children == 0 then break end
+
+        local idx = rawIdx
+        if idx < 1 then idx = 1 end
+        if idx > #node.Children then idx = #node.Children end
+
+        local child = node.Children[idx]
+        local hidden = child and child.IsHidden and child:IsHidden() or false
+        if hidden then
+            child = self.WidgetTemplateHelpers:FindVisibleChild(node, idx - 1, 1, true)
+                or self.WidgetTemplateHelpers:FindFirstVisibleChild(node)
+        end
+        if not child then break end
+
+        node.FocusedChild = child
+        table.insert(path, child)
+        node = child
+    end
+
+    return #path > 0 and path or nil
+end
+
+---Build and apply focus from a container root plus child indexes.
+---@param root UIWidget
+---@param indexPath integer[]|nil
+---@return boolean
+function UIScreenManager:SetFocusIndexPath(root, indexPath)
+    if not root or not indexPath or #indexPath == 0 then return false end
+    local path = self:BuildFocusPathFromIndexPath(root, indexPath)
+    if not path then return false end
+    return self:SetFocusPath(path)
 end
 
 ---Global input handler: Calls the widget's local 'OnHandleInput' if any, starting from deepest focused widget

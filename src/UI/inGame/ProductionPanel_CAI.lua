@@ -1,63 +1,50 @@
 include("caiUtils")
 include("ProductionPanel")
-local mgr                      = ExposedMembers.CAI_UIManager
+local mgr                              = ExposedMembers.CAI_UIManager
 
-local LISTMODE                 = { PRODUCTION = 1, PURCHASE_GOLD = 2, PURCHASE_FAITH = 3, PROD_QUEUE = 4 }
+local LISTMODE                         = { PRODUCTION = 1, PURCHASE_GOLD = 2, PURCHASE_FAITH = 3, PROD_QUEUE = 4 }
 
-local TAB_PRODUCTION           = 1
-local TAB_PURCHASE_GOLD        = 2
-local TAB_PURCHASE_FAITH       = 3
-local TAB_QUEUE                = 4
-local TAB_MANAGER              = 5
+local TAB_PRODUCTION                   = 1
+local TAB_PURCHASE_GOLD                = 2
+local TAB_PURCHASE_FAITH               = 3
+local TAB_QUEUE                        = 4
 
-local MAX_QUEUE_SIZE           = 7
+local MAX_QUEUE_SIZE                   = 7
 
-local m_caiPanel               = nil ---@type UIWidget|nil
-local m_caiTabBar              = nil ---@type UIWidget|nil
-local m_caiTabs                = {} ---@type table<number, UIWidget>
-local m_caiTree                = nil ---@type UIWidget|nil
-local m_caiCurrentNode         = nil ---@type UIWidget|nil
-local m_caiQueueNode           = nil ---@type UIWidget|nil
-local m_caiCatDistricts        = nil ---@type UIWidget|nil
-local m_caiCatWonders          = nil ---@type UIWidget|nil
-local m_caiCatBuildings        = nil ---@type UIWidget|nil
-local m_caiCatUnits            = nil ---@type UIWidget|nil
-local m_caiCatProjects         = nil ---@type UIWidget|nil
-local m_caiDetailEdit          = nil ---@type UIWidget|nil
-local m_caiCloseBtn            = nil ---@type UIWidget|nil
+local m_caiPanel                       = nil ---@type UIWidget|nil
+local m_caiTabBar                      = nil ---@type UIWidget|nil
+local m_caiTabs                        = {} ---@type table<number, UIWidget>
+local m_caiTree                        = nil ---@type UIWidget|nil
+local m_caiQueueList                   = nil ---@type UIWidget|nil
+local m_caiCurrentNode                 = nil ---@type UIWidget|nil
+local m_caiQueueNode                   = nil ---@type UIWidget|nil
+local m_caiCatDistricts                = nil ---@type UIWidget|nil
+local m_caiCatWonders                  = nil ---@type UIWidget|nil
+local m_caiCatBuildings                = nil ---@type UIWidget|nil
+local m_caiCatUnits                    = nil ---@type UIWidget|nil
+local m_caiCatProjects                 = nil ---@type UIWidget|nil
+local m_caiDetailEdit                  = nil ---@type UIWidget|nil
+local m_caiCloseBtn                    = nil ---@type UIWidget|nil
 
-local m_caiData                = nil ---@type table|nil
-local m_caiTab                 = TAB_PRODUCTION
-local m_caiOpenPending         = false
-local m_caiRecommended         = {} ---@type table<number, boolean>
+local m_caiData                        = nil ---@type table|nil
+local m_caiTab                         = TAB_PRODUCTION
+local m_caiOpenPending                 = false
+local m_caiRecommended                 = {} ---@type table<number, boolean>
+local m_caiQueueActionActive           = false
+local m_caiQueueFocusIndexAfterRebuild = nil ---@type integer|nil
+local m_caiLastBuiltTab                = nil ---@type integer|nil
+local m_caiLastBuiltCityID             = nil ---@type integer|nil
+local m_caiLastBuiltPlayerID           = nil ---@type integer|nil
+local m_caiLastDetailFocusKey          = nil ---@type string|nil
 
-local m_caiInstanceByHash      = {} ---@type table<number, table>
-local m_caiInstancesByModeHash = {} ---@type table<number, table<number, table>>
-local m_caiWonderList          = nil ---@type table|nil
-local m_caiProjectList         = nil ---@type table|nil
-local m_caiDistrictList        = nil ---@type table|nil
-local m_caiBuildingList        = nil ---@type table|nil
-local m_caiUnitList            = nil ---@type table|nil
-local m_caiCaptureListMode     = nil ---@type integer|nil
-
-function StripMarkup(s)
-    if not s or s == "" then return "" end
-    s = s:gsub("%[ICON_[^%]]*%]", "")
-    s = s:gsub("%[COLOR[^%]]*%]", "")
-    s = s:gsub("%[ENDCOLOR%]", "")
-    s = s:gsub("%[NEWLINE%]", " ")
-    s = s:gsub("%s+", " ")
-    s = s:gsub("^%s+", ""):gsub("%s+$", "")
-    return s
-end
-
-function StripDetailMarkup(s)
-    if not s or s == "" then return "" end
-    s = s:gsub("%[ICON_[^%]]*%]", "")
-    s = s:gsub("%[COLOR[^%]]*%]", "")
-    s = s:gsub("%[ENDCOLOR%]", "")
-    return s
-end
+local m_caiInstanceByHash              = {} ---@type table<number, table>
+local m_caiInstancesByModeHash         = {} ---@type table<number, table<number, table>>
+local m_caiWonderList                  = nil ---@type table|nil
+local m_caiProjectList                 = nil ---@type table|nil
+local m_caiDistrictList                = nil ---@type table|nil
+local m_caiBuildingList                = nil ---@type table|nil
+local m_caiUnitList                    = nil ---@type table|nil
+local m_caiCaptureListMode             = nil ---@type integer|nil
 
 function PlayMenuHover()
     UI.PlaySound("Main_Menu_Mouse_Over")
@@ -67,6 +54,16 @@ function SetDetailText(text)
     if m_caiDetailEdit then
         mgr.WidgetTemplateHelpers:SetEditBoxText(m_caiDetailEdit, text or "")
     end
+end
+
+function SetFocusedDetailText(focusKey, text)
+    if not focusKey then
+        SetDetailText(text)
+        return
+    end
+    if m_caiLastDetailFocusKey == focusKey then return end
+    m_caiLastDetailFocusKey = focusKey
+    SetDetailText(text)
 end
 
 function WithFormationSuffix(name, formation)
@@ -82,7 +79,7 @@ function GetListModeForTab(tab)
     if tab == TAB_PRODUCTION then return LISTMODE.PRODUCTION end
     if tab == TAB_PURCHASE_GOLD then return LISTMODE.PURCHASE_GOLD end
     if tab == TAB_PURCHASE_FAITH then return LISTMODE.PURCHASE_FAITH end
-    if tab == TAB_QUEUE or tab == TAB_MANAGER then return LISTMODE.PROD_QUEUE end
+    if NormalizeCAITab(tab) == TAB_QUEUE then return LISTMODE.PROD_QUEUE end
     return nil
 end
 
@@ -210,14 +207,14 @@ function ReadRowLabel(item, formation)
 
     local parts = {}
     if labelCtrl and labelCtrl.GetText then
-        local t = StripMarkup(labelCtrl:GetText() or "")
+        local t = labelCtrl:GetText() or ""
         if t ~= "" then table.insert(parts, WithFormationSuffix(t, formation)) end
     end
     if m_caiRecommended[item.Hash] and not formation then
         table.insert(parts, Locale.Lookup("LOC_RECOMMENDED"))
     end
     if costCtrl and costCtrl.GetText then
-        local t = StripMarkup(costCtrl:GetText() or "")
+        local t = costCtrl:GetText() or ""
         if t ~= "" then table.insert(parts, t) end
     end
     return table.concat(parts, ", ")
@@ -230,7 +227,7 @@ function ReadRowTooltip(item, formation)
     if formation == "corps" then btn = kInstance.TrainCorpsButton or btn end
     if formation == "army" then btn = kInstance.TrainArmyButton or btn end
     if btn and btn.GetToolTipString then
-        return StripMarkup(btn:GetToolTipString() or "")
+        return btn:GetToolTipString() or ""
     end
     return ""
 end
@@ -243,14 +240,14 @@ function ComposeDetail(item, formation)
     if formation == "army" then btn = kInstance.TrainArmyButton or btn end
     if btn and btn.GetToolTipString then
         local tip = btn:GetToolTipString() or ""
-        if tip ~= "" then return StripDetailMarkup(tip) end
+        if tip ~= "" then return tip end
     end
     return Locale.Lookup(item.Name or "")
 end
 
 function ReadControlText(control)
     if not control or not control.GetText then return "" end
-    return StripMarkup(control:GetText() or "")
+    return control:GetText() or ""
 end
 
 function ReadCurrentProductionLabel()
@@ -271,8 +268,8 @@ function ReadCurrentProductionLabel()
 end
 
 function ReadCurrentProductionTooltip()
-    if Controls.ProductionIcon and Controls.ProductionIcon.GetToolTipString then
-        return StripMarkup(Controls.ProductionIcon:GetToolTipString() or "")
+    if Controls.ProductionIcon and type(Controls.ProductionIcon.GetToolTipString) == "function" then
+        return Controls.ProductionIcon:GetToolTipString() or ""
     end
     return ""
 end
@@ -342,6 +339,53 @@ function BuildItemLeftAction(item, tab, formation)
     end
 end
 
+function SpeakQueuedProduction(item, formation)
+    if not item or not item.Name then return end
+
+    local spokenName = Locale.Lookup(item.Name)
+    if formation == "corps" then
+        spokenName = WithFormationSuffix(spokenName, "corps")
+    elseif formation == "army" then
+        spokenName = WithFormationSuffix(spokenName, "army")
+    end
+
+    if spokenName ~= "" then
+        Speak(Locale.Lookup("LOC_CAI_PRODUCTION_QUEUED", spokenName))
+    end
+end
+
+function BuildItemQueueAction(item, tab, formation)
+    local leftAction = BuildItemLeftAction(item, tab, formation)
+
+    return function()
+        if tab ~= TAB_PRODUCTION then return false end
+
+        local restoreManager = false
+        if type(CloseManager) == "function" then
+            CloseManager()
+        end
+        if type(OpenQueue) == "function" then
+            OpenQueue()
+        else
+            return false
+        end
+
+        m_caiQueueActionActive = true
+        leftAction()
+        m_caiQueueActionActive = false
+
+        if type(CloseQueue) == "function" then
+            CloseQueue()
+        end
+        if restoreManager and type(OpenManager) == "function" then
+            OpenManager()
+        end
+
+        SpeakQueuedProduction(item, formation)
+        return true
+    end
+end
+
 function GetItemsForTab(tab)
     local out = {}
     if not m_caiData then return out end
@@ -378,17 +422,6 @@ function GetItemsForTab(tab)
     return out
 end
 
-function FindNodeByFocusKey(root, focusKey)
-    if not root or not focusKey then return nil end
-    if root._caiFocusKey == focusKey then return root end
-    if not root.Children then return nil end
-    for _, child in ipairs(root.Children) do
-        local found = FindNodeByFocusKey(child, focusKey)
-        if found then return found end
-    end
-    return nil
-end
-
 function CreateActionNode(props)
     local node = mgr:CreateUIWidget("TreeviewItem", {
         GetLabel = props.GetLabel,
@@ -419,6 +452,16 @@ function CreateActionNode(props)
             end,
         })
     end
+    if props.ControlAction then
+        node:AddInputBinding({
+            Key = Keys.VK_RETURN,
+            IsControl = true,
+            Action = function(w)
+                if w.IsDisabled and w:IsDisabled() then return true end
+                return props.ControlAction(w) ~= false
+            end,
+        })
+    end
 
     return node
 end
@@ -435,10 +478,11 @@ function CreateItemRow(item, tab, formation)
             return item.Disabled
         end,
         LeftAction = BuildItemLeftAction(item, tab, formation),
+        ControlAction = tab == TAB_PRODUCTION and BuildItemQueueAction(item, tab, formation) or nil,
         RightAction = function() return InvokeRightClickPedia(item) end,
-        FocusAction = function()
+        FocusAction = function(w)
             PlayMenuHover()
-            SetDetailText(ComposeDetail(item, formation))
+            SetFocusedDetailText((w and w._caiFocusKey) or focusKey, ComposeDetail(item, formation))
         end,
     })
 end
@@ -457,7 +501,7 @@ function AddUnitEntry(parent, unit, tab)
         GetLabel = function()
             local inst = GetInstanceForItem(unit, tab)
             if inst and inst.LabelText and inst.LabelText.GetText then
-                local t = StripMarkup(inst.LabelText:GetText() or "")
+                local t = inst.LabelText:GetText() or ""
                 if t ~= "" then return t end
             end
             return Locale.Lookup(unit.Name or "")
@@ -470,9 +514,10 @@ function AddUnitEntry(parent, unit, tab)
             end
         end,
         RightAction = function() return InvokeRightClickPedia(unit) end,
-        FocusAction = function()
+        FocusAction = function(w)
             PlayMenuHover()
-            SetDetailText(ComposeDetail(unit, nil))
+            SetFocusedDetailText((w and w._caiFocusKey) or string.format("unit-group:%d:%d", tab, unit.Hash or -1),
+                ComposeDetail(unit, nil))
         end,
     })
 
@@ -503,7 +548,6 @@ end
 
 function FillCategoryNode(node, items, tab, isUnits)
     if not node then return end
-    node.FocusedChild = nil
     node:ClearChildren()
     for _, item in ipairs(items or {}) do
         if isUnits then
@@ -516,7 +560,6 @@ end
 
 function FillProductionDistrictsNode(node, districtItems, buildingItems)
     if not node then return end
-    node.FocusedChild = nil
     node:ClearChildren()
     for _, item in ipairs(districtItems or {}) do
         node:AddChild(CreateItemRow(item, TAB_PRODUCTION, nil))
@@ -544,53 +587,241 @@ function MakeQueueEntryDescription(entry)
     return ""
 end
 
-function CreateQueueRowWidget(queueIndex, name)
-    local queueInstance = m_QueueInstanceIM and m_QueueInstanceIM.GetAllocatedInstance
-        and m_QueueInstanceIM:GetAllocatedInstance(queueIndex) or nil
-    local queueTooltip = queueInstance and queueInstance.Top and queueInstance.Top.GetToolTipString
-        and queueInstance.Top:GetToolTipString() or name
+function NormalizeCAITab(tab)
+    -- Older CAI code used a separate manager tab at index 5; map it to queue.
+    if tab == 5 then
+        return TAB_QUEUE
+    end
 
-    local row = CreateActionNode({
-        FocusKey = "queue:" .. tostring(queueIndex),
-        GetLabel = function() return name end,
-        GetTooltip = function() return StripMarkup(queueTooltip or "") end,
-        IsDisabled = function()
-            return queueInstance and queueInstance.Top and queueInstance.Top.IsDisabled and
-                queueInstance.Top:IsDisabled() or false
-        end,
-        LeftAction = function()
-            if queueInstance and queueInstance.Top then
-                OnItemClicked(queueInstance, queueInstance.Top)
+    return tab
+end
+
+function IsQueueModeTab(tab)
+    return NormalizeCAITab(tab) == TAB_QUEUE
+end
+
+function GetQueueEntryName(queueIndex)
+    if not m_caiData or not m_caiData.City then return "" end
+
+    local pBuildQueue = m_caiData.City:GetBuildQueue()
+    if not pBuildQueue then return "" end
+
+    return MakeQueueEntryDescription(pBuildQueue:GetAt(queueIndex))
+end
+
+function GetQueueRowCount()
+    local count = 0
+    if not m_caiData or not m_caiData.City then return count end
+
+    local pBuildQueue = m_caiData.City:GetBuildQueue()
+    if not pBuildQueue then return count end
+
+    for i = 1, MAX_QUEUE_SIZE do
+        if pBuildQueue:GetAt(i) ~= nil then
+            count = i
+        end
+    end
+
+    return count
+end
+
+function GetQueueInstance(queueIndex)
+    if not queueIndex or not m_QueueInstanceIM or not m_QueueInstanceIM.GetAllocatedInstance then
+        return nil
+    end
+    return m_QueueInstanceIM:GetAllocatedInstance(queueIndex)
+end
+
+function GetFocusedQueueRow()
+    local focused = mgr and mgr.GetFocusedWidget and mgr:GetFocusedWidget() or nil
+    if focused and focused._caiQueueIndex then
+        return focused
+    end
+    return nil
+end
+
+function GetFocusedQueueListIndex()
+    if not m_caiQueueList or not m_caiQueueList.Children or not mgr or not mgr.GetFocusedWidget then
+        return nil
+    end
+
+    local focused = mgr:GetFocusedWidget()
+    if not focused then return nil end
+
+    for idx, child in ipairs(m_caiQueueList.Children) do
+        if child == focused then
+            return idx
+        end
+    end
+
+    return nil
+end
+
+function GetCurrentProductionName()
+    if Controls.CurrentProductionName and Controls.CurrentProductionName.GetText then
+        return Controls.CurrentProductionName:GetText() or ""
+    end
+    return ""
+end
+
+function RemoveQueueIndex(queueIndex, name)
+    if queueIndex == nil or queueIndex < 0 then return true end
+
+    m_caiQueueFocusIndexAfterRebuild = GetFocusedQueueListIndex()
+    UI.PlaySound("Play_UI_Click")
+    Speak(Locale.Lookup("LOC_CAI_PRODUCTION_QUEUE_REMOVED", name))
+    RemoveQueueItem(queueIndex)
+    return true
+end
+
+function RemoveFocusedQueueItem()
+    local row = GetFocusedQueueRow()
+    if row and row._caiQueueIndex and row._caiQueueName then
+        return RemoveQueueIndex(row._caiQueueIndex, row._caiQueueName)
+    end
+
+    return false
+end
+
+function MoveQueueSelection(direction)
+    local row = GetFocusedQueueRow()
+    local queueIndex = row and row._caiQueueIndex or -1
+    local rowName = row and row._caiQueueName or ""
+
+    if queueIndex == -1 then return false end
+
+    local targetIndex = queueIndex + direction
+    if targetIndex < 1 or targetIndex > GetQueueRowCount() then
+        if rowName ~= "" then
+            if direction < 0 then
+                Speak(Locale.Lookup("LOC_CAI_PRODUCTION_QUEUE_ALREADY_FIRST", rowName))
+            else
+                Speak(Locale.Lookup("LOC_CAI_PRODUCTION_QUEUE_ALREADY_LAST", rowName))
             end
-        end,
-        RightAction = function()
-            UI.PlaySound("Play_UI_Click")
-            Speak(Locale.Lookup("LOC_CAI_PRODUCTION_QUEUE_REMOVED", name))
-            RemoveQueueItem(queueIndex)
-            return true
-        end,
-        FocusAction = function()
+        end
+        return true
+    end
+
+    m_caiQueueFocusIndexAfterRebuild = targetIndex + 1
+    SwapQueueItem(queueIndex, targetIndex)
+    if rowName ~= "" then
+        if direction < 0 then
+            Speak(Locale.Lookup("LOC_CAI_PRODUCTION_QUEUE_MOVED_UP", rowName))
+        else
+            Speak(Locale.Lookup("LOC_CAI_PRODUCTION_QUEUE_MOVED_DOWN", rowName))
+        end
+    end
+    return true
+end
+
+function RemoveCurrentProductionFromQueue()
+    local name = GetCurrentProductionName()
+    if name == "" then return true end
+
+    m_caiQueueFocusIndexAfterRebuild = GetFocusedQueueListIndex()
+    UI.PlaySound("Play_UI_Click")
+    Speak(Locale.Lookup("LOC_CAI_PRODUCTION_CURRENT_REMOVED", name))
+    RemoveQueueItem(0)
+    return true
+end
+
+function CreateQueueRowWidget(queueIndex, name)
+    local row = mgr:CreateUIWidget("Button", {
+        GetLabel = function() return name end,
+        OnClick = function() return true end,
+        OnFocusEnter = function(w)
             PlayMenuHover()
-            SetDetailText(StripDetailMarkup(queueTooltip or name))
         end,
     })
 
-    row:AddInputBinding({
-        Key = Keys.VK_DELETE,
-        Action = function()
-            UI.PlaySound("Play_UI_Click")
-            Speak(Locale.Lookup("LOC_CAI_PRODUCTION_QUEUE_REMOVED", name))
-            RemoveQueueItem(queueIndex)
-            return true
-        end,
+    row._caiFocusKey = "queue:" .. tostring(queueIndex)
+    row._caiQueueIndex = queueIndex
+    row._caiQueueName = name
+
+    row:AddInputBindings({
+        {
+            Key = Keys.VK_DELETE,
+            Action = function()
+                return RemoveFocusedQueueItem()
+            end,
+        },
+        {
+            Key = Keys.VK_UP,
+            MSG = KeyEvents.KeyDown,
+            IsShift = true,
+            Action = function()
+                return MoveQueueSelection(-1)
+            end,
+        },
+        {
+            Key = Keys.VK_DOWN,
+            MSG = KeyEvents.KeyDown,
+            IsShift = true,
+            Action = function()
+                return MoveQueueSelection(1)
+            end,
+        },
     })
 
     return row
 end
 
+function CreateQueueCurrentWidget()
+    local row = mgr:CreateUIWidget("Button", {
+        GetLabel = ReadCurrentProductionLabel,
+        GetTooltip = ReadCurrentProductionTooltip,
+        OnClick = function() return true end,
+        OnFocusEnter = function()
+            PlayMenuHover()
+            SetFocusedDetailText("current", ReadCurrentProductionTooltip())
+        end,
+    })
+
+    row._caiFocusKey = "current"
+
+    row:AddInputBindings({
+        {
+            Key = Keys.VK_DELETE,
+            Action = function()
+                return RemoveCurrentProductionFromQueue()
+            end,
+        },
+    })
+
+    return row
+end
+
+function RebuildQueueList()
+    if not m_caiQueueList then return end
+
+    local focusIndex = m_caiQueueFocusIndexAfterRebuild or GetFocusedQueueListIndex()
+    m_caiQueueList:ClearChildren()
+
+    m_caiQueueList:AddChild(CreateQueueCurrentWidget())
+
+    if m_caiData and m_caiData.City then
+        local pBuildQueue = m_caiData.City:GetBuildQueue()
+        if pBuildQueue then
+            for i = 1, MAX_QUEUE_SIZE do
+                local entry = pBuildQueue:GetAt(i)
+                if entry then
+                    local desc = MakeQueueEntryDescription(entry)
+                    if desc ~= "" then
+                        m_caiQueueList:AddChild(CreateQueueRowWidget(i, desc))
+                    end
+                end
+            end
+        end
+    end
+
+    if focusIndex and mgr and m_caiPanel and mgr:HasWidget(m_caiPanel) then
+        m_caiQueueList:SetFocusedChild(focusIndex)
+    end
+    m_caiQueueFocusIndexAfterRebuild = nil
+end
+
 function FillQueueNode()
     if not m_caiQueueNode then return end
-    m_caiQueueNode.FocusedChild = nil
     m_caiQueueNode:ClearChildren()
     if not m_caiData or not m_caiData.City then return end
 
@@ -609,13 +840,15 @@ function FillQueueNode()
 end
 
 function ApplyTabVisibility(tab)
+    tab = NormalizeCAITab(tab)
     local isProduction = tab == TAB_PRODUCTION
     local isPurchase = tab == TAB_PURCHASE_GOLD or tab == TAB_PURCHASE_FAITH
     local isQueue = tab == TAB_QUEUE
-    local isManager = tab == TAB_MANAGER
 
+    if m_caiTree then m_caiTree._caiHidden = isQueue end
+    if m_caiQueueList then m_caiQueueList._caiHidden = not isQueue end
     if m_caiCurrentNode then m_caiCurrentNode._caiHidden = not (isProduction or isQueue) end
-    if m_caiQueueNode then m_caiQueueNode._caiHidden = not (isQueue or isManager) end
+    if m_caiQueueNode then m_caiQueueNode._caiHidden = not isQueue end
     if m_caiCatDistricts then m_caiCatDistricts._caiHidden = not (isProduction or isPurchase) end
     if m_caiCatWonders then m_caiCatWonders._caiHidden = not isProduction end
     if m_caiCatBuildings then m_caiCatBuildings._caiHidden = not isPurchase end
@@ -635,7 +868,7 @@ function InvokePrimaryAction(node, leftAction)
         leftAction(node)
         return true
     end
-    if not node.IsLeaf or not node:IsLeaf() then
+    if not node.IsLeaf or (type(node.IsLeaf) == "function" and not node:IsLeaf()) then
         return mgr.WidgetTemplateHelpers:ToggleTreeItem(node)
     end
     return false
@@ -643,7 +876,8 @@ end
 
 function OnTreeExpandOrDescend()
     local item = GetFocusedTreeItem()
-    if not item or item:IsLeaf() then return false end
+    if not item then return false end
+    if type(item.IsLeaf) == "function" and item:IsLeaf() then return false end
     if mgr.WidgetTemplateHelpers:ExpandTreeItem(item) then
         return true
     end
@@ -659,39 +893,69 @@ function OnTreeCollapseOrAscend()
     return mgr.WidgetTemplateHelpers:FocusParentTreeItem(m_caiTree, item)
 end
 
-function RebuildBody()
+function RebuildBody(preserveTreeFocus)
     if not m_caiPanel then return end
 
-    local items = GetItemsForTab(m_caiTab)
-    if m_caiTab == TAB_PRODUCTION then
-        FillProductionDistrictsNode(m_caiCatDistricts, items.Districts, items.Buildings)
-        FillCategoryNode(m_caiCatBuildings, nil, m_caiTab, false)
-    else
-        FillCategoryNode(m_caiCatDistricts, items.Districts, m_caiTab, false)
-        FillCategoryNode(m_caiCatBuildings, items.Buildings, m_caiTab, false)
+    local activeTab = NormalizeCAITab(m_caiTab)
+    if activeTab == TAB_QUEUE then
+        RebuildQueueList()
+        ApplyTabVisibility(activeTab)
+        m_caiLastBuiltTab = activeTab
+        m_caiLastBuiltCityID = m_caiData and m_caiData.City and m_caiData.City:GetID() or nil
+        m_caiLastBuiltPlayerID = m_caiData and m_caiData.Owner or nil
+        m_caiLastDetailFocusKey = nil
+        SetDetailText("")
+        return
     end
-    FillCategoryNode(m_caiCatWonders, items.Wonders, m_caiTab, false)
-    FillCategoryNode(m_caiCatUnits, items.Units, m_caiTab, true)
-    FillCategoryNode(m_caiCatProjects, items.Projects, m_caiTab, false)
-    FillQueueNode()
-    ApplyTabVisibility(m_caiTab)
 
+    local focusPath = nil
+    if preserveTreeFocus ~= false then
+        focusPath = mgr:CaptureFocusIndexPath(m_caiTree)
+    end
+    local items = GetItemsForTab(activeTab)
+    if activeTab == TAB_PRODUCTION then
+        FillProductionDistrictsNode(m_caiCatDistricts, items.Districts, items.Buildings)
+        FillCategoryNode(m_caiCatBuildings, nil, activeTab, false)
+    else
+        FillCategoryNode(m_caiCatDistricts, items.Districts, activeTab, false)
+        FillCategoryNode(m_caiCatBuildings, items.Buildings, activeTab, false)
+    end
+    FillCategoryNode(m_caiCatWonders, items.Wonders, activeTab, false)
+    FillCategoryNode(m_caiCatUnits, items.Units, activeTab, true)
+    FillCategoryNode(m_caiCatProjects, items.Projects, activeTab, false)
+    FillQueueNode()
+    ApplyTabVisibility(activeTab)
+
+    m_caiLastBuiltTab = activeTab
+    m_caiLastBuiltCityID = m_caiData and m_caiData.City and m_caiData.City:GetID() or nil
+    m_caiLastBuiltPlayerID = m_caiData and m_caiData.Owner or nil
+    m_caiLastDetailFocusKey = nil
     SetDetailText("")
+
+    if focusPath and m_caiPanel and mgr and mgr:HasWidget(m_caiPanel) then
+        mgr:SetFocusIndexPath(m_caiTree, focusPath)
+    end
 end
 
 function CreateTabWidget(index, vanillaTabControl, vanillaHandler)
     return mgr:CreateUIWidget("Tab", {
         GetLabel = function()
             if vanillaTabControl and vanillaTabControl.GetText then
-                return StripMarkup(vanillaTabControl:GetText() or "")
+                return vanillaTabControl:GetText() or ""
             end
             return ""
         end,
         OnFocusEnter = function()
             PlayMenuHover()
-            m_caiTab = index
+            local nextTab = NormalizeCAITab(index)
             if vanillaHandler then vanillaHandler() end
-            RebuildBody()
+            if m_caiTab ~= nextTab then
+                m_caiTab = nextTab
+                m_caiLastDetailFocusKey = nil
+                RebuildBody(false)
+            else
+                m_caiTab = nextTab
+            end
         end,
     })
 end
@@ -701,11 +965,25 @@ function MakeCategoryLabel(getListRef, fallback)
         local list = getListRef and getListRef() or nil
         if list and list.Header and list.Header.GetText then
             local t = list.Header:GetText()
-            if t and t ~= "" then return StripMarkup(t) end
+            if t and t ~= "" then return t end
         end
         if type(fallback) == "function" then return fallback() end
+        if fallback == nil then return "" end
         return Locale.Lookup(fallback)
     end
+end
+
+function GetSelectedTabDefaultIndex()
+    local defaultIndex = 1
+
+    for index, tab in ipairs(m_caiTabBar.Children or {}) do
+        if tab == m_caiTabs[m_caiTab] then
+            defaultIndex = index
+            break
+        end
+    end
+
+    return defaultIndex
 end
 
 function CreateCategoryNode(focusKey, getLabel, getListRef, hidable)
@@ -722,9 +1000,9 @@ function CreateCategoryNode(focusKey, getLabel, getListRef, hidable)
             if not list then return end
             if expanded then OnExpand(list) else OnCollapse(list) end
         end,
-        FocusAction = function()
+        FocusAction = function(w)
             PlayMenuHover()
-            SetDetailText(getLabel())
+            SetFocusedDetailText((w and w._caiFocusKey) or focusKey, getLabel())
         end,
     })
 end
@@ -745,11 +1023,11 @@ function EnsurePanelBuilt()
     if m_caiPanel then return end
 
     m_caiPanel = mgr:CreateUIWidget("Panel", {
-        GetLabel = function() return Locale.Lookup("LOC_HUD_CITY_PRODUCTION") end,
+        GetLabel = function() return Locale.Lookup("LOC_HUD_CHOOSE_PRODUCTION") end,
     })
 
     m_caiTabBar = mgr:CreateUIWidget("TabBar", {
-        GetLabel = function() return Locale.Lookup("LOC_HUD_CITY_PRODUCTION") end,
+        GetLabel = function() return Locale.Lookup("LOC_HUD_CHOOSE_PRODUCTION") end,
     })
     m_caiPanel:AddChild(m_caiTabBar)
 
@@ -758,7 +1036,6 @@ function EnsurePanelBuilt()
     m_caiTabs[TAB_PURCHASE_FAITH] = CreateTabWidget(TAB_PURCHASE_FAITH, Controls.PurchaseFaithTab,
         OnTabChangePurchaseFaith)
     m_caiTabs[TAB_QUEUE] = CreateTabWidget(TAB_QUEUE, Controls.QueueTab, OnTabChangeQueue)
-    m_caiTabs[TAB_MANAGER] = CreateTabWidget(TAB_MANAGER, Controls.ManagerTab, OnTabChangeManager)
 
     m_caiTabBar:AddChild(m_caiTabs[TAB_PRODUCTION])
     if GameCapabilities.HasCapability("CAPABILITY_GOLD") then
@@ -769,11 +1046,12 @@ function EnsurePanelBuilt()
     end
     if CurrentTabSupportsQueue() then
         m_caiTabBar:AddChild(m_caiTabs[TAB_QUEUE])
-        m_caiTabBar:AddChild(m_caiTabs[TAB_MANAGER])
     end
+    m_caiTabBar.DefaultIndex = GetSelectedTabDefaultIndex()
 
     m_caiTree = mgr:CreateUIWidget("Treeview", {
-        GetLabel = function() return Locale.Lookup("LOC_HUD_CITY_PRODUCTION") end,
+        GetLabel = function() return Locale.Lookup("LOC_HUD_CHOOSE_PRODUCTION") end,
+        IsHidden = function(w) return w._caiHidden end,
     })
     m_caiTree:AddInputBindings({
         {
@@ -792,8 +1070,43 @@ function EnsurePanelBuilt()
                     OnTreeCollapseOrAscend()
             end
         },
+        {
+            Key = Keys.VK_DELETE,
+            Action = function()
+                local focused = GetFocusedTreeItem()
+                if focused == m_caiCurrentNode then
+                    return RemoveCurrentProductionFromQueue()
+                end
+                if not IsQueueModeTab(m_caiTab) then return false end
+                return RemoveFocusedQueueItem()
+            end,
+        },
+        {
+            Key = Keys.VK_UP,
+            MSG = KeyEvents.KeyDown,
+            IsShift = true,
+            Action = function()
+                if not IsQueueModeTab(m_caiTab) then return false end
+                return MoveQueueSelection(-1)
+            end,
+        },
+        {
+            Key = Keys.VK_DOWN,
+            MSG = KeyEvents.KeyDown,
+            IsShift = true,
+            Action = function()
+                if not IsQueueModeTab(m_caiTab) then return false end
+                return MoveQueueSelection(1)
+            end,
+        },
     })
     m_caiPanel:AddChild(m_caiTree)
+
+    m_caiQueueList = mgr:CreateUIWidget("List", {
+        GetLabel = function() return Locale.Lookup("LOC_CAI_PRODUCTION_QUEUE_LIST") end,
+        IsHidden = function(w) return w._caiHidden end,
+    })
+    m_caiPanel:AddChild(m_caiQueueList)
 
     m_caiCurrentNode = mgr:CreateUIWidget("TreeviewItem", {
         GetLabel = ReadCurrentProductionLabel,
@@ -801,8 +1114,7 @@ function EnsurePanelBuilt()
         IsHidden = function(w) return w._caiHidden end,
         OnFocusEnter = function()
             PlayMenuHover()
-            SetDetailText(StripDetailMarkup((Controls.ProductionIcon and Controls.ProductionIcon.GetToolTipString and Controls.ProductionIcon:GetToolTipString()) or
-                ""))
+            SetFocusedDetailText("current-tree", ReadCurrentProductionTooltip())
         end,
     })
     m_caiCurrentNode._caiFocusKey = "current"
@@ -817,11 +1129,9 @@ function EnsurePanelBuilt()
         end,
     })
     m_caiCurrentNode:AddInputBinding({
-        Key = Keys.VK_RETURN,
-        IsShift = true,
+        Key = Keys.VK_DELETE,
         Action = function()
-            RemoveQueueItem(0)
-            return true
+            return RemoveCurrentProductionFromQueue()
         end,
     })
     m_caiTree:AddChild(m_caiCurrentNode)
@@ -834,9 +1144,9 @@ function EnsurePanelBuilt()
             if w._caiHidden then return true end
             return not w.Children or #w.Children == 0
         end,
-        FocusAction = function()
+        FocusAction = function(w)
             PlayMenuHover()
-            SetDetailText(Locale.Lookup("LOC_CAI_PRODUCTION_QUEUE_LIST"))
+            SetFocusedDetailText((w and w._caiFocusKey) or "queue-root", Locale.Lookup("LOC_CAI_PRODUCTION_QUEUE_LIST"))
         end,
     })
     m_caiTree:AddChild(m_caiQueueNode)
@@ -844,7 +1154,7 @@ function EnsurePanelBuilt()
     m_caiCatDistricts = CreateCategoryNode(
         "cat:districts",
         MakeCategoryLabel(function() return m_caiDistrictList end, function()
-            if m_caiTab == TAB_PRODUCTION then
+            if NormalizeCAITab(m_caiTab) == TAB_PRODUCTION then
                 return Locale.Lookup("LOC_HUD_DISTRICTS_BUILDINGS")
             end
             return Locale.Lookup("LOC_HUD_DISTRICTS")
@@ -898,9 +1208,9 @@ function EnsurePanelBuilt()
 
     m_caiCloseBtn = mgr:CreateUIWidget("Button", {
         GetLabel = function()
-            if Controls.CloseButton and Controls.CloseButton.GetToolTipString then
+            if Controls.CloseButton and type(Controls.CloseButton.GetToolTipString) == "function" then
                 local tip = Controls.CloseButton:GetToolTipString()
-                if tip and tip ~= "" then return StripMarkup(tip) end
+                if tip and tip ~= "" then return tip end
             end
             return Locale.Lookup("LOC_HUD_CLOSE")
         end,
@@ -909,11 +1219,19 @@ function EnsurePanelBuilt()
     })
     m_caiPanel:AddChild(m_caiCloseBtn)
 
-    ApplyTabVisibility(m_caiTab)
+    ApplyTabVisibility(NormalizeCAITab(m_caiTab))
 end
 
 function OnPanelOpenedCAI()
+    if m_CurrentListMode == LISTMODE.PROD_QUEUE then
+        m_caiTab = TAB_QUEUE
+    else
+        m_caiTab = NormalizeCAITab(m_caiTab)
+    end
     EnsurePanelBuilt()
+    if m_caiTabBar then
+        m_caiTabBar.DefaultIndex = GetSelectedTabDefaultIndex()
+    end
     if mgr:HasWidget(m_caiPanel) then return end
     m_caiOpenPending = true
 end
@@ -926,6 +1244,7 @@ function OnPanelClosedCAI()
     m_caiTabBar = nil
     m_caiTabs = {}
     m_caiTree = nil
+    m_caiQueueList = nil
     m_caiCurrentNode = nil
     m_caiQueueNode = nil
     m_caiCatDistricts = nil
@@ -946,6 +1265,10 @@ function OnPanelClosedCAI()
     m_caiInstancesByModeHash = {}
     m_caiCaptureListMode = nil
     m_caiOpenPending = false
+    m_caiLastBuiltTab = nil
+    m_caiLastBuiltCityID = nil
+    m_caiLastBuiltPlayerID = nil
+    m_caiLastDetailFocusKey = nil
 end
 
 PopulateGenericItemData = WrapFunc(PopulateGenericItemData, function(orig, kInstance, kItem)
@@ -1019,7 +1342,17 @@ View = WrapFunc(View, function(orig, data)
     orig(data)
     RefreshRecommendations()
     EnsurePanelBuilt()
-    RebuildBody()
+    local activeTab = NormalizeCAITab(m_caiTab)
+    local cityID = data and data.City and data.City:GetID() or nil
+    local ownerID = data and data.Owner or nil
+    local shouldRebuild = activeTab == TAB_QUEUE
+        or m_caiLastBuiltTab ~= activeTab
+        or m_caiLastBuiltCityID ~= cityID
+        or m_caiLastBuiltPlayerID ~= ownerID
+
+    if shouldRebuild then
+        RebuildBody()
+    end
 
     if m_caiOpenPending and m_caiPanel and mgr and not mgr:HasWidget(m_caiPanel) then
         m_caiOpenPending = false
@@ -1029,30 +1362,18 @@ end)
 
 RefreshQueue = WrapFunc(RefreshQueue, function(orig, playerID, cityID)
     orig(playerID, cityID)
-    if m_caiPanel and mgr and mgr:HasWidget(m_caiPanel) and (m_caiTab == TAB_QUEUE or m_caiTab == TAB_MANAGER) then
-        RebuildBody()
-    end
 end)
 
 OnManagerSelectedIndexChanged = WrapFunc(OnManagerSelectedIndexChanged, function(orig, newIndex)
     orig(newIndex)
-    if m_caiPanel and mgr and mgr:HasWidget(m_caiPanel) and m_caiTab == TAB_MANAGER then
-        RebuildBody()
-    end
 end)
 
-OnItemClicked = WrapFunc(OnItemClicked, function(orig, kParentControl, kButtonControl)
-    orig(kParentControl, kButtonControl)
-    if m_caiPanel and mgr and mgr:HasWidget(m_caiPanel) and (m_caiTab == TAB_QUEUE or m_caiTab == TAB_MANAGER) then
-        RebuildBody()
-    end
+SwapQueueItem = WrapFunc(SwapQueueItem, function(orig, fromIndex, toIndex)
+    return orig(fromIndex, toIndex)
 end)
 
-DeselectItem = WrapFunc(DeselectItem, function(orig)
-    orig()
-    if m_caiPanel and mgr and mgr:HasWidget(m_caiPanel) and (m_caiTab == TAB_QUEUE or m_caiTab == TAB_MANAGER) then
-        RebuildBody()
-    end
+RemoveQueueItem = WrapFunc(RemoveQueueItem, function(orig, queueIndex)
+    return orig(queueIndex)
 end)
 
 OnCorpsToggle = WrapFunc(OnCorpsToggle, function(orig, unitList, unitListing)
@@ -1063,43 +1384,37 @@ OnCorpsToggle = WrapFunc(OnCorpsToggle, function(orig, unitList, unitListing)
 end)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
-    if mgr then
-        Speak(ContextPtr:GetID())
-        local panelWasOnStack = m_caiPanel and mgr:HasWidget(m_caiPanel)
-        if mgr:HandleInput(pInputStruct) then
-            if panelWasOnStack and not mgr:HasWidget(m_caiPanel) then
-                Close()
-            end
-            return true
-        end
+    local handled = (mgr and mgr:HandleInput(pInputStruct)) or false
+    if handled then
+        return true
     end
     return orig(pInputStruct)
 end)
 ContextPtr:SetInputHandler(OnInputHandler, true)
 
 BuildBuilding = WrapFunc(BuildBuilding, function(orig, city, entry)
-    if entry and entry.Name then
+    if not m_caiQueueActionActive and entry and entry.Name then
         Speak(Locale.Lookup("LOC_CAI_PRODUCTION_CHOSEN", Locale.Lookup(entry.Name)))
     end
     return orig(city, entry)
 end)
 
 ZoneDistrict = WrapFunc(ZoneDistrict, function(orig, city, entry)
-    if entry and entry.Name then
+    if not m_caiQueueActionActive and entry and entry.Name then
         Speak(Locale.Lookup("LOC_CAI_PRODUCTION_CHOSEN", Locale.Lookup(entry.Name)))
     end
     return orig(city, entry)
 end)
 
 BuildUnit = WrapFunc(BuildUnit, function(orig, city, entry)
-    if entry and entry.Name then
+    if not m_caiQueueActionActive and entry and entry.Name then
         Speak(Locale.Lookup("LOC_CAI_PRODUCTION_CHOSEN", Locale.Lookup(entry.Name)))
     end
     return orig(city, entry)
 end)
 
 BuildUnitCorps = WrapFunc(BuildUnitCorps, function(orig, city, entry)
-    if entry and entry.Name then
+    if not m_caiQueueActionActive and entry and entry.Name then
         local n = WithFormationSuffix(Locale.Lookup(entry.Name), "corps")
         Speak(Locale.Lookup("LOC_CAI_PRODUCTION_CHOSEN", n))
     end
@@ -1107,7 +1422,7 @@ BuildUnitCorps = WrapFunc(BuildUnitCorps, function(orig, city, entry)
 end)
 
 BuildUnitArmy = WrapFunc(BuildUnitArmy, function(orig, city, entry)
-    if entry and entry.Name then
+    if not m_caiQueueActionActive and entry and entry.Name then
         local n = WithFormationSuffix(Locale.Lookup(entry.Name), "army")
         Speak(Locale.Lookup("LOC_CAI_PRODUCTION_CHOSEN", n))
     end
@@ -1115,7 +1430,7 @@ BuildUnitArmy = WrapFunc(BuildUnitArmy, function(orig, city, entry)
 end)
 
 AdvanceProject = WrapFunc(AdvanceProject, function(orig, city, entry)
-    if entry and entry.Name then
+    if not m_caiQueueActionActive and entry and entry.Name then
         Speak(Locale.Lookup("LOC_CAI_PRODUCTION_CHOSEN", Locale.Lookup(entry.Name)))
     end
     return orig(city, entry)
@@ -1170,6 +1485,5 @@ end
 if Events then
     if Events.CityProductionChanged then Events.CityProductionChanged.Add(RefreshIfOpen) end
     if Events.CityProductionUpdated then Events.CityProductionUpdated.Add(RefreshIfOpen) end
-    if Events.CityProductionQueueChanged then Events.CityProductionQueueChanged.Add(RefreshIfOpen) end
     if Events.CityWorkersChanged then Events.CityWorkersChanged.Add(RefreshIfOpen) end
 end

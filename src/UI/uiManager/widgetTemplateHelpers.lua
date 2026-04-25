@@ -56,22 +56,28 @@ function WidgetTemplateHelpers:CreatePopupDialog(popup)
             })
         elseif type == "EditBox" then
             w = mgr:CreateUIWidget("Edit", {
-                GetLabel = function()
+                GetLabel     = function()
                     local p = item.Control:GetParent()
                     if not p or not p.EditLabel then return "" end
                     return p.EditLabel:GetText() or ""
                 end,
-                GetValue = function() return item.Control:GetText() end,
-                OnSetText = function(w, text) item.Control:SetText(text) end,
-                OnCommit  = function(w, text) item.Control:SetText(text) end,
+                GetValue     = function() return item.Control:GetText() end,
+                OnSetText    = function(w, text) item.Control:SetText(text) end,
+                OnCommit     = function(w, text) item.Control:SetText(text) end,
                 OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end
             })
         elseif type == "Count" then
             w = mgr:CreateUIWidget("StaticText", {
                 GetLabel = function()
-                    local p = item.Control:GetParent()
-                    if not p or not p.Text then return "" end
-                    local text = p.Text:GetText()
+                    local val = nil
+                    for _, child in ipairs(item.Control:GetChildren()) do
+                        if child:GetID() == "Text" then
+                            val = child;
+                            break;
+                        end
+                    end
+                    if not val then return "" end
+                    local text = val:GetText()
                     return Locale.Lookup("LOC_CAI_DIALOG_COUNT", text) or ""
                 end,
                 OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end
@@ -115,7 +121,7 @@ function WidgetTemplateHelpers:MakeGeneralDialog(titleFunc, actionButtons, dlgCo
     })
     d:AddInputBindings({
         { Key = Keys.VK_UP,   MSG = KeyEvents.KeyDown, Action = function(w) return w:Navigate(-1) end },
-        { Key = Keys.VK_DOWN, MSG = KeyEvents.KeyDown, Action = function(w) return w:Navigate(1)  end }
+        { Key = Keys.VK_DOWN, MSG = KeyEvents.KeyDown, Action = function(w) return w:Navigate(1) end }
     })
     local buttonRow = mgr:CreateUIWidget("Panel", {
         WrapAround = false,
@@ -124,7 +130,7 @@ function WidgetTemplateHelpers:MakeGeneralDialog(titleFunc, actionButtons, dlgCo
     })
     buttonRow:AddInputBindings({
         { Key = Keys.VK_LEFT,  MSG = KeyEvents.KeyDown, Action = function(w) return w:Navigate(-1) end },
-        { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown, Action = function(w) return w:Navigate(1)  end },
+        { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown, Action = function(w) return w:Navigate(1) end },
     })
     if dlgContent and #dlgContent > 0 then
         d:AddChildren(dlgContent)
@@ -236,6 +242,9 @@ end
 function WidgetTemplateHelpers:GetContainerDefChild(w)
     if not w.Children or #w.Children == 0 then return end
     if w.FocusedChild then return w.FocusedChild end
+    local defaultIndex = w.DefaultIndex or 1
+    local child = self:FindVisibleChild(w, defaultIndex - 1, 1, true)
+    if child then return child end
     return self:FindFirstVisibleChild(w)
 end
 
@@ -292,7 +301,9 @@ function WidgetTemplateHelpers:NavigateTreeFlat(root, direction)
     local node = current
     while node and not curIdx do
         for i, item in ipairs(flat) do
-            if item == node then curIdx = i; break end
+            if item == node then
+                curIdx = i; break
+            end
         end
         node = node.Parent
     end

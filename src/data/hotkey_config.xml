@@ -2,6 +2,7 @@
 <GameInfo>
   <InputCategories>
     <Row CategoryId="CAI" Name="LOC_OPTIONS_HOTKEY_CATEGORY_CAI" Visible="1" SortIndex="0" />
+    <Row CategoryId="CITY" Name="LOC_OPTIONS_HOTKEY_CATEGORY_CITY" Visible="1" SortIndex="0" />
   </InputCategories>
 
   <InputActions>
@@ -15,15 +16,50 @@
     <Row ActionId="PlotInfo8" Name="LOC_CAI_PLOTINFO8" Description="LOC_CAI_PLOTINFO8_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotInfo9" Name="LOC_CAI_PLOTINFO9" Description="LOC_CAI_PLOTINFO9_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotInfo10" Name="LOC_CAI_PLOTINFO10" Description="LOC_CAI_PLOTINFO10_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionSummary" Name="LOC_CAI_READ_SELECTION_SUMMARY" Description="LOC_CAI_READ_SELECTION_SUMMARY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo1" Name="LOC_CAI_READ_SELECTION_INFO1" Description="LOC_CAI_READ_SELECTION_INFO1_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo2" Name="LOC_CAI_READ_SELECTION_INFO2" Description="LOC_CAI_READ_SELECTION_INFO2_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo3" Name="LOC_CAI_READ_SELECTION_INFO3" Description="LOC_CAI_READ_SELECTION_INFO3_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo4" Name="LOC_CAI_READ_SELECTION_INFO4" Description="LOC_CAI_READ_SELECTION_INFO4_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo5" Name="LOC_CAI_READ_SELECTION_INFO5" Description="LOC_CAI_READ_SELECTION_INFO5_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo6" Name="LOC_CAI_READ_SELECTION_INFO6" Description="LOC_CAI_READ_SELECTION_INFO6_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo7" Name="LOC_CAI_READ_SELECTION_INFO7" Description="LOC_CAI_READ_SELECTION_INFO7_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo8" Name="LOC_CAI_READ_SELECTION_INFO8" Description="LOC_CAI_READ_SELECTION_INFO8_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo9" Name="LOC_CAI_READ_SELECTION_INFO9" Description="LOC_CAI_READ_SELECTION_INFO9_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo10" Name="LOC_CAI_READ_SELECTION_INFO10" Description="LOC_CAI_READ_SELECTION_INFO10_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SelectionActions" Name="LOC_CAI_SELECTION_ACTIONS" Description="LOC_CAI_SELECTION_ACTIONS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="InterfaceWidgetPrimaryAction" Name="LOC_CAI_INTERFACE_PRIMARY_ACTION" Description="LOC_CAI_INTERFACE_PRIMARY_ACTION_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SharedEndTurn" Name="LOC_CAI_END_TURN" Description="LOC_CAI_END_TURN_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UnitPathInfo" Name="LOC_CAI_MOVE_INFO" Description="LOC_CAI_MOVE_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityToggleOverview" Name="LOC_HUD_CITY_TOGGLE_OVERVIEW" Description="LOC_CAI_CITY_TOGGLE_OVERVIEW_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityOpenBuildings" Name="LOC_HUD_CITY_BUILDINGS" Description="LOC_CAI_CITY_OPEN_BUILDINGS_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityOpenReligion" Name="LOC_HUD_CITY_RELIGIOUS_CITIZENS" Description="LOC_CAI_CITY_OPEN_RELIGION_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityOpenAmenities" Name="LOC_HUD_CITY_AMENITIES" Description="LOC_CAI_CITY_OPEN_AMENITIES_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityOpenHousing" Name="LOC_HUD_CITY_HOUSING" Description="LOC_CAI_CITY_OPEN_HOUSING_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityOpenCitizens" Name="LOC_CAI_CITY_ACTION_CITIZENS_GROWTH" Description="LOC_CAI_CITY_OPEN_CITIZENS_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityPurchaseTile" Name="LOC_HUD_CITY_PURCHASE_TILE" Description="LOC_HUD_CITY_PURCHASE_TILE" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityManageCitizens" Name="LOC_HUD_CITY_MANAGE_CITIZENS" Description="LOC_HUD_CITY_MANAGE_CITIZENS" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityPurchaseWithGold" Name="LOC_HUD_CITY_PURCHASE_WITH_GOLD" Description="LOC_HUD_CITY_PURCHASE_WITH_GOLD" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityPurchaseWithFaith" Name="LOC_HUD_CITY_PURCHASE_WITH_FAITH" Description="LOC_HUD_CITY_PURCHASE_WITH_FAITH" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityChangeProduction" Name="LOC_HUD_CITY_CHANGE_PRODUCTION" Description="LOC_HUD_CITY_CHANGE_PRODUCTION" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityChangeCitizenYieldFocus" Name="LOC_CAI_CITY_CHANGE_CITIZEN_YIELD_FOCUS" Description="LOC_CAI_CITY_CHANGE_CITIZEN_YIELD_FOCUS_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
   </InputActions>
 
   <InputActionDefaultGestures>
-  <Row ActionId="InterfaceWidgetPrimaryAction" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_RETURN" />
-  <Row ActionId="SharedEndTurn" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SPACE" />
-  <Row ActionId="UnitPathInfo" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_D" />
+    <Row ActionId="ReadSelectionSummary" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_TILDE" />
+    <Row ActionId="ReadSelectionInfo1" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_1" />
+    <Row ActionId="ReadSelectionInfo2" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_2" />
+    <Row ActionId="ReadSelectionInfo3" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_3" />
+    <Row ActionId="ReadSelectionInfo4" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_4" />
+    <Row ActionId="ReadSelectionInfo5" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_5" />
+    <Row ActionId="ReadSelectionInfo6" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_6" />
+    <Row ActionId="ReadSelectionInfo7" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_7" />
+    <Row ActionId="ReadSelectionInfo8" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_8" />
+    <Row ActionId="ReadSelectionInfo9" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_9" />
+    <Row ActionId="ReadSelectionInfo10" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_0" />
+    <Row ActionId="InterfaceWidgetPrimaryAction" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_RETURN" />
+    <Row ActionId="SharedEndTurn" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SPACE" />
+    <Row ActionId="UnitPathInfo" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_D" />
     <Row ActionId="PlotInfo1" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_1" />
     <Row ActionId="PlotInfo2" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_2" />
     <Row ActionId="PlotInfo3" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_3" />

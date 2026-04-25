@@ -37,7 +37,7 @@ end
 ---@param overrides table
 ---@return table
 function HijackTable(originalTable, overrides)
-    if not originalTable then 
+    if not originalTable then
         print("Error: originalTable cannot be nil")
         return originalTable
     end
@@ -68,3 +68,18 @@ function GetKeys(tbl)
     return list
 end
 
+---Returns a list of input action ids given a category string
+---@param cat string
+---@return number[]
+function GetInputActionsByCategory(cat)
+    local count = Input.GetActionCount()
+    local actions = {}
+    for i = 0, count - 1, 1 do
+        local action = Input.GetActionId(i);
+        local category = Input.GetActionCategory(action)
+        if category == cat and Input then
+            table.insert(actions, action)
+        end
+    end
+    return actions
+end

@@ -14,9 +14,6 @@ local caiInfo            = ExposedMembers.CAIInfo
 --- Most actions should only execute when the game view widget is focused; however, there might be exceptions
 ---@type table<number, fun(w:UIWidget)>
 local SharedInputActions = {
-	[Input.GetActionId("SharedEndTurn")] = function(w)
-		LuaEvents.CAIEndTurn()
-	end,
 	[Input.GetActionId("UnitPathInfo")] = function(w)
 		local unit = UI.GetHeadSelectedUnit()
 		if not unit then return end

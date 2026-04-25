@@ -157,6 +157,7 @@ Shared global table for cross-context communication:
 - `ExposedMembers.CAI_UIManager` — the UIScreenManager singleton
 - `ExposedMembers.CAICursor` — the navigation cursor object
 - `ExposedMembers.CAICursorOverrides` — cursor coordinate override functions
+- `ExposedMembers.CAI_MainGamePanel` — the root in-world CAI game panel created by `WorldInput_CAI.lua`; in-world HUD accessibility layers can attach themselves with `AddChild(...)` instead of pushing a separate screen
 
 ## CAI Custom API
 
@@ -174,6 +175,62 @@ Wrapper for `CAI.output`. Use this for all TTS output.
 
 - Included Civ VI Lua panel files expose their top-level functions directly in the current chunk after `include("...")`, so wrappers can usually reassign names like `PopulateWonders = WrapFunc(PopulateWonders, ...)`.
 - Do not rely on `_G` or `rawget(_G, ...)` for panel helper discovery in Civ VI UI contexts. These globals are not consistently available/mod-safe in this project; prefer explicit one-by-one capture/wrapping of the functions you need.
+- Tutorial input locking:
+  - `TutorialScenarioBase.lua` starts the tutorial with `Input.SetActiveContext(InputContext.Tutorial)`.
+  - `TutorialUIRoot.lua` installs `ContextPtr:SetInputHandler(OnInput, true)`, so it receives all input during tutorial flow. Its normal handler only handles debug keys and Escape, but the tutorial system also drives `UITutorialManager` overlays/control filtering.
+  - `AdvisorPopup.lua` also installs `ContextPtr:SetInputHandler(OnInputHandler, true)`. When `AdvisorBase` or `MetaBase` is visible, `IsBlockingInput()` returns true, so `OnInputHandler()` consumes most input. Escape is special-cased to fire `LuaEvents.Tutorial_ToggleInGameOptionsMenu()`.
+  - `AdvisorPopup.lua` calls `UITutorialManager:SetActiveAlways(isAdvisorVisible)` and `UITutorialManager:EnableOverlay(isAdvisorVisible)` from show/hide handlers. While the advisor is visible, normal UI controls do not get input.
+  - Detailed tutorial steps call `RaiseDetailedTutorial(item)`, which shows only the tutorial-triggered controls and calls `UITutorialManager:EnableControlsByIdOrTag(...)` for the item `EnabledControls`. Other controls may be blocked by the tutorial overlay even when the advisor popup is hidden.
+  - In the base tutorial `OPEN_CITY_PANEL` item, the only explicitly enabled target is the city panel `ChangeProductionCheck`, and completion is `CityPanel_ProductionOpen` -> `ProductionPanelViaCityOpen`. This is why normal arrow/Escape navigation can appear stolen until that control is activated.
+- `ProductionPanel.lua` queue selection is a single-item pick-up mode, not multi-select:
+  - the real selected queue item is local `m_kSelectedQueueItem = { Parent, Button, Index }`
+  - `OnItemClicked(parent, button)` selects when `Index == -1`, swaps with the clicked queue index when another item is selected, or deselects when clicking the same item
+  - `HighlightButtons(true)` calls `SetSelected(true)` on current production and every valid queue slot, so `control:IsSelected()` means "queue selection mode is active", not "this exact row is selected"
+  - `RefreshQueue(...)` starts with `DeselectItem()`, so queue rebuilds intentionally clear vanilla selection
+- `ProductionManager.lua` is the separate multi-queue UI context opened by `ProductionPanel.lua` Manager tab:
+  - `OnTabChangeManager()` calls `OpenManager()`, which broadcasts `LuaEvents.ProductionPanel_OpenManager()`
+  - `ProductionManager.lua` listens for `ProductionPanel_OpenManager`, `ProductionPanel_CloseManager`, `ProductionPanel_ProductionClicked`, and `ProductionPanel_CancelManagerSelection`
+  - it owns `Controls.FilterPulldown`, `Controls.CityStack`, per-city `CityInstance` rows, per-city `CurrentProductionGrid`, per-city queue slots, and per-city `TrashButton`
+  - `SetupFilters()` creates sort entries with `Controls.FilterPulldown:BuildEntry("FilterItemInstance", controlTable)`; each entry button calls `Refresh(sortFunc, name)`
+  - built-in sort filters are founding order, city name, and population
+- `CityPanel.lua` exposes the live selected-city data table as local `m_kData` inside the included chunk, so a wrapper can read the same live data after wrapping `Refresh()`.
+- `CitySupport.lua` exposes `GetCityData(city)`, and `CityPanel.lua` includes `CitySupport`, so `CityPanel_CAI.lua` can request fresh city data without wrapping `Refresh()`.
+- `CityManager.GetCity(playerID, cityID)` is available in UI context and can resolve a city for helper-based city info requests.
+- `CityPanel_CAI.lua` now extends `ExposedMembers.CAIInfo` with:
+  - `CityInfo` helper table (`Summary`, `BuildingCount`, `ReligiousFollowersCount`, `AmenitiesSummary`, `HousingSummary`, `GrowthSummary`, `ProductionSummary`, `VisibleYields`, `NormalFocusYields`, `FavoredFocusYields`, `IgnoredFocusYields`)
+  - `RequestCityInfo(cityOrCityID, requestedKeys, playerID)` which defaults to the currently selected city when no city is passed
+- `CityPanel_CAI.lua` now builds city info from `GetCityData(city)` using the same vanilla loc keys / string assembly patterns as `CityPanel.lua`; it does not read back from UI controls or call `ViewMain(data)`.
+- City growth / production helpers can also expose the visible progress-bar state from `GetCityData(city)`:
+  - growth: `CurrentFoodPercent`, `FoodPercentNextTurn`
+  - production: `CurrentProdPercent`, `ProdPercentNextTurn`
+- Vanilla does not appear to provide clean city-panel loc tags for labeling those two percentage values as speech output, so `CityPanel_CAI.lua` uses CAI loc tags for:
+  - `LOC_CAI_CURRENT_PROGRESS`
+  - `LOC_CAI_NEXT_TURN_PROGRESS`
+- `CityPanel_CAI.lua` also listens to `Events.InputActionTriggered(actionId)` and uses an action-id-to-helper map instead of an `if` / `elseif` chain.
+- Current city selection hotkey mapping in `src/data/hotkey_config.xml`:
+  - `ReadSelectionSummary` -> `Summary`
+  - `ReadSelectionInfo1` -> `BuildingCount`
+  - `ReadSelectionInfo2` -> `ReligiousFollowersCount`
+  - `ReadSelectionInfo3` -> `AmenitiesSummary`
+  - `ReadSelectionInfo4` -> `HousingSummary`
+  - `ReadSelectionInfo5` -> `GrowthSummary`
+  - `ReadSelectionInfo6` -> `ProductionSummary`
+  - `ReadSelectionInfo7` -> `VisibleYields`
+  - `ReadSelectionInfo8` -> `NormalFocusYields`
+  - `ReadSelectionInfo9` -> `FavoredFocusYields`
+  - `ReadSelectionInfo10` -> `IgnoredFocusYields`
+- City yield focus states in `GetCityData(city)` are stored in `data.YieldFilters[yieldType]` and map to:
+  - `YIELD_STATE.FAVORED`
+  - `YIELD_STATE.IGNORED`
+  - any other value = normal
+- City yield preferences use a native three-state model:
+  - `YIELD_STATE.FAVORED`
+  - `YIELD_STATE.IGNORED`
+  - neither state = normal
+- CityPanel helpers for yield preference changes:
+  - `OnCheckYield(yieldType, yieldName)` transitions normal to favored, or favored to ignored depending on the checkbox visual state
+  - `OnResetYieldToNormal(yieldType, yieldName)` transitions ignored back to normal
+  - `SetYieldFocus(yieldType)` and `SetYieldIgnore(yieldType)` are the lower-level command helpers used underneath
 
 ## Interface Modes
 

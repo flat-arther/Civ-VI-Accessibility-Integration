@@ -38,6 +38,7 @@
     <File>UI/inGame/WorldInput_CAI.lua</File>
     <File>UI/inGame/ResearchChooser_CAI.lua</File>
     <File>UI/inGame/ProductionPanel_CAI.lua</File>
+    <File>UI/inGame/CityPanel_CAI.lua</File>
     <File>data/hotkey_config.xml</File>
     <File>Text/en_US/cai_text_ui.xml</File>
   </Files>
@@ -142,6 +143,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>ProductionPanel</LuaContext>
         <LuaReplace>UI/inGame/ProductionPanel_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_CityPanel">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>CityPanel</LuaContext>
+        <LuaReplace>UI/inGame/CityPanel_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
   </InGameActions>
