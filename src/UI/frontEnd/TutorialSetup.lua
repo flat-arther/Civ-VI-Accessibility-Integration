@@ -352,8 +352,8 @@ OnShow = WrapFunc(OnShow, function(orig)
 	CAI_Movie = mgr:CreateUIWidget("Panel", {
 		GetLabel = function() return Locale.Lookup("CAI_TUT_MOVIE") end
 	})
-		mgr:Push(CAI_Dialog, false)
-	mgr:Push(CAI_Movie)
+	mgr:Push(CAI_Movie, PopupPriority.Current)
+		mgr:Push(CAI_Dialog, PopupPriority.High)
 end)
 
 StopMovie = WrapFunc(StopMovie, function(orig)

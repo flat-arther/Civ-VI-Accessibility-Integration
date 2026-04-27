@@ -2873,7 +2873,7 @@ OnShow = WrapFunc(OnShow, function(orig)
 		end
 		return true
 	end, true)
-	mgr:Push(CAI_Panel)
+	mgr:Push(CAI_Panel, PopupPriority.Current)
 end)
 
 OnBackButton = WrapFunc(OnBackButton, function(orig)

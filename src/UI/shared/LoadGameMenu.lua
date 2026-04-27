@@ -1248,7 +1248,7 @@ OnShow = WrapFunc(OnShow, function(orig, ...)
 
 	LuaEvents.FileListQueryComplete.Remove(RebuildFileListAccessibility)
 	LuaEvents.FileListQueryComplete.Add(RebuildFileListAccessibility)
-	mgr:Push(CAI_Panel)
+	mgr:Push(CAI_Panel, PopupPriority.Current)
 end)
 
 OnHide = WrapFunc(OnHide, function(orig, ...)

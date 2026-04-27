@@ -171,6 +171,19 @@ Shared global table for cross-context communication:
 
 Wrapper for `CAI.output`. Use this for all TTS output.
 
+### UIScreenManager priority stack
+
+- `UIWidgetPriority` defines shared root-widget priority levels:
+  - `Low = -10`
+  - `Normal = 0`
+  - `High = 10`
+- `mgr:Push(widget, priority)` accepts a numeric priority. Nil priority resolves to `Normal`.
+- Stack sorting is deterministic: priority wins first, then push order breaks ties. Equal-priority widgets therefore behave like a normal last-in-first-out stack.
+- The active root is always `mgr:GetTop()`, which is the last entry after sorting.
+- Pushing a lower-priority root does not refocus or reannounce the existing active root when it remains on top.
+- `mgr:Pop()` removes the active root. `mgr:Pop(widget)` removes a specific root widget if a screen needs to close a non-active lower-priority root.
+- `mgr:SetFocus(...)` and `mgr:SetFocusPath(...)` only apply focus when the target path belongs to the active root, preventing lower-priority screens from stealing focus while a higher-priority modal/popup is active.
+
 ## Lua Context Notes
 
 - Included Civ VI Lua panel files expose their top-level functions directly in the current chunk after `include("...")`, so wrappers can usually reassign names like `PopulateWonders = WrapFunc(PopulateWonders, ...)`.

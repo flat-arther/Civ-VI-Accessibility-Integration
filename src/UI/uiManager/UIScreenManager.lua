@@ -30,6 +30,8 @@ function UIScreenManager:New()
     Speak(Locale.Lookup("LOC_CAI_CREATING_UI_MANAGER"))
     local mgr = setmetatable({}, { __index = UIScreenManager })
     mgr.Stack = {}
+    mgr.CurrentPath = {}
+    mgr.NextStackOrder = 0
     mgr.WidgetTemplateHelpers = WidgetTemplateHelpers
     mgr.WidgetTemplateHelpers.Manager = mgr
     return mgr
@@ -66,25 +68,73 @@ function UIScreenManager:CreateUIWidget(type, props)
     return w
 end
 
----Adds a UI widget to the top of the stack.
+---Sorts the stack so the last entry is always the active root. Priority wins;
+---equal priority falls back to push order, preserving normal stack behavior.
+function UIScreenManager:SortStack()
+    table.sort(self.Stack, function(a, b)
+        local aPriority = a and a.__priority or PopupPriority.Low
+        local bPriority = b and b.__priority or PopupPriority.Low
+        if aPriority ~= bPriority then
+            return aPriority < bPriority
+        end
+
+        local aOrder = a and a.__stackOrder or 0
+        local bOrder = b and b.__stackOrder or 0
+        return aOrder < bOrder
+    end)
+end
+
+---Adds a UI widget to the stack. The active root is chosen by priority, then by
+---push order for ties.
 ---@param w UIWidget
----@param shouldFocus? boolean
-function UIScreenManager:Push(w, shouldFocus)
+---@param priority? PopupPriority
+function UIScreenManager:Push(w, priority)
+    if not w then return end
+
+    local oldTop = self:GetTop()
+    local oldPriority = oldTop and oldTop.__priority
+    self.NextStackOrder = (self.NextStackOrder or 0) + 1
+    w.__priority = priority or w.__priority or oldPriority or PopupPriority.Low
+    w.__stackOrder = self.NextStackOrder
     table.insert(self.Stack, w)
-    if shouldFocus == nil then shouldFocus = true end
-    if shouldFocus then
-        self:SetFocus(w)
+    self:SortStack()
+    local newTop = self:GetTop()
+    Speak("Pushing with priority " .. tostring(w.__priority))
+    if newTop ~= oldTop or not self.CurrentPath or self.CurrentPath[1] ~= newTop then
+        self:UpdateRootFocus()
     end
 end
 
----Removes the top UI widget
+---Updates focus to the active root after push/pop/sort changes.
+function UIScreenManager:UpdateRootFocus()
+    if #self.Stack == 0 then
+        self.CurrentPath = {}
+        return
+    end
+
+    local current = self.CurrentPath[1]
+    local top = self:GetTop()
+    if not top then return end
+    if current == top then return end
+
+    CAI.Silence()
+    self:SetFocus(top)
+end
+
+---Removes a widget from the stack. Defaults to the active root.
+---@param target? UIWidget
+---@return UIWidget|nil
 function UIScreenManager:Pop()
-    if #self.Stack > 0 then
-        local w = table.remove(self.Stack)
+    if #self.Stack == 0 then return nil end
+    local w = table.remove(self.Stack, #self.Stack)
+    if w then
+        w.__priority = nil
+        w.__stackOrder = nil
         w:Destroy()
     end
-    if #self.Stack == 0 then return end
-    self:SetFocus(self.Stack[#self.Stack])
+
+    self:UpdateRootFocus()
+    return w
 end
 
 ---Returns the top widget in the stack
@@ -201,9 +251,10 @@ end
 
 ---Builds and applies a focus path to a given widget
 ---@param widget UIWidget
+---@return boolean
 function UIScreenManager:SetFocus(widget)
     local path = self.BuildFocusPath(widget)
-    self:SetFocusPath(path)
+    return self:SetFocusPath(path)
 end
 
 ---Applies a prebuilt focus path directly.
@@ -211,6 +262,7 @@ end
 ---@return boolean
 function UIScreenManager:SetFocusPath(path)
     if not path or #path == 0 then return false end
+    if path[1] ~= self:GetTop() then return false end
     self:ApplyFocus(path)
     return true
 end
@@ -331,8 +383,15 @@ end
 
 ---Clears the manager's widget stack. Also destroys all widgets
 function UIScreenManager:Clear()
-    local root = self:GetTop()
-    if root then root:Destroy() end
+    self.CurrentPath = {}
+    while #self.Stack > 0 do
+        local root = table.remove(self.Stack)
+        if root then
+            root.__priority = nil
+            root.__stackOrder = nil
+            root:Destroy()
+        end
+    end
     self.Stack = {}
 end
 

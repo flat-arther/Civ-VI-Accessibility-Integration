@@ -231,16 +231,20 @@ local function PushPausePanel()
 
     BuildPanel()
     if CAI_Panel then
-        mgr:Push(CAI_Panel)
+        mgr:Push(CAI_Panel, PopupPriority.InGameTopOptionsMenu)
         LuaEvents.InGameTopOptionsMenu_Close.Add(PopPausePanel)
     end
 end
 
 OnInput = WrapFunc(OnInput, function(orig, input)
-    if mgr and mgr:HandleInput(input) then
-        return true
+    if mgr then
+        local handled = mgr:HandleInput(input)
+        if handled then
+            return handled
+        end
     end
-    return orig(input)
+    orig(input)
+    return true
 end)
 
 OnShow = WrapFunc(OnShow, function(orig)

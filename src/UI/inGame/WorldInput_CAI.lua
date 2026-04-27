@@ -91,9 +91,6 @@ function OnInputAction(actionId)
 end
 
 function InitGameview()
-	ContextPtr:SetInputHandler(function(input)
-		return mgr:HandleInput(input, true)
-	end, true)
 	cursor = ExposedMembers.CAICursor
 	if not cursor then
 		print("CAI failed to init nav cursor")
@@ -153,5 +150,13 @@ OnLoadScreenClose = WrapFunc(OnLoadScreenClose, function(orig)
 	end
 end)
 
+OnInputHandler = WrapFunc(OnInputHandler, function(orig, inputStruct)
+	if mgr then
+		local handled = mgr:HandleInput(inputStruct)
+		if handled then return handled end
+	end
+	return orig(inputStruct)
+end)
 OnShutdown = WrapFunc(OnShutdown, function() mgr:ShutDown() end)
 ContextPtr:SetShutdown(OnShutdown);
+ContextPtr:SetInputHandler(OnInputHandler, true);

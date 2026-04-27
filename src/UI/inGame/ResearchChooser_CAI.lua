@@ -1,22 +1,22 @@
 include("caiUtils")
 include("ResearchChooser")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr                  = ExposedMembers.CAI_UIManager
 
-local TUTORIAL_MOD_ID   = "17462E0F-1EE1-4819-AAAA-052B5896B02A"
-local UNLOCKS_INLINE    = 2
+local TUTORIAL_MOD_ID      = "17462E0F-1EE1-4819-AAAA-052B5896B02A"
+local UNLOCKS_INLINE       = 2
 
-local m_caiPanel            = nil ---@type UIWidget|nil
-local m_caiAvailableList    = nil ---@type UIWidget|nil
-local m_caiAvailableDetail  = nil ---@type UIWidget|nil
-local m_caiQueueList        = nil ---@type UIWidget|nil
-local m_caiQueueDetail      = nil ---@type UIWidget|nil
-local m_caiRowData          = {}  ---@type table<number, table>
-local m_caiAvailableRows    = {}  ---@type table<number, table>
-local m_caiQueueRows        = {}  ---@type table<number, table>
-local m_caiCurrentData      = nil ---@type table|nil
-local m_caiIsTutorial       = nil ---@type boolean|nil
-local m_caiTutorialTechs    = nil ---@type table<number, number>|nil
-local m_caiOpenPending      = false ---@type boolean
+local m_caiPanel           = nil ---@type UIWidget|nil
+local m_caiAvailableList   = nil ---@type UIWidget|nil
+local m_caiAvailableDetail = nil ---@type UIWidget|nil
+local m_caiQueueList       = nil ---@type UIWidget|nil
+local m_caiQueueDetail     = nil ---@type UIWidget|nil
+local m_caiRowData         = {} ---@type table<number, table>
+local m_caiAvailableRows   = {} ---@type table<number, table>
+local m_caiQueueRows       = {} ---@type table<number, table>
+local m_caiCurrentData     = nil ---@type table|nil
+local m_caiIsTutorial      = nil ---@type boolean|nil
+local m_caiTutorialTechs   = nil ---@type table<number, number>|nil
+local m_caiOpenPending     = false ---@type boolean
 
 -- ===========================================================================
 -- Tutorial detection and reorder. Vanilla's m_isTutorial / TUTORIAL_TECHS are
@@ -213,7 +213,7 @@ local function CreateRowWidget(kData, detailEdit, interactive)
         GetLabel = function() return FormatRowLabel(captured, inline) end,
         OnClick = interactive
             and function() OnChooseResearch(captured.Hash) end
-            or  function() end,
+            or function() end,
         OnFocusEnter = function()
             UI.PlaySound("Main_Menu_Mouse_Over")
             if detailEdit then
@@ -271,7 +271,10 @@ local function RebuildCAIPanel()
     if m_caiCurrentData then
         local already = false
         for _, row in ipairs(m_caiQueueRows) do
-            if row.Hash == m_caiCurrentData.Hash then already = true break end
+            if row.Hash == m_caiCurrentData.Hash then
+                already = true
+                break
+            end
         end
         if not already then
             table.insert(m_caiQueueRows, 1, m_caiCurrentData)
@@ -279,7 +282,7 @@ local function RebuildCAIPanel()
     end
 
     RebuildOneList(m_caiAvailableList, m_caiAvailableRows, m_caiAvailableDetail, true)
-    RebuildOneList(m_caiQueueList,     m_caiQueueRows,     m_caiQueueDetail,     false)
+    RebuildOneList(m_caiQueueList, m_caiQueueRows, m_caiQueueDetail, false)
 end
 
 -- ===========================================================================
@@ -398,7 +401,7 @@ View = WrapFunc(View, function(orig, playerID, kData)
     -- choose the initial focus path.
     if m_caiOpenPending and m_caiPanel and mgr and not mgr:HasWidget(m_caiPanel) then
         m_caiOpenPending = false
-        mgr:Push(m_caiPanel)
+        mgr:Push(m_caiPanel, PopupPriority.Low)
     end
 end)
 

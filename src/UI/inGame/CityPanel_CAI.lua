@@ -535,7 +535,7 @@ function OpenCityActionList()
 
     CityActionList = BuildCityActionList()
     if CityActionList ~= nil and CityActionList.Children ~= nil and #CityActionList.Children > 0 then
-        mgr:Push(CityActionList)
+        mgr:Push(CityActionList, PopupPriority.Low)
     else
         CityActionList = nil
     end

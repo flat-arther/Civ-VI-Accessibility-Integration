@@ -311,3 +311,24 @@ Lua accessibility mod for Civilization VI. Adds TTS/screen reader support for bl
 2. Verify Shift+Enter no longer queues research from the chooser
 3. Verify queued/current research remains visible in the read-only queue list
 4. Verify opening and refreshing ResearchChooser uses the normal UIScreenManager focus behavior without stray focus jumps
+
+## Current Work (2026-04-27): UIScreenManager priority stack
+
+### What's done
+- Finished the root-widget priority stack in `src/UI/uiManager/UIScreenManager.lua`
+- Added shared `UIWidgetPriority` levels for low/normal/high roots
+- Added deterministic stack sorting: priority first, then push order as the equal-priority tie breaker
+- Removed the extra priority normalization helper; `Push` now defaults nil priority directly to `UIWidgetPriority.Normal`
+- Fixed first-push focus initialization by initializing `CurrentPath` and always focusing the sorted active root when it changes
+- Pushing a lower-priority root now leaves the already-focused active root alone, with no refocus or duplicate announcement
+- Guarded `SetFocus(...)` / `SetFocusPath(...)` so lower-priority roots cannot steal active focus while a higher-priority root is on top
+- Added optional `mgr:Pop(widget)` support for closing a specific non-active root; plain `mgr:Pop()` still removes the active root
+- Updated `Clear()` so it destroys every root widget in the stack, not only the current top root
+- Documented the priority stack behavior in `docs/game-api.md`
+
+### Needs testing
+1. Push two same-priority roots and verify the later push receives focus and pops back to the earlier root
+2. Push a lower-priority root while a higher-priority root is active and verify focus stays on the higher-priority root
+3. Push a high-priority root over a normal-priority root and verify focus moves to the high-priority root, then returns when popped
+4. Verify `mgr:Pop(widget)` can close a non-active lower-priority root without changing focus
+5. Verify existing screens that call `mgr:Push(...)` without a priority still behave as normal-priority LIFO screens

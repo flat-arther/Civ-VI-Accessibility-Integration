@@ -46,7 +46,6 @@ OnInput = WrapFunc(OnInput, function(orig, input)
             end
         end
     end
-
     return orig(input)
 end)
 

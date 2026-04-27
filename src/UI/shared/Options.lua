@@ -2748,13 +2748,6 @@ local function BuildBasePanel()
         GetLabel = function() return Locale.Lookup("LOC_CAI_OPTIONS_DIALOG") end,
         SpeechSettings = { Role = false }
     })
-    OptionsPanel:AddInputBinding({
-        Key = Keys.VK_ESCAPE,
-        Action = function()
-            OnCancel()
-            return true
-        end
-    })
 
     -- Tab bar as first child of OptionsPanel (not inside OptionsList)
     TabBar = mgr:CreateUIWidget("TabBar")
@@ -2843,13 +2836,10 @@ end)
 
 OnShow = WrapFunc(OnShow, function(orig)
     orig() -- populates m_ctrlData via the wrapped Populate* helpers
-    ContextPtr:SetInputHandler(function(input)
-        return mgr:HandleInput(input)
-    end, true)
     if not OptionsPanel then BuildBasePanel() end
     RebuildTabContent(m_activeTabIdx)
     if not mgr:HasWidget(OptionsPanel) then
-        mgr:Push(OptionsPanel)
+        mgr:Push(OptionsPanel, PopupPriority.Current)
     end
 end)
 
@@ -2871,6 +2861,14 @@ end)
 OnCancel = WrapFunc(OnCancel, function(orig)
     orig()
     CloseOptions()
+end)
+
+InputHandler = WrapFunc(InputHandler, function(orig, inputStruct)
+    if mgr then
+        local handled = mgr:HandleInput(inputStruct)
+        if handled then return handled end
+    end    
+    return orig(inputStruct) or true
 end)
 --#End of accessibility integration
 Initialize();

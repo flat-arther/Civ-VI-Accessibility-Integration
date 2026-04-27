@@ -574,7 +574,7 @@ PopupDialog.Open = WrapFunc(PopupDialog.Open, function(orig, self, optionalID)
         DialogWidget = mgr.WidgetTemplateHelpers:CreatePopupDialog(self)
 		if not DialogWidget then return end
     if not mgr:HasWidget(DialogWidget) then
-        mgr:Push(DialogWidget)
+        mgr:Push(DialogWidget, PopupPriority.Current)
     end
 end)
 

@@ -23,9 +23,9 @@ UIWidget = {
 ---@field Action fun(w:UIWidget):boolean
 ---@field IsShift? boolean
 ---@field IsControl? boolean
+---@Field IsAlt? boolean
 ---@field MSG? KeyEvents
-local baseInputBinding = { IsShift = false, IsControl = false, MSG = KeyEvents.KeyUp }
-
+local baseInputBinding = { IsShift = false, IsControl = false, IsAlt = false, MSG = KeyEvents.KeyUp }
 
 --#Base methods
 ---Adds a widget to the list of children
@@ -154,7 +154,7 @@ function UIWidget:IsFocused()
 end
 
 ---Adds an input binding to the widget's input map table. Best to use this as a base for new bindings to avoid issues with missing fields
----@param binding InputBinding -- This inherits from 'baseInputBinding', so 'IsShift' and 'IsControl' are false by default. 'MSG' is set to 'KeyEvents.KeyDown'
+---@param binding InputBinding -- This inherits from 'baseInputBinding', so 'IsShift', 'IsAlt', and 'IsControl' are false by default. 'MSG' is set to 'KeyEvents.KeyUp'
 function UIWidget:AddInputBinding(binding)
     setmetatable(binding, { __index = baseInputBinding })
     table.insert(self.InputMap, binding)
@@ -168,6 +168,20 @@ function UIWidget:AddInputBindings(bindings)
             self:AddInputBinding(binding)
         end
     end
+end
+
+---Binds the given widget's 'OnClick' to the enter key for this widget. Acts as default action for panels and dialogs etc
+---@param w UIWidget
+function UIWidget:SetDefaultActionWidget(w)
+    if not w then return end
+    if not w.OnClick then return end
+    self:AddInputBinding({
+        Key = Keys.VK_RETURN,
+        Action = function(widget)
+            if w then w:OnClick() end
+            return true
+        end
+    })
 end
 
 ---Base input handler for widgets. Checks the widget's input map for matches
@@ -184,7 +198,8 @@ function UIWidget:OnHandleInput(input)
                 if key == binding.Key then
                     local isShift = input:IsShiftDown()
                     local isControl = input:IsControlDown()
-                    if isShift == binding.IsShift and isControl == binding.IsControl then
+                    local isAlt = input:IsAltDown()
+                    if isShift == binding.IsShift and isControl == binding.IsControl and isAlt == binding.IsAlt then
                         return binding.Action(self)
                     end
                 end
@@ -192,6 +207,13 @@ function UIWidget:OnHandleInput(input)
         end
     end
     return false
+end
+
+---Sets the priority for a widget for sorting purposes. Should only be used on root widgits
+---@param priority PopupPriority
+function UIWidget:SetPriority(priority)
+    if not priority or type(priority) ~= "number" then return end
+    self.__priority = priority
 end
 
 ---Sets the widget's value and triggers OnValueChanged callback + speaks the new value

@@ -111,12 +111,12 @@ end
 ---@param titleFunc function
 ---@param actionButtons UIWidget[]
 ---@param dlgContent UIWidget[]
+---@param defaultActionButton integer ---The index of the default action button to click when pressing enter
 ---@return UIWidget|nil
-function WidgetTemplateHelpers:MakeGeneralDialog(titleFunc, actionButtons, dlgContent)
+function WidgetTemplateHelpers:MakeGeneralDialog(titleFunc, actionButtons, dlgContent, defaultActionButton)
     local mgr = self.Manager
     if not mgr or not titleFunc or not actionButtons then return end
     local d = mgr:CreateUIWidget("Dialog", {
-        DefaultIndex = 2,
         GetLabel = titleFunc,
     })
     d:AddInputBindings({
@@ -137,6 +137,10 @@ function WidgetTemplateHelpers:MakeGeneralDialog(titleFunc, actionButtons, dlgCo
     end
     buttonRow:AddChildren(actionButtons)
     d:AddChild(buttonRow)
+    if not defaultActionButton then defaultActionButton = 1 end
+    if defaultActionButton > #actionButtons then defaultActionButton = #actionButtons end
+    if defaultActionButton < 1 then defaultActionButton = 1 end
+    d:SetDefaultActionWidget(actionButtons[defaultActionButton])
     return d
 end
 

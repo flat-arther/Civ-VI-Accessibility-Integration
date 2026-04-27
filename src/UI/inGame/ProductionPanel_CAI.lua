@@ -1356,7 +1356,7 @@ View = WrapFunc(View, function(orig, data)
 
     if m_caiOpenPending and m_caiPanel and mgr and not mgr:HasWidget(m_caiPanel) then
         m_caiOpenPending = false
-        mgr:Push(m_caiPanel)
+        mgr:Push(m_caiPanel, PopupPriority.Low)
     end
 end)
 
