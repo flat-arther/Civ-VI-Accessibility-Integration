@@ -35,7 +35,9 @@ end)
 
 RaiseDetailedTutorial = WrapFunc(RaiseDetailedTutorial, function(orig, item)
     detailedItem = item
-    return orig(item)
+    local result = orig(item)
+    LuaEvents.CAI_TutorialDetailedControlsReady()
+    return result
 end)
 
 OnInput = WrapFunc(OnInput, function(orig, input)

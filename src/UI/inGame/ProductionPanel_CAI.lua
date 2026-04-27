@@ -106,6 +106,47 @@ function GetInstanceForItem(item, tab)
     return m_caiInstanceByHash[item.Hash]
 end
 
+function ControlIsHidden(control)
+    return control and control.IsHidden and control:IsHidden() or false
+end
+
+function ControlIsDisabled(control)
+    return control and control.IsDisabled and control:IsDisabled() or false
+end
+
+function GetInstanceActionControl(kInstance, formation)
+    if not kInstance then return nil end
+    if formation == "corps" then return kInstance.TrainCorpsButton or kInstance.Button end
+    if formation == "army" then return kInstance.TrainArmyButton or kInstance.Button end
+    return kInstance.Button
+end
+
+function GetInstanceContainerControl(kInstance, formation)
+    if not kInstance then return nil end
+    if formation == "corps" then return kInstance.CorpsButtonContainer or kInstance.Root end
+    if formation == "army" then return kInstance.ArmyButtonContainer or kInstance.Root end
+    return kInstance.Root
+end
+
+function IsItemRowHidden(item, tab, formation)
+    local kInstance = GetInstanceForItem(item, tab)
+    if not kInstance then return false end
+
+    local container = GetInstanceContainerControl(kInstance, formation)
+    local actionControl = GetInstanceActionControl(kInstance, formation)
+    return ControlIsHidden(container) or ControlIsHidden(actionControl)
+end
+
+function IsItemRowDisabled(item, tab, formation)
+    local dataDisabled = item and item.Disabled or false
+    if formation == "corps" then dataDisabled = item and item.CorpsDisabled or false end
+    if formation == "army" then dataDisabled = item and item.ArmyDisabled or false end
+
+    local kInstance = GetInstanceForItem(item, tab)
+    local actionControl = GetInstanceActionControl(kInstance, formation)
+    return dataDisabled or ControlIsDisabled(actionControl)
+end
+
 function GetActiveProductionCity()
     local city = UI.GetHeadSelectedCity and UI.GetHeadSelectedCity() or nil
     if city then return city end
@@ -189,6 +230,16 @@ end
 
 function CurrentTabSupportsQueue()
     return not m_isTutorialRunning and not m_tutorialTestMode
+end
+
+function IsProductionTutorialMode()
+    local tutorialRunning = false
+    if type(IsTutorialRunning) == "function" then
+        tutorialRunning = IsTutorialRunning()
+    end
+    return tutorialRunning
+        or m_isTutorialRunning == true
+        or m_tutorialTestMode == true
 end
 
 function ReadRowLabel(item, formation)
@@ -472,13 +523,10 @@ function CreateItemRow(item, tab, formation)
         FocusKey = focusKey,
         GetLabel = function() return ReadRowLabel(item, formation) end,
         GetTooltip = function() return ReadRowTooltip(item, formation) end,
-        IsDisabled = function()
-            if formation == "corps" then return item.CorpsDisabled end
-            if formation == "army" then return item.ArmyDisabled end
-            return item.Disabled
-        end,
+        IsDisabled = function() return IsItemRowDisabled(item, tab, formation) end,
+        IsHidden = function() return IsItemRowHidden(item, tab, formation) end,
         LeftAction = BuildItemLeftAction(item, tab, formation),
-        ControlAction = tab == TAB_PRODUCTION and BuildItemQueueAction(item, tab, formation) or nil,
+        ControlAction = tab == TAB_PRODUCTION and CurrentTabSupportsQueue() and BuildItemQueueAction(item, tab, formation) or nil,
         RightAction = function() return InvokeRightClickPedia(item) end,
         FocusAction = function(w)
             PlayMenuHover()
@@ -506,6 +554,8 @@ function AddUnitEntry(parent, unit, tab)
             end
             return Locale.Lookup(unit.Name or "")
         end,
+        IsDisabled = function() return false end,
+        IsHidden = function() return IsItemRowHidden(unit, tab, nil) end,
         IsExpanded = kInstance and kInstance.CorpsArmyArrow and kInstance.CorpsArmyArrow:IsSelected() or false,
         OnToggleExpanded = function(expanded)
             local inst = GetInstanceForItem(unit, tab)
@@ -937,14 +987,54 @@ function RebuildBody(preserveTreeFocus)
     end
 end
 
-function CreateTabWidget(index, vanillaTabControl, vanillaHandler)
+function GetTabControlText(tabControls)
+    for _, control in ipairs(tabControls or {}) do
+        if control and control.GetText then
+            local text = control:GetText()
+            if text and text ~= "" then return text end
+        end
+        if control and control.GetToolTipString then
+            local tip = control:GetToolTipString()
+            if tip and tip ~= "" then return tip end
+        end
+    end
+    return ""
+end
+
+function AreAllTabControlsHidden(tabControls)
+    if IsProductionTutorialMode() then return true end
+    local hasControl = false
+    for _, control in ipairs(tabControls or {}) do
+        if control then
+            hasControl = true
+            if not ControlIsHidden(control) then return false end
+        end
+    end
+    return hasControl
+end
+
+function AreAllTabControlsDisabled(tabControls)
+    if IsProductionTutorialMode() then return true end
+    local hasControl = false
+    for _, control in ipairs(tabControls or {}) do
+        if control then
+            hasControl = true
+            if not ControlIsDisabled(control) then return false end
+        end
+    end
+    return hasControl
+end
+
+function CreateTabWidget(index, vanillaTabControl, vanillaHandler, alternateTabControls)
+    local tabControls = { vanillaTabControl }
+    for _, control in ipairs(alternateTabControls or {}) do
+        table.insert(tabControls, control)
+    end
+
     return mgr:CreateUIWidget("Tab", {
-        GetLabel = function()
-            if vanillaTabControl and vanillaTabControl.GetText then
-                return vanillaTabControl:GetText() or ""
-            end
-            return ""
-        end,
+        GetLabel = function() return GetTabControlText(tabControls) end,
+        IsDisabled = function() return AreAllTabControlsDisabled(tabControls) end,
+        IsHidden = function() return AreAllTabControlsHidden(tabControls) end,
         OnFocusEnter = function()
             PlayMenuHover()
             local nextTab = NormalizeCAITab(index)
@@ -1028,13 +1118,18 @@ function EnsurePanelBuilt()
 
     m_caiTabBar = mgr:CreateUIWidget("TabBar", {
         GetLabel = function() return Locale.Lookup("LOC_HUD_CHOOSE_PRODUCTION") end,
+        IsHidden = function(w)
+            return IsProductionTutorialMode() or #w:GetVisibleChildren() == 0
+        end,
     })
     m_caiPanel:AddChild(m_caiTabBar)
 
-    m_caiTabs[TAB_PRODUCTION] = CreateTabWidget(TAB_PRODUCTION, Controls.ProductionTab, OnTabChangeProduction)
-    m_caiTabs[TAB_PURCHASE_GOLD] = CreateTabWidget(TAB_PURCHASE_GOLD, Controls.PurchaseTab, OnTabChangePurchase)
+    m_caiTabs[TAB_PRODUCTION] = CreateTabWidget(TAB_PRODUCTION, Controls.ProductionTab, OnTabChangeProduction,
+        { Controls.MiniProductionTab })
+    m_caiTabs[TAB_PURCHASE_GOLD] = CreateTabWidget(TAB_PURCHASE_GOLD, Controls.PurchaseTab, OnTabChangePurchase,
+        { Controls.MiniPurchaseTab })
     m_caiTabs[TAB_PURCHASE_FAITH] = CreateTabWidget(TAB_PURCHASE_FAITH, Controls.PurchaseFaithTab,
-        OnTabChangePurchaseFaith)
+        OnTabChangePurchaseFaith, { Controls.MiniPurchaseFaithTab })
     m_caiTabs[TAB_QUEUE] = CreateTabWidget(TAB_QUEUE, Controls.QueueTab, OnTabChangeQueue)
 
     m_caiTabBar:AddChild(m_caiTabs[TAB_PRODUCTION])
@@ -1044,9 +1139,7 @@ function EnsurePanelBuilt()
     if GameCapabilities.HasCapability("CAPABILITY_FAITH") then
         m_caiTabBar:AddChild(m_caiTabs[TAB_PURCHASE_FAITH])
     end
-    if CurrentTabSupportsQueue() then
-        m_caiTabBar:AddChild(m_caiTabs[TAB_QUEUE])
-    end
+    m_caiTabBar:AddChild(m_caiTabs[TAB_QUEUE])
     m_caiTabBar.DefaultIndex = GetSelectedTabDefaultIndex()
 
     m_caiTree = mgr:CreateUIWidget("Treeview", {
@@ -1111,7 +1204,14 @@ function EnsurePanelBuilt()
     m_caiCurrentNode = mgr:CreateUIWidget("TreeviewItem", {
         GetLabel = ReadCurrentProductionLabel,
         GetTooltip = ReadCurrentProductionTooltip,
-        IsHidden = function(w) return w._caiHidden end,
+        IsHidden = function(w)
+            return w._caiHidden
+                or ControlIsHidden(Controls.CurrentProductionContainer)
+                or ControlIsHidden(Controls.CurrentProductionButton)
+        end,
+        IsDisabled = function()
+            return ControlIsDisabled(Controls.CurrentProductionButton)
+        end,
         OnFocusEnter = function()
             PlayMenuHover()
             SetFocusedDetailText("current-tree", ReadCurrentProductionTooltip())
@@ -1214,6 +1314,8 @@ function EnsurePanelBuilt()
             end
             return Locale.Lookup("LOC_HUD_CLOSE")
         end,
+        IsDisabled = function() return ControlIsDisabled(Controls.CloseButton) end,
+        IsHidden = function() return IsProductionTutorialMode() or ControlIsHidden(Controls.CloseButton) end,
         OnClick = function() Close() end,
         OnFocusEnter = function() PlayMenuHover() end,
     })

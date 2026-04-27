@@ -99,7 +99,6 @@ function UIScreenManager:Push(w, priority)
     table.insert(self.Stack, w)
     self:SortStack()
     local newTop = self:GetTop()
-    Speak("Pushing with priority " .. tostring(w.__priority))
     if newTop ~= oldTop or not self.CurrentPath or self.CurrentPath[1] ~= newTop then
         self:UpdateRootFocus()
     end
@@ -414,7 +413,7 @@ end
 ---Adds a char to the search buffer
 ---@param c string
 function UIScreenManager:AppendSearchChar(c)
-    local now = os.clock()
+    local now = Automation.GetTime()
     if not self.LastTypeTime or (now - self.LastTypeTime) > self.CAISettings.SearchTimeout then
         self.SearchBuffer = ""
     end

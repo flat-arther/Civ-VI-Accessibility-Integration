@@ -252,7 +252,7 @@ function UIWidget:BuildSpeech(elements)
     end
 
     if #parts == 0 then return nil end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "  ")
 end
 
 ---Speaks the widget's info
@@ -268,6 +268,20 @@ function UIWidget:SpeakFocus()
 end
 
 --#Helpers
+
+---Returns this widget's non-hidden children.
+---@return UIWidget[]
+function UIWidget:GetVisibleChildren()
+    local visible = {}
+    if not self.Children then return visible end
+    for _, child in ipairs(self.Children) do
+        local hidden = child.IsHidden and child:IsHidden()
+        if not hidden then
+            table.insert(visible, child)
+        end
+    end
+    return visible
+end
 
 ---Returns the visible index and visible total among siblings, skipping hidden elements
 ---@return integer|nil, integer
@@ -309,9 +323,9 @@ function UIWidget:GetInfoStrings()
     return {
         label = label ~= "" and label or nil,
         role = role ~= "" and role or nil,
+        state = state ~= "" and state or nil,
         value = value ~= "" and value or nil,
         position = posText ~= "" and posText or nil,
-        state = state ~= "" and state or nil,
         tooltip = tooltip ~= "" and tooltip or nil
     }
 end

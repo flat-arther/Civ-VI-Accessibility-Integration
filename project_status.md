@@ -332,3 +332,54 @@ Lua accessibility mod for Civilization VI. Adds TTS/screen reader support for bl
 3. Push a high-priority root over a normal-priority root and verify focus moves to the high-priority root, then returns when popped
 4. Verify `mgr:Pop(widget)` can close a non-active lower-priority root without changing focus
 5. Verify existing screens that call `mgr:Push(...)` without a priority still behave as normal-priority LIFO screens
+
+## Current Work (2026-04-27): ProductionPanel tutorial gating
+
+### What's done
+- Traced vanilla tutorial gating:
+  - `TutorialUIRoot.RaiseDetailedTutorial(item)` calls `UITutorialManager:ShowControlsByID(...)` for `UITriggers`
+  - It then calls `UITutorialManager:EnableControlsByIdOrTag(...)` for each `EnabledControls` value and disables any `DisabledControls`
+  - Production tutorial steps enable production rows by `UITutorialManager:GetHash(item.Type)`, for example `UNIT_WARRIOR`, `UNIT_BUILDER`, and `BUILDING_MONUMENT`
+- `ProductionPanel_CAI.lua` now exposes live vanilla row control state through each CAI row widget's `IsHidden` / `IsDisabled` methods
+- CAI production row activation now relies on those widget disabled predicates, so disabled rows do not activate through Enter
+- Hidden rows and tabs are still built as widgets; UI manager navigation skips them through their `IsHidden` methods
+- Production tab widgets now read hidden/disabled state from both full and mini vanilla tab controls where Civ VI has both, so purchase with gold/faith tabs follow the actual visible vanilla tab variant during tutorial gating
+- Added `UIWidget:GetVisibleChildren()` and hid the ProductionPanel tab bar itself when all tab children are hidden
+- ProductionPanel now hides its CAI tab bar and close button during vanilla production tutorial mode because `TabContainer` and `CloseButton` sit outside the tutorial-triggered `ChooseProductionMenu` container
+- ProductionPanel tutorial-mode detection now calls public `IsTutorialRunning()` instead of relying on vanilla file-local `m_isTutorialRunning` / `m_tutorialTestMode` values
+- Scanned `TutorialScenarioBase.lua` production-panel steps:
+  - active detailed production steps all use `SetUITriggers("ChooseProductionMenu", ...)`
+  - each enables a specific production item hash such as `UNIT_WARRIOR`, `UNIT_BUILDER`, `BUILDING_MONUMENT`, `UNIT_SETTLER`, `UNIT_SLINGER`, `DISTRICT_CAMPUS`, or `BUILDING_LIBRARY`
+  - no active production step enables `TabContainer`, `TabRow`, purchase tabs, queue tab, or `CloseButton`
+- `Ctrl+Enter` queue insertion remains unavailable while vanilla queue support is disabled for tutorial mode
+- Documented the live-control tutorial-state pattern in `docs/game-api.md`
+
+### Needs testing
+1. In the tutorial production step for warriors, verify CAI navigation skips production rows whose vanilla controls are hidden by tutorial gating
+2. In the builder and monument tutorial production steps, verify CAI follows the vanilla hidden/disabled state for each row
+3. Verify disabled production rows that vanilla still shows are spoken as disabled and do not activate
+4. Verify rows hidden by vanilla, including disabled rows when disabled display is off, are skipped by CAI navigation
+5. Verify normal non-tutorial production, purchase, unit corps/army expansion, and queue actions still work
+
+## Current Work (2026-04-27): ResearchChooser live control state
+
+### What's done
+- Applied the same live-control pattern used for ProductionPanel to `ResearchChooser_CAI.lua`
+- CAI now caches the vanilla instance returned by `AddAvailableResearch(...)` by research hash
+- CAI research row widgets now expose:
+  - `IsHidden` from the vanilla row's `TopContainer` / `Top`
+  - `IsDisabled` from the vanilla row's `Top` for interactive available research rows
+- Hidden research rows are still built; UI manager navigation skips them through `IsHidden`
+- The Open Tech Tree and Close buttons are always built and now expose live `IsHidden` / `IsDisabled` from the vanilla controls
+- Fixed the first-focus tutorial timing issue:
+  - `TutorialScenarioBase.lua` opens ResearchChooser before `AdvisorPopup_ShowDetails(...)`
+  - `TutorialUIRoot_CAI.lua` now emits `CAI_TutorialDetailedControlsReady` after `RaiseDetailedTutorial(item)` returns
+  - `ResearchChooser_CAI.lua` delays only the tutorial-open initial `mgr:Push(...)` until that signal, so first focus reads the already-filtered vanilla control state
+- Documented the ResearchChooser tutorial/live-control pattern in `docs/game-api.md`
+
+### Needs testing
+1. In the tutorial research step, open ResearchChooser from the advisor "Show me" button and verify the initial focus skips/marks disabled rows immediately, without needing to move away and back
+2. Verify disabled available research rows speak disabled and do not activate
+3. Verify normal non-tutorial ResearchChooser still chooses available research with Enter
+4. Verify Open Tech Tree and Close button visibility follows the vanilla controls
+5. Verify queued/current research rows remain read-only and inspectable

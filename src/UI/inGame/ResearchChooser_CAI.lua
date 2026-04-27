@@ -17,6 +17,10 @@ local m_caiCurrentData     = nil ---@type table|nil
 local m_caiIsTutorial      = nil ---@type boolean|nil
 local m_caiTutorialTechs   = nil ---@type table<number, number>|nil
 local m_caiOpenPending     = false ---@type boolean
+local m_caiTutorialPushDelay = false ---@type boolean
+local m_caiTutorialControlsReady = false ---@type boolean
+local m_caiTutorialPushPending = false ---@type boolean
+local m_caiInstanceByHash  = {} ---@type table<number, table>
 
 -- ===========================================================================
 -- Tutorial detection and reorder. Vanilla's m_isTutorial / TUTORIAL_TECHS are
@@ -65,6 +69,31 @@ end
 -- Unlock helpers. Reuses the native cached lookup — format is {typeName, Name,
 -- CivilopediaKey}. Entries missing a name are skipped.
 -- ===========================================================================
+local function ControlIsHidden(control)
+    return control and control.IsHidden and control:IsHidden() or false
+end
+
+local function ControlIsDisabled(control)
+    return control and control.IsDisabled and control:IsDisabled() or false
+end
+
+local function GetInstanceForResearch(kData)
+    if not kData or not kData.Hash then return nil end
+    return m_caiInstanceByHash[kData.Hash]
+end
+
+local function IsResearchRowHidden(kData)
+    local instance = GetInstanceForResearch(kData)
+    if not instance then return false end
+    return ControlIsHidden(instance.TopContainer) or ControlIsHidden(instance.Top)
+end
+
+local function IsResearchRowDisabled(kData)
+    local instance = GetInstanceForResearch(kData)
+    if not instance then return false end
+    return ControlIsDisabled(instance.Top)
+end
+
 local function GetUnlockNames(kData)
     if not kData or not kData.TechType then return {} end
     local playerID = Game.GetLocalPlayer()
@@ -211,6 +240,8 @@ local function CreateRowWidget(kData, detailEdit, interactive)
 
     local row = mgr:CreateUIWidget("Button", {
         GetLabel = function() return FormatRowLabel(captured, inline) end,
+        IsHidden = function() return IsResearchRowHidden(captured) end,
+        IsDisabled = function() return interactive and IsResearchRowDisabled(captured) or false end,
         OnClick = interactive
             and function() OnChooseResearch(captured.Hash) end
             or function() end,
@@ -330,19 +361,21 @@ local function EnsurePanelBuilt()
     })
     m_caiPanel:AddChild(m_caiQueueDetail)
 
-    if not Controls.OpenTreeButton:IsHidden() then
-        local treeBtn = mgr:CreateUIWidget("Button", {
-            GetLabel = function() return Controls.OpenTreeButton:GetText() end,
-            OnClick = function()
-                LuaEvents.ResearchChooser_RaiseTechTree()
-                OnClosePanel()
-            end,
-        })
-        m_caiPanel:AddChild(treeBtn)
-    end
+    local treeBtn = mgr:CreateUIWidget("Button", {
+        GetLabel = function() return Controls.OpenTreeButton:GetText() end,
+        IsHidden = function() return ControlIsHidden(Controls.OpenTreeButton) end,
+        IsDisabled = function() return ControlIsDisabled(Controls.OpenTreeButton) end,
+        OnClick = function()
+            LuaEvents.ResearchChooser_RaiseTechTree()
+            OnClosePanel()
+        end,
+    })
+    m_caiPanel:AddChild(treeBtn)
 
     local closeBtn = mgr:CreateUIWidget("Button", {
         GetLabel = function() return Controls.CloseButton:GetToolTipString() or "Close" end,
+        IsHidden = function() return ControlIsHidden(Controls.CloseButton) end,
+        IsDisabled = function() return ControlIsDisabled(Controls.CloseButton) end,
         OnClick = function() OnClosePanel() end,
     })
     m_caiPanel:AddChild(closeBtn)
@@ -366,6 +399,22 @@ local function OnPanelOpenedCAI()
     m_caiOpenPending = true
 end
 
+local function PushPanelWhenReady()
+    if not m_caiPanel or not mgr or mgr:HasWidget(m_caiPanel) then return end
+
+    if m_caiTutorialPushDelay and not m_caiTutorialControlsReady then
+        m_caiOpenPending = false
+        m_caiTutorialPushPending = true
+        return
+    end
+
+    m_caiOpenPending = false
+    m_caiTutorialPushDelay = false
+    m_caiTutorialControlsReady = false
+    m_caiTutorialPushPending = false
+    mgr:Push(m_caiPanel, PopupPriority.Low)
+end
+
 local function OnPanelClosedCAI()
     if m_caiPanel and mgr:HasWidget(m_caiPanel) then
         mgr:Pop()
@@ -382,6 +431,27 @@ local function OnPanelClosedCAI()
     m_caiQueueRows       = {}
     m_caiCurrentData     = nil
     m_caiOpenPending     = false
+    m_caiTutorialPushDelay = false
+    m_caiTutorialControlsReady = false
+    m_caiTutorialPushPending = false
+    m_caiInstanceByHash  = {}
+end
+
+local NativeOnOpenPanel = OnOpenPanel
+
+local function OnTutorialResearchOpenCAI()
+    m_caiTutorialPushDelay = true
+    m_caiTutorialControlsReady = false
+    m_caiTutorialPushPending = false
+    NativeOnOpenPanel()
+end
+
+local function OnTutorialDetailedControlsReadyCAI()
+    if not m_caiTutorialPushDelay then return end
+    m_caiTutorialControlsReady = true
+    if m_caiTutorialPushPending or m_caiOpenPending then
+        PushPanelWhenReady()
+    end
 end
 
 -- ===========================================================================
@@ -394,14 +464,14 @@ end
 View = WrapFunc(View, function(orig, playerID, kData)
     m_caiRowData = {}
     m_caiCurrentData = nil
+    m_caiInstanceByHash = {}
     orig(playerID, kData)
     RebuildCAIPanel()
     -- Initial open: OnPanelOpenedCAI set m_caiOpenPending but deferred the
     -- Push. Now that the list has its real rows, let the UI screen manager
     -- choose the initial focus path.
     if m_caiOpenPending and m_caiPanel and mgr and not mgr:HasWidget(m_caiPanel) then
-        m_caiOpenPending = false
-        mgr:Push(m_caiPanel, PopupPriority.Low)
+        PushPanelWhenReady()
     end
 end)
 
@@ -409,6 +479,9 @@ AddAvailableResearch = WrapFunc(AddAvailableResearch, function(orig, playerID, k
     local instance = orig(playerID, kData)
     if playerID ~= -1 then
         table.insert(m_caiRowData, kData)
+        if kData and kData.Hash and instance then
+            m_caiInstanceByHash[kData.Hash] = instance
+        end
     end
     return instance
 end)
@@ -458,6 +531,9 @@ end)
 
 LuaEvents.ResearchChooser_ForceHideWorldTracker.Add(OnPanelOpenedCAI)
 LuaEvents.ResearchChooser_RestoreWorldTracker.Add(OnPanelClosedCAI)
+LuaEvents.Tutorial_ResearchOpen.Remove(NativeOnOpenPanel)
+LuaEvents.Tutorial_ResearchOpen.Add(OnTutorialResearchOpenCAI)
+LuaEvents.CAI_TutorialDetailedControlsReady.Add(OnTutorialDetailedControlsReadyCAI)
 
 -- Queue changes from vanilla surfaces (for example Tech Tree queue edits) that
 -- don't also change the active research don't fire
