@@ -2,6 +2,7 @@ include("caiUtils")
 include("InGameTopOptionsMenu")
 
 local mgr = ExposedMembers.CAI_UIManager
+local isOpening = false
 
 local CAI_Panel = nil ---@type UIWidget|nil
 local CAI_ButtonList = nil ---@type UIWidget|nil
@@ -184,7 +185,7 @@ local function BuildPanelContent()
     CAI_ButtonList = CreateSectionList(
     -- TODO: maybe change this title in the future
         function() return Controls.WindowTitle:GetText() end,
-        function() return Controls.PauseWindow:IsHidden() end
+        function() return Controls.MainStack:IsHidden() end
     )
     CAI_Panel:AddChild(CAI_ButtonList)
     CAI_ModsList = nil
@@ -204,19 +205,18 @@ local function BuildPanelContent()
 end
 
 local function BuildPanel()
-    CAI_Panel = mgr:CreateUIWidget("Dialog", {
+    CAI_Panel = mgr:CreateUIWidget("Panel", {
         GetLabel = function()
             return Controls.WindowTitle:GetText()
-        end,
-        SpeechSettings = { Role = false },
+        end
     })
 
     BuildPanelContent()
 end
 
 local function PopPausePanel()
-    LuaEvents.InGameTopOptionsMenu_Close.Remove(PopPausePanel)
     if not mgr or not CAI_Panel then return end
+
     if mgr:HasWidget(CAI_Panel) and mgr:GetTop() == CAI_Panel then
         mgr:Pop()
     end
@@ -227,16 +227,19 @@ local function PopPausePanel()
 end
 
 local function PushPausePanel()
-    if not mgr then return end
+    if not mgr or not Controls.PauseWindow or Controls.PauseWindow:IsHidden() then return end
 
     BuildPanel()
     if CAI_Panel then
         mgr:Push(CAI_Panel, PopupPriority.InGameTopOptionsMenu)
-        LuaEvents.InGameTopOptionsMenu_Close.Add(PopPausePanel)
     end
 end
 
 OnInput = WrapFunc(OnInput, function(orig, input)
+    if Controls.PauseWindow and Controls.PauseWindow:IsHidden() then
+        return false
+    end
+
     if mgr then
         local handled = mgr:HandleInput(input)
         if handled then
@@ -247,19 +250,21 @@ OnInput = WrapFunc(OnInput, function(orig, input)
     return true
 end)
 
-OnShow = WrapFunc(OnShow, function(orig)
-    orig()
-    if mgr and not mgr:HasWidget(CAI_Panel) then
-        PushPausePanel()
-    end
-end)
-
 SetupButtons = WrapFunc(SetupButtons, function(orig)
     orig()
     if Controls.PauseWindow and not Controls.PauseWindow:IsHidden() then
         BuildPanelContent()
     end
+    if isOpening then
+        if not mgr:HasWidget(CAI_Panel) then
+            PushPausePanel()
+        end
+        isOpening = false
+    end
 end)
 
+ContextPtr:SetHideHandler(PopPausePanel)
 ContextPtr:SetInputHandler(OnInput, true)
-ContextPtr:SetShowHandler(OnShow)
+LuaEvents.InGameTopOptionsMenu_Show.Add(function()
+    isOpening = true
+end)

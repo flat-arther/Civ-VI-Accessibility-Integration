@@ -4,6 +4,7 @@ include("TutorialUIRoot")
 local mgr = ExposedMembers.CAI_UIManager
 local activeItem = nil
 local detailedItem = nil
+local tutorialLoaded = false
 
 local function HasUITrigger(item, triggerName)
     if not item or not item.UITriggers then return false end
@@ -46,7 +47,18 @@ OnInput = WrapFunc(OnInput, function(orig, input)
             end
         end
     end
+    -- have to do this because the original has the escape key miss spelled and it doesn't work
+    local event = input:GetMessageType()
+    local key = input:GetKey()
+    if key == Keys.VK_ESCAPE and event == KeyEvents.KeyUp and tutorialLoaded then
+        local topOptionsMenu = ContextPtr:LookUpControl("/InGame/TopOptionsMenu");
+        if not UIManager:IsInPopupQueue(topOptionsMenu) then
+            LuaEvents.InGame_OpenInGameOptionsMenu();
+        end
+        return true
+    end
     return orig(input)
 end)
 
 ContextPtr:SetInputHandler(OnInput, true)
+Events.LoadScreenClose.Add(function() tutorialLoaded = true end)
