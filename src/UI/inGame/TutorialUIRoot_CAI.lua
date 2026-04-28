@@ -42,9 +42,12 @@ RaiseDetailedTutorial = WrapFunc(RaiseDetailedTutorial, function(orig, item)
 end)
 
 OnInput = WrapFunc(OnInput, function(orig, input)
-    if not IsTutorialRunning() then
+    -- Stop input from executing when it shouldn't be, like when the pause menu is open or the tutorial isn't running because this context is always active, and it gets input first in the tutorial
+    local topOptionsMenu = ContextPtr:LookUpControl("/InGame/TopOptionsMenu");
+    if not IsTutorialRunning() or UIManager:IsInPopupQueue(topOptionsMenu) then
         return false
     end
+
     if detailedItem and HasUITrigger(detailedItem, "ChooseProductionMenu") then
         if mgr then
             local handled = mgr:HandleInput(input)
@@ -53,14 +56,12 @@ OnInput = WrapFunc(OnInput, function(orig, input)
             end
         end
     end
+
     -- have to do this because the original has the escape key miss spelled and it doesn't work
     local event = input:GetMessageType()
     local key = input:GetKey()
     if key == Keys.VK_ESCAPE and event == KeyEvents.KeyUp and tutorialLoaded then
-        local topOptionsMenu = ContextPtr:LookUpControl("/InGame/TopOptionsMenu");
-        if not UIManager:IsInPopupQueue(topOptionsMenu) then
-            LuaEvents.InGame_OpenInGameOptionsMenu();
-        end
+        LuaEvents.InGame_OpenInGameOptionsMenu();
         return true
     end
     return orig(input)
