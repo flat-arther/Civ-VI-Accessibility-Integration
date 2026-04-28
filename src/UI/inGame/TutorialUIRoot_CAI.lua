@@ -1,5 +1,6 @@
 include("caiUtils")
 include("TutorialUIRoot")
+include("Civ6Common")
 
 local mgr = ExposedMembers.CAI_UIManager
 local activeItem = nil
@@ -41,6 +42,9 @@ RaiseDetailedTutorial = WrapFunc(RaiseDetailedTutorial, function(orig, item)
 end)
 
 OnInput = WrapFunc(OnInput, function(orig, input)
+    if not IsTutorialRunning() then
+        return false
+    end
     if detailedItem and HasUITrigger(detailedItem, "ChooseProductionMenu") then
         if mgr then
             local handled = mgr:HandleInput(input)
