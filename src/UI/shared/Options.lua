@@ -2160,7 +2160,7 @@ end)
 local function W_Dropdown(labelText, ctrl)
     local data = m_ctrlData[ctrl]
     if not data then return nil end
-    return mgr:CreateUIWidget("DropdownMenu", {
+    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsDropdownMenu"), "DropdownMenu", {
         GetLabel     = function() return labelText end,
         GetValue     = function() return ctrl:GetButton():GetText() end,
         GetTooltip   = function() return ctrl:GetToolTipString() end,
@@ -2168,7 +2168,7 @@ local function W_Dropdown(labelText, ctrl)
         IsHidden     = function() return ctrl:IsHidden() end,
         OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
         OnClick      = function(w)
-            local optList = mgr:CreateUIWidget("List")
+            local optList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsList"), "List")
             optList:AddInputBinding({
                 Key = Keys.VK_ESCAPE,
                 Action = function()
@@ -2180,7 +2180,7 @@ local function W_Dropdown(labelText, ctrl)
             local selectedChild = nil
             for _, opt in ipairs(data.values) do
                 local optLabel = type(opt[1]) == "string" and Locale.Lookup(opt[1]) or tostring(opt[1])
-                local child = mgr:CreateUIWidget("MenuItem", {
+                local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsMenuItem"), "MenuItem", {
                     GetLabel     = function() return optLabel end,
                     OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
                     OnClick      = function()
@@ -2205,7 +2205,7 @@ end
 local function W_Checkbox(ctrl)
     local data = m_ctrlData[ctrl]
     if not data then return nil end
-    return mgr:CreateUIWidget("Checkbox", {
+    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsCheckbox"), "Checkbox", {
         GetLabel   = function() return ctrl:GetText() end,
         GetTooltip = function() return ctrl:GetToolTipString() end,
         GetValue   = function()
@@ -2226,7 +2226,7 @@ end
 local function W_EditBox(labelText, ctrl)
     local data = m_ctrlData[ctrl]
     if not data then return nil end
-    return mgr:CreateUIWidget("Edit", {
+    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsEdit"), "Edit", {
         GetLabel   = function() return labelText end,
         GetValue   = function() return ctrl:GetText() end,
         IsDisabled = function() return ctrl:IsDisabled() end,
@@ -2243,7 +2243,7 @@ end
 
 ---Stepped slider (fires the registered callback via SetStepAndCall)
 local function W_SteppedSlider(labelText, sliderCtrl, valueLabelCtrl)
-    return mgr:CreateUIWidget("Slider", {
+    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsSlider"), "Slider", {
         GetLabel   = function() return labelText end,
         GetValue   = function()
             return valueLabelCtrl and valueLabelCtrl:GetText()
@@ -2265,7 +2265,7 @@ local function W_VolSlider(labelText, sliderCtrl, audioGroup, audioKey, soundKey
         if soundKey then UI.PlaySound(soundKey) end
         Controls.ConfirmButton:SetDisabled(false)
     end
-    return mgr:CreateUIWidget("Slider", {
+    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsSlider"), "Slider", {
         GetLabel  = function() return labelText end,
         GetValue  = function() return tostring(math.floor(sliderCtrl:GetValue() * 100)) .. "%" end,
         Increment = function() ApplyVolume(0.01) end,
@@ -2335,7 +2335,7 @@ local gameTabSpecs = {
     {
         type = "X",
         build = function()      -- Time-of-day slider (continuous; replicates callback inline)
-            return mgr:CreateUIWidget("Slider", {
+            return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsSlider"), "Slider", {
                 GetLabel   = function() return Locale.Lookup("LOC_OPTIONS_TIME_OF_DAY") end,
                 GetValue   = function() return Controls.TODText:GetText() end,
                 GetTooltip = function() return Controls.TODSlider:GetToolTipString() end,
@@ -2370,7 +2370,7 @@ local graphicsBaseSpecs = {
     {
         type = "X",
         build = function()      -- Adapter pulldown (lazy; not via PopulateComboBox)
-            return mgr:CreateUIWidget("DropdownMenu", {
+            return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsDropdownMenu"), "DropdownMenu", {
                 GetLabel     = function() return Locale.Lookup("LOC_OPTIONS_VIDEO_ADAPTER_TEXT") end,
                 GetValue     = function() return Controls.AdapterPullDown:GetButton():GetText() end,
                 GetTooltip   = function() return Controls.AdapterPullDown:GetToolTipString() end,
@@ -2378,14 +2378,14 @@ local graphicsBaseSpecs = {
                 OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
                 OnClick      = function()
                     local adapters = Options.GetAvailableDisplayAdapters()
-                    local ddList = mgr:CreateUIWidget("List")
+                    local ddList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsList"), "List")
                     ddList:AddInputBinding({ Key = Keys.VK_ESCAPE, Action = function()
                         mgr:Pop(); return true
                     end })
                     local currentText = Controls.AdapterPullDown:GetButton():GetText()
                     local selectedChild = nil
                     for i, v in pairs(adapters) do
-                        local child = mgr:CreateUIWidget("MenuItem", {
+                        local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsMenuItem"), "MenuItem", {
                             GetLabel     = function() return v end,
                             OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
                             OnClick      = function()
@@ -2413,14 +2413,14 @@ local graphicsBaseSpecs = {
     {
         type = "X",
         build = function()      -- Resolution pulldown (lazy; uses m_resModes)
-            return mgr:CreateUIWidget("DropdownMenu", {
+            return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsDropdownMenu"), "DropdownMenu", {
                 GetLabel     = function() return Locale.Lookup("LOC_OPTIONS_VIDEO_RESOLUTION_TEXT") end,
                 GetValue     = function() return Controls.ResolutionPullDown:GetButton():GetText() end,
                 GetTooltip   = function() return Controls.ResolutionPullDown:GetToolTipString() end,
                 IsDisabled   = function() return Controls.ResolutionPullDown:IsDisabled() end,
                 OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
                 OnClick      = function()
-                    local ddList = mgr:CreateUIWidget("List")
+                    local ddList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsList"), "List")
                     ddList:AddInputBinding({ Key = Keys.VK_ESCAPE, Action = function()
                         mgr:Pop(); return true
                     end })
@@ -2428,7 +2428,7 @@ local graphicsBaseSpecs = {
                     local curH = tonumber(Options.GetAppOption("Video", "RenderHeight"))
                     local selectedChild = nil
                     for _, mode in ipairs(m_resModes) do
-                        local child = mgr:CreateUIWidget("MenuItem", {
+                        local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsMenuItem"), "MenuItem", {
                             GetLabel     = function() return mode.label end,
                             OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
                             OnClick      = function()
@@ -2462,7 +2462,7 @@ local graphicsBaseSpecs = {
     {
         type = "X",
         build = function()      -- Advanced toggle button
-            return mgr:CreateUIWidget("Button", {
+            return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsButton"), "Button", {
                 GetLabel     = function() return Controls.AdvancedGraphicsOptions:GetText() end,
                 OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
                 OnClick      = function() OnToggleAdvancedOptions() end,
@@ -2526,7 +2526,7 @@ local interfaceTabSpecs = {
     {
         type = "X",
         build = function()      -- Scroll speed (continuous)
-            return mgr:CreateUIWidget("Slider", {
+            return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsSlider"), "Slider", {
                 GetLabel  = function() return Locale.Lookup("LOC_OPTIONS_SCROLL_SPEED") end,
                 GetValue  = function() return Controls.ScrollSpeedValue:GetText() end,
                 Increment = function()
@@ -2551,7 +2551,7 @@ local interfaceTabSpecs = {
     {
         type = "X",
         build = function()      -- Scroll text speed (continuous)
-            return mgr:CreateUIWidget("Slider", {
+            return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsSlider"), "Slider", {
                 GetLabel  = function() return Locale.Lookup("LOC_OPTIONS_SCROLL_TEXT_SPEED") end,
                 GetValue  = function() return Controls.ScrollTextSpeedValue:GetText() end,
                 Increment = function()
@@ -2580,7 +2580,7 @@ local interfaceTabSpecs = {
     {
         type = "X",
         build = function()
-            return mgr:CreateUIWidget("Button", {
+            return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsButton"), "Button", {
                 GetLabel     = function() return Controls.SwitchUILayout:GetText() end,
                 IsHidden     = function() return Controls.SwitchUILayout:IsHidden() end,
                 OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
@@ -2643,13 +2643,13 @@ local function BuildKeyBindingsTab()
         if action.cat ~= currentCat then
             currentCat = action.cat
             local catName = currentCat
-            Add(mgr:CreateUIWidget("StaticText", {
+            Add(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsStaticText"), "StaticText", {
                 GetLabel = function() return catName end,
             }))
         end
 
         local actionId = action.id
-        local sub = mgr:CreateUIWidget("SubMenu", {
+        local sub = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsSubMenu"), "SubMenu", {
             GetLabel     = function() return action.name end,
             GetValue     = function()
                 local p = Input.GetGestureDisplayString(actionId, 0)
@@ -2668,7 +2668,7 @@ local function BuildKeyBindingsTab()
             StartActiveKeyBinding(actionId, index)
             -- Push a key capture popup onto the manager stack
             local prompt = Locale.Lookup("LOC_CAI_KEYBINDING_PRESS_KEY", action.name)
-            local capturePopup = mgr:CreateUIWidget("Panel", {
+            local capturePopup = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsPanel"), "Panel", {
                 GetLabel = function() return prompt end,
                 SpeechSettings = { Role = false },
             })
@@ -2689,17 +2689,17 @@ local function BuildKeyBindingsTab()
             mgr:Push(capturePopup)
         end
 
-        sub:AddChild(mgr:CreateUIWidget("MenuItem", {
+        sub:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsMenuItem"), "MenuItem", {
             GetLabel = function() return Locale.Lookup("LOC_CAI_KEYBINDING_SET_PRIMARY") end,
             GetValue = function() return Input.GetGestureDisplayString(actionId, 0) or unbound end,
             OnClick  = function() StartBinding(0) end,
         }))
-        sub:AddChild(mgr:CreateUIWidget("MenuItem", {
+        sub:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsMenuItem"), "MenuItem", {
             GetLabel = function() return Locale.Lookup("LOC_CAI_KEYBINDING_SET_ALT") end,
             GetValue = function() return Input.GetGestureDisplayString(actionId, 1) or unbound end,
             OnClick  = function() StartBinding(1) end,
         }))
-        sub:AddChild(mgr:CreateUIWidget("MenuItem", {
+        sub:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsMenuItem"), "MenuItem", {
             GetLabel = function() return Locale.Lookup("LOC_CAI_KEYBINDING_CLEAR_PRIMARY") end,
             IsHidden = function() return not Input.GetGestureDisplayString(actionId, 0) end,
             OnClick  = function()
@@ -2708,7 +2708,7 @@ local function BuildKeyBindingsTab()
                 RefreshKeyBinding()
             end,
         }))
-        sub:AddChild(mgr:CreateUIWidget("MenuItem", {
+        sub:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsMenuItem"), "MenuItem", {
             GetLabel = function() return Locale.Lookup("LOC_CAI_KEYBINDING_CLEAR_ALT") end,
             IsHidden = function() return not Input.GetGestureDisplayString(actionId, 1) end,
             OnClick  = function()
@@ -2744,20 +2744,20 @@ end
 
 ---Builds the static panel skeleton: OptionsPanel with TabBar, OptionsList, action buttons
 local function BuildBasePanel()
-    OptionsPanel = mgr:CreateUIWidget("Dialog", {
+    OptionsPanel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsDialog"), "Dialog", {
         GetLabel = function() return Locale.Lookup("LOC_CAI_OPTIONS_DIALOG") end,
         SpeechSettings = { Role = false }
     })
 
     -- Tab bar as first child of OptionsPanel (not inside OptionsList)
-    TabBar = mgr:CreateUIWidget("TabBar")
+    TabBar = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsTabBar"), "TabBar")
     OptionsPanel:AddChild(TabBar)
 
     for i, tab in ipairs(m_tabs) do
         local tabBtn   = tab[1]
         local titleKey = tab[3]
         local tabIdx   = i
-        TabBar:AddChild(mgr:CreateUIWidget("Tab", {
+        TabBar:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsTab"), "Tab", {
             GetLabel     = function() return Locale.Lookup(titleKey) end,
             OnFocusEnter = function(w)
                 UI.PlaySound("Main_Menu_Mouse_Over")
@@ -2771,23 +2771,23 @@ local function BuildBasePanel()
     end
 
     -- Options list as second child of OptionsPanel
-    OptionsList = mgr:CreateUIWidget("List")
+    OptionsList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsList"), "List")
     OptionsPanel:AddChild(OptionsList)
 
     -- Action buttons as direct Panel children (below the list)
-    OptionsPanel:AddChild(mgr:CreateUIWidget("Button", {
+    OptionsPanel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsButton"), "Button", {
         GetLabel     = function() return Controls.ConfirmButton:GetText() end,
         IsDisabled   = function() return Controls.ConfirmButton:IsDisabled() end,
         OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
         OnClick      = function() OnConfirm() end,
     }))
-    OptionsPanel:AddChild(mgr:CreateUIWidget("Button", {
+    OptionsPanel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsButton"), "Button", {
         GetLabel     = function() return Controls.ResetButton:GetText() end,
         IsHidden     = function() return Controls.ResetButton:IsHidden() end,
         OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
         OnClick      = function() OnReset() end,
     }))
-    OptionsPanel:AddChild(mgr:CreateUIWidget("Button", {
+    OptionsPanel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsButton"), "Button", {
         GetLabel     = function() return Controls.WindowCloseButton:GetText() end,
         OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
         OnClick      = function() OnCancel() end,
@@ -2868,7 +2868,7 @@ InputHandler = WrapFunc(InputHandler, function(orig, inputStruct)
         local handled = mgr:HandleInput(inputStruct)
         if handled then return handled end
     end    
-    return orig(inputStruct) or true
+    return orig(inputStruct)
 end)
 --#End of accessibility integration
 Initialize();

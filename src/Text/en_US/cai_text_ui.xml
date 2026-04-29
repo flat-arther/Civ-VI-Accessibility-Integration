@@ -52,6 +52,15 @@
     <Row Tag="LOC_UIWidget_Role_TreeviewItem" Language="en_US">
       <Text>Tree Item</Text>
     </Row>
+    <Row Tag="LOC_CAI_TREEVIEW_EXPANDED" Language="en_US">
+      <Text>Expanded</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TREEVIEW_COLLAPSED" Language="en_US">
+      <Text>Collapsed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TREEVIEW_ITEM_COUNT" Language="en_US">
+      <Text>{1_Count} items</Text>
+    </Row>
     <Row Tag="LOC_UIWidget_Role_GameView" Language="en_US">
       <Text>Game View</Text>
     </Row>
@@ -150,6 +159,107 @@
     <Row Tag="LOC_CAI_EXITED_MOVEMENT_MODE" Language="en_US">
       <Text>Exited movement mode</Text>
     </Row>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_UP" Language="en_US">
+      <Text>Move cursor up</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_UP_TOOLTIP" Language="en_US">
+      <Text>Moves the CAI map cursor up</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_DOWN" Language="en_US">
+      <Text>Move cursor down</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_DOWN_TOOLTIP" Language="en_US">
+      <Text>Moves the CAI map cursor down</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_LEFT" Language="en_US">
+      <Text>Move cursor left</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_LEFT_TOOLTIP" Language="en_US">
+      <Text>Moves the CAI map cursor left</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_RIGHT" Language="en_US">
+      <Text>Move cursor right</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_RIGHT_TOOLTIP" Language="en_US">
+      <Text>Moves the CAI map cursor right</Text>
+    </Row>
+
+    <!-- Notification panel -->
+    <Row Tag="LOC_CAI_NOTIFICATION_CENTER" Language="en_US">
+      <Text>Notification center</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NOTIFICATION_CENTER_TOOLTIP" Language="en_US">
+      <Text>Opens an accessible tree of current notifications</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NOTIFICATION_EMPTY" Language="en_US">
+      <Text>No current notifications</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NOTIFICATION_ALERT" Language="en_US">
+      <Text>Alert: {1_Notification}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NOTIFICATION_AT_LOCATION" Language="en_US">
+      <Text>At {1_X}, {2_Y}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NOTIFICATION_GROUP_COUNT" Language="en_US">
+      <Text>{1_Count} notifications</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NOTIFICATION_STACK_POSITION" Language="en_US">
+      <Text>{1_Index} of {2_Count}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NOTIFICATION_WRONG_PHASE" Language="en_US">
+      <Text>Wrong phase</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NOTIFICATION_DISMISSIBLE" Language="en_US">
+      <Text>Dismissible</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NOTIFICATION_EXPIRES_TURN" Language="en_US">
+      <Text>Expires turn {1_Turn}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NOTIFICATION_UNAVAILABLE" Language="en_US">
+      <Text>Notification no longer available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NOTIFICATION_DISMISSED" Language="en_US">
+      <Text>Notification dismissed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NOTIFICATION_GROUP_DISMISSED" Language="en_US">
+      <Text>{1_Count} notifications dismissed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NOTIFICATION_CANNOT_DISMISS" Language="en_US">
+      <Text>Cannot dismiss this notification</Text>
+    </Row>
+
+    <!-- Top panel hotkeys -->
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE" Language="en_US">
+      <Text>Read turn, time, and date</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE_TOOLTIP" Language="en_US">
+      <Text>Reads the current turn, time, and date from the top panel</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_YIELDS" Language="en_US">
+      <Text>Read top panel yield summary</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_YIELDS_TOOLTIP" Language="en_US">
+      <Text>Reads all top panel yield summaries, including gold and faith balances</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_YIELD_INFO" Language="en_US">
+      <Text>Yield info</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_YIELD_INFO_TOOLTIP" Language="en_US">
+      <Text>Opens a tree of top panel yield breakdowns</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_RESOURCE_INFO" Language="en_US">
+      <Text>Resource info</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_RESOURCE_INFO_TOOLTIP" Language="en_US">
+      <Text>Opens a list of top panel strategic resources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_BALANCE_AND_RATE" Language="en_US">
+      <Text>{1_Balance}, {2_PerTurn}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_NO_STRATEGIC_RESOURCES" Language="en_US">
+      <Text>No strategic resources</Text>
+    </Row>
+
     <Row Tag="LOC_CAI_CITY_PANEL" Language="en_US">
       <Text>City</Text>
     </Row>
@@ -404,6 +514,104 @@
       <Text>Next turn progress</Text>
     </Row>
 
+    <!-- World Tracker accessibility -->
+    <Row Tag="LOC_CAI_WORLDTRACKER_OPTIONS" Language="en_US">
+      <Text>World Tracker options</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_TOGGLE_OPTIONS" Language="en_US">
+      <Text>World Tracker menu</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_EXPAND" Language="en_US">
+      <Text>Show World Tracker</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_COLLAPSE" Language="en_US">
+      <Text>Hide World Tracker</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_EXPANDED" Language="en_US">
+      <Text>Shown</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_COLLAPSED" Language="en_US">
+      <Text>Hidden</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_VISIBLE" Language="en_US">
+      <Text>Visible</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_HIDDEN" Language="en_US">
+      <Text>Hidden</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_NO_ACTIVE_RESEARCH" Language="en_US">
+      <Text>No research selected</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_NO_ACTIVE_CIVIC" Language="en_US">
+      <Text>No civic selected</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_TURNS_REMAINING" Language="en_US">
+      <Text>{1_Num} turns remaining</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_UNLOCKS" Language="en_US">
+      <Text>Unlocks: {1_Items}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_MORE_UNLOCKS" Language="en_US">
+      <Text>{1_Num} more</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_SEARCH_FILTER" Language="en_US">
+      <Text>Search filter: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_UNIT_COORDS" Language="en_US">
+      <Text>Location {1_X}, {2_Y}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_UNIT_CAN_MOVE" Language="en_US">
+      <Text>Can move</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_UNIT_NO_MOVES" Language="en_US">
+      <Text>No moves remaining</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_UNIT_SLEEP" Language="en_US">
+      <Text>Sleeping</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_UNIT_HOLD" Language="en_US">
+      <Text>Holding</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_UNIT_FORTIFIED" Language="en_US">
+      <Text>Fortified</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_UNIT_MISSING" Language="en_US">
+      <Text>Unit no longer available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_OPEN_RESEARCH_CHOOSER" Language="en_US">
+      <Text>Open research chooser</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_OPEN_RESEARCH_CHOOSER_TOOLTIP" Language="en_US">
+      <Text>Opens the vanilla research chooser from the World Tracker</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_OPEN_CIVICS_CHOOSER" Language="en_US">
+      <Text>Open civics chooser</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_OPEN_CIVICS_CHOOSER_TOOLTIP" Language="en_US">
+      <Text>Opens the vanilla civics chooser from the World Tracker</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_READ_SUMMARY" Language="en_US">
+      <Text>Read World Tracker summary</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_READ_SUMMARY_TOOLTIP" Language="en_US">
+      <Text>Reads current research, current civic, and total unit count</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_SUMMARY" Language="en_US">
+      <Text>World Tracker summary</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_SUMMARY_UNAVAILABLE" Language="en_US">
+      <Text>World Tracker summary unavailable</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_RESEARCH_LINE" Language="en_US">
+      <Text>Research: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_CIVIC_LINE" Language="en_US">
+      <Text>Civic: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLDTRACKER_UNIT_COUNT" Language="en_US">
+      <Text>Units: {1_Count}</Text>
+    </Row>
+
     <!-- City hotkeys -->
     <Row Tag="LOC_OPTIONS_HOTKEY_CATEGORY_CITY" Language="en_US">
       <Text>City</Text>
@@ -434,6 +642,9 @@
     </Row>
     <Row Tag="LOC_CAI_CITY_CHANGE_CITIZEN_YIELD_FOCUS_TOOLTIP" Language="en_US">
       <Text>Opens the citizen yield focus controls</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SELECTION_ACTIONS_FOR" Language="en_US">
+      <Text>Actions for {1_Name}</Text>
     </Row>
 
     <!-- Selection info hotkeys -->

@@ -474,7 +474,7 @@ function GetItemsForTab(tab)
 end
 
 function CreateActionNode(props)
-    local node = mgr:CreateUIWidget("TreeviewItem", {
+    local node = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIProductionPanelTreeviewItem"), "TreeviewItem", {
         GetLabel = props.GetLabel,
         GetTooltip = props.GetTooltip,
         IsDisabled = props.IsDisabled,
@@ -487,12 +487,14 @@ function CreateActionNode(props)
     })
     node._caiFocusKey = props.FocusKey
 
-    node:AddInputBinding({
-        Key = Keys.VK_RETURN,
-        Action = function(w)
-            return InvokePrimaryAction(w, props.LeftAction)
-        end,
-    })
+    if props.LeftAction then
+        node:AddInputBinding({
+            Key = Keys.VK_RETURN,
+            Action = function(w)
+                return InvokePrimaryAction(w, props.LeftAction)
+            end,
+        })
+    end
     if props.RightAction then
         node:AddInputBinding({
             Key = Keys.VK_RETURN,
@@ -776,7 +778,7 @@ function RemoveCurrentProductionFromQueue()
 end
 
 function CreateQueueRowWidget(queueIndex, name)
-    local row = mgr:CreateUIWidget("Button", {
+    local row = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIProductionPanelButton"), "Button", {
         GetLabel = function() return name end,
         OnClick = function() return true end,
         OnFocusEnter = function(w)
@@ -817,7 +819,7 @@ function CreateQueueRowWidget(queueIndex, name)
 end
 
 function CreateQueueCurrentWidget()
-    local row = mgr:CreateUIWidget("Button", {
+    local row = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIProductionPanelButton"), "Button", {
         GetLabel = ReadCurrentProductionLabel,
         GetTooltip = ReadCurrentProductionTooltip,
         OnClick = function() return true end,
@@ -918,29 +920,7 @@ function InvokePrimaryAction(node, leftAction)
         leftAction(node)
         return true
     end
-    if not node.IsLeaf or (type(node.IsLeaf) == "function" and not node:IsLeaf()) then
-        return mgr.WidgetTemplateHelpers:ToggleTreeItem(node)
-    end
     return false
-end
-
-function OnTreeExpandOrDescend()
-    local item = GetFocusedTreeItem()
-    if not item then return false end
-    if type(item.IsLeaf) == "function" and item:IsLeaf() then return false end
-    if mgr.WidgetTemplateHelpers:ExpandTreeItem(item) then
-        return true
-    end
-    return mgr.WidgetTemplateHelpers:FocusTreeFirstChild(item)
-end
-
-function OnTreeCollapseOrAscend()
-    local item = GetFocusedTreeItem()
-    if not item then return false end
-    if mgr.WidgetTemplateHelpers:CollapseTreeItem(item) then
-        return true
-    end
-    return mgr.WidgetTemplateHelpers:FocusParentTreeItem(m_caiTree, item)
 end
 
 function RebuildBody(preserveTreeFocus)
@@ -1031,7 +1011,7 @@ function CreateTabWidget(index, vanillaTabControl, vanillaHandler, alternateTabC
         table.insert(tabControls, control)
     end
 
-    return mgr:CreateUIWidget("Tab", {
+    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIProductionPanelTab"), "Tab", {
         GetLabel = function() return GetTabControlText(tabControls) end,
         IsDisabled = function() return AreAllTabControlsDisabled(tabControls) end,
         IsHidden = function() return AreAllTabControlsHidden(tabControls) end,
@@ -1112,11 +1092,11 @@ end
 function EnsurePanelBuilt()
     if m_caiPanel then return end
 
-    m_caiPanel = mgr:CreateUIWidget("Panel", {
+    m_caiPanel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIProductionPanelPanel"), "Panel", {
         GetLabel = function() return Locale.Lookup("LOC_HUD_CHOOSE_PRODUCTION") end,
     })
 
-    m_caiTabBar = mgr:CreateUIWidget("TabBar", {
+    m_caiTabBar = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIProductionPanelTabBar"), "TabBar", {
         GetLabel = function() return Locale.Lookup("LOC_HUD_CHOOSE_PRODUCTION") end,
         IsHidden = function(w)
             return IsProductionTutorialMode() or #w:GetVisibleChildren() == 0
@@ -1142,27 +1122,11 @@ function EnsurePanelBuilt()
     m_caiTabBar:AddChild(m_caiTabs[TAB_QUEUE])
     m_caiTabBar.DefaultIndex = GetSelectedTabDefaultIndex()
 
-    m_caiTree = mgr:CreateUIWidget("Treeview", {
+    m_caiTree = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIProductionPanelTreeview"), "Treeview", {
         GetLabel = function() return Locale.Lookup("LOC_HUD_CHOOSE_PRODUCTION") end,
         IsHidden = function(w) return w._caiHidden end,
     })
     m_caiTree:AddInputBindings({
-        {
-            Key = Keys.VK_RIGHT,
-            MSG = KeyEvents.KeyDown,
-            Action = function()
-                return
-                    OnTreeExpandOrDescend()
-            end
-        },
-        {
-            Key = Keys.VK_LEFT,
-            MSG = KeyEvents.KeyDown,
-            Action = function()
-                return
-                    OnTreeCollapseOrAscend()
-            end
-        },
         {
             Key = Keys.VK_DELETE,
             Action = function()
@@ -1195,13 +1159,13 @@ function EnsurePanelBuilt()
     })
     m_caiPanel:AddChild(m_caiTree)
 
-    m_caiQueueList = mgr:CreateUIWidget("List", {
+    m_caiQueueList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIProductionPanelList"), "List", {
         GetLabel = function() return Locale.Lookup("LOC_CAI_PRODUCTION_QUEUE_LIST") end,
         IsHidden = function(w) return w._caiHidden end,
     })
     m_caiPanel:AddChild(m_caiQueueList)
 
-    m_caiCurrentNode = mgr:CreateUIWidget("TreeviewItem", {
+    m_caiCurrentNode = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIProductionPanelTreeviewItem"), "TreeviewItem", {
         GetLabel = ReadCurrentProductionLabel,
         GetTooltip = ReadCurrentProductionTooltip,
         IsHidden = function(w)
@@ -1296,7 +1260,7 @@ function EnsurePanelBuilt()
     )
     m_caiTree:AddChild(m_caiCatProjects)
 
-    m_caiDetailEdit = mgr:CreateUIWidget("Edit", {
+    m_caiDetailEdit = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIProductionPanelEdit"), "Edit", {
         GetLabel = function() return Locale.Lookup("LOC_CAI_PRODUCTION_DETAIL_LABEL") end,
         GetValue = function() return m_caiDetailEdit and m_caiDetailEdit.EditBuffer or "" end,
         AlwaysEdit = true,
@@ -1306,7 +1270,7 @@ function EnsurePanelBuilt()
     })
     m_caiPanel:AddChild(m_caiDetailEdit)
 
-    m_caiCloseBtn = mgr:CreateUIWidget("Button", {
+    m_caiCloseBtn = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIProductionPanelButton"), "Button", {
         GetLabel = function()
             if Controls.CloseButton and type(Controls.CloseButton.GetToolTipString) == "function" then
                 local tip = Controls.CloseButton:GetToolTipString()

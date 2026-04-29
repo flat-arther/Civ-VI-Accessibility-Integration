@@ -14,7 +14,8 @@ local UIScreenManager = {
         speakPosition = true,
         speakState = true,
         speakTooltip = true,
-        SearchTimeout = 1.0
+        SearchTimeout = 1.0,
+        ValidateWidgetIds = false
     }
 }
 
@@ -32,20 +33,35 @@ function UIScreenManager:New()
     mgr.Stack = {}
     mgr.CurrentPath = {}
     mgr.NextStackOrder = 0
+    mgr.NextWidgetId = 0
     mgr.WidgetTemplateHelpers = WidgetTemplateHelpers
     mgr.WidgetTemplateHelpers.Manager = mgr
     return mgr
 end
 
----Creates a UI widget given a type and an optional properties table
+---@param prefix string
+---@return string
+function UIScreenManager:GenerateWidgetId(prefix)
+    self.NextWidgetId = (self.NextWidgetId or 0) + 1
+    prefix = prefix or "CAIWidget"
+    return string.format("%s%04d", prefix, self.NextWidgetId)
+end
+
+---Creates a UI widget given a unique id, type, and optional properties table
+---@param id string ---Unique widget id used for lookup
 ---@param type string ---The type of widget to create. This should correspond to a key in 'WidgetTemplates'. If not, the props table must not be nil or empty
 ---@param props? table ---A table of properties to override the widget template's defaults. This is optional if you use a template
 ---@return UIWidget|nil --The created widget, or nil if the type was invalid
-function UIScreenManager:CreateUIWidget(type, props)
+function UIScreenManager:CreateUIWidget(id, type, props)
+    if not id or id == "" then
+        print("CAI CreateUIWidget missing widget id")
+        return
+    end
     local template = WidgetTemplates[type]
     if not template and not props then return end
     local w = setmetatable({}, { __index = UIWidget }) ---@type UIWidget
 
+    w.Id = id
     w.Manager = self
     w.Type = type
     w.Children = {}
@@ -53,8 +69,10 @@ function UIScreenManager:CreateUIWidget(type, props)
     w.SpeechSettings = {}
     w.FocusedChild = nil
 
-    for k, v in pairs(template) do
-        w[k] = v
+    if template then
+        for k, v in pairs(template) do
+            w[k] = v
+        end
     end
     if props then
         for k, v in pairs(props) do
@@ -90,6 +108,9 @@ end
 ---@param priority? PopupPriority
 function UIScreenManager:Push(w, priority)
     if not w then return end
+    if self.CAISettings and self.CAISettings.ValidateWidgetIds then
+        self:WarnIfDuplicateWidgetId(w)
+    end
 
     local oldTop = self:GetTop()
     local oldPriority = oldTop and oldTop.__priority
@@ -121,7 +142,6 @@ function UIScreenManager:UpdateRootFocus()
 end
 
 ---Removes a widget from the stack. Defaults to the active root.
----@param target? UIWidget
 ---@return UIWidget|nil
 function UIScreenManager:Pop()
     if #self.Stack == 0 then return nil end
@@ -134,6 +154,29 @@ function UIScreenManager:Pop()
 
     self:UpdateRootFocus()
     return w
+end
+
+---Removes a widget root from the stack by id.
+---@param id string
+---@return UIWidget|nil
+function UIScreenManager:RemoveFromStack(id)
+    if not id or id == "" then return nil end
+    if #self.Stack == 0 then return nil end
+
+    for i = #self.Stack, 1, -1 do
+        local w = self.Stack[i]
+        local widgetId = w and w.GetId and w:GetId() or w and w.Id
+        if widgetId == id then
+            table.remove(self.Stack, i)
+            w.__priority = nil
+            w.__stackOrder = nil
+            w:Destroy()
+            self:UpdateRootFocus()
+            return w
+        end
+    end
+
+    return nil
 end
 
 ---Returns the top widget in the stack
@@ -165,8 +208,12 @@ function UIScreenManager:BuildAnnouncement(path, diverge)
     for i = diverge, #path do
         local current = path[i]
         if current.BuildSpeech then
-            local speech = current:BuildSpeech()
-            if speech then table.insert(announcements, speech) end
+            local ignore = ((current.SpeechSettings and current.SpeechSettings.IgnoreWhenNotFocused) and self:GetFocusedWidget() ~= current) or
+            false
+            if not ignore then
+                local speech = current:BuildSpeech()
+                if speech then table.insert(announcements, speech) end
+            end
         end
     end
 
@@ -408,6 +455,50 @@ function UIScreenManager:HasWidget(w)
         if widget == w then return true end
     end
     return false
+end
+
+---@param id string
+---@param recurse? boolean
+---@return UIWidget|nil
+function UIScreenManager:GetWidgetById(id, recurse)
+    if not id or id == "" then return nil end
+
+    for i = #self.Stack, 1, -1 do
+        local match = self:FindWidgetByIdInTree(self.Stack[i], id, recurse)
+        if match then return match end
+    end
+    return nil
+end
+
+---@param candidate UIWidget
+---@param root? UIWidget
+function UIScreenManager:WarnIfDuplicateWidgetId(candidate, root)
+    if not candidate or not candidate.Id or candidate.Id == "" then return end
+    local existing = self:GetWidgetById(candidate.Id, true)
+    if existing == candidate then existing = nil end
+    if not existing and root then
+        existing = self:FindWidgetByIdInTree(root, candidate.Id, true, candidate)
+    end
+    if existing then
+        print("CAI duplicate widget id: " .. tostring(candidate.Id))
+    end
+end
+
+---@param root UIWidget
+---@param id string
+---@param recurse? boolean
+---@param ignore? UIWidget
+---@return UIWidget|nil
+function UIScreenManager:FindWidgetByIdInTree(root, id, recurse, ignore)
+    if not root or not id or id == "" then return nil end
+    if root ~= ignore and root.Id == id then return root end
+    if recurse and root.Children then
+        for _, child in ipairs(root.Children) do
+            local match = self:FindWidgetByIdInTree(child, id, recurse, ignore)
+            if match then return match end
+        end
+    end
+    return nil
 end
 
 ---Adds a char to the search buffer

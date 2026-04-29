@@ -1785,7 +1785,7 @@ local function OpenParamDropdown(parameterId)
 		and g_GameParameters.Parameters[parameterId]
 	if not param or not param.Values then return end
 
-	local optList = mgr:CreateUIWidget("List")
+	local optList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupList"), "List")
 	optList:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
 		mgr:Pop()
 		return true
@@ -1795,7 +1795,7 @@ local function OpenParamDropdown(parameterId)
 	local selectedChild = nil
 	for _, v in ipairs(param.Values) do
 		local val = v -- capture
-		local child = mgr:CreateUIWidget("MenuItem", {
+		local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupMenuItem"), "MenuItem", {
 			GetLabel     = function() return val.Name end,
 			GetTooltip   = function() return val.Description or "" end,
 			OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
@@ -1883,7 +1883,7 @@ local function OpenLeaderDropdown()
 	local param = parameters.Parameters and parameters.Parameters["PlayerLeader"]
 	if not param or not param.Values then return end
 
-	local optList = mgr:CreateUIWidget("List")
+	local optList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupList"), "List")
 	optList:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
 		mgr:Pop()
 		return true
@@ -1895,7 +1895,7 @@ local function OpenLeaderDropdown()
 		local val = v
 		local sections = BuildLeaderInfoSections(val.Domain, val.Value)
 
-		local child = mgr:CreateUIWidget("MenuItem", {
+		local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupMenuItem"), "MenuItem", {
 			GetLabel     = function() return val.Name end,
 			OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 			OnClick      = function()
@@ -1932,7 +1932,7 @@ end
 -- Build the panel + settings list + action buttons (called once).
 -- ---------------------------------------------------------------------------
 local function BuildPanel()
-	CAI_Panel = mgr:CreateUIWidget("Dialog", {
+	CAI_Panel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupDialog"), "Dialog", {
 		GetLabel = function() return Controls.WindowTitle:GetText() end,
 		SpeechSettings = { Role = false },
 	})
@@ -1948,14 +1948,14 @@ local function BuildPanel()
 	end
 
 	-- Tab bar: Basic / Advanced
-	CAI_TabBar = mgr:CreateUIWidget("TabBar")
-	CAI_TabBar:AddChild(mgr:CreateUIWidget("Tab", {
+	CAI_TabBar = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupTabBar"), "TabBar")
+	CAI_TabBar:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupTab"), "Tab", {
 		GetLabel = function() return Controls.WindowTitle:GetText() end,
 		GetState = function() return m_activeTab == "basic" and Locale.Lookup("LOC_CAI_STATE_SELECTED") or nil end,
 		OnFocusEnter = function() SwitchToTab("basic") end,
 		OnClick      = function() SwitchToTab("basic") end,
 	}))
-	CAI_TabBar:AddChild(mgr:CreateUIWidget("Tab", {
+	CAI_TabBar:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupTab"), "Tab", {
 		GetLabel = function() return Controls.AdvancedSetupButton:GetText() end,
 		GetState = function() return m_activeTab == "advanced" and Locale.Lookup("LOC_CAI_STATE_SELECTED") or nil end,
 		OnFocusEnter = function() SwitchToTab("advanced") end,
@@ -1963,12 +1963,12 @@ local function BuildPanel()
 	}))
 	CAI_Panel:AddChild(CAI_TabBar)
 
-	CAI_SettingsList = mgr:CreateUIWidget("List")
+	CAI_SettingsList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupList"), "List")
 	CAI_Panel:AddChild(CAI_SettingsList)
 
 	-- Ruleset pulldown (first in visual order)
 	local rulesetSpec = kStaticPulldowns[1]
-	CAI_SettingsList:AddChild(mgr:CreateUIWidget("DropdownMenu", {
+	CAI_SettingsList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupDropdownMenu"), "DropdownMenu", {
 		GetLabel     = function() return Locale.Lookup(rulesetSpec[4]) end,
 		GetValue     = function() local c = rulesetSpec[2](); return c and c:GetButton():GetText() or "" end,
 		GetTooltip   = function() local c = rulesetSpec[2](); return c and c:GetButton():GetToolTipString() or "" end,
@@ -1979,7 +1979,7 @@ local function BuildPanel()
 	}))
 
 	-- Leader pulldown (second in visual order)
-	CAI_SettingsList:AddChild(mgr:CreateUIWidget("DropdownMenu", {
+	CAI_SettingsList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupDropdownMenu"), "DropdownMenu", {
 		GetLabel     = function() return Locale.Lookup("LOC_SETUP_CIVILIZATION") end,
 		GetValue     = function()
 			local scrollText = Controls.Basic_LocalPlayerScrollText
@@ -1998,7 +1998,7 @@ local function BuildPanel()
 		local getCtrl = spec[2]
 		local getContainer = spec[3]
 		local locKey = spec[4]
-		CAI_SettingsList:AddChild(mgr:CreateUIWidget("DropdownMenu", {
+		CAI_SettingsList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupDropdownMenu"), "DropdownMenu", {
 			GetLabel     = function() return Locale.Lookup(locKey) end,
 			GetValue     = function() local c = getCtrl(); return c and c:GetButton():GetText() or "" end,
 			GetTooltip   = function() local c = getCtrl(); return c and c:GetButton():GetToolTipString() or "" end,
@@ -2010,7 +2010,7 @@ local function BuildPanel()
 	end
 
 	-- Map select button — label is "Map Type", value is the current map name
-	CAI_SettingsList:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_SettingsList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
 		GetLabel     = function() return Locale.Lookup("LOC_SETUP_MAP_TYPE") end,
 		GetValue     = function() return Controls.MapSelectButton:GetText() or "" end,
 		GetTooltip   = function() return Controls.MapSelectButton:GetToolTipString() or "" end,
@@ -2020,13 +2020,13 @@ local function BuildPanel()
 
 	-- Action buttons as direct panel children
 	-- LoadConfig and SaveConfig are only visible in advanced mode
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
 		GetLabel     = function() return Controls.LoadConfig:GetText() end,
 		IsHidden     = function() return Controls.LoadConfig:IsHidden() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 		OnClick      = function() OnLoadConfig() end,
 	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
 		GetLabel     = function() return Controls.SaveConfig:GetText() end,
 		IsHidden     = function() return Controls.SaveConfig:IsHidden() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
@@ -2041,7 +2041,7 @@ local function BuildPanel()
 	for _, btn in ipairs(kActionButtons) do
 		local getCtrl = btn[1]
 		local onClick = btn[2]
-		CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+		CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
 			GetLabel     = function() return getCtrl():GetText() end,
 			IsHidden     = function() return getCtrl():IsHidden() end,
 			OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
@@ -2065,7 +2065,7 @@ CreateSimpleParameterDriver = WrapFunc(CreateSimpleParameterDriver, function(ori
 
 	if parameter.GroupId == "GameModes" or parameter.Domain == "bool" then
 		-- Checkbox
-		widget = mgr:CreateUIWidget("Checkbox", {
+		widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupCheckbox"), "Checkbox", {
 			GetLabel   = function() return parameter.Name end,
 			GetTooltip = function() return parameter.Description or "" end,
 			GetValue   = function()
@@ -2106,7 +2106,7 @@ CreateSimpleParameterDriver = WrapFunc(CreateSimpleParameterDriver, function(ori
 		-- Slider
 		local minVal = parameter.Values.MinimumValue
 		local maxVal = parameter.Values.MaximumValue
-		widget = mgr:CreateUIWidget("Slider", {
+		widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupSlider"), "Slider", {
 			GetLabel   = function() return parameter.Name end,
 			GetTooltip = function() return parameter.Description or "" end,
 			GetValue   = function()
@@ -2136,7 +2136,7 @@ CreateSimpleParameterDriver = WrapFunc(CreateSimpleParameterDriver, function(ori
 		})
 	elseif parameter.Values then
 		-- MultiValue pulldown
-		widget = mgr:CreateUIWidget("DropdownMenu", {
+		widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupDropdownMenu"), "DropdownMenu", {
 			GetLabel     = function() return parameter.Name end,
 			GetTooltip   = function() return parameter.Description or "" end,
 			GetValue     = function()
@@ -2156,7 +2156,7 @@ CreateSimpleParameterDriver = WrapFunc(CreateSimpleParameterDriver, function(ori
 	elseif parameter.Domain == "int" or parameter.Domain == "uint" or parameter.Domain == "text" then
 		-- Edit/string
 		local domain = parameter.Domain
-		widget = mgr:CreateUIWidget("Edit", {
+		widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupEdit"), "Edit", {
 			GetLabel   = function() return parameter.Name end,
 			GetValue   = function()
 				local ctrl = control.Control
@@ -2199,7 +2199,7 @@ local function OpenLeaderDropdownForPlayer(playerId)
 	local param = parameters.Parameters and parameters.Parameters["PlayerLeader"]
 	if not param or not param.Values then return end
 
-	local optList = mgr:CreateUIWidget("List")
+	local optList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupList"), "List")
 	optList:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
 		mgr:Pop()
 		return true
@@ -2212,7 +2212,7 @@ local function OpenLeaderDropdownForPlayer(playerId)
 		local sections = (playerId == m_singlePlayerID)
 			and BuildLeaderInfoSections(val.Domain, val.Value) or {}
 
-		local child = mgr:CreateUIWidget("MenuItem", {
+		local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupMenuItem"), "MenuItem", {
 			GetLabel     = function() return val.Name end,
 			OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 			OnClick      = function()
@@ -2264,7 +2264,7 @@ local function OpenColorDropdown()
 	local icons = GetPlayerIcons(leaderParam.Value.Domain, leaderParam.Value.Value)
 	if not icons then return end
 
-	local optList = mgr:CreateUIWidget("List")
+	local optList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupList"), "List")
 	optList:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
 		mgr:Pop()
 		return true
@@ -2276,7 +2276,7 @@ local function OpenColorDropdown()
 		local backColor, frontColor = UI.GetPlayerColorValues(icons.PlayerColor, j)
 		if backColor and frontColor and backColor ~= 0 and frontColor ~= 0 then
 			local colorIdx = j
-			local child = mgr:CreateUIWidget("MenuItem", {
+			local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupMenuItem"), "MenuItem", {
 				GetLabel     = function() return Locale.Lookup("LOC_CAI_COLOR") .. " " .. (colorIdx + 1) end,
 				OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 				OnClick      = function()
@@ -2326,7 +2326,7 @@ local function BuildPlayerSection()
 	m_aiPlayerWidgets = {}
 
 	-- Local player leader
-	m_advancedPlayersSection:AddChild(mgr:CreateUIWidget("DropdownMenu", {
+	m_advancedPlayersSection:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupDropdownMenu"), "DropdownMenu", {
 		GetLabel     = function() return Locale.Lookup("LOC_SETUP_CIVILIZATION") end,
 		GetValue     = function()
 			local scrollText = Controls.Advanced_LocalPlayerScrollText
@@ -2339,7 +2339,7 @@ local function BuildPlayerSection()
 	}))
 
 	-- Local player color
-	m_advancedPlayersSection:AddChild(mgr:CreateUIWidget("DropdownMenu", {
+	m_advancedPlayersSection:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupDropdownMenu"), "DropdownMenu", {
 		GetLabel     = function() return Locale.Lookup("LOC_CAI_COLOR") end,
 		GetValue     = function()
 			local ctrl = Controls.Advanced_LocalColorPullDown
@@ -2369,7 +2369,7 @@ local function BuildPlayerSection()
 			local playerNum = aiIndex + 1 -- capture for closure
 			local playerConfig = PlayerConfigurations[pid]
 
-			local aiSubmenu = mgr:CreateUIWidget("SubMenu", {
+			local aiSubmenu = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupSubMenu"), "SubMenu", {
 				GetLabel = function()
 					local params = GetPlayerParameters(pid)
 					local leaderParam = params and params.Parameters and params.Parameters["PlayerLeader"]
@@ -2379,7 +2379,7 @@ local function BuildPlayerSection()
 			})
 
 			-- Leader dropdown
-			aiSubmenu:AddChild(mgr:CreateUIWidget("DropdownMenu", {
+			aiSubmenu:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupDropdownMenu"), "DropdownMenu", {
 				GetLabel     = function() return Locale.Lookup("LOC_SETUP_CIVILIZATION") end,
 				GetValue     = function()
 					local params = GetPlayerParameters(pid)
@@ -2392,7 +2392,7 @@ local function BuildPlayerSection()
 
 			-- Remove button
 			if can_remove then
-				aiSubmenu:AddChild(mgr:CreateUIWidget("Button", {
+				aiSubmenu:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
 					GetLabel = function() return Locale.Lookup("LOC_DELETE_AI") end,
 					OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 					OnClick = function()
@@ -2409,7 +2409,7 @@ local function BuildPlayerSection()
 	end
 
 	-- Add AI button
-	m_advancedPlayersSection:AddChild(mgr:CreateUIWidget("Button", {
+	m_advancedPlayersSection:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
 		GetLabel     = function() return Controls.AddAIButton:GetText() end,
 		IsHidden     = function() return Controls.AddAIButton:IsHidden() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
@@ -2432,13 +2432,13 @@ local function BuildAdvancedChildren()
 		{ key = "Advanced",  label = "LOC_ADVANCED_OPTIONS" },
 	}
 	for _, def in ipairs(sectionDefs) do
-		m_advancedSections[def.key] = mgr:CreateUIWidget("List", {
+		m_advancedSections[def.key] = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupList"), "List", {
 			GetLabel = function() return Locale.Lookup(def.label) end,
 		})
 	end
 
 	-- Players section
-	m_advancedPlayersSection = mgr:CreateUIWidget("List", {
+	m_advancedPlayersSection = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupList"), "List", {
 		GetLabel = function() return Locale.Lookup("LOC_PLAYERS") end,
 	})
 	BuildPlayerSection()
@@ -2574,7 +2574,7 @@ function CreateAdvancedParamWidget(parameter, section)
 		-- These are handled by the special driver wraps when they fire during refresh
 		-- But if we're populating after the fact, create a simple button
 		local paramId_inner = parameter.ParameterId
-		widget = mgr:CreateUIWidget("Button", {
+		widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
 			GetLabel     = function() return parameter.Name end,
 			GetTooltip   = function() return parameter.Description or "" end,
 			GetValue     = function()
@@ -2607,7 +2607,7 @@ function CreateAdvancedParamWidget(parameter, section)
 			end,
 		})
 	elseif parameter.Domain == "bool" then
-		widget = mgr:CreateUIWidget("Checkbox", {
+		widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupCheckbox"), "Checkbox", {
 			GetLabel   = function() return parameter.Name end,
 			GetTooltip = function() return parameter.Description or "" end,
 			GetValue   = function()
@@ -2631,7 +2631,7 @@ function CreateAdvancedParamWidget(parameter, section)
 	elseif parameter.Values and parameter.Values.Type == "IntRange" then
 		local minVal = parameter.Values.MinimumValue
 		local maxVal = parameter.Values.MaximumValue
-		widget = mgr:CreateUIWidget("Slider", {
+		widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupSlider"), "Slider", {
 			GetLabel   = function() return parameter.Name end,
 			GetTooltip = function() return parameter.Description or "" end,
 			GetValue   = function()
@@ -2657,7 +2657,7 @@ function CreateAdvancedParamWidget(parameter, section)
 			end,
 		})
 	elseif parameter.Values then
-		widget = mgr:CreateUIWidget("DropdownMenu", {
+		widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupDropdownMenu"), "DropdownMenu", {
 			GetLabel     = function() return parameter.Name end,
 			GetTooltip   = function() return parameter.Description or "" end,
 			GetValue     = function()
@@ -2670,7 +2670,7 @@ function CreateAdvancedParamWidget(parameter, section)
 		})
 	elseif parameter.Domain == "int" or parameter.Domain == "uint" or parameter.Domain == "text" then
 		local domain = parameter.Domain
-		widget = mgr:CreateUIWidget("Edit", {
+		widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupEdit"), "Edit", {
 			GetLabel = function() return parameter.Name end,
 			GetValue = function()
 				local p = g_GameParameters and g_GameParameters.Parameters
@@ -2713,7 +2713,7 @@ CreateButtonPopupDriver = WrapFunc(CreateButtonPopupDriver, function(orig, o, pa
 	local section = GetAdvancedSection(parameter.GroupId)
 	if not section then return driver end
 
-	local widget = mgr:CreateUIWidget("Button", {
+	local widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
 		GetLabel     = function() return parameter.Name end,
 		GetValue     = function()
 			local c = driver.Cache
@@ -2740,7 +2740,7 @@ CreateMultiSelectWindowDriver = WrapFunc(CreateMultiSelectWindowDriver, function
 	local section = GetAdvancedSection(parameter.GroupId)
 	if not section then return driver end
 
-	local widget = mgr:CreateUIWidget("Button", {
+	local widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
 		GetLabel     = function() return parameter.Name end,
 		GetValue     = function()
 			local c = driver.Cache
@@ -2768,7 +2768,7 @@ CreateCityStatePickerDriver = WrapFunc(CreateCityStatePickerDriver, function(ori
 	local section = GetAdvancedSection(parameter.GroupId)
 	if not section then return driver end
 
-	local widget = mgr:CreateUIWidget("Button", {
+	local widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
 		GetLabel     = function() return parameter.Name end,
 		GetValue     = function()
 			local c = driver.Cache
@@ -2796,7 +2796,7 @@ CreateLeaderPickerDriver = WrapFunc(CreateLeaderPickerDriver, function(orig, o, 
 	local section = GetAdvancedSection(parameter.GroupId)
 	if not section then return driver end
 
-	local widget = mgr:CreateUIWidget("Button", {
+	local widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
 		GetLabel     = function() return parameter.Name end,
 		GetValue     = function()
 			local c = driver.Cache

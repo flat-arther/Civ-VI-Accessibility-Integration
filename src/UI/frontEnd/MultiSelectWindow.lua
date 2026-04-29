@@ -205,7 +205,7 @@ local function RebuildItemList()
 		local item = node["item"]
 		local checkBox = node["checkbox"]
 
-		local child = mgr:CreateUIWidget("Checkbox", {
+		local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowCheckbox"), "Checkbox", {
 			GetLabel = function() return item.Name end,
 			GetTooltip = function()
 				-- Sync the visual focus panel then read its text
@@ -233,7 +233,7 @@ end
 -- Build the accessible widget hierarchy
 -- ---------------------------------------------------------------------------
 local function BuildPanel()
-	CAI_Panel = mgr:CreateUIWidget("Dialog", {
+	CAI_Panel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowDialog"), "Dialog", {
 		GetLabel = function() return Controls.WindowTitle:GetText() end,
 		SpeechSettings = { Role = false },
 	})
@@ -243,26 +243,26 @@ local function BuildPanel()
 	end})
 
 	-- Item list
-	CAI_ItemList = mgr:CreateUIWidget("List")
+	CAI_ItemList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowList"), "List")
 	CAI_Panel:AddChild(CAI_ItemList)
 
 	-- Action buttons
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowButton"), "Button", {
 		GetLabel     = function() return Controls.SelectAllButton:GetText() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 		OnClick      = function() OnSelectAll() end,
 	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowButton"), "Button", {
 		GetLabel     = function() return Controls.SelectNoneButton:GetText() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 		OnClick      = function() OnSelectNone() end,
 	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowButton"), "Button", {
 		GetLabel     = function() return Controls.ConfirmButton:GetText() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 		OnClick      = function() OnConfirmChanges() end,
 	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowButton"), "Button", {
 		GetLabel     = function() return Controls.CloseButton:GetText() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 		OnClick      = function() Close() end,

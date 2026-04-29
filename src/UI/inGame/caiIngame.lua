@@ -15,30 +15,4 @@ function OnCAICursorMove(x, y, plot, cursor)
 	Speak(table.concat(pInfo, "\n"))
 end
 
----Speak selected unit
----@param playerID number
----@param unitID number
----@param hexI number
----@param hexJ number
----@param hexK number
----@param bSelected boolean
----@param bEditable boolean
-function OnSelectedUnit(playerID, unitID, hexI, hexJ, hexK, bSelected, bEditable)
-	if bSelected then
-    local unit = UnitManager.GetUnit(playerID, unitID)
-    local x = unit:GetX()
-    local y = unit:GetY()
-    
-    if bSelected then
-        local uInfo = ExposedMembers.CAIInfo:RequestUnitInfo(unit)
-        local str = "No info"
-        if #uInfo > 0 then
-            str = table.concat(uInfo, ", ")
-        end
-    Speak(str)
-    end
-end
-end
-
-Events.UnitSelectionChanged.Add(OnSelectedUnit)
 LuaEvents.CAICursorMoved.Add(OnCAICursorMove)

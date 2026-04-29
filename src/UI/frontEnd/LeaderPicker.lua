@@ -366,7 +366,7 @@ local function RebuildItemList()
 		local item = node["item"]
 		local checkBox = node["checkbox"]
 
-		local child = mgr:CreateUIWidget("Checkbox", {
+		local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerCheckbox"), "Checkbox", {
 			GetLabel = function()
 				-- Read the name from the visual control
 				return item.Name
@@ -402,7 +402,7 @@ end
 -- Open the preset dropdown as an accessible list overlay
 -- ---------------------------------------------------------------------------
 local function OpenPresetDropdown()
-	local optList = mgr:CreateUIWidget("List", {
+	local optList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerList"), "List", {
 		GetLabel = function() return Controls.StringName:GetText() end,
 	})
 	optList:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
@@ -414,7 +414,7 @@ local function OpenPresetDropdown()
 	local pulldown = Controls.PresetPulldown
 
 	-- All
-	optList:AddChild(mgr:CreateUIWidget("MenuItem", {
+	optList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerMenuItem"), "MenuItem", {
 		GetLabel = function()
 			return Locale.Lookup("LOC_LEADER_PICK_PRESET_ALL")
 		end,
@@ -428,7 +428,7 @@ local function OpenPresetDropdown()
 	}))
 
 	-- None
-	optList:AddChild(mgr:CreateUIWidget("MenuItem", {
+	optList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerMenuItem"), "MenuItem", {
 		GetLabel = function()
 			return Locale.Lookup("LOC_LEADER_PICK_PRESET_NONE")
 		end,
@@ -442,7 +442,7 @@ local function OpenPresetDropdown()
 	}))
 
 	-- No Wins
-	optList:AddChild(mgr:CreateUIWidget("MenuItem", {
+	optList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerMenuItem"), "MenuItem", {
 		GetLabel = function()
 			return Locale.Lookup("LOC_LEADER_PICK_PRESET_NO_WINS")
 		end,
@@ -462,7 +462,7 @@ end
 -- Build the accessible widget hierarchy
 -- ---------------------------------------------------------------------------
 local function BuildPanel()
-	CAI_Panel = mgr:CreateUIWidget("Dialog", {
+	CAI_Panel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerDialog"), "Dialog", {
 		GetLabel = function() return Controls.WindowTitle:GetText() end,
 		SpeechSettings = { Role = false },
 	})
@@ -472,7 +472,7 @@ local function BuildPanel()
 	end})
 
 	-- Preset dropdown
-	CAI_Panel:AddChild(mgr:CreateUIWidget("DropdownMenu", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerDropdownMenu"), "DropdownMenu", {
 		GetLabel     = function() return Controls.StringName:GetText() end,
 		GetValue     = function() return Controls.PresetPulldown:GetButton():GetText() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
@@ -480,7 +480,7 @@ local function BuildPanel()
 	}))
 
 	-- Count warning (hidden when empty)
-	CAI_Panel:AddChild(mgr:CreateUIWidget("StaticText", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerStaticText"), "StaticText", {
 		GetLabel = function() return Controls.CountWarning:GetText() or "" end,
 		IsHidden = function()
 			local text = Controls.CountWarning:GetText()
@@ -489,17 +489,17 @@ local function BuildPanel()
 	}))
 
 	-- Item list
-	CAI_ItemList = mgr:CreateUIWidget("List")
+	CAI_ItemList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerList"), "List")
 	CAI_Panel:AddChild(CAI_ItemList)
 
 	-- Action buttons
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerButton"), "Button", {
 		GetLabel     = function() return Controls.ConfirmButton:GetText() end,
 		IsDisabled   = function() return Controls.ConfirmButton:IsDisabled() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 		OnClick      = function() OnConfirmChanges() end,
 	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerButton"), "Button", {
 		GetLabel     = function() return Controls.CloseButton:GetText() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 		OnClick      = function() Close() end,

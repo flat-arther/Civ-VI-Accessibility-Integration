@@ -56,7 +56,7 @@ end
 
 local function AddStaticTextListItem(parentList, label, value, tooltip, isHidden)
     if not parentList then return end
-    parentList:AddChild(mgr:CreateUIWidget("StaticText", {
+    parentList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIInGameTopOptionsMenuStaticText"), "StaticText", {
         GetLabel = function()
             return label and label() or ""
         end,
@@ -68,7 +68,7 @@ end
 
 local function AddButtonListItem(parentList, nativeButton, action)
     if not parentList or not nativeButton or not action then return end
-    parentList:AddChild(mgr:CreateUIWidget("Button", {
+    parentList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIInGameTopOptionsMenuButton"), "Button", {
         GetLabel = function()
             return nativeButton:GetText()
         end,
@@ -91,7 +91,7 @@ local function AddButtonListItem(parentList, nativeButton, action)
 end
 
 local function CreateSectionList(label, isHidden)
-    return mgr:CreateUIWidget("List", {
+    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIInGameTopOptionsMenuList"), "List", {
         GetLabel = label,
         IsHidden = isHidden,
     })
@@ -205,7 +205,7 @@ local function BuildPanelContent()
 end
 
 local function BuildPanel()
-    CAI_Panel = mgr:CreateUIWidget("Panel", {
+    CAI_Panel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIInGameTopOptionsMenuPanel"), "Panel", {
         GetLabel = function()
             return Controls.WindowTitle:GetText()
         end

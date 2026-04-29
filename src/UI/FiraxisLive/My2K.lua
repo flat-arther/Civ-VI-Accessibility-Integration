@@ -975,7 +975,7 @@ end
 
 local function CAI_CreateStaticText(labelFunc, valueFunc)
 	if mgr == nil then return nil end
-	return mgr:CreateUIWidget("StaticText", {
+	return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMy2KStaticText"), "StaticText", {
 		GetLabel = labelFunc,
 		GetValue = valueFunc,
 		SpeechSettings = { Role = false },
@@ -984,7 +984,7 @@ end
 
 local function CAI_CreateReadOnlyText(labelFunc, valueFunc)
 	if mgr == nil then return nil end
-	local widget = mgr:CreateUIWidget("Edit", {
+	local widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMy2KEdit"), "Edit", {
 		GetLabel = labelFunc,
 		GetValue = valueFunc,
 		EditReadOnly = true,
@@ -999,7 +999,7 @@ end
 
 local function CAI_CreateButton(labelControl, backingButton, fallback, onClick)
 	if mgr == nil then return nil end
-	return mgr:CreateUIWidget("Button", {
+	return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMy2KButton"), "Button", {
 		GetLabel = function() return CAI_GetText(labelControl or backingButton, fallback) end,
 		GetTooltip = function() return CAI_GetTooltip(backingButton) end,
 		IsDisabled = function()
@@ -1015,7 +1015,7 @@ end
 local function CAI_CreateEdit(labelFunc, editControl, options)
 	if mgr == nil then return nil end
 	options = options or {}
-	local widget = mgr:CreateUIWidget("Edit", {
+	local widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMy2KEdit"), "Edit", {
 		GetLabel = labelFunc,
 		GetValue = function()
 			if editControl ~= nil and editControl.GetText ~= nil then
@@ -1189,13 +1189,13 @@ local function CAI_ShowLegal(instance)
 	CAI_AddIfPresent(content, CAI_CreateStaticText(function() return CAI_GetText(instance.Message) end))
 
 	if m_currentDialogData ~= nil and m_currentDialogData.documents ~= nil then
-		local docList = mgr:CreateUIWidget("List", {
+		local docList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMy2KList"), "List", {
 			GetLabel = function() return CAI_GetText(instance.Title) end,
 		})
 		for i, document in ipairs(m_currentDialogData.documents) do
 			local documentIndex = i
 			local name = FixupText(document.Name or "")
-			docList:AddChild(mgr:CreateUIWidget("Button", {
+			docList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMy2KButton"), "Button", {
 				GetLabel = function() return name end,
 				OnClick = function()
 					UI.PlaySound("Play_UI_Click")

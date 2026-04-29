@@ -43,7 +43,5 @@ function CAICursor:SnapToUnit(unit) end
 function CAICursor:GetPlotId() end
 
 
---- This is here so that the ide doesn't drive me crazy
----@class ExposedMembers
----@field CAICursor CAICursor Access to the Accessibility Cursor system.
-ExposedMembers = ExposedMembers or {}
+---Public move API: call LuaEvents.CAICursorMove(x, y) to move the cursor.
+---The cursor object remains local to the cursor API and should not be reached through ExposedMembers.

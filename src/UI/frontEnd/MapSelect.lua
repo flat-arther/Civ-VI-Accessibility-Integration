@@ -191,7 +191,7 @@ local function RebuildMapList()
 				or (m_lastSetMapValue == mapData.Value and m_selectedMapValue == nil)
 				or (m_selectedMap == nil and m_lastSetMapValue == nil and mapData.RawName == DEFAULT_MAP_RAWNAME)
 
-			local child = mgr:CreateUIWidget("MenuItem", {
+			local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMapSelectMenuItem"), "MenuItem", {
 				GetLabel     = function() return Locale.Lookup(mapData.RawName) end,
 				GetTooltip   = function() return Locale.Lookup(mapData.RawDescription) end,
 				OnFocusEnter = function()
@@ -222,7 +222,7 @@ local function RebuildMapList()
 end
 
 local function BuildPanel()
-	CAI_Panel = mgr:CreateUIWidget("Dialog", {
+	CAI_Panel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMapSelectDialog"), "Dialog", {
 		GetLabel = function() return Controls.WindowTitle:GetText() end,
 		SpeechSettings = { Role = false },
 	})
@@ -232,14 +232,14 @@ local function BuildPanel()
 	end})
 
 	-- Sort tab bar (first child of panel, like Options)
-	CAI_TabBar = mgr:CreateUIWidget("TabBar")
+	CAI_TabBar = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMapSelectTabBar"), "TabBar")
 	CAI_Panel:AddChild(CAI_TabBar)
 
 	for _, spec in ipairs(kSortTabs) do
 		local sortNum = spec[1]
 		local locKey = spec[2]
 		local getSelector = spec[3]
-		CAI_TabBar:AddChild(mgr:CreateUIWidget("Tab", {
+		CAI_TabBar:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMapSelectTab"), "Tab", {
 			GetLabel     = function() return Locale.Lookup(locKey) end,
 			OnFocusEnter = function()
 				UI.PlaySound("Main_Menu_Mouse_Over")
@@ -256,16 +256,16 @@ local function BuildPanel()
 	end
 
 	-- Map list
-	CAI_MapList = mgr:CreateUIWidget("List")
+	CAI_MapList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMapSelectList"), "List")
 	CAI_Panel:AddChild(CAI_MapList)
 
 	-- Action buttons
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMapSelectButton"), "Button", {
 		GetLabel     = function() return Controls.MapSelectionButton:GetText() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 		OnClick      = function() OnSelectMapButton() end,
 	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMapSelectButton"), "Button", {
 		GetLabel     = function() return Controls.CloseButton:GetText() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 		OnClick      = function() Close() end,

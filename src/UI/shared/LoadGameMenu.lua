@@ -688,7 +688,7 @@ local function AddInspectorRow(label, value)
 	if not value or value == "" then return end
 
 	local text = label and label ~= "" and (label .. ", " .. value) or value
-	CAI_InspectorList:AddChild(mgr:CreateUIWidget("MenuItem", {
+	CAI_InspectorList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuMenuItem"), "MenuItem", {
 		GetLabel = function()
 			return text
 		end,
@@ -706,7 +706,7 @@ local function RebuildInspectorAccessibility()
 
 	local function AddHeader(text)
 		if not text or text == "" then return end
-		CAI_InspectorList:AddChild(mgr:CreateUIWidget("MenuItem", {
+		CAI_InspectorList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuMenuItem"), "MenuItem", {
 			GetLabel = function()
 				return text
 			end,
@@ -810,7 +810,7 @@ end
 -- Accessible pulldown overlays
 -- ---------------------------------------------------------------------------
 local function OpenSortDropdown()
-	local optList = mgr:CreateUIWidget("List", {
+	local optList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuList"), "List", {
 		GetLabel = function()
 			return Controls.WindowHeader:GetText()
 		end,
@@ -835,7 +835,7 @@ local function OpenSortDropdown()
 		local sortFunc = v[2]
 		local sortIndex = v[3]
 
-		local child = mgr:CreateUIWidget("MenuItem", {
+		local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuMenuItem"), "MenuItem", {
 			GetLabel = function()
 				return Locale.Lookup(labelKey)
 			end,
@@ -877,7 +877,7 @@ local function OpenDirectoryDropdown()
 		return
 	end
 
-	local optList = mgr:CreateUIWidget("List", {
+	local optList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuList"), "List", {
 		GetLabel = function()
 			return Controls.WindowHeader:GetText()
 		end,
@@ -899,7 +899,7 @@ local function OpenDirectoryDropdown()
 			local v = g_CurrentDirectorySegments[i]
 			local displayName = (v.DisplayName ~= nil and v.DisplayName ~= "") and v.DisplayName or v.SegmentName
 
-			local child = mgr:CreateUIWidget("MenuItem", {
+			local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuMenuItem"), "MenuItem", {
 				GetLabel = function()
 					return displayName
 				end,
@@ -934,7 +934,7 @@ local function OpenDirectoryDropdown()
 				local displayName = (v.DisplayName ~= nil and v.DisplayName ~= "") and v.DisplayName or v.VolumeName
 				local volumeName = v.VolumeName
 
-				local child = mgr:CreateUIWidget("MenuItem", {
+				local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuMenuItem"), "MenuItem", {
 					GetLabel = function()
 						return displayName
 					end,
@@ -967,7 +967,7 @@ local function RebuildFileListAccessibility()
 	CAI_FileList:ClearChildren()
 
 	if not g_FileList or #g_FileList == 0 then
-		local emptyChild = mgr:CreateUIWidget("MenuItem", {
+		local emptyChild = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuMenuItem"), "MenuItem", {
 			GetLabel = function()
 				return Controls.NoGames:GetText() or ""
 			end,
@@ -985,7 +985,7 @@ local function RebuildFileListAccessibility()
 	local focusedChild = nil
 
 	for idx, entry in ipairs(g_FileList) do
-		local child = mgr:CreateUIWidget("MenuItem", {
+		local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuMenuItem"), "MenuItem", {
 			GetLabel = function()
 				return GetEntryLabel(idx, entry)
 			end,
@@ -1036,7 +1036,7 @@ end
 -- Build panel
 -- ---------------------------------------------------------------------------
 local function BuildPanel()
-	CAI_Panel = mgr:CreateUIWidget("Dialog", {
+	CAI_Panel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuDialog"), "Dialog", {
 		GetLabel = function()
 			return Controls.WindowHeader:GetText()
 		end,
@@ -1051,7 +1051,7 @@ local function BuildPanel()
 		end
 	})
 
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuButton"), "Button", {
 		GetLabel = function()
 			return Controls.BackButton:GetText()
 		end,
@@ -1063,7 +1063,7 @@ local function BuildPanel()
 		end,
 	}))
 
-	local autoSaveCheckbox = mgr:CreateUIWidget("Checkbox", {
+	local autoSaveCheckbox = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuCheckbox"), "Checkbox", {
 		GetLabel = function()
 			return Controls.AutoCheck:GetText()
 		end,
@@ -1084,7 +1084,7 @@ local function BuildPanel()
 	})
 	CAI_Panel:AddChild(autoSaveCheckbox)
 
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Checkbox", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuCheckbox"), "Checkbox", {
 		GetLabel = function()
 			local base
 			if not Controls.CloudDummy:IsHidden() then
@@ -1131,7 +1131,7 @@ local function BuildPanel()
 		end,
 	}))
 
-	CAI_Panel:AddChild(mgr:CreateUIWidget("DropdownMenu", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuDropdownMenu"), "DropdownMenu", {
 		GetLabel = function()
 			return Locale.Lookup("LOC_SORTBY_NAME")
 		end,
@@ -1149,7 +1149,7 @@ local function BuildPanel()
 		end,
 	}))
 
-	CAI_Panel:AddChild(mgr:CreateUIWidget("DropdownMenu", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuDropdownMenu"), "DropdownMenu", {
 		GetLabel = function()
 			return GetCurrentDirectoryLabel()
 		end,
@@ -1164,14 +1164,14 @@ local function BuildPanel()
 		end,
 	}))
 
-	CAI_FileList = mgr:CreateUIWidget("List", {
+	CAI_FileList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuList"), "List", {
 		GetLabel = function()
 			return Controls.WindowHeader:GetText()
 		end,
 	})
 	CAI_Panel:AddChild(CAI_FileList)
 
-	CAI_InspectorList = mgr:CreateUIWidget("List", {
+	CAI_InspectorList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuList"), "List", {
 		GetLabel = function()
 			local name = SafeText(Controls.FileName)
 			-- TODO: localize this with arguments
@@ -1183,7 +1183,7 @@ local function BuildPanel()
 	})
 	CAI_Panel:AddChild(CAI_InspectorList)
 
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuButton"), "Button", {
 		GetLabel = function()
 			return Controls.ActionButton:GetText()
 		end,
@@ -1204,7 +1204,7 @@ local function BuildPanel()
 		end,
 	}))
 
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILoadGameMenuButton"), "Button", {
 		GetLabel = function()
 			return Controls.Delete:GetText()
 		end,

@@ -1,5 +1,6 @@
 ---@alias UIWidgetCallbackTypes "OnFocusLeave"|"OnFocusEnter"|"OnFocus"|"OnClick"|"OnAltClick"|"OnToggleChecked"|"OnToggleExpand"|"OnValueChanged"
 ---@class UIWidget
+---@field Id? string
 ---@field FocusedChild? UIWidget
 ---@field Children? UIWidget[]
 ---@field DefaultIndex? integer
@@ -28,10 +29,19 @@ UIWidget = {
 local baseInputBinding = { IsShift = false, IsControl = false, IsAlt = false, MSG = KeyEvents.KeyUp }
 
 --#Base methods
+---Returns the unique widget id.
+---@return string|nil
+function UIWidget:GetId()
+    return self.Id
+end
+
 ---Adds a widget to the list of children
 ---@param w UIWidget
 function UIWidget:AddChild(w, focus)
     if not w then return end
+    if self.Manager and self.Manager.CAISettings and self.Manager.CAISettings.ValidateWidgetIds then
+        self.Manager:WarnIfDuplicateWidgetId(w, self)
+    end
     focus = focus or false
     w.Parent = self
     table.insert(self.Children, w)
@@ -53,6 +63,9 @@ end
 ---@param w UIWidget
 function UIWidget:InsertChild(index, w)
     if not w then return end
+    if self.Manager and self.Manager.CAISettings and self.Manager.CAISettings.ValidateWidgetIds then
+        self.Manager:WarnIfDuplicateWidgetId(w, self)
+    end
     w.Parent = self
     table.insert(self.Children, index, w)
 end
@@ -75,6 +88,23 @@ function UIWidget:GetChildIndex(child)
     if not self.Children then return nil end
     for i, c in ipairs(self.Children) do
         if c == child then return i end
+    end
+    return nil
+end
+
+---Returns the first child widget with a matching id.
+---@param id string
+---@param recurse? boolean
+---@return UIWidget|nil
+function UIWidget:GetChildById(id, recurse)
+    if not id or not self.Children then return nil end
+    for _, child in ipairs(self.Children) do
+        local childId = child and child.GetId and child:GetId() or child and child.Id
+        if childId == id then return child end
+        if recurse and child and child.GetChildById then
+            local found = child:GetChildById(id, true)
+            if found then return found end
+        end
     end
     return nil
 end
@@ -301,6 +331,13 @@ function UIWidget:GetVisiblePosition()
         end
     end
     return (visibleIndex > 0) and visibleIndex or nil, visibleTotal
+end
+
+---Sets the default index from which focus starts
+---@param idx integer
+function UIWidget:SetDefaultIndex(idx)
+    if not idx then return end
+    self.DefaultIndex = idx
 end
 
 ---Returns a table of descriptive strings for the widget

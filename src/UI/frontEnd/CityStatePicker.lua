@@ -382,7 +382,7 @@ function RebuildItemList()
 		local item = node["item"]
 		local checkBox = node["checkbox"]
 
-		local child = mgr:CreateUIWidget("Checkbox", {
+		local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerCheckbox"), "Checkbox", {
 			GetLabel = function()
 				return Controls.FocusedItemName:GetText()
 			end,
@@ -408,7 +408,7 @@ end
 
 function OpenSortByDropdown()
 	local pulldown = Controls.SortByPulldown
-	local optList = mgr:CreateUIWidget("List", {
+	local optList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerList"), "List", {
 		GetLabel = function() return Controls.StringName:GetText() end,
 	})
 	optList:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
@@ -418,7 +418,7 @@ function OpenSortByDropdown()
 
 
 
-	optList:AddChild(mgr:CreateUIWidget("MenuItem", {
+	optList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerMenuItem"), "MenuItem", {
 		GetLabel = function()
 			return Locale.Lookup("LOC_CITY_STATE_PICKER_SORT_NAME")
 		end,
@@ -430,7 +430,7 @@ function OpenSortByDropdown()
 		end,
 	}))
 
-	optList:AddChild(mgr:CreateUIWidget("MenuItem", {
+	optList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerMenuItem"), "MenuItem", {
 		GetLabel = function()
 			return Locale.Lookup("LOC_CITY_STATE_PICKER_SORT_TYPE")
 		end,
@@ -447,7 +447,7 @@ end
 
 function BuildPanel()
 	local pulldown = Controls.SortByPulldown
-	CAI_Panel = mgr:CreateUIWidget("Dialog", {
+	CAI_Panel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerDialog"), "Dialog", {
 		GetLabel = function() return Controls.WindowTitle:GetText() end,
 		GetTooltip = function() return Controls.TopDescription:GetText() end,
 		SpeechSettings = { Role = false },
@@ -458,14 +458,14 @@ function BuildPanel()
 	end})
 
 
-	CAI_Panel:AddChild(mgr:CreateUIWidget("DropdownMenu", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerDropdownMenu"), "DropdownMenu", {
 		GetLabel = function() return Controls.StringName:GetText() end,
 		GetValue     = function() return pulldown:GetButton():GetText() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 		OnClick      = function() OpenSortByDropdown() end,
 	}))
 
-	CAI_Panel:AddChild(mgr:CreateUIWidget("StaticText", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerStaticText"), "StaticText", {
 		GetLabel = function() return Controls.CountWarning:GetText() or "" end,
 		IsHidden = function()
 			local text = Controls.CountWarning:GetText()
@@ -473,26 +473,26 @@ function BuildPanel()
 		end,
 	}))
 
-	CAI_ItemList = mgr:CreateUIWidget("List")
+	CAI_ItemList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerList"), "List")
 	CAI_Panel:AddChild(CAI_ItemList)
 
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerButton"), "Button", {
 		GetLabel     = function() return Controls.SelectAllButton:GetText() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 		OnClick      = function() OnSelectAll() end,
 	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerButton"), "Button", {
 		GetLabel     = function() return Controls.SelectNoneButton:GetText() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 		OnClick      = function() OnSelectNone() end,
 	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerButton"), "Button", {
 		GetLabel     = function() return Controls.ConfirmButton:GetText() end,
 		IsDisabled   = function() return Controls.ConfirmButton:IsDisabled() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 		OnClick      = function() OnConfirmChanges() end,
 	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget("Button", {
+	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerButton"), "Button", {
 		GetLabel     = function() return Controls.CloseButton:GetText() end,
 		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
 		OnClick      = function() Close() end,

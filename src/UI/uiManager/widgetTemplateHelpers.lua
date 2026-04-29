@@ -35,11 +35,11 @@ function WidgetTemplateHelpers:CreatePopupDialog(popup)
         local type = item.Type
         local w
         if type == "Text" then
-            w = mgr:CreateUIWidget("StaticText", {
+            w = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIwidgetTemplateHelpersStaticText"), "StaticText", {
                 GetLabel = function() return item.Control:GetText() end
             })
         elseif type == "Check" then
-            w = mgr:CreateUIWidget("Checkbox", {
+            w = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIwidgetTemplateHelpersCheckbox"), "Checkbox", {
                 GetLabel = function()
                     if item.Control.GetTextButton then
                         return item.Control:GetTextButton():GetText() or ""
@@ -55,7 +55,7 @@ function WidgetTemplateHelpers:CreatePopupDialog(popup)
                 OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end
             })
         elseif type == "EditBox" then
-            w = mgr:CreateUIWidget("Edit", {
+            w = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIwidgetTemplateHelpersEdit"), "Edit", {
                 GetLabel     = function()
                     local p = item.Control:GetParent()
                     if not p or not p.EditLabel then return "" end
@@ -67,7 +67,7 @@ function WidgetTemplateHelpers:CreatePopupDialog(popup)
                 OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end
             })
         elseif type == "Count" then
-            w = mgr:CreateUIWidget("StaticText", {
+            w = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIwidgetTemplateHelpersStaticText"), "StaticText", {
                 GetLabel = function()
                     local val = nil
                     for _, child in ipairs(item.Control:GetChildren()) do
@@ -83,7 +83,7 @@ function WidgetTemplateHelpers:CreatePopupDialog(popup)
                 OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end
             })
         elseif type == "Button" then
-            w = mgr:CreateUIWidget("Button", {
+            w = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIwidgetTemplateHelpersButton"), "Button", {
                 GetLabel = function() return item.Control:GetText() or "" end,
                 GetTooltip = function() return item.Control:GetToolTipString() or "" end,
                 IsDisabled = function() return item.Control:IsDisabled() end,
@@ -116,14 +116,14 @@ end
 function WidgetTemplateHelpers:MakeGeneralDialog(titleFunc, actionButtons, dlgContent, defaultActionButton)
     local mgr = self.Manager
     if not mgr or not titleFunc or not actionButtons then return end
-    local d = mgr:CreateUIWidget("Dialog", {
+    local d = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIwidgetTemplateHelpersDialog"), "Dialog", {
         GetLabel = titleFunc,
     })
     d:AddInputBindings({
         { Key = Keys.VK_UP,   MSG = KeyEvents.KeyDown, Action = function(w) return w:Navigate(-1) end },
         { Key = Keys.VK_DOWN, MSG = KeyEvents.KeyDown, Action = function(w) return w:Navigate(1) end }
     })
-    local buttonRow = mgr:CreateUIWidget("Panel", {
+    local buttonRow = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIwidgetTemplateHelpersPanel"), "Panel", {
         WrapAround = false,
         SpeechSettings = { Position = false, Role = false },
         OnFocusLeave = function(w) w.FocusedChild = nil end,
@@ -406,6 +406,12 @@ function WidgetTemplateHelpers:ToggleTreeItem(item)
     return true
 end
 
+---@param root UIWidget
+---@return boolean
+function WidgetTemplateHelpers:ToggleFocusedTreeItem(root)
+    return self:ToggleTreeItem(self:GetFocusedTreeItem(root))
+end
+
 ---@param item UIWidget|nil
 ---@return boolean
 function WidgetTemplateHelpers:FocusTreeFirstChild(item)
@@ -425,6 +431,29 @@ function WidgetTemplateHelpers:FocusParentTreeItem(root, item)
     parent.FocusedChild = nil
     root.Manager:SetFocus(parent)
     return true
+end
+
+---@param root UIWidget
+---@return boolean
+function WidgetTemplateHelpers:ExpandOrDescendTree(root)
+    local item = self:GetFocusedTreeItem(root)
+    if not item then return false end
+    if type(item.IsLeaf) == "function" and item:IsLeaf() then return false end
+    if self:ExpandTreeItem(item) then
+        return true
+    end
+    return self:FocusTreeFirstChild(item)
+end
+
+---@param root UIWidget
+---@return boolean
+function WidgetTemplateHelpers:CollapseOrAscendTree(root)
+    local item = self:GetFocusedTreeItem(root)
+    if not item then return false end
+    if self:CollapseTreeItem(item) then
+        return true
+    end
+    return self:FocusParentTreeItem(root, item)
 end
 
 -- ===========================================================================

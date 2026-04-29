@@ -485,9 +485,11 @@ function GetCityCategoryActionIds()
 end
 
 function BuildCityActionList()
-    local list = mgr:CreateUIWidget("List", {
+    local data, city = GetCityInfoData(UI.GetHeadSelectedCity())
+    local cityName = GetCityInfoName(data) or Locale.Lookup("LOC_CAI_CITY_ACTIONS")
+    local list = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityPanelList"), "List", {
         GetLabel = function()
-            return Locale.Lookup("LOC_CAI_CITY_ACTIONS")
+            return Locale.Lookup("LOC_CAI_SELECTION_ACTIONS_FOR", cityName)
         end,
     })
 
@@ -503,7 +505,7 @@ function BuildCityActionList()
         local actionData = CityActionMap[actionId]
         if actionData ~= nil and actionData.IsEnabled() then
             local currentActionId = actionId
-            list:AddChild(mgr:CreateUIWidget("MenuItem", {
+            list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityPanelMenuItem"), "MenuItem", {
                 GetLabel = function()
                     return GetActionNameText(currentActionId)
                 end,

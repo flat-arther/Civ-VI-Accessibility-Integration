@@ -1,5 +1,4 @@
 include("caiUtils")
-include("InputSupport")
 include("AdvisorPopup")
 local mgr = ExposedMembers.CAI_UIManager
 
@@ -27,7 +26,7 @@ ShowAdvisorPopup = WrapFunc(ShowAdvisorPopup, function(orig, advisorData)
     local isPortrait = advisorData.ShowPortrait
 
     --m_tutorialPanel =
-    local bodyWidget = mgr:CreateUIWidget("StaticText", {
+    local bodyWidget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvisorPopupStaticText"), "StaticText", {
         GetValue = function()
             if isPortrait then
                 return Controls.InfoString:GetText()
@@ -45,7 +44,7 @@ ShowAdvisorPopup = WrapFunc(ShowAdvisorPopup, function(orig, advisorData)
     for _, btn in ipairs(buttons) do
         if btn.text then
             local capturedFunc = btn.func
-            local btnWidget = mgr:CreateUIWidget("Button", {
+            local btnWidget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvisorPopupButton"), "Button", {
                 GetLabel = function() return Locale.Lookup(btn.text) end,
                 OnClick = function()
                     OnHideAdvisorDialog()
@@ -73,5 +72,4 @@ OnHideAdvisorDialog = WrapFunc(OnHideAdvisorDialog, function(orig)
     if mgr:GetTop() == m_tutorialPanel then
         mgr:Pop()
     end
-    Input.SetActiveContext(InputContext.World)
 end)

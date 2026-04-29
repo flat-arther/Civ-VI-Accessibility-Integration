@@ -326,30 +326,30 @@ OnShow = WrapFunc(OnShow, function(orig)
 	orig()
 	if CAI_Dialog then return end
 	local content = {
-		mgr:CreateUIWidget("StaticText", {
+		mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITutorialSetupStaticText"), "StaticText", {
 			GetValue = function() return Locale.Lookup("LOC_SETUP_TUTORIAL_DESCRIPTION") end
 		}),
-		mgr:CreateUIWidget("StaticText", {
+		mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITutorialSetupStaticText"), "StaticText", {
 			GetValue = function() return Controls.Status:GetText() end,
 			IsHidden = function() return Controls.StatusPanel:IsHidden() end
 		})
 	}
 	local btns = {
-		mgr:CreateUIWidget("Button", {
+		mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITutorialSetupButton"), "Button", {
 			GetLabel = function() return Controls.Leader1Start:GetText() end,
 			OnClick = function() OnLeader1() end
 		}),
-		mgr:CreateUIWidget("Button", {
+		mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITutorialSetupButton"), "Button", {
 			GetLabel = function() return Controls.Leader2Start:GetText() end,
 			OnClick = function() OnLeader2() end
 		}),
-		mgr:CreateUIWidget("Button", {
+		mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITutorialSetupButton"), "Button", {
 			GetLabel = function() return Controls.CloseButton:GetText() end,
 			OnClick = function() OnBackButton() end
 		})
 	}
 	CAI_Dialog = mgr.WidgetTemplateHelpers:MakeGeneralDialog(GetTitle, btns, content)
-	CAI_Movie = mgr:CreateUIWidget("Panel", {
+	CAI_Movie = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITutorialSetupPanel"), "Panel", {
 		GetLabel = function() return Locale.Lookup("CAI_TUT_MOVIE") end
 	})
 	mgr:Push(CAI_Movie, PopupPriority.Current)

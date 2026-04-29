@@ -1,26 +1,26 @@
 include("caiUtils")
 include("ResearchChooser")
-local mgr                  = ExposedMembers.CAI_UIManager
+local mgr                        = ExposedMembers.CAI_UIManager
 
-local TUTORIAL_MOD_ID      = "17462E0F-1EE1-4819-AAAA-052B5896B02A"
-local UNLOCKS_INLINE       = 2
+local TUTORIAL_MOD_ID            = "17462E0F-1EE1-4819-AAAA-052B5896B02A"
+local UNLOCKS_INLINE             = 2
 
-local m_caiPanel           = nil ---@type UIWidget|nil
-local m_caiAvailableList   = nil ---@type UIWidget|nil
-local m_caiAvailableDetail = nil ---@type UIWidget|nil
-local m_caiQueueList       = nil ---@type UIWidget|nil
-local m_caiQueueDetail     = nil ---@type UIWidget|nil
-local m_caiRowData         = {} ---@type table<number, table>
-local m_caiAvailableRows   = {} ---@type table<number, table>
-local m_caiQueueRows       = {} ---@type table<number, table>
-local m_caiCurrentData     = nil ---@type table|nil
-local m_caiIsTutorial      = nil ---@type boolean|nil
-local m_caiTutorialTechs   = nil ---@type table<number, number>|nil
-local m_caiOpenPending     = false ---@type boolean
-local m_caiTutorialPushDelay = false ---@type boolean
+local m_caiPanel                 = nil ---@type UIWidget|nil
+local m_caiAvailableList         = nil ---@type UIWidget|nil
+local m_caiAvailableDetail       = nil ---@type UIWidget|nil
+local m_caiQueueList             = nil ---@type UIWidget|nil
+local m_caiQueueDetail           = nil ---@type UIWidget|nil
+local m_caiRowData               = {} ---@type table<number, table>
+local m_caiAvailableRows         = {} ---@type table<number, table>
+local m_caiQueueRows             = {} ---@type table<number, table>
+local m_caiCurrentData           = nil ---@type table|nil
+local m_caiIsTutorial            = nil ---@type boolean|nil
+local m_caiTutorialTechs         = nil ---@type table<number, number>|nil
+local m_caiOpenPending           = false ---@type boolean
+local m_caiTutorialPushDelay     = false ---@type boolean
 local m_caiTutorialControlsReady = false ---@type boolean
-local m_caiTutorialPushPending = false ---@type boolean
-local m_caiInstanceByHash  = {} ---@type table<number, table>
+local m_caiTutorialPushPending   = false ---@type boolean
+local m_caiInstanceByHash        = {} ---@type table<number, table>
 
 -- ===========================================================================
 -- Tutorial detection and reorder. Vanilla's m_isTutorial / TUTORIAL_TECHS are
@@ -238,7 +238,7 @@ local function CreateRowWidget(kData, detailEdit, interactive)
     local captured = kData
     local inline = GetFirstNUnlockNames(captured, UNLOCKS_INLINE)
 
-    local row = mgr:CreateUIWidget("Button", {
+    local row = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserButton"), "Button", {
         GetLabel = function() return FormatRowLabel(captured, inline) end,
         IsHidden = function() return IsResearchRowHidden(captured) end,
         IsDisabled = function() return interactive and IsResearchRowDisabled(captured) or false end,
@@ -323,34 +323,19 @@ end
 local function EnsurePanelBuilt()
     if m_caiPanel then return end
 
-    m_caiPanel = mgr:CreateUIWidget("Panel", {
+    m_caiPanel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserPanel"), "Panel", {
         GetLabel = function() return Controls.Title:GetText() end,
     })
 
-    m_caiAvailableList = mgr:CreateUIWidget("List", {
-        GetLabel = function() return Locale.Lookup("LOC_CAI_RESEARCH_AVAILABLE_LIST") end,
-    })
-    m_caiPanel:AddChild(m_caiAvailableList)
-
-    m_caiAvailableDetail = mgr:CreateUIWidget("Edit", {
-        GetLabel = function() return Locale.Lookup("LOC_CAI_RESEARCH_AVAILABLE_DETAILS") end,
-        GetValue = function() return m_caiAvailableDetail and m_caiAvailableDetail.EditBuffer or "" end,
-        AlwaysEdit = true,
-        EditReadOnly = true,
-        HighlightOnEdit = false,
-        EditBuffer = "",
-    })
-    m_caiPanel:AddChild(m_caiAvailableDetail)
-
     -- Queue list + detail are hidden when nothing is researching and the
     -- queue is empty (early game), so Tab-order doesn't hit dead widgets.
-    m_caiQueueList = mgr:CreateUIWidget("List", {
+    m_caiQueueList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserList"), "List", {
         GetLabel = function() return Locale.Lookup("LOC_CAI_RESEARCH_QUEUE_LIST") end,
         IsHidden = function() return #m_caiQueueRows == 0 end,
     })
     m_caiPanel:AddChild(m_caiQueueList)
 
-    m_caiQueueDetail = mgr:CreateUIWidget("Edit", {
+    m_caiQueueDetail = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserEdit"), "Edit", {
         GetLabel = function() return Locale.Lookup("LOC_CAI_RESEARCH_QUEUE_DETAILS") end,
         GetValue = function() return m_caiQueueDetail and m_caiQueueDetail.EditBuffer or "" end,
         IsHidden = function() return #m_caiQueueRows == 0 end,
@@ -361,7 +346,22 @@ local function EnsurePanelBuilt()
     })
     m_caiPanel:AddChild(m_caiQueueDetail)
 
-    local treeBtn = mgr:CreateUIWidget("Button", {
+    m_caiAvailableList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserList"), "List", {
+        GetLabel = function() return Locale.Lookup("LOC_CAI_RESEARCH_AVAILABLE_LIST") end,
+    })
+    m_caiPanel:AddChild(m_caiAvailableList)
+
+    m_caiAvailableDetail = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserEdit"), "Edit", {
+        GetLabel = function() return Locale.Lookup("LOC_CAI_RESEARCH_AVAILABLE_DETAILS") end,
+        GetValue = function() return m_caiAvailableDetail and m_caiAvailableDetail.EditBuffer or "" end,
+        AlwaysEdit = true,
+        EditReadOnly = true,
+        HighlightOnEdit = false,
+        EditBuffer = "",
+    })
+    m_caiPanel:AddChild(m_caiAvailableDetail)
+
+    local treeBtn = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserButton"), "Button", {
         GetLabel = function() return Controls.OpenTreeButton:GetText() end,
         IsHidden = function() return ControlIsHidden(Controls.OpenTreeButton) end,
         IsDisabled = function() return ControlIsDisabled(Controls.OpenTreeButton) end,
@@ -372,7 +372,7 @@ local function EnsurePanelBuilt()
     })
     m_caiPanel:AddChild(treeBtn)
 
-    local closeBtn = mgr:CreateUIWidget("Button", {
+    local closeBtn = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserButton"), "Button", {
         GetLabel = function() return Controls.CloseButton:GetToolTipString() or "Close" end,
         IsHidden = function() return ControlIsHidden(Controls.CloseButton) end,
         IsDisabled = function() return ControlIsDisabled(Controls.CloseButton) end,
@@ -421,20 +421,20 @@ local function OnPanelClosedCAI()
     end
     -- Null out so next open rebuilds; mgr:Pop destroys children and detaches
     -- the panel, making it unusable for a subsequent push.
-    m_caiPanel           = nil
-    m_caiAvailableList   = nil
-    m_caiAvailableDetail = nil
-    m_caiQueueList       = nil
-    m_caiQueueDetail     = nil
-    m_caiRowData         = {}
-    m_caiAvailableRows   = {}
-    m_caiQueueRows       = {}
-    m_caiCurrentData     = nil
-    m_caiOpenPending     = false
-    m_caiTutorialPushDelay = false
+    m_caiPanel                 = nil
+    m_caiAvailableList         = nil
+    m_caiAvailableDetail       = nil
+    m_caiQueueList             = nil
+    m_caiQueueDetail           = nil
+    m_caiRowData               = {}
+    m_caiAvailableRows         = {}
+    m_caiQueueRows             = {}
+    m_caiCurrentData           = nil
+    m_caiOpenPending           = false
+    m_caiTutorialPushDelay     = false
     m_caiTutorialControlsReady = false
-    m_caiTutorialPushPending = false
-    m_caiInstanceByHash  = {}
+    m_caiTutorialPushPending   = false
+    m_caiInstanceByHash        = {}
 end
 
 local NativeOnOpenPanel = OnOpenPanel

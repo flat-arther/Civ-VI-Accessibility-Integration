@@ -1,7 +1,7 @@
 -- All helpers (Nav / Search / EditBox) live on WidgetTemplateHelpers (see
 -- widgetTemplateHelpers.lua). Templates close over a local alias so each
 -- binding can dispatch through it without re-resolving the global.
-
+include("InputSupport")
 ---@class WidgetTemplate :UIWidget
 ---@field RegisterInputs InputBinding[]
 
@@ -724,7 +724,7 @@ WidgetTemplates = {
             }
         },
         OnCreate = function(w)
-            local edit = w.Manager:CreateUIWidget("Edit")
+            local edit = w.Manager:CreateUIWidget(w.Manager:GenerateWidgetId("CAIwidgetTemplatesEdit"), "Edit")
             edit.AlwaysEdit = true
             edit.EditReadOnly = true
             edit.HighlightOnEdit = false
@@ -735,106 +735,77 @@ WidgetTemplates = {
     GameView = {
         GetLabel = function() return Locale.Lookup("LOC_CAI_ROLE_GAME_VIEW") end,
         GetDefaultChild = function(w) return H:GetContainerDefChild(w) end,
-        RegisterInputs = {
-            {
-                Key = Keys.VK_UP,
-                MSG = KeyEvents.KeyDown,
-                Action = function(w)
-                    local cursor = ExposedMembers.CAICursor
-                    cursor:SetCoords(cursor.curX, cursor.curY + 1)
-                    return true
-                end
-            },
-            {
-                Key = Keys.VK_DOWN,
-                MSG = KeyEvents.KeyDown,
-                Action = function(w)
-                    local cursor = ExposedMembers.CAICursor
-                    cursor:SetCoords(cursor.curX, cursor.curY - 1)
-                    return true
-                end
-            },
-            {
-                Key = Keys.VK_RIGHT,
-                MSG = KeyEvents.KeyDown,
-                Action = function(w)
-                    local cursor = ExposedMembers.CAICursor
-                    cursor:SetCoords(cursor.curX + 1, cursor.curY)
-                    return true
-                end
-            },
-            {
-                Key = Keys.VK_LEFT,
-                MSG = KeyEvents.KeyDown,
-                Action = function(w)
-                    local cursor = ExposedMembers.CAICursor
-                    cursor:SetCoords(cursor.curX - 1, cursor.curY)
-                    return true
-                end
-            },
-            {
-                Key = Keys.VK_NUMPAD1,
-                MSG = KeyEvents.KeyDown,
-                Action = function(w)
-                    ExposedMembers.CAICursor:MoveToNextPlot(DirectionTypes.DIRECTION_SOUTHWEST); return true
-                end
-            },
-            {
-                Key = Keys.VK_NUMPAD3,
-                MSG = KeyEvents.KeyDown,
-                Action = function(w)
-                    ExposedMembers.CAICursor:MoveToNextPlot(DirectionTypes.DIRECTION_SOUTHEAST); return true
-                end
-            },
-            {
-                Key = Keys.VK_NUMPAD4,
-                MSG = KeyEvents.KeyDown,
-                Action = function(w)
-                    ExposedMembers.CAICursor:MoveToNextPlot(DirectionTypes.DIRECTION_WEST); return true
-                end
-            },
-            {
-                Key = Keys.VK_NUMPAD6,
-                MSG = KeyEvents.KeyDown,
-                Action = function(w)
-                    ExposedMembers.CAICursor:MoveToNextPlot(DirectionTypes.DIRECTION_EAST); return true
-                end
-            },
-            {
-                Key = Keys.VK_NUMPAD7,
-                MSG = KeyEvents.KeyDown,
-                Action = function(w)
-                    ExposedMembers.CAICursor:MoveToNextPlot(DirectionTypes.DIRECTION_NORTHWEST); return true
-                end
-            },
-            {
-                Key = Keys.VK_NUMPAD9,
-                MSG = KeyEvents.KeyDown,
-                Action = function(w)
-                    ExposedMembers.CAICursor:MoveToNextPlot(DirectionTypes.DIRECTION_NORTHEAST); return true
-                end
-            },
-        },
+        OnFocusEnter = function(w)
+            Input.SetActiveContext(InputContext.World)
+        end,
+        OnFocusLeave = function(w)
+            Input.SetActiveContext(InputContext.GameOptions)
+        end,
     },
     InterfaceMode = {
         AnnounceRole = false,
     },
 
     -- =======================================================================
-    -- Treeview: container that owns flat up/down navigation across the whole
-    -- visible (expanded) tree of TreeviewItems. Screen-specific behaviors such
-    -- as expand/collapse and activation are added by the consumer with
-    -- AddInputBinding(s), keeping the templates generic.
+    -- Treeview: container that owns flat navigation and generic node
+    -- expand/collapse for the whole visible tree of TreeviewItems. Screens can
+    -- still attach item activation bindings and react to expansion with
+    -- OnToggleExpanded.
     -- =======================================================================
     Treeview = {
         Role = "Treeview",
         WrapAround = false,
         SearchDepth = 3,
         RegisterInputs = {
-            { Key = Keys.VK_UP,   MSG = KeyEvents.KeyDown, Action = function(w) return H:NavigateTreeFlat(w, -1) end },
-            { Key = Keys.VK_DOWN, MSG = KeyEvents.KeyDown, Action = function(w) return H:NavigateTreeFlat(w, 1) end },
-            { Key = Keys.VK_HOME, MSG = KeyEvents.KeyDown, Action = function(w) return H:NavigateTreeFirst(w) end },
-            { Key = Keys.VK_END,  MSG = KeyEvents.KeyDown, Action = function(w) return H:NavigateTreeLast(w) end },
+            {
+                Key = Keys.VK_UP,
+                MSG = KeyEvents.KeyDown,
+                Action = function(w)
+                    return
+                        H:NavigateTreeFlat(w, -1)
+                end
+            },
+            {
+                Key = Keys.VK_DOWN,
+                MSG = KeyEvents.KeyDown,
+                Action = function(w)
+                    return
+                        H:NavigateTreeFlat(w, 1)
+                end
+            },
+            {
+                Key = Keys.VK_RIGHT,
+                MSG = KeyEvents.KeyDown,
+                Action = function(w)
+                    return
+                        H:ExpandOrDescendTree(w)
+                end
+            },
+            {
+                Key = Keys.VK_LEFT,
+                MSG = KeyEvents.KeyDown,
+                Action = function(w)
+                    return
+                        H:CollapseOrAscendTree(w)
+                end
+            },
+            { Key = Keys.VK_RETURN, Action = function(w) return H:ToggleFocusedTreeItem(w) end },
+            {
+                Key = Keys.VK_HOME,
+                MSG = KeyEvents.KeyDown,
+                Action = function(w)
+                    return
+                        H:NavigateTreeFirst(w)
+                end
+            },
+            {
+                Key = Keys.VK_END,
+                MSG = KeyEvents.KeyDown,
+                Action = function(w)
+                    return
+                        H:NavigateTreeLast(w)
+                end
+            },
         },
         Navigate = function(w, dir) return H:NavigateTreeFlat(w, dir) end,
         GetDefaultChild = function(w) return H:GetContainerDefChild(w) end,
@@ -854,21 +825,34 @@ WidgetTemplates = {
     },
 
     -- =======================================================================
-    -- TreeviewItem: leaf or node. The template only provides state/methods;
-    -- screens add concrete bindings with AddInputBinding(s) so each tree can
-    -- define its own activation / expand / collapse semantics.
+    -- TreeviewItem: leaf or node. Expansion state is exposed as value so focus
+    -- and SetValue announcements say whether a node is expanded/collapsed.
     -- =======================================================================
     TreeviewItem = {
         Role = "TreeviewItem",
         IsExpanded = false,
+        SpeechSettings = {
+            Role = false,
+            IgnoreWhenNotFocused = true
+        },
         IsLeaf = function(w)
             return not w.Children or #w.Children == 0
+        end,
+        GetValue = function(w)
+            if w:IsLeaf() then return "" end
+            if w.IsExpanded then
+                local childCount = #(w:GetVisibleChildren())
+                return Locale.Lookup("LOC_CAI_TREEVIEW_EXPANDED") .. ", "
+                    .. Locale.Lookup("LOC_CAI_TREEVIEW_ITEM_COUNT", childCount)
+            end
+            return Locale.Lookup("LOC_CAI_TREEVIEW_COLLAPSED")
         end,
         Expand = function(w)
             if w.IsExpanded then return false end
             if not w.Children or #w.Children == 0 then return false end
             w.IsExpanded = true
             if w.OnToggleExpanded then w:OnToggleExpanded(true) end
+            w:SetValue(w.GetValue and w:GetValue() or "")
             return true
         end,
         Collapse = function(w)
@@ -876,6 +860,7 @@ WidgetTemplates = {
             w.IsExpanded = false
             w.FocusedChild = nil
             if w.OnToggleExpanded then w:OnToggleExpanded(false) end
+            w:SetValue(w.GetValue and w:GetValue() or "")
             return true
         end,
         GetDefaultChild = function(w)

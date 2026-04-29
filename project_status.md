@@ -45,6 +45,7 @@ Lua accessibility mod for Civilization VI. Adds TTS/screen reader support for bl
 
 ### Docs
 - `docs/game-api.md` - API reference for input, locale, controls, events, ExposedMembers, CAI custom API, and Civ VI Lua context notes
+- Vanilla `ActionPanel.lua` / `ActionPanel.xml` analysis added to `docs/game-api.md`: end-turn blockers, secondary/overflow blocker controls, era indicator, turn timer, observer mode, input paths, and generic `LuaEvents.ActionPanel_ActivateNotification(...)` behavior are now documented.
 
 ### Scripts
 - `scripts/Deploy-Mod.ps1` - legacy deploy script; `src/` is now symlinked into the mod folder so no copy step is normally needed
@@ -70,10 +71,10 @@ Lua accessibility mod for Civilization VI. Adds TTS/screen reader support for bl
 - Replaced the remaining generic populate-wrapper helper that used `rawget(_G, ...)`
 - Production panel now captures vanilla `Populate*` helpers explicitly one by one (`PopulateWonders`, `PopulateProjects`, `PopulateUnits`, `PopulateDistrictsWithNestedBuildings`, `PopulateDistrictsWithoutNestedBuildings`)
 - Documented the Civ VI Lua limitation in `docs/game-api.md`: prefer direct function wrapping after `include(...)`, not `_G` lookup
-- `TreeviewItem` is back to being a minimal template; ProductionPanel now adds its own row bindings with `AddInputBinding(...)`
+- `Treeview` owns shared Left/Right/Return expand-collapse bindings; screen trees only add screen-specific activation bindings where needed
 - ProductionPanel CAI layer was rewritten to mirror vanilla interaction flow more closely: Enter maps to vanilla left click, Shift+Enter maps to vanilla right click, and focus reuses vanilla hover behavior
 - Queue and Manager are now separate accessible tabs instead of treating Queue like another production list
-- Expand/collapse behavior moved off the `TreeviewItem` template and onto the ProductionPanel tree container, with category toggles calling vanilla expand/collapse handlers
+- Expand/collapse behavior lives on the generic `Treeview` template, with screen-specific nodes reacting through `OnToggleExpanded` where needed
 - Added missing localization entries for ProductionPanel CAI strings, Treeview roles, and search feedback
 - Production panel title now uses vanilla `LOC_HUD_CHOOSE_PRODUCTION`
 - Removed the local ProductionPanel markup-stripping helpers so row labels, tooltips, and detail text now use the raw vanilla strings directly
@@ -104,6 +105,7 @@ Lua accessibility mod for Civilization VI. Adds TTS/screen reader support for bl
 - Removed CAI queue selection mirroring from `ProductionPanel_CAI.lua`; Delete and move actions now operate only on the focused queue row
 - Queue item rows no longer expose a tooltip because vanilla queue rows do not provide useful queue-item detail beyond the item name
 - Traced vanilla `ProductionManager.lua`: the multi-queue tab is a separate UI context opened via `LuaEvents.ProductionPanel_OpenManager`, with its own city list, filter pulldown, per-city current production, queue slots, and trash buttons
+- Updated `navCursor.lua` coordinate handling: `CAICursor:SetCoords(x, y, wrapCoords)` now bounds-checks before `Map.GetPlot(...)` so Civ VI's implicit X wrapping is not used. When `wrapCoords` is true, CAI manually wraps both X and Y using `Map.GetGridSize()`. Public cursor move LuaEvents now accept the same optional `wrapCoords` flag.
 
 ### Needs testing
 1. Enter on production and purchase rows should commit again
@@ -153,7 +155,7 @@ Lua accessibility mod for Civilization VI. Adds TTS/screen reader support for bl
 ## Pending Questions / Notes
 
 - ProductionPanel follow-up: `_G`/`rawget` is not safe in Civ VI UI Lua here; explicit one-by-one wrapping is the chosen pattern
-- Tree widgets should follow the CAI pattern where templates stay generic and screen-specific bindings are added by the consumer
+- Tree widgets use generic template bindings for Left/Right/Return expand-collapse; consumers add only screen-specific activation bindings and react through `OnToggleExpanded`
 - Tutorial input tracing:
   - Vanilla tutorial flow can intentionally consume keys through `AdvisorPopup.lua` while the advisor/metapopup is visible, and through `UITutorialManager` overlay/control gating during detailed tutorial steps.
   - `OPEN_CITY_PANEL` enables only `ChangeProductionCheck` and completes via `CityPanel_ProductionOpen` -> `ProductionPanelViaCityOpen`.
@@ -383,3 +385,306 @@ Lua accessibility mod for Civilization VI. Adds TTS/screen reader support for bl
 3. Verify normal non-tutorial ResearchChooser still chooses available research with Enter
 4. Verify Open Tech Tree and Close button visibility follows the vanilla controls
 5. Verify queued/current research rows remain read-only and inspectable
+
+## Investigation (2026-04-28): WorldTracker controls and accessibility plan
+
+### Findings
+- Vanilla `WorldTracker.lua` is an ambient HUD stack under `WorldTrackerVerticalContainer`, not a modal screen
+- Static visual sections are header, empty message, research panel, civics panel, unit list panel, chat panel, dynamic "other" panels, and tutorial goals
+- Header controls:
+  - `ToggleAllButton` collapses/expands the full tracker
+  - `ToggleDropdownButton` opens/closes the options dropdown
+- Options dropdown controls are checkboxes for chat, civics, research, and unit list visibility; unchecked options become disabled with `LOC_WORLDTRACKER_NO_ROOM` when vertical space is insufficient
+- Research and civics panels are capability/player-state gated, use `TechAndCivicSupport.lua` to populate title, icon, turn count, progress/boost meters, boost text/icons, unlock icons, and overflow page-turner
+- Research/civics icon buttons open the vanilla choosers through `LuaEvents.WorldTracker_OpenChooseResearch()` and `LuaEvents.WorldTracker_OpenChooseCivic()`
+- Unit list is hidden by default; when enabled it rebuilds on unit events, filters through `UnitsSearchBox`, groups units by broad type, and unit rows select/look at the unit on click
+- World Tracker is hidden during modal lens mode, force-hidden by research/civic choosers and tutorial events, and tutorial restore mode forces research/civics visible while hiding the normal collapse/options buttons
+- Documented the WorldTracker pattern in `docs/game-api.md`
+
+## Current Work (2026-04-28): WorldTracker accessibility
+
+### What's done
+- Added `src/UI/inGame/WorldTracker_CAI.lua` as a wrapper around vanilla `WorldTracker.lua`
+- Registered the WorldTracker replacement in `src/CivViAccess.modinfo`
+- Fixed an existing duplicate replacement id typo by renaming the ProductionPanel replacement id from `CAI_ResearchChooser` to `CAI_ProductionPanel`
+- Scrapped the ambient CAI WorldTracker widget mirror; no persistent WorldTracker panel is attached to `ExposedMembers.CAI_MainGamePanel`
+- `WorldTracker_CAI.lua` now follows the CityPanel/TopPanel input-action pattern:
+  - `T` -> `WorldTrackerOpenResearchChooser` -> `LuaEvents.WorldTracker_OpenChooseResearch()`
+  - `C` -> `WorldTrackerOpenCivicsChooser` -> `LuaEvents.WorldTracker_OpenChooseCivic()`
+  - `W` -> `WorldTrackerReadSummary` -> speaks current research, current civic, and total local-player unit count
+- Research and civic summary data is read from live player state through `GetResearchData()` and `GetCivicData()`, so it works regardless of visual panel visibility
+- Research/civic summary lines intentionally speak only label, turns remaining, and boost status; progress, boost trigger text, and unlock summaries are not included
+- `W` speaks summary lines directly without a leading "World Tracker summary" heading
+- Unit count is read directly from `Players[localPlayer]:GetUnits():GetCount()`, so it does not depend on the vanilla unit list being visible or populated
+- Added WorldTracker hotkey actions to `src/data/hotkey_config.xml`
+- Added WorldTracker hotkey/summary localization strings to `src/Text/en_US/cai_text_ui.xml`
+- Updated `docs/game-api.md` to document the hotkey-based WorldTracker pattern
+
+### Needs testing
+1. Launch a normal game and verify no Lua errors from `WorldTracker_CAI.lua`
+2. Press `T` and verify the vanilla Research Chooser opens
+3. Press `C` and verify the vanilla Civics Chooser opens
+4. Press `W` and verify the summary speaks current research label/turns/boost status, current civic label/turns/boost status, and total unit count
+5. Hide/collapse the visual World Tracker panels, then press `W` and verify research/civic/unit summaries still speak from live player state
+6. Choose new research/civics and verify `W` updates immediately
+7. Add/remove units and verify `W` reports the updated total unit count
+8. Verify no persistent WorldTracker CAI panel appears in Tab navigation
+9. Verify tutorial WorldTracker force-hide/restore events do not leave stale CAI focus or Lua errors
+
+## Current Work (2026-04-28): TopPanel hotkey access
+
+### What's done
+- Traced vanilla `TopPanel.lua`:
+  - `RefreshYields()` owns global science, culture, faith, gold, and tourism display
+  - `RefreshResources()` owns the strategic-resource strip
+  - base TopPanel yield buttons do not register click callbacks; only menu and Civilopedia buttons do in the base file
+- Added `src/UI/inGame/TopPanel_CAI.lua` as a wrapper around vanilla `TopPanel.lua`
+- Registered `TopPanel_CAI.lua` in `src/CivViAccess.modinfo`
+- Added CAI input actions in `src/data/hotkey_config.xml`:
+  - `Shift+T` -> `TopPanelSpeakTurnTimeDate`
+  - `Y` -> `TopPanelSpeakYields`
+  - `Ctrl+Y` -> `TopPanelYieldInfoList`
+  - `Q` -> `TopPanelResourceInfoList`
+- `Shift+T` refreshes and speaks the current turn, date, time, and full time tooltip
+- `Y` speaks all TopPanel yield summaries shown by vanilla TopPanel, including gold and faith balance plus per-turn rate
+- Faith yield tree nodes now mirror the TopPanel double-label display by previewing current faith balance plus faith per turn
+- Removed the separate `TopPanelSpeakBalanceYields` action
+- `Ctrl+Y` pushes a CAI tree containing all TopPanel yields; each yield node is the yield name plus a preview value
+- `Ctrl+Y` yield nodes now contain localized category nodes:
+  - gold is split into vanilla income and expense categories, each with its total in the label and localized vanilla tooltip detail lines underneath
+  - science, culture, faith, and tourism put the rate/balance preview in the outer yield label, then expose vanilla localized breakdown lines as category/detail nodes using indentation/line structure, without English text parsing
+- `Ctrl+Y` outer yield nodes no longer expose the full vanilla tooltip because the tree already contains the formatted breakdown
+- Science, culture, tourism, gold, and faith rate previews now append localized vanilla `LOC_HUD_REPORTS_PER_TURN` text
+- Confirmed the base UI/IDE helpers do not expose structured player-yield breakdown rows for science, culture, faith, or tourism; vanilla TopPanel relies on localized tooltip strings for those details
+- `Ctrl+Y` yield tree and `Q` resource list now pop themselves when focus leaves their pushed widget
+- Reverted the experimental `UIScreenManager:Pop(target)` idea; `Pop()` is again stack-top only
+- `UIScreenManager:CreateUIWidget(id, type, props)` now requires a widget id
+- Added recursive live-stack lookup through singular `GetWidgetById(id, recurse)`; ids are expected to be unique among live widgets
+- Added `UIWidget:GetId()` for reading a widget's assigned id
+- Added `UIScreenManager:RemoveFromStack(id)` for closing pushed stack-root widgets by unique id
+- Added `GenerateWidgetId(prefix)` for repeated row/item widgets that need unique ids but do not need stable lookup
+- Added opt-in duplicate-id diagnostics through `mgr.CAISettings.ValidateWidgetIds` to catch accidental duplicate ids during debugging
+- Migrated all `CreateUIWidget(...)` calls in `src/` to pass ids
+- Removed redundant TopPanel manager reinitialization checks; TopPanel now uses the manager captured at file load
+- Tree expand/collapse behavior now comes from the shared `Treeview` template:
+  - `Right` expands or descends
+  - `Left` collapses or ascends
+  - `Return` toggles the focused node when the focused item has no screen-specific Return action
+  - tree nodes now announce `Expanded`, `Collapsed`, and visible child count through `TreeviewItem:GetValue()`
+- `Q` pushes a CAI list of TopPanel strategic resources using the same inclusion rule as vanilla: non-bonus, non-luxury, non-artifact resources with amount > 0
+- Did not add production to TopPanel access because vanilla TopPanel does not show global production
+- Did not add local markup filtering; strings and tooltips are passed through as vanilla/localized text for future global formatting
+- Documented the TopPanel pattern in `docs/game-api.md`
+
+### Needs testing
+1. Launch a normal game and verify no Lua errors from `TopPanel_CAI.lua`
+2. Verify `Shift+T` speaks current turn, visible date, visible time, and time tooltip
+3. Verify `Y` speaks science, culture, tourism when visible, gold, and faith; it should not speak production
+4. Verify `Shift+S` no longer triggers a CAI TopPanel balance action
+5. Verify `Ctrl+Y` opens a navigable yield info tree with yield nodes, localized category nodes, and detail children for science, culture, tourism, gold, and faith when available
+6. Verify gold expands into income and expense categories, each category label includes its total, and each category contains the correct vanilla localized detail lines
+7. Verify science, culture, faith, and tourism outer labels include the rate/balance preview and expand directly to localized category/detail nodes such as cities/envoys/etc. without English-only parsing
+8. Verify outer yield nodes do not repeat the full vanilla tooltip after the label/value
+9. Verify `Q` opens a navigable strategic-resource list, or "No strategic resources" when none are owned
+10. Verify Escape closes the yield/resource pushed lists and returns to normal game focus
+
+## Investigation (2026-04-28): NotificationPanel accessibility plan
+
+### Findings
+- Vanilla `NotificationPanel.lua` is an ambient right-side HUD rail under `Controls.ScrollStack`, not a modal screen
+- Visual notification rows are created only for visible, icon-displayable, non-end-turn-blocking notifications; end-turn blockers are normally owned visually by ActionPanel but remain live notifications
+- Each visual row includes:
+  - icon/button area
+  - expanded title and summary labels
+  - optional stack count badge
+  - optional hidden dismiss-stack hit target on the count badge
+  - optional previous/next arrows for stacked notifications
+  - page pips or a page-number label for large stacks
+  - valid/invalid-phase icon background state
+- Live notification data is available through `NotificationManager.Find(playerID, notificationID)` and `NotificationManager.GetList(playerID)`
+- Useful notification APIs include `GetMessage()`, `GetSummary()`, `GetTypeName()`, `GetType()`, `GetIconName()`, `GetGroup()`, `GetCount()`, `GetEndTurnBlocking()`, `CanUserDismiss()`, `IsVisibleInUI()`, `IsValidForPhase()`, `IsLocationValid()`, `GetLocation()`, `IsTargetValid()`, `GetTarget()`, `Activate(true)`, and `GetValue(key)`
+- Vanilla activation should be preserved by calling `pNotification:Activate(true)`; the engine then routes to the same type-specific handlers used by mouse activation
+- Vanilla dismiss should be preserved by calling `NotificationManager.Dismiss(playerID, notificationID)` only when `CanUserDismiss()` is true
+- Stacked notification previous/next behavior is type-sensitive: most stacks look at/select the next notification target, while `COMMAND_UNITS` maps previous/next to previous/next ready unit selection
+- Documented the NotificationPanel pattern in `docs/game-api.md`
+
+### Suggested CAI integration
+- Add `NotificationPanel_CAI.lua` as a wrapper around vanilla `NotificationPanel.lua`
+- Register it as a `ReplaceUIScript` for the `NotificationPanel` Lua context
+- Add a bindable input action such as `NotificationPanelOpenList` to push a transient accessible notification list
+- Build the accessible list from live `NotificationManager.GetList(Game.GetLocalPlayer())` data, grouped by `GetTypeName()` to mirror vanilla stacked rows
+- Each group/list row should expose the localized title from `GetMessage()`, summary from `GetSummary()`, stack position/count, dismissible state, valid-phase state, and location/target availability
+- Row controls should preserve vanilla actions:
+  - `Enter` / `Space` activates the focused notification with `pNotification:Activate(true)` when valid for phase
+  - `Delete` or a row action dismisses the focused notification when `CanUserDismiss()` is true
+  - `Shift+Delete` dismisses all dismissible notifications in the focused stack
+  - `Left` / `Right` move previous/next within the focused stack, matching vanilla stack order
+- Use optional concise speech on `Events.NotificationAdded` for important new notifications, but avoid pushing persistent CAI focus or creating a permanent mirrored widget
+- Do not include end-turn blockers in the notification center; ActionPanel should expose those because vanilla does not create rail instances for them
+
+### Needs implementation
+1. Add `NotificationPanel_CAI.lua` wrapper and modinfo replacement entry
+2. Add notification hotkey actions and localized strings
+3. Implement live notification grouping/list generation
+4. Preserve vanilla activate, dismiss, stack navigation, and wrong-phase behavior
+5. Test normal notifications, stacked notifications, `COMMAND_UNITS`, wrong-phase notifications, end-turn blocker exclusion, and notification refresh/local-player-change flows
+
+## Current Work (2026-04-28): Event-driven cursor and NotificationPanel tree
+
+### What's done
+- Refactored CAI cursor movement away from `ExposedMembers.CAICursor` access
+- Added public cursor movement events:
+  - `LuaEvents.CAICursorMove(x, y)` for absolute movement
+  - `LuaEvents.CAICursorMoveRelative(dx, dy)` for relative movement
+  - `LuaEvents.CAICursorMoveDirection(direction)` for internal directional helpers
+  - `LuaEvents.CAICursorSnapToUnit(unit)`, `LuaEvents.CAICursorSnapToStartPlot()`, and `LuaEvents.CAICursorSnapToPlot(plot)` for existing snap flows
+- Removed hardcoded cursor navigation bindings from the `GameView` widget template
+- Added remappable cursor input actions to `src/data/hotkey_config.xml`:
+  - `CAICursorMoveUp` -> Up arrow
+  - `CAICursorMoveDown` -> Down arrow
+  - `CAICursorMoveLeft` -> Left arrow
+  - `CAICursorMoveRight` -> Right arrow
+- Routed those cursor input actions through the `SharedInputActions` table in `WorldInput_CAI.lua`
+- Left query-style cursor access on the `UI` hijack as `UI.GetCursorPlotID()` and `UI.GetCursorPlotCoord()`
+- Refactored `WorldInput_CAI.lua`:
+  - CAI input action records now declare `Type = "Started"` for repeat-style inputs and `Type = "Triggered"` for one-shot inputs
+  - cursor movement actions are handled from `Events.InputActionStarted`
+  - path info and interface primary action are handled from `Events.InputActionTriggered`
+  - all CAI `UI` table overrides are centralized in `InstallUIOverrides()`
+  - CAI still initializes the main game view from wrapped vanilla `OnLoadScreenClose(...)`, preserving the load-screen boundary
+  - CAI event registration/unregistration is grouped in `RegisterCAIEvents()` / `UnregisterCAIEvents()`
+  - CAI camera follow now listens to `LuaEvents.CAICursorMoved(...)` and calls vanilla `UI.LookAtPlot(plot)` so the camera follows cursor movement without changing selection or interface mode
+- Added `src/UI/inGame/NotificationPanel_CAI.lua` as a wrapper around vanilla `NotificationPanel.lua`
+- Registered `NotificationPanel_CAI.lua` in `src/CivViAccess.modinfo` as a replacement for the `NotificationPanel` Lua context
+- Added `NotificationPanelOpenList` input action, bound by default to `Ctrl+N`
+- Implemented a transient CAI notification center as a `Treeview`:
+  - single notifications are direct leaves
+  - stacked/grouped notification types become expandable group nodes
+  - leaf `Enter` / `Space` calls `pNotification:Activate(true)`
+  - leaf `Delete` dismisses the notification when `CanUserDismiss()` is true
+  - group `Shift+Delete` dismisses all dismissible notifications in that group
+  - end-turn-blocking notifications are excluded because vanilla does not create rail instances for them
+  - activating a notification closes the notification center before executing the vanilla action
+- Notification tree stale-dismissal handling:
+  - notification leaf widget ids now match their notification instance ids via `tostring(notificationID)`
+  - added `UIWidget:GetChildById(id, recurse)` for direct child lookup in open trees/stacks
+  - wrapped vanilla `OnNotificationDismissed(...)` so CAI preserves vanilla deletion and removes the matching tree leaf immediately
+  - wrapped vanilla `OnNotificationAdded(...)` so an already-open notification tree updates in place when new rail notifications arrive
+  - open-tree add removes the empty placeholder, appends new direct leaves, appends to existing group nodes, and converts a same-type direct leaf into a group when a stack forms live
+  - tied CAI availability checks to vanilla `GetNotificationEntry(playerID, notificationID).m_Instance` so reopened trees reject ids that vanilla already released from the visible rail
+  - CAI notification center now intentionally excludes end-turn blockers because vanilla tracks them without rail instances; ActionPanel should handle those separately
+  - tree rebuilds also filter optional `IsDismissed()` / `IsExpired()` notification states when those methods are available
+- Added notification announcement de-duplication by notification id so repeated add-path calls do not speak the same notification twice
+- Wrapped vanilla `LookAtNotification(...)` so vanilla notification camera jumps also sync the CAI cursor, except while the notification center tree is open
+- Added `Events.NotificationAdded` speech after vanilla add processing:
+  - speaks `Alert: notification title`
+  - includes summary text when available
+  - includes `At x, y` when the notification exposes a location or target
+- Added notification and cursor localization strings to `src/Text/en_US/cai_text_ui.xml`
+- Updated `docs/game-api.md` with the event-driven cursor API and NotificationPanel tree behavior
+- XML parse checks pass for `src/data/hotkey_config.xml`, `src/Text/en_US/cai_text_ui.xml`, and `src/CivViAccess.modinfo`
+
+### Needs testing
+1. Launch a game and verify no Lua errors from `navCursor.lua`, `WorldInput_CAI.lua`, or `NotificationPanel_CAI.lua`
+2. Verify arrow keys still move the CAI cursor through the new input actions
+3. Rebind cursor movement actions in Key Bindings and verify movement follows the new bindings
+4. Verify numpad keys no longer move the CAI cursor unless explicitly rebound by the user
+5. Trigger a notification and verify it speaks as `Alert: ...`, with summary and `At x, y` when available
+6. Press `Ctrl+N` and verify the notification center opens as a navigable tree
+7. Verify single notifications appear as direct leaves
+8. Verify grouped notifications appear as expandable parent nodes with one child per notification
+9. Verify focusing/browsing a notification with a target/location does not move the CAI cursor while the notification tree is open
+10. Verify `Enter` / `Space` closes the tree, then preserves vanilla activation behavior and moves the CAI cursor only through the resulting vanilla look-at flow
+11. Verify `Delete` dismisses dismissible leaves and reports when a notification cannot be dismissed
+12. Verify `Shift+Delete` on a group dismisses all dismissible notifications in that group
+13. Verify wrong-phase notifications do not activate and announce the wrong-phase message
+14. Verify end-turn blockers no longer appear in the notification center; they should be handled through ActionPanel access next
+
+## Investigation (2026-04-29): LoadScreen accessibility plan
+
+### Findings
+- Vanilla `LoadScreen.lua` is the shell-to-game loading context under `UI/FrontEnd/LoadScreen`, shown while moving from front end/load/save setup into the game.
+- The XML layout is a full-screen visual scene:
+  - black/root background and fallback `Loading, please wait...` text
+  - leader background image and leader portrait
+  - central colored civilization banner
+  - civilization icon and civilization name
+  - fixed "Joins the World Stage" label
+  - era/save-era line
+  - leader or challenge name
+  - leader/challenge loading text
+  - "Features & Abilities" section with unique abilities, units, buildings, districts, and improvements
+  - loading message
+  - final Begin Game / Continue Game button once loading is complete
+- Data is populated on `Events.LoadScreenContentReady` from `PlayerConfigurations`, `GameInfo.LoadingInfo`, `GameInfo.Leaders`, `GameInfo.Eras`, saved-game metadata, `Challenges`, and `GetLeaderUniqueTraits()` / `GetCivilizationUniqueTraits()`.
+- `Events.LoadGameViewStateDone` marks load complete, hides the loading message, shows the Begin/Continue button, sets `InputContext.Ready`, registers callbacks, and listens for `StartGame` / `StartGameAlt`.
+- `OnActivateButtonClicked()` is the only continue path to preserve: it raises `Events.LoadScreenClose()`, stops loading speech/music, dequeues the popup, switches to `InputContext.World`, and handles Play-By-Cloud follow-up checks.
+- Escape and StartGame actions are only honored after `m_isLoadComplete`; before that, input must not force progression.
+- Resync, multiplayer, World Builder, and automation can skip the visible button and call the continue path automatically.
+- Existing `WorldInput_CAI.lua` correctly initializes CAI game view only after `Events.LoadScreenClose`; load-screen CAI should not disturb that boundary.
+- Documented the LoadScreen pattern in `docs/game-api.md`.
+
+### Suggested CAI integration
+- Add a front-end `UI/frontEnd/LoadScreen.lua` wrapper or imported replacement and register it in `src/CivViAccess.modinfo` front-end files.
+- Include `caiUtils` and use `ExposedMembers.CAI_UIManager`; keep all speech through `Speak()`.
+- Wrap `OnLoadScreenContentReady()` after vanilla population to build a transient accessible panel/dialog from live control text:
+  - civilization name from `Controls.CivName:GetText()`
+  - era from visible `Controls.EraInfo:GetText()`
+  - leader/challenge name from `Controls.LeaderName:GetText()`
+  - leader/challenge text from visible `Controls.LeaderInfo:GetText()`
+  - unique feature rows from the instances built into `Controls.FeaturesStack`, or preferably from the same trait tables before/while building widgets if instance inspection is unreliable
+- Represent the screen as a read-only `Dialog` or `Panel` with `StaticText` children plus a final `Button` for Begin/Continue once ready.
+- Wrap `OnLoadGameViewStateDone()` to update/speak readiness and add/enable the Begin/Continue button widget. Its `OnClick` should call vanilla `OnActivateButtonClicked()`.
+- Wrap `OnActivateButtonClicked()` or `OnHide()` to remove/destroy the load-screen CAI widget before the in-game main panel initializes.
+- For resync/multiplayer/World Builder/autostart paths, announce a short localized loading/entering-game message only if CAI is active, but do not block automatic continuation.
+- Avoid announcing all feature text automatically by default because Dawn of Man audio may be playing; prefer initial short summary plus navigable read-on-demand content.
+
+### Needs implementation
+1. Add `src/UI/frontEnd/LoadScreen.lua` based on vanilla `LoadScreen.lua` plus CAI accessibility region.
+2. Register the file in the front-end import list in `src/CivViAccess.modinfo`.
+3. Add CAI localization for loading-screen panel title, ready state, and any missing labels not exposed by vanilla controls.
+4. Verify normal new-game loading, saved-game loading, challenge loading, multiplayer/resync auto-continue, World Builder load, and automation auto-start.
+
+## Current Work (2026-04-29): Unit operation hotkey configuration
+
+### What's done
+- Added `src/data/unitOperationConfig.sql` with `update UnitOperations set HotkeyId='...' where OperationType='...';` statements for all vanilla unit operations that previously had no `HotkeyId`.
+- Added matching unbound `InputActions` rows in `src/data/hotkey_config.xml` under the base `UNIT` category.
+- Reused each operation's existing localized description tag for the hotkey action name and description.
+- Pointed `UNITOPERATION_TELEPORT_TO` at the existing vanilla `LOC_UNITOPERATION_TELEPORT_TO_CITY_DESCRIPTION` text tag, because vanilla references `LOC_UNITOPERATION_TELEPORT_TO` in operation data but does not define that tag in `InGameText.xml`.
+- Registered `data/unitOperationConfig.sql` in `src/CivViAccess.modinfo` and added an in-game `UpdateDatabase` action for it.
+- XML parse checks pass for `src/data/hotkey_config.xml` and `src/CivViAccess.modinfo`; `src/data/unitOperationConfig.sql` contains 47 `UnitOperations` update statements.
+
+### Needs testing
+1. Launch the game and verify the mod loads without database errors.
+2. Open Options > Key Bindings > Unit Actions and verify the new unit operation actions appear.
+3. Verify the new unit operation actions are unbound by default.
+4. Bind a few actions, such as Build Improvement, Pillage, and Upgrade, and verify they trigger the selected unit's matching operation when available.
+
+## Current Work (2026-04-29): UnitPanel selection info and action list
+
+### What's done
+- Added `src/UI/inGame/UnitPanel_CAI.lua` as a wrapper around vanilla `UnitPanel.lua`.
+- Registered `UnitPanel_CAI.lua` in `src/CivViAccess.modinfo` as the replacement for the `UnitPanel` Lua context.
+- Added selected-unit info access through `ExposedMembers.CAIInfo:RequestUnitInfo(unitID, requestedKeys, playerID)`.
+- Moved selected-unit info responsibility out of `worldInfo.lua`; plot info now keeps only its own small aggregated unit-name helper for plot summaries.
+- Preserved the old unit nationality/adjective behavior by adding it to the new unit-panel name helper.
+- Removed the outdated selected-unit announcer from `caiIngame.lua` so unit selection speech is not duplicated.
+- Reused the existing selection info actions:
+  - `~` reads selected-unit summary.
+  - `Shift+1` through `Shift+0` read unit info slots for health, movement, combat, charges, promotions, formation, abilities, special state, available actions, and full details.
+- Reused `SelectionActions` to open a transient CAI unit action list built from vanilla `GetSubjectData().Actions`.
+- Unit action rows preserve vanilla callback functions, callback parameters, action order, disabled/failure tooltip text, and action sounds.
+- Reused existing vanilla unit-panel and keybinding localization strings instead of adding CAI-specific unit-panel tags.
+- Documented the UnitPanel data/action pattern in `docs/game-api.md`.
+- XML parse checks pass for `src/CivViAccess.modinfo`, `src/Text/en_US/cai_text_ui.xml`, `src/data/hotkey_config.xml`, and `src/data/unitOperationConfig.xml`.
+
+### Needs testing
+1. Launch a game and verify no Lua errors from `UnitPanel_CAI.lua`, `worldInfo.lua`, or `caiIngame.lua`.
+2. Select several unit types and verify one concise selection summary is spoken.
+3. Verify `~` and `Shift+1` through `Shift+0` read selected-unit info while a unit is selected.
+4. Verify city selection info still works for cities and does not conflict with unit selection info.
+5. Bind/use `SelectionActions` and verify the unit action list opens for the selected unit.
+6. Verify action-list `Enter` / `Space` triggers normal vanilla actions, including build improvements, promotion, delete confirmation, spy actions, and ranged/targeting modes.
+7. Verify disabled unit actions are readable and speak their tooltip/failure reason without executing.
+8. Verify plot info still reports aggregated units on a plot without depending on `UnitPanel_CAI.lua`.

@@ -2,6 +2,7 @@ include("caiUtils")
 include("TutorialUIRoot")
 include("Civ6Common")
 
+
 local mgr = ExposedMembers.CAI_UIManager
 local activeItem = nil
 local detailedItem = nil
@@ -48,6 +49,7 @@ OnInput = WrapFunc(OnInput, function(orig, input)
         return false
     end
 
+    -- If the current detailed item has the choose production menu trigger, we need the manager to handle input for it here, otherwise the production menu won't work in the tutorial. This is due to the fact that only part of the production panel is activated, and not the entire context
     if detailedItem and HasUITrigger(detailedItem, "ChooseProductionMenu") then
         if mgr then
             local handled = mgr:HandleInput(input)
@@ -57,7 +59,7 @@ OnInput = WrapFunc(OnInput, function(orig, input)
         end
     end
 
-    -- have to do this because the original has the escape key miss spelled and it doesn't work
+    -- have to do this because the original has the escape key misspelled and it doesn't work
     local event = input:GetMessageType()
     local key = input:GetKey()
     if key == Keys.VK_ESCAPE and event == KeyEvents.KeyUp and tutorialLoaded then

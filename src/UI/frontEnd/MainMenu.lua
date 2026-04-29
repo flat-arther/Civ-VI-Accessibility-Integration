@@ -1854,14 +1854,14 @@ BuildMenu = WrapFunc(BuildMenu, function(orig, menuOptions)
     end
 
     if not MainPanel then
-        MainPanel = mgr:CreateUIWidget("Panel", {
+        MainPanel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuPanel"), "Panel", {
             GetLabel = function() return Locale.Lookup("LOC_CAI_MAIN_MENU") end,
             SpeechSettings = { Role = false }
         })
     end
 
     if not MenuList then
-        MenuList = mgr:CreateUIWidget("List")
+        MenuList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuList"), "List")
         MainPanel:AddChild(MenuList)
         BuildCarouselWidgets()
         BuildMotDWidget()
@@ -1875,7 +1875,7 @@ BuildMenu = WrapFunc(BuildMenu, function(orig, menuOptions)
             local controlRef = menuOption.control
 
             if dataEntry then
-                local widget = mgr:CreateUIWidget("MenuItem", {
+                local widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuMenuItem"), "MenuItem", {
                     GetLabel = function() return controlRef.ButtonLabel:GetText() end,
                     GetTooltip = function() return controlRef.Top:GetToolTipString() end,
                     IsHidden = function() return controlRef.Top:IsHidden() end,
@@ -1913,7 +1913,7 @@ BuildCarouselWidgets = function()
     if entryCount == 0 then return end
 
     if not m_CarouselList then
-        m_CarouselList = mgr:CreateUIWidget("HorizontalList", {
+        m_CarouselList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuHorizontalList"), "HorizontalList", {
             GetLabel = function() return Locale.Lookup("LOC_CAI_CAROUSEL") end,
             IsHidden = function() return Controls.ChallengeContainer:IsHidden() end,
         })
@@ -1923,7 +1923,7 @@ BuildCarouselWidgets = function()
     for i = 0, entryCount - 1 do
         local entryIndex = i
         local entryNum = i + 1
-        local widget = mgr:CreateUIWidget("Button", {
+        local widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuButton"), "Button", {
             GetLabel = function()
                 local entryType = Challenges.GetCarouselEntryType(entryIndex)
                 local typeLabel = entryType == "Clickout"
@@ -1960,7 +1960,7 @@ end)
 --#MotD widget
 BuildMotDWidget = function()
     if m_MotDWidget then return end
-    m_MotDWidget = mgr:CreateUIWidget("StaticText", {
+    m_MotDWidget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuStaticText"), "StaticText", {
         GetLabel = function() return Locale.Lookup("LOC_MESSAGE_OF_THE_DAY_HEADING") end,
         GetValue = function() return Controls.MotDText:GetText() or "" end,
         IsHidden = function() return Controls.MotDContainter:IsHidden() end,
@@ -1978,7 +1978,7 @@ end)
 --#Version widget
 BuildVersionWidget = function()
     if m_VersionWidget then return end
-    m_VersionWidget = mgr:CreateUIWidget("StaticText", {
+    m_VersionWidget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuStaticText"), "StaticText", {
         GetLabel = function()
             return Locale.Lookup("LOC_PAUSEMENU_INFO_VERSION_TOOLTIP", UI.GetAppVersion())
         end,
@@ -1989,7 +1989,7 @@ end
 --#My2K widget
 BuildMy2KWidget = function()
     if m_My2KWidget then return end
-    m_My2KWidget = mgr:CreateUIWidget("Button", {
+    m_My2KWidget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuButton"), "Button", {
         GetLabel = function() return Locale.Lookup("TXT_KEY_MY2K") end,
         GetValue = function() return Controls.My2KStatus:GetText() or "" end,
         IsHidden = function() return Controls.My2KContents:IsHidden() end,
@@ -2043,7 +2043,7 @@ BuildSubMenu = WrapFunc(BuildSubMenu, function(orig, menuOptions)
     if not controls or #controls == 0 then return end
 
     if not m_SubmenuList then
-        m_SubmenuList = mgr:CreateUIWidget("List", {
+        m_SubmenuList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuList"), "List", {
             GetLabel = function() return m_submenuLabel end,
         })
         m_SubmenuList:AddInputBinding({
@@ -2072,14 +2072,14 @@ BuildSubMenu = WrapFunc(BuildSubMenu, function(orig, menuOptions)
                 local hasHelpElement = data.helpCallback ~= nil
 
                 if hasHelpElement then
-                    local helpGroup = mgr:CreateUIWidget("SubMenu", {
+                    local helpGroup = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuSubMenu"), "SubMenu", {
                         GetLabel = function() return mainLabel end,
                         OnFocusEnter = function()
                             HighlightSubmenuInstance(control)
                         end
                     })
 
-                    local playButton = mgr:CreateUIWidget("MenuItem", {
+                    local playButton = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuMenuItem"), "MenuItem", {
                         GetLabel = function() return Locale.Lookup("LOC_CAI_PLAY_NOW") end,
                         GetTooltip = function() return control.Top:GetToolTipString() end,
                         IsHidden = function() return control.Top:IsDisabled() end,
@@ -2090,7 +2090,7 @@ BuildSubMenu = WrapFunc(BuildSubMenu, function(orig, menuOptions)
                         end
                     })
 
-                    local helpButton = mgr:CreateUIWidget("MenuItem", {
+                    local helpButton = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuMenuItem"), "MenuItem", {
                         GetLabel = function() return Locale.Lookup("LOC_CAI_HELP") end,
                         GetTooltip = function() return control.HelpButton:GetToolTipString() end,
                         IsDisabled = function() return control.HelpButton:IsDisabled() end,
@@ -2106,7 +2106,7 @@ BuildSubMenu = WrapFunc(BuildSubMenu, function(orig, menuOptions)
                     helpGroup:AddChild(helpButton)
                     m_SubmenuList:AddChild(helpGroup)
                 else
-                    local standardButton = mgr:CreateUIWidget("MenuItem", {
+                    local standardButton = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuMenuItem"), "MenuItem", {
                         GetLabel = function() return mainLabel end,
                         GetTooltip = function() return control.Top:GetToolTipString() end,
                         IsDisabled = function() return control.OptionButton:IsDisabled() end,
