@@ -3,10 +3,20 @@ include("TutorialUIRoot")
 include("Civ6Common")
 
 
-local mgr = ExposedMembers.CAI_UIManager
-local activeItem = nil
-local detailedItem = nil
-local tutorialLoaded = false
+local mgr                  = ExposedMembers.CAI_UIManager
+local activeItem           = nil
+local detailedItem         = nil
+local tutorialLoaded       = false
+
+local escapePassthroughIds = {
+    "CAINotificationCenterTree",
+    "CAIUnitPanelActionList",
+    "CAICityPanelList",
+    "CAITopPanelResourceInfoList",
+    "CAITopPanelYieldInfoTree",
+    "CAIWorldInputInterfaceMode",
+}
+
 
 local function HasUITrigger(item, triggerName)
     if not item or not item.UITriggers then return false end
@@ -63,6 +73,13 @@ OnInput = WrapFunc(OnInput, function(orig, input)
     local event = input:GetMessageType()
     local key = input:GetKey()
     if key == Keys.VK_ESCAPE and event == KeyEvents.KeyUp and tutorialLoaded then
+        -- don't handle escape if certain UI elements are open, like the notification center, since the tutorial is always active and would cause escape to not work for those elements
+        for _, id in ipairs(escapePassthroughIds) do
+            local hasWidget = mgr and mgr:GetWidgetById(id, true)
+            if hasWidget then
+                return false
+            end
+        end
         LuaEvents.InGame_OpenInGameOptionsMenu();
         return true
     end
