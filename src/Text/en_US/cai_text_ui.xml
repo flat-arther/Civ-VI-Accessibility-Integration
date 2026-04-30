@@ -251,7 +251,7 @@
       <Text>Empty slot {1_Num}</Text>
     </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_SLOTS_USED" Language="en_US">
-      <Text>{1_Used} of {2_Total} slots used</Text>
+      <Text>{1_Used} out of {2_Total} slots used</Text>
     </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_CHOOSE_POLICY" Language="en_US">
       <Text>Choose {1_Category} policy</Text>
@@ -524,6 +524,50 @@
     </Row>
     <Row Tag="LOC_CAI_RESEARCH_NO_UNLOCKS" Language="en_US">
       <Text>No unlocks</Text>
+    </Row>
+
+    <!-- Civics chooser -->
+    <Row Tag="LOC_CAI_CIVIC_CURRENT" Language="en_US">
+      <Text>Civic: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_JUST_COMPLETED" Language="en_US">
+      <Text>Just completed: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_PROGRESS" Language="en_US">
+      <Text>{1_Percent} percent</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_QUEUE_POSITION" Language="en_US">
+      <Text>Queue position {1_Position}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_CURRENT_STATUS" Language="en_US">
+      <Text>Civic in progress</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_AVAILABLE_LIST" Language="en_US">
+      <Text>Available civics</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_QUEUE_LIST" Language="en_US">
+      <Text>Civics queue</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_UNLOCKS_COUNT_ONE" Language="en_US">
+      <Text>{1_Count} unlock</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_UNLOCKS_COUNT" Language="en_US">
+      <Text>{1_Count} unlocks</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_NO_UNLOCKS" Language="en_US">
+      <Text>No unlocks</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_MAKES_OBSOLETE_PREVIEW" Language="en_US">
+      <Text>Makes obsolete: {1_Items}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_MAKES_OBSOLETE_COUNT_ONE" Language="en_US">
+      <Text>{1_Count} obsolete policy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_MAKES_OBSOLETE_COUNT" Language="en_US">
+      <Text>{1_Count} obsolete policies</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_CHOSEN" Language="en_US">
+      <Text>Chose civic: {1_Name}</Text>
     </Row>
 
     <!-- Production panel -->

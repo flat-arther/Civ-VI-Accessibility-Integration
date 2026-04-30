@@ -43,6 +43,7 @@
     <File>UI/inGame/NotificationPanel_CAI.lua</File>
     <File>UI/inGame/GovernmentScreen_CAI.lua</File>
     <File>UI/inGame/ResearchChooser_CAI.lua</File>
+    <File>UI/inGame/CivicsChooser_CAI.lua</File>
     <File>UI/inGame/ProductionPanel_CAI.lua</File>
     <File>UI/inGame/CityPanel_CAI.lua</File>
     <File>UI/inGame/UnitPanel_CAI.lua</File>
@@ -188,6 +189,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>ResearchChooser</LuaContext>
         <LuaReplace>UI/inGame/ResearchChooser_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_CivicsChooser">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>CivicsChooser</LuaContext>
+        <LuaReplace>UI/inGame/CivicsChooser_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

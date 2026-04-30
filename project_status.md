@@ -31,10 +31,12 @@ Civilization VI accessibility mod for blind players. Adds TTS/screen reader navi
 ## Current Focus
 
 GovernmentScreen accessibility is the latest active implementation and needs in-game verification.
+CivicsChooser accessibility has also been implemented and needs in-game verification.
 
 Files involved:
 
 - `src/UI/inGame/GovernmentScreen_CAI.lua`
+- `src/UI/inGame/CivicsChooser_CAI.lua`
 - `src/UI/Popups/InGamePopup_CAI.lua`
 - `src/CivViAccess.modinfo`
 - `src/Text/en_US/cai_text_ui.xml`
@@ -76,6 +78,20 @@ GovernmentScreen test queue:
 16. Verify locked government rows are readable but not activatable.
 17. Verify Shift+Enter on policy entries opens Civilopedia outside tutorial mode and does nothing harmful during tutorial mode.
 18. Verify Escape closes pushed trees first, then closes CAI root and vanilla screen together, including the vanilla unsaved-policy warning.
+
+CivicsChooser test queue:
+
+1. Launch a game and verify no Lua errors from `CivicsChooser_CAI.lua`.
+2. Open CivicsChooser from the ActionPanel civic blocker and from WorldTracker `C`.
+3. Verify opening CivicsChooser does not also open when ResearchChooser opens.
+4. Verify initial focus lands on the civics queue tree while a civic is active, otherwise on available civics.
+5. Verify available civic rows speak name, recommendation, turns, boost, tooltip detail, queue position, and first unlocks.
+6. Verify Enter on available civics selects the civic, speaks the chosen-civic confirmation, plays vanilla confirm sound, and closes the chooser.
+7. Verify queued/current civic rows are read-only and expandable.
+8. Verify Shift+Enter opens Civilopedia outside tutorial mode and does nothing harmful during tutorial mode.
+9. Verify Open Civics Tree opens the full CivicsTree and closes the chooser.
+10. Verify rows disabled by zero culture yield or tutorial filtering are announced disabled and do not activate.
+11. Verify Escape, close button, title/icon close, and `LaunchBar_CloseChoosers` close both CAI and vanilla state.
 
 ## Pending Test Queue By Area
 
@@ -159,7 +175,7 @@ Unit operation hotkeys:
 ## Known Gaps / Next Steps
 
 - Test GovernmentScreen first; it is the current active feature.
-- CivicsChooser accessibility has been analyzed and planned; implementation should mirror `ResearchChooser_CAI.lua` with civic-specific data/unlocks and live vanilla row state.
+- Test CivicsChooser accessibility after GovernmentScreen.
 - Implement ProductionManager / multi-queue accessibility.
 - Implement LoadScreen accessibility from the existing plan in `docs/game-api.md`.
 - Review unclear older replacements: `InGameTopOptionsMenu_CAI.lua`, `IntroScreen.lua`, `FrontEndPopup.lua`, `MapSelect.lua`.

@@ -1,8 +1,7 @@
-include("caiUtils")
-include("ResearchChooser")
+﻿include("caiUtils")
+include("CivicsChooser")
 local mgr                        = ExposedMembers.CAI_UIManager
 
-local TUTORIAL_MOD_ID            = "17462E0F-1EE1-4819-AAAA-052B5896B02A"
 local UNLOCKS_INLINE             = 2
 
 local m_caiPanel                 = nil ---@type UIWidget|nil
@@ -12,60 +11,21 @@ local m_caiRowData               = {} ---@type table<number, table>
 local m_caiAvailableRows         = {} ---@type table<number, table>
 local m_caiQueueRows             = {} ---@type table<number, table>
 local m_caiCurrentData           = nil ---@type table|nil
-local m_caiIsTutorial            = nil ---@type boolean|nil
-local m_caiTutorialTechs         = nil ---@type table<number, number>|nil
 local m_caiOpenPending           = false ---@type boolean
-local m_caiTutorialPushDelay     = false ---@type boolean
-local m_caiTutorialControlsReady = false ---@type boolean
-local m_caiTutorialPushPending   = false ---@type boolean
 local m_caiInstanceByHash        = {} ---@type table<number, table>
 local m_caiCurrentControl        = nil ---@type table|nil
 
 -- ===========================================================================
--- Tutorial detection and reorder. Vanilla's m_isTutorial / TUTORIAL_TECHS are
--- file-local to ResearchChooser.lua and unreachable from here, so we replicate
--- them. Reorder drops the matching techs into positions 2/3/4, matching the
--- visual stack ordering vanilla applies via AddChildAtIndex.
+-- Vanilla CivicsChooser does not have the base tutorial reorder hack that
+-- ResearchChooser has. Tutorial behavior is still respected by reading the
+-- live native row controls for hidden/disabled state.
 -- ===========================================================================
-local function IsCAITutorial()
-    if m_caiIsTutorial ~= nil then return m_caiIsTutorial end
-    m_caiIsTutorial = false
-    for _, v in ipairs(Modding.GetActiveMods()) do
-        if v.Id == TUTORIAL_MOD_ID then
-            m_caiIsTutorial = true
-            break
-        end
-    end
-    return m_caiIsTutorial
-end
-
-local function GetTutorialTechHashes()
-    if m_caiTutorialTechs then return m_caiTutorialTechs end
-    m_caiTutorialTechs = {
-        [2] = UITutorialManager:GetHash("TECH_MINING"),
-        [3] = UITutorialManager:GetHash("TECH_IRRIGATION"),
-        [4] = UITutorialManager:GetHash("TECH_POTTERY"),
-    }
-    return m_caiTutorialTechs
-end
-
 local function ReorderForTutorial(rowData)
-    if not IsCAITutorial() then return end
-    local targets = GetTutorialTechHashes()
-    for targetIdx, techHash in pairs(targets) do
-        for i, kData in ipairs(rowData) do
-            if kData.Hash == techHash and i ~= targetIdx then
-                table.remove(rowData, i)
-                local insertAt = math.min(targetIdx, #rowData + 1)
-                table.insert(rowData, insertAt, kData)
-                break
-            end
-        end
-    end
+    return rowData
 end
 
 -- ===========================================================================
--- Unlock helpers. Reuses the native cached lookup — format is {typeName, Name,
+-- Unlock helpers. Reuses the native cached lookup - format is {typeName, Name,
 -- CivilopediaKey}. Entries missing a name are skipped.
 -- ===========================================================================
 local function ControlIsHidden(control)
@@ -99,40 +59,96 @@ local function ControlTooltip(control)
     return ""
 end
 
-local function GetInstanceForResearch(kData)
-    if not kData or not kData.Hash then return nil end
-    return m_caiInstanceByHash[kData.Hash]
+local function GetChildren(control)
+    if control and control.GetChildren then
+        return control:GetChildren() or {}
+    end
+    return {}
 end
 
-local function GetCurrentResearchControl()
-    return m_caiCurrentControl or Controls
-end
-
-local function GetDisplayControl(kData)
-    local instance = GetInstanceForResearch(kData)
-    if instance then return instance end
-    if kData and kData.IsCurrent then
-        return GetCurrentResearchControl()
+local function FindControlTextRecursive(control, targetText)
+    if not control or not targetText or targetText == "" then return nil end
+    if ControlText(control) == targetText then return control end
+    for _, child in ipairs(GetChildren(control)) do
+        local found = FindControlTextRecursive(child, targetText)
+        if found then return found end
     end
     return nil
 end
 
-local function IsResearchRowHidden(kData)
-    local instance = GetInstanceForResearch(kData)
+local function FindControlTooltipRecursive(control, targetTooltip)
+    if not control or not targetTooltip or targetTooltip == "" then return nil end
+    if ControlTooltip(control) == targetTooltip then return control end
+    for _, child in ipairs(GetChildren(control)) do
+        local found = FindControlTooltipRecursive(child, targetTooltip)
+        if found then return found end
+    end
+    return nil
+end
+
+local function BuildCivicInstanceFromContainer(topContainer, kData)
+    if not topContainer then return nil end
+    local children = GetChildren(topContainer)
+    return {
+        TopContainer = topContainer,
+        Top = FindControlTooltipRecursive(topContainer, kData and kData.ToolTip or "") or children[1] or topContainer,
+        TechName = FindControlTextRecursive(topContainer, kData and Locale.ToUpper(kData.Name) or ""),
+    }
+end
+
+local function GetLatestCivicInstanceFromStack(beforeCount, kData)
+    local children = GetChildren(Controls.CivicStack)
+    local targetName = kData and Locale.ToUpper(kData.Name) or ""
+    if targetName ~= "" then
+        for _, topContainer in ipairs(children) do
+            local instance = BuildCivicInstanceFromContainer(topContainer, kData)
+            if instance and instance.TechName then
+                return instance
+            end
+        end
+    end
+    local topContainer = children[beforeCount + 1] or children[#children]
+    return BuildCivicInstanceFromContainer(topContainer, kData)
+end
+
+local function GetInstanceForCivic(kData)
+    if not kData or not kData.Hash then return nil end
+    return m_caiInstanceByHash[kData.Hash]
+end
+
+local function GetCurrentCivicControl()
+    return m_caiCurrentControl or Controls
+end
+
+local function GetDisplayControl(kData)
+    local instance = GetInstanceForCivic(kData)
+    if instance then return instance end
+    if kData and kData.IsCurrent then
+        return GetCurrentCivicControl()
+    end
+    return nil
+end
+
+local function IsCivicRowHidden(kData)
+    local instance = GetInstanceForCivic(kData)
     if not instance then return false end
     return ControlIsHidden(instance.TopContainer) or ControlIsHidden(instance.Top)
 end
 
-local function IsResearchRowDisabled(kData)
-    local instance = GetInstanceForResearch(kData)
+local function IsCivicRowDisabled(kData)
+    local instance = GetInstanceForCivic(kData)
     if not instance then return false end
     return ControlIsDisabled(instance.Top)
 end
 
-local function GetUnlockNames(kData)
-    if not kData or not kData.TechType then return {} end
+local function GetUnlockables(kData)
+    if not kData or not kData.CivicType then return {} end
     local playerID = Game.GetLocalPlayer()
-    local unlockables = GetUnlockablesForTech_Cached(kData.TechType, playerID) or {}
+    return GetUnlockablesForCivic_Cached(kData.CivicType, playerID) or {}
+end
+
+local function GetUnlockNames(kData)
+    local unlockables = GetUnlockables(kData)
     local names = {}
     for _, v in ipairs(unlockables) do
         local name = v[2]
@@ -143,7 +159,27 @@ local function GetUnlockNames(kData)
     return names
 end
 
-local function GetResearchDisplayName(kData)
+local function GetObsoletePolicyNames(kData)
+    local unlockables = GetUnlockables(kData)
+    local unlockableIndex = {}
+    for _, v in ipairs(unlockables) do
+        unlockableIndex[v[1]] = true
+    end
+
+    local obsoleteNames = {}
+    for row in GameInfo.ObsoletePolicies() do
+        if unlockableIndex[row.ObsoletePolicy] then
+            local policy = GameInfo.Policies[row.PolicyType]
+            if policy then
+                table.insert(obsoleteNames, Locale.Lookup("LOC_TOOLTIP_UNLOCKS_POLICY", policy.Name))
+            end
+        end
+    end
+    table.sort(obsoleteNames, function(a, b) return Locale.Compare(a, b) == -1 end)
+    return obsoleteNames
+end
+
+local function GetCivicDisplayName(kData)
     local control = GetDisplayControl(kData)
     if control then
         local name = ControlText(control.TechName) or ""
@@ -181,7 +217,7 @@ local function FormatTurnsPart(kData)
         if turnsText ~= "" then return turnsText end
     end
     if kData.IsLastCompleted and not kData.Repeatable then
-        return Locale.Lookup("LOC_RESEARCH_CHOOSER_JUST_COMPLETED")
+        return Locale.Lookup("LOC_CAI_CIVIC_JUST_COMPLETED", GetCivicDisplayName(kData))
     end
     if kData.TurnsLeft and kData.TurnsLeft >= 0 then
         return Locale.Lookup("LOC_TURNS_REMAINING_VAL", kData.TurnsLeft)
@@ -217,7 +253,7 @@ local function FormatBoostPart(kData)
     return string.gsub(firstLine, "^%s*(.-)%s*$", "%1")
 end
 
-local function GetResearchTooltipText(kData)
+local function GetCivicTooltipText(kData)
     local control = GetDisplayControl(kData)
     if control then
         local tooltip = ControlTooltip(control.Top)
@@ -231,11 +267,11 @@ local function GetQueuePositionText(kData)
     if control then
         local number = ControlText(control.NodeNumber)
         if number ~= "" then
-            return Locale.Lookup("LOC_CAI_RESEARCH_QUEUE_POSITION", number)
+            return Locale.Lookup("LOC_CAI_CIVIC_QUEUE_POSITION", number)
         end
     end
     if kData.ResearchQueuePosition and kData.ResearchQueuePosition ~= -1 then
-        return Locale.Lookup("LOC_CAI_RESEARCH_QUEUE_POSITION", kData.ResearchQueuePosition)
+        return Locale.Lookup("LOC_CAI_CIVIC_QUEUE_POSITION", kData.ResearchQueuePosition)
     end
     return nil
 end
@@ -243,9 +279,9 @@ end
 local function FormatRowLabel(kData)
     local parts = {}
     if kData.IsCurrent then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_CURRENT", GetResearchDisplayName(kData)))
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_CURRENT", GetCivicDisplayName(kData)))
     else
-        AppendIfNonEmpty(parts, GetResearchDisplayName(kData))
+        AppendIfNonEmpty(parts, GetCivicDisplayName(kData))
     end
     if kData.IsRecommended then
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_TECH_FILTER_RECOMMENDED"))
@@ -255,10 +291,10 @@ end
 
 -- ===========================================================================
 -- Detail helpers. The old read-only edit contents now live as collapsed child
--- tree items under each research row. Sources:
+-- tree items under each Civic row. Sources:
 --   1. kData.ToolTip (name, cost, description, unlocks) from ToolTipHelper.
---   2. Boost line — ToolTipHelper does NOT include boost info; sighted get
---      this via the BoostLabel + boost icon tooltip next to the tech. Built
+--   2. Boost line - ToolTipHelper does NOT include boost info; sighted get
+--      this via the BoostLabel + boost icon tooltip next to the civic. Built
 --      to match the sighted icon tooltip: "Can/Has been boosted: <trigger>".
 --   3. Live status (IsCurrent progress/turns, queue position).
 -- [NEWLINE] tokens are split into tree rows for easier navigation.
@@ -293,30 +329,40 @@ local function IsUnlocksHeader(text)
     return unlocksLabel and unlocksLabel ~= "" and string.find(text, unlocksLabel, 1, true) ~= nil
 end
 
-local function SplitTooltipLinesWithoutUnlocks(text)
+local function IsMakesObsoleteHeader(text)
+    if not text or text == "" then return false end
+    local obsoleteLabel = Locale.Lookup("LOC_TOOLTIP_MAKES_OBSOLETE")
+    return obsoleteLabel and obsoleteLabel ~= "" and string.find(text, obsoleteLabel, 1, true) ~= nil
+end
+
+local function SplitTooltipLinesWithoutSpecialLists(text)
     local lines = {}
-    local skippingUnlocks = false
+    local skippingList = false
     for _, line in ipairs(SplitFormattedLines(text)) do
-        if IsUnlocksHeader(line) then
-            skippingUnlocks = true
-        elseif skippingUnlocks and StartsWithIconBullet(line) then
-            -- Unlock rows are exposed in the dedicated expandable unlock node.
+        if IsUnlocksHeader(line) or IsMakesObsoleteHeader(line) then
+            skippingList = true
+        elseif skippingList and StartsWithIconBullet(line) then
+            -- Unlock and obsolete rows are exposed in dedicated expandable nodes.
         else
-            skippingUnlocks = false
+            skippingList = false
             table.insert(lines, line)
         end
     end
     return lines
 end
 
-local function FormatShortTooltip(kData, unlockNames)
+local function FormatShortTooltip(kData, unlockNames, obsoleteNames)
     local parts = {}
-    local tooltipLines = SplitTooltipLinesWithoutUnlocks(GetResearchTooltipText(kData))
+    local tooltipLines = SplitTooltipLinesWithoutSpecialLists(GetCivicTooltipText(kData))
     AppendIfNonEmpty(parts, FormatTurnsPart(kData))
     AppendIfNonEmpty(parts, tooltipLines[2])
     AppendIfNonEmpty(parts, FormatBoostPart(kData))
     for _, name in ipairs(GetFirstNUnlockNamesFromList(unlockNames, UNLOCKS_INLINE)) do
         AppendIfNonEmpty(parts, name)
+    end
+    local obsoletePreview = table.concat(GetFirstNUnlockNamesFromList(obsoleteNames, UNLOCKS_INLINE), ", ")
+    if obsoletePreview ~= "" then
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_MAKES_OBSOLETE_PREVIEW", obsoletePreview))
     end
     return table.concat(parts, "[NEWLINE]")
 end
@@ -324,40 +370,63 @@ end
 local function AddTextDetailNode(parent, text)
     if not text or text == "" then return end
     local detailText = text
-    parent:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserDetail"), "TreeviewItem", {
+    parent:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserDetail"), "TreeviewItem", {
         GetLabel = function() return NormalizeFormattedText(detailText) end,
     }))
 end
 
 local function AddUnlocksNode(parent, unlockNames)
     local count = #unlockNames
-    local unlockNode = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserUnlocks"), "TreeviewItem", {
+    local unlockNode = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserUnlocks"), "TreeviewItem", {
         GetLabel = function()
             if count == 1 then
-                return Locale.Lookup("LOC_CAI_RESEARCH_UNLOCKS_COUNT_ONE", count)
+                return Locale.Lookup("LOC_CAI_CIVIC_UNLOCKS_COUNT_ONE", count)
             end
-            return Locale.Lookup("LOC_CAI_RESEARCH_UNLOCKS_COUNT", count)
+            return Locale.Lookup("LOC_CAI_CIVIC_UNLOCKS_COUNT", count)
         end,
     })
 
     if count > 0 then
         for _, name in ipairs(unlockNames) do
             local unlockName = name
-            unlockNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserUnlock"), "TreeviewItem", {
+            unlockNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserUnlock"), "TreeviewItem", {
                 GetLabel = function() return unlockName end,
             }))
         end
     else
-        unlockNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserUnlock"), "TreeviewItem", {
-            GetLabel = function() return Locale.Lookup("LOC_CAI_RESEARCH_NO_UNLOCKS") end,
+        unlockNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserUnlock"), "TreeviewItem", {
+            GetLabel = function() return Locale.Lookup("LOC_CAI_CIVIC_NO_UNLOCKS") end,
         }))
     end
 
     parent:AddChild(unlockNode)
 end
 
-local function AddResearchDetailChildren(parent, kData, unlockNames)
-    for _, line in ipairs(SplitTooltipLinesWithoutUnlocks(GetResearchTooltipText(kData))) do
+local function AddMakesObsoleteNode(parent, obsoleteNames)
+    local count = #obsoleteNames
+    if count <= 0 then return end
+
+    local obsoleteNode = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserObsolete"), "TreeviewItem", {
+        GetLabel = function()
+            if count == 1 then
+                return Locale.Lookup("LOC_CAI_CIVIC_MAKES_OBSOLETE_COUNT_ONE", count)
+            end
+            return Locale.Lookup("LOC_CAI_CIVIC_MAKES_OBSOLETE_COUNT", count)
+        end,
+    })
+
+    for _, name in ipairs(obsoleteNames) do
+        local obsoleteName = name
+        obsoleteNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserObsoleteItem"), "TreeviewItem", {
+            GetLabel = function() return obsoleteName end,
+        }))
+    end
+
+    parent:AddChild(obsoleteNode)
+end
+
+local function AddCivicDetailChildren(parent, kData, unlockNames, obsoleteNames)
+    for _, line in ipairs(SplitTooltipLinesWithoutSpecialLists(GetCivicTooltipText(kData))) do
         AddTextDetailNode(parent, line)
     end
 
@@ -365,9 +434,9 @@ local function AddResearchDetailChildren(parent, kData, unlockNames)
 
     local statusParts = {}
     if kData.IsCurrent then
-        table.insert(statusParts, Locale.Lookup("LOC_CAI_RESEARCH_CURRENT_STATUS"))
+        table.insert(statusParts, Locale.Lookup("LOC_CAI_CIVIC_CURRENT_STATUS"))
         local pct = math.floor((kData.Progress or 0) * 100 + 0.5)
-        table.insert(statusParts, Locale.Lookup("LOC_CAI_RESEARCH_PROGRESS", pct))
+        table.insert(statusParts, Locale.Lookup("LOC_CAI_CIVIC_PROGRESS", pct))
         AppendIfNonEmpty(statusParts, FormatTurnsPart(kData))
     elseif kData.TurnsLeft and kData.TurnsLeft >= 0 then
         AppendIfNonEmpty(statusParts, FormatTurnsPart(kData))
@@ -378,11 +447,12 @@ local function AddResearchDetailChildren(parent, kData, unlockNames)
     end
 
     AddUnlocksNode(parent, unlockNames)
+    AddMakesObsoleteNode(parent, obsoleteNames)
 end
 
 -- ===========================================================================
 -- Partition predicate. Queued-or-current rows go to the view-only queue list;
--- everything else goes to the interactive available list. Current research
+-- everything else goes to the interactive available list. Current Civic
 -- reports ResearchQueuePosition == -1 so IsCurrent is the separate check.
 -- ===========================================================================
 local function IsQueuedOrCurrent(kData)
@@ -391,19 +461,20 @@ local function IsQueuedOrCurrent(kData)
 end
 
 -- ===========================================================================
--- Row factory. `interactive` true = available tree: Enter chooses research.
+-- Row factory. `interactive` true = available tree: Enter chooses Civic.
 -- `interactive` false = queue tree: Enter bubbles to the treeview's generic
--- expand/collapse binding, keeping queued/current research view-only.
+-- expand/collapse binding, keeping queued/current civic view-only.
 -- ===========================================================================
 local function CreateRowWidget(kData, interactive)
     local captured = kData
     local unlockNames = GetUnlockNames(captured)
+    local obsoleteNames = GetObsoletePolicyNames(captured)
 
-    local row = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserItem"), "TreeviewItem", {
+    local row = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserItem"), "TreeviewItem", {
         GetLabel = function() return FormatRowLabel(captured) end,
-        GetTooltip = function() return FormatShortTooltip(captured, unlockNames) end,
-        IsHidden = function() return IsResearchRowHidden(captured) end,
-        IsDisabled = function() return interactive and IsResearchRowDisabled(captured) or false end,
+        GetTooltip = function() return FormatShortTooltip(captured, unlockNames, obsoleteNames) end,
+        IsHidden = function() return IsCivicRowHidden(captured) end,
+        IsDisabled = function() return interactive and IsCivicRowDisabled(captured) or false end,
         OnFocusEnter = function()
             UI.PlaySound("Main_Menu_Mouse_Over")
         end,
@@ -413,7 +484,7 @@ local function CreateRowWidget(kData, interactive)
             Key = Keys.VK_RETURN,
             Action = function(w)
                 if w and w.IsDisabled and w:IsDisabled() then return true end
-                OnChooseResearch(captured.Hash)
+                OnChooseCivic(captured.Hash)
                 return true
             end,
         })
@@ -423,13 +494,13 @@ local function CreateRowWidget(kData, interactive)
         IsShift = true,
         Action = function()
             if IsTutorialRunning and IsTutorialRunning() then return true end
-            if captured.TechType then
-                LuaEvents.OpenCivilopedia(captured.TechType)
+            if captured.CivicType then
+                LuaEvents.OpenCivilopedia(captured.CivicType)
             end
             return true
         end,
     })
-    AddResearchDetailChildren(row, captured, unlockNames)
+    AddCivicDetailChildren(row, captured, unlockNames, obsoleteNames)
     row._caiHash = captured.Hash
     return row
 end
@@ -449,8 +520,8 @@ end
 -- Full panel rebuild. Partitions m_caiRowData, applies tutorial reorder to
 -- the available list only, sorts queue by (IsCurrent first, then
 -- ResearchQueuePosition asc), splices m_caiCurrentData in at the head of the
--- queue list (vanilla View doesn't route non-Repeatable current research
--- through AddAvailableResearch), and rebuilds both lists.
+-- queue list (vanilla View doesn't route non-Repeatable current Civic
+-- through AddAvailableCivic), and rebuilds both lists.
 -- ===========================================================================
 local function RebuildCAIPanel()
     m_caiAvailableRows = {}
@@ -467,11 +538,11 @@ local function RebuildCAIPanel()
         if a.IsCurrent ~= b.IsCurrent then return a.IsCurrent == true end
         return (a.ResearchQueuePosition or 0) < (b.ResearchQueuePosition or 0)
     end)
-    -- Vanilla View routes current research to RealizeCurrentResearch (not
-    -- AddAvailableResearch) unless the tech is Repeatable, so it never lands
-    -- in m_caiRowData. Our RealizeCurrentResearch wrap captures it in
-    -- m_caiCurrentData — splice it in at the head of the queue list here so
-    -- the user sees "Researching: X" as the first queue row.
+    -- Vanilla View routes current Civic to RealizeCurrentCivic (not
+    -- AddAvailableCivic) unless the civic is Repeatable, so it never lands
+    -- in m_caiRowData. Our RealizeCurrentCivic wrap captures it in
+    -- m_caiCurrentData - splice it in at the head of the queue list here so
+    -- the user sees "Civic: X" as the first queue row.
     if m_caiCurrentData then
         local already = false
         for _, row in ipairs(m_caiQueueRows) do
@@ -499,29 +570,29 @@ end
 local function EnsurePanelBuilt()
     if m_caiPanel then return end
 
-    m_caiPanel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserPanel"), "Panel", {
+    m_caiPanel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserPanel"), "Panel", {
         GetLabel = function() return Controls.Title:GetText() end,
     })
 
-    -- Queue tree is hidden when nothing is researching and the queue is empty,
+    -- Queue tree is hidden when no civic is active and the queue is empty,
     -- so Tab-order doesn't hit a dead widget in early game.
-    m_caiQueueTree = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserTree"), "Treeview", {
-        GetLabel = function() return Locale.Lookup("LOC_CAI_RESEARCH_QUEUE_LIST") end,
+    m_caiQueueTree = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserTree"), "Treeview", {
+        GetLabel = function() return Locale.Lookup("LOC_CAI_CIVIC_QUEUE_LIST") end,
         IsHidden = function() return #m_caiQueueRows == 0 end,
     })
     m_caiPanel:AddChild(m_caiQueueTree)
 
-    m_caiAvailableTree = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserTree"), "Treeview", {
-        GetLabel = function() return Locale.Lookup("LOC_CAI_RESEARCH_AVAILABLE_LIST") end,
+    m_caiAvailableTree = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserTree"), "Treeview", {
+        GetLabel = function() return Locale.Lookup("LOC_CAI_CIVIC_AVAILABLE_LIST") end,
     })
     m_caiPanel:AddChild(m_caiAvailableTree)
 
-    local treeBtn = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserButton"), "Button", {
+    local treeBtn = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserButton"), "Button", {
         GetLabel = function() return Controls.OpenTreeButton:GetText() end,
         IsHidden = function() return ControlIsHidden(Controls.OpenTreeButton) end,
         IsDisabled = function() return ControlIsDisabled(Controls.OpenTreeButton) end,
         OnClick = function()
-            LuaEvents.ResearchChooser_RaiseTechTree()
+            LuaEvents.CivicsChooser_RaiseCivicsTree()
             OnClosePanel()
         end,
     })
@@ -537,7 +608,7 @@ end
 -- ===========================================================================
 -- Defer the Push until the View wrap finishes populating the rows. Pushing
 -- here would focus an empty list, then View's rebuild would add children
--- while the stale path [Panel, List] was still current — causing two speech
+-- while the stale path [Panel, List] was still current - causing two speech
 -- bursts (empty panel, then rebuilt panel with rows). The View wrap consumes
 -- m_caiOpenPending below.
 local function OnPanelOpenedCAI()
@@ -549,16 +620,7 @@ end
 local function PushPanelWhenReady()
     if not m_caiPanel or not mgr or mgr:HasWidget(m_caiPanel) then return end
 
-    if m_caiTutorialPushDelay and not m_caiTutorialControlsReady then
-        m_caiOpenPending = false
-        m_caiTutorialPushPending = true
-        return
-    end
-
     m_caiOpenPending = false
-    m_caiTutorialPushDelay = false
-    m_caiTutorialControlsReady = false
-    m_caiTutorialPushPending = false
     mgr:Push(m_caiPanel, PopupPriority.Low)
 end
 
@@ -577,34 +639,14 @@ local function OnPanelClosedCAI()
     m_caiCurrentData           = nil
     m_caiCurrentControl        = nil
     m_caiOpenPending           = false
-    m_caiTutorialPushDelay     = false
-    m_caiTutorialControlsReady = false
-    m_caiTutorialPushPending   = false
     m_caiInstanceByHash        = {}
 end
 
-local NativeOnOpenPanel = OnOpenPanel
-
-local function OnTutorialResearchOpenCAI()
-    m_caiTutorialPushDelay = true
-    m_caiTutorialControlsReady = false
-    m_caiTutorialPushPending = false
-    NativeOnOpenPanel()
-end
-
-local function OnTutorialDetailedControlsReadyCAI()
-    if not m_caiTutorialPushDelay then return end
-    m_caiTutorialControlsReady = true
-    if m_caiTutorialPushPending or m_caiOpenPending then
-        PushPanelWhenReady()
-    end
-end
-
 -- ===========================================================================
--- Wraps. View and AddAvailableResearch are called by global-name lookup from
+-- Wraps. View and AddAvailableCivic are called by global-name lookup from
 -- inside the native file, so global re-binding takes effect for them.
 -- OnInputHandler must be re-registered because Initialize captured the old
--- function reference. OnChooseResearch is wrapped only for selection
+-- function reference. OnChooseCivic is wrapped only for selection
 -- announcement on CAI-initiated calls (sighted-mouse clicks bypass it).
 -- ===========================================================================
 View = WrapFunc(View, function(orig, playerID, kData)
@@ -622,21 +664,22 @@ View = WrapFunc(View, function(orig, playerID, kData)
     end
 end)
 
-AddAvailableResearch = WrapFunc(AddAvailableResearch, function(orig, playerID, kData)
-    local instance = orig(playerID, kData)
+AddAvailableCivic = WrapFunc(AddAvailableCivic, function(orig, playerID, kData)
+    local beforeCount = #GetChildren(Controls.CivicStack)
+    orig(playerID, kData)
+    local instance = GetLatestCivicInstanceFromStack(beforeCount, kData)
     if playerID ~= -1 then
         table.insert(m_caiRowData, kData)
         if kData and kData.Hash and instance then
             m_caiInstanceByHash[kData.Hash] = instance
         end
     end
-    return instance
 end)
 
-RealizeCurrentResearch = WrapFunc(RealizeCurrentResearch, function(orig, playerID, kData, kControl)
+RealizeCurrentCivic = WrapFunc(RealizeCurrentCivic, function(orig, playerID, kData, kControl, cachedModifiers)
     m_caiCurrentData = kData
     m_caiCurrentControl = kControl or Controls
-    return orig(playerID, kData, kControl)
+    return orig(playerID, kData, kControl, cachedModifiers)
 end)
 
 -- Returning true when mgr consumes the input prevents WorldInput's wrapped
@@ -658,19 +701,19 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, kInputStruct)
 end)
 ContextPtr:SetInputHandler(OnInputHandler, true)
 
-OnChooseResearch = WrapFunc(OnChooseResearch, function(orig, techHash)
+OnChooseCivic = WrapFunc(OnChooseCivic, function(orig, civicHash)
     for _, kData in ipairs(m_caiRowData) do
-        if kData.Hash == techHash then
-            Speak(Locale.Lookup("LOC_HUD_RESEARCH_CHOSEN", kData.Name) or kData.Name)
+        if kData.Hash == civicHash then
+            Speak(Locale.Lookup("LOC_CAI_CIVIC_CHOSEN", kData.Name) or kData.Name)
             break
         end
     end
-    return orig(techHash)
+    return orig(civicHash)
 end)
 
 -- Every native close path funnels through OnClosePanel (Escape via SlideAnimator,
--- Space via action binding, X button, LaunchBar_CloseChoosers, tech-pick auto-close).
--- The LuaEvent fires only after the slide animation — not reliable for Space —
+-- Space via action binding, X button, LaunchBar_CloseChoosers, civic-pick auto-close).
+-- The LuaEvent fires only after the slide animation - not reliable for Space -
 -- so pop here to sync immediately. OnPanelClosedCAI is idempotent.
 OnClosePanel = WrapFunc(OnClosePanel, function(orig)
     orig()
@@ -679,20 +722,18 @@ end)
 
 LuaEvents.ResearchChooser_ForceHideWorldTracker.Add(OnPanelOpenedCAI)
 LuaEvents.ResearchChooser_RestoreWorldTracker.Add(OnPanelClosedCAI)
-LuaEvents.Tutorial_ResearchOpen.Remove(NativeOnOpenPanel)
-LuaEvents.Tutorial_ResearchOpen.Add(OnTutorialResearchOpenCAI)
-LuaEvents.CAI_TutorialDetailedControlsReady.Add(OnTutorialDetailedControlsReadyCAI)
 
--- Queue changes from vanilla surfaces (for example Tech Tree queue edits) that
--- don't also change the active research don't fire
--- Events.ResearchChanged, so the native Refresh/FlushChanges pipeline misses
--- them. Hook ResearchQueueChanged and call Refresh() — that calls GetData()
--- (which re-reads pPlayerTechs:GetResearchQueue()) and View(kData), which
+-- Queue changes from vanilla surfaces (for example Civics Tree queue edits) that
+-- don't also change the active Civic don't fire
+-- Events.CivicChanged, so the native Refresh/FlushChanges pipeline misses
+-- them. Hook CivicQueueChanged and call Refresh() - that calls GetData()
+-- (which re-reads pPlayerCulture:GetCivicQueue()) and View(kData), which
 -- our wrap then turns into RebuildCAIPanel.
-if Events and Events.ResearchQueueChanged then
-    Events.ResearchQueueChanged.Add(function()
+if Events and Events.CivicQueueChanged then
+    Events.CivicQueueChanged.Add(function()
         if m_caiPanel and mgr and mgr:HasWidget(m_caiPanel) and Refresh then
             Refresh()
         end
     end)
 end
+
