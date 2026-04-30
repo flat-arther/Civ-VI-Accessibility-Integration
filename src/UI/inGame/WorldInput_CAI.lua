@@ -158,11 +158,7 @@ local function OnInterfaceChanged(oldMode, newMode)
 	local newData = interfaceWidgets[newMode]
 	if not newData then return end
 
-	local mode = mgr:CreateUIWidget(
-		mgr:GenerateWidgetId("CAIWorldInputInterfaceMode"),
-		"InterfaceMode",
-		newData.Properties
-	)
+	local mode = mgr:CreateUIWidget("CAIWorldInputInterfaceMode", "InterfaceMode", newData.Properties)
 	if not mode then return end
 
 	gCurrentModeWidget = mode

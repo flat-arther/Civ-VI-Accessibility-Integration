@@ -6,10 +6,8 @@ local TUTORIAL_MOD_ID            = "17462E0F-1EE1-4819-AAAA-052B5896B02A"
 local UNLOCKS_INLINE             = 2
 
 local m_caiPanel                 = nil ---@type UIWidget|nil
-local m_caiAvailableList         = nil ---@type UIWidget|nil
-local m_caiAvailableDetail       = nil ---@type UIWidget|nil
-local m_caiQueueList             = nil ---@type UIWidget|nil
-local m_caiQueueDetail           = nil ---@type UIWidget|nil
+local m_caiAvailableTree         = nil ---@type UIWidget|nil
+local m_caiQueueTree             = nil ---@type UIWidget|nil
 local m_caiRowData               = {} ---@type table<number, table>
 local m_caiAvailableRows         = {} ---@type table<number, table>
 local m_caiQueueRows             = {} ---@type table<number, table>
@@ -21,6 +19,7 @@ local m_caiTutorialPushDelay     = false ---@type boolean
 local m_caiTutorialControlsReady = false ---@type boolean
 local m_caiTutorialPushPending   = false ---@type boolean
 local m_caiInstanceByHash        = {} ---@type table<number, table>
+local m_caiCurrentControl        = nil ---@type table|nil
 
 -- ===========================================================================
 -- Tutorial detection and reorder. Vanilla's m_isTutorial / TUTORIAL_TECHS are
@@ -77,9 +76,45 @@ local function ControlIsDisabled(control)
     return control and control.IsDisabled and control:IsDisabled() or false
 end
 
+local function ControlText(control)
+    if control and control.GetText then
+        local text = control:GetText()
+        if text and text ~= "" then return text end
+    end
+    if control and control.GetTextControl then
+        local textControl = control:GetTextControl()
+        if textControl and textControl.GetText then
+            local text = textControl:GetText()
+            if text and text ~= "" then return text end
+        end
+    end
+    return ""
+end
+
+local function ControlTooltip(control)
+    if control and control.GetToolTipString then
+        local text = control:GetToolTipString()
+        if text and text ~= "" then return text end
+    end
+    return ""
+end
+
 local function GetInstanceForResearch(kData)
     if not kData or not kData.Hash then return nil end
     return m_caiInstanceByHash[kData.Hash]
+end
+
+local function GetCurrentResearchControl()
+    return m_caiCurrentControl or Controls
+end
+
+local function GetDisplayControl(kData)
+    local instance = GetInstanceForResearch(kData)
+    if instance then return instance end
+    if kData and kData.IsCurrent then
+        return GetCurrentResearchControl()
+    end
+    return nil
 end
 
 local function IsResearchRowHidden(kData)
@@ -108,10 +143,20 @@ local function GetUnlockNames(kData)
     return names
 end
 
-local function GetFirstNUnlockNames(kData, n)
-    local names = GetUnlockNames(kData)
+local function GetResearchDisplayName(kData)
+    local control = GetDisplayControl(kData)
+    if control then
+        local name = ControlText(control.TechName) or ""
+        if name ~= "" then return name end
+        name = ControlText(control.TitleButton) or ""
+        if name ~= "" then return name end
+    end
+    return kData and kData.Name or ""
+end
+
+local function GetFirstNUnlockNamesFromList(names, n)
     local head = {}
-    for i, name in ipairs(names) do
+    for i, name in ipairs(names or {}) do
         if i <= n then table.insert(head, name) else break end
     end
     return head
@@ -126,6 +171,11 @@ local function AppendIfNonEmpty(parts, text)
 end
 
 local function FormatTurnsPart(kData)
+    local control = GetDisplayControl(kData)
+    if control then
+        local turnsText = ControlText(control.TurnsLeft)
+        if turnsText ~= "" then return turnsText end
+    end
     if kData.IsLastCompleted and not kData.Repeatable then
         return Locale.Lookup("LOC_RESEARCH_CHOOSER_JUST_COMPLETED")
     end
@@ -135,88 +185,194 @@ local function FormatTurnsPart(kData)
     return nil
 end
 
-local function FormatBoostPart(kData)
-    if not kData.Boostable then return nil end
-    if kData.BoostTriggered then
-        return Locale.Lookup("LOC_TECH_HAS_BEEN_BOOSTED")
+local function GetBoostTooltipText(kData)
+    local control = GetDisplayControl(kData)
+    if control and kData and kData.Boostable then
+        if kData.BoostTriggered then
+            local tooltip = ControlTooltip(control.IconHasBeenBoosted)
+            if tooltip ~= "" then return tooltip end
+        else
+            local tooltip = ControlTooltip(control.IconCanBeBoosted)
+            if tooltip ~= "" then return tooltip end
+        end
     end
-    return Locale.Lookup("LOC_TECH_CAN_BE_BOOSTED")
+    if not kData.Boostable then return "" end
+    local trigger = kData.TriggerDesc and Locale.Lookup(kData.TriggerDesc) or ""
+    if kData.BoostTriggered then
+        return Locale.Lookup("LOC_TECH_HAS_BEEN_BOOSTED") .. ((trigger ~= "" and "[NEWLINE]" .. trigger) or "")
+    end
+    return Locale.Lookup("LOC_TECH_CAN_BE_BOOSTED") .. ((trigger ~= "" and "[NEWLINE]" .. trigger) or "")
 end
 
-local function FormatRowLabel(kData, inlineUnlocks)
+local function FormatBoostPart(kData)
+    local tooltip = GetBoostTooltipText(kData)
+    if tooltip == "" then return nil end
+    tooltip = string.gsub(tooltip, "%[NEWLINE%]", "\n")
+    local firstLine = string.match(tooltip, "([^\n]+)")
+    if not firstLine then return nil end
+    return string.gsub(firstLine, "^%s*(.-)%s*$", "%1")
+end
+
+local function GetResearchTooltipText(kData)
+    local control = GetDisplayControl(kData)
+    if control then
+        local tooltip = ControlTooltip(control.Top)
+        if tooltip ~= "" then return tooltip end
+    end
+    return kData and kData.ToolTip or ""
+end
+
+local function GetQueuePositionText(kData)
+    local control = GetDisplayControl(kData)
+    if control then
+        local number = ControlText(control.NodeNumber)
+        if number ~= "" then
+            return Locale.Lookup("LOC_CAI_RESEARCH_QUEUE_POSITION", number)
+        end
+    end
+    if kData.ResearchQueuePosition and kData.ResearchQueuePosition ~= -1 then
+        return Locale.Lookup("LOC_CAI_RESEARCH_QUEUE_POSITION", kData.ResearchQueuePosition)
+    end
+    return nil
+end
+
+local function FormatRowLabel(kData)
     local parts = {}
-    -- Current-research row gets the "Researching: {Name}" prefix and an inline
-    -- progress % so the queue list's first row replaces what the old standalone
-    -- summary StaticText used to announce.
     if kData.IsCurrent then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_CURRENT", kData.Name))
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_CURRENT", GetResearchDisplayName(kData)))
     else
-        AppendIfNonEmpty(parts, kData.Name)
+        AppendIfNonEmpty(parts, GetResearchDisplayName(kData))
     end
     if kData.IsRecommended then
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_TECH_FILTER_RECOMMENDED"))
-    end
-    AppendIfNonEmpty(parts, FormatBoostPart(kData))
-    if kData.ResearchCost and kData.ResearchCost > 0 then
-        AppendIfNonEmpty(parts, kData.ResearchCost .. " " .. Locale.Lookup("LOC_YIELD_SCIENCE_NAME"))
-    end
-    if kData.IsCurrent and kData.Progress then
-        local pct = math.floor((kData.Progress or 0) * 100 + 0.5)
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_PROGRESS", pct))
-    end
-    AppendIfNonEmpty(parts, FormatTurnsPart(kData))
-    if kData.ResearchQueuePosition and kData.ResearchQueuePosition ~= -1 then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_QUEUE_POSITION", kData.ResearchQueuePosition))
-    end
-    for _, name in ipairs(inlineUnlocks) do
-        AppendIfNonEmpty(parts, name)
     end
     return table.concat(parts, ", ")
 end
 
 -- ===========================================================================
--- Compose the detail text for the Edit widget. Sections are joined with blank
--- lines so arrow-through landings match sighted breaks. Sources:
+-- Detail helpers. The old read-only edit contents now live as collapsed child
+-- tree items under each research row. Sources:
 --   1. kData.ToolTip (name, cost, description, unlocks) from ToolTipHelper.
 --   2. Boost line — ToolTipHelper does NOT include boost info; sighted get
 --      this via the BoostLabel + boost icon tooltip next to the tech. Built
 --      to match the sighted icon tooltip: "Can/Has been boosted: <trigger>".
 --   3. Live status (IsCurrent progress/turns, queue position).
--- [NEWLINE] tokens are left in the composed string; SetEditBoxText converts
--- them to real newline characters when it pushes the buffer.
+-- [NEWLINE] tokens are split into tree rows for easier navigation.
 -- ===========================================================================
-local function ComposeDetail(kData)
-    if not kData then return "" end
-    local sections = {}
+local function NormalizeFormattedText(text)
+    text = text or ""
+    text = string.gsub(text, "%[NEWLINE%]", ", ")
+    text = string.gsub(text, "%s+", " ")
+    return text
+end
 
-    local tip = kData.ToolTip or ""
-    if tip ~= "" then table.insert(sections, tip) end
-
-    if kData.Boostable and kData.TriggerDesc then
-        local label = kData.BoostTriggered
-            and Locale.Lookup("LOC_TECH_HAS_BEEN_BOOSTED")
-            or Locale.Lookup("LOC_TECH_CAN_BE_BOOSTED")
-        local trigger = Locale.Lookup(kData.TriggerDesc)
-        table.insert(sections, label .. ": " .. trigger)
+local function SplitFormattedLines(text)
+    local lines = {}
+    text = text or ""
+    text = string.gsub(text, "%[NEWLINE%]", "\n")
+    for line in string.gmatch(text, "([^\n]+)") do
+        local trimmed = string.gsub(line, "^%s*(.-)%s*$", "%1")
+        if trimmed ~= "" then
+            table.insert(lines, trimmed)
+        end
     end
+    return lines
+end
+
+local function StartsWithIconBullet(text)
+    return text and string.find(text, "^%s*%[ICON_Bullet%]") ~= nil
+end
+
+local function IsUnlocksHeader(text)
+    if not text or text == "" then return false end
+    local unlocksLabel = Locale.Lookup("LOC_TOOLTIP_UNLOCKS")
+    return unlocksLabel and unlocksLabel ~= "" and string.find(text, unlocksLabel, 1, true) ~= nil
+end
+
+local function SplitTooltipLinesWithoutUnlocks(text)
+    local lines = {}
+    local skippingUnlocks = false
+    for _, line in ipairs(SplitFormattedLines(text)) do
+        if IsUnlocksHeader(line) then
+            skippingUnlocks = true
+        elseif skippingUnlocks and StartsWithIconBullet(line) then
+            -- Unlock rows are exposed in the dedicated expandable unlock node.
+        else
+            skippingUnlocks = false
+            table.insert(lines, line)
+        end
+    end
+    return lines
+end
+
+local function FormatShortTooltip(kData, unlockNames)
+    local parts = {}
+    local tooltipLines = SplitTooltipLinesWithoutUnlocks(GetResearchTooltipText(kData))
+    AppendIfNonEmpty(parts, tooltipLines[2])
+    AppendIfNonEmpty(parts, FormatBoostPart(kData))
+    for _, name in ipairs(GetFirstNUnlockNamesFromList(unlockNames, UNLOCKS_INLINE)) do
+        AppendIfNonEmpty(parts, name)
+    end
+    return table.concat(parts, "[NEWLINE]")
+end
+
+local function AddTextDetailNode(parent, text)
+    if not text or text == "" then return end
+    local detailText = text
+    parent:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserDetail"), "TreeviewItem", {
+        GetLabel = function() return NormalizeFormattedText(detailText) end,
+    }))
+end
+
+local function AddUnlocksNode(parent, unlockNames)
+    local count = #unlockNames
+    local unlockNode = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserUnlocks"), "TreeviewItem", {
+        GetLabel = function()
+            if count == 1 then
+                return Locale.Lookup("LOC_CAI_RESEARCH_UNLOCKS_COUNT_ONE", count)
+            end
+            return Locale.Lookup("LOC_CAI_RESEARCH_UNLOCKS_COUNT", count)
+        end,
+    })
+
+    if count > 0 then
+        for _, name in ipairs(unlockNames) do
+            local unlockName = name
+            unlockNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserUnlock"), "TreeviewItem", {
+                GetLabel = function() return unlockName end,
+            }))
+        end
+    else
+        unlockNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserUnlock"), "TreeviewItem", {
+            GetLabel = function() return Locale.Lookup("LOC_CAI_RESEARCH_NO_UNLOCKS") end,
+        }))
+    end
+
+    parent:AddChild(unlockNode)
+end
+
+local function AddResearchDetailChildren(parent, kData, unlockNames)
+    for _, line in ipairs(SplitTooltipLinesWithoutUnlocks(GetResearchTooltipText(kData))) do
+        AddTextDetailNode(parent, line)
+    end
+
+    AddTextDetailNode(parent, NormalizeFormattedText(GetBoostTooltipText(kData)))
 
     local statusParts = {}
     if kData.IsCurrent then
         table.insert(statusParts, Locale.Lookup("LOC_CAI_RESEARCH_CURRENT_STATUS"))
         local pct = math.floor((kData.Progress or 0) * 100 + 0.5)
         table.insert(statusParts, Locale.Lookup("LOC_CAI_RESEARCH_PROGRESS", pct))
-        if kData.TurnsLeft and kData.TurnsLeft >= 0 then
-            table.insert(statusParts, Locale.Lookup("LOC_TURNS_REMAINING_VAL", kData.TurnsLeft))
-        end
+        AppendIfNonEmpty(statusParts, FormatTurnsPart(kData))
+    elseif kData.TurnsLeft and kData.TurnsLeft >= 0 then
+        AppendIfNonEmpty(statusParts, FormatTurnsPart(kData))
     end
-    if kData.ResearchQueuePosition and kData.ResearchQueuePosition ~= -1 then
-        table.insert(statusParts, Locale.Lookup("LOC_CAI_RESEARCH_QUEUE_POSITION", kData.ResearchQueuePosition))
-    end
+    AppendIfNonEmpty(statusParts, GetQueuePositionText(kData))
     if #statusParts > 0 then
-        table.insert(sections, table.concat(statusParts, ", "))
+        AddTextDetailNode(parent, table.concat(statusParts, ", "))
     end
 
-    return table.concat(sections, "[NEWLINE][NEWLINE]")
+    AddUnlocksNode(parent, unlockNames)
 end
 
 -- ===========================================================================
@@ -230,45 +386,46 @@ local function IsQueuedOrCurrent(kData)
 end
 
 -- ===========================================================================
--- Row factory. `interactive` true = available list: Enter chooses research.
--- `interactive` false = queue list: Enter is a no-op (the queue is view-only).
--- OnFocusEnter always updates the companion detail Edit.
+-- Row factory. `interactive` true = available tree: Enter chooses research.
+-- `interactive` false = queue tree: Enter bubbles to the treeview's generic
+-- expand/collapse binding, keeping queued/current research view-only.
 -- ===========================================================================
-local function CreateRowWidget(kData, detailEdit, interactive)
+local function CreateRowWidget(kData, interactive)
     local captured = kData
-    local inline = GetFirstNUnlockNames(captured, UNLOCKS_INLINE)
+    local unlockNames = GetUnlockNames(captured)
 
-    local row = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserButton"), "Button", {
-        GetLabel = function() return FormatRowLabel(captured, inline) end,
+    local row = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserItem"), "TreeviewItem", {
+        GetLabel = function() return FormatRowLabel(captured) end,
+        GetTooltip = function() return FormatShortTooltip(captured, unlockNames) end,
         IsHidden = function() return IsResearchRowHidden(captured) end,
         IsDisabled = function() return interactive and IsResearchRowDisabled(captured) or false end,
-        OnClick = interactive
-            and function() OnChooseResearch(captured.Hash) end
-            or function() end,
         OnFocusEnter = function()
             UI.PlaySound("Main_Menu_Mouse_Over")
-            if detailEdit then
-                mgr.WidgetTemplateHelpers:SetEditBoxText(detailEdit, ComposeDetail(captured))
-            end
         end,
     })
+    if interactive then
+        row:AddInputBinding({
+            Key = Keys.VK_RETURN,
+            Action = function(w)
+                if w and w.IsDisabled and w:IsDisabled() then return true end
+                OnChooseResearch(captured.Hash)
+                return true
+            end,
+        })
+    end
+    AddResearchDetailChildren(row, captured, unlockNames)
     row._caiHash = captured.Hash
     return row
 end
 
 -- ===========================================================================
--- Rebuild one list's children from its row table and seed the companion
--- detail Edit with the first row's details.
+-- Rebuild one tree's children from its row table.
 -- ===========================================================================
-local function RebuildOneList(listWidget, rows, detailEdit, interactive)
-    if not listWidget then return end
-    listWidget:ClearChildren()
+local function RebuildOneTree(treeWidget, rows, interactive)
+    if not treeWidget then return end
+    treeWidget:ClearChildren()
     for _, kData in ipairs(rows) do
-        listWidget:AddChild(CreateRowWidget(kData, detailEdit, interactive))
-    end
-    if detailEdit then
-        mgr.WidgetTemplateHelpers:SetEditBoxText(detailEdit,
-            rows[1] and ComposeDetail(rows[1]) or "")
+        treeWidget:AddChild(CreateRowWidget(kData, interactive))
     end
 end
 
@@ -312,8 +469,11 @@ local function RebuildCAIPanel()
         end
     end
 
-    RebuildOneList(m_caiAvailableList, m_caiAvailableRows, m_caiAvailableDetail, true)
-    RebuildOneList(m_caiQueueList, m_caiQueueRows, m_caiQueueDetail, false)
+    RebuildOneTree(m_caiQueueTree, m_caiQueueRows, false)
+    RebuildOneTree(m_caiAvailableTree, m_caiAvailableRows, true)
+    if m_caiPanel then
+        m_caiPanel:SetDefaultIndex(m_caiCurrentData and m_caiCurrentData.IsCurrent and 1 or 2)
+    end
 end
 
 -- ===========================================================================
@@ -327,39 +487,18 @@ local function EnsurePanelBuilt()
         GetLabel = function() return Controls.Title:GetText() end,
     })
 
-    -- Queue list + detail are hidden when nothing is researching and the
-    -- queue is empty (early game), so Tab-order doesn't hit dead widgets.
-    m_caiQueueList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserList"), "List", {
+    -- Queue tree is hidden when nothing is researching and the queue is empty,
+    -- so Tab-order doesn't hit a dead widget in early game.
+    m_caiQueueTree = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserTree"), "Treeview", {
         GetLabel = function() return Locale.Lookup("LOC_CAI_RESEARCH_QUEUE_LIST") end,
         IsHidden = function() return #m_caiQueueRows == 0 end,
     })
-    m_caiPanel:AddChild(m_caiQueueList)
+    m_caiPanel:AddChild(m_caiQueueTree)
 
-    m_caiQueueDetail = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserEdit"), "Edit", {
-        GetLabel = function() return Locale.Lookup("LOC_CAI_RESEARCH_QUEUE_DETAILS") end,
-        GetValue = function() return m_caiQueueDetail and m_caiQueueDetail.EditBuffer or "" end,
-        IsHidden = function() return #m_caiQueueRows == 0 end,
-        AlwaysEdit = true,
-        EditReadOnly = true,
-        HighlightOnEdit = false,
-        EditBuffer = "",
-    })
-    m_caiPanel:AddChild(m_caiQueueDetail)
-
-    m_caiAvailableList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserList"), "List", {
+    m_caiAvailableTree = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserTree"), "Treeview", {
         GetLabel = function() return Locale.Lookup("LOC_CAI_RESEARCH_AVAILABLE_LIST") end,
     })
-    m_caiPanel:AddChild(m_caiAvailableList)
-
-    m_caiAvailableDetail = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserEdit"), "Edit", {
-        GetLabel = function() return Locale.Lookup("LOC_CAI_RESEARCH_AVAILABLE_DETAILS") end,
-        GetValue = function() return m_caiAvailableDetail and m_caiAvailableDetail.EditBuffer or "" end,
-        AlwaysEdit = true,
-        EditReadOnly = true,
-        HighlightOnEdit = false,
-        EditBuffer = "",
-    })
-    m_caiPanel:AddChild(m_caiAvailableDetail)
+    m_caiPanel:AddChild(m_caiAvailableTree)
 
     local treeBtn = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserButton"), "Button", {
         GetLabel = function() return Controls.OpenTreeButton:GetText() end,
@@ -371,14 +510,6 @@ local function EnsurePanelBuilt()
         end,
     })
     m_caiPanel:AddChild(treeBtn)
-
-    local closeBtn = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserButton"), "Button", {
-        GetLabel = function() return Controls.CloseButton:GetToolTipString() or "Close" end,
-        IsHidden = function() return ControlIsHidden(Controls.CloseButton) end,
-        IsDisabled = function() return ControlIsDisabled(Controls.CloseButton) end,
-        OnClick = function() OnClosePanel() end,
-    })
-    m_caiPanel:AddChild(closeBtn)
 
     RebuildCAIPanel()
 end
@@ -422,14 +553,13 @@ local function OnPanelClosedCAI()
     -- Null out so next open rebuilds; mgr:Pop destroys children and detaches
     -- the panel, making it unusable for a subsequent push.
     m_caiPanel                 = nil
-    m_caiAvailableList         = nil
-    m_caiAvailableDetail       = nil
-    m_caiQueueList             = nil
-    m_caiQueueDetail           = nil
+    m_caiAvailableTree         = nil
+    m_caiQueueTree             = nil
     m_caiRowData               = {}
     m_caiAvailableRows         = {}
     m_caiQueueRows             = {}
     m_caiCurrentData           = nil
+    m_caiCurrentControl        = nil
     m_caiOpenPending           = false
     m_caiTutorialPushDelay     = false
     m_caiTutorialControlsReady = false
@@ -464,6 +594,7 @@ end
 View = WrapFunc(View, function(orig, playerID, kData)
     m_caiRowData = {}
     m_caiCurrentData = nil
+    m_caiCurrentControl = nil
     m_caiInstanceByHash = {}
     orig(playerID, kData)
     RebuildCAIPanel()
@@ -488,6 +619,7 @@ end)
 
 RealizeCurrentResearch = WrapFunc(RealizeCurrentResearch, function(orig, playerID, kData, kControl)
     m_caiCurrentData = kData
+    m_caiCurrentControl = kControl or Controls
     return orig(playerID, kData, kControl)
 end)
 

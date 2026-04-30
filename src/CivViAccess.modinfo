@@ -31,6 +31,7 @@
     <File>UI/FiraxisLive/My2K.lua</File>
     <File>UI/shared/LoadGameMenu.lua</File>
     <File>UI/shared/PopupDialog.lua</File>
+    <File>UI/inGame/InGamePopup_CAI.lua</File>
     <File>UI/shared/Options.lua</File>
     <File>UI/inGame/InGame.lua</File>
     <File>UI/inGame/ActionPanel_CAI.lua</File>
@@ -40,6 +41,7 @@
     <File>UI/inGame/WorldTracker_CAI.lua</File>
     <File>UI/inGame/TopPanel_CAI.lua</File>
     <File>UI/inGame/NotificationPanel_CAI.lua</File>
+    <File>UI/inGame/GovernmentScreen_CAI.lua</File>
     <File>UI/inGame/ResearchChooser_CAI.lua</File>
     <File>UI/inGame/ProductionPanel_CAI.lua</File>
     <File>UI/inGame/CityPanel_CAI.lua</File>
@@ -146,6 +148,22 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>NotificationPanel</LuaContext>
         <LuaReplace>UI/inGame/NotificationPanel_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_GovernmentScreen">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>GovernmentScreen</LuaContext>
+        <LuaReplace>UI/inGame/GovernmentScreen_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_InGamePopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>InGamePopup</LuaContext>
+        <LuaReplace>UI/inGame/InGamePopup_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

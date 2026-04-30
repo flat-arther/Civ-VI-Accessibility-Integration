@@ -141,7 +141,7 @@ WidgetTemplates = {
     },
     Button = {
         RegisterInputs = {
-            { Key = Keys.VK_RETURN, Action = function(w) return w:Click(w) end },
+            { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyUp, Action = function(w) return w:Click(w) end },
             { Key = Keys.VK_SPACE,  Action = function(w) return w:Click(w) end },
         },
         Click = function(w)
@@ -655,15 +655,6 @@ WidgetTemplates = {
     },
     Tab = {
         Role = "Tab",
-        RegisterInputs = {
-            {
-                Key = Keys.VK_RETURN,
-                Action = function(w)
-                    if w.OnClick then w:OnClick() end
-                    return true
-                end
-            },
-        },
     },
     TabBar = {
         Role = "TabBar",

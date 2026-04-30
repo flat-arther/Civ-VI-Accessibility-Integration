@@ -228,6 +228,59 @@
       <Text>Cannot dismiss this notification</Text>
     </Row>
 
+    <!-- Government screen -->
+    <Row Tag="LOC_CAI_GOVERNMENT_POLICIES_LOCKED" Language="en_US">
+      <Text>Policies cannot be changed right now</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_POLICY_ALREADY_ACTIVE" Language="en_US">
+      <Text>{1_Policy} is already active</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_POLICY_ASSIGNED" Language="en_US">
+      <Text>Assigned {1_Policy} to {2_Row}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_POLICY_REMOVED" Language="en_US">
+      <Text>Removed {1_Policy}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_POLICY_MOVED" Language="en_US">
+      <Text>Moved {1_Policy} to {2_Row}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_NO_LEGAL_SLOT" Language="en_US">
+      <Text>No legal slot available for {1_Policy}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_EMPTY_SLOT" Language="en_US">
+      <Text>Empty slot {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_SLOTS_USED" Language="en_US">
+      <Text>{1_Used} of {2_Total} slots used</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_CHOOSE_POLICY" Language="en_US">
+      <Text>Choose {1_Category} policy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_VIEW_ALL_POLICIES" Language="en_US">
+      <Text>View all policies</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_NO_AVAILABLE_POLICIES" Language="en_US">
+      <Text>No available policies</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_POLICY_TYPE" Language="en_US">
+      <Text>Type: {1_Type}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_DESCRIPTION" Language="en_US">
+      <Text>Description: {1_Description}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_SLOTS" Language="en_US">
+      <Text>Slots: {1_Slots}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_INHERENT_BONUS" Language="en_US">
+      <Text>Inherent bonus: {1_Bonus}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_LEGACY_BONUS" Language="en_US">
+      <Text>Legacy bonus: {1_Bonus}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_STATS" Language="en_US">
+      <Text>Stats: {1_Stats}</Text>
+    </Row>
+
     <!-- Top panel hotkeys -->
     <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE" Language="en_US">
       <Text>Read turn, time, and date</Text>
@@ -462,6 +515,15 @@
     </Row>
     <Row Tag="LOC_CAI_RESEARCH_QUEUE_DETAILS" Language="en_US">
       <Text>Queued research details</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_UNLOCKS_COUNT_ONE" Language="en_US">
+      <Text>{1_Count} unlock</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_UNLOCKS_COUNT" Language="en_US">
+      <Text>{1_Count} unlocks</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_NO_UNLOCKS" Language="en_US">
+      <Text>No unlocks</Text>
     </Row>
 
     <!-- Production panel -->
