@@ -6,6 +6,16 @@ local ACTION_OPEN_CIVICS_CHOOSER = Input.GetActionId("WorldTrackerOpenCivicsChoo
 local ACTION_READ_SUMMARY = Input.GetActionId("WorldTrackerReadSummary")
 
 local m_caiWorldTrackerActions = {}
+local m_caiResearchTrackerControl = nil
+local m_caiCivicsTrackerControl = nil
+
+local function ControlIsHidden(control)
+    return control and control.IsHidden and control:IsHidden() or false
+end
+
+local function ControlIsDisabled(control)
+    return control and control.IsDisabled and control:IsDisabled() or false
+end
 
 local function GetLocalPlayer()
     local playerID = Game.GetLocalPlayer()
@@ -123,22 +133,48 @@ local function RegisterWorldTrackerAction(actionId, callback)
     end
 end
 
+local function IsTrackerChooserControlEnabled(control)
+    if control == nil then return true end
+    return not ControlIsHidden(control.MainPanel)
+        and not ControlIsHidden(control.IconButton)
+        and not ControlIsDisabled(control.MainPanel)
+        and not ControlIsDisabled(control.IconButton)
+        and not ControlIsDisabled(control.TitleButton)
+end
+
 local function InitializeWorldTrackerActions()
     RegisterWorldTrackerAction(ACTION_OPEN_RESEARCH_CHOOSER, function()
+        if not IsTrackerChooserControlEnabled(m_caiResearchTrackerControl) then return end
         LuaEvents.WorldTracker_OpenChooseResearch()
     end)
     RegisterWorldTrackerAction(ACTION_OPEN_CIVICS_CHOOSER, function()
+        if not IsTrackerChooserControlEnabled(m_caiCivicsTrackerControl) then return end
         LuaEvents.WorldTracker_OpenChooseCivic()
     end)
     RegisterWorldTrackerAction(ACTION_READ_SUMMARY, SpeakWorldTrackerSummary)
 end
 
 local function OnWorldTrackerInputActionTriggered(actionId)
+    if ContextPtr:IsHidden() then return end
     local action = m_caiWorldTrackerActions[actionId]
     if action == nil then return end
 
     action()
 end
+
+RealizeCurrentResearch = WrapFunc(RealizeCurrentResearch, function(orig, playerID, kData, kControl)
+    if kControl and kControl.IconButton then
+        m_caiResearchTrackerControl = kControl
+    end
+    return orig(playerID, kData, kControl)
+end)
+
+RealizeCurrentCivic = WrapFunc(RealizeCurrentCivic, function(orig, playerID, kData, kControl, cachedModifiers)
+    if kControl and kControl.IconButton then
+        m_caiCivicsTrackerControl = kControl
+    end
+    return orig(playerID, kData, kControl, cachedModifiers)
+end)
 
 OnShutdown = WrapFunc(OnShutdown, function(orig)
     Events.InputActionTriggered.Remove(OnWorldTrackerInputActionTriggered)

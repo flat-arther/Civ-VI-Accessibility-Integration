@@ -191,6 +191,18 @@
     <Row Tag="LOC_CAI_NOTIFICATION_CENTER_TOOLTIP" Language="en_US">
       <Text>Opens an accessible tree of current notifications</Text>
     </Row>
+    <Row Tag="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS" Language="en_US">
+      <Text>Turn blockers</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS_TOOLTIP" Language="en_US">
+      <Text>Opens an accessible list of current turn actions and blockers</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ACTION_PANEL_NO_TURN_BLOCKERS" Language="en_US">
+      <Text>No current turn actions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ACTION_PANEL_BLOCKER_COUNT" Language="en_US">
+      <Text>{1_Count} items</Text>
+    </Row>
     <Row Tag="LOC_CAI_NOTIFICATION_EMPTY" Language="en_US">
       <Text>No current notifications</Text>
     </Row>

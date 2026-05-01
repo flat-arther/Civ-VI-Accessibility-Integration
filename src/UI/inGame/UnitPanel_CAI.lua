@@ -584,6 +584,7 @@ function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locatio
     end
 
     Speak(table.concat(results, "[NEWLINE]"))
+    LuaEvents.CAICursorMove(locationX, locationY)
 end
 
 --# Public API

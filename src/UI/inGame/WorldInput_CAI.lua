@@ -227,11 +227,29 @@ local function CreateGameViewWidgets()
 	return true
 end
 
-local function SnapCursorToInitialSelection()
-	local unit = UI.GetHeadSelectedUnit()
-	if unit then
-		LuaEvents.CAICursorSnapToUnit(unit)
+local function SnapCursorToInitialCameraPosition()
+	local worldX, worldY = UI.GetMapLookAtWorldTarget()
+	if worldX == nil or worldY == nil then
+		print("CAI cursor unable to read initial camera position")
+		LuaEvents.CAICursorSnapToStartPlot()
+		return
 	end
+
+	local plotX, plotY = UI.GetPlotCoordFromWorld(worldX, worldY)
+	if plotX == nil or plotY == nil or plotX < 0 or plotY < 0 then
+		print("CAI cursor unable to resolve initial camera plot: " .. tostring(worldX) .. ", " .. tostring(worldY))
+		LuaEvents.CAICursorSnapToStartPlot()
+		return
+	end
+
+	local plot = Map.GetPlot(plotX, plotY)
+	if not plot then
+		print("CAI cursor unable to resolve initial camera plot coordinates: " .. tostring(plotX) .. ", " .. tostring(plotY))
+		LuaEvents.CAICursorSnapToStartPlot()
+		return
+	end
+
+	LuaEvents.CAICursorSnapToPlot(plot)
 end
 
 local function OnCAICursorMoved(x, y, plot)
@@ -261,7 +279,7 @@ local function InitializeCAIGameView()
 	gCAISystemsInitialized = true
 	mgr:Push(gamePanel)
 	RegisterCAIEvents()
-	SnapCursorToInitialSelection()
+	SnapCursorToInitialCameraPosition()
 end
 
 -- Vanilla subscribes this function to Events.LoadScreenClose. Keep using that

@@ -262,18 +262,22 @@ local function GetCivicTooltipText(kData)
     return kData and kData.ToolTip or ""
 end
 
+local function HasQueuePosition(kData)
+    if not kData or kData.IsCurrent then return false end
+    local position = kData.ResearchQueuePosition
+    return position ~= nil and position ~= -1 and position ~= 99
+end
+
 local function GetQueuePositionText(kData)
+    if not HasQueuePosition(kData) then return nil end
     local control = GetDisplayControl(kData)
     if control then
         local number = ControlText(control.NodeNumber)
-        if number ~= "" then
+        if number ~= "" and number ~= "99" then
             return Locale.Lookup("LOC_CAI_CIVIC_QUEUE_POSITION", number)
         end
     end
-    if kData.ResearchQueuePosition and kData.ResearchQueuePosition ~= -1 then
-        return Locale.Lookup("LOC_CAI_CIVIC_QUEUE_POSITION", kData.ResearchQueuePosition)
-    end
-    return nil
+    return Locale.Lookup("LOC_CAI_CIVIC_QUEUE_POSITION", kData.ResearchQueuePosition)
 end
 
 local function FormatRowLabel(kData)
@@ -453,11 +457,11 @@ end
 -- ===========================================================================
 -- Partition predicate. Queued-or-current rows go to the view-only queue list;
 -- everything else goes to the interactive available list. Current Civic
--- reports ResearchQueuePosition == -1 so IsCurrent is the separate check.
+-- uses IsCurrent; vanilla can use sentinel queue positions for nonqueued rows.
 -- ===========================================================================
 local function IsQueuedOrCurrent(kData)
     return kData.IsCurrent
-        or (kData.ResearchQueuePosition and kData.ResearchQueuePosition ~= -1)
+        or HasQueuePosition(kData)
 end
 
 -- ===========================================================================
@@ -579,11 +583,13 @@ local function EnsurePanelBuilt()
     m_caiQueueTree = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserTree"), "Treeview", {
         GetLabel = function() return Locale.Lookup("LOC_CAI_CIVIC_QUEUE_LIST") end,
         IsHidden = function() return #m_caiQueueRows == 0 end,
+        SearchDepth = 0,
     })
     m_caiPanel:AddChild(m_caiQueueTree)
 
     m_caiAvailableTree = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserTree"), "Treeview", {
         GetLabel = function() return Locale.Lookup("LOC_CAI_CIVIC_AVAILABLE_LIST") end,
+        SearchDepth = 0,
     })
     m_caiPanel:AddChild(m_caiAvailableTree)
 

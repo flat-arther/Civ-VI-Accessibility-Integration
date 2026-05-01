@@ -820,13 +820,6 @@ local function BuildPanel()
     m_caiPanel = mgr:CreateUIWidget("CAIGovernmentScreenPanel", "Panel", {
         GetLabel = function() return ControlText(Controls.ModalScreenTitle) end,
     })
-    m_caiPanel:AddInputBinding({
-        Key = Keys.VK_ESCAPE,
-        Action = function()
-            OnClose()
-            return true
-        end,
-    })
 
     m_caiTabBar = mgr:CreateUIWidget("CAIGovernmentScreenTabBar", "TabBar", {
         GetLabel = function() return ControlText(Controls.ModalScreenTitle) end,

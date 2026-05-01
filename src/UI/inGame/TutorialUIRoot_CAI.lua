@@ -8,15 +8,19 @@ local activeItem           = nil
 local detailedItem         = nil
 local tutorialLoaded       = false
 
+local tutorialActivatedIds = {
+    ChooseProductionMenu = true,
+    ButtonPolicies = true
+}
 local escapePassthroughIds = {
     "CAINotificationCenterTree",
+    "CAIActionPanelTurnBlockerList",
     "CAIUnitPanelActionList",
     "CAICityPanelList",
     "CAITopPanelResourceInfoList",
     "CAITopPanelYieldInfoTree",
     "CAIWorldInputInterfaceMode",
 }
-
 
 local function HasUITrigger(item, triggerName)
     if not item or not item.UITriggers then return false end
@@ -30,9 +34,14 @@ local function HasUITrigger(item, triggerName)
     return false
 end
 
+local function NotifyActionPanelAllowed(item)
+    LuaEvents.CAI_TutorialActionPanelAllowed(item ~= nil and HasUITrigger(item, "ActionPanel"))
+end
+
 ActivateItem = WrapFunc(ActivateItem, function(orig, item)
     activeItem = item
     detailedItem = nil
+    LuaEvents.CAI_TutorialActionPanelAllowed(false)
     return orig(item)
 end)
 
@@ -40,6 +49,7 @@ DeActivateItem = WrapFunc(DeActivateItem, function(orig, item)
     if activeItem == item then
         activeItem = nil
         detailedItem = nil
+        LuaEvents.CAI_TutorialActionPanelAllowed(false)
     end
 
     return orig(item)
@@ -48,6 +58,7 @@ end)
 RaiseDetailedTutorial = WrapFunc(RaiseDetailedTutorial, function(orig, item)
     detailedItem = item
     local result = orig(item)
+    NotifyActionPanelAllowed(detailedItem)
     LuaEvents.CAI_TutorialDetailedControlsReady()
     return result
 end)
@@ -60,11 +71,15 @@ OnInput = WrapFunc(OnInput, function(orig, input)
     end
 
     -- If the current detailed item has the choose production menu trigger, we need the manager to handle input for it here, otherwise the production menu won't work in the tutorial. This is due to the fact that only part of the production panel is activated, and not the entire context
-    if detailedItem and HasUITrigger(detailedItem, "ChooseProductionMenu") then
-        if mgr then
-            local handled = mgr:HandleInput(input)
-            if handled then
-                return true
+    if detailedItem then
+        for id, _ in pairs(tutorialActivatedIds) do
+            if HasUITrigger(detailedItem, id) then
+                if mgr then
+                    local handled = mgr:HandleInput(input)
+                    if handled then
+                        return true
+                    end
+                end
             end
         end
     end

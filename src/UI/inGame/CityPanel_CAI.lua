@@ -704,6 +704,7 @@ function OnCitySelectionChanged(ownerPlayerID, cityID, i, j, k, isSelected, isEd
     end
 
     Speak(table.concat(results, "[NEWLINE]"))
+    LuaEvents.CAICursorMove(i, j)
 end
 
 --#Public API

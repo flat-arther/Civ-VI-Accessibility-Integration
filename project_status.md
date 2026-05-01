@@ -57,6 +57,16 @@ What is implemented:
 - CAI suppresses unsafe rebuilds around vanilla confirmation/popup flows to avoid focus loss.
 - After accepting a government change, CAI mirrors vanilla by returning to Policies.
 - XML parse checks passed for the edited XML/modinfo files.
+- ActionPanel now has a Ctrl+Space CAI turn blocker list (`ActionPanelOpenTurnBlockers`, `CAIActionPanelTurnBlockerList`). Rows activate through vanilla `DoEndTurn()` / `DoEndTurn(blockerType)` and respect backing vanilla button hidden/disabled state where available.
+- Latest chooser/action fixes: ResearchChooser and CivicsChooser first-letter search now stays on root rows, queue position ignores nonqueued sentinel values, WorldTracker research/civic hotkeys respect the live tracker control disabled state before opening choosers, Space/Ctrl+Space end-turn hotkeys respect live disabled state plus tutorial ActionPanel UI-trigger gating and the vanilla tutorial slow-turn input shield, and GovernmentScreen no longer adds its own root Escape binding.
+- Tutorial ActionPanel analysis: active base-tutorial detailed steps that show ActionPanel are `TURN_BASED_C`, `SELECT_RESEARCH_8`, `SELECT_END_TURN_B`, `SELECT_END_TURN_PRODUCTION`, `SELECT_END_TURN_C`, `SELECT_END_TURN_D`, `SCOUTS_D2`, `SCOUTS_E`, `SELECT_END_TURN_RESEARCH`, and `RESEARCH_IRRIGATION`; `NOTIFICATION_PANEL` only uses an advisor-side ActionPanel pointer.
+- ActionPanel input handler now only wraps `OnInputActionTriggered`; vanilla `LateInitialize()` registers the wrapped global, avoiding duplicate input-action subscriptions.
+- ActionPanel context input handler now routes only through CAI UI manager and no longer falls back to vanilla Enter / Shift+Enter end-turn handling.
+- ActionPanel refresh handler speaks the live main action tooltip when it changes, using the post-vanilla `EndTurnButton` tooltip as the source of truth. Speech is gated by ActionPanel context visibility and tutorial ActionPanel permission, and the tutorial allow event forces one current-action announcement.
+- ActionPanel turn blocker list closes with Escape.
+- Camera/nav cursor analysis documented in `docs/game-api.md`: vanilla exposes `Events.Camera_Updated`, but selected-object sync should primarily use unit/city selection events and explicit `LookAtPlot` touch points, with camera-center sync treated as an optional throttled fallback.
+- WorldInput CAI cursor startup now snaps to the current camera focus via `UI.GetMapLookAtWorldTarget()` -> `UI.GetPlotCoordFromWorld(...)`, rather than preferring a selected unit.
+- UnitPanel and CityPanel selection summary handlers now move the CAI cursor to the selected unit/city location after speaking the summary.
 
 GovernmentScreen test queue:
 
@@ -77,7 +87,7 @@ GovernmentScreen test queue:
 15. Verify Enter on an unlocked government opens the vanilla confirmation; accepting changes government and switches to Policies.
 16. Verify locked government rows are readable but not activatable.
 17. Verify Shift+Enter on policy entries opens Civilopedia outside tutorial mode and does nothing harmful during tutorial mode.
-18. Verify Escape closes pushed trees first, then closes CAI root and vanilla screen together, including the vanilla unsaved-policy warning.
+18. Verify Escape closes pushed picker/view-all trees first; on the CAI root, vanilla handles Escape and any unsaved-policy warning.
 
 CivicsChooser test queue:
 
@@ -85,7 +95,7 @@ CivicsChooser test queue:
 2. Open CivicsChooser from the ActionPanel civic blocker and from WorldTracker `C`.
 3. Verify opening CivicsChooser does not also open when ResearchChooser opens.
 4. Verify initial focus lands on the civics queue tree while a civic is active, otherwise on available civics.
-5. Verify available civic rows speak name, recommendation, turns, boost, tooltip detail, queue position, and first unlocks.
+5. Verify available civic rows speak name, recommendation, turns, boost, tooltip detail, and first unlocks, without queue position `99`.
 6. Verify Enter on available civics selects the civic, speaks the chosen-civic confirmation, plays vanilla confirm sound, and closes the chooser.
 7. Verify queued/current civic rows are read-only and expandable.
 8. Verify Shift+Enter opens Civilopedia outside tutorial mode and does nothing harmful during tutorial mode.
@@ -123,6 +133,9 @@ ResearchChooser:
 - Verify queued/current research remains read-only and inspectable.
 - Verify tutorial-open first focus already respects filtered/disabled vanilla row state.
 - Verify Open Tech Tree still follows the live vanilla control state, and Escape remains the chooser close path.
+- Verify first-letter search in both research trees only lands on top-level research rows, even after expanding detail/unlock nodes.
+- Verify nonqueued research rows do not speak queue position `99`, while actual queued rows still speak their queue position.
+- Verify opening CivicsChooser does not push a ResearchChooser CAI panel, and opening ResearchChooser does not push a CivicsChooser CAI panel.
 
 CityPanel:
 
@@ -146,10 +159,14 @@ WorldInput / cursor / notifications:
 - Verify notification speech de-duplicates and includes summary/location when available.
 - Verify `Ctrl+N` opens the notification tree; Enter/Space activate, Delete dismisses, Shift+Delete dismisses group items.
 - Verify wrong-phase notifications do not activate and end-turn blockers stay out of the notification center.
+- Verify Space and Ctrl+Space do not trigger next action/end turn during tutorial steps without an ActionPanel detailed UI trigger, especially the first `OPEN_CITY_PANEL` / city-panel production selection step, and remain inert while the vanilla tutorial slow-turn input shield is visible.
+- Verify ActionPanel speaks the current main blocker tooltip once when it changes, such as end turn, choose production, select unit, research, civic, or policy blockers, without repeating on ordinary refreshes.
+- Verify Escape closes the `Ctrl+Space` ActionPanel turn blocker list.
 
 WorldTracker:
 
 - Verify `T` opens ResearchChooser, `C` opens CivicsChooser, and `W` speaks live research/civic/unit summary.
+- Verify `T` and `C` do nothing when the matching live WorldTracker research/civic open control is disabled by tutorial or WorldTracker filtering.
 - Verify summaries still work when visual WorldTracker panels are hidden/collapsed.
 - Verify no persistent WorldTracker CAI panel appears in Tab navigation.
 

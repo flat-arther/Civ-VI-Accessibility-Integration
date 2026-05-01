@@ -30,6 +30,7 @@
     <Row ActionId="SelectionActions" Name="LOC_CAI_SELECTION_ACTIONS" Description="LOC_CAI_SELECTION_ACTIONS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="InterfaceWidgetPrimaryAction" Name="LOC_CAI_INTERFACE_PRIMARY_ACTION" Description="LOC_CAI_INTERFACE_PRIMARY_ACTION_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SharedEndTurn" Name="LOC_CAI_END_TURN" Description="LOC_CAI_END_TURN_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ActionPanelOpenTurnBlockers" Name="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS" Description="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UnitPathInfo" Name="LOC_CAI_MOVE_INFO" Description="LOC_CAI_MOVE_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAICursorMoveUp" Name="LOC_CAI_CURSOR_MOVE_UP" Description="LOC_CAI_CURSOR_MOVE_UP_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAICursorMoveDown" Name="LOC_CAI_CURSOR_MOVE_DOWN" Description="LOC_CAI_CURSOR_MOVE_DOWN_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
@@ -118,6 +119,7 @@
     <Row ActionId="ReadSelectionInfo10" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_0" />
     <Row ActionId="InterfaceWidgetPrimaryAction" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_RETURN" />
     <Row ActionId="SharedEndTurn" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SPACE" />
+    <Row ActionId="ActionPanelOpenTurnBlockers" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SPACE" />
     <Row ActionId="UnitPathInfo" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_D" />
     <Row ActionId="CAICursorMoveUp" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_UP" />
     <Row ActionId="CAICursorMoveDown" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_DOWN" />
