@@ -1,5 +1,5 @@
 include("caiUtils")
-include("worldInfo")
+include("unitHelpers_CAI")
 include("UIScreenManager")
 include("caiIngame")
 include("WorldInput")
@@ -8,7 +8,6 @@ local INPUT_ACTION_STARTED = "Started"
 local INPUT_ACTION_TRIGGERED = "Triggered"
 
 local mgr = ExposedMembers.CAI_UIManager
-local caiInfo = ExposedMembers.CAIInfo
 
 local gamePanel = nil
 local mainArea = nil
@@ -59,10 +58,10 @@ local function SpeakUnitPathInfo()
 	local plot = UI.GetCursorPlotID()
 	if not Map.IsPlot(plot) then return false end
 
-	local info = caiInfo.BuildMovementPathInfo(unit, plot, true)
+	local info = BuildMovementPathInfo(unit, plot, true)
 	if not info then return false end
 
-	local lines = caiInfo.BuildMovementSpeech(info)
+	local lines = BuildMovementSpeech(info)
 	if lines and #lines > 0 then
 		Speak(table.concat(lines, ", "))
 	end

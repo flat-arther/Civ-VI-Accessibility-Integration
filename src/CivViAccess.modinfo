@@ -17,6 +17,7 @@
     <File>UI/uiManager/UIScreenManager.lua</File>
     <File>UI/inGame/caiIngame.lua</File>
     <File>UI/inGame/worldInfo.lua</File>
+    <File>UI/inGame/unitHelpers_CAI.lua</File>
     <File>UI/inGame/navCursor.lua</File>
     <File>UI/frontEnd/FrontEnd.lua</File>
     <File>UI/frontEnd/IntroScreen.lua</File>
@@ -47,6 +48,7 @@
     <File>UI/inGame/ProductionPanel_CAI.lua</File>
     <File>UI/inGame/CityPanel_CAI.lua</File>
     <File>UI/inGame/UnitPanel_CAI.lua</File>
+    <File>UI/inGame/PlotToolTip_CAI.lua</File>
     <File>UI/inGame/TutorialUIRoot_CAI.lua</File>
     <File>data/hotkey_config.xml</File>
     <File>data/unitOperationConfig.sql</File>
@@ -221,6 +223,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>UnitPanel</LuaContext>
         <LuaReplace>UI/inGame/UnitPanel_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_PlotToolTip">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>PlotToolTip</LuaContext>
+        <LuaReplace>UI/inGame/PlotToolTip_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

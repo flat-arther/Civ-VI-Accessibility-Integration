@@ -765,6 +765,153 @@
       <Text>Actions for {1_Name}</Text>
     </Row>
 
+    <!-- Unit categories and hotkeys -->
+    <Row Tag="LOC_OPTIONS_HOTKEY_CATEGORY_CAI" Language="en_US">
+      <Text>Accessibility</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_MOVES" Language="en_US">
+      <Text>{1_Current} of {2_Moves} moves</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_CAT_ALL" Language="en_US">
+      <Text>All units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_CAT_READY" Language="en_US">
+      <Text>Ready units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PREV_UNIT_CAT" Language="en_US">
+      <Text>Previous unit category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_PREV_CAT_TOOLTIP" Language="en_US">
+      <Text>Selects the previous unit cycling category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NEXT_UNIT_CAT" Language="en_US">
+      <Text>Next unit category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_NEXT_CAT_TOOLTIP" Language="en_US">
+      <Text>Selects the next unit cycling category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PREV_UNIT" Language="en_US">
+      <Text>Previous unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_PREV_TOOLTIP" Language="en_US">
+      <Text>Selects the previous unit in the active unit category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NEXT_UNIT" Language="en_US">
+      <Text>Next unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_NEXT_TOOLTIP" Language="en_US">
+      <Text>Selects the next unit in the active unit category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVE_INFO" Language="en_US">
+      <Text>Unit path info</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVE_INFO_TOOLTIP" Language="en_US">
+      <Text>Reads movement path details for the selected unit and CAI map cursor</Text>
+    </Row>
+
+    <!-- Plot info hotkeys -->
+    <Row Tag="LOC_CAI_PLOTINFO1" Language="en_US">
+      <Text>Plot Summary</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO_TOOLTIP" Language="en_US">
+      <Text>Read plot name and coordinates</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO2" Language="en_US">
+      <Text>Tile Type</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO2_TOOLTIP" Language="en_US">
+      <Text>Read tile type and yields</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO3" Language="en_US">
+      <Text>Features</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO3_TOOLTIP" Language="en_US">
+      <Text>Read terrain features and natural wonders</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO4" Language="en_US">
+      <Text>Units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO4_TOOLTIP" Language="en_US">
+      <Text>Read units on this plot</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO5" Language="en_US">
+      <Text>Movement Preview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO5_TOOLTIP" Language="en_US">
+      <Text>Read movement path information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO6" Language="en_US">
+      <Text>Resources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO6_TOOLTIP" Language="en_US">
+      <Text>Read resources on this plot</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO7" Language="en_US">
+      <Text>Buildings</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO7_TOOLTIP" Language="en_US">
+      <Text>Read buildings on this plot</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO8" Language="en_US">
+      <Text>Owner</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO8_TOOLTIP" Language="en_US">
+      <Text>Read owner of this plot</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO9" Language="en_US">
+      <Text>Physical Info</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO9_TOOLTIP" Language="en_US">
+      <Text>Read movement cost, defense modifier, rivers, and cliffs</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO10" Language="en_US">
+      <Text>Ambient Info</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOTINFO10_TOOLTIP" Language="en_US">
+      <Text>Read continent, appeal, workers, fallout, and national park</Text>
+    </Row>
+
+    <!-- Plot info fallback messages -->
+    <Row Tag="LOC_CAI_PLOT_NO_TILE_INFO" Language="en_US">
+      <Text>No tile information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_NO_FEATURES" Language="en_US">
+      <Text>No features on this plot</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_NO_UNITS" Language="en_US">
+      <Text>No units on this plot</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_NO_MOVEMENT_PREVIEW" Language="en_US">
+      <Text>No movement preview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_NO_RESOURCES" Language="en_US">
+      <Text>No resources on this plot</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_NO_BUILDINGS" Language="en_US">
+      <Text>No buildings on this plot</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_UNOWNED" Language="en_US">
+      <Text>Unowned</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_NO_PHYSICAL_INFO" Language="en_US">
+      <Text>No physical modifiers</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_NO_AMBIENT_INFO" Language="en_US">
+      <Text>No additional information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_INTERFACE_PRIMARY_ACTION" Language="en_US">
+      <Text>Primary interface action</Text>
+    </Row>
+    <Row Tag="LOC_CAI_INTERFACE_PRIMARY_ACTION_TOOLTIP" Language="en_US">
+      <Text>Activates the focused accessibility widget or current interface action</Text>
+    </Row>
+    <Row Tag="LOC_CAI_END_TURN" Language="en_US">
+      <Text>End turn or current action</Text>
+    </Row>
+    <Row Tag="LOC_CAI_END_TURN_TOOLTIP" Language="en_US">
+      <Text>Triggers the current ActionPanel action when available</Text>
+    </Row>
+
     <!-- Selection info hotkeys -->
     <Row Tag="LOC_CAI_READ_SELECTION_SUMMARY" Language="en_US">
       <Text>Read selection summary</Text>

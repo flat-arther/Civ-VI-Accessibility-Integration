@@ -6,6 +6,10 @@
   </InputCategories>
 
   <InputActions>
+    <Row ActionId="PrevUnitSelectionCategory" Name="LOC_CAI_PREV_UNIT_CAT" Description="LOC_CAI_UNIT_PREV_CAT_TOOLTIP" CategoryId="GLOBAL" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="NextUnitSelectionCategory" Name="LOC_CAI_NEXT_UNIT_CAT" Description="LOC_CAI_UNIT_NEXT_CAT_TOOLTIP" CategoryId="GLOBAL" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PrevUnitSelection" Name="LOC_CAI_PREV_UNIT" Description="LOC_CAI_UNIT_PREV_TOOLTIP" CategoryId="GLOBAL" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="NextUnitSelection" Name="LOC_CAI_NEXT_UNIT" Description="LOC_CAI_UNIT_NEXT_TOOLTIP" CategoryId="GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotInfo1" Name="LOC_CAI_PLOTINFO1" Description="LOC_CAI_PLOTINFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotInfo2" Name="LOC_CAI_PLOTINFO2" Description="LOC_CAI_PLOTINFO2_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotInfo3" Name="LOC_CAI_PLOTINFO3" Description="LOC_CAI_PLOTINFO3_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
@@ -91,6 +95,25 @@
     <Row ActionId="WaitFor" Name="LOC_UNITOPERATION_WAIT_FOR_DESCRIPTION" Description="LOC_UNITOPERATION_WAIT_FOR_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ReligiousHeal" Name="LOC_UNITOPERATION_RELIGIOUS_HEAL_DESCRIPTION" Description="LOC_UNITOPERATION_RELIGIOUS_HEAL_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ExecuteScript" Name="LOC_UNITOPERATION_EXECUTE_SCRIPT_DESCRIPTION" Description="LOC_UNITOPERATION_EXECUTE_SCRIPT_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandPromote" Name="LOC_UNITCOMMAND_PROMOTE_DESCRIPTION" Description="LOC_UNITCOMMAND_PROMOTE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandUpgrade" Name="LOC_UNITCOMMAND_UPGRADE_DESCRIPTION" Description="LOC_UNITCOMMAND_UPGRADE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandWake" Name="LOC_UNITCOMMAND_WAKE_DESCRIPTION" Description="LOC_UNITCOMMAND_WAKE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandCancel" Name="LOC_UNITCOMMAND_CANCEL_DESCRIPTION" Description="LOC_UNITCOMMAND_CANCEL_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandStopAutomation" Name="LOC_UNITCOMMAND_STOP_AUTOMATION_DESCRIPTION" Description="LOC_UNITCOMMAND_STOP_AUTOMATION_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandGift" Name="LOC_UNITCOMMAND_GIFT_DESCRIPTION" Description="LOC_UNITCOMMAND_GIFT_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandEnterFormation" Name="LOC_UNITCOMMAND_ENTER_FORMATION_DESCRIPTION" Description="LOC_UNITCOMMAND_ENTER_FORMATION_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandExitFormation" Name="LOC_UNITCOMMAND_EXIT_FORMATION_DESCRIPTION" Description="LOC_UNITCOMMAND_EXIT_FORMATION_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandActivateGreatPerson" Name="LOC_UNITCOMMAND_ACTIVATE_GREAT_PERSON_DESCRIPTION" Description="LOC_UNITCOMMAND_ACTIVATE_GREAT_PERSON_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandDistrictProduction" Name="LOC_UNITCOMMAND_DISTRICT_PRODUCTION_DESCRIPTION" Description="LOC_UNITCOMMAND_DISTRICT_PRODUCTION_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandFormCorps" Name="LOC_UNITCOMMAND_FORM_CORPS_DESCRIPTION" Description="LOC_UNITCOMMAND_FORM_CORPS_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandFormArmy" Name="LOC_UNITCOMMAND_FORM_ARMY_DESCRIPTION" Description="LOC_UNITCOMMAND_FORM_ARMY_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandPlunderTradeRoute" Name="LOC_UNITCOMMAND_PLUNDER_TRADE_ROUTE_DESCRIPTION" Description="LOC_UNITCOMMAND_PLUNDER_TRADE_ROUTE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandCondemnHeretic" Name="LOC_UNITCOMMAND_CONDEMN_HERETIC_DESCRIPTION" Description="LOC_UNITCOMMAND_CONDEMN_HERETIC_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandNameUnit" Name="LOC_UNITCOMMAND_NAME_UNIT_DESCRIPTION" Description="LOC_UNITCOMMAND_NAME_UNIT_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandWonderProduction" Name="LOC_UNITCOMMAND_WONDER_PRODUCTION_DESCRIPTION" Description="LOC_UNITCOMMAND_WONDER_PRODUCTION_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandHarvestWonder" Name="LOC_UNITCOMMAND_HARVEST_WONDER_DESCRIPTION" Description="LOC_UNITCOMMAND_HARVEST_WONDER_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandAirlift" Name="LOC_UNITCOMMAND_AIRLIFT_DESCRIPTION" Description="LOC_UNITCOMMAND_AIRLIFT_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UnitCommandPetTheDog" Name="LOC_UNITCOMMAND_PET_THE_DOG_DESCRIPTION" Description="LOC_UNITCOMMAND_PET_THE_DOG_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityToggleOverview" Name="LOC_HUD_CITY_TOGGLE_OVERVIEW" Description="LOC_CAI_CITY_TOGGLE_OVERVIEW_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityOpenBuildings" Name="LOC_HUD_CITY_BUILDINGS" Description="LOC_CAI_CITY_OPEN_BUILDINGS_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityOpenReligion" Name="LOC_HUD_CITY_RELIGIOUS_CITIZENS" Description="LOC_CAI_CITY_OPEN_RELIGION_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
@@ -143,5 +166,9 @@
     <Row ActionId="PlotInfo8" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_8" />
     <Row ActionId="PlotInfo9" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_9" />
     <Row ActionId="PlotInfo10" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_0" />
+    <Row ActionId="PrevUnitSelectionCategory" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_COMMA" />
+    <Row ActionId="NextUnitSelectionCategory" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_PERIOD" />
+    <Row ActionId="PrevUnitSelection" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_COMMA" />
+    <Row ActionId="NextUnitSelection" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_PERIOD" />
   </InputActionDefaultGestures>
 </GameInfo>

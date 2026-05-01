@@ -3,6 +3,37 @@ include("UnitPanel")
 
 local mgr = ExposedMembers.CAI_UIManager
 local UNIT_ACTION_LIST_ID = "CAIUnitPanelActionList"
+local prevUnitCatAction = Input.GetActionId("PrevUnitSelectionCategory")
+local nextUnitCatAction = Input.GetActionId("NextUnitSelectionCategory")
+local prevUnitAction = Input.GetActionId("PrevUnitSelection")
+local nextUnitAction = Input.GetActionId("NextUnitSelection")
+local UnitCategories = {
+    {
+        Name = "LOC_CAI_UNIT_CAT_ALL",
+        Prev = UI.SelectPrevUnit,
+        Next = UI.SelectNextUnit
+    },
+    {
+        Name = "LOC_CAI_UNIT_CAT_READY",
+        Prev = UI.SelectPrevReadyUnit,
+        Next = UI.SelectNextReadyUnit
+    }
+}
+local activeCategoryIdx = 1
+--#Category functions
+function ChangeUnitSelectionCategory(dir)
+    activeCategoryIdx = ((activeCategoryIdx - 1 + dir) % #UnitCategories) + 1
+    Speak(Locale.Lookup(UnitCategories[activeCategoryIdx].Name))
+end
+
+function ChangeUnitSelection(dir)
+    local sel = UnitCategories[activeCategoryIdx]
+    if dir == -1 and sel.Prev then
+        sel.Prev()
+    elseif dir == 1 and sel.Next then
+        sel.Next()
+    end
+end
 
 info = ExposedMembers.CAIInfo or {}
 ExposedMembers.CAIInfo = info
@@ -189,13 +220,7 @@ function GetUnitInfoMovement(data)
     end
 
     local moves = data.MovementMoves or data.Moves or 0
-    return Locale.Lookup("LOC_HUD_UNIT_PANEL_MOVEMENT") ..
-        ", " ..
-        tostring(moves) ..
-        " / " ..
-        tostring(data.MaxMoves or 0) ..
-        ", " ..
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_MOVES", moves)
+    return Locale.Lookup("LOC_CAI_UNIT_MOVES", moves, data.MaxMoves)
 end
 
 function GetUnitInfoCombat(data)
@@ -330,7 +355,7 @@ function GetUnitInfoSpecialState(data)
 end
 
 function GetUnitInfoActions(data)
-    local actions = GetUnitActionEntries(data, true)
+    local actions = GetUnitActionEntries(data)
     local results = {}
 
     for _, action in ipairs(actions) do
@@ -406,7 +431,7 @@ function GetUnitActionLabel(action)
     return GetFirstUnitInfoLine(action.helpString) or Locale.Lookup("LOC_OPTIONS_HOTKEY_CATEGORY_UNIT")
 end
 
-function GetUnitActionEntries(data, includeDisabled)
+function GetUnitActionEntries(data)
     if data == nil or data.Actions == nil then
         return {}
     end
@@ -431,7 +456,7 @@ function GetUnitActionEntries(data, includeDisabled)
             local categoryTable = data.Actions[categoryName]
             if categoryTable ~= nil then
                 for _, action in ipairs(categoryTable) do
-                    if includeDisabled or not action.Disabled then
+                    if not action.Disabled then
                         table.insert(results, action)
                     end
                 end
@@ -466,7 +491,7 @@ function BuildUnitActionList(data)
         end,
     })
 
-    for _, action in ipairs(GetUnitActionEntries(data, true)) do
+    for _, action in ipairs(GetUnitActionEntries(data)) do
         local currentAction = action
         list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitPanelMenuItem"), "MenuItem", {
             GetLabel = function()
@@ -566,11 +591,18 @@ function OnUnitPanelSelectionInfoInputActionTriggered(actionId)
 end
 
 function OnUnitPanelSelectionActionInputTriggered(actionId)
-    if actionId ~= Input.GetActionId("SelectionActions") then
-        return
+    if actionId == prevUnitCatAction then
+        ChangeUnitSelectionCategory(-1)
+    elseif actionId == nextUnitCatAction then
+        ChangeUnitSelectionCategory(1)
+    elseif actionId == prevUnitAction then
+        ChangeUnitSelection(-1)
+    elseif actionId == nextUnitAction then
+        ChangeUnitSelection(1)
     end
-
-    OpenUnitActionList()
+    if actionId == Input.GetActionId("SelectionActions") then
+        OpenUnitActionList()
+    end
 end
 
 function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locationZ, isSelected, isEditable)

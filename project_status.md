@@ -67,6 +67,9 @@ What is implemented:
 - Camera/nav cursor analysis documented in `docs/game-api.md`: vanilla exposes `Events.Camera_Updated`, but selected-object sync should primarily use unit/city selection events and explicit `LookAtPlot` touch points, with camera-center sync treated as an optional throttled fallback.
 - WorldInput CAI cursor startup now snaps to the current camera focus via `UI.GetMapLookAtWorldTarget()` -> `UI.GetPlotCoordFromWorld(...)`, rather than preferring a selected unit.
 - UnitPanel and CityPanel selection summary handlers now move the CAI cursor to the selected unit/city location after speaking the summary.
+- UnitPanel action summaries and `SelectionActions` now filter out all vanilla-disabled rows via `action.Disabled`, covering both operations and tutorial-disabled commands such as Delete Unit.
+- Unit command hotkeys now mirror the prior unit-operation hotkey expansion: visible vanilla `UnitCommands` without safe existing input paths get `HotkeyId` values in `unitOperationConfig.sql` plus unbound `UNIT` input actions in `hotkey_config.xml`. `UNITCOMMAND_DELETE` is excluded because vanilla already has the `DeleteUnit` action and a separate UnitPanel special case.
+- Unit selection category labels and unit navigation/path hotkey labels now have CAI localization. Unit command hotkey labels intentionally use vanilla unit-command localization.
 
 GovernmentScreen test queue:
 
@@ -149,7 +152,9 @@ UnitPanel:
 - Verify no Lua errors from `UnitPanel_CAI.lua`, `worldInfo.lua`, or `caiIngame.lua`.
 - Verify unit selection speaks one concise summary.
 - Verify `~`, `Shift+1` through `Shift+0`, and `SelectionActions` behave correctly for units.
-- Verify disabled unit actions are readable and do not execute.
+- Verify disabled unit actions do not appear in the spoken action summary or `SelectionActions` list, including tutorial-disabled commands such as Delete Unit.
+- Verify enabled commands and operations still activate through vanilla callbacks.
+- Verify previous/next unit category announces the localized active category, and unit navigation/path keybinding labels appear localized in Options.
 - Verify plot info still reports aggregated units without depending on `UnitPanel_CAI.lua`.
 
 WorldInput / cursor / notifications:
@@ -183,11 +188,13 @@ Frontend/shared:
 - Verify LoadGameMenu keyboard behavior with the updated vanilla `KeyHandler` plus CAI block.
 - Verify My2K accessible dialogs: account menu, login, sign-up, legal document list/detail, logout/unlink confirmations, disabled-state speech, successful return to main menu.
 
-Unit operation hotkeys:
+Unit operation / command hotkeys:
 
 - Verify the mod loads without database errors.
 - Verify new unbound Unit Actions appear in Options > Key Bindings.
 - Bind a few actions, such as Build Improvement, Pillage, and Upgrade, and verify they trigger the matching selected-unit operation when available.
+- Bind a few command actions, such as Promote, Wake, Cancel, Form Corps, Airlift, and Pet the Dog, and verify they trigger the matching selected-unit command when available.
+- Verify Delete Unit still appears only through vanilla `DeleteUnit` and does not double-open its confirmation prompt.
 
 ## Known Gaps / Next Steps
 
@@ -225,5 +232,5 @@ Unit operation hotkeys:
 - TopPanel: hotkey-driven turn/time/yield/resource access implemented.
 - NotificationPanel: transient notification tree and event-driven cursor sync implemented.
 - UnitPanel: selected unit info and action list implemented.
-- Unit operations: unbound hotkey ids added for vanilla operations lacking `HotkeyId`.
+- Unit operations and commands: unbound hotkey ids added for visible vanilla operations/commands lacking safe existing `HotkeyId` paths.
 - GovernmentScreen: latest implementation complete enough for in-game testing.
