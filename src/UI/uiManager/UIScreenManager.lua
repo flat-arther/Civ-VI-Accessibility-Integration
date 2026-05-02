@@ -290,7 +290,7 @@ function UIScreenManager:ApplyFocus(newPath)
     local speechQueue = self:BuildAnnouncement(newPath, diverge)
     if speechQueue and #speechQueue > 0 then
         for _, string in ipairs(speechQueue) do
-            Speak(string)
+            Speak(ProcessIcons(string))
         end
     end
 end

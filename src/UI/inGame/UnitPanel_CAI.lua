@@ -52,6 +52,15 @@ UnitInfoPriority = {
 }
 
 UnitInfoActionMap = {}
+UnitInfoFallbacks = {
+    Combat       = "LOC_CAI_UNIT_NO_COMBAT",
+    Charges      = "LOC_CAI_UNIT_NO_CHARGES",
+    Promotions   = "LOC_CAI_UNIT_NO_PROMOTIONS",
+    Formation    = "LOC_CAI_UNIT_NOT_IN_FORMATION",
+    Abilities    = "LOC_CAI_UNIT_NO_ABILITIES",
+    SpecialState = "LOC_CAI_UNIT_NO_SPECIAL_STATE",
+    Actions      = "LOC_CAI_UNIT_NO_ACTIONS",
+}
 UnitActionList = nil
 
 --# General formatting
@@ -506,7 +515,7 @@ function BuildUnitActionList(data)
             OnClick = function()
                 if currentAction.Disabled then
                     if currentAction.helpString ~= nil and currentAction.helpString ~= "" then
-                        Speak(currentAction.helpString)
+                        Speak(ProcessIcons(currentAction.helpString))
                     end
                     return
                 end
@@ -517,6 +526,19 @@ function BuildUnitActionList(data)
                     UI.PlaySound(currentAction.Sound)
                 end
                 currentAction.CallbackFunc(currentAction.CallbackVoid1, currentAction.CallbackVoid2)
+            end,
+        }))
+    end
+
+    if data ~= nil and data.Ability ~= nil and #data.Ability > 0 then
+        local abilitiesActionId = Input.GetActionId("UnitViewAbilities")
+        list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitViewAbilities"), "MenuItem", {
+            GetLabel     = function() return Locale.Lookup("LOC_CAI_UNIT_VIEW_ABILITIES") end,
+            GetTooltip   = function() return Locale.Lookup("LOC_CAI_UNIT_VIEW_ABILITIES_TOOLTIP") end,
+            OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
+            OnClick      = function()
+                CloseUnitActionList()
+                OnUnitPanelSelectionActionInputTriggered(abilitiesActionId)
             end,
         }))
     end
@@ -565,10 +587,8 @@ function InitializeUnitInfoActionMap()
         [Input.GetActionId("ReadSelectionInfo4")] = { "Charges" },
         [Input.GetActionId("ReadSelectionInfo5")] = { "Promotions" },
         [Input.GetActionId("ReadSelectionInfo6")] = { "Formation" },
-        [Input.GetActionId("ReadSelectionInfo7")] = { "Abilities" },
-        [Input.GetActionId("ReadSelectionInfo8")] = { "SpecialState" },
-        [Input.GetActionId("ReadSelectionInfo9")] = { "Actions" },
-        [Input.GetActionId("ReadSelectionInfo10")] = UnitInfoPriority,
+        [Input.GetActionId("ReadSelectionInfo7")] = { "SpecialState" },
+        [Input.GetActionId("ReadSelectionInfo8")] = { "Actions" },
     }
 end
 
@@ -584,10 +604,16 @@ function OnUnitPanelSelectionInfoInputActionTriggered(actionId)
 
     local results = info:RequestUnitInfo(nil, requestedKeys)
     if results == nil or #results == 0 then
+        if #requestedKeys == 1 then
+            local fallback = UnitInfoFallbacks[requestedKeys[1]]
+            if fallback ~= nil then
+                Speak(Locale.Lookup(fallback))
+            end
+        end
         return
     end
 
-    Speak(table.concat(results, "[NEWLINE]"))
+    Speak(ProcessIcons(table.concat(results, "\n")))
 end
 
 function OnUnitPanelSelectionActionInputTriggered(actionId)
@@ -603,6 +629,44 @@ function OnUnitPanelSelectionActionInputTriggered(actionId)
     if actionId == Input.GetActionId("SelectionActions") then
         OpenUnitActionList()
     end
+    if actionId == Input.GetActionId("UnitViewAbilities") then
+        if ContextPtr:IsHidden() or GetSelectedUnit() == nil then return end
+
+        local data = GetSubjectData ~= nil and GetSubjectData() or nil
+        if data == nil then
+            local unit = GetSelectedUnit()
+            if unit ~= nil and ReadUnitData ~= nil then data = ReadUnitData(unit) end
+        end
+
+        if data == nil or data.Ability == nil or #data.Ability == 0 then
+            Speak(Locale.Lookup("LOC_CAI_UNIT_NO_ABILITIES"))
+            return
+        end
+
+        local UNIT_ABILITIES_LIST_ID = "CAIUnitAbilitiesList"
+        local list = mgr:CreateUIWidget(UNIT_ABILITIES_LIST_ID, "List", {
+            GetLabel = function() return Locale.Lookup("LOC_CAI_UNIT_ABILITIES_LIST") end,
+        })
+        list:AddInputBinding({ Key = Keys.VK_ESCAPE, Action = function()
+            mgr:RemoveFromStack(UNIT_ABILITIES_LIST_ID); return true
+        end })
+
+        for _, ability in ipairs(data.Ability) do
+            local desc = GetUnitAbilityDescription(ability)
+            if desc ~= nil and desc ~= "" then
+                local locDesc = Locale.Lookup(desc)
+                list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitAbilityItem"), "MenuItem", {
+                    GetLabel     = function() return locDesc end,
+                    OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
+                    OnClick      = function() mgr:RemoveFromStack(UNIT_ABILITIES_LIST_ID) end,
+                }))
+            end
+        end
+
+        if list.Children ~= nil and #list.Children > 0 then
+            mgr:Push(list, PopupPriority.Low)
+        end
+    end
 end
 
 function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locationZ, isSelected, isEditable)
@@ -615,7 +679,7 @@ function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locatio
         return
     end
 
-    Speak(table.concat(results, "[NEWLINE]"))
+    Speak(ProcessIcons(table.concat(results, "\n")))
     LuaEvents.CAICursorMove(locationX, locationY)
 end
 

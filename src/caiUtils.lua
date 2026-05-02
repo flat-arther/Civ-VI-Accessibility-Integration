@@ -1,3 +1,5 @@
+include("iconsProcessing")
+
 CAI = ExposedMembers.CAI
 ---Utility wrapper for 'CAI.output'
 ---@param text string -- the text to speak

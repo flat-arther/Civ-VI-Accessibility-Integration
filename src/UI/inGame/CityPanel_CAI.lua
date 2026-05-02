@@ -397,6 +397,12 @@ CityInfo = {
 info.CityInfo = CityInfo
 info.CityInfoPriority = CityInfoPriority
 CityInfoActionMap = {}
+CityInfoFallbacks = {
+    ReligiousFollowersCount = "LOC_CAI_CITY_NO_RELIGION_INFO",
+    NormalFocusYields       = "LOC_CAI_CITY_NO_NORMAL_FOCUS_YIELDS",
+    FavoredFocusYields      = "LOC_CAI_CITY_NO_FAVORED_YIELDS",
+    IgnoredFocusYields      = "LOC_CAI_CITY_NO_IGNORED_YIELDS",
+}
 CityActionMap = {}
 CityActionList = nil
 CityActionCategoryIds = nil
@@ -543,6 +549,114 @@ function OpenCityActionList()
     end
 end
 
+--#Citizen Yield Focus
+
+local CAI_YIELD_FOCUS_YIELDS = {
+    { Type = YieldTypes.FOOD },
+    { Type = YieldTypes.PRODUCTION },
+    { Type = YieldTypes.GOLD },
+    { Type = YieldTypes.SCIENCE },
+    { Type = YieldTypes.CULTURE },
+    { Type = YieldTypes.FAITH },
+}
+
+local CAI_YIELD_FOCUS_LIST_ID = "CAICityYieldFocusList"
+
+function CAI_GetYieldStateName(state)
+    if state == YIELD_STATE.FAVORED then
+        return Locale.Lookup("LOC_CAI_CITY_YIELD_STATE_FAVORED")
+    elseif state == YIELD_STATE.IGNORED then
+        return Locale.Lookup("LOC_CAI_CITY_YIELD_STATE_IGNORED")
+    else
+        return Locale.Lookup("LOC_CAI_CITY_YIELD_STATE_NORMAL")
+    end
+end
+
+function CAI_SetCitizenFocusTo(yieldType, targetState)
+    local city = g_pCity or UI.GetHeadSelectedCity()
+    if city == nil then return end
+    local pCitizens = city:GetCitizens()
+    local isFavored = pCitizens:IsFavoredYield(yieldType)
+    local isDisfavored = pCitizens:IsDisfavoredYield(yieldType)
+
+    if targetState == YIELD_STATE.FAVORED then
+        if not isFavored then SetYieldFocus(yieldType) end
+    elseif targetState == YIELD_STATE.IGNORED then
+        if not isDisfavored then SetYieldIgnore(yieldType) end
+    else
+        if isFavored then SetYieldFocus(yieldType)
+        elseif isDisfavored then SetYieldIgnore(yieldType) end
+    end
+end
+
+function OpenCitizenYieldFocusList()
+    if mgr == nil or UI.GetHeadSelectedCity() == nil or ContextPtr:IsHidden() then return end
+
+    local data = GetCityInfoData(UI.GetHeadSelectedCity())
+    local cityName = GetCityInfoName(data) or Locale.Lookup("LOC_CAI_CITY_ACTIONS")
+
+    local outerList = mgr:CreateUIWidget(CAI_YIELD_FOCUS_LIST_ID, "List", {
+        GetLabel = function() return Locale.Lookup("LOC_CAI_CITY_YIELD_FOCUS_LIST", cityName) end,
+    })
+    outerList:AddInputBinding({ Key = Keys.VK_ESCAPE, Action = function()
+        mgr:RemoveFromStack(CAI_YIELD_FOCUS_LIST_ID); return true
+    end })
+
+    for _, yieldEntry in ipairs(CAI_YIELD_FOCUS_YIELDS) do
+        local yieldType = yieldEntry.Type
+        local yieldInfo = GameInfo.Yields[yieldType]
+        if yieldInfo ~= nil then
+            local yieldName = Locale.Lookup(yieldInfo.Name)
+            outerList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityYieldFocusDropdown"), "DropdownMenu", {
+                GetLabel = function() return yieldName end,
+                GetValue = function()
+                    local liveData = GetCityInfoData(UI.GetHeadSelectedCity())
+                    return CAI_GetYieldStateName(GetCityInfoYieldState(liveData, yieldType))
+                end,
+                OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
+                OnClick = function()
+                    local subList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityYieldFocusSub"), "List", {
+                        GetLabel = function() return Locale.Lookup("LOC_CAI_CITY_YIELD_FOCUS_OPTIONS", yieldName) end,
+                    })
+                    subList:AddInputBinding({ Key = Keys.VK_ESCAPE, Action = function()
+                        mgr:Pop(); return true
+                    end })
+
+                    local focusStates = {
+                        { State = YIELD_STATE.NORMAL,  Key = "LOC_CAI_CITY_YIELD_STATE_NORMAL" },
+                        { State = YIELD_STATE.FAVORED, Key = "LOC_CAI_CITY_YIELD_STATE_FAVORED" },
+                        { State = YIELD_STATE.IGNORED, Key = "LOC_CAI_CITY_YIELD_STATE_IGNORED" },
+                    }
+                    for _, entry in ipairs(focusStates) do
+                        local targetState = entry.State
+                        local stateKey = entry.Key
+                        subList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityYieldFocusState"), "MenuItem", {
+                            GetLabel = function() return Locale.Lookup(stateKey) end,
+                            GetState = function()
+                                local liveData = GetCityInfoData(UI.GetHeadSelectedCity())
+                                local current = GetCityInfoYieldState(liveData, yieldType)
+                                local isMatch = (targetState == YIELD_STATE.NORMAL
+                                    and current ~= YIELD_STATE.FAVORED and current ~= YIELD_STATE.IGNORED)
+                                    or current == targetState
+                                return isMatch and Locale.Lookup("LOC_CAI_STATE_SELECTED") or nil
+                            end,
+                            OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
+                            OnClick = function()
+                                CAI_SetCitizenFocusTo(yieldType, targetState)
+                                mgr:Pop()
+                            end,
+                        }))
+                    end
+
+                    mgr:Push(subList, PopupPriority.Low)
+                end,
+            }))
+        end
+    end
+
+    mgr:Push(outerList, PopupPriority.Low)
+end
+
 --#Action Maps
 
 function InitializeCityActionMap()
@@ -619,10 +733,13 @@ function InitializeCityActionMap()
             end
         ),
         [Input.GetActionId("CityChangeCitizenYieldFocus")] = BuildCityActionData(
+            OpenCitizenYieldFocusList,
             function()
-            end,
-            function()
-                return UI.GetHeadSelectedCity() ~= nil and ContextPtr:IsHidden() == false
+                return UI.GetHeadSelectedCity() ~= nil
+                    and ContextPtr:IsHidden() == false
+                    and Controls.YieldsArea ~= nil
+                    and not Controls.YieldsArea:IsHidden()
+                    and not Controls.YieldsArea:IsDisabled()
             end
         ),
         [Input.GetActionId("CityPurchaseWithFaith")] = BuildCityActionData(
@@ -678,10 +795,16 @@ function OnSelectionInfoInputActionTriggered(actionId)
 
     results = info:RequestCityInfo(nil, requestedKeys)
     if results == nil or #results == 0 then
+        if #requestedKeys == 1 and requestedKeys[1] ~= "Summary" then
+            local fallback = CityInfoFallbacks[requestedKeys[1]]
+            if fallback ~= nil then
+                Speak(Locale.Lookup(fallback))
+            end
+        end
         return
     end
 
-    Speak(table.concat(results, "[NEWLINE]"))
+    Speak(ProcessIcons(table.concat(results, "\n")))
 end
 
 function OnCityActionInputActionTriggered(actionId)
@@ -703,7 +826,7 @@ function OnCitySelectionChanged(ownerPlayerID, cityID, i, j, k, isSelected, isEd
         return
     end
 
-    Speak(table.concat(results, "[NEWLINE]"))
+    Speak(ProcessIcons(table.concat(results, "\n")))
     LuaEvents.CAICursorMove(i, j)
 end
 

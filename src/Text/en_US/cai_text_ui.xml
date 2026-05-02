@@ -448,6 +448,24 @@
     <Row Tag="LOC_CAI_CITY_YIELD_STATE_IGNORED" Language="en_US">
       <Text>Ignored</Text>
     </Row>
+    <Row Tag="LOC_CAI_CITY_NO_RELIGION_INFO" Language="en_US">
+      <Text>Religion capability not available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_NO_NORMAL_FOCUS_YIELDS" Language="en_US">
+      <Text>No yields with normal focus</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_NO_FAVORED_YIELDS" Language="en_US">
+      <Text>No yields with favored focus</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_NO_IGNORED_YIELDS" Language="en_US">
+      <Text>No yields with ignored focus</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_YIELD_FOCUS_LIST" Language="en_US">
+      <Text>Yield focus for {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_YIELD_FOCUS_OPTIONS" Language="en_US">
+      <Text>Focus options for {1_Yield}</Text>
+    </Row>
 
     <!-- Edit box -->
     <Row Tag="LOC_CAI_EDIT_EDITING" Language="en_US">
@@ -808,6 +826,36 @@
     <Row Tag="LOC_CAI_MOVE_INFO_TOOLTIP" Language="en_US">
       <Text>Reads movement path details for the selected unit and CAI map cursor</Text>
     </Row>
+    <Row Tag="LOC_CAI_UNIT_VIEW_ABILITIES" Language="en_US">
+      <Text>View unit abilities</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_VIEW_ABILITIES_TOOLTIP" Language="en_US">
+      <Text>Opens a list of this unit's special abilities</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ABILITIES_LIST" Language="en_US">
+      <Text>Unit abilities</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_NO_COMBAT" Language="en_US">
+      <Text>No combat statistics</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_NO_CHARGES" Language="en_US">
+      <Text>Charges not supported for this unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_NO_PROMOTIONS" Language="en_US">
+      <Text>No promotions available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_NOT_IN_FORMATION" Language="en_US">
+      <Text>This unit is not in a formation</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_NO_ABILITIES" Language="en_US">
+      <Text>This unit has no abilities</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_NO_SPECIAL_STATE" Language="en_US">
+      <Text>No special state</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_NO_ACTIONS" Language="en_US">
+      <Text>No actions available</Text>
+    </Row>
 
     <!-- Plot info hotkeys -->
     <Row Tag="LOC_CAI_PLOTINFO1" Language="en_US">
@@ -984,6 +1032,20 @@
     </Row>
     <Row Tag="LOC_CAI_SELECTION_ACTIONS_TOOLTIP" Language="en_US">
       <Text>Opens a list of actions for the current selection</Text>
+    </Row>
+
+    <!-- Icon substitution strings -->
+    <Row Tag="LOC_CAI_ICON_EXCLAMATION" Language="en_US">
+      <Text>!</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ICON_ANTI_AIR" Language="en_US">
+      <Text>Anti-Air Combat</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ICON_CHARGES" Language="en_US">
+      <Text>Charges</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ICON_LIFESPAN" Language="en_US">
+      <Text>Lifespan</Text>
     </Row>
 
   </LocalizedText>

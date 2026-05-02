@@ -643,7 +643,7 @@ function OnPlotInfoInputActionTriggered(actionId)
         local helper = info.PlotInfo[key]
         if helper then AppendPlotInfo(results, helper(plot)) end
     end
-    if #results > 0 then Speak(table.concat(results, "\n")) end
+    if #results > 0 then Speak(ProcessIcons(table.concat(results, "\n"))) end
 end
 
 --# Cursor move handler
@@ -653,7 +653,7 @@ function OnCAICursorMove(x, y, plot, cursor)
     local results = {}
     AppendPlotInfo(results, GetPlotInfoCoords(plot))
     AppendPlotInfo(results, info:RequestPlotInfo(plot))
-    if #results > 0 then Speak(table.concat(results, "\n")) end
+    if #results > 0 then Speak(ProcessIcons(table.concat(results, "\n"))) end
 end
 
 --# Init

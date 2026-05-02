@@ -1043,11 +1043,12 @@ function MakeCategoryLabel(getListRef, fallback)
     end
 end
 
-function GetSelectedTabDefaultIndex()
+function GetSelectedTabDefaultIndex(tab)
+    tab = tab or m_caiTab
     local defaultIndex = 1
 
-    for index, tab in ipairs(m_caiTabBar.Children or {}) do
-        if tab == m_caiTabs[m_caiTab] then
+    for index, child in ipairs(m_caiTabBar.Children or {}) do
+        if child == m_caiTabs[tab] then
             defaultIndex = index
             break
         end
@@ -1120,7 +1121,7 @@ function EnsurePanelBuilt()
         m_caiTabBar:AddChild(m_caiTabs[TAB_PURCHASE_FAITH])
     end
     m_caiTabBar:AddChild(m_caiTabs[TAB_QUEUE])
-    m_caiTabBar.DefaultIndex = GetSelectedTabDefaultIndex()
+    m_caiTabBar:SetDefaultIndex(GetSelectedTabDefaultIndex())
 
     m_caiTree = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIProductionPanelTreeview"), "Treeview", {
         GetLabel = function() return Locale.Lookup("LOC_HUD_CHOOSE_PRODUCTION") end,
@@ -1296,7 +1297,7 @@ function OnPanelOpenedCAI()
     end
     EnsurePanelBuilt()
     if m_caiTabBar then
-        m_caiTabBar.DefaultIndex = GetSelectedTabDefaultIndex()
+        m_caiTabBar:SetDefaultIndex(GetSelectedTabDefaultIndex())
     end
     if mgr:HasWidget(m_caiPanel) then return end
     m_caiOpenPending = true
@@ -1539,8 +1540,24 @@ PurchaseDistrict = WrapFunc(PurchaseDistrict, function(orig, city, entry)
     return orig(city, entry)
 end)
 
+function OnListModeChangedCAI(listMode)
+    if not m_caiTabBar then return end
+    local newTab
+    if listMode == LISTMODE.PROD_QUEUE then
+        newTab = TAB_QUEUE
+    elseif listMode == LISTMODE.PURCHASE_GOLD then
+        newTab = TAB_PURCHASE_GOLD
+    elseif listMode == LISTMODE.PURCHASE_FAITH then
+        newTab = TAB_PURCHASE_FAITH
+    else
+        newTab = TAB_PRODUCTION
+    end
+    m_caiTabBar:SetDefaultIndex(GetSelectedTabDefaultIndex(newTab))
+end
+
 LuaEvents.ProductionPanel_Open.Add(OnPanelOpenedCAI)
 LuaEvents.ProductionPanel_Close.Add(OnPanelClosedCAI)
+LuaEvents.ProductionPanel_ListModeChanged.Add(OnListModeChangedCAI)
 
 function RefreshIfOpen()
     if m_caiPanel and mgr and mgr:HasWidget(m_caiPanel) and RefreshView then
