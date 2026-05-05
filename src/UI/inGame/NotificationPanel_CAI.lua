@@ -1,11 +1,13 @@
 include("caiUtils")
-include("NotificationPanel")
 
 local mgr = ExposedMembers.CAI_UIManager
 local NOTIFICATION_CENTER_ID = "CAINotificationCenterTree"
 local EMPTY_NODE_ID = "CAINotificationEmptyTreeItem"
 local GROUP_NODE_PREFIX = "CAINotificationGroupTreeItem_"
 local ACTION_OPEN_NOTIFICATION_CENTER = Input.GetActionId("NotificationPanelOpenList")
+local CAI_TUTORIAL_GOAL_ADDED_TYPE = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_ADDED")
+local CAI_TUTORIAL_GOAL_COMPLETED_TYPE = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_COMPLETED")
+local BASE_RegisterHandlers = RegisterHandlers
 local m_caiNotificationCenter = nil
 local m_caiOriginalOnNotificationAdded = OnNotificationAdded
 local m_caiOriginalOnNotificationDismissed = OnNotificationDismissed
@@ -16,6 +18,15 @@ local function GetLocalPlayer()
     local playerID = Game.GetLocalPlayer()
     if playerID == nil or playerID < 0 then return nil end
     return playerID
+end
+
+function RegisterHandlers()
+    BASE_RegisterHandlers()
+
+    g_notificationHandlers[CAI_TUTORIAL_GOAL_ADDED_TYPE] = MakeDefaultHandlers()
+    g_notificationHandlers[CAI_TUTORIAL_GOAL_COMPLETED_TYPE] = MakeDefaultHandlers()
+    g_notificationHandlers[CAI_TUTORIAL_GOAL_ADDED_TYPE].Activate = OnCAITutorialGoalNotificationActivate
+    g_notificationHandlers[CAI_TUTORIAL_GOAL_COMPLETED_TYPE].Activate = OnCAITutorialGoalNotificationActivate
 end
 
 local function LookupNotificationText(notification)
@@ -157,6 +168,20 @@ local function SpeakUnavailable()
     Speak(Locale.Lookup("LOC_CAI_NOTIFICATION_UNAVAILABLE"))
 end
 
+function OnCAITutorialGoalNotificationActivate(notificationEntry, notificationID, activatedByUser)
+    if notificationEntry == nil or notificationEntry.m_PlayerID ~= Game.GetLocalPlayer() then
+        return
+    end
+
+    local notification = GetActiveNotificationFromEntry(notificationEntry, notificationID)
+    if notification == nil then
+        return
+    end
+
+    LookAtNotification(notification)
+    LuaEvents.CAI_TutorialGoalNotificationActivate(notification:GetPlayerID(), notification:GetID(), activatedByUser)
+end
+
 local function ActivateNotification(playerID, notificationID)
     local notification = GetLiveNotification(playerID, notificationID)
     if not IsNotificationAvailable(notification, notificationID, playerID) then
@@ -171,7 +196,18 @@ local function ActivateNotification(playerID, notificationID)
     end
 
     CloseNotificationCenter()
-    notification:Activate(true)
+
+    -- Mirror vanilla rail left-click: route through the registered TryActivate
+    -- handler on the notification entry (defaults to OnDefaultTryActivateNotification).
+    -- This ensures the engine fires Events.NotificationActivated which vanilla
+    -- NotificationPanel dispatches to the registered Activate handler, whether
+    -- that is vanilla's USER_DEFINED path or CAI's custom goal notifications.
+    local notificationEntry = GetVanillaNotificationEntry(playerID, notificationID)
+    if notificationEntry and notificationEntry.m_kHandlers and notificationEntry.m_kHandlers.TryActivate then
+        notificationEntry.m_kHandlers.TryActivate(notificationEntry)
+    else
+        notification:Activate(true)
+    end
     return true
 end
 
@@ -183,7 +219,14 @@ local function DismissNotification(playerID, notificationID)
     end
 
     if notification:CanUserDismiss() then
-        NotificationManager.Dismiss(playerID, notificationID)
+        -- Mirror vanilla rail right-click: route through the registered
+        -- TryDismiss handler on the notification entry.
+        local notificationEntry = GetVanillaNotificationEntry(playerID, notificationID)
+        if notificationEntry and notificationEntry.m_kHandlers and notificationEntry.m_kHandlers.TryDismiss then
+            notificationEntry.m_kHandlers.TryDismiss(notificationEntry)
+        else
+            NotificationManager.Dismiss(playerID, notificationID)
+        end
         RemoveNotificationWidget(notificationID)
         Speak(Locale.Lookup("LOC_CAI_NOTIFICATION_DISMISSED"))
     else
@@ -473,7 +516,13 @@ local function SpeakNotificationAdded(playerID, notificationID)
     m_caiAnnouncedNotificationIDs[notificationID] = true
 
     local title, summary = LookupNotificationText(notification)
+    local notificationType = notification:GetType()
     local line = Locale.Lookup("LOC_CAI_NOTIFICATION_ALERT", title)
+    if notificationType == CAI_TUTORIAL_GOAL_ADDED_TYPE then
+        line = Locale.Lookup("LOC_CAI_TUTORIAL_GOAL_ADDED_ALERT", title)
+    elseif notificationType == CAI_TUTORIAL_GOAL_COMPLETED_TYPE then
+        line = Locale.Lookup("LOC_CAI_TUTORIAL_GOAL_COMPLETED_ALERT", title)
+    end
     if summary ~= "" then
         line = line .. "[NEWLINE]" .. summary
     end
@@ -486,28 +535,20 @@ local function SpeakNotificationAdded(playerID, notificationID)
     Speak(line)
 end
 
-if m_caiOriginalOnNotificationAdded then
-    Events.NotificationAdded.Remove(m_caiOriginalOnNotificationAdded)
-    OnNotificationAdded = function(playerID, notificationID)
-        m_caiOriginalOnNotificationAdded(playerID, notificationID)
-        if playerID == GetLocalPlayer() then
-            AddNotificationToOpenTree(playerID, notificationID)
-        end
-        SpeakNotificationAdded(playerID, notificationID)
+OnNotificationAdded = function(playerID, notificationID)
+    m_caiOriginalOnNotificationAdded(playerID, notificationID)
+    if playerID == GetLocalPlayer() then
+        AddNotificationToOpenTree(playerID, notificationID)
     end
-    Events.NotificationAdded.Add(OnNotificationAdded)
+    SpeakNotificationAdded(playerID, notificationID)
 end
 
-if m_caiOriginalOnNotificationDismissed then
-    Events.NotificationDismissed.Remove(m_caiOriginalOnNotificationDismissed)
-    OnNotificationDismissed = function(playerID, notificationID)
-        m_caiOriginalOnNotificationDismissed(playerID, notificationID)
-        if playerID == GetLocalPlayer() then
-            m_caiAnnouncedNotificationIDs[notificationID] = nil
-            RemoveNotificationWidget(notificationID)
-        end
+OnNotificationDismissed = function(playerID, notificationID)
+    m_caiOriginalOnNotificationDismissed(playerID, notificationID)
+    if playerID == GetLocalPlayer() then
+        m_caiAnnouncedNotificationIDs[notificationID] = nil
+        RemoveNotificationWidget(notificationID)
     end
-    Events.NotificationDismissed.Add(OnNotificationDismissed)
 end
 
 local function OnCAINotificationInputAction(actionId)
@@ -521,6 +562,5 @@ OnShutdown = WrapFunc(OnShutdown, function(orig)
     CloseNotificationCenter()
     orig()
 end)
-ContextPtr:SetShutdown(OnShutdown)
 
 Events.InputActionStarted.Add(OnCAINotificationInputAction)

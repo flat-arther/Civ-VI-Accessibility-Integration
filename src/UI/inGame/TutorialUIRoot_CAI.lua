@@ -78,6 +78,7 @@ local tutorialActivatedIds = {
 }
 --- List of CAI UI widgets that, when open, should allow the escape key to pass through to them instead of being caught by the tutorial and opening the pause menu. This is necessary because the tutorial context is always active and has an input handler that catches the escape key, so we need to make sure it doesn't interfere with other UI elements that also use the escape key.
 local escapePassthroughIds = {
+    "CAITutorialGoalsList",
     "CAINotificationCenterTree",
     "CAIGovernmentPolicyPicker",
     "CAIGovernmentAllPoliciesTree",

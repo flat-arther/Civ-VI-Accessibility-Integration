@@ -48,6 +48,7 @@
     <Row ActionId="WorldTrackerOpenCivicsChooser" Name="LOC_CAI_WORLDTRACKER_OPEN_CIVICS_CHOOSER" Description="LOC_CAI_WORLDTRACKER_OPEN_CIVICS_CHOOSER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldTrackerReadSummary" Name="LOC_CAI_WORLDTRACKER_READ_SUMMARY" Description="LOC_CAI_WORLDTRACKER_READ_SUMMARY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="NotificationPanelOpenList" Name="LOC_CAI_NOTIFICATION_CENTER" Description="LOC_CAI_NOTIFICATION_CENTER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="TutorialGoalsOpenList" Name="LOC_CAI_TUTORIAL_GOALS_HOTKEY" Description="LOC_CAI_TUTORIAL_GOALS_HOTKEY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="BuildImprovement" Name="LOC_UNITOPERATION_BUILD_IMPROVEMENT_DESCRIPTION" Description="LOC_UNITOPERATION_BUILD_IMPROVEMENT_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="BuildRoute" Name="LOC_UNITOPERATION_BUILD_ROUTE_DESCRIPTION" Description="LOC_UNITOPERATION_BUILD_ROUTE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ClearContamination" Name="ICON_UNITOPERATION_CLEAR_CONTAMINATION_DESCRIPTION" Description="ICON_UNITOPERATION_CLEAR_CONTAMINATION_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
@@ -157,6 +158,7 @@
     <Row ActionId="WorldTrackerOpenCivicsChooser" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_C" />
     <Row ActionId="WorldTrackerReadSummary" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_W" />
     <Row ActionId="NotificationPanelOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_N" />
+    <Row ActionId="TutorialGoalsOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_T" />
     <Row ActionId="PlotInfo1" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_1" />
     <Row ActionId="PlotInfo2" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_2" />
     <Row ActionId="PlotInfo3" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_3" />

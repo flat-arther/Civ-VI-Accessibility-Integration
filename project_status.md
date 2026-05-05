@@ -59,6 +59,7 @@ What is implemented:
 - ActionPanel now has a Ctrl+Space CAI turn blocker list (`ActionPanelOpenTurnBlockers`, `CAIActionPanelTurnBlockerList`). Rows activate through vanilla `DoEndTurn()` / `DoEndTurn(blockerType)` and respect backing vanilla button hidden/disabled state where available.
 - Latest chooser/action fixes: ResearchChooser and CivicsChooser first-letter search now stays on root rows, queue position ignores nonqueued sentinel values, WorldTracker research/civic hotkeys respect the live tracker control disabled state before opening choosers, Space/Ctrl+Space end-turn hotkeys respect live disabled state plus tutorial ActionPanel UI-trigger gating and the vanilla tutorial slow-turn input shield, and GovernmentScreen no longer adds its own root Escape binding.
 - Tutorial ActionPanel analysis: active base-tutorial detailed steps that show ActionPanel are `TURN_BASED_C`, `SELECT_RESEARCH_8`, `SELECT_END_TURN_B`, `SELECT_END_TURN_PRODUCTION`, `SELECT_END_TURN_C`, `SELECT_END_TURN_D`, `SCOUTS_D2`, `SCOUTS_E`, `SELECT_END_TURN_RESEARCH`, and `RESEARCH_IRRIGATION`; `NOTIFICATION_PANEL` only uses an advisor-side ActionPanel pointer.
+- Notification analysis documented in `docs/game-api.md`: `NotificationManager.SendNotification(...)` takes a numeric type id, `notification:GetType()` matches `GameInfo.Notifications[...].Hash`, unregistered types fall back to `NotificationTypes.DEFAULT`, and CAI can safely own custom notification types by registering hashes in `g_notificationHandlers[...]` through the `NotificationPanel_*.lua` wildcard include path.
 - ActionPanel input handler now only wraps `OnInputActionTriggered`; vanilla `LateInitialize()` registers the wrapped global, avoiding duplicate input-action subscriptions.
 - ActionPanel context input handler now routes only through CAI UI manager and no longer falls back to vanilla Enter / Shift+Enter end-turn handling.
 - ActionPanel refresh handler speaks the live main action tooltip when it changes, using the post-vanilla `EndTurnButton` tooltip as the source of truth. Speech is gated by ActionPanel context visibility and tutorial ActionPanel permission, and the tutorial allow event forces one current-action announcement.
@@ -193,6 +194,7 @@ Unit operation / command hotkeys:
 - WorldTracker: hotkey-driven research/civic/unit summary access implemented.
 - TopPanel: hotkey-driven turn/time/yield/resource access implemented.
 - NotificationPanel: transient notification tree and event-driven cursor sync implemented.
+- TutorialGoals now use custom `NOTIFICATION_CAI_TUTORIAL_GOAL_ADDED` / `NOTIFICATION_CAI_TUTORIAL_GOAL_COMPLETED` types sent from Lua and activated through the NotificationPanel wildcard extension path rather than `USER_DEFINED_*`.
 - UnitPanel: selected unit info and action list implemented.
 - Unit operations and commands: unbound hotkey ids added for visible vanilla operations/commands lacking safe existing `HotkeyId` paths.
 - GovernmentScreen: implementation complete and verified in-game.

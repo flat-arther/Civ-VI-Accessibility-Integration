@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameInfo>
+  <Types>
+    <Row Type="NOTIFICATION_CAI_TUTORIAL_GOAL_ADDED" Kind="KIND_NOTIFICATION"/>
+    <Row Type="NOTIFICATION_CAI_TUTORIAL_GOAL_COMPLETED" Kind="KIND_NOTIFICATION"/>
+  </Types>
+  <Notifications>
+    <Row NotificationType="NOTIFICATION_CAI_TUTORIAL_GOAL_ADDED" SeverityType="MID" ExpiresEndOfTurn="True" AutoNotify="False" GroupType="USER"/>
+    <Row NotificationType="NOTIFICATION_CAI_TUTORIAL_GOAL_COMPLETED" SeverityType="MID" ExpiresEndOfTurn="True" AutoNotify="False" GroupType="USER"/>
+  </Notifications>
+</GameInfo>

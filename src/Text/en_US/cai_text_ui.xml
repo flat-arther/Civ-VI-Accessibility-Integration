@@ -1148,5 +1148,30 @@
       <Text>Lifespan</Text>
     </Row>
 
+    <Row Tag="LOC_CAI_TUTORIAL_GOALS" Language="en_US">
+      <Text>Tutorial goals</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOALS_NO_GOALS" Language="en_US">
+      <Text>No tutorial goals at the moment.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOAL_COMPLETE" Language="en_US">
+      <Text>complete</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOAL_INCOMPLETE" Language="en_US">
+      <Text>incomplete</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOALS_HOTKEY" Language="en_US">
+      <Text>Open tutorial goals</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOALS_HOTKEY_TOOLTIP" Language="en_US">
+      <Text>Opens a list of current tutorial goals.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOAL_ADDED_ALERT" Language="en_US">
+      <Text>Tutorial goal added: {1_Goal}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOAL_COMPLETED_ALERT" Language="en_US">
+      <Text>Tutorial goal completed: {1_Goal}</Text>
+    </Row>
+
   </LocalizedText>
 </GameData>
