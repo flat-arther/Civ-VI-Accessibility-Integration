@@ -18,6 +18,7 @@ end
 
 local function ActivateProductionPanel(item) SetControlToAlwaysReceiveInput("/InGame/ProductionPanel", true) end
 local function DeactivateProductionPanel(item) SetControlToAlwaysReceiveInput("/InGame/ProductionPanel", false) end
+
 --- Table of hooks for tutorial items, keyed by item ID, then by event name (OnActivate / OnDeactivate). These functions will be called when the corresponding event happens for the item with the matching ID. The functions will be passed the item as a parameter.
 --- They are mostly used to set certain controls to always receive input when specific tutorial items are active, since some tutorial items only activate a portion of the UI, like the production panel, and we need to make sure they receive input in those cases.
 local TutorialItemHooks    = { ---@type table<string,TutItemEvents>
@@ -75,6 +76,7 @@ local tutorialLoaded       = false
 local tutorialActivatedIds = {
 
 }
+--- List of CAI UI widgets that, when open, should allow the escape key to pass through to them instead of being caught by the tutorial and opening the pause menu. This is necessary because the tutorial context is always active and has an input handler that catches the escape key, so we need to make sure it doesn't interfere with other UI elements that also use the escape key.
 local escapePassthroughIds = {
     "CAINotificationCenterTree",
     "CAIGovernmentPolicyPicker",
@@ -87,6 +89,8 @@ local escapePassthroughIds = {
     "CAIWorldInputInterfaceMode",
     "CAICivicsTreePanel",
     "CAICivicsTreeFilterList",
+    "CAITechTreePanel",
+    "CAITechTreeFilterList",
 }
 
 local function HasUITrigger(item, triggerName)
