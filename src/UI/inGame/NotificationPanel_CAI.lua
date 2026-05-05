@@ -293,13 +293,10 @@ local function AddNotificationLeaf(parent, playerID, notificationID, index, grou
     leaf.NotificationTypeName = GetNotificationTypeName(notification)
     leaf.NotificationGroup = group
 
+    leaf.OnClick = function()
+        ActivateNotification(playerID, notificationID)
+    end
     leaf:AddInputBindings({
-        {
-            Key = Keys.VK_RETURN,
-            Action = function()
-                return ActivateNotification(playerID, notificationID)
-            end,
-        },
         {
             Key = Keys.VK_SPACE,
             Action = function()

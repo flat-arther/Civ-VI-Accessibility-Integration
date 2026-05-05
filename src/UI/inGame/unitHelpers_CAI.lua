@@ -1,3 +1,8 @@
+-- ===========================================================================
+-- Unit movement helpers (extracted from vanilla WorldInput so other contexts
+-- can reuse path-info / movement-speech without depending on WorldInput state).
+-- ===========================================================================
+
 ---@class MovementPathInfo
 ---@field kind string
 ---@field turns number[]
@@ -30,6 +35,152 @@
 ---@field isFog boolean
 ---@field isRestricted boolean
 ---@field isDestination boolean
+
+-- ===========================================================================
+-- TUTORIAL RESTRICTION STATE (mirrors vanilla WorldInput)
+-- ===========================================================================
+
+local m_constrainToPlotID = 0
+local m_kTutorialUnitMoveRestrictions = nil
+local m_kTutorialUnitHexRestrictions = nil
+
+-- ===========================================================================
+-- TUTORIAL RESTRICTION EVENT HANDLERS
+-- ===========================================================================
+
+function OnTutorial_AddUnitMoveRestriction(unitType)
+    if m_kTutorialUnitMoveRestrictions == nil then
+        m_kTutorialUnitMoveRestrictions = {}
+    end
+    if m_kTutorialUnitMoveRestrictions[unitType] then
+        UI.DataError("Setting tutorial WorldInput unit selection for '" ..
+            unitType .. "' but it's already set to restricted!")
+    end
+    m_kTutorialUnitMoveRestrictions[unitType] = true
+end
+
+function OnTutorial_RemoveUnitMoveRestrictions(optionalUnitType)
+    if optionalUnitType == nil then
+        m_kTutorialUnitMoveRestrictions = nil
+    else
+        if m_kTutorialUnitMoveRestrictions[optionalUnitType] == nil then
+            UI.DataError("Tutorial did not reset WorldInput selection for the unit type '" ..
+                optionalUnitType .. "' since it's not in the restriction list.")
+        end
+        m_kTutorialUnitMoveRestrictions[optionalUnitType] = nil
+    end
+end
+
+function OnTutorial_ConstrainMovement(plotID)
+    m_constrainToPlotID = plotID
+end
+
+function OnTutorial_AddUnitHexRestriction(unitType, kPlotIds)
+    if m_kTutorialUnitHexRestrictions == nil then
+        m_kTutorialUnitHexRestrictions = {}
+    end
+    if m_kTutorialUnitHexRestrictions[unitType] == nil then
+        m_kTutorialUnitHexRestrictions[unitType] = {}
+    end
+    for _, plotId in ipairs(kPlotIds) do
+        table.insert(m_kTutorialUnitHexRestrictions[unitType], plotId)
+    end
+end
+
+function OnTutorial_RemoveUnitHexRestriction(unitType, kPlotIds)
+    if m_kTutorialUnitHexRestrictions == nil then
+        UI.DataError("Cannot RemoveUnitHexRestriction( " .. unitType .. " ...) as no restrictions are set.")
+        return
+    end
+    if m_kTutorialUnitHexRestrictions[unitType] == nil then
+        UI.DataError("Cannot RemoveUnitHexRestriction( " ..
+            unitType .. " ...) as a restriction for that unit type is not set.")
+        return
+    end
+
+    for _, plotId in ipairs(kPlotIds) do
+        local isRemoved = false
+        for i = #m_kTutorialUnitHexRestrictions[unitType], 1, -1 do
+            if m_kTutorialUnitHexRestrictions[unitType][i] == plotId then
+                table.remove(m_kTutorialUnitHexRestrictions[unitType], i)
+                isRemoved = true
+                break
+            end
+        end
+        if not isRemoved then
+            UI.DataError("Cannot remove restriction for the plot " ..
+                tostring(plotId) .. ", it wasn't found in the list for unit " .. unitType)
+        end
+    end
+end
+
+function OnTutorial_ClearAllUnitHexRestrictions()
+    m_kTutorialUnitHexRestrictions = nil
+end
+
+-- ===========================================================================
+-- RESTRICTION QUERIES
+-- ===========================================================================
+
+function IsUnitTypeAllowedToMoveToPlot(unitType, plotId)
+    if m_kTutorialUnitHexRestrictions == nil then return true end
+    if m_kTutorialUnitHexRestrictions[unitType] ~= nil then
+        for _, restrictedPlotId in ipairs(m_kTutorialUnitHexRestrictions[unitType]) do
+            if plotId == restrictedPlotId then
+                return false
+            end
+        end
+    end
+    return true
+end
+
+local function IsPlotPathRestrictedForUnit(kPlotPath, kTurnsList, pUnit)
+    local endPlotId = kPlotPath[table.count(kPlotPath)]
+    if m_constrainToPlotID ~= 0 and endPlotId ~= m_constrainToPlotID then
+        return true, m_constrainToPlotID
+    end
+
+    local unitType = GameInfo.Units[pUnit:GetUnitType()].UnitType
+
+    if m_kTutorialUnitMoveRestrictions ~= nil and m_kTutorialUnitMoveRestrictions[unitType] ~= nil then
+        return true, -1
+    end
+
+    if m_kTutorialUnitHexRestrictions ~= nil then
+        if m_kTutorialUnitHexRestrictions[unitType] ~= nil then
+            local lastTurn = 1
+            local lastRestrictedPlot = -1
+            for i, plotId in ipairs(kPlotPath) do
+                if i > 1 then
+                    if kTurnsList[i] == lastTurn then
+                        lastRestrictedPlot = -1
+                        if not IsUnitTypeAllowedToMoveToPlot(unitType, plotId) then
+                            lastTurn = kTurnsList[i]
+                            lastRestrictedPlot = plotId
+                        end
+                    else
+                        if lastRestrictedPlot ~= -1 then
+                            return true, lastRestrictedPlot
+                        end
+                        if not IsUnitTypeAllowedToMoveToPlot(unitType, plotId) then
+                            lastTurn = kTurnsList[i]
+                            lastRestrictedPlot = plotId
+                        end
+                    end
+                end
+            end
+            if lastRestrictedPlot ~= -1 then
+                return true, lastRestrictedPlot
+            end
+        end
+    end
+
+    return false
+end
+
+-- ===========================================================================
+-- PATH STEP ANALYSIS
+-- ===========================================================================
 
 local function GetSquareDirection(dx, dy)
     if dx == 0 and dy > 0 then return "north" end
@@ -67,19 +218,19 @@ local function BuildAnnotatedSteps(pathInfo, unit)
         local dy = b:GetY() - a:GetY()
 
         steps[#steps + 1] = {
-            fromPlotId = fromId,
-            toPlotId = toId,
-            fromX = a:GetX(),
-            fromY = a:GetY(),
-            toX = b:GetX(),
-            toY = b:GetY(),
-            dir = GetSquareDirection(dx, dy),
-            turn = (pathInfo.turns and pathInfo.turns[i]) or 1,
-            isTurnBreak = (i > 2 and pathInfo.turns and pathInfo.turns[i] ~= pathInfo.turns[i - 1]) or false,
+            fromPlotId      = fromId,
+            toPlotId        = toId,
+            fromX           = a:GetX(),
+            fromY           = a:GetY(),
+            toX             = b:GetX(),
+            toY             = b:GetY(),
+            dir             = GetSquareDirection(dx, dy),
+            turn            = (pathInfo.turns and pathInfo.turns[i]) or 1,
+            isTurnBreak     = (i > 2 and pathInfo.turns and pathInfo.turns[i] ~= pathInfo.turns[i - 1]) or false,
             crossesObstacle = obstacleSet[fromId] or obstacleSet[toId] or false,
-            isFog = vis and not vis:IsVisible(toId) or false,
-            isRestricted = pathInfo.restrictedPlotId == toId,
-            isDestination = (i == #pathInfo.plots),
+            isFog           = vis and not vis:IsVisible(toId) or false,
+            isRestricted    = pathInfo.restrictedPlotId == toId,
+            isDestination   = (i == #pathInfo.plots),
         }
     end
 
@@ -93,13 +244,13 @@ local function CompressPathSteps(steps)
     end
 
     local current = {
-        dir = steps[1].dir,
-        count = 1,
-        startIndex = 1,
-        endIndex = 1,
-        hasTurnBreak = steps[1].isTurnBreak,
-        hasObstacle = steps[1].crossesObstacle,
-        hasFog = steps[1].isFog,
+        dir            = steps[1].dir,
+        count          = 1,
+        startIndex     = 1,
+        endIndex       = 1,
+        hasTurnBreak   = steps[1].isTurnBreak,
+        hasObstacle    = steps[1].crossesObstacle,
+        hasFog         = steps[1].isFog,
         hasRestriction = steps[1].isRestricted,
     }
 
@@ -114,19 +265,19 @@ local function CompressPathSteps(steps)
     for i = 2, #steps do
         local s = steps[i]
         local bucket = {
-            dir = s.dir,
-            isTurnBreak = s.isTurnBreak,
+            dir             = s.dir,
+            isTurnBreak     = s.isTurnBreak,
             crossesObstacle = s.crossesObstacle,
-            isFog = s.isFog,
-            isRestricted = s.isRestricted,
+            isFog           = s.isFog,
+            isRestricted    = s.isRestricted,
         }
 
         local currentBucket = {
-            dir = current.dir,
-            isTurnBreak = current.hasTurnBreak,
+            dir             = current.dir,
+            isTurnBreak     = current.hasTurnBreak,
             crossesObstacle = current.hasObstacle,
-            isFog = current.hasFog,
-            isRestricted = current.hasRestriction,
+            isFog           = current.hasFog,
+            isRestricted    = current.hasRestriction,
         }
 
         if sameBucket(bucket, currentBucket) then
@@ -135,13 +286,13 @@ local function CompressPathSteps(steps)
         else
             segments[#segments + 1] = current
             current = {
-                dir = s.dir,
-                count = 1,
-                startIndex = i,
-                endIndex = i,
-                hasTurnBreak = s.isTurnBreak,
-                hasObstacle = s.crossesObstacle,
-                hasFog = s.isFog,
+                dir            = s.dir,
+                count          = 1,
+                startIndex     = i,
+                endIndex       = i,
+                hasTurnBreak   = s.isTurnBreak,
+                hasObstacle    = s.crossesObstacle,
+                hasFog         = s.isFog,
                 hasRestriction = s.isRestricted,
             }
         end
@@ -150,6 +301,10 @@ local function CompressPathSteps(steps)
     segments[#segments + 1] = current
     return segments
 end
+
+-- ===========================================================================
+-- PUBLIC API
+-- ===========================================================================
 
 ---@param unit table
 ---@param endPlotId number
@@ -160,22 +315,22 @@ function BuildMovementPathInfo(unit, endPlotId, showQueuedPath, showDetails)
     if not unit or not Map.IsPlot(endPlotId) then return nil end
 
     local result = {
-        kind = "move",
-        turns = {},
-        plots = {},
-        steps = nil,
-        segments = nil,
-        obstacles = {},
-        isRestricted = false,
-        restrictedPlotId = nil,
-        isPathInFog = false,
-        enemyAtEnd = false,
-        isQueued = false,
-        destPlot = -1,
+        kind                   = "move",
+        turns                  = {},
+        plots                  = {},
+        steps                  = nil,
+        segments               = nil,
+        obstacles              = {},
+        isRestricted           = false,
+        restrictedPlotId       = nil,
+        isPathInFog            = false,
+        enemyAtEnd             = false,
+        isQueued               = false,
+        destPlot               = -1,
         isImplicitRangedAttack = false,
-        isSamePlot = false,
-        entrancePortals = {},
-        exitPortals = {}
+        isSamePlot             = false,
+        entrancePortals        = {},
+        exitPortals            = {},
     }
 
     local eLocalPlayer = Game.GetLocalPlayer()
@@ -205,12 +360,12 @@ function BuildMovementPathInfo(unit, endPlotId, showQueuedPath, showDetails)
 
     local tParams = {
         [UnitOperationTypes.PARAM_X] = plot:GetX(),
-        [UnitOperationTypes.PARAM_Y] = plot:GetY()
+        [UnitOperationTypes.PARAM_Y] = plot:GetY(),
     }
 
     if UnitManager.CanStartOperation(unit, UnitOperationTypes.SWAP_UNITS, nil, tParams) then
         result.kind = "swap"
-        result.turns = {1}
+        result.turns = { 1 }
         result.plots = { startPlotId, endPlotId }
         return result
     end
@@ -319,7 +474,8 @@ function BuildMovementSpeech(pathInfo)
     end
 
     if pathInfo.obstacles and #pathInfo.obstacles > 0 then
-        table.insert(out, "Crosses "..#pathInfo.obstacles.." "..(#pathInfo.obstacles > 1 and "obstacles" or "obstacle"))
+        table.insert(out, "Crosses " .. #pathInfo.obstacles ..
+            " " .. (#pathInfo.obstacles > 1 and "obstacles" or "obstacle"))
     end
 
     if pathInfo.turns and #pathInfo.turns > 0 then
@@ -359,3 +515,14 @@ function BuildMovementSpeech(pathInfo)
 
     return out
 end
+
+-- ===========================================================================
+-- EVENT WIRING
+-- ===========================================================================
+
+LuaEvents.Tutorial_AddUnitMoveRestriction.Add(OnTutorial_AddUnitMoveRestriction)
+LuaEvents.Tutorial_RemoveUnitMoveRestrictions.Add(OnTutorial_RemoveUnitMoveRestrictions)
+LuaEvents.Tutorial_ConstrainMovement.Add(OnTutorial_ConstrainMovement)
+LuaEvents.Tutorial_AddUnitHexRestriction.Add(OnTutorial_AddUnitHexRestriction)
+LuaEvents.Tutorial_RemoveUnitHexRestriction.Add(OnTutorial_RemoveUnitHexRestriction)
+LuaEvents.Tutorial_ClearAllHexMoveRestrictions.Add(OnTutorial_ClearAllUnitHexRestrictions)

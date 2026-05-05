@@ -476,11 +476,6 @@ function WidgetTemplateHelpers:FindNextMatch(root, query, maxDepth)
         local candidate = children[idx]
         local found = self:FindMatchDFS(candidate, query, 0, maxDepth)
         if found then
-            local current = found
-            while current do
-                if current.Expand then current:Expand() end
-                current = current.Parent
-            end
             return found
         end
     end

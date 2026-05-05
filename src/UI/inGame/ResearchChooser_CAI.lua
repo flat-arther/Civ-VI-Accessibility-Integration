@@ -1,5 +1,6 @@
 include("caiUtils")
 include("ResearchChooser")
+include("researchHelpers")
 local mgr                        = ExposedMembers.CAI_UIManager
 
 local TUTORIAL_MOD_ID            = "17462E0F-1EE1-4819-AAAA-052B5896B02A"
@@ -129,20 +130,6 @@ local function IsResearchRowDisabled(kData)
     return ControlIsDisabled(instance.Top)
 end
 
-local function GetUnlockNames(kData)
-    if not kData or not kData.TechType then return {} end
-    local playerID = Game.GetLocalPlayer()
-    local unlockables = GetUnlockablesForTech_Cached(kData.TechType, playerID) or {}
-    local names = {}
-    for _, v in ipairs(unlockables) do
-        local name = v[2]
-        if name and name ~= "" then
-            table.insert(names, Locale.Lookup(name))
-        end
-    end
-    return names
-end
-
 local function GetResearchDisplayName(kData)
     local control = GetDisplayControl(kData)
     if control then
@@ -166,10 +153,6 @@ end
 -- Formatting. Order of parts matches the user spec: name first, then any
 -- status badges (recommended, boost), then cost, turns, queue, first N unlocks.
 -- ===========================================================================
-local function AppendIfNonEmpty(parts, text)
-    if text and text ~= "" then table.insert(parts, text) end
-end
-
 local function FormatTurnsPart(kData)
     local control = GetDisplayControl(kData)
     if control then
@@ -267,52 +250,6 @@ end
 --   3. Live status (IsCurrent progress/turns, queue position).
 -- [NEWLINE] tokens are split into tree rows for easier navigation.
 -- ===========================================================================
-local function NormalizeFormattedText(text)
-    text = text or ""
-    text = string.gsub(text, "%[NEWLINE%]", ", ")
-    text = string.gsub(text, "%s+", " ")
-    return text
-end
-
-local function SplitFormattedLines(text)
-    local lines = {}
-    text = text or ""
-    text = string.gsub(text, "%[NEWLINE%]", "\n")
-    for line in string.gmatch(text, "([^\n]+)") do
-        local trimmed = string.gsub(line, "^%s*(.-)%s*$", "%1")
-        if trimmed ~= "" then
-            table.insert(lines, trimmed)
-        end
-    end
-    return lines
-end
-
-local function StartsWithIconBullet(text)
-    return text and string.find(text, "^%s*%[ICON_Bullet%]") ~= nil
-end
-
-local function IsUnlocksHeader(text)
-    if not text or text == "" then return false end
-    local unlocksLabel = Locale.Lookup("LOC_TOOLTIP_UNLOCKS")
-    return unlocksLabel and unlocksLabel ~= "" and string.find(text, unlocksLabel, 1, true) ~= nil
-end
-
-local function SplitTooltipLinesWithoutUnlocks(text)
-    local lines = {}
-    local skippingUnlocks = false
-    for _, line in ipairs(SplitFormattedLines(text)) do
-        if IsUnlocksHeader(line) then
-            skippingUnlocks = true
-        elseif skippingUnlocks and StartsWithIconBullet(line) then
-            -- Unlock rows are exposed in the dedicated expandable unlock node.
-        else
-            skippingUnlocks = false
-            table.insert(lines, line)
-        end
-    end
-    return lines
-end
-
 local function FormatShortTooltip(kData, unlockNames)
     local parts = {}
     local tooltipLines = SplitTooltipLinesWithoutUnlocks(GetResearchTooltipText(kData))
@@ -325,47 +262,12 @@ local function FormatShortTooltip(kData, unlockNames)
     return table.concat(parts, "[NEWLINE]")
 end
 
-local function AddTextDetailNode(parent, text)
-    if not text or text == "" then return end
-    local detailText = text
-    parent:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserDetail"), "TreeviewItem", {
-        GetLabel = function() return NormalizeFormattedText(detailText) end,
-    }))
-end
-
-local function AddUnlocksNode(parent, unlockNames)
-    local count = #unlockNames
-    local unlockNode = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserUnlocks"), "TreeviewItem", {
-        GetLabel = function()
-            if count == 1 then
-                return Locale.Lookup("LOC_CAI_RESEARCH_UNLOCKS_COUNT_ONE", count)
-            end
-            return Locale.Lookup("LOC_CAI_RESEARCH_UNLOCKS_COUNT", count)
-        end,
-    })
-
-    if count > 0 then
-        for _, name in ipairs(unlockNames) do
-            local unlockName = name
-            unlockNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserUnlock"), "TreeviewItem", {
-                GetLabel = function() return unlockName end,
-            }))
-        end
-    else
-        unlockNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserUnlock"), "TreeviewItem", {
-            GetLabel = function() return Locale.Lookup("LOC_CAI_RESEARCH_NO_UNLOCKS") end,
-        }))
-    end
-
-    parent:AddChild(unlockNode)
-end
-
 local function AddResearchDetailChildren(parent, kData, unlockNames)
     for _, line in ipairs(SplitTooltipLinesWithoutUnlocks(GetResearchTooltipText(kData))) do
-        AddTextDetailNode(parent, line)
+        AddTextDetailNode(mgr, parent, line)
     end
 
-    AddTextDetailNode(parent, NormalizeFormattedText(GetBoostTooltipText(kData)))
+    AddTextDetailNode(mgr, parent, NormalizeFormattedText(GetBoostTooltipText(kData)))
 
     local statusParts = {}
     if kData.IsCurrent then
@@ -378,10 +280,10 @@ local function AddResearchDetailChildren(parent, kData, unlockNames)
     end
     AppendIfNonEmpty(statusParts, GetQueuePositionText(kData))
     if #statusParts > 0 then
-        AddTextDetailNode(parent, table.concat(statusParts, ", "))
+        AddTextDetailNode(mgr, parent, table.concat(statusParts, ", "))
     end
 
-    AddUnlocksNode(parent, unlockNames)
+    AddUnlocksNode(mgr, parent, unlockNames)
 end
 
 -- ===========================================================================
@@ -413,14 +315,10 @@ local function CreateRowWidget(kData, interactive)
         end,
     })
     if interactive then
-        row:AddInputBinding({
-            Key = Keys.VK_RETURN,
-            Action = function(w)
-                if w and w.IsDisabled and w:IsDisabled() then return true end
-                OnChooseResearch(captured.Hash)
-                return true
-            end,
-        })
+        row.OnClick = function(w)
+            if w and w.IsDisabled and w:IsDisabled() then return end
+            OnChooseResearch(captured.Hash)
+        end
     end
     row:AddInputBinding({
         Key = Keys.VK_RETURN,

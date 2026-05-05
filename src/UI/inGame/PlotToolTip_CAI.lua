@@ -1,6 +1,6 @@
 include("caiUtils")
-include("PlotToolTip")
 include("unitHelpers_CAI")
+include("PlotToolTip")
 
 local currentPlot = -1
 local info = ExposedMembers.CAIInfo or {}
@@ -244,7 +244,6 @@ info.PlotInfoHelpers = {
                 local improvement = GameInfo.Improvements[improvementType]
 
                 if improvement ~= nil then
-
                     local has_feature = false
                     for inner_row in GameInfo.Improvement_ValidFeatures() do
                         if inner_row.ImprovementType == improvementType then
@@ -370,9 +369,11 @@ info.PlotInfoHelpers = {
             local routeInfo = GameInfo.Routes[data.RouteType]
             if routeInfo ~= nil and routeInfo.MovementCost ~= nil and routeInfo.Name ~= nil then
                 if data.RoutePillaged then
-                    table.insert(results, Locale.Lookup("LOC_TOOLTIP_ROUTE_MOVEMENT_PILLAGED", routeInfo.MovementCost, routeInfo.Name))
+                    table.insert(results,
+                        Locale.Lookup("LOC_TOOLTIP_ROUTE_MOVEMENT_PILLAGED", routeInfo.MovementCost, routeInfo.Name))
                 else
-                    table.insert(results, Locale.Lookup("LOC_TOOLTIP_ROUTE_MOVEMENT", routeInfo.MovementCost, routeInfo.Name))
+                    table.insert(results,
+                        Locale.Lookup("LOC_TOOLTIP_ROUTE_MOVEMENT", routeInfo.MovementCost, routeInfo.Name))
                 end
             end
         end
@@ -424,7 +425,9 @@ info.PlotInfoHelpers = {
             if data.WonderComplete then
                 table.insert(results, Locale.Lookup(GameInfo.Buildings[data.WonderType].Name))
             else
-                table.insert(results, Locale.Lookup(GameInfo.Buildings[data.WonderType].Name) .. " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_CONSTRUCTION_TEXT"))
+                table.insert(results,
+                    Locale.Lookup(GameInfo.Buildings[data.WonderType].Name) ..
+                    " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_CONSTRUCTION_TEXT"))
             end
             return results
         end
@@ -440,7 +443,6 @@ info.PlotInfoHelpers = {
 
         if data.DistrictID ~= -1 and data.DistrictType ~= nil then
             if not GameInfo.Districts[data.DistrictType].InternalOnly then
-
                 if data.Owner ~= nil and data.Owner == Game.GetLocalPlayer() and data.Yields ~= nil then
                     if table.count(data.Yields) > 0 then
                         table.insert(results, Locale.Lookup("LOC_PEDIA_CONCEPTS_PAGE_CITIES_9_CHAPTER_CONTENT_TITLE"))
@@ -517,7 +519,8 @@ info.PlotInfoHelpers = {
         for i, v in ipairs(data.BuildingNames) do
             if data.WonderType == nil then
                 if data.BuildingsPillaged[i] then
-                    table.insert(results, "- " .. Locale.Lookup(v) .. " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_PILLAGED_TEXT"))
+                    table.insert(results,
+                        "- " .. Locale.Lookup(v) .. " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_PILLAGED_TEXT"))
                 else
                     table.insert(results, "- " .. Locale.Lookup(v))
                 end
@@ -601,15 +604,24 @@ info.PlotInfo = {
         return r
     end,
 
-    TileType     = function(plot) return RequestWithFallback(plot, { "TileType" },                              "LOC_CAI_PLOT_NO_TILE_INFO") end,
-    FeatureInfo  = function(plot) return RequestWithFallback(plot, { "Feature", "NaturalWonder" },              "LOC_CAI_PLOT_NO_FEATURES") end,
-    Units        = function(plot) return RequestWithFallback(plot, { "Units" },                                 "LOC_CAI_PLOT_NO_UNITS") end,
-    MovementInfo = function(plot) return RequestWithFallback(plot, { "MovementInfo" },                          "LOC_CAI_PLOT_NO_MOVEMENT_PREVIEW") end,
-    Resources    = function(plot) return RequestWithFallback(plot, { "Resources" },                             "LOC_CAI_PLOT_NO_RESOURCES") end,
-    Buildings    = function(plot) return RequestWithFallback(plot, { "Buildings" },                             "LOC_CAI_PLOT_NO_BUILDINGS") end,
-    Owner        = function(plot) return RequestWithFallback(plot, { "Owner" },                                 "LOC_CAI_PLOT_UNOWNED") end,
-    PhysicalInfo = function(plot) return RequestWithFallback(plot, { "Movement", "Defense", "Geography" },      "LOC_CAI_PLOT_NO_PHYSICAL_INFO") end,
-    AmbientInfo  = function(plot) return RequestWithFallback(plot, { "Continent", "Appeal", "Status", "NationalPark" }, "LOC_CAI_PLOT_NO_AMBIENT_INFO") end,
+    TileType     = function(plot) return RequestWithFallback(plot, { "TileType" }, "LOC_CAI_PLOT_NO_TILE_INFO") end,
+    FeatureInfo  = function(plot)
+        return RequestWithFallback(plot, { "Feature", "NaturalWonder" },
+            "LOC_CAI_PLOT_NO_FEATURES")
+    end,
+    Units        = function(plot) return RequestWithFallback(plot, { "Units" }, "LOC_CAI_PLOT_NO_UNITS") end,
+    MovementInfo = function(plot) return RequestWithFallback(plot, { "MovementInfo" }, "LOC_CAI_PLOT_NO_MOVEMENT_PREVIEW") end,
+    Resources    = function(plot) return RequestWithFallback(plot, { "Resources" }, "LOC_CAI_PLOT_NO_RESOURCES") end,
+    Buildings    = function(plot) return RequestWithFallback(plot, { "Buildings" }, "LOC_CAI_PLOT_NO_BUILDINGS") end,
+    Owner        = function(plot) return RequestWithFallback(plot, { "Owner" }, "LOC_CAI_PLOT_UNOWNED") end,
+    PhysicalInfo = function(plot)
+        return RequestWithFallback(plot, { "Movement", "Defense", "Geography" },
+            "LOC_CAI_PLOT_NO_PHYSICAL_INFO")
+    end,
+    AmbientInfo  = function(plot)
+        return RequestWithFallback(plot, { "Continent", "Appeal", "Status", "NationalPark" },
+            "LOC_CAI_PLOT_NO_AMBIENT_INFO")
+    end,
 }
 
 info.PlotInfoActionPriority = PlotInfoActionPriority

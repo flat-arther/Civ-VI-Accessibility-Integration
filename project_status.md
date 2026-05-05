@@ -30,10 +30,9 @@ Civilization VI accessibility mod for blind players. Adds TTS/screen reader navi
 
 ## Current Focus
 
-GovernmentScreen accessibility is the latest active implementation and needs in-game verification.
-CivicsChooser accessibility has also been implemented and needs in-game verification.
+No active feature. CivicsTree, GovernmentScreen, and CivicsChooser are implemented and verified in-game.
 
-Files involved:
+Files involved in the most recent verified work:
 
 - `src/UI/inGame/GovernmentScreen_CAI.lua`
 - `src/UI/inGame/CivicsChooser_CAI.lua`
@@ -70,41 +69,6 @@ What is implemented:
 - UnitPanel action summaries and `SelectionActions` now filter out all vanilla-disabled rows via `action.Disabled`, covering both operations and tutorial-disabled commands such as Delete Unit.
 - Unit command hotkeys now mirror the prior unit-operation hotkey expansion: visible vanilla `UnitCommands` without safe existing input paths get `HotkeyId` values in `unitOperationConfig.sql` plus unbound `UNIT` input actions in `hotkey_config.xml`. `UNITCOMMAND_DELETE` is excluded because vanilla already has the `DeleteUnit` action and a separate UnitPanel special case.
 - Unit selection category labels and unit navigation/path hotkey labels now have CAI localization. Unit command hotkey labels intentionally use vanilla unit-command localization.
-
-GovernmentScreen test queue:
-
-1. Launch a game and verify no Lua errors from `GovernmentScreen_CAI.lua` or `InGamePopup_CAI.lua`.
-2. Press F7 and verify CAI exposes only Policies and Governments.
-3. Verify vanilla My Government opens land on CAI Policies, and vanilla Governments opens land on CAI Governments.
-4. Verify Policies view mode is read-only and shows all four categories with one child per live slot.
-5. Verify category summaries speak used/total slot count and filled policy names.
-6. Verify Enter on empty and filled slots in change mode opens the filtered picker for that exact slot.
-7. Verify choosing a policy assigns/replaces the exact slot and makes the old policy available again.
-8. Verify Delete removes a filled policy only in change mode.
-9. Verify no policy movement workflow or movement shortcut is exposed.
-10. Verify Wildcard slot pickers include all unused legal policies.
-11. Verify View All Policies opens a read-only categorized tree and policies expand to detail children.
-12. Verify Confirm Policies uses the vanilla confirmation dialog and applies policy changes.
-13. Verify Unlock Policies / Unlock Governments preserve vanilla cost and disabled behavior.
-14. Verify Governments rows read selected, locked, slot mix, bonuses, and prerequisite/progress info.
-15. Verify Enter on an unlocked government opens the vanilla confirmation; accepting changes government and switches to Policies.
-16. Verify locked government rows are readable but not activatable.
-17. Verify Shift+Enter on policy entries opens Civilopedia outside tutorial mode and does nothing harmful during tutorial mode.
-18. Verify Escape closes pushed picker/view-all trees first; on the CAI root, vanilla handles Escape and any unsaved-policy warning.
-
-CivicsChooser test queue:
-
-1. Launch a game and verify no Lua errors from `CivicsChooser_CAI.lua`.
-2. Open CivicsChooser from the ActionPanel civic blocker and from WorldTracker `C`.
-3. Verify opening CivicsChooser does not also open when ResearchChooser opens.
-4. Verify initial focus lands on the civics queue tree while a civic is active, otherwise on available civics.
-5. Verify available civic rows speak name, recommendation, turns, boost, tooltip detail, and first unlocks, without queue position `99`.
-6. Verify Enter on available civics selects the civic, speaks the chosen-civic confirmation, plays vanilla confirm sound, and closes the chooser.
-7. Verify queued/current civic rows are read-only and expandable.
-8. Verify Shift+Enter opens Civilopedia outside tutorial mode and does nothing harmful during tutorial mode.
-9. Verify Open Civics Tree opens the full CivicsTree and closes the chooser.
-10. Verify rows disabled by zero culture yield or tutorial filtering are announced disabled and do not activate.
-11. Verify Escape, close button, title/icon close, and `LaunchBar_CloseChoosers` close both CAI and vanilla state.
 
 ## Pending Test Queue By Area
 
@@ -198,8 +162,6 @@ Unit operation / command hotkeys:
 
 ## Known Gaps / Next Steps
 
-- Test GovernmentScreen first; it is the current active feature.
-- Test CivicsChooser accessibility after GovernmentScreen.
 - Implement ProductionManager / multi-queue accessibility.
 - Implement LoadScreen accessibility from the existing plan in `docs/game-api.md`.
 - Review unclear older replacements: `InGameTopOptionsMenu_CAI.lua`, `IntroScreen.lua`, `FrontEndPopup.lua`, `MapSelect.lua`.
@@ -233,4 +195,6 @@ Unit operation / command hotkeys:
 - NotificationPanel: transient notification tree and event-driven cursor sync implemented.
 - UnitPanel: selected unit info and action list implemented.
 - Unit operations and commands: unbound hotkey ids added for visible vanilla operations/commands lacking safe existing `HotkeyId` paths.
-- GovernmentScreen: latest implementation complete enough for in-game testing.
+- GovernmentScreen: implementation complete and verified in-game.
+- CivicsChooser: implementation complete and verified in-game.
+- CivicsTree: implementation complete and verified in-game. Live-control labels and tooltips, era-grouped main tree, queue tree with shared row format, filter as a `DropdownMenu` that pushes a `MenuItem` list and rebuilds the main tree on selection, government summary as a read-only `Edit`, `IsDisabled` mirroring vanilla clickability (READY and BLOCKED enabled; RESEARCHED, CURRENT, UNREVEALED disabled), reference links disabled when target is unrevealed, Backspace breadcrumb stack on the main tree using widget ids + `GetChildById`, unified queue-added announcement reporting count and total culture cost, ESC routed through vanilla `Close()` via the wrapped input handler.

@@ -17,7 +17,6 @@
     <File>UI/uiManager/UIScreenManager.lua</File>
     <File>UI/inGame/caiIngame.lua</File>
     <File>UI/inGame/worldInfo.lua</File>
-    <File>UI/inGame/unitHelpers_CAI.lua</File>
     <File>UI/inGame/navCursor.lua</File>
     <File>UI/frontEnd/FrontEnd.lua</File>
     <File>UI/frontEnd/IntroScreen.lua</File>
@@ -45,7 +44,12 @@
     <File>UI/inGame/NotificationPanel_CAI.lua</File>
     <File>UI/inGame/GovernmentScreen_CAI.lua</File>
     <File>UI/inGame/ResearchChooser_CAI.lua</File>
+    <File>UI/inGame/civicHelpers.lua</File>
+    <File>UI/inGame/unitHelpers_CAI.lua</File>
     <File>UI/inGame/CivicsChooser_CAI.lua</File>
+    <File>UI/inGame/CivicsTree_CAI.lua</File>
+    <File>UI/inGame/researchHelpers.lua</File>
+    <File>UI/inGame/TechTree_CAI.lua</File>
     <File>UI/inGame/ProductionPanel_CAI.lua</File>
     <File>UI/inGame/CityPanel_CAI.lua</File>
     <File>UI/inGame/UnitPanel_CAI.lua</File>
@@ -115,6 +119,9 @@
       <File>UI/shared/PopupDialog.lua</File>
       <File>UI/shared/LoadGameMenu.lua</File>
       <File>UI/shared/Options.lua</File>
+      <File>UI/inGame/civicHelpers.lua</File>
+      <File>UI/inGame/researchHelpers.lua</File>
+      <File>UI/inGame/unitHelpers_CAI.lua</File>
     </ImportFiles>
 
     <ReplaceUIScript id="CAI_WorldInput">
@@ -194,6 +201,22 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>ResearchChooser</LuaContext>
         <LuaReplace>UI/inGame/ResearchChooser_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_CivicsTree">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>CivicsTree</LuaContext>
+        <LuaReplace>UI/inGame/CivicsTree_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_TechTree">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>TechTree</LuaContext>
+        <LuaReplace>UI/inGame/TechTree_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

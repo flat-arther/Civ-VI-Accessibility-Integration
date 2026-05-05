@@ -1,19 +1,20 @@
 ﻿include("caiUtils")
+include("civicHelpers")
 include("CivicsChooser")
-local mgr                        = ExposedMembers.CAI_UIManager
+local mgr                 = ExposedMembers.CAI_UIManager
 
-local UNLOCKS_INLINE             = 2
+local UNLOCKS_INLINE      = 2
 
-local m_caiPanel                 = nil ---@type UIWidget|nil
-local m_caiAvailableTree         = nil ---@type UIWidget|nil
-local m_caiQueueTree             = nil ---@type UIWidget|nil
-local m_caiRowData               = {} ---@type table<number, table>
-local m_caiAvailableRows         = {} ---@type table<number, table>
-local m_caiQueueRows             = {} ---@type table<number, table>
-local m_caiCurrentData           = nil ---@type table|nil
-local m_caiOpenPending           = false ---@type boolean
-local m_caiInstanceByHash        = {} ---@type table<number, table>
-local m_caiCurrentControl        = nil ---@type table|nil
+local m_caiPanel          = nil ---@type UIWidget|nil
+local m_caiAvailableTree  = nil ---@type UIWidget|nil
+local m_caiQueueTree      = nil ---@type UIWidget|nil
+local m_caiRowData        = {} ---@type table<number, table>
+local m_caiAvailableRows  = {} ---@type table<number, table>
+local m_caiQueueRows      = {} ---@type table<number, table>
+local m_caiCurrentData    = nil ---@type table|nil
+local m_caiOpenPending    = false ---@type boolean
+local m_caiInstanceByHash = {} ---@type table<number, table>
+local m_caiCurrentControl = nil ---@type table|nil
 
 -- ===========================================================================
 -- Vanilla CivicsChooser does not have the base tutorial reorder hack that
@@ -141,44 +142,6 @@ local function IsCivicRowDisabled(kData)
     return ControlIsDisabled(instance.Top)
 end
 
-local function GetUnlockables(kData)
-    if not kData or not kData.CivicType then return {} end
-    local playerID = Game.GetLocalPlayer()
-    return GetUnlockablesForCivic_Cached(kData.CivicType, playerID) or {}
-end
-
-local function GetUnlockNames(kData)
-    local unlockables = GetUnlockables(kData)
-    local names = {}
-    for _, v in ipairs(unlockables) do
-        local name = v[2]
-        if name and name ~= "" then
-            table.insert(names, Locale.Lookup(name))
-        end
-    end
-    return names
-end
-
-local function GetObsoletePolicyNames(kData)
-    local unlockables = GetUnlockables(kData)
-    local unlockableIndex = {}
-    for _, v in ipairs(unlockables) do
-        unlockableIndex[v[1]] = true
-    end
-
-    local obsoleteNames = {}
-    for row in GameInfo.ObsoletePolicies() do
-        if unlockableIndex[row.ObsoletePolicy] then
-            local policy = GameInfo.Policies[row.PolicyType]
-            if policy then
-                table.insert(obsoleteNames, Locale.Lookup("LOC_TOOLTIP_UNLOCKS_POLICY", policy.Name))
-            end
-        end
-    end
-    table.sort(obsoleteNames, function(a, b) return Locale.Compare(a, b) == -1 end)
-    return obsoleteNames
-end
-
 local function GetCivicDisplayName(kData)
     local control = GetDisplayControl(kData)
     if control then
@@ -196,14 +159,6 @@ local function GetFirstNUnlockNamesFromList(names, n)
         if i <= n then table.insert(head, name) else break end
     end
     return head
-end
-
--- ===========================================================================
--- Formatting. Order of parts matches the user spec: name first, then any
--- status badges (recommended, boost), then cost, turns, queue, first N unlocks.
--- ===========================================================================
-local function AppendIfNonEmpty(parts, text)
-    if text and text ~= "" then table.insert(parts, text) end
 end
 
 local function FormatTurnsPart(kData)
@@ -293,68 +248,13 @@ local function FormatRowLabel(kData)
     return table.concat(parts, ", ")
 end
 
+-- NormalizeFormattedText, SplitTooltipLinesWithoutSpecialLists,
+-- AppendIfNonEmpty, GetUnlockNames, GetObsoletePolicyNames,
+-- AddTextDetailNode, AddUnlocksNode, AddMakesObsoleteNode -> civicHelpers.lua
+
 -- ===========================================================================
--- Detail helpers. The old read-only edit contents now live as collapsed child
--- tree items under each Civic row. Sources:
---   1. kData.ToolTip (name, cost, description, unlocks) from ToolTipHelper.
---   2. Boost line - ToolTipHelper does NOT include boost info; sighted get
---      this via the BoostLabel + boost icon tooltip next to the civic. Built
---      to match the sighted icon tooltip: "Can/Has been boosted: <trigger>".
---   3. Live status (IsCurrent progress/turns, queue position).
--- [NEWLINE] tokens are split into tree rows for easier navigation.
+-- Detail helpers
 -- ===========================================================================
-local function NormalizeFormattedText(text)
-    text = text or ""
-    text = string.gsub(text, "%[NEWLINE%]", ", ")
-    text = string.gsub(text, "%s+", " ")
-    return text
-end
-
-local function SplitFormattedLines(text)
-    local lines = {}
-    text = text or ""
-    text = string.gsub(text, "%[NEWLINE%]", "\n")
-    for line in string.gmatch(text, "([^\n]+)") do
-        local trimmed = string.gsub(line, "^%s*(.-)%s*$", "%1")
-        if trimmed ~= "" then
-            table.insert(lines, trimmed)
-        end
-    end
-    return lines
-end
-
-local function StartsWithIconBullet(text)
-    return text and string.find(text, "^%s*%[ICON_Bullet%]") ~= nil
-end
-
-local function IsUnlocksHeader(text)
-    if not text or text == "" then return false end
-    local unlocksLabel = Locale.Lookup("LOC_TOOLTIP_UNLOCKS")
-    return unlocksLabel and unlocksLabel ~= "" and string.find(text, unlocksLabel, 1, true) ~= nil
-end
-
-local function IsMakesObsoleteHeader(text)
-    if not text or text == "" then return false end
-    local obsoleteLabel = Locale.Lookup("LOC_TOOLTIP_MAKES_OBSOLETE")
-    return obsoleteLabel and obsoleteLabel ~= "" and string.find(text, obsoleteLabel, 1, true) ~= nil
-end
-
-local function SplitTooltipLinesWithoutSpecialLists(text)
-    local lines = {}
-    local skippingList = false
-    for _, line in ipairs(SplitFormattedLines(text)) do
-        if IsUnlocksHeader(line) or IsMakesObsoleteHeader(line) then
-            skippingList = true
-        elseif skippingList and StartsWithIconBullet(line) then
-            -- Unlock and obsolete rows are exposed in dedicated expandable nodes.
-        else
-            skippingList = false
-            table.insert(lines, line)
-        end
-    end
-    return lines
-end
-
 local function FormatShortTooltip(kData, unlockNames, obsoleteNames)
     local parts = {}
     local tooltipLines = SplitTooltipLinesWithoutSpecialLists(GetCivicTooltipText(kData))
@@ -371,70 +271,12 @@ local function FormatShortTooltip(kData, unlockNames, obsoleteNames)
     return table.concat(parts, "[NEWLINE]")
 end
 
-local function AddTextDetailNode(parent, text)
-    if not text or text == "" then return end
-    local detailText = text
-    parent:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserDetail"), "TreeviewItem", {
-        GetLabel = function() return NormalizeFormattedText(detailText) end,
-    }))
-end
-
-local function AddUnlocksNode(parent, unlockNames)
-    local count = #unlockNames
-    local unlockNode = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserUnlocks"), "TreeviewItem", {
-        GetLabel = function()
-            if count == 1 then
-                return Locale.Lookup("LOC_CAI_CIVIC_UNLOCKS_COUNT_ONE", count)
-            end
-            return Locale.Lookup("LOC_CAI_CIVIC_UNLOCKS_COUNT", count)
-        end,
-    })
-
-    if count > 0 then
-        for _, name in ipairs(unlockNames) do
-            local unlockName = name
-            unlockNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserUnlock"), "TreeviewItem", {
-                GetLabel = function() return unlockName end,
-            }))
-        end
-    else
-        unlockNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserUnlock"), "TreeviewItem", {
-            GetLabel = function() return Locale.Lookup("LOC_CAI_CIVIC_NO_UNLOCKS") end,
-        }))
-    end
-
-    parent:AddChild(unlockNode)
-end
-
-local function AddMakesObsoleteNode(parent, obsoleteNames)
-    local count = #obsoleteNames
-    if count <= 0 then return end
-
-    local obsoleteNode = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserObsolete"), "TreeviewItem", {
-        GetLabel = function()
-            if count == 1 then
-                return Locale.Lookup("LOC_CAI_CIVIC_MAKES_OBSOLETE_COUNT_ONE", count)
-            end
-            return Locale.Lookup("LOC_CAI_CIVIC_MAKES_OBSOLETE_COUNT", count)
-        end,
-    })
-
-    for _, name in ipairs(obsoleteNames) do
-        local obsoleteName = name
-        obsoleteNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserObsoleteItem"), "TreeviewItem", {
-            GetLabel = function() return obsoleteName end,
-        }))
-    end
-
-    parent:AddChild(obsoleteNode)
-end
-
 local function AddCivicDetailChildren(parent, kData, unlockNames, obsoleteNames)
     for _, line in ipairs(SplitTooltipLinesWithoutSpecialLists(GetCivicTooltipText(kData))) do
-        AddTextDetailNode(parent, line)
+        AddTextDetailNode(mgr, parent, line)
     end
 
-    AddTextDetailNode(parent, NormalizeFormattedText(GetBoostTooltipText(kData)))
+    AddTextDetailNode(mgr, parent, NormalizeFormattedText(GetBoostTooltipText(kData)))
 
     local statusParts = {}
     if kData.IsCurrent then
@@ -447,11 +289,11 @@ local function AddCivicDetailChildren(parent, kData, unlockNames, obsoleteNames)
     end
     AppendIfNonEmpty(statusParts, GetQueuePositionText(kData))
     if #statusParts > 0 then
-        AddTextDetailNode(parent, table.concat(statusParts, ", "))
+        AddTextDetailNode(mgr, parent, table.concat(statusParts, ", "))
     end
 
-    AddUnlocksNode(parent, unlockNames)
-    AddMakesObsoleteNode(parent, obsoleteNames)
+    AddUnlocksNode(mgr, parent, unlockNames)
+    AddMakesObsoleteNode(mgr, parent, obsoleteNames)
 end
 
 -- ===========================================================================
@@ -484,14 +326,10 @@ local function CreateRowWidget(kData, interactive)
         end,
     })
     if interactive then
-        row:AddInputBinding({
-            Key = Keys.VK_RETURN,
-            Action = function(w)
-                if w and w.IsDisabled and w:IsDisabled() then return true end
-                OnChooseCivic(captured.Hash)
-                return true
-            end,
-        })
+        row.OnClick = function(w)
+            if w and w.IsDisabled and w:IsDisabled() then return end
+            OnChooseCivic(captured.Hash)
+        end
     end
     row:AddInputBinding({
         Key = Keys.VK_RETURN,
@@ -636,16 +474,16 @@ local function OnPanelClosedCAI()
     end
     -- Null out so next open rebuilds; mgr:Pop destroys children and detaches
     -- the panel, making it unusable for a subsequent push.
-    m_caiPanel                 = nil
-    m_caiAvailableTree         = nil
-    m_caiQueueTree             = nil
-    m_caiRowData               = {}
-    m_caiAvailableRows         = {}
-    m_caiQueueRows             = {}
-    m_caiCurrentData           = nil
-    m_caiCurrentControl        = nil
-    m_caiOpenPending           = false
-    m_caiInstanceByHash        = {}
+    m_caiPanel          = nil
+    m_caiAvailableTree  = nil
+    m_caiQueueTree      = nil
+    m_caiRowData        = {}
+    m_caiAvailableRows  = {}
+    m_caiQueueRows      = {}
+    m_caiCurrentData    = nil
+    m_caiCurrentControl = nil
+    m_caiOpenPending    = false
+    m_caiInstanceByHash = {}
 end
 
 -- ===========================================================================
@@ -693,17 +531,10 @@ end)
 -- time (which caused focus to jump twice on Up/Down/Tab). When the input
 -- causes our panel to pop, also close the native slide animator so visual
 -- and accessibility state stay in sync.
-OnInputHandler = WrapFunc(OnInputHandler, function(orig, kInputStruct)
-    if mgr then
-        local panelWasOnStack = m_caiPanel and mgr:HasWidget(m_caiPanel)
-        if mgr:HandleInput(kInputStruct) then
-            if panelWasOnStack and not mgr:HasWidget(m_caiPanel) then
-                OnClosePanel()
-            end
-            return true
-        end
-    end
-    return orig(kInputStruct)
+OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
+    local handled = mgr and mgr:HandleInput(pInputStruct)
+    if handled then return true end
+    return orig(pInputStruct)
 end)
 ContextPtr:SetInputHandler(OnInputHandler, true)
 
@@ -742,4 +573,3 @@ if Events and Events.CivicQueueChanged then
         end
     end)
 end
-

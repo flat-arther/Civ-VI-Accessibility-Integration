@@ -1,13 +1,23 @@
 include("caiUtils")
 include("GovernmentScreen")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr                          = ExposedMembers.CAI_UIManager
 
-local CAI_TAB_POLICIES = 1
-local CAI_TAB_GOVERNMENTS = 2
-local CAI_SCREEN_GOVERNMENTS = 2
-local CAI_SCREEN_POLICIES = 3
-local CAI_EMPTY_POLICY_TYPE = EMPTY_POLICY_TYPE or "empty"
+local CAI_TAB_GOVERNMENTS          = 1
+local CAI_TAB_POLICIES             = 2
+local CAI_EMPTY_POLICY_TYPE        = EMPTY_POLICY_TYPE or "empty"
+
+-- Mirror of vanilla GovernmentScreen.lua's local SCREEN_ENUMS (not exported across include).
+local VANILLA_SCREEN_MY_GOVERNMENT = 1
+local VANILLA_SCREEN_GOVERNMENTS   = 2
+local VANILLA_SCREEN_POLICIES      = 3
+
+local function CAITabForScreenEnum(screenEnum)
+    if screenEnum == VANILLA_SCREEN_POLICIES then
+        return CAI_TAB_POLICIES
+    end
+    return CAI_TAB_GOVERNMENTS
+end
 
 local CAI_ROW_ORDER = {
     { Index = ROW_INDEX and ROW_INDEX.MILITARY or 1, SlotType = "SLOT_MILITARY",   LabelControl = "LabelMilitary",   Tooltip = "LOC_GOVT_POLICY_TYPE_MILITARY",   Empty = "LOC_GOVT_NO_MILITARY_SLOTS" },
@@ -17,13 +27,14 @@ local CAI_ROW_ORDER = {
 }
 
 local m_caiPanel = nil
+local m_caiPicker = nnil
+local m_caiPoliciesTree = nil
 local m_caiTabBar = nil
 local m_caiBody = nil
 local m_caiActionButtons = {}
 local m_caiTabs = {}
-local m_caiTab = CAI_TAB_POLICIES
+local m_caiTab = nil
 local m_caiRebuilding = false
-local m_caiSyncingTab = false
 local m_caiCaptureMode = nil
 local m_caiCatalogCards = {}
 local m_caiActiveRows = {}
@@ -305,17 +316,15 @@ local function CreatePolicyTreeItem(policyType, action)
     local item = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIGovernmentPolicyItem"), "TreeviewItem", {
         GetLabel = function() return GetPolicyName(policyType) end,
         GetTooltip = function() return GetPolicyTooltip(policyType) end,
+        OnFocusEnter = PlayGovernmentHoverSound,
     })
     AddPolicyDetailChildren(item, policyType)
 
     if action then
-        item:AddInputBinding({
-            Key = Keys.VK_RETURN,
-            Action = function(w)
-                if w and w.IsDisabled and w:IsDisabled() then return true end
-                return action(policyType)
-            end,
-        })
+        item.OnClick = function(w)
+            if w and w.IsDisabled and w:IsDisabled() then return end
+            action(policyType)
+        end
     end
     item:AddInputBinding({
         Key = Keys.VK_RETURN,
@@ -370,48 +379,50 @@ local function OpenPolicyPickerForSlot(slotIndex, rowIndex)
         return true
     end
 
-    local picker = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIGovernmentPolicyPicker"), "Treeview", {
+    m_caiPicker = mgr:CreateUIWidget("CAIGovernmentPolicyPicker", "Treeview", {
         GetLabel = function()
             return Locale.Lookup("LOC_CAI_GOVERNMENT_CHOOSE_POLICY", GetRowName(rowIndex))
         end,
     })
-    picker:AddInputBinding({
+    m_caiPicker:AddInputBinding({
         Key = Keys.VK_ESCAPE,
         Action = function()
-            if mgr then mgr:RemoveFromStack(picker:GetId()) end
+            if mgr then mgr:RemoveFromStack(m_caiPicker:GetId()) end
+            m_caiPicker = nil
             return true
         end,
     })
 
-    BuildPolicyCategoryTree(picker, {
+    BuildPolicyCategoryTree(m_caiPicker, {
         RowIndex = rowIndex,
         StartExpanded = true,
         Action = function(policyType)
             local handled = AssignPolicyToSlot(policyType, slotIndex, rowIndex)
-            if mgr then mgr:RemoveFromStack(picker:GetId()) end
+            if mgr then mgr:RemoveFromStack(m_caiPicker:GetId()) end
             return handled
         end,
     })
 
-    mgr:Push(picker)
+    mgr:Push(m_caiPicker)
     return true
 end
 
 local function OpenAllPoliciesTree()
-    local tree = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIGovernmentAllPoliciesTree"), "Treeview", {
+    m_caiPoliciesTree = mgr:CreateUIWidget("CAIGovernmentAllPoliciesTree", "Treeview", {
         GetLabel = function() return Locale.Lookup("LOC_CAI_GOVERNMENT_VIEW_ALL_POLICIES") end,
     })
-    tree:AddInputBinding({
+    m_caiPoliciesTree:AddInputBinding({
         Key = Keys.VK_ESCAPE,
         Action = function()
-            if mgr then mgr:RemoveFromStack(tree:GetId()) end
+            if mgr then mgr:RemoveFromStack(m_caiPoliciesTree:GetId()) end
+            m_caiPoliciesTree = nil
             return true
         end,
     })
 
-    BuildPolicyCategoryTree(tree, { IncludeActive = true })
+    BuildPolicyCategoryTree(m_caiPoliciesTree, { IncludeActive = true })
 
-    mgr:Push(tree)
+    mgr:Push(m_caiPoliciesTree)
     return true
 end
 
@@ -456,24 +467,20 @@ local function CreatePolicySlotWidget(slotData, slotOrdinal)
             if isEmpty then return Locale.Lookup("LOC_CAI_GOVERNMENT_EMPTY_SLOT", slotOrdinal) end
             return GetPolicyTooltip(policyType)
         end,
+        OnFocusEnter = PlayGovernmentHoverSound,
     })
 
     AddPolicySlotDetailChildren(widget, slotIndex)
 
     if IsAbleToChangePolicies() then
-        widget:AddInputBindings({
-            {
-                Key = Keys.VK_RETURN,
-                Action = function()
-                    return OpenPolicyPickerForSlot(slotIndex, rowIndex)
-                end,
-            },
-            {
-                Key = Keys.VK_DELETE,
-                Action = function()
-                    return RemovePolicyFromSlot(slotIndex, GetPolicyTypeForSlot(slotIndex))
-                end,
-            },
+        widget.OnClick = function()
+            OpenPolicyPickerForSlot(slotIndex, rowIndex)
+        end
+        widget:AddInputBinding({
+            Key = Keys.VK_DELETE,
+            Action = function()
+                return RemovePolicyFromSlot(slotIndex, GetPolicyTypeForSlot(slotIndex))
+            end,
         })
     end
 
@@ -572,16 +579,75 @@ local function IsCapturedGovernmentUnlocked(governmentType)
     return not ControlIsDisabled(inst.Top)
 end
 
+local function GetGovernmentStatusLine(governmentType)
+    if IsGovernmentSelected(governmentType) then
+        return Locale.Lookup("LOC_CAI_STATE_SELECTED")
+    elseif not IsCapturedGovernmentUnlocked(governmentType) then
+        return Locale.Lookup("LOC_CAI_STATE_DISABLED")
+    end
+    return ""
+end
+
+local function GetGovernmentBonusIndex(governmentType)
+    local govRow = GameInfo.Governments[governmentType]
+    local bonusName = govRow and govRow.BonusType or nil
+    if not bonusName or bonusName == "NO_GOVERNMENTBONUS" then return nil end
+    local bonusRow = GameInfo.GovernmentBonusNames[bonusName]
+    return bonusRow and bonusRow.Index or nil
+end
+
+local function GetCurrentGovernmentHeritageParts(governmentType)
+    local parts = {}
+    local culture = GetLocalPlayerCulture()
+    if not culture then return parts end
+    local bonusIndex = GetGovernmentBonusIndex(governmentType)
+    if not bonusIndex then return parts end
+
+    local government = g_kGovernments and g_kGovernments[governmentType] or nil
+    local flat = culture:GetFlatBonus(bonusIndex)
+    local accumulated = culture:GetIncrementingBonus(bonusIndex)
+    local increment = culture:GetIncrementingBonusIncrement(bonusIndex)
+    local turnsTillNext = culture:GetIncrementingBonusTurnsUntilNext(bonusIndex)
+
+    if flat and flat > 0 then
+        table.insert(parts, Locale.Lookup("LOC_CAI_GOVERNMENT_FLAT_BONUS", flat))
+    end
+    if accumulated and accumulated > 0 then
+        table.insert(parts, Locale.Lookup("LOC_CAI_GOVERNMENT_LEGACY_BONUS", accumulated))
+    end
+    if increment and increment > 0 and government then
+        local nextDesc = Locale.Lookup("LOC_GOVT_HERITAGE_BONUS_NEXT", turnsTillNext or 0,
+            Locale.Lookup(government.Name))
+        table.insert(parts, "+" .. tostring(increment) .. " " .. nextDesc)
+    end
+    return parts
+end
+
+local function GetCarryoverBonusParts(currentGovernmentType)
+    local parts = {}
+    local culture = GetLocalPlayerCulture()
+    if not culture then return parts end
+    for governmentType, government in pairs(g_kGovernments or {}) do
+        if governmentType ~= currentGovernmentType then
+            local bonusIndex = GetGovernmentBonusIndex(governmentType)
+            if bonusIndex then
+                local stored = culture:GetIncrementingBonus(bonusIndex)
+                if stored and stored > 0 then
+                    table.insert(parts,
+                        "+" .. tostring(stored) .. " " ..
+                        Locale.Lookup("LOC_GOVT_HERITAGE_BONUS_PREV", Locale.Lookup(government.Name)))
+                end
+            end
+        end
+    end
+    return parts
+end
+
 local function GetGovernmentDetailParts(governmentType)
     local government = g_kGovernments and g_kGovernments[governmentType] or nil
     if not government then return {} end
 
     local parts = {}
-    if IsGovernmentSelected(governmentType) then
-        table.insert(parts, Locale.Lookup("LOC_CAI_STATE_SELECTED"))
-    elseif not IsCapturedGovernmentUnlocked(governmentType) then
-        table.insert(parts, Locale.Lookup("LOC_CAI_STATE_DISABLED"))
-    end
 
     local slots = GetGovernmentSlotSummary(government)
     if slots ~= "" then table.insert(parts, Locale.Lookup("LOC_CAI_GOVERNMENT_SLOTS", slots)) end
@@ -639,19 +705,21 @@ function BuildGovernmentsBody()
         local government = g_kGovernments[governmentTypeForItem]
         local item = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIGovernmentGovernmentItem"), "TreeviewItem", {
             GetLabel = function() return Locale.Lookup(government.Name) end,
-            GetTooltip = function() return table.concat(GetGovernmentDetailParts(governmentTypeForItem), "[NEWLINE]") end,
+            GetTooltip = function()
+                return JoinNonEmpty({
+                    GetGovernmentStatusLine(governmentTypeForItem),
+                    table.concat(GetGovernmentDetailParts(governmentTypeForItem), "[NEWLINE]"),
+                }, "[NEWLINE]")
+            end,
             IsDisabled = function()
                 return not IsCapturedGovernmentUnlocked(governmentTypeForItem)
             end,
-        })
-        item:AddInputBinding({
-            Key = Keys.VK_RETURN,
-            Action = function(w)
-                if w and w.IsDisabled and w:IsDisabled() then return true end
+            OnFocusEnter = PlayGovernmentHoverSound,
+            OnClick = function(w)
+                if w and w.IsDisabled and w:IsDisabled() then return end
                 m_caiSuppressRebuild = true
                 OnGovernmentSelected(governmentTypeForItem)
                 m_caiSuppressRebuild = false
-                return true
             end,
         })
 
@@ -662,29 +730,34 @@ function BuildGovernmentsBody()
             }))
         end
 
+        if IsGovernmentSelected(governmentTypeForItem) then
+            for _, part in ipairs(GetCurrentGovernmentHeritageParts(governmentTypeForItem)) do
+                local detailText = part
+                item:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIGovernmentHeritageDetail"), "TreeviewItem", {
+                    GetLabel = function() return detailText end,
+                }))
+            end
+
+            local carryover = GetCarryoverBonusParts(governmentTypeForItem)
+            if #carryover > 0 then
+                for _, part in ipairs(carryover) do
+                    local detailText = part
+                    item:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIGovernmentCarryoverDetail"), "TreeviewItem",
+                        {
+                            GetLabel = function() return detailText end,
+                        }))
+                end
+            else
+                item:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIGovernmentCarryoverDetail"), "TreeviewItem", {
+                    GetLabel = function() return Locale.Lookup("LOC_GOVT_NO_LEGACY_BONUS") end,
+                }))
+            end
+        end
+
         tree:AddChild(item)
     end
 
     return tree
-end
-
-local function GetSelectedCAITab()
-    return m_caiTab == CAI_TAB_GOVERNMENTS and CAI_TAB_GOVERNMENTS or CAI_TAB_POLICIES
-end
-
-local function SyncTabBarSelection()
-    if not m_caiTabBar then return end
-    local selectedTab = GetSelectedCAITab()
-    local selectedWidget = m_caiTabs[selectedTab]
-    if not selectedWidget then return end
-
-    for index, tab in ipairs(m_caiTabBar.Children or {}) do
-        if tab == selectedWidget then
-            m_caiTabBar.DefaultIndex = index
-            m_caiTabBar.FocusedChild = selectedWidget
-            return
-        end
-    end
 end
 
 function RebuildBody(selectedTab)
@@ -699,8 +772,7 @@ function RebuildBody(selectedTab)
     end
     m_caiActionButtons = {}
 
-    m_caiTab = selectedTab or GetSelectedCAITab()
-    SyncTabBarSelection()
+    if selectedTab then m_caiTab = selectedTab end
 
     if m_caiTab == CAI_TAB_GOVERNMENTS then
         m_caiBody = BuildGovernmentsBody()
@@ -710,10 +782,6 @@ function RebuildBody(selectedTab)
     end
 
     if m_caiBody then
-        local closeButton = m_caiPanel.CloseButton
-        if closeButton then
-            closeButton:RemoveFromParent()
-        end
         m_caiPanel:AddChild(m_caiBody)
         if m_caiTab == CAI_TAB_POLICIES then
             table.insert(m_caiActionButtons,
@@ -760,58 +828,24 @@ function RebuildBody(selectedTab)
         for _, button in ipairs(m_caiActionButtons) do
             m_caiPanel:AddChild(button)
         end
-        if closeButton then
-            m_caiPanel:AddChild(closeButton)
-        end
     end
 end
 
-local function ActivateVanillaTab(control, fallback)
-    if control and control.CallbackFunc then
-        control.CallbackFunc()
-    elseif fallback then
-        fallback()
-    end
-end
-
-local function SelectVanillaTabFromCAI(tab)
-    if m_caiSyncingTab then return true end
-
-    m_caiSyncingTab = true
-    if tab == CAI_TAB_GOVERNMENTS then
-        ActivateVanillaTab(Controls.ButtonGovernments, SwitchTabToGovernments)
-    else
-        ActivateVanillaTab(Controls.ButtonPolicies, SwitchTabToPolicies)
-    end
-    m_caiSyncingTab = false
-    m_caiTab = tab
-    RebuildBody(tab)
-    return true
-end
-
-local function CreateTabWidget(tab, control)
+local function CreateTabWidget(tab, control, switchFunc)
     return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIGovernmentTab"), "Tab", {
         GetLabel = function() return ControlText(control) end,
         IsHidden = function() return ControlIsHidden(control) end,
         IsDisabled = function() return ControlIsDisabled(control) end,
-        OnFocusEnter = function()
+        OnFocusEnter = function(w)
+            if m_caiTab == w:GetIndexInParent() then return end
             PlayGovernmentHoverSound()
-            return SelectVanillaTabFromCAI(tab)
+            switchFunc()
         end,
         OnClick = function()
-            return SelectVanillaTabFromCAI(tab)
+            switchFunc()
+            return true
         end,
     })
-end
-
-local function GetSelectedTabDefaultIndex()
-    local selectedTab = GetSelectedCAITab()
-    for index, tab in ipairs(m_caiTabBar.Children or {}) do
-        if tab == m_caiTabs[selectedTab] then
-            return index
-        end
-    end
-    return 1
 end
 
 local function BuildPanel()
@@ -826,35 +860,21 @@ local function BuildPanel()
     })
     m_caiPanel:AddChild(m_caiTabBar)
 
-    m_caiTabs[CAI_TAB_POLICIES] = CreateTabWidget(CAI_TAB_POLICIES, Controls.ButtonPolicies)
-    m_caiTabs[CAI_TAB_GOVERNMENTS] = CreateTabWidget(CAI_TAB_GOVERNMENTS, Controls.ButtonGovernments)
+    m_caiTabs[CAI_TAB_GOVERNMENTS] = CreateTabWidget(CAI_TAB_GOVERNMENTS, Controls.ButtonGovernments,
+        SwitchTabToGovernments)
+    m_caiTabs[CAI_TAB_POLICIES] = CreateTabWidget(CAI_TAB_POLICIES, Controls.ButtonPolicies, SwitchTabToPolicies)
 
-    m_caiTabBar:AddChild(m_caiTabs[CAI_TAB_POLICIES])
     m_caiTabBar:AddChild(m_caiTabs[CAI_TAB_GOVERNMENTS])
-    m_caiTabBar.DefaultIndex = GetSelectedTabDefaultIndex()
-
-    m_caiPanel.CloseButton = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIGovernmentCloseButton"), "Button", {
-        GetLabel = function() return ControlText(Controls.ModalScreenClose) end,
-        OnClick = function()
-            OnClose()
-            return true
-        end,
-    })
-    m_caiPanel:AddChild(m_caiPanel.CloseButton)
-
-    RebuildBody()
+    m_caiTabBar:AddChild(m_caiTabs[CAI_TAB_POLICIES])
 end
 
-local function PushPanel()
+local function PushPanel(desiredTab)
     if not mgr then return end
     if not m_caiPanel then BuildPanel() end
     if not m_caiPanel then return end
-    if m_caiTabBar then
-        SyncTabBarSelection()
-    end
-    RebuildBody()
+    m_caiTabBar:SetDefaultIndex(desiredTab)
     if not mgr:HasWidget(m_caiPanel) then
-        mgr:Push(m_caiPanel)
+        mgr:Push(m_caiPanel, PopupPriority.Low)
     end
 end
 
@@ -869,16 +889,13 @@ local function PopPanel()
     m_caiBody = nil
     m_caiActionButtons = {}
     m_caiTabs = {}
+    m_caiTab = nil
 end
 
 OnOpenGovernmentScreen = WrapFunc(OnOpenGovernmentScreen, function(orig, screenEnum)
-    if screenEnum == CAI_SCREEN_GOVERNMENTS then
-        m_caiTab = CAI_TAB_GOVERNMENTS
-    else
-        m_caiTab = CAI_TAB_POLICIES
-    end
     orig(screenEnum)
-    PushPanel()
+    Speak(screenEnum)
+    PushPanel(screenEnum and CAITabForScreenEnum(screenEnum) or CAI_TAB_GOVERNMENTS)
 end)
 
 Close = WrapFunc(Close, function(orig)
@@ -890,29 +907,24 @@ end)
 
 SwitchTabToMyGovernment = WrapFunc(SwitchTabToMyGovernment, function(orig)
     orig()
-    m_caiTab = CAI_TAB_POLICIES
-    if m_caiPanel and not m_caiSyncingTab then RebuildBody(CAI_TAB_POLICIES) end
+    RebuildBody(CAI_TAB_GOVERNMENTS)
 end)
 
 SwitchTabToPolicies = WrapFunc(SwitchTabToPolicies, function(orig)
     orig()
-    m_caiTab = CAI_TAB_POLICIES
-    if m_caiPanel and not m_caiSyncingTab then RebuildBody(CAI_TAB_POLICIES) end
+    RebuildBody(CAI_TAB_POLICIES)
 end)
 
 SwitchTabToGovernments = WrapFunc(SwitchTabToGovernments, function(orig)
     orig()
-    m_caiTab = CAI_TAB_GOVERNMENTS
-    if m_caiPanel and not m_caiSyncingTab then RebuildBody(CAI_TAB_GOVERNMENTS) end
+    RebuildBody(CAI_TAB_GOVERNMENTS)
 end)
 
 OnAcceptGovernmentChange = WrapFunc(OnAcceptGovernmentChange, function(orig)
     orig()
-    if m_caiPanel and not ContextPtr:IsHidden() then
-        m_caiTab = CAI_TAB_POLICIES
-        SyncTabBarSelection()
-        RebuildBody(CAI_TAB_POLICIES)
-    end
+    if not m_caiPanel or ContextPtr:IsHidden() then return end
+    SwitchTabToPolicies()
+    m_caiTabBar:SetDefaultIndex(CAI_TAB_POLICIES)
 end)
 
 RealizeGovernmentInstance = WrapFunc(RealizeGovernmentInstance,
@@ -956,9 +968,8 @@ RealizePolicyCatalog = WrapFunc(RealizePolicyCatalog, function(orig)
     orig()
     m_caiCaptureMode = nil
     if m_caiSuppressRebuild then return end
-    if m_caiPanel and m_caiTab == CAI_TAB_POLICIES and not m_caiRebuilding and not m_caiSyncingTab then
-        RebuildBody(
-            CAI_TAB_POLICIES)
+    if m_caiPanel and m_caiTab == CAI_TAB_POLICIES and not m_caiRebuilding then
+        RebuildBody(CAI_TAB_POLICIES)
     end
 end)
 
@@ -971,16 +982,15 @@ RealizeActivePoliciesRows = WrapFunc(RealizeActivePoliciesRows, function(orig)
         RefreshCapturedActiveRowsFromLivePlayer()
     end
     if m_caiSuppressRebuild then return end
-    if m_caiPanel and m_caiTab == CAI_TAB_POLICIES and not m_caiRebuilding and not m_caiSyncingTab then
-        RebuildBody(
-            CAI_TAB_POLICIES)
+    if m_caiPanel and m_caiTab == CAI_TAB_POLICIES and not m_caiRebuilding then
+        RebuildBody(CAI_TAB_POLICIES)
     end
 end)
 
 RealizeMyGovernmentPage = WrapFunc(RealizeMyGovernmentPage, function(orig)
     orig()
     if m_caiSuppressRebuild then return end
-    if m_caiPanel and m_caiTab == CAI_TAB_POLICIES and not m_caiSyncingTab then RebuildBody(CAI_TAB_POLICIES) end
+    if m_caiPanel and m_caiTab == CAI_TAB_POLICIES then RebuildBody(CAI_TAB_POLICIES) end
 end)
 
 RealizeGovernmentsPage = WrapFunc(RealizeGovernmentsPage, function(orig)
@@ -990,10 +1000,12 @@ end)
 RealizePoliciesPage = WrapFunc(RealizePoliciesPage, function(orig)
     orig()
     if m_caiSuppressRebuild then return end
-    if m_caiPanel and m_caiTab == CAI_TAB_POLICIES and not m_caiSyncingTab then RebuildBody(CAI_TAB_POLICIES) end
+    if m_caiPanel and m_caiTab == CAI_TAB_POLICIES then RebuildBody(CAI_TAB_POLICIES) end
 end)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
+    local top = mgr and mgr:GetTop()
+    if top ~= m_caiPanel and top ~= m_caiPicker and top ~= m_caiPoliciesTree then return false end
     local handled = (mgr and mgr:HandleInput(input)) or false
     if handled then return true end
     return orig(input)

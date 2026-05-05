@@ -1,7 +1,71 @@
 include("caiUtils")
 include("TutorialUIRoot")
 include("Civ6Common")
+---@ class TutItemEvents
+---@field OnActivate fun(item:table)
+---@field OnDeactivate fun(item:table)
 
+--# Helpers
+local function SetControlToAlwaysReceiveInput(path, state)
+    local control = ContextPtr:LookUpControl(path)
+    if not control then return end
+    if state then
+        UITutorialManager:AddControlToAlwaysReceiveInput(control)
+    else
+        UITutorialManager:RemoveControlToAlwaysReceiveInput(control)
+    end
+end
+
+local function ActivateProductionPanel(item) SetControlToAlwaysReceiveInput("/InGame/ProductionPanel", true) end
+local function DeactivateProductionPanel(item) SetControlToAlwaysReceiveInput("/InGame/ProductionPanel", false) end
+--- Table of hooks for tutorial items, keyed by item ID, then by event name (OnActivate / OnDeactivate). These functions will be called when the corresponding event happens for the item with the matching ID. The functions will be passed the item as a parameter.
+--- They are mostly used to set certain controls to always receive input when specific tutorial items are active, since some tutorial items only activate a portion of the UI, like the production panel, and we need to make sure they receive input in those cases.
+local TutorialItemHooks    = { ---@type table<string,TutItemEvents>
+    ["CIVICS_TREE_H"] = {
+        OnActivate = function(item)
+            SetControlToAlwaysReceiveInput("/InGame/CivicsTree", true)
+        end,
+        OnDeactivate = function(item)
+            SetControlToAlwaysReceiveInput("/InGame/CivicsTree", false)
+        end
+    },
+    ["TRAIN_WARRIORS"] = {
+        OnActivate = ActivateProductionPanel,
+        OnDeactivate = DeactivateProductionPanel
+    },
+    ["TRAIN_BUILDER"] = {
+        OnActivate = ActivateProductionPanel,
+        OnDeactivate = DeactivateProductionPanel
+    },
+    ["CONSTRUCTING_BUILDINGS_C"] = {
+        OnActivate = ActivateProductionPanel,
+        OnDeactivate = DeactivateProductionPanel
+    },
+    ["TRAIN_SETTLER_B"] = {
+        OnActivate = ActivateProductionPanel,
+        OnDeactivate = DeactivateProductionPanel
+    },
+    ["TRAIN_SLINGER"] = {
+        OnActivate = ActivateProductionPanel,
+        OnDeactivate = DeactivateProductionPanel
+    },
+    ["DISTRICTS_F"] = {
+        OnActivate = ActivateProductionPanel,
+        OnDeactivate = DeactivateProductionPanel
+    },
+    ["CAMPUS_COMPLETE_D"] = {
+        OnActivate = ActivateProductionPanel,
+        OnDeactivate = DeactivateProductionPanel
+    },
+    ["GOVERNMENT_POLICIES_H"] = {
+        OnActivate = function(item)
+            SetControlToAlwaysReceiveInput("/InGame/GovernmentScreen", true)
+        end,
+        OnDeactivate = function(item)
+            SetControlToAlwaysReceiveInput("/InGame/GovernmentScreen", false)
+        end
+    },
+}
 
 local mgr                  = ExposedMembers.CAI_UIManager
 local activeItem           = nil
@@ -9,17 +73,20 @@ local detailedItem         = nil
 local tutorialLoaded       = false
 
 local tutorialActivatedIds = {
-    ChooseProductionMenu = true,
-    ButtonPolicies = true
+
 }
 local escapePassthroughIds = {
     "CAINotificationCenterTree",
+    "CAIGovernmentPolicyPicker",
+    "CAIGovernmentAllPoliciesTree",
     "CAIActionPanelTurnBlockerList",
     "CAIUnitPanelActionList",
     "CAICityPanelList",
     "CAITopPanelResourceInfoList",
     "CAITopPanelYieldInfoTree",
     "CAIWorldInputInterfaceMode",
+    "CAICivicsTreePanel",
+    "CAICivicsTreeFilterList",
 }
 
 local function HasUITrigger(item, triggerName)
@@ -34,31 +101,42 @@ local function HasUITrigger(item, triggerName)
     return false
 end
 
-local function NotifyActionPanelAllowed(item)
-    LuaEvents.CAI_TutorialActionPanelAllowed(item ~= nil and HasUITrigger(item, "ActionPanel"))
+local function NotifyActionPanelAllowed()
+    local allowed = false
+    if activeItem ~= nil and #activeItem.UITriggers > 0 then
+        if HasUITrigger(activeItem, "ActionPanel") then allowed = true end
+    else
+        allowed = true
+    end
+    LuaEvents.CAI_TutorialActionPanelAllowed(allowed)
 end
 
 ActivateItem = WrapFunc(ActivateItem, function(orig, item)
     activeItem = item
     detailedItem = nil
-    LuaEvents.CAI_TutorialActionPanelAllowed(false)
-    return orig(item)
+    orig(item)
+    Speak("Activating item " .. item.ID)
+    local hook = TutorialItemHooks[item.ID]
+    if hook and hook.OnActivate then hook.OnActivate() end
+    NotifyActionPanelAllowed()
 end)
 
 DeActivateItem = WrapFunc(DeActivateItem, function(orig, item)
+    orig(item)
+    local hook = TutorialItemHooks[item.ID]
+    if hook and hook.OnDeactivate then hook.OnDeactivate() end
     if activeItem == item then
         activeItem = nil
         detailedItem = nil
-        LuaEvents.CAI_TutorialActionPanelAllowed(false)
+        NotifyActionPanelAllowed()
     end
-
-    return orig(item)
+    Speak("DeActivateItem: " .. item.ID)
 end)
 
 RaiseDetailedTutorial = WrapFunc(RaiseDetailedTutorial, function(orig, item)
     detailedItem = item
     local result = orig(item)
-    NotifyActionPanelAllowed(detailedItem)
+    NotifyActionPanelAllowed()
     LuaEvents.CAI_TutorialDetailedControlsReady()
     return result
 end)

@@ -83,7 +83,7 @@ If `project_status.md` says a user test is pending, ask for that result before l
 - ProductionPanel queue rows are dummy CAI buttons, not checkboxes; vanilla queue selection is a single-item pick-up mode.
 - ProductionManager / multi-queue is a separate UI context and still needs its own accessibility work.
 - ResearchChooser should not add custom Shift+Enter queueing; keep queue/current research read-only and inspectable.
-- GovernmentScreen CAI exposes Policies and Governments only; vanilla My Government opens map to Policies.
+- GovernmentScreen CAI exposes Governments and Policies only (Governments is tab 1, Policies is tab 2); vanilla screen enums 1 (My Government) and 2 (Governments) open to the Governments tab, enum 3 (Policies) opens to the Policies tab. Accepting a government change auto-switches to the Policies tab.
 - Government policy movement shortcuts are intentionally not exposed. Use slot picker/replace/remove flows instead.
 - LoadScreen accessibility must preserve `OnActivateButtonClicked()` as the continue path and must not force progress before load completion.
 

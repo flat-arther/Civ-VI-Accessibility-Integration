@@ -141,7 +141,7 @@ WidgetTemplates = {
     },
     Button = {
         RegisterInputs = {
-            { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyUp, Action = function(w) return w:Click(w) end },
+            { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyUp,                     Action = function(w) return w:Click(w) end },
             { Key = Keys.VK_SPACE,  Action = function(w) return w:Click(w) end },
         },
         Click = function(w)
@@ -825,6 +825,20 @@ WidgetTemplates = {
         SpeechSettings = {
             Role = false,
             IgnoreWhenNotFocused = true
+        },
+        RegisterInputs = {
+            {
+                -- It is possible for a TreeviewItem to have an OnClick even while being a container (e.g. for a leaf that performs an action when activated), so we put the activation binding here. Not setting an OnClick function for the widget lets enter bubble up.
+                Key = Keys.VK_RETURN,
+                Action = function(w)
+                    if w.OnClick then
+                        if w.IsDisabled and w:IsDisabled() then return true end
+                        w:OnClick(w)
+                        return true
+                    end
+                    return false
+                end
+            }
         },
         IsLeaf = function(w)
             return not w.Children or #w.Children == 0

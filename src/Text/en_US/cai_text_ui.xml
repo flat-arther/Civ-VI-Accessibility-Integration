@@ -292,6 +292,9 @@
     <Row Tag="LOC_CAI_GOVERNMENT_STATS" Language="en_US">
       <Text>Stats: {1_Stats}</Text>
     </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_FLAT_BONUS" Language="en_US">
+      <Text>Flat bonus: {1_Value}</Text>
+    </Row>
 
     <!-- Top panel hotkeys -->
     <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE" Language="en_US">
@@ -598,6 +601,100 @@
     </Row>
     <Row Tag="LOC_CAI_CIVIC_CHOSEN" Language="en_US">
       <Text>Chose civic: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_QUEUED" Language="en_US">
+      <Text>Queued civic: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_QUEUE_ADDED" Language="en_US">
+      <Text>{1_Count} items added to queue, for {2_Cost} total culture</Text>
+    </Row>
+
+    <!-- Civics tree -->
+    <Row Tag="LOC_CAI_CIVICS_TREE_QUEUE_LIST" Language="en_US">
+      <Text>Research queue</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVICS_TREE_MAIN_LIST" Language="en_US">
+      <Text>All civics</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVICS_TREE_FILTER" Language="en_US">
+      <Text>Filter</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVICS_TREE_GOVERNMENT" Language="en_US">
+      <Text>Current government</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVICS_TREE_PREREQS" Language="en_US">
+      <Text>Required civics</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVICS_TREE_LEADS_TO" Language="en_US">
+      <Text>Leads to</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVICS_TREE_PATH_IF_SELECTED" Language="en_US">
+      <Text>Civics to research first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_STATUS_RESEARCHED" Language="en_US">
+      <Text>Completed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_STATUS_CURRENT" Language="en_US">
+      <Text>In progress</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_STATUS_READY" Language="en_US">
+      <Text>Available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_STATUS_BLOCKED" Language="en_US">
+      <Text>Blocked</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_STATUS_UNREVEALED" Language="en_US">
+      <Text>Unknown</Text>
+    </Row>
+    <!-- Tech tree -->
+    <Row Tag="LOC_CAI_TECH_TREE_QUEUE_LIST" Language="en_US">
+      <Text>Research queue</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_TREE_MAIN_LIST" Language="en_US">
+      <Text>All technologies</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_TREE_FILTER" Language="en_US">
+      <Text>Filter</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_TREE_PREREQS" Language="en_US">
+      <Text>Required technologies</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_TREE_LEADS_TO" Language="en_US">
+      <Text>Leads to</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_TREE_PATH_IF_SELECTED" Language="en_US">
+      <Text>Technologies to research first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_STATUS_RESEARCHED" Language="en_US">
+      <Text>Completed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_STATUS_CURRENT" Language="en_US">
+      <Text>In progress</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_STATUS_BLOCKED" Language="en_US">
+      <Text>Blocked</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_STATUS_UNREVEALED" Language="en_US">
+      <Text>Unknown</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_QUEUE_ADDED" Language="en_US">
+      <Text>{1_Count} items added to queue, for {2_Cost} total science</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_GOVERNMENT_SUMMARY" Language="en_US">
+      <Text>{1_Gov}. {2_Dip} diplomatic, {3_Eco} economic, {4_Mil} military, {5_Wld} wildcard slots.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_POLICY_SLOT_DIPLOMATIC" Language="en_US">
+      <Text>Diplomatic</Text>
+    </Row>
+    <Row Tag="LOC_CAI_POLICY_SLOT_ECONOMIC" Language="en_US">
+      <Text>Economic</Text>
+    </Row>
+    <Row Tag="LOC_CAI_POLICY_SLOT_MILITARY" Language="en_US">
+      <Text>Military</Text>
+    </Row>
+    <Row Tag="LOC_CAI_POLICY_SLOT_WILDCARD" Language="en_US">
+      <Text>Wildcard</Text>
     </Row>
 
     <!-- Production panel -->
@@ -1016,10 +1113,13 @@
       <Text>Reads selection info slot 8</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO9" Language="en_US">
-      <Text>Read selection info 9</Text>
+      <Text>Read queued movement path</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO9_TOOLTIP" Language="en_US">
-      <Text>Reads selection info slot 9</Text>
+      <Text>Reads the queued movement path of the selected unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_NO_QUEUED_PATH" Language="en_US">
+      <Text>No queued path.</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO10" Language="en_US">
       <Text>Read selection info 10</Text>

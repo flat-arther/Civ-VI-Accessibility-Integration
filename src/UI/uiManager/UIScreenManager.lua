@@ -209,7 +209,7 @@ function UIScreenManager:BuildAnnouncement(path, diverge)
         local current = path[i]
         if current.BuildSpeech then
             local ignore = ((current.SpeechSettings and current.SpeechSettings.IgnoreWhenNotFocused) and self:GetFocusedWidget() ~= current) or
-            false
+                false
             if not ignore then
                 local speech = current:BuildSpeech()
                 if speech then table.insert(announcements, speech) end
@@ -282,7 +282,10 @@ function UIScreenManager:ApplyFocus(newPath)
     end
 
     for i = 1, #newPath - 1 do
-        newPath[i].FocusedChild = newPath[i + 1]
+        local w = newPath[i]
+        local next = newPath[i + 1]
+        if w.Expand then w:Expand() end
+        w.FocusedChild = next
     end
 
     self.CurrentPath = newPath

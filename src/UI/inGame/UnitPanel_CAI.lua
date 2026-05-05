@@ -1,4 +1,5 @@
 include("caiUtils")
+include("unitHelpers_CAI")
 include("UnitPanel")
 
 local mgr = ExposedMembers.CAI_UIManager
@@ -49,6 +50,7 @@ UnitInfoPriority = {
     "Abilities",
     "SpecialState",
     "Actions",
+    "QueuedPath",
 }
 
 UnitInfoActionMap = {}
@@ -60,6 +62,7 @@ UnitInfoFallbacks = {
     Abilities    = "LOC_CAI_UNIT_NO_ABILITIES",
     SpecialState = "LOC_CAI_UNIT_NO_SPECIAL_STATE",
     Actions      = "LOC_CAI_UNIT_NO_ACTIONS",
+    QueuedPath   = "LOC_CAI_UNIT_NO_QUEUED_PATH",
 }
 UnitActionList = nil
 
@@ -425,6 +428,13 @@ UnitInfo = {
     Actions = function(data, unit)
         return GetUnitInfoActions(data)
     end,
+
+    QueuedPath = function(data, unit)
+        if unit == nil then return nil end
+        local queued = UnitManager.GetQueuedDestination(unit)
+        if not queued then return nil end
+        return BuildMovementSpeech(BuildMovementPathInfo(unit, queued, true, true))
+    end,
 }
 
 info.UnitInfo = UnitInfo
@@ -589,6 +599,7 @@ function InitializeUnitInfoActionMap()
         [Input.GetActionId("ReadSelectionInfo6")] = { "Formation" },
         [Input.GetActionId("ReadSelectionInfo7")] = { "SpecialState" },
         [Input.GetActionId("ReadSelectionInfo8")] = { "Actions" },
+        [Input.GetActionId("ReadSelectionInfo9")] = { "QueuedPath" },
     }
 end
 

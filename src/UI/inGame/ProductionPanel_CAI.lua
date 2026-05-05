@@ -488,12 +488,9 @@ function CreateActionNode(props)
     node._caiFocusKey = props.FocusKey
 
     if props.LeftAction then
-        node:AddInputBinding({
-            Key = Keys.VK_RETURN,
-            Action = function(w)
-                return InvokePrimaryAction(w, props.LeftAction)
-            end,
-        })
+        node.OnClick = function(w)
+            InvokePrimaryAction(w, props.LeftAction)
+        end
     end
     if props.RightAction then
         node:AddInputBinding({
@@ -528,7 +525,8 @@ function CreateItemRow(item, tab, formation)
         IsDisabled = function() return IsItemRowDisabled(item, tab, formation) end,
         IsHidden = function() return IsItemRowHidden(item, tab, formation) end,
         LeftAction = BuildItemLeftAction(item, tab, formation),
-        ControlAction = tab == TAB_PRODUCTION and CurrentTabSupportsQueue() and BuildItemQueueAction(item, tab, formation) or nil,
+        ControlAction = tab == TAB_PRODUCTION and CurrentTabSupportsQueue() and
+            BuildItemQueueAction(item, tab, formation) or nil,
         RightAction = function() return InvokeRightClickPedia(item) end,
         FocusAction = function(w)
             PlayMenuHover()
@@ -1183,16 +1181,12 @@ function EnsurePanelBuilt()
         end,
     })
     m_caiCurrentNode._caiFocusKey = "current"
-    m_caiCurrentNode:AddInputBinding({
-        Key = Keys.VK_RETURN,
-        Action = function()
-            if Controls.CurrentProductionButton and Controls.CurrentProductionButton.IsDisabled and Controls.CurrentProductionButton:IsDisabled() then
-                return true
-            end
-            OnItemClicked(Controls, Controls.CurrentProductionButton)
-            return true
-        end,
-    })
+    m_caiCurrentNode.OnClick = function()
+        if Controls.CurrentProductionButton and Controls.CurrentProductionButton.IsDisabled and Controls.CurrentProductionButton:IsDisabled() then
+            return
+        end
+        OnItemClicked(Controls, Controls.CurrentProductionButton)
+    end
     m_caiCurrentNode:AddInputBinding({
         Key = Keys.VK_DELETE,
         Action = function()
@@ -1451,7 +1445,9 @@ OnCorpsToggle = WrapFunc(OnCorpsToggle, function(orig, unitList, unitListing)
 end)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
-    local handled = (mgr and mgr:HandleInput(pInputStruct)) or false
+    -- This panel does not have any popups in its context, so we can skip input handling if the top widget is not the production panel. We do so to avoid conflict with the tutorial root input handler while in the pause menu
+    if mgr:GetTop() ~= m_caiPanel then return false end
+    local handled = (mgr and mgr:HandleInput(pInputStruct))
     if handled then
         return true
     end
