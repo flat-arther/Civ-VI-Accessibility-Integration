@@ -1,5 +1,6 @@
 include("caiUtils")
 include("WorldTracker")
+include("Civ6Common")
 
 local ACTION_OPEN_RESEARCH_CHOOSER = Input.GetActionId("WorldTrackerOpenResearchChooser")
 local ACTION_OPEN_CIVICS_CHOOSER = Input.GetActionId("WorldTrackerOpenCivicsChooser")
@@ -144,10 +145,12 @@ end
 
 local function InitializeWorldTrackerActions()
     RegisterWorldTrackerAction(ACTION_OPEN_RESEARCH_CHOOSER, function()
+        if IsTutorialRunning() then return end
         if not IsTrackerChooserControlEnabled(m_caiResearchTrackerControl) then return end
         LuaEvents.WorldTracker_OpenChooseResearch()
     end)
     RegisterWorldTrackerAction(ACTION_OPEN_CIVICS_CHOOSER, function()
+        if IsTutorialRunning() then return end
         if not IsTrackerChooserControlEnabled(m_caiCivicsTrackerControl) then return end
         LuaEvents.WorldTracker_OpenChooseCivic()
     end)

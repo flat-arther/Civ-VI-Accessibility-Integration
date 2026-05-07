@@ -1,5 +1,5 @@
 include("caiUtils")
-include("unitHelpers_CAI")
+include("interfaceInfoHelpers_CAI")
 include("UIScreenManager")
 include("caiIngame")
 include("WorldInput")
@@ -9,16 +9,15 @@ local INPUT_ACTION_TRIGGERED = "Triggered"
 
 local mgr = ExposedMembers.CAI_UIManager
 
-local gamePanel = nil
+local m_caiGamePanel = nil
 local mainArea = nil
-local gCurrentModeWidget = nil
-local gCAISystemsInitialized = false
+local m_caiCurrentInterfaceWidget = nil
+local m_caiSystemsInitialized = false
 
 local ACTION_CURSOR_UP = Input.GetActionId("CAICursorMoveUp")
 local ACTION_CURSOR_DOWN = Input.GetActionId("CAICursorMoveDown")
 local ACTION_CURSOR_LEFT = Input.GetActionId("CAICursorMoveLeft")
 local ACTION_CURSOR_RIGHT = Input.GetActionId("CAICursorMoveRight")
-local ACTION_UNIT_PATH_INFO = Input.GetActionId("UnitPathInfo")
 local ACTION_INTERFACE_PRIMARY = Input.GetActionId("InterfaceWidgetPrimaryAction")
 
 -- ===========================================================================
@@ -51,23 +50,6 @@ local function MoveCursor(dx, dy)
 	return true
 end
 
-local function SpeakUnitPathInfo()
-	local unit = UI.GetHeadSelectedUnit()
-	if not unit then return false end
-
-	local plot = UI.GetCursorPlotID()
-	if not Map.IsPlot(plot) then return false end
-
-	local info = BuildMovementPathInfo(unit, plot, true)
-	if not info then return false end
-
-	local lines = BuildMovementSpeech(info)
-	if lines and #lines > 0 then
-		Speak(table.concat(lines, ", "))
-	end
-	return true
-end
-
 ---Input actions that are common to all interface widgets should go here.
 ---Action functions are passed the game view widget, then any event arguments.
 ---@type table<number, { Type: string, Action: fun(w:UIWidget, ...):boolean|nil }>
@@ -94,12 +76,6 @@ local SharedInputActions = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return MoveCursor(1, 0)
-		end,
-	},
-	[ACTION_UNIT_PATH_INFO] = {
-		Type = INPUT_ACTION_TRIGGERED,
-		Action = function()
-			return SpeakUnitPathInfo()
 		end,
 	},
 }
@@ -137,6 +113,64 @@ local interfaceWidgets = {
 			},
 		},
 	},
+	[InterfaceModeTypes.DISTRICT_PLACEMENT] = {
+		Properties = {
+			GetLabel = function()
+				return Locale.Lookup("LOC_CAI_DISTRICT_PLACEMENT_MODE")
+			end,
+			OnDestroy = function()
+				Speak(Locale.Lookup("LOC_CAI_EXITED_DISTRICT_PLACEMENT_MODE"))
+			end,
+			RegisterInputs = {
+				{
+					Key = Keys.VK_ESCAPE,
+					MSG = KeyEvents.KeyUp,
+					Action = function()
+						OnMouseDistrictPlacementCancel()
+						return true
+					end,
+				},
+			},
+		},
+		InputActions = {
+			[ACTION_INTERFACE_PRIMARY] = {
+				Type = INPUT_ACTION_TRIGGERED,
+				Action = function()
+					OnMouseDistrictPlacementEnd()
+					return true
+				end,
+			},
+		},
+	},
+	[InterfaceModeTypes.BUILDING_PLACEMENT] = {
+		Properties = {
+			GetLabel = function()
+				return Locale.Lookup("LOC_CAI_WONDER_PLACEMENT_MODE")
+			end,
+			OnDestroy = function()
+				Speak(Locale.Lookup("LOC_CAI_EXITED_WONDER_PLACEMENT_MODE"))
+			end,
+			RegisterInputs = {
+				{
+					Key = Keys.VK_ESCAPE,
+					MSG = KeyEvents.KeyUp,
+					Action = function()
+						OnMouseBuildingPlacementCancel()
+						return true
+					end,
+				},
+			},
+		},
+		InputActions = {
+			[ACTION_INTERFACE_PRIMARY] = {
+				Type = INPUT_ACTION_TRIGGERED,
+				Action = function()
+					OnMouseBuildingPlacementEnd()
+					return true
+				end,
+			},
+		},
+	},
 }
 
 local function GetInterfaceWidgetData()
@@ -144,14 +178,16 @@ local function GetInterfaceWidgetData()
 end
 
 local function OnInterfaceChanged(oldMode, newMode)
-	if not gamePanel or not mainArea then
+	if not m_caiGamePanel or not mainArea then
 		print("Error: CAI game view widget is nil")
 		return
 	end
 
-	if gCurrentModeWidget then
-		gCurrentModeWidget:Destroy()
-		gCurrentModeWidget = nil
+	if m_caiCurrentInterfaceWidget then
+		-- We explicitly remove the widget by id just in case interface mode resets while we are in some other popup
+		mgr:RemoveFromStack(m_caiCurrentInterfaceWidget:GetId())
+		m_caiCurrentInterfaceWidget:Destroy()
+		m_caiCurrentInterfaceWidget = nil
 	end
 
 	local newData = interfaceWidgets[newMode]
@@ -160,8 +196,8 @@ local function OnInterfaceChanged(oldMode, newMode)
 	local mode = mgr:CreateUIWidget("CAIWorldInputInterfaceMode", "InterfaceMode", newData.Properties)
 	if not mode then return end
 
-	gCurrentModeWidget = mode
-	mainArea:AddChild(mode, true)
+	m_caiCurrentInterfaceWidget = mode
+	mgr:Push(mode, PopupPriority.Medium)
 end
 
 -- ===========================================================================
@@ -201,7 +237,7 @@ local function CreateGameViewWidgets()
 		return false
 	end
 
-	gamePanel = mgr:CreateUIWidget(
+	m_caiGamePanel = mgr:CreateUIWidget(
 		mgr:GenerateWidgetId("CAIWorldInputPanel"),
 		"Panel",
 		{
@@ -210,7 +246,7 @@ local function CreateGameViewWidgets()
 			end,
 		}
 	)
-	if not gamePanel then
+	if not m_caiGamePanel then
 		print("Failed to create main game panel")
 		return false
 	end
@@ -221,8 +257,8 @@ local function CreateGameViewWidgets()
 		return false
 	end
 
-	gamePanel:AddChild(mainArea)
-	ExposedMembers.CAI_MainGamePanel = gamePanel
+	m_caiGamePanel:AddChild(mainArea)
+	ExposedMembers.CAI_MainGamePanel = m_caiGamePanel
 	return true
 end
 
@@ -243,7 +279,8 @@ local function SnapCursorToInitialCameraPosition()
 
 	local plot = Map.GetPlot(plotX, plotY)
 	if not plot then
-		print("CAI cursor unable to resolve initial camera plot coordinates: " .. tostring(plotX) .. ", " .. tostring(plotY))
+		print("CAI cursor unable to resolve initial camera plot coordinates: " ..
+			tostring(plotX) .. ", " .. tostring(plotY))
 		LuaEvents.CAICursorSnapToStartPlot()
 		return
 	end
@@ -272,11 +309,11 @@ local function UnregisterCAIEvents()
 end
 
 local function InitializeCAIGameView()
-	if gCAISystemsInitialized then return end
+	if m_caiSystemsInitialized then return end
 	if not CreateGameViewWidgets() then return end
 
-	gCAISystemsInitialized = true
-	mgr:Push(gamePanel)
+	m_caiSystemsInitialized = true
+	mgr:Push(m_caiGamePanel)
 	RegisterCAIEvents()
 	SnapCursorToInitialCameraPosition()
 end

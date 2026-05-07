@@ -32,6 +32,24 @@ Civilization VI accessibility mod for blind players. Adds TTS/screen reader navi
 
 No active feature. CivicsTree, GovernmentScreen, and CivicsChooser are implemented and verified in-game.
 
+Latest analysis note:
+
+- GovernmentScreen unlock-button blank-label issue traced from in-game logging: on first normal open, vanilla populates `UnlockPolicies` but leaves `UnlockGovernments` empty because the open path is `OnOpenGovernmentScreenMyGovernment()` -> `SwitchTabToMyGovernment()`, not the real vanilla Governments tab. CAI maps vanilla My Government to its own Governments view, so it was rebuilding the CAI Governments action row from `Controls.UnlockGovernments` before vanilla `RealizeGovernmentsPage()` had ever run. Patched by explicitly priming `RealizeGovernmentsPage()` inside the wrapped `SwitchTabToMyGovernment()` before rebuilding the CAI Governments body. Pending in-game verification.
+- GovernmentScreen policy-slot regression identified in `src/UI/inGame/GovernmentScreen_CAI.lua`: a recent refactor stopped refreshing CAI's captured active rows from live culture data after vanilla `RealizeActivePoliciesRows()`. Vanilla only realizes filled policy cards there, so empty slots disappeared entirely from the CAI Policies tree after tab switches and especially right after government changes. Fixed by restoring the post-row-rebuild live-slot sync when `m_caiSuppressRebuild` is false, which preserves pending assign/remove mirrors while repopulating empty slots for normal open/tab/government-change flows. Follow-up user test narrowed the remaining trap: the stale data is the built child slot list, not the outer row summaries, because row summary getters are already dynamic. CAI now consumes the pending-government-change flag inside `BuildPoliciesBody()` itself, refreshing the live slot mirror immediately before creating policy-row children so the rebuilt slot widgets use the current government layout on the first automatic switch to Policies. Pending in-game verification.
+- GovernmentScreen Policies tree now uses lazy row-child rebuilding on `TreeviewItem.OnToggleExpanded` / focus while expanded, reading live culture slot data per row instead of snapshotting slot children at body-build time. After that refactor, the older captured-row scaffolding was trimmed: unused screen-enum constants, unused government-instance capture, catalog capture, row-capture tables, and thin pass-through rebuild helpers were removed so the wrapper now keeps only the slot-policy mirror needed for pending unconfirmed edits.
+- GovernmentScreen policy-change focus trap found after the lazy row-child refactor: rebuilding expanded row children from `OnFocusEnter` could clear and recreate the row subtree while the UI manager was restoring focus back from the policy picker into one of those children, leaving focus effectively stuck. The row-child resync hook is now `OnToggleExpanded` only; ordinary policy assign/remove still refreshes vanilla controls and the slot-policy mirror, but no longer destroys the focused row subtree during focus restoration.
+- GovernmentScreen government-change follow-up analysis completed from base Lua plus user screenshot. The screenshot shows vanilla already has the correct new government slot layout and an enabled `Confirm Policies` button, so the bug is in CAI state mirroring rather than the base screen. Confirmed traps so far: `OnAcceptGovernmentChange()` switches to Policies but does not repopulate `m_ActivePolicyRows`, and CAI must not keep its own button-state model here. GovernmentScreen is now back on the `SetCAITab`-driven flow: tab wrappers own body rebuilds, `SetCAITab()` updates both tab-bar selection fields, and rebuild focus only targets the body's second child when vanilla switched tabs and `m_caiUserSwitchedTab` is false. Pending in-game verification.
+- ProductionPanel CAI close-path bug found and patched: `OnPanelClosedCAI()` was using `mgr:Pop()`, which could remove the current top widget instead of the actual production panel. During district placement that top widget can be the CAI district-placement interface, which matches the observed focus drop back to game view after confirming placement. The handler now removes the production panel by its own widget id. Verified in-game.
+- ProductionPanel district-placement close/reopen behavior is now confirmed from base Lua and documented in `docs/game-api.md`: production-build district placement (`ZoneDistrict`) explicitly closes the panel before placement, queue mode reopens the panel on return via `StrageticView_MapPlacement_ProductionOpen`, non-queue production only auto-reopens on cancel, and purchase-district placement does not use the same explicit close path.
+- Interface preview refactor implemented: `src/UI/inGame/unitHelpers_CAI.lua` was renamed to `src/UI/inGame/interfaceInfoHelpers_CAI.lua`, movement preview was generalized into interface-mode preview dispatch, district placement preview now reuses vanilla adjacency helper text plus CAI-owned/purchasable state checks, `PlotInfo5` now reads interface preview instead of movement-only preview, and `WorldInput_CAI.lua` now has a CAI district placement interface widget while dropping the redundant `UnitPathInfo` shortcut. Verified in-game.
+- Wonder placement follow-up analysis completed from base Lua. Vanilla uses `InterfaceModeTypes.BUILDING_PLACEMENT`, shows valid and purchasable plots plus hover focus, but does not expose district-style adjacency badges; the main explanatory text for wonders comes from the confirmation popup `SUCCESS_CONDITIONS`. CAI currently only handles `DISTRICT_PLACEMENT`, so wonder placement should be added through the same shared interface-preview path and interface widget pattern.
+- Wonder placement CAI support is now implemented in `src/UI/inGame/interfaceInfoHelpers_CAI.lua` and `src/UI/inGame/WorldInput_CAI.lua`: `BUILDING_PLACEMENT` now reports valid / owned / purchasable / invalid through `PlotInfo5` and automatic cursor speech, and exposes the same CAI interface widget pattern as movement and district placement. Pending in-game verification.
+- District / wonder placement investigation completed from base Lua. Findings for `StrategicView_MapPlacement`, `DistrictPlotIconManager`, `AdjacencyBonusSupport`, `PlotInfo`, and the district-versus-wonder placement info split are now documented in `docs/game-api.md`.
+- Diplomacy UI investigation completed from base Lua. Findings for `LeaderView`, `DiplomacyActionView`, `DiplomacyDealView`, `DiplomacyRibbon`, first-meet flow, open paths, intel tabs, and deal contents are now documented in `docs/game-api.md`.
+- LeaderView accessibility wrapper implemented in `src/UI/inGame/LeaderView_CAI.lua` and registered in `src/CivViAccess.modinfo`.
+- ProductionPanel open-target analysis completed from base Lua. Vanilla `CreateCorrectTabs()` always initializes to Production first, then city-panel purchase open handlers explicitly switch tabs after `Open()`. CAI now keeps its requested tab across panel close/open teardown so CityPanel purchase actions can reopen the accessibility panel on Gold/Faith instead of falling back to Production. Pending in-game verification.
+- ProductionPanel follow-up analysis found the real trap: `include("ProductionPanel")` runs `Initialize()` immediately, so city open LuaEvent handlers and `m_tabs` tab callbacks capture the original vanilla functions before CAI wraps them. The effective CAI sync point is `LuaEvents.ProductionPanel_ListModeChanged(...)`, which fires from the real vanilla tab switch callback. CAI now listens there to update its tab/body/default-index from vanilla's actual selected list mode. Pending in-game verification.
+
 Files involved in the most recent verified work:
 
 - `src/UI/inGame/GovernmentScreen_CAI.lua`
@@ -44,7 +62,7 @@ Files involved in the most recent verified work:
 What is implemented:
 
 - Government screen wrapper registered as a replacement.
-- CAI exposes two tabs: Policies and Governments. Vanilla My Government opens map to CAI Policies.
+- CAI exposes two tabs: Policies and Governments. Vanilla My Government maps to the CAI Governments view.
 - Policies tab is a slot-first tree with Military, Economic, Diplomatic, and Wildcard categories.
 - Empty and filled policy slots are represented from live player culture slot APIs.
 - Change mode supports Enter on a slot to open a filtered picker; Delete removes a filled policy.
@@ -55,9 +73,13 @@ What is implemented:
 - Government confirmation dialogs are handled through `InGamePopup_CAI.lua`, with manager-first input routing.
 - CAI suppresses unsafe rebuilds around vanilla confirmation/popup flows to avoid focus loss.
 - After accepting a government change, CAI mirrors vanilla by returning to Policies.
+- After accepting a government change, CAI now forces a full government-screen data refresh before rebuilding Policies so the new policy slot layout appears immediately and Confirm Policies reflects the real remaining empty slots.
+- CAI GovernmentScreen action buttons now read live policy/government action state instead of caching a stale snapshot from the first body build.
+- GovernmentScreen CAI now reads confirm/unlock button label, hidden, and disabled state directly from the live vanilla controls while keeping the older `SetCAITab` tab-switch/rebuild model. Pending in-game verification.
 - XML parse checks passed for the edited XML/modinfo files.
 - ActionPanel now has a Ctrl+Space CAI turn blocker list (`ActionPanelOpenTurnBlockers`, `CAIActionPanelTurnBlockerList`). Rows activate through vanilla `DoEndTurn()` / `DoEndTurn(blockerType)` and respect backing vanilla button hidden/disabled state where available.
 - Latest chooser/action fixes: ResearchChooser and CivicsChooser first-letter search now stays on root rows, queue position ignores nonqueued sentinel values, WorldTracker research/civic hotkeys respect the live tracker control disabled state before opening choosers, Space/Ctrl+Space end-turn hotkeys respect live disabled state plus tutorial ActionPanel UI-trigger gating and the vanilla tutorial slow-turn input shield, and GovernmentScreen no longer adds its own root Escape binding.
+- ProductionPanel CAI tab-sync cleanup: CAI now follows vanilla tab-change callbacks directly for Production / Purchase Gold / Purchase Faith / Queue open paths, redundant pass-through wrappers were removed, and duplicate tab-bar default-index updates were trimmed; pending in-game verification.
 - Tutorial ActionPanel analysis: active base-tutorial detailed steps that show ActionPanel are `TURN_BASED_C`, `SELECT_RESEARCH_8`, `SELECT_END_TURN_B`, `SELECT_END_TURN_PRODUCTION`, `SELECT_END_TURN_C`, `SELECT_END_TURN_D`, `SCOUTS_D2`, `SCOUTS_E`, `SELECT_END_TURN_RESEARCH`, and `RESEARCH_IRRIGATION`; `NOTIFICATION_PANEL` only uses an advisor-side ActionPanel pointer.
 - Notification analysis documented in `docs/game-api.md`: `NotificationManager.SendNotification(...)` takes a numeric type id, `notification:GetType()` matches `GameInfo.Notifications[...].Hash`, unregistered types fall back to `NotificationTypes.DEFAULT`, and CAI can safely own custom notification types by registering hashes in `g_notificationHandlers[...]` through the `NotificationPanel_*.lua` wildcard include path.
 - ActionPanel input handler now only wraps `OnInputActionTriggered`; vanilla `LateInitialize()` registers the wrapped global, avoiding duplicate input-action subscriptions.
@@ -75,11 +97,20 @@ What is implemented:
 
 ProductionPanel:
 
+- Revised to ResearchChooser conventions: every production / purchase row is now an expandable TreeviewItem. Outer label is the item name (plus recommended tag), the item tooltip is a brief summary (cost / turns from vanilla CostText, plus the second line of the vanilla button tooltip), and expanding the row reveals the full breakdown rows from the vanilla button tooltip with the duplicated leading name line skipped. The read-only Edit detail box is gone, along with `LOC_CAI_PRODUCTION_DETAIL_LABEL`.
+- Unit formations stay nested: base unit row is itself the build-base activation, with breakdown children plus separate Corps and Army child rows that each carry their own breakdown. Vanilla `CorpsArmyArrow` still toggles via `OnCorpsToggle` when the base row expands or collapses.
+- Queue tab kept simple: current production button + queued buttons remain non-expanding rows for management only.
 - Verify production/purchase Enter activation and Shift+Enter Civilopedia behavior.
-- Verify non-leaf tree expand/collapse with Enter, Left, and Right.
+- Verify Right arrow expands an item to the breakdown rows, Left arrow collapses, and Enter still activates rather than expanding.
+- Verify the outer item tooltip reads cost/turns plus a short description and does not repeat the item name.
+- Verify the breakdown children (yields, prereqs, status lines from the vanilla tooltip) read cleanly with the leading name line stripped.
+- Verify base unit expand reveals breakdown rows followed by Corps/Army children, each themselves expandable to their own breakdown, with the vanilla CorpsArmyArrow staying in sync.
+- Verify the cost line in every row tooltip / detail also reads the `LOC_TURNS_REMAINING_VAL` turns-left clause, matching the ResearchChooser/CivicsChooser cost-and-turns format.
+- Verify the current-production tree node now uses the same `BuildItemDetail` cost/description/maintenance/stats layout as the rest of the production rows (no separate vanilla status/progress/cost duplicate lines).
 - Verify queue tab is queue-management only: current production first, queued items after it, rows spoken as buttons, Delete removes focused row, Shift+Up/Down reorders.
 - Verify Ctrl+Enter from Production tab appends to queue without duplicate browser/focus noise.
 - Verify tutorial gating: hidden/disabled vanilla controls are skipped or announced disabled, and blocked rows do not activate.
+- Verify focus on a previously focused item is preserved across rebuilds (capture/restore via `mgr:CaptureFocusIndexPath` / `SetFocusIndexPath` already in `RebuildBody`).
 - ProductionManager / multi-queue accessibility still needs implementation.
 
 ResearchChooser:
@@ -126,6 +157,8 @@ WorldInput / cursor / notifications:
 
 - Verify remappable cursor actions move the CAI cursor and camera correctly.
 - Verify numpad no longer moves the cursor unless rebound by the user.
+- Verify wonder placement preview is spoken automatically on cursor move and repeats cleanly on `PlotInfo5`.
+- Verify the CAI wonder placement interface widget opens during `BUILDING_PLACEMENT`, confirms on primary action, and cancels on Escape.
 - Verify notification speech de-duplicates and includes summary/location when available.
 - Verify `Ctrl+N` opens the notification tree; Enter/Space activate, Delete dismisses, Shift+Delete dismisses group items.
 - Verify wrong-phase notifications do not activate and end-turn blockers stay out of the notification center.
@@ -149,6 +182,11 @@ TopPanel:
 Frontend/shared:
 
 - Verify refreshed frontend/shared files still open without Lua errors.
+- Verify GovernmentScreen Policies rows now always expose the live slot children after opening the screen, switching from Governments back to Policies, and immediately after accepting a government change with newly empty slots.
+- Verify GovernmentScreen first normal open now speaks/shows the Governments-side unlock button label without needing a Policies -> Governments tab cycle.
+- Verify GovernmentScreen immediately rebuilds the Policies tree after accepting a new government, including changed slot counts/types, without needing to close and reopen the screen.
+- Verify after filling every slot on the new government, Confirm Policies enables and changes from Assign All Policies to Confirm Policies.
+- Verify replacing or removing a policy while the screen stays open does not revert the CAI tree back to the committed pre-confirmation layout.
 - Verify IntroScreen still skips inaccessible startup/EULA screen as intended.
 - Verify LoadGameMenu keyboard behavior with the updated vanilla `KeyHandler` plus CAI block.
 - Verify My2K accessible dialogs: account menu, login, sign-up, legal document list/detail, logout/unlink confirmations, disabled-state speech, successful return to main menu.

@@ -730,11 +730,16 @@ WidgetTemplates = {
             Input.SetActiveContext(InputContext.World)
         end,
         OnFocusLeave = function(w)
-            Input.SetActiveContext(InputContext.GameOptions)
+            Input.SetActiveContext(InputContext.Shell)
         end,
     },
     InterfaceMode = {
-        AnnounceRole = false,
+        OnFocusEnter = function(w)
+            Input.SetActiveContext(InputContext.World)
+        end,
+        OnFocusLeave = function(w)
+            Input.SetActiveContext(InputContext.Shell)
+        end,
     },
 
     -- =======================================================================
@@ -841,7 +846,7 @@ WidgetTemplates = {
             }
         },
         IsLeaf = function(w)
-            return not w.Children or #w.Children == 0
+            return #w:GetVisibleChildren() == 0
         end,
         GetValue = function(w)
             if w:IsLeaf() then return "" end

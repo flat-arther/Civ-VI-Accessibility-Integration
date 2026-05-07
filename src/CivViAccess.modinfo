@@ -37,6 +37,7 @@
     <File>UI/inGame/InGame.lua</File>
     <File>UI/inGame/ActionPanel_CAI.lua</File>
     <File>UI/inGame/AdvisorPopup_CAI.lua</File>
+    <File>UI/inGame/LeaderView_CAI.lua</File>
     <File>UI/inGame/InGameTopOptionsMenu_CAI.lua</File>
     <File>UI/inGame/WorldInput_CAI.lua</File>
     <File>UI/inGame/WorldTracker_CAI.lua</File>
@@ -44,11 +45,10 @@
     <File>UI/inGame/NotificationPanel_CAI.lua</File>
     <File>UI/inGame/GovernmentScreen_CAI.lua</File>
     <File>UI/inGame/ResearchChooser_CAI.lua</File>
-    <File>UI/inGame/civicHelpers.lua</File>
-    <File>UI/inGame/unitHelpers_CAI.lua</File>
+    <File>UI/inGame/inGameHelpers_CAI.lua</File>
+    <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>
     <File>UI/inGame/CivicsChooser_CAI.lua</File>
     <File>UI/inGame/CivicsTree_CAI.lua</File>
-    <File>UI/inGame/researchHelpers.lua</File>
     <File>UI/inGame/TechTree_CAI.lua</File>
     <File>UI/inGame/ProductionPanel_CAI.lua</File>
     <File>UI/inGame/CityPanel_CAI.lua</File>
@@ -125,9 +125,8 @@
       <File>UI/shared/LoadGameMenu.lua</File>
       <File>UI/shared/Options.lua</File>
       <File>UI/inGame/NotificationPanel_CAI.lua</File>
-      <File>UI/inGame/civicHelpers.lua</File>
-      <File>UI/inGame/researchHelpers.lua</File>
-      <File>UI/inGame/unitHelpers_CAI.lua</File>
+      <File>UI/inGame/inGameHelpers_CAI.lua</File>
+      <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>
     </ImportFiles>
 
     <ReplaceUIScript id="CAI_WorldInput">
@@ -191,6 +190,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>AdvisorPopup</LuaContext>
         <LuaReplace>UI/inGame/AdvisorPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_LeaderView">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>LeaderView</LuaContext>
+        <LuaReplace>UI/inGame/LeaderView_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

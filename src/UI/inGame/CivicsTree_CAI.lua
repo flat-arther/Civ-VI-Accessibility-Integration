@@ -1,6 +1,6 @@
 include("caiUtils")
 include("CivicsTree")
-include("civicHelpers")
+include("inGameHelpers_CAI")
 
 local mgr                 = ExposedMembers.CAI_UIManager
 
@@ -167,7 +167,7 @@ local function FormatRowTooltip(civicType)
     AppendIfNonEmpty(parts, GetCivicBoostFirstLine(civicType))
 
     local kData = { CivicType = civicType, Type = civicType }
-    local unlockNames = GetUnlockNames(kData)
+    local unlockNames = GetCivicUnlockNames(kData)
     local obsoleteNames = GetObsoletePolicyNames(kData)
 
     for _, name in ipairs(GetFirstNNames(unlockNames, UNLOCKS_INLINE)) do
@@ -346,7 +346,7 @@ local function AddCivicDetailChildren(civicItem, civicType, sourceCivicId)
     AddTextDetailNode(mgr, civicItem, GetCivicBoostFirstLine(civicType))
 
     local kData = { CivicType = civicType, Type = civicType }
-    AddUnlocksNode(mgr, civicItem, GetUnlockNames(kData))
+    AddCivicUnlocksNode(mgr, civicItem, GetCivicUnlockNames(kData))
     AddMakesObsoleteNode(mgr, civicItem, GetObsoletePolicyNames(kData))
 
     local prereqTypes = {}
@@ -754,9 +754,13 @@ LuaEvents.LaunchBar_RaiseCivicsTree.Add(OnOpen)
 
 -- KeyUpHandler ESC and OnClose both call Close() by global name, so wrapping
 -- Close catches every vanilla close path including LaunchBar_CloseCivicsTree.
+-- Pop the CAI panel before orig() fires CivicsTree_CloseCivicsTree, otherwise
+-- the tutorial may synchronously raise an advisor popup onto the stack between
+-- orig() and the pop, and mgr:Pop() would remove that popup instead of the
+-- civics tree panel.
 Close = WrapFunc(Close, function(orig)
-    orig()
     OnPanelClosedCAI()
+    orig()
 end)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)

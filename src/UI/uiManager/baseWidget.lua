@@ -15,6 +15,13 @@
 ---@field GetState? fun():string
 ---@field GetTooltip? fun():string
 ---@field OnValueChanged? fun(w:UIWidget, value:string)
+---@field IsDisabled? fun(w:UIWidget):boolean
+---@---@field IsHidden? fun(w:UIWidget):boolean
+---@field OnClick? fun(w:UIWidget)
+---@field OnCreate? fun(w:UIWidget)
+---@field OnDestroy? fun(w:UIWidget)
+---@field OnFocusEnter? fun(w:UIWidget)
+---@field OnFocusLeave? fun(w:UIWidget)
 ---@field Callbacks table<UIWidgetCallbackTypes, fun(w):boolean[]>
 UIWidget = {
 }
@@ -173,8 +180,9 @@ end
 ---@param pos integer
 function UIWidget:SetFocusedChild(pos)
     if not self.Children or #self.Children == 0 then return end
-    if not self.Manager then return end
-    self.Manager:SetFocusIndexPath(self, { pos })
+    if pos > #self.Children then pos = #self.Children end
+    if pos < 1 then pos = 1 end
+    self.FocusedChild = self.Children[pos]
 end
 
 ---Checks if the widget is currently focused

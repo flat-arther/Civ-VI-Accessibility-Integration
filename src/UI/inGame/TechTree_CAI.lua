@@ -1,6 +1,6 @@
 include("caiUtils")
 include("TechTree")
-include("researchHelpers")
+include("inGameHelpers_CAI")
 
 local mgr                 = ExposedMembers.CAI_UIManager
 
@@ -166,7 +166,7 @@ local function FormatRowTooltip(techType)
     AppendIfNonEmpty(parts, GetTechBoostFirstLine(techType))
 
     local kData = { TechType = techType, Type = techType }
-    local unlockNames = GetUnlockNames(kData)
+    local unlockNames = GetTechUnlockNames(kData)
 
     for _, name in ipairs(GetFirstNNames(unlockNames, UNLOCKS_INLINE)) do
         AppendIfNonEmpty(parts, name)
@@ -341,7 +341,7 @@ local function AddTechDetailChildren(techItem, techType, sourceTechId)
     AddTextDetailNode(mgr, techItem, GetTechBoostFirstLine(techType))
 
     local kData = { TechType = techType, Type = techType }
-    AddUnlocksNode(mgr, techItem, GetUnlockNames(kData))
+    AddTechUnlocksNode(mgr, techItem, GetTechUnlockNames(kData))
 
     local prereqTypes = {}
     for _, pt in ipairs(kStatic.Prereqs or {}) do
@@ -698,9 +698,13 @@ LuaEvents.ResearchChooser_RaiseTechTree.Add(OnOpen)
 
 -- KeyUpHandler ESC and OnClose both call Close() by global name, so wrapping
 -- Close catches every vanilla close path including LaunchBar_CloseTechTree.
+-- Pop the CAI panel before orig() fires TechTree_CloseTechTree, otherwise the
+-- tutorial may synchronously raise an advisor popup onto the stack between
+-- orig() and the pop, and mgr:Pop() would remove that popup instead of the
+-- tech tree panel.
 Close = WrapFunc(Close, function(orig)
-    orig()
     OnPanelClosedCAI()
+    orig()
 end)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)

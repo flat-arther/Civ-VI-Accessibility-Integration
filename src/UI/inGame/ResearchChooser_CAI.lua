@@ -1,6 +1,6 @@
 include("caiUtils")
 include("ResearchChooser")
-include("researchHelpers")
+include("inGameHelpers_CAI")
 local mgr                        = ExposedMembers.CAI_UIManager
 
 local TUTORIAL_MOD_ID            = "17462E0F-1EE1-4819-AAAA-052B5896B02A"
@@ -283,7 +283,7 @@ local function AddResearchDetailChildren(parent, kData, unlockNames)
         AddTextDetailNode(mgr, parent, table.concat(statusParts, ", "))
     end
 
-    AddUnlocksNode(mgr, parent, unlockNames)
+    AddTechUnlocksNode(mgr, parent, unlockNames)
 end
 
 -- ===========================================================================
@@ -303,7 +303,7 @@ end
 -- ===========================================================================
 local function CreateRowWidget(kData, interactive)
     local captured = kData
-    local unlockNames = GetUnlockNames(captured)
+    local unlockNames = GetTechUnlockNames(captured)
 
     local row = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchChooserItem"), "TreeviewItem", {
         GetLabel = function() return FormatRowLabel(captured) end,

@@ -1,5 +1,5 @@
 include("caiUtils")
-include("unitHelpers_CAI")
+include("interfaceInfoHelpers_CAI")
 include("UnitPanel")
 
 local mgr = ExposedMembers.CAI_UIManager

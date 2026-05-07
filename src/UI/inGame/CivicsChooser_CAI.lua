@@ -1,5 +1,5 @@
 ﻿include("caiUtils")
-include("civicHelpers")
+include("inGameHelpers_CAI")
 include("CivicsChooser")
 local mgr                 = ExposedMembers.CAI_UIManager
 
@@ -248,9 +248,7 @@ local function FormatRowLabel(kData)
     return table.concat(parts, ", ")
 end
 
--- NormalizeFormattedText, SplitTooltipLinesWithoutSpecialLists,
--- AppendIfNonEmpty, GetUnlockNames, GetObsoletePolicyNames,
--- AddTextDetailNode, AddUnlocksNode, AddMakesObsoleteNode -> civicHelpers.lua
+-- Shared formatting and tree-builder helpers live in inGameHelpers_CAI.lua.
 
 -- ===========================================================================
 -- Detail helpers
@@ -292,7 +290,7 @@ local function AddCivicDetailChildren(parent, kData, unlockNames, obsoleteNames)
         AddTextDetailNode(mgr, parent, table.concat(statusParts, ", "))
     end
 
-    AddUnlocksNode(mgr, parent, unlockNames)
+    AddCivicUnlocksNode(mgr, parent, unlockNames)
     AddMakesObsoleteNode(mgr, parent, obsoleteNames)
 end
 
@@ -313,7 +311,7 @@ end
 -- ===========================================================================
 local function CreateRowWidget(kData, interactive)
     local captured = kData
-    local unlockNames = GetUnlockNames(captured)
+    local unlockNames = GetCivicUnlockNames(captured)
     local obsoleteNames = GetObsoletePolicyNames(captured)
 
     local row = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicsChooserItem"), "TreeviewItem", {

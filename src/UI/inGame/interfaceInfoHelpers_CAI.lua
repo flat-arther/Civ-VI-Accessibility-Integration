@@ -2,6 +2,7 @@
 -- Unit movement helpers (extracted from vanilla WorldInput so other contexts
 -- can reuse path-info / movement-speech without depending on WorldInput state).
 -- ===========================================================================
+include("AdjacencyBonusSupport")
 
 ---@class MovementPathInfo
 ---@field kind string
@@ -514,6 +515,162 @@ function BuildMovementSpeech(pathInfo)
     end
 
     return out
+end
+
+-- ===========================================================================
+-- Interface-specific plot preview helpers
+-- ===========================================================================
+
+InterfaceInfoHelpers = InterfaceInfoHelpers or {}
+
+local function BuildMoveToInterfaceInfo(plot)
+    local unit = UI.GetHeadSelectedUnit()
+    if not unit or not plot then return nil end
+    return BuildMovementSpeech(BuildMovementPathInfo(unit, plot:GetIndex(), false, false))
+end
+
+local function GetDistrictPlacementTargets(city, districtHash)
+    if city == nil or districtHash == nil then return nil, nil, nil end
+
+    local district = GameInfo.Districts[districtHash]
+    if district == nil then return nil, nil, nil end
+
+    local validOwned = {}
+    local buildParams = {
+        [CityOperationTypes.PARAM_DISTRICT_TYPE] = districtHash,
+    }
+    local buildResults = CityManager.GetOperationTargets(city, CityOperationTypes.BUILD, buildParams)
+    local buildPlots = buildResults and buildResults[CityOperationResults.PLOTS]
+    if buildPlots ~= nil then
+        for _, plotId in ipairs(buildPlots) do
+            validOwned[plotId] = true
+        end
+    end
+
+    local validPurchasable = {}
+    local purchaseParams = {
+        [CityCommandTypes.PARAM_PLOT_PURCHASE] = UI.GetInterfaceModeParameter(CityCommandTypes.PARAM_PLOT_PURCHASE),
+    }
+    local purchaseResults = CityManager.GetCommandTargets(city, CityCommandTypes.PURCHASE, purchaseParams)
+    local purchasePlots = purchaseResults and purchaseResults[CityCommandResults.PLOTS]
+    if purchasePlots ~= nil then
+        for _, plotId in ipairs(purchasePlots) do
+            local plot = Map.GetPlotByIndex(plotId)
+            if plot ~= nil and not validOwned[plotId] and
+                plot:CanHaveDistrict(district.Index, city:GetOwner(), city:GetID()) then
+                validPurchasable[plotId] = true
+            end
+        end
+    end
+
+    return district, validOwned, validPurchasable
+end
+
+local function GetWonderPlacementTargets(city, buildingHash)
+    if city == nil or buildingHash == nil then return nil, nil, nil end
+
+    local building = GameInfo.Buildings[buildingHash]
+    if building == nil then return nil, nil, nil end
+
+    local validOwned = {}
+    local buildParams = {
+        [CityOperationTypes.PARAM_BUILDING_TYPE] = buildingHash,
+    }
+    local buildResults = CityManager.GetOperationTargets(city, CityOperationTypes.BUILD, buildParams)
+    local buildPlots = buildResults and buildResults[CityOperationResults.PLOTS]
+    if buildPlots ~= nil then
+        for _, plotId in ipairs(buildPlots) do
+            validOwned[plotId] = true
+        end
+    end
+
+    local validPurchasable = {}
+    local purchaseParams = {
+        [CityCommandTypes.PARAM_PLOT_PURCHASE] = UI.GetInterfaceModeParameter(CityCommandTypes.PARAM_PLOT_PURCHASE),
+    }
+    local purchaseResults = CityManager.GetCommandTargets(city, CityCommandTypes.PURCHASE, purchaseParams)
+    local purchasePlots = purchaseResults and purchaseResults[CityCommandResults.PLOTS]
+    if purchasePlots ~= nil then
+        for _, plotId in ipairs(purchasePlots) do
+            local plot = Map.GetPlotByIndex(plotId)
+            if plot ~= nil and not validOwned[plotId] and
+                plot:CanHaveWonder(building.Index, city:GetOwner(), city:GetID()) then
+                validPurchasable[plotId] = true
+            end
+        end
+    end
+
+    return building, validOwned, validPurchasable
+end
+
+local function BuildDistrictPlacementInterfaceInfo(plot)
+    if plot == nil then return nil end
+
+    local city = UI.GetHeadSelectedCity()
+    local districtHash = UI.GetInterfaceModeParameter(CityOperationTypes.PARAM_DISTRICT_TYPE)
+    local district, validOwned, validPurchasable = GetDistrictPlacementTargets(city, districtHash)
+    if district == nil or validOwned == nil or validPurchasable == nil then return nil end
+
+    local plotId = plot:GetIndex()
+    local isOwnedValid = validOwned[plotId] == true
+    local isPurchasableValid = validPurchasable[plotId] == true
+
+    local lines = {}
+    if isOwnedValid or isPurchasableValid then
+        table.insert(lines, Locale.Lookup("LOC_CAI_PLOT_INTERFACE_VALID"))
+        table.insert(lines,
+            Locale.Lookup(isOwnedValid and "LOC_CAI_PLOT_INTERFACE_OWNED" or "LOC_CAI_PLOT_INTERFACE_PURCHASABLE"))
+
+        local _, bonusTooltip, requiredText = GetAdjacentYieldBonusString(district.Index, city, plot)
+        if bonusTooltip ~= nil and bonusTooltip ~= "" then
+            table.insert(lines, bonusTooltip)
+        else
+            table.insert(lines, Locale.Lookup("LOC_CAI_PLOT_NO_PLACEMENT_BONUS"))
+        end
+        if requiredText ~= nil and requiredText ~= "" then
+            table.insert(lines, requiredText)
+        end
+    else
+        table.insert(lines, Locale.Lookup("LOC_CAI_PLOT_INTERFACE_INVALID"))
+    end
+
+    return lines
+end
+
+local function BuildWonderPlacementInterfaceInfo(plot)
+    if plot == nil then return nil end
+
+    local city = UI.GetHeadSelectedCity()
+    local buildingHash = UI.GetInterfaceModeParameter(CityOperationTypes.PARAM_BUILDING_TYPE)
+    local building, validOwned, validPurchasable = GetWonderPlacementTargets(city, buildingHash)
+    if building == nil or validOwned == nil or validPurchasable == nil then return nil end
+
+    local plotId = plot:GetIndex()
+    local isOwnedValid = validOwned[plotId] == true
+    local isPurchasableValid = validPurchasable[plotId] == true
+
+    local lines = {}
+    if isOwnedValid or isPurchasableValid then
+        table.insert(lines, Locale.Lookup("LOC_CAI_PLOT_INTERFACE_VALID"))
+        table.insert(lines,
+            Locale.Lookup(isOwnedValid and "LOC_CAI_PLOT_INTERFACE_OWNED" or "LOC_CAI_PLOT_INTERFACE_PURCHASABLE"))
+    else
+        table.insert(lines, Locale.Lookup("LOC_CAI_PLOT_INTERFACE_INVALID"))
+    end
+
+    return lines
+end
+
+InterfaceInfoHelpers[InterfaceModeTypes.MOVE_TO] = BuildMoveToInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.DISTRICT_PLACEMENT] = BuildDistrictPlacementInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.BUILDING_PLACEMENT] = BuildWonderPlacementInterfaceInfo
+
+function GetActiveInterfacePlotInfo(plot)
+    if plot == nil then return nil end
+
+    local helper = InterfaceInfoHelpers[UI.GetInterfaceMode()]
+    if helper == nil then return nil end
+    return helper(plot)
 end
 
 -- ===========================================================================

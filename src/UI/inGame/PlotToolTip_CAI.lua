@@ -1,5 +1,5 @@
 include("caiUtils")
-include("unitHelpers_CAI")
+include("interfaceInfoHelpers_CAI")
 include("PlotToolTip")
 
 local currentPlot = -1
@@ -13,7 +13,7 @@ local INFO_PRIORITY = {
     "TileType",
     "Feature",
     "Units",
-    "MovementInfo",
+    "InterfaceInfo",
     "NaturalWonder",
     "Resources",
     "Buildings",
@@ -32,7 +32,7 @@ PlotInfoActionPriority = {
     "TileType",
     "FeatureInfo",
     "Units",
-    "MovementInfo",
+    "InterfaceInfo",
     "Resources",
     "Buildings",
     "Owner",
@@ -134,11 +134,9 @@ info.PlotInfoHelpers = {
         return Locale.Lookup(data.TerrainTypeName)
     end,
 
-    MovementInfo = function(data)
-        if UI.GetInterfaceMode() ~= InterfaceModeTypes.MOVE_TO then return end
-        local unit = UI.GetHeadSelectedUnit()
-        if not unit then return end
-        return BuildMovementSpeech(BuildMovementPathInfo(unit, data.Index, false, false))
+    InterfaceInfo = function(data, plot)
+        if not plot then return nil end
+        return GetActiveInterfacePlotInfo(plot)
     end,
 
     Units = function(data)
@@ -582,7 +580,7 @@ function info:RequestPlotInfo(plot, requestedKeys)
     for _, key in ipairs(requestedKeys) do
         local helper = self.PlotInfoHelpers[key]
         if helper then
-            local output = helper(data)
+            local output = helper(data, plot)
             if type(output) == "table" then
                 for _, s in ipairs(output) do
                     if s and s ~= "" then table.insert(results, s) end
@@ -610,7 +608,7 @@ info.PlotInfo = {
             "LOC_CAI_PLOT_NO_FEATURES")
     end,
     Units        = function(plot) return RequestWithFallback(plot, { "Units" }, "LOC_CAI_PLOT_NO_UNITS") end,
-    MovementInfo = function(plot) return RequestWithFallback(plot, { "MovementInfo" }, "LOC_CAI_PLOT_NO_MOVEMENT_PREVIEW") end,
+    InterfaceInfo = function(plot) return RequestWithFallback(plot, { "InterfaceInfo" }, "LOC_CAI_PLOT_NO_INTERFACE_PREVIEW") end,
     Resources    = function(plot) return RequestWithFallback(plot, { "Resources" }, "LOC_CAI_PLOT_NO_RESOURCES") end,
     Buildings    = function(plot) return RequestWithFallback(plot, { "Buildings" }, "LOC_CAI_PLOT_NO_BUILDINGS") end,
     Owner        = function(plot) return RequestWithFallback(plot, { "Owner" }, "LOC_CAI_PLOT_UNOWNED") end,
@@ -634,7 +632,7 @@ function InitializePlotInfoActionMap()
         [Input.GetActionId("PlotInfo2")]  = { "TileType" },
         [Input.GetActionId("PlotInfo3")]  = { "FeatureInfo" },
         [Input.GetActionId("PlotInfo4")]  = { "Units" },
-        [Input.GetActionId("PlotInfo5")]  = { "MovementInfo" },
+        [Input.GetActionId("PlotInfo5")]  = { "InterfaceInfo" },
         [Input.GetActionId("PlotInfo6")]  = { "Resources" },
         [Input.GetActionId("PlotInfo7")]  = { "Buildings" },
         [Input.GetActionId("PlotInfo8")]  = { "Owner" },

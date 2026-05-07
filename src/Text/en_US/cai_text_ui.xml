@@ -159,6 +159,18 @@
     <Row Tag="LOC_CAI_EXITED_MOVEMENT_MODE" Language="en_US">
       <Text>Exited movement mode</Text>
     </Row>
+    <Row Tag="LOC_CAI_DISTRICT_PLACEMENT_MODE" Language="en_US">
+      <Text>District placement mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EXITED_DISTRICT_PLACEMENT_MODE" Language="en_US">
+      <Text>Exited district placement mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WONDER_PLACEMENT_MODE" Language="en_US">
+      <Text>Wonder placement mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EXITED_WONDER_PLACEMENT_MODE" Language="en_US">
+      <Text>Exited wonder placement mode</Text>
+    </Row>
     <Row Tag="LOC_CAI_CURSOR_MOVE_UP" Language="en_US">
       <Text>Move cursor up</Text>
     </Row>
@@ -698,14 +710,41 @@
     </Row>
 
     <!-- Production panel -->
-    <Row Tag="LOC_CAI_PRODUCTION_CURRENT" Language="en_US">
-      <Text>Current production: {1_Name}</Text>
-    </Row>
     <Row Tag="LOC_CAI_PRODUCTION_QUEUE_LIST" Language="en_US">
       <Text>Production queue</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_DETAIL_LABEL" Language="en_US">
-      <Text>Production details</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_REQUIREMENTS_COUNT" Language="en_US">
+      <Text>Requirements: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_REQUIREMENTS_COUNT_ONE" Language="en_US">
+      <Text>Requirements: 1</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CITIZEN_YIELDS_COUNT" Language="en_US">
+      <Text>Citizen yields: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CITIZEN_YIELDS_COUNT_ONE" Language="en_US">
+      <Text>Citizen yields: 1</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_BONUSES_COUNT" Language="en_US">
+      <Text>Bonuses: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_BONUSES_COUNT_ONE" Language="en_US">
+      <Text>Bonuses: 1</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_REQUIREMENTS_LABEL" Language="en_US">
+      <Text>Requirements:</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_BONUSES_LABEL" Language="en_US">
+      <Text>Bonuses:</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_STATS_LABEL" Language="en_US">
+      <Text>Stats:</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_STATS_COUNT" Language="en_US">
+      <Text>Stats: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_STATS_COUNT_ONE" Language="en_US">
+      <Text>Stats: 1</Text>
     </Row>
     <Row Tag="LOC_CAI_PRODUCTION_CHOSEN" Language="en_US">
       <Text>Chose: {1_Name}</Text>
@@ -980,10 +1019,10 @@
       <Text>Read units on this plot</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOTINFO5" Language="en_US">
-      <Text>Movement Preview</Text>
+      <Text>Interface Preview</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOTINFO5_TOOLTIP" Language="en_US">
-      <Text>Read movement path information</Text>
+      <Text>Read interface-specific plot preview</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOTINFO6" Language="en_US">
       <Text>Resources</Text>
@@ -1026,8 +1065,23 @@
     <Row Tag="LOC_CAI_PLOT_NO_UNITS" Language="en_US">
       <Text>No units on this plot</Text>
     </Row>
-    <Row Tag="LOC_CAI_PLOT_NO_MOVEMENT_PREVIEW" Language="en_US">
-      <Text>No movement preview</Text>
+    <Row Tag="LOC_CAI_PLOT_NO_INTERFACE_PREVIEW" Language="en_US">
+      <Text>No interface preview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_INTERFACE_VALID" Language="en_US">
+      <Text>Valid</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_INTERFACE_INVALID" Language="en_US">
+      <Text>Invalid</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_INTERFACE_OWNED" Language="en_US">
+      <Text>Owned</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_INTERFACE_PURCHASABLE" Language="en_US">
+      <Text>Purchasable</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_NO_PLACEMENT_BONUS" Language="en_US">
+      <Text>No placement bonus</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_NO_RESOURCES" Language="en_US">
       <Text>No resources on this plot</Text>

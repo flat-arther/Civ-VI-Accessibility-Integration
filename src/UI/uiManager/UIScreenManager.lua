@@ -21,6 +21,7 @@ local UIScreenManager = {
 
 --#Includes
 include("caiUtils")
+include("InputSupport")
 include("baseWidget")
 include("widgetTemplateHelpers")
 include("widgetTemplates")
@@ -165,7 +166,7 @@ function UIScreenManager:RemoveFromStack(id)
 
     for i = #self.Stack, 1, -1 do
         local w = self.Stack[i]
-        local widgetId = w and w.GetId and w:GetId() or w and w.Id
+        local widgetId = w:GetId()
         if widgetId == id then
             table.remove(self.Stack, i)
             w.__priority = nil
