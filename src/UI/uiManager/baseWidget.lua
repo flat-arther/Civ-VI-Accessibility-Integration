@@ -174,6 +174,7 @@ function UIWidget:ClearChildren()
     end
     self.FocusedChild = nil
     self.Children = {}
+    if self.Collapse then self:Collapse() end
 end
 
 ---Focuses a child of this widget given its index
