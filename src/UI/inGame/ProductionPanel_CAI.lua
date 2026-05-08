@@ -37,6 +37,19 @@ local m_caiBuildingList                = nil ---@type table|nil
 local m_caiUnitList                    = nil ---@type table|nil
 local m_caiCaptureListMode             = nil ---@type integer|nil
 
+-- Stable bodies and category nodes. Built once in EnsurePanelBuilt and
+-- refreshed (ClearChildren + repopulate) on every vanilla View() call.
+-- m_caiBody hosts the items tree (Production / Purchase Gold / Purchase Faith).
+-- m_caiQueueBody hosts the queue rows (Queue tab). Each body's IsHidden is
+-- gated on the active tab so only one is visible at a time.
+local m_caiQueueBody                   = nil ---@type UIWidget|nil
+local m_caiCurrentProductionNode       = nil ---@type UIWidget|nil
+local m_caiDistrictsNode               = nil ---@type UIWidget|nil
+local m_caiBuildingsNode               = nil ---@type UIWidget|nil
+local m_caiWondersNode                 = nil ---@type UIWidget|nil
+local m_caiUnitsNode                   = nil ---@type UIWidget|nil
+local m_caiProjectsNode                = nil ---@type UIWidget|nil
+
 function PlayMenuHover()
     UI.PlaySound("Main_Menu_Mouse_Over")
 end
@@ -101,15 +114,6 @@ function GetInstanceContainerControl(kInstance, formation)
     if formation == "corps" then return kInstance.CorpsButtonContainer or kInstance.Root end
     if formation == "army" then return kInstance.ArmyButtonContainer or kInstance.Root end
     return kInstance.Root
-end
-
-function IsItemRowHidden(item, tab, formation)
-    local kInstance = GetInstanceForItem(item, tab)
-    if not kInstance then return false end
-
-    local container = GetInstanceContainerControl(kInstance, formation)
-    local actionControl = GetInstanceActionControl(kInstance, formation)
-    return ControlIsHidden(container) or ControlIsHidden(actionControl)
 end
 
 function IsItemRowDisabled(item, tab, formation)
@@ -1107,7 +1111,6 @@ function CreateItemRow(item, tab, formation)
         GetLabel = function() return ReadRowLabel(item, formation) end,
         GetTooltip = function() return ReadRowTooltip(item, formation) end,
         IsDisabled = function() return IsItemRowDisabled(item, tab, formation) end,
-        IsHidden = function() return IsItemRowHidden(item, tab, formation) end,
         LeftAction = BuildItemLeftAction(item, tab, formation),
         ControlAction = tab == TAB_PRODUCTION and CurrentTabSupportsQueue() and
             BuildItemQueueAction(item, tab, formation) or nil,
@@ -1131,7 +1134,6 @@ function AddUnitEntry(parent, unit, tab)
         GetLabel = function() return ReadRowLabel(unit, nil) end,
         GetTooltip = function() return ReadRowTooltip(unit, nil) end,
         IsDisabled = function() return IsItemRowDisabled(unit, tab, nil) end,
-        IsHidden = function() return IsItemRowHidden(unit, tab, nil) end,
         IsExpanded = kInstance and kInstance.CorpsArmyArrow and kInstance.CorpsArmyArrow:IsSelected() or false,
         OnToggleExpanded = function(expanded)
             local inst = GetInstanceForItem(unit, tab)
@@ -1191,6 +1193,12 @@ function BuildCategoryNode(focusKey, fallbackLabel, items, extraItems, tab, isUn
             if expanded then OnExpand(list) else OnCollapse(list) end
         end,
     })
+    PopulateCategoryChildren(node, items, extraItems, tab, isUnits)
+    return node
+end
+
+function PopulateCategoryChildren(node, items, extraItems, tab, isUnits)
+    if not node then return end
     for _, item in ipairs(items or {}) do
         if isUnits then
             AddUnitEntry(node, item, tab)
@@ -1201,7 +1209,6 @@ function BuildCategoryNode(focusKey, fallbackLabel, items, extraItems, tab, isUn
     for _, item in ipairs(extraItems or {}) do
         node:AddChild(CreateItemRow(item, tab, nil))
     end
-    return node
 end
 
 function MakeQueueEntryDescription(entry)
@@ -1434,102 +1441,77 @@ function InvokePrimaryAction(node, leftAction)
     return false
 end
 
-function BuildItemTreeBody(tab)
-    local tree = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIProductionPanelTreeview"), "Treeview", {
-        GetLabel = function() return Locale.Lookup("LOC_HUD_CHOOSE_PRODUCTION") end,
-    })
-
-    local items = GetItemsForTab(tab)
-
-    if tab == TAB_PRODUCTION and HasActiveCurrentProduction() then
-        tree:AddChild(BuildCurrentProductionNode())
-    end
-
-    if tab == TAB_PRODUCTION then
-        tree:AddChild(BuildCategoryNode("cat:districts", "LOC_HUD_DISTRICTS_BUILDINGS",
-            items.Districts, items.Buildings, tab, false,
-            function() return m_caiDistrictList end))
-    else
-        tree:AddChild(BuildCategoryNode("cat:districts", "LOC_HUD_DISTRICTS",
-            items.Districts, nil, tab, false,
-            function() return m_caiDistrictList end))
-        tree:AddChild(BuildCategoryNode("cat:buildings", "LOC_HUD_BUILDINGS",
-            items.Buildings, nil, tab, false,
-            function() return m_caiBuildingList end))
-    end
-
-    if tab == TAB_PRODUCTION then
-        tree:AddChild(BuildCategoryNode("cat:wonders", "LOC_HUD_CITY_WONDERS",
-            items.Wonders, nil, tab, false,
-            function() return m_caiWonderList end))
-    end
-
-    tree:AddChild(BuildCategoryNode("cat:units", "LOC_TECH_FILTER_UNITS",
-        items.Units, nil, tab, true,
-        function() return m_caiUnitList end))
-
-    if tab == TAB_PRODUCTION then
-        tree:AddChild(BuildCategoryNode("cat:projects", "LOC_HUD_PROJECTS",
-            items.Projects, nil, tab, false,
-            function() return m_caiProjectList end))
-    end
-
-    return tree
-end
-
-function BuildQueueBody()
-    local list = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIProductionPanelList"), "List", {
-        GetLabel = function() return Locale.Lookup("LOC_CAI_PRODUCTION_QUEUE_LIST") end,
-    })
-
-    list:AddChild(CreateQueueCurrentWidget())
-
-    if m_caiData and m_caiData.City then
-        local pBuildQueue = m_caiData.City:GetBuildQueue()
-        if pBuildQueue then
-            for i = 1, MAX_QUEUE_SIZE do
-                local entry = pBuildQueue:GetAt(i)
-                if entry then
-                    local desc = MakeQueueEntryDescription(entry)
-                    if desc ~= "" then
-                        list:AddChild(CreateQueueRowWidget(i, desc))
-                    end
-                end
+function CreateStableCategoryNode(focusKey, fallbackLabel, getListRef)
+    return CreateActionNode({
+        FocusKey = focusKey,
+        GetLabel = function()
+            local list = getListRef and getListRef() or nil
+            if list and list.Header then
+                local t = list.Header:GetText()
+                if t and t ~= "" then return t end
             end
-        end
-    end
-
-    return list
+            return Locale.Lookup(fallbackLabel)
+        end,
+        IsExpanded = true,
+        IsHidden = function(w) return (w.Children == nil) or (#w.Children == 0) end,
+        OnToggleExpanded = function(expanded)
+            local list = getListRef and getListRef() or nil
+            if not list then return end
+            if expanded then OnExpand(list) else OnCollapse(list) end
+        end,
+    })
 end
 
-function RebuildBody(selectedTab)
-    if not m_caiPanel then return end
-
-    local tabChanged = selectedTab ~= nil and selectedTab ~= m_caiTab
-    if selectedTab then m_caiTab = selectedTab end
+function RefreshBodyContents()
+    if not m_caiBody then return end
+    local tab = NormalizeCAITab(m_caiTab) or TAB_PRODUCTION
+    local activeBody = (tab == TAB_QUEUE) and m_caiQueueBody or m_caiBody
 
     local focusPath
     if m_caiQueueFocusIndexAfterRebuild then
         focusPath = { m_caiQueueFocusIndexAfterRebuild }
         m_caiQueueFocusIndexAfterRebuild = nil
-    elseif not tabChanged and m_caiBody then
-        focusPath = mgr:CaptureFocusIndexPath(m_caiBody)
+    elseif activeBody then
+        focusPath = mgr:CaptureFocusIndexPath(activeBody)
     end
 
-    if m_caiBody then m_caiBody:Destroy() end
+    if m_caiDistrictsNode then m_caiDistrictsNode:ClearChildren() end
+    if m_caiBuildingsNode then m_caiBuildingsNode:ClearChildren() end
+    if m_caiWondersNode then m_caiWondersNode:ClearChildren() end
+    if m_caiUnitsNode then m_caiUnitsNode:ClearChildren() end
+    if m_caiProjectsNode then m_caiProjectsNode:ClearChildren() end
+    if m_caiQueueBody then m_caiQueueBody:ClearChildren() end
 
-    local tab = NormalizeCAITab(m_caiTab)
     if tab == TAB_QUEUE then
-        m_caiBody = BuildQueueBody()
+        if m_caiQueueBody and m_caiData and m_caiData.City then
+            local pBuildQueue = m_caiData.City:GetBuildQueue()
+            if pBuildQueue then
+                for i = 1, MAX_QUEUE_SIZE do
+                    local entry = pBuildQueue:GetAt(i)
+                    if entry then
+                        local desc = MakeQueueEntryDescription(entry)
+                        if desc ~= "" then
+                            m_caiQueueBody:AddChild(CreateQueueRowWidget(i, desc))
+                        end
+                    end
+                end
+            end
+        end
     else
-        m_caiBody = BuildItemTreeBody(tab)
+        local items = GetItemsForTab(tab)
+        if tab == TAB_PRODUCTION then
+            PopulateCategoryChildren(m_caiDistrictsNode, items.Districts, items.Buildings, tab, false)
+            PopulateCategoryChildren(m_caiWondersNode, items.Wonders, nil, tab, false)
+            PopulateCategoryChildren(m_caiProjectsNode, items.Projects, nil, tab, false)
+        else
+            PopulateCategoryChildren(m_caiDistrictsNode, items.Districts, nil, tab, false)
+            PopulateCategoryChildren(m_caiBuildingsNode, items.Buildings, nil, tab, false)
+        end
+        PopulateCategoryChildren(m_caiUnitsNode, items.Units, nil, tab, true)
     end
-    m_caiPanel:InsertChild(2, m_caiBody)
 
-    if tabChanged then
-        m_caiBody:ClearFocusedChild()
-    elseif focusPath then
-        mgr:SetFocusIndexPath(m_caiBody, focusPath)
+    if focusPath and activeBody then
+        mgr:SetFocusIndexPath(activeBody, focusPath)
     end
 
     m_caiLastBuiltTab = tab
@@ -1580,13 +1562,8 @@ end
 
 local function OnVanillaListModeChangedCAI(listMode)
     local targetTab = GetCAITabForListMode(listMode)
-    local tabChanged = NormalizeCAITab(m_caiTab) ~= targetTab
-
     SetCAITab(targetTab)
-
-    if m_caiPanel and (m_caiBody == nil or tabChanged or m_caiLastBuiltTab ~= targetTab) then
-        RebuildBody(targetTab)
-    end
+    RefreshBodyContents()
 
     if m_caiOpenPending and m_caiPanel and mgr and not mgr:HasWidget(m_caiPanel) then
         m_caiOpenPending = false
@@ -1596,7 +1573,7 @@ end
 
 local function RebuildForTab(tab)
     SetCAITab(tab)
-    RebuildBody(tab)
+    RefreshBodyContents()
 end
 
 function RefreshRecommendations()
@@ -1642,6 +1619,41 @@ function EnsurePanelBuilt()
     m_caiTabBar:AddChild(m_caiTabs[TAB_QUEUE])
     m_caiTabBar:SetDefaultIndex(GetTabBarIndex(m_caiTab))
     m_caiTabBar:SetFocusedChild(GetTabBarIndex(m_caiTab))
+
+    m_caiBody = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIProductionPanelTreeview"), "Treeview", {
+        GetLabel = function() return Locale.Lookup("LOC_HUD_CHOOSE_PRODUCTION") end,
+        IsHidden = function() return NormalizeCAITab(m_caiTab) == TAB_QUEUE end,
+    })
+    m_caiPanel:AddChild(m_caiBody)
+
+    m_caiCurrentProductionNode = BuildCurrentProductionNode()
+    m_caiBody:AddChild(m_caiCurrentProductionNode)
+
+    m_caiDistrictsNode = CreateStableCategoryNode("cat:districts", "LOC_HUD_DISTRICTS",
+        function() return m_caiDistrictList end)
+    m_caiBody:AddChild(m_caiDistrictsNode)
+
+    m_caiBuildingsNode = CreateStableCategoryNode("cat:buildings", "LOC_HUD_BUILDINGS",
+        function() return m_caiBuildingList end)
+    m_caiBody:AddChild(m_caiBuildingsNode)
+
+    m_caiWondersNode = CreateStableCategoryNode("cat:wonders", "LOC_HUD_CITY_WONDERS",
+        function() return m_caiWonderList end)
+    m_caiBody:AddChild(m_caiWondersNode)
+
+    m_caiUnitsNode = CreateStableCategoryNode("cat:units", "LOC_TECH_FILTER_UNITS",
+        function() return m_caiUnitList end)
+    m_caiBody:AddChild(m_caiUnitsNode)
+
+    m_caiProjectsNode = CreateStableCategoryNode("cat:projects", "LOC_HUD_PROJECTS",
+        function() return m_caiProjectList end)
+    m_caiBody:AddChild(m_caiProjectsNode)
+
+    m_caiQueueBody = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIProductionPanelList"), "List", {
+        GetLabel = function() return Locale.Lookup("LOC_CAI_PRODUCTION_QUEUE_LIST") end,
+        IsHidden = function() return NormalizeCAITab(m_caiTab) ~= TAB_QUEUE end,
+    })
+    m_caiPanel:AddChild(m_caiQueueBody)
 end
 
 function OnPanelOpenedCAI()
@@ -1660,6 +1672,13 @@ function OnPanelClosedCAI()
     m_caiTabBar = nil
     m_caiTabs = {}
     m_caiBody = nil
+    m_caiQueueBody = nil
+    m_caiCurrentProductionNode = nil
+    m_caiDistrictsNode = nil
+    m_caiBuildingsNode = nil
+    m_caiWondersNode = nil
+    m_caiUnitsNode = nil
+    m_caiProjectsNode = nil
     m_caiData = nil
     m_caiRecommended = {}
     m_caiInstanceByHash = {}
@@ -1800,34 +1819,13 @@ View = WrapFunc(View, function(orig, data)
     orig(data)
     RefreshRecommendations()
     EnsurePanelBuilt()
-    local activeTab = NormalizeCAITab(m_caiTab)
-    local cityID = data and data.City and data.City:GetID() or nil
-    local ownerID = data and data.Owner or nil
-
-    local currentHash = nil
-    local pBuildQueue = data and data.City and data.City.GetBuildQueue and data.City:GetBuildQueue() or nil
-    if pBuildQueue then
-        currentHash = pBuildQueue:GetCurrentProductionTypeHash()
-    end
-    local sameContext = m_caiLastBuiltCityID == cityID and m_caiLastBuiltPlayerID == ownerID
-    local currentProductionChanged = sameContext and m_caiLastCurrentProductionHash ~= currentHash
-    m_caiLastCurrentProductionHash = currentHash
-
-    local shouldRebuild = activeTab == TAB_QUEUE
-        or m_caiLastBuiltTab ~= activeTab
-        or m_caiLastBuiltCityID ~= cityID
-        or m_caiLastBuiltPlayerID ~= ownerID
-        or currentProductionChanged
-
-    if shouldRebuild and not m_caiOpenPending then
-        RebuildBody()
-    end
+    RefreshBodyContents()
 end)
 
 OnCorpsToggle = WrapFunc(OnCorpsToggle, function(orig, unitList, unitListing)
     orig(unitList, unitListing)
     if m_caiPanel and mgr and mgr:HasWidget(m_caiPanel) and (m_caiTab == TAB_PRODUCTION or m_caiTab == TAB_PURCHASE_GOLD or m_caiTab == TAB_PURCHASE_FAITH) then
-        RebuildBody()
+        RefreshBodyContents()
     end
 end)
 
