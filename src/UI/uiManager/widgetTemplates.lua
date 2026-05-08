@@ -135,7 +135,9 @@ WidgetTemplates = {
             return false
         end,
         GetDefaultChild = function(w)
-            if w.IsExpanded and w.FocusedChild then return w.FocusedChild end
+            if w.IsExpanded then
+                return H:GetVisibleFocusedChild(w)
+            end
             return nil
         end,
     },
@@ -874,7 +876,9 @@ WidgetTemplates = {
             return true
         end,
         GetDefaultChild = function(w)
-            if w.IsExpanded and w.FocusedChild then return w.FocusedChild end
+            if w.IsExpanded then
+                return H:GetVisibleFocusedChild(w)
+            end
             return nil
         end,
     },

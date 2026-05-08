@@ -194,7 +194,13 @@ function UIScreenManager:GetFocusedWidget()
 
     local current = root
     while current.FocusedChild do
-        current = current.FocusedChild
+        local child = current.FocusedChild
+        local hidden = child.IsHidden and child:IsHidden() or false
+        if hidden then
+            current.FocusedChild = nil
+            break
+        end
+        current = child
     end
     return current
 end
@@ -237,6 +243,13 @@ function UIScreenManager.BuildFocusPath(widget)
     while node.GetDefaultChild do
         local child = node:GetDefaultChild()
         if not child then break end
+        local hidden = child.IsHidden and child:IsHidden() or false
+        if hidden then
+            if node.FocusedChild == child then
+                node.FocusedChild = nil
+            end
+            break
+        end
         node = child
         table.insert(path, node)
     end

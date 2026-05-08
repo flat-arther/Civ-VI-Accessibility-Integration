@@ -243,9 +243,25 @@ end
 
 ---Returns FocusedChild if any, else first visible child.
 ---@param w UIWidget
+---@return UIWidget|nil
+function WidgetTemplateHelpers:GetVisibleFocusedChild(w)
+    if not w then return nil end
+    local child = w.FocusedChild
+    if not child then return nil end
+    local isHidden = child.IsHidden and child:IsHidden()
+    if isHidden then
+        w.FocusedChild = nil
+        return nil
+    end
+    return child
+end
+
+---Returns FocusedChild if any, else first visible child.
+---@param w UIWidget
 function WidgetTemplateHelpers:GetContainerDefChild(w)
     if not w.Children or #w.Children == 0 then return end
-    if w.FocusedChild then return w.FocusedChild end
+    local focusedChild = self:GetVisibleFocusedChild(w)
+    if focusedChild then return focusedChild end
     local defaultIndex = w.DefaultIndex or 1
     local child = self:FindVisibleChild(w, defaultIndex - 1, 1, true)
     if child then return child end
