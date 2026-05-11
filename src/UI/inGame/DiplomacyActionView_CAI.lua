@@ -1350,12 +1350,14 @@ ShowCinemaMode = WrapFunc(ShowCinemaMode, function(orig)
 end)
 
 SelectPlayer = WrapFunc(SelectPlayer, function(orig, playerID, mode, refresh, allowDeadPlayer)
+    EnsureRootBuilt()
     orig(playerID, mode, refresh, allowDeadPlayer)
     m_state.SelectedPlayer = playerID
-    EnsureRootBuilt()
     SyncSelectedLeaderRow()
     if mode == CAI_OVERVIEW_MODE then
         FocusOverviewPanel()
+    elseif mode == CAI_DEAL_MODE then
+        FocusCinemaPanel()
     end
 end)
 

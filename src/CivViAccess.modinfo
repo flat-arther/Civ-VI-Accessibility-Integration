@@ -55,6 +55,7 @@
     <File>UI/inGame/TechTree_CAI.lua</File>
     <File>UI/inGame/ProductionPanel_CAI.lua</File>
     <File>UI/inGame/CityPanel_CAI.lua</File>
+    <File>UI/inGame/CivilopediaScreen_CAI.lua</File>
     <File>UI/inGame/UnitPanel_CAI.lua</File>
     <File>UI/inGame/PlotToolTip_CAI.lua</File>
     <File>UI/inGame/TutorialUIRoot_CAI.lua</File>
@@ -289,6 +290,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>UnitPanel</LuaContext>
         <LuaReplace>UI/inGame/UnitPanel_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_CivilopediaScreen">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>CivilopediaScreen</LuaContext>
+        <LuaReplace>UI/inGame/CivilopediaScreen_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

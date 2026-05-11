@@ -1263,5 +1263,21 @@
       <Text>Tutorial goal completed: {1_Goal}</Text>
     </Row>
 
+    <Row Tag="LOC_CAI_PEDIA_PANEL" Language="en_US">
+      <Text>Civilopedia</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SECTIONS" Language="en_US">
+      <Text>Sections</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_ARTICLE" Language="en_US">
+      <Text>Article</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_QUOTES" Language="en_US">
+      <Text>Quotes</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_RELATED" Language="en_US">
+      <Text>Related</Text>
+    </Row>
+
   </LocalizedText>
 </GameData>
