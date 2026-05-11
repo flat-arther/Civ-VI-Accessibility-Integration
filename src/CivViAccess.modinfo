@@ -37,7 +37,10 @@
     <File>UI/inGame/InGame.lua</File>
     <File>UI/inGame/ActionPanel_CAI.lua</File>
     <File>UI/inGame/AdvisorPopup_CAI.lua</File>
-    <File>UI/inGame/LeaderView_CAI.lua</File>
+    <File>UI/inGame/TechCivicCompletedPopup_CAI.lua</File>
+    <File>UI/inGame/DeclareWarPopup_CAI.lua</File>
+    <File>UI/inGame/DiplomacyActionView_CAI.lua</File>
+    <File>UI/inGame/DiplomacyDealView_CAI.lua</File>
     <File>UI/inGame/InGameTopOptionsMenu_CAI.lua</File>
     <File>UI/inGame/WorldInput_CAI.lua</File>
     <File>UI/inGame/WorldTracker_CAI.lua</File>
@@ -193,11 +196,35 @@
       </Properties>
     </ReplaceUIScript>
 
-    <ReplaceUIScript id="CAI_LeaderView">
+    <ReplaceUIScript id="CAI_TechCivicCompletedPopup">
       <Properties>
         <LoadOrder>100</LoadOrder>
-        <LuaContext>LeaderView</LuaContext>
-        <LuaReplace>UI/inGame/LeaderView_CAI.lua</LuaReplace>
+        <LuaContext>TechCivicCompletedPopup</LuaContext>
+        <LuaReplace>UI/inGame/TechCivicCompletedPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_DeclareWarPopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>DeclareWarPopup</LuaContext>
+        <LuaReplace>UI/inGame/DeclareWarPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_DiplomacyActionView">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>DiplomacyActionView</LuaContext>
+        <LuaReplace>UI/inGame/DiplomacyActionView_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_DiplomacyDealView">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>DiplomacyDealView</LuaContext>
+        <LuaReplace>UI/inGame/DiplomacyDealView_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

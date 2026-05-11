@@ -44,6 +44,7 @@
     <Row ActionId="TopPanelSpeakYields" Name="LOC_CAI_TOP_PANEL_SPEAK_YIELDS" Description="LOC_CAI_TOP_PANEL_SPEAK_YIELDS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TopPanelYieldInfoList" Name="LOC_CAI_TOP_PANEL_YIELD_INFO" Description="LOC_CAI_TOP_PANEL_YIELD_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TopPanelResourceInfoList" Name="LOC_CAI_TOP_PANEL_RESOURCE_INFO" Description="LOC_CAI_TOP_PANEL_RESOURCE_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="TopPanelOpenDiplomacy" Name="LOC_CAI_TOP_PANEL_OPEN_DIPLOMACY" Description="LOC_CAI_TOP_PANEL_OPEN_DIPLOMACY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldTrackerOpenResearchChooser" Name="LOC_CAI_WORLDTRACKER_OPEN_RESEARCH_CHOOSER" Description="LOC_CAI_WORLDTRACKER_OPEN_RESEARCH_CHOOSER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldTrackerOpenCivicsChooser" Name="LOC_CAI_WORLDTRACKER_OPEN_CIVICS_CHOOSER" Description="LOC_CAI_WORLDTRACKER_OPEN_CIVICS_CHOOSER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldTrackerReadSummary" Name="LOC_CAI_WORLDTRACKER_READ_SUMMARY" Description="LOC_CAI_WORLDTRACKER_READ_SUMMARY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
@@ -154,6 +155,7 @@
     <Row ActionId="TopPanelSpeakYields" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_Y" />
     <Row ActionId="TopPanelYieldInfoList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_Y" />
     <Row ActionId="TopPanelResourceInfoList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_Q" />
+    <Row ActionId="TopPanelOpenDiplomacy" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_D" />
     <Row ActionId="WorldTrackerOpenResearchChooser" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_T" />
     <Row ActionId="WorldTrackerOpenCivicsChooser" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_C" />
     <Row ActionId="WorldTrackerReadSummary" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_W" />

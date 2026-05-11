@@ -1,6 +1,6 @@
 include("caiUtils")
 include("LeaderView")
-
+Speak("Leader view shown")
 local mgr = ExposedMembers.CAI_UIManager
 local CAI_LeaderViewDialog = nil ---@type UIWidget|nil
 
@@ -10,16 +10,35 @@ end
 
 local function RemoveLeaderViewDialog()
     if not mgr or not CAI_LeaderViewDialog then return end
-    if mgr:HasWidget(CAI_LeaderViewDialog) and mgr:GetTop() == CAI_LeaderViewDialog then
-        mgr:Pop()
+    if mgr:HasWidget(CAI_LeaderViewDialog) then
+        mgr:RemoveFromStack(CAI_LeaderViewDialog:GetId())
     end
 
     CAI_LeaderViewDialog = nil
 end
 
+local function GetLiveControlText(control)
+    if not control or control.IsHidden and control:IsHidden() then return nil end
+    local text = control.GetText and control:GetText() or nil
+    if text and text ~= "" then
+        return text
+    end
+
+    if control.GetChildren then
+        for _, child in ipairs(control:GetChildren()) do
+            local childText = GetLiveControlText(child)
+            if childText and childText ~= "" then
+                return childText
+            end
+        end
+    end
+
+    return nil
+end
+
 local function HasVisibleControlText(control)
     if not control or control.IsHidden and control:IsHidden() then return false end
-    local text = control.GetText and control:GetText() or nil
+    local text = GetLiveControlText(control)
     return text ~= nil and text ~= ""
 end
 
@@ -48,7 +67,7 @@ local function BuildLeaderViewDialog()
             local action = entry.action
             table.insert(buttons, mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderViewButton"), "Button", {
                 GetLabel = function()
-                    return control:GetText()
+                    return GetLiveControlText(control) or ""
                 end,
                 GetTooltip = function()
                     return control:GetToolTipString() or ""
@@ -79,47 +98,41 @@ local function BuildLeaderViewDialog()
     mgr:Push(CAI_LeaderViewDialog, PopupPriority.Current)
 end
 
-OnContinue = WrapFunc(OnContinue, function(orig)
-    --RemoveLeaderViewDialog()
-    orig()
-end)
-
-OnDeclareWar = WrapFunc(OnDeclareWar, function(orig)
-    RemoveLeaderViewDialog()
-    orig()
+local function OnCAILeaderViewShow()
     BuildLeaderViewDialog()
-end)
-
-ShowFirstMeetingLeader = WrapFunc(ShowFirstMeetingLeader, function(orig, firstPlayer, secondPlayer)
-    orig(firstPlayer, secondPlayer)
-    BuildLeaderViewDialog()
-end)
-
-ShowWarLeader = WrapFunc(ShowWarLeader, function(orig, actingPlayer, reactingPlayer)
-    orig(actingPlayer, reactingPlayer)
-    BuildLeaderViewDialog()
-end)
-
-ShowRefusePeaceLeader = WrapFunc(ShowRefusePeaceLeader, function(orig, actingPlayer, reactingPlayer)
-    orig(actingPlayer, reactingPlayer)
-    BuildLeaderViewDialog()
-end)
-
-OnTalkToLeader = WrapFunc(OnTalkToLeader, function(orig, playerID)
-    orig(playerID)
-    BuildLeaderViewDialog()
-end)
+end
 
 local function OnCAILeaderViewHide()
     RemoveLeaderViewDialog()
 end
 
+ContextPtr:SetShowHandler(OnCAILeaderViewShow)
 ContextPtr:SetHideHandler(OnCAILeaderViewHide)
 
 local function OnCAILeaderViewInput(pInputStruct)
+    if not mgr then return false end
     if mgr:GetTop() ~= CAI_LeaderViewDialog then return false end
 
     return mgr:HandleInput(pInputStruct)
 end
 
 ContextPtr:SetInputHandler(OnCAILeaderViewInput, true)
+
+OnContinue = WrapFunc(OnContinue, function(orig, ...)
+    RemoveLeaderViewDialog()
+    return orig(...)
+end)
+
+OnDeclareWar = WrapFunc(OnDeclareWar, function(orig, ...)
+    RemoveLeaderViewDialog()
+    local result = orig(...)
+    if IsLeaderViewVisible() then
+        BuildLeaderViewDialog()
+    end
+    return result
+end)
+
+Controls.GoodbyeButton:ClearCallback(Mouse.eLClick)
+Controls.GoodbyeButton:RegisterCallback(Mouse.eLClick, OnContinue)
+Controls.DeclareWarButton:ClearCallback(Mouse.eLClick)
+Controls.DeclareWarButton:RegisterCallback(Mouse.eLClick, OnDeclareWar)

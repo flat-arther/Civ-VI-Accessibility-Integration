@@ -8,6 +8,7 @@ local ACTION_SPEAK_TURN_TIME_DATE = Input.GetActionId("TopPanelSpeakTurnTimeDate
 local ACTION_SPEAK_YIELDS = Input.GetActionId("TopPanelSpeakYields")
 local ACTION_OPEN_YIELD_LIST = Input.GetActionId("TopPanelYieldInfoList")
 local ACTION_OPEN_RESOURCE_LIST = Input.GetActionId("TopPanelResourceInfoList")
+local ACTION_OPEN_DIPLOMACY = Input.GetActionId("TopPanelOpenDiplomacy")
 
 local TOP_PANEL_YIELD_INFO_ID = "CAITopPanelYieldInfoTree"
 local TOP_PANEL_RESOURCE_INFO_ID = "CAITopPanelResourceInfoList"
@@ -408,6 +409,11 @@ local function OnCAITopPanelInputAction(actionId)
         return
     elseif actionId == ACTION_OPEN_RESOURCE_LIST then
         OpenResourceInfoList()
+        return
+    elseif actionId == ACTION_OPEN_DIPLOMACY then
+        if GameCapabilities.HasCapability("CAPABILITY_DIPLOMACY") then
+            LuaEvents.TopPanel_OpenDiplomacyActionView()
+        end
         return
     end
 end

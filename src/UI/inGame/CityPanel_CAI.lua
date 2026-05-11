@@ -10,12 +10,16 @@ ExposedMembers.CAIInfo = info
 
 CityInfoPriority = {
     "Summary",
+    "Name",
+    "Coords",
+    "Health",
     "BuildingCount",
     "ReligiousFollowersCount",
     "AmenitiesSummary",
     "HousingSummary",
     "GrowthSummary",
     "ProductionSummary",
+    "BuildingsAmenitiesSummary",
     "VisibleYields",
     "NormalFocusYields",
     "FavoredFocusYields",
@@ -353,6 +357,18 @@ CityInfo = {
         }, ", ")
     end,
 
+    Name = function(data, city)
+        return GetCityInfoName(data)
+    end,
+
+    Coords = function(data, city)
+        return GetCityInfoCoords(data, city)
+    end,
+
+    Health = function(data, city)
+        return GetCityInfoHealth(data)
+    end,
+
     BuildingCount = function(data, city)
         return GetCityInfoBuildings(data)
     end,
@@ -375,6 +391,13 @@ CityInfo = {
 
     ProductionSummary = function(data, city)
         return GetCityInfoProduction(data)
+    end,
+
+    BuildingsAmenitiesSummary = function(data, city)
+        return {
+            GetCityInfoBuildings(data),
+            GetCityInfoAmenities(data),
+        }
     end,
 
     VisibleYields = function(data, city)
@@ -763,13 +786,13 @@ end
 
 function InitializeCityInfoActionMap()
     CityInfoActionMap = {
-        [Input.GetActionId("ReadSelectionSummary")] = { "Summary" },
-        [Input.GetActionId("ReadSelectionInfo1")] = { "BuildingCount" },
-        [Input.GetActionId("ReadSelectionInfo2")] = { "ReligiousFollowersCount" },
-        [Input.GetActionId("ReadSelectionInfo3")] = { "AmenitiesSummary" },
+        [Input.GetActionId("ReadSelectionSummary")] = { "Name", "Coords", "Health", "GrowthSummary", "ProductionSummary" },
+        [Input.GetActionId("ReadSelectionInfo1")] = { "Health" },
+        [Input.GetActionId("ReadSelectionInfo2")] = { "ProductionSummary" },
+        [Input.GetActionId("ReadSelectionInfo3")] = { "GrowthSummary" },
         [Input.GetActionId("ReadSelectionInfo4")] = { "HousingSummary" },
-        [Input.GetActionId("ReadSelectionInfo5")] = { "GrowthSummary" },
-        [Input.GetActionId("ReadSelectionInfo6")] = { "ProductionSummary" },
+        [Input.GetActionId("ReadSelectionInfo5")] = { "BuildingsAmenitiesSummary" },
+        [Input.GetActionId("ReadSelectionInfo6")] = { "ReligiousFollowersCount" },
         [Input.GetActionId("ReadSelectionInfo7")] = { "VisibleYields" },
         [Input.GetActionId("ReadSelectionInfo8")] = { "NormalFocusYields" },
         [Input.GetActionId("ReadSelectionInfo9")] = { "FavoredFocusYields" },

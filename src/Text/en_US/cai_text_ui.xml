@@ -333,11 +333,47 @@
     <Row Tag="LOC_CAI_TOP_PANEL_RESOURCE_INFO_TOOLTIP" Language="en_US">
       <Text>Opens a list of top panel strategic resources</Text>
     </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_OPEN_DIPLOMACY" Language="en_US">
+      <Text>Open diplomacy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_OPEN_DIPLOMACY_TOOLTIP" Language="en_US">
+      <Text>Opens the diplomacy action view through the top panel path</Text>
+    </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_BALANCE_AND_RATE" Language="en_US">
       <Text>{1_Balance}, {2_PerTurn}</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_NO_STRATEGIC_RESOURCES" Language="en_US">
       <Text>No strategic resources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_LEADERS" Language="en_US">
+        <Text>Leaders</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_ACTIONS" Language="en_US">
+      <Text>Actions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_NO_ACTIONS" Language="en_US">
+        <Text>No available diplomacy actions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_ACTIVE_SOURCES" Language="en_US">
+      <Text>Active visibility sources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_NEW" Language="en_US">
+      <Text>new</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_SELF_ABILITIES" Language="en_US">
+      <Text>Abilities</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_SELF_UNITS" Language="en_US">
+      <Text>Unique units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_SELF_BUILDINGS" Language="en_US">
+      <Text>Unique buildings</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACYDEAL_OFFERS" Language="en_US">
+      <Text>Current offers</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACYDEAL_INVENTORY" Language="en_US">
+      <Text>Inventory</Text>
     </Row>
 
     <Row Tag="LOC_CAI_CITY_PANEL" Language="en_US">

@@ -78,25 +78,25 @@ function UIWidget:InsertChild(index, w)
 end
 
 ---Returns the widget's index in it's parrent
----@return integer|nil
+---@return integer
 function UIWidget:GetIndexInParent()
     local parent = self.Parent
-    if not parent then return end
+    if not parent then return 0 end
     for i, child in ipairs(parent.Children) do
         if child == self then return i end
     end
-    return
+    return 0
 end
 
 ---Returns the current position of a widget among its siblings
 ---@param child UIWidget
----@return integer|nil
+---@return integer
 function UIWidget:GetChildIndex(child)
-    if not self.Children then return nil end
+    if not self.Children then return 0 end
     for i, c in ipairs(self.Children) do
         if c == child then return i end
     end
-    return nil
+    return 0
 end
 
 ---Returns the first child widget with a matching id.
@@ -175,6 +175,14 @@ function UIWidget:ClearChildren()
     self.FocusedChild = nil
     self.Children = {}
     if self.Collapse then self:Collapse() end
+end
+
+---Returns the index of the focused child with in its parent
+---@return integer
+function UIWidget:GetFocusedChildIndex()
+    local w = self.FocusedChild
+    if not w then return 0 end
+    return w:GetIndexInParent()
 end
 
 ---Focuses a child of this widget given its index

@@ -4,18 +4,6 @@ local mgr = ExposedMembers.CAI_UIManager
 
 local m_tutorialPanel = nil ---@type UIWidget|nil
 
-OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
-    -- We need to let input pass through if either of the popup base controls are not visible, otherwise input is doubled in world
-    local isAdvisorVisible = not ContextPtr:IsHidden() and
-        (not Controls.AdvisorBase:IsHidden() or not Controls.MetaBase:IsHidden())
-    if not isAdvisorVisible then return false end
-    if mgr then
-        local handled = mgr:GetTop() == m_tutorialPanel and mgr:HandleInput(pInputStruct)
-        if handled then return handled end
-    end
-    return orig(pInputStruct)
-end)
-ContextPtr:SetInputHandler(OnInputHandler, true)
 
 ShowAdvisorPopup = WrapFunc(ShowAdvisorPopup, function(orig, advisorData)
     orig(advisorData)
@@ -73,3 +61,15 @@ OnHideAdvisorDialog = WrapFunc(OnHideAdvisorDialog, function(orig)
         mgr:Pop()
     end
 end)
+
+OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
+    if mgr and mgr:GetTop() ~= m_tutorialPanel then return false end
+    -- We need to let input pass through if either of the popup base controls are not visible, otherwise input is doubled in world
+    local isAdvisorVisible = not ContextPtr:IsHidden() and
+        (not Controls.AdvisorBase:IsHidden() or not Controls.MetaBase:IsHidden())
+    if not isAdvisorVisible then return false end
+    local handled = mgr:HandleInput(pInputStruct)
+    if handled then return handled end
+    return orig(pInputStruct)
+end)
+ContextPtr:SetInputHandler(OnInputHandler, true)

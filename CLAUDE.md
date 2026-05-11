@@ -58,8 +58,10 @@ If `project_status.md` says a user test is pending, ask for that result before l
 - Work with vanilla game mechanics. Preserve vanilla callbacks, events, input contexts, dialogs, and state changes where possible.
 - Do not override vanilla game keys casually. Use safe mod keys or bindable input actions.
 - Cache references or ids, not displayed values. Always read live data before speaking or rendering state.
-- Null checks should log and announce rather than fail silently.
-- Normal Lua code should use explicit nil checks. Reserve try/catch-style protection for reflection/external calls such as Tolk or changing external APIs.
+- Use defensive nil handling only where nil is an expected, legitimate state: public API boundaries, real lookup misses, or early-show `Controls.X` timing.
+- Do not add broad chained guards or silent empty returns for private/internal code. If something that should exist is nil, let it crash so the error reaches `Lua.log`.
+- When nil is expected, log or announce clearly instead of failing silently.
+- Reserve try/catch-style protection for reflection/external calls such as Tolk or changing external APIs.
 - Debug logging should remain cheap when debug mode is off.
 
 ## Accessibility Widget Rules
