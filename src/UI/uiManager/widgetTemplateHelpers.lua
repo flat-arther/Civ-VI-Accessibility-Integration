@@ -373,7 +373,7 @@ end
 ---@return UIWidget|nil
 function WidgetTemplateHelpers:GetTreeItemForWidget(root, node)
     while node and node ~= root do
-        if node.Type == "TreeviewItem" then return node end
+        if node.IsTreeviewItem then return node end
         node = node.Parent
     end
     return nil
@@ -454,7 +454,7 @@ end
 function WidgetTemplateHelpers:ExpandOrDescendTree(root)
     local item = self:GetFocusedTreeItem(root)
     if not item then return false end
-    if type(item.IsLeaf) == "function" and item:IsLeaf() then return false end
+    if item.IsLeaf and item:IsLeaf() then return false end
     if self:ExpandTreeItem(item) then
         return true
     end

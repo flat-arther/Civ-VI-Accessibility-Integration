@@ -276,8 +276,9 @@ function UIScreenManager.FindDivergence(oldPath, newPath)
     return i
 end
 
----Applies a given focus widget path and speaks any changes starting from the point of diverge
+---Applies a given focus widget path. Returns a pair of path and diverge
 ---@param newPath UIWidget[]
+---@return UIWidget[],integer
 function UIScreenManager:ApplyFocus(newPath)
     local oldPath = self.CurrentPath or {}
     local diverge = self.FindDivergence(oldPath, newPath)
@@ -304,29 +305,37 @@ function UIScreenManager:ApplyFocus(newPath)
 
     self.CurrentPath = newPath
 
-    local speechQueue = self:BuildAnnouncement(newPath, diverge)
-    if speechQueue and #speechQueue > 0 then
-        for _, string in ipairs(speechQueue) do
-            Speak(ProcessIcons(string))
-        end
-    end
+    return newPath, diverge
 end
 
 ---Builds and applies a focus path to a given widget
 ---@param widget UIWidget
+---@param announce? boolean
 ---@return boolean
-function UIScreenManager:SetFocus(widget)
+function UIScreenManager:SetFocus(widget, announce)
     local path = self.BuildFocusPath(widget)
-    return self:SetFocusPath(path)
+    return self:SetFocusPath(path, announce)
 end
 
----Applies a prebuilt focus path directly.
+---Applies a prebuilt focus path directly and speaks changes, starting from diverge.
 ---@param path UIWidget[]|nil
+---@param root? UIWidget
+---@parem announce? boolean
 ---@return boolean
-function UIScreenManager:SetFocusPath(path)
+function UIScreenManager:SetFocusPath(path, root, announce)
     if not path or #path == 0 then return false end
-    if path[1] ~= self:GetTop() then return false end
-    self:ApplyFocus(path)
+    if root == nil then root = self:GetTop() end
+    if path[1] ~= root then return false end
+    local newPath, diverge = self:ApplyFocus(path)
+    if announce == nil then announce = true end
+    if announce then
+        local speechQueue = self:BuildAnnouncement(newPath, diverge)
+        if speechQueue and #speechQueue > 0 then
+            for _, string in ipairs(speechQueue) do
+                Speak(ProcessIcons(string))
+            end
+        end
+    end
     return true
 end
 
@@ -355,20 +364,36 @@ function UIScreenManager:CaptureFocusIndexPath(root)
     return path
 end
 
----Build a full widget focus path from a container root plus child indexes.
+---Build the child-index path from a container root down to a specific widget.
+---@param root UIWidget
+---@param widget UIWidget
+---@return integer[]|nil
+function UIScreenManager:BuildFocusIndexPath(root, widget)
+    if not root or not widget or root == widget then return nil end
+
+    local path = {}
+    local node = widget
+    while node and node ~= root do
+        local parent = node.Parent
+        if not parent then return nil end
+        local idx = parent:GetChildIndex(node)
+        if not idx then return nil end
+        table.insert(path, 1, idx)
+        node = parent
+    end
+
+    if node ~= root or #path == 0 then return nil end
+    return path
+end
+
+---Build a widget path from a container root plus child indexes.
 ---@param root UIWidget
 ---@param indexPath integer[]|nil
 ---@return UIWidget[]|nil
 function UIScreenManager:BuildFocusPathFromIndexPath(root, indexPath)
     if not root or not indexPath or #indexPath == 0 then return nil end
 
-    local path = {}
-    local current = root
-    while current do
-        table.insert(path, 1, current)
-        current = current.Parent
-    end
-
+    local path = { root }
     local node = root
     for _, rawIdx in ipairs(indexPath) do
         if not node.Children or #node.Children == 0 then break end
@@ -385,15 +410,16 @@ function UIScreenManager:BuildFocusPathFromIndexPath(root, indexPath)
         end
         if not child then break end
 
-        node.FocusedChild = child
         table.insert(path, child)
         node = child
     end
 
-    return #path > 0 and path or nil
+    return #path > 1 and path or nil
 end
 
----Build and apply focus from a container root plus child indexes.
+---Set focused children from a container root plus child indexes.
+---This only updates the rooted child-focus chain and does not replace the
+---manager's full top-level CurrentPath.
 ---@param root UIWidget
 ---@param indexPath integer[]|nil
 ---@return boolean
@@ -401,7 +427,15 @@ function UIScreenManager:SetFocusIndexPath(root, indexPath)
     if not root or not indexPath or #indexPath == 0 then return false end
     local path = self:BuildFocusPathFromIndexPath(root, indexPath)
     if not path then return false end
-    return self:SetFocusPath(path)
+
+    for i = 1, #path - 1 do
+        local node = path[i]
+        local child = path[i + 1]
+        if node.Expand then node:Expand() end
+        node.FocusedChild = child
+    end
+
+    return true
 end
 
 ---Global input handler: Calls the widget's local 'OnHandleInput' if any, starting from deepest focused widget

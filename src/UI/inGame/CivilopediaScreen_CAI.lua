@@ -4,6 +4,8 @@ include("CivilopediaScreen")
 local mgr = ExposedMembers.CAI_UIManager
 
 local m_state = {
+    userSwitchedFocus = false,
+    isOpeningOnHistoryPage = false,
     pageHeader = "",
     pageSubHeader = "",
     chapters = {},
@@ -12,16 +14,22 @@ local m_state = {
     quotes = {},
     relatedLinks = {},
     suppressLinkCapture = false,
-    syncingFocus = false,
     pushed = false,
+    history = {
+        pageIndex = 0,
+        pages = {},
+    },
 }
 
 local m_ui = {
     panel = nil,
     sectionsTree = nil,
+    historyList = nil,
     articleTree = nil,
     pageNodes = {},
 }
+
+local MAX_HISTORY_CRUMBS = 10
 
 local function PlayHover()
     UI.PlaySound("Main_Menu_Mouse_Over")
@@ -111,11 +119,14 @@ local function CreatePageNode(sectionId, pageId, label)
             GetLabel = function() return label or "" end,
             OnFocusEnter = function()
                 PlayHover()
-                if m_state.syncingFocus then return end
                 local curSid, curPid = GetCurrentPage()
                 if curSid == sectionId and curPid == pageId then return end
+                m_state.userSwitchedFocus = true
                 NavigateTo(sectionId, pageId)
             end,
+            OnClick = function(w)
+                mgr:SetFocus(m_ui.articleTree)
+            end
         })
     m_ui.pageNodes[PageKey(sectionId, pageId)] = node
     return node
@@ -128,13 +139,14 @@ local function CreateGroupNode(sectionId, group)
         "TreeviewItem",
         {
             GetLabel = function() return LookupOrEmpty(group.TabName) end,
-            OnFocusEnter = function()
+            OnFocusEnter = function(w, newPath, index)
+                if not newPath or newPath[#newPath] ~= w then return end
                 PlayHover()
-                if m_state.syncingFocus then return end
                 local firstPid = FirstPageIdInGroup(sectionId, groupId)
                 if not firstPid then return end
                 local curSid, curPid = GetCurrentPage()
                 if curSid == sectionId and curPid == firstPid then return end
+                m_state.userSwitchedFocus = true
                 NavigateTo(sectionId, firstPid)
             end,
         })
@@ -150,12 +162,13 @@ local function CreateSectionNode(section)
         "TreeviewItem",
         {
             GetLabel = function() return LookupOrEmpty(section.TabName or section.Name) end,
-            OnFocusEnter = function()
+            OnFocusEnter = function(w, newPath, index)
+                if not newPath or newPath[#newPath] ~= w then return end
                 PlayHover()
-                if m_state.syncingFocus then return end
                 if not firstPid then return end
                 local curSid, curPid = GetCurrentPage()
                 if curSid == sectionId and curPid == firstPid then return end
+                m_state.userSwitchedFocus = true
                 NavigateTo(sectionId, firstPid)
             end,
         })
@@ -197,7 +210,10 @@ local function CreateStaticText(idPrefix, text)
     return mgr:CreateUIWidget(
         mgr:GenerateWidgetId(idPrefix),
         "StaticText",
-        { GetValue = function() return text end })
+        {
+            IsTreeviewItem = true,
+            GetValue = function() return text end
+        })
 end
 
 local function CreateRelatedButton(label, searchTerm)
@@ -205,6 +221,7 @@ local function CreateRelatedButton(label, searchTerm)
         mgr:GenerateWidgetId("CAIPediaLink"),
         "Button",
         {
+            IsTreeviewItem = true,
             GetLabel = function() return label end,
             OnFocusEnter = PlayHover,
             OnClick = function()
@@ -221,7 +238,10 @@ local function CreateChapterNode(chapter)
     local node = mgr:CreateUIWidget(
         mgr:GenerateWidgetId("CAIPediaChapter"),
         "TreeviewItem",
-        { GetLabel = function() return chapter.header ~= "" and chapter.header or "" end })
+        {
+            IsExpanded = true,
+            GetLabel = function() return chapter.header ~= "" and chapter.header or "" end
+        })
     for _, para in ipairs(chapter.paragraphs) do
         node:AddChild(CreateStaticText("CAIPediaPara", para))
     end
@@ -310,7 +330,10 @@ local function CreateStatBoxNode(box)
     local node = mgr:CreateUIWidget(
         mgr:GenerateWidgetId("CAIPediaStatBox"),
         "TreeviewItem",
-        { GetLabel = function() return box.title end })
+        {
+            IsExpanded = true,
+            GetLabel = function() return box.title end
+        })
 
     -- Group entries by AddHeader. Entries before the first AddHeader land in
     -- an implicit (headerless) group and are added flat under the box node.
@@ -327,14 +350,12 @@ local function CreateStatBoxNode(box)
             current = { header = LookupOrEmpty(entry.args[1]), values = {} }
             table.insert(groups, current)
             i = i + 1
-
         elseif method == "AddSeparator" then
             -- Separators close the current group; subsequent values without
             -- an AddHeader belong to a fresh implicit (headerless) group.
             current = { header = nil, values = {} }
             table.insert(groups, current)
             i = i + 1
-
         elseif method == "AddIconLabel" then
             -- Vanilla pages emit AddIconLabel followed by trailing
             -- AddLabel/AddSmallLabel calls describing the row's specifics
@@ -362,7 +383,6 @@ local function CreateStatBoxNode(box)
                 table.insert(current.values, v)
             end
             i = j
-
         else
             for _, v in ipairs(EntryToValues(entry)) do
                 table.insert(current.values, v)
@@ -398,7 +418,10 @@ local function CreateStatBoxNode(box)
             local sub = mgr:CreateUIWidget(
                 mgr:GenerateWidgetId("CAIPediaStatGroup"),
                 "TreeviewItem",
-                { GetLabel = function() return g.header end })
+                {
+                    IsExpanded = true,
+                    GetLabel = function() return g.header end
+                })
             for _, v in ipairs(g.values) do
                 AppendValueChild(sub, v)
             end
@@ -451,7 +474,10 @@ local function RebuildArticleTree()
         local quotesNode = mgr:CreateUIWidget(
             mgr:GenerateWidgetId("CAIPediaQuotes"),
             "TreeviewItem",
-            { GetLabel = function() return Locale.Lookup("LOC_CAI_PEDIA_QUOTES") end })
+            {
+                IsExpanded = true,
+                GetLabel = function() return Locale.Lookup("LOC_CAI_PEDIA_QUOTES") end
+            })
         for _, quote in ipairs(m_state.quotes) do
             local text = quote.text
             if text and text ~= "" then
@@ -461,6 +487,7 @@ local function RebuildArticleTree()
                         mgr:GenerateWidgetId("CAIPediaQuote"),
                         "Button",
                         {
+                            IsTreeviewItem = true,
                             GetLabel = function() return text end,
                             OnFocusEnter = PlayHover,
                             OnClick = function()
@@ -480,7 +507,10 @@ local function RebuildArticleTree()
         local relatedNode = mgr:CreateUIWidget(
             mgr:GenerateWidgetId("CAIPediaRelated"),
             "TreeviewItem",
-            { GetLabel = function() return Locale.Lookup("LOC_CAI_PEDIA_RELATED") end })
+            {
+                IsExpanded = true,
+                GetLabel = function() return Locale.Lookup("LOC_CAI_PEDIA_RELATED") end
+            })
         for _, link in ipairs(m_state.relatedLinks) do
             if link.label and link.label ~= "" and link.searchTerm then
                 relatedNode:AddChild(CreateRelatedButton(link.label, link.searchTerm))
@@ -493,34 +523,99 @@ local function RebuildArticleTree()
 
     if m_ui.articleTree.Children and #m_ui.articleTree.Children > 0 then
         m_ui.articleTree:SetFocusedChild(1)
+        if not m_state.userSwitchedFocus and not m_state.isOpeningOnHistoryPage then
+            m_ui.panel:SetFocusedChild(2)
+            mgr:SetFocus(m_ui.articleTree)
+        end
     end
+    m_state.isOpeningOnHistoryPage = false
+end
+
+-- ===========================================================================
+-- History / crumbs
+-- ===========================================================================
+local function GetPageTitle(sectionId, pageId)
+    local page = GetPage(sectionId, pageId)
+    if not page then return "" end
+    return LookupOrEmpty(page.Title or page.TabName)
+end
+
+local function CreateHistoryButton(entry)
+    return mgr:CreateUIWidget(
+        mgr:GenerateWidgetId("CAIPediaHistoryButton"),
+        "Button",
+        {
+            GetLabel = function() return entry.title end,
+            GetValue = function(w)
+                if entry.index == m_state.history.pageIndex then
+                    return Locale.Lookup("LOC_CAI_STATE_SELECTED")
+                end
+            end,
+            OnFocusEnter = PlayHover,
+            OnClick = function()
+                NavigateToPageTrailIndex(entry.index, false)
+                return true
+            end,
+        })
+end
+
+local function RefreshHistoryList()
+    if not m_ui.historyList then return end
+
+    m_ui.historyList:ClearChildren()
+
+    for index, page in ipairs(m_state.history.pages) do
+        local title = page.title
+        if title and title ~= "" then
+            local entry = {
+                index = index,
+                title = title,
+            }
+            m_ui.historyList:AddChild(CreateHistoryButton(entry))
+        end
+    end
+
+    if m_ui.historyList.Children and #m_ui.historyList.Children > 0 then
+        local focusIndex = m_state.history.pageIndex
+        m_ui.historyList:SetFocusedChild(focusIndex)
+    end
+end
+
+local function MirrorHistoryNavigate(sectionId, pageId)
+    local title = GetPageTitle(sectionId, pageId)
+    if title == "" then return end
+
+    local history = m_state.history
+    if #history.pages == MAX_HISTORY_CRUMBS then
+        table.remove(history.pages, 1)
+    end
+
+    table.insert(history.pages, {
+        sectionId = sectionId,
+        pageId = pageId,
+        title = title,
+    })
+    history.pageIndex = #history.pages
+end
+
+local function MirrorHistoryJump(index)
+    local history = m_state.history
+    if index < 1 or index > #history.pages then return end
+    history.pageIndex = index
 end
 
 -- ===========================================================================
 -- Focus sync
 -- ===========================================================================
-local function ExpandAncestors(node)
-    local ancestors = {}
-    local cur = node.Parent
-    while cur and cur ~= m_ui.sectionsTree do
-        table.insert(ancestors, 1, cur)
-        cur = cur.Parent
-    end
-    for _, anc in ipairs(ancestors) do
-        if anc.Expand then anc:Expand() end
-    end
-end
-
 local function SyncFocusToCurrentPage()
-    if not m_ui.panel or not mgr:HasWidget(m_ui.panel) then return end
     local sid, pid = GetCurrentPage()
     if not sid or not pid then return end
     local node = m_ui.pageNodes[PageKey(sid, pid)]
     if not node then return end
-    m_state.syncingFocus = true
-    --ExpandAncestors(node)
-    --mgr:SetFocus(node)
-    m_state.syncingFocus = false
+    local path = mgr:BuildFocusIndexPath(m_ui.sectionsTree, node)
+    if path and #path > 0 then
+        mgr:SetFocusIndexPath(m_ui.sectionsTree, path)
+    end
 end
 
 -- ===========================================================================
@@ -530,25 +625,34 @@ local function EnsureRootBuilt()
     if m_ui.panel then return end
 
     m_ui.panel = mgr:CreateUIWidget("CAIPediaPanel", "Panel", {
-        GetLabel = function() return Locale.Lookup("LOC_CAI_PEDIA_PANEL") end,
+        GetLabel = function() return Controls.WindowTitle:GetText() end,
     })
     m_ui.panel:AddInputBindings({
         {
             Key = Keys.VK_LEFT,
             MSG = KeyEvents.KeyDown,
             IsAlt = true,
-            Action = function() OnNavBackward(); return true end,
+            Action = function()
+                OnNavBackward(); return true
+            end,
         },
         {
             Key = Keys.VK_RIGHT,
             MSG = KeyEvents.KeyDown,
             IsAlt = true,
-            Action = function() OnNavForward(); return true end,
+            Action = function()
+                OnNavForward(); return true
+            end,
         },
     })
 
     m_ui.sectionsTree = mgr:CreateUIWidget("CAIPediaSectionsTree", "Treeview", {
         GetLabel = function() return Locale.Lookup("LOC_CAI_PEDIA_SECTIONS") end,
+    })
+
+    m_ui.historyList = mgr:CreateUIWidget("CAIPediaHistoryList", "List", {
+        GetLabel = function() return Locale.Lookup("LOC_CAI_PEDIA_HISTORY") end,
+        IsHidden = function(w) return not w.Children or #w.Children < 2 end,
     })
 
     m_ui.articleTree = mgr:CreateUIWidget("CAIPediaArticleTree", "Treeview", {
@@ -566,12 +670,13 @@ local function EnsureRootBuilt()
 
     m_ui.panel:AddChild(m_ui.sectionsTree)
     m_ui.panel:AddChild(m_ui.articleTree)
+    m_ui.panel:AddChild(m_ui.historyList)
 
     BuildSectionsTree()
+    RefreshHistoryList()
 end
 
 local function PushPanel()
-    EnsureRootBuilt()
     if not mgr:HasWidget(m_ui.panel) then
         mgr:Push(m_ui.panel)
     end
@@ -583,6 +688,11 @@ local function PopPanel()
         mgr:RemoveFromStack(m_ui.panel:GetId())
     end
     m_state.pushed = false
+    m_ui.panel = nil
+    m_ui.articleTree = nil
+    m_ui.historyList = nil
+    m_ui.sectionsTree = nil
+    m_ui.pageNodes = {}
 end
 
 -- ===========================================================================
@@ -687,6 +797,17 @@ local STAT_BOX_METHODS = {
     "AddIconLabel", "AddIconNumberLabel", "AddIconList",
 }
 
+local function ResetCapturedArticleState()
+    m_state.pageHeader = ""
+    m_state.pageSubHeader = ""
+    m_state.chapters = {}
+    m_state.currentChapter = nil
+    m_state.statBoxes = {}
+    m_state.quotes = {}
+    m_state.relatedLinks = {}
+    m_state.suppressLinkCapture = false
+end
+
 AddRightColumnStatBox = WrapFunc(AddRightColumnStatBox, function(orig, title, populate_method)
     local entries = {}
     local function wrapped_populate(stat_box)
@@ -719,20 +840,52 @@ end)
 -- Navigation / lifecycle
 -- ===========================================================================
 NavigateTo = WrapFunc(NavigateTo, function(orig, sectionId, pageId)
-    m_state.pageHeader = ""
-    m_state.pageSubHeader = ""
-    m_state.chapters = {}
-    m_state.currentChapter = nil
-    m_state.statBoxes = {}
-    m_state.quotes = {}
-    m_state.relatedLinks = {}
-    m_state.suppressLinkCapture = false
+    local prevSid, prevPid = GetCurrentPage()
+    local pageChanged = sectionId ~= prevSid or pageId ~= prevPid
+    if pageChanged then
+        ResetCapturedArticleState()
+    end
     orig(sectionId, pageId)
-    if m_state.pushed then
-        RebuildArticleTree()
-        if not m_state.syncingFocus then
-            SyncFocusToCurrentPage()
-        end
+    if pageChanged then
+        MirrorHistoryNavigate(sectionId, pageId)
+    end
+    RefreshHistoryList()
+    RebuildArticleTree()
+    if not m_state.userSwitchedFocus then
+        SyncFocusToCurrentPage()
+    end
+    m_state.userSwitchedFocus = false
+end)
+
+NavigateToPageTrailIndex = WrapFunc(NavigateToPageTrailIndex, function(orig, index, bUpdateScroll)
+    local prevSid, prevPid = GetCurrentPage()
+    local entry = m_state.history.pages[index]
+    local targetSid = entry and entry.sectionId or nil
+    local targetPid = entry and entry.pageId or nil
+    local pageChanged = targetSid ~= nil and targetPid ~= nil and (targetSid ~= prevSid or targetPid ~= prevPid)
+    if pageChanged then
+        ResetCapturedArticleState()
+    end
+    orig(index, bUpdateScroll)
+    MirrorHistoryJump(index)
+    RefreshHistoryList()
+    RebuildArticleTree()
+    SyncFocusToCurrentPage()
+end)
+
+OnNavBackward = WrapFunc(OnNavBackward, function(orig)
+    if m_state.history.pageIndex > 1 then
+        orig()
+    else
+        Speak(Locale.Lookup("LOC_CAI_PEDIA_HISTORY_START"))
+    end
+end)
+
+OnNavForward = WrapFunc(OnNavForward, function(orig)
+    if m_state.history.pageIndex < #m_state.history.pages then
+        orig()
+    else
+        Speak(Locale.Lookup("LOC_CAI_PEDIA_HISTORY_END"))
     end
 end)
 
@@ -744,12 +897,20 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
 end)
 ContextPtr:SetInputHandler(OnInputHandler, true)
 
-ContextPtr:SetShowHandler(function()
+local _origOnOpenCivilopedia = OnOpenCivilopedia
+OnOpenCivilopedia = WrapFunc(OnOpenCivilopedia, function(orig, sectionIdOrSearch, pageId)
+    EnsureRootBuilt()
+    m_state.isOpeningOnHistoryPage = sectionIdOrSearch == nil and pageId == nil and #m_state.history.pages > 0
+    orig(sectionIdOrSearch, pageId)
     PushPanel()
-    RebuildArticleTree()
-    SyncFocusToCurrentPage()
 end)
 
-ContextPtr:SetHideHandler(function()
+LuaEvents.OpenCivilopedia.Remove(_origOnOpenCivilopedia)
+LuaEvents.OpenCivilopedia.Add(OnOpenCivilopedia)
+
+OnClose = WrapFunc(OnClose, function(orig)
     PopPanel()
+    orig()
 end)
+
+Controls.WindowCloseButton:RegisterCallback(Mouse.eLClick, OnClose)

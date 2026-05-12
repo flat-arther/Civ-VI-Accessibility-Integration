@@ -36,10 +36,12 @@
     <Row ActionId="SharedEndTurn" Name="LOC_CAI_END_TURN" Description="LOC_CAI_END_TURN_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ActionPanelOpenTurnBlockers" Name="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS" Description="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UnitPathInfo" Name="LOC_CAI_MOVE_INFO" Description="LOC_CAI_MOVE_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CAICursorMoveUp" Name="LOC_CAI_CURSOR_MOVE_UP" Description="LOC_CAI_CURSOR_MOVE_UP_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CAICursorMoveDown" Name="LOC_CAI_CURSOR_MOVE_DOWN" Description="LOC_CAI_CURSOR_MOVE_DOWN_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CAICursorMoveLeft" Name="LOC_CAI_CURSOR_MOVE_LEFT" Description="LOC_CAI_CURSOR_MOVE_LEFT_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CAICursorMoveRight" Name="LOC_CAI_CURSOR_MOVE_RIGHT" Description="LOC_CAI_CURSOR_MOVE_RIGHT_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAICursorMoveNorthWest" Name="LOC_CAI_CURSOR_MOVE_NORTHWEST" Description="LOC_CAI_CURSOR_MOVE_NORTHWEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAICursorMoveNorthEast" Name="LOC_CAI_CURSOR_MOVE_NORTHEAST" Description="LOC_CAI_CURSOR_MOVE_NORTHEAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAICursorMoveWest" Name="LOC_CAI_CURSOR_MOVE_WEST" Description="LOC_CAI_CURSOR_MOVE_WEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAICursorMoveEast" Name="LOC_CAI_CURSOR_MOVE_EAST" Description="LOC_CAI_CURSOR_MOVE_EAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAICursorMoveSouthWest" Name="LOC_CAI_CURSOR_MOVE_SOUTHWEST" Description="LOC_CAI_CURSOR_MOVE_SOUTHWEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAICursorMoveSouthEast" Name="LOC_CAI_CURSOR_MOVE_SOUTHEAST" Description="LOC_CAI_CURSOR_MOVE_SOUTHEAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TopPanelSpeakTurnTimeDate" Name="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE" Description="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TopPanelSpeakYields" Name="LOC_CAI_TOP_PANEL_SPEAK_YIELDS" Description="LOC_CAI_TOP_PANEL_SPEAK_YIELDS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TopPanelYieldInfoList" Name="LOC_CAI_TOP_PANEL_YIELD_INFO" Description="LOC_CAI_TOP_PANEL_YIELD_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
@@ -147,17 +149,25 @@
     <Row ActionId="SharedEndTurn" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SPACE" />
     <Row ActionId="ActionPanelOpenTurnBlockers" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SPACE" />
     <Row ActionId="UnitPathInfo" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_D" />
-    <Row ActionId="CAICursorMoveUp" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_UP" />
-    <Row ActionId="CAICursorMoveDown" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_DOWN" />
-    <Row ActionId="CAICursorMoveLeft" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_LEFT" />
-    <Row ActionId="CAICursorMoveRight" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_RIGHT" />
-    <Row ActionId="TopPanelSpeakTurnTimeDate" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_T" />
+    <Row ActionId="CAICursorMoveNorthWest" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_Q" />
+    <Row ActionId="CAICursorMoveNorthWest" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_7" />
+    <Row ActionId="CAICursorMoveNorthEast" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_E" />
+    <Row ActionId="CAICursorMoveNorthEast" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_9" />
+    <Row ActionId="CAICursorMoveWest" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_A" />
+    <Row ActionId="CAICursorMoveWest" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_4" />
+    <Row ActionId="CAICursorMoveEast" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_D" />
+    <Row ActionId="CAICursorMoveEast" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_6" />
+    <Row ActionId="CAICursorMoveSouthWest" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_Z" />
+    <Row ActionId="CAICursorMoveSouthWest" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_1" />
+    <Row ActionId="CAICursorMoveSouthEast" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_C" />
+    <Row ActionId="CAICursorMoveSouthEast" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_3" />
+    <Row ActionId="TopPanelSpeakTurnTimeDate" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_T" />
     <Row ActionId="TopPanelSpeakYields" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_Y" />
     <Row ActionId="TopPanelYieldInfoList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_Y" />
     <Row ActionId="TopPanelResourceInfoList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_Q" />
     <Row ActionId="TopPanelOpenDiplomacy" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_D" />
-    <Row ActionId="WorldTrackerOpenResearchChooser" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_T" />
-    <Row ActionId="WorldTrackerOpenCivicsChooser" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_C" />
+    <Row ActionId="WorldTrackerOpenResearchChooser" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_T" />
+    <Row ActionId="WorldTrackerOpenCivicsChooser" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_C" />
     <Row ActionId="WorldTrackerReadSummary" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_W" />
     <Row ActionId="NotificationPanelOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_N" />
     <Row ActionId="TutorialGoalsOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_T" />

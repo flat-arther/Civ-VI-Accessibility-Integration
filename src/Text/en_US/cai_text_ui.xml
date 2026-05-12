@@ -171,29 +171,41 @@
     <Row Tag="LOC_CAI_EXITED_WONDER_PLACEMENT_MODE" Language="en_US">
       <Text>Exited wonder placement mode</Text>
     </Row>
-    <Row Tag="LOC_CAI_CURSOR_MOVE_UP" Language="en_US">
-      <Text>Move cursor up</Text>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_NORTHWEST" Language="en_US">
+      <Text>Move cursor northwest</Text>
     </Row>
-    <Row Tag="LOC_CAI_CURSOR_MOVE_UP_TOOLTIP" Language="en_US">
-      <Text>Moves the CAI map cursor up</Text>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_NORTHWEST_TOOLTIP" Language="en_US">
+      <Text>Moves the CAI map cursor northwest</Text>
     </Row>
-    <Row Tag="LOC_CAI_CURSOR_MOVE_DOWN" Language="en_US">
-      <Text>Move cursor down</Text>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_NORTHEAST" Language="en_US">
+      <Text>Move cursor northeast</Text>
     </Row>
-    <Row Tag="LOC_CAI_CURSOR_MOVE_DOWN_TOOLTIP" Language="en_US">
-      <Text>Moves the CAI map cursor down</Text>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_NORTHEAST_TOOLTIP" Language="en_US">
+      <Text>Moves the CAI map cursor northeast</Text>
     </Row>
-    <Row Tag="LOC_CAI_CURSOR_MOVE_LEFT" Language="en_US">
-      <Text>Move cursor left</Text>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_WEST" Language="en_US">
+      <Text>Move cursor west</Text>
     </Row>
-    <Row Tag="LOC_CAI_CURSOR_MOVE_LEFT_TOOLTIP" Language="en_US">
-      <Text>Moves the CAI map cursor left</Text>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_WEST_TOOLTIP" Language="en_US">
+      <Text>Moves the CAI map cursor west</Text>
     </Row>
-    <Row Tag="LOC_CAI_CURSOR_MOVE_RIGHT" Language="en_US">
-      <Text>Move cursor right</Text>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_EAST" Language="en_US">
+      <Text>Move cursor east</Text>
     </Row>
-    <Row Tag="LOC_CAI_CURSOR_MOVE_RIGHT_TOOLTIP" Language="en_US">
-      <Text>Moves the CAI map cursor right</Text>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_EAST_TOOLTIP" Language="en_US">
+      <Text>Moves the CAI map cursor east</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_SOUTHWEST" Language="en_US">
+      <Text>Move cursor southwest</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_SOUTHWEST_TOOLTIP" Language="en_US">
+      <Text>Moves the CAI map cursor southwest</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_SOUTHEAST" Language="en_US">
+      <Text>Move cursor southeast</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CURSOR_MOVE_SOUTHEAST_TOOLTIP" Language="en_US">
+      <Text>Moves the CAI map cursor southeast</Text>
     </Row>
 
     <!-- Notification panel -->
@@ -1263,11 +1275,11 @@
       <Text>Tutorial goal completed: {1_Goal}</Text>
     </Row>
 
-    <Row Tag="LOC_CAI_PEDIA_PANEL" Language="en_US">
-      <Text>Civilopedia</Text>
-    </Row>
     <Row Tag="LOC_CAI_PEDIA_SECTIONS" Language="en_US">
       <Text>Sections</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_HISTORY" Language="en_US">
+      <Text>History</Text>
     </Row>
     <Row Tag="LOC_CAI_PEDIA_ARTICLE" Language="en_US">
       <Text>Article</Text>
@@ -1277,6 +1289,12 @@
     </Row>
     <Row Tag="LOC_CAI_PEDIA_RELATED" Language="en_US">
       <Text>Related</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_HISTORY_START" Language="en_US">
+      <Text>Already at the oldest history item</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_HISTORY_END" Language="en_US">
+      <Text>Already at the newest history item</Text>
     </Row>
 
   </LocalizedText>

@@ -30,9 +30,8 @@ Civilization VI accessibility mod for blind players. Adds TTS and screen-reader 
 
 ## Current Focus
 
-Civilopedia accessibility plus diplomacy/production polish.
+Diplomacy/production polish plus remaining in-game verification.
 
-- `CivilopediaScreen_CAI.lua`: panel with sections > page groups > pages treeview and an article list (readable text, quote buttons that play audio on activate, related-link buttons). Capture wraps on text/quote/icon adders and a wrap on `NavigateTo` keep the list in sync with vanilla; show/hide handlers push/pop the panel; focus seeds from `GetCurrentPage()` so opening on any article works.
 - `DiplomacyDealView_CAI.lua`: root panel with tab bar, offers tree, inventory tree, and actions list is implemented. Amount editing, agreement-option selection, delete, unacceptable-item marking, category inventory activation, and demand-mode side handling are wired to live vanilla behavior.
 - `DiplomacyActionView_CAI.lua`: persistent CAI root with leaders tree, actions list, conversation panel, and cinema handling is implemented. Intel tabs, submenu rebuilds, conversation lifecycle sync, and close-path cleanup are in place.
 - `DeclareWarPopup_CAI.lua`: dedicated declare-war warning dialog wrapper is implemented for diplomacy, city-state, Civ6Common, and world-input open paths, with live targets/consequence summaries and modal button handling.
@@ -46,6 +45,7 @@ Civilopedia accessibility plus diplomacy/production polish.
 - `UIScreenManager.lua` and shared widget helpers: stale hidden focused-child recovery is fixed and verified.
 - `GovernmentScreen_CAI.lua`: implementation is complete and verified in game.
 - `CivicsChooser` and `CivicsTree`: implementations are complete and verified in game.
+- `CivilopediaScreen_CAI.lua`: implementation is complete. CAI now exposes sections, article content, quotes, related links, and a mirrored native history list with reopen/history-path fixes and boundary speech.
 - Frontend AdvancedSetup and My2K accessibility work are implemented and working.
 
 ## Open Test Queue
@@ -86,16 +86,6 @@ WorldInput / Notifications / ActionPanel:
 - Verify notification speech, notification tree activation/dismissal, and blocker filtering.
 - Verify tutorial-safe handling of Space and Ctrl+Space.
 - Verify blocker-tooltip speech changes and Escape closing of the ActionPanel blocker list.
-
-Civilopedia:
-
-- Verify the panel opens with section tree on the left and article list on the right when pedia is opened cold (hotkey or main menu).
-- Verify opening from a Production row / CivicsTree / TechTree / DiplomacyActionView lands tree focus directly on that article.
-- Verify arrowing through sections, page groups, and pages navigates vanilla and refills the article list each time.
-- Verify quote rows announce the quote text and that Enter plays the audio on rows where vanilla shows a play button.
-- Verify related-link buttons at the bottom of the article list navigate to the linked article on Enter.
-- Verify the article list is hidden on pages with no readable content.
-- Verify Escape closes the pedia cleanly and that re-opening starts without stale links or quotes.
 
 WorldTracker and TopPanel:
 
@@ -153,5 +143,6 @@ Unit operation / command hotkeys:
 - `CityPanel_CAI.lua` exposes city info helpers through `ExposedMembers.CAIInfo` and supports reordered selection helper keys plus a city action list.
 - `UnitPanel_CAI.lua` exposes unit info helpers, filtered spoken actions, and `SelectionActions`.
 - `WorldTracker`, `TopPanel`, and `NotificationPanel` hotkey-driven access patterns are implemented.
+- Nav cursor movement now uses six remappable hex-direction actions wired through `LuaEvents.CAICursorMoveDirection(...)` and `Map.GetAdjacentPlot(...)`, with alphanumeric and numpad defaults.
 - Tutorial goals now use custom CAI notification types rather than `USER_DEFINED_*`.
 - Unit operations and commands gained unbound hotkey ids where vanilla had no safe direct binding path.

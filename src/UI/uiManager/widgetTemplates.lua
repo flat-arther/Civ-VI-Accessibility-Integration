@@ -829,6 +829,7 @@ WidgetTemplates = {
     TreeviewItem = {
         Role = "TreeviewItem",
         IsExpanded = false,
+        IsTreeviewItem = true,
         SpeechSettings = {
             Role = false,
             IgnoreWhenNotFocused = true

@@ -145,8 +145,8 @@ Used to create dynamic UI instances from XML templates:
 ### Lua Events (LuaEvents.*)
 
 - `LuaEvents.CAIEndTurn` — CAI custom: triggers end turn
-- `LuaEvents.CAICursorMove(x, y, wrapCoords)` — CAI custom: public absolute cursor move event; call this instead of accessing the cursor object directly. If `wrapCoords` is true, CAI wraps both axes manually using `Map.GetGridSize()` before resolving the plot; otherwise out-of-bounds coordinates are rejected before calling `Map.GetPlot(...)`.
-- `LuaEvents.CAICursorMoveRelative(dx, dy, wrapCoords)` — CAI custom: public relative cursor move event used by remappable cursor input actions. `wrapCoords` has the same behavior as absolute cursor moves.
+- `LuaEvents.CAICursorMove(x, y)` — CAI custom: public absolute cursor move event; call this instead of accessing the cursor object directly.
+- `LuaEvents.CAICursorMoveDirection(direction)` — CAI custom: public directional cursor move event; calls `CAICursor:MoveToNextPlot(direction)` so Civ VI's adjacent-plot logic handles wrapping.
 - `LuaEvents.CAICursorMoved(x, y, plot, cursor)` — CAI custom: emitted after the cursor moves; listeners should read/speak plot info here
 - `LuaEvents.MainMenu_ShowAdditionalContent` — opens mods screen
 - `LuaEvents.MainMenu_UserRequestClose` — main menu exit request
@@ -392,13 +392,12 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - CAI implication: model Civilopedia as a document browser with separate accessible structures for section tabs, page tree/search results, history, article chapters, and related-entry links. A flat single-speech dump would miss too much of the sighted interaction model.
 - `navCursor.lua` owns the CAI map cursor:
   - Public movement should use Lua events, not `ExposedMembers.CAICursor`.
-  - Absolute moves use `LuaEvents.CAICursorMove(x, y, wrapCoords)`.
-  - Relative moves use `LuaEvents.CAICursorMoveRelative(dx, dy, wrapCoords)`.
-  - Cursor `SetCoords(x, y, wrapCoords)` performs its own bounds check before calling `Map.GetPlot(...)`, avoiding Civ VI's implicit X wrapping unless `wrapCoords` is true.
-  - Directional helpers exist internally as `LuaEvents.CAICursorMoveDirection(direction)`, but default cursor navigation now uses remappable input actions rather than hardcoded numpad bindings.
+  - Absolute moves use `LuaEvents.CAICursorMove(x, y)`.
+  - Directional moves use `LuaEvents.CAICursorMoveDirection(direction)`.
+  - Cursor `SetCoords(x, y)` resolves the target plot directly with `Map.GetPlot(...)`; directional movement relies on `Map.GetAdjacentPlot(...)`.
   - Query-style access remains available through the WorldInput `UI` hijack: `UI.GetCursorPlotID()` and `UI.GetCursorPlotCoord()`.
   - `LuaEvents.CAICursorMoved(x, y, plot, cursor)` is the post-move notification event used by speech listeners.
-  - Current default cursor input actions are `CAICursorMoveUp`, `CAICursorMoveDown`, `CAICursorMoveLeft`, and `CAICursorMoveRight`, bound to arrow keys by default.
+  - Current default cursor input actions are `CAICursorMoveNorthWest`, `CAICursorMoveNorthEast`, `CAICursorMoveWest`, `CAICursorMoveEast`, `CAICursorMoveSouthWest`, and `CAICursorMoveSouthEast`, bound by default to `Q/E`, `A/D`, `Z/C` with numpad `7/9`, `4/6`, `1/3` as alternate bindings.
 - `WorldInput_CAI.lua` wraps vanilla `WorldInput.lua`:
   - CAI installs all `UI` table overrides in one `InstallUIOverrides()` section. Current overrides are `UI.GetCursorPlotID()` and `UI.GetCursorPlotCoord()`.
   - CAI keeps the vanilla `Events.LoadScreenClose` boundary by wrapping `OnLoadScreenClose(...)`; the main game view widget is created and pushed only after the load screen closes.
@@ -613,8 +612,9 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - `mgr.CAISettings.ValidateWidgetIds = true` enables attachment-time duplicate-id warnings for debugging without adding normal runtime lookup-table state.
 - `CivilopediaScreen.lua` / `CivilopediaSupport.lua` (decompiled/Assets/UI/Civilopedia/):
   - Data model: `_Sections`, `_PagesBySection[sid]`, `_PageGroupsBySection[sid]`. Public accessors `GetSections()`, `GetPages(sid)`, `GetPageGroup(sid, gid)`, `GetPage(sid, pid)`, `GetCurrentPage()` (returns `sid, pid`). `_CurrentSectionId` / `_CurrentPageId` are file-locals; always go through `GetCurrentPage()`.
-  - Entry points: `OnOpenCivilopedia(sectionId_or_search, pageId)` opens or searches and ends with `UIManager:QueuePopup(ContextPtr, PopupPriority.Civilopedia)`; `OnClose()` calls `UIManager:DequeuePopup(ContextPtr)`. `LuaEvents.OpenCivilopedia` and `LuaEvents.ToggleCivilopedia` register the originals in `Initialize()`, so reassigning the globals does not retro-add wraps to the LuaEvents listeners — use `ContextPtr:SetShowHandler` / `SetHideHandler` instead of trying to wrap the LuaEvents path.
+  - Entry points: `OnOpenCivilopedia(sectionId_or_search, pageId)` opens or searches and ends with `UIManager:QueuePopup(ContextPtr, PopupPriority.Civilopedia)`; `OnClose()` calls `UIManager:DequeuePopup(ContextPtr)`. `LuaEvents.OpenCivilopedia` and `LuaEvents.ToggleCivilopedia` register the original open functions in `Initialize()`, and `Controls.WindowCloseButton:RegisterCallback(Mouse.eLClick, OnClose)` captures the original close function there too. If CAI wraps `OnOpenCivilopedia` / `OnClose` after `include("CivilopediaScreen")`, remove and re-add the `LuaEvents.OpenCivilopedia` listener and re-register the close button callback so the wrapped functions become the live open/close path.
   - Navigation: `NavigateTo(SectionId, PageId)` is the single re-render point for both the chapter stacks and the right-column quotes/icon lists. Wrap it to refresh CAI state on every page change; the same wrap fires whether the user clicked vanilla tabs or activated a CAI tree node.
+  - History: vanilla breadcrumb state lives in file-local `m_kPageTrail`, so CAI cannot read the trail table directly from a wrapper file. Mirror the trail in CAI by wrapping `NavigateTo(...)` for append/truncate behavior and `NavigateToPageTrailIndex(index, bUpdateScroll)` for current-index changes, then call the vanilla `NavigateToPageTrailIndex(...)` from accessible history buttons so activation still uses the native path.
   - Readable text: text reaches the article through `SetPageHeader`, `SetPageSubHeader`, `AddFullWidthChapter` / `AddFullWidthHeader` / `AddFullWidthParagraph` / `AddFullWidthParagraphs`, `AddLeftColumnChapter` / `AddLeftColumnHeader` / `AddLeftColumnParagraph` / `AddLeftColumnParagraphs`, `AddLeftColumnHeaderBody`, and `AddLeftColumnIconHeaderBody`. Each takes a localized text key (often a `LOC_…`). Wrapping these and capturing `Locale.Lookup` of each argument is more reliable than walking `Controls.PageChaptersStack` / `LeftColumnStack` instance children.
   - Quotes: `AddQuote(quote, audio)` renders into `_RightColumnQuoteManager`. When `audio` is a non-empty string the instance's `PlayQuote` button is shown and registered to call `UI.PlaySound(audio)`. CAI captures both in the `AddQuote` wrap and exposes activation through a Button widget whose `OnClick` plays the audio.
   - Related links: `HookupIcon(icon_data, icon_control, button_control)` is the single point that wires every clickable related-concept icon (used by stat boxes' `AddIconLabel` / `AddIconList` and by `Do_AddIconHeaderBody`). When `icon_data` is a table with a non-nil `search_term` at index 3 the button's `eLClick` runs `CivilopediaSearch(search_term, 1)` then `NavigateTo(result.SectionId, result.PageId)`. CAI captures `{tooltip = icon_data[2], search_term = icon_data[3]}` and reproduces the click behavior on a Button widget in the article list.

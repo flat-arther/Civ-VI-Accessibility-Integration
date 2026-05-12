@@ -3,50 +3,21 @@ CAICursor = CAICursor or {
     curY = 0
 }
 
-local function WrapCoord(value, size)
-    return ((value % size) + size) % size
-end
-
-local function NormalizeCoords(x, y, wrapCoords)
-    local width, height = Map.GetGridSize()
-
-    if width == nil or height == nil or width <= 0 or height <= 0 then
-        print("CAI cursor unable to read map grid size")
-        return nil, nil
-    end
-
-    if wrapCoords then
-        return WrapCoord(x, width), WrapCoord(y, height)
-    end
-
-    if x < 0 or x >= width or y < 0 or y >= height then
-        print("CAI cursor move requested outside map bounds: " .. tostring(x) .. ", " .. tostring(y))
-        return nil, nil
-    end
-
-    return x, y
-end
-
 --# Methods
-function CAICursor:SetCoords(x, y, wrapCoords)
+function CAICursor:SetCoords(x, y)
     if x == nil or y == nil then
         print("CAI cursor move requested with nil coordinates")
         return
     end
 
-    local normalizedX, normalizedY = NormalizeCoords(x, y, wrapCoords)
-    if normalizedX == nil or normalizedY == nil then
-        return
-    end
-
-    local plot = Map.GetPlot(normalizedX, normalizedY)
+    local plot = Map.GetPlot(x, y)
     if not plot then
-        print("CAI cursor unable to resolve plot at coordinates: " .. tostring(normalizedX) .. ", " .. tostring(normalizedY))
+        print("CAI cursor unable to resolve plot at coordinates: " .. tostring(x) .. ", " .. tostring(y))
         return
     end
 
-    self.curX = normalizedX
-    self.curY = normalizedY
+    self.curX = plot:GetX()
+    self.curY = plot:GetY()
     LuaEvents.CAICursorMoved(self.curX, self.curY, plot, self)
 end
 
@@ -90,12 +61,8 @@ function CAICursor:GetPlotId()
     return plot:GetIndex()
 end
 
-LuaEvents.CAICursorMove.Add(function(x, y, wrapCoords)
-    CAICursor:SetCoords(x, y, wrapCoords)
-end)
-
-LuaEvents.CAICursorMoveRelative.Add(function(dx, dy, wrapCoords)
-    CAICursor:SetCoords(CAICursor.curX + dx, CAICursor.curY + dy, wrapCoords)
+LuaEvents.CAICursorMove.Add(function(x, y)
+    CAICursor:SetCoords(x, y)
 end)
 
 LuaEvents.CAICursorMoveDirection.Add(function(direction)

@@ -14,10 +14,12 @@ local mainArea = nil
 local m_caiCurrentInterfaceWidget = nil
 local m_caiSystemsInitialized = false
 
-local ACTION_CURSOR_UP = Input.GetActionId("CAICursorMoveUp")
-local ACTION_CURSOR_DOWN = Input.GetActionId("CAICursorMoveDown")
-local ACTION_CURSOR_LEFT = Input.GetActionId("CAICursorMoveLeft")
-local ACTION_CURSOR_RIGHT = Input.GetActionId("CAICursorMoveRight")
+local ACTION_CURSOR_NORTHWEST = Input.GetActionId("CAICursorMoveNorthWest")
+local ACTION_CURSOR_NORTHEAST = Input.GetActionId("CAICursorMoveNorthEast")
+local ACTION_CURSOR_WEST = Input.GetActionId("CAICursorMoveWest")
+local ACTION_CURSOR_EAST = Input.GetActionId("CAICursorMoveEast")
+local ACTION_CURSOR_SOUTHWEST = Input.GetActionId("CAICursorMoveSouthWest")
+local ACTION_CURSOR_SOUTHEAST = Input.GetActionId("CAICursorMoveSouthEast")
 local ACTION_INTERFACE_PRIMARY = Input.GetActionId("InterfaceWidgetPrimaryAction")
 
 -- ===========================================================================
@@ -45,8 +47,8 @@ end
 -- ===========================================================================
 -- Shared input actions
 -- ===========================================================================
-local function MoveCursor(dx, dy)
-	LuaEvents.CAICursorMoveRelative(dx, dy, true)
+local function MoveCursor(direction)
+	LuaEvents.CAICursorMoveDirection(direction)
 	return true
 end
 
@@ -54,28 +56,40 @@ end
 ---Action functions are passed the game view widget, then any event arguments.
 ---@type table<number, { Type: string, Action: fun(w:UIWidget, ...):boolean|nil }>
 local SharedInputActions = {
-	[ACTION_CURSOR_UP] = {
+	[ACTION_CURSOR_NORTHWEST] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
-			return MoveCursor(0, 1)
+			return MoveCursor(DirectionTypes.DIRECTION_NORTHWEST)
 		end,
 	},
-	[ACTION_CURSOR_DOWN] = {
+	[ACTION_CURSOR_NORTHEAST] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
-			return MoveCursor(0, -1)
+			return MoveCursor(DirectionTypes.DIRECTION_NORTHEAST)
 		end,
 	},
-	[ACTION_CURSOR_LEFT] = {
+	[ACTION_CURSOR_WEST] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
-			return MoveCursor(-1, 0)
+			return MoveCursor(DirectionTypes.DIRECTION_WEST)
 		end,
 	},
-	[ACTION_CURSOR_RIGHT] = {
+	[ACTION_CURSOR_EAST] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
-			return MoveCursor(1, 0)
+			return MoveCursor(DirectionTypes.DIRECTION_EAST)
+		end,
+	},
+	[ACTION_CURSOR_SOUTHWEST] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			return MoveCursor(DirectionTypes.DIRECTION_SOUTHWEST)
+		end,
+	},
+	[ACTION_CURSOR_SOUTHEAST] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			return MoveCursor(DirectionTypes.DIRECTION_SOUTHEAST)
 		end,
 	},
 }
