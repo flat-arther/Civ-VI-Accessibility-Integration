@@ -1,4 +1,5 @@
 include("caiUtils")
+include("inGameHelpers_CAI")
 include("interfaceInfoHelpers_CAI")
 include("UnitPanel")
 
@@ -147,27 +148,6 @@ function ResolveUnitData(unitID, playerID)
 end
 
 --# Unit info helpers
-
-function GetUnitOwnershipPrefix(unit)
-    if unit == nil then
-        return nil
-    end
-
-    local playerID = unit:GetOwner()
-    local playerConfig = PlayerConfigurations[playerID]
-    if playerConfig ~= nil then
-        local civName = playerConfig:GetCivilizationShortDescription()
-        if civName ~= nil and civName ~= "" then
-            local adjective = civName:gsub("_NAME", "_ADJECTIVE")
-            if adjective ~= nil and adjective ~= "" then
-                return Locale.Lookup(adjective)
-            end
-        end
-    end
-
-    return Locale.Lookup("LOC_TOOLTIP_PLAYER_ID", playerID)
-end
-
 function GetUnitFormationSuffix(data)
     if data == nil or data.UnitType == nil or data.UnitType == -1 then
         return nil
@@ -198,16 +178,8 @@ function GetUnitInfoName(data, unit)
         return nil
     end
 
-    local unitName = Locale.Lookup(data.Name)
     local formationSuffix = GetUnitFormationSuffix(data)
-    if formationSuffix ~= nil then
-        unitName = unitName .. " " .. formationSuffix
-    end
-
-    return JoinUnitInfo({
-        GetUnitOwnershipPrefix(unit),
-        unitName,
-    }, " ")
+    return FormatOwnedUnitDisplayName(unit, formationSuffix)
 end
 
 function GetUnitInfoCoords(unit)
@@ -658,9 +630,12 @@ function OnUnitPanelSelectionActionInputTriggered(actionId)
         local list = mgr:CreateUIWidget(UNIT_ABILITIES_LIST_ID, "List", {
             GetLabel = function() return Locale.Lookup("LOC_CAI_UNIT_ABILITIES_LIST") end,
         })
-        list:AddInputBinding({ Key = Keys.VK_ESCAPE, Action = function()
-            mgr:RemoveFromStack(UNIT_ABILITIES_LIST_ID); return true
-        end })
+        list:AddInputBinding({
+            Key = Keys.VK_ESCAPE,
+            Action = function()
+                mgr:RemoveFromStack(UNIT_ABILITIES_LIST_ID); return true
+            end
+        })
 
         for _, ability in ipairs(data.Ability) do
             local desc = GetUnitAbilityDescription(ability)

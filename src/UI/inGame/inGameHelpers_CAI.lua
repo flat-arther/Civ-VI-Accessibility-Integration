@@ -1,7 +1,7 @@
+include("caiUtils")
+
 -- Shared in-game CAI formatting and widget helpers used by ResearchChooser_CAI,
 -- TechTree_CAI, CivicsChooser_CAI, CivicsTree_CAI, and ProductionPanel_CAI.
--- Defined as plain globals; _G is per-context in Civ VI Lua, so each consumer
--- still has to include this file to make the helpers visible in its context.
 --
 -- Widget builders take `mgr` as their first arg (the caller's
 -- ExposedMembers.CAI_UIManager) so they work in any screen context regardless
@@ -256,4 +256,45 @@ function AddMakesObsoleteNode(mgr, parent, obsoleteNames)
     end
 
     parent:AddChild(obsoleteNode)
+end
+
+--#Unit info helpers
+---Returns the unit's owner civ prefix, as an adjective
+---@param unit Unit
+---@return string|nil
+function GetUnitOwnershipPrefix(unit)
+    if unit == nil then
+        return nil
+    end
+
+    local playerID = unit:GetOwner()
+    local playerConfig = PlayerConfigurations[playerID]
+    if playerConfig ~= nil then
+        local civName = playerConfig:GetCivilizationShortDescription()
+        if civName ~= nil and civName ~= "" then
+            local adjective = civName:gsub("_NAME", "_ADJECTIVE")
+            if adjective ~= nil and adjective ~= "" then
+                return Locale.Lookup(adjective)
+            end
+        end
+    end
+
+    return Locale.Lookup("LOC_TOOLTIP_PLAYER_ID", playerID)
+end
+
+---Formats a unit display name as owner adjective + localized unit name + optional formation suffix.
+---Uses a CAI localization pattern so translators can reorder the pieces by language.
+---@param unit Unit
+---@param formationSuffix string|nil
+---@return string|nil
+function FormatOwnedUnitDisplayName(unit, formationSuffix)
+    if unit == nil then
+        return nil
+    end
+
+    local owner = GetUnitOwnershipPrefix(unit)
+    local name = Locale.Lookup(unit:GetName())
+    local suffix = formationSuffix or ""
+    local formatted = Locale.Lookup("LOC_CAI_UNIT_FLAG_NAME_PATTERN", owner, name, suffix)
+    return NormalizeFormattedText(formatted)
 end

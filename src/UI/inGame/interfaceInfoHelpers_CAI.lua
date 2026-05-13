@@ -667,7 +667,6 @@ InterfaceInfoHelpers[InterfaceModeTypes.BUILDING_PLACEMENT] = BuildWonderPlaceme
 
 function GetActiveInterfacePlotInfo(plot)
     if plot == nil then return nil end
-
     local helper = InterfaceInfoHelpers[UI.GetInterfaceMode()]
     if helper == nil then return nil end
     return helper(plot)

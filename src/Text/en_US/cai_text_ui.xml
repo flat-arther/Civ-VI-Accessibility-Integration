@@ -358,13 +358,13 @@
       <Text>No strategic resources</Text>
     </Row>
     <Row Tag="LOC_CAI_DIPLOMACY_LEADERS" Language="en_US">
-        <Text>Leaders</Text>
+      <Text>Leaders</Text>
     </Row>
     <Row Tag="LOC_CAI_DIPLOMACY_ACTIONS" Language="en_US">
       <Text>Actions</Text>
     </Row>
     <Row Tag="LOC_CAI_DIPLOMACY_NO_ACTIONS" Language="en_US">
-        <Text>No available diplomacy actions</Text>
+      <Text>No available diplomacy actions</Text>
     </Row>
     <Row Tag="LOC_CAI_DIPLOMACY_ACTIVE_SOURCES" Language="en_US">
       <Text>Active visibility sources</Text>
@@ -895,6 +895,15 @@
     <Row Tag="LOC_CAI_WORLDTRACKER_UNIT_FORTIFIED" Language="en_US">
       <Text>Fortified</Text>
     </Row>
+    <Row Tag="LOC_CAI_UNIT_EMBARKED" Language="en_US">
+      <Text>Embarked</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_NAME_PATTERN" Language="en_US">
+      <Text>{1_Owner} {2_Name} {3_FormationSuffix}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_HEALTH" Language="en_US">
+      <Text>{1_CurrentHp}/{2_MaxHp} hp</Text>
+    </Row>
     <Row Tag="LOC_CAI_WORLDTRACKER_UNIT_MISSING" Language="en_US">
       <Text>Unit no longer available</Text>
     </Row>
@@ -1041,12 +1050,12 @@
       <Text>No actions available</Text>
     </Row>
 
-    <!-- Plot info hotkeys -->
+    <!-- Tile info hotkeys -->
     <Row Tag="LOC_CAI_PLOTINFO1" Language="en_US">
-      <Text>Plot Summary</Text>
+      <Text>Tile Summary</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOTINFO_TOOLTIP" Language="en_US">
-      <Text>Read plot name and coordinates</Text>
+      <Text>Read tile name and coordinates</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOTINFO2" Language="en_US">
       <Text>Tile Type</Text>
@@ -1064,31 +1073,31 @@
       <Text>Units</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOTINFO4_TOOLTIP" Language="en_US">
-      <Text>Read units on this plot</Text>
+      <Text>Read units on this tile</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOTINFO5" Language="en_US">
       <Text>Interface Preview</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOTINFO5_TOOLTIP" Language="en_US">
-      <Text>Read interface-specific plot preview</Text>
+      <Text>Read interface-specific tile preview</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOTINFO6" Language="en_US">
       <Text>Resources</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOTINFO6_TOOLTIP" Language="en_US">
-      <Text>Read resources on this plot</Text>
+      <Text>Read resources on this tile</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOTINFO7" Language="en_US">
       <Text>Buildings</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOTINFO7_TOOLTIP" Language="en_US">
-      <Text>Read buildings on this plot</Text>
+      <Text>Read buildings on this tile</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOTINFO8" Language="en_US">
       <Text>Owner</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOTINFO8_TOOLTIP" Language="en_US">
-      <Text>Read owner of this plot</Text>
+      <Text>Read owner of this tile</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOTINFO9" Language="en_US">
       <Text>Physical Info</Text>
@@ -1103,15 +1112,46 @@
       <Text>Read continent, appeal, workers, fallout, and national park</Text>
     </Row>
 
-    <!-- Plot info fallback messages -->
+    <Row Tag="LOC_CAI_PLOT_READ_UNITS" Language="en_US">
+      <Text>Read tile units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_READ_UNITS_TOOLTIP" Language="en_US">
+      <Text>Reads the units on the current tile</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER" Language="en_US">
+      <Text>Read tile yields</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER_TOOLTIP" Language="en_US">
+      <Text>Reads the current tile yields, river information, and owner</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_READ_STATS" Language="en_US">
+      <Text>Read tile stats</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_READ_STATS_TOOLTIP" Language="en_US">
+      <Text>Reads movement cost, defense modifier, and appeal for the current tile</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_READ_RELATIVE_COORDS" Language="en_US">
+      <Text>Read relative coordinates</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_READ_RELATIVE_COORDS_TOOLTIP" Language="en_US">
+      <Text>Reads the current tile coordinates relative to your original capital</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_READ_DISTRICT_BUILDINGS" Language="en_US">
+      <Text>Read district and buildings</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_READ_DISTRICT_BUILDINGS_TOOLTIP" Language="en_US">
+      <Text>Reads district, building, and great work information for the current tile</Text>
+    </Row>
+
+    <!-- Tile info fallback messages -->
     <Row Tag="LOC_CAI_PLOT_NO_TILE_INFO" Language="en_US">
       <Text>No tile information</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_NO_FEATURES" Language="en_US">
-      <Text>No features on this plot</Text>
+      <Text>No features on this tile</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_NO_UNITS" Language="en_US">
-      <Text>No units on this plot</Text>
+      <Text>No units on this tile</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_NO_INTERFACE_PREVIEW" Language="en_US">
       <Text>No interface preview</Text>
@@ -1132,10 +1172,19 @@
       <Text>No placement bonus</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_NO_RESOURCES" Language="en_US">
-      <Text>No resources on this plot</Text>
+      <Text>No resources on this tile</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_NO_BUILDINGS" Language="en_US">
-      <Text>No buildings on this plot</Text>
+      <Text>No buildings on this tile</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_NO_YIELD_RIVER_OWNER_INFO" Language="en_US">
+      <Text>No yields, fresh water, river, or owner information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_NO_COORDINATES" Language="en_US">
+      <Text>No coordinates available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_NO_DISTRICTS_OR_BUILDINGS" Language="en_US">
+      <Text>No districts or buildings on this tile</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_UNOWNED" Language="en_US">
       <Text>Unowned</Text>
@@ -1145,6 +1194,27 @@
     </Row>
     <Row Tag="LOC_CAI_PLOT_NO_AMBIENT_INFO" Language="en_US">
       <Text>No additional information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS" Language="en_US">
+      <Text>{1_RiverText}, {2_Directions}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIR_NE" Language="en_US">
+      <Text>NE</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIR_NW" Language="en_US">
+      <Text>NW</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIR_SE" Language="en_US">
+      <Text>SE</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIR_SW" Language="en_US">
+      <Text>SW</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIR_E" Language="en_US">
+      <Text>E</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIR_W" Language="en_US">
+      <Text>W</Text>
     </Row>
     <Row Tag="LOC_CAI_INTERFACE_PRIMARY_ACTION" Language="en_US">
       <Text>Primary interface action</Text>

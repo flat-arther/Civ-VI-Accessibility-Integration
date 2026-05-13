@@ -10,16 +10,6 @@
     <Row ActionId="NextUnitSelectionCategory" Name="LOC_CAI_NEXT_UNIT_CAT" Description="LOC_CAI_UNIT_NEXT_CAT_TOOLTIP" CategoryId="GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PrevUnitSelection" Name="LOC_CAI_PREV_UNIT" Description="LOC_CAI_UNIT_PREV_TOOLTIP" CategoryId="GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="NextUnitSelection" Name="LOC_CAI_NEXT_UNIT" Description="LOC_CAI_UNIT_NEXT_TOOLTIP" CategoryId="GLOBAL" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotInfo1" Name="LOC_CAI_PLOTINFO1" Description="LOC_CAI_PLOTINFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotInfo2" Name="LOC_CAI_PLOTINFO2" Description="LOC_CAI_PLOTINFO2_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotInfo3" Name="LOC_CAI_PLOTINFO3" Description="LOC_CAI_PLOTINFO3_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotInfo4" Name="LOC_CAI_PLOTINFO4" Description="LOC_CAI_PLOTINFO4_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotInfo5" Name="LOC_CAI_PLOTINFO5" Description="LOC_CAI_PLOTINFO5_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotInfo6" Name="LOC_CAI_PLOTINFO6" Description="LOC_CAI_PLOTINFO6_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotInfo7" Name="LOC_CAI_PLOTINFO7" Description="LOC_CAI_PLOTINFO7_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotInfo8" Name="LOC_CAI_PLOTINFO8" Description="LOC_CAI_PLOTINFO8_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotInfo9" Name="LOC_CAI_PLOTINFO9" Description="LOC_CAI_PLOTINFO9_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotInfo10" Name="LOC_CAI_PLOTINFO10" Description="LOC_CAI_PLOTINFO10_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ReadSelectionSummary" Name="LOC_CAI_READ_SELECTION_SUMMARY" Description="LOC_CAI_READ_SELECTION_SUMMARY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ReadSelectionInfo1" Name="LOC_CAI_READ_SELECTION_INFO1" Description="LOC_CAI_READ_SELECTION_INFO1_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ReadSelectionInfo2" Name="LOC_CAI_READ_SELECTION_INFO2" Description="LOC_CAI_READ_SELECTION_INFO2_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
@@ -50,6 +40,11 @@
     <Row ActionId="WorldTrackerOpenResearchChooser" Name="LOC_CAI_WORLDTRACKER_OPEN_RESEARCH_CHOOSER" Description="LOC_CAI_WORLDTRACKER_OPEN_RESEARCH_CHOOSER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldTrackerOpenCivicsChooser" Name="LOC_CAI_WORLDTRACKER_OPEN_CIVICS_CHOOSER" Description="LOC_CAI_WORLDTRACKER_OPEN_CIVICS_CHOOSER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldTrackerReadSummary" Name="LOC_CAI_WORLDTRACKER_READ_SUMMARY" Description="LOC_CAI_WORLDTRACKER_READ_SUMMARY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotReadUnits" Name="LOC_CAI_PLOT_READ_UNITS" Description="LOC_CAI_PLOT_READ_UNITS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotReadYieldRiverOwner" Name="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER" Description="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotReadStats" Name="LOC_CAI_PLOT_READ_STATS" Description="LOC_CAI_PLOT_READ_STATS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotReadRelativeCoords" Name="LOC_CAI_PLOT_READ_RELATIVE_COORDS" Description="LOC_CAI_PLOT_READ_RELATIVE_COORDS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotReadDistrictBuildings" Name="LOC_CAI_PLOT_READ_DISTRICT_BUILDINGS" Description="LOC_CAI_PLOT_READ_DISTRICT_BUILDINGS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="NotificationPanelOpenList" Name="LOC_CAI_NOTIFICATION_CENTER" Description="LOC_CAI_NOTIFICATION_CENTER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TutorialGoalsOpenList" Name="LOC_CAI_TUTORIAL_GOALS_HOTKEY" Description="LOC_CAI_TUTORIAL_GOALS_HOTKEY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="BuildImprovement" Name="LOC_UNITOPERATION_BUILD_IMPROVEMENT_DESCRIPTION" Description="LOC_UNITOPERATION_BUILD_IMPROVEMENT_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
@@ -168,19 +163,18 @@
     <Row ActionId="TopPanelOpenDiplomacy" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_D" />
     <Row ActionId="WorldTrackerOpenResearchChooser" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_T" />
     <Row ActionId="WorldTrackerOpenCivicsChooser" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_C" />
-    <Row ActionId="WorldTrackerReadSummary" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_W" />
+    <Row ActionId="WorldTrackerReadSummary" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_W" />
+    <Row ActionId="PlotReadUnits" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_S" />
+    <Row ActionId="PlotReadUnits" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_5" />
+    <Row ActionId="PlotReadYieldRiverOwner" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_W" />
+    <Row ActionId="PlotReadYieldRiverOwner" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_8" />
+    <Row ActionId="PlotReadStats" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_X" />
+    <Row ActionId="PlotReadStats" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_2" />
+    <Row ActionId="PlotReadRelativeCoords" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_S" />
+    <Row ActionId="PlotReadRelativeCoords" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_NP_5" />
+    <Row ActionId="PlotReadDistrictBuildings" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_D" />
     <Row ActionId="NotificationPanelOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_N" />
     <Row ActionId="TutorialGoalsOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_T" />
-    <Row ActionId="PlotInfo1" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_1" />
-    <Row ActionId="PlotInfo2" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_2" />
-    <Row ActionId="PlotInfo3" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_3" />
-    <Row ActionId="PlotInfo4" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_4" />
-    <Row ActionId="PlotInfo5" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_5" />
-    <Row ActionId="PlotInfo6" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_6" />
-    <Row ActionId="PlotInfo7" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_7" />
-    <Row ActionId="PlotInfo8" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_8" />
-    <Row ActionId="PlotInfo9" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_9" />
-    <Row ActionId="PlotInfo10" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_0" />
     <Row ActionId="PrevUnitSelectionCategory" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_COMMA" />
     <Row ActionId="NextUnitSelectionCategory" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_PERIOD" />
     <Row ActionId="PrevUnitSelection" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_COMMA" />

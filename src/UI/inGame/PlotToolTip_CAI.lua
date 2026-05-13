@@ -1,112 +1,486 @@
 include("caiUtils")
 include("interfaceInfoHelpers_CAI")
-include("PlotToolTip")
+include("Civ6Common")
+
+local function IsBarbarianClansModeActive()
+    return GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS") == 1
+end
+
+local function GetPlotToolTipIncludeName()
+    if IsExpansion2Active() then
+        if IsBarbarianClansModeActive() then
+            return "PlotTooltip_Expansion2_BarbarianClansMode"
+        end
+        return "PlotTooltip_Expansion2"
+    end
+
+    if IsBarbarianClansModeActive() then
+        return "PlotToolTip_BarbarianClansMode"
+    end
+
+    return "PlotToolTip"
+end
+
+local PLOT_TOOLTIP_INCLUDE = GetPlotToolTipIncludeName()
+local IS_XP2_TOOLTIP = PLOT_TOOLTIP_INCLUDE == "PlotTooltip_Expansion2"
+    or PLOT_TOOLTIP_INCLUDE == "PlotTooltip_Expansion2_BarbarianClansMode"
+local IS_BARBARIAN_CLANS_TOOLTIP = PLOT_TOOLTIP_INCLUDE == "PlotToolTip_BarbarianClansMode"
+    or PLOT_TOOLTIP_INCLUDE == "PlotTooltip_Expansion2_BarbarianClansMode"
+
+include(PLOT_TOOLTIP_INCLUDE)
 
 local currentPlot = -1
 local info = ExposedMembers.CAIInfo or {}
 ExposedMembers.CAIInfo = info
 
---# Constants
-
-local INFO_PRIORITY = {
+local STATIC_INFO_PRIORITY = {
     "plotName",
-    "TileType",
-    "Feature",
-    "Units",
-    "InterfaceInfo",
-    "NaturalWonder",
-    "Resources",
-    "Buildings",
-    "Owner",
-    "NationalPark",
-    "Movement",
-    "Defense",
-    "Continent",
-    "Appeal",
-    "Status",
-    "Geography",
+    "owner",
+    "feature",
+    "nationalPark",
+    "resource",
+    "volcano",
+    "freshWater",
+    "river",
+    "cliff",
+    "territory",
+    "storm",
+    "drought",
+    "movement",
+    "route",
+    "defense",
+    "appeal",
+    "continent",
+    "coastalLowland",
+    "wonderTitle",
+    "cityDistrictTitle",
+    "cityResourceExtraction",
+    "districtSpecialistsHeader",
+    "districtTitle",
+    "districtResourceExtraction",
+    "improvement",
+    "barbarianClan",
+    "plotResourceExtraction",
+    "impassable",
+    "naturalWonder",
+    "buildingsHeader",
+    "greatWorksHeader",
+    "workers",
+    "fallout",
+    "units",
+    "interfaceInfo",
 }
 
-PlotInfoActionPriority = {
-    "Summary",
-    "TileType",
-    "FeatureInfo",
-    "Units",
-    "InterfaceInfo",
-    "Resources",
-    "Buildings",
-    "Owner",
-    "PhysicalInfo",
-    "AmbientInfo",
+local CURSOR_MOVE_INFO_PRIORITY = {
+    "units",
+    "interfaceInfo",
+    "cityName",
+    "wonderTitle",
+    "cityResourceExtraction",
+    "districtTitle",
+    "districtResourceExtraction",
+    "districtSpecialistsHeader",
+    "plotName",
+    "feature",
+    "nationalPark",
+    "resource",
+    "improvement",
+    "barbarianClan",
+    "plotResourceExtraction",
+    "river",
 }
 
-PlotInfoActionMap = {}
-
---# Local utilities
+local PlotInfoActionRequestBuilders = {}
 
 local function GetCurrentCursorPlot()
     return Map.GetPlotByIndex(currentPlot)
 end
 
-local function GetPlotInfoCoords(plot)
-    if not plot then return nil end
-    return tostring(plot:GetX()) .. ", " .. tostring(plot:GetY())
-end
+local function AddIfPresent(results, value)
+    if value == nil then
+        return
+    end
 
-local function AppendPlotInfo(results, value)
     if type(value) == "table" then
-        for _, s in ipairs(value) do
-            if s and s ~= "" then table.insert(results, s) end
+        for _, innerValue in ipairs(value) do
+            AddIfPresent(results, innerValue)
         end
-    elseif value and value ~= "" then
+        return
+    end
+
+    if value ~= "" then
         table.insert(results, value)
     end
 end
 
-local function RequestWithFallback(plot, rawKeys, visibleFallback)
-    local r = info:RequestPlotInfo(plot, rawKeys)
-    if #r > 0 then return r end
-    if not info.IsPlotVisible(plot:GetIndex()) then
-        return { Locale.Lookup("LOC_MINIMAP_FOG_OF_WAR_TOOLTIP") }
-    end
-    return { Locale.Lookup(visibleFallback) }
+local function HasEntries(t)
+    return t ~= nil and next(t) ~= nil
 end
 
-local function GetPlotUnitFormationSuffix(unit)
-    if unit == nil then return nil end
+local function GetOrderedYieldTypes(yieldTable)
+    local ordered = {}
+    if yieldTable == nil then
+        return ordered
+    end
 
-    local unitInfo = GameInfo.Units[unit:GetUnitType()]
-    if unitInfo == nil then return nil end
+    for row in GameInfo.Yields() do
+        if yieldTable[row.YieldType] ~= nil then
+            table.insert(ordered, row.YieldType)
+        end
+    end
 
-    local formation = unit:GetMilitaryFormation()
-    if formation == MilitaryFormationTypes.CORPS_FORMATION then
-        if unitInfo.Domain == "DOMAIN_SEA" then
-            return Locale.Lookup("LOC_HUD_UNIT_PANEL_FLEET_SUFFIX")
+    return ordered
+end
+
+local function GetYieldLine(yieldType, amount)
+    local yieldInfo = GameInfo.Yields[yieldType]
+    if yieldInfo == nil or amount == nil then
+        return nil
+    end
+
+    return tostring(amount) .. Locale.Lookup(yieldInfo.IconString) .. Locale.Lookup(yieldInfo.Name)
+end
+
+local function GetActiveOriginalCapitalCoords()
+    local localPlayerID = Game.GetLocalPlayer()
+    if localPlayerID == nil or localPlayerID == -1 then
+        return nil, nil
+    end
+
+    for playerID = 0, 63 do
+        local player = Players[playerID]
+        if player ~= nil then
+            local cities = player:GetCities()
+            if cities ~= nil then
+                for _, city in cities:Members() do
+                    if city ~= nil
+                        and city:IsOriginalCapital()
+                        and city:GetOriginalOwner() == localPlayerID then
+                        return city:GetX(), city:GetY()
+                    end
+                end
+            end
         end
-        return Locale.Lookup("LOC_HUD_UNIT_PANEL_CORPS_SUFFIX")
-    elseif formation == MilitaryFormationTypes.ARMY_FORMATION then
-        if unitInfo.Domain == "DOMAIN_SEA" then
-            return Locale.Lookup("LOC_HUD_UNIT_PANEL_ARMADA_SUFFIX")
+    end
+
+    return nil, nil
+end
+
+local function GetRelativeCoordinateString(plot)
+    if plot == nil then
+        return nil
+    end
+
+    local capitalX, capitalY = GetActiveOriginalCapitalCoords()
+    if capitalX == nil or capitalY == nil then
+        return nil
+    end
+
+    local x = plot:GetX()
+    local y = plot:GetY()
+    local dy = y - capitalY
+    local dx = (x + 0.5 * (y % 2)) - (capitalX + 0.5 * (capitalY % 2))
+
+    if Map.IsWrapX() then
+        local width = Map.GetGridSize()
+        local half = width / 2
+        if dx > half then
+            dx = dx - width
+        elseif dx < -half then
+            dx = dx + width
         end
-        return Locale.Lookup("LOC_HUD_UNIT_PANEL_ARMY_SUFFIX")
+    end
+
+    return tostring(dx) .. ", " .. tostring(dy)
+end
+
+local function BuildPlotInfoData(plot)
+    if not plot then
+        return nil
+    end
+
+    local data = FetchData(plot)
+    FetchAdditionalData(plot, data)
+    data.IsVisible = info.IsPlotVisible(plot:GetIndex())
+    data.Units = Units.GetUnitsInPlotLayerID(plot:GetX(), plot:GetY(), MapLayers.ANY)
+
+    return data
+end
+
+local function GetPlotFeatureInfo(data)
+    if data.FeatureType == nil then
+        return nil
+    end
+    return GameInfo.Features[data.FeatureType]
+end
+
+local function GetPlotResourceContext(data)
+    if data._CAIResourceContext ~= nil then
+        return data._CAIResourceContext
+    end
+
+    if data.ResourceType == nil then
+        data._CAIResourceContext = false
+        return nil
+    end
+
+    local resource = GameInfo.Resources[data.ResourceType]
+    if resource == nil then
+        data._CAIResourceContext = false
+        return nil
+    end
+
+    local context = {
+        Resource = resource,
+        ResourceHash = resource.Hash,
+        ResourceString = Locale.Lookup(resource.Name),
+        ResourceTechType = nil,
+        ValidFeature = false,
+        ValidTerrain = false,
+        ValidResources = false,
+    }
+
+    local terrainInfo = data.TerrainType ~= nil and GameInfo.Terrains[data.TerrainType] or nil
+
+    for row in GameInfo.Improvement_ValidResources() do
+        if row.ResourceType == data.ResourceType then
+            local improvementType = row.ImprovementType
+            local improvement = GameInfo.Improvements[improvementType]
+
+            if improvement ~= nil then
+                local hasFeature = false
+                for innerRow in GameInfo.Improvement_ValidFeatures() do
+                    if innerRow.ImprovementType == improvementType then
+                        hasFeature = true
+                        if innerRow.FeatureType == data.FeatureType then
+                            context.ValidFeature = true
+                        end
+                    end
+                end
+                if not hasFeature then
+                    context.ValidFeature = true
+                end
+
+                local hasTerrain = false
+                for innerRow in GameInfo.Improvement_ValidTerrains() do
+                    if innerRow.ImprovementType == improvementType then
+                        hasTerrain = true
+                        if innerRow.TerrainType == data.TerrainType then
+                            context.ValidTerrain = true
+                        end
+                    end
+                end
+                if not hasTerrain then
+                    context.ValidTerrain = true
+                end
+
+                for innerRow in GameInfo.Improvement_ValidResources() do
+                    if innerRow.ImprovementType == improvementType and innerRow.ResourceType == data.ResourceType then
+                        context.ValidResources = true
+                        break
+                    end
+                end
+
+                if terrainInfo ~= nil then
+                    if terrainInfo.TerrainType == "TERRAIN_COAST" then
+                        if improvement.Domain == "DOMAIN_SEA" then
+                            context.ValidTerrain = true
+                        elseif improvement.Domain == "DOMAIN_LAND" then
+                            context.ValidTerrain = false
+                        end
+                    else
+                        if improvement.Domain == "DOMAIN_SEA" then
+                            context.ValidTerrain = false
+                        elseif improvement.Domain == "DOMAIN_LAND" then
+                            context.ValidTerrain = true
+                        end
+                    end
+                end
+
+                if (context.ValidFeature and context.ValidTerrain) or context.ValidResources then
+                    context.ResourceTechType = improvement.PrereqTech
+                    break
+                end
+            end
+        end
+    end
+
+    data._CAIResourceContext = context
+    return context
+end
+
+local function GetVisibleResourceString(data)
+    local context = GetPlotResourceContext(data)
+    if context == nil then
+        return nil
+    end
+
+    local localPlayer = Players[Game.GetLocalPlayer()]
+    if localPlayer ~= nil then
+        local playerResources = localPlayer:GetResources()
+        if not playerResources:IsResourceVisible(context.ResourceHash) then
+            return nil
+        end
+
+        local resourceString = context.ResourceString
+        if context.ResourceTechType ~= nil and ((context.ValidFeature and context.ValidTerrain) or context.ValidResources) then
+            local playerTechs = localPlayer:GetTechs()
+            local techType = GameInfo.Technologies[context.ResourceTechType]
+            if techType ~= nil and not playerTechs:HasTech(techType.Index) then
+                resourceString = resourceString
+                    .. "[COLOR:Civ6Red]  ( "
+                    .. Locale.Lookup("LOC_TOOLTIP_REQUIRES")
+                    .. " "
+                    .. Locale.Lookup(techType.Name)
+                    .. ")[ENDCOLOR]"
+            end
+        end
+
+        return resourceString
+    elseif GameConfiguration.IsWorldBuilderEditor() then
+        local resourceString = context.ResourceString
+        if context.ResourceTechType ~= nil and ((context.ValidFeature and context.ValidTerrain) or context.ValidResources) then
+            local techType = GameInfo.Technologies[context.ResourceTechType]
+            if techType ~= nil then
+                resourceString = resourceString
+                    .. "( "
+                    .. Locale.Lookup("LOC_TOOLTIP_REQUIRES")
+                    .. " "
+                    .. Locale.Lookup(techType.Name)
+                    .. ")[ENDCOLOR]"
+            end
+        end
+
+        return resourceString
     end
 
     return nil
 end
 
-local function GetPlotUnitDisplayName(unit)
-    if unit == nil then return nil end
-
-    local name = Locale.Lookup(unit:GetName())
-    local formationSuffix = GetPlotUnitFormationSuffix(unit)
-    if formationSuffix ~= nil then
-        name = name .. " " .. formationSuffix
+local function GetResourceAccumulationString(data, plot, requiresExtractablePlot)
+    if not IS_XP2_TOOLTIP or data.ResourceType == nil then
+        return nil
     end
 
-    return name
+    local localPlayer = Players[Game.GetLocalPlayer()]
+    if localPlayer == nil then
+        return nil
+    end
+
+    local context = GetPlotResourceContext(data)
+    if context == nil then
+        return nil
+    end
+
+    local playerResources = localPlayer:GetResources()
+    if not playerResources:IsResourceVisible(context.ResourceHash) then
+        return nil
+    end
+
+    if requiresExtractablePlot and (plot == nil or not playerResources:IsResourceExtractableAt(plot)) then
+        return nil
+    end
+
+    local resourceTechType = GameInfo.Resources[data.ResourceType].PrereqTech
+    if resourceTechType == nil then
+        return nil
+    end
+
+    local techType = GameInfo.Technologies[resourceTechType]
+    if techType == nil or not localPlayer:GetTechs():HasTech(techType.Index) then
+        return nil
+    end
+
+    local consumption = GameInfo.Resource_Consumption[data.ResourceType]
+    if consumption == nil or not consumption.Accumulate then
+        return nil
+    end
+
+    local extraction = consumption.ImprovedExtractionRate
+    if extraction == nil or extraction <= 0 then
+        return nil
+    end
+
+    return Locale.Lookup(
+        "LOC_RESOURCE_ACCUMULATION_EXISTING_IMPROVEMENT",
+        extraction,
+        "[ICON_" .. data.ResourceType .. "]",
+        GameInfo.Resources[data.ResourceType].Name
+    )
 end
 
---# Visibility
+local function GetCoastalLowlandString(data)
+    if not IS_XP2_TOOLTIP or data.CoastalLowland == nil or data.CoastalLowland == -1 then
+        return nil
+    end
+
+    local detailText = ""
+    if data.CoastalLowland == 0 then
+        detailText = Locale.Lookup("LOC_COASTAL_LOWLAND_1M_NAME")
+    elseif data.CoastalLowland == 1 then
+        detailText = Locale.Lookup("LOC_COASTAL_LOWLAND_2M_NAME")
+    elseif data.CoastalLowland == 2 then
+        detailText = Locale.Lookup("LOC_COASTAL_LOWLAND_3M_NAME")
+    end
+
+    if data.Submerged then
+        detailText = detailText .. " " .. Locale.Lookup("LOC_COASTAL_LOWLAND_SUBMERGED")
+    elseif data.Flooded then
+        detailText = detailText .. " " .. Locale.Lookup("LOC_COASTAL_LOWLAND_FLOODED")
+    end
+
+    return detailText ~= "" and detailText or nil
+end
+
+local function GetVolcanoString(data)
+    if not IS_XP2_TOOLTIP or not data.IsVolcano then
+        return nil
+    end
+
+    local volcanoString = Locale.Lookup("LOC_VOLCANO_TOOLTIP_STRING", data.VolcanoName)
+    if data.Erupting then
+        volcanoString = volcanoString .. " " .. Locale.Lookup("LOC_VOLCANO_ERUPTING_STRING")
+    elseif data.Active then
+        volcanoString = volcanoString .. " " .. Locale.Lookup("LOC_VOLCANO_ACTIVE_STRING")
+    end
+
+    return volcanoString
+end
+
+local function BuildDefaultRequestedKeys(data)
+    local keys = {}
+    for _, key in ipairs(STATIC_INFO_PRIORITY) do
+        table.insert(keys, key)
+
+        if key == "cityDistrictTitle" then
+            for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
+                table.insert(keys, "cityYield:" .. yieldType)
+            end
+        elseif key == "districtSpecialistsHeader" then
+            for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
+                table.insert(keys, "districtSpecialistYield:" .. yieldType)
+            end
+        elseif key == "districtTitle" then
+            for _, yieldType in ipairs(GetOrderedYieldTypes(data.DistrictYields)) do
+                table.insert(keys, "districtYield:" .. yieldType)
+            end
+        elseif key == "improvement" then
+            for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
+                table.insert(keys, "plotYield:" .. yieldType)
+            end
+        elseif key == "buildingsHeader" and data.BuildingNames ~= nil then
+            for i = 1, #data.BuildingNames do
+                table.insert(keys, "building:" .. tostring(i))
+            end
+        elseif key == "greatWorksHeader" then
+            local greatWorkCount = data._CAIGreatWorkCount or 0
+            for i = 1, greatWorkCount do
+                table.insert(keys, "greatWork:" .. tostring(i))
+            end
+        end
+    end
+    return keys
+end
 
 function info.IsPlotVisible(plot)
     if not plot then return false end
@@ -117,9 +491,252 @@ function info.IsPlotVisible(plot)
     return vis:IsRevealed(plot)
 end
 
---# Raw plot info helpers
+local function CacheGreatWorks(data)
+    if data._CAIGreatWorksCached then
+        return
+    end
 
----@type table<string, fun(data:table):string[]|string|nil>
+    data._CAIGreatWorksCached = true
+    data._CAIGreatWorks = {}
+
+    if data.BuildingNames == nil or data.OwnerCity == nil then
+        data._CAIGreatWorkCount = 0
+        return
+    end
+
+    local cityBuildings = data.OwnerCity:GetBuildings()
+    if cityBuildings == nil then
+        data._CAIGreatWorkCount = 0
+        return
+    end
+
+    for i = 1, #data.BuildingNames do
+        local slots = cityBuildings:GetNumGreatWorkSlots(data.BuildingTypes[i])
+        for j = 0, slots - 1 do
+            local idx = cityBuildings:GetGreatWorkInSlot(data.BuildingTypes[i], j)
+            if idx ~= -1 then
+                local greatWorkType = cityBuildings:GetGreatWorkTypeFromIndex(idx)
+                local greatWork = GameInfo.GreatWorks[greatWorkType]
+                if greatWork ~= nil then
+                    table.insert(data._CAIGreatWorks, "- " .. Locale.Lookup(greatWork.Name))
+                end
+            end
+        end
+    end
+
+    data._CAIGreatWorkCount = #data._CAIGreatWorks
+end
+
+local RIVER_SELF_EDGES = {
+    { dir = "LOC_CAI_DIR_E", hasRiver = function(p) return p ~= nil and p:IsWOfRiver() end },
+    { dir = "LOC_CAI_DIR_SE", hasRiver = function(p) return p ~= nil and p:IsNWOfRiver() end },
+    { dir = "LOC_CAI_DIR_SW", hasRiver = function(p) return p ~= nil and p:IsNEOfRiver() end },
+}
+
+local RIVER_NEIGHBOR_EDGES = {
+    {
+        dir = "LOC_CAI_DIR_W",
+        neighborDir = DirectionTypes.DIRECTION_WEST,
+        hasRiver = function(p)
+            return p ~= nil and p:IsWOfRiver()
+        end
+    },
+    {
+        dir = "LOC_CAI_DIR_NW",
+        neighborDir = DirectionTypes.DIRECTION_NORTHWEST,
+        hasRiver = function(p)
+            return p ~= nil and p:IsNWOfRiver()
+        end
+    },
+    {
+        dir = "LOC_CAI_DIR_NE",
+        neighborDir = DirectionTypes.DIRECTION_NORTHEAST,
+        hasRiver = function(p)
+            return p ~= nil and p:IsNEOfRiver()
+        end
+    },
+}
+
+local RIVER_SPOKEN_ORDER = {
+    "LOC_CAI_DIR_NE",
+    "LOC_CAI_DIR_E",
+    "LOC_CAI_DIR_SE",
+    "LOC_CAI_DIR_SW",
+    "LOC_CAI_DIR_W",
+    "LOC_CAI_DIR_NW",
+}
+
+local function GetRiverDirectionString(plot)
+    if plot == nil or not plot:IsRiver() then
+        return nil
+    end
+
+    local presentEdges = {}
+    for _, edge in ipairs(RIVER_SELF_EDGES) do
+        if edge.hasRiver(plot) then
+            presentEdges[edge.dir] = true
+        end
+    end
+
+    local x = plot:GetX()
+    local y = plot:GetY()
+    for _, edge in ipairs(RIVER_NEIGHBOR_EDGES) do
+        local neighbor = Map.GetAdjacentPlot(x, y, edge.neighborDir)
+        if edge.hasRiver(neighbor) then
+            presentEdges[edge.dir] = true
+        end
+    end
+
+    local directions = {}
+    for _, dirTag in ipairs(RIVER_SPOKEN_ORDER) do
+        if presentEdges[dirTag] then
+            table.insert(directions, Locale.Lookup(dirTag))
+        end
+    end
+
+    if #directions == 0 then
+        return nil
+    end
+
+    return table.concat(directions, " ")
+end
+
+local function LogRiverDebug(plot, data, directionString)
+    if plot == nil then
+        return
+    end
+
+    local function TryRiverCrossingToPlot(sourcePlot, targetPlot)
+        if sourcePlot == nil or targetPlot == nil then
+            return "nil"
+        end
+
+        local ok, result = pcall(function()
+            return sourcePlot:IsRiverCrossingToPlot(targetPlot)
+        end)
+
+        if not ok then
+            return "error"
+        end
+
+        return tostring(result)
+    end
+
+    local x = plot:GetX()
+    local y = plot:GetY()
+    local northeast = Map.GetAdjacentPlot(x, y, DirectionTypes.DIRECTION_NORTHEAST)
+    local west = Map.GetAdjacentPlot(x, y, DirectionTypes.DIRECTION_WEST)
+    local northwest = Map.GetAdjacentPlot(x, y, DirectionTypes.DIRECTION_NORTHWEST)
+    local riverNames = data ~= nil and data.RiverNames or nil
+    local riverNameText = ""
+    if type(riverNames) == "table" then
+        local parts = {}
+        for _, name in pairs(riverNames) do
+            if name ~= nil and name ~= "" then
+                table.insert(parts, tostring(name))
+            end
+        end
+        riverNameText = table.concat(parts, "|")
+    elseif riverNames ~= nil then
+        riverNameText = tostring(riverNames)
+    end
+
+    print(string.format(
+        "CAI_RIVER_DEBUG plot=(%d,%d) isRiver=%s isRiverAdjacent=%s isRiverSide=%s isRiverCrossing=%s names=%s directions=%s self[E<-W=%s,SE<-NW=%s,SW<-NE=%s] west[W<-W=%s] northwest[NW<-NW=%s] northeast[NE<-NE=%s] crossingTo[NE=%s,E=%s,SE=%s,SW=%s,W=%s,NW=%s]",
+        x,
+        y,
+        tostring(plot:IsRiver()),
+        tostring(plot:IsRiverAdjacent()),
+        tostring(plot:IsRiverSide()),
+        tostring(plot:IsRiverCrossing()),
+        riverNameText,
+        tostring(directionString),
+        tostring(plot:IsWOfRiver()),
+        tostring(plot:IsNWOfRiver()),
+        tostring(plot:IsNEOfRiver()),
+        tostring(west ~= nil and west:IsWOfRiver() or false),
+        tostring(northwest ~= nil and northwest:IsNWOfRiver() or false),
+        tostring(northeast ~= nil and northeast:IsNEOfRiver() or false),
+        TryRiverCrossingToPlot(plot, northeast),
+        TryRiverCrossingToPlot(plot, Map.GetAdjacentPlot(x, y, DirectionTypes.DIRECTION_EAST)),
+        TryRiverCrossingToPlot(plot, Map.GetAdjacentPlot(x, y, DirectionTypes.DIRECTION_SOUTHEAST)),
+        TryRiverCrossingToPlot(plot, Map.GetAdjacentPlot(x, y, DirectionTypes.DIRECTION_SOUTHWEST)),
+        TryRiverCrossingToPlot(plot, west),
+        TryRiverCrossingToPlot(plot, northwest)
+    ))
+end
+
+local function FormatNamedRiverString(riverNames, directionString)
+    if riverNames == nil then
+        return nil
+    end
+
+    local localizedNames = {}
+    if type(riverNames) == "table" then
+        for _, riverName in pairs(riverNames) do
+            if riverName ~= nil and riverName ~= "" then
+                local riverText = Locale.Lookup("LOC_RIVER_TOOLTIP_STRING", riverName)
+                if directionString ~= nil and directionString ~= "" then
+                    riverText = Locale.Lookup("LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS", riverText, directionString)
+                end
+                table.insert(localizedNames, riverText)
+            end
+        end
+    else
+        local riverText = Locale.Lookup("LOC_RIVER_TOOLTIP_STRING", riverNames)
+        if directionString ~= nil and directionString ~= "" then
+            riverText = Locale.Lookup("LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS", riverText, directionString)
+        end
+        table.insert(localizedNames, riverText)
+    end
+
+    if #localizedNames == 0 then
+        return nil
+    end
+
+    return table.concat(localizedNames, ", ")
+end
+
+local function GetPlainRiverString(data, plot)
+    if not data.IsVisible or not data.IsRiver then
+        return nil
+    end
+
+    local directionString = GetRiverDirectionString(plot)
+    LogRiverDebug(plot, data, directionString)
+
+    local riverString = Locale.Lookup("LOC_TOOLTIP_RIVER")
+    if directionString ~= nil then
+        return Locale.Lookup("LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS", riverString, directionString)
+    end
+
+    return riverString
+end
+
+local function GetNamedRiverString(data, plot)
+    if not data.IsVisible or not data.IsRiver then
+        return nil
+    end
+
+    local directionString = GetRiverDirectionString(plot)
+    LogRiverDebug(plot, data, directionString)
+
+    if IS_XP2_TOOLTIP and data.RiverNames then
+        local riverString = FormatNamedRiverString(data.RiverNames, directionString)
+        if riverString ~= nil then
+            return riverString
+        end
+    end
+
+    local riverString = Locale.Lookup("LOC_TOOLTIP_RIVER")
+    if directionString ~= nil then
+        return Locale.Lookup("LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS", riverString, directionString)
+    end
+
+    return riverString
+end
+
+---@type table<string, fun(data:table, plot:table, arg:string|nil):string|string[]|nil>
 info.PlotInfoHelpers = {
     plotName = function(data)
         if not data.IsVisible then
@@ -134,540 +751,683 @@ info.PlotInfoHelpers = {
         return Locale.Lookup(data.TerrainTypeName)
     end,
 
-    InterfaceInfo = function(data, plot)
-        if not plot then return nil end
-        return GetActiveInterfacePlotInfo(plot)
+    relativeCoords = function(data, plot)
+        return GetRelativeCoordinateString(plot)
     end,
 
-    Units = function(data)
-        local units = data.Units
-        if not units or #units == 0 then return nil end
-
-        local summary = {}
-        local appearanceOrder = {}
-        for _, unit in ipairs(units) do
-            local displayName = GetPlotUnitDisplayName(unit)
-            if summary[displayName] == nil then
-                summary[displayName] = 1
-                table.insert(appearanceOrder, displayName)
-            else
-                summary[displayName] = summary[displayName] + 1
-            end
+    cityName = function(data)
+        if not data.IsVisible or data.OwningCityName == nil or data.OwningCityName == "" then
+            return nil
         end
-
-        local finalStrings = {}
-        for _, name in ipairs(appearanceOrder) do
-            table.insert(finalStrings, summary[name] .. " " .. name)
-        end
-
-        return table.concat(finalStrings, ", ")
+        return Locale.Lookup(data.OwningCityName)
     end,
 
-    Owner = function(data)
-        if not data.IsVisible then return nil end
-        if data.Owner == nil then return nil end
+    owner = function(data)
+        if not data.IsVisible or data.Owner == nil then return nil end
 
-        local szOwnerString
-        local pPlayerConfig = PlayerConfigurations[data.Owner]
+        local ownerString
+        local playerConfig = PlayerConfigurations[data.Owner]
 
-        if pPlayerConfig ~= nil then
-            szOwnerString = Locale.Lookup(pPlayerConfig:GetCivilizationShortDescription())
+        if playerConfig ~= nil then
+            ownerString = Locale.Lookup(playerConfig:GetCivilizationShortDescription())
         end
 
-        if szOwnerString == nil or string.len(szOwnerString) == 0 then
-            szOwnerString = Locale.Lookup("LOC_TOOLTIP_PLAYER_ID", data.Owner)
+        if ownerString == nil or string.len(ownerString) == 0 then
+            ownerString = Locale.Lookup("LOC_TOOLTIP_PLAYER_ID", data.Owner)
         end
 
-        local pPlayer = Players[data.Owner]
-        if GameConfiguration:IsAnyMultiplayer() and pPlayer ~= nil and pPlayer:IsHuman() then
-            szOwnerString = szOwnerString .. " (" .. Locale.Lookup(pPlayerConfig:GetPlayerName()) .. ")"
+        local player = Players[data.Owner]
+        if GameConfiguration:IsAnyMultiplayer() and player ~= nil and player:IsHuman() then
+            ownerString = ownerString .. " (" .. Locale.Lookup(playerConfig:GetPlayerName()) .. ")"
         end
 
-        return Locale.Lookup("LOC_TOOLTIP_CITY_OWNER", szOwnerString, data.OwningCityName)
+        return Locale.Lookup("LOC_TOOLTIP_CITY_OWNER", ownerString, data.OwningCityName)
     end,
 
-    Feature = function(data)
-        if not data.IsVisible then return nil end
-        if data.FeatureType == nil then return nil end
+    feature = function(data)
+        if not data.IsVisible or data.FeatureType == nil then return nil end
 
-        local szFeatureString = Locale.Lookup(GameInfo.Features[data.FeatureType].Name)
+        local featureInfo = GetPlotFeatureInfo(data)
+        if featureInfo == nil then
+            return nil
+        end
+
+        local featureString = Locale.Lookup(featureInfo.Name)
         local localPlayer = Players[Game.GetLocalPlayer()]
-        local addCivicName = GameInfo.Features[data.FeatureType].AddCivic
+        local addCivicName = featureInfo.AddCivic
 
         if localPlayer ~= nil and addCivicName ~= nil then
-            local civicIndex = GameInfo.Civics[addCivicName].Index
-            if localPlayer:GetCulture():HasCivic(civicIndex) then
-                local szAdditionalString
+            local civicInfo = GameInfo.Civics[addCivicName]
+            if civicInfo ~= nil and localPlayer:GetCulture():HasCivic(civicInfo.Index) then
+                local additionalString
                 if not data.FeatureAdded then
-                    szAdditionalString = Locale.Lookup("LOC_TOOLTIP_PLOT_WOODS_OLD_GROWTH")
+                    additionalString = Locale.Lookup("LOC_TOOLTIP_PLOT_WOODS_OLD_GROWTH")
                 else
-                    szAdditionalString = Locale.Lookup("LOC_TOOLTIP_PLOT_WOODS_SECONDARY")
+                    additionalString = Locale.Lookup("LOC_TOOLTIP_PLOT_WOODS_SECONDARY")
                 end
-                szFeatureString = szFeatureString .. " " .. szAdditionalString
+                featureString = featureString .. " " .. additionalString
             end
         end
 
-        return szFeatureString
+        return featureString
     end,
 
-    NationalPark = function(data)
+    nationalPark = function(data)
+        if not data.IsVisible or data.NationalPark == "" then return nil end
+        return data.NationalPark
+    end,
+
+    resource = function(data)
         if not data.IsVisible then return nil end
-        if data.NationalPark ~= "" then
-            return data.NationalPark
+        return GetVisibleResourceString(data)
+    end,
+
+    volcano = function(data)
+        if not data.IsVisible then return nil end
+        return GetVolcanoString(data)
+    end,
+
+    freshWater = function(data, plot)
+        if not data.IsVisible or plot == nil then return nil end
+        if plot:IsFreshWater() then
+            return Locale.Lookup("LOC_SETTLEMENT_RECOMMENDATION_FRESH_WATER")
         end
         return nil
     end,
 
-    Resources = function(data)
-        if not data.IsVisible then return nil end
-        if data.ResourceType == nil then return "" end
-
-        local resourceType = data.ResourceType
-        local resource = GameInfo.Resources[resourceType]
-        if resource == nil then return nil end
-
-        local resourceHash = GameInfo.Resources[resourceType].Hash
-        local resourceString = Locale.Lookup(resource.Name)
-        local terrainType = data.TerrainType
-        local featureType = data.FeatureType
-        local resourceTechType = nil
-
-        local valid_feature = false
-        local valid_terrain = false
-        local valid_resources = false
-
-        for row in GameInfo.Improvement_ValidResources() do
-            if row.ResourceType == resourceType then
-                local improvementType = row.ImprovementType
-                local improvement = GameInfo.Improvements[improvementType]
-
-                if improvement ~= nil then
-                    local has_feature = false
-                    for inner_row in GameInfo.Improvement_ValidFeatures() do
-                        if inner_row.ImprovementType == improvementType then
-                            has_feature = true
-                            if inner_row.FeatureType == featureType then
-                                valid_feature = true
-                            end
-                        end
-                    end
-                    if not has_feature then
-                        valid_feature = true
-                    end
-
-                    local has_terrain = false
-                    for inner_row in GameInfo.Improvement_ValidTerrains() do
-                        if inner_row.ImprovementType == improvementType then
-                            has_terrain = true
-                            if inner_row.TerrainType == terrainType then
-                                valid_terrain = true
-                            end
-                        end
-                    end
-                    if not has_terrain then
-                        valid_terrain = true
-                    end
-
-                    for inner_row in GameInfo.Improvement_ValidResources() do
-                        if inner_row.ImprovementType == improvementType then
-                            if inner_row.ResourceType == resourceType then
-                                valid_resources = true
-                                break
-                            end
-                        end
-                    end
-
-                    if terrainType ~= nil and GameInfo.Terrains[terrainType] ~= nil then
-                        if GameInfo.Terrains[terrainType].TerrainType == "TERRAIN_COAST" then
-                            if improvement.Domain == "DOMAIN_SEA" then
-                                valid_terrain = true
-                            elseif improvement.Domain == "DOMAIN_LAND" then
-                                valid_terrain = false
-                            end
-                        else
-                            if improvement.Domain == "DOMAIN_SEA" then
-                                valid_terrain = false
-                            elseif improvement.Domain == "DOMAIN_LAND" then
-                                valid_terrain = true
-                            end
-                        end
-                    end
-
-                    if (valid_feature and valid_terrain) or valid_resources then
-                        resourceTechType = improvement.PrereqTech
-                        break
-                    end
-                end
-            end
-        end
-
-        local localPlayer = Players[Game.GetLocalPlayer()]
-        if localPlayer ~= nil then
-            local playerResources = localPlayer:GetResources()
-            if playerResources:IsResourceVisible(resourceHash) then
-                if resourceTechType ~= nil and ((valid_feature and valid_terrain) or valid_resources) then
-                    local playerTechs = localPlayer:GetTechs()
-                    local techType = GameInfo.Technologies[resourceTechType]
-
-                    if techType ~= nil and not playerTechs:HasTech(techType.Index) then
-                        resourceString =
-                            resourceString ..
-                            "[COLOR:Civ6Red]  ( " ..
-                            Locale.Lookup("LOC_TOOLTIP_REQUIRES") .. " " ..
-                            Locale.Lookup(techType.Name) ..
-                            ")[ENDCOLOR]"
-                    end
-                end
-
-                return resourceString
-            end
-        elseif GameConfiguration.IsWorldBuilderEditor() then
-            if resourceTechType ~= nil and ((valid_feature and valid_terrain) or valid_resources) then
-                local techType = GameInfo.Technologies[resourceTechType]
-                if techType ~= nil then
-                    resourceString =
-                        resourceString ..
-                        "( " ..
-                        Locale.Lookup("LOC_TOOLTIP_REQUIRES") .. " " ..
-                        Locale.Lookup(techType.Name) ..
-                        ")[ENDCOLOR]"
-                end
-            end
-
-            return resourceString
-        end
-
-        return nil
+    river = function(data, plot)
+        return GetPlainRiverString(data, plot)
     end,
 
-    Geography = function(data)
+    riverNamed = function(data, plot)
+        return GetNamedRiverString(data, plot)
+    end,
+
+    cliff = function(data)
         if not data.IsVisible then return nil end
-        local results = {}
-
-        if data.IsRiver then
-            table.insert(results, Locale.Lookup("LOC_TOOLTIP_RIVER"))
-        end
-
         if data.IsNWOfCliff or data.IsWOfCliff or data.IsNEOfCliff then
-            table.insert(results, Locale.Lookup("LOC_TOOLTIP_CLIFF"))
+            return Locale.Lookup("LOC_TOOLTIP_CLIFF")
         end
-
-        return #results > 0 and results or nil
+        return nil
     end,
 
-    Movement = function(data)
-        if not data.IsVisible then return nil end
-        local results = {}
+    territory = function(data)
+        if not data.IsVisible or not IS_XP2_TOOLTIP or data.TerritoryName == nil then return nil end
+        return Locale.Lookup(data.TerritoryName)
+    end,
 
+    storm = function(data)
+        if not data.IsVisible or not IS_XP2_TOOLTIP or data.Storm == nil or data.Storm == -1 then return nil end
+        local randomEvent = GameInfo.RandomEvents[data.Storm]
+        return randomEvent ~= nil and Locale.Lookup(randomEvent.Name) or nil
+    end,
+
+    drought = function(data)
+        if not data.IsVisible or not IS_XP2_TOOLTIP or data.Drought == nil or data.Drought == -1 then return nil end
+        local randomEvent = GameInfo.RandomEvents[data.Drought]
+        if randomEvent == nil then
+            return nil
+        end
+        return Locale.Lookup("LOC_DROUGHT_TOOLTIP_STRING", randomEvent.Name, data.DroughtTurns)
+    end,
+
+    movement = function(data)
+        if not data.IsVisible then return nil end
         if not data.Impassable and data.MovementCost > 0 then
-            table.insert(results, Locale.Lookup("LOC_TOOLTIP_MOVEMENT_COST", data.MovementCost))
+            return Locale.Lookup("LOC_TOOLTIP_MOVEMENT_COST", data.MovementCost)
+        end
+        return nil
+    end,
+
+    route = function(data)
+        if not data.IsVisible or not data.IsRoute then return nil end
+        if IS_XP2_TOOLTIP and data.Impassable then
+            return nil
         end
 
-        if data.IsRoute then
-            local routeInfo = GameInfo.Routes[data.RouteType]
-            if routeInfo ~= nil and routeInfo.MovementCost ~= nil and routeInfo.Name ~= nil then
-                if data.RoutePillaged then
-                    table.insert(results,
-                        Locale.Lookup("LOC_TOOLTIP_ROUTE_MOVEMENT_PILLAGED", routeInfo.MovementCost, routeInfo.Name))
-                else
-                    table.insert(results,
-                        Locale.Lookup("LOC_TOOLTIP_ROUTE_MOVEMENT", routeInfo.MovementCost, routeInfo.Name))
+        local routeInfo = GameInfo.Routes[data.RouteType]
+        if routeInfo == nil or routeInfo.MovementCost == nil or routeInfo.Name == nil then
+            return nil
+        end
+
+        if data.RoutePillaged then
+            return Locale.Lookup("LOC_TOOLTIP_ROUTE_MOVEMENT_PILLAGED", routeInfo.MovementCost, routeInfo.Name)
+        end
+        return Locale.Lookup("LOC_TOOLTIP_ROUTE_MOVEMENT", routeInfo.MovementCost, routeInfo.Name)
+    end,
+
+    defense = function(data)
+        if not data.IsVisible or data.DefenseModifier == 0 then return nil end
+        return Locale.Lookup("LOC_TOOLTIP_DEFENSE_MODIFIER", data.DefenseModifier)
+    end,
+
+    appeal = function(data)
+        if not data.IsVisible then return nil end
+
+        local featureInfo = GetPlotFeatureInfo(data)
+        if not GameCapabilities.HasCapability("CAPABILITY_LENS_APPEAL") then
+            return nil
+        end
+
+        if ((data.FeatureType ~= nil and featureInfo ~= nil and featureInfo.NaturalWonder) or not data.IsWater) then
+            for row in GameInfo.AppealHousingChanges() do
+                if data.Appeal >= row.MinimumValue then
+                    return Locale.Lookup("LOC_TOOLTIP_APPEAL", Locale.Lookup(row.Description), data.Appeal)
                 end
             end
         end
 
-        return #results > 0 and results or nil
-    end,
-
-    Defense = function(data)
-        if not data.IsVisible then return nil end
-        if data.DefenseModifier ~= 0 then
-            return Locale.Lookup("LOC_TOOLTIP_DEFENSE_MODIFIER", data.DefenseModifier)
-        end
         return nil
     end,
 
-    Appeal = function(data)
-        if not data.IsVisible then return nil end
-        local feature = nil
-        if data.FeatureType ~= nil then
-            feature = GameInfo.Features[data.FeatureType]
-        end
-
-        if GameCapabilities.HasCapability("CAPABILITY_LENS_APPEAL") then
-            if ((data.FeatureType ~= nil and feature ~= nil and feature.NaturalWonder) or not data.IsWater) then
-                for row in GameInfo.AppealHousingChanges() do
-                    if data.Appeal >= row.MinimumValue then
-                        return Locale.Lookup("LOC_TOOLTIP_APPEAL", Locale.Lookup(row.Description), data.Appeal)
-                    end
-                end
-            end
-        end
-
-        return nil
+    continent = function(data)
+        if not data.IsVisible or data.Continent == nil then return nil end
+        local continent = GameInfo.Continents[data.Continent]
+        return continent ~= nil and Locale.Lookup("LOC_TOOLTIP_CONTINENT", continent.Description) or nil
     end,
 
-    Continent = function(data)
+    coastalLowland = function(data)
         if not data.IsVisible then return nil end
-        if data.Continent ~= nil then
-            return Locale.Lookup("LOC_TOOLTIP_CONTINENT", GameInfo.Continents[data.Continent].Description)
-        end
-        return nil
+        return GetCoastalLowlandString(data)
     end,
 
-    TileType = function(data)
-        if not data.IsVisible then return nil end
-        local results = {}
+    wonderTitle = function(data)
+        if not data.IsVisible or data.WonderType == nil then return nil end
+        local wonderInfo = GameInfo.Buildings[data.WonderType]
+        if wonderInfo == nil then
+            return nil
+        end
+        local wonderName = Locale.Lookup(wonderInfo.Name)
+        if data.WonderComplete then
+            return wonderName
+        end
+        return wonderName .. " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_CONSTRUCTION_TEXT")
+    end,
 
-        if data.WonderType ~= nil then
-            if data.WonderComplete then
-                table.insert(results, Locale.Lookup(GameInfo.Buildings[data.WonderType].Name))
-            else
-                table.insert(results,
-                    Locale.Lookup(GameInfo.Buildings[data.WonderType].Name) ..
-                    " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_CONSTRUCTION_TEXT"))
-            end
-            return results
+    cityDistrictTitle = function(data)
+        if not data.IsVisible or not data.IsCity or data.DistrictType == nil then return nil end
+        local districtInfo = GameInfo.Districts[data.DistrictType]
+        return districtInfo ~= nil and Locale.Lookup(districtInfo.Name) or nil
+    end,
+
+    cityResourceExtraction = function(data, plot)
+        if not data.IsVisible or not IS_XP2_TOOLTIP or not data.IsCity or data.DistrictType == nil then return nil end
+        return GetResourceAccumulationString(data, plot, false)
+    end,
+
+    districtSpecialistsHeader = function(data)
+        if not data.IsVisible or data.DistrictID == -1 or data.DistrictType == nil then return nil end
+        if GameInfo.Districts[data.DistrictType] == nil or GameInfo.Districts[data.DistrictType].InternalOnly then
+            return nil
+        end
+        if data.Owner ~= Game.GetLocalPlayer() or not HasEntries(data.Yields) then
+            return nil
+        end
+        return Locale.Lookup("LOC_PEDIA_CONCEPTS_PAGE_CITIES_9_CHAPTER_CONTENT_TITLE")
+    end,
+
+    districtTitle = function(data)
+        if not data.IsVisible or data.DistrictID == -1 or data.DistrictType == nil then return nil end
+
+        local districtInfo = GameInfo.Districts[data.DistrictType]
+        if districtInfo == nil or districtInfo.InternalOnly then
+            return nil
         end
 
-        if data.IsCity == true and data.DistrictType ~= nil then
-            table.insert(results, Locale.Lookup(GameInfo.Districts[data.DistrictType].Name))
-            for yieldType, v in pairs(data.Yields) do
-                local yield = GameInfo.Yields[yieldType]
-                table.insert(results, tostring(v) .. Locale.Lookup(yield.IconString) .. Locale.Lookup(yield.Name))
-            end
-            return results
+        local districtName = Locale.Lookup(districtInfo.Name)
+        if data.DistrictPillaged then
+            districtName = districtName .. " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_PILLAGED_TEXT")
+        elseif not data.DistrictComplete then
+            districtName = districtName .. " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_CONSTRUCTION_TEXT")
+        end
+
+        return districtName
+    end,
+
+    districtResourceExtraction = function(data, plot)
+        if not data.IsVisible or not IS_XP2_TOOLTIP or data.DistrictID == -1 or data.DistrictType == nil then return nil end
+        local districtInfo = GameInfo.Districts[data.DistrictType]
+        if districtInfo == nil or districtInfo.InternalOnly then
+            return nil
+        end
+        return GetResourceAccumulationString(data, plot, false)
+    end,
+
+    improvement = function(data)
+        if not data.IsVisible then return nil end
+
+        if data.WonderType ~= nil or (data.IsCity and data.DistrictType ~= nil) then
+            return nil
         end
 
         if data.DistrictID ~= -1 and data.DistrictType ~= nil then
-            if not GameInfo.Districts[data.DistrictType].InternalOnly then
-                if data.Owner ~= nil and data.Owner == Game.GetLocalPlayer() and data.Yields ~= nil then
-                    if table.count(data.Yields) > 0 then
-                        table.insert(results, Locale.Lookup("LOC_PEDIA_CONCEPTS_PAGE_CITIES_9_CHAPTER_CONTENT_TITLE"))
-                    end
-                    for yieldType, v in pairs(data.Yields) do
-                        local yield = GameInfo.Yields[yieldType]
-                        table.insert(results, tostring(v) .. Locale.Lookup(yield.IconString) .. Locale.Lookup(yield.Name))
-                    end
-                end
+            return nil
+        end
 
-                local name = Locale.Lookup(GameInfo.Districts[data.DistrictType].Name)
-                if data.DistrictPillaged then
-                    name = name .. " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_PILLAGED_TEXT")
-                elseif not data.DistrictComplete then
-                    name = name .. " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_CONSTRUCTION_TEXT")
+        if IS_XP2_TOOLTIP then
+            if data.ImprovementType ~= nil then
+                local improvementInfo = GameInfo.Improvements[data.ImprovementType]
+                if improvementInfo == nil then
+                    return nil
                 end
-
-                table.insert(results, name)
-
-                if data.DistrictYields ~= nil then
-                    for yieldType, v in pairs(data.DistrictYields) do
-                        local yield = GameInfo.Yields[yieldType]
-                        table.insert(results, tostring(v) .. Locale.Lookup(yield.IconString) .. Locale.Lookup(yield.Name))
-                    end
+                local improvementString = Locale.Lookup(improvementInfo.Name)
+                if data.ImprovementPillaged then
+                    improvementString = improvementString .. " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_PILLAGED_TEXT")
                 end
+                return improvementString
             end
-            return results
+            return nil
         end
 
         if data.Impassable then
-            return { Locale.Lookup("LOC_TOOLTIP_PLOT_IMPASSABLE_TEXT") }
+            return nil
         end
 
         if data.ImprovementType ~= nil then
-            local name = Locale.Lookup(GameInfo.Improvements[data.ImprovementType].Name)
-            if data.ImprovementPillaged then
-                name = name .. " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_PILLAGED_TEXT")
+            local improvementInfo = GameInfo.Improvements[data.ImprovementType]
+            if improvementInfo == nil then
+                return nil
             end
-            table.insert(results, name)
+            local improvementString = Locale.Lookup(improvementInfo.Name)
+            if data.ImprovementPillaged then
+                improvementString = improvementString .. " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_PILLAGED_TEXT")
+            end
+            return improvementString
         end
 
-        for yieldType, v in pairs(data.Yields) do
-            local yield = GameInfo.Yields[yieldType]
-            table.insert(results, tostring(v) .. Locale.Lookup(yield.IconString) .. Locale.Lookup(yield.Name))
-        end
-
-        return results
+        return nil
     end,
 
-    NaturalWonder = function(data)
-        if not data.IsVisible then return nil end
-        if data.FeatureType ~= nil then
-            local feature = GameInfo.Features[data.FeatureType]
-            if feature ~= nil and feature.NaturalWonder then
-                return Locale.Lookup(feature.Description)
-            end
+    barbarianClan = function(data)
+        if not data.IsVisible or not IS_BARBARIAN_CLANS_TOOLTIP or data.ImprovementType ~= "IMPROVEMENT_BARBARIAN_CAMP" then
+            return nil
+        end
+
+        local barbManager = Game.GetBarbarianManager()
+        if barbManager == nil then
+            return nil
+        end
+
+        local tribeIndex = barbManager:GetTribeIndexAtLocation(data.X, data.Y)
+        if tribeIndex < 0 then
+            return nil
+        end
+
+        local tribeNameType = barbManager:GetTribeNameType(tribeIndex)
+        local tribeInfo = GameInfo.BarbarianTribeNames[tribeNameType]
+        if tribeInfo == nil then
+            return nil
+        end
+
+        return Locale.Lookup("LOC_TOOLTIP_BARBARIAN_CLAN_NAME", tribeInfo.TribeDisplayName)
+    end,
+
+    plotResourceExtraction = function(data, plot)
+        if not data.IsVisible or not IS_XP2_TOOLTIP then return nil end
+        if data.ImprovementType == nil or data.ResourceType == nil then return nil end
+        if data.WonderType ~= nil or (data.IsCity and data.DistrictType ~= nil) or (data.DistrictID ~= -1 and data.DistrictType ~= nil) then
+            return nil
+        end
+        return GetResourceAccumulationString(data, plot, true)
+    end,
+
+    impassable = function(data)
+        if not data.IsVisible or not data.Impassable then return nil end
+
+        if IS_XP2_TOOLTIP then
+            return Locale.Lookup("LOC_TOOLTIP_PLOT_IMPASSABLE_TEXT")
+        end
+
+        if data.WonderType ~= nil or (data.IsCity and data.DistrictType ~= nil) then
+            return nil
+        end
+
+        if data.DistrictID ~= -1 and data.DistrictType ~= nil then
+            return nil
+        end
+
+        return Locale.Lookup("LOC_TOOLTIP_PLOT_IMPASSABLE_TEXT")
+    end,
+
+    naturalWonder = function(data)
+        if not data.IsVisible or data.FeatureType == nil then return nil end
+        local featureInfo = GetPlotFeatureInfo(data)
+        if featureInfo ~= nil and featureInfo.NaturalWonder then
+            return Locale.Lookup(featureInfo.Description)
         end
         return nil
     end,
 
-    Buildings = function(data)
+    buildingsHeader = function(data)
         if not data.IsVisible then return nil end
         if not (data.IsCity or data.WonderType ~= nil or data.DistrictID ~= -1) then return nil end
-        if data.BuildingNames == nil or table.count(data.BuildingNames) == 0 then return nil end
-
-        local results = {}
-        local cityBuildings = data.OwnerCity:GetBuildings()
-        local greatWorksSection = {}
-
-        if data.WonderType == nil then
-            table.insert(results, Locale.Lookup("LOC_TOOLTIP_PLOT_BUILDINGS_TEXT"))
+        if data.BuildingNames == nil or #data.BuildingNames == 0 or data.WonderType ~= nil then
+            return nil
         end
-
-        for i, v in ipairs(data.BuildingNames) do
-            if data.WonderType == nil then
-                if data.BuildingsPillaged[i] then
-                    table.insert(results,
-                        "- " .. Locale.Lookup(v) .. " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_PILLAGED_TEXT"))
-                else
-                    table.insert(results, "- " .. Locale.Lookup(v))
-                end
-            end
-
-            local slots = cityBuildings:GetNumGreatWorkSlots(data.BuildingTypes[i])
-            for j = 0, slots - 1 do
-                local idx = cityBuildings:GetGreatWorkInSlot(data.BuildingTypes[i], j)
-                if idx ~= -1 then
-                    local gwType = cityBuildings:GetGreatWorkTypeFromIndex(idx)
-                    table.insert(greatWorksSection, "- " .. Locale.Lookup(GameInfo.GreatWorks[gwType].Name))
-                end
-            end
-        end
-
-        if #greatWorksSection > 0 then
-            table.insert(results, Locale.Lookup("LOC_GREAT_WORKS") .. ":")
-            for _, v in ipairs(greatWorksSection) do
-                table.insert(results, v)
-            end
-        end
-
-        return results
+        return Locale.Lookup("LOC_TOOLTIP_PLOT_BUILDINGS_TEXT")
     end,
 
-    Status = function(data)
+    greatWorksHeader = function(data)
         if not data.IsVisible then return nil end
-        local results = {}
+        CacheGreatWorks(data)
+        if data._CAIGreatWorkCount > 0 then
+            return Locale.Lookup("LOC_GREAT_WORKS") .. ":"
+        end
+        return nil
+    end,
 
+    workers = function(data)
+        if not data.IsVisible then return nil end
         if data.Owner == Game.GetLocalPlayer() and data.Workers > 0 then
-            table.insert(results, Locale.Lookup("LOC_TOOLTIP_PLOT_WORKED_TEXT", data.Workers))
+            return Locale.Lookup("LOC_TOOLTIP_PLOT_WORKED_TEXT", data.Workers)
+        end
+        return nil
+    end,
+
+    fallout = function(data)
+        if not data.IsVisible or data.Fallout <= 0 then return nil end
+        return Locale.Lookup("LOC_TOOLTIP_PLOT_CONTAMINATED_TEXT", data.Fallout)
+    end,
+
+    units = function(data)
+        local units = data.Units
+        if not units or #units == 0 or info.RequestUnitFlagInfo == nil then return nil end
+
+        local results = {}
+        local seen = {}
+        for _, unit in ipairs(units) do
+            local unitInfo = info:RequestUnitFlagInfo(unit:GetOwner(), unit:GetID())
+            if unitInfo ~= nil and not seen[unitInfo] then
+                seen[unitInfo] = true
+                table.insert(results, unitInfo)
+            end
         end
 
-        if data.Fallout > 0 then
-            table.insert(results, Locale.Lookup("LOC_TOOLTIP_PLOT_CONTAMINATED_TEXT", data.Fallout))
-        end
+        return #results > 0 and table.concat(results, ", ") or nil
+    end,
 
-        return #results > 0 and results or nil
+    interfaceInfo = function(data, plot)
+        if plot == nil then return nil end
+        return GetActiveInterfacePlotInfo(plot)
     end,
 }
 
---# Plot info request
+local DynamicPlotInfoHelpers = {
+    cityYield = function(data, _, yieldType)
+        if not data.IsVisible or not data.IsCity or data.DistrictType == nil then return nil end
+        return GetYieldLine(yieldType, data.Yields[yieldType])
+    end,
+
+    districtSpecialistYield = function(data, _, yieldType)
+        if not data.IsVisible or data.DistrictID == -1 or data.DistrictType == nil then return nil end
+        if GameInfo.Districts[data.DistrictType] == nil or GameInfo.Districts[data.DistrictType].InternalOnly then
+            return nil
+        end
+        if data.Owner ~= Game.GetLocalPlayer() then
+            return nil
+        end
+        return GetYieldLine(yieldType, data.Yields[yieldType])
+    end,
+
+    districtYield = function(data, _, yieldType)
+        if not data.IsVisible or data.DistrictID == -1 or data.DistrictType == nil then return nil end
+        if GameInfo.Districts[data.DistrictType] == nil or GameInfo.Districts[data.DistrictType].InternalOnly then
+            return nil
+        end
+        return GetYieldLine(yieldType, data.DistrictYields[yieldType])
+    end,
+
+    plotYield = function(data, _, yieldType)
+        if not data.IsVisible then return nil end
+        if data.WonderType ~= nil or (data.IsCity and data.DistrictType ~= nil) then
+            return nil
+        end
+        if data.DistrictID ~= -1 and data.DistrictType ~= nil then
+            return nil
+        end
+        if not IS_XP2_TOOLTIP and data.Impassable then
+            return nil
+        end
+        return GetYieldLine(yieldType, data.Yields[yieldType])
+    end,
+
+    building = function(data, _, indexArg)
+        if not data.IsVisible or data.BuildingNames == nil then return nil end
+
+        local index = tonumber(indexArg)
+        if index == nil or data.BuildingNames[index] == nil then
+            return nil
+        end
+
+        if data.WonderType == nil then
+            if data.BuildingsPillaged[index] then
+                return "- " ..
+                    Locale.Lookup(data.BuildingNames[index]) .. " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_PILLAGED_TEXT")
+            end
+            return "- " .. Locale.Lookup(data.BuildingNames[index])
+        end
+
+        return nil
+    end,
+
+    greatWork = function(data, _, indexArg)
+        CacheGreatWorks(data)
+
+        local index = tonumber(indexArg)
+        if index == nil or data._CAIGreatWorks[index] == nil then
+            return nil
+        end
+
+        return data._CAIGreatWorks[index]
+    end,
+}
+
+local function ResolvePlotInfoHelper(key)
+    local helper = info.PlotInfoHelpers[key]
+    if helper ~= nil then
+        return helper, nil
+    end
+
+    local prefix, arg = string.match(key, "^([%a%d_]+)%:(.+)$")
+    if prefix ~= nil then
+        local dynamicHelper = DynamicPlotInfoHelpers[prefix]
+        if dynamicHelper ~= nil then
+            return dynamicHelper, arg
+        end
+    end
+
+    return nil, nil
+end
+
+local function RequestPlotInfoFromData(plot, data, requestedKeys)
+    local keys = requestedKeys or BuildDefaultRequestedKeys(data)
+    local results = {}
+
+    for _, key in ipairs(keys) do
+        local helper, arg = ResolvePlotInfoHelper(key)
+        if helper ~= nil then
+            AddIfPresent(results, helper(data, plot, arg))
+        end
+    end
+
+    return results
+end
+
+local function BuildYieldInfoRequestKeys(data)
+    local keys = {}
+
+    if data.IsCity == true and data.DistrictType ~= nil then
+        for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
+            table.insert(keys, "cityYield:" .. yieldType)
+        end
+        return keys
+    end
+
+    if data.DistrictID ~= -1 and data.DistrictType ~= nil then
+        local districtInfo = GameInfo.Districts[data.DistrictType]
+        if districtInfo ~= nil and not districtInfo.InternalOnly then
+            if data.Owner == Game.GetLocalPlayer() and HasEntries(data.Yields) then
+                table.insert(keys, "districtSpecialistsHeader")
+                for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
+                    table.insert(keys, "districtSpecialistYield:" .. yieldType)
+                end
+            end
+
+            for _, yieldType in ipairs(GetOrderedYieldTypes(data.DistrictYields)) do
+                table.insert(keys, "districtYield:" .. yieldType)
+            end
+        end
+
+        return keys
+    end
+
+    for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
+        table.insert(keys, "plotYield:" .. yieldType)
+    end
+
+    return keys
+end
+
+local function BuildDistrictAndBuildingRequestKeys(data)
+    local keys = {
+        "wonderTitle",
+        "cityDistrictTitle",
+        "districtTitle",
+        "buildingsHeader",
+    }
+
+    if data.BuildingNames ~= nil then
+        for i = 1, #data.BuildingNames do
+            table.insert(keys, "building:" .. tostring(i))
+        end
+    end
+
+    CacheGreatWorks(data)
+    if data._CAIGreatWorkCount > 0 then
+        table.insert(keys, "greatWorksHeader")
+        for i = 1, data._CAIGreatWorkCount do
+            table.insert(keys, "greatWork:" .. tostring(i))
+        end
+    end
+
+    return keys
+end
+
+local function InitializePlotInfoActionRequestBuilders()
+    PlotInfoActionRequestBuilders = {
+        [Input.GetActionId("PlotReadUnits")] = function(plot, data)
+            return {
+                keys = { "units" },
+                emptyLoc = "LOC_CAI_PLOT_NO_UNITS",
+            }
+        end,
+        [Input.GetActionId("PlotReadYieldRiverOwner")] = function(plot, data)
+            local keys = BuildYieldInfoRequestKeys(data)
+            table.insert(keys, "freshWater")
+            table.insert(keys, "riverNamed")
+            table.insert(keys, "owner")
+            return {
+                keys = keys,
+                emptyLoc = "LOC_CAI_PLOT_NO_YIELD_RIVER_OWNER_INFO",
+            }
+        end,
+        [Input.GetActionId("PlotReadStats")] = function(plot, data)
+            return {
+                keys = { "movement", "defense", "appeal" },
+                emptyLoc = "LOC_CAI_PLOT_NO_PHYSICAL_INFO",
+            }
+        end,
+        [Input.GetActionId("PlotReadRelativeCoords")] = function(plot, data)
+            return {
+                keys = { "relativeCoords" },
+                emptyLoc = "LOC_CAI_PLOT_NO_COORDINATES",
+            }
+        end,
+        [Input.GetActionId("PlotReadDistrictBuildings")] = function(plot, data)
+            return {
+                keys = BuildDistrictAndBuildingRequestKeys(data),
+                emptyLoc = "LOC_CAI_PLOT_NO_DISTRICTS_OR_BUILDINGS",
+            }
+        end,
+    }
+end
 
 ---@param plot Plot
 ---@param requestedKeys string[]|nil
 ---@return string[]
 function info:RequestPlotInfo(plot, requestedKeys)
     if not plot then return { "No plot" } end
-    requestedKeys = requestedKeys or INFO_PRIORITY
 
-    local vis = self.IsPlotVisible(plot:GetIndex())
-    local units = Units.GetUnitsInPlotLayerID(plot:GetX(), plot:GetY(), MapLayers.ANY)
-    local data = FetchData(plot)
-    FetchAdditionalData(plot, data)
-    data.IsVisible = vis
-    data.Units = units
-
-    local results = {}
-    for _, key in ipairs(requestedKeys) do
-        local helper = self.PlotInfoHelpers[key]
-        if helper then
-            local output = helper(data, plot)
-            if type(output) == "table" then
-                for _, s in ipairs(output) do
-                    if s and s ~= "" then table.insert(results, s) end
-                end
-            elseif type(output) == "string" and output ~= "" then
-                table.insert(results, output)
-            end
-        end
+    local data = BuildPlotInfoData(plot)
+    if data == nil then
+        return {}
     end
-    return results
-end
 
---# Bucket helpers (10 collapsed slots for keyboard access)
-
-info.PlotInfo = {
-    Summary      = function(plot)
-        local r = { GetPlotInfoCoords(plot) }
-        AppendPlotInfo(r, info:RequestPlotInfo(plot, { "plotName" }))
-        return r
-    end,
-
-    TileType     = function(plot) return RequestWithFallback(plot, { "TileType" }, "LOC_CAI_PLOT_NO_TILE_INFO") end,
-    FeatureInfo  = function(plot)
-        return RequestWithFallback(plot, { "Feature", "NaturalWonder" },
-            "LOC_CAI_PLOT_NO_FEATURES")
-    end,
-    Units        = function(plot) return RequestWithFallback(plot, { "Units" }, "LOC_CAI_PLOT_NO_UNITS") end,
-    InterfaceInfo = function(plot) return RequestWithFallback(plot, { "InterfaceInfo" }, "LOC_CAI_PLOT_NO_INTERFACE_PREVIEW") end,
-    Resources    = function(plot) return RequestWithFallback(plot, { "Resources" }, "LOC_CAI_PLOT_NO_RESOURCES") end,
-    Buildings    = function(plot) return RequestWithFallback(plot, { "Buildings" }, "LOC_CAI_PLOT_NO_BUILDINGS") end,
-    Owner        = function(plot) return RequestWithFallback(plot, { "Owner" }, "LOC_CAI_PLOT_UNOWNED") end,
-    PhysicalInfo = function(plot)
-        return RequestWithFallback(plot, { "Movement", "Defense", "Geography" },
-            "LOC_CAI_PLOT_NO_PHYSICAL_INFO")
-    end,
-    AmbientInfo  = function(plot)
-        return RequestWithFallback(plot, { "Continent", "Appeal", "Status", "NationalPark" },
-            "LOC_CAI_PLOT_NO_AMBIENT_INFO")
-    end,
-}
-
-info.PlotInfoActionPriority = PlotInfoActionPriority
-
---# Action map
-
-function InitializePlotInfoActionMap()
-    PlotInfoActionMap = {
-        [Input.GetActionId("PlotInfo1")]  = { "Summary" },
-        [Input.GetActionId("PlotInfo2")]  = { "TileType" },
-        [Input.GetActionId("PlotInfo3")]  = { "FeatureInfo" },
-        [Input.GetActionId("PlotInfo4")]  = { "Units" },
-        [Input.GetActionId("PlotInfo5")]  = { "InterfaceInfo" },
-        [Input.GetActionId("PlotInfo6")]  = { "Resources" },
-        [Input.GetActionId("PlotInfo7")]  = { "Buildings" },
-        [Input.GetActionId("PlotInfo8")]  = { "Owner" },
-        [Input.GetActionId("PlotInfo9")]  = { "PhysicalInfo" },
-        [Input.GetActionId("PlotInfo10")] = { "AmbientInfo" },
-    }
-end
-
---# Input handler
-
-function OnPlotInfoInputActionTriggered(actionId)
-    local bucketKeys = PlotInfoActionMap[actionId]
-    if not bucketKeys then return end
-    local plot = GetCurrentCursorPlot()
-    if not plot then return end
-    local results = {}
-    for _, key in ipairs(bucketKeys) do
-        local helper = info.PlotInfo[key]
-        if helper then AppendPlotInfo(results, helper(plot)) end
+    if requestedKeys == nil then
+        CacheGreatWorks(data)
     end
-    if #results > 0 then Speak(ProcessIcons(table.concat(results, "\n"))) end
-end
 
---# Cursor move handler
+    return RequestPlotInfoFromData(plot, data, requestedKeys)
+end
 
 function OnCAICursorMove(x, y, plot, cursor)
-    if plot then currentPlot = plot:GetIndex() end
-    local results = {}
-    AppendPlotInfo(results, GetPlotInfoCoords(plot))
-    AppendPlotInfo(results, info:RequestPlotInfo(plot))
-    if #results > 0 then Speak(ProcessIcons(table.concat(results, "\n"))) end
+    if plot then
+        currentPlot = plot:GetIndex()
+    end
+
+    local current = plot or GetCurrentCursorPlot()
+    if current == nil then
+        return
+    end
+
+    local results = info:RequestPlotInfo(current, CURSOR_MOVE_INFO_PRIORITY)
+    local coords = GetRelativeCoordinateString(current)
+    if coords then
+        table.insert(results, 1, coords)
+    end
+
+    if #results > 0 then
+        Speak(ProcessIcons(table.concat(results, ", ")))
+    end
 end
 
---# Init
+function OnPlotInfoInputActionTriggered(actionId)
+    local buildRequestKeys = PlotInfoActionRequestBuilders[actionId]
+    if buildRequestKeys == nil then
+        return
+    end
 
-InitializePlotInfoActionMap()
+    local plot = GetCurrentCursorPlot()
+    if plot == nil then
+        return
+    end
+
+    local data = BuildPlotInfoData(plot)
+    if data == nil then
+        return
+    end
+
+    local request = buildRequestKeys(plot, data)
+    if request == nil then
+        return
+    end
+
+    local requestKeys = request.keys
+    if requestKeys == nil then
+        return
+    end
+
+    local results = RequestPlotInfoFromData(plot, data, requestKeys)
+    if #results == 0 then
+        if request.emptyLoc ~= nil then
+            Speak(ProcessIcons(Locale.Lookup(request.emptyLoc)))
+        end
+        return
+    end
+
+    Speak(ProcessIcons(table.concat(results, ", ")))
+end
+
+InitializePlotInfoActionRequestBuilders()
 Events.InputActionTriggered.Add(OnPlotInfoInputActionTriggered)
 LuaEvents.CAICursorMoved.Add(OnCAICursorMove)

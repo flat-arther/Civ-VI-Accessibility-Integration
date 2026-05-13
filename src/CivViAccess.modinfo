@@ -57,6 +57,7 @@
     <File>UI/inGame/CityPanel_CAI.lua</File>
     <File>UI/inGame/CivilopediaScreen_CAI.lua</File>
     <File>UI/inGame/UnitPanel_CAI.lua</File>
+    <File>UI/inGame/UnitFlagManager_CAI.lua</File>
     <File>UI/inGame/PlotToolTip_CAI.lua</File>
     <File>UI/inGame/TutorialUIRoot_CAI.lua</File>
     <File>UI/inGame/TutorialGoals_CAI.lua</File>
@@ -290,6 +291,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>UnitPanel</LuaContext>
         <LuaReplace>UI/inGame/UnitPanel_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_UnitFlagManager">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>UnitFlagManager</LuaContext>
+        <LuaReplace>UI/inGame/UnitFlagManager_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 
