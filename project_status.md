@@ -79,9 +79,18 @@ UnitPanel:
 - Verify summary speech, helper ordering, action activation, disabled-action filtering, and localized category/keybinding announcements.
 - Verify plot info remains independent from selected-unit helper logic.
 
+UnitFlagManager / PlotToolTip:
+
+- Verify `UnitFlagManager_CAI.lua` exports `ExposedMembers.CAIInfo:RequestUnitFlagInfo(playerID, unitID, requestedKeys)` only for visible flags.
+- Verify grouped same-tile unit speech merges only exact spoken matches by owner, name, formation suffix, rounded health percent, and visible status.
+- Verify plot `units` speech in `PlotToolTip_CAI.lua` now mirrors UnitFlagManager-based speech instead of local name/count reconstruction.
+
 WorldInput / Notifications / ActionPanel:
 
 - Verify remappable cursor movement and camera sync.
+- Verify `PlotToolTip_CAI.lua` picks the correct vanilla include for base, Expansion 2, and Barbarian Clans games, and that `RequestPlotInfo(...)` now reads per-detail strings without the old plot-info action buckets or coord line.
+- Verify river direction speech in `PlotToolTip_CAI.lua`: CAI now appends edge directions to the river line using the six-edge positional helper (`self: E/SE/SW`, neighbors: `W/NW/NE`), and on Gathering Storm / Expansion 2 it appends those directions to the named-river string.
+- Verify new plot read hotkeys in game: `S` units, `W` yields/river/owner, `X` movement+defense+appeal, `Shift+S` relative coordinates, `B` district/buildings. `WorldTrackerReadSummary` now defaults to `Shift+W`.
 - Verify wonder placement speech and the CAI wonder-placement interface flow.
 - Verify notification speech, notification tree activation/dismissal, and blocker filtering.
 - Verify tutorial-safe handling of Space and Ctrl+Space.
@@ -104,6 +113,11 @@ Frontend / Shared:
 - Verify DeclareWarPopup opens from diplomacy, city-state, and world-input paths, reads targets and visible consequence sections, and cleans up on confirm, cancel, Escape, and turn end.
 - Verify GovernmentScreen tab/body refresh remains stable during tab switches, government changes, and policy edits.
 - Verify IntroScreen skip behavior, LoadGameMenu keyboard behavior, and My2K dialog coverage.
+- Verify CityBannerManager cursor reads: summary/info1-info6 should read city-center and visible mini-banner data from live banner state only, with correct unavailable/fallback behavior when the current cursor has no visible banner.
+- Verify district mini-banners stay district-only for identity/status; no parent-city summary should leak into generic district reads.
+- Verify city banner religion, loyalty, and power reads still work with the relevant vanilla lenses off, while full-fog and no-banner cases stay silent except for the normal unavailable callouts.
+- Verify district identity/status reads cover aerodrome, encampment, missile-silo, and generic district details from visible banner state, including revealed-only aerodrome hiding and strike availability wording.
+- Verify city banner loyalty on `5` now reads percent, loyalty per turn, source buckets, and influencer lines directly, without the old separate breakdown UI.
 
 Unit operation / command hotkeys:
 
@@ -143,6 +157,13 @@ Unit operation / command hotkeys:
 - `CityPanel_CAI.lua` exposes city info helpers through `ExposedMembers.CAIInfo` and supports reordered selection helper keys plus a city action list.
 - `UnitPanel_CAI.lua` exposes unit info helpers, filtered spoken actions, and `SelectionActions`.
 - `WorldTracker`, `TopPanel`, and `NotificationPanel` hotkey-driven access patterns are implemented.
+- `SelectionActions` now defaults to `Tab` in `src/data/hotkey_config.xml`, shared by the city and unit selection action lists.
+- `CityBannerManager_CAI.lua` now ignores vanilla lens-only force-hide for generic district banner reads, so ordinary district name/type/construction/description can be spoken without turning on city or empire detail lenses, while still respecting full fog hiding.
+- `CityBannerManager_CAI.lua` now also ignores religion-lens visibility for city banner religion reads by falling back to live `city:GetReligion()` data for conversion turns, follower pressure, and outgoing pressure.
+- `CityBannerManager_CAI.lua` now adds expansion-aware city banner reads on `5` and `6` for loyalty and GS power. Loyalty `5` now speaks the full loyalty breakdown directly in bucket order from live `city:GetCulturalIdentity()` data instead of using a separate breakdown UI.
 - Nav cursor movement now uses six remappable hex-direction actions wired through `LuaEvents.CAICursorMoveDirection(...)` and `Map.GetAdjacentPlot(...)`, with alphanumeric and numpad defaults.
 - Tutorial goals now use custom CAI notification types rather than `USER_DEFINED_*`.
 - Unit operations and commands gained unbound hotkey ids where vanilla had no safe direct binding path.
+- `PlotToolTip_CAI.lua` now exposes helper-driven plot read actions for units, yields/river/owner, movement/defense/appeal, relative coordinates, and district/building info through `Events.InputActionTriggered`.
+- `CityBannerManager.lua` visual banner inventory is now documented in `docs/game-api.md`, covering city-center banners, religion details, and district mini-banners for later CAI work.
+- `CityBannerManager_CAI.lua` now exposes `ExposedMembers.CAIInfo:RequestCityBannerInfo(requestedKeys)` and handles dedicated `CityBannerReadIdentityStatus` through `CityBannerReadDiplomacy` actions with a table-driven city/district bucket definition.

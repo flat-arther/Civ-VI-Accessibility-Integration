@@ -57,7 +57,7 @@ local function BuildDialog()
     m_dialog = mgr.WidgetTemplateHelpers:MakeGeneralDialog(GetTitle, buttonRow, content)
     if not m_dialog then return end
     m_dialog.SpeechSettings = { Role = false, Label = false }
-    mgr:Push(m_dialog, PopupPriority.Tutorial)
+    mgr:Push(m_dialog, PopupPriority.Low)
 end
 
 

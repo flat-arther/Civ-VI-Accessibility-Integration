@@ -8,11 +8,8 @@ local INPUT_ACTION_STARTED = "Started"
 local INPUT_ACTION_TRIGGERED = "Triggered"
 
 local mgr = ExposedMembers.CAI_UIManager
-
-local m_caiGamePanel = nil
-local mainArea = nil
+local m_caiGameViewWidget = nil
 local m_caiCurrentInterfaceWidget = nil
-local m_caiSystemsInitialized = false
 
 local ACTION_CURSOR_NORTHWEST = Input.GetActionId("CAICursorMoveNorthWest")
 local ACTION_CURSOR_NORTHEAST = Input.GetActionId("CAICursorMoveNorthEast")
@@ -192,7 +189,7 @@ local function GetInterfaceWidgetData()
 end
 
 local function OnInterfaceChanged(oldMode, newMode)
-	if not m_caiGamePanel or not mainArea then
+	if not m_caiGameViewWidget then
 		print("Error: CAI game view widget is nil")
 		return
 	end
@@ -226,12 +223,12 @@ local function GetInputAction(actionId)
 end
 
 local function DispatchInputAction(actionId, actionType, ...)
-	if not mainArea then return false end
+	if not m_caiGameViewWidget then return false end
 
 	local action = GetInputAction(actionId)
 	if not action or action.Type ~= actionType then return false end
 
-	return action.Action(mainArea, ...)
+	return action.Action(m_caiGameViewWidget, ...)
 end
 
 local function OnCAIInputActionStarted(actionId, x, y)
@@ -245,34 +242,18 @@ end
 -- ===========================================================================
 -- Game view lifecycle
 -- ===========================================================================
-local function CreateGameViewWidgets()
+local function CreateGameViewWidget()
 	if not mgr then
 		print("Error: ExposedMembers.CAI_UIManager is nil")
 		return false
 	end
 
-	m_caiGamePanel = mgr:CreateUIWidget(
-		mgr:GenerateWidgetId("CAIWorldInputPanel"),
-		"Panel",
-		{
-			GetLabel = function()
-				return Locale.Lookup("LOC_CAI_GAME_CONTAINER")
-			end,
-		}
-	)
-	if not m_caiGamePanel then
-		print("Failed to create main game panel")
-		return false
-	end
-
-	mainArea = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIWorldInputGameView"), "GameView")
-	if not mainArea then
+	m_caiGameViewWidget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIWorldInputGameView"), "GameView")
+	if not m_caiGameViewWidget then
 		print("Failed to create gameview widget")
 		return false
 	end
 
-	m_caiGamePanel:AddChild(mainArea)
-	ExposedMembers.CAI_MainGamePanel = m_caiGamePanel
 	return true
 end
 
@@ -323,11 +304,8 @@ local function UnregisterCAIEvents()
 end
 
 local function InitializeCAIGameView()
-	if m_caiSystemsInitialized then return end
-	if not CreateGameViewWidgets() then return end
-
-	m_caiSystemsInitialized = true
-	mgr:Push(m_caiGamePanel)
+	if not CreateGameViewWidget() then return end
+	mgr:Push(m_caiGameViewWidget)
 	RegisterCAIEvents()
 	SnapCursorToInitialCameraPosition()
 end

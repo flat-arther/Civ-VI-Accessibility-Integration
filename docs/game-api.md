@@ -129,6 +129,21 @@ Used to create dynamic UI instances from XML templates:
 - `Map.GetGridSize()` — returns map width and height
 - `Map.GetPlot(x, y)` — returns a Plot for valid coordinates. On maps where `Map:IsWrapX()` is true, X coordinates wrap east/west, so `x = -1` resolves to the last column. Y coordinates only wrap if `Map:IsWrapY()` is true; normal Civ VI maps do not wrap north/south, so `y = -1` returns nil.
 - `Map:IsWrapX()` / `Map:IsWrapY()` — return whether the active map wraps on that axis. Check these before manually wrapping absolute coordinates.
+- `plot:IsRiver()` and named-river membership can be true even when the legacy edge booleans `IsNEOfRiver()`, `IsWOfRiver()`, and `IsNWOfRiver()` all report false for that same plot.
+- `plot:IsFreshWater()` is the better coarse helper when CAI wants to announce settlement/fresh-water access. Use `LOC_SETTLEMENT_RECOMMENDATION_FRESH_WATER` for that spoken line rather than inferring fresh water from `IsRiver()`.
+- CAI's river-edge speech model uses Civ VI's positional ownership flags:
+  - this plot's `IsWOfRiver()` means the river is on this plot's `E` edge
+  - this plot's `IsNWOfRiver()` means the river is on this plot's `SE` edge
+  - this plot's `IsNEOfRiver()` means the river is on this plot's `SW` edge
+  - this plot's `W` edge comes from the west neighbor's `IsWOfRiver()`
+  - this plot's `NW` edge comes from the northwest neighbor's `IsNWOfRiver()`
+  - this plot's `NE` edge comes from the northeast neighbor's `IsNEOfRiver()`
+- Diagnostic logs showed `IsRiverCrossingToPlot(...)` can report river relationships even when those legacy booleans return false. Treat that as evidence that Civ VI tracks some river-topology cases outside the old edge-flag model, not as a proven replacement for the intended ownership model.
+- The flow getters `GetRiverEFlowDirection()`, `GetRiverSEFlowDirection()`, and `GetRiverSWFlowDirection()` exist, but CAI's current river helper uses only edge-presence checks for direction speech.
+- CAI should use the inverted positional helper above for spoken river directions rather than the older literal-edge interpretation.
+- `plot:IsRiver()` is still the coarse yes/no helper and is what vanilla `PlotToolTip.lua` uses for the generic "River" line.
+- In CAI plot reads, the `W` action now announces fresh water before rivers and owner so players can distinguish broad fresh-water access from actual river-edge directions.
+- In Gathering Storm / Expansion 2, `PlotTooltip_Expansion2.lua` populates `data.RiverNames` from `RiverManager.GetRiverName(pPlot)`. CAI should treat that as a named-river collection shape, not as a single lookup argument, and append the computed edge-direction suffix to each named river entry individually.
 
 ## Events
 
@@ -310,9 +325,21 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - `src/data/unitOperationConfig.sql` assigns missing `HotkeyId` values for visible vanilla `UnitOperations` and visible vanilla `UnitCommands`. Unit-command action ids use the `UnitCommand...` prefix to avoid colliding with operation action ids such as `Upgrade`.
   - `UNITCOMMAND_DELETE` is intentionally not assigned through `UnitCommands.HotkeyId`: vanilla already exposes the `DeleteUnit` input action and separately special-cases it in `OnInputActionTriggered`, so adding it to `m_kHotkeyActions` could double-call the delete prompt.
   - `UnitPanel_CAI.lua` extends `ExposedMembers.CAIInfo` with `RequestUnitInfo(unitID, requestedKeys, playerID)`, defaults to `UI.GetHeadSelectedUnit()`, and uses the same `ReadUnitData` / `GetSubjectData` data rather than reimplementing unit state.
-  - `UnitPanel_CAI.lua` handles the shared selection info inputs (`~`, `Shift+1` through `Shift+0`) when a unit is selected and opens a transient action list from the existing `SelectionActions` input. Disabled rows are filtered from both the spoken action summary and transient list by checking vanilla `action.Disabled`.
-  - `Events.UnitOperationAdded`, `Events.UnitOperationDeactivated`, and `Events.UnitOperationsCleared` request a vanilla UnitPanel refresh for the selected unit.
-  - Plot info does not call selected-unit info helpers. `worldInfo.lua` keeps a small local plot-unit display-name helper for aggregated plot summaries.
+- `UnitPanel_CAI.lua` handles the shared selection info inputs (`~`, `Shift+1` through `Shift+0`) when a unit is selected and opens a transient action list from the existing `SelectionActions` input. Disabled rows are filtered from both the spoken action summary and transient list by checking vanilla `action.Disabled`.
+- `Events.UnitOperationAdded`, `Events.UnitOperationDeactivated`, and `Events.UnitOperationsCleared` request a vanilla UnitPanel refresh for the selected unit.
+- Plot info does not call selected-unit info helpers. `worldInfo.lua` keeps a small local plot-unit display-name helper for aggregated plot summaries.
+- `UnitFlagManager_CAI.lua` exposes `ExposedMembers.CAIInfo:RequestUnitFlagInfo(playerID, unitID, requestedKeys)` for visible unit flags only. The first pass is intentionally limited to non-owned-unit-visible info: grouped count for exact spoken matches on the same tile, owner adjective, localized unit name, formation suffix, rounded damaged-health percent, and visible non-normal flag state (`Fortified`, `Embarked`).
+- `UnitFlagManager.lua` / `UnitFlagManager.xml` own the ambient world-map unit flags:
+  - Persistent on-map information is mostly iconographic, not textual: frame style, unit emblem icon, optional health bar, promotion-or-levy badge, corps/army marker, religion badge, hero glow, barbarian attention `!`, and for air-capable hosts an air-capacity counter plus a popup list of stationed aircraft.
+  - `CreateUnitFlag(...)` chooses style from the unit role: land combat and air -> military, naval -> naval, support -> support, civilian traders -> trade, religious civilians -> religion, and other civilians -> civilian.
+  - `UpdateFlagType()` can override that role frame with embarked or fortified visuals, so the base role is not always what sighted players see.
+  - There is no persistent visible name label on the flag itself. Identity/details live in the unit-icon tooltip from `UpdateName()`: civilization short name, multiplayer human player name when relevant, unit name, renamed-vs-type suffix, corps/fleet/army/armada suffix, archaeology home city and artifact owner, religion name, and levy status with turns remaining.
+  - The religion badge is separately visible only when `GetReligionType() > 0` and `GetReligiousStrength() > 0`; its tooltip is the religion name.
+  - Damage swaps the normal frame/button out for a visible health bar. Thresholds are green at `>= 80%`, yellow at `>= 40%`, and red below that.
+  - Local human units dim when not `IsReadyToSelect()`. Selection overrides that dimming so the selected unit stays full alpha.
+  - Hidden states are layered: non-visible fog state hides the flag; combat visualization temporarily force-hides attacker/defender/interceptor/anti-air flags; turning the relevant lens layer off hides the entire manager context; and stationed air units usually hide their own individual flags on airstrips, aerodromes, and carriers, except intercepting air units keep a visible flag.
+  - Same-tile stacking is communicated visually with per-role offsets and duo/trio formation-link graphics. Those link graphics can be suppressed for non-local players when one member of the formation is hidden.
+  - Clicking your own visible flag selects the unit when the current interface mode allows it. Clicking a visible enemy flag with a selected local unit can trigger range attack or move-to-attack.
 - Vanilla does not appear to provide clean city-panel loc tags for labeling those two percentage values as speech output, so `CityPanel_CAI.lua` uses CAI loc tags for:
   - `LOC_CAI_CURRENT_PROGRESS`
   - `LOC_CAI_NEXT_TURN_PROGRESS`
@@ -329,6 +356,7 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - `ReadSelectionInfo8` -> `NormalFocusYields`
   - `ReadSelectionInfo9` -> `FavoredFocusYields`
   - `ReadSelectionInfo10` -> `IgnoredFocusYields`
+  - `SelectionActions` -> `Tab`
 - City yield focus states in `GetCityData(city)` are stored in `data.YieldFilters[yieldType]` and map to:
   - `YIELD_STATE.FAVORED`
   - `YIELD_STATE.IGNORED`
@@ -433,6 +461,34 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - Type-specific vanilla activation handlers include research/civic choosers, production, government/policies, raze city, pantheon/religion/artifact/great people/envoys, espionage escape route, continent lens, boost/completed popups, relic popup, PBC popups, user-defined notification activation, city ranged attack, command units, and default look-at/select behavior.
   - `RegisterHandlers()` explicitly assigns all nine `NotificationTypes.USER_DEFINED_*` entries both default handlers and `OnUserNotificationActivate`, which raises `LuaEvents.NotificationPanel_UserNotificationActivate(playerID, notificationID)`. These slots are convenient, but CAI can also register its own custom notification hashes in `g_notificationHandlers[...]` through the notification-panel wildcard include path.
   - `GetHandler(notificationType)` falls back to `NotificationTypes.DEFAULT` when a type has no explicit registration. That means a database-added notification type can still get generic rail UI, but it will not automatically get a custom Lua activation hook unless CAI or vanilla registers one.
+  - `WorldView/CityBannerManager.lua` owns the floating map banners for cities and city-linked districts:
+  - It creates two full city-center variants: `TeamCityBanner` for the local player and `OtherCityBanner` for everyone else, plus mini-banners for aerodromes, missile silos, encampments, and other districts.
+  - Core city-center visuals for both variants are city name, population number, population meter, defense strength, district and outer-defense health bars when relevant, majority-religion or pantheon icon, and player-color styling. Foreign-city banners also show the owner's civilization icon.
+  - The name line can carry situational markers: capital icon, trading-post icon, disabled trading-post icon, under-siege icon, occupied icon, insufficient-housing icon, insufficient-amenities icon, and city-state quest icon. The quest tooltip lists each active quest from that city-state.
+  - Local-player city banners additionally show production directly in the banner: current production icon, progress meter, turns-left label, tooltip text, and a clickable production button. Foreign-city banners keep some of those controls in XML but vanilla hides the owner-only production visuals.
+  - Population always shows as a large number. For the local player only, the banner also shows turns until growth or starvation, color-codes that turns label, and adds a tooltip with growth, stagnation, or starvation details plus food surplus.
+  - Defense info comes from the city-center district: defense strength number, garrison hit points, optional outer-defense hit points, and color-coded health bars. A city-range-strike button appears only for the local player when the city can currently perform a ranged strike.
+  - Religion has two layers. The normal banner can show a majority-religion icon or pantheon icon with a tooltip. When the religion lens is active, an attached religion panel appears under the banner with religion icons present in the city, conversion-turns status, a detailed follower list with pressure values, outgoing pressure, and a follower pie chart.
+  - CAI no longer requires that religion lens panel to be visibly open for banner speech. `CityBannerManager_CAI.lua` now falls back to live `city:GetReligion()` data for conversion turns, follower-pressure lines, and outgoing pressure when the vanilla religion detail panel is hidden.
+  - `AerodromeBanner` shows stationed aircraft as `current/max`, a capacity tooltip, and a dropdown list of air units with icon, uppercase name, and dimmed styling for units that cannot move. When the plot is only revealed, the count bar is hidden and the dropdown is disabled.
+  - `WMDBanner` is local-player-only and shows nuclear and thermonuclear stockpile counts plus strike buttons that are enabled only when the silo has valid targets.
+  - `EncampmentBanner` shows district defense strength, district hit points, optional outer-defense hit points, and a district ranged-strike button when usable by the local player.
+  - `DistrictBanner` is normally force-hidden and becomes visible through the city-details or empire-details lens. When shown it displays the district or wonder icon, an under-construction overlay if incomplete, and a tooltip with the district or wonder name plus description.
+  - CAI now ignores that lens-only force-hide for `BANNERTYPE_OTHER_DISTRICT` when resolving banner info reads. For accessibility reads, generic district name/type/construction/description can be spoken even with the lens off, as long as the underlying mini-banner instance exists and the plot is not fully hidden by fog.
+  - Expansion 1 (`DLC/Expansion1/UI/CityBanners/CityBannerManager.lua`) keeps the base city-center and mini-banner inventory, but adds loyalty and governors to city-center banners:
+    - A governor status widget in `CityStatusStack` with governor portrait/fill art, tooltip, turns-left label, and ambassador count.
+    - A loyalty flyout under the city banner with a compact bar and an expanded panel. The compact panel shows owner civ icon, most-influential civ icon, a loyalty pressure icon, and a loyalty fill meter.
+    - The expanded loyalty panel adds a loyalty percentage label plus per-source breakdown widgets for population pressure, governors, happiness, other modifiers, city-state bonus, and free-city bonus, and an `IdentityBreakdownStack` of detailed influence lines.
+    - Expansion 1 also replaces the old center-row production display with `CityStatProduction` in the city status stack for city-center banners, alongside the population and governor widgets.
+  - Expansion 2 (`DLC/Expansion2/UI/CityBanners/CityBannerManager.lua`) keeps the Expansion 1 loyalty/governor city-center additions and adds:
+    - Two new improvement mini-banner types: `BANNERTYPE_MOUNTAIN_TUNNEL` and `BANNERTYPE_QHAPAQ_NAN`, each rendered as a small icon-only improvement banner with the improvement-name tooltip.
+    - A new `CityDetailsEffects` stack and `CityDetailEffect` instances at the top of the city banner. Firaxis marks this in code as the XP2 difference for the power menu.
+    - New `CityInfoType` and `CityInfoCondition` instance managers in the city info row, including rising/falling condition overlays. These are the extra icon/condition slots Expansion 2 adds around the city name for city detail summaries.
+  - Click behavior is important for accessibility parity: clicking your own city banner selects the city, clicking a met major civ banner opens diplomacy, clicking a met city-state banner opens the city-state panel, clicking during trade-route mode sets that city as the destination, and clicking local mini-banners selects their district or triggers unit or strike actions.
+  - CAI extends vanilla through the wildcard include file `src/UI/inGame/CityBannerManager_CAI.lua` and exposes `ExposedMembers.CAIInfo:RequestCityBannerInfo(requestedKeys)` for on-demand cursor reads.
+  - The banner reader tracks the current cursor plot from `LuaEvents.CAICursorMoved`, resolves the active live city or mini-banner for that plot, and only speaks banner-backed information.
+  - Dedicated city-banner bucket actions are `CityBannerReadIdentityStatus`, `CityBannerReadGrowthInfluence`, `CityBannerReadReligion`, and `CityBannerReadDiplomacy`.
+  - The input-action bucket mapping is table-driven in `CityBannerManager_CAI.lua`, with separate `city` and `district` key lists so bucket order and banner-type variants can be edited in one place.
   - Base data defines `KIND_NOTIFICATION` rows in `Gameplay/Data/Notifications.xml` under both `Types` and `Notifications`. The base game already reserves `NOTIFICATION_USER_DEFINED_1` through `NOTIFICATION_USER_DEFINED_9` there, all grouped as `USER`.
   - CAI access uses `NotificationPanel_CAI.lua` through vanilla's `include("NotificationPanel_", true)` wildcard extension path rather than a full `ReplaceUIScript`.
   - `Ctrl+N` opens a transient `Treeview` notification center through the `NotificationPanelOpenList` input action.
@@ -599,6 +655,11 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - District placement preview reuses vanilla `AdjacencyBonusSupport.GetAdjacentYieldBonusString(...)` for the short bonus summary, detailed tooltip text, and requirement/warning text, while CAI computes owned-valid versus purchasable-valid state locally from `CityManager.GetOperationTargets(...)` and `CityManager.GetCommandTargets(...)`.
   - Wonder placement is the next missing extension point for this helper. Vanilla exposes enough data to mirror the sighted experience: valid owned plots from `CityManager.GetOperationTargets(...)`, valid purchasable plots from `CityManager.GetCommandTargets(...)` filtered through `plot:CanHaveWonder(...)`, and wonder-specific explanatory text from the confirmation-time `SUCCESS_CONDITIONS` strings.
   - `PlotToolTip_CAI.lua` now treats `PlotInfo5` as a general interface preview slot rather than a movement-only slot, and automatic cursor speech includes the same interface preview lines when the active mode supplies them.
+  - `PlotToolTip_CAI.lua` now selects its vanilla include by active rules content: base `PlotToolTip`, `PlotTooltip_Expansion2` when `IsExpansion2Active()` is true, `PlotToolTip_BarbarianClansMode` when `GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS") == 1`, and `PlotTooltip_Expansion2_BarbarianClansMode` when both are active.
+  - `ExposedMembers.CAIInfo:RequestPlotInfo(plot, requestedKeys)` returns a flat `string[]`. Individual plot info helpers may return either one string or a list of strings; the request path must flatten helper tables before concatenating speech. This matters for `interfaceInfoHelpers_CAI.lua`, whose movement and placement previews are multi-line.
+  - `PlotToolTip_CAI.lua` also owns one-shot plot read actions through `Events.InputActionTriggered`. The current action ids are `PlotReadUnits`, `PlotReadYieldRiverOwner`, `PlotReadStats`, `PlotReadRelativeCoords`, and `PlotReadDistrictBuildings`; each action builds a requested-key list and then routes through the same `RequestPlotInfo(...)` / helper pipeline used by cursor speech.
+  - `PlotReadStats` intentionally uses separate `movement`, `defense`, and `appeal` helpers instead of a bundled physical-info bucket. `relativeCoords` is the one helper allowed to speak when plot visibility gates would otherwise suppress normal tooltip data.
+  - Current default bindings in `src/data/hotkey_config.xml`: `S` / `NP_5` -> `PlotReadUnits`, `W` / `NP_8` -> `PlotReadYieldRiverOwner`, `X` / `NP_2` -> `PlotReadStats`, `Shift+S` / `Shift+NP_5` -> `PlotReadRelativeCoords`, `B` -> `PlotReadDistrictBuildings`. `WorldTrackerReadSummary` moved to `Shift+W` to free `W` for plot reads.
   - `WorldInput_CAI.lua` exposes both move mode and district placement mode through CAI `InterfaceMode` widgets; district placement uses the same Escape / primary-action widget pattern as move mode, but routed to `OnMouseDistrictPlacementCancel()` and `OnMouseDistrictPlacementEnd()`.
   - Wonder placement should follow the same pattern in CAI, but keyed off `InterfaceModeTypes.BUILDING_PLACEMENT` and the vanilla `OnMouseBuildingPlacementCancel()` / `OnMouseBuildingPlacementEnd()` handlers from `WorldInput.lua`.
 - CAI widgets require an id at construction: `mgr:CreateUIWidget(id, type, props)`.
@@ -650,3 +711,10 @@ Wrapper for `CAI.output`. Use this for all TTS output.
 - `Network.LeaveGame()` — leaves current network session
 - `Network.LoadGame(saveData, serverType)` — loads a save file
 - `Network.GetFriends()` — returns friends API object
+
+## City Banner XP1 / XP2
+
+- `Civ6Common.lua` exposes `IsExpansion1Active()` and `IsExpansion2Active()`, and CAI can include it directly in in-game UI helpers when behavior needs to branch on Rise and Fall / Gathering Storm.
+- `CityBannerManager` expansion loyalty data can be rebuilt from live `city:GetCulturalIdentity()` calls without the loyalty lens. Useful methods are `GetLoyalty()`, `GetMaxLoyalty()`, `GetLoyaltyPerTurn()`, `GetPotentialTransferPlayer()`, `GetPlayerIdentitiesInCity()`, and `GetIdentitySourcesBreakdown()`.
+- Expansion loyalty mini-panel control names are stable enough for CAI tree labels/tooltips: `LoyaltyInfo.LoyaltyPercentageLabel`, `PopulationTop`, `GovernorTop`, `Happiness`, `OtherTop`, `CityStateTop`, `FreeCityTop`, and `IdentityBreakdownStack`.
+- GS power banner text can be mirrored from `city:GetPower()` with vanilla loc keys. Firaxis uses `GetFreePower()`, `GetTemporaryPower()`, `GetRequiredPower()`, `IsFullyPowered()`, and `IsFullyPoweredByActiveProject()` together with `LOC_CITY_BANNER_POWERED_CITY`, `LOC_CITY_BANNER_POWERED_CITY_FROM_ACTIVE_PROJECT`, and `LOC_CITY_BANNER_UNPOWERED_CITY`.

@@ -58,6 +58,7 @@
     <File>UI/inGame/CivilopediaScreen_CAI.lua</File>
     <File>UI/inGame/UnitPanel_CAI.lua</File>
     <File>UI/inGame/UnitFlagManager_CAI.lua</File>
+    <File>UI/inGame/CityBannerManager_CAI.lua</File>
     <File>UI/inGame/PlotToolTip_CAI.lua</File>
     <File>UI/inGame/TutorialUIRoot_CAI.lua</File>
     <File>UI/inGame/TutorialGoals_CAI.lua</File>
@@ -129,6 +130,7 @@
       <File>UI/shared/PopupDialog.lua</File>
       <File>UI/shared/LoadGameMenu.lua</File>
       <File>UI/shared/Options.lua</File>
+      <File>UI/inGame/CityBannerManager_CAI.lua</File>
       <File>UI/inGame/NotificationPanel_CAI.lua</File>
       <File>UI/inGame/inGameHelpers_CAI.lua</File>
       <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>

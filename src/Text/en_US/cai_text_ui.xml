@@ -529,7 +529,93 @@
     <Row Tag="LOC_CAI_CITY_YIELD_FOCUS_OPTIONS" Language="en_US">
       <Text>Focus options for {1_Yield}</Text>
     </Row>
-
+    <Row Tag="LOC_CAI_CITY_BANNER_NO_BANNER" Language="en_US">
+      <Text>No city or district banner at the current cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_INFO_UNAVAILABLE" Language="en_US">
+      <Text>Information unavailable on this banner</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_DISTRICT_TYPE" Language="en_US">
+      <Text>Type: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_CONSTRUCTION_COMPLETE" Language="en_US">
+      <Text>Complete</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_PROGRESS" Language="en_US">
+      <Text>Progress: {1_Num} percent</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_AIR_UNITS" Language="en_US">
+      <Text>Air units: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_NUCLEAR_DEVICES" Language="en_US">
+      <Text>Nuclear devices: {1_Count}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_THERMONUCLEAR_DEVICES" Language="en_US">
+      <Text>Thermonuclear devices: {1_Count}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_OUTGOING_PRESSURE" Language="en_US">
+      <Text>Outgoing pressure: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_TRADING_POST_ACTIVE" Language="en_US">
+      <Text>Trading post active</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_TRADING_POST_INACTIVE" Language="en_US">
+      <Text>Trading post inactive</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_NO_IDENTITY_STATUS" Language="en_US">
+      <Text>No visible identity or status information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_NO_GROWTH" Language="en_US">
+      <Text>No visible growth or production information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_NO_RELIGION" Language="en_US">
+      <Text>No visible religion information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_NO_DIPLOMACY" Language="en_US">
+      <Text>No visible diplomacy information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_READ_1" Language="en_US">
+      <Text>Read city banner identity and status</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_READ_1_TOOLTIP" Language="en_US">
+      <Text>Reads visible city or district banner identity, health, defense, and status information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_READ_2" Language="en_US">
+      <Text>Read city banner growth and influence</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_READ_2_TOOLTIP" Language="en_US">
+      <Text>Reads visible city banner growth and production information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_READ_3" Language="en_US">
+      <Text>Read city banner religion</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_READ_3_TOOLTIP" Language="en_US">
+      <Text>Reads visible city banner religion information, including lens details when open</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_READ_4" Language="en_US">
+      <Text>Read city banner diplomacy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_READ_4_TOOLTIP" Language="en_US">
+      <Text>Reads visible city banner diplomacy information such as owner, quests, and trading post state</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_READ_5" Language="en_US">
+      <Text>Read city banner loyalty</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_READ_5_TOOLTIP" Language="en_US">
+      <Text>Reads visible city banner loyalty percentage and breakdown information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_READ_6" Language="en_US">
+      <Text>Read city banner power</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_READ_6_TOOLTIP" Language="en_US">
+      <Text>Reads visible city banner power information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_LOYALTY_PERCENT" Language="en_US">
+      <Text>{1_Num}% loyalty</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_LOYALTY_PER_TURN" Language="en_US">
+      <Text>{1_Text} loyalty per turn</Text>
+    </Row>
     <!-- Edit box -->
     <Row Tag="LOC_CAI_EDIT_EDITING" Language="en_US">
       <Text>{1_Label}, Edit, {2_Text}</Text>
