@@ -1,0 +1,230 @@
+include("caiUtils")
+include("MinimapPanel")
+
+local mgr = ExposedMembers.CAI_UIManager
+
+local LENS_LIST_WIDGET_ID = "CAIMinimapLensList"
+local m_caiLensList = nil ---@type UIWidget|nil
+
+local function ControlIsHidden(control)
+    return control == nil or (control.IsHidden ~= nil and control:IsHidden())
+end
+
+local function ControlIsDisabled(control)
+    return control ~= nil and control.IsDisabled ~= nil and control:IsDisabled()
+end
+
+local function ControlText(control)
+    if control == nil then
+        return ""
+    end
+
+    if control.GetText ~= nil then
+        local text = control:GetText()
+        if text ~= nil and text ~= "" then
+            return text
+        end
+    end
+
+    if control.GetTextButton ~= nil then
+        local textButton = control:GetTextButton()
+        if textButton ~= nil and textButton.GetText ~= nil then
+            local text = textButton:GetText()
+            if text ~= nil and text ~= "" then
+                return text
+            end
+        end
+    end
+
+    return ""
+end
+
+local function ControlTooltip(control)
+    if control ~= nil and control.GetToolTipString ~= nil then
+        local tooltip = control:GetToolTipString()
+        if tooltip ~= nil and tooltip ~= "" then
+            return tooltip
+        end
+    end
+
+    return ""
+end
+
+local function CloseLensListWidget()
+    if mgr ~= nil then
+        mgr:RemoveFromStack(LENS_LIST_WIDGET_ID)
+    end
+    m_caiLensList = nil
+end
+
+local function IsLensListAvailable()
+    return mgr ~= nil
+        and Game.GetLocalPlayer() ~= -1
+        and UI.GetInterfaceMode() ~= InterfaceModeTypes.DISTRICT_PLACEMENT
+        and not GameConfiguration.IsWorldBuilderEditor()
+        and GameCapabilities.HasCapability("CAPABILITY_LENS_TOGGLING_UI")
+        and not ControlIsHidden(Controls.LensButton)
+end
+
+local lensEntries = {
+    {
+        Id = "Religion",
+        GetControl = function() return Controls.ReligionLensButton end,
+        Toggle = function() LensPanelHotkeyControl(Controls.ReligionLensButton); ToggleReligionLens(); UI.PlaySound("Play_UI_Click"); end,
+    },
+    {
+        Id = "Continent",
+        GetControl = function() return Controls.ContinentLensButton end,
+        Toggle = function() LensPanelHotkeyControl(Controls.ContinentLensButton); ToggleContinentLens(); UI.PlaySound("Play_UI_Click"); end,
+    },
+    {
+        Id = "Appeal",
+        GetControl = function() return Controls.AppealLensButton end,
+        Toggle = function() LensPanelHotkeyControl(Controls.AppealLensButton); ToggleAppealLens(); UI.PlaySound("Play_UI_Click"); end,
+    },
+    {
+        Id = "Water",
+        GetControl = function() return Controls.WaterLensButton end,
+        Toggle = function() LensPanelHotkeyControl(Controls.WaterLensButton); ToggleWaterLens(); UI.PlaySound("Play_UI_Click"); end,
+    },
+    {
+        Id = "Government",
+        GetControl = function() return Controls.GovernmentLensButton end,
+        Toggle = function() LensPanelHotkeyControl(Controls.GovernmentLensButton); ToggleGovernmentLens(); UI.PlaySound("Play_UI_Click"); end,
+    },
+    {
+        Id = "Owner",
+        GetControl = function() return Controls.OwnerLensButton end,
+        Toggle = function() LensPanelHotkeyControl(Controls.OwnerLensButton); ToggleOwnerLens(); UI.PlaySound("Play_UI_Click"); end,
+    },
+    {
+        Id = "Tourism",
+        GetControl = function() return Controls.TourismLensButton end,
+        Toggle = function() LensPanelHotkeyControl(Controls.TourismLensButton); ToggleTourismLens(); UI.PlaySound("Play_UI_Click"); end,
+    },
+    {
+        Id = "Empire",
+        GetControl = function() return Controls.EmpireLensButton end,
+        Toggle = function() LensPanelHotkeyControl(Controls.EmpireLensButton); ToggleEmpireLens(); UI.PlaySound("Play_UI_Click"); end,
+    },
+}
+
+local function GetLensEntryLabel(entry)
+    local control = entry.GetControl()
+    local text = ControlText(control)
+    if text ~= "" then
+        return text
+    end
+
+    local tooltip = ControlTooltip(control)
+    if tooltip ~= "" then
+        return tooltip
+    end
+
+    return entry.Id
+end
+
+local function OpenLensListWidget()
+    if not IsLensListAvailable() then
+        return false
+    end
+
+    if m_caiLensList ~= nil and mgr ~= nil and mgr:HasWidget(m_caiLensList) then
+        return true
+    end
+
+    local list = mgr:CreateUIWidget(LENS_LIST_WIDGET_ID, "List", {
+        GetLabel = function()
+            return Locale.Lookup("LOC_CAI_MINIMAP_LENS_LIST")
+        end,
+    })
+    list:AddInputBinding({
+        Key = Keys.VK_ESCAPE,
+        Action = function()
+            CloseLensListWidget()
+            return true
+        end,
+    })
+
+    for _, entry in ipairs(lensEntries) do
+        local capturedEntry = entry
+        list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMinimapLensItem"), "MenuItem", {
+            GetLabel = function()
+                return GetLensEntryLabel(capturedEntry)
+            end,
+            GetTooltip = function()
+                return ControlTooltip(capturedEntry.GetControl())
+            end,
+            GetState = function()
+                local control = capturedEntry.GetControl()
+                if ControlIsDisabled(control) then
+                    return Locale.Lookup("LOC_CAI_STATE_DISABLED")
+                end
+                if control ~= nil and control.IsChecked ~= nil and control:IsChecked() then
+                    return Locale.Lookup("LOC_CAI_STATE_SELECTED")
+                end
+                return nil
+            end,
+            IsHidden = function()
+                return not IsLensListAvailable() or ControlIsHidden(capturedEntry.GetControl())
+            end,
+            IsDisabled = function()
+                return ControlIsDisabled(capturedEntry.GetControl())
+            end,
+            OnFocusEnter = function()
+                UI.PlaySound("Main_Menu_Mouse_Over")
+            end,
+            OnClick = function()
+                if ControlIsHidden(capturedEntry.GetControl()) or ControlIsDisabled(capturedEntry.GetControl()) then
+                    return
+                end
+                capturedEntry.Toggle()
+                CloseLensListWidget()
+            end,
+        }))
+    end
+
+    if #list:GetVisibleChildren() > 0 then
+        m_caiLensList = list
+        mgr:Push(list, PopupPriority.Low)
+        return true
+    end
+
+    CloseLensListWidget()
+    return false
+end
+
+local function ToggleAccessibleLensList()
+    if not IsLensListAvailable() then
+        return false
+    end
+
+    if m_caiLensList ~= nil and mgr ~= nil and mgr:HasWidget(m_caiLensList) then
+        CloseLensListWidget()
+        return true
+    end
+
+    return OpenLensListWidget()
+end
+
+OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
+    if mgr ~= nil then
+        local handled = mgr:HandleInput(pInputStruct)
+        if handled then
+            return handled
+        end
+    end
+
+    return orig(pInputStruct)
+end)
+
+OnShutdown = WrapFunc(OnShutdown, function(orig)
+    LuaEvents.CAIMinimapLensListToggle.Remove(ToggleAccessibleLensList)
+    CloseLensListWidget()
+    orig()
+end)
+
+LuaEvents.CAIMinimapLensListToggle.Remove(ToggleAccessibleLensList)
+LuaEvents.CAIMinimapLensListToggle.Add(ToggleAccessibleLensList)
+ContextPtr:SetShutdown(OnShutdown)
+ContextPtr:SetInputHandler(OnInputHandler, true)

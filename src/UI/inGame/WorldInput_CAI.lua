@@ -1,7 +1,9 @@
 include("caiUtils")
+include("navCursor")
 include("interfaceInfoHelpers_CAI")
 include("UIScreenManager")
-include("caiIngame")
+include("WorldScanner_CAI")
+include("RevealAnnouncements_CAI")
 include("WorldInput")
 
 local INPUT_ACTION_STARTED = "Started"
@@ -18,6 +20,18 @@ local ACTION_CURSOR_EAST = Input.GetActionId("CAICursorMoveEast")
 local ACTION_CURSOR_SOUTHWEST = Input.GetActionId("CAICursorMoveSouthWest")
 local ACTION_CURSOR_SOUTHEAST = Input.GetActionId("CAICursorMoveSouthEast")
 local ACTION_INTERFACE_PRIMARY = Input.GetActionId("InterfaceWidgetPrimaryAction")
+local ACTION_SCANNER_PREV_CATEGORY = Input.GetActionId("WorldScannerPrevCategory")
+local ACTION_SCANNER_NEXT_CATEGORY = Input.GetActionId("WorldScannerNextCategory")
+local ACTION_SCANNER_PREV_SUBCATEGORY = Input.GetActionId("WorldScannerPrevSubCategory")
+local ACTION_SCANNER_NEXT_SUBCATEGORY = Input.GetActionId("WorldScannerNextSubCategory")
+local ACTION_SCANNER_PREV_GROUP = Input.GetActionId("WorldScannerPrevGroup")
+local ACTION_SCANNER_NEXT_GROUP = Input.GetActionId("WorldScannerNextGroup")
+local ACTION_SCANNER_PREV_ITEM = Input.GetActionId("WorldScannerPrevItem")
+local ACTION_SCANNER_NEXT_ITEM = Input.GetActionId("WorldScannerNextItem")
+local ACTION_SCANNER_JUMP = Input.GetActionId("WorldScannerJumpToCurrent")
+local ACTION_SCANNER_RETURN = Input.GetActionId("WorldScannerReturnFromJump")
+local ACTION_SCANNER_SPEAK_DIRECTION = Input.GetActionId("WorldScannerSpeakCurrentDirection")
+local ACTION_MINIMAP_LENS_LIST = Input.GetActionId("CAIMinimapOpenLensList")
 
 -- ===========================================================================
 -- UI overrides
@@ -87,6 +101,79 @@ local SharedInputActions = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return MoveCursor(DirectionTypes.DIRECTION_SOUTHEAST)
+		end,
+	},
+	[ACTION_SCANNER_PREV_CATEGORY] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			CAIWorldScanner:CycleCategory(-1)
+		end,
+	},
+	[ACTION_SCANNER_NEXT_CATEGORY] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			CAIWorldScanner:CycleCategory(1)
+		end,
+	},
+	[ACTION_SCANNER_PREV_SUBCATEGORY] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			CAIWorldScanner:CycleSubCategory(-1)
+		end,
+	},
+	[ACTION_SCANNER_NEXT_SUBCATEGORY] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			CAIWorldScanner:CycleSubCategory(1)
+		end,
+	},
+	[ACTION_SCANNER_PREV_GROUP] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			CAIWorldScanner:CycleGroup(-1)
+		end,
+	},
+	[ACTION_SCANNER_NEXT_GROUP] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			CAIWorldScanner:CycleGroup(1)
+		end,
+	},
+	[ACTION_SCANNER_PREV_ITEM] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			CAIWorldScanner:CycleItem(-1)
+		end,
+	},
+	[ACTION_SCANNER_NEXT_ITEM] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			CAIWorldScanner:CycleItem(1)
+		end,
+	},
+	[ACTION_SCANNER_JUMP] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			CAIWorldScanner:JumpToCurrent()
+		end,
+	},
+	[ACTION_SCANNER_RETURN] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			CAIWorldScanner:ReturnFromJump()
+		end,
+	},
+	[ACTION_SCANNER_SPEAK_DIRECTION] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			CAIWorldScanner:SpeakCurrentDirection()
+		end,
+	},
+	[ACTION_MINIMAP_LENS_LIST] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			LuaEvents.CAIMinimapLensListToggle()
+			return true
 		end,
 	},
 }
@@ -228,7 +315,8 @@ local function DispatchInputAction(actionId, actionType, ...)
 	local action = GetInputAction(actionId)
 	if not action or action.Type ~= actionType then return false end
 
-	return action.Action(m_caiGameViewWidget, ...)
+	action.Action(m_caiGameViewWidget, ...)
+	return true
 end
 
 local function OnCAIInputActionStarted(actionId, x, y)
@@ -289,10 +377,19 @@ local function OnCAICursorMoved(x, y, plot)
 	end
 end
 
+local function OnLocalPlayerTurnBegin()
+	CAIWorldScanner:OnLocalPlayerTurnBegin()
+end
+
+local function OnUpdate()
+	RevealAnnouncements_CAI.UpdateVisibility()
+end
+
 local function RegisterCAIEvents()
 	Events.InterfaceModeChanged.Add(OnInterfaceChanged)
 	Events.InputActionStarted.Add(OnCAIInputActionStarted)
 	Events.InputActionTriggered.Add(OnCAIInputActionTriggered)
+	Events.LocalPlayerTurnBegin.Add(OnLocalPlayerTurnBegin)
 	LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
 end
 
@@ -300,6 +397,7 @@ local function UnregisterCAIEvents()
 	Events.InterfaceModeChanged.Remove(OnInterfaceChanged)
 	Events.InputActionStarted.Remove(OnCAIInputActionStarted)
 	Events.InputActionTriggered.Remove(OnCAIInputActionTriggered)
+	Events.LocalPlayerTurnBegin.Remove(OnLocalPlayerTurnBegin)
 	LuaEvents.CAICursorMoved.Remove(OnCAICursorMoved)
 end
 
@@ -308,6 +406,8 @@ local function InitializeCAIGameView()
 	mgr:Push(m_caiGameViewWidget)
 	RegisterCAIEvents()
 	SnapCursorToInitialCameraPosition()
+	CAIWorldScanner:Initialize()
+	RevealAnnouncements_CAI.Initialize()
 end
 
 -- Vanilla subscribes this function to Events.LoadScreenClose. Keep using that
@@ -330,6 +430,8 @@ end)
 
 OnShutdown = WrapFunc(OnShutdown, function(orig)
 	UnregisterCAIEvents()
+	CAIWorldScanner:ClearScanner()
+	RevealAnnouncements_CAI.Shutdown()
 	if mgr then
 		mgr:ShutDown()
 	end
@@ -339,3 +441,4 @@ end)
 InstallUIOverrides()
 ContextPtr:SetShutdown(OnShutdown)
 ContextPtr:SetInputHandler(OnInputHandler, true)
+ContextPtr:SetUpdate(OnUpdate)

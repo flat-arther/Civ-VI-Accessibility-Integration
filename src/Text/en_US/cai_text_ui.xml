@@ -171,6 +171,21 @@
     <Row Tag="LOC_CAI_EXITED_WONDER_PLACEMENT_MODE" Language="en_US">
       <Text>Exited wonder placement mode</Text>
     </Row>
+    <Row Tag="LOC_CAI_REVEAL_QUEUE_REVEALED" Language="en_US">
+      <Text>Revealed {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REVEAL_QUEUE_HIDDEN" Language="en_US">
+      <Text>{1_Text} hidden</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REVEAL_QUEUE_GONE" Language="en_US">
+      <Text>{1_Text} gone</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REVEAL_TILES" Language="en_US">
+      <Text>{1_Count : plural 1?{1_Count} tile; other?{1_Count} tiles;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REVEAL_PLOT" Language="en_US">
+      <Text>tile</Text>
+    </Row>
     <Row Tag="LOC_CAI_CURSOR_MOVE_NORTHWEST" Language="en_US">
       <Text>Move cursor northwest</Text>
     </Row>
@@ -206,6 +221,192 @@
     </Row>
     <Row Tag="LOC_CAI_CURSOR_MOVE_SOUTHEAST_TOOLTIP" Language="en_US">
       <Text>Moves the CAI map cursor southeast</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_CITIES" Language="en_US">
+      <Text>Cities</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_BARBARIAN_CAMPS" Language="en_US">
+      <Text>Barbarian camps</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_IMPROVEMENTS" Language="en_US">
+      <Text>Improvements and routes</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TERRAIN" Language="en_US">
+      <Text>Terrain</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_WATER_AVAILABILITY" Language="en_US">
+      <Text>Water availability</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_RESOURCES" Language="en_US">
+      <Text>Resources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_UNITS" Language="en_US">
+      <Text>Units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_MY_UNITS" Language="en_US">
+      <Text>My units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_NEUTRAL_UNITS" Language="en_US">
+      <Text>Neutral units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_ENEMY_UNITS" Language="en_US">
+      <Text>Enemy units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_SPECIAL_MAP_OBJECTS" Language="en_US">
+      <Text>Special map objects</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_MY" Language="en_US">
+      <Text>My</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_MY_PILLAGED" Language="en_US">
+      <Text>My pillaged</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_NEUTRAL" Language="en_US">
+      <Text>Neutral</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_ENEMY" Language="en_US">
+      <Text>Enemy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_ALL" Language="en_US">
+      <Text>All</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CIVILIAN" Language="en_US">
+      <Text>Civilian</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_RELIGIOUS" Language="en_US">
+      <Text>Religious</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_MELEE" Language="en_US">
+      <Text>Melee</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_RANGED" Language="en_US">
+      <Text>Ranged</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_SIEGE" Language="en_US">
+      <Text>Siege</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_NAVAL" Language="en_US">
+      <Text>Naval</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_AIR" Language="en_US">
+      <Text>Air</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_SUPPORT" Language="en_US">
+      <Text>Support</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BARBARIANS" Language="en_US">
+      <Text>Barbarians</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CAMPS" Language="en_US">
+      <Text>Camps</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BASE" Language="en_US">
+      <Text>Base</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_FEATURES" Language="en_US">
+      <Text>Features</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_ELEVATION" Language="en_US">
+      <Text>Elevation</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BONUS" Language="en_US">
+      <Text>Bonus</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_LUXURY" Language="en_US">
+      <Text>Luxury</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_STRATEGIC" Language="en_US">
+      <Text>Strategic</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_ARTIFACT" Language="en_US">
+      <Text>Artifact</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_NATURAL_WONDERS" Language="en_US">
+      <Text>Natural wonders</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TRIBAL_VILLAGES" Language="en_US">
+      <Text>Tribal villages</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_UNKNOWN" Language="en_US">
+      <Text>Unknown</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_UNAVAILABLE" Language="en_US">
+      <Text>Current scanner entry unavailable</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_NO_PREVIOUS_JUMP" Language="en_US">
+      <Text>No previous scanner jump position</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_EMPTY" Language="en_US">
+      <Text>No scanner entries available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_DISTANCE" Language="en_US">
+      <Text>{1_Num} tiles away</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PREV_CATEGORY" Language="en_US">
+      <Text>Previous world scanner category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PREV_CATEGORY_TOOLTIP" Language="en_US">
+      <Text>Cycles to the previous world scanner category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_NEXT_CATEGORY" Language="en_US">
+      <Text>Next world scanner category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_NEXT_CATEGORY_TOOLTIP" Language="en_US">
+      <Text>Cycles to the next world scanner category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PREV_SUBCATEGORY" Language="en_US">
+      <Text>Previous world scanner subcategory</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PREV_SUBCATEGORY_TOOLTIP" Language="en_US">
+      <Text>Cycles to the previous subcategory in the current world scanner category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_NEXT_SUBCATEGORY" Language="en_US">
+      <Text>Next world scanner subcategory</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_NEXT_SUBCATEGORY_TOOLTIP" Language="en_US">
+      <Text>Cycles to the next subcategory in the current world scanner category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PREV_GROUP" Language="en_US">
+      <Text>Previous world scanner group</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PREV_GROUP_TOOLTIP" Language="en_US">
+      <Text>Cycles to the previous group in the current world scanner subcategory</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_NEXT_GROUP" Language="en_US">
+      <Text>Next world scanner group</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_NEXT_GROUP_TOOLTIP" Language="en_US">
+      <Text>Cycles to the next group in the current world scanner subcategory</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PREV_ITEM" Language="en_US">
+      <Text>Previous world scanner item</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PREV_ITEM_TOOLTIP" Language="en_US">
+      <Text>Cycles to the previous item in the current world scanner group</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_NEXT_ITEM" Language="en_US">
+      <Text>Next world scanner item</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_NEXT_ITEM_TOOLTIP" Language="en_US">
+      <Text>Cycles to the next item in the current world scanner group</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_JUMP" Language="en_US">
+      <Text>Jump to current world scanner entry</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_JUMP_TOOLTIP" Language="en_US">
+      <Text>Moves the CAI cursor to the current world scanner item or group</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_RETURN" Language="en_US">
+      <Text>Return from world scanner jump</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_RETURN_TOOLTIP" Language="en_US">
+      <Text>Returns the CAI cursor to the plot it occupied before the last world scanner jump</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SPEAK_DIRECTION" Language="en_US">
+      <Text>Speak current world scanner direction</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SPEAK_DIRECTION_TOOLTIP" Language="en_US">
+      <Text>Speaks the direction from the CAI cursor to the currently selected world scanner item</Text>
     </Row>
 
     <!-- Notification panel -->
@@ -1302,6 +1503,12 @@
     <Row Tag="LOC_CAI_DIR_W" Language="en_US">
       <Text>W</Text>
     </Row>
+    <Row Tag="LOC_CAI_HERE" Language="en_US">
+      <Text>Here</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIRECTION_STEP" Language="en_US">
+      <Text>{1_Num} {2_Direction}</Text>
+    </Row>
     <Row Tag="LOC_CAI_INTERFACE_PRIMARY_ACTION" Language="en_US">
       <Text>Primary interface action</Text>
     </Row>
@@ -1423,6 +1630,15 @@
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GOALS_HOTKEY_TOOLTIP" Language="en_US">
       <Text>Opens a list of current tutorial goals.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MINIMAP_OPEN_LENS_LIST" Language="en_US">
+      <Text>Open lens list</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MINIMAP_OPEN_LENS_LIST_TOOLTIP" Language="en_US">
+      <Text>Opens the accessible minimap lens list.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MINIMAP_LENS_LIST" Language="en_US">
+      <Text>Lens list</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GOAL_ADDED_ALERT" Language="en_US">
       <Text>Tutorial goal added: {1_Goal}</Text>

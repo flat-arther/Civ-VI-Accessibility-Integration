@@ -144,6 +144,10 @@ Used to create dynamic UI instances from XML templates:
 - `plot:IsRiver()` is still the coarse yes/no helper and is what vanilla `PlotToolTip.lua` uses for the generic "River" line.
 - In CAI plot reads, the `W` action now announces fresh water before rivers and owner so players can distinguish broad fresh-water access from actual river-edge directions.
 - In Gathering Storm / Expansion 2, `PlotTooltip_Expansion2.lua` populates `data.RiverNames` from `RiverManager.GetRiverName(pPlot)`. CAI should treat that as a named-river collection shape, not as a single lookup argument, and append the computed edge-direction suffix to each named river entry individually.
+- Vanilla's settler lens calls `Map.GetContinentPlotsWaterAvailability()`, which returns four explicit plot lists in this order: fresh water, coastal water, no water, and cannot-settle / blocked. `MinimapPanel.lua` colors those arrays directly for the `WaterAvailability` lens, and `ModalLensPanel.lua` / `UnitPanel.lua` supply the localized meanings.
+- For Maya (`TRAIT_CIVILIZATION_MAYAB`), vanilla collapses the first three settler-lens meanings into a single "valid settling location" bucket and keeps only the blocked bucket separate.
+- The shared decompiled UI still uses that same `WaterAvailability` path with expansions enabled; I did not find an XP1/XP2 branch that adds loyalty or coastal-lowland buckets to `Map.GetContinentPlotsWaterAvailability()`.
+- Gathering Storm coastal-lowland state is exposed separately through `TerrainManager.GetCoastalLowlandType(plotIndex)` and `GameInfo.CoastalLowlands()`. That is a distinct API path from the settler water-availability lens.
 
 ## Events
 
@@ -190,6 +194,76 @@ Shared global table for cross-context communication:
 ### Speak(text, interrupt)
 
 Wrapper for `CAI.output`. Use this for all TTS output.
+
+### World scanner module layout
+
+- CAI's world scanner now lives under `src/UI/InGame/WorldScanner/`.
+- Entry point: `WorldScanner_CAI.lua`
+- Shared modules:
+  - `WorldScannerCategoryUtils.lua`
+  - `WorldScannerCore.lua`
+- Category modules:
+  - `WorldScannerCategory_cities.lua`
+  - `WorldScannerCategory_barbarianCamps.lua`
+  - `WorldScannerCategory_improvements.lua`
+  - `WorldScannerCategory_terrain.lua`
+  - `WorldScannerCategory_waterAvailability.lua`
+  - `WorldScannerCategory_resources.lua`
+  - `WorldScannerCategory_units.lua`
+  - `WorldScannerCategory_specialMapObjects.lua`
+- `WorldScanner_CAI.lua` includes the shared modules directly and then uses `include("WorldScannerCategory_", true)` so all loaded category files with that prefix are pulled in automatically, matching the vanilla late-include pattern.
+- `WorldInput_CAI.lua` includes the scanner entry point and dispatches scanner input actions through `Events.InputActionTriggered`.
+- `WorldInput_CAI.lua` also drives `RevealAnnouncements_CAI.UpdateVisibility()` through a `ContextPtr:SetUpdate(...)` timer hook so visibility event speech can be throttled without speaking directly inside engine callbacks.
+- `RevealAnnouncements_CAI.lua` subscribes to `PlotVisibilityChanged`, `UnitVisibilityChanged`, `ImprovementVisibilityChanged`, `ResourceVisibilityChanged`, `CityVisibilityChanged`, and `DistrictVisibilityChanged`.
+- Reveal announcements now use three top-level queues: reveal, hidden, and gone.
+- Each queue stores category buckets in this flush order: plots, units, resources, cities, districts, improvements.
+- Each visibility callback refreshes a shared quiet-period timer, and `WorldInput_CAI.lua` flushes after 0.5 seconds pass with no new visibility events.
+- Plot, improvement, resource, city, and district reveals still enter the reveal queue directly from Civ VI visibility events.
+- Unit reveal and hidden speech is now snapshot-driven:
+  - visibility events only refresh the shared timer
+  - flush rebuilds the currently visible foreign-unit set from live unit state
+  - reveal units are `current - previous`
+  - hidden units are `previous - current`
+  - this avoids noisy cross-map `UnitVisibilityChanged` callbacks from speaking units the player never locally saw
+- Only resources currently enter the hidden queue directly from `RevealedState.HIDDEN` events; unit hidden speech comes from the snapshot diff instead.
+- Gone speech is now snapshot-driven for Civ VI's special removable improvements:
+  - barbarian outposts are still the `IMPROVEMENT_BARBARIAN_CAMP` improvement with `BarbarianCamp="true"`
+  - tribal villages are still the `IMPROVEMENT_GOODY_HUT` improvement with `Goody="true"`
+  - both use `RemoveOnEntry="true"` in `decompiled/Assets/Gameplay/Data/Improvements.xml`
+  - CAI keeps a Lua-side last-known per-plot snapshot for visible plots and, on revisit, announces the prior special improvement as gone if that plot no longer has the same special improvement
+  - unlike the older Civ V-style file, this Civ VI version does not bootstrap from a `GetRevealedImprovementType(...)` Lua API because I did not find that API exposed in the Civ VI Lua files
+- Flush grammar is queue-wide rather than per item:
+  - reveal speaks `Revealed {text}`
+  - hidden speaks `{text} hidden`
+  - gone speaks `{text} gone`
+  - category payloads are ordered as plots, units, resources, cities, districts, improvements
+  - payload items are comma-separated for screen-reader friendliness
+  - tiles always speak a count and use Civ VI plural tags through `LOC_CAI_REVEAL_TILES`
+  - non-tile labels only prepend a count when the aggregated count is greater than 1
+- Scanner rebuild policy in v1: rebuild on category change and on `Events.LocalPlayerTurnBegin`.
+- Scanner distance sorting uses the current CAI cursor plot and `Map.GetPlotDistance(...)`.
+- Scanner jump and return use CAI cursor movement through `LuaEvents.CAICursorMove(x, y)`.
+- Full-map scanner categories should iterate plots with `for plotIndex = 0, Map.GetPlotCount() - 1 do` and `Map.GetPlotByIndex(plotIndex)`. Do not use `Map.GetNumPlots()`.
+
+### World scanner reveal and object rules
+
+- Terrain scanner gates on revealed plots only. It intentionally emits separate entries for base terrain, feature, and elevation on the same revealed plot.
+- Resources should use `plot:GetResourceType()` together with the local player's `GetResources():IsResourceVisible(resource.Hash)` check so invisible strategic resources stay hidden.
+- Improvements use the same live plot getters as vanilla `PlotToolTip.lua`: `plot:GetImprovementType()`, `plot:IsImprovementPillaged()`, `plot:IsRoute()`, `plot:IsRoutePillaged()`, and `plot:GetRouteType()`. Civ VI models routes separately from improvements.
+- Barbarian camps and tribal villages are improvements in Civ VI data:
+  - `IMPROVEMENT_BARBARIAN_CAMP` has `BarbarianCamp="true"`
+  - `IMPROVEMENT_GOODY_HUT` has `Goody="true"`
+- Natural wonders are feature rows with `NaturalWonder="true"` in `GameInfo.Features`.
+- Non-local city and unit scanner entries should be gated by diplomacy met state via `localPlayer:GetDiplomacy():HasMet(playerID)`.
+- Non-local unit scanner entries should also respect actual visibility through `PlayersVisibility[observer]:IsUnitVisible(unit)`.
+- For scanner units, prefer player-based unit enumeration, but do not rely on a raw `0 .. PlayerManager.GetWasEverAliveCount() - 1` loop for barbarians. Mirror the `UnitFlagManager` pattern instead: scan normal alive players and also do an explicit `for _, pPlayer in ipairs(Players) do if pPlayer:IsBarbarian() then ... end end` pass, then apply the usual revealed-plot and `IsUnitVisible(unit)` gates.
+- Scanner units now use three top-level categories from the same `WorldScannerCategory_units.lua` file: my units, neutral units, and enemy units.
+- Unit scanner subcategories should stay broad for navigation. CAI now derives them from live unit metadata in this order: barbarians, religious, civilian, support, air, naval, siege, ranged, then melee fallback.
+- When classifying religious units from `GameInfo.Units`, do not treat Civ VI gameplay booleans or numeric stats as plain Lua truthy checks. Database booleans arrive as `0` or `1`, and `ReligiousStrength` / charge columns default to `0`; in Lua, `0` is truthy, so scanner logic must check `== 1` / `== true` or `> 0` explicitly.
+- Every scanner category now gets an implicit `All` subcategory from `WorldScannerCore.lua`. It is always inserted first and contains every validated item in that category, grouped through the same `GroupId` / `GroupLabelResolver` path as normal subcategories.
+- `hexCoordUtils_CAI.lua` now owns shared original-capital lookup, relative-coordinate math, wrap-aware spoken hex geometry helpers, and reusable direction/path utilities (`directionString`, `stepListString`, `stepListFromPath`, `unitVector`, `cubeDistance`, `directionRank`, `plotsInRange`).
+- Plot tooltip relative coordinates should call `GetRelativeCoords(plot)` and format the returned `dx, dy` locally; world scanner item speech should call `GetDirectionString(cursorX, cursorY, targetX, targetY)` and speak direction text instead of tile distance.
+- A future scanner category can mirror vanilla settler-lens water availability exactly by consuming `Map.GetContinentPlotsWaterAvailability()` and mapping its returned arrays to localized subcategories rather than reverse-engineering lens colors.
 
 ### UIScreenManager priority stack
 

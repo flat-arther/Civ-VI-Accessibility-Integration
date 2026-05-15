@@ -36,6 +36,13 @@ Diplomacy/production polish plus remaining in-game verification.
 - `DiplomacyActionView_CAI.lua`: persistent CAI root with leaders tree, actions list, conversation panel, and cinema handling is implemented. Intel tabs, submenu rebuilds, conversation lifecycle sync, and close-path cleanup are in place.
 - `DeclareWarPopup_CAI.lua`: dedicated declare-war warning dialog wrapper is implemented for diplomacy, city-state, Civ6Common, and world-input open paths, with live targets/consequence summaries and modal button handling.
 - `ProductionPanel_CAI.lua`: per-tab CAI bodies, expandable production rows, queue management rows, live category capture, and vanilla tab-sync/open timing fixes are implemented.
+- World scanner v1 scaffolding is implemented under `src/UI/InGame/WorldScanner/`, with category scanning for cities, barbarian camps, improvements and routes, terrain, resources, units, and special map objects, plus CAI cursor jump/return navigation through new input actions.
+- `WorldScannerCategory_units.lua` now splits units into three top-level scanner categories: my units, neutral units, and enemy units. Each category uses broad combat-role subcategories, and enemy units adds a dedicated barbarians subcategory.
+- `WorldScannerCore.lua` now injects an implicit `All` subcategory at the front of every scanner category. It aggregates all validated items in that category without replacing the category-specific subcategories.
+- `hexCoordUtils_CAI.lua` now centralizes original-capital lookup, relative coordinates, wrap-aware hex direction math, and shared path/direction utility helpers. Scanner items now speak direction from the CAI cursor instead of tile distance.
+- `WorldScannerCategory_waterAvailability.lua` now adds a water-availability world scanner category gated by the live settler water lens layer. It mirrors the vanilla legend locale keys, rebuilds on lens layer on/off, and collapses fresh/coastal/no-water into a single valid-location subcategory for Maya.
+- `MinimapPanel_CAI.lua` now wraps the vanilla minimap lens flyout with a CAI list through the shared UI manager. A new bindable `CAIMinimapOpenLensList` action defaults to `Ctrl+L`, mirrors the live vanilla lens button visibility and checked state, and supports `Escape` to close the CAI list and underlying vanilla lens panel together.
+- `RevealAnnouncements_CAI.lua` now batches visibility-change callbacks into three top-level queues: reveal, hidden, and gone. `WorldInput_CAI.lua` drives a shared 0.5 second quiet-period flush, and reveal output is grouped in category order: tiles, units, resources, cities, districts, improvements.
 
 ## Verified Recently
 
@@ -88,6 +95,19 @@ UnitFlagManager / PlotToolTip:
 WorldInput / Notifications / ActionPanel:
 
 - Verify remappable cursor movement and camera sync.
+- Verify reveal announcements:
+- multiple identical labels in the same category should aggregate to `count + label`.
+- reveal output should say `Revealed {text}` and hidden output should say `{text} hidden`.
+- reveal category order should be tiles, units, resources, cities, districts, improvements.
+- tile wording should always speak the count and should come from the Civ VI plural-loc tag rather than Lua singular/plural branching.
+- reveal and hidden should flush as separate lines in order, not as one merged per-item state list.
+- unit reveal and hidden should now come from the visible-unit snapshot diff rather than direct `UnitVisibilityChanged` labels.
+- cross-map `UnitVisibilityChanged` noise should no longer produce hidden speech for units the player never locally saw.
+- only resources should currently enter the hidden queue directly from visibility events.
+- gone should announce previously seen barbarian outposts and tribal villages when a revisited visible plot no longer has that same special improvement.
+- gone detection currently bootstraps only from plots visible in this session, not from a Civ VI revealed-improvement memory API.
+- a new visibility event inside the 0.5 second window should extend the shared flush timer rather than causing an early partial announcement.
+- shutdown / reload should not duplicate subscriptions or replay stale queued announcements.
 - Verify `PlotToolTip_CAI.lua` picks the correct vanilla include for base, Expansion 2, and Barbarian Clans games, and that `RequestPlotInfo(...)` now reads per-detail strings without the old plot-info action buckets or coord line.
 - Verify river direction speech in `PlotToolTip_CAI.lua`: CAI now appends edge directions to the river line using the six-edge positional helper (`self: E/SE/SW`, neighbors: `W/NW/NE`), and on Gathering Storm / Expansion 2 it appends those directions to the named-river string.
 - Verify new plot read hotkeys in game: `S` units, `W` yields/river/owner, `X` movement+defense+appeal, `Shift+S` relative coordinates, `B` district/buildings. `WorldTrackerReadSummary` now defaults to `Shift+W`.
@@ -95,6 +115,35 @@ WorldInput / Notifications / ActionPanel:
 - Verify notification speech, notification tree activation/dismissal, and blocker filtering.
 - Verify tutorial-safe handling of Space and Ctrl+Space.
 - Verify blocker-tooltip speech changes and Escape closing of the ActionPanel blocker list.
+- Verify world scanner hotkeys and speech:
+- `Ctrl+PageUp` / `Ctrl+PageDown` categories, `Shift+PageUp` / `Shift+PageDown` subcategories, `PageUp` / `PageDown` groups, `Alt+PageUp` / `Alt+PageDown` items.
+- Verify the new minimap lens list hotkey and wrapper:
+- `Ctrl+L` should open and close the accessible minimap lens list through the wrapped vanilla lens panel.
+- `Escape` from the CAI lens list should close both the CAI widget and the vanilla flyout.
+- The CAI list should mirror only currently visible vanilla lens entries and announce selected/disabled state from live button state.
+- Verify the new water-availability scanner category:
+- it should appear only while the `Hex_Coloring_Water_Availablity` layer is on.
+- subcategories should use the same vanilla meanings as `ModalLensPanel.lua`.
+- Maya should collapse fresh/coastal/no-water into a single valid-location subcategory while leaving blocked separate.
+- Verify `End` speaks only the direction string for the currently selected scanner item, without moving the CAI cursor.
+- Verify `Home` jumps the CAI cursor to the current scanner target and `Backspace` returns to the prior cursor plot.
+- Verify group navigation speaks the first item in the group rather than a synthetic group label.
+- Verify category/subcategory navigation skips empty entries and rebuilds cleanly on local turn begin.
+- Verify the implicit `All` subcategory appears first in every scanner category and includes every item from that category.
+- Verify scanner unit subcategories after the religion-classification fix in `WorldScannerCategory_units.lua`: barbarian units should appear under Enemy Units > Barbarians, and non-religious units should no longer collapse into Religious because Civ VI `GameInfo.Units` booleans and default stat values use `0` / `1`.
+- Verify scanner barbarian-unit discovery after the player-enumeration fix in `WorldScannerCategory_units.lua`: unit scanning now mirrors the `UnitFlagManager` approach by scanning alive players plus an explicit `ipairs(Players)` barbarian pass, rather than relying on the `GetWasEverAliveCount()` player loop.
+- Verify scanner direction speech: items should now announce direction from the CAI cursor, including `Here` on the same tile and grouped direction wording such as `4 E, 1 NE`.
+- Verify the scanner refactor:
+- full-map categories now use `Map.GetPlotCount()` rather than `Map.GetNumPlots()`.
+- category files now emit flat scanner items and the core rebuilds `subcategory -> group -> items`.
+- Verify the wildcard category include refactor:
+- `WorldScanner_CAI.lua` should load category modules through `include("WorldScannerCategory_", true)` without direct per-category include lines.
+- renamed scanner files should still load from `.modinfo` and `WorldInput_CAI.lua` with the new `WorldScanner...` names.
+- Verify scanner reveal and stance gating:
+- cities and units should respect met-state rules for non-local players.
+- units should respect actual visibility, not just revealed plots.
+- resources should hide invisible strategic resources until the reveal prereq is met.
+- routes and improvements should both appear in the improvements scanner without double-counting the same object kind.
 
 WorldTracker and TopPanel:
 
@@ -149,6 +198,10 @@ Unit operation / command hotkeys:
 - Avoid persistent mirrors for ambient HUD panels when hotkey/read-on-demand access is better.
 - End-turn blockers belong with ActionPanel access, not the notification center.
 - Cache references and ids only; always read live values when speaking state.
+- World scanner v1 is a data/navigation layer, not a pushed CAI widget tree yet.
+- World scanner groups are structural only; when a group changes, CAI should speak the group's first item rather than a group label.
+- World scanner routes should remain separate from improvements in scan logic because Civ VI exposes them through `plot:IsRoute()` / `plot:GetRouteType()` rather than `plot:GetImprovementType()`.
+- When reading Civ VI gameplay DB rows in Lua, remember that `0` is truthy. Classification logic must test boolean columns like `TrackReligion`, `FoundReligion`, and `EnabledByReligion` explicitly, and treat religious stat columns as active only when `> 0`.
 
 ## Compressed History
 
@@ -167,3 +220,7 @@ Unit operation / command hotkeys:
 - `PlotToolTip_CAI.lua` now exposes helper-driven plot read actions for units, yields/river/owner, movement/defense/appeal, relative coordinates, and district/building info through `Events.InputActionTriggered`.
 - `CityBannerManager.lua` visual banner inventory is now documented in `docs/game-api.md`, covering city-center banners, religion details, and district mini-banners for later CAI work.
 - `CityBannerManager_CAI.lua` now exposes `ExposedMembers.CAIInfo:RequestCityBannerInfo(requestedKeys)` and handles dedicated `CityBannerReadIdentityStatus` through `CityBannerReadDiplomacy` actions with a table-driven city/district bucket definition.
+- `WorldScannerCategory_units.lua` religious-unit detection now uses explicit `0` / `1` and `> 0` checks, preventing ordinary units from collapsing into the Religious subcategory and restoring the intended enemy and barbarian role buckets.
+- `WorldScannerCategory_units.lua` now mirrors `UnitFlagManager` for barbarian discovery by scanning alive players plus an explicit `ipairs(Players)` barbarian pass, while keeping the normal revealed-plot and `IsUnitVisible(unit)` gates for scanner visibility.
+- World scanner category files now use the `WorldScannerCategory_*.lua` naming pattern, and `WorldScanner_CAI.lua` loads them via the same wildcard include style vanilla `NotificationPanel.lua` uses.
+- World scanner now has a dedicated `WorldScannerSpeakCurrentDirection` action on `End`, which speaks only the current item's direction string via `CAIWorldScanner:SpeakCurrentDirection()`.

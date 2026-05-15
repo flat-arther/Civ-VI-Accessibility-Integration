@@ -15,7 +15,6 @@
     <File>UI/uiManager/widgetTemplateHelpers.lua</File>
     <File>UI/uiManager/widgetTemplates.lua</File>
     <File>UI/uiManager/UIScreenManager.lua</File>
-    <File>UI/inGame/caiIngame.lua</File>
     <File>UI/inGame/worldInfo.lua</File>
     <File>UI/inGame/navCursor.lua</File>
     <File>UI/frontEnd/FrontEnd.lua</File>
@@ -50,6 +49,20 @@
     <File>UI/inGame/ResearchChooser_CAI.lua</File>
     <File>UI/inGame/inGameHelpers_CAI.lua</File>
     <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>
+    <File>UI/inGame/hexCoordUtils_CAI.lua</File>
+    <File>UI/inGame/RevealAnnouncements_CAI.lua</File>
+    <File>UI/inGame/MinimapPanel_CAI.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScanner_CAI.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategoryUtils.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCore.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_cities.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_barbarianCamps.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_improvements.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_terrain.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_waterAvailability.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_resources.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_units.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_specialMapObjects.lua</File>
     <File>UI/inGame/CivicsChooser_CAI.lua</File>
     <File>UI/inGame/CivicsTree_CAI.lua</File>
     <File>UI/inGame/TechTree_CAI.lua</File>
@@ -125,7 +138,6 @@
       <File>UI/uiManager/widgetTemplates.lua</File>
       <File>UI/inGame/worldInfo.lua</File>
       <File>UI/inGame/navCursor.lua</File>
-      <File>UI/inGame/caiIngame.lua</File>
       <File>UI/shared/iconsProcessing.lua</File>
       <File>UI/shared/PopupDialog.lua</File>
       <File>UI/shared/LoadGameMenu.lua</File>
@@ -134,6 +146,20 @@
       <File>UI/inGame/NotificationPanel_CAI.lua</File>
       <File>UI/inGame/inGameHelpers_CAI.lua</File>
       <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>
+      <File>UI/inGame/hexCoordUtils_CAI.lua</File>
+      <File>UI/inGame/RevealAnnouncements_CAI.lua</File>
+      <File>UI/inGame/MinimapPanel_CAI.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScanner_CAI.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategoryUtils.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCore.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_cities.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_barbarianCamps.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_improvements.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_terrain.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_waterAvailability.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_resources.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_units.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_specialMapObjects.lua</File>
     </ImportFiles>
 
     <ReplaceUIScript id="CAI_WorldInput">
@@ -149,6 +175,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>ActionPanel</LuaContext>
         <LuaReplace>UI/inGame/ActionPanel_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_MinimapPanel">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>MinimapPanel</LuaContext>
+        <LuaReplace>UI/inGame/MinimapPanel_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

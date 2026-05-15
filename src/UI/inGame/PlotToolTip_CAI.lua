@@ -1,6 +1,9 @@
 include("caiUtils")
 include("interfaceInfoHelpers_CAI")
+include("hexCoordUtils_CAI")
 include("Civ6Common")
+
+local HexCoordUtils = CAIHexCoordUtils
 
 local function IsBarbarianClansModeActive()
     return GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS") == 1
@@ -141,57 +144,17 @@ local function GetYieldLine(yieldType, amount)
     return tostring(amount) .. Locale.Lookup(yieldInfo.IconString) .. Locale.Lookup(yieldInfo.Name)
 end
 
-local function GetActiveOriginalCapitalCoords()
-    local localPlayerID = Game.GetLocalPlayer()
-    if localPlayerID == nil or localPlayerID == -1 then
-        return nil, nil
-    end
-
-    for playerID = 0, 63 do
-        local player = Players[playerID]
-        if player ~= nil then
-            local cities = player:GetCities()
-            if cities ~= nil then
-                for _, city in cities:Members() do
-                    if city ~= nil
-                        and city:IsOriginalCapital()
-                        and city:GetOriginalOwner() == localPlayerID then
-                        return city:GetX(), city:GetY()
-                    end
-                end
-            end
-        end
-    end
-
-    return nil, nil
-end
-
 local function GetRelativeCoordinateString(plot)
     if plot == nil then
         return nil
     end
 
-    local capitalX, capitalY = GetActiveOriginalCapitalCoords()
-    if capitalX == nil or capitalY == nil then
+    local coordinateString = HexCoordUtils.coordinateString(plot:GetX(), plot:GetY())
+    if coordinateString == nil or coordinateString == "" then
         return nil
     end
 
-    local x = plot:GetX()
-    local y = plot:GetY()
-    local dy = y - capitalY
-    local dx = (x + 0.5 * (y % 2)) - (capitalX + 0.5 * (capitalY % 2))
-
-    if Map.IsWrapX() then
-        local width = Map.GetGridSize()
-        local half = width / 2
-        if dx > half then
-            dx = dx - width
-        elseif dx < -half then
-            dx = dx + width
-        end
-    end
-
-    return tostring(dx) .. ", " .. tostring(dy)
+    return coordinateString
 end
 
 local function BuildPlotInfoData(plot)
