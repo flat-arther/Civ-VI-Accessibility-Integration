@@ -42,7 +42,8 @@ Diplomacy/production polish plus remaining in-game verification.
 - `hexCoordUtils_CAI.lua` now centralizes original-capital lookup, relative coordinates, wrap-aware hex direction math, and shared path/direction utility helpers. Scanner items now speak direction from the CAI cursor instead of tile distance.
 - `WorldScannerCategory_waterAvailability.lua` now adds a water-availability world scanner category gated by the live settler water lens layer. It mirrors the vanilla legend locale keys, rebuilds on lens layer on/off, and collapses fresh/coastal/no-water into a single valid-location subcategory for Maya.
 - `MinimapPanel_CAI.lua` now wraps the vanilla minimap lens flyout with a CAI list through the shared UI manager. A new bindable `CAIMinimapOpenLensList` action defaults to `Ctrl+L`, mirrors the live vanilla lens button visibility and checked state, and supports `Escape` to close the CAI list and underlying vanilla lens panel together.
-- `RevealAnnouncements_CAI.lua` now batches visibility-change callbacks into three top-level queues: reveal, hidden, and gone. `WorldInput_CAI.lua` drives a shared 0.5 second quiet-period flush, and reveal output is grouped in category order: tiles, units, resources, cities, districts, improvements.
+- `RevealAnnouncements_CAI.lua` now mirrors the older Civ V-style split with a cleaner internal layout: first-reveal plots are tracked separately from revisit visibility, foreign units come from a live visible-unit snapshot diff, foreign cities/resources/districts/ordinary improvements are first-reveal-only, city-center districts are skipped as redundant with cities, and gone announces revisited barbarian outposts or tribal villages that disappeared since the last sighting. `WorldInput_CAI.lua` still drives the shared 0.5 second quiet-period flush, and all visibility events refresh that timer so deferred Civ VI callbacks can extend the burst instead of flushing early.
+- Shared unit naming now lives in `inGameHelpers_CAI.lua`: formation suffix resolution and owned-unit display formatting are centralized there, and `UnitFlagManager_CAI.lua`, `UnitPanel_CAI.lua`, `WorldScannerCategory_units.lua`, and `RevealAnnouncements_CAI.lua` now use that one path.
 
 ## Verified Recently
 
@@ -97,14 +98,19 @@ WorldInput / Notifications / ActionPanel:
 - Verify remappable cursor movement and camera sync.
 - Verify reveal announcements:
 - multiple identical labels in the same category should aggregate to `count + label`.
-- reveal output should say `Revealed {text}` and hidden output should say `{text} hidden`.
-- reveal category order should be tiles, units, resources, cities, districts, improvements.
+- reveal output should follow the older Civ V-style line split:
+- `<N> tiles revealed` when first-reveal plots were involved, otherwise `Revealed`.
+- payload sections should be `Enemy`, `Units`, `Cities`, `Resources`, `Districts`, `Improvements` in that order.
+- hidden should speak as `Hidden: ...` and gone should speak as `Gone: ...`.
 - tile wording should always speak the count and should come from the Civ VI plural-loc tag rather than Lua singular/plural branching.
-- reveal and hidden should flush as separate lines in order, not as one merged per-item state list.
+- reveal, hidden, and gone should flush as separate lines in that order when present.
 - unit reveal and hidden should now come from the visible-unit snapshot diff rather than direct `UnitVisibilityChanged` labels.
 - cross-map `UnitVisibilityChanged` noise should no longer produce hidden speech for units the player never locally saw.
-- only resources should currently enter the hidden queue directly from visibility events.
+- destroyed or captured foreign units should not be re-announced as hidden.
 - gone should announce previously seen barbarian outposts and tribal villages when a revisited visible plot no longer has that same special improvement.
+- first reveal of foreign non-city-center districts and foreign ordinary improvements should announce under `Districts` and `Improvements`.
+- city-center districts should not announce as districts.
+- revisiting already revealed districts and ordinary improvements should not re-announce them.
 - gone detection currently bootstraps only from plots visible in this session, not from a Civ VI revealed-improvement memory API.
 - a new visibility event inside the 0.5 second window should extend the shared flush timer rather than causing an early partial announcement.
 - shutdown / reload should not duplicate subscriptions or replay stale queued announcements.

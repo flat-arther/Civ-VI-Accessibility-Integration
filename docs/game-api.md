@@ -214,32 +214,44 @@ Wrapper for `CAI.output`. Use this for all TTS output.
 - `WorldScanner_CAI.lua` includes the shared modules directly and then uses `include("WorldScannerCategory_", true)` so all loaded category files with that prefix are pulled in automatically, matching the vanilla late-include pattern.
 - `WorldInput_CAI.lua` includes the scanner entry point and dispatches scanner input actions through `Events.InputActionTriggered`.
 - `WorldInput_CAI.lua` also drives `RevealAnnouncements_CAI.UpdateVisibility()` through a `ContextPtr:SetUpdate(...)` timer hook so visibility event speech can be throttled without speaking directly inside engine callbacks.
-- `RevealAnnouncements_CAI.lua` subscribes to `PlotVisibilityChanged`, `UnitVisibilityChanged`, `ImprovementVisibilityChanged`, `ResourceVisibilityChanged`, `CityVisibilityChanged`, and `DistrictVisibilityChanged`.
-- Reveal announcements now use three top-level queues: reveal, hidden, and gone.
-- Each queue stores category buckets in this flush order: plots, units, resources, cities, districts, improvements.
-- Each visibility callback refreshes a shared quiet-period timer, and `WorldInput_CAI.lua` flushes after 0.5 seconds pass with no new visibility events.
-- Plot, improvement, resource, city, and district reveals still enter the reveal queue directly from Civ VI visibility events.
-- Unit reveal and hidden speech is now snapshot-driven:
+- `RevealAnnouncements_CAI.lua` subscribes to `PlotVisibilityChanged`, `UnitVisibilityChanged`, `ImprovementVisibilityChanged`, `ResourceVisibilityChanged`, `CityVisibilityChanged`, `DistrictVisibilityChanged`, and `LocalPlayerTurnBegin`.
+- All visibility callbacks refresh the same 0.5 second quiet-period timer. Plot callbacks still own the reveal/revisit plot-state buffer, while the other visibility callbacks exist so late deferred object events can extend the burst instead of letting the queue flush early.
+- Reveal announcements now mirror the older Civ V-style split:
+  - reveal tracks first-reveal plots separately from revisit-visible plots
+  - first reveal is detected from a Lua-side `PlayerVisibility:IsRevealed(plot)` snapshot rather than a custom C++ hook
+  - the reveal line speaks `<N> tiles revealed` when unexplored plots were involved, otherwise `Revealed`
+  - hidden speaks as its own `Hidden: ...` line
+  - gone speaks as its own `Gone: ...` line
+- Unit reveal and hidden speech is snapshot-driven:
   - visibility events only refresh the shared timer
   - flush rebuilds the currently visible foreign-unit set from live unit state
   - reveal units are `current - previous`
   - hidden units are `previous - current`
+  - destroyed or captured units are dropped from the hidden line by checking whether they still exist under the previous owner
   - this avoids noisy cross-map `UnitVisibilityChanged` callbacks from speaking units the player never locally saw
-- Only resources currently enter the hidden queue directly from `RevealedState.HIDDEN` events; unit hidden speech comes from the snapshot diff instead.
-- Gone speech is now snapshot-driven for Civ VI's special removable improvements:
+- First-reveal payload mirrors the older Civ V reveal model while using Civ VI's visibility APIs:
+  - units can speak on first reveal or revisit, but only from the visible-unit snapshot diff
+  - cities and resources speak only for first-reveal plots
+  - foreign districts and foreign ordinary improvements speak only for first-reveal plots
+  - city-center districts are skipped because they are redundant with city announcements
+- Reveal-payload skip rules mirror the older mod logic:
+  - natural wonders are excluded from the reveal payload
+  - barbarian outposts and tribal villages are excluded from the reveal payload
+  - own units, own cities, own districts, own improvements, teammates, and unmet foreign players are filtered out
+  - foreign districts use live `plot:GetDistrictType()` / `GameInfo.Districts[...]` and skip `DISTRICT_CITY_CENTER` plus internal-only districts when detectable
+  - foreign improvements use live `plot:GetImprovementType()` / `GameInfo.Improvements[...]`; ownership comes from `plot:GetImprovementOwner()`
+- Gone speech is snapshot-driven for Civ VI's special removable improvements:
   - barbarian outposts are still the `IMPROVEMENT_BARBARIAN_CAMP` improvement with `BarbarianCamp="true"`
   - tribal villages are still the `IMPROVEMENT_GOODY_HUT` improvement with `Goody="true"`
   - both use `RemoveOnEntry="true"` in `decompiled/Assets/Gameplay/Data/Improvements.xml`
   - CAI keeps a Lua-side last-known per-plot snapshot for visible plots and, on revisit, announces the prior special improvement as gone if that plot no longer has the same special improvement
-  - unlike the older Civ V-style file, this Civ VI version does not bootstrap from a `GetRevealedImprovementType(...)` Lua API because I did not find that API exposed in the Civ VI Lua files
-- Flush grammar is queue-wide rather than per item:
-  - reveal speaks `Revealed {text}`
-  - hidden speaks `{text} hidden`
-  - gone speaks `{text} gone`
-  - category payloads are ordered as plots, units, resources, cities, districts, improvements
-  - payload items are comma-separated for screen-reader friendliness
-  - tiles always speak a count and use Civ VI plural tags through `LOC_CAI_REVEAL_TILES`
-  - non-tile labels only prepend a count when the aggregated count is greater than 1
+  - unlike the older Civ V-style file, this Civ VI version still cannot bootstrap from a revealed-improvement memory API because I did not find a Civ VI Lua equivalent to `GetRevealedImprovementType(...)`
+- Flush grammar is line-oriented rather than queue-category-oriented:
+  - reveal speaks either `<N> tiles revealed: ...`, `<N> tiles revealed`, or `Revealed: ...`
+  - hidden speaks `Hidden: ...`
+  - gone speaks `Gone: ...`
+  - repeated labels aggregate to `count + label`
+  - reveal payload section order is `Enemy`, `Units`, `Cities`, `Resources`, `Districts`, `Improvements`
 - Scanner rebuild policy in v1: rebuild on category change and on `Events.LocalPlayerTurnBegin`.
 - Scanner distance sorting uses the current CAI cursor plot and `Map.GetPlotDistance(...)`.
 - Scanner jump and return use CAI cursor movement through `LuaEvents.CAICursorMove(x, y)`.
@@ -263,6 +275,11 @@ Wrapper for `CAI.output`. Use this for all TTS output.
 - Every scanner category now gets an implicit `All` subcategory from `WorldScannerCore.lua`. It is always inserted first and contains every validated item in that category, grouped through the same `GroupId` / `GroupLabelResolver` path as normal subcategories.
 - `hexCoordUtils_CAI.lua` now owns shared original-capital lookup, relative-coordinate math, wrap-aware spoken hex geometry helpers, and reusable direction/path utilities (`directionString`, `stepListString`, `stepListFromPath`, `unitVector`, `cubeDistance`, `directionRank`, `plotsInRange`).
 - Plot tooltip relative coordinates should call `GetRelativeCoords(plot)` and format the returned `dx, dy` locally; world scanner item speech should call `GetDirectionString(cursorX, cursorY, targetX, targetY)` and speak direction text instead of tile distance.
+- Shared unit naming now lives in `inGameHelpers_CAI.lua`:
+  - `GetUnitFormationSuffix(unit)` is the single formation-suffix helper for live unit objects
+  - `GetUnitDataFormationSuffix(data)` is the matching helper for vanilla `UnitPanel` data tables
+  - `FormatOwnedUnitDisplayName(unit)` now auto-applies the shared formation suffix when the caller does not pass one explicitly
+  - `UnitFlagManager_CAI.lua`, `UnitPanel_CAI.lua`, `WorldScannerCategory_units.lua`, and `RevealAnnouncements_CAI.lua` should use those helpers instead of duplicating corps/army/fleet/armada logic
 - A future scanner category can mirror vanilla settler-lens water availability exactly by consuming `Map.GetContinentPlotsWaterAvailability()` and mapping its returned arrays to localized subcategories rather than reverse-engineering lens colors.
 
 ### UIScreenManager priority stack

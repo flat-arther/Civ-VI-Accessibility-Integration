@@ -5,106 +5,21 @@ RevealAnnouncements_CAI = RevealAnnouncements_CAI or {}
 
 local ANNOUNCE_DELAY_SECONDS = 0.5
 
-local CATEGORY_ORDER = {
-    "plot",
-    "unit",
-    "resource",
-    "city",
-    "district",
-    "improvement",
-}
-
-local QUEUE_REVEAL = "reveal"
-local QUEUE_HIDDEN = "hidden"
-local QUEUE_GONE = "gone"
-
-local EVENT_HIDDEN_ALLOWED = {
-    resource = true,
-}
-
-local SPECIAL_IMPROVEMENT_KIND_BARBARIAN_OUTPOST = "barbarianOutpost"
-local SPECIAL_IMPROVEMENT_KIND_TRIBAL_VILLAGE = "tribalVillage"
-
 local EVENT_BINDINGS = {}
 local m_isInitialized = false
 local m_lastEventTime = nil
-local m_queues = {}
+local m_firstRevealPlots = {}
+local m_nowVisiblePlots = {}
+local m_knownRevealedPlots = {}
 local m_previousVisibleUnits = {}
 local m_specialImprovementKinds = {}
-local m_recentlyVisiblePlots = {}
+
+-- ===========================================================================
+--  Local player and visibility
+-- ===========================================================================
 
 local function LogVisibilityError(message)
     print("RevealAnnouncements_CAI: " .. tostring(message))
-end
-
-local function CreateQueue()
-    local queue = {}
-    for _, categoryName in ipairs(CATEGORY_ORDER) do
-        queue[categoryName] = {}
-    end
-    return queue
-end
-
-local function EnsureQueues()
-    m_queues[QUEUE_REVEAL] = m_queues[QUEUE_REVEAL] or CreateQueue()
-    m_queues[QUEUE_HIDDEN] = m_queues[QUEUE_HIDDEN] or CreateQueue()
-    m_queues[QUEUE_GONE] = m_queues[QUEUE_GONE] or CreateQueue()
-end
-
-local function GetQueue(queueName)
-    EnsureQueues()
-    return m_queues[queueName]
-end
-
-local function ClearQueue(queue)
-    for _, categoryName in ipairs(CATEGORY_ORDER) do
-        queue[categoryName] = {}
-    end
-end
-
-local function TouchTimer()
-    m_lastEventTime = Automation.GetTime()
-end
-
-local function PushQueueLabel(queueName, categoryName, label)
-    if queueName == nil or categoryName == nil or label == nil or label == "" then
-        return
-    end
-
-    table.insert(GetQueue(queueName)[categoryName], label)
-end
-
-local function Enqueue(queueName, categoryName, label)
-    PushQueueLabel(queueName, categoryName, label)
-    TouchTimer()
-end
-
-local function LookupInfoRow(infoTable, index, infoLabel)
-    if index == nil or index < 0 then
-        return nil
-    end
-
-    local row = infoTable[index]
-    if row == nil then
-        LogVisibilityError("Missing " .. tostring(infoLabel) .. " row for index " .. tostring(index))
-        return nil
-    end
-
-    return row
-end
-
-local function LookupInfoName(infoTable, index, infoLabel)
-    local row = LookupInfoRow(infoTable, index, infoLabel)
-    if row == nil then
-        return nil
-    end
-
-    if row.Name == nil or row.Name == "" then
-        LogVisibilityError("Missing " .. tostring(infoLabel) .. " name for index " .. tostring(index))
-        return nil
-    end
-
-    return Locale.Lookup(row.Name)
 end
 
 local function GetObserverVisibility()
@@ -127,7 +42,11 @@ end
 
 local function GetLocalTeamID()
     local localPlayer = GetLocalPlayer()
-    return localPlayer and localPlayer.GetTeam and localPlayer:GetTeam() or -1
+    if localPlayer == nil then
+        return -1
+    end
+
+    return localPlayer:GetTeam()
 end
 
 local function IsPlotCurrentlyVisible(plot)
@@ -143,168 +62,242 @@ local function IsPlotCurrentlyVisible(plot)
     return visibility:IsVisible(plot:GetIndex())
 end
 
-local function MarkPlotVisibleByCoords(x, y)
-    if x == nil or y == nil then
-        return
+local function IsPlotCurrentlyRevealed(plot)
+    if plot == nil then
+        return false
     end
 
-    local plotIndex = Map.GetPlotIndex(x, y)
-    if plotIndex == nil or plotIndex < 0 then
-        return
+    local visibility = GetObserverVisibility()
+    if visibility == nil then
+        return true
     end
 
-    m_recentlyVisiblePlots[plotIndex] = true
+    return visibility:IsRevealed(plot)
 end
 
-local function CanAnnounceForeignPlayer(playerID)
+local function TouchTimer()
+    m_lastEventTime = Automation.GetTime()
+end
+
+local function ResetBufferedPlots()
+    m_firstRevealPlots = {}
+    m_nowVisiblePlots = {}
+end
+
+-- ===========================================================================
+--  Owner classification
+-- ===========================================================================
+
+local function ClassifyForeignOwner(playerID)
     local localPlayerID = Game.GetLocalPlayer()
     if playerID == nil or playerID == -1 or localPlayerID == nil or localPlayerID == -1 then
-        return false
+        return nil
     end
 
     if playerID == localPlayerID then
-        return false
+        return nil
     end
 
     local player = Players[playerID]
     if player == nil or not player:IsAlive() then
-        return false
-    end
-
-    if player:IsBarbarian() then
-        return true
-    end
-
-    local localTeamID = GetLocalTeamID()
-    local playerTeamID = player.GetTeam and player:GetTeam() or -1
-    if localTeamID ~= -1 and playerTeamID == localTeamID then
-        return false
-    end
-
-    local localPlayer = GetLocalPlayer()
-    local diplomacy = localPlayer and localPlayer.GetDiplomacy and localPlayer:GetDiplomacy() or nil
-    return diplomacy ~= nil and diplomacy:HasMet(playerID)
-end
-
-local function GetCityName(playerID, cityID)
-    local player = playerID ~= nil and Players[playerID] or nil
-    if player == nil then
-        LogVisibilityError("Missing player for city visibility event: " .. tostring(playerID))
         return nil
     end
 
-    local city = player:GetCities():FindID(cityID)
-    if city == nil then
-        LogVisibilityError("Missing city for visibility event: " .. tostring(playerID) .. ":" .. tostring(cityID))
+    local localTeamID = GetLocalTeamID()
+    local playerTeamID = player:GetTeam()
+    if localTeamID ~= -1 and playerTeamID == localTeamID then
+        return nil
+    end
+
+    if player:IsBarbarian() then
+        return "enemy"
+    end
+
+    local localPlayer = GetLocalPlayer()
+    local diplomacy = localPlayer ~= nil and localPlayer:GetDiplomacy() or nil
+    if diplomacy == nil or not diplomacy:HasMet(playerID) then
+        return nil
+    end
+
+    if diplomacy:IsAtWarWith(playerID) then
+        return "enemy"
+    end
+
+    return "other"
+end
+
+-- ===========================================================================
+--  Labels and aggregate sections
+-- ===========================================================================
+
+local function AppendLabel(list, label)
+    if label ~= nil and label ~= "" then
+        list[#list + 1] = label
+    end
+end
+
+local function GetInfoRow(infoTable, index, infoLabel)
+    if index == nil or index < 0 then
+        return nil
+    end
+
+    local row = infoTable[index]
+    if row == nil then
+        LogVisibilityError("Missing " .. tostring(infoLabel) .. " row for index " .. tostring(index))
+    end
+
+    return row
+end
+
+local function AggregateLabels(labels)
+    local counts = {}
+    local order = {}
+
+    for _, label in ipairs(labels or {}) do
+        if label ~= nil and label ~= "" then
+            if counts[label] == nil then
+                counts[label] = 0
+                order[#order + 1] = label
+            end
+            counts[label] = counts[label] + 1
+        end
+    end
+
+    local parts = {}
+    for _, label in ipairs(order) do
+        local count = counts[label]
+        parts[#parts + 1] = count > 1 and tostring(count) .. " " .. tostring(label) or tostring(label)
+    end
+
+    return parts
+end
+
+local function BuildLabeledSection(labelKey, labels)
+    local parts = AggregateLabels(labels)
+    if #parts == 0 then
+        return nil
+    end
+
+    return Locale.Lookup(labelKey, table.concat(parts, ", "))
+end
+
+-- ===========================================================================
+--  Plot payload collectors
+-- ===========================================================================
+
+local function GetImprovementTypeName(improvementType)
+    local row = GetInfoRow(GameInfo.Improvements, improvementType, "improvement")
+    return row ~= nil and row.ImprovementType or nil
+end
+
+local function IsTrackedGoneImprovementType(improvementTypeName)
+    return improvementTypeName == "IMPROVEMENT_BARBARIAN_CAMP"
+        or improvementTypeName == "IMPROVEMENT_GOODY_HUT"
+end
+
+local function IsSpecialImprovement(row)
+    return row.BarbarianCamp or row.Goody
+end
+
+local function ShouldSkipRevealPayload(plot)
+    if plot == nil then
+        return true
+    end
+
+    if plot:IsNaturalWonder() then
+        return true
+    end
+
+    local improvementTypeName = GetImprovementTypeName(plot:GetImprovementType())
+    return IsTrackedGoneImprovementType(improvementTypeName)
+end
+
+local function GetForeignCityLabel(plot)
+    local city = Cities.GetCityInPlot(plot:GetX(), plot:GetY())
+    if city == nil or ClassifyForeignOwner(city:GetOwner()) == nil then
         return nil
     end
 
     return Locale.Lookup(city:GetName())
 end
 
-local function GetDistrictName(playerID, districtID)
-    local player = playerID ~= nil and Players[playerID] or nil
-    if player == nil then
-        LogVisibilityError("Missing player for district visibility event: " .. tostring(playerID))
-        return nil
-    end
-
-    local district = player:GetDistricts():FindID(districtID)
-    if district == nil then
-        LogVisibilityError("Missing district for visibility event: " .. tostring(playerID) .. ":" .. tostring(districtID))
-        return nil
-    end
-
-    return LookupInfoName(GameInfo.Districts, district:GetType(), "district")
-end
-
-local function GetSpecialImprovementKind(improvementType)
-    local row = LookupInfoRow(GameInfo.Improvements, improvementType, "improvement")
+local function GetVisibleResourceLabel(plot)
+    local resourceType = plot:GetResourceType()
+    local row = GetInfoRow(GameInfo.Resources, resourceType, "resource")
     if row == nil then
         return nil
     end
 
-    if row.BarbarianCamp == true or row.BarbarianCamp == 1 or row.ImprovementType == "IMPROVEMENT_BARBARIAN_CAMP" then
-        return SPECIAL_IMPROVEMENT_KIND_BARBARIAN_OUTPOST
+    local localPlayer = GetLocalPlayer()
+    local resources = localPlayer ~= nil and localPlayer:GetResources() or nil
+    if resources ~= nil and not resources:IsResourceVisible(row.Hash) then
+        return nil
     end
 
-    if row.Goody == true or row.Goody == 1 or row.ImprovementType == "IMPROVEMENT_GOODY_HUT" then
-        return SPECIAL_IMPROVEMENT_KIND_TRIBAL_VILLAGE
-    end
-
-    return nil
+    return Locale.Lookup(row.Name)
 end
 
-local function GetSpecialImprovementLabel(kind)
-    if kind == SPECIAL_IMPROVEMENT_KIND_BARBARIAN_OUTPOST then
-        return Locale.Lookup("LOC_IMPROVEMENT_BARBARIAN_CAMP_NAME")
-    end
-    if kind == SPECIAL_IMPROVEMENT_KIND_TRIBAL_VILLAGE then
-        return Locale.Lookup("LOC_IMPROVEMENT_GOODY_HUT_NAME")
+local function GetForeignDistrictLabel(plot)
+    if plot:IsCity() or plot:IsInternalOnlyDistrict() then
+        return nil
     end
 
-    return nil
+    local districtType = plot:GetDistrictType()
+    local row = GetInfoRow(GameInfo.Districts, districtType, "district")
+    if row == nil or row.DistrictType == "DISTRICT_CITY_CENTER" then
+        return nil
+    end
+
+    local district = CityManager.GetDistrictAt(plot:GetX(), plot:GetY())
+    local ownerID = district ~= nil and district:GetOwner() or nil
+    if ownerID == nil or ownerID == -1 then
+        ownerID = plot:GetOwner()
+    end
+
+    if ClassifyForeignOwner(ownerID) == nil then
+        return nil
+    end
+
+    return Locale.Lookup(row.Name)
 end
 
-local function QueueEventDrivenVisibility(categoryName, label, visibilityType)
-    if label == nil or label == "" then
-        return
+local function GetForeignImprovementLabel(plot)
+    local improvementType = plot:GetImprovementType()
+    local row = GetInfoRow(GameInfo.Improvements, improvementType, "improvement")
+    if row == nil or IsSpecialImprovement(row) then
+        return nil
     end
 
-    if visibilityType == RevealedState.VISIBLE then
-        Enqueue(QUEUE_REVEAL, categoryName, label)
-        return
+    if ClassifyForeignOwner(plot:GetImprovementOwner()) == nil then
+        return nil
     end
 
-    if visibilityType == RevealedState.HIDDEN and EVENT_HIDDEN_ALLOWED[categoryName] then
-        Enqueue(QUEUE_HIDDEN, categoryName, label)
-    end
+    return Locale.Lookup(row.Name)
 end
+
+-- ===========================================================================
+--  Snapshot builders
+-- ===========================================================================
 
 local function BuildVisibleForeignUnitSnapshot()
     local visibility = GetObserverVisibility()
     local current = {}
-    local scanPlayers = {}
-    local seenPlayers = {}
 
-    local function AddScanPlayer(player)
-        if player == nil or not player:IsAlive() then
-            return
-        end
-
+    for _, player in ipairs(PlayerManager.GetAlive()) do
         local playerID = player:GetID()
-        if playerID == nil or seenPlayers[playerID] then
-            return
-        end
-
-        seenPlayers[playerID] = true
-        scanPlayers[#scanPlayers + 1] = player
-    end
-
-    for _, player in ipairs(PlayerManager.GetAlive() or {}) do
-        AddScanPlayer(player)
-    end
-
-    for _, player in ipairs(Players) do
-        if player ~= nil and player:IsBarbarian() then
-            AddScanPlayer(player)
-        end
-    end
-
-    for _, player in ipairs(scanPlayers) do
-        local playerID = player:GetID()
-        if CanAnnounceForeignPlayer(playerID) then
-            local units = player:GetUnits()
-            if units ~= nil then
-                for _, unit in units:Members() do
-                    if unit ~= nil and (visibility == nil or visibility:IsUnitVisible(unit)) then
-                        local plotIndex = unit:GetPlotId()
-                        local plot = plotIndex ~= nil and plotIndex >= 0 and Map.GetPlotByIndex(plotIndex) or nil
-                        if plot ~= nil and IsPlotCurrentlyVisible(plot) then
-                            current[tostring(playerID) .. ":" .. tostring(unit:GetID())] = {
-                                Label = FormatOwnedUnitDisplayName(unit),
-                            }
-                        end
+        local bucket = ClassifyForeignOwner(playerID)
+        local units = bucket ~= nil and player:GetUnits() or nil
+        if units ~= nil then
+            for _, unit in units:Members() do
+                if visibility == nil or visibility:IsUnitVisible(unit) then
+                    local plot = Map.GetPlot(unit:GetX(), unit:GetY())
+                    if plot ~= nil and IsPlotCurrentlyVisible(plot) then
+                        current[tostring(playerID) .. ":" .. tostring(unit:GetID())] = {
+                            PlayerID = playerID,
+                            UnitID = unit:GetID(),
+                            Bucket = bucket,
+                            Label = FormatOwnedUnitDisplayName(unit),
+                        }
                     end
                 end
             end
@@ -314,222 +307,281 @@ local function BuildVisibleForeignUnitSnapshot()
     return current
 end
 
-local function BootstrapVisibleUnitSnapshot()
-    m_previousVisibleUnits = BuildVisibleForeignUnitSnapshot()
-end
+local function BootstrapKnownRevealedPlots()
+    m_knownRevealedPlots = {}
 
-local function BootstrapSpecialImprovementSnapshot()
-    m_specialImprovementKinds = {}
-
-    local plotCount = Map.GetPlotCount and Map.GetPlotCount() or 0
+    local plotCount = Map.GetPlotCount()
     for plotIndex = 0, plotCount - 1 do
         local plot = Map.GetPlotByIndex(plotIndex)
-        if plot ~= nil and IsPlotCurrentlyVisible(plot) then
-            m_specialImprovementKinds[plotIndex] = GetSpecialImprovementKind(plot:GetImprovementType())
+        if plot ~= nil and IsPlotCurrentlyRevealed(plot) then
+            m_knownRevealedPlots[plotIndex] = true
         end
     end
 end
 
-local function BuildCategoryText(categoryName, labels)
-    if labels == nil or #labels == 0 then
-        return nil
-    end
+local function BootstrapSpecialImprovementSnapshot(visibleOnly)
+    m_specialImprovementKinds = visibleOnly and m_specialImprovementKinds or {}
 
-    if categoryName == "plot" then
-        return Locale.Lookup("LOC_CAI_REVEAL_TILES", #labels)
-    end
-
-    local counts = {}
-    local order = {}
-    for _, label in ipairs(labels) do
-        if counts[label] == nil then
-            counts[label] = 0
-            table.insert(order, label)
-        end
-        counts[label] = counts[label] + 1
-    end
-
-    local parts = {}
-    for _, label in ipairs(order) do
-        if counts[label] > 1 then
-            table.insert(parts, tostring(counts[label]) .. " " .. tostring(label))
-        else
-            table.insert(parts, tostring(label))
-        end
-    end
-
-    return table.concat(parts, ", ")
-end
-
-local function BuildQueueText(queueName)
-    local queue = GetQueue(queueName)
-    local parts = {}
-    for _, categoryName in ipairs(CATEGORY_ORDER) do
-        local text = BuildCategoryText(categoryName, queue[categoryName])
-        if text ~= nil and text ~= "" then
-            table.insert(parts, text)
-        end
-    end
-
-    if #parts == 0 then
-        return nil
-    end
-
-    return table.concat(parts, ", ")
-end
-
-local function ApplyUnitSnapshotDiff()
-    local currentVisibleUnits = BuildVisibleForeignUnitSnapshot()
-
-    for key, current in pairs(currentVisibleUnits) do
-        if m_previousVisibleUnits[key] == nil and current.Label ~= nil and current.Label ~= "" then
-            PushQueueLabel(QUEUE_REVEAL, "unit", current.Label)
-        end
-    end
-
-    for key, previous in pairs(m_previousVisibleUnits) do
-        if currentVisibleUnits[key] == nil and previous.Label ~= nil and previous.Label ~= "" then
-            PushQueueLabel(QUEUE_HIDDEN, "unit", previous.Label)
-        end
-    end
-
-    m_previousVisibleUnits = currentVisibleUnits
-end
-
-local function ApplyGoneSnapshotDiff()
-    for plotIndex in pairs(m_recentlyVisiblePlots) do
+    local plotCount = Map.GetPlotCount()
+    for plotIndex = 0, plotCount - 1 do
         local plot = Map.GetPlotByIndex(plotIndex)
-        if plot ~= nil and IsPlotCurrentlyVisible(plot) then
-            local nowKind = GetSpecialImprovementKind(plot:GetImprovementType())
-            local previousKind = m_specialImprovementKinds[plotIndex]
-            if previousKind ~= nil and previousKind ~= nowKind then
-                local label = GetSpecialImprovementLabel(previousKind)
-                if label ~= nil and label ~= "" then
-                    PushQueueLabel(QUEUE_GONE, "improvement", label)
-                end
-            end
-            m_specialImprovementKinds[plotIndex] = nowKind
+        local shouldRead = plot ~= nil
+            and ((visibleOnly and IsPlotCurrentlyVisible(plot)) or (not visibleOnly and IsPlotCurrentlyRevealed(plot)))
+
+        if shouldRead then
+            local improvementTypeName = GetImprovementTypeName(plot:GetImprovementType())
+            m_specialImprovementKinds[plotIndex] =
+                IsTrackedGoneImprovementType(improvementTypeName) and improvementTypeName or nil
         end
     end
-
-    m_recentlyVisiblePlots = {}
 end
 
-local function ApplySnapshotDiffs()
-    ApplyUnitSnapshotDiff()
-    ApplyGoneSnapshotDiff()
-end
+-- ===========================================================================
+--  Event state recording
+-- ===========================================================================
 
-local function FlushAllQueues()
-    ApplySnapshotDiffs()
-
-    local revealText = BuildQueueText(QUEUE_REVEAL)
-    local hiddenText = BuildQueueText(QUEUE_HIDDEN)
-    local goneText = BuildQueueText(QUEUE_GONE)
-    local lines = {}
-
-    if revealText ~= nil and revealText ~= "" then
-        table.insert(lines, Locale.Lookup("LOC_CAI_REVEAL_QUEUE_REVEALED", revealText))
-    end
-    if hiddenText ~= nil and hiddenText ~= "" then
-        table.insert(lines, Locale.Lookup("LOC_CAI_REVEAL_QUEUE_HIDDEN", hiddenText))
-    end
-    if goneText ~= nil and goneText ~= "" then
-        table.insert(lines, Locale.Lookup("LOC_CAI_REVEAL_QUEUE_GONE", goneText))
+local function RecordPlotState(plot, shouldTrackVisible)
+    if plot == nil then
+        return
     end
 
-    ClearQueue(GetQueue(QUEUE_REVEAL))
-    ClearQueue(GetQueue(QUEUE_HIDDEN))
-    ClearQueue(GetQueue(QUEUE_GONE))
-    m_lastEventTime = nil
+    local plotIndex = plot:GetIndex()
+    if plotIndex == nil or plotIndex < 0 then
+        return
+    end
 
-    if #lines > 0 then
-        Speak(table.concat(lines, "[NEWLINE]"))
+    if not m_knownRevealedPlots[plotIndex] and IsPlotCurrentlyRevealed(plot) then
+        m_knownRevealedPlots[plotIndex] = true
+        m_firstRevealPlots[plotIndex] = true
+    end
+
+    if shouldTrackVisible and IsPlotCurrentlyVisible(plot) then
+        m_nowVisiblePlots[plotIndex] = true
     end
 end
 
 local function OnPlotVisibilityChanged(x, y, visibilityType)
     TouchTimer()
 
-    if visibilityType == RevealedState.VISIBLE then
-        MarkPlotVisibleByCoords(x, y)
-        Enqueue(QUEUE_REVEAL, "plot", Locale.Lookup("LOC_CAI_REVEAL_PLOT"))
-    end
-end
-
-local function OnUnitVisibilityChanged(playerID, unitID, visibilityType)
-    TouchTimer()
-end
-
-local function OnImprovementVisibilityChanged(x, y, improvementType, visibilityType)
-    TouchTimer()
-
-    if visibilityType == RevealedState.VISIBLE then
-        MarkPlotVisibleByCoords(x, y)
-    end
-
-    local label = LookupInfoName(GameInfo.Improvements, improvementType, "improvement")
-    if label == nil then
+    if visibilityType == RevealedState.HIDDEN then
         return
     end
 
-    QueueEventDrivenVisibility("improvement", label, visibilityType)
+    RecordPlotState(Map.GetPlot(x, y), true)
 end
 
-local function OnResourceVisibilityChanged(x, y, resourceType, visibilityType)
+local function OnUnitVisibilityChanged()
     TouchTimer()
-
-    if visibilityType == RevealedState.VISIBLE then
-        MarkPlotVisibleByCoords(x, y)
-    end
-
-    local label = LookupInfoName(GameInfo.Resources, resourceType, "resource")
-    if label == nil then
-        return
-    end
-
-    QueueEventDrivenVisibility("resource", label, visibilityType)
 end
 
-local function OnCityVisibilityChanged(playerID, cityID, visibilityType)
+local function OnImprovementVisibilityChanged()
     TouchTimer()
-
-    local label = GetCityName(playerID, cityID)
-    if label == nil then
-        return
-    end
-
-    QueueEventDrivenVisibility("city", label, visibilityType)
 end
 
-local function OnDistrictVisibilityChanged(playerID, districtID, visibilityType)
+local function OnResourceVisibilityChanged()
     TouchTimer()
+end
 
-    local label = GetDistrictName(playerID, districtID)
-    if label == nil then
-        return
+local function OnCityVisibilityChanged()
+    TouchTimer()
+end
+
+local function OnDistrictVisibilityChanged()
+    TouchTimer()
+end
+
+local function ResyncTurnStartSnapshots()
+    local ok, err = pcall(function()
+        BootstrapKnownRevealedPlots()
+        m_previousVisibleUnits = BuildVisibleForeignUnitSnapshot()
+        BootstrapSpecialImprovementSnapshot(true)
+        ResetBufferedPlots()
+        m_lastEventTime = nil
+    end)
+    if not ok then
+        LogVisibilityError("Turn-start snapshot reset failed: " .. tostring(err))
     end
-
-    QueueEventDrivenVisibility("district", label, visibilityType)
 end
 
 EVENT_BINDINGS = {
-    { Event = Events.PlotVisibilityChanged,        Handler = OnPlotVisibilityChanged },
-    { Event = Events.UnitVisibilityChanged,        Handler = OnUnitVisibilityChanged },
+    { Event = Events.PlotVisibilityChanged, Handler = OnPlotVisibilityChanged },
+    { Event = Events.UnitVisibilityChanged, Handler = OnUnitVisibilityChanged },
     { Event = Events.ImprovementVisibilityChanged, Handler = OnImprovementVisibilityChanged },
-    { Event = Events.ResourceVisibilityChanged,    Handler = OnResourceVisibilityChanged },
-    { Event = Events.CityVisibilityChanged,        Handler = OnCityVisibilityChanged },
-    { Event = Events.DistrictVisibilityChanged,    Handler = OnDistrictVisibilityChanged },
+    { Event = Events.ResourceVisibilityChanged, Handler = OnResourceVisibilityChanged },
+    { Event = Events.CityVisibilityChanged, Handler = OnCityVisibilityChanged },
+    { Event = Events.DistrictVisibilityChanged, Handler = OnDistrictVisibilityChanged },
+    { Event = Events.LocalPlayerTurnBegin, Handler = ResyncTurnStartSnapshots },
 }
+
+-- ===========================================================================
+--  Flush and speech
+-- ===========================================================================
+
+local function CollectRevealPayload()
+    local enemyUnits, otherUnits = {}, {}
+    local enemyHidden, otherHidden = {}, {}
+    local cities, resources, districts, improvements = {}, {}, {}, {}
+    local goneOutposts, goneVillages = 0, 0
+    local revealedCount = 0
+
+    for plotIndex in pairs(m_firstRevealPlots) do
+        local plot = Map.GetPlotByIndex(plotIndex)
+        if plot ~= nil then
+            revealedCount = revealedCount + 1
+
+            if not ShouldSkipRevealPayload(plot) then
+                AppendLabel(cities, GetForeignCityLabel(plot))
+                AppendLabel(resources, GetVisibleResourceLabel(plot))
+                AppendLabel(districts, GetForeignDistrictLabel(plot))
+                AppendLabel(improvements, GetForeignImprovementLabel(plot))
+            end
+        end
+    end
+
+    local currentVisibleUnits = BuildVisibleForeignUnitSnapshot()
+    for key, current in pairs(currentVisibleUnits) do
+        if m_previousVisibleUnits[key] == nil and current.Label ~= nil and current.Label ~= "" then
+            if current.Bucket == "enemy" then
+                enemyUnits[#enemyUnits + 1] = current.Label
+            else
+                otherUnits[#otherUnits + 1] = current.Label
+            end
+        end
+    end
+
+    for key, previous in pairs(m_previousVisibleUnits) do
+        if currentVisibleUnits[key] == nil and previous.Label ~= nil and previous.Label ~= "" then
+            local owner = Players[previous.PlayerID]
+            local units = owner ~= nil and owner:GetUnits() or nil
+            local unitStillExists = units ~= nil and units:FindID(previous.UnitID) ~= nil
+            if unitStillExists then
+                if previous.Bucket == "enemy" then
+                    enemyHidden[#enemyHidden + 1] = previous.Label
+                else
+                    otherHidden[#otherHidden + 1] = previous.Label
+                end
+            end
+        end
+    end
+    m_previousVisibleUnits = currentVisibleUnits
+
+    for plotIndex in pairs(m_nowVisiblePlots) do
+        local plot = Map.GetPlotByIndex(plotIndex)
+        if plot ~= nil and IsPlotCurrentlyVisible(plot) then
+            local nowImprovementTypeName = GetImprovementTypeName(plot:GetImprovementType())
+            if not IsTrackedGoneImprovementType(nowImprovementTypeName) then
+                nowImprovementTypeName = nil
+            end
+
+            local previousImprovementTypeName = m_specialImprovementKinds[plotIndex]
+            if not m_firstRevealPlots[plotIndex]
+                and previousImprovementTypeName ~= nil
+                and previousImprovementTypeName ~= nowImprovementTypeName then
+                if previousImprovementTypeName == "IMPROVEMENT_BARBARIAN_CAMP" then
+                    goneOutposts = goneOutposts + 1
+                elseif previousImprovementTypeName == "IMPROVEMENT_GOODY_HUT" then
+                    goneVillages = goneVillages + 1
+                end
+            end
+
+            m_specialImprovementKinds[plotIndex] = nowImprovementTypeName
+        end
+    end
+
+    local revealSections = {}
+    AppendLabel(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_ENEMY", enemyUnits))
+    AppendLabel(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_UNITS", otherUnits))
+    AppendLabel(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_CITIES", cities))
+    AppendLabel(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_RESOURCES", resources))
+    AppendLabel(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_DISTRICTS", districts))
+    AppendLabel(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_IMPROVEMENTS", improvements))
+
+    local hiddenSections = {}
+    AppendLabel(hiddenSections, BuildLabeledSection("LOC_CAI_REVEAL_ENEMY", enemyHidden))
+    AppendLabel(hiddenSections, BuildLabeledSection("LOC_CAI_REVEAL_UNITS", otherHidden))
+
+    local goneSections = {}
+    if goneOutposts > 0 then
+        AppendLabel(goneSections, Locale.Lookup("LOC_CAI_GONE_OUTPOST_PART", goneOutposts))
+    end
+    if goneVillages > 0 then
+        AppendLabel(goneSections, Locale.Lookup("LOC_CAI_GONE_TRIBAL_VILLAGE_PART", goneVillages))
+    end
+
+    return {
+        RevealedCount = revealedCount,
+        RevealSections = revealSections,
+        HiddenSections = hiddenSections,
+        GoneSections = goneSections,
+    }
+end
+
+local function BuildRevealLine(payload)
+    if payload == nil then
+        return nil
+    end
+
+    local revealSections = payload.RevealSections or {}
+    if payload.RevealedCount > 0 then
+        local header = Locale.Lookup("LOC_CAI_REVEAL_COUNT", payload.RevealedCount)
+        return #revealSections > 0 and header .. ": " .. table.concat(revealSections, ", ") or header
+    end
+
+    if #revealSections > 0 then
+        return Locale.Lookup("LOC_CAI_REVEAL_HEADER") .. ": " .. table.concat(revealSections, ", ")
+    end
+
+    return nil
+end
+
+local function BuildHiddenLine(payload)
+    if payload == nil or payload.HiddenSections == nil or #payload.HiddenSections == 0 then
+        return nil
+    end
+
+    return Locale.Lookup("LOC_CAI_HIDDEN_HEADER") .. ": " .. table.concat(payload.HiddenSections, ", ")
+end
+
+local function BuildGoneLine(payload)
+    if payload == nil or payload.GoneSections == nil or #payload.GoneSections == 0 then
+        return nil
+    end
+
+    return Locale.Lookup("LOC_CAI_GONE_HEADER")
+        .. ": "
+        .. table.concat(payload.GoneSections, Locale.Lookup("LOC_CAI_GONE_AND"))
+end
+
+local function FlushAnnouncements()
+    local payload = CollectRevealPayload()
+    local lines = {}
+
+    AppendLabel(lines, BuildRevealLine(payload))
+    AppendLabel(lines, BuildHiddenLine(payload))
+    AppendLabel(lines, BuildGoneLine(payload))
+
+    ResetBufferedPlots()
+    m_lastEventTime = nil
+
+    for _, line in ipairs(lines) do
+        Speak(ProcessIcons(line))
+    end
+end
+
+-- ===========================================================================
+--  Public API
+-- ===========================================================================
 
 function RevealAnnouncements_CAI.Initialize()
     if m_isInitialized then
         return
     end
 
-    EnsureQueues()
-    BootstrapVisibleUnitSnapshot()
-    BootstrapSpecialImprovementSnapshot()
+    BootstrapKnownRevealedPlots()
+    m_previousVisibleUnits = BuildVisibleForeignUnitSnapshot()
+    BootstrapSpecialImprovementSnapshot(false)
+    ResetBufferedPlots()
+    m_lastEventTime = nil
 
     for _, binding in ipairs(EVENT_BINDINGS) do
         binding.Event.Add(binding.Handler)
@@ -539,13 +591,10 @@ function RevealAnnouncements_CAI.Initialize()
 end
 
 function RevealAnnouncements_CAI.Clear()
-    EnsureQueues()
-    ClearQueue(GetQueue(QUEUE_REVEAL))
-    ClearQueue(GetQueue(QUEUE_HIDDEN))
-    ClearQueue(GetQueue(QUEUE_GONE))
+    ResetBufferedPlots()
+    m_knownRevealedPlots = {}
     m_previousVisibleUnits = {}
     m_specialImprovementKinds = {}
-    m_recentlyVisiblePlots = {}
     m_lastEventTime = nil
 end
 
@@ -570,6 +619,6 @@ function RevealAnnouncements_CAI.UpdateVisibility()
 
     local now = Automation.GetTime()
     if (now - m_lastEventTime) > ANNOUNCE_DELAY_SECONDS then
-        FlushAllQueues()
+        FlushAnnouncements()
     end
 end

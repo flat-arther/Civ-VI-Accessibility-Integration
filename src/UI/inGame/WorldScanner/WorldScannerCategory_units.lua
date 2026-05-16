@@ -60,32 +60,6 @@ CAIWorldScannerCategory_MyUnits = CreateUnitsCategory(CATEGORY_IDS.My, "LOC_CAI_
 CAIWorldScannerCategory_NeutralUnits = CreateUnitsCategory(CATEGORY_IDS.Neutral, "LOC_CAI_WORLD_SCANNER_CATEGORY_NEUTRAL_UNITS")
 CAIWorldScannerCategory_EnemyUnits = CreateUnitsCategory(CATEGORY_IDS.Enemy, "LOC_CAI_WORLD_SCANNER_CATEGORY_ENEMY_UNITS")
 
-local function GetUnitScannerFormationSuffix(unit)
-    if unit == nil then
-        return nil
-    end
-
-    local unitInfo = GameInfo.Units[unit:GetUnitType()]
-    if unitInfo == nil then
-        return nil
-    end
-
-    local formation = unit:GetMilitaryFormation()
-    if formation == MilitaryFormationTypes.CORPS_FORMATION then
-        if unitInfo.Domain == "DOMAIN_SEA" then
-            return Locale.Lookup("LOC_UNITFLAG_FLEET_SUFFIX")
-        end
-        return Locale.Lookup("LOC_UNITFLAG_CORPS_SUFFIX")
-    elseif formation == MilitaryFormationTypes.ARMY_FORMATION then
-        if unitInfo.Domain == "DOMAIN_SEA" then
-            return Locale.Lookup("LOC_UNITFLAG_ARMADA_SUFFIX")
-        end
-        return Locale.Lookup("LOC_UNITFLAG_ARMY_SUFFIX")
-    end
-
-    return nil
-end
-
 local function IsReligiousCivilian(unitInfo)
     if unitInfo == nil then
         return false
@@ -232,7 +206,7 @@ local function BuildUnitScannerItems(context)
                         local unitType = unit:GetUnitType()
                         local unitInfo = GameInfo.Units[unitType]
                         if unitInfo ~= nil then
-                            local unitLabel = FormatOwnedUnitDisplayName(unit, GetUnitScannerFormationSuffix(unit)) or unitInfo.Name
+                            local unitLabel = FormatOwnedUnitDisplayName(unit) or Locale.Lookup(unitInfo.Name)
                             local categoryId = GetUnitCategoryId(context, ownerID)
                             local subCategoryId = GetUnitSubCategoryId(player, unitInfo)
                             out[#out + 1] = {

@@ -148,38 +148,21 @@ function ResolveUnitData(unitID, playerID)
 end
 
 --# Unit info helpers
-function GetUnitFormationSuffix(data)
-    if data == nil or data.UnitType == nil or data.UnitType == -1 then
-        return nil
-    end
-
-    local unitInfo = GameInfo.Units[data.UnitType]
-    if unitInfo == nil then
-        return nil
-    end
-
-    if data.MilitaryFormation == MilitaryFormationTypes.CORPS_FORMATION then
-        if unitInfo.Domain == "DOMAIN_SEA" then
-            return Locale.Lookup("LOC_HUD_UNIT_PANEL_FLEET_SUFFIX")
-        end
-        return Locale.Lookup("LOC_HUD_UNIT_PANEL_CORPS_SUFFIX")
-    elseif data.MilitaryFormation == MilitaryFormationTypes.ARMY_FORMATION then
-        if unitInfo.Domain == "DOMAIN_SEA" then
-            return Locale.Lookup("LOC_HUD_UNIT_PANEL_ARMADA_SUFFIX")
-        end
-        return Locale.Lookup("LOC_HUD_UNIT_PANEL_ARMY_SUFFIX")
-    end
-
-    return nil
-end
-
 function GetUnitInfoName(data, unit)
+    if unit ~= nil then
+        return FormatOwnedUnitDisplayName(unit)
+    end
+
     if data == nil then
         return nil
     end
 
-    local formationSuffix = GetUnitFormationSuffix(data)
-    return FormatOwnedUnitDisplayName(unit, formationSuffix)
+    local unitInfo = data.UnitType ~= nil and GameInfo.Units[data.UnitType] or nil
+    if unitInfo == nil or unitInfo.Name == nil then
+        return nil
+    end
+
+    return FormatOwnedName(nil, Locale.Lookup(unitInfo.Name), GetUnitDataFormationSuffix(data))
 end
 
 function GetUnitInfoCoords(unit)
@@ -289,7 +272,7 @@ function GetUnitInfoFormation(data)
     end
 
     return JoinUnitInfo({
-        GetUnitFormationSuffix(data),
+        GetUnitDataFormationSuffix(data),
         Locale.Lookup("LOC_HUD_UNIT_PANEL_MOVEMENT") ..
         ", " ..
         tostring(data.FormationMoves or 0) ..

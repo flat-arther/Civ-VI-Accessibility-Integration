@@ -259,15 +259,14 @@ function AddMakesObsoleteNode(mgr, parent, obsoleteNames)
 end
 
 --#Unit info helpers
----Returns the unit's owner civ prefix, as an adjective
----@param unit Unit
+---Returns the player's civ prefix, as an adjective.
+---@param playerID number|nil
 ---@return string|nil
-function GetUnitOwnershipPrefix(unit)
-    if unit == nil then
+function GetPlayerOwnershipPrefix(playerID)
+    if playerID == nil or playerID == -1 then
         return nil
     end
 
-    local playerID = unit:GetOwner()
     local playerConfig = PlayerConfigurations[playerID]
     if playerConfig ~= nil then
         local civName = playerConfig:GetCivilizationShortDescription()
@@ -282,6 +281,84 @@ function GetUnitOwnershipPrefix(unit)
     return Locale.Lookup("LOC_TOOLTIP_PLAYER_ID", playerID)
 end
 
+---Returns the unit's owner civ prefix, as an adjective.
+---@param unit Unit
+---@return string|nil
+function GetUnitOwnershipPrefix(unit)
+    if unit == nil then
+        return nil
+    end
+
+    return GetPlayerOwnershipPrefix(unit:GetOwner())
+end
+
+local function GetUnitFormationSuffixFromDomainAndFormation(domain, formation)
+    if formation == MilitaryFormationTypes.CORPS_FORMATION then
+        if domain == "DOMAIN_SEA" then
+            return Locale.Lookup("LOC_UNITFLAG_FLEET_SUFFIX")
+        end
+        return Locale.Lookup("LOC_UNITFLAG_CORPS_SUFFIX")
+    end
+
+    if formation == MilitaryFormationTypes.ARMY_FORMATION then
+        if domain == "DOMAIN_SEA" then
+            return Locale.Lookup("LOC_UNITFLAG_ARMADA_SUFFIX")
+        end
+        return Locale.Lookup("LOC_UNITFLAG_ARMY_SUFFIX")
+    end
+
+    return nil
+end
+
+---@param data table|nil
+---@return string|nil
+function GetUnitDataFormationSuffix(data)
+    if data == nil or data.UnitType == nil or data.UnitType == -1 then
+        return nil
+    end
+
+    local unitInfo = GameInfo.Units[data.UnitType]
+    if unitInfo == nil then
+        return nil
+    end
+
+    return GetUnitFormationSuffixFromDomainAndFormation(unitInfo.Domain, data.MilitaryFormation)
+end
+
+---@param unit Unit|nil
+---@return string|nil
+function GetUnitFormationSuffix(unit)
+    if unit == nil then
+        return nil
+    end
+
+    local unitInfo = GameInfo.Units[unit:GetUnitType()]
+    if unitInfo == nil then
+        return nil
+    end
+
+    return GetUnitFormationSuffixFromDomainAndFormation(unitInfo.Domain, unit:GetMilitaryFormation())
+end
+
+---@param ownerPrefix string|nil
+---@param name string|nil
+---@param suffix string|nil
+---@return string|nil
+function FormatOwnedName(ownerPrefix, name, suffix)
+    if name == nil or name == "" then
+        return nil
+    end
+
+    local formatted = Locale.Lookup("LOC_CAI_UNIT_FLAG_NAME_PATTERN", ownerPrefix or "", name, suffix or "")
+    local normalized = NormalizeFormattedText(formatted)
+    normalized = string.gsub(normalized, "^%s*(.-)%s*$", "%1")
+    if normalized == "" then
+        return nil
+    end
+
+    return normalized
+end
+
 ---Formats a unit display name as owner adjective + localized unit name + optional formation suffix.
 ---Uses a CAI localization pattern so translators can reorder the pieces by language.
 ---@param unit Unit
@@ -293,8 +370,22 @@ function FormatOwnedUnitDisplayName(unit, formationSuffix)
     end
 
     local owner = GetUnitOwnershipPrefix(unit)
-    local name = Locale.Lookup(unit:GetName())
-    local suffix = formationSuffix or ""
-    local formatted = Locale.Lookup("LOC_CAI_UNIT_FLAG_NAME_PATTERN", owner, name, suffix)
-    return NormalizeFormattedText(formatted)
+    local unitName = unit:GetName()
+    local name = unitName ~= nil and unitName ~= "" and Locale.Lookup(unitName) or nil
+    if name == nil or name == "" then
+        local unitInfo = GameInfo.Units[unit:GetUnitType()]
+        if unitInfo ~= nil and unitInfo.Name ~= nil and unitInfo.Name ~= "" then
+            name = Locale.Lookup(unitInfo.Name)
+        end
+    end
+
+    return FormatOwnedName(owner, name, formationSuffix or GetUnitFormationSuffix(unit))
+end
+
+---@param playerID number|nil
+---@param cityName string|nil
+---@return string|nil
+function FormatOwnedCityDisplayName(playerID, cityName)
+    local localizedName = cityName ~= nil and cityName ~= "" and Locale.Lookup(cityName) or nil
+    return FormatOwnedName(GetPlayerOwnershipPrefix(playerID), localizedName)
 end

@@ -17,38 +17,12 @@ local function AppendUnitFlagInfo(parts, value)
     end
 end
 
-local function GetUnitFlagFormationSuffix(unit)
-    if unit == nil then
-        return nil
-    end
-
-    local unitInfo = GameInfo.Units[unit:GetUnitType()]
-    if unitInfo == nil then
-        return nil
-    end
-
-    local formation = unit:GetMilitaryFormation()
-    if formation == MilitaryFormationTypes.CORPS_FORMATION then
-        if unitInfo.Domain == "DOMAIN_SEA" then
-            return Locale.Lookup("LOC_UNITFLAG_FLEET_SUFFIX")
-        end
-        return Locale.Lookup("LOC_UNITFLAG_CORPS_SUFFIX")
-    elseif formation == MilitaryFormationTypes.ARMY_FORMATION then
-        if unitInfo.Domain == "DOMAIN_SEA" then
-            return Locale.Lookup("LOC_UNITFLAG_ARMADA_SUFFIX")
-        end
-        return Locale.Lookup("LOC_UNITFLAG_ARMY_SUFFIX")
-    end
-
-    return nil
-end
-
 local function FormatUnitFlagDisplayName(unit)
     if unit == nil then
         return nil
     end
 
-    return FormatOwnedUnitDisplayName(unit, GetUnitFlagFormationSuffix(unit))
+    return FormatOwnedUnitDisplayName(unit)
 end
 
 local function GetUnitFlagHealth(unit)
@@ -168,7 +142,7 @@ info.UnitFlagInfo = {
         return FormatUnitFlagDisplayName(unit)
     end,
     formationSuffix = function(unit)
-        return GetUnitFlagFormationSuffix(unit)
+        return GetUnitFormationSuffix(unit)
     end,
     healthPercent = function(unit)
         return GetUnitFlagHealth(unit)

@@ -180,6 +180,45 @@
     <Row Tag="LOC_CAI_REVEAL_QUEUE_GONE" Language="en_US">
       <Text>{1_Text} gone</Text>
     </Row>
+    <Row Tag="LOC_CAI_REVEAL_HEADER" Language="en_US">
+      <Text>Revealed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_HIDDEN_HEADER" Language="en_US">
+      <Text>Hidden</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GONE_HEADER" Language="en_US">
+      <Text>Gone</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REVEAL_COUNT" Language="en_US">
+      <Text>{1_Count : plural 1?{1_Count} tile revealed; other?{1_Count} tiles revealed;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REVEAL_ENEMY" Language="en_US">
+      <Text>Enemy: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REVEAL_UNITS" Language="en_US">
+      <Text>Units: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REVEAL_CITIES" Language="en_US">
+      <Text>Cities: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REVEAL_RESOURCES" Language="en_US">
+      <Text>Resources: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REVEAL_DISTRICTS" Language="en_US">
+      <Text>Districts: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REVEAL_IMPROVEMENTS" Language="en_US">
+      <Text>Improvements: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GONE_OUTPOST_PART" Language="en_US">
+      <Text>{1_Count : plural 1?{1_Count} barbarian outpost; other?{1_Count} barbarian outposts;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GONE_TRIBAL_VILLAGE_PART" Language="en_US">
+      <Text>{1_Count : plural 1?{1_Count} tribal village; other?{1_Count} tribal villages;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GONE_AND" Language="en_US">
+      <Text> and </Text>
+    </Row>
     <Row Tag="LOC_CAI_REVEAL_TILES" Language="en_US">
       <Text>{1_Count : plural 1?{1_Count} tile; other?{1_Count} tiles;}</Text>
     </Row>
