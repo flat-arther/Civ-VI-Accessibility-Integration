@@ -521,7 +521,17 @@ end
 -- Interface-specific plot preview helpers
 -- ===========================================================================
 
+include("interfaceTargetHelpers_CAI")
+
 InterfaceInfoHelpers = InterfaceInfoHelpers or {}
+local function BuildCombatPreviewInterfaceInfo(plot, isExplicitSpeech)
+    if isExplicitSpeech then
+        LuaEvents.CAISpeakCombatPreview()
+        return false
+    end
+
+    return nil
+end
 
 local function BuildMoveToInterfaceInfo(plot)
     local unit = UI.GetHeadSelectedUnit()
@@ -661,15 +671,107 @@ local function BuildWonderPlacementInterfaceInfo(plot)
     return lines
 end
 
+local function BuildTargetValidityInterfaceInfo(plot)
+    if plot == nil then return nil end
+
+    local target = CAIInterfaceTargets.GetTargetAtPlot(plot)
+    if target == nil then
+        return { Locale.Lookup("LOC_CAI_PLOT_INTERFACE_INVALID_TARGET") }
+    end
+
+    local lines = { Locale.Lookup("LOC_CAI_PLOT_INTERFACE_VALID") }
+    if target.LabelKey ~= nil and target.LabelKey ~= "" then
+        table.insert(lines, target.LabelKey)
+    end
+    if target.Kind == CAIInterfaceTargets.KindUnit then
+        table.insert(lines, Locale.Lookup("LOC_CAI_FORMATION_TARGET"))
+    end
+
+    return lines
+end
+
 InterfaceInfoHelpers[InterfaceModeTypes.MOVE_TO] = BuildMoveToInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.RANGE_ATTACK] = BuildCombatPreviewInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.CITY_RANGE_ATTACK] = BuildCombatPreviewInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.DISTRICT_RANGE_ATTACK] = BuildCombatPreviewInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.AIR_ATTACK] = BuildCombatPreviewInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.DISTRICT_PLACEMENT] = BuildDistrictPlacementInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.BUILDING_PLACEMENT] = BuildWonderPlacementInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.DEPLOY] = BuildTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.REBASE] = BuildTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.TELEPORT_TO_CITY] = BuildTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.FORM_CORPS] = BuildTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.FORM_ARMY] = BuildTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.AIRLIFT] = BuildTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.SACRIFICE_SELECTION] = BuildTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.KILL_WEAKER_UNIT] = BuildTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.TRANSFORM_UNIT] = BuildTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.RESTORE_UNIT_MOVES] = BuildTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.NAVAL_GOLD_RAID] = BuildTargetValidityInterfaceInfo
 
 function GetActiveInterfacePlotInfo(plot)
     if plot == nil then return nil end
     local helper = InterfaceInfoHelpers[UI.GetInterfaceMode()]
     if helper == nil then return nil end
-    return helper(plot)
+    local lines = helper(plot, false)
+    if lines == false then return nil end
+    return lines
+end
+
+local function ResolveActiveInterfacePlot(plot)
+    if plot ~= nil then return plot end
+
+    local plotID = -1
+    if CAICursor ~= nil and CAICursor.GetPlotId ~= nil then
+        plotID = CAICursor:GetPlotId()
+    end
+
+    if not Map.IsPlot(plotID) then
+        plotID = UI.GetCursorPlotID()
+    end
+
+    if Map.IsPlot(plotID) then
+        return Map.GetPlotByIndex(plotID)
+    end
+
+    return nil
+end
+
+function SpeakActiveInterfacePlotInfo(plot)
+    local resolvedPlot = ResolveActiveInterfacePlot(plot)
+    if resolvedPlot == nil then
+        Speak(Locale.Lookup("LOC_CAI_NO_INTERFACE_INFO"))
+        return false
+    end
+
+    local helper = InterfaceInfoHelpers[UI.GetInterfaceMode()]
+    if helper == nil then
+        Speak(Locale.Lookup("LOC_CAI_NO_INTERFACE_INFO"))
+        return false
+    end
+
+    local lines = helper(resolvedPlot, true)
+    if lines == false then
+        return true
+    end
+
+    if type(lines) == "string" then
+        if lines == "" then
+            Speak(Locale.Lookup("LOC_CAI_NO_INTERFACE_INFO"))
+            return false
+        end
+
+        Speak(ProcessIcons(lines))
+        return true
+    end
+
+    if lines ~= nil and #lines > 0 then
+        Speak(ProcessIcons(table.concat(lines, ", ")))
+        return true
+    end
+
+    Speak(Locale.Lookup("LOC_CAI_NO_INTERFACE_INFO"))
+    return false
 end
 
 -- ===========================================================================

@@ -1,4 +1,25 @@
 include("caiUtils")
+-- Shared function for overriding the base game's GetCursorPlot functions
+local CAICursor = ExposedMembers.CAICursor
+local function GetCAICursorPlotId()
+    if not CAICursor then return -1 end
+    return CAICursor:GetPlotId()
+end
+
+local function GetCAICursorPlotCoord()
+    local plotId = GetCAICursorPlotId()
+    local plot = Map.GetPlotByIndex(plotId)
+    if not plot then return -1, -1 end
+    return plot:GetX(), plot:GetY()
+end
+
+function InstallUIOverrides()
+    Speak("Installing ui overrides for " .. ContextPtr:GetID())
+    UI = HijackTable(UI, {
+        GetCursorPlotCoord = GetCAICursorPlotCoord,
+        GetCursorPlotID = GetCAICursorPlotId,
+    })
+end
 
 -- Shared in-game CAI formatting and widget helpers used by ResearchChooser_CAI,
 -- TechTree_CAI, CivicsChooser_CAI, CivicsTree_CAI, and ProductionPanel_CAI.

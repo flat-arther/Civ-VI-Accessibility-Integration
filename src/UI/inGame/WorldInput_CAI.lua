@@ -1,8 +1,10 @@
 include("caiUtils")
 include("navCursor")
+include("inGameHelpers_CAI")
 include("interfaceInfoHelpers_CAI")
 include("UIScreenManager")
 include("WorldScanner_CAI")
+include("Surveyor_CAI")
 include("RevealAnnouncements_CAI")
 include("WorldInput")
 
@@ -19,6 +21,7 @@ local ACTION_CURSOR_WEST = Input.GetActionId("CAICursorMoveWest")
 local ACTION_CURSOR_EAST = Input.GetActionId("CAICursorMoveEast")
 local ACTION_CURSOR_SOUTHWEST = Input.GetActionId("CAICursorMoveSouthWest")
 local ACTION_CURSOR_SOUTHEAST = Input.GetActionId("CAICursorMoveSouthEast")
+local ACTION_INTERFACE_INFO = Input.GetActionId("InterfaceInfo")
 local ACTION_INTERFACE_PRIMARY = Input.GetActionId("InterfaceWidgetPrimaryAction")
 local ACTION_SCANNER_PREV_CATEGORY = Input.GetActionId("WorldScannerPrevCategory")
 local ACTION_SCANNER_NEXT_CATEGORY = Input.GetActionId("WorldScannerNextCategory")
@@ -32,29 +35,14 @@ local ACTION_SCANNER_JUMP = Input.GetActionId("WorldScannerJumpToCurrent")
 local ACTION_SCANNER_RETURN = Input.GetActionId("WorldScannerReturnFromJump")
 local ACTION_SCANNER_SPEAK_DIRECTION = Input.GetActionId("WorldScannerSpeakCurrentDirection")
 local ACTION_MINIMAP_LENS_LIST = Input.GetActionId("CAIMinimapOpenLensList")
-
--- ===========================================================================
--- UI overrides
--- ===========================================================================
-local function GetCAICursorPlotId()
-	if not CAICursor then return -1 end
-	return CAICursor:GetPlotId()
-end
-
-local function GetCAICursorPlotCoord()
-	local plotId = GetCAICursorPlotId()
-	local plot = Map.GetPlotByIndex(plotId)
-	if not plot then return -1, -1 end
-	return plot:GetX(), plot:GetY()
-end
-
-local function InstallUIOverrides()
-	UI = HijackTable(UI, {
-		GetCursorPlotCoord = GetCAICursorPlotCoord,
-		GetCursorPlotID = GetCAICursorPlotId,
-	})
-end
-
+local ACTION_SURVEYOR_GROW_RADIUS = Input.GetActionId("SurveyorGrowRadius")
+local ACTION_SURVEYOR_SHRINK_RADIUS = Input.GetActionId("SurveyorShrinkRadius")
+local ACTION_SURVEYOR_READ_YIELDS = Input.GetActionId("SurveyorReadYields")
+local ACTION_SURVEYOR_READ_RESOURCES = Input.GetActionId("SurveyorReadResources")
+local ACTION_SURVEYOR_READ_TERRAIN = Input.GetActionId("SurveyorReadTerrain")
+local ACTION_SURVEYOR_READ_OWN_UNITS = Input.GetActionId("SurveyorReadOwnUnits")
+local ACTION_SURVEYOR_READ_ENEMY_UNITS = Input.GetActionId("SurveyorReadEnemyUnits")
+local ACTION_SURVEYOR_READ_CITIES = Input.GetActionId("SurveyorReadCities")
 -- ===========================================================================
 -- Shared input actions
 -- ===========================================================================
@@ -101,6 +89,12 @@ local SharedInputActions = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return MoveCursor(DirectionTypes.DIRECTION_SOUTHEAST)
+		end,
+	},
+	[ACTION_INTERFACE_INFO] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return SpeakActiveInterfacePlotInfo()
 		end,
 	},
 	[ACTION_SCANNER_PREV_CATEGORY] = {
@@ -176,11 +170,103 @@ local SharedInputActions = {
 			return true
 		end,
 	},
+	[ACTION_SURVEYOR_GROW_RADIUS] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return CAISurveyor.SpeakResult(CAISurveyor.GrowRadius)
+		end,
+	},
+	[ACTION_SURVEYOR_SHRINK_RADIUS] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return CAISurveyor.SpeakResult(CAISurveyor.ShrinkRadius)
+		end,
+	},
+	[ACTION_SURVEYOR_READ_YIELDS] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return CAISurveyor.SpeakResult(CAISurveyor.ReadYields)
+		end,
+	},
+	[ACTION_SURVEYOR_READ_RESOURCES] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return CAISurveyor.SpeakResult(CAISurveyor.ReadResources)
+		end,
+	},
+	[ACTION_SURVEYOR_READ_TERRAIN] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return CAISurveyor.SpeakResult(CAISurveyor.ReadTerrain)
+		end,
+	},
+	[ACTION_SURVEYOR_READ_OWN_UNITS] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return CAISurveyor.SpeakResult(CAISurveyor.ReadOwnUnits)
+		end,
+	},
+	[ACTION_SURVEYOR_READ_ENEMY_UNITS] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return CAISurveyor.SpeakResult(CAISurveyor.ReadEnemyUnits)
+		end,
+	},
+	[ACTION_SURVEYOR_READ_CITIES] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return CAISurveyor.SpeakResult(CAISurveyor.ReadCities)
+		end,
+	},
 }
 
 -- ===========================================================================
 -- Interface mode widgets
 -- ===========================================================================
+local function RunVanillaPlacementCancel()
+	OnPlacementKeyUp({
+		GetKey = function()
+			return Keys.VK_ESCAPE
+		end,
+	})
+end
+
+local function CreateTargetingWidgetData(labelKey, primaryAction, cancelAction)
+	return {
+		Properties = {
+			GetLabel = function()
+				return Locale.Lookup(labelKey)
+			end,
+			OnDestroy = function()
+				Speak(Locale.Lookup("LOC_CAI_EXITED_TARGETING_MODE"))
+			end,
+			RegisterInputs = {
+				{
+					Key = Keys.VK_ESCAPE,
+					MSG = KeyEvents.KeyUp,
+					Action = function()
+						if cancelAction ~= nil then
+							cancelAction()
+						else
+							RunVanillaPlacementCancel()
+						end
+						return true
+					end,
+				},
+			},
+		},
+		InputActions = {
+			[ACTION_INTERFACE_PRIMARY] = {
+				Type = INPUT_ACTION_TRIGGERED,
+				Action = function()
+					primaryAction()
+					return true
+				end,
+			},
+		},
+	}
+end
+
 local interfaceWidgets = {
 	[InterfaceModeTypes.MOVE_TO] = {
 		Properties = {
@@ -211,6 +297,60 @@ local interfaceWidgets = {
 			},
 		},
 	},
+	[InterfaceModeTypes.RANGE_ATTACK] = CreateTargetingWidgetData("LOC_CAI_RANGE_ATTACK_MODE", function()
+		OnMouseUnitRangeAttack()
+	end),
+	[InterfaceModeTypes.CITY_RANGE_ATTACK] = CreateTargetingWidgetData("LOC_CAI_CITY_RANGE_ATTACK_MODE", function()
+		CityRangeAttack()
+	end),
+	[InterfaceModeTypes.DISTRICT_RANGE_ATTACK] = CreateTargetingWidgetData("LOC_CAI_DISTRICT_RANGE_ATTACK_MODE", function()
+		DistrictRangeAttack()
+	end),
+	[InterfaceModeTypes.AIR_ATTACK] = CreateTargetingWidgetData("LOC_CAI_AIR_ATTACK_MODE", function()
+		UnitAirAttack()
+	end),
+	[InterfaceModeTypes.WMD_STRIKE] = CreateTargetingWidgetData("LOC_CAI_WMD_STRIKE_MODE", function()
+		OnWMDStrikeEnd()
+	end),
+	[InterfaceModeTypes.ICBM_STRIKE] = CreateTargetingWidgetData("LOC_CAI_ICBM_STRIKE_MODE", function()
+		OnICBMStrikeEnd()
+	end),
+	[InterfaceModeTypes.COASTAL_RAID] = CreateTargetingWidgetData("LOC_CAI_COASTAL_RAID_MODE", function()
+		CoastalRaid()
+	end),
+	[InterfaceModeTypes.DEPLOY] = CreateTargetingWidgetData("LOC_CAI_DEPLOY_MODE", function()
+		AirUnitDeploy()
+	end),
+	[InterfaceModeTypes.REBASE] = CreateTargetingWidgetData("LOC_CAI_REBASE_MODE", function()
+		AirUnitReBase()
+	end),
+	[InterfaceModeTypes.TELEPORT_TO_CITY] = CreateTargetingWidgetData("LOC_CAI_TELEPORT_TO_CITY_MODE", function()
+		TeleportToCity()
+	end),
+	[InterfaceModeTypes.FORM_CORPS] = CreateTargetingWidgetData("LOC_CAI_FORM_CORPS_MODE", function()
+		FormCorps()
+	end),
+	[InterfaceModeTypes.FORM_ARMY] = CreateTargetingWidgetData("LOC_CAI_FORM_ARMY_MODE", function()
+		FormArmy()
+	end),
+	[InterfaceModeTypes.AIRLIFT] = CreateTargetingWidgetData("LOC_CAI_AIRLIFT_MODE", function()
+		UnitAirlift()
+	end),
+	[InterfaceModeTypes.SACRIFICE_SELECTION] = CreateTargetingWidgetData("LOC_CAI_SACRIFICE_SELECTION_MODE", function()
+		DOSacrificeSelection()
+	end),
+	[InterfaceModeTypes.KILL_WEAKER_UNIT] = CreateTargetingWidgetData("LOC_CAI_KILL_WEAKER_UNIT_MODE", function()
+		PerformKillWeakerUnit()
+	end),
+	[InterfaceModeTypes.TRANSFORM_UNIT] = CreateTargetingWidgetData("LOC_CAI_TRANSFORM_UNIT_MODE", function()
+		PerformTransformUnit()
+	end),
+	[InterfaceModeTypes.RESTORE_UNIT_MOVES] = CreateTargetingWidgetData("LOC_CAI_RESTORE_UNIT_MOVES_MODE", function()
+		PerformRestoreUnitMoves()
+	end),
+	[InterfaceModeTypes.NAVAL_GOLD_RAID] = CreateTargetingWidgetData("LOC_CAI_NAVAL_GOLD_RAID_MODE", function()
+		PerformNavalGoldRaid()
+	end),
 	[InterfaceModeTypes.DISTRICT_PLACEMENT] = {
 		Properties = {
 			GetLabel = function()

@@ -48,10 +48,12 @@
     <File>UI/inGame/GovernmentScreen_CAI.lua</File>
     <File>UI/inGame/ResearchChooser_CAI.lua</File>
     <File>UI/inGame/inGameHelpers_CAI.lua</File>
+    <File>UI/inGame/interfaceTargetHelpers_CAI.lua</File>
     <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>
     <File>UI/inGame/hexCoordUtils_CAI.lua</File>
     <File>UI/inGame/RevealAnnouncements_CAI.lua</File>
     <File>UI/inGame/MinimapPanel_CAI.lua</File>
+    <File>UI/inGame/Surveyor_CAI.lua</File>
     <File>UI/inGame/WorldScanner/WorldScanner_CAI.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategoryUtils.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCore.lua</File>
@@ -62,6 +64,7 @@
     <File>UI/inGame/WorldScanner/WorldScannerCategory_waterAvailability.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_resources.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_units.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_validTargets.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_specialMapObjects.lua</File>
     <File>UI/inGame/CivicsChooser_CAI.lua</File>
     <File>UI/inGame/CivicsTree_CAI.lua</File>
@@ -145,10 +148,12 @@
       <File>UI/inGame/CityBannerManager_CAI.lua</File>
       <File>UI/inGame/NotificationPanel_CAI.lua</File>
       <File>UI/inGame/inGameHelpers_CAI.lua</File>
+      <File>UI/inGame/interfaceTargetHelpers_CAI.lua</File>
       <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>
       <File>UI/inGame/hexCoordUtils_CAI.lua</File>
       <File>UI/inGame/RevealAnnouncements_CAI.lua</File>
       <File>UI/inGame/MinimapPanel_CAI.lua</File>
+      <File>UI/inGame/Surveyor_CAI.lua</File>
       <File>UI/inGame/WorldScanner/WorldScanner_CAI.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategoryUtils.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCore.lua</File>
@@ -159,6 +164,7 @@
       <File>UI/inGame/WorldScanner/WorldScannerCategory_waterAvailability.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_resources.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_units.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_validTargets.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_specialMapObjects.lua</File>
     </ImportFiles>
 

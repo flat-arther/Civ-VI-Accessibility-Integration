@@ -7,6 +7,7 @@ local SUBCATEGORY_COASTAL = "LOC_HUD_UNIT_PANEL_TOOLTIP_COASTAL_WATER"
 local SUBCATEGORY_NO_WATER = "LOC_HUD_UNIT_PANEL_TOOLTIP_NO_WATER"
 local SUBCATEGORY_BLOCKED = "LOC_HUD_UNIT_PANEL_TOOLTIP_TOO_CLOSE_TO_CITY"
 local MAYA_CIVILIZATION_TYPE = "CIVILIZATION_MAYA"
+local IsWaterLensVisible
 
 local subCategoryLabels = {
     [SUBCATEGORY_VALID] = SUBCATEGORY_VALID,
@@ -19,6 +20,7 @@ local subCategoryLabels = {
 CAIWorldScannerCategory_WaterAvailability = {
     Id = "waterAvailability",
     LabelKey = "LOC_CAI_WORLD_SCANNER_CATEGORY_WATER_AVAILABILITY",
+    BuildOncePerDynamicState = true,
     SubCategoryOrder = {
         SUBCATEGORY_VALID,
         SUBCATEGORY_FRESH,
@@ -30,9 +32,12 @@ CAIWorldScannerCategory_WaterAvailability = {
     GroupLabelResolver = function(_, firstItem)
         return firstItem ~= nil and firstItem.GroupLabelKey or "LOC_CAI_WORLD_SCANNER_UNKNOWN"
     end,
+    CanScan = function()
+        return IsWaterLensVisible()
+    end,
 }
 
-local function IsWaterLensVisible()
+function IsWaterLensVisible()
     return UILens.IsLayerOn ~= nil and UILens.IsLayerOn(WATER_LAYER)
 end
 
@@ -67,10 +72,6 @@ local function AddPlotList(out, context, plotList, subCategoryId)
 end
 
 function CAIWorldScannerCategory_WaterAvailability.Scan(context)
-    if not IsWaterLensVisible() then
-        return {}
-    end
-
     local out = {}
     local fullWaterPlots, coastalWaterPlots, noWaterPlots, noSettlePlots = Map.GetContinentPlotsWaterAvailability()
 

@@ -1315,13 +1315,19 @@ local function InitializePlotInfoActionRequestBuilders()
     }
 end
 
----@param plot Plot
+---@param plot Plot|nil
 ---@param requestedKeys string[]|nil
+---@param explicitPlotId integer|nil
 ---@return string[]
-function info:RequestPlotInfo(plot, requestedKeys)
-    if not plot then return { "No plot" } end
+function info:RequestPlotInfo(plot, requestedKeys, explicitPlotId)
+    local targetPlot = plot
+    if explicitPlotId ~= nil and Map.IsPlot(explicitPlotId) then
+        targetPlot = Map.GetPlotByIndex(explicitPlotId)
+    end
 
-    local data = BuildPlotInfoData(plot)
+    if not targetPlot then return { "No plot" } end
+
+    local data = BuildPlotInfoData(targetPlot)
     if data == nil then
         return {}
     end
@@ -1330,7 +1336,7 @@ function info:RequestPlotInfo(plot, requestedKeys)
         CacheGreatWorks(data)
     end
 
-    return RequestPlotInfoFromData(plot, data, requestedKeys)
+    return RequestPlotInfoFromData(targetPlot, data, requestedKeys)
 end
 
 function OnCAICursorMove(x, y, plot, cursor)

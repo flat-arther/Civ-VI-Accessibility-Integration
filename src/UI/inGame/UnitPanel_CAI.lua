@@ -1,14 +1,33 @@
 include("caiUtils")
 include("inGameHelpers_CAI")
 include("interfaceInfoHelpers_CAI")
-include("UnitPanel")
+include("Civ6Common")
+
+if IsExpansion2Active ~= nil and IsExpansion2Active() then
+    include("UnitPanel_Expansion2")
+else
+    include("UnitPanel")
+end
 
 local mgr = ExposedMembers.CAI_UIManager
+
 local UNIT_ACTION_LIST_ID = "CAIUnitPanelActionList"
+local UNIT_LIST_ID = "CAIUnitPanelUnitList"
+local UNIT_ABILITIES_LIST_ID = "CAIUnitAbilitiesList"
+local UNIT_ABILITY_INFO_LIMIT = 10
+
 local prevUnitCatAction = Input.GetActionId("PrevUnitSelectionCategory")
 local nextUnitCatAction = Input.GetActionId("NextUnitSelectionCategory")
 local prevUnitAction = Input.GetActionId("PrevUnitSelection")
 local nextUnitAction = Input.GetActionId("NextUnitSelection")
+local openUnitListAction = Input.GetActionId("UnitPanelOpenUnitList")
+local unitViewAbilitiesAction = Input.GetActionId("UnitViewAbilities")
+local selectionActionsAction = Input.GetActionId("SelectionActions")
+local promoteActionHash = GameInfo.UnitCommands["PROMOTE"] ~= nil and GameInfo.UnitCommands["PROMOTE"].Hash or
+    UnitCommandTypes.PROMOTE
+local upgradeActionHash = GameInfo.UnitCommands["UPGRADE"] ~= nil and GameInfo.UnitCommands["UPGRADE"].Hash or
+    UnitCommandTypes.UPGRADE
+
 local UnitCategories = {
     {
         Name = "LOC_CAI_UNIT_CAT_ALL",
@@ -21,92 +40,91 @@ local UnitCategories = {
         Next = UI.SelectNextReadyUnit
     }
 }
-local activeCategoryIdx = 1
---#Category functions
-function ChangeUnitSelectionCategory(dir)
-    activeCategoryIdx = ((activeCategoryIdx - 1 + dir) % #UnitCategories) + 1
-    Speak(Locale.Lookup(UnitCategories[activeCategoryIdx].Name))
-end
 
-function ChangeUnitSelection(dir)
-    local sel = UnitCategories[activeCategoryIdx]
-    if dir == -1 and sel.Prev then
-        sel.Prev()
-    elseif dir == 1 and sel.Next then
-        sel.Next()
-    end
-end
+local activeCategoryIdx = 1
+local UnitActionList = nil
+local UnitList = nil
 
 info = ExposedMembers.CAIInfo or {}
 ExposedMembers.CAIInfo = info
 
 UnitInfoPriority = {
     "Summary",
-    "Health",
-    "Movement",
-    "Combat",
-    "Charges",
     "Promotions",
-    "Formation",
     "Abilities",
-    "SpecialState",
-    "Actions",
+    "Stats",
+    "SpecialInfo",
     "QueuedPath",
 }
 
 UnitInfoActionMap = {}
 UnitInfoFallbacks = {
-    Combat       = "LOC_CAI_UNIT_NO_COMBAT",
-    Charges      = "LOC_CAI_UNIT_NO_CHARGES",
-    Promotions   = "LOC_CAI_UNIT_NO_PROMOTIONS",
-    Formation    = "LOC_CAI_UNIT_NOT_IN_FORMATION",
-    Abilities    = "LOC_CAI_UNIT_NO_ABILITIES",
-    SpecialState = "LOC_CAI_UNIT_NO_SPECIAL_STATE",
-    Actions      = "LOC_CAI_UNIT_NO_ACTIONS",
-    QueuedPath   = "LOC_CAI_UNIT_NO_QUEUED_PATH",
+    Stats         = "LOC_CAI_UNIT_NO_STATS",
+    Charges       = "LOC_CAI_UNIT_NO_CHARGES",
+    Promotions    = "LOC_CAI_UNIT_NO_PROMOTIONS",
+    Abilities     = "LOC_CAI_UNIT_NO_ABILITIES",
+    SpecialInfo   = "LOC_CAI_UNIT_NO_SPECIAL_INFO",
+    QueuedPath    = "LOC_CAI_UNIT_NO_QUEUED_PATH",
+    Activity      = "LOC_CAI_UNIT_NO_ACTIVITY",
+    CombatPreview = "LOC_CAI_UNIT_NO_COMBAT",
 }
-UnitActionList = nil
 
---# General formatting
+local UnitSummaryRequestedKeys = {
+    "UnitName",
+    "Activity",
+    "Health",
+    "Moves",
+    "Charges",
+    "UpgradeHint",
+    "Promotions",
+    "BuilderRecommendation",
+    "SettlerWaterGuide",
+    "Abilities",
+}
 
-function AppendUnitInfo(results, value)
+local function AppendUnitInfo(results, value)
     if value ~= nil and value ~= "" then
         table.insert(results, value)
     end
 end
 
-function JoinUnitInfo(parts, separator)
+local function JoinUnitInfo(parts, separator)
     local results = {}
-
     for _, part in ipairs(parts) do
         if part ~= nil and part ~= "" then
             table.insert(results, part)
         end
     end
-
     return table.concat(results, separator or ", ")
 end
 
-function GetFirstUnitInfoLine(value)
+local function GetFirstUnitInfoLine(value)
     if value == nil then
         return nil
     end
 
-    local firstLine = string.match(value, "([^[]*)%[NEWLINE%]")
-    if firstLine ~= nil and firstLine ~= "" then
-        return firstLine
+    local newlinePos = string.find(value, "%[NEWLINE%]", 1)
+    if newlinePos ~= nil then
+        local firstLine = string.sub(value, 1, newlinePos - 1)
+        if firstLine ~= nil and firstLine ~= "" then
+            return firstLine
+        end
     end
 
     return value
 end
 
---# Unit lookup
-
-function GetSelectedUnit()
+local function GetSelectedUnit()
     return UI.GetHeadSelectedUnit()
 end
 
-function ResolveUnit(unitID, playerID)
+local GetUnitActionEntries
+local GetUnitActionLabel
+local GetUnitActionTooltip
+local GetControlText
+local GetControlTooltip
+
+local function ResolveUnit(unitID, playerID)
     if unitID == nil then
         return GetSelectedUnit()
     end
@@ -124,7 +142,7 @@ function ResolveUnit(unitID, playerID)
     return player:GetUnits():FindID(unitID)
 end
 
-function ResolveUnitData(unitID, playerID)
+local function ResolveUnitData(unitID, playerID)
     local unit = ResolveUnit(unitID, playerID)
     if unit == nil then
         return nil, nil
@@ -147,8 +165,7 @@ function ResolveUnitData(unitID, playerID)
     return data, unit
 end
 
---# Unit info helpers
-function GetUnitInfoName(data, unit)
+local function GetUnitInfoName(data, unit)
     if unit ~= nil then
         return FormatOwnedUnitDisplayName(unit)
     end
@@ -165,37 +182,99 @@ function GetUnitInfoName(data, unit)
     return FormatOwnedName(nil, Locale.Lookup(unitInfo.Name), GetUnitDataFormationSuffix(data))
 end
 
-function GetUnitInfoCoords(unit)
+local function GetUnitListName(unit)
     if unit == nil then
         return nil
     end
 
-    return Locale.Lookup("LOC_CAI_COORDS_STRING", unit:GetX(), unit:GetY())
-end
-
-function GetUnitInfoHealth(data)
-    if data == nil or data.MaxDamage == nil or data.MaxDamage <= 0 then
-        return nil
+    local unitName = unit:GetName()
+    local localizedName = unitName ~= nil and unitName ~= "" and Locale.Lookup(unitName) or nil
+    if localizedName == nil or localizedName == "" then
+        local unitInfo = GameInfo.Units[unit:GetUnitType()]
+        if unitInfo ~= nil and unitInfo.Name ~= nil and unitInfo.Name ~= "" then
+            localizedName = Locale.Lookup(unitInfo.Name)
+        end
     end
 
-    return Locale.Lookup("LOC_HUD_UNIT_PANEL_HEALTH_TOOLTIP", data.MaxDamage - data.Damage, data.MaxDamage)
+    return FormatOwnedName(nil, localizedName, GetUnitFormationSuffix(unit))
 end
 
-function GetUnitInfoMovement(data)
+local function GetUnitTypeDetail(data, unit)
     if data == nil then
         return nil
     end
 
-    local moves = data.MovementMoves or data.Moves or 0
-    return Locale.Lookup("LOC_CAI_UNIT_MOVES", moves, data.MaxMoves)
+    local unitInfo = data.UnitType ~= nil and GameInfo.Units[data.UnitType] or nil
+    if unitInfo == nil or unitInfo.Name == nil then
+        return nil
+    end
+
+    local unitTypeName = Locale.Lookup(unitInfo.Name)
+    local unitName = unit ~= nil and Locale.Lookup(unit:GetName()) or Locale.Lookup(data.Name or unitInfo.Name)
+
+    if unitName ~= unitTypeName then
+        return Locale.Lookup("LOC_UNIT_UNIT_TYPE_NAME_SUFFIX", unitTypeName)
+    end
+
+    return nil
 end
 
-function GetUnitInfoCombat(data)
+local function GetUnitInfoLifespan(data)
+    if data == nil or data.Lifespan == nil or data.Lifespan < 0 then
+        return nil
+    end
+
+    return Locale.Lookup("LOC_HUD_UNIT_PANEL_LIFESPAN") .. ", " .. tostring(data.Lifespan)
+end
+
+local function GetUnitInfoHealth(data)
+    if data == nil or data.MaxDamage == nil or data.MaxDamage <= 0 then
+        return nil
+    end
+
+    return JoinUnitInfo({
+        Locale.Lookup("LOC_HUD_UNIT_PANEL_HEALTH_TOOLTIP", data.MaxDamage - data.Damage, data.MaxDamage),
+        GetUnitInfoLifespan(data),
+    }, ", ")
+end
+
+local function GetUnitInfoMovement(data)
+    if data == nil then
+        return nil
+    end
+
+    return {
+        Locale.Lookup("LOC_CAI_UNIT_MOVES", data.MovementMoves or data.Moves or 0, data.MaxMoves),
+    }
+end
+
+local function IsSelectedUnit(unit)
+    local selectedUnit = GetSelectedUnit()
+    return selectedUnit ~= nil
+        and unit ~= nil
+        and selectedUnit:GetOwner() == unit:GetOwner()
+        and selectedUnit:GetID() == unit:GetID()
+end
+
+local function GetUnitInfoStats(data)
     if data == nil then
         return nil
     end
 
     local results = {}
+    if data.IsSpy then
+        return results
+    end
+
+    if data.IsTradeUnit then
+        AppendUnitInfo(results, data.TradeRouteName)
+        AppendUnitInfo(results,
+            Locale.Lookup("LOC_HUD_UNIT_PANEL_LAND_ROUTE_RANGE") .. ", " .. tostring(data.TradeLandRange or 0))
+        AppendUnitInfo(results,
+            Locale.Lookup("LOC_HUD_UNIT_PANEL_SEA_ROUTE_RANGE") .. ", " .. tostring(data.TradeSeaRange or 0))
+        return results
+    end
+
     AppendUnitInfo(results,
         (data.Combat or 0) > 0 and Locale.Lookup("LOC_HUD_UNIT_PANEL_STRENGTH") .. ", " .. tostring(data.Combat) or nil)
     AppendUnitInfo(results,
@@ -216,7 +295,20 @@ function GetUnitInfoCombat(data)
     return results
 end
 
-function GetUnitInfoCharges(data)
+local function GetParkCharges(unit)
+    if unit == nil then
+        return nil
+    end
+
+    local unitInfo = GameInfo.Units[unit:GetUnitType()]
+    if unitInfo == nil or (unitInfo.ParkCharges or 0) <= 0 then
+        return nil
+    end
+
+    return unit:GetParkCharges()
+end
+
+local function GetUnitInfoCharges(data, unit)
     if data == nil then
         return nil
     end
@@ -242,110 +334,580 @@ function GetUnitInfoCharges(data)
         Locale.Lookup("LOC_HUD_UNIT_PANEL_GREAT_PERSON_ACTIONS") .. ", " .. tostring(data.GreatPersonActionCharges) or
         nil)
 
+    local parkCharges = GetParkCharges(unit)
+    AppendUnitInfo(results,
+        parkCharges ~= nil and parkCharges > 0 and
+        Locale.Lookup("LOC_HUD_UNIT_PANEL_PARK_CHARGES") .. ", " .. tostring(parkCharges) or nil)
+
     return results
 end
 
-function GetUnitInfoPromotions(data)
+local function GetSpyOperationDescription(data)
+    if data == nil or not data.IsSpy or data.SpyOperation == nil or data.SpyOperation == -1 then
+        return nil
+    end
+
+    local operationInfo = GameInfo.UnitOperations[data.SpyOperation]
+    if operationInfo == nil or operationInfo.Description == nil then
+        return nil
+    end
+
+    return Locale.Lookup(operationInfo.Description)
+end
+
+local function GetTradeStatusText(unit)
+    if Controls == nil or Controls.TradeUnitStatusLabel == nil or Controls.TradeUnitStatusLabel.GetText == nil then
+        return nil
+    end
+
+    local selectedUnit = GetSelectedUnit()
+    if selectedUnit == nil or unit == nil then
+        return nil
+    end
+    if selectedUnit:GetOwner() ~= unit:GetOwner() or selectedUnit:GetID() ~= unit:GetID() then
+        return nil
+    end
+
+    local text = Controls.TradeUnitStatusLabel:GetText()
+    if text == nil or text == "" then
+        return nil
+    end
+
+    return text
+end
+
+local function GetTradeYieldTexts(unit)
+    if not IsSelectedUnit(unit)
+        or Controls == nil
+        or Controls.TradeYieldGrid == nil
+        or Controls.TradeYieldGrid.IsHidden == nil
+        or Controls.TradeYieldGrid:IsHidden()
+        or Controls.TradeResourceList == nil
+        or Controls.TradeResourceList.GetChildren == nil then
+        return nil
+    end
+
+    local function collectTexts(control, results)
+        if control == nil or (control.IsHidden ~= nil and control:IsHidden()) then
+            return
+        end
+
+        local text = GetControlText(control)
+        if text ~= nil and text ~= "" then
+            table.insert(results, text)
+        end
+
+        local children = control.GetChildren ~= nil and control:GetChildren() or nil
+        if children ~= nil then
+            for _, child in ipairs(children) do
+                collectTexts(child, results)
+            end
+        end
+    end
+
+    local results = {}
+    for _, child in ipairs(Controls.TradeResourceList:GetChildren() or {}) do
+        local entryParts = {}
+        collectTexts(child, entryParts)
+        if #entryParts > 0 then
+            AppendUnitInfo(results, JoinUnitInfo(entryParts, " "))
+        end
+    end
+
+    return #results > 0 and results or nil
+end
+
+local function GetRecommendedBuilderActionText(unit)
+    if not IsSelectedUnit(unit)
+        or Controls == nil
+        or Controls.RecommendedActionButton == nil
+        or Controls.RecommendedActionButton.IsHidden == nil
+        or Controls.RecommendedActionButton:IsHidden() then
+        return nil
+    end
+
+    local action = GetControlTooltip(Controls.RecommendedActionButton)
+    if action == nil or action == "" then
+        return nil
+    end
+
+    return action ~= "" and action or nil
+end
+
+local function GetSettlerWaterGuideText(unit)
+    if not IsSelectedUnit(unit)
+        or Controls == nil
+        or Controls.SettlementWaterContainer == nil
+        or Controls.SettlementWaterContainer.IsHidden == nil
+        or Controls.SettlementWaterContainer:IsHidden() then
+        return nil
+    end
+
+    local results = {}
+    AppendUnitInfo(results, GetControlText(Controls.SettlementWaterHeader))
+
+    local waterControls = {
+        Controls.SettlementWaterGrid_FreshWater,
+        Controls.SettlementWaterGrid_CoastalWater,
+        Controls.SettlementWaterGrid_NoWater,
+        Controls.SettlementWaterGrid_SettlementBlocked,
+    }
+
+    for _, control in ipairs(waterControls) do
+        if control ~= nil and (control.IsHidden == nil or not control:IsHidden()) then
+            AppendUnitInfo(results, GetControlTooltip(control))
+        end
+    end
+
+    return #results > 0 and JoinUnitInfo(results, ", ") or nil
+end
+
+local function GetUpgradeAction(data)
+    for _, action in ipairs(GetUnitActionEntries(data)) do
+        if action ~= nil and action.userTag == upgradeActionHash then
+            return action
+        end
+    end
+
+    return nil
+end
+
+local function GetUpgradeHintText(data)
+    local upgradeAction = GetUpgradeAction(data)
+    if upgradeAction == nil then
+        return nil
+    end
+
+    local tooltip = GetUnitActionTooltip(upgradeAction)
+    if tooltip ~= nil and tooltip ~= "" then
+        return tooltip
+    end
+
+    return GetUnitActionLabel(upgradeAction)
+end
+
+local function GetUnitInfoActivity(data, unit)
+    if data == nil or unit == nil then
+        return nil
+    end
+
+    local results = {}
+
+    local activityType = UnitManager.GetActivityType(unit)
+    if activityType == ActivityTypes.ACTIVITY_SLEEP then
+        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_SLEEP"))
+    elseif activityType == ActivityTypes.ACTIVITY_HOLD then
+        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_SKIP"))
+    elseif activityType ~= ActivityTypes.ACTIVITY_AWAKE and unit:GetFortifyTurns() > 0 then
+        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_FORTIFIED"))
+    elseif activityType == ActivityTypes.ACTIVITY_OPERATION and not data.IsSpy and not data.IsTradeUnit then
+        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_OPERATION"))
+    end
+
+    if unit:IsReadyToMove() then
+        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_READY"))
+    else
+        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_NOT_READY"))
+    end
+
+    return results
+end
+
+local function HasPromoteActionInData(data)
+    if data == nil or data.Actions == nil then
+        return false
+    end
+
+    for categoryName, categoryTable in pairs(data.Actions) do
+        if categoryName ~= "displayOrder" and type(categoryTable) == "table" then
+            for _, action in ipairs(categoryTable) do
+                if action ~= nil and action.userTag == promoteActionHash and not action.Disabled then
+                    return true
+                end
+            end
+        end
+    end
+
+    return false
+end
+
+local function CanUnitPromoteNow(data, unit)
+    if HasPromoteActionInData(data) then
+        return true
+    end
+
+    if unit == nil then
+        return false
+    end
+
+    local canStart, results = UnitManager.CanStartCommand(unit, UnitCommandTypes.PROMOTE, true, true)
+    if not canStart or results == nil then
+        return false
+    end
+
+    local promotions = results[UnitCommandResults.PROMOTIONS]
+    return promotions ~= nil and #promotions > 0
+end
+
+local function GetUnitInfoPromotions(data, unit)
     if data == nil then
         return nil
     end
 
     local results = {
         Locale.Lookup("LOC_HUD_UNIT_PANEL_LEVEL_ABBREVIATION") .. " " .. tostring(data.UnitLevel),
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_XP_TT", data.UnitExperience, data.MaxExperience, data.UnitLevel + 1),
     }
+
+    if (data.MaxExperience or 0) > 0 then
+        AppendUnitInfo(results,
+            Locale.Lookup("LOC_HUD_UNIT_PANEL_XP_TT", data.UnitExperience or 0, data.MaxExperience,
+                (data.UnitLevel or 0) + 1))
+    end
 
     if data.CurrentPromotions ~= nil and #data.CurrentPromotions > 0 then
         for _, promotion in ipairs(data.CurrentPromotions) do
             AppendUnitInfo(results, Locale.Lookup(promotion.Name))
         end
-    elseif GetPromotionBannerVisibility ~= nil and GetPromotionBannerVisibility() then
+    end
+
+    if CanUnitPromoteNow(data, unit) then
         AppendUnitInfo(results, Locale.Lookup("LOC_HUD_UNIT_CHOOSE_PROMOTION_TEXT"))
     end
 
     return results
 end
 
-function GetUnitInfoFormation(data)
-    if data == nil or not data.InFormation then
-        return nil
-    end
-
-    return JoinUnitInfo({
-        GetUnitDataFormationSuffix(data),
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_MOVEMENT") ..
-        ", " ..
-        tostring(data.FormationMoves or 0) ..
-        " / " ..
-        tostring(data.FormationMaxMoves or 0),
-    }, ", ")
-end
-
-function GetUnitInfoAbilities(data)
+local function GetUnitInfoAbilities(data)
     if data == nil or data.Ability == nil or #data.Ability == 0 then
         return nil
     end
 
     local results = {}
-    for _, ability in ipairs(data.Ability) do
-        local description = GetUnitAbilityDescription(ability)
-        if description ~= nil and description ~= "" then
-            AppendUnitInfo(results, Locale.Lookup(description))
+    for idx, ability in ipairs(data.Ability) do
+        if idx > UNIT_ABILITY_INFO_LIMIT then
+            break
         end
+
+        local abilityText = GetUnitAbilityDescription(ability)
+        if abilityText ~= nil and abilityText ~= "" then
+            AppendUnitInfo(results, abilityText)
+        end
+    end
+
+    local remainingCount = #data.Ability - UNIT_ABILITY_INFO_LIMIT
+    if remainingCount > 0 then
+        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_MORE_ABILITIES", remainingCount))
     end
 
     return results
 end
 
-function GetUnitInfoSpecialState(data)
+local function GetUnitInfoSpecialState(data)
     if data == nil then
         return nil
     end
 
     local results = {}
-    AppendUnitInfo(results,
-        data.GreatPersonPassiveText ~= nil and data.GreatPersonPassiveText ~= "" and
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_GREAT_PERSON_PASSIVE_ABILITY_TOOLTIP", data.GreatPersonPassiveName,
-            data.GreatPersonPassiveText) or nil)
-    AppendUnitInfo(results, data.IsTradeUnit and JoinUnitInfo({
-        data.TradeRouteName,
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_LAND_ROUTE_RANGE") .. ", " .. tostring(data.TradeLandRange),
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_SEA_ROUTE_RANGE") .. ", " .. tostring(data.TradeSeaRange),
-    }, ", ") or nil)
-    AppendUnitInfo(results, data.IsSpy and JoinUnitInfo({
-        data.SpyTargetCityName,
-        (data.SpyRemainingTurns or 0) > 0 and Locale.Lookup("LOC_UNITPANEL_ESPIONAGE_MORE_TURNS", data.SpyRemainingTurns) or
-        nil,
-    }, ", ") or nil)
 
-    return results
+    return #results > 0 and results or nil
 end
 
-function GetUnitInfoActions(data)
-    local actions = GetUnitActionEntries(data)
-    local results = {}
-
-    for _, action in ipairs(actions) do
-        AppendUnitInfo(results, GetUnitActionLabel(action))
+local function GetUnitInfoSpecialInfo(data, unit)
+    if data == nil or unit == nil then
+        return nil
     end
 
-    return results
+    local results = {}
+
+    if data.GreatPersonPassiveText ~= nil and data.GreatPersonPassiveText ~= "" then
+        AppendUnitInfo(results,
+            Locale.Lookup("LOC_HUD_UNIT_PANEL_GREAT_PERSON_PASSIVE_ABILITY_TOOLTIP", data.GreatPersonPassiveName,
+                data.GreatPersonPassiveText))
+    end
+
+    if data.IsSpy then
+        local operationDesc = GetSpyOperationDescription(data)
+        if operationDesc ~= nil then
+            AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_SPY_MISSION", operationDesc))
+            AppendUnitInfo(results, data.SpyTargetCityName)
+            AppendUnitInfo(results,
+                (data.SpyRemainingTurns or 0) > 0
+                and Locale.Lookup("LOC_UNITPANEL_ESPIONAGE_MORE_TURNS", data.SpyRemainingTurns)
+                or nil)
+        else
+            AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_SPY_IDLE"))
+        end
+    elseif data.IsTradeUnit then
+        if data.TradeRouteName ~= nil and data.TradeRouteName ~= "" then
+            AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_TRADE_ROUTE", data.TradeRouteName))
+        else
+            AppendUnitInfo(results, GetTradeStatusText(unit) or Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_TRADE_IDLE"))
+        end
+
+        local tradeYieldTexts = GetTradeYieldTexts(unit)
+        if tradeYieldTexts ~= nil then
+            for _, text in ipairs(tradeYieldTexts) do
+                AppendUnitInfo(results, text)
+            end
+        end
+    end
+
+    if data.IsRockbandUnit then
+        AppendUnitInfo(results,
+            (data.RockBandLevel or -1) >= 0 and
+            Locale.Lookup("LOC_HUD_UNIT_PANEL_ROCK_BAND_LEVEL") .. ", " .. tostring(data.RockBandLevel) or nil)
+        AppendUnitInfo(results,
+            (data.AlbumSales or 0) > 0 and
+            Locale.Lookup("LOC_HUD_UNIT_PANEL_ROCK_BAND_ALBUM_SALES") .. ", " .. tostring(data.AlbumSales) or nil)
+    end
+
+    return #results > 0 and results or nil
+end
+
+GetControlText = function(control)
+    if control ~= nil and control.GetText ~= nil then
+        local text = control:GetText()
+        if text ~= nil and text ~= "" then
+            return text
+        end
+    end
+
+    return nil
+end
+
+GetControlTooltip = function(control)
+    if control ~= nil and control.GetToolTipString ~= nil then
+        local tooltip = control:GetToolTipString()
+        if tooltip ~= nil and tooltip ~= "" then
+            return tooltip
+        end
+    end
+
+    return nil
+end
+
+local function GetControlChildren(control)
+    if control ~= nil and control.GetChildren ~= nil then
+        return control:GetChildren() or {}
+    end
+
+    return {}
+end
+
+local function CollectControlTextsRecursive(control, results)
+    if control == nil then
+        return
+    end
+
+    if control.IsHidden == nil or not control:IsHidden() then
+        local text = GetControlText(control)
+        if text ~= nil and text ~= "" then
+            table.insert(results, text)
+        end
+
+        for _, child in ipairs(GetControlChildren(control)) do
+            CollectControlTextsRecursive(child, results)
+        end
+    end
+end
+
+local function AppendStackTexts(results, stack)
+    if stack == nil or (stack.IsHidden ~= nil and stack:IsHidden()) then
+        return
+    end
+
+    local stackTexts = {}
+    for _, child in ipairs(GetControlChildren(stack)) do
+        CollectControlTextsRecursive(child, stackTexts)
+    end
+
+    for _, text in ipairs(stackTexts) do
+        AppendUnitInfo(results, text)
+    end
+end
+
+local function BuildLabeledText(labelTag, text)
+    if text == nil or text == "" then
+        return nil
+    end
+
+    return Locale.Lookup(labelTag, text)
+end
+
+local function GetSubjectCombatStatLabel()
+    local combatType = GetCombatPreviewResults()[CombatResultParameters.COMBAT_TYPE]
+    if combatType == CombatTypes.RANGED then
+        return Locale.Lookup("LOC_HUD_UNIT_PANEL_RANGED_STRENGTH")
+    elseif combatType == CombatTypes.BOMBARD then
+        return Locale.Lookup("LOC_HUD_UNIT_PANEL_BOMBARD_STRENGTH")
+    elseif combatType == CombatTypes.AIR then
+        return Locale.Lookup("LOC_HUD_UNIT_PANEL_ANTI_AIR_STRENGTH")
+    elseif combatType == CombatTypes.RELIGIOUS then
+        return Locale.Lookup("LOC_HUD_UNIT_PANEL_RELIGIOUS_STRENGTH")
+    end
+
+    return Locale.Lookup("LOC_HUD_UNIT_PANEL_STRENGTH")
+end
+
+local function GetTargetCombatStatLabel()
+    local combatType = GetCombatPreviewResults()[CombatResultParameters.COMBAT_TYPE]
+    if combatType == CombatTypes.RELIGIOUS then
+        return Locale.Lookup("LOC_HUD_UNIT_PANEL_RELIGIOUS_STRENGTH")
+    end
+
+    return Locale.Lookup("LOC_HUD_UNIT_PANEL_STRENGTH")
+end
+
+local function BuildStrengthText(control, statLabel)
+    return JoinUnitInfo({ GetControlText(control), statLabel }, " ")
+end
+
+local function GetCombatPreviewActorName(control)
+    local text = GetControlText(control)
+    if text == nil or text == "" then
+        return nil
+    end
+
+    return text
+end
+
+local function GetCombatPreviewSummaryText()
+    local attackerName = GetCombatPreviewActorName(Controls.CombatPreviewUnitName)
+    local targetName = GetCombatPreviewActorName(Controls.TargetUnitName)
+    local assessment = GetControlText(Controls.CombatAssessmentText)
+    if attackerName == nil or targetName == nil or assessment == nil or assessment == "" then
+        return nil
+    end
+
+    return Locale.Lookup("LOC_CAI_COMBAT_PREVIEW_SUMMARY", attackerName, targetName, assessment)
+end
+
+local function GetCombatPreviewTargetName()
+    return GetCombatPreviewActorName(Controls.TargetUnitName)
+end
+
+local function AppendLabeledStrengthText(results, labelTag, control, statLabel)
+    AppendUnitInfo(results, BuildLabeledText(labelTag, BuildStrengthText(control, statLabel)))
+end
+
+local function AppendLabeledText(results, labelTag, text)
+    AppendUnitInfo(results, BuildLabeledText(labelTag, text))
+end
+
+local function AppendModifierTexts(results, labelTag, stack)
+    local modifierTexts = {}
+    AppendStackTexts(modifierTexts, stack)
+    if #modifierTexts > 0 then
+        AppendLabeledText(results, labelTag, JoinUnitInfo(modifierTexts, ", "))
+    end
+end
+
+local function GetPreviewDamageText(damage)
+    if damage <= 0 then
+        return Locale.Lookup("LOC_CAI_COMBAT_PREVIEW_NO_DAMAGE")
+    end
+
+    return "-" .. tostring(damage)
+end
+
+local function GetSubjectPreviewDamageText()
+    local combatResults = GetCombatPreviewResults()
+    return GetPreviewDamageText(combatResults[CombatResultParameters.ATTACKER][CombatResultParameters.DAMAGE_TO])
+end
+
+local function GetTargetPreviewDamageText()
+    local combatResults = GetCombatPreviewResults()
+    local defender = combatResults[CombatResultParameters.DEFENDER]
+
+    if not Controls.TargetCityHealthMeters:IsHidden() then
+        if not Controls.TargetCityWallsHealthMeters:IsHidden() then
+            local wallDamageText = GetPreviewDamageText(defender[CombatResultParameters.DEFENSE_DAMAGE_TO])
+            if wallDamageText ~= Locale.Lookup("LOC_CAI_COMBAT_PREVIEW_NO_DAMAGE") then
+                return wallDamageText
+            end
+        end
+
+        return GetPreviewDamageText(defender[CombatResultParameters.DAMAGE_TO])
+    end
+
+    return GetPreviewDamageText(defender[CombatResultParameters.DAMAGE_TO])
+end
+
+local function GetInterceptorPreviewDamageText()
+    local combatResults = GetCombatPreviewResults()
+    return GetPreviewDamageText(combatResults[CombatResultParameters.INTERCEPTOR][CombatResultParameters.DAMAGE_TO])
+end
+
+local function GetUnitInfoCombatPreview()
+    if Controls == nil or Controls.EnemyUnitPanel == nil or Controls.EnemyUnitPanel:IsHidden() then
+        return nil
+    end
+
+    local results = {}
+    local targetName = GetCombatPreviewTargetName()
+
+    AppendUnitInfo(results, GetCombatPreviewSummaryText())
+
+    if not Controls.InterceptorGrid:IsHidden() then
+        AppendUnitInfo(results,
+            Locale.Lookup("LOC_CAI_COMBAT_PREVIEW_INTERCEPTED_BY", GetControlText(Controls.InterceptorName)))
+    end
+
+    if not Controls.AAGrid:IsHidden() then
+        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_COMBAT_PREVIEW_ANTI_AIR_FROM", GetControlText(Controls.AAName)))
+    end
+
+    AppendLabeledText(results, "LOC_CAI_COMBAT_PREVIEW_MY_DAMAGE", GetSubjectPreviewDamageText())
+    if targetName ~= nil then
+        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_COMBAT_PREVIEW_THEIR_DAMAGE_TARGET", targetName,
+            GetTargetPreviewDamageText()))
+    else
+        AppendLabeledText(results, "LOC_CAI_COMBAT_PREVIEW_THEIR_DAMAGE", GetTargetPreviewDamageText())
+    end
+
+    if not Controls.InterceptorGrid:IsHidden() then
+        AppendLabeledText(results, "LOC_CAI_COMBAT_PREVIEW_INTERCEPTOR_DAMAGE", GetInterceptorPreviewDamageText())
+    end
+
+    AppendLabeledStrengthText(results, "LOC_CAI_COMBAT_PREVIEW_MY_STRENGTH",
+        Controls.CombatPreview_CombatStatStrength, GetSubjectCombatStatLabel())
+    if not Controls.CombatPreview_CombatStatFoeStrength:IsHidden() then
+        AppendLabeledStrengthText(results, "LOC_CAI_COMBAT_PREVIEW_THEIR_STRENGTH",
+            Controls.CombatPreview_CombatStatFoeStrength, GetTargetCombatStatLabel())
+    end
+
+    if not Controls.InterceptorGrid:IsHidden() then
+        AppendLabeledStrengthText(results, "LOC_CAI_COMBAT_PREVIEW_INTERCEPTOR_STRENGTH",
+            Controls.InterceptorStrength, Locale.Lookup("LOC_HUD_UNIT_PANEL_ANTI_AIR_STRENGTH"))
+    end
+
+    if not Controls.AAGrid:IsHidden() then
+        AppendLabeledStrengthText(results, "LOC_CAI_COMBAT_PREVIEW_ANTI_AIR_STRENGTH",
+            Controls.AAStrength, Locale.Lookup("LOC_HUD_UNIT_PANEL_ANTI_AIR_STRENGTH"))
+    end
+
+    AppendModifierTexts(results, "LOC_CAI_COMBAT_PREVIEW_MY_MODIFIERS", Controls.SubjectModifierStack)
+    AppendModifierTexts(results, "LOC_CAI_COMBAT_PREVIEW_THEIR_MODIFIERS", Controls.TargetModifierStack)
+    AppendModifierTexts(results, "LOC_CAI_COMBAT_PREVIEW_INTERCEPTOR_MODIFIERS", Controls.InterceptorModifierStack)
+    AppendModifierTexts(results, "LOC_CAI_COMBAT_PREVIEW_ANTI_AIR_MODIFIERS", Controls.AntiAirModifierStack)
+
+    return #results > 0 and JoinUnitInfo(results, ", ") or nil
 end
 
 UnitInfo = {
     Summary = function(data, unit)
-        return JoinUnitInfo({
-            GetUnitInfoName(data, unit),
-            GetUnitInfoCoords(unit),
-            GetUnitInfoHealth(data),
-            GetUnitInfoMovement(data),
-            JoinUnitInfo(GetUnitInfoCombat(data) or {}, ", "),
-            JoinUnitInfo(GetUnitInfoCharges(data) or {}, ", "),
-        }, ", ")
+        return info:RequestUnitInfo(unit:GetID(), UnitSummaryRequestedKeys, unit:GetOwner())
     end,
 
-    Name = function(data, unit)
+    UnitName = function(data, unit)
         return GetUnitInfoName(data, unit)
+    end,
+
+    Identity = function(data, unit)
+        return JoinUnitInfo({
+            GetUnitInfoName(data, unit),
+            GetUnitTypeDetail(data, unit),
+        }, ", ")
     end,
 
     Health = function(data, unit)
@@ -356,32 +918,40 @@ UnitInfo = {
         return GetUnitInfoMovement(data)
     end,
 
-    Combat = function(data, unit)
-        return GetUnitInfoCombat(data)
+    Moves = function(data, unit)
+        return GetUnitInfoMovement(data)
+    end,
+
+    Activity = function(data, unit)
+        return GetUnitInfoActivity(data, unit)
+    end,
+
+    Stats = function(data, unit)
+        return GetUnitInfoStats(data)
     end,
 
     Charges = function(data, unit)
-        return GetUnitInfoCharges(data)
+        return GetUnitInfoCharges(data, unit)
     end,
 
     Promotions = function(data, unit)
-        return GetUnitInfoPromotions(data)
-    end,
-
-    Formation = function(data, unit)
-        return GetUnitInfoFormation(data)
+        return GetUnitInfoPromotions(data, unit)
     end,
 
     Abilities = function(data, unit)
         return GetUnitInfoAbilities(data)
     end,
 
+    SpecialInfo = function(data, unit)
+        return GetUnitInfoSpecialInfo(data, unit)
+    end,
+
     SpecialState = function(data, unit)
         return GetUnitInfoSpecialState(data)
     end,
 
-    Actions = function(data, unit)
-        return GetUnitInfoActions(data)
+    CombatPreview = function(data, unit)
+        return GetUnitInfoCombatPreview()
     end,
 
     QueuedPath = function(data, unit)
@@ -390,22 +960,55 @@ UnitInfo = {
         if not queued then return nil end
         return BuildMovementSpeech(BuildMovementPathInfo(unit, queued, true, true))
     end,
+
+    BuilderRecommendation = function(data, unit)
+        return GetRecommendedBuilderActionText(unit)
+    end,
+
+    SettlerWaterGuide = function(data, unit)
+        return GetSettlerWaterGuideText(unit)
+    end,
+
+    UpgradeHint = function(data, unit)
+        return GetUpgradeHintText(data)
+    end,
 }
 
 info.UnitInfo = UnitInfo
 info.UnitInfoPriority = UnitInfoPriority
 
---# Action list
-
-function GetUnitActionLabel(action)
+GetUnitActionLabel = function(action)
     if action == nil then
         return nil
     end
 
-    return GetFirstUnitInfoLine(action.helpString) or Locale.Lookup("LOC_OPTIONS_HOTKEY_CATEGORY_UNIT")
+    local label = GetFirstUnitInfoLine(action.helpString)
+    if label ~= nil and label ~= "" and not string.match(label, "^%[ICON_[^%]]+%]$") then
+        return label
+    end
+
+    if action.userTag == upgradeActionHash then
+        return Locale.Lookup("LOC_UNITCOMMAND_UPGRADE_DESCRIPTION")
+    end
+
+    return Locale.Lookup("LOC_OPTIONS_HOTKEY_CATEGORY_UNIT")
 end
 
-function GetUnitActionEntries(data)
+GetUnitActionTooltip = function(action)
+    if action == nil then
+        return ""
+    end
+
+    local tooltip = action.helpString or ""
+    local label = GetUnitActionLabel(action) or ""
+    if tooltip == label then
+        return ""
+    end
+
+    return tooltip
+end
+
+GetUnitActionEntries = function(data)
     if data == nil or data.Actions == nil then
         return {}
     end
@@ -430,9 +1033,7 @@ function GetUnitActionEntries(data)
             local categoryTable = data.Actions[categoryName]
             if categoryTable ~= nil then
                 for _, action in ipairs(categoryTable) do
-                    if not action.Disabled then
-                        table.insert(results, action)
-                    end
+                    table.insert(results, action)
                 end
             end
         end
@@ -441,14 +1042,21 @@ function GetUnitActionEntries(data)
     return results
 end
 
-function CloseUnitActionList()
+local function CloseUnitActionList()
     if UnitActionList ~= nil then
         mgr:RemoveFromStack(UNIT_ACTION_LIST_ID)
         UnitActionList = nil
     end
 end
 
-function BuildUnitActionList(data)
+local function CloseUnitList()
+    if UnitList ~= nil then
+        mgr:RemoveFromStack(UNIT_LIST_ID)
+        UnitList = nil
+    end
+end
+
+local function BuildUnitActionList(data)
     local selectedUnit = GetSelectedUnit()
     local unitName = GetUnitInfoName(data, selectedUnit) or Locale.Lookup("LOC_OPTIONS_HOTKEY_CATEGORY_UNIT")
     local list = mgr:CreateUIWidget(UNIT_ACTION_LIST_ID, "List", {
@@ -467,43 +1075,47 @@ function BuildUnitActionList(data)
 
     for _, action in ipairs(GetUnitActionEntries(data)) do
         local currentAction = action
-        list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitPanelMenuItem"), "MenuItem", {
+        local item = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitPanelMenuItem"), "MenuItem", {
             GetLabel = function()
                 return GetUnitActionLabel(currentAction)
             end,
             GetTooltip = function()
-                return currentAction.helpString
+                return GetUnitActionTooltip(currentAction)
+            end,
+            IsDisabled = function()
+                return currentAction.Disabled == true
             end,
             OnFocusEnter = function()
                 UI.PlaySound("Main_Menu_Mouse_Over")
             end,
             OnClick = function()
                 if currentAction.Disabled then
-                    if currentAction.helpString ~= nil and currentAction.helpString ~= "" then
-                        Speak(ProcessIcons(currentAction.helpString))
+                    local tooltip = GetUnitActionTooltip(currentAction)
+                    if tooltip ~= "" then
+                        Speak(tooltip)
                     end
                     return
                 end
 
-                CloseUnitActionList()
                 UI.PlaySound("Play_UI_Click")
                 if currentAction.Sound ~= nil and currentAction.Sound ~= "" then
                     UI.PlaySound(currentAction.Sound)
                 end
                 currentAction.CallbackFunc(currentAction.CallbackVoid1, currentAction.CallbackVoid2)
+                CloseUnitActionList()
             end,
-        }))
+        })
+        list:AddChild(item)
     end
 
     if data ~= nil and data.Ability ~= nil and #data.Ability > 0 then
-        local abilitiesActionId = Input.GetActionId("UnitViewAbilities")
         list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitViewAbilities"), "MenuItem", {
-            GetLabel     = function() return Locale.Lookup("LOC_CAI_UNIT_VIEW_ABILITIES") end,
-            GetTooltip   = function() return Locale.Lookup("LOC_CAI_UNIT_VIEW_ABILITIES_TOOLTIP") end,
+            GetLabel = function() return Locale.Lookup("LOC_CAI_UNIT_VIEW_ABILITIES") end,
+            GetTooltip = function() return Locale.Lookup("LOC_CAI_UNIT_VIEW_ABILITIES_TOOLTIP") end,
             OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-            OnClick      = function()
+            OnClick = function()
                 CloseUnitActionList()
-                OnUnitPanelSelectionActionInputTriggered(abilitiesActionId)
+                OnUnitPanelSelectionActionInputTriggered(unitViewAbilitiesAction)
             end,
         }))
     end
@@ -511,7 +1123,7 @@ function BuildUnitActionList(data)
     return list
 end
 
-function OpenUnitActionList()
+local function OpenUnitActionList()
     if mgr == nil or ContextPtr:IsHidden() or GetSelectedUnit() == nil then
         return
     end
@@ -536,7 +1148,184 @@ function OpenUnitActionList()
     end
 end
 
---# Input handling
+local function ChangeUnitSelectionCategory(dir)
+    activeCategoryIdx = ((activeCategoryIdx - 1 + dir) % #UnitCategories) + 1
+    Speak(Locale.Lookup(UnitCategories[activeCategoryIdx].Name))
+end
+
+local function ChangeUnitSelection(dir)
+    local sel = UnitCategories[activeCategoryIdx]
+    if dir == -1 and sel.Prev then
+        sel.Prev()
+    elseif dir == 1 and sel.Next then
+        sel.Next()
+    end
+end
+
+local function AddUnitToUnitList(list, unit)
+    local data = ReadUnitData ~= nil and ReadUnitData(unit) or nil
+    local unitName = GetUnitListName(unit)
+    local selectedUnit = GetSelectedUnit()
+    local isSelected = selectedUnit ~= nil
+        and selectedUnit:GetOwner() == unit:GetOwner()
+        and selectedUnit:GetID() == unit:GetID()
+    local value = isSelected and Locale.Lookup("LOC_CAI_STATE_SELECTED") or ""
+    local tooltip = JoinUnitInfo(GetUnitInfoActivity(data, unit) or {}, ", ")
+    local unitID = unit:GetID()
+
+    local item = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitListItem"), "MenuItem", {
+        GetLabel = function()
+            return unitName
+        end,
+        GetValue = function()
+            return value
+        end,
+        GetTooltip = function()
+            return tooltip
+        end,
+        OnFocusEnter = function()
+            UI.PlaySound("Main_Menu_Mouse_Over")
+        end,
+        OnClick = function()
+            local resolved = Players[Game.GetLocalPlayer()]:GetUnits():FindID(unitID)
+            if resolved == nil then
+                return
+            end
+
+            CloseUnitList()
+            UI.SelectUnit(resolved)
+            local plot = Map.GetPlot(resolved:GetX(), resolved:GetY())
+            UI.LookAtPlot(plot)
+        end,
+    })
+
+    item:AddInputBinding({
+        Key = Keys.VK_RETURN,
+        IsShift = true,
+        Action = function()
+            local resolved = Players[Game.GetLocalPlayer()]:GetUnits():FindID(unitID)
+            if resolved == nil then
+                return true
+            end
+
+            local unitInfo = GameInfo.Units[resolved:GetUnitType()]
+            if unitInfo ~= nil then
+                CloseUnitList()
+                LuaEvents.OpenCivilopedia(unitInfo.UnitType)
+            end
+            return true
+        end,
+    })
+
+    list:AddChild(item)
+
+    return isSelected
+end
+
+local function BuildUnitList()
+    local playerID = Game.GetLocalPlayer()
+    if playerID == nil or playerID < 0 then
+        return nil
+    end
+
+    local player = Players[playerID]
+    if player == nil then
+        return nil
+    end
+
+    local list = mgr:CreateUIWidget(UNIT_LIST_ID, "List", {
+        GetLabel = function()
+            return Locale.Lookup("LOC_CAI_UNIT_LIST")
+        end,
+    })
+
+    list:AddInputBinding({
+        Key = Keys.VK_ESCAPE,
+        Action = function()
+            CloseUnitList()
+            return true
+        end,
+    })
+
+    local playerUnits = player:GetUnits()
+    local militaryUnits = {}
+    local navalUnits = {}
+    local airUnits = {}
+    local supportUnits = {}
+    local civilianUnits = {}
+    local tradeUnits = {}
+
+    for _, unit in playerUnits:Members() do
+        local unitInfo = GameInfo.Units[unit:GetUnitType()]
+        if unitInfo.MakeTradeRoute == true then
+            table.insert(tradeUnits, unit)
+        elseif unit:GetCombat() == 0 and unit:GetRangedCombat() == 0 then
+            table.insert(civilianUnits, unit)
+        elseif unitInfo.Domain == "DOMAIN_LAND" then
+            table.insert(militaryUnits, unit)
+        elseif unitInfo.Domain == "DOMAIN_SEA" then
+            table.insert(navalUnits, unit)
+        elseif unitInfo.Domain == "DOMAIN_AIR" then
+            table.insert(airUnits, unit)
+        else
+            table.insert(supportUnits, unit)
+        end
+    end
+
+    local function sortFunc(a, b)
+        local aType = GameInfo.Units[a:GetUnitType()].UnitType
+        local bType = GameInfo.Units[b:GetUnitType()].UnitType
+        return aType < bType
+    end
+
+    table.sort(militaryUnits, sortFunc)
+    table.sort(navalUnits, sortFunc)
+    table.sort(airUnits, sortFunc)
+    table.sort(supportUnits, sortFunc)
+    table.sort(civilianUnits, sortFunc)
+    table.sort(tradeUnits, sortFunc)
+
+    local selectedIndex = nil
+    local function addUnits(units)
+        for _, unit in ipairs(units) do
+            local isSelected = AddUnitToUnitList(list, unit)
+            if selectedIndex == nil and isSelected and list.Children ~= nil then
+                selectedIndex = #list.Children
+            end
+        end
+    end
+
+    addUnits(militaryUnits)
+    addUnits(navalUnits)
+    addUnits(airUnits)
+    addUnits(supportUnits)
+    addUnits(civilianUnits)
+    addUnits(tradeUnits)
+
+    if selectedIndex ~= nil then
+        list:SetDefaultIndex(selectedIndex)
+    end
+
+    return list
+end
+
+local function OpenUnitList()
+    if mgr == nil then
+        return
+    end
+
+    if UnitList ~= nil then
+        CloseUnitList()
+    end
+
+    UnitList = BuildUnitList()
+    if UnitList ~= nil and UnitList.Children ~= nil and #UnitList.Children > 0 then
+        mgr:Push(UnitList, PopupPriority.Low)
+    else
+        UnitList = nil
+        Speak(Locale.Lookup("LOC_CAI_UNIT_NO_UNITS"))
+    end
+end
 
 function OnHandleInput(inputStruct)
     if not mgr then return false end
@@ -546,14 +1335,14 @@ end
 function InitializeUnitInfoActionMap()
     UnitInfoActionMap = {
         [Input.GetActionId("ReadSelectionSummary")] = { "Summary" },
-        [Input.GetActionId("ReadSelectionInfo1")] = { "Health" },
+        [Input.GetActionId("ReadSelectionInfo1")] = { "Identity", "Health" },
         [Input.GetActionId("ReadSelectionInfo2")] = { "Movement" },
-        [Input.GetActionId("ReadSelectionInfo3")] = { "Combat" },
+        [Input.GetActionId("ReadSelectionInfo3")] = { "Activity" },
         [Input.GetActionId("ReadSelectionInfo4")] = { "Charges" },
         [Input.GetActionId("ReadSelectionInfo5")] = { "Promotions" },
-        [Input.GetActionId("ReadSelectionInfo6")] = { "Formation" },
-        [Input.GetActionId("ReadSelectionInfo7")] = { "SpecialState" },
-        [Input.GetActionId("ReadSelectionInfo8")] = { "Actions" },
+        [Input.GetActionId("ReadSelectionInfo6")] = { "Stats" },
+        [Input.GetActionId("ReadSelectionInfo7")] = { "Abilities" },
+        [Input.GetActionId("ReadSelectionInfo8")] = { "SpecialInfo" },
         [Input.GetActionId("ReadSelectionInfo9")] = { "QueuedPath" },
     }
 end
@@ -579,23 +1368,35 @@ function OnUnitPanelSelectionInfoInputActionTriggered(actionId)
         return
     end
 
-    Speak(ProcessIcons(table.concat(results, "\n")))
+    Speak(ProcessIcons(table.concat(results, ", ")))
 end
 
 function OnUnitPanelSelectionActionInputTriggered(actionId)
     if actionId == prevUnitCatAction then
         ChangeUnitSelectionCategory(-1)
+        return
     elseif actionId == nextUnitCatAction then
         ChangeUnitSelectionCategory(1)
+        return
     elseif actionId == prevUnitAction then
         ChangeUnitSelection(-1)
+        return
     elseif actionId == nextUnitAction then
         ChangeUnitSelection(1)
+        return
     end
-    if actionId == Input.GetActionId("SelectionActions") then
+
+    if actionId == selectionActionsAction then
         OpenUnitActionList()
+        return
     end
-    if actionId == Input.GetActionId("UnitViewAbilities") then
+
+    if actionId == openUnitListAction then
+        OpenUnitList()
+        return
+    end
+
+    if actionId == unitViewAbilitiesAction then
         if ContextPtr:IsHidden() or GetSelectedUnit() == nil then return end
 
         local data = GetSubjectData ~= nil and GetSubjectData() or nil
@@ -609,25 +1410,24 @@ function OnUnitPanelSelectionActionInputTriggered(actionId)
             return
         end
 
-        local UNIT_ABILITIES_LIST_ID = "CAIUnitAbilitiesList"
         local list = mgr:CreateUIWidget(UNIT_ABILITIES_LIST_ID, "List", {
             GetLabel = function() return Locale.Lookup("LOC_CAI_UNIT_ABILITIES_LIST") end,
         })
         list:AddInputBinding({
             Key = Keys.VK_ESCAPE,
             Action = function()
-                mgr:RemoveFromStack(UNIT_ABILITIES_LIST_ID); return true
+                mgr:RemoveFromStack(UNIT_ABILITIES_LIST_ID)
+                return true
             end
         })
 
         for _, ability in ipairs(data.Ability) do
-            local desc = GetUnitAbilityDescription(ability)
-            if desc ~= nil and desc ~= "" then
-                local locDesc = Locale.Lookup(desc)
+            local abilityText = GetUnitAbilityDescription(ability)
+            if abilityText ~= nil and abilityText ~= "" then
                 list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitAbilityItem"), "MenuItem", {
-                    GetLabel     = function() return locDesc end,
+                    GetLabel = function() return abilityText end,
                     OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-                    OnClick      = function() mgr:RemoveFromStack(UNIT_ABILITIES_LIST_ID) end,
+                    OnClick = function() mgr:RemoveFromStack(UNIT_ABILITIES_LIST_ID) end,
                 }))
             end
         end
@@ -648,11 +1448,23 @@ function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locatio
         return
     end
 
-    Speak(ProcessIcons(table.concat(results, "\n")))
+    Speak(ProcessIcons(table.concat(results, ", ")))
     LuaEvents.CAICursorMove(locationX, locationY)
 end
 
---# Public API
+local function OnCAICursorMoved(x, y, plot, cursor)
+    InspectWhatsBelowTheCursor()
+end
+
+local function OnCAISpeakCombatPreview()
+    local results = GetUnitInfoCombatPreview()
+    if results == nil or results == "" then
+        Speak(Locale.Lookup("LOC_CAI_UNIT_NO_COMBAT"))
+        return
+    end
+
+    Speak(ProcessIcons(results))
+end
 
 function info:RequestUnitInfo(unitID, requestedKeys, playerID)
     local data, unit = ResolveUnitData(unitID, playerID)
@@ -685,6 +1497,7 @@ InitializeUnitInfoActionMap()
 Events.InputActionTriggered.Add(OnUnitPanelSelectionInfoInputActionTriggered)
 Events.InputActionTriggered.Add(OnUnitPanelSelectionActionInputTriggered)
 Events.UnitSelectionChanged.Add(OnCAIUnitSelectionChanged)
-
--- Init input handler
+LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
+LuaEvents.CAISpeakCombatPreview.Add(OnCAISpeakCombatPreview)
 ContextPtr:SetInputHandler(OnHandleInput, true)
+InstallUIOverrides()

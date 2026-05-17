@@ -448,6 +448,101 @@
       <Text>Speaks the direction from the CAI cursor to the currently selected world scanner item</Text>
     </Row>
 
+    <!-- Surveyor -->
+    <Row Tag="LOC_CAI_SURVEYOR_GROW_RADIUS" Language="en_US">
+      <Text>Surveyor grow radius</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_GROW_RADIUS_TOOLTIP" Language="en_US">
+      <Text>Increases the Surveyor radius around the CAI cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_SHRINK_RADIUS" Language="en_US">
+      <Text>Surveyor shrink radius</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_SHRINK_RADIUS_TOOLTIP" Language="en_US">
+      <Text>Decreases the Surveyor radius around the CAI cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_YIELDS" Language="en_US">
+      <Text>Surveyor read yields</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_YIELDS_TOOLTIP" Language="en_US">
+      <Text>Reads total yields within the Surveyor radius around the CAI cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_RESOURCES" Language="en_US">
+      <Text>Surveyor read resources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_RESOURCES_TOOLTIP" Language="en_US">
+      <Text>Reads visible resources within the Surveyor radius around the CAI cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_TERRAIN" Language="en_US">
+      <Text>Surveyor read terrain</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_TERRAIN_TOOLTIP" Language="en_US">
+      <Text>Reads revealed terrain within the Surveyor radius around the CAI cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_OWN_UNITS" Language="en_US">
+      <Text>Surveyor read own units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_OWN_UNITS_TOOLTIP" Language="en_US">
+      <Text>Reads friendly units within the Surveyor radius around the CAI cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_ENEMY_UNITS" Language="en_US">
+      <Text>Surveyor read enemy units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_ENEMY_UNITS_TOOLTIP" Language="en_US">
+      <Text>Reads visible enemy units within the Surveyor radius around the CAI cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_CITIES" Language="en_US">
+      <Text>Surveyor read cities and camps</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_CITIES_TOOLTIP" Language="en_US">
+      <Text>Reads known cities and barbarian camps within the Surveyor radius around the CAI cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_RADIUS" Language="en_US">
+      <Text>Surveyor radius {1_Radius}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_RADIUS_MIN" Language="en_US">
+      <Text>Surveyor radius {1_Radius}, minimum</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_RADIUS_MAX" Language="en_US">
+      <Text>Surveyor radius {1_Radius}, maximum</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_CURSOR_UNAVAILABLE" Language="en_US">
+      <Text>Surveyor cursor unavailable</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_COUNT" Language="en_US">
+      <Text>{1_Count} {2_Label}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_YIELD_COUNT" Language="en_US">
+      <Text>{1_Count}{2_Icon}{3_Yield}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_UNEXPLORED_SUFFIX" Language="en_US">
+      <Text>{1_Count : plural 1?{1_Count} unexplored tile; other?{1_Count} unexplored tiles;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_EMPTY_YIELDS" Language="en_US">
+      <Text>No yields</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_EMPTY_RESOURCES" Language="en_US">
+      <Text>No visible resources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_EMPTY_TERRAIN" Language="en_US">
+      <Text>No revealed terrain</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_EMPTY_OWN_UNITS" Language="en_US">
+      <Text>No friendly units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_EMPTY_ENEMY_UNITS" Language="en_US">
+      <Text>No visible enemy units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_EMPTY_CITIES" Language="en_US">
+      <Text>No known cities or camps</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_HILLS" Language="en_US">
+      <Text>Hills</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_MOUNTAINS" Language="en_US">
+      <Text>Mountains</Text>
+    </Row>
+
     <!-- Notification panel -->
     <Row Tag="LOC_CAI_NOTIFICATION_CENTER" Language="en_US">
       <Text>Notification center</Text>
@@ -1351,11 +1446,23 @@
     <Row Tag="LOC_CAI_UNIT_VIEW_ABILITIES_TOOLTIP" Language="en_US">
       <Text>Opens a list of this unit's special abilities</Text>
     </Row>
+    <Row Tag="LOC_CAI_UNIT_OPEN_LIST" Language="en_US">
+      <Text>Open unit list</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_OPEN_LIST_TOOLTIP" Language="en_US">
+      <Text>Opens a list of your units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_LIST" Language="en_US">
+      <Text>Unit list</Text>
+    </Row>
     <Row Tag="LOC_CAI_UNIT_ABILITIES_LIST" Language="en_US">
       <Text>Unit abilities</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_NO_COMBAT" Language="en_US">
       <Text>No combat statistics</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_NO_STATS" Language="en_US">
+      <Text>No unit statistics</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_NO_CHARGES" Language="en_US">
       <Text>Charges not supported for this unit</Text>
@@ -1369,11 +1476,116 @@
     <Row Tag="LOC_CAI_UNIT_NO_ABILITIES" Language="en_US">
       <Text>This unit has no abilities</Text>
     </Row>
+    <Row Tag="LOC_CAI_UNIT_MORE_ABILITIES" Language="en_US">
+      <Text>+ {1_Num} more abilities</Text>
+    </Row>
     <Row Tag="LOC_CAI_UNIT_NO_SPECIAL_STATE" Language="en_US">
       <Text>No special state</Text>
     </Row>
+    <Row Tag="LOC_CAI_UNIT_NO_SPECIAL_INFO" Language="en_US">
+      <Text>No special unit information</Text>
+    </Row>
     <Row Tag="LOC_CAI_UNIT_NO_ACTIONS" Language="en_US">
       <Text>No actions available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_NO_ACTIVITY" Language="en_US">
+      <Text>No activity information available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_NO_UNITS" Language="en_US">
+      <Text>No units available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_RELATIVE_COORDS" Language="en_US">
+      <Text>Location {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTIVITY_READY" Language="en_US">
+      <Text>Ready for orders</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTIVITY_NOT_READY" Language="en_US">
+      <Text>Not ready</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTIVITY_SLEEP" Language="en_US">
+      <Text>Sleeping</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTIVITY_SKIP" Language="en_US">
+      <Text>Skipping turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTIVITY_FORTIFIED" Language="en_US">
+      <Text>Fortified</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTIVITY_OPERATION" Language="en_US">
+      <Text>Busy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTIVITY_SPY_IDLE" Language="en_US">
+      <Text>Awaiting spy assignment</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTIVITY_SPY_MISSION" Language="en_US">
+      <Text>Mission: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTIVITY_TRADE_ROUTE" Language="en_US">
+      <Text>Trading: {1_Route}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTIVITY_TRADE_IDLE" Language="en_US">
+      <Text>Awaiting trade route assignment</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_YOURS" Language="en_US">
+      <Text>Your side</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_TARGET" Language="en_US">
+      <Text>Target</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_SUMMARY" Language="en_US">
+      <Text>{1_Attacker} versus {2_Target}: {3_Assessment}.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_INTERCEPTED_BY" Language="en_US">
+      <Text>Intercepted by {1_Name}.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_ANTI_AIR_FROM" Language="en_US">
+      <Text>Anti-Air from {1_Name}.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_INTERCEPTOR" Language="en_US">
+      <Text>Interceptor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_ANTI_AIR" Language="en_US">
+      <Text>Anti-air</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_MY_STRENGTH" Language="en_US">
+      <Text>Your strength: {1_Value}.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_THEIR_STRENGTH" Language="en_US">
+      <Text>Target's strength: {1_Value}.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_INTERCEPTOR_STRENGTH" Language="en_US">
+      <Text>Interceptor strength: {1_Value}.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_ANTI_AIR_STRENGTH" Language="en_US">
+      <Text>Anti-Air strength: {1_Value}.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_MY_DAMAGE" Language="en_US">
+      <Text>Damage you will suffer: {1_Value}.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_THEIR_DAMAGE" Language="en_US">
+      <Text>Damage you will deal: {1_Value}.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_THEIR_DAMAGE_TARGET" Language="en_US">
+      <Text>Damage you will deal to {1_Target}: {2_Value}.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_INTERCEPTOR_DAMAGE" Language="en_US">
+      <Text>Interceptor takes: {1_Value}.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_MY_MODIFIERS" Language="en_US">
+      <Text>Your modifiers: {1_Value}.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_THEIR_MODIFIERS" Language="en_US">
+      <Text>Target's modifiers: {1_Value}.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_INTERCEPTOR_MODIFIERS" Language="en_US">
+      <Text>Interceptor modifiers: {1_Value}.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_ANTI_AIR_MODIFIERS" Language="en_US">
+      <Text>Anti-Air modifiers: {1_Value}.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_NO_DAMAGE" Language="en_US">
+      <Text>No damage</Text>
     </Row>
 
     <!-- Tile info hotkeys -->
@@ -1488,6 +1700,9 @@
     <Row Tag="LOC_CAI_PLOT_INTERFACE_INVALID" Language="en_US">
       <Text>Invalid</Text>
     </Row>
+    <Row Tag="LOC_CAI_PLOT_INTERFACE_INVALID_TARGET" Language="en_US">
+      <Text>Invalid target</Text>
+    </Row>
     <Row Tag="LOC_CAI_PLOT_INTERFACE_OWNED" Language="en_US">
       <Text>Owned</Text>
     </Row>
@@ -1548,6 +1763,15 @@
     <Row Tag="LOC_CAI_DIRECTION_STEP" Language="en_US">
       <Text>{1_Num} {2_Direction}</Text>
     </Row>
+    <Row Tag="LOC_CAI_INTERFACE_INFO" Language="en_US">
+      <Text>Interface info</Text>
+    </Row>
+    <Row Tag="LOC_CAI_INTERFACE_INFO_TOOLTIP" Language="en_US">
+      <Text>Reads information for the current interface target</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NO_INTERFACE_INFO" Language="en_US">
+      <Text>No interface information</Text>
+    </Row>
     <Row Tag="LOC_CAI_INTERFACE_PRIMARY_ACTION" Language="en_US">
       <Text>Primary interface action</Text>
     </Row>
@@ -1559,6 +1783,75 @@
     </Row>
     <Row Tag="LOC_CAI_END_TURN_TOOLTIP" Language="en_US">
       <Text>Triggers the current ActionPanel action when available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RANGE_ATTACK_MODE" Language="en_US">
+      <Text>Ranged attack mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_RANGE_ATTACK_MODE" Language="en_US">
+      <Text>City ranged attack mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DISTRICT_RANGE_ATTACK_MODE" Language="en_US">
+      <Text>District ranged attack mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_AIR_ATTACK_MODE" Language="en_US">
+      <Text>Air attack mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WMD_STRIKE_MODE" Language="en_US">
+      <Text>WMD strike mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ICBM_STRIKE_MODE" Language="en_US">
+      <Text>ICBM strike mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COASTAL_RAID_MODE" Language="en_US">
+      <Text>Coastal raid mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DEPLOY_MODE" Language="en_US">
+      <Text>Deploy mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REBASE_MODE" Language="en_US">
+      <Text>Rebase mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TELEPORT_TO_CITY_MODE" Language="en_US">
+      <Text>Teleport to city mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_FORM_CORPS_MODE" Language="en_US">
+      <Text>Form corps mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_FORM_ARMY_MODE" Language="en_US">
+      <Text>Form army mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_AIRLIFT_MODE" Language="en_US">
+      <Text>Airlift mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SACRIFICE_SELECTION_MODE" Language="en_US">
+      <Text>Sacrifice selection mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KILL_WEAKER_UNIT_MODE" Language="en_US">
+      <Text>Kill weaker unit mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRANSFORM_UNIT_MODE" Language="en_US">
+      <Text>Transform unit mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESTORE_UNIT_MOVES_MODE" Language="en_US">
+      <Text>Restore unit moves mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NAVAL_GOLD_RAID_MODE" Language="en_US">
+      <Text>Naval gold raid mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EXITED_TARGETING_MODE" Language="en_US">
+      <Text>Exited targeting mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_FORMATION_TARGET" Language="en_US">
+      <Text>formation target</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_VALID_TARGETS" Language="en_US">
+      <Text>Valid targets</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TARGET_PLOTS" Language="en_US">
+      <Text>Target plots</Text>
+    </Row>
+    <Row Tag="LOC_CAI_VALID_TARGET_PLOT" Language="en_US">
+      <Text>Target plot {1_X}, {2_Y}</Text>
     </Row>
 
     <!-- Selection info hotkeys -->
@@ -1599,22 +1892,22 @@
       <Text>Reads selection info slot 5</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO6" Language="en_US">
-      <Text>Read selection info 6</Text>
+      <Text>Read unit stats</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO6_TOOLTIP" Language="en_US">
-      <Text>Reads selection info slot 6</Text>
+      <Text>Reads unit statistics for the selected unit</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO7" Language="en_US">
-      <Text>Read selection info 7</Text>
+      <Text>Read unit abilities</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO7_TOOLTIP" Language="en_US">
-      <Text>Reads selection info slot 7</Text>
+      <Text>Reads the selected unit's abilities</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO8" Language="en_US">
-      <Text>Read selection info 8</Text>
+      <Text>Read special unit info</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO8_TOOLTIP" Language="en_US">
-      <Text>Reads selection info slot 8</Text>
+      <Text>Reads special selected-unit info such as spy, trader, rock band, and great person details</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO9" Language="en_US">
       <Text>Read queued movement path</Text>

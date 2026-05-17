@@ -80,3 +80,4 @@ end)
 LuaEvents.CAICursorSnapToPlot.Add(function(plot)
     CAICursor:SnapToPlot(plot)
 end)
+ExposedMembers.CAICursor = CAICursor

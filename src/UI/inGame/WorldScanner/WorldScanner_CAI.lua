@@ -21,6 +21,8 @@ include("WorldScannerCore")
 ---@field SubCategoryLabels table<string, string>
 ---@field GroupOrderBySubCategory table<string, string[]>|nil
 ---@field GroupLabelResolver fun(groupId:string, firstItem:table|nil):string|nil
+---@field CanScan fun(context:WorldScannerContext):boolean|nil
+---@field BuildOncePerDynamicState boolean|nil
 ---@field Scan fun(context:WorldScannerContext):table[]
 
 ---@class WorldScanner
@@ -41,6 +43,8 @@ local Utils = CAIWorldScannerUtils
 local WATER_LAYER = UILens.CreateLensLayerHash("Hex_Coloring_Water_Availablity")
 ---@type WorldScannerCategoryDefinition[]
 local RegisteredCategoryDefinitions = {}
+local EMPTY_CATEGORY = false
+local FindCategorySlotById
 
 ---@param definition WorldScannerCategoryDefinition|nil
 function CAIWorldScanner:RegisterCategoryDefinition(definition)
@@ -69,6 +73,174 @@ end
 
 local function GetCurrentItem(scanner)
     return Core.GetCurrentItem(scanner)
+end
+
+local function BuildScannerContext()
+    return {
+        LocalPlayerID = Game.GetLocalPlayer(),
+        ObserverID = Game.GetLocalObserver(),
+    }
+end
+
+local function CreateCategorySlots(definitions)
+    local slots = {}
+    for _, definition in ipairs(definitions or {}) do
+        slots[#slots + 1] = {
+            Definition = definition,
+            Category = nil,
+        }
+    end
+    return slots
+end
+
+local function GetCategorySlot(scanner, index)
+    return scanner and scanner.Categories and scanner.Categories[index] or nil
+end
+
+local function GetSlotCategory(slot)
+    if slot == nil or slot.Category == EMPTY_CATEGORY then
+        return nil
+    end
+
+    return slot.Category
+end
+
+local function IsBuildOnceCategory(slotOrDefinition)
+    return slotOrDefinition ~= nil and slotOrDefinition.BuildOncePerDynamicState == true
+end
+
+local function EnsureCategoryBuilt(scanner, index)
+    local slot = GetCategorySlot(scanner, index)
+    if slot == nil then
+        return nil
+    end
+
+    if slot.Category == nil then
+        slot.Category = Core.BuildCategory(slot.Definition, BuildScannerContext()) or EMPTY_CATEGORY
+    end
+
+    return GetSlotCategory(slot)
+end
+
+local function RebuildPerCycleCategories(scanner)
+    if scanner == nil then
+        return
+    end
+
+    local oldSlots = scanner.Categories or {}
+    local focus = Core.CaptureFocus(scanner)
+    scanner.Categories = CreateCategorySlots(scanner.CategoryDefinitions)
+
+    for index, slot in ipairs(scanner.Categories) do
+        local definition = slot.Definition
+        local oldSlot = oldSlots[index]
+        if IsBuildOnceCategory(definition) then
+            slot.Category = oldSlot and oldSlot.Category or nil
+        else
+            slot.Category = Core.BuildCategory(definition, BuildScannerContext()) or EMPTY_CATEGORY
+        end
+    end
+
+    if focus ~= nil and focus.CategoryId ~= nil then
+        scanner.CategoryIndex = FindCategorySlotById(scanner, focus.CategoryId) or scanner.CategoryIndex
+    end
+end
+
+local function CountCategorySlots(scanner)
+    return scanner and scanner.Categories and #scanner.Categories or 0
+end
+
+local function IsCategoryPotentiallyAvailable(slot)
+    if slot == nil or slot.Category == EMPTY_CATEGORY then
+        return false
+    end
+
+    if slot.Category ~= nil then
+        return true
+    end
+
+    local definition = slot.Definition
+    if definition ~= nil and definition.CanScan ~= nil and not definition.CanScan(BuildScannerContext()) then
+        return false
+    end
+
+    return true
+end
+
+local function CountPotentialCategories(scanner)
+    local count = 0
+    for _, slot in ipairs(scanner and scanner.Categories or {}) do
+        if IsCategoryPotentiallyAvailable(slot) then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+local function GetPotentialCategoryPosition(scanner, targetIndex)
+    local position = 0
+    for index, slot in ipairs(scanner and scanner.Categories or {}) do
+        if IsCategoryPotentiallyAvailable(slot) then
+            position = position + 1
+            if index == targetIndex then
+                return position
+            end
+        end
+    end
+
+    return 0
+end
+
+local function FindAvailableCategoryIndex(scanner, startIndex, step)
+    local count = CountCategorySlots(scanner)
+    if count == 0 then
+        return nil
+    end
+
+    for offset = 0, count - 1 do
+        local index = ((startIndex - 1 + (offset * step)) % count) + 1
+        if EnsureCategoryBuilt(scanner, index) ~= nil then
+            return index
+        end
+    end
+
+    return nil
+end
+
+local function EnsureCurrentCategory(scanner)
+    local current = EnsureCategoryBuilt(scanner, scanner.CategoryIndex)
+    if current ~= nil then
+        return current
+    end
+
+    local availableIndex = FindAvailableCategoryIndex(scanner, scanner.CategoryIndex, 1)
+    if availableIndex == nil then
+        scanner.CategoryIndex = 0
+        scanner.SubCategoryIndex = 0
+        scanner.GroupIndex = 0
+        scanner.ItemIndex = 0
+        return nil
+    end
+
+    scanner.CategoryIndex = availableIndex
+    scanner.SubCategoryIndex = 1
+    scanner.GroupIndex = 0
+    scanner.ItemIndex = 0
+    return GetCategory(scanner)
+end
+
+FindCategorySlotById = function(scanner, categoryId)
+    if scanner == nil or scanner.Categories == nil then
+        return nil
+    end
+
+    for index, slot in ipairs(scanner.Categories) do
+        if slot.Definition ~= nil and slot.Definition.Id == categoryId then
+            return index
+        end
+    end
+
+    return nil
 end
 
 local function GetItemDirectionText(item)
@@ -140,46 +312,97 @@ end
 
 local function OnScannerCursorMoved(x, y)
     Utils.SetCurrentCursorPosition(x, y)
-    CAIWorldScanner:Resort()
+    CAIWorldScanner:ResortCurrentCategory()
 end
 
 local function OnScannerLensLayerOn(layerNum)
-    CAIWorldScanner:Rebuild()
+    if layerNum == WATER_LAYER then
+        CAIWorldScanner:RebuildCategory("waterAvailability")
+    end
 end
 
 local function OnScannerLensLayerOff(layerNum)
-    CAIWorldScanner:Rebuild()
+    if layerNum == WATER_LAYER then
+        CAIWorldScanner:RebuildCategory("waterAvailability")
+    end
 end
 
 local function OnScannerUnitSelectionChanged(playerID, unitID, locationX, locationY, locationZ, isSelected, isEditable)
     if playerID == Game.GetLocalPlayer() then
-        CAIWorldScanner:Rebuild()
+        if CAIInterfaceTargets ~= nil and CAIInterfaceTargets.ClearCache ~= nil then
+            CAIInterfaceTargets.ClearCache()
+        end
+        CAIWorldScanner:RebuildCategory("validTargets")
     end
+end
+
+local function OnScannerInterfaceModeChanged(oldMode, newMode)
+    if CAIInterfaceTargets ~= nil and CAIInterfaceTargets.ClearCache ~= nil then
+        CAIInterfaceTargets.ClearCache()
+    end
+    CAIWorldScanner:RebuildCategory("validTargets")
 end
 
 ---@param focusOverride WorldScannerFocus|nil
 function CAIWorldScanner:Rebuild(focusOverride)
-    ---@type WorldScannerContext
-    local context = {
-        LocalPlayerID = Game.GetLocalPlayer(),
-        ObserverID = Game.GetLocalObserver(),
-    }
     local focus = focusOverride or Core.CaptureFocus(self)
-    self.Categories = Core.BuildScanner(self.CategoryDefinitions, context)
+    self.Categories = CreateCategorySlots(self.CategoryDefinitions)
+
+    if focus ~= nil and focus.CategoryId ~= nil then
+        self.CategoryIndex = FindCategorySlotById(self, focus.CategoryId) or self.CategoryIndex
+    end
+    if self.CategoryIndex < 1 then
+        self.CategoryIndex = 1
+    end
+
+    EnsureCurrentCategory(self)
+
+    local category = GetCategory(self)
+    if category == nil then
+        return
+    end
+
+    Core.RestoreFocus(self, focus)
+    EnsureCurrentCategory(self)
+    Core.ClampIndexes(self)
+end
+
+function CAIWorldScanner:RebuildCategory(categoryId)
+    local index = FindCategorySlotById(self, categoryId)
+    if index == nil then
+        return
+    end
+
+    local focus = Core.CaptureFocus(self)
+    local slot = self.Categories[index]
+    slot.Category = nil
+
+    if index == self.CategoryIndex then
+        EnsureCategoryBuilt(self, index)
+        if GetCategory(self) == nil then
+            EnsureCurrentCategory(self)
+        end
+    end
+
+    Core.RestoreFocus(self, focus)
+    EnsureCurrentCategory(self)
+    Core.ClampIndexes(self)
+end
+
+function CAIWorldScanner:ResortCurrentCategory()
+    local focus = Core.CaptureFocus(self)
+    Core.RefreshCategorySort(GetCategory(self))
     Core.RestoreFocus(self, focus)
     Core.ClampIndexes(self)
 end
 
 function CAIWorldScanner:Resort()
-    local focus = Core.CaptureFocus(self)
-    Core.RefreshSorts(self.Categories)
-    Core.RestoreFocus(self, focus)
-    Core.ClampIndexes(self)
+    self:ResortCurrentCategory()
 end
 
 function CAIWorldScanner:Initialize()
     self.CategoryDefinitions = RegisteredCategoryDefinitions
-    self.Categories = {}
+    self.Categories = CreateCategorySlots(self.CategoryDefinitions)
     self.CategoryIndex = 1
     self.SubCategoryIndex = 1
     self.GroupIndex = 0
@@ -192,7 +415,8 @@ function CAIWorldScanner:Initialize()
     Events.LensLayerOn.Add(OnScannerLensLayerOn)
     Events.LensLayerOff.Add(OnScannerLensLayerOff)
     Events.UnitSelectionChanged.Add(OnScannerUnitSelectionChanged)
-    self:Rebuild()
+    Events.InterfaceModeChanged.Add(OnScannerInterfaceModeChanged)
+    EnsureCurrentCategory(self)
 end
 
 function CAIWorldScanner:ClearScanner()
@@ -200,6 +424,7 @@ function CAIWorldScanner:ClearScanner()
     Events.LensLayerOn.Remove(OnScannerLensLayerOn)
     Events.LensLayerOff.Remove(OnScannerLensLayerOff)
     Events.UnitSelectionChanged.Remove(OnScannerUnitSelectionChanged)
+    Events.InterfaceModeChanged.Remove(OnScannerInterfaceModeChanged)
     self.Categories = {}
     self.CategoryDefinitions = {}
     self.CategoryIndex = 1
@@ -215,28 +440,30 @@ end
 
 ---@param step integer
 function CAIWorldScanner:CycleCategory(step)
-    local count = #self.Categories
+    RebuildPerCycleCategories(self)
+
+    local count = CountPotentialCategories(self)
     if count == 0 then
         Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_EMPTY"))
         return
     end
 
-    local targetIndex = ((self.CategoryIndex - 1 + step) % count) + 1
-    local targetCategory = self.Categories[targetIndex]
-    local focus = {
-        CategoryId = targetCategory and targetCategory.Id or nil,
-        SubCategoryId = nil,
-        GroupId = nil,
-        ItemId = nil,
-        HadGroupSelection = false,
-        HadItemSelection = false,
-    }
-    self:Rebuild(focus)
+    local targetIndex = FindAvailableCategoryIndex(self, self.CategoryIndex + step, step)
+    if targetIndex == nil then
+        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_EMPTY"))
+        return
+    end
+    count = CountPotentialCategories(self)
+
+    self.CategoryIndex = targetIndex
+    self.SubCategoryIndex = 1
+    self.GroupIndex = 0
+    self.ItemIndex = 0
     SelectFirstGroupAndItem(self)
 
     local category = GetCategory(self)
     if category ~= nil then
-        SpeakPositionedLabel(category.LabelKey, self.CategoryIndex, #self.Categories)
+        SpeakPositionedLabel(category.LabelKey, GetPotentialCategoryPosition(self, self.CategoryIndex), count)
     end
 end
 

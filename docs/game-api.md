@@ -210,6 +210,7 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - `WorldScannerCategory_waterAvailability.lua`
   - `WorldScannerCategory_resources.lua`
   - `WorldScannerCategory_units.lua`
+  - `WorldScannerCategory_validTargets.lua`
   - `WorldScannerCategory_specialMapObjects.lua`
 - `WorldScanner_CAI.lua` includes the shared modules directly and then uses `include("WorldScannerCategory_", true)` so all loaded category files with that prefix are pulled in automatically, matching the vanilla late-include pattern.
 - `WorldInput_CAI.lua` includes the scanner entry point and dispatches scanner input actions through `Events.InputActionTriggered`.
@@ -252,10 +253,38 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - gone speaks `Gone: ...`
   - repeated labels aggregate to `count + label`
   - reveal payload section order is `Enemy`, `Units`, `Cities`, `Resources`, `Districts`, `Improvements`
-- Scanner rebuild policy in v1: rebuild on category change and on `Events.LocalPlayerTurnBegin`.
+- Scanner rebuild policy in the current scanner: category definitions are registered up front, but only dynamic categories keep their built contents across category cycles. Ordinary categories are discarded and rebuilt from live data whenever the player cycles scanner categories, which keeps stale entries from lingering without reintroducing a full scanner rebuild on every cursor move.
+- Category definitions can opt into dynamic one-shot behavior with `BuildOncePerDynamicState = true`. CAI currently uses that for `validTargets` and `waterAvailability`.
+- Scanner invalidation is category-scoped where possible: `Events.InterfaceModeChanged` and local unit selection changes rebuild only `validTargets`; water-lens layer changes rebuild only `waterAvailability`; `Events.LocalPlayerTurnBegin` clears all built category contents.
+- Category definitions can expose a cheap `CanScan(context)` predicate to avoid expensive API calls when a category cannot currently exist, such as `validTargets` outside supported interface modes or `waterAvailability` while the water lens is off.
+- Cursor movement resorts only the current built category. It does not rebuild or resort every scanner category.
 - Scanner distance sorting uses the current CAI cursor plot and `Map.GetPlotDistance(...)`.
 - Scanner jump and return use CAI cursor movement through `LuaEvents.CAICursorMove(x, y)`.
 - Full-map scanner categories should iterate plots with `for plotIndex = 0, Map.GetPlotCount() - 1 do` and `Map.GetPlotByIndex(plotIndex)`. Do not use `Map.GetNumPlots()`.
+- `WorldScannerCategory_validTargets.lua` appears only in active targeting modes. It gets target items from the neutral `CAIInterfaceTargets` helper in `interfaceTargetHelpers_CAI.lua`, so scanner and Space interface info use the same live target resolution without the scanner depending on `interfaceInfoHelpers_CAI.lua`. It does not attach per-item validation callbacks because the category is rebuilt when target mode or selected unit changes, and re-calling target APIs during scanner core validation is too expensive.
+- `CAIInterfaceTargets` is now a slim target enumeration/cache helper. It owns target discovery, mode support checks, cache signatures, cached scalar item data, and plot lookup by plot id. It should not own standalone plot-label heuristics beyond the formation-unit special case.
+- `CAIInterfaceTargets` caches only scalar target item data: plot ids, unit owner/id, labels, and a plot-id lookup table. Do not cache live `Plot`, `Unit`, `City`, or `District` objects. The cache is cleared on interface-mode and selected-local-unit changes so target APIs such as `UnitManager.GetOperationTargets(... REBASE ...)` are not called on every cursor move.
+- Valid Targets plot modes are computed from vanilla `UnitManager.GetOperationTargets(...)`, `UnitManager.GetCommandTargets(...)`, or `CityManager.GetCommandTargets(...)` instead of vanilla `g_targetPlots`. Normal ranged/city/district/air attacks filter for `MODIFIER_IS_TARGET`; WMD, ICBM, coastal raid, deploy, rebase, teleport-to-city, airlift, soothsayer sacrifice, hero target commands, and naval gold raid use the eligible plot list vanilla exposes.
+- `FORM_CORPS` and `FORM_ARMY` are unit-target modes, not plot-target modes. Vanilla reads `UnitCommandResults.UNITS` from `UnitManager.GetCommandTargets(selectedUnit, UnitCommandTypes.FORM_CORPS/FORM_ARMY)`, highlights each target unit plot, draws form-corps wave overlays from target unit to selected unit, and activation chooses the valid unit on the cursor plot through the vanilla `FormCorps()` / `FormArmy()` handlers.
+- Valid Targets plot labels should go through `ExposedMembers.CAIInfo:RequestPlotInfo(...)` with mode-appropriate requested keys, so plot-tooltip helpers remain the single source of spoken target details. WMD and ICBM targets should request full plot info by passing no keys. Formation scanner items still use the target unit display name and stable owner/id item ids.
+
+### Surveyor world input
+
+- `Surveyor_CAI.lua` is an in-world hotkey module for answering "what is within N tiles of the CAI cursor."
+- It is included by `WorldInput_CAI.lua`, uses `CAIHexCoordUtils.plotsInRange(...)`, and keeps its radius as private module-local state clamped from 1 to 5.
+- Surveyor reads live game state on each action rather than caching scope results.
+- Current default bindings:
+  - `Ctrl+Shift+W` grows Surveyor radius.
+  - `Shift+W` shrinks Surveyor radius.
+  - `Shift+Q` reads summed yields.
+  - `Shift+A` reads visible resources.
+  - `Shift+Z` reads terrain, features, and elevation.
+  - `Shift+E` reads friendly units.
+  - `Shift+D` reads visible enemy units.
+  - `Shift+C` reads known cities and barbarian camps.
+- To free those Surveyor keys, `WorldTrackerReadSummary` is now `R`, `PlotReadDistrictBuildings` is `Shift+X`, `UnitViewAbilities` is `Ctrl+A`, and `WorldTrackerOpenCivicsChooser` is `Ctrl+C`.
+- Surveyor resources should use `plot:GetResourceType()`, `plot:GetResourceCount()`, and `localPlayer:GetResources():IsResourceVisible(resource.Hash)` so invisible strategic resources stay hidden.
+- Surveyor units should scan `Units.GetUnitsInPlotLayerID(x, y, MapLayers.ANY)` on revealed plots; enemy-unit speech should additionally require actual visibility through `PlayersVisibility[observer]:IsUnitVisible(unit)`.
 
 ### World scanner reveal and object rules
 
@@ -413,11 +442,52 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - Vanilla unit commands and operations use loose `UnitManager.CanStartCommand(...)` / `CanStartOperation(...)` checks to decide whether an action should be visible, then stricter current-executability checks where needed. If the stricter check or tutorial gating fails, the row can still be added with `Disabled = true` and failure reasons appended to `helpString`.
   - `data.Actions.displayOrder.primaryArea` and `secondaryArea` define the normal unit-panel action order. Build actions live in `data.Actions["BUILD"]`.
   - `AddActionToTable(...)` also populates vanilla `m_kHotkeyActions` for actions with `HotkeyId`; CAI should let vanilla continue handling directly bound unit operation / command keys.
+  - Combat preview is a live hover pipeline:
+    - `OnInterfaceModeChanged(...)` is the attack-preview mode-entry path for `CITY_RANGE_ATTACK` and `DISTRICT_RANGE_ATTACK`. It makes the panel visible, swaps the subject view to the attacker city-center district or district, and calls `OnShowCombat(...)`.
+    - `OnInputHandler(...)` calls `InspectWhatsBelowTheCursor()` on every `MouseMove` while the panel is processing input and no unit flag has focus.
+    - `InspectWhatsBelowTheCursor()` checks `UI.GetCursorPlotID()` against `m_plotId`; when the cursor enters a new visible plot it calls `InspectPlot(plot)`, otherwise it does nothing.
+    - `InspectPlot(plot)` is the main plot-hover preview entry point. It calls `GetCombatResults(...)`, then `ReadTargetData(attacker)`, `CanShowCombat()`, and `OnShowCombat(isValidToShow)`.
+    - `OnUnitFlagPointerEntered(playerID, unitID)` is the unit-flag-hover entry point. It simulates direct combat against the hovered defender with `CombatManager.SimulateAttackVersus(...)`, then calls `ReadTargetData(attacker)` and `OnShowCombat(isValidToShow)`.
+    - `OnUnitFlagPointerExited(...)` clears flag focus, resets `m_plotId`, and reruns `InspectWhatsBelowTheCursor()` so preview falls back to the plot under the cursor.
+    - `GetCombatResults(attacker, x, y)` skips duplicate attacker+plot requests by caching `m_attackerUnit`, `m_locX`, and `m_locY`. It uses `CombatManager.SimulateAttackInto(...)` normally and `SimulatePriorityAttackInto(...)` in `PRIORITY_TARGET`.
+    - `ReadTargetData(attacker)` populates `g_targetData` from `m_combatResults` for unit, district, and improvement / plot defenders, including interceptor and anti-air side data when present.
+    - `OnShowCombat(showCombat)` is the final display gate. If `m_combatResults` is nil it hides preview; otherwise it renders the attacker/target combat UI from the current live state.
+    - CAI combat-preview speech reads visible UnitPanel controls for names, strength numbers, assessment, and modifier text. Since subject/target combat stat icons are image controls, CAI appends localized stat labels for the main attacker/defender strengths by mirroring vanilla's `COMBAT_TYPE` icon-selection logic. Interceptor and anti-air strength sections use only their visible numeric labels. Damage comes from vanilla `GetCombatPreviewResults()` / `CombatResultParameters` rather than health meters, because UnitPanel meter controls are write-only for this purpose.
   - `src/data/unitOperationConfig.sql` assigns missing `HotkeyId` values for visible vanilla `UnitOperations` and visible vanilla `UnitCommands`. Unit-command action ids use the `UnitCommand...` prefix to avoid colliding with operation action ids such as `Upgrade`.
   - `UNITCOMMAND_DELETE` is intentionally not assigned through `UnitCommands.HotkeyId`: vanilla already exposes the `DeleteUnit` input action and separately special-cases it in `OnInputActionTriggered`, so adding it to `m_kHotkeyActions` could double-call the delete prompt.
   - `UnitPanel_CAI.lua` extends `ExposedMembers.CAIInfo` with `RequestUnitInfo(unitID, requestedKeys, playerID)`, defaults to `UI.GetHeadSelectedUnit()`, and uses the same `ReadUnitData` / `GetSubjectData` data rather than reimplementing unit state.
-- `UnitPanel_CAI.lua` handles the shared selection info inputs (`~`, `Shift+1` through `Shift+0`) when a unit is selected and opens a transient action list from the existing `SelectionActions` input. Disabled rows are filtered from both the spoken action summary and transient list by checking vanilla `action.Disabled`.
+- `UnitPanel_CAI.lua` handles the shared selection info inputs (`~`, `Shift+1` through `Shift+0`) when a unit is selected and opens a transient action list from the existing `SelectionActions` input.
+  - Current unit bucket mapping is:
+    - `Shift+6` -> unit stats
+    - `Shift+7` -> unit abilities
+    - `Shift+8` -> special unit info (spy, trader, rock band, great person passive)
+    - `Shift+9` -> queued movement path
+  - Summary speech now reuses the same helper pipeline and inserts upgrade availability before promotions, plus builder recommendation and settler water guide before abilities.
+  - Unit stats should skip combat speech for spies and ordinary civilians, use trade-route name plus land/sea ranges for traders, and keep normal combat/religious stat speech for units that actually expose those stats.
+  - Summary-only builder recommendation should prefer the live `RecommendedActionButton` tooltip text, and settler water guide should prefer the live UnitPanel settler-water control tooltips and header text.
+- Vanilla shows or refreshes combat preview in these cases:
+  - entering city or district ranged-attack mode
+  - moving the cursor onto a different visible plot while a valid attacking unit, district, or city attack context is active
+  - moving the cursor onto an enemy unit flag while a valid attacking context is active
+  - leaving an enemy unit flag, which immediately re-evaluates the plot under the cursor
+- Vanilla `WorldInput.lua` attack-related interface modes:
+  - `RANGE_ATTACK` executes `UnitOperationTypes.RANGE_ATTACK`; it shows valid target plots on the attack-range lens with attack arcs from the unit, focuses a valid target hex on mouse move, and enables UnitPanel combat preview on hover/flag focus.
+  - `CITY_RANGE_ATTACK` and `DISTRICT_RANGE_ATTACK` execute `CityCommandTypes.RANGE_ATTACK`; they show valid target plots on the attack-range lens with arcs from the city center or district, focus valid target hexes on mouse move, and enable UnitPanel combat preview. UnitPanel also swaps the subject display to the attacking city-center district or district on mode entry.
+  - `AIR_ATTACK` executes `UnitOperationTypes.AIR_ATTACK`; it highlights valid target plots on `Hex_Coloring_Attack`. UnitPanel records explicit air-attack target plots and can show combat preview for hovered unit, district, improvement, or owned plot targets, including interceptor and anti-air data when present.
+  - `WMD_STRIKE` executes `UnitOperationTypes.WMD_STRIKE`; it highlights valid strike plots with attack-range-style target arcs, but UnitPanel `CanShowCombat()` explicitly suppresses combat preview. Selection shows only the targeting lens plus the launch / war confirmation flow.
+  - `ICBM_STRIKE` executes `CityCommandTypes.WMD_STRIKE`; it highlights valid strike plots with attack-range-style target arcs and uses the launch / war confirmation flow. Vanilla WorldInput does not pair it with a UnitPanel combat-preview subject path.
+  - `COASTAL_RAID` executes `UnitOperationTypes.COASTAL_RAID`; it highlights valid raid plots on `Hex_Coloring_Attack` and may trigger war confirmation. WorldInput itself does not add target details beyond the lens.
+  - `InterfaceModeTypes.ATTACK` is allocated in the handler table but has no vanilla enter/leave/mouse mappings in `WorldInput.lua`.
+  - Several non-attack modes reuse `CursorTypes.RANGE_ATTACK` or target-plot highlighting (`DEPLOY`, `REBASE`, `TELEPORT_TO_CITY`, `FORM_CORPS`, `FORM_ARMY`, `AIRLIFT`, `SACRIFICE_SELECTION`, hero `KILL_WEAKER_UNIT`, `TRANSFORM_UNIT`, `RESTORE_UNIT_MOVES`, `NAVAL_GOLD_RAID`), but their displayed information is only eligible target plots / movement-style lens feedback, not normal combat-preview data.
+- Vanilla suppresses or hides combat preview in these cases:
+  - `m_combatResults` is nil
+  - `CanShowCombat()` rejects the current mode, currently including `WMD_STRIKE`
+  - the selected unit has neither normal combat nor religious strength
+  - the hovered plot is not visible to the local player
+  - the hovered flag belongs to the local player
+  - `UI.IsGameCoreBusy()` prevents simulation
 - `Events.UnitOperationAdded`, `Events.UnitOperationDeactivated`, and `Events.UnitOperationsCleared` request a vanilla UnitPanel refresh for the selected unit.
+- Normal panel refresh events such as `OnUnitSelectionChanged(...)`, `OnUnitCommandStarted(...)`, `OnUnitOperationAdded(...)`, `OnUnitOperationDeactivated(...)`, `OnUnitOperationsCleared(...)`, and movement-point refreshes update the UnitPanel itself, but they do not independently recompute combat preview unless one of the hover or mode-entry paths above runs again. `OnUnitSelectionChanged(...)` explicitly clears `m_combatResults`.
 - Plot info does not call selected-unit info helpers. `worldInfo.lua` keeps a small local plot-unit display-name helper for aggregated plot summaries.
 - `UnitFlagManager_CAI.lua` exposes `ExposedMembers.CAIInfo:RequestUnitFlagInfo(playerID, unitID, requestedKeys)` for visible unit flags only. The first pass is intentionally limited to non-owned-unit-visible info: grouped count for exact spoken matches on the same tile, owner adjective, localized unit name, formation suffix, rounded damaged-health percent, and visible non-normal flag state (`Fortified`, `Embarked`).
 - `UnitFlagManager.lua` / `UnitFlagManager.xml` own the ambient world-map unit flags:
@@ -523,6 +593,9 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - CAI input action entries are records with `Type` and `Action`. Use `Type = "Started"` for repeat-style inputs such as cursor movement, and `Type = "Triggered"` for one-shot inputs such as path info or interface primary action.
   - CAI registers separate dispatchers for `Events.InputActionStarted` and `Events.InputActionTriggered`, while vanilla `WorldInput` keeps its own subscriptions.
   - Interface-mode-specific action records override shared action records for the same action id.
+  - `InterfaceInfo` is the Space-bound world action. `WorldInput_CAI.lua` dispatches it to `SpeakActiveInterfacePlotInfo(...)`, which resolves the CAI cursor plot and calls the active `InterfaceInfoHelpers[UI.GetInterfaceMode()]` function.
+  - Current default ActionPanel bindings are `SharedEndTurn` on `Ctrl+Space` and `ActionPanelOpenTurnBlockers` on `Ctrl+Shift+Space`; plain Space is reserved for interface-specific information.
+  - CAI targeting widgets cover `RANGE_ATTACK`, `CITY_RANGE_ATTACK`, `DISTRICT_RANGE_ATTACK`, `AIR_ATTACK`, `WMD_STRIKE`, `ICBM_STRIKE`, and `COASTAL_RAID`. Return delegates to the matching vanilla execution handler and Escape delegates through vanilla `OnPlacementKeyUp(...)`.
   - Vanilla camera movement has two main paths: continuous camera panning through `UI.PanMap(panX, panY)` / `ProcessPan(...)`, and plot-centering through `SnapToPlot(plotId)` -> `UI.LookAtPlot(plot)`.
   - CAI cursor follow listens to `LuaEvents.CAICursorMoved(x, y, plot, cursor)` and calls `UI.LookAtPlot(plot)` when the plot is valid. This follows the vanilla snap-to-plot pattern without selecting units/cities or changing interface mode.
   - Do not use `UI.PanMap(...)` for CAI cursor follow; it is designed for analog/held camera pan state and does not naturally target a discrete cursor plot.
@@ -740,19 +813,23 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - `TreeviewItem:GetValue()` announces `LOC_CAI_TREEVIEW_EXPANDED`, `LOC_CAI_TREEVIEW_COLLAPSED`, and `LOC_CAI_TREEVIEW_ITEM_COUNT` for expanded nodes.
 - CAI interface preview helpers:
   - `interfaceInfoHelpers_CAI.lua` is the shared helper module for interface-specific plot previews.
+  - `interfaceTargetHelpers_CAI.lua` owns neutral active-target resolution used by both interface info and the world scanner.
   - The legacy movement path helpers remain there unchanged for callers such as `UnitPanel_CAI.lua`.
   - `GetActiveInterfacePlotInfo(plot)` dispatches by `UI.GetInterfaceMode()` through `InterfaceInfoHelpers[...]`.
-  - Current supported preview modes are `InterfaceModeTypes.MOVE_TO` and `InterfaceModeTypes.DISTRICT_PLACEMENT`.
+  - `SpeakActiveInterfacePlotInfo(plot)` is the one-shot speech wrapper for the Space-bound `InterfaceInfo` action. Helpers remain plain functions and return either a string, a list of strings, nil, or `false` when explicit speech was handled by side effect.
+  - Current supported preview modes include `MOVE_TO`, `DISTRICT_PLACEMENT`, `BUILDING_PLACEMENT`, `RANGE_ATTACK`, `CITY_RANGE_ATTACK`, `DISTRICT_RANGE_ATTACK`, `AIR_ATTACK`, `DEPLOY`, `REBASE`, `TELEPORT_TO_CITY`, `FORM_CORPS`, `FORM_ARMY`, `AIRLIFT`, `SACRIFICE_SELECTION`, `KILL_WEAKER_UNIT`, `TRANSFORM_UNIT`, `RESTORE_UNIT_MOVES`, and `NAVAL_GOLD_RAID`.
+  - Ranged, city ranged, district ranged, and air attack helpers call `LuaEvents.CAISpeakCombatPreview()` and return `false`; combat preview speech remains owned by `UnitPanel_CAI.lua`.
   - District placement preview reuses vanilla `AdjacencyBonusSupport.GetAdjacentYieldBonusString(...)` for the short bonus summary, detailed tooltip text, and requirement/warning text, while CAI computes owned-valid versus purchasable-valid state locally from `CityManager.GetOperationTargets(...)` and `CityManager.GetCommandTargets(...)`.
-  - Wonder placement is the next missing extension point for this helper. Vanilla exposes enough data to mirror the sighted experience: valid owned plots from `CityManager.GetOperationTargets(...)`, valid purchasable plots from `CityManager.GetCommandTargets(...)` filtered through `plot:CanHaveWonder(...)`, and wonder-specific explanatory text from the confirmation-time `SUCCESS_CONDITIONS` strings.
+  - Wonder placement uses valid owned plots from `CityManager.GetOperationTargets(...)` and valid purchasable plots from `CityManager.GetCommandTargets(...)` filtered through `plot:CanHaveWonder(...)`.
+  - Non-attack targeting/destination helpers use shared `CAIInterfaceTargets` target resolution. Space says `Valid` plus the plot target label, `Invalid target` when the CAI cursor is not on an eligible plot, and for `FORM_CORPS` / `FORM_ARMY` appends `formation target` after the target unit name.
   - `PlotToolTip_CAI.lua` now treats `PlotInfo5` as a general interface preview slot rather than a movement-only slot, and automatic cursor speech includes the same interface preview lines when the active mode supplies them.
   - `PlotToolTip_CAI.lua` now selects its vanilla include by active rules content: base `PlotToolTip`, `PlotTooltip_Expansion2` when `IsExpansion2Active()` is true, `PlotToolTip_BarbarianClansMode` when `GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS") == 1`, and `PlotTooltip_Expansion2_BarbarianClansMode` when both are active.
-  - `ExposedMembers.CAIInfo:RequestPlotInfo(plot, requestedKeys)` returns a flat `string[]`. Individual plot info helpers may return either one string or a list of strings; the request path must flatten helper tables before concatenating speech. This matters for `interfaceInfoHelpers_CAI.lua`, whose movement and placement previews are multi-line.
+  - `ExposedMembers.CAIInfo:RequestPlotInfo(plot, requestedKeys, optionalPlotId)` returns a flat `string[]`. Existing callers can keep passing the explicit `plot` object. Callers that need info for a specific target plot without depending on the current cursor plot can pass `nil` for `plot` and the target plot id as `optionalPlotId`. Individual plot info helpers may return either one string or a list of strings; the request path must flatten helper tables before concatenating speech. This matters for `interfaceInfoHelpers_CAI.lua`, whose movement and placement previews are multi-line.
   - `PlotToolTip_CAI.lua` also owns one-shot plot read actions through `Events.InputActionTriggered`. The current action ids are `PlotReadUnits`, `PlotReadYieldRiverOwner`, `PlotReadStats`, `PlotReadRelativeCoords`, and `PlotReadDistrictBuildings`; each action builds a requested-key list and then routes through the same `RequestPlotInfo(...)` / helper pipeline used by cursor speech.
   - `PlotReadStats` intentionally uses separate `movement`, `defense`, and `appeal` helpers instead of a bundled physical-info bucket. `relativeCoords` is the one helper allowed to speak when plot visibility gates would otherwise suppress normal tooltip data.
   - Current default bindings in `src/data/hotkey_config.xml`: `S` / `NP_5` -> `PlotReadUnits`, `W` / `NP_8` -> `PlotReadYieldRiverOwner`, `X` / `NP_2` -> `PlotReadStats`, `Shift+S` / `Shift+NP_5` -> `PlotReadRelativeCoords`, `B` -> `PlotReadDistrictBuildings`. `WorldTrackerReadSummary` moved to `Shift+W` to free `W` for plot reads.
   - `WorldInput_CAI.lua` exposes both move mode and district placement mode through CAI `InterfaceMode` widgets; district placement uses the same Escape / primary-action widget pattern as move mode, but routed to `OnMouseDistrictPlacementCancel()` and `OnMouseDistrictPlacementEnd()`.
-  - Wonder placement should follow the same pattern in CAI, but keyed off `InterfaceModeTypes.BUILDING_PLACEMENT` and the vanilla `OnMouseBuildingPlacementCancel()` / `OnMouseBuildingPlacementEnd()` handlers from `WorldInput.lua`.
+  - `WorldInput_CAI.lua` also exposes targeting widgets for `RANGE_ATTACK`, `CITY_RANGE_ATTACK`, `DISTRICT_RANGE_ATTACK`, `AIR_ATTACK`, `WMD_STRIKE`, `ICBM_STRIKE`, `COASTAL_RAID`, `DEPLOY`, `REBASE`, `TELEPORT_TO_CITY`, `FORM_CORPS`, `FORM_ARMY`, `AIRLIFT`, `SACRIFICE_SELECTION`, `KILL_WEAKER_UNIT`, `TRANSFORM_UNIT`, `RESTORE_UNIT_MOVES`, and `NAVAL_GOLD_RAID`. Return delegates to the matching vanilla execution function, and Escape delegates through vanilla `OnPlacementKeyUp(...)`.
 - CAI widgets require an id at construction: `mgr:CreateUIWidget(id, type, props)`.
   - Use stable semantic ids for widgets that need direct lookup, for example `CAITopPanelYieldInfoTree`.
   - Use `mgr:GenerateWidgetId("CAIScreenWidgetType")` for repeated rows/items that must be unique but do not need stable lookup.

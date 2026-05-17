@@ -61,6 +61,22 @@ local function SortItems(items)
     end)
 end
 
+local function ResolveCategoryEntry(entry)
+    if entry == nil then
+        return nil
+    end
+
+    if entry.Category ~= nil then
+        if entry.Category == false then
+            return nil
+        end
+
+        return entry.Category
+    end
+
+    return entry
+end
+
 local function FindIndexInOrder(order, key)
     if order == nil or key == nil then
         return nil
@@ -173,6 +189,10 @@ end
 ---@param context WorldScannerContext
 ---@return WorldScannerCategory|nil
 function Core.BuildCategory(definition, context)
+    if definition.CanScan ~= nil and not definition.CanScan(context) then
+        return nil
+    end
+
     local rawItems = definition.Scan and definition.Scan(context) or {}
     if rawItems == nil or #rawItems == 0 then
         return nil
@@ -251,30 +271,39 @@ function Core.BuildScanner(categoryDefinitions, context)
     return categories
 end
 
+---@param category WorldScannerCategory|nil
+function Core.RefreshCategorySort(category)
+    if category == nil then
+        return
+    end
+
+    local subCategories = category.SubCategories or {}
+    for _, subCategory in ipairs(subCategories) do
+        local groups = subCategory.Groups or {}
+        for _, group in ipairs(groups) do
+            SortItems(group.Items or {})
+            local firstItem = group.Items and group.Items[1] or nil
+            group.PlotIndex = firstItem and firstItem.PlotIndex or group.PlotIndex
+        end
+        SortGroups(groups, subCategory.GroupOrder)
+    end
+end
+
 ---@param categories WorldScannerCategory[]|nil
 function Core.RefreshSorts(categories)
     if categories == nil then
         return
     end
 
-    for _, category in ipairs(categories) do
-        local subCategories = category.SubCategories or {}
-        for _, subCategory in ipairs(subCategories) do
-            local groups = subCategory.Groups or {}
-            for _, group in ipairs(groups) do
-                SortItems(group.Items or {})
-                local firstItem = group.Items and group.Items[1] or nil
-                group.PlotIndex = firstItem and firstItem.PlotIndex or group.PlotIndex
-            end
-            SortGroups(groups, subCategory.GroupOrder)
-        end
+    for _, entry in ipairs(categories) do
+        Core.RefreshCategorySort(ResolveCategoryEntry(entry))
     end
 end
 
 ---@param scanner WorldScanner
 ---@return WorldScannerCategory|nil
 function Core.GetCategory(scanner)
-    return scanner and scanner.Categories and scanner.Categories[scanner.CategoryIndex] or nil
+    return scanner and scanner.Categories and ResolveCategoryEntry(scanner.Categories[scanner.CategoryIndex]) or nil
 end
 
 ---@param scanner WorldScanner
@@ -346,8 +375,11 @@ local function FindCategoryIndex(categories, categoryId)
         return nil
     end
 
-    for index, category in ipairs(categories) do
-        if category.Id == categoryId then
+    for index, entry in ipairs(categories) do
+        local category = ResolveCategoryEntry(entry)
+        local definition = entry and entry.Definition or nil
+        if (category ~= nil and category.Id == categoryId)
+            or (definition ~= nil and definition.Id == categoryId) then
             return index
         end
     end
@@ -415,7 +447,13 @@ function Core.RestoreFocus(scanner, focus)
 
     scanner.CategoryIndex = FindCategoryIndex(categories, focus and focus.CategoryId) or 1
 
-    local category = categories[scanner.CategoryIndex]
+    local category = ResolveCategoryEntry(categories[scanner.CategoryIndex])
+    if category == nil then
+        scanner.SubCategoryIndex = 0
+        scanner.GroupIndex = 0
+        scanner.ItemIndex = 0
+        return
+    end
     local subCategories = category.SubCategories or {}
     if #subCategories == 0 then
         scanner.SubCategoryIndex = 0
@@ -480,7 +518,15 @@ function Core.ClampIndexes(scanner)
         scanner.CategoryIndex = categoryCount
     end
 
-    local subCategories = scanner.Categories[scanner.CategoryIndex].SubCategories or {}
+    local category = ResolveCategoryEntry(scanner.Categories[scanner.CategoryIndex])
+    if category == nil then
+        scanner.SubCategoryIndex = 0
+        scanner.GroupIndex = 0
+        scanner.ItemIndex = 0
+        return
+    end
+
+    local subCategories = category.SubCategories or {}
     local subCount = #subCategories
     if subCount <= 0 then
         scanner.SubCategoryIndex = 0

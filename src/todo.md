@@ -25,4 +25,4 @@
 [ ] Add map search accessibility
 [ ] Add plot info for active lenses
 [ ] Handle different advisor recommendations
-[ ]
+[ ]Add some flag info to unit panel selection info
