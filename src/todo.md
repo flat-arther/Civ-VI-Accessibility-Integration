@@ -25,4 +25,9 @@
 [ ] Add map search accessibility
 [ ] Add plot info for active lenses
 [ ] Handle different advisor recommendations
-[ ]Add some flag info to unit panel selection info
+[ ]Add some flag info to unit panel selection info plottooltip
+[ ] confirm that anti-air intercepter combat previews / results work as intended
+[ ]Move abilities and xp gains to their own event, so we can report which unit got xp / abilities
+[ ]Make espionage shit accessible and test spy unit panel info
+[ ] add city states to the cities category in the scanner
+[ ] Add districts to the scanner

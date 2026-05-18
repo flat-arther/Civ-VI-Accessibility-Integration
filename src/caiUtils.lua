@@ -85,3 +85,11 @@ function GetInputActionsByCategory(cat)
     end
     return actions
 end
+
+function SwapPairs(tbl)
+    local swapped = {}
+    for k, v in pairs(tbl) do
+        swapped[v] = k
+    end
+    return swapped
+end

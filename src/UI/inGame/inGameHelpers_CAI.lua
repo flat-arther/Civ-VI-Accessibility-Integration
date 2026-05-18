@@ -14,7 +14,6 @@ local function GetCAICursorPlotCoord()
 end
 
 function InstallUIOverrides()
-    Speak("Installing ui overrides for " .. ContextPtr:GetID())
     UI = HijackTable(UI, {
         GetCursorPlotCoord = GetCAICursorPlotCoord,
         GetCursorPlotID = GetCAICursorPlotId,

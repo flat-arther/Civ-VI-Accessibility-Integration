@@ -1569,6 +1569,12 @@
     <Row Tag="LOC_CAI_COMBAT_PREVIEW_THEIR_DAMAGE_TARGET" Language="en_US">
       <Text>Damage you will deal to {1_Target}: {2_Value}.</Text>
     </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_WALL_DAMAGE_SUFFIX" Language="en_US">
+      <Text>{1_Value} to walls</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_PREVIEW_WALLS_DESTROYED_SUFFIX" Language="en_US">
+      <Text>destroys walls</Text>
+    </Row>
     <Row Tag="LOC_CAI_COMBAT_PREVIEW_INTERCEPTOR_DAMAGE" Language="en_US">
       <Text>Interceptor takes: {1_Value}.</Text>
     </Row>
@@ -1586,6 +1592,42 @@
     </Row>
     <Row Tag="LOC_CAI_COMBAT_PREVIEW_NO_DAMAGE" Language="en_US">
       <Text>No damage</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_RESULT_TOOK_DAMAGE" Language="en_US">
+      <Text>{1_Name} took {2_Damage}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_RESULT_UNHARMED" Language="en_US">
+      <Text>{1_Name} unharmed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_RESULT_WALLS_TOOK_DAMAGE" Language="en_US">
+      <Text>{1_Name} walls took {2_Damage}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_RESULT_INTERCEPTED_BY" Language="en_US">
+      <Text>intercepted by {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_RESULT_INTERCEPTED_BY_DAMAGE" Language="en_US">
+      <Text>intercepted by {1_Name} for {2_Damage}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_RESULT_ANTI_AIR_FROM" Language="en_US">
+      <Text>anti-air from {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_RESULT_ANTI_AIR_FROM_DAMAGE" Language="en_US">
+      <Text>anti-air from {1_Name} for {2_Damage}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_RESULT_KILLED" Language="en_US">
+      <Text>{1_Name} killed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_RESULT_CAPTURED" Language="en_US">
+      <Text>{1_Name} captured</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_RESULT_WALLS_DESTROYED" Language="en_US">
+      <Text>{1_Name} walls destroyed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_RESULT_PILLAGED" Language="en_US">
+      <Text>pillaged</Text>
+    </Row>
+    <Row Tag="LOC_CAI_COMBAT_RESULT_PILLAGE_FAILED" Language="en_US">
+      <Text>pillage failed</Text>
     </Row>
 
     <!-- Tile info hotkeys -->

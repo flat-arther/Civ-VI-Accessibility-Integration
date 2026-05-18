@@ -76,6 +76,7 @@
     <File>UI/inGame/UnitFlagManager_CAI.lua</File>
     <File>UI/inGame/CityBannerManager_CAI.lua</File>
     <File>UI/inGame/PlotToolTip_CAI.lua</File>
+    <File>UI/inGame/WorldViewPlotMessages_CAI.lua</File>
     <File>UI/inGame/TutorialUIRoot_CAI.lua</File>
     <File>UI/inGame/TutorialGoals_CAI.lua</File>
     <File>data/hotkey_config.xml</File>
@@ -357,6 +358,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>PlotToolTip</LuaContext>
         <LuaReplace>UI/inGame/PlotToolTip_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WorldViewPlotMessages">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>WorldViewPlotMessages</LuaContext>
+        <LuaReplace>UI/inGame/WorldViewPlotMessages_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

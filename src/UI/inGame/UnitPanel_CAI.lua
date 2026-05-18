@@ -78,7 +78,6 @@ local UnitSummaryRequestedKeys = {
     "UpgradeHint",
     "Promotions",
     "BuilderRecommendation",
-    "SettlerWaterGuide",
     "Abilities",
 }
 
@@ -434,34 +433,6 @@ local function GetRecommendedBuilderActionText(unit)
     return action ~= "" and action or nil
 end
 
-local function GetSettlerWaterGuideText(unit)
-    if not IsSelectedUnit(unit)
-        or Controls == nil
-        or Controls.SettlementWaterContainer == nil
-        or Controls.SettlementWaterContainer.IsHidden == nil
-        or Controls.SettlementWaterContainer:IsHidden() then
-        return nil
-    end
-
-    local results = {}
-    AppendUnitInfo(results, GetControlText(Controls.SettlementWaterHeader))
-
-    local waterControls = {
-        Controls.SettlementWaterGrid_FreshWater,
-        Controls.SettlementWaterGrid_CoastalWater,
-        Controls.SettlementWaterGrid_NoWater,
-        Controls.SettlementWaterGrid_SettlementBlocked,
-    }
-
-    for _, control in ipairs(waterControls) do
-        if control ~= nil and (control.IsHidden == nil or not control:IsHidden()) then
-            AppendUnitInfo(results, GetControlTooltip(control))
-        end
-    end
-
-    return #results > 0 and JoinUnitInfo(results, ", ") or nil
-end
-
 local function GetUpgradeAction(data)
     for _, action in ipairs(GetUnitActionEntries(data)) do
         if action ~= nil and action.userTag == upgradeActionHash then
@@ -807,7 +778,7 @@ local function GetPreviewDamageText(damage)
         return Locale.Lookup("LOC_CAI_COMBAT_PREVIEW_NO_DAMAGE")
     end
 
-    return "-" .. tostring(damage)
+    return tostring(damage)
 end
 
 local function GetSubjectPreviewDamageText()
@@ -818,24 +789,493 @@ end
 local function GetTargetPreviewDamageText()
     local combatResults = GetCombatPreviewResults()
     local defender = combatResults[CombatResultParameters.DEFENDER]
+    local cityDamage = defender[CombatResultParameters.DAMAGE_TO] or 0
+    local wallDamage = defender[CombatResultParameters.DEFENSE_DAMAGE_TO] or 0
+    local maxWallHitPoints = defender[CombatResultParameters.MAX_DEFENSE_HIT_POINTS] or 0
+    local finalWallDamage = defender[CombatResultParameters.FINAL_DEFENSE_DAMAGE_TO] or 0
+    local destroysWalls = maxWallHitPoints > 0 and wallDamage > 0 and finalWallDamage >= maxWallHitPoints
 
     if not Controls.TargetCityHealthMeters:IsHidden() then
-        if not Controls.TargetCityWallsHealthMeters:IsHidden() then
-            local wallDamageText = GetPreviewDamageText(defender[CombatResultParameters.DEFENSE_DAMAGE_TO])
-            if wallDamageText ~= Locale.Lookup("LOC_CAI_COMBAT_PREVIEW_NO_DAMAGE") then
-                return wallDamageText
-            end
+        if cityDamage > 0 and wallDamage > 0 then
+            return GetPreviewDamageText(cityDamage) .. ", "
+                .. Locale.Lookup(destroysWalls and "LOC_CAI_COMBAT_PREVIEW_WALLS_DESTROYED_SUFFIX"
+                    or "LOC_CAI_COMBAT_PREVIEW_WALL_DAMAGE_SUFFIX", GetPreviewDamageText(wallDamage))
         end
 
-        return GetPreviewDamageText(defender[CombatResultParameters.DAMAGE_TO])
+        if wallDamage > 0 then
+            return Locale.Lookup(destroysWalls and "LOC_CAI_COMBAT_PREVIEW_WALLS_DESTROYED_SUFFIX"
+                or "LOC_CAI_COMBAT_PREVIEW_WALL_DAMAGE_SUFFIX", GetPreviewDamageText(wallDamage))
+        end
+
+        return GetPreviewDamageText(cityDamage)
     end
 
-    return GetPreviewDamageText(defender[CombatResultParameters.DAMAGE_TO])
+    return GetPreviewDamageText(cityDamage)
 end
 
 local function GetInterceptorPreviewDamageText()
     local combatResults = GetCombatPreviewResults()
     return GetPreviewDamageText(combatResults[CombatResultParameters.INTERCEPTOR][CombatResultParameters.DAMAGE_TO])
+end
+
+local function GetLocalPlayerVisibility()
+    local localPlayer = Game.GetLocalPlayer()
+    if localPlayer == nil or localPlayer == -1 then
+        return nil
+    end
+
+    return PlayerVisibilityManager.GetPlayerVisibility(localPlayer)
+end
+
+local function IsCombatLocationVisibleToLocalPlayer(results)
+    local visibility = GetLocalPlayerVisibility()
+    local location = results ~= nil and results[CombatResultParameters.LOCATION] or nil
+    if visibility == nil or location == nil or location.x == nil or location.y == nil then
+        return false
+    end
+
+    return visibility:IsVisible(location.x, location.y)
+end
+
+local function DoesCombatComponentBelongToLocalPlayer(componentData)
+    local localPlayer = Game.GetLocalPlayer()
+    if localPlayer == nil or localPlayer == -1 or componentData == nil then
+        return false
+    end
+
+    local componentId = componentData[CombatResultParameters.ID]
+    return componentId ~= nil and componentId.player == localPlayer
+end
+
+local function IsCombatVisibleToLocalPlayer(results)
+    if results == nil then
+        return false
+    end
+
+    if DoesCombatComponentBelongToLocalPlayer(results[CombatResultParameters.ATTACKER])
+        or DoesCombatComponentBelongToLocalPlayer(results[CombatResultParameters.DEFENDER])
+        or DoesCombatComponentBelongToLocalPlayer(results[CombatResultParameters.INTERCEPTOR])
+        or DoesCombatComponentBelongToLocalPlayer(results[CombatResultParameters.ANTI_AIR]) then
+        return true
+    end
+
+    return IsCombatLocationVisibleToLocalPlayer(results)
+end
+
+local function IsWMDCombatResult(results)
+    if results == nil then
+        return false
+    end
+
+    local wmdType = results[CombatResultParameters.WMD_TYPE]
+    if wmdType ~= nil and wmdType ~= -1 then
+        return true
+    end
+
+    local wmdStatus = results[CombatResultParameters.WMD_STATUS]
+    if wmdStatus ~= nil and wmdStatus ~= WMDStatus.WMD_NONE then
+        return true
+    end
+
+    return false
+end
+
+local function ResolveCombatCityName(playerID, city)
+    if city == nil then
+        return nil
+    end
+
+    local cityName = city:GetName()
+    if cityName == nil or cityName == "" then
+        return nil
+    end
+
+    return Locale.Lookup(cityName)
+end
+
+local function ResolveCombatDistrictName(playerID, district)
+    if district == nil then
+        return nil
+    end
+
+    local districtInfo = GameInfo.Districts[district:GetType()]
+    local city = district:GetCity()
+    if districtInfo ~= nil and districtInfo.CityCenter and city ~= nil then
+        return ResolveCombatCityName(playerID, city)
+    end
+
+    if districtInfo ~= nil and districtInfo.Name ~= nil and districtInfo.Name ~= "" then
+        return Locale.Lookup(districtInfo.Name)
+    end
+
+    if city ~= nil then
+        return ResolveCombatCityName(playerID, city)
+    end
+
+    return nil
+end
+
+local function ResolveCombatPlotTargetInfo(location)
+    local info = {
+        Name = nil,
+        HasImprovementOrDistrict = false,
+        IsCityCenter = false,
+    }
+
+    if location == nil or location.x == nil or location.y == nil then
+        return info
+    end
+
+    local plot = Map.GetPlot(location.x, location.y)
+    if plot == nil or not plot:IsOwned() then
+        return info
+    end
+
+    local improvementType = plot:GetImprovementType()
+    if improvementType ~= -1 then
+        local improvementInfo = GameInfo.Improvements[improvementType]
+        if improvementInfo ~= nil and improvementInfo.Name ~= nil and improvementInfo.Name ~= "" then
+            info.Name = Locale.Lookup(improvementInfo.Name)
+            info.HasImprovementOrDistrict = true
+            return info
+        end
+    end
+
+    local districtType = plot:GetDistrictType()
+    if districtType ~= -1 then
+        local districtInfo = GameInfo.Districts[districtType]
+        if districtInfo ~= nil then
+            if not districtInfo.CityCenter then
+                if districtInfo.Name ~= nil and districtInfo.Name ~= "" then
+                    info.Name = Locale.Lookup(districtInfo.Name)
+                end
+            else
+                local city = CityManager.GetCityAt(location.x, location.y)
+                if city ~= nil then
+                    info.Name = ResolveCombatCityName(city:GetOwner(), city)
+                    info.IsCityCenter = true
+                end
+            end
+
+            info.HasImprovementOrDistrict = true
+        end
+    end
+
+    return info
+end
+
+local function ResolveCombatComponentName(componentData)
+    if componentData == nil then
+        return nil
+    end
+
+    local componentId = componentData[CombatResultParameters.ID]
+    if componentId == nil then
+        return nil
+    end
+
+    if componentId.type == ComponentType.UNIT then
+        local unit = UnitManager.GetUnit(componentId.player, componentId.id)
+        if unit ~= nil then
+            return FormatOwnedUnitDisplayName(unit)
+        end
+    elseif componentId.type == ComponentType.DISTRICT then
+        local player = Players[componentId.player]
+        if player ~= nil then
+            local district = player:GetDistricts():FindID(componentId.id)
+            if district ~= nil then
+                return ResolveCombatDistrictName(componentId.player, district)
+            end
+        end
+    elseif componentId.type == ComponentType.CITY then
+        local player = Players[componentId.player]
+        if player ~= nil and player.GetCities ~= nil then
+            local city = player:GetCities():FindID(componentId.id)
+            if city ~= nil then
+                return ResolveCombatCityName(componentId.player, city)
+            end
+        end
+    end
+
+    return nil
+end
+
+local function IsCombatCityTarget(componentData, plotTargetInfo)
+    if componentData ~= nil then
+        local componentId = componentData[CombatResultParameters.ID]
+        if componentId ~= nil then
+            if componentId.type == ComponentType.CITY then
+                return true
+            end
+
+            if componentId.type == ComponentType.DISTRICT then
+                local player = Players[componentId.player]
+                if player ~= nil then
+                    local district = player:GetDistricts():FindID(componentId.id)
+                    if district ~= nil then
+                        local districtInfo = GameInfo.Districts[district:GetType()]
+                        if districtInfo ~= nil and districtInfo.CityCenter then
+                            return true
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return plotTargetInfo ~= nil and plotTargetInfo.IsCityCenter or false
+end
+
+local function ResolveCombatSupportUnitName(componentData)
+    if componentData == nil then
+        return nil
+    end
+
+    local componentId = componentData[CombatResultParameters.ID]
+    if componentId == nil or componentId.type ~= ComponentType.UNIT then
+        return nil
+    end
+
+    local unit = UnitManager.GetUnit(componentId.player, componentId.id)
+    if unit == nil then
+        return nil
+    end
+
+    return FormatOwnedUnitDisplayName(unit)
+end
+
+local function AreCombatComponentIdsEqual(leftData, rightData)
+    local leftId = leftData ~= nil and leftData[CombatResultParameters.ID] or nil
+    local rightId = rightData ~= nil and rightData[CombatResultParameters.ID] or nil
+    if leftId == nil or rightId == nil then
+        return false
+    end
+
+    return leftId.player == rightId.player
+        and leftId.id == rightId.id
+        and leftId.type == rightId.type
+end
+
+local function GetCombatDamageValue(componentData)
+    if componentData == nil then
+        return 0
+    end
+
+    return componentData[CombatResultParameters.DAMAGE_TO] or 0
+end
+
+local function GetCombatFinalDamageValue(componentData)
+    if componentData == nil then
+        return 0
+    end
+
+    return componentData[CombatResultParameters.FINAL_DAMAGE_TO] or 0
+end
+
+local function GetCombatMaxHitPoints(componentData)
+    if componentData == nil then
+        return 0
+    end
+
+    return componentData[CombatResultParameters.MAX_HIT_POINTS] or 0
+end
+
+local function IsCombatComponentKilled(componentData)
+    local maxHitPoints = GetCombatMaxHitPoints(componentData)
+    return maxHitPoints > 0 and GetCombatFinalDamageValue(componentData) >= maxHitPoints
+end
+
+local function GetCombatWallDamageValue(componentData)
+    if componentData == nil then
+        return 0
+    end
+
+    return componentData[CombatResultParameters.DEFENSE_DAMAGE_TO] or 0
+end
+
+local function ShouldSpeakCombatWallDamage(componentData)
+    if componentData == nil then
+        return false
+    end
+
+    local maxWallHitPoints = componentData[CombatResultParameters.MAX_DEFENSE_HIT_POINTS] or 0
+    if maxWallHitPoints <= 0 then
+        return false
+    end
+
+    local finalWallDamage = componentData[CombatResultParameters.FINAL_DEFENSE_DAMAGE_TO] or 0
+    local wallDamage = componentData[CombatResultParameters.DEFENSE_DAMAGE_TO] or 0
+    local priorWallDamage = finalWallDamage - wallDamage
+    return priorWallDamage < maxWallHitPoints
+end
+
+local function DidCombatWallsGetDestroyed(componentData)
+    if componentData == nil then
+        return false
+    end
+
+    local maxWallHitPoints = componentData[CombatResultParameters.MAX_DEFENSE_HIT_POINTS] or 0
+    if maxWallHitPoints <= 0 then
+        return false
+    end
+
+    if not ShouldSpeakCombatWallDamage(componentData) then
+        return false
+    end
+
+    local finalWallDamage = componentData[CombatResultParameters.FINAL_DEFENSE_DAMAGE_TO] or 0
+    return finalWallDamage >= maxWallHitPoints
+end
+
+local function AppendCombatResultClause(results, value)
+    if value ~= nil and value ~= "" then
+        table.insert(results, value)
+    end
+end
+
+local function BuildCombatDamageClause(name, damage)
+    if name == nil or name == "" then
+        return nil
+    end
+
+    if damage > 0 then
+        return Locale.Lookup("LOC_CAI_COMBAT_RESULT_TOOK_DAMAGE", name, damage)
+    end
+
+    return Locale.Lookup("LOC_CAI_COMBAT_RESULT_UNHARMED", name)
+end
+
+local function BuildCombatWallDamageClause(name, damage)
+    if name == nil or name == "" or damage <= 0 then
+        return nil
+    end
+
+    return Locale.Lookup("LOC_CAI_COMBAT_RESULT_WALLS_TOOK_DAMAGE", name, damage)
+end
+
+local function BuildCombatSupportClause(name, damage, withDamageTag, withoutDamageTag)
+    if name == nil or name == "" then
+        return nil
+    end
+
+    if damage ~= nil and damage > 0 then
+        return Locale.Lookup(withDamageTag, name, damage)
+    end
+
+    return Locale.Lookup(withoutDamageTag, name)
+end
+
+local function BuildCombatOutcomeClause(name, locTag)
+    if name == nil or name == "" then
+        return nil
+    end
+
+    return Locale.Lookup(locTag, name)
+end
+
+local function BuildCombatResultIntroClause(attackerName, defenderName)
+    if attackerName == nil or attackerName == "" or defenderName == nil or defenderName == "" then
+        return nil
+    end
+
+    local text = Locale.Lookup("LOC_CAI_COMBAT_PREVIEW_SUMMARY", attackerName, defenderName, "")
+    if text == nil or text == "" then
+        return nil
+    end
+
+    text = string.gsub(text, ":%s*%.$", ".")
+    text = string.gsub(text, "%s+", " ")
+    text = string.gsub(text, "^%s*(.-)%s*$", "%1")
+    return text
+end
+
+local function BuildCombatResultText(results)
+    if results == nil or IsWMDCombatResult(results) or not IsCombatVisibleToLocalPlayer(results) then
+        return nil
+    end
+
+    local location = results[CombatResultParameters.LOCATION]
+    local attackerData = results[CombatResultParameters.ATTACKER]
+    local defenderData = results[CombatResultParameters.DEFENDER]
+    local interceptorData = results[CombatResultParameters.INTERCEPTOR]
+    local antiAirData = results[CombatResultParameters.ANTI_AIR]
+
+    local attackerName = ResolveCombatComponentName(attackerData)
+    local defenderName = ResolveCombatComponentName(defenderData)
+    local plotTargetInfo = nil
+    if defenderName == nil then
+        plotTargetInfo = ResolveCombatPlotTargetInfo(location)
+        defenderName = plotTargetInfo.Name
+    end
+    local isCityTarget = IsCombatCityTarget(defenderData, plotTargetInfo)
+
+    local parts = {}
+    AppendCombatResultClause(parts, BuildCombatResultIntroClause(attackerName, defenderName))
+    AppendCombatResultClause(parts, BuildCombatDamageClause(attackerName, GetCombatDamageValue(attackerData)))
+
+    local defenderDamage = GetCombatDamageValue(defenderData)
+    local defenderWallDamage = GetCombatWallDamageValue(defenderData)
+    local defenderMaxWallHitPoints = defenderData ~= nil and defenderData[CombatResultParameters.MAX_DEFENSE_HIT_POINTS] or
+        0
+    local defenderFinalWallDamage = defenderData ~= nil and defenderData[CombatResultParameters.FINAL_DEFENSE_DAMAGE_TO] or
+        0
+    if defenderWallDamage > 0 and ShouldSpeakCombatWallDamage(defenderData) then
+        AppendCombatResultClause(parts, BuildCombatWallDamageClause(defenderName, defenderWallDamage))
+    end
+    if defenderDamage > 0 then
+        AppendCombatResultClause(parts, BuildCombatDamageClause(defenderName, defenderDamage))
+    elseif defenderName ~= nil and defenderName ~= "" then
+        AppendCombatResultClause(parts, BuildCombatDamageClause(defenderName, 0))
+    end
+
+    if interceptorData ~= nil and not AreCombatComponentIdsEqual(interceptorData, defenderData) then
+        local interceptorName = ResolveCombatSupportUnitName(interceptorData)
+        if interceptorName ~= nil and interceptorName ~= "" then
+            AppendCombatResultClause(parts,
+                BuildCombatSupportClause(interceptorName, GetCombatDamageValue(interceptorData),
+                    "LOC_CAI_COMBAT_RESULT_INTERCEPTED_BY_DAMAGE", "LOC_CAI_COMBAT_RESULT_INTERCEPTED_BY"))
+        end
+    end
+
+    if antiAirData ~= nil and not AreCombatComponentIdsEqual(antiAirData, defenderData) then
+        local antiAirName = ResolveCombatSupportUnitName(antiAirData)
+        if antiAirName ~= nil and antiAirName ~= "" then
+            AppendCombatResultClause(parts,
+                BuildCombatSupportClause(antiAirName, GetCombatDamageValue(antiAirData),
+                    "LOC_CAI_COMBAT_RESULT_ANTI_AIR_FROM_DAMAGE", "LOC_CAI_COMBAT_RESULT_ANTI_AIR_FROM"))
+        end
+    end
+
+    if DidCombatWallsGetDestroyed(defenderData) then
+        AppendCombatResultClause(parts, BuildCombatOutcomeClause(defenderName, "LOC_CAI_COMBAT_RESULT_WALLS_DESTROYED"))
+    end
+
+    if IsCombatComponentKilled(attackerData) then
+        AppendCombatResultClause(parts, BuildCombatOutcomeClause(attackerName, "LOC_CAI_COMBAT_RESULT_KILLED"))
+    end
+
+    if results[CombatResultParameters.DEFENDER_CAPTURED] or (isCityTarget and IsCombatComponentKilled(defenderData)) then
+        AppendCombatResultClause(parts, BuildCombatOutcomeClause(defenderName, "LOC_CAI_COMBAT_RESULT_CAPTURED"))
+    elseif IsCombatComponentKilled(defenderData) then
+        AppendCombatResultClause(parts, BuildCombatOutcomeClause(defenderName, "LOC_CAI_COMBAT_RESULT_KILLED"))
+    end
+
+    local hasImprovementOrDistrict = plotTargetInfo ~= nil and plotTargetInfo.HasImprovementOrDistrict or false
+    if hasImprovementOrDistrict then
+        if results[CombatResultParameters.LOCATION_PILLAGED] then
+            AppendCombatResultClause(parts, Locale.Lookup("LOC_CAI_COMBAT_RESULT_PILLAGED"))
+        else
+            AppendCombatResultClause(parts, Locale.Lookup("LOC_CAI_COMBAT_RESULT_PILLAGE_FAILED"))
+        end
+    elseif results[CombatResultParameters.LOCATION_PILLAGED] then
+        AppendCombatResultClause(parts, Locale.Lookup("LOC_CAI_COMBAT_RESULT_PILLAGED"))
+    end
+
+    if #parts == 0 then
+        return nil
+    end
+
+    return JoinUnitInfo(parts, ", ")
 end
 
 local function GetUnitInfoCombatPreview()
@@ -963,10 +1403,6 @@ UnitInfo = {
 
     BuilderRecommendation = function(data, unit)
         return GetRecommendedBuilderActionText(unit)
-    end,
-
-    SettlerWaterGuide = function(data, unit)
-        return GetSettlerWaterGuideText(unit)
     end,
 
     UpgradeHint = function(data, unit)
@@ -1466,6 +1902,16 @@ local function OnCAISpeakCombatPreview()
     Speak(ProcessIcons(results))
 end
 
+local resultStrings = SwapPairs(CombatResultParameters)
+local function OnCombatResolved(results)
+    local text = BuildCombatResultText(results)
+    if text == nil or text == "" then
+        return
+    end
+
+    Speak(ProcessIcons(text))
+end
+
 function info:RequestUnitInfo(unitID, requestedKeys, playerID)
     local data, unit = ResolveUnitData(unitID, playerID)
     local results = {}
@@ -1497,6 +1943,7 @@ InitializeUnitInfoActionMap()
 Events.InputActionTriggered.Add(OnUnitPanelSelectionInfoInputActionTriggered)
 Events.InputActionTriggered.Add(OnUnitPanelSelectionActionInputTriggered)
 Events.UnitSelectionChanged.Add(OnCAIUnitSelectionChanged)
+Events.Combat.Add(OnCombatResolved)
 LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
 LuaEvents.CAISpeakCombatPreview.Add(OnCAISpeakCombatPreview)
 ContextPtr:SetInputHandler(OnHandleInput, true)
