@@ -31,3 +31,4 @@
 [ ]Make espionage shit accessible and test spy unit panel info
 [ ] add city states to the cities category in the scanner
 [ ] Add districts to the scanner
+[ ]Fix bug in the gov screen, if you choose a policy, go to governments and back, it does not remember your selection while still excluding it from the picker

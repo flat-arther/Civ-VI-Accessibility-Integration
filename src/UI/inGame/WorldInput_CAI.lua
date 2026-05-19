@@ -1,11 +1,13 @@
 include("caiUtils")
 include("navCursor")
 include("inGameHelpers_CAI")
+include("UnitWaypoints_CAI")
 include("interfaceInfoHelpers_CAI")
 include("UIScreenManager")
 include("WorldScanner_CAI")
 include("Surveyor_CAI")
 include("RevealAnnouncements_CAI")
+include("EventSubs_CAI")
 include("WorldInput")
 
 local INPUT_ACTION_STARTED = "Started"
@@ -98,13 +100,13 @@ local SharedInputActions = {
 		end,
 	},
 	[ACTION_SCANNER_PREV_CATEGORY] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			CAIWorldScanner:CycleCategory(-1)
 		end,
 	},
 	[ACTION_SCANNER_NEXT_CATEGORY] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			CAIWorldScanner:CycleCategory(1)
 		end,
@@ -303,9 +305,10 @@ local interfaceWidgets = {
 	[InterfaceModeTypes.CITY_RANGE_ATTACK] = CreateTargetingWidgetData("LOC_CAI_CITY_RANGE_ATTACK_MODE", function()
 		CityRangeAttack()
 	end),
-	[InterfaceModeTypes.DISTRICT_RANGE_ATTACK] = CreateTargetingWidgetData("LOC_CAI_DISTRICT_RANGE_ATTACK_MODE", function()
-		DistrictRangeAttack()
-	end),
+	[InterfaceModeTypes.DISTRICT_RANGE_ATTACK] = CreateTargetingWidgetData("LOC_CAI_DISTRICT_RANGE_ATTACK_MODE",
+		function()
+			DistrictRangeAttack()
+		end),
 	[InterfaceModeTypes.AIR_ATTACK] = CreateTargetingWidgetData("LOC_CAI_AIR_ATTACK_MODE", function()
 		UnitAirAttack()
 	end),
@@ -570,6 +573,9 @@ end)
 
 OnShutdown = WrapFunc(OnShutdown, function(orig)
 	UnregisterCAIEvents()
+	if CAIUnitWaypoints ~= nil and CAIUnitWaypoints.Shutdown ~= nil then
+		CAIUnitWaypoints:Shutdown()
+	end
 	CAIWorldScanner:ClearScanner()
 	RevealAnnouncements_CAI.Shutdown()
 	if mgr then

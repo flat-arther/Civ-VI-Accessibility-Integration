@@ -225,6 +225,9 @@
     <Row Tag="LOC_CAI_REVEAL_PLOT" Language="en_US">
       <Text>tile</Text>
     </Row>
+    <Row Tag="LOC_CAI_PLOT_FOG" Language="en_US">
+      <Text>Fog</Text>
+    </Row>
     <Row Tag="LOC_CAI_CURSOR_MOVE_NORTHWEST" Language="en_US">
       <Text>Move cursor northwest</Text>
     </Row>
@@ -294,6 +297,12 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_SPECIAL_MAP_OBJECTS" Language="en_US">
       <Text>Special map objects</Text>
     </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_WAYPOINTS" Language="en_US">
+      <Text>Waypoints</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_QUEUED_PATH" Language="en_US">
+      <Text>Queued path</Text>
+    </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_MY" Language="en_US">
       <Text>My</Text>
     </Row>
@@ -335,6 +344,12 @@
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BARBARIANS" Language="en_US">
       <Text>Barbarians</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_WAYPOINTS" Language="en_US">
+      <Text>Waypoints</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_FULL_PATH" Language="en_US">
+      <Text>Full path</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CAMPS" Language="en_US">
       <Text>Camps</Text>
@@ -1781,6 +1796,9 @@
     <Row Tag="LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS" Language="en_US">
       <Text>{1_RiverText}, {2_Directions}</Text>
     </Row>
+    <Row Tag="LOC_CAI_PLOT_WAYPOINT" Language="en_US">
+      <Text>Waypoint</Text>
+    </Row>
     <Row Tag="LOC_CAI_DIR_NE" Language="en_US">
       <Text>NE</Text>
     </Row>
@@ -1813,6 +1831,102 @@
     </Row>
     <Row Tag="LOC_CAI_NO_INTERFACE_INFO" Language="en_US">
       <Text>No interface information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_CURRENT_TILE" Language="en_US">
+      <Text>Current tile</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_SWAP" Language="en_US">
+      <Text>Swap with unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_VALID" Language="en_US">
+      <Text>Valid move</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_QUEUED" Language="en_US">
+      <Text>Queued path</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_THIS_TURN" Language="en_US">
+      <Text>This turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_TURNS" Language="en_US">
+      <Text>{1_Turns : plural 1?This turn; other?{1_Turns} turns;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_CANNOT_MOVE" Language="en_US">
+      <Text>Cannot move there</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_INVALID_PLOT" Language="en_US">
+      <Text>Invalid destination</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_BLOCKED" Language="en_US">
+      <Text>Movement blocked</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_TUTORIAL_RESTRICTED" Language="en_US">
+      <Text>Movement blocked by tutorial restriction</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_PATH_FOG" Language="en_US">
+      <Text>Path enters fog</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_PATH_UNEXPLORED" Language="en_US">
+      <Text>Path enters unexplored territory</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_THEN_UNEXPLORED" Language="en_US">
+      <Text>Then unexplored</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_CROSSES_OBSTACLES" Language="en_US">
+      <Text>{1_Count : plural 1?Crosses {1_Count} obstacle; other?Crosses {1_Count} obstacles;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_USES_TUNNEL" Language="en_US">
+      <Text>Uses tunnel</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_REQUIRES_EMBARK" Language="en_US">
+      <Text>Requires embark</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_REQUIRES_DISEMBARK" Language="en_US">
+      <Text>Requires disembark</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_ENTERS_ZOC" Language="en_US">
+      <Text>Enters zone of control</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_WILL_DECLARE_WAR" Language="en_US">
+      <Text>Will declare war</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_ATTACK_AFTER_MOVE_THIS_TURN" Language="en_US">
+      <Text>Encounters combat this turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_ATTACK_AFTER_MOVE_TURNS" Language="en_US">
+      <Text>{1_Turns : plural 1?Encounters combat this turn; other?Encounters combat in {1_Turns} turns;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_PATH_STEPS" Language="en_US">
+      <Text>{1_Steps}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_ENEMY_AT_DESTINATION" Language="en_US">
+      <Text>Enemy at destination</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_BLOCKED_UNIT" Language="en_US">
+      <Text>Blocked by unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_BLOCKED_MOUNTAIN" Language="en_US">
+      <Text>Blocked by impassable terrain</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_CANNOT_ATTACK_FROM_LAND" Language="en_US">
+      <Text>Cannot attack from land</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_CANNOT_ATTACK_FROM_WATER" Language="en_US">
+      <Text>Cannot attack from water</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_CANNOT_TRAVEL_TO_LAND" Language="en_US">
+      <Text>Cannot travel to land</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_BLOCKED_BORDERS" Language="en_US">
+      <Text>Cannot enter this territory</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_RESULT_MOVED_TO" Language="en_US">
+      <Text>{1_Moves : plural 1?Moved, {1_Moves} move left; other?Moved, {1_Moves} moves left;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_RESULT_STOPPED_SHORT_TURNS" Language="en_US">
+      <Text>{1_Turns : plural 1?Stopped short, 1 turn till arrival; other?Stopped short, {1_Turns} turns till arrival;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_RESULT_STOPPED_SHORT" Language="en_US">
+      <Text>Stopped short</Text>
     </Row>
     <Row Tag="LOC_CAI_INTERFACE_PRIMARY_ACTION" Language="en_US">
       <Text>Primary interface action</Text>
@@ -1891,6 +2005,12 @@
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TARGET_PLOTS" Language="en_US">
       <Text>Target plots</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_WAYPOINT_TURN" Language="en_US">
+      <Text>Waypoint, turn {1_Turn}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_NEXT_WAYPOINT" Language="en_US">
+      <Text>Next waypoint: {1_Direction}</Text>
     </Row>
     <Row Tag="LOC_CAI_VALID_TARGET_PLOT" Language="en_US">
       <Text>Target plot {1_X}, {2_Y}</Text>

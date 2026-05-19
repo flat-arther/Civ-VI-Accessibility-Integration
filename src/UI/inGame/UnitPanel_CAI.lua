@@ -10,6 +10,7 @@ else
 end
 
 local mgr = ExposedMembers.CAI_UIManager
+local HexCoordUtils = CAIHexCoordUtils
 
 local UNIT_ACTION_LIST_ID = "CAIUnitPanelActionList"
 local UNIT_LIST_ID = "CAIUnitPanelUnitList"
@@ -72,6 +73,7 @@ UnitInfoFallbacks = {
 local UnitSummaryRequestedKeys = {
     "UnitName",
     "Activity",
+    "NextWaypoint",
     "Health",
     "Moves",
     "Charges",
@@ -482,6 +484,144 @@ local function GetUnitInfoActivity(data, unit)
     end
 
     return results
+end
+
+local function GetUnitInfoNextWaypoint(unit)
+    if unit == nil or info == nil or info.GetNextUnitWaypoint == nil then
+        return nil
+    end
+
+    local waypointPlotId = info:GetNextUnitWaypoint()
+    if waypointPlotId == nil or waypointPlotId == false or not Map.IsPlot(waypointPlotId) then
+        return nil
+    end
+
+    local waypointPlot = Map.GetPlotByIndex(waypointPlotId)
+    if waypointPlot == nil then
+        return nil
+    end
+
+    local direction = HexCoordUtils.directionString(unit:GetX(), unit:GetY(), waypointPlot:GetX(), waypointPlot:GetY())
+    if direction == nil or direction == "" then
+        direction = Locale.Lookup("LOC_CAI_HERE")
+    end
+
+    return Locale.Lookup("LOC_CAI_UNIT_NEXT_WAYPOINT", direction)
+end
+
+local function GetCachedQueuedPathPlotIds(entries)
+    local plotIds = {}
+    for _, entry in ipairs(entries or {}) do
+        local plotId = entry ~= nil and entry.PlotId or nil
+        if plotId ~= nil and plotId ~= false and Map.IsPlot(plotId) then
+            plotIds[#plotIds + 1] = plotId
+        end
+    end
+    return plotIds
+end
+
+local function CachedPlotIdsToPathNodes(plotIds, startIndex, endIndex)
+    local nodes = {}
+    if plotIds == nil then
+        return nodes
+    end
+
+    startIndex = startIndex or 1
+    endIndex = endIndex or #plotIds
+    for i = startIndex, endIndex do
+        local plot = Map.GetPlotByIndex(plotIds[i])
+        if plot ~= nil then
+            nodes[#nodes + 1] = { x = plot:GetX(), y = plot:GetY() }
+        end
+    end
+
+    return nodes
+end
+
+local function GetCachedQueuedPathVisibleText(plotIds)
+    if plotIds == nil or #plotIds < 2 then
+        return nil, false, false
+    end
+
+    local entersFog = false
+    local entersUnrevealed = false
+    local revealedEndIndex = #plotIds
+    local visibility = PlayersVisibility[Game.GetLocalPlayer()]
+    if visibility ~= nil then
+        for i, plotId in ipairs(plotIds) do
+            if not visibility:IsRevealed(plotId) then
+                entersUnrevealed = true
+                revealedEndIndex = math.max(1, i - 1)
+                break
+            elseif not visibility:IsVisible(plotId) then
+                entersFog = true
+            end
+        end
+    end
+
+    local steps = nil
+    if revealedEndIndex >= 2 then
+        local nodes = CachedPlotIdsToPathNodes(plotIds, 1, revealedEndIndex)
+        steps = HexCoordUtils.stepListFromPath(nodes)
+        if steps == "" then
+            steps = nil
+        end
+    end
+
+    return steps, entersFog, entersUnrevealed
+end
+
+local function FormatCachedQueuedPathArrivalTurn(arrivalTurn)
+    arrivalTurn = tonumber(arrivalTurn) or 1
+    if arrivalTurn <= 1 then
+        return Locale.Lookup("LOC_CAI_MOVEMENT_THIS_TURN")
+    end
+    return Locale.Lookup("LOC_CAI_MOVEMENT_TURNS", arrivalTurn)
+end
+
+local function GetQueuedPathInfo()
+    if info == nil or info.GetQueuedPath == nil then
+        return nil
+    end
+
+    local entries = info:GetQueuedPath()
+    if entries == nil or #entries < 2 then
+        return nil
+    end
+
+    return {
+        Entries = entries,
+        PlotIds = GetCachedQueuedPathPlotIds(entries),
+        ArrivalTurn = info.GetQueuedPathArrivalTurn ~= nil and info:GetQueuedPathArrivalTurn() or nil,
+    }
+end
+
+local function GetUnitInfoQueuedPath(unit)
+    local queuedPath = GetQueuedPathInfo()
+    if queuedPath == nil then
+        return nil
+    end
+
+    local results = {}
+    AppendUnitInfo(results, Locale.Lookup("LOC_CAI_MOVEMENT_QUEUED"))
+    AppendUnitInfo(results, FormatCachedQueuedPathArrivalTurn(queuedPath.ArrivalTurn))
+
+    local steps, entersFog, entersUnrevealed = GetCachedQueuedPathVisibleText(queuedPath.PlotIds)
+    if entersUnrevealed then
+        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_UNEXPLORED"))
+    elseif entersFog then
+        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_FOG"))
+    end
+
+    if steps ~= nil then
+        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_STEPS", steps))
+    end
+
+    if entersUnrevealed then
+        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_MOVEMENT_THEN_UNEXPLORED"))
+    end
+
+    return #results > 0 and results or nil
 end
 
 local function HasPromoteActionInData(data)
@@ -1366,6 +1506,10 @@ UnitInfo = {
         return GetUnitInfoActivity(data, unit)
     end,
 
+    NextWaypoint = function(data, unit)
+        return GetUnitInfoNextWaypoint(unit)
+    end,
+
     Stats = function(data, unit)
         return GetUnitInfoStats(data)
     end,
@@ -1395,10 +1539,17 @@ UnitInfo = {
     end,
 
     QueuedPath = function(data, unit)
-        if unit == nil then return nil end
-        local queued = UnitManager.GetQueuedDestination(unit)
-        if not queued then return nil end
-        return BuildMovementSpeech(BuildMovementPathInfo(unit, queued, true, true))
+        local results = {}
+        AppendUnitInfo(results, GetUnitInfoNextWaypoint(unit))
+        local queuedPathInfo = GetUnitInfoQueuedPath(unit)
+        if type(queuedPathInfo) == "table" then
+            for _, value in ipairs(queuedPathInfo) do
+                AppendUnitInfo(results, value)
+            end
+        else
+            AppendUnitInfo(results, queuedPathInfo)
+        end
+        return #results > 0 and results or nil
     end,
 
     BuilderRecommendation = function(data, unit)

@@ -819,6 +819,88 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - `interfaceInfoHelpers_CAI.lua` is the shared helper module for interface-specific plot previews.
   - `interfaceTargetHelpers_CAI.lua` owns neutral active-target resolution used by both interface info and the world scanner.
   - The legacy movement path helpers remain there unchanged for callers such as `UnitPanel_CAI.lua`.
+  - Vanilla movement-path behavior lives in `decompiled/Assets/UI/WorldInput.lua`, centered on `RealizeMovementPath(showQueuedPath)`. That function is primarily a renderer for sighted feedback, not a text-summary API.
+  - Lifecycle and entry points for vanilla move-path visuals:
+    - entering `InterfaceModeTypes.MOVE_TO` calls `OnInterfaceModeChange_MoveTo()` -> `RealizeMovementPath()`
+    - while already in move mode, mouse move calls `OnMouseMoveToUpdate()` -> `RealizeMovementPath()`
+    - while in normal selection mode, holding right mouse to quick-move calls `OnMouseSelectionUnitMoveStart()` / `OnMouseSelectionMove()` -> `RealizeMovementPath()`
+    - touch pathing calls `OnTouchSelectionStart()` / `OnTouchSelectionUpdate()` or `OnTouchMoveToUpdate()` -> `RealizeMovementPath()`
+    - selecting a unit with a queued destination calls `OnUnitSelectionChanged(..., isSelected=true, ...)` -> `RealizeMovementPath(true)`
+    - cancelling movement clears the active preview, then restores queued-path preview if the selected unit still has one
+    - leaving move mode calls `OnInterfaceModeChange_MoveToLeave()` -> `ClearMovementPath()`
+  - Queued-order ownership:
+    - Vanilla Lua clearly knows about already queued movement through `UnitManager.GetQueuedDestination(unit)`, but the actual act of making a move become queued is not exposed as a Lua branch in the decompiled UI.
+    - `WorldInput.lua` move confirmation paths such as `OnMouseSelectionUnitMoveEnd()` and `OnMouseMoveToEnd()` simply call `MoveUnitToCursorPlot(unit)` with no `Shift` or queue-specific condition.
+    - `MoveUnitToCursorPlot()` in `WorldInput.lua` delegates to `MoveUnitToPlot()`, and `MoveUnitToPlot()` / `RequestMoveOperation()` in `Civ6Common.lua` submit the same normal `UnitManager.RequestOperation(unit, UnitOperationTypes.MOVE_TO, tParameters)` request used for ordinary movement.
+    - The only move modifiers Lua supplies there are combat / fog related (`ATTACK`, `MOVE_IGNORE_UNEXPLORED_DESTINATION`, or `NONE`); no exposed `UnitOperationMoveModifiers` value represents `queue movement`.
+    - Practical implication: sighted queued movement is a real engine-level state that Lua can read back and render, but the input rule that turns a move order into a queued order is likely handled below Lua rather than by a visible `if Shift then queue` script branch.
+  - Early-exit conditions:
+    - no path is shown if `UI.IsMovementPathOn()` is false or `UI.IsGameCoreBusy()` is true
+    - no path is shown with no selected unit
+    - no path is shown for `IgnoreMoves` units
+    - no path is shown when `UI.GetCursorPlotID()` is not a valid plot
+  - `RealizeMovementPath(...)` computes or consumes these concrete data points:
+    - end plot: current cursor plot, or `UnitManager.GetQueuedDestination(unit)` when `showQueuedPath=true`
+    - full path data from `UnitManager.GetMoveToPathEx(unit, endPlotId)`, notably `plots`, `turns`, `obstacles`, `entrancePortals`, and `exitPortals`
+    - tutorial / constrained-path invalidity from `IsPlotPathRestrictedForUnit(pathInfo.plots, pathInfo.turns, unit)`
+    - fog-of-war state by checking every plot in the path against `PlayersVisibility[localPlayer]:IsVisible(plotId)`
+    - enemy presence on the destination plot by scanning visible units in that plot
+    - implicit ranged-attack targeting by checking `UnitManager.GetOperationTargets(unit, UnitOperationTypes.RANGE_ATTACK)` for the hovered end plot
+    - swap-with-unit validity by testing `UnitManager.CanStartOperation(unit, UnitOperationTypes.SWAP_UNITS, nil, params)`
+  - What a sighted player is told by the movement preview:
+    - The preview is almost entirely visual. Vanilla does not build a spoken or tooltip summary string here.
+    - Path validity category is conveyed by lens family:
+      - `MovementGood`: ordinary valid movement path
+      - `MovementQueue`: queued path for an already issued order
+      - `MovementBad`: restricted / invalid path, including tutorial-forbidden destinations
+      - `MovementFOW`: otherwise valid path that enters fog or mid-fog
+    - Origin / destination are shown with dedicated path-end variants such as `_Origin` and `_Destination`.
+    - Turn count is conveyed visually by numbered markers added with `UI.AddNumberToPath(turnNumber, plotId)`. Markers are placed at each turn break and at the final path plot. This is not a per-step numeric breakdown.
+    - Non-turn-break intermediate plots are shown as ordinary pips (`..._Pip`).
+    - Obstacles along the path, such as river crossings, are shown with `..._Minus` markers between the obstacle plot and the following plot.
+    - If the cursor target is a valid same-turn ranged attack for the selected unit, vanilla does not show a movement path at all. It instead highlights the target hex in the attack-range lens and focuses that hex.
+    - If the cursor target is a valid unit-swap destination, vanilla shows a special two-plot move path with turn `1` markers on both ends.
+    - If no multi-plot path exists:
+      - same tile: only a `MovementGood_Destination` marker on the current plot
+      - different invalid tile: only a `MovementBad_Destination` marker on the target plot
+    - If a visible enemy unit is on the destination and arrival is this turn, vanilla hides the normal destination marker. For later-turn arrivals, the destination marker is still shown.
+    - Mountain-tunnel travel is drawn as segmented path pieces using `exitPortals` / `entrancePortals`; the function comments note there are no special portal-entry/exit variations yet.
+  - Non-visual feedback in this path system is minimal:
+    - when a path first becomes multi-turn (`lastTurn == 2` and the previous preview was 1 turn), vanilla plays `UI_Multi_Turn_Movement_Alert`
+    - when confirming a move after at least one realized turn count, vanilla plays `UI_Move_Confirm`
+    - `RealizeMovementPath(...)` itself does not generate text, tooltip content, or combat-preview strings
+  - Design implication for CAI:
+    - vanilla preview exposes a small set of stable semantic facts: valid / queued / restricted / fog, implicit ranged attack vs movement, visible enemy-at-end affecting marker visibility, turn-break count, obstacles, swap, and portal segmentation
+    - many current CAI movement sentences are interpretations layered on top of those visuals, not direct vanilla wording. A clean redesign should treat the items above as the real vanilla source model and decide separately what spoken abstraction best serves blind play.
+  - CAI movement speech now treats `UnitManager.GetMoveToPathEx(...)` as the source for path structure and uses the final `pathInfo.turns[#pathInfo.turns]` entry as the arrival turn. Do not use `#pathInfo.turns` as the turn count; that is the number of path nodes.
+  - Movement path direction speech should use `CAIHexCoordUtils.stepListFromPath(...)` with `{ x, y }` path nodes. Civ VI vanilla uses `IsVisible(...)` to choose the `MovementFOW` lens, but speech must distinguish revealed fog from unexplored tiles: use `IsRevealed(...)` for the route-geometry cutoff and only say `Then unexplored` after the first unrevealed path tile.
+  - If active `MOVE_TO` interface info would immediately resolve as combat against an at-war visible unit, city, or district, CAI requests `LuaEvents.CAISpeakCombatPreview()` and suppresses movement speech. Queued-path reads keep speaking queued movement information instead of firing combat preview.
+  - Runtime dumps confirm `GetMoveToPathEx(...)` exposes only the keys vanilla uses (`plots`, `turns`, `obstacles`, `entrancePortals`, `exitPortals`), so CAI should not promise Civ V-style MP spent / MP remaining unless a future engine hook exposes per-node remaining movement.
+  - 2026-05-19 comparison against Civ V Access `CivVAccess_PathDiagnostic.lua` / `CivVAccess_UnitControlMovement.lua`: that mod does not settle for a generic move failure. It re-runs the engine pathfinder with progressively relaxed flags, then names causes such as blocked borders / would declare war, friendly stacking, at-war enemy blocker, no embark tech, no deep-water tech, mountain or natural wonder, no naval connection, cannot attack from land, cannot attack from water, and cannot travel to land.
+  - Civ VI does not expose a Civ V-style discriminative path API. In confirmed Lua/UI surfaces we have only the `GetMoveToPathEx(...)` structure, `UnitManager.GetOperationTargets(...)` for implicit ranged attacks, `UnitManager.GetReachableZonesOfControl(...)`, `CombatManager.IsAttackChangeWarState(...)`, plot terrain/water queries, visibility checks, and generic `UnitManager.CanStartOperation(...)` booleans.
+  - Civ VI's generic `UnitManager.CanStartOperation(unit, operationType, plotOrParams, returnResults)` signature can return `UnitOperationResults.FAILURE_REASONS` for many unit operations when `returnResults=true`, and vanilla `UnitPanel.lua` appends those localized strings for disabled actions. However, direct probing showed that per-destination `MOVE_TO` preview does not populate useful `FAILURE_REASONS`, `ACTION_NAME`, or `ADDITIONAL_DESCRIPTION` data through the tested `CanStartOperation(...)` call shapes, so CAI should not rely on that path for movement diagnostics.
+  - CAI adds movement hints from other confirmed vanilla systems: visible ZOC entry is detected by intersecting `pathInfo.plots` with `UnitManager.GetReachableZonesOfControl(unit, true)`, war-start warning follows `CombatManager.IsAttackChangeWarState(unit:GetComponentID(), x, y)`, delayed melee/combat destinations use the path truncated to the attack-from tile, and same-domain land routes with opposite-domain middle tiles announce embark/disembark.
+  - Current practical parity judgement versus Civ V:
+    - can match directly now: blocked visible unit, impassable terrain / mountain, land-vs-water attack incompatibility, sea unit cannot travel to land, ZOC entry, war-start warning, embark/disembark along a valid route, fog vs unexplored, swap, queued path, arrival turn, and combat-at-end preview suppression
+    - can now approximate in CAI from start/target plot state: blocked foreign territory, unit-specific embark tech (`TECH_SAILING` for builders, `TECH_CELESTIAL_NAVIGATION` for traders, `TECH_SHIPBUILDING` for other land units), and `TECH_CARTOGRAPHY`-gated ocean travel once embark is already unlocked
+    - confirmed gameplay data: `Technologies.xml` uses `EmbarkUnitType="UNIT_BUILDER"` on `TECH_SAILING`, `EmbarkUnitType="UNIT_TRADER"` on `TECH_CELESTIAL_NAVIGATION`, `EmbarkAll="true"` on `TECH_SHIPBUILDING`, and `CARTOGRAPHY_GRANT_OCEAN_NAVIGATION` on `TECH_CARTOGRAPHY`
+    - cannot currently match from confirmed Civ VI Lua alone: Civ V-style closest-reachable direction beyond adjacent plots, natural-wonder-specific blocker naming, and naval no-water-connection diagnosis
+  - `BuildMovementResultSpeech(unit, targetX, targetY, turnsToArrival)` formats post-move result text for later event handlers. It compares the unit's live position to the original target; on arrival it uses `unit:GetMovementMovesRemaining()` as Civ VI's display movement value, so no Civ V-style `MOVE_DENOMINATOR` conversion is needed. If the unit stopped short, caller-supplied `turnsToArrival` controls whether CAI says `Stopped short, n turns till arrival` or bare `Stopped short`.
+  - `EventSubs_CAI.lua` owns orphan event subscriptions that do not naturally belong to a screen override. It currently listens to `Events.UnitMoveComplete(playerID, unitID, x, y)` for the local player only, finds the unit, checks `UnitManager.GetQueuedDestination(unit)`, re-runs `UnitManager.GetMoveToPathEx(unit, queuedPlotId)` when a queued destination remains, and passes the final turn entry to `BuildMovementResultSpeech(...)` before speaking the result.
+  - `UnitWaypoints_CAI.lua` is a WorldInput-owned singleton service for the currently selected unit's queued-path cache. It is included from `WorldInput_CAI.lua`, not from `PlotToolTip_CAI.lua`, because the authoritative lifecycle events (`Events.UnitSelectionChanged` and `Events.UnitMoveComplete`) already belong to world input and the world scanner also lives in that same context.
+  - The service caches exactly one full queued path at a time, for the currently selected unit only. Each cached entry stores a `PlotId` plus `IsWaypoint` boolean. Waypoints are end-of-turn stop plots on that queued path, derived by walking `GetMoveToPathEx(unit, queuedDestination).turns` and marking `plots[i - 1]` when `turns[i]` increases. The unit's current plot is never marked as a waypoint, so an already-exhausted unit does not speak `Next waypoint: Here`.
+  - `UnitWaypoints_CAI.lua` exposes read-only queries through `ExposedMembers.CAIInfo`:
+    - `GetQueuedPath()` -> copied `{ PlotId, IsWaypoint }[]` cache for the selected unit's queued path
+    - `GetQueuedPathArrivalTurn()` -> cached final `pathInfo.turns[#turns]`
+    - `GetUnitWaypoints()` -> copied `plotId[]` filtered from cached queued-path entries where `IsWaypoint == true`
+    - `GetNextUnitWaypoint()` -> first cached waypoint plot id, or nil when no end-of-turn stop remains before the queued destination
+    - `IsQueuedPathPlot(plotId)` -> true when that plot appears anywhere on the cached queued path
+    - `IsWaypointPlot(plotId)` -> true when that plot is marked as an end-of-turn waypoint on the cached queued path
+  - `UnitWaypoints_CAI.lua` clears and repopulates the cache on `Events.UnitSelectionChanged` when a local unit becomes selected, refreshes it on `Events.UnitMoveComplete` only for the currently selected unit, and every public getter/query self-clears when the currently selected unit no longer has a queued destination.
+  - `UnitPanel_CAI.lua` uses `GetNextUnitWaypoint()` plus `CAIHexCoordUtils.directionString(unitX, unitY, waypointX, waypointY)` to speak `Next waypoint: ...` from the unit's location. Summary speech inserts it immediately after activity.
+  - `UnitPanel_CAI.lua` queued-path reads no longer recalculate from the pathfinder. They rebuild explicit queued-path speech from cached queued-path entries plus live visibility, using `GetQueuedPath()`, `GetQueuedPathArrivalTurn()`, and `CAIHexCoordUtils.stepListFromPath(...)`.
+  - `PlotToolTip_CAI.lua` consumes `IsWaypointPlot(plotId)` through a `waypoint` plot-info helper and can announce `Waypoint` for matching plots.
+  - `WorldScannerCategory_waypoints.lua` now represents the selected unit's cached queued path as a dynamic `Queued path` scanner category with `Full path` and `Waypoints` subcategories. Scanner item labels are built from `RequestPlotInfo(..., { "waypoint", "plotName", "feature", "cityName", "districtTitle", "cityDistrictTitle" }, plotId)` so the category reuses normal plot naming instead of custom label logic.
   - `GetActiveInterfacePlotInfo(plot)` dispatches by `UI.GetInterfaceMode()` through `InterfaceInfoHelpers[...]`.
   - `SpeakActiveInterfacePlotInfo(plot)` is the one-shot speech wrapper for the Space-bound `InterfaceInfo` action. Helpers remain plain functions and return either a string, a list of strings, nil, or `false` when explicit speech was handled by side effect.
   - Current supported preview modes include `MOVE_TO`, `DISTRICT_PLACEMENT`, `BUILDING_PLACEMENT`, `RANGE_ATTACK`, `CITY_RANGE_ATTACK`, `DISTRICT_RANGE_ATTACK`, `AIR_ATTACK`, `DEPLOY`, `REBASE`, `TELEPORT_TO_CITY`, `FORM_CORPS`, `FORM_ARMY`, `AIRLIFT`, `SACRIFICE_SELECTION`, `KILL_WEAKER_UNIT`, `TRANSFORM_UNIT`, `RESTORE_UNIT_MOVES`, and `NAVAL_GOLD_RAID`.
@@ -827,6 +909,7 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - Wonder placement uses valid owned plots from `CityManager.GetOperationTargets(...)` and valid purchasable plots from `CityManager.GetCommandTargets(...)` filtered through `plot:CanHaveWonder(...)`.
   - Non-attack targeting/destination helpers use shared `CAIInterfaceTargets` target resolution. Space says `Valid` plus the plot target label, `Invalid target` when the CAI cursor is not on an eligible plot, and for `FORM_CORPS` / `FORM_ARMY` appends `formation target` after the target unit name.
   - `PlotToolTip_CAI.lua` now treats `PlotInfo5` as a general interface preview slot rather than a movement-only slot, and automatic cursor speech includes the same interface preview lines when the active mode supplies them.
+  - CAI cursor-move plot speech now distinguishes revealed fog from both live-visible plots and unexplored plots. Use `PlayersVisibility[observer]:IsRevealed(plot)` together with `:IsVisible(plot:GetIndex())`: revealed plus not visible should speak the CAI-owned `Fog` helper, while unrevealed plots still fall back to the terrain-name helper's fog-of-war behavior.
   - `PlotToolTip_CAI.lua` now selects its vanilla include by active rules content: base `PlotToolTip`, `PlotTooltip_Expansion2` when `IsExpansion2Active()` is true, `PlotToolTip_BarbarianClansMode` when `GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS") == 1`, and `PlotTooltip_Expansion2_BarbarianClansMode` when both are active.
   - `ExposedMembers.CAIInfo:RequestPlotInfo(plot, requestedKeys, optionalPlotId)` returns a flat `string[]`. Existing callers can keep passing the explicit `plot` object. Callers that need info for a specific target plot without depending on the current cursor plot can pass `nil` for `plot` and the target plot id as `optionalPlotId`. Individual plot info helpers may return either one string or a list of strings; the request path must flatten helper tables before concatenating speech. This matters for `interfaceInfoHelpers_CAI.lua`, whose movement and placement previews are multi-line.
   - `PlotToolTip_CAI.lua` also owns one-shot plot read actions through `Events.InputActionTriggered`. The current action ids are `PlotReadUnits`, `PlotReadYieldRiverOwner`, `PlotReadStats`, `PlotReadRelativeCoords`, and `PlotReadDistrictBuildings`; each action builds a requested-key list and then routes through the same `RequestPlotInfo(...)` / helper pipeline used by cursor speech.

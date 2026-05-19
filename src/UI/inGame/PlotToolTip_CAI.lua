@@ -50,6 +50,7 @@ local STATIC_INFO_PRIORITY = {
     "storm",
     "drought",
     "movement",
+    "waypoint",
     "route",
     "defense",
     "appeal",
@@ -75,8 +76,10 @@ local STATIC_INFO_PRIORITY = {
 }
 
 local CURSOR_MOVE_INFO_PRIORITY = {
+    "isFog",
     "units",
     "interfaceInfo",
+    "waypoint",
     "cityName",
     "wonderTitle",
     "cityResourceExtraction",
@@ -454,6 +457,24 @@ function info.IsPlotVisible(plot)
     return vis:IsRevealed(plot)
 end
 
+function info.IsPlotFogged(plot)
+    if not plot then
+        return false
+    end
+
+    local observer = Game.GetLocalObserver()
+    if observer == PlayerTypes.OBSERVER then
+        return false
+    end
+
+    local vis = PlayersVisibility[observer]
+    if vis == nil then
+        return false
+    end
+
+    return vis:IsRevealed(plot) and not vis:IsVisible(plot:GetIndex())
+end
+
 local function CacheGreatWorks(data)
     if data._CAIGreatWorksCached then
         return
@@ -701,6 +722,18 @@ end
 
 ---@type table<string, fun(data:table, plot:table, arg:string|nil):string|string[]|nil>
 info.PlotInfoHelpers = {
+    isFog = function(data, plot)
+        if plot == nil or info.IsPlotFogged == nil then
+            return nil
+        end
+
+        if info.IsPlotFogged(plot) then
+            return Locale.Lookup("LOC_CAI_PLOT_FOG")
+        end
+
+        return nil
+    end,
+
     plotName = function(data)
         if not data.IsVisible then
             return Locale.Lookup("LOC_MINIMAP_FOG_OF_WAR_TOOLTIP")
@@ -839,6 +872,18 @@ info.PlotInfoHelpers = {
         if not data.Impassable and data.MovementCost > 0 then
             return Locale.Lookup("LOC_TOOLTIP_MOVEMENT_COST", data.MovementCost)
         end
+        return nil
+    end,
+
+    waypoint = function(data, plot)
+        if plot == nil or info.IsWaypointPlot == nil then
+            return nil
+        end
+
+        if info:IsWaypointPlot(plot:GetIndex()) then
+            return Locale.Lookup("LOC_CAI_PLOT_WAYPOINT")
+        end
+
         return nil
     end,
 
@@ -1350,10 +1395,6 @@ function OnCAICursorMove(x, y, plot, cursor)
     end
 
     local results = info:RequestPlotInfo(current, CURSOR_MOVE_INFO_PRIORITY)
-    local coords = GetRelativeCoordinateString(current)
-    if coords then
-        table.insert(results, 1, coords)
-    end
 
     if #results > 0 then
         Speak(ProcessIcons(table.concat(results, ", ")))
