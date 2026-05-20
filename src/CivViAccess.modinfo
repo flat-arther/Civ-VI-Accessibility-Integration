@@ -17,6 +17,7 @@
     <File>UI/uiManager/UIScreenManager.lua</File>
     <File>UI/inGame/worldInfo.lua</File>
     <File>UI/inGame/navCursor.lua</File>
+    <File>UI/inGame/MovementActions_CAI.lua</File>
     <File>UI/inGame/UnitWaypoints_CAI.lua</File>
     <File>UI/frontEnd/FrontEnd.lua</File>
     <File>UI/frontEnd/IntroScreen.lua</File>
@@ -145,6 +146,7 @@
       <File>UI/uiManager/widgetTemplates.lua</File>
       <File>UI/inGame/worldInfo.lua</File>
       <File>UI/inGame/navCursor.lua</File>
+      <File>UI/inGame/MovementActions_CAI.lua</File>
       <File>UI/inGame/UnitWaypoints_CAI.lua</File>
       <File>UI/shared/iconsProcessing.lua</File>
       <File>UI/shared/PopupDialog.lua</File>

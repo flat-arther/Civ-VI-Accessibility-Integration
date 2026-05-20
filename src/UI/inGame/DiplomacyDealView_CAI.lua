@@ -857,7 +857,7 @@ end
 local function PushRoot()
     if not mgr or not m_ui.root then return end
     if not mgr:HasWidget(m_ui.root) then
-        mgr:Push(m_ui.root)
+        mgr:Push(m_ui.root, PopupPriority.Current)
     end
 end
 

@@ -12,6 +12,7 @@ local HexCoordUtils = CAIHexCoordUtils
 ---@field kind string
 ---@field turns number[]
 ---@field plots number[]
+---@field hasPath boolean
 ---@field steps PathStep[]
 ---@field segments PathSegment[]
 ---@field obstacles number[]
@@ -19,7 +20,6 @@ local HexCoordUtils = CAIHexCoordUtils
 ---@field isRestricted boolean
 ---@field restrictedPlotId number|nil
 ---@field isPathInFog boolean
----@field enemyAtEnd boolean
 ---@field enemyAtWarAtEnd boolean
 ---@field isQueued boolean
 ---@field destPlot integer
@@ -37,9 +37,6 @@ local HexCoordUtils = CAIHexCoordUtils
 ---@field combatAtEnd boolean
 ---@field enemyCityAtEnd boolean
 ---@field willDeclareWar boolean
----@field requiresEmbark boolean
----@field requiresDisembark boolean
----@field attackAfterMoveText string|nil
 ---@field blockingUnit table|nil
 ---@field requiredTechType string|nil
 ---@field targetOwner number|nil
@@ -369,22 +366,6 @@ local function AnalyzePathFeatures(unit, targetPlot, pathInfo)
         end
     end
 
-    if domain == "DOMAIN_LAND" and #pathInfo.plots >= 3 then
-        local startPlot = Map.GetPlotByIndex(pathInfo.plots[1])
-        local endPlot = Map.GetPlotByIndex(pathInfo.plots[#pathInfo.plots])
-        if startPlot ~= nil and endPlot ~= nil and startPlot:IsWater() == endPlot:IsWater() then
-            local startWater = startPlot:IsWater()
-            for i = 2, #pathInfo.plots - 1 do
-                local plot = Map.GetPlotByIndex(pathInfo.plots[i])
-                if plot ~= nil and plot:IsWater() ~= startWater then
-                    pathInfo.requiresDisembark = startWater
-                    pathInfo.requiresEmbark = not startWater
-                    break
-                end
-            end
-        end
-    end
-
     if not pathInfo.isQueued
         and unit.IgnoresZOC ~= nil and not unit:IgnoresZOC()
         and unit.HasMovedIntoZOC ~= nil and not unit:HasMovedIntoZOC() then
@@ -409,15 +390,6 @@ local function AnalyzePathFeatures(unit, targetPlot, pathInfo)
         end
     end
 
-    if (pathInfo.enemyAtWarAtEnd or pathInfo.enemyCityAtEnd)
-        and not pathInfo.combatAtEnd
-        and #pathInfo.plots >= 3 then
-        local attackFromPath = PlotIdsToPathNodes(pathInfo.plots, 1, #pathInfo.plots - 1)
-        local steps = HexCoordUtils.stepListFromPath(attackFromPath)
-        if steps ~= "" then
-            pathInfo.attackAfterMoveText = steps
-        end
-    end
 end
 
 PlotIdsToPathNodes = function(plotIds, startIndex, endIndex)
@@ -538,19 +510,17 @@ end
 
 local function FinalizeMovementAnalysis(unit, targetPlot, pathInfo)
     local turns = pathInfo.turns or {}
-    local startPlot = Map.GetPlotByIndex(pathInfo.plots ~= nil and pathInfo.plots[1] or unit:GetPlotId())
+    local startPlot = Map.GetPlotByIndex(unit:GetPlotId())
     pathInfo.arrivalTurn = (#turns > 0 and turns[#turns]) or 1
     pathInfo.usesPortal = HasPortal(pathInfo)
     pathInfo.combatAtEnd = false
     pathInfo.enemyCityAtEnd = false
     pathInfo.enemyAtWarAtEnd = false
     pathInfo.failureKind = nil
-
     AnalyzeVisiblePrefix(pathInfo)
 
-    if targetPlot ~= nil then
-        local hasForeignUnit, _, unitIsAtWar = HasVisibleForeignUnit(targetPlot)
-        pathInfo.enemyAtEnd = hasForeignUnit
+    if pathInfo.hasPath and targetPlot ~= nil then
+        local _, _, unitIsAtWar = HasVisibleForeignUnit(targetPlot)
         pathInfo.enemyAtWarAtEnd = unitIsAtWar
 
         local visibility = PlayersVisibility[Game.GetLocalPlayer()]
@@ -588,8 +558,41 @@ local function FormatObstacleCount(count)
     return Locale.Lookup("LOC_CAI_MOVEMENT_CROSSES_OBSTACLES", count)
 end
 
+local function IsImplicitRangedAttackTarget(unit, endPlotId)
+    if unit == nil or endPlotId == nil or unit:GetMovesRemaining() <= 0 then
+        return false
+    end
+
+    local results = UnitManager.GetOperationTargets(unit, UnitOperationTypes.RANGE_ATTACK)
+    local plots = results and results[UnitOperationResults.PLOTS] or nil
+    local modifiers = results and results[UnitOperationResults.MODIFIERS] or nil
+    if plots == nil or modifiers == nil then
+        return false
+    end
+
+    for i, modifier in ipairs(modifiers) do
+        if modifier == UnitOperationResults.MODIFIER_IS_TARGET and plots[i] == endPlotId then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function HasImmediateCombat(pathInfo)
+    return pathInfo ~= nil and pathInfo.combatAtEnd and not pathInfo.isQueued
+end
+
+local function HasDelayedCombat(pathInfo)
+    if pathInfo == nil then
+        return false
+    end
+
+    return not pathInfo.combatAtEnd and (pathInfo.enemyAtWarAtEnd or pathInfo.enemyCityAtEnd)
+end
+
 local function FormatAttackAfterMove(pathInfo)
-    if pathInfo.attackAfterMoveText == nil or pathInfo.attackAfterMoveText == "" then
+    if not HasDelayedCombat(pathInfo) then
         return nil
     end
     if pathInfo.arrivalTurn <= 1 then
@@ -639,13 +642,13 @@ function BuildMovementPathInfo(unit, endPlotId, showQueuedPath, showDetails)
         kind                   = "move",
         turns                  = {},
         plots                  = {},
+        hasPath                = false,
         steps                  = nil,
         segments               = nil,
         obstacles              = {},
         isRestricted           = false,
         restrictedPlotId       = nil,
         isPathInFog            = false,
-        enemyAtEnd             = false,
         enemyAtWarAtEnd        = false,
         isQueued               = false,
         destPlot               = -1,
@@ -663,10 +666,7 @@ function BuildMovementPathInfo(unit, endPlotId, showQueuedPath, showDetails)
         combatAtEnd            = false,
         enemyCityAtEnd         = false,
         willDeclareWar         = false,
-        requiresEmbark         = false,
-        requiresDisembark      = false,
         zocPlotId              = nil,
-        attackAfterMoveText    = nil,
         blockingUnit           = nil,
         requiredTechType       = nil,
         targetOwner            = nil,
@@ -687,15 +687,6 @@ function BuildMovementPathInfo(unit, endPlotId, showQueuedPath, showDetails)
     result.destPlot = endPlotId
     targetPlot = Map.GetPlotByIndex(endPlotId)
 
-    if startPlotId == endPlotId then
-        result.kind = "same"
-        result.isSamePlot = true
-        result.plots = { startPlotId }
-        result.turns = { 1 }
-        FinalizeMovementAnalysis(unit, targetPlot, result)
-        return result
-    end
-
     if not targetPlot then
         result.kind = "bad"
         result.failureKind = "invalidPlot"
@@ -709,6 +700,7 @@ function BuildMovementPathInfo(unit, endPlotId, showQueuedPath, showDetails)
 
     if UnitManager.CanStartOperation(unit, UnitOperationTypes.SWAP_UNITS, nil, tParams) then
         result.kind = "swap"
+        result.hasPath = true
         result.turns = { 1 }
         result.plots = { startPlotId, endPlotId }
         FinalizeMovementAnalysis(unit, targetPlot, result)
@@ -716,74 +708,55 @@ function BuildMovementPathInfo(unit, endPlotId, showQueuedPath, showDetails)
     end
 
     local pathInfo = UnitManager.GetMoveToPathEx(unit, endPlotId)
-    if not pathInfo or not pathInfo.plots then
-        result.kind = "bad"
-        FinalizeMovementAnalysis(unit, targetPlot, result)
-        return result
-    end
+    result.plots = (pathInfo and pathInfo.plots) or {}
+    result.turns = (pathInfo and pathInfo.turns) or {}
+    result.obstacles = (pathInfo and pathInfo.obstacles) or {}
+    result.entrancePortals = (pathInfo and pathInfo.entrancePortals) or {}
+    result.exitPortals = (pathInfo and pathInfo.exitPortals) or {}
 
-    result.plots = pathInfo.plots or {}
-    result.turns = pathInfo.turns or {}
-    result.obstacles = pathInfo.obstacles or {}
-    result.entrancePortals = pathInfo.entrancePortals or {}
-    result.exitPortals = pathInfo.exitPortals or {}
+    if #result.plots > 1 then
+        result.hasPath = true
 
-    if #result.plots <= 1 then
-        result.kind = "bad"
-        FinalizeMovementAnalysis(unit, targetPlot, result)
-        return result
-    end
-
-    local vis = PlayersVisibility[eLocalPlayer]
-    if vis then
-        for _, pid in ipairs(result.plots) do
-            if not vis:IsVisible(pid) then
-                result.isPathInFog = true
-                break
-            end
+        if IsImplicitRangedAttackTarget(unit, endPlotId) then
+            result.kind = "attack"
+            result.isImplicitRangedAttack = true
+            FinalizeMovementAnalysis(unit, targetPlot, result)
+            return result
         end
-    end
 
-    local restricted, restrictedId = IsPlotPathRestrictedForUnit(result.plots, result.turns, unit)
-    if restricted then
-        result.isRestricted = true
-        result.restrictedPlotId = restrictedId
-    end
-
-    if unit:GetMovesRemaining() > 0 then
-        local results = UnitManager.GetOperationTargets(unit, UnitOperationTypes.RANGE_ATTACK)
-        if results and results[UnitOperationResults.PLOTS] then
-            for i, modifier in ipairs(results[UnitOperationResults.MODIFIERS]) do
-                if modifier == UnitOperationResults.MODIFIER_IS_TARGET then
-                    if results[UnitOperationResults.PLOTS][i] == endPlotId then
-                        result.kind = "attack"
-                        result.isImplicitRangedAttack = true
-                        FinalizeMovementAnalysis(unit, targetPlot, result)
-                        return result
-                    end
+        local vis = PlayersVisibility[eLocalPlayer]
+        if vis then
+            for _, pid in ipairs(result.plots) do
+                if not vis:IsVisible(pid) then
+                    result.isPathInFog = true
+                    break
                 end
             end
         end
-    end
 
-    if result.isQueued then
-        result.kind = "queue"
-    elseif result.isRestricted then
-        result.kind = "bad"
-    elseif result.isPathInFog then
-        result.kind = "fow"
+        local restricted, restrictedId = IsPlotPathRestrictedForUnit(result.plots, result.turns, unit)
+        if restricted then
+            result.isRestricted = true
+            result.restrictedPlotId = restrictedId
+        end
+
+        if result.isQueued then
+            result.kind = "queue"
+        elseif result.isRestricted then
+            result.kind = "bad"
+        elseif result.isPathInFog then
+            result.kind = "fow"
+        else
+            result.kind = "move"
+        end
     else
-        result.kind = "move"
-    end
-
-    local endPlot = Map.GetPlotByIndex(endPlotId)
-    if endPlot and vis then
-        local units = Units.GetUnitsInPlotLayerID(endPlot:GetX(), endPlot:GetY(), MapLayers.ANY)
-        for _, u in ipairs(units) do
-            if u:GetOwner() ~= eLocalPlayer and vis:IsUnitVisible(u) then
-                result.enemyAtEnd = true
-                break
-            end
+        result.turns = { 1 }
+        result.plots = { endPlotId }
+        if startPlotId ~= endPlotId then
+            result.kind = "bad"
+        else
+            result.kind = "same"
+            result.isSamePlot = true
         end
     end
 
@@ -813,19 +786,21 @@ function BuildMovementSpeech(pathInfo, isExplicitSpeech)
             LuaEvents.CAISpeakCombatPreview()
             return false
         end
-        return nil
+        return { Locale.Lookup("LOC_CAI_MOVEMENT_RANGED_ATTACK") }
     end
 
-    if pathInfo.combatAtEnd and not pathInfo.isQueued then
+    if HasImmediateCombat(pathInfo) then
         if isExplicitSpeech then
             LuaEvents.CAISpeakCombatPreview()
             return false
         end
-        return nil
     end
 
     if pathInfo.kind == "bad" then
         AddLine(out, FormatFailure(pathInfo))
+        if not pathInfo.hasPath then
+            return out
+        end
     elseif pathInfo.kind == "fow" then
         if pathInfo.entersUnrevealed then
             AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_UNEXPLORED"))
@@ -846,12 +821,6 @@ function BuildMovementSpeech(pathInfo, isExplicitSpeech)
         AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_USES_TUNNEL"))
     end
 
-    if pathInfo.requiresEmbark then
-        AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_REQUIRES_EMBARK"))
-    elseif pathInfo.requiresDisembark then
-        AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_REQUIRES_DISEMBARK"))
-    end
-
     if pathInfo.zocPlotId ~= nil then
         AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_ENTERS_ZOC"))
     end
@@ -862,7 +831,7 @@ function BuildMovementSpeech(pathInfo, isExplicitSpeech)
 
     AddLine(out, FormatAttackAfterMove(pathInfo))
 
-    if pathInfo.enemyAtEnd and not pathInfo.combatAtEnd and pathInfo.attackAfterMoveText == nil then
+    if HasImmediateCombat(pathInfo) then
         AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_ENEMY_AT_DESTINATION"))
     end
 
@@ -870,7 +839,7 @@ function BuildMovementSpeech(pathInfo, isExplicitSpeech)
         AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_BLOCKED"))
     end
 
-    if (pathInfo.attackAfterMoveText == nil or pathInfo.isQueued)
+    if (not HasImmediateCombat(pathInfo) and (not HasDelayedCombat(pathInfo) or pathInfo.isQueued))
         and pathInfo.visiblePathText ~= nil
         and pathInfo.visiblePathText ~= "" then
         AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_STEPS", pathInfo.visiblePathText))

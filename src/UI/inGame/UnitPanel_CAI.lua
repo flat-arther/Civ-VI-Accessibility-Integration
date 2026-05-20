@@ -2029,21 +2029,27 @@ function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locatio
     if ContextPtr:IsHidden() or not isSelected then
         return
     end
+    local plot = Map.GetPlot(locationX, locationY)
+    if plot == nil then
+        print("CAI UnitPanel could not resolve selected unit plot: " ..
+            tostring(locationX) .. ", " .. tostring(locationY))
+        return
+    end
 
+    LuaEvents.CAICursorJump(plot:GetIndex(), true)
     local results = info:RequestUnitInfo(unitId, { "Summary" }, player)
     if results == nil or #results == 0 then
         return
     end
 
     Speak(ProcessIcons(table.concat(results, ", ")))
-    LuaEvents.CAICursorMove(locationX, locationY)
 end
 
-local function OnCAICursorMoved(x, y, plot, cursor)
+local function OnCAICursorMoved(x, y, plotId)
     InspectWhatsBelowTheCursor()
 end
 
-local function OnCAISpeakCombatPreview()
+local function SpeakCurrentCombatPreview()
     local results = GetUnitInfoCombatPreview()
     if results == nil or results == "" then
         Speak(Locale.Lookup("LOC_CAI_UNIT_NO_COMBAT"))
@@ -2051,6 +2057,58 @@ local function OnCAISpeakCombatPreview()
     end
 
     Speak(ProcessIcons(results))
+end
+
+local function OnCAISpeakCombatPreview()
+    SpeakCurrentCombatPreview()
+end
+
+local function InspectCombatPreviewAtPlotId(plotId)
+    local localPlayerID = Game.GetLocalPlayer()
+    if localPlayerID == nil or localPlayerID == -1 then
+        return false
+    end
+
+    local playerVisibility = PlayersVisibility[localPlayerID]
+    if playerVisibility == nil then
+        return false
+    end
+
+    local selectedPlayerUnit = UI.GetHeadSelectedUnit()
+    if selectedPlayerUnit ~= nil then
+        if selectedPlayerUnit:GetCombat() == 0 and selectedPlayerUnit:GetReligiousStrength() == 0 then
+            return false
+        end
+    end
+
+    if plotId == nil or not Map.IsPlot(plotId) then
+        OnShowCombat(false)
+        return false
+    end
+
+    local plot = Map.GetPlotByIndex(plotId)
+    if plot == nil then
+        OnShowCombat(false)
+        return false
+    end
+
+    if not playerVisibility:IsVisible(plotId) then
+        OnShowCombat(false)
+        return false
+    end
+
+    m_plotId = plotId
+    InspectPlot(plot)
+    return true
+end
+
+local function OnCAISpeakCombatPreviewForPlot(plotId)
+    if not InspectCombatPreviewAtPlotId(plotId) then
+        Speak(Locale.Lookup("LOC_CAI_UNIT_NO_COMBAT"))
+        return
+    end
+
+    SpeakCurrentCombatPreview()
 end
 
 local resultStrings = SwapPairs(CombatResultParameters)
@@ -2097,5 +2155,6 @@ Events.UnitSelectionChanged.Add(OnCAIUnitSelectionChanged)
 Events.Combat.Add(OnCombatResolved)
 LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
 LuaEvents.CAISpeakCombatPreview.Add(OnCAISpeakCombatPreview)
+LuaEvents.CAISpeakCombatPreviewForPlot.Add(OnCAISpeakCombatPreviewForPlot)
 ContextPtr:SetInputHandler(OnHandleInput, true)
 InstallUIOverrides()

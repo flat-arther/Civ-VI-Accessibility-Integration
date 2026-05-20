@@ -32,6 +32,12 @@
     <Row ActionId="CAICursorMoveEast" Name="LOC_CAI_CURSOR_MOVE_EAST" Description="LOC_CAI_CURSOR_MOVE_EAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAICursorMoveSouthWest" Name="LOC_CAI_CURSOR_MOVE_SOUTHWEST" Description="LOC_CAI_CURSOR_MOVE_SOUTHWEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAICursorMoveSouthEast" Name="LOC_CAI_CURSOR_MOVE_SOUTHEAST" Description="LOC_CAI_CURSOR_MOVE_SOUTHEAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="QuickMoveNorthWest" Name="LOC_CAI_QUICK_MOVE_NORTHWEST" Description="LOC_CAI_QUICK_MOVE_NORTHWEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="QuickMoveNorthEast" Name="LOC_CAI_QUICK_MOVE_NORTHEAST" Description="LOC_CAI_QUICK_MOVE_NORTHEAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="QuickMoveWest" Name="LOC_CAI_QUICK_MOVE_WEST" Description="LOC_CAI_QUICK_MOVE_WEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="QuickMoveEast" Name="LOC_CAI_QUICK_MOVE_EAST" Description="LOC_CAI_QUICK_MOVE_EAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="QuickMoveSouthWest" Name="LOC_CAI_QUICK_MOVE_SOUTHWEST" Description="LOC_CAI_QUICK_MOVE_SOUTHWEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="QuickMoveSouthEast" Name="LOC_CAI_QUICK_MOVE_SOUTHEAST" Description="LOC_CAI_QUICK_MOVE_SOUTHEAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TopPanelSpeakTurnTimeDate" Name="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE" Description="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TopPanelSpeakYields" Name="LOC_CAI_TOP_PANEL_SPEAK_YIELDS" Description="LOC_CAI_TOP_PANEL_SPEAK_YIELDS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TopPanelYieldInfoList" Name="LOC_CAI_TOP_PANEL_YIELD_INFO" Description="LOC_CAI_TOP_PANEL_YIELD_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
@@ -184,6 +190,18 @@
     <Row ActionId="CAICursorMoveSouthWest" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_1" />
     <Row ActionId="CAICursorMoveSouthEast" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_C" />
     <Row ActionId="CAICursorMoveSouthEast" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_3" />
+    <Row ActionId="QuickMoveNorthWest" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_Q" />
+    <Row ActionId="QuickMoveNorthWest" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_NP_7" />
+    <Row ActionId="QuickMoveNorthEast" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_E" />
+    <Row ActionId="QuickMoveNorthEast" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_NP_9" />
+    <Row ActionId="QuickMoveWest" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_A" />
+    <Row ActionId="QuickMoveWest" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_NP_4" />
+    <Row ActionId="QuickMoveEast" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_D" />
+    <Row ActionId="QuickMoveEast" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_NP_6" />
+    <Row ActionId="QuickMoveSouthWest" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_Z" />
+    <Row ActionId="QuickMoveSouthWest" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_NP_1" />
+    <Row ActionId="QuickMoveSouthEast" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_C" />
+    <Row ActionId="QuickMoveSouthEast" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_NP_3" />
     <Row ActionId="TopPanelSpeakTurnTimeDate" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_T" />
     <Row ActionId="TopPanelSpeakYields" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_Y" />
     <Row ActionId="TopPanelYieldInfoList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_Y" />

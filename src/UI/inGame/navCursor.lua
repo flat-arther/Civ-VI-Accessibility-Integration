@@ -3,36 +3,95 @@ CAICursor = CAICursor or {
     curY = 0
 }
 
+local HexCoordUtils = nil
+
+local function GetHexCoordUtils()
+    if HexCoordUtils == nil then
+        include("hexCoordUtils_CAI")
+        HexCoordUtils = CAIHexCoordUtils
+    end
+
+    return HexCoordUtils
+end
+
+local function ResolvePlotById(plotId)
+    if plotId == nil or plotId < 0 or not Map.IsPlot(plotId) then
+        return nil
+    end
+
+    return Map.GetPlotByIndex(plotId)
+end
+
+local function SpeakJumpDirection(fromX, fromY, targetPlot)
+    if fromX == nil or fromY == nil or targetPlot == nil then
+        return
+    end
+
+    local hexUtils = GetHexCoordUtils()
+    if hexUtils == nil or hexUtils.directionString == nil then
+        return
+    end
+
+    local directionText = hexUtils.directionString(fromX, fromY, targetPlot:GetX(), targetPlot:GetY())
+    if directionText == nil or directionText == "" then
+        directionText = Locale.Lookup("LOC_CAI_HERE")
+    end
+
+    Speak(directionText)
+end
+
 --# Methods
 function CAICursor:SetCoords(x, y)
     if x == nil or y == nil then
         print("CAI cursor move requested with nil coordinates")
-        return
+        return false
     end
 
     local plot = Map.GetPlot(x, y)
     if not plot then
         print("CAI cursor unable to resolve plot at coordinates: " .. tostring(x) .. ", " .. tostring(y))
-        return
+        return false
     end
 
     self.curX = plot:GetX()
     self.curY = plot:GetY()
-    LuaEvents.CAICursorMoved(self.curX, self.curY, plot, self)
+    return true
+end
+
+function CAICursor:SetPlotId(plotId)
+    local plot = ResolvePlotById(plotId)
+    if plot == nil then
+        print("CAI cursor unable to resolve plot id: " .. tostring(plotId))
+        return
+    end
+
+    self:SetCoords(plot:GetX(), plot:GetY())
 end
 
 function CAICursor:MoveToNextPlot(dir)
-    local nextPlot = Map.GetAdjacentPlot(self.curX, self.curY, dir)
-    if nextPlot then
-        self:SetCoords(nextPlot:GetX(), nextPlot:GetY())
+    local plot = Map.GetAdjacentPlot(self.curX, self.curY, dir)
+    if plot then
+        local moved = self:SetCoords(plot:GetX(), plot:GetY())
+        if moved then
+            LuaEvents.CAICursorMoved(self.curX, self.curY, plot:GetIndex())
+        end
     end
 end
 
-function CAICursor:SnapToUnit(unit)
-    if not unit then return end
-    local x = unit:GetX()
-    local y = unit:GetY()
-    self:SetCoords(x, y)
+function CAICursor:JumpToPlotId(plotId, suppressEvent)
+    local plot = ResolvePlotById(plotId)
+    if plot == nil then
+        print("CAI cursor jump unable to resolve plot id: " .. tostring(plotId))
+        return
+    end
+
+    local fromX = self.curX
+    local fromY = self.curY
+    SpeakJumpDirection(fromX, fromY, plot)
+    local moved = self:SetCoords(plot:GetX(), plot:GetY())
+    if moved and not suppressEvent then
+        LuaEvents.CAICursorMoved(self.curX, self.curY, plot:GetIndex())
+    end
 end
 
 function CAICursor:SnapToStartPlot()
@@ -47,12 +106,8 @@ function CAICursor:SnapToStartPlot()
     end
 end
 
-function CAICursor:SnapToPlot(plot)
-    if not plot then
-        print("CAI cursor attempting to snap to nil plot")
-        return
-    end
-    self:SetCoords(plot:GetX(), plot:GetY())
+function CAICursor:SnapToPlot(plotId)
+    self:SetPlotId(plotId)
 end
 
 function CAICursor:GetPlotId()
@@ -62,22 +117,23 @@ function CAICursor:GetPlotId()
 end
 
 LuaEvents.CAICursorMove.Add(function(x, y)
-    CAICursor:SetCoords(x, y)
+    local moved = CAICursor:SetCoords(x, y)
+    if moved then
+        LuaEvents.CAICursorMoved(CAICursor.curX, CAICursor.curY, CAICursor:GetPlotId())
+    end
 end)
 
 LuaEvents.CAICursorMoveDirection.Add(function(direction)
     CAICursor:MoveToNextPlot(direction)
 end)
 
-LuaEvents.CAICursorSnapToUnit.Add(function(unit)
-    CAICursor:SnapToUnit(unit)
+LuaEvents.CAICursorJump.Add(function(plotId, suppressEvent)
+    CAICursor:JumpToPlotId(plotId, suppressEvent)
 end)
+
 
 LuaEvents.CAICursorSnapToStartPlot.Add(function()
     CAICursor:SnapToStartPlot()
 end)
 
-LuaEvents.CAICursorSnapToPlot.Add(function(plot)
-    CAICursor:SnapToPlot(plot)
-end)
 ExposedMembers.CAICursor = CAICursor

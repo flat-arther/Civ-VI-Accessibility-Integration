@@ -1333,12 +1333,8 @@ local function OnCityBannerInfoInputActionTriggered(actionId)
     Speak(ProcessIcons(table.concat(results, ", ")))
 end
 
-local function OnCAICursorMoved(x, y, plot)
-    if plot ~= nil then
-        currentPlotId = plot:GetIndex()
-    else
-        currentPlotId = -1
-    end
+local function OnCAICursorMoved(x, y, plotId)
+    currentPlotId = plotId ~= nil and plotId or -1
 end
 
 local function OnShutdown()

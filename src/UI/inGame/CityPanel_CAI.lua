@@ -607,8 +607,11 @@ function CAI_SetCitizenFocusTo(yieldType, targetState)
     elseif targetState == YIELD_STATE.IGNORED then
         if not isDisfavored then SetYieldIgnore(yieldType) end
     else
-        if isFavored then SetYieldFocus(yieldType)
-        elseif isDisfavored then SetYieldIgnore(yieldType) end
+        if isFavored then
+            SetYieldFocus(yieldType)
+        elseif isDisfavored then
+            SetYieldIgnore(yieldType)
+        end
     end
 end
 
@@ -621,9 +624,12 @@ function OpenCitizenYieldFocusList()
     local outerList = mgr:CreateUIWidget(CAI_YIELD_FOCUS_LIST_ID, "List", {
         GetLabel = function() return Locale.Lookup("LOC_CAI_CITY_YIELD_FOCUS_LIST", cityName) end,
     })
-    outerList:AddInputBinding({ Key = Keys.VK_ESCAPE, Action = function()
-        mgr:RemoveFromStack(CAI_YIELD_FOCUS_LIST_ID); return true
-    end })
+    outerList:AddInputBinding({
+        Key = Keys.VK_ESCAPE,
+        Action = function()
+            mgr:RemoveFromStack(CAI_YIELD_FOCUS_LIST_ID); return true
+        end
+    })
 
     for _, yieldEntry in ipairs(CAI_YIELD_FOCUS_YIELDS) do
         local yieldType = yieldEntry.Type
@@ -641,9 +647,12 @@ function OpenCitizenYieldFocusList()
                     local subList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityYieldFocusSub"), "List", {
                         GetLabel = function() return Locale.Lookup("LOC_CAI_CITY_YIELD_FOCUS_OPTIONS", yieldName) end,
                     })
-                    subList:AddInputBinding({ Key = Keys.VK_ESCAPE, Action = function()
-                        mgr:Pop(); return true
-                    end })
+                    subList:AddInputBinding({
+                        Key = Keys.VK_ESCAPE,
+                        Action = function()
+                            mgr:Pop(); return true
+                        end
+                    })
 
                     local focusStates = {
                         { State = YIELD_STATE.NORMAL,  Key = "LOC_CAI_CITY_YIELD_STATE_NORMAL" },
@@ -659,7 +668,7 @@ function OpenCitizenYieldFocusList()
                                 local liveData = GetCityInfoData(UI.GetHeadSelectedCity())
                                 local current = GetCityInfoYieldState(liveData, yieldType)
                                 local isMatch = (targetState == YIELD_STATE.NORMAL
-                                    and current ~= YIELD_STATE.FAVORED and current ~= YIELD_STATE.IGNORED)
+                                        and current ~= YIELD_STATE.FAVORED and current ~= YIELD_STATE.IGNORED)
                                     or current == targetState
                                 return isMatch and Locale.Lookup("LOC_CAI_STATE_SELECTED") or nil
                             end,
@@ -843,14 +852,18 @@ end
 function OnCitySelectionChanged(ownerPlayerID, cityID, i, j, k, isSelected, isEditable)
     if ContextPtr:IsHidden() then return end
     if not isSelected then return end
-
+    local plot = Map.GetPlot(i, j)
+    if plot == nil then
+        print("CAI CityPanel could not resolve selected city plot: " .. tostring(i) .. ", " .. tostring(j))
+        return
+    end
+    LuaEvents.CAICursorJump(plot:GetIndex(), true)
     local results = info:RequestCityInfo(cityID, { "Summary" }, ownerPlayerID)
     if results == nil or #results == 0 then
         return
     end
 
     Speak(ProcessIcons(table.concat(results, "\n")))
-    LuaEvents.CAICursorMove(i, j)
 end
 
 --#Public API

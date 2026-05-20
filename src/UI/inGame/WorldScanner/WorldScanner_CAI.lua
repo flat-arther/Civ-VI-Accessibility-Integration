@@ -561,7 +561,7 @@ function CAIWorldScanner:JumpToCurrent()
         return
     end
 
-    LuaEvents.CAICursorMove(plot:GetX(), plot:GetY())
+    LuaEvents.CAICursorJump(plotIndex)
 end
 
 function CAIWorldScanner:ReturnFromJump()
@@ -577,7 +577,7 @@ function CAIWorldScanner:ReturnFromJump()
         return
     end
 
-    LuaEvents.CAICursorMove(plot:GetX(), plot:GetY())
+    LuaEvents.CAICursorJump(self.PreviousJumpPlotIndex)
     self.PreviousJumpPlotIndex = nil
 end
 

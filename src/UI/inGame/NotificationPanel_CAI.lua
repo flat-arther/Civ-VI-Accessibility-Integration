@@ -75,7 +75,13 @@ LookAtNotification = WrapFunc(LookAtNotification, function(orig, notification)
     local x, y = GetNotificationCoords(notification)
     orig(notification)
     if m_caiNotificationCenter == nil and x ~= nil and y ~= nil then
-        LuaEvents.CAICursorMove(x, y)
+        local plot = Map.GetPlot(x, y)
+        if plot == nil then
+            print("CAI NotificationPanel could not resolve notification plot: " .. tostring(x) .. ", " .. tostring(y))
+            return
+        end
+
+        LuaEvents.CAICursorJump(plot:GetIndex())
     end
 end)
 

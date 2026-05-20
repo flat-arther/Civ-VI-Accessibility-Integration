@@ -1,4 +1,5 @@
 include("caiUtils")
+include("hexCoordUtils_CAI")
 -- Shared function for overriding the base game's GetCursorPlot functions
 local CAICursor = ExposedMembers.CAICursor
 local function GetCAICursorPlotId()

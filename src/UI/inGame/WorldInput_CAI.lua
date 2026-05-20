@@ -9,6 +9,7 @@ include("Surveyor_CAI")
 include("RevealAnnouncements_CAI")
 include("EventSubs_CAI")
 include("WorldInput")
+include("MovementActions_CAI")
 
 local INPUT_ACTION_STARTED = "Started"
 local INPUT_ACTION_TRIGGERED = "Triggered"
@@ -23,6 +24,12 @@ local ACTION_CURSOR_WEST = Input.GetActionId("CAICursorMoveWest")
 local ACTION_CURSOR_EAST = Input.GetActionId("CAICursorMoveEast")
 local ACTION_CURSOR_SOUTHWEST = Input.GetActionId("CAICursorMoveSouthWest")
 local ACTION_CURSOR_SOUTHEAST = Input.GetActionId("CAICursorMoveSouthEast")
+local ACTION_QUICK_MOVE_NORTHWEST = Input.GetActionId("QuickMoveNorthWest")
+local ACTION_QUICK_MOVE_NORTHEAST = Input.GetActionId("QuickMoveNorthEast")
+local ACTION_QUICK_MOVE_WEST = Input.GetActionId("QuickMoveWest")
+local ACTION_QUICK_MOVE_EAST = Input.GetActionId("QuickMoveEast")
+local ACTION_QUICK_MOVE_SOUTHWEST = Input.GetActionId("QuickMoveSouthWest")
+local ACTION_QUICK_MOVE_SOUTHEAST = Input.GetActionId("QuickMoveSouthEast")
 local ACTION_INTERFACE_INFO = Input.GetActionId("InterfaceInfo")
 local ACTION_INTERFACE_PRIMARY = Input.GetActionId("InterfaceWidgetPrimaryAction")
 local ACTION_SCANNER_PREV_CATEGORY = Input.GetActionId("WorldScannerPrevCategory")
@@ -51,6 +58,12 @@ local ACTION_SURVEYOR_READ_CITIES = Input.GetActionId("SurveyorReadCities")
 local function MoveCursor(direction)
 	LuaEvents.CAICursorMoveDirection(direction)
 	return true
+end
+
+local function ActivateCurrentMoveTarget()
+	local unit = UI.GetHeadSelectedUnit()
+	local targetPlotId = UI.GetCursorPlotID()
+	return MovementActions_CAI:TryActivateMoveTarget(unit, targetPlotId)
 end
 
 ---Input actions that are common to all interface widgets should go here.
@@ -91,6 +104,42 @@ local SharedInputActions = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return MoveCursor(DirectionTypes.DIRECTION_SOUTHEAST)
+		end,
+	},
+	[ACTION_QUICK_MOVE_NORTHWEST] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return MovementActions_CAI:TryQuickMoveDirection(DirectionTypes.DIRECTION_NORTHWEST)
+		end,
+	},
+	[ACTION_QUICK_MOVE_NORTHEAST] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return MovementActions_CAI:TryQuickMoveDirection(DirectionTypes.DIRECTION_NORTHEAST)
+		end,
+	},
+	[ACTION_QUICK_MOVE_WEST] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return MovementActions_CAI:TryQuickMoveDirection(DirectionTypes.DIRECTION_WEST)
+		end,
+	},
+	[ACTION_QUICK_MOVE_EAST] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return MovementActions_CAI:TryQuickMoveDirection(DirectionTypes.DIRECTION_EAST)
+		end,
+	},
+	[ACTION_QUICK_MOVE_SOUTHWEST] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return MovementActions_CAI:TryQuickMoveDirection(DirectionTypes.DIRECTION_SOUTHWEST)
+		end,
+	},
+	[ACTION_QUICK_MOVE_SOUTHEAST] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return MovementActions_CAI:TryQuickMoveDirection(DirectionTypes.DIRECTION_SOUTHEAST)
 		end,
 	},
 	[ACTION_INTERFACE_INFO] = {
@@ -283,6 +332,7 @@ local interfaceWidgets = {
 					Key = Keys.VK_ESCAPE,
 					MSG = KeyEvents.KeyUp,
 					Action = function()
+						MovementActions_CAI:ClearReadyForCombat()
 						OnMouseMoveToCancel()
 						return true
 					end,
@@ -293,8 +343,7 @@ local interfaceWidgets = {
 			[ACTION_INTERFACE_PRIMARY] = {
 				Type = INPUT_ACTION_TRIGGERED,
 				Action = function()
-					OnMouseMoveToEnd()
-					return true
+					return ActivateCurrentMoveTarget()
 				end,
 			},
 		},
@@ -424,6 +473,10 @@ local function OnInterfaceChanged(oldMode, newMode)
 		return
 	end
 
+	if oldMode == InterfaceModeTypes.MOVE_TO then
+		MovementActions_CAI:ClearReadyForCombat()
+	end
+
 	if m_caiCurrentInterfaceWidget then
 		-- We explicitly remove the widget by id just in case interface mode resets while we are in some other popup
 		mgr:RemoveFromStack(m_caiCurrentInterfaceWidget:GetId())
@@ -511,16 +564,30 @@ local function SnapCursorToInitialCameraPosition()
 		return
 	end
 
-	LuaEvents.CAICursorSnapToPlot(plot)
+	LuaEvents.CAICursorSnapToPlot(plot:GetIndex())
 end
 
-local function OnCAICursorMoved(x, y, plot)
-	if plot then
-		UI.LookAtPlot(plot)
+local function OnCAICursorMoved(x, y, plotId)
+	if plotId == nil or plotId < 0 or not Map.IsPlot(plotId) then
+		print("CAI WorldInput received invalid cursor plot id: " .. tostring(plotId))
+		return
 	end
+
+	local plot = Map.GetPlotByIndex(plotId)
+	if plot == nil then
+		print("CAI WorldInput could not resolve cursor plot id: " .. tostring(plotId))
+		return
+	end
+
+	UI.LookAtPlot(plot)
+end
+
+local function OnUnitSelectionChanged(playerID, unitID, hexI, hexJ, hexK, isSelected, isEditable)
+	MovementActions_CAI:ClearReadyForCombat()
 end
 
 local function OnLocalPlayerTurnBegin()
+	MovementActions_CAI:ClearReadyForCombat()
 	CAIWorldScanner:OnLocalPlayerTurnBegin()
 end
 
@@ -533,6 +600,7 @@ local function RegisterCAIEvents()
 	Events.InputActionStarted.Add(OnCAIInputActionStarted)
 	Events.InputActionTriggered.Add(OnCAIInputActionTriggered)
 	Events.LocalPlayerTurnBegin.Add(OnLocalPlayerTurnBegin)
+	Events.UnitSelectionChanged.Add(OnUnitSelectionChanged)
 	LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
 end
 
@@ -541,6 +609,7 @@ local function UnregisterCAIEvents()
 	Events.InputActionStarted.Remove(OnCAIInputActionStarted)
 	Events.InputActionTriggered.Remove(OnCAIInputActionTriggered)
 	Events.LocalPlayerTurnBegin.Remove(OnLocalPlayerTurnBegin)
+	Events.UnitSelectionChanged.Remove(OnUnitSelectionChanged)
 	LuaEvents.CAICursorMoved.Remove(OnCAICursorMoved)
 end
 
@@ -573,6 +642,7 @@ end)
 
 OnShutdown = WrapFunc(OnShutdown, function(orig)
 	UnregisterCAIEvents()
+	MovementActions_CAI:ClearReadyForCombat()
 	if CAIUnitWaypoints ~= nil and CAIUnitWaypoints.Shutdown ~= nil then
 		CAIUnitWaypoints:Shutdown()
 	end

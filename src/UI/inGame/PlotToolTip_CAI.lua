@@ -512,7 +512,7 @@ local function CacheGreatWorks(data)
 end
 
 local RIVER_SELF_EDGES = {
-    { dir = "LOC_CAI_DIR_E", hasRiver = function(p) return p ~= nil and p:IsWOfRiver() end },
+    { dir = "LOC_CAI_DIR_E",  hasRiver = function(p) return p ~= nil and p:IsWOfRiver() end },
     { dir = "LOC_CAI_DIR_SE", hasRiver = function(p) return p ~= nil and p:IsNWOfRiver() end },
     { dir = "LOC_CAI_DIR_SW", hasRiver = function(p) return p ~= nil and p:IsNEOfRiver() end },
 }
@@ -1384,13 +1384,17 @@ function info:RequestPlotInfo(plot, requestedKeys, explicitPlotId)
     return RequestPlotInfoFromData(targetPlot, data, requestedKeys)
 end
 
-function OnCAICursorMove(x, y, plot, cursor)
-    if plot then
-        currentPlot = plot:GetIndex()
+function OnCAICursorMove(x, y, plotId)
+    currentPlot = plotId ~= nil and plotId or -1
+
+    if plotId == nil or plotId < 0 or not Map.IsPlot(plotId) then
+        print("CAI PlotToolTip received invalid cursor plot id: " .. tostring(plotId))
+        return
     end
 
-    local current = plot or GetCurrentCursorPlot()
+    local current = Map.GetPlotByIndex(plotId)
     if current == nil then
+        print("CAI PlotToolTip could not resolve cursor plot id: " .. tostring(plotId))
         return
     end
 

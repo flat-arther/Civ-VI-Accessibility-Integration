@@ -7,6 +7,7 @@ ExposedMembers.CAIInfo = info
 local UNIT_FLAG_INFO_DEFAULT_KEYS = {
     "unitCount",
     "name",
+    "queuedMovement",
     "healthPercent",
     "status",
 }
@@ -59,6 +60,24 @@ local function GetUnitFlagStatus(unit)
     return nil
 end
 
+local function GetUnitFlagWaypoint(unit)
+    if unit == nil then
+        return nil
+    end
+
+    local localPlayer = Game.GetLocalPlayer()
+    if localPlayer == nil or unit:GetOwner() ~= localPlayer or info.RequestUnitInfo == nil then
+        return nil
+    end
+
+    local results = info:RequestUnitInfo(unit:GetID(), { "NextWaypoint" }, unit:GetOwner())
+    if results ~= nil and #results > 0 then
+        return results[1]
+    end
+
+    return nil
+end
+
 local function IsUnitFlagVisible(flag, unit)
     if flag == nil or unit == nil then
         return false
@@ -89,11 +108,13 @@ local function GetUnitFlagSignature(unit)
     end
 
     local name = FormatUnitFlagDisplayName(unit)
+    local queuedMovement = GetUnitFlagWaypoint(unit)
     local health = GetUnitFlagHealth(unit)
     local status = GetUnitFlagStatus(unit)
 
     local parts = {}
     AppendUnitFlagInfo(parts, name)
+    AppendUnitFlagInfo(parts, queuedMovement)
     AppendUnitFlagInfo(parts, health)
     AppendUnitFlagInfo(parts, status)
 
@@ -146,6 +167,9 @@ info.UnitFlagInfo = {
     end,
     healthPercent = function(unit)
         return GetUnitFlagHealth(unit)
+    end,
+    queuedMovement = function(unit)
+        return GetUnitFlagWaypoint(unit)
     end,
     status = function(unit)
         return GetUnitFlagStatus(unit)

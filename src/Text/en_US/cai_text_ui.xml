@@ -159,6 +159,12 @@
     <Row Tag="LOC_CAI_EXITED_MOVEMENT_MODE" Language="en_US">
       <Text>Exited movement mode</Text>
     </Row>
+    <Row Tag="LOC_CAI_QUICK_MOVE_NO_UNIT" Language="en_US">
+      <Text>No selected unit to move</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_COMBAT_CONFIRM" Language="en_US">
+      <Text>Press again to confirm combat</Text>
+    </Row>
     <Row Tag="LOC_CAI_DISTRICT_PLACEMENT_MODE" Language="en_US">
       <Text>District placement mode</Text>
     </Row>
@@ -1449,6 +1455,42 @@
     <Row Tag="LOC_CAI_UNIT_NEXT_TOOLTIP" Language="en_US">
       <Text>Selects the next unit in the active unit category</Text>
     </Row>
+    <Row Tag="LOC_CAI_QUICK_MOVE_NORTHWEST" Language="en_US">
+      <Text>Quick move northwest</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_MOVE_NORTHWEST_TOOLTIP" Language="en_US">
+      <Text>Moves the selected unit one tile northwest, or previews combat before confirming</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_MOVE_NORTHEAST" Language="en_US">
+      <Text>Quick move northeast</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_MOVE_NORTHEAST_TOOLTIP" Language="en_US">
+      <Text>Moves the selected unit one tile northeast, or previews combat before confirming</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_MOVE_WEST" Language="en_US">
+      <Text>Quick move west</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_MOVE_WEST_TOOLTIP" Language="en_US">
+      <Text>Moves the selected unit one tile west, or previews combat before confirming</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_MOVE_EAST" Language="en_US">
+      <Text>Quick move east</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_MOVE_EAST_TOOLTIP" Language="en_US">
+      <Text>Moves the selected unit one tile east, or previews combat before confirming</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_MOVE_SOUTHWEST" Language="en_US">
+      <Text>Quick move southwest</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_MOVE_SOUTHWEST_TOOLTIP" Language="en_US">
+      <Text>Moves the selected unit one tile southwest, or previews combat before confirming</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_MOVE_SOUTHEAST" Language="en_US">
+      <Text>Quick move southeast</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_MOVE_SOUTHEAST_TOOLTIP" Language="en_US">
+      <Text>Moves the selected unit one tile southeast, or previews combat before confirming</Text>
+    </Row>
     <Row Tag="LOC_CAI_MOVE_INFO" Language="en_US">
       <Text>Unit path info</Text>
     </Row>
@@ -1943,6 +1985,9 @@
     <Row Tag="LOC_CAI_RANGE_ATTACK_MODE" Language="en_US">
       <Text>Ranged attack mode</Text>
     </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_RANGED_ATTACK" Language="en_US">
+      <Text>Ranged attack</Text>
+    </Row>
     <Row Tag="LOC_CAI_CITY_RANGE_ATTACK_MODE" Language="en_US">
       <Text>City ranged attack mode</Text>
     </Row>
@@ -2011,6 +2056,9 @@
     </Row>
     <Row Tag="LOC_CAI_UNIT_NEXT_WAYPOINT" Language="en_US">
       <Text>Next waypoint: {1_Direction}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_QUEUED_MOVEMENT" Language="en_US">
+      <Text>Queued movement: {1_Direction}</Text>
     </Row>
     <Row Tag="LOC_CAI_VALID_TARGET_PLOT" Language="en_US">
       <Text>Target plot {1_X}, {2_Y}</Text>
