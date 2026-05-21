@@ -211,6 +211,25 @@ function HexCoordUtils.stepListFromPath(path)
     return HexCoordUtils.stepListString(directions)
 end
 
+function HexCoordUtils.joinStepSegments(segments)
+    if segments == nil or #segments == 0 then
+        return ""
+    end
+
+    local nonEmpty = {}
+    for _, segment in ipairs(segments) do
+        if segment ~= nil and segment ~= "" then
+            nonEmpty[#nonEmpty + 1] = segment
+        end
+    end
+
+    if #nonEmpty == 0 then
+        return ""
+    end
+
+    return table.concat(nonEmpty, ", " .. Locale.Lookup("LOC_CAI_MOVEMENT_THEN") .. ", ")
+end
+
 function HexCoordUtils.coordinateString(x, y)
     local capitalX, capitalY = ActiveOriginalCapital()
     if capitalX == nil or capitalY == nil then

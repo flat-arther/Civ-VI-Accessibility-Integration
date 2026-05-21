@@ -588,10 +588,12 @@ end
 
 local function OnLocalPlayerTurnBegin()
 	MovementActions_CAI:ClearReadyForCombat()
+	MovementActions_CAI:ClearPendingMovementResult()
 	CAIWorldScanner:OnLocalPlayerTurnBegin()
 end
 
 local function OnUpdate()
+	MovementActions_CAI:UpdatePendingMovementResult()
 	RevealAnnouncements_CAI.UpdateVisibility()
 end
 
@@ -643,6 +645,7 @@ end)
 OnShutdown = WrapFunc(OnShutdown, function(orig)
 	UnregisterCAIEvents()
 	MovementActions_CAI:ClearReadyForCombat()
+	MovementActions_CAI:ClearPendingMovementResult()
 	if CAIUnitWaypoints ~= nil and CAIUnitWaypoints.Shutdown ~= nil then
 		CAIUnitWaypoints:Shutdown()
 	end

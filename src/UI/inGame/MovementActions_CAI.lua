@@ -6,6 +6,9 @@ local m_readyForCombat = {
     targetPlotId = nil,
 }
 
+local m_pendingMovementResult = nil
+local PENDING_MOVEMENT_WATCH_DELAY_FRAMES = 2
+
 local function SpeakText(text, interrupt)
     if text == nil or text == "" then
         return false
@@ -46,6 +49,158 @@ local function IsImmediateMoveCombat(pathInfo)
         and pathInfo.isQueued ~= true
 end
 
+local function GetArrivalEstimate(unit, targetPlotId)
+    if unit == nil or targetPlotId == nil or targetPlotId == false or not Map.IsPlot(targetPlotId) then
+        return nil
+    end
+
+    if unit:GetPlotId() == targetPlotId then
+        return 0
+    end
+
+    local pathInfo = UnitManager.GetMoveToPathEx(unit, targetPlotId)
+    local turns = pathInfo ~= nil and pathInfo.turns or nil
+    return turns ~= nil and #turns > 0 and turns[#turns] or nil
+end
+
+function MovementActions_CAI:BuildMovementResultSpeech(unit, reachedTarget, turnsToArrival)
+    if unit == nil then
+        return nil
+    end
+
+    if reachedTarget ~= true then
+        if turnsToArrival ~= nil and turnsToArrival > 0 then
+            return Locale.Lookup("LOC_CAI_MOVEMENT_RESULT_STOPPED_SHORT_TURNS", turnsToArrival)
+        end
+
+        return Locale.Lookup("LOC_CAI_MOVEMENT_RESULT_STOPPED_SHORT")
+    end
+
+    if turnsToArrival ~= nil and turnsToArrival > 0 then
+        return Locale.Lookup("LOC_CAI_MOVEMENT_RESULT_STOPPED_SHORT_TURNS", turnsToArrival)
+    end
+
+    local movesLeft = unit:GetMovesRemaining()
+    return Locale.Lookup("LOC_CAI_MOVEMENT_RESULT_MOVED_TO", movesLeft)
+end
+
+function MovementActions_CAI:QueuePendingMovementResult(unit, targetPlotId)
+    local owner, unitId = GetUnitIdentity(unit)
+    if owner == nil or unitId == nil then
+        m_pendingMovementResult = nil
+        return false
+    end
+
+    if targetPlotId == nil or targetPlotId == false or not Map.IsPlot(targetPlotId) then
+        m_pendingMovementResult = nil
+        return false
+    end
+
+    m_pendingMovementResult = {
+        unitOwner = owner,
+        unitId = unitId,
+        startPlotId = unit:GetPlotId(),
+        targetPlotId = targetPlotId,
+        watchDelayFrames = PENDING_MOVEMENT_WATCH_DELAY_FRAMES,
+    }
+    return true
+end
+
+function MovementActions_CAI:ClearPendingMovementResult()
+    m_pendingMovementResult = nil
+end
+
+function MovementActions_CAI:GetMatchingPendingMovementResult(playerID, unitID)
+    local pending = m_pendingMovementResult
+    if pending == nil then
+        return nil
+    end
+
+    if pending.unitOwner ~= playerID or pending.unitId ~= unitID then
+        return nil
+    end
+
+    return pending
+end
+
+function MovementActions_CAI:ResolvePendingMovementResult(playerID, unitID, currentPlotId)
+    if playerID ~= Game.GetLocalPlayer() then
+        return false
+    end
+
+    local pending = self:GetMatchingPendingMovementResult(playerID, unitID)
+    if pending == nil then
+        return false
+    end
+
+    local unit = UnitManager.GetUnit(playerID, unitID)
+    if unit == nil then
+        m_pendingMovementResult = nil
+        return false
+    end
+
+    local targetPlotId = pending.targetPlotId
+    local reachedTarget = currentPlotId ~= nil and currentPlotId == targetPlotId
+    local turnsToArrival = nil
+    local queuedToTarget = false
+    if not reachedTarget and targetPlotId ~= nil and targetPlotId ~= false and Map.IsPlot(targetPlotId) then
+        local queuedDestination = UnitManager.GetQueuedDestination(unit)
+        if queuedDestination ~= nil and queuedDestination ~= false and queuedDestination == targetPlotId then
+            queuedToTarget = true
+            turnsToArrival = GetArrivalEstimate(unit, targetPlotId)
+        end
+    end
+
+    if not reachedTarget and not queuedToTarget then
+        return false
+    end
+
+    m_pendingMovementResult = nil
+
+    local text = self:BuildMovementResultSpeech(unit, reachedTarget, turnsToArrival)
+    if text ~= nil and text ~= "" then
+        Speak(text)
+    end
+
+    return true
+end
+
+function MovementActions_CAI:OnUnitMoveComplete(playerID, unitID, x, y)
+    if playerID ~= Game.GetLocalPlayer() then
+        return
+    end
+
+    local unit = UnitManager.GetUnit(playerID, unitID)
+    local currentPlot = Map.GetPlot(x, y) or (unit ~= nil and Map.GetPlot(unit:GetX(), unit:GetY()) or nil)
+    local currentPlotId = currentPlot ~= nil and currentPlot:GetIndex() or nil
+    self:ResolvePendingMovementResult(playerID, unitID, currentPlotId)
+end
+
+function MovementActions_CAI:UpdatePendingMovementResult()
+    local pending = m_pendingMovementResult
+    if pending == nil then
+        return false
+    end
+
+    if pending.unitOwner ~= Game.GetLocalPlayer() then
+        m_pendingMovementResult = nil
+        return false
+    end
+
+    local unit = UnitManager.GetUnit(pending.unitOwner, pending.unitId)
+    if unit == nil then
+        m_pendingMovementResult = nil
+        return false
+    end
+
+    if pending.watchDelayFrames ~= nil and pending.watchDelayFrames > 0 then
+        pending.watchDelayFrames = pending.watchDelayFrames - 1
+        return false
+    end
+
+    return self:ResolvePendingMovementResult(pending.unitOwner, pending.unitId, unit:GetPlotId())
+end
+
 function MovementActions_CAI:ClearReadyForCombat()
     m_readyForCombat.unitOwner = nil
     m_readyForCombat.unitId = nil
@@ -70,12 +225,14 @@ end
 
 function MovementActions_CAI:CommitMoveTarget(unit, targetPlotId)
     if unit == nil or not Map.IsPlot(targetPlotId) then
+        self:ClearPendingMovementResult()
         self:ClearReadyForCombat()
         SpeakText(Locale.Lookup("LOC_CAI_MOVEMENT_INVALID_PLOT"), true)
         return false
     end
 
     if OnMouseMoveToEnd == nil then
+        self:ClearPendingMovementResult()
         print("MovementActions_CAI could not access OnMouseMoveToEnd for move commit")
         return false
     end
@@ -90,7 +247,14 @@ function MovementActions_CAI:CommitMoveTarget(unit, targetPlotId)
         LuaEvents.CAICursorJump(targetPlotId, true)
     end
 
-    return OnMouseMoveToEnd()
+    self:QueuePendingMovementResult(unit, targetPlotId)
+
+    local committed = OnMouseMoveToEnd()
+    if not committed then
+        self:ClearPendingMovementResult()
+    end
+
+    return committed
 end
 
 function MovementActions_CAI:TryActivateMoveTarget(unit, targetPlotId, useCursorCombatPreview)
@@ -177,3 +341,7 @@ function MovementActions_CAI:TryQuickMoveDirection(direction)
 
     return self:TryActivateMoveTarget(unit, targetPlot:GetIndex(), false)
 end
+
+Events.UnitMoveComplete.Add(function(playerID, unitID, x, y)
+    MovementActions_CAI:OnUnitMoveComplete(playerID, unitID, x, y)
+end)

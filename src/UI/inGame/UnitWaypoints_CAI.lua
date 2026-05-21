@@ -42,6 +42,14 @@ local function GetSelectedUnit()
     return UI.GetHeadSelectedUnit()
 end
 
+local function GetQueuedDestinationPlotId(unit)
+    local destinationPlotId = unit ~= nil and UnitManager.GetQueuedDestination(unit) or nil
+    if destinationPlotId == nil or destinationPlotId == false or not Map.IsPlot(destinationPlotId) then
+        return nil
+    end
+    return destinationPlotId
+end
+
 function UnitWaypoints:EnsureSelectedUnitStillQueued()
     local unit = GetSelectedUnit()
     if unit == nil then
@@ -49,8 +57,8 @@ function UnitWaypoints:EnsureSelectedUnitStillQueued()
         return nil
     end
 
-    local destinationPlotId = UnitManager.GetQueuedDestination(unit)
-    if destinationPlotId == nil or destinationPlotId == false or not Map.IsPlot(destinationPlotId) then
+    local destinationPlotId = GetQueuedDestinationPlotId(unit)
+    if destinationPlotId == nil then
         self:Clear()
         return nil
     end
@@ -75,8 +83,8 @@ function UnitWaypoints:RefreshForUnit(unit)
         return false
     end
 
-    local destinationPlotId = UnitManager.GetQueuedDestination(unit)
-    if destinationPlotId == nil or destinationPlotId == false or not Map.IsPlot(destinationPlotId) then
+    local destinationPlotId = GetQueuedDestinationPlotId(unit)
+    if destinationPlotId == nil then
         return false
     end
 
@@ -136,7 +144,8 @@ function UnitWaypoints:GetQueuedPathArrivalTurn()
 end
 
 function UnitWaypoints:GetUnitWaypoints()
-    if self:EnsureSelectedUnitStillQueued() == nil then
+    local unit = self:EnsureSelectedUnitStillQueued()
+    if unit == nil then
         return {}
     end
 
@@ -146,11 +155,18 @@ function UnitWaypoints:GetUnitWaypoints()
             out[#out + 1] = entry.PlotId
         end
     end
+
+    local destinationPlotId = GetQueuedDestinationPlotId(unit)
+    if destinationPlotId ~= nil and self._waypointLookup[destinationPlotId] ~= true then
+        out[#out + 1] = destinationPlotId
+    end
+
     return out
 end
 
 function UnitWaypoints:GetNext()
-    if self:EnsureSelectedUnitStillQueued() == nil then
+    local unit = self:EnsureSelectedUnitStillQueued()
+    if unit == nil then
         return nil
     end
 
@@ -159,7 +175,8 @@ function UnitWaypoints:GetNext()
             return entry.PlotId
         end
     end
-    return nil
+
+    return GetQueuedDestinationPlotId(unit)
 end
 
 function UnitWaypoints:IsQueuedPathPlot(plotId)
@@ -170,10 +187,20 @@ function UnitWaypoints:IsQueuedPathPlot(plotId)
 end
 
 function UnitWaypoints:IsWaypointPlot(plotId)
-    if self:EnsureSelectedUnitStillQueued() == nil then
+    local unit = self:EnsureSelectedUnitStillQueued()
+    if unit == nil then
         return false
     end
-    return plotId ~= nil and self._waypointLookup[plotId] == true or false
+
+    if plotId == nil then
+        return false
+    end
+
+    if self._waypointLookup[plotId] == true then
+        return true
+    end
+
+    return GetQueuedDestinationPlotId(unit) == plotId
 end
 
 local function OnQueuedPathUnitSelectionChanged(playerID, unitID, hexI, hexJ, hexK, isSelected, isEditable)

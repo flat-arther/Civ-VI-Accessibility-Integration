@@ -1,5 +1,51 @@
 include("inGameHelpers_CAI")
-include("UnitFlagManager")
+
+local function GetCurrentRuleSet()
+    if GameConfiguration.GetRuleSet ~= nil then
+        return GameConfiguration.GetRuleSet()
+    end
+
+    if GameConfiguration.GetValue ~= nil then
+        return GameConfiguration.GetValue("RULESET")
+    end
+
+    return nil
+end
+
+local function IsRuleSetActive(ruleSetType)
+    return GetCurrentRuleSet() == ruleSetType
+end
+
+local function IsBarbarianClansModeActive()
+    return GameConfiguration.GetValue ~= nil
+        and GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS") == 1
+end
+
+local function IsPiratesScenarioActive()
+    return IsRuleSetActive("RULESET_SCENARIO_PIRATES")
+end
+
+local function IsCivRoyaleScenarioActive()
+    return IsRuleSetActive("RULESET_SCENARIO_CIV_ROYALE")
+end
+
+local function GetUnitFlagManagerIncludeName()
+    if IsCivRoyaleScenarioActive() then
+        return "UnitFlagManager_CivRoyaleScenario"
+    end
+
+    if IsPiratesScenarioActive() then
+        return "UnitFlagManager_PiratesScenario"
+    end
+
+    if IsBarbarianClansModeActive() then
+        return "UnitFlagManager_BarbarianClansMode"
+    end
+
+    return "UnitFlagManager"
+end
+
+include(GetUnitFlagManagerIncludeName())
 
 local info = ExposedMembers.CAIInfo or {}
 ExposedMembers.CAIInfo = info
@@ -9,13 +55,49 @@ local UNIT_FLAG_INFO_DEFAULT_KEYS = {
     "name",
     "queuedMovement",
     "healthPercent",
+    "promotionOrLevy",
     "status",
+    "religion",
+    "archaeology",
+    "aircraftCapacity",
+    "markers",
+    "barbarianClan",
+    "pirates",
 }
 
 local function AppendUnitFlagInfo(parts, value)
+    if type(value) == "table" then
+        for _, innerValue in ipairs(value) do
+            AppendUnitFlagInfo(parts, innerValue)
+        end
+        return
+    end
+
     if value ~= nil and value ~= "" then
         table.insert(parts, value)
     end
+end
+
+local function GetControlText(control)
+    if control ~= nil and control.GetText ~= nil then
+        local text = control:GetText()
+        if text ~= nil and text ~= "" then
+            return text
+        end
+    end
+
+    return nil
+end
+
+local function GetControlTooltip(control)
+    if control ~= nil and control.GetToolTipString ~= nil then
+        local tooltip = control:GetToolTipString()
+        if tooltip ~= nil and tooltip ~= "" then
+            return tooltip
+        end
+    end
+
+    return nil
 end
 
 local function FormatUnitFlagDisplayName(unit)
@@ -60,6 +142,239 @@ local function GetUnitFlagStatus(unit)
     return nil
 end
 
+local function GetUnitFlagPromotionOrLevy(unit)
+    if unit == nil then
+        return nil
+    end
+
+    if GetLevyTurnsRemaining ~= nil then
+        local levyTurnsRemaining = GetLevyTurnsRemaining(unit)
+        if levyTurnsRemaining ~= nil and levyTurnsRemaining >= 0 then
+            return Locale.Lookup("LOC_CAI_UNIT_FLAG_LEVIED_SHORT", levyTurnsRemaining)
+        end
+    end
+
+    local experience = unit.GetExperience ~= nil and unit:GetExperience() or nil
+    if experience == nil then
+        return nil
+    end
+
+    local level = experience.GetLevel ~= nil and experience:GetLevel() or nil
+    if level ~= nil and level >= 2 then
+        return Locale.Lookup("LOC_HUD_UNIT_PANEL_LEVEL_ABBREVIATION") .. " " .. tostring(level)
+    end
+
+    return nil
+end
+
+local function GetUnitFlagReligion(unit, flag)
+    if unit == nil then
+        return nil
+    end
+
+    local religionName = nil
+    if flag ~= nil and flag.m_Instance ~= nil then
+        religionName = GetControlTooltip(flag.m_Instance.ReligionIconBacking)
+    end
+
+    if religionName == nil and unit.GetReligiousStrength ~= nil and unit:GetReligiousStrength() > 0 then
+        local religionType = unit:GetReligionType()
+        if religionType ~= nil and religionType > 0 and Game.GetReligion ~= nil then
+            religionName = Game.GetReligion():GetName(religionType)
+        end
+    end
+
+    if religionName == nil or religionName == "" then
+        return nil
+    end
+
+    return Locale.Lookup("LOC_CAI_UNIT_FLAG_RELIGION_SHORT", religionName)
+end
+
+local function GetUnitFlagArchaeology(unit)
+    if unit == nil then
+        return nil
+    end
+
+    local results = {}
+
+    local homeCityID = unit:GetArchaeologyHomeCity()
+    if homeCityID ~= nil and homeCityID ~= 0 then
+        local owner = Players[unit:GetOwner()]
+        local city = owner ~= nil and owner:GetCities() ~= nil and owner:GetCities():FindID(homeCityID) or nil
+        if city ~= nil then
+            AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_HOME_CITY_SHORT", city:GetName()))
+        end
+
+        local greatWorkIndex = unit:GetGreatWorkIndex()
+        if greatWorkIndex ~= nil and greatWorkIndex >= 0 then
+            local greatWorkType = Game.GetGreatWorkType(greatWorkIndex)
+            local greatWorkOwner = Game.GetGreatWorkPlayer(greatWorkIndex)
+            local greatWorkInfo = greatWorkType ~= nil and GameInfo.GreatWorks[greatWorkType] or nil
+            local ownerConfig = greatWorkOwner ~= nil and PlayerConfigurations[greatWorkOwner] or nil
+            if greatWorkInfo ~= nil and greatWorkInfo.Name ~= nil and ownerConfig ~= nil then
+                AppendUnitFlagInfo(results,
+                    Locale.Lookup("LOC_CAI_UNIT_FLAG_ARTIFACT_SHORT",
+                        Locale.Lookup(greatWorkInfo.Name),
+                        ownerConfig:GetPlayerName()))
+            end
+        end
+    end
+
+    return #results > 0 and results or nil
+end
+
+local function GetUnitFlagAircraftCapacity(unit, flag)
+    if unit == nil then
+        return nil
+    end
+
+    local maxAirSlots = unit.GetAirSlots ~= nil and unit:GetAirSlots() or 0
+    if maxAirSlots == nil or maxAirSlots <= 0 then
+        return nil
+    end
+
+    local currentCount = 0
+    if unit.GetAirUnits ~= nil then
+        local hasAirUnits, airUnits = unit:GetAirUnits()
+        if hasAirUnits and airUnits ~= nil then
+            for _ in pairs(airUnits) do
+                currentCount = currentCount + 1
+            end
+        end
+    end
+
+    if flag ~= nil and flag.m_Instance ~= nil and flag.m_Instance.AirUnitInstance ~= nil then
+        local instance = flag.m_Instance.AirUnitInstance
+        local currentText = GetControlText(instance.CurrentUnitCount)
+        local maxText = GetControlText(instance.MaxUnitCount)
+        currentCount = tonumber(currentText) or currentCount
+        maxAirSlots = tonumber(maxText) or maxAirSlots
+    end
+
+    return Locale.Lookup("LOC_CAI_UNIT_FLAG_AIRCRAFT_SHORT", currentCount, maxAirSlots)
+end
+
+local function IsHeroUnit(unit)
+    if unit == nil then
+        return false
+    end
+
+    local unitInfo = GameInfo.Units[unit:GetUnitType()]
+    if unitInfo == nil or GameInfo.HeroClasses == nil then
+        return false
+    end
+
+    for row in GameInfo.HeroClasses() do
+        if row.UnitType == unitInfo.UnitType then
+            return true
+        end
+    end
+
+    return false
+end
+
+local function GetUnitFlagMarkers(unit, flag)
+    if unit == nil then
+        return nil
+    end
+
+    local results = {}
+
+    if IsHeroUnit(unit) or (flag ~= nil and flag.m_Instance ~= nil and flag.m_Instance.HeroGlowInstance ~= nil) then
+        AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_HERO_SHORT"))
+    end
+
+    if flag ~= nil and flag.bHasAttentionMarker == true then
+        AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_THREAT_SHORT"))
+    end
+
+    if IsPiratesScenarioActive() and unit:GetMaxDamage() > 100 then
+        AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_FLAGSHIP_SHORT"))
+    end
+
+    return #results > 0 and results or nil
+end
+
+local function GetBarbarianClanPlayerName(playerID)
+    local playerConfig = playerID ~= nil and PlayerConfigurations[playerID] or nil
+    return playerConfig ~= nil and playerConfig:GetPlayerName() or nil
+end
+
+local function GetUnitFlagBarbarianClan(unit)
+    if unit == nil or not IsBarbarianClansModeActive() then
+        return nil
+    end
+
+    local tribeIndex = unit.GetBarbarianTribeIndex ~= nil and unit:GetBarbarianTribeIndex() or -1
+    if tribeIndex == nil or tribeIndex < 0 then
+        return nil
+    end
+
+    local barbarianManager = Game.GetBarbarianManager ~= nil and Game.GetBarbarianManager() or nil
+    if barbarianManager == nil or barbarianManager.IsClanExcludeUnitType == nil then
+        return nil
+    end
+
+    if barbarianManager:IsClanExcludeUnitType(unit:GetType()) then
+        return nil
+    end
+
+    local results = {}
+    local tribeNameType = barbarianManager:GetTribeNameType(tribeIndex)
+    local tribeInfo = tribeNameType ~= nil and tribeNameType >= 0 and GameInfo.BarbarianTribeNames[tribeNameType] or nil
+    if tribeInfo ~= nil and tribeInfo.TribeDisplayName ~= nil then
+        AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_CLAN_SHORT", Locale.Lookup(tribeInfo.TribeDisplayName)))
+    end
+
+    local localPlayerID = Game.GetLocalPlayer()
+    if localPlayerID == nil or localPlayerID < 0 then
+        return #results > 0 and results or nil
+    end
+
+    local bribedTurnsRemaining = barbarianManager:GetTribeBribeTurnsRemaining(tribeIndex, localPlayerID)
+    if bribedTurnsRemaining ~= nil and bribedTurnsRemaining > 0 then
+        AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_BRIBED_SHORT", bribedTurnsRemaining))
+        return #results > 0 and results or nil
+    end
+
+    local inciteTargetID = barbarianManager:GetTribeInciteTargetPlayer(tribeIndex)
+    if inciteTargetID ~= nil and inciteTargetID >= 0 then
+        if inciteTargetID == localPlayerID then
+            local inciteSourceName = GetBarbarianClanPlayerName(barbarianManager:GetTribeInciteSourcePlayer(tribeIndex))
+            if inciteSourceName ~= nil and inciteSourceName ~= "" then
+                AppendUnitFlagInfo(results,
+                    Locale.Lookup("LOC_CAI_UNIT_FLAG_INCITED_AGAINST_YOU_SHORT", inciteSourceName))
+            else
+                AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_INCITED_AGAINST_YOU_UNKNOWN_SHORT"))
+            end
+        else
+            local inciteSourceID = barbarianManager:GetTribeInciteSourcePlayer(tribeIndex)
+            if inciteSourceID == localPlayerID then
+                local inciteTargetName = GetBarbarianClanPlayerName(inciteTargetID)
+                if inciteTargetName ~= nil and inciteTargetName ~= "" then
+                    AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_INCITED_BY_YOU_SHORT", inciteTargetName))
+                end
+            end
+        end
+    end
+
+    return #results > 0 and results or nil
+end
+
+local function GetUnitFlagPiratesText(unit)
+    if unit == nil or not IsPiratesScenarioActive() then
+        return nil
+    end
+
+    local playerConfig = PlayerConfigurations[unit:GetOwner()]
+    if playerConfig == nil or playerConfig:GetCivilizationTypeName() ~= "CIVILIZATION_BARBARIAN" then
+        return nil
+    end
+
+    return Locale.Lookup("LOC_PIRATES_BUCCANEER_DESCRIPTION")
+end
+
 local function GetUnitFlagWaypoint(unit)
     if unit == nil then
         return nil
@@ -102,7 +417,7 @@ local function IsUnitFlagVisible(flag, unit)
     return true
 end
 
-local function GetUnitFlagSignature(unit)
+local function GetUnitFlagSignature(unit, flag)
     if unit == nil then
         return nil
     end
@@ -111,12 +426,26 @@ local function GetUnitFlagSignature(unit)
     local queuedMovement = GetUnitFlagWaypoint(unit)
     local health = GetUnitFlagHealth(unit)
     local status = GetUnitFlagStatus(unit)
+    local promotionOrLevy = GetUnitFlagPromotionOrLevy(unit)
+    local religion = GetUnitFlagReligion(unit, flag)
+    local archaeology = GetUnitFlagArchaeology(unit)
+    local aircraftCapacity = GetUnitFlagAircraftCapacity(unit, flag)
+    local markers = GetUnitFlagMarkers(unit, flag)
+    local barbarianClan = GetUnitFlagBarbarianClan(unit)
+    local pirates = GetUnitFlagPiratesText(unit)
 
     local parts = {}
     AppendUnitFlagInfo(parts, name)
     AppendUnitFlagInfo(parts, queuedMovement)
     AppendUnitFlagInfo(parts, health)
     AppendUnitFlagInfo(parts, status)
+    AppendUnitFlagInfo(parts, promotionOrLevy)
+    AppendUnitFlagInfo(parts, religion)
+    AppendUnitFlagInfo(parts, archaeology)
+    AppendUnitFlagInfo(parts, aircraftCapacity)
+    AppendUnitFlagInfo(parts, markers)
+    AppendUnitFlagInfo(parts, barbarianClan)
+    AppendUnitFlagInfo(parts, pirates)
 
     return table.concat(parts, " ")
 end
@@ -131,7 +460,8 @@ local function GetMatchingVisibleUnitFlagCount(unit)
         return nil
     end
 
-    local signature = GetUnitFlagSignature(unit)
+    local unitFlag = GetUnitFlag(unit:GetOwner(), unit:GetID())
+    local signature = GetUnitFlagSignature(unit, unitFlag)
     if signature == nil or signature == "" then
         return nil
     end
@@ -140,7 +470,7 @@ local function GetMatchingVisibleUnitFlagCount(unit)
     local units = Units.GetUnitsInPlotLayerID(plot:GetX(), plot:GetY(), MapLayers.ANY)
     for _, otherUnit in ipairs(units) do
         local otherFlag = GetUnitFlag(otherUnit:GetOwner(), otherUnit:GetID())
-        if IsUnitFlagVisible(otherFlag, otherUnit) and GetUnitFlagSignature(otherUnit) == signature then
+        if IsUnitFlagVisible(otherFlag, otherUnit) and GetUnitFlagSignature(otherUnit, otherFlag) == signature then
             matchingCount = matchingCount + 1
         end
     end
@@ -173,6 +503,27 @@ info.UnitFlagInfo = {
     end,
     status = function(unit)
         return GetUnitFlagStatus(unit)
+    end,
+    promotionOrLevy = function(unit, flag)
+        return GetUnitFlagPromotionOrLevy(unit, flag)
+    end,
+    religion = function(unit, flag)
+        return GetUnitFlagReligion(unit, flag)
+    end,
+    archaeology = function(unit)
+        return GetUnitFlagArchaeology(unit)
+    end,
+    aircraftCapacity = function(unit, flag)
+        return GetUnitFlagAircraftCapacity(unit, flag)
+    end,
+    markers = function(unit, flag)
+        return GetUnitFlagMarkers(unit, flag)
+    end,
+    barbarianClan = function(unit)
+        return GetUnitFlagBarbarianClan(unit)
+    end,
+    pirates = function(unit)
+        return GetUnitFlagPiratesText(unit)
     end,
 }
 

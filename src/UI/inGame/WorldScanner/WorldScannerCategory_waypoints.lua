@@ -94,7 +94,7 @@ function CAIWorldScannerCategory_Waypoints.Scan(context)
     for index, entry in ipairs(queuedPath) do
         if index > 1 and entry ~= nil and entry.PlotId ~= nil and Map.IsPlot(entry.PlotId) then
             out[#out + 1] = BuildFullPathItem(entry, index)
-            if entry.IsWaypoint then
+            if entry.IsWaypoint or index == #queuedPath then
                 out[#out + 1] = BuildWaypointItem(entry, index)
             end
         end

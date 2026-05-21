@@ -16,7 +16,8 @@ local HexCoordUtils = CAIHexCoordUtils
 ---@field steps PathStep[]
 ---@field segments PathSegment[]
 ---@field obstacles number[]
----@field zocPlotId number|nil
+---@field intersectsZOC boolean
+---@field endsInZOC boolean
 ---@field isRestricted boolean
 ---@field restrictedPlotId number|nil
 ---@field isPathInFog boolean
@@ -349,6 +350,49 @@ end
 
 local PlotIdsToPathNodes
 
+local function BuildTurnSegmentedPathText(plotIds, turns, endIndex)
+    if plotIds == nil or turns == nil then
+        return nil
+    end
+
+    endIndex = math.min(endIndex or #plotIds, #plotIds, #turns)
+    if endIndex < 2 then
+        return nil
+    end
+
+    local segments = {}
+    local segmentStart = 1
+    local lastTurn = tonumber(turns[1]) or 1
+
+    for i = 2, endIndex do
+        local turn = tonumber(turns[i])
+        if turn ~= nil and turn > lastTurn then
+            if segmentStart < i - 1 then
+                local segmentNodes = PlotIdsToPathNodes(plotIds, segmentStart, i - 1)
+                local segmentText = HexCoordUtils.stepListFromPath(segmentNodes)
+                if segmentText ~= "" then
+                    segments[#segments + 1] = segmentText
+                end
+            end
+            segmentStart = i - 1
+            lastTurn = turn
+        end
+    end
+
+    local finalNodes = PlotIdsToPathNodes(plotIds, segmentStart, endIndex)
+    local finalText = HexCoordUtils.stepListFromPath(finalNodes)
+    if finalText ~= "" then
+        segments[#segments + 1] = finalText
+    end
+
+    local text = HexCoordUtils.joinStepSegments(segments)
+    if text == "" then
+        return nil
+    end
+
+    return text
+end
+
 local function AnalyzePathFeatures(unit, targetPlot, pathInfo)
     if pathInfo.plots == nil or #pathInfo.plots < 2 then
         return
@@ -382,10 +426,14 @@ local function AnalyzePathFeatures(unit, targetPlot, pathInfo)
                 zoc[plotId] = true
             end
         end
-        for i = 2, #pathInfo.plots do
+        local lastPlotIndex = #pathInfo.plots
+        for i = 2, lastPlotIndex do
             if zoc[pathInfo.plots[i]] then
-                pathInfo.zocPlotId = pathInfo.plots[i]
-                break
+                if i < lastPlotIndex then
+                    pathInfo.intersectsZOC = true
+                else
+                    pathInfo.endsInZOC = true
+                end
             end
         end
     end
@@ -434,7 +482,7 @@ local function AnalyzeVisiblePrefix(pathInfo)
 
     if revealedEndIndex >= 2 then
         pathInfo.visiblePathNodes = PlotIdsToPathNodes(pathInfo.plots, 1, revealedEndIndex)
-        pathInfo.visiblePathText = HexCoordUtils.stepListFromPath(pathInfo.visiblePathNodes)
+        pathInfo.visiblePathText = BuildTurnSegmentedPathText(pathInfo.plots, pathInfo.turns, revealedEndIndex)
     end
 end
 
@@ -666,7 +714,8 @@ function BuildMovementPathInfo(unit, endPlotId, showQueuedPath, showDetails)
         combatAtEnd            = false,
         enemyCityAtEnd         = false,
         willDeclareWar         = false,
-        zocPlotId              = nil,
+        intersectsZOC          = false,
+        endsInZOC              = false,
         blockingUnit           = nil,
         requiredTechType       = nil,
         targetOwner            = nil,
@@ -801,12 +850,6 @@ function BuildMovementSpeech(pathInfo, isExplicitSpeech)
         if not pathInfo.hasPath then
             return out
         end
-    elseif pathInfo.kind == "fow" then
-        if pathInfo.entersUnrevealed then
-            AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_UNEXPLORED"))
-        else
-            AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_FOG"))
-        end
     elseif pathInfo.kind == "queue" then
         AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_QUEUED"))
     end
@@ -821,8 +864,10 @@ function BuildMovementSpeech(pathInfo, isExplicitSpeech)
         AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_USES_TUNNEL"))
     end
 
-    if pathInfo.zocPlotId ~= nil then
-        AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_ENTERS_ZOC"))
+    if pathInfo.endsInZOC then
+        AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_ENDS_AT_ZOC"))
+    elseif pathInfo.intersectsZOC then
+        AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_INTERSECTS_ZOC"))
     end
 
     if pathInfo.willDeclareWar then
@@ -839,35 +884,27 @@ function BuildMovementSpeech(pathInfo, isExplicitSpeech)
         AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_BLOCKED"))
     end
 
-    if (not HasImmediateCombat(pathInfo) and (not HasDelayedCombat(pathInfo) or pathInfo.isQueued))
+    if isExplicitSpeech
+        and pathInfo.kind == "fow" then
+        if pathInfo.entersUnrevealed then
+            AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_UNEXPLORED"))
+        else
+            AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_FOG"))
+        end
+    end
+
+    if isExplicitSpeech
+        and (not HasImmediateCombat(pathInfo) and (not HasDelayedCombat(pathInfo) or pathInfo.isQueued))
         and pathInfo.visiblePathText ~= nil
         and pathInfo.visiblePathText ~= "" then
         AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_STEPS", pathInfo.visiblePathText))
     end
 
-    if pathInfo.entersUnrevealed then
+    if isExplicitSpeech and pathInfo.entersUnrevealed then
         AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_THEN_UNEXPLORED"))
     end
 
     return out
-end
-
----@param unit Unit
----@param targetX number
----@param targetY number
----@param turnsToArrival number|nil
----@return string|nil
-function BuildMovementResultSpeech(unit, targetX, targetY, turnsToArrival)
-    if unit == nil or targetX == nil or targetY == nil then
-        return nil
-    end
-
-    if turnsToArrival ~= nil and turnsToArrival > 0 then
-        return Locale.Lookup("LOC_CAI_MOVEMENT_RESULT_STOPPED_SHORT_TURNS", turnsToArrival)
-    end
-
-    local movesLeft = unit:GetMovesRemaining()
-    return Locale.Lookup("LOC_CAI_MOVEMENT_RESULT_MOVED_TO", movesLeft)
 end
 
 -- ===========================================================================

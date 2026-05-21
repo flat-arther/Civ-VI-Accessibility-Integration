@@ -1346,6 +1346,48 @@
     <Row Tag="LOC_CAI_UNIT_FLAG_HEALTH" Language="en_US">
       <Text>{1_CurrentHp}/{2_MaxHp} hp</Text>
     </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_PROMOTIONS_SHORT" Language="en_US">
+      <Text>{1_Count} promotions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_LEVIED_SHORT" Language="en_US">
+      <Text>Levied {1_Turns}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_RELIGION_SHORT" Language="en_US">
+      <Text>Religion: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_HOME_CITY_SHORT" Language="en_US">
+      <Text>Home: {1_City}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_ARTIFACT_SHORT" Language="en_US">
+      <Text>Artifact: {1_Name}, {2_Player}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_AIRCRAFT_SHORT" Language="en_US">
+      <Text>Aircraft: {1_Current}/{2_Max}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_HERO_SHORT" Language="en_US">
+      <Text>Hero</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_THREAT_SHORT" Language="en_US">
+      <Text>Threat</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_FLAGSHIP_SHORT" Language="en_US">
+      <Text>Flagship</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_CLAN_SHORT" Language="en_US">
+      <Text>{1_Name} clan</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_BRIBED_SHORT" Language="en_US">
+      <Text>Bribed, {1_Turns}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_INCITED_BY_YOU_SHORT" Language="en_US">
+      <Text>Incited by you, {1_Player}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_INCITED_AGAINST_YOU_SHORT" Language="en_US">
+      <Text>Incited against you, {1_Player}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_INCITED_AGAINST_YOU_UNKNOWN_SHORT" Language="en_US">
+      <Text>Incited against you</Text>
+    </Row>
     <Row Tag="LOC_CAI_WORLDTRACKER_UNIT_MISSING" Language="en_US">
       <Text>Unit no longer available</Text>
     </Row>
@@ -1913,6 +1955,9 @@
     <Row Tag="LOC_CAI_MOVEMENT_THEN_UNEXPLORED" Language="en_US">
       <Text>Then unexplored</Text>
     </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_THEN" Language="en_US">
+      <Text>then</Text>
+    </Row>
     <Row Tag="LOC_CAI_MOVEMENT_CROSSES_OBSTACLES" Language="en_US">
       <Text>{1_Count : plural 1?Crosses {1_Count} obstacle; other?Crosses {1_Count} obstacles;}</Text>
     </Row>
@@ -1925,8 +1970,11 @@
     <Row Tag="LOC_CAI_MOVEMENT_REQUIRES_DISEMBARK" Language="en_US">
       <Text>Requires disembark</Text>
     </Row>
-    <Row Tag="LOC_CAI_MOVEMENT_ENTERS_ZOC" Language="en_US">
-      <Text>Enters zone of control</Text>
+    <Row Tag="LOC_CAI_MOVEMENT_INTERSECTS_ZOC" Language="en_US">
+      <Text>Intersects zone of control</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_ENDS_AT_ZOC" Language="en_US">
+      <Text>Ends at zone of control</Text>
     </Row>
     <Row Tag="LOC_CAI_MOVEMENT_WILL_DECLARE_WAR" Language="en_US">
       <Text>Will declare war</Text>

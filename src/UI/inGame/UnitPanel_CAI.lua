@@ -538,8 +538,48 @@ local function CachedPlotIdsToPathNodes(plotIds, startIndex, endIndex)
     return nodes
 end
 
-local function GetCachedQueuedPathVisibleText(plotIds)
-    if plotIds == nil or #plotIds < 2 then
+local function BuildQueuedPathSegmentedText(entries, plotIds, endIndex)
+    if entries == nil or plotIds == nil then
+        return nil
+    end
+
+    endIndex = math.min(endIndex or #plotIds, #plotIds, #entries)
+    if endIndex < 2 then
+        return nil
+    end
+
+    local segments = {}
+    local segmentStart = 1
+    for i = 2, endIndex do
+        local previousEntry = entries[i - 1]
+        if previousEntry ~= nil and previousEntry.IsWaypoint then
+            if segmentStart < i - 1 then
+                local segmentNodes = CachedPlotIdsToPathNodes(plotIds, segmentStart, i - 1)
+                local segmentText = HexCoordUtils.stepListFromPath(segmentNodes)
+                if segmentText ~= "" then
+                    segments[#segments + 1] = segmentText
+                end
+            end
+            segmentStart = i - 1
+        end
+    end
+
+    local finalNodes = CachedPlotIdsToPathNodes(plotIds, segmentStart, endIndex)
+    local finalText = HexCoordUtils.stepListFromPath(finalNodes)
+    if finalText ~= "" then
+        segments[#segments + 1] = finalText
+    end
+
+    local text = HexCoordUtils.joinStepSegments(segments)
+    if text == "" then
+        return nil
+    end
+
+    return text
+end
+
+local function GetCachedQueuedPathVisibleText(entries, plotIds)
+    if entries == nil or plotIds == nil or #plotIds < 2 then
         return nil, false, false
     end
 
@@ -561,11 +601,7 @@ local function GetCachedQueuedPathVisibleText(plotIds)
 
     local steps = nil
     if revealedEndIndex >= 2 then
-        local nodes = CachedPlotIdsToPathNodes(plotIds, 1, revealedEndIndex)
-        steps = HexCoordUtils.stepListFromPath(nodes)
-        if steps == "" then
-            steps = nil
-        end
+        steps = BuildQueuedPathSegmentedText(entries, plotIds, revealedEndIndex)
     end
 
     return steps, entersFog, entersUnrevealed
@@ -606,7 +642,7 @@ local function GetUnitInfoQueuedPath(unit)
     AppendUnitInfo(results, Locale.Lookup("LOC_CAI_MOVEMENT_QUEUED"))
     AppendUnitInfo(results, FormatCachedQueuedPathArrivalTurn(queuedPath.ArrivalTurn))
 
-    local steps, entersFog, entersUnrevealed = GetCachedQueuedPathVisibleText(queuedPath.PlotIds)
+    local steps, entersFog, entersUnrevealed = GetCachedQueuedPathVisibleText(queuedPath.Entries, queuedPath.PlotIds)
     if entersUnrevealed then
         AppendUnitInfo(results, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_UNEXPLORED"))
     elseif entersFog then
