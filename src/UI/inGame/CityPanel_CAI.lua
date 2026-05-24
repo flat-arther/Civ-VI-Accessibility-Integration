@@ -1,29 +1,41 @@
 include("caiUtils")
-include("CityPanel")
+include("hexCoordUtils_CAI")
+include("Civ6Common")
+
+local function GetCityPanelIncludeName()
+    if IsExpansion2Active() then
+        return "CityPanel_Expansion2"
+    end
+
+    if IsExpansion1Active() then
+        return "CityPanel_Expansion1"
+    end
+
+    return "CityPanel"
+end
+
+include(GetCityPanelIncludeName())
 
 --#State
 local mgr = ExposedMembers.CAI_UIManager
 local CITY_ACTION_CATEGORY = "LOC_OPTIONS_HOTKEY_CATEGORY_CITY"
+local HexCoordUtils = CAIHexCoordUtils
 
 info = ExposedMembers.CAIInfo or {}
 ExposedMembers.CAIInfo = info
 
-CityInfoPriority = {
-    "Summary",
-    "Name",
-    "Coords",
-    "Health",
-    "BuildingCount",
-    "ReligiousFollowersCount",
-    "AmenitiesSummary",
-    "HousingSummary",
-    "GrowthSummary",
-    "ProductionSummary",
-    "BuildingsAmenitiesSummary",
-    "VisibleYields",
-    "NormalFocusYields",
-    "FavoredFocusYields",
-    "IgnoredFocusYields",
+local CITY_INFO_BUCKETS = {
+    Summary = { "Name", "Population", "Health", "Production", "Growth" },
+    Info1 = { "Name", "Health" },
+    Info2 = { "Production" },
+    Info3 = { "Growth" },
+    Info4 = { "BorderGrowth" },
+    Info5 = { "Religion" },
+    Info6 = { "Population", "Housing", "BuildingsOrLoyalty" },
+    Info7 = { "VisibleYields" },
+    Info8 = { "NormalFocusYields" },
+    Info9 = { "FavoredFocusYields" },
+    Info10 = { "IgnoredFocusYields" },
 }
 --#City Info Lookup
 
@@ -33,11 +45,6 @@ function GetCityInfoData(city)
     end
 
     local data = GetCityData(city)
-    if data ~= nil then
-        data.X = city:GetX()
-        data.Y = city:GetY()
-    end
-
     return data, city
 end
 
@@ -67,16 +74,6 @@ function GetCityInfoName(data)
     end
 
     return (data.IsCapital and "[ICON_Capital]" or "") .. Locale.ToUpper(Locale.Lookup(data.CityName))
-end
-
-function GetCityInfoCoords(data, city)
-    if city == nil and data == nil then
-        return nil
-    end
-
-    local x = city and city:GetX() or data.X
-    local y = city and city:GetY() or data.Y
-    return Locale.Lookup("LOC_CAI_COORDS_STRING", x, y)
 end
 
 function GetCityInfoPopulation(data)
@@ -114,6 +111,19 @@ function GetCityInfoPercentText(value)
     return tostring(math.floor((value * 100) + 0.5)) .. "%"
 end
 
+function GetCityInfoValueText(value)
+    if value == nil then
+        return nil
+    end
+
+    local rounded = math.floor((value * 10) + 0.5) / 10
+    if math.abs(rounded - math.floor(rounded)) < 0.05 then
+        return Locale.ToNumber(math.floor(rounded))
+    end
+
+    return Locale.ToNumber(rounded, "#.#")
+end
+
 function GetCityInfoCurrentProgressText(value)
     local percentText = GetCityInfoPercentText(value)
     if percentText == nil then
@@ -130,6 +140,15 @@ function GetCityInfoNextTurnProgressText(value)
     end
 
     return Locale.Lookup("LOC_CAI_NEXT_TURN_PROGRESS") .. ", " .. percentText
+end
+
+function GetCityInfoLabelValueText(locKey, value)
+    local valueText = GetCityInfoValueText(value)
+    if valueText == nil then
+        return nil
+    end
+
+    return Locale.Lookup(locKey) .. ", " .. valueText
 end
 
 function GetCityInfoYieldState(data, yieldType)
@@ -316,6 +335,96 @@ function GetCityInfoGrowth(data)
     end
 end
 
+function GetCityBorderGrowthDirectionText(city, plotId)
+    if city == nil or plotId == nil or plotId == -1 or HexCoordUtils == nil then
+        return nil
+    end
+
+    local plot = Map.GetPlotByIndex(plotId)
+    if plot == nil then
+        return nil
+    end
+
+    local direction = HexCoordUtils.directionString(city:GetX(), city:GetY(), plot:GetX(), plot:GetY())
+    if direction == nil or direction == "" then
+        return nil
+    end
+
+    return direction
+end
+
+function GetCityBorderGrowthStoredRequiredText(currentCulture, cost)
+    local currentCultureText = GetCityInfoValueText(currentCulture)
+    local costText = GetCityInfoValueText(cost)
+    if currentCultureText == nil or costText == nil then
+        return nil
+    end
+
+    return JoinCityInfo({
+        Locale.Lookup("LOC_CAI_CITY_TOTAL_CULTURE") .. ": " .. currentCultureText,
+        Locale.Lookup("LOC_HUD_CITY_REQUIRED") .. ": " .. costText,
+    }, ", ")
+end
+
+function GetCityBorderGrowthPerTurnText(currentYield)
+    local currentYieldText = GetCityInfoValueText(currentYield)
+    if currentYieldText == nil then
+        return nil
+    end
+
+    return currentYieldText .. " " .. Locale.ToLower(Locale.Lookup("LOC_HUD_CITY_CULTURE_PER_TURN", currentYieldText)):gsub("^" .. currentYieldText .. "%s*", "")
+end
+
+function GetCityBorderGrowth(data, city)
+    if city == nil or not HasCapability("CAPABILITY_CULTURE") then
+        return nil
+    end
+
+    if IsExpansion2Active() then
+        local localPlayerID = Game.GetLocalPlayer()
+        local resolutions = Game.GetWorldCongress():GetResolutions(localPlayerID)
+        if resolutions ~= nil then
+            for _, resolutionData in pairs(resolutions) do
+                if type(resolutionData) == "table" and
+                    resolutionData.ChosenOption == "LOC_WORLD_CONGRESS_NO_CULTURE_BORDER_GROWTH_DESC" and
+                    tonumber(resolutionData.ChosenThing) == localPlayerID then
+                    return nil
+                end
+            end
+        end
+    end
+
+    local cityCulture = city:GetCulture()
+    if cityCulture == nil then
+        return nil
+    end
+
+    local nextGrowthPlot = cityCulture:GetNextPlot()
+    if nextGrowthPlot == nil or nextGrowthPlot == -1 then
+        return nil
+    end
+
+    local cost = cityCulture:GetNextPlotCultureCost()
+    local currentCulture = cityCulture:GetCurrentCulture()
+    local currentYield = cityCulture:GetCultureYield()
+    if cost == nil or cost <= 0 or currentCulture == nil or currentYield == nil then
+        return nil
+    end
+
+    local currentGrowth = math.max(math.min(currentCulture / cost, 1.0), 0)
+    local nextTurnGrowth = math.max(math.min((currentCulture + currentYield) / cost, 1.0), 0)
+    local turnsRemaining = cityCulture:GetTurnsUntilExpansion()
+
+    return JoinCityInfo({
+        Locale.Lookup("LOC_HUD_CITY_BORDER_EXPANSION", turnsRemaining),
+        GetCityBorderGrowthDirectionText(city, nextGrowthPlot),
+        GetCityBorderGrowthStoredRequiredText(currentCulture, cost),
+        GetCityBorderGrowthPerTurnText(currentYield),
+        GetCityInfoCurrentProgressText(currentGrowth),
+        GetCityInfoNextTurnProgressText(nextTurnGrowth),
+    }, ", ")
+end
+
 function GetCityInfoProduction(data)
     if data == nil then
         return nil
@@ -339,65 +448,59 @@ function GetCityInfoProduction(data)
     }, ", ")
 end
 
+function GetCityInfoBuildingsOrLoyalty(data, city)
+    if data == nil then
+        return nil
+    end
+
+    if (IsExpansion2Active() or IsExpansion1Active()) and city ~= nil then
+        local culturalIdentity = city:GetCulturalIdentity()
+        if culturalIdentity ~= nil then
+            return Locale.Lookup("LOC_CULTURAL_IDENTITY_LOYALTY_SUBSECTION") .. ", " ..
+                tostring(Round(culturalIdentity:GetLoyalty(), 1))
+        end
+    end
+
+    return Locale.Lookup("LOC_HUD_CITY_BUILDINGS") .. ", " .. tostring(data.BuildingsNum)
+end
+
 --#City Info Registry
 
 CityInfo = {
-    Summary = function(data, city)
-        return JoinCityInfo({
-            GetCityInfoName(data),
-            GetCityInfoCoords(data, city),
-            GetCityInfoPopulation(data),
-            GetCityInfoHealth(data),
-            GetCityInfoCultureYield(data),
-            GetCityInfoFoodYield(data),
-            GetCityInfoProductionYield(data),
-            GetCityInfoScienceYield(data),
-            GetCityInfoFaithYield(data),
-            GetCityInfoGoldYield(data),
-        }, ", ")
-    end,
-
     Name = function(data, city)
         return GetCityInfoName(data)
-    end,
-
-    Coords = function(data, city)
-        return GetCityInfoCoords(data, city)
     end,
 
     Health = function(data, city)
         return GetCityInfoHealth(data)
     end,
 
-    BuildingCount = function(data, city)
-        return GetCityInfoBuildings(data)
+    Population = function(data, city)
+        return GetCityInfoPopulation(data)
     end,
 
-    ReligiousFollowersCount = function(data, city)
-        return GetCityInfoReligionFollowers(data)
-    end,
-
-    AmenitiesSummary = function(data, city)
-        return GetCityInfoAmenities(data)
-    end,
-
-    HousingSummary = function(data, city)
-        return GetCityInfoHousing(data)
-    end,
-
-    GrowthSummary = function(data, city)
+    Growth = function(data, city)
         return GetCityInfoGrowth(data)
     end,
 
-    ProductionSummary = function(data, city)
+    BorderGrowth = function(data, city)
+        return GetCityBorderGrowth(data, city)
+    end,
+
+    Production = function(data, city)
         return GetCityInfoProduction(data)
     end,
 
-    BuildingsAmenitiesSummary = function(data, city)
-        return {
-            GetCityInfoBuildings(data),
-            GetCityInfoAmenities(data),
-        }
+    Housing = function(data, city)
+        return GetCityInfoHousing(data)
+    end,
+
+    Religion = function(data, city)
+        return GetCityInfoReligionFollowers(data)
+    end,
+
+    BuildingsOrLoyalty = function(data, city)
+        return GetCityInfoBuildingsOrLoyalty(data, city)
     end,
 
     VisibleYields = function(data, city)
@@ -417,11 +520,26 @@ CityInfo = {
     end,
 }
 
+CityInfo.BuildingCount = CityInfo.BuildingsOrLoyalty
+CityInfo.ReligiousFollowersCount = CityInfo.Religion
+CityInfo.AmenitiesSummary = function(data, city) return GetCityInfoAmenities(data) end
+CityInfo.HousingSummary = CityInfo.Housing
+CityInfo.GrowthSummary = CityInfo.Growth
+CityInfo.ProductionSummary = CityInfo.Production
+CityInfo.BuildingsAmenitiesSummary = function(data, city)
+    return {
+        GetCityInfoBuildingsOrLoyalty(data, city),
+        GetCityInfoAmenities(data),
+    }
+end
+
 info.CityInfo = CityInfo
-info.CityInfoPriority = CityInfoPriority
+info.CityInfoBuckets = CITY_INFO_BUCKETS
 CityInfoActionMap = {}
 CityInfoFallbacks = {
+    Religion                = "LOC_CAI_CITY_NO_RELIGION_INFO",
     ReligiousFollowersCount = "LOC_CAI_CITY_NO_RELIGION_INFO",
+    BorderGrowth            = "LOC_CAI_CITY_NO_BORDER_GROWTH_INFO",
     NormalFocusYields       = "LOC_CAI_CITY_NO_NORMAL_FOCUS_YIELDS",
     FavoredFocusYields      = "LOC_CAI_CITY_NO_FAVORED_YIELDS",
     IgnoredFocusYields      = "LOC_CAI_CITY_NO_IGNORED_YIELDS",
@@ -482,6 +600,27 @@ function ToggleCityPanelCheck(control)
     control:SetAndCall(not control:IsChecked())
 end
 
+function IsVanillaProductionPanelVisible()
+    local productionPanel = ContextPtr:LookUpControl("/InGame/ProductionPanel")
+    return productionPanel ~= nil and not productionPanel:IsHidden()
+end
+
+function OpenOrToggleCityProduction()
+    if Controls.ChangeProductionCheck == nil or Controls.ChangeProductionCheck:IsDisabled()
+        or Controls.ChangeProductionCheck:IsHidden() then
+        return
+    end
+
+    if not IsVanillaProductionPanelVisible() then
+        if LuaEvents.CityPanel_ProductionOpen ~= nil then
+            LuaEvents.CityPanel_ProductionOpen()
+            return
+        end
+    end
+
+    ToggleCityPanelCheck(Controls.ChangeProductionCheck)
+end
+
 function CloseCityActionList()
     if CityActionList ~= nil then
         mgr:Pop()
@@ -513,6 +652,349 @@ function GetCityCategoryActionIds()
     return CityActionCategoryIds
 end
 
+function GetOrderedCityActionIds()
+    local ordered = {
+        Input.GetActionId("CityChangeProduction"),
+        Input.GetActionId("CityPurchaseWithGold"),
+        Input.GetActionId("CityPurchaseWithFaith"),
+        Input.GetActionId("CityToggleOverview"),
+        Input.GetActionId("CityOpenBuildings"),
+        Input.GetActionId("CityOpenLoyalty"),
+        Input.GetActionId("CityOpenPower"),
+        Input.GetActionId("CityOpenReligion"),
+        Input.GetActionId("CityOpenAmenities"),
+        Input.GetActionId("CityOpenHousing"),
+        Input.GetActionId("CityOpenCitizens"),
+        Input.GetActionId("CityChangeCitizenYieldFocus"),
+    }
+
+    local seen = {}
+    local results = {}
+    local excluded = {
+        [Input.GetActionId("CityManageCitizens")] = true,
+        [Input.GetActionId("CityPurchaseTile")] = true,
+    }
+
+    for _, actionId in ipairs(ordered) do
+        if actionId ~= nil and CityActionMap[actionId] ~= nil and not seen[actionId] then
+            seen[actionId] = true
+            table.insert(results, actionId)
+        end
+    end
+
+    for _, actionId in ipairs(GetCityCategoryActionIds()) do
+        if actionId ~= nil and CityActionMap[actionId] ~= nil and not seen[actionId] and not excluded[actionId] then
+            seen[actionId] = true
+            table.insert(results, actionId)
+        end
+    end
+
+    return results
+end
+
+function CanToggleCombinedCityManagement()
+    local canManage = IsCityPanelActionAvailable(Controls.ManageCitizensCheck)
+    local canPurchase = GameCapabilities.HasCapability("CAPABILITY_GOLD")
+        and IsCityPanelActionAvailable(Controls.PurchaseTileCheck)
+    return canManage or canPurchase
+end
+
+function ToggleCombinedCityManagement()
+    local canManage = IsCityPanelActionAvailable(Controls.ManageCitizensCheck)
+    local canPurchase = GameCapabilities.HasCapability("CAPABILITY_GOLD")
+        and IsCityPanelActionAvailable(Controls.PurchaseTileCheck)
+
+    if not canManage and not canPurchase then
+        return
+    end
+
+    local allActive = (not canManage or Controls.ManageCitizensCheck:IsChecked())
+        and (not canPurchase or Controls.PurchaseTileCheck:IsChecked())
+    local targetState = not allActive
+
+    if canPurchase and Controls.PurchaseTileCheck:IsChecked() ~= targetState then
+        Controls.PurchaseTileCheck:SetAndCall(targetState)
+    end
+
+    if canManage and Controls.ManageCitizensCheck:IsChecked() ~= targetState then
+        Controls.ManageCitizensCheck:SetAndCall(targetState)
+    end
+end
+
+function EnsureCityOverviewPanelOpen()
+    if Controls.ToggleOverviewPanel == nil or Controls.ToggleOverviewPanel:IsChecked() then
+        return
+    end
+
+    Controls.ToggleOverviewPanel:SetAndCall(true)
+end
+
+function OpenCityOverviewLoyalty()
+    if UI.GetHeadSelectedCity() == nil or ContextPtr:IsHidden() then
+        return
+    end
+
+    EnsureCityOverviewPanelOpen()
+    if LuaEvents.CityPanel_ToggleOverviewLoyalty ~= nil then
+        LuaEvents.CityPanel_ToggleOverviewLoyalty()
+    end
+end
+
+function OpenCityOverviewPower()
+    if UI.GetHeadSelectedCity() == nil or ContextPtr:IsHidden() then
+        return
+    end
+
+    EnsureCityOverviewPanelOpen()
+    if LuaEvents.CityPanel_ToggleOverviewPower ~= nil then
+        LuaEvents.CityPanel_ToggleOverviewPower()
+    end
+end
+
+function CanOpenAnyCityOverviewTab()
+    return UI.GetHeadSelectedCity() ~= nil
+        and ContextPtr:IsHidden() == false
+        and Controls.ToggleOverviewPanel ~= nil
+        and not Controls.ToggleOverviewPanel:IsHidden()
+        and not Controls.ToggleOverviewPanel:IsDisabled()
+end
+
+function IsOverviewTabControlAvailable(control)
+    if control == nil then
+        return false
+    end
+
+    if not control:IsHidden() and not control:IsDisabled() then
+        return true
+    end
+
+    return CanOpenAnyCityOverviewTab()
+end
+
+function OpenCityOverviewBuildings()
+    if not IsOverviewTabControlAvailable(Controls.BreakdownButton) then
+        return
+    end
+
+    EnsureCityOverviewPanelOpen()
+    if LuaEvents.CityPanel_ToggleOverviewBuildings ~= nil then
+        LuaEvents.CityPanel_ToggleOverviewBuildings()
+    end
+end
+
+function OpenCityOverviewReligion()
+    if not CanOpenAnyCityOverviewTab() then
+        return
+    end
+
+    if Controls.ReligionButton ~= nil and (Controls.ReligionButton:IsHidden() or Controls.ReligionButton:IsDisabled()) then
+        return
+    end
+
+    if not GameCapabilities.HasCapability("CAPABILITY_CITY_HUD_RELIGION_TAB") then
+        return
+    end
+
+    EnsureCityOverviewPanelOpen()
+    if LuaEvents.CityPanel_ToggleOverviewReligion ~= nil then
+        LuaEvents.CityPanel_ToggleOverviewReligion()
+    end
+end
+
+function OpenCityOverviewCitizens()
+    if not IsOverviewTabControlAvailable(Controls.CitizensGrowthButton) then
+        return
+    end
+
+    EnsureCityOverviewPanelOpen()
+    if LuaEvents.CityPanel_ToggleOverviewCitizens ~= nil then
+        LuaEvents.CityPanel_ToggleOverviewCitizens()
+    end
+end
+
+function OpenCityOverviewAmenities()
+    if not IsOverviewTabControlAvailable(Controls.AmenitiesButton) then
+        return
+    end
+
+    OpenCityOverviewCitizens()
+end
+
+function OpenCityOverviewHousing()
+    if not IsOverviewTabControlAvailable(Controls.HousingButton) then
+        return
+    end
+
+    OpenCityOverviewCitizens()
+end
+
+function GetDistrictDisplayName(district)
+    if district == nil then
+        return nil
+    end
+
+    local districtDef = GameInfo.Districts[district:GetType()]
+    if districtDef == nil or districtDef.Name == nil then
+        return nil
+    end
+
+    return Locale.Lookup(districtDef.Name)
+end
+
+function IsDistrictInCity(district, city)
+    if district == nil or city == nil then
+        return false
+    end
+
+    local districtCity = district:GetCity()
+    return districtCity ~= nil and districtCity:GetID() == city:GetID()
+end
+
+function IsCityCenterDistrict(district)
+    return district ~= nil and district:GetType() == GameInfo.Districts["DISTRICT_CITY_CENTER"].Index
+end
+
+function GetDistrictPlot(district)
+    if district == nil then
+        return nil
+    end
+
+    return Map.GetPlot(district:GetX(), district:GetY())
+end
+
+function GetCityRangeStrikeActions(city)
+    local actions = {}
+    if city == nil or city:GetOwner() ~= Game.GetLocalPlayer() then
+        return actions
+    end
+
+    if CityManager.CanStartCommand(city, CityCommandTypes.RANGE_ATTACK) then
+        table.insert(actions, {
+            Label = Locale.Lookup("LOC_CAI_CITY_ACTION_RANGE_STRIKE_CITY"),
+            Tooltip = Locale.Lookup("LOC_CAI_CITY_ACTION_RANGE_STRIKE_CITY_TOOLTIP"),
+            Action = function()
+                UI.SelectCity(city)
+                UI.SetInterfaceMode(InterfaceModeTypes.CITY_RANGE_ATTACK)
+            end,
+        })
+    end
+
+    local player = Players[city:GetOwner()]
+    local districts = player ~= nil and player:GetDistricts() or nil
+    if districts == nil or districts.Members == nil then
+        return actions
+    end
+
+    for _, district in districts:Members() do
+        if district ~= nil then
+            if IsDistrictInCity(district, city) and not IsCityCenterDistrict(district) and
+                CityManager.CanStartCommand(district, CityCommandTypes.RANGE_ATTACK) then
+                local districtName = GetDistrictDisplayName(district)
+                if districtName ~= nil then
+                    table.insert(actions, {
+                        Label = Locale.Lookup("LOC_CAI_CITY_ACTION_RANGE_STRIKE_DISTRICT", districtName),
+                        Tooltip = Locale.Lookup("LOC_CAI_CITY_ACTION_RANGE_STRIKE_DISTRICT_TOOLTIP", districtName),
+                        Action = function()
+                            local districtPlot = GetDistrictPlot(district)
+                            if districtPlot ~= nil then
+                                LuaEvents.CAICursorJump(districtPlot:GetIndex(), true)
+                            end
+                            UI.DeselectAll()
+                            UI.SelectDistrict(district)
+                            UI.SetInterfaceMode(InterfaceModeTypes.DISTRICT_RANGE_ATTACK)
+                        end,
+                    })
+                end
+            end
+        end
+    end
+
+    return actions
+end
+
+function CanDistrictPerformWMDStrike(city, districtPlot, wmdType)
+    if city == nil or districtPlot == nil or wmdType == nil then
+        return false
+    end
+
+    local parameters = {}
+    parameters[CityCommandTypes.PARAM_WMD_TYPE] = wmdType
+    parameters[CityCommandTypes.PARAM_X0] = districtPlot:GetX()
+    parameters[CityCommandTypes.PARAM_Y0] = districtPlot:GetY()
+
+    local results = CityManager.GetCommandTargets(city, CityCommandTypes.WMD_STRIKE, parameters)
+    local plots = results ~= nil and results[CityCommandResults.PLOTS] or nil
+    return plots ~= nil
+end
+
+function BuildDistrictWMDStrikeAction(city, district, districtPlot, wmdDef)
+    if city == nil or district == nil or districtPlot == nil or wmdDef == nil or wmdDef.Name == nil then
+        return nil
+    end
+
+    local districtName = GetDistrictDisplayName(district)
+    if districtName == nil then
+        return nil
+    end
+
+    local weaponName = Locale.Lookup(wmdDef.Name)
+    return {
+        Label = Locale.Lookup("LOC_CAI_CITY_ACTION_WMD_STRIKE_DISTRICT", districtName, weaponName),
+        Tooltip = Locale.Lookup("LOC_CAI_CITY_ACTION_WMD_STRIKE_DISTRICT_TOOLTIP", districtName, weaponName),
+        Action = function()
+            LuaEvents.CAICursorJump(districtPlot:GetIndex(), true)
+            if UI.GetInterfaceMode() == InterfaceModeTypes.ICBM_STRIKE then
+                UI.SetInterfaceMode(InterfaceModeTypes.SELECTION)
+            end
+            UI.SelectCity(city)
+            UILens.SetActive("Default")
+            local parameters = {}
+            parameters[CityCommandTypes.PARAM_WMD_TYPE] = wmdDef.Index
+            parameters[CityCommandTypes.PARAM_X0] = districtPlot:GetX()
+            parameters[CityCommandTypes.PARAM_Y0] = districtPlot:GetY()
+            UI.SetInterfaceMode(InterfaceModeTypes.ICBM_STRIKE, parameters)
+        end,
+    }
+end
+
+function GetCityWMDStrikeActions(city)
+    local actions = {}
+    if city == nil or city:GetOwner() ~= Game.GetLocalPlayer() then
+        return actions
+    end
+
+    local player = Players[city:GetOwner()]
+    local districts = player ~= nil and player:GetDistricts() or nil
+    local playerWMDs = player ~= nil and player:GetWMDs() or nil
+    if districts == nil or districts.Members == nil or playerWMDs == nil then
+        return actions
+    end
+
+    local supportedWMDTypes = {
+        GameInfo.WMDs["WMD_NUCLEAR_DEVICE"],
+        GameInfo.WMDs["WMD_THERMONUCLEAR_DEVICE"],
+    }
+
+    for _, district in districts:Members() do
+        if district ~= nil and IsDistrictInCity(district, city) and not IsCityCenterDistrict(district) then
+            local districtPlot = GetDistrictPlot(district)
+            if districtPlot ~= nil then
+                for _, wmdDef in ipairs(supportedWMDTypes) do
+                    if wmdDef ~= nil and playerWMDs:GetWeaponCount(wmdDef.Index) > 0 and
+                        CanDistrictPerformWMDStrike(city, districtPlot, wmdDef.Index) then
+                        local action = BuildDistrictWMDStrikeAction(city, district, districtPlot, wmdDef)
+                        if action ~= nil then
+                            table.insert(actions, action)
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return actions
+end
+
 function BuildCityActionList()
     local data, city = GetCityInfoData(UI.GetHeadSelectedCity())
     local cityName = GetCityInfoName(data) or Locale.Lookup("LOC_CAI_CITY_ACTIONS")
@@ -530,7 +1012,45 @@ function BuildCityActionList()
         end,
     })
 
-    for _, actionId in ipairs(GetCityCategoryActionIds()) do
+    for _, strikeAction in ipairs(GetCityRangeStrikeActions(city)) do
+        local currentStrikeAction = strikeAction
+        list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityPanelRangeStrikeItem"), "MenuItem", {
+            GetLabel = function()
+                return currentStrikeAction.Label
+            end,
+            GetTooltip = function()
+                return currentStrikeAction.Tooltip
+            end,
+            OnFocusEnter = function()
+                UI.PlaySound("Main_Menu_Mouse_Over")
+            end,
+            OnClick = function()
+                CloseCityActionList()
+                currentStrikeAction.Action()
+            end,
+        }))
+    end
+
+    for _, wmdAction in ipairs(GetCityWMDStrikeActions(city)) do
+        local currentWMDAction = wmdAction
+        list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityPanelWMDStrikeItem"), "MenuItem", {
+            GetLabel = function()
+                return currentWMDAction.Label
+            end,
+            GetTooltip = function()
+                return currentWMDAction.Tooltip
+            end,
+            OnFocusEnter = function()
+                UI.PlaySound("Main_Menu_Mouse_Over")
+            end,
+            OnClick = function()
+                CloseCityActionList()
+                currentWMDAction.Action()
+            end,
+        }))
+    end
+
+    for _, actionId in ipairs(GetOrderedCityActionIds()) do
         local actionData = CityActionMap[actionId]
         if actionData ~= nil and actionData.IsEnabled() then
             local currentActionId = actionId
@@ -550,6 +1070,24 @@ function BuildCityActionList()
                 end,
             }))
         end
+    end
+
+    if CanToggleCombinedCityManagement() then
+        list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityPanelManageCityItem"), "MenuItem", {
+            GetLabel = function()
+                return Locale.Lookup("LOC_CAI_CITY_MANAGE_CITY")
+            end,
+            GetTooltip = function()
+                return Locale.Lookup("LOC_CAI_CITY_MANAGE_CITY_TOOLTIP")
+            end,
+            OnFocusEnter = function()
+                UI.PlaySound("Main_Menu_Mouse_Over")
+            end,
+            OnClick = function()
+                CloseCityActionList()
+                ToggleCombinedCityManagement()
+            end,
+        }))
     end
 
     return list
@@ -704,56 +1242,69 @@ function InitializeCityActionMap()
                 ToggleCityPanelCheck(Controls.ToggleOverviewPanel)
             end,
             function()
-                return UI.GetHeadSelectedCity() ~= nil and ContextPtr:IsHidden() == false
+                return IsCityPanelActionAvailable(Controls.ToggleOverviewPanel)
             end
         ),
         [Input.GetActionId("CityOpenBuildings")] = BuildCityActionData(
-            OnBreakdown,
+            OpenCityOverviewBuildings,
             function()
-                return UI.GetHeadSelectedCity() ~= nil and ContextPtr:IsHidden() == false
+                return IsOverviewTabControlAvailable(Controls.BreakdownButton)
+            end
+        ),
+        [Input.GetActionId("CityOpenLoyalty")] = BuildCityActionData(
+            OpenCityOverviewLoyalty,
+            function()
+                return UI.GetHeadSelectedCity() ~= nil
+                    and ContextPtr:IsHidden() == false
+                    and (IsExpansion1Active() or IsExpansion2Active())
+                    and LuaEvents.CityPanel_ToggleOverviewLoyalty ~= nil
+            end
+        ),
+        [Input.GetActionId("CityOpenPower")] = BuildCityActionData(
+            OpenCityOverviewPower,
+            function()
+                return UI.GetHeadSelectedCity() ~= nil
+                    and ContextPtr:IsHidden() == false
+                    and IsExpansion2Active()
+                    and GameCapabilities.HasCapability("CAPABILITY_LENS_POWER")
+                    and LuaEvents.CityPanel_ToggleOverviewPower ~= nil
             end
         ),
         [Input.GetActionId("CityOpenReligion")] = BuildCityActionData(
-            OnReligion,
+            OpenCityOverviewReligion,
             function()
-                return GameCapabilities.HasCapability("CAPABILITY_CITY_HUD_RELIGION_TAB")
-                    and IsCityPanelActionVisible(Controls.ReligionButton)
+                return CanOpenAnyCityOverviewTab()
+                    and GameCapabilities.HasCapability("CAPABILITY_CITY_HUD_RELIGION_TAB")
+                    and Controls.ReligionButton ~= nil
+                    and not Controls.ReligionButton:IsHidden()
+                    and not Controls.ReligionButton:IsDisabled()
             end
         ),
         [Input.GetActionId("CityOpenAmenities")] = BuildCityActionData(
-            OnAmenities,
+            OpenCityOverviewAmenities,
             function()
-                return UI.GetHeadSelectedCity() ~= nil and ContextPtr:IsHidden() == false
+                return IsOverviewTabControlAvailable(Controls.AmenitiesButton)
             end
         ),
         [Input.GetActionId("CityOpenHousing")] = BuildCityActionData(
-            OnHousing,
+            OpenCityOverviewHousing,
             function()
-                return UI.GetHeadSelectedCity() ~= nil and ContextPtr:IsHidden() == false
+                return IsOverviewTabControlAvailable(Controls.HousingButton)
             end
         ),
         [Input.GetActionId("CityOpenCitizens")] = BuildCityActionData(
-            OnCitizensGrowth,
+            OpenCityOverviewCitizens,
             function()
-                return UI.GetHeadSelectedCity() ~= nil and ContextPtr:IsHidden() == false
+                return IsOverviewTabControlAvailable(Controls.CitizensGrowthButton)
             end
         ),
         [Input.GetActionId("CityPurchaseTile")] = BuildCityActionData(
-            function()
-                ToggleCityPanelCheck(Controls.PurchaseTileCheck)
-            end,
-            function()
-                return GameCapabilities.HasCapability("CAPABILITY_GOLD")
-                    and IsCityPanelActionAvailable(Controls.PurchaseTileCheck)
-            end
+            ToggleCombinedCityManagement,
+            CanToggleCombinedCityManagement
         ),
         [Input.GetActionId("CityManageCitizens")] = BuildCityActionData(
-            function()
-                ToggleCityPanelCheck(Controls.ManageCitizensCheck)
-            end,
-            function()
-                return IsCityPanelActionAvailable(Controls.ManageCitizensCheck)
-            end
+            ToggleCombinedCityManagement,
+            CanToggleCombinedCityManagement
         ),
         [Input.GetActionId("CityPurchaseWithGold")] = BuildCityActionData(
             function()
@@ -783,9 +1334,7 @@ function InitializeCityActionMap()
             end
         ),
         [Input.GetActionId("CityChangeProduction")] = BuildCityActionData(
-            function()
-                ToggleCityPanelCheck(Controls.ChangeProductionCheck)
-            end,
+            OpenOrToggleCityProduction,
             function()
                 return IsCityPanelActionAvailable(Controls.ChangeProductionCheck)
             end
@@ -795,17 +1344,17 @@ end
 
 function InitializeCityInfoActionMap()
     CityInfoActionMap = {
-        [Input.GetActionId("ReadSelectionSummary")] = { "Name", "Coords", "Health", "GrowthSummary", "ProductionSummary" },
-        [Input.GetActionId("ReadSelectionInfo1")] = { "Health" },
-        [Input.GetActionId("ReadSelectionInfo2")] = { "ProductionSummary" },
-        [Input.GetActionId("ReadSelectionInfo3")] = { "GrowthSummary" },
-        [Input.GetActionId("ReadSelectionInfo4")] = { "HousingSummary" },
-        [Input.GetActionId("ReadSelectionInfo5")] = { "BuildingsAmenitiesSummary" },
-        [Input.GetActionId("ReadSelectionInfo6")] = { "ReligiousFollowersCount" },
-        [Input.GetActionId("ReadSelectionInfo7")] = { "VisibleYields" },
-        [Input.GetActionId("ReadSelectionInfo8")] = { "NormalFocusYields" },
-        [Input.GetActionId("ReadSelectionInfo9")] = { "FavoredFocusYields" },
-        [Input.GetActionId("ReadSelectionInfo10")] = { "IgnoredFocusYields" },
+        [Input.GetActionId("ReadSelectionSummary")] = CITY_INFO_BUCKETS.Summary,
+        [Input.GetActionId("ReadSelectionInfo1")] = CITY_INFO_BUCKETS.Info1,
+        [Input.GetActionId("ReadSelectionInfo2")] = CITY_INFO_BUCKETS.Info2,
+        [Input.GetActionId("ReadSelectionInfo3")] = CITY_INFO_BUCKETS.Info3,
+        [Input.GetActionId("ReadSelectionInfo4")] = CITY_INFO_BUCKETS.Info4,
+        [Input.GetActionId("ReadSelectionInfo5")] = CITY_INFO_BUCKETS.Info5,
+        [Input.GetActionId("ReadSelectionInfo6")] = CITY_INFO_BUCKETS.Info6,
+        [Input.GetActionId("ReadSelectionInfo7")] = CITY_INFO_BUCKETS.Info7,
+        [Input.GetActionId("ReadSelectionInfo8")] = CITY_INFO_BUCKETS.Info8,
+        [Input.GetActionId("ReadSelectionInfo9")] = CITY_INFO_BUCKETS.Info9,
+        [Input.GetActionId("ReadSelectionInfo10")] = CITY_INFO_BUCKETS.Info10,
     }
 end
 
@@ -827,7 +1376,7 @@ function OnSelectionInfoInputActionTriggered(actionId)
 
     results = info:RequestCityInfo(nil, requestedKeys)
     if results == nil or #results == 0 then
-        if #requestedKeys == 1 and requestedKeys[1] ~= "Summary" then
+        if #requestedKeys == 1 then
             local fallback = CityInfoFallbacks[requestedKeys[1]]
             if fallback ~= nil then
                 Speak(Locale.Lookup(fallback))
@@ -836,7 +1385,7 @@ function OnSelectionInfoInputActionTriggered(actionId)
         return
     end
 
-    Speak(ProcessIcons(table.concat(results, "\n")))
+    Speak(ProcessIcons(table.concat(results, ", ")))
 end
 
 function OnCityActionInputActionTriggered(actionId)
@@ -858,12 +1407,12 @@ function OnCitySelectionChanged(ownerPlayerID, cityID, i, j, k, isSelected, isEd
         return
     end
     LuaEvents.CAICursorJump(plot:GetIndex(), true)
-    local results = info:RequestCityInfo(cityID, { "Summary" }, ownerPlayerID)
+    local results = info:RequestCityInfo(cityID, CITY_INFO_BUCKETS.Summary, ownerPlayerID)
     if results == nil or #results == 0 then
         return
     end
 
-    Speak(ProcessIcons(table.concat(results, "\n")))
+    Speak(ProcessIcons(table.concat(results, ", ")))
 end
 
 --#Public API
@@ -895,7 +1444,7 @@ function info:RequestCityInfo(cityID, requestedKeys, playerID)
         return results
     end
 
-    requestedKeys = requestedKeys or CityInfoPriority
+    requestedKeys = requestedKeys or CITY_INFO_BUCKETS.Summary
 
     for _, key in ipairs(requestedKeys) do
         local helper = self.CityInfo[key]

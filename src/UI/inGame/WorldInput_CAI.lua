@@ -8,11 +8,26 @@ include("WorldScanner_CAI")
 include("Surveyor_CAI")
 include("RevealAnnouncements_CAI")
 include("EventSubs_CAI")
-include("WorldInput")
+include("Civ6Common")
+
+local function GetWorldInputIncludeName()
+	if IsExpansion2Active ~= nil and IsExpansion2Active() then
+		return "WorldInput_Expansion2"
+	end
+
+	if IsExpansion1Active ~= nil and IsExpansion1Active() then
+		return "WorldInput_Expansion1"
+	end
+
+	return "WorldInput"
+end
+
+include(GetWorldInputIncludeName())
 include("MovementActions_CAI")
 
 local INPUT_ACTION_STARTED = "Started"
 local INPUT_ACTION_TRIGGERED = "Triggered"
+local CITY_MANAGEMENT_WIDGET_ID = "CAIWorldInputCityManagement"
 
 local mgr = ExposedMembers.CAI_UIManager
 local m_caiGameViewWidget = nil
@@ -32,6 +47,7 @@ local ACTION_QUICK_MOVE_SOUTHWEST = Input.GetActionId("QuickMoveSouthWest")
 local ACTION_QUICK_MOVE_SOUTHEAST = Input.GetActionId("QuickMoveSouthEast")
 local ACTION_INTERFACE_INFO = Input.GetActionId("InterfaceInfo")
 local ACTION_INTERFACE_PRIMARY = Input.GetActionId("InterfaceWidgetPrimaryAction")
+local ACTION_INTERFACE_SECONDARY = Input.GetActionId("InterfaceWidgetSecondaryAction")
 local ACTION_SCANNER_PREV_CATEGORY = Input.GetActionId("WorldScannerPrevCategory")
 local ACTION_SCANNER_NEXT_CATEGORY = Input.GetActionId("WorldScannerNextCategory")
 local ACTION_SCANNER_PREV_SUBCATEGORY = Input.GetActionId("WorldScannerPrevSubCategory")
@@ -64,6 +80,26 @@ local function ActivateCurrentMoveTarget()
 	local unit = UI.GetHeadSelectedUnit()
 	local targetPlotId = UI.GetCursorPlotID()
 	return MovementActions_CAI:TryActivateMoveTarget(unit, targetPlotId)
+end
+
+local function GetCurrentCAICursorPlotId()
+	if CAICursor ~= nil and CAICursor.GetPlotId ~= nil then
+		local plotId = CAICursor:GetPlotId()
+		if plotId ~= nil then
+			return plotId
+		end
+	end
+
+	return UI.GetCursorPlotID()
+end
+
+local function RaiseCurrentInterfaceWidgetAction(luaEvent)
+	if luaEvent == nil or m_caiCurrentInterfaceWidget == nil then
+		return false
+	end
+
+	luaEvent(m_caiCurrentInterfaceWidget:GetId(), GetCurrentCAICursorPlotId())
+	return true
 end
 
 ---Input actions that are common to all interface widgets should go here.
@@ -146,6 +182,18 @@ local SharedInputActions = {
 		Type = INPUT_ACTION_TRIGGERED,
 		Action = function()
 			return SpeakActiveInterfacePlotInfo()
+		end,
+	},
+	[ACTION_INTERFACE_PRIMARY] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return RaiseCurrentInterfaceWidgetAction(LuaEvents.CAIInterfaceWidgetPrimaryAction)
+		end,
+	},
+	[ACTION_INTERFACE_SECONDARY] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return RaiseCurrentInterfaceWidgetAction(LuaEvents.CAIInterfaceWidgetSecondaryAction)
 		end,
 	},
 	[ACTION_SCANNER_PREV_CATEGORY] = {
@@ -284,6 +332,7 @@ end
 
 local function CreateTargetingWidgetData(labelKey, primaryAction, cancelAction)
 	return {
+		WidgetId = "CAIWorldInputTargetingMode",
 		Properties = {
 			GetLabel = function()
 				return Locale.Lookup(labelKey)
@@ -320,6 +369,7 @@ end
 
 local interfaceWidgets = {
 	[InterfaceModeTypes.MOVE_TO] = {
+		WidgetId = "CAIWorldInputMoveToMode",
 		Properties = {
 			GetLabel = function()
 				return Locale.Lookup("LOC_CAI_MOVEMENT_MODE")
@@ -388,6 +438,12 @@ local interfaceWidgets = {
 	[InterfaceModeTypes.AIRLIFT] = CreateTargetingWidgetData("LOC_CAI_AIRLIFT_MODE", function()
 		UnitAirlift()
 	end),
+	[InterfaceModeTypes.PARADROP] = CreateTargetingWidgetData("LOC_CAI_PARADROP_MODE", function()
+		UnitParadrop()
+	end),
+	[InterfaceModeTypes.PRIORITY_TARGET] = CreateTargetingWidgetData("LOC_CAI_PRIORITY_TARGET_MODE", function()
+		PriorityTarget()
+	end),
 	[InterfaceModeTypes.SACRIFICE_SELECTION] = CreateTargetingWidgetData("LOC_CAI_SACRIFICE_SELECTION_MODE", function()
 		DOSacrificeSelection()
 	end),
@@ -403,7 +459,37 @@ local interfaceWidgets = {
 	[InterfaceModeTypes.NAVAL_GOLD_RAID] = CreateTargetingWidgetData("LOC_CAI_NAVAL_GOLD_RAID_MODE", function()
 		PerformNavalGoldRaid()
 	end),
+	[InterfaceModeTypes.BUILD_IMPROVEMENT_ADJACENT] = CreateTargetingWidgetData(
+		"LOC_CAI_BUILD_IMPROVEMENT_ADJACENT_MODE",
+		function()
+			BuildImprovementAdjacent()
+		end),
+	[InterfaceModeTypes.MOVE_JUMP] = CreateTargetingWidgetData("LOC_CAI_MOVE_JUMP_MODE", function()
+		MoveJump()
+	end),
+	[InterfaceModeTypes.CITY_MANAGEMENT] = {
+		WidgetId = CITY_MANAGEMENT_WIDGET_ID,
+		Properties = {
+			GetLabel = function()
+				return Locale.Lookup("LOC_HUD_CITY_MANAGE_CITIZENS")
+			end,
+			OnDestroy = function()
+				Speak(Locale.Lookup("LOC_CAI_EXITED_TARGETING_MODE"))
+			end,
+			RegisterInputs = {
+				{
+					Key = Keys.VK_ESCAPE,
+					MSG = KeyEvents.KeyUp,
+					Action = function()
+						RunVanillaPlacementCancel()
+						return true
+					end,
+				},
+			},
+		},
+	},
 	[InterfaceModeTypes.DISTRICT_PLACEMENT] = {
+		WidgetId = "CAIWorldInputDistrictPlacementMode",
 		Properties = {
 			GetLabel = function()
 				return Locale.Lookup("LOC_CAI_DISTRICT_PLACEMENT_MODE")
@@ -433,6 +519,7 @@ local interfaceWidgets = {
 		},
 	},
 	[InterfaceModeTypes.BUILDING_PLACEMENT] = {
+		WidgetId = "CAIWorldInputBuildingPlacementMode",
 		Properties = {
 			GetLabel = function()
 				return Locale.Lookup("LOC_CAI_WONDER_PLACEMENT_MODE")
@@ -487,7 +574,8 @@ local function OnInterfaceChanged(oldMode, newMode)
 	local newData = interfaceWidgets[newMode]
 	if not newData then return end
 
-	local mode = mgr:CreateUIWidget("CAIWorldInputInterfaceMode", "InterfaceMode", newData.Properties)
+	local widgetId = newData.WidgetId or "CAIWorldInputInterfaceMode"
+	local mode = mgr:CreateUIWidget(widgetId, "InterfaceMode", newData.Properties)
 	if not mode then return end
 
 	m_caiCurrentInterfaceWidget = mode

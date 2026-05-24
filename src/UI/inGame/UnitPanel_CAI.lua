@@ -16,6 +16,7 @@ local UNIT_ACTION_LIST_ID = "CAIUnitPanelActionList"
 local UNIT_LIST_ID = "CAIUnitPanelUnitList"
 local UNIT_ABILITIES_LIST_ID = "CAIUnitAbilitiesList"
 local UNIT_ABILITY_INFO_LIMIT = 10
+local UNIT_BUILD_IMPROVEMENTS_SUBMENU_ID = "CAIUnitBuildImprovementsSubMenu"
 
 local prevUnitCatAction = Input.GetActionId("PrevUnitSelectionCategory")
 local nextUnitCatAction = Input.GetActionId("NextUnitSelectionCategory")
@@ -124,6 +125,7 @@ local GetUnitActionLabel
 local GetUnitActionTooltip
 local GetControlText
 local GetControlTooltip
+local CloseUnitActionList
 
 local function ResolveUnit(unitID, playerID)
     if unitID == nil then
@@ -418,8 +420,22 @@ local function GetTradeYieldTexts(unit)
     return #results > 0 and results or nil
 end
 
-local function GetRecommendedBuilderActionText(unit)
+local function IsBuilderTypeUnit(data, unit)
+    if unit == nil then
+        return false
+    end
+
+    local unitInfo = GameInfo.Units[unit:GetUnitType()]
+    if unitInfo ~= nil and (unitInfo.BuildCharges or 0) > 0 then
+        return true
+    end
+
+    return data ~= nil and (data.BuildCharges or 0) > 0
+end
+
+local function GetRecommendedBuilderActionText(data, unit)
     if not IsSelectedUnit(unit)
+        or not IsBuilderTypeUnit(data, unit)
         or Controls == nil
         or Controls.RecommendedActionButton == nil
         or Controls.RecommendedActionButton.IsHidden == nil
@@ -536,6 +552,49 @@ local function CachedPlotIdsToPathNodes(plotIds, startIndex, endIndex)
     end
 
     return nodes
+end
+
+local function GetUnitActionFailureReasonCount(action)
+    if action == nil or action.helpString == nil or action.helpString == "" then
+        return 0
+    end
+
+    local count = 0
+    local startIndex = 1
+    while true do
+        local matchStart, matchEnd = string.find(action.helpString, "%[COLOR:Red%]", startIndex)
+        if matchStart == nil then
+            break
+        end
+
+        count = count + 1
+        startIndex = matchEnd + 1
+    end
+
+    return count
+end
+
+local function ActionHasFailureReason(action)
+    return GetUnitActionFailureReasonCount(action) > 0
+end
+
+local function ShouldHideDisabledBuildAction(action)
+    return action ~= nil and action.Disabled == true and not ActionHasFailureReason(action)
+end
+
+local function FilterBuildActionsForDisplay(data)
+    if data == nil or data.Actions == nil or data.Actions["BUILD"] == nil then
+        return
+    end
+
+    local filteredActions = {}
+    for _, action in ipairs(data.Actions["BUILD"]) do
+        if not ShouldHideDisabledBuildAction(action) then
+            table.insert(filteredActions, action)
+        end
+    end
+
+    data.Actions["BUILD"] = filteredActions
 end
 
 local function BuildQueuedPathSegmentedText(entries, plotIds, endIndex)
@@ -806,6 +865,19 @@ local function GetUnitInfoSpecialInfo(data, unit)
         AppendUnitInfo(results,
             (data.AlbumSales or 0) > 0 and
             Locale.Lookup("LOC_HUD_UNIT_PANEL_ROCK_BAND_ALBUM_SALES") .. ", " .. tostring(data.AlbumSales) or nil)
+    end
+
+    local hostedAircraftData = GetHostedAircraftData(unit)
+    if hostedAircraftData ~= nil then
+        AppendUnitInfo(results,
+            Locale.Lookup("LOC_CAI_UNIT_CARRIER_AIRCRAFT_CAPACITY", hostedAircraftData.CurrentCount,
+                hostedAircraftData.MaxSlots))
+
+        local hostedAircraftNames = GetHostedAircraftUnitNames(unit)
+        if hostedAircraftNames ~= nil and #hostedAircraftNames > 0 then
+            AppendUnitInfo(results,
+                Locale.Lookup("LOC_CAI_UNIT_CARRIER_STATIONED_AIRCRAFT", JoinUnitInfo(hostedAircraftNames, ", ")))
+        end
     end
 
     return #results > 0 and results or nil
@@ -1589,7 +1661,7 @@ UnitInfo = {
     end,
 
     BuilderRecommendation = function(data, unit)
-        return GetRecommendedBuilderActionText(unit)
+        return GetRecommendedBuilderActionText(data, unit)
     end,
 
     UpgradeHint = function(data, unit)
@@ -1647,7 +1719,6 @@ GetUnitActionEntries = function(data)
             table.insert(actionOrder, categoryName)
         end
     end
-    table.insert(actionOrder, "BUILD")
 
     local seenCategories = {}
     for _, categoryName in ipairs(actionOrder) do
@@ -1665,7 +1736,76 @@ GetUnitActionEntries = function(data)
     return results
 end
 
-local function CloseUnitActionList()
+local function GetBuildUnitActionEntries(data)
+    if data == nil or data.Actions == nil or data.Actions["BUILD"] == nil then
+        return {}
+    end
+
+    return data.Actions["BUILD"]
+end
+
+local function CreateUnitActionMenuItem(currentAction)
+    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitPanelMenuItem"), "MenuItem", {
+        GetLabel = function()
+            return GetUnitActionLabel(currentAction)
+        end,
+        GetTooltip = function()
+            return GetUnitActionTooltip(currentAction)
+        end,
+        IsDisabled = function()
+            return currentAction.Disabled == true
+        end,
+        OnFocusEnter = function()
+            UI.PlaySound("Main_Menu_Mouse_Over")
+        end,
+        OnClick = function()
+            if currentAction.Disabled then
+                local tooltip = GetUnitActionTooltip(currentAction)
+                if tooltip ~= "" then
+                    Speak(tooltip)
+                end
+                return
+            end
+
+            UI.PlaySound("Play_UI_Click")
+            if currentAction.Sound ~= nil and currentAction.Sound ~= "" then
+                UI.PlaySound(currentAction.Sound)
+            end
+            currentAction.CallbackFunc(currentAction.CallbackVoid1, currentAction.CallbackVoid2)
+            CloseUnitActionList()
+        end,
+    })
+end
+
+local function CreateBuildImprovementsSubMenu(data)
+    local buildActions = GetBuildUnitActionEntries(data)
+    if buildActions == nil or #buildActions == 0 then
+        return nil
+    end
+
+    local submenu = mgr:CreateUIWidget(UNIT_BUILD_IMPROVEMENTS_SUBMENU_ID, "SubMenu", {
+        GetLabel = function()
+            return Locale.Lookup("LOC_CAI_UNIT_BUILD_IMPROVEMENTS_SUBMENU")
+        end,
+        GetTooltip = function()
+            return Locale.Lookup("LOC_CAI_UNIT_BUILD_IMPROVEMENTS_SUBMENU_TOOLTIP")
+        end,
+        OnFocusEnter = function()
+            UI.PlaySound("Main_Menu_Mouse_Over")
+        end,
+        OnToggleExpanded = function()
+            UI.PlaySound("Main_Menu_Mouse_Over")
+        end,
+    })
+
+    for _, action in ipairs(buildActions) do
+        submenu:AddChild(CreateUnitActionMenuItem(action))
+    end
+
+    return submenu
+end
+
+CloseUnitActionList = function()
     if UnitActionList ~= nil then
         mgr:RemoveFromStack(UNIT_ACTION_LIST_ID)
         UnitActionList = nil
@@ -1696,39 +1836,13 @@ local function BuildUnitActionList(data)
         end,
     })
 
-    for _, action in ipairs(GetUnitActionEntries(data)) do
-        local currentAction = action
-        local item = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitPanelMenuItem"), "MenuItem", {
-            GetLabel = function()
-                return GetUnitActionLabel(currentAction)
-            end,
-            GetTooltip = function()
-                return GetUnitActionTooltip(currentAction)
-            end,
-            IsDisabled = function()
-                return currentAction.Disabled == true
-            end,
-            OnFocusEnter = function()
-                UI.PlaySound("Main_Menu_Mouse_Over")
-            end,
-            OnClick = function()
-                if currentAction.Disabled then
-                    local tooltip = GetUnitActionTooltip(currentAction)
-                    if tooltip ~= "" then
-                        Speak(tooltip)
-                    end
-                    return
-                end
+    local buildSubMenu = CreateBuildImprovementsSubMenu(data)
+    if buildSubMenu ~= nil then
+        list:AddChild(buildSubMenu)
+    end
 
-                UI.PlaySound("Play_UI_Click")
-                if currentAction.Sound ~= nil and currentAction.Sound ~= "" then
-                    UI.PlaySound(currentAction.Sound)
-                end
-                currentAction.CallbackFunc(currentAction.CallbackVoid1, currentAction.CallbackVoid2)
-                CloseUnitActionList()
-            end,
-        })
-        list:AddChild(item)
+    for _, action in ipairs(GetUnitActionEntries(data)) do
+        list:AddChild(CreateUnitActionMenuItem(action))
     end
 
     if data ~= nil and data.Ability ~= nil and #data.Ability > 0 then
@@ -1762,6 +1876,8 @@ local function OpenUnitActionList()
             data = ReadUnitData(unit)
         end
     end
+
+    FilterBuildActionsForDisplay(data)
 
     UnitActionList = BuildUnitActionList(data)
     if UnitActionList ~= nil and UnitActionList.Children ~= nil and #UnitActionList.Children > 0 then
@@ -2080,6 +2196,11 @@ function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locatio
 
     Speak(ProcessIcons(table.concat(results, ", ")))
 end
+
+View = WrapFunc(View, function(orig, data)
+    FilterBuildActionsForDisplay(data)
+    return orig(data)
+end)
 
 local function OnCAICursorMoved(x, y, plotId)
     InspectWhatsBelowTheCursor()

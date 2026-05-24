@@ -282,8 +282,8 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TERRAIN" Language="en_US">
       <Text>Terrain</Text>
     </Row>
-    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_WATER_AVAILABILITY" Language="en_US">
-      <Text>Water availability</Text>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_ACTIVE_LENS" Language="en_US">
+      <Text>Active lens</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_RESOURCES" Language="en_US">
       <Text>Resources</Text>
@@ -387,6 +387,33 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TRIBAL_VILLAGES" Language="en_US">
       <Text>Tribal villages</Text>
     </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_SETTLER_WATER" Language="en_US">
+      <Text>Water availability</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_SETTLER_LOYALTY" Language="en_US">
+      <Text>Loyalty</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_SETTLER_DISASTERS" Language="en_US">
+      <Text>Disasters</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_POWER_SOURCES" Language="en_US">
+      <Text>Power sources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_POWER_RANGE" Language="en_US">
+      <Text>Power range</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_POWERED_CITY_PLOTS" Language="en_US">
+      <Text>Powered city plots</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_UNPOWERED_CITY_PLOTS" Language="en_US">
+      <Text>Unpowered city plots</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TOURISM_CITY" Language="en_US">
+      <Text>By city</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TOURISM_STRENGTH" Language="en_US">
+      <Text>By strength</Text>
+    </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_UNKNOWN" Language="en_US">
       <Text>Unknown</Text>
     </Row>
@@ -401,6 +428,39 @@
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_DISTANCE" Language="en_US">
       <Text>{1_Num} tiles away</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SETTLER_LOYALTY_VALUE" Language="en_US">
+      <Text>{1_Value} loyalty per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SETTLER_DISASTER_FLOOD" Language="en_US">
+      <Text>Flood risk</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SETTLER_DISASTER_VOLCANO" Language="en_US">
+      <Text>Volcano risk</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_GOVERNMENT_GROUP_WITH_CITY" Language="en_US">
+      <Text>{1_Government}, {2_Player}, {3_City}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_POWER_RANGE_CITY" Language="en_US">
+      <Text>{1_City} power range</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_POWER_PLOTS_POWERED" Language="en_US">
+      <Text>{1_City} powered plots</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_POWER_PLOTS_UNPOWERED" Language="en_US">
+      <Text>{1_City} unpowered plots</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_TOURISM_ITEM" Language="en_US">
+      <Text>{1_Tourism} tourism, {2_Tourists} tourists</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_TOURISM_HIGH" Language="en_US">
+      <Text>High tourism</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_TOURISM_MEDIUM" Language="en_US">
+      <Text>Medium tourism</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_TOURISM_LOW" Language="en_US">
+      <Text>Low tourism</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_PREV_CATEGORY" Language="en_US">
       <Text>Previous world scanner category</Text>
@@ -768,6 +828,12 @@
     <Row Tag="LOC_CAI_CITY_MANAGE_CITIZENS" Language="en_US">
       <Text>Manage citizens</Text>
     </Row>
+    <Row Tag="LOC_CAI_CITY_MANAGE_CITY" Language="en_US">
+      <Text>Manage city</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_MANAGE_CITY_TOOLTIP" Language="en_US">
+      <Text>Toggles citizen management and tile purchase together</Text>
+    </Row>
     <Row Tag="LOC_CAI_CITY_PURCHASE_TILE" Language="en_US">
       <Text>Purchase tile</Text>
     </Row>
@@ -870,6 +936,9 @@
     <Row Tag="LOC_CAI_CITY_NO_RELIGION_INFO" Language="en_US">
       <Text>Religion capability not available</Text>
     </Row>
+    <Row Tag="LOC_CAI_CITY_NO_BORDER_GROWTH_INFO" Language="en_US">
+      <Text>No border growth information</Text>
+    </Row>
     <Row Tag="LOC_CAI_CITY_NO_NORMAL_FOCUS_YIELDS" Language="en_US">
       <Text>No yields with normal focus</Text>
     </Row>
@@ -930,6 +999,9 @@
     <Row Tag="LOC_CAI_CITY_BANNER_NO_DIPLOMACY" Language="en_US">
       <Text>No visible diplomacy information</Text>
     </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_NO_GOVERNOR" Language="en_US">
+      <Text>No visible governor information</Text>
+    </Row>
     <Row Tag="LOC_CAI_CITY_BANNER_READ_1" Language="en_US">
       <Text>Read city banner identity and status</Text>
     </Row>
@@ -961,9 +1033,15 @@
       <Text>Reads visible city banner loyalty percentage and breakdown information</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_BANNER_READ_6" Language="en_US">
-      <Text>Read city banner power</Text>
+      <Text>Read city banner governor</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_BANNER_READ_6_TOOLTIP" Language="en_US">
+      <Text>Reads visible city banner governor information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_READ_7" Language="en_US">
+      <Text>Read city banner power</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_BANNER_READ_7_TOOLTIP" Language="en_US">
       <Text>Reads visible city banner power information</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_BANNER_LOYALTY_PERCENT" Language="en_US">
@@ -1275,6 +1353,9 @@
     <Row Tag="LOC_CAI_NEXT_TURN_PROGRESS" Language="en_US">
       <Text>Next turn progress</Text>
     </Row>
+    <Row Tag="LOC_CAI_CITY_TOTAL_CULTURE" Language="en_US">
+      <Text>Total culture</Text>
+    </Row>
 
     <!-- World Tracker accessibility -->
     <Row Tag="LOC_CAI_WORLDTRACKER_OPTIONS" Language="en_US">
@@ -1432,11 +1513,41 @@
     <Row Tag="LOC_CAI_CITY_ACTION_CITIZENS_GROWTH" Language="en_US">
       <Text>Citizens and growth</Text>
     </Row>
+    <Row Tag="LOC_CAI_CITY_ACTION_RANGE_STRIKE_CITY" Language="en_US">
+      <Text>City ranged strike</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_ACTION_RANGE_STRIKE_CITY_TOOLTIP" Language="en_US">
+      <Text>Selects the city center and enters city ranged attack targeting mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_ACTION_RANGE_STRIKE_DISTRICT" Language="en_US">
+      <Text>{1_Name} ranged strike</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_ACTION_RANGE_STRIKE_DISTRICT_TOOLTIP" Language="en_US">
+      <Text>Selects {1_Name} and enters district ranged attack targeting mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_ACTION_WMD_STRIKE_DISTRICT" Language="en_US">
+      <Text>{1_Name} {2_Text} strike</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_ACTION_WMD_STRIKE_DISTRICT_TOOLTIP" Language="en_US">
+      <Text>Selects the city and enters nuclear strike targeting mode for {2_Text} from {1_Name}</Text>
+    </Row>
     <Row Tag="LOC_CAI_CITY_TOGGLE_OVERVIEW_TOOLTIP" Language="en_US">
       <Text>Opens or closes the city overview panel</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_OPEN_BUILDINGS_TOOLTIP" Language="en_US">
       <Text>Opens the buildings breakdown tab</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OPEN_LOYALTY" Language="en_US">
+      <Text>Loyalty and governors</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OPEN_LOYALTY_TOOLTIP" Language="en_US">
+      <Text>Opens the loyalty and governors tab</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OPEN_POWER" Language="en_US">
+      <Text>Power</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OPEN_POWER_TOOLTIP" Language="en_US">
+      <Text>Opens the power tab</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_OPEN_RELIGION_TOOLTIP" Language="en_US">
       <Text>Opens the religion tab</Text>
@@ -1556,6 +1667,18 @@
     </Row>
     <Row Tag="LOC_CAI_UNIT_ABILITIES_LIST" Language="en_US">
       <Text>Unit abilities</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_BUILD_IMPROVEMENTS_SUBMENU" Language="en_US">
+      <Text>Build improvements</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_BUILD_IMPROVEMENTS_SUBMENU_TOOLTIP" Language="en_US">
+      <Text>Opens the available build improvement actions for this unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_CARRIER_AIRCRAFT_CAPACITY" Language="en_US">
+      <Text>Aircraft, {1_Num}/{2_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_CARRIER_STATIONED_AIRCRAFT" Language="en_US">
+      <Text>Stationed aircraft: {1_Text}</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_NO_COMBAT" Language="en_US">
       <Text>No combat statistics</Text>
@@ -1871,6 +1994,9 @@
     <Row Tag="LOC_CAI_PLOT_UNOWNED" Language="en_US">
       <Text>Unowned</Text>
     </Row>
+    <Row Tag="LOC_CAI_NAV_CURSOR_CONTINENT_ZONE" Language="en_US">
+      <Text>The continent of {1_Name}</Text>
+    </Row>
     <Row Tag="LOC_CAI_PLOT_NO_PHYSICAL_INFO" Language="en_US">
       <Text>No physical modifiers</Text>
     </Row>
@@ -1915,6 +2041,9 @@
     </Row>
     <Row Tag="LOC_CAI_NO_INTERFACE_INFO" Language="en_US">
       <Text>No interface information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_INTERFACE_ACTION_UNAVAILABLE" Language="en_US">
+      <Text>No interface action available</Text>
     </Row>
     <Row Tag="LOC_CAI_MOVEMENT_CURRENT_TILE" Language="en_US">
       <Text>Current tile</Text>
@@ -2024,6 +2153,12 @@
     <Row Tag="LOC_CAI_INTERFACE_PRIMARY_ACTION_TOOLTIP" Language="en_US">
       <Text>Activates the focused accessibility widget or current interface action</Text>
     </Row>
+    <Row Tag="LOC_CAI_INTERFACE_SECONDARY_ACTION" Language="en_US">
+      <Text>Secondary interface action</Text>
+    </Row>
+    <Row Tag="LOC_CAI_INTERFACE_SECONDARY_ACTION_TOOLTIP" Language="en_US">
+      <Text>Activates the secondary action for the focused accessibility widget or current interface action</Text>
+    </Row>
     <Row Tag="LOC_CAI_END_TURN" Language="en_US">
       <Text>End turn or current action</Text>
     </Row>
@@ -2072,6 +2207,12 @@
     <Row Tag="LOC_CAI_AIRLIFT_MODE" Language="en_US">
       <Text>Airlift mode</Text>
     </Row>
+    <Row Tag="LOC_CAI_PARADROP_MODE" Language="en_US">
+      <Text>Paradrop mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRIORITY_TARGET_MODE" Language="en_US">
+      <Text>Priority target mode</Text>
+    </Row>
     <Row Tag="LOC_CAI_SACRIFICE_SELECTION_MODE" Language="en_US">
       <Text>Sacrifice selection mode</Text>
     </Row>
@@ -2087,6 +2228,12 @@
     <Row Tag="LOC_CAI_NAVAL_GOLD_RAID_MODE" Language="en_US">
       <Text>Naval gold raid mode</Text>
     </Row>
+    <Row Tag="LOC_CAI_BUILD_IMPROVEMENT_ADJACENT_MODE" Language="en_US">
+      <Text>Build adjacent improvement mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVE_JUMP_MODE" Language="en_US">
+      <Text>Move jump mode</Text>
+    </Row>
     <Row Tag="LOC_CAI_EXITED_TARGETING_MODE" Language="en_US">
       <Text>Exited targeting mode</Text>
     </Row>
@@ -2095,6 +2242,30 @@
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_VALID_TARGETS" Language="en_US">
       <Text>Valid targets</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_CITY_MANAGEMENT" Language="en_US">
+      <Text>City management</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_LOCKED" Language="en_US">
+      <Text>Locked tiles</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_SPECIALISTS" Language="en_US">
+      <Text>Specialist tiles</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_WORKED" Language="en_US">
+      <Text>Worked tiles</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_AVAILABLE" Language="en_US">
+      <Text>Available tiles</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_SWAPPABLE" Language="en_US">
+      <Text>Swappable tiles</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_PURCHASABLE" Language="en_US">
+      <Text>Purchasable tiles</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_TOO_EXPENSIVE" Language="en_US">
+      <Text>Too expensive</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TARGET_PLOTS" Language="en_US">
       <Text>Target plots</Text>
@@ -2108,8 +2279,32 @@
     <Row Tag="LOC_CAI_UNIT_FLAG_QUEUED_MOVEMENT" Language="en_US">
       <Text>Queued movement: {1_Direction}</Text>
     </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_QUEUED_MOVE_NOT_SELECTED" Language="en_US">
+      <Text>Queued movement</Text>
+    </Row>
     <Row Tag="LOC_CAI_VALID_TARGET_PLOT" Language="en_US">
       <Text>Target plot {1_X}, {2_Y}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_MANAGEMENT_LOCKED" Language="en_US">
+      <Text>Locked</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_MANAGEMENT_UNWORKED" Language="en_US">
+      <Text>Unworked</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_MANAGEMENT_SWAPPABLE" Language="en_US">
+      <Text>Swappable</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_MANAGEMENT_SPECIALISTS_SHORT" Language="en_US">
+      <Text>{1_num} out of {2_num} specialists</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_MANAGEMENT_TILE_PURCHASED" Language="en_US">
+      <Text>Tile purchased</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_MANAGEMENT_TILE_SWAPPED" Language="en_US">
+      <Text>Tile swapped</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_MANAGEMENT_AVAILABLE" Language="en_US">
+      <Text>Available to work</Text>
     </Row>
 
     <!-- Selection info hotkeys -->
@@ -2150,28 +2345,28 @@
       <Text>Reads selection info slot 5</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO6" Language="en_US">
-      <Text>Read unit stats</Text>
+      <Text>Read selection info 6</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO6_TOOLTIP" Language="en_US">
-      <Text>Reads unit statistics for the selected unit</Text>
+      <Text>Reads selection info slot 6</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO7" Language="en_US">
-      <Text>Read unit abilities</Text>
+      <Text>Read selection info 7</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO7_TOOLTIP" Language="en_US">
-      <Text>Reads the selected unit's abilities</Text>
+      <Text>Reads selection info slot 7</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO8" Language="en_US">
-      <Text>Read special unit info</Text>
+      <Text>Read selection info 8</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO8_TOOLTIP" Language="en_US">
-      <Text>Reads special selected-unit info such as spy, trader, rock band, and great person details</Text>
+      <Text>Reads selection info slot 8</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO9" Language="en_US">
-      <Text>Read queued movement path</Text>
+      <Text>Read selection info 9</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO9_TOOLTIP" Language="en_US">
-      <Text>Reads the queued movement path of the selected unit</Text>
+      <Text>Reads selection info slot 9</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_NO_QUEUED_PATH" Language="en_US">
       <Text>No queued path.</Text>

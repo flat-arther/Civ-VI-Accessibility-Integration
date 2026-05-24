@@ -24,6 +24,7 @@
     <Row ActionId="SelectionActions" Name="LOC_CAI_SELECTION_ACTIONS" Description="LOC_CAI_SELECTION_ACTIONS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="InterfaceInfo" Name="LOC_CAI_INTERFACE_INFO" Description="LOC_CAI_INTERFACE_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="InterfaceWidgetPrimaryAction" Name="LOC_CAI_INTERFACE_PRIMARY_ACTION" Description="LOC_CAI_INTERFACE_PRIMARY_ACTION_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="InterfaceWidgetSecondaryAction" Name="LOC_CAI_INTERFACE_SECONDARY_ACTION" Description="LOC_CAI_INTERFACE_SECONDARY_ACTION_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SharedEndTurn" Name="LOC_CAI_END_TURN" Description="LOC_CAI_END_TURN_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ActionPanelOpenTurnBlockers" Name="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS" Description="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAICursorMoveNorthWest" Name="LOC_CAI_CURSOR_MOVE_NORTHWEST" Description="LOC_CAI_CURSOR_MOVE_NORTHWEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
@@ -64,7 +65,8 @@
     <Row ActionId="CityBannerReadReligion" Name="LOC_CAI_CITY_BANNER_READ_3" Description="LOC_CAI_CITY_BANNER_READ_3_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityBannerReadDiplomacy" Name="LOC_CAI_CITY_BANNER_READ_4" Description="LOC_CAI_CITY_BANNER_READ_4_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityBannerReadLoyaltySummary" Name="LOC_CAI_CITY_BANNER_READ_5" Description="LOC_CAI_CITY_BANNER_READ_5_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityBannerReadPower" Name="LOC_CAI_CITY_BANNER_READ_6" Description="LOC_CAI_CITY_BANNER_READ_6_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityBannerReadGovernor" Name="LOC_CAI_CITY_BANNER_READ_6" Description="LOC_CAI_CITY_BANNER_READ_6_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityBannerReadPower" Name="LOC_CAI_CITY_BANNER_READ_7" Description="LOC_CAI_CITY_BANNER_READ_7_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="NotificationPanelOpenList" Name="LOC_CAI_NOTIFICATION_CENTER" Description="LOC_CAI_NOTIFICATION_CENTER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TutorialGoalsOpenList" Name="LOC_CAI_TUTORIAL_GOALS_HOTKEY" Description="LOC_CAI_TUTORIAL_GOALS_HOTKEY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAIMinimapOpenLensList" Name="LOC_CAI_MINIMAP_OPEN_LENS_LIST" Description="LOC_CAI_MINIMAP_OPEN_LENS_LIST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
@@ -79,22 +81,17 @@
     <Row ActionId="WorldScannerJumpToCurrent" Name="LOC_CAI_WORLD_SCANNER_JUMP" Description="LOC_CAI_WORLD_SCANNER_JUMP_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldScannerReturnFromJump" Name="LOC_CAI_WORLD_SCANNER_RETURN" Description="LOC_CAI_WORLD_SCANNER_RETURN_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldScannerSpeakCurrentDirection" Name="LOC_CAI_WORLD_SCANNER_SPEAK_DIRECTION" Description="LOC_CAI_WORLD_SCANNER_SPEAK_DIRECTION_TOOLTIP" CategoryId="CAI" ContextId="WorldOrFullScreenMap" LayoutType="PC"/>
-    <Row ActionId="BuildImprovement" Name="LOC_UNITOPERATION_BUILD_IMPROVEMENT_DESCRIPTION" Description="LOC_UNITOPERATION_BUILD_IMPROVEMENT_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="BuildRoute" Name="LOC_UNITOPERATION_BUILD_ROUTE_DESCRIPTION" Description="LOC_UNITOPERATION_BUILD_ROUTE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ClearContamination" Name="ICON_UNITOPERATION_CLEAR_CONTAMINATION_DESCRIPTION" Description="ICON_UNITOPERATION_CLEAR_CONTAMINATION_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ConvertBarbarians" Name="LOC_UNITOPERATION_CONVERT_BARBARIANS_DESCRIPTION" Description="LOC_UNITOPERATION_CONVERT_BARBARIANS_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="Deploy" Name="LOC_UNITOPERATION_DEPLOY_DESCRIPTION" Description="LOC_UNITOPERATION_DEPLOY_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="DesignatePark" Name="LOC_UNITOPERATION_DESIGNATE_PARK_DESCRIPTION" Description="LOC_UNITOPERATION_DESIGNATE_PARK_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="Disembark" Name="LOC_UNITOPERATION_DISEMBARK_DESCRIPTION" Description="LOC_UNITOPERATION_DISEMBARK_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="Embark" Name="LOC_UNITOPERATION_EMBARK_DESCRIPTION" Description="LOC_UNITOPERATION_EMBARK_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="EvangelizeBelief" Name="LOC_UNITOPERATION_EVANGELIZE_BELIEF_DESCRIPTION" Description="LOC_UNITOPERATION_EVANGELIZE_BELIEF_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="Excavate" Name="LOC_UNITOPERATION_EXCAVATE_DESCRIPTION" Description="LOC_UNITOPERATION_EXCAVATE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="FoundReligion" Name="LOC_UNITOPERATION_FOUND_RELIGION_DESCRIPTION" Description="LOC_UNITOPERATION_FOUND_RELIGION_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="HarvestResource" Name="LOC_UNITOPERATION_HARVEST_RESOURCE_DESCRIPTION" Description="LOC_UNITOPERATION_HARVEST_RESOURCE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="LaunchInquisition" Name="LOC_UNITOPERATION_LAUNCH_INQUISITION_DESCRIPTION" Description="LOC_UNITOPERATION_LAUNCH_INQUISITION_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="MakeTradeRoute" Name="LOC_UNITOPERATION_MAKE_TRADE_ROUTE_DESCRIPTION" Description="LOC_UNITOPERATION_MAKE_TRADE_ROUTE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="MoveToUnit" Name="LOC_UNITOPERATION_MOVE_TO_UNIT_DESCRIPTION" Description="LOC_UNITOPERATION_MOVE_TO_UNIT_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="WMDStrike" Name="LOC_UNITOPERATION_WMD_STRIKE_DESCRIPTION" Description="LOC_UNITOPERATION_WMD_STRIKE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CoastalRaid" Name="LOC_UNITOPERATION_COASTAL_RAID" Description="LOC_UNITOPERATION_COASTAL_RAID" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="Pillage" Name="LOC_UNITOPERATION_PILLAGE_DESCRIPTION" Description="LOC_UNITOPERATION_PILLAGE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PillageRoute" Name="LOC_UNITOPERATION_PILLAGE_ROUTE_DESCRIPTION" Description="LOC_UNITOPERATION_PILLAGE_ROUTE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
@@ -107,32 +104,17 @@
     <Row ActionId="RepairRoute" Name="LOC_UNITOPERATION_REPAIR_ROUTE_DESCRIPTION" Description="LOC_UNITOPERATION_REPAIR_ROUTE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="RestRepair" Name="LOC_UNITOPERATION_REST_REPAIR_DESCRIPTION" Description="LOC_UNITOPERATION_REST_REPAIR_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="Retrain" Name="LOC_UNITOPERATION_RETRAIN_DESCRIPTION" Description="LOC_UNITOPERATION_RETRAIN_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="RouteTo" Name="LOC_UNITOPERATION_ROUTE_TO_DESCRIPTION" Description="LOC_UNITOPERATION_ROUTE_TO_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SpreadReligion" Name="LOC_UNITOPERATION_SPREAD_RELIGION_DESCRIPTION" Description="LOC_UNITOPERATION_SPREAD_RELIGION_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SpyCounterspy" Name="LOC_UNITOPERATION_SPY_COUNTERSPY_DESCRIPTION" Description="LOC_UNITOPERATION_SPY_COUNTERSPY_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SpyDisruptRocketry" Name="LOC_UNITOPERATION_SPY_DISRUPT_ROCKETRY_DESCRIPTION" Description="LOC_UNITOPERATION_SPY_DISRUPT_ROCKETRY_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SpyGainSources" Name="LOC_UNITOPERATION_SPY_GAIN_SOURCES_DESCRIPTION" Description="LOC_UNITOPERATION_SPY_GAIN_SOURCES_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SpyGreatWorkHeist" Name="LOC_UNITOPERATION_SPY_GREAT_WORK_HEIST_DESCRIPTION" Description="LOC_UNITOPERATION_SPY_GREAT_WORK_HEIST_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SpyListeningPost" Name="LOC_UNITOPERATION_SPY_LISTENING_POST_DESCRIPTION" Description="LOC_UNITOPERATION_SPY_LISTENING_POST_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SpyRecruitPartisans" Name="LOC_UNITOPERATION_SPY_RECRUIT_PARTISANS_DESCRIPTION" Description="LOC_UNITOPERATION_SPY_RECRUIT_PARTISANS_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SpySabotageProduction" Name="LOC_UNITOPERATION_SPY_SABOTAGE_PRODUCTION_DESCRIPTION" Description="LOC_UNITOPERATION_SPY_SABOTAGE_PRODUCTION_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SpySiphonFunds" Name="LOC_UNITOPERATION_SPY_SIPHON_FUNDS_DESCRIPTION" Description="LOC_UNITOPERATION_SPY_SIPHON_FUNDS_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SpyStealTechBoost" Name="LOC_UNITOPERATION_SPY_STEAL_TECH_BOOST_DESCRIPTION" Description="LOC_UNITOPERATION_SPY_STEAL_TECH_BOOST_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SpyTravelNewCity" Name="LOC_UNITOPERATION_SPY_TRAVEL_NEW_CITY_DESCRIPTION" Description="LOC_UNITOPERATION_SPY_TRAVEL_NEW_CITY_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SwapUnits" Name="LOC_UNITOPERATION_SWAP_UNITS_DESCRIPTION" Description="LOC_UNITOPERATION_SWAP_UNITS_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="TeleportTo" Name="LOC_UNITOPERATION_TELEPORT_TO_CITY_DESCRIPTION" Description="LOC_UNITOPERATION_TELEPORT_TO_CITY_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TeleportToCity" Name="LOC_UNITOPERATION_TELEPORT_TO_CITY_DESCRIPTION" Description="LOC_UNITOPERATION_TELEPORT_TO_CITY_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="Upgrade" Name="LOC_UNITOPERATION_UPGRADE_DESCRIPTION" Description="LOC_UNITOPERATION_UPGRADE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="WaitFor" Name="LOC_UNITOPERATION_WAIT_FOR_DESCRIPTION" Description="LOC_UNITOPERATION_WAIT_FOR_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ReligiousHeal" Name="LOC_UNITOPERATION_RELIGIOUS_HEAL_DESCRIPTION" Description="LOC_UNITOPERATION_RELIGIOUS_HEAL_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="ExecuteScript" Name="LOC_UNITOPERATION_EXECUTE_SCRIPT_DESCRIPTION" Description="LOC_UNITOPERATION_EXECUTE_SCRIPT_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UnitCommandPromote" Name="LOC_UNITCOMMAND_PROMOTE_DESCRIPTION" Description="LOC_UNITCOMMAND_PROMOTE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="UnitCommandUpgrade" Name="LOC_UNITCOMMAND_UPGRADE_DESCRIPTION" Description="LOC_UNITCOMMAND_UPGRADE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UnitCommandWake" Name="LOC_UNITCOMMAND_WAKE_DESCRIPTION" Description="LOC_UNITCOMMAND_WAKE_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UnitCommandCancel" Name="LOC_UNITCOMMAND_CANCEL_DESCRIPTION" Description="LOC_UNITCOMMAND_CANCEL_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UnitCommandStopAutomation" Name="LOC_UNITCOMMAND_STOP_AUTOMATION_DESCRIPTION" Description="LOC_UNITCOMMAND_STOP_AUTOMATION_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UnitCommandGift" Name="LOC_UNITCOMMAND_GIFT_DESCRIPTION" Description="LOC_UNITCOMMAND_GIFT_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="UnitCommandEnterFormation" Name="LOC_UNITCOMMAND_ENTER_FORMATION_DESCRIPTION" Description="LOC_UNITCOMMAND_ENTER_FORMATION_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UnitCommandExitFormation" Name="LOC_UNITCOMMAND_EXIT_FORMATION_DESCRIPTION" Description="LOC_UNITCOMMAND_EXIT_FORMATION_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UnitCommandActivateGreatPerson" Name="LOC_UNITCOMMAND_ACTIVATE_GREAT_PERSON_DESCRIPTION" Description="LOC_UNITCOMMAND_ACTIVATE_GREAT_PERSON_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UnitCommandDistrictProduction" Name="LOC_UNITCOMMAND_DISTRICT_PRODUCTION_DESCRIPTION" Description="LOC_UNITCOMMAND_DISTRICT_PRODUCTION_DESCRIPTION" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
@@ -149,6 +131,8 @@
     <Row ActionId="UnitPanelOpenUnitList" Name="LOC_CAI_UNIT_OPEN_LIST" Description="LOC_CAI_UNIT_OPEN_LIST_TOOLTIP" CategoryId="UNIT" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityToggleOverview" Name="LOC_HUD_CITY_TOGGLE_OVERVIEW" Description="LOC_CAI_CITY_TOGGLE_OVERVIEW_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityOpenBuildings" Name="LOC_HUD_CITY_BUILDINGS" Description="LOC_CAI_CITY_OPEN_BUILDINGS_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityOpenLoyalty" Name="LOC_CAI_CITY_OPEN_LOYALTY" Description="LOC_CAI_CITY_OPEN_LOYALTY_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityOpenPower" Name="LOC_CAI_CITY_OPEN_POWER" Description="LOC_CAI_CITY_OPEN_POWER_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityOpenReligion" Name="LOC_HUD_CITY_RELIGIOUS_CITIZENS" Description="LOC_CAI_CITY_OPEN_RELIGION_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityOpenAmenities" Name="LOC_HUD_CITY_AMENITIES" Description="LOC_CAI_CITY_OPEN_AMENITIES_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityOpenHousing" Name="LOC_HUD_CITY_HOUSING" Description="LOC_CAI_CITY_OPEN_HOUSING_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
@@ -176,6 +160,7 @@
     <Row ActionId="SelectionActions" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_TAB" />
     <Row ActionId="InterfaceInfo" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SPACE" />
     <Row ActionId="InterfaceWidgetPrimaryAction" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_RETURN" />
+    <Row ActionId="InterfaceWidgetSecondaryAction" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_RETURN" />
     <Row ActionId="SharedEndTurn" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SPACE" />
     <Row ActionId="ActionPanelOpenTurnBlockers" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_SPACE" />
     <Row ActionId="CAICursorMoveNorthWest" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_Q" />
@@ -232,7 +217,8 @@
     <Row ActionId="CityBannerReadReligion" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_3" />
     <Row ActionId="CityBannerReadDiplomacy" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_4" />
     <Row ActionId="CityBannerReadLoyaltySummary" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_5" />
-    <Row ActionId="CityBannerReadPower" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_6" />
+    <Row ActionId="CityBannerReadGovernor" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_6" />
+    <Row ActionId="CityBannerReadPower" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_7" />
     <Row ActionId="NotificationPanelOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_N" />
     <Row ActionId="TutorialGoalsOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_T" />
     <Row ActionId="CAIMinimapOpenLensList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_L" />

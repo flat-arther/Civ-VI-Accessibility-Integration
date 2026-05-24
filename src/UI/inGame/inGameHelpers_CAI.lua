@@ -410,3 +410,66 @@ function FormatOwnedCityDisplayName(playerID, cityName)
     local localizedName = cityName ~= nil and cityName ~= "" and Locale.Lookup(cityName) or nil
     return FormatOwnedName(GetPlayerOwnershipPrefix(playerID), localizedName)
 end
+
+---@param unit Unit|nil
+---@return table|nil
+function GetHostedAircraftData(unit)
+    if unit == nil or unit.GetAirSlots == nil then
+        return nil
+    end
+
+    local maxSlots = unit:GetAirSlots() or 0
+    if maxSlots <= 0 then
+        return nil
+    end
+
+    local airUnits = {}
+    if unit.GetAirUnits ~= nil then
+        local hasAirUnits, hostedUnits = unit:GetAirUnits()
+        if hasAirUnits and hostedUnits ~= nil then
+            for _, hostedUnit in ipairs(hostedUnits) do
+                table.insert(airUnits, hostedUnit)
+            end
+        end
+    end
+
+    return {
+        CurrentCount = #airUnits,
+        MaxSlots = maxSlots,
+        AirUnits = airUnits,
+    }
+end
+
+---@param unit Unit|nil
+---@return string|nil
+function GetHostedAircraftCapacityText(unit)
+    local aircraftData = GetHostedAircraftData(unit)
+    if aircraftData == nil then
+        return nil
+    end
+
+    return Locale.Lookup("LOC_CAI_UNIT_FLAG_AIRCRAFT_SHORT", aircraftData.CurrentCount, aircraftData.MaxSlots)
+end
+
+---@param unit Unit|nil
+---@return string[]|nil
+function GetHostedAircraftUnitNames(unit)
+    local aircraftData = GetHostedAircraftData(unit)
+    if aircraftData == nil or aircraftData.AirUnits == nil or #aircraftData.AirUnits == 0 then
+        return nil
+    end
+
+    local names = {}
+    for _, hostedUnit in ipairs(aircraftData.AirUnits) do
+        local name = FormatOwnedUnitDisplayName(hostedUnit)
+        if name ~= nil and name ~= "" then
+            table.insert(names, name)
+        end
+    end
+
+    if #names == 0 then
+        return nil
+    end
+
+    return names
+end

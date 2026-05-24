@@ -912,6 +912,7 @@ end
 -- ===========================================================================
 
 include("interfaceTargetHelpers_CAI")
+include("cityManagementInterfaceHelpers_CAI")
 
 InterfaceInfoHelpers = InterfaceInfoHelpers or {}
 local function BuildCombatPreviewInterfaceInfo(plot, isExplicitSpeech)
@@ -1080,7 +1081,16 @@ local function BuildTargetValidityInterfaceInfo(plot)
     return lines
 end
 
+local function BuildCityManagementInterfaceInfo(plot)
+    if plot == nil or CAICityManagementInterface == nil or CAICityManagementInterface.BuildSpeechTextOrInvalid == nil then
+        return nil
+    end
+
+    return { CAICityManagementInterface.BuildSpeechTextOrInvalid(plot) }
+end
+
 InterfaceInfoHelpers[InterfaceModeTypes.MOVE_TO] = BuildMoveToInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.CITY_MANAGEMENT] = BuildCityManagementInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.RANGE_ATTACK] = BuildCombatPreviewInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.CITY_RANGE_ATTACK] = BuildCombatPreviewInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.DISTRICT_RANGE_ATTACK] = BuildCombatPreviewInterfaceInfo
@@ -1090,9 +1100,13 @@ InterfaceInfoHelpers[InterfaceModeTypes.BUILDING_PLACEMENT] = BuildWonderPlaceme
 InterfaceInfoHelpers[InterfaceModeTypes.DEPLOY] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.REBASE] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.TELEPORT_TO_CITY] = BuildTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.BUILD_IMPROVEMENT_ADJACENT] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.FORM_CORPS] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.FORM_ARMY] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.AIRLIFT] = BuildTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.PARADROP] = BuildTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.PRIORITY_TARGET] = BuildTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.MOVE_JUMP] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.SACRIFICE_SELECTION] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.KILL_WEAKER_UNIT] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.TRANSFORM_UNIT] = BuildTargetValidityInterfaceInfo

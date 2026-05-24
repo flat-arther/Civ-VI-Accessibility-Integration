@@ -20,6 +20,7 @@ include("WorldScannerCore")
 ---@field SubCategoryOrder string[]
 ---@field SubCategoryLabels table<string, string>
 ---@field GroupOrderBySubCategory table<string, string[]>|nil
+---@field GroupComparatorBySubCategory table<string, fun(a:WorldScannerGroup, b:WorldScannerGroup):boolean|nil>|nil
 ---@field GroupLabelResolver fun(groupId:string, firstItem:table|nil):string|nil
 ---@field CanScan fun(context:WorldScannerContext):boolean|nil
 ---@field BuildOncePerDynamicState boolean|nil
@@ -40,7 +41,6 @@ CAIWorldScanner = CAIWorldScanner or {}
 local HexCoordUtils = CAIHexCoordUtils
 local Core = CAIWorldScannerCore
 local Utils = CAIWorldScannerUtils
-local WATER_LAYER = UILens.CreateLensLayerHash("Hex_Coloring_Water_Availablity")
 ---@type WorldScannerCategoryDefinition[]
 local RegisteredCategoryDefinitions = {}
 local EMPTY_CATEGORY = false
@@ -315,16 +315,60 @@ local function OnScannerCursorMoved(x, y)
     CAIWorldScanner:ResortCurrentCategory()
 end
 
+local function RebuildActiveLensCategory()
+    CAIWorldScanner:RebuildCategory("activeLens")
+end
+
 local function OnScannerLensLayerOn(layerNum)
-    if layerNum == WATER_LAYER then
-        CAIWorldScanner:RebuildCategory("waterAvailability")
-    end
+    RebuildActiveLensCategory()
 end
 
 local function OnScannerLensLayerOff(layerNum)
-    if layerNum == WATER_LAYER then
-        CAIWorldScanner:RebuildCategory("waterAvailability")
-    end
+    RebuildActiveLensCategory()
+end
+
+local function OnScannerPlotVisibilityChanged()
+    RebuildActiveLensCategory()
+end
+
+local function OnScannerCityVisibilityChanged()
+    RebuildActiveLensCategory()
+end
+
+local function OnScannerCityAddedToMap(playerID, cityID, x, y)
+    RebuildActiveLensCategory()
+end
+
+local function OnScannerCityRemovedFromMap(playerID, cityID, x, y)
+    RebuildActiveLensCategory()
+end
+
+local function OnScannerCityMadePurchase(playerID, cityID, plotX, plotY, purchaseType, objectType)
+    RebuildActiveLensCategory()
+end
+
+local function OnScannerCityTileOwnershipChanged(playerID, cityID)
+    RebuildActiveLensCategory()
+end
+
+local function OnScannerGovernmentChanged(playerID)
+    RebuildActiveLensCategory()
+end
+
+local function OnScannerCityPowerChanged(playerID, cityID)
+    RebuildActiveLensCategory()
+end
+
+local function OnScannerCityOccupationChanged(playerID, cityID)
+    RebuildActiveLensCategory()
+end
+
+local function OnScannerDiplomacyChanged()
+    RebuildActiveLensCategory()
+end
+
+local function OnScannerLocalPlayerChanged()
+    RebuildActiveLensCategory()
 end
 
 local function OnScannerUnitSelectionChanged(playerID, unitID, locationX, locationY, locationZ, isSelected, isEditable)
@@ -414,6 +458,23 @@ function CAIWorldScanner:Initialize()
     LuaEvents.CAICursorMoved.Add(OnScannerCursorMoved)
     Events.LensLayerOn.Add(OnScannerLensLayerOn)
     Events.LensLayerOff.Add(OnScannerLensLayerOff)
+    Events.PlotVisibilityChanged.Add(OnScannerPlotVisibilityChanged)
+    Events.CityVisibilityChanged.Add(OnScannerCityVisibilityChanged)
+    Events.CityAddedToMap.Add(OnScannerCityAddedToMap)
+    Events.CityRemovedFromMap.Add(OnScannerCityRemovedFromMap)
+    Events.CityMadePurchase.Add(OnScannerCityMadePurchase)
+    Events.CityTileOwnershipChanged.Add(OnScannerCityTileOwnershipChanged)
+    Events.GovernmentChanged.Add(OnScannerGovernmentChanged)
+    if Events.CityPowerChanged ~= nil then
+        Events.CityPowerChanged.Add(OnScannerCityPowerChanged)
+    end
+    if Events.CityOccupationChanged ~= nil then
+        Events.CityOccupationChanged.Add(OnScannerCityOccupationChanged)
+    end
+    Events.DiplomacyMeet.Add(OnScannerDiplomacyChanged)
+    Events.DiplomacyDeclareWar.Add(OnScannerDiplomacyChanged)
+    Events.DiplomacyMakePeace.Add(OnScannerDiplomacyChanged)
+    Events.LocalPlayerChanged.Add(OnScannerLocalPlayerChanged)
     Events.UnitSelectionChanged.Add(OnScannerUnitSelectionChanged)
     Events.InterfaceModeChanged.Add(OnScannerInterfaceModeChanged)
     EnsureCurrentCategory(self)
@@ -423,6 +484,23 @@ function CAIWorldScanner:ClearScanner()
     LuaEvents.CAICursorMoved.Remove(OnScannerCursorMoved)
     Events.LensLayerOn.Remove(OnScannerLensLayerOn)
     Events.LensLayerOff.Remove(OnScannerLensLayerOff)
+    Events.PlotVisibilityChanged.Remove(OnScannerPlotVisibilityChanged)
+    Events.CityVisibilityChanged.Remove(OnScannerCityVisibilityChanged)
+    Events.CityAddedToMap.Remove(OnScannerCityAddedToMap)
+    Events.CityRemovedFromMap.Remove(OnScannerCityRemovedFromMap)
+    Events.CityMadePurchase.Remove(OnScannerCityMadePurchase)
+    Events.CityTileOwnershipChanged.Remove(OnScannerCityTileOwnershipChanged)
+    Events.GovernmentChanged.Remove(OnScannerGovernmentChanged)
+    if Events.CityPowerChanged ~= nil then
+        Events.CityPowerChanged.Remove(OnScannerCityPowerChanged)
+    end
+    if Events.CityOccupationChanged ~= nil then
+        Events.CityOccupationChanged.Remove(OnScannerCityOccupationChanged)
+    end
+    Events.DiplomacyMeet.Remove(OnScannerDiplomacyChanged)
+    Events.DiplomacyDeclareWar.Remove(OnScannerDiplomacyChanged)
+    Events.DiplomacyMakePeace.Remove(OnScannerDiplomacyChanged)
+    Events.LocalPlayerChanged.Remove(OnScannerLocalPlayerChanged)
     Events.UnitSelectionChanged.Remove(OnScannerUnitSelectionChanged)
     Events.InterfaceModeChanged.Remove(OnScannerInterfaceModeChanged)
     self.Categories = {}

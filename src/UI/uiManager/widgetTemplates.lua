@@ -76,7 +76,8 @@ WidgetTemplates = {
                 MSG = KeyEvents.KeyDown,
                 Action = function(w)
                     if w.IsExpanded then
-                        w:Navigate(-1); return true
+                        w:Navigate(-1)
+                        return true
                     end
                     return false
                 end
@@ -86,13 +87,35 @@ WidgetTemplates = {
                 MSG = KeyEvents.KeyDown,
                 Action = function(w)
                     if w.IsExpanded then
-                        w:Navigate(1); return true
+                        w:Navigate(1)
+                        return true
                     end
                     return false
                 end
             },
-            { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyDown, Action = function(w) return w:Expand() end },
-            { Key = Keys.VK_RIGHT,  MSG = KeyEvents.KeyDown, Action = function(w) return w:Expand() end },
+            {
+                Key = Keys.VK_RETURN,
+                Action = function(w)
+                    local firstChild = H:FindFirstVisibleChild(w)
+                    if firstChild == nil then
+                        return false
+                    end
+                    w.Manager:SetFocus(firstChild)
+                    return true
+                end
+            },
+            {
+                Key = Keys.VK_RIGHT,
+                MSG = KeyEvents.KeyDown,
+                Action = function(w)
+                    local firstChild = H:FindFirstVisibleChild(w)
+                    if firstChild == nil then
+                        return false
+                    end
+                    w.Manager:SetFocus(firstChild)
+                    return true
+                end
+            },
             {
                 Key = Keys.VK_LEFT,
                 MSG = KeyEvents.KeyDown,
@@ -111,7 +134,10 @@ WidgetTemplates = {
                 Key = Keys.VK_HOME,
                 MSG = KeyEvents.KeyDown,
                 Action = function(w)
-                    if w.IsExpanded then return H:NavigateToFirst(w) end
+                    if w.IsExpanded then
+                        H:NavigateToFirst(w)
+                        return true
+                    end
                     return false
                 end
             },
@@ -119,7 +145,10 @@ WidgetTemplates = {
                 Key = Keys.VK_END,
                 MSG = KeyEvents.KeyDown,
                 Action = function(w)
-                    if w.IsExpanded then return H:NavigateToLast(w) end
+                    if w.IsExpanded then
+                        H:NavigateToLast(w)
+                        return true
+                    end
                     return false
                 end
             },
@@ -129,7 +158,6 @@ WidgetTemplates = {
             if not w.IsExpanded and w.Children and #w.Children > 0 then
                 w.IsExpanded = true
                 if w.OnToggleExpanded then w:OnToggleExpanded(w.IsExpanded) end
-                w:Navigate(0)
                 return true
             end
             return false

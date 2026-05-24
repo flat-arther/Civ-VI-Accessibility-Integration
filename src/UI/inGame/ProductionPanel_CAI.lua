@@ -19,6 +19,7 @@ local m_state                          = {
     recommended = {}, ---@type table<number, boolean>
     isQueueActionActive = false,
     queueFocusIndexAfterRebuild = nil, ---@type integer|nil
+    bodyFocusAfterRebuild = {}, ---@type table<number, {Key:string|nil, Path:table|nil}|nil>
 }
 
 local m_ui                             = {
@@ -1468,6 +1469,143 @@ local function GetBodyForTab(tab)
     return m_ui.bodies[NormalizeCAITab(tab) or TAB_PRODUCTION]
 end
 
+local function BuildPathWithIndex(path, index)
+    local out = {}
+    if path then
+        for i = 1, #path do
+            out[i] = path[i]
+        end
+    end
+    out[#out + 1] = index
+    return out
+end
+
+local function CaptureFocusStateForBody(body)
+    if not body or not body.Children or not mgr or not mgr.GetFocusedWidget then
+        return nil
+    end
+
+    local focused = mgr:GetFocusedWidget()
+    if not focused then
+        return nil
+    end
+
+    local function Visit(node, path)
+        if node == focused then
+            if node._caiFocusKey then
+                return {
+                    Key = node._caiFocusKey,
+                    Path = path,
+                }, true
+            end
+            return nil, true
+        end
+
+        local children = node.Children
+        if not children then
+            return nil, false
+        end
+
+        for index, child in ipairs(children) do
+            local childPath = BuildPathWithIndex(path, index)
+            local state, found = Visit(child, childPath)
+            if found then
+                if state then
+                    return state, true
+                end
+                if node._caiFocusKey then
+                    return {
+                        Key = node._caiFocusKey,
+                        Path = path,
+                    }, true
+                end
+                return {
+                    Key = nil,
+                    Path = path,
+                }, true
+            end
+        end
+
+        return nil, false
+    end
+
+    for index, child in ipairs(body.Children) do
+        local state, found = Visit(child, { index })
+        if found then
+            return state
+        end
+    end
+
+    return nil
+end
+
+local function FindFocusPathByKey(node, focusKey, path)
+    if not node or not focusKey then
+        return nil
+    end
+
+    if node._caiFocusKey == focusKey then
+        return path
+    end
+
+    local children = node.Children
+    if not children then
+        return nil
+    end
+
+    for index, child in ipairs(children) do
+        local childPath = BuildPathWithIndex(path, index)
+        local foundPath = FindFocusPathByKey(child, focusKey, childPath)
+        if foundPath then
+            return foundPath
+        end
+    end
+
+    return nil
+end
+
+local function CaptureBodyFocusForTab(tab)
+    local body = GetBodyForTab(tab)
+    local normalizedTab = NormalizeCAITab(tab) or TAB_PRODUCTION
+    m_state.bodyFocusAfterRebuild[normalizedTab] = CaptureFocusStateForBody(body)
+end
+
+local function RestoreOrResetBodyFocus(tab, forceResetToFirstChild)
+    local body = GetBodyForTab(tab)
+    if not body or not mgr then
+        return
+    end
+
+    local normalizedTab = NormalizeCAITab(tab) or TAB_PRODUCTION
+    local saved = m_state.bodyFocusAfterRebuild[normalizedTab]
+    m_state.bodyFocusAfterRebuild[normalizedTab] = nil
+
+    local focusPath = nil
+    if saved then
+        if saved.Key then
+            for index, child in ipairs(body.Children or {}) do
+                focusPath = FindFocusPathByKey(child, saved.Key, { index })
+                if focusPath then
+                    break
+                end
+            end
+        end
+
+        if not focusPath then
+            focusPath = saved.Path
+        end
+    end
+
+    if focusPath and m_ui.panel and mgr:HasWidget(m_ui.panel) then
+        mgr:SetFocusIndexPath(body, focusPath)
+        return
+    end
+
+    if forceResetToFirstChild and body.Children and #body.Children > 0 then
+        body:SetFocusedChild(1)
+    end
+end
+
 local function GetBodyNodesForTab(tab)
     local normalizedTab = NormalizeCAITab(tab) or TAB_PRODUCTION
     if not m_ui.bodyNodes[normalizedTab] then
@@ -1547,14 +1685,17 @@ local function PopulateTreeBodyRows(tab)
 end
 
 local function RefreshTreeBody(tab)
+    CaptureBodyFocusForTab(tab)
     RebuildTreeBodyRows(tab)
     PopulateTreeBodyRows(tab)
+    RestoreOrResetBodyFocus(tab, true)
 end
 
 local function RefreshQueueBody()
     local queueBody = GetBodyForTab(TAB_QUEUE)
     if not queueBody then return end
 
+    CaptureBodyFocusForTab(TAB_QUEUE)
     local focusPath = nil
     if m_state.queueFocusIndexAfterRebuild then
         focusPath = { m_state.queueFocusIndexAfterRebuild }
@@ -1584,6 +1725,9 @@ local function RefreshQueueBody()
 
     if focusPath then
         mgr:SetFocusIndexPath(queueBody, focusPath)
+        m_state.bodyFocusAfterRebuild[TAB_QUEUE] = nil
+    else
+        RestoreOrResetBodyFocus(TAB_QUEUE, true)
     end
 end
 
@@ -1804,6 +1948,7 @@ function OnPanelClosedCAI()
     m_state.recommended = {}
     m_state.isQueueActionActive = false
     m_state.queueFocusIndexAfterRebuild = nil
+    m_state.bodyFocusAfterRebuild = {}
     m_state.activeTab = TAB_PRODUCTION
     m_vanilla = {
         instanceByHash = {},

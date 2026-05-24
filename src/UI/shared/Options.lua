@@ -2622,11 +2622,17 @@ local function BuildKeyBindingsTab()
     for i = 0, count - 1 do
         local actionId = Input.GetActionId(i)
         if Input.ShouldShowActionKeybinding(actionId) then
+            local nameTag = Input.GetActionName(actionId)
+            local categoryTag = Input.GetActionCategory(actionId)
+            local descTag = Input.GetActionDescription(actionId)
             table.insert(actions, {
-                id   = actionId,
-                name = Locale.Lookup(Input.GetActionName(actionId)),
-                cat  = Locale.Lookup(Input.GetActionCategory(actionId)),
-                desc = Locale.Lookup(Input.GetActionDescription(actionId)) or "",
+                id          = actionId,
+                name        = Locale.Lookup(nameTag),
+                cat         = Locale.Lookup(categoryTag),
+                desc        = Locale.Lookup(descTag) or "",
+                rawNameTag  = nameTag,
+                rawCatTag   = categoryTag,
+                rawDescTag  = descTag,
             })
         end
     end
@@ -2660,7 +2666,15 @@ local function BuildKeyBindingsTab()
                 return unbound
             end,
             GetTooltip   = function() return action.desc end,
-            OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
+            OnFocusEnter = function()
+                UI.PlaySound("Main_Menu_Mouse_Over")
+                print("CAI Keybinding Focus: actionId=" ..
+                    tostring(actionId) ..
+                    ", nameTag=" .. tostring(action.rawNameTag) ..
+                    ", categoryTag=" .. tostring(action.rawCatTag) ..
+                    ", descriptionTag=" .. tostring(action.rawDescTag) ..
+                    ", resolvedName=" .. tostring(action.name))
+            end,
         })
 
         local function StartBinding(index)

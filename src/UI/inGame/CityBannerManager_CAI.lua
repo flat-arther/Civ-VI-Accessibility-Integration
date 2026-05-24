@@ -10,6 +10,7 @@ local ACTION_BANNER_GROWTH_INFLUENCE = Input.GetActionId("CityBannerReadGrowthIn
 local ACTION_BANNER_RELIGION = Input.GetActionId("CityBannerReadReligion")
 local ACTION_BANNER_DIPLOMACY = Input.GetActionId("CityBannerReadDiplomacy")
 local ACTION_BANNER_LOYALTY_SUMMARY = Input.GetActionId("CityBannerReadLoyaltySummary")
+local ACTION_BANNER_GOVERNOR = Input.GetActionId("CityBannerReadGovernor")
 local ACTION_BANNER_POWER = Input.GetActionId("CityBannerReadPower")
 
 local function AppendResult(results, value)
@@ -72,6 +73,103 @@ local function GetControlTooltip(control)
     end
 
     return NormalizeBannerText(control:GetToolTipString())
+end
+
+local function GetFirstAllocatedInstance(instanceManager)
+    if instanceManager == nil or instanceManager.m_AllocatedInstances == nil then
+        return nil
+    end
+
+    for i = 1, #instanceManager.m_AllocatedInstances do
+        local instance = instanceManager.m_AllocatedInstances[i]
+        if instance ~= nil then
+            return instance
+        end
+    end
+
+    for _, instance in pairs(instanceManager.m_AllocatedInstances) do
+        if instance ~= nil then
+            return instance
+        end
+    end
+
+    return nil
+end
+
+local function GetAllocatedInstances(instanceManager)
+    local results = {}
+    if instanceManager == nil or instanceManager.m_AllocatedInstances == nil then
+        return results
+    end
+
+    for i = 1, #instanceManager.m_AllocatedInstances do
+        local instance = instanceManager.m_AllocatedInstances[i]
+        if instance ~= nil then
+            table.insert(results, instance)
+        end
+    end
+
+    if #results > 0 then
+        return results
+    end
+
+    for _, instance in pairs(instanceManager.m_AllocatedInstances) do
+        if instance ~= nil then
+            table.insert(results, instance)
+        end
+    end
+
+    return results
+end
+
+local function AppendUniqueText(results, seen, value)
+    local normalized = NormalizeBannerText(value)
+    if normalized == nil or seen[normalized] then
+        return
+    end
+
+    seen[normalized] = true
+    table.insert(results, normalized)
+end
+
+local function GetInstanceTooltip(instance, ...)
+    if instance == nil then
+        return nil
+    end
+
+    local controlNames = { ... }
+    for i = 1, #controlNames do
+        local control = instance[controlNames[i]]
+        local tooltip = GetControlTooltip(control)
+        if tooltip ~= nil then
+            return tooltip
+        end
+    end
+
+    return nil
+end
+
+local function CollectInstanceTooltips(instanceManager, ...)
+    local results = {}
+    local seen = {}
+    local instances = GetAllocatedInstances(instanceManager)
+    for i = 1, #instances do
+        AppendUniqueText(results, seen, GetInstanceTooltip(instances[i], ...))
+    end
+
+    return results
+end
+
+local function FindInstanceTooltip(instanceManager, predicate, ...)
+    local instances = GetAllocatedInstances(instanceManager)
+    for i = 1, #instances do
+        local tooltip = GetInstanceTooltip(instances[i], ...)
+        if tooltip ~= nil and predicate(tooltip) then
+            return tooltip
+        end
+    end
+
+    return nil
 end
 
 local function IsControlVisible(control)
@@ -170,6 +268,10 @@ end
 
 local function HasPowerExpansion()
     return IsExpansion2Active ~= nil and IsExpansion2Active()
+end
+
+local function HasGovernorExpansion()
+    return HasLoyaltyExpansion()
 end
 
 local function GetDistrictBannerTypeName(ctx)
@@ -283,6 +385,8 @@ local function ResolveBannerContext(plot)
     return nil
 end
 
+local GetPowerSummaryText
+
 local function GetStatusList(ctx)
     if ctx == nil or ctx.instance == nil then
         return nil
@@ -313,6 +417,14 @@ local function GetStatusList(ctx)
         table.insert(statuses, Locale.Lookup("LOC_TOOLTIP_PLOT_CONSTRUCTION_TEXT"))
     end
 
+    local powerTooltip = GetPowerSummaryText(ctx)
+    local effectTooltips = CollectInstanceTooltips(ctx.banner and ctx.banner.m_DetailEffectsIM, "Icon", "Button")
+    for i = 1, #effectTooltips do
+        if powerTooltip == nil or effectTooltips[i] ~= powerTooltip then
+            table.insert(statuses, effectTooltips[i])
+        end
+    end
+
     if #statuses == 0 then
         return nil
     end
@@ -320,12 +432,51 @@ local function GetStatusList(ctx)
     return table.concat(statuses, ", ")
 end
 
-local function GetPopulationGrowthLines(ctx)
-    if ctx == nil or ctx.instance == nil or ctx.instance.CityPopulation == nil then
+local function GetPopulationStatInstance(ctx)
+    if ctx == nil or ctx.banner == nil then
+        return nil
+    end
+
+    return GetFirstAllocatedInstance(ctx.banner.m_StatPopulationIM)
+end
+
+local function GetProductionStatInstance(ctx)
+    if ctx == nil or ctx.banner == nil then
+        return nil
+    end
+
+    return GetFirstAllocatedInstance(ctx.banner.m_StatProductionIM)
+end
+
+local function GetGovernorTooltips(ctx)
+    if ctx == nil or ctx.banner == nil then
         return {}
     end
 
-    local lines = SplitBannerLines(GetControlTooltip(ctx.instance.CityPopulation))
+    return CollectInstanceTooltips(ctx.banner.m_StatGovernorIM, "FillMeter", "Button")
+end
+
+local function GetDetailStatusTooltip(ctx, predicate)
+    if ctx == nil or ctx.banner == nil then
+        return nil
+    end
+
+    return FindInstanceTooltip(ctx.banner.m_DetailStatusIM, predicate, "Icon", "Button")
+end
+
+local function GetPopulationGrowthLines(ctx)
+    if ctx == nil or ctx.instance == nil then
+        return {}
+    end
+
+    local tooltip = GetControlTooltip(ctx.instance.CityPopulation)
+    if tooltip == nil then
+        local populationInstance = GetPopulationStatInstance(ctx)
+        tooltip = GetControlTooltip(populationInstance and populationInstance.FillMeter)
+            or GetControlTooltip(populationInstance and populationInstance.Button)
+    end
+
+    local lines = SplitBannerLines(tooltip)
     if #lines <= 1 then
         return {}
     end
@@ -338,11 +489,17 @@ local function GetPopulationGrowthLines(ctx)
 end
 
 local function GetProductionTooltipLines(ctx)
-    if ctx == nil or ctx.instance == nil or ctx.instance.CityProduction == nil then
+    if ctx == nil or ctx.instance == nil then
         return {}
     end
 
-    return SplitBannerLines(GetControlTooltip(ctx.instance.CityProduction))
+    local tooltip = GetControlTooltip(ctx.instance.CityProduction)
+    if tooltip == nil then
+        local productionInstance = GetProductionStatInstance(ctx)
+        tooltip = GetControlTooltip(productionInstance and productionInstance.Button)
+    end
+
+    return SplitBannerLines(tooltip)
 end
 
 local function GetDistrictTooltipLines(ctx)
@@ -733,7 +890,7 @@ local function GetLoyaltyInfluenceText(ctx)
     return table.concat(lines, "\n")
 end
 
-local function GetPowerSummaryText(ctx)
+GetPowerSummaryText = function(ctx)
     if ctx == nil or ctx.kind ~= "city" or ctx.city == nil or not HasPowerExpansion() then
         return nil
     end
@@ -799,11 +956,16 @@ info.CityBannerInfo = {
         return Locale.Lookup("LOC_HUD_CITY_OWNER", ownerName)
     end,
     population = function(ctx)
-        if ctx == nil or ctx.kind ~= "city" or ctx.instance == nil or ctx.instance.CityPopulation == nil then
+        if ctx == nil or ctx.kind ~= "city" or ctx.instance == nil then
             return nil
         end
 
         local value = GetControlText(ctx.instance.CityPopulation)
+        if value == nil then
+            local populationInstance = GetPopulationStatInstance(ctx)
+            value = GetControlText(populationInstance and populationInstance.CityPopulation)
+        end
+
         if value == nil then
             return nil
         end
@@ -948,11 +1110,16 @@ info.CityBannerInfo = {
             return nil
         end
 
-        if ctx.instance.CityProductionProgress == nil or ctx.instance.CityProductionProgress:IsHidden() then
+        if ctx.instance.CityProductionProgress ~= nil and not ctx.instance.CityProductionProgress:IsHidden() then
+            return BuildProgressLine(GetBannerMeterPercent(ctx.instance.CityProductionMeter))
+        end
+
+        local productionInstance = GetProductionStatInstance(ctx)
+        if productionInstance == nil or not IsControlVisible(productionInstance.FillMeter) then
             return nil
         end
 
-        return BuildProgressLine(GetBannerMeterPercent(ctx.instance.CityProductionMeter))
+        return BuildProgressLine(GetBannerMeterPercent(productionInstance.FillMeter))
     end,
     religionSummary = function(ctx)
         if ctx == nil or ctx.kind ~= "city" or ctx.instance == nil then
@@ -1011,16 +1178,22 @@ info.CityBannerInfo = {
         return pressure
     end,
     quest = function(ctx)
-        if ctx == nil or ctx.kind ~= "city" or ctx.instance == nil or ctx.instance.CityQuestIcon == nil then
+        if ctx == nil or ctx.kind ~= "city" or ctx.instance == nil then
             return nil
         end
 
-        local text = GetControlText(ctx.instance.CityQuestIcon)
-        if text == nil then
-            return nil
+        if ctx.instance.CityQuestIcon ~= nil then
+            local text = GetControlText(ctx.instance.CityQuestIcon)
+            if text ~= nil then
+                return GetControlTooltip(ctx.instance.CityQuestIcon)
+            end
         end
 
-        return GetControlTooltip(ctx.instance.CityQuestIcon)
+        local questHeader = Locale.Lookup("LOC_CITY_STATES_QUESTS")
+        return GetDetailStatusTooltip(ctx, function(tooltip)
+            local lines = SplitBannerLines(tooltip)
+            return #lines > 0 and lines[1] == questHeader
+        end)
     end,
     tradingPost = function(ctx)
         if ctx == nil or ctx.kind ~= "city" or ctx.instance == nil then
@@ -1035,7 +1208,37 @@ info.CityBannerInfo = {
             return Locale.Lookup("LOC_CAI_CITY_BANNER_TRADING_POST_ACTIVE")
         end
 
+        local activeTrade = Locale.Lookup("LOC_CITY_BANNER_ACTIVE_TRADING")
+        local inactiveTrade = Locale.Lookup("LOC_CITY_BANNER_INACTIVE_TRADING")
+        local tooltip = GetDetailStatusTooltip(ctx, function(candidate)
+            return candidate == activeTrade or candidate == inactiveTrade
+        end)
+        if tooltip == inactiveTrade then
+            return Locale.Lookup("LOC_CAI_CITY_BANNER_TRADING_POST_INACTIVE")
+        end
+        if tooltip == activeTrade then
+            return Locale.Lookup("LOC_CAI_CITY_BANNER_TRADING_POST_ACTIVE")
+        end
+
         return nil
+    end,
+    governor = function(ctx)
+        if ctx == nil or ctx.kind ~= "city" then
+            return nil
+        end
+
+        local tooltips = GetGovernorTooltips(ctx)
+        if #tooltips == 0 then
+            return nil
+        end
+
+        return table.concat(tooltips, ", ")
+    end,
+    powerSummary = function(ctx)
+        return GetPowerSummaryText(ctx)
+    end,
+    powerDetails = function(ctx)
+        return info.CityBannerInfo.powerSummary(ctx)
     end,
     aerodromeCapacity = function(ctx)
         if ctx == nil or ctx.bannerType ~= BANNERTYPE_AERODROME or ctx.instance == nil or ctx.instance.AerodromeBase == nil then
@@ -1119,9 +1322,6 @@ info.CityBannerInfo = {
     loyaltyInfluence = function(ctx)
         return GetLoyaltyInfluenceText(ctx)
     end,
-    powerSummary = function(ctx)
-        return GetPowerSummaryText(ctx)
-    end,
 }
 
 local function IsForeignCityContext(ctx)
@@ -1154,6 +1354,10 @@ end
 
 local function IsCityPowerContext(ctx)
     return ctx ~= nil and ctx.kind == "city" and HasPowerExpansion()
+end
+
+local function IsCityGovernorContext(ctx)
+    return ctx ~= nil and ctx.kind == "city" and HasGovernorExpansion()
 end
 
 local function AppendBucketKeys(results, ctx, definitions)
@@ -1269,10 +1473,17 @@ local BannerBucketActions = {
         },
         district = {},
     },
+    [ACTION_BANNER_GOVERNOR] = {
+        emptyLoc = "LOC_CAI_CITY_BANNER_NO_GOVERNOR",
+        city = {
+            { key = "governor", when = IsCityGovernorContext },
+        },
+        district = {},
+    },
     [ACTION_BANNER_POWER] = {
         emptyLoc = CITY_BANNER_INFO_UNAVAILABLE,
         city = {
-            { key = "powerSummary", when = IsCityPowerContext },
+            { key = "powerDetails", when = IsCityPowerContext },
         },
         district = {},
     },

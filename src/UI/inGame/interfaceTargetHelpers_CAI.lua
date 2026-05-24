@@ -89,6 +89,18 @@ local PLOT_TARGET_MODES = {
             return UI.GetInterfaceModeParameter(UnitOperationTypes.PARAM_OPERATION_TYPE)
         end,
     },
+    [InterfaceModeTypes.BUILD_IMPROVEMENT_ADJACENT] = {
+        Source = "unitOperation",
+        GetType = function()
+            return UI.GetInterfaceModeParameter(UnitOperationTypes.PARAM_OPERATION_TYPE)
+        end,
+        GetParameters = function()
+            return {
+                [UnitOperationTypes.PARAM_IMPROVEMENT_TYPE] =
+                    UI.GetInterfaceModeParameter(UnitOperationTypes.PARAM_IMPROVEMENT_TYPE),
+            }
+        end,
+    },
     [InterfaceModeTypes.SACRIFICE_SELECTION] = {
         Source = "unitOperation",
         Type = "UNITOPERATION_SOOTHSAYER_SACRIFICE",
@@ -96,6 +108,19 @@ local PLOT_TARGET_MODES = {
     [InterfaceModeTypes.AIRLIFT] = {
         Source = "unitCommand",
         Type = UnitCommandTypes.AIRLIFT,
+    },
+    [InterfaceModeTypes.PARADROP] = {
+        Source = "unitCommand",
+        Type = UnitCommandTypes.PARADROP,
+    },
+    [InterfaceModeTypes.PRIORITY_TARGET] = {
+        Source = "unitCommand",
+        Type = UnitCommandTypes.PRIORITY_TARGET,
+        RequireTargetModifier = true,
+    },
+    [InterfaceModeTypes.MOVE_JUMP] = {
+        Source = "unitCommand",
+        Type = UnitCommandTypes.MOVE_JUMP,
     },
     [InterfaceModeTypes.KILL_WEAKER_UNIT] = {
         Source = "unitCommand",
@@ -239,8 +264,12 @@ local PLOT_INFO_KEYS_BY_MODE = {
     [InterfaceModeTypes.DEPLOY] = { "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
     [InterfaceModeTypes.REBASE] = { "cityName", "districtTitle", "plotName" },
     [InterfaceModeTypes.TELEPORT_TO_CITY] = { "cityName", "districtTitle", "plotName" },
+    [InterfaceModeTypes.BUILD_IMPROVEMENT_ADJACENT] = { "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
     [InterfaceModeTypes.SACRIFICE_SELECTION] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
     [InterfaceModeTypes.AIRLIFT] = { "cityName", "districtTitle", "plotName" },
+    [InterfaceModeTypes.PARADROP] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
+    [InterfaceModeTypes.PRIORITY_TARGET] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
+    [InterfaceModeTypes.MOVE_JUMP] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
     [InterfaceModeTypes.KILL_WEAKER_UNIT] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
     [InterfaceModeTypes.TRANSFORM_UNIT] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
     [InterfaceModeTypes.RESTORE_UNIT_MOVES] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
@@ -375,6 +404,9 @@ local function BuildTargetCacheSignature(mode)
             AddInterfaceParameterSignature(parts, UnitOperationTypes.PARAM_WMD_TYPE)
         elseif mode == InterfaceModeTypes.TELEPORT_TO_CITY then
             AddInterfaceParameterSignature(parts, UnitOperationTypes.PARAM_OPERATION_TYPE)
+        elseif mode == InterfaceModeTypes.BUILD_IMPROVEMENT_ADJACENT then
+            AddInterfaceParameterSignature(parts, UnitOperationTypes.PARAM_OPERATION_TYPE)
+            AddInterfaceParameterSignature(parts, UnitOperationTypes.PARAM_IMPROVEMENT_TYPE)
         end
     end
 

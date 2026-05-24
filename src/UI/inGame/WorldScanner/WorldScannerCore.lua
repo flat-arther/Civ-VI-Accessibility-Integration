@@ -91,8 +91,15 @@ local function FindIndexInOrder(order, key)
     return nil
 end
 
-local function SortGroups(groups, groupOrder)
+local function SortGroups(groups, groupOrder, groupComparator)
     table.sort(groups, function(a, b)
+        if groupComparator ~= nil then
+            local result = groupComparator(a, b)
+            if result ~= nil then
+                return result
+            end
+        end
+
         local aOrder = FindIndexInOrder(groupOrder, a.Id)
         local bOrder = FindIndexInOrder(groupOrder, b.Id)
         if aOrder ~= nil or bOrder ~= nil then
@@ -176,12 +183,14 @@ local function BuildGroups(definition, subCategoryId, items, context)
                 PlotIndex = leaves[1].PlotIndex,
                 Items = leaves,
                 TotalItems = #leaves,
+                SortValue = firstItem and firstItem.GroupSortValue or nil,
             }
         end
     end
 
     local groupOrder = definition.GroupOrderBySubCategory and definition.GroupOrderBySubCategory[subCategoryId] or nil
-    SortGroups(groups, groupOrder)
+    local groupComparator = definition.GroupComparatorBySubCategory and definition.GroupComparatorBySubCategory[subCategoryId] or nil
+    SortGroups(groups, groupOrder, groupComparator)
     return groups
 end
 
@@ -219,6 +228,8 @@ function Core.BuildCategory(definition, context)
             LabelKey = Core.AllSubCategoryLabelKey,
             Groups = allGroups,
             TotalItems = allCount,
+            GroupOrder = definition.GroupOrderBySubCategory and definition.GroupOrderBySubCategory[Core.AllSubCategoryId] or nil,
+            GroupComparator = definition.GroupComparatorBySubCategory and definition.GroupComparatorBySubCategory[Core.AllSubCategoryId] or nil,
         }
     end
 
@@ -238,6 +249,8 @@ function Core.BuildCategory(definition, context)
                     LabelKey = definition.SubCategoryLabels[subCategoryId] or "LOC_CAI_WORLD_SCANNER_UNKNOWN",
                     Groups = groups,
                     TotalItems = count,
+                    GroupOrder = definition.GroupOrderBySubCategory and definition.GroupOrderBySubCategory[subCategoryId] or nil,
+                    GroupComparator = definition.GroupComparatorBySubCategory and definition.GroupComparatorBySubCategory[subCategoryId] or nil,
                 }
             end
         end
@@ -285,7 +298,7 @@ function Core.RefreshCategorySort(category)
             local firstItem = group.Items and group.Items[1] or nil
             group.PlotIndex = firstItem and firstItem.PlotIndex or group.PlotIndex
         end
-        SortGroups(groups, subCategory.GroupOrder)
+        SortGroups(groups, subCategory.GroupOrder, subCategory.GroupComparator)
     end
 end
 

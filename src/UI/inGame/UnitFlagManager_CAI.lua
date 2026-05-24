@@ -229,30 +229,22 @@ local function GetUnitFlagAircraftCapacity(unit, flag)
         return nil
     end
 
-    local maxAirSlots = unit.GetAirSlots ~= nil and unit:GetAirSlots() or 0
-    if maxAirSlots == nil or maxAirSlots <= 0 then
+    local capacityText = GetHostedAircraftCapacityText(unit)
+    if capacityText == nil then
         return nil
-    end
-
-    local currentCount = 0
-    if unit.GetAirUnits ~= nil then
-        local hasAirUnits, airUnits = unit:GetAirUnits()
-        if hasAirUnits and airUnits ~= nil then
-            for _ in pairs(airUnits) do
-                currentCount = currentCount + 1
-            end
-        end
     end
 
     if flag ~= nil and flag.m_Instance ~= nil and flag.m_Instance.AirUnitInstance ~= nil then
         local instance = flag.m_Instance.AirUnitInstance
         local currentText = GetControlText(instance.CurrentUnitCount)
         local maxText = GetControlText(instance.MaxUnitCount)
-        currentCount = tonumber(currentText) or currentCount
-        maxAirSlots = tonumber(maxText) or maxAirSlots
+        local aircraftData = GetHostedAircraftData(unit)
+        local currentCount = tonumber(currentText) or (aircraftData ~= nil and aircraftData.CurrentCount or 0)
+        local maxAirSlots = tonumber(maxText) or (aircraftData ~= nil and aircraftData.MaxSlots or 0)
+        return Locale.Lookup("LOC_CAI_UNIT_FLAG_AIRCRAFT_SHORT", currentCount, maxAirSlots)
     end
 
-    return Locale.Lookup("LOC_CAI_UNIT_FLAG_AIRCRAFT_SHORT", currentCount, maxAirSlots)
+    return capacityText
 end
 
 local function IsHeroUnit(unit)
@@ -324,7 +316,8 @@ local function GetUnitFlagBarbarianClan(unit)
     local tribeNameType = barbarianManager:GetTribeNameType(tribeIndex)
     local tribeInfo = tribeNameType ~= nil and tribeNameType >= 0 and GameInfo.BarbarianTribeNames[tribeNameType] or nil
     if tribeInfo ~= nil and tribeInfo.TribeDisplayName ~= nil then
-        AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_CLAN_SHORT", Locale.Lookup(tribeInfo.TribeDisplayName)))
+        AppendUnitFlagInfo(results,
+            Locale.Lookup("LOC_CAI_UNIT_FLAG_CLAN_SHORT", Locale.Lookup(tribeInfo.TribeDisplayName)))
     end
 
     local localPlayerID = Game.GetLocalPlayer()
@@ -499,7 +492,15 @@ info.UnitFlagInfo = {
         return GetUnitFlagHealth(unit)
     end,
     queuedMovement = function(unit)
-        return GetUnitFlagWaypoint(unit)
+        local player = Game.GetLocalPlayer()
+        if player and player == unit:GetOwner() and UnitManager.GetQueuedDestination(unit) then
+            local isSelected = UI.GetHeadSelectedUnit() == unit
+            if isSelected then
+                return GetUnitFlagWaypoint(unit)
+            else
+                return Locale.Lookup("LOC_CAI_UNIT_FLAG_QUEUED_MOVE_NOT_SELECTED")
+            end
+        end
     end,
     status = function(unit)
         return GetUnitFlagStatus(unit)

@@ -1397,7 +1397,6 @@ function OnCAICursorMove(x, y, plotId)
         print("CAI PlotToolTip could not resolve cursor plot id: " .. tostring(plotId))
         return
     end
-
     local results = info:RequestPlotInfo(current, CURSOR_MOVE_INFO_PRIORITY)
 
     if #results > 0 then

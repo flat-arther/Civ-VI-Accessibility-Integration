@@ -46,6 +46,9 @@ Passed to input handlers. Methods:
 - `Input.StopRecordingGestures()` — stops gesture capture
 - `Input.ClearRecordedGestures()` — clears captured gestures
 - `Input.SetActiveContext(context)` — sets the active input context (e.g. `InputContext.Startup`)
+- For CAI unit hotkeys, keep the hotkey surface aligned with vanilla `VisibleInUI`. If a `UnitOperations.xml` or `UnitCommands.xml` row is hidden there, do not register a CAI `InputActions` row for it and do not assign a `HotkeyId`, or it will appear in the keybinding UI even though vanilla intentionally hides it.
+- Avoid exposing duplicate keybinding entries for the same user action. In particular, `UNITOPERATION_UPGRADE` already covers unit upgrading in the keybinding UI, so CAI should not also expose a separate `UNITCOMMAND_UPGRADE` binding row.
+- Also avoid exposing unit actions whose vanilla UI expands one action id into multiple concrete choices or collapses several DB rows into one chooser. Confirmed examples are `UNITOPERATION_BUILD_IMPROVEMENT`, `UNITCOMMAND_ENTER_FORMATION`, `UNITOPERATION_WMD_STRIKE`, and the offensive-spy mission operations.
 
 ### ContextPtr
 
@@ -126,6 +129,8 @@ Used to create dynamic UI instances from XML templates:
 
 - `Map.GetPlotByIndex(plotId)` — returns a Plot object
 - `plot:GetX()`, `plot:GetY()` — plot coordinates
+- `plot:GetContinentType()` returns the numeric `GameInfo.Continents.Index` for the plot, so CAI can read the localized continent name directly from `GameInfo.Continents[index].Description` without the older extra type-map hop.
+- `plot:GetOwner()` returns `-1` / no owner for unclaimed plots. For NavCursor-style territory change speech, use vanilla `LOC_MINIMAP_UNCLAIMED_TOOLTIP` for that case instead of a CAI-owned placeholder string.
 - `Map.GetGridSize()` — returns map width and height
 - `Map.GetPlot(x, y)` — returns a Plot for valid coordinates. On maps where `Map:IsWrapX()` is true, X coordinates wrap east/west, so `x = -1` resolves to the last column. Y coordinates only wrap if `Map:IsWrapY()` is true; normal Civ VI maps do not wrap north/south, so `y = -1` returns nil.
 - `Map:IsWrapX()` / `Map:IsWrapY()` — return whether the active map wraps on that axis. Check these before manually wrapping absolute coordinates.
@@ -147,7 +152,38 @@ Used to create dynamic UI instances from XML templates:
 - Vanilla's settler lens calls `Map.GetContinentPlotsWaterAvailability()`, which returns four explicit plot lists in this order: fresh water, coastal water, no water, and cannot-settle / blocked. `MinimapPanel.lua` colors those arrays directly for the `WaterAvailability` lens, and `ModalLensPanel.lua` / `UnitPanel.lua` supply the localized meanings.
 - For Maya (`TRAIT_CIVILIZATION_MAYAB`), vanilla collapses the first three settler-lens meanings into a single "valid settling location" bucket and keeps only the blocked bucket separate.
 - The shared decompiled UI still uses that same `WaterAvailability` path with expansions enabled; I did not find an XP1/XP2 branch that adds loyalty or coastal-lowland buckets to `Map.GetContinentPlotsWaterAvailability()`.
+- Rise and Fall / Gathering Storm do add extra settlement information, but not by changing the four water-availability color buckets:
+  - `DLC/Expansion2/UI/Additions/SettlerInfluenceIconManager.lua` listens for `Hex_Coloring_Water_Availablity`, calls `Map.GetContinentPlotsLoyalty()`, and draws numeric loyalty-pressure icons on top of the active settler lens. Tooltip loc key: `LOC_SETTLER_LOYALTY_WARNING_TOOLTIP`.
+    - The settler-lens loyalty overlay is not a named category set like fresh/coastal/no-water/blocked. Firaxis displays the exact `loyaltyVal` returned by `Map.GetContinentPlotsLoyalty()` on each plot, and the tooltip says that nearby cities would apply that many loyalty-per-turn to a new city settled there.
+  - `DLC/Expansion2/UI/Additions/SettlerWarningIconManager.lua` also listens for `Hex_Coloring_Water_Availablity` and overlays hazard icons for floodplains, volcano risk, and XP2 coastal lowlands. The coastal warning comes from `TerrainManager.GetCoastalLowlandType(plot)` plus `GameInfo.CoastalLowlands()[...]`, not from the water-availability array.
+  - Those overlays are independent of the separate XP1 loyalty lens in `MinimapPanel_Expansion1.lua`, which uses `UILens.SetActive("Loyalty")` and `pCity:GetCulturalIdentity()` pressure waves / flag markers for existing cities.
+- CAI now exposes the current supported modal lens through a single dynamic scanner category in `src/UI/InGame/WorldScanner/WorldScannerCategory_activeLens.lua`:
+  - active-lens detection is registry-driven through the actual minimap layer state (`UILens.IsLayerOn(...)` for hashes such as `Hex_Coloring_Water_Availablity`, `Hex_Coloring_Appeal_Level`, `Hex_Coloring_Continent`, `Hex_Coloring_Owning_Civ`, `Hex_Coloring_Government`, and XP2 `Power_Lens`), rather than hard-wiring scanner rebuild logic to the settler water layer
+  - currently supported scanner-backed lenses are `WaterAvailability`, `Appeal`, `Continent`, `OwningCiv`, `Government`, `Tourism`, and XP2 `Power`
+  - the settler implementation remains the richest one so far: subcategories are `Water availability`, `Loyalty`, and `Disasters`
+  - appeal uses a single subcategory grouped into breathtaking, charming, average, uninviting, and disgusting
+  - continent uses a single subcategory grouped by continent name
+  - owning-civ uses stance subcategories `My`, `Neutral`, and `Enemy`, then groups within those by owner
+  - government also uses stance subcategories `My`, `Neutral`, and `Enemy`, but groups by government + owning civ + owning city. The reliable city lookup for arbitrary owned plots is `Cities.GetPlotPurchaseCity(plot)` with `Cities.GetCityInPlot(x, y)` as a city-center fallback
+  - tourism follows `TourismBannerManager.lua`: it scans only the local player's purchased city plots, keeps only plots where `player:GetCulture():GetTourismAt(plotID) > 0`, and exposes two subcategories: `By city` and `By strength`
+  - tourism strength grouping mirrors Firaxis' visual thresholds from `TourismBannerManager.lua`: `High` at `>= 16`, `Medium` at `>= 8`, and `Low` otherwise. Item labels use tourism value plus tourist count from `GetTourismAt(plotID)` and `GetTouristsAt(plotID)`
+  - XP2 power uses four simple subcategories derived from `PowerLensManager.lua`: `Power sources`, `Power range`, `Powered city plots`, and `Unpowered city plots`. It rebuilds from local-player cities only, matching the vanilla power lens
+  - loyalty groups are keyed by exact loyalty-per-turn value and sorted highest to lowest through a scanner-core subcategory comparator hook
+  - disaster groups currently mirror the visual overlay types: flood risk, volcano risk, and coastal lowland 1 / 2 / 3
 - Gathering Storm coastal-lowland state is exposed separately through `TerrainManager.GetCoastalLowlandType(plotIndex)` and `GameInfo.CoastalLowlands()`. That is a distinct API path from the settler water-availability lens.
+- Minimap modal-lens ownership is split across files:
+  - base `Assets/UI/MinimapPanel.lua` toggles `Religion`, `Continent`, `Appeal`, `WaterAvailability`, `Government`, `OwningCiv`, `Tourism`, and `EmpireDetails`
+  - XP1 `DLC/Expansion1/UI/Replacements/MinimapPanel_Expansion1.lua` adds `Loyalty`
+  - XP2 `DLC/Expansion2/UI/Replacements/MinimapPanel_Expansion2.lua` adds `Power`
+- Scanner-friendly lens data paths confirmed during minimap investigation:
+  - `Appeal` uses `Map.GetContinentPlotsAppeal()` for five explicit plot buckets: breathtaking, charming, average, uninviting, disgusting
+  - `Continent` uses `Map.GetVisibleContinentPlots(continentID)` and `GameInfo.Continents[...].Description`
+  - `Government` colors each city's purchased plots via `Map.GetCityPlots():GetPurchasedPlots(city)` and the owner's `player:GetCulture():GetCurrentGovernment()`
+  - `OwningCiv` / political colors each city's purchased plots via `Map.GetCityPlots():GetPurchasedPlots(city)` and the owner's player color; XP1 modal-lens key adds a distinct free-city entry
+  - `Loyalty` is expansion-only and city-based: `MinimapPanel_Expansion1.lua` uses `city:GetCulturalIdentity():GetConversionOutcome()` plus `GetCityIdentityPressures()` for rising / falling city markers and pressure waves, while settler-lens loyalty uses the separate plot API `Map.GetContinentPlotsLoyalty()`
+  - `Power` is XP2-only and lives in `DLC/Expansion2/UI/Additions/PowerLensManager.lua`; it rebuilds from `city:GetPower()` using `GetPlotsCoveredByRegionalPower()`, `GetPlotsProvidingPower()`, `IsFullyPowered()`, and `Map.GetCityPlots():GetPurchasedPlots(city)`
+  - `Tourism` uses `Assets/UI/WorldView/TourismBannerManager.lua`; per plot it reads `player:GetCulture():GetTourismAt(plotID)`, `GetTouristsAt(plotID)`, and `GetTourismTooltipAt(plotID)` and creates banners only for owned plots with tourism > 0. Current CAI scanner support mirrors that with local-player-only plot scanning, plus `By city` and `By strength` groupings
+  - `EmpireDetails` does not expose a unique plot-bucket API in `MinimapPanel`; the visible effect is largely city / district banner detail and district-banner reveal, so it is a weaker scanner target than the other modal lenses
 
 ## Events
 
@@ -256,7 +292,7 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - reveal payload section order is `Enemy`, `Units`, `Cities`, `Resources`, `Districts`, `Improvements`
 - Scanner rebuild policy in the current scanner: category definitions are registered up front, but only dynamic categories keep their built contents across category cycles. Ordinary categories are discarded and rebuilt from live data whenever the player cycles scanner categories, which keeps stale entries from lingering without reintroducing a full scanner rebuild on every cursor move.
 - Category definitions can opt into dynamic one-shot behavior with `BuildOncePerDynamicState = true`. CAI currently uses that for `validTargets` and `waterAvailability`.
-- Scanner invalidation is category-scoped where possible: `Events.InterfaceModeChanged` and local unit selection changes rebuild only `validTargets`; water-lens layer changes rebuild only `waterAvailability`; `Events.LocalPlayerTurnBegin` clears all built category contents.
+- Scanner invalidation is category-scoped where possible: `Events.InterfaceModeChanged` and local unit selection changes rebuild only `validTargets`; the dynamic active-lens category now rebuilds on generic lens toggles plus supporting world events such as plot visibility, city visibility, tile ownership, government, diplomacy, local-player change, city occupation, and XP2 `Events.CityPowerChanged`; `Events.LocalPlayerTurnBegin` clears all built category contents.
 - Category definitions can expose a cheap `CanScan(context)` predicate to avoid expensive API calls when a category cannot currently exist, such as `validTargets` outside supported interface modes or `waterAvailability` while the water lens is off.
 - Cursor movement resorts only the current built category. It does not rebuild or resort every scanner category.
 - Scanner distance sorting uses the current CAI cursor plot and `Map.GetPlotDistance(...)`.
@@ -373,6 +409,8 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - `LuaEvents.ProductionPanel_ListModeChanged(...)` is still the correct CAI sync point for ordinary vanilla tab changes because vanilla emits it directly from `OnTabChangeProduction`, `OnTabChangePurchase`, `OnTabChangePurchaseFaith`, `OnTabChangeQueue`, and `OnTabChangeManager`.
   - For delayed open, `LuaEvents.ProductionPanel_Open()` should be treated only as an "open pending" signal. Vanilla `Open()` fires it before the caller has necessarily selected the final tab.
   - The practical open handshake is therefore: mark CAI open-pending on `ProductionPanel_Open`, wait for the first real `ProductionPanel_ListModeChanged(...)`, then sync the CAI active tab from `m_CurrentListMode` and push the CAI panel.
+  - `CityPanel.lua` treats `Controls.ChangeProductionCheck` as the toggle for the whole production-side panel family, not specifically the production chooser. `OnProductionPanelListModeChanged(...)` sets that check true for both `LISTMODE.PRODUCTION` and `LISTMODE.PROD_QUEUE`.
+  - `ProductionPanel.OnCityPanelProductionOpen()` also defaults to the queue tab when `GetQueueSize(m_pCity) > 1` or auto-queue is enabled. Practical implication: a city-panel "change production" activation can land on queue mode first, and if CAI blindly toggles `ChangeProductionCheck` while queue mode already owns that check, the first activation just flips panel state instead of forcing the chooser tab.
   - Because this flow relies on vanilla's own later `m_tabs.SelectTab(...)`, CAI does not need to wrap and re-register the city/notification/tutorial open-entry LuaEvent handlers just to discover the final tab.
   - Vanilla only shows the shared current-production summary container on the Production tab and the Queue tab. `OnTabChangePurchase()` and `OnTabChangePurchaseFaith()` both hide `Controls.CurrentProductionContainer`, while `OnTabChangeProduction()` and `OnTabChangeQueue()` show it when `m_hasProductionToShow` is true.
   - CAI production refresh hooks should use the real engine events `Events.CityProductionChanged`, `Events.CityProductionUpdated`, and `Events.CityProductionQueueChanged`. The older speculative `CityWorkersChanged` hook is not documented in the IDE helpers and should not be relied on.
@@ -430,18 +468,37 @@ Wrapper for `CAI.output`. Use this for all TTS output.
 - `CitySupport.lua` exposes `GetCityData(city)`, and `CityPanel.lua` includes `CitySupport`, so `CityPanel_CAI.lua` can request fresh city data without wrapping `Refresh()`.
 - `CityManager.GetCity(playerID, cityID)` is available in UI context and can resolve a city for helper-based city info requests.
 - `CityPanel_CAI.lua` now extends `ExposedMembers.CAIInfo` with:
-  - `CityInfo` helper table (`Summary`, `Name`, `Coords`, `Health`, `BuildingCount`, `ReligiousFollowersCount`, `AmenitiesSummary`, `HousingSummary`, `GrowthSummary`, `ProductionSummary`, `BuildingsAmenitiesSummary`, `VisibleYields`, `NormalFocusYields`, `FavoredFocusYields`, `IgnoredFocusYields`)
+  - `CityInfo` helper table. Current single-purpose city-panel helpers are `Name`, `Population`, `Health`, `Growth`, `BorderGrowth`, `Production`, `Housing`, `Religion`, `BuildingsOrLoyalty`, `VisibleYields`, `NormalFocusYields`, `FavoredFocusYields`, and `IgnoredFocusYields`
+  - `CityInfoBuckets`, which define the current main city-panel read buckets:
+    - summary / tilde: `Name`, `Population`, `Health`, `Production`, `Growth`
+    - `Shift+1`: `Name`, `Health`
+    - `Shift+2`: `Production`
+    - `Shift+3`: `Growth`
+    - `Shift+4`: `BorderGrowth`
+    - `Shift+5`: `Religion`
+    - `Shift+6`: `Population`, `Housing`, `BuildingsOrLoyalty`
+    - `Shift+7`: `VisibleYields`
+    - `Shift+8`: `NormalFocusYields`
+    - `Shift+9`: `FavoredFocusYields`
+    - `Shift+0`: `IgnoredFocusYields`
   - `RequestCityInfo(cityOrCityID, requestedKeys, playerID)` which defaults to the currently selected city when no city is passed
 - `CityPanel_CAI.lua` now builds city info from `GetCityData(city)` using the same vanilla loc keys / string assembly patterns as `CityPanel.lua`; it does not read back from UI controls or call `ViewMain(data)`.
+- The city-selection speech path is now consistent with manual summary reads: `Events.CitySelectionChanged` requests the same summary bucket instead of a separate summary helper.
 - City growth / production helpers can also expose the visible progress-bar state from `GetCityData(city)`:
   - growth: `CurrentFoodPercent`, `FoodPercentNextTurn`
   - production: `CurrentProdPercent`, `ProdPercentNextTurn`
+- City panel border-growth speech now uses the city-panel growth tile as parity target: it speaks the target hex direction relative to the city via `CAIHexCoordUtils.directionString(...)` plus the same live culture values vanilla uses for the tile meters (`GetNextPlot()`, `GetCurrentCulture()`, `GetCultureYield()`, `GetNextPlotCultureCost()`, `GetTurnsUntilExpansion()`).
+- Main `CityPanel` parity rules currently mirrored by CAI:
+  - the old city coords helper was removed from normal city-panel reads
+  - border growth is a dedicated helper built from `city:GetCulture()` (`GetNextPlot()`, `GetNextPlotCultureCost()`, `GetCurrentCulture()`, `GetCultureYield()`, `GetTurnsUntilExpansion()`)
+  - XP1 / XP2 main-panel first-slot parity uses `IsExpansion1Active()` / `IsExpansion2Active()` from `Civ6Common.lua`; when an expansion ruleset is active CAI speaks current loyalty from `city:GetCulturalIdentity():GetLoyalty()`, otherwise it speaks building count like base vanilla
 - `UnitPanel.lua` owns selected-unit panel data and action button construction:
   - `ReadUnitData(unit)` builds the panel data table from the live unit, including name, type, movement, health, charges, promotions, abilities, stats, and `Actions`.
   - `GetSubjectData()` returns the current selected-unit data table cached by `View(data)`.
   - `GetUnitActionsTable(unit)` builds `data.Actions` with vanilla action order, disabled state, tooltip/failure text, callback function, callback void values, and optional sound.
   - Vanilla unit commands and operations use loose `UnitManager.CanStartCommand(...)` / `CanStartOperation(...)` checks to decide whether an action should be visible, then stricter current-executability checks where needed. If the stricter check or tutorial gating fails, the row can still be added with `Disabled = true` and failure reasons appended to `helpString`.
   - `data.Actions.displayOrder.primaryArea` and `secondaryArea` define the normal unit-panel action order. Build actions live in `data.Actions["BUILD"]`.
+  - Vanilla does not mix build-improvement actions into the ordinary action stacks. `View(data)` renders `data.Actions["BUILD"]` separately through `BuildActionsStack`, and `RecommendedActionButton` is just a second view over the single `BUILD` entry whose row has `IsBestImprovement = true`.
   - `AddActionToTable(...)` also populates vanilla `m_kHotkeyActions` for actions with `HotkeyId`; CAI should let vanilla continue handling directly bound unit operation / command keys.
   - Combat preview is a live hover pipeline:
     - `OnInterfaceModeChanged(...)` is the attack-preview mode-entry path for `CITY_RANGE_ATTACK` and `DISTRICT_RANGE_ATTACK`. It makes the panel visible, swaps the subject view to the attacker city-center district or district, and calls `OnShowCombat(...)`.
@@ -516,26 +573,36 @@ Wrapper for `CAI.output`. Use this for all TTS output.
     - `GAMEMODE_BARBARIAN_CLANS = 1` -> `UnitFlagManager_BarbarianClansMode`
     - otherwise -> `UnitFlagManager`
   - CAI unit-flag speech now keeps the ambient buckets short and additive instead of mirroring the full vanilla tooltip text. New helpers cover promotion count or levy turns, religion name, archaeology home city and artifact owner, aircraft capacity as `current/max`, hero / threat / flagship markers, Barbarian Clans short status, and the Pirates Buccaneer label.
+  - Carrier / host-aircraft popup contents come straight from the host unit each refresh. `UpdateAircraftCounter()` uses `unit:GetAirSlots()` for capacity, `unit:GetAirUnits()` for the stationed-aircraft rows, writes the counts into `AirUnitInstance.CurrentUnitCount` / `MaxUnitCount`, and rebuilds `UnitListPopup` from that live list.
   - Local human units dim when not `IsReadyToSelect()`. Selection overrides that dimming so the selected unit stays full alpha.
   - Hidden states are layered: non-visible fog state hides the flag; combat visualization temporarily force-hides attacker/defender/interceptor/anti-air flags; turning the relevant lens layer off hides the entire manager context; and stationed air units usually hide their own individual flags on airstrips, aerodromes, and carriers, except intercepting air units keep a visible flag.
   - Same-tile stacking is communicated visually with per-role offsets and duo/trio formation-link graphics. Those link graphics can be suppressed for non-local players when one member of the formation is hidden.
   - Clicking your own visible flag selects the unit when the current interface mode allows it. Clicking a visible enemy flag with a selected local unit can trigger range attack or move-to-attack.
-- Vanilla does not appear to provide clean city-panel loc tags for labeling those two percentage values as speech output, so `CityPanel_CAI.lua` uses CAI loc tags for:
+- Vanilla does not appear to provide clean city-panel loc tags for labeling the two percentage values as speech output, so `CityPanel_CAI.lua` uses CAI loc tags only for:
   - `LOC_CAI_CURRENT_PROGRESS`
   - `LOC_CAI_NEXT_TURN_PROGRESS`
 - `CityPanel_CAI.lua` also listens to `Events.InputActionTriggered(actionId)` and uses an action-id-to-helper map instead of an `if` / `elseif` chain.
-- Current city selection hotkey mapping in `src/data/hotkey_config.xml`:
-  - `ReadSelectionSummary` -> `Name`, `Coords`, `Health`, `GrowthSummary`, `ProductionSummary`
-  - `ReadSelectionInfo1` -> `Health`
-  - `ReadSelectionInfo2` -> `ProductionSummary`
-  - `ReadSelectionInfo3` -> `GrowthSummary`
-  - `ReadSelectionInfo4` -> `HousingSummary`
-  - `ReadSelectionInfo5` -> `BuildingsAmenitiesSummary`
-  - `ReadSelectionInfo6` -> `ReligiousFollowersCount`
+- Current city selection hotkey mapping uses the shared city-panel buckets:
+  - `ReadSelectionSummary` -> `Name`, `Population`, `Health`, `Production`, `Growth`
+  - `ReadSelectionInfo1` -> `Name`, `Health`
+  - `ReadSelectionInfo2` -> `Production`
+  - `ReadSelectionInfo3` -> `Growth`
+  - `ReadSelectionInfo4` -> `BorderGrowth`
+  - `ReadSelectionInfo5` -> `Religion`
+  - `ReadSelectionInfo6` -> `Population`, `Housing`, `BuildingsOrLoyalty`
   - `ReadSelectionInfo7` -> `VisibleYields`
   - `ReadSelectionInfo8` -> `NormalFocusYields`
   - `ReadSelectionInfo9` -> `FavoredFocusYields`
   - `ReadSelectionInfo10` -> `IgnoredFocusYields`
+- `CityPanel_CAI.lua` now appends dynamic ranged-strike rows to the city `SelectionActions` list:
+  - availability is gated by `CityManager.CanStartCommand(target, CityCommandTypes.RANGE_ATTACK)` for both the city center and each district owned by the selected city
+  - city rows reuse vanilla city targeting flow: `UI.SelectCity(city)` then `UI.SetInterfaceMode(InterfaceModeTypes.CITY_RANGE_ATTACK)`
+  - district rows reuse vanilla district targeting flow: `UI.DeselectAll()`, `UI.SelectDistrict(district)`, then `UI.SetInterfaceMode(InterfaceModeTypes.DISTRICT_RANGE_ATTACK)`
+  - these rows are CAI-only synthetic menu items, so they centralize strike-capable city and district attacks even though vanilla normally exposes them only on banners / minibanners
+- `CityPanel_CAI.lua` also appends dynamic WMD strike rows for strike-capable city districts such as missile silos:
+  - availability mirrors vanilla `UpdateWMDBanner()` instead of using `CanStartCommand(...)`: for each supported WMD type, CAI checks local stock through `player:GetWMDs():GetWeaponCount(wmd.Index)` and then calls `CityManager.GetCommandTargets(city, CityCommandTypes.WMD_STRIKE, parameters)` with the district plot as `PARAM_X0` / `PARAM_Y0`
+  - launch flow mirrors vanilla `OnICBMStrikeButtonClick(...)`: if already in `ICBM_STRIKE`, switch back to `SELECTION`, then `UI.SelectCity(city)`, `UILens.SetActive("Default")`, and finally `UI.SetInterfaceMode(InterfaceModeTypes.ICBM_STRIKE, parameters)` using the chosen weapon type and district plot
+  - CAI additionally jumps the cursor to the firing district plot before entering strike mode so the centralized action list stays spatially grounded
   - `SelectionActions` -> `Tab`
 - City yield focus states in `GetCityData(city)` are stored in `data.YieldFilters[yieldType]` and map to:
   - `YIELD_STATE.FAVORED`
@@ -549,6 +616,37 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - `OnCheckYield(yieldType, yieldName)` transitions normal to favored, or favored to ignored depending on the checkbox visual state
   - `OnResetYieldToNormal(yieldType, yieldName)` transitions ignored back to normal
   - `SetYieldFocus(yieldType)` and `SetYieldIgnore(yieldType)` are the lower-level command helpers used underneath
+- Compared against vanilla base `CityPanelOverview.lua`, current `CityPanel_CAI.lua` only exposes compact speech for summary, health, production summary, growth summary, housing summary, amenity/building counts, religion follower count, visible yields, and yield-focus state. It does not yet mirror most of the detailed left-panel overview content.
+- Vanilla base city panel overview exposes these information groups that CAI does not currently speak in structured form:
+  - breakdown tab: district count vs district cap, built districts with pillage state, each built building with pillage state, per-entry yield strings, wonders, and trading-post owners
+  - religion tab: pantheon belief, dominant religion, other religions in the city, and dominant-religion belief list
+  - amenities tab: city mood, growth/yield effect text, amenity advice, required amenities, and the detailed amenity-source breakdown
+  - housing tab: housing growth state, housing advice, and the detailed housing-source breakdown
+  - citizens/growth tab: gross food, food consumption, net food, growth threshold, happiness bonus, other growth modifiers, housing multiplier, occupation multiplier, modified food, and total surplus/deficit
+  - production tab: current production unit stats and explicit production queue rows
+- `CityPanel_CAI.lua` currently opens the same vanilla tabs and toggles through native callbacks / controls, but its spoken info registry in `CityInfo` does not include keys for those detailed overview breakdowns.
+- Base city-management ownership split confirmed from the decompiled UI:
+  - `CityPanel.lua` owns the compact selected-city shell, the overview toggle, the manage-citizens toggle, the purchase-tile toggle, and the enter/leave transitions for `InterfaceModeTypes.CITY_MANAGEMENT`.
+  - `CityPanelOverview.lua` owns the detailed left-side overview tabs and their data views: breakdown, religion, amenities, housing, citizens/growth math, current production detail, and production queue.
+  - `PlotInfo.lua` owns the in-world per-plot city-management overlays. In citizen management it exposes workable plots, specialist capacity meters, and locked-citizen icons; in tile purchase it exposes per-plot gold buttons and affordability tooltip state; it also owns tile-swap buttons and the city-yield overlay.
+  - `WorldInput.lua` does not own the city-management content itself. It only owns the `CITY_MANAGEMENT` mode routing, including enter/leave handlers, Escape-style key handling through `OnPlacementKeyUp`, and a pointer-up no-op so plot overlays, not world selection, consume interaction while the mode is active.
+- Expansion 1 adds loyalty/culture data to the city panel:
+  - main panel swaps the first stat from building count to current loyalty in `CityPanel_Expansion1.lua`
+  - overview adds a loyalty tab (`CityPanelCulture.lua`) with current/max loyalty, loyalty level, per-turn pressure status, detailed source breakdown, loyalty effects, loyalty advice, diplomatic presence, and assigned-governor details including establishment state / turns
+  - XP1 also changes citizens-growth math display to show loyalty growth modifiers instead of the old occupation-only wording, and adds governor-derived amenities in `ViewPanelAmenities`
+- Expansion 2 keeps the XP1 loyalty/governor culture tab and further adds a power tab (`CityPanelPower.lua`) with:
+  - consumed vs required power totals
+  - power status name and description
+  - consumed, required, and generated power-source breakdowns
+  - power advice
+- `CityPanel_CAI.lua` should include the same base / XP1 / XP2 `CityPanel` replacement chain that vanilla would load:
+  - base ruleset -> `CityPanel`
+  - Expansion 1 active -> `CityPanel_Expansion1`
+  - Expansion 2 active -> `CityPanel_Expansion2`
+- The city action list can open the expansion overview tabs through the overview context LuaEvents rather than loading those panels itself:
+  - XP1 / XP2 loyalty-governor overview -> `LuaEvents.CityPanel_ToggleOverviewLoyalty()`
+  - XP2 power overview -> `LuaEvents.CityPanel_ToggleOverviewPower()`
+- For the planned city-panel redo, the largest parity gaps are the overview subpanels and the XP1/XP2 dynamic tabs, not the main action buttons.
 - `WorldTracker.lua` is a passive in-game HUD stack, not a modal chooser:
   - It builds `ResearchInstance`, `CivicInstance`, `OtherContainer`, `UnitListInstance`, `ChatPanelContainer`, and `TutorialGoals` under `Controls.WorldTrackerVerticalContainer` in that order.
   - The header has `Controls.ToggleAllButton` to collapse/expand the whole tracker and `Controls.ToggleDropdownButton` to open tracker options.
@@ -614,6 +712,7 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - CAI registers separate dispatchers for `Events.InputActionStarted` and `Events.InputActionTriggered`, while vanilla `WorldInput` keeps its own subscriptions.
   - Interface-mode-specific action records override shared action records for the same action id.
   - `InterfaceInfo` is the Space-bound world action. `WorldInput_CAI.lua` dispatches it to `SpeakActiveInterfacePlotInfo(...)`, which resolves the CAI cursor plot and calls the active `InterfaceInfoHelpers[UI.GetInterfaceMode()]` function.
+  - Shared interface widget activation now has a generic event fallback: when the active interface widget does not override `InterfaceWidgetPrimaryAction` or `InterfaceWidgetSecondaryAction`, `WorldInput_CAI.lua` raises `LuaEvents.CAIInterfaceWidgetPrimaryAction(widgetId, plotId)` or `LuaEvents.CAIInterfaceWidgetSecondaryAction(widgetId, plotId)` using the current CAI widget id and the plot id under the CAI cursor.
   - Current default ActionPanel bindings are `SharedEndTurn` on `Ctrl+Space` and `ActionPanelOpenTurnBlockers` on `Ctrl+Shift+Space`; plain Space is reserved for interface-specific information.
   - CAI targeting widgets cover `RANGE_ATTACK`, `CITY_RANGE_ATTACK`, `DISTRICT_RANGE_ATTACK`, `AIR_ATTACK`, `WMD_STRIKE`, `ICBM_STRIKE`, and `COASTAL_RAID`. Return delegates to the matching vanilla execution handler and Escape delegates through vanilla `OnPlacementKeyUp(...)`.
   - Vanilla camera movement has two main paths: continuous camera panning through `UI.PanMap(panX, panY)` / `ProcessPan(...)`, and plot-centering through `SnapToPlot(plotId)` -> `UI.LookAtPlot(plot)`.
@@ -927,10 +1026,27 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - `UnitPanel_CAI.lua` queued-path reads no longer recalculate from the pathfinder. They rebuild explicit queued-path speech from cached queued-path entries plus live visibility, using `GetQueuedPath()`, `GetQueuedPathArrivalTurn()`, and `CAIHexCoordUtils.stepListFromPath(...)`.
   - `PlotToolTip_CAI.lua` consumes `IsWaypointPlot(plotId)` through a `waypoint` plot-info helper and can announce `Waypoint` for matching plots.
   - `WorldScannerCategory_waypoints.lua` now represents the selected unit's cached queued path as a dynamic `Queued path` scanner category with `Full path` and `Waypoints` subcategories. Scanner item labels are built from `RequestPlotInfo(..., { "waypoint", "plotName", "feature", "cityName", "districtTitle", "cityDistrictTitle" }, plotId)` so the category reuses normal plot naming instead of custom label logic.
+  - `WorldScannerCategory_cityManagement.lua` now exposes the active `CITY_MANAGEMENT` overlay as a scanner category when that interface mode is active and either the citizen-management lens or purchase lens is on.
+    - It rebuilds from the shared city-management helper instead of caching live controls.
+    - Current subcategories are `locked`, `specialists`, `worked`, `available`, `swappable`, `purchasable`, and `tooExpensive`.
+    - Scanner item labels reuse the same full spoken line as `InterfaceInfo` for that plot so Space reads and scanner reads stay aligned.
   - `GetActiveInterfacePlotInfo(plot)` dispatches by `UI.GetInterfaceMode()` through `InterfaceInfoHelpers[...]`.
   - `SpeakActiveInterfacePlotInfo(plot)` is the one-shot speech wrapper for the Space-bound `InterfaceInfo` action. Helpers remain plain functions and return either a string, a list of strings, nil, or `false` when explicit speech was handled by side effect.
-  - Current supported preview modes include `MOVE_TO`, `DISTRICT_PLACEMENT`, `BUILDING_PLACEMENT`, `RANGE_ATTACK`, `CITY_RANGE_ATTACK`, `DISTRICT_RANGE_ATTACK`, `AIR_ATTACK`, `DEPLOY`, `REBASE`, `TELEPORT_TO_CITY`, `FORM_CORPS`, `FORM_ARMY`, `AIRLIFT`, `SACRIFICE_SELECTION`, `KILL_WEAKER_UNIT`, `TRANSFORM_UNIT`, `RESTORE_UNIT_MOVES`, and `NAVAL_GOLD_RAID`.
+  - Current supported preview modes include `MOVE_TO`, `CITY_MANAGEMENT`, `DISTRICT_PLACEMENT`, `BUILDING_PLACEMENT`, `RANGE_ATTACK`, `CITY_RANGE_ATTACK`, `DISTRICT_RANGE_ATTACK`, `AIR_ATTACK`, `DEPLOY`, `REBASE`, `TELEPORT_TO_CITY`, `FORM_CORPS`, `FORM_ARMY`, `AIRLIFT`, `SACRIFICE_SELECTION`, `KILL_WEAKER_UNIT`, `TRANSFORM_UNIT`, `RESTORE_UNIT_MOVES`, and `NAVAL_GOLD_RAID`.
   - Ranged, city ranged, district ranged, and air attack helpers call `LuaEvents.CAISpeakCombatPreview()` and return `false`; combat preview speech remains owned by `UnitPanel_CAI.lua`.
+  - `CITY_MANAGEMENT` interface info is now rebuilt from the same live `CityManager.GetCommandTargets(...)` data that `PlotInfo.lua` uses instead of reading overlay controls:
+    - citizen management uses `CityCommandTypes.MANAGE` and reads `PLOTS`, `CITIZENS`, `MAX_CITIZENS`, and `LOCKED_CITIZENS`
+    - tile swapping uses `CityCommandTypes.SWAP_TILE_OWNER`
+    - tile purchase uses `CityCommandTypes.PURCHASE` plus live `city:GetGold():GetPlotPurchaseCost(plotId)` and local treasury gold
+    - speech intentionally does not split compact vs explicit modes; passive preview and explicit `Space` both say the same full plot-state line and omit unavailable states
+  - `PlotInfo_CAI.lua` now replaces `PlotInfo` and keeps vanilla overlay logic, but listens for the generic `CAIInterfaceWidgetPrimaryAction` and `CAIInterfaceWidgetSecondaryAction` Lua events.
+    - It reacts only when `widgetId == "CAIWorldInputCityManagement"`.
+    - Primary resolves to purchase first when the purchase lens is active on that plot, otherwise citizen manage; secondary resolves explicitly to tile swap.
+    - It wraps vanilla `OnClickCitizen(...)`, `OnClickPurchasePlot(...)`, and `OnClickSwapTile(...)` only to prime a pending action payload with owner, city id, and clicked plot id.
+    - Result speech is then driven by matching game events: `CityWorkerChanged(ownerPlayerID, cityID)` for manage, `CityMadePurchase(owner, cityID, plotX, plotY, purchaseType, objectType)` for purchase, and `CityTileOwnershipChanged(owner, cityID)` for swap.
+    - Vanilla uses both a 2-arg and a 4-arg `OnCityWorkerChanged` helper signature in different UI files, but CAI's pending manage feedback should treat the event as owner + city only and then speak the pending plot's refreshed state.
+    - Purchase matching should agree on owner, city, and purchased plot id. Swap matching should agree on owner and city, then speak the pending plot's refreshed state.
+    - It also listens to `LuaEvents.CAICursorMoved` and reuses vanilla `OnSpinningCoinAnimMouseEnter(...)` to play the purchase coin animation when the CAI cursor lands on an affordable purchase plot.
   - District placement preview reuses vanilla `AdjacencyBonusSupport.GetAdjacentYieldBonusString(...)` for the short bonus summary, detailed tooltip text, and requirement/warning text, while CAI computes owned-valid versus purchasable-valid state locally from `CityManager.GetOperationTargets(...)` and `CityManager.GetCommandTargets(...)`.
   - Wonder placement uses valid owned plots from `CityManager.GetOperationTargets(...)` and valid purchasable plots from `CityManager.GetCommandTargets(...)` filtered through `plot:CanHaveWonder(...)`.
   - Non-attack targeting/destination helpers use shared `CAIInterfaceTargets` target resolution. Space says `Valid` plus the plot target label, `Invalid target` when the CAI cursor is not on an eligible plot, and for `FORM_CORPS` / `FORM_ARMY` appends `formation target` after the target unit name.
@@ -943,6 +1059,22 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - Current default bindings in `src/data/hotkey_config.xml`: `S` / `NP_5` -> `PlotReadUnits`, `W` / `NP_8` -> `PlotReadYieldRiverOwner`, `X` / `NP_2` -> `PlotReadStats`, `Shift+S` / `Shift+NP_5` -> `PlotReadRelativeCoords`, `B` -> `PlotReadDistrictBuildings`. `WorldTrackerReadSummary` moved to `Shift+W` to free `W` for plot reads.
   - `WorldInput_CAI.lua` exposes both move mode and district placement mode through CAI `InterfaceMode` widgets; district placement uses the same Escape / primary-action widget pattern as move mode, but routed to `OnMouseDistrictPlacementCancel()` and `OnMouseDistrictPlacementEnd()`.
   - `WorldInput_CAI.lua` also exposes targeting widgets for `RANGE_ATTACK`, `CITY_RANGE_ATTACK`, `DISTRICT_RANGE_ATTACK`, `AIR_ATTACK`, `WMD_STRIKE`, `ICBM_STRIKE`, `COASTAL_RAID`, `DEPLOY`, `REBASE`, `TELEPORT_TO_CITY`, `FORM_CORPS`, `FORM_ARMY`, `AIRLIFT`, `SACRIFICE_SELECTION`, `KILL_WEAKER_UNIT`, `TRANSFORM_UNIT`, `RESTORE_UNIT_MOVES`, and `NAVAL_GOLD_RAID`. Return delegates to the matching vanilla execution function, and Escape delegates through vanilla `OnPlacementKeyUp(...)`.
+  - Base-game interface modes that still do not have CAI world-input widgets fall into two groups:
+    - World-input-light modes whose useful information lives elsewhere:
+      - `MAKE_TRADE_ROUTE` - `WorldInput.lua` only changes cursor; route choice and route details live in `Choosers/TradeRouteChooser.lua` plus related city-banner trade selection hooks.
+      - `PLACE_MAP_PIN` - `WorldInput.lua` only changes cursor and commits placement; the user-facing flow lives in `Popups/MapPinListPanel.lua`.
+      - `SPY_CHOOSE_MISSION` and `SPY_TRAVEL_TO_CITY` - `WorldInput.lua` only resets cursor/lens; chooser content lives in `Choosers/EspionageChooser.lua` and `Popups/EspionagePopup.lua`.
+      - `FULLSCREEN_MAP` - visible content lives in `FullscreenMapPopup.lua`.
+      - `VIEW_MODAL_LENS` - world input only routes clicks; active lens labels and state live in `MinimapPanel.lua`, `Panels/ModalLensPanel.lua`, and other HUD listeners.
+      - `CITY_SELECTION` - `WorldInput.lua` only resets cursor; the mode is entered by `Panels/CityPanelOverview.lua` and coordinated with `Panels/ModalLensPanel.lua`.
+      - `CINEMATIC` and deprecated `NATURAL_WONDER` - world input only toggles fixed tilt / cursor state; actual content lives in cinematic popups such as `NaturalWonderPopup.lua`, `WonderBuiltPopup.lua`, and `ProjectBuiltPopup.lua`.
+    - Modes with little or no normal gameplay payload in world input:
+      - `SELECTION` - ambient/default world mode. Useful speech is already split across CAI cursor reads, plot tooltip, scanner, surveyor, unit panel, city panel, and notification/HUD readers rather than a dedicated world-input widget.
+      - `DEBUG` and `WB_SELECT_PLOT` - debug / World Builder only.
+  - Expansion world-input replacements add interface modes that CAI currently does not mirror:
+    - Expansion 1 adds `PARADROP` and `PRIORITY_TARGET` in `DLC/Expansion1/UI/Replacements/WorldInput_Expansion1.lua`. Expansion 2 includes that XP1 replacement layer too.
+    - Expansion 2 adds `BUILD_IMPROVEMENT_ADJACENT` and `MOVE_JUMP` in `DLC/Expansion2/UI/Replacements/WorldInput_Expansion2.lua`.
+    - Unlike city management, these four expansion modes are true world-input-owned target-selection modes. Their visible payload is built directly by the world-input replacement itself from `UnitManager.GetCommandTargets(...)` or `UnitManager.GetOperationTargets(...)` plus placement / movement overlays, so CAI should eventually add first-class interface widgets for them rather than delegating them to another popup or panel.
 - CAI widgets require an id at construction: `mgr:CreateUIWidget(id, type, props)`.
   - Use stable semantic ids for widgets that need direct lookup, for example `CAITopPanelYieldInfoTree`.
   - Use `mgr:GenerateWidgetId("CAIScreenWidgetType")` for repeated rows/items that must be unique but do not need stable lookup.
@@ -996,6 +1128,10 @@ Wrapper for `CAI.output`. Use this for all TTS output.
 ## City Banner XP1 / XP2
 
 - `Civ6Common.lua` exposes `IsExpansion1Active()` and `IsExpansion2Active()`, and CAI can include it directly in in-game UI helpers when behavior needs to branch on Rise and Fall / Gathering Storm.
+- Base `CityBannerManager.lua` stores local-city growth and production speech data on top-level controls such as `m_Instance.CityPopulation`, `m_Instance.CityProduction`, `m_Instance.CityPopulationMeter`, and `m_Instance.CityProductionMeter`.
+- Expansion 1 and Expansion 2 move those reads into stat-row instance managers instead: `m_StatPopulationIM` allocates a `CityStatPopulation` row whose tooltip lives on `FillMeter`, and `m_StatProductionIM` allocates a `CityStatProduction` row whose tooltip lives on `Button` and whose progress meter lives on `FillMeter`. CAI hotkey reads must support both layouts.
+- Expansion 1 and Expansion 2 also move governor info into `m_StatGovernorIM`, with governor detail tooltips on each row `FillMeter`.
+- Expansion 1 and Expansion 2 shift city-state quest / trading-post status and city effect icons into instance-manager rows: `m_DetailStatusIM` for status icons such as quests and trading posts, and `m_DetailEffectsIM` for effects such as siege, occupied, housing, amenities, and XP2 power.
 - `CityBannerManager` expansion loyalty data can be rebuilt from live `city:GetCulturalIdentity()` calls without the loyalty lens. Useful methods are `GetLoyalty()`, `GetMaxLoyalty()`, `GetLoyaltyPerTurn()`, `GetPotentialTransferPlayer()`, `GetPlayerIdentitiesInCity()`, and `GetIdentitySourcesBreakdown()`.
 - Expansion loyalty mini-panel control names are stable enough for CAI tree labels/tooltips: `LoyaltyInfo.LoyaltyPercentageLabel`, `PopulationTop`, `GovernorTop`, `Happiness`, `OtherTop`, `CityStateTop`, `FreeCityTop`, and `IdentityBreakdownStack`.
 - GS power banner text can be mirrored from `city:GetPower()` with vanilla loc keys. Firaxis uses `GetFreePower()`, `GetTemporaryPower()`, `GetRequiredPower()`, `IsFullyPowered()`, and `IsFullyPoweredByActiveProject()` together with `LOC_CITY_BANNER_POWERED_CITY`, `LOC_CITY_BANNER_POWERED_CITY_FROM_ACTIVE_PROJECT`, and `LOC_CITY_BANNER_UNPOWERED_CITY`.
