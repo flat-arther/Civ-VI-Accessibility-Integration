@@ -84,6 +84,26 @@ local function ResolvePlotById(plotId)
     return Map.GetPlotByIndex(plotId)
 end
 
+---@param plot Plot|nil
+---@return boolean
+local function CanUpdateZonesForPlot(plot)
+    if plot == nil then
+        return false
+    end
+
+    local localPlayerID = Game.GetLocalPlayer()
+    if localPlayerID == nil or localPlayerID < 0 then
+        return false
+    end
+
+    local visibility = PlayersVisibility[localPlayerID]
+    if visibility == nil then
+        return false
+    end
+
+    return visibility:IsVisible(plot:GetIndex()) or visibility:IsRevealed(plot)
+end
+
 local function SpeakJumpDirection(fromX, fromY, targetPlot)
     if fromX == nil or fromY == nil or targetPlot == nil then
         return
@@ -111,6 +131,10 @@ function CAICursor:UpdateZones()
 
     local plot = Map.GetPlotByIndex(plotId)
     if plot == nil then
+        return
+    end
+
+    if not CanUpdateZonesForPlot(plot) then
         return
     end
 
