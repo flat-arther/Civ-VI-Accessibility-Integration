@@ -3,7 +3,7 @@ include("navCursor")
 include("inGameHelpers_CAI")
 include("UnitWaypoints_CAI")
 include("interfaceInfoHelpers_CAI")
-include("UIScreenManager")
+include("CAIUIScreenManager")
 include("WorldScanner_CAI")
 include("Surveyor_CAI")
 include("RevealAnnouncements_CAI")
@@ -575,7 +575,7 @@ local function OnInterfaceChanged(oldMode, newMode)
 	if not newData then return end
 
 	local widgetId = newData.WidgetId or "CAIWorldInputInterfaceMode"
-	local mode = mgr:CreateUIWidget(widgetId, "InterfaceMode", newData.Properties)
+	local mode = mgr:CreateWidget(widgetId, "InterfaceMode", newData.Properties)
 	if not mode then return end
 
 	m_caiCurrentInterfaceWidget = mode
@@ -620,7 +620,7 @@ local function CreateGameViewWidget()
 		return false
 	end
 
-	m_caiGameViewWidget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIWorldInputGameView"), "GameView")
+	m_caiGameViewWidget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWorldInputGameView"), "GameView")
 	if not m_caiGameViewWidget then
 		print("Failed to create gameview widget")
 		return false

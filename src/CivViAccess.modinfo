@@ -11,10 +11,36 @@
 
   <Files>
     <File>caiUtils.lua</File>
-    <File>UI/uiManager/baseWidget.lua</File>
-    <File>UI/uiManager/widgetTemplateHelpers.lua</File>
-    <File>UI/uiManager/widgetTemplates.lua</File>
-    <File>UI/uiManager/UIScreenManager.lua</File>
+    <File>UI/uiManager/helpers/CAIWidgetHelpers_Navigation.lua</File>
+    <File>UI/uiManager/helpers/CAIWidgetHelpers_Search.lua</File>
+    <File>UI/uiManager/helpers/CAIWidgetHelpers_Tree.lua</File>
+    <File>UI/uiManager/helpers/CAIWidgetHelpers_EditBox.lua</File>
+    <File>UI/uiManager/helpers/CAIWidgetHelpers_DialogBuilder.lua</File>
+    <File>UI/uiManager/CAIWidget_Base.lua</File>
+    <File>UI/uiManager/CAIWidget_Container.lua</File>
+    <File>UI/uiManager/CAIWidget_Value.lua</File>
+    <File>UI/uiManager/CAIWidgetRegistry.lua</File>
+    <File>UI/uiManager/CAIWidget_Button.lua</File>
+    <File>UI/uiManager/CAIWidget_MenuItem.lua</File>
+    <File>UI/uiManager/CAIWidget_StaticText.lua</File>
+    <File>UI/uiManager/CAIWidget_Panel.lua</File>
+    <File>UI/uiManager/CAIWidget_Dialog.lua</File>
+    <File>UI/uiManager/CAIWidget_List.lua</File>
+    <File>UI/uiManager/CAIWidget_HorizontalList.lua</File>
+    <File>UI/uiManager/CAIWidget_SubMenu.lua</File>
+    <File>UI/uiManager/CAIWidget_Dropdown.lua</File>
+    <File>UI/uiManager/CAIWidget_Tree.lua</File>
+    <File>UI/uiManager/CAIWidget_TreeItem.lua</File>
+    <File>UI/uiManager/CAIWidget_Checkbox.lua</File>
+    <File>UI/uiManager/CAIWidget_Slider.lua</File>
+    <File>UI/uiManager/CAIWidget_EditBox.lua</File>
+    <File>UI/uiManager/CAIWidget_Tab.lua</File>
+    <File>UI/uiManager/CAIWidget_TabPage.lua</File>
+    <File>UI/uiManager/CAIWidget_TabControl.lua</File>
+    <File>UI/uiManager/CAIWidget_Table.lua</File>
+    <File>UI/uiManager/CAIWidget_GameView.lua</File>
+    <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>
+    <File>UI/uiManager/CAIUIScreenManager.lua</File>
     <File>UI/inGame/worldInfo.lua</File>
     <File>UI/inGame/navCursor.lua</File>
     <File>UI/inGame/MovementActions_CAI.lua</File>
@@ -105,10 +131,36 @@
         <LoadOrder>1</LoadOrder>
       </Properties>
       <File>caiUtils.lua</File>
-      <File>UI/uiManager/UIScreenManager.lua</File>
-      <File>UI/uiManager/baseWidget.lua</File>
-      <File>UI/uiManager/widgetTemplateHelpers.lua</File>
-      <File>UI/uiManager/widgetTemplates.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_Navigation.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_Search.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_Tree.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_EditBox.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_DialogBuilder.lua</File>
+      <File>UI/uiManager/CAIWidget_Base.lua</File>
+      <File>UI/uiManager/CAIWidget_Container.lua</File>
+      <File>UI/uiManager/CAIWidget_Value.lua</File>
+      <File>UI/uiManager/CAIWidgetRegistry.lua</File>
+      <File>UI/uiManager/CAIWidget_Button.lua</File>
+      <File>UI/uiManager/CAIWidget_MenuItem.lua</File>
+      <File>UI/uiManager/CAIWidget_StaticText.lua</File>
+      <File>UI/uiManager/CAIWidget_Panel.lua</File>
+      <File>UI/uiManager/CAIWidget_Dialog.lua</File>
+      <File>UI/uiManager/CAIWidget_List.lua</File>
+      <File>UI/uiManager/CAIWidget_HorizontalList.lua</File>
+      <File>UI/uiManager/CAIWidget_SubMenu.lua</File>
+      <File>UI/uiManager/CAIWidget_Dropdown.lua</File>
+      <File>UI/uiManager/CAIWidget_Tree.lua</File>
+      <File>UI/uiManager/CAIWidget_TreeItem.lua</File>
+      <File>UI/uiManager/CAIWidget_Checkbox.lua</File>
+      <File>UI/uiManager/CAIWidget_Slider.lua</File>
+      <File>UI/uiManager/CAIWidget_EditBox.lua</File>
+      <File>UI/uiManager/CAIWidget_Tab.lua</File>
+      <File>UI/uiManager/CAIWidget_TabPage.lua</File>
+      <File>UI/uiManager/CAIWidget_TabControl.lua</File>
+      <File>UI/uiManager/CAIWidget_Table.lua</File>
+      <File>UI/uiManager/CAIWidget_GameView.lua</File>
+      <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>
+      <File>UI/uiManager/CAIUIScreenManager.lua</File>
       <File>UI/frontEnd/IntroScreen.lua</File>
       <File>UI/frontEnd/FrontEndPopup.lua</File>
       <File>UI/frontEnd/FrontEnd.lua</File>
@@ -143,10 +195,36 @@
       </Properties>
       <File>UI/inGame/InGame.lua</File>
       <File>caiUtils.lua</File>
-      <File>UI/uiManager/UIScreenManager.lua</File>
-      <File>UI/uiManager/baseWidget.lua</File>
-      <File>UI/uiManager/widgetTemplateHelpers.lua</File>
-      <File>UI/uiManager/widgetTemplates.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_Navigation.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_Search.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_Tree.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_EditBox.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_DialogBuilder.lua</File>
+      <File>UI/uiManager/CAIWidget_Base.lua</File>
+      <File>UI/uiManager/CAIWidget_Container.lua</File>
+      <File>UI/uiManager/CAIWidget_Value.lua</File>
+      <File>UI/uiManager/CAIWidgetRegistry.lua</File>
+      <File>UI/uiManager/CAIWidget_Button.lua</File>
+      <File>UI/uiManager/CAIWidget_MenuItem.lua</File>
+      <File>UI/uiManager/CAIWidget_StaticText.lua</File>
+      <File>UI/uiManager/CAIWidget_Panel.lua</File>
+      <File>UI/uiManager/CAIWidget_Dialog.lua</File>
+      <File>UI/uiManager/CAIWidget_List.lua</File>
+      <File>UI/uiManager/CAIWidget_HorizontalList.lua</File>
+      <File>UI/uiManager/CAIWidget_SubMenu.lua</File>
+      <File>UI/uiManager/CAIWidget_Dropdown.lua</File>
+      <File>UI/uiManager/CAIWidget_Tree.lua</File>
+      <File>UI/uiManager/CAIWidget_TreeItem.lua</File>
+      <File>UI/uiManager/CAIWidget_Checkbox.lua</File>
+      <File>UI/uiManager/CAIWidget_Slider.lua</File>
+      <File>UI/uiManager/CAIWidget_EditBox.lua</File>
+      <File>UI/uiManager/CAIWidget_Tab.lua</File>
+      <File>UI/uiManager/CAIWidget_TabPage.lua</File>
+      <File>UI/uiManager/CAIWidget_TabControl.lua</File>
+      <File>UI/uiManager/CAIWidget_Table.lua</File>
+      <File>UI/uiManager/CAIWidget_GameView.lua</File>
+      <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>
+      <File>UI/uiManager/CAIUIScreenManager.lua</File>
       <File>UI/inGame/worldInfo.lua</File>
       <File>UI/inGame/navCursor.lua</File>
       <File>UI/inGame/MovementActions_CAI.lua</File>

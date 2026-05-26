@@ -1,7 +1,6 @@
 -- ===========================================================================
 --	Options
 -- ===========================================================================
-include("UIScreenManager")
 include("Civ6Common");
 include("InstanceManager");
 include("PopupDialog");
@@ -2112,37 +2111,54 @@ function Initialize()
 end
 
 --#Accessibility integration
+-- ===========================================================================
+-- All accessibility hooks live in this section. The screen's vanilla code
+-- above is unchanged; everything here wraps it or builds parallel widgets
+-- through the new CAI UI manager (see docs/ui-manager.md).
+--
+-- Layout: Panel root
+--   ├── TabControl (Game / Graphics / Audio / Interface / Application /
+--   │              Language? / KeyBindings?)
+--   └── Action row (Confirm, Reset, Cancel)
+--
+-- The screen mirrors vanilla state: each widget reads live from the matching
+-- Controls.* control and writes back through the vanilla setter handler that
+-- PopulateComboBox/PopulateCheckBox/PopulateEditBox registered. The CAI tree
+-- on the keybindings page rebuilds whenever vanilla's RefreshKeyBinding runs.
+-- ===========================================================================
 include("caiUtils")
-local mgr                 = ExposedMembers.CAI_UIManager
-local OptionsPanel        = nil ---@type UIWidget
-local OptionsList         = nil ---@type UIWidget
-local TabBar              = nil ---@type UIWidget
-local m_activeTabIdx      = 1
-local m_ignoreNextBinding = false
-local m_bindingPopup      = nil ---@type UIWidget|nil
-local m_ctrlData          = {}
-local m_resModes          = {}
+include("CAIUIScreenManager") -- self-runs UIScreenManager:Init() and populates ExposedMembers.CAI_UIManager
 
----Capture dropdown options and handler when PopulateComboBox is called
-PopulateComboBox          = WrapFunc(PopulateComboBox, function(orig, ctrl, vals, sel, handler, locked)
+local mgr             = ExposedMembers.CAI_UIManager
+local optionsRoot     ---@type UIWidget|nil
+local tabs            ---@type UIWidget|nil
+local keysTree        ---@type UIWidget|nil
+local rootPushed      = false
+local m_tabPages      = {} ---@type table<integer, UIWidget>     -- vanilla tab idx -> TabPage
+local m_ctrlData      = {} ---@type table<table, table>          -- vanilla ctrl -> { values?, handler? }
+local m_resModes      = {} ---@type table[]                       -- list of { label, w, h, hz }
+local m_suppressTabSync = false  -- guard against vanilla/CAI tab-switch ping-pong
+
+-- ---------------------------------------------------------------------------
+-- Capture vanilla populate handlers so each widget can read its handler back
+-- ---------------------------------------------------------------------------
+
+PopulateComboBox = WrapFunc(PopulateComboBox, function(orig, ctrl, vals, sel, handler, locked)
     orig(ctrl, vals, sel, handler, locked)
     m_ctrlData[ctrl] = { values = vals, handler = handler }
 end)
 
----Capture toggle handler when PopulateCheckBox is called
-PopulateCheckBox          = WrapFunc(PopulateCheckBox, function(orig, ctrl, val, handler, locked)
+PopulateCheckBox = WrapFunc(PopulateCheckBox, function(orig, ctrl, val, handler, locked)
     orig(ctrl, val, handler, locked)
     m_ctrlData[ctrl] = { handler = handler }
 end)
 
----Capture commit handler when PopulateEditBox is called
-PopulateEditBox           = WrapFunc(PopulateEditBox, function(orig, ctrl, val, handler, locked)
+PopulateEditBox = WrapFunc(PopulateEditBox, function(orig, ctrl, val, handler, locked)
     orig(ctrl, val, handler, locked)
     m_ctrlData[ctrl] = { handler = handler }
 end)
 
----Capture resolution modes on each AdjustResolutionPulldown call
-AdjustResolutionPulldown  = WrapFunc(AdjustResolutionPulldown, function(orig, window_mode, is_in_game)
+AdjustResolutionPulldown = WrapFunc(AdjustResolutionPulldown, function(orig, window_mode, is_in_game)
     orig(window_mode, is_in_game)
     m_resModes = {}
     for _, v in ipairs(Options.GetAvailableDisplayModes()) do
@@ -2152,139 +2168,356 @@ AdjustResolutionPulldown  = WrapFunc(AdjustResolutionPulldown, function(orig, wi
     end
 end)
 
--- ============================================================
--- Widget factory helpers
--- ============================================================
+-- ---------------------------------------------------------------------------
+-- Keybindings tree
+-- ---------------------------------------------------------------------------
 
----Standard dropdown backed by a PopulateComboBox-registered control
-local function W_Dropdown(labelText, ctrl)
-    local data = m_ctrlData[ctrl]
-    if not data then return nil end
-    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsDropdownMenu"), "DropdownMenu", {
-        GetLabel     = function() return labelText end,
-        GetValue     = function() return ctrl:GetButton():GetText() end,
-        GetTooltip   = function() return ctrl:GetToolTipString() end,
-        IsDisabled   = function() return ctrl:IsDisabled() end,
-        IsHidden     = function() return ctrl:IsHidden() end,
-        OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-        OnClick      = function(w)
-            local optList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsList"), "List")
-            optList:AddInputBinding({
-                Key = Keys.VK_ESCAPE,
-                Action = function()
-                    mgr:Pop()
-                    return true
-                end
-            })
-            local currentText = ctrl:GetButton():GetText()
-            local selectedChild = nil
-            for _, opt in ipairs(data.values) do
-                local optLabel = type(opt[1]) == "string" and Locale.Lookup(opt[1]) or tostring(opt[1])
-                local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsMenuItem"), "MenuItem", {
-                    GetLabel     = function() return optLabel end,
-                    OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-                    OnClick      = function()
-                        if data.handler then data.handler(opt[2]) end
-                        mgr:Pop()
-                    end,
-                })
-                optList:AddChild(child)
-                if not selectedChild and optLabel == currentText then
-                    selectedChild = child
-                end
-            end
-            if selectedChild then
-                optList.FocusedChild = selectedChild
-            end
-            mgr:Push(optList)
-        end,
-    })
+local function GestureOrUnbound(actionId, slot)
+    local g = Input.GetGestureDisplayString(actionId, slot)
+    if not g or g == "" then return Locale.Lookup("LOC_CAI_KEYBINDS_UNBOUND") end
+    return g
 end
 
----Checkbox widget backed by a PopulateCheckBox-registered control
+local bindingCaptureWidget    ---@type UIWidget|nil
+local bindingCaptureListener  ---@type fun()|nil
+
+---Close the capture widget if pushed and detach the one-shot gesture listener.
+local function CloseBindingCapture()
+    if bindingCaptureListener then
+        Events.InputGestureRecorded.Remove(bindingCaptureListener)
+        bindingCaptureListener = nil
+    end
+    if bindingCaptureWidget then
+        mgr:RemoveFromStack(bindingCaptureWidget:GetId())
+        bindingCaptureWidget = nil
+    end
+end
+
+---Push a "press a key" announcement and start vanilla gesture recording.
+---The capture widget owns Escape (cancels + pops) and a one-shot
+---InputGestureRecorded listener pops it after vanilla's BindRecordedGesture
+---has applied the new binding.
+local function OpenBindingCapture(actionId, slot)
+    if bindingCaptureWidget then return end
+    local actionName = Locale.Lookup(Input.GetActionName(actionId))
+    bindingCaptureWidget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIKeys_Capture"), "StaticText", {
+        Label = function() return Locale.Lookup("LOC_CAI_KEYBINDING_PRESS_KEY", actionName) end,
+    })
+    bindingCaptureWidget:AddInputBindings({
+        {
+            Key = Keys.VK_ESCAPE, MSG = KeyEvents.KeyUp,
+            Action = function()
+                StopActiveKeyBinding()
+                CloseBindingCapture()
+                return true
+            end,
+        },
+    })
+    -- Register the one-shot listener BEFORE BeginRecordingGestures so we
+    -- don't miss a fast recording. Vanilla's BindRecordedGesture is added in
+    -- InitializeKeyBinding earlier, so it fires first and applies the bind;
+    -- our listener then tears down the CAI capture widget.
+    bindingCaptureListener = function() CloseBindingCapture() end
+    Events.InputGestureRecorded.Add(bindingCaptureListener)
+    mgr:Push(bindingCaptureWidget, { priority = PopupPriority.Current })
+    -- Defer BeginRecordingGestures by one frame so the activating Enter is
+    -- fully drained from the input queue before the recorder turns on —
+    -- otherwise it captures the same Enter and immediately binds VK_RETURN.
+    ContextPtr:SetUpdate(function()
+        ContextPtr:ClearUpdate()
+        StartActiveKeyBinding(actionId, slot)
+    end)
+end
+
+local function OpenKeybindMenu(actionId, actionName)
+    local dd = mgr:CreateWidget(mgr:GenerateWidgetId("CAIKeys_Menu"), "Dropdown", {
+        Label = function() return actionName end,
+    })
+    dd:SetOptions({
+        { label = Locale.Lookup("LOC_CAI_KEYBINDS_SET_PRIMARY"),   value = "p" },
+        { label = Locale.Lookup("LOC_CAI_KEYBINDS_SET_SECONDARY"), value = "s" },
+        { label = Locale.Lookup("LOC_CAI_KEYBINDS_CLEAR"),         value = "c" },
+    })
+    dd:On("value_changed", function(_, v)
+        mgr:RemoveFromStack(dd:GetId())
+        if v == "p" then
+            OpenBindingCapture(actionId, 0)
+        elseif v == "s" then
+            OpenBindingCapture(actionId, 1)
+        elseif v == "c" then
+            Input.ClearGesture(actionId, 0)
+            Input.ClearGesture(actionId, 1)
+            Controls.ConfirmButton:SetDisabled(false)
+            Speak(Locale.Lookup("LOC_CAI_KEYBINDS_CLEARED", actionName), true)
+            RefreshKeyBinding()
+        end
+    end)
+    mgr:Push(dd, { priority = PopupPriority.Current })
+    dd:Open()
+end
+
+local function RebuildKeyBindingsTree()
+    if not keysTree then return end
+    local capture = mgr:CaptureFocusKey(keysTree)
+    keysTree:ClearChildren()
+
+    local actions = {}
+    local count = Input.GetActionCount()
+    for i = 0, count - 1 do
+        local action = Input.GetActionId(i)
+        if Input.ShouldShowActionKeybinding(action) then
+            table.insert(actions, {
+                id       = action,
+                name     = Locale.Lookup(Input.GetActionName(action)),
+                category = Locale.Lookup(Input.GetActionCategory(action)),
+            })
+        end
+    end
+    table.sort(actions, function(a, b)
+        local r = Locale.Compare(a.category, b.category)
+        if r == 0 then return Locale.Compare(a.name, b.name) == -1 end
+        return r == -1
+    end)
+
+    local catNode, catKey
+    for _, info in ipairs(actions) do
+        local actionId   = info.id
+        local actionName = info.name
+        if info.category ~= catKey then
+            catKey = info.category
+            catNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIKeys_Cat"), "TreeItem", {
+                Label    = info.category,
+                FocusKey = "cat:" .. info.category,
+            })
+            keysTree:AddChild(catNode)
+        end
+
+        local actionNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIKeys_Act"), "TreeItem", {
+            Label    = function()
+                return Locale.Lookup("LOC_CAI_KEYBINDS_ACTION_LINE",
+                    actionName,
+                    GestureOrUnbound(actionId, 0),
+                    GestureOrUnbound(actionId, 1))
+            end,
+            Tooltip  = function() return Locale.Lookup(Input.GetActionDescription(actionId)) or "" end,
+            FocusKey = "act:" .. tostring(actionId),
+        })
+        actionNode:On("activate", function() OpenKeybindMenu(actionId, actionName) end)
+        catNode:AddChild(actionNode)
+    end
+
+    mgr:RestoreFocus(keysTree, capture)
+end
+
+-- ---------------------------------------------------------------------------
+-- Widget factories
+-- ---------------------------------------------------------------------------
+
+---Build option list [{label, value}] from m_ctrlData entry
+local function BuildDropdownOptions(values)
+    local out = {}
+    for i, opt in ipairs(values) do
+        local label = type(opt[1]) == "string" and Locale.Lookup(opt[1]) or tostring(opt[1])
+        out[i] = { label = label, value = opt[2] }
+    end
+    return out
+end
+
+---Index whose label matches the current vanilla button text (best-effort).
+---Returns 1 if no match.
+local function SelectedIndexFor(options, currentText)
+    if not currentText then return 1 end
+    for i, opt in ipairs(options) do
+        if opt.label == currentText then return i end
+    end
+    return 1
+end
+
+---Standard dropdown backed by a PopulateComboBox-registered control.
+local function W_Dropdown(labelText, ctrl)
+    local data = m_ctrlData[ctrl]
+    if not (data and data.values) then return nil end
+    local options = BuildDropdownOptions(data.values)
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIOpt_Dropdown"), "Dropdown", {
+        Label             = function() return labelText end,
+        Tooltip           = function() return ctrl:GetToolTipString() or "" end,
+        DisabledPredicate = function() return ctrl:IsDisabled() end,
+        HiddenPredicate   = function() return ctrl:IsHidden() end,
+    })
+    w:SetFocusSound("Main_Menu_Mouse_Over")
+    w:SetOptions(options)
+    w:SetSelectedIndex(SelectedIndexFor(options, ctrl:GetButton() and ctrl:GetButton():GetText() or nil), true)
+    w:SetValueSetter(function(_, value)
+        if data.handler then data.handler(value) end
+        -- Mirror the vanilla button text so the visual control matches the
+        -- CAI selection (PopulateComboBox's RegisterSelectionCallback does
+        -- this when the user clicks the native pulldown; we bypass that).
+        for _, opt in ipairs(data.values) do
+            if opt[2] == value and ctrl:GetButton() then
+                ctrl:GetButton():LocalizeAndSetText(opt[1])
+                break
+            end
+        end
+    end)
+    return w
+end
+
+---Checkbox backed by a PopulateCheckBox-registered control.
 local function W_Checkbox(ctrl)
     local data = m_ctrlData[ctrl]
     if not data then return nil end
-    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsCheckbox"), "Checkbox", {
-        GetLabel   = function() return ctrl:GetText() end,
-        GetTooltip = function() return ctrl:GetToolTipString() end,
-        GetValue   = function()
-            return ctrl:IsSelected() and Locale.Lookup("LOC_OPTIONS_ENABLED")
-                or Locale.Lookup("LOC_OPTIONS_DISABLED")
-        end,
-        IsDisabled = function() return ctrl:IsDisabled() end,
-        IsHidden   = function() return ctrl:IsHidden() end,
-        Toggle     = function(w)
-            local selected = not ctrl:IsSelected()
-            ctrl:SetSelected(selected)
-            if data.handler then data.handler(selected) end
-        end,
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIOpt_Checkbox"), "Checkbox", {
+        Label             = function() return ctrl:GetText() or "" end,
+        Tooltip           = function() return ctrl:GetToolTipString() or "" end,
+        DisabledPredicate = function() return ctrl:IsDisabled() end,
+        HiddenPredicate   = function() return ctrl:IsHidden() end,
     })
+    w:SetFocusSound("Main_Menu_Mouse_Over")
+    w:SetChecked(ctrl:IsSelected(), true)
+    w:SetValueSetter(function(_, checked)
+        ctrl:SetSelected(checked)
+        if data.handler then data.handler(checked) end
+    end)
+    return w
 end
 
----Edit box widget backed by a PopulateEditBox-registered control
+---Edit box backed by a PopulateEditBox-registered control.
 local function W_EditBox(labelText, ctrl)
     local data = m_ctrlData[ctrl]
     if not data then return nil end
-    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsEdit"), "Edit", {
-        GetLabel   = function() return labelText end,
-        GetValue   = function() return ctrl:GetText() end,
-        IsDisabled = function() return ctrl:IsDisabled() end,
-        OnSetText  = function(w, text)
-            ctrl:SetText(text)
-        end,
-        OnCommit   = function(w, text)
-            ctrl:SetText(text)
-            if data.handler then data.handler(text) end
-            Controls.ConfirmButton:SetDisabled(false)
-        end,
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIOpt_Edit"), "EditBox", {
+        Label             = function() return labelText end,
+        Tooltip           = function() return ctrl:GetToolTipString() or "" end,
+        DisabledPredicate = function() return ctrl:IsDisabled() end,
+        HiddenPredicate   = function() return ctrl:IsHidden() end,
     })
+    w:SetFocusSound("Main_Menu_Mouse_Over")
+    w:SetText(ctrl:GetText() or "", true)
+    w:SetValueSetter(function(_, text)
+        ctrl:SetText(text)
+        if data.handler then data.handler(text) end
+        Controls.ConfirmButton:SetDisabled(false)
+    end)
+    return w
 end
 
----Stepped slider (fires the registered callback via SetStepAndCall)
+---Stepped slider: vanilla SetStepAndCall drives all the side-effects.
 local function W_SteppedSlider(labelText, sliderCtrl, valueLabelCtrl)
-    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsSlider"), "Slider", {
-        GetLabel   = function() return labelText end,
-        GetValue   = function()
-            return valueLabelCtrl and valueLabelCtrl:GetText()
-                or tostring(math.floor(sliderCtrl:GetValue() * 100)) .. "%"
-        end,
-        GetTooltip = function() return sliderCtrl:GetToolTipString() end,
-        IsDisabled = function() return sliderCtrl:IsDisabled() end,
-        Increment  = function() sliderCtrl:SetStepAndCall(math.min(sliderCtrl:GetStep() + 1, sliderCtrl:GetNumSteps())) end,
-        Decrement  = function() sliderCtrl:SetStepAndCall(math.max(sliderCtrl:GetStep() - 1, 0)) end,
+    local numSteps = sliderCtrl:GetNumSteps() or 0
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIOpt_Slider"), "Slider", {
+        Label             = function() return labelText end,
+        Tooltip           = function() return sliderCtrl:GetToolTipString() or "" end,
+        DisabledPredicate = function() return sliderCtrl:IsDisabled() end,
+        HiddenPredicate   = function() return sliderCtrl:IsHidden() end,
     })
+    w:SetFocusSound("Main_Menu_Mouse_Over")
+    w:SetMin(0); w:SetMax(numSteps); w:SetStepSize(1); w:SetPageStep(math.max(1, math.floor(numSteps / 10)))
+    -- ValueGetter reads the vanilla value-label control when present so we
+    -- announce the same "1080p" / "5%" / etc. string the user sees.
+    w:SetValueGetter(function()
+        if valueLabelCtrl and valueLabelCtrl.GetText then return valueLabelCtrl:GetText() or "" end
+        return tostring(sliderCtrl:GetStep() or 0)
+    end)
+    w:SetValue(sliderCtrl:GetStep() or 0, true)
+    w:SetValueSetter(function(_, step)
+        sliderCtrl:SetStepAndCall(step)
+        Controls.ConfirmButton:SetDisabled(false)
+    end)
+    return w
 end
 
----Continuous audio-volume slider (directly writes the option on change)
+---Continuous audio-volume slider. Vanilla SetAudioOption writes the change;
+---we also update the slider control so the visual stays in sync.
 local function W_VolSlider(labelText, sliderCtrl, audioGroup, audioKey, soundKey)
-    local function ApplyVolume(delta)
-        local v = math.max(0.0, math.min(sliderCtrl:GetValue() + delta, 1.0))
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIOpt_VolSlider"), "Slider", {
+        Label             = function() return labelText end,
+        Tooltip           = function() return sliderCtrl:GetToolTipString() or "" end,
+        DisabledPredicate = function() return sliderCtrl:IsDisabled() end,
+        HiddenPredicate   = function() return sliderCtrl:IsHidden() end,
+    })
+    w:SetFocusSound("Main_Menu_Mouse_Over")
+    w:SetMin(0); w:SetMax(100); w:SetStepSize(1); w:SetPageStep(10)
+    w:SetValueGetter(function() return tostring(math.floor((sliderCtrl:GetValue() or 0) * 100)) .. "%" end)
+    w:SetValue(math.floor((sliderCtrl:GetValue() or 0) * 100), true)
+    w:SetValueSetter(function(_, pct)
+        local v = math.max(0.0, math.min(pct / 100.0, 1.0))
         sliderCtrl:SetValue(v)
         Options.SetAudioOption(audioGroup, audioKey, v * 100.0, 0)
         if soundKey then UI.PlaySound(soundKey) end
         Controls.ConfirmButton:SetDisabled(false)
-    end
-    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsSlider"), "Slider", {
-        GetLabel  = function() return labelText end,
-        GetValue  = function() return tostring(math.floor(sliderCtrl:GetValue() * 100)) .. "%" end,
-        Increment = function() ApplyVolume(0.01) end,
-        Decrement = function() ApplyVolume(-0.01) end,
+    end)
+    return w
+end
+
+---Generic continuous slider that writes to a user/graphics option via setter.
+---The setter receives the [0..1] normalized slider value AND the live vanilla
+---value control after writing, so labels stay in sync.
+---@param labelText string
+---@param sliderCtrl table
+---@param valueLabelCtrl table|nil
+---@param setterFn fun(v:number) -- called with normalized [0..1]
+local function W_ContSlider(labelText, sliderCtrl, valueLabelCtrl, setterFn)
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIOpt_ContSlider"), "Slider", {
+        Label             = function() return labelText end,
+        Tooltip           = function() return sliderCtrl:GetToolTipString() or "" end,
+        DisabledPredicate = function() return sliderCtrl:IsDisabled() end,
+        HiddenPredicate   = function() return sliderCtrl:IsHidden() end,
     })
+    w:SetFocusSound("Main_Menu_Mouse_Over")
+    w:SetMin(0); w:SetMax(100); w:SetStepSize(1); w:SetPageStep(10)
+    w:SetValueGetter(function()
+        if valueLabelCtrl and valueLabelCtrl.GetText then return valueLabelCtrl:GetText() or "" end
+        return tostring(math.floor((sliderCtrl:GetValue() or 0) * 100)) .. "%"
+    end)
+    w:SetValue(math.floor((sliderCtrl:GetValue() or 0) * 100), true)
+    w:SetValueSetter(function(_, pct)
+        local v = math.max(0.0, math.min(pct / 100.0, 1.0))
+        sliderCtrl:SetValue(v)
+        setterFn(v)
+        Controls.ConfirmButton:SetDisabled(false)
+    end)
+    return w
 end
 
----Appends a widget to OptionsList (silently ignores nil)
-local function Add(widget)
-    if widget then OptionsList:AddChild(widget) end
+---Simple button bound to a vanilla control's text + callback.
+local function W_Button(ctrl, onActivate)
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIOpt_Button"), "Button", {
+        Label             = function() return ctrl:GetText() or "" end,
+        Tooltip           = function() return ctrl:GetToolTipString() or "" end,
+        DisabledPredicate = function() return ctrl:IsDisabled() end,
+        HiddenPredicate   = function() return ctrl:IsHidden() end,
+    })
+    w:SetFocusSound("Main_Menu_Mouse_Over")
+    w:On("activate", onActivate)
+    return w
 end
 
--- ============================================================
--- Spec dispatch helpers
--- ============================================================
+---Custom-list dropdown: options are not from PopulateComboBox but built by
+---the caller. `optionsFn` returns the option list at build time, `onCommit`
+---runs with the selected option's value.
+local function W_CustomDropdown(labelText, ctrl, optionsFn, onCommit)
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIOpt_Dropdown"), "Dropdown", {
+        Label             = function() return labelText end,
+        Tooltip           = function() return ctrl:GetToolTipString() or "" end,
+        DisabledPredicate = function() return ctrl:IsDisabled() end,
+        HiddenPredicate   = function() return ctrl:IsHidden() end,
+    })
+    w:SetFocusSound("Main_Menu_Mouse_Over")
+    local options = optionsFn() or {}
+    w:SetOptions(options)
+    local currentText = ctrl:GetButton() and ctrl:GetButton():GetText() or nil
+    w:SetSelectedIndex(SelectedIndexFor(options, currentText), true)
+    w:SetValueSetter(function(_, value) onCommit(value) end)
+    return w
+end
 
----Dispatches one spec entry to the appropriate widget factory.
----If s.adv is true, the returned widget's IsHidden is overridden to track
----Controls.AdvancedOptionsContainer so navigation skips it when collapsed.
+-- ---------------------------------------------------------------------------
+-- Spec dispatch
+-- ---------------------------------------------------------------------------
+
+---Dispatch one spec entry to the matching factory. s.adv=true overrides
+---HiddenPredicate to track the AdvancedOptionsContainer so navigation skips
+---when the advanced section is collapsed.
 local function BuildFromSpec(s)
     if s.when and not s.when() then return nil end
     local lbl = s.label and Locale.Lookup(s.label) or (s.labelFn and s.labelFn()) or nil
@@ -2303,19 +2536,21 @@ local function BuildFromSpec(s)
         w = s.build()
     end
     if w and s.adv then
-        w.IsHidden = function() return Controls.AdvancedOptionsContainer:IsHidden() end
+        w:SetHiddenPredicate(function() return Controls.AdvancedOptionsContainer:IsHidden() end)
     end
     return w
 end
 
----Iterates a spec table and adds each resulting widget to OptionsList
-local function AddSpecs(specs)
-    for _, s in ipairs(specs) do Add(BuildFromSpec(s)) end
+local function AddSpecsTo(pageList, specs)
+    for _, s in ipairs(specs) do
+        local w = BuildFromSpec(s)
+        if w then pageList:AddChild(w) end
+    end
 end
 
--- ============================================================
--- Tab spec tables
--- ============================================================
+-- ---------------------------------------------------------------------------
+-- Per-tab specs
+-- ---------------------------------------------------------------------------
 
 local gameTabSpecs = {
     { type = "D", label = "LOC_OPTIONS_QUICK_COMBAT",  ctrl = Controls.QuickCombatPullDown },
@@ -2327,38 +2562,24 @@ local gameTabSpecs = {
         type = "D",
         labelFn = function() return Controls.AutoDownloadLabel:GetText() end,
         ctrl = Controls.AutoDownloadPullDown,
-        when = function() return not Controls.AutoDownloadPullDown:IsHidden() end
+        when = function() return not Controls.AutoDownloadPullDown:IsHidden() end,
     },
     { type = "D", label = "LOC_OPTIONS_TUTORIAL",            ctrl = Controls.TutorialPullDown },
     { type = "D", label = "LOC_OPTIONS_TURNS_BETWEEN_AUTOSAVES", ctrl = Controls.SaveFrequencyPullDown },
     { type = "D", label = "LOC_OPTIONS_AUTOSAVES_TO_KEEP",   ctrl = Controls.SaveKeepPullDown },
     {
         type = "X",
-        build = function()      -- Time-of-day slider (continuous; replicates callback inline)
-            return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsSlider"), "Slider", {
-                GetLabel   = function() return Locale.Lookup("LOC_OPTIONS_TIME_OF_DAY") end,
-                GetValue   = function() return Controls.TODText:GetText() end,
-                GetTooltip = function() return Controls.TODSlider:GetToolTipString() end,
-                Increment  = function()
-                    local v = math.min(Controls.TODSlider:GetValue() + (1 / TIME_SCALE), 1.0)
-                    Controls.TODSlider:SetValue(v)
+        build = function()      -- Time-of-day slider (continuous; replicates vanilla callback)
+            return W_ContSlider(
+                Locale.Lookup("LOC_OPTIONS_TIME_OF_DAY"),
+                Controls.TODSlider, Controls.TODText,
+                function(v)
                     local fTime = v * TIME_SCALE
                     Options.SetGraphicsOption("General", "DefaultTimeOfDay", fTime, 0)
                     UI.SetAmbientTimeOfDay(fTime)
                     UpdateTimeLabel(fTime)
-                    Controls.ConfirmButton:SetDisabled(false)
-                end,
-                Decrement  = function()
-                    local v = math.max(Controls.TODSlider:GetValue() - (1 / TIME_SCALE), 0.0)
-                    Controls.TODSlider:SetValue(v)
-                    local fTime = v * TIME_SCALE
-                    Options.SetGraphicsOption("General", "DefaultTimeOfDay", fTime, 0)
-                    UI.SetAmbientTimeOfDay(fTime)
-                    UpdateTimeLabel(fTime)
-                    Controls.ConfirmButton:SetDisabled(false)
-                end,
-            })
-        end
+                end)
+        end,
     },
     { type = "C", ctrl = Controls.TimeOfDayCheckbox },
     { type = "E", label = "LOC_OPTIONS_LAN_PLAYER_NAME", ctrl = Controls.LANPlayerNameEdit },
@@ -2370,121 +2591,81 @@ local graphicsBaseSpecs = {
     {
         type = "X",
         build = function()      -- Adapter pulldown (lazy; not via PopulateComboBox)
-            return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsDropdownMenu"), "DropdownMenu", {
-                GetLabel     = function() return Locale.Lookup("LOC_OPTIONS_VIDEO_ADAPTER_TEXT") end,
-                GetValue     = function() return Controls.AdapterPullDown:GetButton():GetText() end,
-                GetTooltip   = function() return Controls.AdapterPullDown:GetToolTipString() end,
-                IsDisabled   = function() return Controls.AdapterPullDown:IsDisabled() end,
-                OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-                OnClick      = function()
-                    local adapters = Options.GetAvailableDisplayAdapters()
-                    local ddList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsList"), "List")
-                    ddList:AddInputBinding({ Key = Keys.VK_ESCAPE, Action = function()
-                        mgr:Pop(); return true
-                    end })
-                    local currentText = Controls.AdapterPullDown:GetButton():GetText()
-                    local selectedChild = nil
-                    for i, v in pairs(adapters) do
-                        local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsMenuItem"), "MenuItem", {
-                            GetLabel     = function() return v end,
-                            OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-                            OnClick      = function()
-                                Controls.AdapterPullDown:GetButton():SetText(v)
-                                Options.SetAppOption("Video", "DeviceID", i)
-                                Controls.ConfirmButton:SetDisabled(false)
-                                _PromptRestartApp = true
-                                mgr:Pop()
-                            end,
-                        })
-                        ddList:AddChild(child)
-                        if not selectedChild and v == currentText then
-                            selectedChild = child
-                        end
+            return W_CustomDropdown(
+                Locale.Lookup("LOC_OPTIONS_VIDEO_ADAPTER_TEXT"),
+                Controls.AdapterPullDown,
+                function()
+                    local out = {}
+                    for i, v in pairs(Options.GetAvailableDisplayAdapters()) do
+                        table.insert(out, { label = v, value = i })
                     end
-                    if selectedChild then
-                        ddList.FocusedChild = selectedChild
-                    end
-                    mgr:Push(ddList)
+                    return out
                 end,
-            })
-        end
+                function(deviceIdx)
+                    local adapters = Options.GetAvailableDisplayAdapters()
+                    local label = adapters and adapters[deviceIdx] or nil
+                    if label and Controls.AdapterPullDown:GetButton() then
+                        Controls.AdapterPullDown:GetButton():SetText(label)
+                    end
+                    Options.SetAppOption("Video", "DeviceID", deviceIdx)
+                    Controls.ConfirmButton:SetDisabled(false)
+                    _PromptRestartApp = true
+                end)
+        end,
     },
     { type = "C", ctrl = Controls.MultiGPUCheckbox },
     {
         type = "X",
         build = function()      -- Resolution pulldown (lazy; uses m_resModes)
-            return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsDropdownMenu"), "DropdownMenu", {
-                GetLabel     = function() return Locale.Lookup("LOC_OPTIONS_VIDEO_RESOLUTION_TEXT") end,
-                GetValue     = function() return Controls.ResolutionPullDown:GetButton():GetText() end,
-                GetTooltip   = function() return Controls.ResolutionPullDown:GetToolTipString() end,
-                IsDisabled   = function() return Controls.ResolutionPullDown:IsDisabled() end,
-                OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-                OnClick      = function()
-                    local ddList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsList"), "List")
-                    ddList:AddInputBinding({ Key = Keys.VK_ESCAPE, Action = function()
-                        mgr:Pop(); return true
-                    end })
-                    local curW = tonumber(Options.GetAppOption("Video", "RenderWidth"))
-                    local curH = tonumber(Options.GetAppOption("Video", "RenderHeight"))
-                    local selectedChild = nil
-                    for _, mode in ipairs(m_resModes) do
-                        local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsMenuItem"), "MenuItem", {
-                            GetLabel     = function() return mode.label end,
-                            OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-                            OnClick      = function()
-                                Options.SetAppOption("Video", "RenderWidth", mode.w)
-                                Options.SetAppOption("Video", "RenderHeight", mode.h)
-                                Options.SetGraphicsOption("Video", "RefreshRateInHz", mode.hz)
-                                Controls.ResolutionPullDown:GetButton():SetText(mode.label)
-                                Controls.ConfirmButton:SetDisabled(false)
-                                _PromptResolutionAck = (Options.GetAppOption("Video", "FullScreen") == FULLSCREEN_OPTION)
-                                mgr:Pop()
-                            end,
-                        })
-                        ddList:AddChild(child)
-                        if not selectedChild and tonumber(mode.w) == curW and tonumber(mode.h) == curH then
-                            selectedChild = child
-                        end
+            return W_CustomDropdown(
+                Locale.Lookup("LOC_OPTIONS_VIDEO_RESOLUTION_TEXT"),
+                Controls.ResolutionPullDown,
+                function()
+                    local out = {}
+                    for i, mode in ipairs(m_resModes) do
+                        table.insert(out, { label = mode.label, value = i })
                     end
-                    if selectedChild then
-                        ddList.FocusedChild = selectedChild
-                    end
-                    mgr:Push(ddList)
+                    return out
                 end,
-            })
-        end
+                function(modeIdx)
+                    local mode = m_resModes[modeIdx]
+                    if not mode then return end
+                    Options.SetAppOption("Video", "RenderWidth", mode.w)
+                    Options.SetAppOption("Video", "RenderHeight", mode.h)
+                    Options.SetGraphicsOption("Video", "RefreshRateInHz", mode.hz)
+                    if Controls.ResolutionPullDown:GetButton() then
+                        Controls.ResolutionPullDown:GetButton():SetText(mode.label)
+                    end
+                    Controls.ConfirmButton:SetDisabled(false)
+                    _PromptResolutionAck = (Options.GetAppOption("Video", "FullScreen") == FULLSCREEN_OPTION)
+                end)
+        end,
     },
     { type = "D", label = "LOC_OPTIONS_VIDEO_UI_UPSCALE_TEXT", ctrl = Controls.UIScalePulldown },
     { type = "D", label = "LOC_OPTIONS_VIDEO_WINDOW_MODE_TEXT", ctrl = Controls.FullScreenPullDown },
-    { type = "D", label = "LOC_OPTIONS_VIDEO_MSAA_TEXT",    ctrl = Controls.MSAAPullDown },
+    { type = "D", label = "LOC_OPTIONS_VIDEO_MSAA_TEXT", ctrl = Controls.MSAAPullDown },
     { type = "S", label = "LOC_OPTIONS_VIDEO_PERFORMANCE_TEXT", ctrl = Controls.PerformanceSlider, val = Controls.PerformanceValue },
-    { type = "S", label = "LOC_OPTIONS_VIDEO_MEMORY_TEXT",  ctrl = Controls.MemorySlider,    val = Controls.MemoryValue },
+    { type = "S", label = "LOC_OPTIONS_VIDEO_MEMORY_TEXT", ctrl = Controls.MemorySlider, val = Controls.MemoryValue },
     {
         type = "X",
-        build = function()      -- Advanced toggle button
-            return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsButton"), "Button", {
-                GetLabel     = function() return Controls.AdvancedGraphicsOptions:GetText() end,
-                OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-                OnClick      = function() OnToggleAdvancedOptions() end,
-            })
-        end
+        build = function()
+            return W_Button(Controls.AdvancedGraphicsOptions, function() OnToggleAdvancedOptions() end)
+        end,
     },
 }
 
--- adv=true: IsHidden delegates to Controls.AdvancedOptionsContainer so navigation
--- skips these entries when the advanced section is collapsed
 local graphicsAdvSpecs = {
     { adv = true, type = "C", ctrl = Controls.VSyncEnabledCheckbox },
-    { adv = true, type = "D", label = "LOC_OPTIONS_PERFORMANCE_TICK_INTERVAL_TEXT",  ctrl = Controls.TickIntervalPullDown },
+    { adv = true, type = "D", label = "LOC_OPTIONS_PERFORMANCE_TICK_INTERVAL_TEXT", ctrl = Controls.TickIntervalPullDown },
     { adv = true, type = "C", ctrl = Controls.AssetTextureResolutionCheckbox },
-    { adv = true, type = "D", label = "LOC_OPTIONS_VIDEO_VFX_DETAIL_LEVEL_TEXT",     ctrl = Controls.VFXDetailLevelPullDown },
+    { adv = true, type = "D", label = "LOC_OPTIONS_VIDEO_VFX_DETAIL_LEVEL_TEXT", ctrl = Controls.VFXDetailLevelPullDown },
     { adv = true, type = "C", ctrl = Controls.LightingBloomEnabledCheckbox },
     { adv = true, type = "C", ctrl = Controls.LightingDynamicLightingEnabledCheckbox },
     { adv = true, type = "C", ctrl = Controls.ShadowsEnabledCheckbox },
-    { adv = true, type = "D", label = "LOC_OPTIONS_SHADOWS_RESOLUTION_TEXT",         ctrl = Controls.ShadowsResolutionPullDown },
+    { adv = true, type = "D", label = "LOC_OPTIONS_SHADOWS_RESOLUTION_TEXT", ctrl = Controls.ShadowsResolutionPullDown },
     { adv = true, type = "C", ctrl = Controls.CloudShadowsEnabledCheckbox },
     { adv = true, type = "C", ctrl = Controls.SSOverlayEnabledCheckbox },
-    { adv = true, type = "D", label = "LOC_OPTIONS_TERRAIN_QUALITY_TOOLTIP",         ctrl = Controls.TerrainQualityPullDown },
+    { adv = true, type = "D", label = "LOC_OPTIONS_TERRAIN_QUALITY_TOOLTIP", ctrl = Controls.TerrainQualityPullDown },
     { adv = true, type = "C", ctrl = Controls.TerrainSynthesisCheckbox },
     { adv = true, type = "C", ctrl = Controls.TerrainTextureResolutionCheckbox },
     { adv = true, type = "C", ctrl = Controls.TerrainShaderCheckbox },
@@ -2493,100 +2674,67 @@ local graphicsAdvSpecs = {
     { adv = true, type = "C", ctrl = Controls.TerrainClutterCheckbox },
     { adv = true, type = "C", ctrl = Controls.WaterResolutionCheckbox },
     { adv = true, type = "C", ctrl = Controls.WaterShaderCheckbox },
-    { adv = true, type = "D", label = "LOC_OPTIONS_REFLECTION_PASSES_TOOLTIP",       ctrl = Controls.ReflectionPassesPullDown },
-    { adv = true, type = "D", label = "LOC_OPTIONS_LEADER_QUALITY_TOOLTIP",          ctrl = Controls.LeaderQualityPullDown },
+    { adv = true, type = "D", label = "LOC_OPTIONS_REFLECTION_PASSES_TOOLTIP", ctrl = Controls.ReflectionPassesPullDown },
+    { adv = true, type = "D", label = "LOC_OPTIONS_LEADER_QUALITY_TOOLTIP", ctrl = Controls.LeaderQualityPullDown },
     { adv = true, type = "C", ctrl = Controls.MotionBlurEnabledCheckbox },
 }
 
 local audioTabSpecs = {
-    { type = "V", label = "LOC_OPTIONS_MASTER_VOLUME", ctrl = Controls.MasterVolSlider, grp = "Sound", key = "Master Volume", snd = "Bus_Feedback_Master" },
-    { type = "V", label = "LOC_OPTIONS_MUSIC_VOLUME", ctrl = Controls.MusicVolSlider, grp = "Sound", key = "Music Volume", snd = nil },
-    { type = "V", label = "LOC_OPTIONS_EFFECTS_VOLUME", ctrl = Controls.SFXVolSlider, grp = "Sound", key = "SFX Volume", snd = "Bus_Feedback_SFX" },
-    { type = "V", label = "LOC_OPTIONS_AMBIENT_VOLUME", ctrl = Controls.AmbVolSlider, grp = "Sound", key = "Ambience Volume", snd = "Bus_Feedback_Ambience" },
-    { type = "V", label = "LOC_OPTIONS_SPEECH_VOLUME", ctrl = Controls.SpeechVolSlider, grp = "Sound", key = "Speech Volume", snd = "Bus_Feedback_Speech" },
+    { type = "V", label = "LOC_OPTIONS_MASTER_VOLUME",  ctrl = Controls.MasterVolSlider, grp = "Sound", key = "Master Volume",   snd = "Bus_Feedback_Master" },
+    { type = "V", label = "LOC_OPTIONS_MUSIC_VOLUME",   ctrl = Controls.MusicVolSlider,  grp = "Sound", key = "Music Volume",    snd = nil },
+    { type = "V", label = "LOC_OPTIONS_EFFECTS_VOLUME", ctrl = Controls.SFXVolSlider,    grp = "Sound", key = "SFX Volume",      snd = "Bus_Feedback_SFX" },
+    { type = "V", label = "LOC_OPTIONS_AMBIENT_VOLUME", ctrl = Controls.AmbVolSlider,    grp = "Sound", key = "Ambience Volume", snd = "Bus_Feedback_Ambience" },
+    { type = "V", label = "LOC_OPTIONS_SPEECH_VOLUME",  ctrl = Controls.SpeechVolSlider, grp = "Sound", key = "Speech Volume",   snd = "Bus_Feedback_Speech" },
     { type = "C", ctrl = Controls.MuteFocusCheckbox },
 }
 
 local interfaceTabSpecs = {
-    { type = "D", label = "LOC_OPTIONS_INTERFACE_CLOCK_FORMAT",              ctrl = Controls.ClockFormat },
+    { type = "D", label = "LOC_OPTIONS_INTERFACE_CLOCK_FORMAT",                 ctrl = Controls.ClockFormat },
     { type = "D", label = "LOC_OPTIONS_INTERFACE_PLAYBYCLOUD_END_TURN_BEHAVIOR", ctrl = Controls.PlayByCloudEndTurnBehavior },
-    { type = "D", label = "LOC_OPTIONS_INTERFACE_PLAYBYCLOUD_READY_BEHAVIOR", ctrl = Controls.PlayByCloudClientReadyBehavior },
-    { type = "D", label = "LOC_OPTIONS_INTERFACE_COLOR_BLINDNESS_ADAPTATION", ctrl = Controls.ColorblindAdaptation },
-    { type = "D", label = "LOC_OPTIONS_INTERFACE_LIGHTING",                  ctrl = Controls.RGBControl },
-    { type = "D", label = "LOC_OPTIONS_STRATEGIC_VIEW_START",                ctrl = Controls.StartInStrategicView },
-    { type = "D", label = "LOC_OPTIONS_INTERFACE_GRAB_MOUSE",                ctrl = Controls.MouseGrabPullDown },
-    { type = "D", label = "LOC_OPTIONS_INTERFACE_EDGE_SCROLL",               ctrl = Controls.EdgeScrollPullDown },
-    { type = "D", label = "LOC_OPTIONS_INTERFACE_OPEN_TO_PROD_QUEUE",        ctrl = Controls.AutoProdQueuePullDown },
-    { type = "D", label = "LOC_OPTIONS_INTERFACE_FORCE_CLICK_TO_DRAG",       ctrl = Controls.ReplaceDragWithClickPullDown },
-    { type = "D", label = "LOC_OPTIONS_AUTO_UNIT_CYCLING",                   ctrl = Controls.UnitCyclingPullDown },
-    { type = "D", label = "LOC_OPTIONS_RIBBON_STATS_LABEL",                  ctrl = Controls.RibbonStatsPullDown },
-    { type = "S", label = "LOC_OPTIONS_CHAT_TEXT_SIZE",                      ctrl = Controls.ChatTextSizeSlider,          val = Controls.ChatTextValue },
-    { type = "S", label = "LOC_OPTIONS_INTERFACE_MINIMAP_SIZE",              ctrl = Controls.MinimapSizeSlider,           val = nil },
-    { type = "S", label = "LOC_OPTIONS_PLOT_TOOLTIP_DELAY",                  ctrl = Controls.PlotToolTipDelaySlider,      val = Controls.PlotToolTipDelayValue },
+    { type = "D", label = "LOC_OPTIONS_INTERFACE_PLAYBYCLOUD_READY_BEHAVIOR",   ctrl = Controls.PlayByCloudClientReadyBehavior },
+    { type = "D", label = "LOC_OPTIONS_INTERFACE_COLOR_BLINDNESS_ADAPTATION",   ctrl = Controls.ColorblindAdaptation },
+    { type = "D", label = "LOC_OPTIONS_INTERFACE_LIGHTING",                     ctrl = Controls.RGBControl },
+    { type = "D", label = "LOC_OPTIONS_STRATEGIC_VIEW_START",                   ctrl = Controls.StartInStrategicView },
+    { type = "D", label = "LOC_OPTIONS_INTERFACE_GRAB_MOUSE",                   ctrl = Controls.MouseGrabPullDown },
+    { type = "D", label = "LOC_OPTIONS_INTERFACE_EDGE_SCROLL",                  ctrl = Controls.EdgeScrollPullDown },
+    { type = "D", label = "LOC_OPTIONS_INTERFACE_OPEN_TO_PROD_QUEUE",           ctrl = Controls.AutoProdQueuePullDown },
+    { type = "D", label = "LOC_OPTIONS_INTERFACE_FORCE_CLICK_TO_DRAG",          ctrl = Controls.ReplaceDragWithClickPullDown },
+    { type = "D", label = "LOC_OPTIONS_AUTO_UNIT_CYCLING",                      ctrl = Controls.UnitCyclingPullDown },
+    { type = "D", label = "LOC_OPTIONS_RIBBON_STATS_LABEL",                     ctrl = Controls.RibbonStatsPullDown },
+    { type = "S", label = "LOC_OPTIONS_CHAT_TEXT_SIZE",                         ctrl = Controls.ChatTextSizeSlider,    val = Controls.ChatTextValue },
+    { type = "S", label = "LOC_OPTIONS_INTERFACE_MINIMAP_SIZE",                 ctrl = Controls.MinimapSizeSlider },
+    { type = "S", label = "LOC_OPTIONS_PLOT_TOOLTIP_DELAY",                     ctrl = Controls.PlotToolTipDelaySlider, val = Controls.PlotToolTipDelayValue },
     {
         type = "X",
-        build = function()      -- Scroll speed (continuous)
-            return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsSlider"), "Slider", {
-                GetLabel  = function() return Locale.Lookup("LOC_OPTIONS_SCROLL_SPEED") end,
-                GetValue  = function() return Controls.ScrollSpeedValue:GetText() end,
-                Increment = function()
-                    local v = math.min(Controls.ScrollSpeedSlider:GetValue() + 0.01, 1.0)
-                    Controls.ScrollSpeedSlider:SetValue(v)
+        build = function()
+            return W_ContSlider(
+                Locale.Lookup("LOC_OPTIONS_SCROLL_SPEED"),
+                Controls.ScrollSpeedSlider, Controls.ScrollSpeedValue,
+                function(v)
                     local adj = math.clamp(MIN_SCROLL_SPEED + MAX_SCROLL_SPEED * v, MIN_SCROLL_SPEED, MAX_SCROLL_SPEED)
                     Options.SetUserOption("Interface", "ScrollSpeed", adj)
-                    Controls.ConfirmButton:SetDisabled(false)
                     Controls.ScrollSpeedValue:LocalizeAndSetText("LOC_OPTIONS_SCROLL_SPEED_VALUE", adj * 100)
-                end,
-                Decrement = function()
-                    local v = math.max(Controls.ScrollSpeedSlider:GetValue() - 0.01, 0.0)
-                    Controls.ScrollSpeedSlider:SetValue(v)
-                    local adj = math.clamp(MIN_SCROLL_SPEED + MAX_SCROLL_SPEED * v, MIN_SCROLL_SPEED, MAX_SCROLL_SPEED)
-                    Options.SetUserOption("Interface", "ScrollSpeed", adj)
-                    Controls.ConfirmButton:SetDisabled(false)
-                    Controls.ScrollSpeedValue:LocalizeAndSetText("LOC_OPTIONS_SCROLL_SPEED_VALUE", adj * 100)
-                end,
-            })
-        end
+                end)
+        end,
     },
     {
         type = "X",
-        build = function()      -- Scroll text speed (continuous)
-            return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsSlider"), "Slider", {
-                GetLabel  = function() return Locale.Lookup("LOC_OPTIONS_SCROLL_TEXT_SPEED") end,
-                GetValue  = function() return Controls.ScrollTextSpeedValue:GetText() end,
-                Increment = function()
-                    local v = math.min(Controls.ScrollTextSpeedSlider:GetValue() + 0.01, 1.0)
-                    Controls.ScrollTextSpeedSlider:SetValue(v)
-                    local adj = math.clamp(MIN_SCROLL_TEXT_SPEED + MAX_SCROLL_SPEED * v, MIN_SCROLL_TEXT_SPEED,
-                        MAX_SCROLL_TEXT_SPEED)
+        build = function()
+            return W_ContSlider(
+                Locale.Lookup("LOC_OPTIONS_SCROLL_TEXT_SPEED"),
+                Controls.ScrollTextSpeedSlider, Controls.ScrollTextSpeedValue,
+                function(v)
+                    local adj = math.clamp(MIN_SCROLL_TEXT_SPEED + MAX_SCROLL_SPEED * v, MIN_SCROLL_TEXT_SPEED, MAX_SCROLL_TEXT_SPEED)
                     Options.SetUserOption("Interface", "ScrollTextSpeed", adj)
-                    Controls.ConfirmButton:SetDisabled(false)
                     Controls.ScrollTextSpeedValue:LocalizeAndSetText("LOC_OPTIONS_SCROLL_TEXT_SPEED_VALUE", adj * 100)
-                end,
-                Decrement = function()
-                    local v = math.max(Controls.ScrollTextSpeedSlider:GetValue() - 0.01, 0.0)
-                    Controls.ScrollTextSpeedSlider:SetValue(v)
-                    local adj = math.clamp(MIN_SCROLL_TEXT_SPEED + MAX_SCROLL_SPEED * v, MIN_SCROLL_TEXT_SPEED,
-                        MAX_SCROLL_TEXT_SPEED)
-                    Options.SetUserOption("Interface", "ScrollTextSpeed", adj)
-                    Controls.ConfirmButton:SetDisabled(false)
-                    Controls.ScrollTextSpeedValue:LocalizeAndSetText("LOC_OPTIONS_SCROLL_TEXT_SPEED_VALUE", adj * 100)
-                end,
-            })
-        end
+                end)
+        end,
     },
     { type = "C", ctrl = Controls.TouchInputCheckbox },
     { type = "C", ctrl = Controls.HistoricMomentsAnimCheckbox },
     {
         type = "X",
-        build = function()
-            return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsButton"), "Button", {
-                GetLabel     = function() return Controls.SwitchUILayout:GetText() end,
-                IsHidden     = function() return Controls.SwitchUILayout:IsHidden() end,
-                OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-                OnClick      = function() OnSwitchUILayout() end,
-            })
-        end
+        build = function() return W_Button(Controls.SwitchUILayout, function() OnSwitchUILayout() end) end,
     },
 }
 
@@ -2597,292 +2745,164 @@ local appTabSpecs = {
 
 local langTabSpecs = {
     { type = "D", label = "LOC_OPTIONS_DISPLAY_LANGUAGE", ctrl = Controls.DisplayLanguagePullDown },
-    { type = "D", label = "LOC_OPTIONS_SPOKEN_LANGUAGE", ctrl = Controls.SpokenLanguagePullDown },
+    { type = "D", label = "LOC_OPTIONS_SPOKEN_LANGUAGE",  ctrl = Controls.SpokenLanguagePullDown },
     { type = "C", ctrl = Controls.EnableSubtitlesCheckbox },
 }
 
--- ============================================================
--- Tab content builders
--- ============================================================
-
-local function BuildGameTab() AddSpecs(gameTabSpecs) end
-local function BuildAudioTab() AddSpecs(audioTabSpecs) end
-local function BuildInterfaceTab() AddSpecs(interfaceTabSpecs) end
-local function BuildApplicationTab() AddSpecs(appTabSpecs) end
-local function BuildLanguageTab() AddSpecs(langTabSpecs) end
-
-local function BuildGraphicsTab()
-    AddSpecs(graphicsBaseSpecs)
-    AddSpecs(graphicsAdvSpecs) -- adv widgets report IsHidden from AdvancedOptionsContainer
-end
-
-local function BuildKeyBindingsTab()
-    local actions = {}
-    local count = Input.GetActionCount()
-    for i = 0, count - 1 do
-        local actionId = Input.GetActionId(i)
-        if Input.ShouldShowActionKeybinding(actionId) then
-            local nameTag = Input.GetActionName(actionId)
-            local categoryTag = Input.GetActionCategory(actionId)
-            local descTag = Input.GetActionDescription(actionId)
-            table.insert(actions, {
-                id          = actionId,
-                name        = Locale.Lookup(nameTag),
-                cat         = Locale.Lookup(categoryTag),
-                desc        = Locale.Lookup(descTag) or "",
-                rawNameTag  = nameTag,
-                rawCatTag   = categoryTag,
-                rawDescTag  = descTag,
-            })
-        end
-    end
-    table.sort(actions, function(a, b)
-        local r = Locale.Compare(a.cat, b.cat)
-        if r == 0 then return Locale.Compare(a.name, b.name) == -1 end
-        return r == -1
-    end)
-
-    local unbound = Locale.Lookup("LOC_CAI_KEYBINDING_UNBOUND")
-    local altPrefix = Locale.Lookup("LOC_CAI_KEYBINDING_ALT")
-    local currentCat = nil
-    for _, action in ipairs(actions) do
-        if action.cat ~= currentCat then
-            currentCat = action.cat
-            local catName = currentCat
-            Add(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsStaticText"), "StaticText", {
-                GetLabel = function() return catName end,
-            }))
-        end
-
-        local actionId = action.id
-        local sub = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsSubMenu"), "SubMenu", {
-            GetLabel     = function() return action.name end,
-            GetValue     = function()
-                local p = Input.GetGestureDisplayString(actionId, 0)
-                local a = Input.GetGestureDisplayString(actionId, 1)
-                if p and a then return p .. ", " .. altPrefix .. ": " .. a end
-                if p then return p end
-                if a then return altPrefix .. ": " .. a end
-                return unbound
-            end,
-            GetTooltip   = function() return action.desc end,
-            OnFocusEnter = function()
-                UI.PlaySound("Main_Menu_Mouse_Over")
-                print("CAI Keybinding Focus: actionId=" ..
-                    tostring(actionId) ..
-                    ", nameTag=" .. tostring(action.rawNameTag) ..
-                    ", categoryTag=" .. tostring(action.rawCatTag) ..
-                    ", descriptionTag=" .. tostring(action.rawDescTag) ..
-                    ", resolvedName=" .. tostring(action.name))
-            end,
+---Map vanilla tab panel control -> spec list (or special key for keybindings).
+---Each tab page is laid out as [primary container, Confirm, Reset]. The
+---primary container is a List of option widgets for normal tabs, or the
+---Key Bindings Tree on the keybindings tab.
+local function PopulateTabPage(tabEntry, tabPage, tabIdx)
+    local panel = tabEntry[2]
+    local primary
+    if panel == Controls.KeyBindings then
+        keysTree = mgr:CreateWidget("CAIOptions_KeysTree", "Tree", {
+            Label = function() return Locale.Lookup("LOC_CAI_KEYBINDS_TREE") end,
         })
-
-        local function StartBinding(index)
-            m_ignoreNextBinding = true
-            StartActiveKeyBinding(actionId, index)
-            -- Push a key capture popup onto the manager stack
-            local prompt = Locale.Lookup("LOC_CAI_KEYBINDING_PRESS_KEY", action.name)
-            local capturePopup = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsPanel"), "Panel", {
-                GetLabel = function() return prompt end,
-                SpeechSettings = { Role = false },
-            })
-            -- Escape cancels binding. All other input falls through (returns
-            -- false) so the engine's gesture recorder can capture the key
-            -- combo. This is safe because HandleInput only walks the parent
-            -- chain — the popup is a stack root with no parent, so input
-            -- cannot leak to widgets below.
-            capturePopup.OnHandleInput = function(w, input)
-                if input:GetMessageType() == KeyEvents.KeyUp
-                    and input:GetKey() == Keys.VK_ESCAPE then
-                    StopActiveKeyBinding()
-                    return true
-                end
-                return false
-            end
-            m_bindingPopup = capturePopup
-            mgr:Push(capturePopup)
+        primary = keysTree
+    else
+        primary = mgr:CreateWidget("CAIOptions_Page" .. tabIdx .. "_List", "List", {
+            Label = function() return Locale.Lookup(tabEntry[3]) end,
+        })
+        if panel == Controls.GameOptions then
+            AddSpecsTo(primary, gameTabSpecs)
+        elseif panel == Controls.GraphicsOptions then
+            AddSpecsTo(primary, graphicsBaseSpecs)
+            AddSpecsTo(primary, graphicsAdvSpecs)
+        elseif panel == Controls.AudioOptions then
+            AddSpecsTo(primary, audioTabSpecs)
+        elseif panel == Controls.InterfaceOptions then
+            AddSpecsTo(primary, interfaceTabSpecs)
+        elseif panel == Controls.ApplicationOptions then
+            AddSpecsTo(primary, appTabSpecs)
+        elseif panel == Controls.LanguageOptions then
+            AddSpecsTo(primary, langTabSpecs)
         end
-
-        sub:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsMenuItem"), "MenuItem", {
-            GetLabel = function() return Locale.Lookup("LOC_CAI_KEYBINDING_SET_PRIMARY") end,
-            GetValue = function() return Input.GetGestureDisplayString(actionId, 0) or unbound end,
-            OnClick  = function() StartBinding(0) end,
-        }))
-        sub:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsMenuItem"), "MenuItem", {
-            GetLabel = function() return Locale.Lookup("LOC_CAI_KEYBINDING_SET_ALT") end,
-            GetValue = function() return Input.GetGestureDisplayString(actionId, 1) or unbound end,
-            OnClick  = function() StartBinding(1) end,
-        }))
-        sub:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsMenuItem"), "MenuItem", {
-            GetLabel = function() return Locale.Lookup("LOC_CAI_KEYBINDING_CLEAR_PRIMARY") end,
-            IsHidden = function() return not Input.GetGestureDisplayString(actionId, 0) end,
-            OnClick  = function()
-                Input.ClearGesture(actionId, 0)
-                Controls.ConfirmButton:SetDisabled(false)
-                RefreshKeyBinding()
-            end,
-        }))
-        sub:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsMenuItem"), "MenuItem", {
-            GetLabel = function() return Locale.Lookup("LOC_CAI_KEYBINDING_CLEAR_ALT") end,
-            IsHidden = function() return not Input.GetGestureDisplayString(actionId, 1) end,
-            OnClick  = function()
-                Input.ClearGesture(actionId, 1)
-                Controls.ConfirmButton:SetDisabled(false)
-                RefreshKeyBinding()
-            end,
-        }))
-
-        Add(sub)
     end
+    tabPage:AddChild(primary)
+    tabPage:AddChild(W_Button(Controls.ConfirmButton, function() OnConfirm() end))
+    tabPage:AddChild(W_Button(Controls.ResetButton,   function() OnReset() end))
 end
 
--- ============================================================
--- Panel management
--- ============================================================
+-- ---------------------------------------------------------------------------
+-- Root + lifecycle
+-- ---------------------------------------------------------------------------
 
-local tabBuilders = {
-    BuildGameTab, BuildGraphicsTab, BuildAudioTab, BuildInterfaceTab,
-    BuildApplicationTab, BuildLanguageTab, BuildKeyBindingsTab
-}
+local CloseOptions
 
----Clears all OptionsList children and rebuilds content for tabIdx.
----Does NOT call SetFocus — the list's GetDefaultChild will pick up the first
----visible child when the user navigates into it naturally.
-local function RebuildTabContent(tabIdx)
-    if not OptionsList then return end
-    OptionsList:ClearChildren()
-    OptionsList.FocusedChild = nil
-    local builder = tabBuilders[tabIdx]
-    if builder then builder() end
-end
-
----Builds the static panel skeleton: OptionsPanel with TabBar, OptionsList, action buttons
-local function BuildBasePanel()
-    OptionsPanel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsDialog"), "Dialog", {
-        GetLabel = function() return Locale.Lookup("LOC_CAI_OPTIONS_DIALOG") end,
-        SpeechSettings = { Role = false }
+local function BuildOptionsRoot()
+    if optionsRoot then return end
+    optionsRoot = mgr:CreateWidget("CAIOptions_Root", "Panel", {
+        Label          = function() return Locale.Lookup("LOC_OPTIONS_TITLE") end,
+        SpeechSettings = { Role = false },
     })
 
-    -- Tab bar as first child of OptionsPanel (not inside OptionsList)
-    TabBar = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsTabBar"), "TabBar")
-    OptionsPanel:AddChild(TabBar)
+    tabs = mgr:CreateWidget("CAIOptions_Tabs", "TabControl", {
+        Label = function() return Locale.Lookup("LOC_OPTIONS_TITLE") end,
+    })
+    tabs:SetWrapAround(true)
+    optionsRoot:AddChild(tabs)
 
-    for i, tab in ipairs(m_tabs) do
-        local tabBtn   = tab[1]
-        local titleKey = tab[3]
-        local tabIdx   = i
-        TabBar:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsTab"), "Tab", {
-            GetLabel     = function() return Locale.Lookup(titleKey) end,
-            OnFocusEnter = function(w)
-                UI.PlaySound("Main_Menu_Mouse_Over")
-                -- Rebuild list content only when switching to a different tab
-                if tabIdx ~= m_activeTabIdx then
-                    OnSelectTab(tabIdx)
-                end
-            end,
-            OnClick      = function() OnSelectTab(tabIdx) end,
-        }))
+    m_tabPages = {}
+    for i, tabEntry in ipairs(m_tabs) do
+        local titleKey = tabEntry[3]
+        local page = tabs:AddPage(function() return Locale.Lookup(titleKey) end)
+        m_tabPages[i] = page
+        PopulateTabPage(tabEntry, page, i)
     end
 
-    -- Options list as second child of OptionsPanel
-    OptionsList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsList"), "List")
-    OptionsPanel:AddChild(OptionsList)
-
-    -- Action buttons as direct Panel children (below the list)
-    OptionsPanel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsButton"), "Button", {
-        GetLabel     = function() return Controls.ConfirmButton:GetText() end,
-        IsDisabled   = function() return Controls.ConfirmButton:IsDisabled() end,
-        OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-        OnClick      = function() OnConfirm() end,
-    }))
-    OptionsPanel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsButton"), "Button", {
-        GetLabel     = function() return Controls.ResetButton:GetText() end,
-        IsHidden     = function() return Controls.ResetButton:IsHidden() end,
-        OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-        OnClick      = function() OnReset() end,
-    }))
-    OptionsPanel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIOptionsButton"), "Button", {
-        GetLabel     = function() return Controls.WindowCloseButton:GetText() end,
-        OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-        OnClick      = function() OnCancel() end,
-    }))
-end
-
----Pops OptionsPanel and any dropdowns above it from the manager stack
-local function CloseOptions()
-    while #mgr.Stack > 0 and mgr.Stack[#mgr.Stack] ~= OptionsPanel do
-        mgr:Pop()
-    end
-    if #mgr.Stack > 0 then mgr:Pop() end
-    OptionsPanel = nil
-    OptionsList  = nil
-    TabBar       = nil
-end
-
----Pops the key capture popup if it's on the stack
-local function PopBindingPopup()
-    if m_bindingPopup and mgr:HasWidget(m_bindingPopup) then
-        mgr:Pop()
-    end
-    m_bindingPopup = nil
-end
-
-Initialize = WrapFunc(Initialize, function(orig)
-    orig()
-    -- BindRecordedGesture is defined by InitializeKeyBinding called inside orig().
-    -- Wrap it to discard the activation keypress so the user's intended key is recorded.
-    -- After the real binding, pop the capture popup.
-    BindRecordedGesture = WrapFunc(BindRecordedGesture, function(orig_bgr, gesture)
-        if m_ignoreNextBinding then
-            m_ignoreNextBinding = false
-            return
-        end
-        orig_bgr(gesture)
-        PopBindingPopup()
+    -- Mirror vanilla -> CAI tab changes
+    tabs:On("value_changed", function(_, idx)
+        if m_suppressTabSync then return end
+        local tabEntry = m_tabs[idx]
+        if not tabEntry then return end
+        m_suppressTabSync = true
+        OnSelectTab(tabEntry)
+        m_suppressTabSync = false
     end)
-    -- Wrap StopActiveKeyBinding to also pop the popup on cancel
-    StopActiveKeyBinding = WrapFunc(StopActiveKeyBinding, function(orig_stop)
-        orig_stop()
-        PopBindingPopup()
-    end)
-    BuildBasePanel()
-end)
+end
+
+CloseOptions = function()
+    if rootPushed and optionsRoot then
+        mgr:RemoveFromStack(optionsRoot:GetId())
+    end
+    rootPushed   = false
+    optionsRoot  = nil
+    tabs         = nil
+    keysTree     = nil
+    m_tabPages   = {}
+end
+
+-- ---------------------------------------------------------------------------
+-- Vanilla wraps
+-- ---------------------------------------------------------------------------
 
 OnShow = WrapFunc(OnShow, function(orig)
-    orig() -- populates m_ctrlData via the wrapped Populate* helpers
-    if not OptionsPanel then BuildBasePanel() end
-    RebuildTabContent(m_activeTabIdx)
-    if not mgr:HasWidget(OptionsPanel) then
-        mgr:Push(OptionsPanel, PopupPriority.Current)
-    end
-end)
-
-OnSelectTab = WrapFunc(OnSelectTab, function(orig, tab)
-    orig(tab)
-    local idx = type(tab) == "number" and tab or nil
-    if not idx then
-        for i, t in ipairs(m_tabs) do
-            if t == tab then
-                idx = i; break
-            end
-        end
-    end
-    if not idx or idx == m_activeTabIdx then return end
-    m_activeTabIdx = idx
-    if OptionsList then RebuildTabContent(idx) end
+    orig() -- vanilla populates Controls + m_ctrlData via the Populate* wraps
+    -- Rebuild on every show so widget state reflects current option values.
+    CloseOptions()
+    BuildOptionsRoot()
+    RebuildKeyBindingsTree()
+    mgr:Push(optionsRoot, { priority = PopupPriority.Current })
+    rootPushed = true
 end)
 
 OnCancel = WrapFunc(OnCancel, function(orig)
     orig()
+    Speak(Locale.Lookup("LOC_CAI_OPTIONS_REVERTED"), true)
     CloseOptions()
 end)
 
+OnConfirm = WrapFunc(OnConfirm, function(orig)
+    orig()
+    -- Vanilla OnConfirm may pop a restart-required dialog whose OK button defers
+    -- the save. Announcing "saved" here is slightly early in that branch but
+    -- keeps the common path correct without a flag handshake.
+    Speak(Locale.Lookup("LOC_CAI_OPTIONS_SAVED"), true)
+end)
+
+-- The keybindings infrastructure is set up inside Initialize() ->
+-- InitializeKeyBinding(), where RefreshKeyBinding becomes a global. Wrap after
+-- Initialize() runs so we catch every refresh (initial, post-bind, post-clear,
+-- OnCancel).
+Initialize = WrapFunc(Initialize, function(orig)
+    orig()
+    if RefreshKeyBinding then
+        RefreshKeyBinding = WrapFunc(RefreshKeyBinding, function(orig_refresh)
+            orig_refresh()
+            RebuildKeyBindingsTree()
+        end)
+    end
+end)
+
+-- Mirror vanilla tab switches into the CAI TabControl so mouse-driven tab
+-- clicks update the screen reader state too.
+OnSelectTab = WrapFunc(OnSelectTab, function(orig, tab)
+    orig(tab)
+    if m_suppressTabSync or not tabs then return end
+    local idx
+    if type(tab) == "number" then
+        idx = tab
+    else
+        for i, t in ipairs(m_tabs) do if t == tab then idx = i; break end end
+    end
+    if not idx then return end
+    m_suppressTabSync = true
+    tabs:SetActivePage(idx)
+    m_suppressTabSync = false
+end)
+
+-- Route input through the manager first; fall back to vanilla on non-consumes.
+-- Wrap returns true on mgr consume so vanilla's handler doesn't double-fire.
 InputHandler = WrapFunc(InputHandler, function(orig, inputStruct)
     if mgr then
         local handled = mgr:HandleInput(inputStruct)
-        if handled then return handled end
-    end    
+        if handled then return true end
+    end
     return orig(inputStruct)
 end)
+
+ContextPtr:SetHideHandler(function() CloseOptions() end)
 --#End of accessibility integration
 Initialize();

@@ -1811,22 +1811,189 @@ end
 --#Accessibility integration
 include("caiUtils")
 local mgr = ExposedMembers.CAI_UIManager
-local MainPanel = nil ---@type UIWidget
-local MenuList = nil ---@type UIWidget
-local m_SubmenuList = nil ---@type UIWidget
-local m_submenuLabel = "" ---Current submenu parent label
-local m_CarouselList = nil ---@type UIWidget
-local m_MotDWidget = nil ---@type UIWidget
-local m_VersionWidget = nil ---@type UIWidget
-local m_My2KWidget = nil ---@type UIWidget
 
--- Forward declarations for build functions used in BuildMenu wrap
-local BuildCarouselWidgets
-local BuildMotDWidget
-local BuildVersionWidget
-local BuildMy2KWidget
+local MAIN_PANEL_ID    = "CAIMainMenu_Panel"
+local MENU_LIST_ID     = "CAIMainMenu_MenuList"
+local CAROUSEL_ID      = "CAIMainMenu_Carousel"
+local MOTD_ID          = "CAIMainMenu_MotD"
+local VERSION_ID       = "CAIMainMenu_Version"
+local MY2K_ID          = "CAIMainMenu_My2K"
+local SUBMENU_LIST_ID  = "CAIMainMenu_SubmenuList"
 
--- Wrap the 'Initialize' function so we can set the input handler
+local m_MainPanel       ---@type UIWidget|nil
+local m_MenuList        ---@type UIWidget|nil
+local m_CarouselList    ---@type UIWidget|nil
+local m_MotDWidget      ---@type UIWidget|nil
+local m_VersionWidget   ---@type UIWidget|nil
+local m_My2KWidget      ---@type UIWidget|nil
+local m_SubmenuList     ---@type UIWidget|nil
+local m_SubmenuParent   = nil       -- vanilla optionIndex of the mounted submenu's parent
+local m_PendingParent   = nil       -- optionIndex captured in ToggleOption pre-orig, consumed by BuildSubMenu wrap
+local m_LastMotDText    = ""        -- prior MotD text, for change-driven Announce
+local m_CloudRowIdx     = nil       -- vanilla index of the Cloud Games row inside the current submenu
+local m_MultiplayerIdx  = nil       -- vanilla optionIndex of the top-level Multiplayer row
+
+-- Vanilla highlight reuse: mirrors what mouse hover does in vanilla so the
+-- sighted-mirror UI looks right while a CAI row is focused. Trigger from
+-- focus_enter / focus_leave so highlights track focus rather than activation.
+local function HighlightMainOption(idx)
+    if not m_currentOptions or not m_currentOptions[idx] then return end
+    local ctrl = m_currentOptions[idx].control
+    if not ctrl then return end
+    ctrl.SelectionAnimAlpha:SetToBeginning(); ctrl.SelectionAnimAlpha:Play()
+    ctrl.SelectionAnimSlide:SetToBeginning(); ctrl.SelectionAnimSlide:Play()
+end
+
+local function HighlightSubmenuInstance(uiOption)
+    if not uiOption then return end
+    if uiOption.SelectedLabel and uiOption.ButtonLabel then
+        uiOption.SelectedLabel:SetHide(false)
+        uiOption.ButtonLabel:SetHide(true)
+    end
+    if uiOption.LabelAlphaAnim then
+        uiOption.LabelAlphaAnim:SetToBeginning(); uiOption.LabelAlphaAnim:Play()
+    end
+    if uiOption.FlagAnim then
+        uiOption.FlagAnim:SetToBeginning(); uiOption.FlagAnim:Play()
+    end
+end
+
+local function ClearSubmenuHighlight(uiOption)
+    if not uiOption then return end
+    if uiOption.SelectedLabel and uiOption.ButtonLabel then
+        uiOption.SelectedLabel:SetHide(true)
+        uiOption.ButtonLabel:SetHide(false)
+    end
+    if uiOption.FlagAnim then
+        uiOption.FlagAnim:SetToBeginning(); uiOption.FlagAnim:Stop()
+    end
+end
+
+local function RemoveSubmenuWidget()
+    if not m_SubmenuList then return end
+    mgr:RemoveFromStack(SUBMENU_LIST_ID)
+    m_SubmenuList = nil
+    m_SubmenuParent = nil
+    m_CloudRowIdx = nil
+end
+
+local function BuildCarouselRows()
+    if not m_CarouselList then return end
+    local capture = mgr:CaptureFocusKey(m_CarouselList)
+    m_CarouselList:ClearChildren()
+    local entryCount = Challenges.GetCarouselEntryCount()
+    for i = 0, entryCount - 1 do
+        local entryIndex = i
+        local entryNum = i + 1
+        local btn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_CarouselBtn"), "Button", {
+            Label = function()
+                local entryType = Challenges.GetCarouselEntryType(entryIndex)
+                local typeLabel = entryType == "Clickout"
+                    and Locale.Lookup("LOC_CAI_CAROUSEL_LINK")
+                    or Locale.Lookup("LOC_CAI_CAROUSEL_CHALLENGE")
+                return Locale.Lookup("LOC_CAI_CAROUSEL_ENTRY", typeLabel, entryNum, entryCount)
+            end,
+            FocusKey = "carousel:" .. tostring(entryIndex),
+            SpeechSettings = { Role = false },
+        })
+        btn:On("activate", function()
+            Challenges.PublishCarouselEntryClick(entryIndex)
+            local t = Challenges.GetCarouselEntryType(entryIndex)
+            if t == "Clickout" then
+                Challenges.LoadCarouselEntry(entryIndex)
+            else
+                _StartChallengeEntry = entryIndex
+                LuaEvents.Raise_State_Transition("MainMenu")
+            end
+        end)
+        btn:On("focus_enter", function()
+            CarouselScrollToEntry(entryNum, "manual scroll")
+        end)
+        m_CarouselList:AddChild(btn)
+    end
+    mgr:RestoreFocus(m_CarouselList, capture)
+end
+
+local function BuildMainPanelOnce()
+    if m_MainPanel then return end
+
+    m_MainPanel = mgr:CreateWidget(MAIN_PANEL_ID, "Panel", {
+        Label = function() return Locale.Lookup("LOC_CAI_MAIN_MENU") end,
+        SpeechSettings = { Role = false },
+    })
+
+    m_MenuList = mgr:CreateWidget(MENU_LIST_ID, "List")
+    m_MainPanel:AddChild(m_MenuList)
+
+    m_CarouselList = mgr:CreateWidget(CAROUSEL_ID, "HorizontalList", {
+        Label = function() return Locale.Lookup("LOC_CAI_CAROUSEL") end,
+        HiddenPredicate = function() return Controls.ChallengeContainer:IsHidden() end,
+    })
+    -- Pause vanilla autoscroll while focus is inside; restore on leave.
+    m_CarouselList:On("focus_enter", function() SetCarouselEnabled(false) end)
+    m_CarouselList:On("focus_leave", function() SetCarouselEnabled(true) end)
+    m_MainPanel:AddChild(m_CarouselList)
+
+    m_MotDWidget = mgr:CreateWidget(MOTD_ID, "StaticText", {
+        Label = function() return Locale.Lookup("LOC_MESSAGE_OF_THE_DAY_HEADING") end,
+        ValueGetter = function() return Controls.MotDText:GetText() or "" end,
+        HiddenPredicate = function() return Controls.MotDContainter:IsHidden() end,
+    })
+    m_MainPanel:AddChild(m_MotDWidget)
+
+    m_VersionWidget = mgr:CreateWidget(VERSION_ID, "StaticText", {
+        Label = function()
+            return Locale.Lookup("LOC_PAUSEMENU_INFO_VERSION_TOOLTIP", UI.GetAppVersion())
+        end,
+    })
+    m_MainPanel:AddChild(m_VersionWidget)
+
+    m_My2KWidget = mgr:CreateWidget(MY2K_ID, "Button", {
+        Label = function() return Locale.Lookup("TXT_KEY_MY2K") end,
+        ValueGetter = function() return Controls.My2KStatus:GetText() or "" end,
+        HiddenPredicate = function() return Controls.My2KContents:IsHidden() end,
+    })
+    m_My2KWidget:On("activate", function() OnMy2KLogin() end)
+    m_MainPanel:AddChild(m_My2KWidget)
+end
+
+local function RebuildMenuRows(menuOptions)
+    if not m_MenuList then return end
+    local capture = mgr:CaptureFocusKey(m_MenuList)
+    m_MenuList:ClearChildren()
+    m_MultiplayerIdx = nil
+
+    for i, menuOption in ipairs(m_currentOptions) do
+        local dataEntry = menuOptions[i]
+        local controlRef = menuOption.control
+        if dataEntry and controlRef then
+            if dataEntry.callback == OnMultiPlayer then m_MultiplayerIdx = i end
+
+            local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_MenuItem"), "MenuItem", {
+                Label = function() return controlRef.ButtonLabel:GetText() end,
+                Tooltip = function() return controlRef.Top:GetToolTipString() end,
+                HiddenPredicate = function() return controlRef.Top:IsHidden() end,
+                FocusKey = "main:" .. tostring(i),
+            })
+            row:On("activate", function()
+                if dataEntry.submenu then
+                    dataEntry.callback(i, dataEntry.submenu)
+                else
+                    dataEntry.callback()
+                end
+            end)
+            row:On("focus_enter", function()
+                UI.PlaySound("Main_Menu_Mouse_Over")
+                HighlightMainOption(i)
+            end)
+            m_MenuList:AddChild(row)
+        end
+    end
+
+    mgr:RestoreFocus(m_MenuList, capture)
+end
+
+-- Hook the input handler onto the screen.
 Initialize = WrapFunc(Initialize, function(orig)
     orig()
     ContextPtr:SetInputHandler(function(input)
@@ -1834,207 +2001,41 @@ Initialize = WrapFunc(Initialize, function(orig)
     end, true)
 end)
 
-function HighlightMainOption(index)
-    if not m_currentOptions then return end
-    local control = m_currentOptions[index] and m_currentOptions[index].control
-    control.SelectionAnimAlpha:SetToBeginning()
-    control.SelectionAnimSlide:SetToBeginning()
-    control.SelectionAnimAlpha:Play()
-    control.SelectionAnimSlide:Play()
-end
-
+-- BuildMenu fires on first paint AND on rebuilds (preSave -> default after the
+-- save-file query, network loss reverting the menu, etc.). Any rebuild
+-- invalidates an open submenu, so explicitly remove it via the manager.
 BuildMenu = WrapFunc(BuildMenu, function(orig, menuOptions)
     orig(menuOptions)
     if not m_currentOptions or #m_currentOptions == 0 then return end
 
-    -- If submenu is on top of the stack, pop it — a menu rebuild invalidates it
-    if m_SubmenuList and mgr:GetTop() == m_SubmenuList then
-        mgr:Pop()
-        m_SubmenuList = nil
-    end
+    RemoveSubmenuWidget()
+    BuildMainPanelOnce()
+    RebuildMenuRows(menuOptions)
+    BuildCarouselRows()
 
-    if not MainPanel then
-        MainPanel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuPanel"), "Panel", {
-            GetLabel = function() return Locale.Lookup("LOC_CAI_MAIN_MENU") end,
-            SpeechSettings = { Role = false }
-        })
-    end
-
-    if not MenuList then
-        MenuList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuList"), "List")
-        MainPanel:AddChild(MenuList)
-        BuildCarouselWidgets()
-        BuildMotDWidget()
-        BuildVersionWidget()
-        BuildMy2KWidget()
-    end
-    if #MenuList.Children ~= #m_currentOptions then
-        MenuList:ClearChildren()
-        for i, menuOption in ipairs(m_currentOptions) do
-            local dataEntry = menuOptions[i]
-            local controlRef = menuOption.control
-
-            if dataEntry then
-                local widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuMenuItem"), "MenuItem", {
-                    GetLabel = function() return controlRef.ButtonLabel:GetText() end,
-                    GetTooltip = function() return controlRef.Top:GetToolTipString() end,
-                    IsHidden = function() return controlRef.Top:IsHidden() end,
-                    OnClick = function()
-                        if dataEntry.submenu then
-                            dataEntry.callback(i, dataEntry.submenu)
-                        else
-                            dataEntry.callback()
-                        end
-                    end,
-                    OnFocusEnter = function()
-                        UI.PlaySound("Main_Menu_Mouse_Over");
-                        HighlightMainOption(i)
-                    end,
-                    OnToggleExpanded = dataEntry.submenu and function(isExpanded)
-                        dataEntry.callback(i, dataEntry.submenu)
-                    end
-                })
-                MenuList:AddChild(widget)
-            end
-        end
-    end
-    if not mgr:HasWidget(MainPanel) then
-        mgr:Push(MainPanel)
+    -- Push exactly once. Subsequent BuildMenu rebuilds reuse the mounted panel.
+    if mgr:GetWidgetById(MAIN_PANEL_ID) ~= m_MainPanel then
+        mgr:Push(m_MainPanel)
     end
 end)
 
---#Carousel widget
-BuildCarouselWidgets = function()
-    if m_CarouselList then
-        m_CarouselList:ClearChildren()
-    end
-
-    local entryCount = Challenges.GetCarouselEntryCount()
-    if entryCount == 0 then return end
-
-    if not m_CarouselList then
-        m_CarouselList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuHorizontalList"), "HorizontalList", {
-            GetLabel = function() return Locale.Lookup("LOC_CAI_CAROUSEL") end,
-            IsHidden = function() return Controls.ChallengeContainer:IsHidden() end,
-        })
-        MainPanel:AddChild(m_CarouselList)
-    end
-
-    for i = 0, entryCount - 1 do
-        local entryIndex = i
-        local entryNum = i + 1
-        local widget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuButton"), "Button", {
-            GetLabel = function()
-                local entryType = Challenges.GetCarouselEntryType(entryIndex)
-                local typeLabel = entryType == "Clickout"
-                    and Locale.Lookup("LOC_CAI_CAROUSEL_LINK")
-                    or Locale.Lookup("LOC_CAI_CAROUSEL_CHALLENGE")
-                return Locale.Lookup("LOC_CAI_CAROUSEL_ENTRY", typeLabel, entryNum, entryCount)
-            end,
-            OnClick = function()
-                Challenges.PublishCarouselEntryClick(entryIndex)
-                local carouselEntryType = Challenges.GetCarouselEntryType(entryIndex)
-                if carouselEntryType == "Clickout" then
-                    Challenges.LoadCarouselEntry(entryIndex)
-                else
-                    _StartChallengeEntry = entryIndex
-                    LuaEvents.Raise_State_Transition("MainMenu")
-                end
-            end,
-            OnFocusEnter = function()
-                CarouselScrollToEntry(entryNum, "manual scroll")
-            end,
-            SpeechSettings = { Role = false },
-        })
-        m_CarouselList:AddChild(widget)
-    end
-end
-
-UpdateChallengeCarousel = WrapFunc(UpdateChallengeCarousel, function(orig)
-    orig()
-    if MainPanel then
-        BuildCarouselWidgets()
-    end
-end)
-
---#MotD widget
-BuildMotDWidget = function()
-    if m_MotDWidget then return end
-    m_MotDWidget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuStaticText"), "StaticText", {
-        GetLabel = function() return Locale.Lookup("LOC_MESSAGE_OF_THE_DAY_HEADING") end,
-        GetValue = function() return Controls.MotDText:GetText() or "" end,
-        IsHidden = function() return Controls.MotDContainter:IsHidden() end,
-    })
-    MainPanel:AddChild(m_MotDWidget)
-end
-
-UpdateMotD = WrapFunc(UpdateMotD, function(orig)
-    orig()
-    if MainPanel and m_MotDWidget then
-        m_MotDWidget:SetValue(Controls.MotDText:GetText() or "")
-    end
-end)
-
---#Version widget
-BuildVersionWidget = function()
-    if m_VersionWidget then return end
-    m_VersionWidget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuStaticText"), "StaticText", {
-        GetLabel = function()
-            return Locale.Lookup("LOC_PAUSEMENU_INFO_VERSION_TOOLTIP", UI.GetAppVersion())
-        end,
-    })
-    MainPanel:AddChild(m_VersionWidget)
-end
-
---#My2K widget
-BuildMy2KWidget = function()
-    if m_My2KWidget then return end
-    m_My2KWidget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuButton"), "Button", {
-        GetLabel = function() return Locale.Lookup("TXT_KEY_MY2K") end,
-        GetValue = function() return Controls.My2KStatus:GetText() or "" end,
-        IsHidden = function() return Controls.My2KContents:IsHidden() end,
-        OnClick = function() OnMy2KLogin() end,
-    })
-    MainPanel:AddChild(m_My2KWidget)
-end
-
-function HighlightSubmenuInstance(uiOption)
-    if uiOption == nil then return end
-    if uiOption.SelectedLabel and uiOption.ButtonLabel then
-        uiOption.SelectedLabel:SetHide(false)
-        uiOption.ButtonLabel:SetHide(true)
-    end
-
-    if uiOption.LabelAlphaAnim then
-        uiOption.LabelAlphaAnim:SetToBeginning()
-        uiOption.LabelAlphaAnim:Play()
-    end
-
-    if uiOption.FlagAnim then
-        uiOption.FlagAnim:SetToBeginning()
-        uiOption.FlagAnim:Play()
-    end
-end
-
-function ClearSubmenuHighlights()
-    local controls = m_subOptionIM and m_subOptionIM.m_AllocatedInstances
-    for _, uiOption in ipairs(controls) do
-        if uiOption.SelectedLabel and uiOption.ButtonLabel then
-            uiOption.SelectedLabel:SetHide(true)
-            uiOption.ButtonLabel:SetHide(false)
-        end
-
-        if uiOption.FlagAnim then
-            uiOption.FlagAnim:SetToBeginning(); uiOption.FlagAnim:Stop()
-        end
-    end
-end
-
+-- ToggleOption is vanilla's single entry point for selecting/deselecting a
+-- main-menu parent. Wrap it to:
+--   pre-orig:  capture optionIndex into m_PendingParent so BuildSubMenu (which
+--              fires inside orig before isSelected is set) knows which parent
+--              this submenu belongs to.
+--   post-orig: if the mounted submenu's parent is no longer selected (vanilla
+--              just collapsed it), tear our widget down to match.
+-- Invariant: do not call ToggleOption recursively from inside this wrap or
+-- from a handler reached by orig — m_PendingParent would clobber.
 ToggleOption = WrapFunc(ToggleOption, function(orig, optionIndex, submenu)
-    if m_currentOptions[optionIndex] then
-        m_submenuLabel = m_currentOptions[optionIndex].control.ButtonLabel:GetText()
-    end
+    m_PendingParent = optionIndex
     orig(optionIndex, submenu)
+    if m_SubmenuParent and m_currentOptions
+        and m_currentOptions[m_SubmenuParent]
+        and not m_currentOptions[m_SubmenuParent].isSelected then
+        RemoveSubmenuWidget()
+    end
 end)
 
 BuildSubMenu = WrapFunc(BuildSubMenu, function(orig, menuOptions)
@@ -2042,90 +2043,123 @@ BuildSubMenu = WrapFunc(BuildSubMenu, function(orig, menuOptions)
     local controls = m_subOptionIM and m_subOptionIM.m_AllocatedInstances
     if not controls or #controls == 0 then return end
 
-    if not m_SubmenuList then
-        m_SubmenuList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuList"), "List", {
-            GetLabel = function() return m_submenuLabel end,
-        })
-        m_SubmenuList:AddInputBinding({
-            Key = Keys.VK_ESCAPE,
-            Action = function(w)
-                mgr:Pop()
-                for i, option in ipairs(m_currentOptions) do
-                    if option.isSelected then
-                        ToggleOption(i)
-                    end
-                end
-                m_SubmenuList = nil
-                return true
+    -- Same parent re-fired BuildSubMenu (defensive — vanilla doesn't do this
+    -- organically): leave the mounted widget alone.
+    if m_SubmenuList and m_SubmenuParent == m_PendingParent then return end
+    if m_SubmenuList then RemoveSubmenuWidget() end
+
+    m_SubmenuParent = m_PendingParent
+    m_SubmenuList = mgr:CreateWidget(SUBMENU_LIST_ID, "List", {
+        Label = function()
+            if m_SubmenuParent and m_currentOptions[m_SubmenuParent] then
+                return m_currentOptions[m_SubmenuParent].control.ButtonLabel:GetText()
             end
-        })
-    end
-    local isBuilt
-    if #m_SubmenuList.Children ~= #controls then
-        m_SubmenuList:ClearChildren()
-        isBuilt = true
-        for i, data in ipairs(menuOptions) do
+            return ""
+        end,
+    })
+    m_CloudRowIdx = nil
+    -- Vanilla MainMenu has no Escape handler for submenus; forward the key
+    -- through ToggleOption so the normal collapse path runs. The ToggleOption
+    -- wrap removes our widget when vanilla flips isSelected to false. Vanilla's
+    -- own IsStopped guard implicitly handles the "animation in progress" case
+    -- by no-opping the call, matching mouse-click behavior.
+    m_SubmenuList:AddInputBinding({
+        Key = Keys.VK_ESCAPE,
+        Action = function()
+            if m_SubmenuParent then ToggleOption(m_SubmenuParent) end
+            return true
+        end,
+    })
+
+    for i, data in ipairs(menuOptions) do
             local control = controls[i]
-
             if control then
-                local mainLabel = control.ButtonLabel:GetText()
-                local hasHelpElement = data.helpCallback ~= nil
-
-                if hasHelpElement then
-                    local helpGroup = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuSubMenu"), "SubMenu", {
-                        GetLabel = function() return mainLabel end,
-                        OnFocusEnter = function()
-                            HighlightSubmenuInstance(control)
-                        end
+                if data.callback == OnPlayByCloud then m_CloudRowIdx = i end
+                local labelText = control.ButtonLabel:GetText()
+                if data.helpCallback ~= nil then
+                    -- Play + Help pair as an entered SubMenu (Enter to expand).
+                    local group = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_SubMenu"), "SubMenu", {
+                        Label = function() return labelText end,
+                        HiddenPredicate = function() return control.Top:IsHidden() end,
+                        FocusKey = "sub:" .. tostring(i),
                     })
+                    group:On("focus_enter", function() HighlightSubmenuInstance(control) end)
+                    group:On("focus_leave", function() ClearSubmenuHighlight(control) end)
 
-                    local playButton = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuMenuItem"), "MenuItem", {
-                        GetLabel = function() return Locale.Lookup("LOC_CAI_PLAY_NOW") end,
-                        GetTooltip = function() return control.Top:GetToolTipString() end,
-                        IsHidden = function() return control.Top:IsDisabled() end,
-                        IsDisabled = function() return control.OptionButton:IsDisabled() end,
-                        OnClick = function() data.callback() end,
-                        OnFocusEnter = function()
-                            HighlightSubmenuInstance(control)
-                        end
+                    local playBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_PlayBtn"), "MenuItem", {
+                        Label = function() return Locale.Lookup("LOC_CAI_PLAY_NOW") end,
+                        Tooltip = function() return control.Top:GetToolTipString() end,
+                        DisabledPredicate = function() return control.OptionButton:IsDisabled() end,
                     })
+                    playBtn:On("activate", function() data.callback() end)
+                    playBtn:On("focus_enter", function() HighlightSubmenuInstance(control) end)
+                    group:AddChild(playBtn)
 
-                    local helpButton = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuMenuItem"), "MenuItem", {
-                        GetLabel = function() return Locale.Lookup("LOC_CAI_HELP") end,
-                        GetTooltip = function() return control.HelpButton:GetToolTipString() end,
-                        IsDisabled = function() return control.HelpButton:IsDisabled() end,
-                        IsHidden = function() return control.HelpButton:IsHidden() end,
-                        OnClick = function()
-                            if data.helpCallback then
-                                data.helpCallback()
-                            end
-                        end
+                    local helpBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_HelpBtn"), "MenuItem", {
+                        Label = function() return Locale.Lookup("LOC_CAI_HELP") end,
+                        Tooltip = function() return control.HelpButton:GetToolTipString() end,
+                        DisabledPredicate = function() return control.HelpButton:IsDisabled() end,
+                        HiddenPredicate = function() return control.HelpButton:IsHidden() end,
                     })
+                    helpBtn:On("activate", function()
+                        if data.helpCallback then data.helpCallback() end
+                    end)
+                    group:AddChild(helpBtn)
 
-                    helpGroup:AddChild(playButton)
-                    helpGroup:AddChild(helpButton)
-                    m_SubmenuList:AddChild(helpGroup)
+                    m_SubmenuList:AddChild(group)
                 else
-                    local standardButton = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMainMenuMenuItem"), "MenuItem", {
-                        GetLabel = function() return mainLabel end,
-                        GetTooltip = function() return control.Top:GetToolTipString() end,
-                        IsDisabled = function() return control.OptionButton:IsDisabled() end,
-                        IsHidden = function() return data.space or control.Top:IsHidden() end,
-                        OnClick = function() data.callback() end,
-                        OnFocusEnter = function()
-                            HighlightSubmenuInstance(control)
-                        end
+                    local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_SubItem"), "MenuItem", {
+                        Label = function() return labelText end,
+                        Tooltip = function() return control.Top:GetToolTipString() end,
+                        DisabledPredicate = function() return control.OptionButton:IsDisabled() end,
+                        HiddenPredicate = function() return data.space or control.Top:IsHidden() end,
+                        FocusKey = "sub:" .. tostring(i),
                     })
-                    m_SubmenuList:AddChild(standardButton)
+                    row:On("activate", function() data.callback() end)
+                    row:On("focus_enter", function() HighlightSubmenuInstance(control) end)
+                    row:On("focus_leave", function() ClearSubmenuHighlight(control) end)
+                    m_SubmenuList:AddChild(row)
                 end
             end
-        end
     end
-    if isBuilt then
-        mgr:Push(m_SubmenuList)
+
+    mgr:Push(m_SubmenuList)
+end)
+
+UpdateChallengeCarousel = WrapFunc(UpdateChallengeCarousel, function(orig)
+    orig()
+    if m_CarouselList then BuildCarouselRows() end
+end)
+
+-- MotD updates fire while the menu is open (UI.GetPushData polling); only
+-- re-announce when the text actually changed and the widget is focused.
+UpdateMotD = WrapFunc(UpdateMotD, function(orig)
+    orig()
+    if not m_MotDWidget then return end
+    local text = Controls.MotDText:GetText() or ""
+    if text == m_LastMotDText then return end
+    m_LastMotDText = text
+    if mgr:GetFocusedWidget() == m_MotDWidget then
+        m_MotDWidget:Announce({ "value" })
     end
+end)
+
+-- Cloud / MP labels mutate on incoming notifications. If the matching row is
+-- focused, Refocus re-speaks the new label without changing the focus path.
+UpdateMultiplayerButton = WrapFunc(UpdateMultiplayerButton, function(orig, btn)
+    orig(btn)
+    if not (m_MenuList and m_MultiplayerIdx) then return end
+    local row = mgr:FindByFocusKey(m_MenuList, "main:" .. tostring(m_MultiplayerIdx))
+    if row and mgr:GetFocusedWidget() == row then mgr:Refocus() end
+end)
+
+UpdateCloudGamesButton = WrapFunc(UpdateCloudGamesButton, function(orig, btn)
+    orig(btn)
+    if not (m_SubmenuList and m_CloudRowIdx) then return end
+    local row = mgr:FindByFocusKey(m_SubmenuList, "sub:" .. tostring(m_CloudRowIdx))
+    if row and mgr:GetFocusedWidget() == row then mgr:Refocus() end
 end)
 
 OnShutdown = WrapFunc(OnShutdown, function() mgr:ShutDown() end)
 --#End of accessibility integration
-Initialize();
+Initialize()

@@ -1,6 +1,20 @@
 # Project Status: Civ VI Accessibility Integration (CAI)
 
 Last compacted: 2026-05-21
+Last updated: 2026-05-26 (InGameTopOptionsMenu migration to new UI manager)
+
+## UI Manager Rework (branch: UIManagerRework)
+
+The UI manager has been rewritten as a class-based widget framework. The four old files (`baseWidget.lua`, `widgetTemplates.lua`, `widgetTemplateHelpers.lua`, `UIScreenManager.lua`) are deleted. The new framework lives under `src/UI/uiManager/` and `src/UI/uiManager/helpers/` with `CAIWidget_*` / `CAIWidgetHelpers_*` / `CAIUIScreenManager` file naming for VFS uniqueness.
+
+- Framework is complete: `UIWidget` / `ContainerWidget` / `ValueWidget` base classes plus 20 concrete widgets (Button, MenuItem, StaticText, Panel, Dialog, List, HorizontalList, SubMenu, Tree, TreeItem, Dropdown, Checkbox, Slider, EditBox, TabControl, Tab, TabPage, Table, GameView, InterfaceMode). Five helper modules (Navigation, Search, Tree, EditBox, DialogBuilder).
+- Manager-level additions over the old model: multi-listener event system (`On/Off/Emit`), single-source-of-truth focus path with directional entry (Windows tab-stop semantics), `FocusKey` + `CaptureFocusKey` + `RestoreFocus` for rebuild-survival, `Refocus` and `Announce` for out-of-band re-speak, path pruning on destroy, hidden-ancestor input skip, `_focusSound` auto-played on focus enter, `Transparent` widget flag, PgUp/PgDn paging, same-letter type-to-find cycling.
+- Speech follows the Windows one-line-per-widget model. Multi-line emission routes through `SpeakLines(lines, interrupt)` where only the first line interrupts; the rest queue.
+- Docs: `docs/ui-manager.md` is the source of truth (19 sections — architecture, focus, speech, events, widgets, helpers, migration). LuaLS annotations in `src/ideHelpers.lua`.
+- A disposable test screen lives at `src/UI/test/CAITestScreen.lua`, exercised via `LuaEvents.CAITest_Open/Close/Rebuild/Refocus`. Delete once the first migrated screen is verified.
+- **Migrated screens:** `src/UI/frontEnd/MainMenu.lua` CAI block and `src/UI/inGame/InGameTopOptionsMenu_CAI.lua` now use the new framework (CreateWidget, On("activate"/"focus_enter"/"focus_leave"), CaptureFocusKey/RestoreFocus, FocusKey rows, Push with mirrored vanilla flow). The disposable `src/UI/test/CAITestScreen.lua` and the `UI/test/` directory have been deleted along with the three `.modinfo` references. All other `*_CAI.lua` screens still use the old API and will fail to load on this branch; migrate them per `docs/ui-manager.md` section 16. Next pilots: `LoadGameMenu.lua` or `Options.lua` before tackling `ProductionPanel_CAI.lua` / `CivicsTree_CAI.lua`.
+- **InGameTopOptionsMenu migration notes:** main button list activates rows by calling `child:DoLeftClick()` on the underlying vanilla `GridButton` instead of mapping controls to specific action functions; children of `MainStack` are filtered by non-empty `GetID()` so unnamed spacer Containers are skipped. The information section (`DetailsBox`) and the mods section (`ModsInUse`) are read-only `AlwaysEdit` EditBoxes — `SetText` normalizes `[NEWLINE]` to `\n` so no manual newline splitting is needed for the version tooltip; the mods listing's vanilla single-space spacer instance is emitted as a real `\n` separator, but only when it sits between real entries (leading/trailing spacer instances are trimmed). Expansion include chain: the file follows `Civ6Common`'s `IsExpansion1Active`/`IsExpansion2Active` to include `Expansion1_InGameTopOptionsMenu` when an expansion is active — required so the expansion's `LateInitialize` registers the `ExpansionNewFeatures` eLClick callback that `DoLeftClick()` relies on.
+- **Manager mirrors vanilla flow** (durable rule). CAI never drives push/pop on its own; it observes vanilla's screen state and uses `mgr:RemoveFromStack(id)` (not `Pop`) when vanilla closes/rebuilds a section. Escape is NOT bound at the manager level — vanilla owns Escape, CAI follows. MainMenu submenu teardown is driven by inspecting `m_currentOptions[i].isSelected` after vanilla's `ToggleOption` runs.
 
 ## Purpose
 
@@ -29,8 +43,8 @@ The large implementation backlog from earlier sessions is considered resolved fo
 
 ## Resolved Areas
 
-- `caiUtils.lua`: shared speech and utility wrappers are established.
-- `UIScreenManager.lua`, `baseWidget.lua`, `widgetTemplates.lua`, and `widgetTemplateHelpers.lua`: shared CAI widget stack, focus, and navigation system are established.
+- `caiUtils.lua`: shared speech and utility wrappers; now exposes `Speak` and `SpeakLines`.
+- UI manager rewritten on the `UIManagerRework` branch into a class-based framework under `src/UI/uiManager/` and `src/UI/uiManager/helpers/`. The four old files are deleted; see the "UI Manager Rework" section above for the new layout and `docs/ui-manager.md` for the design.
 - `CityPanel_CAI.lua`: city summary, helper reads, and city `SelectionActions` support are implemented.
 - `UnitPanel_CAI.lua`: unit summary, stats, actions list, queued path, combat preview speech, post-combat speech, unit list, builder recommendation gating, build-improvement submenu, and carrier special-info reads are implemented.
 - `UnitFlagManager_CAI.lua`: expansion-aware include selection and short spoken flag info are implemented, including aircraft capacity count.
@@ -75,6 +89,9 @@ The large implementation backlog from earlier sessions is considered resolved fo
 
 ## Known Remaining Work
 
+- Screen migration to the new class-based UI manager (per `docs/ui-manager.md` section 16). `MainMenu.lua` CAI block and `InGameTopOptionsMenu_CAI.lua` have been ported; every other `*_CAI.lua` file still uses the old `OnClick`/`OnFocusEnter`/`FocusedChild` patterns and must be ported. Tackle `ProductionPanel_CAI.lua` and `CivicsTree_CAI.lua` once an easier screen confirms the pattern; both currently carry 130-line rebuild-restore dances that collapse to ~3 lines via `FocusKey` + `RestoreFocus`.
+- **Pending in-game test:** verify the new MainMenu CAI block on launch. Things to confirm: main menu rows speak with correct labels/tooltips/hidden state; opening Single Player / Multiplayer / Additional Content / Benchmark / WorldBuilder pushes a submenu list that reads; same-key re-toggle and switching parents both remove the old submenu cleanly via `RemoveFromStack`; Escape inside a submenu collapses via vanilla (not via the manager); MotD changes are re-announced only when focused; cloud-notify label changes refocus the matching row; carousel autoscroll pauses on focus_enter and resumes on focus_leave.
+- **InGameTopOptionsMenu verified (partial):** other buttons activate via `DoLeftClick()`, `ExpansionNewFeatures` activates after fixing the expansion include chain, mods edit box no longer shows a leading blank line. Still worth confirming in a real save: navigation between button list / mods edit / details edit via Tab, arrow-key navigation inside both edit boxes (line-by-line read-on-demand), behavior with no enabled-modes section vs. enabled-modes + alphabetical mods (the spacer-only-between-entries rule), and Escape cleanly tearing down via vanilla `Close()` + `RemoveFromStack(PANEL_ID)` on the hide handler.
 - `ProductionManager` / multi-queue accessibility is still not implemented.
 - `LoadScreen` accessibility is still planned, not implemented.
 

@@ -13,6 +13,9 @@
     <Row Tag="LOC_UIWidget_Role_Edit" Language="en_US">
       <Text>Edit</Text>
     </Row>
+    <Row Tag="LOC_UIWidget_Role_EditReadOnly" Language="en_US">
+      <Text>Edit read only</Text>
+    </Row>
     <Row Tag="LOC_UIWidget_Role_List" Language="en_US">
       <Text>List</Text>
     </Row>
@@ -39,6 +42,9 @@
     </Row>
     <Row Tag="LOC_UIWidget_Role_TabBar" Language="en_US">
       <Text>Tab Bar</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_TabPage" Language="en_US">
+      <Text>Tab Page</Text>
     </Row>
     <Row Tag="LOC_UIWidget_Role_MenuItem" Language="en_US">
       <Text>Menu Item</Text>
@@ -1072,14 +1078,29 @@
     <Row Tag="LOC_CAI_EDIT_SELECTED" Language="en_US">
       <Text>{1_Text} selected</Text>
     </Row>
+    <Row Tag="LOC_CAI_EDIT_SELECTED_COUNT" Language="en_US">
+      <Text>{1_Num} characters selected</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_UNSELECTED_COUNT" Language="en_US">
+      <Text>{1_Num} characters unselected</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_ACTIVATE_SELECTED_COUNT" Language="en_US">
+      <Text>Editing {1_Label}: {2_Num} characters selected</Text>
+    </Row>
     <Row Tag="LOC_CAI_EDIT_PASTED" Language="en_US">
       <Text>Pasted {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_PASTED_COUNT" Language="en_US">
+      <Text>Pasted {1_Num} characters</Text>
     </Row>
     <Row Tag="LOC_CAI_EDIT_UNSELECTED" Language="en_US">
       <Text>{1_Text} unselected</Text>
     </Row>
     <Row Tag="LOC_CAI_EDIT_COPIED" Language="en_US">
       <Text>Copied {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_COPIED_COUNT" Language="en_US">
+      <Text>Copied {1_Num} characters</Text>
     </Row>
     <Row Tag="LOC_CAI_SEARCH_NO_MATCH" Language="en_US">
       <Text>No match</Text>
@@ -2452,6 +2473,49 @@
     </Row>
     <Row Tag="LOC_CAI_PEDIA_HISTORY_END" Language="en_US">
       <Text>Already at the newest history item</Text>
+    </Row>
+
+    <!-- Options screen feedback -->
+    <Row Tag="LOC_CAI_OPTIONS_SAVED" Language="en_US">
+      <Text>Settings saved</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPTIONS_RESET" Language="en_US">
+      <Text>Settings reset to defaults</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPTIONS_REVERTED" Language="en_US">
+      <Text>Changes discarded</Text>
+    </Row>
+
+    <!-- Keybindings tree -->
+    <Row Tag="LOC_CAI_KEYBINDS_TREE" Language="en_US">
+      <Text>Key Bindings</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_UNBOUND" Language="en_US">
+      <Text>unbound</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_PRIMARY" Language="en_US">
+      <Text>Primary: {1_Gesture}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_SECONDARY" Language="en_US">
+      <Text>Secondary: {1_Gesture}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_CLEAR" Language="en_US">
+      <Text>Clear bindings</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_CLEARED" Language="en_US">
+      <Text>{1_Action} bindings cleared</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_SET_PRIMARY" Language="en_US">
+      <Text>Set primary binding</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_SET_SECONDARY" Language="en_US">
+      <Text>Set secondary binding</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_ACTION_LINE" Language="en_US">
+      <Text>{1_Name}: primary {2_P}, secondary {3_S}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TAB_STRIP_LABEL" Language="en_US">
+      <Text>Tab control</Text>
     </Row>
 
   </LocalizedText>

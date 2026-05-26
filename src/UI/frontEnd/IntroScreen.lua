@@ -99,7 +99,7 @@ function Startup()
 end
 --#Accessibility integration
 include ("caiUtils")
-include("UIScreenManager")
+include("CAIUIScreenManager")
 local mgr             = ExposedMembers.CAI_UIManager
 
 -- This context does not have a vanilla 'OnShutdown' function, so we add one to kill the UI manager

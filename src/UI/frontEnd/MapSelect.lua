@@ -170,11 +170,24 @@ local kSortTabs = {
 	{ 2, "LOC_SETUP_MAP_WORLD_BUILDER_MAPS",   function() return Controls.WorldBuilderMapsSelector end },
 }
 
+local function MakeButton(labelCtrl, onClick)
+	local b = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapSelectButton"), "Button", {
+		Label = function() return labelCtrl:GetText() end,
+	})
+	b:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+	b:On("activate", onClick)
+	return b
+end
+
 local function RebuildMapList()
 	if not CAI_MapList then return end
+	local capture = mgr:CaptureFocusKey(CAI_MapList)
 	CAI_MapList:ClearChildren()
 
-	if not m_kAllMaps then return end
+	if not m_kAllMaps then
+		mgr:RestoreFocus(CAI_MapList, capture)
+		return
+	end
 	for k, v in pairs(m_kAllMaps) do
 		local include = false
 		if m_sortType == 0 then
@@ -191,39 +204,40 @@ local function RebuildMapList()
 				or (m_lastSetMapValue == mapData.Value and m_selectedMapValue == nil)
 				or (m_selectedMap == nil and m_lastSetMapValue == nil and mapData.RawName == DEFAULT_MAP_RAWNAME)
 
-			local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMapSelectMenuItem"), "MenuItem", {
-				GetLabel     = function() return Locale.Lookup(mapData.RawName) end,
-				GetTooltip   = function() return Locale.Lookup(mapData.RawDescription) end,
-				OnFocusEnter = function()
-					UI.PlaySound("Main_Menu_Mouse_Over")
-					-- Sync visual selection
-					local instances = m_mapSelectorIM and m_mapSelectorIM.m_AllocatedInstances
-					if instances then
-						for _, inst in ipairs(instances) do
-							if inst.MapName:GetText() == Locale.Lookup(mapData.RawName) then
-								OnMapButton(mapData, inst.MapButton)
-								break
-							end
+			local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapSelectMenuItem"), "MenuItem", {
+				Label = function() return Locale.Lookup(mapData.RawName) end,
+				Tooltip = function() return Locale.Lookup(mapData.RawDescription) end,
+				FocusKey = "map:" .. tostring(mapData.Value),
+			})
+			child:On("focus_enter", function()
+				UI.PlaySound("Main_Menu_Mouse_Over")
+				local instances = m_mapSelectorIM and m_mapSelectorIM.m_AllocatedInstances
+				if instances then
+					for _, inst in ipairs(instances) do
+						if inst.MapName:GetText() == Locale.Lookup(mapData.RawName) then
+							OnMapButton(mapData, inst.MapButton)
+							break
 						end
 					end
-				end,
-				OnClick      = function()
-					m_selectedMapValue = mapData.Value
-					OnSelectMapButton()
-				end,
-			})
+				end
+			end)
+			child:On("activate", function()
+				m_selectedMapValue = mapData.Value
+				OnSelectMapButton()
+			end)
 			CAI_MapList:AddChild(child)
 
 			if isSelected then
-				CAI_MapList.FocusedChild = child
+				CAI_MapList:SetDefaultIndex(#CAI_MapList.Children)
 			end
 		end
 	end
+	mgr:RestoreFocus(CAI_MapList, capture)
 end
 
 local function BuildPanel()
-	CAI_Panel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMapSelectDialog"), "Dialog", {
-		GetLabel = function() return Controls.WindowTitle:GetText() end,
+	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapSelectDialog"), "Dialog", {
+		Label = function() return Controls.WindowTitle:GetText() end,
 		SpeechSettings = { Role = false },
 	})
 	CAI_Panel:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
@@ -231,50 +245,41 @@ local function BuildPanel()
 		return true
 	end})
 
-	-- Sort tab bar (first child of panel, like Options)
-	CAI_TabBar = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMapSelectTabBar"), "TabBar")
+	-- Sort selector as a horizontal list of buttons (tabs of the old TabBar).
+	CAI_TabBar = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapSelectTabBar"), "HorizontalList")
 	CAI_Panel:AddChild(CAI_TabBar)
 
 	for _, spec in ipairs(kSortTabs) do
 		local sortNum = spec[1]
 		local locKey = spec[2]
 		local getSelector = spec[3]
-		CAI_TabBar:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMapSelectTab"), "Tab", {
-			GetLabel     = function() return Locale.Lookup(locKey) end,
-			OnFocusEnter = function()
-				UI.PlaySound("Main_Menu_Mouse_Over")
-				if m_sortType ~= sortNum then
-					OnSortButton(sortNum, getSelector())
-					RebuildMapList()
-				end
-			end,
-			OnClick      = function()
+		local tab = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapSelectTab"), "Button", {
+			Label = function() return Locale.Lookup(locKey) end,
+		})
+		tab:On("focus_enter", function()
+			UI.PlaySound("Main_Menu_Mouse_Over")
+			if m_sortType ~= sortNum then
 				OnSortButton(sortNum, getSelector())
 				RebuildMapList()
-			end,
-		}))
+			end
+		end)
+		tab:On("activate", function()
+			OnSortButton(sortNum, getSelector())
+			RebuildMapList()
+		end)
+		CAI_TabBar:AddChild(tab)
 	end
 
-	-- Map list
-	CAI_MapList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMapSelectList"), "List")
+	CAI_MapList = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapSelectList"), "List")
 	CAI_Panel:AddChild(CAI_MapList)
 
-	-- Action buttons
-	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMapSelectButton"), "Button", {
-		GetLabel     = function() return Controls.MapSelectionButton:GetText() end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick      = function() OnSelectMapButton() end,
-	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMapSelectButton"), "Button", {
-		GetLabel     = function() return Controls.CloseButton:GetText() end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick      = function() Close() end,
-	}))
+	CAI_Panel:AddChild(MakeButton(Controls.MapSelectionButton, function() OnSelectMapButton() end))
+	CAI_Panel:AddChild(MakeButton(Controls.CloseButton,        function() Close() end))
 end
 
 local function ClosePanel()
-	if CAI_Panel and mgr:HasWidget(CAI_Panel) then
-		mgr:Pop()
+	if CAI_Panel then
+		mgr:RemoveFromStack(CAI_Panel:GetId())
 	end
 end
 
@@ -299,9 +304,8 @@ end)
 
 -- Use show/hide handlers for push/pop
 ContextPtr:SetShowHandler(function()
-	-- Clean up stale panel if still on stack (e.g. after a non-intentional hide)
-	if CAI_Panel and mgr:HasWidget(CAI_Panel) then
-		mgr:Pop()
+	if CAI_Panel then
+		mgr:RemoveFromStack(CAI_Panel:GetId())
 	end
 	-- Rebuild fresh each show
 	CAI_Panel = nil

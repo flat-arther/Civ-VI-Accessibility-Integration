@@ -373,83 +373,85 @@ local mgr = ExposedMembers.CAI_UIManager
 local CAI_Panel = nil
 local CAI_ItemList = nil
 
+local function MakeButton(idPrefix, labelCtrl, onClick, disabledCtrl)
+	local b = mgr:CreateWidget(mgr:GenerateWidgetId(idPrefix), "Button", {
+		Label = function() return labelCtrl:GetText() end,
+	})
+	if disabledCtrl then
+		b:SetDisabledPredicate(function() return disabledCtrl:IsDisabled() end)
+	end
+	b:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+	b:On("activate", onClick)
+	return b
+end
+
 function RebuildItemList()
 	if not CAI_ItemList then return end
+	local capture = mgr:CaptureFocusKey(CAI_ItemList)
 	CAI_ItemList:ClearChildren()
 
-	if not m_kItemList then return end
+	if not m_kItemList then
+		mgr:RestoreFocus(CAI_ItemList, capture)
+		return
+	end
 	for idx, node in ipairs(m_kItemList) do
 		local item = node["item"]
 		local checkBox = node["checkbox"]
 
-		local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerCheckbox"), "Checkbox", {
-			GetLabel = function()
-				return Controls.FocusedItemName:GetText()
-			end,
-			GetTooltip = function()
-				return Controls.FocusedItemDescription:GetText()
-			end,
-			GetValue = function()
+		local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStatePickerCheckbox"), "Checkbox", {
+			Label = function() return Controls.FocusedItemName:GetText() end,
+			Tooltip = function() return Controls.FocusedItemDescription:GetText() end,
+			ValueGetter = function()
 				return checkBox:IsChecked()
 					and Locale.Lookup("LOC_OPTIONS_ENABLED")
 					or Locale.Lookup("LOC_OPTIONS_DISABLED")
 			end,
-			Toggle = function()
-				OnItemSelect(item, checkBox)
-			end,
-			OnFocusEnter = function()
-				UI.PlaySound("Main_Menu_Mouse_Over")
-				OnItemFocus(item)
-			end,
+			FocusKey = "csp:item:" .. tostring(idx),
 		})
+		child:On("value_changed", function() OnItemSelect(item, checkBox) end)
+		child:On("focus_enter", function()
+			UI.PlaySound("Main_Menu_Mouse_Over")
+			OnItemFocus(item)
+		end)
 		CAI_ItemList:AddChild(child)
 	end
+	mgr:RestoreFocus(CAI_ItemList, capture)
 end
 
 function OpenSortByDropdown()
 	local pulldown = Controls.SortByPulldown
-	local optList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerList"), "List", {
-		GetLabel = function() return Controls.StringName:GetText() end,
+	local optList = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStatePickerList"), "List", {
+		Label = function() return Controls.StringName:GetText() end,
 	})
 	optList:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
-		mgr:Pop()
+		mgr:RemoveFromStack(optList:GetId())
 		return true
 	end})
 
+	local function AddSort(labelKey, sortFn)
+		local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStatePickerMenuItem"), "MenuItem", {
+			Label = function() return Locale.Lookup(labelKey) end,
+		})
+		item:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+		item:On("activate", function()
+			pulldown:GetButton():SetText(Locale.Lookup(labelKey))
+			RefreshList(sortFn)
+			mgr:RemoveFromStack(optList:GetId())
+		end)
+		optList:AddChild(item)
+	end
 
-
-	optList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerMenuItem"), "MenuItem", {
-		GetLabel = function()
-			return Locale.Lookup("LOC_CITY_STATE_PICKER_SORT_NAME")
-		end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick = function()
-			pulldown:GetButton():SetText(Locale.Lookup("LOC_CITY_STATE_PICKER_SORT_NAME"))
-			RefreshList(SortByName)
-			mgr:Pop()
-		end,
-	}))
-
-	optList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerMenuItem"), "MenuItem", {
-		GetLabel = function()
-			return Locale.Lookup("LOC_CITY_STATE_PICKER_SORT_TYPE")
-		end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick = function()
-			pulldown:GetButton():SetText(Locale.Lookup("LOC_CITY_STATE_PICKER_SORT_TYPE"))
-			RefreshList(SortByType);
-			mgr:Pop()
-		end,
-	}))
+	AddSort("LOC_CITY_STATE_PICKER_SORT_NAME", SortByName)
+	AddSort("LOC_CITY_STATE_PICKER_SORT_TYPE", SortByType)
 
 	mgr:Push(optList)
 end
 
 function BuildPanel()
 	local pulldown = Controls.SortByPulldown
-	CAI_Panel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerDialog"), "Dialog", {
-		GetLabel = function() return Controls.WindowTitle:GetText() end,
-		GetTooltip = function() return Controls.TopDescription:GetText() end,
+	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStatePickerDialog"), "Dialog", {
+		Label = function() return Controls.WindowTitle:GetText() end,
+		Tooltip = function() return Controls.TopDescription:GetText() end,
 		SpeechSettings = { Role = false },
 	})
 	CAI_Panel:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
@@ -457,51 +459,34 @@ function BuildPanel()
 		return true
 	end})
 
+	local sortBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStatePickerSortBtn"), "Button", {
+		Label = function() return Controls.StringName:GetText() end,
+		ValueGetter = function() return pulldown:GetButton():GetText() end,
+	})
+	sortBtn:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+	sortBtn:On("activate", function() OpenSortByDropdown() end)
+	CAI_Panel:AddChild(sortBtn)
 
-	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerDropdownMenu"), "DropdownMenu", {
-		GetLabel = function() return Controls.StringName:GetText() end,
-		GetValue     = function() return pulldown:GetButton():GetText() end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick      = function() OpenSortByDropdown() end,
-	}))
-
-	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerStaticText"), "StaticText", {
-		GetLabel = function() return Controls.CountWarning:GetText() or "" end,
-		IsHidden = function()
+	CAI_Panel:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStatePickerStaticText"), "StaticText", {
+		Label = function() return Controls.CountWarning:GetText() or "" end,
+		HiddenPredicate = function()
 			local text = Controls.CountWarning:GetText()
 			return not text or text == ""
 		end,
 	}))
 
-	CAI_ItemList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerList"), "List")
+	CAI_ItemList = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStatePickerList"), "List")
 	CAI_Panel:AddChild(CAI_ItemList)
 
-	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerButton"), "Button", {
-		GetLabel     = function() return Controls.SelectAllButton:GetText() end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick      = function() OnSelectAll() end,
-	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerButton"), "Button", {
-		GetLabel     = function() return Controls.SelectNoneButton:GetText() end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick      = function() OnSelectNone() end,
-	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerButton"), "Button", {
-		GetLabel     = function() return Controls.ConfirmButton:GetText() end,
-		IsDisabled   = function() return Controls.ConfirmButton:IsDisabled() end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick      = function() OnConfirmChanges() end,
-	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityStatePickerButton"), "Button", {
-		GetLabel     = function() return Controls.CloseButton:GetText() end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick      = function() Close() end,
-	}))
+	CAI_Panel:AddChild(MakeButton("CAICityStatePickerButton", Controls.SelectAllButton,  function() OnSelectAll() end))
+	CAI_Panel:AddChild(MakeButton("CAICityStatePickerButton", Controls.SelectNoneButton, function() OnSelectNone() end))
+	CAI_Panel:AddChild(MakeButton("CAICityStatePickerButton", Controls.ConfirmButton,    function() OnConfirmChanges() end, Controls.ConfirmButton))
+	CAI_Panel:AddChild(MakeButton("CAICityStatePickerButton", Controls.CloseButton,      function() Close() end))
 end
 
 function ClosePanel()
-	if CAI_Panel and mgr:HasWidget(CAI_Panel) then
-		mgr:Pop()
+	if CAI_Panel then
+		mgr:RemoveFromStack(CAI_Panel:GetId())
 	end
 	CAI_Panel = nil
 	CAI_ItemList = nil
@@ -537,8 +522,8 @@ SetAllItems = WrapFunc(SetAllItems, function(orig, bState)
 end)
 
 ContextPtr:SetShowHandler(function()
-	if CAI_Panel and mgr:HasWidget(CAI_Panel) then
-		mgr:Pop()
+	if CAI_Panel then
+		mgr:RemoveFromStack(CAI_Panel:GetId())
 	end
 	CAI_Panel = nil
 	CAI_ItemList = nil
