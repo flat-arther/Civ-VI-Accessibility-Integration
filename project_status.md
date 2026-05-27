@@ -1,7 +1,7 @@
 # Project Status: Civ VI Accessibility Integration (CAI)
 
 Last compacted: 2026-05-21
-Last updated: 2026-05-27 (CivicsChooser migration to new UI manager)
+Last updated: 2026-05-27 (ProductionPanel migration to new UI manager)
 
 ## UI Manager Rework (branch: UIManagerRework)
 
@@ -89,13 +89,71 @@ The large implementation backlog from earlier sessions is considered resolved fo
 
 ## Known Remaining Work
 
-- Screen migration to the new class-based UI manager (per `docs/ui-manager.md` section 16). `MainMenu.lua` CAI block and `InGameTopOptionsMenu_CAI.lua` have been ported; every other `*_CAI.lua` file still uses the old `OnClick`/`OnFocusEnter`/`FocusedChild` patterns and must be ported. Tackle `ProductionPanel_CAI.lua` and `CivicsTree_CAI.lua` once an easier screen confirms the pattern; both currently carry 130-line rebuild-restore dances that collapse to ~3 lines via `FocusKey` + `RestoreFocus`.
+- Screen migration to the new class-based UI manager (per `docs/ui-manager.md` section 16). `MainMenu.lua` CAI block, `InGameTopOptionsMenu_CAI.lua`, `ResearchChooser_CAI.lua`, `CivicsChooser_CAI.lua`, and `ProductionPanel_CAI.lua` have been ported; every other `*_CAI.lua` file still uses the old `OnClick`/`OnFocusEnter`/`FocusedChild` patterns and must be ported. `CivicsTree_CAI.lua` still carries the 130-line rebuild-restore dance that collapses to ~3 lines via `FocusKey` + `RestoreFocus`.
 - **Pending in-game test:** verify the new CivicsChooser CAI panel: queue tree (hidden when empty) reads current + queued civics; available tree activation calls vanilla `inst.Top:DoLeftClick()` (which triggers vanilla's `OnChooseCivic` and auto-closes the panel via the slide animator); recommended tag reads as "Recommended by Military advisor / Culture advisor / Religion advisor / Science advisor / General advisor" via the shared `GetRecommendedPart` helper and is suppressed when the row is disabled; tooltip is one comma-joined line `<cost> culture, <turns> turns, <progress>%, <description>, <boost>, Makes obsolete: Policy: A, Policy: B, Unlocks: X, Y`; obsolete-policy list is inline-only (vanilla shows no per-policy descriptions); unlocks with non-empty descriptions appear as TreeItem children with full description as tooltip; Shift+Enter on a row opens civilopedia for the civic, on an unlock child opens civilopedia for that unlock; both no-op during tutorial; Open Civics Tree button calls `Controls.OpenTreeButton:DoLeftClick()`; focused row re-speaks on CivicChanged/CivicCompleted/CultureYieldChanged via `mgr:Refocus()`; close path uses `mgr:RemoveFromStack(PANEL_ID)` (no `Pop`) so external pushes are not stomped; closing via Space/Escape/X-button/civic-pick/`LaunchBar_CloseChoosers` all funnel through wrapped `OnClosePanel`.
 - **Pending in-game test:** verify the new ResearchChooser CAI panel: queue tree (hidden when empty) reads current + queued techs; available tree activation calls vanilla `kItemInstance.Top:DoLeftClick()`; recommended tag reads as "Recommended by Science Advisor / Conquest Advisor / Religion Advisor / Advisor" and is hidden when the row is disabled; tooltip is one comma-joined line `Cost: X science, N turns, <desc>, Eureka {triggered|available}: <req>, Alliance research bonus: <tip>, Unlocks: <name>: <desc>, ...`; alliance bonus appears only when XP1/XP2 is active and an ally has/is researching the tech; Shift+Enter opens Civilopedia outside the tutorial; Open Tech Tree button calls `Controls.OpenTreeButton:DoLeftClick()`; focused row re-speaks on ResearchChanged/ResearchCompleted via `mgr:Refocus()`; close path uses `mgr:RemoveFromStack(PANEL_ID)` (no `Pop`) so external pushes are not stomped; tutorial open path (`Tutorial_ResearchOpen` → `CAI_TutorialDetailedControlsReady`) defers the push until controls are ready.
 - **Pending in-game test:** verify the new MainMenu CAI block on launch. Things to confirm: main menu rows speak with correct labels/tooltips/hidden state; opening Single Player / Multiplayer / Additional Content / Benchmark / WorldBuilder pushes a submenu list that reads; same-key re-toggle and switching parents both remove the old submenu cleanly via `RemoveFromStack`; Escape inside a submenu collapses via vanilla (not via the manager); MotD changes are re-announced only when focused; cloud-notify label changes refocus the matching row; carousel autoscroll pauses on focus_enter and resumes on focus_leave.
 - **InGameTopOptionsMenu verified (partial):** other buttons activate via `DoLeftClick()`, `ExpansionNewFeatures` activates after fixing the expansion include chain, mods edit box no longer shows a leading blank line. Still worth confirming in a real save: navigation between button list / mods edit / details edit via Tab, arrow-key navigation inside both edit boxes (line-by-line read-on-demand), behavior with no enabled-modes section vs. enabled-modes + alphabetical mods (the spacer-only-between-entries rule), and Escape cleanly tearing down via vanilla `Close()` + `RemoveFromStack(PANEL_ID)` on the hide handler.
 - `ProductionManager` / multi-queue accessibility is still not implemented.
 - `LoadScreen` accessibility is still planned, not implemented.
+
+- **Pending in-game test:** verify the new ProductionPanel CAI panel. Things to confirm: Panel with TabControl exposes Production / Purchase with gold (if CAPABILITY_GOLD) / Purchase with faith (if CAPABILITY_FAITH) / Queue tabs; Ctrl+Tab cycles tabs and switching CAI tab also switches the vanilla tab (and vice versa) without re-entry recursion; production tab shows current-production TreeItem then Districts / Wonders / Projects / Units category TreeItems (buildings merge under Districts); purchase tabs show Districts / Buildings / Units; unit rows with Corps/Army get child rows with formation-suffixed labels; row activation calls vanilla `kInstance.Button:DoLeftClick()` (or TrainCorpsButton / TrainArmyButton) so wrapped BuildBuilding/ZoneDistrict/BuildUnit/BuildUnitCorps/BuildUnitArmy/AdvanceProject/PurchaseUnit*/PurchaseBuilding/PurchaseDistrict speech fires once; current production row uses Controls.CurrentProductionButton:DoLeftClick(); Shift+Enter opens civilopedia for the item; Ctrl+Enter on production tab queues the item (CloseManager/OpenQueue around DoLeftClick, then CloseQueue, speaks `LOC_CAI_PRODUCTION_QUEUED`); Delete on current-production row calls `RemoveQueueItem(0)`; Delete on queue row calls `RemoveQueueItem(index)`; Shift+Up/Shift+Down on queue row swaps with neighbor; tooltip is comma-joined `<cost> <yield>, <turns>, <progress>%, <maintenance>, <strategic upkeep>, <short desc>, <stats>, <adjacency headline>, <failures>` with `Cannot afford` flag on purchase tabs and `Repair needed`/`Already built` flags when applicable; detail TreeItem children appear only for full description (when longer than short), bonuses (when count > adjacency headline), requirements, and unlocks; rebuild-and-restore uses `mgr:CaptureFocusKey`/`mgr:RestoreFocus`; close path uses `mgr:RemoveFromStack(PANEL_ID)`; refocus on CityProductionChanged/Updated/QueueChanged for `item:` / `current` / `queue:` FocusKeys.
+
+## ProductionPanel migration (implemented 2026-05-27)
+
+`ProductionPanel_CAI.lua` (2206 lines) is a no-back-compat rewrite for the new UI manager. Old API surface to delete: `mgr:CreateUIWidget`, widget types `"TabBar"`/`"Tab"`/`"Treeview"`/`"TreeviewItem"`, field callbacks (`OnClick`/`OnFocusEnter`/`IsHidden`/`IsDisabled`/`GetLabel`/`GetTooltip`/`IsExpanded`/`OnToggleExpanded`), `node._caiFocusKey` + hand-rolled `CaptureFocusStateForBody`/`FindFocusPathByKey`/`RestoreOrResetBodyFocus`/`BuildPathWithIndex`/`SetFocusIndexPath`/`SetFocusedChild`/`SetDefaultIndex`, `mgr:HasWidget`, multi-body `IsHidden`-toggle tab fake, `AddInputBinding` (singular).
+
+**Includes**: `include("ProductionPanel")` then conditionally `include("ProductionPanel_Babylon_Heroes")` when Babylon is active (Mod GUID `1B28771A-C749-434B-9053-D1380C553DE9`). No XP1/XP2 ProductionPanel replacement exists — confirmed via game install scan. Babylon's only override is `RightClickProductionItem` (redirects Hero Devotion projects to the Hero unit pedia); our `InvokeRightClickPedia` wrap already routes through it.
+
+**Layout** (Panel + TabControl + four TabPages):
+- Page "Production" (TAB_PRODUCTION): current-production TreeItem (FocusKey `current`, Delete = remove from queue), then Tree "Available" with category TreeItems Districts / Wonders / Projects / Units (FocusKey `cat:<key>`); production tab merges nested buildings under Districts. Units with Corps/Army have child rows (FocusKey `item:prod:unit-corps:<hash>` etc.).
+- Page "Purchase with Gold" (capability-gated `CAPABILITY_GOLD`): Tree with Districts / Buildings / Units.
+- Page "Purchase with Faith" (capability-gated `CAPABILITY_FAITH`): same.
+- Page "Queue": List of queue Button rows (FocusKey `queue:<index>`, Delete = remove, Shift+Up/Down = move). Current-production Button at the top when active.
+- TabControl swap via `SetActivePageById`; vanilla `OnTabChange*` wraps call into it; `OnVanillaListModeChanged` reverse-routes.
+
+**Item row** (TreeItem with `FocusKey "item:<mode>:<class>:<hash>[:corps|army]"`, `Label`/`Tooltip` functions, `DisabledPredicate`, `HiddenPredicate`, `On("activate")` → vanilla left-click action; `AddInputBindings` for Shift+Enter pedia and Ctrl+Enter queue-this-item). Drop the `CreateActionNode` indirection.
+
+**Recommendation suffix** in label: replace boolean `m_state.recommended[hash]` with `{ hash → advisorType }` map sourced from `pCity:GetCityAI():GetBuildRecommendations()` and routed through shared `GetRecommendedPart(kData, disabled)` so labels read `Knight, Recommended by Conquest advisor` — same wording as the chooser migration.
+
+**Tooltip vs details — no duplication rule**:
+- Tooltip (comma-joined single line, chooser format `Name, 25 production, 5 turns, 30 percent, description, ...`):
+  - Repair/already-built status
+  - Cost: `<n> production` / `<n> gold` / `<n> faith` (use new `LOC_CAI_PRODUCTION_COST_*` tags matching `LOC_CAI_RESEARCH_COST` shape)
+  - Turns left (production tab) or affordability (purchase tabs, append `Cannot afford` flag)
+  - Accumulated progress percent when partial (`LOC_CAI_RESEARCH_PROGRESS` style — reuse "{1_Percent} percent")
+  - Maintenance per turn
+  - Strategic-resource upkeep (`-1 Oil per turn`) — new bucket; not currently extracted
+  - One-line short description (LOC_*_DESCRIPTION first sentence)
+  - Headline stats (units: combat/ranged+range/movement; buildings/districts/wonders: housing, amenities, citizen slots, GP points; projects: amenities-while-active / yield conversion)
+  - Adjacency *headline* when short (≤ 2 lines)
+  - Failure reasons (always — they explain disabled state)
+- Details (TreeItem children, each category appears only when non-empty AND not already in tooltip):
+  - Description (full prose) — only when longer than the one-line short used in tooltip
+  - Bonuses — full yield/citizen-yield/GP/adjacency/housing/amenities list, only when count > headline threshold (e.g. >2 lines or a district with many adjacency rules)
+  - Requirements — full prereq list: tech/civic prereq, district prereq, mutually-exclusive list, terrain (river/lake/coast/mountain), adjacent district/improvement/resource, religion-founded requirement with founder religion name
+  - Reveals / Unlocks — for projects and wonders that grant follow-on capabilities
+  - When all detail buckets are empty (basic worker/scout type rows), the TreeItem has zero children — focus speaks tooltip and Tab moves on. Drop `PRODUCTION_TOOLTIP_PREVIEW`, the mixed top-level description/cost/maintenance/failures rows currently in `AddDetailChildren`, and the `LOC_CAI_PRODUCTION_STATS_*` count tags (stats are tooltip-only now).
+- `NewDetail()` becomes two-section: `{ status, cost, turnsOrAffordability, progressPct, maintenance, strategicUpkeep, descriptionShort, stats, adjacencyHeadline, failures }` (tooltip-only) and `{ descriptionFull, bonuses, requirements, unlocks }` (details-only).
+
+**Focus restore on rebuild**: every row gets a `FocusKey`; each rebuild becomes the standard 3-line `mgr:CaptureFocusKey` / `ClearChildren` / `mgr:RestoreFocus` idiom. Delete the entire 160-line custom capture/restore block. Queue move: mutate target row's `FocusKey` to `queue:<targetIndex>` before `RestoreFocus`.
+
+**Re-announce on game events**: `Events.CityProductionChanged` / `CityProductionUpdated` / `CityProductionQueueChanged` rebuild active body, then if focused widget's `FocusKey` starts with `item:`/`current`/`queue:` call `mgr:Refocus()`.
+
+**Lifecycle**: `LuaEvents.ProductionPanel_Open`/`_Close`/`_ListModeChanged` keep current routing. Close path uses `mgr:RemoveFromStack(PANEL_ID)` (NOT `Pop`) per `feedback_mgr_mirrors_vanilla_flow`. Input handler wrap returns true on mgr consume per `feedback_input_handler_consume`, with the `if mgr:GetTop() ~= m_ui.panel then return false end` guard.
+
+**Missing-from-vanilla items to add during rewrite** (currently not surfaced):
+- `kItem.Repair` flag → explicit `Repair needed` in label/tooltip (current code reads `LabelText:GetText()` which strips the `[NEWLINE]` suffix).
+- Strategic-resource per-turn consumption for units (XP1/XP2 `UnitConsumption.ResourceMaintenanceAmount`).
+- Wonder-completed / "Already built" marker (vanilla's `CompletedArea` for wonders already in the city).
+- In-progress production progress for non-current items already partly built (`ComposeProductionCostString`).
+- Religion name on `RequiresReligion` buildings (vanilla's `ReligionIcon` tooltip).
+- Project victory-stage context (space race, diplo victory) via `ToolTipHelper` lookup.
+- District unique-replacement note when a civ's UD replaces a base district.
+
+**Detail-bucket builders to reshape**: `BuildUnitDetail` / `BuildBuildingDetail` / `BuildDistrictDetail` / `BuildProjectDetail` keep their GameInfo accesses but emit into the new tooltip-only vs details-only split. `ExtractFailureReasons` stays (parses `[COLOR:Red]` blocks). `FormatDetailBriefTooltip` becomes `FormatTooltip(detail)` returning the chooser-style comma-joined string. `AddDetailChildren` only emits TreeItems for the four details-only buckets that are non-empty.
+
+Reusable as-is from current file: data-extraction half (NewDetail buckets, per-class detail builders, GameInfo accesses, ExtractFailureReasons), all vanilla function wraps (`PopulateGenericItemData`, `PopulateList`, `PopulateWonders/Projects/Units/DistrictsWithNestedBuildings/DistrictsWithoutNestedBuildings`, `View`, `OnCorpsToggle`, `OnTabChange*`, `OnCityPanelChoose*`, `OnCityPanelPurchase*Open`, `OnProductionOpenForQueue`, `BuildBuilding`/`ZoneDistrict`/`BuildUnit`/`BuildUnitCorps`/`BuildUnitArmy`/`AdvanceProject`/`Purchase*` speech wraps), recommendation refresh, instance-by-hash capture, category-list capture.
 
 ## Session Notes
 

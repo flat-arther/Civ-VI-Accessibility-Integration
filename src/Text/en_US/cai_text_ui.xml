@@ -52,10 +52,10 @@
     <Row Tag="LOC_UIWidget_Role_StaticText" Language="en_US">
       <Text>Text</Text>
     </Row>
-    <Row Tag="LOC_UIWidget_Role_Treeview" Language="en_US">
+    <Row Tag="LOC_UIWidget_Role_Tree" Language="en_US">
       <Text>Tree View</Text>
     </Row>
-    <Row Tag="LOC_UIWidget_Role_TreeviewItem" Language="en_US">
+    <Row Tag="LOC_UIWidget_Role_TreeItem" Language="en_US">
       <Text>Tree Item</Text>
     </Row>
     <Row Tag="LOC_CAI_TREEVIEW_EXPANDED" Language="en_US">
@@ -1353,38 +1353,80 @@
     <Row Tag="LOC_CAI_PRODUCTION_QUEUE_LIST" Language="en_US">
       <Text>Production queue</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_REQUIREMENTS_COUNT" Language="en_US">
-      <Text>Requirements: {1_Num}</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_PANEL_TITLE" Language="en_US">
+      <Text>Production</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_REQUIREMENTS_COUNT_ONE" Language="en_US">
-      <Text>Requirements: 1</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_TAB_PRODUCTION" Language="en_US">
+      <Text>Production</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_CITIZEN_YIELDS_COUNT" Language="en_US">
-      <Text>Citizen yields: {1_Num}</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_TAB_PURCHASE_GOLD" Language="en_US">
+      <Text>Purchase with gold</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_CITIZEN_YIELDS_COUNT_ONE" Language="en_US">
-      <Text>Citizen yields: 1</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_TAB_PURCHASE_FAITH" Language="en_US">
+      <Text>Purchase with faith</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_BONUSES_COUNT" Language="en_US">
-      <Text>Bonuses: {1_Num}</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_TAB_QUEUE" Language="en_US">
+      <Text>Queue</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_BONUSES_COUNT_ONE" Language="en_US">
-      <Text>Bonuses: 1</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS" Language="en_US">
+      <Text>Districts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CATEGORY_BUILDINGS" Language="en_US">
+      <Text>Buildings</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CATEGORY_WONDERS" Language="en_US">
+      <Text>Wonders</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CATEGORY_PROJECTS" Language="en_US">
+      <Text>Projects</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CATEGORY_UNITS" Language="en_US">
+      <Text>Units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_COST_PRODUCTION" Language="en_US">
+      <Text>{1_Cost} production</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_COST_GOLD" Language="en_US">
+      <Text>{1_Cost} gold</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_COST_FAITH" Language="en_US">
+      <Text>{1_Cost} faith</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_TURNS" Language="en_US">
+      <Text>{1_Turns} turns</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_PROGRESS" Language="en_US">
+      <Text>{1_Percent} percent</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_MAINTENANCE" Language="en_US">
+      <Text>{1_Cost} gold maintenance</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_RESOURCE_UPKEEP" Language="en_US">
+      <Text>-{1_Amount} {2_Resource} per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CANNOT_AFFORD" Language="en_US">
+      <Text>Cannot afford</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_REPAIR_NEEDED" Language="en_US">
+      <Text>Repair needed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_ALREADY_BUILT" Language="en_US">
+      <Text>Already built</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_UNLOCKS_HEADER" Language="en_US">
+      <Text>Unlocks: {1_List}</Text>
     </Row>
     <Row Tag="LOC_CAI_PRODUCTION_REQUIREMENTS_LABEL" Language="en_US">
-      <Text>Requirements:</Text>
+      <Text>Requirements</Text>
     </Row>
     <Row Tag="LOC_CAI_PRODUCTION_BONUSES_LABEL" Language="en_US">
-      <Text>Bonuses:</Text>
+      <Text>Bonuses</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_STATS_LABEL" Language="en_US">
-      <Text>Stats:</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_DESCRIPTION_LABEL" Language="en_US">
+      <Text>Description</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_STATS_COUNT" Language="en_US">
-      <Text>Stats: {1_Num}</Text>
-    </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_STATS_COUNT_ONE" Language="en_US">
-      <Text>Stats: 1</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_UNLOCKS_LABEL" Language="en_US">
+      <Text>Unlocks</Text>
     </Row>
     <Row Tag="LOC_CAI_PRODUCTION_CHOSEN" Language="en_US">
       <Text>Chose: {1_Name}</Text>
@@ -1736,6 +1778,24 @@
     </Row>
     <Row Tag="LOC_CAI_UNIT_LIST" Language="en_US">
       <Text>Unit list</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_DOMAIN_MILITARY" Language="en_US">
+      <Text>Military</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_DOMAIN_NAVAL" Language="en_US">
+      <Text>Naval</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_DOMAIN_AIR" Language="en_US">
+      <Text>Air</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_DOMAIN_SUPPORT" Language="en_US">
+      <Text>Support</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_DOMAIN_CIVILIAN" Language="en_US">
+      <Text>Civilian</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_DOMAIN_TRADE" Language="en_US">
+      <Text>Trade</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_ABILITIES_LIST" Language="en_US">
       <Text>Unit abilities</Text>
