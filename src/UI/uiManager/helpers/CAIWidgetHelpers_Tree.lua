@@ -13,6 +13,21 @@ local function HasVisibleChildren(w)
     return false
 end
 
+---Wipe descent cache so SetFocus(item) lands ON the item rather than on a
+---cached descendant. Call before SetFocus from every within-tree navigation
+---path (flat nav, search, ascent) — without this, an expanded item whose
+---cache still points to a previously focused child would auto-descend on
+---re-entry and Up/flat-Down would become no-ops.
+---@param item UIWidget
+function T.ClearDescent(item)
+    if not item or not item.IsTreeItem then return end
+    item._lastFocusedChild = nil
+    item._lastFocusedKey = nil
+end
+
+local ClearDescent = T.ClearDescent
+
+
 ---Build flat in-order list of visible TreeItems reachable from root,
 ---honoring IsExpanded on intermediate nodes.
 ---@param root UIWidget
@@ -85,7 +100,7 @@ function T.NavigateFlat(root, direction)
         if targetIdx < 1 or targetIdx > #flat then return false end
     end
     local target = flat[targetIdx]
-    if target.IsTreeItem then target._lastFocusedChild = nil end
+    ClearDescent(target)
     mgr:SetFocus(target, { direction = direction })
     return true
 end
@@ -120,7 +135,7 @@ function T.NavigatePage(root, direction, pageSize)
         if targetIdx == curIdx then return false end
     end
     local target = flat[targetIdx]
-    if target.IsTreeItem then target._lastFocusedChild = nil end
+    ClearDescent(target)
     mgr:SetFocus(target, { direction = direction })
     return true
 end
@@ -130,7 +145,7 @@ end
 function T.NavigateFirst(root)
     local flat = T.Flatten(root)
     if #flat == 0 then return false end
-    if flat[1].IsTreeItem then flat[1]._lastFocusedChild = nil end
+    ClearDescent(flat[1])
     root.Manager:SetFocus(flat[1], { direction = 1 })
     return true
 end
@@ -141,7 +156,7 @@ function T.NavigateLast(root)
     local flat = T.Flatten(root)
     if #flat == 0 then return false end
     local last = flat[#flat]
-    if last.IsTreeItem then last._lastFocusedChild = nil end
+    ClearDescent(last)
     root.Manager:SetFocus(last, { direction = -1 })
     return true
 end
@@ -177,7 +192,7 @@ function T.CollapseOrAscend(root)
     end
     local parent = T.GetParentTreeItem(root, item)
     if not parent then return false end
-    parent._lastFocusedChild = nil
+    ClearDescent(parent)
     root.Manager:SetFocus(parent)
     return true
 end

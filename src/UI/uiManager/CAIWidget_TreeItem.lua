@@ -29,7 +29,7 @@ function TreeItemWidget.Create(mgr, id, props)
     w.Manager = mgr
     w.IsExpanded = false
     w.IsTreeItem = true
-    w.SpeechSettings = { Role = false, IgnoreWhenNotFocused = true }
+    w.SpeechSettings = { IgnoreWhenNotFocused = true }
 
     w:SetValueGetter(function(self)
         if self:IsLeaf() then return "" end
@@ -84,14 +84,22 @@ function TreeItemWidget:Collapse()
     return true
 end
 
----Tree navigation lands on the item itself, never on its children. The flat
----traversal exposes each expanded child as its own focus stop, and
----ExpandOrDescend handles entry explicitly when the user presses Right.
+---Descent into an expanded item is gated by the descent cache. Within-tree
+---navigation helpers (NavigateFlat/Page/First/Last, CollapseOrAscend, search)
+---wipe the cache via Tree.ClearDescent before calling SetFocus so the item
+---lands as the focus leaf. Descent that's just passing through (Tab back into
+---the tree, screen Push focusing a higher container) leaves the cache intact
+---and restores deep focus. Direction is irrelevant.
 ---@return UIWidget|nil
-function TreeItemWidget:GetDefaultChild() return nil end
+function TreeItemWidget:GetDefaultChild()
+    if not self.IsExpanded then return nil end
+    if not self._lastFocusedChild and not self._lastFocusedKey then return nil end
+    return ContainerWidget.GetDefaultChild(self)
+end
 
----@param direction 1|-1|0|nil
 ---@return UIWidget|nil
-function TreeItemWidget:GetEntryChild(direction) return nil end
+function TreeItemWidget:GetEntryChild()
+    return self:GetDefaultChild()
+end
 
 CAIWidgetRegistry.Register("TreeItem", TreeItemWidget.Create)

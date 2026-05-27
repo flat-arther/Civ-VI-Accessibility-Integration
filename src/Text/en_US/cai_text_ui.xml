@@ -690,6 +690,12 @@
     <Row Tag="LOC_CAI_GOVERNMENT_POLICIES_LOCKED" Language="en_US">
       <Text>Policies cannot be changed right now</Text>
     </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_ACTIVE" Language="en_US">
+      <Text>Active</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_CONFIRM_POLICIES" Language="en_US">
+      <Text>Confirm policies</Text>
+    </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_POLICY_ALREADY_ACTIVE" Language="en_US">
       <Text>{1_Policy} is already active</Text>
     </Row>
@@ -1159,6 +1165,42 @@
     <Row Tag="LOC_CAI_RESEARCH_NO_UNLOCKS" Language="en_US">
       <Text>No unlocks</Text>
     </Row>
+    <Row Tag="LOC_CAI_RESEARCH_QUEUED" Language="en_US">
+      <Text>Queued {1_Position}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_RECOMMENDED_BY" Language="en_US">
+      <Text>Recommended by {1_Advisor}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_RECOMMENDED" Language="en_US">
+      <Text>Recommended</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_COST" Language="en_US">
+      <Text>{1_Cost} science</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_TURNS" Language="en_US">
+      <Text>{1_Turns} turns</Text>
+    </Row>
+<Row Tag="LOC_CAI_RESEARCH_UNLOCKS_HEADER" Language="en_US">
+      <Text>Unlocks: {1_List}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_ALLIANCE_BONUS" Language="en_US">
+      <Text>Alliance research bonus: {1_Detail}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVISOR_GENERIC" Language="en_US">
+      <Text>General advisor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVISOR_CONQUEST" Language="en_US">
+      <Text>Military advisor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVISOR_CULTURE" Language="en_US">
+      <Text>Culture advisor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVISOR_RELIGIOUS" Language="en_US">
+      <Text>Religion advisor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVISOR_TECHNOLOGY" Language="en_US">
+      <Text>Science advisor</Text>
+    </Row>
 
     <!-- Civics chooser -->
     <Row Tag="LOC_CAI_CIVIC_CURRENT" Language="en_US">
@@ -1208,6 +1250,15 @@
     </Row>
     <Row Tag="LOC_CAI_CIVIC_QUEUE_ADDED" Language="en_US">
       <Text>{1_Count} items added to queue, for {2_Cost} total culture</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_COST" Language="en_US">
+      <Text>{1_Cost} culture</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_UNLOCKS_HEADER" Language="en_US">
+      <Text>Unlocks: {1_List}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_OBSOLETES_HEADER" Language="en_US">
+      <Text>Makes obsolete: {1_List}</Text>
     </Row>
 
     <!-- Civics tree -->

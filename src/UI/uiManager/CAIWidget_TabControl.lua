@@ -41,7 +41,7 @@ function TabControlWidget.Create(mgr, id, props)
     w._tabs = {}
     w._pages = {}
     w._activeIndex = 0
-    w.WrapAround = false
+    w.WrapAround = true
     -- The TabControl is a layout shell — the speakable structure the user
     -- cares about is the strip and the active page. Marking it Transparent
     -- suppresses its own announcement (role + label + position) on focus.

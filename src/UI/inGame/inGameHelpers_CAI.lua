@@ -109,6 +109,35 @@ function SplitTooltipLinesWithoutSpecialLists(text)
 end
 
 -- ===========================================================================
+-- Advisor / recommendation (shared between ResearchChooser and CivicsChooser)
+-- ===========================================================================
+
+local ADVISOR_LOC = {
+    ADVISOR_GENERIC    = "LOC_CAI_ADVISOR_GENERIC",
+    ADVISOR_CONQUEST   = "LOC_CAI_ADVISOR_CONQUEST",
+    ADVISOR_CULTURE    = "LOC_CAI_ADVISOR_CULTURE",
+    ADVISOR_RELIGIOUS  = "LOC_CAI_ADVISOR_RELIGIOUS",
+    ADVISOR_TECHNOLOGY = "LOC_CAI_ADVISOR_TECHNOLOGY",
+}
+
+function GetAdvisorName(advisorType)
+    if not advisorType then return nil end
+    local tag = ADVISOR_LOC[advisorType]
+    if tag then return Locale.Lookup(tag) end
+    return nil
+end
+
+function GetRecommendedPart(kData, isDisabled)
+    if not kData or not kData.IsRecommended then return nil end
+    if isDisabled then return nil end
+    local advisor = GetAdvisorName(kData.AdvisorType)
+    if advisor then
+        return Locale.Lookup("LOC_CAI_RESEARCH_RECOMMENDED_BY", advisor)
+    end
+    return Locale.Lookup("LOC_CAI_RESEARCH_RECOMMENDED")
+end
+
+-- ===========================================================================
 -- Domain queries
 -- ===========================================================================
 

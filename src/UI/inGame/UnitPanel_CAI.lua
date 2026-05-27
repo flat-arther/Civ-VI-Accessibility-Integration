@@ -125,7 +125,6 @@ local GetUnitActionLabel
 local GetUnitActionTooltip
 local GetControlText
 local GetControlTooltip
-local CloseUnitActionList
 
 local function ResolveUnit(unitID, playerID)
     if unitID == nil then
@@ -1745,36 +1744,34 @@ local function GetBuildUnitActionEntries(data)
 end
 
 local function CreateUnitActionMenuItem(currentAction)
-    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitPanelMenuItem"), "MenuItem", {
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitPanelMenuItem"), "MenuItem", {
         GetLabel = function()
             return GetUnitActionLabel(currentAction)
         end,
         GetTooltip = function()
             return GetUnitActionTooltip(currentAction)
         end,
-        IsDisabled = function()
+        DisabledPredicate = function()
             return currentAction.Disabled == true
         end,
-        OnFocusEnter = function()
-            UI.PlaySound("Main_Menu_Mouse_Over")
-        end,
-        OnClick = function()
-            if currentAction.Disabled then
-                local tooltip = GetUnitActionTooltip(currentAction)
-                if tooltip ~= "" then
-                    Speak(tooltip)
-                end
-                return
-            end
-
-            UI.PlaySound("Play_UI_Click")
-            if currentAction.Sound ~= nil and currentAction.Sound ~= "" then
-                UI.PlaySound(currentAction.Sound)
-            end
-            currentAction.CallbackFunc(currentAction.CallbackVoid1, currentAction.CallbackVoid2)
-            CloseUnitActionList()
-        end,
     })
+    w:SetFocusSound("Main_Menu_Mouse_Over")
+    w:On("activate", function()
+        if currentAction.Disabled then
+            local tooltip = GetUnitActionTooltip(currentAction)
+            if tooltip ~= "" then
+                Speak(tooltip)
+            end
+            return
+        end
+
+        UI.PlaySound("Play_UI_Click")
+        if currentAction.Sound ~= nil and currentAction.Sound ~= "" then
+            UI.PlaySound(currentAction.Sound)
+        end
+        currentAction.CallbackFunc(currentAction.CallbackVoid1, currentAction.CallbackVoid2)
+        CloseUnitActionList()
+    end)
 end
 
 local function CreateBuildImprovementsSubMenu(data)
@@ -1783,21 +1780,15 @@ local function CreateBuildImprovementsSubMenu(data)
         return nil
     end
 
-    local submenu = mgr:CreateUIWidget(UNIT_BUILD_IMPROVEMENTS_SUBMENU_ID, "SubMenu", {
+    local submenu = mgr:CreateWidget(UNIT_BUILD_IMPROVEMENTS_SUBMENU_ID, "SubMenu", {
         GetLabel = function()
             return Locale.Lookup("LOC_CAI_UNIT_BUILD_IMPROVEMENTS_SUBMENU")
         end,
         GetTooltip = function()
             return Locale.Lookup("LOC_CAI_UNIT_BUILD_IMPROVEMENTS_SUBMENU_TOOLTIP")
         end,
-        OnFocusEnter = function()
-            UI.PlaySound("Main_Menu_Mouse_Over")
-        end,
-        OnToggleExpanded = function()
-            UI.PlaySound("Main_Menu_Mouse_Over")
-        end,
     })
-
+    submenu:SetFocusSound("Main_Menu_Mouse_Over")
     for _, action in ipairs(buildActions) do
         submenu:AddChild(CreateUnitActionMenuItem(action))
     end
@@ -1805,7 +1796,7 @@ local function CreateBuildImprovementsSubMenu(data)
     return submenu
 end
 
-CloseUnitActionList = function()
+function CloseUnitActionList()
     if UnitActionList ~= nil then
         mgr:RemoveFromStack(UNIT_ACTION_LIST_ID)
         UnitActionList = nil
@@ -1822,7 +1813,7 @@ end
 local function BuildUnitActionList(data)
     local selectedUnit = GetSelectedUnit()
     local unitName = GetUnitInfoName(data, selectedUnit) or Locale.Lookup("LOC_OPTIONS_HOTKEY_CATEGORY_UNIT")
-    local list = mgr:CreateUIWidget(UNIT_ACTION_LIST_ID, "List", {
+    local list = mgr:CreateWidget(UNIT_ACTION_LIST_ID, "List", {
         GetLabel = function()
             return Locale.Lookup("LOC_CAI_SELECTION_ACTIONS_FOR", unitName)
         end,
@@ -1846,15 +1837,17 @@ local function BuildUnitActionList(data)
     end
 
     if data ~= nil and data.Ability ~= nil and #data.Ability > 0 then
-        list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitViewAbilities"), "MenuItem", {
+        local abilities = mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitViewAbilities"), "MenuItem", {
             GetLabel = function() return Locale.Lookup("LOC_CAI_UNIT_VIEW_ABILITIES") end,
             GetTooltip = function() return Locale.Lookup("LOC_CAI_UNIT_VIEW_ABILITIES_TOOLTIP") end,
-            OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-            OnClick = function()
-                CloseUnitActionList()
-                OnUnitPanelSelectionActionInputTriggered(unitViewAbilitiesAction)
-            end,
-        }))
+        })
+        abilities:SetFocusSound("Main_Menu_Mouse_Over")
+        abilities:On("activate", function(w, ...)
+            UI.PlaySound("Play_UI_Click")
+            CloseUnitActionList()
+            OnUnitPanelSelectionActionInputTriggered(unitViewAbilitiesAction)
+        end)
+        list:AddChild(abilities)
     end
 
     return list
@@ -1912,7 +1905,7 @@ local function AddUnitToUnitList(list, unit)
     local tooltip = JoinUnitInfo(GetUnitInfoActivity(data, unit) or {}, ", ")
     local unitID = unit:GetID()
 
-    local item = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitListItem"), "MenuItem", {
+    local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitListItem"), "MenuItem", {
         GetLabel = function()
             return unitName
         end,
@@ -1922,22 +1915,18 @@ local function AddUnitToUnitList(list, unit)
         GetTooltip = function()
             return tooltip
         end,
-        OnFocusEnter = function()
-            UI.PlaySound("Main_Menu_Mouse_Over")
-        end,
-        OnClick = function()
-            local resolved = Players[Game.GetLocalPlayer()]:GetUnits():FindID(unitID)
-            if resolved == nil then
-                return
-            end
-
-            CloseUnitList()
-            UI.SelectUnit(resolved)
-            local plot = Map.GetPlot(resolved:GetX(), resolved:GetY())
-            UI.LookAtPlot(plot)
-        end,
     })
+    item:On("activate", function(w, ...)
+        local resolved = Players[Game.GetLocalPlayer()]:GetUnits():FindID(unitID)
+        if resolved == nil then
+            return
+        end
 
+        CloseUnitList()
+        UI.SelectUnit(resolved)
+        local plot = Map.GetPlot(resolved:GetX(), resolved:GetY())
+        UI.LookAtPlot(plot)
+    end)
     item:AddInputBinding({
         Key = Keys.VK_RETURN,
         IsShift = true,
@@ -1972,7 +1961,7 @@ local function BuildUnitList()
         return nil
     end
 
-    local list = mgr:CreateUIWidget(UNIT_LIST_ID, "List", {
+    local list = mgr:CreateWidget(UNIT_LIST_ID, "List", {
         GetLabel = function()
             return Locale.Lookup("LOC_CAI_UNIT_LIST")
         end,
@@ -2024,13 +2013,10 @@ local function BuildUnitList()
     table.sort(civilianUnits, sortFunc)
     table.sort(tradeUnits, sortFunc)
 
-    local selectedIndex = nil
+
     local function addUnits(units)
         for _, unit in ipairs(units) do
-            local isSelected = AddUnitToUnitList(list, unit)
-            if selectedIndex == nil and isSelected and list.Children ~= nil then
-                selectedIndex = #list.Children
-            end
+            local selected = AddUnitToUnitList(list, unit)
         end
     end
 
@@ -2149,7 +2135,7 @@ function OnUnitPanelSelectionActionInputTriggered(actionId)
             return
         end
 
-        local list = mgr:CreateUIWidget(UNIT_ABILITIES_LIST_ID, "List", {
+        local list = mgr:CreateWidget(UNIT_ABILITIES_LIST_ID, "List", {
             GetLabel = function() return Locale.Lookup("LOC_CAI_UNIT_ABILITIES_LIST") end,
         })
         list:AddInputBinding({
@@ -2163,7 +2149,7 @@ function OnUnitPanelSelectionActionInputTriggered(actionId)
         for _, ability in ipairs(data.Ability) do
             local abilityText = GetUnitAbilityDescription(ability)
             if abilityText ~= nil and abilityText ~= "" then
-                list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitAbilityItem"), "MenuItem", {
+                list:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitAbilityItem"), "MenuItem", {
                     GetLabel = function() return abilityText end,
                     OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
                     OnClick = function() mgr:RemoveFromStack(UNIT_ABILITIES_LIST_ID) end,

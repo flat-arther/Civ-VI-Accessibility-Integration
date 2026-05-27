@@ -42,6 +42,17 @@ end
 ---@param char string
 ---@return boolean
 function TreeWidget:OnCharInput(char)
+    -- Type-to-find can match a TreeItem that still has a stale descent cache
+    -- from a previous visit. Clear every tree item in the subtree before
+    -- search so the matched item lands as the focus leaf rather than
+    -- redirecting into a cached child.
+    local function clearAll(node)
+        if node.IsTreeItem then Tree.ClearDescent(node) end
+        if node.Children then
+            for _, c in ipairs(node.Children) do clearAll(c) end
+        end
+    end
+    clearAll(self)
     return Search.HandleChar(self, char, self.SearchDepth)
 end
 

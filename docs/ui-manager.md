@@ -525,7 +525,7 @@ TabPage internally and returns the TabPage to populate.
 
 ```lua
 local tabs = mgr:CreateWidget("CityPanel_Tabs", "TabControl", { Label = ... })
-tabs:SetWrapAround(true)
+-- WrapAround defaults to true; call tabs:SetWrapAround(false) to opt out.
 
 local overview = tabs:AddPage(function() return Locale.Lookup("LOC_OVERVIEW") end)
 overview:AddChild(headerStaticText)
@@ -571,7 +571,7 @@ detached from the children list. `SetActivePage(i)` swaps slot 2.
 | `GetActivePageIndex()`          | 1-based index                              |
 | `SetActivePage(i, silent)`      | Programmatic switch; focus follows context |
 | `SetActivePageById(id, silent)` |                                            |
-| `NextPage/PreviousPage(silent)` | Wraps if `SetWrapAround(true)`             |
+| `NextPage/PreviousPage(silent)` | Wraps by default; `SetWrapAround(false)` to disable |
 
 ---
 
