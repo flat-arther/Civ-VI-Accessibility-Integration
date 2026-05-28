@@ -1,31 +1,37 @@
 include("caiUtils")
 include("TechTree")
 include("inGameHelpers_CAI")
+include("ToolTipHelper")
+include("Civ6Common")
 
 local mgr                 = ExposedMembers.CAI_UIManager
 
-local UNLOCKS_INLINE      = 2
+local PANEL_ID            = "CAITechTree_Panel"
+local QUEUE_LIST_ID       = "CAITechTree_QueueList"
+local FILTER_LIST_ID      = "CAITechTree_FilterList"
+local MAIN_TREE_ID        = "CAITechTree_MainTree"
+local FILTER_RESULTS_ID   = "CAITechTree_FilterResults"
 
 -- ===========================================================================
 -- MODULE STATE
 -- ===========================================================================
-local m_caiPanel          = nil ---@type UIWidget|nil
-local m_caiFilterList ---@type UIWidget|nil
-local m_caiQueueTree      = nil ---@type UIWidget|nil
-local m_caiMainTree       = nil ---@type UIWidget|nil
-local m_caiFilterDropdown = nil ---@type UIWidget|nil
+local m_panel             = nil ---@type UIWidget|nil
+local m_queueList         = nil ---@type UIWidget|nil
+local m_filterList        = nil ---@type UIWidget|nil
+local m_mainTree          = nil ---@type UIWidget|nil
+local m_filterResults     = nil ---@type UIWidget|nil
 
-local m_caiTechsByType    = {} ---@type table<string, UIWidget>
-local m_leadsToByType     = {} ---@type table<string, table>
+local m_techsByType       = {} ---@type table<string, UIWidget>
+local m_leadsToByType     = {} ---@type table<string, string[]>
 local m_techIndexToType   = {} ---@type table<integer, string>
 
-local m_caiFilterEntries  = nil ---@type table|nil
+local m_filterEntries     = nil ---@type table|nil
 local m_activeFilterEntry = nil ---@type table|nil
 local m_activeFilterFunc  = nil ---@type function|nil
 local m_lastPlayerData    = nil ---@type table|nil
 
--- Stack of source tech widget IDs the user navigated away from via reference
--- links. Backspace inside the main tree pops the last one and re-focuses it.
+-- Breadcrumb stack of techTypes the user navigated *away from* via a ref
+-- link. Backspace in the main tree pops the most recent one and jumps back.
 local m_breadcrumbs       = {} ---@type string[]
 
 -- ===========================================================================
@@ -52,14 +58,6 @@ local function ControlText(ctrl)
     return ""
 end
 
-local function ControlTooltip(ctrl)
-    if ctrl and ctrl.GetToolTipString then
-        local t = ctrl:GetToolTipString()
-        if t and t ~= "" then return t end
-    end
-    return ""
-end
-
 local function ControlIsHidden(ctrl)
     return ctrl and ctrl.IsHidden and ctrl:IsHidden() or false
 end
@@ -71,40 +69,70 @@ local function GetLiveData(techType)
 end
 
 -- ===========================================================================
--- ROW LABEL / TOOLTIP (live controls)
+-- ROW DATA
 -- ===========================================================================
 
 local function GetTechName(techType)
     local node = GetUiNode(techType)
-    return ControlText(node and node.NodeName)
+    local name = ControlText(node and node.NodeName)
+    if name ~= "" then return name end
+    local row = GameInfo.Technologies[techType]
+    if row and row.Name then return Locale.Lookup(row.Name) end
+    return techType
 end
 
-local function GetTechTooltipText(techType)
-    local node = GetUiNode(techType)
-    return ControlTooltip(node and node.NodeButton)
+local function GetTechCostText(techType)
+    local kLive = GetLiveData(techType)
+    if kLive and kLive.Cost and kLive.Cost > 0 then
+        return Locale.Lookup("LOC_CAI_RESEARCH_COST", kLive.Cost)
+    end
+    return nil
 end
 
 local function GetTechTurnsText(techType)
     local node = GetUiNode(techType)
-    if not node or ControlIsHidden(node.Turns) then return nil end
-    local t = ControlText(node.Turns)
-    if t == "" then return nil end
-    return t
+    if node and not ControlIsHidden(node.Turns) then
+        local raw = ControlText(node.Turns)
+        local n = string.match(raw, "%[ICON_Turn%](%d+)")
+        if n then return Locale.Lookup("LOC_CAI_RESEARCH_TURNS", tonumber(n)) end
+        if raw ~= "" then return raw end
+    end
+    local kLive = GetLiveData(techType)
+    if kLive and kLive.TurnsLeft and kLive.TurnsLeft >= 0 then
+        return Locale.Lookup("LOC_CAI_RESEARCH_TURNS", kLive.TurnsLeft)
+    end
+    return nil
 end
 
-local function GetTechBoostFirstLine(techType)
+local function GetTechProgressText(techType)
+    local kLive = GetLiveData(techType)
+    if not kLive or not kLive.Progress or not kLive.Cost or kLive.Cost <= 0 then
+        return nil
+    end
+    local pct = math.floor((kLive.Progress / kLive.Cost) * 100 + 0.5)
+    if pct <= 0 then return nil end
+    return Locale.Lookup("LOC_CAI_RESEARCH_PROGRESS", pct)
+end
+
+local function GetTechDescriptionText(techType)
+    local row = GameInfo.Technologies[techType]
+    local desc = row and row.Description or nil
+    if desc and desc ~= "" then
+        local text = Locale.Lookup(desc)
+        if text and text ~= "" then return text end
+    end
+    return nil
+end
+
+local function GetTechBoostText(techType)
     local kStatic = g_kItemDefaults[techType]
     if not kStatic or not kStatic.IsBoostable then return nil end
     local kLive = GetLiveData(techType)
-    local prefix
-    if kLive and kLive.IsBoosted then
-        prefix = Locale.Lookup("LOC_TECH_HAS_BEEN_BOOSTED")
-    else
-        prefix = Locale.Lookup("LOC_TECH_CAN_BE_BOOSTED")
-    end
-    local boostText = kStatic.BoostText or ""
-    if boostText == "" then return prefix end
-    return prefix .. ": " .. boostText
+    local prefix = Locale.Lookup((kLive and kLive.IsBoosted)
+        and "LOC_BOOST_BOOSTED" or "LOC_BOOST_TO_BOOST")
+    local trigger = kStatic.BoostText or ""
+    if trigger == "" then return prefix end
+    return prefix .. " " .. trigger
 end
 
 local function GetTechStatusLabel(kLive)
@@ -119,27 +147,7 @@ local function GetTechStatusLabel(kLive)
     elseif status == ITEM_STATUS.UNREVEALED then
         return Locale.Lookup("LOC_CAI_TECH_STATUS_UNREVEALED")
     end
-    -- READY is the default available state; no announcement needed.
     return nil
-end
-
-local function FormatRowLabel(techType)
-    local parts = {}
-    AppendIfNonEmpty(parts, GetTechName(techType))
-    local kLive = GetLiveData(techType)
-    AppendIfNonEmpty(parts, GetTechStatusLabel(kLive))
-    if kLive and kLive.IsRecommended then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_TECH_FILTER_RECOMMENDED"))
-    end
-    return table.concat(parts, ", ")
-end
-
-local function GetFirstNNames(names, n)
-    local head = {}
-    for i, name in ipairs(names or {}) do
-        if i <= n then table.insert(head, name) else break end
-    end
-    return head
 end
 
 local function GetTechQueuePosition(techType)
@@ -155,29 +163,52 @@ local function GetTechQueuePosition(techType)
     return nil
 end
 
-local function FormatRowTooltip(techType)
+local function TechKData(techType)
+    return { TechType = techType, Type = techType }
+end
+
+-- ===========================================================================
+-- LABEL / TOOLTIP
+-- ===========================================================================
+
+local function FormatRowLabel(techType)
     local parts = {}
+    AppendIfNonEmpty(parts, GetTechName(techType))
+    local kLive = GetLiveData(techType)
+    AppendIfNonEmpty(parts, GetTechStatusLabel(kLive))
+    if kLive and kLive.IsRecommended then
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_TECH_FILTER_RECOMMENDED"))
+    end
+    local qpos = GetTechQueuePosition(techType)
+    if qpos then
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_QUEUED", qpos))
+    end
+    return table.concat(parts, ", ")
+end
 
+local function FormatRowTooltip(techType)
+    local kData = TechKData(techType)
+    local group = GetTechUnlockObjects(kData)
+
+    local parts = {}
+    AppendIfNonEmpty(parts, GetTechCostText(techType))
     AppendIfNonEmpty(parts, GetTechTurnsText(techType))
-
-    local tooltipLines = SplitTooltipLinesWithoutUnlocks(GetTechTooltipText(techType))
-    AppendIfNonEmpty(parts, tooltipLines[2])
-
-    AppendIfNonEmpty(parts, GetTechBoostFirstLine(techType))
-
-    local kData = { TechType = techType, Type = techType }
-    local unlockNames = GetTechUnlockNames(kData)
-
-    for _, name in ipairs(GetFirstNNames(unlockNames, UNLOCKS_INLINE)) do
-        AppendIfNonEmpty(parts, name)
+    AppendIfNonEmpty(parts, GetTechProgressText(techType))
+    AppendIfNonEmpty(parts, GetTechDescriptionText(techType))
+    AppendIfNonEmpty(parts, GetTechBoostText(techType))
+    if #group.Reveals > 0 then
+        local names = {}
+        for _, r in ipairs(group.Reveals) do
+            table.insert(names, Locale.Lookup("LOC_TOOLTIP_UNLOCKS_RESOURCE", r.Name))
+        end
+        AppendIfNonEmpty(parts, table.concat(names, ", "))
     end
-
-    local queuePosition = GetTechQueuePosition(techType)
-    if queuePosition then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_QUEUE_POSITION", queuePosition))
+    if #group.Unlocks > 0 then
+        local names = {}
+        for _, u in ipairs(group.Unlocks) do table.insert(names, u.Name) end
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_UNLOCKS_HEADER", table.concat(names, ", ")))
     end
-
-    return table.concat(parts, "[NEWLINE]")
+    return table.concat(parts, ", ")
 end
 
 -- ===========================================================================
@@ -185,14 +216,8 @@ end
 -- ===========================================================================
 
 local function EnsureFilterEntries()
-    if m_caiFilterEntries then return end
-    m_caiFilterEntries = {
-        {
-            Label        = Locale.Lookup("LOC_TECH_FILTER_NONE"),
-            Func         = nil,
-            VanillaEntry = { Func = nil, Description = "LOC_TECH_FILTER_NONE" },
-        },
-    }
+    if m_filterEntries then return end
+    m_filterEntries = {}
     if not g_TechFilters then return end
     local defs = {
         { "TECHFILTER_FOOD",         "LOC_TECH_FILTER_FOOD" },
@@ -209,7 +234,7 @@ local function EnsureFilterEntries()
     for _, pair in ipairs(defs) do
         local fn = g_TechFilters[pair[1]]
         if fn then
-            table.insert(m_caiFilterEntries, {
+            table.insert(m_filterEntries, {
                 Label        = Locale.Lookup(pair[2]),
                 Func         = fn,
                 VanillaEntry = { Func = fn, Description = pair[2] },
@@ -224,7 +249,7 @@ local function FilterMatchesTech(techType)
 end
 
 -- ===========================================================================
--- STATIC DATA (leads-to and Index<->Type lookups)
+-- STATIC DATA
 -- ===========================================================================
 
 local function BuildStaticMaps()
@@ -243,28 +268,28 @@ local function BuildStaticMaps()
 end
 
 -- ===========================================================================
--- TECH ACTIONS (set current vs. append to queue)
+-- TECH ACTIONS
 -- ===========================================================================
 
-local function RequestProgressTech(techType, append)
+local function CanResearch(techType)
+    local kLive = GetLiveData(techType)
+    if not kLive or not kLive.IsRevealed then return false end
+    return kLive.Status == ITEM_STATUS.READY
+        or kLive.Status == ITEM_STATUS.BLOCKED
+end
+
+local function IsTechRevealed(techType)
+    local kLive = GetLiveData(techType)
+    return kLive ~= nil and kLive.IsRevealed == true
+end
+
+local function SpeakProgressSummary(techType)
     local kStatic = g_kItemDefaults[techType]
-    local playerTechs, ePlayer = GetLocalPlayerTechs()
-    if not kStatic or not playerTechs or ePlayer == -1 then return end
-
-    local pathToTech                                = playerTechs:GetResearchPath(kStatic.Hash)
-    local tParameters                               = {}
-    tParameters[PlayerOperations.PARAM_TECH_TYPE]   = pathToTech
-    tParameters[PlayerOperations.PARAM_INSERT_MODE] = append
-        and PlayerOperations.VALUE_APPEND
-        or PlayerOperations.VALUE_EXCLUSIVE
-    UI.RequestPlayerOperation(ePlayer, PlayerOperations.RESEARCH, tParameters)
-    UI.PlaySound("Confirm_Tech_TechTree")
-
-    -- BLOCKED techs queue the whole prereq chain; READY techs queue just one.
-    -- The announcement is the same for set-current and append: count and total
-    -- science cost summed from live data for each step in the path.
+    local playerTechs = GetLocalPlayerTechs()
+    if not kStatic or not playerTechs then return end
+    local pathToTech = playerTechs:GetResearchPath(kStatic.Hash) or {}
     local count, totalCost = 0, 0
-    for _, idx in ipairs(pathToTech or {}) do
+    for _, idx in ipairs(pathToTech) do
         count = count + 1
         local tt = m_techIndexToType[idx]
         local kLive = tt and GetLiveData(tt) or nil
@@ -275,105 +300,162 @@ local function RequestProgressTech(techType, append)
     Speak(Locale.Lookup("LOC_CAI_TECH_QUEUE_ADDED", count, totalCost))
 end
 
--- Vanilla wires the click callback to both NodeButton and OtherStates, so
--- clicking is functional for any revealed tech. BLOCKED is intentionally
--- clickable: GetResearchPath returns the prereq chain, queueing the whole path.
--- RESEARCHED / CURRENT have no useful path (already done / in progress) and
--- UNREVEALED isn't a valid target.
-local function CanResearch(techType)
-    local kLive = GetLiveData(techType)
-    if not kLive or not kLive.IsRevealed then return false end
-    return kLive.Status == ITEM_STATUS.READY
-        or kLive.Status == ITEM_STATUS.BLOCKED
+local function ActivateSetCurrent(techType)
+    local node = GetUiNode(techType)
+    local clicked = false
+    if node and node.NodeButton and node.NodeButton.DoLeftClick and not ControlIsHidden(node.NodeButton) then
+        node.NodeButton:DoLeftClick()
+        clicked = true
+    elseif node and node.OtherStates and node.OtherStates.DoLeftClick and not ControlIsHidden(node.OtherStates) then
+        node.OtherStates:DoLeftClick()
+        clicked = true
+    end
+    if not clicked then
+        local kStatic = g_kItemDefaults[techType]
+        local playerTechs, ePlayer = GetLocalPlayerTechs()
+        if not kStatic or not playerTechs or ePlayer == -1 then return end
+        local tParameters                               = {}
+        tParameters[PlayerOperations.PARAM_TECH_TYPE]   = playerTechs:GetResearchPath(kStatic.Hash)
+        tParameters[PlayerOperations.PARAM_INSERT_MODE] = PlayerOperations.VALUE_EXCLUSIVE
+        UI.RequestPlayerOperation(ePlayer, PlayerOperations.RESEARCH, tParameters)
+        UI.PlaySound("Confirm_Tech_TechTree")
+    end
+    SpeakProgressSummary(techType)
+end
+
+local function ActivateAppendToQueue(techType)
+    local kStatic = g_kItemDefaults[techType]
+    local playerTechs, ePlayer = GetLocalPlayerTechs()
+    if not kStatic or not playerTechs or ePlayer == -1 then return end
+    local tParameters                               = {}
+    tParameters[PlayerOperations.PARAM_TECH_TYPE]   = playerTechs:GetResearchPath(kStatic.Hash)
+    tParameters[PlayerOperations.PARAM_INSERT_MODE] = PlayerOperations.VALUE_APPEND
+    UI.RequestPlayerOperation(ePlayer, PlayerOperations.RESEARCH, tParameters)
+    UI.PlaySound("Confirm_Tech_TechTree")
+    SpeakProgressSummary(techType)
 end
 
 -- ===========================================================================
--- REFERENCE LINKS (jump to tech node) and DETAIL CHILDREN
+-- JUMP-TO-NODE
 -- ===========================================================================
 
-local function IsTechRevealed(techType)
-    local kLive = GetLiveData(techType)
-    return kLive ~= nil and kLive.IsRevealed == true
+local function GetFocusedTechType()
+    local path = mgr and mgr.CurrentPath or nil
+    if not path then return nil end
+    for i = #path, 1, -1 do
+        local w = path[i]
+        local key = w and w.FocusKey or nil
+        if key and string.sub(key, 1, 5) == "tech:" then
+            return string.sub(key, 6)
+        end
+    end
+    return nil
 end
 
-local function CreateRefLink(parentWidget, techType, sourceTechId)
+local function JumpToTech(techType, recordBreadcrumb)
+    local target = m_techsByType[techType]
+    if not target then return end
+
+    if recordBreadcrumb then
+        local source = GetFocusedTechType()
+        if source and source ~= techType then
+            table.insert(m_breadcrumbs, source)
+        end
+    end
+
+    Speak(Locale.Lookup("LOC_CAI_TECH_TREE_JUMPING", GetTechName(techType) or ""), true)
+    mgr:SetFocus(target)
+end
+
+-- ===========================================================================
+-- REF LINKS + DETAIL CHILDREN
+-- ===========================================================================
+
+local function CreateRefLink(parentWidget, techType)
     local capturedType = techType
-    local capturedSourceId = sourceTechId
-    local item = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITechTreeRef"), "TreeviewItem", {
-        GetLabel   = function() return GetTechName(capturedType) end,
-        IsHidden   = function() return m_caiTechsByType[capturedType] == nil end,
-        IsDisabled = function() return not IsTechRevealed(capturedType) end,
-        OnClick    = function(w)
-            if w.IsDisabled and w:IsDisabled() then return end
-            local target = m_caiTechsByType[capturedType]
-            if target then
-                if capturedSourceId then
-                    table.insert(m_breadcrumbs, capturedSourceId)
-                end
-                mgr:SetFocus(target)
-            end
-        end,
+    local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreeRef"), "TreeItem", {
+        Label             = function() return GetTechName(capturedType) end,
+        HiddenPredicate   = function() return m_techsByType[capturedType] == nil end,
+        DisabledPredicate = function() return not IsTechRevealed(capturedType) end,
+        FocusKey          = "ref:" .. tostring(capturedType),
     })
-    item:AddInputBinding({
-        Key = Keys.VK_RETURN,
-        IsShift = true,
-        Action = function(w)
-            if w.IsDisabled and w:IsDisabled() then return true end
-            if IsTutorialRunning and IsTutorialRunning() then return true end
-            LuaEvents.OpenCivilopedia(capturedType)
-            return true
-        end,
+    item:On("activate", function(w)
+        if w:IsDisabled() then return end
+        JumpToTech(capturedType, true)
+    end)
+    item:AddInputBindings({
+        {
+            Key     = Keys.VK_RETURN,
+            IsShift = true,
+            MSG     = KeyEvents.KeyUp,
+            Action  = function(w)
+                if w:IsDisabled() then return true end
+                if IsTutorialRunning and IsTutorialRunning() then return true end
+                LuaEvents.OpenCivilopedia(capturedType)
+                return true
+            end,
+        },
     })
     parentWidget:AddChild(item)
     return item
 end
 
-local function AddTechDetailChildren(techItem, techType, sourceTechId)
-    local kStatic = g_kItemDefaults[techType]
-    if not kStatic then return end
+local function AddTechDetailChildren(techItem, techType)
+    local kData = TechKData(techType)
+    local group = GetTechUnlockObjects(kData)
 
-    -- Description body lines from the live tooltip; the unlocks bullet list
-    -- is dropped here and rebuilt as a collapsed node below.
-    for _, line in ipairs(SplitTooltipLinesWithoutUnlocks(GetTechTooltipText(techType))) do
-        AddTextDetailNode(mgr, techItem, line)
+    -- 1) Unlocks bucket
+    local unlockChildren = {}
+    for _, unlock in ipairs(group.Unlocks) do
+        if unlock.Description then
+            table.insert(unlockChildren, unlock)
+        end
+    end
+    if #unlockChildren > 0 then
+        local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreeUnlocks"), "TreeItem", {
+            Label = function() return Locale.Lookup("LOC_CAI_TECH_TREE_UNLOCKS") end,
+        })
+        for _, unlock in ipairs(unlockChildren) do
+            node:AddChild(CreateUnlockChild(mgr, unlock, "CAITechTreeUnlock"))
+        end
+        techItem:AddChild(node)
     end
 
-    AddTextDetailNode(mgr, techItem, GetTechBoostFirstLine(techType))
-
-    local kData = { TechType = techType, Type = techType }
-    AddTechUnlocksNode(mgr, techItem, GetTechUnlockNames(kData))
-
+    -- 2) Prerequisites
+    local kStatic = g_kItemDefaults[techType]
     local prereqTypes = {}
-    for _, pt in ipairs(kStatic.Prereqs or {}) do
+    for _, pt in ipairs(kStatic and kStatic.Prereqs or {}) do
         if pt ~= PREREQ_ID_TREE_START then table.insert(prereqTypes, pt) end
     end
     if #prereqTypes > 0 then
-        local node = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITechTreePrereqs"), "TreeviewItem", {
-            GetLabel = function() return Locale.Lookup("LOC_CAI_TECH_TREE_PREREQS") end,
+        local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreePrereqs"), "TreeItem", {
+            Label = function() return Locale.Lookup("LOC_CAI_TECH_TREE_PREREQS") end,
         })
-        for _, pt in ipairs(prereqTypes) do CreateRefLink(node, pt, sourceTechId) end
+        for _, pt in ipairs(prereqTypes) do CreateRefLink(node, pt) end
         techItem:AddChild(node)
     end
 
+    -- 3) Leads to
     local leadsTo = m_leadsToByType[techType]
     if leadsTo and #leadsTo > 0 then
-        local node = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITechTreeLeadsTo"), "TreeviewItem", {
-            GetLabel = function() return Locale.Lookup("LOC_CAI_TECH_TREE_LEADS_TO") end,
+        local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreeLeadsTo"), "TreeItem", {
+            Label = function() return Locale.Lookup("LOC_CAI_TECH_TREE_LEADS_TO") end,
         })
-        for _, lt in ipairs(leadsTo) do CreateRefLink(node, lt, sourceTechId) end
+        for _, lt in ipairs(leadsTo) do CreateRefLink(node, lt) end
         techItem:AddChild(node)
     end
 
-    if CanResearch(techType) then
+    -- 4) Full path
+    if CanResearch(techType) and kStatic then
         local playerTechs = GetLocalPlayerTechs()
         local path = playerTechs and playerTechs:GetResearchPath(kStatic.Hash) or nil
         if path and #path > 1 then
-            local node = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITechTreePath"), "TreeviewItem", {
-                GetLabel = function() return Locale.Lookup("LOC_CAI_TECH_TREE_PATH_IF_SELECTED") end,
+            local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreePath"), "TreeItem", {
+                Label = function() return Locale.Lookup("LOC_CAI_TECH_TREE_PATH_IF_SELECTED") end,
             })
             for i = 1, #path - 1 do
                 local tt = m_techIndexToType[path[i]]
-                if tt then CreateRefLink(node, tt, sourceTechId) end
+                if tt then CreateRefLink(node, tt) end
             end
             techItem:AddChild(node)
         end
@@ -386,72 +468,61 @@ end
 
 local function BuildTechNode(techType)
     local capturedType = techType
-    local techId = mgr:GenerateWidgetId("CAITechTreeTech")
-    local techItem = mgr:CreateUIWidget(techId, "TreeviewItem", {
-        GetLabel     = function() return FormatRowLabel(capturedType) end,
-        GetTooltip   = function() return FormatRowTooltip(capturedType) end,
-        IsDisabled   = function()
+    local techItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreeTech"), "TreeItem", {
+        Label             = function() return FormatRowLabel(capturedType) end,
+        Tooltip           = function() return FormatRowTooltip(capturedType) end,
+        DisabledPredicate = function()
             local node = GetUiNode(capturedType)
-            if node and node.Top:IsDisabled() then return true end
+            if node and node.Top and node.Top:IsDisabled() then return true end
             return not CanResearch(capturedType)
         end,
-        OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-        OnClick      = function()
-            if not CanResearch(capturedType) then return end
-            RequestProgressTech(capturedType, false)
-        end,
+        FocusKey          = "tech:" .. tostring(capturedType),
+    })
+    techItem:SetFocusSound("Main_Menu_Mouse_Over")
+
+    techItem:On("activate", function(w)
+        if w:IsDisabled() then return end
+        ActivateSetCurrent(capturedType)
+    end)
+
+    techItem:AddInputBindings({
+        {
+            Key       = Keys.VK_RETURN,
+            IsControl = true,
+            MSG       = KeyEvents.KeyUp,
+            Action    = function()
+                if not CanResearch(capturedType) then return true end
+                ActivateAppendToQueue(capturedType)
+                return true
+            end,
+        },
+        {
+            Key     = Keys.VK_RETURN,
+            IsShift = true,
+            MSG     = KeyEvents.KeyUp,
+            Action  = function()
+                if IsTutorialRunning and IsTutorialRunning() then return true end
+                LuaEvents.OpenCivilopedia(capturedType)
+                return true
+            end,
+        },
     })
 
-    techItem:AddInputBinding({
-        Key = Keys.VK_RETURN,
-        IsControl = true,
-        Action = function()
-            if not CanResearch(capturedType) then return true end
-            RequestProgressTech(capturedType, true)
-            return true
-        end,
-    })
-    techItem:AddInputBinding({
-        Key = Keys.VK_RETURN,
-        IsShift = true,
-        Action = function()
-            if IsTutorialRunning and IsTutorialRunning() then return true end
-            LuaEvents.OpenCivilopedia(capturedType)
-            return true
-        end,
-    })
-
-    AddTechDetailChildren(techItem, techType, techId)
+    AddTechDetailChildren(techItem, capturedType)
     return techItem
 end
 
 -- ===========================================================================
--- MAIN TREE REBUILD (era-grouped, filter is a structural exclusion)
+-- MAIN TREE
 -- ===========================================================================
 
-local function CaptureFocusedTechType()
-    if not mgr.GetFocusedWidget then return nil end
-    local focused = mgr:GetFocusedWidget()
-    if not focused then return nil end
-    for tt, widget in pairs(m_caiTechsByType) do
-        if widget == focused then return tt end
-    end
-    return nil
-end
-
 local function RebuildMainTree()
-    if not m_caiMainTree then return end
+    if not m_mainTree then return end
 
-    local focusedType = CaptureFocusedTechType()
-    m_caiMainTree:ClearChildren()
-    m_caiTechsByType = {}
-    -- Old tech widget ids are gone; previously-recorded breadcrumbs would
-    -- never resolve through GetChildById, so drop them.
-    m_breadcrumbs = {}
+    local capture = mgr:CaptureFocusKey(m_mainTree)
+    m_mainTree:ClearChildren()
+    m_techsByType = {}
 
-    -- Vanilla PopulateEraData inserts each era twice into g_kEras: once into
-    -- the array part (sorted by ChronologyIndex) and once keyed by EraType.
-    -- ipairs walks only the array half so each era surfaces exactly once.
     for _, era in ipairs(g_kEras) do
         local eraTechs = {}
         for techType, kEntry in pairs(g_kItemDefaults) do
@@ -463,125 +534,204 @@ local function RebuildMainTree()
             table.sort(eraTechs, function(a, b) return a.row < b.row end)
 
             local capturedDescription = era.Description
-            local eraItem = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITechTreeEra"), "TreeviewItem", {
-                GetLabel = function() return capturedDescription end,
+            local eraItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreeEra"), "TreeItem", {
+                Label    = function() return Locale.Lookup(capturedDescription) end,
+                FocusKey = "era:" .. tostring(era.EraType),
             })
 
             for _, entry in ipairs(eraTechs) do
                 local widget = BuildTechNode(entry.techType)
-                if widget then
-                    m_caiTechsByType[entry.techType] = widget
-                    eraItem:AddChild(widget)
-                end
+                m_techsByType[entry.techType] = widget
+                eraItem:AddChild(widget)
             end
-            m_caiMainTree:AddChild(eraItem)
+            m_mainTree:AddChild(eraItem)
         end
     end
 
-    if focusedType and m_caiTechsByType[focusedType] and m_caiPanel and mgr:HasWidget(m_caiPanel) then
-        mgr:SetFocus(m_caiTechsByType[focusedType])
-    end
+    mgr:RestoreFocus(m_mainTree, capture)
 end
 
 -- ===========================================================================
--- QUEUE TREE REBUILD (current tech + queued techs)
+-- QUEUE LIST
 -- ===========================================================================
 
-local function CreateQueueRow(techType, prefix)
+local function CreateQueueButton(techType, isCurrent)
     local capturedType = techType
-    local row = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITechTreeQueueRow"), "TreeviewItem", {
-        GetLabel = function()
-            local label = FormatRowLabel(capturedType)
-            if prefix then return prefix .. ": " .. label end
-            return label
+    local btn = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreeQueueRow"), "Button", {
+        Label    = function()
+            if isCurrent then
+                return Locale.Lookup("LOC_CAI_RESEARCH_CURRENT", FormatRowLabel(capturedType))
+            end
+            return FormatRowLabel(capturedType)
         end,
-        GetTooltip = function() return FormatRowTooltip(capturedType) end,
-        OnClick = function()
-            local target = m_caiTechsByType[capturedType]
-            if target then mgr:SetFocus(target) end
-        end,
+        Tooltip  = function() return FormatRowTooltip(capturedType) end,
+        FocusKey = (isCurrent and "queue:current:" or "queue:") .. tostring(capturedType),
     })
-    row:AddInputBinding({
-        Key = Keys.VK_RETURN,
-        IsShift = true,
-        Action = function()
-            if IsTutorialRunning and IsTutorialRunning() then return true end
-            LuaEvents.OpenCivilopedia(capturedType)
-            return true
-        end,
+    btn:SetFocusSound("Main_Menu_Mouse_Over")
+    btn:On("activate", function() JumpToTech(capturedType) end)
+    btn:AddInputBindings({
+        {
+            Key     = Keys.VK_RETURN,
+            IsShift = true,
+            MSG     = KeyEvents.KeyUp,
+            Action  = function()
+                if IsTutorialRunning and IsTutorialRunning() then return true end
+                LuaEvents.OpenCivilopedia(capturedType)
+                return true
+            end,
+        },
     })
-    return row
+    return btn
 end
 
-local function RebuildQueueTree()
-    if not m_caiQueueTree then return end
+local function RebuildQueueList()
+    if not m_queueList then return end
 
-    local focusPath = mgr:CaptureFocusIndexPath(m_caiQueueTree)
-    m_caiQueueTree:ClearChildren()
+    local capture = mgr:CaptureFocusKey(m_queueList)
+    m_queueList:ClearChildren()
 
     local playerTechs = GetLocalPlayerTechs()
     if playerTechs then
+        local currentIdx = playerTechs:GetResearchingTech()
+        if currentIdx and currentIdx ~= -1 then
+            local tt = m_techIndexToType[currentIdx]
+            if tt then m_queueList:AddChild(CreateQueueButton(tt, true)) end
+        end
         local queue = playerTechs:GetResearchQueue()
         if queue then
             for _, techID in ipairs(queue) do
-                local techType = m_techIndexToType[techID]
-                if techType then
-                    m_caiQueueTree:AddChild(CreateQueueRow(techType, nil))
+                local tt = m_techIndexToType[techID]
+                if tt and tt ~= m_techIndexToType[currentIdx or -1] then
+                    m_queueList:AddChild(CreateQueueButton(tt, false))
                 end
             end
         end
     end
 
-    if focusPath and m_caiPanel and mgr:HasWidget(m_caiPanel) then
-        mgr:SetFocusIndexPath(m_caiQueueTree, focusPath)
-    end
+    mgr:RestoreFocus(m_queueList, capture)
 end
 
 -- ===========================================================================
--- FILTER DROPDOWN (single DropdownMenu; OnClick pushes a List of MenuItems)
+-- FILTER LIST + RESULTS SUBLIST
 -- ===========================================================================
 
-local function OnFilterChosen(entry)
+local function ResetFilterToNone()
+    m_activeFilterEntry = nil
+    m_activeFilterFunc  = nil
+    if OnFilterClicked then
+        OnFilterClicked({ Func = nil, Description = "LOC_TECH_FILTER_NONE" })
+    end
+    RebuildMainTree()
+end
+
+local function CreateFilterResultButton(techType)
+    local capturedType = techType
+    local btn = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreeFilterResult"), "Button", {
+        Label             = function() return FormatRowLabel(capturedType) end,
+        Tooltip           = function() return FormatRowTooltip(capturedType) end,
+        DisabledPredicate = function()
+            local node = GetUiNode(capturedType)
+            if node and node.Top and node.Top:IsDisabled() then return true end
+            return false
+        end,
+        FocusKey          = "filterResult:" .. tostring(capturedType),
+    })
+    btn:SetFocusSound("Main_Menu_Mouse_Over")
+    btn:On("activate", function()
+        mgr:RemoveFromStack(FILTER_RESULTS_ID)
+        JumpToTech(capturedType)
+    end)
+    btn:AddInputBindings({
+        {
+            Key       = Keys.VK_RETURN,
+            IsControl = true,
+            MSG       = KeyEvents.KeyUp,
+            Action    = function()
+                if not CanResearch(capturedType) then return true end
+                ActivateAppendToQueue(capturedType)
+                return true
+            end,
+        },
+        {
+            Key     = Keys.VK_RETURN,
+            IsShift = true,
+            MSG     = KeyEvents.KeyUp,
+            Action  = function()
+                if IsTutorialRunning and IsTutorialRunning() then return true end
+                LuaEvents.OpenCivilopedia(capturedType)
+                return true
+            end,
+        },
+    })
+    return btn
+end
+
+local function OpenFilterResults(entry)
+    if not entry or not entry.Func then return end
+
     m_activeFilterEntry = entry
     m_activeFilterFunc  = entry.Func
     if OnFilterClicked then OnFilterClicked(entry.VanillaEntry) end
     RebuildMainTree()
-    if m_caiMainTree and m_caiPanel and mgr:HasWidget(m_caiPanel) then
-        mgr:SetFocus(m_caiMainTree)
-    end
-end
 
-local function OpenFilterList()
-    EnsureFilterEntries()
-    if not m_caiFilterEntries then return end
-
-    m_caiFilterList = mgr:CreateUIWidget("CAITechTreeFilterList", "List", {
-        GetLabel = function() return Locale.Lookup("LOC_CAI_TECH_TREE_FILTER") end,
-    })
-    m_caiFilterList:AddInputBinding({
-        Key = Keys.VK_ESCAPE,
-        Action = function()
-            mgr:Pop(); return true
+    m_filterResults = mgr:CreateWidget(FILTER_RESULTS_ID, "List", {
+        Label = function()
+            return Locale.Lookup("LOC_CAI_TECH_TREE_FILTER_RESULTS", entry.Label)
         end,
     })
 
-    for _, entry in ipairs(m_caiFilterEntries) do
-        local capturedEntry = entry
-        m_caiFilterList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITechTreeFilterItem"), "MenuItem", {
-            GetLabel = function() return capturedEntry.Label end,
-            GetState = function()
-                return m_activeFilterEntry == capturedEntry
-                    and Locale.Lookup("LOC_CAI_STATE_SELECTED") or nil
-            end,
-            OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-            OnClick = function()
-                OnFilterChosen(capturedEntry)
-                mgr:Pop()
-            end,
-        }))
+    for _, era in ipairs(g_kEras) do
+        local eraTechs = {}
+        for techType, kEntry in pairs(g_kItemDefaults) do
+            if kEntry.EraType == era.EraType and FilterMatchesTech(techType) then
+                table.insert(eraTechs, { techType = techType, row = kEntry.UITreeRow or 0 })
+            end
+        end
+        table.sort(eraTechs, function(a, b) return a.row < b.row end)
+        for _, e in ipairs(eraTechs) do
+            m_filterResults:AddChild(CreateFilterResultButton(e.techType))
+        end
     end
 
-    mgr:Push(m_caiFilterList)
+    m_filterResults:AddInputBindings({
+        {
+            Key    = Keys.VK_ESCAPE,
+            MSG    = KeyEvents.KeyUp,
+            Action = function()
+                mgr:RemoveFromStack(FILTER_RESULTS_ID)
+                return true
+            end,
+        },
+    })
+
+    m_filterResults:On("destroy", function()
+        m_filterResults = nil
+        ResetFilterToNone()
+    end)
+
+    mgr:Push(m_filterResults)
+end
+
+local function BuildFilterList()
+    EnsureFilterEntries()
+    m_filterList:ClearChildren()
+    if not m_filterEntries then return end
+    for _, entry in ipairs(m_filterEntries) do
+        local capturedEntry = entry
+        local btn = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreeFilterBtn"), "Button", {
+            Label    = function() return capturedEntry.Label end,
+            FocusKey = "filter:" .. tostring(capturedEntry.Label),
+        })
+        btn:SetFocusSound("Main_Menu_Mouse_Over")
+        btn:On("activate", function()
+            if capturedEntry.Func then
+                OpenFilterResults(capturedEntry)
+            else
+                ResetFilterToNone()
+            end
+        end)
+        m_filterList:AddChild(btn)
+    end
 end
 
 -- ===========================================================================
@@ -589,85 +739,84 @@ end
 -- ===========================================================================
 
 local function EnsurePanelBuilt()
-    if m_caiPanel or not mgr then return end
+    if m_panel or not mgr then return end
 
     BuildStaticMaps()
     EnsureFilterEntries()
 
-    m_caiPanel = mgr:CreateUIWidget("CAITechTreePanel", "Panel", {
-        GetLabel = function() return ControlText(Controls.ModalScreenTitle) end,
+    m_panel = mgr:CreateWidget(PANEL_ID, "Panel", {
+        Label = function() return ControlText(Controls.ModalScreenTitle) end,
     })
 
-    m_caiQueueTree = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITechTreeQueue"), "Treeview", {
-        GetLabel    = function() return Locale.Lookup("LOC_CAI_TECH_TREE_QUEUE_LIST") end,
-        IsHidden    = function(w) return not w.Children or #w.Children == 0 end,
+    m_queueList = mgr:CreateWidget(QUEUE_LIST_ID, "List", {
+        Label           = function() return Locale.Lookup("LOC_CAI_TECH_TREE_QUEUE_LIST") end,
+        HiddenPredicate = function(w) return not w.Children or #w.Children == 0 end,
+        SearchDepth     = 0,
+    })
+    m_panel:AddChild(m_queueList)
+
+    m_filterList = mgr:CreateWidget(FILTER_LIST_ID, "List", {
+        Label       = function() return Locale.Lookup("LOC_CAI_TECH_TREE_FILTER") end,
         SearchDepth = 0,
     })
-    m_caiPanel:AddChild(m_caiQueueTree)
+    m_panel:AddChild(m_filterList)
+    BuildFilterList()
 
-    m_caiMainTree = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITechTreeMain"), "Treeview", {
-        GetLabel    = function() return Locale.Lookup("LOC_CAI_TECH_TREE_MAIN_LIST") end,
+    m_mainTree = mgr:CreateWidget(MAIN_TREE_ID, "Tree", {
+        Label       = function() return Locale.Lookup("LOC_CAI_TECH_TREE_MAIN_LIST") end,
         SearchDepth = 2,
     })
-    m_caiMainTree:AddInputBinding({
-        Key = Keys.VK_BACK,
-        Action = function()
-            local id = table.remove(m_breadcrumbs)
-            if not id then return false end
-            local widget = m_caiMainTree:GetChildById(id, true)
-            if widget then mgr:SetFocus(widget) end
-            return true
-        end,
+    m_mainTree:AddInputBindings({
+        {
+            Key    = Keys.VK_BACK,
+            MSG    = KeyEvents.KeyUp,
+            Action = function()
+                local source = table.remove(m_breadcrumbs)
+                if not source then return false end
+                JumpToTech(source, false)
+                return true
+            end,
+        },
     })
-    m_caiPanel:AddChild(m_caiMainTree)
-
-    m_caiFilterDropdown = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITechTreeFilter"), "DropdownMenu", {
-        GetLabel     = function() return Locale.Lookup("LOC_CAI_TECH_TREE_FILTER") end,
-        GetValue     = function()
-            return (m_activeFilterEntry and m_activeFilterEntry.Label)
-                or Locale.Lookup("LOC_TECH_FILTER_NONE")
-        end,
-        OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-        OnClick      = OpenFilterList,
-    })
-    m_caiPanel:AddChild(m_caiFilterDropdown)
+    m_panel:AddChild(m_mainTree)
 
     RebuildMainTree()
-    RebuildQueueTree()
+    RebuildQueueList()
 end
 
 local function PushPanel()
     if not mgr then return end
     EnsurePanelBuilt()
-    if not m_caiPanel or mgr:HasWidget(m_caiPanel) then return end
+    if not m_panel or mgr:GetWidgetById(PANEL_ID) then return end
 
     local playerTechs = GetLocalPlayerTechs()
     local hasCurrent = playerTechs and playerTechs:GetResearchingTech() ~= -1
-    -- Index 1 = queue, 2 = main tree, 3 = filter
-    m_caiPanel:SetDefaultIndex(hasCurrent and 1 or 2)
-    mgr:Push(m_caiPanel)
+    local focusChild = hasCurrent and m_queueList or m_mainTree
+    mgr:Push(m_panel, { focus = focusChild })
 end
 
 local function OnPanelClosedCAI()
-    if m_caiPanel and mgr and mgr:HasWidget(m_caiPanel) then
-        mgr:Pop()
+    if mgr and m_panel then
+        mgr:RemoveFromStack(FILTER_RESULTS_ID)
+        mgr:RemoveFromStack(PANEL_ID)
     end
-    m_caiPanel          = nil
-    m_caiQueueTree      = nil
-    m_caiMainTree       = nil
-    m_caiFilterDropdown = nil
-    m_caiTechsByType    = {}
+    m_panel             = nil
+    m_queueList         = nil
+    m_filterList        = nil
+    m_mainTree          = nil
+    m_filterResults     = nil
+    m_techsByType       = {}
     m_leadsToByType     = {}
     m_techIndexToType   = {}
     m_lastPlayerData    = nil
-    m_caiFilterEntries  = nil
+    m_filterEntries     = nil
     m_activeFilterEntry = nil
     m_activeFilterFunc  = nil
     m_breadcrumbs       = {}
 end
 
 local function IsPanelOnStack()
-    return m_caiPanel and mgr and mgr:HasWidget(m_caiPanel)
+    return m_panel and mgr and mgr:GetWidgetById(PANEL_ID) ~= nil
 end
 
 -- ===========================================================================
@@ -677,15 +826,11 @@ end
 View = WrapFunc(View, function(orig, playerData)
     m_lastPlayerData = playerData
     orig(playerData)
-    if m_caiPanel then
-        RebuildQueueTree()
+    if m_panel then
+        RebuildQueueList()
     end
 end)
 
-
--- Vanilla Initialize subscribed the original OnOpen reference to the open
--- LuaEvents before this file loaded; rewrap-and-reswap so the wrapped version
--- is what actually fires.
 local _origOnOpen = OnOpen
 OnOpen = WrapFunc(OnOpen, function(orig)
     orig()
@@ -696,22 +841,14 @@ LuaEvents.ResearchChooser_RaiseTechTree.Remove(_origOnOpen)
 LuaEvents.LaunchBar_RaiseTechTree.Add(OnOpen)
 LuaEvents.ResearchChooser_RaiseTechTree.Add(OnOpen)
 
--- KeyUpHandler ESC and OnClose both call Close() by global name, so wrapping
--- Close catches every vanilla close path including LaunchBar_CloseTechTree.
--- Pop the CAI panel before orig() fires TechTree_CloseTechTree, otherwise the
--- tutorial may synchronously raise an advisor popup onto the stack between
--- orig() and the pop, and mgr:Pop() would remove that popup instead of the
--- tech tree panel.
 Close = WrapFunc(Close, function(orig)
     OnPanelClosedCAI()
     orig()
 end)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
-    local top = mgr:GetTop()
-    if top ~= m_caiPanel and top ~= m_caiFilterList then return false end
-    if mgr:HandleInput(pInputStruct) then
-        return true
+    if mgr and IsPanelOnStack() then
+        if mgr:HandleInput(pInputStruct) then return true end
     end
     return orig(pInputStruct)
 end)
@@ -721,31 +858,41 @@ ContextPtr:SetInputHandler(OnInputHandler, true)
 -- EVENTS
 -- ===========================================================================
 
-local function RebuildQueueIfOpen()
-    if IsPanelOnStack() then RebuildQueueTree() end
+local function RefocusIfTechRow()
+    if not IsPanelOnStack() then return end
+    local focused = mgr:GetFocusedWidget()
+    if not focused or not focused.FocusKey then return end
+    local key = focused.FocusKey
+    if string.sub(key, 1, 5) == "tech:"
+        or string.sub(key, 1, 6) == "queue:" then
+        mgr:Refocus()
+    end
 end
 
 Events.ResearchChanged.Add(function(ePlayer)
-    if ePlayer == Game.GetLocalPlayer() then RebuildQueueIfOpen() end
+    if ePlayer == Game.GetLocalPlayer() and IsPanelOnStack() then
+        RebuildQueueList()
+        RefocusIfTechRow()
+    end
 end)
 
 Events.ResearchQueueChanged.Add(function(ePlayer)
-    if ePlayer == Game.GetLocalPlayer() then RebuildQueueIfOpen() end
+    if ePlayer == Game.GetLocalPlayer() and IsPanelOnStack() then
+        RebuildQueueList()
+        RefocusIfTechRow()
+    end
 end)
 
 Events.ResearchCompleted.Add(function(ePlayer)
     if ePlayer ~= Game.GetLocalPlayer() or not IsPanelOnStack() then return end
-    if not m_lastPlayerData then return end
-    local focusedType = CaptureFocusedTechType()
     RebuildMainTree()
-    RebuildQueueTree()
-    if focusedType and m_caiTechsByType[focusedType] then
-        mgr:SetFocus(m_caiTechsByType[focusedType])
-    end
+    RebuildQueueList()
 end)
 
 Events.LocalPlayerTurnBegin.Add(function(ePlayer)
-    if ePlayer == Game.GetLocalPlayer() then RebuildQueueIfOpen() end
+    if ePlayer == Game.GetLocalPlayer() and IsPanelOnStack() then
+        RebuildQueueList()
+    end
 end)
 
 Events.LocalPlayerChanged.Add(function() OnPanelClosedCAI() end)

@@ -199,53 +199,6 @@ local function GetAllianceText(kData)
     return Locale.Lookup("LOC_CAI_RESEARCH_ALLIANCE_BONUS", tip)
 end
 
-local UNLOCK_DESC_TABLES = {
-    "Buildings", "Units", "Improvements", "Districts", "Projects",
-    "Resources", "Routes", "Policies", "Civics", "Technologies",
-}
-
-local function GetUnlockDescription(typeName)
-    if not typeName or typeName == "" then return nil end
-    for _, tableName in ipairs(UNLOCK_DESC_TABLES) do
-        local info = GameInfo[tableName]
-        local row = info and info[typeName] or nil
-        local desc = row and row.Description or nil
-        if desc and desc ~= "" then
-            local text = Locale.Lookup(desc)
-            if text and text ~= "" then return text end
-        end
-    end
-    return nil
-end
-
-local function GetUnlocks(kData)
-    local techType = kData and kData.TechType
-    if not techType then return { Unlocks = {}, Reveals = {} } end
-    local playerID = Game.GetLocalPlayer()
-    local raw = GetUnlockablesForTech_Cached(techType, playerID) or {}
-    local unlocks, reveals = {}, {}
-    for _, u in ipairs(raw) do
-        local typeName, locName = u[1], u[2]
-        if locName and locName ~= "" then
-            local t = GameInfo.Types[typeName]
-            local kind = t and t.Kind or nil
-            if kind == "KIND_RESOURCE" then
-                table.insert(reveals, {
-                    TypeName = typeName,
-                    Name = Locale.Lookup(locName),
-                })
-            else
-                table.insert(unlocks, {
-                    TypeName = typeName,
-                    Name = Locale.Lookup(locName),
-                    Description = GetUnlockDescription(typeName),
-                })
-            end
-        end
-    end
-    return { Unlocks = unlocks, Reveals = reveals }
-end
-
 local function GetRevealsText(group)
     local reveals = group and group.Reveals or nil
     if not reveals or #reveals == 0 then return nil end
@@ -297,29 +250,8 @@ end
 -- ===========================================================================
 -- Row factory
 -- ===========================================================================
-local function CreateUnlockChild(unlock)
-    local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAIResearchChooserUnlock"), "TreeItem", {
-        Label    = function() return unlock.Name end,
-        Tooltip  = function() return unlock.Description or "" end,
-        FocusKey = "unlock:" .. tostring(unlock.TypeName),
-    })
-    child:AddInputBindings({
-        {
-            Key     = Keys.VK_RETURN,
-            IsShift = true,
-            MSG     = KeyEvents.KeyUp,
-            Action  = function()
-                if IsTutorialRunning and IsTutorialRunning() then return true end
-                if unlock.TypeName then LuaEvents.OpenCivilopedia(unlock.TypeName) end
-                return true
-            end,
-        },
-    })
-    return child
-end
-
 local function CreateRow(kData, interactive)
-    local group = GetUnlocks(kData)
+    local group = GetTechUnlockObjects(kData)
 
     local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIResearchChooserRow"), "TreeItem", {
         Label             = function() return FormatLabel(kData) end,
@@ -357,7 +289,7 @@ local function CreateRow(kData, interactive)
 
     for _, unlock in ipairs(group.Unlocks) do
         if unlock.Description then
-            row:AddChild(CreateUnlockChild(unlock))
+            row:AddChild(CreateUnlockChild(mgr, unlock, "CAIResearchChooserUnlock"))
         end
     end
 

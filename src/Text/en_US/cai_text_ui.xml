@@ -1274,6 +1274,9 @@
     <Row Tag="LOC_CAI_CIVICS_TREE_GOVERNMENT" Language="en_US">
       <Text>Current government</Text>
     </Row>
+    <Row Tag="LOC_CAI_CIVICS_TREE_UNLOCKS" Language="en_US">
+      <Text>Unlocks</Text>
+    </Row>
     <Row Tag="LOC_CAI_CIVICS_TREE_PREREQS" Language="en_US">
       <Text>Required civics</Text>
     </Row>
@@ -1282,6 +1285,15 @@
     </Row>
     <Row Tag="LOC_CAI_CIVICS_TREE_PATH_IF_SELECTED" Language="en_US">
       <Text>Civics to research first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVICS_TREE_JUMPING" Language="en_US">
+      <Text>Jumping to {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVICS_TREE_FILTER_RESULTS" Language="en_US">
+      <Text>{1_Filter} results</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_AWARDS_HEADER" Language="en_US">
+      <Text>Awards: {1_List}</Text>
     </Row>
     <Row Tag="LOC_CAI_CIVIC_STATUS_RESEARCHED" Language="en_US">
       <Text>Completed</Text>
@@ -1308,6 +1320,9 @@
     <Row Tag="LOC_CAI_TECH_TREE_FILTER" Language="en_US">
       <Text>Filter</Text>
     </Row>
+    <Row Tag="LOC_CAI_TECH_TREE_UNLOCKS" Language="en_US">
+      <Text>Unlocks</Text>
+    </Row>
     <Row Tag="LOC_CAI_TECH_TREE_PREREQS" Language="en_US">
       <Text>Required technologies</Text>
     </Row>
@@ -1316,6 +1331,15 @@
     </Row>
     <Row Tag="LOC_CAI_TECH_TREE_PATH_IF_SELECTED" Language="en_US">
       <Text>Technologies to research first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_TREE_JUMPING" Language="en_US">
+      <Text>Jumping to {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_TREE_FILTER_RESULTS" Language="en_US">
+      <Text>{1_Filter} results</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_AWARDS_HEADER" Language="en_US">
+      <Text>Awards: {1_List}</Text>
     </Row>
     <Row Tag="LOC_CAI_TECH_STATUS_RESEARCHED" Language="en_US">
       <Text>Completed</Text>
@@ -1421,6 +1445,12 @@
     </Row>
     <Row Tag="LOC_CAI_PRODUCTION_BONUSES_LABEL" Language="en_US">
       <Text>Bonuses</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_BONUSES_MORE" Language="en_US">
+      <Text>and {1_Num} more bonuses</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_FAILURE_REASONS_LABEL" Language="en_US">
+      <Text>Failure reasons</Text>
     </Row>
     <Row Tag="LOC_CAI_PRODUCTION_DESCRIPTION_LABEL" Language="en_US">
       <Text>Description</Text>

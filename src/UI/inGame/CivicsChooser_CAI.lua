@@ -20,7 +20,15 @@ local m_availableRows     = {} ---@type table[]
 local m_currentData       = nil ---@type table|nil
 local m_currentControl    = nil ---@type table|nil
 local m_instanceByHash    = {} ---@type table<number, table>
+local m_modifierCache     = nil ---@type table|nil
 local m_openPending       = false
+
+local function GetModifierCache()
+    if not m_modifierCache and TechAndCivicSupport_BuildCivicModifierCache then
+        m_modifierCache = TechAndCivicSupport_BuildCivicModifierCache()
+    end
+    return m_modifierCache or {}
+end
 
 -- ===========================================================================
 -- Control helpers
@@ -131,65 +139,6 @@ local function GetBoostText(kData)
     return prefix .. " " .. trigger
 end
 
-local UNLOCK_DESC_TABLES = {
-    "Buildings", "Units", "Improvements", "Districts", "Projects",
-    "Resources", "Routes", "Policies", "Civics", "Technologies", "Governments",
-}
-
-local function GetUnlockDescription(typeName)
-    if not typeName or typeName == "" then return nil end
-    for _, tableName in ipairs(UNLOCK_DESC_TABLES) do
-        local info = GameInfo[tableName]
-        local row = info and info[typeName] or nil
-        local desc = row and row.Description or nil
-        if desc and desc ~= "" then
-            local text = Locale.Lookup(desc)
-            if text and text ~= "" then return text end
-        end
-    end
-    return nil
-end
-
-local function GetUnlocks(kData)
-    local civicType = kData and kData.CivicType
-    if not civicType then return {} end
-    local playerID = Game.GetLocalPlayer()
-    local raw = GetUnlockablesForCivic_Cached(civicType, playerID) or {}
-    local unlocks = {}
-    for _, u in ipairs(raw) do
-        local typeName, locName = u[1], u[2]
-        if locName and locName ~= "" then
-            table.insert(unlocks, {
-                TypeName = typeName,
-                Name = Locale.Lookup(locName),
-                Description = GetUnlockDescription(typeName),
-            })
-        end
-    end
-    return unlocks
-end
-
-local function GetObsoletePolicyNames(kData)
-    local civicType = kData and kData.CivicType
-    if not civicType then return {} end
-    local playerID = Game.GetLocalPlayer()
-    local unlockables = GetUnlockablesForCivic_Cached(civicType, playerID) or {}
-    local unlockableIndex = {}
-    for _, v in ipairs(unlockables) do unlockableIndex[v[1]] = true end
-
-    local names = {}
-    for row in GameInfo.ObsoletePolicies() do
-        if unlockableIndex[row.ObsoletePolicy] then
-            local policy = GameInfo.Policies[row.PolicyType]
-            if policy then
-                table.insert(names, Locale.Lookup("LOC_TOOLTIP_UNLOCKS_POLICY", policy.Name))
-            end
-        end
-    end
-    table.sort(names, function(a, b) return Locale.Compare(a, b) == -1 end)
-    return names
-end
-
 local function GetUnlocksText(unlocks)
     if not unlocks or #unlocks == 0 then return nil end
     local names = {}
@@ -200,6 +149,12 @@ end
 local function GetObsoletesText(obsoleteNames)
     if not obsoleteNames or #obsoleteNames == 0 then return nil end
     return Locale.Lookup("LOC_CAI_CIVIC_OBSOLETES_HEADER", table.concat(obsoleteNames, ", "))
+end
+
+local function GetAwardNamesFor(kData)
+    local civicType = kData and kData.CivicType
+    if not civicType then return {} end
+    return GetAwardNames(GetModifierCache()[civicType])
 end
 
 -- ===========================================================================
@@ -219,7 +174,7 @@ local function FormatLabel(kData)
     return table.concat(parts, ", ")
 end
 
-local function FormatTooltip(kData, unlocks, obsoleteNames)
+local function FormatTooltip(kData, unlocks, obsoleteNames, awardNames)
     local parts = {}
     AppendIfNonEmpty(parts, GetCostText(kData))
     AppendIfNonEmpty(parts, GetTurnsText(kData))
@@ -228,40 +183,21 @@ local function FormatTooltip(kData, unlocks, obsoleteNames)
     AppendIfNonEmpty(parts, GetBoostText(kData))
     AppendIfNonEmpty(parts, GetObsoletesText(obsoleteNames))
     AppendIfNonEmpty(parts, GetUnlocksText(unlocks))
+    AppendIfNonEmpty(parts, GetCivicAwardsText(awardNames))
     return table.concat(parts, ", ")
 end
 
 -- ===========================================================================
 -- Row factory
 -- ===========================================================================
-local function CreateUnlockChild(unlock)
-    local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsChooserUnlock"), "TreeItem", {
-        Label    = function() return unlock.Name end,
-        Tooltip  = function() return unlock.Description or "" end,
-        FocusKey = "unlock:" .. tostring(unlock.TypeName),
-    })
-    child:AddInputBindings({
-        {
-            Key     = Keys.VK_RETURN,
-            IsShift = true,
-            MSG     = KeyEvents.KeyUp,
-            Action  = function()
-                if IsTutorialRunning and IsTutorialRunning() then return true end
-                if unlock.TypeName then LuaEvents.OpenCivilopedia(unlock.TypeName) end
-                return true
-            end,
-        },
-    })
-    return child
-end
-
 local function CreateRow(kData, interactive)
-    local unlocks = GetUnlocks(kData)
+    local unlocks = GetCivicUnlockObjects(kData)
     local obsoleteNames = GetObsoletePolicyNames(kData)
+    local awardNames = GetAwardNamesFor(kData)
 
     local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsChooserRow"), "TreeItem", {
         Label             = function() return FormatLabel(kData) end,
-        Tooltip           = function() return FormatTooltip(kData, unlocks, obsoleteNames) end,
+        Tooltip           = function() return FormatTooltip(kData, unlocks, obsoleteNames, awardNames) end,
         HiddenPredicate   = function() return RowIsHidden(kData) end,
         DisabledPredicate = function() return interactive and RowIsDisabled(kData) or false end,
         FocusKey          = "civic:" .. tostring(kData.Hash),
@@ -295,7 +231,7 @@ local function CreateRow(kData, interactive)
 
     for _, unlock in ipairs(unlocks) do
         if unlock.Description then
-            row:AddChild(CreateUnlockChild(unlock))
+            row:AddChild(CreateUnlockChild(mgr, unlock, "CAICivicsChooserUnlock"))
         end
     end
 
@@ -419,6 +355,7 @@ local function OnPanelClosedCAI()
     m_currentData = nil
     m_currentControl = nil
     m_instanceByHash = {}
+    m_modifierCache = nil
     m_openPending = false
 end
 

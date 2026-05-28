@@ -124,16 +124,18 @@ function UIScreenManager:Push(w, opts)
     self:SortStack()
     local newTop = self:GetTop()
 
-    -- Resolve opts.focus up-front so we can suppress the root announcement
-    -- when we're about to focus a specific target.
+    -- Resolve opts.focus up-front. When we have a specific target we set
+    -- focus straight to it so the full path [root, ..., target] speaks in a
+    -- single announcement; otherwise fall back to the default root entry.
     local target = opts.focus
     if type(target) == "string" then target = self:FindByFocusKey(w, target) end
     local willFocusTarget = target ~= nil and newTop == w
 
-    if newTop ~= oldTop or not self.CurrentPath or self.CurrentPath[1] ~= newTop then
-        self:UpdateRootFocus(not willFocusTarget)
+    if willFocusTarget then
+        self:SetFocus(target)
+    elseif newTop ~= oldTop or not self.CurrentPath or self.CurrentPath[1] ~= newTop then
+        self:UpdateRootFocus(true)
     end
-    if willFocusTarget then self:SetFocus(target) end
 end
 
 ---@param announce? boolean defaults true; pass false to suppress speech
@@ -346,7 +348,10 @@ function UIScreenManager:SetFocusPath(path, root, announce)
     local newPath, diverge = self:ApplyFocus(path)
     if announce == nil then announce = true end
     if announce then
-        SpeakLines(self:BuildAnnouncement(newPath, diverge), true)
+        -- Focus speech never interrupts: callers that need to interrupt (e.g.
+        -- "Jumping to X" feedback before a ref-link jump) should Speak with
+        -- interrupt=true themselves and let the focus lines queue behind.
+        SpeakLines(self:BuildAnnouncement(newPath, diverge), false)
     end
     return true
 end
@@ -356,7 +361,7 @@ end
 function UIScreenManager:Refocus()
     local path = self.CurrentPath
     if not path or #path == 0 then return end
-    SpeakLines(self:BuildAnnouncement(path, #path), true)
+    SpeakLines(self:BuildAnnouncement(path, #path), false)
 end
 
 --#endregion
