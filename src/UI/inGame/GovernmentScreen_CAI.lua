@@ -1,5 +1,37 @@
 include("caiUtils")
-include("GovernmentScreen")
+include("Civ6Common") -- IsExpansion1Active / IsExpansion2Active
+
+-- Dramatic Ages is a game mode, not a mod, so it cannot be detected via
+-- Modding.GetActiveMods. Its only government-screen content is the Golden Age
+-- policy set, whose data loads on the same criteria as the mode's screen
+-- replacement, so the presence of any RequiresGoldenAge policy is a reliable,
+-- locale-independent signal that the mode variant is the one vanilla would pick.
+local function IsDramaticAgesActive()
+    if not GameInfo.Policies_XP1 then return false end
+    for row in GameInfo.Policies_XP1() do
+        if row.RequiresGoldenAge then return true end
+    end
+    return false
+end
+
+-- CAI replaces the GovernmentScreen context outright, so it must re-include the
+-- exact vanilla script that would otherwise win; otherwise a sighted hotseat
+-- player loses that variant's visuals (e.g. the Golden card art and filter tab).
+if IsExpansion2Active() then
+    if IsDramaticAgesActive() then
+        include("GovernmentScreen_Byzantium_Gaul_Expansion2_MODE")
+    else
+        include("GovernmentScreen_Expansion2")
+    end
+elseif IsExpansion1Active() then
+    if IsDramaticAgesActive() then
+        include("GovernmentScreen_Byzantium_Gaul_Expansion1_MODE")
+    else
+        include("GovernmentScreen_Expansion1")
+    end
+else
+    include("GovernmentScreen")
+end
 
 local mgr                   = ExposedMembers.CAI_UIManager
 
@@ -139,10 +171,20 @@ local function GetPolicySlotLabel(policyType)
     return Locale.Lookup(policy.SlotType)
 end
 
+local function GetPolicyAgeIndicator(policyType)
+    if not GameInfo.Policies_XP1 then return "" end
+    local def = GameInfo.Policies_XP1[policyType]
+    if not def then return "" end
+    if def.RequiresDarkAge then return Locale.Lookup("LOC_CAI_GOVERNMENT_DARK_AGE_POLICY") end
+    if def.RequiresGoldenAge then return Locale.Lookup("LOC_CAI_GOVERNMENT_GOLDEN_AGE_POLICY") end
+    return ""
+end
+
 local function GetPolicyTooltip(policyType)
     return JoinNonEmpty({
-        Locale.Lookup("LOC_CAI_GOVERNMENT_POLICY_TYPE", GetPolicySlotLabel(policyType)),
-        Locale.Lookup("LOC_CAI_GOVERNMENT_DESCRIPTION", GetPolicyDescription(policyType)),
+        GetPolicySlotLabel(policyType),
+        GetPolicyAgeIndicator(policyType),
+        GetPolicyDescription(policyType),
     }, ", ")
 end
 
@@ -476,7 +518,7 @@ BuildPolicyCategoryTree = function(parent, options)
             end
 
             parent:AddChild(category)
-            if startExpanded then category:Expand() end
+            if startExpanded then category:Expand(true) end
         end
     end
 end
@@ -559,6 +601,10 @@ local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
     widget:SetFocusSound("Main_Menu_Mouse_Over")
 
     widget:On("activate", function()
+        if IsReadOnly() then
+            Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_CONGRESS_LOCKED"))
+            return
+        end
         if not IsAbleToChangePolicies() then
             Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_POLICIES_LOCKED"))
             return
@@ -573,6 +619,10 @@ local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
             Action = function()
                 local currentPolicyType = GetPolicyTypeForSlot(slotIndex)
                 if currentPolicyType == CAI_EMPTY_POLICY_TYPE then return true end
+                if IsReadOnly() then
+                    Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_CONGRESS_LOCKED"))
+                    return true
+                end
                 if not IsAbleToChangePolicies() then
                     Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_POLICIES_LOCKED"))
                     return true
@@ -661,6 +711,10 @@ local function BuildGovernmentsTreeContent(tree)
 
         item:On("activate", function(w)
             if w:IsDisabled() then return end
+            if IsReadOnly() then
+                Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_CONGRESS_LOCKED"))
+                return
+            end
             OnGovernmentSelected(govType)
         end)
 

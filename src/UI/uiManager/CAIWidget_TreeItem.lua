@@ -1,8 +1,9 @@
 -- CAIWidget_TreeItem.lua
--- A node or leaf inside a TreeWidget. IsExpanded is exposed through GetValue so
--- focus speech announces expanded/collapsed state. Enter activates if there are
--- "activate" listeners; otherwise it bubbles up to the parent Tree which
--- toggles expand/collapse.
+-- A node or leaf inside a TreeWidget. Focus speech announces expand/collapse
+-- state via the value element. The toggle itself is spoken only on the
+-- user-driven Expand/Collapse path; automatic/programmatic calls pass
+-- silent=true. Enter activates if there are "activate" listeners; otherwise it
+-- bubbles up to the parent Tree which toggles expand/collapse.
 
 ---@class TreeItemWidget : ContainerWidget
 ---@field IsExpanded boolean
@@ -29,8 +30,13 @@ function TreeItemWidget.Create(mgr, id, props)
     w.Manager = mgr
     w.IsExpanded = false
     w.IsTreeItem = true
-    w.SpeechSettings = { IgnoreWhenNotFocused = true }
+    w.SpeechSettings = { IgnoreWhenNotFocused = true, Role = false }
 
+    -- Focus speech announces expand/collapse state (and item count when open)
+    -- on every node, the standard tree-item readout. The toggle itself is
+    -- announced by the user-driven Expand/Collapse path; automatic/programmatic
+    -- expands and collapses pass silent=true so only navigation and deliberate
+    -- toggles ever speak the state.
     w:SetValueGetter(function(self)
         if self:IsLeaf() then return "" end
         if self.IsExpanded then
@@ -64,23 +70,49 @@ function TreeItemWidget:IsLeaf()
     return #self:GetVisibleChildren() == 0
 end
 
+-- Recursively collapse every descendant in place — no speech, no events.
+-- Collapsing a node tears down its whole subtree so a later re-expand reveals
+-- a single clean level rather than whatever deep state was left behind.
+local function CollapseDescendants(node)
+    for _, child in ipairs(node.Children or {}) do
+        if child.IsExpanded then
+            child.IsExpanded = false
+            child._lastFocusedChild = nil
+        end
+        CollapseDescendants(child)
+    end
+end
+
+---Expand this node. `silent` suppresses both the `expanded` event and speech
+---(use it for seeding initial state or auto-expanding focus ancestors); the
+---default user-driven path emits and announces.
+---@param silent? boolean
 ---@return boolean
-function TreeItemWidget:Expand()
+function TreeItemWidget:Expand(silent)
     if self.IsExpanded then return false end
     if self:IsLeaf() then return false end
     self.IsExpanded = true
-    self:Emit("expanded")
-    self:SpeakElements({ "value" })
+    if not silent then
+        self:Emit("expanded")
+        self:SpeakElements({ "value" })
+    end
     return true
 end
 
+---Collapse this node and, recursively, every descendant. Descendant collapses
+---are always silent; `silent` controls whether this node emits `collapsed` and
+---speaks.
+---@param silent? boolean
 ---@return boolean
-function TreeItemWidget:Collapse()
+function TreeItemWidget:Collapse(silent)
     if not self.IsExpanded then return false end
     self.IsExpanded = false
     self._lastFocusedChild = nil
-    self:Emit("collapsed")
-    self:SpeakElements({ "value" })
+    CollapseDescendants(self)
+    if not silent then
+        self:Emit("collapsed")
+        self:SpeakElements({ "value" })
+    end
     return true
 end
 

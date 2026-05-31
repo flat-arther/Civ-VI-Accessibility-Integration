@@ -13,45 +13,40 @@ ShowAdvisorPopup = WrapFunc(ShowAdvisorPopup, function(orig, advisorData)
 
     local isPortrait = advisorData.ShowPortrait
 
-    --m_tutorialPanel =
-    local bodyWidget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvisorPopupStaticText"), "StaticText", {
-        GetValue = function()
+    local bodyWidget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvisorPopupStaticText"), "StaticText", {
+        Label = function()
             if isPortrait then
-                return Controls.InfoString:GetText()
+                return Controls.InfoString:GetText() or ""
             end
-            return Controls.MetaInfoString:GetText()
-        end
+            return Controls.MetaInfoString:GetText() or ""
+        end,
     })
 
-
-    local buttons = {
-        { text = advisorData.Button1Text, func = advisorData.Button1Func },
-        { text = advisorData.Button2Text, func = advisorData.Button2Func }
-    }
+    -- Drive the live vanilla button controls. Each DialogButton instance in the
+    -- (Meta)ButtonStack already registers a Mouse.eLClick callback that calls
+    -- OnHideAdvisorDialog() + the advisor button func, so we just DoLeftClick it.
+    local buttonStack = isPortrait and Controls.ButtonStack or Controls.MetaButtonStack
     local buttonRow = {}
-    for _, btn in ipairs(buttons) do
-        if btn.text then
-            local capturedFunc = btn.func
-            local btnWidget = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIAdvisorPopupButton"), "Button", {
-                GetLabel = function() return Locale.Lookup(btn.text) end,
-                OnClick = function()
-                    OnHideAdvisorDialog()
-                    if capturedFunc then capturedFunc(advisorData) end
-                end
-            })
-            table.insert(buttonRow, btnWidget)
-        end
+    for _, native in ipairs(buttonStack:GetChildren() or {}) do
+        local btnWidget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvisorPopupButton"), "Button", {
+            Label = function() return native:GetText() or "" end,
+            Tooltip = function() return native:GetToolTipString() or "" end,
+            DisabledPredicate = function() return native:IsDisabled() end,
+            HiddenPredicate = function() return native:IsHidden() end,
+        })
+        btnWidget:On("activate", function() native:DoLeftClick() end)
+        table.insert(buttonRow, btnWidget)
     end
+
     local function GetTitle()
         if isPortrait then
-            return Controls.TitleText:GetText()
+            return Controls.TitleText:GetText() or ""
         end
-        return Controls.MetaTitleText:GetText()
+        return Controls.MetaTitleText:GetText() or ""
     end
-    m_tutorialPanel = mgr.WidgetTemplateHelpers:MakeGeneralDialog(GetTitle, buttonRow, { bodyWidget })
+    m_tutorialPanel = mgr.WidgetHelpers.MakeGeneralDialog(GetTitle, buttonRow, { bodyWidget })
     if not m_tutorialPanel then return end
-    m_tutorialPanel.SpeechSettings = { Role = false, Label = false }
-    mgr:Push(m_tutorialPanel, PopupPriority.Tutorial)
+    mgr:Push(m_tutorialPanel, { priority = PopupPriority.Tutorial })
 end)
 
 

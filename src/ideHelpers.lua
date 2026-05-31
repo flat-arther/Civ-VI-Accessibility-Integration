@@ -106,7 +106,8 @@ EditModes = {}
 ---@field label string
 ---@field value any
 
----One column in a TableWidget.
+---One column in a TableWidget. `width` is the number of side-by-side tiers
+---the column holds (default 1).
 ---@class TableColumn
 ---@field header string|fun():string
 ---@field width? integer
@@ -430,6 +431,16 @@ HorizontalListWidget = {}
 ---@class SubMenuWidget : ContainerWidget
 ---@field IsExpanded boolean
 SubMenuWidget = {}
+---Expand the submenu (state only; the caller moves focus). `silent` suppresses
+---the `expanded` event.
+---@param silent? boolean
+---@return boolean
+function SubMenuWidget:Expand(silent) end
+---Collapse the submenu and (always silently) every descendant. `silent`
+---suppresses this node's `collapsed` event.
+---@param silent? boolean
+---@return boolean
+function SubMenuWidget:Collapse(silent) end
 
 ---@class TreeWidget : ContainerWidget
 ---@field SearchDepth integer
@@ -444,10 +455,15 @@ function TreeWidget:OnCharInput(char) end
 TreeItemWidget = {}
 ---@return boolean
 function TreeItemWidget:IsLeaf() end
+---Expand this node. `silent` suppresses the `expanded` event and speech.
+---@param silent? boolean
 ---@return boolean
-function TreeItemWidget:Expand() end
+function TreeItemWidget:Expand(silent) end
+---Collapse this node and (always silently) every descendant. `silent`
+---suppresses this node's `collapsed` event and speech.
+---@param silent? boolean
 ---@return boolean
-function TreeItemWidget:Collapse() end
+function TreeItemWidget:Collapse(silent) end
 
 ---@class CheckboxWidget : ValueWidget
 CheckboxWidget = {}
@@ -546,16 +562,31 @@ TabWidget = {}
 ---@class TabPageWidget : ContainerWidget
 TabPageWidget = {}
 
+---Three-level table: Table -> Column -> Tier -> item cell. A column speaks
+---only its header label (role/position muted) and owns its cells through
+---tiers, so the column header is announced when focus crosses into it.
 ---@class TableWidget : ContainerWidget
 TableWidget = {}
+---Append a column holding `width` side-by-side tiers. Returns the column widget.
 ---@param col TableColumn
----@return integer columnIndex
+---@return ContainerWidget column
 function TableWidget:AddColumn(col) end
 ---@return integer
 function TableWidget:GetColumnCount() end
 ---@param i integer
----@return TableColumn|nil
-function TableWidget:GetColumn(i) end
+---@return ContainerWidget|nil
+function TableWidget:GetColumnWidget(i) end
+---@param column ContainerWidget|integer
+---@param tierIndex? integer
+---@return ContainerWidget|nil
+function TableWidget:GetTier(column, tierIndex) end
+---Append an item cell to a column's tier (vertical stack).
+---@param column ContainerWidget|integer
+---@param tierIndex integer|nil
+---@param widget UIWidget
+---@return integer itemIndex
+function TableWidget:AddItem(column, tierIndex, widget) end
+---Grid convenience: one cell into each column's first tier, in column order.
 ---@param cells (UIWidget|nil)[]
 ---@return integer rowIndex
 function TableWidget:AddRow(cells) end

@@ -1,8 +1,17 @@
 include("caiUtils")
-include("CivicsTree")
 include("inGameHelpers_CAI")
 include("ToolTipHelper")
 include("Civ6Common")
+
+-- Expansion-aware include chain. Only XP2 ships a CivicsTree replacement (adds
+-- revealed-only search; there is no XP1 civics variant and no alliance on the
+-- civics side). CAI replaces the screen context outright, so it must load the
+-- exact variant vanilla would.
+if IsExpansion2Active and IsExpansion2Active() then
+    include("CivicsTree_Expansion2")
+else
+    include("CivicsTree")
+end
 
 local mgr                 = ExposedMembers.CAI_UIManager
 
@@ -10,7 +19,10 @@ local PANEL_ID            = "CAICivicsTree_Panel"
 local QUEUE_LIST_ID       = "CAICivicsTree_QueueList"
 local FILTER_LIST_ID      = "CAICivicsTree_FilterList"
 local MAIN_TREE_ID        = "CAICivicsTree_MainTree"
+local TABLE_VIEW_ID       = "CAICivicsTree_TableView"
+local UNLOCKS_LIST_ID     = "CAICivicsTree_UnlocksList"
 local GOV_EDIT_ID         = "CAICivicsTree_GovEdit"
+local CHANGE_VIEW_ID      = "CAICivicsTree_ChangeView"
 local FILTER_RESULTS_ID   = "CAICivicsTree_FilterResults"
 
 -- ===========================================================================
@@ -20,12 +32,21 @@ local m_panel             = nil ---@type UIWidget|nil
 local m_queueList         = nil ---@type UIWidget|nil
 local m_filterList        = nil ---@type UIWidget|nil
 local m_mainTree          = nil ---@type UIWidget|nil
+local m_tableView         = nil ---@type UIWidget|nil
+local m_unlocksList       = nil ---@type UIWidget|nil
 local m_govEdit           = nil ---@type UIWidget|nil
+local m_changeViewBtn     = nil ---@type UIWidget|nil
 local m_filterResults     = nil ---@type UIWidget|nil
 
-local m_civicsByType      = {} ---@type table<string, UIWidget>
+-- "table" (default) or "tree". The toggle button swaps between them; the
+-- inactive view is hidden so navigation skips it.
+local m_viewMode          = "table"
+
+local m_treeCivics        = {} ---@type table<string, UIWidget> civicType -> tree node
+local m_tableCivics       = {} ---@type table<string, UIWidget> civicType -> table cell
 local m_leadsToByType     = {} ---@type table<string, string[]>
 local m_civicIndexToType  = {} ---@type table<integer, string>
+local m_civicTierByType   = {} ---@type table<string, integer> civicType -> tier number within its era
 
 local m_filterEntries     = nil ---@type table|nil
 local m_activeFilterEntry = nil ---@type table|nil
@@ -84,6 +105,12 @@ end
 -- ===========================================================================
 
 local function GetCivicName(civicType)
+    -- Unrevealed civics hide their identity in vanilla (the node shows
+    -- "Not revealed"); never leak the real name through labels or ref links.
+    local kLive = GetLiveData(civicType)
+    if kLive and not kLive.IsRevealed then
+        return Locale.Lookup("LOC_CIVICS_TREE_NOT_REVEALED_CIVIC")
+    end
     local node = GetUiNode(civicType)
     local name = ControlText(node and node.NodeName)
     if name ~= "" then return name end
@@ -179,13 +206,87 @@ local function CivicKData(civicType)
 end
 
 -- ===========================================================================
+-- RELATED-CIVIC NAMING (prereqs / leads-to)
+-- An unrevealed civic hides its name but its connector line is still drawn, so
+-- we convey its tree location instead: "<era>, Tier N" (era omitted when it
+-- matches the civic we're listing from). These run at speak time, after
+-- BuildStaticMaps has populated m_civicTierByType.
+-- ===========================================================================
+
+local function IsCivicHidden(civicType)
+    local kLive = GetLiveData(civicType)
+    return kLive ~= nil and kLive.IsRevealed == false
+end
+
+---@return string[] prefix parts ("<era>", "Tier N"), possibly empty
+local function UnrevealedLocationPrefix(civicType, currentEraType)
+    local parts = {}
+    local kEntry = g_kItemDefaults[civicType]
+    if kEntry and kEntry.EraType and kEntry.EraType ~= currentEraType then
+        local era = g_kEras and g_kEras[kEntry.EraType]
+        if era and era.Description then table.insert(parts, Locale.Lookup(era.Description)) end
+    end
+    local tier = m_civicTierByType[civicType]
+    if tier then table.insert(parts, Locale.Lookup("LOC_CAI_TREE_TIER", tier)) end
+    return parts
+end
+
+-- Per-entry label (used for the individually focusable ref-link rows).
+local function GetRelatedCivicLabel(civicType, currentEraType)
+    if not IsCivicHidden(civicType) then return GetCivicName(civicType) end
+    local prefix = UnrevealedLocationPrefix(civicType, currentEraType)
+    local notRevealed = Locale.Lookup("LOC_CIVICS_TREE_NOT_REVEALED_CIVIC")
+    if #prefix > 0 then return table.concat(prefix, ", ") .. " " .. notRevealed end
+    return notRevealed
+end
+
+-- Comma-list for the tooltip: revealed civics by name, unrevealed grouped by
+-- location, e.g. "Craftsmanship, Future Era, Tier 1: Not revealed, Not revealed".
+local function FormatRelatedCivicNames(civicTypes, currentEraType)
+    local out, groupOrder, groups = {}, {}, {}
+    for _, ct in ipairs(civicTypes) do
+        if not IsCivicHidden(ct) then
+            table.insert(out, GetCivicName(ct))
+        else
+            local prefix = UnrevealedLocationPrefix(ct, currentEraType)
+            local key = table.concat(prefix, "|")
+            local g = groups[key]
+            if not g then
+                g = { prefix = prefix, count = 0 }
+                groups[key] = g
+                table.insert(groupOrder, g)
+            end
+            g.count = g.count + 1
+        end
+    end
+    local notRevealed = Locale.Lookup("LOC_CIVICS_TREE_NOT_REVEALED_CIVIC")
+    for _, g in ipairs(groupOrder) do
+        local prefixStr = table.concat(g.prefix, ", ")
+        if g.count == 1 then
+            -- "Future Era, Tier 1 Not revealed"
+            table.insert(out, prefixStr ~= "" and (prefixStr .. " " .. notRevealed) or notRevealed)
+        else
+            -- "Tier 1: Not revealed, Not revealed"
+            local items = {}
+            for _ = 1, g.count do table.insert(items, notRevealed) end
+            local joined = table.concat(items, ", ")
+            table.insert(out, prefixStr ~= "" and (prefixStr .. ": " .. joined) or joined)
+        end
+    end
+    return out
+end
+
+-- ===========================================================================
 -- LABEL / TOOLTIP
 -- ===========================================================================
 
 local function FormatRowLabel(civicType)
+    local kLive = GetLiveData(civicType)
+    if kLive and not kLive.IsRevealed then
+        return GetCivicName(civicType)
+    end
     local parts = {}
     AppendIfNonEmpty(parts, GetCivicName(civicType))
-    local kLive = GetLiveData(civicType)
     AppendIfNonEmpty(parts, GetCivicStatusLabel(kLive))
     if kLive and kLive.IsRecommended then
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_TECH_FILTER_RECOMMENDED"))
@@ -198,26 +299,55 @@ local function FormatRowLabel(civicType)
 end
 
 local function FormatRowTooltip(civicType)
-    local kData = CivicKData(civicType)
-    local unlocks = GetCivicUnlockObjects(kData)
-    local obsoletes = GetObsoletePolicyNames(kData)
-    local awards = GetAwardNames(GetModifierCache()[civicType])
+    -- Vanilla hides an unrevealed civic's cost / turns / description / boost /
+    -- obsoletes / unlocks / awards (generic node tooltip + hidden unlock stack).
+    -- But it still draws the prereq/leads-to connector lines for every node, so
+    -- the topology is visible — keep those even when unrevealed.
+    local kLive = GetLiveData(civicType)
+    local revealed = not (kLive and not kLive.IsRevealed)
 
     local parts = {}
-    AppendIfNonEmpty(parts, GetCivicCostText(civicType))
-    AppendIfNonEmpty(parts, GetCivicTurnsText(civicType))
-    AppendIfNonEmpty(parts, GetCivicProgressText(civicType))
-    AppendIfNonEmpty(parts, GetCivicDescriptionText(civicType))
-    AppendIfNonEmpty(parts, GetCivicBoostText(civicType))
-    if #obsoletes > 0 then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_OBSOLETES_HEADER", table.concat(obsoletes, ", ")))
+
+    if revealed then
+        AppendIfNonEmpty(parts, GetCivicCostText(civicType))
+        AppendIfNonEmpty(parts, GetCivicTurnsText(civicType))
+        AppendIfNonEmpty(parts, GetCivicProgressText(civicType))
+        AppendIfNonEmpty(parts, GetCivicDescriptionText(civicType))
+        AppendIfNonEmpty(parts, GetCivicBoostText(civicType))
+        local obsoletes = GetObsoletePolicyNames(CivicKData(civicType))
+        if #obsoletes > 0 then
+            AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_OBSOLETES_HEADER", table.concat(obsoletes, ", ")))
+        end
     end
-    if #unlocks > 0 then
-        local names = {}
-        for _, u in ipairs(unlocks) do table.insert(names, u.Name) end
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_UNLOCKS_HEADER", table.concat(names, ", ")))
+
+    local kStatic = g_kItemDefaults[civicType]
+    local currentEraType = kStatic and kStatic.EraType
+
+    local prereqTypes = {}
+    for _, pt in ipairs(kStatic and kStatic.Prereqs or {}) do
+        if pt ~= PREREQ_ID_TREE_START then table.insert(prereqTypes, pt) end
     end
-    AppendIfNonEmpty(parts, GetCivicAwardsText(awards))
+    if #prereqTypes > 0 then
+        local names = FormatRelatedCivicNames(prereqTypes, currentEraType)
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_PREREQS_HEADER", table.concat(names, ", ")))
+    end
+
+    local leadsTo = m_leadsToByType[civicType]
+    if leadsTo and #leadsTo > 0 then
+        local names = FormatRelatedCivicNames(leadsTo, currentEraType)
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_LEADS_TO_HEADER", table.concat(names, ", ")))
+    end
+
+    if revealed then
+        local unlocks = GetCivicUnlockObjects(CivicKData(civicType))
+        if #unlocks > 0 then
+            local names = {}
+            for _, u in ipairs(unlocks) do table.insert(names, u.Name) end
+            AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_UNLOCKS_HEADER", table.concat(names, ", ")))
+        end
+        AppendIfNonEmpty(parts, GetCivicAwardsText(GetModifierCache()[civicType]))
+    end
+
     return table.concat(parts, ", ")
 end
 
@@ -263,6 +393,12 @@ end
 local function BuildStaticMaps()
     m_leadsToByType    = {}
     m_civicIndexToType = {}
+    m_civicTierByType  = {}
+
+    -- Collect each era's distinct Column values so we can rank a civic's tier
+    -- (1-based position of its Column among the era's columns). Mirrors the
+    -- Column grouping used when building the tree/table tiers.
+    local eraColumnSet = {} ---@type table<string, table<integer, boolean>>
     for civicType, kEntry in pairs(g_kItemDefaults) do
         local row = GameInfo.Civics[civicType]
         if row then m_civicIndexToType[row.Index] = civicType end
@@ -272,6 +408,24 @@ local function BuildStaticMaps()
                 table.insert(m_leadsToByType[prereqType], civicType)
             end
         end
+        if kEntry.EraType then
+            eraColumnSet[kEntry.EraType] = eraColumnSet[kEntry.EraType] or {}
+            eraColumnSet[kEntry.EraType][kEntry.Column or 0] = true
+        end
+    end
+
+    local tierByEraColumn = {} ---@type table<string, table<integer, integer>>
+    for eraType, colSet in pairs(eraColumnSet) do
+        local cols = {}
+        for c in pairs(colSet) do table.insert(cols, c) end
+        table.sort(cols)
+        local rank = {}
+        for i, c in ipairs(cols) do rank[c] = i end
+        tierByEraColumn[eraType] = rank
+    end
+    for civicType, kEntry in pairs(g_kItemDefaults) do
+        local rank = kEntry.EraType and tierByEraColumn[kEntry.EraType]
+        m_civicTierByType[civicType] = rank and rank[kEntry.Column or 0] or nil
     end
 end
 
@@ -368,8 +522,31 @@ local function GetFocusedCivicType()
     return nil
 end
 
+-- The focusable widget for a civic in the currently active view.
+local function GetActiveCivicWidget(civicType)
+    if m_viewMode == "table" then return m_tableCivics[civicType] end
+    return m_treeCivics[civicType]
+end
+
+-- Walk a widget's ancestor chain for the enclosing tree era and tier nodes
+-- (identified by their FocusKey prefixes). Returns nil for widgets outside the
+-- tree (queue/filter rows), which the caller treats as "everything diverges".
+local function GetEnclosingEraTier(widget)
+    local era, tier
+    local node = widget
+    while node do
+        local key = node.FocusKey
+        if key then
+            if not tier and string.sub(key, 1, 5) == "tier:" then tier = node end
+            if not era and string.sub(key, 1, 4) == "era:" then era = node end
+        end
+        node = node.Parent
+    end
+    return era, tier
+end
+
 local function JumpToCivic(civicType, recordBreadcrumb)
-    local target = m_civicsByType[civicType]
+    local target = GetActiveCivicWidget(civicType)
     if not target then return end
 
     if recordBreadcrumb then
@@ -379,7 +556,20 @@ local function JumpToCivic(civicType, recordBreadcrumb)
         end
     end
 
-    Speak(Locale.Lookup("LOC_CAI_CIVICS_TREE_JUMPING", GetCivicName(civicType) or ""), true)
+    -- Tree mode: era/tier nodes are IgnoreWhenNotFocused, so focus speech won't
+    -- mention them on a jump. Fold the diverging era/tier into the spoken line,
+    -- announcing only what actually changed (compared by widget, so Tier 1 of a
+    -- different era still counts as different). Table mode gets the era for free
+    -- via the column header's natural focus speech, so it just says the civic.
+    local parts = { GetCivicName(civicType) or "" }
+    if m_viewMode == "tree" then
+        local srcEra, srcTier = GetEnclosingEraTier(mgr:GetFocusedWidget())
+        local tgtEra, tgtTier = GetEnclosingEraTier(target)
+        if tgtTier and tgtTier ~= srcTier then AppendIfNonEmpty(parts, tgtTier:GetLabel()) end
+        if tgtEra and tgtEra ~= srcEra then AppendIfNonEmpty(parts, tgtEra:GetLabel()) end
+    end
+
+    Speak(Locale.Lookup("LOC_CAI_CIVICS_TREE_JUMPING", table.concat(parts, ", ")), true)
     mgr:SetFocus(target)
 end
 
@@ -387,11 +577,11 @@ end
 -- REFERENCE LINKS + DETAIL CHILDREN
 -- ===========================================================================
 
-local function CreateRefLink(parentWidget, civicType)
+local function CreateRefLink(parentWidget, civicType, currentEraType)
     local capturedType = civicType
     local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreeRef"), "TreeItem", {
-        Label             = function() return GetCivicName(capturedType) end,
-        HiddenPredicate   = function() return m_civicsByType[capturedType] == nil end,
+        Label             = function() return GetRelatedCivicLabel(capturedType, currentEraType) end,
+        HiddenPredicate   = function() return m_treeCivics[capturedType] == nil end,
         DisabledPredicate = function() return not IsCivicRevealed(capturedType) end,
         FocusKey          = "ref:" .. tostring(capturedType),
     })
@@ -417,29 +607,33 @@ local function CreateRefLink(parentWidget, civicType)
 end
 
 local function AddCivicDetailChildren(civicItem, civicType)
-    local kData = CivicKData(civicType)
-    local unlocks = GetCivicUnlockObjects(kData)
+    -- Unlocks (and the Path bucket) are hidden for unrevealed civics, but the
+    -- prereq/leads-to buckets mirror the connector lines vanilla always draws,
+    -- so they stay regardless of reveal status.
+    local kStatic = g_kItemDefaults[civicType]
+    local currentEraType = kStatic and kStatic.EraType
 
-    -- 1) Unlocks bucket — only entries with descriptions get their own child;
-    --    each child has Shift+Enter to open Civilopedia for the unlock type.
-    local unlockChildren = {}
-    for _, unlock in ipairs(unlocks) do
-        if unlock.Description then
-            table.insert(unlockChildren, unlock)
+    -- 1) Unlocks bucket (revealed only) — only entries with descriptions get
+    --    their own child; each child has Shift+Enter Civilopedia.
+    if IsCivicRevealed(civicType) then
+        local unlockChildren = {}
+        for _, unlock in ipairs(GetCivicUnlockObjects(CivicKData(civicType))) do
+            if unlock.Description then
+                table.insert(unlockChildren, unlock)
+            end
         end
-    end
-    if #unlockChildren > 0 then
-        local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreeUnlocks"), "TreeItem", {
-            Label = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_UNLOCKS") end,
-        })
-        for _, unlock in ipairs(unlockChildren) do
-            node:AddChild(CreateUnlockChild(mgr, unlock, "CAICivicsTreeUnlock"))
+        if #unlockChildren > 0 then
+            local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreeUnlocks"), "TreeItem", {
+                Label = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_UNLOCKS") end,
+            })
+            for _, unlock in ipairs(unlockChildren) do
+                node:AddChild(CreateUnlockChild(mgr, unlock, "CAICivicsTreeUnlock"))
+            end
+            civicItem:AddChild(node)
         end
-        civicItem:AddChild(node)
     end
 
     -- 2) Prerequisites
-    local kStatic = g_kItemDefaults[civicType]
     local prereqTypes = {}
     for _, pt in ipairs(kStatic and kStatic.Prereqs or {}) do
         if pt ~= PREREQ_ID_TREE_START then table.insert(prereqTypes, pt) end
@@ -448,7 +642,7 @@ local function AddCivicDetailChildren(civicItem, civicType)
         local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreePrereqs"), "TreeItem", {
             Label = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_PREREQS") end,
         })
-        for _, pt in ipairs(prereqTypes) do CreateRefLink(node, pt) end
+        for _, pt in ipairs(prereqTypes) do CreateRefLink(node, pt, currentEraType) end
         civicItem:AddChild(node)
     end
 
@@ -458,7 +652,7 @@ local function AddCivicDetailChildren(civicItem, civicType)
         local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreeLeadsTo"), "TreeItem", {
             Label = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_LEADS_TO") end,
         })
-        for _, lt in ipairs(leadsTo) do CreateRefLink(node, lt) end
+        for _, lt in ipairs(leadsTo) do CreateRefLink(node, lt, currentEraType) end
         civicItem:AddChild(node)
     end
 
@@ -472,7 +666,7 @@ local function AddCivicDetailChildren(civicItem, civicType)
             })
             for i = 1, #path - 1 do
                 local ct = m_civicIndexToType[path[i]]
-                if ct then CreateRefLink(node, ct) end
+                if ct then CreateRefLink(node, ct, currentEraType) end
             end
             civicItem:AddChild(node)
         end
@@ -518,6 +712,7 @@ local function BuildCivicNode(civicType)
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
             Action  = function()
+                if not IsCivicRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 LuaEvents.OpenCivilopedia(capturedType)
                 return true
@@ -538,17 +733,22 @@ local function RebuildMainTree()
 
     local capture = mgr:CaptureFocusKey(m_mainTree)
     m_mainTree:ClearChildren()
-    m_civicsByType = {}
+    m_treeCivics = {}
 
     for _, era in ipairs(g_kEras) do
-        local eraCivics = {}
+        -- Group this era's filtered civics by tree Column; each distinct Column
+        -- is one prereq tier (a Column-N civic's prereqs sit in Column N-1), so
+        -- tier 1 holds the era's root civics, tier 2 their leads-to, and so on.
+        local byColumn, colValues = {}, {}
         for civicType, kEntry in pairs(g_kItemDefaults) do
             if kEntry.EraType == era.EraType and FilterMatchesCivic(civicType) then
-                table.insert(eraCivics, { civicType = civicType, row = kEntry.UITreeRow or 0 })
+                local col = kEntry.Column or 0
+                if not byColumn[col] then byColumn[col] = {}; table.insert(colValues, col) end
+                table.insert(byColumn[col], { civicType = civicType, row = kEntry.UITreeRow or 0 })
             end
         end
-        if #eraCivics > 0 then
-            table.sort(eraCivics, function(a, b) return a.row < b.row end)
+        if #colValues > 0 then
+            table.sort(colValues)
 
             local capturedDescription = era.Description
             local eraItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreeEra"), "TreeItem", {
@@ -556,16 +756,163 @@ local function RebuildMainTree()
                 FocusKey = "era:" .. tostring(era.EraType),
             })
 
-            for _, entry in ipairs(eraCivics) do
-                local widget = BuildCivicNode(entry.civicType)
-                m_civicsByType[entry.civicType] = widget
-                eraItem:AddChild(widget)
+            for tierIndex, colVal in ipairs(colValues) do
+                local tierNumber = tierIndex
+                local tierItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreeTier"), "TreeItem", {
+                    Label    = function() return Locale.Lookup("LOC_CAI_TREE_TIER", tierNumber) end,
+                    FocusKey = "tier:" .. tostring(era.EraType) .. ":" .. tostring(colVal),
+                })
+
+                local tierCivics = byColumn[colVal]
+                table.sort(tierCivics, function(a, b) return a.row < b.row end)
+                for _, entry in ipairs(tierCivics) do
+                    local widget = BuildCivicNode(entry.civicType)
+                    m_treeCivics[entry.civicType] = widget
+                    tierItem:AddChild(widget)
+                end
+
+                -- Auto-expanded: expanding the era reveals each tier's civics
+                -- directly, without a separate expand step per tier.
+                tierItem:Expand(true)
+                eraItem:AddChild(tierItem)
             end
+
+            -- Whenever the era is (re-)expanded, force every tier open. This
+            -- keeps tiers visible even after a recursive collapse closes them.
+            eraItem:On("expanded", function(self)
+                for _, tier in ipairs(self.Children) do
+                    tier:Expand(true)
+                end
+            end)
+
             m_mainTree:AddChild(eraItem)
         end
     end
 
     mgr:RestoreFocus(m_mainTree, capture)
+end
+
+-- ===========================================================================
+-- TABLE VIEW (eras = columns, tier = a Column-group within an era, cells =
+-- civic Buttons stacked by UITreeRow). A sibling unlocks list mirrors the
+-- focused civic's described unlocks.
+-- ===========================================================================
+
+-- Rebuild the unlocks list to mirror the focused civic. Focus stays on the
+-- table cell; the list is a passive sibling, so no capture/restore is needed.
+local function RebuildUnlocksList(civicType)
+    if not m_unlocksList then return end
+    m_unlocksList:ClearChildren()
+    if not civicType then return end
+    if not IsCivicRevealed(civicType) then return end
+    for _, unlock in ipairs(GetCivicUnlockObjects(CivicKData(civicType))) do
+        if unlock.Description then
+            m_unlocksList:AddChild(CreateUnlockChild(mgr, unlock, "CAICivicsTableUnlock"))
+        end
+    end
+end
+
+local function BuildCivicCell(civicType)
+    local capturedType = civicType
+    local cell = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTableCivic"), "Button", {
+        Label             = function() return FormatRowLabel(capturedType) end,
+        Tooltip           = function() return FormatRowTooltip(capturedType) end,
+        DisabledPredicate = function()
+            local node = GetUiNode(capturedType)
+            if node and node.Top and node.Top:IsDisabled() then return true end
+            return not CanResearch(capturedType)
+        end,
+        FocusKey          = "civic:" .. tostring(capturedType),
+    })
+    cell:SetFocusSound("Main_Menu_Mouse_Over")
+
+    cell:On("activate", function(w)
+        if w:IsDisabled() then return end
+        ActivateSetCurrent(capturedType)
+    end)
+
+    -- Keep the unlocks list in step with the focused civic.
+    cell:On("focus_enter", function(w)
+        if w:IsFocused() then RebuildUnlocksList(capturedType) end
+    end)
+
+    cell:AddInputBindings({
+        {
+            Key       = Keys.VK_RETURN,
+            IsControl = true,
+            MSG       = KeyEvents.KeyUp,
+            Action    = function()
+                if not CanResearch(capturedType) then return true end
+                ActivateAppendToQueue(capturedType)
+                return true
+            end,
+        },
+        {
+            Key     = Keys.VK_RETURN,
+            IsShift = true,
+            MSG     = KeyEvents.KeyUp,
+            Action  = function()
+                if not IsCivicRevealed(capturedType) then return true end
+                if IsTutorialRunning and IsTutorialRunning() then return true end
+                LuaEvents.OpenCivilopedia(capturedType)
+                return true
+            end,
+        },
+    })
+    return cell
+end
+
+local function RebuildTableView()
+    if not m_tableView then return end
+
+    local capture = mgr:CaptureFocusKey(m_tableView)
+    m_tableView:ClearChildren()
+    m_tableCivics = {}
+
+    for _, era in ipairs(g_kEras) do
+        -- Group this era's filtered civics by their tree Column; each distinct
+        -- Column becomes one side-by-side tier, ordered left to right.
+        local byColumn, colValues = {}, {}
+        for civicType, kEntry in pairs(g_kItemDefaults) do
+            if kEntry.EraType == era.EraType and FilterMatchesCivic(civicType) then
+                local col = kEntry.Column or 0
+                if not byColumn[col] then byColumn[col] = {}; table.insert(colValues, col) end
+                table.insert(byColumn[col], { civicType = civicType, row = kEntry.UITreeRow or 0 })
+            end
+        end
+        if #colValues > 0 then
+            table.sort(colValues)
+            local capturedDescription = era.Description
+            local column = m_tableView:AddColumn({
+                header = function() return Locale.Lookup(capturedDescription) end,
+                width  = #colValues,
+            })
+            for tierIndex, colVal in ipairs(colValues) do
+                local tierCivics = byColumn[colVal]
+                table.sort(tierCivics, function(a, b) return a.row < b.row end)
+                for _, entry in ipairs(tierCivics) do
+                    local cell = BuildCivicCell(entry.civicType)
+                    m_tableCivics[entry.civicType] = cell
+                    m_tableView:AddItem(column, tierIndex, cell)
+                end
+            end
+        end
+    end
+
+    mgr:RestoreFocus(m_tableView, capture)
+end
+
+-- Rebuild whichever civic views exist, keeping both in sync with game/filter
+-- state so jumps land correctly regardless of the active mode.
+local function RebuildCivicsViews()
+    RebuildMainTree()
+    RebuildTableView()
+end
+
+local function ToggleViewMode()
+    m_viewMode = (m_viewMode == "tree") and "table" or "tree"
+    local active = (m_viewMode == "table") and m_tableView or m_mainTree
+    if active then mgr:SetFocus(active) end
 end
 
 -- ===========================================================================
@@ -592,6 +939,7 @@ local function CreateQueueButton(civicType, isCurrent)
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
             Action  = function()
+                if not IsCivicRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 LuaEvents.OpenCivilopedia(capturedType)
                 return true
@@ -640,7 +988,7 @@ local function ResetFilterToNone()
     if OnFilterClicked then
         OnFilterClicked({ Func = nil, Description = "LOC_TECH_FILTER_NONE" })
     end
-    RebuildMainTree()
+    RebuildCivicsViews()
 end
 
 local function CreateFilterResultButton(civicType)
@@ -679,6 +1027,7 @@ local function CreateFilterResultButton(civicType)
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
             Action  = function()
+                if not IsCivicRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 LuaEvents.OpenCivilopedia(capturedType)
                 return true
@@ -694,7 +1043,7 @@ local function OpenFilterResults(entry)
     m_activeFilterEntry = entry
     m_activeFilterFunc  = entry.Func
     if OnFilterClicked then OnFilterClicked(entry.VanillaEntry) end
-    RebuildMainTree()
+    RebuildCivicsViews()
 
     m_filterResults = mgr:CreateWidget(FILTER_RESULTS_ID, "List", {
         Label = function()
@@ -707,10 +1056,13 @@ local function OpenFilterResults(entry)
         local eraCivics = {}
         for civicType, kEntry in pairs(g_kItemDefaults) do
             if kEntry.EraType == era.EraType and FilterMatchesCivic(civicType) then
-                table.insert(eraCivics, { civicType = civicType, row = kEntry.UITreeRow or 0 })
+                table.insert(eraCivics, { civicType = civicType, col = kEntry.Column or 0, row = kEntry.UITreeRow or 0 })
             end
         end
-        table.sort(eraCivics, function(a, b) return a.row < b.row end)
+        table.sort(eraCivics, function(a, b)
+            if a.col ~= b.col then return a.col < b.col end
+            return a.row < b.row
+        end)
         for _, e in ipairs(eraCivics) do
             m_filterResults:AddChild(CreateFilterResultButton(e.civicType))
         end
@@ -834,10 +1186,11 @@ local function EnsurePanelBuilt()
     m_panel:AddChild(m_filterList)
     BuildFilterList()
 
-    -- 3) Main tree
+    -- 3) Main tree (hidden in table mode)
     m_mainTree = mgr:CreateWidget(MAIN_TREE_ID, "Tree", {
-        Label       = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_MAIN_LIST") end,
-        SearchDepth = 2,
+        Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_MAIN_LIST") end,
+        HiddenPredicate = function() return m_viewMode ~= "tree" end,
+        SearchDepth     = 3,
     })
     m_mainTree:AddInputBindings({
         {
@@ -855,7 +1208,25 @@ local function EnsurePanelBuilt()
     })
     m_panel:AddChild(m_mainTree)
 
-    -- 4) Government summary (read-only edit)
+    -- 4) Table view (hidden in tree mode): eras = columns, tiers = Column-groups
+    m_tableView = mgr:CreateWidget(TABLE_VIEW_ID, "Table", {
+        Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_TABLE") end,
+        HiddenPredicate = function() return m_viewMode ~= "table" end,
+    })
+    m_panel:AddChild(m_tableView)
+
+    -- 5) Unlocks list beside the table; mirrors the focused civic (table mode
+    --    only, and only when the focused civic has described unlocks)
+    m_unlocksList = mgr:CreateWidget(UNLOCKS_LIST_ID, "List", {
+        Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_UNLOCKS") end,
+        HiddenPredicate = function(w)
+            return m_viewMode ~= "table" or not w.Children or #w.Children == 0
+        end,
+        SearchDepth     = 0,
+    })
+    m_panel:AddChild(m_unlocksList)
+
+    -- 6) Government summary (read-only edit)
     m_govEdit = mgr:CreateWidget(GOV_EDIT_ID, "EditBox", {
         Label      = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_GOVERNMENT") end,
         AlwaysEdit = true,
@@ -863,7 +1234,19 @@ local function EnsurePanelBuilt()
     })
     m_panel:AddChild(m_govEdit)
 
-    RebuildMainTree()
+    -- 7) View toggle — must remain the last child. Label reflects the mode it
+    --    switches *to*.
+    m_changeViewBtn = mgr:CreateWidget(CHANGE_VIEW_ID, "Button", {
+        Label = function()
+            return Locale.Lookup(m_viewMode == "table"
+                and "LOC_CAI_TREE_SWITCH_TO_TREE"
+                or  "LOC_CAI_TREE_SWITCH_TO_TABLE")
+        end,
+    })
+    m_changeViewBtn:On("activate", function() ToggleViewMode() end)
+    m_panel:AddChild(m_changeViewBtn)
+
+    RebuildCivicsViews()
     RebuildQueueList()
     RefreshGovernmentEdit()
 end
@@ -875,7 +1258,8 @@ local function PushPanel()
 
     local playerCulture = GetLocalPlayerCulture()
     local hasCurrent = playerCulture and playerCulture:GetProgressingCivic() ~= -1
-    local focusChild = hasCurrent and m_queueList or m_mainTree
+    local activeView = (m_viewMode == "table") and m_tableView or m_mainTree
+    local focusChild = hasCurrent and m_queueList or activeView
     mgr:Push(m_panel, { focus = focusChild })
 end
 
@@ -888,11 +1272,17 @@ local function OnPanelClosedCAI()
     m_queueList         = nil
     m_filterList        = nil
     m_mainTree          = nil
+    m_tableView         = nil
+    m_unlocksList       = nil
     m_govEdit           = nil
+    m_changeViewBtn     = nil
     m_filterResults     = nil
-    m_civicsByType      = {}
+    m_viewMode          = "table"
+    m_treeCivics        = {}
+    m_tableCivics       = {}
     m_leadsToByType     = {}
     m_civicIndexToType  = {}
+    m_civicTierByType   = {}
     m_lastPlayerData    = nil
     m_filterEntries     = nil
     m_activeFilterEntry = nil
@@ -973,7 +1363,7 @@ end)
 
 Events.CivicCompleted.Add(function(ePlayer)
     if ePlayer ~= Game.GetLocalPlayer() or not IsPanelOnStack() then return end
-    RebuildMainTree()
+    RebuildCivicsViews()
     RebuildQueueList()
 end)
 

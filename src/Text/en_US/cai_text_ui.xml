@@ -726,11 +726,14 @@
     <Row Tag="LOC_CAI_GOVERNMENT_NO_AVAILABLE_POLICIES" Language="en_US">
       <Text>No available policies</Text>
     </Row>
-    <Row Tag="LOC_CAI_GOVERNMENT_POLICY_TYPE" Language="en_US">
-      <Text>Type: {1_Type}</Text>
+    <Row Tag="LOC_CAI_GOVERNMENT_DARK_AGE_POLICY" Language="en_US">
+      <Text>Dark Age</Text>
     </Row>
-    <Row Tag="LOC_CAI_GOVERNMENT_DESCRIPTION" Language="en_US">
-      <Text>Description: {1_Description}</Text>
+    <Row Tag="LOC_CAI_GOVERNMENT_GOLDEN_AGE_POLICY" Language="en_US">
+      <Text>Golden Age</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_CONGRESS_LOCKED" Language="en_US">
+      <Text>Locked during the World Congress</Text>
     </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_SLOTS" Language="en_US">
       <Text>Slots: {1_Slots}</Text>
@@ -814,6 +817,81 @@
     </Row>
     <Row Tag="LOC_CAI_DIPLOMACYDEAL_INVENTORY" Language="en_US">
       <Text>Inventory</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACYDEAL_ADDED_YOUR_SIDE" Language="en_US">
+      <Text>Added to your side</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACYDEAL_REMOVED_YOUR_SIDE" Language="en_US">
+      <Text>Removed from your side</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACYDEAL_ADDED_THEIR_SIDE" Language="en_US">
+      <Text>Added to their side</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACYDEAL_REMOVED_THEIR_SIDE" Language="en_US">
+      <Text>Removed from their side</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACYDEAL_STOP_ASKING_HINT" Language="en_US">
+      <Text>Can mark unacceptable to stop the AI asking for this</Text>
+    </Row>
+
+    <!-- Diplomacy intel: Alliance tab -->
+    <Row Tag="LOC_CAI_DIPLOMACY_ALLIANCE_LEVEL" Language="en_US">
+      <Text>Alliance Level: {1_Level}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_ALLIANCE_POINTS_LINE" Language="en_US">
+      <Text>Alliance Points: {1_Current} of {2_Needed}, {3_PerTurn} per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_ALLIANCE_POINTS_LINE_NO_RATE" Language="en_US">
+      <Text>Alliance Points: {1_Current} of {2_Needed}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_ALLIANCE_POINTS_MAX" Language="en_US">
+      <Text>Alliance Points: Maximum</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_CURRENT_ALLIANCE" Language="en_US">
+      <Text>Current alliance</Text>
+    </Row>
+
+    <!-- Diplomacy intel: Emergency tab -->
+    <Row Tag="LOC_CAI_DIPLOMACY_EMERGENCY_TARGETING_YOU" Language="en_US">
+      <Text>Emergencies targeting you</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_EMERGENCY_PARTICIPATING" Language="en_US">
+      <Text>Emergencies you are participating in</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_EMERGENCY_ENTRY" Language="en_US">
+      <Text>{1_Name}, {2_Status}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_EMERGENCY_TURNS_LEFT" Language="en_US">
+      <Text>{1_Turns} turns left</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_EMERGENCY_NONE" Language="en_US">
+      <Text>No emergencies involving this player</Text>
+    </Row>
+
+    <!-- Diplomacy intel: Grievances tab -->
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCES_AGAINST_YOU" Language="en_US">
+      <Text>Grievances against you: {1_Value}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCES_AGAINST_THEM" Language="en_US">
+      <Text>Grievances against them: {1_Value}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_PER_TURN" Language="en_US">
+      <Text>{1_Rate} per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_BREAKDOWN" Language="en_US">
+      <Text>Grievance change per turn: {1_Rate}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_LOG" Language="en_US">
+      <Text>Grievance log</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_LOG_ENTRY" Language="en_US">
+      <Text>Turn {1_Turn}: {2_Description} ({3_Amount}, {4_Actor})</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_BY_YOU" Language="en_US">
+      <Text>caused by you</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_BY_THEM" Language="en_US">
+      <Text>caused by them</Text>
     </Row>
 
     <Row Tag="LOC_CAI_CITY_PANEL" Language="en_US">
@@ -1183,6 +1261,12 @@
 <Row Tag="LOC_CAI_RESEARCH_UNLOCKS_HEADER" Language="en_US">
       <Text>Unlocks: {1_List}</Text>
     </Row>
+    <Row Tag="LOC_CAI_RESEARCH_PREREQS_HEADER" Language="en_US">
+      <Text>Required technologies: {1_List}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_LEADS_TO_HEADER" Language="en_US">
+      <Text>Leads to: {1_List}</Text>
+    </Row>
     <Row Tag="LOC_CAI_RESEARCH_ALLIANCE_BONUS" Language="en_US">
       <Text>Alliance research bonus: {1_Detail}</Text>
     </Row>
@@ -1260,6 +1344,12 @@
     <Row Tag="LOC_CAI_CIVIC_OBSOLETES_HEADER" Language="en_US">
       <Text>Makes obsolete: {1_List}</Text>
     </Row>
+    <Row Tag="LOC_CAI_CIVIC_PREREQS_HEADER" Language="en_US">
+      <Text>Required civics: {1_List}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_LEADS_TO_HEADER" Language="en_US">
+      <Text>Leads to: {1_List}</Text>
+    </Row>
 
     <!-- Civics tree -->
     <Row Tag="LOC_CAI_CIVICS_TREE_QUEUE_LIST" Language="en_US">
@@ -1267,6 +1357,19 @@
     </Row>
     <Row Tag="LOC_CAI_CIVICS_TREE_MAIN_LIST" Language="en_US">
       <Text>All civics</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVICS_TREE_TABLE" Language="en_US">
+      <Text>Civics table</Text>
+    </Row>
+    <!-- Shared by civics + tech trees (see LOC_CAI_TREE_* below). -->
+    <Row Tag="LOC_CAI_TREE_TIER" Language="en_US">
+      <Text>Tier {1_Number}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TREE_SWITCH_TO_TABLE" Language="en_US">
+      <Text>Switch to table view</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TREE_SWITCH_TO_TREE" Language="en_US">
+      <Text>Switch to tree view</Text>
     </Row>
     <Row Tag="LOC_CAI_CIVICS_TREE_FILTER" Language="en_US">
       <Text>Filter</Text>
@@ -1316,6 +1419,9 @@
     </Row>
     <Row Tag="LOC_CAI_TECH_TREE_MAIN_LIST" Language="en_US">
       <Text>All technologies</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_TREE_TABLE" Language="en_US">
+      <Text>Technology table</Text>
     </Row>
     <Row Tag="LOC_CAI_TECH_TREE_FILTER" Language="en_US">
       <Text>Filter</Text>
@@ -2614,6 +2720,9 @@
     </Row>
     <Row Tag="LOC_CAI_PEDIA_HISTORY_END" Language="en_US">
       <Text>Already at the newest history item</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_JUMPING" Language="en_US">
+      <Text>Jumping to {1_Name}</Text>
     </Row>
 
     <!-- Options screen feedback -->

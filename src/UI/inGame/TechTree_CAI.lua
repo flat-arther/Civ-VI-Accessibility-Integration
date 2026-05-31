@@ -1,8 +1,19 @@
 include("caiUtils")
-include("TechTree")
 include("inGameHelpers_CAI")
 include("ToolTipHelper")
 include("Civ6Common")
+
+-- Expansion-aware include chain. XP1 adds AllianceResearchSupport (per-node
+-- alliance research icon/tooltip); XP2 includes XP1 and adds revealed-only
+-- search. CAI replaces the screen context outright, so it must load the exact
+-- variant vanilla would.
+if IsExpansion2Active and IsExpansion2Active() then
+    include("TechTree_Expansion2")
+elseif IsExpansion1Active and IsExpansion1Active() then
+    include("TechTree_Expansion1")
+else
+    include("TechTree")
+end
 
 local mgr                 = ExposedMembers.CAI_UIManager
 
@@ -10,6 +21,9 @@ local PANEL_ID            = "CAITechTree_Panel"
 local QUEUE_LIST_ID       = "CAITechTree_QueueList"
 local FILTER_LIST_ID      = "CAITechTree_FilterList"
 local MAIN_TREE_ID        = "CAITechTree_MainTree"
+local TABLE_VIEW_ID       = "CAITechTree_TableView"
+local UNLOCKS_LIST_ID     = "CAITechTree_UnlocksList"
+local CHANGE_VIEW_ID      = "CAITechTree_ChangeView"
 local FILTER_RESULTS_ID   = "CAITechTree_FilterResults"
 
 -- ===========================================================================
@@ -19,11 +33,25 @@ local m_panel             = nil ---@type UIWidget|nil
 local m_queueList         = nil ---@type UIWidget|nil
 local m_filterList        = nil ---@type UIWidget|nil
 local m_mainTree          = nil ---@type UIWidget|nil
+local m_tableView         = nil ---@type UIWidget|nil
+local m_unlocksList       = nil ---@type UIWidget|nil
+local m_changeViewBtn     = nil ---@type UIWidget|nil
 local m_filterResults     = nil ---@type UIWidget|nil
 
-local m_techsByType       = {} ---@type table<string, UIWidget>
+-- "table" (default) or "tree". The toggle button swaps between them; the
+-- inactive view is hidden so navigation skips it.
+local m_viewMode          = "table"
+
+local m_treeTechs         = {} ---@type table<string, UIWidget> techType -> tree node
+local m_tableTechs        = {} ---@type table<string, UIWidget> techType -> table cell
 local m_leadsToByType     = {} ---@type table<string, string[]>
 local m_techIndexToType   = {} ---@type table<integer, string>
+local m_techTierByType    = {} ---@type table<string, integer> techType -> tier number within its era
+-- Prereq-based column per tech (1 = no in-era prereqs). Computed by CAI rather
+-- than read from vanilla's kEntry.Column, because the base tech tree lays out
+-- columns by COST, not prerequisites. We mirror the civics tree (and vanilla's
+-- "PREREQ" layout method) so tiers reflect the research dependency chain.
+local m_techColumnByType  = {} ---@type table<string, integer> techType -> prereq column within its era
 
 local m_filterEntries     = nil ---@type table|nil
 local m_activeFilterEntry = nil ---@type table|nil
@@ -73,6 +101,12 @@ end
 -- ===========================================================================
 
 local function GetTechName(techType)
+    -- Unrevealed techs hide their identity in vanilla (the node shows
+    -- "Not revealed"); never leak the real name through labels or ref links.
+    local kLive = GetLiveData(techType)
+    if kLive and not kLive.IsRevealed then
+        return Locale.Lookup("LOC_TECH_TREE_NOT_REVEALED_TECH")
+    end
     local node = GetUiNode(techType)
     local name = ControlText(node and node.NodeName)
     if name ~= "" then return name end
@@ -163,8 +197,91 @@ local function GetTechQueuePosition(techType)
     return nil
 end
 
+-- XP1/XP2 only: the expansion's PopulateNode populates node.Alliance /
+-- node.AllianceIcon when an ally has or is researching this tech. Mirrors the
+-- research chooser's alliance tooltip line.
+local function GetAllianceText(techType)
+    local node = GetUiNode(techType)
+    if not node or not node.Alliance or not node.AllianceIcon then return nil end
+    if ControlIsHidden(node.Alliance) then return nil end
+    local tip = NormalizeFormattedText(node.AllianceIcon:GetToolTipString())
+    if tip == "" then return nil end
+    return Locale.Lookup("LOC_CAI_RESEARCH_ALLIANCE_BONUS", tip)
+end
+
 local function TechKData(techType)
     return { TechType = techType, Type = techType }
+end
+
+-- ===========================================================================
+-- RELATED-TECH NAMING (prereqs / leads-to)
+-- An unrevealed tech hides its name but its connector line is still drawn, so
+-- we convey its tree location instead: "<era>, Tier N" (era omitted when it
+-- matches the tech we're listing from). These run at speak time, after
+-- BuildStaticMaps has populated m_techTierByType.
+-- ===========================================================================
+
+local function IsTechHidden(techType)
+    local kLive = GetLiveData(techType)
+    return kLive ~= nil and kLive.IsRevealed == false
+end
+
+---@return string[] prefix parts ("<era>", "Tier N"), possibly empty
+local function UnrevealedLocationPrefix(techType, currentEraType)
+    local parts = {}
+    local kEntry = g_kItemDefaults[techType]
+    if kEntry and kEntry.EraType and kEntry.EraType ~= currentEraType then
+        local era = g_kEras and g_kEras[kEntry.EraType]
+        if era and era.Description then table.insert(parts, Locale.Lookup(era.Description)) end
+    end
+    local tier = m_techTierByType[techType]
+    if tier then table.insert(parts, Locale.Lookup("LOC_CAI_TREE_TIER", tier)) end
+    return parts
+end
+
+-- Per-entry label (used for the individually focusable ref-link rows).
+local function GetRelatedTechLabel(techType, currentEraType)
+    if not IsTechHidden(techType) then return GetTechName(techType) end
+    local prefix = UnrevealedLocationPrefix(techType, currentEraType)
+    local notRevealed = Locale.Lookup("LOC_TECH_TREE_NOT_REVEALED_TECH")
+    if #prefix > 0 then return table.concat(prefix, ", ") .. " " .. notRevealed end
+    return notRevealed
+end
+
+-- Comma-list for the tooltip: revealed techs by name, unrevealed grouped by
+-- location, e.g. "Pottery, Future Era, Tier 1: Not revealed, Not revealed".
+local function FormatRelatedTechNames(techTypes, currentEraType)
+    local out, groupOrder, groups = {}, {}, {}
+    for _, tt in ipairs(techTypes) do
+        if not IsTechHidden(tt) then
+            table.insert(out, GetTechName(tt))
+        else
+            local prefix = UnrevealedLocationPrefix(tt, currentEraType)
+            local key = table.concat(prefix, "|")
+            local g = groups[key]
+            if not g then
+                g = { prefix = prefix, count = 0 }
+                groups[key] = g
+                table.insert(groupOrder, g)
+            end
+            g.count = g.count + 1
+        end
+    end
+    local notRevealed = Locale.Lookup("LOC_TECH_TREE_NOT_REVEALED_TECH")
+    for _, g in ipairs(groupOrder) do
+        local prefixStr = table.concat(g.prefix, ", ")
+        if g.count == 1 then
+            -- "Future Era, Tier 1 Not revealed"
+            table.insert(out, prefixStr ~= "" and (prefixStr .. " " .. notRevealed) or notRevealed)
+        else
+            -- "Tier 1: Not revealed, Not revealed"
+            local items = {}
+            for _ = 1, g.count do table.insert(items, notRevealed) end
+            local joined = table.concat(items, ", ")
+            table.insert(out, prefixStr ~= "" and (prefixStr .. ": " .. joined) or joined)
+        end
+    end
+    return out
 end
 
 -- ===========================================================================
@@ -172,9 +289,12 @@ end
 -- ===========================================================================
 
 local function FormatRowLabel(techType)
+    local kLive = GetLiveData(techType)
+    if kLive and not kLive.IsRevealed then
+        return GetTechName(techType)
+    end
     local parts = {}
     AppendIfNonEmpty(parts, GetTechName(techType))
-    local kLive = GetLiveData(techType)
     AppendIfNonEmpty(parts, GetTechStatusLabel(kLive))
     if kLive and kLive.IsRecommended then
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_TECH_FILTER_RECOMMENDED"))
@@ -187,27 +307,55 @@ local function FormatRowLabel(techType)
 end
 
 local function FormatRowTooltip(techType)
-    local kData = TechKData(techType)
-    local group = GetTechUnlockObjects(kData)
+    -- Vanilla hides an unrevealed tech's cost / turns / description / boost /
+    -- reveals / unlocks (generic node tooltip + hidden unlock stack). But it
+    -- still draws the prereq/leads-to connector lines for every node, so the
+    -- topology is visible — keep those even when unrevealed.
+    local kLive = GetLiveData(techType)
+    local revealed = not (kLive and not kLive.IsRevealed)
 
     local parts = {}
-    AppendIfNonEmpty(parts, GetTechCostText(techType))
-    AppendIfNonEmpty(parts, GetTechTurnsText(techType))
-    AppendIfNonEmpty(parts, GetTechProgressText(techType))
-    AppendIfNonEmpty(parts, GetTechDescriptionText(techType))
-    AppendIfNonEmpty(parts, GetTechBoostText(techType))
-    if #group.Reveals > 0 then
-        local names = {}
-        for _, r in ipairs(group.Reveals) do
-            table.insert(names, Locale.Lookup("LOC_TOOLTIP_UNLOCKS_RESOURCE", r.Name))
+
+    if revealed then
+        AppendIfNonEmpty(parts, GetTechCostText(techType))
+        AppendIfNonEmpty(parts, GetTechTurnsText(techType))
+        AppendIfNonEmpty(parts, GetTechProgressText(techType))
+        AppendIfNonEmpty(parts, GetTechDescriptionText(techType))
+        AppendIfNonEmpty(parts, GetTechBoostText(techType))
+        AppendIfNonEmpty(parts, GetAllianceText(techType))
+        local group = GetTechUnlockObjects(TechKData(techType))
+        if #group.Reveals > 0 then
+            local names = {}
+            for _, r in ipairs(group.Reveals) do
+                table.insert(names, Locale.Lookup("LOC_TOOLTIP_UNLOCKS_RESOURCE", r.Name))
+            end
+            AppendIfNonEmpty(parts, table.concat(names, ", "))
         end
-        AppendIfNonEmpty(parts, table.concat(names, ", "))
+        if #group.Unlocks > 0 then
+            local names = {}
+            for _, u in ipairs(group.Unlocks) do table.insert(names, u.Name) end
+            AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_UNLOCKS_HEADER", table.concat(names, ", ")))
+        end
     end
-    if #group.Unlocks > 0 then
-        local names = {}
-        for _, u in ipairs(group.Unlocks) do table.insert(names, u.Name) end
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_UNLOCKS_HEADER", table.concat(names, ", ")))
+
+    local kStatic = g_kItemDefaults[techType]
+    local currentEraType = kStatic and kStatic.EraType
+
+    local prereqTypes = {}
+    for _, pt in ipairs(kStatic and kStatic.Prereqs or {}) do
+        if pt ~= PREREQ_ID_TREE_START then table.insert(prereqTypes, pt) end
     end
+    if #prereqTypes > 0 then
+        local names = FormatRelatedTechNames(prereqTypes, currentEraType)
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_PREREQS_HEADER", table.concat(names, ", ")))
+    end
+
+    local leadsTo = m_leadsToByType[techType]
+    if leadsTo and #leadsTo > 0 then
+        local names = FormatRelatedTechNames(leadsTo, currentEraType)
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_LEADS_TO_HEADER", table.concat(names, ", ")))
+    end
+
     return table.concat(parts, ", ")
 end
 
@@ -252,9 +400,37 @@ end
 -- STATIC DATA
 -- ===========================================================================
 
+-- Prereq-based column for a tech, memoized into m_techColumnByType. A tech with
+-- no in-era prerequisites sits in column 1; every other tech is placed one
+-- column past its deepest in-era prereq. Cross-era prereqs do not push the
+-- column (each era restarts at 1), matching vanilla's civics layout and the
+-- tech tree's own "PREREQ" layout method (1 + in-era prereq chain depth).
+local function ComputeTechColumn(techType)
+    local cached = m_techColumnByType[techType]
+    if cached then return cached end
+    local kEntry = g_kItemDefaults[techType]
+    if not kEntry then return 1 end
+    local maxPrereqCol = 0
+    for _, prereqType in ipairs(kEntry.Prereqs or {}) do
+        if prereqType ~= PREREQ_ID_TREE_START then
+            local kPrereq = g_kItemDefaults[prereqType]
+            if kPrereq and kPrereq.EraType == kEntry.EraType then
+                local c = ComputeTechColumn(prereqType)
+                if c > maxPrereqCol then maxPrereqCol = c end
+            end
+        end
+    end
+    local col = maxPrereqCol + 1
+    m_techColumnByType[techType] = col
+    return col
+end
+
 local function BuildStaticMaps()
     m_leadsToByType   = {}
     m_techIndexToType = {}
+    m_techTierByType  = {}
+    m_techColumnByType = {}
+
     for techType, kEntry in pairs(g_kItemDefaults) do
         local row = GameInfo.Technologies[techType]
         if row then m_techIndexToType[row.Index] = techType end
@@ -264,6 +440,34 @@ local function BuildStaticMaps()
                 table.insert(m_leadsToByType[prereqType], techType)
             end
         end
+    end
+
+    -- Compute each tech's prereq-based column (the basis for its tier).
+    for techType in pairs(g_kItemDefaults) do ComputeTechColumn(techType) end
+
+    -- Collect each era's distinct prereq columns so we can rank a tech's tier
+    -- (1-based position of its column among the era's columns). Prereq columns
+    -- are normally contiguous, but rank-compression keeps tiers gap-free.
+    local eraColumnSet = {} ---@type table<string, table<integer, boolean>>
+    for techType, kEntry in pairs(g_kItemDefaults) do
+        if kEntry.EraType then
+            eraColumnSet[kEntry.EraType] = eraColumnSet[kEntry.EraType] or {}
+            eraColumnSet[kEntry.EraType][m_techColumnByType[techType] or 1] = true
+        end
+    end
+
+    local tierByEraColumn = {} ---@type table<string, table<integer, integer>>
+    for eraType, colSet in pairs(eraColumnSet) do
+        local cols = {}
+        for c in pairs(colSet) do table.insert(cols, c) end
+        table.sort(cols)
+        local rank = {}
+        for i, c in ipairs(cols) do rank[c] = i end
+        tierByEraColumn[eraType] = rank
+    end
+    for techType, kEntry in pairs(g_kItemDefaults) do
+        local rank = kEntry.EraType and tierByEraColumn[kEntry.EraType]
+        m_techTierByType[techType] = rank and rank[m_techColumnByType[techType] or 1] or nil
     end
 end
 
@@ -352,8 +556,31 @@ local function GetFocusedTechType()
     return nil
 end
 
+-- The focusable widget for a tech in the currently active view.
+local function GetActiveTechWidget(techType)
+    if m_viewMode == "table" then return m_tableTechs[techType] end
+    return m_treeTechs[techType]
+end
+
+-- Walk a widget's ancestor chain for the enclosing tree era and tier nodes
+-- (identified by their FocusKey prefixes). Returns nil for widgets outside the
+-- tree (queue/filter rows), which the caller treats as "everything diverges".
+local function GetEnclosingEraTier(widget)
+    local era, tier
+    local node = widget
+    while node do
+        local key = node.FocusKey
+        if key then
+            if not tier and string.sub(key, 1, 5) == "tier:" then tier = node end
+            if not era and string.sub(key, 1, 4) == "era:" then era = node end
+        end
+        node = node.Parent
+    end
+    return era, tier
+end
+
 local function JumpToTech(techType, recordBreadcrumb)
-    local target = m_techsByType[techType]
+    local target = GetActiveTechWidget(techType)
     if not target then return end
 
     if recordBreadcrumb then
@@ -363,7 +590,20 @@ local function JumpToTech(techType, recordBreadcrumb)
         end
     end
 
-    Speak(Locale.Lookup("LOC_CAI_TECH_TREE_JUMPING", GetTechName(techType) or ""), true)
+    -- Tree mode: era/tier nodes are IgnoreWhenNotFocused, so focus speech won't
+    -- mention them on a jump. Fold the diverging era/tier into the spoken line,
+    -- announcing only what actually changed (compared by widget, so Tier 1 of a
+    -- different era still counts as different). Table mode gets the era for free
+    -- via the column header's natural focus speech, so it just says the tech.
+    local parts = { GetTechName(techType) or "" }
+    if m_viewMode == "tree" then
+        local srcEra, srcTier = GetEnclosingEraTier(mgr:GetFocusedWidget())
+        local tgtEra, tgtTier = GetEnclosingEraTier(target)
+        if tgtTier and tgtTier ~= srcTier then AppendIfNonEmpty(parts, tgtTier:GetLabel()) end
+        if tgtEra and tgtEra ~= srcEra then AppendIfNonEmpty(parts, tgtEra:GetLabel()) end
+    end
+
+    Speak(Locale.Lookup("LOC_CAI_TECH_TREE_JUMPING", table.concat(parts, ", ")), true)
     mgr:SetFocus(target)
 end
 
@@ -371,11 +611,11 @@ end
 -- REF LINKS + DETAIL CHILDREN
 -- ===========================================================================
 
-local function CreateRefLink(parentWidget, techType)
+local function CreateRefLink(parentWidget, techType, currentEraType)
     local capturedType = techType
     local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreeRef"), "TreeItem", {
-        Label             = function() return GetTechName(capturedType) end,
-        HiddenPredicate   = function() return m_techsByType[capturedType] == nil end,
+        Label             = function() return GetRelatedTechLabel(capturedType, currentEraType) end,
+        HiddenPredicate   = function() return m_treeTechs[capturedType] == nil end,
         DisabledPredicate = function() return not IsTechRevealed(capturedType) end,
         FocusKey          = "ref:" .. tostring(capturedType),
     })
@@ -401,28 +641,32 @@ local function CreateRefLink(parentWidget, techType)
 end
 
 local function AddTechDetailChildren(techItem, techType)
-    local kData = TechKData(techType)
-    local group = GetTechUnlockObjects(kData)
+    -- Unlocks (and the Path bucket) are hidden for unrevealed techs, but the
+    -- prereq/leads-to buckets mirror the connector lines vanilla always draws,
+    -- so they stay regardless of reveal status.
+    local kStatic = g_kItemDefaults[techType]
+    local currentEraType = kStatic and kStatic.EraType
 
-    -- 1) Unlocks bucket
-    local unlockChildren = {}
-    for _, unlock in ipairs(group.Unlocks) do
-        if unlock.Description then
-            table.insert(unlockChildren, unlock)
+    -- 1) Unlocks bucket (revealed only)
+    if IsTechRevealed(techType) then
+        local unlockChildren = {}
+        for _, unlock in ipairs(GetTechUnlockObjects(TechKData(techType)).Unlocks) do
+            if unlock.Description then
+                table.insert(unlockChildren, unlock)
+            end
         end
-    end
-    if #unlockChildren > 0 then
-        local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreeUnlocks"), "TreeItem", {
-            Label = function() return Locale.Lookup("LOC_CAI_TECH_TREE_UNLOCKS") end,
-        })
-        for _, unlock in ipairs(unlockChildren) do
-            node:AddChild(CreateUnlockChild(mgr, unlock, "CAITechTreeUnlock"))
+        if #unlockChildren > 0 then
+            local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreeUnlocks"), "TreeItem", {
+                Label = function() return Locale.Lookup("LOC_CAI_TECH_TREE_UNLOCKS") end,
+            })
+            for _, unlock in ipairs(unlockChildren) do
+                node:AddChild(CreateUnlockChild(mgr, unlock, "CAITechTreeUnlock"))
+            end
+            techItem:AddChild(node)
         end
-        techItem:AddChild(node)
     end
 
     -- 2) Prerequisites
-    local kStatic = g_kItemDefaults[techType]
     local prereqTypes = {}
     for _, pt in ipairs(kStatic and kStatic.Prereqs or {}) do
         if pt ~= PREREQ_ID_TREE_START then table.insert(prereqTypes, pt) end
@@ -431,7 +675,7 @@ local function AddTechDetailChildren(techItem, techType)
         local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreePrereqs"), "TreeItem", {
             Label = function() return Locale.Lookup("LOC_CAI_TECH_TREE_PREREQS") end,
         })
-        for _, pt in ipairs(prereqTypes) do CreateRefLink(node, pt) end
+        for _, pt in ipairs(prereqTypes) do CreateRefLink(node, pt, currentEraType) end
         techItem:AddChild(node)
     end
 
@@ -441,11 +685,11 @@ local function AddTechDetailChildren(techItem, techType)
         local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreeLeadsTo"), "TreeItem", {
             Label = function() return Locale.Lookup("LOC_CAI_TECH_TREE_LEADS_TO") end,
         })
-        for _, lt in ipairs(leadsTo) do CreateRefLink(node, lt) end
+        for _, lt in ipairs(leadsTo) do CreateRefLink(node, lt, currentEraType) end
         techItem:AddChild(node)
     end
 
-    -- 4) Full path
+    -- 4) Full path (only when researchable and the path has > 1 step)
     if CanResearch(techType) and kStatic then
         local playerTechs = GetLocalPlayerTechs()
         local path = playerTechs and playerTechs:GetResearchPath(kStatic.Hash) or nil
@@ -455,7 +699,7 @@ local function AddTechDetailChildren(techItem, techType)
             })
             for i = 1, #path - 1 do
                 local tt = m_techIndexToType[path[i]]
-                if tt then CreateRefLink(node, tt) end
+                if tt then CreateRefLink(node, tt, currentEraType) end
             end
             techItem:AddChild(node)
         end
@@ -501,6 +745,7 @@ local function BuildTechNode(techType)
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
             Action  = function()
+                if not IsTechRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 LuaEvents.OpenCivilopedia(capturedType)
                 return true
@@ -521,17 +766,22 @@ local function RebuildMainTree()
 
     local capture = mgr:CaptureFocusKey(m_mainTree)
     m_mainTree:ClearChildren()
-    m_techsByType = {}
+    m_treeTechs = {}
 
     for _, era in ipairs(g_kEras) do
-        local eraTechs = {}
+        -- Group this era's filtered techs by their prereq column; each distinct
+        -- column is one prereq tier (a tier-N tech's in-era prereqs sit in tier
+        -- N-1), so tier 1 holds the era's root techs, tier 2 their leads-to, etc.
+        local byColumn, colValues = {}, {}
         for techType, kEntry in pairs(g_kItemDefaults) do
             if kEntry.EraType == era.EraType and FilterMatchesTech(techType) then
-                table.insert(eraTechs, { techType = techType, row = kEntry.UITreeRow or 0 })
+                local col = m_techColumnByType[techType] or 1
+                if not byColumn[col] then byColumn[col] = {}; table.insert(colValues, col) end
+                table.insert(byColumn[col], { techType = techType, row = kEntry.UITreeRow or 0 })
             end
         end
-        if #eraTechs > 0 then
-            table.sort(eraTechs, function(a, b) return a.row < b.row end)
+        if #colValues > 0 then
+            table.sort(colValues)
 
             local capturedDescription = era.Description
             local eraItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreeEra"), "TreeItem", {
@@ -539,16 +789,163 @@ local function RebuildMainTree()
                 FocusKey = "era:" .. tostring(era.EraType),
             })
 
-            for _, entry in ipairs(eraTechs) do
-                local widget = BuildTechNode(entry.techType)
-                m_techsByType[entry.techType] = widget
-                eraItem:AddChild(widget)
+            for tierIndex, colVal in ipairs(colValues) do
+                local tierNumber = tierIndex
+                local tierItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTreeTier"), "TreeItem", {
+                    Label    = function() return Locale.Lookup("LOC_CAI_TREE_TIER", tierNumber) end,
+                    FocusKey = "tier:" .. tostring(era.EraType) .. ":" .. tostring(colVal),
+                })
+
+                local tierTechs = byColumn[colVal]
+                table.sort(tierTechs, function(a, b) return a.row < b.row end)
+                for _, entry in ipairs(tierTechs) do
+                    local widget = BuildTechNode(entry.techType)
+                    m_treeTechs[entry.techType] = widget
+                    tierItem:AddChild(widget)
+                end
+
+                -- Auto-expanded: expanding the era reveals each tier's techs
+                -- directly, without a separate expand step per tier.
+                tierItem:Expand(true)
+                eraItem:AddChild(tierItem)
             end
+
+            -- Whenever the era is (re-)expanded, force every tier open. This
+            -- keeps tiers visible even after a recursive collapse closes them.
+            eraItem:On("expanded", function(self)
+                for _, tier in ipairs(self.Children) do
+                    tier:Expand(true)
+                end
+            end)
+
             m_mainTree:AddChild(eraItem)
         end
     end
 
     mgr:RestoreFocus(m_mainTree, capture)
+end
+
+-- ===========================================================================
+-- TABLE VIEW (eras = columns, tier = a Column-group within an era, cells =
+-- tech Buttons stacked by UITreeRow). A sibling unlocks list mirrors the
+-- focused tech's described unlocks.
+-- ===========================================================================
+
+-- Rebuild the unlocks list to mirror the focused tech. Focus stays on the
+-- table cell; the list is a passive sibling, so no capture/restore is needed.
+local function RebuildUnlocksList(techType)
+    if not m_unlocksList then return end
+    m_unlocksList:ClearChildren()
+    if not techType then return end
+    if not IsTechRevealed(techType) then return end
+    for _, unlock in ipairs(GetTechUnlockObjects(TechKData(techType)).Unlocks) do
+        if unlock.Description then
+            m_unlocksList:AddChild(CreateUnlockChild(mgr, unlock, "CAITechTableUnlock"))
+        end
+    end
+end
+
+local function BuildTechCell(techType)
+    local capturedType = techType
+    local cell = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTableTech"), "Button", {
+        Label             = function() return FormatRowLabel(capturedType) end,
+        Tooltip           = function() return FormatRowTooltip(capturedType) end,
+        DisabledPredicate = function()
+            local node = GetUiNode(capturedType)
+            if node and node.Top and node.Top:IsDisabled() then return true end
+            return not CanResearch(capturedType)
+        end,
+        FocusKey          = "tech:" .. tostring(capturedType),
+    })
+    cell:SetFocusSound("Main_Menu_Mouse_Over")
+
+    cell:On("activate", function(w)
+        if w:IsDisabled() then return end
+        ActivateSetCurrent(capturedType)
+    end)
+
+    -- Keep the unlocks list in step with the focused tech.
+    cell:On("focus_enter", function(w)
+        if w:IsFocused() then RebuildUnlocksList(capturedType) end
+    end)
+
+    cell:AddInputBindings({
+        {
+            Key       = Keys.VK_RETURN,
+            IsControl = true,
+            MSG       = KeyEvents.KeyUp,
+            Action    = function()
+                if not CanResearch(capturedType) then return true end
+                ActivateAppendToQueue(capturedType)
+                return true
+            end,
+        },
+        {
+            Key     = Keys.VK_RETURN,
+            IsShift = true,
+            MSG     = KeyEvents.KeyUp,
+            Action  = function()
+                if not IsTechRevealed(capturedType) then return true end
+                if IsTutorialRunning and IsTutorialRunning() then return true end
+                LuaEvents.OpenCivilopedia(capturedType)
+                return true
+            end,
+        },
+    })
+    return cell
+end
+
+local function RebuildTableView()
+    if not m_tableView then return end
+
+    local capture = mgr:CaptureFocusKey(m_tableView)
+    m_tableView:ClearChildren()
+    m_tableTechs = {}
+
+    for _, era in ipairs(g_kEras) do
+        -- Group this era's filtered techs by their prereq column; each distinct
+        -- column becomes one side-by-side tier, ordered left to right.
+        local byColumn, colValues = {}, {}
+        for techType, kEntry in pairs(g_kItemDefaults) do
+            if kEntry.EraType == era.EraType and FilterMatchesTech(techType) then
+                local col = m_techColumnByType[techType] or 1
+                if not byColumn[col] then byColumn[col] = {}; table.insert(colValues, col) end
+                table.insert(byColumn[col], { techType = techType, row = kEntry.UITreeRow or 0 })
+            end
+        end
+        if #colValues > 0 then
+            table.sort(colValues)
+            local capturedDescription = era.Description
+            local column = m_tableView:AddColumn({
+                header = function() return Locale.Lookup(capturedDescription) end,
+                width  = #colValues,
+            })
+            for tierIndex, colVal in ipairs(colValues) do
+                local tierTechs = byColumn[colVal]
+                table.sort(tierTechs, function(a, b) return a.row < b.row end)
+                for _, entry in ipairs(tierTechs) do
+                    local cell = BuildTechCell(entry.techType)
+                    m_tableTechs[entry.techType] = cell
+                    m_tableView:AddItem(column, tierIndex, cell)
+                end
+            end
+        end
+    end
+
+    mgr:RestoreFocus(m_tableView, capture)
+end
+
+-- Rebuild whichever tech views exist, keeping both in sync with game/filter
+-- state so jumps land correctly regardless of the active mode.
+local function RebuildTechViews()
+    RebuildMainTree()
+    RebuildTableView()
+end
+
+local function ToggleViewMode()
+    m_viewMode = (m_viewMode == "tree") and "table" or "tree"
+    local active = (m_viewMode == "table") and m_tableView or m_mainTree
+    if active then mgr:SetFocus(active) end
 end
 
 -- ===========================================================================
@@ -575,6 +972,7 @@ local function CreateQueueButton(techType, isCurrent)
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
             Action  = function()
+                if not IsTechRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 LuaEvents.OpenCivilopedia(capturedType)
                 return true
@@ -621,7 +1019,7 @@ local function ResetFilterToNone()
     if OnFilterClicked then
         OnFilterClicked({ Func = nil, Description = "LOC_TECH_FILTER_NONE" })
     end
-    RebuildMainTree()
+    RebuildTechViews()
 end
 
 local function CreateFilterResultButton(techType)
@@ -657,6 +1055,7 @@ local function CreateFilterResultButton(techType)
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
             Action  = function()
+                if not IsTechRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 LuaEvents.OpenCivilopedia(capturedType)
                 return true
@@ -672,7 +1071,7 @@ local function OpenFilterResults(entry)
     m_activeFilterEntry = entry
     m_activeFilterFunc  = entry.Func
     if OnFilterClicked then OnFilterClicked(entry.VanillaEntry) end
-    RebuildMainTree()
+    RebuildTechViews()
 
     m_filterResults = mgr:CreateWidget(FILTER_RESULTS_ID, "List", {
         Label = function()
@@ -684,10 +1083,13 @@ local function OpenFilterResults(entry)
         local eraTechs = {}
         for techType, kEntry in pairs(g_kItemDefaults) do
             if kEntry.EraType == era.EraType and FilterMatchesTech(techType) then
-                table.insert(eraTechs, { techType = techType, row = kEntry.UITreeRow or 0 })
+                table.insert(eraTechs, { techType = techType, col = m_techColumnByType[techType] or 1, row = kEntry.UITreeRow or 0 })
             end
         end
-        table.sort(eraTechs, function(a, b) return a.row < b.row end)
+        table.sort(eraTechs, function(a, b)
+            if a.col ~= b.col then return a.col < b.col end
+            return a.row < b.row
+        end)
         for _, e in ipairs(eraTechs) do
             m_filterResults:AddChild(CreateFilterResultButton(e.techType))
         end
@@ -762,9 +1164,11 @@ local function EnsurePanelBuilt()
     m_panel:AddChild(m_filterList)
     BuildFilterList()
 
+    -- Main tree (hidden in table mode)
     m_mainTree = mgr:CreateWidget(MAIN_TREE_ID, "Tree", {
-        Label       = function() return Locale.Lookup("LOC_CAI_TECH_TREE_MAIN_LIST") end,
-        SearchDepth = 2,
+        Label           = function() return Locale.Lookup("LOC_CAI_TECH_TREE_MAIN_LIST") end,
+        HiddenPredicate = function() return m_viewMode ~= "tree" end,
+        SearchDepth     = 3,
     })
     m_mainTree:AddInputBindings({
         {
@@ -780,7 +1184,37 @@ local function EnsurePanelBuilt()
     })
     m_panel:AddChild(m_mainTree)
 
-    RebuildMainTree()
+    -- Table view (hidden in tree mode): eras = columns, tiers = Column-groups
+    m_tableView = mgr:CreateWidget(TABLE_VIEW_ID, "Table", {
+        Label           = function() return Locale.Lookup("LOC_CAI_TECH_TREE_TABLE") end,
+        HiddenPredicate = function() return m_viewMode ~= "table" end,
+    })
+    m_panel:AddChild(m_tableView)
+
+    -- Unlocks list beside the table; mirrors the focused tech (table mode only,
+    -- and only when the focused tech has described unlocks)
+    m_unlocksList = mgr:CreateWidget(UNLOCKS_LIST_ID, "List", {
+        Label           = function() return Locale.Lookup("LOC_CAI_TECH_TREE_UNLOCKS") end,
+        HiddenPredicate = function(w)
+            return m_viewMode ~= "table" or not w.Children or #w.Children == 0
+        end,
+        SearchDepth     = 0,
+    })
+    m_panel:AddChild(m_unlocksList)
+
+    -- View toggle — must remain the last child. Label reflects the mode it
+    -- switches *to*.
+    m_changeViewBtn = mgr:CreateWidget(CHANGE_VIEW_ID, "Button", {
+        Label = function()
+            return Locale.Lookup(m_viewMode == "table"
+                and "LOC_CAI_TREE_SWITCH_TO_TREE"
+                or  "LOC_CAI_TREE_SWITCH_TO_TABLE")
+        end,
+    })
+    m_changeViewBtn:On("activate", function() ToggleViewMode() end)
+    m_panel:AddChild(m_changeViewBtn)
+
+    RebuildTechViews()
     RebuildQueueList()
 end
 
@@ -791,7 +1225,8 @@ local function PushPanel()
 
     local playerTechs = GetLocalPlayerTechs()
     local hasCurrent = playerTechs and playerTechs:GetResearchingTech() ~= -1
-    local focusChild = hasCurrent and m_queueList or m_mainTree
+    local activeView = (m_viewMode == "table") and m_tableView or m_mainTree
+    local focusChild = hasCurrent and m_queueList or activeView
     mgr:Push(m_panel, { focus = focusChild })
 end
 
@@ -804,10 +1239,17 @@ local function OnPanelClosedCAI()
     m_queueList         = nil
     m_filterList        = nil
     m_mainTree          = nil
+    m_tableView         = nil
+    m_unlocksList       = nil
+    m_changeViewBtn     = nil
     m_filterResults     = nil
-    m_techsByType       = {}
+    m_viewMode          = "table"
+    m_treeTechs         = {}
+    m_tableTechs        = {}
     m_leadsToByType     = {}
     m_techIndexToType   = {}
+    m_techTierByType    = {}
+    m_techColumnByType  = {}
     m_lastPlayerData    = nil
     m_filterEntries     = nil
     m_activeFilterEntry = nil
@@ -885,7 +1327,7 @@ end)
 
 Events.ResearchCompleted.Add(function(ePlayer)
     if ePlayer ~= Game.GetLocalPlayer() or not IsPanelOnStack() then return end
-    RebuildMainTree()
+    RebuildTechViews()
     RebuildQueueList()
 end)
 

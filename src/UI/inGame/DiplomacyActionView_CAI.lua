@@ -1,43 +1,82 @@
+-- DiplomacyActionView_CAI.lua
+--
+-- Accessibility layer for the diplomacy action view (the leader screen: intel,
+-- statement actions, conversation choices, and the cinematic intro).
+--
+-- Unlike DiplomacyDealView, DiplomacyActionView has NO wildcard include, so the
+-- CAI layer is still a ReplaceUIScript. To stay correct on every ruleset we must
+-- re-include the exact vanilla script the game would otherwise load: with an
+-- expansion installed the active context is DiplomacyActionView_Expansion1/2,
+-- which add the Alliance / Emergency / World Congress intel tabs and override
+-- war-type and statement logic. Re-including the base file there would silently
+-- drop all of that. Mirrors GovernmentScreen_CAI's variant include.
+
 include("caiUtils")
-include("DiplomacyActionView")
+include("Civ6Common") -- IsExpansion1Active / IsExpansion2Active
+
+if IsExpansion2Active() then
+    include("DiplomacyActionView_Expansion2")
+elseif IsExpansion1Active() then
+    include("DiplomacyActionView_Expansion1")
+else
+    include("DiplomacyActionView")
+end
 
 local mgr = ExposedMembers.CAI_UIManager
+
 local CAI_OVERVIEW_MODE = 0
 local CAI_CONVERSATION_MODE = 1
-local CAI_DEAL_MODE = 3;
+local CAI_CINEMA_MODE = 2
+local CAI_DEAL_MODE = 3
+
+local ROOT_ID = "CAIDiplomacyRoot"
+local OVERVIEW_PANEL_ID = "CAIDiplomacyOverviewPanel"
+local CONVERSATION_PANEL_ID = "CAIDiplomacyConversationPanel"
+local CINEMA_PANEL_ID = "CAIDiplomacyCinemaPanel"
+local LEADERS_TREE_ID = "CAIDiplomacyLeadersTree"
+local ACTIONS_LIST_ID = "CAIDiplomacyActionsList"
+local CONVERSATION_LIST_ID = "CAIDiplomacyConversationList"
 
 local m_ui = {
     root = nil,
     overviewPanel = nil,
+    conversationPanel = nil,
+    cinemaPanel = nil,
     leadersTree = nil,
     actionsList = nil,
-    conversationPanel = nil,
     conversationList = nil,
-    cinemaPanel = nil,
     leaderEntries = {},
     leaderOrder = {},
 }
 
 local m_state = {
     syncingLeaderSelection = false,
-    SelectedPlayer = -1,
-    activePanel = nil,
-    ActiveIntelPanel = nil,
+    suppressActionsRebuild = false,
+    selectedPlayer = -1,
+    -- True while a cinematic intro is playing. Both vanilla containers are hidden
+    -- in cinema, so the only navigable widget is the (silent) cinema panel; this
+    -- flag drives its HiddenPredicate and tells the focus code to land there.
+    cinema = false,
 }
 
 local m_vanilla = {
-    intelPanels = {},
     intelInstances = {},
-    actionLists = {
-        root = {},
-        sub = {},
-    },
-    activeIntelKey = "overview",
+    actionLists = { root = {}, sub = {} },
     conversationBindings = nil,
 }
 
-local function PlayHover()
-    UI.PlaySound("Main_Menu_Mouse_Over")
+-- Map of vanilla intel-tab header text -> clean hand-authored reader. Built lazily
+-- so the Locale lookups resolve after the context is up. Tabs not in this map
+-- (DLC alliance / emergency / world congress, future content) fall back to a
+-- generic panel-text reader so they are still exposed.
+local m_knownReaders = nil
+
+-- ============================================================================
+-- Control helpers
+-- ============================================================================
+
+local function PlayHoverSound(widget)
+    widget:SetFocusSound("Main_Menu_Mouse_Over")
 end
 
 local function ControlIsHidden(control)
@@ -52,9 +91,7 @@ local function ControlText(control)
     if not control or ControlIsHidden(control) then return "" end
     if control.GetText then
         local text = control:GetText()
-        if text and text ~= "" then
-            return text
-        end
+        if text and text ~= "" then return text end
     end
     return ""
 end
@@ -98,6 +135,13 @@ local function JoinNonEmpty(parts, separator)
     return table.concat(out, separator)
 end
 
+-- Flatten a multi-line tooltip into a single comma-separated line so a screen
+-- reader speaks it as one continuous string instead of broken across lines.
+local function JoinTooltipLines(text)
+    if not text or text == "" then return text end
+    return table.concat(SplitLines(text), ", ")
+end
+
 local function CountEntries(list)
     local count = 0
     if not list then return count end
@@ -108,22 +152,14 @@ local function CountEntries(list)
 end
 
 local function CreateReadOnlyNode(id, label, tooltip)
-    return mgr:CreateUIWidget(id, "TreeviewItem", {
-        GetLabel = function() return label end,
-        GetTooltip = function() return tooltip or "" end,
+    return mgr:CreateWidget(id, "TreeItem", {
+        Label   = function() return label end,
+        Tooltip = function() return tooltip or "" end,
     })
 end
 
 local function GetLeaderRowId(playerID)
     return "CAIDiplomacyLeaderRow_" .. tostring(playerID)
-end
-
-local function GetConversationTextId()
-    return "CAIDiplomacyConversationText"
-end
-
-local function GetConversationReasonId()
-    return "CAIDiplomacyConversationReason"
 end
 
 local function GetSelectedPlayerConfig()
@@ -174,63 +210,74 @@ local function IsSelfSelected()
     return ms_SelectedPlayerID ~= nil and ms_SelectedPlayerID == ms_LocalPlayerID
 end
 
+-- True when the Secret Societies game mode (Ethiopia pack) is enabled. Cheap engine
+-- capability check; gates the diplomacy overview Secret Society row so non-Ethiopia
+-- games add nothing.
+local function IsSecretSocietiesActive()
+    return GameCapabilities and GameCapabilities.HasCapability
+        and GameCapabilities.HasCapability("CAPABILITY_SECRETSOCIETIES")
+end
+
+-- ============================================================================
+-- View switching (replaces the old three-panel SetActivePanel hack). One of two
+-- panels is navigable at a time, gated by HiddenPredicate following the live
+-- vanilla containers; cinema hides both, so nothing is focused during it.
+-- ============================================================================
+
+local function IsRootPushed()
+    return mgr and mgr:GetWidgetById(ROOT_ID) ~= nil
+end
+
+-- "Conversation" is the active navigable view whenever the vanilla conversation
+-- container is shown. Vanilla hides ConversationContainer when it routes a demand
+-- straight to the deal view or drops back to the overview, so reading the live
+-- container state keeps the overview navigable without a separate view flag,
+-- empty-list, or focus-visibility check.
+local function IsConversationActive()
+    return not ControlIsHidden(Controls.ConversationContainer) and
+        (m_ui.conversationList and m_ui.conversationList.Children and #m_ui.conversationList.Children > 0)
+end
+
+-- True when the live focus leaf already sits inside the overview panel. When a
+-- SelectPlayer refresh returns to the overview we only need to drop focus back
+-- onto the overview when it is NOT already there -- i.e. focus is nil (the deal
+-- overlay closed while both containers were hidden, so the manager could not
+-- restore the prior leaf), or still parked in the now-hidden conversation panel.
+-- Focus already on an overview widget (an action button after a make-demand round
+-- trip, an intel node) is left untouched so it is not re-announced. This is a
+-- purely structural ancestry walk -- visibility is decided by the panels'
+-- container-driven HiddenPredicates, not here.
+local function IsFocusInOverview()
+    local w = mgr and mgr:GetFocusedWidget() or nil
+    while w do
+        if w == m_ui.overviewPanel then return true end
+        w = w.Parent
+    end
+    return false
+end
+
+-- Focus the conversation list only once it actually has content. Called from
+-- both SetConversationMode and RefreshConversationPanel because their order is
+-- not guaranteed: whichever runs second (with the conversation container shown
+-- and the list populated) lands focus on fresh response text + reply choices.
+-- Guards: never steals focus unless the action-view root is the live top, and
+-- never focuses an empty list (e.g. a demand that routes straight to the deal).
+local function FocusConversationIfReady()
+    if not IsConversationActive() then return end
+    if mgr:GetTop() ~= m_ui.root then return end
+    CAI.Silence()
+    mgr:SetFocus(m_ui.conversationList)
+end
+
+-- ============================================================================
+-- Statement actions list
+-- ============================================================================
+
 local function ClearConversationState()
     m_vanilla.conversationBindings = nil
     if m_ui.conversationList then
         m_ui.conversationList:ClearChildren()
     end
-end
-
-local function ResetCapturedState()
-    m_vanilla.intelPanels = {}
-    m_vanilla.intelInstances = {}
-    m_vanilla.actionLists = {
-        root = {},
-        sub = {},
-    }
-    m_vanilla.activeIntelKey = "overview"
-    ClearConversationState()
-end
-
-local function DestroyRoot()
-    if not m_ui.root then
-        ResetCapturedState()
-        m_ui = {
-            root = nil,
-            overviewPanel = nil,
-            leadersTree = nil,
-            actionsList = nil,
-            conversationPanel = nil,
-            conversationList = nil,
-            cinemaPanel = nil,
-            leaderEntries = {},
-            leaderOrder = {},
-        }
-        m_state.syncingLeaderSelection = false
-        m_state.activePanel = nil
-        return
-    end
-
-    if mgr and mgr:HasWidget(m_ui.root) then
-        mgr:RemoveFromStack(m_ui.root:GetId())
-    else
-        m_ui.root:Destroy()
-    end
-
-    m_ui = {
-        root = nil,
-        overviewPanel = nil,
-        leadersTree = nil,
-        actionsList = nil,
-        conversationPanel = nil,
-        conversationList = nil,
-        cinemaPanel = nil,
-        leaderEntries = {},
-        leaderOrder = {},
-    }
-    m_state.syncingLeaderSelection = false
-    m_state.activePanel = nil
-    ResetCapturedState()
 end
 
 local function CaptureActionList(options, isSubList, createdInstances)
@@ -268,94 +315,99 @@ local function SyncSubActionsForEntry(entry)
     return subEntries
 end
 
-local function RebuildActionSubMenu(subMenu, entry)
-    if not subMenu then return end
-    subMenu:ClearChildren()
-
-    for _, subEntry in ipairs(SyncSubActionsForEntry(entry)) do
-        if not subEntry.IsCancel then
-            local currentSubEntry = subEntry
-            subMenu:AddChild(mgr:CreateUIWidget(
-                mgr:GenerateWidgetId("CAIDiplomacySubActionButton"),
-                "Button",
-                {
-                    GetLabel = function() return ControlText(currentSubEntry.LabelControl) end,
-                    GetTooltip = function() return ControlTooltip(currentSubEntry.Button) end,
-                    IsDisabled = function() return ControlIsDisabled(currentSubEntry.Button) end,
-                    OnFocusEnter = PlayHover,
-                    OnClick = function()
-                        if currentSubEntry.Callback then
-                            currentSubEntry.Callback()
-                        end
-                        return true
-                    end,
-                }))
-        end
-    end
+-- Stable per-action key so RestoreFocus matches by FocusKey (silent) across the
+-- frequent action-list rebuilds, and so focus returns to e.g. the Make Deal
+-- button after the deal screen closes instead of jumping to the leader row.
+local function GetActionFocusKey(entry, prefix)
+    local key = entry.Selection and entry.Selection.Key
+    return "diplo:action:" .. tostring(prefix) .. ":" .. tostring(key or ControlText(entry.LabelControl))
 end
 
 local function CreateActionButton(entry)
-    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIDiplomacyActionButton"), "Button", {
-        GetLabel = function() return ControlText(entry.LabelControl) end,
-        GetTooltip = function() return ControlTooltip(entry.Button) end,
-        IsDisabled = function() return ControlIsDisabled(entry.Button) end,
-        OnFocusEnter = function()
-            PlayHover()
-            ShowOptionStack(false)
-            return true
-        end,
-        OnClick = function()
-            if entry.Callback then
-                entry.Callback()
-            end
-            return true
-        end,
+    local btn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDiplomacyActionButton"), "Button", {
+        Label             = function() return ControlText(entry.LabelControl) end,
+        Tooltip           = function() return ControlTooltip(entry.Button) end,
+        DisabledPredicate = function() return ControlIsDisabled(entry.Button) end,
+        FocusKey          = GetActionFocusKey(entry, "btn"),
     })
+    PlayHoverSound(btn)
+    btn:On("focus_enter", function(w)
+        if w:IsFocused() then ShowOptionStack(false) end
+    end)
+    btn:On("activate", function()
+        if entry.Callback then entry.Callback() end
+    end)
+    return btn
 end
 
 local function CreateActionSubMenu(entry)
-    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIDiplomacyActionSubMenu"), "SubMenu", {
-        GetLabel = function() return ControlText(entry.LabelControl) end,
-        GetTooltip = function() return ControlTooltip(entry.Button) end,
-        IsDisabled = function() return ControlIsDisabled(entry.Button) end,
-        Expand = function(w)
-            if w.IsExpanded then return false end
-            RebuildActionSubMenu(w, entry)
-            if not w.Children or #w.Children == 0 then
-                return true
-            end
-            w.IsExpanded = true
-            if w.OnToggleExpanded then
-                w:OnToggleExpanded(w.IsExpanded)
-            end
-            w:Navigate(0)
-            return true
-        end,
-        OnFocusEnter = function()
-            PlayHover()
-            ShowOptionStack(false)
-            return true
-        end,
-        OnToggleExpanded = function(_, expanded)
-            if not expanded then
-                ShowOptionStack(false)
-            end
-        end,
+    local sub = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDiplomacyActionSubMenu"), "SubMenu", {
+        Label             = function() return ControlText(entry.LabelControl) end,
+        Tooltip           = function() return ControlTooltip(entry.Button) end,
+        DisabledPredicate = function() return ControlIsDisabled(entry.Button) end,
+        FocusKey          = GetActionFocusKey(entry, "sub"),
     })
+    PlayHoverSound(sub)
+    sub:On("focus_enter", function(w)
+        if w:IsFocused() then ShowOptionStack(false) end
+    end)
+    sub:On("collapsed", function() ShowOptionStack(false) end)
+
+    -- Pre-populate sub-options now (guarded so the vanilla sub-list rebuild does
+    -- not recurse into another actions rebuild). SubMenu:Expand refuses to open
+    -- a childless node, so lazy population on the expand event would not work.
+    --
+    -- All sub-lists share the g_ActionListIM instance pool, so harvesting a later
+    -- submenu (e.g. Casus Belli) ResetInstances()es and overwrites the very
+    -- controls an earlier submenu (e.g. Ask For Promise) captured. Snapshot the
+    -- label/tooltip/disabled as values here -- while the pooled control still
+    -- holds this submenu's data -- instead of reading the recycled control live.
+    for _, subEntry in ipairs(SyncSubActionsForEntry(entry)) do
+        if not subEntry.IsCancel then
+            local callback = subEntry.Callback
+            local label    = ControlText(subEntry.LabelControl)
+            local tooltip  = ControlTooltip(subEntry.Button)
+            local disabled = ControlIsDisabled(subEntry.Button)
+            local child    = mgr:CreateWidget(
+                mgr:GenerateWidgetId("CAIDiplomacySubActionButton"), "Button", {
+                    Label             = function() return label end,
+                    Tooltip           = function() return tooltip end,
+                    DisabledPredicate = function() return disabled end,
+                })
+            PlayHoverSound(child)
+            child:On("activate", function()
+                if callback then callback() end
+            end)
+            sub:AddChild(child)
+        end
+    end
+
+    return sub
 end
 
 local function RebuildActionsList()
     if not m_ui.actionsList then return end
+    -- During a transition away from the overview (vanilla SelectPlayer rebuilds
+    -- the statement list and only THEN flips to conversation/cinema/deal), the
+    -- caller is about to hand focus to the conversation list / a pushed context.
+    -- Skip our focus restore for that pass -- a nil capture makes every
+    -- RestoreFocus below a no-op -- so the actions list doesn't audibly land on
+    -- a leftover button (e.g. Casus Belli) before the real destination speaks.
+    local capture = (not m_state.suppressActionsFocus)
+        and mgr:CaptureFocusKey(m_ui.actionsList) or nil
     m_ui.actionsList:ClearChildren()
 
-    if IsSelfSelected() then return end
+    if IsSelfSelected() then
+        mgr:RestoreFocus(m_ui.actionsList, capture)
+        return
+    end
 
     if m_LiteMode then
-        m_ui.actionsList:AddChild(mgr:CreateUIWidget("CAIDiplomacyNoActions", "Button", {
-            GetLabel = function() return Locale.Lookup("LOC_CAI_DIPLOMACY_NO_ACTIONS") end,
-            IsDisabled = function() return true end,
-            OnFocusEnter = PlayHover,
+        m_ui.actionsList:AddChild(mgr:CreateWidget("CAIDiplomacyNoActions", "Button", {
+            Label             = function() return Locale.Lookup("LOC_CAI_DIPLOMACY_NO_ACTIONS") end,
+            DisabledPredicate = function() return true end,
         }))
+        mgr:RestoreFocus(m_ui.actionsList, capture)
         return
     end
 
@@ -368,52 +420,19 @@ local function RebuildActionsList()
     end
 
     if not m_ui.actionsList.Children or #m_ui.actionsList.Children == 0 then
-        m_ui.actionsList:AddChild(mgr:CreateUIWidget("CAIDiplomacyNoActions", "Button", {
-            GetLabel = function() return Locale.Lookup("LOC_CAI_DIPLOMACY_NO_ACTIONS") end,
-            IsDisabled = function() return true end,
-            OnFocusEnter = PlayHover,
+        m_ui.actionsList:AddChild(mgr:CreateWidget("CAIDiplomacyNoActions", "Button", {
+            Label             = function() return Locale.Lookup("LOC_CAI_DIPLOMACY_NO_ACTIONS") end,
+            DisabledPredicate = function() return true end,
         }))
     end
+
+    mgr:RestoreFocus(m_ui.actionsList, capture)
 end
 
-local function CacheIntelPanels()
-    local container = ms_IntelPanel and ms_IntelPanel.IntelPanelContainer or nil
-    if not container or not container.GetChildren then
-        m_vanilla.intelPanels = {}
-        m_vanilla.activeIntelKey = "overview"
-        return
-    end
-
-    local liveChildren = {}
-    for _, child in ipairs(container:GetChildren()) do
-        liveChildren[child] = true
-    end
-
-    for key, panel in pairs(m_vanilla.intelPanels) do
-        if not liveChildren[panel] then
-            m_vanilla.intelPanels[key] = nil
-        end
-    end
-end
-
-local function GetActiveIntelKey()
-    for _, key in ipairs({ "overview", "gossip", "access", "relationship" }) do
-        local panel = m_vanilla.intelPanels[key]
-        if panel and not panel:IsHidden() then
-            m_vanilla.activeIntelKey = key
-            return key
-        end
-    end
-    return m_vanilla.activeIntelKey or "overview"
-end
-
-local function ShowIntelPanel(key)
-    local panel = m_vanilla.intelPanels[key]
-    if panel and panel:IsHidden() then
-        ShowPanel(panel)
-    end
-    m_state.ActiveIntelPanel = key
-end
+-- ============================================================================
+-- Intel: hand-authored readers (clean output for the well-known vanilla tabs).
+-- These read the live game state / captured typed instances, matching vanilla.
+-- ============================================================================
 
 local function AddTextLineChildren(parent, text)
     for _, line in ipairs(SplitLines(text)) do
@@ -645,6 +664,34 @@ local function AddOverviewChildren(node)
     if relationshipsNode.Children and #relationshipsNode.Children > 0 then
         node:AddChild(relationshipsNode)
     end
+
+    -- Secret Society (Ethiopia game mode). Vanilla injects this as an overview ROW
+    -- via DiploScene_RefreshOverviewRows (DiplomacyActionView_SecretSocietyRow), not
+    -- as an intel tab, so it lives here rather than as its own reader. That addon is
+    -- a separate context whose Controls we cannot read, so rebuild from the governors
+    -- API. The vanilla row checks awareness against the SELECTED player's own governors
+    -- (a leader is always aware of their own society), so the real society name shows
+    -- on screen once a leader has joined one; replicated here for screen parity.
+    if IsSecretSocietiesActive() then
+        local selectedGovernors = ms_SelectedPlayer and ms_SelectedPlayer.GetGovernors
+            and ms_SelectedPlayer:GetGovernors() or nil
+        if selectedGovernors and selectedGovernors.GetSecretSociety then
+            local society = selectedGovernors:GetSecretSociety()
+            local label, tooltip
+            if society ~= -1 then
+                if selectedGovernors:IsAwareOfSecretSociety(society) and GameInfo.SecretSocieties[society] then
+                    label = Locale.Lookup(GameInfo.SecretSocieties[society].Name)
+                else
+                    label = Locale.Lookup("LOC_SECRETSOCIETY_DIPLO_UNKNOWN_NAME")
+                    tooltip = Locale.Lookup("LOC_SECRETSOCIETY_DIPLO_UNKNOWN_DESCRIPTION")
+                end
+            else
+                label = Locale.Lookup("LOC_SECRETSOCIETY_DIPLO_NONE_NAME")
+            end
+            node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyOverviewSecretSociety"),
+                Locale.Lookup("LOC_SECRETSOCIETY") .. ": " .. label, tooltip))
+        end
+    end
 end
 
 local function AddGossipChildren(node)
@@ -803,49 +850,317 @@ local function AddRelationshipChildren(node)
     end
 end
 
-local function CaptureLastIntelPanel(key)
-    local container = ms_IntelPanel and ms_IntelPanel.IntelPanelContainer or nil
-    if not container or not container.GetChildren then return end
-    local children = container:GetChildren()
-    if children and #children > 0 then
-        m_vanilla.intelPanels[key] = children[#children]
-    end
-end
-
-local function CaptureIntelInstance(key, instance)
-    if instance then
-        m_vanilla.intelInstances[key] = instance
-    end
-end
-
-local function RefreshIntelTabChildren(tabNode, populate)
-    if not tabNode then return end
-    isExpanded = tabNode.IsExpanded
-    tabNode:ClearChildren()
-    tabNode.IsExpanded = isExpanded
-    populate(tabNode)
-end
-
-local function CreatePersistentIntelTabNode(playerID, key, label, populate)
-    local currentPlayerID = playerID
-    local currentKey = key
-    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIDiplomacyIntelSection"), "TreeviewItem", {
-        GetLabel = function() return label end,
-        IsHidden = function()
-            if currentKey == "relationship" then
-                local selectedPlayer = Players[currentPlayerID]
-                return selectedPlayer == nil or selectedPlayer:IsHuman()
+-- Generic fallback: walk a captured vanilla panel control and surface every
+-- visible, non-empty text string. Used for DLC tabs (alliance / emergency /
+-- world congress) and any future tab we have no hand-authored reader for.
+local function CollectControlText(control, out, seen)
+    if not control then return end
+    if control.IsHidden and control:IsHidden() then return end
+    if control.GetText then
+        local t = control:GetText()
+        if t and t ~= "" then
+            local norm = NormalizeText(t)
+            if norm ~= "" and not seen[norm] then
+                seen[norm] = true
+                table.insert(out, norm)
             end
-            return false
-        end,
-        OnFocusEnter = function(widget)
-            if m_state.ActiveIntelPanel == currentKey then return end
-            PlayHover()
-            ShowIntelPanel(currentKey)
-            RefreshIntelTabChildren(widget, populate)
-        end,
-    })
+        end
+    end
+    if control.GetChildren then
+        for _, child in ipairs(control:GetChildren()) do
+            CollectControlText(child, out, seen)
+        end
+    end
 end
+
+local function AddGenericPanelChildren(node, panel)
+    if not panel then return end
+    local lines, seen = {}, {}
+    CollectControlText(panel, lines, seen)
+    for _, line in ipairs(lines) do
+        node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyGenericLine"), line, nil))
+    end
+end
+
+-- ============================================================================
+-- DLC intel readers (Rise & Fall / Gathering Storm). The vanilla DLC tabs load
+-- their own separate contexts whose control trees we cannot reliably scrape, so
+-- each reader rebuilds from the same stable game APIs the vanilla Refresh
+-- functions use. Output mirrors the base readers: "Category: value" leaves for
+-- single values, category TreeItems with child entries for grouped lists.
+-- ============================================================================
+
+local ALLIANCE_MAX_LEVEL = 3
+
+-- Active-summary modifier strings for an alliance at the given level, replicated
+-- from DiplomacyActionView_AllianceTab.GetAllianceModifiersFromDB.
+local function GetAllianceModifierStrings(allianceType, allianceLevel)
+    local modifiers = {}
+    local effects = DB.Query("SELECT ModifierID, LevelRequirement from AllianceEffects WHERE AllianceType = ?",
+        allianceType)
+    for _, effect in ipairs(effects) do
+        if effect.LevelRequirement <= allianceLevel then
+            local modifierText = DB.Query(
+            "SELECT Text from ModifierStrings where ModifierID = ? and Context = 'Summary'", effect.ModifierID)
+            if modifierText and modifierText[1] then
+                table.insert(modifiers, modifierText[1].Text)
+            end
+        end
+    end
+    return modifiers
+end
+
+-- One alliance type as a single leaf "<Name>: Level N" whose tooltip lists its
+-- bonus summaries. The bonus set is short, so there is no need to expand each
+-- type to read it.
+local function AddAllianceDetailNode(parent, allianceDefinition, allianceLevel)
+    local bonuses = {}
+    for _, modifier in ipairs(GetAllianceModifierStrings(allianceDefinition.AllianceType, allianceLevel)) do
+        table.insert(bonuses, Locale.Lookup(modifier))
+    end
+    parent:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyAllianceDetail"),
+        Locale.Lookup(allianceDefinition.Name) .. ": " ..
+        Locale.Lookup("LOC_DIPLOACTION_ALLIANCE_LEVEL", allianceLevel),
+        table.concat(bonuses, ", ")))
+end
+
+local function AddAllianceChildren(node)
+    local localPlayerDiplomacy = ms_LocalPlayer and ms_LocalPlayer.GetDiplomacy and ms_LocalPlayer:GetDiplomacy() or nil
+    if not localPlayerDiplomacy then return end
+
+    local allianceLevel = localPlayerDiplomacy:GetAllianceLevel(ms_SelectedPlayerID)
+    local allianceType = localPlayerDiplomacy:GetAllianceType(ms_SelectedPlayerID)
+    local multiplier = GlobalParameters.ALLIANCE_POINTS_MULTIPLIER
+
+    node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyAllianceLevel"),
+        Locale.Lookup("LOC_CAI_DIPLOMACY_ALLIANCE_LEVEL", allianceLevel), nil))
+
+    -- Alliance points: current of needed plus per-turn gain, or "Maximum" at cap.
+    local pointsLine
+    if allianceLevel >= ALLIANCE_MAX_LEVEL then
+        pointsLine = Locale.Lookup("LOC_CAI_DIPLOMACY_ALLIANCE_POINTS_MAX")
+    else
+        local current = localPlayerDiplomacy:GetAllianceTurnsThisLevel(ms_SelectedPlayerID) / multiplier
+        local needed = localPlayerDiplomacy:GetAllianceTurnsToNextLevel(ms_SelectedPlayerID) / multiplier
+        if allianceType ~= -1 then
+            local perTurn = localPlayerDiplomacy:GetAlliancePointsPerTurn(ms_SelectedPlayerID) / multiplier
+            pointsLine = Locale.Lookup("LOC_CAI_DIPLOMACY_ALLIANCE_POINTS_LINE", current, needed, perTurn)
+        else
+            pointsLine = Locale.Lookup("LOC_CAI_DIPLOMACY_ALLIANCE_POINTS_LINE_NO_RATE", current, needed)
+        end
+    end
+    -- The raw points tooltip is a per-turn rate breakdown. With no alliance,
+    -- vanilla prepends a "you must be allied to gain points" clarifier so the
+    -- rates are not misread as current holdings; mirror that.
+    local pointsTooltip = localPlayerDiplomacy:GetAlliancePointsTooltip(ms_SelectedPlayerID)
+    if allianceType == -1 then
+        pointsTooltip = Locale.Lookup("LOC_DIPLOMACY_NEED_ALLIANCE_TO_GAIN_POINTS_TT", pointsTooltip)
+    end
+    node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyAlliancePoints"),
+        pointsLine, JoinTooltipLines(pointsTooltip)))
+
+    -- Current alliance as a single leaf "Current alliance: <Name>, Level N" whose
+    -- tooltip leads with the expiration, then the active bonuses, or a "none" leaf.
+    if allianceType ~= -1 and GameInfo.Alliances[allianceType] then
+        local definition = GameInfo.Alliances[allianceType]
+        local tooltipParts = {
+            Locale.Lookup("LOC_DIPLOACTION_EXPIRES_IN_X_TURNS",
+                localPlayerDiplomacy:GetAllianceTurnsUntilExpiration(ms_SelectedPlayerID)),
+        }
+        for _, modifier in ipairs(GetAllianceModifierStrings(definition.AllianceType, allianceLevel)) do
+            table.insert(tooltipParts, Locale.Lookup(modifier))
+        end
+        node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyAllianceCurrent"),
+            Locale.Lookup("LOC_CAI_DIPLOMACY_CURRENT_ALLIANCE") .. ": " ..
+            Locale.Lookup(definition.Name) .. ", " ..
+            Locale.Lookup("LOC_DIPLOACTION_ALLIANCE_LEVEL", allianceLevel),
+            table.concat(tooltipParts, ", ")))
+    else
+        node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyAllianceCurrent"),
+            Locale.Lookup("LOC_CAI_DIPLOMACY_CURRENT_ALLIANCE") .. ": " ..
+            Locale.Lookup("LOC_DIPLOACTION_NO_CURRENT_ALLIANCE"), nil))
+    end
+
+    -- Benefits of every alliance type at the relevant level (next when allied and
+    -- below cap, otherwise current), matching vanilla's possible-alliance list.
+    local benefitsHeaderKey, levelToShow
+    if allianceType ~= -1 then
+        benefitsHeaderKey = "LOC_DIPLOACTION_BENEFITS_NEXT_LEVEL"
+        levelToShow = allianceLevel < ALLIANCE_MAX_LEVEL and allianceLevel + 1 or allianceLevel
+    else
+        benefitsHeaderKey = "LOC_DIPLOACTION_BENEFITS_CURRENT_LEVEL"
+        levelToShow = allianceLevel
+    end
+
+    local benefitsNode = CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyAllianceBenefits"),
+        Locale.Lookup(benefitsHeaderKey), nil)
+    for alliance in GameInfo.Alliances() do
+        -- ALLIANCE_TEAMUP has no modifiers; vanilla skips it.
+        if alliance.AllianceType ~= "ALLIANCE_TEAMUP" then
+            AddAllianceDetailNode(benefitsNode, alliance, levelToShow)
+        end
+    end
+    if benefitsNode.Children and #benefitsNode.Children > 0 then
+        node:AddChild(benefitsNode)
+    end
+end
+
+local function AddEmergencyChildren(node)
+    local manager = Game.GetEmergencyManager()
+    local crisisData = manager and manager.GetEmergencyInfoTable
+        and manager:GetEmergencyInfoTable(ms_LocalPlayerID) or {}
+
+    local targetingNode = CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyEmergencyTargeting"),
+        Locale.Lookup("LOC_CAI_DIPLOMACY_EMERGENCY_TARGETING_YOU"), nil)
+    local participatingNode = CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyEmergencyParticipating"),
+        Locale.Lookup("LOC_CAI_DIPLOMACY_EMERGENCY_PARTICIPATING"), nil)
+
+    for _, crisis in ipairs(crisisData) do
+        -- Only crises the selected player is involved in (target or member).
+        local selectedParticipates = crisis.TargetID == ms_SelectedPlayerID
+        if not selectedParticipates then
+            for _, memberID in ipairs(crisis.MemberIDs) do
+                if memberID == ms_SelectedPlayerID then
+                    selectedParticipates = true
+                    break
+                end
+            end
+        end
+
+        if selectedParticipates then
+            -- Group by the local player's role, mirroring vanilla's two stacks.
+            local destination = nil
+            if crisis.TargetID == ms_LocalPlayerID then
+                destination = targetingNode
+            else
+                for _, memberID in ipairs(crisis.MemberIDs) do
+                    if memberID == ms_LocalPlayerID then
+                        destination = participatingNode
+                        break
+                    end
+                end
+            end
+
+            if destination then
+                local status = crisis.TurnsLeft >= 0
+                    and Locale.Lookup("LOC_CAI_DIPLOMACY_EMERGENCY_TURNS_LEFT", crisis.TurnsLeft)
+                    or Locale.Lookup("LOC_EMERGENCY_TAB_COMPLETED")
+                local entryNode = CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyEmergencyEntry"),
+                    Locale.Lookup("LOC_CAI_DIPLOMACY_EMERGENCY_ENTRY",
+                        Locale.Lookup(crisis.NameText), status), nil)
+                AddTextLineChildren(entryNode, crisis.GoalDescription)
+                destination:AddChild(entryNode)
+            end
+        end
+    end
+
+    if targetingNode.Children and #targetingNode.Children > 0 then
+        node:AddChild(targetingNode)
+    end
+    if participatingNode.Children and #participatingNode.Children > 0 then
+        node:AddChild(participatingNode)
+    end
+    if (not targetingNode.Children or #targetingNode.Children == 0)
+        and (not participatingNode.Children or #participatingNode.Children == 0) then
+        node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyEmergencyNone"),
+            Locale.Lookup("LOC_CAI_DIPLOMACY_EMERGENCY_NONE"), nil))
+    end
+end
+
+local function AddGrievancesChildren(node)
+    local localPlayerDiplomacy = ms_LocalPlayer and ms_LocalPlayer.GetDiplomacy and ms_LocalPlayer:GetDiplomacy() or nil
+    local gameDiplomacy = Game.GetGameDiplomacy()
+    if not localPlayerDiplomacy or not gameDiplomacy then return end
+
+    local targetName = PlayerConfigurations[ms_SelectedPlayerID]:GetCivilizationShortDescription()
+    local totalGrievances = localPlayerDiplomacy:GetGrievancesAgainst(ms_SelectedPlayerID)
+    local perTurn = gameDiplomacy:GetGrievanceChangePerTurn(ms_SelectedPlayerID, ms_LocalPlayerID)
+    -- The per-turn tooltip is a multi-line breakdown ("Grievances per turn from:
+    -- ...") surfaced below as its own expandable category, not as a flat tooltip.
+    local breakdownLines = SplitLines(gameDiplomacy:GetGrievanceChangeTooltip(ms_SelectedPlayerID, ms_LocalPlayerID))
+
+    -- Sign follows vanilla: >0 favors the local player (grievances against them),
+    -- <0 favors the selected player (grievances against you).
+    local againstThem, againstYou = 0, 0
+    local favorLine, descriptionLine
+    if totalGrievances == 0 then
+        favorLine = Locale.Lookup("LOC_GRIEVANCE_LOG_WORLD_FAVORS_NONE")
+        descriptionLine = Locale.Lookup("LOC_GRIEVANCE_LOG_DESCRIPTION_DEFAULT", targetName, 0)
+    elseif totalGrievances > 0 then
+        againstThem = totalGrievances
+        favorLine = Locale.Lookup("LOC_GRIEVANCE_LOG_WORLD_FAVORS_YOU")
+        descriptionLine = Locale.Lookup("LOC_GRIEVANCE_LOG_DESCRIPTION_POSITIVE", targetName, totalGrievances)
+    else
+        againstYou = -totalGrievances
+        favorLine = Locale.Lookup("LOC_GRIEVANCE_LOG_WORLD_FAVORS", targetName)
+        descriptionLine = Locale.Lookup("LOC_GRIEVANCE_LOG_DESCRIPTION_NEGATIVE", targetName, againstYou)
+    end
+
+    local perTurnText = Locale.Lookup("{1: number +#,###.#;-#,###.#}", perTurn)
+    local againstYouLine = Locale.Lookup("LOC_CAI_DIPLOMACY_GRIEVANCES_AGAINST_YOU", againstYou)
+    local againstThemLine = Locale.Lookup("LOC_CAI_DIPLOMACY_GRIEVANCES_AGAINST_THEM", againstThem)
+    if totalGrievances < 0 then
+        againstYouLine = againstYouLine .. ", " .. Locale.Lookup("LOC_CAI_DIPLOMACY_GRIEVANCE_PER_TURN", perTurnText)
+    elseif totalGrievances > 0 then
+        againstThemLine = againstThemLine .. ", " .. Locale.Lookup("LOC_CAI_DIPLOMACY_GRIEVANCE_PER_TURN", perTurnText)
+    end
+
+    -- Headline as the label; the "Having witnessed the hardships..." sentence
+    -- becomes its tooltip rather than a separate orphaned leaf.
+    node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyGrievanceFavor"), favorLine, descriptionLine))
+    node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyGrievanceAgainstYou"), againstYouLine, nil))
+    node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyGrievanceAgainstThem"), againstThemLine, nil))
+
+    -- Per-turn change breakdown, just above the log so the summary lines read
+    -- first. Each "from:" contribution is its own child line.
+    if #breakdownLines > 0 then
+        local breakdownNode = CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyGrievanceBreakdown"),
+            Locale.Lookup("LOC_CAI_DIPLOMACY_GRIEVANCE_BREAKDOWN", perTurnText), nil)
+        for _, line in ipairs(breakdownLines) do
+            -- Skip the "LOSING / Grievances per turn from:" header line; the
+            -- parent label already states the net change. Header lines end in ":".
+            if not string.match(line, ":%s*$") then
+                breakdownNode:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyGrievanceBreakdownEntry"),
+                    line, nil))
+            end
+        end
+        node:AddChild(breakdownNode)
+    end
+
+    local logEntries = gameDiplomacy:GetGrievanceLogEntries(ms_SelectedPlayerID, ms_LocalPlayerID) or {}
+    table.sort(logEntries, function(a, b) return a.Turn > b.Turn end)
+    if #logEntries > 0 then
+        local logNode = CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyGrievanceLog"),
+            Locale.Lookup("LOC_CAI_DIPLOMACY_GRIEVANCE_LOG"), nil)
+        for _, entry in ipairs(logEntries) do
+            local actor = entry.Initiator == ms_LocalPlayerID
+                and Locale.Lookup("LOC_CAI_DIPLOMACY_GRIEVANCE_BY_YOU")
+                or Locale.Lookup("LOC_CAI_DIPLOMACY_GRIEVANCE_BY_THEM")
+            logNode:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyGrievanceEntry"),
+                Locale.Lookup("LOC_CAI_DIPLOMACY_GRIEVANCE_LOG_ENTRY",
+                    entry.Turn, entry.Description, entry.Amount, actor), nil))
+        end
+        node:AddChild(logNode)
+    end
+end
+
+local function GetKnownReaders()
+    if m_knownReaders then return m_knownReaders end
+    m_knownReaders = {
+        [Locale.ToUpper("LOC_DIPLOMACY_INTEL_REPORT_OVERVIEW")] = AddOverviewChildren,
+        [Locale.ToUpper("LOC_DIPLOMACY_INTEL_REPORT_GOSSIP")] = AddGossipChildren,
+        [Locale.ToUpper("LOC_DIPLOMACY_INTEL_REPORT_ACCESS_LEVEL")] = AddAccessChildren,
+        [Locale.ToUpper("LOC_DIPLOMACY_INTEL_REPORT_RELATIONSHIP")] = AddRelationshipChildren,
+        [Locale.ToUpper("LOC_DIPLOACTION_INTEL_REPORT_ALLIANCE")] = AddAllianceChildren,
+        [Locale.ToUpper("LOC_DIPLOACTION_INTEL_REPORT_EMERGENCY")] = AddEmergencyChildren,
+        [Locale.ToUpper("LOC_DIPLOACTION_INTEL_REPORT_GRIEVANCES")] = AddGrievancesChildren,
+    }
+    return m_knownReaders
+end
+
+-- ============================================================================
+-- Self (local player) unique-trait sections
+-- ============================================================================
 
 local function PopulateSelfTraitCategory(category, items)
     if not items or #items == 0 then return end
@@ -853,90 +1168,196 @@ local function PopulateSelfTraitCategory(category, items)
         if item.Name and item.Name ~= "NONE" then
             local name = Locale.Lookup(item.Name)
             local description = Locale.Lookup(item.Description or "")
-            local entry = CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacySelfEntry"), name, description)
-            category:AddChild(entry)
+            category:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacySelfEntry"), name, description))
         end
     end
 end
 
-
 local function CreateSelfTraitCategory(label)
-    local category = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIDiplomacySelfCategory"), "TreeviewItem", {
-        GetLabel = function() return label end,
+    return mgr:CreateWidget(mgr:GenerateWidgetId("CAIDiplomacySelfCategory"), "TreeItem", {
+        Label = function() return label end,
     })
-    return category
 end
+
+local function BuildSelfChildren(row)
+    local playerConfig = PlayerConfigurations[ms_LocalPlayerID]
+    local civType = playerConfig and playerConfig:GetCivilizationTypeName() or nil
+    local leaderType = playerConfig and playerConfig:GetLeaderTypeName() or nil
+    local uniqueAbilities, uniqueUnits, uniqueBuildings = {}, {}, {}
+    local civAbilities, civUnits, civBuildings = {}, {}, {}
+    if leaderType then
+        uniqueAbilities, uniqueUnits, uniqueBuildings = GetLeaderUniqueTraits(leaderType, true)
+    end
+    if civType then
+        civAbilities, civUnits, civBuildings = GetCivilizationUniqueTraits(civType, true)
+    end
+    for _, item in ipairs(civAbilities) do table.insert(uniqueAbilities, item) end
+    for _, item in ipairs(civUnits) do table.insert(uniqueUnits, item) end
+    for _, item in ipairs(civBuildings) do table.insert(uniqueBuildings, item) end
+
+    local abilities = CreateSelfTraitCategory(Locale.Lookup("LOC_CAI_DIPLOMACY_SELF_ABILITIES"))
+    local units = CreateSelfTraitCategory(Locale.Lookup("LOC_CAI_DIPLOMACY_SELF_UNITS"))
+    local buildings = CreateSelfTraitCategory(Locale.Lookup("LOC_CAI_DIPLOMACY_SELF_BUILDINGS"))
+    PopulateSelfTraitCategory(abilities, uniqueAbilities)
+    PopulateSelfTraitCategory(units, uniqueUnits)
+    PopulateSelfTraitCategory(buildings, uniqueBuildings)
+    row:AddChild(abilities)
+    row:AddChild(units)
+    row:AddChild(buildings)
+end
+
+-- ============================================================================
+-- Intel sections for the selected leader, built from the live vanilla tab set
+-- (enumerated silently by CaptureIntelTabs). Each leader's sections persist
+-- across re-selection; see BuildSelectedLeaderChildren.
+-- ============================================================================
+
+-- The currently-shown intel panel (ShowPanel hides all the others). Used as the
+-- generic-fallback source for an unknown tab, resolved when that tab is shown.
+local function VisibleIntelPanelChild()
+    local panel = ms_IntelPanel
+    if not panel or not panel.IntelPanelContainer then return nil end
+    for _, child in ipairs(panel.IntelPanelContainer:GetChildren()) do
+        if not ControlIsHidden(child) then return child end
+    end
+    return nil
+end
+
+local function PopulateSectionChildren(sectionNode, tab)
+    local reader = GetKnownReaders()[tab.Header]
+    if reader then
+        reader(sectionNode)
+    else
+        AddGenericPanelChildren(sectionNode, tab.Panel)
+    end
+end
+
+local function CreateIntelSection(tab)
+    -- tab.Header / tab.Panel are resolved lazily on first focus (below): pre-reading
+    -- them would require clicking every tab on every build (audible, redundant).
+    local section = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDiplomacyIntelSection"), "TreeItem", {
+        Label = function() return tab.Header or "" end,
+    })
+    section:On("focus_enter", function(w)
+        -- Bubbles on subtree entry (a focused child counts), so this fires whenever
+        -- the user enters this tab from anywhere. Only drive the real tab button
+        -- when this tab is not already the one vanilla shows: IsSelected() tracks
+        -- the live shown tab (ShowPanel SetSelected()s it), so re-entering the
+        -- current tab -- Shift+Tab back from the actions list, moving among this
+        -- tab's own children, or focusing Overview right after a leader select
+        -- (vanilla leaves it shown) -- fires no click and no rebuild. Switching to
+        -- a different tab is the one case that legitimately clicks.
+        local button = tab.Button
+        if button and not (button.IsSelected and button:IsSelected()) then
+            button:DoLeftClick()
+        end
+        -- Now that this tab's panel is the visible one, resolve its header (drives
+        -- reader lookup + label) and panel (generic fallback) once.
+        if not tab.Header then
+            tab.Header = ms_IntelPanel and ms_IntelPanel.IntelHeader
+                and ms_IntelPanel.IntelHeader:GetText() or ""
+        end
+        -- Populate once. The readers freeze the selected leader's live state into
+        -- the child nodes, and a leader's screen never spans a turn change, so the
+        -- persisted content stays correct without a teardown on re-entry.
+        if not w._intelPopulated then
+            tab.Panel = tab.Panel or VisibleIntelPanelChild()
+            PopulateSectionChildren(w, tab)
+            w._intelPopulated = true
+        end
+    end)
+    return section
+end
+
+-- Enumerate the live intel tab buttons in visual (button-stack) order. Every tab
+-- -- base (overview / gossip / access / relationship) and DLC (alliance /
+-- emergency / world congress) -- lands a button in IntelTabButtonStack; the DLC
+-- adders build theirs through CreateTabButton, so walking the finished stack is
+-- the only way to see them all. This does NOT click: a tab's header and panel
+-- are resolved lazily the first time its section is focused (see
+-- CreateIntelSection), keeping leader (re)builds silent. Pooled buttons from a
+-- richer prior build linger hidden in the stack; only live tabs are visible.
+local function CaptureIntelTabs()
+    local tabs = {}
+    local panel = ms_IntelPanel
+    if not panel or not panel.IntelTabButtonStack then
+        return tabs
+    end
+    for _, button in ipairs(panel.IntelTabButtonStack:GetChildren()) do
+        if not ControlIsHidden(button) then
+            table.insert(tabs, { Button = button })
+        end
+    end
+    return tabs
+end
+
+local function BuildSelectedLeaderChildren()
+    local entry = m_ui.leaderEntries[ms_SelectedPlayerID]
+    if not entry or not entry.Row then return end
+
+    local isSelf = ms_SelectedPlayerID == ms_LocalPlayerID
+    local liveTabs = isSelf and {} or CaptureIntelTabs()
+
+    -- Persist a leader's subtree across re-selection so expand state, populated
+    -- content and focus position survive switching away and back. The intel-tab
+    -- button instances are pooled and recycled per vanilla rebuild, so when the
+    -- tab set is unchanged we only re-bind the existing sections to the current
+    -- buttons (mutating the shared tab tables the section closures hold) -- no
+    -- teardown, no focus loss. A changed tab count (e.g. DLC tabs arriving) falls
+    -- through to a full rebuild.
+    if entry.IntelBuilt and entry.IsSelf == isSelf and #entry.Tabs == #liveTabs then
+        for i, tab in ipairs(entry.Tabs) do
+            tab.Button = liveTabs[i].Button
+        end
+        return
+    end
+
+    local capture = mgr:CaptureFocusKey(entry.Row)
+    entry.Row:ClearChildren()
+    entry.IsSelf = isSelf
+    entry.Tabs = liveTabs
+
+    if isSelf then
+        BuildSelfChildren(entry.Row)
+    else
+        for _, tab in ipairs(liveTabs) do
+            entry.Row:AddChild(CreateIntelSection(tab))
+        end
+    end
+    entry.IntelBuilt = true
+
+    mgr:RestoreFocus(entry.Row, capture)
+end
+
+-- ============================================================================
+-- Leaders tree
+-- ============================================================================
 
 local function CreateLeaderNode(playerID)
     local currentID = playerID
-    local row = mgr:CreateUIWidget(GetLeaderRowId(currentID), "TreeviewItem", {
-        GetLabel = function()
-            return GetLeaderRowLabel(currentID)
-        end,
-        OnFocusEnter = function()
-            PlayHover()
-            if not m_state.syncingLeaderSelection and m_state.SelectedPlayer ~= currentID then
-                SelectPlayer(currentID, CAI_OVERVIEW_MODE)
-            end
-            return true
-        end,
+    local row = mgr:CreateWidget(GetLeaderRowId(currentID), "TreeItem", {
+        Label    = function() return GetLeaderRowLabel(currentID) end,
+        FocusKey = "diplo:leader:" .. tostring(currentID),
     })
+    PlayHoverSound(row)
+    -- Reselect whenever this leader's subtree is entered (not just when the row
+    -- itself is the focus leaf). With the row expanded, arrowing back up from
+    -- another leader lands on one of this leader's intel children, firing the
+    -- row's focus_enter as a non-leaf; if we bailed there, vanilla would stay on
+    -- the other leader and the intel readers (which key off ms_SelectedPlayerID)
+    -- would render the wrong leader's data. Compare against the live vanilla
+    -- selection rather than the CAI mirror.
+    row:On("focus_enter", function(w)
+        if not m_state.syncingLeaderSelection and ms_SelectedPlayerID ~= currentID then
+            -- The user focused into this leader; flag it so SelectPlayer doesn't
+            -- re-focus the same row (which would re-announce it).
+            m_state.selectingFromRow = true
+            SelectPlayer(currentID, CAI_OVERVIEW_MODE)
+            m_state.selectingFromRow = false
+        end
+    end)
     row.CAI_PlayerID = currentID
     return row
-end
-
-local function EnsureLeaderEntryChildren(entry)
-    if not entry or entry.ChildrenBuilt then return end
-
-    if entry.PlayerID == ms_LocalPlayerID then
-        local playerConfig = PlayerConfigurations[ms_LocalPlayerID]
-        local civType = playerConfig and playerConfig:GetCivilizationTypeName() or nil
-        local leaderType = playerConfig and playerConfig:GetLeaderTypeName() or nil
-        local uniqueAbilities = {}
-        local uniqueUnits = {}
-        local uniqueBuildings = {}
-        local civAbilities = {}
-        local civUnits = {}
-        local civBuildings = {}
-        if leaderType then
-            uniqueAbilities, uniqueUnits, uniqueBuildings = GetLeaderUniqueTraits(leaderType, true)
-        end
-        if civType then
-            civAbilities, civUnits, civBuildings = GetCivilizationUniqueTraits(civType, true)
-        end
-        for _, item in ipairs(civAbilities) do table.insert(uniqueAbilities, item) end
-        for _, item in ipairs(civUnits) do table.insert(uniqueUnits, item) end
-        for _, item in ipairs(civBuildings) do table.insert(uniqueBuildings, item) end
-
-        entry.SelfCategories = {
-            abilities = CreateSelfTraitCategory(Locale.Lookup("LOC_CAI_DIPLOMACY_SELF_ABILITIES")),
-            units = CreateSelfTraitCategory(Locale.Lookup("LOC_CAI_DIPLOMACY_SELF_UNITS")),
-            buildings = CreateSelfTraitCategory(Locale.Lookup("LOC_CAI_DIPLOMACY_SELF_BUILDINGS")),
-        }
-        PopulateSelfTraitCategory(entry.SelfCategories.abilities, uniqueAbilities)
-        PopulateSelfTraitCategory(entry.SelfCategories.units, uniqueUnits)
-        PopulateSelfTraitCategory(entry.SelfCategories.buildings, uniqueBuildings)
-        entry.Row:AddChild(entry.SelfCategories.abilities)
-        entry.Row:AddChild(entry.SelfCategories.units)
-        entry.Row:AddChild(entry.SelfCategories.buildings)
-    else
-        entry.IntelTabs = {
-            overview = CreatePersistentIntelTabNode(entry.PlayerID, "overview",
-                Locale.Lookup("LOC_DIPLOMACY_INTEL_REPORT_OVERVIEW"), AddOverviewChildren),
-            gossip = CreatePersistentIntelTabNode(entry.PlayerID, "gossip",
-                Locale.Lookup("LOC_DIPLOMACY_INTEL_REPORT_GOSSIP"), AddGossipChildren),
-            access = CreatePersistentIntelTabNode(entry.PlayerID, "access",
-                Locale.Lookup("LOC_DIPLOMACY_INTEL_REPORT_ACCESS_LEVEL"), AddAccessChildren),
-            relationship = CreatePersistentIntelTabNode(entry.PlayerID, "relationship",
-                Locale.Lookup("LOC_DIPLOMACY_INTEL_REPORT_RELATIONSHIP"), AddRelationshipChildren),
-        }
-        entry.Row:AddChild(entry.IntelTabs.overview)
-        entry.Row:AddChild(entry.IntelTabs.gossip)
-        entry.Row:AddChild(entry.IntelTabs.access)
-        entry.Row:AddChild(entry.IntelTabs.relationship)
-    end
-
-    entry.ChildrenBuilt = true
 end
 
 local function EnsureLeadersTreeStructure()
@@ -954,62 +1375,47 @@ local function EnsureLeadersTreeStructure()
     end
     if not needsRebuild then return end
 
+    local capture = mgr:CaptureFocusKey(m_ui.leadersTree)
     m_ui.leadersTree:ClearChildren()
     m_ui.leaderEntries = {}
     m_ui.leaderOrder = leaderIDs
 
     for _, playerID in ipairs(leaderIDs) do
-        local entry = {
-            PlayerID = playerID,
-            Row = CreateLeaderNode(playerID),
-            ChildrenBuilt = false,
-            IntelTabs = {},
-            SelfCategories = {},
-        }
-        EnsureLeaderEntryChildren(entry)
+        local entry = { PlayerID = playerID, Row = CreateLeaderNode(playerID) }
         m_ui.leaderEntries[playerID] = entry
         m_ui.leadersTree:AddChild(entry.Row)
     end
-end
 
-local function RefreshSelectedLeaderDetails()
-    local entry = m_ui.leaderEntries[ms_SelectedPlayerID]
-    if not entry then return end
-    if ms_SelectedPlayerID == ms_LocalPlayerID then return end
-
-    CacheIntelPanels()
-    for key, tabNode in pairs(entry.IntelTabs or {}) do
-        if tabNode then
-            RefreshIntelTabChildren(tabNode, key == "overview" and AddOverviewChildren
-                or key == "gossip" and AddGossipChildren
-                or key == "access" and AddAccessChildren
-                or AddRelationshipChildren)
-        end
-    end
+    mgr:RestoreFocus(m_ui.leadersTree, capture)
 end
 
 local function SyncSelectedLeaderRow()
     if not m_ui.root or not m_ui.leadersTree then return end
     local selectedEntry = m_ui.leaderEntries[ms_SelectedPlayerID]
     if not selectedEntry or not selectedEntry.Row then return end
-
-    local row = m_ui.leadersTree:GetChildById(GetLeaderRowId(ms_SelectedPlayerID), true) or selectedEntry.Row
-    local index = m_ui.leadersTree:GetChildIndex(row)
-    if not index then return end
+    if not IsRootPushed() then return end
 
     m_state.syncingLeaderSelection = true
-    m_ui.leadersTree:SetFocusedChild(index)
+    mgr:SetFocus(selectedEntry.Row)
     m_state.syncingLeaderSelection = false
 end
 
-local function RefreshOverviewPanel()
+local function RefreshOverview()
+    -- Short-circuit while harvesting sub-menu options (the eager sub-action
+    -- population re-enters PopulateStatementList with the suppress flag set);
+    -- we don't want any CAI rebuild for those transient sub-list passes.
+    if m_state.suppressActionsRebuild then return end
     if not m_ui.overviewPanel then return end
     EnsureLeadersTreeStructure()
-    RefreshSelectedLeaderDetails()
-    if not m_state.suppressActionsRebuild then
-        RebuildActionsList()
-    end
+    -- Intel section nodes are rebuilt on selection change / DLC refresh events,
+    -- not here, so an action-only refresh doesn't yank the user out of the intel
+    -- content they're reading. Section content re-reads live state on focus.
+    RebuildActionsList()
 end
+
+-- ============================================================================
+-- Conversation panel
+-- ============================================================================
 
 local function GetConversationSelectionTooltip(selection)
     if selection.IsDisabled and selection.FailureReasons and selection.FailureReasons[1] then
@@ -1024,13 +1430,11 @@ end
 local function FilterConversationSelections(selections)
     local filtered = {}
     if not selections then return filtered end
-
     for _, selection in ipairs(selections) do
         if selection.Key ~= "CHOICE_STOP_ASKING" or not Players[ms_OtherPlayerID]:IsHuman() then
             table.insert(filtered, selection)
         end
     end
-
     return filtered
 end
 
@@ -1049,18 +1453,25 @@ end
 local function RefreshConversationPanel()
     if not m_ui.conversationList then return end
     m_ui.conversationList:ClearChildren()
+    -- A conversation rebuild always presents a fresh leader response, so focus
+    -- belongs on the first item (the response text), never the positional slot of
+    -- the reply just picked. Drop the entry-descent cache so FocusConversationIfReady
+    -- lands on the first child instead of restoring a remembered choice button (the
+    -- replies carry no FocusKey, so a capture/restore would only match by index).
+    m_ui.conversationList._lastFocusedKey = nil
+    m_ui.conversationList._lastFocusedChild = nil
 
     local responseText = ControlText(Controls.LeaderResponseText)
     if responseText ~= "" then
-        m_ui.conversationList:AddChild(mgr:CreateUIWidget(GetConversationTextId(), "StaticText", {
-            GetValue = function() return ControlText(Controls.LeaderResponseText) end,
-        }), responseText and responseText ~= "")
+        m_ui.conversationList:AddChild(mgr:CreateWidget("CAIDiplomacyConversationText", "StaticText", {
+            Label = function() return ControlText(Controls.LeaderResponseText) end,
+        }))
     end
 
     local reasonText = ControlText(Controls.LeaderReasonText)
     if reasonText ~= "" then
-        m_ui.conversationList:AddChild(mgr:CreateUIWidget(GetConversationReasonId(), "StaticText", {
-            GetValue = function() return ControlText(Controls.LeaderReasonText) end,
+        m_ui.conversationList:AddChild(mgr:CreateWidget("CAIDiplomacyConversationReason", "StaticText", {
+            Label = function() return ControlText(Controls.LeaderReasonText) end,
         }))
     end
 
@@ -1076,116 +1487,173 @@ local function RefreshConversationPanel()
         local labelControl = buttonControl and buttonControl.GetTextControl and buttonControl:GetTextControl() or nil
         local currentSelection = selection
 
-        m_ui.conversationList:AddChild(mgr:CreateUIWidget(
-            mgr:GenerateWidgetId("CAIDiplomacyConversationButton"),
-            "Button",
-            {
-                GetLabel = function()
+        local choice = mgr:CreateWidget(
+            mgr:GenerateWidgetId("CAIDiplomacyConversationButton"), "Button", {
+                Label = function()
                     local liveText = labelControl and ControlText(labelControl) or ""
                     if liveText ~= "" then return liveText end
                     return Locale.Lookup(currentSelection.Text or "")
                 end,
-                GetTooltip = function()
+                Tooltip = function()
                     local liveTooltip = buttonControl and ControlTooltip(buttonControl) or ""
                     if liveTooltip ~= "" then return liveTooltip end
                     return GetConversationSelectionTooltip(currentSelection)
                 end,
-                IsDisabled = function()
+                DisabledPredicate = function()
                     return buttonControl and buttonControl:IsDisabled() or currentSelection.IsDisabled == true
                 end,
-                OnFocusEnter = PlayHover,
-                OnClick = function()
-                    if m_vanilla.conversationBindings and m_vanilla.conversationBindings.Handler then
-                        m_vanilla.conversationBindings.Handler.OnSelectionButtonClicked(currentSelection.Key)
-                        if currentSelection.Key == "CHOICE_EXIT" then
-                            ClearConversationState()
-                        end
-                    end
-                    return true
-                end,
-            }))
+            })
+        PlayHoverSound(choice)
+        choice:On("activate", function()
+            if m_vanilla.conversationBindings and m_vanilla.conversationBindings.Handler then
+                m_vanilla.conversationBindings.Handler.OnSelectionButtonClicked(currentSelection.Key)
+                if currentSelection.Key == "CHOICE_EXIT" then
+                    ClearConversationState()
+                end
+            end
+        end)
+        m_ui.conversationList:AddChild(choice)
     end
+
+    FocusConversationIfReady()
 end
 
-local function SetActivePanel(panel)
-    if not panel then return end
-    if panel == m_state.activePanel then return end
-    m_state.activePanel = panel
-    if mgr:GetTop() == m_ui.root then
-        mgr:SetFocus(panel)
-    else
-        m_ui.root:SetFocusedChild(panel:GetIndexInParent())
-    end
-end
+-- ============================================================================
+-- Build / lifecycle
+-- ============================================================================
 
 local function EnsureRootBuilt()
     if m_ui.root then return end
 
-    m_ui.root = mgr:CreateUIWidget("CAIDiplomacyRoot", "Panel", {
-        RegisterInputs = {},
-        Navigate = function() return false end,
-        GetDefaultChild = function(w)
-            if w.FocusedChild then return w.FocusedChild end
-            return m_state.activePanel
-        end,
-        GetLabel = GetPanelLabel,
+    m_ui.root = mgr:CreateWidget(ROOT_ID, "Panel", {
+        Transparent = true,
     })
-
-    m_ui.cinemaPanel = mgr:CreateUIWidget("CAIDiplomacyCinemaPanel", "Panel", {
-        SpeechSettings = { Role = false, Position = false }
+    m_ui.root:SetWrapAround(false)
+    -- View panels are structural (the root carries the leader title and each
+    -- inner tree/list has its own label), so they are Transparent — they must
+    -- not announce a bare "panel" or re-speak the title on every focus change.
+    m_ui.overviewPanel = mgr:CreateWidget(OVERVIEW_PANEL_ID, "Panel", {
+        SpeechSettings = { Position = false },
+        HiddenPredicate = function() return ControlIsHidden(Controls.OverviewContainer) end,
+        Label = function() return GetPanelLabel() end,
     })
-
-    m_ui.overviewPanel = mgr:CreateUIWidget("CAIDiplomacyOverviewPanel", "Panel", {
-        SpeechSettings = { Role = false, Position = false },
-        GetLabel = function() return GetPanelLabel() end,
+    m_ui.leadersTree = mgr:CreateWidget(LEADERS_TREE_ID, "Tree", {
+        Label = function() return Locale.Lookup("LOC_CAI_DIPLOMACY_LEADERS") end,
     })
-    m_ui.leadersTree = mgr:CreateUIWidget("CAIDiplomacyLeadersTree", "Treeview", {
-        GetLabel = function() return Locale.Lookup("LOC_CAI_DIPLOMACY_LEADERS") end,
-    })
-    m_ui.actionsList = mgr:CreateUIWidget("CAIDiplomacyActionsList", "List", {
-        GetLabel = function() return Locale.Lookup("LOC_CAI_DIPLOMACY_ACTIONS") end,
-        IsHidden = function() return IsSelfSelected() end,
+    m_ui.actionsList = mgr:CreateWidget(ACTIONS_LIST_ID, "List", {
+        Label           = function() return Locale.Lookup("LOC_CAI_DIPLOMACY_ACTIONS") end,
+        HiddenPredicate = function() return IsSelfSelected() end,
     })
     m_ui.overviewPanel:AddChild(m_ui.leadersTree)
     m_ui.overviewPanel:AddChild(m_ui.actionsList)
 
-    m_ui.conversationPanel = mgr:CreateUIWidget("CAIDiplomacyConversationPanel", "Panel", {
-        SpeechSettings = { Role = false, Position = false },
+    m_ui.conversationPanel = mgr:CreateWidget(CONVERSATION_PANEL_ID, "Panel", {
+        Transparent     = true,
+        HiddenPredicate = function() return ControlIsHidden(Controls.ConversationContainer) end,
     })
-    m_ui.conversationList = mgr:CreateUIWidget("CAIDiplomacyConversationList", "List", {
+    m_ui.conversationPanel:SetWrapAround(false)
+    m_ui.conversationList = mgr:CreateWidget(CONVERSATION_LIST_ID, "List", {
         SpeechSettings = { Position = false },
-        GetLabel = function()
+        Label          = function()
             local title = ControlText(Controls.LeaderResponseName)
             if title ~= "" then return title end
             return GetPanelLabel()
         end,
     })
     m_ui.conversationPanel:AddChild(m_ui.conversationList)
-    m_ui.root:AddChild(m_ui.cinemaPanel)
+
+    -- Cinema has no readable content of its own (the leader's line shows up in
+    -- the conversation list once cinema reveals it), so this panel is a silent,
+    -- childless focus holder: Transparent so it announces nothing, navigable only
+    -- while m_state.cinema is set. Focusing it captures input (arrows do nothing,
+    -- Escape/clicks bubble to vanilla) without speaking and without letting the
+    -- overview grab focus by default during the cinematic.
+    m_ui.cinemaPanel = mgr:CreateWidget(CINEMA_PANEL_ID, "Panel", {
+        SpeechSettings = { Position = false },
+        Label = function() return GetPanelLabel() end,
+        HiddenPredicate = function() return not m_state.cinema end,
+    })
+    m_ui.cinemaPanel:SetWrapAround(false)
     m_ui.root:AddChild(m_ui.overviewPanel)
     m_ui.root:AddChild(m_ui.conversationPanel)
+    m_ui.root:AddChild(m_ui.cinemaPanel)
 
     EnsureLeadersTreeStructure()
 end
 
-local function PushRoot()
+local function ResetState()
+    m_ui = {
+        root = nil,
+        overviewPanel = nil,
+        conversationPanel = nil,
+        cinemaPanel = nil,
+        leadersTree = nil,
+        actionsList = nil,
+        conversationList = nil,
+        leaderEntries = {},
+        leaderOrder = {},
+    }
+    m_state.syncingLeaderSelection = false
+    m_state.selectingFromRow = false
+    m_state.suppressActionsRebuild = false
+    m_state.suppressActionsFocus = false
+    m_state.buildingIntel = false
+    m_state.selectedPlayer = -1
+    m_state.cinema = false
+    m_vanilla.intelInstances = {}
+    m_vanilla.actionLists = { root = {}, sub = {} }
+    m_vanilla.conversationBindings = nil
+end
+
+local function DestroyRoot()
+    if m_ui.root and mgr then
+        if mgr:GetWidgetById(ROOT_ID) then
+            mgr:RemoveFromStack(ROOT_ID)
+        else
+            m_ui.root:Destroy()
+        end
+    end
+    ResetState()
+end
+
+-- Push focusing the right child for the current view: the cinema panel while a
+-- cinematic intro is playing (so the screen has a real focus target even when it
+-- opens straight into the cinematic), otherwise the *selected* leader's row --
+-- not the tree's first visible row (which is self). m_state.selectedPlayer is
+-- pre-set by the caller so the row's focus_enter guard sees itself as already
+-- selected and doesn't re-trigger SelectPlayer. After this first push the tree's
+-- _lastFocusedKey cache keeps later re-entries on the right row.
+local function PushRootFocusingSelected()
     if not mgr then return end
-    if not mgr:HasWidget(m_ui.root) then
+    EnsureRootBuilt()
+    if IsRootPushed() then return end
+    EnsureLeadersTreeStructure()
+    if m_state.cinema then
+        mgr:Push(m_ui.root, { priority = PopupPriority.Utmost, focus = m_ui.cinemaPanel })
+        return
+    end
+    -- Opening straight into a conversation (e.g. an AI request to place an embassy):
+    -- vanilla runs OnDiplomacyStatement -> SetConversationMode + ApplyStatement
+    -- BEFORE OnShow, so the conversation container is already shown and its list
+    -- populated by the time we push, but the overview panel is hidden. Land on the
+    -- conversation list rather than the selected leader's row, which sits inside the
+    -- hidden overview -- SetFocus to an explicit target does not reject hidden
+    -- ancestors, so focusing the row there would silently navigate into a hidden tree.
+    if IsConversationActive() then
+        mgr:Push(m_ui.root, { priority = PopupPriority.Utmost, focus = m_ui.conversationList })
+        return
+    end
+    local entry = ms_SelectedPlayerID and m_ui.leaderEntries[ms_SelectedPlayerID] or nil
+    if entry and entry.Row then
+        mgr:Push(m_ui.root, { priority = PopupPriority.Utmost, focus = entry.Row })
+    else
         mgr:Push(m_ui.root, PopupPriority.Utmost)
     end
 end
 
-local function FocusOverviewPanel()
-    SetActivePanel(m_ui.overviewPanel)
-end
-
-local function FocusConversationPanel()
-    SetActivePanel(m_ui.conversationPanel)
-end
-
-local function FocusCinemaPanel()
-    SetActivePanel(m_ui.cinemaPanel)
-end
+-- ============================================================================
+-- Vanilla wraps
+-- ============================================================================
 
 local originalApplyStatement = ApplyStatement
 ApplyStatement = WrapFunc(ApplyStatement,
@@ -1236,62 +1704,50 @@ PopulateStatementList = WrapFunc(PopulateStatementList, function(orig, options, 
     end
 
     CaptureActionList(options, isSubList, createdInstances)
-    RefreshOverviewPanel()
+    RefreshOverview()
+end)
+
+-- The selected leader's sections are (re)built from the finished tab bar in the
+-- SelectPlayer wrap, after orig() has created every tab. The DLC alliance /
+-- emergency / world-congress adders build their buttons through CreateTabButton
+-- and fire DiploScene_RefreshTabs / RefreshOverviewRows *during* this build, so
+-- flag the build window to keep those handlers from rebuilding against a
+-- half-built tab stack.
+AddIntelPanel = WrapFunc(AddIntelPanel, function(orig, rootControl, ...)
+    m_state.buildingIntel = true
+    local result = orig(rootControl, ...)
+    m_state.buildingIntel = false
+    return result
 end)
 
 PopulateIntelOverview = WrapFunc(PopulateIntelOverview, function(orig, overviewInstance, ...)
     local result = orig(overviewInstance, ...)
-    CaptureIntelInstance("overview", overviewInstance)
+    if overviewInstance then m_vanilla.intelInstances.overview = overviewInstance end
     return result
 end)
 
 OnActivateIntelGossipHistoryPanel = WrapFunc(OnActivateIntelGossipHistoryPanel, function(orig, gossipInstance, ...)
     local result = orig(gossipInstance, ...)
-    CaptureIntelInstance("gossip", gossipInstance)
+    if gossipInstance then m_vanilla.intelInstances.gossip = gossipInstance end
     return result
 end)
 
 OnActivateIntelAccessLevelPanel = WrapFunc(OnActivateIntelAccessLevelPanel, function(orig, accessLevelInstance, ...)
     local result = orig(accessLevelInstance, ...)
-    CaptureIntelInstance("access", accessLevelInstance)
+    if accessLevelInstance then m_vanilla.intelInstances.access = accessLevelInstance end
     return result
 end)
 
 OnActivateIntelRelationshipPanel = WrapFunc(OnActivateIntelRelationshipPanel, function(orig, relationshipInstance, ...)
     local result = orig(relationshipInstance, ...)
-    CaptureIntelInstance("relationship", relationshipInstance)
-    return result
-end)
-
-AddIntelOverview = WrapFunc(AddIntelOverview, function(orig, ...)
-    local result = orig(...)
-    CaptureLastIntelPanel("overview")
-    return result
-end)
-
-AddIntelGossip = WrapFunc(AddIntelGossip, function(orig, ...)
-    local result = orig(...)
-    CaptureLastIntelPanel("gossip")
-    return result
-end)
-
-AddIntelAccessLevel = WrapFunc(AddIntelAccessLevel, function(orig, ...)
-    local result = orig(...)
-    CaptureLastIntelPanel("access")
-    return result
-end)
-
-AddIntelRelationship = WrapFunc(AddIntelRelationship, function(orig, ...)
-    local result = orig(...)
-    CaptureLastIntelPanel("relationship")
+    if relationshipInstance then m_vanilla.intelInstances.relationship = relationshipInstance end
     return result
 end)
 
 local originalMakeDealApplyStatement = MakeDeal_ApplyStatement
 MakeDeal_ApplyStatement = WrapFunc(MakeDeal_ApplyStatement, function(orig, ...)
     ClearConversationState()
-    local result = orig(...)
-    return result
+    return orig(...)
 end)
 if StatementHandlers["MAKE_DEAL"] and StatementHandlers["MAKE_DEAL"].ApplyStatement == originalMakeDealApplyStatement then
     StatementHandlers["MAKE_DEAL"].ApplyStatement = MakeDeal_ApplyStatement
@@ -1300,32 +1756,16 @@ end
 local originalMakeDemandApplyStatement = MakeDemand_ApplyStatement
 MakeDemand_ApplyStatement = WrapFunc(MakeDemand_ApplyStatement, function(orig, ...)
     ClearConversationState()
-    local result = orig(...)
-    return result
+    return orig(...)
 end)
 if StatementHandlers["MAKE_DEMAND"] and StatementHandlers["MAKE_DEMAND"].ApplyStatement == originalMakeDemandApplyStatement then
     StatementHandlers["MAKE_DEMAND"].ApplyStatement = MakeDemand_ApplyStatement
 end
 
-ShowPanel = WrapFunc(ShowPanel, function(orig, panelInstance, ...)
-    local result = orig(panelInstance, ...)
-    if panelInstance then
-        for key, panel in pairs(m_vanilla.intelPanels) do
-            if panel == panelInstance then
-                m_vanilla.activeIntelKey = key
-                break
-            end
-        end
-    end
-    RefreshSelectedLeaderDetails()
-    return result
-end)
-
 OnDiplomacySessionClosed = WrapFunc(OnDiplomacySessionClosed, function(orig, ...)
     orig(...)
     ClearConversationState()
 end)
-
 
 OnHide = WrapFunc(OnHide, function(orig)
     DestroyRoot()
@@ -1341,24 +1781,82 @@ ContextPtr:SetShutdown(OnShutdown)
 
 SetConversationMode = WrapFunc(SetConversationMode, function(orig, player)
     orig(player)
-    FocusConversationPanel()
-end)
-
-ShowCinemaMode = WrapFunc(ShowCinemaMode, function(orig)
-    orig()
-    FocusCinemaPanel()
+    -- Leaving any cinematic intro: the conversation is now the live view.
+    m_state.cinema = false
+    -- orig shows the vanilla ConversationContainer, so the conversation panel is
+    -- now navigable. Focus only if the conversation list is already populated;
+    -- otherwise the ApplyStatement -> RefreshConversationPanel pass focuses it
+    -- with fresh text.
+    FocusConversationIfReady()
 end)
 
 SelectPlayer = WrapFunc(SelectPlayer, function(orig, playerID, mode, refresh, allowDeadPlayer)
     EnsureRootBuilt()
+    local prevSelected = m_state.selectedPlayer
+    local fromRow = m_state.selectingFromRow
+    -- Set the guard before orig so any focus settling on this leader's row does
+    -- not recursively re-enter SelectPlayer.
+    m_state.selectedPlayer = playerID
+    -- Track cinema across the SelectPlayer/OnShow split: a voiced open calls
+    -- SelectPlayer(CINEMA) while hidden, then OnShow plays the cinematic. This
+    -- flag drives the cinema panel's HiddenPredicate and tells OnShow's push (and
+    -- the in-place focus below) to land on the cinema panel.
+    m_state.cinema = mode == CAI_CINEMA_MODE
+    -- Vanilla SelectPlayer rebuilds the statement list (-> RebuildActionsList)
+    -- and only afterwards flips into conversation/cinema. The actions list is
+    -- hidden in those modes and the conversation list (or cinema line) is the
+    -- real destination, so suppress the actions focus restore for the duration
+    -- of orig() -- otherwise a picked sub-option whose submenu just dissolved
+    -- falls to the positional restore and audibly lands on a leftover button
+    -- (e.g. Casus Belli) before the conversation speaks. DEAL mode is excluded:
+    -- the triggering button (Make Deal/Demand) survives the rebuild, so its
+    -- restore is a silent FocusKey match that also preserves the spot to return
+    -- to when the deal closes.
+    m_state.suppressActionsFocus = mode == CAI_CONVERSATION_MODE
+        or mode == CAI_CINEMA_MODE
     orig(playerID, mode, refresh, allowDeadPlayer)
-    m_state.SelectedPlayer = playerID
-    SyncSelectedLeaderRow()
+    m_state.suppressActionsFocus = false
+    EnsureLeadersTreeStructure()
+    BuildSelectedLeaderChildren()
     if mode == CAI_OVERVIEW_MODE then
-        FocusOverviewPanel()
-    elseif mode == CAI_DEAL_MODE then
-        FocusCinemaPanel()
+        if not IsRootPushed() then
+            PushRootFocusingSelected()
+        elseif fromRow then
+            -- User navigated onto the row themselves; focus is already correct.
+        elseif playerID ~= prevSelected then
+            -- Programmatic switch to a different leader: the old action position
+            -- is meaningless for the new leader, so land on its row.
+            SyncSelectedLeaderRow()
+        elseif not IsFocusInOverview() then
+            -- Same leader, but focus is not in the overview: either still parked
+            -- in the conversation panel vanilla just hid, or nil because a deal
+            -- overlay closed while both containers were hidden and the manager
+            -- could not restore the prior leaf. Drop back into the overview where
+            -- we were -- the action that launched the conversation/deal -- NOT the
+            -- leaders tree. Focusing the (transparent) overview panel descends
+            -- through the cached _lastFocusedKey/_lastFocusedChild chain, so it
+            -- lands on that action (or its submenu), falling back to the first row
+            -- only if no prior position survives. When focus already rests on an
+            -- overview widget (actions list after a make-demand round trip, an
+            -- intel node) the per-subtree restore kept it, so we leave it alone.
+            mgr:SetFocus(m_ui.overviewPanel)
+        end
+        -- implicit else (same leader, focus already resting on a live overview
+        -- widget): leave it where the manager restored it, e.g. the Make Deal
+        -- button still focused after the deal closes.
+    elseif mode == CAI_CINEMA_MODE and IsRootPushed() then
+        -- Cinematic intro on an already-open screen (e.g. declaring war): both
+        -- vanilla containers are hidden, so the cinema panel is the only navigable
+        -- widget. Focus it -- it is Transparent, so this captures input without
+        -- speaking; the leader's line stays readable in the conversation list once
+        -- cinema reveals it. (When the screen opens straight into cinema the root
+        -- is not pushed yet; OnShow's PushRootFocusingSelected focuses it there.)
+        CAI.Silence()
+        mgr:SetFocus(m_ui.cinemaPanel)
     end
+    -- DEAL mode needs no view bookkeeping: the deal screen overlays via its own
+    -- context and the overview/conversation panels follow their vanilla
+    -- containers' live hidden state once it closes.
 end)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
@@ -1375,6 +1873,30 @@ end)
 
 OnShow = WrapFunc(OnShow, function(orig)
     orig()
-    PushRoot()
+    EnsureRootBuilt()
+    -- Only push here if a leader is already selected (so we can focus that row).
+    -- Otherwise the push is deferred to the first overview SelectPlayer, which
+    -- knows the target and avoids landing focus on the self row by default. When
+    -- opening straight into a cinematic intro (orig ran ShowCinemaMode for the
+    -- prior SelectPlayer(CINEMA)), PushRootFocusingSelected sees m_state.cinema
+    -- and focuses the cinema panel instead of the leader row.
+    if ms_SelectedPlayerID ~= nil and ms_SelectedPlayerID >= 0 then
+        m_state.selectedPlayer = ms_SelectedPlayerID
+        PushRootFocusingSelected()
+    end
 end)
 ContextPtr:SetShowHandler(OnShow)
+
+-- DLC additions (alliance/emergency/world-congress tabs, secret-society overview
+-- row) repopulate asynchronously via these LuaEvents. Rebuild the selected
+-- leader's sections so the new content is reachable.
+local function OnDLCDiploSceneRefresh()
+    if m_state.buildingIntel then return end
+    if m_ui.root and not ContextPtr:IsHidden() then BuildSelectedLeaderChildren() end
+end
+if LuaEvents.DiploScene_RefreshTabs then
+    LuaEvents.DiploScene_RefreshTabs.Add(OnDLCDiploSceneRefresh)
+end
+if LuaEvents.DiploScene_RefreshOverviewRows then
+    LuaEvents.DiploScene_RefreshOverviewRows.Add(OnDLCDiploSceneRefresh)
+end

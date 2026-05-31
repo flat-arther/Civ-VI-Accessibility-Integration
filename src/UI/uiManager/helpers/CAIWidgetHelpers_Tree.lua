@@ -161,12 +161,14 @@ function T.NavigateLast(root)
     return true
 end
 
----Right key behavior on the focused item: expand if collapsed node; descend if already expanded.
+---Right key behavior on the focused item: expand if collapsed node; descend if
+---already expanded. A focused widget that is not itself a TreeItem (a plain leaf
+---placed inside the tree) is a leaf by default, so Right is a no-op on it.
 ---@param root UIWidget
 ---@return boolean
 function T.ExpandOrDescend(root)
-    local item = T.GetFocusedTreeItem(root)
-    if not item or item:IsLeaf() then return false end
+    local item = root.Manager:GetFocusedWidget()
+    if not item or not item.IsTreeItem or item:IsLeaf() then return false end
     if not item.IsExpanded then
         item:Expand()
         return true
@@ -180,29 +182,32 @@ function T.ExpandOrDescend(root)
     return true
 end
 
----Left key behavior on the focused item: collapse if expanded; otherwise jump to parent item.
+---Left key behavior on the focused item: collapse if it is an expanded TreeItem;
+---otherwise jump to the parent TreeItem. A focused non-TreeItem leaf is treated as
+---a leaf, so Left ascends to its enclosing TreeItem rather than collapsing it.
 ---@param root UIWidget
 ---@return boolean
 function T.CollapseOrAscend(root)
-    local item = T.GetFocusedTreeItem(root)
-    if not item then return false end
-    if item.IsExpanded then
-        item:Collapse()
+    local focused = root.Manager:GetFocusedWidget()
+    if not focused then return false end
+    if focused.IsTreeItem and focused.IsExpanded then
+        focused:Collapse()
         return true
     end
-    local parent = T.GetParentTreeItem(root, item)
+    local parent = T.GetParentTreeItem(root, focused)
     if not parent then return false end
     ClearDescent(parent)
     root.Manager:SetFocus(parent)
     return true
 end
 
----Toggle expand/collapse on the focused item (used by Enter on Tree).
+---Toggle expand/collapse on the focused item (used by Enter on Tree). No-op when
+---the focused widget is not a TreeItem (a plain leaf) or is a leaf TreeItem.
 ---@param root UIWidget
 ---@return boolean
 function T.ToggleFocused(root)
-    local item = T.GetFocusedTreeItem(root)
-    if not item or item:IsLeaf() then return false end
+    local item = root.Manager:GetFocusedWidget()
+    if not item or not item.IsTreeItem or item:IsLeaf() then return false end
     if item.IsExpanded then item:Collapse() else item:Expand() end
     return true
 end

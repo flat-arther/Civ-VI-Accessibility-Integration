@@ -235,6 +235,10 @@
       <File>UI/shared/Options.lua</File>
       <File>UI/inGame/CityBannerManager_CAI.lua</File>
       <File>UI/inGame/NotificationPanel_CAI.lua</File>
+      <!-- DiplomacyDealView is a wildcard host (include("DiplomacyDealView_", true)),
+           so the CAI layer rides that wildcard as an imported file instead of a
+           full LuaReplace. Keeps every vanilla/DLC DiplomacyDealView_* override. -->
+      <File>UI/inGame/DiplomacyDealView_CAI.lua</File>
       <File>UI/inGame/inGameHelpers_CAI.lua</File>
       <File>UI/inGame/interfaceTargetHelpers_CAI.lua</File>
       <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>
@@ -353,14 +357,6 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>DiplomacyActionView</LuaContext>
         <LuaReplace>UI/inGame/DiplomacyActionView_CAI.lua</LuaReplace>
-      </Properties>
-    </ReplaceUIScript>
-
-    <ReplaceUIScript id="CAI_DiplomacyDealView">
-      <Properties>
-        <LoadOrder>100</LoadOrder>
-        <LuaContext>DiplomacyDealView</LuaContext>
-        <LuaReplace>UI/inGame/DiplomacyDealView_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

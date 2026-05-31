@@ -20,10 +20,9 @@ end
 function R.GetCtor(typeName) return R._ctors[typeName] end
 
 ---Apply per-instance prop overrides on top of the constructed widget.
----Props with a `Set<Name>` setter MUST go through the setter — primitives
----without a setter are a misuse (silent field writes bypass invariants like
----role/state coupling). Function values without a setter are allowed as a
----direct assignment escape hatch for screen-supplied callbacks.
+---Props with a `Set<Name>` setter route through the setter so coupled
+---invariants (e.g. role/state) are enforced. Any other prop — function or
+---primitive — is assigned directly to the instance field.
 ---@param w UIWidget
 ---@param props table
 function R.ApplyProps(w, props)
@@ -32,12 +31,8 @@ function R.ApplyProps(w, props)
         local setter = w["Set" .. k]
         if type(setter) == "function" then
             setter(w, v)
-        elseif type(v) == "function" then
-            w[k] = v
         else
-            print("CAI widget registry: prop '" .. tostring(k) .. "' on "
-                .. tostring(w.Type or "?") .. " has no Set" .. tostring(k)
-                .. " setter; primitive props must use the setter contract.")
+            w[k] = v
         end
     end
 end

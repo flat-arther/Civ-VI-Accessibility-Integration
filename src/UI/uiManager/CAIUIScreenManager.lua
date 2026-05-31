@@ -225,6 +225,15 @@ function UIScreenManager.BuildFocusPath(widget, direction)
         table.insert(path, 1, node)
         node = node.Parent
     end
+    -- If the target sits inside collapsed expandable ancestors, expand them
+    -- (silently — no speech, no expand/collapse events) so the focus leaf is
+    -- actually reachable and visible. The target itself keeps its own state.
+    for i = 1, #path - 1 do
+        local anc = path[i]
+        if anc.IsExpanded == false and anc.Expand then
+            anc:Expand(true)
+        end
+    end
     local leaf = path[#path]
     while leaf do
         local child
@@ -469,6 +478,12 @@ function UIScreenManager:RestoreFocus(root, capture)
         local Nav = CAIWidgetHelpers_Navigation
         local node = root
         for _, idx in ipairs(capture.path) do
+            -- Don't descend through a node that is now collapsed (an expandable
+            -- whose IsExpanded is false): the captured position pointed inside a
+            -- subtree the rebuild left closed, so land on the collapsed node
+            -- rather than silently re-opening it (which auto-entered submenus /
+            -- tree items). The captured key, if any, already had first crack.
+            if node ~= root and node.Expand and node.IsExpanded == false then break end
             local children = node.Children
             if not children or #children == 0 then break end
             local i = idx

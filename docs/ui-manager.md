@@ -138,10 +138,20 @@ mgr:SetFocus(widget, { direction = 1, announce = true }) -- directional nav
 mgr:SetFocus(widget, false)                           -- legacy boolean = announce=false
 ```
 
+A screen that is shown with no readable view (e.g. a cinematic intro where every
+vanilla container is hidden) should give the manager a Transparent, childless
+focus-holder widget to land on rather than trying to focus nothing — `SetFocus`
+with no target is not a supported "clear focus" path. Gate that holder's
+`HiddenPredicate` on the cinematic state so normal navigation skips it.
+
 `SetFocus` calls `BuildFocusPath(widget, direction)`:
 
 1. Walks `widget.Parent` chain to the root, producing a `[root, ..., widget]`
    prefix.
+1a. Auto-expands any collapsed expandable ancestor in that prefix (calls
+   `anc:Expand(true)` — silent, no event) so a focus target buried inside a
+   collapsed TreeItem/SubMenu is reachable and visible. The target itself
+   keeps its own expand state.
 2. Descends from `widget` to a leaf. Each step calls one of:
    - `GetEntryChild(direction)` if `direction` is set (Windows tab-stop
      semantics: forward → first visible, backward → last visible).
@@ -177,8 +187,14 @@ they were, not at the start/end of the new children.
 
 ### Container entry overrides
 
-- `SubMenuWidget:GetEntryChild` returns nil while collapsed (focus stops on
-  the submenu node).
+- `SubMenuWidget:GetEntryChild` / `GetDefaultChild` return nil while collapsed
+  **or** while expanded but with no remembered focus child (no
+  `_lastFocusedChild` / `_lastFocusedKey`) — mirrors `TreeItem`. So a bare
+  `Expand(true)` (e.g. `BuildFocusPath` opening an ancestor, or a seeded node)
+  leaves the submenu a focus stop instead of auto-entering its first child;
+  only an explicit `EnterFirstChild` (Enter/Right from the collapsed node)
+  descends. `EnterFirstChild` is a no-op once expanded, so a Right/Enter that
+  bubbles up from a child does not re-enter and yank focus back to the first.
 - `TreeItemWidget:GetEntryChild` returns nil while collapsed (same).
 - `TabControlWidget` inherits the default — Shift+Tab into it lands on the
   active page (last child), Tab forward into it lands on the tab strip (first
@@ -214,6 +230,20 @@ focus. When capture is non-nil it tries in order: match `key` via DFS → walk
 child of `root` (the item under focus went away). Initial focus on screen
 open is set by `Push` itself (via `UpdateRootFocus` → `SetFocus(top)`); do
 not rely on `RestoreFocus` to anchor it.
+
+The `key` match restores silently (`announce = false`) — same logical position,
+nothing new to say. The `path` walk and first-visible-child fallback re-`SetFocus`
+and **speak**, since the original item moved or went away and the user should
+hear where focus landed. The `path` walk also **stops at a collapsed expandable**
+(a node whose `IsExpanded` is false): the captured position pointed inside a
+subtree the rebuild left closed, so focus lands on the collapsed node rather than
+silently re-opening it (which previously auto-entered submenus / tree items).
+
+A screen that is itself about to move focus elsewhere after a rebuild (e.g. the
+diplomacy ActionView rebuilds its statement list inside `SelectPlayer` and then
+hands focus to the conversation list) should skip the restore for that pass —
+pass a `nil` capture so `RestoreFocus` no-ops — rather than relying on a silent
+restore. The default restore is meant to speak.
 
 ### Re-announcing without re-focusing
 
@@ -274,8 +304,22 @@ row is the canonical example.
 
 - `ValueWidget:SetValue(v)` (non-silent) speaks the value element after firing
   `value_changed`.
-- `TreeItemWidget:Expand/Collapse` and `SubMenuWidget` expand/collapse speak
-  the value element so the user hears "expanded, 5 items" / "collapsed".
+- `TreeItemWidget:Expand/Collapse` speak the value element on toggle so the
+  user hears "expanded, 5 items" / "collapsed", and focus speech announces the
+  same state on every node as the user navigates (the standard tree readout).
+  The crucial rule: **only user-driven toggles speak**. Both methods take a
+  `silent` flag (`Expand(true)` / `Collapse(true)`) that suppresses **both** the
+  `expanded`/`collapsed` event and the speech — every automatic or programmatic
+  caller passes it (seeding initial state, the focus-path ancestor auto-expand,
+  a screen's re-expand listener), so navigation and deliberate Left/Right/Enter
+  toggles are the only things that ever speak the state. The default (no flag),
+  used by the Tree key handlers, is the user-driven speaking path.
+  `Collapse` always tears down its whole subtree: every descendant is collapsed
+  (silently, no events) so a later re-expand reveals one clean level. Seed
+  initial expand state with `Expand(true)` after children exist; only fall back
+  to a direct `IsExpanded = true` write when children are added later (the leaf
+  guard makes `Expand` a no-op on a childless node). `SubMenuWidget`
+  expand/collapse don't speak a value at all — the focus change announces.
 - `EditBoxWidget` speaks per-keystroke characters, deleted text, selection
   changes, line content on Up/Down, etc. — all routed through `Speak(.., true)`
   for the interrupting feel.
@@ -577,45 +621,66 @@ detached from the children list. `SetActivePage(i)` swaps slot 2.
 
 ## 11. Table
 
-Row-major. Cells are arbitrary widgets and are also added to `Children` so
-they integrate with the focus tree (a screen can `SetFocus(table:GetCell(r,c))`
-to read out a specific cell).
+Three-level hierarchy: **Table → Column → Tier → item cell**.
+
+- **Column** is a labeled group (e.g. a civics-tree era). It speaks only its
+  header label — role and position are muted — and owns its cells through
+  tiers. Because of that ownership, the manager's focus-divergence machinery
+  announces the column header automatically when, and only when, focus crosses
+  into a new column. No custom speech code.
+- **Tier** is a side-by-side sub-column inside a column. A column of `width` N
+  holds N tiers laid out left-to-right. Tiers are `Transparent` — they
+  contribute nothing of their own to speech.
+- **Item cell** is an arbitrary widget stacked vertically inside a tier. Its
+  position element reads as its vertical index within the tier ("3 of 7").
+
+A plain data grid is the degenerate case: every column has one tier (`width`
+defaults to 1), so Left/Right walks columns and Up/Down walks rows, and each
+column header is announced as you move across.
 
 ```lua
+-- Plain grid
 local tbl = mgr:CreateWidget(id, "Table", { Label = ... })
 tbl:AddColumn({ header = "Unit" })
 tbl:AddColumn({ header = "Health" })
-tbl:AddColumn({ header = "Moves" })
-
 for _, unit in ipairs(units) do
-    tbl:AddRow({
-        cellStaticText(unit.name),
-        cellStaticText(unit.healthString),
-        cellStaticText(tostring(unit.moves)),
-    })
+    tbl:AddRow({ cellStaticText(unit.name), cellStaticText(unit.healthString) })
 end
+
+-- Multi-tier (civics tree: era column with several tiers side by side)
+local era = tbl:AddColumn({ header = eraName, width = 3 })
+tbl:AddItem(era, 1, civicWidget)   -- tier 1, appended vertically
+tbl:AddItem(era, 2, otherCivic)    -- tier 2
 ```
 
-| Method                       | What                                       |
-|------------------------------|--------------------------------------------|
-| `AddColumn({ header, width? })` | Append a column; returns column index    |
-| `GetColumnCount / GetColumn(i)` |                                          |
-| `AddRow(cells)`              | Append a row; returns row index            |
-| `SetCell(row, col, widget)`  | Replace a cell (destroys the old one)      |
-| `GetCell(row, col)`          |                                            |
-| `GetRowCount`                |                                            |
-| `RemoveRow(row)`             | Destroys cells; shifts subsequent rows up  |
-| `ClearRows`                  | Destroys everything                        |
+| Method                          | What                                          |
+|---------------------------------|-----------------------------------------------|
+| `AddColumn({ header, width? })` | Append a column (width = tier count); returns the column widget |
+| `GetColumnCount / GetColumnWidget(i)` |                                         |
+| `GetTier(column, tierIndex?)`   | Tier widget (column = widget or index)        |
+| `AddItem(column, tierIndex, w)` | Append a cell into a tier; returns item index |
+| `AddRow(cells)`                 | Grid convenience: one cell per column, tier 1 |
+| `SetCell(row, col, widget)`     | Replace/insert a grid cell in column's tier 1 |
+| `GetCell(row, col)`             | Grid cell from column's tier 1                |
+| `GetRowCount`                   | Longest first-tier stack across columns       |
+| `RemoveRow(row)`                | Destroys the row-th cell in each column's tier 1 |
+| `ClearRows`                     | Destroys all cells; keeps column/tier structure |
 
 ### Grid navigation
 
-Arrow keys move between cells in row-major order. Empty (`nil`) and hidden
-cells are **skipped in the direction of travel** — never landed on. A Down
-press from `(2, 3)` walks `(3, 3), (4, 3), ...` until it finds a navigable
-cell or falls off the grid. Home/End jump to the leftmost/rightmost navigable
-cell in the current row. Ctrl+Home / Ctrl+End jump to the table-wide first /
-last navigable cell. There is no wrap; reaching an edge with no candidate
-returns false so the input bubbles to the parent.
+All navigation lives on the `TableWidget` (it reads the live focus leaf via
+`Manager:GetFocusedWidget()`). Hidden and empty cells are **skipped in the
+direction of travel** — never landed on. There is no wrap; reaching an edge
+with no candidate returns false so input bubbles to the parent.
+
+- **Up / Down** — move within the focused cell's tier.
+- **Left / Right** — step to the adjacent tier in the flattened tier list
+  (across all columns), landing on the cell at the same vertical index
+  (clamped). Crossing a column boundary triggers the header announce.
+- **Home / End** — first / last visible cell in the current tier.
+- **Ctrl+Home / Ctrl+End** — table-wide first / last navigable cell.
+- **Ctrl+Left / Ctrl+Right** — jump to the first cell of the previous / next
+  column.
 
 ---
 
@@ -854,5 +919,5 @@ When migrating a screen from the old template-merged manager:
 | Tab strip      | Left / Right (via HorizontalList) cycles tabs and switches    |
 | Dropdown       | Closed: Enter → open. Open: List nav on inner items;           |
 |                | Enter on item → commit + close; Esc → close without commit     |
-| Table          | Arrows → cell-to-cell (skip empty/hidden); Home/End row edge;  |
-|                | Ctrl+Home / Ctrl+End → table-wide first / last navigable cell |
+| Table          | Up/Down → within tier; Left/Right → across tiers; Home/End →  |
+|                | tier edge; Ctrl+Home/End → table edge; Ctrl+Left/Right → column |
