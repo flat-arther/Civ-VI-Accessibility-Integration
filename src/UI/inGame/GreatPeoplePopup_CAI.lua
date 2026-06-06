@@ -25,8 +25,11 @@ local GP_RECRUIT_BTN_ID = "CAIGreatPeople_RecruitBtn"
 local GP_REJECT_BTN_ID  = "CAIGreatPeople_RejectBtn"
 local GP_GOLD_BTN_ID    = "CAIGreatPeople_GoldBtn"
 local GP_FAITH_BTN_ID   = "CAIGreatPeople_FaithBtn"
-local PAST_TABLE_ID     = "CAIGreatPeople_PastTable"
-local HEROES_TREE_ID    = "CAIGreatPeople_HeroesTree"
+local PAST_TABLE_ID          = "CAIGreatPeople_PastTable"
+local HEROES_LIST_ID         = "CAIGreatPeople_HeroesList"
+local HERO_RECALL_BTN_ID     = "CAIGreatPeople_HeroRecallBtn"
+
+local HOVER_SOUND = "Main_Menu_Mouse_Over"
 
 local m_hasBabylon = false
 
@@ -44,48 +47,24 @@ local m_ui = {
     rejectBtn  = nil,
     goldBtn    = nil,
     faithBtn   = nil,
-    pastPage  = nil,
-    pastTable = nil,
-    heroPage  = nil,
-    heroTree  = nil,
+    pastPage       = nil,
+    pastTable      = nil,
+    heroPage       = nil,
+    heroList       = nil,
+    heroRecallBtn  = nil,
 }
 
 local m_cachedPersons   = {}
 local m_cachedData      = nil
 local m_focusedPersonID = nil
+local m_focusedHero     = nil
 local m_isMirroringTab  = false
+local m_vanillaTabButtons  = {}
+local m_vanillaTabCount    = 0
 
 -- ===========================================================================
 -- Control helpers
 -- ===========================================================================
-
-local function ControlIsHidden(c)
-    return c and c.IsHidden and c:IsHidden() or false
-end
-
-local function ControlIsDisabled(c)
-    return c and c.IsDisabled and c:IsDisabled() or false
-end
-
-local function ControlText(c)
-    if not c or not c.GetText then return "" end
-    return c:GetText() or ""
-end
-
-local function ControlTooltip(c)
-    if not c or not c.GetToolTipString then return "" end
-    return c:GetToolTipString() or ""
-end
-
-local function FindChildById(control, id)
-    if not control or not control.GetChildren then return nil end
-    for _, child in ipairs(control:GetChildren()) do
-        if child:GetID() == id then return child end
-        local found = FindChildById(child, id)
-        if found then return found end
-    end
-    return nil
-end
 
 local function JoinNonEmpty(parts, sep)
     local out = {}
@@ -93,11 +72,6 @@ local function JoinNonEmpty(parts, sep)
         if part and part ~= "" then out[#out + 1] = part end
     end
     return table.concat(out, sep)
-end
-
-local function StripIcons(text)
-    if not text then return "" end
-    return text:gsub("%[ICON_[^%]]*%]", ""):gsub("^%s+", ""):gsub("%s+$", "")
 end
 
 -- ===========================================================================
@@ -110,13 +84,23 @@ local function FormatPersonLabel(kPerson)
         if kPerson and kPerson.ClassID then
             className = Locale.Lookup(GameInfo.GreatPersonClasses[kPerson.ClassID].Name)
         end
-        return Locale.Lookup("LOC_CAI_GP_PERSON_LABEL", className, Locale.Lookup("LOC_CAI_GP_NONE_AVAILABLE"))
+        return Locale.Lookup("LOC_CAI_GP_PERSON_LABEL", Locale.Lookup("LOC_GREAT_PEOPLE_NONE_AVAILABLE"), className)
+            .. ", " .. Locale.Lookup("LOC_GREAT_PEOPLE_ALL_POSSIBLE_CHOSEN")
     end
     local name = kPerson.Name or ""
     local className = ""
     if kPerson.ClassID then
         className = Locale.Lookup(GameInfo.GreatPersonClasses[kPerson.ClassID].Name)
     end
+
+    if kPerson.EarnConditions and kPerson.EarnConditions ~= "" then
+        return Locale.Lookup("LOC_CAI_GP_PERSON_LABEL_EARN_BLOCKED", name, className, kPerson.EarnConditions)
+    end
+
+    if kPerson.CanRecruit then
+        return Locale.Lookup("LOC_CAI_GP_PERSON_LABEL_RECRUITABLE", name, className)
+    end
+
     return Locale.Lookup("LOC_CAI_GP_PERSON_LABEL", name, className)
 end
 
@@ -126,19 +110,6 @@ local function FormatPersonTooltip(kPerson)
 
     if kPerson.EraID then
         parts[#parts + 1] = Locale.Lookup(GameInfo.Eras[kPerson.EraID].Name)
-    end
-
-    if kPerson.PassiveNameText and kPerson.PassiveNameText ~= "" then
-        parts[#parts + 1] = kPerson.PassiveNameText .. ": " .. kPerson.PassiveEffectText
-    end
-
-    if kPerson.ActionNameText and kPerson.ActionNameText ~= "" then
-        local actionText = kPerson.ActionNameText
-        if kPerson.ActionCharges and kPerson.ActionCharges > 0 then
-            actionText = actionText .. " (" .. Locale.Lookup("LOC_GREATPERSON_ACTION_CHARGES", kPerson.ActionCharges) .. ")"
-        end
-        actionText = actionText .. ": " .. kPerson.ActionEffectText
-        parts[#parts + 1] = actionText
     end
 
     if m_cachedData and kPerson.ClassID then
@@ -155,6 +126,22 @@ local function FormatPersonTooltip(kPerson)
                 end
             end
         end
+    end
+
+    if kPerson.PassiveNameText and kPerson.PassiveNameText ~= "" then
+        parts[#parts + 1] = kPerson.PassiveNameText .. ": " .. kPerson.PassiveEffectText
+    end
+
+    if kPerson.ActionNameText and kPerson.ActionNameText ~= "" then
+        local actionText = kPerson.ActionNameText
+        if kPerson.ActionCharges and kPerson.ActionCharges > 0 then
+            actionText = actionText .. " (" .. Locale.Lookup("LOC_GREATPERSON_ACTION_CHARGES", kPerson.ActionCharges) .. ")"
+        end
+        if kPerson.ActionUsageText and kPerson.ActionUsageText ~= "" then
+            actionText = actionText .. ", " .. kPerson.ActionUsageText
+        end
+        actionText = actionText .. ": " .. kPerson.ActionEffectText
+        parts[#parts + 1] = actionText
     end
 
     if kPerson.EarnConditions and kPerson.EarnConditions ~= "" then
@@ -202,6 +189,8 @@ local function BuildGPTree()
         return
     end
 
+    local firstRecruitableKey = nil
+
     for _, kPerson in ipairs(m_cachedData.Timeline) do
         local personID = kPerson.IndividualID
         local item = mgr:CreateWidget(
@@ -210,8 +199,13 @@ local function BuildGPTree()
                 Tooltip = function() return FormatPersonTooltip(kPerson) end,
                 FocusKey = personID and ("gp:" .. tostring(personID)) or nil,
             })
+        item:SetFocusSound(HOVER_SOUND)
 
         if personID then
+            if not firstRecruitableKey and kPerson.CanRecruit then
+                firstRecruitableKey = "gp:" .. tostring(personID)
+            end
+
             item:On("focus_enter", function()
                 m_focusedPersonID = personID
                 UpdateBiographyAndButtons()
@@ -239,6 +233,7 @@ local function BuildGPTree()
                                 end,
                                 FocusKey = "gpprog:" .. tostring(personID) .. ":" .. tostring(kPlayerPoints.PlayerID),
                             })
+                        leaf:SetFocusSound(HOVER_SOUND)
                         item:AddChild(leaf)
                     end
                 end
@@ -248,7 +243,10 @@ local function BuildGPTree()
         m_ui.gpTree:AddChild(item)
     end
 
-    mgr:RestoreFocus(m_ui.gpTree, capture)
+    if not mgr:RestoreFocus(m_ui.gpTree, capture) and firstRecruitableKey then
+        local target = mgr:FindByFocusKey(m_ui.gpTree, firstRecruitableKey)
+        if target then mgr:SetFocus(target) end
+    end
 end
 
 -- ===========================================================================
@@ -282,6 +280,9 @@ local function FormatPastAbilities(kPerson)
         if kPerson.ActionCharges and kPerson.ActionCharges > 0 then
             actionText = actionText .. " (" .. Locale.Lookup("LOC_GREATPERSON_ACTION_CHARGES", kPerson.ActionCharges) .. ")"
         end
+        if kPerson.ActionUsageText and kPerson.ActionUsageText ~= "" then
+            actionText = actionText .. ", " .. kPerson.ActionUsageText
+        end
         actionText = actionText .. ": " .. kPerson.ActionEffectText
         parts[#parts + 1] = actionText
     end
@@ -298,12 +299,17 @@ local function BuildPastTable(data)
         return
     end
 
+    local localPlayerID = Game.GetLocalPlayer()
+
     for _, kPerson in ipairs(data.Timeline) do
         local className = ""
         if kPerson.ClassID then
             className = Locale.Lookup(GameInfo.GreatPersonClasses[kPerson.ClassID].Name)
         end
         local personLabel = className .. ": " .. (kPerson.Name or "")
+        if kPerson.ClaimantID == localPlayerID then
+            personLabel = personLabel .. " (" .. Locale.Lookup("LOC_GREAT_PEOPLE_RECRUITED_BY_YOU") .. ")"
+        end
 
         local earnDate = ""
         if kPerson.TurnGranted then
@@ -318,15 +324,19 @@ local function BuildPastTable(data)
             Label = function() return personLabel end,
             FocusKey = focusKey,
         })
+        cellPerson:SetFocusSound(HOVER_SOUND)
         local cellDate = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGP_PastDate"), "StaticText", {
             Label = function() return earnDate end,
         })
+        cellDate:SetFocusSound(HOVER_SOUND)
         local cellRecruiter = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGP_PastRecruiter"), "StaticText", {
             Label = function() return recruiter end,
         })
+        cellRecruiter:SetFocusSound(HOVER_SOUND)
         local cellAbilities = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGP_PastAbilities"), "StaticText", {
             Label = function() return abilities end,
         })
+        cellAbilities:SetFocusSound(HOVER_SOUND)
 
         m_ui.pastTable:AddRow({ cellPerson, cellDate, cellRecruiter, cellAbilities })
     end
@@ -338,136 +348,211 @@ end
 -- Tab 3: Heroes (Babylon DLC)
 -- ===========================================================================
 
-local function GetHeroStack()
-    if not m_hasBabylon then return nil end
-    return ContextPtr:LookUpControl("GreatPeopleHeroPanel/HeroStack")
-end
+local function GetHeroData(pGameHeroes, kHeroDef)
+    local localPlayerID = Game.GetLocalPlayer()
+    local claimedByPlayer = pGameHeroes:GetHeroClaimPlayer(kHeroDef.Index)
 
-local function ClassifyEffectChild(child)
-    local statIcon = FindChildById(child, "StatIcon")
-    if statIcon then return "stat" end
-    local abilityName = FindChildById(child, "AbilityName")
-    if abilityName then return "ability" end
-    local commandIcon = FindChildById(child, "CommandIcon")
-    if commandIcon then return "command" end
-    return nil
-end
+    local data = {
+        heroDef         = kHeroDef,
+        claimedByPlayer = claimedByPlayer,
+        isAlive         = false,
+        heroUnit        = nil,
+        heroCity        = nil,
+        recallInfo      = nil,
+    }
 
-local function ReadHeroTooltipFromControls(content)
-    local parts = {}
-
-    local effectStack = FindChildById(content, "EffectStack")
-    if effectStack then
-        local statParts = {}
-        local abilityParts = {}
-        local commandParts = {}
-        for _, child in ipairs(effectStack:GetChildren()) do
-            local kind = ClassifyEffectChild(child)
-            if kind == "stat" then
-                local nameCtrl = FindChildById(child, "NameText")
-                local valCtrl = FindChildById(child, "ValueText")
-                if nameCtrl and valCtrl then
-                    statParts[#statParts + 1] = ControlText(nameCtrl) .. ": " .. ControlText(valCtrl)
-                end
-            elseif kind == "ability" then
-                local nameCtrl = FindChildById(child, "AbilityName")
-                local textCtrl = FindChildById(child, "AbilityText")
-                if nameCtrl then
-                    local t = StripIcons(ControlText(nameCtrl))
-                    if textCtrl then t = t .. ": " .. ControlText(textCtrl) end
-                    abilityParts[#abilityParts + 1] = t
-                end
-            elseif kind == "command" then
-                local nameCtrl = FindChildById(child, "CommandName")
-                local textCtrl = FindChildById(child, "CommandText")
-                if nameCtrl then
-                    local t = StripIcons(ControlText(nameCtrl))
-                    if textCtrl then t = t .. ": " .. ControlText(textCtrl) end
-                    commandParts[#commandParts + 1] = t
+    if claimedByPlayer ~= -1 then
+        local pPlayer = Players[claimedByPlayer]
+        if pPlayer then
+            local pPlayerUnits = pPlayer:GetUnits()
+            for _, pUnit in pPlayerUnits:Members() do
+                if GameInfo.Units[pUnit:GetType()].UnitType == kHeroDef.UnitType then
+                    data.isAlive = true
+                    data.heroUnit = pUnit
                 end
             end
         end
-        if #statParts > 0 then
-            parts[#parts + 1] = JoinNonEmpty(statParts, ", ")
+        if claimedByPlayer == localPlayerID and not data.heroUnit then
+            local kCityID = pGameHeroes:GetHeroOriginCityID(kHeroDef.Index)
+            local pPlayerCities = Players[claimedByPlayer]:GetCities()
+            data.heroCity = pPlayerCities:FindID(kCityID.id)
+
+            if not data.isAlive and data.heroCity then
+                local kHeroUnitDef = GameInfo.Units[kHeroDef.UnitType]
+                local kYieldDef = GameInfo.Yields["YIELD_FAITH"]
+                local tParameters = {}
+                tParameters[CityCommandTypes.PARAM_UNIT_TYPE] = kHeroUnitDef.Hash
+                tParameters[CityCommandTypes.PARAM_YIELD_TYPE] = kYieldDef.Index
+                if CityManager.CanStartCommand(data.heroCity, CityCommandTypes.PURCHASE, true, tParameters, false) then
+                    local isCanStart, results = CityManager.CanStartCommand(data.heroCity, CityCommandTypes.PURCHASE, false, tParameters, true)
+                    local pCityGold = data.heroCity:GetGold()
+                    local faithCost = pCityGold:GetPurchaseCost(kYieldDef.Index, kHeroUnitDef.Hash, MilitaryFormationTypes.STANDARD_MILITARY_FORMATION)
+                    local sToolTip = Locale.Lookup("LOC_GREAT_PEOPLE_HEROES_FAITH_RECALL_TT", faithCost)
+                    if not isCanStart and results and results[CityCommandResults.FAILURE_REASONS] then
+                        for _, v in ipairs(results[CityCommandResults.FAILURE_REASONS]) do
+                            sToolTip = sToolTip .. ", " .. Locale.Lookup(v)
+                        end
+                        local pPlayerReligion = Players[data.heroCity:GetOwner()]:GetReligion()
+                        if pPlayerReligion and not pPlayerReligion:CanAfford(data.heroCity:GetID(), kHeroUnitDef.Hash) then
+                            sToolTip = sToolTip .. ", " .. Locale.Lookup("LOC_GREAT_PEOPLE_HEROES_INSUFFICIENT_FAITH_TT")
+                        end
+                    end
+                    data.recallInfo = {
+                        faithCost = faithCost,
+                        canRecall = isCanStart,
+                        tooltip   = sToolTip,
+                        heroClass = kHeroDef.Index,
+                    }
+                end
+            end
         end
-        for _, a in ipairs(abilityParts) do parts[#parts + 1] = a end
-        for _, c in ipairs(commandParts) do parts[#parts + 1] = c end
     end
 
-    local statusCtrl = FindChildById(content, "HeroStatus")
-    if statusCtrl then
-        local statusText = ControlText(statusCtrl)
-        local deceasedCtrl = FindChildById(content, "DeceasedText")
-        if deceasedCtrl and not ControlIsHidden(deceasedCtrl) then
-            statusText = statusText .. ", " .. ControlText(deceasedCtrl)
+    return data
+end
+
+local function FormatHeroLabel(pGameHeroes, kHeroDef)
+    local heroName = Locale.ToUpper(kHeroDef.Name)
+    local claimedByPlayer = pGameHeroes:GetHeroClaimPlayer(kHeroDef.Index)
+
+    if claimedByPlayer == -1 then
+        return Locale.Lookup("LOC_CAI_GP_HERO_LABEL_DISCOVERED", heroName)
+    end
+
+    local civName
+    local localPlayerID = Game.GetLocalPlayer()
+    if claimedByPlayer == localPlayerID then
+        civName = Locale.Lookup("LOC_GREAT_PEOPLE_RECRUITED_BY_YOU")
+    else
+        local localPlayer = Players[localPlayerID]
+        if Game.GetLocalObserver() == PlayerTypes.OBSERVER
+            or (localPlayer and localPlayer:GetDiplomacy() and localPlayer:GetDiplomacy():HasMet(claimedByPlayer)) then
+            local config = PlayerConfigurations[claimedByPlayer]
+            civName = config and Locale.Lookup(config:GetPlayerName()) or Locale.Lookup("LOC_GREAT_PEOPLE_RECRUITED_BY_UNKNOWN")
+        else
+            civName = Locale.Lookup("LOC_GREAT_PEOPLE_RECRUITED_BY_UNKNOWN")
         end
-        if statusText ~= "" then parts[#parts + 1] = statusText end
+    end
+
+    local bIsAlive = false
+    local pPlayer = Players[claimedByPlayer]
+    if pPlayer then
+        for _, pUnit in pPlayer:GetUnits():Members() do
+            if GameInfo.Units[pUnit:GetType()].UnitType == kHeroDef.UnitType then
+                bIsAlive = true
+            end
+        end
+    end
+
+    if bIsAlive then
+        return Locale.Lookup("LOC_CAI_GP_HERO_LABEL_RECRUITED", heroName, civName)
+    else
+        return Locale.Lookup("LOC_CAI_GP_HERO_LABEL_DECEASED", heroName, civName)
+    end
+end
+
+local function FormatHeroTooltip(kHeroDef)
+    local parts = {}
+
+    local kStats = GetHeroUnitStats(kHeroDef.Index)
+    local statParts = {}
+    if kStats.Lifespan then
+        statParts[#statParts + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_LIFESPAN") .. ": " .. tostring(kStats.Lifespan)
+    end
+    if kStats.BaseMoves and kStats.BaseMoves > 0 then
+        statParts[#statParts + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_MOVEMENT") .. ": " .. tostring(kStats.BaseMoves)
+    end
+    if kStats.Combat and kStats.Combat > 0 then
+        statParts[#statParts + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_STRENGTH") .. ": " .. tostring(kStats.Combat)
+    end
+    if kStats.RangedCombat and kStats.RangedCombat > 0 then
+        statParts[#statParts + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_RANGED_STRENGTH") .. ": " .. tostring(kStats.RangedCombat)
+    end
+    if kStats.Range and kStats.Range > 0 then
+        statParts[#statParts + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_ATTACK_RANGE") .. ": " .. tostring(kStats.Range)
+    end
+    if kStats.Charges and kStats.Charges > 0 then
+        statParts[#statParts + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_CHARGES") .. ": " .. tostring(kStats.Charges)
+    end
+    if #statParts > 0 then
+        parts[#parts + 1] = JoinNonEmpty(statParts, ", ")
+    end
+
+    local kAbilities = GetHeroClassUnitAbilities(kHeroDef.Index)
+    for _, kAbility in ipairs(kAbilities) do
+        local t = Locale.Lookup(kAbility.Name)
+        if kAbility.Description and kAbility.Description ~= "" then
+            t = t .. ": " .. Locale.Lookup(kAbility.Description)
+        end
+        parts[#parts + 1] = t
+    end
+
+    local kCommands = GetHeroClassUnitCommands(kHeroDef.Index)
+    for _, kCommand in ipairs(kCommands) do
+        local t = Locale.Lookup(kCommand.Name)
+        if kCommand.Description and kCommand.Description ~= "" then
+            t = t .. ": " .. kCommand.Description
+        end
+        parts[#parts + 1] = t
     end
 
     return JoinNonEmpty(parts, ", ")
 end
 
-local function BuildHeroesTree()
-    if not mgr or not m_ui.heroTree then return end
-    local heroStack = GetHeroStack()
-    if not heroStack then return end
+local function GetFocusedHero()
+    return m_focusedHero
+end
 
-    local capture = mgr:CaptureFocusKey(m_ui.heroTree)
-    m_ui.heroTree:ClearChildren()
+local function BuildHeroesList()
+    if not mgr or not m_ui.heroList then return end
+    local pGameHeroes = Game.GetHeroesManager()
+    if not pGameHeroes then return end
 
-    for _, content in ipairs(heroStack:GetChildren()) do
-        local nameCtrl = FindChildById(content, "IndividualName")
-        if nameCtrl then
-            local heroName = StripIcons(ControlText(nameCtrl))
-            if heroName ~= "" then
-                local heroItem = mgr:CreateWidget(
-                    mgr:GenerateWidgetId("CAIGP_Hero"), "TreeItem", {
-                        Label = function() return heroName end,
-                        Tooltip = function() return ReadHeroTooltipFromControls(content) end,
-                        FocusKey = "hero:" .. heroName:gsub("%s+", "_"),
-                    })
+    local capture = mgr:CaptureFocusKey(m_ui.heroList)
+    m_ui.heroList:ClearChildren()
 
-                local lookAtBtn = FindChildById(content, "LookAtButton")
-                if lookAtBtn then
-                    local btn = mgr:CreateWidget(
-                        mgr:GenerateWidgetId("CAIGP_HeroLookAt"), "Button", {
-                            Label = function() return ControlTooltip(lookAtBtn) end,
-                            HiddenPredicate = function() return ControlIsHidden(lookAtBtn) end,
-                        })
-                    btn:On("activate", function() lookAtBtn:DoLeftClick() end)
-                    heroItem:AddChild(btn)
+    local localPlayerID = Game.GetLocalPlayer()
+
+    for row in GameInfo.HeroClasses() do
+        if pGameHeroes:IsHeroDiscovered(localPlayerID, row.Index) then
+            local heroRow = row
+            local item = mgr:CreateWidget(
+                mgr:GenerateWidgetId("CAIGP_Hero"), "MenuItem", {
+                    Label = function() return FormatHeroLabel(pGameHeroes, heroRow) end,
+                    Tooltip = function() return FormatHeroTooltip(heroRow) end,
+                    FocusKey = "hero:" .. heroRow.HeroClassType,
+                })
+            item:SetFocusSound(HOVER_SOUND)
+            item:On("focus_enter", function()
+                m_focusedHero = GetHeroData(pGameHeroes, heroRow)
+            end)
+            item:On("activate", function()
+                local h = GetHeroData(pGameHeroes, heroRow)
+                if not h or h.claimedByPlayer ~= Game.GetLocalPlayer() then return end
+                if h.heroUnit then
+                    LuaEvents.GreatPeopleHeroPanel_Close()
+                    UI.LookAtPlotScreenPosition(h.heroUnit:GetX(), h.heroUnit:GetY(), 0.5, 0.5)
+                    UI.SelectUnit(h.heroUnit)
+                elseif h.heroCity then
+                    LuaEvents.GreatPeopleHeroPanel_Close()
+                    UI.LookAtPlotScreenPosition(h.heroCity:GetX(), h.heroCity:GetY(), 0.5, 0.5)
+                    UI.SelectCity(h.heroCity)
                 end
-
-                local civBtn = FindChildById(content, "CivilopediaButton")
-                if civBtn then
-                    local btn = mgr:CreateWidget(
-                        mgr:GenerateWidgetId("CAIGP_HeroCivpedia"), "Button", {
-                            Label = function() return Locale.Lookup("LOC_CAI_GP_HERO_CIVILOPEDIA") end,
-                            HiddenPredicate = function() return ControlIsHidden(civBtn) end,
-                        })
-                    btn:On("activate", function() civBtn:DoLeftClick() end)
-                    heroItem:AddChild(btn)
-                end
-
-                local recallBtn = FindChildById(content, "FaithRecallButton")
-                if recallBtn then
-                    local btn = mgr:CreateWidget(
-                        mgr:GenerateWidgetId("CAIGP_HeroRecall"), "Button", {
-                            Label = function() return ControlText(recallBtn) end,
-                            Tooltip = function() return ControlTooltip(recallBtn) end,
-                            HiddenPredicate = function() return ControlIsHidden(recallBtn) end,
-                            DisabledPredicate = function() return ControlIsDisabled(recallBtn) end,
-                        })
-                    btn:On("activate", function() recallBtn:DoLeftClick() end)
-                    heroItem:AddChild(btn)
-                end
-
-                m_ui.heroTree:AddChild(heroItem)
+            end)
+            if GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_CIVPEDIA") then
+                item:AddInputBindings({
+                    { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyUp, IsShift = true, Action = function()
+                        LuaEvents.GreatPeopleHeroPanel_Close()
+                        LuaEvents.OpenCivilopedia(heroRow.UnitType)
+                        return true
+                    end },
+                })
             end
+            m_ui.heroList:AddChild(item)
         end
     end
 
-    mgr:RestoreFocus(m_ui.heroTree, capture)
+    mgr:RestoreFocus(m_ui.heroList, capture)
 end
 
 -- ===========================================================================
@@ -498,10 +583,11 @@ local function BuildPanel()
     m_ui.gpPage:AddChild(m_ui.gpTree)
 
     m_ui.bioEdit = mgr:CreateWidget(GP_BIO_ID, "EditBox", {
-        Label = function() return Locale.Lookup("LOC_CAI_GP_BIOGRAPHY") end,
+        Label = function() return Locale.Lookup("LOC_GREAT_PEOPLE_BIOGRAPHY") end,
     })
     m_ui.bioEdit:SetReadOnly(true)
     m_ui.bioEdit:SetAlwaysEdit(true)
+    m_ui.bioEdit:SetFocusSound(HOVER_SOUND)
     m_ui.gpPage:AddChild(m_ui.bioEdit)
 
     -- Action buttons — call vanilla global callbacks directly with individualID
@@ -509,10 +595,12 @@ local function BuildPanel()
         Label = function()
             local p = GetFocusedPerson()
             if p and p.RecruitCost then
-                return Locale.Lookup("LOC_GREAT_PEOPLE_RECRUIT") .. ", " ..
-                    Locale.Lookup("LOC_GREAT_PEOPLE_RECRUIT_DETAILS", p.RecruitCost)
+                return Locale.Lookup("LOC_CAI_GP_RECRUIT_LABEL", p.RecruitCost)
             end
             return Locale.Lookup("LOC_GREAT_PEOPLE_RECRUIT")
+        end,
+        Tooltip = function()
+            return Locale.Lookup("LOC_GREAT_PEOPLE_RECRUIT_DETAILS", (GetFocusedPerson() or {}).RecruitCost or 0)
         end,
         HiddenPredicate = function()
             local p = GetFocusedPerson()
@@ -521,6 +609,7 @@ local function BuildPanel()
         end,
         DisabledPredicate = function() return IsReadOnly() end,
     })
+    m_ui.recruitBtn:SetFocusSound(HOVER_SOUND)
     m_ui.recruitBtn:On("activate", function()
         if m_focusedPersonID then OnRecruitButtonClick(m_focusedPersonID) end
     end)
@@ -530,10 +619,12 @@ local function BuildPanel()
         Label = function()
             local p = GetFocusedPerson()
             if p and p.RejectCost then
-                return Locale.Lookup("LOC_GREAT_PEOPLE_PASS") .. ", " ..
-                    Locale.Lookup("LOC_GREAT_PEOPLE_PASS_DETAILS", p.RejectCost)
+                return Locale.Lookup("LOC_CAI_GP_REJECT_LABEL", p.RejectCost)
             end
             return Locale.Lookup("LOC_GREAT_PEOPLE_PASS")
+        end,
+        Tooltip = function()
+            return Locale.Lookup("LOC_GREAT_PEOPLE_PASS_DETAILS", (GetFocusedPerson() or {}).RejectCost or 0)
         end,
         HiddenPredicate = function()
             local p = GetFocusedPerson()
@@ -542,6 +633,7 @@ local function BuildPanel()
         end,
         DisabledPredicate = function() return IsReadOnly() end,
     })
+    m_ui.rejectBtn:SetFocusSound(HOVER_SOUND)
     m_ui.rejectBtn:On("activate", function()
         if m_focusedPersonID then OnRejectButtonClick(m_focusedPersonID) end
     end)
@@ -551,9 +643,14 @@ local function BuildPanel()
         Label = function()
             local p = GetFocusedPerson()
             if p and p.PatronizeWithGoldCost then
-                return Locale.Lookup("LOC_GREAT_PEOPLE_PATRONAGE_GOLD_DETAILS", p.PatronizeWithGoldCost)
+                return Locale.Lookup("LOC_CAI_GP_PATRONIZE_GOLD_LABEL", p.PatronizeWithGoldCost)
             end
             return ""
+        end,
+        Tooltip = function()
+            local p = GetFocusedPerson()
+            if not p then return "" end
+            return GetPatronizeWithGoldTT(p)
         end,
         HiddenPredicate = function()
             local p = GetFocusedPerson()
@@ -568,6 +665,7 @@ local function BuildPanel()
             return (not p.CanPatronizeWithGold) or IsReadOnly()
         end,
     })
+    m_ui.goldBtn:SetFocusSound(HOVER_SOUND)
     m_ui.goldBtn:On("activate", function()
         if m_focusedPersonID then OnGoldButtonClick(m_focusedPersonID) end
     end)
@@ -577,9 +675,14 @@ local function BuildPanel()
         Label = function()
             local p = GetFocusedPerson()
             if p and p.PatronizeWithFaithCost then
-                return Locale.Lookup("LOC_GREAT_PEOPLE_PATRONAGE_FAITH_DETAILS", p.PatronizeWithFaithCost)
+                return Locale.Lookup("LOC_CAI_GP_PATRONIZE_FAITH_LABEL", p.PatronizeWithFaithCost)
             end
             return ""
+        end,
+        Tooltip = function()
+            local p = GetFocusedPerson()
+            if not p then return "" end
+            return GetPatronizeWithFaithTT(p)
         end,
         HiddenPredicate = function()
             local p = GetFocusedPerson()
@@ -594,6 +697,7 @@ local function BuildPanel()
             return (not p.CanPatronizeWithFaith) or IsReadOnly()
         end,
     })
+    m_ui.faithBtn:SetFocusSound(HOVER_SOUND)
     m_ui.faithBtn:On("activate", function()
         if m_focusedPersonID then OnFaithButtonClick(m_focusedPersonID) end
     end)
@@ -605,7 +709,7 @@ local function BuildPanel()
     end)
 
     m_ui.pastTable = mgr:CreateWidget(PAST_TABLE_ID, "Table", {
-        Label = function() return Locale.Lookup("LOC_CAI_GP_PAST_TABLE") end,
+        Label = function() return Locale.Lookup("LOC_GREAT_PEOPLE_RECRUITMENT_HISTORY") end,
     })
     m_ui.pastTable:AddColumn({ header = Locale.Lookup("LOC_CAI_GP_COL_PERSON") })
     m_ui.pastTable:AddColumn({ header = Locale.Lookup("LOC_CAI_GP_COL_DATE") })
@@ -619,23 +723,50 @@ local function BuildPanel()
             return Locale.Lookup("LOC_GREAT_PEOPLE_TAB_HEROES")
         end)
 
-        m_ui.heroTree = mgr:CreateWidget(HEROES_TREE_ID, "Tree", {
-            Label = function() return Locale.Lookup("LOC_CAI_GP_HEROES_TREE") end,
+        m_ui.heroList = mgr:CreateWidget(HEROES_LIST_ID, "List", {
+            Label = function() return Locale.Lookup("LOC_CAI_GP_HEROES_LIST") end,
         })
-        m_ui.heroPage:AddChild(m_ui.heroTree)
+        m_ui.heroPage:AddChild(m_ui.heroList)
+
+        m_ui.heroRecallBtn = mgr:CreateWidget(HERO_RECALL_BTN_ID, "Button", {
+            Label = function()
+                local h = GetFocusedHero()
+                if not h or not h.recallInfo then return "" end
+                return tostring(h.recallInfo.faithCost) .. " [ICON_Faith]"
+            end,
+            Tooltip = function()
+                local h = GetFocusedHero()
+                if not h or not h.recallInfo then return "" end
+                return h.recallInfo.tooltip
+            end,
+            HiddenPredicate = function()
+                local h = GetFocusedHero()
+                if not h then return true end
+                if h.claimedByPlayer ~= Game.GetLocalPlayer() then return true end
+                return h.isAlive or not h.recallInfo
+            end,
+            DisabledPredicate = function()
+                local h = GetFocusedHero()
+                if not h or not h.recallInfo then return true end
+                return not h.recallInfo.canRecall
+            end,
+        })
+        m_ui.heroRecallBtn:SetFocusSound(HOVER_SOUND)
+        m_ui.heroRecallBtn:On("activate", function()
+            local h = GetFocusedHero()
+            if h and h.recallInfo then RecallHero(h.recallInfo.heroClass) end
+        end)
+        m_ui.heroPage:AddChild(m_ui.heroRecallBtn)
     end
 
     m_ui.tabs:On("value_changed", function(_, idx)
         if m_isMirroringTab then return end
-        m_isMirroringTab = true
-        if idx == 1 then
-            OnGreatPeopleClick(nil)
-        elseif idx == 2 then
-            OnPreviousRecruitedClick(nil)
-        elseif idx == 3 and m_hasBabylon and OnHeroesClick then
-            OnHeroesClick(nil)
+        local btn = m_vanillaTabButtons[idx]
+        if btn then
+            m_isMirroringTab = true
+            btn:DoLeftClick()
+            m_isMirroringTab = false
         end
-        m_isMirroringTab = false
     end)
 
     m_ui.panel:AddChild(m_ui.tabs)
@@ -663,11 +794,12 @@ local function PopPanel()
         gpPage = nil, gpTree = nil, bioEdit = nil,
         recruitBtn = nil, rejectBtn = nil, goldBtn = nil, faithBtn = nil,
         pastPage = nil, pastTable = nil,
-        heroPage = nil, heroTree = nil,
+        heroPage = nil, heroList = nil, heroRecallBtn = nil,
     }
     m_cachedPersons = {}
     m_cachedData = nil
     m_focusedPersonID = nil
+    m_focusedHero = nil
     m_isMirroringTab = false
 end
 
@@ -682,16 +814,26 @@ AddRecruit = WrapFunc(AddRecruit, function(orig, kData, kPerson)
     end
 end)
 
+local function SyncCAITab(idx)
+    if m_ui.tabs and not m_isMirroringTab then
+        m_isMirroringTab = true
+        m_ui.tabs:SetActivePage(idx, true)
+        m_isMirroringTab = false
+    end
+end
+
 ViewCurrent = WrapFunc(ViewCurrent, function(orig, data)
     m_cachedPersons = {}
     m_cachedData = nil
     orig(data)
     m_cachedData = data
+    SyncCAITab(1)
     BuildGPTree()
 end)
 
 ViewPast = WrapFunc(ViewPast, function(orig, data)
     orig(data)
+    SyncCAITab(2)
     BuildPastTable(data)
 end)
 
@@ -700,6 +842,9 @@ Open = WrapFunc(Open, function(orig)
     orig()
     if not ContextPtr:IsHidden() then
         PushPanel()
+        if IsExpansion2Active and IsExpansion2Active() and IsReadOnly() then
+            Speak(Locale.Lookup("LOC_CAI_GP_WORLD_CONGRESS_READONLY"))
+        end
     end
 end)
 
@@ -710,22 +855,11 @@ Close = WrapFunc(Close, function(orig)
     end
 end)
 
-OnGreatPeopleClick = WrapFunc(OnGreatPeopleClick, function(orig, uiSelectedButton)
-    orig(uiSelectedButton)
-    if m_ui.tabs and not m_isMirroringTab then
-        m_isMirroringTab = true
-        m_ui.tabs:SetActivePage(1, true)
-        m_isMirroringTab = false
-    end
-end)
-
-OnPreviousRecruitedClick = WrapFunc(OnPreviousRecruitedClick, function(orig, uiSelectedButton)
-    orig(uiSelectedButton)
-    if m_ui.tabs and not m_isMirroringTab then
-        m_isMirroringTab = true
-        m_ui.tabs:SetActivePage(2, true)
-        m_isMirroringTab = false
-    end
+AddTabInstance = WrapFunc(AddTabInstance, function(orig, buttonText, callbackFunc)
+    local kInstance = orig(buttonText, callbackFunc)
+    m_vanillaTabCount = m_vanillaTabCount + 1
+    m_vanillaTabButtons[m_vanillaTabCount] = kInstance.Button
+    return kInstance
 end)
 
 -- Babylon-specific wraps are deferred to LateInitialize because the Babylon
@@ -738,18 +872,12 @@ function LateInitialize()
     m_hasBabylon = (OnHeroesClick ~= nil) and (Game.GetHeroesManager ~= nil)
 
     if m_hasBabylon then
-        OnHeroesClick = WrapFunc(OnHeroesClick, function(orig, uiSelectedButton)
-            orig(uiSelectedButton)
-            if m_ui.tabs and not m_isMirroringTab then
-                m_isMirroringTab = true
-                m_ui.tabs:SetActivePage(3, true)
-                m_isMirroringTab = false
-            end
-        end)
+        include("HeroesSupport")
 
         RefreshHeroesPanel = WrapFunc(RefreshHeroesPanel, function(orig)
             orig()
-            BuildHeroesTree()
+            SyncCAITab(3)
+            BuildHeroesList()
         end)
     end
 end

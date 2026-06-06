@@ -761,17 +761,8 @@
     <Row Tag="LOC_CAI_GP_LOCAL_PROGRESS" Language="en_US">
       <Text>Your progress: {1_Points} of {2_Cost}, {3_PerTurn} per turn</Text>
     </Row>
-    <Row Tag="LOC_CAI_GP_BIOGRAPHY" Language="en_US">
-      <Text>Biography</Text>
-    </Row>
     <Row Tag="LOC_CAI_GP_NO_BIOGRAPHY" Language="en_US">
       <Text>No biography available</Text>
-    </Row>
-    <Row Tag="LOC_CAI_GP_NONE_AVAILABLE" Language="en_US">
-      <Text>No one available</Text>
-    </Row>
-    <Row Tag="LOC_CAI_GP_PAST_TABLE" Language="en_US">
-      <Text>Previously Recruited</Text>
     </Row>
     <Row Tag="LOC_CAI_GP_COL_PERSON" Language="en_US">
       <Text>Great Person</Text>
@@ -785,11 +776,38 @@
     <Row Tag="LOC_CAI_GP_COL_ABILITIES" Language="en_US">
       <Text>Abilities</Text>
     </Row>
-    <Row Tag="LOC_CAI_GP_HEROES_TREE" Language="en_US">
+    <Row Tag="LOC_CAI_GP_HEROES_LIST" Language="en_US">
       <Text>Heroes</Text>
     </Row>
-    <Row Tag="LOC_CAI_GP_HERO_CIVILOPEDIA" Language="en_US">
-      <Text>Civilopedia</Text>
+    <Row Tag="LOC_CAI_GP_HERO_LABEL_DISCOVERED" Language="en_US">
+      <Text>{1_Name}, Discovered</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_HERO_LABEL_RECRUITED" Language="en_US">
+      <Text>{1_Name}, Recruited by {2_CivName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_HERO_LABEL_DECEASED" Language="en_US">
+      <Text>{1_Name}, Recruited by {2_CivName}, Deceased</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_WORLD_CONGRESS_READONLY" Language="en_US">
+      <Text>World Congress is in session, actions are disabled</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_PERSON_LABEL_EARN_BLOCKED" Language="en_US">
+      <Text>{1_Name}, {2_Class}, {3_EarnConditions}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_PERSON_LABEL_RECRUITABLE" Language="en_US">
+      <Text>{1_Name}, {2_Class}, Ready to recruit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_RECRUIT_LABEL" Language="en_US">
+      <Text>Recruit, {1_Cost} points</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_REJECT_LABEL" Language="en_US">
+      <Text>Pass, {1_Cost} points</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_PATRONIZE_GOLD_LABEL" Language="en_US">
+      <Text>Patronize with Gold, {1_Cost} [ICON_Gold]</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_PATRONIZE_FAITH_LABEL" Language="en_US">
+      <Text>Patronize with Faith, {1_Cost} [ICON_Faith]</Text>
     </Row>
 
     <!-- Top panel hotkeys -->
@@ -3147,6 +3165,12 @@
     </Row>
     <Row Tag="LOC_CAI_WC_VOTE_REMOVED" Language="en_US">
       <Text>Vote removed, gained {1_Favor} Diplomatic Favor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_SUPPORT_VOTES" Language="en_US">
+      <Text>Support, {1_Count} votes</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_OPPOSE_VOTES" Language="en_US">
+      <Text>Oppose, {1_Count} votes</Text>
     </Row>
     <Row Tag="LOC_CAI_WC_COST_LABEL" Language="en_US">
       <Text>Cost:</Text>
