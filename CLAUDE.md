@@ -48,12 +48,19 @@ Before implementation work:
 
 If `project_status.md` says a user test is pending, ask for that result before layering more code on the same area.
 
+## File Creation Rules
+
+- **In-game screens** are partial replacements. Create a file named `{OriginalName}_CAI.lua`. At the top, include the base file conditionally: if the original has DLC replacements, include those with `if IsExpansion2Active() then include("X_Expansion2") elseif IsExpansion1Active() then include("X_Expansion1") else include("X") end`. Register the file in `CivViAccess.modinfo` as a `<ReplaceUIScript>` with `<LuaContext>` matching the vanilla context name and `<LuaReplace>` pointing to the new file.
+- **Front-end or shared UI** (main menu, options menu) are full replacements. Copy the vanilla file into the mod, then add accessibility code directly before the `Initialize()` call at the end, between `--#Accessibility integration` and `--#End of accessibility integration` comments.
+- Every new CAI screen file must be added to both the top-level `<File>` list (which registers it on the VFS) and as a `<ReplaceUIScript>` entry in `src/CivViAccess.modinfo` or it will not load. The top-level `<File>` list is separate from `<ImportFiles>` — even `<ReplaceUIScript>` files need a top-level `<File>` entry.
+- If the original vanilla file uses a wildcard-style `include()` (e.g. `include("FileName")`  resolved at runtime from any loaded context), the CAI file must also be added to the `<ImportFiles>` section under `<ImportFiles id="CAIInGame">` in addition to the `<File>` list. This makes it available for wildcard resolution.
+
 ## Coding Rules
 
 - Logs and code comments are English.
-- All user-facing strings must be localized.
+- All user-facing strings must be localized. Never use literal strings for user-facing text; only debug prints may use literals.
 - Prefer existing control text and tooltips through `control:GetText()` and `control:GetToolTipString()`.
-- Use `Locale.Lookup()` when no existing control exposes the text or for CAI-specific localization tags.
+- Use `Locale.Lookup()` when no existing control exposes the text or for CAI-specific localization tags. Add new `LOC_CAI_` tags to `src/Text/en_US/cai_text_ui.xml` when vanilla has no suitable key.
 - TTS output must always go through `Speak()` in `caiUtils.lua`; never call `CAI.output` directly.
 - Work with vanilla game mechanics. Preserve vanilla callbacks, events, input contexts, dialogs, and state changes where possible.
 - Do not override vanilla game keys casually. Use safe mod keys or bindable input actions.

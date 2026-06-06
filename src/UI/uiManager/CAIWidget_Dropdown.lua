@@ -37,9 +37,11 @@ local function RebuildList(self)
     self._list:ClearChildren()
     local mgr = self.Manager
     for i, opt in ipairs(self._options) do
-        local item = mgr:CreateWidget(self.Id .. "_Item" .. i, "MenuItem", {
-            Label = function() return opt.label end,
-        })
+        local props = { Label = function() return opt.label end }
+        if opt.tooltip then
+            props.Tooltip = function() return opt.tooltip end
+        end
+        local item = mgr:CreateWidget(self.Id .. "_Item" .. i, "MenuItem", props)
         item._dropdownIndex = i
         item:On("activate", function(menuItem)
             self:Commit(menuItem._dropdownIndex)
@@ -90,7 +92,6 @@ function DropdownWidget.Create(mgr, id, props)
         },
         {
             Key = Keys.VK_ESCAPE,
-            MSG = KeyEvents.KeyDown,
             Action = function(self)
                 if not self._isOpen then return false end
                 self:Close()
@@ -161,11 +162,13 @@ function DropdownWidget:GetRawValue() return self._value end
 ---@param options DropdownOption[]
 function DropdownWidget:SetOptions(options)
     self._options = options or {}
-    if self._selectedIndex < 1 or self._selectedIndex > #self._options then
-        self._selectedIndex = #self._options > 0 and 1 or 0
+    if self._selectedIndex > #self._options then
+        self._selectedIndex = 0
+        self._value = nil
+    else
+        local opt = self._options[self._selectedIndex]
+        self._value = opt and opt.value or nil
     end
-    local opt = self._options[self._selectedIndex]
-    self._value = opt and opt.value or nil
     RebuildList(self)
 end
 

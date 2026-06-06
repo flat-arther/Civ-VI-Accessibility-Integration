@@ -402,7 +402,12 @@ local function PushPanelWhenReady()
     m_tutorialPushDelay = false
     m_tutorialControlsReady = false
     m_tutorialPushPending = false
-    mgr:Push(m_panel, PopupPriority.Low)
+
+    local ePlayer = Game.GetLocalPlayer()
+    local playerTechs = ePlayer and ePlayer ~= -1 and Players[ePlayer]:GetTechs() or nil
+    local hasCurrent = playerTechs and playerTechs:GetResearchingTech() ~= -1
+    local focusChild = hasCurrent and m_queueTree or m_availableTree
+    mgr:Push(m_panel, { focus = focusChild, priority = PopupPriority.Low })
 end
 
 local function OnPanelOpenedCAI()

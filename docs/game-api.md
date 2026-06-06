@@ -258,8 +258,77 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - reveal tracks first-reveal plots separately from revisit-visible plots
   - first reveal is detected from a Lua-side `PlayerVisibility:IsRevealed(plot)` snapshot rather than a custom C++ hook
   - the reveal line speaks `<N> tiles revealed` when unexplored plots were involved, otherwise `Revealed`
+
+## Screen Investigation Notes
+
+### Great People Popup
+
+- Base popup files are `decompiled/Assets/UI/Popups/GreatPeoplePopup.lua` and `.xml`.
+- The popup is opened from the Launch Bar via `LuaEvents.LaunchBar_OpenGreatPeoplePopup`, from the notification center via `LuaEvents.NotificationPanel_OpenGreatPeoplePopup`, and from the `ToggleGreatPeople` input action handled in `LaunchBar.lua`.
+- Base game tabs are `Great People` and `Previously Recruited`. The popup uses `CreateTabs(...)`, but its own input handler only consumes `Escape`; all per-item interaction in the Lua file is wired through mouse callbacks (`Mouse.eLClick`) on the tab buttons and row controls.
+- When opened from a `CLAIM_GREAT_PERSON` notification, the popup explicitly selects the `Great People` tab.
+- The `Great People` tab is a horizontally scrolling strip of one card per currently available Great Person candidate. If any candidate is currently recruitable, the popup auto-scrolls to the first recruitable card on open or refresh.
+- Each Great Person card contains:
+  - class name, individual name, era, portrait, passive/active effect list
+  - a `Biography` button that swaps the card into a biography view populated from Civilopedia history loc keys
+  - a `Recruit progress` section with one collapsed local-player row plus expandable rows for all alive major players
+  - per-player progress rows formatted as `current points / recruit cost`, with a progress bar and a tooltip containing that player's per-turn rate for the class
+  - contextual action buttons: `Recruit`, `Pass`, `Gold patronage`, `Faith patronage`
+  - a red `Cannot Recruit` label when `Game.GetGreatPeople():GetEarnConditionsText(...)` returns a restriction string
+- Recruit / pass / patronage actions call `UI.RequestPlayerOperation(...)` and immediately close the popup.
+- The `Previously Recruited` tab switches to a vertical history table showing earn date, Great Person, claimant civ/leader, and passive/active ability summaries.
+- The popup listens for `Events.GreatPeoplePointsChanged` and refreshes live while open, and closes automatically on hotseat turn end.
+- Expansion behavior is additive through the wildcard include at the bottom of `GreatPeoplePopup.lua`:
+  - `Expansion1` overrides the gold / faith patronage tooltips when the player is not allowed to patronize with that yield (`IsNoPatronageWith(...)`).
+  - `Expansion2` overrides `IsReadOnly()` so the popup becomes read-only during an active World Congress session.
+  - `Babylon Heroes` adds a third `Heroes` tab instead of replacing the existing tabs. The screen title/tooltip become `Heroes & Great People`, and the extra tab is driven by `GreatPeopleHeroPanel.lua/.xml`.
+- The Babylon `Heroes` tab reuses the same horizontal card metaphor but swaps in hero-specific controls:
+  - hero portrait, stats, abilities, commands, status
+  - `Look At` button for the current hero or origin city
+  - `Civilopedia` button
+  - `Faith Recall` button when the claimed local hero is dead and recall is allowed
   - hidden speaks as its own `Hidden: ...` line
   - gone speaks as its own `Gone: ...` line
+
+## World Congress popup
+
+- Gathering Storm's World Congress UI is split across three standalone popup contexts under `decompiled/DLC/Expansion2/UI/Additions/`:
+  - `WorldCongressIntro.lua/.xml`: a full-screen intro banner with title, two centered body paragraphs, and one `Continue` button. It opens on `Events.WorldCongressStage1/Stage2`, and `Escape`, `Enter`, and the `EndTurn` action all dismiss it into the main congress popup.
+  - `WorldCongressPopup.lua/.xml`: the main congress screen. It is a full-screen framed overlay with a fixed left member ribbon (`CongressMembers`), a centered title + Favor total, a large central content frame, bottom navigation buttons, a top launch-bar strip with `World Congress` and `Diplomacy` buttons, and a close button in the top-right corner.
+  - `WorldCongressBetweenTurns.lua/.xml`: the between-turns waiting banner shown after the player submits votes in single-player. It shows a vertical list of leader portraits with `Waiting` / `Submitted` status rows and a centered status line until all players finish.
+- Main popup stages and phases:
+  - stage 1 = regular session voting
+  - stage 2 = special session / emergency voting
+  - stage 4 = out-of-session review
+  - while in session, the popup uses two phases: phase 1 is vote entry, phase 2 is a summary/confirmation screen before submission
+- Sighted stage-1 / stage-2 layout:
+  - left column: one portrait tile per alive major civ, wrapping vertically, with Favor and sometimes grievance values beneath the portrait
+  - main body: a scrollable stack of framed cards
+  - bottom buttons: `Prev`, `Next`, `Pass`, `Submit`, or `Return` depending on stage/tab
+  - the active screen title also shows the local player's remaining spendable Diplomatic Favor on the right
+- Resolution cards (`ResolutionItem`) are visually rich and stateful:
+  - title + icon + description
+  - two large A/B outcome slots
+  - each outcome has a separate up/down vote widget with live vote count and incremental Favor cost
+  - a target selector under the chosen outcome, using either a normal pulldown or a player pulldown with civ + leader icons
+  - favored/disfavored player badges showing how many leaders prefer each side
+  - a `MoreInfo` button whose tooltip summarizes how this same resolution went the previous time it appeared
+  - visual selection state is shown by swapping frame textures and line colors once the player has both chosen an outcome and selected a target
+- Discussion / emergency proposal cards (`ProposalItem`, `EmergencyProposalItem`) show:
+  - title, description, target leader or proposal-type icon
+  - a single vote widget for up/down support during an active session
+  - expandable emergency details outside a session
+  - in the `Available Proposals` review tab, a checkbox-style selector is used instead of live voting so the player chooses which emergency proposals to submit for a future special session
+- Review mode (stage 4) has three top tabs:
+  - `Last Session Results`: shows passed/failed resolutions and discussions, with expandable per-player vote breakdowns
+  - `Active Effects`: shows currently active resolutions and how many turns remain
+  - `Available Proposals`: shows emergencies/special-session proposals the player can currently submit
+- Input and launch behavior:
+  - the HUD congress button (`CongressButton.lua`) either resumes the live congress session or opens the results/review popup when congress is not in session
+  - the main popup's `DiploButton` opens diplomacy directly from the congress overlay
+  - clicking leader portraits in the left ribbon opens diplomacy for that leader when met
+  - `Enter` advances from phase 1 to phase 2, or submits on the confirmation screen; in review mode it activates the visible submit/return path
+  - `Escape` closes the popup; the close button mirrors that behavior
 - Unit reveal and hidden speech is snapshot-driven:
   - visibility events only refresh the shared timer
   - flush rebuilds the currently visible foreign-unit set from live unit state
@@ -1110,6 +1179,67 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - Stat boxes: `AddRightColumnStatBox(title, populate_method)` (line 1641) builds a stat box and calls `populate_method(stat_box)` once. `stat_box` is a local table built fresh per call, with methods `AddSeparator`, `AddHeader(caption)`, `AddLabel(caption)`, `AddSmallLabel(caption)`, `AddIconLabel(icon, caption)`, `AddIconNumberLabel(icon, value, caption)`, `AddIconList(icon1..icon4)`. These methods cannot be wrapped globally — wrap `AddRightColumnStatBox` itself and replace `stat_box[name]` with a shim that records and delegates before invoking the user populate. The user populate must still run; do not run it twice.
   - `AddIconLabel` / `AddIconList` internally call `HookupIcon`, so a global `HookupIcon` wrap will see every stat-box icon. If you also capture related links through `HookupIcon`, suppress that capture (via a state flag) for the duration of the wrapped stat-box populate so icons inside stat boxes don't duplicate into a global Related list.
   - Focus seeding on a deep `TreeviewItem` requires expanding its ancestor tree items first: `TreeviewItem.GetDefaultChild` returns nil when `IsExpanded` is false (`src/UI/uiManager/widgetTemplates.lua:878-883`), so `mgr:SetFocus(leaf)` will not land on a leaf inside collapsed ancestors. Walk `node.Parent` up to the Treeview root and call `:Expand()` on each ancestor `TreeviewItem` before `SetFocus`.
+
+- `ReligionScreen.lua` / `ReligionScreen.xml` (decompiled/Assets/UI/):
+  - Mainline base, Rise and Fall, and Gathering Storm all register the same `ReligionScreen` context. Base `Assets/UI/InGame.xml`, XP1 `DLC/Expansion1/UI/InGame.xml`, and XP2 `DLC/Expansion2/UI/Replacements/InGame.xml` each declare `<LuaContext ID="ReligionScreen" FileName="ReligionScreen" Hidden="1"/>`; there is no separate XP1/XP2 religion-screen replacement in the decompiled UI mirror.
+  - Mainline base, Rise and Fall, and Gathering Storm also keep the same standalone `PantheonChooser` context. `Assets/UI/InGame.xml` registers `<LuaContext ID="PantheonChooser" FileName="PantheonChooser" Hidden="1"/>`, and there is no separate XP1/XP2 pantheon-chooser replacement in the decompiled UI mirror.
+  - Opening path is split across three vanilla entry points:
+    - `LaunchBar.lua` opens `PantheonChooser` instead of `ReligionScreen` when the local player can found a pantheon and has none yet; otherwise it raises `LuaEvents.LaunchBar_OpenReligionPanel()`.
+    - `NotificationPanel.lua` routes both choose-pantheon and choose-religion notifications into the religion flow (`OpenPantheonChooser` for pantheon, `OpenReligionPanel` for religion).
+    - `PantheonChooser.lua` closes after founding the pantheon, then immediately raises `LuaEvents.PantheonChooser_OpenReligionPanel()` so the full religion screen opens next.
+  - `PantheonChooser.lua` / `PantheonChooser.xml` (decompiled/Assets/UI/Choosers/) is a separate compact left slide-out chooser:
+    - `PantheonChooserSlideAnim` slides a 495px-wide panel in from the left.
+    - Top panel: decorative religion frame plus either the generic `Choosing a Pantheon` title or a selected-belief summary card.
+    - Body panel: one scrollable vertical stack of pantheon belief buttons; each row is a large card with icon, uppercase belief name, and wrapped description.
+    - Bottom drawer: `Found this Pantheon` confirm button plus `Reselect Pantheon` clear-selection button.
+    - Interaction model: single-select only. Clicking a belief highlights it and reveals the confirm drawer; clicking the selected summary card or the reset button clears the selection; Escape or the close button closes the chooser.
+    - Confirm path: `ConfirmPantheon()` submits `PlayerOperations.FOUND_PANTHEON`, closes the chooser, then raises `LuaEvents.PantheonChooser_OpenReligionPanel()` to open the full religion screen.
+  - The religion screen is a single stateful popup that swaps whole-page containers on one shared context. `ViewMyReligion()` is the state router and chooses among:
+    - `WorkingTowardsPantheon()`
+    - `WorkingTowardsReligion()`
+    - `ChooseReligion()`
+    - `SelectPantheonBeliefs()`
+    - `SelectReligionBeliefs()`
+    - `ConfirmPantheonBeliefs()`
+    - `ConfirmReligionBeliefs()`
+    - `ViewReligion(religionType)`
+    - `ViewAllReligions()`
+  - XML top-level sections are:
+    - `WorkingTowards`: progress/instructions before founding
+    - `SelectBeliefs`: choose beliefs for a pantheon or first-time religion founding
+    - `AddBeliefs`: add beliefs to an existing founded religion
+    - `ChooseReligion`: icon-grid religion picker plus optional custom-name edit box
+    - `ViewReligion`: one religion detail page with beliefs, pantheon, unit icons, and city table
+    - `ViewAllReligions`: scrollable multi-card summary of every founded religion
+  - Tab strip behavior:
+    - Tabs are rebuilt every open from live religion state.
+    - First tab is always the local player's current religion/pantheon state (`My Religion` or `My Pantheon`).
+    - One tab is added for each founded non-pantheon religion other than the player's own.
+    - Final tab is `All Religions` only when at least one religion has been founded.
+    - When tabs do not fit, middle religion tabs collapse to icon-only buttons and expose the religion name by tooltip instead of visible text.
+  - `ViewReligion(...)` is the main sighted-information page. It shows:
+    - Religion identity block: large icon, religion name, founder civ, holy city, dominant-city count
+    - Unit icon strip: all religious-strength units the local player can own/build in the current ruleset, including scenario-added units; the count badge shows how many are owned, and alpha dimming indicates none owned
+    - Pantheon summary block: pantheon icon plus full belief description
+    - Beliefs list: unlocked beliefs first, then gray `Locked belief` placeholders up to `NUM_MAX_BELIEFS` (4)
+    - Cities table: city name, follower counts for each founded religion, and the active pantheon belief description for that city
+    - City filter pull-down with two modes: cities following the selected religion, or cities where the religion is merely present
+  - `ViewAllReligions()` is not interactive beyond scrolling; it renders one card per founded religion with religion icon, founder, dominant-city count, and a compact list of equipped beliefs.
+  - `ChooseReligion()` uses a grid of clickable religion icons (`ReligionOption` instances). Selecting one updates the big preview icon/title on the left and may enable a custom-name `EditBox` when `RequiresCustomName` and `CAPABILITY_RENAME` are both true.
+  - Belief-picking behavior:
+    - Available beliefs are displayed as large button rows with icon, uppercase name, and description.
+    - Clicking a belief disables its source row and adds it to the selected-beliefs list.
+    - When the player has no equipped religion beliefs yet, vanilla forces the first pick to be a follower belief before broader religion beliefs become available.
+    - Confirm/reselect buttons swap in only after the required number of beliefs is selected.
+    - Pantheon founding is single-belief-only in both the standalone chooser and the religion-screen pantheon state.
+  - Input/lifecycle:
+    - Escape closes the popup.
+    - The screen is a low-priority popup queued at the current parent, not a full hard modal over everything.
+    - `Events.BeliefAdded`, `PantheonFounded`, and `ReligionFounded` refresh the screen, except during the short post-confirm blocking-state window guarded by `m_isConfirmedBeliefs`.
+  - Scenario exceptions:
+    - `DLC/PolandScenario/UI/ReligionScreen.lua` and `DLC/VikingsScenario/UI/ReligionScreen.lua` each ship their own full `ReligionScreen.lua` copy, including pantheon-selection states (`SelectPantheonBeliefs`, `ConfirmPantheonBeliefs`) and `FOUND_PANTHEON` handling inside the full-screen religion UI rather than the standalone chooser.
+    - `DLC/Indonesia_KhmerScenario/UI/Replacements/ReligionScreen_Indonesia_KhmerScenario.lua` is only a thin wrapper around base `ReligionScreen` that overrides `AddLockedBeliefs`; it does not replace the pantheon-founding interaction model.
+  - Accessibility-shape implication: this is fundamentally a tabbed multi-state information-and-picker screen, not one flat list. CAI should preserve the state model and expose explicit widgets for tab strip, current page body, religion icon grid, belief lists, and the per-city follower matrix rather than flattening everything into one monolithic reader.
 
 ## Interface Modes
 

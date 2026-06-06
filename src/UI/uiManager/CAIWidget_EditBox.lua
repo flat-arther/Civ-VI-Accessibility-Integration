@@ -102,8 +102,14 @@ function EditBoxWidget.Create(mgr, id, props)
     -- Leaving focus mid-edit on a non-AlwaysEdit box would silently strand the
     -- buffer (and lose the cancel-restore point on the next refresh). Auto-
     -- cancel so the committed value stays intact and the user hears it.
+    -- AlwaysEdit + writable boxes auto-commit on focus loss (matches vanilla
+    -- edit-mode behavior where the field value is always live).
     w:On("focus_leave", function(self)
-        if self._active and not self._alwaysEdit then self:Cancel() end
+        if self._active and not self._alwaysEdit then
+            self:Cancel()
+        elseif self._alwaysEdit and not self._readOnly then
+            self:Commit()
+        end
     end)
 
     CAIWidgetRegistry.ApplyProps(w, props)

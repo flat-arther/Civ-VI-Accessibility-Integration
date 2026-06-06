@@ -4,6 +4,8 @@
 PanelWidget = setmetatable({}, { __index = ContainerWidget })
 PanelWidget.__index = PanelWidget
 
+local Nav = CAIWidgetHelpers_Navigation
+
 ---@param mgr UIScreenManager
 ---@param id string
 ---@param props? table
@@ -20,6 +22,14 @@ function PanelWidget.Create(mgr, id, props)
     })
     CAIWidgetRegistry.ApplyProps(w, props)
     return w
+end
+
+---@param direction 1|-1|0|nil
+---@return UIWidget|nil
+function PanelWidget:GetEntryChild(direction)
+    if direction == 1 then return Nav.First(self) end
+    if direction == -1 then return Nav.Last(self) end
+    return Nav.DefaultChild(self)
 end
 
 CAIWidgetRegistry.Register("Panel", PanelWidget.Create)

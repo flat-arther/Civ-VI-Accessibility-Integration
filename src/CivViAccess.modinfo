@@ -68,6 +68,7 @@
     <File>UI/inGame/DeclareWarPopup_CAI.lua</File>
     <File>UI/inGame/DiplomacyActionView_CAI.lua</File>
     <File>UI/inGame/DiplomacyDealView_CAI.lua</File>
+    <File>UI/inGame/GreatPeoplePopup_CAI.lua</File>
     <File>UI/inGame/InGameTopOptionsMenu_CAI.lua</File>
     <File>UI/inGame/WorldInput_CAI.lua</File>
     <File>UI/inGame/WorldTracker_CAI.lua</File>
@@ -98,6 +99,17 @@
     <File>UI/inGame/WorldScanner/WorldScannerCategory_specialMapObjects.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
+    <File>UI/inGame/CityStates_CAI.lua</File>
+    <File>UI/inGame/ReligionScreen_CAI.lua</File>
+    <File>UI/inGame/PantheonChooser_CAI.lua</File>
+    <File>UI/inGame/EraReviewPopup_CAI.lua</File>
+    <File>UI/inGame/RazeCity_CAI.lua</File>
+    <File>UI/inGame/DisloyalCityChooser_CAI.lua</File>
+    <File>UI/inGame/DedicationPopup_CAI.lua</File>
+    <File>UI/inGame/WorldCongressIntro_CAI.lua</File>
+    <File>UI/inGame/WorldCongressPopup_CAI.lua</File>
+    <File>UI/inGame/WorldCongressBetweenTurns_CAI.lua</File>
+    <File>UI/inGame/DiplomacyRibbon_CAI.lua</File>
     <File>UI/inGame/CivicsChooser_CAI.lua</File>
     <File>UI/inGame/CivicsTree_CAI.lua</File>
     <File>UI/inGame/TechTree_CAI.lua</File>
@@ -239,6 +251,10 @@
            so the CAI layer rides that wildcard as an imported file instead of a
            full LuaReplace. Keeps every vanilla/DLC DiplomacyDealView_* override. -->
       <File>UI/inGame/DiplomacyDealView_CAI.lua</File>
+      <!-- GreatPeoplePopup is a wildcard host (include("GreatPeoplePopup_", true)),
+           so the CAI layer rides that wildcard as an imported file instead of a
+           full LuaReplace. Keeps every vanilla/DLC GreatPeoplePopup_* override. -->
+      <File>UI/inGame/GreatPeoplePopup_CAI.lua</File>
       <File>UI/inGame/inGameHelpers_CAI.lua</File>
       <File>UI/inGame/interfaceTargetHelpers_CAI.lua</File>
       <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>
@@ -469,6 +485,94 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>TutorialUIRoot</LuaContext>
         <LuaReplace>UI/inGame/TutorialUIRoot_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_CityStates">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>CityStates</LuaContext>
+        <LuaReplace>UI/inGame/CityStates_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_ReligionScreen">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>ReligionScreen</LuaContext>
+        <LuaReplace>UI/inGame/ReligionScreen_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_PantheonChooser">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>PantheonChooser</LuaContext>
+        <LuaReplace>UI/inGame/PantheonChooser_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_EraReviewPopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>EraReviewPopup</LuaContext>
+        <LuaReplace>UI/inGame/EraReviewPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_RazeCity">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>RazeCity</LuaContext>
+        <LuaReplace>UI/inGame/RazeCity_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_DisloyalCityChooser">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>DisloyalCityChooser</LuaContext>
+        <LuaReplace>UI/inGame/DisloyalCityChooser_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_DedicationPopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>DedicationPopup</LuaContext>
+        <LuaReplace>UI/inGame/DedicationPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WorldCongressIntro">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>WorldCongressIntro</LuaContext>
+        <LuaReplace>UI/inGame/WorldCongressIntro_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WorldCongressPopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>WorldCongressPopup</LuaContext>
+        <LuaReplace>UI/inGame/WorldCongressPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_DiplomacyRibbon">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>DiplomacyRibbon</LuaContext>
+        <LuaReplace>UI/inGame/DiplomacyRibbon_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WorldCongressBetweenTurns">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>WorldCongressBetweenTurns</LuaContext>
+        <LuaReplace>UI/inGame/WorldCongressBetweenTurns_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
   </InGameActions>

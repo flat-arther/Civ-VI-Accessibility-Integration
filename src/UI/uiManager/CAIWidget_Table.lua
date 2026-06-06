@@ -218,31 +218,29 @@ function TableWidget:_FocusedCell()
     return cell, cell.Parent
 end
 
----Visible (1-based) index of a cell within its tier, skipping hidden cells.
+---Find the nearest non-hidden cell to raw child index `idx` in a tier.
+---Searches outward from `idx` (checking idx first, then idx±1, idx±2, …).
 ---@param tier ContainerWidget
----@param cell UIWidget
----@return integer|nil
-local function visibleIndexInTier(tier, cell)
-    local idx = 0
-    for _, c in ipairs(tier.Children) do
-        if not c:IsHidden() then
-            idx = idx + 1
-            if c == cell then return idx end
+---@param idx integer 1-based raw child index
+---@return UIWidget|nil
+local function nearestVisibleAt(tier, idx)
+    local children = tier.Children
+    if not children or #children == 0 then return nil end
+    local n = #children
+    if idx < 1 then idx = 1 end
+    if idx > n then idx = n end
+    for offset = 0, n - 1 do
+        local lo, hi = idx - offset, idx + offset
+        if lo >= 1 then
+            local c = children[lo]
+            if not c:IsHidden() then return c end
+        end
+        if hi ~= lo and hi <= n then
+            local c = children[hi]
+            if not c:IsHidden() then return c end
         end
     end
     return nil
-end
-
----The visible cell at (clamped) vertical index `vIdx` in a tier.
----@param tier ContainerWidget
----@param vIdx integer
----@return UIWidget|nil
-local function cellAtVisibleIndex(tier, vIdx)
-    local visible = tier:GetVisibleChildren()
-    if #visible == 0 then return nil end
-    if vIdx < 1 then vIdx = 1 end
-    if vIdx > #visible then vIdx = #visible end
-    return visible[vIdx]
 end
 
 ---Up/Down within the focused cell's tier. No wrap.
@@ -260,7 +258,8 @@ function TableWidget:_NavigateVertical(dir)
     return false
 end
 
----Left/Right across the flattened tier list, preserving vertical position.
+---Left/Right across the flattened tier list, preserving spatial row position.
+---Uses raw child index so hidden spacers keep tiers aligned.
 ---@param dir 1|-1
 ---@return boolean
 function TableWidget:_NavigateHorizontal(dir)
@@ -272,10 +271,10 @@ function TableWidget:_NavigateHorizontal(dir)
         if t == tier then ti = i; break end
     end
     if not ti then return false end
-    local vIdx = visibleIndexInTier(tier, cell) or 1
+    local rawIdx = tier:GetChildIndex(cell)
     local j = ti + dir
     while j >= 1 and j <= #tiers do
-        local target = cellAtVisibleIndex(tiers[j], vIdx)
+        local target = nearestVisibleAt(tiers[j], rawIdx)
         if target then
             self.Manager:SetFocus(target, { direction = dir })
             return true

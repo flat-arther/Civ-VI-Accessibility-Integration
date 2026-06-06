@@ -895,6 +895,12 @@ local function BuildTechCell(techType)
     return cell
 end
 
+local function MakeTableSpacer()
+    return mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTableSpacer"), "StaticText", {
+        HiddenPredicate = function() return true end,
+    })
+end
+
 local function RebuildTableView()
     if not m_tableView then return end
 
@@ -906,11 +912,15 @@ local function RebuildTableView()
         -- Group this era's filtered techs by their prereq column; each distinct
         -- column becomes one side-by-side tier, ordered left to right.
         local byColumn, colValues = {}, {}
+        local rowMin, rowMax = 0, 0
         for techType, kEntry in pairs(g_kItemDefaults) do
             if kEntry.EraType == era.EraType and FilterMatchesTech(techType) then
                 local col = m_techColumnByType[techType] or 1
                 if not byColumn[col] then byColumn[col] = {}; table.insert(colValues, col) end
-                table.insert(byColumn[col], { techType = techType, row = kEntry.UITreeRow or 0 })
+                local row = kEntry.UITreeRow or 0
+                table.insert(byColumn[col], { techType = techType, row = row })
+                if row < rowMin then rowMin = row end
+                if row > rowMax then rowMax = row end
             end
         end
         if #colValues > 0 then
@@ -922,11 +932,20 @@ local function RebuildTableView()
             })
             for tierIndex, colVal in ipairs(colValues) do
                 local tierTechs = byColumn[colVal]
-                table.sort(tierTechs, function(a, b) return a.row < b.row end)
-                for _, entry in ipairs(tierTechs) do
-                    local cell = BuildTechCell(entry.techType)
-                    m_tableTechs[entry.techType] = cell
-                    m_tableView:AddItem(column, tierIndex, cell)
+                -- Build a sparse map from row -> entry
+                local byRow = {}
+                for _, entry in ipairs(tierTechs) do byRow[entry.row] = entry end
+                -- Fill every slot from rowMin to rowMax; real cells at occupied
+                -- rows, hidden spacers elsewhere so indices align across tiers.
+                for r = rowMin, rowMax do
+                    local entry = byRow[r]
+                    if entry then
+                        local cell = BuildTechCell(entry.techType)
+                        m_tableTechs[entry.techType] = cell
+                        m_tableView:AddItem(column, tierIndex, cell)
+                    else
+                        m_tableView:AddItem(column, tierIndex, MakeTableSpacer())
+                    end
                 end
             end
         end

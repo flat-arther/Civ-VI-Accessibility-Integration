@@ -440,6 +440,14 @@ local function AddTextLineChildren(parent, text)
     end
 end
 
+local function IsSelectedPlayerInCrisis(crisis)
+    if crisis.TargetID == ms_SelectedPlayerID then return true end
+    for _, memberID in ipairs(crisis.MemberIDs) do
+        if memberID == ms_SelectedPlayerID then return true end
+    end
+    return false
+end
+
 local function AddOverviewChildren(node)
     local gossipCount = CountEntries(Game.GetGossipManager():GetRecentVisibleGossipStrings(
         Game.GetCurrentGameTurn() - 1,
@@ -663,6 +671,34 @@ local function AddOverviewChildren(node)
     end
     if relationshipsNode.Children and #relationshipsNode.Children > 0 then
         node:AddChild(relationshipsNode)
+    end
+
+    if IsExpansion1Active() then
+        local emergencyMgr = Game.GetEmergencyManager()
+        local crisisData = emergencyMgr and emergencyMgr.GetEmergencyInfoTable
+            and emergencyMgr:GetEmergencyInfoTable(ms_LocalPlayerID) or {}
+        local emergencyNames = {}
+        for _, crisis in ipairs(crisisData) do
+            if crisis.HasBegun and IsSelectedPlayerInCrisis(crisis) then
+                local localInvolved = crisis.TargetID == ms_LocalPlayerID
+                if not localInvolved then
+                    for _, memberID in ipairs(crisis.MemberIDs) do
+                        if memberID == ms_LocalPlayerID then
+                            localInvolved = true
+                            break
+                        end
+                    end
+                end
+                if localInvolved then
+                    table.insert(emergencyNames, Locale.Lookup(crisis.NameText))
+                end
+            end
+        end
+        if #emergencyNames > 0 then
+            node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyOverviewEmergency"),
+                Locale.Lookup("LOC_CAI_DIPLOMACY_OVERVIEW_EMERGENCY",
+                    table.concat(emergencyNames, ", ")), nil))
+        end
     end
 
     -- Secret Society (Ethiopia game mode). Vanilla injects this as an overview ROW
@@ -1005,30 +1041,39 @@ local function AddAllianceChildren(node)
     end
 end
 
+local function BuildEmergencyTooltip(crisis)
+    local parts = {}
+    if crisis.DescriptionText and crisis.DescriptionText ~= "" then
+        table.insert(parts, Locale.Lookup(crisis.DescriptionText))
+    end
+    if crisis.GoalDescription and crisis.GoalDescription ~= "" then
+        table.insert(parts, crisis.GoalDescription)
+    end
+    if crisis.GoalsTable then
+        local done, total = 0, 0
+        for _, goal in ipairs(crisis.GoalsTable) do
+            total = total + 1
+            if goal.Completed then done = done + 1 end
+        end
+        if total > 0 then
+            table.insert(parts, Locale.Lookup("LOC_CAI_DIPLOMACY_EMERGENCY_PROGRESS", done, total))
+        end
+    end
+    return table.concat(parts, "[NEWLINE]")
+end
+
 local function AddEmergencyChildren(node)
     local manager = Game.GetEmergencyManager()
     local crisisData = manager and manager.GetEmergencyInfoTable
         and manager:GetEmergencyInfoTable(ms_LocalPlayerID) or {}
 
     local targetingNode = CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyEmergencyTargeting"),
-        Locale.Lookup("LOC_CAI_DIPLOMACY_EMERGENCY_TARGETING_YOU"), nil)
+        Locale.Lookup("LOC_DIPLOMACY_EMERGENCIES_TARGET_YOU"), nil)
     local participatingNode = CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyEmergencyParticipating"),
-        Locale.Lookup("LOC_CAI_DIPLOMACY_EMERGENCY_PARTICIPATING"), nil)
+        Locale.Lookup("LOC_DIPLOMACY_EMERGENCIES_PARTICIPATING_YOU"), nil)
 
     for _, crisis in ipairs(crisisData) do
-        -- Only crises the selected player is involved in (target or member).
-        local selectedParticipates = crisis.TargetID == ms_SelectedPlayerID
-        if not selectedParticipates then
-            for _, memberID in ipairs(crisis.MemberIDs) do
-                if memberID == ms_SelectedPlayerID then
-                    selectedParticipates = true
-                    break
-                end
-            end
-        end
-
-        if selectedParticipates then
-            -- Group by the local player's role, mirroring vanilla's two stacks.
+        if IsSelectedPlayerInCrisis(crisis) then
             local destination = nil
             if crisis.TargetID == ms_LocalPlayerID then
                 destination = targetingNode
@@ -1047,8 +1092,8 @@ local function AddEmergencyChildren(node)
                     or Locale.Lookup("LOC_EMERGENCY_TAB_COMPLETED")
                 local entryNode = CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyEmergencyEntry"),
                     Locale.Lookup("LOC_CAI_DIPLOMACY_EMERGENCY_ENTRY",
-                        Locale.Lookup(crisis.NameText), status), nil)
-                AddTextLineChildren(entryNode, crisis.GoalDescription)
+                        Locale.Lookup(crisis.NameText), status),
+                    BuildEmergencyTooltip(crisis))
                 destination:AddChild(entryNode)
             end
         end

@@ -5,9 +5,9 @@
 --
 -- Tab.focus_enter calls _OnTabFocused so Left/Right in the strip immediately
 -- swaps the active page. Ctrl+Tab / Ctrl+Shift+Tab cycles from anywhere
--- inside the control (input bubbles up to TabControl). Tab/Shift+Tab inside
--- the control behave like any ContainerWidget — strip is child 1, page is
--- child 2.
+-- inside the control (input bubbles up to TabControl). Tab from the strip
+-- enters the page; Tab from the page's last child bubbles out to the next
+-- sibling. Shift+Tab from the page returns to the strip.
 
 ---@class TabControlWidget : ContainerWidget
 ---@field _tabs TabWidget[]
@@ -53,15 +53,13 @@ function TabControlWidget.Create(mgr, id, props)
     w:AddInputBindings({
         { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsControl = true,                  Action = function(self) return self:NextPage() end },
         { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsControl = true, IsShift = true,  Action = function(self) return self:PreviousPage() end },
-        -- Plain Tab keeps focus inside the TabControl as a cycle:
-        --   strip -> (Tab) -> first child of page
-        --   last child of page -> (Tab) -> active tab in strip
-        -- The page's NavigateNext consumes Tab while children remain; only
-        -- the boundary case bubbles here.
-        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown,                                    Action = function(self) return self:_TabForwardCycle() end },
-        -- Symmetric reverse cycle: Shift+Tab from inside the page returns to
-        -- the active tab; Shift+Tab from a tab in the strip bubbles so the
-        -- user can exit the TabControl backward.
+        -- Tab from the strip enters the first child of the active page.
+        -- When focus is at the last child of the page, Tab is NOT consumed
+        -- so it bubbles to the parent and moves to the next sibling.
+        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown,                                    Action = function(self) return self:_EnterPageFromStrip(1) end },
+        -- Shift+Tab from inside the page returns to the active tab in the
+        -- strip; Shift+Tab from a tab in the strip bubbles so the user can
+        -- exit the TabControl backward.
         { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsShift = true,                    Action = function(self) return self:_ReturnToStripFromPage() end },
     })
 
@@ -69,19 +67,24 @@ function TabControlWidget.Create(mgr, id, props)
     return w
 end
 
----Default focus entry skips the tab strip and lands on the active page so
----first-time entry into the TabControl places the user on page content.
----ExpandOrDescend-style strip access still works because Tabs are reachable
----via Shift+Tab from the page (_ReturnToStripFromPage) and the strip is the
----first child for backward containers descent.
+---Programmatic focus (no direction) lands on the active page.
 ---@return UIWidget|nil
 function TabControlWidget:GetDefaultChild()
     return self:GetActivePage() or self._tabStrip
 end
 
+---Directional entry: Tab (direction=1) lands on the tab strip so the user
+---sees which tab is active; Shift+Tab (direction=-1) lands on the page's
+---last child. No direction → default to page.
 ---@param direction 1|-1|0|nil
 ---@return UIWidget|nil
 function TabControlWidget:GetEntryChild(direction)
+    if direction == 1 then
+        return self._tabStrip
+    end
+    if direction == -1 then
+        return self:GetActivePage() or self._tabStrip
+    end
     return self:GetActivePage() or self._tabStrip
 end
 
@@ -109,21 +112,6 @@ function TabControlWidget:_EnterPageFromStrip(direction)
     local page = self:GetActivePage()
     if not page then return false end
     self.Manager:SetFocus(page, { direction = direction })
-    return true
-end
-
----Forward-Tab cycle inside the TabControl. Bubbles in two cases:
----  * Focus is in the strip → step into the page (first child).
----  * Focus is in the page, NavigateNext already returned false (last child)
----    → wrap back to the active tab in the strip.
----@return boolean
-function TabControlWidget:_TabForwardCycle()
-    if self:_EnterPageFromStrip(1) then return true end
-    local page = self:GetActivePage()
-    if not self:_FocusInside(page) then return false end
-    local tab = self._tabs[self._activeIndex]
-    if not tab then return false end
-    self.Manager:SetFocus(tab, { direction = 1 })
     return true
 end
 

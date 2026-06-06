@@ -862,6 +862,12 @@ local function BuildCivicCell(civicType)
     return cell
 end
 
+local function MakeTableSpacer()
+    return mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicTableSpacer"), "StaticText", {
+        HiddenPredicate = function() return true end,
+    })
+end
+
 local function RebuildTableView()
     if not m_tableView then return end
 
@@ -873,11 +879,15 @@ local function RebuildTableView()
         -- Group this era's filtered civics by their tree Column; each distinct
         -- Column becomes one side-by-side tier, ordered left to right.
         local byColumn, colValues = {}, {}
+        local rowMin, rowMax = 0, 0
         for civicType, kEntry in pairs(g_kItemDefaults) do
             if kEntry.EraType == era.EraType and FilterMatchesCivic(civicType) then
                 local col = kEntry.Column or 0
                 if not byColumn[col] then byColumn[col] = {}; table.insert(colValues, col) end
-                table.insert(byColumn[col], { civicType = civicType, row = kEntry.UITreeRow or 0 })
+                local row = kEntry.UITreeRow or 0
+                table.insert(byColumn[col], { civicType = civicType, row = row })
+                if row < rowMin then rowMin = row end
+                if row > rowMax then rowMax = row end
             end
         end
         if #colValues > 0 then
@@ -889,11 +899,20 @@ local function RebuildTableView()
             })
             for tierIndex, colVal in ipairs(colValues) do
                 local tierCivics = byColumn[colVal]
-                table.sort(tierCivics, function(a, b) return a.row < b.row end)
-                for _, entry in ipairs(tierCivics) do
-                    local cell = BuildCivicCell(entry.civicType)
-                    m_tableCivics[entry.civicType] = cell
-                    m_tableView:AddItem(column, tierIndex, cell)
+                -- Build a sparse map from row -> entry
+                local byRow = {}
+                for _, entry in ipairs(tierCivics) do byRow[entry.row] = entry end
+                -- Fill every slot from rowMin to rowMax; real cells at occupied
+                -- rows, hidden spacers elsewhere so indices align across tiers.
+                for r = rowMin, rowMax do
+                    local entry = byRow[r]
+                    if entry then
+                        local cell = BuildCivicCell(entry.civicType)
+                        m_tableCivics[entry.civicType] = cell
+                        m_tableView:AddItem(column, tierIndex, cell)
+                    else
+                        m_tableView:AddItem(column, tierIndex, MakeTableSpacer())
+                    end
                 end
             end
         end
