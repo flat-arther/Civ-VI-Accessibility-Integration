@@ -685,53 +685,91 @@ local function BuildVotingBody()
                     propItem.FocusKey = "prop:" .. instanceRoot:GetID()
                     propItem:SetFocusSound(HOVER_SOUND)
 
+                    local DIRECTION_SUPPORT = 1
+                    local DIRECTION_OPPOSE = -1
+
                     local function GetPropVoteState()
                         local text = voteLabel and voteLabel:GetText() or "0"
                         local votes = tonumber(text:match("%d+")) or 0
                         local costText = voteCostCtrl and voteCostCtrl:GetText() or ""
                         local cost = tonumber(costText:match("%d+")) or 0
-                        return votes, cost
-                    end
-
-                    local function BuildPropVoteTooltip(vanillaBtn)
-                        local parts = {}
-                        local tip = vanillaBtn and vanillaBtn:GetToolTipString() or ""
-                        if tip ~= "" then table.insert(parts, tip) end
-                        local votes, cost = GetPropVoteState()
+                        local direction = 0
                         if votes > 0 then
-                            table.insert(parts, Locale.Lookup("LOC_CAI_WC_CURRENT_VOTES", votes, cost))
+                            if text:find("ICON_VOTE_DOWN") then
+                                direction = DIRECTION_OPPOSE
+                            else
+                                direction = DIRECTION_SUPPORT
+                            end
                         end
-                        return table.concat(parts, ", ")
+                        return votes, cost, direction
                     end
 
                     if voteUpBtn then
                         local support = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWC_PropUp"), "Button", {
-                            Label = function() return Locale.Lookup("LOC_CAI_WC_SUPPORT") end,
-                            Tooltip = function() return BuildPropVoteTooltip(voteUpBtn) end,
+                            Label = function()
+                                local _, _, dir = GetPropVoteState()
+                                if dir == DIRECTION_OPPOSE then
+                                    return Locale.Lookup("LOC_CAI_WC_REMOVE_VOTE")
+                                end
+                                return Locale.Lookup("LOC_CAI_WC_SUPPORT")
+                            end,
+                            Tooltip = function()
+                                local parts = {}
+                                local tip = voteUpBtn:GetToolTipString() or ""
+                                if tip ~= "" then table.insert(parts, tip) end
+                                local votes, cost, dir = GetPropVoteState()
+                                if dir == DIRECTION_SUPPORT and votes > 0 then
+                                    table.insert(parts, Locale.Lookup("LOC_CAI_WC_CURRENT_VOTES", votes, cost))
+                                end
+                                return table.concat(parts, ", ")
+                            end,
                         })
                         support:SetFocusSound(HOVER_SOUND)
                         support:SetDisabledPredicate(function() return voteUpBtn:IsDisabled() end)
                         support:On("activate", function()
-                            local _, prevCost = GetPropVoteState()
+                            local prevVotes, prevCost = GetPropVoteState()
                             voteUpBtn:DoLeftClick()
-                            local _, newCost = GetPropVoteState()
-                            Speak(Locale.Lookup("LOC_CAI_WC_VOTE_ADDED", newCost - prevCost))
+                            local newVotes, newCost = GetPropVoteState()
+                            if newVotes > prevVotes then
+                                Speak(Locale.Lookup("LOC_CAI_WC_VOTE_ADDED", newCost - prevCost))
+                            elseif newVotes < prevVotes then
+                                Speak(Locale.Lookup("LOC_CAI_WC_VOTE_REMOVED", prevCost - newCost))
+                            end
                         end)
                         propItem:AddChild(support)
                     end
 
                     if voteDownBtn then
                         local oppose = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWC_PropDn"), "Button", {
-                            Label = function() return Locale.Lookup("LOC_CAI_WC_OPPOSE") end,
-                            Tooltip = function() return BuildPropVoteTooltip(voteDownBtn) end,
+                            Label = function()
+                                local _, _, dir = GetPropVoteState()
+                                if dir == DIRECTION_SUPPORT then
+                                    return Locale.Lookup("LOC_CAI_WC_REMOVE_VOTE")
+                                end
+                                return Locale.Lookup("LOC_CAI_WC_OPPOSE")
+                            end,
+                            Tooltip = function()
+                                local parts = {}
+                                local tip = voteDownBtn:GetToolTipString() or ""
+                                if tip ~= "" then table.insert(parts, tip) end
+                                local votes, cost, dir = GetPropVoteState()
+                                if dir == DIRECTION_OPPOSE and votes > 0 then
+                                    table.insert(parts, Locale.Lookup("LOC_CAI_WC_CURRENT_VOTES", votes, cost))
+                                end
+                                return table.concat(parts, ", ")
+                            end,
                         })
                         oppose:SetFocusSound(HOVER_SOUND)
                         oppose:SetDisabledPredicate(function() return voteDownBtn:IsDisabled() end)
                         oppose:On("activate", function()
-                            local _, prevCost = GetPropVoteState()
+                            local prevVotes, prevCost = GetPropVoteState()
                             voteDownBtn:DoLeftClick()
-                            local _, newCost = GetPropVoteState()
-                            Speak(Locale.Lookup("LOC_CAI_WC_VOTE_REMOVED", prevCost - newCost))
+                            local newVotes, newCost = GetPropVoteState()
+                            if newVotes > prevVotes then
+                                Speak(Locale.Lookup("LOC_CAI_WC_VOTE_ADDED", newCost - prevCost))
+                            elseif newVotes < prevVotes then
+                                Speak(Locale.Lookup("LOC_CAI_WC_VOTE_REMOVED", prevCost - newCost))
+                            end
                         end)
                         propItem:AddChild(oppose)
                     end
@@ -851,13 +889,20 @@ local function BuildConfirmationDialog()
                 if titleCtrl and not isCategoryTitle then
                     local descCtrl = FindChildDeep(instanceRoot, "Description")
                     local costCtrl = FindChildDeep(instanceRoot, "Cost")
-                    local voteLabel = FindChildDeep(instanceRoot, "VoteLabel")
+                    local upVoteStack = FindChildDeep(instanceRoot, "UpVoteStack")
+                    local downVoteStack = FindChildDeep(instanceRoot, "DownVoteStack")
+                    local upVoteLabel = FindChildDeep(instanceRoot, "UpVoteLabel")
+                    local downVoteLabel = FindChildDeep(instanceRoot, "DownVoteLabel")
 
                     local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWC_ConfProp"), "StaticText", {
                         Label = function()
                             local parts = { titleCtrl:GetText() or "" }
-                            if voteLabel and voteLabel:GetText() ~= "" then
-                                table.insert(parts, voteLabel:GetText())
+                            if upVoteStack and not upVoteStack:IsHidden() then
+                                local count = upVoteLabel and upVoteLabel:GetText() or ""
+                                table.insert(parts, Locale.Lookup("LOC_CAI_WC_SUPPORT_VOTES", count))
+                            elseif downVoteStack and not downVoteStack:IsHidden() then
+                                local count = downVoteLabel and downVoteLabel:GetText() or ""
+                                table.insert(parts, Locale.Lookup("LOC_CAI_WC_OPPOSE_VOTES", count))
                             end
                             if costCtrl and costCtrl:GetText() ~= "" then
                                 table.insert(parts, Locale.Lookup("LOC_CAI_WC_COST_LABEL")
@@ -1421,6 +1466,12 @@ local function BuildReviewBody()
 
     m_resultsItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWC_Results"), "TreeItem", {
         Label = function() return Locale.Lookup("LOC_WORLD_CONGRESS_LAST_SESSION_RESULTS") end,
+        Tooltip = function()
+            if m_activeSection == 1 then
+                return Controls.Description and Controls.Description:GetText() or ""
+            end
+            return ""
+        end,
     })
     m_resultsItem.FocusKey = "review:results"
     m_resultsItem:SetFocusSound(HOVER_SOUND)
@@ -1429,6 +1480,12 @@ local function BuildReviewBody()
 
     m_effectsItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWC_Effects"), "TreeItem", {
         Label = function() return Locale.Lookup("LOC_WORLD_CONGRESS_ACTIVE_EFFECTS") end,
+        Tooltip = function()
+            if m_activeSection == 2 then
+                return Controls.Description and Controls.Description:GetText() or ""
+            end
+            return ""
+        end,
     })
     m_effectsItem.FocusKey = "review:effects"
     m_effectsItem:SetFocusSound(HOVER_SOUND)

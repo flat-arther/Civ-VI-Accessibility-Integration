@@ -208,20 +208,16 @@ function TabControlWidget:GetActivePageIndex() return self._activeIndex end
 ---@param silent? boolean
 function TabControlWidget:SetActivePage(i, silent)
     if i < 1 or i > #self._pages or i == self._activeIndex then return end
-    -- Capture focus location BEFORE remount: MountActivePage detaches the old
-    -- page from the widget tree, which would break _FocusInside walks.
     local focusInStrip = self:_FocusInside(self._tabStrip)
-    local focusInside = self:_FocusInside(self)
     self._activeIndex = i
     MountActivePage(self)
     if not silent then self:Emit("value_changed", i) end
-    -- Focus lands on the new page so the user hears the page contents, unless
-    -- they were navigating the tab strip — then focus the new tab. External
-    -- callers (focus outside the control) get the legacy tab-focus behavior.
-    if focusInside and not focusInStrip then
-        self.Manager:SetFocus(self._pages[i])
-    else
+    self._tabStrip._lastFocusedChild = self._tabs[i]
+    self._tabStrip._lastFocusedKey = self._tabs[i].FocusKey
+    if focusInStrip then
         self.Manager:SetFocus(self._tabs[i])
+    else
+        self.Manager:SetFocus(self._pages[i])
     end
 end
 

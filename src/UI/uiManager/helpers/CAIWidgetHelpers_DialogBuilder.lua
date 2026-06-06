@@ -89,7 +89,7 @@ function DB.CreatePopupDialog(mgr, popup)
                 Tooltip = function() return item.Control:GetToolTipString() or "" end,
             })
             w:SetDisabledPredicate(function() return item.Control:IsDisabled() end)
-            w:On("activate", function() item.Callback() end)
+            w:On("activate", function() item.Control:DoLeftClick() end)
             w:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
         end
 
