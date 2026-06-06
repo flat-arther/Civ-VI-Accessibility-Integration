@@ -13,6 +13,9 @@
     <Row Tag="LOC_UIWidget_Role_Edit" Language="en_US">
       <Text>Edit</Text>
     </Row>
+    <Row Tag="LOC_UIWidget_Role_EditReadOnly" Language="en_US">
+      <Text>Edit read only</Text>
+    </Row>
     <Row Tag="LOC_UIWidget_Role_List" Language="en_US">
       <Text>List</Text>
     </Row>
@@ -40,16 +43,19 @@
     <Row Tag="LOC_UIWidget_Role_TabBar" Language="en_US">
       <Text>Tab Bar</Text>
     </Row>
+    <Row Tag="LOC_UIWidget_Role_TabPage" Language="en_US">
+      <Text>Tab Page</Text>
+    </Row>
     <Row Tag="LOC_UIWidget_Role_MenuItem" Language="en_US">
       <Text>Menu Item</Text>
     </Row>
     <Row Tag="LOC_UIWidget_Role_StaticText" Language="en_US">
       <Text>Text</Text>
     </Row>
-    <Row Tag="LOC_UIWidget_Role_Treeview" Language="en_US">
+    <Row Tag="LOC_UIWidget_Role_Tree" Language="en_US">
       <Text>Tree View</Text>
     </Row>
-    <Row Tag="LOC_UIWidget_Role_TreeviewItem" Language="en_US">
+    <Row Tag="LOC_UIWidget_Role_TreeItem" Language="en_US">
       <Text>Tree Item</Text>
     </Row>
     <Row Tag="LOC_CAI_TREEVIEW_EXPANDED" Language="en_US">
@@ -684,6 +690,12 @@
     <Row Tag="LOC_CAI_GOVERNMENT_POLICIES_LOCKED" Language="en_US">
       <Text>Policies cannot be changed right now</Text>
     </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_ACTIVE" Language="en_US">
+      <Text>Active</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_CONFIRM_POLICIES" Language="en_US">
+      <Text>Confirm policies</Text>
+    </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_POLICY_ALREADY_ACTIVE" Language="en_US">
       <Text>{1_Policy} is already active</Text>
     </Row>
@@ -714,11 +726,14 @@
     <Row Tag="LOC_CAI_GOVERNMENT_NO_AVAILABLE_POLICIES" Language="en_US">
       <Text>No available policies</Text>
     </Row>
-    <Row Tag="LOC_CAI_GOVERNMENT_POLICY_TYPE" Language="en_US">
-      <Text>Type: {1_Type}</Text>
+    <Row Tag="LOC_CAI_GOVERNMENT_DARK_AGE_POLICY" Language="en_US">
+      <Text>Dark Age</Text>
     </Row>
-    <Row Tag="LOC_CAI_GOVERNMENT_DESCRIPTION" Language="en_US">
-      <Text>Description: {1_Description}</Text>
+    <Row Tag="LOC_CAI_GOVERNMENT_GOLDEN_AGE_POLICY" Language="en_US">
+      <Text>Golden Age</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_CONGRESS_LOCKED" Language="en_US">
+      <Text>Locked during the World Congress</Text>
     </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_SLOTS" Language="en_US">
       <Text>Slots: {1_Slots}</Text>
@@ -734,6 +749,47 @@
     </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_FLAT_BONUS" Language="en_US">
       <Text>Flat bonus: {1_Value}</Text>
+    </Row>
+
+    <!-- Great People popup -->
+    <Row Tag="LOC_CAI_GP_PERSON_LABEL" Language="en_US">
+      <Text>{1_Name}, {2_Class}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_CIV_PROGRESS" Language="en_US">
+      <Text>{1_CivName}, {2_Points} of {3_Cost}, {4_PerTurn} per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_LOCAL_PROGRESS" Language="en_US">
+      <Text>Your progress: {1_Points} of {2_Cost}, {3_PerTurn} per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_BIOGRAPHY" Language="en_US">
+      <Text>Biography</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_NO_BIOGRAPHY" Language="en_US">
+      <Text>No biography available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_NONE_AVAILABLE" Language="en_US">
+      <Text>No one available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_PAST_TABLE" Language="en_US">
+      <Text>Previously Recruited</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_COL_PERSON" Language="en_US">
+      <Text>Great Person</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_COL_DATE" Language="en_US">
+      <Text>Earn Date</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_COL_RECRUITER" Language="en_US">
+      <Text>Recruiter</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_COL_ABILITIES" Language="en_US">
+      <Text>Abilities</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_HEROES_TREE" Language="en_US">
+      <Text>Heroes</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_HERO_CIVILOPEDIA" Language="en_US">
+      <Text>Civilopedia</Text>
     </Row>
 
     <!-- Top panel hotkeys -->
@@ -802,6 +858,81 @@
     </Row>
     <Row Tag="LOC_CAI_DIPLOMACYDEAL_INVENTORY" Language="en_US">
       <Text>Inventory</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACYDEAL_ADDED_YOUR_SIDE" Language="en_US">
+      <Text>Added to your side</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACYDEAL_REMOVED_YOUR_SIDE" Language="en_US">
+      <Text>Removed from your side</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACYDEAL_ADDED_THEIR_SIDE" Language="en_US">
+      <Text>Added to their side</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACYDEAL_REMOVED_THEIR_SIDE" Language="en_US">
+      <Text>Removed from their side</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACYDEAL_STOP_ASKING_HINT" Language="en_US">
+      <Text>Can mark unacceptable to stop the AI asking for this</Text>
+    </Row>
+
+    <!-- Diplomacy intel: Alliance tab -->
+    <Row Tag="LOC_CAI_DIPLOMACY_ALLIANCE_LEVEL" Language="en_US">
+      <Text>Alliance Level: {1_Level}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_ALLIANCE_POINTS_LINE" Language="en_US">
+      <Text>Alliance Points: {1_Current} of {2_Needed}, {3_PerTurn} per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_ALLIANCE_POINTS_LINE_NO_RATE" Language="en_US">
+      <Text>Alliance Points: {1_Current} of {2_Needed}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_ALLIANCE_POINTS_MAX" Language="en_US">
+      <Text>Alliance Points: Maximum</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_CURRENT_ALLIANCE" Language="en_US">
+      <Text>Current alliance</Text>
+    </Row>
+
+    <!-- Diplomacy intel: Emergency tab -->
+    <Row Tag="LOC_CAI_DIPLOMACY_EMERGENCY_ENTRY" Language="en_US">
+      <Text>{1_Name}, {2_Status}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_EMERGENCY_TURNS_LEFT" Language="en_US">
+      <Text>{1_Turns} turns left</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_EMERGENCY_NONE" Language="en_US">
+      <Text>No shared emergencies</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_EMERGENCY_PROGRESS" Language="en_US">
+      <Text>{1_Done} of {2_Total} goals completed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_OVERVIEW_EMERGENCY" Language="en_US">
+      <Text>Shared emergencies: {1_Names}</Text>
+    </Row>
+
+    <!-- Diplomacy intel: Grievances tab -->
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCES_AGAINST_YOU" Language="en_US">
+      <Text>Grievances against you: {1_Value}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCES_AGAINST_THEM" Language="en_US">
+      <Text>Grievances against them: {1_Value}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_PER_TURN" Language="en_US">
+      <Text>{1_Rate} per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_BREAKDOWN" Language="en_US">
+      <Text>Grievance change per turn: {1_Rate}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_LOG" Language="en_US">
+      <Text>Grievance log</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_LOG_ENTRY" Language="en_US">
+      <Text>Turn {1_Turn}: {2_Description} ({3_Amount}, {4_Actor})</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_BY_YOU" Language="en_US">
+      <Text>caused by you</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_BY_THEM" Language="en_US">
+      <Text>caused by them</Text>
     </Row>
 
     <Row Tag="LOC_CAI_CITY_PANEL" Language="en_US">
@@ -1072,14 +1203,29 @@
     <Row Tag="LOC_CAI_EDIT_SELECTED" Language="en_US">
       <Text>{1_Text} selected</Text>
     </Row>
+    <Row Tag="LOC_CAI_EDIT_SELECTED_COUNT" Language="en_US">
+      <Text>{1_Num} characters selected</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_UNSELECTED_COUNT" Language="en_US">
+      <Text>{1_Num} characters unselected</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_ACTIVATE_SELECTED_COUNT" Language="en_US">
+      <Text>Editing {1_Label}: {2_Num} characters selected</Text>
+    </Row>
     <Row Tag="LOC_CAI_EDIT_PASTED" Language="en_US">
       <Text>Pasted {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_PASTED_COUNT" Language="en_US">
+      <Text>Pasted {1_Num} characters</Text>
     </Row>
     <Row Tag="LOC_CAI_EDIT_UNSELECTED" Language="en_US">
       <Text>{1_Text} unselected</Text>
     </Row>
     <Row Tag="LOC_CAI_EDIT_COPIED" Language="en_US">
       <Text>Copied {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_COPIED_COUNT" Language="en_US">
+      <Text>Copied {1_Num} characters</Text>
     </Row>
     <Row Tag="LOC_CAI_SEARCH_NO_MATCH" Language="en_US">
       <Text>No match</Text>
@@ -1138,6 +1284,48 @@
     <Row Tag="LOC_CAI_RESEARCH_NO_UNLOCKS" Language="en_US">
       <Text>No unlocks</Text>
     </Row>
+    <Row Tag="LOC_CAI_RESEARCH_QUEUED" Language="en_US">
+      <Text>Queued {1_Position}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_RECOMMENDED_BY" Language="en_US">
+      <Text>Recommended by {1_Advisor}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_RECOMMENDED" Language="en_US">
+      <Text>Recommended</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_COST" Language="en_US">
+      <Text>{1_Cost} science</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_TURNS" Language="en_US">
+      <Text>{1_Turns} turns</Text>
+    </Row>
+<Row Tag="LOC_CAI_RESEARCH_UNLOCKS_HEADER" Language="en_US">
+      <Text>Unlocks: {1_List}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_PREREQS_HEADER" Language="en_US">
+      <Text>Required technologies: {1_List}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_LEADS_TO_HEADER" Language="en_US">
+      <Text>Leads to: {1_List}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RESEARCH_ALLIANCE_BONUS" Language="en_US">
+      <Text>Alliance research bonus: {1_Detail}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVISOR_GENERIC" Language="en_US">
+      <Text>General advisor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVISOR_CONQUEST" Language="en_US">
+      <Text>Military advisor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVISOR_CULTURE" Language="en_US">
+      <Text>Culture advisor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVISOR_RELIGIOUS" Language="en_US">
+      <Text>Religion advisor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVISOR_TECHNOLOGY" Language="en_US">
+      <Text>Science advisor</Text>
+    </Row>
 
     <!-- Civics chooser -->
     <Row Tag="LOC_CAI_CIVIC_CURRENT" Language="en_US">
@@ -1188,6 +1376,21 @@
     <Row Tag="LOC_CAI_CIVIC_QUEUE_ADDED" Language="en_US">
       <Text>{1_Count} items added to queue, for {2_Cost} total culture</Text>
     </Row>
+    <Row Tag="LOC_CAI_CIVIC_COST" Language="en_US">
+      <Text>{1_Cost} culture</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_UNLOCKS_HEADER" Language="en_US">
+      <Text>Unlocks: {1_List}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_OBSOLETES_HEADER" Language="en_US">
+      <Text>Makes obsolete: {1_List}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_PREREQS_HEADER" Language="en_US">
+      <Text>Required civics: {1_List}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_LEADS_TO_HEADER" Language="en_US">
+      <Text>Leads to: {1_List}</Text>
+    </Row>
 
     <!-- Civics tree -->
     <Row Tag="LOC_CAI_CIVICS_TREE_QUEUE_LIST" Language="en_US">
@@ -1196,11 +1399,27 @@
     <Row Tag="LOC_CAI_CIVICS_TREE_MAIN_LIST" Language="en_US">
       <Text>All civics</Text>
     </Row>
+    <Row Tag="LOC_CAI_CIVICS_TREE_TABLE" Language="en_US">
+      <Text>Civics table</Text>
+    </Row>
+    <!-- Shared by civics + tech trees (see LOC_CAI_TREE_* below). -->
+    <Row Tag="LOC_CAI_TREE_TIER" Language="en_US">
+      <Text>Tier {1_Number}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TREE_SWITCH_TO_TABLE" Language="en_US">
+      <Text>Switch to table view</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TREE_SWITCH_TO_TREE" Language="en_US">
+      <Text>Switch to tree view</Text>
+    </Row>
     <Row Tag="LOC_CAI_CIVICS_TREE_FILTER" Language="en_US">
       <Text>Filter</Text>
     </Row>
     <Row Tag="LOC_CAI_CIVICS_TREE_GOVERNMENT" Language="en_US">
       <Text>Current government</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVICS_TREE_UNLOCKS" Language="en_US">
+      <Text>Unlocks</Text>
     </Row>
     <Row Tag="LOC_CAI_CIVICS_TREE_PREREQS" Language="en_US">
       <Text>Required civics</Text>
@@ -1210,6 +1429,15 @@
     </Row>
     <Row Tag="LOC_CAI_CIVICS_TREE_PATH_IF_SELECTED" Language="en_US">
       <Text>Civics to research first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVICS_TREE_JUMPING" Language="en_US">
+      <Text>Jumping to {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVICS_TREE_FILTER_RESULTS" Language="en_US">
+      <Text>{1_Filter} results</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIVIC_AWARDS_HEADER" Language="en_US">
+      <Text>Awards: {1_List}</Text>
     </Row>
     <Row Tag="LOC_CAI_CIVIC_STATUS_RESEARCHED" Language="en_US">
       <Text>Completed</Text>
@@ -1233,8 +1461,14 @@
     <Row Tag="LOC_CAI_TECH_TREE_MAIN_LIST" Language="en_US">
       <Text>All technologies</Text>
     </Row>
+    <Row Tag="LOC_CAI_TECH_TREE_TABLE" Language="en_US">
+      <Text>Technology table</Text>
+    </Row>
     <Row Tag="LOC_CAI_TECH_TREE_FILTER" Language="en_US">
       <Text>Filter</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_TREE_UNLOCKS" Language="en_US">
+      <Text>Unlocks</Text>
     </Row>
     <Row Tag="LOC_CAI_TECH_TREE_PREREQS" Language="en_US">
       <Text>Required technologies</Text>
@@ -1244,6 +1478,15 @@
     </Row>
     <Row Tag="LOC_CAI_TECH_TREE_PATH_IF_SELECTED" Language="en_US">
       <Text>Technologies to research first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_TREE_JUMPING" Language="en_US">
+      <Text>Jumping to {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_TREE_FILTER_RESULTS" Language="en_US">
+      <Text>{1_Filter} results</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TECH_AWARDS_HEADER" Language="en_US">
+      <Text>Awards: {1_List}</Text>
     </Row>
     <Row Tag="LOC_CAI_TECH_STATUS_RESEARCHED" Language="en_US">
       <Text>Completed</Text>
@@ -1281,38 +1524,86 @@
     <Row Tag="LOC_CAI_PRODUCTION_QUEUE_LIST" Language="en_US">
       <Text>Production queue</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_REQUIREMENTS_COUNT" Language="en_US">
-      <Text>Requirements: {1_Num}</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_PANEL_TITLE" Language="en_US">
+      <Text>Production</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_REQUIREMENTS_COUNT_ONE" Language="en_US">
-      <Text>Requirements: 1</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_TAB_PRODUCTION" Language="en_US">
+      <Text>Production</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_CITIZEN_YIELDS_COUNT" Language="en_US">
-      <Text>Citizen yields: {1_Num}</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_TAB_PURCHASE_GOLD" Language="en_US">
+      <Text>Purchase with gold</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_CITIZEN_YIELDS_COUNT_ONE" Language="en_US">
-      <Text>Citizen yields: 1</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_TAB_PURCHASE_FAITH" Language="en_US">
+      <Text>Purchase with faith</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_BONUSES_COUNT" Language="en_US">
-      <Text>Bonuses: {1_Num}</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_TAB_QUEUE" Language="en_US">
+      <Text>Queue</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_BONUSES_COUNT_ONE" Language="en_US">
-      <Text>Bonuses: 1</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS" Language="en_US">
+      <Text>Districts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CATEGORY_BUILDINGS" Language="en_US">
+      <Text>Buildings</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CATEGORY_WONDERS" Language="en_US">
+      <Text>Wonders</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CATEGORY_PROJECTS" Language="en_US">
+      <Text>Projects</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CATEGORY_UNITS" Language="en_US">
+      <Text>Units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_COST_PRODUCTION" Language="en_US">
+      <Text>{1_Cost} production</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_COST_GOLD" Language="en_US">
+      <Text>{1_Cost} gold</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_COST_FAITH" Language="en_US">
+      <Text>{1_Cost} faith</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_TURNS" Language="en_US">
+      <Text>{1_Turns} turns</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_PROGRESS" Language="en_US">
+      <Text>{1_Percent} percent</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_MAINTENANCE" Language="en_US">
+      <Text>{1_Cost} gold maintenance</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_RESOURCE_UPKEEP" Language="en_US">
+      <Text>-{1_Amount} {2_Resource} per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CANNOT_AFFORD" Language="en_US">
+      <Text>Cannot afford</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_REPAIR_NEEDED" Language="en_US">
+      <Text>Repair needed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_ALREADY_BUILT" Language="en_US">
+      <Text>Already built</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_UNLOCKS_HEADER" Language="en_US">
+      <Text>Unlocks: {1_List}</Text>
     </Row>
     <Row Tag="LOC_CAI_PRODUCTION_REQUIREMENTS_LABEL" Language="en_US">
-      <Text>Requirements:</Text>
+      <Text>Requirements</Text>
     </Row>
     <Row Tag="LOC_CAI_PRODUCTION_BONUSES_LABEL" Language="en_US">
-      <Text>Bonuses:</Text>
+      <Text>Bonuses</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_STATS_LABEL" Language="en_US">
-      <Text>Stats:</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_BONUSES_MORE" Language="en_US">
+      <Text>and {1_Num} more bonuses</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_STATS_COUNT" Language="en_US">
-      <Text>Stats: {1_Num}</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_FAILURE_REASONS_LABEL" Language="en_US">
+      <Text>Failure reasons</Text>
     </Row>
-    <Row Tag="LOC_CAI_PRODUCTION_STATS_COUNT_ONE" Language="en_US">
-      <Text>Stats: 1</Text>
+    <Row Tag="LOC_CAI_PRODUCTION_DESCRIPTION_LABEL" Language="en_US">
+      <Text>Description</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_UNLOCKS_LABEL" Language="en_US">
+      <Text>Unlocks</Text>
     </Row>
     <Row Tag="LOC_CAI_PRODUCTION_CHOSEN" Language="en_US">
       <Text>Chose: {1_Name}</Text>
@@ -1664,6 +1955,24 @@
     </Row>
     <Row Tag="LOC_CAI_UNIT_LIST" Language="en_US">
       <Text>Unit list</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_DOMAIN_MILITARY" Language="en_US">
+      <Text>Military</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_DOMAIN_NAVAL" Language="en_US">
+      <Text>Naval</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_DOMAIN_AIR" Language="en_US">
+      <Text>Air</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_DOMAIN_SUPPORT" Language="en_US">
+      <Text>Support</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_DOMAIN_CIVILIAN" Language="en_US">
+      <Text>Civilian</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_DOMAIN_TRADE" Language="en_US">
+      <Text>Trade</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_ABILITIES_LIST" Language="en_US">
       <Text>Unit abilities</Text>
@@ -2452,6 +2761,448 @@
     </Row>
     <Row Tag="LOC_CAI_PEDIA_HISTORY_END" Language="en_US">
       <Text>Already at the newest history item</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_JUMPING" Language="en_US">
+      <Text>Jumping to {1_Name}</Text>
+    </Row>
+
+    <!-- Options screen feedback -->
+    <Row Tag="LOC_CAI_OPTIONS_SAVED" Language="en_US">
+      <Text>Settings saved</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPTIONS_RESET" Language="en_US">
+      <Text>Settings reset to defaults</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPTIONS_REVERTED" Language="en_US">
+      <Text>Changes discarded</Text>
+    </Row>
+
+    <!-- Keybindings tree -->
+    <Row Tag="LOC_CAI_KEYBINDS_TREE" Language="en_US">
+      <Text>Key Bindings</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_UNBOUND" Language="en_US">
+      <Text>unbound</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_PRIMARY" Language="en_US">
+      <Text>Primary: {1_Gesture}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_SECONDARY" Language="en_US">
+      <Text>Secondary: {1_Gesture}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_CLEAR" Language="en_US">
+      <Text>Clear bindings</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_CLEARED" Language="en_US">
+      <Text>{1_Action} bindings cleared</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_SET_PRIMARY" Language="en_US">
+      <Text>Set primary binding</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_SET_SECONDARY" Language="en_US">
+      <Text>Set secondary binding</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_ACTION_LINE" Language="en_US">
+      <Text>{1_Name}: primary {2_P}, secondary {3_S}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TAB_STRIP_LABEL" Language="en_US">
+      <Text>Tab control</Text>
+    </Row>
+
+    <!-- City-States screen -->
+    <Row Tag="LOC_CAI_CITYSTATES_ENVOYS_TO_SEND" Language="en_US">
+      <Text>Envoys to send: {1_Num} remaining</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REMAINING" Language="en_US">
+      <Text>{1_Num} remaining</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ENVOYS_SENT" Language="en_US">
+      <Text>{1_Num} envoys sent</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_ENVOYS" Language="en_US">
+      <Text>{1_Num} envoys</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_PENDING" Language="en_US">
+      <Text>+{1_Num} pending</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_ACTIVE" Language="en_US">
+      <Text>{1_Num} active</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_INFO" Language="en_US">
+      <Text>City-States Info</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_AMBASSADOR" Language="en_US">
+      <Text>Ambassador</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_BONUS_COUNT" Language="en_US">
+      <Text>{1_Num} of {2_Total} active</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_ENVOYS_TIER" Language="en_US">
+      <Text>{1_Num} envoys</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_MET_COUNT" Language="en_US">
+      <Text>{1_Num} met</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_LEVY_COST" Language="en_US">
+      <Text>{1_Num} Gold</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_QUEST_AVAILABLE" Language="en_US">
+      <Text>Quest</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_REL_AT_WAR" Language="en_US">
+      <Text>At War</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_REL_SUZERAIN" Language="en_US">
+      <Text>Suzerain</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_REL_PATRON" Language="en_US">
+      <Text>Patron</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_REL_AWARE" Language="en_US">
+      <Text>Aware</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_BONUS_ACTIVE" Language="en_US">
+      <Text>Active</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_REQUIRES_ENVOYS" Language="en_US">
+      <Text>Requires {1_Num} {1_Num:plural 1?envoy; other?envoys;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_REQUIRES_SUZERAIN" Language="en_US">
+      <Text>Requires 3 envoys and more than any other civilization</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_ENVOYS_OF" Language="en_US">
+      <Text>{1_Sent} of {2_Needed} envoys for Suzerain</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_CURRENT_SUZERAIN" Language="en_US">
+      <Text>Current: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_AMBASSADOR_ASSIGNED" Language="en_US">
+      <Text>{1_Name} assigned</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_RELATIONSHIP" Language="en_US">
+      <Text>Relationship: {1_Short}, {2_Details}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_RESOURCES" Language="en_US">
+      <Text>Resources: {1_List}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_INFO_ENVOYS_AVAILABLE" Language="en_US">
+      <Text>Envoys available: {1_Count}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_INFO_INFLUENCE" Language="en_US">
+      <Text>Influence: {1_Balance} / {2_Threshold} (+{3_Rate} per turn), {4_EnvoysPerThreshold} {4_EnvoysPerThreshold : plural 1?envoy; other?envoys;} per threshold</Text>
+    </Row>
+
+    <!-- Religion screen -->
+    <Row Tag="LOC_CAI_RELIGION_SETUP_ADD_BELIEFS" Language="en_US">
+      <Text>Add Beliefs</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_BELIEFS_COUNT" Language="en_US">
+      <Text>Beliefs, {1_Num} of {2_Num} unlocked</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_LOCKED_BELIEF" Language="en_US">
+      <Text>Locked belief slot</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_FILTER_FOLLOWING" Language="en_US">
+      <Text>Following Religion</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_FILTER_PRESENT" Language="en_US">
+      <Text>Religion Present</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_CITY_FOLLOWERS" Language="en_US">
+      <Text>{1_ReligionName}: {2_Num} followers</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_MAJORITY" Language="en_US">
+      <Text>Majority: {1_ReligionName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_NO_CITIES" Language="en_US">
+      <Text>No cities</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_UNITS_SECTION" Language="en_US">
+      <Text>Religious Units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_UNIT_ENTRY" Language="en_US">
+      <Text>{1_UnitName}, {2_Num} owned</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_UNIT_CAN_PRODUCE" Language="en_US">
+      <Text>Can produce</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_UNIT_CANNOT_PRODUCE" Language="en_US">
+      <Text>Cannot produce</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_SUMMARY" Language="en_US">
+      <Text>Summary</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_FAITH_NEEDED" Language="en_US">
+      <Text>Faith needed for next pantheon: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_PROPHET_HAS" Language="en_US">
+      <Text>Great Prophet available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_PROPHET_NONE" Language="en_US">
+      <Text>No Great Prophet yet</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_BELIEF_SELECTED" Language="en_US">
+      <Text>Selected: {1_BeliefName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_PENDING_BELIEFS" Language="en_US">
+      <Text>Pending beliefs: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_NO_PANTHEON" Language="en_US">
+      <Text>No pantheon</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_PANTHEON_SECTION" Language="en_US">
+      <Text>Pantheon</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_PANTHEON_LINE" Language="en_US">
+      <Text>Pantheon: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_NO_RELIGIONS_AVAILABLE" Language="en_US">
+      <Text>No religions available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_MY_PANTHEON" Language="en_US">
+      <Text>My Pantheon</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_MY_RELIGION" Language="en_US">
+      <Text>My Religion</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_SETUP_PANEL" Language="en_US">
+      <Text>Religion Setup</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_CHOOSE_ICON" Language="en_US">
+      <Text>Choose Religion</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_CONFIRM_CHANGES" Language="en_US">
+      <Text>Confirm Changes</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_CONFIRM_SUMMARY" Language="en_US">
+      <Text>Confirm Religion Changes</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_SUMMARY_ICON" Language="en_US">
+      <Text>Religion: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_SUMMARY_NAME" Language="en_US">
+      <Text>Name: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_SUMMARY_BELIEF" Language="en_US">
+      <Text>{1_Class}: {2_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_FOLLOWER_BELIEF" Language="en_US">
+      <Text>Follower Belief</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_BELIEF_SLOT" Language="en_US">
+      <Text>Belief Slot {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_BELIEF_NONE" Language="en_US">
+      <Text>None</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_BLOCKER_ICON" Language="en_US">
+      <Text>Must choose religion icon</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_BLOCKER_NAME" Language="en_US">
+      <Text>Must set religion name</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_BLOCKER_FOLLOWER" Language="en_US">
+      <Text>Must choose follower belief</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_BLOCKER_SLOT" Language="en_US">
+      <Text>Must fill belief slot {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_BLOCKER_PANTHEON" Language="en_US">
+      <Text>Must choose pantheon belief</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELIGION_SLOT_CLEARED" Language="en_US">
+      <Text>{1_Slot} cleared</Text>
+    </Row>
+
+    <!-- Pantheon Chooser -->
+    <Row Tag="LOC_CAI_PANTHEON_CHOOSER_LIST" Language="en_US">
+      <Text>Available Pantheons</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PANTHEON_CONFIRM_TITLE" Language="en_US">
+      <Text>Confirm Pantheon Selection</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PANTHEON_CONFIRM" Language="en_US">
+      <Text>Confirm Pantheon</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PANTHEON_RESELECT" Language="en_US">
+      <Text>Reselect</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_ERA_REVIEW_CLOSE" Language="en_US">
+      <Text>Close</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_DEDICATION_CLOSE" Language="en_US">
+      <Text>Close</Text>
+    </Row>
+
+    <!-- World Congress -->
+    <Row Tag="LOC_CAI_WC_BETWEEN_TURNS_TITLE" Language="en_US">
+      <Text>World Congress - Waiting</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_BETWEEN_TURNS_PLAYERS" Language="en_US">
+      <Text>Players</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_BETWEEN_TURNS_HIDE" Language="en_US">
+      <Text>Hide</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_OPEN_DIPLOMACY" Language="en_US">
+      <Text>Open Diplomacy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_RESOLUTIONS" Language="en_US">
+      <Text>Resolutions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_FAVOR_REMAINING" Language="en_US">
+      <Text>Diplomatic Favor: {1_Amount} remaining</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_OPTION_A" Language="en_US">
+      <Text>Option A</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_OPTION_B" Language="en_US">
+      <Text>Option B</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_VOTES" Language="en_US">
+      <Text>Votes</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_ADD_VOTE" Language="en_US">
+      <Text>Add Vote</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_ADD_VOTE_A" Language="en_US">
+      <Text>Add Vote for A</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_REMOVE_VOTE_A" Language="en_US">
+      <Text>Remove Vote for A</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_ADD_VOTE_B" Language="en_US">
+      <Text>Add Vote for B</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_REMOVE_VOTE" Language="en_US">
+      <Text>Remove Vote</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_REMOVE_VOTE_B" Language="en_US">
+      <Text>Remove Vote for B</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_TARGET_A" Language="en_US">
+      <Text>Target for A</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_TARGET_B" Language="en_US">
+      <Text>Target for B</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_FAVORED_A" Language="en_US">
+      <Text>Favor A: {1_Count}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_FAVORED_B" Language="en_US">
+      <Text>Favor B: {1_Count}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_SUPPORT" Language="en_US">
+      <Text>Support</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_OPPOSE" Language="en_US">
+      <Text>Oppose</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_NEW" Language="en_US">
+      <Text>(New) </Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_REJECTED_OUTCOME" Language="en_US">
+      <Text>Rejected Outcome</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_CRISIS_DETAILS" Language="en_US">
+      <Text>Crisis Details</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_REWARDS" Language="en_US">
+      <Text>Rewards</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_VOTES_FOR" Language="en_US">
+      <Text>Votes for: {1_Count}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_VOTES_AGAINST" Language="en_US">
+      <Text>Votes against: {1_Count}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_HISTORY_TAB" Language="en_US">
+      <Text>History</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_PROPOSALS_TAB" Language="en_US">
+      <Text>Available Proposals</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_REVIEW" Language="en_US">
+      <Text>Review</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_EXPIRES_TURNS" Language="en_US">
+      <Text>Expires in {1_Turns} {1_Turns : plural 1?turn; other?turns;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_OUTCOME_LABEL" Language="en_US">
+      <Text>Outcome to vote for</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_TARGET_LABEL" Language="en_US">
+      <Text>Target</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_TARGET_VOTE_FIRST" Language="en_US">
+      <Text>Add at least one vote before picking a target</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_CURRENT_VOTES" Language="en_US">
+      <Text>Current votes: {1_Votes} for {2_Favor} Diplomatic Favor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_VOTE_ADDED" Language="en_US">
+      <Text>Vote added, lost {1_Favor} Diplomatic Favor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_VOTE_REMOVED" Language="en_US">
+      <Text>Vote removed, gained {1_Favor} Diplomatic Favor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_COST_LABEL" Language="en_US">
+      <Text>Cost:</Text>
+    </Row>
+
+    <!-- Diplomacy Ribbon -->
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_LABEL" Language="en_US">
+      <Text>Diplomacy Ribbon</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_YOU" Language="en_US">
+      <Text>you</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_ACTIVE_TURN" Language="en_US">
+      <Text>active turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_CAPITAL" Language="en_US">
+      <Text>Capital: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_SCORE" Language="en_US">
+      <Text>Score: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_FAVOR" Language="en_US">
+      <Text>Favor: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_MILITARY" Language="en_US">
+      <Text>Military: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_SCIENCE" Language="en_US">
+      <Text>Science: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_CULTURE" Language="en_US">
+      <Text>Culture: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_GOLD" Language="en_US">
+      <Text>Gold: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_FAITH" Language="en_US">
+      <Text>Faith: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_CONGRESS" Language="en_US">
+      <Text>World Congress</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_TEAM" Language="en_US">
+      <Text>Team {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_OPEN_LIST" Language="en_US">
+      <Text>Open Diplomacy Ribbon</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_OPEN_LIST_TOOLTIP" Language="en_US">
+      <Text>Browse leader stats and open diplomacy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS" Language="en_US">
+      <Text>Open World Congress</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS_TOOLTIP" Language="en_US">
+      <Text>Open the World Congress screen</Text>
     </Row>
 
   </LocalizedText>

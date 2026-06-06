@@ -322,52 +322,57 @@ EnsureTutorialIsEnabled = WrapFunc(EnsureTutorialIsEnabled, function(orig)
 end)
 
 local function GetTitle() return Controls.TitleLabel:GetText() end
+
+local function MakeButton(idPrefix, labelCtrl, onClick)
+	local b = mgr:CreateWidget(mgr:GenerateWidgetId(idPrefix), "Button", {
+		Label = function() return labelCtrl:GetText() end,
+	})
+	b:On("activate", onClick)
+	return b
+end
+
 OnShow = WrapFunc(OnShow, function(orig)
 	orig()
 	if CAI_Dialog then return end
 	local content = {
-		mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITutorialSetupStaticText"), "StaticText", {
-			GetValue = function() return Locale.Lookup("LOC_SETUP_TUTORIAL_DESCRIPTION") end
+		mgr:CreateWidget(mgr:GenerateWidgetId("CAITutorialSetupStaticText"), "StaticText", {
+			ValueGetter = function() return Locale.Lookup("LOC_SETUP_TUTORIAL_DESCRIPTION") end,
 		}),
-		mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITutorialSetupStaticText"), "StaticText", {
-			GetValue = function() return Controls.Status:GetText() end,
-			IsHidden = function() return Controls.StatusPanel:IsHidden() end
-		})
+		mgr:CreateWidget(mgr:GenerateWidgetId("CAITutorialSetupStaticText"), "StaticText", {
+			ValueGetter = function() return Controls.Status:GetText() end,
+			HiddenPredicate = function() return Controls.StatusPanel:IsHidden() end,
+		}),
 	}
 	local btns = {
-		mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITutorialSetupButton"), "Button", {
-			GetLabel = function() return Controls.Leader1Start:GetText() end,
-			OnClick = function() OnLeader1() end
-		}),
-		mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITutorialSetupButton"), "Button", {
-			GetLabel = function() return Controls.Leader2Start:GetText() end,
-			OnClick = function() OnLeader2() end
-		}),
-		mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITutorialSetupButton"), "Button", {
-			GetLabel = function() return Controls.CloseButton:GetText() end,
-			OnClick = function() OnBackButton() end
-		})
+		MakeButton("CAITutorialSetupButton", Controls.Leader1Start, function() OnLeader1() end),
+		MakeButton("CAITutorialSetupButton", Controls.Leader2Start, function() OnLeader2() end),
+		MakeButton("CAITutorialSetupButton", Controls.CloseButton,  function() OnBackButton() end),
 	}
-	CAI_Dialog = mgr.WidgetTemplateHelpers:MakeGeneralDialog(GetTitle, btns, content)
-	CAI_Movie = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITutorialSetupPanel"), "Panel", {
-		GetLabel = function() return Locale.Lookup("CAI_TUT_MOVIE") end
+	CAI_Dialog = mgr.WidgetHelpers.MakeGeneralDialog(GetTitle, btns, content)
+	CAI_Movie = mgr:CreateWidget(mgr:GenerateWidgetId("CAITutorialSetupPanel"), "Panel", {
+		Label = function() return Locale.Lookup("CAI_TUT_MOVIE") end,
 	})
-	mgr:Push(CAI_Movie, PopupPriority.Current)
-		mgr:Push(CAI_Dialog, PopupPriority.High)
+	mgr:Push(CAI_Movie, { priority = PopupPriority.Current })
+	mgr:Push(CAI_Dialog, { priority = PopupPriority.High })
 end)
 
 StopMovie = WrapFunc(StopMovie, function(orig)
 	orig()
-	if mgr:HasWidget(CAI_Movie) then
-		mgr:Pop()
+	if CAI_Movie then
+		mgr:RemoveFromStack(CAI_Movie:GetId())
+		CAI_Movie = nil
 	end
 end)
 
 OnHide = WrapFunc(OnHide, function(orig)
 	orig()
-	if CAI_Dialog and mgr:HasWidget(CAI_Dialog) then
-		mgr:Pop()
+	if CAI_Dialog then
+		mgr:RemoveFromStack(CAI_Dialog:GetId())
 		CAI_Dialog = nil
+	end
+	if CAI_Movie then
+		mgr:RemoveFromStack(CAI_Movie:GetId())
+		CAI_Movie = nil
 	end
 end)
 --#End of accessibility integration

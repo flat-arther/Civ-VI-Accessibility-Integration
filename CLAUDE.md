@@ -48,12 +48,19 @@ Before implementation work:
 
 If `project_status.md` says a user test is pending, ask for that result before layering more code on the same area.
 
+## File Creation Rules
+
+- **In-game screens** are partial replacements. Create a file named `{OriginalName}_CAI.lua`. At the top, include the base file conditionally: if the original has DLC replacements, include those with `if IsExpansion2Active() then include("X_Expansion2") elseif IsExpansion1Active() then include("X_Expansion1") else include("X") end`. Register the file in `CivViAccess.modinfo` as a `<ReplaceUIScript>` with `<LuaContext>` matching the vanilla context name and `<LuaReplace>` pointing to the new file.
+- **Front-end or shared UI** (main menu, options menu) are full replacements. Copy the vanilla file into the mod, then add accessibility code directly before the `Initialize()` call at the end, between `--#Accessibility integration` and `--#End of accessibility integration` comments.
+- Every new CAI screen file must be added to both the top-level `<File>` list (which registers it on the VFS) and as a `<ReplaceUIScript>` entry in `src/CivViAccess.modinfo` or it will not load. The top-level `<File>` list is separate from `<ImportFiles>` — even `<ReplaceUIScript>` files need a top-level `<File>` entry.
+- If the original vanilla file uses a wildcard-style `include()` (e.g. `include("FileName")`  resolved at runtime from any loaded context), the CAI file must also be added to the `<ImportFiles>` section under `<ImportFiles id="CAIInGame">` in addition to the `<File>` list. This makes it available for wildcard resolution.
+
 ## Coding Rules
 
 - Logs and code comments are English.
-- All user-facing strings must be localized.
+- All user-facing strings must be localized. Never use literal strings for user-facing text; only debug prints may use literals.
 - Prefer existing control text and tooltips through `control:GetText()` and `control:GetToolTipString()`.
-- Use `Locale.Lookup()` when no existing control exposes the text or for CAI-specific localization tags.
+- Use `Locale.Lookup()` when no existing control exposes the text or for CAI-specific localization tags. Add new `LOC_CAI_` tags to `src/Text/en_US/cai_text_ui.xml` when vanilla has no suitable key.
 - TTS output must always go through `Speak()` in `caiUtils.lua`; never call `CAI.output` directly.
 - Work with vanilla game mechanics. Preserve vanilla callbacks, events, input contexts, dialogs, and state changes where possible.
 - Do not override vanilla game keys casually. Use safe mod keys or bindable input actions.
@@ -66,17 +73,28 @@ If `project_status.md` says a user test is pending, ask for that result before l
 
 ## Accessibility Widget Rules
 
+The UI manager is a class-based widget framework rebuilt on the `UIManagerRework` branch. `docs/ui-manager.md` is the source of truth; `src/ideHelpers.lua` carries the LuaLS annotations. Use the framework primitives below — do not fall back to the old template/single-callback patterns.
+
+- Create widgets through `mgr:CreateWidget(id, type, props)`. The full type catalog is in `docs/ui-manager.md` section 2.
+- Attach behavior with the event system: `w:On("activate", fn)`, `w:On("value_changed", fn)`, `w:On("focus_enter", fn)`. Never assign `OnClick`/`OnFocusEnter`/`OnCommit` as fields.
+- Pre-position focus on push with `mgr:Push(w, { focus = childOrKey })`. Never write `widget.FocusedChild = ...` or call `widget:SetFocusedChild(N)`.
+- For lists/trees/rows that rebuild from game state, set `FocusKey` on each rebuilt row and wrap the rebuild with `mgr:CaptureFocusKey(root)` / `mgr:RestoreFocus(root, capture)`. Do not reinvent the capture-and-restore dance per screen.
+- For tabs, use `TabControl:AddPage(labelOrFn)` — never toggle `IsHidden` on sibling containers to fake tab swaps.
+- For dialogs, use `Dialog:SetButtons(buttons, defaultIndex)` or `CAIWidgetHelpers_DialogBuilder.MakeGeneralDialog`. The button row is `Transparent` and gets Left/Right + Up/Down sticky navigation automatically.
 - Do not wire widgets one by one for list/grid rows. Wrap the vanilla init/populate function where controls/items are created and attach accessibility there.
-- Reference patterns: `src/UI/frontEnd/LeaderPicker.lua` and `src/UI/frontEnd/CityStatePicker.lua`.
-- Hidden vanilla controls may still have CAI widgets, but navigation must skip them through live `IsHidden` checks.
-- Disabled vanilla controls should remain readable when useful, but activation must honor live disabled state.
-- Tree expand/collapse behavior belongs in the shared `Treeview` template. Screens should add only screen-specific activation logic.
-- Pushed transient trees/lists should usually inherit current stack priority and close cleanly through `UIScreenManager`.
+- Hidden vanilla controls may still have CAI widgets, but navigation must skip them through live `IsHidden` checks (manager honors `IsHidden` during input bubble and child resolution).
+- Disabled vanilla controls should remain readable when useful, but activation must honor live disabled state (`Button:Activate` no-ops when `IsDisabled()` is true).
+- Tree expand/collapse behavior belongs in `TreeWidget` / `TreeItemWidget`. Screens add only screen-specific activation by attaching an `activate` listener on leaf items.
+- Pushed transient trees/lists should inherit current stack priority and close cleanly through the manager (`mgr:Pop`, `mgr:RemoveFromStack`).
 - Prefer hotkey/read-on-demand access for ambient HUD panels instead of persistent mirrored widgets.
-- Do not expose stale focus after rebuilds. Preserve focus by stable ids, child index, or tree path when that matches the vanilla interaction.
+- For out-of-band re-speak after a game event updates focused data, call `mgr:Refocus()` or `widget:Announce({ "value" })`. Do not call `Speak()` directly for focus-driven output.
 
 ## Firm Project Decisions / Traps
 
+- The `UIManagerRework` branch is a no-back-compat rewrite of the UI manager. The four old files (`baseWidget.lua`, `widgetTemplates.lua`, `widgetTemplateHelpers.lua`, `UIScreenManager.lua`) are deleted. All widget files now live under `src/UI/uiManager/` with the `CAIWidget_` / `CAIUIScreenManager` / `CAIWidgetHelpers_` prefix (Civ VI VFS collision avoidance). Screens still on the old API will not load until migrated per `docs/ui-manager.md` section 16.
+- The Manager owns focus as `Manager.CurrentPath`. Direction is threaded through `SetFocus(widget, { direction = ±1 })` for Windows tab-stop semantics; programmatic focus omits direction and uses `_lastFocusedKey` / `_lastFocusedChild` cache.
+- Speech is one TTS line per widget (Windows screen-reader model). Multi-line announcements route through `SpeakLines(lines, interrupt)` where only the first line interrupts.
+- A disposable test screen lives at `src/UI/test/CAITestScreen.lua` and fires via `LuaEvents.CAITest_Open/Close/Rebuild/Refocus`. Delete once the first real screen has been migrated and verified in-game.
 - Civ VI UI Lua does not reliably expose included local functions through `_G`; wrap direct function names immediately after `include(...)` when possible.
 - Prefer live vanilla control state for visibility, disabled checks, labels, and tooltips.
 - End-turn-blocking notifications belong with ActionPanel accessibility, not the notification center, because vanilla does not create rail instances for them.
@@ -116,6 +134,8 @@ Patterns: `docs/ACCESSIBILITY_MODDING_GUIDE.md`
 ## References
 
 - `project_status.md`: current working memory and pending tests.
+- `docs/ui-manager.md`: source of truth for the class-based UI manager rework (architecture, focus, speech, events, widgets, migration guide). Consult this before any UI manager or widget work.
+- `src/ideHelpers.lua`: LuaLS annotations for every widget class, manager method, event name, and helper module. Use for autocomplete and signature checks.
 - `docs/game-api.md`: Civ VI API discoveries, safe keys, screen patterns, and firm implementation notes.
 - `docs/ACCESSIBILITY_MODDING_GUIDE.md`: CAI implementation patterns.
 - `docs/setup-guide.md`: project setup flow.

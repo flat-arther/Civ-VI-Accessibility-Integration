@@ -8,6 +8,21 @@ function Speak(text, interrupt)
     if CAI and CAI.Output then CAI.Output(tostring(text), interrupt) end
 end
 
+---Speak each line in turn. If interrupt is true, only the first line interrupts
+---ongoing speech; the rest are queued so they don't cut each other off. Used
+---by the manager so focus changes interrupt prior speech without breaking the
+---one-line-per-widget Windows screen-reader model.
+---@param lines string[]
+---@param interrupt? boolean
+function SpeakLines(lines, interrupt)
+    if not lines or #lines == 0 then return end
+    for i, line in ipairs(lines) do
+        if line and line ~= "" then
+            Speak(line, interrupt and i == 1)
+        end
+    end
+end
+
 ---Prints a table to the lua log. Do not use with recursives
 ---@param tbl table -- the table to print
 ---@param indent number -- the current indentation level (used for recursive calls, should probably not be set manually)

@@ -196,45 +196,55 @@ local m_intentionalClose = false
 -- ---------------------------------------------------------------------------
 -- Rebuild the accessible item list from vanilla's m_ItemList
 -- ---------------------------------------------------------------------------
+local function MakeButton(labelCtrl, onClick)
+	local b = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowButton"), "Button", {
+		Label = function() return labelCtrl:GetText() end,
+	})
+	b:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+	b:On("activate", onClick)
+	return b
+end
+
 local function RebuildItemList()
 	if not CAI_ItemList then return end
+	local capture = mgr:CaptureFocusKey(CAI_ItemList)
 	CAI_ItemList:ClearChildren()
 
-	if not m_ItemList then return end
-	for idx, node in ipairs(m_ItemList) do
-		local item = node["item"]
-		local checkBox = node["checkbox"]
+	if m_ItemList then
+		for idx, node in ipairs(m_ItemList) do
+			local item = node["item"]
+			local checkBox = node["checkbox"]
 
-		local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowCheckbox"), "Checkbox", {
-			GetLabel = function() return item.Name end,
-			GetTooltip = function()
-				-- Sync the visual focus panel then read its text
-				OnItemFocus(item)
-				return Controls.FocusedItemDescription:GetText() or ""
-			end,
-			GetValue = function()
-				return checkBox:IsChecked()
-					and Locale.Lookup("LOC_OPTIONS_ENABLED")
-					or Locale.Lookup("LOC_OPTIONS_DISABLED")
-			end,
-			Toggle = function()
-				OnItemSelect(item, checkBox)
-			end,
-			OnFocusEnter = function()
+			local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowCheckbox"), "Checkbox", {
+				Label = function() return item.Name end,
+				Tooltip = function()
+					OnItemFocus(item)
+					return Controls.FocusedItemDescription:GetText() or ""
+				end,
+				ValueGetter = function()
+					return checkBox:IsChecked()
+						and Locale.Lookup("LOC_OPTIONS_ENABLED")
+						or Locale.Lookup("LOC_OPTIONS_DISABLED")
+				end,
+				FocusKey = "msw:item:" .. tostring(idx),
+			})
+			child:On("value_changed", function() OnItemSelect(item, checkBox) end)
+			child:On("focus_enter", function()
 				UI.PlaySound("Main_Menu_Mouse_Over")
 				OnItemFocus(item)
-			end,
-		})
-		CAI_ItemList:AddChild(child)
+			end)
+			CAI_ItemList:AddChild(child)
+		end
 	end
+	mgr:RestoreFocus(CAI_ItemList, capture)
 end
 
 -- ---------------------------------------------------------------------------
 -- Build the accessible widget hierarchy
 -- ---------------------------------------------------------------------------
 local function BuildPanel()
-	CAI_Panel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowDialog"), "Dialog", {
-		GetLabel = function() return Controls.WindowTitle:GetText() end,
+	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowDialog"), "Dialog", {
+		Label = function() return Controls.WindowTitle:GetText() end,
 		SpeechSettings = { Role = false },
 	})
 	CAI_Panel:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
@@ -242,36 +252,18 @@ local function BuildPanel()
 		return true
 	end})
 
-	-- Item list
-	CAI_ItemList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowList"), "List")
+	CAI_ItemList = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowList"), "List")
 	CAI_Panel:AddChild(CAI_ItemList)
 
-	-- Action buttons
-	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowButton"), "Button", {
-		GetLabel     = function() return Controls.SelectAllButton:GetText() end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick      = function() OnSelectAll() end,
-	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowButton"), "Button", {
-		GetLabel     = function() return Controls.SelectNoneButton:GetText() end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick      = function() OnSelectNone() end,
-	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowButton"), "Button", {
-		GetLabel     = function() return Controls.ConfirmButton:GetText() end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick      = function() OnConfirmChanges() end,
-	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowButton"), "Button", {
-		GetLabel     = function() return Controls.CloseButton:GetText() end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick      = function() Close() end,
-	}))
+	CAI_Panel:AddChild(MakeButton(Controls.SelectAllButton,  function() OnSelectAll() end))
+	CAI_Panel:AddChild(MakeButton(Controls.SelectNoneButton, function() OnSelectNone() end))
+	CAI_Panel:AddChild(MakeButton(Controls.ConfirmButton,    function() OnConfirmChanges() end))
+	CAI_Panel:AddChild(MakeButton(Controls.CloseButton,      function() Close() end))
 end
 
 local function ClosePanel()
-	if CAI_Panel and mgr:HasWidget(CAI_Panel) then
-		mgr:Pop()
+	if CAI_Panel then
+		mgr:RemoveFromStack(CAI_Panel:GetId())
 	end
 end
 
@@ -299,9 +291,8 @@ end)
 
 -- Show/hide handlers for push/pop lifecycle
 ContextPtr:SetShowHandler(function()
-	-- Clean up stale panel if still on stack
-	if CAI_Panel and mgr:HasWidget(CAI_Panel) then
-		mgr:Pop()
+	if CAI_Panel then
+		mgr:RemoveFromStack(CAI_Panel:GetId())
 	end
 	-- Rebuild fresh each show
 	CAI_Panel = nil

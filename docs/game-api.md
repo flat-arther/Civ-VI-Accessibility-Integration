@@ -258,8 +258,77 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - reveal tracks first-reveal plots separately from revisit-visible plots
   - first reveal is detected from a Lua-side `PlayerVisibility:IsRevealed(plot)` snapshot rather than a custom C++ hook
   - the reveal line speaks `<N> tiles revealed` when unexplored plots were involved, otherwise `Revealed`
+
+## Screen Investigation Notes
+
+### Great People Popup
+
+- Base popup files are `decompiled/Assets/UI/Popups/GreatPeoplePopup.lua` and `.xml`.
+- The popup is opened from the Launch Bar via `LuaEvents.LaunchBar_OpenGreatPeoplePopup`, from the notification center via `LuaEvents.NotificationPanel_OpenGreatPeoplePopup`, and from the `ToggleGreatPeople` input action handled in `LaunchBar.lua`.
+- Base game tabs are `Great People` and `Previously Recruited`. The popup uses `CreateTabs(...)`, but its own input handler only consumes `Escape`; all per-item interaction in the Lua file is wired through mouse callbacks (`Mouse.eLClick`) on the tab buttons and row controls.
+- When opened from a `CLAIM_GREAT_PERSON` notification, the popup explicitly selects the `Great People` tab.
+- The `Great People` tab is a horizontally scrolling strip of one card per currently available Great Person candidate. If any candidate is currently recruitable, the popup auto-scrolls to the first recruitable card on open or refresh.
+- Each Great Person card contains:
+  - class name, individual name, era, portrait, passive/active effect list
+  - a `Biography` button that swaps the card into a biography view populated from Civilopedia history loc keys
+  - a `Recruit progress` section with one collapsed local-player row plus expandable rows for all alive major players
+  - per-player progress rows formatted as `current points / recruit cost`, with a progress bar and a tooltip containing that player's per-turn rate for the class
+  - contextual action buttons: `Recruit`, `Pass`, `Gold patronage`, `Faith patronage`
+  - a red `Cannot Recruit` label when `Game.GetGreatPeople():GetEarnConditionsText(...)` returns a restriction string
+- Recruit / pass / patronage actions call `UI.RequestPlayerOperation(...)` and immediately close the popup.
+- The `Previously Recruited` tab switches to a vertical history table showing earn date, Great Person, claimant civ/leader, and passive/active ability summaries.
+- The popup listens for `Events.GreatPeoplePointsChanged` and refreshes live while open, and closes automatically on hotseat turn end.
+- Expansion behavior is additive through the wildcard include at the bottom of `GreatPeoplePopup.lua`:
+  - `Expansion1` overrides the gold / faith patronage tooltips when the player is not allowed to patronize with that yield (`IsNoPatronageWith(...)`).
+  - `Expansion2` overrides `IsReadOnly()` so the popup becomes read-only during an active World Congress session.
+  - `Babylon Heroes` adds a third `Heroes` tab instead of replacing the existing tabs. The screen title/tooltip become `Heroes & Great People`, and the extra tab is driven by `GreatPeopleHeroPanel.lua/.xml`.
+- The Babylon `Heroes` tab reuses the same horizontal card metaphor but swaps in hero-specific controls:
+  - hero portrait, stats, abilities, commands, status
+  - `Look At` button for the current hero or origin city
+  - `Civilopedia` button
+  - `Faith Recall` button when the claimed local hero is dead and recall is allowed
   - hidden speaks as its own `Hidden: ...` line
   - gone speaks as its own `Gone: ...` line
+
+## World Congress popup
+
+- Gathering Storm's World Congress UI is split across three standalone popup contexts under `decompiled/DLC/Expansion2/UI/Additions/`:
+  - `WorldCongressIntro.lua/.xml`: a full-screen intro banner with title, two centered body paragraphs, and one `Continue` button. It opens on `Events.WorldCongressStage1/Stage2`, and `Escape`, `Enter`, and the `EndTurn` action all dismiss it into the main congress popup.
+  - `WorldCongressPopup.lua/.xml`: the main congress screen. It is a full-screen framed overlay with a fixed left member ribbon (`CongressMembers`), a centered title + Favor total, a large central content frame, bottom navigation buttons, a top launch-bar strip with `World Congress` and `Diplomacy` buttons, and a close button in the top-right corner.
+  - `WorldCongressBetweenTurns.lua/.xml`: the between-turns waiting banner shown after the player submits votes in single-player. It shows a vertical list of leader portraits with `Waiting` / `Submitted` status rows and a centered status line until all players finish.
+- Main popup stages and phases:
+  - stage 1 = regular session voting
+  - stage 2 = special session / emergency voting
+  - stage 4 = out-of-session review
+  - while in session, the popup uses two phases: phase 1 is vote entry, phase 2 is a summary/confirmation screen before submission
+- Sighted stage-1 / stage-2 layout:
+  - left column: one portrait tile per alive major civ, wrapping vertically, with Favor and sometimes grievance values beneath the portrait
+  - main body: a scrollable stack of framed cards
+  - bottom buttons: `Prev`, `Next`, `Pass`, `Submit`, or `Return` depending on stage/tab
+  - the active screen title also shows the local player's remaining spendable Diplomatic Favor on the right
+- Resolution cards (`ResolutionItem`) are visually rich and stateful:
+  - title + icon + description
+  - two large A/B outcome slots
+  - each outcome has a separate up/down vote widget with live vote count and incremental Favor cost
+  - a target selector under the chosen outcome, using either a normal pulldown or a player pulldown with civ + leader icons
+  - favored/disfavored player badges showing how many leaders prefer each side
+  - a `MoreInfo` button whose tooltip summarizes how this same resolution went the previous time it appeared
+  - visual selection state is shown by swapping frame textures and line colors once the player has both chosen an outcome and selected a target
+- Discussion / emergency proposal cards (`ProposalItem`, `EmergencyProposalItem`) show:
+  - title, description, target leader or proposal-type icon
+  - a single vote widget for up/down support during an active session
+  - expandable emergency details outside a session
+  - in the `Available Proposals` review tab, a checkbox-style selector is used instead of live voting so the player chooses which emergency proposals to submit for a future special session
+- Review mode (stage 4) has three top tabs:
+  - `Last Session Results`: shows passed/failed resolutions and discussions, with expandable per-player vote breakdowns
+  - `Active Effects`: shows currently active resolutions and how many turns remain
+  - `Available Proposals`: shows emergencies/special-session proposals the player can currently submit
+- Input and launch behavior:
+  - the HUD congress button (`CongressButton.lua`) either resumes the live congress session or opens the results/review popup when congress is not in session
+  - the main popup's `DiploButton` opens diplomacy directly from the congress overlay
+  - clicking leader portraits in the left ribbon opens diplomacy for that leader when met
+  - `Enter` advances from phase 1 to phase 2, or submits on the confirmation screen; in review mode it activates the visible submit/return path
+  - `Escape` closes the popup; the close button mirrors that behavior
 - Unit reveal and hidden speech is snapshot-driven:
   - visibility events only refresh the shared timer
   - flush rebuilds the currently visible foreign-unit set from live unit state
@@ -892,6 +961,11 @@ Wrapper for `CAI.output`. Use this for all TTS output.
 - The intel panel has tabs for Overview, Gossip, Access Level, and Relationship. The Relationship tab is omitted for human-controlled targets.
 - When mirroring the intel panel into CAI tree nodes, keep the first-level tab widgets persistent and do not hide non-selected leaders' child nodes in CAI. Leader focus already triggers a real vanilla selection change plus refresh, which should resolve focus and live detail content naturally. Also do not force leader/tree expansion from selection state; user collapse/expand state should stay under CAI tree control.
 - In a replacement `DiplomacyActionView` wrapper, the local intel `InstanceManager` objects and per-row local instance tables are not directly safe to read by name after `include("DiplomacyActionView")`. Prefer capturing live instance tables from vanilla callbacks that receive them, such as `PopulateIntelOverview(overviewInstance)`, `OnActivateIntelGossipHistoryPanel(gossipInstance)`, `OnActivateIntelAccessLevelPanel(accessLevelInstance)`, and `OnActivateIntelRelationshipPanel(relationshipInstance)`. The overview sub-row instances themselves are still created inside local helper functions, so if you need those exact row controls you must either capture them at creation time or rebuild just that sub-data from stable game APIs.
+- Intel tabs do NOT all share a single creation chokepoint. The base tabs (overview/gossip/access/relationship) are built by `AddIntelTab(tabPanelIM, tooltip, header, icon)`, but the expansion tabs are added by separate adders that bypass it: `AddIntelAlliance`/`AddIntelEmergency` (Expansion1 replacement) and `AddWorldCongressInfoTab` (Expansion2) each call the lower-level `CreateTabButton()` and `GetTabAnchor()` + `ContextPtr:LoadNewContext(...)`, loading the tab's content into its own context. So wrapping `AddIntelTab` only captures the base tabs. Conditions for the DLC tabs: Alliance shows for any selected player NOT on your team; Emergency shows only when `AreThereEmergenciesForPlayer(selectedID)` (a begun emergency involving both you and them); World Congress is added unconditionally but its whole tab bar is hidden before `GlobalParameters.WORLD_CONGRESS_INITIAL_ERA`. DLC adders that should hide bail before `GetTabAnchor`/`SetHide(true)`, so they don't linger as live tabs.
+- To enumerate ALL intel tabs (base + DLC) generically from a wrapper, walk the live tab bar after the panel build instead of wrapping creation: iterate `ms_IntelPanel.IntelTabButtonStack:GetChildren()` and skip `IsHidden()` (pooled/stale) buttons. `ms_IntelPanel` itself is a global and is reachable; the panel/anchor/button instance managers are file-locals and attached Lua fields (`m_HeaderText`/`m_ButtonInstance`) do NOT survive `GetChildren()` (cf. the `LastTenTurnsStack` note below) — only `.CData`-backed control methods are reliable on `GetChildren()` results.
+- **Do NOT pre-resolve each tab's header/panel by clicking through them.** `button:DoLeftClick()` is NOT silent: although `ShowPanel(...)` itself plays no sound, `DoLeftClick` fires the Button control's own native press SoundData (from its XML `Style`), so clicking every tab on every panel build produces an audible click-storm. Resolve a tab lazily instead — only when the user actually navigates into it: `DoLeftClick` that one button, then read its title from `ms_IntelPanel.IntelHeader:GetText()` (equals the tab's `Locale.ToUpper("LOC_..._REPORT_*")`, usable as a reader key) and grab the now-visible child of `ms_IntelPanel.IntelPanelContainer` as its panel.
+- **Gate the panel switch on live `button:IsSelected()`.** `ShowPanel` calls `SetSelected(true)` on the shown tab's button and `false` on the rest (DLC anchors set `m_ButtonInstance`/`m_HeaderText`, so this works for them too), and `AddIntelPanel` ends with `ShowOverviewPanel()` so Overview is the shown/selected tab after every (re)build. So a tab is already displayed iff its `button:IsSelected()` — skip the `DoLeftClick` in that case to avoid a redundant click (e.g. focusing Overview right after a leader select, or re-entering the tab you're already on). Only an actual tab change should click.
+- The base readers' typed instances are captured eagerly: vanilla calls `PopulateIntelOverview`/`OnActivateIntelGossipHistoryPanel`/`OnActivateIntelAccessLevelPanel`/`OnActivateIntelRelationshipPanel` inside `AddIntelPanel` (right after each `AddIntelTab`), NOT on tab click. So wrapping those to stash the instances works without driving any tab clicks.
 - Selecting yourself in `DiplomacyActionView` switches to a self-view instead of the normal action/intel panel: the right-side player panel is hidden, the large leader/civ header stays visible, and the body becomes a scrollable "Features & Abilities" list built from leader/civilization unique abilities, units, and buildings.
 - For CAI text on this screen, prefer live vanilla controls and vanilla loc keys over CAI-owned replacements wherever the base screen already exposes the text. Useful direct sources include `Controls.PlayerNameText`, `Controls.CivNameText`, `Controls.LeaderResponseName`, and `ms_IntelPanel.IntelHeader`. Keep CAI localization only for wrapper-owned group labels or synthesized states that vanilla never names on a control.
   - Overview rows are built in this order: recent gossip count, access level, current government, agendas, active agreements, our relationship with them, and their relationships with other met leaders.
@@ -902,6 +976,7 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - Overview agreements can show delegation, embassy, defensive pact, open borders in either direction, research agreement, and joint war.
   - Overview "our relationship" shows the selected leader's diplomatic state toward us, with special tooltip handling for denouncements and declared friendship turns remaining.
   - Overview "other relationships" shows non-neutral relationships the selected leader has with other met major players, filtered through `DiplomacyRibbonSupport.lua` rules. Valid displayed states include allied, declared friend, denounced, war, and for AI also unfriendly/friendly.
+  - Overview Secret Society row (Ethiopia / Secret Societies mode, gated by `GameCapabilities.HasCapability("CAPABILITY_SECRETSOCIETIES")`): vanilla `DiplomacyActionView_SecretSocietyRow.Refresh(selectedID)` reads `Players[selectedID]:GetGovernors():GetSecretSociety()` (a hash, or `-1` for none). Indexes `GameInfo.SecretSocieties[hash].Name` for the known name; `LOC_SECRETSOCIETY_DIPLO_NONE_NAME` when `-1`; and `LOC_SECRETSOCIETY_DIPLO_UNKNOWN_NAME` + `_DESCRIPTION` (tooltip) when unaware. Row header label is `LOC_SECRETSOCIETY`. Quirk: the awareness check `IsAwareOfSecretSociety(hash)` is run against the SELECTED player's own governors (the computed `pLocalPlayer` is unused), so a leader is always aware of their own society and the real name is shown on screen whenever they have joined one — the "Unknown" branch is effectively dead. CAI reconstructs from this same API (the addon is a separate context whose Controls are not reachable) and replicates the awareness quirk for screen parity, surfacing the row as a leaf in the overview reader (`AddOverviewChildren`), not as a separate intel tab.
   - The Access Level tab shows active visibility sources, the info shared at the current level, the info unlocked at the next level, and advisor suggestions for new visibility sources.
 - The Gossip tab shows visible gossip from the last 100 turns, split into "last ten turns" and older items, with a "new" indicator for this turn or last turn. If there is no recent gossip, the first section shows `LOC_DIPLOMACY_GOSSIP_ITEM_NO_RECENT`.
 - The Relationship tab shows the selected AI leader's diplomatic state toward us, a relationship bar/icon, sorted positive and negative modifier reasons from `GetDiplomaticModifiers(...)`, and advisor suggestions for improving or worsening relations.
@@ -912,17 +987,24 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - `DiplomacyDealView.lua` is the separate make-deal / make-demand screen. `DiplomacyActionView` opens it through `LuaEvents.DiploPopup_ShowMakeDeal(ms_OtherPlayerID)` or `LuaEvents.DiploPopup_ShowMakeDemand(ms_OtherPlayerID)`.
   - Sighted players normally reach `DiplomacyDealView` from the full diplomacy hub, not directly from the map. `DiplomacyRibbon.lua` opens `DiplomacyActionView` from leader portraits, `PartialScreenHooks.lua` opens the diplomacy hub from the top panel, and `DiplomacyActionView.lua` then switches from a `MAKE_DEAL` or `MAKE_DEMAND` statement into the separate deal screen by hiding its own overview/conversation containers and raising the `DiploPopup_ShowMakeDeal` / `DiploPopup_ShowMakeDemand` Lua events.
   - Available trade inventory groups are gold, luxury resources, strategic resources, agreements, cities, other players, great works, and captives.
+  - Diplomatic Favor is a Gathering Storm-only deal item (`DealItemTypes.FAVOR`), added by the `DiplomacyDealView_Expansion2` wildcard rider, not the base script. It is a bare-amount lump-sum item like gold (no value-type name), traded via the global `OnClickAvailableOneTimeFavor(player, amount)` with a default add amount of `1`. Vanilla `PopulateAvailableFavor` shows it only when `player:GetFavor() > 0` and `not ms_bIsDemand` (favor is not demandable). On-screen amount is the side's current favor balance. `GameInfo`/loc: `LOC_DIPLOMATIC_FAVOR_NAME`, icon `ICON_YIELD_FAVOR`. Because favor carries no `GetValueTypeNameID()`, a generic deal-item label/header path renders it blank+silent — FAVOR needs an explicit branch reading `LOC_DIPLOMATIC_FAVOR_NAME` + `GetAmount()`. Accumulated/stockpiled strategic resources (also GS) need no special handling: they come back from `GetPossibleDealItems(..., DealItemTypes.RESOURCES, ...)` as ordinary `RESOURCES` entries (`MaxAmount` = stockpile, `duration == 0` lump sum) and reuse the XP2-overridden global `OnClickAvailableResource`.
   - The current deal area can show resources, agreements, cities, great works, and captives. City deal entries can expand for detailed city contents.
   - Deal action buttons include `EqualizeDeal`, `AcceptDeal`, `DemandDeal`, `RefuseDeal`, and `ResumeGame`, with visibility depending on whether the current screen is a deal, a demand, or a pending viewed proposal.
   - Visually, `DiplomacyDealView.xml` is a full-screen modal sheet with a tall parchment/banner panel on the left half of the screen, an animated leader speech bubble at the top, and a small animated yield strip in the top-right for science, culture, faith, and gold. Inside the main trade panel, the content is split into two mirrored columns: left for the local player and right for the other player.
   - The body is vertically divided into two mirrored sections. The upper section is the current offer area, labeled `My Offer` and `Their Offer`; the lower section is the inventory area showing what each side can add. A draggable resize handle sits between them, so sighted players can drag the divider to give more height to offers or inventory.
   - Inventory items are presented as icon tiles or icon-plus-text rows grouped under headers. Gold and resources are mostly compact horizontal icon rows. Agreements, cities, great works, and captives use vertical category blocks with collapsible headers. When collapsed, the category turns into a minimized icon strip rather than disappearing completely.
   - Offer items are interactive review rows rather than plain text. Left click edits an item's amount or parameter when the item supports it, right click removes the item, and a dedicated remove button is also shown on the row. For AI-proposed items the screen can also show a small "don't ask again" marker button for unacceptable items.
+  - `OnClickAvailableAgreement(player, agreementType, agreementTurns)` does NOT add an item for `DealAgreementTypes.JOINT_WAR`, `THIRD_PARTY_WAR`, or `RESEARCH_AGREEMENT` — it calls `ShowAgreementOptionPopup(...)` to pick the target/war-type/tech first, and only `OnSelectAgreementOption(agreementType, turns, value, parameters, fromPlayerID)` then adds the item. All other agreement types (and `ALLIANCE`) add directly on click; their value, where any, is chosen later via the offer item's value-edit. So a CAI layer that only wraps the click + offer-edit path will silently no-op on joint/third-party war and research agreements (the item never gets created, and the vanilla option popup is mouse-only). The accessible fix is to detect those three types at inventory-click time and push the same option list the offer-edit selector builds (`GetPossibleDealItems(from, to, AGREEMENTS, agreementType, pForDeal)` → rows with `ForType`/`Parameters.WarType`, activated via `OnSelectAgreementOption`).
   - Editing an item opens a centered darkened-overlay popup inside the same screen. For gold/resources it shows the item icon, amount field, left/right arrow buttons, and a confirm/back button. For agreement items it instead shows a scrollable option list, such as alliance type, research target, or joint-war target.
   - City items are visually richer than other rows. They can show a collapse/expand button that reveals child detail icons inside the row's own detail grid, so sighted players can inspect the city's bundled contents before deciding whether to keep it in the trade.
   - The leader-dialog bubble at the top is reused as deal feedback text. It changes to reactions such as unfair deal, invalid deal, gift, acceptable proposal, equalize failed, and demand flavor text, so sighted players get immediate conversational feedback while modifying the deal.
   - Human interaction on this screen is strongly mouse-oriented in vanilla. Players click inventory items to add them, click or arrow-adjust existing deal items to edit values, right click or hit remove to take items back out, click header chevrons to collapse deal categories, drag the central resize handle, and use the bottom action buttons to propose, accept, demand, refuse, cancel, or resume.
   - Keyboard handling in base Lua is minimal here. `DiplomacyDealView.lua` explicitly handles Escape only, routing it to popup close, Resume Game, or Refuse/Cancel depending on state. Everything else is expected to go through ordinary control focus/click behavior rather than a screen-specific keyboard navigation layer.
+- Diplomacy context-extension mechanics (important for CAI load strategy):
+  - `DiplomacyDealView.lua` ends with `include("DiplomacyDealView_", true)` — a **wildcard host**: it pulls in every loaded file whose name starts with `DiplomacyDealView_`. `Initialize()` is called on the line *after* the wildcard include (`DiplomacyDealView.lua:3179` vs `:3177`), so a wildcard-included file runs while all vanilla functions exist but before handlers are registered. The file's own comment says a new `DiplomacyDealView_*` file must NOT `include("DiplomacyDealView")`. CAI therefore ships `DiplomacyDealView_CAI.lua` as a wildcard rider (InGame `<ImportFiles>` File, no `ReplaceUIScript`): it only reassigns globals and lets vanilla's later `Initialize()` register them. `ms_bIsDemand` and the `OnClickAvailable*` / `OnValueEditButton` / `OnSelectAgreementOption` callbacks are true globals, reachable from the rider.
+  - `DiplomacyActionView.lua` has **no** wildcard include, so it must be extended via `ReplaceUIScript`. The expansions register their own `ReplaceUIScript` on the same `DiplomacyActionView` context (`Expansion1.modinfo` criteria=Expansion1 → `DiplomacyActionView_Expansion1.lua`; `Expansion2.modinfo` criteria=Expansion2 → `DiplomacyActionView_Expansion2.lua`, which chain-includes the XP1 file). A CAI `ReplaceUIScript` that `include("DiplomacyActionView")` (base) would clobber all expansion logic on XP1/XP2. Fix: branch on `IsExpansion2Active()` / `IsExpansion1Active()` and re-include the matching variant (same approach as `GovernmentScreen_CAI`).
+  - `AddIntelTab(tabPanelIM, buttonTooltip, headerText, buttonIcon)` is the single chokepoint that creates every intel tab — base overview/gossip/access/relationship and all DLC tabs. It returns the panel instance; `inst:GetTopControl()` is the panel control, and it caches `m_ButtonInstance` / `m_HeaderText` on that control. Wrapping `AddIntelTab` captures the full live tab set generically (the `headerText` arg is the already-`Locale.ToUpper`'d display string). `AddIntelPanel(rootControl)` is the per-selected-player rebuild that runs `PopulateIntelPanels` → the `AddIntel*` adders.
+  - DLC intel additions are separate contexts that populate reserved containers in response to `LuaEvents.DiploScene_RefreshTabs(playerID)` and `LuaEvents.DiploScene_RefreshOverviewRows(playerID)`, both raised synchronously *during* the intel build (XP1's `PopulateIntelPanels` override raises RefreshTabs; base `AddIntelOverview` raises RefreshOverviewRows). XP1 adds the Alliance and Emergency tabs (`DiplomacyActionView_AllianceTab` / `_EmergencyTab`); XP2 adds the World Congress tab (`_WorldCongressTab`); the Ethiopia/Secret-Societies mode adds an overview row via `_SecretSocietyRow`.
 - Vanilla `InGamePopup.lua`:
   - `PopupDialogInGame:Open()` raises `LuaEvents.OnRaisePopupInGame(id, options)`, which is handled by the separate `InGamePopup` context. Government confirmation dialogs therefore do not receive input through `GovernmentScreen`'s input handler.
   - Vanilla `InGamePopup` uses the old `InputHandler(uiMsg, wParam, lParam)` signature and registers it with `ContextPtr:SetInputHandler(InputHandler)`. CAI replacement should wrap that handler, call `mgr:HandleInput(input)` first, then preserve vanilla Escape/Enter behavior by calling the original handler with `input:GetMessageType()` and `input:GetKey()`. Register the wrapper with `ContextPtr:SetInputHandler(InputHandler, true)`.
@@ -1098,6 +1180,67 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - Stat boxes: `AddRightColumnStatBox(title, populate_method)` (line 1641) builds a stat box and calls `populate_method(stat_box)` once. `stat_box` is a local table built fresh per call, with methods `AddSeparator`, `AddHeader(caption)`, `AddLabel(caption)`, `AddSmallLabel(caption)`, `AddIconLabel(icon, caption)`, `AddIconNumberLabel(icon, value, caption)`, `AddIconList(icon1..icon4)`. These methods cannot be wrapped globally — wrap `AddRightColumnStatBox` itself and replace `stat_box[name]` with a shim that records and delegates before invoking the user populate. The user populate must still run; do not run it twice.
   - `AddIconLabel` / `AddIconList` internally call `HookupIcon`, so a global `HookupIcon` wrap will see every stat-box icon. If you also capture related links through `HookupIcon`, suppress that capture (via a state flag) for the duration of the wrapped stat-box populate so icons inside stat boxes don't duplicate into a global Related list.
   - Focus seeding on a deep `TreeviewItem` requires expanding its ancestor tree items first: `TreeviewItem.GetDefaultChild` returns nil when `IsExpanded` is false (`src/UI/uiManager/widgetTemplates.lua:878-883`), so `mgr:SetFocus(leaf)` will not land on a leaf inside collapsed ancestors. Walk `node.Parent` up to the Treeview root and call `:Expand()` on each ancestor `TreeviewItem` before `SetFocus`.
+
+- `ReligionScreen.lua` / `ReligionScreen.xml` (decompiled/Assets/UI/):
+  - Mainline base, Rise and Fall, and Gathering Storm all register the same `ReligionScreen` context. Base `Assets/UI/InGame.xml`, XP1 `DLC/Expansion1/UI/InGame.xml`, and XP2 `DLC/Expansion2/UI/Replacements/InGame.xml` each declare `<LuaContext ID="ReligionScreen" FileName="ReligionScreen" Hidden="1"/>`; there is no separate XP1/XP2 religion-screen replacement in the decompiled UI mirror.
+  - Mainline base, Rise and Fall, and Gathering Storm also keep the same standalone `PantheonChooser` context. `Assets/UI/InGame.xml` registers `<LuaContext ID="PantheonChooser" FileName="PantheonChooser" Hidden="1"/>`, and there is no separate XP1/XP2 pantheon-chooser replacement in the decompiled UI mirror.
+  - Opening path is split across three vanilla entry points:
+    - `LaunchBar.lua` opens `PantheonChooser` instead of `ReligionScreen` when the local player can found a pantheon and has none yet; otherwise it raises `LuaEvents.LaunchBar_OpenReligionPanel()`.
+    - `NotificationPanel.lua` routes both choose-pantheon and choose-religion notifications into the religion flow (`OpenPantheonChooser` for pantheon, `OpenReligionPanel` for religion).
+    - `PantheonChooser.lua` closes after founding the pantheon, then immediately raises `LuaEvents.PantheonChooser_OpenReligionPanel()` so the full religion screen opens next.
+  - `PantheonChooser.lua` / `PantheonChooser.xml` (decompiled/Assets/UI/Choosers/) is a separate compact left slide-out chooser:
+    - `PantheonChooserSlideAnim` slides a 495px-wide panel in from the left.
+    - Top panel: decorative religion frame plus either the generic `Choosing a Pantheon` title or a selected-belief summary card.
+    - Body panel: one scrollable vertical stack of pantheon belief buttons; each row is a large card with icon, uppercase belief name, and wrapped description.
+    - Bottom drawer: `Found this Pantheon` confirm button plus `Reselect Pantheon` clear-selection button.
+    - Interaction model: single-select only. Clicking a belief highlights it and reveals the confirm drawer; clicking the selected summary card or the reset button clears the selection; Escape or the close button closes the chooser.
+    - Confirm path: `ConfirmPantheon()` submits `PlayerOperations.FOUND_PANTHEON`, closes the chooser, then raises `LuaEvents.PantheonChooser_OpenReligionPanel()` to open the full religion screen.
+  - The religion screen is a single stateful popup that swaps whole-page containers on one shared context. `ViewMyReligion()` is the state router and chooses among:
+    - `WorkingTowardsPantheon()`
+    - `WorkingTowardsReligion()`
+    - `ChooseReligion()`
+    - `SelectPantheonBeliefs()`
+    - `SelectReligionBeliefs()`
+    - `ConfirmPantheonBeliefs()`
+    - `ConfirmReligionBeliefs()`
+    - `ViewReligion(religionType)`
+    - `ViewAllReligions()`
+  - XML top-level sections are:
+    - `WorkingTowards`: progress/instructions before founding
+    - `SelectBeliefs`: choose beliefs for a pantheon or first-time religion founding
+    - `AddBeliefs`: add beliefs to an existing founded religion
+    - `ChooseReligion`: icon-grid religion picker plus optional custom-name edit box
+    - `ViewReligion`: one religion detail page with beliefs, pantheon, unit icons, and city table
+    - `ViewAllReligions`: scrollable multi-card summary of every founded religion
+  - Tab strip behavior:
+    - Tabs are rebuilt every open from live religion state.
+    - First tab is always the local player's current religion/pantheon state (`My Religion` or `My Pantheon`).
+    - One tab is added for each founded non-pantheon religion other than the player's own.
+    - Final tab is `All Religions` only when at least one religion has been founded.
+    - When tabs do not fit, middle religion tabs collapse to icon-only buttons and expose the religion name by tooltip instead of visible text.
+  - `ViewReligion(...)` is the main sighted-information page. It shows:
+    - Religion identity block: large icon, religion name, founder civ, holy city, dominant-city count
+    - Unit icon strip: all religious-strength units the local player can own/build in the current ruleset, including scenario-added units; the count badge shows how many are owned, and alpha dimming indicates none owned
+    - Pantheon summary block: pantheon icon plus full belief description
+    - Beliefs list: unlocked beliefs first, then gray `Locked belief` placeholders up to `NUM_MAX_BELIEFS` (4)
+    - Cities table: city name, follower counts for each founded religion, and the active pantheon belief description for that city
+    - City filter pull-down with two modes: cities following the selected religion, or cities where the religion is merely present
+  - `ViewAllReligions()` is not interactive beyond scrolling; it renders one card per founded religion with religion icon, founder, dominant-city count, and a compact list of equipped beliefs.
+  - `ChooseReligion()` uses a grid of clickable religion icons (`ReligionOption` instances). Selecting one updates the big preview icon/title on the left and may enable a custom-name `EditBox` when `RequiresCustomName` and `CAPABILITY_RENAME` are both true.
+  - Belief-picking behavior:
+    - Available beliefs are displayed as large button rows with icon, uppercase name, and description.
+    - Clicking a belief disables its source row and adds it to the selected-beliefs list.
+    - When the player has no equipped religion beliefs yet, vanilla forces the first pick to be a follower belief before broader religion beliefs become available.
+    - Confirm/reselect buttons swap in only after the required number of beliefs is selected.
+    - Pantheon founding is single-belief-only in both the standalone chooser and the religion-screen pantheon state.
+  - Input/lifecycle:
+    - Escape closes the popup.
+    - The screen is a low-priority popup queued at the current parent, not a full hard modal over everything.
+    - `Events.BeliefAdded`, `PantheonFounded`, and `ReligionFounded` refresh the screen, except during the short post-confirm blocking-state window guarded by `m_isConfirmedBeliefs`.
+  - Scenario exceptions:
+    - `DLC/PolandScenario/UI/ReligionScreen.lua` and `DLC/VikingsScenario/UI/ReligionScreen.lua` each ship their own full `ReligionScreen.lua` copy, including pantheon-selection states (`SelectPantheonBeliefs`, `ConfirmPantheonBeliefs`) and `FOUND_PANTHEON` handling inside the full-screen religion UI rather than the standalone chooser.
+    - `DLC/Indonesia_KhmerScenario/UI/Replacements/ReligionScreen_Indonesia_KhmerScenario.lua` is only a thin wrapper around base `ReligionScreen` that overrides `AddLockedBeliefs`; it does not replace the pantheon-founding interaction model.
+  - Accessibility-shape implication: this is fundamentally a tabbed multi-state information-and-picker screen, not one flat list. CAI should preserve the state model and expose explicit widgets for tab strip, current page body, religion icon grid, belief lists, and the per-city follower matrix rather than flattening everything into one monolithic reader.
 
 ## Interface Modes
 

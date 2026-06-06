@@ -56,94 +56,44 @@ function SplitFormattedLines(text)
     return lines
 end
 
-function StartsWithIconBullet(text)
-    return text and string.find(text, "^%s*%[ICON_Bullet%]") ~= nil
+-- ===========================================================================
+-- Advisor / recommendation (shared between ResearchChooser and CivicsChooser)
+-- ===========================================================================
+
+local ADVISOR_LOC = {
+    ADVISOR_GENERIC    = "LOC_CAI_ADVISOR_GENERIC",
+    ADVISOR_CONQUEST   = "LOC_CAI_ADVISOR_CONQUEST",
+    ADVISOR_CULTURE    = "LOC_CAI_ADVISOR_CULTURE",
+    ADVISOR_RELIGIOUS  = "LOC_CAI_ADVISOR_RELIGIOUS",
+    ADVISOR_TECHNOLOGY = "LOC_CAI_ADVISOR_TECHNOLOGY",
+}
+
+function GetAdvisorName(advisorType)
+    if not advisorType then return nil end
+    local tag = ADVISOR_LOC[advisorType]
+    if tag then return Locale.Lookup(tag) end
+    return nil
 end
 
-function IsUnlocksHeader(text)
-    if not text or text == "" then return false end
-    local label = Locale.Lookup("LOC_TOOLTIP_UNLOCKS")
-    return label and label ~= "" and string.find(text, label, 1, true) ~= nil
-end
-
-function IsMakesObsoleteHeader(text)
-    if not text or text == "" then return false end
-    local label = Locale.Lookup("LOC_TOOLTIP_MAKES_OBSOLETE")
-    return label and label ~= "" and string.find(text, label, 1, true) ~= nil
-end
-
--- Tech/research tooltips: drop the Unlocks header and its bullet rows so the
--- expandable unlocks node doesn't duplicate them.
-function SplitTooltipLinesWithoutUnlocks(text)
-    local lines = {}
-    local skippingUnlocks = false
-    for _, line in ipairs(SplitFormattedLines(text)) do
-        if IsUnlocksHeader(line) then
-            skippingUnlocks = true
-        elseif skippingUnlocks and StartsWithIconBullet(line) then
-            -- handled by AddTechUnlocksNode
-        else
-            skippingUnlocks = false
-            table.insert(lines, line)
-        end
+function GetRecommendedPart(kData, isDisabled)
+    if not kData or not kData.IsRecommended then return nil end
+    if isDisabled then return nil end
+    local advisor = GetAdvisorName(kData.AdvisorType)
+    if advisor then
+        return Locale.Lookup("LOC_CAI_RESEARCH_RECOMMENDED_BY", advisor)
     end
-    return lines
-end
-
--- Civic tooltips: drop both the Unlocks and Makes Obsolete headers and their
--- bullet rows so the expandable unlocks/obsolete nodes don't duplicate them.
-function SplitTooltipLinesWithoutSpecialLists(text)
-    local lines = {}
-    local skippingList = false
-    for _, line in ipairs(SplitFormattedLines(text)) do
-        if IsUnlocksHeader(line) or IsMakesObsoleteHeader(line) then
-            skippingList = true
-        elseif skippingList and StartsWithIconBullet(line) then
-            -- handled by AddCivicUnlocksNode / AddMakesObsoleteNode
-        else
-            skippingList = false
-            table.insert(lines, line)
-        end
-    end
-    return lines
+    return Locale.Lookup("LOC_CAI_RESEARCH_RECOMMENDED")
 end
 
 -- ===========================================================================
 -- Domain queries
 -- ===========================================================================
 
-function GetTechUnlockNames(kData)
-    local techType = kData and (kData.TechType or kData.Type)
-    if not techType then return {} end
-    local playerID = Game.GetLocalPlayer()
-    local unlockables = GetUnlockablesForTech_Cached(techType, playerID) or {}
-    local names = {}
-    for _, v in ipairs(unlockables) do
-        local name = v[2]
-        if name and name ~= "" then
-            table.insert(names, Locale.Lookup(name))
-        end
-    end
-    return names
-end
-
 local function GetCivicUnlockables(kData)
     local civicType = kData and (kData.CivicType or kData.Type)
     if not civicType then return {} end
     local playerID = Game.GetLocalPlayer()
     return GetUnlockablesForCivic_Cached(civicType, playerID) or {}
-end
-
-function GetCivicUnlockNames(kData)
-    local unlockables = GetCivicUnlockables(kData)
-    local names = {}
-    for _, v in ipairs(unlockables) do
-        local name = v[2]
-        if name and name ~= "" then
-            table.insert(names, Locale.Lookup(name))
-        end
-    end
-    return names
 end
 
 function GetObsoletePolicyNames(kData)
@@ -167,116 +117,141 @@ function GetObsoletePolicyNames(kData)
 end
 
 -- ===========================================================================
--- Widget builders
+-- Unlock objects (shared by choosers + trees)
+-- Each unlock is { TypeName, Name, Description } where Description is the
+-- localized prose from the matching GameInfo row, or nil if none exists.
 -- ===========================================================================
 
-function AddTextDetailNode(mgr, parent, text)
-    if not text or text == "" then return end
-    local detailText = text
-    parent:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIDetailNode"), "TreeviewItem", {
-        GetLabel = function() return NormalizeFormattedText(detailText) end,
-    }))
-end
+UNLOCK_DESC_TABLES = {
+    "Buildings", "Units", "Improvements", "Districts", "Projects",
+    "Resources", "Routes", "Policies", "Civics", "Technologies", "Governments",
+}
 
--- Generic counted expandable list node. `items` is a list of strings; the parent
--- gets one TreeviewItem child whose label is `locOne` (with count = 1) or
--- `locMany` (with count = N), and whose children are one TreeviewItem per item.
-function AddCountedListNode(mgr, parent, items, widgetIdPrefix, locOne, locMany)
-    local count = items and #items or 0
-    if count <= 0 then return end
-
-    local node = mgr:CreateUIWidget(mgr:GenerateWidgetId(widgetIdPrefix), "TreeviewItem", {
-        GetLabel = function()
-            if count == 1 then return Locale.Lookup(locOne, count) end
-            return Locale.Lookup(locMany, count)
-        end,
-    })
-
-    for _, text in ipairs(items) do
-        local itemText = text
-        node:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId(widgetIdPrefix .. "Item"), "TreeviewItem", {
-            GetLabel = function() return NormalizeFormattedText(itemText) end,
-        }))
-    end
-
-    parent:AddChild(node)
-end
-
-function AddTechUnlocksNode(mgr, parent, unlockNames)
-    local count = #unlockNames
-    local unlockNode = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchUnlocks"), "TreeviewItem", {
-        GetLabel = function()
-            if count == 1 then
-                return Locale.Lookup("LOC_CAI_RESEARCH_UNLOCKS_COUNT_ONE", count)
-            end
-            return Locale.Lookup("LOC_CAI_RESEARCH_UNLOCKS_COUNT", count)
-        end,
-    })
-
-    if count > 0 then
-        for _, name in ipairs(unlockNames) do
-            local unlockName = name
-            unlockNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchUnlock"), "TreeviewItem", {
-                GetLabel = function() return unlockName end,
-            }))
+function GetUnlockDescription(typeName)
+    if not typeName or typeName == "" then return nil end
+    for _, tableName in ipairs(UNLOCK_DESC_TABLES) do
+        local info = GameInfo[tableName]
+        local row = info and info[typeName] or nil
+        local desc = row and row.Description or nil
+        if desc and desc ~= "" then
+            local text = Locale.Lookup(desc)
+            if text and text ~= "" then return text end
         end
-    else
-        unlockNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIResearchUnlock"), "TreeviewItem", {
-            GetLabel = function() return Locale.Lookup("LOC_CAI_RESEARCH_NO_UNLOCKS") end,
-        }))
     end
-
-    parent:AddChild(unlockNode)
+    return nil
 end
 
-function AddCivicUnlocksNode(mgr, parent, unlockNames)
-    local count = #unlockNames
-    local unlockNode = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicUnlocks"), "TreeviewItem", {
-        GetLabel = function()
-            if count == 1 then
-                return Locale.Lookup("LOC_CAI_CIVIC_UNLOCKS_COUNT_ONE", count)
-            end
-            return Locale.Lookup("LOC_CAI_CIVIC_UNLOCKS_COUNT", count)
-        end,
-    })
-
-    if count > 0 then
-        for _, name in ipairs(unlockNames) do
-            local unlockName = name
-            unlockNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicUnlockItem"), "TreeviewItem", {
-                GetLabel = function() return unlockName end,
-            }))
+function GetCivicUnlockObjects(kData)
+    local unlocks = {}
+    for _, u in ipairs(GetCivicUnlockables(kData)) do
+        local typeName, locName = u[1], u[2]
+        if locName and locName ~= "" then
+            table.insert(unlocks, {
+                TypeName = typeName,
+                Name = Locale.Lookup(locName),
+                Description = GetUnlockDescription(typeName),
+            })
         end
-    else
-        unlockNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicUnlockItem"), "TreeviewItem", {
-            GetLabel = function() return Locale.Lookup("LOC_CAI_CIVIC_NO_UNLOCKS") end,
-        }))
     end
-
-    parent:AddChild(unlockNode)
+    return unlocks
 end
 
-function AddMakesObsoleteNode(mgr, parent, obsoleteNames)
-    local count = #obsoleteNames
-    if count <= 0 then return end
-
-    local obsoleteNode = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicObsolete"), "TreeviewItem", {
-        GetLabel = function()
-            if count == 1 then
-                return Locale.Lookup("LOC_CAI_CIVIC_MAKES_OBSOLETE_COUNT_ONE", count)
+-- Tech unlocks split revealed resources off from regular unlocks so the
+-- tooltip can render `Reveals: ...` separately from `Unlocks: ...`.
+function GetTechUnlockObjects(kData)
+    local techType = kData and (kData.TechType or kData.Type)
+    if not techType then return { Unlocks = {}, Reveals = {} } end
+    local playerID = Game.GetLocalPlayer()
+    local raw = GetUnlockablesForTech_Cached(techType, playerID) or {}
+    local unlocks, reveals = {}, {}
+    for _, u in ipairs(raw) do
+        local typeName, locName = u[1], u[2]
+        if locName and locName ~= "" then
+            local t = GameInfo.Types[typeName]
+            local kind = t and t.Kind or nil
+            if kind == "KIND_RESOURCE" then
+                table.insert(reveals, {
+                    TypeName = typeName,
+                    Name = Locale.Lookup(locName),
+                })
+            else
+                table.insert(unlocks, {
+                    TypeName = typeName,
+                    Name = Locale.Lookup(locName),
+                    Description = GetUnlockDescription(typeName),
+                })
             end
-            return Locale.Lookup("LOC_CAI_CIVIC_MAKES_OBSOLETE_COUNT", count)
-        end,
-    })
-
-    for _, name in ipairs(obsoleteNames) do
-        local obsoleteName = name
-        obsoleteNode:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICivicObsoleteItem"), "TreeviewItem", {
-            GetLabel = function() return obsoleteName end,
-        }))
+        end
     end
+    return { Unlocks = unlocks, Reveals = reveals }
+end
 
-    parent:AddChild(obsoleteNode)
+-- ===========================================================================
+-- Awards (XP1/XP2 extra civic/tech rewards: Envoys, Governor title, Favor).
+-- Mirrors vanilla's g_ExtraIconData lookup. Returns an array of localized
+-- strings ready to splice into the row tooltip after the Unlocks header.
+-- ===========================================================================
+
+local AWARD_LOC_TAGS = {
+    MODIFIER_PLAYER_GRANT_INFLUENCE_TOKEN = "LOC_CIVIC_ENVOY_AWARDED_TOOLTIP",
+    MODIFIER_PLAYER_ADJUST_GOVERNOR_POINTS = "LOC_HUD_CIVICS_TREE_AWARD_GOVERNOR",
+    MODIFIER_PLAYER_ADD_FAVOR = "LOC_HUD_CIVICS_TREE_AWARD_FAVOR",
+}
+
+function GetAwardNames(modifierList)
+    local names = {}
+    if not modifierList then return names end
+    -- g_ExtraIconData is a screen-level global declared by CivicsTree.lua /
+    -- CivicsChooser.lua includes; reading an undeclared global is nil in Lua,
+    -- so no rawget guard is needed (and the sandbox doesn't expose rawget).
+    local extra = g_ExtraIconData
+    for _, m in ipairs(modifierList) do
+        local tag = AWARD_LOC_TAGS[m.ModifierType]
+        local hasIconData = extra and extra[m.ModifierType] ~= nil
+        if tag and hasIconData then
+            local num = tonumber(m.ModifierValue)
+            if num then
+                table.insert(names, Locale.Lookup(tag, num))
+            else
+                table.insert(names, Locale.Lookup(tag))
+            end
+        end
+    end
+    return names
+end
+
+function GetCivicAwardsText(awardNames)
+    if not awardNames or #awardNames == 0 then return nil end
+    return Locale.Lookup("LOC_CAI_CIVIC_AWARDS_HEADER", table.concat(awardNames, ", "))
+end
+
+function GetTechAwardsText(awardNames)
+    if not awardNames or #awardNames == 0 then return nil end
+    return Locale.Lookup("LOC_CAI_TECH_AWARDS_HEADER", table.concat(awardNames, ", "))
+end
+
+-- Shared TreeItem for one unlock entry (label = unlock name, tooltip =
+-- description, Shift+Enter opens Civilopedia for the underlying type).
+function CreateUnlockChild(mgr, unlock, idPrefix)
+    local prefix = idPrefix or "CAIUnlock"
+    local child = mgr:CreateWidget(mgr:GenerateWidgetId(prefix), "TreeItem", {
+        Label    = function() return unlock.Name end,
+        Tooltip  = function() return unlock.Description or "" end,
+        FocusKey = "unlock:" .. tostring(unlock.TypeName),
+    })
+    child:AddInputBindings({
+        {
+            Key     = Keys.VK_RETURN,
+            IsShift = true,
+            MSG     = KeyEvents.KeyUp,
+            Action  = function()
+                if IsTutorialRunning and IsTutorialRunning() then return true end
+                if unlock.TypeName then LuaEvents.OpenCivilopedia(unlock.TypeName) end
+                return true
+            end,
+        },
+    })
+    return child
 end
 
 --#Unit info helpers

@@ -621,9 +621,11 @@ function OpenOrToggleCityProduction()
     ToggleCityPanelCheck(Controls.ChangeProductionCheck)
 end
 
+local CITY_ACTION_LIST_ID = "CAICityPanel_ActionList"
+
 function CloseCityActionList()
     if CityActionList ~= nil then
-        mgr:Pop()
+        mgr:RemoveFromStack(CITY_ACTION_LIST_ID)
         CityActionList = nil
     end
 end
@@ -995,99 +997,66 @@ function GetCityWMDStrikeActions(city)
     return actions
 end
 
+local function MakeCityActionMenuItem(idPrefix, getLabel, getTooltip, onActivate)
+    local item = mgr:CreateWidget(mgr:GenerateWidgetId(idPrefix), "MenuItem", {
+        Label   = getLabel,
+        Tooltip = getTooltip,
+    })
+    item:SetFocusSound("Main_Menu_Mouse_Over")
+    item:On("activate", function()
+        CloseCityActionList()
+        onActivate()
+    end)
+    return item
+end
+
 function BuildCityActionList()
     local data, city = GetCityInfoData(UI.GetHeadSelectedCity())
     local cityName = GetCityInfoName(data) or Locale.Lookup("LOC_CAI_CITY_ACTIONS")
-    local list = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityPanelList"), "List", {
-        GetLabel = function()
-            return Locale.Lookup("LOC_CAI_SELECTION_ACTIONS_FOR", cityName)
-        end,
+    local list = mgr:CreateWidget(CITY_ACTION_LIST_ID, "List", {
+        Label = function() return Locale.Lookup("LOC_CAI_SELECTION_ACTIONS_FOR", cityName) end,
     })
 
-    list:AddInputBinding({
-        Key = Keys.VK_ESCAPE,
-        Action = function()
-            CloseCityActionList()
-            return true
-        end,
+    list:AddInputBindings({
+        {
+            Key    = Keys.VK_ESCAPE,
+            MSG    = KeyEvents.KeyUp,
+            Action = function() CloseCityActionList(); return true end,
+        },
     })
 
     for _, strikeAction in ipairs(GetCityRangeStrikeActions(city)) do
-        local currentStrikeAction = strikeAction
-        list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityPanelRangeStrikeItem"), "MenuItem", {
-            GetLabel = function()
-                return currentStrikeAction.Label
-            end,
-            GetTooltip = function()
-                return currentStrikeAction.Tooltip
-            end,
-            OnFocusEnter = function()
-                UI.PlaySound("Main_Menu_Mouse_Over")
-            end,
-            OnClick = function()
-                CloseCityActionList()
-                currentStrikeAction.Action()
-            end,
-        }))
+        local current = strikeAction
+        list:AddChild(MakeCityActionMenuItem("CAICityPanelRangeStrikeItem",
+            function() return current.Label end,
+            function() return current.Tooltip end,
+            current.Action))
     end
 
     for _, wmdAction in ipairs(GetCityWMDStrikeActions(city)) do
-        local currentWMDAction = wmdAction
-        list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityPanelWMDStrikeItem"), "MenuItem", {
-            GetLabel = function()
-                return currentWMDAction.Label
-            end,
-            GetTooltip = function()
-                return currentWMDAction.Tooltip
-            end,
-            OnFocusEnter = function()
-                UI.PlaySound("Main_Menu_Mouse_Over")
-            end,
-            OnClick = function()
-                CloseCityActionList()
-                currentWMDAction.Action()
-            end,
-        }))
+        local current = wmdAction
+        list:AddChild(MakeCityActionMenuItem("CAICityPanelWMDStrikeItem",
+            function() return current.Label end,
+            function() return current.Tooltip end,
+            current.Action))
     end
 
     for _, actionId in ipairs(GetOrderedCityActionIds()) do
         local actionData = CityActionMap[actionId]
         if actionData ~= nil and actionData.IsEnabled() then
             local currentActionId = actionId
-            list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityPanelMenuItem"), "MenuItem", {
-                GetLabel = function()
-                    return GetActionNameText(currentActionId)
-                end,
-                GetTooltip = function()
-                    return GetActionDescriptionText(currentActionId)
-                end,
-                OnFocusEnter = function()
-                    UI.PlaySound("Main_Menu_Mouse_Over")
-                end,
-                OnClick = function()
-                    CloseCityActionList()
-                    actionData.helper()
-                end,
-            }))
+            list:AddChild(MakeCityActionMenuItem("CAICityPanelMenuItem",
+                function() return GetActionNameText(currentActionId) end,
+                function() return GetActionDescriptionText(currentActionId) end,
+                actionData.helper))
         end
     end
 
     if CanToggleCombinedCityManagement() then
-        list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityPanelManageCityItem"), "MenuItem", {
-            GetLabel = function()
-                return Locale.Lookup("LOC_CAI_CITY_MANAGE_CITY")
-            end,
-            GetTooltip = function()
-                return Locale.Lookup("LOC_CAI_CITY_MANAGE_CITY_TOOLTIP")
-            end,
-            OnFocusEnter = function()
-                UI.PlaySound("Main_Menu_Mouse_Over")
-            end,
-            OnClick = function()
-                CloseCityActionList()
-                ToggleCombinedCityManagement()
-            end,
-        }))
+        list:AddChild(MakeCityActionMenuItem("CAICityPanelManageCityItem",
+            function() return Locale.Lookup("LOC_CAI_CITY_MANAGE_CITY") end,
+            function() return Locale.Lookup("LOC_CAI_CITY_MANAGE_CITY_TOOLTIP") end,
+            ToggleCombinedCityManagement))
     end
 
     return list
@@ -1104,7 +1073,7 @@ function OpenCityActionList()
 
     CityActionList = BuildCityActionList()
     if CityActionList ~= nil and CityActionList.Children ~= nil and #CityActionList.Children > 0 then
-        mgr:Push(CityActionList, PopupPriority.Low)
+        mgr:Push(CityActionList, { priority = PopupPriority.Low })
     else
         CityActionList = nil
     end
@@ -1153,20 +1122,49 @@ function CAI_SetCitizenFocusTo(yieldType, targetState)
     end
 end
 
+local CAI_YIELD_FOCUS_STATES = {
+    { state = YIELD_STATE.NORMAL,  loc = "LOC_CAI_CITY_YIELD_STATE_NORMAL" },
+    { state = YIELD_STATE.FAVORED, loc = "LOC_CAI_CITY_YIELD_STATE_FAVORED" },
+    { state = YIELD_STATE.IGNORED, loc = "LOC_CAI_CITY_YIELD_STATE_IGNORED" },
+}
+
+local function GetYieldFocusOptions()
+    local out = {}
+    for _, entry in ipairs(CAI_YIELD_FOCUS_STATES) do
+        table.insert(out, { label = Locale.Lookup(entry.loc), value = entry.state })
+    end
+    return out
+end
+
+local function GetSelectedYieldStateIndex(yieldType)
+    local liveData = GetCityInfoData(UI.GetHeadSelectedCity())
+    local current = GetCityInfoYieldState(liveData, yieldType)
+    for i, entry in ipairs(CAI_YIELD_FOCUS_STATES) do
+        if entry.state == YIELD_STATE.NORMAL
+            and current ~= YIELD_STATE.FAVORED and current ~= YIELD_STATE.IGNORED then
+            return i
+        elseif entry.state == current then
+            return i
+        end
+    end
+    return 1
+end
+
 function OpenCitizenYieldFocusList()
     if mgr == nil or UI.GetHeadSelectedCity() == nil or ContextPtr:IsHidden() then return end
 
     local data = GetCityInfoData(UI.GetHeadSelectedCity())
     local cityName = GetCityInfoName(data) or Locale.Lookup("LOC_CAI_CITY_ACTIONS")
 
-    local outerList = mgr:CreateUIWidget(CAI_YIELD_FOCUS_LIST_ID, "List", {
-        GetLabel = function() return Locale.Lookup("LOC_CAI_CITY_YIELD_FOCUS_LIST", cityName) end,
+    local outerList = mgr:CreateWidget(CAI_YIELD_FOCUS_LIST_ID, "List", {
+        Label = function() return Locale.Lookup("LOC_CAI_CITY_YIELD_FOCUS_LIST", cityName) end,
     })
-    outerList:AddInputBinding({
-        Key = Keys.VK_ESCAPE,
-        Action = function()
-            mgr:RemoveFromStack(CAI_YIELD_FOCUS_LIST_ID); return true
-        end
+    outerList:AddInputBindings({
+        {
+            Key    = Keys.VK_ESCAPE,
+            MSG    = KeyEvents.KeyUp,
+            Action = function() mgr:RemoveFromStack(CAI_YIELD_FOCUS_LIST_ID); return true end,
+        },
     })
 
     for _, yieldEntry in ipairs(CAI_YIELD_FOCUS_YIELDS) do
@@ -1174,57 +1172,25 @@ function OpenCitizenYieldFocusList()
         local yieldInfo = GameInfo.Yields[yieldType]
         if yieldInfo ~= nil then
             local yieldName = Locale.Lookup(yieldInfo.Name)
-            outerList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityYieldFocusDropdown"), "DropdownMenu", {
-                GetLabel = function() return yieldName end,
-                GetValue = function()
-                    local liveData = GetCityInfoData(UI.GetHeadSelectedCity())
-                    return CAI_GetYieldStateName(GetCityInfoYieldState(liveData, yieldType))
-                end,
-                OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-                OnClick = function()
-                    local subList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityYieldFocusSub"), "List", {
-                        GetLabel = function() return Locale.Lookup("LOC_CAI_CITY_YIELD_FOCUS_OPTIONS", yieldName) end,
-                    })
-                    subList:AddInputBinding({
-                        Key = Keys.VK_ESCAPE,
-                        Action = function()
-                            mgr:Pop(); return true
-                        end
-                    })
-
-                    local focusStates = {
-                        { State = YIELD_STATE.NORMAL,  Key = "LOC_CAI_CITY_YIELD_STATE_NORMAL" },
-                        { State = YIELD_STATE.FAVORED, Key = "LOC_CAI_CITY_YIELD_STATE_FAVORED" },
-                        { State = YIELD_STATE.IGNORED, Key = "LOC_CAI_CITY_YIELD_STATE_IGNORED" },
-                    }
-                    for _, entry in ipairs(focusStates) do
-                        local targetState = entry.State
-                        local stateKey = entry.Key
-                        subList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAICityYieldFocusState"), "MenuItem", {
-                            GetLabel = function() return Locale.Lookup(stateKey) end,
-                            GetState = function()
-                                local liveData = GetCityInfoData(UI.GetHeadSelectedCity())
-                                local current = GetCityInfoYieldState(liveData, yieldType)
-                                local isMatch = (targetState == YIELD_STATE.NORMAL
-                                        and current ~= YIELD_STATE.FAVORED and current ~= YIELD_STATE.IGNORED)
-                                    or current == targetState
-                                return isMatch and Locale.Lookup("LOC_CAI_STATE_SELECTED") or nil
-                            end,
-                            OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-                            OnClick = function()
-                                CAI_SetCitizenFocusTo(yieldType, targetState)
-                                mgr:Pop()
-                            end,
-                        }))
-                    end
-
-                    mgr:Push(subList, PopupPriority.Low)
-                end,
-            }))
+            local dd = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityYieldFocusDropdown"), "Dropdown", {
+                Label = function() return yieldName end,
+            })
+            dd:SetFocusSound("Main_Menu_Mouse_Over")
+            dd:SetOptions(GetYieldFocusOptions())
+            dd:SetSelectedIndex(GetSelectedYieldStateIndex(yieldType), true)
+            dd:On("focus_enter", function(w)
+                if w:IsFocused() then
+                    dd:SetSelectedIndex(GetSelectedYieldStateIndex(yieldType), true)
+                end
+            end)
+            dd:On("value_changed", function(_, v)
+                CAI_SetCitizenFocusTo(yieldType, v)
+            end)
+            outerList:AddChild(dd)
         end
     end
 
-    mgr:Push(outerList, PopupPriority.Low)
+    mgr:Push(outerList, { priority = PopupPriority.Low })
 end
 
 --#Action Maps

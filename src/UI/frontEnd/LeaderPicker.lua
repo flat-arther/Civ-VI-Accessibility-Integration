@@ -357,113 +357,89 @@ local m_intentionalClose = false
 -- ---------------------------------------------------------------------------
 -- Rebuild the accessible item list from vanilla's m_kItemList
 -- ---------------------------------------------------------------------------
-local function RebuildItemList()
-	if not CAI_ItemList then return end
-	CAI_ItemList:ClearChildren()
-
-	if not m_kItemList then return end
-	for idx, node in ipairs(m_kItemList) do
-		local item = node["item"]
-		local checkBox = node["checkbox"]
-
-		local child = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerCheckbox"), "Checkbox", {
-			GetLabel = function()
-				-- Read the name from the visual control
-				return item.Name
-			end,
-			GetTooltip = function()
-				-- Sync focus panel then read leader + civ name
-				OnItemFocus(item)
-				local leader = Controls.FocusedLeaderName:GetText() or ""
-				local civ = Controls.FocusedCivName:GetText() or ""
-				if civ ~= "" then
-					return leader .. ", " .. civ
-				end
-				return leader
-			end,
-			GetValue = function()
-				return checkBox:IsChecked()
-					and Locale.Lookup("LOC_OPTIONS_ENABLED")
-					or Locale.Lookup("LOC_OPTIONS_DISABLED")
-			end,
-			Toggle = function()
-				OnItemSelect(item, checkBox)
-			end,
-			OnFocusEnter = function()
-				UI.PlaySound("Main_Menu_Mouse_Over")
-				OnItemFocus(item)
-			end,
-		})
-		CAI_ItemList:AddChild(child)
+local function MakeButton(labelCtrl, onClick, disabledCtrl)
+	local b = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerButton"), "Button", {
+		Label = function() return labelCtrl:GetText() end,
+	})
+	if disabledCtrl then
+		b:SetDisabledPredicate(function() return disabledCtrl:IsDisabled() end)
 	end
+	b:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+	b:On("activate", onClick)
+	return b
 end
 
--- ---------------------------------------------------------------------------
--- Open the preset dropdown as an accessible list overlay
--- ---------------------------------------------------------------------------
+local function RebuildItemList()
+	if not CAI_ItemList then return end
+	local capture = mgr:CaptureFocusKey(CAI_ItemList)
+	CAI_ItemList:ClearChildren()
+
+	if m_kItemList then
+		for idx, node in ipairs(m_kItemList) do
+			local item = node["item"]
+			local checkBox = node["checkbox"]
+
+			local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerCheckbox"), "Checkbox", {
+				Label = function() return item.Name end,
+				Tooltip = function()
+					OnItemFocus(item)
+					local leader = Controls.FocusedLeaderName:GetText() or ""
+					local civ = Controls.FocusedCivName:GetText() or ""
+					if civ ~= "" then return leader .. ", " .. civ end
+					return leader
+				end,
+				ValueGetter = function()
+					return checkBox:IsChecked()
+						and Locale.Lookup("LOC_OPTIONS_ENABLED")
+						or Locale.Lookup("LOC_OPTIONS_DISABLED")
+				end,
+				FocusKey = "lp:item:" .. tostring(idx),
+			})
+			child:On("value_changed", function() OnItemSelect(item, checkBox) end)
+			child:On("focus_enter", function()
+				UI.PlaySound("Main_Menu_Mouse_Over")
+				OnItemFocus(item)
+			end)
+			CAI_ItemList:AddChild(child)
+		end
+	end
+	mgr:RestoreFocus(CAI_ItemList, capture)
+end
+
 local function OpenPresetDropdown()
-	local optList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerList"), "List", {
-		GetLabel = function() return Controls.StringName:GetText() end,
+	local optList = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerList"), "List", {
+		Label = function() return Controls.StringName:GetText() end,
 	})
 	optList:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
-		mgr:Pop()
+		mgr:RemoveFromStack(optList:GetId())
 		return true
 	end})
 
-	-- Read preset entry texts from the pulldown's built entries
 	local pulldown = Controls.PresetPulldown
-
-	-- All
-	optList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerMenuItem"), "MenuItem", {
-		GetLabel = function()
-			return Locale.Lookup("LOC_LEADER_PICK_PRESET_ALL")
-		end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick = function()
-			pulldown:GetButton():SetText(Locale.Lookup("LOC_LEADER_PICK_PRESET_ALL"))
-			OnSelectAll()
+	local function AddPreset(labelKey, action)
+		local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerMenuItem"), "MenuItem", {
+			Label = function() return Locale.Lookup(labelKey) end,
+		})
+		item:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+		item:On("activate", function()
+			pulldown:GetButton():SetText(Locale.Lookup(labelKey))
+			action()
 			RebuildItemList()
-			mgr:Pop()
-		end,
-	}))
+			mgr:RemoveFromStack(optList:GetId())
+		end)
+		optList:AddChild(item)
+	end
 
-	-- None
-	optList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerMenuItem"), "MenuItem", {
-		GetLabel = function()
-			return Locale.Lookup("LOC_LEADER_PICK_PRESET_NONE")
-		end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick = function()
-			pulldown:GetButton():SetText(Locale.Lookup("LOC_LEADER_PICK_PRESET_NONE"))
-			OnSelectNone()
-			RebuildItemList()
-			mgr:Pop()
-		end,
-	}))
-
-	-- No Wins
-	optList:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerMenuItem"), "MenuItem", {
-		GetLabel = function()
-			return Locale.Lookup("LOC_LEADER_PICK_PRESET_NO_WINS")
-		end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick = function()
-			pulldown:GetButton():SetText(Locale.Lookup("LOC_LEADER_PICK_PRESET_NO_WINS"))
-			SelectLeadersWithNoWins()
-			RebuildItemList()
-			mgr:Pop()
-		end,
-	}))
+	AddPreset("LOC_LEADER_PICK_PRESET_ALL",     function() OnSelectAll() end)
+	AddPreset("LOC_LEADER_PICK_PRESET_NONE",    function() OnSelectNone() end)
+	AddPreset("LOC_LEADER_PICK_PRESET_NO_WINS", function() SelectLeadersWithNoWins() end)
 
 	mgr:Push(optList)
 end
 
--- ---------------------------------------------------------------------------
--- Build the accessible widget hierarchy
--- ---------------------------------------------------------------------------
 local function BuildPanel()
-	CAI_Panel = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerDialog"), "Dialog", {
-		GetLabel = function() return Controls.WindowTitle:GetText() end,
+	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerDialog"), "Dialog", {
+		Label = function() return Controls.WindowTitle:GetText() end,
 		SpeechSettings = { Role = false },
 	})
 	CAI_Panel:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
@@ -471,44 +447,32 @@ local function BuildPanel()
 		return true
 	end})
 
-	-- Preset dropdown
-	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerDropdownMenu"), "DropdownMenu", {
-		GetLabel     = function() return Controls.StringName:GetText() end,
-		GetValue     = function() return Controls.PresetPulldown:GetButton():GetText() end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick      = function() OpenPresetDropdown() end,
-	}))
+	local presetBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerPresetBtn"), "Button", {
+		Label = function() return Controls.StringName:GetText() end,
+		ValueGetter = function() return Controls.PresetPulldown:GetButton():GetText() end,
+	})
+	presetBtn:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+	presetBtn:On("activate", function() OpenPresetDropdown() end)
+	CAI_Panel:AddChild(presetBtn)
 
-	-- Count warning (hidden when empty)
-	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerStaticText"), "StaticText", {
-		GetLabel = function() return Controls.CountWarning:GetText() or "" end,
-		IsHidden = function()
+	CAI_Panel:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerStaticText"), "StaticText", {
+		Label = function() return Controls.CountWarning:GetText() or "" end,
+		HiddenPredicate = function()
 			local text = Controls.CountWarning:GetText()
 			return not text or text == ""
 		end,
 	}))
 
-	-- Item list
-	CAI_ItemList = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerList"), "List")
+	CAI_ItemList = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerList"), "List")
 	CAI_Panel:AddChild(CAI_ItemList)
 
-	-- Action buttons
-	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerButton"), "Button", {
-		GetLabel     = function() return Controls.ConfirmButton:GetText() end,
-		IsDisabled   = function() return Controls.ConfirmButton:IsDisabled() end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick      = function() OnConfirmChanges() end,
-	}))
-	CAI_Panel:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAILeaderPickerButton"), "Button", {
-		GetLabel     = function() return Controls.CloseButton:GetText() end,
-		OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-		OnClick      = function() Close() end,
-	}))
+	CAI_Panel:AddChild(MakeButton(Controls.ConfirmButton, function() OnConfirmChanges() end, Controls.ConfirmButton))
+	CAI_Panel:AddChild(MakeButton(Controls.CloseButton,   function() Close() end))
 end
 
 local function ClosePanel()
-	if CAI_Panel and mgr:HasWidget(CAI_Panel) then
-		mgr:Pop()
+	if CAI_Panel then
+		mgr:RemoveFromStack(CAI_Panel:GetId())
 	end
 end
 
@@ -547,8 +511,8 @@ end)
 
 -- Show/hide handlers for push/pop lifecycle
 ContextPtr:SetShowHandler(function()
-	if CAI_Panel and mgr:HasWidget(CAI_Panel) then
-		mgr:Pop()
+	if CAI_Panel then
+		mgr:RemoveFromStack(CAI_Panel:GetId())
 	end
 	CAI_Panel = nil
 	CAI_ItemList = nil

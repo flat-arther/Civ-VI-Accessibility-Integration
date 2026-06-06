@@ -120,12 +120,49 @@ local function GetSelectedUnit()
     return UI.GetHeadSelectedUnit()
 end
 
+local CloseUnitList -- forward declaration; assigned below
+
+local function ReadCurrentUnitData()
+    local data = GetSubjectData ~= nil and GetSubjectData() or nil
+    if data == nil then
+        local unit = GetSelectedUnit()
+        if unit ~= nil and ReadUnitData ~= nil then
+            data = ReadUnitData(unit)
+        end
+    end
+    return data
+end
+
+local function UnitFocusKey(owner, unitID)
+    return "unit:list:" .. tostring(owner) .. ":" .. tostring(unitID)
+end
+
+local function BindCivilopediaShortcut(item, getUnitID)
+    item:AddInputBinding({
+        Key = Keys.VK_RETURN,
+        IsShift = true,
+        Action = function()
+            local unitID = getUnitID()
+            local resolved = Players[Game.GetLocalPlayer()]:GetUnits():FindID(unitID)
+            if resolved == nil then
+                return true
+            end
+
+            local unitInfo = GameInfo.Units[resolved:GetUnitType()]
+            if unitInfo ~= nil then
+                CloseUnitList()
+                LuaEvents.OpenCivilopedia(unitInfo.UnitType)
+            end
+            return true
+        end,
+    })
+end
+
 local GetUnitActionEntries
 local GetUnitActionLabel
 local GetUnitActionTooltip
 local GetControlText
 local GetControlTooltip
-local CloseUnitActionList
 
 local function ResolveUnit(unitID, playerID)
     if unitID == nil then
@@ -1745,36 +1782,35 @@ local function GetBuildUnitActionEntries(data)
 end
 
 local function CreateUnitActionMenuItem(currentAction)
-    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitPanelMenuItem"), "MenuItem", {
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitPanelMenuItem"), "MenuItem", {
         GetLabel = function()
             return GetUnitActionLabel(currentAction)
         end,
         GetTooltip = function()
             return GetUnitActionTooltip(currentAction)
         end,
-        IsDisabled = function()
+        DisabledPredicate = function()
             return currentAction.Disabled == true
         end,
-        OnFocusEnter = function()
-            UI.PlaySound("Main_Menu_Mouse_Over")
-        end,
-        OnClick = function()
-            if currentAction.Disabled then
-                local tooltip = GetUnitActionTooltip(currentAction)
-                if tooltip ~= "" then
-                    Speak(tooltip)
-                end
-                return
-            end
-
-            UI.PlaySound("Play_UI_Click")
-            if currentAction.Sound ~= nil and currentAction.Sound ~= "" then
-                UI.PlaySound(currentAction.Sound)
-            end
-            currentAction.CallbackFunc(currentAction.CallbackVoid1, currentAction.CallbackVoid2)
-            CloseUnitActionList()
-        end,
     })
+    w:SetFocusSound("Main_Menu_Mouse_Over")
+    w:On("activate", function()
+        if currentAction.Disabled then
+            local tooltip = GetUnitActionTooltip(currentAction)
+            if tooltip ~= "" then
+                Speak(tooltip)
+            end
+            return
+        end
+
+        UI.PlaySound("Play_UI_Click")
+        if currentAction.Sound ~= nil and currentAction.Sound ~= "" then
+            UI.PlaySound(currentAction.Sound)
+        end
+        currentAction.CallbackFunc(currentAction.CallbackVoid1, currentAction.CallbackVoid2)
+        CloseUnitActionList()
+    end)
+    return w
 end
 
 local function CreateBuildImprovementsSubMenu(data)
@@ -1783,21 +1819,15 @@ local function CreateBuildImprovementsSubMenu(data)
         return nil
     end
 
-    local submenu = mgr:CreateUIWidget(UNIT_BUILD_IMPROVEMENTS_SUBMENU_ID, "SubMenu", {
+    local submenu = mgr:CreateWidget(UNIT_BUILD_IMPROVEMENTS_SUBMENU_ID, "SubMenu", {
         GetLabel = function()
             return Locale.Lookup("LOC_CAI_UNIT_BUILD_IMPROVEMENTS_SUBMENU")
         end,
         GetTooltip = function()
             return Locale.Lookup("LOC_CAI_UNIT_BUILD_IMPROVEMENTS_SUBMENU_TOOLTIP")
         end,
-        OnFocusEnter = function()
-            UI.PlaySound("Main_Menu_Mouse_Over")
-        end,
-        OnToggleExpanded = function()
-            UI.PlaySound("Main_Menu_Mouse_Over")
-        end,
     })
-
+    submenu:SetFocusSound("Main_Menu_Mouse_Over")
     for _, action in ipairs(buildActions) do
         submenu:AddChild(CreateUnitActionMenuItem(action))
     end
@@ -1805,14 +1835,14 @@ local function CreateBuildImprovementsSubMenu(data)
     return submenu
 end
 
-CloseUnitActionList = function()
+function CloseUnitActionList()
     if UnitActionList ~= nil then
         mgr:RemoveFromStack(UNIT_ACTION_LIST_ID)
         UnitActionList = nil
     end
 end
 
-local function CloseUnitList()
+CloseUnitList = function()
     if UnitList ~= nil then
         mgr:RemoveFromStack(UNIT_LIST_ID)
         UnitList = nil
@@ -1822,7 +1852,7 @@ end
 local function BuildUnitActionList(data)
     local selectedUnit = GetSelectedUnit()
     local unitName = GetUnitInfoName(data, selectedUnit) or Locale.Lookup("LOC_OPTIONS_HOTKEY_CATEGORY_UNIT")
-    local list = mgr:CreateUIWidget(UNIT_ACTION_LIST_ID, "List", {
+    local list = mgr:CreateWidget(UNIT_ACTION_LIST_ID, "List", {
         GetLabel = function()
             return Locale.Lookup("LOC_CAI_SELECTION_ACTIONS_FOR", unitName)
         end,
@@ -1846,15 +1876,17 @@ local function BuildUnitActionList(data)
     end
 
     if data ~= nil and data.Ability ~= nil and #data.Ability > 0 then
-        list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitViewAbilities"), "MenuItem", {
+        local abilities = mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitViewAbilities"), "MenuItem", {
             GetLabel = function() return Locale.Lookup("LOC_CAI_UNIT_VIEW_ABILITIES") end,
             GetTooltip = function() return Locale.Lookup("LOC_CAI_UNIT_VIEW_ABILITIES_TOOLTIP") end,
-            OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-            OnClick = function()
-                CloseUnitActionList()
-                OnUnitPanelSelectionActionInputTriggered(unitViewAbilitiesAction)
-            end,
-        }))
+        })
+        abilities:SetFocusSound("Main_Menu_Mouse_Over")
+        abilities:On("activate", function(w, ...)
+            UI.PlaySound("Play_UI_Click")
+            CloseUnitActionList()
+            OnUnitPanelSelectionActionInputTriggered(unitViewAbilitiesAction)
+        end)
+        list:AddChild(abilities)
     end
 
     return list
@@ -1869,14 +1901,7 @@ local function OpenUnitActionList()
         CloseUnitActionList()
     end
 
-    local data = GetSubjectData ~= nil and GetSubjectData() or nil
-    if data == nil then
-        local unit = GetSelectedUnit()
-        if unit ~= nil and ReadUnitData ~= nil then
-            data = ReadUnitData(unit)
-        end
-    end
-
+    local data = ReadCurrentUnitData()
     FilterBuildActionsForDisplay(data)
 
     UnitActionList = BuildUnitActionList(data)
@@ -1901,7 +1926,7 @@ local function ChangeUnitSelection(dir)
     end
 end
 
-local function AddUnitToUnitList(list, unit)
+local function CreateUnitListItem(unit)
     local data = ReadUnitData ~= nil and ReadUnitData(unit) or nil
     local unitName = GetUnitListName(unit)
     local selectedUnit = GetSelectedUnit()
@@ -1912,7 +1937,8 @@ local function AddUnitToUnitList(list, unit)
     local tooltip = JoinUnitInfo(GetUnitInfoActivity(data, unit) or {}, ", ")
     local unitID = unit:GetID()
 
-    local item = mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitListItem"), "MenuItem", {
+    local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitListItem"), "TreeItem", {
+        FocusKey = UnitFocusKey(unit:GetOwner(), unitID),
         GetLabel = function()
             return unitName
         end,
@@ -1922,43 +1948,62 @@ local function AddUnitToUnitList(list, unit)
         GetTooltip = function()
             return tooltip
         end,
-        OnFocusEnter = function()
-            UI.PlaySound("Main_Menu_Mouse_Over")
-        end,
-        OnClick = function()
-            local resolved = Players[Game.GetLocalPlayer()]:GetUnits():FindID(unitID)
-            if resolved == nil then
-                return
-            end
-
-            CloseUnitList()
-            UI.SelectUnit(resolved)
-            local plot = Map.GetPlot(resolved:GetX(), resolved:GetY())
-            UI.LookAtPlot(plot)
-        end,
     })
+    item:On("activate", function()
+        local resolved = Players[Game.GetLocalPlayer()]:GetUnits():FindID(unitID)
+        if resolved == nil then
+            return
+        end
 
-    item:AddInputBinding({
-        Key = Keys.VK_RETURN,
-        IsShift = true,
-        Action = function()
-            local resolved = Players[Game.GetLocalPlayer()]:GetUnits():FindID(unitID)
-            if resolved == nil then
-                return true
-            end
+        CloseUnitList()
+        UI.SelectUnit(resolved)
+        local plot = Map.GetPlot(resolved:GetX(), resolved:GetY())
+        UI.LookAtPlot(plot)
+    end)
+    BindCivilopediaShortcut(item, function() return unitID end)
 
-            local unitInfo = GameInfo.Units[resolved:GetUnitType()]
-            if unitInfo ~= nil then
-                CloseUnitList()
-                LuaEvents.OpenCivilopedia(unitInfo.UnitType)
-            end
-            return true
-        end,
-    })
+    return item
+end
 
-    list:AddChild(item)
+local UnitListDomains = {
+    { Key = "military", Label = "LOC_CAI_UNIT_DOMAIN_MILITARY" },
+    { Key = "naval",    Label = "LOC_CAI_UNIT_DOMAIN_NAVAL" },
+    { Key = "air",      Label = "LOC_CAI_UNIT_DOMAIN_AIR" },
+    { Key = "support",  Label = "LOC_CAI_UNIT_DOMAIN_SUPPORT" },
+    { Key = "civilian", Label = "LOC_CAI_UNIT_DOMAIN_CIVILIAN" },
+    { Key = "trade",    Label = "LOC_CAI_UNIT_DOMAIN_TRADE" },
+}
 
-    return isSelected
+local function ClassifyPlayerUnits(player)
+    local buckets = {
+        military = {}, naval = {}, air = {}, support = {}, civilian = {}, trade = {},
+    }
+
+    for _, unit in player:GetUnits():Members() do
+        local unitInfo = GameInfo.Units[unit:GetUnitType()]
+        if unitInfo.MakeTradeRoute == true then
+            table.insert(buckets.trade, unit)
+        elseif unit:GetCombat() == 0 and unit:GetRangedCombat() == 0 then
+            table.insert(buckets.civilian, unit)
+        elseif unitInfo.Domain == "DOMAIN_LAND" then
+            table.insert(buckets.military, unit)
+        elseif unitInfo.Domain == "DOMAIN_SEA" then
+            table.insert(buckets.naval, unit)
+        elseif unitInfo.Domain == "DOMAIN_AIR" then
+            table.insert(buckets.air, unit)
+        else
+            table.insert(buckets.support, unit)
+        end
+    end
+
+    local function sortFunc(a, b)
+        return GameInfo.Units[a:GetUnitType()].UnitType < GameInfo.Units[b:GetUnitType()].UnitType
+    end
+    for _, units in pairs(buckets) do
+        table.sort(units, sortFunc)
+    end
+
+    return buckets
 end
 
 local function BuildUnitList()
@@ -1972,13 +2017,13 @@ local function BuildUnitList()
         return nil
     end
 
-    local list = mgr:CreateUIWidget(UNIT_LIST_ID, "List", {
+    local tree = mgr:CreateWidget(UNIT_LIST_ID, "Tree", {
         GetLabel = function()
             return Locale.Lookup("LOC_CAI_UNIT_LIST")
         end,
     })
 
-    list:AddInputBinding({
+    tree:AddInputBinding({
         Key = Keys.VK_ESCAPE,
         Action = function()
             CloseUnitList()
@@ -1986,66 +2031,38 @@ local function BuildUnitList()
         end,
     })
 
-    local playerUnits = player:GetUnits()
-    local militaryUnits = {}
-    local navalUnits = {}
-    local airUnits = {}
-    local supportUnits = {}
-    local civilianUnits = {}
-    local tradeUnits = {}
+    local buckets = ClassifyPlayerUnits(player)
+    local total = 0
 
-    for _, unit in playerUnits:Members() do
-        local unitInfo = GameInfo.Units[unit:GetUnitType()]
-        if unitInfo.MakeTradeRoute == true then
-            table.insert(tradeUnits, unit)
-        elseif unit:GetCombat() == 0 and unit:GetRangedCombat() == 0 then
-            table.insert(civilianUnits, unit)
-        elseif unitInfo.Domain == "DOMAIN_LAND" then
-            table.insert(militaryUnits, unit)
-        elseif unitInfo.Domain == "DOMAIN_SEA" then
-            table.insert(navalUnits, unit)
-        elseif unitInfo.Domain == "DOMAIN_AIR" then
-            table.insert(airUnits, unit)
-        else
-            table.insert(supportUnits, unit)
-        end
-    end
-
-    local function sortFunc(a, b)
-        local aType = GameInfo.Units[a:GetUnitType()].UnitType
-        local bType = GameInfo.Units[b:GetUnitType()].UnitType
-        return aType < bType
-    end
-
-    table.sort(militaryUnits, sortFunc)
-    table.sort(navalUnits, sortFunc)
-    table.sort(airUnits, sortFunc)
-    table.sort(supportUnits, sortFunc)
-    table.sort(civilianUnits, sortFunc)
-    table.sort(tradeUnits, sortFunc)
-
-    local selectedIndex = nil
-    local function addUnits(units)
-        for _, unit in ipairs(units) do
-            local isSelected = AddUnitToUnitList(list, unit)
-            if selectedIndex == nil and isSelected and list.Children ~= nil then
-                selectedIndex = #list.Children
+    for _, domain in ipairs(UnitListDomains) do
+        local units = buckets[domain.Key]
+        if #units > 0 then
+            local domainNode = mgr:CreateWidget(
+                mgr:GenerateWidgetId("CAIUnitListDomain_" .. domain.Key),
+                "TreeItem",
+                {
+                    GetLabel = function()
+                        return Locale.Lookup(domain.Label)
+                    end,
+                }
+            )
+            for _, unit in ipairs(units) do
+                domainNode:AddChild(CreateUnitListItem(unit))
+                total = total + 1
             end
+            -- Start expanded without triggering Expand()'s speech, since the
+            -- push will speak the focused leaf and any expand chatter would
+            -- just be interrupted.
+            domainNode.IsExpanded = true
+            tree:AddChild(domainNode)
         end
     end
 
-    addUnits(militaryUnits)
-    addUnits(navalUnits)
-    addUnits(airUnits)
-    addUnits(supportUnits)
-    addUnits(civilianUnits)
-    addUnits(tradeUnits)
-
-    if selectedIndex ~= nil then
-        list:SetDefaultIndex(selectedIndex)
+    if total == 0 then
+        return nil
     end
 
-    return list
+    return tree
 end
 
 local function OpenUnitList()
@@ -2058,12 +2075,18 @@ local function OpenUnitList()
     end
 
     UnitList = BuildUnitList()
-    if UnitList ~= nil and UnitList.Children ~= nil and #UnitList.Children > 0 then
-        mgr:Push(UnitList, PopupPriority.Low)
-    else
-        UnitList = nil
+    if UnitList == nil then
         Speak(Locale.Lookup("LOC_CAI_UNIT_NO_UNITS"))
+        return
     end
+
+    local selectedUnit = GetSelectedUnit()
+    local focusHint = nil
+    if selectedUnit ~= nil and selectedUnit:GetOwner() == Game.GetLocalPlayer() then
+        focusHint = UnitFocusKey(selectedUnit:GetOwner(), selectedUnit:GetID())
+    end
+
+    mgr:Push(UnitList, { priority = PopupPriority.Low, focus = focusHint })
 end
 
 function OnHandleInput(inputStruct)
@@ -2138,18 +2161,13 @@ function OnUnitPanelSelectionActionInputTriggered(actionId)
     if actionId == unitViewAbilitiesAction then
         if ContextPtr:IsHidden() or GetSelectedUnit() == nil then return end
 
-        local data = GetSubjectData ~= nil and GetSubjectData() or nil
-        if data == nil then
-            local unit = GetSelectedUnit()
-            if unit ~= nil and ReadUnitData ~= nil then data = ReadUnitData(unit) end
-        end
-
+        local data = ReadCurrentUnitData()
         if data == nil or data.Ability == nil or #data.Ability == 0 then
             Speak(Locale.Lookup("LOC_CAI_UNIT_NO_ABILITIES"))
             return
         end
 
-        local list = mgr:CreateUIWidget(UNIT_ABILITIES_LIST_ID, "List", {
+        local list = mgr:CreateWidget(UNIT_ABILITIES_LIST_ID, "List", {
             GetLabel = function() return Locale.Lookup("LOC_CAI_UNIT_ABILITIES_LIST") end,
         })
         list:AddInputBinding({
@@ -2163,11 +2181,14 @@ function OnUnitPanelSelectionActionInputTriggered(actionId)
         for _, ability in ipairs(data.Ability) do
             local abilityText = GetUnitAbilityDescription(ability)
             if abilityText ~= nil and abilityText ~= "" then
-                list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIUnitAbilityItem"), "MenuItem", {
+                local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitAbilityItem"), "MenuItem", {
                     GetLabel = function() return abilityText end,
-                    OnFocusEnter = function() UI.PlaySound("Main_Menu_Mouse_Over") end,
-                    OnClick = function() mgr:RemoveFromStack(UNIT_ABILITIES_LIST_ID) end,
-                }))
+                })
+                item:SetFocusSound("Main_Menu_Mouse_Over")
+                item:On("activate", function()
+                    mgr:RemoveFromStack(UNIT_ABILITIES_LIST_ID)
+                end)
+                list:AddChild(item)
             end
         end
 

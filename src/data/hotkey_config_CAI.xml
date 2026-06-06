@@ -143,6 +143,8 @@
     <Row ActionId="CityPurchaseWithFaith" Name="LOC_HUD_CITY_PURCHASE_WITH_FAITH" Description="LOC_HUD_CITY_PURCHASE_WITH_FAITH" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityChangeProduction" Name="LOC_HUD_CITY_CHANGE_PRODUCTION" Description="LOC_HUD_CITY_CHANGE_PRODUCTION" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityChangeCitizenYieldFocus" Name="LOC_CAI_CITY_CHANGE_CITIZEN_YIELD_FOCUS" Description="LOC_CAI_CITY_CHANGE_CITIZEN_YIELD_FOCUS_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="DiplomacyRibbonOpenList" Name="LOC_CAI_DIPLO_RIBBON_OPEN_LIST" Description="LOC_CAI_DIPLO_RIBBON_OPEN_LIST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="DiplomacyRibbonOpenWorldCongress" Name="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS" Description="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
   </InputActions>
 
   <InputActionDefaultGestures>
@@ -239,5 +241,7 @@
     <Row ActionId="NextUnitSelection" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_PERIOD" />
     <Row ActionId="UnitViewAbilities" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_A" />
     <Row ActionId="UnitPanelOpenUnitList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_U" />
+    <Row ActionId="DiplomacyRibbonOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_P" />
+    <Row ActionId="DiplomacyRibbonOpenWorldCongress" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F8" />
   </InputActionDefaultGestures>
 </GameInfo>
