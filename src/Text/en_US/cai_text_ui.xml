@@ -7,7 +7,7 @@
     <Row Tag="LOC_UIWidget_Role_Button" Language="en_US">
       <Text>Button</Text>
     </Row>
-    <Row Tag="LOC_UIWidget_Role_DropdownMenu" Language="en_US">
+    <Row Tag="LOC_UIWidget_Role_Dropdown" Language="en_US">
       <Text>Dropdown Menu</Text>
     </Row>
     <Row Tag="LOC_UIWidget_Role_Edit" Language="en_US">
@@ -2019,6 +2019,33 @@
     <Row Tag="LOC_CAI_UNIT_NO_PROMOTIONS" Language="en_US">
       <Text>No promotions available</Text>
     </Row>
+    <Row Tag="LOC_CAI_UNIT_PROMOTION_LABEL" Language="en_US">
+      <Text>{1_Name}, {2_Status}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_PROMOTION_NAME_DESC" Language="en_US">
+      <Text>{1_Name}: {2_Desc}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_PROMOTION_STATUS_AVAILABLE" Language="en_US">
+      <Text>Available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_PROMOTION_STATUS_EARNED" Language="en_US">
+      <Text>Earned</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_PROMOTION_STATUS_LOCKED" Language="en_US">
+      <Text>Locked</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_PROMOTION_PREREQS" Language="en_US">
+      <Text>Unlocked by</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_PROMOTION_LEADS_TO" Language="en_US">
+      <Text>Unlocks</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_PROMOTION_PREREQS_HEADER" Language="en_US">
+      <Text>Unlocked by: {1_List}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_PROMOTION_LEADS_TO_HEADER" Language="en_US">
+      <Text>Unlocks: {1_List}</Text>
+    </Row>
     <Row Tag="LOC_CAI_UNIT_NOT_IN_FORMATION" Language="en_US">
       <Text>This unit is not in a formation</Text>
     </Row>
@@ -3227,6 +3254,309 @@
     </Row>
     <Row Tag="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS_TOOLTIP" Language="en_US">
       <Text>Open the World Congress screen</Text>
+    </Row>
+
+    <!-- Era Complete Popup -->
+    <Row Tag="LOC_CAI_ERA_ENTERING" Language="en_US">
+      <Text>Entering {1_EraName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ERA_HEROIC_AGE" Language="en_US">
+      <Text>Heroic Age</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ERA_GOLDEN_AGE" Language="en_US">
+      <Text>Golden Age</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ERA_DARK_AGE" Language="en_US">
+      <Text>Dark Age</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ERA_NORMAL_AGE" Language="en_US">
+      <Text>Normal Age</Text>
+    </Row>
+
+    <!-- Governor panel -->
+    <Row Tag="LOC_CAI_GOVERNOR_PANEL_LABEL" Language="en_US">
+      <Text>{1_Title}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_SUMMARY" Language="en_US">
+      <Text>{1_Num} titles available, {2_Num} titles spent</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_PROMOTIONS" Language="en_US">
+      <Text>Promotions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_BASE_ABILITY" Language="en_US">
+      <Text>Base Ability</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_TIER" Language="en_US">
+      <Text>Level {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_EARNED" Language="en_US">
+      <Text>Earned</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_AVAILABLE" Language="en_US">
+      <Text>Available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_LOCKED" Language="en_US">
+      <Text>Locked</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_UNREVEALED" Language="en_US">
+      <Text>Unrevealed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_READONLY_STATUS" Language="en_US">
+      <Text>Read-only</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_CAN_PROMOTE" Language="en_US">
+      <Text>Can promote</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_ASSIGNED_TO" Language="en_US">
+      <Text>Assigned to {1_CityName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_IDENTITY_PRESSURE" Language="en_US">
+      <Text>Identity pressure: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_ESTABLISH_TURNS" Language="en_US">
+      <Text>Turns to establish: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_EARNED_PROMOS" Language="en_US">
+      <Text>Earned: {1_List}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_AVAILABLE_PROMOS" Language="en_US">
+      <Text>Available: {1_List}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_REQUIRES" Language="en_US">
+      <Text>Requires: {1_List}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_LEADS_TO" Language="en_US">
+      <Text>Leads to: {1_List}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_PROMOTE_TITLE" Language="en_US">
+      <Text>Promote {1_GovName}: {2_PromoName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_PROMOTE_DESC" Language="en_US">
+      <Text>Spend a governor title to earn {1_PromoName}? {2_Desc}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_READONLY" Language="en_US">
+      <Text>Read-only: World Congress is in session</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_FEEDBACK_APPOINTED" Language="en_US">
+      <Text>{1_GovName} appointed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_FEEDBACK_JOINED" Language="en_US">
+      <Text>{1_GovName} joined</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_FEEDBACK_PROMOTED" Language="en_US">
+      <Text>{1_GovName} gained title {2_PromoName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOV_ASSIGN_CHOOSER_LIST" Language="en_US">
+      <Text>Available cities</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOV_ASSIGN_CONFIRM_TITLE" Language="en_US">
+      <Text>Confirm Governor Assignment</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOV_ASSIGN_RESELECT" Language="en_US">
+      <Text>Reselect</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOV_ASSIGN_CITY" Language="en_US">
+      <Text>City: {1_CityName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOV_ASSIGN_INCOMING" Language="en_US">
+      <Text>New governor: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOV_ASSIGN_OUTGOING" Language="en_US">
+      <Text>Current governor: {1_Text}</Text>
+    </Row>
+
+    <!-- Trade Route Chooser -->
+    <Row Tag="LOC_CAI_TRADE_ROUTE_PANEL_TITLE_GENERIC" Language="en_US">
+      <Text>Trade Route Chooser</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_ROUTE_YOUR_CITIES" Language="en_US">
+      <Text>Your Cities</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_ROUTE_OTHER_CIVS" Language="en_US">
+      <Text>Other Civilizations</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_ROUTE_CITY_STATES" Language="en_US">
+      <Text>City States</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_ROUTE_DISTANCE" Language="en_US">
+      <Text>Distance: {1_Num} tiles</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_ROUTE_HAS_TRADING_POST" Language="en_US">
+      <Text>Trading Post</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_ROUTE_PATH_BONUS" Language="en_US">
+      <Text>Route Bonus</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_ROUTE_RELIGION_PRESSURE" Language="en_US">
+      <Text>{1_Num} pressure for {2_ReligionName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_ROUTE_CONFIRM_TITLE" Language="en_US">
+      <Text>Confirm Trade Route</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_ROUTE_CANCEL" Language="en_US">
+      <Text>Cancel</Text>
+    </Row>
+
+    <!-- Trade Overview -->
+    <Row Tag="LOC_CAI_TRADE_OVERVIEW_ACTIVE_ROUTES" Language="en_US">
+      <Text>{1_Active} of {2_Capacity} routes active</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_OVERVIEW_CHOOSE_ROUTE" Language="en_US">
+      <Text>Choose Route for idle trader</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_OVERVIEW_PRODUCE_TRADER" Language="en_US">
+      <Text>Produce Trade Unit</Text>
+    </Row>
+
+    <!-- Espionage Chooser -->
+    <Row Tag="LOC_CAI_ESPIONAGE_CONFIRM_TITLE" Language="en_US">
+      <Text>Confirm Spy Placement</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_CONFIRM_CANCEL" Language="en_US">
+      <Text>Reselect Destination</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_TRAVEL_TIME" Language="en_US">
+      <Text>{1_Num} turns</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_MISSION_TURNS" Language="en_US">
+      <Text>{1_Num} turns to complete</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_MISSION_PROBABILITY" Language="en_US">
+      <Text>{1_Text} success chance</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_MISSION_DISTRICT" Language="en_US">
+      <Text>Target: {1_DistrictName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_CITY_DISTRICTS" Language="en_US">
+      <Text>Districts: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_AVAILABLE_MISSIONS" Language="en_US">
+      <Text>{1_Count} available missions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_GAIN_SOURCES_ACTIVE" Language="en_US">
+      <Text>Gain Sources active, {1_Num} turns remaining</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_GAIN_SOURCES_INACTIVE" Language="en_US">
+      <Text>No active Gain Sources boost</Text>
+    </Row>
+
+    <!-- Espionage Overview -->
+    <Row Tag="LOC_CAI_ESPIONAGE_TAB_OPERATIVES" Language="en_US">
+      <Text>Operatives</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_TAB_MISSION_HISTORY" Language="en_US">
+      <Text>Mission History</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_CATEGORY_TRAVELING" Language="en_US">
+      <Text>Traveling</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_CATEGORY_CAPTURED" Language="en_US">
+      <Text>Captured</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_DISTRICTS_WITH_OPERATIVES" Language="en_US">
+      <Text>Districts with operatives:</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_OTHER_DISTRICTS" Language="en_US">
+      <Text>Other districts:</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_SOURCES" Language="en_US">
+      <Text>Sources boosted</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_SOURCES_DETAIL" Language="en_US">
+      <Text>Sources boosted, {1_Num} turns remaining</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_OPERATIVE_COUNT" Language="en_US">
+      <Text>{1_Num : plural 1?{1_Num} operative; other?{1_Num} operatives;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_OPERATIVE_CAPACITY" Language="en_US">
+      <Text>{1_Num} of {2_Num} active</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_ESPIONAGE_VIEW_CITY_DETAILS" Language="en_US">
+      <Text>View city details for {1_CityName}</Text>
+    </Row>
+
+    <!-- City Panel Overview -->
+    <Row Tag="LOC_CAI_CITY_OV_PANEL_TITLE" Language="en_US">
+      <Text>City details: {1_CityName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_RENAME" Language="en_US">
+      <Text>Rename city</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_CITIZENS_OF_HOUSING" Language="en_US">
+      <Text>{1_Pop} of {2_Housing} citizens</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_FOOD_CONSUMPTION" Language="en_US">
+      <Text>Food consumption</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_NET_FOOD" Language="en_US">
+      <Text>Net food</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_GROWTH_THRESHOLD" Language="en_US">
+      <Text>Food needed for growth</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_DISTRICTS_POSSIBLE" Language="en_US">
+      <Text>{1_Num} possible</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_DISTRICTS_OF" Language="en_US">
+      <Text>Districts: {1_Built} of {2_Possible}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_DISTRICTS_BUILT" Language="en_US">
+      <Text>Districts: {1_Count}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_SPECIALTY_DISTRICTS" Language="en_US">
+      <Text>Specialty districts: {1_Used} of {2_Allowed}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_PILLAGED" Language="en_US">
+      <Text>pillaged</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_WONDERS" Language="en_US">
+      <Text>Wonders</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_NO_WONDERS" Language="en_US">
+      <Text>No wonders</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_TRADING_POSTS" Language="en_US">
+      <Text>Trading posts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_NO_TRADING_POSTS" Language="en_US">
+      <Text>No trading posts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_NO_RELIGION" Language="en_US">
+      <Text>No religion</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_LOYALTY_AND_GOVERNORS" Language="en_US">
+      <Text>Loyalty and governors</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_LOYALTY_PER_TURN" Language="en_US">
+      <Text>Loyalty per turn: {1_Value}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_IDENTITY_SOURCES" Language="en_US">
+      <Text>Identity sources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_DIPLOMATIC_INFLUENCE" Language="en_US">
+      <Text>Diplomatic influence</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_NO_GOVERNOR" Language="en_US">
+      <Text>No governor assigned</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_LOYALTY_OF" Language="en_US">
+      <Text>{1_Current} of {2_Max} loyalty</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_GOVERNOR_STATUS" Language="en_US">
+      <Text>Governor {1_Name}, {2_Status}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_POWER" Language="en_US">
+      <Text>Power</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_POWER_SOURCES" Language="en_US">
+      <Text>Power sources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_POWER_REQUIRED_BY" Language="en_US">
+      <Text>Power required by</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITY_OV_POWER_GENERATED_BY" Language="en_US">
+      <Text>Power generated by</Text>
     </Row>
 
   </LocalizedText>

@@ -169,8 +169,8 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
 end)
 ContextPtr:SetInputHandler(OnInputHandler, true)
 
-local baseOnShutdown = OnShutdown
-ContextPtr:SetShutdown(function()
+OnShutdown = WrapFunc(OnShutdown, function(orig)
     PopPanel()
-    baseOnShutdown()
+    orig()
 end)
+ContextPtr:SetShutdown(OnShutdown)

@@ -17,6 +17,9 @@ local UNIT_LIST_ID = "CAIUnitPanelUnitList"
 local UNIT_ABILITIES_LIST_ID = "CAIUnitAbilitiesList"
 local UNIT_ABILITY_INFO_LIMIT = 10
 local UNIT_BUILD_IMPROVEMENTS_SUBMENU_ID = "CAIUnitBuildImprovementsSubMenu"
+local UNIT_SIMPLE_PROMOTION_LIST_ID = "CAIUnitPanelSimplePromotionList"
+local UNIT_NAME_PANEL_ID = "CAIUnitPanelNamePanel"
+local UNIT_NAME_EDIT_ID = "CAIUnitPanelNameEdit"
 
 local prevUnitCatAction = Input.GetActionId("PrevUnitSelectionCategory")
 local nextUnitCatAction = Input.GetActionId("NextUnitSelectionCategory")
@@ -25,9 +28,11 @@ local nextUnitAction = Input.GetActionId("NextUnitSelection")
 local openUnitListAction = Input.GetActionId("UnitPanelOpenUnitList")
 local unitViewAbilitiesAction = Input.GetActionId("UnitViewAbilities")
 local selectionActionsAction = Input.GetActionId("SelectionActions")
-local promoteActionHash = GameInfo.UnitCommands["PROMOTE"] ~= nil and GameInfo.UnitCommands["PROMOTE"].Hash or
+local promoteActionHash = GameInfo.UnitCommands["UNITCOMMAND_PROMOTE"] ~= nil and
+    GameInfo.UnitCommands["UNITCOMMAND_PROMOTE"].Hash or
     UnitCommandTypes.PROMOTE
-local upgradeActionHash = GameInfo.UnitCommands["UPGRADE"] ~= nil and GameInfo.UnitCommands["UPGRADE"].Hash or
+local upgradeActionHash = GameInfo.UnitCommands["UNITCOMMAND_UPGRADE"] ~= nil and
+    GameInfo.UnitCommands["UNITCOMMAND_UPGRADE"].Hash or
     UnitCommandTypes.UPGRADE
 
 local UnitCategories = {
@@ -46,6 +51,9 @@ local UnitCategories = {
 local activeCategoryIdx = 1
 local UnitActionList = nil
 local UnitList = nil
+local SimplePromotionList = nil
+local UnitNamePanel = nil
+local UnitNameEdit = nil
 
 info = ExposedMembers.CAIInfo or {}
 ExposedMembers.CAIInfo = info
@@ -120,7 +128,9 @@ local function GetSelectedUnit()
     return UI.GetHeadSelectedUnit()
 end
 
-local CloseUnitList -- forward declaration; assigned below
+local CloseUnitList            -- forward declaration; assigned below
+local CloseSimplePromotionList -- forward declaration; assigned below
+local CloseUnitNamePanel       -- forward declaration; assigned below
 
 local function ReadCurrentUnitData()
     local data = GetSubjectData ~= nil and GetSubjectData() or nil
@@ -774,22 +784,30 @@ local function HasPromoteActionInData(data)
     return false
 end
 
+local function GetAvailablePromotionChoices(unit)
+    if unit == nil then
+        return nil
+    end
+
+    local canStart, results = UnitManager.CanStartCommand(unit, UnitCommandTypes.PROMOTE, true, true)
+    if not canStart or results == nil then
+        return nil
+    end
+
+    local promotions = results[UnitCommandResults.PROMOTIONS]
+    if promotions ~= nil and #promotions > 0 then
+        return promotions
+    end
+
+    return nil
+end
+
 local function CanUnitPromoteNow(data, unit)
     if HasPromoteActionInData(data) then
         return true
     end
 
-    if unit == nil then
-        return false
-    end
-
-    local canStart, results = UnitManager.CanStartCommand(unit, UnitCommandTypes.PROMOTE, true, true)
-    if not canStart or results == nil then
-        return false
-    end
-
-    local promotions = results[UnitCommandResults.PROMOTIONS]
-    return promotions ~= nil and #promotions > 0
+    return GetAvailablePromotionChoices(unit) ~= nil
 end
 
 local function GetUnitInfoPromotions(data, unit)
@@ -809,7 +827,13 @@ local function GetUnitInfoPromotions(data, unit)
 
     if data.CurrentPromotions ~= nil and #data.CurrentPromotions > 0 then
         for _, promotion in ipairs(data.CurrentPromotions) do
-            AppendUnitInfo(results, Locale.Lookup(promotion.Name))
+            local name = Locale.Lookup(promotion.Name)
+            local desc = Locale.Lookup(promotion.Desc)
+            if desc ~= nil and desc ~= "" then
+                AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_PROMOTION_NAME_DESC", name, desc))
+            else
+                AppendUnitInfo(results, name)
+            end
         end
     end
 
@@ -1714,6 +1738,10 @@ GetUnitActionLabel = function(action)
         return nil
     end
 
+    if action.userTag == promoteActionHash then
+        return Locale.Lookup("LOC_HUD_UNIT_CHOOSE_PROMOTION_TEXT")
+    end
+
     local label = GetFirstUnitInfoLine(action.helpString)
     if label ~= nil and label ~= "" and not string.match(label, "^%[ICON_[^%]]+%]$") then
         return label
@@ -1771,6 +1799,26 @@ GetUnitActionEntries = function(data)
     end
 
     return results
+end
+
+local function AddSyntheticPromoteActionIfNeeded(actions, data)
+    if HasPromoteActionInData(data) then
+        return
+    end
+
+    local promotions = GetAvailablePromotionChoices(GetSelectedUnit())
+    if promotions == nil then
+        return
+    end
+
+    actions[#actions + 1] = {
+        Disabled = false,
+        helpString = Locale.Lookup("LOC_UNITCOMMAND_PROMOTE_DESCRIPTION"),
+        userTag = promoteActionHash,
+        CallbackFunc = function()
+            ShowPromotionsList(promotions)
+        end,
+    }
 end
 
 local function GetBuildUnitActionEntries(data)
@@ -1835,6 +1883,323 @@ local function CreateBuildImprovementsSubMenu(data)
     return submenu
 end
 
+CloseSimplePromotionList = function()
+    if SimplePromotionList ~= nil then
+        mgr:RemoveFromStack(UNIT_SIMPLE_PROMOTION_LIST_ID)
+        SimplePromotionList = nil
+    end
+end
+
+local function ShouldOpenSimplePromotionList()
+    if mgr == nil or ContextPtr:IsHidden() then
+        return false
+    end
+
+    if Controls.PromotionPanel == nil
+        or Controls.PromotionPanel.IsHidden == nil
+        or Controls.PromotionPanel:IsHidden() then
+        return false
+    end
+
+    local unit = GetSelectedUnit()
+    if unit == nil then
+        return false
+    end
+
+    local unitInfo = GameInfo.Units[unit:GetUnitType()]
+    return unitInfo ~= nil and (unitInfo.NumRandomChoices or 0) > 0
+end
+
+local function FindChildById(control, id)
+    if control == nil then
+        return nil
+    end
+
+    if control.GetID ~= nil and control:GetID() == id then
+        return control
+    end
+
+    for _, child in ipairs(GetControlChildren(control)) do
+        local result = FindChildById(child, id)
+        if result ~= nil then
+            return result
+        end
+    end
+
+    return nil
+end
+
+local function GetSimplePromotionChoiceLabel(row)
+    local tier = GetControlText(row.Tier)
+    local name = GetControlText(row.Name)
+
+    return JoinUnitInfo({ tier, name }, ", ")
+end
+
+local function GetSimplePromotionChoiceTooltip(row)
+    return GetControlText(row.Description) or GetControlTooltip(row.Slot) or ""
+end
+
+local function CreateSimplePromotionChoice(row)
+    if row == nil or row.Slot == nil then
+        return nil
+    end
+
+    local capturedRow = row
+    local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitSimplePromotionChoice"), "MenuItem", {
+        GetLabel = function()
+            return GetSimplePromotionChoiceLabel(capturedRow)
+        end,
+        GetTooltip = function()
+            return GetSimplePromotionChoiceTooltip(capturedRow)
+        end,
+        FocusKey = "simple-promotion:" .. tostring(capturedRow.Index),
+    })
+    item:SetFocusSound("Main_Menu_Mouse_Over")
+    item:On("activate", function()
+        CloseSimplePromotionList()
+        capturedRow.Slot:DoLeftClick()
+    end)
+    return item
+end
+
+local function GetVanillaSimplePromotionRows()
+    local rows = {}
+    if Controls.PromotionList == nil then
+        return rows
+    end
+
+    for index, root in ipairs(GetControlChildren(Controls.PromotionList)) do
+        if root.IsHidden == nil or not root:IsHidden() then
+            local slot = FindChildById(root, "PromotionSlot")
+            if slot ~= nil then
+                rows[#rows + 1] = {
+                    Index = index,
+                    Root = root,
+                    Slot = slot,
+                    Tier = FindChildById(root, "PromotionTier"),
+                    Name = FindChildById(root, "PromotionName"),
+                    Description = FindChildById(root, "PromotionDescription"),
+                }
+            end
+        end
+    end
+
+    return rows
+end
+
+local function OpenSimplePromotionList()
+    if not ShouldOpenSimplePromotionList() then
+        CloseSimplePromotionList()
+        return
+    end
+
+    local rows = GetVanillaSimplePromotionRows()
+    if #rows == 0 then
+        CloseSimplePromotionList()
+        return
+    end
+
+    CloseSimplePromotionList()
+
+    local list = mgr:CreateWidget(UNIT_SIMPLE_PROMOTION_LIST_ID, "List", {
+        GetLabel = function()
+            return Locale.Lookup("LOC_HUD_UNIT_CHOOSE_PROMOTION_TEXT")
+        end,
+    })
+    list:AddInputBinding({
+        Key = Keys.VK_ESCAPE,
+        Action = function()
+            CloseSimplePromotionList()
+            HidePromotionPanel()
+            return true
+        end,
+    })
+
+    for _, row in ipairs(rows) do
+        local item = CreateSimplePromotionChoice(row)
+        if item ~= nil then
+            list:AddChild(item)
+        end
+    end
+
+    if list.Children ~= nil and #list.Children > 0 then
+        SimplePromotionList = list
+        mgr:Push(SimplePromotionList, PopupPriority.Low)
+    end
+end
+
+CloseUnitNamePanel = function()
+    if UnitNamePanel ~= nil then
+        mgr:RemoveFromStack(UNIT_NAME_PANEL_ID)
+        UnitNamePanel = nil
+        UnitNameEdit = nil
+    end
+end
+
+local function ShouldOpenUnitNamePanel()
+    if mgr == nil or ContextPtr:IsHidden() then
+        return false
+    end
+
+    if Controls.VeteranNamePanel == nil
+        or Controls.VeteranNamePanel.IsHidden == nil
+        or Controls.VeteranNamePanel:IsHidden() then
+        return false
+    end
+
+    return GetSelectedUnit() ~= nil
+end
+
+local function GetVeteranNameFieldText()
+    if Controls.VeteranNameField ~= nil and Controls.VeteranNameField.GetText ~= nil then
+        return Controls.VeteranNameField:GetText() or ""
+    end
+
+    return ""
+end
+
+local function SyncUnitNameEditFromVanilla(silent)
+    if UnitNameEdit ~= nil then
+        UnitNameEdit:SetText(GetVeteranNameFieldText(), silent == true)
+    end
+end
+
+local function CommitUnitNameToVanilla(text)
+    if Controls.VeteranNameField == nil then
+        return
+    end
+
+    Controls.VeteranNameField:SetText(text or "")
+    if OnEditCustomVeteranName ~= nil then
+        OnEditCustomVeteranName()
+    end
+end
+
+local function CommitUnitNameEdit()
+    if UnitNameEdit ~= nil then
+        UnitNameEdit:Commit()
+    end
+end
+
+local function ClickConfirmVeteranName()
+    if Controls.ConfirmVeteranName ~= nil then
+        Controls.ConfirmVeteranName:DoLeftClick()
+    end
+end
+
+local function CreateUnitNameButton(id, vanillaControl, activate)
+    if vanillaControl == nil then
+        return nil
+    end
+
+    local control = vanillaControl
+    local button = mgr:CreateWidget(id, "Button", {
+        GetLabel = function()
+            return GetControlText(control) or ""
+        end,
+        GetTooltip = function()
+            return GetControlTooltip(control) or ""
+        end,
+        HiddenPredicate = function()
+            return Controls.VeteranNamePanel == nil
+                or Controls.VeteranNamePanel:IsHidden()
+                or (control.IsHidden ~= nil and control:IsHidden())
+        end,
+        DisabledPredicate = function()
+            return control.IsDisabled ~= nil and control:IsDisabled()
+        end,
+    })
+    button:SetFocusSound("Main_Menu_Mouse_Over")
+    button:On("activate", function()
+        if control.IsDisabled ~= nil and control:IsDisabled() then
+            return
+        end
+
+        activate(control)
+    end)
+    return button
+end
+
+local function OpenUnitNamePanel()
+    if not ShouldOpenUnitNamePanel() then
+        CloseUnitNamePanel()
+        return
+    end
+
+    CloseUnitNamePanel()
+
+    local panel = mgr:CreateWidget(UNIT_NAME_PANEL_ID, "Panel", {
+        GetLabel = function()
+            return Locale.Lookup("LOC_UNITNAME_CHOOSE_NAME")
+        end,
+    })
+    panel:AddInputBinding({
+        Key = Keys.VK_ESCAPE,
+        Action = function()
+            Controls.VeteranNamingCancelButton:DoLeftClick()
+            return true
+        end,
+    })
+    panel:AddInputBinding({
+        Key = Keys.VK_RETURN,
+        Action = function()
+            ClickConfirmVeteranName()
+            return true
+        end,
+    })
+
+    local edit = mgr:CreateWidget(UNIT_NAME_EDIT_ID, "EditBox", {
+        GetLabel = function()
+            return Locale.Lookup("LOC_UNITNAME_CHOOSE_NAME")
+        end,
+        HiddenPredicate = function()
+            return Controls.VeteranNamePanel == nil
+                or Controls.VeteranNamePanel:IsHidden()
+                or Controls.VeteranNameField == nil
+                or (Controls.VeteranNameField.IsHidden ~= nil and Controls.VeteranNameField:IsHidden())
+        end,
+    })
+    edit:SetAlwaysEdit(true)
+    edit:SetHighlightOnEdit(true)
+    edit:SetMaxCharacters(48)
+    edit:SetText(GetVeteranNameFieldText(), true)
+    edit:SetValueSetter(function(_, text)
+        CommitUnitNameToVanilla(text)
+    end)
+    panel:AddChild(edit)
+
+    local randomizeButton = CreateUnitNameButton(
+        mgr:GenerateWidgetId("CAIUnitNameRandomize"),
+        Controls.RandomNameButton,
+        function(control)
+            control:DoLeftClick()
+            SyncUnitNameEditFromVanilla(true)
+            if UnitNameEdit ~= nil then
+                UnitNameEdit:Announce({ "value" })
+            end
+        end
+    )
+    if randomizeButton ~= nil then
+        panel:AddChild(randomizeButton)
+    end
+
+    local confirmButton = CreateUnitNameButton(
+        mgr:GenerateWidgetId("CAIUnitNameConfirm"),
+        Controls.ConfirmVeteranName,
+        function(control)
+            control:DoLeftClick()
+        end
+    )
+    if confirmButton ~= nil then
+        panel:AddChild(confirmButton)
+    end
+
+    UnitNamePanel = panel
+    UnitNameEdit = edit
+    mgr:Push(UnitNamePanel, { priority = PopupPriority.Low, focus = UnitNameEdit })
+end
+
 function CloseUnitActionList()
     if UnitActionList ~= nil then
         mgr:RemoveFromStack(UNIT_ACTION_LIST_ID)
@@ -1871,7 +2236,10 @@ local function BuildUnitActionList(data)
         list:AddChild(buildSubMenu)
     end
 
-    for _, action in ipairs(GetUnitActionEntries(data)) do
+    local actions = GetUnitActionEntries(data)
+    AddSyntheticPromoteActionIfNeeded(actions, data)
+
+    for _, action in ipairs(actions) do
         list:AddChild(CreateUnitActionMenuItem(action))
     end
 
@@ -2202,6 +2570,9 @@ function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locatio
     if ContextPtr:IsHidden() or not isSelected then
         return
     end
+    CloseSimplePromotionList()
+    CloseUnitNamePanel()
+
     local plot = Map.GetPlot(locationX, locationY)
     if plot == nil then
         print("CAI UnitPanel could not resolve selected unit plot: " ..
@@ -2222,6 +2593,38 @@ View = WrapFunc(View, function(orig, data)
     FilterBuildActionsForDisplay(data)
     return orig(data)
 end)
+
+ShowPromotionsList = WrapFunc(ShowPromotionsList, function(orig, promotions)
+    orig(promotions)
+    OpenSimplePromotionList()
+end)
+
+HidePromotionPanel = WrapFunc(HidePromotionPanel, function(orig)
+    CloseSimplePromotionList()
+    orig()
+end)
+
+ShowNameUnitPanel = WrapFunc(ShowNameUnitPanel, function(orig)
+    orig()
+    OpenUnitNamePanel()
+end)
+
+HideNameUnitPanel = WrapFunc(HideNameUnitPanel, function(orig)
+    CloseUnitNamePanel()
+    orig()
+end)
+
+OnConfirmVeteranName = WrapFunc(OnConfirmVeteranName, function(orig)
+    CommitUnitNameEdit()
+    orig()
+end)
+Controls.ConfirmVeteranName:RegisterCallback(Mouse.eLClick, OnConfirmVeteranName)
+
+RandomizeName = WrapFunc(RandomizeName, function(orig)
+    orig()
+    SyncUnitNameEditFromVanilla(true)
+end)
+Controls.RandomNameButton:RegisterCallback(Mouse.eLClick, RandomizeName)
 
 local function OnCAICursorMoved(x, y, plotId)
     InspectWhatsBelowTheCursor()

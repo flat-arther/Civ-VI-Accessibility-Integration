@@ -26,6 +26,7 @@ EditModes = {
 ---@field _maxChars? integer
 ---@field _validator? fun(text:string):boolean
 ---@field _commitValidator? fun(text:string):string|nil
+---@field _enterToCommit boolean
 ---@field _passwordMask boolean
 EditBoxWidget = setmetatable({}, { __index = ValueWidget })
 EditBoxWidget.__index = EditBoxWidget
@@ -49,6 +50,16 @@ local function CharAllowed(mode, ch)
     return true
 end
 
+local function ApplyEditStartPosition(w, text, selectAll)
+    if selectAll and not w._readOnly and #text > 0 then
+        w._selStart = 0
+        w._cursor = #text
+    else
+        w._cursor = w._readOnly and 0 or #text
+        w._selStart = nil
+    end
+end
+
 ---@param mgr UIScreenManager
 ---@param id string
 ---@param props? table
@@ -69,6 +80,7 @@ function EditBoxWidget.Create(mgr, id, props)
     w._alwaysEdit = false
     w._highlightOnEdit = true
     w._editMode = EditModes.Normal
+    w._enterToCommit = true
     w._passwordMask = false
 
     -- Focus speech reads only what the cursor is on: the current selection if
@@ -93,10 +105,16 @@ function EditBoxWidget.Create(mgr, id, props)
     w:AddInputBindings(EditBoxWidget._BuildBindings())
 
     -- Fallback: ensure AlwaysEdit boxes are in edit mode by the time focus lands,
-    -- even if SetAlwaysEdit ran before widget setup. Silent — the manager's
-    -- focus speech already covers label/role/current-line.
+    -- even if SetAlwaysEdit ran before widget setup. Focus entry should not
+    -- reposition the cursor; the only focus-driven state change is explicit
+    -- writable select-all when HighlightOnEdit is enabled.
     w:On("focus_enter", function(self)
         if self._alwaysEdit and not self._active then self:BeginEdit(true) end
+        local text = self._buffer or ""
+        if self._alwaysEdit and self._highlightOnEdit and not self._readOnly and #text > 0 then
+            self._selStart = 0
+            self._cursor = #text
+        end
     end)
 
     -- Leaving focus mid-edit on a non-AlwaysEdit box would silently strand the
@@ -142,23 +160,39 @@ function EditBoxWidget:SetReadOnly(b)
     -- Highlight-on-edit (select-all on BeginEdit) is meaningless for a viewer
     -- and would just dump the whole buffer to TTS. Force it off here so prop
     -- order in ApplyProps doesn't matter.
-    if self._readOnly then self._highlightOnEdit = false end
+    if self._readOnly then
+        self._highlightOnEdit = false
+        self._selStart = nil
+        if self._active then self._cursor = 0 end
+    end
 end
+
 ---When enabled, auto-enter edit mode immediately (silent — focus speech still
 ---runs normally when the widget gains focus). Focus_enter is the fallback path.
 function EditBoxWidget:SetAlwaysEdit(b)
     self._alwaysEdit = b and true or false
     if self._alwaysEdit and not self._active then self:BeginEdit(true) end
 end
-function EditBoxWidget:SetHighlightOnEdit(b) self._highlightOnEdit = b and true or false end
+
+function EditBoxWidget:SetHighlightOnEdit(b)
+    self._highlightOnEdit = b and true or false
+    if not self._highlightOnEdit then self._selStart = nil end
+end
+
 function EditBoxWidget:SetMaxCharacters(n) self._maxChars = n end
+
 ---Per-keystroke / paste guard. Receives the proposed full buffer; return false
 ---to reject the insertion. Runs silently — the input is just dropped.
 function EditBoxWidget:SetValidator(fn) self._validator = fn end
+
 ---Commit-time guard. Receives the committed text; return nil to allow commit
 ---or a string to block it (the string is spoken to the user as an error).
 function EditBoxWidget:SetCommitValidator(fn) self._commitValidator = fn end
+
+function EditBoxWidget:SetEnterToCommit(b) self._enterToCommit = b and true or false end
+
 function EditBoxWidget:SetPasswordMask(b) self._passwordMask = b and true or false end
+
 function EditBoxWidget:SetEditMode(mode) self._editMode = mode or EditModes.Normal end
 
 ---Enter edit mode. By default speaks "Editing {label}: {selection or current
@@ -170,16 +204,7 @@ function EditBoxWidget:BeginEdit(silent)
     self._buffer = text
     self._active = true
     self._original = text
-    -- Read-only viewers should start at the buffer start so the first line
-    -- read on focus is the top of the content, not whatever line the end fell on.
-    local startCursor = self._readOnly and 0 or #text
-    if not silent and self._highlightOnEdit and #text > 0 then
-        self._selStart = 0
-        self._cursor = #text
-    else
-        self._cursor = startCursor
-        self._selStart = nil
-    end
+    ApplyEditStartPosition(self, text, not silent and self._highlightOnEdit)
     if silent then return end
 
     local label = self:GetLabel()
@@ -257,9 +282,12 @@ function EditBoxWidget._BuildBindings()
             Action = function(self)
                 if not self._active then
                     self:BeginEdit()
-                else
-                    if not self._readOnly then self:Commit() end
+                    return true
                 end
+                if self._readOnly or not self._enterToCommit then
+                    return false
+                end
+                self:Commit()
                 return true
             end,
         },
@@ -269,12 +297,13 @@ function EditBoxWidget._BuildBindings()
                 if self._active and not self._alwaysEdit then
                     self:Cancel(); return true
                 end
-                return false
+                return nil
             end,
         },
         -- Char deletion
         {
-            Key = Keys.VK_BACK, MSG = kd,
+            Key = Keys.VK_BACK,
+            MSG = kd,
             Action = function(self)
                 if not active(self) or self._readOnly then return false end
                 if self._selStart then
@@ -287,7 +316,9 @@ function EditBoxWidget._BuildBindings()
             end,
         },
         {
-            Key = Keys.VK_BACK, MSG = kd, IsControl = true,
+            Key = Keys.VK_BACK,
+            MSG = kd,
+            IsControl = true,
             Action = function(self)
                 if not active(self) or self._readOnly then return false end
                 if self._selStart then
@@ -300,7 +331,8 @@ function EditBoxWidget._BuildBindings()
             end,
         },
         {
-            Key = Keys.VK_DELETE, MSG = kd,
+            Key = Keys.VK_DELETE,
+            MSG = kd,
             Action = function(self)
                 if not active(self) or self._readOnly then return false end
                 if self._selStart then
@@ -313,7 +345,9 @@ function EditBoxWidget._BuildBindings()
             end,
         },
         {
-            Key = Keys.VK_DELETE, MSG = kd, IsControl = true,
+            Key = Keys.VK_DELETE,
+            MSG = kd,
+            IsControl = true,
             Action = function(self)
                 if not active(self) or self._readOnly then return false end
                 if self._selStart then
@@ -326,17 +360,48 @@ function EditBoxWidget._BuildBindings()
             end,
         },
         -- Cursor movement
-        { Key = Keys.VK_LEFT,  MSG = kd,                  Action = function(self) if not active(self) then return false end E.MoveCursor(self, -1, false, false); return true end },
-        { Key = Keys.VK_LEFT,  MSG = kd, IsShift = true,  Action = function(self) if not active(self) then return false end E.MoveCursor(self, -1, true,  false); return true end },
-        { Key = Keys.VK_LEFT,  MSG = kd, IsControl = true, Action = function(self) if not active(self) then return false end E.MoveCursor(self, -1, false, true);  return true end },
-        { Key = Keys.VK_LEFT,  MSG = kd, IsControl = true, IsShift = true, Action = function(self) if not active(self) then return false end E.MoveCursor(self, -1, true, true); return true end },
-        { Key = Keys.VK_RIGHT, MSG = kd,                  Action = function(self) if not active(self) then return false end E.MoveCursor(self, 1, false, false); return true end },
-        { Key = Keys.VK_RIGHT, MSG = kd, IsShift = true,  Action = function(self) if not active(self) then return false end E.MoveCursor(self, 1, true,  false); return true end },
-        { Key = Keys.VK_RIGHT, MSG = kd, IsControl = true, Action = function(self) if not active(self) then return false end E.MoveCursor(self, 1, false, true);  return true end },
-        { Key = Keys.VK_RIGHT, MSG = kd, IsControl = true, IsShift = true, Action = function(self) if not active(self) then return false end E.MoveCursor(self, 1, true, true); return true end },
+        { Key = Keys.VK_LEFT,  MSG = kd, Action = function(self)
+            if not active(self) then return false end
+            E.MoveCursor(self, -1, false, false); return true
+        end },
+        { Key = Keys.VK_LEFT,  MSG = kd, IsShift = true,                                                                                                         Action = function(
+            self)
+            if not active(self) then return false end
+            E.MoveCursor(self, -1, true, false); return true
+        end },
+        { Key = Keys.VK_LEFT,  MSG = kd, IsControl = true,                                                                                                       Action = function(
+            self)
+            if not active(self) then return false end
+            E.MoveCursor(self, -1, false, true); return true
+        end },
+        { Key = Keys.VK_LEFT,  MSG = kd, IsControl = true,                                                                                                       IsShift = true,                                                                                                         Action = function(
+            self)
+            if not active(self) then return false end
+            E.MoveCursor(self, -1, true, true); return true
+        end },
+        { Key = Keys.VK_RIGHT, MSG = kd, Action = function(self)
+            if not active(self) then return false end
+            E.MoveCursor(self, 1, false, false); return true
+        end },
+        { Key = Keys.VK_RIGHT, MSG = kd, IsShift = true,                                                                                                         Action = function(
+            self)
+            if not active(self) then return false end
+            E.MoveCursor(self, 1, true, false); return true
+        end },
+        { Key = Keys.VK_RIGHT, MSG = kd, IsControl = true,                                                                                                       Action = function(
+            self)
+            if not active(self) then return false end
+            E.MoveCursor(self, 1, false, true); return true
+        end },
+        { Key = Keys.VK_RIGHT, MSG = kd, IsControl = true,                                                                                                       IsShift = true,                                                                                                         Action = function(
+            self)
+            if not active(self) then return false end
+            E.MoveCursor(self, 1, true, true); return true
+        end },
         -- Line-edge movement
         {
-            Key = Keys.VK_HOME, MSG = kd,
+            Key = Keys.VK_HOME,
+            MSG = kd,
             Action = function(self)
                 if not active(self) then return false end
                 local buf = self._buffer or ""
@@ -344,7 +409,9 @@ function EditBoxWidget._BuildBindings()
             end,
         },
         {
-            Key = Keys.VK_HOME, MSG = kd, IsShift = true,
+            Key = Keys.VK_HOME,
+            MSG = kd,
+            IsShift = true,
             Action = function(self)
                 if not active(self) then return false end
                 local buf = self._buffer or ""
@@ -352,7 +419,8 @@ function EditBoxWidget._BuildBindings()
             end,
         },
         {
-            Key = Keys.VK_END, MSG = kd,
+            Key = Keys.VK_END,
+            MSG = kd,
             Action = function(self)
                 if not active(self) then return false end
                 local buf = self._buffer or ""
@@ -360,7 +428,9 @@ function EditBoxWidget._BuildBindings()
             end,
         },
         {
-            Key = Keys.VK_END, MSG = kd, IsShift = true,
+            Key = Keys.VK_END,
+            MSG = kd,
+            IsShift = true,
             Action = function(self)
                 if not active(self) then return false end
                 local buf = self._buffer or ""
@@ -368,7 +438,9 @@ function EditBoxWidget._BuildBindings()
             end,
         },
         {
-            Key = Keys.VK_HOME, MSG = kd, IsControl = true,
+            Key = Keys.VK_HOME,
+            MSG = kd,
+            IsControl = true,
             Action = function(self)
                 if not active(self) then return false end
                 local prevSelStart, prevCursor = self._selStart, self._cursor or 0
@@ -379,7 +451,9 @@ function EditBoxWidget._BuildBindings()
             end,
         },
         {
-            Key = Keys.VK_END, MSG = kd, IsControl = true,
+            Key = Keys.VK_END,
+            MSG = kd,
+            IsControl = true,
             Action = function(self)
                 if not active(self) then return false end
                 local prevSelStart, prevCursor = self._selStart, self._cursor or 0
@@ -389,11 +463,18 @@ function EditBoxWidget._BuildBindings()
                 return true
             end,
         },
-        { Key = Keys.VK_HOME, MSG = kd, IsControl = true, IsShift = true,   Action = function(self) if not active(self) then return false end E.MoveToEdge(self, 0, true); return true end },
-        { Key = Keys.VK_END,  MSG = kd, IsControl = true, IsShift = true,   Action = function(self) if not active(self) then return false end E.MoveToEdge(self, #(self._buffer or ""), true); return true end },
+        { Key = Keys.VK_HOME, MSG = kd, IsControl = true, IsShift = true, Action = function(self)
+            if not active(self) then return false end
+            E.MoveToEdge(self, 0, true); return true
+        end },
+        { Key = Keys.VK_END,  MSG = kd, IsControl = true, IsShift = true, Action = function(self)
+            if not active(self) then return false end
+            E.MoveToEdge(self, #(self._buffer or ""), true); return true
+        end },
         -- Vertical movement
         {
-            Key = Keys.VK_UP, MSG = kd,
+            Key = Keys.VK_UP,
+            MSG = kd,
             Action = function(self)
                 if not active(self) then return false end
                 local buf = self._buffer or ""
@@ -406,7 +487,8 @@ function EditBoxWidget._BuildBindings()
             end,
         },
         {
-            Key = Keys.VK_DOWN, MSG = kd,
+            Key = Keys.VK_DOWN,
+            MSG = kd,
             Action = function(self)
                 if not active(self) then return false end
                 local buf = self._buffer or ""
@@ -419,7 +501,9 @@ function EditBoxWidget._BuildBindings()
             end,
         },
         {
-            Key = Keys.VK_UP, MSG = kd, IsShift = true,
+            Key = Keys.VK_UP,
+            MSG = kd,
+            IsShift = true,
             Action = function(self)
                 if not active(self) then return false end
                 local buf = self._buffer or ""
@@ -433,7 +517,9 @@ function EditBoxWidget._BuildBindings()
             end,
         },
         {
-            Key = Keys.VK_DOWN, MSG = kd, IsShift = true,
+            Key = Keys.VK_DOWN,
+            MSG = kd,
+            IsShift = true,
             Action = function(self)
                 if not active(self) then return false end
                 local buf = self._buffer or ""
@@ -448,7 +534,9 @@ function EditBoxWidget._BuildBindings()
         },
         -- Clipboard + select-all
         {
-            Key = Keys.C, MSG = kd, IsControl = true,
+            Key = Keys.C,
+            MSG = kd,
+            IsControl = true,
             Action = function(self)
                 if not active(self) then return false end
                 local sel = E.GetSelectedText(self)
@@ -468,7 +556,9 @@ function EditBoxWidget._BuildBindings()
             end,
         },
         {
-            Key = Keys.V, MSG = kd, IsControl = true,
+            Key = Keys.V,
+            MSG = kd,
+            IsControl = true,
             Action = function(self)
                 if not active(self) or self._readOnly then return false end
                 local text = CAI.GetClipboardText()
@@ -481,7 +571,9 @@ function EditBoxWidget._BuildBindings()
             end,
         },
         {
-            Key = Keys.A, MSG = kd, IsControl = true,
+            Key = Keys.A,
+            MSG = kd,
+            IsControl = true,
             Action = function(self)
                 if not active(self) then return false end
                 E.SelectAll(self); return true

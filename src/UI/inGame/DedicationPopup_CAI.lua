@@ -42,23 +42,15 @@ local function BuildDialog()
 
         local cb = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDedicationChoice"), "Checkbox", {
             Label = function()
-                local cat = categoryCtrl and categoryCtrl:GetText() or ""
-                local bonus = bonusCtrl and bonusCtrl:GetText() or ""
-                if cat ~= "" and bonus ~= "" then
-                    return cat .. ": " .. bonus
-                end
-                return cat .. bonus
+                return categoryCtrl and categoryCtrl:GetText() or ""
             end,
-            ValueGetter = function()
-                return selectCheck:IsSelected()
-                    and Locale.Lookup("LOC_OPTIONS_ENABLED")
-                    or Locale.Lookup("LOC_OPTIONS_DISABLED")
+            Tooltip = function()
+                return bonusCtrl and bonusCtrl:GetText() or ""
             end,
         })
         cb:On("value_changed", function()
             selectCheck:DoLeftClick()
             SyncCheckboxStates()
-            mgr:Refocus()
         end)
         table.insert(m_caiEntries, { cb = cb, selectCheck = selectCheck })
         table.insert(contentRows, cb)
@@ -89,7 +81,6 @@ end
 LuaEvents.EraReviewPopup_MakeDedication.Remove(OnGameEraChanged);
 OnGameEraChanged = WrapFunc(OnGameEraChanged, function(orig, ...)
     orig(...)
-    Speak("Pushing dialog")
     BuildDialog()
 end)
 LuaEvents.EraReviewPopup_MakeDedication.Add(OnGameEraChanged);

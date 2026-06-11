@@ -25,7 +25,7 @@ local GP_RECRUIT_BTN_ID = "CAIGreatPeople_RecruitBtn"
 local GP_REJECT_BTN_ID  = "CAIGreatPeople_RejectBtn"
 local GP_GOLD_BTN_ID    = "CAIGreatPeople_GoldBtn"
 local GP_FAITH_BTN_ID   = "CAIGreatPeople_FaithBtn"
-local PAST_TABLE_ID          = "CAIGreatPeople_PastTable"
+local PAST_LIST_ID           = "CAIGreatPeople_PastList"
 local HEROES_LIST_ID         = "CAIGreatPeople_HeroesList"
 local HERO_RECALL_BTN_ID     = "CAIGreatPeople_HeroRecallBtn"
 
@@ -48,7 +48,7 @@ local m_ui = {
     goldBtn    = nil,
     faithBtn   = nil,
     pastPage       = nil,
-    pastTable      = nil,
+    pastList       = nil,
     heroPage       = nil,
     heroList       = nil,
     heroRecallBtn  = nil,
@@ -289,59 +289,52 @@ local function FormatPastAbilities(kPerson)
     return JoinNonEmpty(parts, ". ")
 end
 
-local function BuildPastTable(data)
-    if not mgr or not m_ui.pastTable then return end
-    local capture = mgr:CaptureFocusKey(m_ui.pastTable)
-    m_ui.pastTable:ClearRows()
+local function BuildPastList(data)
+    if not mgr or not m_ui.pastList then return end
+    local capture = mgr:CaptureFocusKey(m_ui.pastList)
+    m_ui.pastList:ClearChildren()
 
     if not data or not data.Timeline then
-        mgr:RestoreFocus(m_ui.pastTable, capture)
+        mgr:RestoreFocus(m_ui.pastList, capture)
         return
     end
 
-    local localPlayerID = Game.GetLocalPlayer()
-
     for _, kPerson in ipairs(data.Timeline) do
-        local className = ""
-        if kPerson.ClassID then
-            className = Locale.Lookup(GameInfo.GreatPersonClasses[kPerson.ClassID].Name)
-        end
-        local personLabel = className .. ": " .. (kPerson.Name or "")
-        if kPerson.ClaimantID == localPlayerID then
-            personLabel = personLabel .. " (" .. Locale.Lookup("LOC_GREAT_PEOPLE_RECRUITED_BY_YOU") .. ")"
+        local parts = {}
+
+        if kPerson.TurnGranted then
+            parts[#parts + 1] = Calendar.MakeYearStr(kPerson.TurnGranted)
         end
 
-        local earnDate = ""
-        if kPerson.TurnGranted then
-            earnDate = Calendar.MakeYearStr(kPerson.TurnGranted)
+        if kPerson.ClassID then
+            parts[#parts + 1] = Locale.Lookup(GameInfo.GreatPersonClasses[kPerson.ClassID].Name)
+        end
+
+        if kPerson.Name and kPerson.Name ~= "" then
+            parts[#parts + 1] = kPerson.Name
         end
 
         local recruiter = FormatPastRecruiter(kPerson)
-        local abilities = FormatPastAbilities(kPerson)
+        if recruiter ~= "" then
+            parts[#parts + 1] = recruiter
+        end
 
+        local abilities = FormatPastAbilities(kPerson)
+        if abilities ~= "" then
+            parts[#parts + 1] = abilities
+        end
+
+        local label = table.concat(parts, ", ")
         local focusKey = kPerson.IndividualID and ("past:" .. tostring(kPerson.IndividualID)) or nil
-        local cellPerson = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGP_PastPerson"), "StaticText", {
-            Label = function() return personLabel end,
+        local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGP_PastRow"), "StaticText", {
+            Label = function() return label end,
             FocusKey = focusKey,
         })
-        cellPerson:SetFocusSound(HOVER_SOUND)
-        local cellDate = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGP_PastDate"), "StaticText", {
-            Label = function() return earnDate end,
-        })
-        cellDate:SetFocusSound(HOVER_SOUND)
-        local cellRecruiter = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGP_PastRecruiter"), "StaticText", {
-            Label = function() return recruiter end,
-        })
-        cellRecruiter:SetFocusSound(HOVER_SOUND)
-        local cellAbilities = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGP_PastAbilities"), "StaticText", {
-            Label = function() return abilities end,
-        })
-        cellAbilities:SetFocusSound(HOVER_SOUND)
-
-        m_ui.pastTable:AddRow({ cellPerson, cellDate, cellRecruiter, cellAbilities })
+        row:SetFocusSound(HOVER_SOUND)
+        m_ui.pastList:AddChild(row)
     end
 
-    mgr:RestoreFocus(m_ui.pastTable, capture)
+    mgr:RestoreFocus(m_ui.pastList, capture)
 end
 
 -- ===========================================================================
@@ -708,14 +701,10 @@ local function BuildPanel()
         return Locale.Lookup("LOC_GREAT_PEOPLE_TAB_PREVIOUSLY_RECRUITED")
     end)
 
-    m_ui.pastTable = mgr:CreateWidget(PAST_TABLE_ID, "Table", {
+    m_ui.pastList = mgr:CreateWidget(PAST_LIST_ID, "List", {
         Label = function() return Locale.Lookup("LOC_GREAT_PEOPLE_RECRUITMENT_HISTORY") end,
     })
-    m_ui.pastTable:AddColumn({ header = Locale.Lookup("LOC_CAI_GP_COL_PERSON") })
-    m_ui.pastTable:AddColumn({ header = Locale.Lookup("LOC_CAI_GP_COL_DATE") })
-    m_ui.pastTable:AddColumn({ header = Locale.Lookup("LOC_CAI_GP_COL_RECRUITER") })
-    m_ui.pastTable:AddColumn({ header = Locale.Lookup("LOC_CAI_GP_COL_ABILITIES") })
-    m_ui.pastPage:AddChild(m_ui.pastTable)
+    m_ui.pastPage:AddChild(m_ui.pastList)
 
     -- Tab 3: Heroes (Babylon DLC)
     if m_hasBabylon then
@@ -793,7 +782,7 @@ local function PopPanel()
         panel = nil, tabs = nil,
         gpPage = nil, gpTree = nil, bioEdit = nil,
         recruitBtn = nil, rejectBtn = nil, goldBtn = nil, faithBtn = nil,
-        pastPage = nil, pastTable = nil,
+        pastPage = nil, pastList = nil,
         heroPage = nil, heroList = nil, heroRecallBtn = nil,
     }
     m_cachedPersons = {}
@@ -834,7 +823,7 @@ end)
 ViewPast = WrapFunc(ViewPast, function(orig, data)
     orig(data)
     SyncCAITab(2)
-    BuildPastTable(data)
+    BuildPastList(data)
 end)
 
 Open = WrapFunc(Open, function(orig)

@@ -579,7 +579,7 @@ local function OnInterfaceChanged(oldMode, newMode)
 	if not mode then return end
 
 	m_caiCurrentInterfaceWidget = mode
-	mgr:Push(mode, PopupPriority.Medium)
+	mgr:Push(mode)
 end
 
 -- ===========================================================================

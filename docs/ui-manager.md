@@ -404,7 +404,9 @@ checkbox:Toggle()
 - `GetValue()` — returns the internal value.
 - `SetValueSetter(fn)` — function called when the value changes through the
   widget. Use this to push the value into the vanilla game system. EditBox
-  `Commit` runs the same setter on Enter.
+  `Commit` runs the same setter. Enter commits for all non-read-only edit
+  boxes by default. Set `EnterToCommit = false` to make Enter bubble instead
+  (useful when a parent confirm binding should handle it).
 
 For EditBox: the buffer/commit phase is internal. Per-keystroke editing
 mutates `_buffer` only — no events fire. `Commit()` promotes the buffer to
@@ -412,6 +414,16 @@ mutates `_buffer` only — no events fire. `Commit()` promotes the buffer to
 for distinguishing user commits from programmatic refresh is the `silent`
 flag on `SetText` / `SetValue`: refresh calls pass `silent=true` and emit
 nothing; user commits run non-silent and fire `value_changed`.
+All non-read-only edit boxes commit on Enter by default (`EnterToCommit`
+is true). Set `EnterToCommit = false` to make Enter bubble — useful when a
+parent confirm wrapper should handle the commit. `AlwaysEdit` writable
+boxes also auto-commit on focus leave.
+For writable `AlwaysEdit`, `HighlightOnEdit` selects the existing text when
+focus lands on the widget. That selection is silent because focus entry is not a
+user-driven edit command; the manager's normal focus speech reads the selected
+value once. When `HighlightOnEdit` is off, focus entry does not reposition the
+cursor. Read-only `AlwaysEdit` viewers preserve their cursor when focus leaves
+and returns.
 
 Direct methods are preferred over string-dispatched actions. EditBox exposes
 `BeginEdit`, `Commit`, `Cancel`. Checkbox: `Toggle`, `SetChecked`. Slider:
@@ -460,7 +472,10 @@ installs `Manager:HandleInput(input)` for the active context. It:
 
 `UIWidget:OnHandleInput` does the default: walks `InputMap` for a binding
 whose key, modifier mask, and message type match the incoming event, then
-calls its `Action(self)` — return true to consume.
+calls its `Action(self)`. Return `true` to consume, `false` to bubble up
+to the parent widget, or `nil` to skip this binding and try the next one
+in the same widget's `InputMap` (useful for class bindings that defer to
+screen-level overrides).
 
 Char input bubbles through `OnCharInput` the same way (used by `List`/`Tree`
 type-to-find and `EditBox` typing).
@@ -779,7 +794,8 @@ For edit boxes wrapping a vanilla `EditBox`:
 ```lua
 edit:SetText(vanillaEdit:GetText() or "", true)
 edit:SetValueSetter(function(_, text) vanillaEdit:SetText(text) end)
--- (SetValueSetter is also called on Commit, so no separate commit handler is needed)
+-- SetValueSetter is also called on Commit.
+-- Enter commits by default. Set edit:SetEnterToCommit(false) to bubble instead.
 ```
 
 ---
@@ -914,7 +930,7 @@ When migrating a screen from the old template-merged manager:
 |                | Left collapse-or-ascend; Enter toggle/activate; chars → search|
 | Checkbox       | Space / Enter → toggle                                        |
 | Slider         | Left/Right step; PgUp/PgDn page; Home/End bounds              |
-| EditBox        | Enter → BeginEdit/Commit; Esc → Cancel; full text-editing set |
+| EditBox        | Enter → BeginEdit/Commit (EnterToCommit=false makes Enter bubble); Esc → Cancel; full text-editing set |
 | TabControl     | Ctrl+Tab / Ctrl+Shift+Tab → cycle pages                       |
 | Tab strip      | Left / Right (via HorizontalList) cycles tabs and switches    |
 | Dropdown       | Closed: Enter → open. Open: List nav on inner items;           |

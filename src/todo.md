@@ -34,4 +34,4 @@
 [ ]Fix bug in the gov screen, if you choose a policy, go to governments and back, it does not remember your selection while still excluding it from the picker
 - [ ] Rework the nav cursor class to send a cursor struct for events rather than splitting between jumping and regular movement
 -[ ] Capital city should say capital
-[ ] Look ats in city states and great people should move the cursor
+[ ] Look ats in city-states, espionage, trade, and great people should move the cursor

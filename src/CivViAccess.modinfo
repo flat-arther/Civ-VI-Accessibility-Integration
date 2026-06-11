@@ -65,6 +65,7 @@
     <File>UI/inGame/ActionPanel_CAI.lua</File>
     <File>UI/inGame/AdvisorPopup_CAI.lua</File>
     <File>UI/inGame/TechCivicCompletedPopup_CAI.lua</File>
+    <File>UI/inGame/UnitPromotionPopup_CAI.lua</File>
     <File>UI/inGame/DeclareWarPopup_CAI.lua</File>
     <File>UI/inGame/DiplomacyActionView_CAI.lua</File>
     <File>UI/inGame/DiplomacyDealView_CAI.lua</File>
@@ -102,6 +103,7 @@
     <File>UI/inGame/CityStates_CAI.lua</File>
     <File>UI/inGame/ReligionScreen_CAI.lua</File>
     <File>UI/inGame/PantheonChooser_CAI.lua</File>
+    <File>UI/inGame/EraCompletePopup_CAI.lua</File>
     <File>UI/inGame/EraReviewPopup_CAI.lua</File>
     <File>UI/inGame/RazeCity_CAI.lua</File>
     <File>UI/inGame/DisloyalCityChooser_CAI.lua</File>
@@ -110,11 +112,21 @@
     <File>UI/inGame/WorldCongressPopup_CAI.lua</File>
     <File>UI/inGame/WorldCongressBetweenTurns_CAI.lua</File>
     <File>UI/inGame/DiplomacyRibbon_CAI.lua</File>
+    <File>UI/inGame/GovernorPanel_CAI.lua</File>
+    <File>UI/inGame/GovernorAssignmentChooser_CAI.lua</File>
+    <File>UI/inGame/EspionageChooser_CAI.lua</File>
+    <File>UI/inGame/EspionagePopup_CAI.lua</File>
+    <File>UI/inGame/EspionageEscape_CAI.lua</File>
+    <File>UI/inGame/EspionageOverview_CAI.lua</File>
+    <File>UI/inGame/TradeRouteChooser_CAI.lua</File>
+    <File>UI/inGame/TradeOverview_CAI.lua</File>
+    <File>UI/inGame/TradeOriginChooser_CAI.lua</File>
     <File>UI/inGame/CivicsChooser_CAI.lua</File>
     <File>UI/inGame/CivicsTree_CAI.lua</File>
     <File>UI/inGame/TechTree_CAI.lua</File>
     <File>UI/inGame/ProductionPanel_CAI.lua</File>
     <File>UI/inGame/CityPanel_CAI.lua</File>
+    <File>UI/inGame/CityPanelOverview_CAI.lua</File>
     <File>UI/inGame/CivilopediaScreen_CAI.lua</File>
     <File>UI/inGame/UnitPanel_CAI.lua</File>
     <File>UI/inGame/UnitFlagManager_CAI.lua</File>
@@ -360,6 +372,14 @@
       </Properties>
     </ReplaceUIScript>
 
+    <ReplaceUIScript id="CAI_UnitPromotionPopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>UnitPromotionPopup</LuaContext>
+        <LuaReplace>UI/inGame/UnitPromotionPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
     <ReplaceUIScript id="CAI_DeclareWarPopup">
       <Properties>
         <LoadOrder>100</LoadOrder>
@@ -432,6 +452,14 @@
       </Properties>
     </ReplaceUIScript>
 
+    <ReplaceUIScript id="CAI_CityPanelOverview">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>CityPanelOverview</LuaContext>
+        <LuaReplace>UI/inGame/CityPanelOverview_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
     <ReplaceUIScript id="CAI_UnitPanel">
       <Properties>
         <LoadOrder>100</LoadOrder>
@@ -488,6 +516,50 @@
       </Properties>
     </ReplaceUIScript>
 
+    <ReplaceUIScript id="CAI_GovernorPanel">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>GovernorPanel</LuaContext>
+        <LuaReplace>UI/inGame/GovernorPanel_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_GovernorAssignmentChooser">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>GovernorAssignmentChooser</LuaContext>
+        <LuaReplace>UI/inGame/GovernorAssignmentChooser_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+    <ReplaceUIScript id="CAI_EspionageChooser">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>EspionageChooser</LuaContext>
+        <LuaReplace>UI/inGame/EspionageChooser_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+    <ReplaceUIScript id="CAI_EspionagePopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>EspionagePopup</LuaContext>
+        <LuaReplace>UI/inGame/EspionagePopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+    <ReplaceUIScript id="CAI_EspionageEscape">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>EspionageEscape</LuaContext>
+        <LuaReplace>UI/inGame/EspionageEscape_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+    <ReplaceUIScript id="CAI_EspionageOverview">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>EspionageOverview</LuaContext>
+        <LuaReplace>UI/inGame/EspionageOverview_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
     <ReplaceUIScript id="CAI_CityStates">
       <Properties>
         <LoadOrder>100</LoadOrder>
@@ -509,6 +581,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>PantheonChooser</LuaContext>
         <LuaReplace>UI/inGame/PantheonChooser_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_EraCompletePopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>EraCompletePopup</LuaContext>
+        <LuaReplace>UI/inGame/EraCompletePopup_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 
@@ -573,6 +653,30 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>WorldCongressBetweenTurns</LuaContext>
         <LuaReplace>UI/inGame/WorldCongressBetweenTurns_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_TradeRouteChooser">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>TradeRouteChooser</LuaContext>
+        <LuaReplace>UI/inGame/TradeRouteChooser_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_TradeOverview">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>TradeOverview</LuaContext>
+        <LuaReplace>UI/inGame/TradeOverview_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_TradeOriginChooser">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>TradeOriginChooser</LuaContext>
+        <LuaReplace>UI/inGame/TradeOriginChooser_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
   </InGameActions>

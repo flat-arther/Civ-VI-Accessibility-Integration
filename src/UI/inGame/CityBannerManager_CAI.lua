@@ -1548,11 +1548,21 @@ local function OnCAICursorMoved(x, y, plotId)
     currentPlotId = plotId ~= nil and plotId or -1
 end
 
+local function OnCAIOpenOverviewForEnemyCity(playerID, cityID)
+    OnCapitalIconClicked(playerID, cityID)
+end
+
 local function OnShutdown()
     Events.InputActionTriggered.Remove(OnCityBannerInfoInputActionTriggered)
     LuaEvents.CAICursorMoved.Remove(OnCAICursorMoved)
+    if IsExpansion2Active() then
+        LuaEvents.CAIOpenOverviewForEnemyCity.Remove(OnCAIOpenOverviewForEnemyCity)
+    end
 end
 
 ContextPtr:SetShutdown(OnShutdown)
 Events.InputActionTriggered.Add(OnCityBannerInfoInputActionTriggered)
 LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
+if IsExpansion2Active() then
+    LuaEvents.CAIOpenOverviewForEnemyCity.Add(OnCAIOpenOverviewForEnemyCity)
+end

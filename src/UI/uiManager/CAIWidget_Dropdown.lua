@@ -10,6 +10,7 @@
 --
 -- Screens that mirror a vanilla PullDown listen for "opened" / "closed"
 -- to call PullDown:SetOpen(true/false) on the matching vanilla control.
+-- Note: DO NOT ACTUALLY DO THIS. The vanilla pulldown traps input, blocking anything aside from escape
 
 ---@class DropdownOption
 ---@field label string

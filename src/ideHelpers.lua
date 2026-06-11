@@ -517,6 +517,8 @@ function EditBoxWidget:SetValidator(fn) end
 ---Commit-time guard. Return nil to allow commit, or a string (spoken to the user) to block.
 ---@param fn fun(text:string):string|nil
 function EditBoxWidget:SetCommitValidator(fn) end
+---@param b boolean  when false, Enter bubbles instead of committing (default true)
+function EditBoxWidget:SetEnterToCommit(b) end
 ---@param b boolean
 function EditBoxWidget:SetPasswordMask(b) end
 ---@param mode integer  one of EditModes.*

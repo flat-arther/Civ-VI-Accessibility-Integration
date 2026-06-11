@@ -10,6 +10,18 @@ local function RemoveDialog()
     m_dialog = nil
 end
 
+local function GetPlayerAgeKey(gameEras, playerID)
+    if gameEras:HasHeroicGoldenAge(playerID) then
+        return "LOC_ERA_PROGRESS_HEROIC_AGE"
+    elseif gameEras:HasGoldenAge(playerID) then
+        return "LOC_ERA_PROGRESS_GOLDEN_AGE"
+    elseif gameEras:HasDarkAge(playerID) then
+        return "LOC_ERA_PROGRESS_DARK_AGE"
+    else
+        return "LOC_ERA_PROGRESS_NORMAL_AGE"
+    end
+end
+
 local function BuildDialog()
     RemoveDialog()
     if not mgr or ContextPtr:IsHidden() then return end
@@ -20,26 +32,28 @@ local function BuildDialog()
 
     local contentRows = { effectsRow }
 
-    -- AddPlayerEraIcon sets the leader/civ tooltip on the CivIconBacking root
-    -- and the age name on EraLabel:SetToolTipString. Unmet players get no
-    -- EraLabel tooltip, so skip those.
-    for _, backing in ipairs(Controls.CivIconStack:GetChildren() or {}) do
-        local children = backing:GetChildren() or {}
-        -- EraLabel is the last child of CivIconBacking (after CivIcon, TeamRibbon)
-        local eraLabelCtrl = children[#children]
-        local ageTip = eraLabelCtrl and eraLabelCtrl:GetToolTipString() or ""
-        if ageTip ~= "" then
-            local civRow = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEraReviewCiv"), "StaticText", {
-                Label = function()
-                    local name = backing:GetToolTipString() or ""
-                    local age = eraLabelCtrl:GetToolTipString() or ""
-                    if name ~= "" and age ~= "" then
-                        return name .. ", " .. age
-                    end
-                    return name .. age
-                end,
-            })
-            table.insert(contentRows, civRow)
+    local localPlayerID = Game.GetLocalPlayer()
+    if localPlayerID == nil or localPlayerID < 0 then return end
+
+    local gameEras = Game.GetEras()
+    local localPlayer = Players[localPlayerID]
+    local aPlayers = PlayerManager.GetAliveMajors()
+
+    for _, pPlayer in ipairs(aPlayers) do
+        local playerID = pPlayer:GetID()
+        if playerID ~= localPlayerID then
+            local playerConfig = PlayerConfigurations[playerID]
+            local isMet = localPlayer and localPlayer:GetDiplomacy():HasMet(playerID)
+            if isMet then
+                local leaderName = Locale.Lookup(playerConfig:GetLeaderName())
+                local civName = Locale.Lookup(playerConfig:GetCivilizationDescription())
+                local ageName = Locale.Lookup(GetPlayerAgeKey(gameEras, playerID))
+                local label = Locale.Lookup("LOC_DIPLOMACY_DEAL_PLAYER_PANEL_TITLE", leaderName, civName) .. ", " .. ageName
+                local civRow = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEraReviewCiv"), "StaticText", {
+                    Label = label,
+                })
+                table.insert(contentRows, civRow)
+            end
         end
     end
 

@@ -4,7 +4,7 @@
 
 include("InputSupport")
 
-local SPEECH_ORDER = { "label", "role", "value", "position", "state", "tooltip" }
+local SPEECH_ORDER = { "label", "role", "state", "value", "tooltip", "position" }
 
 ---@class UIWidget
 ---@field Id? string
@@ -207,11 +207,17 @@ local function asGetter(arg, defaultLiteralReturn)
 end
 
 function UIWidget:SetLabel(arg) self._labelFn = asGetter(arg) end
+
 function UIWidget:SetTooltip(arg) self._tooltipFn = asGetter(arg) end
+
 function UIWidget:SetValueGetter(fn) self._valueGetterFn = fn end
+
 function UIWidget:SetStateGetter(fn) self._stateGetterFn = fn end
+
 function UIWidget:SetHiddenPredicate(fn) self._hiddenFn = fn end
+
 function UIWidget:SetDisabledPredicate(fn) self._disabledFn = fn end
+
 function UIWidget:SetRole(role) self.Role = role end
 
 ---Stable identifier that survives child-list rebuilds. When the parent of a
@@ -230,9 +236,13 @@ function UIWidget:SetTransparent(b) self.Transparent = b and true or false end
 function UIWidget:SetFocusSound(soundName) self._focusSound = soundName end
 
 function UIWidget:GetLabel() return self._labelFn and self._labelFn(self) or "" end
+
 function UIWidget:GetTooltip() return self._tooltipFn and self._tooltipFn(self) or "" end
+
 function UIWidget:GetValue() return self._valueGetterFn and self._valueGetterFn(self) or "" end
+
 function UIWidget:GetState() return self._stateGetterFn and self._stateGetterFn(self) or "" end
+
 ---A widget is hidden if its own predicate says so OR any ancestor is hidden.
 ---Mirrors how the rendered UI treats parent visibility, so navigation, focus
 ---path descent, and announcements all skip the entire subtree of a hidden parent.
@@ -242,6 +252,7 @@ function UIWidget:IsHidden()
     if p and p.IsHidden and p:IsHidden() then return true end
     return false
 end
+
 function UIWidget:IsDisabled() return self._disabledFn and self._disabledFn(self) or false end
 
 --#endregion
@@ -309,7 +320,8 @@ function UIWidget:OnHandleInput(input)
     for _, b in ipairs(self.InputMap) do
         if b.Action and b.Key == key and b.MSG == msg
             and isShift == b.IsShift and isControl == b.IsControl and isAlt == b.IsAlt then
-            return b.Action(self) == true
+            local result = b.Action(self)
+            if result ~= nil then return result == true end
         end
     end
     return false
@@ -347,7 +359,7 @@ function UIWidget:BuildSpeech(elements)
         end
     end
     if #parts == 0 then return nil end
-    return table.concat(parts, "  ")
+    return table.concat(parts, ", ")
 end
 
 ---Speak this widget's info on demand. Used by screens after a value changes
