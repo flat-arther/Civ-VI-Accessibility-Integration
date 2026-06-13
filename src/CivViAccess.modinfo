@@ -70,6 +70,8 @@
     <File>UI/inGame/DiplomacyActionView_CAI.lua</File>
     <File>UI/inGame/DiplomacyDealView_CAI.lua</File>
     <File>UI/inGame/GreatPeoplePopup_CAI.lua</File>
+    <File>UI/inGame/GreatWorksOverview_CAI.lua</File>
+    <File>UI/inGame/GreatWorkShowcase_CAI.lua</File>
     <File>UI/inGame/InGameTopOptionsMenu_CAI.lua</File>
     <File>UI/inGame/WorldInput_CAI.lua</File>
     <File>UI/inGame/WorldTracker_CAI.lua</File>
@@ -267,6 +269,12 @@
            so the CAI layer rides that wildcard as an imported file instead of a
            full LuaReplace. Keeps every vanilla/DLC GreatPeoplePopup_* override. -->
       <File>UI/inGame/GreatPeoplePopup_CAI.lua</File>
+      <!-- GreatWorksOverview is a wildcard host (include("GreatWorksOverview_", true)),
+           so the CAI layer rides that wildcard as an imported file. -->
+      <File>UI/inGame/GreatWorksOverview_CAI.lua</File>
+      <!-- GreatWorkShowcase is a wildcard host (include("GreatWorkShowcase_", true)),
+           so the CAI layer rides that wildcard as an imported file. -->
+      <File>UI/inGame/GreatWorkShowcase_CAI.lua</File>
       <File>UI/inGame/inGameHelpers_CAI.lua</File>
       <File>UI/inGame/interfaceTargetHelpers_CAI.lua</File>
       <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>
