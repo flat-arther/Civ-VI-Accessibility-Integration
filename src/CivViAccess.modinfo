@@ -122,6 +122,7 @@
     <File>UI/inGame/EspionageOverview_CAI.lua</File>
     <File>UI/inGame/TradeRouteChooser_CAI.lua</File>
     <File>UI/inGame/TradeOverview_CAI.lua</File>
+    <File>UI/inGame/WorldRankings_CAI.lua</File>
     <File>UI/inGame/TradeOriginChooser_CAI.lua</File>
     <File>UI/inGame/CivicsChooser_CAI.lua</File>
     <File>UI/inGame/CivicsTree_CAI.lua</File>
@@ -685,6 +686,13 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>TradeOriginChooser</LuaContext>
         <LuaReplace>UI/inGame/TradeOriginChooser_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+    <ReplaceUIScript id="CAI_WorldRankings">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>WorldRankings</LuaContext>
+        <LuaReplace>UI/inGame/WorldRankings_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
   </InGameActions>

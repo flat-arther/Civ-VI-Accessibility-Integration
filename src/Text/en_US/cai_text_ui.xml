@@ -3590,5 +3590,94 @@
       <Text>Next</Text>
     </Row>
 
+    <!-- World Rankings -->
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_TOURISM_CURRENT" Language="en_US">
+      <Text>Tourism per Turn: {1_Current}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_TOURISM_LIFETIME" Language="en_US">
+      <Text>Lifetime Tourism: {1_LifetimeTourism}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_SCORE_CATEGORY" Language="en_US">
+      <Text>{1_Name}: {2_Score}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_MILESTONE_COMPLETE" Language="en_US">
+      <Text>{1_Name}: Complete</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_MILESTONE_PROGRESS" Language="en_US">
+      <Text>{1_Name}: {2_Percent}%</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_MILESTONE_NONE" Language="en_US">
+      <Text>{1_Name}: Not Started</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_HAS_CAPITAL" Language="en_US">
+      <Text>Has Original Capital</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_LOST_CAPITAL" Language="en_US">
+      <Text>Lost Original Capital</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_CAPTURED_FROM" Language="en_US">
+      <Text>Captured from {1_CivName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_CONVERTED" Language="en_US">
+      <Text>Converted: {1_CivName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_TOURISTS" Language="en_US">
+      <Text>{1_Visiting} of {2_Required} tourists</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_DOMESTIC" Language="en_US">
+      <Text>Domestic tourists: {1_Count}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_VISITING_US" Language="en_US">
+      <Text>Visiting us: {1_Count}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_TURNS_VICTORY" Language="en_US">
+      <Text>{1_Turns} turns to victory</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_DIPLO_POINTS" Language="en_US">
+      <Text>{1_Current} of {2_Required} Diplomatic Victory Points</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_COMPLETE_REQ" Language="en_US">
+      <Text>Complete: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_INCOMPLETE_REQ" Language="en_US">
+      <Text>Incomplete: {1_Text}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_MILESTONES_DONE" Language="en_US">
+      <Text>{1_Done} of {2_Total} complete</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_CAPITALS_CAPTURED" Language="en_US">
+      <Text>{1_Count} capitals captured</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_LIGHT_YEARS" Language="en_US">
+      <Text>Light Years: {1_Current} of {2_Total}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_LIGHT_YEARS_RATE" Language="en_US">
+      <Text>{1_Rate} light years per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_SPACEPORT_BUILT" Language="en_US">
+      <Text>Spaceport: Built</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_SPACEPORT_NOT_BUILT" Language="en_US">
+      <Text>Spaceport: Not Built</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_NEXT_STEP" Language="en_US">
+      <Text>Next step: {1_Step}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_CULTURE_WE_DOMINATE" Language="en_US">
+      <Text>You dominate {1_Count} civilizations</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_CULTURE_DOMINATE_US" Language="en_US">
+      <Text>{1_Count} civilizations dominate you</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_CULTURE_WE_ARE_DOMINANT" Language="en_US">
+      <Text>You are culturally dominant over them</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_CULTURE_THEY_ARE_DOMINANT" Language="en_US">
+      <Text>They are culturally dominant over you</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_DIPLO_TOOLTIP" Language="en_US">
+      <Text>{1_Tooltip}</Text>
+    </Row>
+
   </LocalizedText>
 </GameData>
