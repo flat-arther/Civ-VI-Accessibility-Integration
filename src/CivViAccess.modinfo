@@ -123,6 +123,8 @@
     <File>UI/inGame/TradeRouteChooser_CAI.lua</File>
     <File>UI/inGame/TradeOverview_CAI.lua</File>
     <File>UI/inGame/WorldRankings_CAI.lua</File>
+    <File>UI/inGame/ReportScreen_CAI.lua</File>
+    <File>UI/inGame/EraProgressPanel_CAI.lua</File>
     <File>UI/inGame/TradeOriginChooser_CAI.lua</File>
     <File>UI/inGame/CivicsChooser_CAI.lua</File>
     <File>UI/inGame/CivicsTree_CAI.lua</File>
@@ -693,6 +695,22 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>WorldRankings</LuaContext>
         <LuaReplace>UI/inGame/WorldRankings_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_ReportScreen">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>ReportScreen</LuaContext>
+        <LuaReplace>UI/inGame/ReportScreen_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_EraProgressPanel">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>EraProgressPanel</LuaContext>
+        <LuaReplace>UI/inGame/EraProgressPanel_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
   </InGameActions>

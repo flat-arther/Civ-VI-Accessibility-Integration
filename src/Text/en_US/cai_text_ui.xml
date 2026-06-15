@@ -3273,6 +3273,23 @@
       <Text>Normal Age</Text>
     </Row>
 
+    <!-- Era Progress Panel -->
+    <Row Tag="LOC_CAI_ERA_PROGRESS_SCORE" Language="en_US">
+      <Text>Score {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ERA_PROGRESS_TURNS_EXACT" Language="en_US">
+      <Text>{1_Num} turns to next era</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ERA_PROGRESS_TURNS_RANGE" Language="en_US">
+      <Text>{1_Num} to {2_Num} turns to next era</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ERA_PROGRESS_PROJECTED" Language="en_US">
+      <Text>projected</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ERA_PROGRESS_EFFECTS" Language="en_US">
+      <Text>Age effects</Text>
+    </Row>
+
     <!-- Governor panel -->
     <Row Tag="LOC_CAI_GOVERNOR_PANEL_LABEL" Language="en_US">
       <Text>{1_Title}</Text>
@@ -3677,6 +3694,152 @@
     </Row>
     <Row Tag="LOC_CAI_WORLD_RANKINGS_DIPLO_TOOLTIP" Language="en_US">
       <Text>{1_Tooltip}</Text>
+    </Row>
+
+    <!-- Reports Screen -->
+    <Row Tag="LOC_CAI_TOP_PANEL_OPEN_REPORTS" Language="en_US">
+      <Text>Open reports</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_OPEN_REPORTS_TOOLTIP" Language="en_US">
+      <Text>Opens the empire reports screen</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_OPEN_REPORTS_RESOURCES" Language="en_US">
+      <Text>Open reports: Resources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_OPEN_REPORTS_RESOURCES_TOOLTIP" Language="en_US">
+      <Text>Opens the empire reports screen on the resources tab</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_OPEN_REPORTS_CITY_STATUS" Language="en_US">
+      <Text>Open reports: City Status</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_OPEN_REPORTS_CITY_STATUS_TOOLTIP" Language="en_US">
+      <Text>Opens the empire reports screen on the city status tab</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_OPEN_REPORTS_GOSSIP" Language="en_US">
+      <Text>Open reports: Gossip</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_OPEN_REPORTS_GOSSIP_TOOLTIP" Language="en_US">
+      <Text>Opens the empire reports screen on the gossip tab</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_PRODUCING" Language="en_US">
+      <Text>producing {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_YIELD_PRODUCTION" Language="en_US">
+      <Text>Production {1_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_YIELD_FOOD" Language="en_US">
+      <Text>Food {1_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_YIELD_GOLD" Language="en_US">
+      <Text>Gold {1_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_YIELD_FAITH" Language="en_US">
+      <Text>Faith {1_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_YIELD_SCIENCE" Language="en_US">
+      <Text>Science {1_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_YIELD_CULTURE" Language="en_US">
+      <Text>Culture {1_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_YIELD_TOURISM" Language="en_US">
+      <Text>Tourism {1_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_UNIT_COUNT" Language="en_US">
+      <Text>{1_Count} units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_EMPIRE_ECONOMY" Language="en_US">
+      <Text>Empire Economy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_GOLD_BREAKDOWN" Language="en_US">
+      <Text>Gold: income {1_Income}, expense {2_Expense}, net {3_Net}, balance {4_Balance}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_FAITH_BREAKDOWN" Language="en_US">
+      <Text>Faith: income {1_Income}, balance {2_Balance}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_SCIENCE_INCOME" Language="en_US">
+      <Text>Science: {1_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_CULTURE_INCOME" Language="en_US">
+      <Text>Culture: {1_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_TOURISM_INCOME" Language="en_US">
+      <Text>Tourism: {1_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_RESOURCE_TOTAL" Language="en_US">
+      <Text>{1_ResourceName}, total {2_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_RESOURCE_STOCKPILE" Language="en_US">
+      <Text>{1_ResourceName}, {2_Current} of {3_Max} stockpile</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_RESOURCE_COUNT" Language="en_US">
+      <Text>{1_Count} resources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_AMENITIES_PROVIDED" Language="en_US">
+      <Text>providing amenities to {1_Count} cities</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_POPULATION" Language="en_US">
+      <Text>Population {1_Pop} of {2_Housing} housing</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_GROWTH" Language="en_US">
+      <Text>Growth {1_Status}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_AMENITIES" Language="en_US">
+      <Text>Amenities {1_Have} of {2_Need}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_WAR_WEARINESS" Language="en_US">
+      <Text>War Weariness {1_Value}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_DEFENSE" Language="en_US">
+      <Text>Defense {1_Strength}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_DAMAGE" Language="en_US">
+      <Text>Damage {1_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_LOYALTY" Language="en_US">
+      <Text>Loyalty {1_Current} of {2_Max} {3_Trend}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_LOYALTY_RISING" Language="en_US">
+      <Text>rising</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_LOYALTY_FALLING" Language="en_US">
+      <Text>falling</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_LOYALTY_STABLE" Language="en_US">
+      <Text>stable</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_GOVERNOR_ASSIGNED" Language="en_US">
+      <Text>Governor {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_GOVERNOR_TRAVELING" Language="en_US">
+      <Text>Governor {1_Name} traveling</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_NO_GOVERNOR" Language="en_US">
+      <Text>no Governor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_GOSSIP_ENTRY" Language="en_US">
+      <Text>Turn {1_Turn}, {2_Leader}: {3_Description}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_SORT_BY" Language="en_US">
+      <Text>Sort by</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_SORT_NAME" Language="en_US">
+      <Text>Name</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_SORT_DEFENSE" Language="en_US">
+      <Text>Defense</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_SORT_HAPPINESS" Language="en_US">
+      <Text>Happiness</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_SORT_GROWTH" Language="en_US">
+      <Text>Growth</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_FILTER_PLAYER" Language="en_US">
+      <Text>Filter by player</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_FILTER_TYPE" Language="en_US">
+      <Text>Filter by type</Text>
     </Row>
 
   </LocalizedText>

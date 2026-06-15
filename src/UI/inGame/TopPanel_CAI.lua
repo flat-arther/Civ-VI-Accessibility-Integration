@@ -9,6 +9,10 @@ local ACTION_SPEAK_YIELDS = Input.GetActionId("TopPanelSpeakYields")
 local ACTION_OPEN_YIELD_LIST = Input.GetActionId("TopPanelYieldInfoList")
 local ACTION_OPEN_RESOURCE_LIST = Input.GetActionId("TopPanelResourceInfoList")
 local ACTION_OPEN_DIPLOMACY = Input.GetActionId("TopPanelOpenDiplomacy")
+local ACTION_OPEN_REPORTS = Input.GetActionId("TopPanelOpenReports")
+local ACTION_OPEN_REPORTS_RESOURCES = Input.GetActionId("TopPanelOpenReportsResources")
+local ACTION_OPEN_REPORTS_CITY_STATUS = Input.GetActionId("TopPanelOpenReportsCityStatus")
+local ACTION_OPEN_REPORTS_GOSSIP = Input.GetActionId("TopPanelOpenReportsGossip")
 
 local TOP_PANEL_YIELD_INFO_ID = "CAITopPanelYieldInfoTree"
 local TOP_PANEL_RESOURCE_INFO_ID = "CAITopPanelResourceInfoList"
@@ -413,6 +417,20 @@ local function OnCAITopPanelInputAction(actionId)
     elseif actionId == ACTION_OPEN_DIPLOMACY then
         if GameCapabilities.HasCapability("CAPABILITY_DIPLOMACY") then
             LuaEvents.TopPanel_OpenDiplomacyActionView()
+        end
+        return
+    elseif actionId == ACTION_OPEN_REPORTS then
+        LuaEvents.TopPanel_OpenReportsScreen()
+        return
+    elseif actionId == ACTION_OPEN_REPORTS_RESOURCES then
+        LuaEvents.ReportsList_OpenResources()
+        return
+    elseif actionId == ACTION_OPEN_REPORTS_CITY_STATUS then
+        LuaEvents.ReportsList_OpenCityStatus()
+        return
+    elseif actionId == ACTION_OPEN_REPORTS_GOSSIP then
+        if GameCapabilities.HasCapability("CAPABILITY_GOSSIP_REPORT") then
+            LuaEvents.ReportsList_OpenGossip()
         end
         return
     end
