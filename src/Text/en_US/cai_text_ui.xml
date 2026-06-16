@@ -3290,6 +3290,23 @@
       <Text>Age effects</Text>
     </Row>
 
+    <!-- Timeline / Historic Moments -->
+    <Row Tag="LOC_CAI_TIMELINE_TITLE" Language="en_US">
+      <Text>Timeline</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TIMELINE_COUNT" Language="en_US">
+      <Text>{1_Num} {1_Num : plural 1?moment; other?moments;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TIMELINE_TURN" Language="en_US">
+      <Text>Turn {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TIMELINE_ERA_SCORE" Language="en_US">
+      <Text>+{1_Num} Era Score</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TIMELINE_COMMEMORATED" Language="en_US">
+      <Text>Commemorated</Text>
+    </Row>
+
     <!-- Governor panel -->
     <Row Tag="LOC_CAI_GOVERNOR_PANEL_LABEL" Language="en_US">
       <Text>{1_Title}</Text>
