@@ -1,14 +1,27 @@
 include("caiUtils")
-include("WorldTracker")
 include("Civ6Common")
+if IsExpansion2Active() then
+    include("WorldTracker_Expansion1")
+elseif IsExpansion1Active() then
+    include("WorldTracker_Expansion1")
+else
+    include("WorldTracker")
+end
+
+local mgr = ExposedMembers.CAI_UIManager
 
 local ACTION_OPEN_RESEARCH_CHOOSER = Input.GetActionId("WorldTrackerOpenResearchChooser")
 local ACTION_OPEN_CIVICS_CHOOSER = Input.GetActionId("WorldTrackerOpenCivicsChooser")
-local ACTION_READ_SUMMARY = Input.GetActionId("WorldTrackerReadSummary")
+local ACTION_SPEAK_SCIENCE = Input.GetActionId("TopPanelSpeakScience")
+local ACTION_SPEAK_CULTURE = Input.GetActionId("TopPanelSpeakCulture")
 
 local m_caiWorldTrackerActions = {}
 local m_caiResearchTrackerControl = nil
 local m_caiCivicsTrackerControl = nil
+
+local CRISIS_LIST_ID = "CAICrisisTracker_List"
+local HOVER_SOUND = "Main_Menu_Mouse_Over"
+local m_crisisList = nil
 
 local function ControlIsHidden(control)
     return control and control.IsHidden and control:IsHidden() or false
@@ -28,9 +41,9 @@ local function GetLocalPlayer()
     return playerID, player
 end
 
-local function AppendIfText(lines, text)
+local function AppendIfText(parts, text)
     if text ~= nil and text ~= "" then
-        table.insert(lines, text)
+        table.insert(parts, text)
     end
 end
 
@@ -60,73 +73,286 @@ local function GetCurrentCivicData(playerID, player)
     return GetCivicData(playerID, culture, civic)
 end
 
-local function AppendResearchSummary(lines, playerID, player)
+local function GetAllianceResearchText(data)
+    if not (IsExpansion1Active() or IsExpansion2Active()) then return nil end
+    if data == nil or data.TechType == nil then return nil end
+    local techInfo = GameInfo.Technologies[data.TechType]
+    if techInfo == nil then return nil end
+    if AllyHasOrIsResearchingTech and AllyHasOrIsResearchingTech(techInfo.Index) then
+        if GetAllianceIconToolTip then
+            return GetAllianceIconToolTip()
+        end
+    end
+    return nil
+end
+
+local function GetBoostText(kData)
+    if not kData or not kData.Boostable then return nil end
+    local trigger = kData.TriggerDesc and Locale.Lookup(kData.TriggerDesc) or ""
+    local prefix = Locale.Lookup(kData.BoostTriggered and "LOC_BOOST_BOOSTED" or "LOC_BOOST_TO_BOOST")
+    if trigger == "" then return prefix end
+    return prefix .. " " .. trigger
+end
+
+local function AppendResearchSummary(parts, playerID, player)
     local data = GetCurrentResearchData(playerID, player)
     if data == nil then
-        AppendIfText(lines, Locale.Lookup("LOC_CAI_WORLDTRACKER_RESEARCH_LINE",
+        AppendIfText(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_RESEARCH_LINE",
             Locale.Lookup("LOC_WORLD_TRACKER_CHOOSE_RESEARCH")))
         return
     end
 
-    local parts = { data.Name }
+    local inner = { data.Name }
     if data.TurnsLeft ~= nil and data.TurnsLeft >= 0 then
-        table.insert(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_TURNS_REMAINING", data.TurnsLeft))
+        table.insert(inner, Locale.Lookup("LOC_CAI_WORLDTRACKER_TURNS_REMAINING", data.TurnsLeft))
     end
 
-    if data.Boostable then
-        table.insert(parts, Locale.Lookup(data.BoostTriggered
-            and "LOC_TECH_HAS_BEEN_BOOSTED"
-            or "LOC_TECH_CAN_BE_BOOSTED"))
+    AppendIfText(inner, GetBoostText(data))
+
+    local allianceText = GetAllianceResearchText(data)
+    if allianceText then
+        table.insert(inner, allianceText)
     end
 
-    AppendIfText(lines, Locale.Lookup("LOC_CAI_WORLDTRACKER_RESEARCH_LINE", table.concat(parts, ", ")))
+    AppendIfText(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_RESEARCH_LINE", table.concat(inner, ", ")))
 end
 
-local function AppendCivicSummary(lines, playerID, player)
+local function AppendCivicSummary(parts, playerID, player)
     local data = GetCurrentCivicData(playerID, player)
     if data == nil then
-        AppendIfText(lines, Locale.Lookup("LOC_CAI_WORLDTRACKER_CIVIC_LINE",
+        AppendIfText(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_CIVIC_LINE",
             Locale.Lookup("LOC_WORLD_TRACKER_CHOOSE_CIVIC")))
         return
     end
 
-    local parts = { data.Name }
+    local inner = { data.Name }
     if data.TurnsLeft ~= nil and data.TurnsLeft >= 0 then
-        table.insert(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_TURNS_REMAINING", data.TurnsLeft))
+        table.insert(inner, Locale.Lookup("LOC_CAI_WORLDTRACKER_TURNS_REMAINING", data.TurnsLeft))
     end
 
-    if data.Boostable then
-        table.insert(parts, Locale.Lookup(data.BoostTriggered
-            and "LOC_TECH_HAS_BEEN_BOOSTED"
-            or "LOC_TECH_CAN_BE_BOOSTED"))
-    end
+    AppendIfText(inner, GetBoostText(data))
 
-    AppendIfText(lines, Locale.Lookup("LOC_CAI_WORLDTRACKER_CIVIC_LINE", table.concat(parts, ", ")))
+    AppendIfText(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_CIVIC_LINE", table.concat(inner, ", ")))
 end
 
-local function AppendUnitCount(lines, player)
-    local units = player:GetUnits()
-    local count = 0
-    if units ~= nil then
-        count = units:GetCount()
+local function FormatYieldPerTurn(value)
+    if value == 0 then
+        return Locale.ToNumber(value)
     end
-    AppendIfText(lines, Locale.Lookup("LOC_CAI_WORLDTRACKER_UNIT_COUNT", count))
+    return Locale.Lookup("{1: number +#,###.#;-#,###.#}", value)
 end
 
-local function SpeakWorldTrackerSummary()
+local function SpeakScienceAndResearch()
     local playerID, player = GetLocalPlayer()
-    if playerID == nil or player == nil then
-        Speak(Locale.Lookup("LOC_CAI_WORLDTRACKER_SUMMARY_UNAVAILABLE"))
+    if playerID == nil or player == nil then return end
+
+    if IsExpansion1Active() or IsExpansion2Active() then
+        if CalculateAllianceResearchBonus then
+            CalculateAllianceResearchBonus()
+        end
+    end
+
+    local parts = {}
+    if GameCapabilities.HasCapability("CAPABILITY_SCIENCE")
+        and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+        local techs = player:GetTechs()
+        AppendIfText(parts, Locale.Lookup("LOC_TOP_PANEL_SCIENCE") .. ": "
+            .. Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", FormatYieldPerTurn(techs:GetScienceYield())))
+    end
+    AppendResearchSummary(parts, playerID, player)
+    Speak(table.concat(parts, ", "))
+end
+
+local function SpeakCultureAndCivic()
+    local playerID, player = GetLocalPlayer()
+    if playerID == nil or player == nil then return end
+
+    local parts = {}
+    if GameCapabilities.HasCapability("CAPABILITY_CULTURE")
+        and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+        local culture = player:GetCulture()
+        AppendIfText(parts, Locale.Lookup("LOC_TOP_PANEL_CULTURE") .. ": "
+            .. Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", FormatYieldPerTurn(culture:GetCultureYield())))
+    end
+    AppendCivicSummary(parts, playerID, player)
+    Speak(table.concat(parts, ", "))
+end
+
+-- =============================================
+-- Crisis tracker (expansion only)
+-- =============================================
+
+local function GetPlayerName(playerID)
+    if playerID < 0 then return "" end
+    local localPlayerID = Game.GetLocalPlayer()
+    if localPlayerID < 0 then return "" end
+    local pConfig = PlayerConfigurations[playerID]
+    if not pConfig then return "" end
+    local isMP = GameConfiguration.IsAnyMultiplayer()
+    local isMet = (playerID == localPlayerID)
+    if not isMet then
+        local pDip = Players[localPlayerID]:GetDiplomacy()
+        isMet = pDip:HasMet(playerID)
+    end
+    if not isMet and not (isMP and pConfig:IsHuman()) then
+        return Locale.Lookup("LOC_DIPLOPANEL_UNMET_PLAYER")
+    end
+    local name = Locale.Lookup(pConfig:GetLeaderName())
+    if isMP and pConfig:IsHuman() then
+        name = name .. " (" .. pConfig:GetPlayerName() .. ")"
+    end
+    return name
+end
+
+local function GetCrisisGoalCounts(crisis)
+    local goalsCompleted = 0
+    local goalsTotal = 0
+    for _, goal in ipairs(crisis.GoalsTable) do
+        goalsTotal = goalsTotal + 1
+        if goal.Completed then goalsCompleted = goalsCompleted + 1 end
+    end
+    return goalsCompleted, goalsTotal
+end
+
+local function GetCrisisXP2Metadata(crisis)
+    if not IsExpansion2Active() then return false, false end
+    local kDef = GameInfo.EmergencyAlliances[crisis.EmergencyType]
+    if not kDef then return false, false end
+    local kMeta = GameInfo.Emergencies_XP2[kDef.EmergencyType]
+    if not kMeta then return false, false end
+    return kMeta.Hostile, kMeta.NoTarget
+end
+
+local function BuildCrisisLabel(crisis, localPlayerID)
+    local parts = {}
+    local goalsCompleted, goalsTotal = GetCrisisGoalCounts(crisis)
+    local bIsHostile, bNoTarget = GetCrisisXP2Metadata(crisis)
+
+    if crisis.TurnsLeft < 0 then
+        local isWin = (goalsCompleted == goalsTotal and crisis.TargetID ~= localPlayerID)
+            or (crisis.TargetID == localPlayerID and goalsCompleted ~= goalsTotal)
+            or (crisis.TargetID == localPlayerID and not bIsHostile)
+        table.insert(parts, Locale.Lookup(isWin and "LOC_CAI_CRISIS_STATUS_WON" or "LOC_CAI_CRISIS_STATUS_LOST"))
+    elseif crisis.TargetID == localPlayerID then
+        table.insert(parts, Locale.Lookup("LOC_CAI_CRISIS_STATUS_TARGETED"))
+    elseif crisis.HasBegun then
+        table.insert(parts, Locale.Lookup("LOC_CAI_CRISIS_STATUS_JOINED"))
+    else
+        table.insert(parts, Locale.Lookup("LOC_CAI_CRISIS_STATUS_PENDING"))
+    end
+
+    if IsExpansion2Active() then
+        table.insert(parts, Locale.Lookup(bIsHostile and "LOC_CAI_CRISIS_HOSTILE" or "LOC_CAI_CRISIS_AID"))
+    end
+
+    table.insert(parts, Locale.Lookup(crisis.NameText))
+
+    if crisis.TurnsLeft >= 0 then
+        table.insert(parts, Locale.Lookup("LOC_EMERGENCY_TURNS_REMAINING", crisis.TurnsLeft))
+    end
+
+    return table.concat(parts, ", ")
+end
+
+local function BuildCrisisTooltip(crisis, localPlayerID)
+    local parts = {}
+    local goalsCompleted, goalsTotal = GetCrisisGoalCounts(crisis)
+    local _, bNoTarget = GetCrisisXP2Metadata(crisis)
+
+    if not bNoTarget then
+        local targetName = GetPlayerName(crisis.TargetID)
+        if targetName ~= "" then
+            table.insert(parts, Locale.Lookup("LOC_CAI_CRISIS_TARGET") .. " " .. targetName)
+        end
+    end
+
+    if crisis.HasBegun then
+        local progressPrefix = ""
+        local inverseProgressPrefix = ""
+        if goalsTotal > 0 then
+            progressPrefix = "(" .. goalsCompleted .. "/" .. goalsTotal .. ") "
+            inverseProgressPrefix = "(" .. (goalsTotal - goalsCompleted) .. "/" .. goalsTotal .. ") "
+        end
+        if crisis.TargetID == localPlayerID then
+            table.insert(parts, inverseProgressPrefix .. crisis.TargetShortGoalDescription)
+        else
+            table.insert(parts, progressPrefix .. crisis.ShortGoalDescription)
+        end
+    else
+        table.insert(parts, Locale.Lookup("LOC_EMERGENCY_PENDING_SHORT_DESCRIPTION"))
+    end
+
+    if #parts == 0 then return nil end
+    return table.concat(parts, ", ")
+end
+
+local function RemoveCrisisList()
+    if not mgr or not m_crisisList then return end
+    mgr:RemoveFromStack(CRISIS_LIST_ID)
+    m_crisisList = nil
+end
+
+local function BuildAndPushCrisisList()
+    RemoveCrisisList()
+    if not mgr then return end
+
+    local localPlayerID = Game.GetLocalPlayer()
+    if localPlayerID < 0 then return end
+
+    local localPlayer = Players[localPlayerID]
+    if not localPlayer then return end
+
+    local crisisData = Game.GetEmergencyManager():GetEmergencyInfoTable(localPlayerID)
+    if not crisisData or next(crisisData) == nil then
+        Speak(Locale.Lookup("LOC_CAI_CRISIS_TRACKER_NONE"))
         return
     end
 
-    local lines = {}
-    AppendResearchSummary(lines, playerID, player)
-    AppendCivicSummary(lines, playerID, player)
-    AppendUnitCount(lines, player)
+    m_crisisList = mgr:CreateWidget(CRISIS_LIST_ID, "List", {
+        Label = Locale.Lookup("LOC_CAI_CRISIS_TRACKER_TITLE"),
+        _focusSound = HOVER_SOUND,
+    })
 
-    Speak(table.concat(lines, "[NEWLINE]"))
+    for i, crisis in ipairs(crisisData) do
+        local label = BuildCrisisLabel(crisis, localPlayerID)
+        local tooltip = BuildCrisisTooltip(crisis, localPlayerID)
+
+        local boxedCrisis = crisis
+        local btn = mgr:CreateWidget("crisis:" .. i, "Button", {
+            Label = label,
+            Tooltip = tooltip,
+            FocusKey = "crisis:" .. i,
+            _focusSound = HOVER_SOUND,
+        })
+        btn:On("activate", function()
+            LuaEvents.WorldCrisisTracker_EmergencyClicked(boxedCrisis.TargetID, boxedCrisis.EmergencyType)
+            RemoveCrisisList()
+        end)
+        m_crisisList:AddChild(btn)
+    end
+
+    m_crisisList:AddInputBinding({
+        Key = Keys.VK_ESCAPE,
+        Action = function()
+            RemoveCrisisList()
+            return true
+        end
+    })
+
+    mgr:Push(m_crisisList)
 end
+
+local function ToggleCrisisList()
+    if m_crisisList then
+        RemoveCrisisList()
+    else
+        BuildAndPushCrisisList()
+    end
+end
+
+-- =============================================
+-- Input action dispatch
+-- =============================================
 
 local function RegisterWorldTrackerAction(actionId, callback)
     if actionId ~= nil then
@@ -154,7 +380,13 @@ local function InitializeWorldTrackerActions()
         if not IsTrackerChooserControlEnabled(m_caiCivicsTrackerControl) then return end
         LuaEvents.WorldTracker_OpenChooseCivic()
     end)
-    RegisterWorldTrackerAction(ACTION_READ_SUMMARY, SpeakWorldTrackerSummary)
+    RegisterWorldTrackerAction(ACTION_SPEAK_SCIENCE, SpeakScienceAndResearch)
+    RegisterWorldTrackerAction(ACTION_SPEAK_CULTURE, SpeakCultureAndCivic)
+
+    if IsExpansion1Active() or IsExpansion2Active() then
+        local ACTION_OPEN_TRACKER = Input.GetActionId("OpenWorldCrisisTracker")
+        RegisterWorldTrackerAction(ACTION_OPEN_TRACKER, ToggleCrisisList)
+    end
 end
 
 local function OnWorldTrackerInputActionTriggered(actionId)
@@ -169,18 +401,19 @@ RealizeCurrentResearch = WrapFunc(RealizeCurrentResearch, function(orig, playerI
     if kControl and kControl.IconButton then
         m_caiResearchTrackerControl = kControl
     end
-    return orig(playerID, kData, kControl)
+    orig(playerID, kData, kControl)
 end)
 
 RealizeCurrentCivic = WrapFunc(RealizeCurrentCivic, function(orig, playerID, kData, kControl, cachedModifiers)
     if kControl and kControl.IconButton then
         m_caiCivicsTrackerControl = kControl
     end
-    return orig(playerID, kData, kControl, cachedModifiers)
+    orig(playerID, kData, kControl, cachedModifiers)
 end)
 
 OnShutdown = WrapFunc(OnShutdown, function(orig)
     Events.InputActionTriggered.Remove(OnWorldTrackerInputActionTriggered)
+    RemoveCrisisList()
     orig()
 end)
 ContextPtr:SetShutdown(OnShutdown)

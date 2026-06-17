@@ -817,23 +817,53 @@
     <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE_TOOLTIP" Language="en_US">
       <Text>Reads the current turn, time, and date from the top panel</Text>
     </Row>
-    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_YIELDS" Language="en_US">
-      <Text>Read top panel yield summary</Text>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE" Language="en_US">
+      <Text>Read science and research</Text>
     </Row>
-    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_YIELDS_TOOLTIP" Language="en_US">
-      <Text>Reads all top panel yield summaries, including gold and faith balances</Text>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE_TOOLTIP" Language="en_US">
+      <Text>Reads science yield per turn and current research progress</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_CULTURE" Language="en_US">
+      <Text>Read culture and civic</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_CULTURE_TOOLTIP" Language="en_US">
+      <Text>Reads culture yield per turn and current civic progress</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_GOLD" Language="en_US">
+      <Text>Read gold and trade routes</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_GOLD_TOOLTIP" Language="en_US">
+      <Text>Reads gold balance, yield per turn, and trade route capacity</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_FAITH" Language="en_US">
+      <Text>Read faith yield</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_FAITH_TOOLTIP" Language="en_US">
+      <Text>Reads faith balance and yield per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_TOURISM" Language="en_US">
+      <Text>Read tourism</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_TOOLTIP" Language="en_US">
+      <Text>Reads the current tourism rate</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_FAVOR" Language="en_US">
+      <Text>Read diplomatic favor and envoys</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_FAVOR_TOOLTIP" Language="en_US">
+      <Text>Reads diplomatic favor balance, yield per turn, and envoy progress</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_NUKES" Language="en_US">
+      <Text>Read nuclear weapons</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_NUKES_TOOLTIP" Language="en_US">
+      <Text>Reads the count of nuclear and thermonuclear devices</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_YIELD_INFO" Language="en_US">
       <Text>Yield info</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_YIELD_INFO_TOOLTIP" Language="en_US">
       <Text>Opens a tree of top panel yield breakdowns</Text>
-    </Row>
-    <Row Tag="LOC_CAI_TOP_PANEL_RESOURCE_INFO" Language="en_US">
-      <Text>Resource info</Text>
-    </Row>
-    <Row Tag="LOC_CAI_TOP_PANEL_RESOURCE_INFO_TOOLTIP" Language="en_US">
-      <Text>Opens a list of top panel strategic resources</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_OPEN_DIPLOMACY" Language="en_US">
       <Text>Open diplomacy</Text>
@@ -844,8 +874,23 @@
     <Row Tag="LOC_CAI_TOP_PANEL_BALANCE_AND_RATE" Language="en_US">
       <Text>{1_Balance}, {2_PerTurn}</Text>
     </Row>
-    <Row Tag="LOC_CAI_TOP_PANEL_NO_STRATEGIC_RESOURCES" Language="en_US">
-      <Text>No strategic resources</Text>
+    <Row Tag="LOC_CAI_TOP_PANEL_TRADE_ROUTES" Language="en_US">
+      <Text>Trade routes: {1_Active}/{2_Capacity}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_FAVOR" Language="en_US">
+      <Text>Diplomatic Favor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_ENVOYS_SUMMARY" Language="en_US">
+      <Text>Envoys: {1_Available} available, {2_Points}/{3_Threshold} to next</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_NUCLEAR_DEVICES" Language="en_US">
+      <Text>Nuclear devices: {1_Count}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_THERMONUCLEAR_DEVICES" Language="en_US">
+      <Text>Thermonuclear devices: {1_Count}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_NO_NUKES" Language="en_US">
+      <Text>No nuclear weapons</Text>
     </Row>
     <Row Tag="LOC_CAI_DIPLOMACY_LEADERS" Language="en_US">
       <Text>Leaders</Text>
@@ -1792,12 +1837,6 @@
     </Row>
     <Row Tag="LOC_CAI_WORLDTRACKER_OPEN_CIVICS_CHOOSER_TOOLTIP" Language="en_US">
       <Text>Opens the vanilla civics chooser from the World Tracker</Text>
-    </Row>
-    <Row Tag="LOC_CAI_WORLDTRACKER_READ_SUMMARY" Language="en_US">
-      <Text>Read World Tracker summary</Text>
-    </Row>
-    <Row Tag="LOC_CAI_WORLDTRACKER_READ_SUMMARY_TOOLTIP" Language="en_US">
-      <Text>Reads current research, current civic, and total unit count</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLDTRACKER_SUMMARY" Language="en_US">
       <Text>World Tracker summary</Text>
@@ -3738,6 +3777,15 @@
     <Row Tag="LOC_CAI_TOP_PANEL_OPEN_REPORTS_GOSSIP_TOOLTIP" Language="en_US">
       <Text>Opens the empire reports screen on the gossip tab</Text>
     </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_RESOURCE_INFO" Language="en_US">
+      <Text>Strategic Resources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_RESOURCE_INFO_TOOLTIP" Language="en_US">
+      <Text>Opens a tree of strategic resource stockpiles and flow</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_NO_STRATEGIC_RESOURCES" Language="en_US">
+      <Text>No strategic resources</Text>
+    </Row>
     <Row Tag="LOC_CAI_REPORTS_PRODUCING" Language="en_US">
       <Text>producing {1_Name}</Text>
     </Row>
@@ -3857,6 +3905,102 @@
     </Row>
     <Row Tag="LOC_CAI_REPORTS_FILTER_TYPE" Language="en_US">
       <Text>Filter by type</Text>
+    </Row>
+
+    <!-- Climate Screen -->
+    <Row Tag="LOC_CAI_CLIMATE_TEMP_VALUE" Language="en_US">
+      <Text>{1_Temp} degrees Celsius from Ancient Era</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_FERTILE_TILES" Language="en_US">
+      <Text>{1_Num} {1_Num: plural 1?tile; other?tiles;} gained fertility</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_LOST_FERTILE_TILES" Language="en_US">
+      <Text>{1_Num} {1_Num: plural 1?tile; other?tiles;} lost fertility</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_DAMAGED_TILES" Language="en_US">
+      <Text>{1_Num} {1_Num: plural 1?tile; other?tiles;} damaged</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_UNITS_LOST" Language="en_US">
+      <Text>{1_Num} {1_Num: plural 1?unit; other?units;} killed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_POP_LOST" Language="en_US">
+      <Text>{1_Num} population lost</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_AFFECTED_CITIES" Language="en_US">
+      <Text>Affected cities: {1_Cities}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_TURN" Language="en_US">
+      <Text>Turn {1_Turn}, {2_Date}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_PHASE_POINTS" Language="en_US">
+      <Text>Current climate change points: {1_Current}, {2_Required} required for the next phase</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_PHASE_POINTS_MAX" Language="en_US">
+      <Text>Current climate change points: {1_Current}</Text>
+    </Row>
+
+    <!-- World Crisis / Emergency -->
+    <Row Tag="LOC_CAI_CRISIS_TRACKER_TITLE" Language="en_US">
+      <Text>Emergencies</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CRISIS_TRACKER_NONE" Language="en_US">
+      <Text>No active emergencies</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CRISIS_STATUS_COMPLETED" Language="en_US">
+      <Text>Completed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CRISIS_STATUS_TARGETED" Language="en_US">
+      <Text>Targeted</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CRISIS_STATUS_JOINED" Language="en_US">
+      <Text>Joined</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CRISIS_STATUS_PENDING" Language="en_US">
+      <Text>Pending decision</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CRISIS_TARGET" Language="en_US">
+      <Text>Target:</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CRISIS_PARTICIPANTS" Language="en_US">
+      <Text>Participants:</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_CRISIS_TRACKER" Language="en_US">
+      <Text>Open Emergencies List</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_CRISIS_TRACKER_TOOLTIP" Language="en_US">
+      <Text>Open a navigable list of active emergencies and competitions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CRISIS_STATUS_WON" Language="en_US">
+      <Text>Won</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CRISIS_STATUS_LOST" Language="en_US">
+      <Text>Lost</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CRISIS_HOSTILE" Language="en_US">
+      <Text>Hostile</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CRISIS_AID" Language="en_US">
+      <Text>Aid</Text>
+    </Row>
+
+    <!-- End Game Menu -->
+    <Row Tag="LOC_CAI_ENDGAME_TITLE" Language="en_US">
+      <Text>End Game</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ENDGAME_CHAT_HISTORY" Language="en_US">
+      <Text>Chat history</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ENDGAME_CHAT_INPUT" Language="en_US">
+      <Text>Chat message</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ENDGAME_CHAT_SEND" Language="en_US">
+      <Text>Send</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ENDGAME_MOVIE_PLAYING" Language="en_US">
+      <Text>Cinematic playing</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ENDGAME_MOVIE_SKIP" Language="en_US">
+      <Text>Skip cinematic</Text>
     </Row>
 
   </LocalizedText>

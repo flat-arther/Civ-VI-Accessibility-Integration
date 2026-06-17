@@ -24,7 +24,7 @@ local function MakeTabStrip(mgr, ownerId)
     local strip = mgr:CreateWidget(ownerId .. "_Strip", "HorizontalList", {
         Label = function() return Locale.Lookup("LOC_CAI_TAB_STRIP_LABEL") end,
     })
-    strip.SpeechSettings = { Role = false }
+    strip.SpeechSettings = { Role = false, Position = false }
     return strip
 end
 
@@ -51,16 +51,19 @@ function TabControlWidget.Create(mgr, id, props)
     UIWidget.AddChild(w, w._tabStrip)
 
     w:AddInputBindings({
-        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsControl = true,                  Action = function(self) return self:NextPage() end },
-        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsControl = true, IsShift = true,  Action = function(self) return self:PreviousPage() end },
+        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsControl = true,                                              Action = function(
+            self) return self:NextPage() end },
+        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsControl = true,                                              IsShift = true,                                                  Action = function(
+            self) return self:PreviousPage() end },
         -- Tab from the strip enters the first child of the active page.
         -- When focus is at the last child of the page, Tab is NOT consumed
         -- so it bubbles to the parent and moves to the next sibling.
-        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown,                                    Action = function(self) return self:_EnterPageFromStrip(1) end },
+        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, Action = function(self) return self:_EnterPageFromStrip(1) end },
         -- Shift+Tab from inside the page returns to the active tab in the
         -- strip; Shift+Tab from a tab in the strip bubbles so the user can
         -- exit the TabControl backward.
-        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsShift = true,                    Action = function(self) return self:_ReturnToStripFromPage() end },
+        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsShift = true,                                                Action = function(
+            self) return self:_ReturnToStripFromPage() end },
     })
 
     CAIWidgetRegistry.ApplyProps(w, props)
@@ -161,18 +164,18 @@ end
 ---@param labelOrFn string|fun():string
 ---@return TabPageWidget
 function TabControlWidget:AddPage(labelOrFn)
-    local mgr = self.Manager
-    local idx = #self._tabs + 1
-    local pageId = self.Id .. "_Page" .. idx
-    local tabId  = self.Id .. "_Tab"  .. idx
+    local mgr        = self.Manager
+    local idx        = #self._tabs + 1
+    local pageId     = self.Id .. "_Page" .. idx
+    local tabId      = self.Id .. "_Tab" .. idx
 
-    local page = mgr:CreateWidget(pageId, "TabPage", { Label = labelOrFn })
+    local page       = mgr:CreateWidget(pageId, "TabPage", { Label = labelOrFn })
     self._pages[idx] = page
 
-    local tab = mgr:CreateWidget(tabId, "Tab", { Label = labelOrFn })
-    tab._control = self
-    tab._tabIndex = idx
-    self._tabs[idx] = tab
+    local tab        = mgr:CreateWidget(tabId, "Tab", { Label = labelOrFn })
+    tab._control     = self
+    tab._tabIndex    = idx
+    self._tabs[idx]  = tab
     self._tabStrip:AddChild(tab)
 
     if self._activeIndex == 0 then
@@ -225,7 +228,9 @@ end
 ---@param silent? boolean
 function TabControlWidget:SetActivePageById(id, silent)
     for i, p in ipairs(self._pages) do
-        if p.Id == id then self:SetActivePage(i, silent); return end
+        if p.Id == id then
+            self:SetActivePage(i, silent); return
+        end
     end
 end
 

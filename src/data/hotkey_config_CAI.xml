@@ -40,9 +40,14 @@
     <Row ActionId="QuickMoveSouthWest" Name="LOC_CAI_QUICK_MOVE_SOUTHWEST" Description="LOC_CAI_QUICK_MOVE_SOUTHWEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="QuickMoveSouthEast" Name="LOC_CAI_QUICK_MOVE_SOUTHEAST" Description="LOC_CAI_QUICK_MOVE_SOUTHEAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TopPanelSpeakTurnTimeDate" Name="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE" Description="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="TopPanelSpeakYields" Name="LOC_CAI_TOP_PANEL_SPEAK_YIELDS" Description="LOC_CAI_TOP_PANEL_SPEAK_YIELDS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="TopPanelSpeakScience" Name="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE" Description="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="TopPanelSpeakCulture" Name="LOC_CAI_TOP_PANEL_SPEAK_CULTURE" Description="LOC_CAI_TOP_PANEL_SPEAK_CULTURE_TOOLTIP" CategoryId="CAI" ContextId="WorldOrPopup" LayoutType="PC"/>
+    <Row ActionId="TopPanelSpeakGold" Name="LOC_CAI_TOP_PANEL_SPEAK_GOLD" Description="LOC_CAI_TOP_PANEL_SPEAK_GOLD_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="TopPanelSpeakFaith" Name="LOC_CAI_TOP_PANEL_SPEAK_FAITH" Description="LOC_CAI_TOP_PANEL_SPEAK_FAITH_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="TopPanelSpeakTourism" Name="LOC_CAI_TOP_PANEL_SPEAK_TOURISM" Description="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="TopPanelSpeakFavor" Name="LOC_CAI_TOP_PANEL_SPEAK_FAVOR" Description="LOC_CAI_TOP_PANEL_SPEAK_FAVOR_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="TopPanelSpeakNukes" Name="LOC_CAI_TOP_PANEL_SPEAK_NUKES" Description="LOC_CAI_TOP_PANEL_SPEAK_NUKES_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TopPanelYieldInfoList" Name="LOC_CAI_TOP_PANEL_YIELD_INFO" Description="LOC_CAI_TOP_PANEL_YIELD_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="TopPanelResourceInfoList" Name="LOC_CAI_TOP_PANEL_RESOURCE_INFO" Description="LOC_CAI_TOP_PANEL_RESOURCE_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TopPanelOpenDiplomacy" Name="LOC_CAI_TOP_PANEL_OPEN_DIPLOMACY" Description="LOC_CAI_TOP_PANEL_OPEN_DIPLOMACY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TopPanelOpenReports" Name="LOC_CAI_TOP_PANEL_OPEN_REPORTS" Description="LOC_CAI_TOP_PANEL_OPEN_REPORTS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TopPanelOpenReportsResources" Name="LOC_CAI_TOP_PANEL_OPEN_REPORTS_RESOURCES" Description="LOC_CAI_TOP_PANEL_OPEN_REPORTS_RESOURCES_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
@@ -50,7 +55,6 @@
     <Row ActionId="TopPanelOpenReportsGossip" Name="LOC_CAI_TOP_PANEL_OPEN_REPORTS_GOSSIP" Description="LOC_CAI_TOP_PANEL_OPEN_REPORTS_GOSSIP_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldTrackerOpenResearchChooser" Name="LOC_CAI_WORLDTRACKER_OPEN_RESEARCH_CHOOSER" Description="LOC_CAI_WORLDTRACKER_OPEN_RESEARCH_CHOOSER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldTrackerOpenCivicsChooser" Name="LOC_CAI_WORLDTRACKER_OPEN_CIVICS_CHOOSER" Description="LOC_CAI_WORLDTRACKER_OPEN_CIVICS_CHOOSER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="WorldTrackerReadSummary" Name="LOC_CAI_WORLDTRACKER_READ_SUMMARY" Description="LOC_CAI_WORLDTRACKER_READ_SUMMARY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotReadUnits" Name="LOC_CAI_PLOT_READ_UNITS" Description="LOC_CAI_PLOT_READ_UNITS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotReadYieldRiverOwner" Name="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER" Description="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotReadStats" Name="LOC_CAI_PLOT_READ_STATS" Description="LOC_CAI_PLOT_READ_STATS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
@@ -149,6 +153,8 @@
     <Row ActionId="CityChangeCitizenYieldFocus" Name="LOC_CAI_CITY_CHANGE_CITIZEN_YIELD_FOCUS" Description="LOC_CAI_CITY_CHANGE_CITIZEN_YIELD_FOCUS_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
     <Row ActionId="DiplomacyRibbonOpenList" Name="LOC_CAI_DIPLO_RIBBON_OPEN_LIST" Description="LOC_CAI_DIPLO_RIBBON_OPEN_LIST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="DiplomacyRibbonOpenWorldCongress" Name="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS" Description="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="OpenWorldCrisisTracker" Name="LOC_CAI_OPEN_CRISIS_TRACKER" Description="LOC_CAI_OPEN_CRISIS_TRACKER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="TopPanelResourceInfoList" Name="LOC_CAI_TOP_PANEL_RESOURCE_INFO" Description="LOC_CAI_TOP_PANEL_RESOURCE_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
   </InputActions>
 
   <InputActionDefaultGestures>
@@ -194,9 +200,14 @@
     <Row ActionId="QuickMoveSouthEast" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_C" />
     <Row ActionId="QuickMoveSouthEast" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_NP_3" />
     <Row ActionId="TopPanelSpeakTurnTimeDate" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_T" />
-    <Row ActionId="TopPanelSpeakYields" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_Y" />
+    <Row ActionId="TopPanelSpeakScience" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_R" />
+    <Row ActionId="TopPanelSpeakCulture" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_P" />
+    <Row ActionId="TopPanelSpeakGold" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_G" />
+    <Row ActionId="TopPanelSpeakFaith" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F" />
+    <Row ActionId="TopPanelSpeakTourism" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_U" />
+    <Row ActionId="TopPanelSpeakFavor" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_V" />
+    <Row ActionId="TopPanelSpeakNukes" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_N" />
     <Row ActionId="TopPanelYieldInfoList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_Y" />
-    <Row ActionId="TopPanelResourceInfoList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_Q" />
     <Row ActionId="TopPanelOpenDiplomacy" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_D" />
     <Row ActionId="TopPanelOpenReports" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_E" />
     <Row ActionId="TopPanelOpenReportsResources" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_R" />
@@ -204,7 +215,6 @@
     <Row ActionId="TopPanelOpenReportsGossip" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_G" />
     <Row ActionId="WorldTrackerOpenResearchChooser" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_T" />
     <Row ActionId="WorldTrackerOpenCivicsChooser" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_C" />
-    <Row ActionId="WorldTrackerReadSummary" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_R" />
     <Row ActionId="PlotReadUnits" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_S" />
     <Row ActionId="PlotReadUnits" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_5" />
     <Row ActionId="PlotReadYieldRiverOwner" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_W" />
@@ -251,5 +261,7 @@
     <Row ActionId="UnitPanelOpenUnitList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_U" />
     <Row ActionId="DiplomacyRibbonOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_P" />
     <Row ActionId="DiplomacyRibbonOpenWorldCongress" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F8" />
+    <Row ActionId="OpenWorldCrisisTracker" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_O" />
+    <Row ActionId="TopPanelResourceInfoList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_Q" />
   </InputActionDefaultGestures>
 </GameInfo>

@@ -1,21 +1,33 @@
 include("caiUtils")
-include("TopPanel")
+include("Civ6Common")
+
+if IsExpansion2Active() then
+    include("TopPanel_Expansion2")
+elseif IsExpansion1Active() then
+    include("TopPanel_Expansion1")
+else
+    include("TopPanel")
+end
 
 local mgr = ExposedMembers.CAI_UIManager
 local m_caiTopPanelList = nil
 
 local ACTION_SPEAK_TURN_TIME_DATE = Input.GetActionId("TopPanelSpeakTurnTimeDate")
-local ACTION_SPEAK_YIELDS = Input.GetActionId("TopPanelSpeakYields")
+local ACTION_SPEAK_GOLD = Input.GetActionId("TopPanelSpeakGold")
+local ACTION_SPEAK_FAITH = Input.GetActionId("TopPanelSpeakFaith")
+local ACTION_SPEAK_TOURISM = Input.GetActionId("TopPanelSpeakTourism")
+local ACTION_SPEAK_FAVOR = Input.GetActionId("TopPanelSpeakFavor")
+local ACTION_SPEAK_NUKES = Input.GetActionId("TopPanelSpeakNukes")
 local ACTION_OPEN_YIELD_LIST = Input.GetActionId("TopPanelYieldInfoList")
-local ACTION_OPEN_RESOURCE_LIST = Input.GetActionId("TopPanelResourceInfoList")
 local ACTION_OPEN_DIPLOMACY = Input.GetActionId("TopPanelOpenDiplomacy")
 local ACTION_OPEN_REPORTS = Input.GetActionId("TopPanelOpenReports")
 local ACTION_OPEN_REPORTS_RESOURCES = Input.GetActionId("TopPanelOpenReportsResources")
 local ACTION_OPEN_REPORTS_CITY_STATUS = Input.GetActionId("TopPanelOpenReportsCityStatus")
 local ACTION_OPEN_REPORTS_GOSSIP = Input.GetActionId("TopPanelOpenReportsGossip")
+local ACTION_OPEN_RESOURCE_LIST = Input.GetActionId("TopPanelResourceInfoList")
 
 local TOP_PANEL_YIELD_INFO_ID = "CAITopPanelYieldInfoTree"
-local TOP_PANEL_RESOURCE_INFO_ID = "CAITopPanelResourceInfoList"
+local TOP_PANEL_RESOURCE_INFO_ID = "CAITopPanelResourceInfoTree"
 
 local function GetLocalPlayer()
     local playerID = Game.GetLocalPlayer()
@@ -31,202 +43,171 @@ local function FormatRatePerTurn(value)
     return Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", value)
 end
 
-local function GetRateYieldData()
+-- ===========================================================================
+-- Individual yield speech
+-- ===========================================================================
+local function SpeakGold()
     local _, player = GetLocalPlayer()
-    if not player then return {} end
+    if not player then return end
+    if not GameCapabilities.HasCapability("CAPABILITY_GOLD")
+        or not GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then return end
 
-    local entries = {}
+    local parts = {}
+    local treasury = player:GetTreasury()
+    local goldYield = treasury:GetGoldYield() - treasury:GetTotalMaintenance()
+    local goldBalance = math.floor(treasury:GetGoldBalance())
+    table.insert(parts, Locale.Lookup("LOC_TOP_PANEL_GOLD") .. ": "
+        .. Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
+            FormatBalance(goldBalance),
+            FormatRatePerTurn(FormatValuePerTurn(goldYield))))
 
-    if GameCapabilities.HasCapability("CAPABILITY_SCIENCE")
-        and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
-        local techs = player:GetTechs()
-        table.insert(entries, {
-            Label = Locale.Lookup("LOC_TOP_PANEL_SCIENCE"),
-            Value = FormatRatePerTurn(FormatValuePerTurn(techs:GetScienceYield())),
-            Tooltip = GetScienceTooltip(),
-        })
-    end
-
-    if GameCapabilities.HasCapability("CAPABILITY_CULTURE")
-        and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
-        local culture = player:GetCulture()
-        table.insert(entries, {
-            Label = Locale.Lookup("LOC_TOP_PANEL_CULTURE"),
-            Value = FormatRatePerTurn(FormatValuePerTurn(culture:GetCultureYield())),
-            Tooltip = GetCultureTooltip(),
-        })
-    end
-
-    if GameCapabilities.HasCapability("CAPABILITY_TOURISM")
-        and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
-        local tourismRate = Round(player:GetStats():GetTourism(), 1)
-        local tourismTooltip = Locale.Lookup("LOC_WORLD_RANKINGS_OVERVIEW_CULTURE_TOURISM_RATE", tourismRate)
-        local tourismBreakdown = player:GetStats():GetTourismToolTip()
-        if tourismBreakdown and #tourismBreakdown > 0 then
-            tourismTooltip = tourismTooltip .. "[NEWLINE][NEWLINE]" .. tourismBreakdown
-        end
-        if tourismRate > 0 then
-            table.insert(entries, {
-                Label = Locale.Lookup("LOC_TOP_PANEL_TOURISM"),
-                Value = FormatRatePerTurn(FormatBalance(tourismRate)),
-                Tooltip = tourismTooltip,
-            })
+    if GameCapabilities.HasCapability("CAPABILITY_TRADE") then
+        local playerTrade = player:GetTrade()
+        local routesActive = playerTrade:GetNumOutgoingRoutes()
+        local routesCapacity = playerTrade:GetOutgoingRouteCapacity()
+        if routesCapacity > 0 then
+            table.insert(parts, Locale.Lookup("LOC_CAI_TOP_PANEL_TRADE_ROUTES",
+                routesActive, routesCapacity))
         end
     end
 
-    return entries
+    Speak(table.concat(parts, ", "))
 end
 
-local function GetBalanceYieldData()
+local function SpeakFaith()
     local _, player = GetLocalPlayer()
-    if not player then return {} end
+    if not player then return end
+    if not GameCapabilities.HasCapability("CAPABILITY_FAITH")
+        or not GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then return end
 
-    local entries = {}
-
-    if GameCapabilities.HasCapability("CAPABILITY_GOLD")
-        and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
-        local treasury = player:GetTreasury()
-        local goldYield = treasury:GetGoldYield() - treasury:GetTotalMaintenance()
-        local goldBalance = math.floor(treasury:GetGoldBalance())
-        table.insert(entries, {
-            Type = "Gold",
-            Label = Locale.Lookup("LOC_TOP_PANEL_GOLD"),
-            Balance = FormatBalance(goldBalance),
-            PerTurn = FormatRatePerTurn(FormatValuePerTurn(goldYield)),
-            Income = treasury:GetGoldYield(),
-            Expense = -treasury:GetTotalMaintenance(),
-            IncomeTooltip = treasury:GetGoldYieldToolTip(),
-            ExpenseTooltip = treasury:GetTotalMaintenanceToolTip(),
-            Tooltip = GetGoldTooltip(),
-        })
-    end
-
-    if GameCapabilities.HasCapability("CAPABILITY_FAITH")
-        and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
-        local religion = player:GetReligion()
-        table.insert(entries, {
-            Label = Locale.Lookup("LOC_TOP_PANEL_FAITH"),
-            Balance = FormatBalance(religion:GetFaithBalance()),
-            PerTurn = FormatRatePerTurn(FormatValuePerTurn(religion:GetFaithYield())),
-            Value = Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
-                FormatBalance(religion:GetFaithBalance()),
-                FormatRatePerTurn(FormatValuePerTurn(religion:GetFaithYield()))),
-            Tooltip = GetFaithTooltip(),
-        })
-    end
-
-    return entries
+    local religion = player:GetReligion()
+    local value = Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
+        FormatBalance(religion:GetFaithBalance()),
+        FormatRatePerTurn(FormatValuePerTurn(religion:GetFaithYield())))
+    Speak(Locale.Lookup("LOC_TOP_PANEL_FAITH") .. ": " .. value)
 end
 
-local function GetResourceData()
+local function SpeakTourism()
+    local _, player = GetLocalPlayer()
+    if not player then return end
+    if not GameCapabilities.HasCapability("CAPABILITY_TOURISM")
+        or not GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then return end
+
+    local tourismRate = Round(player:GetStats():GetTourism(), 1)
+    if tourismRate > 0 then
+        Speak(Locale.Lookup("LOC_TOP_PANEL_TOURISM") .. ": "
+            .. FormatRatePerTurn(FormatBalance(tourismRate)))
+    else
+        Speak(Locale.Lookup("LOC_TOP_PANEL_TOURISM") .. ": 0")
+    end
+end
+
+local function SpeakFavor()
+    if not IsExpansion2Active() then return end
+    local _, player = GetLocalPlayer()
+    if not player then return end
+
+    local parts = {}
+
+    local playerFavor = player:GetFavor()
+    local favorPerTurn = player:GetFavorPerTurn()
+    table.insert(parts, Locale.Lookup("LOC_CAI_TOP_PANEL_FAVOR") .. ": "
+        .. Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
+            FormatBalance(playerFavor),
+            FormatRatePerTurn(FormatValuePerTurn(favorPerTurn))))
+
+    if GameCapabilities.HasCapability("CAPABILITY_TOP_PANEL_ENVOYS") then
+        local playerInfluence = player:GetInfluence()
+        local currentEnvoys = playerInfluence:GetTokensToGive()
+        local influenceBalance = Round(playerInfluence:GetPointsEarned(), 1)
+        local influenceThreshold = playerInfluence:GetPointsThreshold()
+        table.insert(parts, Locale.Lookup("LOC_CAI_TOP_PANEL_ENVOYS_SUMMARY",
+            currentEnvoys, influenceBalance, influenceThreshold))
+    end
+
+    Speak(table.concat(parts, ", "))
+end
+
+local function SpeakNukes()
     local playerID, player = GetLocalPlayer()
-    if not playerID or not player then return {} end
-    if not GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_RESOURCES") then return {} end
+    if not player then return end
 
-    local playerResources = player:GetResources()
-    local entries = {}
-    for resource in GameInfo.Resources() do
-        if resource.ResourceClassType ~= nil
-            and resource.ResourceClassType ~= "RESOURCECLASS_BONUS"
-            and resource.ResourceClassType ~= "RESOURCECLASS_LUXURY"
-            and resource.ResourceClassType ~= "RESOURCECLASS_ARTIFACT" then
-            local amount = playerResources:GetResourceAmount(resource.ResourceType)
-            if amount > 0 then
-                table.insert(entries, {
-                    Label = Locale.Lookup(resource.Name),
-                    Value = Locale.ToNumber(amount),
-                    Tooltip = Locale.Lookup(resource.Name) ..
-                    "[NEWLINE]" .. Locale.Lookup("LOC_TOOLTIP_STRATEGIC_RESOURCE"),
-                })
+    local playerWMDs = player:GetWMDs()
+    local parts = {}
+    for entry in GameInfo.WMDs() do
+        if entry.WeaponType == "WMD_NUCLEAR_DEVICE" then
+            local count = playerWMDs:GetWeaponCount(entry.Index)
+            if count > 0 then
+                table.insert(parts, Locale.Lookup("LOC_CAI_TOP_PANEL_NUCLEAR_DEVICES", count))
+            end
+        elseif entry.WeaponType == "WMD_THERMONUCLEAR_DEVICE" then
+            local count = playerWMDs:GetWeaponCount(entry.Index)
+            if count > 0 then
+                table.insert(parts, Locale.Lookup("LOC_CAI_TOP_PANEL_THERMONUCLEAR_DEVICES", count))
             end
         end
     end
-    return entries
+
+    if #parts == 0 then
+        Speak(Locale.Lookup("LOC_CAI_TOP_PANEL_NO_NUKES"))
+    else
+        Speak(table.concat(parts, ", "))
+    end
 end
 
-local function SpeakLines(lines)
-    if lines == nil or #lines == 0 then return end
-    Speak(table.concat(lines, "[NEWLINE]"))
+local function GetCurrentEraName()
+    local playerID, player = GetLocalPlayer()
+    if not player then return nil end
+    local eraIndex = player:GetEra() + 1
+    for row in GameInfo.Eras() do
+        if row.ChronologyIndex == eraIndex then
+            return Locale.Lookup(row.Name)
+        end
+    end
+    return nil
+end
+
+local function GetCurrentAgeName()
+    if not (IsExpansion1Active() or IsExpansion2Active()) then return nil end
+    local playerID = Game.GetLocalPlayer()
+    if playerID == nil or playerID < 0 then return nil end
+    local kEras = Game.GetEras()
+    if kEras:HasHeroicGoldenAge(playerID) then
+        return Locale.Lookup("LOC_ERA_PROGRESS_HEROIC_AGE")
+    elseif kEras:HasGoldenAge(playerID) then
+        return Locale.Lookup("LOC_ERA_PROGRESS_GOLDEN_AGE")
+    elseif kEras:HasDarkAge(playerID) then
+        return Locale.Lookup("LOC_ERA_PROGRESS_DARK_AGE")
+    end
+    return Locale.Lookup("LOC_ERA_PROGRESS_NORMAL_AGE")
 end
 
 local function SpeakTurnTimeDate()
     RefreshTurnsRemaining()
     RefreshTime()
 
-    local turnLabel = Locale.Lookup("LOC_TOP_PANEL_CURRENT_TURN")
-    local turnText = Controls.Turns:GetText()
-    local dateText = Controls.CurrentDate:GetText()
-    local timeText = Controls.Time:GetText()
-    local timeTooltip = Controls.Time:GetToolTipString()
+    local parts = {}
+    table.insert(parts, Locale.Lookup("LOC_TOP_PANEL_CURRENT_TURN") .. " " .. Controls.Turns:GetText())
 
-    SpeakLines({
-        turnLabel .. " " .. turnText,
-        dateText,
-        timeText,
-        timeTooltip,
-    })
-end
-
-local function SpeakYieldSummary()
-    local lines = {}
-    for _, entry in ipairs(GetRateYieldData()) do
-        table.insert(lines, entry.Label .. ": " .. entry.Value)
-    end
-    for _, entry in ipairs(GetBalanceYieldData()) do
-        table.insert(lines, entry.Label .. ": " .. entry.Balance .. ", " .. entry.PerTurn)
-    end
-    SpeakLines(lines)
-end
-
-local function CloseTopPanelList(id)
-    local list = m_caiTopPanelList
-    if not list then return end
-
-    local listId = id
-    if not listId and list.GetId then
-        listId = list:GetId()
-    end
-    if not listId or listId == "" then
-        m_caiTopPanelList = nil
-        return
+    local eraName = GetCurrentEraName()
+    if eraName then
+        table.insert(parts, eraName)
     end
 
-    m_caiTopPanelList = nil
-    if mgr then
-        mgr:RemoveFromStack(listId)
+    local ageName = GetCurrentAgeName()
+    if ageName then
+        table.insert(parts, ageName)
     end
+
+    table.insert(parts, Controls.CurrentDate:GetText())
+    table.insert(parts, Controls.Time:GetText())
+
+    Speak(table.concat(parts, ", "))
 end
 
-local function AddListEscapeBinding(list)
-    list:AddInputBinding({
-        Key = Keys.VK_ESCAPE,
-        Action = function()
-            CloseTopPanelList()
-            return true
-        end,
-    })
-end
-
-local function AddTransientFocusLeave(list, id)
-    list.OnFocusLeave = function()
-        CloseTopPanelList(id)
-    end
-end
-
-local function AddStaticListItem(list, label, value, tooltip)
-    list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITopPanelStaticText"), "StaticText", {
-        GetLabel = function()
-            return label
-        end,
-        GetValue = function()
-            return value or ""
-        end,
-        GetTooltip = function()
-            return tooltip or ""
-        end,
-    }))
-end
-
+-- ===========================================================================
+-- Yield breakdown tree (Ctrl+Y)
+-- ===========================================================================
 local function NormalizeTooltipNewlines(tooltip)
     if tooltip == nil or tooltip == "" then return "" end
     tooltip = string.gsub(tooltip, "%[NEWLINE%]", "\n")
@@ -284,13 +265,9 @@ local function GetTooltipDetailLines(tooltip)
 end
 
 local function MakeTreeItem(label, tooltip)
-    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITopPanelTreeviewItem"), "TreeviewItem", {
-        GetLabel = function()
-            return label
-        end,
-        GetTooltip = function()
-            return tooltip or ""
-        end,
+    return mgr:CreateWidget(mgr:GenerateWidgetId("CAITopPanelTreeItem"), "TreeItem", {
+        Label = function() return label end,
+        Tooltip = function() return tooltip or "" end,
     })
 end
 
@@ -324,115 +301,355 @@ local function FormatNodeLabel(label, value)
     return nodeLabel
 end
 
-local function AddGenericYieldTreeNode(tree, entry)
-    local node = MakeTreeItem(FormatNodeLabel(entry.Label, entry.Value), nil)
+local function CloseTopPanelList(id)
+    local list = m_caiTopPanelList
+    if not list then return end
 
-    local detailLines = GetTooltipDetailLines(entry.Tooltip)
+    local listId = id or list.Id
+    if not listId or listId == "" then
+        m_caiTopPanelList = nil
+        return
+    end
+
+    m_caiTopPanelList = nil
+    mgr:RemoveFromStack(listId)
+end
+
+local function AddListEscapeBinding(list)
+    list:AddInputBinding({
+        Key = Keys.VK_ESCAPE,
+        Action = function()
+            CloseTopPanelList()
+            return true
+        end,
+    })
+end
+
+local function AddTransientFocusLeave(list, id)
+    list:On("focus_leave", function()
+        CloseTopPanelList(id)
+    end)
+end
+
+local function AddGenericYieldTreeNode(tree, label, value, tooltip)
+    local node = MakeTreeItem(FormatNodeLabel(label, value), nil)
+    local detailLines = GetTooltipDetailLines(tooltip)
     AddBreakdownTree(node, detailLines)
     tree:AddChild(node)
 end
 
-local function AddGoldYieldTreeNode(tree, entry)
-    local value = Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE", entry.Balance, entry.PerTurn)
-    local node = MakeTreeItem(FormatNodeLabel(entry.Label, value), nil)
+local function AddGoldYieldTreeNode(tree)
+    local _, player = GetLocalPlayer()
+    if not player then return end
+    if not GameCapabilities.HasCapability("CAPABILITY_GOLD")
+        or not GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then return end
 
-    local income = MakeTreeItem(Locale.Lookup("LOC_TOP_PANEL_GOLD_INCOME", entry.Income), nil)
-    AddBreakdownTree(income, SplitTooltipLines(entry.IncomeTooltip))
+    local treasury = player:GetTreasury()
+    local goldYield = treasury:GetGoldYield() - treasury:GetTotalMaintenance()
+    local goldBalance = math.floor(treasury:GetGoldBalance())
+    local value = Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
+        FormatBalance(goldBalance),
+        FormatRatePerTurn(FormatValuePerTurn(goldYield)))
+    local node = MakeTreeItem(FormatNodeLabel(Locale.Lookup("LOC_TOP_PANEL_GOLD"), value), nil)
+
+    local income = MakeTreeItem(Locale.Lookup("LOC_TOP_PANEL_GOLD_INCOME", treasury:GetGoldYield()), nil)
+    AddBreakdownTree(income, SplitTooltipLines(treasury:GetGoldYieldToolTip()))
     node:AddChild(income)
 
-    local expense = MakeTreeItem(Locale.Lookup("LOC_TOP_PANEL_GOLD_EXPENSE", entry.Expense), nil)
-    AddBreakdownTree(expense, SplitTooltipLines(entry.ExpenseTooltip))
+    local expense = MakeTreeItem(Locale.Lookup("LOC_TOP_PANEL_GOLD_EXPENSE", -treasury:GetTotalMaintenance()), nil)
+    AddBreakdownTree(expense, SplitTooltipLines(treasury:GetTotalMaintenanceToolTip()))
     node:AddChild(expense)
 
     tree:AddChild(node)
 end
 
+local function AddTradeRouteTreeNode(tree)
+    local _, player = GetLocalPlayer()
+    if not player then return end
+    if not GameCapabilities.HasCapability("CAPABILITY_TRADE") then return end
+
+    local playerTrade = player:GetTrade()
+    local routesActive = playerTrade:GetNumOutgoingRoutes()
+    local routesCapacity = playerTrade:GetOutgoingRouteCapacity()
+    if routesCapacity > 0 then
+        local node = MakeTreeItem(Locale.Lookup("LOC_CAI_TOP_PANEL_TRADE_ROUTES",
+            routesActive, routesCapacity), nil)
+        tree:AddChild(node)
+    end
+end
+
+local function AddEnvoyTreeNode(tree)
+    local _, player = GetLocalPlayer()
+    if not player then return end
+    if not GameCapabilities.HasCapability("CAPABILITY_TOP_PANEL_ENVOYS") then return end
+
+    local playerInfluence = player:GetInfluence()
+    local currentEnvoys = playerInfluence:GetTokensToGive()
+    local influenceBalance = Round(playerInfluence:GetPointsEarned(), 1)
+    local influenceRate = Round(playerInfluence:GetPointsPerTurn(), 1)
+    local influenceThreshold = playerInfluence:GetPointsThreshold()
+    local envoysPerThreshold = playerInfluence:GetTokensPerThreshold()
+
+    local node = MakeTreeItem(Locale.Lookup("LOC_CAI_TOP_PANEL_ENVOYS_SUMMARY",
+        currentEnvoys, influenceBalance, influenceThreshold), nil)
+
+    node:AddChild(MakeTreeItem(Locale.Lookup("LOC_TOP_PANEL_INFLUENCE_TOOLTIP_POINTS_RATE", influenceRate), nil))
+    node:AddChild(MakeTreeItem(Locale.Lookup("LOC_TOP_PANEL_INFLUENCE_TOOLTIP_POINTS_THRESHOLD", envoysPerThreshold, influenceThreshold), nil))
+
+    tree:AddChild(node)
+end
+
+local function AddFavorTreeNode(tree)
+    if not IsExpansion2Active() then return end
+    local _, player = GetLocalPlayer()
+    if not player then return end
+
+    local playerFavor = player:GetFavor()
+    local favorPerTurn = player:GetFavorPerTurn()
+    local value = Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
+        FormatBalance(playerFavor),
+        FormatRatePerTurn(FormatValuePerTurn(favorPerTurn)))
+    local node = MakeTreeItem(FormatNodeLabel(Locale.Lookup("LOC_CAI_TOP_PANEL_FAVOR"), value), nil)
+
+    local details = player:GetFavorPerTurnToolTip()
+    if details and #details > 0 then
+        AddBreakdownTree(node, SplitTooltipLines(details))
+    end
+
+    tree:AddChild(node)
+end
+
+local function AddWMDTreeNode(tree)
+    local _, player = GetLocalPlayer()
+    if not player then return end
+
+    local playerWMDs = player:GetWMDs()
+    local hasAny = false
+    for entry in GameInfo.WMDs() do
+        if entry.WeaponType == "WMD_NUCLEAR_DEVICE" then
+            local count = playerWMDs:GetWeaponCount(entry.Index)
+            if count > 0 then
+                tree:AddChild(MakeTreeItem(Locale.Lookup("LOC_CAI_TOP_PANEL_NUCLEAR_DEVICES", count), nil))
+                hasAny = true
+            end
+        elseif entry.WeaponType == "WMD_THERMONUCLEAR_DEVICE" then
+            local count = playerWMDs:GetWeaponCount(entry.Index)
+            if count > 0 then
+                tree:AddChild(MakeTreeItem(Locale.Lookup("LOC_CAI_TOP_PANEL_THERMONUCLEAR_DEVICES", count), nil))
+                hasAny = true
+            end
+        end
+    end
+end
+
 local function OpenYieldInfoList()
     CloseTopPanelList()
 
-    local tree = mgr:CreateUIWidget(TOP_PANEL_YIELD_INFO_ID, "Treeview", {
-        GetLabel = function()
-            return Locale.Lookup("LOC_CAI_TOP_PANEL_YIELD_INFO")
-        end,
+    local tree = mgr:CreateWidget(TOP_PANEL_YIELD_INFO_ID, "Tree", {
+        Label = function() return Locale.Lookup("LOC_CAI_TOP_PANEL_YIELD_INFO") end,
     })
     AddListEscapeBinding(tree)
     AddTransientFocusLeave(tree, TOP_PANEL_YIELD_INFO_ID)
 
-    for _, entry in ipairs(GetRateYieldData()) do
-        AddGenericYieldTreeNode(tree, entry)
+    local _, player = GetLocalPlayer()
+    if player then
+        if GameCapabilities.HasCapability("CAPABILITY_SCIENCE")
+            and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+            local techs = player:GetTechs()
+            AddGenericYieldTreeNode(tree,
+                Locale.Lookup("LOC_TOP_PANEL_SCIENCE"),
+                FormatRatePerTurn(FormatValuePerTurn(techs:GetScienceYield())),
+                GetScienceTooltip())
+        end
+
+        if GameCapabilities.HasCapability("CAPABILITY_CULTURE")
+            and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+            local culture = player:GetCulture()
+            AddGenericYieldTreeNode(tree,
+                Locale.Lookup("LOC_TOP_PANEL_CULTURE"),
+                FormatRatePerTurn(FormatValuePerTurn(culture:GetCultureYield())),
+                GetCultureTooltip())
+        end
+
+        AddGoldYieldTreeNode(tree)
+        AddTradeRouteTreeNode(tree)
+
+        if GameCapabilities.HasCapability("CAPABILITY_FAITH")
+            and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+            local religion = player:GetReligion()
+            AddGenericYieldTreeNode(tree,
+                Locale.Lookup("LOC_TOP_PANEL_FAITH"),
+                Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
+                    FormatBalance(religion:GetFaithBalance()),
+                    FormatRatePerTurn(FormatValuePerTurn(religion:GetFaithYield()))),
+                GetFaithTooltip())
+        end
+
+        if GameCapabilities.HasCapability("CAPABILITY_TOURISM")
+            and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+            local tourismRate = Round(player:GetStats():GetTourism(), 1)
+            if tourismRate > 0 then
+                local tourismTooltip = Locale.Lookup("LOC_WORLD_RANKINGS_OVERVIEW_CULTURE_TOURISM_RATE", tourismRate)
+                local tourismBreakdown = player:GetStats():GetTourismToolTip()
+                if tourismBreakdown and #tourismBreakdown > 0 then
+                    tourismTooltip = tourismTooltip .. "[NEWLINE][NEWLINE]" .. tourismBreakdown
+                end
+                AddGenericYieldTreeNode(tree,
+                    Locale.Lookup("LOC_TOP_PANEL_TOURISM"),
+                    FormatRatePerTurn(FormatBalance(tourismRate)),
+                    tourismTooltip)
+            end
+        end
+
+        AddFavorTreeNode(tree)
+        AddEnvoyTreeNode(tree)
+        AddWMDTreeNode(tree)
     end
 
-    for _, entry in ipairs(GetBalanceYieldData()) do
-        if entry.Type == "Gold" then
-            AddGoldYieldTreeNode(tree, entry)
-        else
-            AddGenericYieldTreeNode(tree, entry)
+    if tree.Children and #tree.Children > 0 then
+        m_caiTopPanelList = tree
+        mgr:Push(m_caiTopPanelList, { priority = PopupPriority.Low })
+    end
+end
+
+-- ===========================================================================
+-- Strategic resource tree (Ctrl+Q)
+-- ===========================================================================
+local function OpenResourceInfoTree()
+    CloseTopPanelList()
+
+    local tree = mgr:CreateWidget(TOP_PANEL_RESOURCE_INFO_ID, "Tree", {
+        Label = function() return Locale.Lookup("LOC_CAI_TOP_PANEL_RESOURCE_INFO") end,
+    })
+    AddListEscapeBinding(tree)
+    AddTransientFocusLeave(tree, TOP_PANEL_RESOURCE_INFO_ID)
+
+    local _, player = GetLocalPlayer()
+    if player then
+        local pResources = player:GetResources()
+        local isXP2 = IsExpansion2Active()
+
+        for resource in GameInfo.Resources() do
+            if resource.ResourceClassType ~= nil
+                and resource.ResourceClassType ~= "RESOURCECLASS_BONUS"
+                and resource.ResourceClassType ~= "RESOURCECLASS_LUXURY"
+                and resource.ResourceClassType ~= "RESOURCECLASS_ARTIFACT" then
+
+                local resType = resource.ResourceType
+                local stockpileAmount = pResources:GetResourceAmount(resType)
+
+                if isXP2 then
+                    local stockpileCap = pResources:GetResourceStockpileCap(resType)
+                    local reservedAmount = pResources:GetReservedResourceAmount(resType)
+                    local accumulationPerTurn = pResources:GetResourceAccumulationPerTurn(resType)
+                    local importPerTurn = pResources:GetResourceImportPerTurn(resType)
+                    local bonusPerTurn = pResources:GetBonusResourcePerTurn(resType)
+                    local unitConsumptionPerTurn = pResources:GetUnitResourceDemandPerTurn(resType)
+                    local powerConsumptionPerTurn = pResources:GetPowerResourceDemandPerTurn(resType)
+                    local totalAccumulationPerTurn = accumulationPerTurn + importPerTurn + bonusPerTurn
+                    local totalConsumptionPerTurn = unitConsumptionPerTurn + powerConsumptionPerTurn
+
+                    if stockpileAmount > 0 or totalAccumulationPerTurn > 0 or totalConsumptionPerTurn > 0 then
+                        local resName = Locale.Lookup(resource.Name)
+                        local nodeLabel = resName .. ": " .. stockpileAmount .. "/" .. stockpileCap
+                            .. " " .. Locale.Lookup("LOC_RESOURCE_ITEM_IN_STOCKPILE")
+                        local tooltipParts = {}
+                        table.insert(tooltipParts, Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN", totalAccumulationPerTurn))
+                        if totalConsumptionPerTurn > 0 then
+                            table.insert(tooltipParts, Locale.Lookup("LOC_RESOURCE_CONSUMPTION", totalConsumptionPerTurn))
+                        end
+                        local node = MakeTreeItem(nodeLabel, table.concat(tooltipParts, ", "))
+
+                        if reservedAmount > 0 then
+                            node:AddChild(MakeTreeItem(
+                                "-" .. reservedAmount .. " " .. Locale.Lookup("LOC_RESOURCE_ITEM_IN_RESERVE"), nil))
+                        end
+
+                        local accNode = MakeTreeItem(
+                            Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN", totalAccumulationPerTurn), nil)
+                        if accumulationPerTurn > 0 then
+                            accNode:AddChild(MakeTreeItem(
+                                Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN_EXTRACTED", accumulationPerTurn), nil))
+                        end
+                        if importPerTurn > 0 then
+                            accNode:AddChild(MakeTreeItem(
+                                Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN_FROM_CITY_STATES", importPerTurn), nil))
+                        end
+                        if bonusPerTurn > 0 then
+                            accNode:AddChild(MakeTreeItem(
+                                Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN_FROM_BONUS_SOURCES", bonusPerTurn), nil))
+                        end
+                        node:AddChild(accNode)
+
+                        if totalConsumptionPerTurn > 0 then
+                            local conNode = MakeTreeItem(
+                                Locale.Lookup("LOC_RESOURCE_CONSUMPTION", totalConsumptionPerTurn), nil)
+                            if unitConsumptionPerTurn > 0 then
+                                conNode:AddChild(MakeTreeItem(
+                                    Locale.Lookup("LOC_RESOURCE_UNIT_CONSUMPTION_PER_TURN", unitConsumptionPerTurn), nil))
+                            end
+                            if powerConsumptionPerTurn > 0 then
+                                conNode:AddChild(MakeTreeItem(
+                                    Locale.Lookup("LOC_RESOURCE_POWER_CONSUMPTION_PER_TURN", powerConsumptionPerTurn), nil))
+                            end
+                            node:AddChild(conNode)
+                        end
+
+                        tree:AddChild(node)
+                    end
+                else
+                    if stockpileAmount > 0 then
+                        local resName = Locale.Lookup(resource.Name)
+                        tree:AddChild(MakeTreeItem(resName .. ": " .. stockpileAmount, nil))
+                    end
+                end
+            end
         end
     end
 
     if tree.Children and #tree.Children > 0 then
         m_caiTopPanelList = tree
-        mgr:Push(m_caiTopPanelList, PopupPriority.Low)
-    end
-end
-
-local function OpenResourceInfoList()
-    CloseTopPanelList()
-
-    local list = mgr:CreateUIWidget(TOP_PANEL_RESOURCE_INFO_ID, "List", {
-        GetLabel = function()
-            return Locale.Lookup("LOC_CAI_TOP_PANEL_RESOURCE_INFO")
-        end,
-    })
-    AddListEscapeBinding(list)
-    AddTransientFocusLeave(list, TOP_PANEL_RESOURCE_INFO_ID)
-
-    local resources = GetResourceData()
-    if #resources == 0 then
-        AddStaticListItem(list, Locale.Lookup("LOC_CAI_TOP_PANEL_NO_STRATEGIC_RESOURCES"), nil, nil)
+        mgr:Push(m_caiTopPanelList, { priority = PopupPriority.Low })
     else
-        for _, entry in ipairs(resources) do
-            AddStaticListItem(list, entry.Label, entry.Value, entry.Tooltip)
-        end
+        Speak(Locale.Lookup("LOC_CAI_TOP_PANEL_NO_STRATEGIC_RESOURCES"))
     end
-
-    m_caiTopPanelList = list
-    mgr:Push(m_caiTopPanelList, PopupPriority.Low)
 end
 
+-- ===========================================================================
+-- Input handler
+-- ===========================================================================
 local function OnCAITopPanelInputAction(actionId)
     if ContextPtr:IsHidden() then return end
     if actionId == ACTION_SPEAK_TURN_TIME_DATE then
         SpeakTurnTimeDate()
-        return
-    elseif actionId == ACTION_SPEAK_YIELDS then
-        SpeakYieldSummary()
-        return
+    elseif actionId == ACTION_SPEAK_GOLD then
+        SpeakGold()
+    elseif actionId == ACTION_SPEAK_FAITH then
+        SpeakFaith()
+    elseif actionId == ACTION_SPEAK_TOURISM then
+        SpeakTourism()
+    elseif actionId == ACTION_SPEAK_FAVOR then
+        SpeakFavor()
+    elseif actionId == ACTION_SPEAK_NUKES then
+        SpeakNukes()
     elseif actionId == ACTION_OPEN_YIELD_LIST then
         OpenYieldInfoList()
-        return
     elseif actionId == ACTION_OPEN_RESOURCE_LIST then
-        OpenResourceInfoList()
-        return
+        OpenResourceInfoTree()
     elseif actionId == ACTION_OPEN_DIPLOMACY then
         if GameCapabilities.HasCapability("CAPABILITY_DIPLOMACY") then
             LuaEvents.TopPanel_OpenDiplomacyActionView()
         end
-        return
     elseif actionId == ACTION_OPEN_REPORTS then
         LuaEvents.TopPanel_OpenReportsScreen()
-        return
     elseif actionId == ACTION_OPEN_REPORTS_RESOURCES then
         LuaEvents.ReportsList_OpenResources()
-        return
     elseif actionId == ACTION_OPEN_REPORTS_CITY_STATUS then
         LuaEvents.ReportsList_OpenCityStatus()
-        return
     elseif actionId == ACTION_OPEN_REPORTS_GOSSIP then
         if GameCapabilities.HasCapability("CAPABILITY_GOSSIP_REPORT") then
             LuaEvents.ReportsList_OpenGossip()
         end
-        return
     end
 end
 

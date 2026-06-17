@@ -17,14 +17,23 @@ function TabPageWidget.Create(mgr, id, props)
     w.Id = id
     w.Type = "TabPage"
     w.Role = "TabPage"
+    w.SpeechSettings = { Position = false }
     w.Manager = mgr
     -- Tab/Shift+Tab at page boundary must bubble to TabControl so the
     -- _EnterPageFromStrip / _ReturnToStripFromPage handlers can route focus
     -- between the page and the tab strip.
     w.WrapAround = false
     w:AddInputBindings({
-        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown,                 Action = function(self) return self:NavigateNext() end },
-        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsShift = true, Action = function(self) return self:NavigatePrev() end },
+        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, Action = function(self) return self:NavigateNext() end },
+        {
+            Key = Keys.VK_TAB,
+            MSG = KeyEvents.KeyDown,
+            IsShift = true,
+            Action = function(
+                self)
+                return self:NavigatePrev()
+            end
+        },
     })
     CAIWidgetRegistry.ApplyProps(w, props)
     return w

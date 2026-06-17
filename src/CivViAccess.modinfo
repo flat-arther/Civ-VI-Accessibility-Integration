@@ -126,6 +126,10 @@
     <File>UI/inGame/ReportScreen_CAI.lua</File>
     <File>UI/inGame/EraProgressPanel_CAI.lua</File>
     <File>UI/inGame/HistoricMoments_CAI.lua</File>
+    <File>UI/inGame/ClimateScreen_CAI.lua</File>
+    <File>UI/inGame/NaturalDisasterPopup_CAI.lua</File>
+    <File>UI/inGame/WorldCrisisPopup_CAI.lua</File>
+    <File>UI/inGame/EndGameMenu_CAI.lua</File>
     <File>UI/inGame/TradeOriginChooser_CAI.lua</File>
     <File>UI/inGame/CivicsChooser_CAI.lua</File>
     <File>UI/inGame/CivicsTree_CAI.lua</File>
@@ -302,6 +306,10 @@
       <File>UI/inGame/WorldScanner/WorldScannerCategory_specialMapObjects.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
+      <File>UI/inGame/NaturalDisasterPopup_CAI.lua</File>
+      <!-- EndGameMenu is a wildcard host (include("EndGameMenu_", true)),
+           so the CAI layer rides that wildcard as an imported file. -->
+      <File>UI/inGame/EndGameMenu_CAI.lua</File>
     </ImportFiles>
 
     <ReplaceUIScript id="CAI_WorldInput">
@@ -720,6 +728,30 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>HistoricMoments</LuaContext>
         <LuaReplace>UI/inGame/HistoricMoments_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_ClimateScreen">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>ClimateScreen</LuaContext>
+        <LuaReplace>UI/inGame/ClimateScreen_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_NaturalDisasterPopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>NaturalDisasterPopup</LuaContext>
+        <LuaReplace>UI/inGame/NaturalDisasterPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WorldCrisisPopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>WorldCrisisPopup</LuaContext>
+        <LuaReplace>UI/inGame/WorldCrisisPopup_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
   </InGameActions>
