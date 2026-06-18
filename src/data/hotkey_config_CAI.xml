@@ -155,6 +155,7 @@
     <Row ActionId="DiplomacyRibbonOpenWorldCongress" Name="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS" Description="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="OpenWorldCrisisTracker" Name="LOC_CAI_OPEN_CRISIS_TRACKER" Description="LOC_CAI_OPEN_CRISIS_TRACKER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TopPanelResourceInfoList" Name="LOC_CAI_TOP_PANEL_RESOURCE_INFO" Description="LOC_CAI_TOP_PANEL_RESOURCE_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="OpenGlobalResourcePopup" Name="LOC_CAI_GLOBAL_RES_OPEN" Description="LOC_CAI_GLOBAL_RES_OPEN_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
   </InputActions>
 
   <InputActionDefaultGestures>
@@ -262,6 +263,7 @@
     <Row ActionId="DiplomacyRibbonOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_P" />
     <Row ActionId="DiplomacyRibbonOpenWorldCongress" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F8" />
     <Row ActionId="OpenWorldCrisisTracker" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_O" />
-    <Row ActionId="TopPanelResourceInfoList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_Q" />
+    <Row ActionId="TopPanelResourceInfoList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_I" />
+    <Row ActionId="OpenGlobalResourcePopup" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_Q" />
   </InputActionDefaultGestures>
 </GameInfo>

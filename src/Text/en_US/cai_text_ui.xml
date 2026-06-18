@@ -4003,5 +4003,24 @@
       <Text>Skip cinematic</Text>
     </Row>
 
+    <!-- Global Resource Popup -->
+    <Row Tag="LOC_CAI_GLOBAL_RES_OPEN" Language="en_US">
+      <Text>Global Resources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GLOBAL_RES_OPEN_TOOLTIP" Language="en_US">
+      <Text>Opens the global resources popup showing resource ownership across all known civilizations</Text>
+    </Row>
+
+    <!-- Hall of Fame / Game Summaries -->
+    <Row Tag="LOC_CAI_HOF_RULESET" Language="en_US">
+      <Text>Ruleset</Text>
+    </Row>
+    <Row Tag="LOC_CAI_HOF_SORT_BY" Language="en_US">
+      <Text>Sort by</Text>
+    </Row>
+    <Row Tag="LOC_CAI_HOF_NO_GAMES" Language="en_US">
+      <Text>No game history</Text>
+    </Row>
+
   </LocalizedText>
 </GameData>

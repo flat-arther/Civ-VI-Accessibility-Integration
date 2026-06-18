@@ -25,6 +25,7 @@ local ACTION_OPEN_REPORTS_RESOURCES = Input.GetActionId("TopPanelOpenReportsReso
 local ACTION_OPEN_REPORTS_CITY_STATUS = Input.GetActionId("TopPanelOpenReportsCityStatus")
 local ACTION_OPEN_REPORTS_GOSSIP = Input.GetActionId("TopPanelOpenReportsGossip")
 local ACTION_OPEN_RESOURCE_LIST = Input.GetActionId("TopPanelResourceInfoList")
+local ACTION_OPEN_GLOBAL_RESOURCES = Input.GetActionId("OpenGlobalResourcePopup")
 
 local TOP_PANEL_YIELD_INFO_ID = "CAITopPanelYieldInfoTree"
 local TOP_PANEL_RESOURCE_INFO_ID = "CAITopPanelResourceInfoTree"
@@ -649,6 +650,10 @@ local function OnCAITopPanelInputAction(actionId)
     elseif actionId == ACTION_OPEN_REPORTS_GOSSIP then
         if GameCapabilities.HasCapability("CAPABILITY_GOSSIP_REPORT") then
             LuaEvents.ReportsList_OpenGossip()
+        end
+    elseif actionId == ACTION_OPEN_GLOBAL_RESOURCES then
+        if GameCapabilities.HasCapability("CAPABILITY_DIPLOMACY_DEALS") then
+            LuaEvents.GlobalReportsList_OpenResources()
         end
     end
 end

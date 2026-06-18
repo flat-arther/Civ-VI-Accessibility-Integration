@@ -55,6 +55,8 @@
     <File>UI/frontEnd/CityStatePicker.lua</File>
     <File>UI/frontEnd/MultiSelectWindow.lua</File>
     <File>UI/frontEnd/TutorialSetup.lua</File>
+    <File>UI/frontEnd/GameSummaries.lua</File>
+    <File>UI/frontEnd/GameSummaries_GameDetails.lua</File>
     <File>UI/FiraxisLive/My2K.lua</File>
     <File>UI/shared/iconsProcessing.lua</File>
     <File>UI/shared/LoadGameMenu.lua</File>
@@ -123,6 +125,7 @@
     <File>UI/inGame/TradeRouteChooser_CAI.lua</File>
     <File>UI/inGame/TradeOverview_CAI.lua</File>
     <File>UI/inGame/WorldRankings_CAI.lua</File>
+    <File>UI/inGame/GlobalResourcePopup_CAI.lua</File>
     <File>UI/inGame/ReportScreen_CAI.lua</File>
     <File>UI/inGame/EraProgressPanel_CAI.lua</File>
     <File>UI/inGame/HistoricMoments_CAI.lua</File>
@@ -205,6 +208,8 @@
       <File>UI/frontEnd/LeaderPicker.lua</File>
       <File>UI/frontEnd/CityStatePicker.lua</File>
       <File>UI/frontEnd/TutorialSetup.lua</File>
+      <File>UI/frontEnd/GameSummaries.lua</File>
+      <File>UI/frontEnd/GameSummaries_GameDetails.lua</File>
       <File>UI/FiraxisLive/My2K.lua</File>
       <File>UI/shared/iconsProcessing.lua</File>
       <File>UI/shared/LoadGameMenu.lua</File>
@@ -704,6 +709,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>WorldRankings</LuaContext>
         <LuaReplace>UI/inGame/WorldRankings_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_GlobalResourcePopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>GlobalResourcePopup</LuaContext>
+        <LuaReplace>UI/inGame/GlobalResourcePopup_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 
