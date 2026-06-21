@@ -27,66 +27,60 @@ local function GetPlotStanceKey(context, plot)
     return stance
 end
 
-function CAIWorldScannerCategory_Improvements.Scan(context)
-    local out = {}
+function CAIWorldScannerCategory_Improvements.PlotExtract(plotIndex, plot, context, collect)
+    local stanceKey = GetPlotStanceKey(context, plot)
 
-    Utils.ForEachRevealedPlot(context, function(plotIndex, plot)
-        local stanceKey = GetPlotStanceKey(context, plot)
+    local improvementIndex = plot:GetImprovementType()
+    local improvementInfo = improvementIndex ~= nil and GameInfo.Improvements[improvementIndex] or nil
+    if improvementInfo ~= nil
+        and not improvementInfo.BarbarianCamp
+        and not improvementInfo.Goody then
+        collect({
+            Id = "improvement:" .. tostring(plotIndex),
+            PlotIndex = plotIndex,
+            LabelKey = improvementInfo.Name,
+            SubCategoryId = stanceKey,
+            GroupId = "improvement:" .. improvementInfo.ImprovementType,
+            GroupLabelKey = improvementInfo.Name,
+            Validate = function(item, validateContext)
+                local validatePlot = Map.GetPlotByIndex(item.PlotIndex)
+                if validatePlot == nil or not Utils.IsPlotRevealed(validateContext, validatePlot) then
+                    return false
+                end
 
-        local improvementIndex = plot:GetImprovementType()
-        local improvementInfo = improvementIndex ~= nil and GameInfo.Improvements[improvementIndex] or nil
-        if improvementInfo ~= nil
-            and not improvementInfo.BarbarianCamp
-            and not improvementInfo.Goody then
-            out[#out + 1] = {
-                Id = "improvement:" .. tostring(plotIndex),
+                local validateIndex = validatePlot:GetImprovementType()
+                local validateInfo = validateIndex ~= nil and GameInfo.Improvements[validateIndex] or nil
+                return validateInfo ~= nil
+                    and validateInfo.ImprovementType == improvementInfo.ImprovementType
+                    and GetPlotStanceKey(validateContext, validatePlot) == item.SubCategoryId
+            end,
+        })
+    end
+
+    if plot:IsRoute() then
+        local routeType = plot:GetRouteType()
+        local routeInfo = routeType ~= nil and GameInfo.Routes[routeType] or nil
+        if routeInfo ~= nil then
+            collect({
+                Id = "route:" .. tostring(plotIndex),
                 PlotIndex = plotIndex,
-                LabelKey = improvementInfo.Name,
+                LabelKey = routeInfo.Name,
                 SubCategoryId = stanceKey,
-                GroupId = "improvement:" .. improvementInfo.ImprovementType,
-                GroupLabelKey = improvementInfo.Name,
+                GroupId = "route:" .. tostring(routeType),
+                GroupLabelKey = routeInfo.Name,
                 Validate = function(item, validateContext)
                     local validatePlot = Map.GetPlotByIndex(item.PlotIndex)
                     if validatePlot == nil or not Utils.IsPlotRevealed(validateContext, validatePlot) then
                         return false
                     end
 
-                    local validateIndex = validatePlot:GetImprovementType()
-                    local validateInfo = validateIndex ~= nil and GameInfo.Improvements[validateIndex] or nil
-                    return validateInfo ~= nil
-                        and validateInfo.ImprovementType == improvementInfo.ImprovementType
+                    return validatePlot:IsRoute()
+                        and validatePlot:GetRouteType() == routeType
                         and GetPlotStanceKey(validateContext, validatePlot) == item.SubCategoryId
                 end,
-            }
+            })
         end
-
-        if plot:IsRoute() then
-            local routeType = plot:GetRouteType()
-            local routeInfo = routeType ~= nil and GameInfo.Routes[routeType] or nil
-            if routeInfo ~= nil then
-                out[#out + 1] = {
-                    Id = "route:" .. tostring(plotIndex),
-                    PlotIndex = plotIndex,
-                    LabelKey = routeInfo.Name,
-                    SubCategoryId = stanceKey,
-                    GroupId = "route:" .. tostring(routeType),
-                    GroupLabelKey = routeInfo.Name,
-                    Validate = function(item, validateContext)
-                        local validatePlot = Map.GetPlotByIndex(item.PlotIndex)
-                        if validatePlot == nil or not Utils.IsPlotRevealed(validateContext, validatePlot) then
-                            return false
-                        end
-
-                        return validatePlot:IsRoute()
-                            and validatePlot:GetRouteType() == routeType
-                            and GetPlotStanceKey(validateContext, validatePlot) == item.SubCategoryId
-                    end,
-                }
-            end
-        end
-    end)
-
-    return out
+    end
 end
 
 CAIWorldScanner:RegisterCategoryDefinition(CAIWorldScannerCategory_Improvements)

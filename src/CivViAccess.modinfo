@@ -16,6 +16,7 @@
     <File>UI/uiManager/helpers/CAIWidgetHelpers_Tree.lua</File>
     <File>UI/uiManager/helpers/CAIWidgetHelpers_EditBox.lua</File>
     <File>UI/uiManager/helpers/CAIWidgetHelpers_DialogBuilder.lua</File>
+    <File>UI/uiManager/helpers/CAIWidgetHelpers_PediaLookup.lua</File>
     <File>UI/uiManager/CAIWidget_Base.lua</File>
     <File>UI/uiManager/CAIWidget_Container.lua</File>
     <File>UI/uiManager/CAIWidget_Value.lua</File>
@@ -40,6 +41,7 @@
     <File>UI/uiManager/CAIWidget_Table.lua</File>
     <File>UI/uiManager/CAIWidget_GameView.lua</File>
     <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>
+    <File>UI/uiManager/CAIWidget_SearchPanel.lua</File>
     <File>UI/uiManager/CAIUIScreenManager.lua</File>
     <File>UI/inGame/worldInfo.lua</File>
     <File>UI/inGame/navCursor.lua</File>
@@ -69,6 +71,7 @@
     <File>UI/inGame/TechCivicCompletedPopup_CAI.lua</File>
     <File>UI/inGame/UnitPromotionPopup_CAI.lua</File>
     <File>UI/inGame/DeclareWarPopup_CAI.lua</File>
+    <File>UI/inGame/SecretSocietyPopup_CAI.lua</File>
     <File>UI/inGame/DiplomacyActionView_CAI.lua</File>
     <File>UI/inGame/DiplomacyDealView_CAI.lua</File>
     <File>UI/inGame/GreatPeoplePopup_CAI.lua</File>
@@ -89,13 +92,19 @@
     <File>UI/inGame/RevealAnnouncements_CAI.lua</File>
     <File>UI/inGame/EventSubs_CAI.lua</File>
     <File>UI/inGame/MinimapPanel_CAI.lua</File>
+    <File>UI/inGame/MapSearchPanel_CAI.lua</File>
+    <File>UI/inGame/MapPinListPanel_CAI.lua</File>
+    <File>UI/inGame/MapPinPopup_CAI.lua</File>
     <File>UI/inGame/Surveyor_CAI.lua</File>
+    <File>UI/inGame/RecommendationLogic_CAI.lua</File>
     <File>UI/inGame/WorldScanner/WorldScanner_CAI.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategoryUtils.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCore.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_cities.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_barbarianCamps.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_improvements.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_districts.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_wonders.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_terrain.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_activeLens.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_resources.lua</File>
@@ -104,6 +113,7 @@
     <File>UI/inGame/WorldScanner/WorldScannerCategory_specialMapObjects.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>
     <File>UI/inGame/CityStates_CAI.lua</File>
     <File>UI/inGame/ReligionScreen_CAI.lua</File>
     <File>UI/inGame/PantheonChooser_CAI.lua</File>
@@ -173,6 +183,7 @@
       <File>UI/uiManager/helpers/CAIWidgetHelpers_Tree.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_EditBox.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_DialogBuilder.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_PediaLookup.lua</File>
       <File>UI/uiManager/CAIWidget_Base.lua</File>
       <File>UI/uiManager/CAIWidget_Container.lua</File>
       <File>UI/uiManager/CAIWidget_Value.lua</File>
@@ -197,6 +208,7 @@
       <File>UI/uiManager/CAIWidget_Table.lua</File>
       <File>UI/uiManager/CAIWidget_GameView.lua</File>
       <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>
+      <File>UI/uiManager/CAIWidget_SearchPanel.lua</File>
       <File>UI/uiManager/CAIUIScreenManager.lua</File>
       <File>UI/frontEnd/IntroScreen.lua</File>
       <File>UI/frontEnd/FrontEndPopup.lua</File>
@@ -239,6 +251,7 @@
       <File>UI/uiManager/helpers/CAIWidgetHelpers_Tree.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_EditBox.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_DialogBuilder.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_PediaLookup.lua</File>
       <File>UI/uiManager/CAIWidget_Base.lua</File>
       <File>UI/uiManager/CAIWidget_Container.lua</File>
       <File>UI/uiManager/CAIWidget_Value.lua</File>
@@ -263,6 +276,7 @@
       <File>UI/uiManager/CAIWidget_Table.lua</File>
       <File>UI/uiManager/CAIWidget_GameView.lua</File>
       <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>
+      <File>UI/uiManager/CAIWidget_SearchPanel.lua</File>
       <File>UI/uiManager/CAIUIScreenManager.lua</File>
       <File>UI/inGame/worldInfo.lua</File>
       <File>UI/inGame/navCursor.lua</File>
@@ -296,13 +310,21 @@
       <File>UI/inGame/RevealAnnouncements_CAI.lua</File>
       <File>UI/inGame/EventSubs_CAI.lua</File>
       <File>UI/inGame/MinimapPanel_CAI.lua</File>
+      <!-- MapSearchPanel is a wildcard host (include("MapSearchPanel_", true)),
+           so the CAI layer rides that wildcard as an imported file. -->
+      <File>UI/inGame/MapSearchPanel_CAI.lua</File>
+      <File>UI/inGame/MapPinListPanel_CAI.lua</File>
+      <File>UI/inGame/MapPinPopup_CAI.lua</File>
       <File>UI/inGame/Surveyor_CAI.lua</File>
+      <File>UI/inGame/RecommendationLogic_CAI.lua</File>
       <File>UI/inGame/WorldScanner/WorldScanner_CAI.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategoryUtils.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCore.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_cities.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_barbarianCamps.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_improvements.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_districts.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_wonders.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_terrain.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_activeLens.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_resources.lua</File>
@@ -311,6 +333,7 @@
       <File>UI/inGame/WorldScanner/WorldScannerCategory_specialMapObjects.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>
       <File>UI/inGame/NaturalDisasterPopup_CAI.lua</File>
       <!-- EndGameMenu is a wildcard host (include("EndGameMenu_", true)),
            so the CAI layer rides that wildcard as an imported file. -->
@@ -338,6 +361,22 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>MinimapPanel</LuaContext>
         <LuaReplace>UI/inGame/MinimapPanel_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_MapPinListPanel">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>MapPinListPanel</LuaContext>
+        <LuaReplace>UI/inGame/MapPinListPanel_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_MapPinPopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>MapPinPopup</LuaContext>
+        <LuaReplace>UI/inGame/MapPinPopup_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 
@@ -765,6 +804,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>WorldCrisisPopup</LuaContext>
         <LuaReplace>UI/inGame/WorldCrisisPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_SecretSocietyPopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>SecretSocietyPopup</LuaContext>
+        <LuaReplace>UI/inGame/SecretSocietyPopup_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
   </InGameActions>

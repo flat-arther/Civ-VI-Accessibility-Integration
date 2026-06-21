@@ -82,6 +82,7 @@ function EditBoxWidget.Create(mgr, id, props)
     w._editMode = EditModes.Normal
     w._enterToCommit = true
     w._passwordMask = false
+    w._commitOnBufferChanged = false
 
     -- Focus speech reads only what the cursor is on: the current selection if
     -- any, otherwise the line at the cursor. Reading the entire buffer on focus
@@ -149,6 +150,7 @@ function EditBoxWidget:SetText(text, silent)
     self._selStart = nil
     if self._active then self._original = normalized end
     ValueWidget.SetValue(self, normalized, silent)
+    self:_FireTextChanged()
 end
 
 ---@return string
@@ -192,6 +194,8 @@ function EditBoxWidget:SetCommitValidator(fn) self._commitValidator = fn end
 function EditBoxWidget:SetEnterToCommit(b) self._enterToCommit = b and true or false end
 
 function EditBoxWidget:SetPasswordMask(b) self._passwordMask = b and true or false end
+
+function EditBoxWidget:SetCommitOnBufferChanged(b) self._commitOnBufferChanged = b and true or false end
 
 function EditBoxWidget:SetEditMode(mode) self._editMode = mode or EditModes.Normal end
 
@@ -263,13 +267,23 @@ end
 
 --#region Char input + bindings
 
+function EditBoxWidget:_FireTextChanged()
+    if self._commitOnBufferChanged then
+        self._value = self._buffer or ""
+    end
+    self:Emit("text_changed", self._buffer or "")
+end
+
 ---@param char string
 ---@return boolean
-function EditBoxWidget:OnCharInput(char)
+function EditBoxWidget:OnCharInput(char, silent)
     if not self._active or self._readOnly then return false end
     if not CharAllowed(self._editMode, char) then return false end
     if not E.InsertText(self, char) then return true end
-    Speak(self._passwordMask and "*" or char, true)
+    self:_FireTextChanged()
+    if not silent then
+        Speak(self._passwordMask and "*" or char, true)
+    end
     return true
 end
 
@@ -312,6 +326,7 @@ function EditBoxWidget._BuildBindings()
                 else
                     E.BackspaceChar(self)
                 end
+                self:_FireTextChanged()
                 return true
             end,
         },
@@ -327,6 +342,7 @@ function EditBoxWidget._BuildBindings()
                 else
                     E.BackspaceWord(self)
                 end
+                self:_FireTextChanged()
                 return true
             end,
         },
@@ -341,6 +357,7 @@ function EditBoxWidget._BuildBindings()
                 else
                     E.DeleteChar(self)
                 end
+                self:_FireTextChanged()
                 return true
             end,
         },
@@ -356,6 +373,7 @@ function EditBoxWidget._BuildBindings()
                 else
                     E.DeleteWordForward(self)
                 end
+                self:_FireTextChanged()
                 return true
             end,
         },
@@ -564,6 +582,7 @@ function EditBoxWidget._BuildBindings()
                 local text = CAI.GetClipboardText()
                 if text and text ~= "" then
                     if E.InsertText(self, text) then
+                        self:_FireTextChanged()
                         Speak(E.FormatPasted(self, text), true)
                     end
                 end

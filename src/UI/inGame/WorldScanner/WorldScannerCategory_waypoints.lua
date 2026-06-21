@@ -61,6 +61,7 @@ CAIWorldScannerCategory_Waypoints = {
     Id = "queuedPath",
     LabelKey = "LOC_CAI_WORLD_SCANNER_CATEGORY_QUEUED_PATH",
     BuildOncePerDynamicState = true,
+    AutoFocus = false,
     SubCategoryOrder = { SUBCATEGORY_FULL_PATH, SUBCATEGORY_WAYPOINTS },
     SubCategoryLabels = {
         [SUBCATEGORY_FULL_PATH] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_FULL_PATH",

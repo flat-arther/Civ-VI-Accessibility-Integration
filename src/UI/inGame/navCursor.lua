@@ -2,7 +2,10 @@ CAICursor = CAICursor or {
     curX = 0,
     curY = 0,
     lastOwnerZone = nil,
-    lastContinentZone = nil
+    lastContinentZone = nil,
+    lastTerritoryZone = nil,
+    lastVolcanoZone = nil,
+    lastNationalParkZone = nil,
 }
 
 local HexCoordUtils = nil
@@ -15,6 +18,18 @@ local function GetHexCoordUtils()
 
     return HexCoordUtils
 end
+
+local function ResolvePlotById(plotId)
+    if plotId == nil or plotId < 0 or not Map.IsPlot(plotId) then
+        return nil
+    end
+
+    return Map.GetPlotByIndex(plotId)
+end
+
+-- =========================================================================
+-- Zone helpers (compare-and-speak-on-change)
+-- =========================================================================
 
 ---@param plot Plot|nil
 ---@return string|nil
@@ -76,12 +91,66 @@ local function GetOwnerZoneText(plot)
     return Locale.Lookup(civName)
 end
 
-local function ResolvePlotById(plotId)
-    if plotId == nil or plotId < 0 or not Map.IsPlot(plotId) then
+---@param plot Plot|nil
+---@return string|nil
+local function GetTerritoryZoneText(plot)
+    if plot == nil or not IsExpansion2Active() then
         return nil
     end
 
-    return Map.GetPlotByIndex(plotId)
+    if Territories == nil or Territories.GetTerritoryAt == nil then
+        return nil
+    end
+
+    local territory = Territories.GetTerritoryAt(plot:GetIndex())
+    if territory == nil then
+        return nil
+    end
+
+    local name = territory:GetName()
+    if name == nil or name == "" then
+        return nil
+    end
+
+    return Locale.Lookup("LOC_CAI_NAV_CURSOR_TERRITORY_ZONE", name)
+end
+
+---@param plot Plot|nil
+---@return string|nil
+local function GetVolcanoZoneText(plot)
+    if plot == nil or not IsExpansion2Active() then
+        return nil
+    end
+
+    if MapFeatureManager == nil or MapFeatureManager.GetVolcanoName == nil then
+        return nil
+    end
+
+    local name = MapFeatureManager.GetVolcanoName(plot)
+    if name == nil or name == "" then
+        return nil
+    end
+
+    return Locale.Lookup("LOC_CAI_NAV_CURSOR_VOLCANO_ZONE", name)
+end
+
+---@param plot Plot|nil
+---@return string|nil
+local function GetNationalParkZoneText(plot)
+    if plot == nil then
+        return nil
+    end
+
+    local nationalParks = Game.GetNationalParks()
+    if nationalParks == nil or nationalParks.IsNationalPark == nil then
+        return nil
+    end
+
+    if not nationalParks:IsNationalPark(plot:GetIndex()) then
+        return nil
+    end
+
+    return Locale.Lookup("LOC_CAI_NAV_CURSOR_NATIONAL_PARK_ZONE")
 end
 
 ---@param plot Plot|nil
@@ -104,17 +173,17 @@ local function CanUpdateZonesForPlot(plot)
     return visibility:IsVisible(plot:GetIndex()) or visibility:IsRevealed(plot)
 end
 
-local function SpeakJumpDirection(fromX, fromY, targetPlot)
-    if fromX == nil or fromY == nil or targetPlot == nil then
-        return
-    end
+-- =========================================================================
+-- Direction speech
+-- =========================================================================
 
+local function SpeakMoveDirection(fromX, fromY, toX, toY)
     local hexUtils = GetHexCoordUtils()
     if hexUtils == nil or hexUtils.directionString == nil then
         return
     end
 
-    local directionText = hexUtils.directionString(fromX, fromY, targetPlot:GetX(), targetPlot:GetY())
+    local directionText = hexUtils.directionString(fromX, fromY, toX, toY)
     if directionText == nil or directionText == "" then
         directionText = Locale.Lookup("LOC_CAI_HERE")
     end
@@ -122,7 +191,10 @@ local function SpeakJumpDirection(fromX, fromY, targetPlot)
     Speak(directionText)
 end
 
---# Methods
+-- =========================================================================
+-- Core methods
+-- =========================================================================
+
 function CAICursor:UpdateZones()
     local plotId = self:GetPlotId()
     if plotId == nil or plotId < 0 then
@@ -149,6 +221,24 @@ function CAICursor:UpdateZones()
         Speak(ownerZone)
     end
     self.lastOwnerZone = ownerZone
+
+    local territoryZone = GetTerritoryZoneText(plot)
+    if territoryZone ~= nil and territoryZone ~= self.lastTerritoryZone then
+        Speak(territoryZone)
+    end
+    self.lastTerritoryZone = territoryZone
+
+    local volcanoZone = GetVolcanoZoneText(plot)
+    if volcanoZone ~= nil and volcanoZone ~= self.lastVolcanoZone then
+        Speak(volcanoZone)
+    end
+    self.lastVolcanoZone = volcanoZone
+
+    local nationalParkZone = GetNationalParkZoneText(plot)
+    if nationalParkZone ~= nil and nationalParkZone ~= self.lastNationalParkZone then
+        Speak(nationalParkZone)
+    end
+    self.lastNationalParkZone = nationalParkZone
 end
 
 function CAICursor:SetCoords(x, y)
@@ -165,63 +255,7 @@ function CAICursor:SetCoords(x, y)
 
     self.curX = plot:GetX()
     self.curY = plot:GetY()
-    self:UpdateZones()
     return true
-end
-
-function CAICursor:SetPlotId(plotId)
-    local plot = ResolvePlotById(plotId)
-    if plot == nil then
-        print("CAI cursor unable to resolve plot id: " .. tostring(plotId))
-        return
-    end
-
-    self:SetCoords(plot:GetX(), plot:GetY())
-end
-
-function CAICursor:MoveToNextPlot(dir)
-    local plot = Map.GetAdjacentPlot(self.curX, self.curY, dir)
-    if plot ~= nil then
-        local moved = self:SetCoords(plot:GetX(), plot:GetY())
-        if moved then
-            LuaEvents.CAICursorMoved(self.curX, self.curY, plot:GetIndex())
-        end
-    end
-end
-
-function CAICursor:JumpToPlotId(plotId, suppressEvent)
-    local plot = ResolvePlotById(plotId)
-    if plot == nil then
-        print("CAI cursor jump unable to resolve plot id: " .. tostring(plotId))
-        return
-    end
-
-    local fromX = self.curX
-    local fromY = self.curY
-    SpeakJumpDirection(fromX, fromY, plot)
-
-    local moved = self:SetCoords(plot:GetX(), plot:GetY())
-    if moved and not suppressEvent then
-        LuaEvents.CAICursorMoved(self.curX, self.curY, plot:GetIndex())
-    end
-end
-
-function CAICursor:SnapToStartPlot()
-    local playerID = Game.GetLocalPlayer()
-    if playerID == nil or playerID < 0 then
-        print("CAI cursor unable to find local player")
-        return
-    end
-
-    local playerConfig = PlayerConfigurations[playerID]
-    local location = playerConfig ~= nil and playerConfig:GetStartingPosition() or nil
-    if location ~= nil then
-        self:SetCoords(location.x, location.y)
-    end
-end
-
-function CAICursor:SnapToPlot(plotId)
-    self:SetPlotId(plotId)
 end
 
 function CAICursor:GetPlotId()
@@ -233,23 +267,66 @@ function CAICursor:GetPlotId()
     return plot:GetIndex()
 end
 
-LuaEvents.CAICursorMove.Add(function(x, y)
-    local moved = CAICursor:SetCoords(x, y)
-    if moved then
-        LuaEvents.CAICursorMoved(CAICursor.curX, CAICursor.curY, CAICursor:GetPlotId())
+---@param plotId integer
+---@param reason string "step"|"jump"|"select"|"snap"
+function CAICursor:MoveTo(plotId, reason)
+    local plot = ResolvePlotById(plotId)
+    if plot == nil then
+        print("CAI cursor MoveTo unable to resolve plot id: " .. tostring(plotId))
+        return
     end
+
+    local fromX = self.curX
+    local fromY = self.curY
+    local fromPlotId = self:GetPlotId()
+
+    local toX = plot:GetX()
+    local toY = plot:GetY()
+
+    local moved = self:SetCoords(toX, toY)
+    if not moved then
+        return
+    end
+
+    local hexUtils = GetHexCoordUtils()
+    local distance = hexUtils.cubeDistance(fromX, fromY, toX, toY)
+    local resolvedReason = reason or "jump"
+
+    if resolvedReason == "jump" or resolvedReason == "select" then
+        SpeakMoveDirection(fromX, fromY, toX, toY)
+    end
+
+    self:UpdateZones()
+
+    LuaEvents.CAICursorMoved({
+        fromPlotId = fromPlotId,
+        toPlotId = plotId,
+        distance = distance,
+        fromX = fromX,
+        fromY = fromY,
+        toX = toX,
+        toY = toY,
+        reason = reason or "jump",
+    })
+end
+
+function CAICursor:MoveDirection(dir)
+    local plot = Map.GetAdjacentPlot(self.curX, self.curY, dir)
+    if plot ~= nil then
+        self:MoveTo(plot:GetIndex(), "step")
+    end
+end
+
+-- =========================================================================
+-- Public LuaEvent listeners
+-- =========================================================================
+
+LuaEvents.CAICursorMoveTo.Add(function(plotId, reason)
+    CAICursor:MoveTo(plotId, reason)
 end)
 
 LuaEvents.CAICursorMoveDirection.Add(function(direction)
-    CAICursor:MoveToNextPlot(direction)
-end)
-
-LuaEvents.CAICursorJump.Add(function(plotId, suppressEvent)
-    CAICursor:JumpToPlotId(plotId, suppressEvent)
-end)
-
-LuaEvents.CAICursorSnapToStartPlot.Add(function()
-    CAICursor:SnapToStartPlot()
+    CAICursor:MoveDirection(direction)
 end)
 
 ExposedMembers.CAICursor = CAICursor

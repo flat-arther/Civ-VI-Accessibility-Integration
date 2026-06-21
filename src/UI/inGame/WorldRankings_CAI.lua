@@ -1280,4 +1280,8 @@ local function HandleInput(input)
     end
     return false
 end
-ContextPtr:SetInputHandler(HandleInput, true)
+
+LateInitialize = WrapFunc(LateInitialize, function(orig)
+    orig()
+    ContextPtr:SetInputHandler(HandleInput, true)
+end)

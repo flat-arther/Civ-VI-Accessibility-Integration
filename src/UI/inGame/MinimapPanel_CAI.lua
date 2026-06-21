@@ -1,5 +1,12 @@
 include("caiUtils")
-include("MinimapPanel")
+include("Civ6Common")
+if IsExpansion2Active() then
+    include("MinimapPanel_Expansion2")
+elseif IsExpansion1Active() then
+    include("MinimapPanel_Expansion1")
+else
+    include("MinimapPanel")
+end
 
 local mgr = ExposedMembers.CAI_UIManager
 
@@ -70,44 +77,73 @@ local lensEntries = {
     {
         Id = "Religion",
         GetControl = function() return Controls.ReligionLensButton end,
-        Toggle = function() LensPanelHotkeyControl(Controls.ReligionLensButton); ToggleReligionLens(); UI.PlaySound("Play_UI_Click"); end,
+        Toggle = function()
+            LensPanelHotkeyControl(Controls.ReligionLensButton); ToggleReligionLens(); UI.PlaySound("Play_UI_Click");
+        end,
     },
     {
         Id = "Continent",
         GetControl = function() return Controls.ContinentLensButton end,
-        Toggle = function() LensPanelHotkeyControl(Controls.ContinentLensButton); ToggleContinentLens(); UI.PlaySound("Play_UI_Click"); end,
+        Toggle = function()
+            LensPanelHotkeyControl(Controls.ContinentLensButton); ToggleContinentLens(); UI.PlaySound("Play_UI_Click");
+        end,
     },
     {
         Id = "Appeal",
         GetControl = function() return Controls.AppealLensButton end,
-        Toggle = function() LensPanelHotkeyControl(Controls.AppealLensButton); ToggleAppealLens(); UI.PlaySound("Play_UI_Click"); end,
+        Toggle = function()
+            LensPanelHotkeyControl(Controls.AppealLensButton); ToggleAppealLens(); UI.PlaySound("Play_UI_Click");
+        end,
     },
     {
         Id = "Water",
         GetControl = function() return Controls.WaterLensButton end,
-        Toggle = function() LensPanelHotkeyControl(Controls.WaterLensButton); ToggleWaterLens(); UI.PlaySound("Play_UI_Click"); end,
+        Toggle = function()
+            LensPanelHotkeyControl(Controls.WaterLensButton); ToggleWaterLens(); UI.PlaySound("Play_UI_Click");
+        end,
     },
     {
         Id = "Government",
         GetControl = function() return Controls.GovernmentLensButton end,
-        Toggle = function() LensPanelHotkeyControl(Controls.GovernmentLensButton); ToggleGovernmentLens(); UI.PlaySound("Play_UI_Click"); end,
+        Toggle = function()
+            LensPanelHotkeyControl(Controls.GovernmentLensButton); ToggleGovernmentLens(); UI.PlaySound("Play_UI_Click");
+        end,
     },
     {
         Id = "Owner",
         GetControl = function() return Controls.OwnerLensButton end,
-        Toggle = function() LensPanelHotkeyControl(Controls.OwnerLensButton); ToggleOwnerLens(); UI.PlaySound("Play_UI_Click"); end,
+        Toggle = function()
+            LensPanelHotkeyControl(Controls.OwnerLensButton); ToggleOwnerLens(); UI.PlaySound("Play_UI_Click");
+        end,
     },
     {
         Id = "Tourism",
         GetControl = function() return Controls.TourismLensButton end,
-        Toggle = function() LensPanelHotkeyControl(Controls.TourismLensButton); ToggleTourismLens(); UI.PlaySound("Play_UI_Click"); end,
-    },
-    {
-        Id = "Empire",
-        GetControl = function() return Controls.EmpireLensButton end,
-        Toggle = function() LensPanelHotkeyControl(Controls.EmpireLensButton); ToggleEmpireLens(); UI.PlaySound("Play_UI_Click"); end,
+        Toggle = function()
+            LensPanelHotkeyControl(Controls.TourismLensButton); ToggleTourismLens(); UI.PlaySound("Play_UI_Click");
+        end,
     },
 }
+
+if IsExpansion1Active() and Controls.LoyaltyLensButton ~= nil then
+    table.insert(lensEntries, {
+        Id = "Loyalty",
+        GetControl = function() return Controls.LoyaltyLensButton end,
+        Toggle = function()
+            LensPanelHotkeyControl(Controls.LoyaltyLensButton); ToggleLoyaltyLens(); UI.PlaySound("Play_UI_Click");
+        end,
+    })
+end
+
+if IsExpansion2Active() and Controls.PowerLensButton ~= nil then
+    table.insert(lensEntries, {
+        Id = "Power",
+        GetControl = function() return Controls.PowerLensButton end,
+        Toggle = function()
+            LensPanelHotkeyControl(Controls.PowerLensButton); TogglePowerLens(); UI.PlaySound("Play_UI_Click");
+        end,
+    })
+end
 
 local function GetLensEntryLabel(entry)
     local control = entry.GetControl()
@@ -133,29 +169,31 @@ local function OpenLensListWidget()
         return true
     end
 
-    local list = mgr:CreateUIWidget(LENS_LIST_WIDGET_ID, "List", {
-        GetLabel = function()
+    local list = mgr:CreateWidget(LENS_LIST_WIDGET_ID, "List", {
+        Label = function()
             return Locale.Lookup("LOC_CAI_MINIMAP_LENS_LIST")
         end,
     })
-    list:AddInputBinding({
-        Key = Keys.VK_ESCAPE,
-        Action = function()
-            CloseLensListWidget()
-            return true
-        end,
+    list:AddInputBindings({
+        {
+            Key = Keys.VK_ESCAPE,
+            Action = function()
+                CloseLensListWidget()
+                return true
+            end
+        },
     })
 
     for _, entry in ipairs(lensEntries) do
         local capturedEntry = entry
-        list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIMinimapLensItem"), "MenuItem", {
-            GetLabel = function()
+        local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMinimapLensItem"), "MenuItem", {
+            Label = function()
                 return GetLensEntryLabel(capturedEntry)
             end,
-            GetTooltip = function()
+            Tooltip = function()
                 return ControlTooltip(capturedEntry.GetControl())
             end,
-            GetState = function()
+            State = function()
                 local control = capturedEntry.GetControl()
                 if ControlIsDisabled(control) then
                     return Locale.Lookup("LOC_CAI_STATE_DISABLED")
@@ -171,22 +209,21 @@ local function OpenLensListWidget()
             IsDisabled = function()
                 return ControlIsDisabled(capturedEntry.GetControl())
             end,
-            OnFocusEnter = function()
-                UI.PlaySound("Main_Menu_Mouse_Over")
-            end,
-            OnClick = function()
-                if ControlIsHidden(capturedEntry.GetControl()) or ControlIsDisabled(capturedEntry.GetControl()) then
-                    return
-                end
-                capturedEntry.Toggle()
-                CloseLensListWidget()
-            end,
-        }))
+        })
+        item:SetFocusSound("Main_Menu_Mouse_Over")
+        item:On("activate", function()
+            if ControlIsHidden(capturedEntry.GetControl()) or ControlIsDisabled(capturedEntry.GetControl()) then
+                return
+            end
+            capturedEntry.Toggle()
+            CloseLensListWidget()
+        end)
+        list:AddChild(item)
     end
 
     if #list:GetVisibleChildren() > 0 then
         m_caiLensList = list
-        mgr:Push(list, PopupPriority.Low)
+        mgr:Push(list, { priority = PopupPriority.Low })
         return true
     end
 
@@ -207,6 +244,26 @@ local function ToggleAccessibleLensList()
     return OpenLensListWidget()
 end
 
+local m_caiOpenMapSearchId = Input.GetActionId("CAIOpenMapSearch")
+
+
+
+local function CloseVanillaMapSearch()
+    if not Controls.MapSearchPanel:IsHidden() then
+        ToggleMapSearchPanel()
+    end
+end
+
+OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionId)
+    if m_caiOpenMapSearchId ~= nil and actionId == m_caiOpenMapSearchId then
+        orig(Input.GetActionId("OpenMapSearch"))
+        return
+    end
+    orig(actionId)
+end)
+Events.InputActionTriggered.Remove(OnInputActionTriggered)
+Events.InputActionTriggered.Add(OnInputActionTriggered)
+
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
     if mgr ~= nil then
         local handled = mgr:HandleInput(pInputStruct)
@@ -218,13 +275,45 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
     return orig(pInputStruct)
 end)
 
+ToggleMapPinMode = WrapFunc(ToggleMapPinMode, function(orig)
+    orig()
+    local isVisible = not Controls.MapPinListPanel:IsHidden()
+    LuaEvents.CAIMapPinList_VisibilityChanged(isVisible)
+end)
+Controls.MapPinListButton:RegisterCallback(Mouse.eLClick, ToggleMapPinMode)
+
+local function CloseMapPinList()
+    if Controls.MapPinListPanel:IsHidden() then return end
+    ToggleMapPinMode()
+end
+
+local function ToggleAccessibleMapPinList()
+    if mgr == nil or Game.GetLocalPlayer() == -1 then
+        return false
+    end
+    if ControlIsHidden(Controls.MapPinListButton) or ControlIsDisabled(Controls.MapPinListButton) then
+        return false
+    end
+    ToggleMapPinMode()
+    return true
+end
+
 OnShutdown = WrapFunc(OnShutdown, function(orig)
     LuaEvents.CAIMinimapLensListToggle.Remove(ToggleAccessibleLensList)
+    LuaEvents.CAIMinimapMapPinListToggle.Remove(ToggleAccessibleMapPinList)
+    LuaEvents.CAIMapPinList_RequestClose.Remove(CloseMapPinList)
+    LuaEvents.CAIMapSearch_RequestClose.Remove(CloseVanillaMapSearch)
     CloseLensListWidget()
     orig()
 end)
 
 LuaEvents.CAIMinimapLensListToggle.Remove(ToggleAccessibleLensList)
 LuaEvents.CAIMinimapLensListToggle.Add(ToggleAccessibleLensList)
+LuaEvents.CAIMinimapMapPinListToggle.Remove(ToggleAccessibleMapPinList)
+LuaEvents.CAIMinimapMapPinListToggle.Add(ToggleAccessibleMapPinList)
+LuaEvents.CAIMapPinList_RequestClose.Remove(CloseMapPinList)
+LuaEvents.CAIMapPinList_RequestClose.Add(CloseMapPinList)
+LuaEvents.CAIMapSearch_RequestClose.Remove(CloseVanillaMapSearch)
+LuaEvents.CAIMapSearch_RequestClose.Add(CloseVanillaMapSearch)
 ContextPtr:SetShutdown(OnShutdown)
 ContextPtr:SetInputHandler(OnInputHandler, true)

@@ -1544,8 +1544,8 @@ local function OnCityBannerInfoInputActionTriggered(actionId)
     Speak(ProcessIcons(table.concat(results, ", ")))
 end
 
-local function OnCAICursorMoved(x, y, plotId)
-    currentPlotId = plotId ~= nil and plotId or -1
+local function OnCAICursorMoved(state)
+    currentPlotId = state.toPlotId ~= nil and state.toPlotId or -1
 end
 
 local function OnCAIOpenOverviewForEnemyCity(playerID, cityID)

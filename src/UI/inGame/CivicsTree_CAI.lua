@@ -1176,6 +1176,36 @@ local function RefreshGovernmentEdit()
 end
 
 -- ===========================================================================
+-- SEARCH
+-- ===========================================================================
+
+local function CivicsSearchHandler(query, maxResults)
+    local results = {}
+    local seen = {}
+    if not Search.HasContext("Civics") then return results end
+    local raw = Search.Search("Civics", query)
+    if not raw then return results end
+    for _, hit in ipairs(raw) do
+        local civicType = hit[1]
+        if not seen[civicType] then
+            seen[civicType] = true
+            local label = FormatRowLabel(civicType)
+            if label and label ~= "" then
+                local tooltip = FormatRowTooltip(civicType)
+                results[#results + 1] = {
+                    key   = civicType,
+                    label = label,
+                    tooltip = tooltip ~= "" and tooltip or nil,
+                    onActivate = function() JumpToCivic(civicType, false) end,
+                }
+            end
+            if #results >= maxResults then break end
+        end
+    end
+    return results
+end
+
+-- ===========================================================================
 -- PANEL LIFECYCLE
 -- ===========================================================================
 
@@ -1211,6 +1241,7 @@ local function EnsurePanelBuilt()
         HiddenPredicate = function() return m_viewMode ~= "tree" end,
         SearchDepth     = 3,
     })
+    m_mainTree:SetSearchQueryHandler(CivicsSearchHandler)
     m_mainTree:AddInputBindings({
         {
             Key    = Keys.VK_BACK,
@@ -1232,6 +1263,7 @@ local function EnsurePanelBuilt()
         Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_TABLE") end,
         HiddenPredicate = function() return m_viewMode ~= "table" end,
     })
+    m_tableView:SetSearchQueryHandler(CivicsSearchHandler)
     m_panel:AddChild(m_tableView)
 
     -- 5) Unlocks list beside the table; mirrors the focused civic (table mode

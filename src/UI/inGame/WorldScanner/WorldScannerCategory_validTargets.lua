@@ -7,6 +7,7 @@ CAIWorldScannerCategory_ValidTargets = {
     Id = "validTargets",
     LabelKey = "LOC_CAI_WORLD_SCANNER_CATEGORY_VALID_TARGETS",
     BuildOncePerDynamicState = true,
+    AutoFocus = true,
     SubCategoryOrder = { SUBCATEGORY_TARGET_PLOTS },
     SubCategoryLabels = {
         [SUBCATEGORY_TARGET_PLOTS] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TARGET_PLOTS",

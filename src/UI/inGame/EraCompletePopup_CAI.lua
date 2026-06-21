@@ -21,12 +21,14 @@ local function GetAgeText()
 	return nil
 end
 
-OnShow = WrapFunc(OnShow, function(orig)
+StartEraShow = WrapFunc(StartEraShow, function(orig)
 	orig()
-	Speak("Calling era complete")
-	local eraName = Controls.EraCompletedHeader:GetText()
-	if not eraName or eraName == "" then return end
 
+	local currentEra = Game.GetEras():GetCurrentEra()
+	local kEraData = GameInfo.Eras[currentEra]
+	if not kEraData then return end
+
+	local eraName = Locale.Lookup(kEraData.Name)
 	local text = Locale.Lookup("LOC_CAI_ERA_ENTERING", eraName)
 	local ageText = GetAgeText()
 	if ageText then
@@ -35,4 +37,3 @@ OnShow = WrapFunc(OnShow, function(orig)
 
 	Speak(text)
 end)
-ContextPtr:SetShowHandler(OnShow)

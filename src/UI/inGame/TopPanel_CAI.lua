@@ -104,18 +104,19 @@ local function SpeakTourism()
 end
 
 local function SpeakFavor()
-    if not IsExpansion2Active() then return end
     local _, player = GetLocalPlayer()
     if not player then return end
 
     local parts = {}
 
-    local playerFavor = player:GetFavor()
-    local favorPerTurn = player:GetFavorPerTurn()
-    table.insert(parts, Locale.Lookup("LOC_CAI_TOP_PANEL_FAVOR") .. ": "
-        .. Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
-            FormatBalance(playerFavor),
-            FormatRatePerTurn(FormatValuePerTurn(favorPerTurn))))
+    if IsExpansion2Active() then
+        local playerFavor = player:GetFavor()
+        local favorPerTurn = player:GetFavorPerTurn()
+        table.insert(parts, Locale.Lookup("LOC_CAI_TOP_PANEL_FAVOR") .. ": "
+            .. Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
+                FormatBalance(playerFavor),
+                FormatRatePerTurn(FormatValuePerTurn(favorPerTurn))))
+    end
 
     if GameCapabilities.HasCapability("CAPABILITY_TOP_PANEL_ENVOYS") then
         local playerInfluence = player:GetInfluence()
@@ -126,7 +127,9 @@ local function SpeakFavor()
             currentEnvoys, influenceBalance, influenceThreshold))
     end
 
-    Speak(table.concat(parts, ", "))
+    if #parts > 0 then
+        Speak(table.concat(parts, ", "))
+    end
 end
 
 local function SpeakNukes()
@@ -157,15 +160,10 @@ local function SpeakNukes()
 end
 
 local function GetCurrentEraName()
-    local playerID, player = GetLocalPlayer()
-    if not player then return nil end
-    local eraIndex = player:GetEra() + 1
-    for row in GameInfo.Eras() do
-        if row.ChronologyIndex == eraIndex then
-            return Locale.Lookup(row.Name)
-        end
-    end
-    return nil
+    local currentEra = Game.GetEras():GetCurrentEra()
+    local kEraData = GameInfo.Eras[currentEra]
+    if not kEraData then return nil end
+    return Locale.Lookup(kEraData.Name)
 end
 
 local function GetCurrentAgeName()
@@ -183,6 +181,22 @@ local function GetCurrentAgeName()
     return Locale.Lookup("LOC_ERA_PROGRESS_NORMAL_AGE")
 end
 
+local m_caiTurnTimerElapsed = 0
+local m_caiTurnTimerMax = 0
+
+local function OnTurnTimerUpdated(elapsedTime, maxTurnTime)
+    m_caiTurnTimerElapsed = elapsedTime
+    m_caiTurnTimerMax = maxTurnTime
+end
+
+local function GetTurnTimerString()
+    if m_caiTurnTimerMax <= 0 then return nil end
+    local remaining = m_caiTurnTimerMax - m_caiTurnTimerElapsed
+    if remaining < 0 then remaining = 0 end
+    return Locale.Lookup("LOC_CAI_TOP_PANEL_TURN_TIMER",
+        FormatTimeRemaining(remaining, true))
+end
+
 local function SpeakTurnTimeDate()
     RefreshTurnsRemaining()
     RefreshTime()
@@ -190,14 +204,9 @@ local function SpeakTurnTimeDate()
     local parts = {}
     table.insert(parts, Locale.Lookup("LOC_TOP_PANEL_CURRENT_TURN") .. " " .. Controls.Turns:GetText())
 
-    local eraName = GetCurrentEraName()
-    if eraName then
-        table.insert(parts, eraName)
-    end
-
-    local ageName = GetCurrentAgeName()
-    if ageName then
-        table.insert(parts, ageName)
+    local timerStr = GetTurnTimerString()
+    if timerStr then
+        table.insert(parts, timerStr)
     end
 
     table.insert(parts, Controls.CurrentDate:GetText())
@@ -658,11 +667,28 @@ local function OnCAITopPanelInputAction(actionId)
     end
 end
 
+local function OnLocalPlayerTurnBegin()
+    RefreshTime()
+    local turn = Game.GetCurrentGameTurn()
+    Speak(Locale.Lookup("LOC_TOP_PANEL_CURRENT_TURN") .. " " .. turn
+        .. ", " .. Controls.CurrentDate:GetText())
+end
+
+local function OnLocalPlayerTurnEnd()
+    Speak(Locale.Lookup("LOC_CAI_TOP_PANEL_TURN_ENDED"))
+end
+
 function OnShutdown()
     Events.InputActionTriggered.Remove(OnCAITopPanelInputAction)
+    Events.TurnTimerUpdated.Remove(OnTurnTimerUpdated)
+    Events.LocalPlayerTurnBegin.Remove(OnLocalPlayerTurnBegin)
+    Events.LocalPlayerTurnEnd.Remove(OnLocalPlayerTurnEnd)
     CloseTopPanelList()
 end
 
 ContextPtr:SetShutdown(OnShutdown)
 
 Events.InputActionTriggered.Add(OnCAITopPanelInputAction)
+Events.TurnTimerUpdated.Add(OnTurnTimerUpdated)
+Events.LocalPlayerTurnBegin.Add(OnLocalPlayerTurnBegin)
+Events.LocalPlayerTurnEnd.Add(OnLocalPlayerTurnEnd)

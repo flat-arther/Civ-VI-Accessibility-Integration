@@ -904,6 +904,16 @@ local function EnsurePanelBuilt()
     m_ui.lookAt:On("activate", function()
         if m_selectedPlayerID ~= -1 then
             LookAtCityState(m_selectedPlayerID)
+            local pPlayer = Players[m_selectedPlayerID]
+            if pPlayer then
+                for _, pCity in pPlayer:GetCities():Members() do
+                    local plot = Map.GetPlot(pCity:GetX(), pCity:GetY())
+                    if plot then
+                        LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
+                    end
+                    break
+                end
+            end
         end
     end)
     m_ui.panel:AddChild(m_ui.lookAt)

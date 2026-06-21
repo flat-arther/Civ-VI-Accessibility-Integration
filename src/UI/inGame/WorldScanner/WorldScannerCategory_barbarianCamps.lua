@@ -9,36 +9,30 @@ CAIWorldScannerCategory_BarbarianCamps = {
     },
 }
 
-function CAIWorldScannerCategory_BarbarianCamps.Scan(context)
-    local out = {}
+function CAIWorldScannerCategory_BarbarianCamps.PlotExtract(plotIndex, plot, context, collect)
+    local improvementIndex = plot:GetImprovementType()
+    local improvementInfo = improvementIndex ~= nil and GameInfo.Improvements[improvementIndex] or nil
+    if improvementInfo == nil or improvementInfo.ImprovementType ~= "IMPROVEMENT_BARBARIAN_CAMP" then
+        return
+    end
 
-    Utils.ForEachRevealedPlot(context, function(plotIndex, plot)
-        local improvementIndex = plot:GetImprovementType()
-        local improvementInfo = improvementIndex ~= nil and GameInfo.Improvements[improvementIndex] or nil
-        if improvementInfo == nil or improvementInfo.ImprovementType ~= "IMPROVEMENT_BARBARIAN_CAMP" then
-            return
-        end
+    collect({
+        Id = "barbarianCamp:" .. tostring(plotIndex),
+        PlotIndex = plotIndex,
+        LabelKey = improvementInfo.Name,
+        SubCategoryId = "camps",
+        GroupId = improvementInfo.ImprovementType,
+        Validate = function(item, validateContext)
+            local validatePlot = Map.GetPlotByIndex(item.PlotIndex)
+            if validatePlot == nil or not Utils.IsPlotRevealed(validateContext, validatePlot) then
+                return false
+            end
 
-        out[#out + 1] = {
-            Id = "barbarianCamp:" .. tostring(plotIndex),
-            PlotIndex = plotIndex,
-            LabelKey = improvementInfo.Name,
-            SubCategoryId = "camps",
-            GroupId = improvementInfo.ImprovementType,
-            Validate = function(item, validateContext)
-                local validatePlot = Map.GetPlotByIndex(item.PlotIndex)
-                if validatePlot == nil or not Utils.IsPlotRevealed(validateContext, validatePlot) then
-                    return false
-                end
-
-                local validateImprovement = validatePlot:GetImprovementType()
-                local validateInfo = validateImprovement ~= nil and GameInfo.Improvements[validateImprovement] or nil
-                return validateInfo ~= nil and validateInfo.ImprovementType == "IMPROVEMENT_BARBARIAN_CAMP"
-            end,
-        }
-    end)
-
-    return out
+            local validateImprovement = validatePlot:GetImprovementType()
+            local validateInfo = validateImprovement ~= nil and GameInfo.Improvements[validateImprovement] or nil
+            return validateInfo ~= nil and validateInfo.ImprovementType == "IMPROVEMENT_BARBARIAN_CAMP"
+        end,
+    })
 end
 
-CAIWorldScanner:RegisterCategoryDefinition(CAIWorldScannerCategory_BarbarianCamps)
+-- Registration removed: barbarian camps are now a subcategory under Cities

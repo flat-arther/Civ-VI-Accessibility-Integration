@@ -6,6 +6,8 @@ include("InputSupport")
 
 local SPEECH_ORDER = { "label", "role", "state", "value", "tooltip", "position" }
 
+local PediaLookup = CAIWidgetHelpers_PediaLookup
+
 ---@class UIWidget
 ---@field Id? string
 ---@field Type? string
@@ -37,6 +39,10 @@ function UIWidget.New(class)
     w.InputMap = {}
     w.SpeechSettings = {}
     w._listeners = {}
+    w:AddInputBinding({
+        Key = Keys.I, IsAlt = true,
+        Action = function(self) return PediaLookup.RunLookup(self) end,
+    })
     return w
 end
 

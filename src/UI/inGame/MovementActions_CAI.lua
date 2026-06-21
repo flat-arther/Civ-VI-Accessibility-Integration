@@ -239,12 +239,12 @@ function MovementActions_CAI:CommitMoveTarget(unit, targetPlotId)
 
     local currentPlotId = UI.GetCursorPlotID()
     if currentPlotId ~= targetPlotId then
-        if LuaEvents == nil or LuaEvents.CAICursorJump == nil then
-            print("MovementActions_CAI could not jump CAI cursor before move commit")
+        if LuaEvents == nil or LuaEvents.CAICursorMoveTo == nil then
+            print("MovementActions_CAI could not move CAI cursor before move commit")
             return false
         end
 
-        LuaEvents.CAICursorJump(targetPlotId, true)
+        LuaEvents.CAICursorMoveTo(targetPlotId, "select")
     end
 
     self:QueuePendingMovementResult(unit, targetPlotId)

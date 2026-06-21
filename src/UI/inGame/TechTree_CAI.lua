@@ -1156,6 +1156,36 @@ local function BuildFilterList()
 end
 
 -- ===========================================================================
+-- SEARCH
+-- ===========================================================================
+
+local function TechSearchHandler(query, maxResults)
+    local results = {}
+    local seen = {}
+    if not Search.HasContext("Technologies") then return results end
+    local raw = Search.Search("Technologies", query)
+    if not raw then return results end
+    for _, hit in ipairs(raw) do
+        local techType = hit[1]
+        if not seen[techType] then
+            seen[techType] = true
+            local label = FormatRowLabel(techType)
+            if label and label ~= "" then
+                local tooltip = FormatRowTooltip(techType)
+                results[#results + 1] = {
+                    key   = techType,
+                    label = label,
+                    tooltip = tooltip ~= "" and tooltip or nil,
+                    onActivate = function() JumpToTech(techType, false) end,
+                }
+            end
+            if #results >= maxResults then break end
+        end
+    end
+    return results
+end
+
+-- ===========================================================================
 -- PANEL LIFECYCLE
 -- ===========================================================================
 
@@ -1189,6 +1219,7 @@ local function EnsurePanelBuilt()
         HiddenPredicate = function() return m_viewMode ~= "tree" end,
         SearchDepth     = 3,
     })
+    m_mainTree:SetSearchQueryHandler(TechSearchHandler)
     m_mainTree:AddInputBindings({
         {
             Key    = Keys.VK_BACK,
@@ -1208,6 +1239,7 @@ local function EnsurePanelBuilt()
         Label           = function() return Locale.Lookup("LOC_CAI_TECH_TREE_TABLE") end,
         HiddenPredicate = function() return m_viewMode ~= "table" end,
     })
+    m_tableView:SetSearchQueryHandler(TechSearchHandler)
     m_panel:AddChild(m_tableView)
 
     -- Unlocks list beside the table; mirrors the focused tech (table mode only,

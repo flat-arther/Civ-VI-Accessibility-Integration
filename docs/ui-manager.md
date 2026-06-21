@@ -44,13 +44,14 @@ panel:AddChild(btn)
 
 ```
 UIWidget                       identity, tree, events, input, speech
-├── ContainerWidget            navigable parent
+├── ContainerWidget            navigable parent (Ctrl+F search via AllowSearch)
 │   ├── PanelWidget
+│   │   └── SearchPanelWidget  Ctrl+F overlay (managed singleton)
 │   ├── DialogWidget
-│   ├── ListWidget
+│   ├── ListWidget             AllowSearch=true by default
 │   ├── HorizontalListWidget
 │   ├── SubMenuWidget
-│   ├── TreeWidget
+│   ├── TreeWidget             AllowSearch=true by default
 │   ├── TreeItemWidget
 │   ├── TabPageWidget
 │   ├── TabControlWidget
@@ -557,6 +558,64 @@ end
 
 `SearchDepth` defaults: List = 2, Tree = 3.
 
+### Ctrl+F search panel
+
+`ContainerWidget` owns the Ctrl+F search integration. Every container has an
+`AllowSearch` flag (default `false`). When `AllowSearch` is true and the user
+presses Ctrl+F, the container opens a `SearchPanelWidget` overlay that indexes
+descendants via the game's `Search.*` API, presents matching results as a
+navigable list, and jumps to the selected widget on activation.
+
+**Lists and Trees enable search by default** — they set `AllowSearch = true` in
+their constructors. All other containers (Panel, Dialog, TabPage, etc.) keep it
+off unless explicitly enabled.
+
+#### Enabling search
+
+```lua
+-- Enable with default widget-label indexing:
+myPanel:EnableSearch()
+-- or
+myPanel:SetAllowSearch(true)
+
+-- Enable with a custom query handler (implicitly sets AllowSearch = true):
+myTree:SetSearchQueryHandler(function(query, maxResults)
+    -- Return a list of { key, label, onActivate?, widget? }
+    return results
+end)
+
+-- Disable:
+myPanel:DisableSearch()
+```
+
+#### Custom query handlers
+
+A query handler receives `(query, maxResults)` and must return a list of result
+tables. Each result has:
+
+- `key` — string, used as `FocusKey` on the result button.
+- `label` — string, the display text for this result.
+- `onActivate` — optional function, called when the user activates the result.
+  If omitted and `widget` is present, focus jumps to that widget.
+- `widget` — optional `UIWidget`, the target for focus-jump on activation.
+
+When no custom handler is set, the SearchPanel walks the container's descendants,
+collects their speech text, builds a `Search.*` context, and matches against it.
+
+#### Accessing the search panel from a screen
+
+```lua
+-- Forward results programmatically while the panel is open:
+container:SetSearchResults(myResults)
+
+-- Get the active search panel (nil if not open on this container):
+local panel = container:GetSearchPanel()
+```
+
+The manager owns a single shared `SearchPanelWidget` instance. When
+`mgr:OpenSearch(container)` is called, it applies the container's stored query
+handler (if any) to the panel before opening it.
+
 ### Manager-bound widget helpers
 
 `mgr.WidgetHelpers` is a per-manager table of quick widget builders. Helper
@@ -829,6 +888,7 @@ src/UI/uiManager/
   CAIWidget_Table.lua
   CAIWidget_GameView.lua
   CAIWidget_InterfaceMode.lua
+  CAIWidget_SearchPanel.lua
   helpers/
     CAIWidgetHelpers_Navigation.lua
     CAIWidgetHelpers_Search.lua
@@ -917,17 +977,19 @@ When migrating a screen from the old template-merged manager:
 
 | Widget         | Keys                                                          |
 |----------------|---------------------------------------------------------------|
+| Container (base)| Ctrl+F → open SearchPanel (when AllowSearch=true)            |
 | Button         | Enter, Space → activate                                       |
 | MenuItem       | Enter → activate                                              |
 | Panel          | Tab / Shift+Tab → next/prev                                   |
 | Dialog         | Tab / Shift+Tab / Up / Down → next/prev row; Enter → default  |
 | Dialog buttons | Left / Right / Up / Down → cycle (sticky)                     |
-| List           | Up/Down/Home/End/PgUp/PgDn; chars → search                    |
+| List           | Up/Down/Home/End/PgUp/PgDn; Ctrl+F → search; chars → search  |
 | HorizontalList | Left/Right/Home/End/PgUp/PgDn                                 |
 | SubMenu        | Enter / Right → expand-enter; Left → collapse-exit;            |
 |                | when expanded: Up/Down/Home/End/PgUp/PgDn                     |
 | Tree           | Up/Down/Home/End/PgUp/PgDn flat; Right expand-or-descend;     |
-|                | Left collapse-or-ascend; Enter toggle/activate; chars → search|
+|                | Left collapse-or-ascend; Enter toggle; Ctrl+F; chars → search |
+| SearchPanel    | Tab/Shift+Tab → edit/results; Esc → close; Enter → first result|
 | Checkbox       | Space / Enter → toggle                                        |
 | Slider         | Left/Right step; PgUp/PgDn page; Home/End bounds              |
 | EditBox        | Enter → BeginEdit/Commit (EnterToCommit=false makes Enter bubble); Esc → Cancel; full text-editing set |

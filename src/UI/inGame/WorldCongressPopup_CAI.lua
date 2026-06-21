@@ -1,35 +1,35 @@
 include("caiUtils")
 include("WorldCongressPopup")
 
-local mgr                  = ExposedMembers.CAI_UIManager
+local mgr               = ExposedMembers.CAI_UIManager
 
 -- =========================================================================
 -- Constants
 -- =========================================================================
-local PANEL_ID             = "CAIWorldCongress"
-local LEADERS_ID           = "CAIWorldCongress_Leaders"
-local BODY_ID              = "CAIWorldCongress_Body"
-local HOVER_SOUND          = "Main_Menu_Mouse_Over"
+local PANEL_ID          = "CAIWorldCongress"
+local LEADERS_ID        = "CAIWorldCongress_Leaders"
+local BODY_ID           = "CAIWorldCongress_Body"
+local HOVER_SOUND       = "Main_Menu_Mouse_Over"
 
-local CAI_TAB_RESULTS      = DB.MakeHash("REVIEW_TAB_RESULTS")
-local CAI_TAB_EFFECTS      = DB.MakeHash("REVIEW_TAB_CURRENT_EFFECTS")
-local CAI_TAB_PROPOSALS    = DB.MakeHash("REVIEW_TAB_AVAILABLE_PROPOSALS")
+local CAI_TAB_RESULTS   = DB.MakeHash("REVIEW_TAB_RESULTS")
+local CAI_TAB_EFFECTS   = DB.MakeHash("REVIEW_TAB_CURRENT_EFFECTS")
+local CAI_TAB_PROPOSALS = DB.MakeHash("REVIEW_TAB_AVAILABLE_PROPOSALS")
 
 -- =========================================================================
 -- State
 -- =========================================================================
-local m_panel              = nil ---@type UIWidget|nil
-local m_leadersList        = nil ---@type UIWidget|nil
-local m_body               = nil ---@type UIWidget|nil
-local m_caiStage           = 0
-local m_caiPhase           = 0
-local m_phase1Capture      = nil
-local m_capturedChoices    = {}
-local m_confirmDialog      = nil ---@type UIWidget|nil
-local m_isBuilding         = false
-local m_activeSection      = 0   -- 1=results, 2=effects, 3=proposals
-local m_resultsItem        = nil ---@type UIWidget|nil
-local m_effectsItem        = nil ---@type UIWidget|nil
+local m_panel           = nil ---@type UIWidget|nil
+local m_leadersList     = nil ---@type UIWidget|nil
+local m_body            = nil ---@type UIWidget|nil
+local m_caiStage        = 0
+local m_caiPhase        = 0
+local m_phase1Capture   = nil
+local m_capturedChoices = {}
+local m_confirmDialog   = nil ---@type UIWidget|nil
+local m_isBuilding      = false
+local m_activeSection   = 0    -- 1=results, 2=effects, 3=proposals
+local m_resultsItem     = nil ---@type UIWidget|nil
+local m_effectsItem     = nil ---@type UIWidget|nil
 
 -- =========================================================================
 -- Utility: find a named child control by ID (shallow)
@@ -223,7 +223,8 @@ local function BuildButtons()
     m_panel:AddChild(MakeBtn("CAIWC_Prev", Controls.PrevButton, function() Controls.PrevButton:DoLeftClick() end))
     m_panel:AddChild(MakeBtn("CAIWC_Next", Controls.NextButton, function() Controls.NextButton:DoLeftClick() end))
     if m_caiStage ~= 4 then
-        m_panel:AddChild(MakeBtn("CAIWC_Accept", Controls.AcceptButton, function() Controls.AcceptButton:DoLeftClick() end))
+        m_panel:AddChild(MakeBtn("CAIWC_Accept", Controls.AcceptButton,
+            function() Controls.AcceptButton:DoLeftClick() end))
         m_panel:AddChild(MakeBtn("CAIWC_Pass", Controls.PassButton, function() Controls.PassButton:DoLeftClick() end))
     end
     m_panel:AddChild(MakeBtn("CAIWC_Return", Controls.ReturnButton, function() Controls.ReturnButton:DoLeftClick() end))
@@ -805,10 +806,11 @@ local function BuildVotingBody()
                             return table.concat(parts, ", ")
                         end,
                     })
-                    propItem:SetValueGetter(function() return selectBox:IsSelected() end)
+                    propItem:SetChecked(selectBox:IsSelected(), true)
                     propItem:SetDisabledPredicate(function() return selectBox:IsDisabled() end)
                     propItem:On("value_changed", function()
                         selectBox:DoLeftClick()
+                        propItem:SetChecked(selectBox:IsSelected(), true)
                         if mgr then mgr:Refocus() end
                     end)
                     propItem.FocusKey = "emergency:" .. instanceRoot:GetID()
@@ -1283,23 +1285,23 @@ local function PopulateReviewProposals(parent)
                                                 local pVoterWidget = mgr:CreateWidget(
                                                     mgr:GenerateWidgetId("CAIWC_PVoter"),
                                                     "StaticText", {
-                                                    Label = function()
-                                                        local parts = {}
-                                                        if vUpVoteStack and not vUpVoteStack:IsHidden() and vUpVoteIcon then
-                                                            local t = vUpVoteIcon:GetToolTipString()
-                                                            if t and t ~= "" then table.insert(parts, t) end
-                                                        end
-                                                        if vDownVoteStack and not vDownVoteStack:IsHidden() and vDownVoteIcon then
-                                                            local t = vDownVoteIcon:GetToolTipString()
-                                                            if t and t ~= "" then table.insert(parts, t) end
-                                                        end
-                                                        if vReason then
-                                                            local r = vReason:GetText()
-                                                            if r and r ~= "" then table.insert(parts, r) end
-                                                        end
-                                                        return table.concat(parts, ", ")
-                                                    end,
-                                                })
+                                                        Label = function()
+                                                            local parts = {}
+                                                            if vUpVoteStack and not vUpVoteStack:IsHidden() and vUpVoteIcon then
+                                                                local t = vUpVoteIcon:GetToolTipString()
+                                                                if t and t ~= "" then table.insert(parts, t) end
+                                                            end
+                                                            if vDownVoteStack and not vDownVoteStack:IsHidden() and vDownVoteIcon then
+                                                                local t = vDownVoteIcon:GetToolTipString()
+                                                                if t and t ~= "" then table.insert(parts, t) end
+                                                            end
+                                                            if vReason then
+                                                                local r = vReason:GetText()
+                                                                if r and r ~= "" then table.insert(parts, r) end
+                                                            end
+                                                            return table.concat(parts, ", ")
+                                                        end,
+                                                    })
                                                 pVoterWidget:SetFocusSound(HOVER_SOUND)
                                                 votesNode:AddChild(pVoterWidget)
                                             end
@@ -1395,10 +1397,11 @@ local function BuildProposalsPage(page)
                                 return table.concat(parts, ", ")
                             end,
                         })
-                        epItem:SetValueGetter(function() return selectBox:IsSelected() end)
+                        epItem:SetChecked(selectBox:IsSelected(), true)
                         epItem:SetDisabledPredicate(function() return selectBox:IsDisabled() end)
                         epItem:On("value_changed", function()
                             selectBox:DoLeftClick()
+                            epItem:SetChecked(selectBox:IsSelected(), true)
                             if mgr then mgr:Refocus() end
                         end)
                         epItem.FocusKey = "emergency:" .. instanceRoot:GetID()
@@ -1413,8 +1416,10 @@ local function BuildProposalsPage(page)
     end
 
     page:AddChild(proposalsList)
-    page:AddChild(MakeBtn(mgr:GenerateWidgetId("CAIWC_Accept"), Controls.AcceptButton, function() Controls.AcceptButton:DoLeftClick() end))
-    page:AddChild(MakeBtn(mgr:GenerateWidgetId("CAIWC_Pass"), Controls.PassButton, function() Controls.PassButton:DoLeftClick() end))
+    page:AddChild(MakeBtn(mgr:GenerateWidgetId("CAIWC_Accept"), Controls.AcceptButton,
+        function() Controls.AcceptButton:DoLeftClick() end))
+    page:AddChild(MakeBtn(mgr:GenerateWidgetId("CAIWC_Pass"), Controls.PassButton,
+        function() Controls.PassButton:DoLeftClick() end))
 end
 
 -- =========================================================================
@@ -1500,6 +1505,12 @@ local function BuildReviewBody()
         proposalsPage = m_body:AddPage(function()
             return Locale.Lookup("LOC_WORLD_CONGRESS_AVAILABLE_PROPOSALS")
         end)
+        local proposalsTab = m_body._tabs[2]
+        if proposalsTab then
+            proposalsTab:SetTooltip(function()
+                return Controls.Description:GetText() or ""
+            end)
+        end
     end
 
     m_body:On("value_changed", function(_, pageIndex)
@@ -1569,7 +1580,7 @@ local function BuildAndPush(stage, phase)
     diploBtn:On("activate", function() Controls.DiploButton:DoLeftClick() end)
     m_panel:AddChild(diploBtn)
 
-    if phase == 2 then
+    if phase == 2 and stage ~= 4 then
         BuildConfirmationDialog()
     end
     mgr:Push(m_panel, { priority = PopupPriority.WorldCongressPopup })
@@ -1583,7 +1594,7 @@ end
 local function RebuildBody(stage, phase)
     if not m_panel then return end
 
-    if phase == 2 then
+    if phase == 2 and stage ~= 4 then
         BuildConfirmationDialog()
         return
     end
@@ -1695,11 +1706,8 @@ end)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
     if mgr and m_panel and not ContextPtr:IsHidden() then
-        local top = mgr:GetTop()
-        if top == m_panel or top == m_confirmDialog then
-            local handled = mgr:HandleInput(pInputStruct)
-            if handled then return handled end
-        end
+        local handled = mgr:HandleInput(pInputStruct)
+        if handled then return handled end
     end
     return orig(pInputStruct)
 end)

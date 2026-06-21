@@ -217,6 +217,12 @@ local function CreateRouteRow(entry)
             local unit = Players[entry.originPlayerID]:GetUnits():FindID(entry.traderUnitID)
             if unit then
                 SelectUnit(unit)
+                if entry.originPlayerID ~= Game.GetLocalPlayer() then
+                    local plot = Map.GetPlot(unit:GetX(), unit:GetY())
+                    if plot then
+                        LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
+                    end
+                end
                 if m_caiCurrentTab == TAB_AVAILABLE then
                     LuaEvents.TradeOverview_SelectRouteFromOverview(entry.destPlayerID, entry.destCityID)
                 end

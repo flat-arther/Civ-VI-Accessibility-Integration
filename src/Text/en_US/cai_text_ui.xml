@@ -285,6 +285,12 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_IMPROVEMENTS" Language="en_US">
       <Text>Improvements and routes</Text>
     </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_DISTRICTS" Language="en_US">
+      <Text>Districts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_WONDERS" Language="en_US">
+      <Text>Wonders</Text>
+    </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TERRAIN" Language="en_US">
       <Text>Terrain</Text>
     </Row>
@@ -365,6 +371,12 @@
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CAMPS" Language="en_US">
       <Text>Camps</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_STATES" Language="en_US">
+      <Text>City-States</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BARBARIAN_OUTPOSTS" Language="en_US">
+      <Text>Barbarian Outposts</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BASE" Language="en_US">
       <Text>Base</Text>
@@ -534,6 +546,24 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_SPEAK_DIRECTION_TOOLTIP" Language="en_US">
       <Text>Speaks the direction from the CAI cursor to the currently selected world scanner item</Text>
     </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SEARCH" Language="en_US">
+      <Text>Scanner Search</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SEARCH_TOOLTIP" Language="en_US">
+      <Text>Search across all world scanner categories</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SEARCH_EDIT" Language="en_US">
+      <Text>Scanner Search</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SEARCH_RESULTS" Language="en_US">
+      <Text>Search Results, {1_Count} matches</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SEARCH_NO_RESULTS" Language="en_US">
+      <Text>No search results</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_SEARCH_RESULTS" Language="en_US">
+      <Text>Search Results</Text>
+    </Row>
 
     <!-- Surveyor -->
     <Row Tag="LOC_CAI_SURVEYOR_GROW_RADIUS" Language="en_US">
@@ -648,6 +678,27 @@
     </Row>
     <Row Tag="LOC_CAI_ACTION_PANEL_BLOCKER_COUNT" Language="en_US">
       <Text>{1_Count} items</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE" Language="en_US">
+      <Text>Read era age</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE_TOOLTIP" Language="en_US">
+      <Text>Reads the current era score, age, thresholds, and active commemorations</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ACTION_PANEL_ERA_NOT_AVAILABLE" Language="en_US">
+      <Text>Era ages not available in base game</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ACTION_PANEL_ERA_THRESHOLDS" Language="en_US">
+      <Text>Dark age threshold: {1_Dark}, Golden age threshold: {2_Golden}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ACTION_PANEL_DEDICATIONS" Language="en_US">
+      <Text>Dedications</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_TURN_TIMER" Language="en_US">
+      <Text>Time remaining: {1_Time}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_TURN_ENDED" Language="en_US">
+      <Text>Turn ended</Text>
     </Row>
     <Row Tag="LOC_CAI_NOTIFICATION_EMPTY" Language="en_US">
       <Text>No current notifications</Text>
@@ -1293,6 +1344,35 @@
     <Row Tag="LOC_CAI_SEARCH_NO_MATCH" Language="en_US">
       <Text>No match</Text>
     </Row>
+    <Row Tag="LOC_CAI_SEARCH_EDIT" Language="en_US">
+      <Text>Search</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SEARCH_RESULTS" Language="en_US">
+      <Text>Results</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SEARCH_NO_RESULTS" Language="en_US">
+      <Text>No results</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SEARCH_HISTORY_EMPTY" Language="en_US">
+      <Text>No search history</Text>
+    </Row>
+
+    <!-- Map Search -->
+    <Row Tag="LOC_CAI_OPEN_MAP_SEARCH" Language="en_US">
+      <Text>Map Search</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_MAP_SEARCH_TOOLTIP" Language="en_US">
+      <Text>Open the map search panel</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_SEARCH_SEARCHING" Language="en_US">
+      <Text>Searching</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_SEARCH_COMPLETE" Language="en_US">
+      <Text>{1_Num : plural 1?1 result;other?{1_Num} results;} found</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_SEARCH_GROUP" Language="en_US">
+      <Text>Group {1_Num}, {2_Plots : plural 1?1 plot;other?{2_Plots} plots;}</Text>
+    </Row>
 
     <!-- Create Game (Advanced Setup) -->
     <Row Tag="LOC_CAI_COLOR" Language="en_US">
@@ -1362,7 +1442,7 @@
     <Row Tag="LOC_CAI_RESEARCH_TURNS" Language="en_US">
       <Text>{1_Turns} turns</Text>
     </Row>
-<Row Tag="LOC_CAI_RESEARCH_UNLOCKS_HEADER" Language="en_US">
+    <Row Tag="LOC_CAI_RESEARCH_UNLOCKS_HEADER" Language="en_US">
       <Text>Unlocks: {1_List}</Text>
     </Row>
     <Row Tag="LOC_CAI_RESEARCH_PREREQS_HEADER" Language="en_US">
@@ -2337,6 +2417,12 @@
     <Row Tag="LOC_CAI_PLOT_READ_DISTRICT_BUILDINGS_TOOLTIP" Language="en_US">
       <Text>Reads district, building, and great work information for the current tile</Text>
     </Row>
+    <Row Tag="LOC_CAI_PLOT_READ_GEOGRAPHY" Language="en_US">
+      <Text>Read geography</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_READ_GEOGRAPHY_TOOLTIP" Language="en_US">
+      <Text>Reads route, lowland, volcano, disaster, continent, territory, cliff, river, and national park information for the current tile</Text>
+    </Row>
 
     <!-- Tile info fallback messages -->
     <Row Tag="LOC_CAI_PLOT_NO_TILE_INFO" Language="en_US">
@@ -2384,11 +2470,23 @@
     <Row Tag="LOC_CAI_PLOT_NO_DISTRICTS_OR_BUILDINGS" Language="en_US">
       <Text>No districts or buildings on this tile</Text>
     </Row>
+    <Row Tag="LOC_CAI_PLOT_NO_GEOGRAPHY_INFO" Language="en_US">
+      <Text>No geography information for this tile</Text>
+    </Row>
     <Row Tag="LOC_CAI_PLOT_UNOWNED" Language="en_US">
       <Text>Unowned</Text>
     </Row>
     <Row Tag="LOC_CAI_NAV_CURSOR_CONTINENT_ZONE" Language="en_US">
       <Text>The continent of {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NAV_CURSOR_TERRITORY_ZONE" Language="en_US">
+      <Text>{1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NAV_CURSOR_VOLCANO_ZONE" Language="en_US">
+      <Text>{1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NAV_CURSOR_NATIONAL_PARK_ZONE" Language="en_US">
+      <Text>National Park</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_NO_PHYSICAL_INFO" Language="en_US">
       <Text>No physical modifiers</Text>
@@ -2398,6 +2496,9 @@
     </Row>
     <Row Tag="LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS" Language="en_US">
       <Text>{1_RiverText}, {2_Directions}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_CLIFF_WITH_DIRECTIONS" Language="en_US">
+      <Text>{1_CliffText}, {2_Directions}</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_WAYPOINT" Language="en_US">
       <Text>Waypoint</Text>
@@ -2434,6 +2535,56 @@
     </Row>
     <Row Tag="LOC_CAI_NO_INTERFACE_INFO" Language="en_US">
       <Text>No interface information</Text>
+    </Row>
+
+    <!-- Lens info -->
+    <Row Tag="LOC_CAI_LENS_POWER_SOURCE" Language="en_US">
+      <Text>Power source: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LENS_POWER_CITY_POWERED" Language="en_US">
+      <Text>Powered</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LENS_POWER_CITY_UNPOWERED" Language="en_US">
+      <Text>Unpowered</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LENS_LOYALTY_LEVEL" Language="en_US">
+      <Text>{1_Level}, {2_Current} of {3_Max} loyalty</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LENS_LOYALTY_PER_TURN" Language="en_US">
+      <Text>{1_Value} loyalty per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LENS_LOYALTY_GAINING" Language="en_US">
+      <Text>Gaining loyalty</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LENS_LOYALTY_LOSING" Language="en_US">
+      <Text>Losing loyalty</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LENS_LOYALTY_AT_RISK" Language="en_US">
+      <Text>At risk of converting to {1_Player}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LENS_LOYALTY_ALWAYS_LOYAL" Language="en_US">
+      <Text>Always loyal</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LENS_RELIGION_MAJORITY_FOLLOWERS" Language="en_US">
+      <Text>Majority, {1_Religion}: {2_Count} followers</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LENS_RELIGION_FOLLOWERS" Language="en_US">
+      <Text>{1_Religion}: {2_Count} followers</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LENS_RELIGION_NO_MAJORITY" Language="en_US">
+      <Text>No majority religion</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_RELIGION" Language="en_US">
+      <Text>By religion</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_LOYALTY" Language="en_US">
+      <Text>Loyalty</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_RELIGION_NO_MAJORITY" Language="en_US">
+      <Text>No majority</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LENS_APPEAL" Language="en_US">
+      <Text>{1_Appeal}: {2_Value}</Text>
     </Row>
     <Row Tag="LOC_CAI_INTERFACE_ACTION_UNAVAILABLE" Language="en_US">
       <Text>No interface action available</Text>
@@ -2818,6 +2969,12 @@
     <Row Tag="LOC_CAI_MINIMAP_LENS_LIST" Language="en_US">
       <Text>Lens list</Text>
     </Row>
+    <Row Tag="LOC_CAI_MINIMAP_OPEN_MAP_PIN_LIST" Language="en_US">
+      <Text>Toggle map pin list</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MINIMAP_OPEN_MAP_PIN_LIST_TOOLTIP" Language="en_US">
+      <Text>Opens or closes the map pin list panel.</Text>
+    </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GOAL_ADDED_ALERT" Language="en_US">
       <Text>Tutorial goal added: {1_Goal}</Text>
     </Row>
@@ -2848,6 +3005,15 @@
     </Row>
     <Row Tag="LOC_CAI_PEDIA_JUMPING" Language="en_US">
       <Text>Jumping to {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_LOOKUP_RESULTS" Language="en_US">
+      <Text>Civilopedia Lookup</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_LOOKUP_NO_TERMS" Language="en_US">
+      <Text>No search terms available for this item</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_LOOKUP_NO_RESULTS" Language="en_US">
+      <Text>No Civilopedia articles found</Text>
     </Row>
 
     <!-- Options screen feedback -->
@@ -4020,6 +4186,108 @@
     </Row>
     <Row Tag="LOC_CAI_HOF_NO_GAMES" Language="en_US">
       <Text>No game history</Text>
+    </Row>
+
+    <!-- Map Pin -->
+    <Row Tag="LOC_CAI_PLACE_MAP_PIN" Language="en_US">
+      <Text>Place Map Pin</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLACE_MAP_PIN_TOOLTIP" Language="en_US">
+      <Text>Place a map pin at the current cursor location</Text>
+    </Row>
+
+    <!-- Map Pin Popup -->
+    <Row Tag="LOC_CAI_MAP_PIN_ICON_LABEL" Language="en_US">
+      <Text>Icon</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_PIN_ICON_STRENGTH" Language="en_US">
+      <Text>Strength</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_PIN_ICON_RANGED" Language="en_US">
+      <Text>Ranged</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_PIN_ICON_BOMBARD" Language="en_US">
+      <Text>Bombard</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_PIN_ICON_DISTRICT" Language="en_US">
+      <Text>District</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_PIN_ICON_CHARGES" Language="en_US">
+      <Text>Charges</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_PIN_ICON_DEFENSE" Language="en_US">
+      <Text>Defense</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_PIN_ICON_MOVEMENT" Language="en_US">
+      <Text>Movement</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_PIN_ICON_NO" Language="en_US">
+      <Text>No</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_PIN_ICON_PLUS" Language="en_US">
+      <Text>Plus</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_PIN_ICON_CIRCLE" Language="en_US">
+      <Text>Circle</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_PIN_ICON_TRIANGLE" Language="en_US">
+      <Text>Triangle</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_PIN_ICON_SUN" Language="en_US">
+      <Text>Sun</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_PIN_ICON_SQUARE" Language="en_US">
+      <Text>Square</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_PIN_ICON_DIAMOND" Language="en_US">
+      <Text>Diamond</Text>
+    </Row>
+
+    <!-- Tile interaction -->
+    <Row Tag="LOC_CAI_TILE_INTERACT_UNIT" Language="en_US">
+      <Text>Unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TILE_INTERACT_CITY" Language="en_US">
+      <Text>City</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TILE_INTERACT_DISTRICT" Language="en_US">
+      <Text>District</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TILE_INTERACT_SELECT_UNIT" Language="en_US">
+      <Text>{1_UnitName}, Select Unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TILE_INTERACT_SELECT_CITY" Language="en_US">
+      <Text>{1_CityName}, Select City</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TILE_INTERACT_CITY_STATE" Language="en_US">
+      <Text>{1_CityName}, Open City State</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TILE_INTERACT_DIPLOMACY" Language="en_US">
+      <Text>{1_CityName}, Open Diplomacy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TILE_INTERACT_VIEW_CITY" Language="en_US">
+      <Text>{1_CityName}, View City Details</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TILE_INTERACT_DISTRICT_STRIKE" Language="en_US">
+      <Text>{1_DistrictName}, Ranged Strike</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TILE_INTERACT_LIST_TITLE" Language="en_US">
+      <Text>Tile Actions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TILE_INTERACT_NO_ACTIONS" Language="en_US">
+      <Text>No actions available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_RECOMMENDATIONS" Language="en_US">
+      <Text>Recommendations</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BUILDER_RECOMMENDATIONS" Language="en_US">
+      <Text>Builder recommendations</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_SETTLER_RECOMMENDATIONS" Language="en_US">
+      <Text>Settler recommendations</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_RECOMMENDED_SETTLEMENT" Language="en_US">
+      <Text>Recommended settlement location</Text>
     </Row>
 
   </LocalizedText>

@@ -36,6 +36,7 @@ local currentPlot = -1
 local info = ExposedMembers.CAIInfo or {}
 ExposedMembers.CAIInfo = info
 
+
 local STATIC_INFO_PRIORITY = {
     "plotName",
     "owner",
@@ -73,27 +74,28 @@ local STATIC_INFO_PRIORITY = {
     "fallout",
     "units",
     "interfaceInfo",
+    "lensInfo",
 }
 
 local CURSOR_MOVE_INFO_PRIORITY = {
     "isFog",
     "units",
     "interfaceInfo",
+    "lensInfo",
     "waypoint",
+    "fallout",
     "cityName",
     "wonderTitle",
-    "cityResourceExtraction",
     "districtTitle",
-    "districtResourceExtraction",
-    "districtSpecialistsHeader",
     "plotName",
     "feature",
-    "nationalPark",
     "resource",
     "improvement",
     "barbarianClan",
-    "plotResourceExtraction",
     "river",
+    "cliff",
+    "workers",
+    "recommendation",
 }
 
 local PlotInfoActionRequestBuilders = {}
@@ -550,6 +552,87 @@ local RIVER_SPOKEN_ORDER = {
     "LOC_CAI_DIR_NW",
 }
 
+local CLIFF_SELF_EDGES = {
+    { dir = "LOC_CAI_DIR_E",  hasCliff = function(p) return p ~= nil and p:IsWOfCliff() end },
+    { dir = "LOC_CAI_DIR_SE", hasCliff = function(p) return p ~= nil and p:IsNWOfCliff() end },
+    { dir = "LOC_CAI_DIR_SW", hasCliff = function(p) return p ~= nil and p:IsNEOfCliff() end },
+}
+
+local CLIFF_NEIGHBOR_EDGES = {
+    {
+        dir = "LOC_CAI_DIR_W",
+        neighborDir = DirectionTypes.DIRECTION_WEST,
+        hasCliff = function(p)
+            return p ~= nil and p:IsWOfCliff()
+        end
+    },
+    {
+        dir = "LOC_CAI_DIR_NW",
+        neighborDir = DirectionTypes.DIRECTION_NORTHWEST,
+        hasCliff = function(p)
+            return p ~= nil and p:IsNWOfCliff()
+        end
+    },
+    {
+        dir = "LOC_CAI_DIR_NE",
+        neighborDir = DirectionTypes.DIRECTION_NORTHEAST,
+        hasCliff = function(p)
+            return p ~= nil and p:IsNEOfCliff()
+        end
+    },
+}
+
+local function GetCliffDirectionString(plot)
+    if plot == nil then
+        return nil
+    end
+
+    if not plot:IsNWOfCliff() and not plot:IsWOfCliff() and not plot:IsNEOfCliff() then
+        local x = plot:GetX()
+        local y = plot:GetY()
+        local hasAny = false
+        for _, edge in ipairs(CLIFF_NEIGHBOR_EDGES) do
+            local neighbor = Map.GetAdjacentPlot(x, y, edge.neighborDir)
+            if edge.hasCliff(neighbor) then
+                hasAny = true
+                break
+            end
+        end
+        if not hasAny then
+            return nil
+        end
+    end
+
+    local presentEdges = {}
+    for _, edge in ipairs(CLIFF_SELF_EDGES) do
+        if edge.hasCliff(plot) then
+            presentEdges[edge.dir] = true
+        end
+    end
+
+    local x = plot:GetX()
+    local y = plot:GetY()
+    for _, edge in ipairs(CLIFF_NEIGHBOR_EDGES) do
+        local neighbor = Map.GetAdjacentPlot(x, y, edge.neighborDir)
+        if edge.hasCliff(neighbor) then
+            presentEdges[edge.dir] = true
+        end
+    end
+
+    local directions = {}
+    for _, dirTag in ipairs(RIVER_SPOKEN_ORDER) do
+        if presentEdges[dirTag] then
+            table.insert(directions, Locale.Lookup(dirTag))
+        end
+    end
+
+    if #directions == 0 then
+        return nil
+    end
+
+    return table.concat(directions, " ")
+end
+
 local function GetRiverDirectionString(plot)
     if plot == nil or not plot:IsRiver() then
         return nil
@@ -720,6 +803,7 @@ local function GetNamedRiverString(data, plot)
     return riverString
 end
 
+
 ---@type table<string, fun(data:table, plot:table, arg:string|nil):string|string[]|nil>
 info.PlotInfoHelpers = {
     isFog = function(data, plot)
@@ -839,12 +923,14 @@ info.PlotInfoHelpers = {
         return GetNamedRiverString(data, plot)
     end,
 
-    cliff = function(data)
+    cliff = function(data, plot)
         if not data.IsVisible then return nil end
-        if data.IsNWOfCliff or data.IsWOfCliff or data.IsNEOfCliff then
-            return Locale.Lookup("LOC_TOOLTIP_CLIFF")
+        local directionString = GetCliffDirectionString(plot)
+        if directionString == nil then
+            return nil
         end
-        return nil
+        local cliffString = Locale.Lookup("LOC_TOOLTIP_CLIFF")
+        return Locale.Lookup("LOC_CAI_PLOT_CLIFF_WITH_DIRECTIONS", cliffString, directionString)
     end,
 
     territory = function(data)
@@ -993,7 +1079,7 @@ info.PlotInfoHelpers = {
     end,
 
     districtResourceExtraction = function(data, plot)
-        if not data.IsVisible or not IS_XP2_TOOLTIP or data.DistrictID == -1 or data.DistrictType == nil then return nil end
+        if not data.IsVisible or not IS_XP2_TOOLTIP or data.IsCity or data.DistrictID == -1 or data.DistrictType == nil then return nil end
         local districtInfo = GameInfo.Districts[data.DistrictType]
         if districtInfo == nil or districtInfo.InternalOnly then
             return nil
@@ -1158,6 +1244,16 @@ info.PlotInfoHelpers = {
         if plot == nil then return nil end
         return GetActiveInterfacePlotInfo(plot)
     end,
+
+    lensInfo = function(data, plot)
+        if plot == nil then return nil end
+        return GetActiveLensPlotInfo(plot)
+    end,
+
+    recommendation = function(data, plot)
+        if plot == nil or info.GetRecommendationForPlot == nil then return nil end
+        return info.GetRecommendationForPlot(plot:GetIndex())
+    end,
 }
 
 local DynamicPlotInfoHelpers = {
@@ -1321,6 +1417,34 @@ local function BuildDistrictAndBuildingRequestKeys(data)
     return keys
 end
 
+local function BuildCursorMoveRequestKeys(data)
+    local keys = {}
+    for _, key in ipairs(CURSOR_MOVE_INFO_PRIORITY) do
+        table.insert(keys, key)
+    end
+
+    table.insert(keys, "cityResourceExtraction")
+    table.insert(keys, "districtResourceExtraction")
+    table.insert(keys, "plotResourceExtraction")
+
+    table.insert(keys, "buildingsHeader")
+    if data.BuildingNames ~= nil then
+        for i = 1, #data.BuildingNames do
+            table.insert(keys, "building:" .. tostring(i))
+        end
+    end
+
+    CacheGreatWorks(data)
+    if data._CAIGreatWorkCount > 0 then
+        table.insert(keys, "greatWorksHeader")
+        for i = 1, data._CAIGreatWorkCount do
+            table.insert(keys, "greatWork:" .. tostring(i))
+        end
+    end
+
+    return keys
+end
+
 local function InitializePlotInfoActionRequestBuilders()
     PlotInfoActionRequestBuilders = {
         [Input.GetActionId("PlotReadUnits")] = function(plot, data)
@@ -1331,8 +1455,8 @@ local function InitializePlotInfoActionRequestBuilders()
         end,
         [Input.GetActionId("PlotReadYieldRiverOwner")] = function(plot, data)
             local keys = BuildYieldInfoRequestKeys(data)
+            table.insert(keys, "workers")
             table.insert(keys, "freshWater")
-            table.insert(keys, "riverNamed")
             table.insert(keys, "owner")
             return {
                 keys = keys,
@@ -1341,7 +1465,7 @@ local function InitializePlotInfoActionRequestBuilders()
         end,
         [Input.GetActionId("PlotReadStats")] = function(plot, data)
             return {
-                keys = { "movement", "defense", "appeal" },
+                keys = { "movement", "defense", "appeal", "fallout" },
                 emptyLoc = "LOC_CAI_PLOT_NO_PHYSICAL_INFO",
             }
         end,
@@ -1357,7 +1481,42 @@ local function InitializePlotInfoActionRequestBuilders()
                 emptyLoc = "LOC_CAI_PLOT_NO_DISTRICTS_OR_BUILDINGS",
             }
         end,
+        [Input.GetActionId("PlotReadGeography")] = function(plot, data)
+            return {
+                keys = {
+                    "route",
+                    "coastalLowland",
+                    "volcano",
+                    "storm",
+                    "drought",
+                    "continent",
+                    "territory",
+                    "cliff",
+                    "riverNamed",
+                    "nationalPark",
+                },
+                emptyLoc = "LOC_CAI_PLOT_NO_GEOGRAPHY_INFO",
+            }
+        end,
     }
+end
+
+function info.GetCursorPlotInfoBucket()
+    return CURSOR_MOVE_INFO_PRIORITY
+end
+
+function info:RequestCursorMovePlotInfo(plot, explicitPlotId)
+    local targetPlot = plot
+    if explicitPlotId ~= nil and Map.IsPlot(explicitPlotId) then
+        targetPlot = Map.GetPlotByIndex(explicitPlotId)
+    end
+    if not targetPlot then return {} end
+
+    local data = BuildPlotInfoData(targetPlot)
+    if data == nil then return {} end
+
+    local keys = BuildCursorMoveRequestKeys(data)
+    return RequestPlotInfoFromData(targetPlot, data, keys)
 end
 
 ---@param plot Plot|nil
@@ -1384,8 +1543,13 @@ function info:RequestPlotInfo(plot, requestedKeys, explicitPlotId)
     return RequestPlotInfoFromData(targetPlot, data, requestedKeys)
 end
 
-function OnCAICursorMove(x, y, plotId)
+function OnCAICursorMove(state)
+    local plotId = state.toPlotId
     currentPlot = plotId ~= nil and plotId or -1
+
+    if state.reason == "select" then
+        return
+    end
 
     if plotId == nil or plotId < 0 or not Map.IsPlot(plotId) then
         print("CAI PlotToolTip received invalid cursor plot id: " .. tostring(plotId))
@@ -1397,7 +1561,12 @@ function OnCAICursorMove(x, y, plotId)
         print("CAI PlotToolTip could not resolve cursor plot id: " .. tostring(plotId))
         return
     end
-    local results = info:RequestPlotInfo(current, CURSOR_MOVE_INFO_PRIORITY)
+    local data = BuildPlotInfoData(current)
+    if data == nil then
+        return
+    end
+    local keys = BuildCursorMoveRequestKeys(data)
+    local results = RequestPlotInfoFromData(current, data, keys)
 
     if #results > 0 then
         Speak(ProcessIcons(table.concat(results, ", ")))

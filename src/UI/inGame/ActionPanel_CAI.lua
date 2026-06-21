@@ -1,5 +1,13 @@
 include("caiUtils")
-include("ActionPanel")
+include("Civ6Common")
+
+if IsExpansion2Active() then
+    include("ActionPanel_Expansion2")
+elseif IsExpansion1Active() then
+    include("ActionPanel_Expansion1")
+else
+    include("ActionPanel")
+end
 
 local mgr = ExposedMembers.CAI_UIManager
 
@@ -7,9 +15,11 @@ local ACTION_PANEL_LIST_ID = "CAIActionPanelTurnBlockerList"
 local END_TURN_ACTION = Input.GetActionId("EndTurn")
 local CAI_END_TURN_ACTION = Input.GetActionId("SharedEndTurn")
 local CAI_OPEN_TURN_BLOCKERS_ACTION = Input.GetActionId("ActionPanelOpenTurnBlockers")
+local CAI_SPEAK_ERA_AGE_ACTION = Input.GetActionId("ActionPanelSpeakEraAge")
 local m_caiTutorialActionPanelAllowed = false
 local m_caiLastSpokenActionTooltip = nil
 local IsTutorialActionPanelAllowed = nil
+
 
 local function ControlIsHidden(control)
     return control and control.IsHidden and control:IsHidden() or false
@@ -36,12 +46,11 @@ local function ControlTooltip(control)
 end
 
 local function CanSpeakCurrentAction()
-    if ContextPtr:IsHidden() then return end
+    if ContextPtr:IsHidden() then return false end
     if IsTutorialActionPanelAllowed ~= nil and not IsTutorialActionPanelAllowed() then return false end
 
     local playerID = Game.GetLocalPlayer()
-    local player = playerID and playerID >= 0 and Players[playerID] or nil
-    if player == nil or not player:IsTurnActive() then return false end
+    if playerID == nil or playerID < 0 then return false end
 
     return true
 end
@@ -104,28 +113,28 @@ local function CountBlockerType(blockerType)
     return count
 end
 
-local function MakeActionButton(data)
-    return mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIActionPanelButton"), "Button", {
-        GetLabel = data.GetLabel,
-        GetTooltip = data.GetTooltip,
-        GetValue = data.GetValue,
-        IsHidden = data.IsHidden,
-        IsDisabled = data.IsDisabled,
-        OnFocusEnter = function()
-            UI.PlaySound("Main_Menu_Mouse_Over")
-        end,
-        OnClick = function()
-            if data.IsHidden and data.IsHidden() then return end
-            if data.IsDisabled and data.IsDisabled() then return end
-            CloseTurnBlockerList()
-            data.OnClick()
-        end,
+local function MakeActionButton(list, data)
+    local btn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIActionPanelButton"), "Button", {
+        Label = data.Label,
+        Tooltip = data.Tooltip,
+        Value = data.Value,
+        HiddenPredicate = data.HiddenPredicate,
+        DisabledPredicate = data.DisabledPredicate,
     })
+    btn:SetFocusSound("Main_Menu_Mouse_Over")
+    btn:On("activate", function(w)
+        if w:IsHidden() then return end
+        if w:IsDisabled() then return end
+        CloseTurnBlockerList()
+        data.OnActivate()
+    end)
+    list:AddChild(btn)
+    return btn
 end
 
 local function AddPrimaryAction(list, activeBlocker)
-    list:AddChild(MakeActionButton({
-        GetLabel = function()
+    MakeActionButton(list, {
+        Label = function()
             local text = ControlText(Controls.EndTurnText)
             if text ~= "" then return text end
 
@@ -134,10 +143,10 @@ local function AddPrimaryAction(list, activeBlocker)
 
             return Locale.Lookup("LOC_ACTION_PANEL_END_TURN")
         end,
-        GetTooltip = function()
+        Tooltip = function()
             return ControlTooltip(Controls.EndTurnButton)
         end,
-        GetValue = function()
+        Value = function()
             if activeBlocker == nil then return "" end
 
             local count = CountBlockerType(activeBlocker)
@@ -146,31 +155,31 @@ local function AddPrimaryAction(list, activeBlocker)
             end
             return ""
         end,
-        IsHidden = function()
+        HiddenPredicate = function()
             return ContextPtr:IsHidden()
                 or not IsActionPanelInputEnabled()
         end,
-        IsDisabled = function()
+        DisabledPredicate = function()
             return ControlIsDisabled(Controls.EndTurnButton)
                 or ControlIsDisabled(Controls.EndTurnButtonLabel)
         end,
-        OnClick = function()
+        OnActivate = function()
             DoEndTurn()
         end,
-    }))
+    })
 end
 
 local function AddBlockerAction(list, blockerType, backingControl)
     local capturedType = blockerType
     local capturedControl = backingControl
 
-    list:AddChild(MakeActionButton({
-        GetLabel = function()
+    MakeActionButton(list, {
+        Label = function()
             local info = g_kMessageInfo and g_kMessageInfo[capturedType] or nil
             if info and info.Message then return info.Message end
             return tostring(capturedType)
         end,
-        GetTooltip = function()
+        Tooltip = function()
             local tooltip = ControlTooltip(capturedControl)
             if tooltip ~= "" then return tooltip end
 
@@ -178,24 +187,24 @@ local function AddBlockerAction(list, blockerType, backingControl)
             if info and info.ToolTip then return info.ToolTip end
             return ""
         end,
-        GetValue = function()
+        Value = function()
             local count = CountBlockerType(capturedType)
             if count >= 2 then
                 return Locale.Lookup("LOC_CAI_ACTION_PANEL_BLOCKER_COUNT", count)
             end
             return ""
         end,
-        IsHidden = function()
+        HiddenPredicate = function()
             return ContextPtr:IsHidden()
                 or not IsActionPanelInputEnabled()
         end,
-        IsDisabled = function()
+        DisabledPredicate = function()
             return capturedControl ~= nil and ControlIsDisabled(capturedControl)
         end,
-        OnClick = function()
+        OnActivate = function()
             DoEndTurn(capturedType)
         end,
-    }))
+    })
 end
 
 local function BuildTurnBlockerList()
@@ -204,10 +213,8 @@ local function BuildTurnBlockerList()
     local playerID = GetLocalPlayerID()
     if playerID == nil then return nil end
 
-    local list = mgr:CreateUIWidget(ACTION_PANEL_LIST_ID, "List", {
-        GetLabel = function()
-            return Locale.Lookup("LOC_CAI_ACTION_PANEL_TURN_BLOCKERS")
-        end,
+    local list = mgr:CreateWidget(ACTION_PANEL_LIST_ID, "List", {
+        Label = function() return Locale.Lookup("LOC_CAI_ACTION_PANEL_TURN_BLOCKERS") end,
     })
     list:AddInputBinding({
         Key = Keys.VK_ESCAPE,
@@ -241,10 +248,8 @@ local function BuildTurnBlockerList()
     end
 
     if list.Children == nil or #list.Children == 0 then
-        list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAIActionPanelStaticText"), "StaticText", {
-            GetLabel = function()
-                return Locale.Lookup("LOC_CAI_ACTION_PANEL_NO_TURN_BLOCKERS")
-            end,
+        list:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAIActionPanelStaticText"), "StaticText", {
+            Label = function() return Locale.Lookup("LOC_CAI_ACTION_PANEL_NO_TURN_BLOCKERS") end,
         }))
     end
 
@@ -258,17 +263,128 @@ local function OpenTurnBlockerList()
 
     local list = BuildTurnBlockerList()
     if list ~= nil and #list:GetVisibleChildren() > 0 then
-        mgr:Push(list, PopupPriority.Low)
+        mgr:Push(list, { priority = PopupPriority.Low })
     else
         Speak(Locale.Lookup("LOC_CAI_ACTION_PANEL_NO_TURN_BLOCKERS"))
     end
 end
 
+-- ===========================================================================
+-- Era age speech
+-- ===========================================================================
+local function GetEraName()
+    if IsExpansion1Active() or IsExpansion2Active() then
+        local currentEra = Game.GetEras():GetCurrentEra()
+        local kEraData = GameInfo.Eras[currentEra]
+        if kEraData then return Locale.Lookup(kEraData.Name) end
+    else
+        local playerID = GetLocalPlayerID()
+        if playerID == nil then return nil end
+        local player = Players[playerID]
+        if player == nil then return nil end
+        local eraIndex = player:GetEra() + 1
+        for row in GameInfo.Eras() do
+            if row.ChronologyIndex == eraIndex then
+                return Locale.Lookup(row.Name)
+            end
+        end
+    end
+    return nil
+end
+
+local function SpeakEraAge()
+    local playerID = GetLocalPlayerID()
+    if playerID == nil then return end
+
+    local parts = {}
+
+    local eraName = GetEraName()
+    if eraName then
+        table.insert(parts, eraName)
+    end
+
+    if not (IsExpansion1Active() or IsExpansion2Active()) then
+        Speak(table.concat(parts, ", "))
+        return
+    end
+
+    local gameEras = Game.GetEras()
+    if gameEras == nil then return end
+
+    local isFinalEra = gameEras:GetCurrentEra() == gameEras:GetFinalEra()
+
+    if not isFinalEra then
+        local countdown = gameEras:GetNextEraCountdown() + 1
+        if countdown > 0 then
+            table.insert(parts, Locale.Lookup("LOC_GLORY_HUD_ERA_ENDS_IN", countdown))
+        end
+    end
+
+    local score = gameEras:GetPlayerCurrentScore(playerID)
+    table.insert(parts, Locale.Lookup("LOC_ERA_SCORE_HEADER") .. " " .. score)
+
+    if gameEras:HasHeroicGoldenAge(playerID) then
+        table.insert(parts, Locale.Lookup("LOC_ERA_PROGRESS_HEROIC_AGE"))
+    elseif gameEras:HasGoldenAge(playerID) then
+        table.insert(parts, Locale.Lookup("LOC_ERA_PROGRESS_GOLDEN_AGE"))
+    elseif gameEras:HasDarkAge(playerID) then
+        table.insert(parts, Locale.Lookup("LOC_ERA_PROGRESS_DARK_AGE"))
+    else
+        table.insert(parts, Locale.Lookup("LOC_ERA_PROGRESS_NORMAL_AGE"))
+    end
+
+    if not isFinalEra then
+        local darkAgeThreshold = gameEras:GetPlayerDarkAgeThreshold(playerID)
+        local goldenAgeThreshold = gameEras:GetPlayerGoldenAgeThreshold(playerID)
+        table.insert(parts, Locale.Lookup("LOC_CAI_ACTION_PANEL_ERA_THRESHOLDS",
+            darkAgeThreshold, goldenAgeThreshold))
+    end
+
+    local activeCommemorations = gameEras:GetPlayerActiveCommemorations(playerID)
+    if activeCommemorations and #activeCommemorations > 0 then
+        table.insert(parts, Locale.Lookup("LOC_CAI_ACTION_PANEL_DEDICATIONS"))
+        for _, activeCommemoration in ipairs(activeCommemorations) do
+            local commemorationInfo = GameInfo.CommemorationTypes[activeCommemoration]
+            if commemorationInfo ~= nil then
+                local dedicationName = commemorationInfo.CategoryDescription and Locale.Lookup(commemorationInfo.CategoryDescription) or ""
+                local bonusText = nil
+                if gameEras:HasGoldenAge(playerID) then
+                    bonusText = Locale.Lookup(commemorationInfo.GoldenAgeBonusDescription)
+                    if gameEras:IsPlayerAlwaysAllowedCommemorationQuest(playerID) then
+                        bonusText = bonusText .. ", " .. Locale.Lookup(commemorationInfo.NormalAgeBonusDescription)
+                    end
+                elseif gameEras:HasDarkAge(playerID) then
+                    bonusText = Locale.Lookup(commemorationInfo.DarkAgeBonusDescription)
+                else
+                    bonusText = Locale.Lookup(commemorationInfo.NormalAgeBonusDescription)
+                end
+                if bonusText then
+                    local afterNewline = string.match(bonusText, "%[NEWLINE%](.+)")
+                    if afterNewline then
+                        bonusText = afterNewline
+                    end
+                    table.insert(parts, dedicationName .. ": " .. bonusText)
+                end
+            end
+        end
+    end
+
+    Speak(table.concat(parts, ", "))
+end
+
+-- ===========================================================================
+-- Input
+-- ===========================================================================
 OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     if ContextPtr:IsHidden() then return end
 
     if actionId == CAI_OPEN_TURN_BLOCKERS_ACTION then
         OpenTurnBlockerList()
+        return
+    end
+
+    if actionId == CAI_SPEAK_ERA_AGE_ACTION then
+        SpeakEraAge()
         return
     end
 
@@ -282,9 +398,8 @@ OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionI
 end)
 
 OnRefresh = WrapFunc(OnRefresh, function(orig, ...)
-    local result = orig(...)
+    orig(...)
     SpeakCurrentActionTooltipIfChanged()
-    return result
 end)
 
 function OnCAIActionPanelInputHandler(inputStruct)

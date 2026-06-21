@@ -621,6 +621,16 @@ local function RebuildOperativesTree()
         end)
         cityCat:On("activate", function()
             LookAtCity(group.ownerID, group.cityID)
+            local player = Players[group.ownerID]
+            if player then
+                local city = player:GetCities():FindID(group.cityID)
+                if city then
+                    local plot = Map.GetPlot(city:GetX(), city:GetY())
+                    if plot then
+                        LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
+                    end
+                end
+            end
         end)
 
         for _, entry in ipairs(group.entries) do

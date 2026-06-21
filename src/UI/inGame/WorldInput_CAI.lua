@@ -4,6 +4,7 @@ include("inGameHelpers_CAI")
 include("UnitWaypoints_CAI")
 include("interfaceInfoHelpers_CAI")
 include("CAIUIScreenManager")
+include("RecommendationLogic_CAI")
 include("WorldScanner_CAI")
 include("Surveyor_CAI")
 include("RevealAnnouncements_CAI")
@@ -59,7 +60,10 @@ local ACTION_SCANNER_NEXT_ITEM = Input.GetActionId("WorldScannerNextItem")
 local ACTION_SCANNER_JUMP = Input.GetActionId("WorldScannerJumpToCurrent")
 local ACTION_SCANNER_RETURN = Input.GetActionId("WorldScannerReturnFromJump")
 local ACTION_SCANNER_SPEAK_DIRECTION = Input.GetActionId("WorldScannerSpeakCurrentDirection")
+local ACTION_SCANNER_SEARCH = Input.GetActionId("WorldScannerSearch")
 local ACTION_MINIMAP_LENS_LIST = Input.GetActionId("CAIMinimapOpenLensList")
+local ACTION_MINIMAP_MAP_PIN_LIST = Input.GetActionId("CAIMinimapOpenMapPinList")
+local ACTION_PLACE_MAP_PIN = Input.GetActionId("CAIPlaceMapPin")
 local ACTION_SURVEYOR_GROW_RADIUS = Input.GetActionId("SurveyorGrowRadius")
 local ACTION_SURVEYOR_SHRINK_RADIUS = Input.GetActionId("SurveyorShrinkRadius")
 local ACTION_SURVEYOR_READ_YIELDS = Input.GetActionId("SurveyorReadYields")
@@ -100,6 +104,248 @@ local function RaiseCurrentInterfaceWidgetAction(luaEvent)
 
 	luaEvent(m_caiCurrentInterfaceWidget:GetId(), GetCurrentCAICursorPlotId())
 	return true
+end
+
+-- ===========================================================================
+-- Plot interaction (Enter / Ctrl+Enter in SELECTION mode)
+-- ===========================================================================
+local PLOT_INTERACT_LIST_ID = "CAIWorldInputPlotInteractList"
+
+local function IsMinorCivPlayer(playerID)
+	local config = PlayerConfigurations[playerID]
+	if config == nil then return false end
+	return config:GetCivilizationLevelTypeID() ~= CivilizationLevelTypes.CIVILIZATION_LEVEL_FULL_CIV
+end
+
+local function HasEspionageViewOnCity(ownerID, cityID)
+	if not IsExpansion2Active() then return false end
+	local localPlayerID = Game.GetLocalPlayer()
+	if localPlayerID == nil or localPlayerID < 0 then return false end
+	local pLocalPlayer = Players[localPlayerID]
+	if pLocalPlayer == nil then return false end
+	local pDiplo = pLocalPlayer:GetDiplomacy()
+	if pDiplo == nil then return false end
+	local eVisibility = pDiplo:GetVisibilityOn(ownerID)
+	local kVisDef = GameInfo.Visibilities_XP2 and GameInfo.Visibilities_XP2[eVisibility] or nil
+	if kVisDef == nil then return false end
+	if kVisDef.EspionageViewAll == true then return true end
+	if kVisDef.EspionageViewCapital == true then
+		local pOwner = Players[ownerID]
+		if pOwner ~= nil then
+			local pCity = pOwner:GetCities():FindID(cityID)
+			if pCity ~= nil and pCity:IsCapital() then return true end
+		end
+	end
+	return false
+end
+
+local function CollectPlotInteractions(plotId)
+	local results = {}
+	if plotId == nil or plotId < 0 then return results end
+
+	local plot = Map.GetPlotByIndex(plotId)
+	if plot == nil then return results end
+
+	local localPlayerID = Game.GetLocalPlayer()
+	if localPlayerID == nil or localPlayerID < 0 then return results end
+
+	local plotX = plot:GetX()
+	local plotY = plot:GetY()
+
+	local units = Units.GetUnitsInPlotLayerID(plotX, plotY, MapLayers.ANY)
+	if units ~= nil then
+		for _, unit in ipairs(units) do
+			local ownerID = unit:GetOwner()
+			if ownerID == localPlayerID then
+				local unitName = FormatOwnedUnitDisplayName(unit) or Locale.Lookup("LOC_CAI_TILE_INTERACT_UNIT")
+				table.insert(results, {
+					Label = Locale.Lookup("LOC_CAI_TILE_INTERACT_SELECT_UNIT", unitName),
+					Action = function()
+						UI.DeselectAllUnits()
+						UI.DeselectAllCities()
+						UI.SelectUnit(unit)
+					end,
+				})
+			end
+		end
+	end
+
+	local city = CityManager.GetCityAt(plotX, plotY)
+	if city ~= nil then
+		local cityOwnerID = city:GetOwner()
+		local cityID = city:GetID()
+		local cityName = city:GetName()
+		local displayName = cityName ~= nil and cityName ~= "" and Locale.Lookup(cityName) or Locale.Lookup("LOC_CAI_TILE_INTERACT_CITY")
+
+		if cityOwnerID == localPlayerID then
+			table.insert(results, {
+				Label = Locale.Lookup("LOC_CAI_TILE_INTERACT_SELECT_CITY", displayName),
+				Action = function()
+					UI.SelectCity(city)
+				end,
+			})
+		else
+			local hasMet = false
+			local pLocalPlayer = Players[localPlayerID]
+			if pLocalPlayer ~= nil then
+				local pDiplo = pLocalPlayer:GetDiplomacy()
+				if pDiplo ~= nil then
+					hasMet = pDiplo:HasMet(cityOwnerID)
+				end
+			end
+
+			if hasMet then
+				if IsMinorCivPlayer(cityOwnerID) then
+					table.insert(results, {
+						Label = Locale.Lookup("LOC_CAI_TILE_INTERACT_CITY_STATE", displayName),
+						Action = function()
+							LuaEvents.CityBannerManager_RaiseMinorCivPanel(cityOwnerID)
+						end,
+					})
+					if HasEspionageViewOnCity(cityOwnerID, cityID) then
+						table.insert(results, {
+							Label = Locale.Lookup("LOC_CAI_TILE_INTERACT_VIEW_CITY", displayName),
+							IsViewCity = true,
+							Action = function()
+								LuaEvents.CAIOpenOverviewForEnemyCity(cityOwnerID, cityID)
+							end,
+						})
+					end
+				else
+					table.insert(results, {
+						Label = Locale.Lookup("LOC_CAI_TILE_INTERACT_DIPLOMACY", displayName),
+						Action = function()
+							LuaEvents.CityBannerManager_TalkToLeader(cityOwnerID)
+						end,
+					})
+					if HasEspionageViewOnCity(cityOwnerID, cityID) then
+						table.insert(results, {
+							Label = Locale.Lookup("LOC_CAI_TILE_INTERACT_VIEW_CITY", displayName),
+							IsViewCity = true,
+							Action = function()
+								LuaEvents.CAIOpenOverviewForEnemyCity(cityOwnerID, cityID)
+							end,
+						})
+					end
+				end
+			end
+		end
+	end
+
+	local pLocalPlayer = Players[localPlayerID]
+	if pLocalPlayer ~= nil then
+		local districts = pLocalPlayer:GetDistricts()
+		if districts ~= nil and districts.Members ~= nil then
+			for _, district in districts:Members() do
+				if district ~= nil then
+					local dPlot = Map.GetPlot(district:GetX(), district:GetY())
+					if dPlot ~= nil and dPlot:GetIndex() == plotId then
+						if CityManager.CanStartCommand(district, CityCommandTypes.RANGE_ATTACK) then
+							local districtDef = GameInfo.Districts[district:GetType()]
+							local dName = districtDef ~= nil and districtDef.Name ~= nil and Locale.Lookup(districtDef.Name) or Locale.Lookup("LOC_CAI_TILE_INTERACT_DISTRICT")
+							table.insert(results, {
+								Label = Locale.Lookup("LOC_CAI_TILE_INTERACT_DISTRICT_STRIKE", dName),
+								Action = function()
+									UI.DeselectAll()
+									UI.SelectDistrict(district)
+									UI.SetInterfaceMode(InterfaceModeTypes.DISTRICT_RANGE_ATTACK)
+								end,
+							})
+						end
+					end
+				end
+			end
+		end
+	end
+
+	return results
+end
+
+local function ExecutePlotInteraction(interaction)
+	if interaction ~= nil and interaction.Action ~= nil then
+		interaction.Action()
+	end
+end
+
+local function DismissPlotInteractList()
+	mgr:RemoveFromStack(PLOT_INTERACT_LIST_ID)
+end
+
+local function PushPlotInteractList(interactions)
+	DismissPlotInteractList()
+
+	local list = mgr:CreateWidget(PLOT_INTERACT_LIST_ID, "List", {
+		GetLabel = function()
+			return Locale.Lookup("LOC_CAI_TILE_INTERACT_LIST_TITLE")
+		end,
+	})
+	if list == nil then return end
+
+	list:AddInputBinding({
+		Key = Keys.VK_ESCAPE,
+		MSG = KeyEvents.KeyUp,
+		Action = function()
+			DismissPlotInteractList()
+			return true
+		end,
+	})
+
+	for _, interaction in ipairs(interactions) do
+		local btn = mgr:CreateWidget(mgr:GenerateWidgetId("TileInteract"), "Button", {
+			Label = function() return interaction.Label end,
+		})
+		btn:On("activate", function()
+			DismissPlotInteractList()
+			ExecutePlotInteraction(interaction)
+		end)
+		list:AddChild(btn)
+	end
+
+	mgr:Push(list)
+end
+
+local function OnPlotPrimaryAction()
+	if UI.GetInterfaceMode() ~= InterfaceModeTypes.SELECTION then return false end
+	if m_caiCurrentInterfaceWidget ~= nil then return false end
+
+	local plotId = GetCurrentCAICursorPlotId()
+	local interactions = CollectPlotInteractions(plotId)
+	if #interactions == 0 then
+		Speak(Locale.Lookup("LOC_CAI_TILE_INTERACT_NO_ACTIONS"))
+		return true
+	end
+
+	if #interactions == 1 then
+		ExecutePlotInteraction(interactions[1])
+	else
+		PushPlotInteractList(interactions)
+	end
+
+	return true
+end
+
+local function FindViewCityInteraction(interactions)
+	for _, interaction in ipairs(interactions) do
+		if interaction.IsViewCity then
+			return interaction
+		end
+	end
+	return nil
+end
+
+local function OnPlotSecondaryAction()
+	if UI.GetInterfaceMode() ~= InterfaceModeTypes.SELECTION then return false end
+	if m_caiCurrentInterfaceWidget ~= nil then return false end
+
+	local plotId = GetCurrentCAICursorPlotId()
+	local interactions = CollectPlotInteractions(plotId)
+	local viewCity = FindViewCityInteraction(interactions)
+	if viewCity ~= nil then
+		ExecutePlotInteraction(viewCity)
+		return true
+	end
+
+	return false
 end
 
 ---Input actions that are common to all interface widgets should go here.
@@ -187,13 +433,19 @@ local SharedInputActions = {
 	[ACTION_INTERFACE_PRIMARY] = {
 		Type = INPUT_ACTION_TRIGGERED,
 		Action = function()
-			return RaiseCurrentInterfaceWidgetAction(LuaEvents.CAIInterfaceWidgetPrimaryAction)
+			if RaiseCurrentInterfaceWidgetAction(LuaEvents.CAIInterfaceWidgetPrimaryAction) then
+				return true
+			end
+			return OnPlotPrimaryAction()
 		end,
 	},
 	[ACTION_INTERFACE_SECONDARY] = {
 		Type = INPUT_ACTION_TRIGGERED,
 		Action = function()
-			return RaiseCurrentInterfaceWidgetAction(LuaEvents.CAIInterfaceWidgetSecondaryAction)
+			if RaiseCurrentInterfaceWidgetAction(LuaEvents.CAIInterfaceWidgetSecondaryAction) then
+				return true
+			end
+			return OnPlotSecondaryAction()
 		end,
 	},
 	[ACTION_SCANNER_PREV_CATEGORY] = {
@@ -262,10 +514,30 @@ local SharedInputActions = {
 			CAIWorldScanner:SpeakCurrentDirection()
 		end,
 	},
+	[ACTION_SCANNER_SEARCH] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			CAIWorldScanner:OpenSearch()
+		end,
+	},
 	[ACTION_MINIMAP_LENS_LIST] = {
 		Type = INPUT_ACTION_TRIGGERED,
 		Action = function()
 			LuaEvents.CAIMinimapLensListToggle()
+			return true
+		end,
+	},
+	[ACTION_MINIMAP_MAP_PIN_LIST] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			LuaEvents.CAIMinimapMapPinListToggle()
+			return true
+		end,
+	},
+	[ACTION_PLACE_MAP_PIN] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			PlaceMapPin()
 			return true
 		end,
 	},
@@ -629,33 +901,50 @@ local function CreateGameViewWidget()
 	return true
 end
 
-local function SnapCursorToInitialCameraPosition()
-	local worldX, worldY = UI.GetMapLookAtWorldTarget()
-	if worldX == nil or worldY == nil then
-		print("CAI cursor unable to read initial camera position")
-		LuaEvents.CAICursorSnapToStartPlot()
-		return
+local function FindInitialPlotId()
+	local playerID = Game.GetLocalPlayer()
+	if playerID == nil or playerID < 0 then
+		local fallback = Map.GetPlot(0, 0)
+		return fallback and fallback:GetIndex() or nil
 	end
 
-	local plotX, plotY = UI.GetPlotCoordFromWorld(worldX, worldY)
-	if plotX == nil or plotY == nil or plotX < 0 or plotY < 0 then
-		print("CAI cursor unable to resolve initial camera plot: " .. tostring(worldX) .. ", " .. tostring(worldY))
-		LuaEvents.CAICursorSnapToStartPlot()
-		return
+	local unit = UI.GetHeadSelectedUnit()
+	if unit then
+		local plot = Map.GetPlot(unit:GetX(), unit:GetY())
+		if plot then return plot:GetIndex() end
 	end
 
-	local plot = Map.GetPlot(plotX, plotY)
-	if not plot then
-		print("CAI cursor unable to resolve initial camera plot coordinates: " ..
-			tostring(plotX) .. ", " .. tostring(plotY))
-		LuaEvents.CAICursorSnapToStartPlot()
-		return
+	local city = UI.GetHeadSelectedCity()
+	if city then
+		local plot = Map.GetPlot(city:GetX(), city:GetY())
+		if plot then return plot:GetIndex() end
 	end
 
-	LuaEvents.CAICursorSnapToPlot(plot:GetIndex())
+	local player = Players[playerID]
+	if player then
+		local cities = player:GetCities()
+		if cities then
+			local capital = cities:GetCapitalCity()
+			if capital then
+				local plot = Map.GetPlot(capital:GetX(), capital:GetY())
+				if plot then return plot:GetIndex() end
+			end
+		end
+	end
+
+	local fallback = Map.GetPlot(0, 0)
+	return fallback and fallback:GetIndex() or nil
 end
 
-local function OnCAICursorMoved(x, y, plotId)
+local function SnapCursorToInitialPosition()
+	local plotId = FindInitialPlotId()
+	if plotId ~= nil then
+		CAICursor:MoveTo(plotId, "snap")
+	end
+end
+
+local function OnCAICursorMoved(state)
+	local plotId = state.toPlotId
 	if plotId == nil or plotId < 0 or not Map.IsPlot(plotId) then
 		print("CAI WorldInput received invalid cursor plot id: " .. tostring(plotId))
 		return
@@ -667,7 +956,11 @@ local function OnCAICursorMoved(x, y, plotId)
 		return
 	end
 
-	UI.LookAtPlot(plot)
+	if state.reason == "step" then
+		UI.LookAtPlot(plot:GetX(), plot:GetY(), 0, 0, true)
+	else
+		UI.LookAtPlot(plot)
+	end
 end
 
 local function OnUnitSelectionChanged(playerID, unitID, hexI, hexJ, hexK, isSelected, isEditable)
@@ -692,6 +985,7 @@ local function RegisterCAIEvents()
 	Events.LocalPlayerTurnBegin.Add(OnLocalPlayerTurnBegin)
 	Events.UnitSelectionChanged.Add(OnUnitSelectionChanged)
 	LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
+	CAIRecommendationLogic.Initialize()
 end
 
 local function UnregisterCAIEvents()
@@ -707,7 +1001,7 @@ local function InitializeCAIGameView()
 	if not CreateGameViewWidget() then return end
 	mgr:Push(m_caiGameViewWidget)
 	RegisterCAIEvents()
-	SnapCursorToInitialCameraPosition()
+	SnapCursorToInitialPosition()
 	CAIWorldScanner:Initialize()
 	RevealAnnouncements_CAI.Initialize()
 end
@@ -737,6 +1031,7 @@ OnShutdown = WrapFunc(OnShutdown, function(orig)
 	if CAIUnitWaypoints ~= nil and CAIUnitWaypoints.Shutdown ~= nil then
 		CAIUnitWaypoints:Shutdown()
 	end
+	CAIRecommendationLogic.Shutdown()
 	CAIWorldScanner:ClearScanner()
 	RevealAnnouncements_CAI.Shutdown()
 	if mgr then

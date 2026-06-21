@@ -572,6 +572,10 @@ PopupDialog.Open = WrapFunc(PopupDialog.Open, function(orig, self, optionalID)
     if ContextPtr:IsHidden() then return end
     local mgr = ExposedMembers.CAI_UIManager
     if not mgr then return end
+    if DialogWidget then
+        mgr:RemoveFromStack(DialogWidget:GetId())
+        DialogWidget = nil
+    end
     DialogWidget = mgr.WidgetHelpers.CreatePopupDialog(self)
     if not DialogWidget then return end
     mgr:Push(DialogWidget, { priority = PopupPriority.Current })
@@ -580,7 +584,6 @@ end)
 
 PopupDialog.Close = WrapFunc(PopupDialog.Close, function(orig, self)
     orig(self)
-	Speak("Closing popup dialog")
     if DialogWidget then
         local mgr = ExposedMembers.CAI_UIManager
         if mgr then mgr:RemoveFromStack(DialogWidget:GetId()) end

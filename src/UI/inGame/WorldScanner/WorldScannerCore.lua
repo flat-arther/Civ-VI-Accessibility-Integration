@@ -195,14 +195,10 @@ local function BuildGroups(definition, subCategoryId, items, context)
 end
 
 ---@param definition WorldScannerCategoryDefinition
+---@param rawItems table[]
 ---@param context WorldScannerContext
 ---@return WorldScannerCategory|nil
-function Core.BuildCategory(definition, context)
-    if definition.CanScan ~= nil and not definition.CanScan(context) then
-        return nil
-    end
-
-    local rawItems = definition.Scan and definition.Scan(context) or {}
+local function BuildCategoryFromItems(definition, rawItems, context)
     if rawItems == nil or #rawItems == 0 then
         return nil
     end
@@ -268,20 +264,64 @@ function Core.BuildCategory(definition, context)
     }
 end
 
----@param categoryDefinitions WorldScannerCategoryDefinition[]
+---@param definition WorldScannerCategoryDefinition
 ---@param context WorldScannerContext
----@return WorldScannerCategory[]
-function Core.BuildScanner(categoryDefinitions, context)
-    local categories = {}
+---@return WorldScannerCategory|nil
+function Core.BuildCategory(definition, context)
+    if definition.CanScan ~= nil and not definition.CanScan(context) then
+        return nil
+    end
 
-    for _, definition in ipairs(categoryDefinitions) do
-        local category = Core.BuildCategory(definition, context)
-        if category ~= nil then
-            categories[#categories + 1] = category
+    local rawItems = definition.Scan and definition.Scan(context) or {}
+    return BuildCategoryFromItems(definition, rawItems, context)
+end
+
+---@param definitions WorldScannerCategoryDefinition[]
+---@param context WorldScannerContext
+---@return table<string, WorldScannerCategory|nil>
+function Core.BuildAllCategories(definitions, context)
+    local results = {}
+    local plotExtractors = {}
+    local scanCategories = {}
+
+    for _, definition in ipairs(definitions) do
+        if definition.CanScan ~= nil and not definition.CanScan(context) then
+            results[definition.Id] = nil
+        elseif definition.PlotExtract ~= nil then
+            local entry = { Definition = definition, RawItems = {} }
+            plotExtractors[#plotExtractors + 1] = entry
+        else
+            scanCategories[#scanCategories + 1] = definition
         end
     end
 
-    return categories
+    if #plotExtractors > 0 then
+        for _, entry in ipairs(plotExtractors) do
+            if entry.Definition.BeginExtract ~= nil then
+                entry.Definition.BeginExtract()
+            end
+        end
+
+        Utils.ForEachRevealedPlot(context, function(plotIndex, plot)
+            for _, entry in ipairs(plotExtractors) do
+                local items = entry.RawItems
+                entry.Definition.PlotExtract(plotIndex, plot, context, function(item)
+                    items[#items + 1] = item
+                end)
+            end
+        end)
+
+        for _, entry in ipairs(plotExtractors) do
+            results[entry.Definition.Id] = BuildCategoryFromItems(entry.Definition, entry.RawItems, context)
+        end
+    end
+
+    for _, definition in ipairs(scanCategories) do
+        local rawItems = definition.Scan and definition.Scan(context) or {}
+        results[definition.Id] = BuildCategoryFromItems(definition, rawItems, context)
+    end
+
+    return results
 end
 
 ---@param category WorldScannerCategory|nil

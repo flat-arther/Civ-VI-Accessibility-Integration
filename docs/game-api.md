@@ -200,10 +200,9 @@ Used to create dynamic UI instances from XML templates:
 ### Lua Events (LuaEvents.*)
 
 - `LuaEvents.CAIEndTurn` — CAI custom: triggers end turn
-- `LuaEvents.CAICursorMove(x, y)` — CAI custom: public absolute cursor move event; call this instead of accessing the cursor object directly.
-- `LuaEvents.CAICursorMoveDirection(direction)` — CAI custom: public directional cursor move event; calls `CAICursor:MoveToNextPlot(direction)` so Civ VI's adjacent-plot logic handles wrapping.
-- `LuaEvents.CAICursorJump(plotId)` — CAI custom: public jump cursor event; resolves the target from a plot id, speaks jump direction from the old cursor plot, then moves the cursor.
-- `LuaEvents.CAICursorMoved(x, y, plotId)` — CAI custom: emitted after the cursor moves; listeners should resolve the plot with `Map.GetPlotByIndex(plotId)` before reading or speaking plot info
+- `LuaEvents.CAICursorMoveTo(plotId, reason)` — CAI custom: unified cursor move request. Reason is `"step"`, `"jump"`, `"select"`, or `"snap"`. Speaks direction when distance > 1. Always fires `CAICursorMoved`.
+- `LuaEvents.CAICursorMoveDirection(direction)` — CAI custom: directional cursor step; resolves the adjacent plot and calls `MoveTo` with reason `"step"`.
+- `LuaEvents.CAICursorMoved(state)` — CAI custom: emitted after every cursor move. `state` is a table with `fromPlotId`, `toPlotId`, `distance`, `fromX`, `fromY`, `toX`, `toY`, `reason`. Listeners use `state.reason` to decide behavior (e.g. PlotToolTip speaks on `"step"`/`"jump"`, silent on `"select"`/`"snap"`).
 - `LuaEvents.MainMenu_ShowAdditionalContent` — opens mods screen
 - `LuaEvents.MainMenu_UserRequestClose` — main menu exit request
 - `LuaEvents.MainMenu_LaunchError` — game launch error
@@ -365,7 +364,7 @@ Wrapper for `CAI.output`. Use this for all TTS output.
 - Category definitions can expose a cheap `CanScan(context)` predicate to avoid expensive API calls when a category cannot currently exist, such as `validTargets` outside supported interface modes or `waterAvailability` while the water lens is off.
 - Cursor movement resorts only the current built category. It does not rebuild or resort every scanner category.
 - Scanner distance sorting uses the current CAI cursor plot and `Map.GetPlotDistance(...)`.
-- Scanner jump and return use CAI cursor movement through `LuaEvents.CAICursorMove(x, y)`.
+- Scanner jump and return use `LuaEvents.CAICursorMoveTo(plotIndex, "jump")`.
 - Full-map scanner categories should iterate plots with `for plotIndex = 0, Map.GetPlotCount() - 1 do` and `Map.GetPlotByIndex(plotIndex)`. Do not use `Map.GetNumPlots()`.
 - `WorldScannerCategory_validTargets.lua` appears only in active targeting modes. It gets target items from the neutral `CAIInterfaceTargets` helper in `interfaceTargetHelpers_CAI.lua`, so scanner and Space interface info use the same live target resolution without the scanner depending on `interfaceInfoHelpers_CAI.lua`. It does not attach per-item validation callbacks because the category is rebuilt when target mode or selected unit changes, and re-calling target APIs during scanner core validation is too expensive.
 - `CAIInterfaceTargets` is now a slim target enumeration/cache helper. It owns target discovery, mode support checks, cache signatures, cached scalar item data, and plot lookup by plot id. It should not own standalone plot-label heuristics beyond the formation-unit special case.
@@ -768,13 +767,12 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - Content is data-driven from `Assets/Gameplay/Data/Civilopedia.xml`: sections define top tabs, page groups define left-list buckets, pages and page queries populate entries, and page layouts map into Lua templates such as `Simple`, `Technology`, `Unit`, `Government`, `Feature`, and `Leader`.
   - CAI implication: model Civilopedia as a document browser with separate accessible structures for section tabs, page tree/search results, history, article chapters, and related-entry links. A flat single-speech dump would miss too much of the sighted interaction model.
 - `navCursor.lua` owns the CAI map cursor:
-  - Public movement should use Lua events, not `ExposedMembers.CAICursor`.
-  - Absolute moves use `LuaEvents.CAICursorMove(x, y)`.
-  - Directional moves use `LuaEvents.CAICursorMoveDirection(direction)`.
-  - Cursor `SetCoords(x, y)` resolves the target plot directly with `Map.GetPlot(...)`; directional movement relies on `Map.GetAdjacentPlot(...)`.
+  - Public movement uses two LuaEvents: `CAICursorMoveTo(plotId, reason)` for absolute moves and `CAICursorMoveDirection(direction)` for hex stepping.
+  - `reason` is `"step"` (adjacent hex), `"jump"` (scanner/search), `"select"` (unit/city selection), or `"snap"` (post-move/initial placement).
+  - `CAICursor:MoveTo(plotId, reason)` is the single internal entry point. It updates coordinates and zones, speaks direction on `"jump"` and `"select"`, and fires `LuaEvents.CAICursorMoved(state)` with a state table (`fromPlotId`, `toPlotId`, `distance`, `fromX`, `fromY`, `toX`, `toY`, `reason`).
+  - Listeners use `state.reason` to decide behavior: PlotToolTip speaks on all reasons except `"select"`. Direction speech is reason-based (`"jump"` and `"select"`), not distance-based.
+  - Zone tracking announces continent, owner, territory (XP2 deserts/mountains/seas/lakes/oceans), volcano (XP2), natural wonder, and national park on first entry only.
   - Query-style access remains available through the WorldInput `UI` hijack: `UI.GetCursorPlotID()` and `UI.GetCursorPlotCoord()`.
-  - `LuaEvents.CAICursorJump(plotId)` is the jump-specific public API for scanner jumps and selection-driven cursor snaps when CAI should also speak the direction from the prior cursor plot.
-  - `LuaEvents.CAICursorMoved(x, y, plotId)` is the post-move notification event used by speech listeners.
   - Current default cursor input actions are `CAICursorMoveNorthWest`, `CAICursorMoveNorthEast`, `CAICursorMoveWest`, `CAICursorMoveEast`, `CAICursorMoveSouthWest`, and `CAICursorMoveSouthEast`, bound by default to `Q/E`, `A/D`, `Z/C` with numpad `7/9`, `4/6`, `1/3` as alternate bindings.
 - `WorldInput_CAI.lua` wraps vanilla `WorldInput.lua`:
   - CAI installs all `UI` table overrides in one `InstallUIOverrides()` section. Current overrides are `UI.GetCursorPlotID()` and `UI.GetCursorPlotCoord()`.
@@ -858,7 +856,7 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - Rebuilding the tree filters out notification ids that no longer have a vanilla rail instance, plus `IsDismissed()` / `IsExpired()` when those optional methods are available, so stale ids still returned by `NotificationManager.GetList(...)` are not reintroduced.
   - Activating a leaf closes the notification center before calling `pNotification:Activate(true)`, so vanilla action/camera behavior runs after CAI focus is gone.
   - CAI tutorial goals now use custom notification types `NOTIFICATION_CAI_TUTORIAL_GOAL_ADDED` and `NOTIFICATION_CAI_TUTORIAL_GOAL_COMPLETED`, resolved in Lua with `DB.MakeHash(...)`, sent with direct text via `NotificationManager.SendNotification(...)`, and activated through custom `g_notificationHandlers[...]` entries that open the tutorial goals list.
-  - Vanilla `LookAtNotification(...)` syncs the CAI cursor through `LuaEvents.CAICursorJump(plotId)` when a notification has a valid location or target, except while the CAI notification center is open. Browsing the tree should not move the cursor.
+  - Vanilla `LookAtNotification(...)` syncs the CAI cursor through `LuaEvents.CAICursorMoveTo(plotId, "jump")` when a notification has a valid location or target, except while the CAI notification center is open. Browsing the tree should not move the cursor.
   - `NotificationPanel_CAI.lua` also speaks new rail notifications from `Events.NotificationAdded` as `LOC_CAI_NOTIFICATION_ALERT`, followed by summary and `LOC_CAI_NOTIFICATION_AT_LOCATION` when coordinates are available.
   - Notification add speech is de-duplicated by notification id until dismissal because Civ VI can surface the same notification id through the add path more than once.
 - Vanilla `ActionPanel.lua` / `ActionPanel.xml`:

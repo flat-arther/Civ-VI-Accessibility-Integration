@@ -16,6 +16,8 @@ local SUBCATEGORY_POWERED = "poweredCityPlots"
 local SUBCATEGORY_UNPOWERED = "unpoweredCityPlots"
 local SUBCATEGORY_TOURISM_CITY = "tourismCity"
 local SUBCATEGORY_TOURISM_STRENGTH = "tourismStrength"
+local SUBCATEGORY_RELIGION = "religion"
+local SUBCATEGORY_LOYALTY_LENS = "loyaltyLens"
 
 local GROUP_WATER_VALID = "water:valid"
 local GROUP_WATER_FRESH = "water:fresh"
@@ -45,6 +47,8 @@ local LENS_OWNER = "OwningCiv"
 local LENS_GOVERNMENT = "Government"
 local LENS_POWER = "Power"
 local LENS_TOURISM = "Tourism"
+local LENS_RELIGION = "Religion"
+local LENS_LOYALTY = "Loyalty"
 
 local LAYER_SETTLER = UILens.CreateLensLayerHash("Hex_Coloring_Water_Availablity")
 local LAYER_APPEAL = UILens.CreateLensLayerHash("Hex_Coloring_Appeal_Level")
@@ -53,6 +57,8 @@ local LAYER_OWNER = UILens.CreateLensLayerHash("Hex_Coloring_Owning_Civ")
 local LAYER_GOVERNMENT = UILens.CreateLensLayerHash("Hex_Coloring_Government")
 local LAYER_POWER = UILens.CreateLensLayerHash("Power_Lens")
 local LAYER_TOURISM = UILens.CreateLensLayerHash("Tourist_Tokens")
+local LAYER_RELIGION = UILens.CreateLensLayerHash("Hex_Coloring_Religion")
+local LAYER_LOYALTY = UILens.CreateLensLayerHash("Cultural_Identity_Lens")
 
 local MAYA_CIVILIZATION_TYPE = "CIVILIZATION_MAYA"
 local TOURISM_SCORE_HIGH = 16
@@ -103,6 +109,8 @@ local subCategoryLabels = {
     [SUBCATEGORY_UNPOWERED] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_UNPOWERED_CITY_PLOTS",
     [SUBCATEGORY_TOURISM_CITY] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TOURISM_CITY",
     [SUBCATEGORY_TOURISM_STRENGTH] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TOURISM_STRENGTH",
+    [SUBCATEGORY_RELIGION] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_RELIGION",
+    [SUBCATEGORY_LOYALTY_LENS] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_LOYALTY",
 }
 
 local DISASTER_GROUP_ORDER = {
@@ -626,6 +634,205 @@ local function ScanTourismLens(context)
     return out
 end
 
+local GROUP_RELIGION_NO_MAJORITY = "religion:noMajority"
+
+local function GetReligionName(religionType)
+    if religionType == nil or religionType < 0 then
+        return nil
+    end
+
+    local gameReligion = Game.GetReligion ~= nil and Game.GetReligion() or nil
+    if gameReligion ~= nil and gameReligion.GetName ~= nil then
+        local name = gameReligion:GetName(religionType)
+        if name ~= nil and name ~= "" then
+            return Locale.Lookup(name)
+        end
+    end
+
+    return nil
+end
+
+local function ScanReligionLens(context)
+    local out = {}
+    local seenCities = {}
+
+    Utils.ForEachRevealedPlot(context, function(plotIndex, plot)
+        local city = Cities.GetCityInPlot(plot:GetX(), plot:GetY())
+        if city == nil or city:GetX() ~= plot:GetX() or city:GetY() ~= plot:GetY() then
+            return
+        end
+
+        local ownerID = city:GetOwner()
+        if not Utils.CanKnowPlayer(context, ownerID) then
+            return
+        end
+
+        local cityID = city:GetID()
+        local uniqueKey = tostring(ownerID) .. ":" .. tostring(cityID)
+        if seenCities[uniqueKey] then
+            return
+        end
+        seenCities[uniqueKey] = true
+
+        local cityReligion = city.GetReligion ~= nil and city:GetReligion() or nil
+        if cityReligion == nil then
+            return
+        end
+
+        local majorityType = cityReligion.GetMajorityReligion ~= nil and cityReligion:GetMajorityReligion() or -1
+        local groupId
+        local groupLabel
+
+        if majorityType ~= nil and majorityType >= 0 then
+            local religionName = GetReligionName(majorityType)
+            if religionName == nil then
+                return
+            end
+            groupId = "religion:" .. tostring(majorityType)
+            groupLabel = religionName
+        else
+            groupId = GROUP_RELIGION_NO_MAJORITY
+            groupLabel = "LOC_CAI_WORLD_SCANNER_RELIGION_NO_MAJORITY"
+        end
+
+        local cityLabel = Utils.ResolveText(Utils.GetCityLabel(city))
+        local itemLabel = groupLabel ~= nil and (Utils.ResolveText(groupLabel) .. ", " .. cityLabel) or cityLabel
+
+        AddItem(out, {
+            Id = "activeLens:" .. LENS_RELIGION .. ":" .. SUBCATEGORY_RELIGION .. ":" .. groupId .. ":" .. tostring(plotIndex),
+            PlotIndex = plotIndex,
+            LabelKey = itemLabel,
+            SubCategoryId = SUBCATEGORY_RELIGION,
+            GroupId = groupId,
+            GroupLabelKey = groupLabel,
+            Validate = function(item, validateContext)
+                local validatePlot = Map.GetPlotByIndex(item.PlotIndex)
+                if validatePlot == nil or not Utils.IsPlotRevealed(validateContext, validatePlot) then
+                    return false
+                end
+
+                local validateCity = Cities.GetCityInPlot(validatePlot:GetX(), validatePlot:GetY())
+                if validateCity == nil or validateCity:GetOwner() ~= ownerID or validateCity:GetID() ~= cityID then
+                    return false
+                end
+
+                if not Utils.CanKnowPlayer(validateContext, ownerID) then
+                    return false
+                end
+
+                local validateReligion = validateCity.GetReligion ~= nil and validateCity:GetReligion() or nil
+                if validateReligion == nil then
+                    return false
+                end
+
+                local validateMajority = validateReligion.GetMajorityReligion ~= nil and validateReligion:GetMajorityReligion() or -1
+                local validateGroupId
+                if validateMajority ~= nil and validateMajority >= 0 then
+                    validateGroupId = "religion:" .. tostring(validateMajority)
+                else
+                    validateGroupId = GROUP_RELIGION_NO_MAJORITY
+                end
+
+                return validateGroupId == item.GroupId
+            end,
+        })
+    end)
+
+    return out
+end
+
+local function GetLoyaltyLevelGroupData(identity)
+    if identity.IsAlwaysFullyLoyal ~= nil and identity:IsAlwaysFullyLoyal() then
+        return "loyaltyLevel:alwaysLoyal", "LOC_CAI_LENS_LOYALTY_ALWAYS_LOYAL"
+    end
+
+    local levelIndex = identity.GetLoyaltyLevel ~= nil and identity:GetLoyaltyLevel() or nil
+    if levelIndex == nil then
+        return nil, nil
+    end
+
+    local levelInfo = GameInfo.LoyaltyLevels and GameInfo.LoyaltyLevels[levelIndex] or nil
+    if levelInfo == nil or levelInfo.Name == nil then
+        return nil, nil
+    end
+
+    return "loyaltyLevel:" .. tostring(levelIndex), levelInfo.Name
+end
+
+local function ScanLoyaltyLens(context)
+    local out = {}
+    local seenCities = {}
+
+    Utils.ForEachRevealedPlot(context, function(plotIndex, plot)
+        local city = Cities.GetCityInPlot(plot:GetX(), plot:GetY())
+        if city == nil or city:GetX() ~= plot:GetX() or city:GetY() ~= plot:GetY() then
+            return
+        end
+
+        local ownerID = city:GetOwner()
+        if not Utils.CanKnowPlayer(context, ownerID) then
+            return
+        end
+
+        local cityID = city:GetID()
+        local uniqueKey = tostring(ownerID) .. ":" .. tostring(cityID)
+        if seenCities[uniqueKey] then
+            return
+        end
+
+        local identity = city.GetCulturalIdentity ~= nil and city:GetCulturalIdentity() or nil
+        if identity == nil then
+            return
+        end
+
+        seenCities[uniqueKey] = true
+
+        local groupId, groupLabelKey = GetLoyaltyLevelGroupData(identity)
+        if groupId == nil or groupLabelKey == nil then
+            return
+        end
+
+        local loyaltyPerTurn = identity.GetLoyaltyPerTurn ~= nil and identity:GetLoyaltyPerTurn() or 0
+        local perTurnText = Locale.Lookup("LOC_CAI_LENS_LOYALTY_PER_TURN", FormatSignedNumber(math.floor(loyaltyPerTurn)))
+        local cityLabel = Utils.ResolveText(Utils.GetCityLabel(city))
+        local levelLabel = Utils.ResolveText(groupLabelKey)
+
+        AddItem(out, {
+            Id = "activeLens:" .. LENS_LOYALTY .. ":" .. SUBCATEGORY_LOYALTY_LENS .. ":" .. tostring(plotIndex),
+            PlotIndex = plotIndex,
+            LabelKey = levelLabel .. ", " .. cityLabel .. ", " .. perTurnText,
+            SubCategoryId = SUBCATEGORY_LOYALTY_LENS,
+            GroupId = groupId,
+            GroupLabelKey = groupLabelKey,
+            Validate = function(item, validateContext)
+                local validatePlot = Map.GetPlotByIndex(item.PlotIndex)
+                if validatePlot == nil or not Utils.IsPlotRevealed(validateContext, validatePlot) then
+                    return false
+                end
+
+                local validateCity = Cities.GetCityInPlot(validatePlot:GetX(), validatePlot:GetY())
+                if validateCity == nil or validateCity:GetOwner() ~= ownerID or validateCity:GetID() ~= cityID then
+                    return false
+                end
+
+                if not Utils.CanKnowPlayer(validateContext, ownerID) then
+                    return false
+                end
+
+                local validateIdentity = validateCity.GetCulturalIdentity ~= nil and validateCity:GetCulturalIdentity() or nil
+                if validateIdentity == nil then
+                    return false
+                end
+
+                local validateGroupId = GetLoyaltyLevelGroupData(validateIdentity)
+                return validateGroupId == item.GroupId
+            end,
+        })
+    end)
+
+    return out
+end
+
 local supportedLenses = {
     {
         Id = LENS_SETTLER,
@@ -676,6 +883,20 @@ local supportedLenses = {
         end,
         Scan = ScanTourismLens,
     },
+    {
+        Id = LENS_RELIGION,
+        IsActive = function()
+            return UILens.IsLayerOn(LAYER_RELIGION)
+        end,
+        Scan = ScanReligionLens,
+    },
+    {
+        Id = LENS_LOYALTY,
+        IsActive = function()
+            return IsExpansion1Active() and UILens.IsLayerOn(LAYER_LOYALTY)
+        end,
+        Scan = ScanLoyaltyLens,
+    },
 }
 
 local function GetActiveSupportedLens()
@@ -692,6 +913,7 @@ CAIWorldScannerCategory_ActiveLens = {
     Id = "activeLens",
     LabelKey = "LOC_CAI_WORLD_SCANNER_CATEGORY_ACTIVE_LENS",
     BuildOncePerDynamicState = true,
+    AutoFocus = true,
     SubCategoryOrder = {
         SUBCATEGORY_WATER,
         SUBCATEGORY_LOYALTY,
@@ -707,6 +929,8 @@ CAIWorldScannerCategory_ActiveLens = {
         SUBCATEGORY_UNPOWERED,
         SUBCATEGORY_TOURISM_CITY,
         SUBCATEGORY_TOURISM_STRENGTH,
+        SUBCATEGORY_RELIGION,
+        SUBCATEGORY_LOYALTY_LENS,
     },
     SubCategoryLabels = subCategoryLabels,
     GroupOrderBySubCategory = {

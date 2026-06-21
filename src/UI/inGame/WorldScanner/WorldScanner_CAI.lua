@@ -24,7 +24,10 @@ include("WorldScannerCore")
 ---@field GroupLabelResolver fun(groupId:string, firstItem:table|nil):string|nil
 ---@field CanScan fun(context:WorldScannerContext):boolean|nil
 ---@field BuildOncePerDynamicState boolean|nil
----@field Scan fun(context:WorldScannerContext):table[]
+---@field Scan fun(context:WorldScannerContext):table[]|nil
+---@field PlotExtract fun(plotIndex:integer, plot:table, context:WorldScannerContext, collect:fun(item:table))|nil
+---@field BeginExtract fun()|nil
+---@field AutoFocus boolean|nil
 
 ---@class WorldScanner
 ---@field Categories table[]
@@ -83,12 +86,26 @@ local function BuildScannerContext()
 end
 
 local function CreateCategorySlots(definitions)
-    local slots = {}
+    local autoFocusSlots = {}
+    local normalSlots = {}
     for _, definition in ipairs(definitions or {}) do
-        slots[#slots + 1] = {
+        local slot = {
             Definition = definition,
             Category = nil,
         }
+        if definition.AutoFocus then
+            autoFocusSlots[#autoFocusSlots + 1] = slot
+        else
+            normalSlots[#normalSlots + 1] = slot
+        end
+    end
+
+    local slots = {}
+    for _, slot in ipairs(autoFocusSlots) do
+        slots[#slots + 1] = slot
+    end
+    for _, slot in ipairs(normalSlots) do
+        slots[#slots + 1] = slot
     end
     return slots
 end
@@ -105,44 +122,16 @@ local function GetSlotCategory(slot)
     return slot.Category
 end
 
-local function IsBuildOnceCategory(slotOrDefinition)
-    return slotOrDefinition ~= nil and slotOrDefinition.BuildOncePerDynamicState == true
-end
+local function BuildAllIntoSlots(scanner)
+    local context = BuildScannerContext()
+    local builtMap = Core.BuildAllCategories(scanner.CategoryDefinitions, context)
 
-local function EnsureCategoryBuilt(scanner, index)
-    local slot = GetCategorySlot(scanner, index)
-    if slot == nil then
-        return nil
-    end
-
-    if slot.Category == nil then
-        slot.Category = Core.BuildCategory(slot.Definition, BuildScannerContext()) or EMPTY_CATEGORY
-    end
-
-    return GetSlotCategory(slot)
-end
-
-local function RebuildPerCycleCategories(scanner)
-    if scanner == nil then
-        return
-    end
-
-    local oldSlots = scanner.Categories or {}
-    local focus = Core.CaptureFocus(scanner)
-    scanner.Categories = CreateCategorySlots(scanner.CategoryDefinitions)
-
-    for index, slot in ipairs(scanner.Categories) do
+    for _, slot in ipairs(scanner.Categories) do
         local definition = slot.Definition
-        local oldSlot = oldSlots[index]
-        if IsBuildOnceCategory(definition) then
-            slot.Category = oldSlot and oldSlot.Category or nil
-        else
-            slot.Category = Core.BuildCategory(definition, BuildScannerContext()) or EMPTY_CATEGORY
+        if definition ~= nil then
+            local built = builtMap[definition.Id]
+            slot.Category = built or EMPTY_CATEGORY
         end
-    end
-
-    if focus ~= nil and focus.CategoryId ~= nil then
-        scanner.CategoryIndex = FindCategorySlotById(scanner, focus.CategoryId) or scanner.CategoryIndex
     end
 end
 
@@ -150,37 +139,28 @@ local function CountCategorySlots(scanner)
     return scanner and scanner.Categories and #scanner.Categories or 0
 end
 
-local function IsCategoryPotentiallyAvailable(slot)
+local function IsCategoryAvailable(slot)
     if slot == nil or slot.Category == EMPTY_CATEGORY then
         return false
     end
 
-    if slot.Category ~= nil then
-        return true
-    end
-
-    local definition = slot.Definition
-    if definition ~= nil and definition.CanScan ~= nil and not definition.CanScan(BuildScannerContext()) then
-        return false
-    end
-
-    return true
+    return slot.Category ~= nil
 end
 
-local function CountPotentialCategories(scanner)
+local function CountAvailableCategories(scanner)
     local count = 0
     for _, slot in ipairs(scanner and scanner.Categories or {}) do
-        if IsCategoryPotentiallyAvailable(slot) then
+        if IsCategoryAvailable(slot) then
             count = count + 1
         end
     end
     return count
 end
 
-local function GetPotentialCategoryPosition(scanner, targetIndex)
+local function GetAvailableCategoryPosition(scanner, targetIndex)
     local position = 0
     for index, slot in ipairs(scanner and scanner.Categories or {}) do
-        if IsCategoryPotentiallyAvailable(slot) then
+        if IsCategoryAvailable(slot) then
             position = position + 1
             if index == targetIndex then
                 return position
@@ -199,7 +179,8 @@ local function FindAvailableCategoryIndex(scanner, startIndex, step)
 
     for offset = 0, count - 1 do
         local index = ((startIndex - 1 + (offset * step)) % count) + 1
-        if EnsureCategoryBuilt(scanner, index) ~= nil then
+        local slot = GetCategorySlot(scanner, index)
+        if GetSlotCategory(slot) ~= nil then
             return index
         end
     end
@@ -208,7 +189,8 @@ local function FindAvailableCategoryIndex(scanner, startIndex, step)
 end
 
 local function EnsureCurrentCategory(scanner)
-    local current = EnsureCategoryBuilt(scanner, scanner.CategoryIndex)
+    local slot = GetCategorySlot(scanner, scanner.CategoryIndex)
+    local current = GetSlotCategory(slot)
     if current ~= nil then
         return current
     end
@@ -261,23 +243,28 @@ local function GetItemDirectionText(item)
     return directionText
 end
 
-local function SpeakItemEntry(item, itemIndex, itemTotal)
+local function BuildItemEntryText(item, itemIndex, itemTotal)
     if item == nil then
-        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_UNAVAILABLE"))
-        return false
+        return nil
     end
 
     local directionText = GetItemDirectionText(item)
-
-    local parts = {
-        Utils.ResolveText(item.LabelKey),
-    }
+    local parts = { Utils.ResolveText(item.LabelKey) }
     if directionText ~= nil and directionText ~= "" then
         parts[#parts + 1] = directionText
     end
     parts[#parts + 1] = Utils.MakePositionText(itemIndex, itemTotal)
+    return table.concat(parts, ", ")
+end
 
-    Speak(table.concat(parts, ", "))
+local function SpeakItemEntry(item, itemIndex, itemTotal)
+    local text = BuildItemEntryText(item, itemIndex, itemTotal)
+    if text == nil then
+        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_UNAVAILABLE"))
+        return false
+    end
+
+    Speak(text)
     return true
 end
 
@@ -310,65 +297,56 @@ local function SelectFirstGroupAndItem(scanner)
     return true
 end
 
-local function OnScannerCursorMoved(x, y)
-    Utils.SetCurrentCursorPosition(x, y)
+local function FocusCategory(scanner, categoryIndex)
+    scanner.CategoryIndex = categoryIndex
+    scanner.SubCategoryIndex = 1
+    scanner.GroupIndex = 0
+    scanner.ItemIndex = 0
+    SelectFirstGroupAndItem(scanner)
+
+    local category = GetCategory(scanner)
+    if category == nil then
+        return
+    end
+
+    local count = CountAvailableCategories(scanner)
+    local line1 = Utils.ResolveText(category.LabelKey) .. ", " .. Utils.MakePositionText(GetAvailableCategoryPosition(scanner, scanner.CategoryIndex), count)
+
+    local group = GetGroup(scanner)
+    local item = group ~= nil and group.Items ~= nil and group.Items[scanner.ItemIndex] or nil
+    local line2 = BuildItemEntryText(item, scanner.ItemIndex, group ~= nil and (group.TotalItems or #group.Items) or 0)
+    if line2 ~= nil then
+        SpeakLines({ line1, line2 })
+    else
+        SpeakLines({ line1 })
+    end
+end
+
+local function OnScannerCursorMoved(state)
+    Utils.SetCurrentCursorPosition(state.toX, state.toY)
     CAIWorldScanner:ResortCurrentCategory()
 end
 
-local function RebuildActiveLensCategory()
+local _lastActiveLensId = nil
+
+local function OnScannerLensLayerChanged(layerNum)
+    local activeLens = CAIWorldScannerCategory_ActiveLens.CanScan() and "activeLens" or nil
+    if activeLens == _lastActiveLensId then
+        return
+    end
+    _lastActiveLensId = activeLens
     CAIWorldScanner:RebuildCategory("activeLens")
 end
 
-local function OnScannerLensLayerOn(layerNum)
-    RebuildActiveLensCategory()
-end
+local _lastActiveLensId = nil
 
-local function OnScannerLensLayerOff(layerNum)
-    RebuildActiveLensCategory()
-end
-
-local function OnScannerPlotVisibilityChanged()
-    RebuildActiveLensCategory()
-end
-
-local function OnScannerCityVisibilityChanged()
-    RebuildActiveLensCategory()
-end
-
-local function OnScannerCityAddedToMap(playerID, cityID, x, y)
-    RebuildActiveLensCategory()
-end
-
-local function OnScannerCityRemovedFromMap(playerID, cityID, x, y)
-    RebuildActiveLensCategory()
-end
-
-local function OnScannerCityMadePurchase(playerID, cityID, plotX, plotY, purchaseType, objectType)
-    RebuildActiveLensCategory()
-end
-
-local function OnScannerCityTileOwnershipChanged(playerID, cityID)
-    RebuildActiveLensCategory()
-end
-
-local function OnScannerGovernmentChanged(playerID)
-    RebuildActiveLensCategory()
-end
-
-local function OnScannerCityPowerChanged(playerID, cityID)
-    RebuildActiveLensCategory()
-end
-
-local function OnScannerCityOccupationChanged(playerID, cityID)
-    RebuildActiveLensCategory()
-end
-
-local function OnScannerDiplomacyChanged()
-    RebuildActiveLensCategory()
-end
-
-local function OnScannerLocalPlayerChanged()
-    RebuildActiveLensCategory()
+local function OnScannerLensLayerChanged(layerNum)
+    local activeLens = CAIWorldScannerCategory_ActiveLens.CanScan() and "activeLens" or nil
+    if activeLens == _lastActiveLensId then
+        return
+    end
+    _lastActiveLensId = activeLens
+    CAIWorldScanner:RebuildCategory("activeLens")
 end
 
 local function OnScannerUnitSelectionChanged(playerID, unitID, locationX, locationY, locationZ, isSelected, isEditable)
@@ -391,6 +369,7 @@ end
 function CAIWorldScanner:Rebuild(focusOverride)
     local focus = focusOverride or Core.CaptureFocus(self)
     self.Categories = CreateCategorySlots(self.CategoryDefinitions)
+    BuildAllIntoSlots(self)
 
     if focus ~= nil and focus.CategoryId ~= nil then
         self.CategoryIndex = FindCategorySlotById(self, focus.CategoryId) or self.CategoryIndex
@@ -400,12 +379,6 @@ function CAIWorldScanner:Rebuild(focusOverride)
     end
 
     EnsureCurrentCategory(self)
-
-    local category = GetCategory(self)
-    if category == nil then
-        return
-    end
-
     Core.RestoreFocus(self, focus)
     EnsureCurrentCategory(self)
     Core.ClampIndexes(self)
@@ -419,16 +392,22 @@ function CAIWorldScanner:RebuildCategory(categoryId)
 
     local focus = Core.CaptureFocus(self)
     local slot = self.Categories[index]
-    slot.Category = nil
+    local definition = slot.Definition
 
-    if index == self.CategoryIndex then
-        EnsureCategoryBuilt(self, index)
-        if GetCategory(self) == nil then
-            EnsureCurrentCategory(self)
-        end
+    if definition ~= nil and definition.PlotExtract ~= nil then
+        BuildAllIntoSlots(self)
+    else
+        local context = BuildScannerContext()
+        slot.Category = Core.BuildCategory(definition, context) or EMPTY_CATEGORY
     end
 
-    Core.RestoreFocus(self, focus)
+    if definition ~= nil and definition.AutoFocus
+        and slot.Category ~= nil and slot.Category ~= EMPTY_CATEGORY then
+        FocusCategory(self, index)
+    else
+        Core.RestoreFocus(self, focus)
+    end
+
     EnsureCurrentCategory(self)
     Core.ClampIndexes(self)
 end
@@ -455,26 +434,10 @@ function CAIWorldScanner:Initialize()
     if CAICursor ~= nil then
         Utils.SetCurrentCursorPosition(CAICursor.curX, CAICursor.curY)
     end
+    BuildAllIntoSlots(self)
     LuaEvents.CAICursorMoved.Add(OnScannerCursorMoved)
-    Events.LensLayerOn.Add(OnScannerLensLayerOn)
-    Events.LensLayerOff.Add(OnScannerLensLayerOff)
-    Events.PlotVisibilityChanged.Add(OnScannerPlotVisibilityChanged)
-    Events.CityVisibilityChanged.Add(OnScannerCityVisibilityChanged)
-    Events.CityAddedToMap.Add(OnScannerCityAddedToMap)
-    Events.CityRemovedFromMap.Add(OnScannerCityRemovedFromMap)
-    Events.CityMadePurchase.Add(OnScannerCityMadePurchase)
-    Events.CityTileOwnershipChanged.Add(OnScannerCityTileOwnershipChanged)
-    Events.GovernmentChanged.Add(OnScannerGovernmentChanged)
-    if Events.CityPowerChanged ~= nil then
-        Events.CityPowerChanged.Add(OnScannerCityPowerChanged)
-    end
-    if Events.CityOccupationChanged ~= nil then
-        Events.CityOccupationChanged.Add(OnScannerCityOccupationChanged)
-    end
-    Events.DiplomacyMeet.Add(OnScannerDiplomacyChanged)
-    Events.DiplomacyDeclareWar.Add(OnScannerDiplomacyChanged)
-    Events.DiplomacyMakePeace.Add(OnScannerDiplomacyChanged)
-    Events.LocalPlayerChanged.Add(OnScannerLocalPlayerChanged)
+    Events.LensLayerOn.Add(OnScannerLensLayerChanged)
+    Events.LensLayerOff.Add(OnScannerLensLayerChanged)
     Events.UnitSelectionChanged.Add(OnScannerUnitSelectionChanged)
     Events.InterfaceModeChanged.Add(OnScannerInterfaceModeChanged)
     EnsureCurrentCategory(self)
@@ -482,25 +445,8 @@ end
 
 function CAIWorldScanner:ClearScanner()
     LuaEvents.CAICursorMoved.Remove(OnScannerCursorMoved)
-    Events.LensLayerOn.Remove(OnScannerLensLayerOn)
-    Events.LensLayerOff.Remove(OnScannerLensLayerOff)
-    Events.PlotVisibilityChanged.Remove(OnScannerPlotVisibilityChanged)
-    Events.CityVisibilityChanged.Remove(OnScannerCityVisibilityChanged)
-    Events.CityAddedToMap.Remove(OnScannerCityAddedToMap)
-    Events.CityRemovedFromMap.Remove(OnScannerCityRemovedFromMap)
-    Events.CityMadePurchase.Remove(OnScannerCityMadePurchase)
-    Events.CityTileOwnershipChanged.Remove(OnScannerCityTileOwnershipChanged)
-    Events.GovernmentChanged.Remove(OnScannerGovernmentChanged)
-    if Events.CityPowerChanged ~= nil then
-        Events.CityPowerChanged.Remove(OnScannerCityPowerChanged)
-    end
-    if Events.CityOccupationChanged ~= nil then
-        Events.CityOccupationChanged.Remove(OnScannerCityOccupationChanged)
-    end
-    Events.DiplomacyMeet.Remove(OnScannerDiplomacyChanged)
-    Events.DiplomacyDeclareWar.Remove(OnScannerDiplomacyChanged)
-    Events.DiplomacyMakePeace.Remove(OnScannerDiplomacyChanged)
-    Events.LocalPlayerChanged.Remove(OnScannerLocalPlayerChanged)
+    Events.LensLayerOn.Remove(OnScannerLensLayerChanged)
+    Events.LensLayerOff.Remove(OnScannerLensLayerChanged)
     Events.UnitSelectionChanged.Remove(OnScannerUnitSelectionChanged)
     Events.InterfaceModeChanged.Remove(OnScannerInterfaceModeChanged)
     self.Categories = {}
@@ -518,9 +464,9 @@ end
 
 ---@param step integer
 function CAIWorldScanner:CycleCategory(step)
-    RebuildPerCycleCategories(self)
+    self:Rebuild()
 
-    local count = CountPotentialCategories(self)
+    local count = CountAvailableCategories(self)
     if count == 0 then
         Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_EMPTY"))
         return
@@ -531,18 +477,9 @@ function CAIWorldScanner:CycleCategory(step)
         Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_EMPTY"))
         return
     end
-    count = CountPotentialCategories(self)
+    count = CountAvailableCategories(self)
 
-    self.CategoryIndex = targetIndex
-    self.SubCategoryIndex = 1
-    self.GroupIndex = 0
-    self.ItemIndex = 0
-    SelectFirstGroupAndItem(self)
-
-    local category = GetCategory(self)
-    if category ~= nil then
-        SpeakPositionedLabel(category.LabelKey, GetPotentialCategoryPosition(self, self.CategoryIndex), count)
-    end
+    FocusCategory(self, targetIndex)
 end
 
 ---@param step integer
@@ -639,7 +576,7 @@ function CAIWorldScanner:JumpToCurrent()
         return
     end
 
-    LuaEvents.CAICursorJump(plotIndex)
+    LuaEvents.CAICursorMoveTo(plotIndex, "jump")
 end
 
 function CAIWorldScanner:ReturnFromJump()
@@ -655,7 +592,7 @@ function CAIWorldScanner:ReturnFromJump()
         return
     end
 
-    LuaEvents.CAICursorJump(self.PreviousJumpPlotIndex)
+    LuaEvents.CAICursorMoveTo(self.PreviousJumpPlotIndex, "jump")
     self.PreviousJumpPlotIndex = nil
 end
 
@@ -668,6 +605,284 @@ function CAIWorldScanner:SpeakCurrentDirection()
     end
 
     Speak(directionText)
+end
+
+-- ==========================================================================
+-- Scanner Search
+-- ==========================================================================
+local SCANNER_SEARCH_CONTEXT = "CAI_ScannerSearch"
+local SCANNER_SEARCH_HISTORY_CONTEXT = "WorldScanner"
+local SCANNER_SEARCH_CATEGORY_ID = "__searchResults"
+local SCANNER_SEARCH_MAX_RESULTS = 200
+
+local SearchUtils = CAIWidgetHelpers_Search
+local mgr = ExposedMembers.CAI_UIManager
+
+local m_searchEditBox = nil
+local m_searchSnapshot = nil
+local m_searchHistoryIndex = 0
+
+---Walk all built scanner categories and collect a flat snapshot of every leaf item.
+---@return table[] Array of { key, text, categoryLabel, groupLabel, item }
+local function BuildSearchSnapshot(scanner)
+    local snapshot = {}
+    for _, slot in ipairs(scanner.Categories or {}) do
+        local category = slot.Category
+        if category and category ~= false then
+            local categoryLabel = Utils.ResolveText(category.LabelKey)
+            for _, subCategory in ipairs(category.SubCategories or {}) do
+                if subCategory.Id ~= Core.AllSubCategoryId then
+                    for _, group in ipairs(subCategory.Groups or {}) do
+                        local groupLabel = Utils.ResolveText(group.LabelKey)
+                        for _, leaf in ipairs(group.Items or {}) do
+                            local itemLabel = Utils.ResolveText(leaf.LabelKey)
+                            local searchText = itemLabel .. " " .. groupLabel .. " " .. categoryLabel
+                            local key = category.Id .. "|" .. (subCategory.Id or "") .. "|" .. (group.Id or "") .. "|" .. tostring(leaf.Id)
+                            snapshot[#snapshot + 1] = {
+                                key = key,
+                                text = searchText,
+                                label = itemLabel,
+                                categoryLabel = categoryLabel,
+                                groupLabel = groupLabel,
+                                plotIndex = leaf.PlotIndex,
+                                item = leaf,
+                            }
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return snapshot
+end
+
+local function BuildSearchContext(snapshot)
+    Search.DestroyContext(SCANNER_SEARCH_CONTEXT)
+    if not Search.CreateContext(SCANNER_SEARCH_CONTEXT, "", "", "...") then
+        return false
+    end
+    for _, entry in ipairs(snapshot) do
+        Search.AddData(SCANNER_SEARCH_CONTEXT, entry.key, entry.text, "", {})
+    end
+    Search.Optimize(SCANNER_SEARCH_CONTEXT)
+    return true
+end
+
+local function DestroySearchContext()
+    Search.DestroyContext(SCANNER_SEARCH_CONTEXT)
+end
+
+local function BuildSnapshotLookup(snapshot)
+    local lookup = {}
+    for _, entry in ipairs(snapshot) do
+        lookup[entry.key] = entry
+    end
+    return lookup
+end
+
+local function CommitSearch(scanner, rawQuery)
+    if not rawQuery or rawQuery == "" then
+        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_SEARCH_NO_RESULTS"))
+        return
+    end
+
+    local whitelist, blacklist = SearchUtils.ParseQuery(rawQuery)
+    if #whitelist == 0 then
+        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_SEARCH_NO_RESULTS"))
+        return
+    end
+
+    SearchUtils.AddHistory(SCANNER_SEARCH_HISTORY_CONTEXT, rawQuery)
+
+    local hits = SearchUtils.MultiTermSearch(SCANNER_SEARCH_CONTEXT, whitelist, blacklist, SCANNER_SEARCH_MAX_RESULTS)
+    if #hits == 0 then
+        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_SEARCH_NO_RESULTS"))
+        return
+    end
+
+    local lookup = BuildSnapshotLookup(m_searchSnapshot)
+
+    local groups = {}
+    for _, hit in ipairs(hits) do
+        local entry = lookup[hit.key]
+        if entry then
+            groups[#groups + 1] = {
+                Id = hit.key,
+                Key = hit.key,
+                LabelKey = entry.label,
+                PlotIndex = entry.plotIndex,
+                Items = { entry.item },
+                TotalItems = 1,
+            }
+        end
+    end
+
+    if #groups == 0 then
+        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_SEARCH_NO_RESULTS"))
+        return
+    end
+
+    table.sort(groups, function(a, b)
+        return Utils.GetDistance(nil, a.PlotIndex) < Utils.GetDistance(nil, b.PlotIndex)
+    end)
+
+    local searchCategory = {
+        Id = SCANNER_SEARCH_CATEGORY_ID,
+        LabelKey = "LOC_CAI_WORLD_SCANNER_CATEGORY_SEARCH_RESULTS",
+        SubCategories = {
+            {
+                Id = "results",
+                Key = "results",
+                LabelKey = "LOC_CAI_WORLD_SCANNER_CATEGORY_SEARCH_RESULTS",
+                Groups = groups,
+                TotalItems = #groups,
+            },
+        },
+        TotalItems = #groups,
+    }
+
+    scanner:InjectSearchCategory(searchCategory)
+end
+
+local function CloseSearchEditBox()
+    if m_searchEditBox then
+        if mgr then
+            mgr:RemoveFromStack(m_searchEditBox.Id)
+        end
+        m_searchEditBox:Destroy()
+        m_searchEditBox = nil
+    end
+    m_searchHistoryIndex = 0
+end
+
+function CAIWorldScanner:OpenSearch()
+    if not mgr then return end
+    if m_searchEditBox then return end
+
+    self:Rebuild()
+
+    m_searchSnapshot = BuildSearchSnapshot(self)
+    if #m_searchSnapshot == 0 then
+        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_EMPTY"))
+        return
+    end
+
+    if not BuildSearchContext(m_searchSnapshot) then
+        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_EMPTY"))
+        return
+    end
+
+    local scanner = self
+    m_searchHistoryIndex = 0
+
+    local editBox = mgr:CreateWidget(mgr:GenerateWidgetId("CAIScannerSearch"), "EditBox", {
+        Label = function() return Locale.Lookup("LOC_CAI_WORLD_SCANNER_SEARCH_EDIT") end,
+        AlwaysEdit = true,
+        EnterToCommit = true,
+    })
+
+    editBox:On("value_changed", function(_, text)
+        CloseSearchEditBox()
+        CommitSearch(scanner, text)
+        DestroySearchContext()
+    end)
+
+    editBox:AddInputBindings({
+        {
+            Key = Keys.VK_ESCAPE,
+            Action = function()
+                CloseSearchEditBox()
+                DestroySearchContext()
+                return true
+            end,
+        },
+        {
+            Key = Keys.VK_PRIOR,
+            MSG = KeyEvents.KeyDown,
+            Action = function()
+                local history = SearchUtils.GetHistory(SCANNER_SEARCH_HISTORY_CONTEXT)
+                if #history == 0 then
+                    Speak(Locale.Lookup("LOC_CAI_SEARCH_HISTORY_EMPTY"))
+                    return true
+                end
+                local newIndex, entry = SearchUtils.NavigateHistory(SCANNER_SEARCH_HISTORY_CONTEXT, m_searchHistoryIndex, 1)
+                if newIndex == m_searchHistoryIndex then return true end
+                m_searchHistoryIndex = newIndex
+                if entry then
+                    editBox:SetText(entry, true)
+                    Speak(entry)
+                end
+                return true
+            end,
+        },
+        {
+            Key = Keys.VK_NEXT,
+            MSG = KeyEvents.KeyDown,
+            Action = function()
+                local history = SearchUtils.GetHistory(SCANNER_SEARCH_HISTORY_CONTEXT)
+                if #history == 0 then
+                    Speak(Locale.Lookup("LOC_CAI_SEARCH_HISTORY_EMPTY"))
+                    return true
+                end
+                local newIndex, entry = SearchUtils.NavigateHistory(SCANNER_SEARCH_HISTORY_CONTEXT, m_searchHistoryIndex, -1)
+                if newIndex == m_searchHistoryIndex then return true end
+                m_searchHistoryIndex = newIndex
+                if entry then
+                    editBox:SetText(entry, true)
+                    Speak(entry)
+                else
+                    editBox:SetText("", true)
+                end
+                return true
+            end,
+        },
+    })
+
+    m_searchEditBox = editBox
+    mgr:Push(editBox)
+end
+
+function CAIWorldScanner:ClearSearchCategory()
+    if not self.Categories then return end
+
+    for i = #self.Categories, 1, -1 do
+        local slot = self.Categories[i]
+        if slot and slot.Category and slot.Category ~= false and slot.Category.Id == SCANNER_SEARCH_CATEGORY_ID then
+            table.remove(self.Categories, i)
+            break
+        end
+    end
+end
+
+function CAIWorldScanner:InjectSearchCategory(searchCategory)
+    self:ClearSearchCategory()
+
+    local slot = {
+        Definition = {
+            Id = SCANNER_SEARCH_CATEGORY_ID,
+            LabelKey = searchCategory.LabelKey,
+        },
+        Category = searchCategory,
+    }
+
+    table.insert(self.Categories, 1, slot)
+    FocusCategory(self, 1)
+end
+
+-- Override CycleCategory to clear search results on category change.
+local OrigCycleCategory = CAIWorldScanner.CycleCategory
+function CAIWorldScanner:CycleCategory(step)
+    self:ClearSearchCategory()
+    OrigCycleCategory(self, step)
+end
+
+-- Override ClearScanner to clean up search state.
+local OrigClearScanner = CAIWorldScanner.ClearScanner
+function CAIWorldScanner:ClearScanner()
+    CloseSearchEditBox()
+    DestroySearchContext()
+    m_searchSnapshot = nil
+    OrigClearScanner(self)
 end
 
 -- This wildcard include will include all loaded files beginning with "WorldScannerCategory_".

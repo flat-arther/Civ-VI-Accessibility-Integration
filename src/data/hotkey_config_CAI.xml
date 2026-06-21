@@ -27,6 +27,7 @@
     <Row ActionId="InterfaceWidgetSecondaryAction" Name="LOC_CAI_INTERFACE_SECONDARY_ACTION" Description="LOC_CAI_INTERFACE_SECONDARY_ACTION_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SharedEndTurn" Name="LOC_CAI_END_TURN" Description="LOC_CAI_END_TURN_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ActionPanelOpenTurnBlockers" Name="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS" Description="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ActionPanelSpeakEraAge" Name="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE" Description="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAICursorMoveNorthWest" Name="LOC_CAI_CURSOR_MOVE_NORTHWEST" Description="LOC_CAI_CURSOR_MOVE_NORTHWEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAICursorMoveNorthEast" Name="LOC_CAI_CURSOR_MOVE_NORTHEAST" Description="LOC_CAI_CURSOR_MOVE_NORTHEAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAICursorMoveWest" Name="LOC_CAI_CURSOR_MOVE_WEST" Description="LOC_CAI_CURSOR_MOVE_WEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
@@ -60,6 +61,7 @@
     <Row ActionId="PlotReadStats" Name="LOC_CAI_PLOT_READ_STATS" Description="LOC_CAI_PLOT_READ_STATS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotReadRelativeCoords" Name="LOC_CAI_PLOT_READ_RELATIVE_COORDS" Description="LOC_CAI_PLOT_READ_RELATIVE_COORDS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotReadDistrictBuildings" Name="LOC_CAI_PLOT_READ_DISTRICT_BUILDINGS" Description="LOC_CAI_PLOT_READ_DISTRICT_BUILDINGS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotReadGeography" Name="LOC_CAI_PLOT_READ_GEOGRAPHY" Description="LOC_CAI_PLOT_READ_GEOGRAPHY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SurveyorGrowRadius" Name="LOC_CAI_SURVEYOR_GROW_RADIUS" Description="LOC_CAI_SURVEYOR_GROW_RADIUS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SurveyorShrinkRadius" Name="LOC_CAI_SURVEYOR_SHRINK_RADIUS" Description="LOC_CAI_SURVEYOR_SHRINK_RADIUS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SurveyorReadYields" Name="LOC_CAI_SURVEYOR_READ_YIELDS" Description="LOC_CAI_SURVEYOR_READ_YIELDS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
@@ -78,6 +80,7 @@
     <Row ActionId="NotificationPanelOpenList" Name="LOC_CAI_NOTIFICATION_CENTER" Description="LOC_CAI_NOTIFICATION_CENTER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TutorialGoalsOpenList" Name="LOC_CAI_TUTORIAL_GOALS_HOTKEY" Description="LOC_CAI_TUTORIAL_GOALS_HOTKEY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAIMinimapOpenLensList" Name="LOC_CAI_MINIMAP_OPEN_LENS_LIST" Description="LOC_CAI_MINIMAP_OPEN_LENS_LIST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMinimapOpenMapPinList" Name="LOC_CAI_MINIMAP_OPEN_MAP_PIN_LIST" Description="LOC_CAI_MINIMAP_OPEN_MAP_PIN_LIST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldScannerPrevCategory" Name="LOC_CAI_WORLD_SCANNER_PREV_CATEGORY" Description="LOC_CAI_WORLD_SCANNER_PREV_CATEGORY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldScannerNextCategory" Name="LOC_CAI_WORLD_SCANNER_NEXT_CATEGORY" Description="LOC_CAI_WORLD_SCANNER_NEXT_CATEGORY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldScannerPrevSubCategory" Name="LOC_CAI_WORLD_SCANNER_PREV_SUBCATEGORY" Description="LOC_CAI_WORLD_SCANNER_PREV_SUBCATEGORY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
@@ -156,6 +159,9 @@
     <Row ActionId="OpenWorldCrisisTracker" Name="LOC_CAI_OPEN_CRISIS_TRACKER" Description="LOC_CAI_OPEN_CRISIS_TRACKER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="TopPanelResourceInfoList" Name="LOC_CAI_TOP_PANEL_RESOURCE_INFO" Description="LOC_CAI_TOP_PANEL_RESOURCE_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="OpenGlobalResourcePopup" Name="LOC_CAI_GLOBAL_RES_OPEN" Description="LOC_CAI_GLOBAL_RES_OPEN_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIPlaceMapPin" Name="LOC_CAI_PLACE_MAP_PIN" Description="LOC_CAI_PLACE_MAP_PIN_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIOpenMapSearch" Name="LOC_CAI_OPEN_MAP_SEARCH" Description="LOC_CAI_OPEN_MAP_SEARCH_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSearch" Name="LOC_CAI_WORLD_SCANNER_SEARCH" Description="LOC_CAI_WORLD_SCANNER_SEARCH_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
   </InputActions>
 
   <InputActionDefaultGestures>
@@ -176,6 +182,7 @@
     <Row ActionId="InterfaceWidgetSecondaryAction" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_RETURN" />
     <Row ActionId="SharedEndTurn" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SPACE" />
     <Row ActionId="ActionPanelOpenTurnBlockers" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_SPACE" />
+    <Row ActionId="ActionPanelSpeakEraAge" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_Y" />
     <Row ActionId="CAICursorMoveNorthWest" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_Q" />
     <Row ActionId="CAICursorMoveNorthWest" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_7" />
     <Row ActionId="CAICursorMoveNorthEast" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_E" />
@@ -225,6 +232,7 @@
     <Row ActionId="PlotReadRelativeCoords" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_S" />
     <Row ActionId="PlotReadRelativeCoords" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_NP_5" />
     <Row ActionId="PlotReadDistrictBuildings" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_X" />
+    <Row ActionId="PlotReadGeography" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_B" />
     <Row ActionId="SurveyorGrowRadius" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_W" />
     <Row ActionId="SurveyorShrinkRadius" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_W" />
     <Row ActionId="SurveyorReadYields" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_Q" />
@@ -243,6 +251,7 @@
     <Row ActionId="NotificationPanelOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_N" />
     <Row ActionId="TutorialGoalsOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_T" />
     <Row ActionId="CAIMinimapOpenLensList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_L" />
+    <Row ActionId="CAIMinimapOpenMapPinList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_M" />
     <Row ActionId="WorldScannerPrevCategory" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_PAGEUP" />
     <Row ActionId="WorldScannerNextCategory" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_PAGEDOWN" />
     <Row ActionId="WorldScannerPrevSubCategory" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_PAGEUP" />
@@ -265,5 +274,8 @@
     <Row ActionId="OpenWorldCrisisTracker" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_O" />
     <Row ActionId="TopPanelResourceInfoList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_I" />
     <Row ActionId="OpenGlobalResourcePopup" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_Q" />
+    <Row ActionId="CAIPlaceMapPin" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_M" />
+    <Row ActionId="CAIOpenMapSearch" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_F" />
+    <Row ActionId="WorldScannerSearch" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_F" />
   </InputActionDefaultGestures>
 </GameInfo>

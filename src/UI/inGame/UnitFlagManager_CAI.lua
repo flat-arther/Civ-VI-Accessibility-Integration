@@ -554,3 +554,25 @@ function info:RequestUnitFlagInfo(playerID, unitID, requestedKeys)
 
     return table.concat(results, " ")
 end
+
+function info:RequestUnitNamesInPlot(x, y)
+    local units = Units.GetUnitsInPlotLayerID(x, y, MapLayers.ANY)
+    if not units or #units == 0 then return nil end
+
+    local names = {}
+    local seen = {}
+    for _, pUnit in ipairs(units) do
+        local flag = GetUnitFlag(pUnit:GetOwner(), pUnit:GetID())
+        if flag and IsUnitFlagVisible(flag, flag:GetUnit()) then
+            local unitInfo = GameInfo.Units[pUnit:GetUnitType()]
+            if unitInfo then
+                local name = Locale.Lookup(unitInfo.Name)
+                if name ~= "" and not seen[name] then
+                    seen[name] = true
+                    names[#names + 1] = name
+                end
+            end
+        end
+    end
+    return #names > 0 and names or nil
+end

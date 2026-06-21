@@ -17,6 +17,7 @@ function ListWidget.Create(mgr, id, props)
     w.Type = "List"
     w.Role = "List"
     w.Manager = mgr
+    w.AllowSearch = true
     w.SearchDepth = 2
     w:AddInputBindings({
         { Key = Keys.VK_UP,    MSG = KeyEvents.KeyDown, Action = function(self) return self:NavigatePrev() end },

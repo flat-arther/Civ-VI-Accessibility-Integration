@@ -1,8 +1,115 @@
 -- CAIWidgetHelpers_Search.lua
--- Type-to-find: depth-limited DFS that prefix-matches on widget labels.
+-- Type-to-find helpers and shared search utilities (query parsing, history,
+-- multi-term Search.* queries) used by SearchPanel, scanner search, etc.
 
 CAIWidgetHelpers_Search = {}
 local S = CAIWidgetHelpers_Search
+
+--#region Shared search utilities
+
+local MAX_HISTORY = 10
+local g_SearchHistory = {}
+
+---Split raw input into whitelist and blacklist terms.
+---Terms prefixed with "--" go to the blacklist (the prefix is stripped).
+---@param rawQuery string
+---@return string[], string[]
+function S.ParseQuery(rawQuery)
+    local whitelist = {}
+    local blacklist = {}
+    for term in (rawQuery or ""):gmatch("%S+") do
+        if term:sub(1, 2) == "--" and #term > 2 then
+            blacklist[#blacklist + 1] = term:sub(3)
+        else
+            whitelist[#whitelist + 1] = term
+        end
+    end
+    return whitelist, blacklist
+end
+
+---@param context string
+---@return string[]
+function S.GetHistory(context)
+    if not g_SearchHistory[context] then g_SearchHistory[context] = {} end
+    return g_SearchHistory[context]
+end
+
+---@param context string
+---@param query string
+function S.AddHistory(context, query)
+    if not query or query == "" then return end
+    local history = S.GetHistory(context)
+    for i = #history, 1, -1 do
+        if history[i] == query then table.remove(history, i) end
+    end
+    table.insert(history, 1, query)
+    while #history > MAX_HISTORY do table.remove(history) end
+end
+
+---Navigate search history. Returns newIndex, entry (or nil at index 0).
+---@param context string
+---@param currentIndex integer
+---@param direction integer  1=older, -1=newer
+---@return integer, string|nil
+function S.NavigateHistory(context, currentIndex, direction)
+    local history = S.GetHistory(context)
+    local newIndex = currentIndex + direction
+    if newIndex < 0 then newIndex = 0 end
+    if newIndex > #history then newIndex = #history end
+    if newIndex == 0 then
+        return 0, nil
+    end
+    return newIndex, history[newIndex]
+end
+
+---Run a multi-term AND query with blacklist subtraction against a game Search.* context.
+---@param searchContext string  The Search.* context name
+---@param whitelist string[]
+---@param blacklist string[]
+---@param maxResults integer
+---@return table[]  Array of { key=string, highlighted=string }
+function S.MultiTermSearch(searchContext, whitelist, blacklist, maxResults)
+    if not Search.HasContext(searchContext) then return {} end
+
+    local hitCounts = {}
+    local resultsByKey = {}
+    local queryMax = maxResults * 3
+
+    for _, term in ipairs(whitelist) do
+        local raw = Search.Search(searchContext, term, queryMax)
+        if not raw or #raw == 0 then return {} end
+        for _, hit in ipairs(raw) do
+            local key = hit[1]
+            hitCounts[key] = (hitCounts[key] or 0) + 1
+            if not resultsByKey[key] then
+                resultsByKey[key] = { key = key, highlighted = hit[2] or "" }
+            end
+        end
+    end
+
+    for _, term in ipairs(blacklist) do
+        local raw = Search.Search(searchContext, term, queryMax)
+        if raw then
+            for _, hit in ipairs(raw) do
+                hitCounts[hit[1]] = -1
+            end
+        end
+    end
+
+    local needed = #whitelist
+    local results = {}
+    for k, count in pairs(hitCounts) do
+        if count >= needed and resultsByKey[k] then
+            results[#results + 1] = resultsByKey[k]
+            if #results >= maxResults then break end
+        end
+    end
+    return results
+end
+
+--#endregion
+
+--#region Type-to-find (widget tree prefix search)
 
 ---DFS rooted at w; matches the lowercased label prefix against query.
 ---@param w UIWidget
@@ -81,3 +188,5 @@ function S.HandleChar(root, char, maxDepth)
     Speak(Locale.Lookup("LOC_CAI_SEARCH_NO_MATCH"))
     return false
 end
+
+--#endregion

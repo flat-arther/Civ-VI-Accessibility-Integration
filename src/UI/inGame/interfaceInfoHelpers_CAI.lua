@@ -437,7 +437,6 @@ local function AnalyzePathFeatures(unit, targetPlot, pathInfo)
             end
         end
     end
-
 end
 
 PlotIdsToPathNodes = function(plotIds, startIndex, endIndex)
@@ -1113,15 +1112,6 @@ InterfaceInfoHelpers[InterfaceModeTypes.TRANSFORM_UNIT] = BuildTargetValidityInt
 InterfaceInfoHelpers[InterfaceModeTypes.RESTORE_UNIT_MOVES] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.NAVAL_GOLD_RAID] = BuildTargetValidityInterfaceInfo
 
-function GetActiveInterfacePlotInfo(plot)
-    if plot == nil then return nil end
-    local helper = InterfaceInfoHelpers[UI.GetInterfaceMode()]
-    if helper == nil then return nil end
-    local lines = helper(plot, false)
-    if lines == false then return nil end
-    return lines
-end
-
 local function ResolveActiveInterfacePlot(plot)
     if plot ~= nil then return plot end
 
@@ -1141,6 +1131,389 @@ local function ResolveActiveInterfacePlot(plot)
     return nil
 end
 
+-- ===========================================================================
+-- LENS INFO HELPERS
+-- ===========================================================================
+
+local LAYER_SETTLER = UILens.CreateLensLayerHash("Hex_Coloring_Water_Availablity")
+local LAYER_APPEAL = UILens.CreateLensLayerHash("Hex_Coloring_Appeal_Level")
+local LAYER_GOVERNMENT = UILens.CreateLensLayerHash("Hex_Coloring_Government")
+local LAYER_POWER = UILens.CreateLensLayerHash("Power_Lens")
+local LAYER_TOURISM = UILens.CreateLensLayerHash("Tourist_Tokens")
+local LAYER_LOYALTY = UILens.CreateLensLayerHash("Cultural_Identity_Lens")
+local LAYER_RELIGION = UILens.CreateLensLayerHash("Hex_Coloring_Religion")
+
+local LensInfoHelpers = {}
+
+local function BuildSettlerLensPlotInfo(plot)
+    if plot:IsWater() then
+        return nil
+    end
+
+    local lines = {}
+
+    if plot:IsFreshWater() then
+        lines[#lines + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_TOOLTIP_FRESH_WATER")
+    elseif plot:IsCoastalLand() then
+        lines[#lines + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_TOOLTIP_COASTAL_WATER")
+    else
+        lines[#lines + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_TOOLTIP_NO_WATER")
+    end
+
+    if type(IsExpansion1Active) == "function" and IsExpansion1Active() then
+        local loyaltyPlots = Map.GetContinentPlotsLoyalty()
+        if loyaltyPlots ~= nil then
+            local loyaltyValue = loyaltyPlots[plot:GetIndex()]
+            if loyaltyValue ~= nil then
+                local numeric = tonumber(loyaltyValue) or 0
+                local sign = numeric > 0 and ("+" .. tostring(numeric)) or tostring(numeric)
+                lines[#lines + 1] = Locale.Lookup("LOC_CAI_WORLD_SCANNER_SETTLER_LOYALTY_VALUE", sign)
+            end
+        end
+    end
+
+    if type(IsExpansion2Active) == "function" and IsExpansion2Active() then
+        if RiverManager ~= nil and RiverManager.CanBeFlooded ~= nil and RiverManager.CanBeFlooded(plot) then
+            lines[#lines + 1] = Locale.Lookup("LOC_CAI_WORLD_SCANNER_SETTLER_DISASTER_FLOOD")
+        end
+
+        if MapFeatureManager ~= nil and MapFeatureManager.CanSufferEruption ~= nil and MapFeatureManager.CanSufferEruption(plot) then
+            lines[#lines + 1] = Locale.Lookup("LOC_CAI_WORLD_SCANNER_SETTLER_DISASTER_VOLCANO")
+        end
+
+        if TerrainManager ~= nil and TerrainManager.GetCoastalLowlandType ~= nil and TerrainManager.IsProtected ~= nil then
+            if not TerrainManager.IsProtected(plot) then
+                local coastalLowlandType = TerrainManager.GetCoastalLowlandType(plot)
+                if coastalLowlandType == 0 then
+                    lines[#lines + 1] = Locale.Lookup("LOC_COASTAL_LOWLAND_1M_NAME")
+                elseif coastalLowlandType == 1 then
+                    lines[#lines + 1] = Locale.Lookup("LOC_COASTAL_LOWLAND_2M_NAME")
+                elseif coastalLowlandType == 2 then
+                    lines[#lines + 1] = Locale.Lookup("LOC_COASTAL_LOWLAND_3M_NAME")
+                end
+            end
+        end
+    end
+
+    return #lines > 0 and lines or nil
+end
+
+local function BuildGovernmentLensPlotInfo(plot)
+    local ownerID = plot:GetOwner()
+    if ownerID == nil or ownerID < 0 then
+        return nil
+    end
+
+    local player = Players[ownerID]
+    if player == nil then
+        return nil
+    end
+
+    if player.IsFreeCities ~= nil and player:IsFreeCities() then
+        return Locale.Lookup("LOC_CIVILIZATION_FREE_CITIES_NAME")
+    end
+
+    local culture = player.GetCulture ~= nil and player:GetCulture() or nil
+    if culture == nil then
+        return nil
+    end
+
+    if culture.IsInAnarchy ~= nil and culture:IsInAnarchy() then
+        return Locale.Lookup("LOC_GOVERNMENT_ANARCHY_NAME")
+    end
+
+    local governmentId = culture.GetCurrentGovernment ~= nil and culture:GetCurrentGovernment() or -1
+    if governmentId == nil or governmentId < 0 then
+        return nil
+    end
+
+    local government = GameInfo.Governments[governmentId]
+    if government == nil then
+        return nil
+    end
+
+    return Locale.Lookup(government.Name)
+end
+
+local function BuildPowerLensPlotInfo(plot)
+    local localPlayerID = Game.GetLocalPlayer()
+    if localPlayerID == nil or localPlayerID < 0 then
+        return nil
+    end
+
+    local city = Cities.GetPlotPurchaseCity(plot)
+    if city == nil then
+        city = Cities.GetCityInPlot(plot:GetX(), plot:GetY())
+    end
+    if city == nil or city:GetOwner() ~= localPlayerID then
+        return nil
+    end
+
+    local cityPower = city.GetPower ~= nil and city:GetPower() or nil
+    if cityPower == nil then
+        return nil
+    end
+
+    local lines = {}
+
+    local plotsProvidingPower = cityPower.GetPlotsProvidingPower ~= nil and cityPower:GetPlotsProvidingPower() or nil
+    if plotsProvidingPower ~= nil then
+        local powerString = plotsProvidingPower[plot:GetIndex()]
+        if powerString ~= nil then
+            lines[#lines + 1] = Locale.Lookup("LOC_CAI_LENS_POWER_SOURCE", powerString)
+        end
+    end
+
+    local isFullyPowered = cityPower.IsFullyPowered ~= nil and cityPower:IsFullyPowered() or false
+    local requiredPower = cityPower.GetRequiredPower ~= nil and cityPower:GetRequiredPower() or 0
+    if requiredPower > 0 then
+        if isFullyPowered then
+            lines[#lines + 1] = Locale.Lookup("LOC_CAI_LENS_POWER_CITY_POWERED")
+        else
+            lines[#lines + 1] = Locale.Lookup("LOC_CAI_LENS_POWER_CITY_UNPOWERED")
+        end
+    end
+
+    return #lines > 0 and lines or nil
+end
+
+local function BuildTourismLensPlotInfo(plot)
+    local localPlayerID = Game.GetLocalPlayer()
+    if localPlayerID == nil or localPlayerID < 0 then
+        return nil
+    end
+
+    local localPlayer = Players[localPlayerID]
+    if localPlayer == nil or localPlayer.GetCulture == nil then
+        return nil
+    end
+
+    local culture = localPlayer:GetCulture()
+    if culture == nil then
+        return nil
+    end
+
+    local plotIndex = plot:GetIndex()
+    local tourismValue = culture.GetTourismAt ~= nil and culture:GetTourismAt(plotIndex) or 0
+    if tourismValue <= 0 then
+        return nil
+    end
+
+    local touristCount = culture.GetTouristsAt ~= nil and culture:GetTouristsAt(plotIndex) or 0
+    return Locale.Lookup("LOC_CAI_WORLD_SCANNER_TOURISM_ITEM", tostring(tourismValue), tostring(touristCount))
+end
+
+local function BuildAppealLensPlotInfo(plot)
+    if plot:IsWater() then
+        return nil
+    end
+
+    if not GameCapabilities.HasCapability("CAPABILITY_LENS_APPEAL") then
+        return nil
+    end
+
+    local appeal = plot:GetAppeal()
+    for row in GameInfo.AppealHousingChanges() do
+        if appeal >= row.MinimumValue then
+            return Locale.Lookup("LOC_CAI_LENS_APPEAL", Locale.Lookup(row.Description), appeal)
+        end
+    end
+
+    return nil
+end
+
+local function BuildLoyaltyLensPlotInfo(plot)
+    local ownerID = plot:GetOwner()
+    if ownerID == nil or ownerID < 0 then
+        return nil
+    end
+
+    local city = Cities.GetPlotPurchaseCity(plot)
+    if city == nil then
+        city = Cities.GetCityInPlot(plot:GetX(), plot:GetY())
+    end
+    if city == nil or city:GetOwner() ~= ownerID then
+        return nil
+    end
+
+    local identity = city.GetCulturalIdentity ~= nil and city:GetCulturalIdentity() or nil
+    if identity == nil then
+        return nil
+    end
+
+    local lines = {}
+
+    if identity.IsAlwaysFullyLoyal ~= nil and identity:IsAlwaysFullyLoyal() then
+        lines[#lines + 1] = Locale.Lookup("LOC_CAI_LENS_LOYALTY_ALWAYS_LOYAL")
+        return lines
+    end
+
+    local loyaltyLevel = identity.GetLoyaltyLevel ~= nil and identity:GetLoyaltyLevel() or nil
+    local loyalty = identity.GetLoyalty ~= nil and identity:GetLoyalty() or 0
+    local maxLoyalty = identity.GetMaxLoyalty ~= nil and identity:GetMaxLoyalty() or 0
+    if loyaltyLevel ~= nil then
+        local levelName = GameInfo.LoyaltyLevels and GameInfo.LoyaltyLevels[loyaltyLevel]
+        local levelText = levelName ~= nil and levelName.Name ~= nil and Locale.Lookup(levelName.Name) or
+            tostring(loyaltyLevel)
+        lines[#lines + 1] = Locale.Lookup("LOC_CAI_LENS_LOYALTY_LEVEL", levelText, math.floor(loyalty),
+            math.floor(maxLoyalty))
+    end
+
+    local perTurn = identity.GetLoyaltyPerTurn ~= nil and identity:GetLoyaltyPerTurn() or 0
+    local sign = perTurn > 0 and ("+" .. tostring(math.floor(perTurn))) or tostring(math.floor(perTurn))
+    lines[#lines + 1] = Locale.Lookup("LOC_CAI_LENS_LOYALTY_PER_TURN", sign)
+
+    if IdentityConversionOutcome ~= nil then
+        local outcome = identity.GetConversionOutcome ~= nil and identity:GetConversionOutcome() or nil
+        if outcome == IdentityConversionOutcome.LOSING_LOYALTY then
+            local transferPlayer = identity.GetPotentialTransferPlayer ~= nil and identity:GetPotentialTransferPlayer() or
+                nil
+            if transferPlayer ~= nil and transferPlayer >= 0 then
+                local config = PlayerConfigurations[transferPlayer]
+                local playerName = config ~= nil and config.GetCivilizationShortDescription ~= nil
+                    and Locale.Lookup(config:GetCivilizationShortDescription()) or tostring(transferPlayer)
+                lines[#lines + 1] = Locale.Lookup("LOC_CAI_LENS_LOYALTY_AT_RISK", playerName)
+            end
+        end
+    end
+
+    return #lines > 0 and lines or nil
+end
+
+local function GetReligionName(religionType)
+    if religionType == nil or religionType < 0 then
+        return nil
+    end
+
+    local gameReligion = Game.GetReligion ~= nil and Game.GetReligion() or nil
+    if gameReligion ~= nil and gameReligion.GetName ~= nil then
+        local name = gameReligion:GetName(religionType)
+        if name ~= nil and name ~= "" then
+            return Locale.Lookup(name)
+        end
+    end
+
+    return nil
+end
+
+local function BuildReligionLensPlotInfo(plot)
+    local city = Cities.GetPlotPurchaseCity(plot)
+    if city == nil then
+        city = Cities.GetCityInPlot(plot:GetX(), plot:GetY())
+    end
+    if city == nil then
+        return nil
+    end
+
+    local cityReligion = city.GetReligion ~= nil and city:GetReligion() or nil
+    if cityReligion == nil then
+        return nil
+    end
+
+    local majorityType = cityReligion.GetMajorityReligion ~= nil and cityReligion:GetMajorityReligion() or -1
+
+    local religionsInCity = cityReligion.GetReligionsInCity ~= nil and cityReligion:GetReligionsInCity() or nil
+    if religionsInCity == nil then
+        return Locale.Lookup("LOC_CAI_LENS_RELIGION_NO_MAJORITY")
+    end
+
+    local sorted = {}
+    for _, entry in ipairs(religionsInCity) do
+        local relType = entry.Religion
+        local followers = entry.Followers or 0
+        if relType ~= nil and relType >= 0 and followers > 0 then
+            local relName = GetReligionName(relType)
+            if relName ~= nil then
+                sorted[#sorted + 1] = { type = relType, name = relName, followers = followers }
+            end
+        end
+    end
+
+    if #sorted == 0 then
+        return Locale.Lookup("LOC_CAI_LENS_RELIGION_NO_MAJORITY")
+    end
+
+    table.sort(sorted, function(a, b) return a.followers > b.followers end)
+
+    local lines = {}
+    for _, rel in ipairs(sorted) do
+        if rel.type == majorityType then
+            lines[#lines + 1] = Locale.Lookup("LOC_CAI_LENS_RELIGION_MAJORITY_FOLLOWERS", rel.name, rel.followers)
+        else
+            lines[#lines + 1] = Locale.Lookup("LOC_CAI_LENS_RELIGION_FOLLOWERS", rel.name, rel.followers)
+        end
+    end
+
+    return lines
+end
+
+LensInfoHelpers[LAYER_SETTLER] = BuildSettlerLensPlotInfo
+LensInfoHelpers[LAYER_APPEAL] = BuildAppealLensPlotInfo
+LensInfoHelpers[LAYER_GOVERNMENT] = BuildGovernmentLensPlotInfo
+LensInfoHelpers[LAYER_POWER] = BuildPowerLensPlotInfo
+LensInfoHelpers[LAYER_TOURISM] = BuildTourismLensPlotInfo
+LensInfoHelpers[LAYER_RELIGION] = BuildReligionLensPlotInfo
+
+if type(IsExpansion1Active) == "function" and IsExpansion1Active() then
+    LensInfoHelpers[LAYER_LOYALTY] = BuildLoyaltyLensPlotInfo
+end
+
+local function GetActiveLensHelper()
+    for layerHash, helper in pairs(LensInfoHelpers) do
+        if UILens.IsLayerOn(layerHash) then
+            return helper
+        end
+    end
+    return nil
+end
+
+function GetActiveLensPlotInfo(plot)
+    if plot == nil then return nil end
+    local helper = GetActiveLensHelper()
+    if helper == nil then return nil end
+    return helper(plot)
+end
+
+local function SpeakActiveLensPlotInfo(plot)
+    local resolvedPlot = ResolveActiveInterfacePlot(plot)
+    if resolvedPlot == nil then
+        return false
+    end
+
+    local lines = GetActiveLensPlotInfo(resolvedPlot)
+    if lines == nil then
+        return false
+    end
+
+    if type(lines) == "string" then
+        if lines == "" then
+            return false
+        end
+        Speak(ProcessIcons(lines))
+        return true
+    end
+
+    if #lines > 0 then
+        Speak(ProcessIcons(table.concat(lines, ", ")))
+        return true
+    end
+
+    return false
+end
+
+-- ===========================================================================
+-- INTERFACE + LENS PUBLIC API
+-- ===========================================================================
+
+function GetActiveInterfacePlotInfo(plot)
+    if plot == nil then return nil end
+    local helper = InterfaceInfoHelpers[UI.GetInterfaceMode()]
+    if helper == nil then return nil end
+    local lines = helper(plot, false)
+    if lines == false then return nil end
+    return lines
+end
+
 function SpeakActiveInterfacePlotInfo(plot)
     local resolvedPlot = ResolveActiveInterfacePlot(plot)
     if resolvedPlot == nil then
@@ -1150,6 +1523,9 @@ function SpeakActiveInterfacePlotInfo(plot)
 
     local helper = InterfaceInfoHelpers[UI.GetInterfaceMode()]
     if helper == nil then
+        if SpeakActiveLensPlotInfo(resolvedPlot) then
+            return true
+        end
         Speak(Locale.Lookup("LOC_CAI_NO_INTERFACE_INFO"))
         return false
     end

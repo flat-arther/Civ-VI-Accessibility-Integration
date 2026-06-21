@@ -18,46 +18,52 @@
 
 
 
+---@class CAICursorMoveState
+---@field fromPlotId integer Plot index before the move.
+---@field toPlotId integer Plot index after the move.
+---@field distance number Hex distance between from and to.
+---@field fromX integer X coordinate before the move.
+---@field fromY integer Y coordinate before the move.
+---@field toX integer X coordinate after the move.
+---@field toY integer Y coordinate after the move.
+---@field reason "step"|"jump"|"select"|"snap" Why the cursor moved.
+
 ---@class CAICursor
 ---@field curX integer The current X coordinate of the cursor.
 ---@field curY integer The current Y coordinate of the cursor.
----@field settings table<string, boolean> Configuration flags for cursor behavior.
+---@field lastOwnerZone string|nil Last spoken owner zone text.
+---@field lastContinentZone string|nil Last spoken continent zone text.
+---@field lastTerritoryZone string|nil Last spoken territory zone text (XP2: deserts, mountains, seas, lakes, oceans).
+---@field lastVolcanoZone string|nil Last spoken volcano zone text (XP2).
+---@field lastNationalParkZone string|nil Last spoken national park zone text.
 CAICursor = {}
 
----Sets cursor coordinates to a given x and y.
----Triggers LuaEvents.CAICursorMoved.
+---Sets cursor coordinates. Updates zone tracking and announces zone changes.
 ---@param x integer
 ---@param y integer
+---@return boolean moved True if coordinates were set successfully.
 function CAICursor:SetCoords(x, y) end
 
----Sets cursor coordinates from a plot id.
----@param plotId integer
-function CAICursor:SetPlotId(plotId) end
+---Unified move entry point. Resolves plotId, updates coordinates and zones,
+---speaks direction on "jump" and "select" reasons, fires LuaEvents.CAICursorMoved(state).
+---@param plotId integer Target plot index.
+---@param reason "step"|"jump"|"select"|"snap" Why the cursor is moving.
+function CAICursor:MoveTo(plotId, reason) end
 
----Moves to the next plot in the specified hex direction.
+---Moves to the adjacent plot in the given hex direction. Calls MoveTo with reason "step".
 ---@param dir DirectionTypes The direction index (0-5).
-function CAICursor:MoveToNextPlot(dir) end
-
----Moves the cursor with jump semantics and direction speech.
----@param plotId integer
-function CAICursor:JumpToPlotId(plotId) end
-
----Snaps the cursor coordinates to a specific unit's location.
----@param playerID integer
----@param unitID integer
-function CAICursor:SnapToUnit(playerID, unitID) end
-
----Snaps the cursor coordinates to a specific plot id.
----@param plotId integer
-function CAICursor:SnapToPlot(plotId) end
+function CAICursor:MoveDirection(dir) end
 
 ---Returns the unique Index of the plot currently under the cursor.
 ---@return integer # The plot index, or -1 if the plot is invalid.
 function CAICursor:GetPlotId() end
 
+---Updates zone tracking (continent, owner, territory, volcano, natural wonder, national park).
+function CAICursor:UpdateZones() end
 
----Public move API: call LuaEvents.CAICursorMove(x, y) to move the cursor.
----The cursor object remains local to the cursor API and should not be reached through ExposedMembers.
+---Public move API: call LuaEvents.CAICursorMoveTo(plotId, reason) to move the cursor.
+---Direction-based stepping: call LuaEvents.CAICursorMoveDirection(direction).
+---Output event: LuaEvents.CAICursorMoved(state) fires after every move with a CAICursorMoveState table.
 
 -- =============================================================================
 -- CAI UI Manager — class and method annotations
@@ -293,9 +299,13 @@ function UIWidget:GetInfoStrings() end
 
 ---ContainerWidget adds sibling navigation + default-child resolution. The base
 ---class for Panel, Dialog, List, HorizontalList, Tree, TabPage, SubMenu.
+---Containers also own the Ctrl+F search integration: set AllowSearch = true
+---(or call EnableSearch / SetSearchQueryHandler) to let the user open a
+---SearchPanel overlay via Ctrl+F. Lists and Trees enable search by default.
 ---@class ContainerWidget : UIWidget
 ---@field WrapAround boolean
 ---@field PageSize integer
+---@field AllowSearch boolean
 ContainerWidget = {}
 
 ---@param b boolean
@@ -303,6 +313,39 @@ function ContainerWidget:SetWrapAround(b) end
 
 ---@param n integer  set to 0 to disable PgUp/PgDn behavior on this container
 function ContainerWidget:SetPageSize(n) end
+
+---@param b boolean
+function ContainerWidget:SetAllowSearch(b) end
+
+function ContainerWidget:EnableSearch() end
+function ContainerWidget:DisableSearch() end
+
+---Set a custom query handler for Ctrl+F search on this container.
+---Implicitly enables search. The handler receives (query, maxResults)
+---and must return a list of {key, label, onActivate?, widget?, tooltip?}.
+---Multi-term AND and "-term" exclusion are handled by the SearchPanel
+---internally — the handler is called once per term.
+---@param handler fun(query:string, maxResults:integer):table[]
+function ContainerWidget:SetSearchQueryHandler(handler) end
+
+---@return fun(query:string, maxResults:integer):table[]|nil
+function ContainerWidget:GetSearchQueryHandler() end
+
+---Set the history context name for search on this container. Defaults to
+---the container's Id. Containers sharing a context name share history.
+---@param context string
+function ContainerWidget:SetSearchHistoryContext(context) end
+
+---@return string|nil
+function ContainerWidget:GetSearchHistoryContext() end
+
+---Forward results to the SearchPanel if it is currently open on this container.
+---@param results table[]
+function ContainerWidget:SetSearchResults(results) end
+
+---Return the SearchPanel if it is currently open and targeting this container.
+---@return SearchPanelWidget|nil
+function ContainerWidget:GetSearchPanel() end
 
 ---Default child for re-entry / programmatic focus. Resolution:
 ---  1. _lastFocusedKey (by FocusKey)  2. _lastFocusedChild (widget ref)
@@ -521,6 +564,11 @@ function EditBoxWidget:SetCommitValidator(fn) end
 function EditBoxWidget:SetEnterToCommit(b) end
 ---@param b boolean
 function EditBoxWidget:SetPasswordMask(b) end
+
+---When true, _value is kept in sync with _buffer on every change, so
+---GetText() always returns the live content without needing an explicit Commit.
+---@param b boolean
+function EditBoxWidget:SetCommitOnBufferChanged(b) end
 ---@param mode integer  one of EditModes.*
 function EditBoxWidget:SetEditMode(mode) end
 ---@param silent? boolean  silent=true flips state without speaking; used for focus-driven activation
@@ -611,6 +659,44 @@ GameViewWidget = {}
 
 ---@class InterfaceModeWidget : ContainerWidget
 InterfaceModeWidget = {}
+
+-- -----------------------------------------------------------------------------
+-- SearchPanelWidget — Ctrl+F overlay
+-- -----------------------------------------------------------------------------
+
+---Overlay search panel. Opened via Ctrl+F on a container with AllowSearch=true.
+---Indexes the container's descendants (or uses a custom query handler) through
+---the game's Search.* API, presents results as a navigable list, and jumps to
+---the selected widget (or fires onActivate) on Enter.
+---Supports multi-term AND queries and "-term" exclusion syntax. The SearchPanel
+---handles parsing and intersect/subtract internally; handlers receive a single
+---query string per call (same as before).
+---Per-context search history is navigable with PageUp/PageDown in the edit box.
+---Emits "search_open", "search_close", and "search_text_changed" events.
+---@class SearchPanelWidget : PanelWidget
+---@field _editBox EditBoxWidget
+---@field _resultList ListWidget
+---@field _targetContainer ContainerWidget
+---@field _queryHandler? fun(query:string, maxResults:integer):table[]
+---@field _contextReady boolean
+---@field _historyContext string
+---@field _historyIndex integer
+SearchPanelWidget = {}
+
+---@param container ContainerWidget
+function SearchPanelWidget:Open(container) end
+
+---@param skipFocusRestore? boolean
+function SearchPanelWidget:Close(skipFocusRestore) end
+
+---@param handler fun(query:string, maxResults:integer):table[]
+function SearchPanelWidget:SetQueryHandler(handler) end
+
+---@param context string
+function SearchPanelWidget:SetHistoryContext(context) end
+
+---@param results table[]
+function SearchPanelWidget:SetResults(results) end
 
 -- -----------------------------------------------------------------------------
 -- UIScreenManager
@@ -720,6 +806,14 @@ function UIScreenManager:AppendSearchChar(c) end
 
 ---@return string
 function UIScreenManager:GetSearchBuffer() end
+
+---Open the Ctrl+F search overlay on a container. Applies the container's
+---query handler (if any) to the shared SearchPanel before opening.
+---@param container ContainerWidget
+function UIScreenManager:OpenSearch(container) end
+
+---@return SearchPanelWidget|nil
+function UIScreenManager:GetSearchPanel() end
 
 -- -----------------------------------------------------------------------------
 -- Widget registry

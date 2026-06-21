@@ -697,6 +697,56 @@ local function EnsureRootBuilt()
         Label = function() return Locale.Lookup("LOC_CAI_PEDIA_SECTIONS") end,
     })
 
+    m_ui.sectionsTree:SetSearchQueryHandler(function(query, maxResults)
+        local results = {}
+        local seen = {}
+
+        local function addResult(sectionId, pageId)
+            local k = sectionId .. "|" .. pageId
+            if seen[k] then return end
+            seen[k] = true
+            local page = GetPage(sectionId, pageId)
+            if not page then return end
+            local title = LookupOrEmpty(page.Title or page.TabName)
+            if title == "" then return end
+            results[#results + 1] = {
+                key = k,
+                label = title,
+                onActivate = function() NavigateTo(sectionId, pageId) end,
+            }
+        end
+
+        for _, section in ipairs(GetSections() or {}) do
+            local sectionId = section.SectionId
+            local pages = GetPages(sectionId) or {}
+            if sectionId == query then
+                if pages[1] then addResult(sectionId, pages[1].PageId) end
+            else
+                for _, page in ipairs(pages) do
+                    if page.PageId == query then
+                        addResult(sectionId, page.PageId)
+                    end
+                end
+            end
+            if #results >= maxResults then return results end
+        end
+
+        if Search.HasContext("Civilopedia") then
+            local raw = Search.Search("Civilopedia", query)
+            if raw then
+                for _, hit in ipairs(raw) do
+                    local sectionId, pageId = string.match(hit[1], "([^|]+)|([^|]+)")
+                    if sectionId and pageId then
+                        addResult(sectionId, pageId)
+                    end
+                    if #results >= maxResults then return results end
+                end
+            end
+        end
+
+        return results
+    end)
+
     m_ui.historyList = mgr:CreateWidget("CAIPediaHistoryList", "List", {
         Label = function() return Locale.Lookup("LOC_CAI_PEDIA_HISTORY") end,
         HiddenPredicate = function(w) return not w.Children or #w.Children < 2 end,

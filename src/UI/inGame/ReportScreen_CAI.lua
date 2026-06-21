@@ -146,7 +146,10 @@ local function ActivateCity(pCity)
         UI.SelectCity(pCity)
         Close()
     else
-        UI.LookAtPlot(pCity:GetX(), pCity:GetY())
+        local plot = Map.GetPlot(pCity:GetX(), pCity:GetY())
+        if plot then
+            LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
+        end
         Close()
     end
 end

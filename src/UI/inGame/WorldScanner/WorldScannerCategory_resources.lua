@@ -20,42 +20,36 @@ CAIWorldScannerCategory_Resources = {
     end,
 }
 
-function CAIWorldScannerCategory_Resources.Scan(context)
-    local out = {}
+function CAIWorldScannerCategory_Resources.PlotExtract(plotIndex, plot, context, collect)
+    local resourceIndex = plot:GetResourceType()
+    local resourceInfo = resourceIndex ~= nil and GameInfo.Resources[resourceIndex] or nil
     local playerResources = Utils.GetPlayerResources(context)
+    if resourceInfo == nil or playerResources == nil or not playerResources:IsResourceVisible(resourceInfo.Hash) then
+        return
+    end
 
-    Utils.ForEachRevealedPlot(context, function(plotIndex, plot)
-        local resourceIndex = plot:GetResourceType()
-        local resourceInfo = resourceIndex ~= nil and GameInfo.Resources[resourceIndex] or nil
-        if resourceInfo == nil or playerResources == nil or not playerResources:IsResourceVisible(resourceInfo.Hash) then
-            return
-        end
+    collect({
+        Id = "resource:" .. tostring(plotIndex),
+        PlotIndex = plotIndex,
+        LabelKey = resourceInfo.Name,
+        SubCategoryId = resourceInfo.ResourceClassType,
+        GroupId = tostring(resourceInfo.ResourceType),
+        GroupLabelKey = resourceInfo.Name,
+        Validate = function(item, validateContext)
+            local validatePlot = Map.GetPlotByIndex(item.PlotIndex)
+            if validatePlot == nil or not Utils.IsPlotRevealed(validateContext, validatePlot) then
+                return false
+            end
 
-        out[#out + 1] = {
-            Id = "resource:" .. tostring(plotIndex),
-            PlotIndex = plotIndex,
-            LabelKey = resourceInfo.Name,
-            SubCategoryId = resourceInfo.ResourceClassType,
-            GroupId = tostring(resourceInfo.ResourceType),
-            GroupLabelKey = resourceInfo.Name,
-            Validate = function(item, validateContext)
-                local validatePlot = Map.GetPlotByIndex(item.PlotIndex)
-                if validatePlot == nil or not Utils.IsPlotRevealed(validateContext, validatePlot) then
-                    return false
-                end
-
-                local validateIndex = validatePlot:GetResourceType()
-                local validateInfo = validateIndex ~= nil and GameInfo.Resources[validateIndex] or nil
-                local validateResources = Utils.GetPlayerResources(validateContext)
-                return validateInfo ~= nil
-                    and validateInfo.ResourceType == resourceInfo.ResourceType
-                    and validateResources ~= nil
-                    and validateResources:IsResourceVisible(validateInfo.Hash)
-            end,
-        }
-    end)
-
-    return out
+            local validateIndex = validatePlot:GetResourceType()
+            local validateInfo = validateIndex ~= nil and GameInfo.Resources[validateIndex] or nil
+            local validateResources = Utils.GetPlayerResources(validateContext)
+            return validateInfo ~= nil
+                and validateInfo.ResourceType == resourceInfo.ResourceType
+                and validateResources ~= nil
+                and validateResources:IsResourceVisible(validateInfo.Hash)
+        end,
+    })
 end
 
 CAIWorldScanner:RegisterCategoryDefinition(CAIWorldScannerCategory_Resources)

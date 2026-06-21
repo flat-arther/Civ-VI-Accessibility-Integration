@@ -105,12 +105,13 @@ local function OnCAIInterfaceWidgetSecondaryAction(widgetId, plotId)
     TryHandleCityManagementSecondary(plotId)
 end
 
-local function OnCAICursorMoved(x, y, plotId)
+local function OnCAICursorMoved(state)
     if not CAICityManagementInterface.IsActive() then
         m_lastHoverAnimatedPlotId = nil
         return
     end
 
+    local plotId = state.toPlotId
     if plotId < 0 or plotId == m_lastHoverAnimatedPlotId then
         return
     end

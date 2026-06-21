@@ -10,6 +10,7 @@ include("CAIWidgetHelpers_Search")
 include("CAIWidgetHelpers_Tree")
 include("CAIWidgetHelpers_EditBox")
 include("CAIWidgetHelpers_DialogBuilder")
+include("CAIWidgetHelpers_PediaLookup")
 include("CAIWidget_Base")
 include("CAIWidget_Container")
 include("CAIWidget_Value")
@@ -34,6 +35,7 @@ include("CAIWidget_TabControl")
 include("CAIWidget_Table")
 include("CAIWidget_GameView")
 include("CAIWidget_InterfaceMode")
+include("CAIWidget_SearchPanel")
 
 ---@class UIScreenManager
 ---@field Stack UIWidget[]
@@ -572,6 +574,30 @@ function UIScreenManager:FindByIdInTree(root, id, recurse)
         end
     end
     return nil
+end
+
+--#endregion
+
+--#region Search
+
+function UIScreenManager:OpenSearch(container)
+    if not container then return end
+    if self._searchPanel then
+        self._searchPanel:Close(true)
+    end
+    local panel = self:CreateWidget(self:GenerateWidgetId("CAI_SearchPanel"), "SearchPanel")
+    if not panel then return end
+    self._searchPanel = panel
+    local handler = container.GetSearchQueryHandler and container:GetSearchQueryHandler() or nil
+    panel:SetQueryHandler(handler)
+    local historyCtx = container.GetSearchHistoryContext and container:GetSearchHistoryContext()
+    panel:SetHistoryContext(historyCtx or container.Id or "default")
+    panel:Open(container)
+end
+
+---@return SearchPanelWidget|nil
+function UIScreenManager:GetSearchPanel()
+    return self._searchPanel
 end
 
 --#endregion

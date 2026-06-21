@@ -899,7 +899,7 @@ function GetCityRangeStrikeActions(city)
                         Action = function()
                             local districtPlot = GetDistrictPlot(district)
                             if districtPlot ~= nil then
-                                LuaEvents.CAICursorJump(districtPlot:GetIndex(), true)
+                                LuaEvents.CAICursorMoveTo(districtPlot:GetIndex(), "select")
                             end
                             UI.DeselectAll()
                             UI.SelectDistrict(district)
@@ -944,7 +944,7 @@ function BuildDistrictWMDStrikeAction(city, district, districtPlot, wmdDef)
         Label = Locale.Lookup("LOC_CAI_CITY_ACTION_WMD_STRIKE_DISTRICT", districtName, weaponName),
         Tooltip = Locale.Lookup("LOC_CAI_CITY_ACTION_WMD_STRIKE_DISTRICT_TOOLTIP", districtName, weaponName),
         Action = function()
-            LuaEvents.CAICursorJump(districtPlot:GetIndex(), true)
+            LuaEvents.CAICursorMoveTo(districtPlot:GetIndex(), "select")
             if UI.GetInterfaceMode() == InterfaceModeTypes.ICBM_STRIKE then
                 UI.SetInterfaceMode(InterfaceModeTypes.SELECTION)
             end
@@ -1372,7 +1372,7 @@ function OnCitySelectionChanged(ownerPlayerID, cityID, i, j, k, isSelected, isEd
         print("CAI CityPanel could not resolve selected city plot: " .. tostring(i) .. ", " .. tostring(j))
         return
     end
-    LuaEvents.CAICursorJump(plot:GetIndex(), true)
+    LuaEvents.CAICursorMoveTo(plot:GetIndex(), "select")
     local results = info:RequestCityInfo(cityID, CITY_INFO_BUCKETS.Summary, ownerPlayerID)
     if results == nil or #results == 0 then
         return

@@ -13,6 +13,7 @@ local SUBCATEGORY_ORDER = {
 CAIWorldScannerCategory_CityManagement = {
     Id = "cityManagement",
     LabelKey = "LOC_CAI_WORLD_SCANNER_CATEGORY_CITY_MANAGEMENT",
+    AutoFocus = true,
     SubCategoryOrder = SUBCATEGORY_ORDER,
     SubCategoryLabels = {
         locked = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_LOCKED",

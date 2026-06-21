@@ -164,6 +164,11 @@ local function BuildPanel()
 
         return JoinNonEmpty(parts, ", ")
     end)
+    summaryNode:SetTooltip(function()
+        local text = Controls.EraEffects:GetText()
+        if not text or text == "" then return "" end
+        return NormalizeText(text)
+    end)
 
     -- Score breakdown as children of summary
     local prevBreakdown = gameEras:GetPlayerPreviousEraScoreBreakdown(localPlayerID)
@@ -301,9 +306,15 @@ local function BuildPanel()
             local playerConfig = PlayerConfigurations[playerID]
             local leaderName = Locale.Lookup(playerConfig:GetLeaderName())
             local civName = Locale.Lookup(playerConfig:GetCivilizationDescription())
-            local ageName = ageKey ~= "" and Locale.Lookup(ageKey) or Locale.Lookup("LOC_DIPLOPANEL_UNMET_PLAYER")
+            local ageName = Locale.Lookup(ageKey)
             local label = Locale.Lookup("LOC_DIPLOMACY_DEAL_PLAYER_PANEL_TITLE", leaderName, civName) .. ", " .. ageName
 
+            local civChild = MakeLeaf("era:civ:" .. playerID, label)
+            civsNode:AddChild(civChild)
+        end
+
+        local function AddUnmetRow(playerID)
+            local label = Locale.Lookup("LOC_DIPLOPANEL_UNMET_PLAYER")
             local civChild = MakeLeaf("era:civ:" .. playerID, label)
             civsNode:AddChild(civChild)
         end
@@ -312,18 +323,10 @@ local function BuildPanel()
         for _, pid in ipairs(goldenPlayers) do AddCivRow(pid, "LOC_ERA_PROGRESS_GOLDEN_AGE") end
         for _, pid in ipairs(normalPlayers) do AddCivRow(pid, "LOC_ERA_PROGRESS_NORMAL_AGE") end
         for _, pid in ipairs(darkPlayers)   do AddCivRow(pid, "LOC_ERA_PROGRESS_DARK_AGE") end
-        for _, pid in ipairs(unmetPlayers)  do AddCivRow(pid, "") end
+        for _, pid in ipairs(unmetPlayers)  do AddUnmetRow(pid) end
 
         m_tree:AddChild(civsNode)
     end
-
-    -- 4. Effects (leaf)
-    local effectsRow = MakeLeaf("era:effects", function()
-        local text = Controls.EraEffects:GetText()
-        if not text or text == "" then return "" end
-        return Locale.Lookup("LOC_CAI_ERA_PROGRESS_EFFECTS") .. ", " .. NormalizeText(text)
-    end)
-    m_tree:AddChild(effectsRow)
 
     -- Build panel
     m_panel = mgr:CreateWidget(PANEL_ID, "Panel", {

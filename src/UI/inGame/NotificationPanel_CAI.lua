@@ -1,22 +1,22 @@
 include("caiUtils")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr                                  = ExposedMembers.CAI_UIManager
 
-local NOTIFICATION_CENTER_ID = "CAINotificationCenter_Tree"
-local EMPTY_NODE_ID          = "CAINotificationCenter_Empty"
-local GROUP_ID_PREFIX        = "CAINotificationCenter_Group_"
-local LEAF_ID_PREFIX         = "CAINotificationCenter_Leaf_"
+local NOTIFICATION_CENTER_ID               = "CAINotificationCenter_Tree"
+local EMPTY_NODE_ID                        = "CAINotificationCenter_Empty"
+local GROUP_ID_PREFIX                      = "CAINotificationCenter_Group_"
+local LEAF_ID_PREFIX                       = "CAINotificationCenter_Leaf_"
 
-local ACTION_OPEN_NOTIFICATION_CENTER = Input.GetActionId("NotificationPanelOpenList")
-local CAI_TUTORIAL_GOAL_ADDED_TYPE     = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_ADDED")
-local CAI_TUTORIAL_GOAL_COMPLETED_TYPE = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_COMPLETED")
+local ACTION_OPEN_NOTIFICATION_CENTER      = Input.GetActionId("NotificationPanelOpenList")
+local CAI_TUTORIAL_GOAL_ADDED_TYPE         = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_ADDED")
+local CAI_TUTORIAL_GOAL_COMPLETED_TYPE     = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_COMPLETED")
 
-local BASE_RegisterHandlers           = RegisterHandlers
+local BASE_RegisterHandlers                = RegisterHandlers
 local m_caiOriginalOnNotificationAdded     = OnNotificationAdded
 local m_caiOriginalOnNotificationDismissed = OnNotificationDismissed
 
-local m_centerTree                    = nil ---@type UIWidget|nil
-local m_caiAnnouncedNotificationIDs   = {}
+local m_centerTree                         = nil ---@type UIWidget|nil
+local m_caiAnnouncedNotificationIDs        = {}
 
 local function GetLocalPlayer()
     local playerID = Game.GetLocalPlayer()
@@ -186,7 +186,7 @@ local function DismissNotificationGroup(playerID, group)
     return true
 end
 
-local function BuildLeafValue(playerID, notificationID, indexInGroup, groupCount)
+local function BuildLeafTooltip(playerID, notificationID)
     return function()
         local notification = GetLiveNotification(playerID, notificationID)
         if not IsNotificationAvailable(notification, notificationID, playerID) then
@@ -194,9 +194,6 @@ local function BuildLeafValue(playerID, notificationID, indexInGroup, groupCount
         end
 
         local parts = {}
-        if groupCount and groupCount > 1 and indexInGroup then
-            table.insert(parts, Locale.Lookup("LOC_CAI_NOTIFICATION_STACK_POSITION", indexInGroup, groupCount))
-        end
         if not notification:IsValidForPhase() then
             table.insert(parts, Locale.Lookup("LOC_CAI_NOTIFICATION_WRONG_PHASE"))
         end
@@ -213,9 +210,9 @@ local function BuildLeafValue(playerID, notificationID, indexInGroup, groupCount
     end
 end
 
-local function CreateLeafWidget(playerID, notificationID, indexInGroup, groupCount)
+local function CreateLeafWidget(playerID, notificationID)
     local leaf = mgr:CreateWidget(LEAF_ID_PREFIX .. tostring(notificationID), "TreeItem", {
-        Label = function()
+        Label    = function()
             local notification = GetLiveNotification(playerID, notificationID)
             if not IsNotificationAvailable(notification, notificationID, playerID) then
                 return Locale.Lookup("LOC_CAI_NOTIFICATION_UNAVAILABLE")
@@ -224,8 +221,8 @@ local function CreateLeafWidget(playerID, notificationID, indexInGroup, groupCou
             if content ~= "" then return content end
             return NotificationTitle(notification)
         end,
-        ValueGetter = BuildLeafValue(playerID, notificationID, indexInGroup, groupCount),
-        FocusKey    = "notification:" .. tostring(notificationID),
+        Tooltip  = BuildLeafTooltip(playerID, notificationID),
+        FocusKey = "notification:" .. tostring(notificationID),
     })
 
     leaf:On("activate", function() ActivateNotification(playerID, notificationID) end)
@@ -247,7 +244,7 @@ end
 
 local function CreateGroupWidget(playerID, group)
     local groupNode = mgr:CreateWidget(GROUP_ID_PREFIX .. group.TypeName, "TreeItem", {
-        Label = function()
+        Label    = function()
             for _, notificationID in ipairs(group.Notifications) do
                 local notification = GetLiveNotification(playerID, notificationID)
                 if IsNotificationAvailable(notification, notificationID, playerID) then
@@ -256,10 +253,10 @@ local function CreateGroupWidget(playerID, group)
             end
             return Locale.Lookup("LOC_CAI_NOTIFICATION_UNAVAILABLE")
         end,
-        ValueGetter = function()
+        Tooltip  = function()
             return Locale.Lookup("LOC_CAI_NOTIFICATION_GROUP_COUNT", #group.Notifications)
         end,
-        FocusKey    = "group:" .. tostring(group.TypeName),
+        FocusKey = "group:" .. tostring(group.TypeName),
     })
 
     groupNode:AddInputBinding({
@@ -270,7 +267,7 @@ local function CreateGroupWidget(playerID, group)
     })
 
     for idx, notificationID in ipairs(group.Notifications) do
-        groupNode:AddChild(CreateLeafWidget(playerID, notificationID, idx, #group.Notifications))
+        groupNode:AddChild(CreateLeafWidget(playerID, notificationID))
     end
 
     return groupNode
@@ -291,7 +288,7 @@ local function PopulateTree(tree, playerID)
     end
     for _, group in ipairs(groups) do
         if #group.Notifications == 1 then
-            tree:AddChild(CreateLeafWidget(playerID, group.Notifications[1], nil, nil))
+            tree:AddChild(CreateLeafWidget(playerID, group.Notifications[1]))
         else
             tree:AddChild(CreateGroupWidget(playerID, group))
         end

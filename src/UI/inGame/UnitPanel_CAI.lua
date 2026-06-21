@@ -2325,8 +2325,6 @@ local function CreateUnitListItem(unit)
 
         CloseUnitList()
         UI.SelectUnit(resolved)
-        local plot = Map.GetPlot(resolved:GetX(), resolved:GetY())
-        UI.LookAtPlot(plot)
     end)
     BindCivilopediaShortcut(item, function() return unitID end)
 
@@ -2580,7 +2578,7 @@ function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locatio
         return
     end
 
-    LuaEvents.CAICursorJump(plot:GetIndex(), true)
+    LuaEvents.CAICursorMoveTo(plot:GetIndex(), "select")
     local results = info:RequestUnitInfo(unitId, { "Summary" }, player)
     if results == nil or #results == 0 then
         return
@@ -2626,7 +2624,7 @@ RandomizeName = WrapFunc(RandomizeName, function(orig)
 end)
 Controls.RandomNameButton:RegisterCallback(Mouse.eLClick, RandomizeName)
 
-local function OnCAICursorMoved(x, y, plotId)
+local function OnCAICursorMoved(state)
     InspectWhatsBelowTheCursor()
 end
 

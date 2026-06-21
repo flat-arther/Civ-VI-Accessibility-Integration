@@ -23,6 +23,8 @@ function TreeWidget.Create(mgr, id, props)
     w.WrapAround = false
     w.SearchDepth = 3
 
+    w.AllowSearch = true
+
     w:AddInputBindings({
         { Key = Keys.VK_UP,     MSG = KeyEvents.KeyDown, Action = function(self) return Tree.NavigateFlat(self, -1) end },
         { Key = Keys.VK_DOWN,   MSG = KeyEvents.KeyDown, Action = function(self) return Tree.NavigateFlat(self,  1) end },

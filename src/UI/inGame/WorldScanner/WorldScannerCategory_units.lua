@@ -9,39 +9,30 @@ local CATEGORY_IDS = {
 }
 
 local SUBCATEGORY_IDS = {
-    Civilian = "civilian",
-    Religious = "religious",
-    Melee = "melee",
-    Ranged = "ranged",
-    Siege = "siege",
+    Military = "military",
     Naval = "naval",
     Air = "air",
     Support = "support",
-    Barbarians = "barbarians",
+    Civilian = "civilian",
+    Trade = "trade",
 }
 
 local subCategoryLabels = {
-    [SUBCATEGORY_IDS.Civilian] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CIVILIAN",
-    [SUBCATEGORY_IDS.Religious] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_RELIGIOUS",
-    [SUBCATEGORY_IDS.Melee] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_MELEE",
-    [SUBCATEGORY_IDS.Ranged] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_RANGED",
-    [SUBCATEGORY_IDS.Siege] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_SIEGE",
-    [SUBCATEGORY_IDS.Naval] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_NAVAL",
-    [SUBCATEGORY_IDS.Air] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_AIR",
-    [SUBCATEGORY_IDS.Support] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_SUPPORT",
-    [SUBCATEGORY_IDS.Barbarians] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BARBARIANS",
+    [SUBCATEGORY_IDS.Military] = "LOC_CAI_UNIT_DOMAIN_MILITARY",
+    [SUBCATEGORY_IDS.Naval] = "LOC_CAI_UNIT_DOMAIN_NAVAL",
+    [SUBCATEGORY_IDS.Air] = "LOC_CAI_UNIT_DOMAIN_AIR",
+    [SUBCATEGORY_IDS.Support] = "LOC_CAI_UNIT_DOMAIN_SUPPORT",
+    [SUBCATEGORY_IDS.Civilian] = "LOC_CAI_UNIT_DOMAIN_CIVILIAN",
+    [SUBCATEGORY_IDS.Trade] = "LOC_CAI_UNIT_DOMAIN_TRADE",
 }
 
 local subCategoryOrder = {
-    SUBCATEGORY_IDS.Civilian,
-    SUBCATEGORY_IDS.Religious,
-    SUBCATEGORY_IDS.Melee,
-    SUBCATEGORY_IDS.Ranged,
-    SUBCATEGORY_IDS.Siege,
+    SUBCATEGORY_IDS.Military,
     SUBCATEGORY_IDS.Naval,
     SUBCATEGORY_IDS.Air,
     SUBCATEGORY_IDS.Support,
-    SUBCATEGORY_IDS.Barbarians,
+    SUBCATEGORY_IDS.Civilian,
+    SUBCATEGORY_IDS.Trade,
 }
 
 local function CreateUnitsCategory(id, labelKey)
@@ -60,26 +51,6 @@ CAIWorldScannerCategory_MyUnits = CreateUnitsCategory(CATEGORY_IDS.My, "LOC_CAI_
 CAIWorldScannerCategory_NeutralUnits = CreateUnitsCategory(CATEGORY_IDS.Neutral, "LOC_CAI_WORLD_SCANNER_CATEGORY_NEUTRAL_UNITS")
 CAIWorldScannerCategory_EnemyUnits = CreateUnitsCategory(CATEGORY_IDS.Enemy, "LOC_CAI_WORLD_SCANNER_CATEGORY_ENEMY_UNITS")
 
-local function IsReligiousCivilian(unitInfo)
-    if unitInfo == nil then
-        return false
-    end
-
-    local function IsGameplayBooleanTrue(value)
-        return value == true or value == 1
-    end
-
-    local function IsPositiveGameplayNumber(value)
-        return type(value) == "number" and value > 0
-    end
-
-    return IsGameplayBooleanTrue(unitInfo.TrackReligion)
-        or IsGameplayBooleanTrue(unitInfo.FoundReligion)
-        or IsPositiveGameplayNumber(unitInfo.ReligiousStrength)
-        or IsPositiveGameplayNumber(unitInfo.SpreadCharges)
-        or IsPositiveGameplayNumber(unitInfo.ReligiousHealCharges)
-        or IsGameplayBooleanTrue(unitInfo.EnabledByReligion)
-end
 
 local function GetUnitCategoryId(context, ownerID)
     local localPlayerID = Utils.GetLocalPlayerID(context)
@@ -113,40 +84,28 @@ local function GetUnitCategoryId(context, ownerID)
     return CATEGORY_IDS.Neutral
 end
 
-local function GetUnitSubCategoryId(player, unitInfo)
-    if player ~= nil and player:IsBarbarian() then
-        return SUBCATEGORY_IDS.Barbarians
+local function GetUnitSubCategoryId(unit, unitInfo)
+    if unitInfo ~= nil and unitInfo.MakeTradeRoute == true then
+        return SUBCATEGORY_IDS.Trade
     end
 
-    if IsReligiousCivilian(unitInfo) then
-        return SUBCATEGORY_IDS.Religious
-    end
-
-    if unitInfo ~= nil and unitInfo.FormationClass == "FORMATION_CLASS_CIVILIAN" then
+    if unit ~= nil and unit:GetCombat() == 0 and unit:GetRangedCombat() == 0 then
         return SUBCATEGORY_IDS.Civilian
     end
 
-    if unitInfo ~= nil and unitInfo.FormationClass == "FORMATION_CLASS_SUPPORT" then
-        return SUBCATEGORY_IDS.Support
-    end
-
-    if unitInfo ~= nil and (unitInfo.FormationClass == "FORMATION_CLASS_AIR" or unitInfo.Domain == "DOMAIN_AIR") then
-        return SUBCATEGORY_IDS.Air
+    if unitInfo ~= nil and unitInfo.Domain == "DOMAIN_LAND" then
+        return SUBCATEGORY_IDS.Military
     end
 
     if unitInfo ~= nil and unitInfo.Domain == "DOMAIN_SEA" then
         return SUBCATEGORY_IDS.Naval
     end
 
-    if unitInfo ~= nil and unitInfo.Bombard ~= nil then
-        return SUBCATEGORY_IDS.Siege
+    if unitInfo ~= nil and unitInfo.Domain == "DOMAIN_AIR" then
+        return SUBCATEGORY_IDS.Air
     end
 
-    if unitInfo ~= nil and unitInfo.RangedCombat ~= nil then
-        return SUBCATEGORY_IDS.Ranged
-    end
-
-    return SUBCATEGORY_IDS.Melee
+    return SUBCATEGORY_IDS.Support
 end
 
 local function BuildUnitScannerItems(context)
@@ -208,7 +167,7 @@ local function BuildUnitScannerItems(context)
                         if unitInfo ~= nil then
                             local unitLabel = FormatOwnedUnitDisplayName(unit) or Locale.Lookup(unitInfo.Name)
                             local categoryId = GetUnitCategoryId(context, ownerID)
-                            local subCategoryId = GetUnitSubCategoryId(player, unitInfo)
+                            local subCategoryId = GetUnitSubCategoryId(unit, unitInfo)
                             out[#out + 1] = {
                                 Id = "unit:" .. uniqueKey,
                                 PlotIndex = plotIndex,
@@ -241,7 +200,7 @@ local function BuildUnitScannerItems(context)
                                     return validateVisible
                                         and (validatePlayer:IsBarbarian() or Utils.CanKnowPlayer(validateContext, ownerID))
                                         and GetUnitCategoryId(validateContext, ownerID) == item.CategoryId
-                                        and GetUnitSubCategoryId(validatePlayer, validateUnitInfo) == item.SubCategoryId
+                                        and GetUnitSubCategoryId(validateUnit, validateUnitInfo) == item.SubCategoryId
                                         and validateUnit:GetUnitType() == unitType
                                 end,
                             }
