@@ -14,7 +14,7 @@ local function SpeakText(text, interrupt)
         return false
     end
 
-    Speak(ProcessIcons(text), interrupt)
+    Speak(text, interrupt)
     return true
 end
 

@@ -2496,7 +2496,7 @@ function OnUnitPanelSelectionInfoInputActionTriggered(actionId)
         return
     end
 
-    Speak(ProcessIcons(table.concat(results, ", ")))
+    Speak(table.concat(results, ", "))
 end
 
 function OnUnitPanelSelectionActionInputTriggered(actionId)
@@ -2584,7 +2584,7 @@ function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locatio
         return
     end
 
-    Speak(ProcessIcons(table.concat(results, ", ")))
+    Speak(table.concat(results, ", "))
 end
 
 View = WrapFunc(View, function(orig, data)
@@ -2635,7 +2635,7 @@ local function SpeakCurrentCombatPreview()
         return
     end
 
-    Speak(ProcessIcons(results))
+    Speak(results)
 end
 
 local function OnCAISpeakCombatPreview()
@@ -2697,7 +2697,7 @@ local function OnCombatResolved(results)
         return
     end
 
-    Speak(ProcessIcons(text))
+    Speak(text)
 end
 
 function info:RequestUnitInfo(unitID, requestedKeys, playerID)

@@ -2942,6 +2942,16 @@
       <Text>Lifespan</Text>
     </Row>
 
+    <!-- Icon dedup aliases: adjacent text forms that mean the same as an
+         icon's spoken form. When one of these appears next to the bracket
+         token, the icon collapses to avoid doubled speech. -->
+    <Row Tag="LOC_CAI_ICON_STRENGTH_ALIAS_COMBAT" Language="en_US">
+      <Text>Combat Strength</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ICON_STRENGTH_ALIAS_DEFENSE" Language="en_US">
+      <Text>Defense Strength</Text>
+    </Row>
+
     <Row Tag="LOC_CAI_TUTORIAL_GOALS" Language="en_US">
       <Text>Tutorial goals</Text>
     </Row>

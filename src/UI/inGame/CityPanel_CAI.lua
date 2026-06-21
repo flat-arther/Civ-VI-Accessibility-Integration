@@ -1351,7 +1351,7 @@ function OnSelectionInfoInputActionTriggered(actionId)
         return
     end
 
-    Speak(ProcessIcons(table.concat(results, ", ")))
+    Speak(table.concat(results, ", "))
 end
 
 function OnCityActionInputActionTriggered(actionId)
@@ -1378,7 +1378,7 @@ function OnCitySelectionChanged(ownerPlayerID, cityID, i, j, k, isSelected, isEd
         return
     end
 
-    Speak(ProcessIcons(table.concat(results, ", ")))
+    Speak(table.concat(results, ", "))
 end
 
 --#Public API

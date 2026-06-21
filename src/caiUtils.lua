@@ -3,9 +3,14 @@ include("iconsProcessing")
 CAI = ExposedMembers.CAI
 ---Utility wrapper for 'CAI.output'
 ---@param text string -- the text to speak
----@param interrupt boolean -- whether to interrupt any currently speaking text. False by default
-function Speak(text, interrupt)
-    if CAI and CAI.Output then CAI.Output(tostring(text), interrupt) end
+---@param interrupt? boolean -- whether to interrupt any currently speaking text. False by default
+---@param processTokens? boolean -- run ProcessIcons on text before speaking. True by default
+function Speak(text, interrupt, processTokens)
+    if CAI and CAI.Output then
+        local out = tostring(text)
+        if processTokens ~= false then out = ProcessIcons(out) end
+        CAI.Output(out, interrupt)
+    end
 end
 
 ---Speak each line in turn. If interrupt is true, only the first line interrupts
@@ -14,11 +19,12 @@ end
 ---one-line-per-widget Windows screen-reader model.
 ---@param lines string[]
 ---@param interrupt? boolean
-function SpeakLines(lines, interrupt)
+---@param processTokens? boolean
+function SpeakLines(lines, interrupt, processTokens)
     if not lines or #lines == 0 then return end
     for i, line in ipairs(lines) do
         if line and line ~= "" then
-            Speak(line, interrupt and i == 1)
+            Speak(line, interrupt and i == 1, processTokens)
         end
     end
 end

@@ -204,7 +204,7 @@ local function GetGreatWorkDetail(pCityBldgs, greatWorkIndex, buildingInfo)
 
     local themeFit = GetGreatWorkThemeFit(pCityBldgs, buildingInfo, greatWorkIndex)
     if themeFit then
-        table.insert(parts, ProcessIcons(themeFit))
+        table.insert(parts, themeFit)
     end
 
     local moveBlocked = GetMoveBlockedReason(pCityBldgs, buildingInfo.Index,
@@ -286,7 +286,7 @@ local function GetBuildingTooltip(pCityBldgs, buildingInfo)
 
     local themeDesc = GetThemeDescription(buildingInfo.BuildingType)
     if themeDesc then
-        table.insert(parts, ProcessIcons(themeDesc))
+        table.insert(parts, themeDesc)
     end
 
     local yieldsText = GetBuildingYieldsText(pCityBldgs, buildingInfo.Index)

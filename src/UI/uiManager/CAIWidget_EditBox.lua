@@ -138,7 +138,7 @@ end
 --#region Public API
 
 ---Set the committed value (and the buffer when not actively editing).
----Normalizes [NEWLINE]/\r\n and runs ProcessIcons.
+---Normalizes [NEWLINE]/\r\n and resolves icon tokens for display.
 ---@param text string
 ---@param silent? boolean
 function EditBoxWidget:SetText(text, silent)
@@ -219,17 +219,17 @@ function EditBoxWidget:BeginEdit(silent)
         if a > b then a, b = b, a end
         local raw = string.sub(buf, a + 1, b)
         if #raw > 500 then
-            Speak(Locale.Lookup("LOC_CAI_EDIT_ACTIVATE_SELECTED_COUNT", label, #raw), true)
+            Speak(Locale.Lookup("LOC_CAI_EDIT_ACTIVATE_SELECTED_COUNT", label, #raw), true, false)
         else
             spoken = self._passwordMask and string.rep("*", #raw) or raw
             if spoken == "" then spoken = Locale.Lookup("LOC_CAI_EDIT_BLANK") end
-            Speak(Locale.Lookup("LOC_CAI_EDIT_ACTIVATE_SELECTED", label, spoken), true)
+            Speak(Locale.Lookup("LOC_CAI_EDIT_ACTIVATE_SELECTED", label, spoken), true, false)
         end
     else
         spoken = E.GetCurrentLine(buf, self._cursor)
         if self._passwordMask then spoken = string.rep("*", #spoken) end
         if spoken == "" then spoken = Locale.Lookup("LOC_CAI_EDIT_BLANK") end
-        Speak(Locale.Lookup("LOC_CAI_EDIT_ACTIVATE", label, spoken), true)
+        Speak(Locale.Lookup("LOC_CAI_EDIT_ACTIVATE", label, spoken), true, false)
     end
 end
 
@@ -238,7 +238,7 @@ function EditBoxWidget:Commit()
     if self._commitValidator then
         local err = self._commitValidator(text)
         if err then
-            Speak(err, true)
+            Speak(err, true, false)
             return
         end
     end
@@ -251,7 +251,7 @@ function EditBoxWidget:Commit()
     -- "committed" every time becomes noise. Listeners can announce their own
     -- confirmation if they need one.
     if not self._alwaysEdit then
-        Speak(Locale.Lookup("LOC_CAI_EDIT_COMMITTED", self._passwordMask and string.rep("*", #text) or text))
+        Speak(Locale.Lookup("LOC_CAI_EDIT_COMMITTED", self._passwordMask and string.rep("*", #text) or text), false, false)
     end
 end
 
@@ -260,7 +260,7 @@ function EditBoxWidget:Cancel()
     self._selStart = nil
     self._buffer = self._original or ""
     self._cursor = #self._buffer
-    Speak(Locale.Lookup("LOC_CAI_EDIT_CANCELLED"))
+    Speak(Locale.Lookup("LOC_CAI_EDIT_CANCELLED"), false, false)
 end
 
 --#endregion
@@ -282,7 +282,7 @@ function EditBoxWidget:OnCharInput(char, silent)
     if not E.InsertText(self, char) then return true end
     self:_FireTextChanged()
     if not silent then
-        Speak(self._passwordMask and "*" or char, true)
+        Speak(self._passwordMask and "*" or char, true, false)
     end
     return true
 end
@@ -322,7 +322,7 @@ function EditBoxWidget._BuildBindings()
                 if not active(self) or self._readOnly then return false end
                 if self._selStart then
                     local d = E.DeleteSelection(self)
-                    if d ~= "" then Speak(self._passwordMask and string.rep("*", #d) or d, true) end
+                    if d ~= "" then Speak(self._passwordMask and string.rep("*", #d) or d, true, false) end
                 else
                     E.BackspaceChar(self)
                 end
@@ -338,7 +338,7 @@ function EditBoxWidget._BuildBindings()
                 if not active(self) or self._readOnly then return false end
                 if self._selStart then
                     local d = E.DeleteSelection(self)
-                    if d ~= "" then Speak(self._passwordMask and string.rep("*", #d) or d, true) end
+                    if d ~= "" then Speak(self._passwordMask and string.rep("*", #d) or d, true, false) end
                 else
                     E.BackspaceWord(self)
                 end
@@ -353,7 +353,7 @@ function EditBoxWidget._BuildBindings()
                 if not active(self) or self._readOnly then return false end
                 if self._selStart then
                     local d = E.DeleteSelection(self)
-                    if d ~= "" then Speak(self._passwordMask and string.rep("*", #d) or d, true) end
+                    if d ~= "" then Speak(self._passwordMask and string.rep("*", #d) or d, true, false) end
                 else
                     E.DeleteChar(self)
                 end
@@ -369,7 +369,7 @@ function EditBoxWidget._BuildBindings()
                 if not active(self) or self._readOnly then return false end
                 if self._selStart then
                     local d = E.DeleteSelection(self)
-                    if d ~= "" then Speak(self._passwordMask and string.rep("*", #d) or d, true) end
+                    if d ~= "" then Speak(self._passwordMask and string.rep("*", #d) or d, true, false) end
                 else
                     E.DeleteWordForward(self)
                 end
@@ -560,14 +560,14 @@ function EditBoxWidget._BuildBindings()
                 local sel = E.GetSelectedText(self)
                 if sel ~= "" then
                     UIManager:SetClipboardString(sel)
-                    Speak(E.FormatCopied(self, sel), true)
+                    Speak(E.FormatCopied(self, sel), true, false)
                 else
                     local buf = self._buffer or ""
                     local pos = self._cursor or 0
                     local ch = string.sub(buf, pos + 1, pos + 1)
                     if ch ~= "" then
                         UIManager:SetClipboardString(ch)
-                        Speak(E.FormatCopied(self, ch), true)
+                        Speak(E.FormatCopied(self, ch), true, false)
                     end
                 end
                 return true
@@ -583,7 +583,7 @@ function EditBoxWidget._BuildBindings()
                 if text and text ~= "" then
                     if E.InsertText(self, text) then
                         self:_FireTextChanged()
-                        Speak(E.FormatPasted(self, text), true)
+                        Speak(E.FormatPasted(self, text), true, false)
                     end
                 end
                 return true

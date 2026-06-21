@@ -564,7 +564,7 @@ local function FlushAnnouncements()
     m_lastEventTime = nil
 
     for _, line in ipairs(lines) do
-        Speak(ProcessIcons(line))
+        Speak(line)
     end
 end
 

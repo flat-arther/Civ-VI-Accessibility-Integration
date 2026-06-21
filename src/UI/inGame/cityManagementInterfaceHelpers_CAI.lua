@@ -163,10 +163,10 @@ function CityManagement.BuildSpeechPartsFromState(state)
                 citizen.MaxCitizens
             )
         elseif citizen.Citizens > 0 then
-            parts[#parts + 1] = ProcessIcons(Locale.Lookup(
+            parts[#parts + 1] = Locale.Lookup(
                 "LOC_TOOLTIP_PLOT_WORKED_TEXT",
                 citizen.Citizens
-            ))
+            )
         else
             parts[#parts + 1] = Locale.Lookup("LOC_CAI_CITY_MANAGEMENT_UNWORKED")
         end
@@ -178,16 +178,14 @@ function CityManagement.BuildSpeechPartsFromState(state)
 
     local purchase = state.Purchase
     if purchase ~= nil then
-        local purchaseText = ProcessIcons(
-            Locale.Lookup("LOC_HUD_CITY_PURCHASE_NEW_PLOT") .. Locale.ToNumber(purchase.Cost)
-        )
+        local purchaseText = Locale.Lookup("LOC_HUD_CITY_PURCHASE_NEW_PLOT") .. Locale.ToNumber(purchase.Cost)
         parts[#parts + 1] = purchaseText
 
         if not purchase.Affordable then
-            parts[#parts + 1] = ProcessIcons(Locale.Lookup(
+            parts[#parts + 1] = Locale.Lookup(
                 "LOC_PLOTINFO_YOU_NEED_MORE_GOLD_TO_PURCHASE",
                 purchase.MissingGold
-            ))
+            )
         end
     end
 

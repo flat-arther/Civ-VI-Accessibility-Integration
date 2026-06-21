@@ -136,7 +136,7 @@ local function AddInstance(instances, centerX, centerY, plot, label)
 end
 
 local function SpeakSurveyor(text)
-    Speak(ProcessIcons(text), true)
+    Speak(text, true)
 end
 
 -- ===========================================================================

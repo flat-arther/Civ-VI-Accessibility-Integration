@@ -4,5 +4,5 @@ include("WorldViewPlotMessages")
 AddMessage = WrapFunc(AddMessage, function(orig, messageType, delay, plotIndex, text, turnAdded)
     orig(messageType, delay, plotIndex, text, turnAdded)
     --if messageType == EventSubTypes.DAMAGE then return end
-    Speak(ProcessIcons(text))
+    Speak(text)
 end)

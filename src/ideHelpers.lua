@@ -72,13 +72,15 @@ function CAICursor:UpdateZones() end
 ---Speak a string through the TTS pipeline.
 ---@param text string
 ---@param interrupt? boolean Interrupt any speech in flight. Default false.
-function Speak(text, interrupt) end
+---@param processTokens? boolean Run ProcessIcons on text before speaking. Default true.
+function Speak(text, interrupt, processTokens) end
 
 ---Speak each line in turn. When interrupt is true only the first line cuts
 ---ongoing speech; the rest queue so per-widget lines don't trample each other.
 ---@param lines string[]
 ---@param interrupt? boolean
-function SpeakLines(lines, interrupt) end
+---@param processTokens? boolean
+function SpeakLines(lines, interrupt, processTokens) end
 
 ---Names of events emitted by widgets via UIWidget:Emit(name, ...).
 ---@alias CAIWidgetEvent
@@ -540,7 +542,7 @@ function SliderWidget:PageDecrement() end
 
 ---@class EditBoxWidget : ValueWidget
 EditBoxWidget = {}
----Normalizes [NEWLINE]/\r\n, runs ProcessIcons, then SetValue.
+---Normalizes [NEWLINE]/\r\n then SetValue.
 ---@param text string
 ---@param silent? boolean
 function EditBoxWidget:SetText(text, silent) end

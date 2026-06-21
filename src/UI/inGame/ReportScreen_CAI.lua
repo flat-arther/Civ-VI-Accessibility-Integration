@@ -988,7 +988,7 @@ local function RebuildGossipList(list)
                 if targetPlayerID and PlayerConfigurations[targetPlayerID] then
                     leaderName = Locale.Lookup(PlayerConfigurations[targetPlayerID]:GetLeaderName())
                 end
-                return Locale.Lookup("LOC_CAI_REPORTS_GOSSIP_ENTRY", turn, leaderName, ProcessIcons(description))
+                return Locale.Lookup("LOC_CAI_REPORTS_GOSSIP_ENTRY", turn, leaderName, description)
             end,
             FocusKey = "gossip:" .. capturedGI,
         })

@@ -1541,7 +1541,7 @@ local function OnCityBannerInfoInputActionTriggered(actionId)
         return
     end
 
-    Speak(ProcessIcons(table.concat(results, ", ")))
+    Speak(table.concat(results, ", "))
 end
 
 local function OnCAICursorMoved(state)

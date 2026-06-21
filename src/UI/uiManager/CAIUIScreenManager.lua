@@ -326,7 +326,7 @@ function UIScreenManager:BuildAnnouncement(path, diverge)
             local skip = settings.IgnoreWhenNotFocused and w ~= focused
             if not skip then
                 local s = w:BuildSpeech()
-                if s then out[#out + 1] = ProcessIcons(s) end
+                if s then out[#out + 1] = s end
             end
         end
     end

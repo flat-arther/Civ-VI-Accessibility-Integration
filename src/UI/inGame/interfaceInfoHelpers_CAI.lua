@@ -1489,12 +1489,12 @@ local function SpeakActiveLensPlotInfo(plot)
         if lines == "" then
             return false
         end
-        Speak(ProcessIcons(lines))
+        Speak(lines)
         return true
     end
 
     if #lines > 0 then
-        Speak(ProcessIcons(table.concat(lines, ", ")))
+        Speak(table.concat(lines, ", "))
         return true
     end
 
@@ -1541,12 +1541,12 @@ function SpeakActiveInterfacePlotInfo(plot)
             return false
         end
 
-        Speak(ProcessIcons(lines))
+        Speak(lines)
         return true
     end
 
     if lines ~= nil and #lines > 0 then
-        Speak(ProcessIcons(table.concat(lines, ", ")))
+        Speak(table.concat(lines, ", "))
         return true
     end
 

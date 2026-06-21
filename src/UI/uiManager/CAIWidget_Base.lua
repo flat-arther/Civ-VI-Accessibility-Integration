@@ -373,7 +373,7 @@ end
 ---@param elements? string[]
 function UIWidget:Announce(elements)
     local speech = self:BuildSpeech(elements)
-    if speech then Speak(ProcessIcons(speech)) end
+    if speech then Speak(speech) end
 end
 
 ---Legacy alias for Announce. Prefer Announce in new code.

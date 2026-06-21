@@ -1569,7 +1569,7 @@ function OnCAICursorMove(state)
     local results = RequestPlotInfoFromData(current, data, keys)
 
     if #results > 0 then
-        Speak(ProcessIcons(table.concat(results, ", ")))
+        Speak(table.concat(results, ", "))
     end
 end
 
@@ -1602,12 +1602,12 @@ function OnPlotInfoInputActionTriggered(actionId)
     local results = RequestPlotInfoFromData(plot, data, requestKeys)
     if #results == 0 then
         if request.emptyLoc ~= nil then
-            Speak(ProcessIcons(Locale.Lookup(request.emptyLoc)))
+            Speak(Locale.Lookup(request.emptyLoc))
         end
         return
     end
 
-    Speak(ProcessIcons(table.concat(results, ", ")))
+    Speak(table.concat(results, ", "))
 end
 
 InitializePlotInfoActionRequestBuilders()
