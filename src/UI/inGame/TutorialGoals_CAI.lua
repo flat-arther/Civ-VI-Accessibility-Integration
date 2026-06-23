@@ -4,7 +4,7 @@ include("TutorialGoals")
 local mgr = ExposedMembers.CAI_UIManager
 
 local TUTORIAL_GOALS_LIST_ID = "CAITutorialGoalsList"
-local CAI_OPEN_TUTORIAL_GOALS_ACTION = Input.GetActionId("TutorialGoalsOpenList")
+local CAI_OPEN_TUTORIAL_GOALS_ACTION = Input.GetActionId("UI_TutorialGoalsOpenList")
 local CAI_TUTORIAL_GOAL_ADDED_TYPE = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_ADDED")
 local CAI_TUTORIAL_GOAL_COMPLETED_TYPE = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_COMPLETED")
 

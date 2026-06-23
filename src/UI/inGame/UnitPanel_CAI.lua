@@ -21,12 +21,12 @@ local UNIT_SIMPLE_PROMOTION_LIST_ID = "CAIUnitPanelSimplePromotionList"
 local UNIT_NAME_PANEL_ID = "CAIUnitPanelNamePanel"
 local UNIT_NAME_EDIT_ID = "CAIUnitPanelNameEdit"
 
-local prevUnitCatAction = Input.GetActionId("PrevUnitSelectionCategory")
-local nextUnitCatAction = Input.GetActionId("NextUnitSelectionCategory")
 local prevUnitAction = Input.GetActionId("PrevUnitSelection")
 local nextUnitAction = Input.GetActionId("NextUnitSelection")
-local openUnitListAction = Input.GetActionId("UnitPanelOpenUnitList")
-local unitViewAbilitiesAction = Input.GetActionId("UnitViewAbilities")
+local prevReadyUnitAction = Input.GetActionId("PrevReadyUnitSelection")
+local nextReadyUnitAction = Input.GetActionId("NextReadyUnitSelection")
+local openUnitListAction = Input.GetActionId("UI_UnitPanelOpenUnitList")
+local unitViewAbilitiesAction = Input.GetActionId("UI_UnitViewAbilities")
 local selectionActionsAction = Input.GetActionId("SelectionActions")
 local promoteActionHash = GameInfo.UnitCommands["UNITCOMMAND_PROMOTE"] ~= nil and
     GameInfo.UnitCommands["UNITCOMMAND_PROMOTE"].Hash or
@@ -2285,19 +2285,6 @@ local function OpenUnitActionList()
     end
 end
 
-local function ChangeUnitSelectionCategory(dir)
-    activeCategoryIdx = ((activeCategoryIdx - 1 + dir) % #UnitCategories) + 1
-    Speak(Locale.Lookup(UnitCategories[activeCategoryIdx].Name))
-end
-
-local function ChangeUnitSelection(dir)
-    local sel = UnitCategories[activeCategoryIdx]
-    if dir == -1 and sel.Prev then
-        sel.Prev()
-    elseif dir == 1 and sel.Next then
-        sel.Next()
-    end
-end
 
 local function CreateUnitListItem(unit)
     local data = ReadUnitData ~= nil and ReadUnitData(unit) or nil
@@ -2506,17 +2493,22 @@ function OnUnitPanelSelectionInfoInputActionTriggered(actionId)
 end
 
 function OnUnitPanelSelectionActionInputTriggered(actionId)
-    if actionId == prevUnitCatAction then
-        ChangeUnitSelectionCategory(-1)
-        return
-    elseif actionId == nextUnitCatAction then
-        ChangeUnitSelectionCategory(1)
-        return
-    elseif actionId == prevUnitAction then
-        ChangeUnitSelection(-1)
+    if actionId == prevUnitAction then
+        UI.SelectPrevUnit()
+        UI.PlaySound("Play_UI_Click");
         return
     elseif actionId == nextUnitAction then
-        ChangeUnitSelection(1)
+        UI.SelectNextUnit()
+        UI.PlaySound("Play_UI_Click");
+        return
+    end
+    if actionId == prevReadyUnitAction then
+        UI.SelectPrevReadyUnit()
+        UI.PlaySound("Play_UI_Click");
+        return
+    elseif actionId == nextReadyUnitAction then
+        UI.SelectNextReadyUnit()
+        UI.PlaySound("Play_UI_Click");
         return
     end
 
@@ -2527,6 +2519,7 @@ function OnUnitPanelSelectionActionInputTriggered(actionId)
 
     if actionId == openUnitListAction then
         OpenUnitList()
+        UI.PlaySound("Play_UI_Click");
         return
     end
 
@@ -2538,7 +2531,7 @@ function OnUnitPanelSelectionActionInputTriggered(actionId)
             Speak(Locale.Lookup("LOC_CAI_UNIT_NO_ABILITIES"))
             return
         end
-
+        UI.PlaySound("Play_UI_Click");
         local list = mgr:CreateWidget(UNIT_ABILITIES_LIST_ID, "List", {
             GetLabel = function() return Locale.Lookup("LOC_CAI_UNIT_ABILITIES_LIST") end,
         })

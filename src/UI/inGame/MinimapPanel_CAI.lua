@@ -245,7 +245,7 @@ local function ToggleAccessibleLensList()
     return OpenLensListWidget()
 end
 
-local m_caiOpenMapSearchId = Input.GetActionId("CAIOpenMapSearch")
+local m_caiOpenMapSearchId = Input.GetActionId("UI_CAIOpenMapSearch")
 
 
 

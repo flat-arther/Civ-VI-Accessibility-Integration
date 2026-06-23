@@ -527,7 +527,9 @@ local m_startBtn = nil
 local function PopulateList()
 	if not m_CAIList then return end
 	m_CAIList:ClearChildren()
-
+m_CAIList:AddChild(mgr:CreateWidget("LeaderCivInfo", "StaticText", {
+	Label = function() return Controls.LeaderName:GetText() .. ", " .. Controls.CivName:GetText() end
+}))
 	local localPlayer = Network.GetLocalPlayerID()
 	if GameConfiguration.IsHotseat() then
 		local maxPlayers = MapConfiguration.GetMaxMajorPlayers()
@@ -571,15 +573,23 @@ local function PopulateList()
 	for _, item in ipairs(uniqueAbilities) do AddFeature(item) end
 	for _, item in ipairs(uniqueUnits) do AddFeature(item) end
 	for _, item in ipairs(uniqueBuildings) do AddFeature(item) end
+	m_CAIList:AddChild(mgr:CreateWidget("EraInfo", "StaticText", {
+	Label = function() return Controls.EraInfo:GetText() end,
+	HiddenPredicate = function() return Controls.EraInfo:IsHidden() end
+}))
+m_CAIList:AddChild(mgr:CreateWidget("LeaderInfo", "StaticText", {
+	Label = function() return Controls.LeaderInfo:GetText() end,
+	HiddenPredicate = function() return Controls.LeaderInfo:IsHidden() end
+}))
 end
 
 local function BuildPanel()
 	if not mgr then return end
 	m_CAIPanel = mgr:CreateWidget(m_PanelId, "Panel", {
-		Label = function() return Controls.LeaderName:GetText() .. ", " .. Controls.CivName:GetText() end,
+		Label = function() return Controls.FallbackMessage:GetText() end,
 	})
 	m_CAIList = mgr:CreateWidget(m_ListId, "List", {
-		Label = function() return Controls.LeaderName:GetText() .. ", " .. Controls.CivName:GetText() end,
+		Label = function() return Locale.Lookup("LOC_LOADING_FEATURES_ABILITIES") end,
 	})
 	m_startBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadScreenStart"), "Button", {
 		Label = function() return Controls.StartLabelButton:GetText() end,
@@ -617,9 +627,11 @@ Events.LoadScreenContentReady.Remove(OnLoadScreenContentReady)
 OnLoadScreenContentReady = WrapFunc(OnLoadScreenContentReady, function(orig, ...)
 	orig(...)
 	ContextPtr:SetInputHandler(OnInputHandler, true)
+	if not m_CAIPanel or mgr:GetTop() ~= m_CAIPanel then
 	BuildPanel()
 	PopulateList()
 	mgr:Push(m_CAIPanel, { focus = m_CAIList })
+	end
 end)
 Events.LoadScreenContentReady.Add(OnLoadScreenContentReady)
 
@@ -627,10 +639,17 @@ OnActivateButtonClicked = WrapFunc(OnActivateButtonClicked, function(orig)
 	mgr:ShutDown()
 	orig()
 end)
-
+local spokeReady = false
 Events.LoadGameViewStateDone.Remove(OnLoadGameViewStateDone)
 OnLoadGameViewStateDone = WrapFunc(OnLoadGameViewStateDone, function(orig, ...)
 	orig(...)
+	if not spokeReady then
+	Speak(Locale.Lookup("LOC_READY_LABEL"))
+	if m_CAIPanel then
+		m_CAIPanel:SetLabel(function() return Locale.Lookup("LOC_READY_LABEL") end)
+		end
+		spokeReady = true
+	end
 	RegisterButtonCallbacks();
 	ContextPtr:SetInputHandler(OnInputHandler, true)
 end)

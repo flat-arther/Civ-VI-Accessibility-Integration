@@ -13,7 +13,7 @@ local mgr = ExposedMembers.CAI_UIManager
 
 local ACTION_PANEL_LIST_ID = "CAIActionPanelTurnBlockerList"
 local END_TURN_ACTION = Input.GetActionId("EndTurn")
-local CAI_END_TURN_ACTION = Input.GetActionId("SharedEndTurn")
+local CAI_END_TURN_ACTION = Input.GetActionId("ReplaceEndTurn_CAI")
 local CAI_OPEN_TURN_BLOCKERS_ACTION = Input.GetActionId("ActionPanelOpenTurnBlockers")
 local CAI_SPEAK_ERA_AGE_ACTION = Input.GetActionId("ActionPanelSpeakEraAge")
 local m_caiTutorialActionPanelAllowed = false
@@ -347,7 +347,8 @@ local function SpeakEraAge()
         for _, activeCommemoration in ipairs(activeCommemorations) do
             local commemorationInfo = GameInfo.CommemorationTypes[activeCommemoration]
             if commemorationInfo ~= nil then
-                local dedicationName = commemorationInfo.CategoryDescription and Locale.Lookup(commemorationInfo.CategoryDescription) or ""
+                local dedicationName = commemorationInfo.CategoryDescription and
+                Locale.Lookup(commemorationInfo.CategoryDescription) or ""
                 local bonusText = nil
                 if gameEras:HasGoldenAge(playerID) then
                     bonusText = Locale.Lookup(commemorationInfo.GoldenAgeBonusDescription)

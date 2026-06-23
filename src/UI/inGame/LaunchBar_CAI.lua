@@ -8,12 +8,12 @@ else
     include("LaunchBar")
 end
 
-local m_caiOpenTechTreeId = Input.GetActionId("CAIOpenTechTree")
-local m_caiOpenCivicsTreeId = Input.GetActionId("CAIOpenCivicsTree")
-local m_caiOpenGovernmentId = Input.GetActionId("CAIOpenGovernment")
-local m_caiOpenReligionId = Input.GetActionId("CAIOpenReligion")
-local m_caiOpenGreatPeopleId = Input.GetActionId("CAIOpenGreatPeople")
-local m_caiOpenGreatWorksId = Input.GetActionId("CAIOpenGreatWorks")
+local m_caiOpenTechTreeId = Input.GetActionId("UI_CAIOpenTechTree")
+local m_caiOpenCivicsTreeId = Input.GetActionId("UI_CAIOpenCivicsTree")
+local m_caiOpenGovernmentId = Input.GetActionId("UI_CAIOpenGovernment")
+local m_caiOpenReligionId = Input.GetActionId("UI_CAIOpenReligion")
+local m_caiOpenGreatPeopleId = Input.GetActionId("UI_CAIOpenGreatPeople")
+local m_caiOpenGreatWorksId = Input.GetActionId("UI_CAIOpenGreatWorks")
 
 local m_vanillaToggleTechTree = Input.GetActionId("ToggleTechTree")
 local m_vanillaToggleCivicsTree = Input.GetActionId("ToggleCivicsTree")
@@ -27,9 +27,9 @@ local m_caiOpenHistoricMomentsId
 local m_vanillaToggleGovernors
 local m_vanillaToggleTimeline
 
-if IsExpansion1Active() then
-    m_caiOpenGovernorsId = Input.GetActionId("CAIOpenGovernors")
-    m_caiOpenHistoricMomentsId = Input.GetActionId("CAIOpenHistoricMoments")
+if IsExpansion1Active() or IsExpansion2Active() then
+    m_caiOpenGovernorsId = Input.GetActionId("UI_CAIOpenGovernors")
+    m_caiOpenHistoricMomentsId = Input.GetActionId("UI_CAIOpenHistoricMoments")
     m_vanillaToggleGovernors = Input.GetActionId("ToggleGovernors")
     m_vanillaToggleTimeline = Input.GetActionId("ToggleTimeline")
 end
@@ -38,7 +38,7 @@ local m_caiOpenWorldClimateId
 local m_vanillaToggleWorldClimate
 
 if IsExpansion2Active() then
-    m_caiOpenWorldClimateId = Input.GetActionId("CAIOpenWorldClimate")
+    m_caiOpenWorldClimateId = Input.GetActionId("UI_CAIOpenWorldClimate")
     m_vanillaToggleWorldClimate = Input.GetActionId("ToggleWorldClimate")
 end
 
@@ -79,5 +79,4 @@ OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionI
         orig(m_vanillaToggleWorldClimate)
         return
     end
-    orig(actionId)
 end)

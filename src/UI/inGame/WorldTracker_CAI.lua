@@ -10,10 +10,10 @@ end
 
 local mgr = ExposedMembers.CAI_UIManager
 
-local ACTION_OPEN_RESEARCH_CHOOSER = Input.GetActionId("WorldTrackerOpenResearchChooser")
-local ACTION_OPEN_CIVICS_CHOOSER = Input.GetActionId("WorldTrackerOpenCivicsChooser")
-local ACTION_SPEAK_SCIENCE = Input.GetActionId("TopPanelSpeakScience")
-local ACTION_SPEAK_CULTURE = Input.GetActionId("TopPanelSpeakCulture")
+local ACTION_OPEN_RESEARCH_CHOOSER = Input.GetActionId("UI_WorldTrackerOpenResearchChooser")
+local ACTION_OPEN_CIVICS_CHOOSER = Input.GetActionId("UI_WorldTrackerOpenCivicsChooser")
+local ACTION_SPEAK_SCIENCE = Input.GetActionId("UI_TopPanelSpeakScience")
+local ACTION_SPEAK_CULTURE = Input.GetActionId("UI_TopPanelSpeakCulture")
 
 local m_caiWorldTrackerActions = {}
 local m_caiResearchTrackerControl = nil
@@ -385,7 +385,7 @@ local function InitializeWorldTrackerActions()
     RegisterWorldTrackerAction(ACTION_SPEAK_CULTURE, SpeakCultureAndCivic)
 
     if IsExpansion1Active() or IsExpansion2Active() then
-        local ACTION_OPEN_TRACKER = Input.GetActionId("OpenWorldCrisisTracker")
+        local ACTION_OPEN_TRACKER = Input.GetActionId("UI_OpenWorldCrisisTracker")
         RegisterWorldTrackerAction(ACTION_OPEN_TRACKER, ToggleCrisisList)
     end
 end

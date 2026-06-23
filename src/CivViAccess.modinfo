@@ -345,8 +345,6 @@
       <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>
-      <File>UI/inGame/LaunchBar_CAI.lua</File>
-      <File>UI/inGame/PartialScreenHooks_CAI.lua</File>
       <File>UI/inGame/NaturalDisasterPopup_CAI.lua</File>
       <!-- EndGameMenu is a wildcard host (include("EndGameMenu_", true)),
            so the CAI layer rides that wildcard as an imported file. -->

@@ -1,12 +1,12 @@
 include("caiUtils")
 include("CivilopediaScreen")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr                = ExposedMembers.CAI_UIManager
 
-local PANEL_ID    = "CAIPediaPanel"
-local HOVER_SOUND = "Main_Menu_Mouse_Over"
+local PANEL_ID           = "CAIPediaPanel"
+local HOVER_SOUND        = "Main_Menu_Mouse_Over"
 
-local m_state = {
+local m_state            = {
     userSwitchedFocus = false,
     isOpeningOnHistoryPage = false,
     pageHeader = "",
@@ -23,7 +23,7 @@ local m_state = {
     },
 }
 
-local m_ui = {
+local m_ui               = {
     panel = nil,
     sectionsTree = nil,
     historyList = nil,
@@ -1018,7 +1018,7 @@ OnClose = WrapFunc(OnClose, function(orig)
     orig()
 end)
 
-local m_caiOpenCivilopediaId = Input.GetActionId("CAIOpenCivilopedia")
+local m_caiOpenCivilopediaId = Input.GetActionId("UI_CAIOpenCivilopedia")
 local m_vanillaOpenCivilopedia = Input.GetActionId("OpenCivilopedia")
 
 OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionId)

@@ -12,20 +12,20 @@ end
 local mgr = ExposedMembers.CAI_UIManager
 local m_caiTopPanelList = nil
 
-local ACTION_SPEAK_TURN_TIME_DATE = Input.GetActionId("TopPanelSpeakTurnTimeDate")
-local ACTION_SPEAK_GOLD = Input.GetActionId("TopPanelSpeakGold")
-local ACTION_SPEAK_FAITH = Input.GetActionId("TopPanelSpeakFaith")
-local ACTION_SPEAK_TOURISM = Input.GetActionId("TopPanelSpeakTourism")
-local ACTION_SPEAK_FAVOR = Input.GetActionId("TopPanelSpeakFavor")
-local ACTION_SPEAK_NUKES = Input.GetActionId("TopPanelSpeakNukes")
-local ACTION_OPEN_YIELD_LIST = Input.GetActionId("TopPanelYieldInfoList")
-local ACTION_OPEN_DIPLOMACY = Input.GetActionId("TopPanelOpenDiplomacy")
-local ACTION_OPEN_REPORTS = Input.GetActionId("TopPanelOpenReports")
-local ACTION_OPEN_REPORTS_RESOURCES = Input.GetActionId("TopPanelOpenReportsResources")
-local ACTION_OPEN_REPORTS_CITY_STATUS = Input.GetActionId("TopPanelOpenReportsCityStatus")
-local ACTION_OPEN_REPORTS_GOSSIP = Input.GetActionId("TopPanelOpenReportsGossip")
-local ACTION_OPEN_RESOURCE_LIST = Input.GetActionId("TopPanelResourceInfoList")
-local ACTION_OPEN_GLOBAL_RESOURCES = Input.GetActionId("OpenGlobalResourcePopup")
+local ACTION_SPEAK_TURN_TIME_DATE = Input.GetActionId("UI_TopPanelSpeakTurnTimeDate")
+local ACTION_SPEAK_GOLD = Input.GetActionId("UI_TopPanelSpeakGold")
+local ACTION_SPEAK_FAITH = Input.GetActionId("UI_TopPanelSpeakFaith")
+local ACTION_SPEAK_TOURISM = Input.GetActionId("UI_TopPanelSpeakTourism")
+local ACTION_SPEAK_FAVOR = Input.GetActionId("UI_TopPanelSpeakFavor")
+local ACTION_SPEAK_NUKES = Input.GetActionId("UI_TopPanelSpeakNukes")
+local ACTION_OPEN_YIELD_LIST = Input.GetActionId("UI_TopPanelYieldInfoList")
+local ACTION_OPEN_DIPLOMACY = Input.GetActionId("UI_TopPanelOpenDiplomacy")
+local ACTION_OPEN_REPORTS = Input.GetActionId("UI_TopPanelOpenReports")
+local ACTION_OPEN_REPORTS_RESOURCES = Input.GetActionId("UI_TopPanelOpenReportsResources")
+local ACTION_OPEN_REPORTS_CITY_STATUS = Input.GetActionId("UI_TopPanelOpenReportsCityStatus")
+local ACTION_OPEN_REPORTS_GOSSIP = Input.GetActionId("UI_TopPanelOpenReportsGossip")
+local ACTION_OPEN_RESOURCE_LIST = Input.GetActionId("UI_TopPanelResourceInfoList")
+local ACTION_OPEN_GLOBAL_RESOURCES = Input.GetActionId("UI_OpenGlobalResourcePopup")
 
 local TOP_PANEL_YIELD_INFO_ID = "CAITopPanelYieldInfoTree"
 local TOP_PANEL_RESOURCE_INFO_ID = "CAITopPanelResourceInfoTree"
@@ -51,7 +51,9 @@ local function SpeakGold()
     local _, player = GetLocalPlayer()
     if not player then return end
     if not GameCapabilities.HasCapability("CAPABILITY_GOLD")
-        or not GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then return end
+        or not GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+        return
+    end
 
     local parts = {}
     local treasury = player:GetTreasury()
@@ -79,7 +81,9 @@ local function SpeakFaith()
     local _, player = GetLocalPlayer()
     if not player then return end
     if not GameCapabilities.HasCapability("CAPABILITY_FAITH")
-        or not GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then return end
+        or not GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+        return
+    end
 
     local religion = player:GetReligion()
     local value = Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
@@ -92,7 +96,9 @@ local function SpeakTourism()
     local _, player = GetLocalPlayer()
     if not player then return end
     if not GameCapabilities.HasCapability("CAPABILITY_TOURISM")
-        or not GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then return end
+        or not GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+        return
+    end
 
     local tourismRate = Round(player:GetStats():GetTourism(), 1)
     if tourismRate > 0 then
@@ -353,7 +359,9 @@ local function AddGoldYieldTreeNode(tree)
     local _, player = GetLocalPlayer()
     if not player then return end
     if not GameCapabilities.HasCapability("CAPABILITY_GOLD")
-        or not GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then return end
+        or not GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+        return
+    end
 
     local treasury = player:GetTreasury()
     local goldYield = treasury:GetGoldYield() - treasury:GetTotalMaintenance()
@@ -405,7 +413,8 @@ local function AddEnvoyTreeNode(tree)
         currentEnvoys, influenceBalance, influenceThreshold), nil)
 
     node:AddChild(MakeTreeItem(Locale.Lookup("LOC_TOP_PANEL_INFLUENCE_TOOLTIP_POINTS_RATE", influenceRate), nil))
-    node:AddChild(MakeTreeItem(Locale.Lookup("LOC_TOP_PANEL_INFLUENCE_TOOLTIP_POINTS_THRESHOLD", envoysPerThreshold, influenceThreshold), nil))
+    node:AddChild(MakeTreeItem(
+        Locale.Lookup("LOC_TOP_PANEL_INFLUENCE_TOOLTIP_POINTS_THRESHOLD", envoysPerThreshold, influenceThreshold), nil))
 
     tree:AddChild(node)
 end
@@ -545,7 +554,6 @@ local function OpenResourceInfoTree()
                 and resource.ResourceClassType ~= "RESOURCECLASS_BONUS"
                 and resource.ResourceClassType ~= "RESOURCECLASS_LUXURY"
                 and resource.ResourceClassType ~= "RESOURCECLASS_ARTIFACT" then
-
                 local resType = resource.ResourceType
                 local stockpileAmount = pResources:GetResourceAmount(resType)
 
@@ -565,7 +573,8 @@ local function OpenResourceInfoTree()
                         local nodeLabel = resName .. ": " .. stockpileAmount .. "/" .. stockpileCap
                             .. " " .. Locale.Lookup("LOC_RESOURCE_ITEM_IN_STOCKPILE")
                         local tooltipParts = {}
-                        table.insert(tooltipParts, Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN", totalAccumulationPerTurn))
+                        table.insert(tooltipParts,
+                            Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN", totalAccumulationPerTurn))
                         if totalConsumptionPerTurn > 0 then
                             table.insert(tooltipParts, Locale.Lookup("LOC_RESOURCE_CONSUMPTION", totalConsumptionPerTurn))
                         end
@@ -601,7 +610,8 @@ local function OpenResourceInfoTree()
                             end
                             if powerConsumptionPerTurn > 0 then
                                 conNode:AddChild(MakeTreeItem(
-                                    Locale.Lookup("LOC_RESOURCE_POWER_CONSUMPTION_PER_TURN", powerConsumptionPerTurn), nil))
+                                    Locale.Lookup("LOC_RESOURCE_POWER_CONSUMPTION_PER_TURN", powerConsumptionPerTurn),
+                                    nil))
                             end
                             node:AddChild(conNode)
                         end

@@ -8,10 +8,10 @@ else
     include("PartialScreenHooks")
 end
 
-local m_caiOpenCityStatesId = Input.GetActionId("CAIOpenCityStates")
-local m_caiOpenEspionageId = Input.GetActionId("CAIOpenEspionage")
-local m_caiOpenWorldRankingsId = Input.GetActionId("CAIOpenWorldRankings")
-local m_caiOpenTradeOverviewId = Input.GetActionId("CAIOpenTradeOverview")
+local m_caiOpenCityStatesId = Input.GetActionId("UI_CAIOpenCityStates")
+local m_caiOpenEspionageId = Input.GetActionId("UI_CAIOpenEspionage")
+local m_caiOpenWorldRankingsId = Input.GetActionId("UI_CAIOpenWorldRankings")
+local m_caiOpenTradeOverviewId = Input.GetActionId("UI_CAIOpenTradeOverview")
 
 local m_vanillaToggleCityStates = Input.GetActionId("ToggleCityStates")
 local m_vanillaToggleEspionage = Input.GetActionId("ToggleEspionage")
@@ -19,10 +19,10 @@ local m_vanillaToggleRankings = Input.GetActionId("ToggleRankings")
 local m_vanillaToggleTradeRoutes = Input.GetActionId("ToggleTradeRoutes")
 
 local m_caiOpenEraProgressId
-if IsExpansion1Active() then
-    m_caiOpenEraProgressId = Input.GetActionId("CAIOpenEraProgress")
+if IsExpansion1Active() or IsExpansion2Active() then
+    m_caiOpenEraProgressId = Input.GetActionId("UI_CAIOpenEraProgress")
 end
-
+Events.InputActionTriggered.Remove(OnInputActionTriggered)
 OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     if m_caiOpenCityStatesId and actionId == m_caiOpenCityStatesId then
         orig(m_vanillaToggleCityStates)
@@ -44,7 +44,5 @@ OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionI
         OnToggleEraProgress()
         return
     end
-    orig(actionId)
 end)
-Events.InputActionTriggered.Remove(OnInputActionTriggered)
 Events.InputActionTriggered.Add(OnInputActionTriggered)

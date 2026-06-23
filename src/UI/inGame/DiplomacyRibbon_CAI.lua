@@ -13,8 +13,8 @@ local mgr = ExposedMembers.CAI_UIManager
 
 local LIST_ID = "CAIDiploRibbon_List"
 
-local ACTION_OPEN_LIST = Input.GetActionId("DiplomacyRibbonOpenList")
-local ACTION_OPEN_CONGRESS = Input.GetActionId("DiplomacyRibbonOpenWorldCongress")
+local ACTION_OPEN_LIST = Input.GetActionId("UI_DiplomacyRibbonOpenList")
+local ACTION_OPEN_CONGRESS = Input.GetActionId("UI_DiplomacyRibbonOpenWorldCongress")
 
 local m_list = nil
 
@@ -159,7 +159,8 @@ local function GetLeaderTooltip(playerID, localPlayerID)
     end
 
     if Game.IsVictoryEnabled("VICTORY_CONQUEST") and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
-        table.insert(parts, Locale.Lookup("LOC_CAI_DIPLO_RIBBON_MILITARY", Round(pPlayer:GetStats():GetMilitaryStrengthWithoutTreasury())))
+        table.insert(parts,
+            Locale.Lookup("LOC_CAI_DIPLO_RIBBON_MILITARY", Round(pPlayer:GetStats():GetMilitaryStrengthWithoutTreasury())))
     end
 
     if GameCapabilities.HasCapability("CAPABILITY_SCIENCE") and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
@@ -171,7 +172,8 @@ local function GetLeaderTooltip(playerID, localPlayerID)
     end
 
     if GameCapabilities.HasCapability("CAPABILITY_GOLD") and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
-        table.insert(parts, Locale.Lookup("LOC_CAI_DIPLO_RIBBON_GOLD", math.floor(pPlayer:GetTreasury():GetGoldBalance())))
+        table.insert(parts,
+            Locale.Lookup("LOC_CAI_DIPLO_RIBBON_GOLD", math.floor(pPlayer:GetTreasury():GetGoldBalance())))
     end
 
     if GameCapabilities.HasCapability("CAPABILITY_RELIGION") and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
@@ -201,10 +203,10 @@ local function BuildList()
         Label = function() return Locale.Lookup("LOC_CAI_DIPLO_RIBBON_LABEL") end,
     })
     list:AddInputBinding({
-        Key    = Keys.VK_ESCAPE,
-        MSG    = KeyEvents.KeyUp,
+        Key         = Keys.VK_ESCAPE,
+        MSG         = KeyEvents.KeyUp,
         Description = "LOC_CAI_KB_CLOSE",
-        Action = function()
+        Action      = function()
             CloseList()
             return true
         end,

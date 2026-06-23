@@ -2175,29 +2175,29 @@
     <Row Tag="LOC_CAI_UNIT_CAT_READY" Language="en_US">
       <Text>Ready units</Text>
     </Row>
-    <Row Tag="LOC_CAI_PREV_UNIT_CAT" Language="en_US">
-      <Text>Previous unit category</Text>
-    </Row>
-    <Row Tag="LOC_CAI_UNIT_PREV_CAT_TOOLTIP" Language="en_US">
-      <Text>Selects the previous unit cycling category</Text>
-    </Row>
-    <Row Tag="LOC_CAI_NEXT_UNIT_CAT" Language="en_US">
-      <Text>Next unit category</Text>
-    </Row>
-    <Row Tag="LOC_CAI_UNIT_NEXT_CAT_TOOLTIP" Language="en_US">
-      <Text>Selects the next unit cycling category</Text>
-    </Row>
     <Row Tag="LOC_CAI_PREV_UNIT" Language="en_US">
       <Text>Previous unit</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_PREV_TOOLTIP" Language="en_US">
-      <Text>Selects the previous unit in the active unit category</Text>
+      <Text>Selects the previous unit</Text>
     </Row>
     <Row Tag="LOC_CAI_NEXT_UNIT" Language="en_US">
       <Text>Next unit</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_NEXT_TOOLTIP" Language="en_US">
-      <Text>Selects the next unit in the active unit category</Text>
+      <Text>Selects the next unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PREV_READY_UNIT" Language="en_US">
+      <Text>Previous ready unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READY_UNIT_PREV_TOOLTIP" Language="en_US">
+      <Text>Selects the previous ready unit </Text>
+    </Row>
+    <Row Tag="LOC_CAI_NEXT_READY_UNIT" Language="en_US">
+      <Text>Next ready unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_READY_UNIT_NEXT_TOOLTIP" Language="en_US">
+      <Text>Selects the next ready unit</Text>
     </Row>
     <Row Tag="LOC_CAI_QUICK_MOVE_NORTHWEST" Language="en_US">
       <Text>Quick move northwest</Text>

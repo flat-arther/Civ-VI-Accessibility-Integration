@@ -6,18 +6,19 @@ local NOTIFICATION_CENTER_ID               = "CAINotificationCenter_Tree"
 local EMPTY_NODE_ID                        = "CAINotificationCenter_Empty"
 local GROUP_ID_PREFIX                      = "CAINotificationCenter_Group_"
 local LEAF_ID_PREFIX                       = "CAINotificationCenter_Leaf_"
-
-local ACTION_OPEN_NOTIFICATION_CENTER      = Input.GetActionId("NotificationPanelOpenList")
+local m_IsGameStarted                      = false
+local ACTION_OPEN_NOTIFICATION_CENTER      = Input.GetActionId("UI_NotificationPanelOpenList")
 local CAI_TUTORIAL_GOAL_ADDED_TYPE         = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_ADDED")
 local CAI_TUTORIAL_GOAL_COMPLETED_TYPE     = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_COMPLETED")
 
-local BASE_LookAtNotification               = LookAtNotification
+local BASE_LookAtNotification              = LookAtNotification
 local BASE_RegisterHandlers                = RegisterHandlers
 local m_caiOriginalOnNotificationAdded     = OnNotificationAdded
 local m_caiOriginalOnNotificationDismissed = OnNotificationDismissed
 
 local m_centerTree                         = nil ---@type UIWidget|nil
 local m_caiAnnouncedNotificationIDs        = {}
+local m_caiDeferedNotificationAnnounce     = {}
 
 local function GetLocalPlayer()
     local playerID = Game.GetLocalPlayer()
@@ -241,16 +242,16 @@ local function CreateLeafWidget(playerID, notificationID)
     leaf:On("activate", function() ActivateNotification(playerID, notificationID) end)
     leaf:AddInputBindings({
         {
-            Key    = Keys.VK_SPACE,
-            MSG    = KeyEvents.KeyUp,
+            Key         = Keys.VK_SPACE,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_ACTIVATE_NOTIFICATION",
-            Action = function() return ActivateNotification(playerID, notificationID) end,
+            Action      = function() return ActivateNotification(playerID, notificationID) end,
         },
         {
-            Key    = Keys.VK_DELETE,
-            MSG    = KeyEvents.KeyUp,
+            Key         = Keys.VK_DELETE,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_DISMISS_NOTIFICATION",
-            Action = function() return DismissNotification(playerID, notificationID) end,
+            Action      = function() return DismissNotification(playerID, notificationID) end,
         },
     })
 
@@ -275,10 +276,10 @@ local function CreateGroupWidget(playerID, group)
     })
 
     groupNode:AddInputBinding({
-        Key    = Keys.VK_DELETE,
-        MSG    = KeyEvents.KeyUp,
+        Key         = Keys.VK_DELETE,
+        MSG         = KeyEvents.KeyUp,
         Description = "LOC_CAI_KB_DISMISS_STACK",
-        Action = function() return DismissNotificationGroup(playerID, group) end,
+        Action      = function() return DismissNotificationGroup(playerID, group) end,
     })
 
     for idx, notificationID in ipairs(group.Notifications) do
@@ -340,10 +341,10 @@ local function OpenNotificationCenter()
         Label = function() return Locale.Lookup("LOC_CAI_NOTIFICATION_CENTER") end,
     })
     tree:AddInputBinding({
-        Key    = Keys.VK_ESCAPE,
-        MSG    = KeyEvents.KeyUp,
+        Key         = Keys.VK_ESCAPE,
+        MSG         = KeyEvents.KeyUp,
         Description = "LOC_CAI_KB_CLOSE",
-        Action = function()
+        Action      = function()
             CloseNotificationCenter()
             return true
         end,
@@ -354,11 +355,21 @@ local function OpenNotificationCenter()
     mgr:Push(tree, latestKey and { focus = latestKey } or nil)
 end
 
+
+local function DeferNotification(playerID, notificationID)
+    if playerID and notificationID then
+        table.insert(m_caiDeferedNotificationAnnounce, { pId = playerID, Id = notificationID })
+    end
+end
+
 local function SpeakNotificationAdded(playerID, notificationID)
     if ContextPtr:IsHidden() then return end
     if playerID ~= GetLocalPlayer() then return end
     if m_caiAnnouncedNotificationIDs[notificationID] then return end
-
+    if not m_IsGameStarted then
+        DeferNotification(playerID, notificationID)
+        return
+    end
     local notification = GetLiveNotification(playerID, notificationID)
     if not IsNotificationAvailable(notification, notificationID, playerID) then return end
     m_caiAnnouncedNotificationIDs[notificationID] = true
@@ -400,10 +411,23 @@ local function OnCAINotificationInputAction(actionId)
     end
 end
 
+-- ensure notifications are not announced in the load screen
+function OnLoadScreenClose()
+    m_IsGameStarted = true
+    if #m_caiDeferedNotificationAnnounce > 0 then
+        for _, n in ipairs(m_caiDeferedNotificationAnnounce) do
+            SpeakNotificationAdded(n.pId, n.Id)
+        end
+    end
+end
+
 OnShutdown = WrapFunc(OnShutdown, function(orig)
     Events.InputActionStarted.Remove(OnCAINotificationInputAction)
+    Events.LoadScreenClose.Remove(OnLoadScreenClose)
     CloseNotificationCenter()
     orig()
 end)
 
+
 Events.InputActionStarted.Add(OnCAINotificationInputAction)
+Events.LoadScreenClose.Add(OnLoadScreenClose)

@@ -200,7 +200,7 @@ local function FormatBinding(binding)
     local parts = {}
     if binding.IsControl then parts[#parts + 1] = Locale.Lookup(KEY_NAMES[Keys.VK_CONTROL]) end
     if binding.IsShift then parts[#parts + 1] = Locale.Lookup(KEY_NAMES[Keys.VK_SHIFT]) end
-    if binding.IsAlt then parts[#parts + 1] = Locale.Lookup(KEY_NAMES[Keys.VK_CONTROL]) end
+    if binding.IsAlt then parts[#parts + 1] = Locale.Lookup(KEY_NAMES[Keys.VK_ALT]) end
     parts[#parts + 1] = GetKeyDisplayName(binding.Key)
     return table.concat(parts, "+")
 end
@@ -296,30 +296,28 @@ local function CollectBindings(widget)
     local commonBindings = {}
     local w = widget
     while w do
-        if not w.Transparent then
-            local described = {}
-            for _, b in ipairs(w.InputMap) do
-                if b.Description and b.Action then
-                    local entry = {
-                        description = Locale.Lookup(b.Description),
-                        keyCombo = FormatBinding(b),
-                        action = b.Action,
-                        owner = w,
-                    }
-                    if b.Common then
-                        commonBindings[#commonBindings + 1] = entry
-                    else
-                        described[#described + 1] = entry
-                    end
+        local described = {}
+        for _, b in ipairs(w.InputMap) do
+            if b.Description and b.Action then
+                local entry = {
+                    description = Locale.Lookup(b.Description),
+                    keyCombo = FormatBinding(b),
+                    action = b.Action,
+                    owner = w,
+                }
+                if b.Common then
+                    commonBindings[#commonBindings + 1] = entry
+                else
+                    described[#described + 1] = entry
                 end
             end
-            described = MergeBindings(described)
-            if #described > 0 then
-                groups[#groups + 1] = {
-                    label = GetWidgetLabel(w),
-                    bindings = described,
-                }
-            end
+        end
+        described = MergeBindings(described)
+        if #described > 0 then
+            groups[#groups + 1] = {
+                label = GetWidgetLabel(w),
+                bindings = described,
+            }
         end
         w = w.Parent
     end
