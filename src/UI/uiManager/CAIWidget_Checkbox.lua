@@ -24,8 +24,8 @@ function CheckboxWidget.Create(mgr, id, props)
     end)
 
     w:AddInputBindings({
-        { Key = Keys.VK_SPACE,                          Action = function(self) self:Toggle(); return true end },
-        { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyUp,  Action = function(self) self:Toggle(); return true end },
+        { Key = Keys.VK_SPACE,                          Description = "LOC_CAI_KB_TOGGLE", Action = function(self) self:Toggle(); return true end },
+        { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyUp,  Description = "LOC_CAI_KB_TOGGLE", Action = function(self) self:Toggle(); return true end },
     })
 
     CAIWidgetRegistry.ApplyProps(w, props)

@@ -55,6 +55,7 @@ local function BuildGoalsList()
     })
     list:AddInputBinding({
         Key = Keys.VK_ESCAPE,
+        Description = "LOC_CAI_KB_CLOSE",
         Action = function()
             CloseGoalsList()
             return true

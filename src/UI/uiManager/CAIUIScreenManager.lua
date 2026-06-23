@@ -11,6 +11,7 @@ include("CAIWidgetHelpers_Tree")
 include("CAIWidgetHelpers_EditBox")
 include("CAIWidgetHelpers_DialogBuilder")
 include("CAIWidgetHelpers_PediaLookup")
+include("CAIWidgetHelpers_InputHelp")
 include("CAIWidget_Base")
 include("CAIWidget_Container")
 include("CAIWidget_Value")
@@ -506,6 +507,38 @@ function UIScreenManager:RestoreFocus(root, capture)
     return false
 end
 
+---Seed the _lastFocusedKey / _lastFocusedChild cache from `root` down to the
+---widget matching `key`, without moving global focus. Use this when the target
+---subtree is not the current stack top (e.g. a rebuild happened while a modal
+---capture widget was pushed). When the modal pops and focus naturally descends
+---back into the subtree, GetDefaultChild will follow the seeded cache to the
+---correct widget. Also expands collapsed TreeItem ancestors silently.
+---@param root UIWidget
+---@param key string
+---@return boolean
+function UIScreenManager:PrepareFocus(root, key)
+    if not root or not key then return false end
+    local match = self:FindByFocusKey(root, key)
+    if not match then return false end
+    local chain = {}
+    local node = match
+    while node and node ~= root do
+        table.insert(chain, 1, node)
+        node = node.Parent
+    end
+    if node ~= root then return false end
+    local parent = root
+    for _, child in ipairs(chain) do
+        parent._lastFocusedChild = child
+        parent._lastFocusedKey = child.FocusKey
+        if parent.IsExpanded == false and parent.Expand then
+            parent:Expand(true)
+        end
+        parent = child
+    end
+    return true
+end
+
 --#endregion
 
 --#region Destroy pruning
@@ -605,9 +638,7 @@ end
 --#region Lifecycle
 
 function UIScreenManager:Init()
-    if not ExposedMembers.CAI_UIManager then
-        ExposedMembers.CAI_UIManager = self:New()
-    end
+    ExposedMembers.CAI_UIManager = self:New()
     local mgr = ExposedMembers.CAI_UIManager
     if CAIWidgetHelpers_DialogBuilder and CAIWidgetHelpers_DialogBuilder.Install then
         CAIWidgetHelpers_DialogBuilder.Install(mgr)

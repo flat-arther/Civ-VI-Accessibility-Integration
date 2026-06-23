@@ -1,9 +1,9 @@
 include("caiUtils")
+include("CAIUIScreenManager")
 include("navCursor")
 include("inGameHelpers_CAI")
 include("UnitWaypoints_CAI")
 include("interfaceInfoHelpers_CAI")
-include("CAIUIScreenManager")
 include("RecommendationLogic_CAI")
 include("WorldScanner_CAI")
 include("Surveyor_CAI")
@@ -11,6 +11,7 @@ include("RevealAnnouncements_CAI")
 include("EventSubs_CAI")
 include("Civ6Common")
 
+local mgr = ExposedMembers.CAI_UIManager
 local function GetWorldInputIncludeName()
 	if IsExpansion2Active ~= nil and IsExpansion2Active() then
 		return "WorldInput_Expansion2"
@@ -30,7 +31,6 @@ local INPUT_ACTION_STARTED = "Started"
 local INPUT_ACTION_TRIGGERED = "Triggered"
 local CITY_MANAGEMENT_WIDGET_ID = "CAIWorldInputCityManagement"
 
-local mgr = ExposedMembers.CAI_UIManager
 local m_caiGameViewWidget = nil
 local m_caiCurrentInterfaceWidget = nil
 
@@ -175,7 +175,8 @@ local function CollectPlotInteractions(plotId)
 		local cityOwnerID = city:GetOwner()
 		local cityID = city:GetID()
 		local cityName = city:GetName()
-		local displayName = cityName ~= nil and cityName ~= "" and Locale.Lookup(cityName) or Locale.Lookup("LOC_CAI_TILE_INTERACT_CITY")
+		local displayName = cityName ~= nil and cityName ~= "" and Locale.Lookup(cityName) or
+			Locale.Lookup("LOC_CAI_TILE_INTERACT_CITY")
 
 		if cityOwnerID == localPlayerID then
 			table.insert(results, {
@@ -242,7 +243,8 @@ local function CollectPlotInteractions(plotId)
 					if dPlot ~= nil and dPlot:GetIndex() == plotId then
 						if CityManager.CanStartCommand(district, CityCommandTypes.RANGE_ATTACK) then
 							local districtDef = GameInfo.Districts[district:GetType()]
-							local dName = districtDef ~= nil and districtDef.Name ~= nil and Locale.Lookup(districtDef.Name) or Locale.Lookup("LOC_CAI_TILE_INTERACT_DISTRICT")
+							local dName = districtDef ~= nil and districtDef.Name ~= nil and
+								Locale.Lookup(districtDef.Name) or Locale.Lookup("LOC_CAI_TILE_INTERACT_DISTRICT")
 							table.insert(results, {
 								Label = Locale.Lookup("LOC_CAI_TILE_INTERACT_DISTRICT_STRIKE", dName),
 								Action = function()
@@ -284,6 +286,7 @@ local function PushPlotInteractList(interactions)
 	list:AddInputBinding({
 		Key = Keys.VK_ESCAPE,
 		MSG = KeyEvents.KeyUp,
+		Description = "LOC_CAI_KB_CLOSE",
 		Action = function()
 			DismissPlotInteractList()
 			return true
@@ -616,6 +619,7 @@ local function CreateTargetingWidgetData(labelKey, primaryAction, cancelAction)
 				{
 					Key = Keys.VK_ESCAPE,
 					MSG = KeyEvents.KeyUp,
+					Description = "LOC_CAI_KB_CANCEL_TARGETING",
 					Action = function()
 						if cancelAction ~= nil then
 							cancelAction()
@@ -653,6 +657,7 @@ local interfaceWidgets = {
 				{
 					Key = Keys.VK_ESCAPE,
 					MSG = KeyEvents.KeyUp,
+					Description = "LOC_CAI_KB_CANCEL_MOVEMENT",
 					Action = function()
 						MovementActions_CAI:ClearReadyForCombat()
 						OnMouseMoveToCancel()
@@ -752,6 +757,7 @@ local interfaceWidgets = {
 				{
 					Key = Keys.VK_ESCAPE,
 					MSG = KeyEvents.KeyUp,
+					Description = "LOC_CAI_KB_CANCEL_TARGETING",
 					Action = function()
 						RunVanillaPlacementCancel()
 						return true
@@ -773,6 +779,7 @@ local interfaceWidgets = {
 				{
 					Key = Keys.VK_ESCAPE,
 					MSG = KeyEvents.KeyUp,
+					Description = "LOC_CAI_KB_CANCEL_PLACEMENT",
 					Action = function()
 						OnMouseDistrictPlacementCancel()
 						return true
@@ -803,6 +810,7 @@ local interfaceWidgets = {
 				{
 					Key = Keys.VK_ESCAPE,
 					MSG = KeyEvents.KeyUp,
+					Description = "LOC_CAI_KB_CANCEL_PLACEMENT",
 					Action = function()
 						OnMouseBuildingPlacementCancel()
 						return true

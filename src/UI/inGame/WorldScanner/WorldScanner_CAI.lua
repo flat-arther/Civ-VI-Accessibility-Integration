@@ -790,6 +790,7 @@ function CAIWorldScanner:OpenSearch()
     editBox:AddInputBindings({
         {
             Key = Keys.VK_ESCAPE,
+            Description = "LOC_CAI_KB_CLOSE",
             Action = function()
                 CloseSearchEditBox()
                 DestroySearchContext()
@@ -799,6 +800,7 @@ function CAIWorldScanner:OpenSearch()
         {
             Key = Keys.VK_PRIOR,
             MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_SEARCH_HISTORY_BACK",
             Action = function()
                 local history = SearchUtils.GetHistory(SCANNER_SEARCH_HISTORY_CONTEXT)
                 if #history == 0 then
@@ -818,6 +820,7 @@ function CAIWorldScanner:OpenSearch()
         {
             Key = Keys.VK_NEXT,
             MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_SEARCH_HISTORY_FORWARD",
             Action = function()
                 local history = SearchUtils.GetHistory(SCANNER_SEARCH_HISTORY_CONTEXT)
                 if #history == 0 then

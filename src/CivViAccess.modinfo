@@ -17,6 +17,7 @@
     <File>UI/uiManager/helpers/CAIWidgetHelpers_EditBox.lua</File>
     <File>UI/uiManager/helpers/CAIWidgetHelpers_DialogBuilder.lua</File>
     <File>UI/uiManager/helpers/CAIWidgetHelpers_PediaLookup.lua</File>
+    <File>UI/uiManager/helpers/CAIWidgetHelpers_InputHelp.lua</File>
     <File>UI/uiManager/CAIWidget_Base.lua</File>
     <File>UI/uiManager/CAIWidget_Container.lua</File>
     <File>UI/uiManager/CAIWidget_Value.lua</File>
@@ -62,6 +63,8 @@
     <File>UI/FiraxisLive/My2K.lua</File>
     <File>UI/shared/iconsProcessing.lua</File>
     <File>UI/shared/LoadGameMenu.lua</File>
+    <File>UI/shared/LoadScreen.lua</File>
+    <File>UI/shared/StateTransition.lua</File>
     <File>UI/shared/PopupDialog.lua</File>
     <File>UI/inGame/InGamePopup_CAI.lua</File>
     <File>UI/shared/Options.lua</File>
@@ -150,6 +153,8 @@
     <File>UI/inGame/ProductionPanel_CAI.lua</File>
     <File>UI/inGame/CityPanel_CAI.lua</File>
     <File>UI/inGame/CityPanelOverview_CAI.lua</File>
+    <File>UI/inGame/LaunchBar_CAI.lua</File>
+    <File>UI/inGame/PartialScreenHooks_CAI.lua</File>
     <File>UI/inGame/CivilopediaScreen_CAI.lua</File>
     <File>UI/inGame/UnitPanel_CAI.lua</File>
     <File>UI/inGame/UnitFlagManager_CAI.lua</File>
@@ -184,6 +189,7 @@
       <File>UI/uiManager/helpers/CAIWidgetHelpers_EditBox.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_DialogBuilder.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_PediaLookup.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_InputHelp.lua</File>
       <File>UI/uiManager/CAIWidget_Base.lua</File>
       <File>UI/uiManager/CAIWidget_Container.lua</File>
       <File>UI/uiManager/CAIWidget_Value.lua</File>
@@ -225,8 +231,10 @@
       <File>UI/FiraxisLive/My2K.lua</File>
       <File>UI/shared/iconsProcessing.lua</File>
       <File>UI/shared/LoadGameMenu.lua</File>
+      <File>UI/shared/LoadScreen.lua</File>
       <File>UI/shared/PopupDialog.lua</File>
       <File>UI/shared/Options.lua</File>
+      <File>UI/shared/StateTransition.lua</File>
     </ImportFiles>
   </FrontEndActions>
 
@@ -252,6 +260,7 @@
       <File>UI/uiManager/helpers/CAIWidgetHelpers_EditBox.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_DialogBuilder.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_PediaLookup.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_InputHelp.lua</File>
       <File>UI/uiManager/CAIWidget_Base.lua</File>
       <File>UI/uiManager/CAIWidget_Container.lua</File>
       <File>UI/uiManager/CAIWidget_Value.lua</File>
@@ -285,7 +294,9 @@
       <File>UI/shared/iconsProcessing.lua</File>
       <File>UI/shared/PopupDialog.lua</File>
       <File>UI/shared/LoadGameMenu.lua</File>
+      <File>UI/shared/LoadScreen.lua</File>
       <File>UI/shared/Options.lua</File>
+      <File>UI/shared/StateTransition.lua</File>
       <File>UI/inGame/CityBannerManager_CAI.lua</File>
       <File>UI/inGame/NotificationPanel_CAI.lua</File>
       <!-- DiplomacyDealView is a wildcard host (include("DiplomacyDealView_", true)),
@@ -334,6 +345,8 @@
       <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>
+      <File>UI/inGame/LaunchBar_CAI.lua</File>
+      <File>UI/inGame/PartialScreenHooks_CAI.lua</File>
       <File>UI/inGame/NaturalDisasterPopup_CAI.lua</File>
       <!-- EndGameMenu is a wildcard host (include("EndGameMenu_", true)),
            so the CAI layer rides that wildcard as an imported file. -->
@@ -353,6 +366,22 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>ActionPanel</LuaContext>
         <LuaReplace>UI/inGame/ActionPanel_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_LaunchBar">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>LaunchBar</LuaContext>
+        <LuaReplace>UI/inGame/LaunchBar_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_PartialScreenHooks">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>PartialScreenHooks</LuaContext>
+        <LuaReplace>UI/inGame/PartialScreenHooks_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

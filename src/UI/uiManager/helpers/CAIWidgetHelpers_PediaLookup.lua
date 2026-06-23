@@ -381,12 +381,16 @@ function P.RunLookup(widget)
     end
 
     panel:AddChild(list)
-    panel:AddInputBinding({
+    panel:AddInputBindings({ {
         Key = Keys.VK_ESCAPE,
+        Description = "LOC_CAI_KB_CLOSE",
         Action = function()
             CloseLookup()
             return true
         end,
+    },
+        { Key = Keys.VK_DOWN, MSG = KeyEvents.KeyDown, Action = function() return true end },
+        { Key = Keys.VK_UP,   MSG = KeyEvents.KeyDown, Action = function() return true end },
     })
 
     root:AddChild(panel)

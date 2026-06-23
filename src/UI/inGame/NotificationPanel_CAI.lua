@@ -11,6 +11,7 @@ local ACTION_OPEN_NOTIFICATION_CENTER      = Input.GetActionId("NotificationPane
 local CAI_TUTORIAL_GOAL_ADDED_TYPE         = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_ADDED")
 local CAI_TUTORIAL_GOAL_COMPLETED_TYPE     = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_COMPLETED")
 
+local BASE_LookAtNotification               = LookAtNotification
 local BASE_RegisterHandlers                = RegisterHandlers
 local m_caiOriginalOnNotificationAdded     = OnNotificationAdded
 local m_caiOriginalOnNotificationDismissed = OnNotificationDismissed
@@ -108,6 +109,18 @@ end
 local function CloseNotificationCenter()
     m_centerTree = nil
     if mgr then mgr:RemoveFromStack(NOTIFICATION_CENTER_ID) end
+end
+
+LookAtNotification = function(pNotification)
+    BASE_LookAtNotification(pNotification)
+    if m_centerTree then return end
+    if pNotification and pNotification:IsLocationValid() then
+        local x, y = pNotification:GetLocation()
+        local plot = Map.GetPlot(x, y)
+        if plot then
+            LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
+        end
+    end
 end
 
 function OnCAITutorialGoalNotificationActivate(notificationEntry, notificationID, activatedByUser)
@@ -230,11 +243,13 @@ local function CreateLeafWidget(playerID, notificationID)
         {
             Key    = Keys.VK_SPACE,
             MSG    = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_ACTIVATE_NOTIFICATION",
             Action = function() return ActivateNotification(playerID, notificationID) end,
         },
         {
             Key    = Keys.VK_DELETE,
             MSG    = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_DISMISS_NOTIFICATION",
             Action = function() return DismissNotification(playerID, notificationID) end,
         },
     })
@@ -260,10 +275,10 @@ local function CreateGroupWidget(playerID, group)
     })
 
     groupNode:AddInputBinding({
-        Key     = Keys.VK_DELETE,
-        IsShift = true,
-        MSG     = KeyEvents.KeyUp,
-        Action  = function() return DismissNotificationGroup(playerID, group) end,
+        Key    = Keys.VK_DELETE,
+        MSG    = KeyEvents.KeyUp,
+        Description = "LOC_CAI_KB_DISMISS_STACK",
+        Action = function() return DismissNotificationGroup(playerID, group) end,
     })
 
     for idx, notificationID in ipairs(group.Notifications) do
@@ -284,15 +299,20 @@ local function PopulateTree(tree, playerID)
     local groups = BuildNotificationGroups(playerID)
     if #groups == 0 then
         AddEmptyNode(tree)
-        return
+        return nil
     end
+    local lastLeafKey = nil
     for _, group in ipairs(groups) do
         if #group.Notifications == 1 then
             tree:AddChild(CreateLeafWidget(playerID, group.Notifications[1]))
+            lastLeafKey = "notification:" .. tostring(group.Notifications[1])
         else
             tree:AddChild(CreateGroupWidget(playerID, group))
+            local lastInGroup = group.Notifications[#group.Notifications]
+            lastLeafKey = "notification:" .. tostring(lastInGroup)
         end
     end
+    return lastLeafKey
 end
 
 local function RebuildTree()
@@ -322,15 +342,16 @@ local function OpenNotificationCenter()
     tree:AddInputBinding({
         Key    = Keys.VK_ESCAPE,
         MSG    = KeyEvents.KeyUp,
+        Description = "LOC_CAI_KB_CLOSE",
         Action = function()
             CloseNotificationCenter()
             return true
         end,
     })
 
-    PopulateTree(tree, playerID)
+    local latestKey = PopulateTree(tree, playerID)
     m_centerTree = tree
-    mgr:Push(tree)
+    mgr:Push(tree, latestKey and { focus = latestKey } or nil)
 end
 
 local function SpeakNotificationAdded(playerID, notificationID)

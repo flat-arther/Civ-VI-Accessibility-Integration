@@ -1064,12 +1064,12 @@ local function RebuildSetupPanel()
                 m_ui.beliefList:AddChild(item)
             end
             m_ui.beliefList:AddInputBindings({
-                { Key = Keys.VK_ESCAPE, Action = function() PopBeliefPicker(); return true end },
+                { Key = Keys.VK_ESCAPE, Description = "LOC_CAI_KB_CLOSE", Action = function() PopBeliefPicker(); return true end },
             })
             mgr:Push(m_ui.beliefList, PopupPriority.Current)
         end)
         pantheonSlot:AddInputBindings({
-            { Key = Keys.VK_DELETE, Action = function()
+            { Key = Keys.VK_DELETE, Description = "LOC_CAI_KB_CLEAR_BELIEF_SLOT", Action = function()
                 if m_pendingBeliefs[1] then
                     m_pendingBeliefs[1] = nil
                     Speak(Locale.Lookup("LOC_CAI_RELIGION_SLOT_CLEARED",
@@ -1219,13 +1219,13 @@ local function RebuildSetupPanel()
                 end
 
                 m_ui.beliefList:AddInputBindings({
-                    { Key = Keys.VK_ESCAPE, MSG = KeyEvents.KeyUp, Action = function() PopBeliefPicker(); return true end },
+                    { Key = Keys.VK_ESCAPE, MSG = KeyEvents.KeyUp, Description = "LOC_CAI_KB_CLOSE", Action = function() PopBeliefPicker(); return true end },
                 })
                 mgr:Push(m_ui.beliefList, PopupPriority.Current)
             end)
 
             slotItem:AddInputBindings({
-                { Key = Keys.VK_DELETE, Action = function()
+                { Key = Keys.VK_DELETE, Description = "LOC_CAI_KB_CLEAR_BELIEF_SLOT", Action = function()
                     if m_pendingBeliefs[capturedSlot] then
                         m_pendingBeliefs[capturedSlot] = nil
                         local slotName = isFollowerSlot

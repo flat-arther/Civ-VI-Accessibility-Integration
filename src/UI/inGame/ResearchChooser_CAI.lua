@@ -279,6 +279,7 @@ local function CreateRow(kData, interactive)
             Key     = Keys.VK_RETURN,
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
             Action  = function()
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 if kData.TechType then LuaEvents.OpenCivilopedia(kData.TechType) end

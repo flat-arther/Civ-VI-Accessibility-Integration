@@ -20,12 +20,12 @@ function ListWidget.Create(mgr, id, props)
     w.AllowSearch = true
     w.SearchDepth = 2
     w:AddInputBindings({
-        { Key = Keys.VK_UP,    MSG = KeyEvents.KeyDown, Action = function(self) return self:NavigatePrev() end },
-        { Key = Keys.VK_DOWN,  MSG = KeyEvents.KeyDown, Action = function(self) return self:NavigateNext() end },
-        { Key = Keys.VK_HOME,  MSG = KeyEvents.KeyDown, Action = function(self) return self:NavigateToFirst() end },
-        { Key = Keys.VK_END,   MSG = KeyEvents.KeyDown, Action = function(self) return self:NavigateToLast() end },
-        { Key = Keys.VK_PRIOR, MSG = KeyEvents.KeyDown, Action = function(self) return self:NavigatePage(-1) end },
-        { Key = Keys.VK_NEXT,  MSG = KeyEvents.KeyDown, Action = function(self) return self:NavigatePage(1) end },
+        { Key = Keys.VK_UP,    MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_UP",       Action = function(self) return self:NavigatePrev() end },
+        { Key = Keys.VK_DOWN,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_DOWN",     Action = function(self) return self:NavigateNext() end },
+        { Key = Keys.VK_HOME,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_TO_FIRST", Action = function(self) return self:NavigateToFirst() end },
+        { Key = Keys.VK_END,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_TO_LAST",  Action = function(self) return self:NavigateToLast() end },
+        { Key = Keys.VK_PRIOR, MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_PAGE_UP",       Action = function(self) return self:NavigatePage(-1) end },
+        { Key = Keys.VK_NEXT,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_PAGE_DOWN",     Action = function(self) return self:NavigatePage(1) end },
     })
     CAIWidgetRegistry.ApplyProps(w, props)
     return w

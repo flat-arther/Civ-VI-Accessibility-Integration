@@ -34,12 +34,12 @@ function SliderWidget.Create(mgr, id, props)
     w:SetValueGetter(function(self) return tostring(self._value) end)
 
     w:AddInputBindings({
-        { Key = Keys.VK_LEFT,  MSG = KeyEvents.KeyDown, Action = function(self) return self:Decrement() end },
-        { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown, Action = function(self) return self:Increment() end },
-        { Key = Keys.VK_PRIOR, MSG = KeyEvents.KeyDown, Action = function(self) return self:PageIncrement() end },
-        { Key = Keys.VK_NEXT,  MSG = KeyEvents.KeyDown, Action = function(self) return self:PageDecrement() end },
-        { Key = Keys.VK_HOME,  MSG = KeyEvents.KeyDown, Action = function(self) self:SetValue(self._min); return true end },
-        { Key = Keys.VK_END,   MSG = KeyEvents.KeyDown, Action = function(self) self:SetValue(self._max); return true end },
+        { Key = Keys.VK_LEFT,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_DECREASE",      Action = function(self) return self:Decrement() end },
+        { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_INCREASE",      Action = function(self) return self:Increment() end },
+        { Key = Keys.VK_PRIOR, MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_INCREASE_PAGE", Action = function(self) return self:PageIncrement() end },
+        { Key = Keys.VK_NEXT,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_DECREASE_PAGE", Action = function(self) return self:PageDecrement() end },
+        { Key = Keys.VK_HOME,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_SET_MINIMUM",   Action = function(self) self:SetValue(self._min); return true end },
+        { Key = Keys.VK_END,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_SET_MAXIMUM",   Action = function(self) self:SetValue(self._max); return true end },
     })
 
     CAIWidgetRegistry.ApplyProps(w, props)

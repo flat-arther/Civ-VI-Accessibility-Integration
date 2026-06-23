@@ -1021,6 +1021,7 @@ function BuildCityActionList()
         {
             Key    = Keys.VK_ESCAPE,
             MSG    = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CLOSE",
             Action = function() CloseCityActionList(); return true end,
         },
     })
@@ -1163,6 +1164,7 @@ function OpenCitizenYieldFocusList()
         {
             Key    = Keys.VK_ESCAPE,
             MSG    = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CLOSE",
             Action = function() mgr:RemoveFromStack(CAI_YIELD_FOCUS_LIST_ID); return true end,
         },
     })

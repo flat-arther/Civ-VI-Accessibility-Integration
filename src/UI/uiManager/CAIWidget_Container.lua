@@ -26,6 +26,8 @@ function ContainerWidget.New(class)
     w._searchHistoryContext = nil
     w:AddInputBinding({
         Key = Keys.F, IsControl = true,
+        Description = "LOC_CAI_KB_SEARCH",
+        Common = true,
         Action = function(self)
             if not self.AllowSearch then return false end
             if self.Manager then self.Manager:OpenSearch(self) end

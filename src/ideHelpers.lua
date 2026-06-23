@@ -108,6 +108,7 @@ EditModes = {}
 ---@field IsShift? boolean
 ---@field IsControl? boolean
 ---@field IsAlt? boolean
+---@field Description? string  LOC tag describing the binding for the input help overlay
 
 ---One option in a Dropdown.
 ---@class DropdownOption

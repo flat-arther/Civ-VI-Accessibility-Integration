@@ -161,23 +161,14 @@ local mgr = ExposedMembers.CAI_UIManager
 
 local CAI_Panel = nil
 local CAI_MapList = nil
-local CAI_TabBar = nil
+local CAI_FilterDD = nil
 local m_intentionalClose = false
 
-local kSortTabs = {
+local kSortOptions = {
 	{ 0, "LOC_SETUP_MAP_ALL_MAPS",            function() return Controls.AllMapsSelector end },
 	{ 1, "LOC_SETUP_MAP_OFFICIAL_MAPS",        function() return Controls.OfficialMapsSelector end },
 	{ 2, "LOC_SETUP_MAP_WORLD_BUILDER_MAPS",   function() return Controls.WorldBuilderMapsSelector end },
 }
-
-local function MakeButton(labelCtrl, onClick)
-	local b = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapSelectButton"), "Button", {
-		Label = function() return labelCtrl:GetText() end,
-	})
-	b:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	b:On("activate", onClick)
-	return b
-end
 
 local function RebuildMapList()
 	if not CAI_MapList then return end
@@ -235,46 +226,48 @@ local function RebuildMapList()
 	mgr:RestoreFocus(CAI_MapList, capture)
 end
 
+local function BuildFilterDropdownOptions()
+	local options = {}
+	local selectedIdx = 1
+	for i, spec in ipairs(kSortOptions) do
+		table.insert(options, {
+			label = Locale.Lookup(spec[2]),
+			value = spec[1],
+		})
+		if m_sortType == spec[1] then selectedIdx = i end
+	end
+	return options, selectedIdx
+end
+
 local function BuildPanel()
-	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapSelectDialog"), "Dialog", {
+	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapSelectPanel"), "Panel", {
 		Label = function() return Controls.WindowTitle:GetText() end,
-		SpeechSettings = { Role = false },
 	})
-	CAI_Panel:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
+	CAI_Panel:AddInputBinding({Key = Keys.VK_ESCAPE, Description = "LOC_CAI_KB_CLOSE", Action = function()
 		Close()
 		return true
 	end})
 
-	-- Sort selector as a horizontal list of buttons (tabs of the old TabBar).
-	CAI_TabBar = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapSelectTabBar"), "HorizontalList")
-	CAI_Panel:AddChild(CAI_TabBar)
-
-	for _, spec in ipairs(kSortTabs) do
-		local sortNum = spec[1]
-		local locKey = spec[2]
-		local getSelector = spec[3]
-		local tab = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapSelectTab"), "Button", {
-			Label = function() return Locale.Lookup(locKey) end,
-		})
-		tab:On("focus_enter", function()
-			UI.PlaySound("Main_Menu_Mouse_Over")
-			if m_sortType ~= sortNum then
-				OnSortButton(sortNum, getSelector())
+	CAI_FilterDD = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapSelectFilterDD"), "Dropdown", {
+		Label = function() return Locale.Lookup("LOC_SETUP_MAP_ALL_MAPS") end,
+	})
+	local options, idx = BuildFilterDropdownOptions()
+	CAI_FilterDD:SetOptions(options)
+	if idx > 0 then CAI_FilterDD:SetSelectedIndex(idx, true) end
+	CAI_FilterDD:SetFocusSound("Main_Menu_Mouse_Over")
+	CAI_FilterDD:On("value_changed", function(_, val)
+		for _, spec in ipairs(kSortOptions) do
+			if spec[1] == val then
+				OnSortButton(val, spec[3]())
 				RebuildMapList()
+				break
 			end
-		end)
-		tab:On("activate", function()
-			OnSortButton(sortNum, getSelector())
-			RebuildMapList()
-		end)
-		CAI_TabBar:AddChild(tab)
-	end
+		end
+	end)
+	CAI_Panel:AddChild(CAI_FilterDD)
 
 	CAI_MapList = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapSelectList"), "List")
 	CAI_Panel:AddChild(CAI_MapList)
-
-	CAI_Panel:AddChild(MakeButton(Controls.MapSelectionButton, function() OnSelectMapButton() end))
-	CAI_Panel:AddChild(MakeButton(Controls.CloseButton,        function() Close() end))
 end
 
 local function ClosePanel()
@@ -283,34 +276,29 @@ local function ClosePanel()
 	end
 end
 
--- Wrap Close to track intentional closes
 Close = WrapFunc(Close, function(orig)
 	m_intentionalClose = true
 	orig()
 end)
 
--- Wrap LoadMaps to rebuild accessible list when maps are populated
 LoadMaps = WrapFunc(LoadMaps, function(orig, k)
 	orig(k)
 	if not CAI_Panel then BuildPanel() end
 	RebuildMapList()
 end)
 
--- Wrap PopulateMapSelectPanel to rebuild on sort changes
 PopulateMapSelectPanel = WrapFunc(PopulateMapSelectPanel, function(orig)
 	orig()
 	RebuildMapList()
 end)
 
--- Use show/hide handlers for push/pop
 ContextPtr:SetShowHandler(function()
 	if CAI_Panel then
 		mgr:RemoveFromStack(CAI_Panel:GetId())
 	end
-	-- Rebuild fresh each show
 	CAI_Panel = nil
 	CAI_MapList = nil
-	CAI_TabBar = nil
+	CAI_FilterDD = nil
 	m_intentionalClose = false
 	BuildPanel()
 	RebuildMapList()

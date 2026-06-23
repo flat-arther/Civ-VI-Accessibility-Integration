@@ -244,6 +244,7 @@ function CreateUnlockChild(mgr, unlock, idPrefix)
             Key     = Keys.VK_RETURN,
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
             Action  = function()
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 if unlock.TypeName then LuaEvents.OpenCivilopedia(unlock.TypeName) end

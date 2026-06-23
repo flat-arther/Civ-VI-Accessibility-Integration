@@ -24,11 +24,12 @@ function TabPageWidget.Create(mgr, id, props)
     -- between the page and the tab strip.
     w.WrapAround = false
     w:AddInputBindings({
-        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, Action = function(self) return self:NavigateNext() end },
+        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_NEXT_CONTROL", Action = function(self) return self:NavigateNext() end },
         {
             Key = Keys.VK_TAB,
             MSG = KeyEvents.KeyDown,
             IsShift = true,
+            Description = "LOC_CAI_KB_PREVIOUS_CONTROL",
             Action = function(
                 self)
                 return self:NavigatePrev()

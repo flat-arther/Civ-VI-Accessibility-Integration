@@ -1017,6 +1017,7 @@ local function BuildPanel()
         {
             Key = Keys.VK_ESCAPE,
             MSG = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CLOSE",
             Action = function()
                 Close()
                 return true

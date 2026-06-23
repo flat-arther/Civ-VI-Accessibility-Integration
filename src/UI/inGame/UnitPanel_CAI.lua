@@ -151,6 +151,7 @@ local function BindCivilopediaShortcut(item, getUnitID)
     item:AddInputBinding({
         Key = Keys.VK_RETURN,
         IsShift = true,
+        Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
         Action = function()
             local unitID = getUnitID()
             local resolved = Players[Game.GetLocalPlayer()]:GetUnits():FindID(unitID)
@@ -2009,6 +2010,7 @@ local function OpenSimplePromotionList()
     })
     list:AddInputBinding({
         Key = Keys.VK_ESCAPE,
+        Description = "LOC_CAI_KB_CLOSE",
         Action = function()
             CloseSimplePromotionList()
             HidePromotionPanel()
@@ -2136,6 +2138,7 @@ local function OpenUnitNamePanel()
     })
     panel:AddInputBinding({
         Key = Keys.VK_ESCAPE,
+        Description = "LOC_CAI_KB_CLOSE",
         Action = function()
             Controls.VeteranNamingCancelButton:DoLeftClick()
             return true
@@ -2143,6 +2146,7 @@ local function OpenUnitNamePanel()
     })
     panel:AddInputBinding({
         Key = Keys.VK_RETURN,
+        Description = "LOC_CAI_KB_CONFIRM_UNIT_NAME",
         Action = function()
             ClickConfirmVeteranName()
             return true
@@ -2225,6 +2229,7 @@ local function BuildUnitActionList(data)
 
     list:AddInputBinding({
         Key = Keys.VK_ESCAPE,
+        Description = "LOC_CAI_KB_CLOSE",
         Action = function()
             CloseUnitActionList()
             return true
@@ -2391,6 +2396,7 @@ local function BuildUnitList()
 
     tree:AddInputBinding({
         Key = Keys.VK_ESCAPE,
+        Description = "LOC_CAI_KB_CLOSE",
         Action = function()
             CloseUnitList()
             return true
@@ -2538,6 +2544,7 @@ function OnUnitPanelSelectionActionInputTriggered(actionId)
         })
         list:AddInputBinding({
             Key = Keys.VK_ESCAPE,
+            Description = "LOC_CAI_KB_CLOSE",
             Action = function()
                 mgr:RemoveFromStack(UNIT_ABILITIES_LIST_ID)
                 return true

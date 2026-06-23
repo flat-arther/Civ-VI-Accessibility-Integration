@@ -565,6 +565,103 @@
       <Text>Search Results</Text>
     </Row>
 
+    <!-- LaunchBar / PartialScreenHooks / Civilopedia screen shortcuts -->
+    <Row Tag="LOC_CAI_OPEN_CIVILOPEDIA" Language="en_US">
+      <Text>Open Civilopedia</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_CIVILOPEDIA_TOOLTIP" Language="en_US">
+      <Text>Open the Civilopedia encyclopedia</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_CITY_STATES" Language="en_US">
+      <Text>Open City States</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_CITY_STATES_TOOLTIP" Language="en_US">
+      <Text>Open the City States overview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_GREAT_PEOPLE" Language="en_US">
+      <Text>Open Great People</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_GREAT_PEOPLE_TOOLTIP" Language="en_US">
+      <Text>Open the Great People panel</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_GREAT_WORKS" Language="en_US">
+      <Text>Open Great Works</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_GREAT_WORKS_TOOLTIP" Language="en_US">
+      <Text>Open the Great Works overview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_TECH_TREE" Language="en_US">
+      <Text>Open Tech Tree</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_TECH_TREE_TOOLTIP" Language="en_US">
+      <Text>Open the Technology tree</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_CIVICS_TREE" Language="en_US">
+      <Text>Open Civics Tree</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_CIVICS_TREE_TOOLTIP" Language="en_US">
+      <Text>Open the Civics tree</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_GOVERNMENT" Language="en_US">
+      <Text>Open Government</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_GOVERNMENT_TOOLTIP" Language="en_US">
+      <Text>Open the Government screen</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_RELIGION" Language="en_US">
+      <Text>Open Religion</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_RELIGION_TOOLTIP" Language="en_US">
+      <Text>Open the Religion screen</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_GOVERNORS" Language="en_US">
+      <Text>Open Governors</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_GOVERNORS_TOOLTIP" Language="en_US">
+      <Text>Open the Governors panel</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_HISTORIC_MOMENTS" Language="en_US">
+      <Text>Open Historic Moments</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_HISTORIC_MOMENTS_TOOLTIP" Language="en_US">
+      <Text>Open the Historic Moments timeline</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_WORLD_CLIMATE" Language="en_US">
+      <Text>Open World Climate</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_WORLD_CLIMATE_TOOLTIP" Language="en_US">
+      <Text>Open the World Climate screen</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_WORLD_RANKINGS" Language="en_US">
+      <Text>Open World Rankings</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_WORLD_RANKINGS_TOOLTIP" Language="en_US">
+      <Text>Open the World Rankings screen</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_ESPIONAGE" Language="en_US">
+      <Text>Open Espionage</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_ESPIONAGE_TOOLTIP" Language="en_US">
+      <Text>Open the Espionage overview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_TRADE_OVERVIEW" Language="en_US">
+      <Text>Open Trade Overview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_TRADE_OVERVIEW_TOOLTIP" Language="en_US">
+      <Text>Open the Trade Routes overview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_ERA_PROGRESS" Language="en_US">
+      <Text>Open Era Progress</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_ERA_PROGRESS_TOOLTIP" Language="en_US">
+      <Text>Open the Era Progress panel</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SPEAK_GOVERNMENT_TOOLTIP" Language="en_US">
+      <Text>Speak Government Info</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SPEAK_GOVERNMENT_TOOLTIP_DESC" Language="en_US">
+      <Text>Speak the current government status tooltip</Text>
+    </Row>
     <!-- Surveyor -->
     <Row Tag="LOC_CAI_SURVEYOR_GROW_RADIUS" Language="en_US">
       <Text>Surveyor grow radius</Text>
@@ -1381,6 +1478,54 @@
     <Row Tag="LOC_CAI_PLAYER" Language="en_US">
       <Text>Player</Text>
     </Row>
+    <Row Tag="LOC_CAI_ADVANCED_SETUP_PLAYERS" Language="en_US">
+      <Text>Players</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVANCED_SETUP_OPTIONS" Language="en_US">
+      <Text>Options</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVANCED_SETUP_GAME_MODES" Language="en_US">
+      <Text>Game Modes</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVANCED_SETUP_ADVANCED" Language="en_US">
+      <Text>Advanced Options</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVANCED_SETUP_ADD_AI" Language="en_US">
+      <Text>Add AI Player</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVANCED_SETUP_CHOOSE_CIV" Language="en_US">
+      <Text>Choose Civilization</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVANCED_SETUP_CIV_ABILITY" Language="en_US">
+      <Text>Civilization Ability</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ADVANCED_SETUP_LEADER_ABILITY" Language="en_US">
+      <Text>Leader Ability</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIQUE_UNIT" Language="en_US">
+      <Text>Unique Unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIQUE_BUILDING" Language="en_US">
+      <Text>Unique Building</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIQUE_DISTRICT" Language="en_US">
+      <Text>Unique District</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIQUE_IMPROVEMENT" Language="en_US">
+      <Text>Unique Improvement</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIQUE_UNITS" Language="en_US">
+      <Text>Unique Units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIQUE_BUILDINGS" Language="en_US">
+      <Text>Unique Buildings</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIQUE_DISTRICTS" Language="en_US">
+      <Text>Unique Districts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIQUE_IMPROVEMENTS" Language="en_US">
+      <Text>Unique Improvements</Text>
+    </Row>
 
     <!-- UI manager -->
     <Row Tag="LOC_CAI_CREATING_UI_MANAGER" Language="en_US">
@@ -2002,6 +2147,24 @@
     <!-- Unit categories and hotkeys -->
     <Row Tag="LOC_OPTIONS_HOTKEY_CATEGORY_CAI" Language="en_US">
       <Text>Accessibility</Text>
+    </Row>
+    <Row Tag="LOC_CAI_HOTKEY_CATEGORY_CITY" Language="en_US">
+      <Text>City Actions:</Text>
+    </Row>
+    <Row Tag="LOC_CAI_HOTKEY_CATEGORY_UI" Language="en_US">
+      <Text>User Interface:</Text>
+    </Row>
+    <Row Tag="LOC_CAI_HOTKEY_CATEGORY_UNIT" Language="en_US">
+      <Text>Unit Actions:</Text>
+    </Row>
+    <Row Tag="LOC_CAI_HOTKEY_CATEGORY_GLOBAL" Language="en_US">
+      <Text>Global Actions:</Text>
+    </Row>
+    <Row Tag="LOC_CAI_HOTKEY_CATEGORY_ONLINE" Language="en_US">
+      <Text>Online Actions:</Text>
+    </Row>
+    <Row Tag="LOC_CAI_HOTKEY_CATEGORY_LENSES" Language="en_US">
+      <Text>Lenses:</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_MOVES" Language="en_US">
       <Text>{1_Current} of {2_Moves} moves</Text>
@@ -2950,6 +3113,9 @@
     </Row>
     <Row Tag="LOC_CAI_ICON_STRENGTH_ALIAS_DEFENSE" Language="en_US">
       <Text>Defense Strength</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ICON_RANGE_ALIAS" Language="en_US">
+      <Text>Range</Text>
     </Row>
 
     <Row Tag="LOC_CAI_TUTORIAL_GOALS" Language="en_US">
@@ -4298,6 +4464,441 @@
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_RECOMMENDED_SETTLEMENT" Language="en_US">
       <Text>Recommended settlement location</Text>
+    </Row>
+
+    <!-- Key display names for input help overlay -->
+    <Row Tag="LOC_CAI_KEY_ENTER" Language="en_US">
+      <Text>Enter</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_ESCAPE" Language="en_US">
+      <Text>Escape</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_SPACE" Language="en_US">
+      <Text>Space</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_TAB" Language="en_US">
+      <Text>Tab</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_UP" Language="en_US">
+      <Text>Up</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_DOWN" Language="en_US">
+      <Text>Down</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_LEFT" Language="en_US">
+      <Text>Left</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_RIGHT" Language="en_US">
+      <Text>Right</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_HOME" Language="en_US">
+      <Text>Home</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_END" Language="en_US">
+      <Text>End</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_PAGE_UP" Language="en_US">
+      <Text>Page Up</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_PAGE_DOWN" Language="en_US">
+      <Text>Page Down</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_DELETE" Language="en_US">
+      <Text>Delete</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_BACKSPACE" Language="en_US">
+      <Text>Backspace</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_SLASH" Language="en_US">
+      <Text>/</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_CTRL" Language="en_US">
+      <Text>Ctrl</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_SHIFT" Language="en_US">
+      <Text>Shift</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEY_ALT" Language="en_US">
+      <Text>Alt</Text>
+    </Row>
+
+    <!-- Input help overlay -->
+    <Row Tag="LOC_CAI_INPUT_HELP_TITLE" Language="en_US">
+      <Text>Input Help</Text>
+    </Row>
+    <Row Tag="LOC_CAI_INPUT_HELP_UI_CATEGORY" Language="en_US">
+      <Text>UI</Text>
+    </Row>
+    <Row Tag="LOC_CAI_INPUT_HELP_NONE" Language="en_US">
+      <Text>No input bindings available</Text>
+    </Row>
+
+    <!-- Input binding descriptions -->
+    <Row Tag="LOC_CAI_KB_ACTIVATE" Language="en_US">
+      <Text>Activate</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_ACTIVATE_FIRST_RESULT" Language="en_US">
+      <Text>Activate first result</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_ACTIVATE_NOTIFICATION" Language="en_US">
+      <Text>Activate notification</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_ADD_TO_QUEUE" Language="en_US">
+      <Text>Add to queue</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_CANCEL_BINDING" Language="en_US">
+      <Text>Cancel binding</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_CANCEL_MOVEMENT" Language="en_US">
+      <Text>Cancel movement</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_CANCEL_PLACEMENT" Language="en_US">
+      <Text>Cancel placement</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_CANCEL_TARGETING" Language="en_US">
+      <Text>Cancel targeting</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_CLEAR_BELIEF_SLOT" Language="en_US">
+      <Text>Clear belief slot</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_CLOSE" Language="en_US">
+      <Text>Close</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_CLOSE_DROPDOWN" Language="en_US">
+      <Text>Close dropdown</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_COLLAPSE" Language="en_US">
+      <Text>Collapse</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_COLLAPSE_SUBMENU" Language="en_US">
+      <Text>Collapse submenu</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_CONFIRM_MAP_PIN" Language="en_US">
+      <Text>Confirm map pin</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_CONFIRM_UNIT_NAME" Language="en_US">
+      <Text>Confirm unit name</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_COPY" Language="en_US">
+      <Text>Copy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_CURSOR_LEFT" Language="en_US">
+      <Text>Cursor left</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_CURSOR_RIGHT" Language="en_US">
+      <Text>Cursor right</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_DECREASE" Language="en_US">
+      <Text>Decrease</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_DECREASE_PAGE" Language="en_US">
+      <Text>Decrease by page</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_DEFAULT_ACTION" Language="en_US">
+      <Text>Default action</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_DELETE_BACK" Language="en_US">
+      <Text>Delete backward</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_DELETE_FORWARD" Language="en_US">
+      <Text>Delete forward</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_DELETE_SAVE" Language="en_US">
+      <Text>Delete save</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_DELETE_WORD_BACK" Language="en_US">
+      <Text>Delete word backward</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_DELETE_WORD_FORWARD" Language="en_US">
+      <Text>Delete word forward</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_DISMISS_NOTIFICATION" Language="en_US">
+      <Text>Dismiss notification</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_DISMISS_STACK" Language="en_US">
+      <Text>Dismiss notification stack</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_DOCUMENT_END" Language="en_US">
+      <Text>Go to document end</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_DOCUMENT_START" Language="en_US">
+      <Text>Go to document start</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_EDIT_CANCEL" Language="en_US">
+      <Text>Cancel editing</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_EDIT_ENTER" Language="en_US">
+      <Text>Begin or confirm edit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_EDIT_MAP_PIN" Language="en_US">
+      <Text>Edit map pin</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_ENTER_SUBMENU" Language="en_US">
+      <Text>Enter submenu</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_ENTER_TAB_PAGE" Language="en_US">
+      <Text>Enter tab page</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_EXPAND" Language="en_US">
+      <Text>Expand</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_GO_BACK" Language="en_US">
+      <Text>Go back</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_INCREASE" Language="en_US">
+      <Text>Increase</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_INCREASE_PAGE" Language="en_US">
+      <Text>Increase by page</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_INPUT_HELP" Language="en_US">
+      <Text>Input help</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_LINE_DOWN" Language="en_US">
+      <Text>Line down</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_LINE_END" Language="en_US">
+      <Text>Go to line end</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_LINE_START" Language="en_US">
+      <Text>Go to line start</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_LINE_UP" Language="en_US">
+      <Text>Line up</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_DOWN" Language="en_US">
+      <Text>Move down</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_LEFT" Language="en_US">
+      <Text>Move left</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_QUEUE_DOWN" Language="en_US">
+      <Text>Move queue item down</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_QUEUE_UP" Language="en_US">
+      <Text>Move queue item up</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_RIGHT" Language="en_US">
+      <Text>Move right</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_TO_FIRST" Language="en_US">
+      <Text>Move to first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_TO_LAST" Language="en_US">
+      <Text>Move to last</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_TO_ROW_END" Language="en_US">
+      <Text>Move to row end</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_TO_ROW_START" Language="en_US">
+      <Text>Move to row start</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_TO_TABLE_END" Language="en_US">
+      <Text>Move to table end</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_TO_TABLE_START" Language="en_US">
+      <Text>Move to table start</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_UP" Language="en_US">
+      <Text>Move up</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_NAVIGATE_BACK" Language="en_US">
+      <Text>Navigate back</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_NAVIGATE_FORWARD" Language="en_US">
+      <Text>Navigate forward</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_NEXT_BUTTON" Language="en_US">
+      <Text>Next button</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_NEXT_COLUMN" Language="en_US">
+      <Text>Next column</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_NEXT_CONTROL" Language="en_US">
+      <Text>Next control</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_NEXT_GREAT_WORK" Language="en_US">
+      <Text>Next great work</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_NEXT_TAB" Language="en_US">
+      <Text>Next tab</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_OPEN_CITY_DETAILS" Language="en_US">
+      <Text>Open city details</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_OPEN_CIVILOPEDIA" Language="en_US">
+      <Text>Open Civilopedia</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_OPEN_DROPDOWN" Language="en_US">
+      <Text>Open dropdown</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_PAGE_DOWN" Language="en_US">
+      <Text>Page down</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_PAGE_UP" Language="en_US">
+      <Text>Page up</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_PASTE" Language="en_US">
+      <Text>Paste</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_PEDIA_LOOKUP" Language="en_US">
+      <Text>Civilopedia lookup</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_PREVIOUS_BUTTON" Language="en_US">
+      <Text>Previous button</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_PREVIOUS_COLUMN" Language="en_US">
+      <Text>Previous column</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_PREVIOUS_CONTROL" Language="en_US">
+      <Text>Previous control</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_PREVIOUS_GREAT_WORK" Language="en_US">
+      <Text>Previous great work</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_PREVIOUS_TAB" Language="en_US">
+      <Text>Previous tab</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_QUEUE_PRODUCTION" Language="en_US">
+      <Text>Queue production</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_QUEUE_RESEARCH" Language="en_US">
+      <Text>Queue research</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_READ_LEADER_INFO" Language="en_US">
+      <Text>Read leader info</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_REMOVE_DEAL_ITEM" Language="en_US">
+      <Text>Remove deal item</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_REMOVE_FROM_QUEUE" Language="en_US">
+      <Text>Remove from queue</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_REMOVE_POLICY" Language="en_US">
+      <Text>Remove policy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_RETURN_TO_TAB_STRIP" Language="en_US">
+      <Text>Return to tab strip</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SEARCH" Language="en_US">
+      <Text>Search</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SEARCH_HISTORY_BACK" Language="en_US">
+      <Text>Previous search result</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SEARCH_HISTORY_FORWARD" Language="en_US">
+      <Text>Next search result</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SEARCH_HISTORY_NEXT" Language="en_US">
+      <Text>Next search history</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SEARCH_HISTORY_PREV" Language="en_US">
+      <Text>Previous search history</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SELECT_ALL" Language="en_US">
+      <Text>Select all</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SELECT_LEFT" Language="en_US">
+      <Text>Select left</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SELECT_LINE_DOWN" Language="en_US">
+      <Text>Select line down</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SELECT_LINE_UP" Language="en_US">
+      <Text>Select line up</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SELECT_RIGHT" Language="en_US">
+      <Text>Select right</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SELECT_TO_DOCUMENT_END" Language="en_US">
+      <Text>Select to document end</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SELECT_TO_DOCUMENT_START" Language="en_US">
+      <Text>Select to document start</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SELECT_TO_LINE_END" Language="en_US">
+      <Text>Select to line end</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SELECT_TO_LINE_START" Language="en_US">
+      <Text>Select to line start</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SELECT_WORD_LEFT" Language="en_US">
+      <Text>Select word left</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SELECT_WORD_RIGHT" Language="en_US">
+      <Text>Select word right</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SET_MAXIMUM" Language="en_US">
+      <Text>Set to maximum</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SET_MINIMUM" Language="en_US">
+      <Text>Set to minimum</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_STOP_ASKING" Language="en_US">
+      <Text>Stop asking</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_TOGGLE" Language="en_US">
+      <Text>Toggle</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_TOGGLE_EXPAND" Language="en_US">
+      <Text>Toggle expand</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_VIEW_GREAT_WORK" Language="en_US">
+      <Text>View great work</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_WORD_LEFT" Language="en_US">
+      <Text>Word left</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_WORD_RIGHT" Language="en_US">
+      <Text>Word right</Text>
+    </Row>
+
+    <!-- Intro / EULA screen -->
+    <Row Tag="LOC_CAI_EULA_PANEL" Language="en_US">
+      <Text>End User License Agreement</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EULA_TEXT" Language="en_US">
+      <Text>License text</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_ACCEPT" Language="en_US">
+      <Text>Accept</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_DESELECT_ALL" Language="en_US">
+      <Text>Deselect all</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ALL_SELECTED" Language="en_US">
+      <Text>All selected</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ALL_DESELECTED" Language="en_US">
+      <Text>All deselected</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_LABEL_FILE_NAME" Language="en_US">
+      <Text>File name</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LABEL_SAVE_TIME" Language="en_US">
+      <Text>Save time</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LABEL_ERA" Language="en_US">
+      <Text>Era</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LABEL_CIV" Language="en_US">
+      <Text>Civilization</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LABEL_LEADER" Language="en_US">
+      <Text>Leader</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LABEL_DIFFICULTY" Language="en_US">
+      <Text>Difficulty</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LABEL_SPEED" Language="en_US">
+      <Text>Speed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LABEL_DETAILS" Language="en_US">
+      <Text>Details</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LABEL_SORT_BY" Language="en_US">
+      <Text>Sort by</Text>
     </Row>
 
   </LocalizedText>

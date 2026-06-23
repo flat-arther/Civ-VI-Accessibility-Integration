@@ -141,6 +141,7 @@ local function RefreshPanelList()
                                     Key = Keys.VK_RETURN,
                                     MSG = KeyEvents.KeyUp,
                                     IsControl = true,
+                                    Description = "LOC_CAI_KB_EDIT_MAP_PIN",
                                     Action = function()
                                         OnMapPinEntryEdit(iPlayer, pinID)
                                         return true
@@ -171,6 +172,7 @@ local function BuildPanel()
         {
             Key = Keys.VK_ESCAPE,
             MSG = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CLOSE",
             Action = function()
                 ClosePanel()
                 return true

@@ -1,7 +1,7 @@
 # Project Status: Civ VI Accessibility Integration (CAI)
 
 Last compacted: 2026-05-29
-Last updated: 2026-06-17 (Hall of Fame / Game Summaries accessibility implemented)
+Last updated: 2026-06-22 (Advanced Setup: round 6 — simplified refresh to single source of truth)
 
 ## UI Manager Rework (branch: UIManagerRework)
 
@@ -24,7 +24,7 @@ Civilization VI accessibility mod for blind players. Adds TTS and screen-reader 
 - Authors: FlatArther and Hamada
 - Source entry: `src/CivViAccess.modinfo`
 - Deploy model: `src/` is symlinked into the Civ VI mod folder
-- Core rule: all TTS goes through `Speak()` from `caiUtils.lua`
+- Core rule: all TTS goes through `Speak()` from `caiUtils.lua`; `ProcessIcons` runs inside `Speak` by default (third arg `processTokens`, true when nil, false bypasses)
 - API notes and discovered behavior live in `docs/game-api.md`
 
 ## Gate Check
@@ -54,7 +54,8 @@ The large implementation backlog from earlier sessions is considered resolved fo
 
 ## Resolved Areas
 
-- `caiUtils.lua`: shared speech and utility wrappers; now exposes `Speak` and `SpeakLines`.
+- `caiUtils.lua`: shared speech and utility wrappers; `Speak(text, interrupt, processTokens)` and `SpeakLines(lines, interrupt, processTokens)` run `ProcessIcons` by default; pass `processTokens=false` to bypass (used by EditBox raw text).
+- `iconsProcessing.lua`: icon-to-speech bracket token replacement with adjacency deduplication. Static REPLACEMENTS table (unit stats, yields, movement, decorative badges), dynamic GameInfo fallback (yields, resources), direct-output tokens (Bullet, NEWLINE), and collapse aliases (LOC-key-based, resolved at runtime). Adjacency dedup: when the icon's spoken form or a collapse alias appears adjacent to the bracket token, the icon collapses and the label stays. All scattered `ProcessIcons()` calls removed from 15 screen files and the UI manager (`BuildAnnouncement`, `Announce`); the speech pipeline handles them centrally. Two `LOC_CAI_ICON_STRENGTH_ALIAS_*` tags for the [ICON_Strength] catch-all collapse.
 - UI manager rewritten on the `UIManagerRework` branch into a class-based framework under `src/UI/uiManager/` and `src/UI/uiManager/helpers/`. The four old files are deleted; see the "UI Manager Rework" section above for the new layout and `docs/ui-manager.md` for the design.
 - `CityPanel_CAI.lua`: city summary, helper reads, and city `SelectionActions` support are implemented.
 - `UnitPanel_CAI.lua`: unit summary, stats, actions list, queued path, combat preview speech, post-combat speech, unit list, builder recommendation gating, build-improvement submenu, and carrier special-info reads are implemented.
@@ -64,7 +65,7 @@ The large implementation backlog from earlier sessions is considered resolved fo
 - `WorldScanner` modules: scanner categories, lazy rebuild behavior, valid-targets integration, waypoint support, and supporting helpers are implemented.
 - `DiplomacyActionView_CAI.lua`, `DiplomacyDealView_CAI.lua`, and `DeclareWarPopup_CAI.lua`: major diplomacy accessibility wrappers are implemented (`DeclareWarPopup_CAI` rebuilt on the new UI manager 2026-05-31, pending in-game test).
 - `ProductionPanel_CAI.lua`, `ResearchChooser_CAI.lua`, `CivicsChooser_CAI.lua`, `CivicsTree_CAI.lua`, `GovernmentScreen_CAI.lua`, and `CivilopediaScreen_CAI.lua`: major screen accessibility work is implemented.
-- Frontend accessibility work for items such as Advanced Setup and My2K is implemented.
+- Frontend accessibility work for items such as Advanced Setup and My2K is implemented. **AdvancedSetup rewritten (2026-06-22):** proper `Dropdown` widgets, `TabControl` + `AddPage` tabs, `Tree`/`TreeItem` advanced view (Players, Options, Game Modes, Victories, Advanced Options), `DoLeftClick()` action buttons, no back button (Escape closes), `Network.BroadcastGameConfig()` fix, leader tooltips with civ/leader abilities and typed unique headers (Unit/Building/District/Improvement), `GameParameters_UI_AfterRefresh` refreshes dropdowns. Round 3 fixes: `SetFocusSound("Main_Menu_Mouse_Over")` on all widgets, parameters sorted by `SortIndex` (matches vanilla order), tree starts collapsed (no auto-expand), vanilla window visibility synced on show and tab switch. Round 4 fixes: OnShow syncs CAI tab to vanilla's `m_AdvancedMode` state instead of forcing basic view, Array parameter `ValueGetter` respects `UxHint == "InvertSelection"` (city states/natural wonders/leader pools show correct Everything/Nothing). Round 5 fixes: dropdown tooltips now read selected value's description dynamically, removed duplicate Map Type button from advanced tree, leader tooltips group uniques by type with headers ("Unique Unit:", "Unique Building:", etc.) using new `LOC_CAI_UNIQUE_*` tags. Round 6: **simplified refresh architecture** — removed all four advanced-mode driver wraps (`CreateButtonPopupDriver`, `CreateMultiSelectWindowDriver`, `CreateCityStatePickerDriver`, `CreateLeaderPickerDriver`). Advanced tree is now built from a single source of truth: `BuildAdvancedTree` iterates `g_GameParameters.Parameters` sorted by `SortIndex`. `GameParameters_UI_AfterRefresh` wrap rebuilds the advanced tree when in advanced mode. `CreateSimpleParameterDriver` wrap only creates basic-view widgets. No more two parallel systems fighting during refresh. PENDING IN-GAME TEST.
 
 ## Recent Decisions
 

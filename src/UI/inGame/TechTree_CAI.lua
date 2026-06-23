@@ -628,6 +628,7 @@ local function CreateRefLink(parentWidget, techType, currentEraType)
             Key     = Keys.VK_RETURN,
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
             Action  = function(w)
                 if w:IsDisabled() then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
@@ -734,6 +735,7 @@ local function BuildTechNode(techType)
             Key       = Keys.VK_RETURN,
             IsControl = true,
             MSG       = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_QUEUE_RESEARCH",
             Action    = function()
                 if not CanResearch(capturedType) then return true end
                 ActivateAppendToQueue(capturedType)
@@ -744,6 +746,7 @@ local function BuildTechNode(techType)
             Key     = Keys.VK_RETURN,
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
             Action  = function()
                 if not IsTechRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
@@ -874,6 +877,7 @@ local function BuildTechCell(techType)
             Key       = Keys.VK_RETURN,
             IsControl = true,
             MSG       = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_QUEUE_RESEARCH",
             Action    = function()
                 if not CanResearch(capturedType) then return true end
                 ActivateAppendToQueue(capturedType)
@@ -884,6 +888,7 @@ local function BuildTechCell(techType)
             Key     = Keys.VK_RETURN,
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
             Action  = function()
                 if not IsTechRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
@@ -990,6 +995,7 @@ local function CreateQueueButton(techType, isCurrent)
             Key     = Keys.VK_RETURN,
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
             Action  = function()
                 if not IsTechRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
@@ -1063,6 +1069,7 @@ local function CreateFilterResultButton(techType)
             Key       = Keys.VK_RETURN,
             IsControl = true,
             MSG       = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_QUEUE_RESEARCH",
             Action    = function()
                 if not CanResearch(capturedType) then return true end
                 ActivateAppendToQueue(capturedType)
@@ -1073,6 +1080,7 @@ local function CreateFilterResultButton(techType)
             Key     = Keys.VK_RETURN,
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
             Action  = function()
                 if not IsTechRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
@@ -1118,6 +1126,7 @@ local function OpenFilterResults(entry)
         {
             Key    = Keys.VK_ESCAPE,
             MSG    = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CLOSE",
             Action = function()
                 mgr:RemoveFromStack(FILTER_RESULTS_ID)
                 return true
@@ -1224,6 +1233,7 @@ local function EnsurePanelBuilt()
         {
             Key    = Keys.VK_BACK,
             MSG    = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_GO_BACK",
             Action = function()
                 local source = table.remove(m_breadcrumbs)
                 if not source then return false end

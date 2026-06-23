@@ -333,6 +333,7 @@ local function BuildAndPushCrisisList()
 
     m_crisisList:AddInputBinding({
         Key = Keys.VK_ESCAPE,
+        Description = "LOC_CAI_KB_CLOSE",
         Action = function()
             RemoveCrisisList()
             return true

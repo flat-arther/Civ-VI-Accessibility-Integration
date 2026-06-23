@@ -1,6 +1,10 @@
 -- ===========================================================================
 --	Options
 -- ===========================================================================
+if UI.IsInFrontEnd() then
+include("CAIUIScreenManager") -- self-runs UIScreenManager:Init() and populates ExposedMembers.CAI_UIManager
+end
+
 include("Civ6Common");
 include("InstanceManager");
 include("PopupDialog");
@@ -1777,11 +1781,21 @@ function InitializeKeyBinding()
 		local Gesture1Index = 4;
 		local Gesture2Index = 5;
 
+		local vanillaCategories = {
+			["LOC_OPTIONS_HOTKEY_CATEGORY_UI"] = true,
+			["LOC_OPTIONS_HOTKEY_CATEGORY_UNIT"] = true,
+			["LOC_OPTIONS_HOTKEY_CATEGORY_GLOBAL"] = true,
+			["LOC_OPTIONS_HOTKEY_CATEGORY_ONLINE"] = true,
+			["LOC_OPTIONS_HOTKEY_CATEGORY_LENSES"] = true,
+			["LOC_OPTIONS_HOTKEY_CATEGORY_UI_XP1"] = true,
+			["LOC_OPTIONS_HOTKEY_CATEGORY_UI_XP2"] = true,
+		};
+
 		local actions = {};
 		local count = Input.GetActionCount();
 		for i = 0, count - 1, 1 do
 			local action = Input.GetActionId(i);
-			if(Input.ShouldShowActionKeybinding(action)) then
+			if(Input.ShouldShowActionKeybinding(action) and not vanillaCategories[Input.GetActionCategory(action)]) then
 				local info = {
 					action,
 					Locale.Lookup(Input.GetActionName(action)),
@@ -2127,7 +2141,6 @@ end
 -- on the keybindings page rebuilds whenever vanilla's RefreshKeyBinding runs.
 -- ===========================================================================
 include("caiUtils")
-include("CAIUIScreenManager") -- self-runs UIScreenManager:Init() and populates ExposedMembers.CAI_UIManager
 
 local mgr             = ExposedMembers.CAI_UIManager
 local optionsRoot     ---@type UIWidget|nil
@@ -2180,6 +2193,7 @@ end
 
 local bindingCaptureWidget    ---@type UIWidget|nil
 local bindingCaptureListener  ---@type fun()|nil
+local bindingActionId         ---@type any|nil
 
 ---Close the capture widget if pushed and detach the one-shot gesture listener.
 local function CloseBindingCapture()
@@ -2199,6 +2213,7 @@ end
 ---has applied the new binding.
 local function OpenBindingCapture(actionId, slot)
     if bindingCaptureWidget then return end
+    bindingActionId = actionId
     local actionName = Locale.Lookup(Input.GetActionName(actionId))
     bindingCaptureWidget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIKeys_Capture"), "StaticText", {
         Label = function() return Locale.Lookup("LOC_CAI_KEYBINDING_PRESS_KEY", actionName) end,
@@ -2206,6 +2221,7 @@ local function OpenBindingCapture(actionId, slot)
     bindingCaptureWidget:AddInputBindings({
         {
             Key = Keys.VK_ESCAPE, MSG = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CANCEL_BINDING",
             Action = function()
                 StopActiveKeyBinding()
                 CloseBindingCapture()
@@ -2229,43 +2245,42 @@ local function OpenBindingCapture(actionId, slot)
     end)
 end
 
-local function OpenKeybindMenu(actionId, actionName)
-    local dd = mgr:CreateWidget(mgr:GenerateWidgetId("CAIKeys_Menu"), "Dropdown", {
-        Label = function() return actionName end,
-    })
-    dd:SetOptions({
-        { label = Locale.Lookup("LOC_CAI_KEYBINDS_SET_PRIMARY"),   value = "p" },
-        { label = Locale.Lookup("LOC_CAI_KEYBINDS_SET_SECONDARY"), value = "s" },
-        { label = Locale.Lookup("LOC_CAI_KEYBINDS_CLEAR"),         value = "c" },
-    })
-    dd:On("value_changed", function(_, v)
-        mgr:RemoveFromStack(dd:GetId())
-        if v == "p" then
-            OpenBindingCapture(actionId, 0)
-        elseif v == "s" then
-            OpenBindingCapture(actionId, 1)
-        elseif v == "c" then
-            Input.ClearGesture(actionId, 0)
-            Input.ClearGesture(actionId, 1)
-            Controls.ConfirmButton:SetDisabled(false)
-            Speak(Locale.Lookup("LOC_CAI_KEYBINDS_CLEARED", actionName), true)
-            RefreshKeyBinding()
-        end
-    end)
-    mgr:Push(dd, { priority = PopupPriority.Current })
-    dd:Open()
+local function HandleKeybindAction(actionId, actionName, value)
+    if value == "p" then
+        OpenBindingCapture(actionId, 0)
+    elseif value == "s" then
+        OpenBindingCapture(actionId, 1)
+    elseif value == "c" then
+        Input.ClearGesture(actionId, 0)
+        Input.ClearGesture(actionId, 1)
+        Controls.ConfirmButton:SetDisabled(false)
+        Speak(Locale.Lookup("LOC_CAI_KEYBINDS_CLEARED", actionName), true)
+        RefreshKeyBinding()
+    end
 end
 
 local function RebuildKeyBindingsTree()
     if not keysTree then return end
     local capture = mgr:CaptureFocusKey(keysTree)
+    local prepareKey = bindingActionId and ("act:" .. tostring(bindingActionId)) or nil
+    bindingActionId = nil
     keysTree:ClearChildren()
+
+    local vanillaCategories = {
+        ["LOC_OPTIONS_HOTKEY_CATEGORY_UI"] = true,
+        ["LOC_OPTIONS_HOTKEY_CATEGORY_UNIT"] = true,
+        ["LOC_OPTIONS_HOTKEY_CATEGORY_GLOBAL"] = true,
+        ["LOC_OPTIONS_HOTKEY_CATEGORY_ONLINE"] = true,
+        ["LOC_OPTIONS_HOTKEY_CATEGORY_LENSES"] = true,
+        ["LOC_OPTIONS_HOTKEY_CATEGORY_UI_XP1"] = true,
+        ["LOC_OPTIONS_HOTKEY_CATEGORY_UI_XP2"] = true,
+    }
 
     local actions = {}
     local count = Input.GetActionCount()
     for i = 0, count - 1 do
         local action = Input.GetActionId(i)
-        if Input.ShouldShowActionKeybinding(action) then
+        if Input.ShouldShowActionKeybinding(action) and not vanillaCategories[Input.GetActionCategory(action)] then
             table.insert(actions, {
                 id       = action,
                 name     = Locale.Lookup(Input.GetActionName(action)),
@@ -2292,7 +2307,7 @@ local function RebuildKeyBindingsTree()
             keysTree:AddChild(catNode)
         end
 
-        local actionNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIKeys_Act"), "TreeItem", {
+        local actionNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIKeys_Act"), "Dropdown", {
             Label    = function()
                 return Locale.Lookup("LOC_CAI_KEYBINDS_ACTION_LINE",
                     actionName,
@@ -2302,11 +2317,23 @@ local function RebuildKeyBindingsTree()
             Tooltip  = function() return Locale.Lookup(Input.GetActionDescription(actionId)) or "" end,
             FocusKey = "act:" .. tostring(actionId),
         })
-        actionNode:On("activate", function() OpenKeybindMenu(actionId, actionName) end)
+        actionNode:SetOptions({
+            { label = Locale.Lookup("LOC_CAI_KEYBINDS_SET_PRIMARY"),   value = "p" },
+            { label = Locale.Lookup("LOC_CAI_KEYBINDS_SET_SECONDARY"), value = "s" },
+            { label = Locale.Lookup("LOC_CAI_KEYBINDS_CLEAR"),         value = "c" },
+        })
+        actionNode:On("value_changed", function(_, v)
+            actionNode._selectedIndex = 0
+            HandleKeybindAction(actionId, actionName, v)
+        end)
         catNode:AddChild(actionNode)
     end
 
-    mgr:RestoreFocus(keysTree, capture)
+    if prepareKey then
+        mgr:PrepareFocus(keysTree, prepareKey)
+    else
+        mgr:RestoreFocus(keysTree, capture)
+    end
 end
 
 -- ---------------------------------------------------------------------------
@@ -2781,8 +2808,8 @@ local function PopulateTabPage(tabEntry, tabPage, tabIdx)
         end
     end
     tabPage:AddChild(primary)
-    tabPage:AddChild(W_Button(Controls.ConfirmButton, function() OnConfirm() end))
-    tabPage:AddChild(W_Button(Controls.ResetButton,   function() OnReset() end))
+    tabPage:AddChild(W_Button(Controls.ConfirmButton, function() Controls.ConfirmButton:DoLeftClick() end))
+    tabPage:AddChild(W_Button(Controls.ResetButton,   function() Controls.ResetButton:DoLeftClick() end))
 end
 
 -- ---------------------------------------------------------------------------
@@ -2848,18 +2875,16 @@ OnShow = WrapFunc(OnShow, function(orig)
     rootPushed = true
 end)
 
-OnCancel = WrapFunc(OnCancel, function(orig)
-    orig()
-    Speak(Locale.Lookup("LOC_CAI_OPTIONS_REVERTED"), true)
-    CloseOptions()
+Events.OptionsSaved.Add(function()
+    if not ContextPtr:IsHidden() then
+        Speak(Locale.Lookup("LOC_CAI_OPTIONS_SAVED"))
+    end
 end)
 
-OnConfirm = WrapFunc(OnConfirm, function(orig)
-    orig()
-    -- Vanilla OnConfirm may pop a restart-required dialog whose OK button defers
-    -- the save. Announcing "saved" here is slightly early in that branch but
-    -- keeps the common path correct without a flag handshake.
-    Speak(Locale.Lookup("LOC_CAI_OPTIONS_SAVED"), true)
+Events.OptionsReset.Add(function()
+    if not ContextPtr:IsHidden() then
+        Speak(Locale.Lookup("LOC_CAI_OPTIONS_RESET"))
+    end
 end)
 
 -- The keybindings infrastructure is set up inside Initialize() ->

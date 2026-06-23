@@ -301,6 +301,7 @@ local function PushPanel()
 
     m_panel:AddInputBinding({
         Key = Keys.VK_ESCAPE,
+        Description = "LOC_CAI_KB_CLOSE",
         Action = function()
             Close()
             return true

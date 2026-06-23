@@ -107,6 +107,7 @@ local function BuildPanel()
         {
             Key    = Keys.VK_LEFT,
             MSG    = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_PREVIOUS_GREAT_WORK",
             Action = function()
                 if not Controls.PreviousGreatWork:IsHidden() then
                     OnPreviousGreatWork()
@@ -118,6 +119,7 @@ local function BuildPanel()
         {
             Key    = Keys.VK_RIGHT,
             MSG    = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_NEXT_GREAT_WORK",
             Action = function()
                 if not Controls.NextGreatWork:IsHidden() then
                     OnNextGreatWork()

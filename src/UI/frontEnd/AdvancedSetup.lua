@@ -1749,303 +1749,805 @@ end
 include("caiUtils")
 local mgr = ExposedMembers.CAI_UIManager
 
-local CAI_Panel = nil ---@type UIWidget
-local CAI_SettingsList = nil ---@type UIWidget
-local CAI_TabBar = nil ---@type UIWidget
-local m_simpleParamWidgets = {} -- parameterId → UIWidget
+local CAI_Panel = nil ---@type PanelWidget
+local CAI_Tabs = nil ---@type TabControlWidget
+local m_basicPage = nil ---@type TabPageWidget
+local m_basicList = nil ---@type ListWidget
+local m_advancedPage = nil ---@type TabPageWidget
+local m_actionRow = nil ---@type PanelWidget
 local m_intentionalClose = false
-local m_activeTab = "basic" -- "basic" or "advanced"
 
--- Advanced view state
-local m_basicChildren = {}        -- snapshot of basic view children
-local m_advancedSections = {}     -- GroupId → List widget
-local m_advancedParamWidgets = {} -- parameterId → widget
-local m_advancedPlayersSection = nil ---@type UIWidget
-local m_aiPlayerWidgets = {}      -- ordered array of {playerId, submenu}
-local SwitchToTab                 -- forward declaration (defined after BuildPanel)
-local RemoveAdvancedSections      -- forward declaration
+-- Basic view: Dropdown widgets keyed by parameterId
+local m_basicDropdowns = {}
+local m_basicParamWidgets = {} -- parameterId → widget (simple params in basic view)
+-- Advanced view: List + SubMenu nodes
+local m_advList = nil ---@type ListWidget
+local m_advParamWidgets = {} -- parameterId → widget
+local m_advPlayerSub = nil ---@type SubMenuWidget
+-- Section submenu widgets keyed by section key (persisted across rebuilds)
+local m_advSections = {} ---@type table<string, SubMenuWidget>
 
--- ---------------------------------------------------------------------------
--- Static pulldown spec: { parameterId, pulldownCtrl, containerCtrl }
--- Leader pulldown handled separately (uses scroll text, not button text).
--- ---------------------------------------------------------------------------
-local kStaticPulldowns = {
-	{ "Ruleset",        function() return Controls.CreateGame_GameRuleset end,     function() return Controls.CreateGame_RulesetContainer end,         "LOC_SETUP_CHOOSE_RULESET" },
-	{ "GameDifficulty", function() return Controls.CreateGame_GameDifficulty end,  function() return Controls.CreateGame_GameDifficultyContainer end,  "LOC_SETUP_DIFFICULTY" },
-	{ "GameSpeeds",     function() return Controls.CreateGame_SpeedPulldown end,   function() return Controls.CreateGame_SpeedPulldownContainer end,   "LOC_SETUP_SPEED" },
-	{ "MapSize",        function() return Controls.CreateGame_MapSize end,         function() return Controls.CreateGame_MapSizeContainer end,         "LOC_SETUP_MAP_SIZE" },
-}
+local HOVER_SOUND = "Main_Menu_Mouse_Over"
 
--- ---------------------------------------------------------------------------
--- Helper: build an accessible option list for a game-parameter pulldown.
--- Reads parameter.Values from g_GameParameters at the time the user opens it.
--- ---------------------------------------------------------------------------
-local function OpenParamDropdown(parameterId)
-	local param = g_GameParameters and g_GameParameters.Parameters
-		and g_GameParameters.Parameters[parameterId]
-	if not param or not param.Values then return end
-
-	local optList = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupList"), "List")
-	optList:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
-		mgr:RemoveFromStack(optList:GetId())
-		return true
-	end})
-
-	local currentVal = param.Value
-	local selectedChild = nil
-	for _, v in ipairs(param.Values) do
-		local val = v
-		local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupMenuItem"), "MenuItem", {
-			Label = function() return val.Name end,
-			Tooltip = function() return val.Description or "" end,
-		})
-		child:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-		child:On("activate", function()
-			g_GameParameters:SetParameterValue(param, val)
-			Network.BroadcastGameConfig()
-			mgr:RemoveFromStack(optList:GetId())
-		end)
-		optList:AddChild(child)
-		if not selectedChild and currentVal and val.QueryId == currentVal.QueryId
-				and val.QueryIndex == currentVal.QueryIndex then
-			selectedChild = child
-		end
-	end
-	mgr:Push(optList, { focus = selectedChild })
-end
-
--- ---------------------------------------------------------------------------
--- Helper: build numbered info sections from a leader's GetPlayerInfo data.
--- Returns an array of {label, text} pairs and corresponding number key bindings.
--- ---------------------------------------------------------------------------
+-- Number keys for leader info sections
 local kNumberKeys = {
 	Keys["1"], Keys["2"], Keys["3"], Keys["4"], Keys["5"],
 	Keys["6"], Keys["7"], Keys["8"], Keys["9"], Keys["0"],
 }
 
+local function CAI_SortParams(a, b)
+	if (a.SortIndex or 0) ~= (b.SortIndex or 0) then
+		return (a.SortIndex or 0) < (b.SortIndex or 0)
+	end
+	return Locale.Compare(a.Name or "", b.Name or "") == -1
+end
+
+-- ---------------------------------------------------------------------------
+-- Leader tooltip builder
+-- ---------------------------------------------------------------------------
+local kUniqueTypeKeys = {
+	{ prefix = "ICON_UNIT_",        singular = "LOC_CAI_UNIQUE_UNIT",        plural = "LOC_CAI_UNIQUE_UNITS" },
+	{ prefix = "ICON_BUILDING_",    singular = "LOC_CAI_UNIQUE_BUILDING",    plural = "LOC_CAI_UNIQUE_BUILDINGS" },
+	{ prefix = "ICON_DISTRICT_",    singular = "LOC_CAI_UNIQUE_DISTRICT",    plural = "LOC_CAI_UNIQUE_DISTRICTS" },
+	{ prefix = "ICON_IMPROVEMENT_", singular = "LOC_CAI_UNIQUE_IMPROVEMENT", plural = "LOC_CAI_UNIQUE_IMPROVEMENTS" },
+}
+
+local function GetUniqueTypeIndex(icon)
+	if not icon then return nil end
+	for i, entry in ipairs(kUniqueTypeKeys) do
+		if string.find(icon, entry.prefix) then return i end
+	end
+	return nil
+end
+
+local function BuildLeaderTooltip(domain, leaderType)
+	if not domain or not leaderType then return "" end
+	if leaderType == "RANDOM" or leaderType == "RANDOM_POOL1" or leaderType == "RANDOM_POOL2" then
+		return ""
+	end
+	local info = GetPlayerInfo(domain, leaderType)
+	if not info then return "" end
+
+	local parts = {}
+	if info.CivilizationAbility then
+		table.insert(parts, Locale.Lookup("LOC_CAI_ADVANCED_SETUP_CIV_ABILITY") .. ": "
+			.. Locale.Lookup(info.CivilizationAbility.Name) .. ": "
+			.. Locale.Lookup(info.CivilizationAbility.Description))
+	end
+	if info.LeaderAbility then
+		table.insert(parts, Locale.Lookup("LOC_CAI_ADVANCED_SETUP_LEADER_ABILITY") .. ": "
+			.. Locale.Lookup(info.LeaderAbility.Name) .. ": "
+			.. Locale.Lookup(info.LeaderAbility.Description))
+	end
+	if info.Uniques then
+		local grouped = {}
+		local ungrouped = {}
+		for _, u in ipairs(info.Uniques) do
+			local typeIdx = GetUniqueTypeIndex(u.Icon)
+			if typeIdx then
+				if not grouped[typeIdx] then grouped[typeIdx] = {} end
+				table.insert(grouped[typeIdx], u)
+			else
+				table.insert(ungrouped, u)
+			end
+		end
+		for i, entry in ipairs(kUniqueTypeKeys) do
+			if grouped[i] then
+				local headerKey = #grouped[i] > 1 and entry.plural or entry.singular
+				local items = {}
+				for _, u in ipairs(grouped[i]) do
+					table.insert(items, Locale.Lookup(u.Name) .. ": " .. Locale.Lookup(u.Description))
+				end
+				table.insert(parts, Locale.Lookup(headerKey) .. ": " .. table.concat(items, ", "))
+			end
+		end
+		for _, u in ipairs(ungrouped) do
+			table.insert(parts, Locale.Lookup(u.Name) .. ": " .. Locale.Lookup(u.Description))
+		end
+	end
+	return table.concat(parts, ", ")
+end
+
+-- ---------------------------------------------------------------------------
+-- Leader info sections for number-key readout
+-- ---------------------------------------------------------------------------
 local function BuildLeaderInfoSections(domain, leaderType)
 	local sections = {}
 	if not domain or not leaderType then return sections end
 	if leaderType == "RANDOM" or leaderType == "RANDOM_POOL1" or leaderType == "RANDOM_POOL2" then
 		return sections
 	end
-
 	local info = GetPlayerInfo(domain, leaderType)
 	if not info then return sections end
 
-	-- 1: Leader + Civilization name
 	local names = Locale.Lookup(info.LeaderName or "")
 	if info.CivilizationName then
 		names = names .. ", " .. Locale.Lookup(info.CivilizationName)
 	end
-	table.insert(sections, { label = Locale.Lookup(info.LeaderName or ""), text = names })
+	table.insert(sections, { text = names })
 
-	-- 2: Civilization Ability
 	if info.CivilizationAbility then
 		local ab = info.CivilizationAbility
-		table.insert(sections, {
-			label = Locale.Lookup(ab.Name),
-			text = Locale.Lookup(ab.Name) .. ": " .. Locale.Lookup(ab.Description),
-		})
+		table.insert(sections, { text = Locale.Lookup(ab.Name) .. ": " .. Locale.Lookup(ab.Description) })
 	end
-
-	-- 3: Leader Ability
 	if info.LeaderAbility then
 		local ab = info.LeaderAbility
-		table.insert(sections, {
-			label = Locale.Lookup(ab.Name),
-			text = Locale.Lookup(ab.Name) .. ": " .. Locale.Lookup(ab.Description),
-		})
+		table.insert(sections, { text = Locale.Lookup(ab.Name) .. ": " .. Locale.Lookup(ab.Description) })
 	end
-
-	-- 4+: Uniques
 	if info.Uniques then
+		local grouped = {}
+		local ungrouped = {}
 		for _, u in ipairs(info.Uniques) do
-			table.insert(sections, {
-				label = Locale.Lookup(u.Name),
-				text = Locale.Lookup(u.Name) .. ": " .. Locale.Lookup(u.Description),
-			})
+			local typeIdx = GetUniqueTypeIndex(u.Icon)
+			if typeIdx then
+				if not grouped[typeIdx] then grouped[typeIdx] = {} end
+				table.insert(grouped[typeIdx], u)
+			else
+				table.insert(ungrouped, u)
+			end
+		end
+		for i, entry in ipairs(kUniqueTypeKeys) do
+			if grouped[i] then
+				local headerKey = #grouped[i] > 1 and entry.plural or entry.singular
+				for _, u in ipairs(grouped[i]) do
+					table.insert(sections, { text = Locale.Lookup(headerKey) .. ": " .. Locale.Lookup(u.Name) .. ": " .. Locale.Lookup(u.Description) })
+				end
+			end
+		end
+		for _, u in ipairs(ungrouped) do
+			table.insert(sections, { text = Locale.Lookup(u.Name) .. ": " .. Locale.Lookup(u.Description) })
 		end
 	end
-
 	return sections
 end
 
 -- ---------------------------------------------------------------------------
--- Helper: build an option list for the leader pulldown.
--- Leader uses PlayerLeader parameter inside the player's own parameter set.
--- Each leader entry gets number key bindings (1-0) to speak info sections.
+-- Build Dropdown options + selected index from a game parameter
 -- ---------------------------------------------------------------------------
-local function OpenLeaderDropdown()
-	local parameters = GetPlayerParameters(m_singlePlayerID)
-	if not parameters then return end
-	local param = parameters.Parameters and parameters.Parameters["PlayerLeader"]
-	if not param or not param.Values then return end
+local function BuildParamDropdownOptions(parameterId)
+	local param = g_GameParameters and g_GameParameters.Parameters
+		and g_GameParameters.Parameters[parameterId]
+	if not param or not param.Values then return {}, 0 end
 
-	local optList = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupList"), "List")
-	optList:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
-		mgr:RemoveFromStack(optList:GetId())
-		return true
-	end})
-
-	local currentVal = param.Value
-	local selectedChild = nil
-	for _, v in ipairs(param.Values) do
-		local val = v
-		local sections = BuildLeaderInfoSections(val.Domain, val.Value)
-
-		local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupMenuItem"), "MenuItem", {
-			Label = function() return val.Name end,
+	local options = {}
+	local selectedIdx = 0
+	for i, v in ipairs(param.Values) do
+		table.insert(options, {
+			label = v.Name or "",
+			tooltip = v.Description or "",
+			value = v,
 		})
-		child:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-		child:On("activate", function()
-			parameters:SetParameterValue(param, val)
-			Network.BroadcastGameConfig()
-			mgr:RemoveFromStack(optList:GetId())
-		end)
-
-		for i, section in ipairs(sections) do
-			if i <= #kNumberKeys then
-				local text = section.text
-				child:AddInputBinding({
-					Key = kNumberKeys[i],
-					Action = function()
-						Speak(text, true)
-						return true
-					end,
-				})
-			end
-		end
-
-		optList:AddChild(child)
-		if not selectedChild and currentVal and val.Value == currentVal.Value then
-			selectedChild = child
+		if selectedIdx == 0 and param.Value
+				and v.QueryId == param.Value.QueryId
+				and v.QueryIndex == param.Value.QueryIndex then
+			selectedIdx = i
 		end
 	end
-	mgr:Push(optList, { focus = selectedChild })
+	if selectedIdx == 0 and #options > 0 then selectedIdx = 1 end
+	return options, selectedIdx
 end
 
 -- ---------------------------------------------------------------------------
--- Build the panel + settings list + action buttons (called once).
+-- Build leader Dropdown options from player parameters
 -- ---------------------------------------------------------------------------
-local function MakeParamPulldown(getCtrl, getContainer, locKey, paramId)
-	local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupPulldown"), "Button", {
+local function BuildLeaderDropdownOptions(playerId)
+	local parameters = GetPlayerParameters(playerId)
+	if not parameters then return {}, 0 end
+	local param = parameters.Parameters and parameters.Parameters["PlayerLeader"]
+	if not param or not param.Values then return {}, 0 end
+
+	local options = {}
+	local selectedIdx = 0
+	for i, v in ipairs(param.Values) do
+		local tooltip = BuildLeaderTooltip(v.Domain, v.Value)
+		local label = v.Name or ""
+		local info = v.Domain and v.Value and GetPlayerInfo(v.Domain, v.Value)
+		if info and info.CivilizationName then
+			label = label .. ", " .. Locale.Lookup(info.CivilizationName)
+		end
+		table.insert(options, {
+			label = label,
+			tooltip = tooltip,
+			value = v,
+		})
+		if selectedIdx == 0 and param.Value and v.Value == param.Value.Value then
+			selectedIdx = i
+		end
+	end
+	if selectedIdx == 0 and #options > 0 then selectedIdx = 1 end
+	return options, selectedIdx
+end
+
+-- ---------------------------------------------------------------------------
+-- Create a Dropdown for a static game parameter (Ruleset, Difficulty, etc.)
+-- ---------------------------------------------------------------------------
+local function MakeParamDropdown(parameterId, locKey, getContainer)
+	local dd = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_DD"), "Dropdown", {
 		Label = function() return Locale.Lookup(locKey) end,
-		ValueGetter = function() local c = getCtrl(); return c and c:GetButton():GetText() or "" end,
-		Tooltip = function() local c = getCtrl(); return c and c:GetButton():GetToolTipString() or "" end,
+		Tooltip = function()
+			local p = g_GameParameters and g_GameParameters.Parameters
+				and g_GameParameters.Parameters[parameterId]
+			if p and p.Value and p.Value.Description then
+				return p.Value.Description
+			end
+			return ""
+		end,
 	})
-	w:SetDisabledPredicate(function() local c = getCtrl(); return c and c:IsDisabled() end)
-	w:SetHiddenPredicate(function() local ct = getContainer(); return ct and ct:IsHidden() end)
-	w:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	w:On("activate", function() OpenParamDropdown(paramId) end)
+	if getContainer then
+		dd:SetHiddenPredicate(function()
+			local ct = getContainer()
+			return ct and ct:IsHidden()
+		end)
+	end
+
+	local options, idx = BuildParamDropdownOptions(parameterId)
+	dd:SetOptions(options)
+	if idx > 0 then dd:SetSelectedIndex(idx, true) end
+
+	dd:SetFocusSound(HOVER_SOUND)
+	dd:On("value_changed", function(_, val)
+		local param = g_GameParameters and g_GameParameters.Parameters
+			and g_GameParameters.Parameters[parameterId]
+		if param then
+			g_GameParameters:SetParameterValue(param, val)
+			Network.BroadcastGameConfig()
+		end
+	end)
+
+	m_basicDropdowns[parameterId] = dd
+	return dd
+end
+
+-- ---------------------------------------------------------------------------
+-- Create a leader Dropdown for local player (basic view)
+-- ---------------------------------------------------------------------------
+local function LeaderTooltipForPlayer(playerId)
+	local params = GetPlayerParameters(playerId)
+	if not params then return "" end
+	local lp = params.Parameters and params.Parameters["PlayerLeader"]
+	if not lp or not lp.Value then return "" end
+	return BuildLeaderTooltip(lp.Value.Domain, lp.Value.Value)
+end
+
+local function MakeLeaderDropdown()
+	local dd = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_LeaderDD"), "Dropdown", {
+		Label = function() return Locale.Lookup("LOC_SETUP_CIVILIZATION") end,
+		Tooltip = function() return LeaderTooltipForPlayer(m_singlePlayerID) end,
+	})
+	dd:SetHiddenPredicate(function() return Controls.CreateGame_LocalPlayerContainer:IsHidden() end)
+	dd:SetFocusSound(HOVER_SOUND)
+
+	local options, idx = BuildLeaderDropdownOptions(m_singlePlayerID)
+	dd:SetOptions(options)
+	if idx > 0 then dd:SetSelectedIndex(idx, true) end
+
+	dd:On("value_changed", function(_, val)
+		local parameters = GetPlayerParameters(m_singlePlayerID)
+		if parameters then
+			local param = parameters.Parameters and parameters.Parameters["PlayerLeader"]
+			if param then
+				parameters:SetParameterValue(param, val)
+				local colorParam = parameters.Parameters["PlayerColorAlternate"]
+				if colorParam then parameters:SetParameterValue(colorParam, 0) end
+				Network.BroadcastGameConfig()
+			end
+		end
+	end)
+
+	m_basicDropdowns["PlayerLeader"] = dd
+	return dd
+end
+
+-- ---------------------------------------------------------------------------
+-- Refresh all basic dropdowns after game parameters change
+-- ---------------------------------------------------------------------------
+local function RefreshBasicDropdowns()
+	for paramId, dd in pairs(m_basicDropdowns) do
+		if paramId == "PlayerLeader" then
+			local options, idx = BuildLeaderDropdownOptions(m_singlePlayerID)
+			dd:SetOptions(options)
+			if idx > 0 then dd:SetSelectedIndex(idx, true) end
+		else
+			local options, idx = BuildParamDropdownOptions(paramId)
+			dd:SetOptions(options)
+			if idx > 0 then dd:SetSelectedIndex(idx, true) end
+		end
+	end
+end
+
+-- ---------------------------------------------------------------------------
+-- Action buttons: use DoLeftClick() on vanilla controls
+-- ---------------------------------------------------------------------------
+local function MakeActionButton(label, ctrl, isHiddenFn)
+	local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_Btn"), "Button", {
+		Label = function() return ctrl:GetText() end,
+	})
+	w:SetFocusSound(HOVER_SOUND)
+	if isHiddenFn then
+		w:SetHiddenPredicate(isHiddenFn)
+	end
+	w:On("activate", function() ctrl:DoLeftClick() end)
 	return w
 end
 
-local function MakeActionButton(getCtrl, onClick)
-	local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
-		Label = function() return getCtrl():GetText() end,
-		HiddenPredicate = function() return getCtrl():IsHidden() end,
+-- ---------------------------------------------------------------------------
+-- Advanced view: build player section
+-- ---------------------------------------------------------------------------
+local function BuildAdvPlayerSection()
+	if not m_advPlayerSub then return end
+	m_advPlayerSub:ClearChildren()
+
+	-- Local player
+	local localItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_LocalPlayer"), "SubMenu", {
+		Label = function()
+			return Locale.Lookup("LOC_CAI_PLAYER") .. " 1"
+		end,
+		FocusKey = "player_local",
 	})
-	w:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	w:On("activate", onClick)
-	return w
+	localItem:SetFocusSound(HOVER_SOUND)
+
+	-- Local leader dropdown
+	local locLeaderDD = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_LocLeaderDD"), "Dropdown", {
+		Label = function() return Locale.Lookup("LOC_SETUP_CIVILIZATION") end,
+		Tooltip = function() return LeaderTooltipForPlayer(m_singlePlayerID) end,
+		FocusKey = "player_local_leader",
+	})
+	locLeaderDD:SetHiddenPredicate(function() return Controls.CreateGame_LocalPlayerContainer:IsHidden() end)
+	locLeaderDD:SetFocusSound(HOVER_SOUND)
+	local lOpts, lIdx = BuildLeaderDropdownOptions(m_singlePlayerID)
+	locLeaderDD:SetOptions(lOpts)
+	if lIdx > 0 then locLeaderDD:SetSelectedIndex(lIdx, true) end
+	locLeaderDD:On("value_changed", function(_, val)
+		local parameters = GetPlayerParameters(m_singlePlayerID)
+		if parameters then
+			local param = parameters.Parameters and parameters.Parameters["PlayerLeader"]
+			if param then
+				parameters:SetParameterValue(param, val)
+				local colorParam = parameters.Parameters["PlayerColorAlternate"]
+				if colorParam then parameters:SetParameterValue(colorParam, 0) end
+				Network.BroadcastGameConfig()
+			end
+		end
+	end)
+	localItem:AddChild(locLeaderDD)
+
+	-- Local color dropdown
+	local locColorDD = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_LocColorDD"), "Dropdown", {
+		Label = function() return Locale.Lookup("LOC_CAI_COLOR") end,
+		FocusKey = "player_local_color",
+	})
+	local function RefreshColorOptions()
+		local parameters = GetPlayerParameters(m_singlePlayerID)
+		if not parameters then return end
+		local colorParam = parameters.Parameters and parameters.Parameters["PlayerColorAlternate"]
+		local leaderParam = parameters.Parameters and parameters.Parameters["PlayerLeader"]
+		if not leaderParam or not leaderParam.Value then return end
+		local icons = GetPlayerIcons(leaderParam.Value.Domain, leaderParam.Value.Value)
+		if not icons then return end
+
+		local colorOpts = {}
+		local currentVal = colorParam and colorParam.Value or 0
+		local selIdx = 0
+		for j = 0, 3 do
+			local backColor, frontColor = UI.GetPlayerColorValues(icons.PlayerColor, j)
+			if backColor and frontColor and backColor ~= 0 and frontColor ~= 0 then
+				table.insert(colorOpts, {
+					label = Locale.Lookup("LOC_CAI_COLOR") .. " " .. (j + 1),
+					value = j,
+				})
+				if j == currentVal then selIdx = #colorOpts end
+			end
+		end
+		locColorDD:SetOptions(colorOpts)
+		if selIdx > 0 then locColorDD:SetSelectedIndex(selIdx, true) end
+	end
+	RefreshColorOptions()
+	locColorDD:On("value_changed", function(_, val)
+		local parameters = GetPlayerParameters(m_singlePlayerID)
+		if parameters then
+			local colorParam = parameters.Parameters and parameters.Parameters["PlayerColorAlternate"]
+			if colorParam then
+				parameters:SetParameterValue(colorParam, val)
+				Network.BroadcastGameConfig()
+			end
+		end
+	end)
+	locColorDD:SetFocusSound(HOVER_SOUND)
+	locColorDD:SetHiddenPredicate(function()
+		local ctrl = Controls.Advanced_LocalColorPullDown
+		return ctrl and ctrl:IsDisabled()
+	end)
+	localItem:AddChild(locColorDD)
+
+	m_advPlayerSub:AddChild(localItem)
+
+	-- AI players
+	local player_ids = GameConfiguration.GetParticipatingPlayerIDs()
+	local minPlayers = MapConfiguration.GetMinMajorPlayers() or 2
+	local can_remove = #player_ids > minPlayers
+	local aiIndex = 0
+
+	for _, player_id in ipairs(player_ids) do
+		if player_id ~= m_singlePlayerID then
+			aiIndex = aiIndex + 1
+			local pid = player_id
+			local playerNum = aiIndex + 1
+			local playerConfig = PlayerConfigurations[pid]
+
+			local aiDD = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_AIDD"), "Dropdown", {
+				Label = function()
+					return Locale.Lookup("LOC_CAI_PLAYER") .. " " .. playerNum
+				end,
+				Tooltip = function() return LeaderTooltipForPlayer(pid) end,
+				FocusKey = "player_ai_" .. pid,
+			})
+			aiDD:SetFocusSound(HOVER_SOUND)
+			local aiOpts, aiIdx = BuildLeaderDropdownOptions(pid)
+			aiDD:SetOptions(aiOpts)
+			if aiIdx > 0 then aiDD:SetSelectedIndex(aiIdx, true) end
+			aiDD:On("value_changed", function(_, val)
+				local params = GetPlayerParameters(pid)
+				if params then
+					local lp = params.Parameters and params.Parameters["PlayerLeader"]
+					if lp then
+						params:SetParameterValue(lp, val)
+						Network.BroadcastGameConfig()
+					end
+				end
+			end)
+
+			if can_remove then
+				aiDD:AddInputBindings({
+					{
+						Key = Keys.VK_DELETE,
+						MSG = KeyEvents.KeyUp,
+						Action = function()
+							playerConfig:SetLeaderTypeName(nil)
+							GameConfiguration.RemovePlayer(pid)
+							GameSetup_PlayerCountChanged()
+							return true
+						end,
+					},
+				})
+			end
+
+			m_advPlayerSub:AddChild(aiDD)
+		end
+	end
+
+	-- Add AI button
+	local addAI = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_AddAI"), "Button", {
+		Label = function() return Locale.Lookup("LOC_CAI_ADVANCED_SETUP_ADD_AI") end,
+		HiddenPredicate = function() return Controls.AddAIButton:IsHidden() end,
+		FocusKey = "player_add_ai",
+	})
+	addAI:SetFocusSound(HOVER_SOUND)
+	addAI:On("activate", function() OnAddAIButton() end)
+	m_advPlayerSub:AddChild(addAI)
 end
 
+-- ---------------------------------------------------------------------------
+-- Advanced view: group mapping
+-- ---------------------------------------------------------------------------
+local kGroupToSection = {
+	BasicGameOptions = "Options",
+	GameOptions      = "Options",
+	BasicMapOptions  = "Options",
+	MapOptions       = "Options",
+	GameModes        = "GameModes",
+	Victories        = "Victories",
+	AdvancedOptions  = "Advanced",
+}
+
+-- ---------------------------------------------------------------------------
+-- Advanced view: create widget for a parameter inside a SubMenu
+-- ---------------------------------------------------------------------------
+local function CreateAdvParamWidget(parameter, parentItem)
+	if not parentItem then return end
+	local paramId = parameter.ParameterId
+	if m_advParamWidgets[paramId] then return end
+
+	local widget = nil
+
+	if parameter.Array then
+		local invert = parameter.UxHint == "InvertSelection"
+		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_AdvBtn"), "Button", {
+			Label = function() return parameter.Name end,
+			Tooltip = function() return parameter.Description or "" end,
+			ValueGetter = function()
+				local p = g_GameParameters and g_GameParameters.Parameters
+					and g_GameParameters.Parameters[paramId]
+				if p and p.Value then
+					if type(p.Value) == "table" then
+						local count = #p.Value
+						local total = p.Values and #p.Values or 0
+						if invert then
+							if count == 0 then return Locale.Lookup("LOC_SELECTION_EVERYTHING") end
+							if count == total then return Locale.Lookup("LOC_SELECTION_NOTHING") end
+							return Locale.Lookup("LOC_SELECTION_CUSTOM", total - count)
+						else
+							if count == 0 then return Locale.Lookup("LOC_SELECTION_NOTHING") end
+							if count == total then return Locale.Lookup("LOC_SELECTION_EVERYTHING") end
+							return Locale.Lookup("LOC_SELECTION_CUSTOM", count)
+						end
+					end
+					return p.Value.Name or ""
+				end
+				if invert then return Locale.Lookup("LOC_SELECTION_EVERYTHING") end
+				return ""
+			end,
+		})
+		widget:On("activate", function()
+			if paramId == "CityStates" then
+				LuaEvents.CityStatePicker_Initialize(g_GameParameters.Parameters[paramId], g_GameParameters)
+				Controls.CityStatePicker:SetHide(false)
+			elseif paramId == "LeaderPool1" or paramId == "LeaderPool2" then
+				LuaEvents.LeaderPicker_Initialize(g_GameParameters.Parameters[paramId], g_GameParameters)
+				Controls.LeaderPicker:SetHide(false)
+			else
+				LuaEvents.MultiSelectWindow_Initialize(g_GameParameters.Parameters[paramId])
+				Controls.MultiSelectWindow:SetHide(false)
+			end
+		end)
+	elseif parameter.GroupId == "GameModes" or parameter.Domain == "bool" then
+		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_AdvChk"), "Checkbox", {
+			Label = function() return parameter.Name end,
+			Tooltip = function() return parameter.Description or "" end,
+			ValueGetter = function()
+				local p = g_GameParameters and g_GameParameters.Parameters
+					and g_GameParameters.Parameters[paramId]
+				if p then
+					return p.Value and Locale.Lookup("LOC_OPTIONS_ENABLED")
+						or Locale.Lookup("LOC_OPTIONS_DISABLED")
+				end
+				return ""
+			end,
+		})
+		widget:On("value_changed", function()
+			local p = g_GameParameters and g_GameParameters.Parameters
+				and g_GameParameters.Parameters[paramId]
+			if p then
+				g_GameParameters:SetParameterValue(p, not p.Value)
+				Network.BroadcastGameConfig()
+			end
+		end)
+	elseif parameter.Values and parameter.Values.Type == "IntRange" then
+		local minVal = parameter.Values.MinimumValue
+		local maxVal = parameter.Values.MaximumValue
+		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_AdvSlider"), "Slider", {
+			Label = function() return parameter.Name end,
+			Tooltip = function() return parameter.Description or "" end,
+			ValueGetter = function()
+				local p = g_GameParameters and g_GameParameters.Parameters
+					and g_GameParameters.Parameters[paramId]
+				return p and tostring(p.Value) or ""
+			end,
+		})
+		widget:SetMin(minVal)
+		widget:SetMax(maxVal)
+		widget:SetValue(parameter.Value or minVal, true)
+		widget:On("value_changed", function(_, newVal)
+			local p = g_GameParameters and g_GameParameters.Parameters
+				and g_GameParameters.Parameters[paramId]
+			if p and p.Value ~= newVal then
+				g_GameParameters:SetParameterValue(p, newVal)
+				Network.BroadcastGameConfig()
+			end
+		end)
+	elseif parameter.Values then
+		local dd = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_AdvDD"), "Dropdown", {
+			Label = function() return parameter.Name end,
+			Tooltip = function()
+				local p = g_GameParameters and g_GameParameters.Parameters
+					and g_GameParameters.Parameters[paramId]
+				if p and p.Value and p.Value.Description then
+					return p.Value.Description
+				end
+				return parameter.Description or ""
+			end,
+		})
+		local options, idx = BuildParamDropdownOptions(paramId)
+		dd:SetOptions(options)
+		if idx > 0 then dd:SetSelectedIndex(idx, true) end
+		dd:On("value_changed", function(_, val)
+			local p = g_GameParameters and g_GameParameters.Parameters
+				and g_GameParameters.Parameters[paramId]
+			if p then
+				g_GameParameters:SetParameterValue(p, val)
+				Network.BroadcastGameConfig()
+			end
+		end)
+		widget = dd
+	elseif parameter.Domain == "int" or parameter.Domain == "uint" or parameter.Domain == "text" then
+		local domain = parameter.Domain
+		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_AdvEdit"), "EditBox", {
+			Label = function() return parameter.Name end,
+		})
+		local pInit = g_GameParameters and g_GameParameters.Parameters
+			and g_GameParameters.Parameters[paramId]
+		widget:SetText(pInit and pInit.Value and tostring(pInit.Value) or "", true)
+		widget:SetValueSetter(function(_, text)
+			local value = text
+			if domain == "int" then
+				value = tonumber(text) or 0
+			elseif domain == "uint" then
+				value = math.max(tonumber(text) or 0, 0)
+			end
+			local p = g_GameParameters and g_GameParameters.Parameters
+				and g_GameParameters.Parameters[paramId]
+			if p then
+				g_GameParameters:SetParameterValue(p, value)
+				Network.BroadcastGameConfig()
+			end
+		end)
+	end
+
+	if widget then
+		widget:SetFocusSound(HOVER_SOUND)
+		widget:SetFocusKey("adv_" .. paramId)
+		parentItem:AddChild(widget)
+		m_advParamWidgets[paramId] = widget
+	end
+end
+
+-- ---------------------------------------------------------------------------
+-- Advanced view: populate parameters into sections
+-- ---------------------------------------------------------------------------
+local function PopulateAdvancedList()
+	if not m_advList then return end
+
+	local capture = mgr:CaptureFocusKey(m_advList)
+	m_advParamWidgets = {}
+
+	-- Clear section contents but keep section submenus
+	for _, sub in pairs(m_advSections) do
+		sub:ClearChildren()
+	end
+	m_advPlayerSub:ClearChildren()
+	BuildAdvPlayerSection()
+
+	-- Populate parameter widgets into sections, sorted by SortIndex
+	if g_GameParameters and g_GameParameters.Parameters then
+		local sorted = {}
+		for paramId, param in pairs(g_GameParameters.Parameters) do
+			local sectionKey = kGroupToSection[param.GroupId]
+			if sectionKey and m_advSections[sectionKey] then
+				table.insert(sorted, param)
+			end
+		end
+		table.sort(sorted, CAI_SortParams)
+		for _, param in ipairs(sorted) do
+			local sectionKey = kGroupToSection[param.GroupId]
+			CreateAdvParamWidget(param, m_advSections[sectionKey])
+		end
+	end
+
+	mgr:RestoreFocus(m_advList, capture)
+end
+
+-- ---------------------------------------------------------------------------
+-- Build the full panel (called once per show)
+-- ---------------------------------------------------------------------------
 local function BuildPanel()
-	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupDialog"), "Dialog", {
+	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_Panel"), "Panel", {
 		Label = function() return Controls.WindowTitle:GetText() end,
 		SpeechSettings = { Role = false },
 	})
-	CAI_Panel:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
-		OnBackButton()
-		return true
-	end})
-	CAI_Panel.GetDefaultChild = function(w)
-		if m_activeTab == "advanced" then
-			return m_advancedPlayersSection or w.Children[2]
-		end
-		return CAI_SettingsList or w.Children[2]
-	end
 
-	-- Tab strip: Basic / Advanced (HorizontalList of Buttons, not a real TabControl
-	-- because the screen swaps siblings in/out of the panel rather than owning pages).
-	CAI_TabBar = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupTabBar"), "HorizontalList")
-	local basicTab = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupTab"), "Button", {
-		Label = function() return Controls.WindowTitle:GetText() end,
-		StateGetter = function() return m_activeTab == "basic" and Locale.Lookup("LOC_CAI_STATE_SELECTED") or "" end,
-	})
-	basicTab:On("focus_enter", function() SwitchToTab("basic") end)
-	basicTab:On("activate", function() SwitchToTab("basic") end)
-	CAI_TabBar:AddChild(basicTab)
-	local advTab = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupTab"), "Button", {
-		Label = function() return Controls.AdvancedSetupButton:GetText() end,
-		StateGetter = function() return m_activeTab == "advanced" and Locale.Lookup("LOC_CAI_STATE_SELECTED") or "" end,
-	})
-	advTab:On("focus_enter", function() SwitchToTab("advanced") end)
-	advTab:On("activate", function() SwitchToTab("advanced") end)
-	CAI_TabBar:AddChild(advTab)
-	CAI_Panel:AddChild(CAI_TabBar)
+	-- TabControl: Basic / Advanced
+	CAI_Tabs = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_Tabs"), "TabControl", {})
 
-	CAI_SettingsList = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupList"), "List")
-	CAI_Panel:AddChild(CAI_SettingsList)
+	-- Basic page with a List container for all options
+	m_basicPage = CAI_Tabs:AddPage(function() return Controls.WindowTitle:GetText() end)
+	m_basicList = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_BasicList"), "List")
+	m_basicPage:AddChild(m_basicList)
 
-	-- Ruleset pulldown
-	local rulesetSpec = kStaticPulldowns[1]
-	CAI_SettingsList:AddChild(MakeParamPulldown(rulesetSpec[2], rulesetSpec[3], rulesetSpec[4], rulesetSpec[1]))
+	-- Ruleset
+	m_basicList:AddChild(MakeParamDropdown("Ruleset", "LOC_SETUP_CHOOSE_RULESET",
+		function() return Controls.CreateGame_RulesetContainer end))
 
-	-- Leader pulldown
-	local leaderBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupPulldown"), "Button", {
-		Label = function() return Locale.Lookup("LOC_SETUP_CIVILIZATION") end,
-		ValueGetter = function()
-			local scrollText = Controls.Basic_LocalPlayerScrollText
-			if scrollText then return scrollText:GetText() or "" end
-			return Controls.Basic_LocalPlayerPulldown:GetButton():GetText() or ""
-		end,
-		HiddenPredicate = function() return Controls.CreateGame_LocalPlayerContainer:IsHidden() end,
-	})
-	leaderBtn:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	leaderBtn:On("activate", function() OpenLeaderDropdown() end)
-	CAI_SettingsList:AddChild(leaderBtn)
+	-- Leader
+	m_basicList:AddChild(MakeLeaderDropdown())
 
-	-- Remaining static pulldowns
-	for i = 2, #kStaticPulldowns do
-		local spec = kStaticPulldowns[i]
-		CAI_SettingsList:AddChild(MakeParamPulldown(spec[2], spec[3], spec[4], spec[1]))
-	end
+	-- Difficulty
+	m_basicList:AddChild(MakeParamDropdown("GameDifficulty", "LOC_SETUP_DIFFICULTY",
+		function() return Controls.CreateGame_GameDifficultyContainer end))
 
-	-- Map select button
-	local mapBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
+	-- Game Speed
+	m_basicList:AddChild(MakeParamDropdown("GameSpeeds", "LOC_SETUP_SPEED",
+		function() return Controls.CreateGame_SpeedPulldownContainer end))
+
+	-- Map Size
+	m_basicList:AddChild(MakeParamDropdown("MapSize", "LOC_SETUP_MAP_SIZE",
+		function() return Controls.CreateGame_MapSizeContainer end))
+
+	-- Map Type (button, opens popup)
+	local mapBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_MapBtn"), "Button", {
 		Label = function() return Locale.Lookup("LOC_SETUP_MAP_TYPE") end,
 		ValueGetter = function() return Controls.MapSelectButton:GetText() or "" end,
 		Tooltip = function() return Controls.MapSelectButton:GetToolTipString() or "" end,
 	})
-	mapBtn:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	mapBtn:On("activate", function() OnMapSelect() end)
-	CAI_SettingsList:AddChild(mapBtn)
+	mapBtn:SetFocusSound(HOVER_SOUND)
+	mapBtn:On("activate", function() Controls.MapSelectButton:DoLeftClick() end)
+	m_basicList:AddChild(mapBtn)
 
-	-- Action buttons as direct panel children
-	CAI_Panel:AddChild(MakeActionButton(function() return Controls.LoadConfig end,    function() OnLoadConfig() end))
-	CAI_Panel:AddChild(MakeActionButton(function() return Controls.SaveConfig end,    function() OnSaveConfig() end))
-	CAI_Panel:AddChild(MakeActionButton(function() return Controls.StartButton end,   function() OnStartButton() end))
-	CAI_Panel:AddChild(MakeActionButton(function() return Controls.DefaultButton end, function() OnDefaultButton() end))
-	CAI_Panel:AddChild(MakeActionButton(function() return Controls.CloseButton end,   function() OnBackButton() end))
+	-- Advanced page with a List + SubMenu sections (created once, repopulated on refresh)
+	m_advancedPage = CAI_Tabs:AddPage(function() return Controls.AdvancedSetupButton:GetText() end)
+	m_advList = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_AdvList"), "List")
+	m_advancedPage:AddChild(m_advList)
+
+	-- Create persistent section submenus
+	m_advPlayerSub = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_PlayersSub"), "SubMenu", {
+		Label = function() return Locale.Lookup("LOC_CAI_ADVANCED_SETUP_PLAYERS") end,
+		FocusKey = "section_Players",
+	})
+	m_advPlayerSub:SetFocusSound(HOVER_SOUND)
+	m_advList:AddChild(m_advPlayerSub)
+
+	local sectionDefs = {
+		{ key = "Options",   loc = "LOC_CAI_ADVANCED_SETUP_OPTIONS" },
+		{ key = "GameModes", loc = "LOC_CAI_ADVANCED_SETUP_GAME_MODES" },
+		{ key = "Victories", loc = "LOC_SETUP_VICTORY_CONDITIONS" },
+		{ key = "Advanced",  loc = "LOC_CAI_ADVANCED_SETUP_ADVANCED" },
+	}
+	m_advSections = {}
+	for _, def in ipairs(sectionDefs) do
+		local sub = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_Sec_" .. def.key), "SubMenu", {
+			Label = function() return Locale.Lookup(def.loc) end,
+			FocusKey = "section_" .. def.key,
+		})
+		sub:SetFocusSound(HOVER_SOUND)
+		m_advSections[def.key] = sub
+		m_advList:AddChild(sub)
+	end
+
+	CAI_Tabs:On("value_changed", function(_, idx)
+		if idx == 2 then
+			Controls.CreateGameWindow:SetHide(true)
+			Controls.AdvancedOptionsWindow:SetHide(false)
+			Controls.LoadConfig:SetHide(GameConfiguration.IsWorldBuilderEditor())
+			Controls.SaveConfig:SetHide(GameConfiguration.IsWorldBuilderEditor())
+			Controls.ButtonStack:CalculateSize()
+			m_AdvancedMode = true
+			PopulateAdvancedList()
+		else
+			Controls.CreateGameWindow:SetHide(false)
+			Controls.AdvancedOptionsWindow:SetHide(true)
+			Controls.LoadConfig:SetHide(true)
+			Controls.SaveConfig:SetHide(true)
+			Controls.ButtonStack:CalculateSize()
+			m_AdvancedMode = false
+		end
+	end)
+
+	CAI_Panel:AddChild(CAI_Tabs)
+
+	-- Action buttons in a Transparent panel (no wrap so Tab escapes)
+	m_actionRow = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_Actions"), "Panel", {
+		Transparent = true,
+		WrapAround = false,
+	})
+	m_actionRow:AddChild(MakeActionButton("Save", Controls.SaveConfig,
+		function() return Controls.SaveConfig:IsHidden() end))
+	m_actionRow:AddChild(MakeActionButton("Load", Controls.LoadConfig,
+		function() return Controls.LoadConfig:IsHidden() end))
+	m_actionRow:AddChild(MakeActionButton("Defaults", Controls.DefaultButton, nil))
+	m_actionRow:AddChild(MakeActionButton("Start", Controls.StartButton, nil))
+	CAI_Panel:AddChild(m_actionRow)
 end
 
 -- ---------------------------------------------------------------------------
--- Dynamic parameter widgets: wrap CreateSimpleParameterDriver to create
--- accessible widgets for game modes, booleans, pulldowns, sliders, edits.
+-- Helper: create a basic-view widget for a simple parameter
 -- ---------------------------------------------------------------------------
-CreateSimpleParameterDriver = WrapFunc(CreateSimpleParameterDriver, function(orig, o, parameter, parent)
-	local control = orig(o, parameter, parent)
-	if not control or not CAI_SettingsList then return control end
-
+local function CreateBasicParamWidget(o, parameter, control)
+	if not m_basicList then return end
 	local paramId = parameter.ParameterId
-	if m_simpleParamWidgets[paramId] then return control end -- already created
+	if m_basicParamWidgets[paramId] then return end
 
 	local widget = nil
 
 	if parameter.GroupId == "GameModes" or parameter.Domain == "bool" then
-		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupCheckbox"), "Checkbox", {
+		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_BasicChk"), "Checkbox", {
 			Label = function() return parameter.Name end,
 			Tooltip = function() return parameter.Description or "" end,
 			ValueGetter = function()
@@ -2081,7 +2583,7 @@ CreateSimpleParameterDriver = WrapFunc(CreateSimpleParameterDriver, function(ori
 	elseif parameter.Values and parameter.Values.Type == "IntRange" then
 		local minVal = parameter.Values.MinimumValue
 		local maxVal = parameter.Values.MaximumValue
-		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupSlider"), "Slider", {
+		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_BasicSlider"), "Slider", {
 			Label = function() return parameter.Name end,
 			Tooltip = function() return parameter.Description or "" end,
 			ValueGetter = function()
@@ -2093,33 +2595,27 @@ CreateSimpleParameterDriver = WrapFunc(CreateSimpleParameterDriver, function(ori
 				return control.Control and control.Control.Root and control.Control.Root:IsHidden()
 			end,
 		})
-		widget.Increment = function(self)
+		widget:SetMin(minVal)
+		widget:SetMax(maxVal)
+		widget:SetValue(parameter.Value or minVal, true)
+		widget:On("value_changed", function(_, newVal)
 			local p = g_GameParameters and g_GameParameters.Parameters
 				and g_GameParameters.Parameters[paramId]
-			if p and p.Value and p.Value < maxVal then
-				o:SetParameterValue(parameter, p.Value + 1)
+			if p and p.Value ~= newVal then
+				o:SetParameterValue(parameter, newVal)
 				Network.BroadcastGameConfig()
-				self:Announce({ "value" })
 			end
-			return true
-		end
-		widget.Decrement = function(self)
-			local p = g_GameParameters and g_GameParameters.Parameters
-				and g_GameParameters.Parameters[paramId]
-			if p and p.Value and p.Value > minVal then
-				o:SetParameterValue(parameter, p.Value - 1)
-				Network.BroadcastGameConfig()
-				self:Announce({ "value" })
-			end
-			return true
-		end
+		end)
 	elseif parameter.Values then
-		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupPulldown"), "Button", {
+		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_BasicDD"), "Dropdown", {
 			Label = function() return parameter.Name end,
-			Tooltip = function() return parameter.Description or "" end,
-			ValueGetter = function()
-				local ctrl = control.Control
-				return ctrl and ctrl.PullDown and ctrl.PullDown:GetButton():GetText() or ""
+			Tooltip = function()
+				local p = g_GameParameters and g_GameParameters.Parameters
+					and g_GameParameters.Parameters[paramId]
+				if p and p.Value and p.Value.Description then
+					return p.Value.Description
+				end
+				return parameter.Description or ""
 			end,
 			HiddenPredicate = function()
 				return control.Control and control.Control.Root and control.Control.Root:IsHidden()
@@ -2129,24 +2625,32 @@ CreateSimpleParameterDriver = WrapFunc(CreateSimpleParameterDriver, function(ori
 				return ctrl and ctrl.PullDown and ctrl.PullDown:IsDisabled()
 			end,
 		})
-		widget:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-		widget:On("activate", function() OpenParamDropdown(paramId) end)
+		local options, idx = BuildParamDropdownOptions(paramId)
+		widget:SetOptions(options)
+		if idx > 0 then widget:SetSelectedIndex(idx, true) end
+		widget:On("value_changed", function(_, val)
+			local p = g_GameParameters and g_GameParameters.Parameters
+				and g_GameParameters.Parameters[paramId]
+			if p then
+				g_GameParameters:SetParameterValue(p, val)
+				Network.BroadcastGameConfig()
+			end
+		end)
+		m_basicDropdowns[paramId] = widget
 	elseif parameter.Domain == "int" or parameter.Domain == "uint" or parameter.Domain == "text" then
 		local domain = parameter.Domain
-		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupEdit"), "EditBox", {
+		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_BasicEdit"), "EditBox", {
 			Label = function() return parameter.Name end,
 			HiddenPredicate = function()
 				return control.Control and control.Control.Root and control.Control.Root:IsHidden()
 			end,
 		})
-		local initial = (function()
-			local ctrl = control.Control
-			return ctrl and ctrl.StringEdit and ctrl.StringEdit:GetText() or ""
-		end)()
+		local ctrl = control.Control
+		local initial = ctrl and ctrl.StringEdit and ctrl.StringEdit:GetText() or ""
 		widget:SetText(initial, true)
 		widget:SetValueSetter(function(_, text)
-			local ctrl = control.Control
-			if ctrl and ctrl.StringEdit then ctrl.StringEdit:SetText(text) end
+			local c = control.Control
+			if c and c.StringEdit then c.StringEdit:SetText(text) end
 			local value = text
 			if domain == "int" then
 				value = tonumber(text) or 0
@@ -2159,633 +2663,48 @@ CreateSimpleParameterDriver = WrapFunc(CreateSimpleParameterDriver, function(ori
 	end
 
 	if widget then
-		CAI_SettingsList:AddChild(widget)
-		m_simpleParamWidgets[paramId] = widget
+		widget:SetFocusSound(HOVER_SOUND)
+		widget._sortIndex = parameter.SortIndex or 0
+		widget._sortName = parameter.Name or ""
+		m_basicList:AddChild(widget)
+		m_basicParamWidgets[paramId] = widget
+	end
+end
+
+-- ---------------------------------------------------------------------------
+-- Sort basic list children by SortIndex (matches vanilla parameter order)
+-- ---------------------------------------------------------------------------
+local function SortBasicList()
+	if not m_basicList then return end
+	local fixedCount = 6 -- Ruleset, Leader, Difficulty, Speed, MapSize, MapType
+	local dynamic = {}
+	while #m_basicList.Children > fixedCount do
+		table.insert(dynamic, table.remove(m_basicList.Children, fixedCount + 1))
+	end
+	table.sort(dynamic, function(a, b)
+		local ai = a._sortIndex or 0
+		local bi = b._sortIndex or 0
+		if ai ~= bi then return ai < bi end
+		return Locale.Compare(a._sortName or "", b._sortName or "") == -1
+	end)
+	for _, w in ipairs(dynamic) do
+		table.insert(m_basicList.Children, w)
+	end
+end
+
+-- ---------------------------------------------------------------------------
+-- Wrap CreateSimpleParameterDriver to capture params for both views
+-- ---------------------------------------------------------------------------
+CreateSimpleParameterDriver = WrapFunc(CreateSimpleParameterDriver, function(orig, o, parameter, parent)
+	local control = orig(o, parameter, parent)
+	if not control then return control end
+
+	-- Basic view: create accessible widget in the basic list
+	if m_basicList then
+		CreateBasicParamWidget(o, parameter, control)
 	end
 
 	return control
-end)
-
--- ---------------------------------------------------------------------------
--- Advanced view: open leader dropdown for any player (local or AI)
--- ---------------------------------------------------------------------------
-local function OpenLeaderDropdownForPlayer(playerId)
-	local parameters = GetPlayerParameters(playerId)
-	if not parameters then return end
-	local param = parameters.Parameters and parameters.Parameters["PlayerLeader"]
-	if not param or not param.Values then return end
-
-	local optList = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupList"), "List")
-	optList:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
-		mgr:RemoveFromStack(optList:GetId())
-		return true
-	end})
-
-	local currentVal = param.Value
-	local selectedChild = nil
-	for _, v in ipairs(param.Values) do
-		local val = v
-		local sections = (playerId == m_singlePlayerID)
-			and BuildLeaderInfoSections(val.Domain, val.Value) or {}
-
-		local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupMenuItem"), "MenuItem", {
-			Label = function() return val.Name end,
-		})
-		child:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-		child:On("activate", function()
-			parameters:SetParameterValue(param, val)
-			local colorParam = parameters.Parameters["PlayerColorAlternate"]
-			if colorParam then
-				parameters:SetParameterValue(colorParam, 0)
-			end
-			Network.BroadcastGameConfig()
-			mgr:RemoveFromStack(optList:GetId())
-		end)
-
-		for i, section in ipairs(sections) do
-			if i <= #kNumberKeys then
-				local text = section.text
-				child:AddInputBinding({
-					Key = kNumberKeys[i],
-					Action = function()
-						Speak(text, true)
-						return true
-					end,
-				})
-			end
-		end
-
-		optList:AddChild(child)
-		if not selectedChild and currentVal and val.Value == currentVal.Value then
-			selectedChild = child
-		end
-	end
-	mgr:Push(optList, { focus = selectedChild })
-end
-
--- ---------------------------------------------------------------------------
--- Advanced view: open color dropdown for local player
--- ---------------------------------------------------------------------------
-local function OpenColorDropdown()
-	local parameters = GetPlayerParameters(m_singlePlayerID)
-	if not parameters then return end
-	local param = parameters.Parameters and parameters.Parameters["PlayerColorAlternate"]
-	if not param then return end
-	local leaderParam = parameters.Parameters["PlayerLeader"]
-	if not leaderParam or not leaderParam.Value then return end
-
-	local icons = GetPlayerIcons(leaderParam.Value.Domain, leaderParam.Value.Value)
-	if not icons then return end
-
-	local optList = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupList"), "List")
-	optList:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
-		mgr:RemoveFromStack(optList:GetId())
-		return true
-	end})
-
-	local currentVal = param.Value or 0
-	local selectedChild = nil
-	for j = 0, 3 do
-		local backColor, frontColor = UI.GetPlayerColorValues(icons.PlayerColor, j)
-		if backColor and frontColor and backColor ~= 0 and frontColor ~= 0 then
-			local colorIdx = j
-			local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupMenuItem"), "MenuItem", {
-				Label = function() return Locale.Lookup("LOC_CAI_COLOR") .. " " .. (colorIdx + 1) end,
-			})
-			child:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-			child:On("activate", function()
-				parameters:SetParameterValue(param, colorIdx)
-				Network.BroadcastGameConfig()
-				mgr:RemoveFromStack(optList:GetId())
-			end)
-			optList:AddChild(child)
-			if not selectedChild and colorIdx == currentVal then
-				selectedChild = child
-			end
-		end
-	end
-	mgr:Push(optList, { focus = selectedChild })
-end
-
--- ---------------------------------------------------------------------------
--- Advanced view: get the section list widget for a parameter group
--- ---------------------------------------------------------------------------
-local kGroupToSection = {
-	BasicGameOptions = "Primary",
-	GameOptions      = "Primary",
-	BasicMapOptions  = "Primary",
-	MapOptions       = "Primary",
-	GameModes        = "GameModes",
-	Victories        = "Victories",
-	AdvancedOptions  = "Advanced",
-}
-
-local function GetAdvancedSection(groupId)
-	local sectionKey = kGroupToSection[groupId]
-	if sectionKey then
-		return m_advancedSections[sectionKey]
-	end
-	-- Default to Advanced for unknown groups
-	return m_advancedSections["Advanced"]
-end
-
--- ---------------------------------------------------------------------------
--- Advanced view: build player section widgets
--- ---------------------------------------------------------------------------
-local function BuildPlayerSection()
-	if not m_advancedPlayersSection then return end
-	m_advancedPlayersSection:ClearChildren()
-	m_aiPlayerWidgets = {}
-
-	-- Local player leader
-	local locLeader = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupPulldown"), "Button", {
-		Label = function() return Locale.Lookup("LOC_SETUP_CIVILIZATION") end,
-		ValueGetter = function()
-			local scrollText = Controls.Advanced_LocalPlayerScrollText
-			if scrollText then return scrollText:GetText() or "" end
-			return Controls.Advanced_LocalPlayerPulldown:GetButton():GetText() or ""
-		end,
-		HiddenPredicate = function() return Controls.CreateGame_LocalPlayerContainer:IsHidden() end,
-	})
-	locLeader:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	locLeader:On("activate", function() OpenLeaderDropdownForPlayer(m_singlePlayerID) end)
-	m_advancedPlayersSection:AddChild(locLeader)
-
-	-- Local player color
-	local locColor = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupPulldown"), "Button", {
-		Label = function() return Locale.Lookup("LOC_CAI_COLOR") end,
-		ValueGetter = function()
-			local ctrl = Controls.Advanced_LocalColorPullDown
-			if ctrl then return ctrl:GetButton():GetText() or "" end
-			return ""
-		end,
-		HiddenPredicate = function()
-			local ctrl = Controls.Advanced_LocalColorPullDown
-			return ctrl and ctrl:IsDisabled()
-		end,
-	})
-	locColor:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	locColor:On("activate", function() OpenColorDropdown() end)
-	m_advancedPlayersSection:AddChild(locColor)
-
-	-- AI player slots
-	local player_ids = GameConfiguration.GetParticipatingPlayerIDs()
-	local minPlayers = MapConfiguration.GetMinMajorPlayers() or 2
-	local can_remove = #player_ids > minPlayers
-
-	local aiIndex = 0
-	for _, player_id in ipairs(player_ids) do
-		if player_id ~= m_singlePlayerID then
-			aiIndex = aiIndex + 1
-			local pid = player_id
-			local playerNum = aiIndex + 1 -- capture for closure
-			local playerConfig = PlayerConfigurations[pid]
-
-			local aiSubmenu = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupSubMenu"), "SubMenu", {
-				Label = function()
-					local params = GetPlayerParameters(pid)
-					local leaderParam = params and params.Parameters and params.Parameters["PlayerLeader"]
-					local leaderName = leaderParam and leaderParam.Value and leaderParam.Value.Name or "?"
-					return Locale.Lookup("LOC_CAI_PLAYER") .. " " .. playerNum .. ": " .. leaderName
-				end,
-			})
-
-			-- Leader dropdown
-			local aiLeader = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupPulldown"), "Button", {
-				Label = function() return Locale.Lookup("LOC_SETUP_CIVILIZATION") end,
-				ValueGetter = function()
-					local params = GetPlayerParameters(pid)
-					local leaderParam = params and params.Parameters and params.Parameters["PlayerLeader"]
-					return leaderParam and leaderParam.Value and leaderParam.Value.Name or ""
-				end,
-			})
-			aiLeader:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-			aiLeader:On("activate", function() OpenLeaderDropdownForPlayer(pid) end)
-			aiSubmenu:AddChild(aiLeader)
-
-			-- Remove button
-			if can_remove then
-				local rm = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
-					Label = function() return Locale.Lookup("LOC_DELETE_AI") end,
-				})
-				rm:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-				rm:On("activate", function()
-					playerConfig:SetLeaderTypeName(nil)
-					GameConfiguration.RemovePlayer(pid)
-					GameSetup_PlayerCountChanged()
-				end)
-				aiSubmenu:AddChild(rm)
-			end
-
-			m_advancedPlayersSection:AddChild(aiSubmenu)
-			table.insert(m_aiPlayerWidgets, {playerId = pid, submenu = aiSubmenu})
-		end
-	end
-
-	-- Add AI button
-	local addAI = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
-		Label = function() return Controls.AddAIButton:GetText() end,
-		HiddenPredicate = function() return Controls.AddAIButton:IsHidden() end,
-	})
-	addAI:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	addAI:On("activate", function() OnAddAIButton() end)
-	m_advancedPlayersSection:AddChild(addAI)
-end
-
--- ---------------------------------------------------------------------------
--- Advanced view: build all children for the advanced settings list
--- ---------------------------------------------------------------------------
-local function BuildAdvancedChildren()
-	m_advancedSections = {}
-	m_advancedParamWidgets = {}
-
-	-- Create section lists
-	local sectionDefs = {
-		{ key = "Primary",   label = "LOC_OPTIONS" },
-		{ key = "GameModes", label = "LOC_SETUP_GAME_MODES" },
-		{ key = "Victories", label = "LOC_SETUP_VICTORY_CONDITIONS" },
-		{ key = "Advanced",  label = "LOC_ADVANCED_OPTIONS" },
-	}
-	for _, def in ipairs(sectionDefs) do
-		m_advancedSections[def.key] = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupList"), "List", {
-			Label = function() return Locale.Lookup(def.label) end,
-		})
-	end
-
-	-- Players section
-	m_advancedPlayersSection = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupList"), "List", {
-		Label = function() return Locale.Lookup("LOC_PLAYERS") end,
-	})
-	BuildPlayerSection()
-end
-
--- ---------------------------------------------------------------------------
--- Detach all children from a widget without destroying them
--- ---------------------------------------------------------------------------
-local function DetachChildren(widget)
-	if not widget or not widget.Children then return end
-	for _, child in ipairs(widget.Children) do
-		child.Parent = nil
-	end
-	widget.Children = {}
-	widget._lastFocusedChild = nil
-	widget._lastFocusedKey = nil
-end
-
--- ---------------------------------------------------------------------------
--- Remove advanced sections from the panel
--- ---------------------------------------------------------------------------
-RemoveAdvancedSections = function()
-	if m_advancedPlayersSection and m_advancedPlayersSection.Parent == CAI_Panel then
-		m_advancedPlayersSection:RemoveFromParent()
-	end
-	for _, section in pairs(m_advancedSections) do
-		if section.Parent == CAI_Panel then
-			section:RemoveFromParent()
-		end
-	end
-end
-
--- ---------------------------------------------------------------------------
--- Swap settings list children between basic and advanced views
--- ---------------------------------------------------------------------------
-local function PopulateBasicView()
-	if not CAI_SettingsList then return end
-
-	-- Remove advanced sections from panel
-	RemoveAdvancedSections()
-
-	-- Re-add the basic settings list after TabBar if not already there
-	if not CAI_Panel:GetChildIndex(CAI_SettingsList) then
-		CAI_Panel:InsertChild(2, CAI_SettingsList)
-	end
-
-	-- Repopulate basic children
-	DetachChildren(CAI_SettingsList)
-	for _, child in ipairs(m_basicChildren) do
-		CAI_SettingsList:AddChild(child)
-	end
-end
-
-local function PopulateAdvancedView()
-	if not CAI_Panel then return end
-
-	-- Build advanced children fresh (params may have changed)
-	BuildAdvancedChildren()
-
-	-- Populate advanced param widgets from current game parameters
-	if g_GameParameters and g_GameParameters.Parameters then
-		for paramId, param in pairs(g_GameParameters.Parameters) do
-			if not m_advancedParamWidgets[paramId] then
-				local section = GetAdvancedSection(param.GroupId)
-				if section then
-					CreateAdvancedParamWidget(param, section)
-				end
-			end
-		end
-	end
-
-	-- Remove the basic settings list from the panel
-	if CAI_Panel:GetChildIndex(CAI_SettingsList) then
-		CAI_SettingsList:RemoveFromParent()
-	end
-
-	-- Add sections directly to panel (after TabBar, before action buttons)
-	local insertIdx = 2
-	CAI_Panel:InsertChild(insertIdx, m_advancedPlayersSection)
-	insertIdx = insertIdx + 1
-
-	local sectionOrder = { "Primary", "GameModes", "Victories", "Advanced" }
-	for _, key in ipairs(sectionOrder) do
-		local section = m_advancedSections[key]
-		if section then
-			CAI_Panel:InsertChild(insertIdx, section)
-			insertIdx = insertIdx + 1
-		end
-	end
-end
-
--- ---------------------------------------------------------------------------
--- Switch between basic and advanced tabs
--- ---------------------------------------------------------------------------
-SwitchToTab = function(tabName)
-	if tabName == m_activeTab then return end
-	m_activeTab = tabName
-	if tabName == "advanced" then
-		Controls.CreateGameWindow:SetHide(true)
-		Controls.AdvancedOptionsWindow:SetHide(false)
-		Controls.LoadConfig:SetHide(GameConfiguration.IsWorldBuilderEditor())
-		Controls.SaveConfig:SetHide(GameConfiguration.IsWorldBuilderEditor())
-		Controls.ButtonStack:CalculateSize()
-		m_AdvancedMode = true
-		PopulateAdvancedView()
-	else
-		Controls.CreateGameWindow:SetHide(false)
-		Controls.AdvancedOptionsWindow:SetHide(true)
-		Controls.LoadConfig:SetHide(true)
-		Controls.SaveConfig:SetHide(true)
-		Controls.ButtonStack:CalculateSize()
-		m_AdvancedMode = false
-		PopulateBasicView()
-	end
-end
-
--- ---------------------------------------------------------------------------
--- Create an accessible widget for an advanced-view parameter
--- ---------------------------------------------------------------------------
-function CreateAdvancedParamWidget(parameter, section)
-	if not section then return end
-	local paramId = parameter.ParameterId
-	if m_advancedParamWidgets[paramId] then return end
-
-	local widget = nil
-
-	-- Skip player parameters (no parent stack) and already-handled special params
-	if not kGroupToSection[parameter.GroupId] and parameter.GroupId ~= nil then
-		return
-	end
-
-	if parameter.Array then
-		local paramId_inner = parameter.ParameterId
-		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
-			Label = function() return parameter.Name end,
-			Tooltip = function() return parameter.Description or "" end,
-			ValueGetter = function()
-				local p = g_GameParameters and g_GameParameters.Parameters
-					and g_GameParameters.Parameters[paramId_inner]
-				if p and p.Value then
-					if type(p.Value) == "table" then
-						local count = #p.Value
-						if count == 0 then return Locale.Lookup("LOC_SELECTION_NOTHING") end
-						if p.AllValues and count == #p.AllValues then return Locale.Lookup("LOC_SELECTION_EVERYTHING") end
-						return Locale.Lookup("LOC_SELECTION_CUSTOM", count)
-					end
-					return p.Value.Name or ""
-				end
-				return ""
-			end,
-		})
-		widget:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-		widget:On("activate", function()
-			if paramId_inner == "CityStates" then
-				LuaEvents.CityStatePicker_Initialize(g_GameParameters.Parameters[paramId_inner], g_GameParameters)
-				Controls.CityStatePicker:SetHide(false)
-			elseif paramId_inner == "LeaderPool1" or paramId_inner == "LeaderPool2" then
-				LuaEvents.LeaderPicker_Initialize(g_GameParameters.Parameters[paramId_inner], g_GameParameters)
-				Controls.LeaderPicker:SetHide(false)
-			else
-				LuaEvents.MultiSelectWindow_Initialize(g_GameParameters.Parameters[paramId_inner])
-				Controls.MultiSelectWindow:SetHide(false)
-			end
-		end)
-	elseif parameter.Domain == "bool" then
-		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupCheckbox"), "Checkbox", {
-			Label = function() return parameter.Name end,
-			Tooltip = function() return parameter.Description or "" end,
-			ValueGetter = function()
-				local p = g_GameParameters and g_GameParameters.Parameters
-					and g_GameParameters.Parameters[paramId]
-				if p then
-					return p.Value and Locale.Lookup("LOC_OPTIONS_ENABLED")
-						or Locale.Lookup("LOC_OPTIONS_DISABLED")
-				end
-				return ""
-			end,
-		})
-		widget:On("value_changed", function()
-			local p = g_GameParameters and g_GameParameters.Parameters
-				and g_GameParameters.Parameters[paramId]
-			if p then
-				g_GameParameters:SetParameterValue(p, not p.Value)
-				BroadcastGameConfigChanges()
-			end
-		end)
-	elseif parameter.Values and parameter.Values.Type == "IntRange" then
-		local minVal = parameter.Values.MinimumValue
-		local maxVal = parameter.Values.MaximumValue
-		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupSlider"), "Slider", {
-			Label = function() return parameter.Name end,
-			Tooltip = function() return parameter.Description or "" end,
-			ValueGetter = function()
-				local p = g_GameParameters and g_GameParameters.Parameters
-					and g_GameParameters.Parameters[paramId]
-				return p and tostring(p.Value) or ""
-			end,
-		})
-		widget.Increment = function(self)
-			local p = g_GameParameters and g_GameParameters.Parameters
-				and g_GameParameters.Parameters[paramId]
-			if p and p.Value and p.Value < maxVal then
-				g_GameParameters:SetParameterValue(p, p.Value + 1)
-				BroadcastGameConfigChanges()
-				self:Announce({ "value" })
-			end
-			return true
-		end
-		widget.Decrement = function(self)
-			local p = g_GameParameters and g_GameParameters.Parameters
-				and g_GameParameters.Parameters[paramId]
-			if p and p.Value and p.Value > minVal then
-				g_GameParameters:SetParameterValue(p, p.Value - 1)
-				BroadcastGameConfigChanges()
-				self:Announce({ "value" })
-			end
-			return true
-		end
-	elseif parameter.Values then
-		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupPulldown"), "Button", {
-			Label = function() return parameter.Name end,
-			Tooltip = function() return parameter.Description or "" end,
-			ValueGetter = function()
-				local p = g_GameParameters and g_GameParameters.Parameters
-					and g_GameParameters.Parameters[paramId]
-				return p and p.Value and p.Value.Name or ""
-			end,
-		})
-		widget:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-		widget:On("activate", function() OpenParamDropdown(paramId) end)
-	elseif parameter.Domain == "int" or parameter.Domain == "uint" or parameter.Domain == "text" then
-		local domain = parameter.Domain
-		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupEdit"), "EditBox", {
-			Label = function() return parameter.Name end,
-		})
-		local pInit = g_GameParameters and g_GameParameters.Parameters
-			and g_GameParameters.Parameters[paramId]
-		widget:SetText(pInit and pInit.Value and tostring(pInit.Value) or "", true)
-		widget:SetValueSetter(function(_, text)
-			local value = text
-			if domain == "int" then
-				value = tonumber(text) or 0
-			elseif domain == "uint" then
-				value = math.max(tonumber(text) or 0, 0)
-			end
-			local p = g_GameParameters and g_GameParameters.Parameters
-				and g_GameParameters.Parameters[paramId]
-			if p then
-				g_GameParameters:SetParameterValue(p, value)
-				BroadcastGameConfigChanges()
-			end
-		end)
-	end
-
-	if widget then
-		section:AddChild(widget)
-		m_advancedParamWidgets[paramId] = widget
-	end
-end
-
--- ---------------------------------------------------------------------------
--- Wrap special button-popup drivers to create accessible widgets
--- ---------------------------------------------------------------------------
-CreateButtonPopupDriver = WrapFunc(CreateButtonPopupDriver, function(orig, o, parameter, activateFunc, parent)
-	local driver = orig(o, parameter, activateFunc, parent)
-	if not m_AdvancedMode or not driver then return driver end
-
-	local paramId = parameter.ParameterId
-	if m_advancedParamWidgets[paramId] then return driver end
-
-	local section = GetAdvancedSection(parameter.GroupId)
-	if not section then return driver end
-
-	local widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
-		Label = function() return parameter.Name end,
-		ValueGetter = function()
-			local c = driver.Cache
-			return c and c.ValueText or ""
-		end,
-		Tooltip = function() return parameter.Description or "" end,
-	})
-	widget:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	widget:On("activate", function()
-		if activateFunc then activateFunc() end
-	end)
-	section:AddChild(widget)
-	m_advancedParamWidgets[paramId] = widget
-	return driver
-end)
-
-CreateMultiSelectWindowDriver = WrapFunc(CreateMultiSelectWindowDriver, function(orig, o, parameter, parent)
-	local driver = orig(o, parameter, parent)
-	if not m_AdvancedMode or not driver then return driver end
-
-	local paramId = parameter.ParameterId
-	if m_advancedParamWidgets[paramId] then return driver end
-
-	local section = GetAdvancedSection(parameter.GroupId)
-	if not section then return driver end
-
-	local widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
-		Label = function() return parameter.Name end,
-		ValueGetter = function()
-			local c = driver.Cache
-			return c and c.ValueText and Locale.Lookup(c.ValueText, c.ValueAmount or 0) or ""
-		end,
-		Tooltip = function() return parameter.Description or "" end,
-	})
-	widget:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	widget:On("activate", function()
-		LuaEvents.MultiSelectWindow_Initialize(o.Parameters[paramId])
-		Controls.MultiSelectWindow:SetHide(false)
-	end)
-	section:AddChild(widget)
-	m_advancedParamWidgets[paramId] = widget
-	return driver
-end)
-
-CreateCityStatePickerDriver = WrapFunc(CreateCityStatePickerDriver, function(orig, o, parameter, parent)
-	local driver = orig(o, parameter, parent)
-	if not m_AdvancedMode or not driver then return driver end
-
-	local paramId = parameter.ParameterId
-	if m_advancedParamWidgets[paramId] then return driver end
-
-	local section = GetAdvancedSection(parameter.GroupId)
-	if not section then return driver end
-
-	local widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
-		Label = function() return parameter.Name end,
-		ValueGetter = function()
-			local c = driver.Cache
-			return c and c.ValueText and Locale.Lookup(c.ValueText, c.ValueAmount or 0) or ""
-		end,
-		Tooltip = function() return parameter.Description or "" end,
-	})
-	widget:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	widget:On("activate", function()
-		LuaEvents.CityStatePicker_Initialize(o.Parameters[paramId], g_GameParameters)
-		Controls.CityStatePicker:SetHide(false)
-	end)
-	section:AddChild(widget)
-	m_advancedParamWidgets[paramId] = widget
-	return driver
-end)
-
-CreateLeaderPickerDriver = WrapFunc(CreateLeaderPickerDriver, function(orig, o, parameter, parent)
-	local driver = orig(o, parameter, parent)
-	if not m_AdvancedMode or not driver then return driver end
-
-	local paramId = parameter.ParameterId
-	if m_advancedParamWidgets[paramId] then return driver end
-
-	local section = GetAdvancedSection(parameter.GroupId)
-	if not section then return driver end
-
-	local widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIAdvancedSetupButton"), "Button", {
-		Label = function() return parameter.Name end,
-		ValueGetter = function()
-			local c = driver.Cache
-			return c and c.ValueText and Locale.Lookup(c.ValueText, c.ValueAmount or 0) or ""
-		end,
-		Tooltip = function() return parameter.Description or "" end,
-	})
-	widget:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	widget:On("activate", function()
-		LuaEvents.LeaderPicker_Initialize(o.Parameters[paramId], g_GameParameters)
-		Controls.LeaderPicker:SetHide(false)
-	end)
-	section:AddChild(widget)
-	m_advancedParamWidgets[paramId] = widget
-	return driver
 end)
 
 -- ---------------------------------------------------------------------------
@@ -2793,8 +2712,22 @@ end)
 -- ---------------------------------------------------------------------------
 RefreshPlayerSlots = WrapFunc(RefreshPlayerSlots, function(orig)
 	orig()
-	if m_AdvancedMode and m_advancedPlayersSection then
-		BuildPlayerSection()
+	if m_AdvancedMode and m_advPlayerSub then
+		local capture = mgr:CaptureFocusKey(m_advPlayerSub)
+		BuildAdvPlayerSection()
+		mgr:RestoreFocus(m_advPlayerSub, capture)
+	end
+end)
+
+-- ---------------------------------------------------------------------------
+-- Wrap GameParameters_UI_AfterRefresh to refresh dropdowns
+-- ---------------------------------------------------------------------------
+GameParameters_UI_AfterRefresh = WrapFunc(GameParameters_UI_AfterRefresh, function(orig, o)
+	orig(o)
+	RefreshBasicDropdowns()
+	SortBasicList()
+	if m_AdvancedMode and m_advList then
+		PopulateAdvancedList()
 	end
 end)
 
@@ -2813,30 +2746,33 @@ end
 OnShow = WrapFunc(OnShow, function(orig)
 	if CAI_Panel then
 		mgr:RemoveFromStack(CAI_Panel:GetId())
+		CAI_Panel:Destroy()
 	end
-	-- Rebuild fresh each show — game recreates parameter controls between visits
 	CAI_Panel = nil
-	CAI_SettingsList = nil
-	m_simpleParamWidgets = {}
-	m_advancedParamWidgets = {}
-	m_advancedSections = {}
-	m_advancedPlayersSection = nil
-	m_aiPlayerWidgets = {}
-	m_basicChildren = {}
-	m_activeTab = "basic"
-	CAI_TabBar = nil
+	CAI_Tabs = nil
+	m_basicPage = nil
+	m_basicList = nil
+	m_advancedPage = nil
+	m_actionRow = nil
+	m_basicDropdowns = {}
+	m_basicParamWidgets = {}
+	m_advParamWidgets = {}
+	m_advSections = {}
+	m_advList = nil
+	m_advPlayerSub = nil
 	m_intentionalClose = false
+
 	BuildPanel()
-	-- Snapshot basic children so we can restore them after leaving advanced view
-	if CAI_SettingsList then
-		for _, child in ipairs(CAI_SettingsList.Children) do
-			table.insert(m_basicChildren, child)
-		end
-	end
 	orig()
+
+	-- Sync CAI tab to vanilla's current view state
+	if m_AdvancedMode then
+		-- Non-silent so value_changed fires and builds the advanced tree + sets vanilla windows
+		CAI_Tabs:SetActivePageById(m_advancedPage.Id)
+	end
+
 	ContextPtr:SetInputHandler(function(input)
 		if mgr:HandleInput(input) then return true end
-		-- Fallback: original input handler consumed all input
 		local uiMsg = input:GetMessageType()
 		if uiMsg == KeyEvents.KeyUp then
 			local key = input:GetKey()
@@ -2850,10 +2786,8 @@ OnShow = WrapFunc(OnShow, function(orig)
 end)
 
 OnBackButton = WrapFunc(OnBackButton, function(orig)
-	-- Always close the screen, regardless of which tab is active
 	m_intentionalClose = true
 	ClosePanel()
-	-- Reset to basic mode so orig() takes the full-close path
 	if m_AdvancedMode then
 		Controls.CreateGameWindow:SetHide(false)
 		Controls.AdvancedOptionsWindow:SetHide(true)
@@ -2865,7 +2799,6 @@ OnBackButton = WrapFunc(OnBackButton, function(orig)
 end)
 
 OnHide = WrapFunc(OnHide, function(orig)
-	-- Only pop if we intentionally closed (not on connection resets or temp hides)
 	if m_intentionalClose then
 		ClosePanel()
 		m_intentionalClose = false

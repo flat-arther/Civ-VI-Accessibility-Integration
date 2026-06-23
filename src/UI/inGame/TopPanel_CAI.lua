@@ -328,6 +328,7 @@ end
 local function AddListEscapeBinding(list)
     list:AddInputBinding({
         Key = Keys.VK_ESCAPE,
+        Description = "LOC_CAI_KB_CLOSE",
         Action = function()
             CloseTopPanelList()
             return true

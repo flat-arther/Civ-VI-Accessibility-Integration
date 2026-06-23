@@ -193,18 +193,6 @@ local CAI_Panel = nil
 local CAI_ItemList = nil
 local m_intentionalClose = false
 
--- ---------------------------------------------------------------------------
--- Rebuild the accessible item list from vanilla's m_ItemList
--- ---------------------------------------------------------------------------
-local function MakeButton(labelCtrl, onClick)
-	local b = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowButton"), "Button", {
-		Label = function() return labelCtrl:GetText() end,
-	})
-	b:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	b:On("activate", onClick)
-	return b
-end
-
 local function RebuildItemList()
 	if not CAI_ItemList then return end
 	local capture = mgr:CaptureFocusKey(CAI_ItemList)
@@ -239,26 +227,48 @@ local function RebuildItemList()
 	mgr:RestoreFocus(CAI_ItemList, capture)
 end
 
--- ---------------------------------------------------------------------------
--- Build the accessible widget hierarchy
--- ---------------------------------------------------------------------------
 local function BuildPanel()
-	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowDialog"), "Dialog", {
+	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowPanel"), "Panel", {
 		Label = function() return Controls.WindowTitle:GetText() end,
-		SpeechSettings = { Role = false },
 	})
-	CAI_Panel:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
+	CAI_Panel:AddInputBinding({Key = Keys.VK_ESCAPE, Description = "LOC_CAI_KB_CLOSE", Action = function()
 		Close()
 		return true
 	end})
 
 	CAI_ItemList = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowList"), "List")
+	CAI_ItemList:AddInputBinding({Key = Keys.A, IsControl = true, Description = "LOC_CAI_KB_SELECT_ALL", Action = function()
+		Controls.SelectAllButton:DoLeftClick()
+		RebuildItemList()
+		return true
+	end})
+	CAI_ItemList:AddInputBinding({Key = Keys.A, IsControl = true, IsShift = true, Description = "LOC_CAI_KB_DESELECT_ALL", Action = function()
+		Controls.SelectNoneButton:DoLeftClick()
+		RebuildItemList()
+		return true
+	end})
 	CAI_Panel:AddChild(CAI_ItemList)
 
-	CAI_Panel:AddChild(MakeButton(Controls.SelectAllButton,  function() OnSelectAll() end))
-	CAI_Panel:AddChild(MakeButton(Controls.SelectNoneButton, function() OnSelectNone() end))
-	CAI_Panel:AddChild(MakeButton(Controls.ConfirmButton,    function() OnConfirmChanges() end))
-	CAI_Panel:AddChild(MakeButton(Controls.CloseButton,      function() Close() end))
+	local selectAllBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowSelectAllBtn"), "Button", {
+		Label = function() return Controls.SelectAllButton:GetText() end,
+	})
+	selectAllBtn:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+	selectAllBtn:On("activate", function() Controls.SelectAllButton:DoLeftClick() end)
+	CAI_Panel:AddChild(selectAllBtn)
+
+	local selectNoneBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowSelectNoneBtn"), "Button", {
+		Label = function() return Controls.SelectNoneButton:GetText() end,
+	})
+	selectNoneBtn:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+	selectNoneBtn:On("activate", function() Controls.SelectNoneButton:DoLeftClick() end)
+	CAI_Panel:AddChild(selectNoneBtn)
+
+	local confirmBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMultiSelectWindowConfirmBtn"), "Button", {
+		Label = function() return Controls.ConfirmButton:GetText() end,
+	})
+	confirmBtn:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+	confirmBtn:On("activate", function() Controls.ConfirmButton:DoLeftClick() end)
+	CAI_Panel:AddChild(confirmBtn)
 end
 
 local function ClosePanel()
@@ -267,19 +277,16 @@ local function ClosePanel()
 	end
 end
 
--- Wrap Close to track intentional closes
 Close = WrapFunc(Close, function(orig)
 	m_intentionalClose = true
 	orig()
 end)
 
--- Wrap ParameterInitialize to rebuild accessible list after vanilla populates
 ParameterInitialize = WrapFunc(ParameterInitialize, function(orig, parameter)
 	orig(parameter)
 	RebuildItemList()
 end)
 
--- Wrap SetAllItems to speak confirmation
 SetAllItems = WrapFunc(SetAllItems, function(orig, bState)
 	orig(bState)
 	if bState then
@@ -289,12 +296,10 @@ SetAllItems = WrapFunc(SetAllItems, function(orig, bState)
 	end
 end)
 
--- Show/hide handlers for push/pop lifecycle
 ContextPtr:SetShowHandler(function()
 	if CAI_Panel then
 		mgr:RemoveFromStack(CAI_Panel:GetId())
 	end
-	-- Rebuild fresh each show
 	CAI_Panel = nil
 	CAI_ItemList = nil
 	m_intentionalClose = false

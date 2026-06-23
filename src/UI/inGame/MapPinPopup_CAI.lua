@@ -107,6 +107,7 @@ local function BuildPanel()
         {
             Key = Keys.VK_ESCAPE,
             MSG = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CLOSE",
             Action = function()
                 Controls.OkButton:DoLeftClick()
                 return true
@@ -115,6 +116,7 @@ local function BuildPanel()
         {
             Key = Keys.VK_RETURN,
             MSG = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CONFIRM_MAP_PIN",
             Action = function()
                 CommitName()
                 Controls.OkButton:DoLeftClick()

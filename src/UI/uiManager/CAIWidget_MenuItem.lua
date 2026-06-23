@@ -16,7 +16,7 @@ function MenuItemWidget.Create(mgr, id, props)
     w.Manager = mgr
     w.SpeechSettings = { Role = false }
     w:AddInputBindings({
-        { Key = Keys.VK_RETURN, Action = function(self) return self:Activate() end },
+        { Key = Keys.VK_RETURN, Description = "LOC_CAI_KB_ACTIVATE", Action = function(self) return self:Activate() end },
     })
     CAIWidgetRegistry.ApplyProps(w, props)
     return w

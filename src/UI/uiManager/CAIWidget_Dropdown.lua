@@ -85,6 +85,7 @@ function DropdownWidget.Create(mgr, id, props)
     w:AddInputBindings({
         {
             Key = Keys.VK_RETURN,
+            Description = "LOC_CAI_KB_OPEN_DROPDOWN",
             Action = function(self)
                 if self._isOpen then return false end
                 self:Open()
@@ -93,6 +94,7 @@ function DropdownWidget.Create(mgr, id, props)
         },
         {
             Key = Keys.VK_ESCAPE,
+            Description = "LOC_CAI_KB_CLOSE_DROPDOWN",
             Action = function(self)
                 if not self._isOpen then return false end
                 self:Close()
@@ -152,7 +154,6 @@ function DropdownWidget:SetValue(value, silent)
     if silent then return end
     if self._valueSetter then self._valueSetter(self, value) end
     self:Emit("value_changed", value)
-    self:Announce({ "value" })
 end
 
 ---@return any
@@ -182,8 +183,8 @@ function DropdownWidget:Commit(index, silent)
     index = ClampIndex(self, index)
     if index == 0 then return end
     self._selectedIndex = index
-    self:SetValue(self._options[index].value, silent)
     self:Close()
+    self:SetValue(self._options[index].value, silent)
 end
 
 ---@param index integer

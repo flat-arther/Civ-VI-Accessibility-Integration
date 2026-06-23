@@ -679,6 +679,7 @@ local function EnsureRootBuilt()
             Key = Keys.VK_LEFT,
             MSG = KeyEvents.KeyDown,
             IsAlt = true,
+            Description = "LOC_CAI_KB_NAVIGATE_BACK",
             Action = function()
                 OnNavBackward(); return true
             end,
@@ -687,6 +688,7 @@ local function EnsureRootBuilt()
             Key = Keys.VK_RIGHT,
             MSG = KeyEvents.KeyDown,
             IsAlt = true,
+            Description = "LOC_CAI_KB_NAVIGATE_FORWARD",
             Action = function()
                 OnNavForward(); return true
             end,
@@ -1015,5 +1017,18 @@ OnClose = WrapFunc(OnClose, function(orig)
     PopPanel()
     orig()
 end)
+
+local m_caiOpenCivilopediaId = Input.GetActionId("CAIOpenCivilopedia")
+local m_vanillaOpenCivilopedia = Input.GetActionId("OpenCivilopedia")
+
+OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionId)
+    if m_caiOpenCivilopediaId and actionId == m_caiOpenCivilopediaId then
+        orig(m_vanillaOpenCivilopedia)
+        return
+    end
+    orig(actionId)
+end)
+Events.InputActionTriggered.Remove(OnInputActionTriggered)
+Events.InputActionTriggered.Add(OnInputActionTriggered)
 
 Controls.WindowCloseButton:RegisterCallback(Mouse.eLClick, OnClose)

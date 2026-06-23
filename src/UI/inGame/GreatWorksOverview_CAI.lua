@@ -387,6 +387,7 @@ local function OpenPicker(dstCityBldgs, dstBuildingIndex, dstSlotIndex)
     })
     m_ui.picker:AddInputBindings({
         { Key = Keys.VK_ESCAPE, MSG = KeyEvents.KeyUp,
+          Description = "LOC_CAI_KB_CLOSE",
           Action = function() ClosePicker() return true end },
     })
 
@@ -575,6 +576,7 @@ local function BuildTreeContent(tree)
                                     Key       = Keys.VK_RETURN,
                                     IsControl = true,
                                     MSG       = KeyEvents.KeyUp,
+                                    Description = "LOC_CAI_KB_VIEW_GREAT_WORK",
                                     Action = function()
                                         local gw = cBldgs:GetGreatWorkInSlot(
                                             cBIdx, cSI)

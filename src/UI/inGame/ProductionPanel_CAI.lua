@@ -845,6 +845,7 @@ local function CreateItemRow(item, tab, formation)
             Key     = Keys.VK_RETURN,
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
             Action  = function() return InvokeRightClickPedia(item) ~= false end,
         },
     }
@@ -853,6 +854,7 @@ local function CreateItemRow(item, tab, formation)
             Key       = Keys.VK_RETURN,
             IsControl = true,
             MSG       = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_QUEUE_PRODUCTION",
             Action    = function(w)
                 if w.IsDisabled and w:IsDisabled() then return true end
                 return BuildItemQueueAction(item, tab, formation)() ~= false
@@ -951,6 +953,7 @@ local function CreateCurrentProductionRow()
         {
             Key    = Keys.VK_DELETE,
             MSG    = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_REMOVE_FROM_QUEUE",
             Action = RemoveCurrentProductionFromQueue,
         },
     })
@@ -1144,13 +1147,15 @@ local function CreateQueueRow(queueIndex, name)
     row._caiQueueIndex = queueIndex
     row._caiQueueName = name
     row:AddInputBindings({
-        { Key = Keys.VK_DELETE, MSG = KeyEvents.KeyUp, Action = RemoveFocusedQueueItem },
+        { Key = Keys.VK_DELETE, MSG = KeyEvents.KeyUp, Description = "LOC_CAI_KB_REMOVE_FROM_QUEUE", Action = RemoveFocusedQueueItem },
         {
             Key = Keys.VK_UP, IsShift = true, MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_MOVE_QUEUE_UP",
             Action = function() return MoveQueueSelection(-1) end,
         },
         {
             Key = Keys.VK_DOWN, IsShift = true, MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_MOVE_QUEUE_DOWN",
             Action = function() return MoveQueueSelection(1) end,
         },
     })
@@ -1165,7 +1170,7 @@ local function CreateQueueCurrentRow()
     })
     row:SetFocusSound("Main_Menu_Mouse_Over")
     row:AddInputBindings({
-        { Key = Keys.VK_DELETE, MSG = KeyEvents.KeyUp, Action = RemoveCurrentProductionFromQueue },
+        { Key = Keys.VK_DELETE, MSG = KeyEvents.KeyUp, Description = "LOC_CAI_KB_REMOVE_FROM_QUEUE", Action = RemoveCurrentProductionFromQueue },
     })
     return row
 end

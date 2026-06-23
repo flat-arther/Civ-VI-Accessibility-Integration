@@ -23,13 +23,14 @@ function DialogWidget.Create(mgr, id, props)
     w.Role = "Dialog"
     w.Manager = mgr
     w:AddInputBindings({
-        { Key = Keys.VK_TAB,  MSG = KeyEvents.KeyDown, Action = function(self) return self:NavigateNext() end },
-        { Key = Keys.VK_TAB,  MSG = KeyEvents.KeyDown, IsShift = true,                                        Action = function(
+        { Key = Keys.VK_TAB,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_NEXT_CONTROL",     Action = function(self) return self:NavigateNext() end },
+        { Key = Keys.VK_TAB,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_PREVIOUS_CONTROL", IsShift = true,                                        Action = function(
             self) return self:NavigatePrev() end },
-        { Key = Keys.VK_DOWN, MSG = KeyEvents.KeyDown, Action = function(self) return self:NavigateNext() end },
-        { Key = Keys.VK_UP,   MSG = KeyEvents.KeyDown, Action = function(self) return self:NavigatePrev() end },
+        { Key = Keys.VK_DOWN, MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_NEXT_CONTROL",     Action = function(self) return self:NavigateNext() end },
+        { Key = Keys.VK_UP,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_PREVIOUS_CONTROL", Action = function(self) return self:NavigatePrev() end },
         {
             Key = Keys.VK_RETURN,
+            Description = "LOC_CAI_KB_DEFAULT_ACTION",
             Action = function(self)
                 local target = self._defaultActionChild
                 if target and not target:IsHidden() and not target:IsDisabled() then
@@ -66,10 +67,10 @@ function DialogWidget:SetButtons(buttons, defaultIndex)
         Transparent = true,
     })
     row:AddInputBindings({
-        { Key = Keys.VK_LEFT,  MSG = KeyEvents.KeyDown, Action = function(self) return self:NavigatePrev() end },
-        { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown, Action = function(self) return self:NavigateNext() end },
-        { Key = Keys.VK_UP,    MSG = KeyEvents.KeyDown, Action = function(self) return self:NavigatePrev() end },
-        { Key = Keys.VK_DOWN,  MSG = KeyEvents.KeyDown, Action = function(self) return self:NavigateNext() end },
+        { Key = Keys.VK_LEFT,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_PREVIOUS_BUTTON", Action = function(self) return self:NavigatePrev() end },
+        { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_NEXT_BUTTON",     Action = function(self) return self:NavigateNext() end },
+        { Key = Keys.VK_UP,    MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_PREVIOUS_BUTTON", Action = function(self) return self:NavigatePrev() end },
+        { Key = Keys.VK_DOWN,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_NEXT_BUTTON",     Action = function(self) return self:NavigateNext() end },
     })
     if buttons then row:AddChildren(buttons) end
     self:AddChild(row)

@@ -74,6 +74,7 @@ local function OpenConfirmDialog(beliefRow, vanillaButton)
             {
                 Key = Keys.VK_ESCAPE,
                 MSG = KeyEvents.KeyUp,
+                Description = "LOC_CAI_KB_CLOSE",
                 Action = function()
                     Controls.CancelButton:DoLeftClick()
                     CloseConfirmDialog()

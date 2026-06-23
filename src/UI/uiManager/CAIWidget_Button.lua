@@ -15,8 +15,8 @@ function ButtonWidget.Create(mgr, id, props)
     w.Role = "Button"
     w.Manager = mgr
     w:AddInputBindings({
-        { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyUp, Action = function(self) return self:Activate() end },
-        { Key = Keys.VK_SPACE,                         Action = function(self) return self:Activate() end },
+        { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyUp, Description = "LOC_CAI_KB_ACTIVATE", Action = function(self) return self:Activate() end },
+        { Key = Keys.VK_SPACE,                         Description = "LOC_CAI_KB_ACTIVATE", Action = function(self) return self:Activate() end },
     })
     CAIWidgetRegistry.ApplyProps(w, props)
     return w

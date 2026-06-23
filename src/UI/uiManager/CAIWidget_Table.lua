@@ -72,16 +72,16 @@ function TableWidget.Create(mgr, id, props)
     w.Manager = mgr
     w.WrapAround = false
     w:AddInputBindings({
-        { Key = Keys.VK_UP,    MSG = KeyEvents.KeyDown,                   Action = function(self) return self:_NavigateVertical(-1) end },
-        { Key = Keys.VK_DOWN,  MSG = KeyEvents.KeyDown,                   Action = function(self) return self:_NavigateVertical( 1) end },
-        { Key = Keys.VK_LEFT,  MSG = KeyEvents.KeyDown,                   Action = function(self) return self:_NavigateHorizontal(-1) end },
-        { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown,                   Action = function(self) return self:_NavigateHorizontal( 1) end },
-        { Key = Keys.VK_HOME,  MSG = KeyEvents.KeyDown,                   Action = function(self) return self:_NavigateTierEdge(-1) end },
-        { Key = Keys.VK_END,   MSG = KeyEvents.KeyDown,                   Action = function(self) return self:_NavigateTierEdge( 1) end },
-        { Key = Keys.VK_HOME,  MSG = KeyEvents.KeyDown, IsControl = true, Action = function(self) return self:_NavigateTableEdge(-1) end },
-        { Key = Keys.VK_END,   MSG = KeyEvents.KeyDown, IsControl = true, Action = function(self) return self:_NavigateTableEdge( 1) end },
-        { Key = Keys.VK_LEFT,  MSG = KeyEvents.KeyDown, IsControl = true, Action = function(self) return self:_NavigateColumn(-1) end },
-        { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown, IsControl = true, Action = function(self) return self:_NavigateColumn( 1) end },
+        { Key = Keys.VK_UP,    MSG = KeyEvents.KeyDown,                   Description = "LOC_CAI_KB_MOVE_UP",             Action = function(self) return self:_NavigateVertical(-1) end },
+        { Key = Keys.VK_DOWN,  MSG = KeyEvents.KeyDown,                   Description = "LOC_CAI_KB_MOVE_DOWN",           Action = function(self) return self:_NavigateVertical( 1) end },
+        { Key = Keys.VK_LEFT,  MSG = KeyEvents.KeyDown,                   Description = "LOC_CAI_KB_MOVE_LEFT",           Action = function(self) return self:_NavigateHorizontal(-1) end },
+        { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown,                   Description = "LOC_CAI_KB_MOVE_RIGHT",          Action = function(self) return self:_NavigateHorizontal( 1) end },
+        { Key = Keys.VK_HOME,  MSG = KeyEvents.KeyDown,                   Description = "LOC_CAI_KB_MOVE_TO_ROW_START",   Action = function(self) return self:_NavigateTierEdge(-1) end },
+        { Key = Keys.VK_END,   MSG = KeyEvents.KeyDown,                   Description = "LOC_CAI_KB_MOVE_TO_ROW_END",     Action = function(self) return self:_NavigateTierEdge( 1) end },
+        { Key = Keys.VK_HOME,  MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_MOVE_TO_TABLE_START", Action = function(self) return self:_NavigateTableEdge(-1) end },
+        { Key = Keys.VK_END,   MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_MOVE_TO_TABLE_END",   Action = function(self) return self:_NavigateTableEdge( 1) end },
+        { Key = Keys.VK_LEFT,  MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_PREVIOUS_COLUMN",     Action = function(self) return self:_NavigateColumn(-1) end },
+        { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_NEXT_COLUMN",         Action = function(self) return self:_NavigateColumn( 1) end },
     })
     CAIWidgetRegistry.ApplyProps(w, props)
     return w

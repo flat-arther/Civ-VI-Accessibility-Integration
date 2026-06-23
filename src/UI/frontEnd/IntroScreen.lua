@@ -94,18 +94,70 @@ function Startup()
 	Events.InputActionTriggered.Add( OnInputActionTriggered );
     Events.UserRequestClose.Add( OnRequestClose );
 
-	-- Manually call OnShow because SetActiveContext does not appear to call it normally.
-	OnShow();
+
 end
 --#Accessibility integration
 include ("caiUtils")
 include("CAIUIScreenManager")
 local mgr             = ExposedMembers.CAI_UIManager
 
+local m_eulaPanel = nil
+
+local function BuildEulaPanel()
+	if m_eulaPanel then return end
+
+	m_eulaPanel = mgr:CreateWidget("CAIIntro_EulaPanel", "Panel", {
+		Label = function() return Locale.Lookup("LOC_CAI_EULA_PANEL") end,
+	})
+
+	local edit = mgr:CreateWidget("CAIIntro_EulaText", "EditBox", {
+		Label    = function() return Locale.Lookup("LOC_CAI_EULA_TEXT") end,
+		ReadOnly = true,
+		AlwaysEdit = true,
+		HighlightOnEdit = false,
+	})
+	edit:SetText(Controls.CopyrightText:GetText(), true)
+	m_eulaPanel:AddChild(edit)
+
+	local acceptBtn = mgr:CreateWidget("CAIIntro_AcceptBtn", "Button", {
+		Label = function() return Controls.CopyrightAccept:GetText() end,
+	})
+	acceptBtn:SetFocusSound("Main_Menu_Mouse_Over")
+	acceptBtn:On("activate", function()
+		OnAccept()
+	end)
+	m_eulaPanel:AddChild(acceptBtn)
+
+	m_eulaPanel:AddInputBinding({
+		Key = Keys.VK_RETURN,
+		MSG = KeyEvents.KeyUp,
+		Description = "LOC_CAI_KB_ACCEPT",
+		Action = function()
+			OnAccept()
+			return true
+		end,
+	})
+end
+
+
+OnShow = WrapFunc(OnShow, function(orig)
+	orig()
+	BuildEulaPanel()
+	mgr:Push(m_eulaPanel)
+end)
+
+function OnHandleInput(pInputStruct)
+	if mgr then
+		return mgr:HandleInput(pInputStruct)
+	end
+end
 -- This context does not have a vanilla 'OnShutdown' function, so we add one to kill the UI manager
 function OnShutdown()
 	mgr:ShutDown()
 end
 ContextPtr:SetShutdown( OnShutdown );
+ContextPtr:SetInputHandler(OnHandleInput, true)
+
 --#End of accessibility integration
-AcceptEULA();
+	-- Manually call OnShow because SetActiveContext does not appear to call it normally.
+	OnShow();

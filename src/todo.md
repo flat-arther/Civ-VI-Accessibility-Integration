@@ -7,7 +7,7 @@
 - [x] investigate goverment screen appears to disallow unlock with gold on the same turn if you've confirmed your policies already
 - [x] make settler lens recommendations
 - [x]make contenents named zones that change if you move in to one, E.G.: contenent of europ. in order to cover the contenent lens.
-- [ ] show cities with religion majority to cover the religion lens
+- [x] show cities with religion majority to cover the religion lens
 - [x] show appeal plots grouped by their level to cover the appeal lens. Other lenses that can be useful [https://civilization.fandom.com/wiki/Lens_(Civ6)]
 - [x] revise and cover info missing from the unit panel
 - [ ] make s or another key show a list of units with a detailed view on a tile with enter allowing you to select your own units
@@ -22,17 +22,17 @@
 - [x]settler lens shows differently colored spots, red = can't settle, bluish gray tiles = no access to fresh water, light green = coastal waters +1 to housing, bright green = access to fresh water from a river or a lake +3 to housing. it also shows icons on plots for loyalty , The negative Loyalty pressure from other civilizations is shown with number icons. Coastal tiles that may be flooded as the sea level rises are marked by a wave icon. There are 3 levels of coastal lowland tiles, which are also shown. (The tiles that belong to the first level which may be flooded by the first sea level rise are without numbers.).
   [x]Floodplains tiles and tiles that are susceptible to volcanic eruptions are marked with their corresponding icons.
 
-[ ] Add map search accessibility
-[ ] Add plot info for active lenses
-[ ] Handle different advisor recommendations
+[x] Add map search accessibility
+[x] Add plot info for active lenses
+[x] Handle different advisor recommendations
 [x]Add some flag info to unit panel selection info plottooltip
 [ ] confirm that anti-air intercepter combat previews / results work as intended
 [ ]Move abilities and xp gains to their own event, so we can report which unit got xp / abilities
 [x]Make espionage shit accessible
-[ ] add city states to the cities category in the scanner
-[ ] Add districts to the scanner
+[x] add city states to the cities category in the scanner
+[x] Add districts to the scanner
 [x]Fix bug in the gov screen, if you choose a policy, go to governments and back, it does not remember your selection while still excluding it from the picker
-- [ ] Rework the nav cursor class to send a cursor struct for events rather than splitting between jumping and regular movement
+- [x] Rework the nav cursor class to send a cursor struct for events rather than splitting between jumping and regular movement
 -[ ] Capital city should say capital
-[ ] Look ats in city-states, espionage, trade, and great people should move the cursor
-[ ] rework icon processing
+[x] Look ats in city-states, espionage, trade, and great people should move the cursor
+[x] rework icon processing

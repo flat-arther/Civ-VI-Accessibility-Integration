@@ -539,6 +539,7 @@ end
 
 local CITY_DETAILS_BINDING = {
     Key = Keys.VK_RETURN, IsControl = true,
+    Description = "LOC_CAI_KB_OPEN_CITY_DETAILS",
     Action = function() return OpenFocusedCityDetails() end,
 }
 
@@ -756,6 +757,7 @@ local function BuildPanel()
         {
             Key = Keys.VK_ESCAPE,
             MSG = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CLOSE",
             Action = function()
                 Close()
                 return true

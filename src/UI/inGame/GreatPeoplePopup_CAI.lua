@@ -534,7 +534,7 @@ local function BuildHeroesList()
             end)
             if GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_CIVPEDIA") then
                 item:AddInputBindings({
-                    { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyUp, IsShift = true, Action = function()
+                    { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyUp, IsShift = true, Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA", Action = function()
                         LuaEvents.GreatPeopleHeroPanel_Close()
                         LuaEvents.OpenCivilopedia(heroRow.UnitType)
                         return true

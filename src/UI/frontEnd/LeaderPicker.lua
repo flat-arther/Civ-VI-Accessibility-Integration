@@ -352,21 +352,21 @@ local mgr = ExposedMembers.CAI_UIManager
 
 local CAI_Panel = nil
 local CAI_ItemList = nil
+local CAI_PresetDD = nil
 local m_intentionalClose = false
 
--- ---------------------------------------------------------------------------
--- Rebuild the accessible item list from vanilla's m_kItemList
--- ---------------------------------------------------------------------------
-local function MakeButton(labelCtrl, onClick, disabledCtrl)
-	local b = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerButton"), "Button", {
-		Label = function() return labelCtrl:GetText() end,
-	})
-	if disabledCtrl then
-		b:SetDisabledPredicate(function() return disabledCtrl:IsDisabled() end)
+local function BuildPresetDropdownOptions()
+	local options = {
+		{ label = Locale.Lookup("LOC_LEADER_PICK_PRESET_ALL"),     value = "all" },
+		{ label = Locale.Lookup("LOC_LEADER_PICK_PRESET_NONE"),    value = "none" },
+		{ label = Locale.Lookup("LOC_LEADER_PICK_PRESET_NO_WINS"), value = "no_wins" },
+	}
+	local current = Controls.PresetPulldown:GetButton():GetText()
+	local selectedIdx = 1
+	for i, opt in ipairs(options) do
+		if opt.label == current then selectedIdx = i end
 	end
-	b:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	b:On("activate", onClick)
-	return b
+	return options, selectedIdx
 end
 
 local function RebuildItemList()
@@ -406,68 +406,49 @@ local function RebuildItemList()
 	mgr:RestoreFocus(CAI_ItemList, capture)
 end
 
-local function OpenPresetDropdown()
-	local optList = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerList"), "List", {
-		Label = function() return Controls.StringName:GetText() end,
-	})
-	optList:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
-		mgr:RemoveFromStack(optList:GetId())
-		return true
-	end})
-
-	local pulldown = Controls.PresetPulldown
-	local function AddPreset(labelKey, action)
-		local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerMenuItem"), "MenuItem", {
-			Label = function() return Locale.Lookup(labelKey) end,
-		})
-		item:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-		item:On("activate", function()
-			pulldown:GetButton():SetText(Locale.Lookup(labelKey))
-			action()
-			RebuildItemList()
-			mgr:RemoveFromStack(optList:GetId())
-		end)
-		optList:AddChild(item)
-	end
-
-	AddPreset("LOC_LEADER_PICK_PRESET_ALL",     function() OnSelectAll() end)
-	AddPreset("LOC_LEADER_PICK_PRESET_NONE",    function() OnSelectNone() end)
-	AddPreset("LOC_LEADER_PICK_PRESET_NO_WINS", function() SelectLeadersWithNoWins() end)
-
-	mgr:Push(optList)
-end
-
 local function BuildPanel()
-	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerDialog"), "Dialog", {
+	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerPanel"), "Panel", {
 		Label = function() return Controls.WindowTitle:GetText() end,
-		SpeechSettings = { Role = false },
 	})
-	CAI_Panel:AddInputBinding({Key = Keys.VK_ESCAPE, Action = function()
+	CAI_Panel:AddInputBinding({Key = Keys.VK_ESCAPE, Description = "LOC_CAI_KB_CLOSE", Action = function()
 		Close()
 		return true
 	end})
 
-	local presetBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerPresetBtn"), "Button", {
+	CAI_PresetDD = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerPresetDD"), "Dropdown", {
 		Label = function() return Controls.StringName:GetText() end,
-		ValueGetter = function() return Controls.PresetPulldown:GetButton():GetText() end,
 	})
-	presetBtn:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	presetBtn:On("activate", function() OpenPresetDropdown() end)
-	CAI_Panel:AddChild(presetBtn)
-
-	CAI_Panel:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerStaticText"), "StaticText", {
-		Label = function() return Controls.CountWarning:GetText() or "" end,
-		HiddenPredicate = function()
-			local text = Controls.CountWarning:GetText()
-			return not text or text == ""
-		end,
-	}))
+	local options, idx = BuildPresetDropdownOptions()
+	CAI_PresetDD:SetOptions(options)
+	if idx > 0 then CAI_PresetDD:SetSelectedIndex(idx, true) end
+	CAI_PresetDD:SetFocusSound("Main_Menu_Mouse_Over")
+	CAI_PresetDD:On("value_changed", function(_, val)
+		local pulldown = Controls.PresetPulldown
+		if val == "all" then
+			pulldown:GetButton():SetText(Locale.Lookup("LOC_LEADER_PICK_PRESET_ALL"))
+			OnSelectAll()
+		elseif val == "none" then
+			pulldown:GetButton():SetText(Locale.Lookup("LOC_LEADER_PICK_PRESET_NONE"))
+			OnSelectNone()
+		elseif val == "no_wins" then
+			pulldown:GetButton():SetText(Locale.Lookup("LOC_LEADER_PICK_PRESET_NO_WINS"))
+			SelectLeadersWithNoWins()
+		end
+		RebuildItemList()
+	end)
+	CAI_Panel:AddChild(CAI_PresetDD)
 
 	CAI_ItemList = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerList"), "List")
 	CAI_Panel:AddChild(CAI_ItemList)
 
-	CAI_Panel:AddChild(MakeButton(Controls.ConfirmButton, function() OnConfirmChanges() end, Controls.ConfirmButton))
-	CAI_Panel:AddChild(MakeButton(Controls.CloseButton,   function() Close() end))
+	local confirmBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerConfirmBtn"), "Button", {
+		Label = function() return Controls.ConfirmButton:GetText() end,
+		Tooltip = function() return Controls.CountWarning:GetText() or "" end,
+	})
+	confirmBtn:SetDisabledPredicate(function() return Controls.ConfirmButton:IsDisabled() end)
+	confirmBtn:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+	confirmBtn:On("activate", function() Controls.ConfirmButton:DoLeftClick() end)
+	CAI_Panel:AddChild(confirmBtn)
 end
 
 local function ClosePanel()
@@ -476,25 +457,26 @@ local function ClosePanel()
 	end
 end
 
--- Wrap Close to track intentional closes
 Close = WrapFunc(Close, function(orig)
 	m_intentionalClose = true
 	orig()
 end)
 
--- Wrap ParameterInitialize to rebuild accessible list
 ParameterInitialize = WrapFunc(ParameterInitialize, function(orig, kParameter, pGameParameters)
 	orig(kParameter, pGameParameters)
+	if CAI_PresetDD then
+		local options, idx = BuildPresetDropdownOptions()
+		CAI_PresetDD:SetOptions(options)
+		if idx > 0 then CAI_PresetDD:SetSelectedIndex(idx, true) end
+	end
 	RebuildItemList()
 end)
 
--- Wrap RefreshList to rebuild accessible list after sort
 RefreshList = WrapFunc(RefreshList, function(orig, sortByFunc)
 	orig(sortByFunc)
 	RebuildItemList()
 end)
 
--- Wrap RefreshCountWarning to speak warning text
 RefreshCountWarning = WrapFunc(RefreshCountWarning, function(orig)
 	orig()
 	local warningText = Controls.CountWarning:GetText()
@@ -503,19 +485,18 @@ RefreshCountWarning = WrapFunc(RefreshCountWarning, function(orig)
 	end
 end)
 
--- Wrap SelectLeadersWithNoWins to rebuild list after
 SelectLeadersWithNoWins = WrapFunc(SelectLeadersWithNoWins, function(orig)
 	orig()
 	RebuildItemList()
 end)
 
--- Show/hide handlers for push/pop lifecycle
 ContextPtr:SetShowHandler(function()
 	if CAI_Panel then
 		mgr:RemoveFromStack(CAI_Panel:GetId())
 	end
 	CAI_Panel = nil
 	CAI_ItemList = nil
+	CAI_PresetDD = nil
 	m_intentionalClose = false
 	BuildPanel()
 	RebuildItemList()

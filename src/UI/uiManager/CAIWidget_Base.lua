@@ -7,6 +7,7 @@ include("InputSupport")
 local SPEECH_ORDER = { "label", "role", "state", "value", "tooltip", "position" }
 
 local PediaLookup = CAIWidgetHelpers_PediaLookup
+local InputHelp = CAIWidgetHelpers_InputHelp
 
 ---@class UIWidget
 ---@field Id? string
@@ -27,6 +28,7 @@ UIWidget.__index = UIWidget
 ---@field IsControl? boolean
 ---@field IsAlt? boolean
 ---@field MSG? KeyEvents
+---@field Description? string
 local baseInputBinding = { IsShift = false, IsControl = false, IsAlt = false, MSG = KeyEvents.KeyUp }
 
 ---Constructs a new widget instance bound to its class metatable.
@@ -40,8 +42,20 @@ function UIWidget.New(class)
     w.SpeechSettings = {}
     w._listeners = {}
     w:AddInputBinding({
-        Key = Keys.I, IsAlt = true,
+        Key = Keys.I,
+        IsAlt = true,
+        Description = "LOC_CAI_KB_PEDIA_LOOKUP",
+        Common = true,
         Action = function(self) return PediaLookup.RunLookup(self) end,
+    })
+    w:AddInputBinding({
+        Key = Keys.VK_OEM_2,
+        IsShift = true,
+        Description = "LOC_CAI_KB_INPUT_HELP",
+        Common = true,
+        Action = function(self)
+            return InputHelp.RunHelp(self)
+        end,
     })
     return w
 end

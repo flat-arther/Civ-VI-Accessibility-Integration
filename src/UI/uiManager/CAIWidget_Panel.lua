@@ -17,8 +17,8 @@ function PanelWidget.Create(mgr, id, props)
     w.Role = "Panel"
     w.Manager = mgr
     w:AddInputBindings({
-        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown,                Action = function(self) return self:NavigateNext() end },
-        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsShift = true, Action = function(self) return self:NavigatePrev() end },
+        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown,                Description = "LOC_CAI_KB_NEXT_CONTROL",     Action = function(self) return self:NavigateNext() end },
+        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsShift = true, Description = "LOC_CAI_KB_PREVIOUS_CONTROL", Action = function(self) return self:NavigatePrev() end },
     })
     CAIWidgetRegistry.ApplyProps(w, props)
     return w

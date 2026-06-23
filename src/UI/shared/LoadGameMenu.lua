@@ -587,8 +587,10 @@ include("caiUtils")
 local mgr = ExposedMembers.CAI_UIManager
 
 local CAI_Panel = nil
-local CAI_FileList = nil
-local CAI_InspectorList = nil
+local CAI_SaveTree = nil
+local CAI_DirList = nil
+local CAI_DirDropdown = nil
+local CAI_SortDropdown = nil
 
 -- ---------------------------------------------------------------------------
 -- Helpers
@@ -618,63 +620,21 @@ local function LookupBundleOrText(value)
 	return ""
 end
 
-local function JoinParts(parts)
-	local out = {}
-	for _, part in ipairs(parts) do
-		if part and part ~= "" then
-			table.insert(out, part)
-		end
-	end
-	return table.concat(out, ", ")
-end
-
-local function GetSelectedFileInfo()
-	if g_FileList and g_iSelectedFileEntry and g_iSelectedFileEntry > 0 then
-		return g_FileList[g_iSelectedFileEntry]
-	end
-	return nil
-end
-
-local function GetCurrentSortLabel()
-	local button = Controls.SortByPullDown and Controls.SortByPullDown:GetButton()
-	return button and button:GetText() or ""
-end
-
-local function GetCurrentDirectoryLabel()
-	local button = Controls.DirectoryPullDown and Controls.DirectoryPullDown:GetButton()
-	return button and button:GetText() or ""
-end
-
-local function GetEntryControl(idx)
-	return g_FileEntryInstanceList and g_FileEntryInstanceList[idx] or nil
-end
-
 local function GetEntryLabel(idx, entry)
-	local instance = GetEntryControl(idx)
+	local instance = g_FileEntryInstanceList and g_FileEntryInstanceList[idx] or nil
 	if instance and instance.ButtonText and instance.ButtonText.GetText then
 		local text = instance.ButtonText:GetText()
 		if text and text ~= "" then
 			return text
 		end
 	end
-
 	if entry and entry.DisplayName and entry.DisplayName ~= "" then
 		return entry.DisplayName
 	end
-
 	if entry then
 		return GetDisplayName(entry)
 	end
-
 	return ""
-end
-
-local function GetShortEntrySummary()
-	return JoinParts({
-		SafeText(Controls.SelectedCurrentTurnLabel),
-		SafeText(Controls.SelectedTimeLabel),
-		SafeText(Controls.SelectedHostEraLabel),
-	})
 end
 
 local function ClosePanel()
@@ -683,87 +643,77 @@ local function ClosePanel()
 	end
 end
 
-local function AddInspectorRow(label, value)
-	if not CAI_InspectorList then return end
-	if not value or value == "" then return end
+local function IsDirectoryView()
+	if not g_FileList or #g_FileList == 0 then return false end
+	for _, entry in ipairs(g_FileList) do
+		if entry.IsDirectory then return true end
+	end
+	return false
+end
 
+-- ---------------------------------------------------------------------------
+-- Add detail rows as children of a TreeItem
+-- ---------------------------------------------------------------------------
+local function AddDetailChild(parent, label, value)
+	if not value or value == "" then return end
 	local text = label and label ~= "" and (label .. ", " .. value) or value
-	CAI_InspectorList:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuMenuItem"), "MenuItem", {
+	parent:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadDetail"), "MenuItem", {
 		Label = function() return text end,
 	}))
 end
 
-local function RebuildInspectorAccessibility()
-	if not CAI_InspectorList then return end
-	CAI_InspectorList:ClearChildren()
-
-	local fileInfo = GetSelectedFileInfo()
-	if not fileInfo or fileInfo.IsDirectory then
-		return
+local function PopulateTreeItemDetails(treeItem, entry)
+	local displayName = entry.DisplayName or GetDisplayName(entry)
+	AddDetailChild(treeItem, Locale.Lookup("LOC_CAI_LABEL_FILE_NAME"), displayName)
+	if entry.CurrentTurn then
+		AddDetailChild(treeItem, nil, Locale.Lookup("LOC_LOADSAVE_CURRENT_TURN", entry.CurrentTurn))
 	end
-
-	local function AddHeader(text)
-		if not text or text == "" then return end
-		CAI_InspectorList:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuMenuItem"), "MenuItem", {
-			Label = function() return text end,
-		}))
+	if entry.DisplaySaveTime and entry.DisplaySaveTime ~= "" then
+		AddDetailChild(treeItem, Locale.Lookup("LOC_CAI_LABEL_SAVE_TIME"), entry.DisplaySaveTime)
 	end
+	AddDetailChild(treeItem, Locale.Lookup("LOC_CAI_LABEL_ERA"), LookupBundleOrText(entry.HostEraName))
+	AddDetailChild(treeItem, Locale.Lookup("LOC_CAI_LABEL_CIV"), LookupBundleOrText(entry.HostCivilizationName))
+	AddDetailChild(treeItem, Locale.Lookup("LOC_CAI_LABEL_LEADER"), LookupBundleOrText(entry.HostLeaderName))
+	AddDetailChild(treeItem, Locale.Lookup("LOC_CAI_LABEL_DIFFICULTY"), LookupBundleOrText(entry.HostDifficultyName))
+	AddDetailChild(treeItem, Locale.Lookup("LOC_CAI_LABEL_SPEED"), LookupBundleOrText(entry.GameSpeedName))
 
-	AddInspectorRow(Locale.Lookup("LOC_CAI_LABEL_FILE_NAME"), SafeText(Controls.FileName))
-	AddInspectorRow(nil, SafeText(Controls.SelectedCurrentTurnLabel))
-	AddInspectorRow(Locale.Lookup("LOC_CAI_LABEL_SAVE_TIME"), SafeText(Controls.SelectedTimeLabel))
-	AddInspectorRow(Locale.Lookup("LOC_CAI_LABEL_ERA"), SafeText(Controls.SelectedHostEraLabel))
-	AddInspectorRow(Locale.Lookup("LOC_CAI_LABEL_CIV"), SafeTooltip(Controls.CivIcon))
-	AddInspectorRow(Locale.Lookup("LOC_CAI_LABEL_LEADER"), SafeTooltip(Controls.LeaderIcon))
-	AddInspectorRow(Locale.Lookup("LOC_AD_SETUP_DIFFICULTY"), SafeTooltip(Controls.GameDifficulty))
-	AddInspectorRow(Locale.Lookup("LOC_GAME_SPEED"), SafeTooltip(Controls.GameSpeed))
+	local rulesetName = LookupBundleOrText(entry.RulesetName)
+	AddDetailChild(treeItem, Locale.Lookup("LOC_LOADSAVE_GAME_OPTIONS_RULESET_TYPE_TITLE"), rulesetName)
 
-	-- Game options section
-	AddHeader(Locale.Lookup("LOC_LOADSAVE_GAME_OPTIONS_HEADER_TITLE"))
-
-	local rulesetName = LookupBundleOrText(fileInfo.RulesetName)
-	AddInspectorRow(Locale.Lookup("LOC_LOADSAVE_GAME_OPTIONS_RULESET_TYPE_TITLE"), rulesetName)
-
-	if fileInfo.EnabledGameModes then
+	if entry.EnabledGameModes then
 		local modeNames = {}
-		local enabledModes = Modding.GetGameModesFromConfigurationString(fileInfo.EnabledGameModes)
+		local enabledModes = Modding.GetGameModesFromConfigurationString(entry.EnabledGameModes)
 		for _, v in ipairs(enabledModes) do
 			if v and v.Name and v.Name ~= "" then
 				table.insert(modeNames, v.Name)
 			end
 		end
 		if #modeNames > 0 then
-			AddInspectorRow(Locale.Lookup("LOC_MULTIPLAYER_LOBBY_GAMEMODES_OFFICIAL"), table.concat(modeNames, ", "))
+			AddDetailChild(treeItem, Locale.Lookup("LOC_MULTIPLAYER_LOBBY_GAMEMODES_OFFICIAL"), table.concat(modeNames, ", "))
 		end
 	end
 
-	local mapScriptName = LookupBundleOrText(fileInfo.MapScriptName)
-	AddInspectorRow(Locale.Lookup("LOC_LOADSAVE_GAME_OPTIONS_MAP_TYPE_TITLE"), mapScriptName)
+	AddDetailChild(treeItem, Locale.Lookup("LOC_LOADSAVE_GAME_OPTIONS_MAP_TYPE_TITLE"), LookupBundleOrText(entry.MapScriptName))
+	AddDetailChild(treeItem, Locale.Lookup("LOC_LOADSAVE_GAME_OPTIONS_MAP_SIZE_TITLE"), LookupBundleOrText(entry.MapSizeName))
 
-	local mapSizeName = LookupBundleOrText(fileInfo.MapSizeName)
-	AddInspectorRow(Locale.Lookup("LOC_LOADSAVE_GAME_OPTIONS_MAP_SIZE_TITLE"), mapSizeName)
-
-	if fileInfo.SavedByVersion and fileInfo.SavedByVersion ~= "" then
-		AddInspectorRow(Locale.Lookup("LOC_LOADSAVE_SAVED_BY_VERSION_TITLE"), fileInfo.SavedByVersion)
+	if entry.SavedByVersion and entry.SavedByVersion ~= "" then
+		AddDetailChild(treeItem, Locale.Lookup("LOC_LOADSAVE_SAVED_BY_VERSION_TITLE"), entry.SavedByVersion)
 	end
 
-	if fileInfo.TunerActive == true then
-		AddInspectorRow(Locale.Lookup("LOC_LOADSAVE_TUNER_ACTIVE_TITLE"), Locale.Lookup("LOC_YES_BUTTON"))
+	if entry.TunerActive == true then
+		AddDetailChild(treeItem, Locale.Lookup("LOC_LOADSAVE_TUNER_ACTIVE_TITLE"), Locale.Lookup("LOC_YES_BUTTON"))
 	end
 
-	-- Additional content / mods section
 	local mods
 	if g_FileType == SaveFileTypes.GAME_CONFIGURATION then
-		mods = fileInfo.EnabledMods or {}
+		mods = entry.EnabledMods or {}
 	else
-		mods = fileInfo.RequiredMods or {}
+		mods = entry.RequiredMods or {}
 	end
 
 	if #mods > 0 then
-		AddHeader(Locale.Lookup("LOC_MAIN_MENU_ADDITIONAL_CONTENT"))
-
 		local modErrors = Modding.CheckRequirements(mods, g_GameType)
-		if not Challenges.IsNullChallengeUuid(fileInfo.GameChallengeUuid) then
+		if not Challenges.IsNullChallengeUuid(entry.GameChallengeUuid) then
 			for _, v in ipairs(mods) do
 				if modErrors and modErrors[v.Id] == "NotAllowed" then
 					modErrors[v.Id] = nil
@@ -784,7 +734,6 @@ local function RebuildInspectorAccessibility()
 			if not title or title == "" then
 				title = LookupBundleOrText(v.Title)
 			end
-
 			if title and title ~= "" then
 				if modErrors and modErrors[v.Id] then
 					table.insert(modTitles, title .. ", " .. Locale.Lookup("LOC_GAME_START_ERROR_TITLE"))
@@ -796,108 +745,36 @@ local function RebuildInspectorAccessibility()
 
 		table.sort(modTitles, function(a, b) return Locale.Compare(a, b) == -1 end)
 
-		for _, title in ipairs(modTitles) do
-			AddInspectorRow(nil, title)
-		end
-	end
-end
-
--- ---------------------------------------------------------------------------
--- Accessible pulldown overlays
--- ---------------------------------------------------------------------------
-local function OpenSortDropdown()
-	local optList = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuList"), "List", {
-		Label = function() return Controls.WindowHeader:GetText() end,
-	})
-
-	optList:AddInputBinding({
-		Key = Keys.VK_ESCAPE,
-		Action = function()
-			mgr:RemoveFromStack(optList:GetId())
-			return true
-		end
-	})
-
-	local options = {
-		{ "LOC_SORTBY_LASTMODIFIED", SortByLastModified, 1 },
-		{ "LOC_SORTBY_NAME", SortByName, 2 },
-	}
-
-	local selectedChild = nil
-	for _, v in ipairs(options) do
-		local labelKey = v[1]
-		local sortFunc = v[2]
-		local sortIndex = v[3]
-
-		local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuMenuItem"), "MenuItem", {
-			Label = function() return Locale.Lookup(labelKey) end,
-		})
-		child:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-		child:On("activate", function()
-			Controls.SortByPullDown:GetButton():LocalizeAndSetText(labelKey)
-			g_CurrentSort = sortFunc
-
-			if g_GameType == SaveTypes.WORLDBUILDER_MAP then
-				Options.SetUserOption("Interface", "WorldBuilderMapBrowseSortDefault", sortIndex)
-			else
-				Options.SetUserOption("Interface", "SaveGameBrowseSortDefault", sortIndex)
+		if #modTitles > 0 then
+			local modsNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadMods"), "TreeItem", {
+				Label = function() return Locale.Lookup("LOC_MAIN_MENU_ADDITIONAL_CONTENT") end,
+			})
+			for _, title in ipairs(modTitles) do
+				modsNode:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadMod"), "MenuItem", {
+					Label = function() return title end,
+				}))
 			end
-			Options.SaveOptions()
-
-			RebuildFileList()
-			mgr:RemoveFromStack(optList:GetId())
-		end)
-
-		optList:AddChild(child)
-
-		if GetCurrentSortLabel() == Locale.Lookup(labelKey) then
-			selectedChild = child
+			treeItem:AddChild(modsNode)
 		end
 	end
-
-	mgr:Push(optList, { focus = selectedChild })
 end
 
-local function OpenDirectoryDropdown()
-	if Controls.DirectoryPullDown:IsHidden() then
-		return
-	end
-
-	local optList = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuList"), "List", {
-		Label = function() return Controls.WindowHeader:GetText() end,
-	})
-
-	optList:AddInputBinding({
-		Key = Keys.VK_ESCAPE,
-		Action = function()
-			mgr:RemoveFromStack(optList:GetId())
-			return true
-		end
-	})
-
-	local selectedChild = nil
+-- ---------------------------------------------------------------------------
+-- Directory dropdown helpers
+-- ---------------------------------------------------------------------------
+local function BuildDirectoryOptions()
+	local options = {}
+	local selectedIdx = 0
 	local usingVolumeName = nil
 
 	if g_CurrentDirectorySegments then
 		for i = #g_CurrentDirectorySegments, 1, -1 do
 			local v = g_CurrentDirectorySegments[i]
 			local displayName = (v.DisplayName ~= nil and v.DisplayName ~= "") and v.DisplayName or v.SegmentName
-
-			local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuMenuItem"), "MenuItem", {
-				Label = function() return displayName end,
-			})
-			child:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-			child:On("activate", function()
-				ChangeDirectoryLevelTo(i)
-				mgr:RemoveFromStack(optList:GetId())
-			end)
-
-			optList:AddChild(child)
-
-			if displayName == GetCurrentDirectoryLabel() then
-				selectedChild = child
+			table.insert(options, { label = displayName, value = { type = "level", level = i } })
+			if i == #g_CurrentDirectorySegments then
+				selectedIdx = #options
 			end
-
 			if i == 1 then
 				usingVolumeName = v.SegmentName
 			end
@@ -912,113 +789,268 @@ local function OpenDirectoryDropdown()
 		for _, v in ipairs(g_VolumeList) do
 			if usingVolumeName == nil or usingVolumeName ~= v.VolumeName then
 				local displayName = (v.DisplayName ~= nil and v.DisplayName ~= "") and v.DisplayName or v.VolumeName
-				local volumeName = v.VolumeName
-
-				local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuMenuItem"), "MenuItem", {
-					Label = function() return displayName end,
-				})
-				child:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-				child:On("activate", function()
-					ChangeVolumeTo(volumeName)
-					mgr:RemoveFromStack(optList:GetId())
-				end)
-
-				optList:AddChild(child)
+				table.insert(options, { label = displayName, value = { type = "volume", name = v.VolumeName } })
 			end
 		end
 	end
 
-	mgr:Push(optList, { focus = selectedChild })
+	return options, selectedIdx
 end
 
 -- ---------------------------------------------------------------------------
--- Rebuild the accessible file list
+-- Sort dropdown helpers
+-- ---------------------------------------------------------------------------
+local function BuildSortOptions()
+	return {
+		{ label = Locale.Lookup("LOC_SORTBY_LASTMODIFIED"), value = { func = SortByLastModified, index = 1 } },
+		{ label = Locale.Lookup("LOC_SORTBY_NAME"), value = { func = SortByName, index = 2 } },
+	}
+end
+
+local function GetCurrentSortIndex()
+	local currentLabel = ""
+	local button = Controls.SortByPullDown and Controls.SortByPullDown:GetButton()
+	if button then currentLabel = button:GetText() or "" end
+	if currentLabel == Locale.Lookup("LOC_SORTBY_NAME") then return 2 end
+	return 1
+end
+
+-- ---------------------------------------------------------------------------
+-- Rebuild the accessible file tree / directory list
 -- ---------------------------------------------------------------------------
 local function RebuildFileListAccessibility()
-	if not CAI_FileList then return end
-	local capture = mgr:CaptureFocusKey(CAI_FileList)
-	CAI_FileList:ClearChildren()
+	if not CAI_Panel then return end
+
+	local dirView = IsDirectoryView()
+
+	if CAI_SaveTree then
+		CAI_SaveTree:SetHiddenPredicate(function() return dirView end)
+	end
+	if CAI_DirList then
+		CAI_DirList:SetHiddenPredicate(function() return not dirView end)
+	end
+
+	local container = dirView and CAI_DirList or CAI_SaveTree
+	if not container then return end
+
+	local capture = mgr:CaptureFocusKey(container)
+	container:ClearChildren()
 
 	if not g_FileList or #g_FileList == 0 then
-		local emptyChild = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuMenuItem"), "MenuItem", {
+		container:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadEmpty"), "MenuItem", {
 			Label = function() return Controls.NoGames:GetText() or "" end,
-		})
-		CAI_FileList:AddChild(emptyChild)
-		mgr:RestoreFocus(CAI_FileList, capture)
+		}))
+		mgr:RestoreFocus(container, capture)
 		return
 	end
 
-	local focusIdx = g_iSelectedFileEntry
-	if not focusIdx or focusIdx < 1 or focusIdx > #g_FileList then
-		focusIdx = 1
-	end
-
 	for idx, entry in ipairs(g_FileList) do
-		local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuMenuItem"), "MenuItem", {
-			Label = function() return GetEntryLabel(idx, entry) end,
-			Tooltip = function() return GetShortEntrySummary() end,
-			ValueGetter = function()
-				return (g_iSelectedFileEntry == idx)
-					and Locale.Lookup("LOC_OPTIONS_ENABLED")
-					or ""
-			end,
-			FocusKey = "loadgame:file:" .. tostring(idx),
-		})
-		child:On("focus_enter", function()
-			UI.PlaySound("Main_Menu_Mouse_Over")
-			if g_iSelectedFileEntry ~= idx then
+		if entry.IsDirectory then
+			local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadDir"), "MenuItem", {
+				Label = function() return GetEntryLabel(idx, entry) end,
+				FocusKey = "loadgame:file:" .. tostring(idx),
+			})
+			child:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+			child:On("activate", function()
 				SetSelected(idx)
-				RebuildInspectorAccessibility()
+				OnActionButton()
+			end)
+			container:AddChild(child)
+		else
+			local mods = {}
+			if g_FileType == SaveFileTypes.GAME_CONFIGURATION then
+				mods = entry.EnabledMods or {}
+			else
+				mods = entry.RequiredMods or {}
 			end
-		end)
-		child:On("activate", function() OnActionButton() end)
-
-		child:AddInputBinding({
-			Key = Keys.VK_DELETE,
-			Action = function()
-				if not Controls.Delete:IsHidden() then
-					OnDelete()
-					return true
+			local modErrors = Modding.CheckRequirements(mods, g_GameType)
+			if entry.GameChallengeUuid and not Challenges.IsNullChallengeUuid(entry.GameChallengeUuid) then
+				for _, v in ipairs(mods) do
+					if modErrors and modErrors[v.Id] == "NotAllowed" then
+						modErrors[v.Id] = nil
+					end
 				end
-				return false
 			end
-		})
+			local saveHasError = not (modErrors == nil or modErrors.Success)
+			local errorModNames = {}
+			if saveHasError and modErrors then
+				for _, v in ipairs(mods) do
+					if modErrors[v.Id] then
+						local name = nil
+						local modHandle = Modding.GetModHandle(v.Id)
+						if modHandle then
+							local modInfo = Modding.GetModInfo(modHandle)
+							if modInfo and modInfo.Name then
+								name = Locale.Lookup(modInfo.Name)
+							end
+						end
+						if not name or name == "" then
+							name = LookupBundleOrText(v.Title)
+						end
+						if name and name ~= "" then
+							table.insert(errorModNames, name)
+						end
+					end
+				end
+			end
 
-		CAI_FileList:AddChild(child)
+				local treeItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadSave"), "TreeItem", {
+					Label = function() return GetEntryLabel(idx, entry) end,
+					Tooltip = function()
+						local parts = {}
+						if saveHasError then
+							if #errorModNames > 0 then
+								table.insert(parts, Locale.Lookup("LOC_GAME_START_ERROR_TITLE") .. ": " .. table.concat(errorModNames, ", "))
+							else
+								table.insert(parts, Locale.Lookup("LOC_GAME_START_ERROR_TITLE"))
+							end
+						end
+						local leader = LookupBundleOrText(entry.HostLeaderName)
+						if leader ~= "" then table.insert(parts, leader) end
+						local civ = LookupBundleOrText(entry.HostCivilizationName)
+						if civ ~= "" then table.insert(parts, civ) end
+						if entry.CurrentTurn then
+							table.insert(parts, Locale.Lookup("LOC_LOADSAVE_CURRENT_TURN", entry.CurrentTurn))
+						end
+						local era = LookupBundleOrText(entry.HostEraName)
+						if era ~= "" then table.insert(parts, era) end
+						if entry.DisplaySaveTime and entry.DisplaySaveTime ~= "" then
+							table.insert(parts, entry.DisplaySaveTime)
+						end
+						return table.concat(parts, ", ")
+					end,
+					DisabledPredicate = function() return saveHasError end,
+					FocusKey = "loadgame:file:" .. tostring(idx),
+				})
+			treeItem:On("focus_enter", function()
+				UI.PlaySound("Main_Menu_Mouse_Over")
+				if g_iSelectedFileEntry ~= idx then
+					SetSelected(idx)
+				end
+			end)
+			treeItem:On("activate", function() OnActionButton() end)
 
-		if idx == focusIdx then
-			CAI_FileList:SetDefaultIndex(idx)
+			PopulateTreeItemDetails(treeItem, entry)
+
+			treeItem:AddInputBinding({
+				Key = Keys.VK_DELETE,
+				Description = "LOC_CAI_KB_DELETE_SAVE",
+				Action = function()
+					if not Controls.Delete:IsHidden() then
+						SetSelected(idx)
+						OnDelete()
+						return true
+					end
+					return false
+				end
+			})
+
+			container:AddChild(treeItem)
 		end
 	end
 
-	mgr:RestoreFocus(CAI_FileList, capture)
+	if not CAI_Panel._pushed then
+		CAI_Panel._pushed = true
+		local firstChild = container.Children and container.Children[1] or nil
+		mgr:Push(CAI_Panel, { priority = PopupPriority.Current, focus = firstChild })
+	else
+		mgr:RestoreFocus(container, capture)
+	end
+
+	if CAI_DirDropdown then
+		local options, selectedIdx = BuildDirectoryOptions()
+		CAI_DirDropdown:SetOptions(options)
+		if selectedIdx > 0 then
+			CAI_DirDropdown:SetSelectedIndex(selectedIdx, true)
+		end
+	end
 end
 
 -- ---------------------------------------------------------------------------
 -- Build panel
 -- ---------------------------------------------------------------------------
 local function BuildPanel()
-	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuDialog"), "Dialog", {
+	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenu"), "Panel", {
 		Label = function() return Controls.WindowHeader:GetText() end,
-		SpeechSettings = { Role = false },
 	})
 
 	CAI_Panel:AddInputBinding({
 		Key = Keys.VK_ESCAPE,
+		Description = "LOC_CAI_KB_CLOSE",
 		Action = function()
 			OnBack()
 			return true
 		end
 	})
 
-	local backBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuButton"), "Button", {
-		Label = function() return Controls.BackButton:GetText() end,
+	-- 1. Directory dropdown (hidden when not applicable)
+	CAI_DirDropdown = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadDir"), "Dropdown", {
+		Label = function()
+			local button = Controls.DirectoryPullDown and Controls.DirectoryPullDown:GetButton()
+			return button and button:GetText() or ""
+		end,
+		HiddenPredicate = function() return Controls.DirectoryPullDown:IsHidden() end,
 	})
-	backBtn:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	backBtn:On("activate", function() OnBack() end)
-	CAI_Panel:AddChild(backBtn)
+	CAI_DirDropdown:On("value_changed", function(self, val)
+		if not val then return end
+		if val.type == "level" then
+			ChangeDirectoryLevelTo(val.level)
+		elseif val.type == "volume" then
+			ChangeVolumeTo(val.name)
+		end
+	end)
+	CAI_Panel:AddChild(CAI_DirDropdown)
 
-	local autoSaveCheckbox = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuCheckbox"), "Checkbox", {
+	-- 2a. Save tree (shown when not in directory view)
+	CAI_SaveTree = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadSaves"), "Tree", {
+		Label = function() return Controls.WindowHeader:GetText() end,
+	})
+
+	CAI_SaveTree:AddInputBinding({
+		Key = Keys.VK_DELETE,
+		Description = "LOC_CAI_KB_DELETE_SAVE",
+		Action = function()
+			if g_iSelectedFileEntry and g_iSelectedFileEntry > 0 and not Controls.Delete:IsHidden() then
+				OnDelete()
+				return true
+			end
+			return false
+		end
+	})
+
+	CAI_Panel:AddChild(CAI_SaveTree)
+
+	-- 2b. Directory list (shown when in directory view)
+	CAI_DirList = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadDirs"), "List", {
+		Label = function() return Controls.WindowHeader:GetText() end,
+		HiddenPredicate = function() return true end,
+	})
+	CAI_Panel:AddChild(CAI_DirList)
+
+	-- 3. Sort dropdown
+	CAI_SortDropdown = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadSort"), "Dropdown", {
+		Label = function() return Locale.Lookup("LOC_CAI_LABEL_SORT_BY") end,
+		HiddenPredicate = function() return Controls.SortByPullDown:IsHidden() end,
+	})
+	CAI_SortDropdown:SetOptions(BuildSortOptions())
+	CAI_SortDropdown:SetSelectedIndex(GetCurrentSortIndex(), true)
+	CAI_SortDropdown:On("value_changed", function(self, val)
+		if not val then return end
+		Controls.SortByPullDown:GetButton():SetText(self._options[self._selectedIndex].label)
+		g_CurrentSort = val.func
+		if g_GameType == SaveTypes.WORLDBUILDER_MAP then
+			Options.SetUserOption("Interface", "WorldBuilderMapBrowseSortDefault", val.index)
+		else
+			Options.SetUserOption("Interface", "SaveGameBrowseSortDefault", val.index)
+		end
+		Options.SaveOptions()
+		RebuildFileList()
+		RebuildFileListAccessibility()
+	end)
+	CAI_Panel:AddChild(CAI_SortDropdown)
+
+	-- 4. Auto-save checkbox
+	local autoSaveCheckbox = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadAutoCheck"), "Checkbox", {
 		Label = function() return Controls.AutoCheck:GetText() end,
 		ValueGetter = function()
 			return Controls.AutoCheck:IsSelected()
@@ -1031,7 +1063,8 @@ local function BuildPanel()
 	autoSaveCheckbox:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
 	CAI_Panel:AddChild(autoSaveCheckbox)
 
-	local cloudCheck = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuCheckbox"), "Checkbox", {
+	-- 5. Cloud checkbox
+	local cloudCheck = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadCloudCheck"), "Checkbox", {
 		Label = function()
 			local base
 			if not Controls.CloudDummy:IsHidden() then
@@ -1039,12 +1072,10 @@ local function BuildPanel()
 			else
 				base = Controls.CloudCheck:GetText()
 			end
-
 			local isNew = (not Controls.CheckNewIndicator:IsHidden()) or (not Controls.DummyNewIndicator:IsHidden())
 			if isNew then
 				return base .. ", new"
 			end
-
 			return base
 		end,
 		Tooltip = function()
@@ -1075,62 +1106,10 @@ local function BuildPanel()
 	end)
 	cloudCheck:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
 	CAI_Panel:AddChild(cloudCheck)
-
-	local sortBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuPulldown"), "Button", {
-		Label = function() return Locale.Lookup("LOC_SORTBY_NAME") end,
-		ValueGetter = function() return GetCurrentSortLabel() end,
-		HiddenPredicate = function() return Controls.SortByPullDown:IsHidden() end,
-	})
-	sortBtn:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	sortBtn:On("activate", function() OpenSortDropdown() end)
-	CAI_Panel:AddChild(sortBtn)
-
-	local dirBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuPulldown"), "Button", {
-		Label = function() return GetCurrentDirectoryLabel() end,
-		HiddenPredicate = function() return Controls.DirectoryPullDown:IsHidden() end,
-	})
-	dirBtn:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	dirBtn:On("activate", function() OpenDirectoryDropdown() end)
-	CAI_Panel:AddChild(dirBtn)
-
-	CAI_FileList = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuList"), "List", {
-		Label = function() return Controls.WindowHeader:GetText() end,
-	})
-	CAI_Panel:AddChild(CAI_FileList)
-
-	CAI_InspectorList = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuList"), "List", {
-		Label = function()
-			local name = SafeText(Controls.FileName)
-			return name ~= "" and ("Details, " .. name) or "Details"
-		end,
-		HiddenPredicate = function() return Controls.SelectedFile:IsHidden() end,
-	})
-	CAI_Panel:AddChild(CAI_InspectorList)
-
-	local actionBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuButton"), "Button", {
-		Label = function() return Controls.ActionButton:GetText() end,
-		Tooltip = function() return SafeTooltip(Controls.ActionButton) end,
-		DisabledPredicate = function() return Controls.ActionButton:IsDisabled() end,
-		HiddenPredicate = function() return Controls.ActionButton:IsHidden() end,
-	})
-	actionBtn:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	actionBtn:On("activate", function() OnActionButton() end)
-	CAI_Panel:AddChild(actionBtn)
-
-	local delBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenuButton"), "Button", {
-		Label = function() return Controls.Delete:GetText() end,
-		HiddenPredicate = function() return Controls.Delete:IsHidden() end,
-		DisabledPredicate = function() return Controls.Delete and Controls.Delete:IsDisabled() end,
-	})
-	delBtn:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
-	delBtn:On("activate", function() OnDelete() end)
-	CAI_Panel:AddChild(delBtn)
-
-	CAI_Panel._initialFocus = autoSaveCheckbox
 end
 
 -- ---------------------------------------------------------------------------
--- Wrapped show/hide only
+-- Wrapped show/hide
 -- ---------------------------------------------------------------------------
 OnShow = WrapFunc(OnShow, function(orig, ...)
 	orig(...)
@@ -1140,8 +1119,10 @@ OnShow = WrapFunc(OnShow, function(orig, ...)
 	end
 
 	CAI_Panel = nil
-	CAI_FileList = nil
-	CAI_InspectorList = nil
+	CAI_SaveTree = nil
+	CAI_DirList = nil
+	CAI_DirDropdown = nil
+	CAI_SortDropdown = nil
 
 	BuildPanel()
 
@@ -1152,7 +1133,6 @@ OnShow = WrapFunc(OnShow, function(orig, ...)
 
 	LuaEvents.FileListQueryComplete.Remove(RebuildFileListAccessibility)
 	LuaEvents.FileListQueryComplete.Add(RebuildFileListAccessibility)
-	mgr:Push(CAI_Panel, { priority = PopupPriority.Current, focus = CAI_Panel._initialFocus })
 end)
 
 OnHide = WrapFunc(OnHide, function(orig, ...)

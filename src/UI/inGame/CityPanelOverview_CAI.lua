@@ -913,7 +913,7 @@ local function PushRenameEdit()
         PopRenameEdit()
     end)
     edit:AddInputBindings({
-        { Key = Keys.VK_ESCAPE, Action = function() PopRenameEdit(); return true end },
+        { Key = Keys.VK_ESCAPE, Description = "LOC_CAI_KB_CLOSE", Action = function() PopRenameEdit(); return true end },
     })
     mgr:Push(edit)
 end

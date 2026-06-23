@@ -475,6 +475,7 @@ local function CreatePolicyTreeItem(policyType, action)
             Key      = Keys.VK_RETURN,
             IsShift  = true,
             MSG      = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
             Action   = function()
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 LuaEvents.OpenCivilopedia(policyType)
@@ -533,6 +534,7 @@ local function CreatePolicyPicker(slotIndex, rowIndex)
         {
             Key    = Keys.VK_ESCAPE,
             MSG    = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CLOSE",
             Action = function() ClosePicker() return true end,
         },
     })
@@ -567,6 +569,7 @@ local function OpenAllPoliciesTree()
         {
             Key    = Keys.VK_ESCAPE,
             MSG    = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CLOSE",
             Action = function() CloseAllPolicies() return true end,
         },
     })
@@ -616,6 +619,7 @@ local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
         {
             Key    = Keys.VK_DELETE,
             MSG    = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_REMOVE_POLICY",
             Action = function()
                 local currentPolicyType = GetPolicyTypeForSlot(slotIndex)
                 if currentPolicyType == CAI_EMPTY_POLICY_TYPE then return true end
@@ -638,6 +642,7 @@ local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
             Key     = Keys.VK_RETURN,
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
             Action  = function()
                 local policyType = GetPolicyTypeForSlot(slotIndex)
                 if policyType == CAI_EMPTY_POLICY_TYPE then return true end
@@ -986,7 +991,53 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
 end)
 ContextPtr:SetInputHandler(OnInputHandler, true)
 
+local m_caiSpeakGovInfoId = Input.GetActionId("CAISpeakGovernmentTooltip")
+
+local function SpeakGovernmentInfo()
+    local culture = GetLocalPlayerCulture()
+    if not culture then return end
+
+    local lines = {}
+
+    local govRowId = culture:GetCurrentGovernment()
+    if govRowId ~= -1 then
+        local govRow = GameInfo.Governments[govRowId]
+        if govRow then
+            table.insert(lines, Locale.Lookup(govRow.Name))
+            local details = GetGovernmentDetailParts(govRow.GovernmentType)
+            for _, d in ipairs(details) do
+                table.insert(lines, d)
+            end
+            for _, h in ipairs(GetCurrentGovernmentHeritageParts(govRow.GovernmentType)) do
+                table.insert(lines, h)
+            end
+        end
+    else
+        table.insert(lines, Locale.Lookup("LOC_GOVERNMENT_DOESNT_UNLOCK"))
+    end
+
+    if culture:IsInAnarchy() then
+        local turnsLeft = culture:GetAnarchyEndTurn() - Game.GetCurrentGameTurn()
+        table.insert(lines, Locale.Lookup("LOC_GOVERNMENT_ANARCHY_TURNS", turnsLeft))
+    elseif culture:GetCostToUnlockPolicies() == 0 and not culture:PolicyChangeMade() then
+        table.insert(lines, Locale.Lookup("LOC_HUD_GOVT_FREE_CHANGES"))
+    end
+
+    if #lines > 0 then
+        Speak(JoinNonEmpty(lines, ". "))
+    end
+end
+
+local function OnCAIInputActionTriggered(actionId)
+    if m_caiSpeakGovInfoId and actionId == m_caiSpeakGovInfoId then
+        SpeakGovernmentInfo()
+    end
+end
+
+Events.InputActionTriggered.Add(OnCAIInputActionTriggered)
+
 OnShutdown = WrapFunc(OnShutdown, function(orig)
+    Events.InputActionTriggered.Remove(OnCAIInputActionTriggered)
     PopPanel()
     orig()
 end)

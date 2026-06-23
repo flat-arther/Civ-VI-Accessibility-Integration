@@ -106,14 +106,16 @@ function SearchPanelWidget.Create(mgr, id, props)
     end)
 
     w:AddInputBindings({
-        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown,                Action = function(self) return self:NavigateNext() end },
-        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsShift = true, Action = function(self) return self:NavigatePrev() end },
+        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown,                Description = "LOC_CAI_KB_NEXT_CONTROL",            Action = function(self) return self:NavigateNext() end },
+        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsShift = true, Description = "LOC_CAI_KB_PREVIOUS_CONTROL",        Action = function(self) return self:NavigatePrev() end },
         {
             Key = Keys.VK_ESCAPE,
+            Description = "LOC_CAI_KB_CLOSE",
             Action = function(self) self:Close(); return true end,
         },
         {
             Key = Keys.VK_RETURN,
+            Description = "LOC_CAI_KB_ACTIVATE_FIRST_RESULT",
             Action = function(self)
                 if mgr:GetFocusedWidget() == self._editBox then
                     local firstChild = Nav.First(self._resultList)
@@ -130,6 +132,7 @@ function SearchPanelWidget.Create(mgr, id, props)
         {
             Key = Keys.VK_PRIOR,
             MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_SEARCH_HISTORY_PREV",
             Action = function(self)
                 if mgr:GetFocusedWidget() ~= self._editBox then return false end
                 return self:_HistoryNavigate(1)
@@ -138,6 +141,7 @@ function SearchPanelWidget.Create(mgr, id, props)
         {
             Key = Keys.VK_NEXT,
             MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_SEARCH_HISTORY_NEXT",
             Action = function(self)
                 if mgr:GetFocusedWidget() ~= self._editBox then return false end
                 return self:_HistoryNavigate(-1)

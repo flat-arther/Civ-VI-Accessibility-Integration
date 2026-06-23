@@ -1,3 +1,16 @@
+-- Override vanilla hotkeys with CAI versions (Alt+key defaults)
+update UnitOperations set HotkeyId='CAIFoundCity' where OperationType='UNITOPERATION_FOUND_CITY';
+update UnitOperations set HotkeyId='CAIMoveTo' where OperationType='UNITOPERATION_MOVE_TO';
+update UnitOperations set HotkeyId='CAIFortify' where OperationType='UNITOPERATION_FORTIFY';
+update UnitOperations set HotkeyId='CAIFortifyUntilHeal' where OperationType='UNITOPERATION_HEAL';
+update UnitOperations set HotkeyId='CAIRangedAttack' where OperationType='UNITOPERATION_RANGE_ATTACK';
+update UnitOperations set HotkeyId='CAIRangedAttack' where OperationType='UNITOPERATION_AIR_ATTACK';
+update UnitOperations set HotkeyId='CAIAutoExplore' where OperationType='UNITOPERATION_AUTOMATE_EXPLORE';
+update UnitOperations set HotkeyId='CAISkipTurn' where OperationType='UNITOPERATION_SKIP_TURN';
+update UnitOperations set HotkeyId='CAISleep' where OperationType='UNITOPERATION_SLEEP';
+update UnitOperations set HotkeyId='CAIAlert' where OperationType='UNITOPERATION_ALERT';
+
+-- CAI hotkeys for operations without vanilla defaults
 update UnitOperations set HotkeyId='BuildRoute' where OperationType='UNITOPERATION_BUILD_ROUTE';
 update UnitOperations set HotkeyId='ClearContamination' where OperationType='UNITOPERATION_CLEAR_CONTAMINATION';
 update UnitOperations set HotkeyId='ConvertBarbarians' where OperationType='UNITOPERATION_CONVERT_BARBARIANS';
@@ -27,6 +40,8 @@ update UnitOperations set HotkeyId='SpyTravelNewCity' where OperationType='UNITO
 update UnitOperations set HotkeyId='TeleportToCity' where OperationType='UNITOPERATION_TELEPORT_TO_CITY';
 update UnitOperations set HotkeyId='Upgrade' where OperationType='UNITOPERATION_UPGRADE';
 update UnitOperations set HotkeyId='ReligiousHeal' where OperationType='UNITOPERATION_RELIGIOUS_HEAL';
+
+-- Unit commands
 update UnitCommands set HotkeyId='UnitCommandPromote' where CommandType='UNITCOMMAND_PROMOTE';
 update UnitCommands set HotkeyId='UnitCommandWake' where CommandType='UNITCOMMAND_WAKE';
 update UnitCommands set HotkeyId='UnitCommandCancel' where CommandType='UNITCOMMAND_CANCEL';

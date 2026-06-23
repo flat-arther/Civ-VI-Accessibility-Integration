@@ -594,6 +594,7 @@ local function CreateRefLink(parentWidget, civicType, currentEraType)
             Key     = Keys.VK_RETURN,
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
             Action  = function(w)
                 if w:IsDisabled() then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
@@ -701,6 +702,7 @@ local function BuildCivicNode(civicType)
             Key       = Keys.VK_RETURN,
             IsControl = true,
             MSG       = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_ADD_TO_QUEUE",
             Action    = function()
                 if not CanResearch(capturedType) then return true end
                 ActivateAppendToQueue(capturedType)
@@ -711,6 +713,7 @@ local function BuildCivicNode(civicType)
             Key     = Keys.VK_RETURN,
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
             Action  = function()
                 if not IsCivicRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
@@ -841,6 +844,7 @@ local function BuildCivicCell(civicType)
             Key       = Keys.VK_RETURN,
             IsControl = true,
             MSG       = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_ADD_TO_QUEUE",
             Action    = function()
                 if not CanResearch(capturedType) then return true end
                 ActivateAppendToQueue(capturedType)
@@ -851,6 +855,7 @@ local function BuildCivicCell(civicType)
             Key     = Keys.VK_RETURN,
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
             Action  = function()
                 if not IsCivicRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
@@ -957,6 +962,7 @@ local function CreateQueueButton(civicType, isCurrent)
             Key     = Keys.VK_RETURN,
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
             Action  = function()
                 if not IsCivicRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
@@ -1035,6 +1041,7 @@ local function CreateFilterResultButton(civicType)
             Key       = Keys.VK_RETURN,
             IsControl = true,
             MSG       = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_ADD_TO_QUEUE",
             Action    = function()
                 if not CanResearch(capturedType) then return true end
                 ActivateAppendToQueue(capturedType)
@@ -1045,6 +1052,7 @@ local function CreateFilterResultButton(civicType)
             Key     = Keys.VK_RETURN,
             IsShift = true,
             MSG     = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
             Action  = function()
                 if not IsCivicRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
@@ -1094,6 +1102,7 @@ local function OpenFilterResults(entry)
         {
             Key    = Keys.VK_ESCAPE,
             MSG    = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CLOSE",
             Action = function()
                 mgr:RemoveFromStack(FILTER_RESULTS_ID)
                 return true
@@ -1246,6 +1255,7 @@ local function EnsurePanelBuilt()
         {
             Key    = Keys.VK_BACK,
             MSG    = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_NAVIGATE_BACK",
             Action = function()
                 local source = table.remove(m_breadcrumbs)
                 if not source then return false end

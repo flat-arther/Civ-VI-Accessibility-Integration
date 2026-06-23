@@ -393,6 +393,7 @@ local function PushAmountEditor(pDealItem)
         {
             Key    = Keys.VK_ESCAPE,
             MSG    = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CLOSE",
             Action = function() CloseEditWidget(); return true end,
         },
     })
@@ -524,6 +525,7 @@ local function PushAgreementOptionList(agreementType, agreementTurns, fromPlayer
         {
             Key    = Keys.VK_ESCAPE,
             MSG    = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CLOSE",
             Action = function() CloseEditWidget(); return true end,
         },
     })
@@ -1044,6 +1046,7 @@ local function MakeSidePage(side, labelKey)
         {
             Key    = Keys.VK_DELETE,
             MSG    = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_REMOVE_DEAL_ITEM",
             Action = function(w)
                 local focused = w.Manager:GetFocusedWidget()
                 if focused and focused.CAI_OnRemove then
@@ -1057,6 +1060,7 @@ local function MakeSidePage(side, labelKey)
             Key     = Keys.VK_DELETE,
             MSG     = KeyEvents.KeyUp,
             IsShift = true,
+            Description = "LOC_CAI_KB_STOP_ASKING",
             Action  = function(w)
                 local focused = w.Manager:GetFocusedWidget()
                 if focused and focused.CAI_OnStopAsking then

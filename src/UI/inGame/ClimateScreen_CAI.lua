@@ -752,10 +752,15 @@ local function BuildPanel()
     end)
 
     m_panel:AddInputBindings({
-        { Keys.VK_ESCAPE, "KeyUp", function()
-            Close()
-            return true
-        end },
+        {
+            Key = Keys.VK_ESCAPE,
+            MSG = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CLOSE",
+            Action = function()
+                Close()
+                return true
+            end,
+        },
     })
 
     mgr:Push(m_panel)

@@ -51,18 +51,18 @@ function TabControlWidget.Create(mgr, id, props)
     UIWidget.AddChild(w, w._tabStrip)
 
     w:AddInputBindings({
-        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsControl = true,                                              Action = function(
+        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsControl = true,                                              Description = "LOC_CAI_KB_NEXT_TAB",              Action = function(
             self) return self:NextPage() end },
-        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsControl = true,                                              IsShift = true,                                                  Action = function(
+        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsControl = true,                                              Description = "LOC_CAI_KB_PREVIOUS_TAB",          IsShift = true,                                                  Action = function(
             self) return self:PreviousPage() end },
         -- Tab from the strip enters the first child of the active page.
         -- When focus is at the last child of the page, Tab is NOT consumed
         -- so it bubbles to the parent and moves to the next sibling.
-        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, Action = function(self) return self:_EnterPageFromStrip(1) end },
+        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_ENTER_TAB_PAGE",      Action = function(self) return self:_EnterPageFromStrip(1) end },
         -- Shift+Tab from inside the page returns to the active tab in the
         -- strip; Shift+Tab from a tab in the strip bubbles so the user can
         -- exit the TabControl backward.
-        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsShift = true,                                                Action = function(
+        { Key = Keys.VK_TAB, MSG = KeyEvents.KeyDown, IsShift = true,                                                Description = "LOC_CAI_KB_RETURN_TO_TAB_STRIP",   Action = function(
             self) return self:_ReturnToStripFromPage() end },
     })
 

@@ -565,12 +565,13 @@ function PopupDialogInGame:ShowYesNoDialog( text:string, callbackOk:ifunction, c
 end
 --#Accessibility integration
 include ("caiUtils")
+local mgr = ExposedMembers.CAI_UIManager
 local DialogWidget = nil ---@type UIWidget|nil
 
 PopupDialog.Open = WrapFunc(PopupDialog.Open, function(orig, self, optionalID)
     orig(self, optionalID)
     if ContextPtr:IsHidden() then return end
-    local mgr = ExposedMembers.CAI_UIManager
+    
     if not mgr then return end
     if DialogWidget then
         mgr:RemoveFromStack(DialogWidget:GetId())
@@ -585,7 +586,6 @@ end)
 PopupDialog.Close = WrapFunc(PopupDialog.Close, function(orig, self)
     orig(self)
     if DialogWidget then
-        local mgr = ExposedMembers.CAI_UIManager
         if mgr then mgr:RemoveFromStack(DialogWidget:GetId()) end
         DialogWidget = nil
     end

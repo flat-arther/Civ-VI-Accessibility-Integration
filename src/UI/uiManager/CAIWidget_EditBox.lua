@@ -293,6 +293,7 @@ function EditBoxWidget._BuildBindings()
     return {
         {
             Key = Keys.VK_RETURN,
+            Description = "LOC_CAI_KB_EDIT_ENTER",
             Action = function(self)
                 if not self._active then
                     self:BeginEdit()
@@ -307,6 +308,7 @@ function EditBoxWidget._BuildBindings()
         },
         {
             Key = Keys.VK_ESCAPE,
+            Description = "LOC_CAI_KB_EDIT_CANCEL",
             Action = function(self)
                 if self._active and not self._alwaysEdit then
                     self:Cancel(); return true
@@ -318,6 +320,7 @@ function EditBoxWidget._BuildBindings()
         {
             Key = Keys.VK_BACK,
             MSG = kd,
+            Description = "LOC_CAI_KB_DELETE_BACK",
             Action = function(self)
                 if not active(self) or self._readOnly then return false end
                 if self._selStart then
@@ -334,6 +337,7 @@ function EditBoxWidget._BuildBindings()
             Key = Keys.VK_BACK,
             MSG = kd,
             IsControl = true,
+            Description = "LOC_CAI_KB_DELETE_WORD_BACK",
             Action = function(self)
                 if not active(self) or self._readOnly then return false end
                 if self._selStart then
@@ -349,6 +353,7 @@ function EditBoxWidget._BuildBindings()
         {
             Key = Keys.VK_DELETE,
             MSG = kd,
+            Description = "LOC_CAI_KB_DELETE_FORWARD",
             Action = function(self)
                 if not active(self) or self._readOnly then return false end
                 if self._selStart then
@@ -365,6 +370,7 @@ function EditBoxWidget._BuildBindings()
             Key = Keys.VK_DELETE,
             MSG = kd,
             IsControl = true,
+            Description = "LOC_CAI_KB_DELETE_WORD_FORWARD",
             Action = function(self)
                 if not active(self) or self._readOnly then return false end
                 if self._selStart then
@@ -378,40 +384,40 @@ function EditBoxWidget._BuildBindings()
             end,
         },
         -- Cursor movement
-        { Key = Keys.VK_LEFT,  MSG = kd, Action = function(self)
+        { Key = Keys.VK_LEFT,  MSG = kd, Description = "LOC_CAI_KB_CURSOR_LEFT", Action = function(self)
             if not active(self) then return false end
             E.MoveCursor(self, -1, false, false); return true
         end },
-        { Key = Keys.VK_LEFT,  MSG = kd, IsShift = true,                                                                                                         Action = function(
+        { Key = Keys.VK_LEFT,  MSG = kd, IsShift = true,                                                                                                         Description = "LOC_CAI_KB_SELECT_LEFT",      Action = function(
             self)
             if not active(self) then return false end
             E.MoveCursor(self, -1, true, false); return true
         end },
-        { Key = Keys.VK_LEFT,  MSG = kd, IsControl = true,                                                                                                       Action = function(
+        { Key = Keys.VK_LEFT,  MSG = kd, IsControl = true,                                                                                                       Description = "LOC_CAI_KB_WORD_LEFT",        Action = function(
             self)
             if not active(self) then return false end
             E.MoveCursor(self, -1, false, true); return true
         end },
-        { Key = Keys.VK_LEFT,  MSG = kd, IsControl = true,                                                                                                       IsShift = true,                                                                                                         Action = function(
+        { Key = Keys.VK_LEFT,  MSG = kd, IsControl = true,                                                                                                       IsShift = true,                                                                                                         Description = "LOC_CAI_KB_SELECT_WORD_LEFT", Action = function(
             self)
             if not active(self) then return false end
             E.MoveCursor(self, -1, true, true); return true
         end },
-        { Key = Keys.VK_RIGHT, MSG = kd, Action = function(self)
+        { Key = Keys.VK_RIGHT, MSG = kd, Description = "LOC_CAI_KB_CURSOR_RIGHT", Action = function(self)
             if not active(self) then return false end
             E.MoveCursor(self, 1, false, false); return true
         end },
-        { Key = Keys.VK_RIGHT, MSG = kd, IsShift = true,                                                                                                         Action = function(
+        { Key = Keys.VK_RIGHT, MSG = kd, IsShift = true,                                                                                                         Description = "LOC_CAI_KB_SELECT_RIGHT",      Action = function(
             self)
             if not active(self) then return false end
             E.MoveCursor(self, 1, true, false); return true
         end },
-        { Key = Keys.VK_RIGHT, MSG = kd, IsControl = true,                                                                                                       Action = function(
+        { Key = Keys.VK_RIGHT, MSG = kd, IsControl = true,                                                                                                       Description = "LOC_CAI_KB_WORD_RIGHT",        Action = function(
             self)
             if not active(self) then return false end
             E.MoveCursor(self, 1, false, true); return true
         end },
-        { Key = Keys.VK_RIGHT, MSG = kd, IsControl = true,                                                                                                       IsShift = true,                                                                                                         Action = function(
+        { Key = Keys.VK_RIGHT, MSG = kd, IsControl = true,                                                                                                       IsShift = true,                                                                                                         Description = "LOC_CAI_KB_SELECT_WORD_RIGHT", Action = function(
             self)
             if not active(self) then return false end
             E.MoveCursor(self, 1, true, true); return true
@@ -420,6 +426,7 @@ function EditBoxWidget._BuildBindings()
         {
             Key = Keys.VK_HOME,
             MSG = kd,
+            Description = "LOC_CAI_KB_LINE_START",
             Action = function(self)
                 if not active(self) then return false end
                 local buf = self._buffer or ""
@@ -430,6 +437,7 @@ function EditBoxWidget._BuildBindings()
             Key = Keys.VK_HOME,
             MSG = kd,
             IsShift = true,
+            Description = "LOC_CAI_KB_SELECT_TO_LINE_START",
             Action = function(self)
                 if not active(self) then return false end
                 local buf = self._buffer or ""
@@ -439,6 +447,7 @@ function EditBoxWidget._BuildBindings()
         {
             Key = Keys.VK_END,
             MSG = kd,
+            Description = "LOC_CAI_KB_LINE_END",
             Action = function(self)
                 if not active(self) then return false end
                 local buf = self._buffer or ""
@@ -449,6 +458,7 @@ function EditBoxWidget._BuildBindings()
             Key = Keys.VK_END,
             MSG = kd,
             IsShift = true,
+            Description = "LOC_CAI_KB_SELECT_TO_LINE_END",
             Action = function(self)
                 if not active(self) then return false end
                 local buf = self._buffer or ""
@@ -459,6 +469,7 @@ function EditBoxWidget._BuildBindings()
             Key = Keys.VK_HOME,
             MSG = kd,
             IsControl = true,
+            Description = "LOC_CAI_KB_DOCUMENT_START",
             Action = function(self)
                 if not active(self) then return false end
                 local prevSelStart, prevCursor = self._selStart, self._cursor or 0
@@ -472,6 +483,7 @@ function EditBoxWidget._BuildBindings()
             Key = Keys.VK_END,
             MSG = kd,
             IsControl = true,
+            Description = "LOC_CAI_KB_DOCUMENT_END",
             Action = function(self)
                 if not active(self) then return false end
                 local prevSelStart, prevCursor = self._selStart, self._cursor or 0
@@ -481,11 +493,11 @@ function EditBoxWidget._BuildBindings()
                 return true
             end,
         },
-        { Key = Keys.VK_HOME, MSG = kd, IsControl = true, IsShift = true, Action = function(self)
+        { Key = Keys.VK_HOME, MSG = kd, IsControl = true, IsShift = true, Description = "LOC_CAI_KB_SELECT_TO_DOCUMENT_START", Action = function(self)
             if not active(self) then return false end
             E.MoveToEdge(self, 0, true); return true
         end },
-        { Key = Keys.VK_END,  MSG = kd, IsControl = true, IsShift = true, Action = function(self)
+        { Key = Keys.VK_END,  MSG = kd, IsControl = true, IsShift = true, Description = "LOC_CAI_KB_SELECT_TO_DOCUMENT_END", Action = function(self)
             if not active(self) then return false end
             E.MoveToEdge(self, #(self._buffer or ""), true); return true
         end },
@@ -493,6 +505,7 @@ function EditBoxWidget._BuildBindings()
         {
             Key = Keys.VK_UP,
             MSG = kd,
+            Description = "LOC_CAI_KB_LINE_UP",
             Action = function(self)
                 if not active(self) then return false end
                 local buf = self._buffer or ""
@@ -507,6 +520,7 @@ function EditBoxWidget._BuildBindings()
         {
             Key = Keys.VK_DOWN,
             MSG = kd,
+            Description = "LOC_CAI_KB_LINE_DOWN",
             Action = function(self)
                 if not active(self) then return false end
                 local buf = self._buffer or ""
@@ -522,6 +536,7 @@ function EditBoxWidget._BuildBindings()
             Key = Keys.VK_UP,
             MSG = kd,
             IsShift = true,
+            Description = "LOC_CAI_KB_SELECT_LINE_UP",
             Action = function(self)
                 if not active(self) then return false end
                 local buf = self._buffer or ""
@@ -538,6 +553,7 @@ function EditBoxWidget._BuildBindings()
             Key = Keys.VK_DOWN,
             MSG = kd,
             IsShift = true,
+            Description = "LOC_CAI_KB_SELECT_LINE_DOWN",
             Action = function(self)
                 if not active(self) then return false end
                 local buf = self._buffer or ""
@@ -555,6 +571,7 @@ function EditBoxWidget._BuildBindings()
             Key = Keys.C,
             MSG = kd,
             IsControl = true,
+            Description = "LOC_CAI_KB_COPY",
             Action = function(self)
                 if not active(self) then return false end
                 local sel = E.GetSelectedText(self)
@@ -577,6 +594,7 @@ function EditBoxWidget._BuildBindings()
             Key = Keys.V,
             MSG = kd,
             IsControl = true,
+            Description = "LOC_CAI_KB_PASTE",
             Action = function(self)
                 if not active(self) or self._readOnly then return false end
                 local text = CAI.GetClipboardText()
@@ -593,6 +611,7 @@ function EditBoxWidget._BuildBindings()
             Key = Keys.A,
             MSG = kd,
             IsControl = true,
+            Description = "LOC_CAI_KB_SELECT_ALL",
             Action = function(self)
                 if not active(self) then return false end
                 E.SelectAll(self); return true

@@ -244,6 +244,7 @@ local function OpenConfirmDialog(rowIndex)
         {
             Key = Keys.VK_ESCAPE,
             MSG = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CLOSE",
             Action = function()
                 CloseConfirmDialog()
                 RestoreRowFocus(rowIndex)

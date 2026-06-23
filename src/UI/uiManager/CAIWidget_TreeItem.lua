@@ -50,6 +50,7 @@ function TreeItemWidget.Create(mgr, id, props)
     w:AddInputBindings({
         {
             Key = Keys.VK_RETURN,
+            Description = "LOC_CAI_KB_ACTIVATE",
             Action = function(self)
                 if self:IsDisabled() then return true end
                 if HasActivateListener(self) then

@@ -203,6 +203,7 @@ local function BuildList()
     list:AddInputBinding({
         Key    = Keys.VK_ESCAPE,
         MSG    = KeyEvents.KeyUp,
+        Description = "LOC_CAI_KB_CLOSE",
         Action = function()
             CloseList()
             return true
