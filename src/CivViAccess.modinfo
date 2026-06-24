@@ -44,7 +44,6 @@
     <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>
     <File>UI/uiManager/CAIWidget_SearchPanel.lua</File>
     <File>UI/uiManager/CAIUIScreenManager.lua</File>
-    <File>UI/inGame/worldInfo.lua</File>
     <File>UI/inGame/navCursor.lua</File>
     <File>UI/inGame/MovementActions_CAI.lua</File>
     <File>UI/inGame/UnitWaypoints_CAI.lua</File>
@@ -72,8 +71,13 @@
     <File>UI/inGame/ActionPanel_CAI.lua</File>
     <File>UI/inGame/AdvisorPopup_CAI.lua</File>
     <File>UI/inGame/TechCivicCompletedPopup_CAI.lua</File>
+    <File>UI/inGame/BoostUnlockedPopup_CAI.lua</File>
     <File>UI/inGame/UnitPromotionPopup_CAI.lua</File>
     <File>UI/inGame/DeclareWarPopup_CAI.lua</File>
+    <File>UI/inGame/NaturalWonderPopup_CAI.lua</File>
+    <File>UI/inGame/WonderBuiltPopup_CAI.lua</File>
+    <File>UI/inGame/ProjectBuiltPopup_CAI.lua</File>
+    <File>UI/inGame/ChooseArtifact_CAI.lua</File>
     <File>UI/inGame/SecretSocietyPopup_CAI.lua</File>
     <File>UI/inGame/DiplomacyActionView_CAI.lua</File>
     <File>UI/inGame/DiplomacyDealView_CAI.lua</File>
@@ -287,7 +291,6 @@
       <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>
       <File>UI/uiManager/CAIWidget_SearchPanel.lua</File>
       <File>UI/uiManager/CAIUIScreenManager.lua</File>
-      <File>UI/inGame/worldInfo.lua</File>
       <File>UI/inGame/navCursor.lua</File>
       <File>UI/inGame/MovementActions_CAI.lua</File>
       <File>UI/inGame/UnitWaypoints_CAI.lua</File>
@@ -839,6 +842,46 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>SecretSocietyPopup</LuaContext>
         <LuaReplace>UI/inGame/SecretSocietyPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_BoostUnlockedPopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>BoostUnlockedPopup</LuaContext>
+        <LuaReplace>UI/inGame/BoostUnlockedPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_NaturalWonderPopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>NaturalWonderPopup</LuaContext>
+        <LuaReplace>UI/inGame/NaturalWonderPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WonderBuiltPopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>WonderBuiltPopup</LuaContext>
+        <LuaReplace>UI/inGame/WonderBuiltPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_ProjectBuiltPopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>ProjectBuiltPopup</LuaContext>
+        <LuaReplace>UI/inGame/ProjectBuiltPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_ChooseArtifact">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>ChooseArtifact</LuaContext>
+        <LuaReplace>UI/inGame/ChooseArtifact_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
   </InGameActions>

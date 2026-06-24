@@ -1792,6 +1792,9 @@
       <Text>{1_Count} items added to queue, for {2_Cost} total science</Text>
     </Row>
 
+    <Row Tag="LOC_CAI_TECH_CIVIC_BOOST_PROGRESS" Language="en_US">
+      <Text>From {1_Start}% to {2_End}%</Text>
+    </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_SUMMARY" Language="en_US">
       <Text>{1_Gov}. {2_Dip} diplomatic, {3_Eco} economic, {4_Mil} military, {5_Wld} wildcard slots.</Text>
     </Row>
