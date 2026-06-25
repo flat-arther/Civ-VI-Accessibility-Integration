@@ -1,5 +1,9 @@
 include("caiUtils")
-include("NaturalDisasterPopup")
+if GameConfiguration.GetValue("GAMEMODE_APOCALYPSE") then
+    include("NaturalDisasterPopup_GranColombia_Maya")
+else
+    include("NaturalDisasterPopup")
+end
 
 local mgr = ExposedMembers.CAI_UIManager
 

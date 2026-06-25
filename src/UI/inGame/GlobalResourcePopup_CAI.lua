@@ -1,6 +1,10 @@
 include("caiUtils")
 include("Civ6Common")
-include("GlobalResourcePopup")
+if GameConfiguration.GetValue("GAMEMODE_MONOPOLIES") then
+    include("GlobalResourcePopup_KublaiKhanVietnam_MODE")
+else
+    include("GlobalResourcePopup")
+end
 
 local mgr                 = ExposedMembers.CAI_UIManager
 

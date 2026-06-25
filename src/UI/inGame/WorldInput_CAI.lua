@@ -1,4 +1,5 @@
 include("caiUtils")
+include("InputSupport")
 include("CAIUIScreenManager")
 include("navCursor")
 include("inGameHelpers_CAI")
@@ -1029,6 +1030,7 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, inputStruct)
 		local handled = mgr:HandleInput(inputStruct)
 		if handled then return handled end
 	end
+	if Input.GetActiveContext() ~= InputContext.World then return true end
 	return orig(inputStruct)
 end)
 

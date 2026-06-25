@@ -86,7 +86,6 @@
     <Row ActionId="WorldScannerSearch" Name="LOC_CAI_WORLD_SCANNER_SEARCH" Description="LOC_CAI_WORLD_SCANNER_SEARCH_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
 
     <!-- ===== CAI_UI: Open/toggle screens and panels ===== -->
-    <Row ActionId="UI_TopPanelOpenDiplomacy" Name="LOC_CAI_TOP_PANEL_OPEN_DIPLOMACY" Description="LOC_CAI_TOP_PANEL_OPEN_DIPLOMACY_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelOpenReports" Name="LOC_CAI_TOP_PANEL_OPEN_REPORTS" Description="LOC_CAI_TOP_PANEL_OPEN_REPORTS_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelOpenReportsResources" Name="LOC_CAI_TOP_PANEL_OPEN_REPORTS_RESOURCES" Description="LOC_CAI_TOP_PANEL_OPEN_REPORTS_RESOURCES_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelOpenReportsCityStatus" Name="LOC_CAI_TOP_PANEL_OPEN_REPORTS_CITY_STATUS" Description="LOC_CAI_TOP_PANEL_OPEN_REPORTS_CITY_STATUS_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
@@ -296,7 +295,6 @@
     <Row ActionId="WorldScannerSearch" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_F" />
 
     <!-- CAI_UI: Open/toggle screens -->
-    <Row ActionId="UI_TopPanelOpenDiplomacy" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F4" />
     <Row ActionId="UI_TopPanelOpenReports" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F2" />
     <Row ActionId="UI_TopPanelOpenReportsResources" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_A" />
     <Row ActionId="UI_TopPanelOpenReportsCityStatus" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_S" />
@@ -307,7 +305,7 @@
     <Row ActionId="UI_TutorialGoalsOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_T" />
     <Row ActionId="UI_CAIMinimapOpenLensList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_J" />
     <Row ActionId="UI_CAIMinimapOpenMapPinList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_M" />
-    <Row ActionId="UI_DiplomacyRibbonOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_D" />
+    <Row ActionId="UI_DiplomacyRibbonOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F4" />
     <Row ActionId="UI_DiplomacyRibbonOpenWorldCongress" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F9" />
     <Row ActionId="UI_OpenWorldCrisisTracker" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_K" />
     <Row ActionId="UI_OpenGlobalResourcePopup" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_Q" />

@@ -17,8 +17,7 @@ local function IsRuleSetActive(ruleSetType)
 end
 
 local function IsBarbarianClansModeActive()
-    return GameConfiguration.GetValue ~= nil
-        and GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS") == 1
+    return GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS")
 end
 
 local function IsPiratesScenarioActive()

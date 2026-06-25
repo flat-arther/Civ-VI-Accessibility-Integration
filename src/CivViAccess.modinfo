@@ -8,7 +8,10 @@
     <AffectsSavedGames>0</AffectsSavedGames>
     <CompatibleVersions>2.0</CompatibleVersions>
   </Properties>
-
+  <References>
+    <Mod id="1B28771A-C749-434B-9053-D1380C553DE9" title="LOC_EXPANSION1_MOD_TITLE"/>
+    <Mod id="4873eb62-8ccc-4574-b784-dda455e74e68" title="LOC_EXPANSION2_MOD_TITLE"/>
+  </References>
   <Files>
     <File>caiUtils.lua</File>
     <File>UI/uiManager/helpers/CAIWidgetHelpers_Navigation.lua</File>
@@ -61,7 +64,9 @@
     <File>UI/frontEnd/GameSummaries_GameDetails.lua</File>
     <File>UI/FiraxisLive/My2K.lua</File>
     <File>UI/shared/iconsProcessing.lua</File>
+    <File>UI/shared/LoadSaveHelpers_CAI.lua</File>
     <File>UI/shared/LoadGameMenu.lua</File>
+    <File>UI/shared/SaveGameMenu.lua</File>
     <File>UI/shared/LoadScreen.lua</File>
     <File>UI/shared/StateTransition.lua</File>
     <File>UI/shared/PopupDialog.lua</File>
@@ -234,7 +239,9 @@
       <File>UI/frontEnd/GameSummaries_GameDetails.lua</File>
       <File>UI/FiraxisLive/My2K.lua</File>
       <File>UI/shared/iconsProcessing.lua</File>
+      <File>UI/shared/LoadSaveHelpers_CAI.lua</File>
       <File>UI/shared/LoadGameMenu.lua</File>
+      <File>UI/shared/SaveGameMenu.lua</File>
       <File>UI/shared/LoadScreen.lua</File>
       <File>UI/shared/PopupDialog.lua</File>
       <File>UI/shared/Options.lua</File>
@@ -296,7 +303,9 @@
       <File>UI/inGame/UnitWaypoints_CAI.lua</File>
       <File>UI/shared/iconsProcessing.lua</File>
       <File>UI/shared/PopupDialog.lua</File>
+      <File>UI/shared/LoadSaveHelpers_CAI.lua</File>
       <File>UI/shared/LoadGameMenu.lua</File>
+      <File>UI/shared/SaveGameMenu.lua</File>
       <File>UI/shared/LoadScreen.lua</File>
       <File>UI/shared/Options.lua</File>
       <File>UI/shared/StateTransition.lua</File>
@@ -434,13 +443,7 @@
       </Properties>
     </ReplaceUIScript>
 
-    <ReplaceUIScript id="CAI_GovernmentScreen">
-      <Properties>
-        <LoadOrder>100</LoadOrder>
-        <LuaContext>GovernmentScreen</LuaContext>
-        <LuaReplace>UI/inGame/GovernmentScreen_CAI.lua</LuaReplace>
-      </Properties>
-    </ReplaceUIScript>
+
 
     <ReplaceUIScript id="CAI_InGamePopup">
       <Properties>
@@ -882,6 +885,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>ChooseArtifact</LuaContext>
         <LuaReplace>UI/inGame/ChooseArtifact_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_GovernmentScreen">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>GovernmentScreen</LuaContext>
+        <LuaReplace>UI/inGame/GovernmentScreen_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
   </InGameActions>

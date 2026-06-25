@@ -636,7 +636,7 @@ end)
 Events.LoadScreenContentReady.Add(OnLoadScreenContentReady)
 
 OnActivateButtonClicked = WrapFunc(OnActivateButtonClicked, function(orig)
-	mgr:ShutDown()
+	mgr:ShutDown(false)
 	orig()
 end)
 local spokeReady = false

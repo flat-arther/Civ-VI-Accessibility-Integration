@@ -1,13 +1,17 @@
 include("caiUtils")
-include("ClimateScreen")
+if GameConfiguration.GetValue("GAMEMODE_APOCALYPSE") then
+    include("ClimateScreen_GranColombia_Maya")
+else
+    include("ClimateScreen")
+end
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr              = ExposedMembers.CAI_UIManager
 
-local PANEL_ID    = "CAIClimate_Panel"
-local HOVER_SOUND = "Main_Menu_Mouse_Over"
+local PANEL_ID         = "CAIClimate_Panel"
+local HOVER_SOUND      = "Main_Menu_Mouse_Over"
 
-local m_panel = nil
-local m_tabControl = nil
+local m_panel          = nil
+local m_tabControl     = nil
 local m_isMirroringTab = false
 
 local function NormalizeText(text)
@@ -95,8 +99,7 @@ local function BuildOverviewTree()
     if kCurrentEvent then
         local kCurrentEventDef = GameInfo.RandomEvents[kCurrentEvent.RandomEvent]
         if kCurrentEventDef and kCurrentEventDef.EffectOperatorType ~= "SEA_LEVEL"
-                            and kCurrentEventDef.EffectOperatorType ~= "NUCLEAR_ACCIDENT" then
-
+            and kCurrentEventDef.EffectOperatorType ~= "NUCLEAR_ACCIDENT" then
             local pCurrentPlot = Map.GetPlotByIndex(kCurrentEvent.CurrentLocation)
             local bIsEventVisible = false
             if pCurrentPlot then
@@ -116,9 +119,11 @@ local function BuildOverviewTree()
 
                 -- Location and direction
                 if kCurrentEventDef.Global then
-                    table.insert(parts, Locale.Lookup("LOC_CLIMATE_SCREEN_LOCATION", Locale.Lookup("LOC_CLIMATE_SCREEN_GLOBAL")))
+                    table.insert(parts,
+                        Locale.Lookup("LOC_CLIMATE_SCREEN_LOCATION", Locale.Lookup("LOC_CLIMATE_SCREEN_GLOBAL")))
                 elseif not bIsEventVisible then
-                    table.insert(parts, Locale.Lookup("LOC_CLIMATE_SCREEN_LOCATION", Locale.Lookup("LOC_CIVICS_TREE_NOT_REVEALED_CIVIC")))
+                    table.insert(parts,
+                        Locale.Lookup("LOC_CLIMATE_SCREEN_LOCATION", Locale.Lookup("LOC_CIVICS_TREE_NOT_REVEALED_CIVIC")))
                 elseif pCurrentPlot then
                     local location = ""
                     local eContinentType = pCurrentPlot:GetContinentType()
@@ -136,7 +141,9 @@ local function BuildOverviewTree()
 
                     local dirText = GetDirectionText(kCurrentEvent.CurrentDirection)
                     if dirText and dirText ~= "" then
-                        table.insert(parts, NormalizeText(Locale.Lookup("LOC_CLIMATE_SCREEN_LOCATION_DIRECTION", location, Locale.Lookup(dirText))))
+                        table.insert(parts,
+                            NormalizeText(Locale.Lookup("LOC_CLIMATE_SCREEN_LOCATION_DIRECTION", location,
+                                Locale.Lookup(dirText))))
                     else
                         table.insert(parts, NormalizeText(Locale.Lookup("LOC_CLIMATE_SCREEN_LOCATION", location)))
                     end
@@ -153,13 +160,16 @@ local function BuildOverviewTree()
                     local isCometStrike = kCurrentEventDef.RandomEventType == "RANDOM_EVENT_COMET_STRIKE"
                     if kCurrentEvent.FertilityAdded and kCurrentEvent.FertilityAdded > 0 then
                         if isCometStrike then
-                            table.insert(parts, Locale.Lookup("LOC_CAI_CLIMATE_DAMAGED_TILES", kCurrentEvent.FertilityAdded))
+                            table.insert(parts,
+                                Locale.Lookup("LOC_CAI_CLIMATE_DAMAGED_TILES", kCurrentEvent.FertilityAdded))
                         else
-                            table.insert(parts, Locale.Lookup("LOC_CAI_CLIMATE_FERTILE_TILES", kCurrentEvent.FertilityAdded))
+                            table.insert(parts,
+                                Locale.Lookup("LOC_CAI_CLIMATE_FERTILE_TILES", kCurrentEvent.FertilityAdded))
                         end
                     end
                     if kCurrentEvent.FertilityAdded and kCurrentEvent.FertilityAdded < 0 then
-                        table.insert(parts, Locale.Lookup("LOC_CAI_CLIMATE_LOST_FERTILE_TILES", math.abs(kCurrentEvent.FertilityAdded)))
+                        table.insert(parts,
+                            Locale.Lookup("LOC_CAI_CLIMATE_LOST_FERTILE_TILES", math.abs(kCurrentEvent.FertilityAdded)))
                     end
                     if kCurrentEvent.TilesDamaged and kCurrentEvent.TilesDamaged > 0 then
                         table.insert(parts, Locale.Lookup("LOC_CAI_CLIMATE_DAMAGED_TILES", kCurrentEvent.TilesDamaged))
@@ -187,7 +197,8 @@ local function BuildOverviewTree()
                         end
                     end
                     if #cityNames > 0 then
-                        table.insert(parts, Locale.Lookup("LOC_CAI_CLIMATE_AFFECTED_CITIES", table.concat(cityNames, ", ")))
+                        table.insert(parts,
+                            Locale.Lookup("LOC_CAI_CLIMATE_AFFECTED_CITIES", table.concat(cityNames, ", ")))
                     end
                 end
 
@@ -276,7 +287,7 @@ local function BuildOverviewTree()
 
     local co2Leaf = MakeLeaf("climate:co2", function()
         return Locale.Lookup("LOC_CLIMATE_CO2_LEVELS") .. ", " ..
-               NormalizeText(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM", CO2Total))
+            NormalizeText(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM", CO2Total))
     end, function()
         return JoinNonEmpty({
             NormalizeText(Locale.Lookup("LOC_CLIMATE_TOP_CONTRIBUTOR_NUM", topContributorName)),
@@ -294,7 +305,7 @@ local function BuildOverviewTree()
 
     local tempLeaf = MakeLeaf("climate:temp", function()
         return Locale.Lookup("LOC_CLIMATE_GLOBAL_TEMPERATURE") .. ", " ..
-               Locale.Lookup("LOC_CAI_CLIMATE_TEMP_VALUE", tempText)
+            Locale.Lookup("LOC_CAI_CLIMATE_TEMP_VALUE", tempText)
     end, function()
         if deforestationType >= 0 then
             local kDef = GameInfo.DeforestationLevels[deforestationType]
@@ -351,7 +362,7 @@ local function BuildOverviewTree()
     local stormIncrease = GameClimate.GetStormClimateIncreasedChance()
     forecastNode:AddChild(MakeLeaf("climate:forecast:storm", function()
         return Locale.Lookup("LOC_CLIMATE_CHANCE_OF_STORMS") .. ", " ..
-               NormalizeText(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", stormChance))
+            NormalizeText(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", stormChance))
     end, function()
         return JoinNonEmpty({
             NormalizeText(Locale.Lookup("LOC_CLIMATE_AMOUNT_FROM_CLIMATE_CHANGE", stormIncrease)),
@@ -364,7 +375,7 @@ local function BuildOverviewTree()
     local floodIncrease = GameClimate.GetFloodClimateIncreasedChance()
     forecastNode:AddChild(MakeLeaf("climate:forecast:flood", function()
         return Locale.Lookup("LOC_CLIMATE_CHANCE_OF_RIVER_FLOOD") .. ", " ..
-               NormalizeText(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", floodChance))
+            NormalizeText(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", floodChance))
     end, function()
         return JoinNonEmpty({
             NormalizeText(Locale.Lookup("LOC_CLIMATE_AMOUNT_FROM_CLIMATE_CHANGE", floodIncrease)),
@@ -377,7 +388,7 @@ local function BuildOverviewTree()
     local droughtIncrease = GameClimate.GetDroughtClimateIncreasedChance()
     forecastNode:AddChild(MakeLeaf("climate:forecast:drought", function()
         return Locale.Lookup("LOC_CLIMATE_DROUGHTS") .. ", " ..
-               NormalizeText(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", droughtChance))
+            NormalizeText(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", droughtChance))
     end, function()
         return JoinNonEmpty({
             NormalizeText(Locale.Lookup("LOC_CLIMATE_AMOUNT_FROM_CLIMATE_CHANGE", droughtIncrease)),
@@ -393,7 +404,7 @@ local function BuildOverviewTree()
     local volcanoNaturalWonder = MapFeatureManager.GetNumNaturalWonderVolcanoes()
     forecastNode:AddChild(MakeLeaf("climate:forecast:volcano", function()
         return Locale.Lookup("LOC_CLIMATE_VOLCANIC_ACTIVITY") .. ", " ..
-               NormalizeText(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", volcanoEruptChance))
+            NormalizeText(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", volcanoEruptChance))
     end, function()
         return JoinNonEmpty({
             NormalizeText(Locale.Lookup("LOC_CLIMATE_VOLCANO_ACTIVE_NUM", volcanoActiveNum)),
@@ -410,7 +421,7 @@ local function BuildOverviewTree()
         local fireIncrease = GameClimate.GetFireClimateIncreasedChance()
         forecastNode:AddChild(MakeLeaf("climate:forecast:fire", function()
             return Locale.Lookup("LOC_CLIMATE_FOREST_FIRE") .. ", " ..
-                   NormalizeText(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", fireChance))
+                NormalizeText(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", fireChance))
         end, function()
             return JoinNonEmpty({
                 NormalizeText(Locale.Lookup("LOC_CLIMATE_AMOUNT_FROM_CLIMATE_CHANGE", fireIncrease)),
@@ -430,7 +441,7 @@ local function BuildOverviewTree()
 
     tree:AddChild(MakeLeaf("climate:ice", function()
         return Locale.Lookup("LOC_CLIMATE_POLAR_ICE") .. ", " ..
-               NormalizeText(Locale.Lookup("LOC_CLIMATE_LOST", iIceLoss))
+            NormalizeText(Locale.Lookup("LOC_CLIMATE_LOST", iIceLoss))
     end, function()
         local parts = {}
         if nextIceLostTurns > 0 and currentSeaLevelPhase < 7 then
@@ -451,7 +462,7 @@ local function BuildOverviewTree()
 
     tree:AddChild(MakeLeaf("climate:sea", function()
         return Locale.Lookup("LOC_CLIMATE_SEA_LEVEL") .. ", " ..
-               NormalizeText(Locale.Lookup("LOC_CLIMATE_SEA_LEVEL_RISE", Locale.Lookup(szSeaLevel)))
+            NormalizeText(Locale.Lookup("LOC_CLIMATE_SEA_LEVEL_RISE", Locale.Lookup(szSeaLevel)))
     end, function()
         local parts = {
             NormalizeText(Locale.Lookup("LOC_CLIMATE_COASTAL_TILES_FLOODED_NUM", tilesFlooded)),
@@ -502,7 +513,7 @@ local function BuildCO2Tree()
     -- Your contribution first (expandable, with per-resource breakdown)
     local yourNode = MakeNode("co2:yours", function()
         return Locale.Lookup("LOC_CLIMATE_YOUR_CO2_CONTRIBUTION") .. ", " ..
-               NormalizeText(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM", CO2Player))
+            NormalizeText(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM", CO2Player))
     end)
     local pResources = pLocalPlayer:GetResources()
     for kResourceInfo in GameInfo.Resources() do
@@ -513,7 +524,8 @@ local function BuildCO2Tree()
                 local capturedName = Locale.Lookup(kResourceInfo.Name)
                 local capturedAmount = amount
                 local amountLastTurn = GameClimate.GetPlayerResourceCO2Footprint(localPlayerID, kResourceInfo.Index, true)
-                local resourceLastTurn = GameClimate.GetPlayerRawResourceConsumption(localPlayerID, kResourceInfo.Index, true)
+                local resourceLastTurn = GameClimate.GetPlayerRawResourceConsumption(localPlayerID, kResourceInfo.Index,
+                    true)
                 local capturedResLT = resourceLastTurn
                 local capturedAmtLT = amountLastTurn
                 yourNode:AddChild(MakeLeaf("co2:yours:" .. kResourceInfo.ResourceType, function()
@@ -578,8 +590,10 @@ local function BuildCO2Tree()
                 local totalAmountLastTurn = 0
                 local totalResourceLastTurn = 0
                 for _, v in ipairs(aliveMajorIDList) do
-                    totalAmountLastTurn = totalAmountLastTurn + GameClimate.GetPlayerResourceCO2Footprint(v, kResourceInfo.Index, true)
-                    totalResourceLastTurn = totalResourceLastTurn + GameClimate.GetPlayerRawResourceConsumption(v, kResourceInfo.Index, true)
+                    totalAmountLastTurn = totalAmountLastTurn +
+                    GameClimate.GetPlayerResourceCO2Footprint(v, kResourceInfo.Index, true)
+                    totalResourceLastTurn = totalResourceLastTurn +
+                    GameClimate.GetPlayerRawResourceConsumption(v, kResourceInfo.Index, true)
                 end
                 local capturedResLT = totalResourceLastTurn
                 local capturedAmtLT = totalAmountLastTurn
@@ -670,16 +684,21 @@ local function BuildEventHistoryList()
                         local isCometStrike = capturedDef.RandomEventType == "RANDOM_EVENT_COMET_STRIKE"
                         if capturedEvent.FertilityAdded and capturedEvent.FertilityAdded > 0 then
                             if isCometStrike then
-                                table.insert(parts, Locale.Lookup("LOC_CAI_CLIMATE_DAMAGED_TILES", capturedEvent.FertilityAdded))
+                                table.insert(parts,
+                                    Locale.Lookup("LOC_CAI_CLIMATE_DAMAGED_TILES", capturedEvent.FertilityAdded))
                             else
-                                table.insert(parts, Locale.Lookup("LOC_CAI_CLIMATE_FERTILE_TILES", capturedEvent.FertilityAdded))
+                                table.insert(parts,
+                                    Locale.Lookup("LOC_CAI_CLIMATE_FERTILE_TILES", capturedEvent.FertilityAdded))
                             end
                         end
                         if capturedEvent.FertilityAdded and capturedEvent.FertilityAdded < 0 then
-                            table.insert(parts, Locale.Lookup("LOC_CAI_CLIMATE_LOST_FERTILE_TILES", math.abs(capturedEvent.FertilityAdded)))
+                            table.insert(parts,
+                                Locale.Lookup("LOC_CAI_CLIMATE_LOST_FERTILE_TILES",
+                                    math.abs(capturedEvent.FertilityAdded)))
                         end
                         if capturedEvent.TilesDamaged and capturedEvent.TilesDamaged > 0 then
-                            table.insert(parts, Locale.Lookup("LOC_CAI_CLIMATE_DAMAGED_TILES", capturedEvent.TilesDamaged))
+                            table.insert(parts,
+                                Locale.Lookup("LOC_CAI_CLIMATE_DAMAGED_TILES", capturedEvent.TilesDamaged))
                         end
                         if capturedEvent.UnitsLost and capturedEvent.UnitsLost > 0 then
                             table.insert(parts, Locale.Lookup("LOC_CAI_CLIMATE_UNITS_LOST", capturedEvent.UnitsLost))
@@ -838,4 +857,5 @@ function OnInputHandler(pInputStruct)
     end
     return BASE_OnInputHandler(pInputStruct)
 end
+
 ContextPtr:SetInputHandler(OnInputHandler, true)

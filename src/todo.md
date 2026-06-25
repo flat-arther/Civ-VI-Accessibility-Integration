@@ -10,11 +10,11 @@
 - [x] show cities with religion majority to cover the religion lens
 - [x] show appeal plots grouped by their level to cover the appeal lens. Other lenses that can be useful [https://civilization.fandom.com/wiki/Lens_(Civ6)]
 - [x] revise and cover info missing from the unit panel
-- [ ] make s or another key show a list of units with a detailed view on a tile with enter allowing you to select your own units
+- [ ] make  a key show a list of units with a detailed view on a tile with enter allowing you to select your own units
 
 ## Suggestions
 
-- [ ] maybe announce eurekas / boosts when they happen
+- [x] announce eurekas / boosts when they happen
 
 ## Informational
 
@@ -32,7 +32,7 @@
 [x] add city states to the cities category in the scanner
 [x] Add districts to the scanner
 [x]Fix bug in the gov screen, if you choose a policy, go to governments and back, it does not remember your selection while still excluding it from the picker
-- [x] Rework the nav cursor class to send a cursor struct for events rather than splitting between jumping and regular movement
+- [x] Rework the nav cursor class to send a cursor state table for events rather than splitting between jumping and regular movement
 -[ ] Capital city should say capital
 [x] Look ats in city-states, espionage, trade, and great people should move the cursor
 [x] rework icon processing

@@ -1,25 +1,19 @@
 include("caiUtils")
 include("Civ6Common") -- IsExpansion1Active / IsExpansion2Active
 
--- Dramatic Ages is a game mode, not a mod, so it cannot be detected via
--- Modding.GetActiveMods. Its only government-screen content is the Golden Age
--- policy set, whose data loads on the same criteria as the mode's screen
--- replacement, so the presence of any RequiresGoldenAge policy is a reliable,
--- locale-independent signal that the mode variant is the one vanilla would pick.
+
 local function IsDramaticAgesActive()
-    if not GameInfo.Policies_XP1 then return false end
-    for row in GameInfo.Policies_XP1() do
-        if row.RequiresGoldenAge then return true end
-    end
+    if GameConfiguration.GetValue("GAMEMODE_DRAMATICAGES") then return true end
     return false
 end
 
 -- CAI replaces the GovernmentScreen context outright, so it must re-include the
 -- exact vanilla script that would otherwise win; otherwise a sighted hotseat
 -- player loses that variant's visuals (e.g. the Golden card art and filter tab).
+include("GovernmentScreen_Byzantium_Gaul_Expansion2_MODE")
 if IsExpansion2Active() then
     if IsDramaticAgesActive() then
-        include("GovernmentScreen_Byzantium_Gaul_Expansion2_MODE")
+        Speak("Opening")
     else
         include("GovernmentScreen_Expansion2")
     end
@@ -472,11 +466,11 @@ local function CreatePolicyTreeItem(policyType, action)
 
     item:AddInputBindings({
         {
-            Key      = Keys.VK_RETURN,
-            IsShift  = true,
-            MSG      = KeyEvents.KeyUp,
+            Key         = Keys.VK_RETURN,
+            IsShift     = true,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action   = function()
+            Action      = function()
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 LuaEvents.OpenCivilopedia(policyType)
                 return true
@@ -532,10 +526,13 @@ local function CreatePolicyPicker(slotIndex, rowIndex)
     })
     m_ui.picker:AddInputBindings({
         {
-            Key    = Keys.VK_ESCAPE,
-            MSG    = KeyEvents.KeyUp,
+            Key         = Keys.VK_ESCAPE,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_CLOSE",
-            Action = function() ClosePicker() return true end,
+            Action      = function()
+                ClosePicker()
+                return true
+            end,
         },
     })
 
@@ -567,10 +564,13 @@ local function OpenAllPoliciesTree()
     })
     m_ui.allPolicies:AddInputBindings({
         {
-            Key    = Keys.VK_ESCAPE,
-            MSG    = KeyEvents.KeyUp,
+            Key         = Keys.VK_ESCAPE,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_CLOSE",
-            Action = function() CloseAllPolicies() return true end,
+            Action      = function()
+                CloseAllPolicies()
+                return true
+            end,
         },
     })
 
@@ -585,14 +585,14 @@ end
 
 local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
     local widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovScreenPolicySlot"), "TreeItem", {
-        Label   = function()
+        Label    = function()
             local policyType = GetPolicyTypeForSlot(slotIndex)
             if policyType == CAI_EMPTY_POLICY_TYPE then
                 return Locale.Lookup("LOC_CAI_GOVERNMENT_EMPTY_SLOT", slotOrdinal)
             end
             return GetPolicyName(policyType)
         end,
-        Tooltip = function()
+        Tooltip  = function()
             local policyType = GetPolicyTypeForSlot(slotIndex)
             if policyType == CAI_EMPTY_POLICY_TYPE then
                 return Locale.Lookup("LOC_CAI_GOVERNMENT_EMPTY_SLOT", slotOrdinal)
@@ -617,10 +617,10 @@ local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
 
     widget:AddInputBindings({
         {
-            Key    = Keys.VK_DELETE,
-            MSG    = KeyEvents.KeyUp,
+            Key         = Keys.VK_DELETE,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_REMOVE_POLICY",
-            Action = function()
+            Action      = function()
                 local currentPolicyType = GetPolicyTypeForSlot(slotIndex)
                 if currentPolicyType == CAI_EMPTY_POLICY_TYPE then return true end
                 if IsReadOnly() then
@@ -639,11 +639,11 @@ local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
             end,
         },
         {
-            Key     = Keys.VK_RETURN,
-            IsShift = true,
-            MSG     = KeyEvents.KeyUp,
+            Key         = Keys.VK_RETURN,
+            IsShift     = true,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action  = function()
+            Action      = function()
                 local policyType = GetPolicyTypeForSlot(slotIndex)
                 if policyType == CAI_EMPTY_POLICY_TYPE then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
@@ -893,11 +893,15 @@ local function PopPanel()
         mgr:RemoveFromStack(PANEL_ID)
     end
     m_ui = {
-        panel = nil, tabs = nil,
-        govPage = nil, polPage = nil,
-        govTree = nil, polTree = nil,
+        panel = nil,
+        tabs = nil,
+        govPage = nil,
+        polPage = nil,
+        govTree = nil,
+        polTree = nil,
         polRows = {},
-        picker = nil, allPolicies = nil,
+        picker = nil,
+        allPolicies = nil,
     }
     m_state.slotPolicyTypes = {}
     m_state.isInternalVanillaRefresh = false
@@ -909,10 +913,12 @@ end
 -- Vanilla wraps
 -- ---------------------------------------------------------------------------
 
+
 OnOpenGovernmentScreen = WrapFunc(OnOpenGovernmentScreen, function(orig, screenEnum)
     orig(screenEnum)
     SyncSlotPolicyTypesFromLive()
     if not m_ui.panel then BuildPanel() end
+
     PushPanel()
     MirrorActiveTabToCAI()
 end)
@@ -1035,10 +1041,10 @@ local function OnCAIInputActionTriggered(actionId)
 end
 
 Events.InputActionTriggered.Add(OnCAIInputActionTriggered)
-
 OnShutdown = WrapFunc(OnShutdown, function(orig)
     Events.InputActionTriggered.Remove(OnCAIInputActionTriggered)
     PopPanel()
     orig()
 end)
+
 ContextPtr:SetShutdown(OnShutdown)

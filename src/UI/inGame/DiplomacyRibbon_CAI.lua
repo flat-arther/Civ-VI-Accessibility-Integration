@@ -183,37 +183,16 @@ local function GetLeaderTooltip(playerID, localPlayerID)
     return JoinNonEmpty(parts, ", ")
 end
 
-local m_isPushed = false
-
 local function CloseList()
-    if mgr and m_isPushed then
+    if mgr and m_list then
         mgr:RemoveFromStack(LIST_ID)
         m_list = nil
-        m_isPushed = false
     end
 end
 
-local function BuildList()
-    if not mgr then return nil end
-
+local function PopulateList(list)
     local localPlayerID = Game.GetLocalPlayer()
-    if localPlayerID == -1 or localPlayerID == 1000 then return nil end
-
-    local list = mgr:CreateWidget(LIST_ID, "List", {
-        Label = function() return Locale.Lookup("LOC_CAI_DIPLO_RIBBON_LABEL") end,
-    })
-    list:AddInputBinding({
-        Key         = Keys.VK_ESCAPE,
-        MSG         = KeyEvents.KeyUp,
-        Description = "LOC_CAI_KB_CLOSE",
-        Action      = function()
-            CloseList()
-            return true
-        end,
-    })
-    list.OnFocusLeave = function()
-        CloseList()
-    end
+    if localPlayerID == -1 then return nil end
 
     local localPlayer = Players[localPlayerID]
     local localDiplomacy = localPlayer:GetDiplomacy()
@@ -257,38 +236,53 @@ local function BuildList()
             Tooltip = function() return GetCongressTooltip() end,
         })
         congressItem.FocusKey = "congress"
-        congressItem:On("activate", function() ActivateCongress() end)
+        congressItem:On("activate", function()
+            ActivateCongress()
+        end)
         list:AddChild(congressItem)
     end
+end
 
-    return list
+local function BuildList()
+    if not mgr then return nil end
+
+    local localPlayerID = Game.GetLocalPlayer()
+    if localPlayerID == -1 then return nil end
+
+    local list = mgr:CreateWidget(LIST_ID, "List", {
+        Label = function() return Locale.Lookup("LOC_CAI_DIPLO_RIBBON_LABEL") end,
+    })
+    list:AddInputBinding({
+        Key         = Keys.VK_ESCAPE,
+        MSG         = KeyEvents.KeyUp,
+        Description = "LOC_CAI_KB_CLOSE",
+        Action      = function()
+            CloseList()
+            return true
+        end,
+    })
+
+    PopulateList(list)
+
+    m_list = list
 end
 
 local function RebuildIfPushed()
-    if not m_isPushed or not mgr then return end
+    if not m_list or not mgr then return end
     local capture = m_list and mgr:CaptureFocusKey(m_list) or nil
-    mgr:RemoveFromStack(LIST_ID)
-    m_list = BuildList()
-    if m_list then
-        mgr:Push(m_list)
-        if capture then
-            mgr:RestoreFocus(m_list, capture)
-        end
-    else
-        m_isPushed = false
+    PopulateList(m_list)
+
+    if capture then
+        mgr:RestoreFocus(m_list, capture)
     end
 end
 
 local function OpenList()
     if not mgr then return end
-    if m_isPushed then
-        CloseList()
-        return
-    end
-    m_list = BuildList()
+    CloseList()
+    BuildList()
     if m_list then
         mgr:Push(m_list)
-        m_isPushed = true
     end
 end
 

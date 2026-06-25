@@ -3530,7 +3530,7 @@
       <Text>Oppose</Text>
     </Row>
     <Row Tag="LOC_CAI_WC_NEW" Language="en_US">
-      <Text>(New) </Text>
+      <Text>(New), </Text>
     </Row>
     <Row Tag="LOC_CAI_WC_REJECTED_OUTCOME" Language="en_US">
       <Text>Rejected Outcome</Text>

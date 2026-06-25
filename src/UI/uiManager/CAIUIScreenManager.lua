@@ -58,7 +58,6 @@ UIScreenManager = {
 
 ---@return UIScreenManager
 function UIScreenManager:New()
-    Speak(Locale.Lookup("LOC_CAI_CREATING_UI_MANAGER"))
     local mgr = setmetatable({}, { __index = UIScreenManager })
     mgr.Stack = {}
     mgr.CurrentPath = {}
@@ -650,12 +649,12 @@ function UIScreenManager:Init()
     end
 end
 
-function UIScreenManager:ShutDown()
+function UIScreenManager:ShutDown(unregCharInput)
     ExposedMembers.CAI_UIManager = nil
-    if CAI and CAI.UnregisterGlobalCharInputHandler then
+    if unregCharInput == nil then unregCharInput = true end
+    if unregCharInput and CAI and CAI.UnregisterGlobalCharInputHandler then
         CAI.UnregisterGlobalCharInputHandler()
     end
-    Speak("Shutting down manager")
 end
 
 UIScreenManager:Init()
