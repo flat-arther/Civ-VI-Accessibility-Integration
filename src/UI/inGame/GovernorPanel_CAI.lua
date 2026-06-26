@@ -243,7 +243,7 @@ local function GetGovernorRowTooltip(governorDef, governor, playerGovernors, loc
         parts[#parts + 1] = Locale.Lookup("LOC_CAI_GOVERNOR_EARNED_PROMOS", table.concat(earnedNames, ", "))
     end
 
-    return JoinNonEmpty(parts, ", ")
+    return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function GetPromotionCellTooltip(promoDef, governorDef, localPlayerID)
@@ -284,7 +284,7 @@ local function GetPromotionCellTooltip(promoDef, governorDef, localPlayerID)
         parts[#parts + 1] = Locale.Lookup("LOC_CAI_GOVERNOR_LEADS_TO", table.concat(leadsToNames, ", "))
     end
 
-    return JoinNonEmpty(parts, ", ")
+    return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 -- ===========================================================================
@@ -901,6 +901,25 @@ local function OnCAIGovernorPromoted(playerID, governorID, promotionID)
     RestorePendingPromotionFocus(governorID)
 end
 
+local function SpeakGovTitles()
+    local localPlayerID = Game.GetLocalPlayer()
+    local pPlayer = Players[localPlayerID]
+    local playerGovernors = pPlayer:GetGovernors()
+    if not playerGovernors then
+        return
+    end
+
+    local governorPointsObtained = playerGovernors:GetGovernorPoints()
+    local governorPointsSpent = playerGovernors:GetGovernorPointsSpent()
+    local capturedAvailable = governorPointsObtained - governorPointsSpent
+    local capturedSpent = governorPointsSpent
+    Speak(GetTitleCountsText(capturedAvailable, capturedSpent))
+end
+
+local function OnInputActionTriggered(actionId)
+    if actionId == Input.GetActionId("CAI_SpeakGovernerTitles") then SpeakGovTitles() end
+end
+
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
     if mgr and mgr:GetWidgetById(PANEL_ID) then
         if mgr:HandleInput(input) then return true end
@@ -911,12 +930,15 @@ end)
 OnShutdown = WrapFunc(OnShutdown, function(orig)
     PopPanel()
     orig()
+    Events.InputActionTriggered.Remove(OnInputActionTriggered)
+    Events.GovernorAppointed.Remove(OnCAIGovernorAppointed)
+    Events.GovernorPromoted.Remove(OnCAIGovernorPromoted)
 end)
 
 -- Re-register callbacks: vanilla Initialize() captured old function references
 -- before our WrapFunc reassigned the globals.
 ContextPtr:SetInputHandler(OnInputHandler, true)
 ContextPtr:SetShutdown(OnShutdown)
-
+Events.InputActionTriggered.Add(OnInputActionTriggered)
 Events.GovernorAppointed.Add(OnCAIGovernorAppointed)
 Events.GovernorPromoted.Add(OnCAIGovernorPromoted)

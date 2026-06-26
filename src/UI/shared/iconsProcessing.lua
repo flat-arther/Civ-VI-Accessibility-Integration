@@ -71,7 +71,7 @@ local REPLACEMENTS = {
 
 local DIRECT_OUTPUT = {
     ["Bullet"]  = "•",
-    ["NEWLINE"] = "\n",
+    ["NEWLINE"] = ", ",
 }
 
 -- Collapse aliases keyed by REPLACEMENTS key (after ICON_ strip). Each
@@ -81,12 +81,12 @@ local DIRECT_OUTPUT = {
 -- specific label (e.g. [ICON_Strength] is used for melee, combat, and
 -- defense strength — the adjacent text carries the real meaning).
 local COLLAPSE_ALIAS_KEYS = {
-    ["Strength"]             = { "LOC_CAI_ICON_STRENGTH_ALIAS_COMBAT", "LOC_CAI_ICON_STRENGTH_ALIAS_DEFENSE" },
-    ["Strength_Large"]       = { "LOC_CAI_ICON_STRENGTH_ALIAS_COMBAT", "LOC_CAI_ICON_STRENGTH_ALIAS_DEFENSE" },
-    ["STRENGTH"]             = { "LOC_CAI_ICON_STRENGTH_ALIAS_COMBAT", "LOC_CAI_ICON_STRENGTH_ALIAS_DEFENSE" },
-    ["Range"]                = { "LOC_CAI_ICON_RANGE_ALIAS" },
-    ["Range_Large"]          = { "LOC_CAI_ICON_RANGE_ALIAS" },
-    ["RANGE"]                = { "LOC_CAI_ICON_RANGE_ALIAS" },
+    ["Strength"]       = { "LOC_CAI_ICON_STRENGTH_ALIAS_COMBAT", "LOC_CAI_ICON_STRENGTH_ALIAS_DEFENSE" },
+    ["Strength_Large"] = { "LOC_CAI_ICON_STRENGTH_ALIAS_COMBAT", "LOC_CAI_ICON_STRENGTH_ALIAS_DEFENSE" },
+    ["STRENGTH"]       = { "LOC_CAI_ICON_STRENGTH_ALIAS_COMBAT", "LOC_CAI_ICON_STRENGTH_ALIAS_DEFENSE" },
+    ["Range"]          = { "LOC_CAI_ICON_RANGE_ALIAS" },
+    ["Range_Large"]    = { "LOC_CAI_ICON_RANGE_ALIAS" },
+    ["RANGE"]          = { "LOC_CAI_ICON_RANGE_ALIAS" },
 }
 
 local function ResolveCollapseAliases(lookupKey)

@@ -9,32 +9,32 @@ else
     include("EspionageOverview")
 end
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr                   = ExposedMembers.CAI_UIManager
 
-local PANEL_ID       = "CAIEspOv_Panel"
-local TABS_ID        = "CAIEspOv_Tabs"
-local OP_TREE        = "CAIEspOv_OpTree"
-local MH_TREE        = "CAIEspOv_MHTree"
-local VIEW_CITY_ID   = "CAIEspOv_ViewCity"
-local HOVER_SOUND    = "Main_Menu_Mouse_Over"
+local PANEL_ID              = "CAIEspOv_Panel"
+local TABS_ID               = "CAIEspOv_Tabs"
+local OP_TREE               = "CAIEspOv_OpTree"
+local MH_TREE               = "CAIEspOv_MHTree"
+local VIEW_CITY_ID          = "CAIEspOv_ViewCity"
+local HOVER_SOUND           = "Main_Menu_Mouse_Over"
 
-local TAB_OPERATIVES     = 1
-local TAB_MISSION_HISTORY = 2
+local TAB_OPERATIVES        = 1
+local TAB_MISSION_HISTORY   = 2
 
-local m_panel        = nil
-local m_tabs         = nil
-local m_opTree       = nil
-local m_mhTree       = nil
-local m_viewCityBtn  = nil
-local m_isMirroringTab = false
-local m_focusedCityOwner = nil
-local m_focusedCityID    = nil
+local m_panel               = nil
+local m_tabs                = nil
+local m_opTree              = nil
+local m_mhTree              = nil
+local m_viewCityBtn         = nil
+local m_isMirroringTab      = false
+local m_focusedCityOwner    = nil
+local m_focusedCityID       = nil
 
-local m_cachedOperatives   = {}
-local m_cachedOffMap       = {}
-local m_cachedCapturedOwn  = {}
+local m_cachedOperatives    = {}
+local m_cachedOffMap        = {}
+local m_cachedCapturedOwn   = {}
 local m_cachedCapturedEnemy = {}
-local m_cachedMissions     = {}
+local m_cachedMissions      = {}
 
 -- ============================================================================
 -- Helpers
@@ -180,7 +180,7 @@ end)
 
 AddMissionHistoryInstance = WrapFunc(AddMissionHistoryInstance, function(orig, mission)
     if mission.InitialResult == EspionageResultTypes.SUCCESS_MUST_ESCAPE or
-       mission.InitialResult == EspionageResultTypes.FAIL_MUST_ESCAPE then
+        mission.InitialResult == EspionageResultTypes.FAIL_MUST_ESCAPE then
         if mission.EscapeResult == EspionageResultTypes.NO_RESULT then
             orig(mission)
             return
@@ -251,7 +251,7 @@ local function BuildSpyTooltip(entry)
         end
     end
 
-    return JoinNonEmpty(parts, ", ")
+    return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function BuildOffMapLabel(entry)
@@ -287,7 +287,7 @@ local function BuildCapturedOwnTooltip(entry)
     else
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_ESPIONAGEOVERVIEW_ASK_FOR_TRADE"))
     end
-    return JoinNonEmpty(parts, ", ")
+    return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function BuildCapturedEnemyLabel(entry)
@@ -330,7 +330,7 @@ local function BuildMissionTooltip(entry)
             AppendIfNonEmpty(parts, entry.outcome.SpyStatus)
         end
     end
-    return JoinNonEmpty(parts, ", ")
+    return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 -- ============================================================================
@@ -457,7 +457,7 @@ local function BuildCityCategoryTooltip(group)
             " " .. table.concat(otherDistricts, ", ")
     end
 
-    return JoinNonEmpty(parts, ". ")
+    return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 -- ============================================================================
@@ -538,7 +538,8 @@ local function OpenFocusedCityDetails()
 end
 
 local CITY_DETAILS_BINDING = {
-    Key = Keys.VK_RETURN, IsControl = true,
+    Key = Keys.VK_RETURN,
+    IsControl = true,
     Description = "LOC_CAI_KB_OPEN_CITY_DETAILS",
     Action = function() return OpenFocusedCityDetails() end,
 }

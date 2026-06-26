@@ -1838,14 +1838,14 @@ local function BuildLeaderTooltip(domain, leaderType)
 				for _, u in ipairs(grouped[i]) do
 					table.insert(items, Locale.Lookup(u.Name) .. ": " .. Locale.Lookup(u.Description))
 				end
-				table.insert(parts, Locale.Lookup(headerKey) .. ": " .. table.concat(items, ", "))
+				table.insert(parts, Locale.Lookup(headerKey) .. "[NEWLINE]" .. table.concat(items, "[NEWLINE]"))
 			end
 		end
 		for _, u in ipairs(ungrouped) do
 			table.insert(parts, Locale.Lookup(u.Name) .. ": " .. Locale.Lookup(u.Description))
 		end
 	end
-	return table.concat(parts, ", ")
+	return table.concat(parts, "[NEWLINE]")
 end
 
 -- ---------------------------------------------------------------------------

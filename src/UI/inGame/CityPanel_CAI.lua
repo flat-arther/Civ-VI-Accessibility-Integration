@@ -18,6 +18,7 @@ include(GetCityPanelIncludeName())
 
 --#State
 local mgr = ExposedMembers.CAI_UIManager
+local m_IsGameStarted = false
 local CITY_ACTION_CATEGORY = "LOC_OPTIONS_HOTKEY_CATEGORY_CITY"
 local HexCoordUtils = CAIHexCoordUtils
 
@@ -372,7 +373,10 @@ function GetCityBorderGrowthPerTurnText(currentYield)
         return nil
     end
 
-    return currentYieldText .. " " .. Locale.ToLower(Locale.Lookup("LOC_HUD_CITY_CULTURE_PER_TURN", currentYieldText)):gsub("^" .. currentYieldText .. "%s*", "")
+    return currentYieldText ..
+        " " ..
+        Locale.ToLower(Locale.Lookup("LOC_HUD_CITY_CULTURE_PER_TURN", currentYieldText)):gsub(
+            "^" .. currentYieldText .. "%s*", "")
 end
 
 function GetCityBorderGrowth(data, city)
@@ -1019,10 +1023,12 @@ function BuildCityActionList()
 
     list:AddInputBindings({
         {
-            Key    = Keys.VK_ESCAPE,
-            MSG    = KeyEvents.KeyUp,
+            Key         = Keys.VK_ESCAPE,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_CLOSE",
-            Action = function() CloseCityActionList(); return true end,
+            Action      = function()
+                CloseCityActionList(); return true
+            end,
         },
     })
 
@@ -1162,10 +1168,12 @@ function OpenCitizenYieldFocusList()
     })
     outerList:AddInputBindings({
         {
-            Key    = Keys.VK_ESCAPE,
-            MSG    = KeyEvents.KeyUp,
+            Key         = Keys.VK_ESCAPE,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_CLOSE",
-            Action = function() mgr:RemoveFromStack(CAI_YIELD_FOCUS_LIST_ID); return true end,
+            Action      = function()
+                mgr:RemoveFromStack(CAI_YIELD_FOCUS_LIST_ID); return true
+            end,
         },
     })
 
@@ -1366,6 +1374,12 @@ function OnCityActionInputActionTriggered(actionId)
     action.helper()
 end
 
+function OnLoadScreenClose()
+    m_IsGameStarted = true
+end
+
+Events.LoadScreenClose.Add(OnLoadScreenClose)
+m_IsGameStarted = true
 function OnCitySelectionChanged(ownerPlayerID, cityID, i, j, k, isSelected, isEditable)
     if ContextPtr:IsHidden() then return end
     if not isSelected then return end
@@ -1374,6 +1388,7 @@ function OnCitySelectionChanged(ownerPlayerID, cityID, i, j, k, isSelected, isEd
         print("CAI CityPanel could not resolve selected city plot: " .. tostring(i) .. ", " .. tostring(j))
         return
     end
+    if not m_IsGameStarted then return end
     LuaEvents.CAICursorMoveTo(plot:GetIndex(), "select")
     local results = info:RequestCityInfo(cityID, CITY_INFO_BUCKETS.Summary, ownerPlayerID)
     if results == nil or #results == 0 then
@@ -1438,4 +1453,5 @@ InitializeCityInfoActionMap()
 Events.CitySelectionChanged.Add(OnCitySelectionChanged)
 Events.InputActionTriggered.Add(OnCityActionInputActionTriggered)
 Events.InputActionTriggered.Add(OnSelectionInfoInputActionTriggered)
+Events.LoadScreenClose.Add(OnLoadScreenClose)
 ContextPtr:SetInputHandler(OnHandleInput, true)

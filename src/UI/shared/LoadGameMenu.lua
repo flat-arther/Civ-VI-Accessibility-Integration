@@ -712,7 +712,7 @@ local function RebuildFileListAccessibility()
 						if entry.DisplaySaveTime and entry.DisplaySaveTime ~= "" then
 							table.insert(parts, entry.DisplaySaveTime)
 						end
-						return table.concat(parts, ", ")
+						return table.concat(parts, "[NEWLINE]")
 					end,
 					DisabledPredicate = function() return saveHasError end,
 					FocusKey = "loadgame:file:" .. tostring(idx),

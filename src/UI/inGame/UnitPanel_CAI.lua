@@ -10,6 +10,7 @@ else
 end
 
 local mgr = ExposedMembers.CAI_UIManager
+local m_IsGameStarted = false
 local HexCoordUtils = CAIHexCoordUtils
 
 local UNIT_ACTION_LIST_ID = "CAIUnitPanelActionList"
@@ -2564,6 +2565,10 @@ function OnUnitPanelSelectionActionInputTriggered(actionId)
     end
 end
 
+function OnLoadScreenClose()
+    m_IsGameStarted = true
+end
+
 function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locationZ, isSelected, isEditable)
     if ContextPtr:IsHidden() or not isSelected then
         return
@@ -2577,7 +2582,7 @@ function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locatio
             tostring(locationX) .. ", " .. tostring(locationY))
         return
     end
-
+    if not m_IsGameStarted then return end
     LuaEvents.CAICursorMoveTo(plot:GetIndex(), "select")
     local results = info:RequestUnitInfo(unitId, { "Summary" }, player)
     if results == nil or #results == 0 then
@@ -2730,6 +2735,7 @@ end
 InitializeUnitInfoActionMap()
 Events.InputActionTriggered.Add(OnUnitPanelSelectionInfoInputActionTriggered)
 Events.InputActionTriggered.Add(OnUnitPanelSelectionActionInputTriggered)
+Events.LoadScreenClose.Add(OnLoadScreenClose)
 Events.UnitSelectionChanged.Add(OnCAIUnitSelectionChanged)
 Events.Combat.Add(OnCombatResolved)
 LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)

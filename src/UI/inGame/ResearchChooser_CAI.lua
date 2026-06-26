@@ -14,30 +14,30 @@ else
     include("ResearchChooser")
 end
 
-local mgr                        = ExposedMembers.CAI_UIManager
+local mgr                     = ExposedMembers.CAI_UIManager
 
-local PANEL_ID                   = "CAIResearchChooser_Panel"
-local QUEUE_TREE_ID              = "CAIResearchChooser_QueueTree"
-local AVAILABLE_TREE_ID          = "CAIResearchChooser_AvailableTree"
-local OPEN_TREE_BUTTON_ID        = "CAIResearchChooser_OpenTreeButton"
+local PANEL_ID                = "CAIResearchChooser_Panel"
+local QUEUE_TREE_ID           = "CAIResearchChooser_QueueTree"
+local AVAILABLE_TREE_ID       = "CAIResearchChooser_AvailableTree"
+local OPEN_TREE_BUTTON_ID     = "CAIResearchChooser_OpenTreeButton"
 
-local TUTORIAL_MOD_ID            = "17462E0F-1EE1-4819-AAAA-052B5896B02A"
+local TUTORIAL_MOD_ID         = "17462E0F-1EE1-4819-AAAA-052B5896B02A"
 
-local m_panel                    = nil ---@type UIWidget|nil
-local m_queueTree                = nil ---@type UIWidget|nil
-local m_availableTree            = nil ---@type UIWidget|nil
-local m_rowData                  = {} ---@type table[]
-local m_queueRows                = {} ---@type table[]
-local m_availableRows            = {} ---@type table[]
-local m_currentData              = nil ---@type table|nil
-local m_currentControl           = nil ---@type table|nil
-local m_instanceByHash           = {} ---@type table<number, table>
-local m_openPending              = false
-local m_isTutorial               = nil ---@type boolean|nil
-local m_tutorialTechs            = nil ---@type table<number, number>|nil
-local m_tutorialPushDelay        = false
-local m_tutorialControlsReady    = false
-local m_tutorialPushPending      = false
+local m_panel                 = nil ---@type UIWidget|nil
+local m_queueTree             = nil ---@type UIWidget|nil
+local m_availableTree         = nil ---@type UIWidget|nil
+local m_rowData               = {} ---@type table[]
+local m_queueRows             = {} ---@type table[]
+local m_availableRows         = {} ---@type table[]
+local m_currentData           = nil ---@type table|nil
+local m_currentControl        = nil ---@type table|nil
+local m_instanceByHash        = {} ---@type table<number, table>
+local m_openPending           = false
+local m_isTutorial            = nil ---@type boolean|nil
+local m_tutorialTechs         = nil ---@type table<number, number>|nil
+local m_tutorialPushDelay     = false
+local m_tutorialControlsReady = false
+local m_tutorialPushPending   = false
 
 -- ===========================================================================
 -- Tutorial detection (vanilla's m_isTutorial / TUTORIAL_TECHS are file-local)
@@ -244,7 +244,7 @@ local function FormatTooltip(kData, group)
     AppendIfNonEmpty(parts, GetAllianceText(kData))
     AppendIfNonEmpty(parts, GetRevealsText(group))
     AppendIfNonEmpty(parts, GetUnlocksText(group))
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 -- ===========================================================================
@@ -276,11 +276,11 @@ local function CreateRow(kData, interactive)
 
     row:AddInputBindings({
         {
-            Key     = Keys.VK_RETURN,
-            IsShift = true,
-            MSG     = KeyEvents.KeyUp,
+            Key         = Keys.VK_RETURN,
+            IsShift     = true,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action  = function()
+            Action      = function()
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 if kData.TechType then LuaEvents.OpenCivilopedia(kData.TechType) end
                 return true

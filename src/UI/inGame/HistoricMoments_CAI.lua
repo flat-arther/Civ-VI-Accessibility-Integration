@@ -1,16 +1,16 @@
 include("caiUtils")
 include("HistoricMoments")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr                    = ExposedMembers.CAI_UIManager
 
-local PANEL_ID     = "CAITimeline_Panel"
-local TREE_ID      = "CAITimeline_Tree"
-local HOVER_SOUND  = "Main_Menu_Mouse_Over"
+local PANEL_ID               = "CAITimeline_Panel"
+local TREE_ID                = "CAITimeline_Tree"
+local HOVER_SOUND            = "Main_Menu_Mouse_Over"
 
 local MIN_INTEREST_LEVEL_CAI = 1
 
-local m_panel = nil
-local m_tree  = nil
+local m_panel                = nil
+local m_tree                 = nil
 
 local function NormalizeText(text)
     if not text then return "" end
@@ -92,7 +92,7 @@ local function FormatMomentTooltip(momentData)
     end
     table.insert(parts, NormalizeText(desc))
 
-    return JoinNonEmpty(parts, ", ")
+    return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function PopPanel()
@@ -165,7 +165,8 @@ local function BuildPanel()
 
             if #majorMoments > 0 then
                 local majorNode = MakeNode("timeline:era:" .. eraIdx .. ":major", function()
-                    return Locale.Lookup("LOC_PEDIA_MOMENTS_PAGEGROUP_MAJOR_NAME") .. ", " .. Locale.Lookup("LOC_CAI_TIMELINE_COUNT", #majorMoments)
+                    return Locale.Lookup("LOC_PEDIA_MOMENTS_PAGEGROUP_MAJOR_NAME") ..
+                    ", " .. Locale.Lookup("LOC_CAI_TIMELINE_COUNT", #majorMoments)
                 end)
                 for _, md in ipairs(majorMoments) do
                     local capturedMD = md
@@ -180,7 +181,8 @@ local function BuildPanel()
 
             if #minorMoments > 0 then
                 local minorNode = MakeNode("timeline:era:" .. eraIdx .. ":minor", function()
-                    return Locale.Lookup("LOC_PEDIA_MOMENTS_PAGEGROUP_MINOR_NAME") .. ", " .. Locale.Lookup("LOC_CAI_TIMELINE_COUNT", #minorMoments)
+                    return Locale.Lookup("LOC_PEDIA_MOMENTS_PAGEGROUP_MINOR_NAME") ..
+                    ", " .. Locale.Lookup("LOC_CAI_TIMELINE_COUNT", #minorMoments)
                 end)
                 for _, md in ipairs(minorMoments) do
                     local capturedMD = md

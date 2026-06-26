@@ -19,13 +19,18 @@ function CheckboxWidget.Create(mgr, id, props)
 
     w:SetValueGetter(function(self)
         return self._value
-            and Locale.Lookup("LOC_OPTIONS_ENABLED")
-            or Locale.Lookup("LOC_OPTIONS_DISABLED")
+            and Locale.Lookup("LOC_UIWidget_Checked")
+            or Locale.Lookup("LOC_UIWidget_Unchecked")
     end)
 
     w:AddInputBindings({
-        { Key = Keys.VK_SPACE,                          Description = "LOC_CAI_KB_TOGGLE", Action = function(self) self:Toggle(); return true end },
-        { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyUp,  Description = "LOC_CAI_KB_TOGGLE", Action = function(self) self:Toggle(); return true end },
+        { Key = Keys.VK_SPACE,  Description = "LOC_CAI_KB_TOGGLE", Action = function(self)
+            self:Toggle(); return true
+        end },
+        { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyUp,             Description = "LOC_CAI_KB_TOGGLE",                     Action = function(
+            self)
+            self:Toggle(); return true
+        end },
     })
 
     CAIWidgetRegistry.ApplyProps(w, props)

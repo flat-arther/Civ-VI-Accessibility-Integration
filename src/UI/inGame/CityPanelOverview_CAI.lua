@@ -387,7 +387,7 @@ local function BuildBuildingsTab(data, city)
                 table.insert(parts,
                     Locale.Lookup("LOC_CAI_CITY_OV_TRADING_POSTS") .. ": " .. tostring(#data.TradingPosts))
             end
-            return table.concat(parts, ", ")
+            return table.concat(parts, "[NEWLINE]")
         end,
         FocusKey = "tab:buildings",
     })
@@ -536,7 +536,7 @@ local function BuildReligionTab(data)
             if #parts == 0 then
                 return Locale.Lookup("LOC_CAI_CITY_OV_NO_RELIGION")
             end
-            return table.concat(parts, ", ")
+            return table.concat(parts, "[NEWLINE]")
         end,
         FocusKey = "tab:religion",
     })
@@ -660,7 +660,7 @@ local function BuildLoyaltyTab(data, city)
                 Locale.Lookup("LOC_CAI_CITY_OV_LOYALTY_PER_TURN",
                     toPlusMinusString(Round(pCulturalIdentity:GetLoyaltyPerTurn(), 1))))
             table.insert(parts, BuildGovernorStatusLine(city))
-            return table.concat(parts, ", ")
+            return table.concat(parts, "[NEWLINE]")
         end,
         FocusKey = "tab:loyalty",
     })
@@ -812,7 +812,7 @@ local function BuildPowerTab(data, city)
             else
                 table.insert(parts, Locale.Lookup("LOC_POWER_STATUS_POWERED_DESCRIPTION"))
             end
-            return table.concat(parts, ", ")
+            return table.concat(parts, "[NEWLINE]")
         end,
         FocusKey = "tab:power",
     })
@@ -913,7 +913,13 @@ local function PushRenameEdit()
         PopRenameEdit()
     end)
     edit:AddInputBindings({
-        { Key = Keys.VK_ESCAPE, Description = "LOC_CAI_KB_CLOSE", Action = function() PopRenameEdit(); return true end },
+        {
+            Key = Keys.VK_ESCAPE,
+            Description = "LOC_CAI_KB_CLOSE",
+            Action = function()
+                PopRenameEdit(); return true
+            end
+        },
     })
     mgr:Push(edit)
 end

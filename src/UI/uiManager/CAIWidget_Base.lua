@@ -8,6 +8,7 @@ local SPEECH_ORDER = { "label", "role", "state", "value", "tooltip", "position" 
 
 local PediaLookup = CAIWidgetHelpers_PediaLookup
 local InputHelp = CAIWidgetHelpers_InputHelp
+local TooltipReader = CAIWidgetHelpers_TooltipReader
 
 ---@class UIWidget
 ---@field Id? string
@@ -41,6 +42,13 @@ function UIWidget.New(class)
     w.InputMap = {}
     w.SpeechSettings = {}
     w._listeners = {}
+    w:On("focus_enter", function(self)
+        TooltipReader.CacheTooltipSections(self)
+    end)
+
+    w:On("focus_leave", function(self)
+        TooltipReader.ClearTooltipSections(self)
+    end)
     w:AddInputBinding({
         Key = Keys.I,
         IsAlt = true,
@@ -55,6 +63,46 @@ function UIWidget.New(class)
         Common = true,
         Action = function(self)
             return InputHelp.RunHelp(self)
+        end,
+    })
+    w:AddInputBinding({
+        Key = Keys.VK_UP,
+        IsAlt = true,
+        Description = "LOC_CAI_KB_TOOLTIP_PREVIOUS_SECTION",
+        Common = true,
+        MSG = KeyEvents.KeyDown,
+        Action = function(self)
+            return TooltipReader.ReadPreviousTooltipSection(self)
+        end,
+    })
+    w:AddInputBinding({
+        Key = Keys.VK_DOWN,
+        IsAlt = true,
+        Description = "LOC_CAI_KB_TOOLTIP_NEXT_SECTION",
+        Common = true,
+        MSG = KeyEvents.KeyDown,
+        Action = function(self)
+            return TooltipReader.ReadNextTooltipSection(self)
+        end,
+    })
+    w:AddInputBinding({
+        Key = Keys.VK_HOME,
+        IsAlt = true,
+        Description = "LOC_CAI_KB_TOOLTIP_FIRST_SECTION",
+        Common = true,
+        MSG = KeyEvents.KeyDown,
+        Action = function(self)
+            return TooltipReader.ReadFirstTooltipSection(self)
+        end,
+    })
+    w:AddInputBinding({
+        Key = Keys.VK_END,
+        IsAlt = true,
+        Description = "LOC_CAI_KB_TOOLTIP_LAST_SECTION",
+        Common = true,
+        MSG = KeyEvents.KeyDown,
+        Action = function(self)
+            return TooltipReader.ReadLastTooltipSection(self)
         end,
     })
     return w

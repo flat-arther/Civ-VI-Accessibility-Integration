@@ -27,7 +27,7 @@ local m_phase1Capture   = nil
 local m_capturedChoices = {}
 local m_confirmDialog   = nil ---@type UIWidget|nil
 local m_isBuilding      = false
-local m_activeSection   = 0    -- 1=results, 2=effects, 3=proposals
+local m_activeSection   = 0 -- 1=results, 2=effects, 3=proposals
 local m_resultsItem     = nil ---@type UIWidget|nil
 local m_effectsItem     = nil ---@type UIWidget|nil
 
@@ -83,7 +83,7 @@ local function CollectCrisisText(stackCtrl)
             if t and t ~= "" then table.insert(parts, t) end
         end
     end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 -- =========================================================================
@@ -181,7 +181,7 @@ local function BuildLeaders()
                 if grievances > 0 then
                     table.insert(parts, Locale.Lookup("LOC_WORLD_CONGRESS_GRIEVANCE_DEFINITION", grievances))
                 end
-                return table.concat(parts, ", ")
+                return table.concat(parts, "[NEWLINE]")
             end,
         })
         item.FocusKey = "leader:" .. playerID
@@ -331,7 +331,7 @@ local function BuildEmergencyTooltipText(instanceRoot)
         table.insert(parts, Locale.Lookup("LOC_CAI_WC_REWARDS") .. ": " .. rewardsText)
     end
 
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 -- =========================================================================
@@ -424,7 +424,7 @@ local function BuildVotingBody()
                             local tip = moreInfoCtrl:GetToolTipString()
                             if tip and tip ~= "" then table.insert(parts, tip) end
                         end
-                        return table.concat(parts, ", ")
+                        return table.concat(parts, "[NEWLINE]")
                     end,
                 })
                 resItem.FocusKey = "res:" .. instanceRoot:GetID()
@@ -503,7 +503,7 @@ local function BuildVotingBody()
                     if votes > 0 then
                         table.insert(parts, Locale.Lookup("LOC_CAI_WC_CURRENT_VOTES", votes, cost))
                     end
-                    return table.concat(parts, ", ")
+                    return table.concat(parts, "[NEWLINE]")
                 end
 
                 local addVoteBtn = mgr:CreateWidget(
@@ -680,7 +680,7 @@ local function BuildVotingBody()
                             local d = descriptionCtrl and descriptionCtrl:GetText() or ""
                             if d ~= "" then table.insert(parts, d) end
                             if emergencyTip ~= "" then table.insert(parts, emergencyTip) end
-                            return table.concat(parts, ", ")
+                            return table.concat(parts, "[NEWLINE]")
                         end,
                     })
                     propItem.FocusKey = "prop:" .. instanceRoot:GetID()
@@ -722,7 +722,7 @@ local function BuildVotingBody()
                                 if dir == DIRECTION_SUPPORT and votes > 0 then
                                     table.insert(parts, Locale.Lookup("LOC_CAI_WC_CURRENT_VOTES", votes, cost))
                                 end
-                                return table.concat(parts, ", ")
+                                return table.concat(parts, "[NEWLINE]")
                             end,
                         })
                         support:SetFocusSound(HOVER_SOUND)
@@ -757,7 +757,7 @@ local function BuildVotingBody()
                                 if dir == DIRECTION_OPPOSE and votes > 0 then
                                     table.insert(parts, Locale.Lookup("LOC_CAI_WC_CURRENT_VOTES", votes, cost))
                                 end
-                                return table.concat(parts, ", ")
+                                return table.concat(parts, "[NEWLINE]")
                             end,
                         })
                         oppose:SetFocusSound(HOVER_SOUND)
@@ -803,7 +803,7 @@ local function BuildVotingBody()
                             local stip = selectBox:GetToolTipString() or ""
                             if stip ~= "" then table.insert(parts, stip) end
                             if emergencyTip ~= "" then table.insert(parts, emergencyTip) end
-                            return table.concat(parts, ", ")
+                            return table.concat(parts, "[NEWLINE]")
                         end,
                     })
                     propItem:SetChecked(selectBox:IsSelected(), true)
@@ -865,7 +865,7 @@ local function BuildConfirmationDialog()
                                 table.insert(parts, Locale.Lookup("LOC_CAI_WC_COST_LABEL")
                                     .. " " .. costCtrl:GetText())
                             end
-                            return table.concat(parts, ", ")
+                            return table.concat(parts, "[NEWLINE]")
                         end,
                         Tooltip = function()
                             return descCtrl and descCtrl:GetText() or ""
@@ -910,7 +910,7 @@ local function BuildConfirmationDialog()
                                 table.insert(parts, Locale.Lookup("LOC_CAI_WC_COST_LABEL")
                                     .. " " .. costCtrl:GetText())
                             end
-                            return table.concat(parts, ", ")
+                            return table.concat(parts, "[NEWLINE]")
                         end,
                         Tooltip = function()
                             return descCtrl and descCtrl:GetText() or ""
@@ -1032,7 +1032,7 @@ local function PopulateReviewResolutions(parent)
                             end
                             local desc = descCtrl and descCtrl:GetText() or ""
                             if desc ~= "" then table.insert(parts, desc) end
-                            return table.concat(parts, ", ")
+                            return table.concat(parts, "[NEWLINE]")
                         end,
                     })
                     effectWidget:SetFocusSound(HOVER_SOUND)
@@ -1112,7 +1112,7 @@ local function PopulateReviewResolutions(parent)
                                     local t = upVoteIcon:GetToolTipString()
                                     if t and t ~= "" then table.insert(parts, t) end
                                 end
-                                return table.concat(parts, " ")
+                                return table.concat(parts, "[NEWLINE]")
                             end,
                         })
                         votesNode:SetFocusSound(HOVER_SOUND)
@@ -1221,7 +1221,7 @@ local function PopulateReviewProposals(parent)
                                 local desc = descCtrl and descCtrl:GetText() or ""
                                 if desc ~= "" then table.insert(parts, desc) end
                                 if emergencyTip ~= "" then table.insert(parts, emergencyTip) end
-                                return table.concat(parts, ", ")
+                                return table.concat(parts, "[NEWLINE]")
                             end,
                         })
                         effPropWidget:SetFocusSound(HOVER_SOUND)
@@ -1247,7 +1247,7 @@ local function PopulateReviewProposals(parent)
                                 local desc = descCtrl and descCtrl:GetText() or ""
                                 if desc ~= "" then table.insert(parts, desc) end
                                 if emergencyTip ~= "" then table.insert(parts, emergencyTip) end
-                                return table.concat(parts, ", ")
+                                return table.concat(parts, "[NEWLINE]")
                             end,
                         })
                         propItem.FocusKey = "revprop:" .. instanceRoot:GetID()
@@ -1265,7 +1265,7 @@ local function PopulateReviewProposals(parent)
                                         local t = downVoteIcon:GetToolTipString()
                                         if t and t ~= "" then table.insert(parts, t) end
                                     end
-                                    return table.concat(parts, " ")
+                                    return table.concat(parts, "[NEWLINE]")
                                 end,
                             })
                             votesNode:SetFocusSound(HOVER_SOUND)
@@ -1299,7 +1299,7 @@ local function PopulateReviewProposals(parent)
                                                                 local r = vReason:GetText()
                                                                 if r and r ~= "" then table.insert(parts, r) end
                                                             end
-                                                            return table.concat(parts, ", ")
+                                                            return table.concat(parts, "[NEWLINE]")
                                                         end,
                                                     })
                                                 pVoterWidget:SetFocusSound(HOVER_SOUND)
@@ -1394,7 +1394,7 @@ local function BuildProposalsPage(page)
                                 if emergencyTip ~= "" then table.insert(parts, emergencyTip) end
                                 local stip = selectBox:GetToolTipString() or ""
                                 if stip ~= "" then table.insert(parts, stip) end
-                                return table.concat(parts, ", ")
+                                return table.concat(parts, "[NEWLINE]")
                             end,
                         })
                         epItem:SetChecked(selectBox:IsSelected(), true)

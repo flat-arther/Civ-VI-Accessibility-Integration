@@ -44,7 +44,7 @@ local function BuildAggregateYields(kRouteInfo)
                 Locale.Lookup("LOC_CAI_TRADE_ROUTE_RELIGION_PRESSURE", kRouteInfo.ReligionPressure, relName))
         end
     end
-    return table.concat(yields, ", ")
+    return table.concat(yields, "[NEWLINE]")
 end
 
 local function ResolveCity(playerID, cityID)
@@ -99,7 +99,7 @@ local function BuildRouteTooltip(entry)
         end
     end
 
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 -- ============================================================================
@@ -138,7 +138,7 @@ local function BuildPlayerHeaderTooltip(playerID)
         parts[#parts + 1] = Locale.Lookup("LOC_TRADE_OVERVIEW_TOOLTIP_NO_DIPLOMATIC_VIS_BONUS")
     end
 
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 CreatePlayerHeader = WrapFunc(CreatePlayerHeader, function(orig, player)

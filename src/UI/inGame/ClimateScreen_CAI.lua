@@ -202,7 +202,7 @@ local function BuildOverviewTree()
                     end
                 end
 
-                return NormalizeText(JoinNonEmpty(parts, ", "))
+                return JoinNonEmpty(parts, "[NEWLINE]")
             end)
             tree:AddChild(eventLeaf)
         end
@@ -263,7 +263,7 @@ local function BuildOverviewTree()
                     table.insert(parts, Locale.Lookup(capturedDef.LongDescription))
                 end
 
-                return NormalizeText(JoinNonEmpty(parts, ", "))
+                return JoinNonEmpty(parts, "[NEWLINE]")
             end)
             phaseNode:AddChild(child)
         end
@@ -293,7 +293,7 @@ local function BuildOverviewTree()
             NormalizeText(Locale.Lookup("LOC_CLIMATE_TOP_CONTRIBUTOR_NUM", topContributorName)),
             NormalizeText(Locale.Lookup("LOC_CLIMATE_MY_CONTRIBUTION_NUM", CO2Player)),
             NormalizeText(Locale.Lookup("LOC_CLIMATE_CO2_TOTAL_TOOLTIP", CO2Modifier)),
-        }, ", ")
+        }, "[NEWLINE]")
     end)
     contributingNode:AddChild(co2Leaf)
 
@@ -346,7 +346,7 @@ local function BuildOverviewTree()
         if realismName then
             table.insert(parts, NormalizeText(Locale.Lookup("LOC_CLIMATE_REALISM", realismName)))
         end
-        return JoinNonEmpty(parts, ", ")
+        return JoinNonEmpty(parts, "[NEWLINE]")
     end)
     contributingNode:AddChild(settingsLeaf)
 
@@ -367,7 +367,7 @@ local function BuildOverviewTree()
         return JoinNonEmpty({
             NormalizeText(Locale.Lookup("LOC_CLIMATE_AMOUNT_FROM_CLIMATE_CHANGE", stormIncrease)),
             NormalizeText(Locale.Lookup("LOC_CLIMATE_STORM_EVENT_DESCRIPTION_TOOLTIP")),
-        }, ", ")
+        }, "[NEWLINE]")
     end))
 
     -- River Floods
@@ -380,7 +380,7 @@ local function BuildOverviewTree()
         return JoinNonEmpty({
             NormalizeText(Locale.Lookup("LOC_CLIMATE_AMOUNT_FROM_CLIMATE_CHANGE", floodIncrease)),
             NormalizeText(Locale.Lookup("LOC_CLIMATE_RIVER_FLOOD_EVENT_DESCRIPTION_TOOLTIP")),
-        }, ", ")
+        }, "[NEWLINE]")
     end))
 
     -- Droughts
@@ -393,7 +393,7 @@ local function BuildOverviewTree()
         return JoinNonEmpty({
             NormalizeText(Locale.Lookup("LOC_CLIMATE_AMOUNT_FROM_CLIMATE_CHANGE", droughtIncrease)),
             NormalizeText(Locale.Lookup("LOC_CLIMATE_DROUGHT_EVENT_DESCRIPTION_TOOLTIP")),
-        }, ", ")
+        }, "[NEWLINE]")
     end))
 
     -- Volcanoes
@@ -412,7 +412,7 @@ local function BuildOverviewTree()
             NormalizeText(Locale.Lookup("LOC_CLIMATE_VOLCANO_ERUPTED_NUM", volcanoEruptionsNum)),
             NormalizeText(Locale.Lookup("LOC_CLIMATE_VOLCANO_VOLATILE_NUM", volcanoNaturalWonder)),
             NormalizeText(Locale.Lookup("LOC_CLIMATE_VOLCANO_EVENT_DESCRIPTION_TOOLTIP")),
-        }, ", ")
+        }, "[NEWLINE]")
     end))
 
     -- Forest Fires (Gran Colombia/Maya mode)
@@ -426,7 +426,7 @@ local function BuildOverviewTree()
             return JoinNonEmpty({
                 NormalizeText(Locale.Lookup("LOC_CLIMATE_AMOUNT_FROM_CLIMATE_CHANGE", fireIncrease)),
                 NormalizeText(Locale.Lookup("LOC_CLIMATE_FOREST_FIRE_EVENT_DESCRIPTION_TOOLTIP")),
-            }, ", ")
+            }, "[NEWLINE]")
         end))
     end
 
@@ -448,7 +448,7 @@ local function BuildOverviewTree()
             table.insert(parts, NormalizeText(Locale.Lookup("LOC_CLIMATE_POLAR_ICE_MELT_X_TURNS", nextIceLostTurns)))
         end
         table.insert(parts, NormalizeText(Locale.Lookup("LOC_CLIMATE_POLAR_ICE_MELT_DESCRIPTION_TOOLTIP")))
-        return JoinNonEmpty(parts, ", ")
+        return JoinNonEmpty(parts, "[NEWLINE]")
     end))
 
     -- 6. Sea Level
@@ -472,7 +472,7 @@ local function BuildOverviewTree()
             table.insert(parts, NormalizeText(Locale.Lookup("LOC_CLIMATE_SEA_LEVEL_RISE_X_TURNS", nextSeaRiseTurns)))
         end
         table.insert(parts, NormalizeText(Locale.Lookup("LOC_CLIMATE_SEA_LEVEL_RISE_DESCRIPTION_TOOLTIP", szSeaLevel)))
-        return JoinNonEmpty(parts, ", ")
+        return JoinNonEmpty(parts, "[NEWLINE]")
     end))
 
     return tree
@@ -591,9 +591,9 @@ local function BuildCO2Tree()
                 local totalResourceLastTurn = 0
                 for _, v in ipairs(aliveMajorIDList) do
                     totalAmountLastTurn = totalAmountLastTurn +
-                    GameClimate.GetPlayerResourceCO2Footprint(v, kResourceInfo.Index, true)
+                        GameClimate.GetPlayerResourceCO2Footprint(v, kResourceInfo.Index, true)
                     totalResourceLastTurn = totalResourceLastTurn +
-                    GameClimate.GetPlayerRawResourceConsumption(v, kResourceInfo.Index, true)
+                        GameClimate.GetPlayerRawResourceConsumption(v, kResourceInfo.Index, true)
                 end
                 local capturedResLT = totalResourceLastTurn
                 local capturedAmtLT = totalAmountLastTurn
@@ -673,7 +673,7 @@ local function BuildEventHistoryList()
                             end
                         end
 
-                        return JoinNonEmpty(parts, ", ")
+                        return JoinNonEmpty(parts, "[NEWLINE]")
                     end, function()
                         if capturedCC then return "" end
 
@@ -706,7 +706,7 @@ local function BuildEventHistoryList()
                         if capturedEvent.PopLost and capturedEvent.PopLost > 0 then
                             table.insert(parts, Locale.Lookup("LOC_CAI_CLIMATE_POP_LOST", capturedEvent.PopLost))
                         end
-                        return NormalizeText(JoinNonEmpty(parts, ", "))
+                        return JoinNonEmpty(parts, "[NEWLINE]")
                     end)
                     list:AddChild(eventWidget)
                 end

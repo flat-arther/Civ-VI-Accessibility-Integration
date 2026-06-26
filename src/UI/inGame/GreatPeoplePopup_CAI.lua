@@ -11,56 +11,56 @@
 
 include("caiUtils")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr                 = ExposedMembers.CAI_UIManager
 
 -- ===========================================================================
 -- Constants
 -- ===========================================================================
 
-local PANEL_ID          = "CAIGreatPeople_Panel"
-local TABS_ID           = "CAIGreatPeople_Tabs"
-local GP_TREE_ID        = "CAIGreatPeople_Tree"
-local GP_BIO_ID         = "CAIGreatPeople_Bio"
-local GP_RECRUIT_BTN_ID = "CAIGreatPeople_RecruitBtn"
-local GP_REJECT_BTN_ID  = "CAIGreatPeople_RejectBtn"
-local GP_GOLD_BTN_ID    = "CAIGreatPeople_GoldBtn"
-local GP_FAITH_BTN_ID   = "CAIGreatPeople_FaithBtn"
-local PAST_LIST_ID           = "CAIGreatPeople_PastList"
-local HEROES_LIST_ID         = "CAIGreatPeople_HeroesList"
-local HERO_RECALL_BTN_ID     = "CAIGreatPeople_HeroRecallBtn"
+local PANEL_ID            = "CAIGreatPeople_Panel"
+local TABS_ID             = "CAIGreatPeople_Tabs"
+local GP_TREE_ID          = "CAIGreatPeople_Tree"
+local GP_BIO_ID           = "CAIGreatPeople_Bio"
+local GP_RECRUIT_BTN_ID   = "CAIGreatPeople_RecruitBtn"
+local GP_REJECT_BTN_ID    = "CAIGreatPeople_RejectBtn"
+local GP_GOLD_BTN_ID      = "CAIGreatPeople_GoldBtn"
+local GP_FAITH_BTN_ID     = "CAIGreatPeople_FaithBtn"
+local PAST_LIST_ID        = "CAIGreatPeople_PastList"
+local HEROES_LIST_ID      = "CAIGreatPeople_HeroesList"
+local HERO_RECALL_BTN_ID  = "CAIGreatPeople_HeroRecallBtn"
 
-local HOVER_SOUND = "Main_Menu_Mouse_Over"
+local HOVER_SOUND         = "Main_Menu_Mouse_Over"
 
-local m_hasBabylon = false
+local m_hasBabylon        = false
 
 -- ===========================================================================
 -- State
 -- ===========================================================================
 
-local m_ui = {
-    panel     = nil,
-    tabs      = nil,
-    gpPage    = nil,
-    gpTree    = nil,
-    bioEdit   = nil,
-    recruitBtn = nil,
-    rejectBtn  = nil,
-    goldBtn    = nil,
-    faithBtn   = nil,
-    pastPage       = nil,
-    pastList       = nil,
-    heroPage       = nil,
-    heroList       = nil,
-    heroRecallBtn  = nil,
+local m_ui                = {
+    panel         = nil,
+    tabs          = nil,
+    gpPage        = nil,
+    gpTree        = nil,
+    bioEdit       = nil,
+    recruitBtn    = nil,
+    rejectBtn     = nil,
+    goldBtn       = nil,
+    faithBtn      = nil,
+    pastPage      = nil,
+    pastList      = nil,
+    heroPage      = nil,
+    heroList      = nil,
+    heroRecallBtn = nil,
 }
 
-local m_cachedPersons   = {}
-local m_cachedData      = nil
-local m_focusedPersonID = nil
-local m_focusedHero     = nil
-local m_isMirroringTab  = false
-local m_vanillaTabButtons  = {}
-local m_vanillaTabCount    = 0
+local m_cachedPersons     = {}
+local m_cachedData        = nil
+local m_focusedPersonID   = nil
+local m_focusedHero       = nil
+local m_isMirroringTab    = false
+local m_vanillaTabButtons = {}
+local m_vanillaTabCount   = 0
 
 -- ===========================================================================
 -- Control helpers
@@ -135,7 +135,8 @@ local function FormatPersonTooltip(kPerson)
     if kPerson.ActionNameText and kPerson.ActionNameText ~= "" then
         local actionText = kPerson.ActionNameText
         if kPerson.ActionCharges and kPerson.ActionCharges > 0 then
-            actionText = actionText .. " (" .. Locale.Lookup("LOC_GREATPERSON_ACTION_CHARGES", kPerson.ActionCharges) .. ")"
+            actionText = actionText ..
+            " (" .. Locale.Lookup("LOC_GREATPERSON_ACTION_CHARGES", kPerson.ActionCharges) .. ")"
         end
         if kPerson.ActionUsageText and kPerson.ActionUsageText ~= "" then
             actionText = actionText .. ", " .. kPerson.ActionUsageText
@@ -148,7 +149,7 @@ local function FormatPersonTooltip(kPerson)
         parts[#parts + 1] = kPerson.EarnConditions
     end
 
-    return JoinNonEmpty(parts, ", ")
+    return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function FormatProgressLabel(kPlayerPoints, recruitCost)
@@ -195,8 +196,8 @@ local function BuildGPTree()
         local personID = kPerson.IndividualID
         local item = mgr:CreateWidget(
             mgr:GenerateWidgetId("CAIGP_Person"), "TreeItem", {
-                Label   = function() return FormatPersonLabel(kPerson) end,
-                Tooltip = function() return FormatPersonTooltip(kPerson) end,
+                Label    = function() return FormatPersonLabel(kPerson) end,
+                Tooltip  = function() return FormatPersonTooltip(kPerson) end,
                 FocusKey = personID and ("gp:" .. tostring(personID)) or nil,
             })
         item:SetFocusSound(HOVER_SOUND)
@@ -278,7 +279,8 @@ local function FormatPastAbilities(kPerson)
     if kPerson.ActionNameText and kPerson.ActionNameText ~= "" then
         local actionText = kPerson.ActionNameText
         if kPerson.ActionCharges and kPerson.ActionCharges > 0 then
-            actionText = actionText .. " (" .. Locale.Lookup("LOC_GREATPERSON_ACTION_CHARGES", kPerson.ActionCharges) .. ")"
+            actionText = actionText ..
+            " (" .. Locale.Lookup("LOC_GREATPERSON_ACTION_CHARGES", kPerson.ActionCharges) .. ")"
         end
         if kPerson.ActionUsageText and kPerson.ActionUsageText ~= "" then
             actionText = actionText .. ", " .. kPerson.ActionUsageText
@@ -286,7 +288,7 @@ local function FormatPastAbilities(kPerson)
         actionText = actionText .. ": " .. kPerson.ActionEffectText
         parts[#parts + 1] = actionText
     end
-    return JoinNonEmpty(parts, ". ")
+    return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function BuildPastList(data)
@@ -377,9 +379,11 @@ local function GetHeroData(pGameHeroes, kHeroDef)
                 tParameters[CityCommandTypes.PARAM_UNIT_TYPE] = kHeroUnitDef.Hash
                 tParameters[CityCommandTypes.PARAM_YIELD_TYPE] = kYieldDef.Index
                 if CityManager.CanStartCommand(data.heroCity, CityCommandTypes.PURCHASE, true, tParameters, false) then
-                    local isCanStart, results = CityManager.CanStartCommand(data.heroCity, CityCommandTypes.PURCHASE, false, tParameters, true)
+                    local isCanStart, results = CityManager.CanStartCommand(data.heroCity, CityCommandTypes.PURCHASE,
+                        false, tParameters, true)
                     local pCityGold = data.heroCity:GetGold()
-                    local faithCost = pCityGold:GetPurchaseCost(kYieldDef.Index, kHeroUnitDef.Hash, MilitaryFormationTypes.STANDARD_MILITARY_FORMATION)
+                    local faithCost = pCityGold:GetPurchaseCost(kYieldDef.Index, kHeroUnitDef.Hash,
+                        MilitaryFormationTypes.STANDARD_MILITARY_FORMATION)
                     local sToolTip = Locale.Lookup("LOC_GREAT_PEOPLE_HEROES_FAITH_RECALL_TT", faithCost)
                     if not isCanStart and results and results[CityCommandResults.FAILURE_REASONS] then
                         for _, v in ipairs(results[CityCommandResults.FAILURE_REASONS]) do
@@ -421,7 +425,8 @@ local function FormatHeroLabel(pGameHeroes, kHeroDef)
         if Game.GetLocalObserver() == PlayerTypes.OBSERVER
             or (localPlayer and localPlayer:GetDiplomacy() and localPlayer:GetDiplomacy():HasMet(claimedByPlayer)) then
             local config = PlayerConfigurations[claimedByPlayer]
-            civName = config and Locale.Lookup(config:GetPlayerName()) or Locale.Lookup("LOC_GREAT_PEOPLE_RECRUITED_BY_UNKNOWN")
+            civName = config and Locale.Lookup(config:GetPlayerName()) or
+            Locale.Lookup("LOC_GREAT_PEOPLE_RECRUITED_BY_UNKNOWN")
         else
             civName = Locale.Lookup("LOC_GREAT_PEOPLE_RECRUITED_BY_UNKNOWN")
         end
@@ -459,7 +464,8 @@ local function FormatHeroTooltip(kHeroDef)
         statParts[#statParts + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_STRENGTH") .. ": " .. tostring(kStats.Combat)
     end
     if kStats.RangedCombat and kStats.RangedCombat > 0 then
-        statParts[#statParts + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_RANGED_STRENGTH") .. ": " .. tostring(kStats.RangedCombat)
+        statParts[#statParts + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_RANGED_STRENGTH") ..
+        ": " .. tostring(kStats.RangedCombat)
     end
     if kStats.Range and kStats.Range > 0 then
         statParts[#statParts + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_ATTACK_RANGE") .. ": " .. tostring(kStats.Range)
@@ -468,7 +474,7 @@ local function FormatHeroTooltip(kHeroDef)
         statParts[#statParts + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_CHARGES") .. ": " .. tostring(kStats.Charges)
     end
     if #statParts > 0 then
-        parts[#parts + 1] = JoinNonEmpty(statParts, ", ")
+        parts[#parts + 1] = JoinNonEmpty(statParts, "[NEWLINE]")
     end
 
     local kAbilities = GetHeroClassUnitAbilities(kHeroDef.Index)
@@ -489,7 +495,7 @@ local function FormatHeroTooltip(kHeroDef)
         parts[#parts + 1] = t
     end
 
-    return JoinNonEmpty(parts, ", ")
+    return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function GetFocusedHero()
@@ -534,11 +540,17 @@ local function BuildHeroesList()
             end)
             if GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_CIVPEDIA") then
                 item:AddInputBindings({
-                    { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyUp, IsShift = true, Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA", Action = function()
-                        LuaEvents.GreatPeopleHeroPanel_Close()
-                        LuaEvents.OpenCivilopedia(heroRow.UnitType)
-                        return true
-                    end },
+                    {
+                        Key = Keys.VK_RETURN,
+                        MSG = KeyEvents.KeyUp,
+                        IsShift = true,
+                        Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
+                        Action = function()
+                            LuaEvents.GreatPeopleHeroPanel_Close()
+                            LuaEvents.OpenCivilopedia(heroRow.UnitType)
+                            return true
+                        end
+                    },
                 })
             end
             m_ui.heroList:AddChild(item)
@@ -779,11 +791,20 @@ local function PopPanel()
         mgr:RemoveFromStack(PANEL_ID)
     end
     m_ui = {
-        panel = nil, tabs = nil,
-        gpPage = nil, gpTree = nil, bioEdit = nil,
-        recruitBtn = nil, rejectBtn = nil, goldBtn = nil, faithBtn = nil,
-        pastPage = nil, pastList = nil,
-        heroPage = nil, heroList = nil, heroRecallBtn = nil,
+        panel = nil,
+        tabs = nil,
+        gpPage = nil,
+        gpTree = nil,
+        bioEdit = nil,
+        recruitBtn = nil,
+        rejectBtn = nil,
+        goldBtn = nil,
+        faithBtn = nil,
+        pastPage = nil,
+        pastList = nil,
+        heroPage = nil,
+        heroList = nil,
+        heroRecallBtn = nil,
     }
     m_cachedPersons = {}
     m_cachedData = nil

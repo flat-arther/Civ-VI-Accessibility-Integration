@@ -180,7 +180,7 @@ local function GetLeaderTooltip(playerID, localPlayerID)
         table.insert(parts, Locale.Lookup("LOC_CAI_DIPLO_RIBBON_FAITH", Round(pPlayer:GetReligion():GetFaithBalance())))
     end
 
-    return JoinNonEmpty(parts, ", ")
+    return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function CloseList()

@@ -8,29 +8,29 @@ else
     include("WorldRankings")
 end
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr                         = ExposedMembers.CAI_UIManager
 
 -- ============================================================================
 -- Constants
 -- ============================================================================
-local PANEL_ID    = "CAIWorldRank_Panel"
-local TABS_ID     = "CAIWorldRank_Tabs"
-local HOVER_SOUND = "Main_Menu_Mouse_Over"
+local PANEL_ID                    = "CAIWorldRank_Panel"
+local TABS_ID                     = "CAIWorldRank_Tabs"
+local HOVER_SOUND                 = "Main_Menu_Mouse_Over"
 
-local REQUIREMENT_CONTEXT = "VictoryProgress"
+local REQUIREMENT_CONTEXT         = "VictoryProgress"
 
 -- ============================================================================
 -- State
 -- ============================================================================
-local m_panel           = nil
-local m_tabs            = nil
-local m_trees           = {}
-local m_capturedTabs    = {}
-local m_isMirroringTab  = false
+local m_panel                     = nil
+local m_tabs                      = nil
+local m_trees                     = {}
+local m_capturedTabs              = {}
+local m_isMirroringTab            = false
 local m_currentGenericVictoryType = nil
-local m_pendingVictoryType = nil
+local m_pendingVictoryType        = nil
 
-local m_isExp2 = (IsExpansion2Active ~= nil and IsExpansion2Active())
+local m_isExp2                    = (IsExpansion2Active ~= nil and IsExpansion2Active())
 
 -- ============================================================================
 -- Helpers
@@ -432,7 +432,7 @@ local function CreateSciencePlayerRow(sciData, parentFocusPrefix)
             if sciData.NextStep then
                 table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_NEXT_STEP", sciData.NextStep))
             end
-            return table.concat(parts, ". ")
+            return table.concat(parts, "[NEWLINE]")
         end
     end
 
@@ -514,7 +514,7 @@ local function RebuildScienceTree(tree)
     for i = 1, milestoneCount do
         table.insert(parts, Locale.Lookup("LOC_WORLD_RANKINGS_SCIENCE_REQUIREMENT_" .. i))
     end
-    AddAdvisorLeaf(tree, table.concat(parts, ", "))
+    AddAdvisorLeaf(tree, table.concat(parts, "[NEWLINE]"))
 
     mgr:RestoreFocus(tree, capture)
 end
@@ -529,7 +529,7 @@ local function RebuildCultureTree(tree)
     local cultureData = GatherCultureData()
     table.sort(cultureData, function(a, b)
         return a.BestNumVisitingUs / a.BestNumRequiredTourists >
-               b.BestNumVisitingUs / b.BestNumRequiredTourists
+            b.BestNumVisitingUs / b.BestNumRequiredTourists
     end)
 
     for _, teamData in ipairs(cultureData) do
@@ -537,7 +537,7 @@ local function RebuildCultureTree(tree)
             local teamItem = MakeTreeItem({
                 Label = function()
                     return Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                        GameConfiguration.GetTeamName(teamData.TeamID)) .. ", " ..
+                            GameConfiguration.GetTeamName(teamData.TeamID)) .. ", " ..
                         Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TOURISTS",
                             teamData.BestNumVisitingUs, teamData.BestNumRequiredTourists)
                 end,
@@ -597,7 +597,7 @@ local function GetCultureDominanceTooltip(playerID)
     end
 
     if #parts > 0 then
-        return table.concat(parts, ". ")
+        return table.concat(parts, "[NEWLINE]")
     end
     return nil
 end
@@ -652,7 +652,7 @@ function CreateCulturePlayerRow(playerData, parentFocusPrefix)
                         lines[2] = Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TOURISM_LIFETIME", lifetime)
                     end
                 end
-                return table.concat(lines, ", ")
+                return table.concat(lines, "[NEWLINE]")
             end,
             FocusKey = fk .. ":visiting_us",
         })
@@ -760,7 +760,7 @@ local function RebuildDominationTree(tree)
             local teamItem = MakeTreeItem({
                 Label = function()
                     return Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                        GameConfiguration.GetTeamName(teamData.TeamID)) .. ", " ..
+                            GameConfiguration.GetTeamName(teamData.TeamID)) .. ", " ..
                         Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CAPITALS_CAPTURED", teamData.TotalCapturedCapitals)
                 end,
                 FocusKey = "team:" .. teamData.TeamID,
@@ -842,7 +842,7 @@ local function RebuildReligionTree(tree)
             local teamItem = MakeTreeItem({
                 Label = function()
                     return Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                        GameConfiguration.GetTeamName(teamData.TeamID)) .. ", " ..
+                            GameConfiguration.GetTeamName(teamData.TeamID)) .. ", " ..
                         #teamData.ConvertedCivs .. "/" .. totalCivs
                 end,
                 FocusKey = "team:" .. teamData.TeamID,

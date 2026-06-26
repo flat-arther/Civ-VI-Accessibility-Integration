@@ -28,6 +28,12 @@
     <Row Tag="LOC_UIWidget_Role_Checkbox" Language="en_US">
       <Text>Checkbox</Text>
     </Row>
+    <Row Tag="LOC_UIWidget_Checked" Language="en_US">
+      <Text>checked</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Unchecked" Language="en_US">
+      <Text>not checked</Text>
+    </Row>
     <Row Tag="LOC_UIWidget_Role_HorizontalList" Language="en_US">
       <Text>Horizontal List</Text>
     </Row>
@@ -657,10 +663,16 @@
       <Text>Open the Era Progress panel</Text>
     </Row>
     <Row Tag="LOC_CAI_SPEAK_GOVERNMENT_TOOLTIP" Language="en_US">
-      <Text>Speak Government Info</Text>
+      <Text>Speak Government Information</Text>
     </Row>
     <Row Tag="LOC_CAI_SPEAK_GOVERNMENT_TOOLTIP_DESC" Language="en_US">
       <Text>Speak the current government status tooltip</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SPEAK_GOVERNER_TITLES" Language="en_US">
+      <Text>Speak Governer Information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SPEAK_GOVERNER_TITLES_DESC" Language="en_US">
+      <Text>Speak available and spent governer titles </Text>
     </Row>
     <!-- Surveyor -->
     <Row Tag="LOC_CAI_SURVEYOR_GROW_RADIUS" Language="en_US">
@@ -4868,6 +4880,21 @@
     </Row>
     <Row Tag="LOC_CAI_KB_DESELECT_ALL" Language="en_US">
       <Text>Deselect all</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_TOOLTIP_PREVIOUS_SECTION" Language="en_US">
+      <Text>Read previous tooltip section</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_TOOLTIP_NEXT_SECTION" Language="en_US">
+      <Text>Read next tooltip section</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_TOOLTIP_FIRST_SECTION" Language="en_US">
+      <Text>Read first tooltip section</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_TOOLTIP_LAST_SECTION" Language="en_US">
+      <Text>Read last tooltip section</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOOLTIP_UNAVAILABLE" Language="en_US">
+      <Text>Tooltip unavailable.</Text>
     </Row>
     <Row Tag="LOC_CAI_ALL_SELECTED" Language="en_US">
       <Text>All selected</Text>

@@ -63,7 +63,7 @@ local function GetPromotionLabel(promo)
     return Locale.Lookup("LOC_CAI_UNIT_PROMOTION_LABEL", GetPromotionName(promo), GetPromotionStatus(promo))
 end
 
-local function FormatPromotionNames(types)
+local function FormatPromotionPrereqs(types)
     local names = {}
     if types then
         for _, promotionType in ipairs(types) do
@@ -71,7 +71,18 @@ local function FormatPromotionNames(types)
             if promo then names[#names + 1] = GetPromotionName(promo) end
         end
     end
-    return table.concat(names, ", ")
+    return table.concat(names, ", or ")
+end
+
+local function FormatPromotionLeadTos(types)
+    local names = {}
+    if types then
+        for _, promotionType in ipairs(types) do
+            local promo = m_model and m_model.byType[promotionType]
+            if promo then names[#names + 1] = GetPromotionName(promo) end
+        end
+    end
+    return table.concat(names, ", and ")
 end
 
 local function GetPromotionTooltip(promo, includeLinks)
@@ -81,18 +92,18 @@ local function GetPromotionTooltip(promo, includeLinks)
     parts[#parts + 1] = Locale.Lookup(promo.Description)
 
     if includeLinks ~= false and m_model then
-        local prereqText = FormatPromotionNames(m_model.prereqs[promo.UnitPromotionType])
+        local prereqText = FormatPromotionPrereqs(m_model.prereqs[promo.UnitPromotionType])
         if prereqText ~= "" then
             parts[#parts + 1] = Locale.Lookup("LOC_CAI_UNIT_PROMOTION_PREREQS_HEADER", prereqText)
         end
 
-        local leadsToText = FormatPromotionNames(m_model.leadsTo[promo.UnitPromotionType])
+        local leadsToText = FormatPromotionLeadTos(m_model.leadsTo[promo.UnitPromotionType])
         if leadsToText ~= "" then
             parts[#parts + 1] = Locale.Lookup("LOC_CAI_UNIT_PROMOTION_LEADS_TO_HEADER", leadsToText)
         end
     end
 
-    return JoinNonEmpty(parts, ", ")
+    return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function SortPromotionTypesByLayout(types, model)

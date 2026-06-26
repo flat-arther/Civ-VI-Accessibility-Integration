@@ -563,7 +563,7 @@ m_CAIList:AddChild(mgr:CreateWidget("LeaderCivInfo", "StaticText", {
 			table.insert(parts, Locale.Lookup(item.Description))
 		end
 		if #parts > 0 then
-			local text = table.concat(parts, ", ")
+			local text = table.concat(parts, "[NEWLINE]")
 			m_CAIList:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadScreenFeature"), "StaticText", {
 				Label = function() return text end,
 			}))
@@ -630,7 +630,7 @@ OnLoadScreenContentReady = WrapFunc(OnLoadScreenContentReady, function(orig, ...
 	if not m_CAIPanel or mgr:GetTop() ~= m_CAIPanel then
 	BuildPanel()
 	PopulateList()
-	mgr:Push(m_CAIPanel, { focus = m_CAIList })
+	mgr:Push(m_CAIPanel, PopupPriority.Current)
 	end
 end)
 Events.LoadScreenContentReady.Add(OnLoadScreenContentReady)

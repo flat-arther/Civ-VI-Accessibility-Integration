@@ -4,20 +4,20 @@
 
 include("caiUtils")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr                      = ExposedMembers.CAI_UIManager
 
-local PANEL_ID  = "CAIGreatWorksOverview_Panel"
-local TREE_ID   = "CAIGreatWorksOverview_Tree"
-local PICKER_ID = "CAIGreatWorksOverview_Picker"
+local PANEL_ID                 = "CAIGreatWorksOverview_Panel"
+local TREE_ID                  = "CAIGreatWorksOverview_Tree"
+local PICKER_ID                = "CAIGreatWorksOverview_Picker"
 
-local m_ui = { panel = nil, tree = nil, picker = nil }
+local m_ui                     = { panel = nil, tree = nil, picker = nil }
 
-local m_caiIsLocalPlayerTurn = true
-local m_lastFocusedWork      = nil
+local m_caiIsLocalPlayerTurn   = true
+local m_lastFocusedWork        = nil
 
 local GREAT_WORK_ARTIFACT_TYPE = "GREATWORKOBJECT_ARTIFACT"
 local DEFAULT_LOCK_TURNS       = 10
-local ART_OBJECT_TYPES = {
+local ART_OBJECT_TYPES         = {
     GREATWORKOBJECT_SCULPTURE = true,
     GREATWORKOBJECT_LANDSCAPE = true,
     GREATWORKOBJECT_PORTRAIT  = true,
@@ -70,10 +70,10 @@ local function GetMoveBlockedReason(pCityBldgs, buildingIndex, slotIndex)
     end
 
     if ART_OBJECT_TYPES[objType] then
-        local iTurnCreated   = pCityBldgs:GetTurnFromIndex(gwIdx)
-        local iCurrentTurn   = Game.GetCurrentGameTurn()
+        local iTurnCreated     = pCityBldgs:GetTurnFromIndex(gwIdx)
+        local iCurrentTurn     = Game.GetCurrentGameTurn()
         local iTurnsBeforeMove = GlobalParameters.GREATWORK_ART_LOCK_TIME or DEFAULT_LOCK_TURNS
-        local iTurnsToWait   = iTurnCreated + iTurnsBeforeMove - iCurrentTurn
+        local iTurnsToWait     = iTurnCreated + iTurnsBeforeMove - iCurrentTurn
         if iTurnsToWait > 0 then
             return Locale.Lookup("LOC_GREAT_WORKS_LOCKED_FROM_MOVE", iTurnsToWait)
         end
@@ -96,11 +96,11 @@ local function GetGreatWorkThemeFit(pCityBldgs, buildingInfo, greatWorkIndex)
     local firstGW = GetFirstGreatWorkInBuilding(pCityBldgs, buildingInfo)
     if firstGW < 0 then return nil end
 
-    local firstGWTypeID    = pCityBldgs:GetGreatWorkTypeFromIndex(firstGW)
-    local firstGWObjType   = GameInfo.GreatWorks[firstGWTypeID].GreatWorkObjectType
+    local firstGWTypeID  = pCityBldgs:GetGreatWorkTypeFromIndex(firstGW)
+    local firstGWObjType = GameInfo.GreatWorks[firstGWTypeID].GreatWorkObjectType
 
-    local gwType  = pCityBldgs:GetGreatWorkTypeFromIndex(greatWorkIndex)
-    local gwInfo  = GameInfo.GreatWorks[gwType]
+    local gwType         = pCityBldgs:GetGreatWorkTypeFromIndex(greatWorkIndex)
+    local gwInfo         = GameInfo.GreatWorks[gwType]
 
     if buildingInfo.BuildingType == "BUILDING_MUSEUM_ART" then
         if firstGW == greatWorkIndex then
@@ -213,7 +213,7 @@ local function GetGreatWorkDetail(pCityBldgs, greatWorkIndex, buildingInfo)
         table.insert(parts, moveBlocked)
     end
 
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function GetBuildingYieldsText(pCityBldgs, buildingIndex)
@@ -231,22 +231,22 @@ local function GetBuildingYieldsText(pCityBldgs, buildingIndex)
         table.insert(parts, totalTourism .. " " .. Locale.Lookup("LOC_GREAT_WORKS_TOURISM"))
     end
     if #parts == 0 then return "" end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function GetBuildingLabel(buildingInfo, pCityBldgs)
-    local label        = Locale.Lookup(buildingInfo.Name)
+    local label         = Locale.Lookup(buildingInfo.Name)
     local buildingIndex = buildingInfo.Index
 
-    local themeDesc = GetThemeDescription(buildingInfo.BuildingType)
+    local themeDesc     = GetThemeDescription(buildingInfo.BuildingType)
     if themeDesc then
         if pCityBldgs:IsBuildingThemedCorrectly(buildingIndex) then
             label = label .. ", " .. Locale.Lookup("LOC_GREAT_WORKS_THEMED_BONUS")
         else
-            local numSlots  = pCityBldgs:GetNumGreatWorkSlots(buildingIndex)
+            local numSlots    = pCityBldgs:GetNumGreatWorkSlots(buildingIndex)
 
             local localPlayer = Players[Game.GetLocalPlayer()]
-            local bAutoTheme = localPlayer
+            local bAutoTheme  = localPlayer
                 and localPlayer:GetCulture()
                 and localPlayer:GetCulture().IsAutoThemedEligible
                 and localPlayer:GetCulture():IsAutoThemedEligible()
@@ -295,7 +295,7 @@ local function GetBuildingTooltip(pCityBldgs, buildingInfo)
     end
 
     if #parts == 0 then return "" end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function GetYieldsSummary()
@@ -335,7 +335,7 @@ local function GetYieldsSummary()
     if tourism > 0 then
         table.insert(parts, tourism .. " " .. Locale.Lookup("LOC_GREAT_WORKS_TOURISM"))
     end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 -- ---------------------------------------------------------------------------
@@ -344,7 +344,7 @@ end
 
 local function ExecuteMove(srcCityID, srcBuildingID, srcGWIndex,
                            dstCityID, dstBuildingID, dstSlotIndex)
-    local t = {}
+    local t                                    = {}
     t[PlayerOperations.PARAM_PLAYER_ONE]       = Game.GetLocalPlayer()
     t[PlayerOperations.PARAM_CITY_SRC]         = srcCityID
     t[PlayerOperations.PARAM_CITY_DEST]        = dstCityID
@@ -386,9 +386,15 @@ local function OpenPicker(dstCityBldgs, dstBuildingIndex, dstSlotIndex)
         Label = function() return pickerLabel end,
     })
     m_ui.picker:AddInputBindings({
-        { Key = Keys.VK_ESCAPE, MSG = KeyEvents.KeyUp,
-          Description = "LOC_CAI_KB_CLOSE",
-          Action = function() ClosePicker() return true end },
+        {
+            Key = Keys.VK_ESCAPE,
+            MSG = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CLOSE",
+            Action = function()
+                ClosePicker()
+                return true
+            end
+        },
     })
 
     local localPlayer = Players[Game.GetLocalPlayer()]
@@ -407,13 +413,13 @@ local function OpenPicker(dstCityBldgs, dstBuildingIndex, dstSlotIndex)
                         for si = 0, ns - 1 do
                             local gwIdx = bldgs:GetGreatWorkInSlot(bi.Index, si)
                             if gwIdx ~= -1
-                               and not (bldgs == dstCityBldgs
-                                        and bi.Index == dstBuildingIndex
-                                        and si == dstSlotIndex)
-                               and CanMoveWorkAtAll(bldgs, bi.Index, si)
-                               and CanMoveGreatWork(bldgs, bi.Index, si,
-                                                    dstCityBldgs, dstBuildingIndex,
-                                                    dstSlotIndex)
+                                and not (bldgs == dstCityBldgs
+                                    and bi.Index == dstBuildingIndex
+                                    and si == dstSlotIndex)
+                                and CanMoveWorkAtAll(bldgs, bi.Index, si)
+                                and CanMoveGreatWork(bldgs, bi.Index, si,
+                                    dstCityBldgs, dstBuildingIndex,
+                                    dstSlotIndex)
                             then
                                 if not cityNode then
                                     local cCityName = Locale.Lookup(pCity:GetName())
@@ -435,29 +441,29 @@ local function OpenPicker(dstCityBldgs, dstBuildingIndex, dstSlotIndex)
                                     bldgNode:Expand(true)
                                 end
 
-                                local cGW    = gwIdx
-                                local cBI    = bi.Index
-                                local cBldgs = bldgs
+                                local cGW     = gwIdx
+                                local cBI     = bi.Index
+                                local cBldgs  = bldgs
                                 local cCityID = pCity:GetID()
-                                local cBInfo = bi
+                                local cBInfo  = bi
 
-                                local item = mgr:CreateWidget(
+                                local item    = mgr:CreateWidget(
                                     mgr:GenerateWidgetId("CAIGWPicker_Item"),
                                     "TreeItem", {
-                                    Label   = function()
-                                        return GetGreatWorkLabel(cBldgs, cGW)
-                                    end,
-                                    Tooltip = function()
-                                        return GetGreatWorkDetail(cBldgs, cGW, cBInfo)
-                                    end,
-                                    FocusKey = "gw:" .. tostring(cGW),
-                                })
+                                        Label    = function()
+                                            return GetGreatWorkLabel(cBldgs, cGW)
+                                        end,
+                                        Tooltip  = function()
+                                            return GetGreatWorkDetail(cBldgs, cGW, cBInfo)
+                                        end,
+                                        FocusKey = "gw:" .. tostring(cGW),
+                                    })
                                 item:SetFocusSound("Main_Menu_Mouse_Over")
                                 item:On("activate", function()
                                     ClosePicker()
                                     ExecuteMove(cCityID, cBI, cGW,
-                                                dstCityID, dstBuildingIndex,
-                                                dstSlotIndex)
+                                        dstCityID, dstBuildingIndex,
+                                        dstSlotIndex)
                                 end)
                                 bldgNode:AddChild(item)
                                 hasItems = true
@@ -472,9 +478,11 @@ local function OpenPicker(dstCityBldgs, dstBuildingIndex, dstSlotIndex)
     if not hasItems then
         m_ui.picker:AddChild(mgr:CreateWidget(
             mgr:GenerateWidgetId("CAIGWPicker_Empty"), "TreeItem",
-            { Label = function()
-                return Locale.Lookup("LOC_CAI_GREAT_WORKS_NO_COMPATIBLE")
-            end }))
+            {
+                Label = function()
+                    return Locale.Lookup("LOC_CAI_GREAT_WORKS_NO_COMPATIBLE")
+                end
+            }))
     end
 
     mgr:Push(m_ui.picker, PopupPriority.Current)
@@ -501,67 +509,67 @@ local function BuildTreeContent(tree)
                             local cCity = pCity
                             cityItem = mgr:CreateWidget(
                                 mgr:GenerateWidgetId("CAIGW_City"), "TreeItem", {
-                                Label    = function()
-                                    return Locale.Lookup(cCity:GetName())
-                                end,
-                                FocusKey = "city:" .. tostring(pCity:GetID()),
-                            })
+                                    Label    = function()
+                                        return Locale.Lookup(cCity:GetName())
+                                    end,
+                                    FocusKey = "city:" .. tostring(pCity:GetID()),
+                                })
                         end
 
-                        local cCity  = pCity
-                        local cBldgs = bldgs
-                        local cBI    = bi
-                        local cBIdx  = bi.Index
+                        local cCity    = pCity
+                        local cBldgs   = bldgs
+                        local cBI      = bi
+                        local cBIdx    = bi.Index
 
                         local bldgItem = mgr:CreateWidget(
                             mgr:GenerateWidgetId("CAIGW_Building"), "TreeItem", {
-                            Label    = function()
-                                return GetBuildingLabel(cBI, cBldgs)
-                            end,
-                            Tooltip  = function()
-                                return GetBuildingTooltip(cBldgs, cBI)
-                            end,
-                            FocusKey = "bldg:" .. tostring(cCity:GetID())
-                                .. ":" .. tostring(cBIdx),
-                        })
+                                Label    = function()
+                                    return GetBuildingLabel(cBI, cBldgs)
+                                end,
+                                Tooltip  = function()
+                                    return GetBuildingTooltip(cBldgs, cBI)
+                                end,
+                                FocusKey = "bldg:" .. tostring(cCity:GetID())
+                                    .. ":" .. tostring(cBIdx),
+                            })
 
                         for si = 0, ns - 1 do
                             local cSI      = si
                             local slotType = bldgs:GetGreatWorkSlotType(cBIdx, si)
                             local slotStr  = GameInfo.GreatWorkSlotTypes[slotType]
-                                                 .GreatWorkSlotType
+                                .GreatWorkSlotType
 
                             local slotItem = mgr:CreateWidget(
                                 mgr:GenerateWidgetId("CAIGW_Slot"), "TreeItem", {
-                                Label = function()
-                                    local gw = cBldgs:GetGreatWorkInSlot(cBIdx, cSI)
-                                    if gw == -1 then
-                                        return Locale.Lookup(
-                                            "LOC_CAI_GREAT_WORKS_EMPTY_SLOT",
-                                            GetSlotTypeName(slotStr))
-                                    end
-                                    return GetGreatWorkLabel(cBldgs, gw)
-                                end,
-                                Tooltip = function()
-                                    local gw = cBldgs:GetGreatWorkInSlot(cBIdx, cSI)
-                                    if gw == -1 then return "" end
-                                    return GetGreatWorkDetail(cBldgs, gw, cBI)
-                                end,
-                                DisabledPredicate = function()
-                                    return not m_caiIsLocalPlayerTurn
-                                end,
-                                FocusKey = "slot:" .. tostring(cCity:GetID())
-                                    .. ":" .. tostring(cBIdx)
-                                    .. ":" .. tostring(cSI),
-                            })
+                                    Label = function()
+                                        local gw = cBldgs:GetGreatWorkInSlot(cBIdx, cSI)
+                                        if gw == -1 then
+                                            return Locale.Lookup(
+                                                "LOC_CAI_GREAT_WORKS_EMPTY_SLOT",
+                                                GetSlotTypeName(slotStr))
+                                        end
+                                        return GetGreatWorkLabel(cBldgs, gw)
+                                    end,
+                                    Tooltip = function()
+                                        local gw = cBldgs:GetGreatWorkInSlot(cBIdx, cSI)
+                                        if gw == -1 then return "" end
+                                        return GetGreatWorkDetail(cBldgs, gw, cBI)
+                                    end,
+                                    DisabledPredicate = function()
+                                        return not m_caiIsLocalPlayerTurn
+                                    end,
+                                    FocusKey = "slot:" .. tostring(cCity:GetID())
+                                        .. ":" .. tostring(cBIdx)
+                                        .. ":" .. tostring(cSI),
+                                })
                             slotItem:SetFocusSound("Main_Menu_Mouse_Over")
 
                             slotItem:On("focus_enter", function()
                                 local gw = cBldgs:GetGreatWorkInSlot(cBIdx, cSI)
                                 if gw ~= -1 then
                                     m_lastFocusedWork = {
-                                        Index    = gw,
-                                        Building = cBIdx,
+                                        Index     = gw,
+                                        Building  = cBIdx,
                                         CityBldgs = cBldgs,
                                     }
                                 end
@@ -573,11 +581,11 @@ local function BuildTreeContent(tree)
 
                             slotItem:AddInputBindings({
                                 {
-                                    Key       = Keys.VK_RETURN,
-                                    IsControl = true,
-                                    MSG       = KeyEvents.KeyUp,
+                                    Key         = Keys.VK_RETURN,
+                                    IsControl   = true,
+                                    MSG         = KeyEvents.KeyUp,
                                     Description = "LOC_CAI_KB_VIEW_GREAT_WORK",
-                                    Action = function()
+                                    Action      = function()
                                         local gw = cBldgs:GetGreatWorkInSlot(
                                             cBIdx, cSI)
                                         if gw ~= -1 then
@@ -633,11 +641,11 @@ local function BuildPanel()
 
     m_ui.tree = mgr:CreateWidget(TREE_ID, "Tree", {
         Label = function()
-            local numGW     = Controls.NumGreatWorks:GetText()    or "0"
+            local numGW     = Controls.NumGreatWorks:GetText() or "0"
             local numSpaces = Controls.NumDisplaySpaces:GetText() or "0"
-            local label = Locale.Lookup("LOC_CAI_GREAT_WORKS_SUMMARY",
+            local label     = Locale.Lookup("LOC_CAI_GREAT_WORKS_SUMMARY",
                 numGW, numSpaces)
-            local yields = GetYieldsSummary()
+            local yields    = GetYieldsSummary()
             if yields ~= "" then
                 label = label .. ", " .. yields
             end

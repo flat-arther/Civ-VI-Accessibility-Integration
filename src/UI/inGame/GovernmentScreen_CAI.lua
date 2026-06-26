@@ -10,10 +10,10 @@ end
 -- CAI replaces the GovernmentScreen context outright, so it must re-include the
 -- exact vanilla script that would otherwise win; otherwise a sighted hotseat
 -- player loses that variant's visuals (e.g. the Golden card art and filter tab).
-include("GovernmentScreen_Byzantium_Gaul_Expansion2_MODE")
+
 if IsExpansion2Active() then
     if IsDramaticAgesActive() then
-        Speak("Opening")
+        include("GovernmentScreen_Byzantium_Gaul_Expansion2_MODE")
     else
         include("GovernmentScreen_Expansion2")
     end
@@ -179,7 +179,7 @@ local function GetPolicyTooltip(policyType)
         GetPolicySlotLabel(policyType),
         GetPolicyAgeIndicator(policyType),
         GetPolicyDescription(policyType),
-    }, ", ")
+    }, "[NEWLINE]")
 end
 
 local function IsPolicyAvailableForPlayer(policyType)
@@ -707,7 +707,7 @@ local function BuildGovernmentsTreeContent(tree)
                 return name
             end,
             Tooltip           = function()
-                return table.concat(GetGovernmentDetailParts(govType), ", ")
+                return table.concat(GetGovernmentDetailParts(govType), "[NEWLINE]")
             end,
             DisabledPredicate = function() return not IsGovernmentUnlockedForPlayer(govType) end,
             FocusKey          = "gov:" .. tostring(governmentType),

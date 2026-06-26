@@ -1,41 +1,41 @@
 include("caiUtils")
 include("ReligionScreen")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr                      = ExposedMembers.CAI_UIManager
 
-local PANEL_ID         = "CAIReligion_Panel"
-local TREE_ID          = "CAIReligion_Tree"
-local SETUP_PANEL_ID   = "CAIReligion_SetupPanel"
+local PANEL_ID                 = "CAIReligion_Panel"
+local TREE_ID                  = "CAIReligion_Tree"
+local SETUP_PANEL_ID           = "CAIReligion_SetupPanel"
 
-local m_ui = {
-    panel       = nil,
-    tree        = nil,
-    setupPanel  = nil,
-    nameEdit    = nil,
-    beliefList  = nil,
-    dialog      = nil,
+local m_ui                     = {
+    panel      = nil,
+    tree       = nil,
+    setupPanel = nil,
+    nameEdit   = nil,
+    beliefList = nil,
+    dialog     = nil,
 }
 
-local m_selectedReligionType = -1
-local m_selectedIsMyReligion = false
+local m_selectedReligionType   = -1
+local m_selectedIsMyReligion   = false
 
-local HOVER_SOUND = "Main_Menu_Mouse_Over"
+local HOVER_SOUND              = "Main_Menu_Mouse_Over"
 
-local CAI_CITIES_FILTER = { FOLLOWING_RELIGION = 1, RELIGION_PRESENT = 2 }
-local cai_citiesFilter = CAI_CITIES_FILTER.FOLLOWING_RELIGION
+local CAI_CITIES_FILTER        = { FOLLOWING_RELIGION = 1, RELIGION_PRESENT = 2 }
+local cai_citiesFilter         = CAI_CITIES_FILTER.FOLLOWING_RELIGION
 
-local CAI_UNIT_TOOLTIPS = {
-    ["UNIT_MISSIONARY"]  = { canProduce = "LOC_UI_RELIGION_MISSIONARY_TT", cannotProduce = "LOC_UI_RELIGION_HOW_TO_MAKE_MISSIONARY_TT" },
-    ["UNIT_APOSTLE"]     = { canProduce = "LOC_UI_RELIGION_APOSTLE_TT", cannotProduce = "LOC_UI_RELIGION_HOW_TO_MAKE_APOSTLE_TT" },
-    ["UNIT_INQUISITOR"]  = { canProduce = "LOC_UI_RELIGION_INQUISITOR_TT", cannotProduce = "LOC_UI_RELIGION_HOW_TO_MAKE_INQUISITOR_TT" },
-    ["UNIT_GURU"]        = { canProduce = "LOC_UI_RELIGION_GURU_TT", cannotProduce = "LOC_UI_RELIGION_HOW_TO_MAKE_GURU_TT" },
+local CAI_UNIT_TOOLTIPS        = {
+    ["UNIT_MISSIONARY"] = { canProduce = "LOC_UI_RELIGION_MISSIONARY_TT", cannotProduce = "LOC_UI_RELIGION_HOW_TO_MAKE_MISSIONARY_TT" },
+    ["UNIT_APOSTLE"]    = { canProduce = "LOC_UI_RELIGION_APOSTLE_TT", cannotProduce = "LOC_UI_RELIGION_HOW_TO_MAKE_APOSTLE_TT" },
+    ["UNIT_INQUISITOR"] = { canProduce = "LOC_UI_RELIGION_INQUISITOR_TT", cannotProduce = "LOC_UI_RELIGION_HOW_TO_MAKE_INQUISITOR_TT" },
+    ["UNIT_GURU"]       = { canProduce = "LOC_UI_RELIGION_GURU_TT", cannotProduce = "LOC_UI_RELIGION_HOW_TO_MAKE_GURU_TT" },
 }
 
 -- ============================================================================
 -- CAI-local state (read from game API, not vanilla's inaccessible locals)
 -- ============================================================================
 
-local cai = {
+local cai                      = {
     pantheonBelief     = -1,
     canCreatePantheon  = false,
     playerReligionType = -1,
@@ -45,16 +45,16 @@ local cai = {
     turnBlockingType   = -1,
 }
 
-local m_pendingIconRow    = nil
-local m_pendingCustomName = nil
-local m_pendingBeliefs    = {}   -- { [slotIndex] = beliefIndex }
+local m_pendingIconRow         = nil
+local m_pendingCustomName      = nil
+local m_pendingBeliefs         = {} -- { [slotIndex] = beliefIndex }
 
 local m_beliefPickerActiveSlot = nil
 
 local function ResetPendingSelections()
-    m_pendingIconRow    = nil
-    m_pendingCustomName = nil
-    m_pendingBeliefs    = {}
+    m_pendingIconRow         = nil
+    m_pendingCustomName      = nil
+    m_pendingBeliefs         = {}
     m_beliefPickerActiveSlot = nil
 end
 
@@ -95,9 +95,9 @@ local function CAI_UpdatePlayerData()
     local displayPlayerID = GetDisplayPlayerID()
     if displayPlayerID == -1 then return end
 
-    local pPlayer = Players[displayPlayerID]
-    local pPlayerReligion = pPlayer:GetReligion()
-    local pGameReligion = Game.GetReligion()
+    local pPlayer          = Players[displayPlayerID]
+    local pPlayerReligion  = pPlayer:GetReligion()
+    local pGameReligion    = Game.GetReligion()
 
     cai.pantheonBelief     = pPlayerReligion:GetPantheon()
     cai.canCreatePantheon  = pPlayerReligion:CanCreatePantheon()
@@ -366,8 +366,8 @@ local function BuildBeliefsSection(parent, religion, religionType)
             local bClass = Locale.Lookup("LOC_" .. belief.BeliefClassType .. "_NAME")
             local bDesc = NormalizeText(Locale.Lookup(belief.Description))
             parent:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAIRel_Belief"), "StaticText", {
-                Label   = function() return bName .. ": " .. bClass end,
-                Tooltip = function() return bDesc end,
+                Label    = function() return bName .. ": " .. bClass end,
+                Tooltip  = function() return bDesc end,
                 FocusKey = "rel:" .. religionType .. ":beliefs:" .. tostring(beliefIndex),
             }))
         end
@@ -415,7 +415,7 @@ local function BuildCityRows(parent, religionType, filter)
                 else
                     table.insert(parts, Locale.Lookup("LOC_UI_RELIGION_NO_PANTHEON_BELIEF"))
                 end
-                return table.concat(parts, ", ")
+                return table.concat(parts, "[NEWLINE]")
             end,
             FocusKey = "rel:" .. religionType .. ":city:" .. tostring(cityData.cityID),
         })
@@ -501,7 +501,8 @@ local function BuildUnitsSection(parent, religion, religionType)
                 else
                     ttip = Locale.Lookup("LOC_CAI_RELIGION_UNIT_CANNOT_PRODUCE")
                     if CAI_UNIT_TOOLTIPS and CAI_UNIT_TOOLTIPS[row.UnitType] and CAI_UNIT_TOOLTIPS[row.UnitType].cannotProduce then
-                        ttip = ttip .. ", " .. NormalizeText(Locale.Lookup(CAI_UNIT_TOOLTIPS[row.UnitType].cannotProduce))
+                        ttip = ttip ..
+                        ", " .. NormalizeText(Locale.Lookup(CAI_UNIT_TOOLTIPS[row.UnitType].cannotProduce))
                     end
                 end
 
@@ -553,15 +554,17 @@ local function CreateReligionRow(religionInfo)
         Label    = function() return GetReligionName(religionType) end,
         Tooltip  = function()
             local parts = {}
-            table.insert(parts, Locale.Lookup("LOC_UI_RELIGION_FOUNDER_NAME", GetFounderInfo(religionInfo, displayPlayerID)))
-            table.insert(parts, Locale.Lookup("LOC_UI_RELIGION_HOLY_CITY", GetHolyCityInfo(religionInfo, displayPlayerID)))
+            table.insert(parts,
+                Locale.Lookup("LOC_UI_RELIGION_FOUNDER_NAME", GetFounderInfo(religionInfo, displayPlayerID)))
+            table.insert(parts,
+                Locale.Lookup("LOC_UI_RELIGION_HOLY_CITY", GetHolyCityInfo(religionInfo, displayPlayerID)))
             local dominantCount = CountDominantCities(religionType)
             if dominantCount == 1 then
                 table.insert(parts, Locale.Lookup("LOC_UI_RELIGION_RELIGION_DOMINANCE", dominantCount))
             else
                 table.insert(parts, Locale.Lookup("LOC_UI_RELIGION_RELIGION_DOMINANCE_PLURAL", dominantCount))
             end
-            return table.concat(parts, ", ")
+            return table.concat(parts, "[NEWLINE]")
         end,
         FocusKey = "rel:" .. religionType,
     })
@@ -601,15 +604,17 @@ local function CreateReligionRow(religionInfo)
         FocusKey = "rel:" .. religionType .. ":cities",
     })
     citiesSection:SetFocusSound(HOVER_SOUND)
-    citiesSection:AddChild(CreateFilterNode(religionType, CAI_CITIES_FILTER.FOLLOWING_RELIGION, "following", "LOC_CAI_RELIGION_FILTER_FOLLOWING"))
-    citiesSection:AddChild(CreateFilterNode(religionType, CAI_CITIES_FILTER.RELIGION_PRESENT, "present", "LOC_CAI_RELIGION_FILTER_PRESENT"))
+    citiesSection:AddChild(CreateFilterNode(religionType, CAI_CITIES_FILTER.FOLLOWING_RELIGION, "following",
+        "LOC_CAI_RELIGION_FILTER_FOLLOWING"))
+    citiesSection:AddChild(CreateFilterNode(religionType, CAI_CITIES_FILTER.RELIGION_PRESENT, "present",
+        "LOC_CAI_RELIGION_FILTER_PRESENT"))
     row:AddChild(citiesSection)
 
     -- 4. Units (hidden for non-player religions)
     local unitsSection = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRel_Units"), "TreeItem", {
-        Label            = function() return Locale.Lookup("LOC_CAI_RELIGION_UNITS_SECTION") end,
-        FocusKey         = "rel:" .. religionType .. ":units",
-        HiddenPredicate  = function() return religionInfo.Founder ~= displayPlayerID end,
+        Label           = function() return Locale.Lookup("LOC_CAI_RELIGION_UNITS_SECTION") end,
+        FocusKey        = "rel:" .. religionType .. ":units",
+        HiddenPredicate = function() return religionInfo.Founder ~= displayPlayerID end,
     })
     unitsSection:SetFocusSound(HOVER_SOUND)
     unitsSection._built = false
@@ -655,8 +660,10 @@ local function GetMyReligionTooltip()
         local displayPlayerID = GetDisplayPlayerID()
         for _, religion in ipairs(Game.GetReligion():GetReligions()) do
             if religion.Founder == displayPlayerID then
-                table.insert(parts, Locale.Lookup("LOC_UI_RELIGION_FOUNDER_NAME", GetFounderInfo(religion, displayPlayerID)))
-                table.insert(parts, Locale.Lookup("LOC_UI_RELIGION_HOLY_CITY", GetHolyCityInfo(religion, displayPlayerID)))
+                table.insert(parts,
+                    Locale.Lookup("LOC_UI_RELIGION_FOUNDER_NAME", GetFounderInfo(religion, displayPlayerID)))
+                table.insert(parts,
+                    Locale.Lookup("LOC_UI_RELIGION_HOLY_CITY", GetHolyCityInfo(religion, displayPlayerID)))
                 local dominantCount = CountDominantCities(cai.playerReligionType)
                 if dominantCount == 1 then
                     table.insert(parts, Locale.Lookup("LOC_UI_RELIGION_RELIGION_DOMINANCE", dominantCount))
@@ -681,7 +688,7 @@ local function GetMyReligionTooltip()
         table.insert(parts, Locale.Lookup("LOC_RELIGIONPANEL_NEXT_STEP_FOUND_PANTHEON", faithNeeded))
     end
 
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function GetPlayerReligionInfo()
@@ -698,8 +705,8 @@ local function CreateMyReligionRow()
     local displayPlayerID = GetDisplayPlayerID()
 
     local row = mgr:CreateWidget("CAIRel_MyReligion", "TreeItem", {
-        Label   = function() return GetMyReligionLabel() end,
-        Tooltip = function() return GetMyReligionTooltip() end,
+        Label    = function() return GetMyReligionLabel() end,
+        Tooltip  = function() return GetMyReligionTooltip() end,
         FocusKey = "rel:my",
     })
     row:SetFocusSound(HOVER_SOUND)
@@ -743,8 +750,10 @@ local function CreateMyReligionRow()
         FocusKey = "rel:my:cities",
     })
     citiesSection:SetFocusSound(HOVER_SOUND)
-    citiesSection:AddChild(CreateFilterNode(religionType, CAI_CITIES_FILTER.FOLLOWING_RELIGION, "following", "LOC_CAI_RELIGION_FILTER_FOLLOWING"))
-    citiesSection:AddChild(CreateFilterNode(religionType, CAI_CITIES_FILTER.RELIGION_PRESENT, "present", "LOC_CAI_RELIGION_FILTER_PRESENT"))
+    citiesSection:AddChild(CreateFilterNode(religionType, CAI_CITIES_FILTER.FOLLOWING_RELIGION, "following",
+        "LOC_CAI_RELIGION_FILTER_FOLLOWING"))
+    citiesSection:AddChild(CreateFilterNode(religionType, CAI_CITIES_FILTER.RELIGION_PRESENT, "present",
+        "LOC_CAI_RELIGION_FILTER_PRESENT"))
     row:AddChild(citiesSection)
 
     -- Units
@@ -876,7 +885,7 @@ local function CommitSetup()
 
     local numSlots = state == "PANTHEON" and 1
         or (state == "RELIGION" and cai.numBeliefsEarned
-        or (cai.numBeliefsEarned - cai.numBeliefsEquipped))
+            or (cai.numBeliefsEarned - cai.numBeliefsEquipped))
     for slot = 1, numSlots do
         local beliefIndex = m_pendingBeliefs[slot]
         if beliefIndex then
@@ -1064,22 +1073,27 @@ local function RebuildSetupPanel()
                 m_ui.beliefList:AddChild(item)
             end
             m_ui.beliefList:AddInputBindings({
-                { Key = Keys.VK_ESCAPE, Description = "LOC_CAI_KB_CLOSE", Action = function() PopBeliefPicker(); return true end },
+                { Key = Keys.VK_ESCAPE, Description = "LOC_CAI_KB_CLOSE", Action = function()
+                    PopBeliefPicker(); return true
+                end },
             })
             mgr:Push(m_ui.beliefList, PopupPriority.Current)
         end)
         pantheonSlot:AddInputBindings({
-            { Key = Keys.VK_DELETE, Description = "LOC_CAI_KB_CLEAR_BELIEF_SLOT", Action = function()
-                if m_pendingBeliefs[1] then
-                    m_pendingBeliefs[1] = nil
-                    Speak(Locale.Lookup("LOC_CAI_RELIGION_SLOT_CLEARED",
-                        Locale.Lookup("LOC_CAI_RELIGION_BELIEF_SLOT", 1)))
+            {
+                Key = Keys.VK_DELETE,
+                Description = "LOC_CAI_KB_CLEAR_BELIEF_SLOT",
+                Action = function()
+                    if m_pendingBeliefs[1] then
+                        m_pendingBeliefs[1] = nil
+                        Speak(Locale.Lookup("LOC_CAI_RELIGION_SLOT_CLEARED",
+                            Locale.Lookup("LOC_CAI_RELIGION_BELIEF_SLOT", 1)))
+                    end
+                    return true
                 end
-                return true
-            end },
+            },
         })
         paramList:AddChild(pantheonSlot)
-
     else
         -- Show pantheon belief as read-only review item if it exists
         if hasPantheon then
@@ -1219,22 +1233,28 @@ local function RebuildSetupPanel()
                 end
 
                 m_ui.beliefList:AddInputBindings({
-                    { Key = Keys.VK_ESCAPE, MSG = KeyEvents.KeyUp, Description = "LOC_CAI_KB_CLOSE", Action = function() PopBeliefPicker(); return true end },
+                    { Key = Keys.VK_ESCAPE, MSG = KeyEvents.KeyUp, Description = "LOC_CAI_KB_CLOSE", Action = function()
+                        PopBeliefPicker(); return true
+                    end },
                 })
                 mgr:Push(m_ui.beliefList, PopupPriority.Current)
             end)
 
             slotItem:AddInputBindings({
-                { Key = Keys.VK_DELETE, Description = "LOC_CAI_KB_CLEAR_BELIEF_SLOT", Action = function()
-                    if m_pendingBeliefs[capturedSlot] then
-                        m_pendingBeliefs[capturedSlot] = nil
-                        local slotName = isFollowerSlot
-                            and Locale.Lookup("LOC_CAI_RELIGION_FOLLOWER_BELIEF")
-                            or Locale.Lookup("LOC_CAI_RELIGION_BELIEF_SLOT", slotNum)
-                        Speak(Locale.Lookup("LOC_CAI_RELIGION_SLOT_CLEARED", slotName))
+                {
+                    Key = Keys.VK_DELETE,
+                    Description = "LOC_CAI_KB_CLEAR_BELIEF_SLOT",
+                    Action = function()
+                        if m_pendingBeliefs[capturedSlot] then
+                            m_pendingBeliefs[capturedSlot] = nil
+                            local slotName = isFollowerSlot
+                                and Locale.Lookup("LOC_CAI_RELIGION_FOLLOWER_BELIEF")
+                                or Locale.Lookup("LOC_CAI_RELIGION_BELIEF_SLOT", slotNum)
+                            Speak(Locale.Lookup("LOC_CAI_RELIGION_SLOT_CLEARED", slotName))
+                        end
+                        return true
                     end
-                    return true
-                end },
+                },
             })
 
             paramList:AddChild(slotItem)
@@ -1319,7 +1339,7 @@ local function RebuildSetupPanel()
                         end
                     end
                 end
-                return table.concat(blockers, ", ")
+                return table.concat(blockers, "[NEWLINE]")
             end,
             FocusKey = "rel:setup:confirm",
         })

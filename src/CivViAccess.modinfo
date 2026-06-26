@@ -8,11 +8,9 @@
     <AffectsSavedGames>0</AffectsSavedGames>
     <CompatibleVersions>2.0</CompatibleVersions>
   </Properties>
-  <References>
-    <Mod id="1B28771A-C749-434B-9053-D1380C553DE9" title="LOC_EXPANSION1_MOD_TITLE"/>
-    <Mod id="4873eb62-8ccc-4574-b784-dda455e74e68" title="LOC_EXPANSION2_MOD_TITLE"/>
-  </References>
   <Files>
+    <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion1_MODE.lua</File>
+    <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion2_MODE.lua</File>
     <File>caiUtils.lua</File>
     <File>UI/uiManager/helpers/CAIWidgetHelpers_Navigation.lua</File>
     <File>UI/uiManager/helpers/CAIWidgetHelpers_Search.lua</File>
@@ -21,6 +19,7 @@
     <File>UI/uiManager/helpers/CAIWidgetHelpers_DialogBuilder.lua</File>
     <File>UI/uiManager/helpers/CAIWidgetHelpers_PediaLookup.lua</File>
     <File>UI/uiManager/helpers/CAIWidgetHelpers_InputHelp.lua</File>
+    <File>UI/uiManager/helpers/CAIWidgetHelpers_TooltipReader.lua</File>
     <File>UI/uiManager/CAIWidget_Base.lua</File>
     <File>UI/uiManager/CAIWidget_Container.lua</File>
     <File>UI/uiManager/CAIWidget_Value.lua</File>
@@ -75,6 +74,7 @@
     <File>UI/inGame/InGame.lua</File>
     <File>UI/inGame/ActionPanel_CAI.lua</File>
     <File>UI/inGame/AdvisorPopup_CAI.lua</File>
+    <File>UI/inGame/ExpansionIntro_CAI.lua</File>
     <File>UI/inGame/TechCivicCompletedPopup_CAI.lua</File>
     <File>UI/inGame/BoostUnlockedPopup_CAI.lua</File>
     <File>UI/inGame/UnitPromotionPopup_CAI.lua</File>
@@ -199,6 +199,7 @@
       <File>UI/uiManager/helpers/CAIWidgetHelpers_DialogBuilder.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_PediaLookup.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_InputHelp.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_TooltipReader.lua</File>
       <File>UI/uiManager/CAIWidget_Base.lua</File>
       <File>UI/uiManager/CAIWidget_Container.lua</File>
       <File>UI/uiManager/CAIWidget_Value.lua</File>
@@ -259,6 +260,17 @@
     <UpdateDatabase id="CAI_NOTIFICATIONS">
       <File>data/notifications_CAI.xml</File>
     </UpdateDatabase>
+
+    <ImportFiles id="DramaticAges_GovernmentsScreen_CAI" criteria="DramaticAges_Expansion1_Mode">
+      <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion1_MODE.lua</File>
+    </ImportFiles>
+    <ImportFiles id="DramaticAges_GovernmentsScreen_Exp2CAI" criteria="DramaticAges_Expansion2_Mode">
+      <Properties>
+        <LoadOrder>50</LoadOrder>
+      </Properties>
+      <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion2_MODE.lua</File>
+    </ImportFiles>
+
     <ImportFiles id="CAIInGame">
       <Properties>
         <LoadOrder>50</LoadOrder>
@@ -272,6 +284,7 @@
       <File>UI/uiManager/helpers/CAIWidgetHelpers_DialogBuilder.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_PediaLookup.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_InputHelp.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_TooltipReader.lua</File>
       <File>UI/uiManager/CAIWidget_Base.lua</File>
       <File>UI/uiManager/CAIWidget_Container.lua</File>
       <File>UI/uiManager/CAIWidget_Value.lua</File>
@@ -458,6 +471,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>AdvisorPopup</LuaContext>
         <LuaReplace>UI/inGame/AdvisorPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_ExpansionIntro">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>ExpansionIntro</LuaContext>
+        <LuaReplace>UI/inGame/ExpansionIntro_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

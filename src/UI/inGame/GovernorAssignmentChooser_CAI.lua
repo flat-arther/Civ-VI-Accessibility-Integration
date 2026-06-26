@@ -98,11 +98,15 @@ end
 local function BuildRowTooltip(row)
     local parts = {}
     AppendIfNonEmpty(parts, ControlTooltip(row.GovernorIcon))
-    AppendIfNonEmpty(parts, TooltipWithValue(row.IdentityPressureBefore, row.IdentityPressureBefore, "LOC_GOVERNOR_ASSIGNMENT_CURRENT_IDENTITY_PRESSURE_TOOLTIP"))
-    AppendIfNonEmpty(parts, TooltipWithValue(row.IdentityPressureAfter, row.IdentityPressureAfter, "LOC_GOVERNOR_ASSIGNMENT_FUTURE_IDENTITY_PRESSURE_TOOLTIP"))
+    AppendIfNonEmpty(parts,
+        TooltipWithValue(row.IdentityPressureBefore, row.IdentityPressureBefore,
+            "LOC_GOVERNOR_ASSIGNMENT_CURRENT_IDENTITY_PRESSURE_TOOLTIP"))
+    AppendIfNonEmpty(parts,
+        TooltipWithValue(row.IdentityPressureAfter, row.IdentityPressureAfter,
+            "LOC_GOVERNOR_ASSIGNMENT_FUTURE_IDENTITY_PRESSURE_TOOLTIP"))
     AppendIfNonEmpty(parts, TooltipWithValue(row.EstablishTurns, row.EstablishTurns, "LOC_GOVERNOR_TURNS_TO_ESTABLISH"))
     AppendIfNonEmpty(parts, ControlTooltip(row.Button))
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildGovernorPreviewText(governorInst)
@@ -111,10 +115,14 @@ local function BuildGovernorPreviewText(governorInst)
     local parts = {}
     AppendIfNonEmpty(parts, ControlText(governorInst.GovernorName))
     if not ControlIsHidden(governorInst.IdentityPressureContainer) then
-        AppendIfNonEmpty(parts, TooltipWithValue(governorInst.GovernorIdentityPressure, governorInst.GovernorIdentityPressure, "LOC_GOVERNOR_IDENTITY_PRESSURE_TOOLTIP"))
+        AppendIfNonEmpty(parts,
+            TooltipWithValue(governorInst.GovernorIdentityPressure, governorInst.GovernorIdentityPressure,
+                "LOC_GOVERNOR_IDENTITY_PRESSURE_TOOLTIP"))
     end
     if not ControlIsHidden(governorInst.TurnsToEstablishIcon) then
-        AppendIfNonEmpty(parts, TooltipWithValue(governorInst.TurnsToEstablish, governorInst.TurnsToEstablish, "LOC_GOVERNOR_TURNS_TO_ESTABLISH"))
+        AppendIfNonEmpty(parts,
+            TooltipWithValue(governorInst.TurnsToEstablish, governorInst.TurnsToEstablish,
+                "LOC_GOVERNOR_TURNS_TO_ESTABLISH"))
     end
 
     if governorInst.GovernorPromotionStack and governorInst.GovernorPromotionStack.GetChildren then
@@ -132,7 +140,7 @@ local function BuildGovernorPreviewText(governorInst)
         end
     end
 
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildLiveRows()

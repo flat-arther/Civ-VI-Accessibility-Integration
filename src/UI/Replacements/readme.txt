@@ -1,0 +1,1 @@
+These are here to fix Firaxis's screw up, neglecting to add the lua files to the import section of their modinfo, thereby causing it not to appear in the virtual file system. This meant I could not include it in my governments screen mod file, and it caused the whole thing to break.

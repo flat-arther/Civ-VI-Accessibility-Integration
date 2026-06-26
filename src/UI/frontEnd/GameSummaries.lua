@@ -1301,7 +1301,7 @@ local function RebuildHistoryList()
         table.insert(tipParts, Locale.Lookup("LOC_GAMESUMMARY_LAST_PLAYED", game.LastPlayed))
 
         local capturedLabel = table.concat(parts, ", ")
-        local capturedTip = #tipParts > 0 and table.concat(tipParts, ", ") or nil
+        local capturedTip = #tipParts > 0 and table.concat(tipParts, "[NEWLINE]") or nil
         local capturedGameId = game.GameId
 
         local row = mgr:CreateWidget(MakeId("CAIHoF_game_"), "Button", {

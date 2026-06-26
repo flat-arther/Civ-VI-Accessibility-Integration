@@ -321,6 +321,7 @@ function ContainerWidget:SetPageSize(n) end
 function ContainerWidget:SetAllowSearch(b) end
 
 function ContainerWidget:EnableSearch() end
+
 function ContainerWidget:DisableSearch() end
 
 ---Set a custom query handler for Ctrl+F search on this container.
@@ -428,14 +429,17 @@ PanelWidget = {}
 DialogWidget = {}
 ---@param child UIWidget
 function DialogWidget:SetDefaultActionWidget(child) end
+
 ---Create (or replace) the action button row. The row is Transparent so focus
 ---speech announces the button directly. Returns the row container.
 ---@param buttons ButtonWidget[]
 ---@param defaultIndex? integer
 ---@return ContainerWidget
 function DialogWidget:SetButtons(buttons, defaultIndex) end
+
 ---@return UIWidget[]
 function DialogWidget:GetActionButtons() end
+
 ---@return UIWidget[]
 function DialogWidget:GetContent() end
 
@@ -443,24 +447,33 @@ function DialogWidget:GetContent() end
 DropdownWidget = {}
 ---@param options DropdownOption[]
 function DropdownWidget:SetOptions(options) end
+
 ---@param index integer
 ---@param silent? boolean
 function DropdownWidget:SetSelectedIndex(index, silent) end
+
 ---@param index integer
 ---@param silent? boolean
 function DropdownWidget:Commit(index, silent) end
+
 ---@return integer committed selection
 function DropdownWidget:GetSelectedIndex() end
+
 function DropdownWidget:Open() end
+
 ---@param silent? boolean
 function DropdownWidget:Close(silent) end
+
 ---@return boolean
 function DropdownWidget:IsOpen() end
+
 ---@param fn fun(w:DropdownWidget, value:any)
 function DropdownWidget:SetValueSetter(fn) end
+
 ---@param value any
 ---@param silent? boolean
 function DropdownWidget:SetValue(value, silent) end
+
 ---@return any
 function DropdownWidget:GetRawValue() end
 
@@ -482,6 +495,7 @@ SubMenuWidget = {}
 ---@param silent? boolean
 ---@return boolean
 function SubMenuWidget:Expand(silent) end
+
 ---Collapse the submenu and (always silently) every descendant. `silent`
 ---suppresses this node's `collapsed` event.
 ---@param silent? boolean
@@ -501,10 +515,12 @@ function TreeWidget:OnCharInput(char) end
 TreeItemWidget = {}
 ---@return boolean
 function TreeItemWidget:IsLeaf() end
+
 ---Expand this node. `silent` suppresses the `expanded` event and speech.
 ---@param silent? boolean
 ---@return boolean
 function TreeItemWidget:Expand(silent) end
+
 ---Collapse this node and (always silently) every descendant. `silent`
 ---suppresses this node's `collapsed` event and speech.
 ---@param silent? boolean
@@ -516,28 +532,37 @@ CheckboxWidget = {}
 ---@param b boolean
 ---@param silent? boolean
 function CheckboxWidget:SetChecked(b, silent) end
+
 ---@return boolean
 function CheckboxWidget:IsChecked() end
+
 function CheckboxWidget:Toggle() end
 
 ---@class SliderWidget : ValueWidget
 SliderWidget = {}
 ---@param n number
 function SliderWidget:SetMin(n) end
+
 ---@param n number
 function SliderWidget:SetMax(n) end
+
 ---@param n number
 function SliderWidget:SetStepSize(n) end
+
 ---@param n number
 function SliderWidget:SetPageStep(n) end
+
 ---@param n? integer
 ---@return boolean
 function SliderWidget:Increment(n) end
+
 ---@param n? integer
 ---@return boolean
 function SliderWidget:Decrement(n) end
+
 ---@return boolean
 function SliderWidget:PageIncrement() end
+
 ---@return boolean
 function SliderWidget:PageDecrement() end
 
@@ -547,24 +572,33 @@ EditBoxWidget = {}
 ---@param text string
 ---@param silent? boolean
 function EditBoxWidget:SetText(text, silent) end
+
 ---@return string
 function EditBoxWidget:GetText() end
+
 ---@param b boolean
 function EditBoxWidget:SetReadOnly(b) end
+
 ---@param b boolean
 function EditBoxWidget:SetAlwaysEdit(b) end
+
 ---@param b boolean
 function EditBoxWidget:SetHighlightOnEdit(b) end
+
 ---@param n integer|nil
 function EditBoxWidget:SetMaxCharacters(n) end
+
 ---Per-keystroke / paste guard. Receives the proposed full buffer; return false to reject.
 ---@param fn fun(text:string):boolean
 function EditBoxWidget:SetValidator(fn) end
+
 ---Commit-time guard. Return nil to allow commit, or a string (spoken to the user) to block.
 ---@param fn fun(text:string):string|nil
 function EditBoxWidget:SetCommitValidator(fn) end
+
 ---@param b boolean  when false, Enter bubbles instead of committing (default true)
 function EditBoxWidget:SetEnterToCommit(b) end
+
 ---@param b boolean
 function EditBoxWidget:SetPasswordMask(b) end
 
@@ -572,11 +606,15 @@ function EditBoxWidget:SetPasswordMask(b) end
 ---GetText() always returns the live content without needing an explicit Commit.
 ---@param b boolean
 function EditBoxWidget:SetCommitOnBufferChanged(b) end
+
 ---@param mode integer  one of EditModes.*
 function EditBoxWidget:SetEditMode(mode) end
+
 ---@param silent? boolean  silent=true flips state without speaking; used for focus-driven activation
 function EditBoxWidget:BeginEdit(silent) end
+
 function EditBoxWidget:Commit() end
+
 function EditBoxWidget:Cancel() end
 
 ---@class TabControlWidget : ContainerWidget
@@ -584,27 +622,36 @@ TabControlWidget = {}
 ---@param labelOrFn string|fun():string
 ---@return TabPageWidget
 function TabControlWidget:AddPage(labelOrFn) end
+
 ---@return integer
 function TabControlWidget:GetPageCount() end
+
 ---@param i integer
 ---@return TabPageWidget|nil
 function TabControlWidget:GetPage(i) end
+
 ---@param id string
 ---@return TabPageWidget|nil
 function TabControlWidget:GetPageById(id) end
+
 ---@return TabPageWidget|nil
 function TabControlWidget:GetActivePage() end
+
 ---@return integer
 function TabControlWidget:GetActivePageIndex() end
+
 ---@param i integer
 ---@param silent? boolean
 function TabControlWidget:SetActivePage(i, silent) end
+
 ---@param id string
 ---@param silent? boolean
 function TabControlWidget:SetActivePageById(id, silent) end
+
 ---@param silent? boolean
 ---@return boolean
 function TabControlWidget:NextPage(silent) end
+
 ---@param silent? boolean
 ---@return boolean
 function TabControlWidget:PreviousPage(silent) end
@@ -624,37 +671,47 @@ TableWidget = {}
 ---@param col TableColumn
 ---@return ContainerWidget column
 function TableWidget:AddColumn(col) end
+
 ---@return integer
 function TableWidget:GetColumnCount() end
+
 ---@param i integer
 ---@return ContainerWidget|nil
 function TableWidget:GetColumnWidget(i) end
+
 ---@param column ContainerWidget|integer
 ---@param tierIndex? integer
 ---@return ContainerWidget|nil
 function TableWidget:GetTier(column, tierIndex) end
+
 ---Append an item cell to a column's tier (vertical stack).
 ---@param column ContainerWidget|integer
 ---@param tierIndex integer|nil
 ---@param widget UIWidget
 ---@return integer itemIndex
 function TableWidget:AddItem(column, tierIndex, widget) end
+
 ---Grid convenience: one cell into each column's first tier, in column order.
 ---@param cells (UIWidget|nil)[]
 ---@return integer rowIndex
 function TableWidget:AddRow(cells) end
+
 ---@param row integer
 ---@param col integer
 ---@param widget UIWidget|nil
 function TableWidget:SetCell(row, col, widget) end
+
 ---@param row integer
 ---@param col integer
 ---@return UIWidget|nil
 function TableWidget:GetCell(row, col) end
+
 ---@return integer
 function TableWidget:GetRowCount() end
+
 ---@param row integer
 function TableWidget:RemoveRow(row) end
+
 function TableWidget:ClearRows() end
 
 ---@class GameViewWidget : ContainerWidget
@@ -867,3 +924,20 @@ function CAIWidgetHelpers_DialogBuilder.MakeGeneralDialog(mgr, titleFn, actionBu
 ---@param popup table
 ---@return DialogWidget|nil
 function CAIWidgetHelpers_DialogBuilder.CreatePopupDialog(mgr, popup) end
+
+--Candidate for type to find search
+---@class SearchCandidate
+---@field Widget UIWidget
+---@field Label string
+---@field LabelLower string
+---@field BFSIndex integer
+
+---@class SearchWord
+---@field Text string
+---@field StartPos integer
+
+---@class SearchResult
+---@field Candidate SearchCandidate
+---@field Tier integer
+---@field MatchPosition integer
+---@field LabelLength integer

@@ -244,8 +244,7 @@ local function GatherChatHistory()
             for _, inner in ipairs(innerChildren) do
                 local text = inner:GetText()
                 if text and text ~= "" then
-                    local cleaned = text:gsub("%[color:[%w_]+%]", ""):gsub("%[ENDCOLOR%]", ""):gsub("%[ICON_[%w_]+%]", "")
-                    table.insert(lines, cleaned)
+                    table.insert(lines, text)
                 end
             end
         end

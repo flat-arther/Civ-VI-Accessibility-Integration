@@ -28,6 +28,7 @@
     <Row ActionId="InterfaceWidgetPrimaryAction" Name="LOC_CAI_INTERFACE_PRIMARY_ACTION" Description="LOC_CAI_INTERFACE_PRIMARY_ACTION_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="InterfaceWidgetSecondaryAction" Name="LOC_CAI_INTERFACE_SECONDARY_ACTION" Description="LOC_CAI_INTERFACE_SECONDARY_ACTION_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ActionPanelSpeakEraAge" Name="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE" Description="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAI_SpeakGovernerTitles" Name="LOC_CAI_SPEAK_GOVERNER_TITLES" Description="LOC_CAI_SPEAK_GOVERNER_TITLES_DESC" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAICursorMoveNorthWest" Name="LOC_CAI_CURSOR_MOVE_NORTHWEST" Description="LOC_CAI_CURSOR_MOVE_NORTHWEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAICursorMoveNorthEast" Name="LOC_CAI_CURSOR_MOVE_NORTHEAST" Description="LOC_CAI_CURSOR_MOVE_NORTHEAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAICursorMoveWest" Name="LOC_CAI_CURSOR_MOVE_WEST" Description="LOC_CAI_CURSOR_MOVE_WEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
@@ -221,6 +222,7 @@
     <Row ActionId="InterfaceWidgetPrimaryAction" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_RETURN" />
     <Row ActionId="InterfaceWidgetSecondaryAction" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_RETURN" />
     <Row ActionId="ActionPanelSpeakEraAge" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_Y" />
+    <Row ActionId="CAI_SpeakGovernerTitles" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_O" />
     <Row ActionId="CAICursorMoveNorthWest" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_Q" />
     <Row ActionId="CAICursorMoveNorthWest" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_7" />
     <Row ActionId="CAICursorMoveNorthEast" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_E" />

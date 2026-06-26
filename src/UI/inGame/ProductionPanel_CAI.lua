@@ -11,41 +11,41 @@ local function HasBabylon()
 end
 if HasBabylon() then include("ProductionPanel_Babylon_Heroes") end
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr            = ExposedMembers.CAI_UIManager
 
-local PANEL_ID         = "CAIProductionPanel_Panel"
-local TABS_ID          = "CAIProductionPanel_Tabs"
-local PAGE_PROD_ID     = "CAIProductionPanel_PageProduction"
-local PAGE_GOLD_ID     = "CAIProductionPanel_PagePurchaseGold"
-local PAGE_FAITH_ID    = "CAIProductionPanel_PagePurchaseFaith"
-local PAGE_QUEUE_ID    = "CAIProductionPanel_PageQueue"
+local PANEL_ID       = "CAIProductionPanel_Panel"
+local TABS_ID        = "CAIProductionPanel_Tabs"
+local PAGE_PROD_ID   = "CAIProductionPanel_PageProduction"
+local PAGE_GOLD_ID   = "CAIProductionPanel_PagePurchaseGold"
+local PAGE_FAITH_ID  = "CAIProductionPanel_PagePurchaseFaith"
+local PAGE_QUEUE_ID  = "CAIProductionPanel_PageQueue"
 
-local LISTMODE         = { PRODUCTION = 1, PURCHASE_GOLD = 2, PURCHASE_FAITH = 3, PROD_QUEUE = 4 }
-local TAB              = { PRODUCTION = 1, PURCHASE_GOLD = 2, PURCHASE_FAITH = 3, QUEUE = 4 }
-local MAX_QUEUE_SIZE   = 7
+local LISTMODE       = { PRODUCTION = 1, PURCHASE_GOLD = 2, PURCHASE_FAITH = 3, PROD_QUEUE = 4 }
+local TAB            = { PRODUCTION = 1, PURCHASE_GOLD = 2, PURCHASE_FAITH = 3, QUEUE = 4 }
+local MAX_QUEUE_SIZE = 7
 
-local m_state = {
-    activeTab          = TAB.PRODUCTION,
-    openPending        = false,
-    data               = nil,         ---@type table|nil
-    recommended        = {},          ---@type table<number, string|nil>
-    isQueueActionActive = false,
-    queueFocusIndexAfterRebuild = nil,---@type integer|nil
+local m_state        = {
+    activeTab                   = TAB.PRODUCTION,
+    openPending                 = false,
+    data                        = nil, ---@type table|nil
+    recommended                 = {}, ---@type table<number, string|nil>
+    isQueueActionActive         = false,
+    queueFocusIndexAfterRebuild = nil, ---@type integer|nil
 }
 
-local m_ui = {
-    panel      = nil, ---@type UIWidget|nil
-    tabs       = nil, ---@type UIWidget|nil
-    pages      = {},  ---@type table<integer, UIWidget>
-    pageTrees  = {},  ---@type table<integer, UIWidget> -- main Tree per tab (or List for queue)
+local m_ui           = {
+    panel         = nil, ---@type UIWidget|nil
+    tabs          = nil, ---@type UIWidget|nil
+    pages         = {}, ---@type table<integer, UIWidget>
+    pageTrees     = {}, ---@type table<integer, UIWidget> -- main Tree per tab (or List for queue)
     categoryNodes = {}, ---@type table<integer, table<string, UIWidget>>
 }
 
-local m_vanilla = {
-    instanceByHash       = {}, ---@type table<number, table>
-    instancesByModeHash  = {}, ---@type table<integer, table<number, table>>
-    categoryListsByMode  = {}, ---@type table<integer, table<string, table>>
-    captureListMode      = nil,---@type integer|nil
+local m_vanilla      = {
+    instanceByHash      = {}, ---@type table<number, table>
+    instancesByModeHash = {}, ---@type table<integer, table<number, table>>
+    categoryListsByMode = {}, ---@type table<integer, table<string, table>>
+    captureListMode     = nil, ---@type integer|nil
 }
 
 -- ===========================================================================
@@ -154,35 +154,35 @@ end
 -- ===========================================================================
 local function NewDetail()
     return {
-        repairNeeded   = false,
-        cannotAfford   = false,
-        cost           = nil,
-        costYield      = nil,
-        turnsLeft      = nil,
-        progressPct    = nil,
-        maintenance    = nil,
-        resourceUpkeep = nil,
-        description    = nil,
-        promotionClass = nil, ---@type string|nil (units only; rendered last)
-        stats          = {},  ---@type string[]
-        citizenYields  = {},  ---@type string[]
+        repairNeeded        = false,
+        cannotAfford        = false,
+        cost                = nil,
+        costYield           = nil,
+        turnsLeft           = nil,
+        progressPct         = nil,
+        maintenance         = nil,
+        resourceUpkeep      = nil,
+        description         = nil,
+        promotionClass      = nil, ---@type string|nil (units only; rendered last)
+        stats               = {}, ---@type string[]
+        citizenYields       = {}, ---@type string[]
         citizenYieldsHeader = nil, ---@type string|nil (loc tag emitted before citizenYields)
-        failures       = {},  ---@type string[]
-        bonuses        = {},  ---@type string[]
-        requirements   = {},  ---@type string[]
-        policyUnlocks  = {},  ---@type table[] -- { {name=, description=}, ... }
+        failures            = {}, ---@type string[]
+        bonuses             = {}, ---@type string[]
+        requirements        = {}, ---@type string[]
+        policyUnlocks       = {}, ---@type table[] -- { {name=, description=}, ... }
     }
 end
 
 local GREAT_WORK_SLOT_LOC = {
-    GREATWORKSLOT_PALACE     = "LOC_TYPE_TRAIT_GREAT_WORKS_PALACE_SLOTS",
-    GREATWORKSLOT_ART        = "LOC_TYPE_TRAIT_GREAT_WORKS_ART_SLOTS",
-    GREATWORKSLOT_WRITING    = "LOC_TYPE_TRAIT_GREAT_WORKS_WRITING_SLOTS",
-    GREATWORKSLOT_MUSIC      = "LOC_TYPE_TRAIT_GREAT_WORKS_MUSIC_SLOTS",
-    GREATWORKSLOT_RELIC      = "LOC_TYPE_TRAIT_GREAT_WORKS_RELIC_SLOTS",
-    GREATWORKSLOT_ARTIFACT   = "LOC_TYPE_TRAIT_GREAT_WORKS_ARTIFACT_SLOTS",
-    GREATWORKSLOT_CATHEDRAL  = "LOC_TYPE_TRAIT_GREAT_WORKS_CATHEDRAL_SLOTS",
-    GREATWORKSLOT_PRODUCT    = "LOC_TYPE_TRAIT_GREAT_WORKS_PRODUCT_SLOTS",
+    GREATWORKSLOT_PALACE    = "LOC_TYPE_TRAIT_GREAT_WORKS_PALACE_SLOTS",
+    GREATWORKSLOT_ART       = "LOC_TYPE_TRAIT_GREAT_WORKS_ART_SLOTS",
+    GREATWORKSLOT_WRITING   = "LOC_TYPE_TRAIT_GREAT_WORKS_WRITING_SLOTS",
+    GREATWORKSLOT_MUSIC     = "LOC_TYPE_TRAIT_GREAT_WORKS_MUSIC_SLOTS",
+    GREATWORKSLOT_RELIC     = "LOC_TYPE_TRAIT_GREAT_WORKS_RELIC_SLOTS",
+    GREATWORKSLOT_ARTIFACT  = "LOC_TYPE_TRAIT_GREAT_WORKS_ARTIFACT_SLOTS",
+    GREATWORKSLOT_CATHEDRAL = "LOC_TYPE_TRAIT_GREAT_WORKS_CATHEDRAL_SLOTS",
+    GREATWORKSLOT_PRODUCT   = "LOC_TYPE_TRAIT_GREAT_WORKS_PRODUCT_SLOTS",
 }
 
 local function ExtractFailureReasons(item)
@@ -222,8 +222,11 @@ local function BuildUnitDetail(item, formation)
     if not def then return d end
 
     local cost = item.Cost
-    if formation == "corps" then cost = item.CorpsCost
-    elseif formation == "army" then cost = item.ArmyCost end
+    if formation == "corps" then
+        cost = item.CorpsCost
+    elseif formation == "army" then
+        cost = item.ArmyCost
+    end
     SetCost(d, cost, item.Yield)
     if item.TurnsLeft and item.TurnsLeft >= 0 then d.turnsLeft = item.TurnsLeft end
 
@@ -575,11 +578,17 @@ end
 local function BuildItemDetail(item, formation, tab)
     local class = GetProductionItemClass(item)
     local d
-    if class == "unit" then d = BuildUnitDetail(item, formation)
-    elseif class == "building" then d = BuildBuildingDetail(item)
-    elseif class == "district" then d = BuildDistrictDetail(item)
-    elseif class == "project" then d = BuildProjectDetail(item)
-    else d = NewDetail() end
+    if class == "unit" then
+        d = BuildUnitDetail(item, formation)
+    elseif class == "building" then
+        d = BuildBuildingDetail(item)
+    elseif class == "district" then
+        d = BuildDistrictDetail(item)
+    elseif class == "project" then
+        d = BuildProjectDetail(item)
+    else
+        d = NewDetail()
+    end
 
     if item and item.Repair then d.repairNeeded = true end
 
@@ -643,8 +652,11 @@ local function GetCurrentProductionItem()
         local formation
         local fmt = pBQ:GetCurrentProductionTypeModifier()
         if MilitaryFormationTypes then
-            if fmt == MilitaryFormationTypes.CORPS_FORMATION then formation = "corps"
-            elseif fmt == MilitaryFormationTypes.ARMY_FORMATION then formation = "army" end
+            if fmt == MilitaryFormationTypes.CORPS_FORMATION then
+                formation = "corps"
+            elseif fmt == MilitaryFormationTypes.ARMY_FORMATION then
+                formation = "army"
+            end
         end
         return item, formation
     end
@@ -721,7 +733,7 @@ local function FormatTooltip(detail)
                 Locale.Lookup("LOC_CAI_PRODUCTION_BONUSES_MORE", #detail.bonuses - BONUS_TOOLTIP_LIMIT))
         end
     end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function CreateContainerChild(focusKey, labelTag)
@@ -778,7 +790,7 @@ local function FormatRowLabel(item, formation, tab)
         and not IsItemRowDisabled(item, tab, formation) then
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_RECOMMENDED"))
     end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 -- ===========================================================================
@@ -842,20 +854,20 @@ local function CreateItemRow(item, tab, formation)
 
     local bindings = {
         {
-            Key     = Keys.VK_RETURN,
-            IsShift = true,
-            MSG     = KeyEvents.KeyUp,
+            Key         = Keys.VK_RETURN,
+            IsShift     = true,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action  = function() return InvokeRightClickPedia(item) ~= false end,
+            Action      = function() return InvokeRightClickPedia(item) ~= false end,
         },
     }
     if tab == TAB.PRODUCTION and CurrentTabSupportsQueue() then
         table.insert(bindings, {
-            Key       = Keys.VK_RETURN,
-            IsControl = true,
-            MSG       = KeyEvents.KeyUp,
+            Key         = Keys.VK_RETURN,
+            IsControl   = true,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_QUEUE_PRODUCTION",
-            Action    = function(w)
+            Action      = function(w)
                 if w.IsDisabled and w:IsDisabled() then return true end
                 return BuildItemQueueAction(item, tab, formation)() ~= false
             end,
@@ -878,15 +890,19 @@ local function AddUnitEntry(parent, unit, tab)
     local group = CreateItemRow(unit, tab, nil)
     if hasCorps then
         local corpsItem = setmetatable({
-            Cost = unit.CorpsCost, TurnsLeft = unit.CorpsTurnsLeft,
-            Progress = unit.CorpsProgress, Disabled = unit.CorpsDisabled,
+            Cost = unit.CorpsCost,
+            TurnsLeft = unit.CorpsTurnsLeft,
+            Progress = unit.CorpsProgress,
+            Disabled = unit.CorpsDisabled,
         }, { __index = unit })
         group:AddChild(CreateItemRow(corpsItem, tab, "corps"))
     end
     if hasArmy then
         local armyItem = setmetatable({
-            Cost = unit.ArmyCost, TurnsLeft = unit.ArmyTurnsLeft,
-            Progress = unit.ArmyProgress, Disabled = unit.ArmyDisabled,
+            Cost = unit.ArmyCost,
+            TurnsLeft = unit.ArmyTurnsLeft,
+            Progress = unit.ArmyProgress,
+            Disabled = unit.ArmyDisabled,
         }, { __index = unit })
         group:AddChild(CreateItemRow(armyItem, tab, "army"))
     end
@@ -932,14 +948,14 @@ end
 
 local function CreateCurrentProductionRow()
     local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIProductionPanelCurrent"), "TreeItem", {
-        Label           = ReadCurrentProductionLabel,
-        Tooltip         = ReadCurrentProductionTooltip,
-        HiddenPredicate = function()
+        Label             = ReadCurrentProductionLabel,
+        Tooltip           = ReadCurrentProductionTooltip,
+        HiddenPredicate   = function()
             return ControlIsHidden(Controls.CurrentProductionContainer)
                 or ControlIsHidden(Controls.CurrentProductionButton)
         end,
         DisabledPredicate = function() return ControlIsDisabled(Controls.CurrentProductionButton) end,
-        FocusKey        = "current",
+        FocusKey          = "current",
     })
     row:SetFocusSound("Main_Menu_Mouse_Over")
     row:On("activate", function(w)
@@ -951,10 +967,10 @@ local function CreateCurrentProductionRow()
     end)
     row:AddInputBindings({
         {
-            Key    = Keys.VK_DELETE,
-            MSG    = KeyEvents.KeyUp,
+            Key         = Keys.VK_DELETE,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_REMOVE_FROM_QUEUE",
-            Action = RemoveCurrentProductionFromQueue,
+            Action      = RemoveCurrentProductionFromQueue,
         },
     })
     return row
@@ -1017,20 +1033,20 @@ end
 
 local CATEGORY_SPECS = {
     [TAB.PRODUCTION] = {
-        { key = "districts", label = "LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS",  focusKey = "cat:districts" },
-        { key = "wonders",   label = "LOC_CAI_PRODUCTION_CATEGORY_WONDERS",    focusKey = "cat:wonders" },
-        { key = "projects",  label = "LOC_CAI_PRODUCTION_CATEGORY_PROJECTS",   focusKey = "cat:projects" },
-        { key = "units",     label = "LOC_CAI_PRODUCTION_CATEGORY_UNITS",      focusKey = "cat:units" },
+        { key = "districts", label = "LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS", focusKey = "cat:districts" },
+        { key = "wonders",   label = "LOC_CAI_PRODUCTION_CATEGORY_WONDERS",   focusKey = "cat:wonders" },
+        { key = "projects",  label = "LOC_CAI_PRODUCTION_CATEGORY_PROJECTS",  focusKey = "cat:projects" },
+        { key = "units",     label = "LOC_CAI_PRODUCTION_CATEGORY_UNITS",     focusKey = "cat:units" },
     },
     [TAB.PURCHASE_GOLD] = {
-        { key = "districts", label = "LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS",  focusKey = "cat:districts" },
-        { key = "buildings", label = "LOC_CAI_PRODUCTION_CATEGORY_BUILDINGS",  focusKey = "cat:buildings" },
-        { key = "units",     label = "LOC_CAI_PRODUCTION_CATEGORY_UNITS",      focusKey = "cat:units" },
+        { key = "districts", label = "LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS", focusKey = "cat:districts" },
+        { key = "buildings", label = "LOC_CAI_PRODUCTION_CATEGORY_BUILDINGS", focusKey = "cat:buildings" },
+        { key = "units",     label = "LOC_CAI_PRODUCTION_CATEGORY_UNITS",     focusKey = "cat:units" },
     },
     [TAB.PURCHASE_FAITH] = {
-        { key = "districts", label = "LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS",  focusKey = "cat:districts" },
-        { key = "buildings", label = "LOC_CAI_PRODUCTION_CATEGORY_BUILDINGS",  focusKey = "cat:buildings" },
-        { key = "units",     label = "LOC_CAI_PRODUCTION_CATEGORY_UNITS",      focusKey = "cat:units" },
+        { key = "districts", label = "LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS", focusKey = "cat:districts" },
+        { key = "buildings", label = "LOC_CAI_PRODUCTION_CATEGORY_BUILDINGS", focusKey = "cat:buildings" },
+        { key = "units",     label = "LOC_CAI_PRODUCTION_CATEGORY_UNITS",     focusKey = "cat:units" },
     },
 }
 
@@ -1042,8 +1058,11 @@ local function GetItemsForTab(tab)
         out.Projects = m_state.data.ProjectItems or {}
         out.Units = m_state.data.UnitItems or {}
         for _, b in ipairs(m_state.data.BuildingItems or {}) do
-            if b.IsWonder then table.insert(out.Wonders, b)
-            else table.insert(out.Buildings, b) end
+            if b.IsWonder then
+                table.insert(out.Wonders, b)
+            else
+                table.insert(out.Buildings, b)
+            end
         end
     elseif tab == TAB.PURCHASE_GOLD or tab == TAB.PURCHASE_FAITH then
         local yield = tab == TAB.PURCHASE_GOLD and "YIELD_GOLD" or "YIELD_FAITH"
@@ -1122,7 +1141,8 @@ local function MoveQueueSelection(direction)
     local target = idx + direction
     if target < 1 or target > GetQueueRowCount() then
         if name ~= "" then
-            local key = direction < 0 and "LOC_CAI_PRODUCTION_QUEUE_ALREADY_FIRST" or "LOC_CAI_PRODUCTION_QUEUE_ALREADY_LAST"
+            local key = direction < 0 and "LOC_CAI_PRODUCTION_QUEUE_ALREADY_FIRST" or
+            "LOC_CAI_PRODUCTION_QUEUE_ALREADY_LAST"
             Speak(Locale.Lookup(key, name))
         end
         return true
@@ -1149,12 +1169,16 @@ local function CreateQueueRow(queueIndex, name)
     row:AddInputBindings({
         { Key = Keys.VK_DELETE, MSG = KeyEvents.KeyUp, Description = "LOC_CAI_KB_REMOVE_FROM_QUEUE", Action = RemoveFocusedQueueItem },
         {
-            Key = Keys.VK_UP, IsShift = true, MSG = KeyEvents.KeyDown,
+            Key = Keys.VK_UP,
+            IsShift = true,
+            MSG = KeyEvents.KeyDown,
             Description = "LOC_CAI_KB_MOVE_QUEUE_UP",
             Action = function() return MoveQueueSelection(-1) end,
         },
         {
-            Key = Keys.VK_DOWN, IsShift = true, MSG = KeyEvents.KeyDown,
+            Key = Keys.VK_DOWN,
+            IsShift = true,
+            MSG = KeyEvents.KeyDown,
             Description = "LOC_CAI_KB_MOVE_QUEUE_DOWN",
             Action = function() return MoveQueueSelection(1) end,
         },
@@ -1248,14 +1272,20 @@ local function RebuildQueuePage()
 end
 
 local function RefreshActivePage()
-    if m_state.activeTab == TAB.QUEUE then RebuildQueuePage()
-    else RebuildTreePage(m_state.activeTab) end
+    if m_state.activeTab == TAB.QUEUE then
+        RebuildQueuePage()
+    else
+        RebuildTreePage(m_state.activeTab)
+    end
 end
 
 local function RefreshAllPages()
     for tab, _ in pairs(m_ui.pageTrees) do
-        if tab == TAB.QUEUE then RebuildQueuePage()
-        else RebuildTreePage(tab) end
+        if tab == TAB.QUEUE then
+            RebuildQueuePage()
+        else
+            RebuildTreePage(tab)
+        end
     end
 end
 
@@ -1363,8 +1393,10 @@ end
 local function PushPanelIfNeeded()
     if not m_ui.panel or not mgr then return end
     if mgr:GetWidgetById(PANEL_ID) then return end
-    mgr:Push(m_ui.panel, { priority = PopupPriority.Low,
-        focus = m_ui.pageTrees[m_state.activeTab] })
+    mgr:Push(m_ui.panel, {
+        priority = PopupPriority.Low,
+        focus = m_ui.pageTrees[m_state.activeTab]
+    })
 end
 
 local function OnPanelOpenedCAI()
@@ -1385,8 +1417,10 @@ local function OnPanelClosedCAI()
     m_state.queueFocusIndexAfterRebuild = nil
     m_state.activeTab = TAB.PRODUCTION
     m_vanilla = {
-        instanceByHash = {}, instancesByModeHash = {},
-        categoryListsByMode = {}, captureListMode = nil,
+        instanceByHash = {},
+        instancesByModeHash = {},
+        categoryListsByMode = {},
+        captureListMode = nil,
     }
 end
 
@@ -1447,8 +1481,11 @@ PopulateDistrictsWithNestedBuildings = WrapCategoryCapture(PopulateDistrictsWith
 end)
 PopulateDistrictsWithoutNestedBuildings = WrapCategoryCapture(PopulateDistrictsWithoutNestedBuildings,
     function(inst, idx)
-        if idx == 1 then SetCategoryListForMode(m_vanilla.captureListMode, "districts", inst)
-        else SetCategoryListForMode(m_vanilla.captureListMode, "buildings", inst) end
+        if idx == 1 then
+            SetCategoryListForMode(m_vanilla.captureListMode, "districts", inst)
+        else
+            SetCategoryListForMode(m_vanilla.captureListMode, "buildings", inst)
+        end
     end)
 
 View = WrapFunc(View, function(orig, data)

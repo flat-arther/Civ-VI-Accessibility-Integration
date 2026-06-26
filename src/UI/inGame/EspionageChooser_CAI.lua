@@ -205,7 +205,7 @@ local function ComputeMissionsForCity(city, spy)
                     end
                 else
                     if results and results[UnitOperationResults.FAILURE_REASONS] then
-                        local failureReasons = table.concat(results[UnitOperationResults.FAILURE_REASONS], ", ")
+                        local failureReasons = table.concat(results[UnitOperationResults.FAILURE_REASONS], "[NEWLINE]")
                         local districtName = Locale.Lookup("LOC_DISTRICT_CITY_CENTER_NAME")
                         missions[#missions + 1] = {
                             operation = operation,
@@ -260,7 +260,7 @@ local function BuildDestinationTooltip(cap)
     if #cap.districts > 0 then
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_CITY_DISTRICTS", table.concat(cap.districts, ", ")))
     end
-    return table.concat(parts, ". ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildMissionLabel(mis)
@@ -611,7 +611,7 @@ AddDisabledOffensiveOperation = WrapFunc(AddDisabledOffensiveOperation, function
 
     local failureReasons = ""
     if results and results[UnitOperationResults.FAILURE_REASONS] then
-        failureReasons = table.concat(results[UnitOperationResults.FAILURE_REASONS], ", ")
+        failureReasons = table.concat(results[UnitOperationResults.FAILURE_REASONS], "[NEWLINE]")
     end
 
     local button = FindNewButton(Controls.MissionStack, GetUsedControls(m_capturedMissions))

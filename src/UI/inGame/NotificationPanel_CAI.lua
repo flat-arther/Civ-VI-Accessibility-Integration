@@ -220,7 +220,7 @@ local function BuildLeafTooltip(playerID, notificationID)
                 table.insert(parts, Locale.Lookup("LOC_CAI_NOTIFICATION_EXPIRES_TURN", expireTurn))
             end
         end
-        return table.concat(parts, ", ")
+        return table.concat(parts, "[NEWLINE]")
     end
 end
 

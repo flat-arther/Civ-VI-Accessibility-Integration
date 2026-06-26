@@ -130,7 +130,7 @@ local function FormatYields(production, food, gold, faith, science, culture, tou
         table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_YIELD_TOURISM", tourism))
     end
     if #parts == 0 then return "" end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function toPlusMinus(val)
@@ -295,7 +295,7 @@ local function RebuildYieldsTree(tree)
                                 end
                                 local text = Locale.Lookup(capturedGW.Name)
                                 if #gwYields > 0 then
-                                    text = text .. ", " .. table.concat(gwYields, ", ")
+                                    text = text .. ", " .. table.concat(gwYields, "[NEWLINE]")
                                 end
                                 return text
                             end)
@@ -322,7 +322,7 @@ local function RebuildYieldsTree(tree)
                             end
                             local text = Locale.Lookup(capturedWonder.Name)
                             if #parts > 0 then
-                                text = text .. ", " .. table.concat(parts, ", ")
+                                text = text .. ", " .. table.concat(parts, "[NEWLINE]")
                             end
                             return text
                         end,
@@ -351,7 +351,7 @@ local function RebuildYieldsTree(tree)
                                     end
                                     local text = Locale.Lookup(capturedGW.Name)
                                     if #gwYields > 0 then
-                                        text = text .. ", " .. table.concat(gwYields, ", ")
+                                        text = text .. ", " .. table.concat(gwYields, "[NEWLINE]")
                                     end
                                     return text
                                 end)
@@ -383,7 +383,7 @@ local function RebuildYieldsTree(tree)
                             end
                             local text = Locale.Lookup("LOC_HUD_REPORTS_TRADE_WITH", destName)
                             if #routeYields > 0 then
-                                text = text .. ", " .. table.concat(routeYields, ", ")
+                                text = text .. ", " .. table.concat(routeYields, "[NEWLINE]")
                             end
                             return text
                         end)
@@ -604,7 +604,7 @@ local function RebuildYieldsTree(tree)
                     toPlusMinus(Round(playerCulture:GetCultureYield(), 1))))
                 table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_YIELD_TOURISM",
                     toPlusMinus(Round(m_caiCityTotalData.Income["TOURISM"] or 0, 1))))
-                return table.concat(parts, ", ")
+                return table.concat(parts, "[NEWLINE]")
             end,
             FocusKey = "yield:economy",
         })
@@ -842,12 +842,14 @@ local function RebuildCityStatusList(list)
 
         local btn = MakeButton({
             Label = function()
-                local parts = {}
                 local cityLabel = Locale.Lookup(capturedCity.CityName)
                 if capturedCity.IsCapital then
                     cityLabel = cityLabel .. ", " .. Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL")
                 end
-                table.insert(parts, cityLabel)
+                return cityLabel
+            end,
+            Tooltip = function()
+                local parts = {}
                 table.insert(parts,
                     Locale.Lookup("LOC_CAI_REPORTS_POPULATION", capturedCity.Population, capturedCity.Housing))
 
@@ -915,7 +917,7 @@ local function RebuildCityStatusList(list)
                     end
                 end
 
-                return table.concat(parts, ", ")
+                return table.concat(parts, "[NEWLINE]")
             end,
             FocusKey = "status:city:" .. capturedCity.City:GetID(),
         })
@@ -937,11 +939,11 @@ local function RebuildCityStatusTab(entry)
     if entry.sortDropdown then return end
 
     local sortOptions = {
-        { label = Locale.Lookup("LOC_CAI_REPORTS_SORT_NAME"),       value = "name" },
+        { label = Locale.Lookup("LOC_CAI_REPORTS_SORT_NAME"),         value = "name" },
         { label = Locale.Lookup("LOC_HUD_REPORTS_HEADER_POPULATION"), value = "population" },
-        { label = Locale.Lookup("LOC_CAI_REPORTS_SORT_DEFENSE"),    value = "defense" },
-        { label = Locale.Lookup("LOC_CAI_REPORTS_SORT_HAPPINESS"),  value = "happiness" },
-        { label = Locale.Lookup("LOC_CAI_REPORTS_SORT_GROWTH"),     value = "growth" },
+        { label = Locale.Lookup("LOC_CAI_REPORTS_SORT_DEFENSE"),      value = "defense" },
+        { label = Locale.Lookup("LOC_CAI_REPORTS_SORT_HAPPINESS"),    value = "happiness" },
+        { label = Locale.Lookup("LOC_CAI_REPORTS_SORT_GROWTH"),       value = "growth" },
     }
     if m_isExp1 or m_isExp2 then
         table.insert(sortOptions,

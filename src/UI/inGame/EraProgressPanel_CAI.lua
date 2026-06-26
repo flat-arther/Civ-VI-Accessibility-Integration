@@ -1,14 +1,14 @@
 include("caiUtils")
 include("EraProgressPanel")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr         = ExposedMembers.CAI_UIManager
 
 local PANEL_ID    = "CAIEraProgress_Panel"
 local TREE_ID     = "CAIEraProgress_Tree"
 local HOVER_SOUND = "Main_Menu_Mouse_Over"
 
-local m_panel = nil
-local m_tree  = nil
+local m_panel     = nil
+local m_tree      = nil
 
 local function GetPlayerAgeKey(gameEras, playerID)
     if gameEras:HasHeroicGoldenAge(playerID) then
@@ -42,7 +42,6 @@ local function NormalizeText(text)
     text = string.gsub(text, "%[ENDCOLOR%]", "")
     text = string.gsub(text, "%[COLOR_[^%]]+%]", "")
     text = string.gsub(text, "%[COLOR:%s*[^%]]+%]", "")
-    text = string.gsub(text, "%[NEWLINE%]", ", ")
     text = string.gsub(text, "%[ICON_[^%]]+%]", "")
     text = string.gsub(text, "[,%s]+,", ",")
     text = string.gsub(text, "^[,%s]+", "")
@@ -167,7 +166,7 @@ local function BuildPanel()
     summaryNode:SetTooltip(function()
         local text = Controls.EraEffects:GetText()
         if not text or text == "" then return "" end
-        return NormalizeText(text)
+        return text
     end)
 
     -- Score breakdown as children of summary
@@ -232,7 +231,8 @@ local function BuildPanel()
                 if pid < 0 then return "" end
                 local darkThresh = pGameEras:GetPlayerDarkAgeThreshold(pid)
                 local goldenThresh = pGameEras:GetPlayerGoldenAgeThreshold(pid)
-                local label = Locale.Lookup("LOC_ERA_REVIEW_HAVE_NORMAL_AGE_LABEL") .. ", " .. darkThresh .. " - " .. (goldenThresh - 1)
+                local label = Locale.Lookup("LOC_ERA_REVIEW_HAVE_NORMAL_AGE_LABEL") ..
+                    ", " .. darkThresh .. " - " .. (goldenThresh - 1)
                 if GetNextEraTypeLabel(pGameEras, pid) == Locale.Lookup("LOC_ERA_PROGRESS_NORMAL_AGE") then
                     label = label .. ", " .. Locale.Lookup("LOC_CAI_ERA_PROGRESS_PROJECTED")
                 end
@@ -267,8 +267,8 @@ local function BuildPanel()
     end
 
     -- 3. Civilization ages node
-    local localPlayer = Players[localPlayerID]
-    local aPlayers = PlayerManager.GetAliveMajors()
+    local localPlayer   = Players[localPlayerID]
+    local aPlayers      = PlayerManager.GetAliveMajors()
 
     local heroicPlayers = {}
     local goldenPlayers = {}
@@ -322,8 +322,8 @@ local function BuildPanel()
         for _, pid in ipairs(heroicPlayers) do AddCivRow(pid, "LOC_ERA_PROGRESS_HEROIC_AGE") end
         for _, pid in ipairs(goldenPlayers) do AddCivRow(pid, "LOC_ERA_PROGRESS_GOLDEN_AGE") end
         for _, pid in ipairs(normalPlayers) do AddCivRow(pid, "LOC_ERA_PROGRESS_NORMAL_AGE") end
-        for _, pid in ipairs(darkPlayers)   do AddCivRow(pid, "LOC_ERA_PROGRESS_DARK_AGE") end
-        for _, pid in ipairs(unmetPlayers)  do AddUnmetRow(pid) end
+        for _, pid in ipairs(darkPlayers) do AddCivRow(pid, "LOC_ERA_PROGRESS_DARK_AGE") end
+        for _, pid in ipairs(unmetPlayers) do AddUnmetRow(pid) end
 
         m_tree:AddChild(civsNode)
     end

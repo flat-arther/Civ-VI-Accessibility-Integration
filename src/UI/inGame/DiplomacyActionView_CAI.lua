@@ -135,11 +135,10 @@ local function JoinNonEmpty(parts, separator)
     return table.concat(out, separator)
 end
 
--- Flatten a multi-line tooltip into a single comma-separated line so a screen
--- reader speaks it as one continuous string instead of broken across lines.
+
 local function JoinTooltipLines(text)
     if not text or text == "" then return text end
-    return table.concat(SplitLines(text), ", ")
+    return table.concat(SplitLines(text), "[NEWLINE]")
 end
 
 local function CountEntries(list)
@@ -937,7 +936,7 @@ local function GetAllianceModifierStrings(allianceType, allianceLevel)
     for _, effect in ipairs(effects) do
         if effect.LevelRequirement <= allianceLevel then
             local modifierText = DB.Query(
-            "SELECT Text from ModifierStrings where ModifierID = ? and Context = 'Summary'", effect.ModifierID)
+                "SELECT Text from ModifierStrings where ModifierID = ? and Context = 'Summary'", effect.ModifierID)
             if modifierText and modifierText[1] then
                 table.insert(modifiers, modifierText[1].Text)
             end
@@ -1010,7 +1009,7 @@ local function AddAllianceChildren(node)
             Locale.Lookup("LOC_CAI_DIPLOMACY_CURRENT_ALLIANCE") .. ": " ..
             Locale.Lookup(definition.Name) .. ", " ..
             Locale.Lookup("LOC_DIPLOACTION_ALLIANCE_LEVEL", allianceLevel),
-            table.concat(tooltipParts, ", ")))
+            table.concat(tooltipParts, "[NEWLINE]")))
     else
         node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyAllianceCurrent"),
             Locale.Lookup("LOC_CAI_DIPLOMACY_CURRENT_ALLIANCE") .. ": " ..

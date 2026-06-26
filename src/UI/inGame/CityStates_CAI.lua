@@ -311,7 +311,7 @@ local function GetSuzerainUniqueBonusAndResources(playerID)
         end
     end
 
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function GetAmbassadorForPlayer(cityStatePlayerID, majorPlayerID)
@@ -411,7 +411,8 @@ local function FormatRowTooltip(playerID)
     for _, tier in ipairs(tiers) do
         local bonus = kCS.Bonuses[tier]
         if bonus then
-            table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_TIER", tier) .. ", " .. NormalizeText(bonus.Details))
+            table.insert(parts,
+                Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_TIER", tier) .. ", " .. NormalizeText(bonus.Details))
         end
     end
 
@@ -420,7 +421,7 @@ local function FormatRowTooltip(playerID)
         table.insert(parts, Locale.Lookup("LOC_CITY_STATES_SUZERAIN") .. ", " .. suzerainUniqueAndRes)
     end
 
-    return JoinNonEmpty(parts, ", ")
+    return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 -- ============================================================================
@@ -763,7 +764,8 @@ local function GetInfoBoxText()
 
     local lines = {}
     table.insert(lines, Locale.Lookup("LOC_CAI_CITYSTATES_INFO_ENVOYS_AVAILABLE", available))
-    table.insert(lines, NormalizeText(Locale.Lookup("LOC_CAI_CITYSTATES_INFO_INFLUENCE", balance, threshold, rate, envoysPerThreshold)))
+    table.insert(lines,
+        NormalizeText(Locale.Lookup("LOC_CAI_CITYSTATES_INFO_INFLUENCE", balance, threshold, rate, envoysPerThreshold)))
     table.insert(lines, NormalizeText(Locale.Lookup("LOC_TOP_PANEL_INFLUENCE_TOOLTIP_SOURCES_HELP")))
     return table.concat(lines, "\n")
 end

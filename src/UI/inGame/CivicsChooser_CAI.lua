@@ -184,7 +184,7 @@ local function FormatTooltip(kData, unlocks, obsoleteNames, awardNames)
     AppendIfNonEmpty(parts, GetObsoletesText(obsoleteNames))
     AppendIfNonEmpty(parts, GetUnlocksText(unlocks))
     AppendIfNonEmpty(parts, GetCivicAwardsText(awardNames))
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 -- ===========================================================================
@@ -218,11 +218,11 @@ local function CreateRow(kData, interactive)
 
     row:AddInputBindings({
         {
-            Key     = Keys.VK_RETURN,
-            IsShift = true,
-            MSG     = KeyEvents.KeyUp,
+            Key         = Keys.VK_RETURN,
+            IsShift     = true,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action  = function()
+            Action      = function()
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 if kData.CivicType then LuaEvents.OpenCivilopedia(kData.CivicType) end
                 return true

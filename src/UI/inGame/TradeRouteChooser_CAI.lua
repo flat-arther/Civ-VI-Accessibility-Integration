@@ -82,7 +82,7 @@ local function BuildAggregateYields(kRouteInfo)
                 Locale.Lookup("LOC_CAI_TRADE_ROUTE_RELIGION_PRESSURE", kRouteInfo.ReligionPressure, relName))
         end
     end
-    return table.concat(yields, ", ")
+    return table.concat(yields, "[NEWLINE]")
 end
 
 local function BuildRouteTooltip(city)
@@ -109,7 +109,7 @@ local function BuildRouteTooltip(city)
             " " .. destAgg)
     end
 
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 -- ============================================================================

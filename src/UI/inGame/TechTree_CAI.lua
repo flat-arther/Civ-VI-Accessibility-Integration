@@ -323,6 +323,25 @@ local function FormatRowTooltip(techType)
         AppendIfNonEmpty(parts, GetTechDescriptionText(techType))
         AppendIfNonEmpty(parts, GetTechBoostText(techType))
         AppendIfNonEmpty(parts, GetAllianceText(techType))
+
+        local kStatic = g_kItemDefaults[techType]
+        local currentEraType = kStatic and kStatic.EraType
+
+        local prereqTypes = {}
+        for _, pt in ipairs(kStatic and kStatic.Prereqs or {}) do
+            if pt ~= PREREQ_ID_TREE_START then table.insert(prereqTypes, pt) end
+        end
+        if #prereqTypes > 0 then
+            local names = FormatRelatedTechNames(prereqTypes, currentEraType)
+            AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_PREREQS_HEADER", table.concat(names, ", ")))
+        end
+
+        local leadsTo = m_leadsToByType[techType]
+        if leadsTo and #leadsTo > 0 then
+            local names = FormatRelatedTechNames(leadsTo, currentEraType)
+            AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_LEADS_TO_HEADER", table.concat(names, ", ")))
+        end
+
         local group = GetTechUnlockObjects(TechKData(techType))
         if #group.Reveals > 0 then
             local names = {}
@@ -338,25 +357,7 @@ local function FormatRowTooltip(techType)
         end
     end
 
-    local kStatic = g_kItemDefaults[techType]
-    local currentEraType = kStatic and kStatic.EraType
-
-    local prereqTypes = {}
-    for _, pt in ipairs(kStatic and kStatic.Prereqs or {}) do
-        if pt ~= PREREQ_ID_TREE_START then table.insert(prereqTypes, pt) end
-    end
-    if #prereqTypes > 0 then
-        local names = FormatRelatedTechNames(prereqTypes, currentEraType)
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_PREREQS_HEADER", table.concat(names, ", ")))
-    end
-
-    local leadsTo = m_leadsToByType[techType]
-    if leadsTo and #leadsTo > 0 then
-        local names = FormatRelatedTechNames(leadsTo, currentEraType)
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_LEADS_TO_HEADER", table.concat(names, ", ")))
-    end
-
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 -- ===========================================================================
@@ -426,9 +427,9 @@ local function ComputeTechColumn(techType)
 end
 
 local function BuildStaticMaps()
-    m_leadsToByType   = {}
-    m_techIndexToType = {}
-    m_techTierByType  = {}
+    m_leadsToByType    = {}
+    m_techIndexToType  = {}
+    m_techTierByType   = {}
     m_techColumnByType = {}
 
     for techType, kEntry in pairs(g_kItemDefaults) do
@@ -625,11 +626,11 @@ local function CreateRefLink(parentWidget, techType, currentEraType)
     end)
     item:AddInputBindings({
         {
-            Key     = Keys.VK_RETURN,
-            IsShift = true,
-            MSG     = KeyEvents.KeyUp,
+            Key         = Keys.VK_RETURN,
+            IsShift     = true,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action  = function(w)
+            Action      = function(w)
                 if w:IsDisabled() then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 LuaEvents.OpenCivilopedia(capturedType)
@@ -732,22 +733,22 @@ local function BuildTechNode(techType)
 
     techItem:AddInputBindings({
         {
-            Key       = Keys.VK_RETURN,
-            IsControl = true,
-            MSG       = KeyEvents.KeyUp,
+            Key         = Keys.VK_RETURN,
+            IsControl   = true,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_QUEUE_RESEARCH",
-            Action    = function()
+            Action      = function()
                 if not CanResearch(capturedType) then return true end
                 ActivateAppendToQueue(capturedType)
                 return true
             end,
         },
         {
-            Key     = Keys.VK_RETURN,
-            IsShift = true,
-            MSG     = KeyEvents.KeyUp,
+            Key         = Keys.VK_RETURN,
+            IsShift     = true,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action  = function()
+            Action      = function()
                 if not IsTechRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 LuaEvents.OpenCivilopedia(capturedType)
@@ -779,7 +780,9 @@ local function RebuildMainTree()
         for techType, kEntry in pairs(g_kItemDefaults) do
             if kEntry.EraType == era.EraType and FilterMatchesTech(techType) then
                 local col = m_techColumnByType[techType] or 1
-                if not byColumn[col] then byColumn[col] = {}; table.insert(colValues, col) end
+                if not byColumn[col] then
+                    byColumn[col] = {}; table.insert(colValues, col)
+                end
                 table.insert(byColumn[col], { techType = techType, row = kEntry.UITreeRow or 0 })
             end
         end
@@ -874,22 +877,22 @@ local function BuildTechCell(techType)
 
     cell:AddInputBindings({
         {
-            Key       = Keys.VK_RETURN,
-            IsControl = true,
-            MSG       = KeyEvents.KeyUp,
+            Key         = Keys.VK_RETURN,
+            IsControl   = true,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_QUEUE_RESEARCH",
-            Action    = function()
+            Action      = function()
                 if not CanResearch(capturedType) then return true end
                 ActivateAppendToQueue(capturedType)
                 return true
             end,
         },
         {
-            Key     = Keys.VK_RETURN,
-            IsShift = true,
-            MSG     = KeyEvents.KeyUp,
+            Key         = Keys.VK_RETURN,
+            IsShift     = true,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action  = function()
+            Action      = function()
                 if not IsTechRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 LuaEvents.OpenCivilopedia(capturedType)
@@ -921,7 +924,9 @@ local function RebuildTableView()
         for techType, kEntry in pairs(g_kItemDefaults) do
             if kEntry.EraType == era.EraType and FilterMatchesTech(techType) then
                 local col = m_techColumnByType[techType] or 1
-                if not byColumn[col] then byColumn[col] = {}; table.insert(colValues, col) end
+                if not byColumn[col] then
+                    byColumn[col] = {}; table.insert(colValues, col)
+                end
                 local row = kEntry.UITreeRow or 0
                 table.insert(byColumn[col], { techType = techType, row = row })
                 if row < rowMin then rowMin = row end
@@ -992,11 +997,11 @@ local function CreateQueueButton(techType, isCurrent)
     btn:On("activate", function() JumpToTech(capturedType) end)
     btn:AddInputBindings({
         {
-            Key     = Keys.VK_RETURN,
-            IsShift = true,
-            MSG     = KeyEvents.KeyUp,
+            Key         = Keys.VK_RETURN,
+            IsShift     = true,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action  = function()
+            Action      = function()
                 if not IsTechRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 LuaEvents.OpenCivilopedia(capturedType)
@@ -1066,22 +1071,22 @@ local function CreateFilterResultButton(techType)
     end)
     btn:AddInputBindings({
         {
-            Key       = Keys.VK_RETURN,
-            IsControl = true,
-            MSG       = KeyEvents.KeyUp,
+            Key         = Keys.VK_RETURN,
+            IsControl   = true,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_QUEUE_RESEARCH",
-            Action    = function()
+            Action      = function()
                 if not CanResearch(capturedType) then return true end
                 ActivateAppendToQueue(capturedType)
                 return true
             end,
         },
         {
-            Key     = Keys.VK_RETURN,
-            IsShift = true,
-            MSG     = KeyEvents.KeyUp,
+            Key         = Keys.VK_RETURN,
+            IsShift     = true,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action  = function()
+            Action      = function()
                 if not IsTechRevealed(capturedType) then return true end
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 LuaEvents.OpenCivilopedia(capturedType)
@@ -1110,7 +1115,8 @@ local function OpenFilterResults(entry)
         local eraTechs = {}
         for techType, kEntry in pairs(g_kItemDefaults) do
             if kEntry.EraType == era.EraType and FilterMatchesTech(techType) then
-                table.insert(eraTechs, { techType = techType, col = m_techColumnByType[techType] or 1, row = kEntry.UITreeRow or 0 })
+                table.insert(eraTechs,
+                    { techType = techType, col = m_techColumnByType[techType] or 1, row = kEntry.UITreeRow or 0 })
             end
         end
         table.sort(eraTechs, function(a, b)
@@ -1124,10 +1130,10 @@ local function OpenFilterResults(entry)
 
     m_filterResults:AddInputBindings({
         {
-            Key    = Keys.VK_ESCAPE,
-            MSG    = KeyEvents.KeyUp,
+            Key         = Keys.VK_ESCAPE,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_CLOSE",
-            Action = function()
+            Action      = function()
                 mgr:RemoveFromStack(FILTER_RESULTS_ID)
                 return true
             end,
@@ -1182,9 +1188,9 @@ local function TechSearchHandler(query, maxResults)
             if label and label ~= "" then
                 local tooltip = FormatRowTooltip(techType)
                 results[#results + 1] = {
-                    key   = techType,
-                    label = label,
-                    tooltip = tooltip ~= "" and tooltip or nil,
+                    key        = techType,
+                    label      = label,
+                    tooltip    = tooltip ~= "" and tooltip or nil,
                     onActivate = function() JumpToTech(techType, false) end,
                 }
             end
@@ -1231,10 +1237,10 @@ local function EnsurePanelBuilt()
     m_mainTree:SetSearchQueryHandler(TechSearchHandler)
     m_mainTree:AddInputBindings({
         {
-            Key    = Keys.VK_BACK,
-            MSG    = KeyEvents.KeyUp,
+            Key         = Keys.VK_BACK,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_GO_BACK",
-            Action = function()
+            Action      = function()
                 local source = table.remove(m_breadcrumbs)
                 if not source then return false end
                 JumpToTech(source, false)
@@ -1269,7 +1275,7 @@ local function EnsurePanelBuilt()
         Label = function()
             return Locale.Lookup(m_viewMode == "table"
                 and "LOC_CAI_TREE_SWITCH_TO_TREE"
-                or  "LOC_CAI_TREE_SWITCH_TO_TABLE")
+                or "LOC_CAI_TREE_SWITCH_TO_TABLE")
         end,
     })
     m_changeViewBtn:On("activate", function() ToggleViewMode() end)
