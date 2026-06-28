@@ -404,13 +404,13 @@ local function ResyncTurnStartSnapshots()
 end
 
 EVENT_BINDINGS = {
-    { Event = Events.PlotVisibilityChanged, Handler = OnPlotVisibilityChanged },
-    { Event = Events.UnitVisibilityChanged, Handler = OnUnitVisibilityChanged },
+    { Event = Events.PlotVisibilityChanged,        Handler = OnPlotVisibilityChanged },
+    { Event = Events.UnitVisibilityChanged,        Handler = OnUnitVisibilityChanged },
     { Event = Events.ImprovementVisibilityChanged, Handler = OnImprovementVisibilityChanged },
-    { Event = Events.ResourceVisibilityChanged, Handler = OnResourceVisibilityChanged },
-    { Event = Events.CityVisibilityChanged, Handler = OnCityVisibilityChanged },
-    { Event = Events.DistrictVisibilityChanged, Handler = OnDistrictVisibilityChanged },
-    { Event = Events.LocalPlayerTurnBegin, Handler = ResyncTurnStartSnapshots },
+    { Event = Events.ResourceVisibilityChanged,    Handler = OnResourceVisibilityChanged },
+    { Event = Events.CityVisibilityChanged,        Handler = OnCityVisibilityChanged },
+    { Event = Events.DistrictVisibilityChanged,    Handler = OnDistrictVisibilityChanged },
+    { Event = Events.LocalPlayerTurnBegin,         Handler = ResyncTurnStartSnapshots },
 }
 
 -- ===========================================================================
@@ -564,7 +564,7 @@ local function FlushAnnouncements()
     m_lastEventTime = nil
 
     for _, line in ipairs(lines) do
-        Speak(line)
+        LuaEvents.CAIAppendToMessageBuffer(line, "reveal")
     end
 end
 

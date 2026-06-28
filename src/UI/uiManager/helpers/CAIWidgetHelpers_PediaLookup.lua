@@ -374,8 +374,8 @@ function P.RunLookup(widget)
             Label = r.label,
         })
         item:On("activate", function()
-            CloseLookup()
             LuaEvents.OpenCivilopedia(r.sectionId, r.pageId)
+            CloseLookup()
         end)
         list:AddChild(item)
     end

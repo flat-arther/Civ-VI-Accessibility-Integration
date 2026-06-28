@@ -79,11 +79,13 @@
     <File>UI/inGame/BoostUnlockedPopup_CAI.lua</File>
     <File>UI/inGame/UnitPromotionPopup_CAI.lua</File>
     <File>UI/inGame/DeclareWarPopup_CAI.lua</File>
+    <File>UI/inGame/HeroesPopup_CAI.lua</File>
     <File>UI/inGame/NaturalWonderPopup_CAI.lua</File>
     <File>UI/inGame/WonderBuiltPopup_CAI.lua</File>
     <File>UI/inGame/ProjectBuiltPopup_CAI.lua</File>
     <File>UI/inGame/ChooseArtifact_CAI.lua</File>
     <File>UI/inGame/SecretSocietyPopup_CAI.lua</File>
+    <File>UI/inGame/TreatWithTribePopup_CAI.lua</File>
     <File>UI/inGame/DiplomacyActionView_CAI.lua</File>
     <File>UI/inGame/DiplomacyDealView_CAI.lua</File>
     <File>UI/inGame/GreatPeoplePopup_CAI.lua</File>
@@ -108,6 +110,7 @@
     <File>UI/inGame/MapPinListPanel_CAI.lua</File>
     <File>UI/inGame/MapPinPopup_CAI.lua</File>
     <File>UI/inGame/Surveyor_CAI.lua</File>
+    <File>UI/inGame/MessageBuffer_CAI.lua</File>
     <File>UI/inGame/RecommendationLogic_CAI.lua</File>
     <File>UI/inGame/WorldScanner/WorldScanner_CAI.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategoryUtils.lua</File>
@@ -352,6 +355,7 @@
       <File>UI/inGame/MapPinListPanel_CAI.lua</File>
       <File>UI/inGame/MapPinPopup_CAI.lua</File>
       <File>UI/inGame/Surveyor_CAI.lua</File>
+      <File>UI/inGame/MessageBuffer_CAI.lua</File>
       <File>UI/inGame/RecommendationLogic_CAI.lua</File>
       <File>UI/inGame/WorldScanner/WorldScanner_CAI.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategoryUtils.lua</File>
@@ -869,6 +873,14 @@
       </Properties>
     </ReplaceUIScript>
 
+    <ReplaceUIScript id="CAI_TreatWithTribePopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>TreatWithTribePopup</LuaContext>
+        <LuaReplace>UI/inGame/TreatWithTribePopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
     <ReplaceUIScript id="CAI_BoostUnlockedPopup">
       <Properties>
         <LoadOrder>100</LoadOrder>
@@ -898,6 +910,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>ProjectBuiltPopup</LuaContext>
         <LuaReplace>UI/inGame/ProjectBuiltPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_HeroesPopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>HeroesPopup</LuaContext>
+        <LuaReplace>UI/inGame/HeroesPopup_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

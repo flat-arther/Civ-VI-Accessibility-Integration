@@ -693,6 +693,15 @@ local function EnsureRootBuilt()
                 OnNavForward(); return true
             end,
         },
+        -- We need to add an input binding to make sure that the civ pedia can close on the load screen. Otherwise, the load screen input handler will take priority
+        {
+            Key = Keys.VK_ESCAPE,
+            Description = "LOC_CAI_KB_CLOSE",
+            Action = function()
+                OnClose()
+                return true
+            end
+        }
     })
 
     m_ui.sectionsTree = mgr:CreateWidget("CAIPediaSectionsTree", "Tree", {

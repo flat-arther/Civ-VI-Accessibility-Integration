@@ -345,7 +345,7 @@ local function FormatRowTooltip(civicType)
             for _, u in ipairs(unlocks) do table.insert(names, u.Name) end
             AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_UNLOCKS_HEADER", table.concat(names, ", ")))
         end
-        AppendIfNonEmpty(parts, GetCivicAwardsText(GetModifierCache()[civicType]))
+        AppendIfNonEmpty(parts, GetCivicAwardsText(GetAwardNames(GetModifierCache()[civicType])))
     end
 
     return table.concat(parts, "[NEWLINE]")

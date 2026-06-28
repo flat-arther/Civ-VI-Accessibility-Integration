@@ -40,13 +40,27 @@ local function RebuildList(self)
     for i, opt in ipairs(self._options) do
         local props = { Label = function() return opt.label end }
         if opt.tooltip then
-            props.Tooltip = function() return opt.tooltip end
+            props.Tooltip = function()
+                return (type(opt.tooltip) == "function" and (opt.tooltip() or "")) or
+                    tostring(opt.tooltip)
+            end
         end
         local item = mgr:CreateWidget(self.Id .. "_Item" .. i, "MenuItem", props)
         item._dropdownIndex = i
         item:On("activate", function(menuItem)
             self:Commit(menuItem._dropdownIndex)
         end)
+        if opt.extraEvents then
+            for ev, handler in pairs(opt.extraEvents) do
+                item:On(ev, handler)
+            end
+        end
+        if opt.disabledPredicate then
+            item:SetDisabledPredicate(opt.disabledPredicate)
+        end
+        if opt.hiddenPredicate then
+            item:SetHiddenPredicate(opt.hiddenPredicate)
+        end
         self._list:AddChild(item)
     end
 end

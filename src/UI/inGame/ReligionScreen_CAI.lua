@@ -165,9 +165,7 @@ local function IsObserverMode()
 end
 
 local function GetSetupState()
-    if cai.pantheonBelief < 0 and cai.canCreatePantheon then
-        return "PANTHEON"
-    elseif cai.pantheonBelief >= 0 and cai.numBeliefsEarned > 0 and cai.playerReligionType < 0 then
+    if cai.pantheonBelief >= 0 and cai.numBeliefsEarned > 0 and cai.playerReligionType < 0 then
         return "RELIGION"
     elseif cai.playerReligionType >= 0 and cai.numBeliefsEarned > cai.numBeliefsEquipped then
         return "ADD_BELIEFS"
@@ -502,7 +500,7 @@ local function BuildUnitsSection(parent, religion, religionType)
                     ttip = Locale.Lookup("LOC_CAI_RELIGION_UNIT_CANNOT_PRODUCE")
                     if CAI_UNIT_TOOLTIPS and CAI_UNIT_TOOLTIPS[row.UnitType] and CAI_UNIT_TOOLTIPS[row.UnitType].cannotProduce then
                         ttip = ttip ..
-                        ", " .. NormalizeText(Locale.Lookup(CAI_UNIT_TOOLTIPS[row.UnitType].cannotProduce))
+                            ", " .. NormalizeText(Locale.Lookup(CAI_UNIT_TOOLTIPS[row.UnitType].cannotProduce))
                     end
                 end
 
@@ -1073,9 +1071,13 @@ local function RebuildSetupPanel()
                 m_ui.beliefList:AddChild(item)
             end
             m_ui.beliefList:AddInputBindings({
-                { Key = Keys.VK_ESCAPE, Description = "LOC_CAI_KB_CLOSE", Action = function()
-                    PopBeliefPicker(); return true
-                end },
+                {
+                    Key = Keys.VK_ESCAPE,
+                    Description = "LOC_CAI_KB_CLOSE",
+                    Action = function()
+                        PopBeliefPicker(); return true
+                    end
+                },
             })
             mgr:Push(m_ui.beliefList, PopupPriority.Current)
         end)
@@ -1233,9 +1235,14 @@ local function RebuildSetupPanel()
                 end
 
                 m_ui.beliefList:AddInputBindings({
-                    { Key = Keys.VK_ESCAPE, MSG = KeyEvents.KeyUp, Description = "LOC_CAI_KB_CLOSE", Action = function()
-                        PopBeliefPicker(); return true
-                    end },
+                    {
+                        Key = Keys.VK_ESCAPE,
+                        MSG = KeyEvents.KeyUp,
+                        Description = "LOC_CAI_KB_CLOSE",
+                        Action = function()
+                            PopBeliefPicker(); return true
+                        end
+                    },
                 })
                 mgr:Push(m_ui.beliefList, PopupPriority.Current)
             end)
@@ -1377,6 +1384,7 @@ local function CAI_RebuildTree()
     end
 
     mgr:RestoreFocus(m_ui.tree, capture)
+    mgr:Refocus()
 
     -- Rebuild the setup panel
     RebuildSetupPanel()

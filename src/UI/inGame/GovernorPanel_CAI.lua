@@ -96,6 +96,21 @@ local function GetPanelTitle()
     return Locale.Lookup("LOC_GOVERNORS_TITLE")
 end
 
+local function GetGovernerTitleCounts()
+    local localPlayerID = Game.GetLocalPlayer()
+    local pPlayer = Players[localPlayerID]
+    local playerGovernors = pPlayer:GetGovernors()
+    if not playerGovernors then
+        return nil, nil
+    end
+
+    local governorPointsObtained = playerGovernors:GetGovernorPoints()
+    local governorPointsSpent = playerGovernors:GetGovernorPointsSpent()
+    local capturedAvailable = governorPointsObtained - governorPointsSpent
+    local capturedSpent = governorPointsSpent
+    return capturedAvailable, capturedSpent
+end
+
 local function GetTitleCountsText(fallbackAvailable, fallbackSpent)
     local parts = {}
     AppendIfNonEmpty(parts, ControlText(Controls.GovernorTitlesAvailable))
@@ -203,17 +218,6 @@ local function GetGovernorRowTooltip(governorDef, governor, playerGovernors, loc
     end
 
     if governor then
-        local pAssignedCity = governor:GetAssignedCity()
-        if pAssignedCity then
-            parts[#parts + 1] = Locale.Lookup("LOC_CAI_GOVERNOR_ASSIGNED_TO", Locale.Lookup(pAssignedCity:GetName()))
-            if governor:IsEstablished() then
-                parts[#parts + 1] = NormalizeText(Locale.Lookup("LOC_GOVERNORS_SCREEN_GOVERNOR_ESTABLISHED_IN"))
-            else
-                local turnsLeft = governor:GetTurnsToEstablish() - governor:GetTurnsOnSite()
-                parts[#parts + 1] = Locale.Lookup("LOC_GOVERNORS_SCREEN_GOVERNOR_TRANSITION_TURNS", turnsLeft)
-            end
-        end
-
         local neutralized = governor:GetNeutralizedTurns()
         if neutralized > 0 then
             parts[#parts + 1] = NormalizeText(Locale.Lookup("LOC_GOVERNORS_GOVERNOR_NEUTRALIZED"))
@@ -701,7 +705,7 @@ local function CreateGovernorRow(governorDef, governor, playerGovernors, canAppo
     return row
 end
 
-local function RebuildTree(forceSummaryFocus)
+local function RebuildTree()
     if not m_ui.tree then return end
     if ContextPtr:IsHidden() then return end
 
@@ -735,19 +739,6 @@ local function RebuildTree(forceSummaryFocus)
 
     local capturedAvailable = governorPointsObtained - governorPointsSpent
     local capturedSpent = governorPointsSpent
-    local summaryRow = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGov_Summary"), "StaticText", {
-        Label = function()
-            return GetTitleCountsText(capturedAvailable, capturedSpent)
-        end,
-        FocusKey = "gov:summary",
-    })
-    summaryRow:SetFocusSound(HOVER_SOUND)
-    summaryRow:On("focus_enter", function(w)
-        if w:IsFocused() then
-            m_focusedGovernorIndex = -1
-        end
-    end)
-    m_ui.tree:AddChild(summaryRow)
 
     -- Secret society governors: appointed first, then candidates
     if tGovernorList then
@@ -791,11 +782,7 @@ local function RebuildTree(forceSummaryFocus)
         end
     end
 
-    if forceSummaryFocus then
-        mgr:SetFocus(summaryRow)
-    else
-        mgr:RestoreFocus(m_ui.tree, capture)
-    end
+    mgr:RestoreFocus(m_ui.tree, capture)
 end
 
 -- ===========================================================================
@@ -810,7 +797,7 @@ local function BuildPanel()
     })
 
     m_ui.tree = mgr:CreateWidget(TREE_ID, "Tree", {
-        Label = GetPanelTitle,
+        Label = function() return GetTitleCountsText(GetGovernerTitleCounts()) end,
     })
     m_ui.panel:AddChild(m_ui.tree)
 
@@ -823,11 +810,10 @@ local function PushPanel()
     if not mgr then return end
     if not m_ui.panel then BuildPanel() end
     if not m_ui.panel then return end
-    local firstOpen = not mgr:GetWidgetById(PANEL_ID)
+    RebuildTree()
     if not mgr:GetWidgetById(PANEL_ID) then
         mgr:Push(m_ui.panel, PopupPriority.Low)
     end
-    RebuildTree(firstOpen)
 end
 
 local function PopPanel()
@@ -902,18 +888,7 @@ local function OnCAIGovernorPromoted(playerID, governorID, promotionID)
 end
 
 local function SpeakGovTitles()
-    local localPlayerID = Game.GetLocalPlayer()
-    local pPlayer = Players[localPlayerID]
-    local playerGovernors = pPlayer:GetGovernors()
-    if not playerGovernors then
-        return
-    end
-
-    local governorPointsObtained = playerGovernors:GetGovernorPoints()
-    local governorPointsSpent = playerGovernors:GetGovernorPointsSpent()
-    local capturedAvailable = governorPointsObtained - governorPointsSpent
-    local capturedSpent = governorPointsSpent
-    Speak(GetTitleCountsText(capturedAvailable, capturedSpent))
+    Speak(GetTitleCountsText(GetGovernerTitleCounts()))
 end
 
 local function OnInputActionTriggered(actionId)

@@ -1,17 +1,18 @@
 include("caiUtils")
 include("Civ6Common")
-local info = ExposedMembers.CAIInfo or {}
-ExposedMembers.CAIInfo = info
-
-local currentPlotId = -1
-local CITY_BANNER_INFO_UNAVAILABLE = "LOC_CAI_CITY_BANNER_INFO_UNAVAILABLE"
-local ACTION_BANNER_IDENTITY_STATUS = Input.GetActionId("CityBannerReadIdentityStatus")
+local info                           = ExposedMembers.CAIInfo or {}
+ExposedMembers.CAIInfo               = info
+BANNERTYPE_INDUSTRY                  = UIManager:GetHash("BANNERTYPE_INDUSTRY");
+BANNERTYPE_CORPORATION               = UIManager:GetHash("BANNERTYPE_CORPORATION");
+local currentPlotId                  = -1
+local CITY_BANNER_INFO_UNAVAILABLE   = "LOC_CAI_CITY_BANNER_INFO_UNAVAILABLE"
+local ACTION_BANNER_IDENTITY_STATUS  = Input.GetActionId("CityBannerReadIdentityStatus")
 local ACTION_BANNER_GROWTH_INFLUENCE = Input.GetActionId("CityBannerReadGrowthInfluence")
-local ACTION_BANNER_RELIGION = Input.GetActionId("CityBannerReadReligion")
-local ACTION_BANNER_DIPLOMACY = Input.GetActionId("CityBannerReadDiplomacy")
-local ACTION_BANNER_LOYALTY_SUMMARY = Input.GetActionId("CityBannerReadLoyaltySummary")
-local ACTION_BANNER_GOVERNOR = Input.GetActionId("CityBannerReadGovernor")
-local ACTION_BANNER_POWER = Input.GetActionId("CityBannerReadPower")
+local ACTION_BANNER_RELIGION         = Input.GetActionId("CityBannerReadReligion")
+local ACTION_BANNER_DIPLOMACY        = Input.GetActionId("CityBannerReadDiplomacy")
+local ACTION_BANNER_LOYALTY_SUMMARY  = Input.GetActionId("CityBannerReadLoyaltySummary")
+local ACTION_BANNER_GOVERNOR         = Input.GetActionId("CityBannerReadGovernor")
+local ACTION_BANNER_POWER            = Input.GetActionId("CityBannerReadPower")
 
 local function AppendResult(results, value)
     if value ~= nil and value ~= "" then
@@ -37,19 +38,16 @@ local function NormalizeBannerText(value)
         return nil
     end
 
-    local normalized = tostring(value)
-    normalized = normalized:gsub("%[NEWLINE%]", "\n")
-    return TrimString(normalized)
+    return TrimString(tostring(value))
 end
 
 local function SplitBannerLines(value)
-    local normalized = NormalizeBannerText(value)
-    if normalized == nil then
+    if value == nil then
         return {}
     end
-
+    local cleanValue = tostring(value):gsub("%[NEWLINE%]", "\n")
     local lines = {}
-    for line in normalized:gmatch("[^\n]+") do
+    for line in cleanValue:gmatch("[^\n]+") do
         local trimmed = TrimString(line)
         if trimmed ~= nil then
             table.insert(lines, trimmed)
@@ -274,6 +272,50 @@ local function HasGovernorExpansion()
     return HasLoyaltyExpansion()
 end
 
+local function IsBarbarianClansModeActive()
+    return GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS")
+end
+
+local m_LocalBarbarianTribeBanners = {}
+
+local function CAI_CreateBarbarianTribeBanner(orig, pPlot, pBarbTribe)
+    local caughtInstance = nil
+
+    local origGetInstance = InstanceManager.GetInstance
+    InstanceManager.GetInstance = function(self, ...)
+        local instance = origGetInstance(self, ...)
+        caughtInstance = instance
+        return instance
+    end
+
+    orig(pPlot, pBarbTribe)
+
+    InstanceManager.GetInstance = origGetInstance
+
+    if caughtInstance ~= nil then
+        table.insert(m_LocalBarbarianTribeBanners, {
+            Plot = pPlot,
+            BarbarianTribe = pBarbTribe,
+            BannerInstance = caughtInstance
+        })
+    end
+end
+
+
+local function CAI_OnImprovementRemovedFromMap(orig, locX, locY, eOwner)
+    orig(locX, locY, eOwner)
+
+    if eOwner == PlayerTypes.BARBARIAN then
+        local pPlot = Map.GetPlot(locX, locY)
+        for k, v in ipairs(m_LocalBarbarianTribeBanners) do
+            if v.Plot == pPlot then
+                table.remove(m_LocalBarbarianTribeBanners, k)
+                break
+            end
+        end
+    end
+end
+
 local function GetDistrictBannerTypeName(ctx)
     if ctx == nil then
         return nil
@@ -382,6 +424,24 @@ local function ResolveBannerContext(plot)
         end
     end
 
+    local improvementIndex = plot:GetImprovementType()
+    local improvementInfo = improvementIndex ~= nil and GameInfo.Improvements[improvementIndex]
+    if improvementInfo ~= nil and improvementInfo.ImprovementType == "IMPROVEMENT_BARBARIAN_CAMP" then
+        for _, clanEntry in ipairs(m_LocalBarbarianTribeBanners) do
+            if clanEntry.Plot == plot then
+                if clanEntry.BannerInstance.Anchor and not clanEntry.BannerInstance.Anchor:IsHidden() then
+                    return {
+                        kind = "barbarian_clan",
+                        plot = plot,
+                        plotId = plot:GetIndex(),
+                        owner = owner,
+                        instance = clanEntry.BannerInstance,
+                        clanData = clanEntry.BarbarianTribe
+                    }
+                end
+            end
+        end
+    end
     return nil
 end
 
@@ -912,7 +972,7 @@ GetPowerSummaryText = function(ctx)
         powerTooltip = Locale.Lookup("LOC_CITY_BANNER_POWERED_CITY", requiredPower, freePower, temporaryPower)
         if cityPower.IsFullyPoweredByActiveProject ~= nil and cityPower:IsFullyPoweredByActiveProject() then
             powerTooltip = powerTooltip ..
-            "[NEWLINE]" .. Locale.Lookup("LOC_CITY_BANNER_POWERED_CITY_FROM_ACTIVE_PROJECT")
+                "[NEWLINE]" .. Locale.Lookup("LOC_CITY_BANNER_POWERED_CITY_FROM_ACTIVE_PROJECT")
         end
     else
         powerTooltip = Locale.Lookup("LOC_CITY_BANNER_UNPOWERED_CITY", requiredPower, freePower, temporaryPower)
@@ -1322,6 +1382,45 @@ info.CityBannerInfo = {
     loyaltyInfluence = function(ctx)
         return GetLoyaltyInfluenceText(ctx)
     end,
+    industryCorpBonus = function(ctx)
+        if ctx == nil or ctx.instance == nil then
+            return nil
+        end
+        return GetControlTooltip(ctx.instance.Icon)
+    end,
+    -- Barbarian clan stuff
+    clanName = function(ctx)
+        if ctx == nil or ctx.kind ~= "barbarian_clan" or ctx.instance == nil then
+            return nil
+        end
+        return GetControlTooltip(ctx.instance.TribeIcon)
+    end,
+    clanInteraction = function(ctx)
+        if ctx == nil or ctx.kind ~= "barbarian_clan" or ctx.instance == nil then
+            return nil
+        end
+        return GetControlTooltip(ctx.instance.TribeBannerButton)
+    end,
+    clanConversionStatus = function(ctx)
+        if ctx == nil or ctx.kind ~= "barbarian_clan" or ctx.instance == nil then
+            return nil
+        end
+
+        if ctx.instance.ConversionBar and ctx.instance.ConversionBar:IsHidden() then
+            return GetControlTooltip(ctx.instance.ConversionBarBG)
+        end
+        return GetControlTooltip(ctx.instance.ConversionBar)
+    end,
+    clanConversionProgress = function(ctx)
+        if ctx == nil or ctx.kind ~= "barbarian_clan" or ctx.instance == nil then
+            return nil
+        end
+        if ctx.instance.ConversionBar and ctx.instance.ConversionBar:IsHidden() then
+            return nil
+        end
+
+        return BuildProgressLine(GetBannerMeterPercent(ctx.instance.ConversionBar))
+    end,
 }
 
 local function IsForeignCityContext(ctx)
@@ -1397,7 +1496,14 @@ local function BuildBucketKeys(ctx, action)
         return {}
     end
 
-    local definition = districtDefinitions[ctx.bannerType] or districtDefinitions.default
+    -- Explicitly intercept the barbarian clan kind before falling back to default districts
+    local definition
+    if ctx.kind == "barbarian_clan" then
+        definition = districtDefinitions.barbarian_clan
+    else
+        definition = districtDefinitions[ctx.bannerType] or districtDefinitions.default
+    end
+
     return AppendBucketKeys({}, ctx, definition)
 end
 
@@ -1425,7 +1531,15 @@ local BannerBucketActions = {
                 "nuclearStrike",
                 "thermonuclearStrike",
             },
+            [BANNERTYPE_INDUSTRY] = { "name", "districtType", "industryCorpBonus" },
+            [BANNERTYPE_CORPORATION] = { "name", "districtType", "industryCorpBonus" },
             default = { "name", "districtType", "constructionState", "districtDescription" },
+            barbarian_clan = {
+                "clanName",
+                "clanInteraction",
+                "clanConversionStatus",
+                "clanConversionProgress"
+            }
         },
     },
     [ACTION_BANNER_GROWTH_INFLUENCE] = {
@@ -1544,6 +1658,8 @@ local function OnCityBannerInfoInputActionTriggered(actionId)
     Speak(table.concat(results, ", "))
 end
 
+
+
 local function OnCAICursorMoved(state)
     currentPlotId = state.toPlotId ~= nil and state.toPlotId or -1
 end
@@ -1566,3 +1682,12 @@ LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
 if IsExpansion2Active() then
     LuaEvents.CAIOpenOverviewForEnemyCity.Add(OnCAIOpenOverviewForEnemyCity)
 end
+
+
+Initialize = WrapFunc(Initialize, function(orig)
+    orig()
+    if IsBarbarianClansModeActive() then
+        CreateBarbarianTribeBanner = WrapFunc(CreateBarbarianTribeBanner, CAI_CreateBarbarianTribeBanner)
+        OnImprovementRemovedFromMap = WrapFunc(OnImprovementRemovedFromMap, CAI_OnImprovementRemovedFromMap)
+    end
+end)

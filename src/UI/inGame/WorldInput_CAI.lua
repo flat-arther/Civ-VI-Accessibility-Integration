@@ -9,6 +9,7 @@ include("RecommendationLogic_CAI")
 include("WorldScanner_CAI")
 include("Surveyor_CAI")
 include("RevealAnnouncements_CAI")
+include("MessageBuffer_CAI")
 include("EventSubs_CAI")
 include("Civ6Common")
 
@@ -34,7 +35,15 @@ local CITY_MANAGEMENT_WIDGET_ID = "CAIWorldInputCityManagement"
 
 local m_caiGameViewWidget = nil
 local m_caiCurrentInterfaceWidget = nil
+local m_messageBuffer = MessageBuffer.Create()
 
+
+local ACTION_MESSAGE_BUFFER_PREVIOUS = Input.GetActionId("MessageBufferPrevious")
+local ACTION_MESSAGE_BUFFER_NEXT = Input.GetActionId("MessageBufferNext")
+local ACTION_MESSAGE_BUFFER_FIRST = Input.GetActionId("MessageBufferFirst")
+local ACTION_MESSAGE_BUFFER_LAST = Input.GetActionId("MessageBufferLast")
+local ACTION_MESSAGE_BUFFER_PREV_CATEGORY = Input.GetActionId("MessageBufferPreviousCategory")
+local ACTION_MESSAGE_BUFFER_NEXT_CATEGORY = Input.GetActionId("MessageBufferNextCategory")
 local ACTION_CURSOR_NORTHWEST = Input.GetActionId("CAICursorMoveNorthWest")
 local ACTION_CURSOR_NORTHEAST = Input.GetActionId("CAICursorMoveNorthEast")
 local ACTION_CURSOR_WEST = Input.GetActionId("CAICursorMoveWest")
@@ -140,6 +149,10 @@ local function HasEspionageViewOnCity(ownerID, cityID)
 	return false
 end
 
+local function IsCityCenterDistrict(district)
+	return district ~= nil and district:GetType() == GameInfo.Districts["DISTRICT_CITY_CENTER"].Index
+end
+
 local function CollectPlotInteractions(plotId)
 	local results = {}
 	if plotId == nil or plotId < 0 then return results end
@@ -232,6 +245,50 @@ local function CollectPlotInteractions(plotId)
 				end
 			end
 		end
+
+		if CityManager.CanStartCommand(city, CityCommandTypes.RANGE_ATTACK) then
+			table.insert(results, {
+				Label = Locale.Lookup("LOC_CAI_TILE_INTERACT_DISTRICT_STRIKE", cityName),
+				Action = function()
+					UI.SelectCity(city)
+					UI.SetInterfaceMode(InterfaceModeTypes.CITY_RANGE_ATTACK)
+				end,
+			})
+		end
+	end
+
+	if GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS") then
+		local improvementIndex = plot:GetImprovementType()
+		local improvementInfo = improvementIndex ~= nil and GameInfo.Improvements[improvementIndex]
+
+		if improvementInfo ~= nil and improvementInfo.ImprovementType == "IMPROVEMENT_BARBARIAN_CAMP" then
+			local observer = Game.GetLocalObserver()
+			local vis = PlayersVisibility[observer]
+
+			if observer == PlayerTypes.OBSERVER or (vis and vis:IsRevealed(plot)) then
+				local barbManager = Game.GetBarbarianManager()
+
+				if barbManager ~= nil then
+					local tribeIndex = barbManager:GetTribeIndexAtLocation(plot:GetX(), plot:GetY())
+
+					if tribeIndex >= 0 then
+						local tribeNameType = barbManager:GetTribeNameType(tribeIndex)
+						local tribeInfo = GameInfo.BarbarianTribeNames[tribeNameType]
+
+						if tribeInfo ~= nil then
+							table.insert(results, {
+								Label = Locale.Lookup(
+									"LOC_TRIBE_BANNER_TREAT_WITH_TRIBE_TT", Locale.Lookup(tribeInfo.TribeDisplayName)
+								),
+								Action = function()
+									LuaEvents.CityBannerManager_OpenTreatWithTribePopup(plot:GetIndex())
+								end,
+							})
+						end
+					end
+				end
+			end
+		end
 	end
 
 	local pLocalPlayer = Players[localPlayerID]
@@ -239,7 +296,7 @@ local function CollectPlotInteractions(plotId)
 		local districts = pLocalPlayer:GetDistricts()
 		if districts ~= nil and districts.Members ~= nil then
 			for _, district in districts:Members() do
-				if district ~= nil then
+				if district ~= nil and not IsCityCenterDistrict(district) then
 					local dPlot = Map.GetPlot(district:GetX(), district:GetY())
 					if dPlot ~= nil and dPlot:GetIndex() == plotId then
 						if CityManager.CanStartCommand(district, CityCommandTypes.RANGE_ATTACK) then
@@ -266,6 +323,7 @@ end
 
 local function ExecutePlotInteraction(interaction)
 	if interaction ~= nil and interaction.Action ~= nil then
+		UI.PlaySound("Play_UI_Click")
 		interaction.Action()
 	end
 end
@@ -356,6 +414,61 @@ end
 ---Action functions are passed the game view widget, then any event arguments.
 ---@type table<number, { Type: string, Action: fun(w:UIWidget, ...):boolean|nil }>
 local SharedInputActions = {
+	[ACTION_MESSAGE_BUFFER_PREVIOUS] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			m_messageBuffer:Previous()
+			m_messageBuffer:SpeakEntry()
+			return true
+		end,
+	},
+
+	[ACTION_MESSAGE_BUFFER_NEXT] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			m_messageBuffer:Next()
+			m_messageBuffer:SpeakEntry()
+			return true
+		end,
+	},
+
+	[ACTION_MESSAGE_BUFFER_FIRST] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			m_messageBuffer:JumpFirst()
+			m_messageBuffer:SpeakEntry()
+			return true
+		end,
+	},
+
+	[ACTION_MESSAGE_BUFFER_LAST] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			m_messageBuffer:JumpLast()
+			m_messageBuffer:SpeakEntry()
+			return true
+		end,
+	},
+
+	[ACTION_MESSAGE_BUFFER_PREV_CATEGORY] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			m_messageBuffer:CycleFilterBackward()
+			m_messageBuffer:SpeakFilter()
+			m_messageBuffer:SpeakEntry()
+			return true
+		end,
+	},
+
+	[ACTION_MESSAGE_BUFFER_NEXT_CATEGORY] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			m_messageBuffer:CycleFilterForward()
+			m_messageBuffer:SpeakFilter()
+			m_messageBuffer:SpeakEntry()
+			return true
+		end,
+	},
 	[ACTION_CURSOR_NORTHWEST] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
@@ -987,6 +1100,11 @@ local function OnUpdate()
 	RevealAnnouncements_CAI.UpdateVisibility()
 end
 
+local function OnCAIAppendToMessageBuffer(text, category)
+	m_messageBuffer:Append(text, category)
+	Speak(text)
+end
+
 local function RegisterCAIEvents()
 	Events.InterfaceModeChanged.Add(OnInterfaceChanged)
 	Events.InputActionStarted.Add(OnCAIInputActionStarted)
@@ -994,6 +1112,7 @@ local function RegisterCAIEvents()
 	Events.LocalPlayerTurnBegin.Add(OnLocalPlayerTurnBegin)
 	Events.UnitSelectionChanged.Add(OnUnitSelectionChanged)
 	LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
+	LuaEvents.CAIAppendToMessageBuffer.Add(OnCAIAppendToMessageBuffer)
 	CAIRecommendationLogic.Initialize()
 end
 
@@ -1004,6 +1123,7 @@ local function UnregisterCAIEvents()
 	Events.LocalPlayerTurnBegin.Remove(OnLocalPlayerTurnBegin)
 	Events.UnitSelectionChanged.Remove(OnUnitSelectionChanged)
 	LuaEvents.CAICursorMoved.Remove(OnCAICursorMoved)
+	LuaEvents.CAIAppendToMessageBuffer.Remove(OnCAIAppendToMessageBuffer)
 end
 
 local function InitializeCAIGameView()
@@ -1013,6 +1133,7 @@ local function InitializeCAIGameView()
 	SnapCursorToInitialPosition()
 	CAIWorldScanner:Initialize()
 	RevealAnnouncements_CAI.Initialize()
+	m_messageBuffer:Clear()
 end
 
 -- Vanilla subscribes this function to Events.LoadScreenClose. Keep using that

@@ -159,7 +159,7 @@ function MovementActions_CAI:ResolvePendingMovementResult(playerID, unitID, curr
 
     local text = self:BuildMovementResultSpeech(unit, reachedTarget, turnsToArrival)
     if text ~= nil and text ~= "" then
-        Speak(text)
+        LuaEvents.CAIAppendToMessageBuffer(text, "movement")
     end
 
     return true

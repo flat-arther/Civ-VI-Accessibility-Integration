@@ -586,6 +586,7 @@ end
 include("caiUtils")
 mgr = ExposedMembers.CAI_UIManager
 include("LoadSaveHelpers_CAI")
+g_MenuType = LOAD_GAME
 
 
 local CAI_Panel = nil
@@ -645,7 +646,7 @@ local function RebuildFileListAccessibility()
 				Label = function() return GetEntryLabel(idx, entry) end,
 				FocusKey = "loadgame:file:" .. tostring(idx),
 			})
-			child:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+			child:SetFocusSound("Main_Menu_Mouse_Over")
 			child:On("activate", function()
 				SetSelected(idx)
 				OnActionButton()
@@ -717,13 +718,11 @@ local function RebuildFileListAccessibility()
 					DisabledPredicate = function() return saveHasError end,
 					FocusKey = "loadgame:file:" .. tostring(idx),
 				})
-			treeItem:On("focus_enter", function()
-				UI.PlaySound("Main_Menu_Mouse_Over")
-				if g_iSelectedFileEntry ~= idx then
-					SetSelected(idx)
-				end
-			end)
-			treeItem:On("activate", function() OnActionButton() end)
+				treeItem:SetFocusSound("Main_Menu_Mouse_Over")
+			treeItem:On("activate", function()
+				SetSelected(idx)
+				Controls.ActionButton:DoLeftClick()
+				end)
 
 			PopulateTreeItemDetails(treeItem, entry)
 
@@ -733,7 +732,7 @@ local function RebuildFileListAccessibility()
 				Action = function()
 					if not Controls.Delete:IsHidden() then
 						SetSelected(idx)
-						OnDelete()
+						Controls.Delete:DoLeftClick()
 						return true
 					end
 					return false
@@ -744,12 +743,7 @@ local function RebuildFileListAccessibility()
 		end
 	end
 
-	if not mgr:GetWidgetById(CAI_Panel:GetId(), false) then
-		local firstChild = container.Children and container.Children[1] or nil
-		mgr:Push(CAI_Panel, { priority = PopupPriority.Current, focus = firstChild })
-	else
-		mgr:RestoreFocus(container, capture)
-	end
+
 
 	if CAI_DirDropdown then
 		local options, selectedIdx = BuildDirectoryOptions()
@@ -758,6 +752,7 @@ local function RebuildFileListAccessibility()
 			CAI_DirDropdown:SetSelectedIndex(selectedIdx, true)
 		end
 	end
+	mgr:RestoreFocus(container, capture)
 end
 
 -- ---------------------------------------------------------------------------
@@ -768,14 +763,6 @@ local function BuildPanel()
 		Label = function() return Controls.WindowHeader:GetText() end,
 	})
 
-	CAI_Panel:AddInputBinding({
-		Key = Keys.VK_ESCAPE,
-		Description = "LOC_CAI_KB_CLOSE",
-		Action = function()
-			OnBack()
-			return true
-		end
-	})
 
 	-- 1. Directory dropdown (hidden when not applicable)
 	CAI_DirDropdown = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadDir"), "Dropdown", {
@@ -800,18 +787,7 @@ local function BuildPanel()
 		Label = function() return Controls.WindowHeader:GetText() end,
 	})
 
-	CAI_SaveTree:AddInputBinding({
-		Key = Keys.VK_DELETE,
-		Description = "LOC_CAI_KB_DELETE_SAVE",
-		Action = function()
-			if g_iSelectedFileEntry and g_iSelectedFileEntry > 0 and not Controls.Delete:IsHidden() then
-				OnDelete()
-				return true
-			end
-			return false
-		end
-	})
-
+	
 	CAI_Panel:AddChild(CAI_SaveTree)
 
 	-- 2b. Directory list (shown when in directory view)
@@ -894,7 +870,9 @@ end
 
 RebuildFileList = WrapFunc(RebuildFileList, function(orig)
     orig()
+	if ContextPtr:IsVisible() then
     RebuildFileListAccessibility()
+	end
 end)
 
 SetupFileList = WrapFunc(SetupFileList, function(orig)
@@ -905,6 +883,9 @@ end)
 OnFileListQueryResults = WrapFunc(OnFileListQueryResults, function(orig, list, id)
     CAI_LoadingFiles = false
     orig(list, id)
+	if CAI_Panel and not mgr:GetWidgetById(CAI_Panel:GetId(), false) then
+		mgr:Push(CAI_Panel, { priority = PopupPriority.Current})
+	end
 end)
 
 -- ---------------------------------------------------------------------------
@@ -923,11 +904,6 @@ OnShow = WrapFunc(OnShow, function(orig, ...)
 	CAI_DirDropdown = nil
 	CAI_SortDropdown = nil
 	BuildPanel()
-
-	ContextPtr:SetInputHandler(function(input)
-	if mgr:HandleInput(input) then return true end
-	return OnInputHandler(input)
-end, true)
 end)
 
 OnHide = WrapFunc(OnHide, function(orig, ...)
@@ -935,11 +911,9 @@ OnHide = WrapFunc(OnHide, function(orig, ...)
 	orig(...)
 end)
 
--- ---------------------------------------------------------------------------
--- Re-register wrapped handlers
--- ---------------------------------------------------------------------------
-ContextPtr:SetShowHandler(OnShow)
-ContextPtr:SetHideHandler(OnHide)
-
+OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
+	if mgr:HandleInput(input) then return true end
+	return orig(input)
+end)
 --#End of accessibility integration
 Initialize();

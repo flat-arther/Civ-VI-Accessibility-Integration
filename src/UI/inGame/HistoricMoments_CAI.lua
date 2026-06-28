@@ -106,7 +106,31 @@ end
 local function BuildPanel()
     if not mgr then return end
     PopPanel()
+    m_panel = mgr:CreateWidget(PANEL_ID, "Panel", {
+        Label = function()
+            local title = Controls.ModalScreenTitle:GetText()
+            if not title or title == "" then
+                title = Locale.Lookup("LOC_CAI_TIMELINE_TITLE")
+            end
+            return title
+        end,
+    })
 
+    m_panel:AddInputBindings({
+        {
+            Key = Keys.VK_ESCAPE,
+            MSG = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CLOSE",
+            Action = function()
+                Close()
+                return true
+            end,
+        },
+    })
+end
+
+local function BuildTree()
+    if not mgr then return end
     local localPlayerID = Game.GetLocalPlayer()
     if localPlayerID == nil or localPlayerID < 0 then return end
 
@@ -166,7 +190,7 @@ local function BuildPanel()
             if #majorMoments > 0 then
                 local majorNode = MakeNode("timeline:era:" .. eraIdx .. ":major", function()
                     return Locale.Lookup("LOC_PEDIA_MOMENTS_PAGEGROUP_MAJOR_NAME") ..
-                    ", " .. Locale.Lookup("LOC_CAI_TIMELINE_COUNT", #majorMoments)
+                        ", " .. Locale.Lookup("LOC_CAI_TIMELINE_COUNT", #majorMoments)
                 end)
                 for _, md in ipairs(majorMoments) do
                     local capturedMD = md
@@ -182,7 +206,7 @@ local function BuildPanel()
             if #minorMoments > 0 then
                 local minorNode = MakeNode("timeline:era:" .. eraIdx .. ":minor", function()
                     return Locale.Lookup("LOC_PEDIA_MOMENTS_PAGEGROUP_MINOR_NAME") ..
-                    ", " .. Locale.Lookup("LOC_CAI_TIMELINE_COUNT", #minorMoments)
+                        ", " .. Locale.Lookup("LOC_CAI_TIMELINE_COUNT", #minorMoments)
                 end)
                 for _, md in ipairs(minorMoments) do
                     local capturedMD = md
@@ -198,36 +222,19 @@ local function BuildPanel()
             m_tree:AddChild(eraNode)
         end
     end
-
-    m_panel = mgr:CreateWidget(PANEL_ID, "Panel", {
-        Label = function()
-            local title = Controls.ModalScreenTitle:GetText()
-            if not title or title == "" then
-                title = Locale.Lookup("LOC_CAI_TIMELINE_TITLE")
-            end
-            return title
-        end,
-    })
-    m_panel:AddChild(m_tree)
-
-    m_panel:AddInputBindings({
-        {
-            Key = Keys.VK_ESCAPE,
-            MSG = KeyEvents.KeyUp,
-            Description = "LOC_CAI_KB_CLOSE",
-            Action = function()
-                Close()
-                return true
-            end,
-        },
-    })
+    if m_panel then
+        m_panel:AddChild(m_tree)
+    end
 end
 
 local function PushPanel()
     if not mgr then return end
     if not m_panel then BuildPanel() end
     if not m_panel then return end
-    mgr:Push(m_panel, GetPopupPriority())
+    BuildTree()
+    if not mgr:GetWidgetById(m_panel:GetId()) then
+        mgr:Push(m_panel, GetPopupPriority())
+    end
 end
 
 local function OnShow()

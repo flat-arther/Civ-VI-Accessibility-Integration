@@ -556,7 +556,7 @@ local function RebuildFileListAccessibility()
                 Description = "LOC_CAI_KB_DELETE_SAVE",
                 Action = function()
                         SetSelected(idx)
-                        OnDelete()
+                        Controls.Delete:DoLeftClick()
                         return true
                 end
             })
@@ -565,12 +565,7 @@ local function RebuildFileListAccessibility()
         end
     end
 
-    if not mgr:GetWidgetById(CAI_Panel:GetId(), false) then
-        local firstChild = container.Children and container.Children[1] or nil
-        mgr:Push(CAI_Panel, { priority = PopupPriority.Current, focus = firstChild })
-    else
-        mgr:RestoreFocus(container, capture)
-    end
+    
 
     if CAI_DirDropdown then
         local options, selectedIdx = BuildDirectoryOptions()
@@ -579,6 +574,7 @@ local function RebuildFileListAccessibility()
             CAI_DirDropdown:SetSelectedIndex(selectedIdx, true)
         end
     end
+    mgr:RestoreFocus(container, capture)
 end
 
 -- ---------------------------------------------------------------------------
@@ -589,19 +585,12 @@ local function BuildPanel()
         Label = function() return (Controls.WindowHeader and Controls.WindowHeader:GetText()) end,
     })
 
-    CAI_Panel:AddInputBindings({{
-        Key = Keys.VK_ESCAPE,
-        Description = "LOC_CAI_KB_CLOSE",
-        Action = function()
-            OnBack()
-            return true
-        end
-    },
+    CAI_Panel:AddInputBindings({
     {
         Key = Keys.VK_RETURN,
         Description = "LOC_SAVE_GAME",
         Action = function()
-            OnActionButton()
+            Controls.ActionButton:DoLeftClick()
             return true
         end
     }
@@ -768,6 +757,9 @@ end)
 OnFileListQueryResults = WrapFunc(OnFileListQueryResults, function(orig, list, id)
     CAI_LoadingFiles = false
     orig(list, id)
+	if CAI_Panel and not mgr:GetWidgetById(CAI_Panel:GetId(), false) then
+		mgr:Push(CAI_Panel, { priority = PopupPriority.Current})
+	end
 end)
 
 RebuildFileList = WrapFunc(RebuildFileList, function(orig)
@@ -791,10 +783,6 @@ OnShow = WrapFunc(OnShow, function(orig, ...)
     CAI_SortDropdown = nil
     CAI_FileNameEdit = nil
     BuildPanel()
-    ContextPtr:SetInputHandler(function(input)
-    if mgr:HandleInput(input) then return true end
-    return OnInputHandler(input)
-end, true)
 Controls.FileName:DropFocus();
 end)
 
@@ -803,11 +791,10 @@ ClosePanel()
     orig(...)
 end)
 
--- ---------------------------------------------------------------------------
--- Re-register wrapped handlers
--- ---------------------------------------------------------------------------
-ContextPtr:SetShowHandler(OnShow)
-ContextPtr:SetHideHandler(OnHide)
+OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
+	if mgr:HandleInput(input) then return true end
+	return orig(input)
+end)
 
 --#End of accessibility integration
 

@@ -282,6 +282,79 @@
     <Row Tag="LOC_CAI_CURSOR_MOVE_SOUTHEAST_TOOLTIP" Language="en_US">
       <Text>Moves the CAI map cursor southeast</Text>
     </Row>
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_PREVIOUS" Language="en_US">
+      <Text>Previous Message Buffer Entry</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_NEXT" Language="en_US">
+      <Text>Next Message Buffer Entry</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_FIRST" Language="en_US">
+      <Text>First Message Buffer Entry</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_LAST" Language="en_US">
+      <Text>Last Message Buffer Entry</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_PREVIOUS_CATEGORY" Language="en_US">
+      <Text>Previous Message Buffer Category</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_NEXT_CATEGORY" Language="en_US">
+      <Text>Next Message Buffer Category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_PREVIOUS_TOOLTIP" Language="en_US">
+      <Text>Reads the previous message in the message buffer.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_NEXT_TOOLTIP" Language="en_US">
+      <Text>Reads the next message in the message buffer.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_FIRST_TOOLTIP" Language="en_US">
+      <Text>Jumps to and reads the oldest message in the current category.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_LAST_TOOLTIP" Language="en_US">
+      <Text>Jumps to and reads the newest message in the current category.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_PREVIOUS_CATEGORY_TOOLTIP" Language="en_US">
+      <Text>Cycles to the previous message category.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_NEXT_CATEGORY_TOOLTIP" Language="en_US">
+      <Text>Cycles to the next message category.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_CAT_ALL" Language="en_US">
+      <Text>All</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_CAT_NOTIFICATION" Language="en_US">
+      <Text>Notifications</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_CAT_REVEAL" Language="en_US">
+      <Text>Reveals</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_CAT_COMBAT" Language="en_US">
+      <Text>Combat</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_CAT_MOVEMENT" Language="en_US">
+      <Text>Movement</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_CAT_CHAT" Language="en_US">
+      <Text>Chat</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_EMPTY" Language="en_US">
+      <Text>No messages.</Text>
+    </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_CITIES" Language="en_US">
       <Text>Cities</Text>
     </Row>
@@ -938,6 +1011,12 @@
     </Row>
     <Row Tag="LOC_CAI_GP_HEROES_LIST" Language="en_US">
       <Text>Heroes</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_HEROES_PASSIVES" Language="en_US">
+      <Text>Passive abilities</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_HEROES_COMMANDS" Language="en_US">
+      <Text>Commands</Text>
     </Row>
     <Row Tag="LOC_CAI_GP_HERO_LABEL_DISCOVERED" Language="en_US">
       <Text>{1_Name}, Discovered</Text>
@@ -2025,13 +2104,13 @@
       <Text>{1_Count} promotions</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_FLAG_LEVIED_SHORT" Language="en_US">
-      <Text>Levied {1_Turns}</Text>
+      <Text>Levied {1_Turns} turns</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_FLAG_RELIGION_SHORT" Language="en_US">
-      <Text>Religion: {1_Name}</Text>
+      <Text>Religion {1_Name}</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_FLAG_HOME_CITY_SHORT" Language="en_US">
-      <Text>Home: {1_City}</Text>
+      <Text>Home {1_City}</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_FLAG_ARTIFACT_SHORT" Language="en_US">
       <Text>Artifact: {1_Name}, {2_Player}</Text>
@@ -2052,13 +2131,13 @@
       <Text>{1_Name} clan</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_FLAG_BRIBED_SHORT" Language="en_US">
-      <Text>Bribed, {1_Turns}</Text>
+      <Text>Bribed, {1_Turns} turns</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_FLAG_INCITED_BY_YOU_SHORT" Language="en_US">
-      <Text>Incited by you, {1_Player}</Text>
+      <Text>Incited by you against{1_Player}</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_FLAG_INCITED_AGAINST_YOU_SHORT" Language="en_US">
-      <Text>Incited against you, {1_Player}</Text>
+      <Text>Incited against you by {1_Player}</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_FLAG_INCITED_AGAINST_YOU_UNKNOWN_SHORT" Language="en_US">
       <Text>Incited against you</Text>

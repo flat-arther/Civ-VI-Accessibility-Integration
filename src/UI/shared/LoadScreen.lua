@@ -515,8 +515,7 @@ function Initialize()
 end
 --#Accessibility integration
 include("caiUtils")
-include("CAIUIScreenManager") -- self-runs UIScreenManager:Init() and populates ExposedMembers.CAI_UIManager
-local mgr = ExposedMembers.CAI_UIManager
+local mgr
 local m_CAIPanel = nil
 local m_PanelId = "CAILoadScreenPanel"
 local m_CAIList = nil
@@ -588,6 +587,18 @@ local function BuildPanel()
 	m_CAIPanel = mgr:CreateWidget(m_PanelId, "Panel", {
 		Label = function() return Controls.FallbackMessage:GetText() end,
 	})
+	m_CAIPanel:AddInputBinding({
+		Key = Keys.VK_RETURN,
+		Description = "LOC_BEGIN_GAME",
+		Action = function()
+			if m_isLoadComplete then
+				Controls.ActivateButton:DoLeftClick()
+				return true
+			end
+			Speak(Controls.FallbackMessage:GetText())
+			return false
+		end
+	})
 	m_CAIList = mgr:CreateWidget(m_ListId, "List", {
 		Label = function() return Locale.Lookup("LOC_LOADING_FEATURES_ABILITIES") end,
 	})
@@ -627,18 +638,9 @@ Events.LoadScreenContentReady.Remove(OnLoadScreenContentReady)
 OnLoadScreenContentReady = WrapFunc(OnLoadScreenContentReady, function(orig, ...)
 	orig(...)
 	ContextPtr:SetInputHandler(OnInputHandler, true)
-	if not m_CAIPanel or mgr:GetTop() ~= m_CAIPanel then
-	BuildPanel()
-	PopulateList()
-	mgr:Push(m_CAIPanel, PopupPriority.Current)
-	end
-end)
+	end)
 Events.LoadScreenContentReady.Add(OnLoadScreenContentReady)
 
-OnActivateButtonClicked = WrapFunc(OnActivateButtonClicked, function(orig)
-	mgr:ShutDown(false)
-	orig()
-end)
 local spokeReady = false
 Events.LoadGameViewStateDone.Remove(OnLoadGameViewStateDone)
 OnLoadGameViewStateDone = WrapFunc(OnLoadGameViewStateDone, function(orig, ...)
@@ -655,6 +657,16 @@ OnLoadGameViewStateDone = WrapFunc(OnLoadGameViewStateDone, function(orig, ...)
 end)
 Events.LoadGameViewStateDone.Add(OnLoadGameViewStateDone)
 
+function OnCAIUIManagerInitialized(manager)
+	mgr = manager
+	if not m_CAIPanel or mgr:GetTop() ~= m_CAIPanel then
+	BuildPanel()
+	PopulateList()
+	mgr:Push(m_CAIPanel, PopupPriority.Current)
+	end
+end
+
+LuaEvents.CAIUIManagerInitialized.Add(OnCAIUIManagerInitialized)
 
 OnHide = WrapFunc(OnHide, function(orig, ...)
 	ClosePanel()

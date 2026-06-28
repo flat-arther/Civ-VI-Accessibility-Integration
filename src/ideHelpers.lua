@@ -114,6 +114,8 @@ EditModes = {}
 ---@class DropdownOption
 ---@field label string
 ---@field value any
+---@field tooltip? string|fun(...):string
+---@field extraEvents? table<string,fun(UIWidget, ...):string>
 
 ---One column in a TableWidget. `width` is the number of side-by-side tiers
 ---the column holds (default 1).

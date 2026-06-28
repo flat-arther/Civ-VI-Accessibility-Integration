@@ -58,6 +58,7 @@ local m_cachedPersons     = {}
 local m_cachedData        = nil
 local m_focusedPersonID   = nil
 local m_focusedHero       = nil
+local m_FocusRecruitable  = nil
 local m_isMirroringTab    = false
 local m_vanillaTabButtons = {}
 local m_vanillaTabCount   = 0
@@ -136,7 +137,7 @@ local function FormatPersonTooltip(kPerson)
         local actionText = kPerson.ActionNameText
         if kPerson.ActionCharges and kPerson.ActionCharges > 0 then
             actionText = actionText ..
-            " (" .. Locale.Lookup("LOC_GREATPERSON_ACTION_CHARGES", kPerson.ActionCharges) .. ")"
+                " (" .. Locale.Lookup("LOC_GREATPERSON_ACTION_CHARGES", kPerson.ActionCharges) .. ")"
         end
         if kPerson.ActionUsageText and kPerson.ActionUsageText ~= "" then
             actionText = actionText .. ", " .. kPerson.ActionUsageText
@@ -191,7 +192,6 @@ local function BuildGPTree()
     end
 
     local firstRecruitableKey = nil
-
     for _, kPerson in ipairs(m_cachedData.Timeline) do
         local personID = kPerson.IndividualID
         local item = mgr:CreateWidget(
@@ -244,10 +244,10 @@ local function BuildGPTree()
         m_ui.gpTree:AddChild(item)
     end
 
-    if not mgr:RestoreFocus(m_ui.gpTree, capture) and firstRecruitableKey then
-        local target = mgr:FindByFocusKey(m_ui.gpTree, firstRecruitableKey)
-        if target then mgr:SetFocus(target) end
+    if firstRecruitableKey then
+        m_FocusRecruitable = firstRecruitableKey
     end
+    mgr:RestoreFocus(m_ui.gpTree, capture)
 end
 
 -- ===========================================================================
@@ -280,7 +280,7 @@ local function FormatPastAbilities(kPerson)
         local actionText = kPerson.ActionNameText
         if kPerson.ActionCharges and kPerson.ActionCharges > 0 then
             actionText = actionText ..
-            " (" .. Locale.Lookup("LOC_GREATPERSON_ACTION_CHARGES", kPerson.ActionCharges) .. ")"
+                " (" .. Locale.Lookup("LOC_GREATPERSON_ACTION_CHARGES", kPerson.ActionCharges) .. ")"
         end
         if kPerson.ActionUsageText and kPerson.ActionUsageText ~= "" then
             actionText = actionText .. ", " .. kPerson.ActionUsageText
@@ -426,7 +426,7 @@ local function FormatHeroLabel(pGameHeroes, kHeroDef)
             or (localPlayer and localPlayer:GetDiplomacy() and localPlayer:GetDiplomacy():HasMet(claimedByPlayer)) then
             local config = PlayerConfigurations[claimedByPlayer]
             civName = config and Locale.Lookup(config:GetPlayerName()) or
-            Locale.Lookup("LOC_GREAT_PEOPLE_RECRUITED_BY_UNKNOWN")
+                Locale.Lookup("LOC_GREAT_PEOPLE_RECRUITED_BY_UNKNOWN")
         else
             civName = Locale.Lookup("LOC_GREAT_PEOPLE_RECRUITED_BY_UNKNOWN")
         end
@@ -465,7 +465,7 @@ local function FormatHeroTooltip(kHeroDef)
     end
     if kStats.RangedCombat and kStats.RangedCombat > 0 then
         statParts[#statParts + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_RANGED_STRENGTH") ..
-        ": " .. tostring(kStats.RangedCombat)
+            ": " .. tostring(kStats.RangedCombat)
     end
     if kStats.Range and kStats.Range > 0 then
         statParts[#statParts + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_ATTACK_RANGE") .. ": " .. tostring(kStats.Range)
@@ -478,21 +478,27 @@ local function FormatHeroTooltip(kHeroDef)
     end
 
     local kAbilities = GetHeroClassUnitAbilities(kHeroDef.Index)
-    for _, kAbility in ipairs(kAbilities) do
-        local t = Locale.Lookup(kAbility.Name)
-        if kAbility.Description and kAbility.Description ~= "" then
-            t = t .. ": " .. Locale.Lookup(kAbility.Description)
+    if #kAbilities > 0 then
+        table.insert(parts, Locale.Lookup("LOC_CAI_GP_HEROES_PASSIVES"))
+        for _, kAbility in ipairs(kAbilities) do
+            local t = Locale.Lookup(kAbility.Name)
+            if kAbility.Description and kAbility.Description ~= "" then
+                t = t .. ": " .. Locale.Lookup(kAbility.Description)
+            end
+            parts[#parts + 1] = t
         end
-        parts[#parts + 1] = t
     end
 
     local kCommands = GetHeroClassUnitCommands(kHeroDef.Index)
-    for _, kCommand in ipairs(kCommands) do
-        local t = Locale.Lookup(kCommand.Name)
-        if kCommand.Description and kCommand.Description ~= "" then
-            t = t .. ": " .. kCommand.Description
+    if #kCommands > 0 then
+        table.insert(parts, Locale.Lookup("LOC_CAI_GP_HEROES_COMMANDS"))
+        for _, kCommand in ipairs(kCommands) do
+            local t = Locale.Lookup(kCommand.Name)
+            if kCommand.Description and kCommand.Description ~= "" then
+                t = t .. ": " .. kCommand.Description
+            end
+            parts[#parts + 1] = t
         end
-        parts[#parts + 1] = t
     end
 
     return JoinNonEmpty(parts, "[NEWLINE]")
@@ -782,7 +788,7 @@ local function PushPanel()
     if not m_ui.panel then BuildPanel() end
     if not m_ui.panel then return end
     if not mgr:GetWidgetById(PANEL_ID) then
-        mgr:Push(m_ui.panel, PopupPriority.Low)
+        mgr:Push(m_ui.panel, { priority = PopupPriority.Low, focus = m_FocusRecruitable })
     end
 end
 
@@ -810,6 +816,7 @@ local function PopPanel()
     m_cachedData = nil
     m_focusedPersonID = nil
     m_focusedHero = nil
+    m_FocusRecruitable = nil
     m_isMirroringTab = false
 end
 
@@ -852,9 +859,6 @@ Open = WrapFunc(Open, function(orig)
     orig()
     if not ContextPtr:IsHidden() then
         PushPanel()
-        if IsExpansion2Active and IsExpansion2Active() and IsReadOnly() then
-            Speak(Locale.Lookup("LOC_CAI_GP_WORLD_CONGRESS_READONLY"))
-        end
     end
 end)
 

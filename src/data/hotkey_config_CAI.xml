@@ -11,7 +11,13 @@
   </InputCategories>
 
   <InputActions>
-    <!-- ===== CAI: Accessibility — cursor, scanner, surveyor, plot/yield reading, widget interaction ===== -->
+    <!-- ===== CAI: Accessibility — cursor, scanner, surveyor, plot/yield reading, widget interaction, buffer ===== -->
+    <Row ActionId="MessageBufferPrevious" Name="LOC_CAI_MESSAGE_BUFFER_PREVIOUS" Description="LOC_CAI_MESSAGE_BUFFER_PREVIOUS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="MessageBufferNext" Name="LOC_CAI_MESSAGE_BUFFER_NEXT" Description="LOC_CAI_MESSAGE_BUFFER_NEXT_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="MessageBufferFirst" Name="LOC_CAI_MESSAGE_BUFFER_FIRST" Description="LOC_CAI_MESSAGE_BUFFER_FIRST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="MessageBufferLast" Name="LOC_CAI_MESSAGE_BUFFER_LAST" Description="LOC_CAI_MESSAGE_BUFFER_LAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="MessageBufferPreviousCategory" Name="LOC_CAI_MESSAGE_BUFFER_PREVIOUS_CATEGORY" Description="LOC_CAI_MESSAGE_BUFFER_PREVIOUS_CATEGORY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="MessageBufferNextCategory" Name="LOC_CAI_MESSAGE_BUFFER_NEXT_CATEGORY" Description="LOC_CAI_MESSAGE_BUFFER_NEXT_CATEGORY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ReadSelectionSummary" Name="LOC_CAI_READ_SELECTION_SUMMARY" Description="LOC_CAI_READ_SELECTION_SUMMARY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ReadSelectionInfo1" Name="LOC_CAI_READ_SELECTION_INFO1" Description="LOC_CAI_READ_SELECTION_INFO1_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ReadSelectionInfo2" Name="LOC_CAI_READ_SELECTION_INFO2" Description="LOC_CAI_READ_SELECTION_INFO2_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
@@ -206,6 +212,14 @@
 
   <InputActionDefaultGestures>
     <!-- CAI: Accessibility -->
+    <Row ActionId="MessageBufferPrevious" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SEMICOLON"/>
+    <Row ActionId="MessageBufferNext" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_QUOTE"/>
+
+    <Row ActionId="MessageBufferFirst" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SEMICOLON"/>
+    <Row ActionId="MessageBufferLast" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_QUOTE"/>
+
+    <Row ActionId="MessageBufferPreviousCategory" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_SEMICOLON"/>
+    <Row ActionId="MessageBufferNextCategory" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_QUOTE"/>
     <Row ActionId="ReadSelectionSummary" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_TILDE" />
     <Row ActionId="ReadSelectionInfo1" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_1" />
     <Row ActionId="ReadSelectionInfo2" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_2" />

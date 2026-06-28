@@ -648,6 +648,7 @@ function UIScreenManager:Init()
             return mgr:HandleCharInput(char)
         end)
     end
+    LuaEvents.CAIUIManagerInitialized(mgr)
 end
 
 function UIScreenManager:ShutDown(unregCharInput)

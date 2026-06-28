@@ -2702,7 +2702,7 @@ local function OnCombatResolved(results)
         return
     end
 
-    Speak(text)
+    LuaEvents.CAIAppendToMessageBuffer(text, "combat")
 end
 
 function info:RequestUnitInfo(unitID, requestedKeys, playerID)

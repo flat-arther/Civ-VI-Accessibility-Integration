@@ -386,7 +386,7 @@ local function SpeakNotificationAdded(playerID, notificationID)
         line = Locale.Lookup("LOC_CAI_NOTIFICATION_ALERT", content)
     end
 
-    Speak(line)
+    LuaEvents.CAIAppendToMessageBuffer(line, "notification")
 end
 
 OnNotificationAdded = function(playerID, notificationID)
