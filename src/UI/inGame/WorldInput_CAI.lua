@@ -1126,7 +1126,20 @@ local function UnregisterCAIEvents()
 	LuaEvents.CAIAppendToMessageBuffer.Remove(OnCAIAppendToMessageBuffer)
 end
 
+-- These are necessary to reset the input context to world, because these UIs use 'Pop' which causes it to clear
+function OnDiplomacyHideIngameUI() Input.SetActiveContext(InputContext.Shell) end
+
+function OnDiplomacyShowIngameUI() Input.SetActiveContext(InputContext.World) end
+
+function OnEndGameMenuShown() Input.SetActiveContext(InputContext.Shell) end
+
+function OnEndGameMenuClosed() Input.SetActiveContext(InputContext.World) end
+
 local function InitializeCAIGameView()
+	LuaEvents.DiplomacyActionView_HideIngameUI.Add(OnDiplomacyHideIngameUI);
+	LuaEvents.DiplomacyActionView_ShowIngameUI.Add(OnDiplomacyShowIngameUI);
+	LuaEvents.EndGameMenu_Shown.Add(OnEndGameMenuShown);
+	LuaEvents.EndGameMenu_Closed.Add(OnEndGameMenuClosed);
 	if not CreateGameViewWidget() then return end
 	mgr:Push(m_caiGameViewWidget)
 	RegisterCAIEvents()

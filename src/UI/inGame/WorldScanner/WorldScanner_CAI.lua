@@ -310,7 +310,8 @@ local function FocusCategory(scanner, categoryIndex)
     end
 
     local count = CountAvailableCategories(scanner)
-    local line1 = Utils.ResolveText(category.LabelKey) .. ", " .. Utils.MakePositionText(GetAvailableCategoryPosition(scanner, scanner.CategoryIndex), count)
+    local line1 = Utils.ResolveText(category.LabelKey) ..
+    ", " .. Utils.MakePositionText(GetAvailableCategoryPosition(scanner, scanner.CategoryIndex), count)
 
     local group = GetGroup(scanner)
     local item = group ~= nil and group.Items ~= nil and group.Items[scanner.ItemIndex] or nil
@@ -350,6 +351,7 @@ local function OnScannerLensLayerChanged(layerNum)
 end
 
 local function OnScannerUnitSelectionChanged(playerID, unitID, locationX, locationY, locationZ, isSelected, isEditable)
+    if not isSelected then return end
     if playerID == Game.GetLocalPlayer() then
         if CAIInterfaceTargets ~= nil and CAIInterfaceTargets.ClearCache ~= nil then
             CAIInterfaceTargets.ClearCache()
@@ -637,7 +639,8 @@ local function BuildSearchSnapshot(scanner)
                         for _, leaf in ipairs(group.Items or {}) do
                             local itemLabel = Utils.ResolveText(leaf.LabelKey)
                             local searchText = itemLabel .. " " .. groupLabel .. " " .. categoryLabel
-                            local key = category.Id .. "|" .. (subCategory.Id or "") .. "|" .. (group.Id or "") .. "|" .. tostring(leaf.Id)
+                            local key = category.Id ..
+                            "|" .. (subCategory.Id or "") .. "|" .. (group.Id or "") .. "|" .. tostring(leaf.Id)
                             snapshot[#snapshot + 1] = {
                                 key = key,
                                 text = searchText,
@@ -807,7 +810,8 @@ function CAIWorldScanner:OpenSearch()
                     Speak(Locale.Lookup("LOC_CAI_SEARCH_HISTORY_EMPTY"))
                     return true
                 end
-                local newIndex, entry = SearchUtils.NavigateHistory(SCANNER_SEARCH_HISTORY_CONTEXT, m_searchHistoryIndex, 1)
+                local newIndex, entry = SearchUtils.NavigateHistory(SCANNER_SEARCH_HISTORY_CONTEXT, m_searchHistoryIndex,
+                    1)
                 if newIndex == m_searchHistoryIndex then return true end
                 m_searchHistoryIndex = newIndex
                 if entry then
@@ -827,7 +831,8 @@ function CAIWorldScanner:OpenSearch()
                     Speak(Locale.Lookup("LOC_CAI_SEARCH_HISTORY_EMPTY"))
                     return true
                 end
-                local newIndex, entry = SearchUtils.NavigateHistory(SCANNER_SEARCH_HISTORY_CONTEXT, m_searchHistoryIndex, -1)
+                local newIndex, entry = SearchUtils.NavigateHistory(SCANNER_SEARCH_HISTORY_CONTEXT, m_searchHistoryIndex,
+                    -1)
                 if newIndex == m_searchHistoryIndex then return true end
                 m_searchHistoryIndex = newIndex
                 if entry then

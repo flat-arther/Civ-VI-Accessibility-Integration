@@ -59,6 +59,7 @@ local m_cachedData        = nil
 local m_focusedPersonID   = nil
 local m_focusedHero       = nil
 local m_FocusRecruitable  = nil
+local m_FocusHero         = nil
 local m_isMirroringTab    = false
 local m_vanillaTabButtons = {}
 local m_vanillaTabCount   = 0
@@ -788,7 +789,7 @@ local function PushPanel()
     if not m_ui.panel then BuildPanel() end
     if not m_ui.panel then return end
     if not mgr:GetWidgetById(PANEL_ID) then
-        mgr:Push(m_ui.panel, { priority = PopupPriority.Low, focus = m_FocusRecruitable })
+        mgr:Push(m_ui.panel, { priority = PopupPriority.Low, focus = m_FocusHero or m_FocusRecruitable })
     end
 end
 
@@ -844,14 +845,14 @@ ViewCurrent = WrapFunc(ViewCurrent, function(orig, data)
     m_cachedData = nil
     orig(data)
     m_cachedData = data
-    SyncCAITab(1)
     BuildGPTree()
+    SyncCAITab(1)
 end)
 
 ViewPast = WrapFunc(ViewPast, function(orig, data)
     orig(data)
-    SyncCAITab(2)
     BuildPastList(data)
+    SyncCAITab(2)
 end)
 
 Open = WrapFunc(Open, function(orig)
@@ -890,11 +891,23 @@ function LateInitialize()
 
         RefreshHeroesPanel = WrapFunc(RefreshHeroesPanel, function(orig)
             orig()
-            SyncCAITab(3)
             BuildHeroesList()
+            SyncCAITab(3)
         end)
     end
 end
+
+function OnCAI_UpdateHeroPanelOpenFocus(key)
+    if key then m_FocusHero = key end
+end
+
+LuaEvents.CAI_UpdateHeroPanelOpenFocus.Add(OnCAI_UpdateHeroPanelOpenFocus)
+
+function OnCAI_ClearHeroPanelOpenFocus()
+    m_FocusHero = nil
+end
+
+LuaEvents.CAI_ClearHeroPanelOpenFocus.Add(OnCAI_ClearHeroPanelOpenFocus)
 
 -- Vanilla Initialize() calls ContextPtr:SetInputHandler(OnInputHandler, true) after
 -- all wildcard includes, so reassigning the global here is enough.
@@ -911,4 +924,6 @@ end)
 OnShutdown = WrapFunc(OnShutdown, function(orig)
     PopPanel()
     orig()
+    LuaEvents.CAI_ClearHeroPanelOpenFocus.Remove(OnCAI_ClearHeroPanelOpenFocus)
+    LuaEvents.CAI_UpdateHeroPanelOpenFocus.Remove(OnCAI_UpdateHeroPanelOpenFocus)
 end)

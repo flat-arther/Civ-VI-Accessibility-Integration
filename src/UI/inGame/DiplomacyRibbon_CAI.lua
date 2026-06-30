@@ -252,6 +252,7 @@ local function BuildList()
     local list = mgr:CreateWidget(LIST_ID, "List", {
         Label = function() return Locale.Lookup("LOC_CAI_DIPLO_RIBBON_LABEL") end,
     })
+    list:On("focus_leave", function() CloseList() end)
     list:AddInputBinding({
         Key         = Keys.VK_ESCAPE,
         MSG         = KeyEvents.KeyUp,

@@ -27,6 +27,7 @@ local MAX_QUEUE_SIZE = 7
 local m_state        = {
     activeTab                   = TAB.PRODUCTION,
     openPending                 = false,
+    closePending                = false,
     data                        = nil, ---@type table|nil
     recommended                 = {}, ---@type table<number, string|nil>
     isQueueActionActive         = false,
@@ -918,15 +919,56 @@ local function HasActiveCurrentProduction()
     return pBQ:GetCurrentProductionTypeHash() ~= 0
 end
 
-local function ReadCurrentProductionLabel()
+local function ReadCurrentGold()
+    local playerId = Game.GetLocalPlayer()
+    if playerId == -1 then return end
+    local player = Players[playerId]
+    if not player then return end
+    local treasury = player:GetTreasury()
+    local goldBalance = math.floor(treasury:GetGoldBalance())
+    if goldBalance then
+        return Locale.Lookup("LOC_CAI_PRODUCTION_COST_GOLD", goldBalance)
+    end
+    return ""
+end
+
+local function ReadCurrentFaith()
+    local playerId = Game.GetLocalPlayer()
+    if playerId == -1 then return end
+    local player = Players[playerId]
+    if not player then return end
+    local religion = player:GetReligion()
+    local faithBalance = math.floor(religion:GetFaithBalance())
+    if faithBalance then
+        return Locale.Lookup("LOC_CAI_PRODUCTION_COST_FAITH", faithBalance)
+    end
+    return ""
+end
+
+local function ReadCurrentProductionLabel(readTurns)
+    local item, formation = GetCurrentProductionItem()
     if not HasActiveCurrentProduction() then
         return Locale.Lookup("LOC_PRODUCTION_MANAGER_NO_CURRENT_PRODUCTION")
     end
     local name = ControlText(Controls.CurrentProductionName)
     if name == "" then return Locale.Lookup("LOC_PRODUCTION_MANAGER_NO_CURRENT_PRODUCTION") end
+    name = Locale.Lookup("LOC_CITY_BANNER_PRODUCING", name)
+    local turns
+    if item then
+        if readTurns then
+            local t = item.TurnsLeft
+            if t > 0 then
+                turns = Locale.Lookup("LOC_CAI_PRODUCTION_TURNS", t)
+            end
+        end
+    end
+    local str = name
     local status = ControlText(Controls.CurrentProductionStatus)
-    if status ~= "" then return name .. ", " .. status end
-    return name
+    if status ~= "" then str = str .. ", " .. status end
+    if turns then
+        str = str .. ", " .. turns
+    end
+    return str
 end
 
 local function ReadCurrentProductionTooltip()
@@ -948,7 +990,7 @@ end
 
 local function CreateCurrentProductionRow()
     local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIProductionPanelCurrent"), "TreeItem", {
-        Label             = ReadCurrentProductionLabel,
+        Label             = function() return ReadCurrentProductionLabel() end,
         Tooltip           = ReadCurrentProductionTooltip,
         HiddenPredicate   = function()
             return ControlIsHidden(Controls.CurrentProductionContainer)
@@ -1142,7 +1184,7 @@ local function MoveQueueSelection(direction)
     if target < 1 or target > GetQueueRowCount() then
         if name ~= "" then
             local key = direction < 0 and "LOC_CAI_PRODUCTION_QUEUE_ALREADY_FIRST" or
-            "LOC_CAI_PRODUCTION_QUEUE_ALREADY_LAST"
+                "LOC_CAI_PRODUCTION_QUEUE_ALREADY_LAST"
             Speak(Locale.Lookup(key, name))
         end
         return true
@@ -1188,7 +1230,7 @@ end
 
 local function CreateQueueCurrentRow()
     local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIProductionPanelQueueCurrent"), "Button", {
-        Label    = ReadCurrentProductionLabel,
+        Label    = function() return ReadCurrentProductionLabel() end,
         Tooltip  = ReadCurrentProductionTooltip,
         FocusKey = "current",
     })
@@ -1207,10 +1249,6 @@ local function RebuildTreePage(tab)
     local capture = mgr:CaptureFocusKey(tree)
     tree:ClearChildren()
     m_ui.categoryNodes[tab] = {}
-
-    if tab == TAB.PRODUCTION then
-        tree:AddChild(CreateCurrentProductionRow())
-    end
 
     local items = GetItemsForTab(tab)
     for _, spec in ipairs(CATEGORY_SPECS[tab] or {}) do
@@ -1344,9 +1382,15 @@ local function EnsurePanelBuilt()
         m_ui.pages[tab] = page
 
         local tree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIProductionPanelTree"), "Tree", {
-            Label       = function() return Locale.Lookup(labelTag) end,
             SearchDepth = 2,
         })
+        if pageId == PAGE_PROD_ID then
+            tree:SetLabel(function() return ReadCurrentProductionLabel(true) end)
+        elseif pageId == PAGE_GOLD_ID then
+            tree:SetLabel(function() return ReadCurrentGold() end)
+        elseif pageId == PAGE_FAITH_ID then
+            tree:SetLabel(function() return ReadCurrentFaith() end)
+        end
         page:AddChild(tree)
         m_ui.pageTrees[tab] = tree
     end
@@ -1364,7 +1408,7 @@ local function EnsurePanelBuilt()
     queuePage.Id = PAGE_QUEUE_ID
     m_ui.pages[TAB.QUEUE] = queuePage
     local queueList = mgr:CreateWidget(mgr:GenerateWidgetId("CAIProductionPanelQueueList"), "List", {
-        Label = function() return Locale.Lookup("LOC_CAI_PRODUCTION_QUEUE_LIST") end,
+        Label = function() return Controls.QueueTab:GetText() or "" end,
     })
     queuePage:AddChild(queueList)
     m_ui.pageTrees[TAB.QUEUE] = queueList
@@ -1399,13 +1443,9 @@ local function PushPanelIfNeeded()
     })
 end
 
-local function OnPanelOpenedCAI()
-    m_state.openPending = true
-    EnsurePanelBuilt()
-    if mgr:GetWidgetById(PANEL_ID) then return end
-end
-
-local function OnPanelClosedCAI()
+local function OnPanelClosedCAI(wasCanceled)
+    if wasCanceled == nil then wasCanceled = false end
+    if wasCanceled or UI.GetInterfaceMode() ~= InterfaceModeTypes.SELECTION then return end
     if m_ui.panel and mgr and mgr:GetWidgetById(PANEL_ID) then
         mgr:RemoveFromStack(PANEL_ID)
     end
@@ -1423,6 +1463,13 @@ local function OnPanelClosedCAI()
         captureListMode = nil,
     }
 end
+
+local function OnPanelOpenedCAI()
+    m_state.openPending = true
+    EnsurePanelBuilt()
+    if mgr:GetWidgetById(PANEL_ID) then return end
+end
+
 
 local function OnVanillaListModeChangedCAI(listMode)
     local tab = GetTabForListMode(listMode)
@@ -1667,6 +1714,7 @@ end)
 ContextPtr:SetInputHandler(OnInputHandler, true)
 
 LuaEvents.ProductionPanel_Open.Add(OnPanelOpenedCAI)
+LuaEvents.StrageticView_MapPlacement_ProductionOpen.Add(OnPanelClosedCAI)
 LuaEvents.ProductionPanel_Close.Add(OnPanelClosedCAI)
 LuaEvents.ProductionPanel_ListModeChanged.Add(OnVanillaListModeChangedCAI)
 

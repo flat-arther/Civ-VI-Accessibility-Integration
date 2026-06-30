@@ -72,7 +72,10 @@ local function BuildAccessibleHeroDialog()
     local continueBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHeroContinue"), "Button", {
         Label = function() return Controls.ContinueButton:GetText() or "" end,
     })
-    continueBtn:On("activate", function() Controls.ContinueButton:DoLeftClick() end)
+    continueBtn:On("activate", function()
+        LuaEvents.CAI_ClearHeroPanelOpenFocus()
+        Controls.ContinueButton:DoLeftClick()
+    end)
     table.insert(buttons, continueBtn)
     table.insert(buttons, lookAtBtn)
 
@@ -84,7 +87,7 @@ local function BuildAccessibleHeroDialog()
     )
 
     if not m_dialog then return end
-    mgr:Push(m_dialog)
+    mgr:Push(m_dialog, PopupPriority.Low)
 end
 
 Open = WrapFunc(Open, function(orig)
@@ -105,6 +108,7 @@ OnPlayerDiscoveredHero = WrapFunc(OnPlayerDiscoveredHero, function(orig, ePlayer
         m_CachedHeroClass = eClass
         m_CachedPopupType = "DISCOVERED"
     end
+    LuaEvents.CAI_UpdateHeroPanelOpenFocus("hero:" .. eClass)
     orig(ePlayer, eClass, eSourceType, eSourceID)
 end)
 
@@ -132,13 +136,14 @@ OnUnitDamageChanged = WrapFunc(OnUnitDamageChanged, function(orig, iPlayerID, iU
 end)
 
 
-OnLookAtHeroButton = WrapFunc(OnLookAtHeroButton, function(heroX, heroY)
+OnLookAtHeroButton = WrapFunc(OnLookAtHeroButton, function(orig, heroX, heroY)
     orig(heroX, heroY)
     local plot = Map.GetPlot(heroX, heroY)
     if plot then
-        LuaEvents.CAICursorMoveTo(plot:GetIndex())
+        LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
     end
 end)
+
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
     if mgr and m_dialog and mgr:GetTop() == m_dialog and not ContextPtr:IsHidden() then
         local handled = mgr:HandleInput(pInputStruct)

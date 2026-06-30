@@ -1008,8 +1008,8 @@ local function MakeCityActionMenuItem(idPrefix, getLabel, getTooltip, onActivate
     })
     item:SetFocusSound("Main_Menu_Mouse_Over")
     item:On("activate", function()
-        CloseCityActionList()
         onActivate()
+        CloseCityActionList()
     end)
     return item
 end

@@ -19,8 +19,12 @@ function GameViewWidget.Create(mgr, id, props)
     w.Manager = mgr
     w:SetLabel(function() return Locale.Lookup("LOC_CAI_ROLE_GAME_VIEW") end)
 
-    w:On("focus_enter", function() Input.SetActiveContext(InputContext.World) end)
-    w:On("focus_leave", function() Input.SetActiveContext(InputContext.Shell) end)
+    w:On("focus_enter", function()
+        Input.SetActiveContext(InputContext.World)
+    end)
+    w:On("focus_leave", function()
+        Input.SetActiveContext(InputContext.Shell)
+    end)
 
     CAIWidgetRegistry.ApplyProps(w, props)
     return w

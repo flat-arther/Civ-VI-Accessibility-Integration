@@ -36,7 +36,7 @@ local function JoinNonEmpty(parts)
             table.insert(out, part)
         end
     end
-    return table.concat(out, ", ")
+    return table.concat(out, "[NEWLINE]")
 end
 
 local function LabelValue(label, value)
@@ -74,33 +74,20 @@ local function MakeRouteButton(nativeButton, nativeLabel, idPrefix)
 end
 
 local function BuildDetailsRow()
-    return MakeTextRow("CAIEspionageEscapeDetails", function()
-        return JoinNonEmpty({
-            LabelValue(Text(Controls.AgentLabel), Text(Controls.AgentDetails)),
-            LabelValue(Text(Controls.LootLabel), Text(Controls.LootDetails)),
-            LabelValue(Text(Controls.PursuitLabel), Text(Controls.PursuitDetails)),
-        })
-    end)
+    return JoinNonEmpty({
+        LabelValue(Text(Controls.AgentLabel), Text(Controls.AgentDetails)),
+        LabelValue(Text(Controls.LootLabel), Text(Controls.LootDetails)),
+        LabelValue(Text(Controls.PursuitLabel), Text(Controls.PursuitDetails)),
+    })
 end
 
-local function BuildContentRows()
-    local rows = {}
-
-    if Text(Controls.CityHeader) then
-        table.insert(rows, MakeTextRow("CAIEspionageEscapeCity", function()
-            return Text(Controls.CityHeader) or ""
-        end))
-    end
-
-    table.insert(rows, BuildDetailsRow())
-
-    if Text(Controls.ChoiceHeader) then
-        table.insert(rows, MakeTextRow("CAIEspionageEscapeChoiceHeader", function()
-            return Text(Controls.ChoiceHeader) or ""
-        end))
-    end
-
-    return rows
+local function BuildContentRow()
+    return MakeTextRow("CAIEspionageEscapeChoiceHeader", function()
+        local choice = Text(Controls.ChoiceHeader) or ""
+        local city = Text(Controls.CityHeader) or ""
+        local details = BuildDetailsRow()
+        return JoinNonEmpty({ choice, city, details })
+    end)
 end
 
 local function BuildButtons()
@@ -115,15 +102,13 @@ end
 local function BuildDialog()
     RemoveDialog()
     if not mgr or ContextPtr:IsHidden() then return end
-
     m_dialog = mgr.WidgetHelpers.MakeGeneralDialog(
         function() return Text(Controls.PanelHeader) or "" end,
         BuildButtons(),
-        BuildContentRows(),
+        { BuildContentRow() },
         1
     )
     if not m_dialog then return end
-
     mgr:Push(m_dialog, { priority = PopupPriority.Low })
 end
 
