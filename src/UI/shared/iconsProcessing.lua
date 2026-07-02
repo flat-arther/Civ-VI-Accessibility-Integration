@@ -45,15 +45,24 @@ local REPLACEMENTS = {
     -- Unit ability stats
     ["Charges"]              = "LOC_CAI_ICON_CHARGES",
     ["Lifespan"]             = "LOC_CAI_ICON_LIFESPAN",
-    ["Damaged"]              = "Damaged",
     -- Capital city status marker
-    ["Capital"]              = "LOC_CITY_CAPITAL_LABEL",
+    ["Capital"]              = "LOC_CAI_CITY_STATUS_CAPITAL",
     -- Attention / alert icons
     ["Exclamation"]          = "LOC_CAI_ICON_EXCLAMATION",
-    -- Purchase button yield labels (appear standalone before "Purchase")
-    ["FaithLarge"]           = "LOC_YIELD_FAITH_NAME",
-    ["GoldLarge"]            = "LOC_YIELD_GOLD_NAME",
-    ["ProductionLarge"]      = "LOC_YIELD_PRODUCTION_NAME",
+    -- yield font icons
+    Gold                     = "LOC_YIELD_GOLD_NAME",
+    GoldLarge                = "LOC_YIELD_GOLD_NAME",
+    Food                     = "LOC_YIELD_FOOD_NAME",
+    FoodLarge                = "LOC_YIELD_FOOD_NAME",
+    Production               = "LOC_YIELD_PRODUCTION_NAME",
+    ProductionLarge          = "LOC_YIELD_PRODUCTION_NAME",
+    Science                  = "LOC_YIELD_SCIENCE_NAME",
+    ScienceLarge             = "LOC_YIELD_SCIENCE_NAME",
+    Culture                  = "LOC_YIELD_CULTURE_NAME",
+    CultureLarge             = "LOC_YIELD_CULTURE_NAME",
+    Faith                    = "LOC_YIELD_FAITH_NAME",
+    FaithLarge               = "LOC_YIELD_FAITH_NAME",
+
     -- Bullet list marker (no dedup)
     ["Bullet"]               = false,
     -- Decorative formation/unit badges: appear after the word they label
@@ -168,55 +177,69 @@ local function IsWordChar(byte)
         or byte == 95
 end
 
--- Check whether `phrase` appears as a whole-word match adjacent to the
--- bracket token at [bracketStart..bracketEnd] in `text`. Adjacent means
--- the phrase starts/ends within a small window on either side, separated
--- from the bracket by only non-word characters (whitespace, punctuation).
-local function FindAdjacentPhrase(text, bracketStart, bracketEnd, phrase)
-    if not phrase or phrase == "" then return false end
-    local phraseLower = phrase:lower()
-    local textLen = #text
-    local windowSize = #phrase + 10
+local function SkipFormatting(text, pos)
+    while true do
+        local s, e = text:find("%b[]", pos)
+        if s ~= pos then
+            break
+        end
 
-    -- Check AFTER the bracket token
-    local afterStart = bracketEnd + 1
-    local afterEnd = math.min(textLen, bracketEnd + windowSize)
-    if afterStart <= textLen then
-        local after = text:sub(afterStart, afterEnd):lower()
-        local matchStart = after:find(phraseLower, 1, true)
-        if matchStart then
-            local gap = after:sub(1, matchStart - 1)
-            if not gap:find("[%a%d_]") then
-                local absMatchEnd = afterStart + matchStart - 2 + #phraseLower
-                if not IsWordChar(text:byte(absMatchEnd + 1)) then
-                    return true
-                end
-            end
+        local tag = text:sub(s + 1, e - 1)
+        if tag:match("^COLOR_") or tag == "ENDCOLOR" then
+            pos = e + 1
+        else
+            break
         end
     end
 
-    -- Check BEFORE the bracket token
-    local beforeEnd = bracketStart - 1
-    local beforeStart = math.max(1, bracketStart - windowSize)
-    if beforeEnd >= 1 then
-        local before = text:sub(beforeStart, beforeEnd):lower()
-        local searchFrom = 1
-        local lastFound = nil
-        while true do
-            local p = before:find(phraseLower, searchFrom, true)
-            if not p then break end
-            lastFound = p
-            searchFrom = p + 1
+    return pos
+end
+
+local function FindAdjacentPhrase(text, bracketStart, bracketEnd, phrase)
+    if not phrase or phrase == "" then
+        return false
+    end
+
+    local phraseLower = phrase:lower()
+
+    ------------------------------------------------------------------------
+    -- AFTER the icon
+    ------------------------------------------------------------------------
+    local pos = SkipFormatting(text, bracketEnd + 1)
+
+    -- Skip ordinary whitespace too.
+    while true do
+        local c = text:sub(pos, pos)
+        if c == " " or c == "\t" or c == "\r" or c == "\n" then
+            pos = pos + 1
+        else
+            break
         end
-        if lastFound then
-            local matchEndInBefore = lastFound + #phraseLower - 1
-            local gap = before:sub(matchEndInBefore + 1)
-            if not gap:find("[%a%d_]") then
-                local absStart = beforeStart + lastFound - 1
-                if not IsWordChar(text:byte(absStart - 1)) then
-                    return true
-                end
-            end
+    end
+
+    if text:sub(pos, pos + #phrase - 1):lower() == phraseLower then
+        return true
+    end
+
+    ------------------------------------------------------------------------
+    -- BEFORE the icon
+    ------------------------------------------------------------------------
+    pos = bracketStart - 1
+
+    -- Skip whitespace backwards.
+    while pos > 0 do
+        local c = text:sub(pos, pos)
+        if c == " " or c == "\t" or c == "\r" or c == "\n" then
+            pos = pos - 1
+        else
+            break
+        end
+    end
+
+    local startPos = pos - #phrase + 1
+    if startPos >= 1 then
+        if text:sub(startPos, pos):lower() == phraseLower then
+            return true
         end
     end
 

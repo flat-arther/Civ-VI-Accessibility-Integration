@@ -1,5 +1,6 @@
 include("caiUtils")
 include("hexCoordUtils_CAI")
+include("MapTacks")
 -- Shared function for overriding the base game's GetCursorPlot functions
 local CAICursor = ExposedMembers.CAICursor
 local function GetCAICursorPlotId()
@@ -253,6 +254,179 @@ function CreateUnlockChild(mgr, unlock, idPrefix)
         },
     })
     return child
+end
+
+--#Map tac helpers
+local CAI_MAP_TAC_STOCK_ICON_LABELS = {
+    ICON_MAP_PIN_STRENGTH = "LOC_CAI_MAP_PIN_ICON_STRENGTH",
+    ICON_MAP_PIN_RANGED   = "LOC_CAI_MAP_PIN_ICON_RANGED",
+    ICON_MAP_PIN_BOMBARD  = "LOC_CAI_MAP_PIN_ICON_BOMBARD",
+    ICON_MAP_PIN_DISTRICT = "LOC_CAI_MAP_PIN_ICON_DISTRICT",
+    ICON_MAP_PIN_CHARGES  = "LOC_CAI_MAP_PIN_ICON_CHARGES",
+    ICON_MAP_PIN_DEFENSE  = "LOC_CAI_MAP_PIN_ICON_DEFENSE",
+    ICON_MAP_PIN_MOVEMENT = "LOC_CAI_MAP_PIN_ICON_MOVEMENT",
+    ICON_MAP_PIN_NO       = "LOC_CAI_MAP_PIN_ICON_NO",
+    ICON_MAP_PIN_PLUS     = "LOC_CAI_MAP_PIN_ICON_PLUS",
+    ICON_MAP_PIN_CIRCLE   = "LOC_CAI_MAP_PIN_ICON_CIRCLE",
+    ICON_MAP_PIN_TRIANGLE = "LOC_CAI_MAP_PIN_ICON_TRIANGLE",
+    ICON_MAP_PIN_SUN      = "LOC_CAI_MAP_PIN_ICON_SUN",
+    ICON_MAP_PIN_SQUARE   = "LOC_CAI_MAP_PIN_ICON_SQUARE",
+    ICON_MAP_PIN_DIAMOND  = "LOC_CAI_MAP_PIN_ICON_DIAMOND",
+}
+
+local function ResolveMapTacGameInfoName(typeKey)
+    if not typeKey then return nil end
+
+    local info
+    if typeKey:find("^DISTRICT_") then
+        info = GameInfo.Districts[typeKey]
+    elseif typeKey:find("^BUILDING_") then
+        info = GameInfo.Buildings[typeKey]
+    elseif typeKey:find("^IMPROVEMENT_") then
+        info = GameInfo.Improvements[typeKey]
+    elseif typeKey:find("^UNIT_") then
+        info = GameInfo.Units[typeKey]
+    end
+
+    if info and info.Name then
+        return Locale.Lookup(info.Name)
+    end
+    return nil
+end
+
+---@param iconName string|nil
+---@return string|nil
+function GetMapTacIconLabel(iconName)
+    if iconName == nil or iconName == "" then
+        return nil
+    end
+
+    local playerID = Game.GetLocalPlayer()
+    local sections = MapTacks.IconOptions(playerID)
+    for _, section in ipairs(sections) do
+        for _, pair in ipairs(section) do
+            if pair.name == iconName then
+                if pair.tooltip then
+                    local locText = Locale.Lookup(pair.tooltip)
+                    if locText and locText ~= "" and locText ~= pair.tooltip then return locText end
+                    local infoName = ResolveMapTacGameInfoName(pair.tooltip)
+                    if infoName then return infoName end
+                end
+            end
+        end
+    end
+
+    local stockKey = CAI_MAP_TAC_STOCK_ICON_LABELS[iconName]
+    if stockKey then return Locale.Lookup(stockKey) end
+    return iconName
+end
+
+---@param mapPinCfg table|nil
+---@return string|nil
+function GetMapTacName(mapPinCfg)
+    if mapPinCfg == nil then
+        return nil
+    end
+
+    local pinName = mapPinCfg:GetName()
+    if pinName ~= nil and pinName ~= "" then
+        return pinName
+    end
+
+    local pinID = mapPinCfg:GetID()
+    return Locale.Lookup("LOC_MAP_PIN_DEFAULT_NAME", pinID + 1)
+end
+
+---@param mapPinCfg table|nil
+---@return string|nil
+function BuildMapTacLabel(mapPinCfg)
+    if mapPinCfg == nil then
+        return nil
+    end
+
+    local parts = {}
+    AppendIfNonEmpty(parts, GetMapTacName(mapPinCfg))
+    AppendIfNonEmpty(parts, GetMapTacIconLabel(mapPinCfg:GetIconName()))
+    return #parts > 0 and table.concat(parts, ", ") or nil
+end
+
+---@param playerID number|nil
+---@return string|nil
+function GetMapTacOwnerLabel(playerID)
+    if playerID == nil or playerID == -1 then
+        return nil
+    end
+
+    local playerConfig = PlayerConfigurations[playerID]
+    if playerConfig == nil then
+        return Locale.Lookup("LOC_TOOLTIP_PLAYER_ID", playerID)
+    end
+
+    local civName = playerConfig:GetCivilizationDescription()
+    if civName ~= nil and civName ~= "" then
+        return Locale.Lookup(civName)
+    end
+
+    local leaderName = playerConfig:GetLeaderName()
+    if leaderName ~= nil and leaderName ~= "" then
+        return Locale.Lookup(leaderName)
+    end
+
+    return Locale.Lookup("LOC_TOOLTIP_PLAYER_ID", playerID)
+end
+
+---@param mapPinCfg table|nil
+---@param playerID number|nil
+---@param localPlayerID number|nil
+---@return string|nil
+function BuildMapTacLabelWithOwner(mapPinCfg, playerID, localPlayerID)
+    local label = BuildMapTacLabel(mapPinCfg)
+    if label == nil or label == "" or playerID == localPlayerID then
+        return label
+    end
+
+    local ownerLabel = GetMapTacOwnerLabel(playerID)
+    if ownerLabel == nil or ownerLabel == "" then
+        return label
+    end
+
+    return label .. ", " .. ownerLabel
+end
+
+---@param plot table|nil
+---@return table
+function GetVisibleMapTacsAtPlot(plot)
+    local results = {}
+    if plot == nil then
+        return results
+    end
+
+    local localPlayerID = Game.GetLocalPlayer()
+    local x = plot:GetX()
+    local y = plot:GetY()
+
+    for iPlayer = 0, GameDefines.MAX_MAJOR_CIVS - 1 do
+        local playerConfig = PlayerConfigurations[iPlayer]
+        local playerPins = playerConfig ~= nil and playerConfig:GetMapPins() or nil
+        if playerPins ~= nil then
+            for _, mapPinCfg in pairs(playerPins) do
+                if mapPinCfg ~= nil
+                    and mapPinCfg:GetHexX() == x
+                    and mapPinCfg:GetHexY() == y
+                    and mapPinCfg:IsVisible(localPlayerID) then
+                    table.insert(results, {
+                        PlayerID = iPlayer,
+                        PinID = mapPinCfg:GetID(),
+                        Config = mapPinCfg,
+                        Label = BuildMapTacLabel(mapPinCfg),
+                        LabelWithOwner = BuildMapTacLabelWithOwner(mapPinCfg, iPlayer, localPlayerID),
+                    })
+                end
+            end
+        end
+    end
+
+    return results
 end
 
 --#Unit info helpers

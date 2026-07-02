@@ -122,7 +122,7 @@ function CAIInterfaceTargets.GetSelectedUnitActionPlots()
                 table.insert(plots, { PlotIndex = plotIndex, Type = "GreatPerson" })
             end
         end
-    elseif kUnit:GetArchaeology() ~= nil and GameInfo.Units[kUnit:GetUnitType()].ExtractsArtifacts == true then
+    elseif kUnit.GetArchaeology and GameInfo.Units[kUnit:GetUnitType()].ExtractsArtifacts == true then
         for _, plotIndex in ipairs(kUnit:GetArchaeology():GetActivationHighlightPlots()) do
             table.insert(plots, { PlotIndex = plotIndex, Type = "Archaeologist" })
         end
@@ -130,7 +130,7 @@ function CAIInterfaceTargets.GetSelectedUnitActionPlots()
         for _, plotIndex in ipairs(Game.GetNationalParks():GetPossibleParkTiles(playerID)) do
             table.insert(plots, { PlotIndex = plotIndex, Type = "Naturalist" })
         end
-    elseif kUnit:GetRockBand() ~= nil and sUnitType == "UNIT_ROCK_BAND" then
+    elseif kUnit.GetRockBand and sUnitType == "UNIT_ROCK_BAND" then
         for _, plotIndex in ipairs(kUnit:GetRockBand():GetActivationHighlightPlots()) do
             table.insert(plots, { PlotIndex = plotIndex, Type = "RockBand" })
         end

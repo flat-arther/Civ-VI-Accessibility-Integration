@@ -1,5 +1,6 @@
 include("caiUtils")
 include("interfaceInfoHelpers_CAI")
+include("inGameHelpers_CAI")
 include("hexCoordUtils_CAI")
 include("Civ6Common")
 
@@ -39,6 +40,7 @@ ExposedMembers.CAIInfo = info
 
 local STATIC_INFO_PRIORITY = {
     "plotName",
+    "mapTac",
     "owner",
     "feature",
     "nationalPark",
@@ -80,6 +82,7 @@ local STATIC_INFO_PRIORITY = {
 local CURSOR_MOVE_INFO_PRIORITY = {
     "isFog",
     "units",
+    "mapTac",
     "interfaceInfo",
     "lensInfo",
     "waypoint",
@@ -1242,6 +1245,29 @@ info.PlotInfoHelpers = {
         end
 
         return #results > 0 and table.concat(results, ", ") or nil
+    end,
+
+    mapTac = function(data, plot)
+        if not data.IsVisible or plot == nil then return nil end
+
+        local mapTacs = GetVisibleMapTacsAtPlot(plot)
+        if #mapTacs == 0 then
+            return nil
+        end
+
+        local labels = {}
+        for _, entry in ipairs(mapTacs) do
+            local label = entry.LabelWithOwner or entry.Label
+            if label ~= nil and label ~= "" then
+                table.insert(labels, label)
+            end
+        end
+
+        if #labels == 0 then
+            return nil
+        end
+
+        return Locale.Lookup("LOC_CAI_PLOT_MAP_TACS", table.concat(labels, ", "))
     end,
 
     interfaceInfo = function(data, plot)

@@ -282,6 +282,30 @@
     <Row Tag="LOC_CAI_CURSOR_MOVE_SOUTHEAST_TOOLTIP" Language="en_US">
       <Text>Moves the CAI map cursor southeast</Text>
     </Row>
+    <Row Tag="LOC_CAI_CURSOR_JUMP_TO_SELECTION" Language="en_US">
+      <Text>Jump cursor to selection</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CURSOR_JUMP_TO_SELECTION_TOOLTIP" Language="en_US">
+      <Text>Moves the CAI map cursor to the selected unit or city</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SELECT_PREVIOUS_CITY" Language="en_US">
+      <Text>Select previous city</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SELECT_PREVIOUS_CITY_TOOLTIP" Language="en_US">
+      <Text>Selects the previous city</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SELECT_NEXT_CITY" Language="en_US">
+      <Text>Select next city</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SELECT_NEXT_CITY_TOOLTIP" Language="en_US">
+      <Text>Selects the next city</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SELECT_CAPITAL_CITY" Language="en_US">
+      <Text>Select capital city</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SELECT_CAPITAL_CITY_TOOLTIP" Language="en_US">
+      <Text>Selects your capital city</Text>
+    </Row>
     <Row Tag="LOC_CAI_MESSAGE_BUFFER_PREVIOUS" Language="en_US">
       <Text>Previous Message Buffer Entry</Text>
     </Row>
@@ -2241,6 +2265,21 @@
     <!-- Unit categories and hotkeys -->
     <Row Tag="LOC_OPTIONS_HOTKEY_CATEGORY_CAI" Language="en_US">
       <Text>Accessibility</Text>
+    </Row>
+    <Row Tag="LOC_CAI_HOTKEY_CATEGORY_MESSAGE_BUFFER" Language="en_US">
+      <Text>Message buffer</Text>
+    </Row>
+    <Row Tag="LOC_CAI_HOTKEY_CATEGORY_NAVIGATION_CURSOR" Language="en_US">
+      <Text>Navigation cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_HOTKEY_CATEGORY_WORLD_SCANNER" Language="en_US">
+      <Text>World scanner</Text>
+    </Row>
+    <Row Tag="LOC_CAI_HOTKEY_CATEGORY_SURVEYOR" Language="en_US">
+      <Text>Surveyor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_HOTKEY_CATEGORY_INFORMATION" Language="en_US">
+      <Text>Information</Text>
     </Row>
     <Row Tag="LOC_CAI_HOTKEY_CATEGORY_CITY" Language="en_US">
       <Text>City Actions:</Text>
@@ -4549,6 +4588,12 @@
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_RECOMMENDATIONS" Language="en_US">
       <Text>Recommendations</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_MAP_TACS" Language="en_US">
+      <Text>Map tacs</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_MAP_TACS" Language="en_US">
+      <Text>Map tacks: {1_MapPinList}</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BUILDER_RECOMMENDATIONS" Language="en_US">
       <Text>Builder recommendations</Text>

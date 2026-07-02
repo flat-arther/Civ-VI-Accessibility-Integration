@@ -27,12 +27,19 @@
 [x] Handle different advisor recommendations
 [x]Add some flag info to unit panel selection info plottooltip
 [ ] confirm that anti-air intercepter combat previews / results work as intended
-[ ]Move abilities and xp gains to their own event, so we can report which unit got xp / abilities
 [x]Make espionage shit accessible
 [x] add city states to the cities category in the scanner
 [x] Add districts to the scanner
 [x]Fix bug in the gov screen, if you choose a policy, go to governments and back, it does not remember your selection while still excluding it from the picker
 - [x] Rework the nav cursor class to send a cursor state table for events rather than splitting between jumping and regular movement
--[ ] Capital city should say capital
 [x] Look ats in city-states, espionage, trade, and great people should move the cursor
 [x] rework icon processing
+[x] Add map pins to plot info and scanner
+[x] unit and city actions should not repeat the names in the tooltip
+[ ] add mod config
+[ ] River flow direction reporting
+[x] / to jump back to selection
+[x] Speaking input binding next to city and unit actions if any are bound
+[ ] Ad great person auras to map info, configurable
+[ ] Roads and bridges should be mentioned in plot info
+-[x] Capital city should say capital

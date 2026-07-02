@@ -1,6 +1,7 @@
 include("caiUtils")
 include("MapPinPopup")
 include("MapTacks")
+include("inGameHelpers_CAI")
 
 local mgr = ExposedMembers.CAI_UIManager
 
@@ -10,57 +11,6 @@ local m_panel       = nil
 local m_nameEdit    = nil
 local m_iconDD      = nil
 local m_iconOptions = nil
-
--- ============================================================================
--- Icon label helpers
--- ============================================================================
-
-local STOCK_ICON_LABELS = {
-    ICON_MAP_PIN_STRENGTH = "LOC_CAI_MAP_PIN_ICON_STRENGTH",
-    ICON_MAP_PIN_RANGED   = "LOC_CAI_MAP_PIN_ICON_RANGED",
-    ICON_MAP_PIN_BOMBARD  = "LOC_CAI_MAP_PIN_ICON_BOMBARD",
-    ICON_MAP_PIN_DISTRICT = "LOC_CAI_MAP_PIN_ICON_DISTRICT",
-    ICON_MAP_PIN_CHARGES  = "LOC_CAI_MAP_PIN_ICON_CHARGES",
-    ICON_MAP_PIN_DEFENSE  = "LOC_CAI_MAP_PIN_ICON_DEFENSE",
-    ICON_MAP_PIN_MOVEMENT = "LOC_CAI_MAP_PIN_ICON_MOVEMENT",
-    ICON_MAP_PIN_NO       = "LOC_CAI_MAP_PIN_ICON_NO",
-    ICON_MAP_PIN_PLUS     = "LOC_CAI_MAP_PIN_ICON_PLUS",
-    ICON_MAP_PIN_CIRCLE   = "LOC_CAI_MAP_PIN_ICON_CIRCLE",
-    ICON_MAP_PIN_TRIANGLE = "LOC_CAI_MAP_PIN_ICON_TRIANGLE",
-    ICON_MAP_PIN_SUN      = "LOC_CAI_MAP_PIN_ICON_SUN",
-    ICON_MAP_PIN_SQUARE   = "LOC_CAI_MAP_PIN_ICON_SQUARE",
-    ICON_MAP_PIN_DIAMOND  = "LOC_CAI_MAP_PIN_ICON_DIAMOND",
-}
-
-local function ResolveGameInfoName(typeKey)
-    if not typeKey then return nil end
-    local info
-    if typeKey:find("^DISTRICT_") then
-        info = GameInfo.Districts[typeKey]
-    elseif typeKey:find("^BUILDING_") then
-        info = GameInfo.Buildings[typeKey]
-    elseif typeKey:find("^IMPROVEMENT_") then
-        info = GameInfo.Improvements[typeKey]
-    elseif typeKey:find("^UNIT_") then
-        info = GameInfo.Units[typeKey]
-    end
-    if info and info.Name then
-        return Locale.Lookup(info.Name)
-    end
-    return nil
-end
-
-local function GetIconLabel(pair)
-    if pair.tooltip then
-        local locText = Locale.Lookup(pair.tooltip)
-        if locText and locText ~= "" and locText ~= pair.tooltip then return locText end
-        local infoName = ResolveGameInfoName(pair.tooltip)
-        if infoName then return infoName end
-    end
-    local stockKey = STOCK_ICON_LABELS[pair.name]
-    if stockKey then return Locale.Lookup(stockKey) end
-    return pair.name or "?"
-end
 
 -- ============================================================================
 -- Build flattened icon option list for the dropdown
@@ -75,7 +25,7 @@ local function BuildIconDropdownOptions()
         for iconIdx, pair in ipairs(section) do
             local flatIdx = #m_iconOptions + 1
             m_iconOptions[flatIdx] = { pair = pair, section = sectionIdx, index = iconIdx }
-            table.insert(options, { label = GetIconLabel(pair), value = flatIdx })
+            table.insert(options, { label = GetMapTacIconLabel(pair.name) or pair.name or "?", value = flatIdx })
         end
     end
     return options

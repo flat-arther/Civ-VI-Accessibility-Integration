@@ -27,14 +27,18 @@ local nextUnitAction = Input.GetActionId("NextUnitSelection")
 local prevReadyUnitAction = Input.GetActionId("PrevReadyUnitSelection")
 local nextReadyUnitAction = Input.GetActionId("NextReadyUnitSelection")
 local openUnitListAction = Input.GetActionId("UI_UnitPanelOpenUnitList")
-local unitViewAbilitiesAction = Input.GetActionId("UI_UnitViewAbilities")
+local unitViewAbilitiesAction = Input.GetActionId("UnitViewAbilities")
 local selectionActionsAction = Input.GetActionId("SelectionActions")
+local caiDeleteUnitAction = Input.GetActionId("CAIDeleteUnit")
 local promoteActionHash = GameInfo.UnitCommands["UNITCOMMAND_PROMOTE"] ~= nil and
     GameInfo.UnitCommands["UNITCOMMAND_PROMOTE"].Hash or
     UnitCommandTypes.PROMOTE
 local upgradeActionHash = GameInfo.UnitCommands["UNITCOMMAND_UPGRADE"] ~= nil and
     GameInfo.UnitCommands["UNITCOMMAND_UPGRADE"].Hash or
     UnitCommandTypes.UPGRADE
+local deleteActionHash = GameInfo.UnitCommands["UNITCOMMAND_DELETE"] ~= nil and
+    GameInfo.UnitCommands["UNITCOMMAND_DELETE"].Hash or
+    UnitCommandTypes.DELETE
 
 local UnitCategories = {
     {
@@ -175,6 +179,7 @@ local GetUnitActionLabel
 local GetUnitActionTooltip
 local GetControlText
 local GetControlTooltip
+local UnitActionHotkeyIds = nil
 
 local function ResolveUnit(unitID, playerID)
     if unitID == nil then
@@ -1770,6 +1775,74 @@ GetUnitActionTooltip = function(action)
     return tooltip
 end
 
+local function BuildUnitActionHotkeyIds()
+    local hotkeyIds = {}
+
+    for row in GameInfo.UnitOperations() do
+        if row.Hash ~= nil and row.HotkeyId ~= nil and row.HotkeyId ~= "" then
+            hotkeyIds[row.Hash] = row.HotkeyId
+        end
+    end
+
+    for row in GameInfo.UnitCommands() do
+        if row.Hash ~= nil and row.HotkeyId ~= nil and row.HotkeyId ~= "" then
+            hotkeyIds[row.Hash] = row.HotkeyId
+        end
+    end
+
+    hotkeyIds[deleteActionHash] = "CAIDeleteUnit"
+    return hotkeyIds
+end
+
+local function GetUnitActionInputActionId(action)
+    if action == nil or action.userTag == nil then
+        return nil
+    end
+
+    if UnitActionHotkeyIds == nil then
+        UnitActionHotkeyIds = BuildUnitActionHotkeyIds()
+    end
+
+    local hotkeyId = UnitActionHotkeyIds[action.userTag]
+    if hotkeyId == nil or hotkeyId == "" then
+        return nil
+    end
+
+    return Input.GetActionId(hotkeyId)
+end
+
+local function GetInputActionBindingText(actionId)
+    if actionId == nil then
+        return nil
+    end
+
+    local bindings = {}
+    local g1 = Input.GetGestureDisplayString(actionId, 0)
+    local g2 = Input.GetGestureDisplayString(actionId, 1)
+    if g1 ~= nil and g1 ~= "" then
+        table.insert(bindings, g1)
+    end
+    if g2 ~= nil and g2 ~= "" then
+        table.insert(bindings, g2)
+    end
+
+    if #bindings == 0 then
+        return nil
+    end
+
+    return table.concat(bindings, ", ")
+end
+
+local function GetUnitActionLabelWithBinding(action)
+    local label = GetUnitActionLabel(action) or ""
+    local binding = GetInputActionBindingText(GetUnitActionInputActionId(action))
+    if binding == nil then
+        return label
+    end
+
+    return label .. ": " .. binding
+end
+
 GetUnitActionEntries = function(data)
     if data == nil or data.Actions == nil then
         return {}
@@ -1834,7 +1907,7 @@ end
 local function CreateUnitActionMenuItem(currentAction)
     local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitPanelMenuItem"), "MenuItem", {
         GetLabel = function()
-            return GetUnitActionLabel(currentAction)
+            return GetUnitActionLabelWithBinding(currentAction)
         end,
         GetTooltip = function()
             return GetUnitActionTooltip(currentAction)
@@ -2251,7 +2324,14 @@ local function BuildUnitActionList(data)
 
     if data ~= nil and data.Ability ~= nil and #data.Ability > 0 then
         local abilities = mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitViewAbilities"), "MenuItem", {
-            GetLabel = function() return Locale.Lookup("LOC_CAI_UNIT_VIEW_ABILITIES") end,
+            GetLabel = function()
+                local label = Locale.Lookup("LOC_CAI_UNIT_VIEW_ABILITIES")
+                local binding = GetInputActionBindingText(unitViewAbilitiesAction)
+                if binding ~= nil then
+                    return label .. ": " .. binding
+                end
+                return label
+            end,
             GetTooltip = function() return Locale.Lookup("LOC_CAI_UNIT_VIEW_ABILITIES_TOOLTIP") end,
         })
         abilities:SetFocusSound("Main_Menu_Mouse_Over")
@@ -2515,6 +2595,14 @@ function OnUnitPanelSelectionActionInputTriggered(actionId)
 
     if actionId == selectionActionsAction then
         OpenUnitActionList()
+        return
+    end
+
+    if actionId == caiDeleteUnitAction then
+        if ContextPtr:IsHidden() or GetSelectedUnit() == nil then return end
+
+        UI.PlaySound("Play_UI_Click")
+        OnPromptToDeleteUnit()
         return
     end
 

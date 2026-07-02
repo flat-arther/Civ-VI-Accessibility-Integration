@@ -85,6 +85,7 @@
     <File>UI/inGame/WonderBuiltPopup_CAI.lua</File>
     <File>UI/inGame/ProjectBuiltPopup_CAI.lua</File>
     <File>UI/inGame/RockBandMoviePopup_CAI.lua</File>
+    <File>UI/inGame/RockBandPopup_CAI.lua</File>
     <File>UI/inGame/ChooseArtifact_CAI.lua</File>
     <File>UI/inGame/SecretSocietyPopup_CAI.lua</File>
     <File>UI/inGame/TreatWithTribePopup_CAI.lua</File>
@@ -98,6 +99,7 @@
     <File>UI/inGame/WorldTracker_CAI.lua</File>
     <File>UI/inGame/TopPanel_CAI.lua</File>
     <File>UI/inGame/NotificationPanel_CAI.lua</File>
+    <File>UI/inGame/StatusMessagePanel_CAI.lua</File>
     <File>UI/inGame/GovernmentScreen_CAI.lua</File>
     <File>UI/inGame/ResearchChooser_CAI.lua</File>
     <File>UI/inGame/inGameHelpers_CAI.lua</File>
@@ -131,6 +133,7 @@
     <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_mapTacs.lua</File>
     <File>UI/inGame/CityStates_CAI.lua</File>
     <File>UI/inGame/ReligionScreen_CAI.lua</File>
     <File>UI/inGame/PantheonChooser_CAI.lua</File>
@@ -376,6 +379,7 @@
       <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_mapTacs.lua</File>
       <File>UI/inGame/NaturalDisasterPopup_CAI.lua</File>
       <!-- EndGameMenu is a wildcard host (include("EndGameMenu_", true)),
            so the CAI layer rides that wildcard as an imported file. -->
@@ -459,6 +463,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>TopPanel</LuaContext>
         <LuaReplace>UI/inGame/TopPanel_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_StatusMessagePanel">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>StatusMessagePanel</LuaContext>
+        <LuaReplace>UI/inGame/StatusMessagePanel_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 
@@ -920,6 +932,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>RockBandMoviePopup</LuaContext>
         <LuaReplace>UI/inGame/RockBandMoviePopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_RockBandPopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>RockBandPopup</LuaContext>
+        <LuaReplace>UI/inGame/RockBandPopup_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

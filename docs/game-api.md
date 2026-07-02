@@ -10,6 +10,7 @@ Keys confirmed safe to bind in mods without conflicting with game defaults:
 - `Keys.VK_HOME`, `Keys.VK_END` — not bound by default
 - `Keys.VK_PRIOR` (Page Up), `Keys.VK_NEXT` (Page Down) — not bound by default
 - `Keys.VK_NUMPAD1` through `Keys.VK_NUMPAD9` — hex grid navigation
+- `Keys.VK_OEM_2` / `/` — CAI global cursor-to-selection action
 - `Keys.VK_SPACE` — safe for checkbox toggle (game uses for other contexts)
 - `Keys.VK_RETURN` — safe for button activation
 - `Keys.VK_ESCAPE` — standard cancel/close
@@ -46,6 +47,7 @@ Passed to input handlers. Methods:
 - `Input.StopRecordingGestures()` — stops gesture capture
 - `Input.ClearRecordedGestures()` — clears captured gestures
 - `Input.SetActiveContext(context)` — sets the active input context (e.g. `InputContext.Startup`)
+- CAI hotkey categories in `src/data/hotkey_config_CAI.xml` are intentionally split by task instead of one broad CAI bucket. Current narrow buckets are `CAI_MESSAGE_BUFFER`, `CAI_NAVIGATION_CURSOR`, `CAI_WORLD_SCANNER`, `CAI_SURVEYOR`, and `CAI_INFORMATION`; the existing `CAI_UNIT`, `CAI_GLOBAL`, `CAI_UI`, `CITY`, `CAI_ONLINE`, and `CAI_LENSES` categories remain separate.
 - For CAI unit hotkeys, keep the hotkey surface aligned with vanilla `VisibleInUI`. If a `UnitOperations.xml` or `UnitCommands.xml` row is hidden there, do not register a CAI `InputActions` row for it and do not assign a `HotkeyId`, or it will appear in the keybinding UI even though vanilla intentionally hides it.
 - Avoid exposing duplicate keybinding entries for the same user action. In particular, `UNITOPERATION_UPGRADE` already covers unit upgrading in the keybinding UI, so CAI should not also expose a separate `UNITCOMMAND_UPGRADE` binding row.
 - Also avoid exposing unit actions whose vanilla UI expands one action id into multiple concrete choices or collapses several DB rows into one chooser. Confirmed examples are `UNITOPERATION_BUILD_IMPROVEMENT`, `UNITCOMMAND_ENTER_FORMATION`, `UNITOPERATION_WMD_STRIKE`, and the offensive-spy mission operations.
@@ -387,7 +389,7 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - `Shift+E` reads friendly units.
   - `Shift+D` reads visible enemy units.
   - `Shift+C` reads known cities and barbarian camps.
-- To free those Surveyor keys, `WorldTrackerReadSummary` is now `R`, `PlotReadDistrictBuildings` is `Shift+X`, `UnitViewAbilities` is `Ctrl+A`, and `WorldTrackerOpenCivicsChooser` is `Ctrl+C`.
+- To free those Surveyor keys, `WorldTrackerReadSummary` is now `R`, `PlotReadDistrictBuildings` is `Shift+X`, `UnitViewAbilities` is `Alt+/`, and `WorldTrackerOpenCivicsChooser` is `Ctrl+C`.
 - Surveyor resources should use `plot:GetResourceType()`, `plot:GetResourceCount()`, and `localPlayer:GetResources():IsResourceVisible(resource.Hash)` so invisible strategic resources stay hidden.
 - Surveyor units should scan `Units.GetUnitsInPlotLayerID(x, y, MapLayers.ANY)` on revealed plots; enemy-unit speech should additionally require actual visibility through `PlayersVisibility[observer]:IsUnitVisible(unit)`.
 
@@ -409,6 +411,7 @@ Wrapper for `CAI.output`. Use this for all TTS output.
 - Every scanner category now gets an implicit `All` subcategory from `WorldScannerCore.lua`. It is always inserted first and contains every validated item in that category, grouped through the same `GroupId` / `GroupLabelResolver` path as normal subcategories.
 - `hexCoordUtils_CAI.lua` now owns shared original-capital lookup, relative-coordinate math, wrap-aware spoken hex geometry helpers, and reusable direction/path utilities (`directionString`, `stepListString`, `stepListFromPath`, `unitVector`, `cubeDistance`, `directionRank`, `plotsInRange`).
 - Plot tooltip relative coordinates should call `GetRelativeCoords(plot)` and format the returned `dx, dy` locally; world scanner item speech should call `GetDirectionString(cursorX, cursorY, targetX, targetY)` and speak direction text instead of tile distance.
+- Map tacs / map pins are read from `PlayerConfigurations[iPlayer]:GetMapPins()` and filtered with `mapPinCfg:IsVisible(localPlayerID)`. Shared label helpers live in `inGameHelpers_CAI.lua`: `BuildMapTacLabel(mapPinCfg)` returns name + icon, `BuildMapTacLabelWithOwner(mapPinCfg, playerID, localPlayerID)` appends the owner name for non-local tacs, `GetVisibleMapTacsAtPlot(plot)` returns visible tacs on a plot, and `GetMapTacIconLabel(iconName)` mirrors `MapTacks.IconOptions(...)` tooltip resolution plus CAI stock-icon localization fallbacks. The world scanner `mapTacs` category builds dynamic subcategories: `My` first, then one subcategory per other visible pin owner. Scanner groups use the item label as their normal group label. `PlotToolTip_CAI.lua` collects visible tack labels into one owner-aware list and speaks it through `LOC_CAI_PLOT_MAP_TACS` as `Map tacks: {list}`.
 - Shared unit naming now lives in `inGameHelpers_CAI.lua`:
   - `GetUnitFormationSuffix(unit)` is the single formation-suffix helper for live unit objects
   - `GetUnitDataFormationSuffix(data)` is the matching helper for vanilla `UnitPanel` data tables
@@ -583,10 +586,13 @@ Wrapper for `CAI.output`. Use this for all TTS output.
     - `Events.Combat(combatResults)` fires after combat resolves and reuses the same hashed `CombatResultParameters` table shape as preview simulation. CAI can read `ATTACKER`, `DEFENDER`, `INTERCEPTOR`, `ANTI_AIR`, `COMBAT_TYPE`, `LOCATION`, `ATTACKER_ADVANCES`, `DEFENDER_CAPTURED`, `DEFENDER_RETALIATES`, `LOCATION_PILLAGED`, `DAMAGE_TO`, `FINAL_DAMAGE_TO`, `DEFENSE_DAMAGE_TO`, `FINAL_DEFENSE_DAMAGE_TO`, `MAX_HIT_POINTS`, `MAX_DEFENSE_HIT_POINTS`, and the nested `ID` payloads from that event without depending on UnitPanel preview visibility.
     - Nested combatant ids in the results table use the same component-id shape UnitPanel reads from `CombatResultParameters.ID`: `id.player`, `id.id`, and `id.type`. Vanilla resolves unit ids with `UnitManager.GetUnit(id.player, id.id)` and district ids with `Players[id.player]:GetDistricts():FindID(id.id)`. Plot-only targets fall back to `CombatResultParameters.LOCATION`.
     - Preview-only text arrays such as `PREVIEW_TEXT_TERRAIN`, `PREVIEW_TEXT_HEALTH`, `PREVIEW_TEXT_OPPONENT`, `PREVIEW_TEXT_MODIFIER`, `PREVIEW_TEXT_ASSIST`, `PREVIEW_TEXT_PROMOTION`, `PREVIEW_TEXT_DEFENSES`, `PREVIEW_TEXT_RESOURCES`, `PREVIEW_TEXT_INTERCEPTOR`, and `PREVIEW_TEXT_ANTI_AIR` are useful for verbose preview breakdowns, but a post-combat summary can ignore them and instead derive concise spoken outcomes from resolved names plus `DAMAGE_TO` / `FINAL_*` / capture-pillaged flags.
-  - `src/data/unitOperationConfig.sql` assigns missing `HotkeyId` values for visible vanilla `UnitOperations` and visible vanilla `UnitCommands`. Unit-command action ids use the `UnitCommand...` prefix to avoid colliding with operation action ids such as `Upgrade`.
+  - `src/data/unitOperationConfig_CAI.sql` assigns missing `HotkeyId` values for visible vanilla `UnitOperations` and visible vanilla `UnitCommands`. Unit-command action ids use the `UnitCommand...` prefix to avoid colliding with operation action ids such as `Upgrade`.
   - `UNITCOMMAND_DELETE` is intentionally not assigned through `UnitCommands.HotkeyId`: vanilla already exposes the `DeleteUnit` input action and separately special-cases it in `OnInputActionTriggered`, so adding it to `m_kHotkeyActions` could double-call the delete prompt.
-  - `UnitPanel_CAI.lua` extends `ExposedMembers.CAIInfo` with `RequestUnitInfo(unitID, requestedKeys, playerID)`, defaults to `UI.GetHeadSelectedUnit()`, and uses the same `ReadUnitData` / `GetSubjectData` data rather than reimplementing unit state.
+- `UnitPanel_CAI.lua` extends `ExposedMembers.CAIInfo` with `RequestUnitInfo(unitID, requestedKeys, playerID)`, defaults to `UI.GetHeadSelectedUnit()`, and uses the same `ReadUnitData` / `GetSubjectData` data rather than reimplementing unit state.
 - `UnitPanel_CAI.lua` handles the shared selection info inputs (`~`, `Shift+1` through `Shift+0`) when a unit is selected and opens a transient action list from the existing `SelectionActions` input.
+  - CAI unit action-list labels append bound gestures after `: ` by mapping each vanilla action row's `userTag` hash back to its `UnitOperations.HotkeyId` or `UnitCommands.HotkeyId`, then reading `Input.GetGestureDisplayString(actionId, 0/1)`.
+  - The standalone view-abilities action id is `UnitViewAbilities`; keep Lua `Input.GetActionId(...)`, `hotkey_config_CAI.xml`, and default gestures on that exact id. `UI_UnitViewAbilities` is not a registered input action.
+  - `CAIDeleteUnit` replaces vanilla's `DeleteUnit` input binding for CAI defaults. It must still call vanilla `OnPromptToDeleteUnit()`, not request deletion directly, so the `CanStartCommand(... DELETE ...)` check, confirmation dialog, `m_DeleteInProgress` guard, and `OnDeleteUnit(unitID)` lens cleanup remain vanilla-owned. The action-list binding display special-cases `UNITCOMMAND_DELETE` to `CAIDeleteUnit` because vanilla intentionally does not assign `UnitCommands.HotkeyId` for delete.
   - Current unit bucket mapping is:
     - `Shift+6` -> unit stats
     - `Shift+7` -> unit abilities
@@ -774,6 +780,8 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - Zone tracking announces continent, owner, territory (XP2 deserts/mountains/seas/lakes/oceans), volcano (XP2), natural wonder, and national park on first entry only.
   - Query-style access remains available through the WorldInput `UI` hijack: `UI.GetCursorPlotID()` and `UI.GetCursorPlotCoord()`.
   - Current default cursor input actions are `CAICursorMoveNorthWest`, `CAICursorMoveNorthEast`, `CAICursorMoveWest`, `CAICursorMoveEast`, `CAICursorMoveSouthWest`, and `CAICursorMoveSouthEast`, bound by default to `Q/E`, `A/D`, `Z/C` with numpad `7/9`, `4/6`, `1/3` as alternate bindings.
+  - `CAICursorJumpToSelection` is a global world input action bound to `/`. It checks `UI.GetHeadSelectedUnit()` first, then `UI.GetHeadSelectedCity()`, resolves the object's plot with `Map.GetPlot(x, y):GetIndex()`, and raises `LuaEvents.CAICursorMoveTo(plotIndex, "jump")`.
+  - CAI city selection replacements use `WorldSelectPreviousCity_CAI` (`[`), `WorldSelectNextCity_CAI` (`]`), and `WorldSelectCapitalCity_CAI` (`\`). They mirror vanilla `WorldInput.lua`: previous/next call `UI.SelectPrevCity(UI.GetHeadSelectedCity())` / `UI.SelectNextCity(UI.GetHeadSelectedCity())`; capital resolves the local capital city and calls `UI.SelectNextCity(capital)`. Use CAI-owned name/description locale keys for these replacement actions; reusing vanilla `LOC_OPTIONS_HOTKEY_GLOBAL_*` labels conflicts in the keybinding UI.
 - `WorldInput_CAI.lua` wraps vanilla `WorldInput.lua`:
   - CAI installs all `UI` table overrides in one `InstallUIOverrides()` section. Current overrides are `UI.GetCursorPlotID()` and `UI.GetCursorPlotCoord()`.
   - CAI keeps the vanilla `Events.LoadScreenClose` boundary by wrapping `OnLoadScreenClose(...)`; the main game view widget is created and pushed only after the load screen closes.

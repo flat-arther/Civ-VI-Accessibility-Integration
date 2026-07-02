@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameInfo>
   <InputCategories>
-    <Row CategoryId="CAI" Name="LOC_OPTIONS_HOTKEY_CATEGORY_CAI" Visible="1" SortIndex="0" />
+    <Row CategoryId="CAI_MESSAGE_BUFFER" Name="LOC_CAI_HOTKEY_CATEGORY_MESSAGE_BUFFER" Visible="1" SortIndex="0" />
+    <Row CategoryId="CAI_NAVIGATION_CURSOR" Name="LOC_CAI_HOTKEY_CATEGORY_NAVIGATION_CURSOR" Visible="1" SortIndex="0" />
+    <Row CategoryId="CAI_WORLD_SCANNER" Name="LOC_CAI_HOTKEY_CATEGORY_WORLD_SCANNER" Visible="1" SortIndex="0" />
+    <Row CategoryId="CAI_SURVEYOR" Name="LOC_CAI_HOTKEY_CATEGORY_SURVEYOR" Visible="1" SortIndex="0" />
+    <Row CategoryId="CAI_INFORMATION" Name="LOC_CAI_HOTKEY_CATEGORY_INFORMATION" Visible="1" SortIndex="0" />
     <Row CategoryId="CITY" Name="LOC_CAI_HOTKEY_CATEGORY_CITY" Visible="1" SortIndex="0" />
     <Row CategoryId="CAI_UI" Name="LOC_CAI_HOTKEY_CATEGORY_UI" Visible="1" SortIndex="0" />
     <Row CategoryId="CAI_UNIT" Name="LOC_CAI_HOTKEY_CATEGORY_UNIT" Visible="1" SortIndex="0" />
@@ -12,85 +16,85 @@
 
   <InputActions>
     <!-- ===== CAI: Accessibility — cursor, scanner, surveyor, plot/yield reading, widget interaction, buffer ===== -->
-    <Row ActionId="MessageBufferPrevious" Name="LOC_CAI_MESSAGE_BUFFER_PREVIOUS" Description="LOC_CAI_MESSAGE_BUFFER_PREVIOUS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="MessageBufferNext" Name="LOC_CAI_MESSAGE_BUFFER_NEXT" Description="LOC_CAI_MESSAGE_BUFFER_NEXT_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="MessageBufferFirst" Name="LOC_CAI_MESSAGE_BUFFER_FIRST" Description="LOC_CAI_MESSAGE_BUFFER_FIRST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="MessageBufferLast" Name="LOC_CAI_MESSAGE_BUFFER_LAST" Description="LOC_CAI_MESSAGE_BUFFER_LAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="MessageBufferPreviousCategory" Name="LOC_CAI_MESSAGE_BUFFER_PREVIOUS_CATEGORY" Description="LOC_CAI_MESSAGE_BUFFER_PREVIOUS_CATEGORY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="MessageBufferNextCategory" Name="LOC_CAI_MESSAGE_BUFFER_NEXT_CATEGORY" Description="LOC_CAI_MESSAGE_BUFFER_NEXT_CATEGORY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="ReadSelectionSummary" Name="LOC_CAI_READ_SELECTION_SUMMARY" Description="LOC_CAI_READ_SELECTION_SUMMARY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="ReadSelectionInfo1" Name="LOC_CAI_READ_SELECTION_INFO1" Description="LOC_CAI_READ_SELECTION_INFO1_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="ReadSelectionInfo2" Name="LOC_CAI_READ_SELECTION_INFO2" Description="LOC_CAI_READ_SELECTION_INFO2_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="ReadSelectionInfo3" Name="LOC_CAI_READ_SELECTION_INFO3" Description="LOC_CAI_READ_SELECTION_INFO3_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="ReadSelectionInfo4" Name="LOC_CAI_READ_SELECTION_INFO4" Description="LOC_CAI_READ_SELECTION_INFO4_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="ReadSelectionInfo5" Name="LOC_CAI_READ_SELECTION_INFO5" Description="LOC_CAI_READ_SELECTION_INFO5_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="ReadSelectionInfo6" Name="LOC_CAI_READ_SELECTION_INFO6" Description="LOC_CAI_READ_SELECTION_INFO6_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="ReadSelectionInfo7" Name="LOC_CAI_READ_SELECTION_INFO7" Description="LOC_CAI_READ_SELECTION_INFO7_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="ReadSelectionInfo8" Name="LOC_CAI_READ_SELECTION_INFO8" Description="LOC_CAI_READ_SELECTION_INFO8_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="ReadSelectionInfo9" Name="LOC_CAI_READ_SELECTION_INFO9" Description="LOC_CAI_READ_SELECTION_INFO9_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="ReadSelectionInfo10" Name="LOC_CAI_READ_SELECTION_INFO10" Description="LOC_CAI_READ_SELECTION_INFO10_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SelectionActions" Name="LOC_CAI_SELECTION_ACTIONS" Description="LOC_CAI_SELECTION_ACTIONS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="InterfaceInfo" Name="LOC_CAI_INTERFACE_INFO" Description="LOC_CAI_INTERFACE_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="InterfaceWidgetPrimaryAction" Name="LOC_CAI_INTERFACE_PRIMARY_ACTION" Description="LOC_CAI_INTERFACE_PRIMARY_ACTION_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="InterfaceWidgetSecondaryAction" Name="LOC_CAI_INTERFACE_SECONDARY_ACTION" Description="LOC_CAI_INTERFACE_SECONDARY_ACTION_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="ActionPanelSpeakEraAge" Name="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE" Description="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CAI_SpeakGovernerTitles" Name="LOC_CAI_SPEAK_GOVERNER_TITLES" Description="LOC_CAI_SPEAK_GOVERNER_TITLES_DESC" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CAICursorMoveNorthWest" Name="LOC_CAI_CURSOR_MOVE_NORTHWEST" Description="LOC_CAI_CURSOR_MOVE_NORTHWEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CAICursorMoveNorthEast" Name="LOC_CAI_CURSOR_MOVE_NORTHEAST" Description="LOC_CAI_CURSOR_MOVE_NORTHEAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CAICursorMoveWest" Name="LOC_CAI_CURSOR_MOVE_WEST" Description="LOC_CAI_CURSOR_MOVE_WEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CAICursorMoveEast" Name="LOC_CAI_CURSOR_MOVE_EAST" Description="LOC_CAI_CURSOR_MOVE_EAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CAICursorMoveSouthWest" Name="LOC_CAI_CURSOR_MOVE_SOUTHWEST" Description="LOC_CAI_CURSOR_MOVE_SOUTHWEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CAICursorMoveSouthEast" Name="LOC_CAI_CURSOR_MOVE_SOUTHEAST" Description="LOC_CAI_CURSOR_MOVE_SOUTHEAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="QuickMoveNorthWest" Name="LOC_CAI_QUICK_MOVE_NORTHWEST" Description="LOC_CAI_QUICK_MOVE_NORTHWEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="QuickMoveNorthEast" Name="LOC_CAI_QUICK_MOVE_NORTHEAST" Description="LOC_CAI_QUICK_MOVE_NORTHEAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="QuickMoveWest" Name="LOC_CAI_QUICK_MOVE_WEST" Description="LOC_CAI_QUICK_MOVE_WEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="QuickMoveEast" Name="LOC_CAI_QUICK_MOVE_EAST" Description="LOC_CAI_QUICK_MOVE_EAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="QuickMoveSouthWest" Name="LOC_CAI_QUICK_MOVE_SOUTHWEST" Description="LOC_CAI_QUICK_MOVE_SOUTHWEST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="QuickMoveSouthEast" Name="LOC_CAI_QUICK_MOVE_SOUTHEAST" Description="LOC_CAI_QUICK_MOVE_SOUTHEAST_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="UI_TopPanelSpeakTurnTimeDate" Name="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE" Description="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="UI_TopPanelSpeakScience" Name="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE" Description="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="UI_TopPanelSpeakCulture" Name="LOC_CAI_TOP_PANEL_SPEAK_CULTURE" Description="LOC_CAI_TOP_PANEL_SPEAK_CULTURE_TOOLTIP" CategoryId="CAI" ContextId="WorldOrPopup" LayoutType="PC"/>
-    <Row ActionId="UI_TopPanelSpeakGold" Name="LOC_CAI_TOP_PANEL_SPEAK_GOLD" Description="LOC_CAI_TOP_PANEL_SPEAK_GOLD_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="UI_TopPanelSpeakFaith" Name="LOC_CAI_TOP_PANEL_SPEAK_FAITH" Description="LOC_CAI_TOP_PANEL_SPEAK_FAITH_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="UI_TopPanelSpeakTourism" Name="LOC_CAI_TOP_PANEL_SPEAK_TOURISM" Description="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="UI_TopPanelSpeakFavor" Name="LOC_CAI_TOP_PANEL_SPEAK_FAVOR" Description="LOC_CAI_TOP_PANEL_SPEAK_FAVOR_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="UI_TopPanelSpeakNukes" Name="LOC_CAI_TOP_PANEL_SPEAK_NUKES" Description="LOC_CAI_TOP_PANEL_SPEAK_NUKES_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="UI_TopPanelYieldInfoList" Name="LOC_CAI_TOP_PANEL_YIELD_INFO" Description="LOC_CAI_TOP_PANEL_YIELD_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="UI_TopPanelResourceInfoList" Name="LOC_CAI_TOP_PANEL_RESOURCE_INFO" Description="LOC_CAI_TOP_PANEL_RESOURCE_INFO_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CAISpeakGovernmentTooltip" Name="LOC_CAI_SPEAK_GOVERNMENT_TOOLTIP" Description="LOC_CAI_SPEAK_GOVERNMENT_TOOLTIP_DESC" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotReadUnits" Name="LOC_CAI_PLOT_READ_UNITS" Description="LOC_CAI_PLOT_READ_UNITS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotReadYieldRiverOwner" Name="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER" Description="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotReadStats" Name="LOC_CAI_PLOT_READ_STATS" Description="LOC_CAI_PLOT_READ_STATS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotReadRelativeCoords" Name="LOC_CAI_PLOT_READ_RELATIVE_COORDS" Description="LOC_CAI_PLOT_READ_RELATIVE_COORDS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotReadDistrictBuildings" Name="LOC_CAI_PLOT_READ_DISTRICT_BUILDINGS" Description="LOC_CAI_PLOT_READ_DISTRICT_BUILDINGS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotReadGeography" Name="LOC_CAI_PLOT_READ_GEOGRAPHY" Description="LOC_CAI_PLOT_READ_GEOGRAPHY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SurveyorGrowRadius" Name="LOC_CAI_SURVEYOR_GROW_RADIUS" Description="LOC_CAI_SURVEYOR_GROW_RADIUS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SurveyorShrinkRadius" Name="LOC_CAI_SURVEYOR_SHRINK_RADIUS" Description="LOC_CAI_SURVEYOR_SHRINK_RADIUS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SurveyorReadYields" Name="LOC_CAI_SURVEYOR_READ_YIELDS" Description="LOC_CAI_SURVEYOR_READ_YIELDS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SurveyorReadResources" Name="LOC_CAI_SURVEYOR_READ_RESOURCES" Description="LOC_CAI_SURVEYOR_READ_RESOURCES_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SurveyorReadTerrain" Name="LOC_CAI_SURVEYOR_READ_TERRAIN" Description="LOC_CAI_SURVEYOR_READ_TERRAIN_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SurveyorReadOwnUnits" Name="LOC_CAI_SURVEYOR_READ_OWN_UNITS" Description="LOC_CAI_SURVEYOR_READ_OWN_UNITS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SurveyorReadEnemyUnits" Name="LOC_CAI_SURVEYOR_READ_ENEMY_UNITS" Description="LOC_CAI_SURVEYOR_READ_ENEMY_UNITS_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="SurveyorReadCities" Name="LOC_CAI_SURVEYOR_READ_CITIES" Description="LOC_CAI_SURVEYOR_READ_CITIES_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityBannerReadIdentityStatus" Name="LOC_CAI_CITY_BANNER_READ_1" Description="LOC_CAI_CITY_BANNER_READ_1_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityBannerReadGrowthInfluence" Name="LOC_CAI_CITY_BANNER_READ_2" Description="LOC_CAI_CITY_BANNER_READ_2_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityBannerReadReligion" Name="LOC_CAI_CITY_BANNER_READ_3" Description="LOC_CAI_CITY_BANNER_READ_3_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityBannerReadDiplomacy" Name="LOC_CAI_CITY_BANNER_READ_4" Description="LOC_CAI_CITY_BANNER_READ_4_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityBannerReadLoyaltySummary" Name="LOC_CAI_CITY_BANNER_READ_5" Description="LOC_CAI_CITY_BANNER_READ_5_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityBannerReadGovernor" Name="LOC_CAI_CITY_BANNER_READ_6" Description="LOC_CAI_CITY_BANNER_READ_6_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityBannerReadPower" Name="LOC_CAI_CITY_BANNER_READ_7" Description="LOC_CAI_CITY_BANNER_READ_7_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="WorldScannerPrevCategory" Name="LOC_CAI_WORLD_SCANNER_PREV_CATEGORY" Description="LOC_CAI_WORLD_SCANNER_PREV_CATEGORY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="WorldScannerNextCategory" Name="LOC_CAI_WORLD_SCANNER_NEXT_CATEGORY" Description="LOC_CAI_WORLD_SCANNER_NEXT_CATEGORY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="WorldScannerPrevSubCategory" Name="LOC_CAI_WORLD_SCANNER_PREV_SUBCATEGORY" Description="LOC_CAI_WORLD_SCANNER_PREV_SUBCATEGORY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="WorldScannerNextSubCategory" Name="LOC_CAI_WORLD_SCANNER_NEXT_SUBCATEGORY" Description="LOC_CAI_WORLD_SCANNER_NEXT_SUBCATEGORY_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="WorldScannerPrevGroup" Name="LOC_CAI_WORLD_SCANNER_PREV_GROUP" Description="LOC_CAI_WORLD_SCANNER_PREV_GROUP_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="WorldScannerNextGroup" Name="LOC_CAI_WORLD_SCANNER_NEXT_GROUP" Description="LOC_CAI_WORLD_SCANNER_NEXT_GROUP_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="WorldScannerPrevItem" Name="LOC_CAI_WORLD_SCANNER_PREV_ITEM" Description="LOC_CAI_WORLD_SCANNER_PREV_ITEM_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="WorldScannerNextItem" Name="LOC_CAI_WORLD_SCANNER_NEXT_ITEM" Description="LOC_CAI_WORLD_SCANNER_NEXT_ITEM_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="WorldScannerJumpToCurrent" Name="LOC_CAI_WORLD_SCANNER_JUMP" Description="LOC_CAI_WORLD_SCANNER_JUMP_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="WorldScannerReturnFromJump" Name="LOC_CAI_WORLD_SCANNER_RETURN" Description="LOC_CAI_WORLD_SCANNER_RETURN_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="WorldScannerSpeakCurrentDirection" Name="LOC_CAI_WORLD_SCANNER_SPEAK_DIRECTION" Description="LOC_CAI_WORLD_SCANNER_SPEAK_DIRECTION_TOOLTIP" CategoryId="CAI" ContextId="WorldOrFullScreenMap" LayoutType="PC"/>
-    <Row ActionId="WorldScannerSearch" Name="LOC_CAI_WORLD_SCANNER_SEARCH" Description="LOC_CAI_WORLD_SCANNER_SEARCH_TOOLTIP" CategoryId="CAI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="MessageBufferPrevious" Name="LOC_CAI_MESSAGE_BUFFER_PREVIOUS" Description="LOC_CAI_MESSAGE_BUFFER_PREVIOUS_TOOLTIP" CategoryId="CAI_MESSAGE_BUFFER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="MessageBufferNext" Name="LOC_CAI_MESSAGE_BUFFER_NEXT" Description="LOC_CAI_MESSAGE_BUFFER_NEXT_TOOLTIP" CategoryId="CAI_MESSAGE_BUFFER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="MessageBufferFirst" Name="LOC_CAI_MESSAGE_BUFFER_FIRST" Description="LOC_CAI_MESSAGE_BUFFER_FIRST_TOOLTIP" CategoryId="CAI_MESSAGE_BUFFER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="MessageBufferLast" Name="LOC_CAI_MESSAGE_BUFFER_LAST" Description="LOC_CAI_MESSAGE_BUFFER_LAST_TOOLTIP" CategoryId="CAI_MESSAGE_BUFFER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="MessageBufferPreviousCategory" Name="LOC_CAI_MESSAGE_BUFFER_PREVIOUS_CATEGORY" Description="LOC_CAI_MESSAGE_BUFFER_PREVIOUS_CATEGORY_TOOLTIP" CategoryId="CAI_MESSAGE_BUFFER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="MessageBufferNextCategory" Name="LOC_CAI_MESSAGE_BUFFER_NEXT_CATEGORY" Description="LOC_CAI_MESSAGE_BUFFER_NEXT_CATEGORY_TOOLTIP" CategoryId="CAI_MESSAGE_BUFFER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionSummary" Name="LOC_CAI_READ_SELECTION_SUMMARY" Description="LOC_CAI_READ_SELECTION_SUMMARY_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo1" Name="LOC_CAI_READ_SELECTION_INFO1" Description="LOC_CAI_READ_SELECTION_INFO1_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo2" Name="LOC_CAI_READ_SELECTION_INFO2" Description="LOC_CAI_READ_SELECTION_INFO2_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo3" Name="LOC_CAI_READ_SELECTION_INFO3" Description="LOC_CAI_READ_SELECTION_INFO3_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo4" Name="LOC_CAI_READ_SELECTION_INFO4" Description="LOC_CAI_READ_SELECTION_INFO4_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo5" Name="LOC_CAI_READ_SELECTION_INFO5" Description="LOC_CAI_READ_SELECTION_INFO5_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo6" Name="LOC_CAI_READ_SELECTION_INFO6" Description="LOC_CAI_READ_SELECTION_INFO6_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo7" Name="LOC_CAI_READ_SELECTION_INFO7" Description="LOC_CAI_READ_SELECTION_INFO7_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo8" Name="LOC_CAI_READ_SELECTION_INFO8" Description="LOC_CAI_READ_SELECTION_INFO8_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo9" Name="LOC_CAI_READ_SELECTION_INFO9" Description="LOC_CAI_READ_SELECTION_INFO9_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReadSelectionInfo10" Name="LOC_CAI_READ_SELECTION_INFO10" Description="LOC_CAI_READ_SELECTION_INFO10_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SelectionActions" Name="LOC_CAI_SELECTION_ACTIONS" Description="LOC_CAI_SELECTION_ACTIONS_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="InterfaceInfo" Name="LOC_CAI_INTERFACE_INFO" Description="LOC_CAI_INTERFACE_INFO_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="InterfaceWidgetPrimaryAction" Name="LOC_CAI_INTERFACE_PRIMARY_ACTION" Description="LOC_CAI_INTERFACE_PRIMARY_ACTION_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="InterfaceWidgetSecondaryAction" Name="LOC_CAI_INTERFACE_SECONDARY_ACTION" Description="LOC_CAI_INTERFACE_SECONDARY_ACTION_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ActionPanelSpeakEraAge" Name="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE" Description="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAI_SpeakGovernerTitles" Name="LOC_CAI_SPEAK_GOVERNER_TITLES" Description="LOC_CAI_SPEAK_GOVERNER_TITLES_DESC" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAICursorMoveNorthWest" Name="LOC_CAI_CURSOR_MOVE_NORTHWEST" Description="LOC_CAI_CURSOR_MOVE_NORTHWEST_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAICursorMoveNorthEast" Name="LOC_CAI_CURSOR_MOVE_NORTHEAST" Description="LOC_CAI_CURSOR_MOVE_NORTHEAST_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAICursorMoveWest" Name="LOC_CAI_CURSOR_MOVE_WEST" Description="LOC_CAI_CURSOR_MOVE_WEST_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAICursorMoveEast" Name="LOC_CAI_CURSOR_MOVE_EAST" Description="LOC_CAI_CURSOR_MOVE_EAST_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAICursorMoveSouthWest" Name="LOC_CAI_CURSOR_MOVE_SOUTHWEST" Description="LOC_CAI_CURSOR_MOVE_SOUTHWEST_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAICursorMoveSouthEast" Name="LOC_CAI_CURSOR_MOVE_SOUTHEAST" Description="LOC_CAI_CURSOR_MOVE_SOUTHEAST_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="QuickMoveNorthWest" Name="LOC_CAI_QUICK_MOVE_NORTHWEST" Description="LOC_CAI_QUICK_MOVE_NORTHWEST_TOOLTIP" CategoryId="CAI_UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="QuickMoveNorthEast" Name="LOC_CAI_QUICK_MOVE_NORTHEAST" Description="LOC_CAI_QUICK_MOVE_NORTHEAST_TOOLTIP" CategoryId="CAI_UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="QuickMoveWest" Name="LOC_CAI_QUICK_MOVE_WEST" Description="LOC_CAI_QUICK_MOVE_WEST_TOOLTIP" CategoryId="CAI_UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="QuickMoveEast" Name="LOC_CAI_QUICK_MOVE_EAST" Description="LOC_CAI_QUICK_MOVE_EAST_TOOLTIP" CategoryId="CAI_UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="QuickMoveSouthWest" Name="LOC_CAI_QUICK_MOVE_SOUTHWEST" Description="LOC_CAI_QUICK_MOVE_SOUTHWEST_TOOLTIP" CategoryId="CAI_UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="QuickMoveSouthEast" Name="LOC_CAI_QUICK_MOVE_SOUTHEAST" Description="LOC_CAI_QUICK_MOVE_SOUTHEAST_TOOLTIP" CategoryId="CAI_UNIT" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UI_TopPanelSpeakTurnTimeDate" Name="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE" Description="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UI_TopPanelSpeakScience" Name="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE" Description="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UI_TopPanelSpeakCulture" Name="LOC_CAI_TOP_PANEL_SPEAK_CULTURE" Description="LOC_CAI_TOP_PANEL_SPEAK_CULTURE_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="WorldOrPopup" LayoutType="PC"/>
+    <Row ActionId="UI_TopPanelSpeakGold" Name="LOC_CAI_TOP_PANEL_SPEAK_GOLD" Description="LOC_CAI_TOP_PANEL_SPEAK_GOLD_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UI_TopPanelSpeakFaith" Name="LOC_CAI_TOP_PANEL_SPEAK_FAITH" Description="LOC_CAI_TOP_PANEL_SPEAK_FAITH_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UI_TopPanelSpeakTourism" Name="LOC_CAI_TOP_PANEL_SPEAK_TOURISM" Description="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UI_TopPanelSpeakFavor" Name="LOC_CAI_TOP_PANEL_SPEAK_FAVOR" Description="LOC_CAI_TOP_PANEL_SPEAK_FAVOR_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UI_TopPanelSpeakNukes" Name="LOC_CAI_TOP_PANEL_SPEAK_NUKES" Description="LOC_CAI_TOP_PANEL_SPEAK_NUKES_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UI_TopPanelYieldInfoList" Name="LOC_CAI_TOP_PANEL_YIELD_INFO" Description="LOC_CAI_TOP_PANEL_YIELD_INFO_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UI_TopPanelResourceInfoList" Name="LOC_CAI_TOP_PANEL_RESOURCE_INFO" Description="LOC_CAI_TOP_PANEL_RESOURCE_INFO_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAISpeakGovernmentTooltip" Name="LOC_CAI_SPEAK_GOVERNMENT_TOOLTIP" Description="LOC_CAI_SPEAK_GOVERNMENT_TOOLTIP_DESC" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotReadUnits" Name="LOC_CAI_PLOT_READ_UNITS" Description="LOC_CAI_PLOT_READ_UNITS_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotReadYieldRiverOwner" Name="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER" Description="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotReadStats" Name="LOC_CAI_PLOT_READ_STATS" Description="LOC_CAI_PLOT_READ_STATS_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotReadRelativeCoords" Name="LOC_CAI_PLOT_READ_RELATIVE_COORDS" Description="LOC_CAI_PLOT_READ_RELATIVE_COORDS_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotReadDistrictBuildings" Name="LOC_CAI_PLOT_READ_DISTRICT_BUILDINGS" Description="LOC_CAI_PLOT_READ_DISTRICT_BUILDINGS_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="PlotReadGeography" Name="LOC_CAI_PLOT_READ_GEOGRAPHY" Description="LOC_CAI_PLOT_READ_GEOGRAPHY_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SurveyorGrowRadius" Name="LOC_CAI_SURVEYOR_GROW_RADIUS" Description="LOC_CAI_SURVEYOR_GROW_RADIUS_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SurveyorShrinkRadius" Name="LOC_CAI_SURVEYOR_SHRINK_RADIUS" Description="LOC_CAI_SURVEYOR_SHRINK_RADIUS_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SurveyorReadYields" Name="LOC_CAI_SURVEYOR_READ_YIELDS" Description="LOC_CAI_SURVEYOR_READ_YIELDS_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SurveyorReadResources" Name="LOC_CAI_SURVEYOR_READ_RESOURCES" Description="LOC_CAI_SURVEYOR_READ_RESOURCES_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SurveyorReadTerrain" Name="LOC_CAI_SURVEYOR_READ_TERRAIN" Description="LOC_CAI_SURVEYOR_READ_TERRAIN_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SurveyorReadOwnUnits" Name="LOC_CAI_SURVEYOR_READ_OWN_UNITS" Description="LOC_CAI_SURVEYOR_READ_OWN_UNITS_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SurveyorReadEnemyUnits" Name="LOC_CAI_SURVEYOR_READ_ENEMY_UNITS" Description="LOC_CAI_SURVEYOR_READ_ENEMY_UNITS_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SurveyorReadCities" Name="LOC_CAI_SURVEYOR_READ_CITIES" Description="LOC_CAI_SURVEYOR_READ_CITIES_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityBannerReadIdentityStatus" Name="LOC_CAI_CITY_BANNER_READ_1" Description="LOC_CAI_CITY_BANNER_READ_1_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityBannerReadGrowthInfluence" Name="LOC_CAI_CITY_BANNER_READ_2" Description="LOC_CAI_CITY_BANNER_READ_2_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityBannerReadReligion" Name="LOC_CAI_CITY_BANNER_READ_3" Description="LOC_CAI_CITY_BANNER_READ_3_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityBannerReadDiplomacy" Name="LOC_CAI_CITY_BANNER_READ_4" Description="LOC_CAI_CITY_BANNER_READ_4_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityBannerReadLoyaltySummary" Name="LOC_CAI_CITY_BANNER_READ_5" Description="LOC_CAI_CITY_BANNER_READ_5_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityBannerReadGovernor" Name="LOC_CAI_CITY_BANNER_READ_6" Description="LOC_CAI_CITY_BANNER_READ_6_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityBannerReadPower" Name="LOC_CAI_CITY_BANNER_READ_7" Description="LOC_CAI_CITY_BANNER_READ_7_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerPrevCategory" Name="LOC_CAI_WORLD_SCANNER_PREV_CATEGORY" Description="LOC_CAI_WORLD_SCANNER_PREV_CATEGORY_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerNextCategory" Name="LOC_CAI_WORLD_SCANNER_NEXT_CATEGORY" Description="LOC_CAI_WORLD_SCANNER_NEXT_CATEGORY_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerPrevSubCategory" Name="LOC_CAI_WORLD_SCANNER_PREV_SUBCATEGORY" Description="LOC_CAI_WORLD_SCANNER_PREV_SUBCATEGORY_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerNextSubCategory" Name="LOC_CAI_WORLD_SCANNER_NEXT_SUBCATEGORY" Description="LOC_CAI_WORLD_SCANNER_NEXT_SUBCATEGORY_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerPrevGroup" Name="LOC_CAI_WORLD_SCANNER_PREV_GROUP" Description="LOC_CAI_WORLD_SCANNER_PREV_GROUP_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerNextGroup" Name="LOC_CAI_WORLD_SCANNER_NEXT_GROUP" Description="LOC_CAI_WORLD_SCANNER_NEXT_GROUP_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerPrevItem" Name="LOC_CAI_WORLD_SCANNER_PREV_ITEM" Description="LOC_CAI_WORLD_SCANNER_PREV_ITEM_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerNextItem" Name="LOC_CAI_WORLD_SCANNER_NEXT_ITEM" Description="LOC_CAI_WORLD_SCANNER_NEXT_ITEM_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerJumpToCurrent" Name="LOC_CAI_WORLD_SCANNER_JUMP" Description="LOC_CAI_WORLD_SCANNER_JUMP_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerReturnFromJump" Name="LOC_CAI_WORLD_SCANNER_RETURN" Description="LOC_CAI_WORLD_SCANNER_RETURN_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSpeakCurrentDirection" Name="LOC_CAI_WORLD_SCANNER_SPEAK_DIRECTION" Description="LOC_CAI_WORLD_SCANNER_SPEAK_DIRECTION_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="WorldOrFullScreenMap" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSearch" Name="LOC_CAI_WORLD_SCANNER_SEARCH" Description="LOC_CAI_WORLD_SCANNER_SEARCH_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
 
     <!-- ===== CAI_UI: Open/toggle screens and panels ===== -->
     <Row ActionId="UI_TopPanelOpenReports" Name="LOC_CAI_TOP_PANEL_OPEN_REPORTS" Description="LOC_CAI_TOP_PANEL_OPEN_REPORTS_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
@@ -132,6 +136,10 @@
     <Row ActionId="NextReadyUnitSelection" Name="LOC_CAI_NEXT_READY_UNIT" Description="LOC_CAI_READY_UNIT_NEXT_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ReplaceEndTurn_CAI" Name="LOC_CAI_END_TURN" Description="LOC_CAI_END_TURN_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ActionPanelOpenTurnBlockers" Name="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS" Description="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAICursorJumpToSelection" Name="LOC_CAI_CURSOR_JUMP_TO_SELECTION" Description="LOC_CAI_CURSOR_JUMP_TO_SELECTION_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldSelectPreviousCity_CAI" Name="LOC_CAI_WORLD_SELECT_PREVIOUS_CITY" Description="LOC_CAI_WORLD_SELECT_PREVIOUS_CITY_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldSelectNextCity_CAI" Name="LOC_CAI_WORLD_SELECT_NEXT_CITY" Description="LOC_CAI_WORLD_SELECT_NEXT_CITY_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldSelectCapitalCity_CAI" Name="LOC_CAI_WORLD_SELECT_CAPITAL_CITY" Description="LOC_CAI_WORLD_SELECT_CAPITAL_CITY_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAIPlaceMapPin" Name="LOC_CAI_PLACE_MAP_PIN" Description="LOC_CAI_PLACE_MAP_PIN_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
 
     <!-- ===== CAI_UNIT: Unit commands and operations ===== -->
@@ -350,6 +358,10 @@
     <Row ActionId="NextReadyUnitSelection" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_PERIOD" />
     <Row ActionId="ReplaceEndTurn_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SPACE" />
     <Row ActionId="ActionPanelOpenTurnBlockers" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_SPACE" />
+    <Row ActionId="CAICursorJumpToSelection" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SLASH" />
+    <Row ActionId="WorldSelectPreviousCity_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_LBRACKET" />
+    <Row ActionId="WorldSelectNextCity_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_RBRACKET" />
+    <Row ActionId="WorldSelectCapitalCity_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_BACKSLASH" />
     <Row ActionId="CAIPlaceMapPin" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_M" />
 
     <!-- CAI_UNIT: Vanilla operation overrides (Alt+key) -->

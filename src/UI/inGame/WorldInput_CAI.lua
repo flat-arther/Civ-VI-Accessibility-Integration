@@ -50,6 +50,7 @@ local ACTION_CURSOR_WEST = Input.GetActionId("CAICursorMoveWest")
 local ACTION_CURSOR_EAST = Input.GetActionId("CAICursorMoveEast")
 local ACTION_CURSOR_SOUTHWEST = Input.GetActionId("CAICursorMoveSouthWest")
 local ACTION_CURSOR_SOUTHEAST = Input.GetActionId("CAICursorMoveSouthEast")
+local ACTION_CURSOR_JUMP_TO_SELECTION = Input.GetActionId("CAICursorJumpToSelection")
 local ACTION_QUICK_MOVE_NORTHWEST = Input.GetActionId("QuickMoveNorthWest")
 local ACTION_QUICK_MOVE_NORTHEAST = Input.GetActionId("QuickMoveNorthEast")
 local ACTION_QUICK_MOVE_WEST = Input.GetActionId("QuickMoveWest")
@@ -82,11 +83,69 @@ local ACTION_SURVEYOR_READ_TERRAIN = Input.GetActionId("SurveyorReadTerrain")
 local ACTION_SURVEYOR_READ_OWN_UNITS = Input.GetActionId("SurveyorReadOwnUnits")
 local ACTION_SURVEYOR_READ_ENEMY_UNITS = Input.GetActionId("SurveyorReadEnemyUnits")
 local ACTION_SURVEYOR_READ_CITIES = Input.GetActionId("SurveyorReadCities")
+local ACTION_WORLD_SELECT_PREVIOUS_CITY = Input.GetActionId("WorldSelectPreviousCity_CAI")
+local ACTION_WORLD_SELECT_NEXT_CITY = Input.GetActionId("WorldSelectNextCity_CAI")
+local ACTION_WORLD_SELECT_CAPITAL_CITY = Input.GetActionId("WorldSelectCapitalCity_CAI")
 -- ===========================================================================
 -- Shared input actions
 -- ===========================================================================
 local function MoveCursor(direction)
 	LuaEvents.CAICursorMoveDirection(direction)
+	return true
+end
+
+local function GetObjectPlotIndex(object)
+	if object == nil then return nil end
+
+	local plot = Map.GetPlot(object:GetX(), object:GetY())
+	if plot ~= nil then
+		return plot:GetIndex()
+	end
+
+	return nil
+end
+
+local function JumpCursorToSelection()
+	local unitPlotId = GetObjectPlotIndex(UI.GetHeadSelectedUnit())
+	if unitPlotId ~= nil then
+		LuaEvents.CAICursorMoveTo(unitPlotId, "jump")
+		return true
+	end
+
+	local cityPlotId = GetObjectPlotIndex(UI.GetHeadSelectedCity())
+	if cityPlotId ~= nil then
+		LuaEvents.CAICursorMoveTo(cityPlotId, "jump")
+		return true
+	end
+
+	return false
+end
+
+local function SelectPreviousCity()
+	local curCity = UI.GetHeadSelectedCity()
+	UI.SelectPrevCity(curCity)
+	UI.PlaySound("Play_UI_Click")
+	return true
+end
+
+local function SelectNextCity()
+	local curCity = UI.GetHeadSelectedCity()
+	UI.SelectNextCity(curCity)
+	UI.PlaySound("Play_UI_Click")
+	return true
+end
+
+local function SelectCapitalCity()
+	local playerID = Game.GetLocalPlayer()
+	if playerID == nil or playerID < 0 then return false end
+
+	local player = Players[playerID]
+	local cities = player ~= nil and player:GetCities() or nil
+	local capital = cities ~= nil and cities:GetCapitalCity() or nil
+	if capital == nil then return false end
+
+	UI.SelectCity(capital)
+	UI.PlaySound("Play_UI_Click")
 	return true
 end
 
@@ -503,6 +562,30 @@ local SharedInputActions = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return MoveCursor(DirectionTypes.DIRECTION_SOUTHEAST)
+		end,
+	},
+	[ACTION_CURSOR_JUMP_TO_SELECTION] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return JumpCursorToSelection()
+		end,
+	},
+	[ACTION_WORLD_SELECT_PREVIOUS_CITY] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return SelectPreviousCity()
+		end,
+	},
+	[ACTION_WORLD_SELECT_NEXT_CITY] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return SelectNextCity()
+		end,
+	},
+	[ACTION_WORLD_SELECT_CAPITAL_CITY] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			return SelectCapitalCity()
 		end,
 	},
 	[ACTION_QUICK_MOVE_NORTHWEST] = {
@@ -1001,8 +1084,8 @@ local function OnCAIInputActionStarted(actionId, x, y)
 	return DispatchInputAction(actionId, INPUT_ACTION_STARTED, x, y)
 end
 
-local function OnCAIInputActionTriggered(actionId)
-	return DispatchInputAction(actionId, INPUT_ACTION_TRIGGERED)
+function OnInputActionTriggered(actionId)
+	DispatchInputAction(actionId, INPUT_ACTION_TRIGGERED)
 end
 
 -- ===========================================================================
@@ -1095,9 +1178,17 @@ local function OnLocalPlayerTurnBegin()
 	CAIWorldScanner:OnLocalPlayerTurnBegin()
 end
 
+local function CheckInput()
+	local focused = mgr:GetFocusedWidget()
+	if focused == m_caiCurrentInterfaceWidget or focused == m_caiGameViewWidget then
+		if Input.GetActiveContext() ~= InputContext.World then Input.SetActiveContext(InputContext.World) end
+	end
+end
+
 local function OnUpdate()
 	MovementActions_CAI:UpdatePendingMovementResult()
 	RevealAnnouncements_CAI.UpdateVisibility()
+	CheckInput()
 end
 
 local function OnCAIAppendToMessageBuffer(text, category)
@@ -1108,7 +1199,6 @@ end
 local function RegisterCAIEvents()
 	Events.InterfaceModeChanged.Add(OnInterfaceChanged)
 	Events.InputActionStarted.Add(OnCAIInputActionStarted)
-	Events.InputActionTriggered.Add(OnCAIInputActionTriggered)
 	Events.LocalPlayerTurnBegin.Add(OnLocalPlayerTurnBegin)
 	Events.UnitSelectionChanged.Add(OnUnitSelectionChanged)
 	LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
@@ -1119,27 +1209,16 @@ end
 local function UnregisterCAIEvents()
 	Events.InterfaceModeChanged.Remove(OnInterfaceChanged)
 	Events.InputActionStarted.Remove(OnCAIInputActionStarted)
-	Events.InputActionTriggered.Remove(OnCAIInputActionTriggered)
+	Events.InputActionTriggered.Remove(OnInputActionTriggered)
 	Events.LocalPlayerTurnBegin.Remove(OnLocalPlayerTurnBegin)
 	Events.UnitSelectionChanged.Remove(OnUnitSelectionChanged)
 	LuaEvents.CAICursorMoved.Remove(OnCAICursorMoved)
 	LuaEvents.CAIAppendToMessageBuffer.Remove(OnCAIAppendToMessageBuffer)
 end
 
--- These are necessary to reset the input context to world, because these UIs use 'Pop' which causes it to clear
-function OnDiplomacyHideIngameUI() Input.SetActiveContext(InputContext.Shell) end
 
-function OnDiplomacyShowIngameUI() Input.SetActiveContext(InputContext.World) end
-
-function OnEndGameMenuShown() Input.SetActiveContext(InputContext.Shell) end
-
-function OnEndGameMenuClosed() Input.SetActiveContext(InputContext.World) end
 
 local function InitializeCAIGameView()
-	LuaEvents.DiplomacyActionView_HideIngameUI.Add(OnDiplomacyHideIngameUI);
-	LuaEvents.DiplomacyActionView_ShowIngameUI.Add(OnDiplomacyShowIngameUI);
-	LuaEvents.EndGameMenu_Shown.Add(OnEndGameMenuShown);
-	LuaEvents.EndGameMenu_Closed.Add(OnEndGameMenuClosed);
 	if not CreateGameViewWidget() then return end
 	mgr:Push(m_caiGameViewWidget)
 	RegisterCAIEvents()

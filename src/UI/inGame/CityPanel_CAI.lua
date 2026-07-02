@@ -574,6 +574,57 @@ function GetActionDescriptionText(actionId)
     return GetActionText(actionId, Input.GetActionDescription)
 end
 
+function GetActionBindingText(actionId)
+    if actionId == nil then
+        return nil
+    end
+
+    local bindings = {}
+    local g1 = Input.GetGestureDisplayString(actionId, 0)
+    local g2 = Input.GetGestureDisplayString(actionId, 1)
+    if g1 ~= nil and g1 ~= "" then
+        table.insert(bindings, g1)
+    end
+    if g2 ~= nil and g2 ~= "" then
+        table.insert(bindings, g2)
+    end
+
+    if #bindings == 0 then
+        return nil
+    end
+
+    return table.concat(bindings, ", ")
+end
+
+function GetActionNameWithBindingText(actionId)
+    local label = GetActionNameText(actionId)
+    local binding = GetActionBindingText(actionId)
+    if binding == nil then
+        return label
+    end
+
+    return label .. ": " .. binding
+end
+
+function GetCityChangeProductionTooltip()
+    local data = GetCityInfoData(UI.GetHeadSelectedCity())
+    return GetCityInfoProduction(data) or ""
+end
+
+function GetActionDescriptionIfDistinct(actionId)
+    if actionId == Input.GetActionId("CityChangeProduction") then
+        return GetCityChangeProductionTooltip()
+    end
+
+    local label = GetActionNameText(actionId)
+    local tooltip = GetActionDescriptionText(actionId)
+    if tooltip == "" or tooltip == label then
+        return ""
+    end
+
+    return tooltip
+end
+
 function IsControlAvailable(control, allowDisabled)
     if control == nil or control:IsHidden() then
         return false
@@ -648,9 +699,20 @@ function GetCityCategoryActionIds()
         return CityActionCategoryIds
     end
 
+    local excluded = {
+        [Input.GetActionId("SelectionActions")] = true,
+        [Input.GetActionId("CityOpenBuildings")] = true,
+        [Input.GetActionId("CityOpenLoyalty")] = true,
+        [Input.GetActionId("CityOpenPower")] = true,
+        [Input.GetActionId("CityOpenReligion")] = true,
+        [Input.GetActionId("CityOpenAmenities")] = true,
+        [Input.GetActionId("CityOpenHousing")] = true,
+        [Input.GetActionId("CityOpenCitizens")] = true,
+    }
+
     CityActionCategoryIds = {}
     for _, actionId in ipairs(GetInputActionsByCategory(CITY_ACTION_CATEGORY)) do
-        if actionId ~= Input.GetActionId("SelectionActions") and CityActionMap[actionId] ~= nil then
+        if not excluded[actionId] and CityActionMap[actionId] ~= nil then
             table.insert(CityActionCategoryIds, actionId)
         end
     end
@@ -664,13 +726,6 @@ function GetOrderedCityActionIds()
         Input.GetActionId("CityPurchaseWithGold"),
         Input.GetActionId("CityPurchaseWithFaith"),
         Input.GetActionId("CityToggleOverview"),
-        Input.GetActionId("CityOpenBuildings"),
-        Input.GetActionId("CityOpenLoyalty"),
-        Input.GetActionId("CityOpenPower"),
-        Input.GetActionId("CityOpenReligion"),
-        Input.GetActionId("CityOpenAmenities"),
-        Input.GetActionId("CityOpenHousing"),
-        Input.GetActionId("CityOpenCitizens"),
         Input.GetActionId("CityChangeCitizenYieldFocus"),
     }
 
@@ -1053,8 +1108,8 @@ function BuildCityActionList()
         if actionData ~= nil and actionData.IsEnabled() then
             local currentActionId = actionId
             list:AddChild(MakeCityActionMenuItem("CAICityPanelMenuItem",
-                function() return GetActionNameText(currentActionId) end,
-                function() return GetActionDescriptionText(currentActionId) end,
+                function() return GetActionNameWithBindingText(currentActionId) end,
+                function() return GetActionDescriptionIfDistinct(currentActionId) end,
                 actionData.helper))
         end
     end
@@ -1219,59 +1274,6 @@ function InitializeCityActionMap()
             end,
             function()
                 return IsCityPanelActionAvailable(Controls.ToggleOverviewPanel)
-            end
-        ),
-        [Input.GetActionId("CityOpenBuildings")] = BuildCityActionData(
-            OpenCityOverviewBuildings,
-            function()
-                return IsOverviewTabControlAvailable(Controls.BreakdownButton)
-            end
-        ),
-        [Input.GetActionId("CityOpenLoyalty")] = BuildCityActionData(
-            OpenCityOverviewLoyalty,
-            function()
-                return UI.GetHeadSelectedCity() ~= nil
-                    and ContextPtr:IsHidden() == false
-                    and (IsExpansion1Active() or IsExpansion2Active())
-                    and LuaEvents.CityPanel_ToggleOverviewLoyalty ~= nil
-            end
-        ),
-        [Input.GetActionId("CityOpenPower")] = BuildCityActionData(
-            OpenCityOverviewPower,
-            function()
-                return UI.GetHeadSelectedCity() ~= nil
-                    and ContextPtr:IsHidden() == false
-                    and IsExpansion2Active()
-                    and GameCapabilities.HasCapability("CAPABILITY_LENS_POWER")
-                    and LuaEvents.CityPanel_ToggleOverviewPower ~= nil
-            end
-        ),
-        [Input.GetActionId("CityOpenReligion")] = BuildCityActionData(
-            OpenCityOverviewReligion,
-            function()
-                return CanOpenAnyCityOverviewTab()
-                    and GameCapabilities.HasCapability("CAPABILITY_CITY_HUD_RELIGION_TAB")
-                    and Controls.ReligionButton ~= nil
-                    and not Controls.ReligionButton:IsHidden()
-                    and not Controls.ReligionButton:IsDisabled()
-            end
-        ),
-        [Input.GetActionId("CityOpenAmenities")] = BuildCityActionData(
-            OpenCityOverviewAmenities,
-            function()
-                return IsOverviewTabControlAvailable(Controls.AmenitiesButton)
-            end
-        ),
-        [Input.GetActionId("CityOpenHousing")] = BuildCityActionData(
-            OpenCityOverviewHousing,
-            function()
-                return IsOverviewTabControlAvailable(Controls.HousingButton)
-            end
-        ),
-        [Input.GetActionId("CityOpenCitizens")] = BuildCityActionData(
-            OpenCityOverviewCitizens,
-            function()
-                return IsOverviewTabControlAvailable(Controls.CitizensGrowthButton)
             end
         ),
         [Input.GetActionId("CityPurchaseTile")] = BuildCityActionData(

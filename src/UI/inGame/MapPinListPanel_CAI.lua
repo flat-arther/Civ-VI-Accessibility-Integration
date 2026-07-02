@@ -1,6 +1,6 @@
 include("caiUtils")
 include("MapPinListPanel")
-include("MapTacks")
+include("inGameHelpers_CAI")
 include("hexCoordUtils_CAI")
 
 local mgr            = ExposedMembers.CAI_UIManager
@@ -14,77 +14,10 @@ local m_panel  = nil
 local m_list   = nil
 
 -- ============================================================================
--- Icon label helpers (shared logic with MapPinPopup_CAI)
--- ============================================================================
-
-local STOCK_ICON_LABELS = {
-    ICON_MAP_PIN_STRENGTH = "LOC_CAI_MAP_PIN_ICON_STRENGTH",
-    ICON_MAP_PIN_RANGED   = "LOC_CAI_MAP_PIN_ICON_RANGED",
-    ICON_MAP_PIN_BOMBARD  = "LOC_CAI_MAP_PIN_ICON_BOMBARD",
-    ICON_MAP_PIN_DISTRICT = "LOC_CAI_MAP_PIN_ICON_DISTRICT",
-    ICON_MAP_PIN_CHARGES  = "LOC_CAI_MAP_PIN_ICON_CHARGES",
-    ICON_MAP_PIN_DEFENSE  = "LOC_CAI_MAP_PIN_ICON_DEFENSE",
-    ICON_MAP_PIN_MOVEMENT = "LOC_CAI_MAP_PIN_ICON_MOVEMENT",
-    ICON_MAP_PIN_NO       = "LOC_CAI_MAP_PIN_ICON_NO",
-    ICON_MAP_PIN_PLUS     = "LOC_CAI_MAP_PIN_ICON_PLUS",
-    ICON_MAP_PIN_CIRCLE   = "LOC_CAI_MAP_PIN_ICON_CIRCLE",
-    ICON_MAP_PIN_TRIANGLE = "LOC_CAI_MAP_PIN_ICON_TRIANGLE",
-    ICON_MAP_PIN_SUN      = "LOC_CAI_MAP_PIN_ICON_SUN",
-    ICON_MAP_PIN_SQUARE   = "LOC_CAI_MAP_PIN_ICON_SQUARE",
-    ICON_MAP_PIN_DIAMOND  = "LOC_CAI_MAP_PIN_ICON_DIAMOND",
-}
-
-local function ResolveGameInfoName(typeKey)
-    if not typeKey then return nil end
-    local info
-    if typeKey:find("^DISTRICT_") then
-        info = GameInfo.Districts[typeKey]
-    elseif typeKey:find("^BUILDING_") then
-        info = GameInfo.Buildings[typeKey]
-    elseif typeKey:find("^IMPROVEMENT_") then
-        info = GameInfo.Improvements[typeKey]
-    elseif typeKey:find("^UNIT_") then
-        info = GameInfo.Units[typeKey]
-    end
-    if info and info.Name then
-        return Locale.Lookup(info.Name)
-    end
-    return nil
-end
-
-local function GetIconLabel(iconName)
-    local playerID = Game.GetLocalPlayer()
-    local sections = MapTacks.IconOptions(playerID)
-    for _, section in ipairs(sections) do
-        for _, pair in ipairs(section) do
-            if pair.name == iconName then
-                if pair.tooltip then
-                    local locText = Locale.Lookup(pair.tooltip)
-                    if locText and locText ~= "" and locText ~= pair.tooltip then return locText end
-                    local infoName = ResolveGameInfoName(pair.tooltip)
-                    if infoName then return infoName end
-                end
-            end
-        end
-    end
-    local stockKey = STOCK_ICON_LABELS[iconName]
-    if stockKey then return Locale.Lookup(stockKey) end
-    return nil
-end
-
--- ============================================================================
 -- Pin label: name, icon, direction
 -- ============================================================================
 
 local function BuildPinLabel(mapPinCfg)
-    local pinID = mapPinCfg:GetID()
-    local pinName = mapPinCfg:GetName()
-    if not pinName or pinName == "" then
-        pinName = Locale.Lookup("LOC_MAP_PIN_DEFAULT_NAME", pinID + 1)
-    end
-
-    local iconLabel = GetIconLabel(mapPinCfg:GetIconName())
-
     local dirText = ""
     if CAICursor and CAICursor.curX and CAICursor.curY then
         local hexX = mapPinCfg:GetHexX()
@@ -92,8 +25,7 @@ local function BuildPinLabel(mapPinCfg)
         dirText = HexCoordUtils.directionString(CAICursor.curX, CAICursor.curY, hexX, hexY)
     end
 
-    local parts = { pinName }
-    if iconLabel then table.insert(parts, iconLabel) end
+    local parts = { BuildMapTacLabel(mapPinCfg) }
     if dirText ~= "" then table.insert(parts, dirText) end
     return table.concat(parts, ", ")
 end
