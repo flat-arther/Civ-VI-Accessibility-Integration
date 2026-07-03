@@ -53,6 +53,11 @@
     <File>UI/frontEnd/IntroScreen.lua</File>
     <File>UI/frontEnd/FrontEndPopup.lua</File>
     <File>UI/frontEnd/MainMenu.lua</File>
+    <File>UI/frontEnd/Multiplayer/Lobby.lua</File>
+    <File>UI/frontEnd/Multiplayer/HostGame.lua</File>
+    <File>UI/frontEnd/Multiplayer/JoiningRoom.lua</File>
+    <File>UI/frontEnd/Multiplayer/StagingRoom.lua</File>
+    <File>UI/frontEnd/Multiplayer/ConfirmKick.lua</File>
     <File>UI/frontEnd/AdvancedSetup.lua</File>
     <File>UI/frontEnd/MapSelect.lua</File>
     <File>UI/frontEnd/LeaderPicker.lua</File>
@@ -97,6 +102,7 @@
     <File>UI/inGame/InGameTopOptionsMenu_CAI.lua</File>
     <File>UI/inGame/WorldInput_CAI.lua</File>
     <File>UI/inGame/WorldTracker_CAI.lua</File>
+    <File>UI/inGame/ChatPanel_CAI.lua</File>
     <File>UI/inGame/TopPanel_CAI.lua</File>
     <File>UI/inGame/NotificationPanel_CAI.lua</File>
     <File>UI/inGame/StatusMessagePanel_CAI.lua</File>
@@ -195,6 +201,47 @@
     <UpdateDatabase id="CAI_WORLD_INPUTS">
       <File>data/hotkey_config_CAI.xml</File>
     </UpdateDatabase>
+
+    <ReplaceUIScript id="CAI_Lobby">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>Lobby</LuaContext>
+      </Properties>
+      <LuaReplace>UI/frontEnd/Multiplayer/Lobby.lua</LuaReplace>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_JoiningRoom">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>JoiningRoom</LuaContext>
+      </Properties>
+      <LuaReplace>UI/frontEnd/Multiplayer/JoiningRoom.lua</LuaReplace>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_HostGame">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>HostGame</LuaContext>
+      </Properties>
+      <LuaReplace>UI/frontEnd/Multiplayer/HostGame.lua</LuaReplace>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_StagingRoom">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>StagingRoom</LuaContext>
+      </Properties>
+      <LuaReplace>UI/frontEnd/Multiplayer/StagingRoom.lua</LuaReplace>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_ConfirmKick">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>ConfirmKick</LuaContext>
+      </Properties>
+      <LuaReplace>UI/frontEnd/Multiplayer/ConfirmKick.lua</LuaReplace>
+    </ReplaceUIScript>
+
     <ImportFiles id="CAIFrontEnd">
       <Properties>
         <LoadOrder>1</LoadOrder>
@@ -238,6 +285,11 @@
       <File>UI/frontEnd/FrontEndPopup.lua</File>
       <File>UI/frontEnd/FrontEnd.lua</File>
       <File>UI/frontEnd/MainMenu.lua</File>
+      <File>UI/frontEnd/Multiplayer/Lobby.lua</File>
+      <File>UI/frontEnd/Multiplayer/HostGame.lua</File>
+      <File>UI/frontEnd/Multiplayer/JoiningRoom.lua</File>
+      <File>UI/frontEnd/Multiplayer/StagingRoom.lua</File>
+      <File>UI/frontEnd/Multiplayer/ConfirmKick.lua</File>
       <File>UI/frontEnd/AdvancedSetup.lua</File>
       <File>UI/frontEnd/MapSelect.lua</File>
       <File>UI/frontEnd/MultiSelectWindow.lua</File>
@@ -347,6 +399,7 @@
            so the CAI layer rides that wildcard as an imported file. -->
       <File>UI/inGame/GreatWorkShowcase_CAI.lua</File>
       <File>UI/inGame/inGameHelpers_CAI.lua</File>
+      <File>UI/inGame/ChatPanel_CAI.lua</File>
       <File>UI/inGame/interfaceTargetHelpers_CAI.lua</File>
       <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>
       <File>UI/inGame/cityManagementInterfaceHelpers_CAI.lua</File>
@@ -455,6 +508,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>WorldTracker</LuaContext>
         <LuaReplace>UI/inGame/WorldTracker_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_ChatPanel">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>ChatPanel</LuaContext>
+        <LuaReplace>UI/inGame/ChatPanel_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

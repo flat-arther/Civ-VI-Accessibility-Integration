@@ -1377,7 +1377,9 @@ function OnCityActionInputActionTriggered(actionId)
 end
 
 function OnLoadScreenClose()
-    m_IsGameStarted = true
+    if not m_IsGameStarted then
+        m_IsGameStarted = true
+    end
 end
 
 Events.LoadScreenClose.Add(OnLoadScreenClose)
@@ -1393,11 +1395,15 @@ function OnCitySelectionChanged(ownerPlayerID, cityID, i, j, k, isSelected, isEd
     if not m_IsGameStarted then return end
     LuaEvents.CAICursorMoveTo(plot:GetIndex(), "select")
     local results = info:RequestCityInfo(cityID, CITY_INFO_BUCKETS.Summary, ownerPlayerID)
-    if results == nil or #results == 0 then
-        return
-    end
+    local focused = mgr:GetFocusedWidget()
+    local isInWorld = focused and (focused.Type == "GameView" or focused.Type == "InterfaceMode")
+    if isInWorld then
+        if results == nil or #results == 0 then
+            return
+        end
 
-    Speak(table.concat(results, ", "))
+        Speak(table.concat(results, ", "))
+    end
 end
 
 --#Public API

@@ -15,6 +15,8 @@ local mgr            = ExposedMembers.CAI_UIManager
 
 local PANEL_ID       = "CAIProductionPanel_Panel"
 local TABS_ID        = "CAIProductionPanel_Tabs"
+local CITIES_ID      = "CAIProductionPanel_Cities"
+local SORT_ID        = "CAIProductionPanel_Sort"
 local PAGE_PROD_ID   = "CAIProductionPanel_PageProduction"
 local PAGE_GOLD_ID   = "CAIProductionPanel_PagePurchaseGold"
 local PAGE_FAITH_ID  = "CAIProductionPanel_PagePurchaseFaith"
@@ -32,11 +34,15 @@ local m_state        = {
     recommended                 = {}, ---@type table<number, string|nil>
     isQueueActionActive         = false,
     queueFocusIndexAfterRebuild = nil, ---@type integer|nil
+    citySortIndex               = 1,
+    cityFocusKeyAfterSelection  = nil, ---@type string|nil
 }
 
 local m_ui           = {
     panel         = nil, ---@type UIWidget|nil
     tabs          = nil, ---@type UIWidget|nil
+    cityList      = nil, ---@type UIWidget|nil
+    sortDropdown  = nil, ---@type UIWidget|nil
     pages         = {}, ---@type table<integer, UIWidget>
     pageTrees     = {}, ---@type table<integer, UIWidget> -- main Tree per tab (or List for queue)
     categoryNodes = {}, ---@type table<integer, table<string, UIWidget>>
@@ -148,6 +154,93 @@ end
 
 local function CurrentTabSupportsQueue()
     return not IsProductionTutorialMode()
+end
+
+local CITY_SORT_OPTIONS = {
+    {
+        label = "LOC_PRODUCTION_MANAGER_FILTER_FOUNDING",
+    },
+    {
+        label = "LOC_PRODUCTION_MANAGER_FILTER_NAME",
+        sort = function(a, b) return Locale.Lookup(a:GetName()) < Locale.Lookup(b:GetName()) end,
+    },
+    {
+        label = "LOC_PRODUCTION_MANAGER_FILTER_POPULATION",
+        sort = function(a, b) return a:GetPopulation() > b:GetPopulation() end,
+    },
+}
+
+local function GetLocalPlayerCities()
+    local playerID = Game.GetLocalPlayer()
+    if playerID == -1 then return {} end
+    local pPlayer = Players[playerID]
+    if not pPlayer then return {} end
+    local cities = {}
+    for _, pCity in pPlayer:GetCities():Members() do
+        table.insert(cities, pCity)
+    end
+    local sortOpt = CITY_SORT_OPTIONS[m_state.citySortIndex]
+    if sortOpt and sortOpt.sort then table.sort(cities, sortOpt.sort) end
+    return cities
+end
+
+local function GetCityFocusKey(cityOrOwner, cityID)
+    local cityOwner = cityOrOwner
+    if type(cityOrOwner) == "table" or type(cityOrOwner) == "userdata" then
+        cityOwner = cityOrOwner:GetOwner()
+        cityID = cityOrOwner:GetID()
+    end
+    return "city:" .. tostring(cityOwner) .. ":" .. tostring(cityID)
+end
+
+local function IsCitySelected(city)
+    local selected = UI.GetHeadSelectedCity and UI.GetHeadSelectedCity() or nil
+    return selected ~= nil and city ~= nil and selected:GetOwner() == city:GetOwner() and
+        selected:GetID() == city:GetID()
+end
+
+local function PrepareCityListFocus(city)
+    if not city or not m_ui.cityList then return false end
+    local focusKey = GetCityFocusKey(city)
+    return mgr:PrepareFocus(m_ui.cityList, focusKey)
+end
+
+local function SelectRelativeCityInPanelList(direction)
+    local cities = GetLocalPlayerCities()
+    if #cities == 0 then return false end
+
+    local selected = UI.GetHeadSelectedCity() or nil
+    local selectedOwner = selected and selected:GetOwner() or nil
+    local selectedID = selected and selected:GetID() or nil
+    local selectedIndex = nil
+
+    if selectedOwner ~= nil and selectedID ~= nil then
+        for i, city in ipairs(cities) do
+            if city:GetOwner() == selectedOwner and city:GetID() == selectedID then
+                selectedIndex = i
+                break
+            end
+        end
+    end
+
+    local targetIndex = selectedIndex and (selectedIndex + direction) or (direction > 0 and 1 or #cities)
+    if targetIndex < 1 then
+        targetIndex = #cities
+    elseif targetIndex > #cities then
+        targetIndex = 1
+    end
+
+    local targetCity = cities[targetIndex]
+    if not targetCity then return false end
+    local targetWasSelected = IsCitySelected(targetCity)
+    PrepareCityListFocus(targetCity)
+    if not targetWasSelected then
+        m_state.cityFocusKeyAfterSelection = GetCityFocusKey(targetCity)
+        UI.SelectCity(targetCity)
+        UI.PlaySound("Play_UI_Click")
+        Speak(FormatCityListRow(targetCity))
+    end
+    return true
 end
 
 -- ===========================================================================
@@ -614,9 +707,9 @@ local function BuildItemDetail(item, formation, tab)
 end
 
 -- Resolve current production item shape (reuses BuildItemDetail dispatch).
-local function GetCurrentProductionItem()
-    if not m_state.data or not m_state.data.City then return nil end
-    local pCity = m_state.data.City
+local function GetCurrentProductionItem(city)
+    local pCity = city or (m_state.data and m_state.data.City) or nil
+    if not pCity then return nil end
     local pBQ = pCity.GetBuildQueue and pCity:GetBuildQueue() or nil
     if not pBQ then return nil end
 
@@ -624,8 +717,8 @@ local function GetCurrentProductionItem()
     if hash == 0 and pBQ.GetPreviousProductionTypeHash then hash = pBQ:GetPreviousProductionTypeHash() end
     if hash == 0 then return nil end
 
-    local function build(typeName, costFn, progressFn)
-        local item = { Hash = hash, Type = typeName }
+    local function build(typeName, name, costFn, progressFn)
+        local item = { Hash = hash, Type = typeName, Name = name }
         if costFn then item.Cost = costFn() end
         if progressFn then item.Progress = progressFn() end
         local turns = pBQ:GetTurnsLeft(hash)
@@ -635,19 +728,19 @@ local function GetCurrentProductionItem()
 
     local b = GameInfo.Buildings[hash]
     if b then
-        return build(b.BuildingType,
+        return build(b.BuildingType, b.Name,
             function() return pBQ:GetBuildingCost(b.Index) end,
             function() return pBQ:GetBuildingProgress(b.Index) end)
     end
     local dInfo = GameInfo.Districts[hash]
     if dInfo then
-        return build(dInfo.DistrictType,
+        return build(dInfo.DistrictType, dInfo.Name,
             function() return pBQ:GetDistrictCost(dInfo.Index) end,
             function() return pBQ:GetDistrictProgress(dInfo.Index) end)
     end
     local u = GameInfo.Units[hash]
     if u then
-        local item = build(u.UnitType,
+        local item = build(u.UnitType, u.Name,
             function() return pBQ:GetUnitCost(u.Index) end,
             function() return pBQ:GetUnitProgress(u.Index) end)
         local formation
@@ -663,7 +756,7 @@ local function GetCurrentProductionItem()
     end
     local p = GameInfo.Projects[hash]
     if p then
-        return build(p.ProjectType,
+        return build(p.ProjectType, p.Name,
             function() return pBQ:GetProjectCost(p.Index) end,
             function() return pBQ:GetProjectProgress(p.Index) end)
     end
@@ -913,9 +1006,10 @@ end
 -- ===========================================================================
 -- Current production node (production tab + queue tab)
 -- ===========================================================================
-local function HasActiveCurrentProduction()
-    if not m_state.data or not m_state.data.City then return false end
-    local pBQ = m_state.data.City:GetBuildQueue(); if not pBQ then return false end
+local function HasActiveCurrentProduction(city)
+    local pCity = city or (m_state.data and m_state.data.City) or nil
+    if not pCity then return false end
+    local pBQ = pCity:GetBuildQueue(); if not pBQ then return false end
     return pBQ:GetCurrentProductionTypeHash() ~= 0
 end
 
@@ -945,12 +1039,17 @@ local function ReadCurrentFaith()
     return ""
 end
 
-local function ReadCurrentProductionLabel(readTurns)
-    local item, formation = GetCurrentProductionItem()
-    if not HasActiveCurrentProduction() then
+local function ReadCurrentProductionLabel(readTurns, city)
+    local item, formation = GetCurrentProductionItem(city)
+    if not HasActiveCurrentProduction(city) then
         return Locale.Lookup("LOC_PRODUCTION_MANAGER_NO_CURRENT_PRODUCTION")
     end
-    local name = ControlText(Controls.CurrentProductionName)
+    local name
+    if city then
+        name = item and Locale.Lookup(item.Name or "") or ""
+    else
+        name = ControlText(Controls.CurrentProductionName)
+    end
     if name == "" then return Locale.Lookup("LOC_PRODUCTION_MANAGER_NO_CURRENT_PRODUCTION") end
     name = Locale.Lookup("LOC_CITY_BANNER_PRODUCING", name)
     local turns
@@ -963,12 +1062,21 @@ local function ReadCurrentProductionLabel(readTurns)
         end
     end
     local str = name
-    local status = ControlText(Controls.CurrentProductionStatus)
-    if status ~= "" then str = str .. ", " .. status end
+    if not city then
+        local status = ControlText(Controls.CurrentProductionStatus)
+        if status ~= "" then str = str .. ", " .. status end
+    end
     if turns then
         str = str .. ", " .. turns
     end
     return str
+end
+
+function FormatCityListRow(city)
+    local parts = { Locale.Lookup(city:GetName()) }
+    table.insert(parts, Locale.Lookup("LOC_CAI_CITY_POPULATION", city:GetPopulation()))
+    table.insert(parts, ReadCurrentProductionLabel(false, city))
+    return table.concat(parts, ", ")
 end
 
 local function ReadCurrentProductionTooltip()
@@ -1201,7 +1309,7 @@ local function MoveQueueSelection(direction)
 end
 
 local function CreateQueueRow(queueIndex, name)
-    local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIProductionPanelQueueRow"), "Button", {
+    local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIProductionPanelQueueRow"), "MenuItem", {
         Label    = function() return name end,
         FocusKey = "queue:" .. tostring(queueIndex),
     })
@@ -1229,7 +1337,7 @@ local function CreateQueueRow(queueIndex, name)
 end
 
 local function CreateQueueCurrentRow()
-    local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIProductionPanelQueueCurrent"), "Button", {
+    local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIProductionPanelQueueCurrent"), "MenuItem", {
         Label    = function() return ReadCurrentProductionLabel() end,
         Tooltip  = ReadCurrentProductionTooltip,
         FocusKey = "current",
@@ -1239,6 +1347,51 @@ local function CreateQueueCurrentRow()
         { Key = Keys.VK_DELETE, MSG = KeyEvents.KeyUp, Description = "LOC_CAI_KB_REMOVE_FROM_QUEUE", Action = RemoveCurrentProductionFromQueue },
     })
     return row
+end
+
+-- ===========================================================================
+-- City list
+-- ===========================================================================
+local function CreateCityRow(city)
+    local cityOwner = city:GetOwner()
+    local cityID = city:GetID()
+    local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIProductionPanelCityRow"), "MenuItem", {
+        Label    = function()
+            local liveCity = CityManager.GetCity(cityOwner, cityID)
+            return liveCity and FormatCityListRow(liveCity) or ""
+        end,
+        FocusKey = GetCityFocusKey(cityOwner, cityID),
+    })
+    row:SetFocusSound("Main_Menu_Mouse_Over")
+    row:On("focus_enter", function(w)
+        if not w:IsFocused() then return end
+        local liveCity = CityManager.GetCity(cityOwner, cityID)
+        if not liveCity or IsCitySelected(liveCity) then return end
+        UI.SelectCity(liveCity)
+    end)
+    row:On("activate", function()
+        local liveCity = CityManager.GetCity(cityOwner, cityID)
+        if liveCity then UI.SelectCity(liveCity) end
+    end)
+    return row
+end
+
+local function RebuildCityList()
+    local list = m_ui.cityList
+    if not list then return end
+
+    local pendingFocusKey = m_state.cityFocusKeyAfterSelection
+    local capture = pendingFocusKey and nil or mgr:CaptureFocusKey(list)
+    list:ClearChildren()
+    for _, city in ipairs(GetLocalPlayerCities()) do
+        list:AddChild(CreateCityRow(city))
+    end
+    if pendingFocusKey then
+        m_state.cityFocusKeyAfterSelection = nil
+        mgr:PrepareFocus(list, pendingFocusKey)
+        return
+    end
+    mgr:RestoreFocus(list, capture)
 end
 
 -- ===========================================================================
@@ -1325,6 +1478,7 @@ local function RefreshAllPages()
             RebuildTreePage(tab)
         end
     end
+    RebuildCityList()
 end
 
 -- ===========================================================================
@@ -1370,11 +1524,48 @@ local function EnsurePanelBuilt()
     m_ui.panel = mgr:CreateWidget(PANEL_ID, "Panel", {
         Label = function() return Locale.Lookup("LOC_CAI_PRODUCTION_PANEL_TITLE") end,
     })
+    m_ui.panel:AddInputBindings({
+        {
+            Key = Keys.VK_LEFT,
+            IsAlt = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_WORLD_SELECT_PREVIOUS_CITY",
+            Action = function() return SelectRelativeCityInPanelList(-1) end,
+        },
+        {
+            Key = Keys.VK_RIGHT,
+            IsAlt = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_WORLD_SELECT_NEXT_CITY",
+            Action = function() return SelectRelativeCityInPanelList(1) end,
+        },
+    })
 
     m_ui.tabs = mgr:CreateWidget(TABS_ID, "TabControl", {
         Label = function() return Locale.Lookup("LOC_CAI_PRODUCTION_PANEL_TITLE") end,
     })
     m_ui.panel:AddChild(m_ui.tabs)
+
+    m_ui.cityList = mgr:CreateWidget(CITIES_ID, "List", {
+        Label = function() return Locale.Lookup("LOC_CAI_PRODUCTION_CITY_LIST") end,
+    })
+    m_ui.panel:AddChild(m_ui.cityList)
+
+    local sortOptions = {}
+    for i, opt in ipairs(CITY_SORT_OPTIONS) do
+        table.insert(sortOptions, { label = Locale.Lookup(opt.label), value = i })
+    end
+    m_ui.sortDropdown = mgr:CreateWidget(SORT_ID, "Dropdown", {
+        Label = function() return Locale.Lookup("LOC_CAI_LABEL_SORT_BY") end,
+    })
+    m_ui.sortDropdown:SetFocusSound("Main_Menu_Mouse_Over")
+    m_ui.sortDropdown:SetOptions(sortOptions)
+    m_ui.sortDropdown:SetSelectedIndex(m_state.citySortIndex, true)
+    m_ui.sortDropdown:On("value_changed", function(_, sortIndex)
+        m_state.citySortIndex = sortIndex
+        RebuildCityList()
+    end)
+    m_ui.panel:AddChild(m_ui.sortDropdown)
 
     local function MakeTreePage(pageId, labelTag, tab)
         local page = m_ui.tabs:AddPage(function() return Locale.Lookup(labelTag) end)
@@ -1449,12 +1640,13 @@ local function OnPanelClosedCAI(wasCanceled)
     if m_ui.panel and mgr and mgr:GetWidgetById(PANEL_ID) then
         mgr:RemoveFromStack(PANEL_ID)
     end
-    m_ui = { panel = nil, tabs = nil, pages = {}, pageTrees = {}, categoryNodes = {} }
+    m_ui = { panel = nil, tabs = nil, cityList = nil, sortDropdown = nil, pages = {}, pageTrees = {}, categoryNodes = {} }
     m_state.data = nil
     m_state.openPending = false
     m_state.recommended = {}
     m_state.isQueueActionActive = false
     m_state.queueFocusIndexAfterRebuild = nil
+    m_state.cityFocusKeyAfterSelection = nil
     m_state.activeTab = TAB.PRODUCTION
     m_vanilla = {
         instanceByHash = {},
@@ -1474,7 +1666,10 @@ end
 local function OnVanillaListModeChangedCAI(listMode)
     local tab = GetTabForListMode(listMode)
     SetCAITabSilent(tab)
-    if m_ui.panel then RefreshActivePage() end
+    if m_ui.panel then
+        RefreshActivePage()
+        RebuildCityList()
+    end
     if m_state.openPending then
         PushPanelIfNeeded()
         m_state.openPending = false

@@ -185,4 +185,4 @@ OnInput = WrapFunc(OnInput, function(orig, input)
 end)
 
 ContextPtr:SetInputHandler(OnInput, true)
-Events.LoadScreenClose.Add(function() tutorialLoaded = true end)
+Events.LoadScreenClose.Add(function() if not tutorialLoaded then tutorialLoaded = true end end)

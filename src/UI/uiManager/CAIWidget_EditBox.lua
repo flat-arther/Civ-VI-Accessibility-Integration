@@ -251,7 +251,8 @@ function EditBoxWidget:Commit()
     -- "committed" every time becomes noise. Listeners can announce their own
     -- confirmation if they need one.
     if not self._alwaysEdit then
-        Speak(Locale.Lookup("LOC_CAI_EDIT_COMMITTED", self._passwordMask and string.rep("*", #text) or text), false, false)
+        Speak(Locale.Lookup("LOC_CAI_EDIT_COMMITTED", self._passwordMask and string.rep("*", #text) or text), false,
+            false)
     end
 end
 
@@ -277,8 +278,9 @@ end
 ---@param char string
 ---@return boolean
 function EditBoxWidget:OnCharInput(char, silent)
-    if not self._active or self._readOnly then return false end
-    if not CharAllowed(self._editMode, char) then return false end
+    if not self._active then return false end
+    if self._readOnly then return true end
+    if not CharAllowed(self._editMode, char) then return true end
     if not E.InsertText(self, char) then return true end
     self:_FireTextChanged()
     if not silent then
@@ -384,44 +386,92 @@ function EditBoxWidget._BuildBindings()
             end,
         },
         -- Cursor movement
-        { Key = Keys.VK_LEFT,  MSG = kd, Description = "LOC_CAI_KB_CURSOR_LEFT", Action = function(self)
-            if not active(self) then return false end
-            E.MoveCursor(self, -1, false, false); return true
-        end },
-        { Key = Keys.VK_LEFT,  MSG = kd, IsShift = true,                                                                                                         Description = "LOC_CAI_KB_SELECT_LEFT",      Action = function(
-            self)
-            if not active(self) then return false end
-            E.MoveCursor(self, -1, true, false); return true
-        end },
-        { Key = Keys.VK_LEFT,  MSG = kd, IsControl = true,                                                                                                       Description = "LOC_CAI_KB_WORD_LEFT",        Action = function(
-            self)
-            if not active(self) then return false end
-            E.MoveCursor(self, -1, false, true); return true
-        end },
-        { Key = Keys.VK_LEFT,  MSG = kd, IsControl = true,                                                                                                       IsShift = true,                                                                                                         Description = "LOC_CAI_KB_SELECT_WORD_LEFT", Action = function(
-            self)
-            if not active(self) then return false end
-            E.MoveCursor(self, -1, true, true); return true
-        end },
-        { Key = Keys.VK_RIGHT, MSG = kd, Description = "LOC_CAI_KB_CURSOR_RIGHT", Action = function(self)
-            if not active(self) then return false end
-            E.MoveCursor(self, 1, false, false); return true
-        end },
-        { Key = Keys.VK_RIGHT, MSG = kd, IsShift = true,                                                                                                         Description = "LOC_CAI_KB_SELECT_RIGHT",      Action = function(
-            self)
-            if not active(self) then return false end
-            E.MoveCursor(self, 1, true, false); return true
-        end },
-        { Key = Keys.VK_RIGHT, MSG = kd, IsControl = true,                                                                                                       Description = "LOC_CAI_KB_WORD_RIGHT",        Action = function(
-            self)
-            if not active(self) then return false end
-            E.MoveCursor(self, 1, false, true); return true
-        end },
-        { Key = Keys.VK_RIGHT, MSG = kd, IsControl = true,                                                                                                       IsShift = true,                                                                                                         Description = "LOC_CAI_KB_SELECT_WORD_RIGHT", Action = function(
-            self)
-            if not active(self) then return false end
-            E.MoveCursor(self, 1, true, true); return true
-        end },
+        {
+            Key = Keys.VK_LEFT,
+            MSG = kd,
+            Description = "LOC_CAI_KB_CURSOR_LEFT",
+            Action = function(self)
+                if not active(self) then return false end
+                E.MoveCursor(self, -1, false, false); return true
+            end
+        },
+        {
+            Key = Keys.VK_LEFT,
+            MSG = kd,
+            IsShift = true,
+            Description = "LOC_CAI_KB_SELECT_LEFT",
+            Action = function(
+                self)
+                if not active(self) then return false end
+                E.MoveCursor(self, -1, true, false); return true
+            end
+        },
+        {
+            Key = Keys.VK_LEFT,
+            MSG = kd,
+            IsControl = true,
+            Description = "LOC_CAI_KB_WORD_LEFT",
+            Action = function(
+                self)
+                if not active(self) then return false end
+                E.MoveCursor(self, -1, false, true); return true
+            end
+        },
+        {
+            Key = Keys.VK_LEFT,
+            MSG = kd,
+            IsControl = true,
+            IsShift = true,
+            Description = "LOC_CAI_KB_SELECT_WORD_LEFT",
+            Action = function(
+                self)
+                if not active(self) then return false end
+                E.MoveCursor(self, -1, true, true); return true
+            end
+        },
+        {
+            Key = Keys.VK_RIGHT,
+            MSG = kd,
+            Description = "LOC_CAI_KB_CURSOR_RIGHT",
+            Action = function(self)
+                if not active(self) then return false end
+                E.MoveCursor(self, 1, false, false); return true
+            end
+        },
+        {
+            Key = Keys.VK_RIGHT,
+            MSG = kd,
+            IsShift = true,
+            Description = "LOC_CAI_KB_SELECT_RIGHT",
+            Action = function(
+                self)
+                if not active(self) then return false end
+                E.MoveCursor(self, 1, true, false); return true
+            end
+        },
+        {
+            Key = Keys.VK_RIGHT,
+            MSG = kd,
+            IsControl = true,
+            Description = "LOC_CAI_KB_WORD_RIGHT",
+            Action = function(
+                self)
+                if not active(self) then return false end
+                E.MoveCursor(self, 1, false, true); return true
+            end
+        },
+        {
+            Key = Keys.VK_RIGHT,
+            MSG = kd,
+            IsControl = true,
+            IsShift = true,
+            Description = "LOC_CAI_KB_SELECT_WORD_RIGHT",
+            Action = function(
+                self)
+                if not active(self) then return false end
+                E.MoveCursor(self, 1, true, true); return true
+            end
+        },
         -- Line-edge movement
         {
             Key = Keys.VK_HOME,
@@ -493,14 +543,28 @@ function EditBoxWidget._BuildBindings()
                 return true
             end,
         },
-        { Key = Keys.VK_HOME, MSG = kd, IsControl = true, IsShift = true, Description = "LOC_CAI_KB_SELECT_TO_DOCUMENT_START", Action = function(self)
-            if not active(self) then return false end
-            E.MoveToEdge(self, 0, true); return true
-        end },
-        { Key = Keys.VK_END,  MSG = kd, IsControl = true, IsShift = true, Description = "LOC_CAI_KB_SELECT_TO_DOCUMENT_END", Action = function(self)
-            if not active(self) then return false end
-            E.MoveToEdge(self, #(self._buffer or ""), true); return true
-        end },
+        {
+            Key = Keys.VK_HOME,
+            MSG = kd,
+            IsControl = true,
+            IsShift = true,
+            Description = "LOC_CAI_KB_SELECT_TO_DOCUMENT_START",
+            Action = function(self)
+                if not active(self) then return false end
+                E.MoveToEdge(self, 0, true); return true
+            end
+        },
+        {
+            Key = Keys.VK_END,
+            MSG = kd,
+            IsControl = true,
+            IsShift = true,
+            Description = "LOC_CAI_KB_SELECT_TO_DOCUMENT_END",
+            Action = function(self)
+                if not active(self) then return false end
+                E.MoveToEdge(self, #(self._buffer or ""), true); return true
+            end
+        },
         -- Vertical movement
         {
             Key = Keys.VK_UP,

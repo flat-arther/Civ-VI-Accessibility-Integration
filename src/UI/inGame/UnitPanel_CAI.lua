@@ -2672,12 +2672,16 @@ function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locatio
     end
     if not m_IsGameStarted then return end
     LuaEvents.CAICursorMoveTo(plot:GetIndex(), "select")
-    local results = info:RequestUnitInfo(unitId, { "Summary" }, player)
-    if results == nil or #results == 0 then
-        return
-    end
+    local focused = mgr:GetFocusedWidget()
+    local isInWorld = focused and (focused.Type == "GameView" or focused.Type == "InterfaceMode")
+    if isInWorld then
+        local results = info:RequestUnitInfo(unitId, { "Summary" }, player)
+        if results == nil or #results == 0 then
+            return
+        end
 
-    Speak(table.concat(results, ", "))
+        Speak(table.concat(results, ", "))
+    end
 end
 
 View = WrapFunc(View, function(orig, data)

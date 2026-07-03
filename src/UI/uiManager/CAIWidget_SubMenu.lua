@@ -46,21 +46,35 @@ function SubMenuWidget.Create(mgr, id, props)
     w.Role = "SubMenu"
     w.Manager = mgr
     w.IsExpanded = false
+    w.SpeechSettings = { IgnoreWhenNotFocused = true }
 
     w:AddInputBindings({
-        { Key = Keys.VK_RETURN, Description = "LOC_CAI_KB_ENTER_SUBMENU",    Action = function(self) return EnterFirstChild(self) end },
-        { Key = Keys.VK_RIGHT,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_ENTER_SUBMENU",    Action = function(self) return EnterFirstChild(self) end },
-        { Key = Keys.VK_LEFT,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_COLLAPSE_SUBMENU", Action = function(self)
-            if not self:Collapse() then return false end
-            self.Manager:SetFocus(self)
-            return true
-        end },
-        { Key = Keys.VK_UP,     MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_UP",       Action = function(self) return self.IsExpanded and self:NavigatePrev() or false end },
-        { Key = Keys.VK_DOWN,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_DOWN",     Action = function(self) return self.IsExpanded and self:NavigateNext() or false end },
-        { Key = Keys.VK_HOME,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_TO_FIRST", Action = function(self) return self.IsExpanded and self:NavigateToFirst() or false end },
-        { Key = Keys.VK_END,    MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_TO_LAST",  Action = function(self) return self.IsExpanded and self:NavigateToLast() or false end },
-        { Key = Keys.VK_PRIOR,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_PAGE_UP",       Action = function(self) return self.IsExpanded and self:NavigatePage(-1) or false end },
-        { Key = Keys.VK_NEXT,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_PAGE_DOWN",     Action = function(self) return self.IsExpanded and self:NavigatePage(1) or false end },
+        { Key = Keys.VK_RETURN, Description = "LOC_CAI_KB_ENTER_SUBMENU", Action = function(self) return EnterFirstChild(
+            self) end },
+        { Key = Keys.VK_RIGHT,  MSG = KeyEvents.KeyDown,                  Description = "LOC_CAI_KB_ENTER_SUBMENU",                Action = function(
+            self) return EnterFirstChild(self) end },
+        {
+            Key = Keys.VK_LEFT,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_COLLAPSE_SUBMENU",
+            Action = function(self)
+                if not self:Collapse() then return false end
+                self.Manager:SetFocus(self)
+                return true
+            end
+        },
+        { Key = Keys.VK_UP,    MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_UP",       Action = function(self) return
+            self.IsExpanded and self:NavigatePrev() or false end },
+        { Key = Keys.VK_DOWN,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_DOWN",     Action = function(self) return
+            self.IsExpanded and self:NavigateNext() or false end },
+        { Key = Keys.VK_HOME,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_TO_FIRST", Action = function(self) return
+            self.IsExpanded and self:NavigateToFirst() or false end },
+        { Key = Keys.VK_END,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_TO_LAST",  Action = function(self) return
+            self.IsExpanded and self:NavigateToLast() or false end },
+        { Key = Keys.VK_PRIOR, MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_PAGE_UP",       Action = function(self) return
+            self.IsExpanded and self:NavigatePage(-1) or false end },
+        { Key = Keys.VK_NEXT,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_PAGE_DOWN",     Action = function(self) return
+            self.IsExpanded and self:NavigatePage(1) or false end },
     })
 
     CAIWidgetRegistry.ApplyProps(w, props)

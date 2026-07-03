@@ -92,9 +92,11 @@ OnInput = WrapFunc(OnInput, function(orig, pInputStruct)
 end)
 
 function OnLoadScreenClose()
-	m_IsGameStarted = true
-	if not ContextPtr:IsHidden() then
-		BuildDialog()
+	if not m_IsGameStarted then
+		m_IsGameStarted = true
+		if not ContextPtr:IsHidden() then
+			BuildDialog()
+		end
 	end
 end
 

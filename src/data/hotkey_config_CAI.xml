@@ -111,6 +111,7 @@
     <Row ActionId="UI_DiplomacyRibbonOpenWorldCongress" Name="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS" Description="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_OpenWorldCrisisTracker" Name="LOC_CAI_OPEN_CRISIS_TRACKER" Description="LOC_CAI_OPEN_CRISIS_TRACKER_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_OpenGlobalResourcePopup" Name="LOC_CAI_GLOBAL_RES_OPEN" Description="LOC_CAI_GLOBAL_RES_OPEN_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UI_OpenChatPanel" Name="LOC_CAI_OPEN_CHAT_PANEL" Description="LOC_CAI_OPEN_CHAT_PANEL_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_CAIOpenMapSearch" Name="LOC_CAI_OPEN_MAP_SEARCH" Description="LOC_CAI_OPEN_MAP_SEARCH_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_CAIOpenCivilopedia" Name="LOC_CAI_OPEN_CIVILOPEDIA" Description="LOC_CAI_OPEN_CIVILOPEDIA_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_CAIOpenCityStates" Name="LOC_CAI_OPEN_CITY_STATES" Description="LOC_CAI_OPEN_CITY_STATES_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
@@ -333,6 +334,7 @@
     <Row ActionId="UI_DiplomacyRibbonOpenWorldCongress" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F9" />
     <Row ActionId="UI_OpenWorldCrisisTracker" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_K" />
     <Row ActionId="UI_OpenGlobalResourcePopup" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_Q" />
+    <Row ActionId="UI_OpenChatPanel" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SLASH" />
     <Row ActionId="UI_CAIOpenMapSearch" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_F" />
     <Row ActionId="UI_CAIOpenCivilopedia" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F1" />
     <Row ActionId="UI_CAIOpenCityStates" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_V" />

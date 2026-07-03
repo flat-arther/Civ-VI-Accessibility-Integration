@@ -413,10 +413,12 @@ end
 
 -- ensure notifications are not announced in the load screen
 function OnLoadScreenClose()
-    m_IsGameStarted = true
-    if #m_caiDeferedNotificationAnnounce > 0 then
-        for _, n in ipairs(m_caiDeferedNotificationAnnounce) do
-            SpeakNotificationAdded(n.pId, n.Id)
+    if not m_IsGameStarted then
+        m_IsGameStarted = true
+        if #m_caiDeferedNotificationAnnounce > 0 then
+            for _, n in ipairs(m_caiDeferedNotificationAnnounce) do
+                SpeakNotificationAdded(n.pId, n.Id)
+            end
         end
     end
 end

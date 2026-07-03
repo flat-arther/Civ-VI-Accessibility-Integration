@@ -1945,6 +1945,9 @@
     <Row Tag="LOC_CAI_PRODUCTION_TAB_QUEUE" Language="en_US">
       <Text>Queue</Text>
     </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CITY_LIST" Language="en_US">
+      <Text>Cities</Text>
+    </Row>
     <Row Tag="LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS" Language="en_US">
       <Text>Districts</Text>
     </Row>
@@ -4468,6 +4471,15 @@
     <Row Tag="LOC_CAI_ENDGAME_CHAT_INPUT" Language="en_US">
       <Text>Chat message</Text>
     </Row>
+    <Row Tag="LOC_CAI_CHAT_PANEL_TITLE" Language="en_US">
+      <Text>In-game chat</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CHAT_PANEL_PLAYERS" Language="en_US">
+      <Text>Players</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CHAT_PANEL_NO_PLAYER_ACTIONS" Language="en_US">
+      <Text>No available actions</Text>
+    </Row>
     <Row Tag="LOC_CAI_ENDGAME_CHAT_SEND" Language="en_US">
       <Text>Send</Text>
     </Row>
@@ -5053,6 +5065,174 @@
     </Row>
     <Row Tag="LOC_CAI_LABEL_SORT_BY" Language="en_US">
       <Text>Sort by</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_SORT_DIRECTION" Language="en_US">
+      <Text>Sort direction</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_SORT_ASCENDING" Language="en_US">
+      <Text>Ascending</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_SORT_DESCENDING" Language="en_US">
+      <Text>Descending</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_SORT_ServerName" Language="en_US">
+      <Text>Game name</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_SORT_RuleSet" Language="en_US">
+      <Text>Ruleset</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_SORT_MapName" Language="en_US">
+      <Text>Map</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_SORT_GameSpeed" Language="en_US">
+      <Text>Game speed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_SORT_MembersSort" Language="en_US">
+      <Text>Players</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_SORT_DLCSort" Language="en_US">
+      <Text>Additional content</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_REFRESH_LIST" Language="en_US">
+      <Text>Refresh list</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_PREVIOUS_PAGE" Language="en_US">
+      <Text>Previous page</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_NEXT_PAGE" Language="en_US">
+      <Text>Next page</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_NO_GAMES" Language="en_US">
+      <Text>No games found</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_REFRESHING" Language="en_US">
+      <Text>Refreshing game list</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_GAME_ROW_LABEL" Language="en_US">
+      <Text>{1}, {2}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_RULESET_VALUE" Language="en_US">
+      <Text>Ruleset: {1}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_MAP_VALUE" Language="en_US">
+      <Text>Map: {1}, {2}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_SPEED_VALUE" Language="en_US">
+      <Text>Speed: {1}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_PLAYERS_VALUE" Language="en_US">
+      <Text>Players: {1}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_OFFICIAL_CONTENT" Language="en_US">
+      <Text>Official additional content</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_COMMUNITY_CONTENT" Language="en_US">
+      <Text>Community additional content</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_NO_CONTENT" Language="en_US">
+      <Text>None</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_CONTENT_COUNTS" Language="en_US">
+      <Text>Owned: {1}. Required: {2}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_CONTENT_OWNED" Language="en_US">
+      <Text>{1}, owned</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_CONTENT_MISSING" Language="en_US">
+      <Text>{1}, missing</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_CONTENT_DOWNLOAD" Language="en_US">
+      <Text>{1}, download required</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_FRIENDS_PANEL" Language="en_US">
+      <Text>Friends</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_FRIENDS" Language="en_US">
+      <Text>Friends list</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_NO_FRIENDS" Language="en_US">
+      <Text>No online friends</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_FRIEND_ROW_LABEL" Language="en_US">
+      <Text>{1_PlayerName}, {2_Status}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LOBBY_NO_FRIEND_ACTIONS" Language="en_US">
+      <Text>No friend actions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_PLAYER_SLOTS" Language="en_US">
+      <Text>Player slots</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_SLOT" Language="en_US">
+      <Text>Slot {1}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_SLOT_LABEL" Language="en_US">
+      <Text>{1}, {2}, {3}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_SLOT_LABEL_WITH_STATUS" Language="en_US">
+      <Text>{1}, {2}, {3}, {4}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_DETAIL" Language="en_US">
+      <Text>{1}: {2}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_SLOT_TYPE" Language="en_US">
+      <Text>Slot type</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_CHOOSE_SLOT_TYPE" Language="en_US">
+      <Text>Choose slot type</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_READY_STATUS" Language="en_US">
+      <Text>Ready status</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_TEAM" Language="en_US">
+      <Text>Team</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_CIV_LEADER" Language="en_US">
+      <Text>Civilization and leader</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_DIFFICULTY" Language="en_US">
+      <Text>Difficulty</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_STATUS" Language="en_US">
+      <Text>Status</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_WARNING" Language="en_US">
+      <Text>Warning</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_OBSERVER" Language="en_US">
+      <Text>Observer</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_HOTSEAT_EDIT" Language="en_US">
+      <Text>Edit hotseat player</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_ADD_PLAYER" Language="en_US">
+      <Text>Add player</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_CHAT_TARGET" Language="en_US">
+      <Text>Chat target</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_CHAT_LINE" Language="en_US">
+      <Text>{1}: {2}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_CHAT_PANEL" Language="en_US">
+      <Text>Open in-game chat</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_CHAT_PANEL_TOOLTIP" Language="en_US">
+      <Text>Opens the in-game chat accessibility panel</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_CHAT_TEAM" Language="en_US">
+      <Text>{1} to team</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_CHAT_WHISPER" Language="en_US">
+      <Text>{1} to {2}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_GAME_SUMMARY" Language="en_US">
+      <Text>Game summary</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_ADDITIONAL_CONTENT" Language="en_US">
+      <Text>Additional content</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_COPY_JOIN_CODE" Language="en_US">
+      <Text>Copy join code</Text>
     </Row>
 
   </LocalizedText>

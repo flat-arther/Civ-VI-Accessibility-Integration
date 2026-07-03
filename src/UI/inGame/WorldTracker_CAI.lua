@@ -351,6 +351,21 @@ local function ToggleCrisisList()
     end
 end
 
+local function ForceShowChatPanel()
+    if not UI.HasFeature("Chat") then return end
+    if not (GameConfiguration.IsNetworkMultiplayer() or GameConfiguration.IsPlayByCloud()) then return end
+
+    if m_hideAll then
+        ToggleAll(false)
+    end
+    if m_hideChat then
+        UpdateChatPanel(false)
+    end
+
+    StartUnitListSizeUpdate()
+    CheckEnoughRoom()
+end
+
 -- =============================================
 -- Input action dispatch
 -- =============================================
@@ -414,6 +429,7 @@ end)
 
 OnShutdown = WrapFunc(OnShutdown, function(orig)
     Events.InputActionTriggered.Remove(OnWorldTrackerInputActionTriggered)
+    LuaEvents.CAIWorldTrackerShowChat.Remove(ForceShowChatPanel)
     RemoveCrisisList()
     orig()
 end)
@@ -421,3 +437,4 @@ ContextPtr:SetShutdown(OnShutdown)
 
 InitializeWorldTrackerActions()
 Events.InputActionTriggered.Add(OnWorldTrackerInputActionTriggered)
+LuaEvents.CAIWorldTrackerShowChat.Add(ForceShowChatPanel)

@@ -1914,7 +1914,7 @@ local function BuildParamDropdownOptions(parameterId)
 	for i, v in ipairs(param.Values) do
 		table.insert(options, {
 			label = v.Name or "",
-			tooltip = v.Description or "",
+			tooltip = v.Description or Locale.Lookup(v.RawDescription or ""),
 			value = v,
 		})
 		if selectedIdx == 0 and param.Value
@@ -1967,8 +1967,8 @@ local function MakeParamDropdown(parameterId, locKey, getContainer)
 		Tooltip = function()
 			local p = g_GameParameters and g_GameParameters.Parameters
 				and g_GameParameters.Parameters[parameterId]
-			if p and p.Value and p.Value.Description then
-				return p.Value.Description
+			if p and p.Value then
+				return p.Value.Description or Locale.Lookup(p.Value.RawDescription)
 			end
 			return ""
 		end,
@@ -2340,8 +2340,8 @@ local function CreateAdvParamWidget(parameter, parentItem)
 			Tooltip = function()
 				local p = g_GameParameters and g_GameParameters.Parameters
 					and g_GameParameters.Parameters[paramId]
-				if p and p.Value and p.Value.Description then
-					return p.Value.Description
+				if p and p.Value then
+					return p.Value.Description or Locale.Lookup(p.Value.RawDescription) or ""
 				end
 				return parameter.Description or ""
 			end,
@@ -2612,8 +2612,8 @@ local function CreateBasicParamWidget(o, parameter, control)
 			Tooltip = function()
 				local p = g_GameParameters and g_GameParameters.Parameters
 					and g_GameParameters.Parameters[paramId]
-				if p and p.Value and p.Value.Description then
-					return p.Value.Description
+				if p and p.Value then
+					return p.Value.Description or Locale.Lookup(p.Value.RawDescription) or ""
 				end
 				return parameter.Description or ""
 			end,

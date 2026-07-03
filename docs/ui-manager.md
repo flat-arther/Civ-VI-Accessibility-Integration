@@ -246,6 +246,16 @@ hands focus to the conversation list) should skip the restore for that pass —
 pass a `nil` capture so `RestoreFocus` no-ops — rather than relying on a silent
 restore. The default restore is meant to speak.
 
+When vanilla refreshes part of a screen, CAI refreshes only the mirrored widget
+container for that same vanilla-owned area. Do not remove and re-push the whole
+CAI root, and do not rebuild unrelated sibling widgets, unless the user
+explicitly asks for that behavior or vanilla has actually closed/reopened the
+whole screen. For list/tree/table refreshes, keep the root mounted and use the
+container-local focus tools above (`CaptureFocusKey` / `RestoreFocus`, or
+`PrepareFocus` when the rebuilt container is not currently focused). This avoids
+spurious root-focus resets such as tab-strip focus bouncing into a refreshed
+tree and back out.
+
 ### Re-announcing without re-focusing
 
 When a focused widget's data updates due to a game event:
@@ -844,8 +854,10 @@ btn:On("activate", function() vanillaButton:CallCallback("Click") end)
 For checkboxes:
 
 ```lua
-check:SetValueGetter(function() return vanillaCheck:IsChecked() end)
-check:On("value_changed", function(_, _) vanillaCheck:CallCallback("CheckHandler") end)
+check:SetChecked(vanillaCheck:IsChecked(), true)
+check:SetValueSetter(function(_, v)
+    if vanillaCheck:IsChecked() ~= v then vanillaCheck:DoLeftClick() end
+end)
 ```
 
 For edit boxes wrapping a vanilla `EditBox`:
