@@ -1772,7 +1772,7 @@ GetUnitActionTooltip = function(action)
         return ""
     end
 
-    return tooltip
+    return tooltip:gsub(label, "")
 end
 
 local function BuildUnitActionHotkeyIds()

@@ -1234,7 +1234,8 @@ end
 local function InitializeCAIGameView()
 	if m_caiGameViewWidget and mgr:GetWidgetById(m_caiGameViewWidget:GetId()) then return end
 	if not CreateGameViewWidget() then return end
-	mgr:Push(m_caiGameViewWidget)
+	-- this needs to sit below everything else. Priority must be low
+	mgr:Push(m_caiGameViewWidget, PopupPriority.Low)
 
 	RegisterCAIEvents()
 	SnapCursorToInitialPosition()

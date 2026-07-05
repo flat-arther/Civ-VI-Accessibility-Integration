@@ -61,7 +61,6 @@
     <Row ActionId="UI_TopPanelSpeakNukes" Name="LOC_CAI_TOP_PANEL_SPEAK_NUKES" Description="LOC_CAI_TOP_PANEL_SPEAK_NUKES_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelYieldInfoList" Name="LOC_CAI_TOP_PANEL_YIELD_INFO" Description="LOC_CAI_TOP_PANEL_YIELD_INFO_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelResourceInfoList" Name="LOC_CAI_TOP_PANEL_RESOURCE_INFO" Description="LOC_CAI_TOP_PANEL_RESOURCE_INFO_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CAISpeakGovernmentTooltip" Name="LOC_CAI_SPEAK_GOVERNMENT_TOOLTIP" Description="LOC_CAI_SPEAK_GOVERNMENT_TOOLTIP_DESC" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotReadUnits" Name="LOC_CAI_PLOT_READ_UNITS" Description="LOC_CAI_PLOT_READ_UNITS_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotReadYieldRiverOwner" Name="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER" Description="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotReadStats" Name="LOC_CAI_PLOT_READ_STATS" Description="LOC_CAI_PLOT_READ_STATS_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
@@ -280,7 +279,6 @@
     <Row ActionId="UI_TopPanelSpeakNukes" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_N" />
     <Row ActionId="UI_TopPanelYieldInfoList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_Y" />
     <Row ActionId="UI_TopPanelResourceInfoList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_I" />
-    <Row ActionId="CAISpeakGovernmentTooltip" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_P" />
     <Row ActionId="PlotReadUnits" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_S" />
     <Row ActionId="PlotReadUnits" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_5" />
     <Row ActionId="PlotReadYieldRiverOwner" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_W" />

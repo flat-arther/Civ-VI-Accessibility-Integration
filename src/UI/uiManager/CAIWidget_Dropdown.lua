@@ -94,6 +94,7 @@ function DropdownWidget.Create(mgr, id, props)
     })
     w._list.SpeechSettings = { Position = false }
     w._list:SetHiddenPredicate(function() return not w._isOpen end)
+    w._list.TrapInput = true
     UIWidget.AddChild(w, w._list)
 
     w:AddInputBindings({
@@ -107,14 +108,17 @@ function DropdownWidget.Create(mgr, id, props)
             end,
         },
         {
-            Key = Keys.VK_ESCAPE,
-            Description = "LOC_CAI_KB_CLOSE_DROPDOWN",
-            Action = function(self)
-                if not self._isOpen then return false end
-                self:Close()
-                return true
-            end,
         },
+    })
+
+    w._list:AddInputBinding({
+        Key = Keys.VK_ESCAPE,
+        Description = "LOC_CAI_KB_CLOSE_DROPDOWN",
+        Action = function(self)
+            if not self.Parent._isOpen then return false end
+            self.Parent:Close()
+            return true
+        end,
     })
 
     -- focus_leave on the dropdown itself fires when focus exits the entire
@@ -196,8 +200,31 @@ end
 function DropdownWidget:Commit(index, silent)
     index = ClampIndex(self, index)
     if index == 0 then return end
+
+    local mgr = self.Manager
+    local focusKey = self.FocusKey
+
     self._selectedIndex = index
     self:SetValue(self._options[index].value, silent)
+
+    -- Some screens like hostGame can rebuild/destroy this dropdown during SetValue().
+    -- their RestoreFocus is silent, so speak once here, only for this user action.
+    if not self.Manager or not self.Children then
+        if not silent and mgr then
+            local focused = mgr:GetFocusedWidget()
+
+            if focusKey and (not focused or focused.FocusKey ~= focusKey) then
+                local replacement = mgr:FindByFocusKey(mgr:GetTop(), focusKey)
+                if replacement then
+                    mgr:SetFocus(replacement, { announce = false })
+                end
+            end
+
+            mgr:Refocus()
+        end
+        return
+    end
+
     if self._isOpen then
         self:Close()
     end

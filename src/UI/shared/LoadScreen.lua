@@ -662,7 +662,7 @@ function OnCAIUIManagerInitialized(manager)
 	if not m_CAIPanel or mgr:GetTop() ~= m_CAIPanel then
 	BuildPanel()
 	PopulateList()
-	mgr:Push(m_CAIPanel, PopupPriority.Current)
+	mgr:Push(m_CAIPanel)
 	end
 end
 

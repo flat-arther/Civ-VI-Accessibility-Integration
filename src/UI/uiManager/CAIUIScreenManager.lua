@@ -392,7 +392,7 @@ function UIScreenManager:HandleInput(input)
     local node = self:GetFocusedWidget()
     while node do
         if not node:IsHidden() and node.OnHandleInput then
-            if node:OnHandleInput(input) then return true end
+            if node:OnHandleInput(input) or node.TrapInput then return true end
         end
         node = node.Parent
     end

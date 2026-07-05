@@ -351,6 +351,7 @@ function P.RunLookup(widget)
     local panel = mgr:CreateWidget(panelId, "Panel", {
         Transparent = true,
         WrapAround = true,
+        TrapInput = true
     })
     panel:On("focus_enter", function() Input.SetActiveContext(InputContext.Shell) end)
     local listId = panelId .. "_List"

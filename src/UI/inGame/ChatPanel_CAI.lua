@@ -307,13 +307,16 @@ end
 local function CAI_GetPlayerEntrySummary(playerID)
     local parts = {}
     local playerEntry = GetPlayerListEntry(playerID)
+    local cfg = PlayerConfigurations[playerID]
     if playerEntry ~= nil then
         local name = CAI_ControlText(playerEntry.PlayerName)
         local status = CAI_ControlText(playerEntry.ConnectionLabel)
         if name ~= "" then table.insert(parts, name) end
         if status ~= "" then table.insert(parts, status) end
+        if Players[playerID] and Players[playerID]:IsTurnActive() then
+            table.insert(parts, Locale.Lookup("LOC_CAI_DIPLO_RIBBON_ACTIVE_TURN"))
+        end
     else
-        local cfg = PlayerConfigurations[playerID]
         if cfg ~= nil then
             table.insert(parts, CAI_Lookup(cfg:GetSlotName()))
         end

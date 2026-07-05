@@ -107,26 +107,27 @@ local function GetLeaderLabel(playerID, localPlayerID)
     local pConfig = PlayerConfigurations[playerID]
     if not pConfig then return "?" end
 
-    if IsMaskedPlayer(playerID, localPlayerID) then
-        return Locale.Lookup("LOC_DIPLOPANEL_UNMET_PLAYER") .. " (" .. pConfig:GetPlayerName() .. ")"
-    end
+    local parts = {}
+    if not IsMaskedPlayer(playerID, localPlayerID) then
+        local name = Locale.Lookup(pConfig:GetLeaderName())
+        local civName = Locale.Lookup(pConfig:GetCivilizationShortDescription())
+        parts = { name, civName }
 
-    local name = Locale.Lookup(pConfig:GetLeaderName())
-    local civName = Locale.Lookup(pConfig:GetCivilizationShortDescription())
-    local parts = { name, civName }
+        if playerID == localPlayerID then
+            table.insert(parts, Locale.Lookup("LOC_HUD_CITY_YOU"))
+        end
 
-    if playerID == localPlayerID then
-        table.insert(parts, Locale.Lookup("LOC_CAI_DIPLO_RIBBON_YOU"))
-    end
+        local rel = GetRelationshipLabel(playerID, localPlayerID)
+        if rel then
+            table.insert(parts, rel)
+        end
 
-    local rel = GetRelationshipLabel(playerID, localPlayerID)
-    if rel then
-        table.insert(parts, rel)
-    end
-
-    local team = GetTeamLabel(playerID, localPlayerID)
-    if team then
-        table.insert(parts, team)
+        local team = GetTeamLabel(playerID, localPlayerID)
+        if team then
+            table.insert(parts, team)
+        end
+    else
+        parts = { Locale.Lookup("LOC_DIPLOPANEL_UNMET_PLAYER") .. " (" .. pConfig:GetPlayerName() .. ")" }
     end
 
     if Players[playerID]:IsTurnActive() then

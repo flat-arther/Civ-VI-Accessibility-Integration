@@ -1,7 +1,6 @@
 include("caiUtils")
 include("Civ6Common") -- IsExpansion1Active / IsExpansion2Active
 
-
 local function IsDramaticAgesActive()
     if GameConfiguration.GetValue("GAMEMODE_DRAMATICAGES") then return true end
     return false
@@ -28,6 +27,9 @@ else
 end
 
 local mgr                   = ExposedMembers.CAI_UIManager
+
+local info                  = ExposedMembers.CAIInfo or {}
+ExposedMembers.CAIInfo      = info
 
 local PANEL_ID              = "CAIGovernmentScreen_Panel"
 local TABS_ID               = "CAIGovernmentScreen_Tabs"
@@ -997,9 +999,10 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
 end)
 ContextPtr:SetInputHandler(OnInputHandler, true)
 
-local m_caiSpeakGovInfoId = Input.GetActionId("CAISpeakGovernmentTooltip")
 
-local function SpeakGovernmentInfo()
+
+
+function info.GetGovernmentInfo()
     local culture = GetLocalPlayerCulture()
     if not culture then return end
 
@@ -1009,6 +1012,7 @@ local function SpeakGovernmentInfo()
     if govRowId ~= -1 then
         local govRow = GameInfo.Governments[govRowId]
         if govRow then
+            table.insert(lines, Locale.Lookup("LOC_GOVT_GOVERNMENT"))
             table.insert(lines, Locale.Lookup(govRow.Name))
             local details = GetGovernmentDetailParts(govRow.GovernmentType)
             for _, d in ipairs(details) do
@@ -1030,19 +1034,11 @@ local function SpeakGovernmentInfo()
     end
 
     if #lines > 0 then
-        Speak(JoinNonEmpty(lines, ". "))
+        return JoinNonEmpty(lines, ". ")
     end
 end
 
-local function OnCAIInputActionTriggered(actionId)
-    if m_caiSpeakGovInfoId and actionId == m_caiSpeakGovInfoId then
-        SpeakGovernmentInfo()
-    end
-end
-
-Events.InputActionTriggered.Add(OnCAIInputActionTriggered)
 OnShutdown = WrapFunc(OnShutdown, function(orig)
-    Events.InputActionTriggered.Remove(OnCAIInputActionTriggered)
     PopPanel()
     orig()
 end)

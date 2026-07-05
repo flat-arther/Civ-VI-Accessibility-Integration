@@ -296,28 +296,30 @@ local function CollectBindings(widget)
     local commonBindings = {}
     local w = widget
     while w do
-        local described = {}
-        for _, b in ipairs(w.InputMap) do
-            if b.Description and b.Action then
-                local entry = {
-                    description = Locale.Lookup(b.Description),
-                    keyCombo = FormatBinding(b),
-                    action = b.Action,
-                    owner = w,
-                }
-                if b.Common then
-                    commonBindings[#commonBindings + 1] = entry
-                else
-                    described[#described + 1] = entry
+        if not w.TrapInput then
+            local described = {}
+            for _, b in ipairs(w.InputMap) do
+                if b.Description and b.Action then
+                    local entry = {
+                        description = Locale.Lookup(b.Description),
+                        keyCombo = FormatBinding(b),
+                        action = b.Action,
+                        owner = w,
+                    }
+                    if b.Common then
+                        commonBindings[#commonBindings + 1] = entry
+                    else
+                        described[#described + 1] = entry
+                    end
                 end
             end
-        end
-        described = MergeBindings(described)
-        if #described > 0 then
-            groups[#groups + 1] = {
-                label = GetWidgetLabel(w),
-                bindings = described,
-            }
+            described = MergeBindings(described)
+            if #described > 0 then
+                groups[#groups + 1] = {
+                    label = GetWidgetLabel(w),
+                    bindings = described,
+                }
+            end
         end
         w = w.Parent
     end
@@ -353,6 +355,7 @@ function H.RunHelp(widget)
     local panel = mgr:CreateWidget(panelId, "Panel", {
         Transparent = true,
         WrapAround = true,
+        TrapInput = true
     })
     panel:On("focus_enter", function() Input.SetActiveContext(InputContext.Shell) end)
     local tree = mgr:CreateWidget(panelId .. "_Tree", "Tree", {
@@ -433,8 +436,6 @@ function H.RunHelp(widget)
             return true
         end,
     },
-        { Key = Keys.VK_DOWN, MSG = KeyEvents.KeyDown, Action = function() return true end },
-        { Key = Keys.VK_UP,   MSG = KeyEvents.KeyDown, Action = function() return true end },
     })
 
     root:AddChild(panel)

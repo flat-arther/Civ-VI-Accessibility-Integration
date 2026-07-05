@@ -8,20 +8,23 @@ else
     include("WorldTracker")
 end
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr                          = ExposedMembers.CAI_UIManager
+
+local info                         = ExposedMembers.CAIInfo or {}
+ExposedMembers.CAIInfo             = info
 
 local ACTION_OPEN_RESEARCH_CHOOSER = Input.GetActionId("UI_WorldTrackerOpenResearchChooser")
-local ACTION_OPEN_CIVICS_CHOOSER = Input.GetActionId("UI_WorldTrackerOpenCivicsChooser")
-local ACTION_SPEAK_SCIENCE = Input.GetActionId("UI_TopPanelSpeakScience")
-local ACTION_SPEAK_CULTURE = Input.GetActionId("UI_TopPanelSpeakCulture")
+local ACTION_OPEN_CIVICS_CHOOSER   = Input.GetActionId("UI_WorldTrackerOpenCivicsChooser")
+local ACTION_SPEAK_SCIENCE         = Input.GetActionId("UI_TopPanelSpeakScience")
+local ACTION_SPEAK_CULTURE         = Input.GetActionId("UI_TopPanelSpeakCulture")
 
-local m_caiWorldTrackerActions = {}
-local m_caiResearchTrackerControl = nil
-local m_caiCivicsTrackerControl = nil
+local m_caiWorldTrackerActions     = {}
+local m_caiResearchTrackerControl  = nil
+local m_caiCivicsTrackerControl    = nil
 
-local CRISIS_LIST_ID = "CAICrisisTracker_List"
-local HOVER_SOUND = "Main_Menu_Mouse_Over"
-local m_crisisList = nil
+local CRISIS_LIST_ID               = "CAICrisisTracker_List"
+local HOVER_SOUND                  = "Main_Menu_Mouse_Over"
+local m_crisisList                 = nil
 
 local function ControlIsHidden(control)
     return control and control.IsHidden and control:IsHidden() or false
@@ -163,7 +166,7 @@ local function SpeakScienceAndResearch()
     Speak(table.concat(parts, ", "))
 end
 
-local function SpeakCultureAndCivic()
+local function SpeakCultureDetails()
     local playerID, player = GetLocalPlayer()
     if playerID == nil or player == nil then return end
 
@@ -175,6 +178,10 @@ local function SpeakCultureAndCivic()
             .. Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", FormatYieldPerTurn(culture:GetCultureYield())))
     end
     AppendCivicSummary(parts, playerID, player)
+
+    local govInfo = info.GetGovernmentInfo and info.GetGovernmentInfo()
+    if govInfo then table.insert(parts, govInfo) end
+
     Speak(table.concat(parts, ", "))
 end
 
@@ -397,7 +404,7 @@ local function InitializeWorldTrackerActions()
         LuaEvents.WorldTracker_OpenChooseCivic()
     end)
     RegisterWorldTrackerAction(ACTION_SPEAK_SCIENCE, SpeakScienceAndResearch)
-    RegisterWorldTrackerAction(ACTION_SPEAK_CULTURE, SpeakCultureAndCivic)
+    RegisterWorldTrackerAction(ACTION_SPEAK_CULTURE, SpeakCultureDetails)
 
     if IsExpansion1Active() or IsExpansion2Active() then
         local ACTION_OPEN_TRACKER = Input.GetActionId("UI_OpenWorldCrisisTracker")

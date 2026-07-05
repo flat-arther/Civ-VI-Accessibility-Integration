@@ -7,7 +7,7 @@ include("Civ6Common")
 local HexCoordUtils = CAIHexCoordUtils
 
 local function IsBarbarianClansModeActive()
-    return GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS") == 1
+    return GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS") == true
 end
 
 local function GetPlotToolTipIncludeName()
@@ -98,6 +98,7 @@ local CURSOR_MOVE_INFO_PRIORITY = {
     "feature",
     "resource",
     "improvement",
+    "routeName",
     "barbarianClan",
     "river",
     "cliff",
@@ -978,6 +979,24 @@ info.PlotInfoHelpers = {
         end
 
         return nil
+    end,
+
+    routeName = function(data)
+        if not data.IsVisible or not data.IsRoute then return nil end
+        if IS_XP2_TOOLTIP and data.Impassable then
+            return nil
+        end
+
+        local routeInfo = GameInfo.Routes[data.RouteType]
+        if routeInfo == nil or routeInfo.MovementCost == nil or routeInfo.Name == nil then
+            return nil
+        end
+
+        if data.RoutePillaged then
+            return Locale.Lookup(routeInfo.Name) .. " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_PILLAGED_TEXT")
+        end
+
+        return Locale.Lookup(routeInfo.Name)
     end,
 
     route = function(data)

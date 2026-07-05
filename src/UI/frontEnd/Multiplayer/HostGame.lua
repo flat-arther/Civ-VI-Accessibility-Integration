@@ -1205,9 +1205,6 @@ local function CAI_PopPanel()
 	if mgr and mgr:GetWidgetById(CAI_PANEL_ID) then
 		mgr:RemoveFromStack(CAI_PANEL_ID)
 	end
-	if CAI_Panel then
-		CAI_Panel:Destroy()
-	end
 	CAI_Panel = nil
 	CAI_OptionsList = nil
 	CAI_ActionRow = nil

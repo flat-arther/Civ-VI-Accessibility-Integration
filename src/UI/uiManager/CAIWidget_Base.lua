@@ -18,6 +18,7 @@ local TooltipReader = CAIWidgetHelpers_TooltipReader
 ---@field Children UIWidget[]
 ---@field Manager? UIScreenManager
 ---@field InputMap InputBinding[]
+---@field TrapInput? boolean
 ---@field SpeechSettings table<string, boolean>
 UIWidget = {}
 UIWidget.__index = UIWidget
@@ -57,8 +58,8 @@ function UIWidget.New(class)
         Action = function(self) return PediaLookup.RunLookup(self) end,
     })
     w:AddInputBinding({
-        Key = Keys.VK_OEM_2,
-        IsShift = true,
+        Key = Keys.H,
+        IsControl = true,
         Description = "LOC_CAI_KB_INPUT_HELP",
         Common = true,
         Action = function(self)
@@ -105,6 +106,7 @@ function UIWidget.New(class)
             return TooltipReader.ReadLastTooltipSection(self)
         end,
     })
+    w.TrapInput = false
     return w
 end
 

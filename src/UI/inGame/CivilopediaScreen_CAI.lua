@@ -1,10 +1,11 @@
 include("caiUtils")
 include("CivilopediaScreen")
 
-local mgr                = ExposedMembers.CAI_UIManager
+local mgr         = ExposedMembers.CAI_UIManager
 
-local PANEL_ID           = "CAIPediaPanel"
-local HOVER_SOUND        = "Main_Menu_Mouse_Over"
+local PANEL_ID    = "CAIPediaPanel"
+local HOVER_SOUND = "Main_Menu_Mouse_Over"
+
 
 local m_state            = {
     userSwitchedFocus = false,
@@ -796,13 +797,14 @@ end
 
 local function PushPanel()
     if mgr:GetTop() ~= m_ui.panel then
-        mgr:Push(m_ui.panel, { focus = ResolveInitialFocus() })
+        mgr:Push(m_ui.panel,
+            { priority = PopupPriority.Civilopedia, focus = ResolveInitialFocus() })
     end
     m_state.isOpeningOnHistoryPage = false
 end
 
 local function PopPanel()
-    if m_ui.panel and mgr:GetTop() == m_ui.panel then
+    if m_ui.panel and mgr:GetWidgetById(PANEL_ID) then
         mgr:RemoveFromStack(PANEL_ID)
     end
     m_ui.panel = nil
@@ -1037,7 +1039,11 @@ OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionI
     end
     orig(actionId)
 end)
+
+
 Events.InputActionTriggered.Remove(OnInputActionTriggered)
 Events.InputActionTriggered.Add(OnInputActionTriggered)
+
+
 
 Controls.WindowCloseButton:RegisterCallback(Mouse.eLClick, OnClose)
