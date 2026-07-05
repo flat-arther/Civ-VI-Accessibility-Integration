@@ -12,6 +12,7 @@
     <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion1_MODE.lua</File>
     <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion2_MODE.lua</File>
     <File>caiUtils.lua</File>
+
     <File>UI/uiManager/helpers/CAIWidgetHelpers_Navigation.lua</File>
     <File>UI/uiManager/helpers/CAIWidgetHelpers_Search.lua</File>
     <File>UI/uiManager/helpers/CAIWidgetHelpers_Tree.lua</File>
@@ -56,8 +57,10 @@
     <File>UI/frontEnd/Multiplayer/Lobby.lua</File>
     <File>UI/frontEnd/Multiplayer/HostGame.lua</File>
     <File>UI/frontEnd/Multiplayer/JoiningRoom.lua</File>
+    <File>UI/frontEnd/Multiplayer/PBCNotifyRemind.lua</File>
     <File>UI/frontEnd/Multiplayer/StagingRoom.lua</File>
     <File>UI/frontEnd/Multiplayer/ConfirmKick.lua</File>
+    <File>UI/frontEnd/Multiplayer/EditHotseatPlayer.lua</File>
     <File>UI/frontEnd/AdvancedSetup.lua</File>
     <File>UI/frontEnd/MapSelect.lua</File>
     <File>UI/frontEnd/LeaderPicker.lua</File>
@@ -74,6 +77,7 @@
     <File>UI/shared/LoadScreen.lua</File>
     <File>UI/shared/StateTransition.lua</File>
     <File>UI/shared/PopupDialog.lua</File>
+    <File>UI/inGame/PlayerStateManager_CAI.lua</File>
     <File>UI/inGame/InGamePopup_CAI.lua</File>
     <File>UI/shared/Options.lua</File>
     <File>UI/inGame/InGame.lua</File>
@@ -146,6 +150,7 @@
     <File>UI/inGame/EraCompletePopup_CAI.lua</File>
     <File>UI/inGame/EraReviewPopup_CAI.lua</File>
     <File>UI/inGame/RazeCity_CAI.lua</File>
+    <File>UI/inGame/PlayerChange_CAI.lua</File>
     <File>UI/inGame/DisloyalCityChooser_CAI.lua</File>
     <File>UI/inGame/DedicationPopup_CAI.lua</File>
     <File>UI/inGame/WorldCongressIntro_CAI.lua</File>
@@ -218,6 +223,14 @@
       <LuaReplace>UI/frontEnd/Multiplayer/JoiningRoom.lua</LuaReplace>
     </ReplaceUIScript>
 
+    <ReplaceUIScript id="CAI_PBCNotifyRemind">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>PBCNotifyRemind</LuaContext>
+      </Properties>
+      <LuaReplace>UI/frontEnd/Multiplayer/PBCNotifyRemind.lua</LuaReplace>
+    </ReplaceUIScript>
+
     <ReplaceUIScript id="CAI_HostGame">
       <Properties>
         <LoadOrder>100</LoadOrder>
@@ -240,6 +253,14 @@
         <LuaContext>ConfirmKick</LuaContext>
       </Properties>
       <LuaReplace>UI/frontEnd/Multiplayer/ConfirmKick.lua</LuaReplace>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_EditHotseatPlayer">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>EditHotseatPlayer</LuaContext>
+      </Properties>
+      <LuaReplace>UI/frontEnd/Multiplayer/EditHotseatPlayer.lua</LuaReplace>
     </ReplaceUIScript>
 
     <ImportFiles id="CAIFrontEnd">
@@ -288,8 +309,10 @@
       <File>UI/frontEnd/Multiplayer/Lobby.lua</File>
       <File>UI/frontEnd/Multiplayer/HostGame.lua</File>
       <File>UI/frontEnd/Multiplayer/JoiningRoom.lua</File>
+      <File>UI/frontEnd/Multiplayer/PBCNotifyRemind.lua</File>
       <File>UI/frontEnd/Multiplayer/StagingRoom.lua</File>
       <File>UI/frontEnd/Multiplayer/ConfirmKick.lua</File>
+      <File>UI/frontEnd/Multiplayer/EditHotseatPlayer.lua</File>
       <File>UI/frontEnd/AdvancedSetup.lua</File>
       <File>UI/frontEnd/MapSelect.lua</File>
       <File>UI/frontEnd/MultiSelectWindow.lua</File>
@@ -371,6 +394,7 @@
       <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>
       <File>UI/uiManager/CAIWidget_SearchPanel.lua</File>
       <File>UI/uiManager/CAIUIScreenManager.lua</File>
+      <File>UI/inGame/PlayerStateManager_CAI.lua</File>
       <File>UI/inGame/navCursor.lua</File>
       <File>UI/inGame/MovementActions_CAI.lua</File>
       <File>UI/inGame/UnitWaypoints_CAI.lua</File>
@@ -802,6 +826,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>RazeCity</LuaContext>
         <LuaReplace>UI/inGame/RazeCity_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_PlayerChange">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>PlayerChange</LuaContext>
+        <LuaReplace>UI/inGame/PlayerChange_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

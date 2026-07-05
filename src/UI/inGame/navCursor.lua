@@ -1,12 +1,23 @@
-CAICursor = CAICursor or {
-    curX = 0,
-    curY = 0,
-    lastOwnerZone = nil,
-    lastContinentZone = nil,
-    lastTerritoryZone = nil,
-    lastVolcanoZone = nil,
-    lastNationalParkZone = nil,
-}
+include("PlayerStateManager_CAI")
+
+CAICursor = CAICursor or {}
+
+local m_PlayerState = PlayerStateManager.Init(function(playerID)
+    return {
+        curX = 0,
+        curY = 0,
+
+        lastOwnerZone = nil,
+        lastContinentZone = nil,
+        lastTerritoryZone = nil,
+        lastVolcanoZone = nil,
+        lastNationalParkZone = nil,
+    }
+end)
+
+local function GetState()
+    return m_PlayerState:GetActive()
+end
 
 local HexCoordUtils = nil
 
@@ -28,35 +39,23 @@ local function ResolvePlotById(plotId)
 end
 
 -- =========================================================================
--- Zone helpers (compare-and-speak-on-change)
+-- Zone helpers
 -- =========================================================================
 
----@param plot Plot|nil
----@return string|nil
 local function GetContinentZoneText(plot)
-    if plot == nil then
-        return nil
-    end
+    if plot == nil then return nil end
 
     local continentIndex = plot:GetContinentType()
-    if continentIndex == nil or continentIndex < 0 then
-        return nil
-    end
+    if continentIndex == nil or continentIndex < 0 then return nil end
 
     local continent = GameInfo.Continents[continentIndex]
-    if continent == nil or continent.Description == nil then
-        return nil
-    end
+    if continent == nil or continent.Description == nil then return nil end
 
     return Locale.Lookup("LOC_CAI_NAV_CURSOR_CONTINENT_ZONE", continent.Description)
 end
 
----@param plot Plot|nil
----@return string|nil
 local function GetOwnerZoneText(plot)
-    if plot == nil then
-        return nil
-    end
+    if plot == nil then return nil end
 
     local ownerID = plot:GetOwner()
     if ownerID == nil or ownerID < 0 then
@@ -64,14 +63,10 @@ local function GetOwnerZoneText(plot)
     end
 
     local localPlayerID = Game.GetLocalPlayer()
-    if localPlayerID == nil or localPlayerID < 0 then
-        return nil
-    end
+    if localPlayerID == nil or localPlayerID < 0 then return nil end
 
     local localPlayer = Players[localPlayerID]
-    if localPlayer == nil then
-        return nil
-    end
+    if localPlayer == nil then return nil end
 
     local diplomacy = localPlayer:GetDiplomacy()
     if diplomacy ~= nil and ownerID ~= localPlayerID and not diplomacy:HasMet(ownerID) then
@@ -79,72 +74,42 @@ local function GetOwnerZoneText(plot)
     end
 
     local playerConfig = PlayerConfigurations[ownerID]
-    if playerConfig == nil then
-        return nil
-    end
+    if playerConfig == nil then return nil end
 
     local civName = playerConfig:GetCivilizationShortDescription()
-    if civName == nil or civName == "" then
-        return nil
-    end
+    if civName == nil or civName == "" then return nil end
 
     return Locale.Lookup(civName)
 end
 
----@param plot Plot|nil
----@return string|nil
 local function GetTerritoryZoneText(plot)
-    if plot == nil or not IsExpansion2Active() then
-        return nil
-    end
-
-    if Territories == nil or Territories.GetTerritoryAt == nil then
-        return nil
-    end
+    if plot == nil or not IsExpansion2Active() then return nil end
+    if Territories == nil or Territories.GetTerritoryAt == nil then return nil end
 
     local territory = Territories.GetTerritoryAt(plot:GetIndex())
-    if territory == nil then
-        return nil
-    end
+    if territory == nil then return nil end
 
     local name = territory:GetName()
-    if name == nil or name == "" then
-        return nil
-    end
+    if name == nil or name == "" then return nil end
 
     return Locale.Lookup("LOC_CAI_NAV_CURSOR_TERRITORY_ZONE", name)
 end
 
----@param plot Plot|nil
----@return string|nil
 local function GetVolcanoZoneText(plot)
-    if plot == nil or not IsExpansion2Active() then
-        return nil
-    end
-
-    if MapFeatureManager == nil or MapFeatureManager.GetVolcanoName == nil then
-        return nil
-    end
+    if plot == nil or not IsExpansion2Active() then return nil end
+    if MapFeatureManager == nil or MapFeatureManager.GetVolcanoName == nil then return nil end
 
     local name = MapFeatureManager.GetVolcanoName(plot)
-    if name == nil or name == "" then
-        return nil
-    end
+    if name == nil or name == "" then return nil end
 
     return Locale.Lookup("LOC_CAI_NAV_CURSOR_VOLCANO_ZONE", name)
 end
 
----@param plot Plot|nil
----@return string|nil
 local function GetNationalParkZoneText(plot)
-    if plot == nil then
-        return nil
-    end
+    if plot == nil then return nil end
 
     local nationalParks = Game.GetNationalParks()
-    if nationalParks == nil or nationalParks.IsNationalPark == nil then
-        return nil
-    end
+    if nationalParks == nil or nationalParks.IsNationalPark == nil then return nil end
 
     if not nationalParks:IsNationalPark(plot:GetIndex()) then
         return nil
@@ -153,22 +118,14 @@ local function GetNationalParkZoneText(plot)
     return Locale.Lookup("LOC_CAI_NAV_CURSOR_NATIONAL_PARK_ZONE")
 end
 
----@param plot Plot|nil
----@return boolean
 local function CanUpdateZonesForPlot(plot)
-    if plot == nil then
-        return false
-    end
+    if plot == nil then return false end
 
     local localPlayerID = Game.GetLocalPlayer()
-    if localPlayerID == nil or localPlayerID < 0 then
-        return false
-    end
+    if localPlayerID == nil or localPlayerID < 0 then return false end
 
     local visibility = PlayersVisibility[localPlayerID]
-    if visibility == nil then
-        return false
-    end
+    if visibility == nil then return false end
 
     return visibility:IsVisible(plot:GetIndex()) or visibility:IsRevealed(plot)
 end
@@ -195,53 +152,63 @@ end
 -- Core methods
 -- =========================================================================
 
+function CAICursor:GetState()
+    return GetState()
+end
+
+function CAICursor:GetStateForPlayer(playerID)
+    return m_PlayerState:Get(playerID)
+end
+
 function CAICursor:UpdateZones()
+    local state = GetState()
+    if state == nil then return end
+
     local plotId = self:GetPlotId()
-    if plotId == nil or plotId < 0 then
-        return
-    end
+    if plotId == nil or plotId < 0 then return end
 
     local plot = Map.GetPlotByIndex(plotId)
-    if plot == nil then
-        return
-    end
+    if plot == nil then return end
 
     if not CanUpdateZonesForPlot(plot) then
         return
     end
 
     local continentZone = GetContinentZoneText(plot)
-    if continentZone ~= nil and continentZone ~= self.lastContinentZone then
+    if continentZone ~= nil and continentZone ~= state.lastContinentZone then
         Speak(continentZone)
     end
-    self.lastContinentZone = continentZone
+    state.lastContinentZone = continentZone
 
     local ownerZone = GetOwnerZoneText(plot)
-    if ownerZone ~= nil and ownerZone ~= self.lastOwnerZone then
+    if ownerZone ~= nil and ownerZone ~= state.lastOwnerZone then
         Speak(ownerZone)
     end
-    self.lastOwnerZone = ownerZone
+    state.lastOwnerZone = ownerZone
 
     local territoryZone = GetTerritoryZoneText(plot)
-    if territoryZone ~= nil and territoryZone ~= self.lastTerritoryZone then
+    if territoryZone ~= nil and territoryZone ~= state.lastTerritoryZone then
         Speak(territoryZone)
     end
-    self.lastTerritoryZone = territoryZone
+    state.lastTerritoryZone = territoryZone
 
     local volcanoZone = GetVolcanoZoneText(plot)
-    if volcanoZone ~= nil and volcanoZone ~= self.lastVolcanoZone then
+    if volcanoZone ~= nil and volcanoZone ~= state.lastVolcanoZone then
         Speak(volcanoZone)
     end
-    self.lastVolcanoZone = volcanoZone
+    state.lastVolcanoZone = volcanoZone
 
     local nationalParkZone = GetNationalParkZoneText(plot)
-    if nationalParkZone ~= nil and nationalParkZone ~= self.lastNationalParkZone then
+    if nationalParkZone ~= nil and nationalParkZone ~= state.lastNationalParkZone then
         Speak(nationalParkZone)
     end
-    self.lastNationalParkZone = nationalParkZone
+    state.lastNationalParkZone = nationalParkZone
 end
 
 function CAICursor:SetCoords(x, y)
+    local state = GetState()
+    if state == nil then return false end
+
     if x == nil or y == nil then
         print("CAI cursor move requested with nil coordinates")
         return false
@@ -253,13 +220,24 @@ function CAICursor:SetCoords(x, y)
         return false
     end
 
-    self.curX = plot:GetX()
-    self.curY = plot:GetY()
+    state.curX = plot:GetX()
+    state.curY = plot:GetY()
+
     return true
 end
 
+function CAICursor:GetCoords()
+    local state = GetState()
+    if state == nil then return nil, nil end
+
+    return state.curX, state.curY
+end
+
 function CAICursor:GetPlotId()
-    local plot = Map.GetPlot(self.curX, self.curY)
+    local state = GetState()
+    if state == nil then return -1 end
+
+    local plot = Map.GetPlot(state.curX, state.curY)
     if plot == nil then
         return -1
     end
@@ -267,17 +245,18 @@ function CAICursor:GetPlotId()
     return plot:GetIndex()
 end
 
----@param plotId integer
----@param reason string "step"|"jump"|"select"|"snap"
 function CAICursor:MoveTo(plotId, reason)
+    local state = GetState()
+    if state == nil then return end
+
     local plot = ResolvePlotById(plotId)
     if plot == nil then
         print("CAI cursor MoveTo unable to resolve plot id: " .. tostring(plotId))
         return
     end
 
-    local fromX = self.curX
-    local fromY = self.curY
+    local fromX = state.curX
+    local fromY = state.curY
     local fromPlotId = self:GetPlotId()
 
     local toX = plot:GetX()
@@ -289,7 +268,11 @@ function CAICursor:MoveTo(plotId, reason)
     end
 
     local hexUtils = GetHexCoordUtils()
-    local distance = hexUtils.cubeDistance(fromX, fromY, toX, toY)
+    local distance = 0
+    if hexUtils ~= nil and hexUtils.cubeDistance ~= nil then
+        distance = hexUtils.cubeDistance(fromX, fromY, toX, toY)
+    end
+
     local resolvedReason = reason or "jump"
 
     if resolvedReason == "jump" or resolvedReason == "select" then
@@ -306,12 +289,15 @@ function CAICursor:MoveTo(plotId, reason)
         fromY = fromY,
         toX = toX,
         toY = toY,
-        reason = reason or "jump",
+        reason = resolvedReason,
     })
 end
 
 function CAICursor:MoveDirection(dir)
-    local plot = Map.GetAdjacentPlot(self.curX, self.curY, dir)
+    local state = GetState()
+    if state == nil then return end
+
+    local plot = Map.GetAdjacentPlot(state.curX, state.curY, dir)
     if plot ~= nil then
         self:MoveTo(plot:GetIndex(), "step")
     end

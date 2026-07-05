@@ -55,20 +55,27 @@ function DB.CreatePopupDialog(mgr, popup)
                     return item.Control:GetText() or ""
                 end,
             })
-            w:SetValueGetter(function() return item.Control:IsChecked() end)
-            w:On("value_changed", function() item.Callback() end)
-            w:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+            w:SetChecked(item.Control:IsChecked(), true)
+            w:SetValueSetter(function() item.Control:DoLeftClick() end)
+            w:SetFocusSound("Main_Menu_Mouse_Over")
         elseif kind == "EditBox" then
             w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDlgEdit"), "EditBox", {
                 Label = function()
-                    local p = item.Control:GetParent()
-                    if not p or not p.EditLabel then return "" end
-                    return p.EditLabel:GetText() or ""
+                    local val
+                    for _, child in ipairs(item.Control:GetChildren()) do
+                        if child:GetID() == "EditLabel" then
+                            val = child; break
+                        end
+                    end
+                    if not val then return "" end
+                    return val:GetText() or ""
                 end,
             })
             w:SetText(item.Control:GetText() or "", true)
             w:SetValueSetter(function(_, text) item.Control:SetText(text) end)
-            w:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+            w:SetMaxCharacters(32) -- Tends to be the default for popupdialogs.
+            w:SetAlwaysEdit(true)
+            w:SetFocusSound("Main_Menu_Mouse_Over")
         elseif kind == "Count" then
             w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDlgCount"), "StaticText", {
                 Label = function()
@@ -82,7 +89,7 @@ function DB.CreatePopupDialog(mgr, popup)
                     return Locale.Lookup("LOC_CAI_DIALOG_COUNT", val:GetText()) or ""
                 end,
             })
-            w:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+            w:SetFocusSound("Main_Menu_Mouse_Over")
         elseif kind == "Button" then
             w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDlgBtn"), "Button", {
                 Label = function() return item.Control:GetText() or "" end,
@@ -90,7 +97,7 @@ function DB.CreatePopupDialog(mgr, popup)
             })
             w:SetDisabledPredicate(function() return item.Control:IsDisabled() end)
             w:On("activate", function() item.Control:DoLeftClick() end)
-            w:On("focus_enter", function() UI.PlaySound("Main_Menu_Mouse_Over") end)
+            w:SetFocusSound("Main_Menu_Mouse_Over")
         end
 
         if w then

@@ -428,7 +428,8 @@ nothing; user commits run non-silent and fire `value_changed`.
 All non-read-only edit boxes commit on Enter by default (`EnterToCommit`
 is true). Set `EnterToCommit = false` to make Enter bubble — useful when a
 parent confirm wrapper should handle the commit. `AlwaysEdit` writable
-boxes also auto-commit on focus leave.
+boxes auto-commit on focus leave by default. Set `CommitOnFocusLeave = false`
+when a screen should preserve the live buffer while focus moves away.
 For writable `AlwaysEdit`, `HighlightOnEdit` selects the existing text when
 focus lands on the widget. That selection is silent because focus entry is not a
 user-driven edit command; the manager's normal focus speech reads the selected

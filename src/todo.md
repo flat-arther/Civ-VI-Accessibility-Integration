@@ -35,7 +35,7 @@
 [x] Look ats in city-states, espionage, trade, and great people should move the cursor
 [x] rework icon processing
 [x] Add map pins to plot info and scanner
-[x] unit and city actions should not repeat the names in the tooltip
+[x] city actions should not repeat the names in the tooltip
 [ ] add mod config
 [ ] River flow direction reporting
 [x] / to jump back to selection
@@ -43,3 +43,9 @@
 [ ] Ad great person auras to map info, configurable
 [ ] Roads and bridges should be mentioned in plot info
 -[x] Capital city should say capital
+[ ] turn status in chat panel
+[x] hamada: the government screen has repeating Empty slot 1, Empty slot 1
+[ ] unit actions should not repeat name in tooltip
+[ ] should not stop player from moving if no combat stats
+[ ] Dedications popup should not duplicate dedication name in tooltip
+[ ] Create 2 message buffers in hotseet mode, set active buffer on player changed events. For cursor, save state on player changed, and restore state based on which player is active next

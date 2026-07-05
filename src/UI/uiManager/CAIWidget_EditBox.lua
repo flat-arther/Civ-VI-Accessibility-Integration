@@ -28,6 +28,7 @@ EditModes = {
 ---@field _commitValidator? fun(text:string):string|nil
 ---@field _enterToCommit boolean
 ---@field _passwordMask boolean
+---@field _commitOnFocusLeave boolean
 EditBoxWidget = setmetatable({}, { __index = ValueWidget })
 EditBoxWidget.__index = EditBoxWidget
 
@@ -83,6 +84,7 @@ function EditBoxWidget.Create(mgr, id, props)
     w._enterToCommit = true
     w._passwordMask = false
     w._commitOnBufferChanged = false
+    w._commitOnFocusLeave = true
 
     -- Focus speech reads only what the cursor is on: the current selection if
     -- any, otherwise the line at the cursor. Reading the entire buffer on focus
@@ -126,7 +128,7 @@ function EditBoxWidget.Create(mgr, id, props)
     w:On("focus_leave", function(self)
         if self._active and not self._alwaysEdit then
             self:Cancel()
-        elseif self._alwaysEdit and not self._readOnly then
+        elseif self._alwaysEdit and not self._readOnly and self._commitOnFocusLeave then
             self:Commit()
         end
     end)
@@ -196,6 +198,8 @@ function EditBoxWidget:SetEnterToCommit(b) self._enterToCommit = b and true or f
 function EditBoxWidget:SetPasswordMask(b) self._passwordMask = b and true or false end
 
 function EditBoxWidget:SetCommitOnBufferChanged(b) self._commitOnBufferChanged = b and true or false end
+
+function EditBoxWidget:SetCommitOnFocusLeave(b) self._commitOnFocusLeave = b and true or false end
 
 function EditBoxWidget:SetEditMode(mode) self._editMode = mode or EditModes.Normal end
 

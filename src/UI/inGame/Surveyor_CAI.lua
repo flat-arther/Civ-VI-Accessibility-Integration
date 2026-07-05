@@ -1,6 +1,7 @@
 include("caiUtils")
 include("hexCoordUtils_CAI")
 include("inGameHelpers_CAI")
+include("PlayerStateManager_CAI")
 
 CAISurveyor = CAISurveyor or {}
 
@@ -13,15 +14,33 @@ local HexCoordUtils = CAIHexCoordUtils
 
 local MIN_RADIUS = 1
 local MAX_RADIUS = 5
-local m_radius = MIN_RADIUS
+local m_PlayerState = PlayerStateManager.Init(function(playerID)
+    return {
+        Radius = MIN_RADIUS,
+    }
+end)
+
+local function GetState()
+    return m_PlayerState:GetActive()
+end
 
 local function SetRadius(radius)
-    m_radius = math.max(MIN_RADIUS, math.min(MAX_RADIUS, radius))
-    return m_radius
+    local state = GetState()
+    if state == nil then
+        return MIN_RADIUS
+    end
+
+    state.Radius = math.max(MIN_RADIUS, math.min(MAX_RADIUS, radius))
+    return state.Radius
 end
 
 local function GetRadius()
-    return m_radius
+    local state = GetState()
+    if state == nil then
+        return MIN_RADIUS
+    end
+
+    return state.Radius
 end
 
 local function FormatRadius(radius)

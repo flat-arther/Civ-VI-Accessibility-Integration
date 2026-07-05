@@ -595,7 +595,7 @@ local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
         Tooltip  = function()
             local policyType = GetPolicyTypeForSlot(slotIndex)
             if policyType == CAI_EMPTY_POLICY_TYPE then
-                return Locale.Lookup("LOC_CAI_GOVERNMENT_EMPTY_SLOT", slotOrdinal)
+                return ""
             end
             return GetPolicyTooltip(policyType)
         end,

@@ -5159,6 +5159,18 @@
     <Row Tag="LOC_CAI_LOBBY_NO_FRIEND_ACTIONS" Language="en_US">
       <Text>No friend actions</Text>
     </Row>
+    <Row Tag="LOC_CAI_STAGING_UNREADY" Language="en_US">
+      <Text>Unready</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_SWAP_ON" Language="en_US">
+      <Text>Swap, on</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_SWAP_OFF" Language="en_US">
+      <Text>Swap, off</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_SWAP_SUCCESS" Language="en_US">
+      <Text>Swap successful</Text>
+    </Row>
     <Row Tag="LOC_CAI_STAGING_PLAYER_SLOTS" Language="en_US">
       <Text>Player slots</Text>
     </Row>
@@ -5171,6 +5183,12 @@
     <Row Tag="LOC_CAI_STAGING_SLOT_LABEL_WITH_STATUS" Language="en_US">
       <Text>{1}, {2}, {3}, {4}</Text>
     </Row>
+    <Row Tag="LOC_CAI_STAGING_SLOT_LABEL_SIMPLE" Language="en_US">
+      <Text>{1}, {2}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_SLOT_LABEL_WITH_ROLE" Language="en_US">
+      <Text>{1}, {2}, {3}</Text>
+    </Row>
     <Row Tag="LOC_CAI_STAGING_DETAIL" Language="en_US">
       <Text>{1}: {2}</Text>
     </Row>
@@ -5182,6 +5200,15 @@
     </Row>
     <Row Tag="LOC_CAI_STAGING_READY_STATUS" Language="en_US">
       <Text>Ready status</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_READY_TOOLTIP_WITH_STATUS" Language="en_US">
+      <Text>{1}. {2}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_PLAYER_READY" Language="en_US">
+      <Text>{1} ready</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_PLAYER_UNREADY" Language="en_US">
+      <Text>{1} unready</Text>
     </Row>
     <Row Tag="LOC_CAI_STAGING_TEAM" Language="en_US">
       <Text>Team</Text>
@@ -5233,6 +5260,12 @@
     </Row>
     <Row Tag="LOC_CAI_STAGING_COPY_JOIN_CODE" Language="en_US">
       <Text>Copy join code</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_COPY_JOIN_CODE_TT" Language="en_US">
+      <Text>Copy the join code to the clipboard.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_INVITE_SENT" Language="en_US">
+      <Text>Invite sent</Text>
     </Row>
 
   </LocalizedText>

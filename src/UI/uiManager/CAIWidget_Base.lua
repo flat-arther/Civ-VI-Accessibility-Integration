@@ -388,8 +388,13 @@ function UIWidget:OnHandleInput(input)
     for _, b in ipairs(self.InputMap) do
         if b.Action and b.Key == key and b.MSG == msg
             and isShift == b.IsShift and isControl == b.IsControl and isAlt == b.IsAlt then
-            local result = b.Action(self)
-            if result ~= nil then return result == true end
+            if b.Action ~= nil then
+                if self:IsDisabled() then return true end
+                local result = b.Action(self)
+                if result ~= nil then
+                    return result == true
+                end
+            end
         end
     end
     return false

@@ -112,8 +112,10 @@ end
 ---  focus:    UIWidget or string FocusKey to focus once mounted (when the pushed
 ---            widget becomes the new top). Avoids screens reaching into
 ---            FocusedChild to pre-position focus.
+--- ignoreFocus: boolean, if true focus is not updated (used by screens that push a widget but don't expect you to interact with it currently).
+--- announce:  boolean, if true the new focus path is spoken (default true).
 ---@param w UIWidget
----@param opts? { priority?: PopupPriority, focus?: UIWidget|string }
+---@param opts? { priority?: PopupPriority, focus?: UIWidget|string, ignoreFocus?: boolean, announce?: boolean }
 function UIScreenManager:Push(w, opts)
     if not w then return end
     opts = opts or {}
@@ -127,6 +129,8 @@ function UIScreenManager:Push(w, opts)
     self:SortStack()
     local newTop = self:GetTop()
 
+    -- Ignore updating focus if ops.ignoreFocus is true. This is used by screens that want to push a widget but not expect you to interact with it currently. Normally priority would take care of this, but some screens push on async events and so priority is not effective.
+    if opts.ignoreFocus then return end
     -- Resolve opts.focus up-front. When we have a specific target we set
     -- focus straight to it so the full path [root, ..., target] speaks in a
     -- single announcement; otherwise fall back to the default root entry.
@@ -137,7 +141,9 @@ function UIScreenManager:Push(w, opts)
     if willFocusTarget then
         self:SetFocus(target)
     elseif newTop ~= oldTop or not self.CurrentPath or self.CurrentPath[1] ~= newTop then
-        self:UpdateRootFocus(true)
+        local announce = opts.announce
+        if announce == nil then announce = true end
+        self:UpdateRootFocus(announce)
     end
 end
 

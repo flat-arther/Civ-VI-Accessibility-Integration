@@ -1191,13 +1191,13 @@ local function CAI_BuildPanel()
 	CAI_RebuildOptions()
 end
 
-local function CAI_PushPanel()
+local function CAI_PushPanel(ignoreFocus)
 	if mgr == nil then return end
 	if CAI_Panel == nil then
 		CAI_BuildPanel()
 	end
 	if CAI_Panel and mgr:GetWidgetById(CAI_PANEL_ID) ~= CAI_Panel then
-		mgr:Push(CAI_Panel, { priority = PopupPriority.Current, focus = CAI_OptionsList })
+		mgr:Push(CAI_Panel, { priority = PopupPriority.Current, ignoreFocus = ignoreFocus})
 	end
 end
 
@@ -1214,9 +1214,14 @@ local function CAI_PopPanel()
 	CAI_Sections = {}
 end
 
-OnShow = WrapFunc(OnShow, function(orig, ...)
+OnRaiseHostGame = WrapFunc(OnRaiseHostGame, function(orig, ...)
 	orig(...)
 	CAI_PushPanel()
+end)
+
+OnEnsureHostGame = WrapFunc(OnEnsureHostGame, function(orig, ...)
+	orig(...)
+	CAI_PushPanel(true)
 end)
 
 OnShutdown = WrapFunc(OnShutdown, function(orig, ...)

@@ -167,6 +167,26 @@ local function CAI_RebuildChatTarget()
     end
 end
 
+local function CAI_SyncChatTargetSelection()
+    if not m_caiChatTarget then return end
+
+    local options, selectedIndex = CAI_BuildChatTargetOptions()
+    if selectedIndex <= 0 then return end
+
+    local currentIndex = m_caiChatTarget:GetSelectedIndex()
+    if currentIndex == selectedIndex then return end
+
+    local currentOption = options[currentIndex]
+    local currentValue = currentOption and currentOption.value or nil
+    if currentValue
+        and currentValue.targetType == m_caiPlayerTarget.targetType
+        and currentValue.targetID == m_caiPlayerTarget.targetID then
+        return
+    end
+
+    m_caiChatTarget:SetSelectedIndex(selectedIndex, true)
+end
+
 local function CAI_CanUseRealtimeChat()
     return UI.HasFeature("Chat")
         and GameConfiguration.IsNetworkMultiplayer()
@@ -305,11 +325,7 @@ local function CAI_GetPlayerEntryTooltip(playerID)
     local playerEntry = GetPlayerListEntry(playerID)
     if playerEntry == nil then return "" end
 
-    local parts = {
-        CAI_ControlTooltip(playerEntry.ConnectionIcon),
-        CAI_ControlText(playerEntry.ConnectionLabel),
-    }
-    return CAI_JoinNonEmpty(parts, ", ")
+    return CAI_ControlTooltip(playerEntry.ConnectionIcon)
 end
 
 local function CAI_BuildPlayerActionWidgets(playerID, submenu)
@@ -476,7 +492,7 @@ local function CAI_SendChat(text)
         parsedText, chatTargetChanged, printHelp = ParseInputChatString(text, m_caiPlayerTarget)
         if chatTargetChanged then
             CAI_UpdateVanillaTargetState()
-            CAI_RebuildChatTarget()
+            CAI_SyncChatTargetSelection()
         end
 
         if printHelp then
@@ -509,6 +525,7 @@ local function CAI_BuildPanel()
         Label = function() return CAI_Lookup("LOC_CAI_ENDGAME_CHAT_INPUT") end,
         Tooltip = CAI_GetChatInputTooltip,
         AlwaysEdit = true,
+        CommitOnFocusLeave = false,
         HighlightOnEdit = true,
         EnterToCommit = true,
         MaxCharacters = 250,
@@ -645,7 +662,7 @@ local function CAI_OnKickVoteStarted(targetPlayerID, fromPlayerID, reason)
 
         local playerConfig = PlayerConfigurations[targetPlayerID]
         local playerName = playerConfig and CAI_Lookup(playerConfig:GetPlayerName()) or
-        CAI_Lookup("LOC_TOOLTIP_PLAYER_ID", targetPlayerID)
+            CAI_Lookup("LOC_TOOLTIP_PLAYER_ID", targetPlayerID)
         local reasonText = CAI_KICKVOTE_REASONS[reason] and CAI_Lookup(CAI_KICKVOTE_REASONS[reason]) or ""
 
         table.insert(m_caiKickVotes, {
@@ -676,7 +693,7 @@ OnKickVoteStarted = WrapFunc(OnKickVoteStarted, function(orig, targetPlayerID, f
 
     local playerConfig = PlayerConfigurations[targetPlayerID]
     local playerName = playerConfig and playerConfig:GetPlayerName() or
-    CAI_Lookup("LOC_TOOLTIP_PLAYER_ID", targetPlayerID)
+        CAI_Lookup("LOC_TOOLTIP_PLAYER_ID", targetPlayerID)
     local reasonText = CAI_KICKVOTE_REASONS[reason] and CAI_Lookup(CAI_KICKVOTE_REASONS[reason]) or ""
     local text = CAI_Lookup("LOC_KICK_VOTE_STARTED_CHAT_ENTRY", playerName, reasonText)
     CAI_RecordTextEntry(text, true)
@@ -691,7 +708,7 @@ OnKickVoteComplete = WrapFunc(OnKickVoteComplete, function(orig, targetPlayerID,
 
     local playerConfig = PlayerConfigurations[targetPlayerID]
     local playerName = playerConfig and playerConfig:GetPlayerName() or
-    CAI_Lookup("LOC_TOOLTIP_PLAYER_ID", targetPlayerID)
+        CAI_Lookup("LOC_TOOLTIP_PLAYER_ID", targetPlayerID)
     local locKey = "LOC_KICK_VOTE_FAILED_CHAT_ENTRY"
     if kickResult == KickVoteResultType.KICKVOTERESULT_VOTE_PASSED then
         locKey = "LOC_KICK_VOTE_SUCCEEDED_CHAT_ENTRY"

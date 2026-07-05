@@ -120,7 +120,6 @@ ActivateItem = WrapFunc(ActivateItem, function(orig, item)
     activeItem = item
     detailedItem = nil
     orig(item)
-    Speak("Activating item " .. item.ID)
     local hook = TutorialItemHooks[item.ID]
     if hook and hook.OnActivate then hook.OnActivate() end
     NotifyActionPanelAllowed()
@@ -135,7 +134,6 @@ DeActivateItem = WrapFunc(DeActivateItem, function(orig, item)
         detailedItem = nil
         NotifyActionPanelAllowed()
     end
-    Speak("DeActivateItem: " .. item.ID)
 end)
 
 RaiseDetailedTutorial = WrapFunc(RaiseDetailedTutorial, function(orig, item)

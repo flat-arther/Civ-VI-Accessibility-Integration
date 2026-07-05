@@ -197,8 +197,10 @@ function DropdownWidget:Commit(index, silent)
     index = ClampIndex(self, index)
     if index == 0 then return end
     self._selectedIndex = index
-    self:Close()
     self:SetValue(self._options[index].value, silent)
+    if self._isOpen then
+        self:Close()
+    end
 end
 
 ---@param index integer

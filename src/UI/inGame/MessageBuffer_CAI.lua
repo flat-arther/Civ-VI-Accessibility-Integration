@@ -1,3 +1,4 @@
+include("PlayerStateManager_CAI")
 ---@class MessageBuffer
 ---@field _entries MessageBufferEntry[]
 ---@field _filter MessageCategory|"all"
@@ -244,3 +245,28 @@ function MessageBuffer:SpeakFilter()
 end
 
 --#endregion
+
+
+--#region State init
+local m_PlayerState = PlayerStateManager.Init(function(playerID)
+    return {
+        Buffer = MessageBuffer.Create(),
+    }
+end)
+
+function MessageBuffer.GetActive()
+    local state = m_PlayerState:GetActive()
+    return state and state.Buffer or nil
+end
+
+function MessageBuffer.GetForPlayer(playerID)
+    local state = m_PlayerState:Get(playerID)
+    return state and state.Buffer or nil
+end
+
+function MessageBuffer.ClearActive()
+    local buffer = MessageBuffer.GetActive()
+    if buffer ~= nil then
+        buffer:Clear()
+    end
+end

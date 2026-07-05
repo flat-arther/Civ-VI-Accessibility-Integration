@@ -609,6 +609,9 @@ function EditBoxWidget:SetPasswordMask(b) end
 ---@param b boolean
 function EditBoxWidget:SetCommitOnBufferChanged(b) end
 
+---@param b boolean  when false, AlwaysEdit writable boxes do not auto-commit on focus leave (default true)
+function EditBoxWidget:SetCommitOnFocusLeave(b) end
+
 ---@param mode integer  one of EditModes.*
 function EditBoxWidget:SetEditMode(mode) end
 

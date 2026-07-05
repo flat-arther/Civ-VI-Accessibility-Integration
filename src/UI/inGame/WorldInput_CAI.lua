@@ -35,7 +35,6 @@ local CITY_MANAGEMENT_WIDGET_ID = "CAIWorldInputCityManagement"
 
 local m_caiGameViewWidget = nil
 local m_caiCurrentInterfaceWidget = nil
-local m_messageBuffer = MessageBuffer.Create()
 
 
 local ACTION_MESSAGE_BUFFER_PREVIOUS = Input.GetActionId("MessageBufferPrevious")
@@ -476,6 +475,8 @@ local SharedInputActions = {
 	[ACTION_MESSAGE_BUFFER_PREVIOUS] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
+			local m_messageBuffer = MessageBuffer.GetActive()
+			if not m_messageBuffer then return end
 			m_messageBuffer:Previous()
 			m_messageBuffer:SpeakEntry()
 			return true
@@ -485,6 +486,8 @@ local SharedInputActions = {
 	[ACTION_MESSAGE_BUFFER_NEXT] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
+			local m_messageBuffer = MessageBuffer.GetActive()
+			if not m_messageBuffer then return end
 			m_messageBuffer:Next()
 			m_messageBuffer:SpeakEntry()
 			return true
@@ -494,6 +497,8 @@ local SharedInputActions = {
 	[ACTION_MESSAGE_BUFFER_FIRST] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
+			local m_messageBuffer = MessageBuffer.GetActive()
+			if not m_messageBuffer then return end
 			m_messageBuffer:JumpFirst()
 			m_messageBuffer:SpeakEntry()
 			return true
@@ -503,6 +508,8 @@ local SharedInputActions = {
 	[ACTION_MESSAGE_BUFFER_LAST] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
+			local m_messageBuffer = MessageBuffer.GetActive()
+			if not m_messageBuffer then return end
 			m_messageBuffer:JumpLast()
 			m_messageBuffer:SpeakEntry()
 			return true
@@ -512,6 +519,8 @@ local SharedInputActions = {
 	[ACTION_MESSAGE_BUFFER_PREV_CATEGORY] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
+			local m_messageBuffer = MessageBuffer.GetActive()
+			if not m_messageBuffer then return end
 			m_messageBuffer:CycleFilterBackward()
 			m_messageBuffer:SpeakFilter()
 			m_messageBuffer:SpeakEntry()
@@ -522,6 +531,8 @@ local SharedInputActions = {
 	[ACTION_MESSAGE_BUFFER_NEXT_CATEGORY] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
+			local m_messageBuffer = MessageBuffer.GetActive()
+			if not m_messageBuffer then return end
 			m_messageBuffer:CycleFilterForward()
 			m_messageBuffer:SpeakFilter()
 			m_messageBuffer:SpeakEntry()
@@ -1192,6 +1203,8 @@ local function OnUpdate()
 end
 
 local function OnCAIAppendToMessageBuffer(text, category)
+	local m_messageBuffer = MessageBuffer.GetActive()
+	if not m_messageBuffer then return end
 	m_messageBuffer:Append(text, category)
 	Speak(text)
 end
@@ -1227,7 +1240,6 @@ local function InitializeCAIGameView()
 	SnapCursorToInitialPosition()
 	CAIWorldScanner:Initialize()
 	RevealAnnouncements_CAI.Initialize()
-	m_messageBuffer:Clear()
 end
 
 -- Vanilla subscribes this function to Events.LoadScreenClose. Keep using that

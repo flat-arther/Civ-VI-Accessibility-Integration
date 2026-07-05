@@ -1598,6 +1598,7 @@ local CAI_RefreshButton = nil
 local CAI_FriendsList = nil
 local CAI_MirroringTab = false
 local CAI_GameListRebuiltBySortDisplay = false
+local CAI_GameListRefreshPending = false
 
 local function CAI_Lookup(tag, ...)
 	return Locale.Lookup(tag, ...)
@@ -1619,6 +1620,10 @@ local function CAI_ControlTooltip(control)
 		return control:GetToolTipString() or ""
 	end
 	return ""
+end
+
+local function CAI_IsGameListRefreshPending()
+	return CAI_GameListRefreshPending or Matchmaking.IsRefreshingGameList()
 end
 
 local function CAI_AddPart(parts, value)
@@ -1952,12 +1957,13 @@ local function CAI_RebuildGamesTree(tree)
 			CAI_AddGameRow(tree, listing)
 		end
 	else
-		local emptyLabel = Matchmaking.IsRefreshingGameList()
+		local isRefreshing = CAI_IsGameListRefreshPending()
+		local emptyLabel = isRefreshing
 			and CAI_Lookup("LOC_CAI_LOBBY_REFRESHING")
 			or CAI_Lookup("LOC_CAI_LOBBY_NO_GAMES")
 		local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAILobbyEmpty"), "TreeItem", {
 			Label = function() return emptyLabel end,
-			FocusKey = "empty",
+			FocusKey = isRefreshing and "empty:refreshing" or "empty:none",
 		})
 		tree:AddChild(item)
 	end
@@ -2086,6 +2092,15 @@ local function CAI_BuildPanel()
 	end)
 	CAI_Panel:AddChild(CAI_RefreshButton)
 
+	local joinCodeButton = mgr:CreateWidget("CAILobbyJoinCode", "Button", {
+		Label = function() return Controls.JoinCodeButton:GetText() end,
+		Tooltip = function() return CAI_ControlTooltip(Controls.JoinCodeButton) end,
+		DisabledPredicate = function() return Controls.JoinCodeButton:IsDisabled() end,
+		HiddenPredicate = function() return Controls.JoinCodeButton:IsHidden() end,
+	})
+	joinCodeButton:On("activate", function() Controls.JoinCodeButton:DoLeftClick() end)
+	CAI_Panel:AddChild(joinCodeButton)
+
 	local loadButton = mgr:CreateWidget("CAILobbyLoad", "Button", {
 		Label = function() return Controls.LoadGameButton:GetText() end,
 		Tooltip = function() return CAI_ControlTooltip(Controls.LoadGameButton) end,
@@ -2142,7 +2157,7 @@ local function CAI_PushLobby()
 		CAI_BuildPanel()
 	end
 	if mgr:GetWidgetById(CAI_PANEL_ID) ~= CAI_Panel then
-		mgr:Push(CAI_Panel)
+		mgr:Push(CAI_Panel, PopupPriority.Current)
 	end
 end
 
@@ -2158,7 +2173,13 @@ local function CAI_PopLobby()
 	CAI_DirectionDropdown = nil
 	CAI_RefreshButton = nil
 	CAI_FriendsList = nil
+	CAI_GameListRefreshPending = false
 end
+
+RebuildGameList = WrapFunc(RebuildGameList, function(orig, ...)
+	CAI_GameListRefreshPending = true
+	return orig(...)
+end)
 
 OnShow = WrapFunc(OnShow, function(orig, ...)
 	orig(...)
@@ -2168,12 +2189,14 @@ end)
 
 OnGameListClear = WrapFunc(OnGameListClear, function(orig, ...)
 	orig(...)
+	CAI_GameListRefreshPending = true
 	CAI_RebuildLobby()
 end)
 
 OnGameListComplete = WrapFunc(OnGameListComplete, function(orig, ...)
 	CAI_GameListRebuiltBySortDisplay = false
 	orig(...)
+	CAI_GameListRefreshPending = false
 	if not CAI_GameListRebuiltBySortDisplay then
 		CAI_RebuildLobby()
 	end
@@ -2182,7 +2205,7 @@ end)
 OnGameListUpdated = WrapFunc(OnGameListUpdated, function(orig, ...)
 	CAI_GameListRebuiltBySortDisplay = false
 	orig(...)
-	if Matchmaking.IsRefreshingGameList() then return end
+	if CAI_GameListRefreshPending then return end
 	if not CAI_GameListRebuiltBySortDisplay then
 		CAI_RebuildLobby()
 	end
@@ -2190,7 +2213,7 @@ end)
 
 SortAndDisplayListings = WrapFunc(SortAndDisplayListings, function(orig, ...)
 	orig(...)
-	if Matchmaking.IsRefreshingGameList() then return end
+	if CAI_GameListRefreshPending then return end
 	CAI_GameListRebuiltBySortDisplay = true
 	CAI_RebuildLobby()
 end)

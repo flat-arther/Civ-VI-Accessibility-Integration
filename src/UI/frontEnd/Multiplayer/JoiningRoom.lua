@@ -394,8 +394,7 @@ local function CAI_PushDialog()
 	CAI_PopDialog()
 	CAI_BuildDialog()
 	if not m_CAI_Dialog then return end
-	local priority = PopupPriority.JoiningScreen or PopupPriority.Current
-	mgr:Push(m_CAI_Dialog, { priority = priority, focus = m_CAI_StatusText })
+	mgr:Push(m_CAI_Dialog, { priority = PopupPriority.JoiningScreen})
 	m_CAI_LastStatusText = CAI_GetControlText(Controls.JoiningLabel)
 end
 

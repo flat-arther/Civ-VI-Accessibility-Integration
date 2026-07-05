@@ -232,9 +232,18 @@ end
 -- straight to the deal view or drops back to the overview, so reading the live
 -- container state keeps the overview navigable without a separate view flag,
 -- empty-list, or focus-visibility check.
+local function IsConversationContainerShown()
+    return not ControlIsHidden(Controls.ConversationContainer)
+end
+
+local function HasConversationChildren()
+    return m_ui.conversationList
+        and m_ui.conversationList.Children
+        and #m_ui.conversationList.Children > 0
+end
+
 local function IsConversationActive()
-    return not ControlIsHidden(Controls.ConversationContainer) and
-        (m_ui.conversationList and m_ui.conversationList.Children and #m_ui.conversationList.Children > 0)
+    return IsConversationContainerShown() and HasConversationChildren()
 end
 
 -- True when the live focus leaf already sits inside the overview panel. When a
@@ -262,10 +271,10 @@ end
 -- Guards: never steals focus unless the action-view root is the live top, and
 -- never focuses an empty list (e.g. a demand that routes straight to the deal).
 local function FocusConversationIfReady()
-    if not IsConversationActive() then return end
-    if mgr:GetTop() ~= m_ui.root then return end
-    CAI.Silence()
-    mgr:SetFocus(m_ui.conversationList)
+    if IsConversationContainerShown() and mgr:GetTop() == m_ui.root then
+        CAI.Silence()
+        mgr:SetFocus(m_ui.conversationList)
+    end
 end
 
 -- ============================================================================
@@ -1475,7 +1484,7 @@ local function FilterConversationSelections(selections)
     local filtered = {}
     if not selections then return filtered end
     for _, selection in ipairs(selections) do
-        if selection.Key ~= "CHOICE_STOP_ASKING" or not Players[ms_OtherPlayerID]:IsHuman() then
+        if selection.Key ~= "CHOICE_STOP_ASKING" or not GetOtherPlayer():IsHuman() then
             table.insert(filtered, selection)
         end
     end
@@ -1683,8 +1692,11 @@ local function PushRootFocusingSelected()
     -- conversation list rather than the selected leader's row, which sits inside the
     -- hidden overview -- SetFocus to an explicit target does not reject hidden
     -- ancestors, so focusing the row there would silently navigate into a hidden tree.
-    if IsConversationActive() then
-        mgr:Push(m_ui.root, { priority = PopupPriority.Utmost, focus = m_ui.conversationList })
+    if IsConversationContainerShown() then
+        mgr:Push(m_ui.root, {
+            priority = PopupPriority.Utmost,
+            focus = HasConversationChildren() and m_ui.conversationList or m_ui.conversationPanel
+        })
         return
     end
     local entry = ms_SelectedPlayerID and m_ui.leaderEntries[ms_SelectedPlayerID] or nil
