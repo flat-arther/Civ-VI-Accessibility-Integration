@@ -31,6 +31,7 @@ UIWidget.__index = UIWidget
 ---@field IsAlt? boolean
 ---@field MSG? KeyEvents
 ---@field Description? string
+---@field Common? boolean
 local baseInputBinding = { IsShift = false, IsControl = false, IsAlt = false, MSG = KeyEvents.KeyUp }
 
 ---Constructs a new widget instance bound to its class metatable.
@@ -391,7 +392,7 @@ function UIWidget:OnHandleInput(input)
         if b.Action and b.Key == key and b.MSG == msg
             and isShift == b.IsShift and isControl == b.IsControl and isAlt == b.IsAlt then
             if b.Action ~= nil then
-                if self:IsDisabled() then return true end
+                if not b.Common and self:IsDisabled() then return true end
                 local result = b.Action(self)
                 if result ~= nil then
                     return result == true

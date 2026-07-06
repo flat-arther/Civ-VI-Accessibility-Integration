@@ -1,7 +1,8 @@
 include("caiUtils")
 include("InputSupport")
 include("CAIUIScreenManager")
-include("navCursor")
+include("cursor_CAI")
+include("cursorAudio_CAI")
 include("inGameHelpers_CAI")
 include("UnitWaypoints_CAI")
 include("interfaceInfoHelpers_CAI")
@@ -1200,6 +1201,7 @@ local function OnUpdate()
 	MovementActions_CAI:UpdatePendingMovementResult()
 	RevealAnnouncements_CAI.UpdateVisibility()
 	CheckInput()
+	CAICursorAudio.OnUpdate()
 end
 
 local function OnCAIAppendToMessageBuffer(text, category)
@@ -1216,6 +1218,7 @@ local function RegisterCAIEvents()
 	Events.UnitSelectionChanged.Add(OnUnitSelectionChanged)
 	LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
 	LuaEvents.CAIAppendToMessageBuffer.Add(OnCAIAppendToMessageBuffer)
+	CAICursorAudio.Initialize()
 	CAIRecommendationLogic.Initialize()
 end
 
@@ -1227,6 +1230,7 @@ local function UnregisterCAIEvents()
 	Events.UnitSelectionChanged.Remove(OnUnitSelectionChanged)
 	LuaEvents.CAICursorMoved.Remove(OnCAICursorMoved)
 	LuaEvents.CAIAppendToMessageBuffer.Remove(OnCAIAppendToMessageBuffer)
+	CAICursorAudio.Shutdown()
 end
 
 

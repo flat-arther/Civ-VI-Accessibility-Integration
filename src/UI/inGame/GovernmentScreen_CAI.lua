@@ -289,7 +289,7 @@ local function GetPolicyRowSummary(rowIndex)
     end
     local parts = { Locale.Lookup("LOC_CAI_GOVERNMENT_SLOTS_USED", used, #liveSlots) }
     for _, name in ipairs(names) do table.insert(parts, name) end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 -- ---------------------------------------------------------------------------
@@ -311,7 +311,7 @@ local function GetGovernmentSlotSummary(government)
     if government.NumSlotWildcard and government.NumSlotWildcard > 0 then
         table.insert(parts, tostring(government.NumSlotWildcard) .. " " .. ControlText(Controls.LabelWildcard))
     end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function IsGovernmentUnlockedForPlayer(governmentType)
@@ -704,7 +704,7 @@ local function BuildGovernmentsTreeContent(tree)
             Label             = function()
                 local name = Locale.Lookup(government.Name)
                 if IsGovernmentSelected(govType) then
-                    return Locale.Lookup("LOC_CAI_GOVERNMENT_ACTIVE") .. ", " .. name
+                    return name .. ", " .. Locale.Lookup("LOC_CAI_GOVERNMENT_ACTIVE")
                 end
                 return name
             end,
@@ -920,9 +920,8 @@ OnOpenGovernmentScreen = WrapFunc(OnOpenGovernmentScreen, function(orig, screenE
     orig(screenEnum)
     SyncSlotPolicyTypesFromLive()
     if not m_ui.panel then BuildPanel() end
-
-    PushPanel()
     MirrorActiveTabToCAI()
+    PushPanel()
 end)
 
 Close = WrapFunc(Close, function(orig)
@@ -1034,7 +1033,7 @@ function info.GetGovernmentInfo()
     end
 
     if #lines > 0 then
-        return JoinNonEmpty(lines, ". ")
+        return JoinNonEmpty(lines, "[NEWLINE]")
     end
 end
 

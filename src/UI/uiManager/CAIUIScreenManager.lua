@@ -389,6 +389,8 @@ end
 ---@param input InputStruct
 ---@return boolean
 function UIScreenManager:HandleInput(input)
+    local msg = input:GetMessageType()
+    if msg == KeyEvents.KeyDown and CAI then CAI.Silence() end
     local node = self:GetFocusedWidget()
     while node do
         if not node:IsHidden() and node.OnHandleInput then

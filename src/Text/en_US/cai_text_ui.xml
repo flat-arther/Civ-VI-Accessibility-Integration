@@ -948,7 +948,7 @@
       <Text>Policies cannot be changed right now</Text>
     </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_ACTIVE" Language="en_US">
-      <Text>Active</Text>
+      <Text>Currently active</Text>
     </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_CONFIRM_POLICIES" Language="en_US">
       <Text>Confirm policies</Text>

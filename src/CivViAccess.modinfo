@@ -9,6 +9,10 @@
     <CompatibleVersions>2.0</CompatibleVersions>
   </Properties>
   <Files>
+    <File>Platforms/Windows/Audio/cai_audio_banks.ini</File>
+    <File>Platforms/Windows/Audio/cai_audio.bnk</File>
+    <File>Platforms/Windows/Audio/cai_audio.txt</File>
+    <File>Platforms/Windows/Audio/cai_audio.xml</File>
     <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion1_MODE.lua</File>
     <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion2_MODE.lua</File>
     <File>caiUtils.lua</File>
@@ -47,7 +51,8 @@
     <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>
     <File>UI/uiManager/CAIWidget_SearchPanel.lua</File>
     <File>UI/uiManager/CAIUIScreenManager.lua</File>
-    <File>UI/inGame/navCursor.lua</File>
+    <File>UI/inGame/cursor_CAI.lua</File>
+    <File>UI/inGame/cursorAudio_CAI.lua</File>
     <File>UI/inGame/MovementActions_CAI.lua</File>
     <File>UI/inGame/UnitWaypoints_CAI.lua</File>
     <File>UI/frontEnd/FrontEnd.lua</File>
@@ -199,6 +204,12 @@
   </Files>
   <!-- FRONTEND -->
   <FrontEndActions>
+    <UpdateAudio id="CAI_FrontendAudio">
+      <File>Platforms/Windows/Audio/cai_audio_banks.ini</File>
+      <File>Platforms/Windows/Audio/cai_audio.bnk</File>
+      <File>Platforms/Windows/Audio/cai_audio.txt</File>
+      <File>Platforms/Windows/Audio/cai_audio.xml</File>
+    </UpdateAudio>
     <UpdateText id="CAI_LOC_FrontEnd">
       <File>Text/en_US/cai_text_ui.xml</File>
     </UpdateText>
@@ -334,6 +345,12 @@
   </FrontEndActions>
 
   <InGameActions>
+    <UpdateAudio id="CAI_IngameAudio">
+      <File>Platforms/Windows/Audio/cai_audio_banks.ini</File>
+      <File>Platforms/Windows/Audio/cai_audio.bnk</File>
+      <File>Platforms/Windows/Audio/cai_audio.txt</File>
+      <File>Platforms/Windows/Audio/cai_audio.xml</File>
+    </UpdateAudio>
     <UpdateText id="CAI_LOC_Ingame">
       <File>Text/en_US/cai_text_ui.xml</File>
     </UpdateText>
@@ -395,7 +412,8 @@
       <File>UI/uiManager/CAIWidget_SearchPanel.lua</File>
       <File>UI/uiManager/CAIUIScreenManager.lua</File>
       <File>UI/inGame/PlayerStateManager_CAI.lua</File>
-      <File>UI/inGame/navCursor.lua</File>
+      <File>UI/inGame/cursor_CAI.lua</File>
+      <File>UI/inGame/cursorAudio_CAI.lua</File>
       <File>UI/inGame/MovementActions_CAI.lua</File>
       <File>UI/inGame/UnitWaypoints_CAI.lua</File>
       <File>UI/shared/iconsProcessing.lua</File>

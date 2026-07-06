@@ -1,0 +1,47 @@
+Event	ID	Name			Wwise Object Path	Notes
+	51226541	Play_Floodplains			\Default Work Unit\Play_Floodplains	
+	200826984	Play_volcano			\Default Work Unit\Play_volcano	
+	207613631	Play_tutorial_added			\Default Work Unit\Play_tutorial_added	
+	207755397	Play_forest			\Default Work Unit\Play_forest	
+	273452326	Play_geothermal_fissure			\Default Work Unit\Play_geothermal_fissure	
+	376173079	Play_marsh			\Default Work Unit\Play_marsh	
+	450287470	Play_tutorial_completed			\Default Work Unit\Play_tutorial_completed	
+	672394073	Play_oasis			\Default Work Unit\Play_oasis	
+	1059420095	Play_river_crossing			\Default Work Unit\Play_river_crossing	
+	1725216094	Play_woosh			\Default Work Unit\Play_woosh	
+	2005925084	Stop_CursorAudio			\Default Work Unit\Stop_CursorAudio	
+	2368575180	Play_reef			\Default Work Unit\Play_reef	
+	2405925199	Play_notification			\Default Work Unit\Play_notification	
+	2658815887	Play_ice			\Default Work Unit\Play_ice	
+	3164191764	Play_coast			\Default Work Unit\Play_coast	
+	3198961276	Play_grass			\Default Work Unit\Play_grass	
+	3303490701	Play_desert			\Default Work Unit\Play_desert	
+	3436230770	Play_tundra			\Default Work Unit\Play_tundra	
+	3716259809	Play_jungle			\Default Work Unit\Play_jungle	
+	3796844225	Play_volcanic_soil			\Default Work Unit\Play_volcanic_soil	
+	4025582929	Play_plains			\Default Work Unit\Play_plains	
+	4026051667	Play_snow			\Default Work Unit\Play_snow	
+
+In Memory Audio	ID	Name	Audio source file		Wwise Object Path	Notes	Data Size
+	36309936	snow	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\snow_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\snow		161116
+	86248088	volcanic_soil	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\volcanic_soil_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\volcanic_soil		170320
+	155095299	coast	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\coast_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\coast		176464
+	206966662	Floodplains	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\Floodplains_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\Floodplains		157588
+	207392292	marsh	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\marsh_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\marsh		176464
+	213140218	tutorial_completed	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\tutorial_completed_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\tutorial_completed		162828
+	253458324	reef	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\reef_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\reef		206864
+	263098268	forest	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\forest_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\forest		176228
+	352518145	geothermal_fissure	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\geothermal_fissure_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\geothermal_fissure		218740
+	359041787	desert	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\desert_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\desert		134540
+	429527301	notification	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\notification_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\notification		328328
+	445480343	volcano	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\volcano_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\volcano		168056
+	450658010	jungle	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\jungle_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\jungle		161116
+	556392167	oasis	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\oasis_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\oasis		173076
+	633006150	plains	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\plains_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\plains		350208
+	718832131	river_crossing	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\river_crossing_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\river_crossing		228364
+	791573879	tutorial_added	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\tutorial_added_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\tutorial_added		193084
+	792175096	grass	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\grass_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\grass		163000
+	850685604	tundra	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\tundra_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\tundra		182404
+	866886362	ice	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\ice_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\ice		193296
+	1071547889	woosh	C:\Users\amine\Downloads\cai_audio_with_stop_event\cai_audio\.cache\Windows\SFX\woosh_9E69E797.wem		\Actor-Mixer Hierarchy\Default Work Unit\woosh		179052
+
