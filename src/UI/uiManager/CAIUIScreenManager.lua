@@ -11,6 +11,7 @@ include("CAIWidgetHelpers_Tree")
 include("CAIWidgetHelpers_EditBox")
 include("CAIWidgetHelpers_DialogBuilder")
 include("CAIWidgetHelpers_PediaLookup")
+include("CAIWidgetHelpers_Settings")
 include("CAIWidgetHelpers_InputHelp")
 include("CAIWidgetHelpers_TooltipReader")
 include("CAIWidget_Base")
@@ -65,6 +66,7 @@ function UIScreenManager:New()
     mgr.NextStackOrder = 0
     mgr.NextWidgetId = 0
     mgr.WidgetHelpers = {}
+    mgr.AppRegainedFocusTime = 0
     return mgr
 end
 
@@ -385,12 +387,18 @@ end
 --#endregion
 
 --#region Input
+---Resets the timer for app regained focus. Used to prevent input from leaking when focus lands on the window, causing you to accidentally escape screens or trigger input actions
+function UIScreenManager:TouchAppRegainedFocusTimer() self.AppRegainedFocusTime = Automation.GetTime() end
 
 ---@param input InputStruct
 ---@return boolean
 function UIScreenManager:HandleInput(input)
     local msg = input:GetMessageType()
-    if msg == KeyEvents.KeyDown and CAI then CAI.Silence() end
+    if msg == KeyEvents.KeyDown then
+        print("test input")
+        if CAI then CAI.Silence() end
+    end
+    if self.AppRegainedFocusTime > 0 and (Automation.GetTime() - self.AppRegainedFocusTime) <= 0.25 then return true end
     local node = self:GetFocusedWidget()
     while node do
         if not node:IsHidden() and node.OnHandleInput then
@@ -575,7 +583,10 @@ end
 ---@param c string
 function UIScreenManager:AppendSearchChar(c)
     local now = Automation.GetTime()
-    local timeout = self.CAISettings.SearchTimeout or 1.0
+    local timeout = CAISettings.GetNumber("SearchTimeout")
+    if timeout <= 0 then
+        timeout = 1.0
+    end
     if not self.LastTypeTime or (now - self.LastTypeTime) > timeout then
         self.SearchBuffer = ""
     end
@@ -644,6 +655,7 @@ end
 --#endregion
 
 --#region Lifecycle
+
 
 function UIScreenManager:Init()
     ExposedMembers.CAI_UIManager = self:New()

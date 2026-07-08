@@ -16,7 +16,7 @@ local ACTION_SPEAK_TURN_TIME_DATE = Input.GetActionId("UI_TopPanelSpeakTurnTimeD
 local ACTION_SPEAK_GOLD = Input.GetActionId("UI_TopPanelSpeakGold")
 local ACTION_SPEAK_FAITH = Input.GetActionId("UI_TopPanelSpeakFaith")
 local ACTION_SPEAK_TOURISM = Input.GetActionId("UI_TopPanelSpeakTourism")
-local ACTION_SPEAK_FAVOR = Input.GetActionId("UI_TopPanelSpeakFavor")
+local ACTION_SPEAK_INFLUENCE = Input.GetActionId("UI_TopPanelSpeakInfluence")
 local ACTION_SPEAK_NUKES = Input.GetActionId("UI_TopPanelSpeakNukes")
 local ACTION_OPEN_YIELD_LIST = Input.GetActionId("UI_TopPanelYieldInfoList")
 local ACTION_OPEN_DIPLOMACY = Input.GetActionId("UI_TopPanelOpenDiplomacy")
@@ -113,28 +113,13 @@ local function SpeakFavor()
     local _, player = GetLocalPlayer()
     if not player then return end
 
-    local parts = {}
-
-    if IsExpansion2Active() then
-        local playerFavor = player:GetFavor()
-        local favorPerTurn = player:GetFavorPerTurn()
-        table.insert(parts, Locale.Lookup("LOC_CAI_TOP_PANEL_FAVOR") .. ": "
-            .. Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
-                FormatBalance(playerFavor),
-                FormatRatePerTurn(FormatValuePerTurn(favorPerTurn))))
-    end
-
     if GameCapabilities.HasCapability("CAPABILITY_TOP_PANEL_ENVOYS") then
         local playerInfluence = player:GetInfluence()
         local currentEnvoys = playerInfluence:GetTokensToGive()
         local influenceBalance = Round(playerInfluence:GetPointsEarned(), 1)
         local influenceThreshold = playerInfluence:GetPointsThreshold()
-        table.insert(parts, Locale.Lookup("LOC_CAI_TOP_PANEL_ENVOYS_SUMMARY",
+        Speak(Locale.Lookup("LOC_CAI_TOP_PANEL_ENVOYS_SUMMARY",
             currentEnvoys, influenceBalance, influenceThreshold))
-    end
-
-    if #parts > 0 then
-        Speak(table.concat(parts, ", "))
     end
 end
 
@@ -649,7 +634,7 @@ local function OnCAITopPanelInputAction(actionId)
         SpeakFaith()
     elseif actionId == ACTION_SPEAK_TOURISM then
         SpeakTourism()
-    elseif actionId == ACTION_SPEAK_FAVOR then
+    elseif actionId == ACTION_SPEAK_INFLUENCE then
         SpeakFavor()
     elseif actionId == ACTION_SPEAK_NUKES then
         SpeakNukes()

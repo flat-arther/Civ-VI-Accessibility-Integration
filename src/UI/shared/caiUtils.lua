@@ -1,6 +1,10 @@
-include("iconsProcessing")
-
+-- global access to the 'CAI' table, lives on 'ExposedMembers' and created by the dll
 CAI = ExposedMembers.CAI
+
+include("iconsProcessing")
+include("CAISettings")
+
+
 ---Utility wrapper for 'CAI.output'
 ---@param text string -- the text to speak
 ---@param interrupt? boolean -- whether to interrupt any currently speaking text. False by default

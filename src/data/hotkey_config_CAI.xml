@@ -57,7 +57,7 @@
     <Row ActionId="UI_TopPanelSpeakGold" Name="LOC_CAI_TOP_PANEL_SPEAK_GOLD" Description="LOC_CAI_TOP_PANEL_SPEAK_GOLD_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelSpeakFaith" Name="LOC_CAI_TOP_PANEL_SPEAK_FAITH" Description="LOC_CAI_TOP_PANEL_SPEAK_FAITH_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelSpeakTourism" Name="LOC_CAI_TOP_PANEL_SPEAK_TOURISM" Description="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="UI_TopPanelSpeakFavor" Name="LOC_CAI_TOP_PANEL_SPEAK_FAVOR" Description="LOC_CAI_TOP_PANEL_SPEAK_FAVOR_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UI_TopPanelSpeakInfluence" Name="LOC_CAI_TOP_PANEL_SPEAK_INFLUENCE" Description="LOC_CAI_TOP_PANEL_SPEAK_INFLUENCE_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelSpeakNukes" Name="LOC_CAI_TOP_PANEL_SPEAK_NUKES" Description="LOC_CAI_TOP_PANEL_SPEAK_NUKES_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelYieldInfoList" Name="LOC_CAI_TOP_PANEL_YIELD_INFO" Description="LOC_CAI_TOP_PANEL_YIELD_INFO_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelResourceInfoList" Name="LOC_CAI_TOP_PANEL_RESOURCE_INFO" Description="LOC_CAI_TOP_PANEL_RESOURCE_INFO_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
@@ -108,6 +108,7 @@
     <Row ActionId="UI_CAIMinimapOpenMapPinList" Name="LOC_CAI_MINIMAP_OPEN_MAP_PIN_LIST" Description="LOC_CAI_MINIMAP_OPEN_MAP_PIN_LIST_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_DiplomacyRibbonOpenList" Name="LOC_CAI_DIPLO_RIBBON_OPEN_LIST" Description="LOC_CAI_DIPLO_RIBBON_OPEN_LIST_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_DiplomacyRibbonOpenWorldCongress" Name="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS" Description="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UI_DiplomacyRibbonSpeakWorldCongressInfo" Name="LOC_CAI_DIPLO_RIBBON_SPEAK_CONGRESS" Description="LOC_CAI_DIPLO_RIBBON_SPEAK_CONGRESS_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_OpenWorldCrisisTracker" Name="LOC_CAI_OPEN_CRISIS_TRACKER" Description="LOC_CAI_OPEN_CRISIS_TRACKER_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_OpenGlobalResourcePopup" Name="LOC_CAI_GLOBAL_RES_OPEN" Description="LOC_CAI_GLOBAL_RES_OPEN_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_OpenChatPanel" Name="LOC_CAI_OPEN_CHAT_PANEL" Description="LOC_CAI_OPEN_CHAT_PANEL_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
@@ -275,7 +276,7 @@
     <Row ActionId="UI_TopPanelSpeakGold" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_G" />
     <Row ActionId="UI_TopPanelSpeakFaith" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F" />
     <Row ActionId="UI_TopPanelSpeakTourism" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_I" />
-    <Row ActionId="UI_TopPanelSpeakFavor" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_V" />
+    <Row ActionId="UI_TopPanelSpeakInfluence" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_V" />
     <Row ActionId="UI_TopPanelSpeakNukes" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_N" />
     <Row ActionId="UI_TopPanelYieldInfoList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_Y" />
     <Row ActionId="UI_TopPanelResourceInfoList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_I" />
@@ -329,8 +330,9 @@
     <Row ActionId="UI_CAIMinimapOpenLensList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_J" />
     <Row ActionId="UI_CAIMinimapOpenMapPinList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_M" />
     <Row ActionId="UI_DiplomacyRibbonOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F4" />
-    <Row ActionId="UI_DiplomacyRibbonOpenWorldCongress" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F9" />
-    <Row ActionId="UI_OpenWorldCrisisTracker" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_K" />
+    <Row ActionId="UI_DiplomacyRibbonOpenWorldCongress" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_K" />
+    <Row ActionId="UI_DiplomacyRibbonSpeakWorldCongressInfo" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_K" />
+    <Row ActionId="UI_OpenWorldCrisisTracker" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_W" />
     <Row ActionId="UI_OpenGlobalResourcePopup" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_Q" />
     <Row ActionId="UI_OpenChatPanel" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SLASH" />
     <Row ActionId="UI_CAIOpenMapSearch" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_F" />
@@ -344,7 +346,7 @@
     <Row ActionId="UI_CAIOpenReligion" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_L" />
     <Row ActionId="UI_CAIOpenGovernors" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_O" />
     <Row ActionId="UI_CAIOpenHistoricMoments" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F11" />
-    <Row ActionId="UI_CAIOpenWorldClimate" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_W" />
+    <Row ActionId="UI_CAIOpenWorldClimate" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F9" />
     <Row ActionId="UI_CAIOpenWorldRankings" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F8" />
     <Row ActionId="UI_CAIOpenEspionage" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_E" />
     <Row ActionId="UI_CAIOpenTradeOverview" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_T" />

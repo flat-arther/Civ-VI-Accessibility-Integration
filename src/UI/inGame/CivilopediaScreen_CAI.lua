@@ -1019,6 +1019,7 @@ OnOpenCivilopedia = WrapFunc(OnOpenCivilopedia, function(orig, sectionIdOrSearch
     m_state.isOpeningOnHistoryPage = sectionIdOrSearch == nil and pageId == nil and #m_state.history.pages > 0
     orig(sectionIdOrSearch, pageId)
     PushPanel()
+    UITutorialManager:AddControlToAlwaysReceiveInput(ContextPtr)
 end)
 
 LuaEvents.OpenCivilopedia.Remove(_origOnOpenCivilopedia)
@@ -1027,6 +1028,7 @@ LuaEvents.OpenCivilopedia.Add(OnOpenCivilopedia)
 OnClose = WrapFunc(OnClose, function(orig)
     PopPanel()
     orig()
+    UITutorialManager:RemoveControlToAlwaysReceiveInput(ContextPtr)
 end)
 
 local m_caiOpenCivilopediaId = Input.GetActionId("UI_CAIOpenCivilopedia")

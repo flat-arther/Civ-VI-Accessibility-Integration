@@ -38,8 +38,8 @@
 [ ] River flow direction reporting
 [x] / to jump back to selection
 [x] Speaking input binding next to city and unit actions if any are bound
-[ ] Ad great person auras to map info, configurable
-[ ] Roads and bridges should be mentioned in plot info
+[ ] Ad great person passive effects to map info, configurable
+[x] Roads should be mentioned in plot info
 -[x] Capital city should say capital
 [x] turn status in chat panel
 [x] hamada: the government screen has repeating Empty slot 1, Empty slot 1

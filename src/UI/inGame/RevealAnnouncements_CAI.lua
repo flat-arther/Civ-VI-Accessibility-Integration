@@ -8,11 +8,10 @@ local ANNOUNCE_DELAY_SECONDS = 0.5
 
 local EVENT_BINDINGS = {}
 local m_isInitialized = false
-local m_waitingForPlayerChangeClose = false
-local REVEAL_FLUSH_IMMEDIATE = "immediate"
-local REVEAL_FLUSH_ACTIVE_TURN_ONLY = "active_turn_only"
-
-local m_flushMode = REVEAL_FLUSH_ACTIVE_TURN_ONLY
+local REVEAL_FLUSH_TURN_START = "turn_start"
+local REVEAL_FLUSH_TURN_END = "turn_end"
+local REVEAL_FLUSH_ACTIVE_TURN = "active_turn"
+local REVEAL_FLUSH_BETWEEN_TURNS = "between_turns"
 
 local m_PlayerState = PlayerStateManager.Init(function(playerID)
     return {
@@ -25,8 +24,6 @@ local m_PlayerState = PlayerStateManager.Init(function(playerID)
         specialImprovementKinds = {},
 
         turnActive = false,
-        speechAllowed = false,
-        pendingFlushAfterHandoff = false,
         initialized = false,
     }
 end)
@@ -98,6 +95,11 @@ local function GetPlayer(playerID)
     end
 
     return Players[playerID]
+end
+
+local function IsLocalPlayerTurnActive(playerID)
+    local player = GetPlayer(playerID)
+    return player ~= nil and player.IsTurnActive ~= nil and player:IsTurnActive()
 end
 
 local function GetTeamID(playerID)
@@ -243,13 +245,21 @@ local function IsSpecialImprovement(row)
     return row.BarbarianCamp or row.Goody
 end
 
-local function CanFlushRevealQueue(state)
-    if m_flushMode == REVEAL_FLUSH_IMMEDIATE then
-        return true
+local function ShouldSpeakRevealFlush(reason)
+    if reason == REVEAL_FLUSH_TURN_START then
+        return CAISettings.GetBool("AnnounceVisibilityChangesTurnStart")
     end
 
-    if m_flushMode == REVEAL_FLUSH_ACTIVE_TURN_ONLY then
-        return state.turnActive and state.speechAllowed
+    if reason == REVEAL_FLUSH_ACTIVE_TURN then
+        return CAISettings.GetBool("AnnounceVisibilityChangesWhileMoving")
+    end
+
+    if reason == REVEAL_FLUSH_BETWEEN_TURNS then
+        return not GameConfiguration.IsHotseat() and CAISettings.GetBool("AnnounceVisibilityChangesOutsideTurn")
+    end
+
+    if reason == REVEAL_FLUSH_TURN_END then
+        return false
     end
 
     return true
@@ -420,9 +430,6 @@ local function EnsurePlayerInitialized(playerID, state)
     BootstrapSpecialImprovementSnapshot(playerID, state, false)
     ResetBufferedPlots(state)
     state.lastEventTime = nil
-    state.turnActive = false
-    state.speechAllowed = true
-    state.pendingFlushAfterHandoff = false
     state.initialized = true
 end
 
@@ -437,9 +444,6 @@ local function ClearState(state)
     state.specialImprovementKinds = {}
     state.lastEventTime = nil
 
-    state.turnActive = false
-    state.speechAllowed = false
-    state.pendingFlushAfterHandoff = false
     state.initialized = false
 end
 
@@ -649,27 +653,42 @@ local function BuildGoneLine(payload)
         .. table.concat(payload.GoneSections, Locale.Lookup("LOC_CAI_GONE_AND"))
 end
 
-local function FlushAnnouncementsForPlayer(localPlayerID)
+local function FlushAnnouncementsForPlayer(localPlayerID, reason)
     local state = GetState(localPlayerID)
     if state == nil then
         return
     end
 
-    if not CanFlushRevealQueue(state) then
-        state.pendingFlushAfterHandoff = true
+    local shouldSpeak = ShouldSpeakRevealFlush(reason)
+
+    -- Between-turn announcements are the only case that can defer.
+    -- If outside-turn speech is off, keep the queue for turn-start.
+    if reason == REVEAL_FLUSH_BETWEEN_TURNS and not shouldSpeak then
         return
     end
 
+    -- All other flushes consume the queue, even when speech is disabled.
+    -- This is what prevents active-turn movement reveals from leaking into
+    -- the next turn-start announcement.
     local payload = CollectRevealPayload(localPlayerID, state)
-    local lines = {}
-
-    AppendLabel(lines, BuildRevealLine(payload))
-    AppendLabel(lines, BuildHiddenLine(payload))
-    AppendLabel(lines, BuildGoneLine(payload))
 
     ResetBufferedPlots(state)
     state.lastEventTime = nil
-    state.pendingFlushAfterHandoff = false
+
+    if reason == REVEAL_FLUSH_TURN_START
+        or reason == REVEAL_FLUSH_BETWEEN_TURNS
+        or reason == REVEAL_FLUSH_ACTIVE_TURN
+        or reason == REVEAL_FLUSH_TURN_END then
+    end
+
+    if not shouldSpeak then
+        return
+    end
+
+    local lines = {}
+    AppendLabel(lines, BuildRevealLine(payload))
+    AppendLabel(lines, BuildHiddenLine(payload))
+    AppendLabel(lines, BuildGoneLine(payload))
 
     for _, line in ipairs(lines) do
         LuaEvents.CAIAppendToMessageBuffer(line, "reveal")
@@ -681,27 +700,21 @@ local function ResyncTurnStartSnapshots()
     local state = GetState(playerID)
     if state == nil then return end
 
-    EnsurePlayerInitialized(playerID, state)
-
-    state.turnActive = true
-
-    if m_waitingForPlayerChangeClose then
-        state.speechAllowed = false
-    else
-        state.speechAllowed = true
+    if not state.initialized then
+        EnsurePlayerInitialized(playerID, state)
+        return
     end
 
-    if state.pendingFlushAfterHandoff then
-        FlushAnnouncementsForPlayer(playerID)
-    end
+
+    -- Always flush/clear at turn start.
+    FlushAnnouncementsForPlayer(playerID, REVEAL_FLUSH_TURN_START)
 end
 
 local function OnLocalPlayerTurnEnd()
     local playerID = GetActivePlayerID()
     local state = GetState(playerID)
     if state == nil then return end
-
-    state.turnActive = false
+    FlushAnnouncementsForPlayer(playerID, REVEAL_FLUSH_TURN_END)
 end
 
 EVENT_BINDINGS = {
@@ -714,31 +727,6 @@ EVENT_BINDINGS = {
     { Event = Events.LocalPlayerTurnBegin,         Handler = ResyncTurnStartSnapshots },
     { Event = Events.LocalPlayerTurnEnd,           Handler = OnLocalPlayerTurnEnd },
 }
-
-local function OnPlayerChangeShow()
-    m_waitingForPlayerChangeClose = true
-
-    local state = GetState(GetActivePlayerID())
-    if state ~= nil then
-        state.speechAllowed = false
-    end
-end
-
-local function OnPlayerChangeClose(playerID)
-    if playerID == nil or playerID == -1 then
-        playerID = GetActivePlayerID()
-    end
-
-    local state = GetState(playerID)
-    if state == nil then return end
-
-    state.turnActive = true
-    state.speechAllowed = true
-
-    if state.pendingFlushAfterHandoff then
-        FlushAnnouncementsForPlayer(playerID)
-    end
-end
 
 -- ===========================================================================
 --  Public API
@@ -753,12 +741,10 @@ function RevealAnnouncements_CAI.Initialize()
         binding.Event.Add(binding.Handler)
     end
 
-    LuaEvents.PlayerChange_Show.Add(OnPlayerChangeShow)
-    LuaEvents.PlayerChange_Close.Add(OnPlayerChangeClose)
-
     m_isInitialized = true
 
     local playerID = GetActivePlayerID()
+    local player = Players[playerID]
     local state = GetState(playerID)
     EnsurePlayerInitialized(playerID, state)
 end
@@ -778,8 +764,6 @@ function RevealAnnouncements_CAI.ClearPlayer(playerID)
     state.previousVisibleUnits = {}
     state.specialImprovementKinds = {}
     state.lastEventTime = nil
-    state.turnActive = false
-    state.pendingFlushAfterHandoff = false
 end
 
 function RevealAnnouncements_CAI.ClearAll()
@@ -817,7 +801,11 @@ function RevealAnnouncements_CAI.UpdateVisibility()
 
     local now = Automation.GetTime()
     if (now - state.lastEventTime) > ANNOUNCE_DELAY_SECONDS then
-        FlushAnnouncementsForPlayer(localPlayerID)
+        if IsLocalPlayerTurnActive(localPlayerID) then
+            FlushAnnouncementsForPlayer(localPlayerID, REVEAL_FLUSH_ACTIVE_TURN)
+        else
+            FlushAnnouncementsForPlayer(localPlayerID, REVEAL_FLUSH_BETWEEN_TURNS)
+        end
     end
 end
 

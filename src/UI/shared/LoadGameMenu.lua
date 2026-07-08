@@ -904,11 +904,13 @@ OnShow = WrapFunc(OnShow, function(orig, ...)
 	CAI_DirDropdown = nil
 	CAI_SortDropdown = nil
 	BuildPanel()
+	UITutorialManager:AddControlToAlwaysReceiveInput(ContextPtr)
 end)
 
 OnHide = WrapFunc(OnHide, function(orig, ...)
 	ClosePanel()
 	orig(...)
+	UITutorialManager:RemoveControlToAlwaysReceiveInput(ContextPtr)
 end)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)

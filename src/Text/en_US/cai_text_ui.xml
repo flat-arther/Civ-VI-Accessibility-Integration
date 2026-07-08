@@ -524,10 +524,10 @@
       <Text>Power range</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_POWERED_CITY_PLOTS" Language="en_US">
-      <Text>Powered city plots</Text>
+      <Text>Powered city tiles</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_UNPOWERED_CITY_PLOTS" Language="en_US">
-      <Text>Unpowered city plots</Text>
+      <Text>Unpowered city tiles</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TOURISM_CITY" Language="en_US">
       <Text>By city</Text>
@@ -566,10 +566,10 @@
       <Text>{1_City} power range</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_POWER_PLOTS_POWERED" Language="en_US">
-      <Text>{1_City} powered plots</Text>
+      <Text>{1_City} powered tiles</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_POWER_PLOTS_UNPOWERED" Language="en_US">
-      <Text>{1_City} unpowered plots</Text>
+      <Text>{1_City} unpowered tiles</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_TOURISM_ITEM" Language="en_US">
       <Text>{1_Tourism} tourism, {2_Tourists} tourists</Text>
@@ -641,7 +641,7 @@
       <Text>Return from world scanner jump</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_RETURN_TOOLTIP" Language="en_US">
-      <Text>Returns the CAI cursor to the plot it occupied before the last world scanner jump</Text>
+      <Text>Returns the CAI cursor to the tile it occupied before the last world scanner jump</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SPEAK_DIRECTION" Language="en_US">
       <Text>Speak current world scanner direction</Text>
@@ -1110,11 +1110,11 @@
     <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_TOOLTIP" Language="en_US">
       <Text>Reads the current tourism rate</Text>
     </Row>
-    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_FAVOR" Language="en_US">
-      <Text>Read diplomatic favor and envoys</Text>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_INFLUENCE" Language="en_US">
+      <Text>Read envoys and influence points</Text>
     </Row>
-    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_FAVOR_TOOLTIP" Language="en_US">
-      <Text>Reads diplomatic favor balance, yield per turn, and envoy progress</Text>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_INFLUENCE_TOOLTIP" Language="en_US">
+      <Text>Reads available envoys, current influence points, and progress to next envoy</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_NUKES" Language="en_US">
       <Text>Read nuclear weapons</Text>
@@ -3111,7 +3111,7 @@
       <Text>Too expensive</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TARGET_PLOTS" Language="en_US">
-      <Text>Target plots</Text>
+      <Text>Target tiles</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_WAYPOINT_TURN" Language="en_US">
       <Text>Waypoint, turn {1_Turn}</Text>
@@ -3126,7 +3126,7 @@
       <Text>Queued movement</Text>
     </Row>
     <Row Tag="LOC_CAI_VALID_TARGET_PLOT" Language="en_US">
-      <Text>Target plot {1_X}, {2_Y}</Text>
+      <Text>Target tile {1_X}, {2_Y}</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_MANAGEMENT_LOCKED" Language="en_US">
       <Text>Locked</Text>
@@ -3765,6 +3765,12 @@
     </Row>
     <Row Tag="LOC_CAI_DIPLO_RIBBON_OPEN_LIST_TOOLTIP" Language="en_US">
       <Text>Browse leader stats and open diplomacy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_SPEAK_CONGRESS" Language="en_US">
+      <Text>Speak World Congress details</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_SPEAK_CONGRESS_TOOLTIP" Language="en_US">
+      <Text>Speak world congress details, such as turns remaining to next session</Text>
     </Row>
     <Row Tag="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS" Language="en_US">
       <Text>Open World Congress</Text>
@@ -4685,6 +4691,9 @@
     </Row>
 
     <!-- Input binding descriptions -->
+    <Row Tag="LOC_CAI_KB_OPEN_SETTINGS" Language="en_US">
+      <Text>Open accessibility mod settings</Text>
+    </Row>
     <Row Tag="LOC_CAI_KB_ACTIVATE" Language="en_US">
       <Text>Activate</Text>
     </Row>
@@ -5266,6 +5275,143 @@
     </Row>
     <Row Tag="LOC_CAI_STAGING_INVITE_SENT" Language="en_US">
       <Text>Invite sent</Text>
+    </Row>
+
+    <!-- Mod settings -->
+    <Row Tag="LOC_CAI_SETTINGS_TITLE" Language="en_US">
+      <Text>Accessibility mod settings</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SECTION_UI" Language="en_US">
+      <Text>UI</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SECTION_NAVIGATION" Language="en_US">
+      <Text>Navigation</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SPEAK_TOOLTIP" Language="en_US">
+      <Text>Speak tooltip</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_TOOLTIP_TOOLTIP" Language="en_US">
+      <Text>Speak the focused control's tooltip when available.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SPEAK_POSITION" Language="en_US">
+      <Text>Speak position</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_POSITION_TOOLTIP" Language="en_US">
+      <Text>Speak position information for focused controls, such as item number in a list.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SPEAK_ROLE" Language="en_US">
+      <Text>Speak role</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_ROLE_TOOLTIP" Language="en_US">
+      <Text>Speak the role of focused controls, such as button, checkbox, slider, or dropdown.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SEARCH_TIMEOUT" Language="en_US">
+      <Text>Search timeout</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SEARCH_TIMEOUT_TOOLTIP" Language="en_US">
+      <Text>Number of seconds before type-to-find search text is cleared.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_CURSOR_AUDIO_ENABLED" Language="en_US">
+      <Text>Enable cursor audio</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_CURSOR_AUDIO_ENABLED_TOOLTIP" Language="en_US">
+      <Text>Play terrain and feature sounds when the navigation cursor moves.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_CURSOR_AUDIO_VOLUME" Language="en_US">
+      <Text>Cursor audio volume</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_CURSOR_AUDIO_VOLUME_TOOLTIP" Language="en_US">
+      <Text>Volume level for navigation cursor audio.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SCANNER_AUTO_MOVE_CURSOR" Language="en_US">
+      <Text>Scanner auto move cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SCANNER_AUTO_MOVE_CURSOR_TOOLTIP" Language="en_US">
+      <Text>Automatically move the navigation cursor to the scanner's current target.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_CURSOR_COORDINATES" Language="en_US">
+      <Text>Cursor coordinates</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_CURSOR_COORDINATES_TOOLTIP" Language="en_US">
+      <Text>Choose whether cursor coordinates are included in movement announcements.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_CURSOR_COORDINATES_DISABLED" Language="en_US">
+      <Text>Disabled</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_CURSOR_COORDINATES_DISABLED_TOOLTIP" Language="en_US">
+      <Text>Do not speak cursor coordinates in movement announcements.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_CURSOR_COORDINATES_APPEND" Language="en_US">
+      <Text>Append to move announcement</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_CURSOR_COORDINATES_APPEND_TOOLTIP" Language="en_US">
+      <Text>Speak coordinates after the normal movement announcement.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_CURSOR_COORDINATES_PREPEND" Language="en_US">
+      <Text>Prepend to move announcement</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_CURSOR_COORDINATES_PREPEND_TOOLTIP" Language="en_US">
+      <Text>Speak coordinates before the normal movement announcement.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SPEAK_OWNER_ZONE" Language="en_US">
+      <Text>Speak owner zone</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_OWNER_ZONE_TOOLTIP" Language="en_US">
+      <Text>Announce when the cursor enters territory owned by a different civilization or city-state.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SPEAK_TERRITORY_ZONE" Language="en_US">
+      <Text>Speak territory zone</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_TERRITORY_ZONE_TOOLTIP" Language="en_US">
+      <Text>Announce labled territory zones, such as named oceans and mountains, when the cursor enters them.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SPEAK_CONTINENT_ZONE" Language="en_US">
+      <Text>Speak continent zone</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_CONTINENT_ZONE_TOOLTIP" Language="en_US">
+      <Text>Announce when the cursor enters a different continent.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SPEAK_NATIONAL_PARK_ZONE" Language="en_US">
+      <Text>Speak national park zone</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_NATIONAL_PARK_ZONE_TOOLTIP" Language="en_US">
+      <Text>Announce when the cursor enters a national park.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_TURN_START" Language="en_US">
+      <Text>Announce visibility changes on start of your turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_TURN_START_TOOLTIP" Language="en_US">
+      <Text>Announce newly revealed, hidden, or changed visible objects when your turn begins.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_OUTSIDE_TURN" Language="en_US">
+      <Text>Announce visibility changes outside of your turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_OUTSIDE_TURN_TOOLTIP" Language="en_US">
+      <Text>Announce visibility changes that happen while it is not your active turn. Note: this is automatically disabled in hot-seet mode</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_WHILE_MOVING" Language="en_US">
+      <Text>Announce visibility changes while moving</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_WHILE_MOVING_TOOLTIP" Language="en_US">
+      <Text>Announce visibility changes caused by owned unit movement.</Text>
     </Row>
 
   </LocalizedText>

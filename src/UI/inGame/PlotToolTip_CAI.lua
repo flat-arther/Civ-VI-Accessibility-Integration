@@ -1617,6 +1617,13 @@ function OnCAICursorMove(state)
     local keys = BuildCursorMoveRequestKeys(data)
     local results = RequestPlotInfoFromData(current, data, keys)
 
+    local coordsAnnounceMode = CAISettings.GetString("CursorCoordinates")
+    if coordsAnnounceMode ~= "disabled" then
+        local coords = RequestPlotInfoFromData(current, data, { "relativeCoords" })[1]
+        if coordsAnnounceMode == "prepend" then table.insert(results, 1, coords) end
+        if coordsAnnounceMode == "append" then table.insert(results, coords) end
+    end
+
     if #results > 0 then
         Speak(table.concat(results, ", "))
     end

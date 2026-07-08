@@ -5,6 +5,7 @@ local mgr            = ExposedMembers.CAI_UIManager
 -- ============================================================================
 -- Constants
 -- ============================================================================
+local m_WasShowing   = false
 local PANEL_ID       = "CAIEndGame_Panel"
 local MOVIE_PANEL_ID = "CAIEndGame_Movie"
 local TABS_ID        = "CAIEndGame_Tabs"
@@ -478,6 +479,10 @@ end
 -- ============================================================================
 OnReplayMovie = WrapFunc(OnReplayMovie, function(orig)
     orig()
+    if not m_WasShowing then
+        UITutorialManager:AddControlToAlwaysReceiveInput(ContextPtr)
+        m_WasShowing = true
+    end
     if Controls.MovieFill and not Controls.MovieFill:IsHidden() then
         PushMoviePanel()
     end
@@ -501,10 +506,11 @@ end)
 Close = WrapFunc(Close, function(orig)
     DestroyPanel()
     orig()
+    UITutorialManager:RemoveControlToAlwaysReceiveInput(ContextPtr)
+    m_WasShowing = false
 end)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, kInput)
-    if ContextPtr:IsHidden() then return false end
     if m_isBuilt or m_moviePanel then
         if mgr:HandleInput(kInput) then
             return true
@@ -513,9 +519,7 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, kInput)
     return orig(kInput)
 end)
 
-if Events.MultiplayerChat then
-    OnChat = WrapFunc(OnChat, function(orig, fromPlayer, toPlayer, text, eTargetType)
-        orig(fromPlayer, toPlayer, text, eTargetType)
-        OnChatReceived()
-    end)
-end
+OnChat = WrapFunc(OnChat, function(orig, fromPlayer, toPlayer, text, eTargetType)
+    orig(fromPlayer, toPlayer, text, eTargetType)
+    OnChatReceived()
+end)

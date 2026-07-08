@@ -175,31 +175,31 @@ function CAICursor:UpdateZones()
     end
 
     local continentZone = GetContinentZoneText(plot)
-    if continentZone ~= nil and continentZone ~= state.lastContinentZone then
+    if continentZone ~= nil and CAISettings.GetBool("SpeakContinentZone") and continentZone ~= state.lastContinentZone then
         Speak(continentZone)
     end
     state.lastContinentZone = continentZone
 
     local ownerZone = GetOwnerZoneText(plot)
-    if ownerZone ~= nil and ownerZone ~= state.lastOwnerZone then
+    if ownerZone ~= nil and CAISettings.GetBool("SpeakOwnerZone") and ownerZone ~= state.lastOwnerZone then
         Speak(ownerZone)
     end
     state.lastOwnerZone = ownerZone
 
     local territoryZone = GetTerritoryZoneText(plot)
-    if territoryZone ~= nil and territoryZone ~= state.lastTerritoryZone then
+    if territoryZone ~= nil and CAISettings.GetBool("SpeakTerritoryZone") and territoryZone ~= state.lastTerritoryZone then
         Speak(territoryZone)
     end
     state.lastTerritoryZone = territoryZone
 
-    local volcanoZone = GetVolcanoZoneText(plot)
-    if volcanoZone ~= nil and volcanoZone ~= state.lastVolcanoZone then
-        Speak(volcanoZone)
-    end
-    state.lastVolcanoZone = volcanoZone
+    --local volcanoZone = GetVolcanoZoneText(plot)
+    --if volcanoZone ~= nil and volcanoZone ~= state.lastVolcanoZone then
+    --Speak(volcanoZone)
+    --end
+    --state.lastVolcanoZone = volcanoZone
 
     local nationalParkZone = GetNationalParkZoneText(plot)
-    if nationalParkZone ~= nil and nationalParkZone ~= state.lastNationalParkZone then
+    if nationalParkZone ~= nil and CAISettings.GetBool("SpeakNationalParkZone") and nationalParkZone ~= state.lastNationalParkZone then
         Speak(nationalParkZone)
     end
     state.lastNationalParkZone = nationalParkZone

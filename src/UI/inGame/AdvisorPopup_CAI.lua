@@ -49,11 +49,10 @@ ShowAdvisorPopup = WrapFunc(ShowAdvisorPopup, function(orig, advisorData)
     mgr:Push(m_tutorialPanel, { priority = PopupPriority.Tutorial })
 end)
 
-
 OnHideAdvisorDialog = WrapFunc(OnHideAdvisorDialog, function(orig)
     orig()
     if mgr:GetTop() == m_tutorialPanel then
-        mgr:Pop()
+        mgr:RemoveFromStack(m_tutorialPanel:GetId())
     end
 end)
 
@@ -62,9 +61,12 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
     -- We need to let input pass through if either of the popup base controls are not visible, otherwise input is doubled in world
     local isAdvisorVisible = not ContextPtr:IsHidden() and
         (not Controls.AdvisorBase:IsHidden() or not Controls.MetaBase:IsHidden())
-    if not isAdvisorVisible then return false end
+    if not isAdvisorVisible then
+        return false
+    end
     local handled = mgr:HandleInput(pInputStruct)
     if handled then return handled end
     return orig(pInputStruct)
 end)
-ContextPtr:SetInputHandler(OnInputHandler, true)
+
+ContextPtr:SetInputHandler(OnInputHandler, true);

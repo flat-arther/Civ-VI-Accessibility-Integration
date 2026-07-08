@@ -348,7 +348,7 @@ local function SpeakEraAge()
             local commemorationInfo = GameInfo.CommemorationTypes[activeCommemoration]
             if commemorationInfo ~= nil then
                 local dedicationName = commemorationInfo.CategoryDescription and
-                Locale.Lookup(commemorationInfo.CategoryDescription) or ""
+                    Locale.Lookup(commemorationInfo.CategoryDescription) or ""
                 local bonusText = nil
                 if gameEras:HasGoldenAge(playerID) then
                     bonusText = Locale.Lookup(commemorationInfo.GoldenAgeBonusDescription)

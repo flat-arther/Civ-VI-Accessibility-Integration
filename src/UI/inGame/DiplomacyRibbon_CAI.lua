@@ -1,5 +1,7 @@
 include("caiUtils")
 include("Civ6Common")
+local info             = ExposedMembers.CAIInfo or {}
+ExposedMembers.CAIInfo = info
 
 if IsExpansion2Active() then
     include("DiplomacyRibbon_Expansion2")
@@ -15,8 +17,32 @@ local LIST_ID = "CAIDiploRibbon_List"
 
 local ACTION_OPEN_LIST = Input.GetActionId("UI_DiplomacyRibbonOpenList")
 local ACTION_OPEN_CONGRESS = Input.GetActionId("UI_DiplomacyRibbonOpenWorldCongress")
+local ACTION_SPEAK_CONGRESS_INFO = Input.GetActionId("UI_DiplomacyRibbonSpeakWorldCongressInfo")
 
 local m_list = nil
+
+
+local function GetLocalPlayer()
+    local playerID = Game.GetLocalPlayer()
+    if playerID == nil or playerID < 0 then return nil, nil end
+    return playerID, Players[playerID]
+end
+
+local function FormatValuePerTurn(value)
+    if value == 0 then
+        return Locale.ToNumber(value)
+    else
+        return Locale.Lookup("{1: number +#,###.#;-#,###.#}", value)
+    end
+end
+
+local function FormatBalance(value)
+    return Locale.ToNumber(value, "#,###.#")
+end
+
+local function FormatRatePerTurn(value)
+    return Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", value)
+end
 
 local function JoinNonEmpty(parts, separator)
     local result = {}
@@ -44,12 +70,32 @@ local function IsCongressInSession()
 end
 
 local function GetCongressTooltip()
-    if IsCongressInSession() then
-        return Locale.Lookup("LOC_WORLD_CONGRESS_IS_CURRENTLY_IN_SESSION")
+    local parts = {}
+    local _, player = GetLocalPlayer()
+    if not player then return end
+
+    if not IsExpansion2Active() then return end
+    local playerFavor = player:GetFavor()
+    local favorPerTurn = player:GetFavorPerTurn()
+    table.insert(parts, Locale.Lookup("LOC_CAI_TOP_PANEL_FAVOR") .. ": "
+        .. Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
+            FormatBalance(playerFavor),
+            FormatRatePerTurn(FormatValuePerTurn(favorPerTurn))))
+
+    if HasCongressButton() then
+        if IsCongressInSession() then
+            table.insert(parts, Locale.Lookup("LOC_WORLD_CONGRESS_IS_CURRENTLY_IN_SESSION"))
+            if info and info.GetCongressStatus then
+                local betweenTurnStatus = info.GetCongressStatus()
+                if betweenTurnStatus then table.insert(parts, betweenTurnStatus) end
+            end
+        else
+            local pData = Game.GetWorldCongress():GetMeetingStatus()
+            local turnsLeft = pData.TurnsLeft + 1
+            table.insert(parts, Locale.Lookup("LOC_WORLD_CONGRESS_HUD_BAR_TIME_UNTIL_NEXT_SESSION", turnsLeft))
+        end
     end
-    local pData = Game.GetWorldCongress():GetMeetingStatus()
-    local turnsLeft = pData.TurnsLeft + 1
-    return Locale.Lookup("LOC_WORLD_CONGRESS_HUD_BAR_TIME_UNTIL_NEXT_SESSION", turnsLeft)
+    return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function ActivateCongress()
@@ -301,6 +347,8 @@ local function OnInputActionTriggered(actionId)
         if HasCongressButton() then
             ActivateCongress()
         end
+    elseif actionId == ACTION_SPEAK_CONGRESS_INFO then
+        Speak(GetCongressTooltip())
     end
 end
 

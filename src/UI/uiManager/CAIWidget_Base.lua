@@ -52,6 +52,16 @@ function UIWidget.New(class)
         TooltipReader.ClearTooltipSections(self)
     end)
     w:AddInputBinding({
+        Key = Keys.VK_F12,
+        Description = "LOC_CAI_KB_OPEN_SETTINGS",
+        Common = true,
+        Action = function(self)
+            CAIWidgetHelpers_Settings.OpenSettings(self.Manager)
+            return true
+        end,
+    })
+
+    w:AddInputBinding({
         Key = Keys.I,
         IsAlt = true,
         Description = "LOC_CAI_KB_PEDIA_LOOKUP",
@@ -419,17 +429,33 @@ end
 ---@param elements? string[] Optional subset of canonical speech keys
 ---@return string|nil
 function UIWidget:BuildSpeech(elements)
+    ---Widget settings helper
+    ---@param key string
+    ---@return boolean
+    local function GlobalSpeechAllows(key)
+        if key == "tooltip" then
+            return CAISettings.GetBool("SpeakTooltip")
+        end
+
+        if key == "position" then
+            return CAISettings.GetBool("SpeakPosition")
+        end
+
+        if key == "role" then
+            return CAISettings.GetBool("SpeakRole")
+        end
+
+        return true
+    end
     local info = self:GetInfoStrings()
     local settings = self.SpeechSettings or {}
-    local globals = self.Manager and self.Manager.CAISettings or {}
     local keys = (elements and #elements > 0) and elements or SPEECH_ORDER
 
     local parts = {}
     for _, key in ipairs(keys) do
         local settingKey = key:sub(1, 1):upper() .. key:sub(2)
         local widgetAllows = settings[settingKey] ~= false
-        local globalKey = "speak" .. settingKey
-        local globalAllows = globals[globalKey] == nil or globals[globalKey] == true
+        local globalAllows = GlobalSpeechAllows(key)
         if widgetAllows and globalAllows and info[key] then
             parts[#parts + 1] = info[key]
         end

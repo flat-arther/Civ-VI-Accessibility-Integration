@@ -1262,8 +1262,13 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, inputStruct)
 		local handled = mgr:HandleInput(inputStruct)
 		if handled then return handled end
 	end
-	if Input.GetActiveContext() ~= InputContext.World then return true end
+	--if Input.GetActiveContext() ~= InputContext.World then return true end
 	return orig(inputStruct)
+end)
+
+OnAppRegainedFocusHandler = WrapFunc(OnAppRegainedFocusHandler, function(orig)
+	orig()
+	mgr:TouchAppRegainedFocusTimer()
 end)
 
 OnShutdown = WrapFunc(OnShutdown, function(orig)
@@ -1286,3 +1291,4 @@ InstallUIOverrides()
 ContextPtr:SetShutdown(OnShutdown)
 ContextPtr:SetInputHandler(OnInputHandler, true)
 ContextPtr:SetUpdate(OnUpdate)
+ContextPtr:SetAppRegainedFocusHandler(OnAppRegainedFocusHandler);

@@ -13,17 +13,17 @@ end
 
 include(GetInGameTopOptionsMenuIncludeName())
 
-local mgr = ExposedMembers.CAI_UIManager
-local isOpening = false
+local mgr             = ExposedMembers.CAI_UIManager
+local isOpening       = false
 
 local PANEL_ID        = "CAIInGameTopOptionsMenu_Panel"
 local BUTTON_LIST_ID  = "CAIInGameTopOptionsMenu_Buttons"
 local MODS_EDIT_ID    = "CAIInGameTopOptionsMenu_ModsEdit"
 local DETAILS_EDIT_ID = "CAIInGameTopOptionsMenu_DetailsEdit"
 
-local m_Panel       ---@type UIWidget|nil
-local m_ButtonList  ---@type UIWidget|nil
-local m_ModsEdit    ---@type EditBoxWidget|nil
+local m_Panel ---@type UIWidget|nil
+local m_ButtonList ---@type UIWidget|nil
+local m_ModsEdit ---@type EditBoxWidget|nil
 local m_DetailsEdit ---@type EditBoxWidget|nil
 
 -- VersionLabel's tooltip begins with the same header we use as the edit-box
@@ -101,11 +101,11 @@ end
 
 local function BuildModsSection()
     m_ModsEdit = mgr:CreateWidget(MODS_EDIT_ID, "EditBox", {
-        Label             = function() return Controls.ModsInUseHeader:GetText() end,
-        HiddenPredicate   = function() return Controls.ModsInUse:IsHidden() end,
-        ReadOnly          = true,
-        AlwaysEdit        = true,
-        HighlightOnEdit   = false,
+        Label           = function() return Controls.ModsInUseHeader:GetText() end,
+        HiddenPredicate = function() return Controls.ModsInUse:IsHidden() end,
+        ReadOnly        = true,
+        AlwaysEdit      = true,
+        HighlightOnEdit = false,
     })
     m_ModsEdit:SetText(BuildModsText(), true)
     m_Panel:AddChild(m_ModsEdit)
@@ -113,11 +113,11 @@ end
 
 local function BuildDetailsSection()
     m_DetailsEdit = mgr:CreateWidget(DETAILS_EDIT_ID, "EditBox", {
-        Label             = function() return Locale.Lookup("LOC_PAUSEMENU_INFO_OVERVIEW_TOOLTIP") end,
-        HiddenPredicate   = function() return Controls.DetailsBox:IsHidden() end,
-        ReadOnly          = true,
-        AlwaysEdit        = true,
-        HighlightOnEdit   = false,
+        Label           = function() return Locale.Lookup("LOC_PAUSEMENU_INFO_OVERVIEW_TOOLTIP") end,
+        HiddenPredicate = function() return Controls.DetailsBox:IsHidden() end,
+        ReadOnly        = true,
+        AlwaysEdit      = true,
+        HighlightOnEdit = false,
     })
     m_DetailsEdit:SetText(BuildDetailsText(), true)
     m_Panel:AddChild(m_DetailsEdit)
@@ -168,15 +168,11 @@ OnInput = WrapFunc(OnInput, function(orig, input)
     if Controls.PauseWindow and Controls.PauseWindow:IsHidden() then
         return false
     end
-
-    if mgr then
-        local handled = mgr:HandleInput(input)
-        if handled then
-            return handled
-        end
+    local handled = mgr and mgr:HandleInput(input)
+    if handled then
+        return handled
     end
-    orig(input)
-    return true
+    return orig(input)
 end)
 
 SetupButtons = WrapFunc(SetupButtons, function(orig)
@@ -194,8 +190,9 @@ SetupButtons = WrapFunc(SetupButtons, function(orig)
     end
 end)
 
-ContextPtr:SetHideHandler(PopPausePanel)
-ContextPtr:SetInputHandler(OnInput, true)
 LuaEvents.InGameTopOptionsMenu_Show.Add(function()
     isOpening = true
 end)
+
+ContextPtr:SetHideHandler(PopPausePanel)
+ContextPtr:SetInputHandler(OnInput, true)

@@ -206,7 +206,7 @@ function CAICursorAudio.PlayPlot(plot, prevPlot)
     if plot == nil then return end
     if not IsPlotRevealed(plot) then return end
 
-    UI.PlaySound("Stop_CursorAudio")
+    --UI.PlaySound("Stop_CursorAudio")
     ClearQueue()
 
     local crossing = GetCrossingSound(prevPlot, plot)
@@ -225,6 +225,7 @@ function CAICursorAudio.PlayPlot(plot, prevPlot)
 end
 
 function CAICursorAudio.PlayPlotById(plotId, prevPlotId)
+    if not CAISettings.GetBool("CursorAudioEnabled") then return end
     if plotId == nil or plotId < 0 then return end
 
     local plot = Map.GetPlotByIndex(plotId)

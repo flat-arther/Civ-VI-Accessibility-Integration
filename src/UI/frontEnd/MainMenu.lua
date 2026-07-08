@@ -2172,7 +2172,12 @@ UpdateCloudGamesButton = WrapFunc(UpdateCloudGamesButton, function(orig, btn)
     if row and mgr:GetFocusedWidget() == row then mgr:Refocus() end
 end)
 
+function OnAppRegainedFocusHandler()
+	mgr:TouchAppRegainedFocusTimer()
+end
+
 OnShutdown = WrapFunc(OnShutdown, function(orig, ...) orig(...) mgr:ShutDown() end)
 ContextPtr:SetShutdown(OnShutdown)
+ContextPtr:SetAppRegainedFocusHandler( OnAppRegainedFocusHandler );
 --#End of accessibility integration
 Initialize()
