@@ -34,7 +34,7 @@
 [x] rework icon processing
 [x] Add map pins to plot info and scanner
 [x] city actions should not repeat the names in the tooltip
-[ ] add mod config
+[x] add mod config
 [ ] River flow direction reporting
 [x] / to jump back to selection
 [x] Speaking input binding next to city and unit actions if any are bound
