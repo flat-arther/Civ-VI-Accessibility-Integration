@@ -205,15 +205,7 @@
 
     <!-- ===== CITY: City panel actions ===== -->
     <Row ActionId="CityToggleOverview" Name="LOC_HUD_CITY_TOGGLE_OVERVIEW" Description="LOC_CAI_CITY_TOGGLE_OVERVIEW_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityOpenBuildings" Name="LOC_HUD_CITY_BUILDINGS" Description="LOC_CAI_CITY_OPEN_BUILDINGS_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityOpenLoyalty" Name="LOC_CAI_CITY_OPEN_LOYALTY" Description="LOC_CAI_CITY_OPEN_LOYALTY_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityOpenPower" Name="LOC_CAI_CITY_OPEN_POWER" Description="LOC_CAI_CITY_OPEN_POWER_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityOpenReligion" Name="LOC_HUD_CITY_RELIGIOUS_CITIZENS" Description="LOC_CAI_CITY_OPEN_RELIGION_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityOpenAmenities" Name="LOC_HUD_CITY_AMENITIES" Description="LOC_CAI_CITY_OPEN_AMENITIES_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityOpenHousing" Name="LOC_HUD_CITY_HOUSING" Description="LOC_CAI_CITY_OPEN_HOUSING_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityOpenCitizens" Name="LOC_CAI_CITY_ACTION_CITIZENS_GROWTH" Description="LOC_CAI_CITY_OPEN_CITIZENS_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityPurchaseTile" Name="LOC_HUD_CITY_PURCHASE_TILE" Description="LOC_HUD_CITY_PURCHASE_TILE" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="CityManageCitizens" Name="LOC_HUD_CITY_MANAGE_CITIZENS" Description="LOC_HUD_CITY_MANAGE_CITIZENS" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CityManageCity" Name="LOC_CAI_CITY_MANAGE_CITY" Description="LOC_CAI_CITY_MANAGE_CITY_TOOLTIP" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityPurchaseWithGold" Name="LOC_HUD_CITY_PURCHASE_WITH_GOLD" Description="LOC_HUD_CITY_PURCHASE_WITH_GOLD" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityPurchaseWithFaith" Name="LOC_HUD_CITY_PURCHASE_WITH_FAITH" Description="LOC_HUD_CITY_PURCHASE_WITH_FAITH" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityChangeProduction" Name="LOC_HUD_CITY_CHANGE_PRODUCTION" Description="LOC_HUD_CITY_CHANGE_PRODUCTION" CategoryId="CITY" ContextId="World" LayoutType="PC"/>
@@ -367,6 +359,9 @@
     <Row ActionId="WorldSelectNextCity_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_RBRACKET" />
     <Row ActionId="WorldSelectCapitalCity_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_BACKSLASH" />
     <Row ActionId="CAIPlaceMapPin" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_M" />
+    <Row ActionId="CityChangeProduction" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_BACKSLASH" />
+    <Row ActionId="CityToggleOverview" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_RBRACKET" />
+    <Row ActionId="CityManageCity" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_LBRACKET" />
 
     <!-- CAI_UNIT: Vanilla operation overrides (Alt+key) -->
     <Row ActionId="CAIFoundCity" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_B" />

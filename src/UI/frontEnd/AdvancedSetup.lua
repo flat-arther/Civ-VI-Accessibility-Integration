@@ -1751,6 +1751,7 @@ local mgr = ExposedMembers.CAI_UIManager
 
 local CAI_Panel = nil ---@type PanelWidget
 local CAI_Tabs = nil ---@type TabControlWidget
+local CAI_ConflictDialog = nil ---@type DialogWidget
 local m_basicPage = nil ---@type TabPageWidget
 local m_basicList = nil ---@type ListWidget
 local m_advancedPage = nil ---@type TabPageWidget
@@ -1763,6 +1764,7 @@ local m_basicParamWidgets = {} -- parameterId → widget (simple params in basic
 -- Advanced view: List + SubMenu nodes
 local m_advList = nil ---@type ListWidget
 local m_advParamWidgets = {} -- parameterId → widget
+local m_paramControls = {} -- parameterId → vanilla parameter control
 local m_advPlayerSub = nil ---@type SubMenuWidget
 -- Section submenu widgets keyed by section key (persisted across rebuilds)
 local m_advSections = {} ---@type table<string, SubMenuWidget>
@@ -1780,6 +1782,81 @@ local function CAI_SortParams(a, b)
 		return (a.SortIndex or 0) < (b.SortIndex or 0)
 	end
 	return Locale.Compare(a.Name or "", b.Name or "") == -1
+end
+
+local function CAI_Lookup(text, ...)
+	if text == nil or text == "" then return "" end
+	return Locale.Lookup(text, ...)
+end
+
+local function CAI_ControlTooltip(control)
+	if control and control.GetToolTipString then
+		return control:GetToolTipString() or ""
+	end
+	return ""
+end
+
+local function CAI_GetInvalidReasonText(value)
+	if not value or not value.Invalid then return "" end
+	return CAI_Lookup(value.InvalidReason or "LOC_SETUP_ERROR_INVALID_OPTION")
+end
+
+local function CAI_AppendExplanation(baseText, extraText)
+	local base = baseText or ""
+	local extra = extraText or ""
+	if extra == "" then return base end
+	if base == "" then return extra end
+	return base .. "[NEWLINE]" .. extra
+end
+
+local function CAI_GetParameterControl(paramId)
+	return m_paramControls[paramId]
+end
+
+local function CAI_GetResolvedControl(control)
+	if control and control.Control then
+		return control
+	end
+	if control and control[1] and control[1].Control then
+		return control[1]
+	end
+	if control and control[2] and control[2].Control then
+		return control[2]
+	end
+	return control
+end
+
+local function CAI_GetControlRoot(control)
+	local resolved = CAI_GetResolvedControl(control)
+	local c = resolved and resolved.Control
+	if not c then return nil end
+	return c.CheckBox or c.StringRoot or c.Root or c.ButtonRoot or c.Button
+end
+
+local function CAI_IsControlHidden(control)
+	local root = CAI_GetControlRoot(control)
+	return root and root.IsHidden and root:IsHidden()
+end
+
+local function CAI_IsControlDisabled(control)
+	local resolved = CAI_GetResolvedControl(control)
+	local c = resolved and resolved.Control
+	if not c then return false end
+	local candidates = {
+		c.CheckBox,
+		c.Button,
+		c.PullDown,
+		c.OptionSlider,
+		c.StringRoot,
+		c.Root,
+		c.StringEdit,
+	}
+	for _, candidate in ipairs(candidates) do
+		if candidate and candidate.IsDisabled and candidate:IsDisabled() then
+			return true
+		end
+	end
+	return false
 end
 
 -- ---------------------------------------------------------------------------
@@ -1912,9 +1989,10 @@ local function BuildParamDropdownOptions(parameterId)
 	local options = {}
 	local selectedIdx = 0
 	for i, v in ipairs(param.Values) do
+		local invalidReason = CAI_GetInvalidReasonText(v)
 		table.insert(options, {
-			label = v.Name or "",
-			tooltip = v.Description or Locale.Lookup(v.RawDescription or ""),
+			label = CAI_AppendExplanation(v.Name or "", invalidReason),
+			tooltip = CAI_AppendExplanation(v.Description or Locale.Lookup(v.RawDescription or ""), invalidReason),
 			value = v,
 		})
 		if selectedIdx == 0 and param.Value
@@ -1939,12 +2017,14 @@ local function BuildLeaderDropdownOptions(playerId)
 	local options = {}
 	local selectedIdx = 0
 	for i, v in ipairs(param.Values) do
-		local tooltip = BuildLeaderTooltip(v.Domain, v.Value)
+		local invalidReason = CAI_GetInvalidReasonText(v)
+		local tooltip = CAI_AppendExplanation(BuildLeaderTooltip(v.Domain, v.Value), invalidReason)
 		local label = v.Name or ""
 		local info = v.Domain and v.Value and GetPlayerInfo(v.Domain, v.Value)
 		if info and info.CivilizationName then
 			label = label .. ", " .. Locale.Lookup(info.CivilizationName)
 		end
+		label = CAI_AppendExplanation(label, invalidReason)
 		table.insert(options, {
 			label = label,
 			tooltip = tooltip,
@@ -1968,7 +2048,10 @@ local function MakeParamDropdown(parameterId, locKey, getContainer)
 			local p = g_GameParameters and g_GameParameters.Parameters
 				and g_GameParameters.Parameters[parameterId]
 			if p and p.Value then
-				return p.Value.Description or Locale.Lookup(p.Value.RawDescription)
+				return CAI_AppendExplanation(
+					p.Value.Description or Locale.Lookup(p.Value.RawDescription),
+					CAI_GetInvalidReasonText(p.Value)
+				)
 			end
 			return ""
 		end,
@@ -1976,9 +2059,24 @@ local function MakeParamDropdown(parameterId, locKey, getContainer)
 	if getContainer then
 		dd:SetHiddenPredicate(function()
 			local ct = getContainer()
-			return ct and ct:IsHidden()
+			local p = g_GameParameters and g_GameParameters.Parameters
+				and g_GameParameters.Parameters[parameterId]
+			return (ct and ct:IsHidden()) or not (p and p.Value)
 		end)
 	end
+	dd:SetDisabledPredicate(function()
+		local control = nil
+		if parameterId == "Ruleset" then
+			control = Controls.CreateGame_GameRuleset
+		elseif parameterId == "GameDifficulty" then
+			control = Controls.CreateGame_GameDifficulty
+		elseif parameterId == "GameSpeeds" then
+			control = Controls.CreateGame_SpeedPulldown
+		elseif parameterId == "MapSize" then
+			control = Controls.CreateGame_MapSize
+		end
+		return control and control.IsDisabled and control:IsDisabled()
+	end)
 
 	local options, idx = BuildParamDropdownOptions(parameterId)
 	dd:SetOptions(options)
@@ -2006,7 +2104,10 @@ local function LeaderTooltipForPlayer(playerId)
 	if not params then return "" end
 	local lp = params.Parameters and params.Parameters["PlayerLeader"]
 	if not lp or not lp.Value then return "" end
-	return BuildLeaderTooltip(lp.Value.Domain, lp.Value.Value)
+	return CAI_AppendExplanation(
+		BuildLeaderTooltip(lp.Value.Domain, lp.Value.Value),
+		CAI_GetInvalidReasonText(lp.Value)
+	)
 end
 
 local function MakeLeaderDropdown()
@@ -2014,7 +2115,15 @@ local function MakeLeaderDropdown()
 		Label = function() return Locale.Lookup("LOC_SETUP_CIVILIZATION") end,
 		Tooltip = function() return LeaderTooltipForPlayer(m_singlePlayerID) end,
 	})
-	dd:SetHiddenPredicate(function() return Controls.CreateGame_LocalPlayerContainer:IsHidden() end)
+	dd:SetHiddenPredicate(function()
+		return Controls.CreateGame_LocalPlayerContainer:IsHidden()
+			or (Controls.Basic_LocalPlayerPulldown and Controls.Basic_LocalPlayerPulldown.IsHidden
+				and Controls.Basic_LocalPlayerPulldown:IsHidden())
+	end)
+	dd:SetDisabledPredicate(function()
+		local ctrl = Controls.Basic_LocalPlayerPulldown
+		return ctrl and ctrl.IsDisabled and ctrl:IsDisabled()
+	end)
 	dd:SetFocusSound(HOVER_SOUND)
 
 	local options, idx = BuildLeaderDropdownOptions(m_singlePlayerID)
@@ -2055,12 +2164,45 @@ local function RefreshBasicDropdowns()
 	end
 end
 
+local function RefreshBasicParamWidgets()
+	for paramId, widget in pairs(m_basicParamWidgets) do
+		local parameter = g_GameParameters and g_GameParameters.Parameters
+			and g_GameParameters.Parameters[paramId]
+		if parameter and widget then
+			if widget.Type == "Checkbox" then
+				widget:SetChecked(parameter.Value and true or false, true)
+			elseif widget.Type == "Slider" then
+				local value = parameter.Value
+				if value ~= nil then
+					widget:SetValue(value, true)
+				end
+			elseif widget.Type == "EditBox" then
+				if not widget._active then
+					local value = parameter.Value
+					local text = value ~= nil and tostring(value) or ""
+					widget:SetText(text, true)
+				end
+			elseif widget.Type == "Dropdown" and paramId ~= "PlayerLeader" then
+				local options, idx = BuildParamDropdownOptions(paramId)
+				widget:SetOptions(options)
+				if idx > 0 then
+					widget:SetSelectedIndex(idx, true)
+				end
+			end
+		end
+	end
+end
+
 -- ---------------------------------------------------------------------------
 -- Action buttons: use DoLeftClick() on vanilla controls
 -- ---------------------------------------------------------------------------
 local function MakeActionButton(label, ctrl, isHiddenFn)
 	local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_Btn"), "Button", {
 		Label = function() return ctrl:GetText() end,
+		Tooltip = function() return CAI_ControlTooltip(ctrl) end,
+		DisabledPredicate = function()
+			return ctrl and ctrl.IsDisabled and ctrl:IsDisabled()
+		end,
 	})
 	w:SetFocusSound(HOVER_SOUND)
 	if isHiddenFn then
@@ -2068,6 +2210,76 @@ local function MakeActionButton(label, ctrl, isHiddenFn)
 	end
 	w:On("activate", function() ctrl:DoLeftClick() end)
 	return w
+end
+
+local function RemoveConflictDialog()
+	if CAI_ConflictDialog then
+		mgr:RemoveFromStack(CAI_ConflictDialog:GetId())
+		CAI_ConflictDialog = nil
+	end
+end
+
+local function GetConflictPlayerOrdinal(playerId)
+	local player_ids = GameConfiguration.GetParticipatingPlayerIDs()
+	for i, pid in ipairs(player_ids) do
+		if pid == playerId then
+			return i
+		end
+	end
+	return nil
+end
+
+local function GetConflictPlayerLabel(playerId)
+	local ordinal = GetConflictPlayerOrdinal(playerId)
+	if ordinal ~= nil then
+		return Locale.Lookup("LOC_CAI_PLAYER") .. " " .. tostring(ordinal)
+	end
+	return Locale.Lookup("LOC_CAI_PLAYER")
+end
+
+local function GetConflictDialogText()
+	local lines = { Locale.Lookup("LOC_SETUP_PLAYER_PARAMETER_ERROR_POPUP") }
+	local player_ids = GameConfiguration.GetParticipatingPlayerIDs()
+	for _, player_id in ipairs(player_ids) do
+		local err = GetPlayerParameterError(player_id)
+		if err then
+			local reason = CAI_Lookup(err.Reason or err.InvalidReason or err.Error)
+			if reason ~= "" then
+				table.insert(lines, GetConflictPlayerLabel(player_id) .. ": " .. reason)
+			end
+		end
+	end
+	return table.concat(lines, "[NEWLINE][NEWLINE]")
+end
+
+local function MakeConflictDialog()
+	if not CAI_Panel or not Controls.ConflictPopup or Controls.ConflictPopup:IsHidden() or CAI_ConflictDialog then
+		return
+	end
+
+	local bodyText = GetConflictDialogText()
+	local msg = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_ConflictMsg"), "StaticText", {
+		Label = function() return bodyText end,
+	})
+	local confirm = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_ConflictConfirm"), "Button", {
+		Label = function() return Controls.ConflictConfirmButton:GetText() end,
+		Tooltip = function() return CAI_ControlTooltip(Controls.ConflictConfirmButton) end,
+	})
+	confirm:SetFocusSound(HOVER_SOUND)
+	confirm:On("activate", function()
+		Controls.ConflictConfirmButton:DoLeftClick()
+		RemoveConflictDialog()
+	end)
+
+	CAI_ConflictDialog = mgr.WidgetHelpers.MakeGeneralDialog(
+		function() return Locale.Lookup("LOC_SETUP_PLAYER_PARAMETER_ERROR") end,
+		{ confirm },
+		{ msg },
+		1
+	)
+	if CAI_ConflictDialog then
+		mgr:Push(CAI_ConflictDialog, { priority = PopupPriority.Current })
+	end
 end
 
 -- ---------------------------------------------------------------------------
@@ -2092,7 +2304,15 @@ local function BuildAdvPlayerSection()
 		Tooltip = function() return LeaderTooltipForPlayer(m_singlePlayerID) end,
 		FocusKey = "player_local_leader",
 	})
-	locLeaderDD:SetHiddenPredicate(function() return Controls.CreateGame_LocalPlayerContainer:IsHidden() end)
+	locLeaderDD:SetHiddenPredicate(function()
+		local ctrl = Controls.Advanced_LocalPlayerPulldown
+		return Controls.CreateGame_LocalPlayerContainer:IsHidden()
+			or (ctrl and ctrl.IsHidden and ctrl:IsHidden())
+	end)
+	locLeaderDD:SetDisabledPredicate(function()
+		local ctrl = Controls.Advanced_LocalPlayerPulldown
+		return ctrl and ctrl.IsDisabled and ctrl:IsDisabled()
+	end)
 	locLeaderDD:SetFocusSound(HOVER_SOUND)
 	local lOpts, lIdx = BuildLeaderDropdownOptions(m_singlePlayerID)
 	locLeaderDD:SetOptions(lOpts)
@@ -2155,7 +2375,11 @@ local function BuildAdvPlayerSection()
 	locColorDD:SetFocusSound(HOVER_SOUND)
 	locColorDD:SetHiddenPredicate(function()
 		local ctrl = Controls.Advanced_LocalColorPullDown
-		return ctrl and ctrl:IsDisabled()
+		return ctrl and ctrl.IsHidden and ctrl:IsHidden()
+	end)
+	locColorDD:SetDisabledPredicate(function()
+		local ctrl = Controls.Advanced_LocalColorPullDown
+		return ctrl and ctrl.IsDisabled and ctrl:IsDisabled()
 	end)
 	localItem:AddChild(locColorDD)
 
@@ -2276,6 +2500,9 @@ local function CreateAdvParamWidget(parameter, parentItem)
 				if invert then return Locale.Lookup("LOC_SELECTION_EVERYTHING") end
 				return ""
 			end,
+			HiddenPredicate = function() return CAI_IsControlHidden(CAI_GetParameterControl(paramId)) end,
+			DisabledPredicate = function() return CAI_IsControlDisabled(CAI_GetParameterControl(paramId)) end,
+			FocusKey = "param:" .. tostring(paramId),
 		})
 		widget:On("activate", function()
 			if paramId == "CityStates" then
@@ -2293,22 +2520,21 @@ local function CreateAdvParamWidget(parameter, parentItem)
 		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_AdvChk"), "Checkbox", {
 			Label = function() return parameter.Name end,
 			Tooltip = function() return parameter.Description or "" end,
-			ValueGetter = function()
-				local p = g_GameParameters and g_GameParameters.Parameters
-					and g_GameParameters.Parameters[paramId]
-				if p then
-					return p.Value and Locale.Lookup("LOC_OPTIONS_ENABLED")
-						or Locale.Lookup("LOC_OPTIONS_DISABLED")
-				end
-				return ""
-			end,
+			HiddenPredicate = function() return CAI_IsControlHidden(CAI_GetParameterControl(paramId)) end,
+			DisabledPredicate = function() return CAI_IsControlDisabled(CAI_GetParameterControl(paramId)) end,
+			FocusKey = "param:" .. tostring(paramId),
 		})
-		widget:On("value_changed", function()
-			local p = g_GameParameters and g_GameParameters.Parameters
-				and g_GameParameters.Parameters[paramId]
-			if p then
-				g_GameParameters:SetParameterValue(p, not p.Value)
-				Network.BroadcastGameConfig()
+		local liveControl = CAI_GetParameterControl(paramId)
+		local liveCheck = CAI_GetResolvedControl(liveControl).Control.CheckBox
+		local checked = parameter.Value
+		if liveCheck and liveCheck.IsSelected then
+			checked = liveCheck:IsSelected()
+		end
+		widget:SetChecked(checked and true or false, true)
+		widget:SetValueSetter(function(_, newValue)
+			local checkBox = CAI_GetResolvedControl(CAI_GetParameterControl(paramId)).Control.CheckBox
+			if checkBox:IsSelected() ~= newValue then
+				checkBox:DoLeftClick()
 			end
 		end)
 	elseif parameter.Values and parameter.Values.Type == "IntRange" then
@@ -2322,11 +2548,19 @@ local function CreateAdvParamWidget(parameter, parentItem)
 					and g_GameParameters.Parameters[paramId]
 				return p and tostring(p.Value) or ""
 			end,
+			HiddenPredicate = function()
+				local live = CAI_GetParameterControl(paramId)
+				local ctrl = live and live.Control
+				return CAI_IsControlHidden(live)
+					or (ctrl and ctrl.OptionSlider and ctrl.OptionSlider.IsHidden and ctrl.OptionSlider:IsHidden())
+			end,
+			DisabledPredicate = function() return CAI_IsControlDisabled(CAI_GetParameterControl(paramId)) end,
+			FocusKey = "param:" .. tostring(paramId),
 		})
 		widget:SetMin(minVal)
 		widget:SetMax(maxVal)
 		widget:SetValue(parameter.Value or minVal, true)
-		widget:On("value_changed", function(_, newVal)
+		widget:SetValueSetter(function(_, newVal)
 			local p = g_GameParameters and g_GameParameters.Parameters
 				and g_GameParameters.Parameters[paramId]
 			if p and p.Value ~= newVal then
@@ -2341,15 +2575,21 @@ local function CreateAdvParamWidget(parameter, parentItem)
 				local p = g_GameParameters and g_GameParameters.Parameters
 					and g_GameParameters.Parameters[paramId]
 				if p and p.Value then
-					return p.Value.Description or Locale.Lookup(p.Value.RawDescription) or ""
+					return CAI_AppendExplanation(
+						p.Value.Description or Locale.Lookup(p.Value.RawDescription) or "",
+						CAI_GetInvalidReasonText(p.Value)
+					)
 				end
 				return parameter.Description or ""
 			end,
+			HiddenPredicate = function() return CAI_IsControlHidden(CAI_GetParameterControl(paramId)) end,
+			DisabledPredicate = function() return CAI_IsControlDisabled(CAI_GetParameterControl(paramId)) end,
+			FocusKey = "param:" .. tostring(paramId),
 		})
 		local options, idx = BuildParamDropdownOptions(paramId)
 		dd:SetOptions(options)
 		if idx > 0 then dd:SetSelectedIndex(idx, true) end
-		dd:On("value_changed", function(_, val)
+		dd:SetValueSetter(function(_, val)
 			local p = g_GameParameters and g_GameParameters.Parameters
 				and g_GameParameters.Parameters[paramId]
 			if p then
@@ -2362,10 +2602,23 @@ local function CreateAdvParamWidget(parameter, parentItem)
 		local domain = parameter.Domain
 		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_AdvEdit"), "EditBox", {
 			Label = function() return parameter.Name end,
+			Tooltip = function() return parameter.Description or "" end,
+			HiddenPredicate = function() return CAI_IsControlHidden(CAI_GetParameterControl(paramId)) end,
+			DisabledPredicate = function() return CAI_IsControlDisabled(CAI_GetParameterControl(paramId)) end,
+			FocusKey = "param:" .. tostring(paramId),
+			HighlightOnEdit = true,
 		})
+		local liveControl = CAI_GetParameterControl(paramId)
+		local liveEdit = liveControl and liveControl.Control and liveControl.Control.StringEdit
 		local pInit = g_GameParameters and g_GameParameters.Parameters
 			and g_GameParameters.Parameters[paramId]
-		widget:SetText(pInit and pInit.Value and tostring(pInit.Value) or "", true)
+		if domain == "int" or domain == "uint" then
+			widget:SetEditMode(2)
+			widget:SetMaxCharacters(16)
+		else
+			widget:SetMaxCharacters(64)
+		end
+		widget:SetText(liveEdit and liveEdit.GetText and liveEdit:GetText() or (pInit and pInit.Value and tostring(pInit.Value) or ""), true)
 		widget:SetValueSetter(function(_, text)
 			local value = text
 			if domain == "int" then
@@ -2466,6 +2719,13 @@ local function BuildPanel()
 		Label = function() return Locale.Lookup("LOC_SETUP_MAP_TYPE") end,
 		ValueGetter = function() return Controls.MapSelectButton:GetText() or "" end,
 		Tooltip = function() return Controls.MapSelectButton:GetToolTipString() or "" end,
+		HiddenPredicate = function()
+			return Controls.CreateGame_MapTypeContainer:IsHidden()
+				or (Controls.MapSelectButton.IsHidden and Controls.MapSelectButton:IsHidden())
+		end,
+		DisabledPredicate = function()
+			return Controls.MapSelectButton.IsDisabled and Controls.MapSelectButton:IsDisabled()
+		end,
 	})
 	mapBtn:SetFocusSound(HOVER_SOUND)
 	mapBtn:On("activate", function() Controls.MapSelectButton:DoLeftClick() end)
@@ -2485,10 +2745,10 @@ local function BuildPanel()
 	m_advList:AddChild(m_advPlayerSub)
 
 	local sectionDefs = {
-		{ key = "Options",   loc = "LOC_CAI_ADVANCED_SETUP_OPTIONS" },
-		{ key = "GameModes", loc = "LOC_CAI_ADVANCED_SETUP_GAME_MODES" },
+		{ key = "Options",   loc = "LOC_MAP_OPTIONS" },
+		{ key = "GameModes", loc = "LOC_SETUP_GAME_MODES" },
 		{ key = "Victories", loc = "LOC_SETUP_VICTORY_CONDITIONS" },
-		{ key = "Advanced",  loc = "LOC_CAI_ADVANCED_SETUP_ADVANCED" },
+		{ key = "Advanced",  loc = "LOC_ADVANCED_OPTIONS" },
 	}
 	m_advSections = {}
 	for _, def in ipairs(sectionDefs) do
@@ -2550,15 +2810,6 @@ local function CreateBasicParamWidget(o, parameter, control)
 		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_BasicChk"), "Checkbox", {
 			Label = function() return parameter.Name end,
 			Tooltip = function() return parameter.Description or "" end,
-			ValueGetter = function()
-				local p = g_GameParameters and g_GameParameters.Parameters
-					and g_GameParameters.Parameters[paramId]
-				if p then
-					return p.Value and Locale.Lookup("LOC_OPTIONS_ENABLED")
-						or Locale.Lookup("LOC_OPTIONS_DISABLED")
-				end
-				return ""
-			end,
 			HiddenPredicate = function()
 				local ctrl = control.Control
 				if parameter.GroupId == "GameModes" then
@@ -2572,11 +2823,23 @@ local function CreateBasicParamWidget(o, parameter, control)
 				return ctrl and ctrl.CheckBox and ctrl.CheckBox:IsDisabled()
 			end,
 		})
-		widget:On("value_changed", function()
+		local liveCheck = control.Control and control.Control.CheckBox
+		local checked = parameter.Value
+		if liveCheck and liveCheck.IsSelected then
+			checked = liveCheck:IsSelected()
+		end
+		widget:SetChecked(checked and true or false, true)
+		widget:SetValueSetter(function(_, newValue)
+			local c = control.Control
+			local checkBox = c and c.CheckBox
+			if checkBox and checkBox.IsSelected and checkBox:IsSelected() ~= newValue then
+				checkBox:DoLeftClick()
+				return
+			end
 			local p = g_GameParameters and g_GameParameters.Parameters
 				and g_GameParameters.Parameters[paramId]
 			if p then
-				o:SetParameterValue(parameter, not p.Value)
+				o:SetParameterValue(parameter, newValue)
 				Network.BroadcastGameConfig()
 			end
 		end)
@@ -2592,13 +2855,15 @@ local function CreateBasicParamWidget(o, parameter, control)
 				return p and tostring(p.Value) or ""
 			end,
 			HiddenPredicate = function()
-				return control.Control and control.Control.Root and control.Control.Root:IsHidden()
+				local ctrl = control.Control
+				return (ctrl and ctrl.Root and ctrl.Root:IsHidden())
+					or (ctrl and ctrl.OptionSlider and ctrl.OptionSlider.IsHidden and ctrl.OptionSlider:IsHidden())
 			end,
 		})
 		widget:SetMin(minVal)
 		widget:SetMax(maxVal)
 		widget:SetValue(parameter.Value or minVal, true)
-		widget:On("value_changed", function(_, newVal)
+		widget:SetValueSetter(function(_, newVal)
 			local p = g_GameParameters and g_GameParameters.Parameters
 				and g_GameParameters.Parameters[paramId]
 			if p and p.Value ~= newVal then
@@ -2613,7 +2878,10 @@ local function CreateBasicParamWidget(o, parameter, control)
 				local p = g_GameParameters and g_GameParameters.Parameters
 					and g_GameParameters.Parameters[paramId]
 				if p and p.Value then
-					return p.Value.Description or Locale.Lookup(p.Value.RawDescription) or ""
+					return CAI_AppendExplanation(
+						p.Value.Description or Locale.Lookup(p.Value.RawDescription) or "",
+						CAI_GetInvalidReasonText(p.Value)
+					)
 				end
 				return parameter.Description or ""
 			end,
@@ -2628,7 +2896,7 @@ local function CreateBasicParamWidget(o, parameter, control)
 		local options, idx = BuildParamDropdownOptions(paramId)
 		widget:SetOptions(options)
 		if idx > 0 then widget:SetSelectedIndex(idx, true) end
-		widget:On("value_changed", function(_, val)
+		widget:SetValueSetter(function(_, val)
 			local p = g_GameParameters and g_GameParameters.Parameters
 				and g_GameParameters.Parameters[paramId]
 			if p then
@@ -2641,12 +2909,24 @@ local function CreateBasicParamWidget(o, parameter, control)
 		local domain = parameter.Domain
 		widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_BasicEdit"), "EditBox", {
 			Label = function() return parameter.Name end,
+			Tooltip = function() return parameter.Description or "" end,
 			HiddenPredicate = function()
 				return control.Control and control.Control.Root and control.Control.Root:IsHidden()
 			end,
+			DisabledPredicate = function()
+				local ctrl = control.Control
+				return ctrl and ctrl.StringEdit and ctrl.StringEdit.IsDisabled and ctrl.StringEdit:IsDisabled()
+			end,
+			HighlightOnEdit = true,
 		})
 		local ctrl = control.Control
 		local initial = ctrl and ctrl.StringEdit and ctrl.StringEdit:GetText() or ""
+		if domain == "int" or domain == "uint" then
+			widget:SetEditMode(2)
+			widget:SetMaxCharacters(16)
+		else
+			widget:SetMaxCharacters(64)
+		end
 		widget:SetText(initial, true)
 		widget:SetValueSetter(function(_, text)
 			local c = control.Control
@@ -2725,16 +3005,37 @@ end)
 GameParameters_UI_AfterRefresh = WrapFunc(GameParameters_UI_AfterRefresh, function(orig, o)
 	orig(o)
 	RefreshBasicDropdowns()
+	RefreshBasicParamWidgets()
 	SortBasicList()
 	if m_AdvancedMode and m_advList then
 		PopulateAdvancedList()
 	end
 end)
 
+UI_PostRefreshParameters = WrapFunc(UI_PostRefreshParameters, function(orig)
+	local wasHidden = Controls.ConflictPopup:IsHidden()
+	orig()
+	if wasHidden and not Controls.ConflictPopup:IsHidden() then
+		MakeConflictDialog()
+	elseif not wasHidden and Controls.ConflictPopup:IsHidden() then
+		RemoveConflictDialog()
+	end
+end)
+
+GameParameters_UI_CreateParameter = WrapFunc(GameParameters_UI_CreateParameter, function(orig, o, parameter)
+	orig(o, parameter)
+	local control = o and o.Controls and parameter and parameter.ParameterId and o.Controls[parameter.ParameterId]
+	if parameter and parameter.ParameterId then
+		m_paramControls[parameter.ParameterId] = control
+	end
+	return control
+end)
+
 -- ---------------------------------------------------------------------------
 -- Close: pop panel from stack
 -- ---------------------------------------------------------------------------
 local function ClosePanel()
+	RemoveConflictDialog()
 	if CAI_Panel then
 		mgr:RemoveFromStack(CAI_Panel:GetId())
 	end
@@ -2744,6 +3045,7 @@ end
 -- Lifecycle hooks
 -- ---------------------------------------------------------------------------
 OnShow = WrapFunc(OnShow, function(orig)
+	RemoveConflictDialog()
 	if CAI_Panel then
 		mgr:RemoveFromStack(CAI_Panel:GetId())
 		CAI_Panel:Destroy()
@@ -2757,6 +3059,7 @@ OnShow = WrapFunc(OnShow, function(orig)
 	m_basicDropdowns = {}
 	m_basicParamWidgets = {}
 	m_advParamWidgets = {}
+	m_paramControls = {}
 	m_advSections = {}
 	m_advList = nil
 	m_advPlayerSub = nil
@@ -2783,6 +3086,9 @@ OnShow = WrapFunc(OnShow, function(orig)
 		return true
 	end, true)
 	mgr:Push(CAI_Panel, { priority = PopupPriority.Current })
+	if not Controls.ConflictPopup:IsHidden() then
+		MakeConflictDialog()
+	end
 end)
 
 OnBackButton = WrapFunc(OnBackButton, function(orig)
@@ -2799,11 +3105,20 @@ OnBackButton = WrapFunc(OnBackButton, function(orig)
 end)
 
 OnHide = WrapFunc(OnHide, function(orig)
+	RemoveConflictDialog()
 	if m_intentionalClose then
 		ClosePanel()
 		m_intentionalClose = false
 	end
 	orig()
+end)
+
+Initialize = WrapFunc(Initialize, function(orig)
+	orig()
+	Controls.ConflictConfirmButton:RegisterCallback(Mouse.eLClick, function()
+		Controls.ConflictPopup:SetHide(true)
+		RemoveConflictDialog()
+	end)
 end)
 ContextPtr:SetShowHandler( OnShow );
 	ContextPtr:SetHideHandler( OnHide );

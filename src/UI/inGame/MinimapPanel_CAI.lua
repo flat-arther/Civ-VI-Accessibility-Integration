@@ -255,14 +255,13 @@ local function CloseVanillaMapSearch()
     end
 end
 
+Events.InputActionTriggered.Remove(OnInputActionTriggered)
 OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     if m_caiOpenMapSearchId ~= nil and actionId == m_caiOpenMapSearchId then
         orig(Input.GetActionId("OpenMapSearch"))
         return
     end
-    orig(actionId)
 end)
-Events.InputActionTriggered.Remove(OnInputActionTriggered)
 Events.InputActionTriggered.Add(OnInputActionTriggered)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)

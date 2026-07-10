@@ -50,3 +50,4 @@
 [x] Rework the diplomacy screen
 
 [x] Recommendation types in tech and civic trees should report the correct advisor
+[ ] redo the scanner categories for the tourism and power lenses. They are shit

@@ -6,6 +6,7 @@ local mgr                    = ExposedMembers.CAI_UIManager
 local PANEL_ID               = "CAITimeline_Panel"
 local TREE_ID                = "CAITimeline_Tree"
 local HOVER_SOUND            = "Main_Menu_Mouse_Over"
+local m_CurrentMoment        = -1
 
 local MIN_INTEREST_LEVEL_CAI = 1
 
@@ -195,9 +196,8 @@ local function BuildTree()
                 for _, md in ipairs(majorMoments) do
                     local capturedMD = md
                     local leaf = MakeLeaf("timeline:moment:" .. md.ID, function()
-                        return FormatMomentLabel(capturedMD)
+                        return FormatMomentLabel(capturedMD) .. "[NEWLINE]" .. FormatMomentTooltip(capturedMD)
                     end)
-                    leaf:SetTooltip(function() return FormatMomentTooltip(capturedMD) end)
                     majorNode:AddChild(leaf)
                 end
                 eraNode:AddChild(majorNode)
@@ -211,9 +211,8 @@ local function BuildTree()
                 for _, md in ipairs(minorMoments) do
                     local capturedMD = md
                     local leaf = MakeLeaf("timeline:moment:" .. md.ID, function()
-                        return FormatMomentLabel(capturedMD)
+                        return FormatMomentLabel(capturedMD) .. "[NEWLINE]" .. FormatMomentTooltip(capturedMD)
                     end)
-                    leaf:SetTooltip(function() return FormatMomentTooltip(capturedMD) end)
                     minorNode:AddChild(leaf)
                 end
                 eraNode:AddChild(minorNode)
@@ -233,19 +232,27 @@ local function PushPanel()
     if not m_panel then return end
     BuildTree()
     if not mgr:GetWidgetById(m_panel:GetId()) then
-        mgr:Push(m_panel, GetPopupPriority())
+        Speak(m_CurrentMoment)
+        mgr:Push(m_panel, { priority = GetPopupPriority(), focus = "timeline:moment:" .. m_CurrentMoment })
     end
 end
 
-local function OnShow()
+ShowNewTimelineMoment = WrapFunc(ShowNewTimelineMoment, function(orig, popupData)
+    m_CurrentMoment = popupData.momentID;
+    orig(popupData)
+end)
+
+DisplayTimeline = WrapFunc(DisplayTimeline, function(orig, ...)
+    orig(...)
     if mgr then
         PushPanel()
     end
-end
+end)
 
 Close = WrapFunc(Close, function(orig)
     PopPanel()
     orig()
+    m_CurrentMoment = -1
 end)
 
 local function HandleInput(input)

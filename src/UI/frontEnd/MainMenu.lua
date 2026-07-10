@@ -1952,8 +1952,7 @@ local function BuildMainPanelOnce()
     -- m_MainPanel:AddChild(m_CarouselList)
 
     m_MotDWidget = mgr:CreateWidget(MOTD_ID, "StaticText", {
-        Label = function() return Locale.Lookup("LOC_MESSAGE_OF_THE_DAY_HEADING") end,
-        ValueGetter = function() return Controls.MotDText:GetText() or "" end,
+        Label = function() return Locale.Lookup("LOC_MESSAGE_OF_THE_DAY_HEADING").."[NEWLINE]"..Controls.MotDText:GetText() or "" end,
         HiddenPredicate = function() return Controls.MotDContainter:IsHidden() end,
     })
     m_MainPanel:AddChild(m_MotDWidget)
@@ -2103,7 +2102,7 @@ BuildSubMenu = WrapFunc(BuildSubMenu, function(orig, menuOptions)
                     group:On("focus_leave", function() ClearSubmenuHighlight(control) end)
 
                     local playBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_PlayBtn"), "MenuItem", {
-                        Label = function() return Locale.Lookup("LOC_CAI_PLAY_NOW") end,
+                        Label = function() return Locale.Lookup("LOC_PLAY_CIVILIZATION_6") end,
                         Tooltip = function() return control.Top:GetToolTipString() end,
                         DisabledPredicate = function() return control.OptionButton:IsDisabled() end,
                     })
@@ -2155,9 +2154,7 @@ UpdateMotD = WrapFunc(UpdateMotD, function(orig)
     local text = Controls.MotDText:GetText() or ""
     if text == m_LastMotDText then return end
     m_LastMotDText = text
-    if mgr:GetFocusedWidget() == m_MotDWidget then
-        m_MotDWidget:Announce({ "value" })
-    end
+        m_MotDWidget:Announce({ "label" })
 end)
 
 -- Cloud / MP labels mutate on incoming notifications. If the matching row is

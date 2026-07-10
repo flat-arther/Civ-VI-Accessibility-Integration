@@ -1324,7 +1324,7 @@
       <Text>Manage city</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_MANAGE_CITY_TOOLTIP" Language="en_US">
-      <Text>Toggles citizen management and tile purchase together</Text>
+      <Text>Toggles the worker management and tile purchace interface for this city</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_PURCHASE_TILE" Language="en_US">
       <Text>Purchase tile</Text>
@@ -1498,7 +1498,7 @@
       <Text>Read city banner identity and status</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_BANNER_READ_1_TOOLTIP" Language="en_US">
-      <Text>Reads visible city or district banner identity, health, defense, and status information</Text>
+      <Text>Reads visible banner identity, such as city and district health</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_BANNER_READ_2" Language="en_US">
       <Text>Read city banner growth and influence</Text>
@@ -1510,13 +1510,13 @@
       <Text>Read city banner religion</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_BANNER_READ_3_TOOLTIP" Language="en_US">
-      <Text>Reads visible city banner religion information, including lens details when open</Text>
+      <Text>Reads visible city banner religion information</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_BANNER_READ_4" Language="en_US">
       <Text>Read city banner diplomacy</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_BANNER_READ_4_TOOLTIP" Language="en_US">
-      <Text>Reads visible city banner diplomacy information such as owner, quests, and trading post state</Text>
+      <Text>Reads visible city banner diplomacy information such as owner, city-state quests, and trading post state</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_BANNER_READ_5" Language="en_US">
       <Text>Read city banner loyalty</Text>
@@ -2264,7 +2264,7 @@
       <Text>Selects the city and enters nuclear strike targeting mode for {2_Text} from {1_Name}</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_TOGGLE_OVERVIEW_TOOLTIP" Language="en_US">
-      <Text>Opens or closes the city overview panel</Text>
+      <Text>View details for this city, including growth, buildings, and religion</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_OPEN_BUILDINGS_TOOLTIP" Language="en_US">
       <Text>Opens the buildings breakdown tab</Text>
@@ -2297,7 +2297,7 @@
       <Text>Change citizen yield focus</Text>
     </Row>
     <Row Tag="LOC_CAI_CITY_CHANGE_CITIZEN_YIELD_FOCUS_TOOLTIP" Language="en_US">
-      <Text>Opens the citizen yield focus controls</Text>
+      <Text>Manage worker yield focus for this city</Text>
     </Row>
     <Row Tag="LOC_CAI_SELECTION_ACTIONS_FOR" Language="en_US">
       <Text>Actions for {1_Name}</Text>
@@ -2731,16 +2731,16 @@
       <Text>Reads the units on the current tile</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER" Language="en_US">
-      <Text>Read tile yields</Text>
+      <Text>Read tile economic information</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER_TOOLTIP" Language="en_US">
-      <Text>Reads the current tile yields, river information, and owner</Text>
+      <Text>Reads the current tile yields, workers, fresh water status, and owner</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_READ_STATS" Language="en_US">
       <Text>Read tile stats</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_READ_STATS_TOOLTIP" Language="en_US">
-      <Text>Reads movement cost, defense modifier, and appeal for the current tile</Text>
+      <Text>Reads contamination status, movement cost, defense modifier, and appeal for the current tile</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_READ_RELATIVE_COORDS" Language="en_US">
       <Text>Read relative coordinates</Text>
@@ -2865,7 +2865,7 @@
       <Text>{1_Num} {2_Direction}</Text>
     </Row>
     <Row Tag="LOC_CAI_INTERFACE_INFO" Language="en_US">
-      <Text>Interface info</Text>
+      <Text>Interface information</Text>
     </Row>
     <Row Tag="LOC_CAI_INTERFACE_INFO_TOOLTIP" Language="en_US">
       <Text>Reads information for the current interface target</Text>
@@ -3429,7 +3429,7 @@
       <Text>{1_Num} active</Text>
     </Row>
     <Row Tag="LOC_CAI_CITYSTATES_INFO" Language="en_US">
-      <Text>City-States Info</Text>
+      <Text>City-States Information</Text>
     </Row>
     <Row Tag="LOC_CAI_CITYSTATES_AMBASSADOR" Language="en_US">
       <Text>Ambassador</Text>
@@ -4964,7 +4964,7 @@
       <Text>Queue research</Text>
     </Row>
     <Row Tag="LOC_CAI_KB_READ_LEADER_INFO" Language="en_US">
-      <Text>Read leader info</Text>
+      <Text>Read leader information</Text>
     </Row>
     <Row Tag="LOC_CAI_KB_REMOVE_DEAL_ITEM" Language="en_US">
       <Text>Remove deal item</Text>

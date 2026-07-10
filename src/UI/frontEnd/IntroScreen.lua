@@ -142,14 +142,16 @@ local function BuildEulaPanel()
 	})
 end
 
-
+local m_LastShownTimer
 OnShow = WrapFunc(OnShow, function(orig)
+	m_LastShownTimer = Automation.GetTime()
 	orig()
 	BuildEulaPanel()
 	mgr:Push(m_eulaPanel)
 end)
 
 function OnHandleInput(pInputStruct)
+	if Automation.GetTime() - m_LastShownTimer < 0.25 then return true end
 	if mgr then
 		return mgr:HandleInput(pInputStruct)
 	end

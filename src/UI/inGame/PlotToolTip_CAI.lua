@@ -1514,7 +1514,7 @@ local function InitializePlotInfoActionRequestBuilders()
         end,
         [Input.GetActionId("PlotReadStats")] = function(plot, data)
             return {
-                keys = { "movement", "defense", "appeal", "fallout" },
+                keys = { "fallout", "movement", "defense", "appeal" },
                 emptyLoc = "LOC_CAI_PLOT_NO_PHYSICAL_INFO",
             }
         end,

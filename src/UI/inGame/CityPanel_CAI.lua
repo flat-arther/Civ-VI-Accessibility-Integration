@@ -701,13 +701,6 @@ function GetCityCategoryActionIds()
 
     local excluded = {
         [Input.GetActionId("SelectionActions")] = true,
-        [Input.GetActionId("CityOpenBuildings")] = true,
-        [Input.GetActionId("CityOpenLoyalty")] = true,
-        [Input.GetActionId("CityOpenPower")] = true,
-        [Input.GetActionId("CityOpenReligion")] = true,
-        [Input.GetActionId("CityOpenAmenities")] = true,
-        [Input.GetActionId("CityOpenHousing")] = true,
-        [Input.GetActionId("CityOpenCitizens")] = true,
     }
 
     CityActionCategoryIds = {}
@@ -723,6 +716,7 @@ end
 function GetOrderedCityActionIds()
     local ordered = {
         Input.GetActionId("CityChangeProduction"),
+        Input.GetActionId("CityManageCity"),
         Input.GetActionId("CityPurchaseWithGold"),
         Input.GetActionId("CityPurchaseWithFaith"),
         Input.GetActionId("CityToggleOverview"),
@@ -731,10 +725,6 @@ function GetOrderedCityActionIds()
 
     local seen = {}
     local results = {}
-    local excluded = {
-        [Input.GetActionId("CityManageCitizens")] = true,
-        [Input.GetActionId("CityPurchaseTile")] = true,
-    }
 
     for _, actionId in ipairs(ordered) do
         if actionId ~= nil and CityActionMap[actionId] ~= nil and not seen[actionId] then
@@ -744,7 +734,7 @@ function GetOrderedCityActionIds()
     end
 
     for _, actionId in ipairs(GetCityCategoryActionIds()) do
-        if actionId ~= nil and CityActionMap[actionId] ~= nil and not seen[actionId] and not excluded[actionId] then
+        if actionId ~= nil and CityActionMap[actionId] ~= nil and not seen[actionId] then
             seen[actionId] = true
             table.insert(results, actionId)
         end
@@ -1114,13 +1104,6 @@ function BuildCityActionList()
         end
     end
 
-    if CanToggleCombinedCityManagement() then
-        list:AddChild(MakeCityActionMenuItem("CAICityPanelManageCityItem",
-            function() return Locale.Lookup("LOC_CAI_CITY_MANAGE_CITY") end,
-            function() return Locale.Lookup("LOC_CAI_CITY_MANAGE_CITY_TOOLTIP") end,
-            ToggleCombinedCityManagement))
-    end
-
     return list
 end
 
@@ -1212,6 +1195,19 @@ local function GetSelectedYieldStateIndex(yieldType)
     return 1
 end
 
+local function CreateCitizenYieldFocusDropdown(yieldType, yieldName)
+    local dd = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityYieldFocusDropdown"), "Dropdown", {
+        Label = function() return yieldName end,
+    })
+    dd:SetFocusSound("Main_Menu_Mouse_Over")
+    dd:SetOptions(GetYieldFocusOptions())
+    dd:SetSelectedIndex(GetSelectedYieldStateIndex(yieldType), true)
+    dd:SetValueSetter(function(_, targetState)
+        CAI_SetCitizenFocusTo(yieldType, targetState)
+    end)
+    return dd
+end
+
 function OpenCitizenYieldFocusList()
     if mgr == nil or UI.GetHeadSelectedCity() == nil or ContextPtr:IsHidden() then return end
 
@@ -1237,21 +1233,7 @@ function OpenCitizenYieldFocusList()
         local yieldInfo = GameInfo.Yields[yieldType]
         if yieldInfo ~= nil then
             local yieldName = Locale.Lookup(yieldInfo.Name)
-            local dd = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityYieldFocusDropdown"), "Dropdown", {
-                Label = function() return yieldName end,
-            })
-            dd:SetFocusSound("Main_Menu_Mouse_Over")
-            dd:SetOptions(GetYieldFocusOptions())
-            dd:SetSelectedIndex(GetSelectedYieldStateIndex(yieldType), true)
-            dd:On("focus_enter", function(w)
-                if w:IsFocused() then
-                    dd:SetSelectedIndex(GetSelectedYieldStateIndex(yieldType), true)
-                end
-            end)
-            dd:On("value_changed", function(_, v)
-                CAI_SetCitizenFocusTo(yieldType, v)
-            end)
-            outerList:AddChild(dd)
+            outerList:AddChild(CreateCitizenYieldFocusDropdown(yieldType, yieldName))
         end
     end
 
@@ -1276,11 +1258,7 @@ function InitializeCityActionMap()
                 return IsCityPanelActionAvailable(Controls.ToggleOverviewPanel)
             end
         ),
-        [Input.GetActionId("CityPurchaseTile")] = BuildCityActionData(
-            ToggleCombinedCityManagement,
-            CanToggleCombinedCityManagement
-        ),
-        [Input.GetActionId("CityManageCitizens")] = BuildCityActionData(
+        [Input.GetActionId("CityManageCity")] = BuildCityActionData(
             ToggleCombinedCityManagement,
             CanToggleCombinedCityManagement
         ),

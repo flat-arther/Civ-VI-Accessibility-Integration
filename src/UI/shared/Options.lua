@@ -2269,8 +2269,13 @@ end
 
 local function RebuildKeyBindingsTree()
     if not keysTree then return end
-    local capture = mgr:CaptureFocusKey(keysTree)
-    local prepareKey = bindingActionId and ("act:" .. tostring(bindingActionId)) or nil
+    local targetKey
+    if bindingActionId then
+        targetKey = "act:" .. tostring(bindingActionId)
+    else
+        local capture = mgr:CaptureFocusKey(keysTree)
+        targetKey = capture and capture.key or nil
+    end
     bindingActionId = nil
     keysTree:ClearChildren()
 
@@ -2337,11 +2342,7 @@ local function RebuildKeyBindingsTree()
         catNode:AddChild(actionNode)
     end
 
-    if prepareKey then
-        mgr:PrepareFocus(keysTree, prepareKey)
-    else
-        mgr:RestoreFocus(keysTree, capture)
-    end
+    mgr:PrepareFocus(keysTree, targetKey)
 end
 
 -- ---------------------------------------------------------------------------
@@ -2410,8 +2411,9 @@ local function W_Checkbox(ctrl)
     w:SetFocusSound("Main_Menu_Mouse_Over")
     w:SetChecked(ctrl:IsSelected(), true)
     w:SetValueSetter(function(_, checked)
-        ctrl:SetSelected(checked)
-        if data.handler then data.handler(checked) end
+        if ctrl:IsSelected() ~= checked then
+            ctrl:DoLeftClick()
+        end
     end)
     return w
 end
@@ -2471,11 +2473,17 @@ local function W_VolSlider(labelText, sliderCtrl, audioGroup, audioKey, soundKey
         HiddenPredicate   = function() return sliderCtrl:IsHidden() end,
     })
     w:SetFocusSound("Main_Menu_Mouse_Over")
-    w:SetMin(0); w:SetMax(100); w:SetStepSize(1); w:SetPageStep(10)
-    w:SetValueGetter(function() return tostring(math.floor((sliderCtrl:GetValue() or 0) * 100)) .. "%" end)
-    w:SetValue(math.floor((sliderCtrl:GetValue() or 0) * 100), true)
-    w:SetValueSetter(function(_, pct)
-        local v = math.max(0.0, math.min(pct / 100.0, 1.0))
+    -- Vanilla audio sliders are normalized continuous controls in the native
+    -- UI (`SetValue(value / 100.0)` / callback `value * 100.0`), so keep the
+    -- CAI widget on the same 0..1 range instead of quantizing to integer
+    -- percent steps.
+    w:SetMin(0.0); w:SetMax(1.0); w:SetStepSize(0.01); w:SetPageStep(0.1)
+    w:SetValueGetter(function()
+        return tostring(math.floor(((sliderCtrl:GetValue() or 0) * 100) + 0.5)) .. "%"
+    end)
+    w:SetValue(sliderCtrl:GetValue() or 0, true)
+    w:SetValueSetter(function(_, v)
+        v = math.max(0.0, math.min(v, 1.0))
         sliderCtrl:SetValue(v)
         Options.SetAudioOption(audioGroup, audioKey, v * 100.0, 0)
         if soundKey then UI.PlaySound(soundKey) end
