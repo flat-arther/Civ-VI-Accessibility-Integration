@@ -128,6 +128,154 @@ EditModes = {}
 ---@field key? string
 ---@field path integer[]
 
+---@class CAIAudioPlayOptions
+---@field SkipIfPlaying? boolean Suppress playback when the sound handle is already playing.
+
+---@class CAIAudioDefinitionRow
+---@field SoundId string
+---@field RelativePath string
+---@field Tag string
+
+---@class CAIAudioRecord
+---@field SoundId string
+---@field RelativePath string
+---@field FullPath string
+---@field Tag string
+---@field Handle SoundHandle
+
+---@class CAIAudioQueueItem
+---@field SoundId string
+---@field DueTime number
+---@field Options? CAIAudioPlayOptions
+
+---@class CAIAudioManager
+---@field Owner any
+---@field ModRoot string|nil
+---@field IsInitialized boolean
+---@field SettingsHooked boolean
+---@field SettingsChangedListener fun(settingId:string)|nil
+---@field DefinitionsById table<string, CAIAudioDefinitionRow>
+---@field LoadedSoundsById table<string, CAIAudioRecord>
+---@field SoundsByTag table<string, CAIAudioRecord[]>
+---@field Queue CAIAudioQueueItem[]
+CAIAudioManager = {}
+
+---@param owner? any
+---@return CAIAudioManager
+function CAIAudioManager:New(owner) end
+
+---@return string|nil
+function CAIAudioManager:ResolveModRoot() end
+
+---@param relativePath string
+---@return string|nil
+function CAIAudioManager:BuildFullPath(relativePath) end
+
+---@return CAIAudioDefinitionRow[]
+function CAIAudioManager:GetDefinitionRows() end
+
+function CAIAudioManager:LoadDefinitions() end
+
+---@param record CAIAudioRecord|nil
+function CAIAudioManager:ApplyTagVolume(record) end
+
+function CAIAudioManager:UnloadSounds() end
+
+function CAIAudioManager:LoadSounds() end
+
+---@param soundId string
+---@return CAIAudioRecord|nil
+function CAIAudioManager:GetSound(soundId) end
+
+---@param tag string
+---@return CAIAudioRecord[]
+function CAIAudioManager:GetSoundsByTag(tag) end
+
+---@param prefix string
+---@param tag string
+---@return string|nil
+function CAIAudioManager:FindTagSettingId(prefix, tag) end
+
+---@param tag string
+---@return string|nil
+function CAIAudioManager:GetTagEnabledSettingId(tag) end
+
+---@param tag string
+---@return string|nil
+function CAIAudioManager:GetTagVolumeSettingId(tag) end
+
+---@param tag string
+---@return boolean
+function CAIAudioManager:IsTagEnabled(tag) end
+
+---@param tag string
+---@return number
+function CAIAudioManager:GetTagVolumeScalar(tag) end
+
+---@param soundId string
+function CAIAudioManager:ClearQueuedSound(soundId) end
+
+---@param tag string
+function CAIAudioManager:ClearQueuedTag(tag) end
+
+---@param record CAIAudioRecord|nil
+---@param options? CAIAudioPlayOptions
+---@return boolean
+function CAIAudioManager:ShouldSkipPlay(record, options) end
+
+---@param soundId string
+---@param options? CAIAudioPlayOptions
+---@return boolean played True when playback was started.
+function CAIAudioManager:Play(soundId, options) end
+
+---@param soundId string
+---@param delaySeconds? number
+---@param options? CAIAudioPlayOptions
+---@return boolean queued True when the sound was accepted into the queue.
+function CAIAudioManager:QueueSound(soundId, delaySeconds, options) end
+
+---@param soundId string
+---@return boolean
+function CAIAudioManager:StopSound(soundId) end
+
+---@param soundId string
+---@return boolean
+function CAIAudioManager:PauseSound(soundId) end
+
+---@param soundId string
+---@param volume number
+---@return boolean
+function CAIAudioManager:SetSoundVolume(soundId, volume) end
+
+---@param tag string
+---@param volume number
+---@return boolean
+function CAIAudioManager:SetTagVolume(tag, volume) end
+
+---@param tag string
+---@return boolean
+function CAIAudioManager:StopTag(tag) end
+
+---@param tag string
+---@return boolean
+function CAIAudioManager:PauseTag(tag) end
+
+function CAIAudioManager:ApplySettings() end
+
+---@param settingId string
+function CAIAudioManager:OnSettingsChanged(settingId) end
+
+function CAIAudioManager:HookSettingsChanged() end
+
+function CAIAudioManager:UnhookSettingsChanged() end
+
+function CAIAudioManager:Update() end
+
+---@param owner? any
+function CAIAudioManager:Initialize(owner) end
+
+function CAIAudioManager:Shutdown() end
+
 -- -----------------------------------------------------------------------------
 -- UIWidget — base class
 -- -----------------------------------------------------------------------------
@@ -145,6 +293,7 @@ EditModes = {}
 ---@field SpeechSettings table<string, boolean>
 ---@field FocusKey? string             stable identifier that survives rebuilds
 ---@field Transparent boolean          when true, skipped by BuildAnnouncement
+---@field UseDirectionalEntry? boolean Transparent containers use directional first/last entry unless this is false.
 ---@field DefaultIndex? integer
 UIWidget = {}
 
@@ -360,6 +509,8 @@ function ContainerWidget:GetSearchPanel() end
 function ContainerWidget:GetDefaultChild() end
 
 ---Direction-aware entry: 1=first visible, -1=last visible, nil/0=default.
+---Transparent containers only use directional first/last entry when
+---UseDirectionalEntry ~= false; otherwise they restore their default child.
 ---@param direction 1|-1|0|nil
 ---@return UIWidget|nil
 function ContainerWidget:GetEntryChild(direction) end
@@ -772,6 +923,7 @@ function SearchPanelWidget:SetResults(results) end
 ---@field Stack UIWidget[]
 ---@field CurrentPath UIWidget[]
 ---@field CAISettings table<string, any>
+---@field AudioManager CAIAudioManager|nil
 ---@field WidgetHelpers CAIWidgetHelpers Manager-bound quick widget helpers (dialog builders, etc.).
 UIScreenManager = {}
 
@@ -879,6 +1031,9 @@ function UIScreenManager:OpenSearch(container) end
 
 ---@return SearchPanelWidget|nil
 function UIScreenManager:GetSearchPanel() end
+
+---@return CAIAudioManager|nil
+function UIScreenManager:GetAudioManager() end
 
 -- -----------------------------------------------------------------------------
 -- Widget registry

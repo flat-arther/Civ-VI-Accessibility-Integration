@@ -402,6 +402,7 @@ function UIWidget:OnHandleInput(input)
         if b.Action and b.Key == key and b.MSG == msg
             and isShift == b.IsShift and isControl == b.IsControl and isAlt == b.IsAlt then
             if b.Action ~= nil then
+                if CAI then CAI.Silence() end
                 if not b.Common and self:IsDisabled() then return true end
                 local result = b.Action(self)
                 if result ~= nil then

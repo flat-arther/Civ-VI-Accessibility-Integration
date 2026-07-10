@@ -70,8 +70,14 @@ local function MakeTreeItem(props)
     return item
 end
 
+local function MakeStaticText(props)
+    local text = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityOV_"), "StaticText", props)
+    text:SetFocusSound(HOVER_SOUND)
+    return text
+end
+
 local function AddLeaf(parent, focusKey, labelFn, tooltipFn)
-    local item = MakeTreeItem({
+    local item = MakeStaticText({
         Label = labelFn,
         Tooltip = tooltipFn,
         FocusKey = focusKey,
@@ -82,8 +88,8 @@ end
 
 local function FlattenNewlines(text)
     if not text or text == "" then return "" end
-    text = text:gsub("%[NEWLINE%]", ", ")
-    text = text:gsub("\n", ", ")
+    text = text:gsub("%[NEWLINE%]", "[NEWLINE]")
+    text = text:gsub("\n", "[NEWLINE]")
     return text
 end
 
@@ -107,6 +113,16 @@ local function FormatNegativeSourceLine(locKey, value)
     return Locale.Lookup(locKey) .. ": " .. Locale.ToNumber(-value)
 end
 
+local function JoinLines(parts)
+    local filtered = {}
+    for _, part in ipairs(parts) do
+        if part and part ~= "" then
+            table.insert(filtered, part)
+        end
+    end
+    return table.concat(filtered, "[NEWLINE]")
+end
+
 -- ===========================================================================
 -- Citizens and Growth tab
 -- ===========================================================================
@@ -117,12 +133,12 @@ local function BuildCitizensTab(data, city)
             return Locale.Lookup("LOC_CAI_CITY_ACTION_CITIZENS_GROWTH")
         end,
         Tooltip = function()
-            return Locale.Lookup("LOC_CAI_CITY_OV_CITIZENS_OF_HOUSING", data.Population, math.floor(data.Housing))
-                .. ", " .. toPlusMinusString(data.FoodPerTurn) .. " " .. Locale.Lookup("LOC_HUD_CITY_FOOD_PER_TURN")
-                ..
-                ", " ..
-                Locale.ToNumber(data.GrowthThreshold, "#,###.#") ..
-                " " .. Locale.Lookup("LOC_HUD_CITY_FOOD_NEEDED_FOR_GROWTH")
+            return JoinLines({
+                Locale.Lookup("LOC_CAI_CITY_OV_CITIZENS_OF_HOUSING", data.Population, math.floor(data.Housing)),
+                toPlusMinusString(data.FoodPerTurn) .. " " .. Locale.Lookup("LOC_HUD_CITY_FOOD_PER_TURN"),
+                Locale.ToNumber(data.GrowthThreshold, "#,###.#") .. " " ..
+                    Locale.Lookup("LOC_HUD_CITY_FOOD_NEEDED_FOR_GROWTH"),
+            })
         end,
         FocusKey = "tab:citizens",
     })
@@ -147,9 +163,11 @@ local function BuildCitizensTab(data, city)
             else
                 growth = Locale.Lookup("LOC_HUD_CITY_TURNS_UNTIL_CITIZEN_LOST", math.abs(data.TurnsUntilGrowth))
             end
-            return Locale.Lookup("LOC_CAI_CITY_OV_FOOD_CONSUMPTION") .. ": " .. consumption
-                .. ", " .. Locale.Lookup("LOC_CAI_CITY_OV_NET_FOOD") .. ": " .. netFood
-                .. ", " .. growth
+            return JoinLines({
+                Locale.Lookup("LOC_CAI_CITY_OV_FOOD_CONSUMPTION") .. ": " .. consumption,
+                Locale.Lookup("LOC_CAI_CITY_OV_NET_FOOD") .. ": " .. netFood,
+                growth,
+            })
         end,
         FocusKey = "citizens:food",
     })
@@ -218,8 +236,10 @@ local function BuildCitizensTab(data, city)
     local amenitiesItem = MakeTreeItem({
         Label = function()
             local mood = Locale.Lookup(GameInfo.Happinesses[data.Happiness].Name)
-            return Locale.Lookup("LOC_HUD_CITY_AMENITIES") .. ": " .. mood .. ", " ..
-                tostring(data.AmenitiesNum) .. "/" .. tostring(data.AmenitiesRequiredNum)
+            return JoinLines({
+                Locale.Lookup("LOC_HUD_CITY_AMENITIES") .. ": " .. mood,
+                tostring(data.AmenitiesNum) .. "/" .. tostring(data.AmenitiesRequiredNum),
+            })
         end,
         FocusKey = "citizens:amenities",
     })
@@ -317,7 +337,10 @@ local function BuildCitizensTab(data, city)
             else
                 status = Locale.Lookup("LOC_HUD_CITY_POPULATION_GROWTH_NORMAL")
             end
-            return Locale.Lookup("LOC_HUD_CITY_HOUSING") .. ": " .. tostring(data.Housing) .. ", " .. status
+            return JoinLines({
+                Locale.Lookup("LOC_HUD_CITY_HOUSING") .. ": " .. tostring(data.Housing),
+                status,
+            })
         end,
         FocusKey = "citizens:housing",
     })
@@ -407,7 +430,15 @@ local function BuildBuildingsTab(data, city)
         if district.isBuilt then builtDistrictCount = builtDistrictCount + 1 end
     end
 
-    local districtsItem = MakeTreeItem({
+    local districtEntries = {}
+    for _, district in ipairs(data.BuildingsAndDistricts) do
+        if district.isBuilt then
+            table.insert(districtEntries, district)
+        end
+    end
+
+    local districtsFactory = (#districtEntries > 0) and MakeTreeItem or MakeStaticText
+    local districtsItem = districtsFactory({
         Label = function()
             return Locale.Lookup("LOC_CAI_CITY_OV_DISTRICTS_BUILT", builtDistrictCount)
         end,
@@ -417,44 +448,48 @@ local function BuildBuildingsTab(data, city)
         FocusKey = "buildings:districts",
     })
 
-    for _, district in ipairs(data.BuildingsAndDistricts) do
-        if district.isBuilt then
-            local dType = district.Type or "unknown"
-            local districtItem = MakeTreeItem({
-                Label = function()
-                    local name = district.Name
-                    if district.isPillaged then
-                        name = name .. " (" .. Locale.Lookup("LOC_CAI_CITY_OV_PILLAGED") .. ")"
-                    end
-                    return name
-                end,
-                Tooltip = function()
-                    return StripTooltipHeader(ToolTipHelper.GetToolTip(dType, playerID))
-                end,
-                FocusKey = "district:" .. dType,
-            })
-
-            for _, building in ipairs(district.Buildings) do
-                if building.isBuilt then
-                    local bType = building.Type or "unknown"
-                    AddLeaf(districtItem, "building:" .. bType .. ":" .. dType, function()
-                        local name = building.Name
-                        if building.isPillaged then
-                            name = name .. " (" .. Locale.Lookup("LOC_CAI_CITY_OV_PILLAGED") .. ")"
-                        end
-                        return name
-                    end, function()
-                        local pRow = GameInfo.Buildings[bType]
-                        if pRow then
-                            return StripTooltipHeader(ToolTipHelper.GetBuildingToolTip(pRow.Hash, playerID, city))
-                        end
-                        return ""
-                    end)
-                end
+    for _, district in ipairs(districtEntries) do
+        local dType = district.Type or "unknown"
+        local buildingEntries = {}
+        for _, building in ipairs(district.Buildings) do
+            if building.isBuilt then
+                table.insert(buildingEntries, building)
             end
-
-            districtsItem:AddChild(districtItem)
         end
+
+        local districtFactory = (#buildingEntries > 0) and MakeTreeItem or MakeStaticText
+        local districtItem = districtFactory({
+            Label = function()
+                local name = district.Name
+                if district.isPillaged then
+                    name = name .. " (" .. Locale.Lookup("LOC_CAI_CITY_OV_PILLAGED") .. ")"
+                end
+                return name
+            end,
+            Tooltip = function()
+                return StripTooltipHeader(ToolTipHelper.GetToolTip(dType, playerID))
+            end,
+            FocusKey = "district:" .. dType,
+        })
+
+        for _, building in ipairs(buildingEntries) do
+            local bType = building.Type or "unknown"
+            AddLeaf(districtItem, "building:" .. bType .. ":" .. dType, function()
+                local name = building.Name
+                if building.isPillaged then
+                    name = name .. " (" .. Locale.Lookup("LOC_CAI_CITY_OV_PILLAGED") .. ")"
+                end
+                return name
+            end, function()
+                local pRow = GameInfo.Buildings[bType]
+                if pRow then
+                    return StripTooltipHeader(ToolTipHelper.GetBuildingToolTip(pRow.Hash, playerID, city))
+                end
+                return ""
+            end)
+        end
+
+        districtsItem:AddChild(districtItem)
     end
     tabItem:AddChild(districtsItem)
 
@@ -503,7 +538,11 @@ local function BuildBuildingsTab(data, city)
                 end
                 table.insert(names, name)
             end
-            return Locale.Lookup("LOC_CAI_CITY_OV_TRADING_POSTS") .. ": " .. table.concat(names, ", ")
+            local parts = { Locale.Lookup("LOC_CAI_CITY_OV_TRADING_POSTS") }
+            for _, name in ipairs(names) do
+                table.insert(parts, name)
+            end
+            return JoinLines(parts)
         end)
     end
 
@@ -693,7 +732,7 @@ local function BuildLoyaltyTab(data, city)
                 local turnsLeft = pGovernor:GetTurnsToEstablish() - pGovernor:GetTurnsOnSite()
                 status = Locale.Lookup("LOC_HUD_CITY_GOVERNOR_TURNS", turnsLeft)
             end
-            return name .. ", " .. title .. ", " .. status
+            return JoinLines({ name, title, status })
         end, function()
             if govDef then
                 return Locale.Lookup(govDef.Description)

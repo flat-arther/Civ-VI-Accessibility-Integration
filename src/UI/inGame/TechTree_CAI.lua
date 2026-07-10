@@ -296,9 +296,7 @@ local function FormatRowLabel(techType)
     local parts = {}
     AppendIfNonEmpty(parts, GetTechName(techType))
     AppendIfNonEmpty(parts, GetTechStatusLabel(kLive))
-    if kLive and kLive.IsRecommended then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_TECH_FILTER_RECOMMENDED"))
-    end
+    AppendIfNonEmpty(parts, GetRecommendedPart(kLive, false))
     local qpos = GetTechQueuePosition(techType)
     if qpos then
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_QUEUED", qpos))
@@ -1252,7 +1250,7 @@ local function EnsurePanelBuilt()
 
     -- Table view (hidden in tree mode): eras = columns, tiers = Column-groups
     m_tableView = mgr:CreateWidget(TABLE_VIEW_ID, "Table", {
-        Label           = function() return Locale.Lookup("LOC_CAI_TECH_TREE_TABLE") end,
+        Label           = function() return Locale.Lookup("LOC_CAI_TECH_TREE_MAIN_LIST") end,
         HiddenPredicate = function() return m_viewMode ~= "table" end,
     })
     m_tableView:SetSearchQueryHandler(TechSearchHandler)

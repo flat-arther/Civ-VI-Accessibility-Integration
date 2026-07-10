@@ -34,6 +34,7 @@ local function makeTier(mgr)
     tier.Type = "TableTier"
     tier.WrapAround = false
     tier.Transparent = true
+    tier.UseDirectionalEntry = false
     return tier
 end
 

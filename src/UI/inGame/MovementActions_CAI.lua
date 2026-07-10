@@ -156,10 +156,10 @@ function MovementActions_CAI:ResolvePendingMovementResult(playerID, unitID, curr
     end
 
     m_pendingMovementResult = nil
-
+    local plot = Map.GetPlotByIndex(targetPlotId)
     local text = self:BuildMovementResultSpeech(unit, reachedTarget, turnsToArrival)
     if text ~= nil and text ~= "" then
-        LuaEvents.CAIAppendToMessageBuffer(text, "movement")
+        LuaEvents.CAIAppendToMessageBuffer(text, "movement", { x = plot:GetX(), y = plot:GetY() })
     end
 
     return true

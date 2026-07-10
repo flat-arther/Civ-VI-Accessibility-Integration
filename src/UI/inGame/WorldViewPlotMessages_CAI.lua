@@ -13,20 +13,20 @@ AddMessage = WrapFunc(AddMessage, function(orig, messageType, delay, plotIndex, 
     if improvementInfo ~= nil then
         if improvementInfo.Goody then
             -- We queue goodyhut messages because there is no way to gate them by units at this moment. Use a goodyhut reward event to speak and clear the variable
-            m_Queued = text
+            m_Queued = { message = text, location = { x = plot:GetX(), y = plot:GetY() } }
         elseif improvementInfo.ImprovementType == "IMPROVEMENT_BARBARIAN_CAMP" then
             --these we can speak imediatly
             if text:find("%[COLOR_FLOAT_GOLD%]") then shouldSpeak = true end
         end
     end
     if shouldSpeak then
-        LuaEvents.CAIAppendToMessageBuffer(text, "notification")
+        LuaEvents.CAIAppendToMessageBuffer(text, "notification", { x = plot:GetX(), plot:GetY() })
     end
 end)
 
 function OnGoodyHutReward(playerID, unitID, goodyTypeHash, goodySubTypeHash)
     if playerID == Game.GetLocalPlayer() and m_Queued ~= nil and m_Queued ~= "" then
-        LuaEvents.CAIAppendToMessageBuffer(m_Queued, "notification")
+        LuaEvents.CAIAppendToMessageBuffer(m_Queued.message, "notification", m_Queued.location)
         m_Queued = nil
     end
 end

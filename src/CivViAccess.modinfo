@@ -9,14 +9,11 @@
     <CompatibleVersions>2.0</CompatibleVersions>
   </Properties>
   <Files>
-    <File>Platforms/Windows/Audio/cai_audio_banks.ini</File>
-    <File>Platforms/Windows/Audio/cai_audio.bnk</File>
-    <File>Platforms/Windows/Audio/cai_audio.txt</File>
-    <File>Platforms/Windows/Audio/cai_audio.xml</File>
     <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion1_MODE.lua</File>
     <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion2_MODE.lua</File>
     <File>UI/shared/caiUtils.lua</File>
     <File>UI/shared/CAISettings.lua</File>
+    <File>UI/shared/audioManager_CAI.lua</File>
 
     <File>UI/uiManager/helpers/CAIWidgetHelpers_Settings.lua</File>
     <File>UI/uiManager/helpers/CAIWidgetHelpers_Navigation.lua</File>
@@ -205,22 +202,18 @@
     <File>data/notifications_CAI.xml</File>
     <File>data/unitOperationConfig_CAI.sql</File>
     <File>data/settings_CAI.sql</File>
+    <File>data/audioDefinitions_CAI.sql</File>
     <File>Text/en_US/cai_text_ui.xml</File>
   </Files>
   <!-- FRONTEND -->
   <FrontEndActions>
-    <UpdateAudio id="CAI_FrontendAudio">
-      <File>Platforms/Windows/Audio/cai_audio_banks.ini</File>
-      <File>Platforms/Windows/Audio/cai_audio.bnk</File>
-      <File>Platforms/Windows/Audio/cai_audio.txt</File>
-      <File>Platforms/Windows/Audio/cai_audio.xml</File>
-    </UpdateAudio>
     <UpdateText id="CAI_LOC_FrontEnd">
       <File>Text/en_US/cai_text_ui.xml</File>
     </UpdateText>
 
     <UpdateDatabase id="FRONTEND_CAI_CONFIG">
       <File>data/settings_CAI.sql</File>
+      <File>data/audioDefinitions_CAI.sql</File>
       <File>data/hotkey_config_CAI.xml</File>
     </UpdateDatabase>
 
@@ -230,6 +223,7 @@
       </Properties>
       <File>UI/shared/caiUtils.lua</File>
       <File>UI/shared/CAISettings.lua</File>
+      <File>UI/shared/audioManager_CAI.lua</File>
 
       <File>UI/uiManager/helpers/CAIWidgetHelpers_Settings.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_Navigation.lua</File>
@@ -298,12 +292,6 @@
   </FrontEndActions>
 
   <InGameActions>
-    <UpdateAudio id="CAI_IngameAudio">
-      <File>Platforms/Windows/Audio/cai_audio_banks.ini</File>
-      <File>Platforms/Windows/Audio/cai_audio.bnk</File>
-      <File>Platforms/Windows/Audio/cai_audio.txt</File>
-      <File>Platforms/Windows/Audio/cai_audio.xml</File>
-    </UpdateAudio>
     <UpdateText id="CAI_LOC_Ingame">
       <File>Text/en_US/cai_text_ui.xml</File>
     </UpdateText>
@@ -328,6 +316,7 @@
       </Properties>
       <File>UI/shared/caiUtils.lua</File>
       <File>UI/shared/CAISettings.lua</File>
+      <File>UI/shared/audioManager_CAI.lua</File>
 
       <File>UI/uiManager/helpers/CAIWidgetHelpers_Settings.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_Navigation.lua</File>

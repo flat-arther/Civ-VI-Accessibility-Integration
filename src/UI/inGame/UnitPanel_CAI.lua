@@ -2793,8 +2793,8 @@ local function OnCombatResolved(results)
     if text == nil or text == "" then
         return
     end
-
-    LuaEvents.CAIAppendToMessageBuffer(text, "combat")
+    local location = results ~= nil and results[CombatResultParameters.LOCATION] or nil
+    LuaEvents.CAIAppendToMessageBuffer(text, "combat", location)
 end
 
 function info:RequestUnitInfo(unitID, requestedKeys, playerID)

@@ -237,10 +237,10 @@ local function CreateRouteRow(entry)
             local tooltipText = entry.originInfo.TooltipText
             local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAITradeOv_OriginYield"), "StaticText", {
                 Label = function()
-                    return Locale.Lookup("LOC_ROUTECHOOSER_RECEIVES_RESOURCE", Locale.Lookup(originCity:GetName()))
+                    return Locale.Lookup("LOC_ROUTECHOOSER_RECEIVES_RESOURCE", Locale.Lookup(originCity:GetName())) ..
+                    "[NEWLINE]" .. tooltipText
                 end,
             })
-            child:SetValueGetter(function() return tooltipText end)
             item:AddChild(child)
         end
 
@@ -248,10 +248,10 @@ local function CreateRouteRow(entry)
             local tooltipText = entry.destInfo.TooltipText
             local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAITradeOv_DestYield"), "StaticText", {
                 Label = function()
-                    return Locale.Lookup("LOC_ROUTECHOOSER_RECEIVES_RESOURCE", Locale.Lookup(destCity:GetName()))
+                    return Locale.Lookup("LOC_ROUTECHOOSER_RECEIVES_RESOURCE", Locale.Lookup(destCity:GetName())) ..
+                    "[NEWLINE]" .. tooltipText
                 end,
             })
-            child:SetValueGetter(function() return tooltipText end)
             item:AddChild(child)
         end
     end
@@ -300,10 +300,7 @@ local function RebuildTreeFromCapture()
             local active = playerTrade:GetNumOutgoingRoutes()
             local capacity = playerTrade:GetOutgoingRouteCapacity()
             local summaryText = Locale.Lookup("LOC_CAI_TRADE_OVERVIEW_ACTIVE_ROUTES", active, capacity)
-            local summary = mgr:CreateWidget(mgr:GenerateWidgetId("CAITradeOv_ActiveSummary"), "StaticText", {
-                Label = function() return summaryText end,
-            })
-            tree:AddChild(summary)
+            tree:SetLabel(function() return summaryText end)
         end
     end
 

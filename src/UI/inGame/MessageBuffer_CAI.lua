@@ -6,19 +6,19 @@ include("PlayerStateManager_CAI")
 MessageBuffer = {}
 MessageBuffer.__index = MessageBuffer
 
-local CAPACITY = 5000
-
 local VALID_CATEGORIES = {
     notification = true,
     reveal = true,
     combat = true,
     movement = true,
     chat = true,
+    gossip = true
 }
 
 ---@class MessageBufferEntry
 ---@field text string
 ---@field category string
+---@field location? table<string, number>|nil
 --#region Core
 
 ---@return MessageBuffer
@@ -32,7 +32,16 @@ function MessageBuffer.Create()
     return self
 end
 
-function MessageBuffer:Append(text, category)
+local function GetCapacity()
+    local limit = CAISettings.GetNumber("MessageBufferLimit")
+    if limit < 1 then
+        return 1
+    end
+
+    return math.floor(limit)
+end
+
+function MessageBuffer:Append(text, category, location)
     if text == nil or text == "" then
         return
     end
@@ -45,9 +54,11 @@ function MessageBuffer:Append(text, category)
     table.insert(self._entries, {
         text = text,
         category = category,
+        location = location
     })
 
-    if #self._entries > CAPACITY then
+    local capacity = GetCapacity()
+    while #self._entries > capacity do
         table.remove(self._entries, 1)
     end
 
@@ -78,6 +89,7 @@ local FILTER_CYCLE = {
     "notification",
     "reveal",
     "combat",
+    "gossip",
     "movement",
     "chat",
 }
@@ -224,7 +236,7 @@ end
 
 --#endregion
 
---#region Speech
+--#region entryInteraction
 function MessageBuffer:SpeakEntry()
     local entry = self:GetCurrentEntry()
 
@@ -242,6 +254,23 @@ function MessageBuffer:SpeakFilter()
     )
 
     Speak(category)
+end
+
+function MessageBuffer:JumpToEntryLocation()
+    local entry = self:GetCurrentEntry()
+    if not entry then return end
+    local loc = entry.location
+    if not loc or not loc.x or not loc.y then
+        Speak(Locale.Lookup("LOC_CAI_MESSAGE_BUFFER_EMPTY_LOCATION"))
+        return
+    end
+
+    local plot = Map.GetPlot(loc.x, loc.y)
+    if not plot then
+        print("CAI message buffer could not find location plot for " .. loc.x .. ", " .. loc.y)
+        return
+    end
+    LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
 end
 
 --#endregion

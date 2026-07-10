@@ -288,9 +288,7 @@ local function FormatRowLabel(civicType)
     local parts = {}
     AppendIfNonEmpty(parts, GetCivicName(civicType))
     AppendIfNonEmpty(parts, GetCivicStatusLabel(kLive))
-    if kLive and kLive.IsRecommended then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_TECH_FILTER_RECOMMENDED"))
-    end
+    AppendIfNonEmpty(parts, GetRecommendedPart(kLive, false))
     local qpos = GetCivicQueuePosition(civicType)
     if qpos then
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_QUEUE_POSITION", qpos))
@@ -1274,7 +1272,7 @@ local function EnsurePanelBuilt()
 
     -- 4) Table view (hidden in tree mode): eras = columns, tiers = Column-groups
     m_tableView = mgr:CreateWidget(TABLE_VIEW_ID, "Table", {
-        Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_TABLE") end,
+        Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_MAIN_LIST") end,
         HiddenPredicate = function() return m_viewMode ~= "table" end,
     })
     m_tableView:SetSearchQueryHandler(CivicsSearchHandler)

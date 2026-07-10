@@ -1,7 +1,7 @@
 include("caiUtils")
 include("StatusMessagePanel")
 
-OnStatusMessage = WrapFunc(OnStatusMessage, function(orig, message, displayTime, type, subType)
-    orig(message, displayTime, type, subType)
-    Speak(message)
+AddGossip = WrapFunc(AddGossip, function(orig, subType, message, displayTime)
+    orig(subType, message, displayTime)
+    LuaEvents.CAIAppendToMessageBuffer(message, "gossip")
 end)

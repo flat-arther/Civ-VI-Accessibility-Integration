@@ -114,15 +114,15 @@ end
 ---Direction-aware entry point used by BuildFocusPath. For normal containers
 ---we always use DefaultChild (cached _lastFocusedKey / _lastFocusedChild,
 ---falling back to first visible) — Shift+Tab into a container restores the
----previous focus instead of jumping to the last child. Only Transparent
----layout-only containers (e.g. dialog button rows, inline button strips)
----use directional entry, where Tab lands on first and Shift+Tab on last.
+---previous focus instead of jumping to the last child. Transparent layout-only
+---containers (e.g. dialog button rows, inline button strips) can opt into
+---directional entry, where Tab lands on first and Shift+Tab on last.
 ---@param w UIWidget
 ---@param direction 1|-1|0|nil
 ---@return UIWidget|nil
 function H.EntryChild(w, direction)
     if not w.Children or #w.Children == 0 then return nil end
-    if w.Transparent then
+    if w.Transparent and w.UseDirectionalEntry ~= false then
         if direction == 1 then return H.First(w) end
         if direction == -1 then return H.Last(w) end
     end

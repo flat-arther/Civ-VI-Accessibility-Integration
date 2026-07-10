@@ -45,8 +45,14 @@ local function MakeTreeItem(props)
     return item
 end
 
+local function MakeStaticText(props)
+    local item = mgr:CreateWidget(MakeId("CAIWR_"), "StaticText", props)
+    item:SetFocusSound(HOVER_SOUND)
+    return item
+end
+
 local function AddLeaf(parent, focusKey, labelFn)
-    local item = MakeTreeItem({
+    local item = MakeStaticText({
         Label = labelFn,
         FocusKey = focusKey,
     })
@@ -56,6 +62,16 @@ end
 
 local function AddAdvisorLeaf(tree, text)
     AddLeaf(tree, "advisor", function() return text end)
+end
+
+local function JoinLines(parts)
+    local filtered = {}
+    for _, part in ipairs(parts) do
+        if part and part ~= "" then
+            table.insert(filtered, part)
+        end
+    end
+    return table.concat(filtered, "[NEWLINE]")
 end
 
 local VIEW_CONTROL_TO_TAB = {
@@ -90,8 +106,43 @@ local function DetectActiveTab()
     return 1, nil
 end
 
+local function IsPlayerKnownToLocal(playerID)
+    local localPlayerID = Game.GetLocalPlayer()
+    if localPlayerID == -1 or playerID == localPlayerID then
+        return true
+    end
+
+    local playerConfig = PlayerConfigurations[playerID]
+    if not playerConfig then
+        return false
+    end
+
+    if playerConfig:IsHuman() and GameConfiguration.IsAnyMultiplayer() then
+        return true
+    end
+
+    local localPlayer = Players[localPlayerID]
+    if not localPlayer then
+        return false
+    end
+
+    local diplomacy = localPlayer:GetDiplomacy()
+    return diplomacy and diplomacy:HasMet(playerID)
+end
+
 local function GetPlayerLabel(playerID)
-    return GetCivNameAndIcon(playerID, false)
+    local playerConfig = PlayerConfigurations[playerID]
+    if not playerConfig then
+        return ""
+    end
+
+    if not IsPlayerKnownToLocal(playerID) then
+        return Locale.Lookup("LOC_DIPLOPANEL_UNMET_PLAYER")
+    end
+
+    return Locale.Lookup("LOC_DIPLOMACY_DEAL_PLAYER_PANEL_TITLE",
+        playerConfig:GetLeaderName(),
+        playerConfig:GetCivilizationDescription())
 end
 
 -- ============================================================================
@@ -151,9 +202,12 @@ local function RebuildOverallTree(tree)
         end)
 
         if #teamData == 0 then
-            local item = MakeTreeItem({
+            local item = MakeStaticText({
                 Label = function()
-                    return displayName .. ", " .. Locale.Lookup("LOC_WORLD_RANKINGS_VICTORY_DISABLED")
+                    return JoinLines({
+                        displayName,
+                        Locale.Lookup("LOC_WORLD_RANKINGS_VICTORY_DISABLED"),
+                    })
                 end,
                 FocusKey = "overall:" .. victoryType,
             })
@@ -183,7 +237,7 @@ local function RebuildOverallTree(tree)
                 if leaderEntry.PlayerCount > 1 then
                     topName = Locale.Lookup("LOC_WORLD_RANKINGS_TEAM", GameConfiguration.GetTeamName(leaderEntry.TeamID))
                 else
-                    topName = GetCivNameAndIcon(leaderEntry.BestPlayerID, false)
+                    topName = GetPlayerLabel(leaderEntry.BestPlayerID)
                 end
                 table.insert(parts, Locale.Lookup("LOC_WORLD_RANKINGS_FIRST_PLACE_OTHER_SIMPLE", topName))
                 if localRank then
@@ -191,10 +245,10 @@ local function RebuildOverallTree(tree)
                     table.insert(parts, Locale.Lookup("LOC_WORLD_RANKINGS_OTHER_PLACE_SIMPLE", posText))
                 end
             end
-            return table.concat(parts, ", ")
+            return JoinLines(parts)
         end
 
-        local item = MakeTreeItem({
+        local item = MakeStaticText({
             Label = labelFn,
             FocusKey = "overall:" .. victoryType,
         })
@@ -221,10 +275,14 @@ end
 local function CreateScorePlayerRow(playerData, parentFocusPrefix)
     local playerID = playerData.PlayerID
     local fk = (parentFocusPrefix or "") .. "player:" .. playerID
+    local rowFactory = (#playerData.Categories > 0) and MakeTreeItem or MakeStaticText
 
-    local item = MakeTreeItem({
+    local item = rowFactory({
         Label = function()
-            return GetPlayerLabel(playerID) .. ", " .. tostring(playerData.PlayerScore)
+            return JoinLines({
+                GetPlayerLabel(playerID),
+                tostring(playerData.PlayerScore),
+            })
         end,
         FocusKey = fk,
     })
@@ -256,8 +314,11 @@ local function RebuildScoreTree(tree)
             table.sort(teamData.PlayerData, function(a, b) return a.PlayerScore > b.PlayerScore end)
             local teamItem = MakeTreeItem({
                 Label = function()
-                    return Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                        GameConfiguration.GetTeamName(teamData.TeamID)) .. ", " .. tostring(teamData.TeamScore)
+                    return JoinLines({
+                        Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
+                            GameConfiguration.GetTeamName(teamData.TeamID)),
+                        tostring(teamData.TeamScore),
+                    })
                 end,
                 FocusKey = "team:" .. teamData.TeamID,
             })
@@ -438,9 +499,11 @@ local function CreateSciencePlayerRow(sciData, parentFocusPrefix)
 
     local item = MakeTreeItem({
         Label = function()
-            return GetPlayerLabel(playerID) .. ", " ..
+            return JoinLines({
+                GetPlayerLabel(playerID),
                 Locale.Lookup("LOC_CAI_WORLD_RANKINGS_MILESTONES_DONE",
-                    sciData.CompletedCount, sciData.TotalMilestones)
+                    sciData.CompletedCount, sciData.TotalMilestones),
+            })
         end,
         Tooltip = tooltipFn,
         FocusKey = fk,
@@ -465,11 +528,11 @@ local function CreateSciencePlayerRow(sciData, parentFocusPrefix)
             local ly = sciData.LightYears
             local lyTotal = sciData.LightYearsTotal
             if ly > lyTotal then ly = lyTotal end
-            local text = Locale.Lookup("LOC_CAI_WORLD_RANKINGS_LIGHT_YEARS", ly, lyTotal)
+            local parts = { Locale.Lookup("LOC_CAI_WORLD_RANKINGS_LIGHT_YEARS", ly, lyTotal) }
             if sciData.LightYearsRate and sciData.LightYearsRate > 0 then
-                text = text .. ", " .. Locale.Lookup("LOC_CAI_WORLD_RANKINGS_LIGHT_YEARS_RATE", sciData.LightYearsRate)
+                table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_LIGHT_YEARS_RATE", sciData.LightYearsRate))
             end
-            return text
+            return JoinLines(parts)
         end)
     end
 
@@ -536,10 +599,12 @@ local function RebuildCultureTree(tree)
         if #teamData.PlayerData > 1 then
             local teamItem = MakeTreeItem({
                 Label = function()
-                    return Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                            GameConfiguration.GetTeamName(teamData.TeamID)) .. ", " ..
+                    return JoinLines({
+                        Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
+                            GameConfiguration.GetTeamName(teamData.TeamID)),
                         Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TOURISTS",
-                            teamData.BestNumVisitingUs, teamData.BestNumRequiredTourists)
+                            teamData.BestNumVisitingUs, teamData.BestNumRequiredTourists),
+                    })
                 end,
                 FocusKey = "team:" .. teamData.TeamID,
             })
@@ -609,9 +674,11 @@ function CreateCulturePlayerRow(playerData, parentFocusPrefix)
     local capturedPlayerID = playerID
     local item = MakeTreeItem({
         Label = function()
-            return GetPlayerLabel(capturedPlayerID) .. ", " ..
+            return JoinLines({
+                GetPlayerLabel(capturedPlayerID),
                 Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TOURISTS",
-                    playerData.NumVisitingUs, playerData.NumRequiredTourists)
+                    playerData.NumVisitingUs, playerData.NumRequiredTourists),
+            })
         end,
         Tooltip = function()
             return GetCultureDominanceTooltip(capturedPlayerID)
@@ -724,17 +791,20 @@ end
 local function CreateDominationPlayerRow(playerData, parentFocusPrefix)
     local playerID = playerData.PlayerID
     local fk = (parentFocusPrefix or "") .. "player:" .. playerID
+    local rowFactory = (#playerData.CapturedCapitals > 0) and MakeTreeItem or MakeStaticText
 
-    local item = MakeTreeItem({
+    local item = rowFactory({
         Label = function()
-            local label = GetPlayerLabel(playerID) .. ", " ..
-                Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CAPITALS_CAPTURED", #playerData.CapturedCapitals)
+            local parts = {
+                GetPlayerLabel(playerID),
+                Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CAPITALS_CAPTURED", #playerData.CapturedCapitals),
+            }
             if playerData.HasOriginalCapital then
-                label = label .. ", " .. Locale.Lookup("LOC_CAI_WORLD_RANKINGS_HAS_CAPITAL")
+                table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_HAS_CAPITAL"))
             else
-                label = label .. ", " .. Locale.Lookup("LOC_CAI_WORLD_RANKINGS_LOST_CAPITAL")
+                table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_LOST_CAPITAL"))
             end
-            return label
+            return JoinLines(parts)
         end,
         FocusKey = fk,
     })
@@ -742,7 +812,7 @@ local function CreateDominationPlayerRow(playerData, parentFocusPrefix)
     for _, capturedFromID in ipairs(playerData.CapturedCapitals) do
         local captID = capturedFromID
         AddLeaf(item, fk .. ":cap:" .. captID, function()
-            return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CAPTURED_FROM", GetCivNameAndIcon(captID, false))
+            return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CAPTURED_FROM", GetPlayerLabel(captID))
         end)
     end
 
@@ -759,9 +829,11 @@ local function RebuildDominationTree(tree)
         if #teamData.PlayerData > 1 then
             local teamItem = MakeTreeItem({
                 Label = function()
-                    return Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                            GameConfiguration.GetTeamName(teamData.TeamID)) .. ", " ..
-                        Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CAPITALS_CAPTURED", teamData.TotalCapturedCapitals)
+                    return JoinLines({
+                        Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
+                            GameConfiguration.GetTeamName(teamData.TeamID)),
+                        Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CAPITALS_CAPTURED", teamData.TotalCapturedCapitals),
+                    })
                 end,
                 FocusKey = "team:" .. teamData.TeamID,
             })
@@ -787,12 +859,15 @@ local function CreateReligionPlayerRow(playerData, totalCivs, parentFocusPrefix)
     local fk = (parentFocusPrefix or "") .. "player:" .. playerID
 
     local religionName = Game.GetReligion():GetName(playerData.ReligionType)
+    local rowFactory = (#playerData.ConvertedCivs > 0) and MakeTreeItem or MakeStaticText
 
-    local item = MakeTreeItem({
+    local item = rowFactory({
         Label = function()
-            return GetPlayerLabel(playerID) .. ", " ..
-                religionName .. ", " ..
-                #playerData.ConvertedCivs .. "/" .. totalCivs
+            return JoinLines({
+                GetPlayerLabel(playerID),
+                religionName,
+                #playerData.ConvertedCivs .. "/" .. totalCivs,
+            })
         end,
         FocusKey = fk,
     })
@@ -800,7 +875,7 @@ local function CreateReligionPlayerRow(playerData, totalCivs, parentFocusPrefix)
     for _, convertedID in ipairs(playerData.ConvertedCivs) do
         local captConvID = convertedID
         AddLeaf(item, fk .. ":conv:" .. captConvID, function()
-            return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CONVERTED", GetCivNameAndIcon(captConvID, false))
+            return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CONVERTED", GetPlayerLabel(captConvID))
         end)
     end
 
@@ -841,9 +916,11 @@ local function RebuildReligionTree(tree)
 
             local teamItem = MakeTreeItem({
                 Label = function()
-                    return Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                            GameConfiguration.GetTeamName(teamData.TeamID)) .. ", " ..
-                        #teamData.ConvertedCivs .. "/" .. totalCivs
+                    return JoinLines({
+                        Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
+                            GameConfiguration.GetTeamName(teamData.TeamID)),
+                        #teamData.ConvertedCivs .. "/" .. totalCivs,
+                    })
                 end,
                 FocusKey = "team:" .. teamData.TeamID,
             })
@@ -871,24 +948,7 @@ local function CreateGenericPlayerRow(playerData, victoryType, parentFocusPrefix
     local fk = (parentFocusPrefix or "") .. "player:" .. playerID
 
     local capturedVictoryType = victoryType
-
-    local item = MakeTreeItem({
-        Label = function()
-            local label = GetPlayerLabel(playerID)
-            if capturedVictoryType == "VICTORY_DIPLOMATIC" and m_isExp2 then
-                local pPlayer = Players[playerID]
-                if pPlayer and pPlayer:IsAlive() then
-                    local current = pPlayer:GetStats():GetDiplomaticVictoryPoints()
-                    local total = GlobalParameters.DIPLOMATIC_VICTORY_POINTS_REQUIRED
-                    label = label .. ", " ..
-                        Locale.Lookup("LOC_CAI_WORLD_RANKINGS_DIPLO_POINTS", current, total)
-                end
-            end
-            return label
-        end,
-        FocusKey = fk,
-    })
-
+    local diploLines = {}
     if capturedVictoryType == "VICTORY_DIPLOMATIC" and m_isExp2 then
         local pPlayer = Players[playerID]
         if pPlayer and pPlayer:IsAlive() then
@@ -896,44 +956,67 @@ local function CreateGenericPlayerRow(playerData, victoryType, parentFocusPrefix
             if pStats and pStats.GetDiplomaticVictoryPointsTooltip then
                 local tt = pStats:GetDiplomaticVictoryPointsTooltip()
                 if tt and tt ~= "" then
-                    local lines = {}
                     for segment in (tt .. "[NEWLINE]"):gmatch("(.-)%[NEWLINE%]") do
                         local trimmed = segment:match("^%s*(.-)%s*$")
                         if trimmed and trimmed ~= "" then
-                            table.insert(lines, trimmed)
+                            table.insert(diploLines, trimmed)
                         end
-                    end
-                    for li, line in ipairs(lines) do
-                        AddLeaf(item, fk .. ":diplo:" .. li, function() return line end)
                     end
                 end
             end
         end
     end
 
+    local requirementLines = {}
     local pTeamID = Players[playerID]:GetTeam()
     local requirementSetID = Game.GetVictoryRequirements(pTeamID, capturedVictoryType)
     if requirementSetID and requirementSetID ~= -1 then
         local innerReqs = GameEffects.GetRequirementSetInnerRequirements(requirementSetID)
         if innerReqs then
-            for ri, reqID in ipairs(innerReqs) do
-                local capturedReqID = reqID
-                local capturedRI = ri
-                local reqKey = GameEffects.GetRequirementTextKey(capturedReqID, REQUIREMENT_CONTEXT)
-                local reqText = GameEffects.GetRequirementText(capturedReqID, reqKey)
+            for _, reqID in ipairs(innerReqs) do
+                local reqKey = GameEffects.GetRequirementTextKey(reqID, REQUIREMENT_CONTEXT)
+                local reqText = GameEffects.GetRequirementText(reqID, reqKey)
                 if reqText and reqText ~= "" then
-                    AddLeaf(item, fk .. ":req:" .. capturedRI, function()
-                        local state = GameEffects.GetRequirementState(capturedReqID)
-                        local isMet = (state == "Met" or state == "AlwaysMet")
-                        if isMet then
-                            return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_COMPLETE_REQ", reqText)
-                        else
-                            return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_INCOMPLETE_REQ", reqText)
-                        end
-                    end)
+                    table.insert(requirementLines, { ReqID = reqID, Text = reqText })
                 end
             end
         end
+    end
+
+    local rowFactory = (#diploLines > 0 or #requirementLines > 0) and MakeTreeItem or MakeStaticText
+
+    local item = rowFactory({
+        Label = function()
+            local parts = { GetPlayerLabel(playerID) }
+            if capturedVictoryType == "VICTORY_DIPLOMATIC" and m_isExp2 then
+                local pPlayer = Players[playerID]
+                if pPlayer and pPlayer:IsAlive() then
+                    local current = pPlayer:GetStats():GetDiplomaticVictoryPoints()
+                    local total = GlobalParameters.DIPLOMATIC_VICTORY_POINTS_REQUIRED
+                    table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_DIPLO_POINTS", current, total))
+                end
+            end
+            return JoinLines(parts)
+        end,
+        FocusKey = fk,
+    })
+
+    for li, line in ipairs(diploLines) do
+        AddLeaf(item, fk .. ":diplo:" .. li, function() return line end)
+    end
+
+    for ri, reqEntry in ipairs(requirementLines) do
+        local capturedReqID = reqEntry.ReqID
+        local capturedReqText = reqEntry.Text
+        AddLeaf(item, fk .. ":req:" .. ri, function()
+            local state = GameEffects.GetRequirementState(capturedReqID)
+            local isMet = (state == "Met" or state == "AlwaysMet")
+            if isMet then
+                return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_COMPLETE_REQ", capturedReqText)
+            else
+                return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_INCOMPLETE_REQ", capturedReqText)
+            end
+        end)
     end
 
     return item

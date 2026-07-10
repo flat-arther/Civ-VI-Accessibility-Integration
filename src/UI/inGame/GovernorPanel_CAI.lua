@@ -16,10 +16,11 @@ if not HasCapability("CAPABILITY_GOVERNORS") then return end
 -- Constants
 -- ===========================================================================
 
-local PANEL_ID                        = "CAIGovernorPanel_Panel"
-local TREE_ID                         = "CAIGovernorPanel_Tree"
-local PROMO_TABLE_ID                  = "CAIGovernorPanel_PromoTable"
-local PROMO_LIST_ID                   = "CAIGovernorPanel_PromoList"
+local PANEL_ID       = "CAIGovernorPanel_Panel"
+local TREE_ID        = "CAIGovernorPanel_Tree"
+local PROMO_TABLE_ID = "CAIGovernorPanel_PromoTable"
+local PROMO_LIST_ID  = "CAIGovernorPanel_PromoList"
+
 
 local HOVER_SOUND                     = "Main_Menu_Mouse_Over"
 
@@ -28,10 +29,11 @@ local HOVER_SOUND                     = "Main_Menu_Mouse_Over"
 -- ===========================================================================
 
 local m_ui                            = {
-    panel      = nil,
-    tree       = nil,
-    promoTable = nil,
-    promoList  = nil,
+    panel              = nil,
+    tree               = nil,
+    promoTable         = nil,
+    promoList          = nil,
+    promoConfirmDialog = nil
 }
 
 local m_focusedGovernorIndex          = -1
@@ -231,6 +233,8 @@ local function GetGovernorRowTooltip(governorDef, governor, playerGovernors, loc
             playerGovernors:GetTurnsToEstablish(governorDef.Hash))
     end
 
+    AppendIfNonEmpty(parts, governorDef.Description and Locale.Lookup(governorDef.Description) or "")
+
     local earnedNames = {}
     for promotionSet in GameInfo.GovernorPromotionSets() do
         if promotionSet.GovernorType == governorDef.GovernorType then
@@ -295,6 +299,14 @@ end
 -- Promote dialog
 -- ===========================================================================
 
+local function RemovePromoDialog()
+    if mgr and m_ui.promoConfirmDialog and mgr:GetWidgetById(m_ui.promoConfirmDialog:GetId()) then
+        mgr:RemoveFromStack(
+            m_ui.promoConfirmDialog:GetId())
+    end
+    m_ui.promoConfirmDialog = nil
+end
+
 local function ShowPromoteDialog(governorIndex, promotionIndex)
     if not mgr then return end
 
@@ -317,6 +329,7 @@ local function ShowPromoteDialog(governorIndex, promotionIndex)
 
     local confirmBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovDlg_Confirm"), "Button", {
         Label = function() return Locale.Lookup("LOC_CONFIRM") end,
+        DisabledPredicate = function() return m_pendingPromotionGovernorIndex > -1 end,
     })
     confirmBtn:On("activate", function()
         local localPlayerID = Game.GetLocalPlayer()
@@ -334,19 +347,20 @@ local function ShowPromoteDialog(governorIndex, promotionIndex)
         Speak(Locale.Lookup("LOC_CAI_GOVERNOR_FEEDBACK_PROMOTED",
             Locale.Lookup(governorDef.Name), Locale.Lookup(promoDef.Name)))
         UI.RequestPlayerOperation(localPlayerID, PlayerOperations.PROMOTE_GOVERNOR, kParameters)
-        mgr:Pop()
+        -- Async promotion event will close the dialog
     end)
 
     local cancelBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovDlg_Cancel"), "Button", {
         Label = function() return Locale.Lookup("LOC_CANCEL") end,
+        DisabledPredicate = function() return m_pendingPromotionGovernorIndex > -1 end,
     })
     cancelBtn:On("activate", function()
-        mgr:Pop()
+        RemovePromoDialog()
     end)
 
-    local dialog = mgr.WidgetHelpers.MakeGeneralDialog(titleFn, { confirmBtn, cancelBtn }, { descWidget }, 1)
-    if dialog then
-        mgr:Push(dialog)
+    m_ui.promoConfirmDialog = mgr.WidgetHelpers.MakeGeneralDialog(titleFn, { confirmBtn, cancelBtn }, { descWidget }, 1)
+    if m_ui.promoConfirmDialog then
+        mgr:Push(m_ui.promoConfirmDialog)
     end
 end
 
@@ -563,11 +577,11 @@ local function PopulatePromotionList(governorIndex)
     end
 end
 
-local function RefreshPromotionsView(governorIndex, resetFocus)
+local function RefreshPromotionsView(governorIndex, resetFocus, pendingFocusKey)
     local governorDef = GameInfo.Governors[governorIndex]
     if not governorDef then return end
     local root = IsCannotAssign(governorDef) and m_ui.promoList or m_ui.promoTable
-    local capture = root and mgr:CaptureFocusKey(root) or nil
+    local capture = (root and not pendingFocusKey) and mgr:CaptureFocusKey(root) or nil
 
     if IsCannotAssign(governorDef) then
         PopulatePromotionList(governorIndex)
@@ -576,6 +590,10 @@ local function RefreshPromotionsView(governorIndex, resetFocus)
     end
 
     if not root then return end
+    if pendingFocusKey then
+        mgr:PrepareFocus(root, pendingFocusKey)
+        return
+    end
     if resetFocus then
         ClearFocusMemory(root)
         if capture then FocusFirstPromotion(root) end
@@ -590,14 +608,7 @@ local function RestorePendingPromotionFocus(governorIndex)
     if not mgr or not m_ui.panel then return end
 
     m_focusedGovernorIndex = governorIndex
-    RefreshPromotionsView(governorIndex, false)
-
-    local governorDef = GameInfo.Governors[governorIndex]
-    local root = governorDef and IsCannotAssign(governorDef) and m_ui.promoList or m_ui.promoTable
-    local target = root and mgr:FindByFocusKey(root, m_pendingPromotionFocusKey)
-    if target then
-        mgr:SetFocus(target, { announce = false })
-    end
+    RefreshPromotionsView(governorIndex, false, m_pendingPromotionFocusKey)
 
     m_pendingPromotionFocusKey = nil
     m_pendingPromotionGovernorIndex = -1
@@ -885,6 +896,7 @@ local function OnCAIGovernorPromoted(playerID, governorID, promotionID)
     if ContextPtr:IsHidden() then return end
 
     RestorePendingPromotionFocus(governorID)
+    RemovePromoDialog()
 end
 
 local function SpeakGovTitles()

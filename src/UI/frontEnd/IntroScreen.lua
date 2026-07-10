@@ -42,11 +42,14 @@ end
 
 -- ===========================================================================
 function OnUpdateDelay(fDTime)
+	if mgr ~= nil then
+		mgr:OnUpdate()
+	end
+
 	if(m_acceptDelayTimer ~= NO_ACCEPT_TIMER) then
 		m_acceptDelayTimer = m_acceptDelayTimer - fDTime;
 		if(m_acceptDelayTimer < 0) then
 			m_acceptDelayTimer = NO_ACCEPT_TIMER;
-			ContextPtr:ClearUpdate();
 
 			Controls.CopyrightAccept:SetHide( false );
 			local currentVersion = UI.GetAppVersion();
@@ -153,7 +156,7 @@ function OnHandleInput(pInputStruct)
 end
 -- This context does not have a vanilla 'OnShutdown' function, so we add one to kill the UI manager
 function OnShutdown()
-	mgr:ShutDown()
+	mgr:ShutDown(false, true)
 end
 ContextPtr:SetShutdown( OnShutdown );
 ContextPtr:SetInputHandler(OnHandleInput, true)

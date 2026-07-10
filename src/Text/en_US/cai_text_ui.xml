@@ -52,11 +52,17 @@
     <Row Tag="LOC_UIWidget_Role_TabPage" Language="en_US">
       <Text>Tab Page</Text>
     </Row>
+    <Row Tag="LOC_UIWidget_Role_TabControl" Language="en_US">
+      <Text>Tab Control</Text>
+    </Row>
     <Row Tag="LOC_UIWidget_Role_MenuItem" Language="en_US">
       <Text>Menu Item</Text>
     </Row>
     <Row Tag="LOC_UIWidget_Role_StaticText" Language="en_US">
       <Text>Text</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_Table" Language="en_US">
+      <Text>Table</Text>
     </Row>
     <Row Tag="LOC_UIWidget_Role_Tree" Language="en_US">
       <Text>Tree View</Text>
@@ -306,6 +312,10 @@
     <Row Tag="LOC_CAI_WORLD_SELECT_CAPITAL_CITY_TOOLTIP" Language="en_US">
       <Text>Selects your capital city</Text>
     </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_JUMP_CURSOR" Language="en_US">
+      <Text>Jump cursor to Message Buffer entry location</Text>
+    </Row>
     <Row Tag="LOC_CAI_MESSAGE_BUFFER_PREVIOUS" Language="en_US">
       <Text>Previous Message Buffer Entry</Text>
     </Row>
@@ -328,6 +338,10 @@
 
     <Row Tag="LOC_CAI_MESSAGE_BUFFER_NEXT_CATEGORY" Language="en_US">
       <Text>Next Message Buffer Category</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_JUMP_CURSOR_TOOLTIP" Language="en_US">
+      <Text>Moves the CAI navigation cursor to the Message Buffer entry's location, if it has one</Text>
     </Row>
     <Row Tag="LOC_CAI_MESSAGE_BUFFER_PREVIOUS_TOOLTIP" Language="en_US">
       <Text>Reads the previous message in the message buffer.</Text>
@@ -375,9 +389,15 @@
     <Row Tag="LOC_CAI_MESSAGE_BUFFER_CAT_CHAT" Language="en_US">
       <Text>Chat</Text>
     </Row>
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_CAT_GOSSIP" Language="en_US">
+      <Text>Gossip</Text>
+    </Row>
 
     <Row Tag="LOC_CAI_MESSAGE_BUFFER_EMPTY" Language="en_US">
       <Text>No messages.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_EMPTY_LOCATION" Language="en_US">
+      <Text>No location for this buffer message</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_CITIES" Language="en_US">
       <Text>Cities</Text>
@@ -1123,7 +1143,7 @@
       <Text>Reads the count of nuclear and thermonuclear devices</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_YIELD_INFO" Language="en_US">
-      <Text>Yield info</Text>
+      <Text>Yield breakdown</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_YIELD_INFO_TOOLTIP" Language="en_US">
       <Text>Opens a tree of top panel yield breakdowns</Text>
@@ -1197,6 +1217,15 @@
     <Row Tag="LOC_CAI_DIPLOMACYDEAL_REMOVED_THEIR_SIDE" Language="en_US">
       <Text>Removed from their side</Text>
     </Row>
+    <Row Tag="LOC_CAI_DIPLOMACYDEAL_CHANGED_YOUR_SIDE" Language="en_US">
+      <Text>Changed on your side</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACYDEAL_CHANGED_THEIR_SIDE" Language="en_US">
+      <Text>Changed on their side</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACYDEAL_CHANGED_ITEM" Language="en_US">
+      <Text>{1_Old} to {2_New}</Text>
+    </Row>
     <Row Tag="LOC_CAI_DIPLOMACYDEAL_STOP_ASKING_HINT" Language="en_US">
       <Text>Can mark unacceptable to stop the AI asking for this</Text>
     </Row>
@@ -1216,6 +1245,12 @@
     </Row>
     <Row Tag="LOC_CAI_DIPLOMACY_CURRENT_ALLIANCE" Language="en_US">
       <Text>Current alliance</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_AVAILABLE_ALLIANCES" Language="en_US">
+      <Text>Available Alliances</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_FOREIGN_RELATIONSHIPS" Language="en_US">
+      <Text>Foreign relationships</Text>
     </Row>
 
     <!-- Diplomacy intel: Emergency tab -->
@@ -1555,6 +1590,9 @@
     </Row>
     <Row Tag="LOC_CAI_SEARCH_NO_MATCH" Language="en_US">
       <Text>No match</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SEARCH_CLEARED" Language="en_US">
+      <Text>Search cleared</Text>
     </Row>
     <Row Tag="LOC_CAI_SEARCH_EDIT" Language="en_US">
       <Text>Search</Text>
@@ -2372,16 +2410,16 @@
       <Text>Moves the selected unit one tile southeast, or previews combat before confirming</Text>
     </Row>
     <Row Tag="LOC_CAI_MOVE_INFO" Language="en_US">
-      <Text>Unit path info</Text>
+      <Text>Read unit path</Text>
     </Row>
     <Row Tag="LOC_CAI_MOVE_INFO_TOOLTIP" Language="en_US">
-      <Text>Reads movement path details for the selected unit and CAI map cursor</Text>
+      <Text>Reads movement path details for the selected unit</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_VIEW_ABILITIES" Language="en_US">
       <Text>View unit abilities</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_VIEW_ABILITIES_TOOLTIP" Language="en_US">
-      <Text>Opens a list of this unit's special abilities</Text>
+      <Text>Opens a list of this unit's passive abilities</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_OPEN_LIST" Language="en_US">
       <Text>Open unit list</Text>
@@ -2414,10 +2452,10 @@
       <Text>Unit abilities</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_BUILD_IMPROVEMENTS_SUBMENU" Language="en_US">
-      <Text>Build improvements</Text>
+      <Text>Improvements</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_BUILD_IMPROVEMENTS_SUBMENU_TOOLTIP" Language="en_US">
-      <Text>Opens the available build improvement actions for this unit</Text>
+      <Text>Opens the available improvement actions for this unit</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_CARRIER_AIRCRAFT_CAPACITY" Language="en_US">
       <Text>Aircraft, {1_Num}/{2_Num}</Text>
@@ -3039,7 +3077,7 @@
       <Text>Rebase mode</Text>
     </Row>
     <Row Tag="LOC_CAI_TELEPORT_TO_CITY_MODE" Language="en_US">
-      <Text>Teleport to city mode</Text>
+      <Text>Transfer to city mode</Text>
     </Row>
     <Row Tag="LOC_CAI_FORM_CORPS_MODE" Language="en_US">
       <Text>Form corps mode</Text>
@@ -4301,19 +4339,19 @@
       <Text>Empire Economy</Text>
     </Row>
     <Row Tag="LOC_CAI_REPORTS_GOLD_BREAKDOWN" Language="en_US">
-      <Text>Gold: income {1_Income}, expense {2_Expense}, net {3_Net}, balance {4_Balance}</Text>
+      <Text>Gold[NEWLINE]Income {1_Income}[NEWLINE]Expense {2_Expense}[NEWLINE]Net {3_Net}[NEWLINE]Balance {4_Balance}</Text>
     </Row>
     <Row Tag="LOC_CAI_REPORTS_FAITH_BREAKDOWN" Language="en_US">
-      <Text>Faith: income {1_Income}, balance {2_Balance}</Text>
+      <Text>Faith[NEWLINE]Income {1_Income}[NEWLINE]Balance {2_Balance}</Text>
     </Row>
     <Row Tag="LOC_CAI_REPORTS_SCIENCE_INCOME" Language="en_US">
-      <Text>Science: {1_Amount}</Text>
+      <Text>Science[NEWLINE]{1_Amount}</Text>
     </Row>
     <Row Tag="LOC_CAI_REPORTS_CULTURE_INCOME" Language="en_US">
-      <Text>Culture: {1_Amount}</Text>
+      <Text>Culture[NEWLINE]{1_Amount}</Text>
     </Row>
     <Row Tag="LOC_CAI_REPORTS_TOURISM_INCOME" Language="en_US">
-      <Text>Tourism: {1_Amount}</Text>
+      <Text>Tourism[NEWLINE]{1_Amount}</Text>
     </Row>
     <Row Tag="LOC_CAI_REPORTS_RESOURCE_TOTAL" Language="en_US">
       <Text>{1_ResourceName}, total {2_Amount}</Text>
@@ -5287,12 +5325,15 @@
     <Row Tag="LOC_CAI_SETTING_SECTION_NAVIGATION" Language="en_US">
       <Text>Navigation</Text>
     </Row>
+    <Row Tag="LOC_CAI_SETTING_SECTION_MESSAGEBUFFER" Language="en_US">
+      <Text>Message buffer</Text>
+    </Row>
 
     <Row Tag="LOC_CAI_SETTING_SPEAK_TOOLTIP" Language="en_US">
       <Text>Speak tooltip</Text>
     </Row>
     <Row Tag="LOC_CAI_SETTING_SPEAK_TOOLTIP_TOOLTIP" Language="en_US">
-      <Text>Speak the focused control's tooltip when available.</Text>
+      <Text>Speak the focused control's tooltip when available. Note: even if disabled, you can still read tooltips using alt + up and down</Text>
     </Row>
 
     <Row Tag="LOC_CAI_SETTING_SPEAK_POSITION" Language="en_US">
@@ -5313,7 +5354,7 @@
       <Text>Search timeout</Text>
     </Row>
     <Row Tag="LOC_CAI_SETTING_SEARCH_TIMEOUT_TOOLTIP" Language="en_US">
-      <Text>Number of seconds before type-to-find search text is cleared.</Text>
+      <Text>Number of seconds before type-to-find search text is cleared, set to 0 to never clear.</Text>
     </Row>
 
     <Row Tag="LOC_CAI_SETTING_CURSOR_AUDIO_ENABLED" Language="en_US">
@@ -5335,6 +5376,48 @@
     </Row>
     <Row Tag="LOC_CAI_SETTING_SCANNER_AUTO_MOVE_CURSOR_TOOLTIP" Language="en_US">
       <Text>Automatically move the navigation cursor to the scanner's current target.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SCANNER_COORDINATES" Language="en_US">
+      <Text>Scanner coordinates</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SCANNER_COORDINATES_TOOLTIP" Language="en_US">
+      <Text>Choose whether scanner item announcements include coordinates for the current target.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SCANNER_COORDINATES_DISABLED" Language="en_US">
+      <Text>Disabled</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SCANNER_COORDINATES_DISABLED_TOOLTIP" Language="en_US">
+      <Text>Do not speak coordinates in scanner item announcements.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SCANNER_COORDINATES_APPEND" Language="en_US">
+      <Text>Append to scanner announcement</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SCANNER_COORDINATES_APPEND_TOOLTIP" Language="en_US">
+      <Text>Speak coordinates after the normal scanner item announcement.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SCANNER_COORDINATES_PREPEND" Language="en_US">
+      <Text>Prepend to scanner announcement</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SCANNER_COORDINATES_PREPEND_TOOLTIP" Language="en_US">
+      <Text>Speak coordinates before the normal scanner item announcement.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_VALID_TARGETS" Language="en_US">
+      <Text>Auto focus valid targets category when available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_VALID_TARGETS_TOOLTIP" Language="en_US">
+      <Text>Automatically switch scanner focus to the Valid targets category when it becomes available.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_ACTIVE_LENS" Language="en_US">
+      <Text>Auto focus active lens category when available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_ACTIVE_LENS_TOOLTIP" Language="en_US">
+      <Text>Automatically switch scanner focus to the Active lens category when it becomes available.</Text>
     </Row>
 
     <Row Tag="LOC_CAI_SETTING_CURSOR_COORDINATES" Language="en_US">
@@ -5412,6 +5495,55 @@
     </Row>
     <Row Tag="LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_WHILE_MOVING_TOOLTIP" Language="en_US">
       <Text>Announce visibility changes caused by owned unit movement.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_NOTIFICATIONS" Language="en_US">
+      <Text>Speak notification messages</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_NOTIFICATIONS_TOOLTIP" Language="en_US">
+      <Text>Speak new message buffer entries from the Notifications category as they are added.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_REVEALS" Language="en_US">
+      <Text>Speak reveal messages</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_REVEALS_TOOLTIP" Language="en_US">
+      <Text>Speak new message buffer entries from the Reveals category as they are added.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_COMBAT" Language="en_US">
+      <Text>Speak combat messages</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_COMBAT_TOOLTIP" Language="en_US">
+      <Text>Speak new message buffer entries from the Combat category as they are added.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_MOVEMENT" Language="en_US">
+      <Text>Speak movement messages</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_MOVEMENT_TOOLTIP" Language="en_US">
+      <Text>Speak new message buffer entries from the Movement category as they are added.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_CHAT" Language="en_US">
+      <Text>Speak chat messages</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_CHAT_TOOLTIP" Language="en_US">
+      <Text>Speak new message buffer entries from the Chat category as they are added.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_GOSSIP" Language="en_US">
+      <Text>Speak gossip messages</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_GOSSIP_TOOLTIP" Language="en_US">
+      <Text>Speak new message buffer entries from the Gossip category as they are added.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_MESSAGE_BUFFER_LIMIT" Language="en_US">
+      <Text>Message buffer limit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_MESSAGE_BUFFER_LIMIT_TOOLTIP" Language="en_US">
+      <Text>Maximum number of entries kept in the message buffer before the oldest entries are discarded.</Text>
     </Row>
 
   </LocalizedText>

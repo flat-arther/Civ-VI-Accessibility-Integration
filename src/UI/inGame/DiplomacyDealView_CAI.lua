@@ -50,6 +50,7 @@ local m_state = {
     lastSpokenLeaderText = "",
     addedQueue = {},          -- [side] = { label, ... }
     removedQueue = {},        -- [side] = { label, ... }
+    changedQueue = {},        -- [side] = { label, ... }
     offerSnapshot = {},       -- [side] = { [dealItemID] = label }
     flushArmed = false,
     flushDirty = false,
@@ -122,6 +123,10 @@ local SIDE_REMOVE_LOC = {
     [SIDE_LOCAL] = "LOC_CAI_DIPLOMACYDEAL_REMOVED_YOUR_SIDE",
     [SIDE_OTHER] = "LOC_CAI_DIPLOMACYDEAL_REMOVED_THEIR_SIDE",
 }
+local SIDE_CHANGED_LOC = {
+    [SIDE_LOCAL] = "LOC_CAI_DIPLOMACYDEAL_CHANGED_YOUR_SIDE",
+    [SIDE_OTHER] = "LOC_CAI_DIPLOMACYDEAL_CHANGED_THEIR_SIDE",
+}
 
 local function BuildSideLine(locTag, labels)
     if not labels or #labels == 0 then return nil end
@@ -134,12 +139,15 @@ end
 local function FlushSideText()
     local lines = {}
     for _, side in ipairs({ SIDE_LOCAL, SIDE_OTHER }) do
-        local addLine = BuildSideLine(SIDE_ADD_LOC[side], m_state.addedQueue[side])
-        if addLine then table.insert(lines, addLine) end
         local remLine = BuildSideLine(SIDE_REMOVE_LOC[side], m_state.removedQueue[side])
         if remLine then table.insert(lines, remLine) end
+        local addLine = BuildSideLine(SIDE_ADD_LOC[side], m_state.addedQueue[side])
+        if addLine then table.insert(lines, addLine) end
+        local changeLine = BuildSideLine(SIDE_CHANGED_LOC[side], m_state.changedQueue[side])
+        if changeLine then table.insert(lines, changeLine) end
         m_state.addedQueue[side] = {}
         m_state.removedQueue[side] = {}
+        m_state.changedQueue[side] = {}
     end
 
     if #lines > 0 then SpeakLines(lines, false) end
@@ -205,6 +213,13 @@ local function QueueOfferRemove(side, label)
     ArmFlush()
 end
 
+local function QueueOfferChange(side, oldLabel, newLabel)
+    m_state.changedQueue[side] = m_state.changedQueue[side] or {}
+    table.insert(m_state.changedQueue[side],
+        Locale.Lookup("LOC_CAI_DIPLOMACYDEAL_CHANGED_ITEM", oldLabel, newLabel))
+    ArmFlush()
+end
+
 local function CancelFlush()
     if m_state.flushArmed then
         ContextPtr:ClearUpdate()
@@ -214,6 +229,7 @@ local function CancelFlush()
     m_state.pendingLeaderText = nil
     m_state.addedQueue = {}
     m_state.removedQueue = {}
+    m_state.changedQueue = {}
 end
 
 -- ============================================================================
@@ -331,9 +347,21 @@ local function GetDealItemLabel(pDealItem)
     end
 
     if pDealItem:IsUnacceptable() then
-        label = label .. " (" .. Locale.Lookup("LOC_DIPLOMACY_DEAL_UNACCEPTABLE") .. ")"
+        label = label .. " (" .. Locale.Lookup("LOC_DIPLO_DEAL_UNACCEPTABLE_ITEM_TOOLTIP") .. ")"
     end
     return label
+end
+
+local function SuppressDuplicateTooltip(label, tooltip)
+    if not tooltip or tooltip == "" then return "" end
+    if tooltip == label then return "" end
+    if label and label ~= "" and string.sub(label, 1, #tooltip) == tooltip then
+        local nextChar = string.sub(label, #tooltip + 1, #tooltip + 1)
+        if nextChar == " " or nextChar == "x" then
+            return ""
+        end
+    end
+    return tooltip
 end
 
 -- ============================================================================
@@ -560,10 +588,17 @@ end
 local function BuildCityChildItem(pChildDealItem)
     local childType = pChildDealItem:GetType()
     local label
+    local tooltip = ""
     if childType == DealItemTypes.RESOURCES then
         local desc = GameInfo.Resources[pChildDealItem:GetValueType()]
         local resName = desc and Locale.Lookup(desc.Name) or ""
         label = resName .. " x" .. tostring(pChildDealItem:GetAmount())
+        tooltip = resName
+    elseif childType == DealItemTypes.GREATWORK then
+        local typeName = pChildDealItem:GetValueTypeNameID()
+        label = typeName and Locale.Lookup(typeName) or ""
+        tooltip = Locale.Lookup(GreatWorksSupport_GetBasicTooltip(
+            pChildDealItem:GetValueType(), false))
     else
         local typeName = pChildDealItem:GetValueTypeNameID()
         label = typeName and Locale.Lookup(typeName) or ""
@@ -572,6 +607,7 @@ local function BuildCityChildItem(pChildDealItem)
     return mgr:CreateWidget(
         mgr:GenerateWidgetId("CAIDiplomacyDealCityChild"), "TreeItem", {
             Label = function() return label end,
+            Tooltip = function() return tooltip end,
         })
 end
 
@@ -592,12 +628,67 @@ local function CanStopAsking(dealItemID)
         and not pItem:IsUnacceptable()
 end
 
+local function GetOfferItemBaseTooltip(sidePlayer, pDealItem)
+    local pDeal = GetWorkingDeal()
+    if not pDeal then return "" end
+
+    local itemType = pDealItem:GetType()
+    if itemType == DealItemTypes.RESOURCES then
+        local desc = GameInfo.Resources[pDealItem:GetValueType()]
+        local tooltip = desc and Locale.Lookup(desc.Name) or ""
+        local parentDealItem = pDeal:GetItemParent(pDealItem)
+        if parentDealItem then
+            tooltip = tooltip .. GetParentItemTransferToolTip(parentDealItem)
+        end
+        return tooltip
+    end
+
+    if itemType == DealItemTypes.AGREEMENTS then
+        local info = GameInfo.DiplomaticActions[pDealItem:GetSubType()]
+        if info and info.DiplomaticActionType == "DIPLOACTION_JOINT_WAR"
+            and m_players.other
+            and pDealItem:GetFromPlayerID() == m_players.other:GetID() then
+            return Locale.Lookup("LOC_JOINT_WAR_CANNOT_EDIT_THEIRS_TOOLTIP")
+        end
+        return ""
+    end
+
+    if itemType == DealItemTypes.GREATWORK then
+        local greatWorkDesc = GameInfo.GreatWorks[pDealItem:GetSubType()]
+        local tooltip = ""
+        local typeName = pDealItem:GetValueTypeNameID()
+        if typeName then
+            tooltip = Locale.Lookup(GreatWorksSupport_GetBasicTooltip(
+                pDealItem:GetValueType(), false))
+        end
+        local parentDealItem = pDeal:GetItemParent(pDealItem)
+        if parentDealItem then
+            tooltip = tooltip .. GetParentItemTransferToolTip(parentDealItem)
+        end
+        if greatWorkDesc then
+            return GetGreatWorkTooltip(greatWorkDesc, tooltip) or ""
+        end
+        return tooltip
+    end
+
+    if itemType == DealItemTypes.CITIES then
+        return sidePlayer and MakeCityToolTip(sidePlayer, pDealItem:GetValueType()) or ""
+    end
+
+    if itemType == DealItemTypes.CAPTIVE then
+        return ""
+    end
+
+    return ""
+end
+
 local function CreateOfferItem(side, pDealItem)
     local sidePlayer = GetSidePlayer(side)
     local dealItemID = pDealItem:GetID()
     local itemType = pDealItem:GetType()
     local label = GetDealItemLabel(pDealItem)
     local isCity = (itemType == DealItemTypes.CITIES)
+    local offerTooltip = GetOfferItemBaseTooltip(sidePlayer, pDealItem)
 
     local item = mgr:CreateWidget(
         mgr:GenerateWidgetId("CAIDiplomacyDealOfferItem"), "TreeItem", {
@@ -606,10 +697,14 @@ local function CreateOfferItem(side, pDealItem)
             -- that's actually available, so the hint tracks live state. The key
             -- itself is intentionally left out of the text.
             Tooltip  = function()
-                if CanStopAsking(dealItemID) then
-                    return Locale.Lookup("LOC_CAI_DIPLOMACYDEAL_STOP_ASKING_HINT")
+                local parts = {}
+                if offerTooltip ~= "" then
+                    table.insert(parts, offerTooltip)
                 end
-                return ""
+                if CanStopAsking(dealItemID) then
+                    table.insert(parts, Locale.Lookup("LOC_DIPLO_DEAL_MARK_UNACCEPTABLE"))
+                end
+                return table.concat(parts, "[NEWLINE]")
             end,
             FocusKey = "diplo:offer:" .. side .. ":" .. tostring(dealItemID),
         })
@@ -680,11 +775,16 @@ local function RefreshOffersTree(side)
     -- pre-existing items aren't reported.
     local oldSnap = m_state.offerSnapshot[side] or {}
     if m_state.dealReady then
-        for id, label in pairs(newSnap) do
-            if oldSnap[id] == nil then QueueOfferAdd(side, label) end
-        end
         for id, label in pairs(oldSnap) do
             if newSnap[id] == nil then QueueOfferRemove(side, label) end
+        end
+        for id, newLabel in pairs(newSnap) do
+            local oldLabel = oldSnap[id]
+            if oldLabel ~= nil and oldLabel ~= newLabel then
+                QueueOfferChange(side, oldLabel, newLabel)
+            elseif oldLabel == nil then
+                QueueOfferAdd(side, newLabel)
+            end
         end
     end
     m_state.offerSnapshot[side] = newSnap
@@ -763,7 +863,7 @@ local function PopulateFavorCategory(node, sidePlayer, otherPlayer)
         local label = Locale.Lookup("LOC_DIPLOMATIC_FAVOR_NAME")
             .. " " .. tostring(sidePlayer:GetFavor())
         node:AddChild(CreateInventoryItem("CAIDiplomacyDealInvFavor",
-            label, Locale.Lookup("LOC_DIPLOMATIC_FAVOR_NAME"), false,
+            label, "", false,
             function() OnClickAvailableOneTimeFavor(sidePlayer, DEFAULT_ONE_TIME_FAVOR) end))
     end
 end
@@ -778,9 +878,20 @@ local function PopulateResourceCategory(node, sidePlayer, otherPlayer, className
         if desc and entry.MaxAmount > 0 and desc.ResourceClassType == className then
             local resourceType = entry.ForType
             local label = Locale.Lookup(desc.Name) .. " x" .. tostring(entry.MaxAmount)
-            local tooltip = Locale.Lookup(desc.Name)
+            local tooltip
+            local invalid = not entry.IsValid
+                and entry.ValidationResult ~= DealValidationResult.MISSING_DEPENDENCY
+            if invalid then
+                local noCapKey = (sidePlayer ~= m_players.local_)
+                    and "LOC_DEAL_PLAYER_HAS_NO_CAP_ROOM"
+                    or "LOC_DEAL_AI_HAS_NO_CAP_ROOM"
+                tooltip = Locale.Lookup(desc.Name) .. "[NEWLINE][COLOR_RED]"
+                    .. Locale.Lookup(noCapKey)
+            else
+                tooltip = SuppressDuplicateTooltip(label, Locale.Lookup(desc.Name))
+            end
             node:AddChild(CreateInventoryItem("CAIDiplomacyDealInvResource",
-                label, tooltip, not entry.IsValid,
+                label, tooltip, invalid,
                 function() OnClickAvailableResource(sidePlayer, resourceType) end))
         end
     end
@@ -795,7 +906,7 @@ local function PopulateAgreementsCategory(node, sidePlayer, otherPlayer)
         local agreementType = entry.SubType
         local agreementDuration = entry.Duration
         local label = entry.SubTypeName and Locale.Lookup(entry.SubTypeName) or ""
-        local tooltip = label
+        local tooltip = ""
         if entry.Duration > 0 then
             tooltip = Locale.Lookup("LOC_DIPLOMACY_DEAL_PARAMETER_WITH_TURNS",
                 entry.SubTypeName, entry.Duration)
@@ -844,11 +955,12 @@ local function PopulateGreatWorksCategory(node, sidePlayer, otherPlayer)
             local greatWorkType = entry.ForType
             local descID = entry.ForTypeDescriptionID
             local label = entry.ForTypeName and Locale.Lookup(entry.ForTypeName) or ""
-            local tooltip = GreatWorksSupport_GetBasicTooltip(entry.ForType, false) or ""
+            local tooltip = GetGreatWorkTooltip(desc,
+                GreatWorksSupport_GetBasicTooltip(entry.ForType, false)) or ""
             local invalid = (not entry.IsValid)
                 and entry.ValidationResult ~= DealValidationResult.MISSING_DEPENDENCY
             node:AddChild(CreateInventoryItem("CAIDiplomacyDealInvGreatWork",
-                label, Locale.Lookup(tooltip), invalid,
+                label, tooltip, invalid,
                 function() OnClickAvailableGreatWork(sidePlayer, greatWorkType, descID) end))
         end
     end
@@ -865,7 +977,7 @@ local function PopulateCaptivesCategory(node, sidePlayer, otherPlayer)
         local invalid = (not entry.IsValid)
             and entry.ValidationResult ~= DealValidationResult.MISSING_DEPENDENCY
         node:AddChild(CreateInventoryItem("CAIDiplomacyDealInvCaptive",
-            label, label, invalid,
+            label, "", invalid,
             function() OnClickAvailableCaptive(sidePlayer, captiveType) end))
     end
 end
@@ -1135,6 +1247,7 @@ local function ResetState()
     m_state.lastSpokenLeaderText = ""
     m_state.addedQueue = {}
     m_state.removedQueue = {}
+    m_state.changedQueue = {}
     m_state.offerSnapshot = {}
     m_state.flushArmed = false
     m_state.flushDirty = false

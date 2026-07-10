@@ -9,90 +9,96 @@
 CAICursorAudio = CAICursorAudio or {}
 
 local STINGER_DELAY_SECONDS = 0.08
-local BRIDGE_SOUND_PLACEHOLDER = "Play_woosh"
+local CURSOR_AUDIO_TAGS = {
+    "CURSOR_FOG",
+    "CURSOR_TERRAIN",
+    "CURSOR_STINGERS",
+}
 
-local m_audioQueue = {}
+local function GetAudioManager()
+    local uiMgr = ExposedMembers.CAI_UIManager
+    if uiMgr ~= nil and uiMgr.GetAudioManager ~= nil then
+        return uiMgr:GetAudioManager()
+    end
+
+    return ExposedMembers.CAI_AudioManager
+end
 
 -- ===========================================================================
 -- Sound mappings
 -- ===========================================================================
 
 local TERRAIN_SOUNDS = {
-    TERRAIN_GRASS = "Play_grass",
-    TERRAIN_GRASS_HILLS = "Play_grass",
+    TERRAIN_GRASS = "CURSOR_GRASS",
+    TERRAIN_GRASS_HILLS = "CURSOR_GRASS",
 
-    TERRAIN_PLAINS = "Play_plains",
-    TERRAIN_PLAINS_HILLS = "Play_plains",
+    TERRAIN_PLAINS = "CURSOR_PLAINS",
+    TERRAIN_PLAINS_HILLS = "CURSOR_PLAINS",
 
-    TERRAIN_DESERT = "Play_desert",
-    TERRAIN_DESERT_HILLS = "Play_desert",
-    TERRAIN_DESERT_MOUNTAIN = "Play_desert",
+    TERRAIN_DESERT = "CURSOR_DESERT",
+    TERRAIN_DESERT_HILLS = "CURSOR_DESERT",
+    TERRAIN_DESERT_MOUNTAIN = "CURSOR_DESERT",
 
-    TERRAIN_TUNDRA = "Play_tundra",
-    TERRAIN_TUNDRA_HILLS = "Play_tundra",
-    TERRAIN_TUNDRA_MOUNTAIN = "Play_tundra",
+    TERRAIN_TUNDRA = "CURSOR_TUNDRA",
+    TERRAIN_TUNDRA_HILLS = "CURSOR_TUNDRA",
+    TERRAIN_TUNDRA_MOUNTAIN = "CURSOR_TUNDRA",
 
-    TERRAIN_SNOW = "Play_snow",
-    TERRAIN_SNOW_HILLS = "Play_snow",
-    TERRAIN_SNOW_MOUNTAIN = "Play_snow",
+    TERRAIN_SNOW = "CURSOR_SNOW",
+    TERRAIN_SNOW_HILLS = "CURSOR_SNOW",
+    TERRAIN_SNOW_MOUNTAIN = "CURSOR_SNOW",
 
-    TERRAIN_COAST = "Play_coast",
-    TERRAIN_OCEAN = "Play_coast",
+    TERRAIN_COAST = "CURSOR_COAST",
+    TERRAIN_OCEAN = "CURSOR_OCEAN",
 }
 
 local FEATURE_BEDS = {
-    FEATURE_JUNGLE = "Play_jungle",
-    FEATURE_MARSH = "Play_marsh",
+    FEATURE_JUNGLE = "CURSOR_JUNGLE",
+    FEATURE_MARSH = "CURSOR_MARSH",
 
-    FEATURE_FLOODPLAINS = "Play_Floodplains",
-    FEATURE_FLOODPLAINS_GRASSLAND = "Play_Floodplains",
-    FEATURE_FLOODPLAINS_PLAINS = "Play_Floodplains",
+    FEATURE_FLOODPLAINS = "CURSOR_FLOODPLAINS",
+    FEATURE_FLOODPLAINS_GRASSLAND = "CURSOR_FLOODPLAINS",
+    FEATURE_FLOODPLAINS_PLAINS = "CURSOR_FLOODPLAINS",
 
-    FEATURE_OASIS = "Play_oasis",
-    FEATURE_ICE = "Play_ice",
-    FEATURE_REEF = "Play_reef",
-    FEATURE_GEOTHERMAL_FISSURE = "Play_geothermal_fissure",
-    FEATURE_VOLCANIC_SOIL = "Play_volcanic_soil",
+    FEATURE_OASIS = "CURSOR_OASIS",
+    FEATURE_ICE = "CURSOR_ICE",
+    FEATURE_REEF = "CURSOR_REEF",
+    FEATURE_GEOTHERMAL_FISSURE = "CURSOR_GEOTHERMAL_FISSURE",
+    FEATURE_VOLCANIC_SOIL = "CURSOR_VOLCANIC_SOIL",
 }
 
 local FEATURE_STINGERS = {
-    FEATURE_FOREST = "Play_forest",
-    FEATURE_VOLCANO = "Play_volcano",
+    FEATURE_FOREST = "CURSOR_FOREST",
+    FEATURE_VOLCANO = "CURSOR_VOLCANO",
 }
 
 -- ===========================================================================
--- Queue
+-- Playback
 -- ===========================================================================
 
-local function GetTime()
-    return Automation.GetTime()
-end
+local function StopCursorTags()
+    local audio = GetAudioManager()
+    if audio == nil then
+        print("CAICursorAudio.StopCursorTags: CAI_AudioManager is unavailable")
+        return
+    end
 
-local function ClearQueue()
-    m_audioQueue = {}
-end
-
-local function QueueSound(sound, delaySeconds)
-    if sound == nil or sound == "" then return end
-
-    table.insert(m_audioQueue, {
-        Sound = sound,
-        Time = GetTime() + (delaySeconds or 0),
-    })
-end
-
-function CAICursorAudio.OnUpdate()
-    if #m_audioQueue == 0 then return end
-
-    local now = GetTime()
-
-    for i = #m_audioQueue, 1, -1 do
-        local item = m_audioQueue[i]
-        if now >= item.Time then
-            UI.PlaySound(item.Sound)
-            table.remove(m_audioQueue, i)
+    for _, tag in ipairs(CURSOR_AUDIO_TAGS) do
+        if audio.SoundsByTag[tag] ~= nil then
+            audio:StopTag(tag)
         end
     end
+end
+
+local function QueueSound(soundId, delaySeconds)
+    if soundId == nil or soundId == "" then return end
+
+    local audio = GetAudioManager()
+    if audio == nil then
+        print("CAICursorAudio.QueueSound: CAI_AudioManager is unavailable for " .. tostring(soundId))
+        return
+    end
+
+    audio:QueueSound(soundId, delaySeconds)
 end
 
 -- ===========================================================================
@@ -129,48 +135,31 @@ local function IsPlotRevealed(plot)
     return visibility:IsRevealed(plot)
 end
 
-local function GetRouteType(plot)
-    if plot == nil then return -1 end
+local function IsPlotVisible(plot)
+    if plot == nil then return false end
 
-    if plot.GetRouteType ~= nil then
-        return plot:GetRouteType() or -1
-    end
+    local playerID = Game.GetLocalPlayer()
+    if playerID == nil or playerID < 0 then return false end
 
-    return -1
-end
+    local visibility = PlayersVisibility[playerID]
+    if visibility == nil then return false end
 
-local function HasRoute(plot)
-    return GetRouteType(plot) >= 0
-end
-
-local function GetCrossingSound(fromPlot, toPlot)
-    if fromPlot == nil or toPlot == nil then return nil end
-
-    if not fromPlot:IsRiverCrossingToPlot(toPlot) then
-        return nil
-    end
-
-    if HasRoute(fromPlot) and HasRoute(toPlot) then
-        -- Placeholder until the bank has a dedicated Play_bridge event.
-        return BRIDGE_SOUND_PLACEHOLDER
-    end
-
-    return "Play_river_crossing"
+    return visibility:IsVisible(plot:GetIndex())
 end
 
 local function GetBedSound(plot)
     if plot == nil then return nil end
 
+    if plot:IsMountain() then
+        return "CURSOR_MOUNTAIN"
+    end
+
     local feature = GetFeatureRow(plot)
-    if feature ~= nil then
+    if feature ~= nil and not feature.NaturalWonder then
         local featureSound = FEATURE_BEDS[feature.FeatureType]
         if featureSound ~= nil then
             return featureSound
         end
-    end
-
-    if plot:IsWater() then
-        return "Play_coast"
     end
 
     local terrain = GetTerrainRow(plot)
@@ -181,7 +170,11 @@ local function GetBedSound(plot)
         end
     end
 
-    return "Play_grass"
+    if plot:IsWater() then
+        return "CURSOR_COAST"
+    end
+
+    return "CURSOR_GRASS"
 end
 
 local function GetStingers(plot)
@@ -198,6 +191,13 @@ local function GetStingers(plot)
     return results
 end
 
+local function GetFogSound(plot)
+    if plot == nil then return nil end
+    if not IsPlotRevealed(plot) then return nil end
+    if IsPlotVisible(plot) then return nil end
+    return "CURSOR_WOOSH"
+end
+
 -- ===========================================================================
 -- Public API
 -- ===========================================================================
@@ -206,18 +206,13 @@ function CAICursorAudio.PlayPlot(plot, prevPlot)
     if plot == nil then return end
     if not IsPlotRevealed(plot) then return end
 
-    --UI.PlaySound("Stop_CursorAudio")
-    ClearQueue()
+    StopCursorTags()
 
-    local crossing = GetCrossingSound(prevPlot, plot)
+    local fog = GetFogSound(plot)
     local bedDelay = 0
 
-    if crossing ~= nil then
-        QueueSound(crossing, 0)
-        bedDelay = STINGER_DELAY_SECONDS
-    end
-
     QueueSound(GetBedSound(plot), bedDelay)
+    QueueSound(fog, bedDelay)
 
     for _, stinger in ipairs(GetStingers(plot)) do
         QueueSound(stinger, bedDelay + STINGER_DELAY_SECONDS)
@@ -225,7 +220,10 @@ function CAICursorAudio.PlayPlot(plot, prevPlot)
 end
 
 function CAICursorAudio.PlayPlotById(plotId, prevPlotId)
-    if not CAISettings.GetBool("CursorAudioEnabled") then return end
+    local audio = GetAudioManager()
+    if audio ~= nil and not audio:IsTagEnabled("CURSOR") then
+        return
+    end
     if plotId == nil or plotId < 0 then return end
 
     local plot = Map.GetPlotByIndex(plotId)
@@ -246,10 +244,9 @@ end
 
 function CAICursorAudio.Initialize()
     LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
-    ClearQueue()
 end
 
 function CAICursorAudio.Shutdown()
     LuaEvents.CAICursorMoved.Remove(OnCAICursorMoved)
-    ClearQueue()
+    StopCursorTags()
 end

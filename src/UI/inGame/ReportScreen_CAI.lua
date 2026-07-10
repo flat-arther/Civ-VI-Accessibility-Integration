@@ -96,14 +96,30 @@ local function MakeButton(props)
     return btn
 end
 
+local function MakeStaticText(props)
+    local text = mgr:CreateWidget(MakeId("CAIRPT_"), "StaticText", props)
+    text:SetFocusSound(HOVER_SOUND)
+    return text
+end
+
 local function AddLeaf(parent, focusKey, labelFn, tooltipFn)
-    local item = MakeTreeItem({
+    local item = MakeStaticText({
         Label = labelFn,
         Tooltip = tooltipFn,
         FocusKey = focusKey,
     })
     parent:AddChild(item)
     return item
+end
+
+local function JoinLines(parts)
+    local filtered = {}
+    for _, part in ipairs(parts) do
+        if part ~= nil and part ~= "" then
+            table.insert(filtered, part)
+        end
+    end
+    return table.concat(filtered, "[NEWLINE]")
 end
 
 local function FormatYields(production, food, gold, faith, science, culture, tourism)
@@ -137,6 +153,100 @@ local function toPlusMinus(val)
     if val == nil or val == 0 then return "0" end
     if val > 0 then return "+" .. tostring(val) end
     return tostring(val)
+end
+
+local function HasNonZeroYieldData(production, food, gold, faith, science, culture, tourism)
+    return (production ~= nil and production ~= 0)
+        or (food ~= nil and food ~= 0)
+        or (gold ~= nil and gold ~= 0)
+        or (faith ~= nil and faith ~= 0)
+        or (science ~= nil and science ~= 0)
+        or (culture ~= nil and culture ~= 0)
+        or (tourism ~= nil and tourism ~= 0)
+end
+
+local function HasAdjacencyChildren(adjacencyBonus)
+    if adjacencyBonus == nil then return false end
+    return HasNonZeroYieldData(
+        adjacencyBonus.Production,
+        adjacencyBonus.Food,
+        adjacencyBonus.Gold,
+        adjacencyBonus.Faith,
+        adjacencyBonus.Science,
+        adjacencyBonus.Culture,
+        adjacencyBonus.Tourism
+    )
+end
+
+local function NewYieldTotals()
+    return {
+        Production = 0,
+        Food = 0,
+        Gold = 0,
+        Faith = 0,
+        Science = 0,
+        Culture = 0,
+        Tourism = 0,
+    }
+end
+
+local function AddYieldTypeAmount(totals, yieldType, amount)
+    if amount == nil or amount == 0 then return end
+    if yieldType == "YIELD_PRODUCTION" then
+        totals.Production = totals.Production + amount
+    elseif yieldType == "YIELD_FOOD" then
+        totals.Food = totals.Food + amount
+    elseif yieldType == "YIELD_GOLD" then
+        totals.Gold = totals.Gold + amount
+    elseif yieldType == "YIELD_FAITH" then
+        totals.Faith = totals.Faith + amount
+    elseif yieldType == "YIELD_SCIENCE" then
+        totals.Science = totals.Science + amount
+    elseif yieldType == "YIELD_CULTURE" then
+        totals.Culture = totals.Culture + amount
+    elseif yieldType == "YIELD_TOURISM" or yieldType == "TOURISM" then
+        totals.Tourism = totals.Tourism + amount
+    end
+end
+
+local function AddYieldFields(totals, source)
+    if source == nil then return end
+    totals.Production = totals.Production + (source.Production or source.ProductionPerTurn or 0)
+    totals.Food = totals.Food + (source.Food or source.FoodPerTurn or 0)
+    totals.Gold = totals.Gold + (source.Gold or source.GoldPerTurn or 0)
+    totals.Faith = totals.Faith + (source.Faith or source.FaithPerTurn or 0)
+    totals.Science = totals.Science + (source.Science or source.SciencePerTurn or 0)
+    totals.Culture = totals.Culture + (source.Culture or source.CulturePerTurn or 0)
+    totals.Tourism = totals.Tourism + (source.Tourism or source.TourismPerTurn or 0)
+end
+
+local function BuildDistrictTotalTooltip(district, greatWorks)
+    local totals = NewYieldTotals()
+    AddYieldFields(totals, district)
+    AddYieldFields(totals, district.AdjacencyBonus)
+
+    for _, building in ipairs(district.Buildings or {}) do
+        AddYieldFields(totals, building)
+
+        local buildingGreatWorks = greatWorks[building.Type]
+        if buildingGreatWorks ~= nil then
+            for _, greatWork in ipairs(buildingGreatWorks) do
+                for _, yield in ipairs(greatWork.YieldChanges or {}) do
+                    AddYieldTypeAmount(totals, yield.YieldType, yield.YieldChange)
+                end
+            end
+        end
+    end
+
+    return FormatYields(
+        totals.Production,
+        totals.Food,
+        totals.Gold,
+        totals.Faith,
+        totals.Science,
+        totals.Culture,
+        totals.Tourism
+    )
 end
 
 local function ActivateCity(pCity)
@@ -189,18 +299,18 @@ local function RebuildYieldsTree(tree)
 
         local cityItem = MakeTreeItem({
             Label = function()
-                local name = Locale.Lookup(capturedCity.CityName)
+                local parts = { Locale.Lookup(capturedCity.CityName) }
                 if capturedCity.IsCapital then
-                    name = name .. ", " .. Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL")
+                    table.insert(parts, Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL"))
                 end
                 local kProd = capturedCity.ProductionQueue[1]
                 if kProd then
-                    name = name .. ", " .. Locale.Lookup("LOC_CAI_REPORTS_PRODUCING", Locale.Lookup(kProd.Name))
+                    table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_PRODUCING", Locale.Lookup(kProd.Name)))
                     if capturedCity.CurrentTurnsLeft and capturedCity.CurrentTurnsLeft > 0 then
-                        name = name .. ", " .. Locale.Lookup("LOC_CAI_PRODUCTION_TURNS", capturedCity.CurrentTurnsLeft)
+                        table.insert(parts, Locale.Lookup("LOC_CAI_PRODUCTION_TURNS", capturedCity.CurrentTurnsLeft))
                     end
                 end
-                return name
+                return JoinLines(parts)
             end,
             Tooltip = function()
                 return FormatYields(
@@ -224,81 +334,86 @@ local function RebuildYieldsTree(tree)
 
         for _, kDistrict in ipairs(capturedCity.BuildingsAndDistricts) do
             local capturedDistrict = kDistrict
-            local districtItem = MakeTreeItem({
+            local districtHasChildren = HasAdjacencyChildren(capturedDistrict.AdjacencyBonus)
+                or #(capturedDistrict.Buildings or {}) > 0
+
+            local districtFactory = districtHasChildren and MakeTreeItem or MakeStaticText
+            local districtItem = districtFactory({
                 Label = function()
+                    local parts = { Locale.Lookup(capturedDistrict.Name) }
                     local yieldStr = FormatYields(
                         capturedDistrict.Production, capturedDistrict.Food,
                         capturedDistrict.Gold, capturedDistrict.Faith,
                         capturedDistrict.Science, capturedDistrict.Culture, nil)
                     if yieldStr ~= "" then
-                        return Locale.Lookup(capturedDistrict.Name) .. ", " .. yieldStr
+                        table.insert(parts, yieldStr)
                     end
-                    return Locale.Lookup(capturedDistrict.Name)
+                    return JoinLines(parts)
                 end,
+                Tooltip = districtHasChildren and function()
+                    return BuildDistrictTotalTooltip(capturedDistrict, greatWorks)
+                end or nil,
                 FocusKey = "yield:city:" .. cityID .. ":dist:" .. tostring(capturedDistrict.Type),
             })
             cityItem:AddChild(districtItem)
 
-            if capturedDistrict.AdjacencyBonus then
-                local hasAdj = false
-                for _, val in pairs(capturedDistrict.AdjacencyBonus) do
-                    if val ~= 0 then
-                        hasAdj = true; break
-                    end
-                end
-                if hasAdj then
+            if districtHasChildren then
+                if HasAdjacencyChildren(capturedDistrict.AdjacencyBonus) then
                     local capturedAdj = capturedDistrict.AdjacencyBonus
                     AddLeaf(districtItem,
                         "yield:city:" .. cityID .. ":dist:" .. tostring(capturedDistrict.Type) .. ":adj",
                         function()
-                            return Locale.Lookup("LOC_HUD_REPORTS_ADJACENCY_BONUS") .. ", " ..
+                            return JoinLines({
+                                Locale.Lookup("LOC_HUD_REPORTS_ADJACENCY_BONUS"),
                                 FormatYields(
                                     capturedAdj.Production, capturedAdj.Food,
                                     capturedAdj.Gold, capturedAdj.Faith,
                                     capturedAdj.Science, capturedAdj.Culture, nil)
+                            })
                         end)
                 end
-            end
 
-            for _, kBuilding in ipairs(capturedDistrict.Buildings) do
-                local capturedBuilding = kBuilding
-                AddLeaf(districtItem,
-                    "yield:city:" .. cityID .. ":bldg:" .. tostring(capturedBuilding.Type),
-                    function()
-                        local yieldStr = FormatYields(
-                            capturedBuilding.ProductionPerTurn, capturedBuilding.FoodPerTurn,
-                            capturedBuilding.GoldPerTurn, capturedBuilding.FaithPerTurn,
-                            capturedBuilding.SciencePerTurn, capturedBuilding.CulturePerTurn, nil)
-                        if yieldStr ~= "" then
-                            return Locale.Lookup(capturedBuilding.Name) .. ", " .. yieldStr
-                        end
-                        return Locale.Lookup(capturedBuilding.Name)
-                    end)
+                for _, kBuilding in ipairs(capturedDistrict.Buildings) do
+                    local capturedBuilding = kBuilding
+                    AddLeaf(districtItem,
+                        "yield:city:" .. cityID .. ":bldg:" .. tostring(capturedBuilding.Type),
+                        function()
+                            local parts = { Locale.Lookup(capturedBuilding.Name) }
+                            local yieldStr = FormatYields(
+                                capturedBuilding.ProductionPerTurn, capturedBuilding.FoodPerTurn,
+                                capturedBuilding.GoldPerTurn, capturedBuilding.FaithPerTurn,
+                                capturedBuilding.SciencePerTurn, capturedBuilding.CulturePerTurn, nil)
+                            if yieldStr ~= "" then
+                                table.insert(parts, yieldStr)
+                            end
+                            return JoinLines(parts)
+                        end)
 
-                if greatWorks[capturedBuilding.Type] then
-                    for gwIdx, kGreatWork in ipairs(greatWorks[capturedBuilding.Type]) do
-                        local capturedGW = kGreatWork
-                        local capturedGWIdx = gwIdx
-                        AddLeaf(districtItem,
-                            "yield:city:" ..
-                            cityID .. ":bldg:" .. tostring(capturedBuilding.Type) .. ":gw:" .. capturedGWIdx,
-                            function()
-                                local gwYields = {}
-                                for _, yield in ipairs(capturedGW.YieldChanges) do
-                                    if yield.YieldChange ~= 0 then
-                                        local yieldInfo = GameInfo.Yields[yield.YieldType]
-                                        if yieldInfo then
-                                            table.insert(gwYields,
-                                                Locale.Lookup(yieldInfo.Name) .. " " .. toPlusMinus(yield.YieldChange))
+                    if greatWorks[capturedBuilding.Type] then
+                        for gwIdx, kGreatWork in ipairs(greatWorks[capturedBuilding.Type]) do
+                            local capturedGW = kGreatWork
+                            local capturedGWIdx = gwIdx
+                            AddLeaf(districtItem,
+                                "yield:city:" ..
+                                cityID .. ":bldg:" .. tostring(capturedBuilding.Type) .. ":gw:" .. capturedGWIdx,
+                                function()
+                                    local gwYields = {}
+                                    for _, yield in ipairs(capturedGW.YieldChanges) do
+                                        if yield.YieldChange ~= 0 then
+                                            local yieldInfo = GameInfo.Yields[yield.YieldType]
+                                            if yieldInfo then
+                                                table.insert(gwYields,
+                                                    Locale.Lookup(yieldInfo.Name) .. " " .. toPlusMinus(yield.YieldChange))
+                                            end
                                         end
                                     end
-                                end
-                                local text = Locale.Lookup(capturedGW.Name)
-                                if #gwYields > 0 then
-                                    text = text .. ", " .. table.concat(gwYields, "[NEWLINE]")
-                                end
-                                return text
-                            end)
+                                    local text = Locale.Lookup(capturedGW.Name)
+                                    if #gwYields > 0 then
+                                        text = JoinLines({ text, table.concat(gwYields, "[NEWLINE]") })
+                                    end
+                                    return text
+                                end)
+                        end
                     end
                 end
             end
@@ -308,7 +423,10 @@ local function RebuildYieldsTree(tree)
             for _, wonder in ipairs(capturedCity.Wonders) do
                 local capturedWonder = wonder
                 if capturedWonder.Yields[1] or (greatWorks[capturedWonder.Type]) then
-                    local wonderItem = MakeTreeItem({
+                    local wonderHasChildren = greatWorks[capturedWonder.Type] ~= nil and
+                        #greatWorks[capturedWonder.Type] > 0
+                    local wonderFactory = wonderHasChildren and MakeTreeItem or MakeStaticText
+                    local wonderItem = wonderFactory({
                         Label = function()
                             local parts = {}
                             for _, yield in ipairs(capturedWonder.Yields) do
@@ -322,7 +440,7 @@ local function RebuildYieldsTree(tree)
                             end
                             local text = Locale.Lookup(capturedWonder.Name)
                             if #parts > 0 then
-                                text = text .. ", " .. table.concat(parts, "[NEWLINE]")
+                                text = JoinLines({ text, table.concat(parts, "[NEWLINE]") })
                             end
                             return text
                         end,
@@ -330,7 +448,7 @@ local function RebuildYieldsTree(tree)
                     })
                     cityItem:AddChild(wonderItem)
 
-                    if greatWorks[capturedWonder.Type] then
+                    if wonderHasChildren then
                         for gwIdx, kGreatWork in ipairs(greatWorks[capturedWonder.Type]) do
                             local capturedGW = kGreatWork
                             local capturedGWIdx = gwIdx
@@ -351,7 +469,7 @@ local function RebuildYieldsTree(tree)
                                     end
                                     local text = Locale.Lookup(capturedGW.Name)
                                     if #gwYields > 0 then
-                                        text = text .. ", " .. table.concat(gwYields, "[NEWLINE]")
+                                        text = JoinLines({ text, table.concat(gwYields, "[NEWLINE]") })
                                     end
                                     return text
                                 end)
@@ -383,7 +501,7 @@ local function RebuildYieldsTree(tree)
                             end
                             local text = Locale.Lookup("LOC_HUD_REPORTS_TRADE_WITH", destName)
                             if #routeYields > 0 then
-                                text = text .. ", " .. table.concat(routeYields, "[NEWLINE]")
+                                text = JoinLines({ text, table.concat(routeYields, "[NEWLINE]") })
                             end
                             return text
                         end)
@@ -394,7 +512,8 @@ local function RebuildYieldsTree(tree)
         AddLeaf(cityItem,
             "yield:city:" .. cityID .. ":worked",
             function()
-                return Locale.Lookup("LOC_HUD_REPORTS_WORKED_TILES") .. ", " ..
+                return JoinLines({
+                    Locale.Lookup("LOC_HUD_REPORTS_WORKED_TILES"),
                     FormatYields(
                         capturedCity.WorkedTileYields["YIELD_PRODUCTION"],
                         capturedCity.WorkedTileYields["YIELD_FOOD"],
@@ -403,6 +522,7 @@ local function RebuildYieldsTree(tree)
                         capturedCity.WorkedTileYields["YIELD_SCIENCE"],
                         capturedCity.WorkedTileYields["YIELD_CULTURE"],
                         nil)
+                })
             end)
 
         if capturedCity.City:GetGrowth() ~= nil and capturedCity.City:GetGrowth():GetHappiness() ~= 4 then
@@ -413,7 +533,8 @@ local function RebuildYieldsTree(tree)
                     "yield:city:" .. cityID .. ":amenity",
                     function()
                         local iYieldPercent = (Round(1 + (amenityMod / 100), 2) * .1)
-                        return Locale.Lookup("LOC_HUD_REPORTS_HEADER_AMENITIES") .. ", " ..
+                        return JoinLines({
+                            Locale.Lookup("LOC_HUD_REPORTS_HEADER_AMENITIES"),
                             FormatYields(
                                 capturedCityForAmenity.WorkedTileYields["YIELD_PRODUCTION"] * iYieldPercent,
                                 nil,
@@ -422,6 +543,7 @@ local function RebuildYieldsTree(tree)
                                 capturedCityForAmenity.WorkedTileYields["YIELD_SCIENCE"] * iYieldPercent,
                                 capturedCityForAmenity.WorkedTileYields["YIELD_CULTURE"] * iYieldPercent,
                                 nil)
+                        })
                     end)
             end
         end
@@ -433,8 +555,10 @@ local function RebuildYieldsTree(tree)
             AddLeaf(cityItem,
                 "yield:city:" .. cityID .. ":popculture",
                 function()
-                    return Locale.Lookup("LOC_HUD_CITY_POPULATION") .. ", " ..
+                    return JoinLines({
+                        Locale.Lookup("LOC_HUD_CITY_POPULATION"),
                         Locale.Lookup("LOC_CAI_REPORTS_YIELD_CULTURE", Round(popCulture, 1))
+                    })
                 end)
         end
     end
@@ -456,8 +580,10 @@ local function RebuildYieldsTree(tree)
 
     local buildingExpGroup = MakeTreeItem({
         Label = function()
-            return Locale.Lookup("LOC_HUD_REPORTS_ROW_BUILDING_EXPENSES") .. ", " ..
+            return JoinLines({
+                Locale.Lookup("LOC_HUD_REPORTS_ROW_BUILDING_EXPENSES"),
                 Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -iTotalBuildingMaintenance)
+            })
         end,
         FocusKey = "yield:group:buildingexp",
     })
@@ -501,8 +627,10 @@ local function RebuildYieldsTree(tree)
         local capturedKey = typeEntry.key
         local typeItem = MakeTreeItem({
             Label = function()
-                return Locale.Lookup(capturedData.Name) .. ", " ..
+                return JoinLines({
+                    Locale.Lookup(capturedData.Name),
                     Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -capturedData.Total)
+                })
             end,
             FocusKey = "yield:bldgexp:type:" .. capturedKey,
         })
@@ -514,8 +642,10 @@ local function RebuildYieldsTree(tree)
             AddLeaf(typeItem,
                 "yield:bldgexp:type:" .. capturedKey .. ":city:" .. capturedEI,
                 function()
-                    return Locale.Lookup(capturedEntry.CityName) .. ", " ..
+                    return JoinLines({
+                        Locale.Lookup(capturedEntry.CityName),
                         Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -capturedEntry.Maintenance)
+                    })
                 end)
         end
     end
@@ -528,8 +658,10 @@ local function RebuildYieldsTree(tree)
                 for _, kUnitData in pairs(m_caiUnitData) do
                     total = total + kUnitData.Maintenance
                 end
-                return Locale.Lookup("LOC_HUD_REPORTS_ROW_UNIT_EXPENSES") .. ", " ..
+                return JoinLines({
+                    Locale.Lookup("LOC_HUD_REPORTS_ROW_UNIT_EXPENSES"),
                     Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -total)
+                })
             end,
             FocusKey = "yield:group:unitexp",
         })
@@ -547,9 +679,11 @@ local function RebuildYieldsTree(tree)
             AddLeaf(unitExpGroup,
                 "yield:unitexp:" .. capturedType,
                 function()
-                    return Locale.Lookup(capturedUnit.Name) .. ", " ..
-                        Locale.Lookup("LOC_CAI_REPORTS_UNIT_COUNT", capturedUnit.Count) .. ", " ..
+                    return JoinLines({
+                        Locale.Lookup(capturedUnit.Name),
+                        Locale.Lookup("LOC_CAI_REPORTS_UNIT_COUNT", capturedUnit.Count),
                         Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -capturedUnit.Maintenance)
+                    })
                 end)
         end
     end
@@ -575,9 +709,11 @@ local function RebuildYieldsTree(tree)
                         else
                             amtStr = Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", capturedDeal.Amount)
                         end
-                        return capturedDeal.Name .. ", " ..
-                            Locale.Lookup("LOC_REPORTS_NUMBER_OF_TURNS", capturedDeal.Duration) .. ", " ..
+                        return JoinLines({
+                            capturedDeal.Name,
+                            Locale.Lookup("LOC_REPORTS_NUMBER_OF_TURNS", capturedDeal.Duration),
                             amtStr
+                        })
                     end)
             end
         end
@@ -697,7 +833,7 @@ local function BuildResourceItem(parent, eResourceType, kSingleResourceData)
                     name, capturedResData.Stockpile, capturedResData.Maximum or 0)
                 local flow = GetXP2ResourceFlowData(capturedResType)
                 if flow then
-                    text = text .. ", " .. Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", toPlusMinus(flow.Delta))
+                    text = JoinLines({ text, Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", toPlusMinus(flow.Delta)) })
                 end
                 return text
             else
@@ -718,27 +854,45 @@ local function BuildResourceItem(parent, eResourceType, kSingleResourceData)
                             table.insert(cityNames, Locale.Lookup(pCity:GetName()))
                         end
                     end
-                    return Locale.Lookup("LOC_CAI_REPORTS_AMENITIES_PROVIDED", numCities)
-                        .. ": " .. table.concat(cityNames, ", ")
+                    return JoinLines({
+                        Locale.Lookup("LOC_CAI_REPORTS_AMENITIES_PROVIDED", numCities),
+                        table.concat(cityNames, "[NEWLINE]")
+                    })
                 end
             end
             return nil
         end,
         FocusKey = "res:" .. tostring(capturedResType),
     })
-    parent:AddChild(resItem)
+    local resourceHasChildren = #(capturedResData.EntryList or {}) > 0
+    if resourceHasChildren then
+        parent:AddChild(resItem)
 
-    for ei, kEntry in ipairs(capturedResData.EntryList) do
-        local capturedEntry = kEntry
-        local capturedEI = ei
-        AddLeaf(resItem,
-            "res:" .. tostring(capturedResType) .. ":entry:" .. capturedEI,
-            function()
-                local source = Locale.Lookup(capturedEntry.EntryText)
-                local amt = capturedEntry.Amount
-                local amtStr = (amt <= 0) and tostring(amt) or ("+" .. tostring(amt))
-                return source .. ", " .. amtStr
-            end)
+        for ei, kEntry in ipairs(capturedResData.EntryList) do
+            local capturedEntry = kEntry
+            local capturedEI = ei
+            AddLeaf(resItem,
+                "res:" .. tostring(capturedResType) .. ":entry:" .. capturedEI,
+                function()
+                    local source = Locale.Lookup(capturedEntry.EntryText)
+                    local amt = capturedEntry.Amount
+                    local amtStr = (amt <= 0) and tostring(amt) or ("+" .. tostring(amt))
+                    return JoinLines({ source, amtStr })
+                end)
+        end
+    else
+        local leafLabel = function()
+            local baseLabel = resItem:GetLabel()
+            local tooltip = resItem:GetTooltip()
+            if tooltip ~= nil and tooltip ~= "" then
+                return JoinLines({ baseLabel, tooltip })
+            end
+            return baseLabel
+        end
+        parent:AddChild(MakeStaticText({
+            Label = leafLabel,
+            FocusKey = "res:" .. tostring(capturedResType),
+        }))
     end
 end
 
@@ -781,8 +935,10 @@ local function RebuildResourcesTree(tree)
             local capturedCat = cat
             local catGroup = MakeTreeItem({
                 Label = function()
-                    return Locale.Lookup(capturedCat.label) .. ", " ..
+                    return JoinLines({
+                        Locale.Lookup(capturedCat.label),
                         Locale.Lookup("LOC_CAI_REPORTS_RESOURCE_COUNT", #capturedCat.items)
+                    })
                 end,
                 FocusKey = "res:group:" .. capturedCat.key,
             })
@@ -842,11 +998,11 @@ local function RebuildCityStatusList(list)
 
         local btn = MakeButton({
             Label = function()
-                local cityLabel = Locale.Lookup(capturedCity.CityName)
+                local parts = { Locale.Lookup(capturedCity.CityName) }
                 if capturedCity.IsCapital then
-                    cityLabel = cityLabel .. ", " .. Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL")
+                    table.insert(parts, Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL"))
                 end
-                return cityLabel
+                return JoinLines(parts)
             end,
             Tooltip = function()
                 local parts = {}

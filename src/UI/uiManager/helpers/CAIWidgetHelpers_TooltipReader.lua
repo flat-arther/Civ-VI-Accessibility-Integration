@@ -64,7 +64,8 @@ function T.CacheTooltipSections(widget)
     if widget.Type == "StaticText" then
         tooltip = widget:BuildSpeech({ "label" })
     else
-        tooltip = widget:BuildSpeech({ "tooltip" })
+        tooltip = widget:GetInfoStrings()
+        ["tooltip"]                                  -- Use this to still show tooltips in the readers even if speak tooltips is disabled
     end
 
     widget._ttSections = SplitTooltipIntoSections(tooltip)

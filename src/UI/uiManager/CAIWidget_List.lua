@@ -37,4 +37,9 @@ function ListWidget:OnCharInput(char)
     return Search.HandleChar(self, char, self.SearchDepth)
 end
 
+---@return boolean
+function ListWidget:OnSearchBackspace()
+    return Search.HandleBackspace(self, self.SearchDepth)
+end
+
 CAIWidgetRegistry.Register("List", ListWidget.Create)

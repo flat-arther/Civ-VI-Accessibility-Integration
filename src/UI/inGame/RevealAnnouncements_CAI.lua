@@ -780,9 +780,6 @@ function RevealAnnouncements_CAI.Shutdown()
         binding.Event.Remove(binding.Handler)
     end
 
-    LuaEvents.PlayerChange_Show.Remove(OnPlayerChangeShow)
-    LuaEvents.PlayerChange_Close.Remove(OnPlayerChangeClose)
-
     RevealAnnouncements_CAI.ClearAll()
     m_isInitialized = false
 end

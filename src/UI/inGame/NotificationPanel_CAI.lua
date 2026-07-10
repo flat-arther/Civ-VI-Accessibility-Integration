@@ -385,8 +385,26 @@ local function SpeakNotificationAdded(playerID, notificationID)
     else
         line = Locale.Lookup("LOC_CAI_NOTIFICATION_ALERT", content)
     end
-
-    LuaEvents.CAIAppendToMessageBuffer(line, "notification")
+    local x, y
+    if notification:IsLocationValid() then
+        x, y = notification:GetLocation()
+    elseif notification:IsTargetValid() then
+        local targetPlayerID, targetID, targetType = pNotification:GetTarget()
+        if targetType == PlayerComponentTypes.UNIT then
+            local pUnit = Players[targetPlayerID]:GetUnits():FindID(targetID) ---@type Unit
+            if pUnit ~= nil then
+                x, y = pUnit:GetLocation()
+            end
+        elseif targetType == PlayerComponentTypes.CITY then
+            local pCity = Players[targetPlayerID]:GetCities():FindID(targetID);
+            if pCity ~= nil then
+                x, y = pCity:GetLocation()
+            end
+        end
+    end
+    local location
+    if x and y then location = { x = x, y = y } end
+    LuaEvents.CAIAppendToMessageBuffer(line, "notification", location)
 end
 
 OnNotificationAdded = function(playerID, notificationID)

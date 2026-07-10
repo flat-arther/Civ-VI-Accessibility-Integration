@@ -2151,6 +2151,15 @@ local m_tabPages      = {} ---@type table<integer, UIWidget>     -- vanilla tab 
 local m_ctrlData      = {} ---@type table<table, table>          -- vanilla ctrl -> { values?, handler? }
 local m_resModes      = {} ---@type table[]                       -- list of { label, w, h, hz }
 local m_suppressTabSync = false  -- guard against vanilla/CAI tab-switch ping-pong
+local m_caiDeferredUpdate ---@type fun()|nil
+
+local function CAI_OnUpdate()
+    if m_caiDeferredUpdate then
+        local fn = m_caiDeferredUpdate
+        m_caiDeferredUpdate = nil
+        fn()
+    end
+end
 
 -- ---------------------------------------------------------------------------
 -- Capture vanilla populate handlers so each widget can read its handler back
@@ -2239,10 +2248,9 @@ local function OpenBindingCapture(actionId, slot)
     -- Defer BeginRecordingGestures by one frame so the activating Enter is
     -- fully drained from the input queue before the recorder turns on —
     -- otherwise it captures the same Enter and immediately binds VK_RETURN.
-    ContextPtr:SetUpdate(function()
-        ContextPtr:ClearUpdate()
+    m_caiDeferredUpdate = function()
         StartActiveKeyBinding(actionId, slot)
-    end)
+    end
 end
 
 local function HandleKeybindAction(actionId, actionName, value)
@@ -2929,5 +2937,6 @@ InputHandler = WrapFunc(InputHandler, function(orig, inputStruct)
 end)
 
 ContextPtr:SetHideHandler(function() CloseOptions() end)
+ContextPtr:SetUpdate(CAI_OnUpdate)
 --#End of accessibility integration
 Initialize();

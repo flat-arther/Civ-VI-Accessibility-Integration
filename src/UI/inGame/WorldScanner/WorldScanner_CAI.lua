@@ -53,6 +53,10 @@ local RegisteredCategoryDefinitions = {}
 
 local EMPTY_CATEGORY = false
 local FindCategorySlotById
+local AUTO_FOCUS_SETTING_BY_CATEGORY_ID = {
+    validTargets = "ScannerAutoFocusValidTargets",
+    activeLens = "ScannerAutoFocusActiveLens",
+}
 
 local m_PlayerState = PlayerStateManager.Init(function(playerID)
     return {
@@ -123,6 +127,19 @@ local function BuildScannerContext()
     }
 end
 
+local function ShouldAutoFocusCategory(definition)
+    if definition == nil or not definition.AutoFocus then
+        return false
+    end
+
+    local settingId = AUTO_FOCUS_SETTING_BY_CATEGORY_ID[definition.Id]
+    if settingId == nil then
+        return true
+    end
+
+    return CAISettings.GetBool(settingId)
+end
+
 local function CreateCategorySlots(definitions)
     local autoFocusSlots = {}
     local normalSlots = {}
@@ -133,7 +150,7 @@ local function CreateCategorySlots(definitions)
             Category = nil,
         }
 
-        if definition.AutoFocus then
+        if ShouldAutoFocusCategory(definition) then
             autoFocusSlots[#autoFocusSlots + 1] = slot
         else
             normalSlots[#normalSlots + 1] = slot
@@ -297,19 +314,42 @@ local function GetItemDirectionText(item)
     return directionText
 end
 
+local function GetItemCoordinatesText(item)
+    if item == nil or item.PlotIndex == nil or HexCoordUtils == nil or HexCoordUtils.coordinateString == nil then
+        return nil
+    end
+
+    local x, y = Utils.GetPlotCoords(item.PlotIndex)
+    if x == nil or y == nil then
+        return nil
+    end
+
+    return HexCoordUtils.coordinateString(x, y)
+end
+
 local function BuildItemEntryText(item, itemIndex, itemTotal)
     if item == nil then
         return nil
     end
 
+    local coordsText = GetItemCoordinatesText(item)
+    local coordsMode = CAISettings.GetString("ScannerCoordinates")
     local directionText = GetItemDirectionText(item)
     local parts = { Utils.ResolveText(item.LabelKey) }
+
+    if coordsText ~= nil and coordsText ~= "" and coordsMode == "prepend" then
+        table.insert(parts, 1, coordsText)
+    end
 
     if directionText ~= nil and directionText ~= "" then
         parts[#parts + 1] = directionText
     end
 
     parts[#parts + 1] = Utils.MakePositionText(itemIndex, itemTotal)
+
+    if coordsText ~= nil and coordsText ~= "" and coordsMode == "append" then
+        parts[#parts + 1] = coordsText
+    end
 
     return table.concat(parts, ", ")
 end
@@ -325,14 +365,51 @@ local function SpeakItemEntry(item, itemIndex, itemTotal)
     return true
 end
 
-local function SpeakCurrentGroup(scanner)
+local function GetCurrentTargetPlotIndex(scanner)
+    local item = GetCurrentItem(scanner)
+    if item ~= nil and item.PlotIndex ~= nil then
+        return item.PlotIndex
+    end
+
+    local group = GetGroup(scanner)
+    if group ~= nil and group.PlotIndex ~= nil then
+        return group.PlotIndex
+    end
+
+    return nil
+end
+
+local function FollowCurrentTarget(scanner)
+    if scanner == nil or not CAISettings.GetBool("ScannerAutoMoveCursor") then
+        return false
+    end
+
+    local plotIndex = GetCurrentTargetPlotIndex(scanner)
+    if plotIndex == nil or plotIndex < 0 then
+        return false
+    end
+
+    local currentPlotIndex = CAICursor and CAICursor.GetPlotId and CAICursor:GetPlotId() or -1
+    if currentPlotIndex == plotIndex then
+        return false
+    end
+
+    LuaEvents.CAICursorMoveTo(plotIndex, "snap")
+    return true
+end
+
+local function FocusCurrentItem(scanner)
     local group = GetGroup(scanner)
     if group == nil or group.Items == nil or #group.Items == 0 then
         Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_UNAVAILABLE"))
         return false
     end
 
-    return SpeakItemEntry(group.Items[scanner.ItemIndex], scanner.ItemIndex, group.TotalItems or #group.Items)
+    local spoke = SpeakItemEntry(group.Items[scanner.ItemIndex], scanner.ItemIndex, group.TotalItems or #group.Items)
+    if spoke then
+        FollowCurrentTarget(scanner)
+    end
+    return spoke
 end
 
 local function SelectFirstGroupAndItem(scanner)
@@ -379,6 +456,7 @@ local function FocusCategory(scanner, categoryIndex)
 
     if line2 ~= nil then
         SpeakLines({ line1, line2 })
+        FollowCurrentTarget(scanner)
     else
         SpeakLines({ line1 })
     end
@@ -474,7 +552,7 @@ function CAIWorldScanner:RebuildCategory(categoryId)
     end
 
     if definition ~= nil
-        and definition.AutoFocus
+        and ShouldAutoFocusCategory(definition)
         and slot.Category ~= nil
         and slot.Category ~= EMPTY_CATEGORY then
         FocusCategory(scanner, index)
@@ -630,6 +708,7 @@ function CAIWorldScanner:CycleSubCategory(step)
 
     if line2 ~= nil then
         SpeakLines({ line1, line2 })
+        FollowCurrentTarget(scanner)
     else
         SpeakLines({ line1 })
     end
@@ -662,8 +741,7 @@ function CAIWorldScanner:CycleGroup(step)
 
     scanner.ItemIndex = 1
 
-    local group = GetGroup(scanner)
-    SpeakItemEntry(GetCurrentItem(scanner), scanner.ItemIndex, group.TotalItems or #group.Items)
+    FocusCurrentItem(scanner)
 end
 
 ---@param step integer
@@ -691,7 +769,7 @@ function CAIWorldScanner:CycleItem(step)
         scanner.ItemIndex = ((scanner.ItemIndex - 1 + step) % count) + 1
     end
 
-    SpeakItemEntry(group.Items[scanner.ItemIndex], scanner.ItemIndex, count)
+    FocusCurrentItem(scanner)
 end
 
 function CAIWorldScanner:JumpToCurrent()
@@ -700,13 +778,7 @@ function CAIWorldScanner:JumpToCurrent()
         return
     end
 
-    local item = GetCurrentItem(scanner)
-    local plotIndex = item and item.PlotIndex or nil
-
-    if plotIndex == nil then
-        local group = GetGroup(scanner)
-        plotIndex = group and group.PlotIndex or nil
-    end
+    local plotIndex = GetCurrentTargetPlotIndex(scanner)
 
     if plotIndex == nil or plotIndex < 0 then
         Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_UNAVAILABLE"))

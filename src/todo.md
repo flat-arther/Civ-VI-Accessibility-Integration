@@ -1,6 +1,6 @@
 ## TODO
 
-- [x] cover compatibility with UnitFlag which are used in other scenarios.
+- [x] cover compatibility with UnitFlags which are used in other modes.
 - [x] cover missing info from unit flag, announce levied and relligion at the end present, look at UnitFlag.UpdateName for already localized strings.
 - [x] announce hero, promotion levels, and aircraft current count / capacity. note for promotion levels show only when a unit is not levied, and the unit has promotions following vanilla
 - [x] investigate if aircraft carriers show their contents to sighted players for units you don't own, so we can say it contains x, y, z
@@ -45,4 +45,8 @@
 [x] hamada: the government screen has repeating Empty slot 1, Empty slot 1
 [x] unit actions should not repeat name in tooltip
 [ ] should not stop player from moving if no combat stats
-[ ] Dedications popup should not duplicate dedication name in tooltip
+[x] Dedications popup should not duplicate dedication name in tooltip
+[x] governer panel is missing the biography. 
+[x] Rework the diplomacy screen
+
+[x] Recommendation types in tech and civic trees should report the correct advisor

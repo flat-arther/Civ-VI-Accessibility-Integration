@@ -16,6 +16,7 @@
 
   <InputActions>
     <!-- ===== CAI: Accessibility — cursor, scanner, surveyor, plot/yield reading, widget interaction, buffer ===== -->
+    <Row ActionId="MessageBufferMoveTo" Name="LOC_CAI_MESSAGE_BUFFER_JUMP_CURSOR" Description="LOC_CAI_MESSAGE_BUFFER_JUMP_CURSOR_TOOLTIP" CategoryId="CAI_MESSAGE_BUFFER" ContextId="World" LayoutType="PC"/>
     <Row ActionId="MessageBufferPrevious" Name="LOC_CAI_MESSAGE_BUFFER_PREVIOUS" Description="LOC_CAI_MESSAGE_BUFFER_PREVIOUS_TOOLTIP" CategoryId="CAI_MESSAGE_BUFFER" ContextId="World" LayoutType="PC"/>
     <Row ActionId="MessageBufferNext" Name="LOC_CAI_MESSAGE_BUFFER_NEXT" Description="LOC_CAI_MESSAGE_BUFFER_NEXT_TOOLTIP" CategoryId="CAI_MESSAGE_BUFFER" ContextId="World" LayoutType="PC"/>
     <Row ActionId="MessageBufferFirst" Name="LOC_CAI_MESSAGE_BUFFER_FIRST" Description="LOC_CAI_MESSAGE_BUFFER_FIRST_TOOLTIP" CategoryId="CAI_MESSAGE_BUFFER" ContextId="World" LayoutType="PC"/>
@@ -221,6 +222,7 @@
 
   <InputActionDefaultGestures>
     <!-- CAI: Accessibility -->
+    <Row ActionId="MessageBufferMoveTo" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_BACKSLASH"/>
     <Row ActionId="MessageBufferPrevious" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SEMICOLON"/>
     <Row ActionId="MessageBufferNext" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_QUOTE"/>
 

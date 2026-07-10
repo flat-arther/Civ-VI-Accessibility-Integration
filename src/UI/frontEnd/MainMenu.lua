@@ -1746,6 +1746,10 @@ function OnUpdate( fDeltaTime )
 
 		Controls.ChallengeContainer:SetShow(false);
 	end
+
+	if mgr ~= nil then
+		mgr:OnUpdate()
+	end
 end
 
 -- ===========================================================================

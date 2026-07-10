@@ -59,7 +59,7 @@ local function BuildRouteLabel(city)
         table.insert(parts, Locale.Lookup("LOC_CITY_STATES_QUESTS"))
     end
 
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildAggregateYields(kRouteInfo)
@@ -210,20 +210,20 @@ local function PopulateCategory(cat, cities)
             if originBreakdown ~= "" then
                 local originChild = mgr:CreateWidget(mgr:GenerateWidgetId("CAITradeRoute_OriginYields"), "StaticText", {
                     Label = function()
-                        return Locale.Lookup("LOC_ROUTECHOOSER_RECEIVES_RESOURCE", Locale.Lookup(originCity:GetName()))
+                        return Locale.Lookup("LOC_ROUTECHOOSER_RECEIVES_RESOURCE", Locale.Lookup(originCity:GetName())) ..
+                        "[NEWLINE]" .. originBreakdown
                     end,
                 })
-                originChild:SetValueGetter(function() return originBreakdown end)
                 item:AddChild(originChild)
             end
 
             if destBreakdown ~= "" then
                 local destChild = mgr:CreateWidget(mgr:GenerateWidgetId("CAITradeRoute_DestYields"), "StaticText", {
                     Label = function()
-                        return Locale.Lookup("LOC_ROUTECHOOSER_RECEIVES_RESOURCE", Locale.Lookup(capturedCity:GetName()))
+                        return Locale.Lookup("LOC_ROUTECHOOSER_RECEIVES_RESOURCE", Locale.Lookup(capturedCity:GetName())) ..
+                        "[NEWLINE]" .. destBreakdown
                     end,
                 })
-                destChild:SetValueGetter(function() return destBreakdown end)
                 item:AddChild(destChild)
             end
         end

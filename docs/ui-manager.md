@@ -176,13 +176,18 @@ rest queue.
 ### Direction semantics
 
 - `direction = 1` (forward / Tab / Down / Right / PgDn): entering a container
-  lands on its first visible child.
+  lands on its first visible child when that container uses directional entry;
+  otherwise it lands on its cached default child.
 - `direction = -1` (backward / Shift+Tab / Up / Left / PgUp): entering a
-  container lands on its last visible child.
+  container lands on its last visible child when that container uses
+  directional entry; otherwise it lands on its cached default child.
 - `direction = nil/0` (programmatic): entering a container lands on its
   cached default child.
 
-This is the **only** place Windows tab-stop convention kicks in. After a
+This is the **only** place Windows tab-stop convention kicks in. By default,
+only `Transparent` layout containers use that directional first/last descent;
+set `UseDirectionalEntry = false` on a transparent container to opt it back
+into normal cached-default re-entry. After a
 rebuild, `RestoreFocus` deliberately omits direction so the user lands where
 they were, not at the start/end of the new children.
 
@@ -309,7 +314,10 @@ and the manager's `CAISettings` table has global toggles (`speakLabel`,
 
 A widget marked `Transparent = true` is skipped entirely by
 `BuildAnnouncement`. Use this for layout-only containers — the dialog button
-row is the canonical example.
+row is the canonical example. Transparent containers also use directional
+first/last entry by default; set `UseDirectionalEntry = false` when a
+transparent container should stay silent in speech but still restore its
+cached/default child on entry.
 
 ### Custom speech triggers
 
@@ -550,7 +558,9 @@ Trees navigate **flat**, not by sibling. The helper module
 
 `CAIWidgetHelpers_Search.HandleChar(root, char, maxDepth)`:
 
-- Appends the char to `Manager.SearchBuffer`, with a 1-second timeout reset.
+- Appends the char to `Manager.SearchBuffer`, with timeout behavior controlled
+  by the `SearchTimeout` setting. If that setting is `<= 0`, the buffer does
+  not expire automatically and only explicit user actions clear it.
 - DFS from root to find the first widget whose label (lowercased) starts with
   the buffer, depth-limited.
 - Cycles forward — search starts after the currently focused child.
@@ -558,6 +568,9 @@ Trees navigate **flat**, not by sibling. The helper module
   timeout doesn't extend the buffer. The next search starts after the focused
   match, cycling through every item starting with that letter. Matches the
   JAWS/NVDA convention.
+- When the type-to-find buffer is non-empty, manager-level `Escape` clears it
+  and speaks `Search cleared`. `Backspace` removes the last character; if that
+  empties the buffer, it also speaks `Search cleared`.
 
 Wire it up on a container:
 

@@ -38,6 +38,7 @@ local m_caiGameViewWidget = nil
 local m_caiCurrentInterfaceWidget = nil
 
 
+local ACTION_MESSAGE_BUFFER_MOVETO = Input.GetActionId("MessageBufferMoveTo")
 local ACTION_MESSAGE_BUFFER_PREVIOUS = Input.GetActionId("MessageBufferPrevious")
 local ACTION_MESSAGE_BUFFER_NEXT = Input.GetActionId("MessageBufferNext")
 local ACTION_MESSAGE_BUFFER_FIRST = Input.GetActionId("MessageBufferFirst")
@@ -473,6 +474,15 @@ end
 ---Action functions are passed the game view widget, then any event arguments.
 ---@type table<number, { Type: string, Action: fun(w:UIWidget, ...):boolean|nil }>
 local SharedInputActions = {
+	[ACTION_MESSAGE_BUFFER_MOVETO] = {
+		Type = INPUT_ACTION_TRIGGERED,
+		Action = function()
+			local m_messageBuffer = MessageBuffer.GetActive()
+			if not m_messageBuffer then return end
+			m_messageBuffer:JumpToEntryLocation()
+			return true
+		end,
+	},
 	[ACTION_MESSAGE_BUFFER_PREVIOUS] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
@@ -1093,6 +1103,7 @@ local function DispatchInputAction(actionId, actionType, ...)
 end
 
 local function OnCAIInputActionStarted(actionId, x, y)
+	if CAI then CAI.Silence() end
 	return DispatchInputAction(actionId, INPUT_ACTION_STARTED, x, y)
 end
 
@@ -1201,13 +1212,28 @@ local function OnUpdate()
 	MovementActions_CAI:UpdatePendingMovementResult()
 	RevealAnnouncements_CAI.UpdateVisibility()
 	CheckInput()
-	CAICursorAudio.OnUpdate()
+	if mgr ~= nil then
+		mgr:OnUpdate()
+	end
 end
 
-local function OnCAIAppendToMessageBuffer(text, category)
+local MESSAGE_BUFFER_SPEECH_SETTINGS = {
+	notification = "SpeakMessageBufferNotifications",
+	reveal = "SpeakMessageBufferReveals",
+	combat = "SpeakMessageBufferCombat",
+	movement = "SpeakMessageBufferMovement",
+	chat = "SpeakMessageBufferChat",
+	gossip = "SpeakMessageBufferGossip",
+}
+
+local function OnCAIAppendToMessageBuffer(text, category, location)
 	local m_messageBuffer = MessageBuffer.GetActive()
 	if not m_messageBuffer then return end
-	m_messageBuffer:Append(text, category)
+	m_messageBuffer:Append(text, category, location)
+	local settingId = MESSAGE_BUFFER_SPEECH_SETTINGS[category]
+	if settingId ~= nil and not CAISettings.GetBool(settingId) then
+		return
+	end
 	Speak(text)
 end
 

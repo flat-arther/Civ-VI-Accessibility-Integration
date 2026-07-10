@@ -5,6 +5,7 @@
 
 include("caiUtils")
 include("InputSupport")
+include("audioManager_CAI")
 include("CAIWidgetHelpers_Navigation")
 include("CAIWidgetHelpers_Search")
 include("CAIWidgetHelpers_Tree")
@@ -67,6 +68,7 @@ function UIScreenManager:New()
     mgr.NextWidgetId = 0
     mgr.WidgetHelpers = {}
     mgr.AppRegainedFocusTime = 0
+    mgr.SearchBufferExpireTime = nil
     return mgr
 end
 
@@ -141,6 +143,7 @@ function UIScreenManager:Push(w, opts)
     local willFocusTarget = target ~= nil and newTop == w
 
     if willFocusTarget then
+        if CAI and CAI.Silence then CAI.Silence() end
         self:SetFocus(target)
     elseif newTop ~= oldTop or not self.CurrentPath or self.CurrentPath[1] ~= newTop then
         local announce = opts.announce
@@ -394,15 +397,28 @@ function UIScreenManager:TouchAppRegainedFocusTimer() self.AppRegainedFocusTime 
 ---@return boolean
 function UIScreenManager:HandleInput(input)
     local msg = input:GetMessageType()
-    if msg == KeyEvents.KeyDown then
-        print("test input")
-        if CAI then CAI.Silence() end
+    if msg == KeyEvents.KeyUp then
+        local key = input:GetKey()
+        if key == Keys.VK_ESCAPE and self:ClearSearchBuffer(true) then
+            return true
+        end
+        if key == Keys.VK_BACK then
+            local node = self:GetFocusedWidget()
+            while node do
+                if not node:IsHidden() and node.OnSearchBackspace then
+                    if node:OnSearchBackspace() then return true end
+                end
+                node = node.Parent
+            end
+        end
     end
     if self.AppRegainedFocusTime > 0 and (Automation.GetTime() - self.AppRegainedFocusTime) <= 0.25 then return true end
     local node = self:GetFocusedWidget()
     while node do
         if not node:IsHidden() and node.OnHandleInput then
-            if node:OnHandleInput(input) or node.TrapInput then return true end
+            if node:OnHandleInput(input) or node.TrapInput then
+                return true
+            end
         end
         node = node.Parent
     end
@@ -580,21 +596,87 @@ end
 
 --#region Type-to-find search buffer
 
----@param c string
-function UIScreenManager:AppendSearchChar(c)
-    local now = Automation.GetTime()
-    local timeout = CAISettings.GetNumber("SearchTimeout")
-    if timeout <= 0 then
-        timeout = 1.0
-    end
-    if not self.LastTypeTime or (now - self.LastTypeTime) > timeout then
+function UIScreenManager:ExpireSearchBufferIfNeeded()
+    local expireTime = self.SearchBufferExpireTime
+    if expireTime ~= nil and Automation.GetTime() >= expireTime then
         self.SearchBuffer = ""
+        self.LastTypeTime = nil
+        self.SearchBufferExpireTime = nil
+        return true
     end
-    self.LastTypeTime = now
-    self.SearchBuffer = (self.SearchBuffer or "") .. c:lower()
+    return false
 end
 
-function UIScreenManager:GetSearchBuffer() return self.SearchBuffer or "" end
+function UIScreenManager:TouchSearchBufferTimer()
+    self:ExpireSearchBufferIfNeeded()
+    local buffer = self.SearchBuffer or ""
+    local timeout = CAISettings.GetNumber("SearchTimeout")
+
+    if buffer == "" or timeout <= 0 then
+        self.SearchBufferExpireTime = nil
+        return
+    end
+
+    self.SearchBufferExpireTime = Automation.GetTime() + timeout
+end
+
+function UIScreenManager:OnUpdate()
+    self:ExpireSearchBufferIfNeeded()
+    self:UpdateAudioManager()
+end
+
+---@param announce? boolean
+---@return boolean
+function UIScreenManager:ClearSearchBuffer(announce)
+    local buffer = self:GetSearchBuffer()
+    if buffer == "" then
+        return false
+    end
+
+    self.SearchBuffer = ""
+    self.LastTypeTime = nil
+    self.SearchBufferExpireTime = nil
+
+    if announce then
+        Speak(Locale.Lookup("LOC_CAI_SEARCH_CLEARED"))
+    end
+
+    return true
+end
+
+---@return string
+function UIScreenManager:RemoveSearchChar()
+    local buffer = self:GetSearchBuffer()
+    if buffer == "" then
+        return ""
+    end
+
+    if #buffer <= 1 then
+        self.SearchBuffer = ""
+        self.LastTypeTime = nil
+        self.SearchBufferExpireTime = nil
+        return ""
+    end
+
+    self.SearchBuffer = string.sub(buffer, 1, #buffer - 1)
+    self.LastTypeTime = Automation.GetTime()
+    self:TouchSearchBufferTimer()
+    return self.SearchBuffer
+end
+
+---@param c string
+function UIScreenManager:AppendSearchChar(c)
+    self:ExpireSearchBufferIfNeeded()
+    local now = Automation.GetTime()
+    self.LastTypeTime = now
+    self.SearchBuffer = (self.SearchBuffer or "") .. c:lower()
+    self:TouchSearchBufferTimer()
+end
+
+function UIScreenManager:GetSearchBuffer()
+    self:ExpireSearchBufferIfNeeded()
+    return self.SearchBuffer or ""
+end
 
 --#endregion
 
@@ -656,10 +738,42 @@ end
 
 --#region Lifecycle
 
+function UIScreenManager:GetAudioManager()
+    return self.AudioManager
+end
+
+function UIScreenManager:InitializeAudioManager()
+    if self.AudioManager == nil then
+        self.AudioManager = CAIAudioManager:New()
+    end
+
+    self.AudioManager:Initialize(self)
+    ExposedMembers.CAI_AudioManager = self.AudioManager
+end
+
+function UIScreenManager:UpdateAudioManager()
+    local audio = self:GetAudioManager()
+    if audio ~= nil then
+        audio:Update()
+    end
+end
+
+function UIScreenManager:ShutdownAudioManager()
+    local audio = self:GetAudioManager()
+    if audio == nil then
+        ExposedMembers.CAI_AudioManager = nil
+        return
+    end
+
+    audio:Shutdown()
+    self.AudioManager = nil
+    ExposedMembers.CAI_AudioManager = nil
+end
 
 function UIScreenManager:Init()
     ExposedMembers.CAI_UIManager = self:New()
     local mgr = ExposedMembers.CAI_UIManager
+    mgr:InitializeAudioManager()
     if CAIWidgetHelpers_DialogBuilder and CAIWidgetHelpers_DialogBuilder.Install then
         CAIWidgetHelpers_DialogBuilder.Install(mgr)
     end
@@ -671,8 +785,13 @@ function UIScreenManager:Init()
     LuaEvents.CAIUIManagerInitialized(mgr)
 end
 
-function UIScreenManager:ShutDown(unregCharInput)
-    ExposedMembers.CAI_UIManager = nil
+function UIScreenManager:ShutDown(unregCharInput, preserveAudio)
+    if preserveAudio ~= true then
+        self:ShutdownAudioManager()
+    end
+    if preserveAudio ~= true then
+        ExposedMembers.CAI_UIManager = nil
+    end
     if unregCharInput == nil then unregCharInput = true end
     if unregCharInput and CAI and CAI.UnregisterGlobalCharInputHandler then
         CAI.UnregisterGlobalCharInputHandler()

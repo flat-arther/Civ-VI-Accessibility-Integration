@@ -581,6 +581,33 @@ function S.FindNextSearchResult(results, focused)
     return 1
 end
 
+---@param root UIWidget
+---@param maxDepth integer
+---@param repeatSearch boolean
+---@return boolean
+function S.ApplyCurrentBuffer(root, maxDepth, repeatSearch)
+    local mgr = root.Manager
+    if not mgr then
+        return false
+    end
+
+    local results = S.FindSearchResults(root, mgr:GetSearchBuffer(), maxDepth or 5)
+
+    if #results == 0 then
+        Speak(Locale.Lookup("LOC_CAI_SEARCH_NO_MATCH"))
+        return false
+    end
+
+    local resultIndex = 1
+
+    if repeatSearch then
+        resultIndex = S.FindNextSearchResult(results, mgr:GetFocusedWidget())
+    end
+
+    mgr:SetFocus(results[resultIndex].Candidate.Widget)
+    return true
+end
+
 ---Convenience: handle a single char input on the widget for search.
 ---Returns true if a match was focused; speaks the no-match message otherwise.
 ---
@@ -603,34 +630,40 @@ function S.HandleChar(root, char, maxDepth)
         return false
     end
 
-    local now = Automation.GetTime()
-    local timeout = mgr.CAISettings.SearchTimeout or 1.0
-    local withinTimeout = mgr.LastTypeTime and (now - mgr.LastTypeTime) <= timeout
-
     local repeatSearch = #prev == 1 and prev == char:lower()
 
     if repeatSearch then
-        -- Keep the buffer at the single letter; just refresh the timestamp.
-        mgr.LastTypeTime = now
+        -- Keep the buffer at the single letter; just refresh the timeout.
+        mgr.LastTypeTime = Automation.GetTime()
+        mgr:TouchSearchBufferTimer()
     else
         mgr:AppendSearchChar(char)
     end
 
-    local results = S.FindSearchResults(root, mgr:GetSearchBuffer(), maxDepth or 5)
+    return S.ApplyCurrentBuffer(root, maxDepth or 5, repeatSearch)
+end
 
-    if #results == 0 then
-        Speak(Locale.Lookup("LOC_CAI_SEARCH_NO_MATCH"))
+---@param root UIWidget
+---@param maxDepth? integer
+---@return boolean
+function S.HandleBackspace(root, maxDepth)
+    local mgr = root.Manager
+    if not mgr then
         return false
     end
 
-    local resultIndex = 1
-
-    if repeatSearch then
-        resultIndex = S.FindNextSearchResult(results, mgr:GetFocusedWidget())
+    local buffer = mgr:GetSearchBuffer()
+    if buffer == "" then
+        return false
     end
 
-    mgr:SetFocus(results[resultIndex].Candidate.Widget)
-    return true
+    local nextBuffer = mgr:RemoveSearchChar()
+    if nextBuffer == "" then
+        Speak(Locale.Lookup("LOC_CAI_SEARCH_CLEARED"))
+        return true
+    end
+
+    return S.ApplyCurrentBuffer(root, maxDepth or 5, false)
 end
 
 --#endregion

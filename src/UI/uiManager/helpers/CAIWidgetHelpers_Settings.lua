@@ -8,6 +8,12 @@ CAIWidgetHelpers_Settings = {}
 local S = CAIWidgetHelpers_Settings
 
 local g_settingsOpen = false
+local EDITBOX_EDIT_MODES = {
+    Normal = 0,
+    LettersOnly = 1,
+    NumbersOnly = 2,
+    AlphanumericOnly = 3,
+}
 
 -- ===========================================================================
 -- Small helpers
@@ -139,8 +145,11 @@ local function CreateText(mgr, row)
         Tooltip = SettingTooltip(row),
         FocusKey = "setting:" .. row.SettingId,
     })
+    local editMode = EDITBOX_EDIT_MODES[tostring(row.EditMode)]
+    if editMode then w:SetEditMode(editMode) end
 
     w:SetText(CAISettings.GetString(row.SettingId), true)
+
 
     w:SetValueSetter(function(_, value)
         CAISettings.SetString(row.SettingId, value)

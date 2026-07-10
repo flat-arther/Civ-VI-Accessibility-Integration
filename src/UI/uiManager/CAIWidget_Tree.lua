@@ -58,4 +58,16 @@ function TreeWidget:OnCharInput(char)
     return Search.HandleChar(self, char, self.SearchDepth)
 end
 
+---@return boolean
+function TreeWidget:OnSearchBackspace()
+    local function clearAll(node)
+        if node.IsTreeItem then Tree.ClearDescent(node) end
+        if node.Children then
+            for _, c in ipairs(node.Children) do clearAll(c) end
+        end
+    end
+    clearAll(self)
+    return Search.HandleBackspace(self, self.SearchDepth)
+end
+
 CAIWidgetRegistry.Register("Tree", TreeWidget.Create)

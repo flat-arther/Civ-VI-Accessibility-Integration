@@ -5,6 +5,29 @@ local mgr = ExposedMembers.CAI_UIManager
 local m_dialog = nil ---@type UIWidget|nil
 local m_caiEntries = {} ---@type table[] -- { cb: CheckboxWidget, selectCheck: control }
 
+local function GetDedicationTooltipText(textControl)
+    if not textControl or not textControl.GetText then
+        return ""
+    end
+
+    local text = textControl:GetText() or ""
+    if text == "" then
+        return ""
+    end
+
+    local firstLine, remainder = text:match("^(.-)%[NEWLINE%](.+)$")
+    if firstLine and remainder and remainder ~= "" then
+        return remainder
+    end
+
+    firstLine, remainder = text:match("^(.-)\r?\n(.+)$")
+    if firstLine and remainder and remainder ~= "" then
+        return remainder
+    end
+
+    return text
+end
+
 local function RemoveDialog()
     if not mgr or not m_dialog then return end
     mgr:RemoveFromStack(m_dialog:GetId())
@@ -39,13 +62,12 @@ local function BuildDialog()
         local labels = detailStack and detailStack:GetChildren()
         local categoryCtrl = labels and labels[1]
         local bonusCtrl = labels and labels[2]
-
         local cb = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDedicationChoice"), "Checkbox", {
             Label = function()
                 return categoryCtrl and categoryCtrl:GetText() or ""
             end,
             Tooltip = function()
-                return bonusCtrl and bonusCtrl:GetText() or ""
+                return GetDedicationTooltipText(bonusCtrl)
             end,
         })
         cb:On("value_changed", function()
@@ -78,19 +100,17 @@ local function BuildDialog()
     mgr:Push(m_dialog, { priority = PopupPriority.MediumHigh })
 end
 
-LuaEvents.EraReviewPopup_MakeDedication.Remove(OnGameEraChanged);
+LuaEvents.EraReviewPopup_MakeDedication.Remove(OnGameEraChanged)
 OnGameEraChanged = WrapFunc(OnGameEraChanged, function(orig, ...)
     orig(...)
-    BuildDialog()
+    if not ContextPtr:IsHidden() then
+        BuildDialog()
+    end
 end)
 LuaEvents.EraReviewPopup_MakeDedication.Add(OnGameEraChanged);
 
-OnClose = WrapFunc(OnClose, function(orig)
-    RemoveDialog()
-    orig()
-end)
 
-OnConfirm = WrapFunc(OnConfirm, function(orig)
+OnClose = WrapFunc(OnClose, function(orig)
     RemoveDialog()
     orig()
 end)
@@ -103,5 +123,4 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
     return orig(pInputStruct)
 end)
 ContextPtr:SetInputHandler(OnInputHandler, true)
-Controls.CloseButton:RegisterCallback(Mouse.eLClick, OnClose);
-Controls.Confirm:RegisterCallback(Mouse.eLClick, OnConfirm);
+Controls.CloseButton:RegisterCallback(Mouse.eLClick, OnClose)
