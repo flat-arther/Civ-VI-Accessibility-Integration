@@ -3335,10 +3335,10 @@
       <Text>Lens list</Text>
     </Row>
     <Row Tag="LOC_CAI_MINIMAP_OPEN_MAP_PIN_LIST" Language="en_US">
-      <Text>Toggle map pin list</Text>
+      <Text>Open map tacs list</Text>
     </Row>
     <Row Tag="LOC_CAI_MINIMAP_OPEN_MAP_PIN_LIST_TOOLTIP" Language="en_US">
-      <Text>Opens or closes the map pin list panel.</Text>
+      <Text>Opens the map tacs list panel.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GOAL_ADDED_ALERT" Language="en_US">
       <Text>Tutorial goal added: {1_Goal}</Text>
@@ -4564,10 +4564,10 @@
 
     <!-- Map Pin -->
     <Row Tag="LOC_CAI_PLACE_MAP_PIN" Language="en_US">
-      <Text>Place Map Pin</Text>
+      <Text>Place Map tac</Text>
     </Row>
     <Row Tag="LOC_CAI_PLACE_MAP_PIN_TOOLTIP" Language="en_US">
-      <Text>Place a map pin at the current cursor location</Text>
+      <Text>Place or edit a map tac at the current cursor location</Text>
     </Row>
 
     <!-- Map Pin Popup -->
@@ -4781,7 +4781,7 @@
       <Text>Collapse submenu</Text>
     </Row>
     <Row Tag="LOC_CAI_KB_CONFIRM_MAP_PIN" Language="en_US">
-      <Text>Confirm map pin</Text>
+      <Text>Confirm map tac</Text>
     </Row>
     <Row Tag="LOC_CAI_KB_CONFIRM_UNIT_NAME" Language="en_US">
       <Text>Confirm unit name</Text>
@@ -4841,7 +4841,7 @@
       <Text>Begin or confirm edit</Text>
     </Row>
     <Row Tag="LOC_CAI_KB_EDIT_MAP_PIN" Language="en_US">
-      <Text>Edit map pin</Text>
+      <Text>Edit map tac</Text>
     </Row>
     <Row Tag="LOC_CAI_KB_ENTER_SUBMENU" Language="en_US">
       <Text>Enter submenu</Text>

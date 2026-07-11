@@ -44,10 +44,13 @@
 [x] turn status in chat panel
 [x] hamada: the government screen has repeating Empty slot 1, Empty slot 1
 [x] unit actions should not repeat name in tooltip
-[ ] should not stop player from moving if no combat stats
+[ ] should not stop player from moving if no combat stats are encountered. Game considers entering a city state teratory as a combat even though there is no enemy on the dest plot
 [x] Dedications popup should not duplicate dedication name in tooltip
 [x] governer panel is missing the biography. 
 [x] Rework the diplomacy screen
-
 [x] Recommendation types in tech and civic trees should report the correct advisor
 [ ] redo the scanner categories for the tourism and power lenses. They are shit
+[ ] figure out tab bar count
+[ ] dedup difficulty tooltip, it repeats label. 
+[ ] change dropdowns that have simple on off options to checkboxes
+[ ] add custom locale for hotkey strings that are symbols
