@@ -8,8 +8,9 @@
 
 CAICursorAudio = CAICursorAudio or {}
 
-local STINGER_DELAY_SECONDS = 0.08
+local STINGER_DELAY_SECONDS = 0.1
 local CURSOR_AUDIO_TAGS = {
+    "CURSOR_CROSSINGS",
     "CURSOR_FOG",
     "CURSOR_TERRAIN",
     "CURSOR_STINGERS",
@@ -71,6 +72,22 @@ local FEATURE_STINGERS = {
     FEATURE_VOLCANO = "CURSOR_VOLCANO",
 }
 
+local function HasRiverCrossing(sourcePlot, targetPlot)
+    if sourcePlot == nil or targetPlot == nil then
+        return false
+    end
+
+    local ok, result = pcall(function()
+        return sourcePlot:IsRiverCrossingToPlot(targetPlot)
+    end)
+    if not ok then
+        LogWarn("CAICursorAudio.HasRiverCrossing: IsRiverCrossingToPlot failed")
+        return false
+    end
+
+    return result == true
+end
+
 -- ===========================================================================
 -- Playback
 -- ===========================================================================
@@ -78,7 +95,7 @@ local FEATURE_STINGERS = {
 local function StopCursorTags()
     local audio = GetAudioManager()
     if audio == nil then
-        print("CAICursorAudio.StopCursorTags: CAI_AudioManager is unavailable")
+        LogWarn("CAICursorAudio.StopCursorTags: CAI_AudioManager is unavailable")
         return
     end
 
@@ -94,7 +111,7 @@ local function QueueSound(soundId, delaySeconds)
 
     local audio = GetAudioManager()
     if audio == nil then
-        print("CAICursorAudio.QueueSound: CAI_AudioManager is unavailable for " .. tostring(soundId))
+        LogWarn("CAICursorAudio.QueueSound: CAI_AudioManager is unavailable for " .. tostring(soundId))
         return
     end
 
@@ -147,6 +164,28 @@ local function IsPlotVisible(plot)
     return visibility:IsVisible(plot:GetIndex())
 end
 
+local function GetRouteRow(plot)
+    if plot == nil or not plot:IsRoute() or plot:IsRoutePillaged() then
+        return nil
+    end
+
+    local routeType = plot:GetRouteType()
+    if routeType == nil or routeType < 0 then
+        return nil
+    end
+
+    return GameInfo.Routes[routeType]
+end
+
+local function RouteSupportsBridges(route)
+    if route == nil then
+        return false
+    end
+
+    local value = route.SupportsBridges
+    return value == true or value == 1 or value == "true" or value == "1"
+end
+
 local function GetBedSound(plot)
     if plot == nil then return nil end
 
@@ -188,6 +227,15 @@ local function GetStingers(plot)
         end
     end
 
+    local route = GetRouteRow(plot)
+    if route ~= nil then
+        if route.RouteType == "ROUTE_RAILROAD" then
+            table.insert(results, "CURSOR_METAL_WALK")
+        else
+            table.insert(results, "CURSOR_ROAD_WALK")
+        end
+    end
+
     return results
 end
 
@@ -198,28 +246,57 @@ local function GetFogSound(plot)
     return "CURSOR_WOOSH"
 end
 
+local function GetCrossingSound(plot, prevPlot, moveReason)
+    if plot == nil or prevPlot == nil then
+        return nil
+    end
+
+    if moveReason ~= "step" then
+        return nil
+    end
+
+    if not HasRiverCrossing(prevPlot, plot) then
+        return nil
+    end
+
+    local fromRoute = GetRouteRow(prevPlot)
+    local toRoute = GetRouteRow(plot)
+    if fromRoute ~= nil and toRoute ~= nil and RouteSupportsBridges(fromRoute) and RouteSupportsBridges(toRoute) then
+        return "CURSOR_WOOD_WALK"
+    end
+
+    return "CURSOR_RIVER_CROSSING"
+end
+
 -- ===========================================================================
 -- Public API
 -- ===========================================================================
 
-function CAICursorAudio.PlayPlot(plot, prevPlot)
+function CAICursorAudio.PlayPlot(plot, prevPlot, moveReason)
     if plot == nil then return end
     if not IsPlotRevealed(plot) then return end
 
     StopCursorTags()
 
     local fog = GetFogSound(plot)
+    local crossing = GetCrossingSound(plot, prevPlot, moveReason)
     local bedDelay = 0
+    if crossing ~= nil then
+        QueueSound(crossing, 0)
+        bedDelay = STINGER_DELAY_SECONDS
+    end
 
     QueueSound(GetBedSound(plot), bedDelay)
     QueueSound(fog, bedDelay)
 
     for _, stinger in ipairs(GetStingers(plot)) do
-        QueueSound(stinger, bedDelay + STINGER_DELAY_SECONDS)
+        if not (crossing == "CURSOR_WOOD_WALK" and (stinger == "CURSOR_ROAD_WALK" or stinger == "CURSOR_METAL_WALK")) then
+            QueueSound(stinger, bedDelay + STINGER_DELAY_SECONDS)
+        end
     end
 end
 
-function CAICursorAudio.PlayPlotById(plotId, prevPlotId)
+function CAICursorAudio.PlayPlotById(plotId, prevPlotId, moveReason)
     local audio = GetAudioManager()
     if audio ~= nil and not audio:IsTagEnabled("CURSOR") then
         return
@@ -234,12 +311,13 @@ function CAICursorAudio.PlayPlotById(plotId, prevPlotId)
         prevPlot = Map.GetPlotByIndex(prevPlotId)
     end
 
-    CAICursorAudio.PlayPlot(plot, prevPlot)
+    CAICursorAudio.PlayPlot(plot, prevPlot, moveReason)
 end
 
 local function OnCAICursorMoved(data)
     if data == nil then return end
-    CAICursorAudio.PlayPlotById(data.toPlotId, data.fromPlotId)
+    if data.fromPlotId == data.toPlotId then return end
+    CAICursorAudio.PlayPlotById(data.toPlotId, data.fromPlotId, data.reason)
 end
 
 function CAICursorAudio.Initialize()

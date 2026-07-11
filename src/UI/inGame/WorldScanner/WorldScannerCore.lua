@@ -34,6 +34,24 @@ local Utils = CAIWorldScannerUtils
 Core.AllSubCategoryId = "__all"
 Core.AllSubCategoryLabelKey = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_ALL"
 
+local function GetCategoryLogId(definition)
+    if definition == nil then
+        return "unknown"
+    end
+
+    return tostring(definition.Id or definition.LabelKey or "unknown")
+end
+
+local function SafeCall(definition, phase, fn, ...)
+    local ok, result = pcall(fn, ...)
+    if not ok then
+        LogError("World scanner " .. phase .. " failed for category " .. GetCategoryLogId(definition) .. ": " .. tostring(result))
+        return false, nil
+    end
+
+    return true, result
+end
+
 local function CompareResolvedLabels(aLabelKey, bLabelKey)
     local aLabel = Utils.ResolveText(aLabelKey)
     local bLabel = Utils.ResolveText(bLabelKey)
@@ -200,6 +218,7 @@ end
 ---@return WorldScannerCategory|nil
 local function BuildCategoryFromItems(definition, rawItems, context)
     if rawItems == nil or #rawItems == 0 then
+        LogMessage("World scanner BuildCategoryFromItems: no raw items for category " .. GetCategoryLogId(definition))
         return nil
     end
 
@@ -253,9 +272,14 @@ local function BuildCategoryFromItems(definition, rawItems, context)
     end
 
     if #subCategories == 0 then
+        LogWarn("World scanner BuildCategoryFromItems: no subcategories built for category " .. GetCategoryLogId(definition) .. " from " .. tostring(#rawItems) .. " raw items")
         return nil
     end
 
+    LogMessage("World scanner BuildCategoryFromItems built category "
+        .. GetCategoryLogId(definition)
+        .. ", subcategories=" .. tostring(#subCategories)
+        .. ", totalItems=" .. tostring(subCategories[1] and subCategories[1].TotalItems or 0))
     return {
         Id = definition.Id,
         LabelKey = definition.LabelKey,
@@ -268,11 +292,34 @@ end
 ---@param context WorldScannerContext
 ---@return WorldScannerCategory|nil
 function Core.BuildCategory(definition, context)
-    if definition.CanScan ~= nil and not definition.CanScan(context) then
+    if definition == nil then
+        LogError("World scanner BuildCategory called with nil definition")
         return nil
     end
 
-    local rawItems = definition.Scan and definition.Scan(context) or {}
+    if definition.CanScan ~= nil then
+        local ok, canScan = SafeCall(definition, "CanScan", definition.CanScan, context)
+        if not ok then
+            return nil
+        end
+        if not canScan then
+            LogMessage("World scanner BuildCategory skipped by CanScan for category " .. GetCategoryLogId(definition))
+            return nil
+        end
+    end
+
+    local rawItems = {}
+    if definition.Scan ~= nil then
+        local ok, result = SafeCall(definition, "Scan", definition.Scan, context)
+        if not ok then
+            return nil
+        end
+        rawItems = result or {}
+    end
+
+    LogMessage("World scanner BuildCategory scanned category "
+        .. GetCategoryLogId(definition)
+        .. ", rawItems=" .. tostring(#rawItems))
     return BuildCategoryFromItems(definition, rawItems, context)
 end
 
@@ -283,10 +330,23 @@ function Core.BuildAllCategories(definitions, context)
     local results = {}
     local plotExtractors = {}
     local scanCategories = {}
+    local failedDefinitions = {}
 
     for _, definition in ipairs(definitions) do
-        if definition.CanScan ~= nil and not definition.CanScan(context) then
-            results[definition.Id] = nil
+        if definition.CanScan ~= nil then
+            local ok, canScan = SafeCall(definition, "CanScan", definition.CanScan, context)
+            if not ok then
+                results[definition.Id] = nil
+                failedDefinitions[definition.Id] = true
+            elseif not canScan then
+                LogMessage("World scanner BuildAllCategories skipped by CanScan for category " .. GetCategoryLogId(definition))
+                results[definition.Id] = nil
+            elseif definition.PlotExtract ~= nil then
+                local entry = { Definition = definition, RawItems = {} }
+                plotExtractors[#plotExtractors + 1] = entry
+            else
+                scanCategories[#scanCategories + 1] = definition
+            end
         elseif definition.PlotExtract ~= nil then
             local entry = { Definition = definition, RawItems = {} }
             plotExtractors[#plotExtractors + 1] = entry
@@ -298,27 +358,63 @@ function Core.BuildAllCategories(definitions, context)
     if #plotExtractors > 0 then
         for _, entry in ipairs(plotExtractors) do
             if entry.Definition.BeginExtract ~= nil then
-                entry.Definition.BeginExtract()
+                local ok = SafeCall(entry.Definition, "BeginExtract", entry.Definition.BeginExtract)
+                if not ok then
+                    results[entry.Definition.Id] = nil
+                    failedDefinitions[entry.Definition.Id] = true
+                end
             end
         end
 
         Utils.ForEachRevealedPlot(context, function(plotIndex, plot)
             for _, entry in ipairs(plotExtractors) do
                 local items = entry.RawItems
-                entry.Definition.PlotExtract(plotIndex, plot, context, function(item)
+                if failedDefinitions[entry.Definition.Id] then
+                    return
+                end
+                local ok = SafeCall(entry.Definition, "PlotExtract", entry.Definition.PlotExtract, plotIndex, plot, context, function(item)
                     items[#items + 1] = item
                 end)
+                if not ok then
+                    results[entry.Definition.Id] = nil
+                    failedDefinitions[entry.Definition.Id] = true
+                end
             end
         end)
 
         for _, entry in ipairs(plotExtractors) do
-            results[entry.Definition.Id] = BuildCategoryFromItems(entry.Definition, entry.RawItems, context)
+            if failedDefinitions[entry.Definition.Id] then
+                LogWarn("World scanner BuildAllCategories skipping failed extractor category " .. GetCategoryLogId(entry.Definition))
+            else
+                LogMessage("World scanner BuildAllCategories extracted category "
+                    .. GetCategoryLogId(entry.Definition)
+                    .. ", rawItems=" .. tostring(#entry.RawItems))
+                results[entry.Definition.Id] = BuildCategoryFromItems(entry.Definition, entry.RawItems, context)
+            end
         end
     end
 
     for _, definition in ipairs(scanCategories) do
-        local rawItems = definition.Scan and definition.Scan(context) or {}
-        results[definition.Id] = BuildCategoryFromItems(definition, rawItems, context)
+        local rawItems = {}
+        local failed = false
+        if definition.Scan ~= nil then
+            local ok, result = SafeCall(definition, "Scan", definition.Scan, context)
+            if ok then
+                rawItems = result or {}
+            else
+                results[definition.Id] = nil
+                failedDefinitions[definition.Id] = true
+                failed = true
+            end
+        end
+        if failed then
+            LogWarn("World scanner BuildAllCategories skipping failed scan category " .. GetCategoryLogId(definition))
+        else
+        LogMessage("World scanner BuildAllCategories scanned category "
+            .. GetCategoryLogId(definition)
+            .. ", rawItems=" .. tostring(#rawItems))
+            results[definition.Id] = BuildCategoryFromItems(definition, rawItems, context)
+        end
     end
 
     return results

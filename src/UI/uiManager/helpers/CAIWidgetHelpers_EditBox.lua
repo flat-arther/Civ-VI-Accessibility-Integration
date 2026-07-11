@@ -283,6 +283,7 @@ function E.InsertText(w, text)
         local room = w._maxChars - #buf
         if room <= 0 then
             w._buffer, w._cursor, w._selStart = origBuffer, origCursor, origSelStart
+            LogMessage("EditBox helper InsertText blocked by max character limit on widget " .. tostring(w.Id or "?"))
             return false
         end
         text = string.sub(text, 1, room)
@@ -290,6 +291,7 @@ function E.InsertText(w, text)
     local proposed = string.sub(buf, 1, pos) .. text .. string.sub(buf, pos + 1)
     if w._validator and not w._validator(proposed) then
         w._buffer, w._cursor, w._selStart = origBuffer, origCursor, origSelStart
+        LogMessage("EditBox helper InsertText rejected by validator on widget " .. tostring(w.Id or "?"))
         return false
     end
     w._buffer = proposed

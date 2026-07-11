@@ -321,19 +321,30 @@ end
 local g_lookupOpen = false
 
 function P.RunLookup(widget)
-    if not Search or not Search.HasContext or not Search.HasContext("Civilopedia") then return false end
-    if g_lookupOpen then return false end
+    if not Search or not Search.HasContext or not Search.HasContext("Civilopedia") then
+        LogWarn("PediaLookup RunLookup aborted because Civilopedia search context is unavailable")
+        return false
+    end
+    if g_lookupOpen then
+        LogWarn("PediaLookup RunLookup ignored because lookup UI is already open")
+        return false
+    end
 
     local mgr = widget.Manager
-    if not mgr then return false end
+    if not mgr then
+        LogWarn("PediaLookup RunLookup called without manager")
+        return false
+    end
 
     local terms = P.CollectTerms(widget)
     if #terms == 0 then
+        LogMessage("PediaLookup RunLookup found no lookup terms")
         Speak(Locale.Lookup("LOC_CAI_PEDIA_LOOKUP_NO_TERMS"))
         return true
     end
 
     local results = SearchPedia(terms)
+    LogMessage("PediaLookup searched Civilopedia, terms=" .. tostring(#terms) .. ", results=" .. tostring(#results))
 
     if #results == 0 then
         Speak(Locale.Lookup("LOC_CAI_PEDIA_LOOKUP_NO_RESULTS"))
@@ -341,6 +352,7 @@ function P.RunLookup(widget)
     end
 
     if #results == 1 then
+        LogMessage("PediaLookup opening single result " .. tostring(results[1].sectionId) .. "|" .. tostring(results[1].pageId))
         LuaEvents.OpenCivilopedia(results[1].sectionId, results[1].pageId)
         return true
     end
@@ -367,6 +379,7 @@ function P.RunLookup(widget)
         g_lookupOpen = false
         panel:Destroy()
         if previousFocus then mgr:SetFocus(previousFocus) end
+        LogMessage("PediaLookup closed lookup UI")
     end
 
     for _, r in ipairs(results) do
@@ -396,6 +409,7 @@ function P.RunLookup(widget)
 
     root:AddChild(panel)
     mgr:SetFocus(list)
+    LogMessage("PediaLookup opened results list with " .. tostring(#results) .. " items")
     return true
 end
 

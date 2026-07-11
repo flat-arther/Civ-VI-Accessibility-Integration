@@ -125,12 +125,23 @@ local m_tabCallIndex = 0
 AddTab = WrapFunc(AddTab, function(orig, label, religionData, onClickCallback)
     local btn = orig(label, religionData, onClickCallback)
     m_tabCallIndex = m_tabCallIndex + 1
-    if religionData and religionData.Index then
-        m_tabButtons[religionData.Index] = btn
-    elseif m_tabCallIndex == 1 then
+
+    -- The player's own tab can carry real religionData once a religion is founded,
+    -- so key the special tabs by their vanilla callback identity instead of by
+    -- whether religionData is nil.
+    if onClickCallback == ViewMyReligion then
         m_tabButtons["my"] = btn
-    else
+    elseif onClickCallback == ViewAllReligions then
         m_tabButtons["all"] = btn
+    elseif religionData and religionData.Index then
+        m_tabButtons[religionData.Index] = btn
+    else
+        -- Fallback for any unexpected vanilla ordering without explicit data.
+        if m_tabCallIndex == 1 then
+            m_tabButtons["my"] = btn
+        else
+            m_tabButtons["all"] = btn
+        end
     end
     return btn
 end)
@@ -514,31 +525,22 @@ local function BuildUnitsSection(parent, religion, religionType)
 end
 
 -- ============================================================================
--- Pantheon line builder
+-- Pantheon tooltip helpers
 -- ============================================================================
 
-local function CreatePantheonLine(religion, religionType)
-    local ownerPlayer = Players[religion.Founder]
+local function AppendPantheonTooltipParts(parts, playerID)
+    local ownerPlayer = Players[playerID]
+    if not ownerPlayer then return end
+
     local playerReligion = ownerPlayer:GetReligion()
     local pantheonIndex = playerReligion:GetPantheon()
+    if pantheonIndex < 0 then return end
 
-    if pantheonIndex >= 0 then
-        local belief = GameInfo.Beliefs[pantheonIndex]
-        if belief then
-            return mgr:CreateWidget(mgr:GenerateWidgetId("CAIRel_Pan"), "StaticText", {
-                Label = function()
-                    return Locale.Lookup("LOC_CAI_RELIGION_PANTHEON_LINE", Locale.Lookup(belief.Name))
-                end,
-                Tooltip = function() return NormalizeText(Locale.Lookup(belief.Description)) end,
-                FocusKey = "rel:" .. religionType .. ":pantheon",
-            })
-        end
-    end
+    local belief = GameInfo.Beliefs[pantheonIndex]
+    if not belief then return end
 
-    return mgr:CreateWidget(mgr:GenerateWidgetId("CAIRel_NoPan"), "StaticText", {
-        Label = function() return Locale.Lookup("LOC_CAI_RELIGION_NO_PANTHEON") end,
-        FocusKey = "rel:" .. religionType .. ":pantheon",
-    })
+    table.insert(parts, Locale.Lookup("LOC_CAI_RELIGION_PANTHEON_LINE", Locale.Lookup(belief.Name)))
+    table.insert(parts, NormalizeText(Locale.Lookup(belief.Description)))
 end
 
 -- ============================================================================
@@ -562,6 +564,7 @@ local function CreateReligionRow(religionInfo)
             else
                 table.insert(parts, Locale.Lookup("LOC_UI_RELIGION_RELIGION_DOMINANCE_PLURAL", dominantCount))
             end
+            AppendPantheonTooltipParts(parts, religionInfo.Founder)
             return table.concat(parts, "[NEWLINE]")
         end,
         FocusKey = "rel:" .. religionType,
@@ -576,10 +579,7 @@ local function CreateReligionRow(religionInfo)
         end
     end)
 
-    -- 1. Pantheon (flat line at top)
-    row:AddChild(CreatePantheonLine(religionInfo, religionType))
-
-    -- 2. Beliefs
+    -- 1. Beliefs
     local beliefsSection = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRel_Beliefs"), "TreeItem", {
         Label = function()
             return Locale.Lookup("LOC_CAI_RELIGION_BELIEFS_COUNT", #religionInfo.Beliefs, 4)
@@ -596,7 +596,7 @@ local function CreateReligionRow(religionInfo)
     end)
     row:AddChild(beliefsSection)
 
-    -- 3. Cities
+    -- 2. Cities
     local citiesSection = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRel_Cities"), "TreeItem", {
         Label    = function() return Locale.Lookup("LOC_UI_RELIGION_CITIES") end,
         FocusKey = "rel:" .. religionType .. ":cities",
@@ -608,7 +608,7 @@ local function CreateReligionRow(religionInfo)
         "LOC_CAI_RELIGION_FILTER_PRESENT"))
     row:AddChild(citiesSection)
 
-    -- 4. Units (hidden for non-player religions)
+    -- 3. Units (hidden for non-player religions)
     local unitsSection = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRel_Units"), "TreeItem", {
         Label           = function() return Locale.Lookup("LOC_CAI_RELIGION_UNITS_SECTION") end,
         FocusKey        = "rel:" .. religionType .. ":units",
@@ -647,13 +647,6 @@ end
 local function GetMyReligionTooltip()
     local parts = {}
 
-    if cai.pantheonBelief >= 0 then
-        local belief = GameInfo.Beliefs[cai.pantheonBelief]
-        if belief then
-            table.insert(parts, NormalizeText(Locale.Lookup(belief.Description)))
-        end
-    end
-
     if cai.playerReligionType >= 0 then
         local displayPlayerID = GetDisplayPlayerID()
         for _, religion in ipairs(Game.GetReligion():GetReligions()) do
@@ -668,6 +661,7 @@ local function GetMyReligionTooltip()
                 else
                     table.insert(parts, Locale.Lookup("LOC_UI_RELIGION_RELIGION_DOMINANCE_PLURAL", dominantCount))
                 end
+                AppendPantheonTooltipParts(parts, displayPlayerID)
                 break
             end
         end
@@ -678,6 +672,7 @@ local function GetMyReligionTooltip()
         else
             table.insert(parts, Locale.Lookup("LOC_RELIGIONPANEL_NEXT_STEP_EARN_PROPHET"))
         end
+        AppendPantheonTooltipParts(parts, GetDisplayPlayerID())
     elseif cai.canCreatePantheon then
         table.insert(parts, Locale.Lookup("LOC_UI_RELIGION_CHOOSING_PANTHEON"))
     else
@@ -721,9 +716,6 @@ local function CreateMyReligionRow()
     if not religionInfo then return row end
 
     local religionType = religionInfo.Religion
-
-    -- Pantheon (flat line at top)
-    row:AddChild(CreatePantheonLine(religionInfo, "my"))
 
     -- Beliefs
     local beliefsSection = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRel_MyBeliefs"), "TreeItem", {

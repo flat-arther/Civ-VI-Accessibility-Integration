@@ -191,6 +191,13 @@ local function BuildAllIntoSlots(scanner)
         if definition ~= nil then
             local built = builtMap[definition.Id]
             slot.Category = built or EMPTY_CATEGORY
+            if built ~= nil then
+                LogMessage("World scanner slot built category "
+                    .. tostring(definition.Id)
+                    .. ", totalItems=" .. tostring(built.TotalItems or 0))
+            else
+                LogMessage("World scanner slot empty category " .. tostring(definition.Id))
+            end
         end
     end
 end
@@ -505,6 +512,7 @@ end
 function CAIWorldScanner:Rebuild(focusOverride)
     local scanner = GetScannerState()
     if scanner == nil then
+        LogError("World scanner Rebuild called without scanner state")
         return
     end
 
@@ -527,16 +535,19 @@ function CAIWorldScanner:Rebuild(focusOverride)
     Core.RestoreFocus(scanner, focus)
     EnsureCurrentCategory(scanner)
     Core.ClampIndexes(scanner)
+    LogMessage("World scanner rebuilt, availableCategories=" .. tostring(CountAvailableCategories(scanner)))
 end
 
 function CAIWorldScanner:RebuildCategory(categoryId)
     local scanner = GetScannerState()
     if scanner == nil then
+        LogError("World scanner RebuildCategory called without scanner state for category " .. tostring(categoryId))
         return
     end
 
     local index = FindCategorySlotById(scanner, categoryId)
     if index == nil then
+        LogWarn("World scanner RebuildCategory could not find category " .. tostring(categoryId))
         return
     end
 
@@ -562,6 +573,13 @@ function CAIWorldScanner:RebuildCategory(categoryId)
 
     EnsureCurrentCategory(scanner)
     Core.ClampIndexes(scanner)
+    if slot.Category ~= nil and slot.Category ~= EMPTY_CATEGORY then
+        LogMessage("World scanner rebuilt category "
+            .. tostring(categoryId)
+            .. ", totalItems=" .. tostring(slot.Category.TotalItems or 0))
+    else
+        LogWarn("World scanner rebuilt category " .. tostring(categoryId) .. " as empty")
+    end
 end
 
 function CAIWorldScanner:ResortCurrentCategory()
@@ -611,6 +629,7 @@ function CAIWorldScanner:Initialize()
     Events.InterfaceModeChanged.Add(OnScannerInterfaceModeChanged)
 
     EnsureCurrentCategory(scanner)
+    LogMessage("World scanner initialized")
 end
 
 function CAIWorldScanner:ClearScanner()
@@ -632,6 +651,7 @@ function CAIWorldScanner:ClearScanner()
         scanner.SearchSnapshot = nil
         scanner.SearchHistoryIndex = 0
     end
+    LogMessage("World scanner cleared")
 end
 
 function CAIWorldScanner:OnLocalPlayerTurnBegin()
@@ -659,6 +679,7 @@ function CAIWorldScanner:CycleCategory(step)
         return
     end
 
+    local previousPosition = GetAvailableCategoryPosition(scanner, scanner.CategoryIndex)
     local targetIndex = FindAvailableCategoryIndex(scanner, scanner.CategoryIndex + step, step)
     if targetIndex == nil then
         Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_EMPTY"))
@@ -666,10 +687,15 @@ function CAIWorldScanner:CycleCategory(step)
     end
 
     count = CountAvailableCategories(scanner)
+    local targetPosition = GetAvailableCategoryPosition(scanner, targetIndex)
     FocusCategory(scanner, targetIndex)
+    local wrapped = step > 0 and targetPosition <= previousPosition
+        or step < 0 and targetPosition >= previousPosition
+    if wrapped then
+        ExposedMembers.CAI_UIManager:HandleNavigationWrap(self, step)
+    end
 end
 
----@param step integer
 ---@param step integer
 function CAIWorldScanner:CycleSubCategory(step)
     local scanner = GetScannerState()
@@ -689,7 +715,10 @@ function CAIWorldScanner:CycleSubCategory(step)
         return
     end
 
+    local previousIndex = scanner.SubCategoryIndex
     scanner.SubCategoryIndex = ((scanner.SubCategoryIndex - 1 + step) % count) + 1
+    local wrapped = step > 0 and scanner.SubCategoryIndex <= previousIndex
+        or step < 0 and scanner.SubCategoryIndex >= previousIndex
     SelectFirstGroupAndItem(scanner)
 
     local subCategory = GetSubCategory(scanner)
@@ -712,6 +741,9 @@ function CAIWorldScanner:CycleSubCategory(step)
     else
         SpeakLines({ line1 })
     end
+    if wrapped then
+        ExposedMembers.CAI_UIManager:HandleNavigationWrap(self, step)
+    end
 end
 
 ---@param step integer
@@ -733,6 +765,7 @@ function CAIWorldScanner:CycleGroup(step)
         return
     end
 
+    local previousIndex = scanner.GroupIndex
     if scanner.GroupIndex == 0 then
         scanner.GroupIndex = step > 0 and 1 or count
     else
@@ -742,6 +775,11 @@ function CAIWorldScanner:CycleGroup(step)
     scanner.ItemIndex = 1
 
     FocusCurrentItem(scanner)
+    local wrapped = previousIndex ~= 0 and (step > 0 and scanner.GroupIndex <= previousIndex
+        or step < 0 and scanner.GroupIndex >= previousIndex)
+    if wrapped then
+        ExposedMembers.CAI_UIManager:HandleNavigationWrap(self, step)
+    end
 end
 
 ---@param step integer

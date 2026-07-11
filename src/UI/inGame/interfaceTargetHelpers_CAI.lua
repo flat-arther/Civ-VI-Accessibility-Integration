@@ -435,7 +435,7 @@ local function ResolvePlotTargetLabel(mode, plotIndex)
         requestedKeys = PLOT_INFO_KEYS_BY_MODE[mode]
     end
 
-    local results = plotInfo:RequestPlotInfo(nil, requestedKeys, plotIndex)
+    local results = plotInfo:RequestPlotInfo(plotIndex, requestedKeys)
     if results ~= nil and #results > 0 then return table.concat(results, ", ") end
 
     local plot = Map.GetPlotByIndex(plotIndex)

@@ -66,7 +66,7 @@ function CAIWorldScannerCategory_Terrain.PlotExtract(plotIndex, plot, context, c
 
     local featureType = plot:GetFeatureType()
     local featureInfo = GameInfo.Features[featureType]
-    if featureInfo ~= nil then
+    if featureInfo ~= nil and not featureInfo.NaturalWonder then
         collect({
             Id = "terrain:feature:" .. tostring(plotIndex),
             PlotIndex = plotIndex,

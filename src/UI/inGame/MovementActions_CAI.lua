@@ -1,3 +1,5 @@
+include("caiUtils")
+
 MovementActions_CAI = MovementActions_CAI or {}
 
 local m_readyForCombat = {
@@ -233,14 +235,14 @@ function MovementActions_CAI:CommitMoveTarget(unit, targetPlotId)
 
     if OnMouseMoveToEnd == nil then
         self:ClearPendingMovementResult()
-        print("MovementActions_CAI could not access OnMouseMoveToEnd for move commit")
+        LogError("MovementActions_CAI could not access OnMouseMoveToEnd for move commit")
         return false
     end
 
     local currentPlotId = UI.GetCursorPlotID()
     if currentPlotId ~= targetPlotId then
         if LuaEvents == nil or LuaEvents.CAICursorMoveTo == nil then
-            print("MovementActions_CAI could not move CAI cursor before move commit")
+            LogWarn("MovementActions_CAI could not move CAI cursor before move commit")
             return false
         end
 

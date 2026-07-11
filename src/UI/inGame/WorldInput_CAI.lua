@@ -1055,7 +1055,7 @@ end
 
 local function OnInterfaceChanged(oldMode, newMode)
 	if not m_caiGameViewWidget then
-		print("Error: CAI game view widget is nil")
+		LogError("CAI WorldInput interface change failed because game view widget is nil")
 		return
 	end
 
@@ -1116,13 +1116,13 @@ end
 -- ===========================================================================
 local function CreateGameViewWidget()
 	if not mgr then
-		print("Error: ExposedMembers.CAI_UIManager is nil")
+		LogError("CAI WorldInput could not create game view widget because ExposedMembers.CAI_UIManager is nil")
 		return false
 	end
 
 	m_caiGameViewWidget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWorldInputGameView"), "GameView")
 	if not m_caiGameViewWidget then
-		print("Failed to create gameview widget")
+		LogError("CAI WorldInput failed to create game view widget")
 		return false
 	end
 
@@ -1174,13 +1174,13 @@ end
 local function OnCAICursorMoved(state)
 	local plotId = state.toPlotId
 	if plotId == nil or plotId < 0 or not Map.IsPlot(plotId) then
-		print("CAI WorldInput received invalid cursor plot id: " .. tostring(plotId))
+		LogWarn("CAI WorldInput received invalid cursor plot id: " .. tostring(plotId))
 		return
 	end
 
 	local plot = Map.GetPlotByIndex(plotId)
 	if plot == nil then
-		print("CAI WorldInput could not resolve cursor plot id: " .. tostring(plotId))
+		LogWarn("CAI WorldInput could not resolve cursor plot id: " .. tostring(plotId))
 		return
 	end
 

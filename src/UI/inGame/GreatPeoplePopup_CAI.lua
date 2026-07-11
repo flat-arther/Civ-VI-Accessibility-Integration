@@ -162,6 +162,39 @@ local function FormatProgressLabel(kPlayerPoints, recruitCost)
         tostring(Round(kPlayerPoints.PointsPerTurn, 1)))
 end
 
+local function GetLocalProgressText(kPerson)
+    if not kPerson or not kPerson.ClassID or not m_cachedData or not m_cachedData.PointsByClass then
+        return ""
+    end
+
+    local pointsByClass = m_cachedData.PointsByClass[kPerson.ClassID]
+    if not pointsByClass then return "" end
+
+    local localPlayerID = Game.GetLocalPlayer()
+    for _, kPlayerPoints in ipairs(pointsByClass) do
+        if kPlayerPoints.PlayerID == localPlayerID then
+            return FormatProgressLabel(kPlayerPoints, kPerson.RecruitCost)
+        end
+    end
+    return ""
+end
+
+local function IsRecruitActionAvailable(kPerson)
+    return kPerson
+        and HasCapability("CAPABILITY_GREAT_PEOPLE_CAN_RECRUIT")
+        and kPerson.CanRecruit
+        and kPerson.RecruitCost
+        and not IsReadOnly()
+end
+
+local function IsPassActionAvailable(kPerson)
+    return kPerson
+        and HasCapability("CAPABILITY_GREAT_PEOPLE_CAN_REJECT")
+        and kPerson.CanReject
+        and kPerson.RejectCost
+        and not IsReadOnly()
+end
+
 local function GetBiographyText(kPerson)
     if not kPerson or not kPerson.BiographyTextTable then
         return Locale.Lookup("LOC_CAI_GP_NO_BIOGRAPHY")
@@ -212,6 +245,29 @@ local function BuildGPTree()
                 m_focusedPersonID = personID
                 UpdateBiographyAndButtons()
             end)
+
+            item:On("activate", function()
+                if IsRecruitActionAvailable(kPerson) then
+                    OnRecruitButtonClick(personID)
+                else
+                    local progressText = GetLocalProgressText(kPerson)
+                    if progressText ~= "" then Speak(progressText) end
+                end
+            end)
+
+            item:AddInputBindings({
+                {
+                    Key = Keys.VK_DELETE,
+                    MSG = KeyEvents.KeyUp,
+                    Description = "LOC_GREAT_PEOPLE_PASS",
+                    Action = function()
+                        if IsPassActionAvailable(kPerson) then
+                            OnRejectButtonClick(personID)
+                        end
+                        return true
+                    end,
+                },
+            })
 
             if m_cachedData.PointsByClass and kPerson.ClassID then
                 local pointsByClass = m_cachedData.PointsByClass[kPerson.ClassID]
@@ -589,9 +645,7 @@ local function BuildPanel()
         return Locale.Lookup("LOC_GREAT_PEOPLE_TAB_GREAT_PEOPLE")
     end)
 
-    m_ui.gpTree = mgr:CreateWidget(GP_TREE_ID, "Tree", {
-        Label = function() return Locale.Lookup("LOC_GREAT_PEOPLE_TAB_GREAT_PEOPLE") end,
-    })
+    m_ui.gpTree = mgr:CreateWidget(GP_TREE_ID, "Tree")
     m_ui.gpPage:AddChild(m_ui.gpTree)
 
     m_ui.bioEdit = mgr:CreateWidget(GP_BIO_ID, "EditBox", {
@@ -600,7 +654,6 @@ local function BuildPanel()
     m_ui.bioEdit:SetReadOnly(true)
     m_ui.bioEdit:SetAlwaysEdit(true)
     m_ui.bioEdit:SetFocusSound(HOVER_SOUND)
-    m_ui.gpPage:AddChild(m_ui.bioEdit)
 
     -- Action buttons — call vanilla global callbacks directly with individualID
     m_ui.recruitBtn = mgr:CreateWidget(GP_RECRUIT_BTN_ID, "Button", {
@@ -715,6 +768,9 @@ local function BuildPanel()
     end)
     m_ui.gpPage:AddChild(m_ui.faithBtn)
 
+    -- Keep biography after all contextual actions in the tab order.
+    m_ui.gpPage:AddChild(m_ui.bioEdit)
+
     -- Tab 2: Previously Recruited
     m_ui.pastPage = m_ui.tabs:AddPage(function()
         return Locale.Lookup("LOC_GREAT_PEOPLE_TAB_PREVIOUSLY_RECRUITED")
@@ -740,7 +796,7 @@ local function BuildPanel()
             Label = function()
                 local h = GetFocusedHero()
                 if not h or not h.recallInfo then return "" end
-                return tostring(h.recallInfo.faithCost) .. " [ICON_Faith]"
+                return Locale.Lookup("LOC_CAI_GP_RECALL_WITH_FAITH_LABEL", h.recallInfo.faithCost)
             end,
             Tooltip = function()
                 local h = GetFocusedHero()

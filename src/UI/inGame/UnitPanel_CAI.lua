@@ -2666,7 +2666,7 @@ function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locatio
 
     local plot = Map.GetPlot(locationX, locationY)
     if plot == nil then
-        print("CAI UnitPanel could not resolve selected unit plot: " ..
+        LogWarn("CAI UnitPanel could not resolve selected unit plot: " ..
             tostring(locationX) .. ", " .. tostring(locationY))
         return
     end

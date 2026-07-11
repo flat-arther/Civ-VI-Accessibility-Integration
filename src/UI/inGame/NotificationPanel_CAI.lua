@@ -1,24 +1,23 @@
 include("caiUtils")
 
-local mgr                                  = ExposedMembers.CAI_UIManager
+local mgr                              = ExposedMembers.CAI_UIManager
 
-local NOTIFICATION_CENTER_ID               = "CAINotificationCenter_Tree"
-local EMPTY_NODE_ID                        = "CAINotificationCenter_Empty"
-local GROUP_ID_PREFIX                      = "CAINotificationCenter_Group_"
-local LEAF_ID_PREFIX                       = "CAINotificationCenter_Leaf_"
-local m_IsGameStarted                      = false
-local ACTION_OPEN_NOTIFICATION_CENTER      = Input.GetActionId("UI_NotificationPanelOpenList")
-local CAI_TUTORIAL_GOAL_ADDED_TYPE         = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_ADDED")
-local CAI_TUTORIAL_GOAL_COMPLETED_TYPE     = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_COMPLETED")
+local NOTIFICATION_CENTER_ID           = "CAINotificationCenter_Tree"
+local EMPTY_NODE_ID                    = "CAINotificationCenter_Empty"
+local GROUP_ID_PREFIX                  = "CAINotificationCenter_Group_"
+local LEAF_ID_PREFIX                   = "CAINotificationCenter_Leaf_"
+local m_IsGameStarted                  = false
+local ACTION_OPEN_NOTIFICATION_CENTER  = Input.GetActionId("UI_NotificationPanelOpenList")
+local CAI_TUTORIAL_GOAL_ADDED_TYPE     = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_ADDED")
+local CAI_TUTORIAL_GOAL_COMPLETED_TYPE = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_COMPLETED")
+local DEFAULT_NOTIFICATION_SOUND       = "ALERT_NEUTRAL"
+local DEFAULT_SOUND_EXCLUDED_TYPES     = {
+    [NotificationTypes.PLAYER_MET] = true,
+}
 
-local BASE_LookAtNotification              = LookAtNotification
-local BASE_RegisterHandlers                = RegisterHandlers
-local m_caiOriginalOnNotificationAdded     = OnNotificationAdded
-local m_caiOriginalOnNotificationDismissed = OnNotificationDismissed
-
-local m_centerTree                         = nil ---@type UIWidget|nil
-local m_caiAnnouncedNotificationIDs        = {}
-local m_caiDeferedNotificationAnnounce     = {}
+local m_centerTree                     = nil ---@type UIWidget|nil
+local m_caiAnnouncedNotificationIDs    = {}
+local m_caiDeferedNotificationAnnounce = {}
 
 local function GetLocalPlayer()
     local playerID = Game.GetLocalPlayer()
@@ -26,14 +25,13 @@ local function GetLocalPlayer()
     return playerID
 end
 
-function RegisterHandlers()
-    BASE_RegisterHandlers()
-
+RegisterHandlers = WrapFunc(RegisterHandlers, function(orig)
+    orig()
     g_notificationHandlers[CAI_TUTORIAL_GOAL_ADDED_TYPE]              = MakeDefaultHandlers()
     g_notificationHandlers[CAI_TUTORIAL_GOAL_COMPLETED_TYPE]          = MakeDefaultHandlers()
     g_notificationHandlers[CAI_TUTORIAL_GOAL_ADDED_TYPE].Activate     = OnCAITutorialGoalNotificationActivate
     g_notificationHandlers[CAI_TUTORIAL_GOAL_COMPLETED_TYPE].Activate = OnCAITutorialGoalNotificationActivate
-end
+end)
 
 -- Vanilla naming is reversed from CAI usage:
 --   notification:GetMessage() -> short title / headline ("Tech boost")
@@ -112,8 +110,8 @@ local function CloseNotificationCenter()
     if mgr then mgr:RemoveFromStack(NOTIFICATION_CENTER_ID) end
 end
 
-LookAtNotification = function(pNotification)
-    BASE_LookAtNotification(pNotification)
+LookAtNotification = WrapFunc(LookAtNotification, function(orig, pNotification)
+    orig(pNotification)
     if m_centerTree then return end
     if pNotification and pNotification:IsLocationValid() then
         local x, y = pNotification:GetLocation()
@@ -122,7 +120,7 @@ LookAtNotification = function(pNotification)
             LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
         end
     end
-end
+end)
 
 function OnCAITutorialGoalNotificationActivate(notificationEntry, notificationID, activatedByUser)
     if notificationEntry == nil or notificationEntry.m_PlayerID ~= Game.GetLocalPlayer() then return end
@@ -389,14 +387,14 @@ local function SpeakNotificationAdded(playerID, notificationID)
     if notification:IsLocationValid() then
         x, y = notification:GetLocation()
     elseif notification:IsTargetValid() then
-        local targetPlayerID, targetID, targetType = pNotification:GetTarget()
+        local targetPlayerID, targetID, targetType = notification:GetTarget()
         if targetType == PlayerComponentTypes.UNIT then
             local pUnit = Players[targetPlayerID]:GetUnits():FindID(targetID) ---@type Unit
             if pUnit ~= nil then
                 x, y = pUnit:GetLocation()
             end
         elseif targetType == PlayerComponentTypes.CITY then
-            local pCity = Players[targetPlayerID]:GetCities():FindID(targetID);
+            local pCity = Players[targetPlayerID]:GetCities():FindID(targetID)
             if pCity ~= nil then
                 x, y = pCity:GetLocation()
             end
@@ -407,21 +405,42 @@ local function SpeakNotificationAdded(playerID, notificationID)
     LuaEvents.CAIAppendToMessageBuffer(line, "notification", location)
 end
 
-OnNotificationAdded = function(playerID, notificationID)
-    m_caiOriginalOnNotificationAdded(playerID, notificationID)
+local function PlayDefaultNotificationSound(playerID, notificationID)
+    if playerID ~= GetLocalPlayer() then return end
+    if not m_IsGameStarted then return end
+
+    local playerConfig = PlayerConfigurations[playerID]
+    if playerConfig == nil or not playerConfig:IsAlive() then return end
+
+    local notification = GetLiveNotification(playerID, notificationID)
+    if not IsNotificationAvailable(notification, notificationID, playerID) then return end
+
+    local handler = GetHandler(notification:GetType())
+    if handler == nil then return end
+    if handler.AddSound ~= nil and handler.AddSound ~= "" then return end
+
+    -- These notifications receive audio outside the handler's AddSound field.
+    if DEFAULT_SOUND_EXCLUDED_TYPES[notification:GetType()] then return end
+
+    UI.PlaySound(DEFAULT_NOTIFICATION_SOUND)
+end
+
+OnNotificationAdded = WrapFunc(OnNotificationAdded, function(orig, playerID, notificationID)
+    orig(playerID, notificationID)
+    PlayDefaultNotificationSound(playerID, notificationID)
     if playerID == GetLocalPlayer() and m_centerTree then
         RebuildTree()
     end
     SpeakNotificationAdded(playerID, notificationID)
-end
+end)
 
-OnNotificationDismissed = function(playerID, notificationID)
-    m_caiOriginalOnNotificationDismissed(playerID, notificationID)
+OnNotificationDismissed = WrapFunc(OnNotificationDismissed, function(orig, playerID, notificationID)
+    orig(playerID, notificationID)
     if playerID == GetLocalPlayer() then
         m_caiAnnouncedNotificationIDs[notificationID] = nil
         if m_centerTree then RebuildTree() end
     end
-end
+end)
 
 local function OnCAINotificationInputAction(actionId)
     if actionId == ACTION_OPEN_NOTIFICATION_CENTER then

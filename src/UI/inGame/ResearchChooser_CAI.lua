@@ -500,16 +500,6 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
 end)
 ContextPtr:SetInputHandler(OnInputHandler, true)
 
-OnChooseResearch = WrapFunc(OnChooseResearch, function(orig, techHash)
-    for _, kData in ipairs(m_rowData) do
-        if kData.Hash == techHash then
-            Speak(Locale.Lookup("LOC_HUD_RESEARCH_CHOSEN", kData.Name) or kData.Name)
-            break
-        end
-    end
-    return orig(techHash)
-end)
-
 OnClosePanel = WrapFunc(OnClosePanel, function(orig)
     orig()
     OnPanelClosedCAI()

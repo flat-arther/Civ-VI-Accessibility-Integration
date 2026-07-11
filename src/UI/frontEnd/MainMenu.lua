@@ -1985,7 +1985,7 @@ local function RebuildMenuRows(menuOptions)
         if dataEntry and controlRef and not EXCLUDED_MAIN_CALLBACKS[dataEntry.callback] then
             if dataEntry.callback == OnMultiPlayer then m_MultiplayerIdx = i end
 
-            local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_MenuItem"), "MenuItem", {
+            local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_MenuItem"), "Button", {
                 Label = function() return controlRef.ButtonLabel:GetText() end,
                 Tooltip = function() return controlRef.Top:GetToolTipString() end,
                 HiddenPredicate = function() return controlRef.Top:IsHidden() end,
@@ -2101,7 +2101,7 @@ BuildSubMenu = WrapFunc(BuildSubMenu, function(orig, menuOptions)
                     group:On("focus_enter", function() HighlightSubmenuInstance(control) end)
                     group:On("focus_leave", function() ClearSubmenuHighlight(control) end)
 
-                    local playBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_PlayBtn"), "MenuItem", {
+                    local playBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_PlayBtn"), "Button", {
                         Label = function() return Locale.Lookup("LOC_PLAY_CIVILIZATION_6") end,
                         Tooltip = function() return control.Top:GetToolTipString() end,
                         DisabledPredicate = function() return control.OptionButton:IsDisabled() end,
@@ -2110,7 +2110,7 @@ BuildSubMenu = WrapFunc(BuildSubMenu, function(orig, menuOptions)
                     playBtn:On("focus_enter", function() HighlightSubmenuInstance(control) end)
                     group:AddChild(playBtn)
 
-                    local helpBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_HelpBtn"), "MenuItem", {
+                    local helpBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_HelpBtn"), "Button", {
                         Label = function() return Locale.Lookup("LOC_CAI_HELP") end,
                         Tooltip = function() return control.HelpButton:GetToolTipString() end,
                         DisabledPredicate = function() return control.HelpButton:IsDisabled() end,
@@ -2123,7 +2123,7 @@ BuildSubMenu = WrapFunc(BuildSubMenu, function(orig, menuOptions)
 
                     m_SubmenuList:AddChild(group)
                 else
-                    local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_SubItem"), "MenuItem", {
+                    local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_SubItem"), "Button", {
                         Label = function() return labelText end,
                         Tooltip = function() return control.Top:GetToolTipString() end,
                         DisabledPredicate = function() return control.OptionButton:IsDisabled() end,

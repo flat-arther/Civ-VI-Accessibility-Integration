@@ -81,7 +81,10 @@ end
 ---@return boolean
 function T.NavigateFlat(root, direction)
     local flat = T.Flatten(root)
-    if #flat == 0 then return false end
+    if #flat == 0 then
+        LogMessage("Tree helper NavigateFlat found no visible tree items")
+        return false
+    end
     local mgr = root.Manager
     local current = mgr:GetFocusedWidget()
     local curIdx
@@ -97,7 +100,10 @@ function T.NavigateFlat(root, direction)
         targetIdx = direction > 0 and 1 or #flat
     else
         targetIdx = curIdx + direction
-        if targetIdx < 1 or targetIdx > #flat then return false end
+        if targetIdx < 1 or targetIdx > #flat then
+            LogMessage("Tree helper NavigateFlat hit tree boundary at index " .. tostring(curIdx))
+            return false
+        end
     end
     local target = flat[targetIdx]
     ClearDescent(target)
@@ -112,9 +118,15 @@ end
 ---@return boolean
 function T.NavigatePage(root, direction, pageSize)
     pageSize = pageSize or 10
-    if pageSize <= 0 then return false end
+    if pageSize <= 0 then
+        LogWarn("Tree helper NavigatePage called with non-positive page size " .. tostring(pageSize))
+        return false
+    end
     local flat = T.Flatten(root)
-    if #flat == 0 then return false end
+    if #flat == 0 then
+        LogMessage("Tree helper NavigatePage found no visible tree items")
+        return false
+    end
     local mgr = root.Manager
     local current = mgr:GetFocusedWidget()
     local curIdx
@@ -132,7 +144,10 @@ function T.NavigatePage(root, direction, pageSize)
         targetIdx = curIdx + direction * pageSize
         if targetIdx < 1 then targetIdx = 1 end
         if targetIdx > #flat then targetIdx = #flat end
-        if targetIdx == curIdx then return false end
+        if targetIdx == curIdx then
+            LogMessage("Tree helper NavigatePage hit tree boundary at index " .. tostring(curIdx))
+            return false
+        end
     end
     local target = flat[targetIdx]
     ClearDescent(target)
@@ -168,7 +183,10 @@ end
 ---@return boolean
 function T.ExpandOrDescend(root)
     local item = root.Manager:GetFocusedWidget()
-    if not item or not item.IsTreeItem or item:IsLeaf() then return false end
+    if not item or not item.IsTreeItem or item:IsLeaf() then
+        LogMessage("Tree helper ExpandOrDescend ignored because focused widget is not an expandable tree item")
+        return false
+    end
     if not item.IsExpanded then
         item:Expand()
         return true
@@ -177,7 +195,10 @@ function T.ExpandOrDescend(root)
     for _, c in ipairs(item.Children) do
         if not c:IsHidden() then first = c; break end
     end
-    if not first then return false end
+    if not first then
+        LogWarn("Tree helper ExpandOrDescend found expanded tree item with no visible children")
+        return false
+    end
     root.Manager:SetFocus(first)
     return true
 end
@@ -195,7 +216,10 @@ function T.CollapseOrAscend(root)
         return true
     end
     local parent = T.GetParentTreeItem(root, focused)
-    if not parent then return false end
+    if not parent then
+        LogMessage("Tree helper CollapseOrAscend could not find parent tree item")
+        return false
+    end
     ClearDescent(parent)
     root.Manager:SetFocus(parent)
     return true
@@ -207,7 +231,10 @@ end
 ---@return boolean
 function T.ToggleFocused(root)
     local item = root.Manager:GetFocusedWidget()
-    if not item or not item.IsTreeItem or item:IsLeaf() then return false end
+    if not item or not item.IsTreeItem or item:IsLeaf() then
+        LogMessage("Tree helper ToggleFocused ignored because focused widget is not a toggleable tree item")
+        return false
+    end
     if item.IsExpanded then item:Collapse() else item:Expand() end
     return true
 end

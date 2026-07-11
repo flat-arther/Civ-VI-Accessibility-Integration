@@ -82,16 +82,23 @@ end
 ---@param direction 1|-1
 ---@return boolean
 function H.Navigate(w, direction)
-    if not w.Children or #w.Children == 0 then return false end
+    if not w.Children or #w.Children == 0 then
+        LogMessage("Navigation helper Navigate found no children on widget " .. tostring(w.Id or "?"))
+        return false
+    end
     local focused = w:GetFocusedChild()
     -- When nothing is focused yet we must start at 0 so FindVisible considers
     -- index 1 on a forward search; using DefaultIndex would skip it.
     local startIdx = focused and w:GetChildIndex(focused) or 0
-    local candidate = H.FindVisible(w, startIdx, direction, w.WrapAround)
+    local candidate, candidateIdx = H.FindVisible(w, startIdx, direction, w.WrapAround)
     if candidate then
+        local wrapped = focused ~= nil and (direction > 0 and candidateIdx <= startIdx
+            or direction < 0 and candidateIdx >= startIdx)
         w.Manager:SetFocus(candidate, { direction = direction })
+        if wrapped then w:Emit("navigation_wrap", direction) end
         return true
     end
+    LogMessage("Navigation helper Navigate found no visible candidate from widget " .. tostring(w.Id or "?"))
     return false
 end
 
@@ -136,11 +143,20 @@ end
 ---@param pageSize integer
 ---@return boolean
 function H.NavigatePage(w, direction, pageSize)
-    if not w.Children or #w.Children == 0 then return false end
+    if not w.Children or #w.Children == 0 then
+        LogMessage("Navigation helper NavigatePage found no children on widget " .. tostring(w.Id or "?"))
+        return false
+    end
     pageSize = pageSize or 10
-    if pageSize <= 0 then return false end
+    if pageSize <= 0 then
+        LogWarn("Navigation helper NavigatePage called with non-positive page size " .. tostring(pageSize))
+        return false
+    end
     local visible = w:GetVisibleChildren()
-    if #visible == 0 then return false end
+    if #visible == 0 then
+        LogMessage("Navigation helper NavigatePage found no visible children on widget " .. tostring(w.Id or "?"))
+        return false
+    end
     local focused = w:GetFocusedChild()
     local curIdx
     if focused then
@@ -155,7 +171,10 @@ function H.NavigatePage(w, direction, pageSize)
         targetIdx = curIdx + direction * pageSize
         if targetIdx < 1 then targetIdx = 1 end
         if targetIdx > #visible then targetIdx = #visible end
-        if targetIdx == curIdx then return false end
+        if targetIdx == curIdx then
+            LogMessage("Navigation helper NavigatePage hit boundary on widget " .. tostring(w.Id or "?"))
+            return false
+        end
     end
     w.Manager:SetFocus(visible[targetIdx], { direction = direction })
     return true

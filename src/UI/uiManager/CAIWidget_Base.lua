@@ -78,6 +78,28 @@ function UIWidget.New(class)
         end,
     })
     w:AddInputBinding({
+        Key = Keys.VK_F1,
+        IsShift = true,
+        Description = "LOC_CAI_KB_SPEAK_FOCUSED_BINDINGS",
+        Common = true,
+        Action = function(self)
+            return InputHelp.SpeakWidgetBindings(self)
+        end,
+    })
+    w:AddInputBinding({
+        Key = Keys.VK_F2,
+        IsShift = true,
+        Description = "LOC_CAI_KB_SPEAK_FOCUS_PATH",
+        Common = true,
+        Action = function(self)
+            local mgr = self.Manager
+            local path = mgr and mgr.CurrentPath
+            if not path or #path == 0 then return false end
+            SpeakLines(mgr:BuildAnnouncement(path, 1), true)
+            return true
+        end,
+    })
+    w:AddInputBinding({
         Key = Keys.VK_UP,
         IsAlt = true,
         Description = "LOC_CAI_KB_TOOLTIP_PREVIOUS_SECTION",

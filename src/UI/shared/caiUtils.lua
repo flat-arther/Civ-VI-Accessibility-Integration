@@ -3,6 +3,7 @@ CAI = ExposedMembers.CAI
 
 include("iconsProcessing")
 include("CAISettings")
+include("CAI_logging")
 
 
 ---Utility wrapper for 'CAI.output'
@@ -31,6 +32,21 @@ function SpeakLines(lines, interrupt, processTokens)
             Speak(line, interrupt and i == 1, processTokens)
         end
     end
+end
+
+---@param msg any
+function LogMessage(msg)
+    return CAILogging.Message(msg)
+end
+
+---@param msg any
+function LogWarn(msg)
+    return CAILogging.Warn(msg)
+end
+
+---@param msg any
+function LogError(msg)
+    return CAILogging.Error(msg)
 end
 
 ---Prints a table to the lua log. Do not use with recursives

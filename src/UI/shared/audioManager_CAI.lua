@@ -59,6 +59,7 @@ function CAIAudioManager:New()
     mgr.Owner = nil
     mgr.ModRoot = nil
     mgr.IsInitialized = false
+    mgr.IsFocusMuted = false
     mgr.SettingsHooked = false
     mgr.SettingsChangedListener = nil
     mgr.DefinitionsById = {}
@@ -71,14 +72,14 @@ end
 function CAIAudioManager:ResolveModRoot()
     local filePath = UIManager:GetFilePath("audioManager_CAI.lua")
     if filePath == nil or filePath == "" then
-        print("CAIAudioManager.ResolveModRoot: UIManager:GetFilePath returned no path for audioManager_CAI.lua")
+        LogError("Audio manager ResolveModRoot: UIManager:GetFilePath returned no path for audioManager_CAI.lua")
         return nil
     end
 
     local normalizedPath = NormalizePath(filePath)
     local modRoot = string.match(normalizedPath, "^(.*)/UI/")
     if modRoot == nil or modRoot == "" then
-        print("CAIAudioManager.ResolveModRoot: unable to derive mod root from " .. tostring(normalizedPath))
+        LogError("Audio manager ResolveModRoot: unable to derive mod root from " .. tostring(normalizedPath))
         return nil
     end
 
@@ -87,12 +88,12 @@ end
 
 function CAIAudioManager:BuildFullPath(relativePath)
     if self.ModRoot == nil or self.ModRoot == "" then
-        print("CAIAudioManager.BuildFullPath: ModRoot is not initialized")
+        LogError("Audio manager BuildFullPath: ModRoot is not initialized")
         return nil
     end
 
     if relativePath == nil or relativePath == "" then
-        print("CAIAudioManager.BuildFullPath: missing RelativePath")
+        LogWarn("Audio manager BuildFullPath: missing RelativePath")
         return nil
     end
 
@@ -102,7 +103,7 @@ end
 function CAIAudioManager:GetDefinitionRows()
     local rows = DB.ConfigurationQuery(AUDIO_DEFINITION_QUERY)
     if rows == nil then
-        print("CAIAudioManager.GetDefinitionRows: DB.ConfigurationQuery returned nil")
+        LogWarn("Audio manager GetDefinitionRows: DB.ConfigurationQuery returned nil")
         return {}
     end
 
@@ -115,11 +116,11 @@ function CAIAudioManager:LoadDefinitions()
     local rows = self:GetDefinitionRows()
     for _, row in ipairs(rows) do
         if row.SoundId == nil or row.SoundId == "" then
-            print("CAIAudioManager.LoadDefinitions: skipping row with missing SoundId")
+            LogWarn("Audio manager LoadDefinitions: skipping row with missing SoundId")
         elseif row.RelativePath == nil or row.RelativePath == "" then
-            print("CAIAudioManager.LoadDefinitions: skipping " .. tostring(row.SoundId) .. " because RelativePath is missing")
+            LogWarn("Audio manager LoadDefinitions: skipping " .. tostring(row.SoundId) .. " because RelativePath is missing")
         elseif row.Tag == nil or row.Tag == "" then
-            print("CAIAudioManager.LoadDefinitions: skipping " .. tostring(row.SoundId) .. " because Tag is missing")
+            LogWarn("Audio manager LoadDefinitions: skipping " .. tostring(row.SoundId) .. " because Tag is missing")
         else
             self.DefinitionsById[row.SoundId] = {
                 SoundId = row.SoundId,
@@ -142,7 +143,7 @@ function CAIAudioManager:UnloadSounds()
         CAI.StopSound(record.Handle)
         local destroyed = CAI.DestroySound(record.Handle)
         if not destroyed then
-            print("CAIAudioManager.UnloadSounds: failed to destroy " .. tostring(soundId))
+            LogWarn("Audio manager UnloadSounds: failed to destroy " .. tostring(soundId))
         end
     end
 
@@ -157,11 +158,11 @@ function CAIAudioManager:LoadSounds()
     for soundId, def in pairs(self.DefinitionsById) do
         local fullPath = self:BuildFullPath(def.RelativePath)
         if fullPath == nil then
-            print("CAIAudioManager.LoadSounds: unable to build full path for " .. tostring(soundId))
+            LogWarn("Audio manager LoadSounds: unable to build full path for " .. tostring(soundId))
         else
             local handle = CAI.LoadSound(fullPath)
             if handle == nil then
-                print("CAIAudioManager.LoadSounds: failed to load " .. tostring(soundId) .. " from " .. tostring(fullPath))
+                LogWarn("Audio manager LoadSounds: failed to load " .. tostring(soundId) .. " from " .. tostring(fullPath))
             else
                 local record = {
                     SoundId = soundId,
@@ -256,14 +257,38 @@ function CAIAudioManager:ShouldSkipPlay(record, options)
     return false
 end
 
+function CAIAudioManager:IsMuteFocusEnabled()
+    return Options.GetAudioOption("Sound", "Mute Focus") == 1
+end
+
+function CAIAudioManager:ShouldMuteForWindowFocus()
+    if not self:IsMuteFocusEnabled() then
+        return false
+    end
+
+    return not CAI.IsGameWindowFocused()
+end
+
+function CAIAudioManager:StopAllSoundsForFocusMute()
+    for _, record in pairs(self.LoadedSoundsById) do
+        if record.Handle ~= nil then
+            CAI.StopSound(record.Handle)
+        end
+    end
+end
+
 function CAIAudioManager:Play(soundId, options)
     local record = self:GetSound(soundId)
     if record == nil then
-        print("CAIAudioManager.Play: unknown or unloaded sound " .. tostring(soundId))
+        LogWarn("Audio manager Play: unknown or unloaded sound " .. tostring(soundId))
         return false
     end
 
     if not self:IsTagEnabled(record.Tag) then
+        return false
+    end
+
+    if self:ShouldMuteForWindowFocus() then
         return false
     end
 
@@ -278,7 +303,7 @@ end
 function CAIAudioManager:QueueSound(soundId, delaySeconds, options)
     local record = self:GetSound(soundId)
     if record == nil then
-        print("CAIAudioManager.QueueSound: unknown or unloaded sound " .. tostring(soundId))
+        LogWarn("Audio manager QueueSound: unknown or unloaded sound " .. tostring(soundId))
         return false
     end
 
@@ -297,7 +322,7 @@ end
 function CAIAudioManager:StopSound(soundId)
     local record = self:GetSound(soundId)
     if record == nil then
-        print("CAIAudioManager.StopSound: unknown or unloaded sound " .. tostring(soundId))
+        LogWarn("Audio manager StopSound: unknown or unloaded sound " .. tostring(soundId))
         return false
     end
 
@@ -309,7 +334,7 @@ end
 function CAIAudioManager:PauseSound(soundId)
     local record = self:GetSound(soundId)
     if record == nil then
-        print("CAIAudioManager.PauseSound: unknown or unloaded sound " .. tostring(soundId))
+        LogWarn("Audio manager PauseSound: unknown or unloaded sound " .. tostring(soundId))
         return false
     end
 
@@ -321,7 +346,7 @@ end
 function CAIAudioManager:SetSoundVolume(soundId, volume)
     local record = self:GetSound(soundId)
     if record == nil then
-        print("CAIAudioManager.SetSoundVolume: unknown or unloaded sound " .. tostring(soundId))
+        LogWarn("Audio manager SetSoundVolume: unknown or unloaded sound " .. tostring(soundId))
         return false
     end
 
@@ -332,7 +357,7 @@ end
 function CAIAudioManager:SetTagVolume(tag, volume)
     local bucket = self.SoundsByTag[tag]
     if bucket == nil then
-        print("CAIAudioManager.SetTagVolume: unknown tag " .. tostring(tag))
+        LogWarn("Audio manager SetTagVolume: unknown tag " .. tostring(tag))
         return false
     end
 
@@ -346,7 +371,7 @@ end
 function CAIAudioManager:StopTag(tag)
     local bucket = self.SoundsByTag[tag]
     if bucket == nil then
-        print("CAIAudioManager.StopTag: unknown tag " .. tostring(tag))
+        LogWarn("Audio manager StopTag: unknown tag " .. tostring(tag))
         return false
     end
 
@@ -361,7 +386,7 @@ end
 function CAIAudioManager:PauseTag(tag)
     local bucket = self.SoundsByTag[tag]
     if bucket == nil then
-        print("CAIAudioManager.PauseTag: unknown tag " .. tostring(tag))
+        LogWarn("Audio manager PauseTag: unknown tag " .. tostring(tag))
         return false
     end
 
@@ -415,6 +440,16 @@ function CAIAudioManager:UnhookSettingsChanged()
 end
 
 function CAIAudioManager:Update()
+    local isFocusMuted = self:ShouldMuteForWindowFocus()
+    if isFocusMuted then
+        if not self.IsFocusMuted then
+            self:StopAllSoundsForFocusMute()
+            self.IsFocusMuted = true
+        end
+    else
+        self.IsFocusMuted = false
+    end
+
     if #self.Queue == 0 then return end
 
     local now = GetTime()
@@ -431,13 +466,14 @@ function CAIAudioManager:Initialize(owner)
     if self.IsInitialized then
         self.Owner = owner
         self:ApplySettings()
+        LogMessage("Audio manager reinitialized with existing state")
         return
     end
 
     self.Owner = owner
     self.ModRoot = self:ResolveModRoot()
     if self.ModRoot == nil then
-        print("CAIAudioManager.Initialize: audio manager has no mod root")
+        LogError("Audio manager Initialize: audio manager has no mod root")
         return
     end
 
@@ -445,6 +481,7 @@ function CAIAudioManager:Initialize(owner)
     self:ApplySettings()
     self:HookSettingsChanged()
     self.IsInitialized = true
+    LogMessage("Audio manager initialized")
 end
 
 function CAIAudioManager:Shutdown()
@@ -453,5 +490,7 @@ function CAIAudioManager:Shutdown()
     self.DefinitionsById = {}
     self.Owner = nil
     self.ModRoot = nil
+    self.IsFocusMuted = false
     self.IsInitialized = false
+    LogMessage("Audio manager shut down")
 end

@@ -86,7 +86,7 @@ local function PopulateList(capture)
             if button then
                 button:DoLeftClick()
             else
-                print("CAI TradeOriginChooser: missing live city button; falling back to TeleportToCity")
+                LogWarn("CAI TradeOriginChooser: missing live city button; falling back to TeleportToCity")
                 TeleportToCity(city)
             end
         end)

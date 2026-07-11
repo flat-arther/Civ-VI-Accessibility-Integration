@@ -4397,6 +4397,15 @@ local function CAI_GetReadyButtonTooltip()
 	return ""
 end
 
+local function CAI_GetReadyCountdownSpeech()
+	if m_countdownType == CountdownTypes.None then return "" end
+	local buttonText = CAI_ControlText(Controls.ReadyButton)
+	if buttonText ~= "" and not CAI_IsHidden(Controls.ReadyButton) then
+		return buttonText
+	end
+	return ""
+end
+
 local function CAI_RefreshChatHistory()
 	if CAI_ChatHistory then
 		local capture = mgr:CaptureFocusKey(CAI_ChatHistory)
@@ -4794,7 +4803,7 @@ local function CAI_PopPanel()
 	CAI_ChatTarget = nil
 	CAI_GameSummary = nil
 	CAI_FriendsList = nil
-	CAI_LastReadySpeech = { label = "", tooltip = "" }
+	CAI_LastReadySpeech = { label = "", tooltip = "", countdown = "" }
 	CAI_LastKnownLocalPlayerID = nil
 	CAI_PlayerListRefreshQueued = false
 	CAI_ChatTargetRefreshQueued = false
@@ -4840,20 +4849,15 @@ UpdateReadyButton = WrapFunc(UpdateReadyButton, function(orig, ...)
 	local result = orig(...)
 	if CAI_ReadyButton then
 		local currentLabel = CAI_GetReadyButtonLabel()
-		local currentStatus = CAI_GetReadyButtonStatus()
 		local currentTooltip = CAI_GetReadyButtonTooltip()
+		local currentCountdown = CAI_GetReadyCountdownSpeech()
 		local focused = mgr and mgr.CurrentPath and mgr.CurrentPath[#mgr.CurrentPath] == CAI_ReadyButton
-		if focused then
-			if m_countdownType ~= CountdownTypes.None and currentStatus ~= CAI_LastReadySpeech.label then
-				Speak(currentStatus, false)
-			elseif currentLabel ~= CAI_LastReadySpeech.label then
-				CAI_ReadyButton:Announce({ "label" })
-			elseif currentTooltip ~= "" and currentTooltip ~= CAI_LastReadySpeech.tooltip then
-				CAI_ReadyButton:Announce({ "tooltip" })
-			end
+		if focused and currentCountdown ~= "" and currentCountdown ~= CAI_LastReadySpeech.countdown then
+			Speak(currentCountdown, false)
 		end
-		CAI_LastReadySpeech.label = m_countdownType ~= CountdownTypes.None and currentStatus or currentLabel
+		CAI_LastReadySpeech.label = currentLabel
 		CAI_LastReadySpeech.tooltip = currentTooltip
+		CAI_LastReadySpeech.countdown = currentCountdown
 	end
 	return result
 end)

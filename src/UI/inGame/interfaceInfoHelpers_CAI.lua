@@ -1,3 +1,4 @@
+include("caiUtils")
 include("AdjacencyBonusSupport")
 include("hexCoordUtils_CAI")
 -- ===========================================================================
@@ -316,7 +317,7 @@ local function LogMovementFailure(pathInfo, startPlot, targetPlot, unit)
     local plotList = pathInfo.plots ~= nil and table.concat(pathInfo.plots, ",") or ""
     local turnList = pathInfo.turns ~= nil and table.concat(pathInfo.turns, ",") or ""
 
-    print(string.format(
+    LogMessage(string.format(
         "CAI movement diag unit=%s start=(%s,%s) target=(%s,%s) startPlotId=%s targetPlotId=%s reason=%s tech=%s targetOwner=%s targetVisibleUnit=%s startWater=%s targetWater=%s startArea=%s targetArea=%s plots=[%s] turns=[%s]",
         tostring(unit:GetID()),
         tostring(startPlot:GetX()),

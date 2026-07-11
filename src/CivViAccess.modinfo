@@ -11,6 +11,7 @@
   <Files>
     <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion1_MODE.lua</File>
     <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion2_MODE.lua</File>
+    <File>UI/shared/CAI_logging.lua</File>
     <File>UI/shared/caiUtils.lua</File>
     <File>UI/shared/CAISettings.lua</File>
     <File>UI/shared/audioManager_CAI.lua</File>
@@ -221,6 +222,7 @@
       <Properties>
         <LoadOrder>1</LoadOrder>
       </Properties>
+      <File>UI/shared/CAI_logging.lua</File>
       <File>UI/shared/caiUtils.lua</File>
       <File>UI/shared/CAISettings.lua</File>
       <File>UI/shared/audioManager_CAI.lua</File>
@@ -314,6 +316,7 @@
       <Properties>
         <LoadOrder>50</LoadOrder>
       </Properties>
+      <File>UI/shared/CAI_logging.lua</File>
       <File>UI/shared/caiUtils.lua</File>
       <File>UI/shared/CAISettings.lua</File>
       <File>UI/shared/audioManager_CAI.lua</File>

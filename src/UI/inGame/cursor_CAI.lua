@@ -210,13 +210,13 @@ function CAICursor:SetCoords(x, y)
     if state == nil then return false end
 
     if x == nil or y == nil then
-        print("CAI cursor move requested with nil coordinates")
+        LogWarn("Cursor move requested with nil coordinates")
         return false
     end
 
     local plot = Map.GetPlot(x, y)
     if plot == nil then
-        print("CAI cursor unable to resolve plot at coordinates: " .. tostring(x) .. ", " .. tostring(y))
+        LogWarn("Cursor unable to resolve plot at coordinates: " .. tostring(x) .. ", " .. tostring(y))
         return false
     end
 
@@ -251,7 +251,7 @@ function CAICursor:MoveTo(plotId, reason)
 
     local plot = ResolvePlotById(plotId)
     if plot == nil then
-        print("CAI cursor MoveTo unable to resolve plot id: " .. tostring(plotId))
+        LogWarn("Cursor MoveTo unable to resolve plot id: " .. tostring(plotId))
         return
     end
 

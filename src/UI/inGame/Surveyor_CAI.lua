@@ -177,7 +177,7 @@ end
 local function GetSurveyRange()
     local plot = GetCursorPlot()
     if plot == nil then
-        print("Surveyor: cursor plot unavailable")
+        LogWarn("Surveyor cursor plot unavailable")
         return nil, nil
     end
 

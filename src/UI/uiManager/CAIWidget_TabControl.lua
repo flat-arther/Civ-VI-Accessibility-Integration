@@ -240,11 +240,14 @@ function TabControlWidget:NextPage(silent)
     local n = #self._pages
     if n == 0 then return false end
     local nextIdx = self._activeIndex + 1
+    local wrapped = false
     if nextIdx > n then
         if not self.WrapAround then return false end
         nextIdx = 1
+        wrapped = true
     end
     self:SetActivePage(nextIdx, silent)
+    if wrapped then self:Emit("navigation_wrap", 1) end
     return true
 end
 
@@ -254,11 +257,14 @@ function TabControlWidget:PreviousPage(silent)
     local n = #self._pages
     if n == 0 then return false end
     local prevIdx = self._activeIndex - 1
+    local wrapped = false
     if prevIdx < 1 then
         if not self.WrapAround then return false end
         prevIdx = n
+        wrapped = true
     end
     self:SetActivePage(prevIdx, silent)
+    if wrapped then self:Emit("navigation_wrap", -1) end
     return true
 end
 

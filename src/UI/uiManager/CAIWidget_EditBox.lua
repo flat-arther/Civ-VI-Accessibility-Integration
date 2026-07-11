@@ -158,6 +158,25 @@ end
 ---@return string
 function EditBoxWidget:GetText() return self._value or "" end
 
+---Prepend the interaction hint appropriate to the live edit state while
+---preserving any screen-specific tooltip supplied by the caller.
+---@return string
+function EditBoxWidget:GetTooltip()
+    local tooltip = UIWidget.GetTooltip(self) or ""
+    if self._readOnly then return tooltip end
+
+    local hint = ""
+    if self._alwaysEdit then
+        hint = Locale.Lookup("LOC_CAI_EDIT_HINT_TYPE_TEXT")
+    elseif not self._active then
+        hint = Locale.Lookup("LOC_CAI_EDIT_HINT_PRESS_ENTER")
+    end
+
+    if hint == "" then return tooltip end
+    if tooltip == "" then return hint end
+    return hint .. " " .. tooltip
+end
+
 function EditBoxWidget:SetReadOnly(b)
     self._readOnly = b and true or false
     self.Role = self._readOnly and "EditReadOnly" or "Edit"

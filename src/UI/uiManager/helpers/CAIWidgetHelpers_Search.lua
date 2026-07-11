@@ -69,7 +69,10 @@ end
 ---@param maxResults integer
 ---@return table[]  Array of { key=string, highlighted=string }
 function S.MultiTermSearch(searchContext, whitelist, blacklist, maxResults)
-    if not Search.HasContext(searchContext) then return {} end
+    if not Search.HasContext(searchContext) then
+        LogWarn("Search helper MultiTermSearch missing context " .. tostring(searchContext))
+        return {}
+    end
 
     local hitCounts = {}
     local resultsByKey = {}
@@ -77,7 +80,11 @@ function S.MultiTermSearch(searchContext, whitelist, blacklist, maxResults)
 
     for _, term in ipairs(whitelist) do
         local raw = Search.Search(searchContext, term, queryMax)
-        if not raw or #raw == 0 then return {} end
+        if not raw or #raw == 0 then
+            LogMessage("Search helper MultiTermSearch whitelist term had no hits in context "
+                .. tostring(searchContext) .. ": " .. tostring(term))
+            return {}
+        end
         for _, hit in ipairs(raw) do
             local key = hit[1]
             hitCounts[key] = (hitCounts[key] or 0) + 1
@@ -104,6 +111,10 @@ function S.MultiTermSearch(searchContext, whitelist, blacklist, maxResults)
             if #results >= maxResults then break end
         end
     end
+    LogMessage("Search helper MultiTermSearch context=" .. tostring(searchContext)
+        .. ", whitelist=" .. tostring(#whitelist)
+        .. ", blacklist=" .. tostring(#blacklist)
+        .. ", results=" .. tostring(#results))
     return results
 end
 
@@ -588,6 +599,7 @@ end
 function S.ApplyCurrentBuffer(root, maxDepth, repeatSearch)
     local mgr = root.Manager
     if not mgr then
+        LogWarn("Search helper ApplyCurrentBuffer called without manager")
         return false
     end
 
@@ -605,6 +617,8 @@ function S.ApplyCurrentBuffer(root, maxDepth, repeatSearch)
     end
 
     mgr:SetFocus(results[resultIndex].Candidate.Widget)
+    LogMessage("Search helper ApplyCurrentBuffer focused search result " .. tostring(resultIndex)
+        .. " of " .. tostring(#results))
     return true
 end
 
@@ -621,12 +635,14 @@ end
 function S.HandleChar(root, char, maxDepth)
     local mgr = root.Manager
     if not mgr then
+        LogWarn("Search helper HandleChar called without manager")
         return false
     end
 
     local prev = mgr:GetSearchBuffer()
 
     if #prev == 0 and not S.IsValidSearchStartCharacter(char) then
+        LogMessage("Search helper rejected invalid search start character '" .. tostring(char) .. "'")
         return false
     end
 
@@ -649,16 +665,19 @@ end
 function S.HandleBackspace(root, maxDepth)
     local mgr = root.Manager
     if not mgr then
+        LogWarn("Search helper HandleBackspace called without manager")
         return false
     end
 
     local buffer = mgr:GetSearchBuffer()
     if buffer == "" then
+        LogMessage("Search helper HandleBackspace ignored because search buffer is empty")
         return false
     end
 
     local nextBuffer = mgr:RemoveSearchChar()
     if nextBuffer == "" then
+        LogMessage("Search helper cleared search buffer via backspace")
         Speak(Locale.Lookup("LOC_CAI_SEARCH_CLEARED"))
         return true
     end

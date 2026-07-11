@@ -63,6 +63,13 @@ local function GetPromotionLabel(promo)
     return Locale.Lookup("LOC_CAI_UNIT_PROMOTION_LABEL", GetPromotionName(promo), GetPromotionStatus(promo))
 end
 
+local function FormatPromotionList(names, conjunctionTag)
+    if #names <= 1 then return table.concat(names) end
+
+    local finalName = table.remove(names)
+    return table.concat(names, ", ") .. ", " .. Locale.Lookup(conjunctionTag) .. " " .. finalName
+end
+
 local function FormatPromotionPrereqs(types)
     local names = {}
     if types then
@@ -71,7 +78,7 @@ local function FormatPromotionPrereqs(types)
             if promo then names[#names + 1] = GetPromotionName(promo) end
         end
     end
-    return table.concat(names, ", or ")
+    return FormatPromotionList(names, "LOC_CAI_OR")
 end
 
 local function FormatPromotionLeadTos(types)
@@ -82,7 +89,7 @@ local function FormatPromotionLeadTos(types)
             if promo then names[#names + 1] = GetPromotionName(promo) end
         end
     end
-    return table.concat(names, ", and ")
+    return FormatPromotionList(names, "LOC_CAI_AND")
 end
 
 local function GetPromotionTooltip(promo, includeLinks)

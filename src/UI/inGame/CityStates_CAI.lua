@@ -37,7 +37,6 @@ local CONFIRM_ENVOY_ID   = "CAICityStates_ConfirmEnvoy"
 local LOOK_AT_ID         = "CAICityStates_LookAt"
 local WAR_PEACE_ID       = "CAICityStates_WarPeace"
 local LEVY_ID            = "CAICityStates_Levy"
-local INFO_BOX_ID        = "CAICityStates_InfoBox"
 
 local m_ui               = {
     panel        = nil,
@@ -47,7 +46,6 @@ local m_ui               = {
     lookAt       = nil,
     warPeace     = nil,
     levy         = nil,
-    infoBox      = nil,
 }
 
 local m_selectedPlayerID = -1
@@ -119,6 +117,10 @@ end
 
 local function GetPendingForPlayer(playerID)
     return m_caiEnvoyChanges[playerID] or 0
+end
+
+local function GetCityStateFocusKey(playerID)
+    return "cs:" .. tostring(playerID)
 end
 
 -- ============================================================================
@@ -524,9 +526,8 @@ local function BuildQuestsSection(parent, playerID)
     end
 end
 
-local function BuildRelationshipEntry(parent, entry, idPrefix)
+local function GetRelationshipEntryLabel(entry)
     local name
-    Speak(entry.DiploTooltip)
     if entry.HasMet then
         name = Locale.Lookup(entry.PlayerName)
     else
@@ -534,24 +535,60 @@ local function BuildRelationshipEntry(parent, entry, idPrefix)
     end
     local pipInfo = DIPLO_PIP_INFO[entry.DiploState]
     local statusText = pipInfo and Locale.Lookup(pipInfo.Short) or ""
-    Speak(statusText)
-    local label = JoinNonEmpty({ name, statusText }, ", ")
+    return JoinNonEmpty({ name, statusText }, ", ")
+end
+
+local function IsSameCityStateRelationship(entry, cityStatePlayerID)
+    local cityStateName = PlayerConfigurations[cityStatePlayerID] and
+        PlayerConfigurations[cityStatePlayerID]:GetCivilizationShortDescription() or nil
+    if not cityStateName or not entry or not entry.PlayerName then return false end
+    if entry.PlayerName == cityStateName then return true end
+    return Locale.Lookup(entry.PlayerName) == Locale.Lookup(cityStateName)
+end
+
+local function ShouldIncludeRelationshipEntry(entry, cityStatePlayerID, isCityStateRelationship)
+    if not entry or not entry.HasMet then return false end
+    if isCityStateRelationship and IsSameCityStateRelationship(entry, cityStatePlayerID) then
+        return false
+    end
+    return true
+end
+
+local function GetVisibleRelationshipCount(kCS)
+    if not kCS or not kCS.Relationships then return 0 end
+
+    local count = 0
+    for _, entry in ipairs(kCS.Relationships.CivRelationships or {}) do
+        if ShouldIncludeRelationshipEntry(entry, kCS.iPlayer, false) then
+            count = count + 1
+        end
+    end
+    for _, entry in ipairs(kCS.Relationships.CityStateRelationships or {}) do
+        if ShouldIncludeRelationshipEntry(entry, kCS.iPlayer, true) then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+local function BuildRelationshipEntry(parent, entry, idPrefix)
     parent:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId(idPrefix), "StaticText", {
-        Label = function() return label end,
+        Label = function() return GetRelationshipEntryLabel(entry) end,
     }))
 end
 
 local function BuildRelationshipsSection(parent, playerID)
     local kCS = GetCityStateData(playerID)
     if not kCS or not kCS.Relationships then return end
-    local selfIcon = "ICON_" .. kCS.CivType
 
     for _, entry in ipairs(kCS.Relationships.CivRelationships or {}) do
-        BuildRelationshipEntry(parent, entry, "CAICityStates_Rel")
+        if ShouldIncludeRelationshipEntry(entry, playerID, false) then
+            BuildRelationshipEntry(parent, entry, "CAICityStates_Rel")
+        end
     end
 
     for _, entry in ipairs(kCS.Relationships.CityStateRelationships or {}) do
-        if entry.PlayerIcon ~= selfIcon then
+        if ShouldIncludeRelationshipEntry(entry, playerID, true) then
             BuildRelationshipEntry(parent, entry, "CAICityStates_RelCS")
         end
     end
@@ -627,6 +664,40 @@ local function SyncEnvoySlider()
     m_ui.envoySlider:SetValue(pending, true)
 end
 
+local function SpeakPendingEnvoys(playerID)
+    Speak(Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", GetPendingForPlayer(playerID)))
+end
+
+local function TryAdjustEnvoysForPlayer(playerID, delta)
+    if delta == 0 then return false end
+    if not IsSendEnvoysMode() or not m_caiIsLocalTurn then return true end
+
+    local kCS = GetCityStateData(playerID)
+    if not kCS or not kCS.CanReceiveTokensFrom then
+        return true
+    end
+
+    if delta > 0 then
+        if GetEnvoysRemaining() <= 0 then return true end
+        OnMoreEnvoyTokens(playerID)
+    else
+        if GetPendingForPlayer(playerID) <= 0 then return true end
+        OnLessEnvoyTokens(playerID)
+    end
+
+    SyncEnvoySlider()
+    SpeakPendingEnvoys(playerID)
+    return true
+end
+
+local function TryConfirmEnvoys()
+    if not m_ui.confirmEnvoy or m_ui.confirmEnvoy:IsHidden() or m_ui.confirmEnvoy:IsDisabled() then
+        return true
+    end
+    m_ui.confirmEnvoy:Emit("activate")
+    return true
+end
+
 -- ============================================================================
 -- Tree row creation
 -- ============================================================================
@@ -635,7 +706,7 @@ local function CreateCityStateRow(playerID)
     local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_Row"), "TreeItem", {
         Label    = function() return FormatRowLabel(playerID) end,
         Tooltip  = function() return FormatRowTooltip(playerID) end,
-        FocusKey = "cs:" .. tostring(playerID),
+        FocusKey = GetCityStateFocusKey(playerID),
     })
     row:SetFocusSound("Main_Menu_Mouse_Over")
 
@@ -646,6 +717,30 @@ local function CreateCityStateRow(playerID)
             SyncEnvoySlider()
         end
     end)
+
+    row:AddInputBindings({
+        {
+            Key         = Keys.VK_LEFT,
+            IsShift     = true,
+            MSG         = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_REMOVE_CITYSTATE_ENVOY",
+            Action      = function() return TryAdjustEnvoysForPlayer(playerID, -1) end,
+        },
+        {
+            Key         = Keys.VK_RIGHT,
+            IsShift     = true,
+            MSG         = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_ADD_CITYSTATE_ENVOY",
+            Action      = function() return TryAdjustEnvoysForPlayer(playerID, 1) end,
+        },
+        {
+            Key         = Keys.VK_RETURN,
+            IsControl   = true,
+            MSG         = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CONFIRM_CITYSTATE_ENVOYS",
+            Action      = function() return TryConfirmEnvoys() end,
+        },
+    })
 
     local relDetailWidget = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_RelDetail"), "StaticText", {
         Label = function()
@@ -723,10 +818,7 @@ local function CreateCityStateRow(playerID)
     local relSection = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_RelSec"), "TreeItem", {
         Label = function()
             local kCS = GetCityStateData(playerID)
-            local count = 0
-            if kCS and kCS.Relationships then
-                count = #(kCS.Relationships.CivRelationships or {}) + #(kCS.Relationships.CityStateRelationships or {})
-            end
+            local count = GetVisibleRelationshipCount(kCS)
             return Locale.Lookup("LOC_CITY_STATES_RELATIONSHIPS") ..
                 ", " .. Locale.Lookup("LOC_CITY_STATES_CIVILIZATIONS", count)
         end,
@@ -748,13 +840,13 @@ end
 -- Info box content
 -- ============================================================================
 
-local function GetInfoBoxText()
+local function GetInfoBoxLines()
     local localPlayerID = Game.GetLocalPlayer()
-    if localPlayerID == -1 then return "" end
+    if localPlayerID == -1 then return {} end
 
     local pLocalPlayer = Players[localPlayerID]
     local pInfluence = pLocalPlayer:GetInfluence()
-    if not pInfluence then return "" end
+    if not pInfluence then return {} end
 
     local balance = math.floor(pInfluence:GetPointsEarned() + 0.5)
     local threshold = pInfluence:GetPointsThreshold()
@@ -766,8 +858,7 @@ local function GetInfoBoxText()
     table.insert(lines, Locale.Lookup("LOC_CAI_CITYSTATES_INFO_ENVOYS_AVAILABLE", available))
     table.insert(lines,
         NormalizeText(Locale.Lookup("LOC_CAI_CITYSTATES_INFO_INFLUENCE", balance, threshold, rate, envoysPerThreshold)))
-    table.insert(lines, NormalizeText(Locale.Lookup("LOC_TOP_PANEL_INFLUENCE_TOOLTIP_SOURCES_HELP")))
-    return table.concat(lines, "\n")
+    return lines
 end
 
 -- ============================================================================
@@ -778,12 +869,14 @@ local function CAI_RebuildTree()
     if not m_ui.tree then return end
     if ContextPtr:IsHidden() then return end
 
-    m_selectedPlayerID = -1
-
+    local selectedPlayerID = m_selectedPlayerID
     local capture = mgr:CaptureFocusKey(m_ui.tree)
     m_ui.tree:ClearChildren()
 
     local allData = GetAllCityStatesData()
+    if selectedPlayerID ~= -1 and not allData[selectedPlayerID] then
+        selectedPlayerID = -1
+    end
     local sortedPlayers = {}
     for playerID, kCS in pairs(allData) do
         table.insert(sortedPlayers, { id = playerID, name = Locale.Lookup(kCS.Name) })
@@ -800,8 +893,13 @@ local function CAI_RebuildTree()
         }))
     end
 
-    if m_ui.infoBox then
-        m_ui.infoBox:SetText(GetInfoBoxText(), true)
+    m_selectedPlayerID = selectedPlayerID
+    if m_selectedPlayerID ~= -1 then
+        SyncVanillaControlsForCityState(m_selectedPlayerID)
+        SyncEnvoySlider()
+        if not capture then
+            mgr:PrepareFocus(m_ui.tree, GetCityStateFocusKey(m_selectedPlayerID))
+        end
     end
 
     mgr:RestoreFocus(m_ui.tree, capture)
@@ -828,18 +926,7 @@ local function EnsurePanelBuilt()
 
     m_ui.tree = mgr:CreateWidget(TREE_ID, "Tree", {
         Label = function()
-            local count = 0
-            local localPlayerID = Game.GetLocalPlayer()
-            if localPlayerID ~= -1 then
-                for _, pPlayer in ipairs(PlayerManager.GetAliveMinors()) do
-                    local pInfluence = pPlayer:GetInfluence()
-                    if pInfluence and pInfluence:CanReceiveInfluence()
-                        and Players[localPlayerID]:GetDiplomacy():HasMet(pPlayer:GetID()) then
-                        count = count + 1
-                    end
-                end
-            end
-            return Locale.Lookup("LOC_CITY_STATES_TITLE") .. ", " .. Locale.Lookup("LOC_CAI_CITYSTATES_MET_COUNT", count)
+            return JoinNonEmpty(GetInfoBoxLines(), ", ")
         end,
     })
     m_ui.panel:AddChild(m_ui.tree)
@@ -975,14 +1062,6 @@ local function EnsurePanelBuilt()
     end)
     m_ui.panel:AddChild(m_ui.levy)
 
-    m_ui.infoBox = mgr:CreateWidget(INFO_BOX_ID, "EditBox", {
-        Label           = function() return Locale.Lookup("LOC_CAI_CITYSTATES_INFO") end,
-        ReadOnly        = true,
-        AlwaysEdit      = true,
-        HighlightOnEdit = false,
-    })
-    m_ui.infoBox:SetText(GetInfoBoxText(), true)
-    m_ui.panel:AddChild(m_ui.infoBox)
 end
 
 -- ============================================================================
@@ -1011,6 +1090,7 @@ end
 
 Close = WrapFunc(Close, function(orig)
     m_caiEnvoyChanges = {}
+    m_selectedPlayerID = -1
     PopPanel()
     orig()
 end)

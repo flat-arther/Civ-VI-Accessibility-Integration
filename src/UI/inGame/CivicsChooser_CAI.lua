@@ -424,16 +424,6 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
 end)
 ContextPtr:SetInputHandler(OnInputHandler, true)
 
-OnChooseCivic = WrapFunc(OnChooseCivic, function(orig, civicHash)
-    for _, kData in ipairs(m_rowData) do
-        if kData.Hash == civicHash then
-            Speak(Locale.Lookup("LOC_CAI_CIVIC_CHOSEN", kData.Name) or kData.Name)
-            break
-        end
-    end
-    return orig(civicHash)
-end)
-
 OnClosePanel = WrapFunc(OnClosePanel, function(orig)
     orig()
     OnPanelClosedCAI()

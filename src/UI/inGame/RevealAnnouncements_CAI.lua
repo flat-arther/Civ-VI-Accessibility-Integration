@@ -73,7 +73,16 @@ end
 -- ===========================================================================
 
 local function LogVisibilityError(message)
-    print("RevealAnnouncements_CAI: " .. tostring(message))
+    LogWarn("Reveal announcements: " .. tostring(message))
+end
+
+local function CountKeys(map)
+    local count = 0
+    for _ in pairs(map or {}) do
+        count = count + 1
+    end
+
+    return count
 end
 
 local function GetVisibilityForPlayer(playerID)
@@ -346,6 +355,11 @@ end
 -- ===========================================================================
 
 local function BuildVisibleForeignUnitSnapshot(localPlayerID)
+    if localPlayerID == nil or localPlayerID == -1 then
+        LogWarn("Reveal announcements could not build visible foreign unit snapshot because local player is invalid")
+        return {}
+    end
+
     local visibility = GetVisibilityForPlayer(localPlayerID)
     local current = {}
 
@@ -376,6 +390,7 @@ end
 
 local function BootstrapKnownRevealedPlots(localPlayerID, state)
     if state == nil then
+        LogWarn("Reveal announcements BootstrapKnownRevealedPlots called without state for player " .. tostring(localPlayerID))
         return
     end
 
@@ -388,10 +403,14 @@ local function BootstrapKnownRevealedPlots(localPlayerID, state)
             state.knownRevealedPlots[plotIndex] = true
         end
     end
+
+    LogMessage("Reveal announcements bootstrapped revealed plots for player "
+        .. tostring(localPlayerID) .. ", count=" .. tostring(CountKeys(state.knownRevealedPlots)))
 end
 
 local function BootstrapSpecialImprovementSnapshot(localPlayerID, state, visibleOnly)
     if state == nil then
+        LogWarn("Reveal announcements BootstrapSpecialImprovementSnapshot called without state for player " .. tostring(localPlayerID))
         return
     end
 
@@ -414,6 +433,10 @@ local function BootstrapSpecialImprovementSnapshot(localPlayerID, state, visible
                 IsTrackedGoneImprovementType(improvementTypeName) and improvementTypeName or nil
         end
     end
+
+    LogMessage("Reveal announcements bootstrapped special improvements for player "
+        .. tostring(localPlayerID) .. ", visibleOnly=" .. tostring(visibleOnly)
+        .. ", trackedPlots=" .. tostring(CountKeys(state.specialImprovementKinds)))
 end
 
 -- ===========================================================================
@@ -421,7 +444,13 @@ end
 -- ===========================================================================
 
 local function EnsurePlayerInitialized(playerID, state)
-    if state == nil or state.initialized then
+    if state == nil then
+        LogWarn("Reveal announcements initialization skipped because state is missing for player " .. tostring(playerID))
+        return
+    end
+
+    if state.initialized then
+        LogMessage("Reveal announcements player " .. tostring(playerID) .. " already initialized")
         return
     end
 
@@ -431,6 +460,10 @@ local function EnsurePlayerInitialized(playerID, state)
     ResetBufferedPlots(state)
     state.lastEventTime = nil
     state.initialized = true
+    LogMessage("Reveal announcements initialized player " .. tostring(playerID)
+        .. " revealedPlots=" .. tostring(CountKeys(state.knownRevealedPlots))
+        .. " visibleForeignUnits=" .. tostring(CountKeys(state.previousVisibleUnits))
+        .. " trackedSpecialImprovements=" .. tostring(CountKeys(state.specialImprovementKinds)))
 end
 
 local function ClearState(state)
@@ -656,6 +689,8 @@ end
 local function FlushAnnouncementsForPlayer(localPlayerID, reason)
     local state = GetState(localPlayerID)
     if state == nil then
+        LogWarn("Reveal announcements flush skipped because state is missing for player "
+            .. tostring(localPlayerID) .. ", reason=" .. tostring(reason))
         return
     end
 
@@ -664,6 +699,7 @@ local function FlushAnnouncementsForPlayer(localPlayerID, reason)
     -- Between-turn announcements are the only case that can defer.
     -- If outside-turn speech is off, keep the queue for turn-start.
     if reason == REVEAL_FLUSH_BETWEEN_TURNS and not shouldSpeak then
+        LogMessage("Reveal announcements deferred between-turn flush for player " .. tostring(localPlayerID))
         return
     end
 
@@ -675,11 +711,13 @@ local function FlushAnnouncementsForPlayer(localPlayerID, reason)
     ResetBufferedPlots(state)
     state.lastEventTime = nil
 
-    if reason == REVEAL_FLUSH_TURN_START
-        or reason == REVEAL_FLUSH_BETWEEN_TURNS
-        or reason == REVEAL_FLUSH_ACTIVE_TURN
-        or reason == REVEAL_FLUSH_TURN_END then
-    end
+    LogMessage("Reveal announcements flushed player " .. tostring(localPlayerID)
+        .. " reason=" .. tostring(reason)
+        .. " speak=" .. tostring(shouldSpeak)
+        .. " revealed=" .. tostring(payload ~= nil and payload.RevealedCount or 0)
+        .. " revealSections=" .. tostring(payload ~= nil and #(payload.RevealSections or {}) or 0)
+        .. " hiddenSections=" .. tostring(payload ~= nil and #(payload.HiddenSections or {}) or 0)
+        .. " goneSections=" .. tostring(payload ~= nil and #(payload.GoneSections or {}) or 0))
 
     if not shouldSpeak then
         return
@@ -698,13 +736,17 @@ end
 local function ResyncTurnStartSnapshots()
     local playerID = GetActivePlayerID()
     local state = GetState(playerID)
-    if state == nil then return end
+    if state == nil then
+        LogWarn("Reveal announcements turn-start resync skipped because active state is missing")
+        return
+    end
 
     if not state.initialized then
         EnsurePlayerInitialized(playerID, state)
         return
     end
 
+    LogMessage("Reveal announcements turn-start resync for player " .. tostring(playerID))
 
     -- Always flush/clear at turn start.
     FlushAnnouncementsForPlayer(playerID, REVEAL_FLUSH_TURN_START)
@@ -713,7 +755,11 @@ end
 local function OnLocalPlayerTurnEnd()
     local playerID = GetActivePlayerID()
     local state = GetState(playerID)
-    if state == nil then return end
+    if state == nil then
+        LogWarn("Reveal announcements turn-end flush skipped because active state is missing")
+        return
+    end
+    LogMessage("Reveal announcements turn-end flush for player " .. tostring(playerID))
     FlushAnnouncementsForPlayer(playerID, REVEAL_FLUSH_TURN_END)
 end
 
@@ -744,18 +790,21 @@ function RevealAnnouncements_CAI.Initialize()
     m_isInitialized = true
 
     local playerID = GetActivePlayerID()
-    local player = Players[playerID]
     local state = GetState(playerID)
     EnsurePlayerInitialized(playerID, state)
+    LogMessage("Reveal announcements initialized for active player " .. tostring(playerID))
 end
 
 function RevealAnnouncements_CAI.Clear()
+    local playerID = GetActivePlayerID()
+    LogMessage("Reveal announcements cleared active player state for player " .. tostring(playerID))
     ClearState(GetActiveState())
 end
 
 function RevealAnnouncements_CAI.ClearPlayer(playerID)
     local state = GetState(playerID)
     if state == nil then
+        LogWarn("Reveal announcements ClearPlayer skipped because state is missing for player " .. tostring(playerID))
         return
     end
 
@@ -764,9 +813,12 @@ function RevealAnnouncements_CAI.ClearPlayer(playerID)
     state.previousVisibleUnits = {}
     state.specialImprovementKinds = {}
     state.lastEventTime = nil
+    state.initialized = false
+    LogMessage("Reveal announcements cleared player state for player " .. tostring(playerID))
 end
 
 function RevealAnnouncements_CAI.ClearAll()
+    LogMessage("Reveal announcements cleared all player state")
     m_PlayerState:ClearAll()
 end
 
@@ -782,6 +834,7 @@ function RevealAnnouncements_CAI.Shutdown()
 
     RevealAnnouncements_CAI.ClearAll()
     m_isInitialized = false
+    LogMessage("Reveal announcements shut down")
 end
 
 function RevealAnnouncements_CAI.UpdateVisibility()
@@ -798,6 +851,8 @@ function RevealAnnouncements_CAI.UpdateVisibility()
 
     local now = Automation.GetTime()
     if (now - state.lastEventTime) > ANNOUNCE_DELAY_SECONDS then
+        LogMessage("Reveal announcements debounce elapsed for player "
+            .. tostring(localPlayerID) .. ", turnActive=" .. tostring(IsLocalPlayerTurnActive(localPlayerID)))
         if IsLocalPlayerTurnActive(localPlayerID) then
             FlushAnnouncementsForPlayer(localPlayerID, REVEAL_FLUSH_ACTIVE_TURN)
         else

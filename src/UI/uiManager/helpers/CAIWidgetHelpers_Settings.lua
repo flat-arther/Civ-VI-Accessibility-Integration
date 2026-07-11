@@ -175,13 +175,14 @@ local function CreateSettingWidget(mgr, row)
         return CreateText(mgr, row)
     end
 
-    print("CAI settings UI: unsupported UIType " .. tostring(row.UIType) .. " for " .. tostring(row.SettingId))
+    LogWarn("Settings helper unsupported UIType " .. tostring(row.UIType) .. " for " .. tostring(row.SettingId))
     return nil
 end
 
 local function CloseTree(mgr)
     local tree = mgr:GetWidgetById("CAISettingsTree")
     if tree then mgr:RemoveFromStack("CAISettingsTree") end
+    LogMessage("Settings helper closed settings tree")
 end
 
 -- ===========================================================================
@@ -189,18 +190,29 @@ end
 -- ===========================================================================
 
 function S.BuildSettingsTree(mgr)
+    if not mgr then
+        LogWarn("Settings helper BuildSettingsTree called with nil manager")
+        return nil
+    end
     local tree = mgr:CreateWidget("CAISettingsTree", "Tree", {
         Label = function()
             return Locale.Lookup("LOC_CAI_SETTINGS_TITLE")
         end,
         FocusKey = "cai_settings_root",
     })
+    if not tree then
+        LogError("Settings helper failed to create settings tree widget")
+        return nil
+    end
 
     tree.TrapInput = true
 
     local categories = {}
+    local rowCount = 0
+    local widgetCount = 0
 
     for _, row in ipairs(GetRows()) do
+        rowCount = rowCount + 1
         local section = row.Section or "General"
         local category = categories[section]
 
@@ -219,6 +231,7 @@ function S.BuildSettingsTree(mgr)
         if settingWidget ~= nil then
             settingWidget:SetFocusSound("Main_Menu_Mouse_Over")
             category:AddChild(settingWidget)
+            widgetCount = widgetCount + 1
         end
     end
 
@@ -231,21 +244,31 @@ function S.BuildSettingsTree(mgr)
         end
     })
 
+    LogMessage("Settings helper built settings tree, rows="
+        .. tostring(rowCount) .. ", widgets=" .. tostring(widgetCount)
+        .. ", sections=" .. tostring(GetKeys(categories) and #GetKeys(categories) or 0))
     return tree
 end
 
 function S.OpenSettings(mgr)
     if g_settingsOpen then
+        LogWarn("Settings helper OpenSettings ignored because settings UI is already open")
         return false
     end
     local tree = S.BuildSettingsTree(mgr)
+    if not tree then
+        LogError("Settings helper OpenSettings failed because tree creation returned nil")
+        return false
+    end
 
     tree:On("destroy", function()
         g_settingsOpen = false
+        LogMessage("Settings helper settings tree destroyed")
     end)
 
     g_settingsOpen = true
     mgr:Push(tree)
+    LogMessage("Settings helper opened settings UI")
 
     return true
 end

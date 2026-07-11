@@ -91,6 +91,11 @@ local w = mgr:CreateWidget(id, "Button", props)
 - `props` is an instance-override table. Keys with a matching `Set<Name>`
   setter (e.g. `Label`, `Tooltip`, `WrapAround`, `FocusKey`, `Transparent`)
   route through the setter. Other keys assign directly to the instance.
+- `StaticText` has only one spoken text channel. If a caller supplies both
+  `Label` and `Tooltip`, the widget exposes them together from `GetLabel()`,
+  separated by `[NEWLINE]`, and `GetTooltip()` returns an empty string. An
+  empty label promotes the tooltip to the label; identical values are not
+  repeated. Prefer putting the complete text in `Label` at new call sites.
 
 ### Push / Pop
 
@@ -387,6 +392,10 @@ iteration.
 | `collapsed`       | TreeItem or SubMenu collapsed                                | —          |
 | `destroy`         | First step of `Destroy`; listeners should clean up           | —          |
 
+`navigation_wrap` fires after a successful navigation move crosses a wrapping
+container or TabControl boundary. Its extra argument is the direction (`1` or
+`-1`). The manager's default listener plays the `UI_MENU_WRAP` raw-audio cue.
+
 ### `focus_enter` contract
 
 `focus_enter` fires on **every newly-populated path slot**, not only the
@@ -444,6 +453,11 @@ user-driven edit command; the manager's normal focus speech reads the selected
 value once. When `HighlightOnEdit` is off, focus entry does not reposition the
 cursor. Read-only `AlwaysEdit` viewers preserve their cursor when focus leaves
 and returns.
+`EditBox:GetTooltip()` prepends a live interaction hint to any tooltip supplied
+by the screen. `AlwaysEdit` boxes prepend `LOC_CAI_EDIT_HINT_TYPE_TEXT`;
+inactive non-`AlwaysEdit` boxes prepend `LOC_CAI_EDIT_HINT_PRESS_ENTER`.
+Read-only boxes never add an interaction hint. An active non-`AlwaysEdit` box
+also exposes only its screen-specific tooltip.
 
 Direct methods are preferred over string-dispatched actions. EditBox exposes
 `BeginEdit`, `Commit`, `Cancel`. Checkbox: `Toggle`, `SetChecked`. Slider:
@@ -995,7 +1009,7 @@ When migrating a screen from the old template-merged manager:
 | TreeItemWidget | activate (leaf only), expanded, collapsed      |
 | SubMenuWidget  | expanded, collapsed                            |
 | TabControlWidget | value_changed (page index)                   |
-| (all)          | focus_enter, focus_leave, destroy              |
+| (all)          | focus_enter, focus_leave, destroy, navigation_wrap |
 
 ---
 
@@ -1003,6 +1017,7 @@ When migrating a screen from the old template-merged manager:
 
 | Widget         | Keys                                                          |
 |----------------|---------------------------------------------------------------|
+| Base widget     | Shift+F1 speaks the focused widget's specific bindings followed by common bindings; Shift+F2 speaks the full focus path |
 | Container (base)| Ctrl+F → open SearchPanel (when AllowSearch=true)            |
 | Button         | Enter, Space → activate                                       |
 | MenuItem       | Enter → activate                                              |

@@ -34,7 +34,7 @@ function CAIWorldScannerCategory_SpecialMapObjects.PlotExtract(plotIndex, plot, 
 
                 local validateFeature = GameInfo.Features[validatePlot:GetFeatureType()]
                 return validateFeature ~= nil
-                    and validateFeature.FeatureType == featureType
+                    and validatePlot:GetFeatureType() == featureType
                     and validateFeature.NaturalWonder
             end,
         })

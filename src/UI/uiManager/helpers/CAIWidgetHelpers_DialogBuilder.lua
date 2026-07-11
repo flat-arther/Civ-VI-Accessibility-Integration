@@ -20,13 +20,23 @@ local DB = CAIWidgetHelpers_DialogBuilder
 ---@param defaultActionIndex? integer 1-based; clamped to button-row size
 ---@return DialogWidget|nil
 function DB.MakeGeneralDialog(mgr, titleFn, actionButtons, contentRows, defaultActionIndex)
-    if not mgr or not titleFn or not actionButtons then return nil end
+    if not mgr or not titleFn or not actionButtons then
+        LogWarn("DialogBuilder MakeGeneralDialog missing required inputs")
+        return nil
+    end
 
     local d = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDlg"), "Dialog", {
         Label = titleFn,
     })
+    if not d then
+        LogError("DialogBuilder MakeGeneralDialog failed to create dialog widget")
+        return nil
+    end
     if contentRows then d:AddChildren(contentRows) end
     d:SetButtons(actionButtons, defaultActionIndex)
+    LogMessage("DialogBuilder MakeGeneralDialog created dialog with contentRows="
+        .. tostring(contentRows and #contentRows or 0)
+        .. ", buttons=" .. tostring(#actionButtons))
     return d
 end
 
@@ -36,7 +46,10 @@ end
 ---@param popup table
 ---@return DialogWidget|nil
 function DB.CreatePopupDialog(mgr, popup)
-    if not mgr or not popup then return nil end
+    if not mgr or not popup then
+        LogWarn("DialogBuilder CreatePopupDialog missing manager or popup")
+        return nil
+    end
     local content, buttons = {}, {}
 
     for _, item in ipairs(popup.PopupControls) do
@@ -98,6 +111,8 @@ function DB.CreatePopupDialog(mgr, popup)
             w:SetDisabledPredicate(function() return item.Control:IsDisabled() end)
             w:On("activate", function() item.Control:DoLeftClick() end)
             w:SetFocusSound("Main_Menu_Mouse_Over")
+        else
+            LogWarn("DialogBuilder CreatePopupDialog unsupported popup control type " .. tostring(kind))
         end
 
         if w then
@@ -112,6 +127,8 @@ function DB.CreatePopupDialog(mgr, popup)
     end
 
     local titleFn = function() return popup.Controls.PopupTitle:GetText() end
+    LogMessage("DialogBuilder CreatePopupDialog converted popup controls, content="
+        .. tostring(#content) .. ", buttons=" .. tostring(#buttons))
     return DB.MakeGeneralDialog(mgr, titleFn, buttons, content)
 end
 
@@ -120,7 +137,10 @@ end
 ---etc., without having to thread the manager through every call.
 ---@param mgr UIScreenManager
 function DB.Install(mgr)
-    if not mgr then return end
+    if not mgr then
+        LogWarn("DialogBuilder Install called with nil manager")
+        return
+    end
     mgr.WidgetHelpers = mgr.WidgetHelpers or {}
     local WH = mgr.WidgetHelpers
     WH.MakeGeneralDialog = function(titleFn, actionButtons, contentRows, defaultActionIndex)
@@ -129,4 +149,5 @@ function DB.Install(mgr)
     WH.CreatePopupDialog = function(popup)
         return DB.CreatePopupDialog(mgr, popup)
     end
+    LogMessage("DialogBuilder installed on manager")
 end

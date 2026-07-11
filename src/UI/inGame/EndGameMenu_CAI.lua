@@ -21,9 +21,15 @@ local m_rankingList  = nil
 local m_graphsTree   = nil
 local m_chatHistory  = nil
 local m_chatInput    = nil
-local m_chatSendBtn  = nil
+local m_chatTarget   = nil
 local m_moviePanel   = nil
 local m_isBuilt      = false
+local m_chatEntries  = {}
+local m_chatEntryId  = 1
+local m_chatTargetState = {
+    targetType = ChatTargetTypes.CHATTARGET_ALL,
+    targetID = GetNoPlayerTargetID(),
+}
 
 -- ============================================================================
 -- Helpers
@@ -35,6 +41,16 @@ end
 local function SafeGetText(control)
     if control and not control:IsHidden() then
         local text = control:GetText()
+        if text and text ~= "" then
+            return text
+        end
+    end
+    return nil
+end
+
+local function SafeGetTooltip(control)
+    if control and control.GetToolTipString and not control:IsHidden() then
+        local text = control:GetToolTipString()
         if text and text ~= "" then
             return text
         end
@@ -232,12 +248,145 @@ end
 -- ============================================================================
 -- Tab 4: Chat
 -- ============================================================================
-local function GatherChatHistory()
-    local lines = {}
+local function GetChatInputTooltip()
+    return SafeGetTooltip(Controls.ChatEntry) or Locale.Lookup("LOC_CHAT_HELP_COMMAND_HINT")
+end
+
+local function BuildChatTargetOptions()
+    local options = {}
+    local selectedIndex = 0
+    local localPlayerID = Game.GetLocalPlayer()
+
+    table.insert(options, {
+        label = Locale.Lookup("LOC_DIPLO_TO_ALL"),
+        value = {
+            targetType = ChatTargetTypes.CHATTARGET_ALL,
+            targetID = GetNoPlayerTargetID(),
+        },
+    })
+    if m_chatTargetState.targetType == ChatTargetTypes.CHATTARGET_ALL then
+        selectedIndex = 1
+    end
+
+    if localPlayerID ~= nil and localPlayerID >= 0 then
+        local localConfig = PlayerConfigurations[localPlayerID]
+        local localTeam = localConfig and localConfig:GetTeam() or TeamTypes.NO_TEAM
+        if localTeam ~= TeamTypes.NO_TEAM and GameConfiguration.GetTeamPlayerCount(localTeam, true) > 1 then
+            table.insert(options, {
+                label = Locale.Lookup("LOC_DIPLO_TO_TEAM"),
+                value = {
+                    targetType = ChatTargetTypes.CHATTARGET_TEAM,
+                    targetID = localTeam,
+                },
+            })
+            if m_chatTargetState.targetType == ChatTargetTypes.CHATTARGET_TEAM then
+                selectedIndex = #options
+            end
+        end
+    end
+
+    for _, playerID in ipairs(GameConfiguration.GetParticipatingPlayerIDs()) do
+        local cfg = PlayerConfigurations[playerID]
+        if playerID ~= localPlayerID and cfg and cfg:IsHuman() then
+            table.insert(options, {
+                label = Locale.Lookup("LOC_DIPLO_TO_PLAYER", cfg:GetPlayerName()),
+                value = {
+                    targetType = ChatTargetTypes.CHATTARGET_PLAYER,
+                    targetID = playerID,
+                },
+            })
+            if m_chatTargetState.targetType == ChatTargetTypes.CHATTARGET_PLAYER
+                and m_chatTargetState.targetID == playerID then
+                selectedIndex = #options
+            end
+        end
+    end
+
+    if selectedIndex == 0 and #options > 0 then
+        selectedIndex = 1
+    end
+
+    return options, selectedIndex
+end
+
+local function SyncLocalChatTargetFromVanilla()
+    local textControl = Controls.ChatPull and Controls.ChatPull:GetButton() and Controls.ChatPull:GetButton():GetTextControl()
+    local liveLabel = textControl and textControl:GetText() or nil
+    if not liveLabel or liveLabel == "" then return end
+
+    local options = BuildChatTargetOptions()
+    for _, option in ipairs(options) do
+        if option.label == liveLabel and option.value then
+            m_chatTargetState.targetType = option.value.targetType
+            m_chatTargetState.targetID = option.value.targetID
+            return
+        end
+    end
+end
+
+local function UpdateVanillaChatTargetState()
+    ValidatePlayerTarget(m_chatTargetState)
+    UpdatePlayerTargetPulldown(Controls.ChatPull, m_chatTargetState)
+    UpdatePlayerTargetEditBox(Controls.ChatEntry, m_chatTargetState)
+    UpdatePlayerTargetIcon(Controls.ChatIcon, m_chatTargetState)
+
+    local textControl = Controls.ChatPull and Controls.ChatPull:GetButton() and Controls.ChatPull:GetButton():GetTextControl()
+    local label = textControl and textControl:GetText() or nil
+    if label and label ~= "" then
+        Controls.ChatPull:SetToolTipString(label)
+    end
+
+    PlayerTargetChanged(m_chatTargetState)
+end
+
+local function RebuildChatTarget()
+    if not m_chatTarget then return end
+
+    local options, selectedIndex = BuildChatTargetOptions()
+    m_chatTarget:SetOptions(options)
+    if selectedIndex > 0 then
+        m_chatTarget:SetSelectedIndex(selectedIndex, true)
+    end
+end
+
+local function SyncChatTargetSelection()
+    if not m_chatTarget then return end
+
+    local options, selectedIndex = BuildChatTargetOptions()
+    if selectedIndex <= 0 then return end
+
+    local currentIndex = m_chatTarget:GetSelectedIndex()
+    if currentIndex == selectedIndex then return end
+
+    local currentOption = options[currentIndex]
+    local currentValue = currentOption and currentOption.value or nil
+    if currentValue
+        and currentValue.targetType == m_chatTargetState.targetType
+        and currentValue.targetID == m_chatTargetState.targetID then
+        return
+    end
+
+    m_chatTarget:SetSelectedIndex(selectedIndex, true)
+end
+
+local function AppendChatEntry(text)
+    if not text or text == "" then return end
+
+    table.insert(m_chatEntries, {
+        Id = m_chatEntryId,
+        Label = text,
+    })
+    m_chatEntryId = m_chatEntryId + 1
+end
+
+local function CaptureVanillaChatHistory()
+    m_chatEntries = {}
+    m_chatEntryId = 1
+
     local stack = Controls.ChatStack
-    if not stack then return "" end
+    if not stack then return end
     local children = stack:GetChildren()
-    if not children then return "" end
+    if not children then return end
 
     for _, child in ipairs(children) do
         local innerChildren = child:GetChildren()
@@ -245,25 +394,62 @@ local function GatherChatHistory()
             for _, inner in ipairs(innerChildren) do
                 local text = inner:GetText()
                 if text and text ~= "" then
-                    table.insert(lines, text)
+                    AppendChatEntry(text)
                 end
             end
         end
     end
-
-    return table.concat(lines, "\n")
 end
 
 local function RebuildChatTab()
     if not m_chatHistory then return end
-    m_chatHistory:SetText(GatherChatHistory())
+
+    local capture = mgr:CaptureFocusKey(m_chatHistory)
+    m_chatHistory:ClearChildren()
+
+    for _, entry in ipairs(m_chatEntries) do
+        local item = mgr:CreateWidget(MakeId("CAIEG_chat_"), "StaticText", {
+            Label = function() return entry.Label end,
+            FocusKey = "endgame:chat:" .. tostring(entry.Id),
+        })
+        m_chatHistory:AddChild(item)
+    end
+
+    mgr:RestoreFocus(m_chatHistory, capture)
 end
 
 local function OnChatReceived()
-    if m_chatHistory and m_isBuilt then
-        RebuildChatTab()
-        mgr:Refocus()
+    if not m_isBuilt then return end
+    CaptureVanillaChatHistory()
+    RebuildChatTab()
+end
+
+local function SendEndGameChat(text)
+    if text == nil then return end
+    if string.len(text) > 0 then
+        local parsedText
+        local chatTargetChanged = false
+        local printHelp = false
+
+        parsedText, chatTargetChanged, printHelp = ParseInputChatString(text, m_chatTargetState)
+        if chatTargetChanged then
+            UpdateVanillaChatTargetState()
+            SyncChatTargetSelection()
+        end
+
+        if printHelp then
+            ChatPrintHelp(Controls.ChatStack, {}, Controls.ChatScroll)
+        end
+
+        if parsedText ~= "" then
+            local chatTarget = {}
+            PlayerTargetToChatTarget(m_chatTargetState, chatTarget)
+            Network.SendChat(parsedText, chatTarget.targetType, chatTarget.targetID)
+            UI.PlaySound("Play_MP_Chat_Message_Sent")
+        end
     end
+
+    Controls.ChatEntry:ClearString()
 end
 
 -- ============================================================================
@@ -394,34 +580,49 @@ local function BuildPanel()
         local chatPage = m_tabs:AddPage(function() return Locale.Lookup("LOC_UI_ENDGAME_CHAT") end)
         vanillaTabButtons[tabIndex] = Controls.ChatButton
 
-        m_chatHistory = mgr:CreateWidget(MakeId("CAIEG_chat_"), "EditBox", {
-            Label = function() return Locale.Lookup("LOC_CAI_ENDGAME_CHAT_HISTORY") end,
+        SyncLocalChatTargetFromVanilla()
+
+        m_chatInput = mgr:CreateWidget(MakeId("CAIEG_chat_"), "EditBox", {
+            Label = function() return Locale.Lookup("LOC_CAI_ENDGAME_CHAT_INPUT") end,
+            Tooltip = GetChatInputTooltip,
             AlwaysEdit = true,
-            ReadOnly = true,
+            CommitOnFocusLeave = false,
+            HighlightOnEdit = true,
+            EnterToCommit = true,
+            MaxCharacters = 250,
+            FocusKey = "endgame:chat:input",
+        })
+        m_chatInput:SetValueSetter(function(widget, text)
+            if text and text ~= "" then
+                SendEndGameChat(text)
+                widget:SetText("", true)
+            end
+        end)
+        chatPage:AddChild(m_chatInput)
+
+        m_chatTarget = mgr:CreateWidget(MakeId("CAIEG_chat_"), "Dropdown", {
+            Label = function() return Locale.Lookup("LOC_CAI_STAGING_CHAT_TARGET") end,
+            FocusKey = "endgame:chat:target",
+        })
+        m_chatTarget:SetFocusSound(HOVER_SOUND)
+        m_chatTarget:SetValueSetter(function(_, target)
+            if target then
+                m_chatTargetState.targetType = target.targetType
+                m_chatTargetState.targetID = target.targetID
+                UpdateVanillaChatTargetState()
+                RebuildChatTarget()
+            end
+        end)
+        chatPage:AddChild(m_chatTarget)
+
+        m_chatHistory = mgr:CreateWidget(MakeId("CAIEG_chat_"), "List", {
+            Label = function() return Locale.Lookup("LOC_CAI_ENDGAME_CHAT_HISTORY") end,
             FocusKey = "endgame:chat:history",
         })
         chatPage:AddChild(m_chatHistory)
 
-        m_chatInput = mgr:CreateWidget(MakeId("CAIEG_chat_"), "EditBox", {
-            Label = function() return Locale.Lookup("LOC_CAI_ENDGAME_CHAT_INPUT") end,
-            AlwaysEdit = true,
-            FocusKey = "endgame:chat:input",
-        })
-        chatPage:AddChild(m_chatInput)
-
-        m_chatSendBtn = mgr:CreateWidget(MakeId("CAIEG_chat_"), "Button", {
-            Label = function() return Locale.Lookup("LOC_CAI_ENDGAME_CHAT_SEND") end,
-            FocusKey = "endgame:chat:send",
-        })
-        m_chatSendBtn:SetFocusSound(HOVER_SOUND)
-        m_chatSendBtn:On("activate", function()
-            local text = m_chatInput:GetValue() or ""
-            if text ~= "" then
-                SendChat(text)
-                m_chatInput:SetText("")
-            end
-        end)
-        chatPage:AddChild(m_chatSendBtn)
+        CaptureVanillaChatHistory()
+        RebuildChatTarget()
     end
 
     local isMirroringTab = false
@@ -447,6 +648,8 @@ local function PopulateAll()
     ReplayInitialize()
     RebuildGraphsTree()
     if m_chatHistory then
+        CaptureVanillaChatHistory()
+        RebuildChatTarget()
         RebuildChatTab()
     end
 end
@@ -469,7 +672,9 @@ local function DestroyPanel()
         m_graphsTree = nil
         m_chatHistory = nil
         m_chatInput = nil
-        m_chatSendBtn = nil
+        m_chatTarget = nil
+        m_chatEntries = {}
+        m_chatEntryId = 1
         m_isBuilt = false
     end
 end
@@ -522,4 +727,18 @@ end)
 OnChat = WrapFunc(OnChat, function(orig, fromPlayer, toPlayer, text, eTargetType)
     orig(fromPlayer, toPlayer, text, eTargetType)
     OnChatReceived()
+end)
+
+ChatPrintHelp = WrapFunc(ChatPrintHelp, function(orig, ...)
+    local result = orig(...)
+    OnChatReceived()
+    return result
+end)
+
+OnPlayerInfoChanged = WrapFunc(OnPlayerInfoChanged, function(orig, playerID)
+    local result = orig(playerID)
+    ValidatePlayerTarget(m_chatTargetState)
+    UpdateVanillaChatTargetState()
+    RebuildChatTarget()
+    return result
 end)

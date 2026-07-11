@@ -327,14 +327,56 @@ local function CollectBindings(widget)
     return groups, commonBindings
 end
 
+---Speaks only the bindings installed on the supplied widget. Unlike RunHelp,
+---this does not include ancestor bindings, world input actions, or open UI.
+---@param widget UIWidget
+---@return boolean
+function H.SpeakWidgetBindings(widget)
+    local widgetBindings = {}
+    local commonBindings = {}
+    for _, b in ipairs(widget.InputMap or {}) do
+        if b.Description and b.Action then
+            local entry = {
+                description = Locale.Lookup(b.Description),
+                keyCombo = FormatBinding(b),
+                action = b.Action,
+                owner = widget,
+            }
+            local target = b.Common and commonBindings or widgetBindings
+            target[#target + 1] = entry
+        end
+    end
+    widgetBindings = MergeBindings(widgetBindings)
+    commonBindings = MergeBindings(commonBindings)
+    if #widgetBindings == 0 and #commonBindings == 0 then
+        Speak(Locale.Lookup("LOC_CAI_INPUT_HELP_NONE"))
+        return true
+    end
+
+    local lines = {}
+    for _, bindings in ipairs({ widgetBindings, commonBindings }) do
+        for _, entry in ipairs(bindings) do
+            lines[#lines + 1] = entry.description .. ": " .. entry.keyCombo
+        end
+    end
+    SpeakLines(lines, true)
+    return true
+end
+
 --#endregion
 
 --#region Public API
 
 function H.RunHelp(widget)
-    if g_helpOpen then return false end
+    if g_helpOpen then
+        LogWarn("InputHelp RunHelp ignored because help UI is already open")
+        return false
+    end
     local mgr = widget.Manager
-    if not mgr then return false end
+    if not mgr then
+        LogWarn("InputHelp RunHelp called without manager")
+        return false
+    end
 
     local groups, commonBindings = CollectBindings(widget)
     local inputActions = {}
@@ -342,6 +384,7 @@ function H.RunHelp(widget)
         inputActions = CollectInputActions()
     end
     if #groups == 0 and #commonBindings == 0 and #inputActions == 0 then
+        LogMessage("InputHelp RunHelp found no bindings or input actions")
         Speak(Locale.Lookup("LOC_CAI_INPUT_HELP_NONE"))
         return true
     end
@@ -366,6 +409,7 @@ function H.RunHelp(widget)
         g_helpOpen = false
         panel:Destroy()
         if previousFocus then mgr:SetFocus(previousFocus) end
+        LogMessage("InputHelp closed help UI")
     end
 
     local function MakeBindingItem(entry)
@@ -440,6 +484,9 @@ function H.RunHelp(widget)
 
     root:AddChild(panel)
     mgr:SetFocus(tree)
+    LogMessage("InputHelp opened help UI, groups="
+        .. tostring(#groups) .. ", commonBindings=" .. tostring(#commonBindings)
+        .. ", inputActions=" .. tostring(#inputActions))
     return true
 end
 

@@ -348,7 +348,10 @@ local function OnInputActionTriggered(actionId)
             ActivateCongress()
         end
     elseif actionId == ACTION_SPEAK_CONGRESS_INFO then
-        Speak(GetCongressTooltip())
+        local tt = GetCongressTooltip()
+        if tt then
+            Speak(tt)
+        end
     end
 end
 

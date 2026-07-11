@@ -1,3 +1,4 @@
+include("caiUtils")
 include("PlayerStateManager_CAI")
 ---@class MessageBuffer
 ---@field _entries MessageBufferEntry[]
@@ -35,6 +36,7 @@ end
 local function GetCapacity()
     local limit = CAISettings.GetNumber("MessageBufferLimit")
     if limit < 1 then
+        LogWarn("MessageBuffer: invalid capacity setting " .. tostring(limit) .. "; clamping to 1")
         return 1
     end
 
@@ -47,7 +49,7 @@ function MessageBuffer:Append(text, category, location)
     end
 
     if not VALID_CATEGORIES[category] then
-        print("MessageBuffer: Unknown category '" .. tostring(category) .. "'")
+        LogWarn("MessageBuffer: unknown category '" .. tostring(category) .. "'")
         return
     end
 
@@ -258,16 +260,20 @@ end
 
 function MessageBuffer:JumpToEntryLocation()
     local entry = self:GetCurrentEntry()
-    if not entry then return end
+    if not entry then
+        LogWarn("MessageBuffer: JumpToEntryLocation called with no current entry")
+        return
+    end
     local loc = entry.location
     if not loc or not loc.x or not loc.y then
         Speak(Locale.Lookup("LOC_CAI_MESSAGE_BUFFER_EMPTY_LOCATION"))
+        LogWarn("MessageBuffer: current entry has no jump location")
         return
     end
 
     local plot = Map.GetPlot(loc.x, loc.y)
     if not plot then
-        print("CAI message buffer could not find location plot for " .. loc.x .. ", " .. loc.y)
+        LogWarn("CAI message buffer could not find location plot for " .. tostring(loc.x) .. ", " .. tostring(loc.y))
         return
     end
     LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
@@ -281,21 +287,51 @@ local m_PlayerState = PlayerStateManager.Init(function(playerID)
     return {
         Buffer = MessageBuffer.Create(),
     }
+end, function(playerID, state)
+    if state == nil or state.Buffer == nil then
+        LogError("MessageBuffer: failed to initialize player state for player " .. tostring(playerID))
+        return
+    end
+
+    LogMessage("MessageBuffer: initialized player buffer for player " .. tostring(playerID))
 end)
 
 function MessageBuffer.GetActive()
     local state = m_PlayerState:GetActive()
-    return state and state.Buffer or nil
+    if state == nil then
+        LogWarn("MessageBuffer: no active player state is available")
+        return nil
+    end
+
+    if state.Buffer == nil then
+        LogError("MessageBuffer: active player state is missing its buffer")
+        return nil
+    end
+
+    return state.Buffer
 end
 
 function MessageBuffer.GetForPlayer(playerID)
     local state = m_PlayerState:Get(playerID)
-    return state and state.Buffer or nil
+    if state == nil then
+        LogWarn("MessageBuffer: no player state is available for player " .. tostring(playerID))
+        return nil
+    end
+
+    if state.Buffer == nil then
+        LogError("MessageBuffer: player state is missing its buffer for player " .. tostring(playerID))
+        return nil
+    end
+
+    return state.Buffer
 end
 
 function MessageBuffer.ClearActive()
     local buffer = MessageBuffer.GetActive()
     if buffer ~= nil then
         buffer:Clear()
+        LogMessage("MessageBuffer: cleared active player buffer")
+    else
+        LogWarn("MessageBuffer: ClearActive called without an active buffer")
     end
 end

@@ -87,15 +87,49 @@ end
 ---@return UIWidget|nil
 function UIScreenManager:CreateWidget(id, type, props)
     if not id or id == "" then
-        print("CAI CreateWidget: missing id for type " .. tostring(type))
+        LogError("CreateWidget missing id for type " .. tostring(type))
         return nil
     end
     local ctor = CAIWidgetRegistry.GetCtor(type)
     if not ctor then
-        print("CAI CreateWidget: unknown type " .. tostring(type))
+        LogError("CreateWidget unknown type " .. tostring(type))
         return nil
     end
-    return ctor(self, id, props)
+    local widget = ctor(self, id, props)
+    if widget then
+        widget:On("navigation_wrap", function(source, direction)
+            self:HandleNavigationWrap(source, direction)
+        end)
+    end
+    return widget
+end
+
+---@param source? table
+---@param direction? integer
+function UIScreenManager:HandleNavigationWrap(source, direction)
+    local audio = self:GetAudioManager()
+    if audio then
+        audio:SetSoundVolume("UI_MENU_WRAP", audio:GetTagVolumeScalar("UI_NAVIGATION") * 0.5)
+        audio:Play("UI_MENU_WRAP")
+    end
+end
+
+---@param w UIWidget|nil
+---@return string
+function UIScreenManager:DescribeWidget(w)
+    if w == nil then
+        return "nil"
+    end
+
+    local id = w.GetId and w:GetId() or w.Id or "?"
+    local role = w.Role or w.Type or "Unknown"
+    local priority = w.__priority ~= nil and tostring(w.__priority) or "nil"
+    local order = w.__stackOrder ~= nil and tostring(w.__stackOrder) or "nil"
+
+    return "id=" .. tostring(id)
+        .. ", role=" .. tostring(role)
+        .. ", priority=" .. tostring(priority)
+        .. ", order=" .. tostring(order)
 end
 
 --#region Stack
@@ -132,6 +166,9 @@ function UIScreenManager:Push(w, opts)
     table.insert(self.Stack, w)
     self:SortStack()
     local newTop = self:GetTop()
+    LogMessage("UI manager Push " .. self:DescribeWidget(w)
+        .. ", stackSize=" .. tostring(#self.Stack)
+        .. ", newTop=" .. self:DescribeWidget(newTop))
 
     -- Ignore updating focus if ops.ignoreFocus is true. This is used by screens that want to push a widget but not expect you to interact with it currently. Normally priority would take care of this, but some screens push on async events and so priority is not effective.
     if opts.ignoreFocus then return end
@@ -168,12 +205,16 @@ end
 function UIScreenManager:Pop()
     if #self.Stack == 0 then return nil end
     local w = table.remove(self.Stack, #self.Stack)
+    local description = self:DescribeWidget(w)
     if w then
         w.__priority = nil
         w.__stackOrder = nil
         w:Destroy()
     end
     self:UpdateRootFocus()
+    LogMessage("UI manager Pop " .. description
+        .. ", stackSize=" .. tostring(#self.Stack)
+        .. ", newTop=" .. self:DescribeWidget(self:GetTop()))
     return w
 end
 
@@ -185,13 +226,18 @@ function UIScreenManager:RemoveFromStack(id)
         local w = self.Stack[i]
         if w:GetId() == id then
             table.remove(self.Stack, i)
+            local description = self:DescribeWidget(w)
             w.__priority = nil
             w.__stackOrder = nil
             w:Destroy()
             self:UpdateRootFocus()
+            LogMessage("UI manager RemoveFromStack " .. description
+                .. ", stackSize=" .. tostring(#self.Stack)
+                .. ", newTop=" .. self:DescribeWidget(self:GetTop()))
             return w
         end
     end
+    LogWarn("UI manager RemoveFromStack could not find id=" .. tostring(id))
     return nil
 end
 
@@ -201,16 +247,20 @@ function UIScreenManager:GetTop() return self.Stack[#self.Stack] end
 function UIScreenManager:IsEmpty() return #self.Stack == 0 end
 
 function UIScreenManager:Clear()
+    LogMessage("UI manager Clear start, stackSize=" .. tostring(#self.Stack))
     self.CurrentPath = {}
     while #self.Stack > 0 do
         local root = table.remove(self.Stack)
+        local description = self:DescribeWidget(root)
         if root then
             root.__priority = nil
             root.__stackOrder = nil
             root:Destroy()
         end
+        LogMessage("UI manager Clear removed " .. description)
     end
     self.Stack = {}
+    LogMessage("UI manager Clear finished")
 end
 
 --#endregion
@@ -749,6 +799,7 @@ function UIScreenManager:InitializeAudioManager()
 
     self.AudioManager:Initialize(self)
     ExposedMembers.CAI_AudioManager = self.AudioManager
+    LogMessage("UI manager audio manager initialized")
 end
 
 function UIScreenManager:UpdateAudioManager()
@@ -768,6 +819,7 @@ function UIScreenManager:ShutdownAudioManager()
     audio:Shutdown()
     self.AudioManager = nil
     ExposedMembers.CAI_AudioManager = nil
+    LogMessage("UI manager audio manager shut down")
 end
 
 function UIScreenManager:Init()
@@ -783,6 +835,7 @@ function UIScreenManager:Init()
         end)
     end
     LuaEvents.CAIUIManagerInitialized(mgr)
+    LogMessage("UI manager initialized")
 end
 
 function UIScreenManager:ShutDown(unregCharInput, preserveAudio)
@@ -796,6 +849,7 @@ function UIScreenManager:ShutDown(unregCharInput, preserveAudio)
     if unregCharInput and CAI and CAI.UnregisterGlobalCharInputHandler then
         CAI.UnregisterGlobalCharInputHandler()
     end
+    LogMessage("UI manager shut down")
 end
 
 UIScreenManager:Init()

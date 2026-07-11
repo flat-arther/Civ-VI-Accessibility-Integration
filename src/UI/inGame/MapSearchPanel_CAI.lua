@@ -411,7 +411,7 @@ end
 
 function RefreshMapSearchResults()
     if ValidateSearchTerms_CAI() and g_bMapSearchInitialized then
-        print("REFRESHING MAP SEARCH RESULTS")
+        LogMessage("CAI MapSearchPanel refreshing search results")
         ClearSearch(false)
         Controls.ProgressBar:SetPercent(0.0)
         Controls.ResultsLabel:SetText(Locale.Lookup("LOC_HUD_MAP_SEARCH_UPDATING"))
@@ -443,8 +443,8 @@ local function CloseSearchPanel()
 end
 
 local function OpenSearchPanel()
-    print("CAI MapSearchPanel: OpenSearchPanel called, mgr=" ..
-    tostring(mgr) .. " m_searchPanel=" .. tostring(m_searchPanel))
+    LogMessage("CAI MapSearchPanel OpenSearchPanel mgr="
+        .. tostring(mgr) .. " existingPanel=" .. tostring(m_searchPanel))
     if not mgr then return end
     if m_searchPanel then return end
 
@@ -501,7 +501,7 @@ end
 --#region Vanilla panel open/close hooks
 
 OnMapSearchPanelOpened = WrapFunc(OnMapSearchPanelOpened, function(orig)
-    print("CAI MapSearchPanel: OnMapSearchPanelOpened fired")
+    LogMessage("CAI MapSearchPanel opened")
     orig()
     Controls.MapSearchBox:DropFocus()
     Controls.MapSearchFilterBox:DropFocus()
@@ -509,7 +509,7 @@ OnMapSearchPanelOpened = WrapFunc(OnMapSearchPanelOpened, function(orig)
 end)
 
 OnMapSearchPanelClosed = WrapFunc(OnMapSearchPanelClosed, function(orig)
-    print("CAI MapSearchPanel: OnMapSearchPanelClosed fired")
+    LogMessage("CAI MapSearchPanel closed")
     orig()
     CloseSearchPanel()
 end)
@@ -527,4 +527,3 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
 end)
 
 --#endregion
-

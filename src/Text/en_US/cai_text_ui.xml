@@ -897,7 +897,7 @@
       <Text>Turn blockers</Text>
     </Row>
     <Row Tag="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS_TOOLTIP" Language="en_US">
-      <Text>Opens an accessible list of current turn actions and blockers</Text>
+      <Text>Opens a list of turn blocking actions </Text>
     </Row>
     <Row Tag="LOC_CAI_ACTION_PANEL_NO_TURN_BLOCKERS" Language="en_US">
       <Text>No current turn actions</Text>
@@ -1092,13 +1092,16 @@
     <Row Tag="LOC_CAI_GP_PATRONIZE_FAITH_LABEL" Language="en_US">
       <Text>Patronize with Faith, {1_Cost} [ICON_Faith]</Text>
     </Row>
+    <Row Tag="LOC_CAI_GP_RECALL_WITH_FAITH_LABEL" Language="en_US">
+      <Text>Recall with Faith, {1_Cost} [ICON_Faith]</Text>
+    </Row>
 
     <!-- Top panel hotkeys -->
     <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE" Language="en_US">
       <Text>Read turn, time, and date</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_TURN_TIME_DATE_TOOLTIP" Language="en_US">
-      <Text>Reads the current turn, time, and date from the top panel</Text>
+      <Text>Reads the current turn, time, and date. Also reads turn timer if available</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE" Language="en_US">
       <Text>Read science and research</Text>
@@ -1152,7 +1155,7 @@
       <Text>Open diplomacy</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_OPEN_DIPLOMACY_TOOLTIP" Language="en_US">
-      <Text>Opens the diplomacy action view through the top panel path</Text>
+      <Text>Opens the diplomacy action view</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_BALANCE_AND_RATE" Language="en_US">
       <Text>{1_Balance}, {2_PerTurn}</Text>
@@ -1543,6 +1546,12 @@
       <Text>{1_Text} loyalty per turn</Text>
     </Row>
     <!-- Edit box -->
+    <Row Tag="LOC_CAI_EDIT_HINT_TYPE_TEXT" Language="en_US">
+      <Text>Type text.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_EDIT_HINT_PRESS_ENTER" Language="en_US">
+      <Text>Press enter to edit.</Text>
+    </Row>
     <Row Tag="LOC_CAI_EDIT_EDITING" Language="en_US">
       <Text>{1_Label}, Edit, {2_Text}</Text>
     </Row>
@@ -2502,6 +2511,12 @@
     <Row Tag="LOC_CAI_UNIT_PROMOTION_LEADS_TO_HEADER" Language="en_US">
       <Text>Unlocks: {1_List}</Text>
     </Row>
+    <Row Tag="LOC_CAI_AND" Language="en_US">
+      <Text>and</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OR" Language="en_US">
+      <Text>or</Text>
+    </Row>
     <Row Tag="LOC_CAI_UNIT_NOT_IN_FORMATION" Language="en_US">
       <Text>This unit is not in a formation</Text>
     </Row>
@@ -3041,10 +3056,10 @@
       <Text>Activates the secondary action for the focused accessibility widget or current interface action</Text>
     </Row>
     <Row Tag="LOC_CAI_END_TURN" Language="en_US">
-      <Text>End turn or current action</Text>
+      <Text>End turn</Text>
     </Row>
     <Row Tag="LOC_CAI_END_TURN_TOOLTIP" Language="en_US">
-      <Text>Triggers the current ActionPanel action when available</Text>
+      <Text>Ends turn or cycles turn blocking actions</Text>
     </Row>
     <Row Tag="LOC_CAI_RANGE_ATTACK_MODE" Language="en_US">
       <Text>Ranged attack mode</Text>
@@ -3193,61 +3208,61 @@
       <Text>Read selection summary</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_SUMMARY_TOOLTIP" Language="en_US">
-      <Text>Reads the summary for the current selection</Text>
+      <Text>Reads the current selection summary. If a city is selected, reads city name, population, health, production, and growth. If a unit is selected, reads the unit summary.</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO1" Language="en_US">
       <Text>Read selection info 1</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO1_TOOLTIP" Language="en_US">
-      <Text>Reads selection info slot 1</Text>
+      <Text>If a city is selected, reads city name and health. If a unit is selected, reads unit identity and health.</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO2" Language="en_US">
       <Text>Read selection info 2</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO2_TOOLTIP" Language="en_US">
-      <Text>Reads selection info slot 2</Text>
+      <Text>If a city is selected, reads production. If a unit is selected, reads movement.</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO3" Language="en_US">
       <Text>Read selection info 3</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO3_TOOLTIP" Language="en_US">
-      <Text>Reads selection info slot 3</Text>
+      <Text>If a city is selected, reads growth. If a unit is selected, reads activity.</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO4" Language="en_US">
       <Text>Read selection info 4</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO4_TOOLTIP" Language="en_US">
-      <Text>Reads selection info slot 4</Text>
+      <Text>If a city is selected, reads border growth. If a unit is selected, reads charges.</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO5" Language="en_US">
       <Text>Read selection info 5</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO5_TOOLTIP" Language="en_US">
-      <Text>Reads selection info slot 5</Text>
+      <Text>If a city is selected, reads religion. If a unit is selected, reads promotions.</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO6" Language="en_US">
       <Text>Read selection info 6</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO6_TOOLTIP" Language="en_US">
-      <Text>Reads selection info slot 6</Text>
+      <Text>If a city is selected, reads population, housing, and buildings or loyalty. If a unit is selected, reads stats.</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO7" Language="en_US">
       <Text>Read selection info 7</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO7_TOOLTIP" Language="en_US">
-      <Text>Reads selection info slot 7</Text>
+      <Text>If a city is selected, reads visible yields. If a unit is selected, reads abilities.</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO8" Language="en_US">
       <Text>Read selection info 8</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO8_TOOLTIP" Language="en_US">
-      <Text>Reads selection info slot 8</Text>
+      <Text>If a city is selected, reads normal yield focus entries. If a unit is selected, reads special info.</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO9" Language="en_US">
       <Text>Read selection info 9</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO9_TOOLTIP" Language="en_US">
-      <Text>Reads selection info slot 9</Text>
+      <Text>If a city is selected, reads favored yield focus entries. If a unit is selected, reads queued path.</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_NO_QUEUED_PATH" Language="en_US">
       <Text>No queued path.</Text>
@@ -3256,13 +3271,13 @@
       <Text>Read selection info 10</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO10_TOOLTIP" Language="en_US">
-      <Text>Reads selection info slot 10</Text>
+      <Text>If a city is selected, reads ignored yield focus entries. If a unit is selected, this hotkey currently has no unit readout.</Text>
     </Row>
     <Row Tag="LOC_CAI_SELECTION_ACTIONS" Language="en_US">
       <Text>Selection actions</Text>
     </Row>
     <Row Tag="LOC_CAI_SELECTION_ACTIONS_TOOLTIP" Language="en_US">
-      <Text>Opens a list of actions for the current selection</Text>
+      <Text>Opens a list of actions for the currently selected city or unit</Text>
     </Row>
 
     <!-- Icon substitution strings -->
@@ -3916,12 +3931,6 @@
     </Row>
     <Row Tag="LOC_CAI_GOVERNOR_AVAILABLE_PROMOS" Language="en_US">
       <Text>Available: {1_List}</Text>
-    </Row>
-    <Row Tag="LOC_CAI_GOVERNOR_REQUIRES" Language="en_US">
-      <Text>Requires: {1_List}</Text>
-    </Row>
-    <Row Tag="LOC_CAI_GOVERNOR_LEADS_TO" Language="en_US">
-      <Text>Leads to: {1_List}</Text>
     </Row>
     <Row Tag="LOC_CAI_GOVERNOR_PROMOTE_TITLE" Language="en_US">
       <Text>Promote {1_GovName}: {2_PromoName}</Text>
@@ -4777,6 +4786,9 @@
     <Row Tag="LOC_CAI_KB_CONFIRM_UNIT_NAME" Language="en_US">
       <Text>Confirm unit name</Text>
     </Row>
+    <Row Tag="LOC_CAI_KB_CONFIRM_CITYSTATE_ENVOYS" Language="en_US">
+      <Text>Confirm envoy placement</Text>
+    </Row>
     <Row Tag="LOC_CAI_KB_COPY" Language="en_US">
       <Text>Copy</Text>
     </Row>
@@ -4846,11 +4858,20 @@
     <Row Tag="LOC_CAI_KB_INCREASE" Language="en_US">
       <Text>Increase</Text>
     </Row>
+    <Row Tag="LOC_CAI_KB_ADD_CITYSTATE_ENVOY" Language="en_US">
+      <Text>Add envoy</Text>
+    </Row>
     <Row Tag="LOC_CAI_KB_INCREASE_PAGE" Language="en_US">
       <Text>Increase by page</Text>
     </Row>
     <Row Tag="LOC_CAI_KB_INPUT_HELP" Language="en_US">
       <Text>Input help</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SPEAK_FOCUSED_BINDINGS" Language="en_US">
+      <Text>Speak input bindings for the focused widget</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_SPEAK_FOCUS_PATH" Language="en_US">
+      <Text>Speak the focused widget path</Text>
     </Row>
     <Row Tag="LOC_CAI_KB_LINE_DOWN" Language="en_US">
       <Text>Line down</Text>
@@ -4878,6 +4899,9 @@
     </Row>
     <Row Tag="LOC_CAI_KB_MOVE_RIGHT" Language="en_US">
       <Text>Move right</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_REMOVE_CITYSTATE_ENVOY" Language="en_US">
+      <Text>Remove envoy</Text>
     </Row>
     <Row Tag="LOC_CAI_KB_MOVE_TO_FIRST" Language="en_US">
       <Text>Move to first</Text>

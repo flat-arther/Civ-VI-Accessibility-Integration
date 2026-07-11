@@ -90,6 +90,7 @@ function SpeakLines(lines, interrupt, processTokens) end
 ---| "value_changed"   # ValueWidget value changed (Toggle, Increment, EditBox Commit, SetValue without silent)
 ---| "expanded"        # TreeItem or SubMenu was expanded
 ---| "collapsed"       # TreeItem or SubMenu was collapsed
+---| "navigation_wrap" # navigation crossed a wrapping container or tab-control boundary; extra arg is direction (+1/-1)
 ---| "destroy"         # widget is being destroyed; clean up subscriptions
 
 ---Edit modes constraining character input on EditBoxWidget.
@@ -1034,6 +1035,10 @@ function UIScreenManager:GetSearchPanel() end
 
 ---@return CAIAudioManager|nil
 function UIScreenManager:GetAudioManager() end
+
+---@param source? table
+---@param direction? integer
+function UIScreenManager:HandleNavigationWrap(source, direction) end
 
 -- -----------------------------------------------------------------------------
 -- Widget registry

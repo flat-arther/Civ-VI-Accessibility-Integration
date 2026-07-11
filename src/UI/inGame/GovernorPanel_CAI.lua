@@ -56,6 +56,13 @@ local function JoinNonEmpty(parts, sep)
     return table.concat(out, sep)
 end
 
+local function FormatPromotionList(names, conjunctionTag)
+    if #names <= 1 then return table.concat(names) end
+
+    local finalName = table.remove(names)
+    return table.concat(names, ", ") .. ", " .. Locale.Lookup(conjunctionTag) .. " " .. finalName
+end
+
 local function NormalizeText(text)
     if not text then return "" end
     local s = tostring(text)
@@ -204,9 +211,15 @@ local function GetGovernorRowTooltip(governorDef, governor, playerGovernors, loc
     if liveRow then
         AppendIfNonEmpty(parts, ControlText(liveRow.GovernorTitle))
         if not isSecret then
-            AppendIfNonEmpty(parts,
-                TooltipWithValue(liveRow.TransitionStrengthLabel, liveRow.TransitionStrengthLabel,
-                    "LOC_GOVERNOR_TRANSITION_STRENGTH_TOOLTIP"))
+            local turnsToEstablish = tonumber(ControlText(liveRow.TransitionStrengthLabel))
+            if turnsToEstablish then
+                local establishmentDescription = ControlTooltip(liveRow.TransitionStrengthLabel)
+                if establishmentDescription == "" then
+                    establishmentDescription = Locale.Lookup("LOC_GOVERNOR_TRANSITION_STRENGTH_TOOLTIP")
+                end
+                AppendIfNonEmpty(parts, establishmentDescription .. " "
+                    .. Locale.Lookup("LOC_GOVERNORS_SCREEN_GOVERNOR_TRANSITION_TURNS", turnsToEstablish))
+            end
             AppendIfNonEmpty(parts,
                 TooltipWithValue(liveRow.IdentityPressureLabel, liveRow.IdentityPressureLabel,
                     "LOC_GOVERNOR_IDENTITY_PRESSURE_TOOLTIP"))
@@ -276,7 +289,8 @@ local function GetPromotionCellTooltip(promoDef, governorDef, localPlayerID)
         end
     end
     if #prereqNames > 0 then
-        parts[#parts + 1] = Locale.Lookup("LOC_CAI_GOVERNOR_REQUIRES", table.concat(prereqNames, ", "))
+        parts[#parts + 1] = Locale.Lookup("LOC_CAI_UNIT_PROMOTION_PREREQS_HEADER",
+            FormatPromotionList(prereqNames, "LOC_CAI_OR"))
     end
 
     local leadsToNames = {}
@@ -289,7 +303,8 @@ local function GetPromotionCellTooltip(promoDef, governorDef, localPlayerID)
         end
     end
     if #leadsToNames > 0 then
-        parts[#parts + 1] = Locale.Lookup("LOC_CAI_GOVERNOR_LEADS_TO", table.concat(leadsToNames, ", "))
+        parts[#parts + 1] = Locale.Lookup("LOC_CAI_UNIT_PROMOTION_LEADS_TO_HEADER",
+            FormatPromotionList(leadsToNames, "LOC_CAI_AND"))
     end
 
     return JoinNonEmpty(parts, "[NEWLINE]")

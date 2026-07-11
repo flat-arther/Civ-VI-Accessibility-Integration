@@ -1367,7 +1367,7 @@ function OnCitySelectionChanged(ownerPlayerID, cityID, i, j, k, isSelected, isEd
     if not isSelected then return end
     local plot = Map.GetPlot(i, j)
     if plot == nil then
-        print("CAI CityPanel could not resolve selected city plot: " .. tostring(i) .. ", " .. tostring(j))
+        LogWarn("CAI CityPanel could not resolve selected city plot: " .. tostring(i) .. ", " .. tostring(j))
         return
     end
     if not m_IsGameStarted then return end

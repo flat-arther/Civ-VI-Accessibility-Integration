@@ -107,6 +107,7 @@ local CURSOR_MOVE_INFO_PRIORITY = {
 }
 
 local PlotInfoActionRequestBuilders = {}
+local PlotInfoBucketHelpers = {}
 
 local function GetCurrentCursorPlot()
     return Map.GetPlotByIndex(currentPlot)
@@ -423,41 +424,6 @@ local function GetVolcanoString(data)
     return volcanoString
 end
 
-local function BuildDefaultRequestedKeys(data)
-    local keys = {}
-    for _, key in ipairs(STATIC_INFO_PRIORITY) do
-        table.insert(keys, key)
-
-        if key == "cityDistrictTitle" then
-            for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
-                table.insert(keys, "cityYield:" .. yieldType)
-            end
-        elseif key == "districtSpecialistsHeader" then
-            for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
-                table.insert(keys, "districtSpecialistYield:" .. yieldType)
-            end
-        elseif key == "districtTitle" then
-            for _, yieldType in ipairs(GetOrderedYieldTypes(data.DistrictYields)) do
-                table.insert(keys, "districtYield:" .. yieldType)
-            end
-        elseif key == "improvement" then
-            for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
-                table.insert(keys, "plotYield:" .. yieldType)
-            end
-        elseif key == "buildingsHeader" and data.BuildingNames ~= nil then
-            for i = 1, #data.BuildingNames do
-                table.insert(keys, "building:" .. tostring(i))
-            end
-        elseif key == "greatWorksHeader" then
-            local greatWorkCount = data._CAIGreatWorkCount or 0
-            for i = 1, greatWorkCount do
-                table.insert(keys, "greatWork:" .. tostring(i))
-            end
-        end
-    end
-    return keys
-end
-
 function info.IsPlotVisible(plot)
     if not plot then return false end
     local observer = Game.GetLocalObserver()
@@ -716,7 +682,7 @@ local function LogRiverDebug(plot, data, directionString)
         riverNameText = tostring(riverNames)
     end
 
-    print(string.format(
+    LogMessage(string.format(
         "CAI_RIVER_DEBUG plot=(%d,%d) isRiver=%s isRiverAdjacent=%s isRiverSide=%s isRiverCrossing=%s names=%s directions=%s self[E<-W=%s,SE<-NW=%s,SW<-NE=%s] west[W<-W=%s] northwest[NW<-NW=%s] northeast[NE<-NE=%s] crossingTo[NE=%s,E=%s,SE=%s,SW=%s,W=%s,NW=%s]",
         x,
         y,
@@ -847,7 +813,13 @@ info.PlotInfoHelpers = {
         if not data.IsVisible or data.OwningCityName == nil or data.OwningCityName == "" then
             return nil
         end
-        return Locale.Lookup(data.OwningCityName)
+
+        local parts = { Locale.Lookup(data.OwningCityName) }
+        if data.OwnerCity ~= nil and data.OwnerCity:IsCapital() then
+            table.insert(parts, Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL"))
+        end
+
+        return table.concat(parts, ", ")
     end,
 
     owner = function(data)
@@ -1218,6 +1190,15 @@ info.PlotInfoHelpers = {
         return nil
     end,
 
+    naturalWonderTitle = function(data)
+        if not data.IsVisible or data.FeatureType == nil then return nil end
+        local featureInfo = GetPlotFeatureInfo(data)
+        if featureInfo ~= nil and featureInfo.NaturalWonder then
+            return Locale.Lookup(featureInfo.Name)
+        end
+        return nil
+    end,
+
     buildingsHeader = function(data)
         if not data.IsVisible then return nil end
         if not (data.IsCity or data.WonderType ~= nil or data.DistrictID ~= -1) then return nil end
@@ -1303,34 +1284,46 @@ info.PlotInfoHelpers = {
         if plot == nil or info.GetRecommendationForPlot == nil then return nil end
         return info.GetRecommendationForPlot(plot:GetIndex())
     end,
-}
 
-local DynamicPlotInfoHelpers = {
-    cityYield = function(data, _, yieldType)
+    cityYields = function(data)
         if not data.IsVisible or not data.IsCity or data.DistrictType == nil then return nil end
-        return GetYieldLine(yieldType, data.Yields[yieldType])
+
+        local results = {}
+        for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
+            AddIfPresent(results, GetYieldLine(yieldType, data.Yields[yieldType]))
+        end
+        return #results > 0 and results or nil
     end,
 
-    districtSpecialistYield = function(data, _, yieldType)
+    districtSpecialistYields = function(data)
         if not data.IsVisible or data.DistrictID == -1 or data.DistrictType == nil then return nil end
-        if GameInfo.Districts[data.DistrictType] == nil or GameInfo.Districts[data.DistrictType].InternalOnly then
+        local districtInfo = GameInfo.Districts[data.DistrictType]
+        if districtInfo == nil or districtInfo.InternalOnly or data.Owner ~= Game.GetLocalPlayer() then
             return nil
         end
-        if data.Owner ~= Game.GetLocalPlayer() then
-            return nil
+
+        local results = {}
+        for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
+            AddIfPresent(results, GetYieldLine(yieldType, data.Yields[yieldType]))
         end
-        return GetYieldLine(yieldType, data.Yields[yieldType])
+        return #results > 0 and results or nil
     end,
 
-    districtYield = function(data, _, yieldType)
+    districtYields = function(data)
         if not data.IsVisible or data.DistrictID == -1 or data.DistrictType == nil then return nil end
-        if GameInfo.Districts[data.DistrictType] == nil or GameInfo.Districts[data.DistrictType].InternalOnly then
+        local districtInfo = GameInfo.Districts[data.DistrictType]
+        if districtInfo == nil or districtInfo.InternalOnly then
             return nil
         end
-        return GetYieldLine(yieldType, data.DistrictYields[yieldType])
+
+        local results = {}
+        for _, yieldType in ipairs(GetOrderedYieldTypes(data.DistrictYields)) do
+            AddIfPresent(results, GetYieldLine(yieldType, data.DistrictYields[yieldType]))
+        end
+        return #results > 0 and results or nil
     end,
 
-    plotYield = function(data, _, yieldType)
+    plotYields = function(data)
         if not data.IsVisible then return nil end
         if data.WonderType ~= nil or (data.IsCity and data.DistrictType ~= nil) then
             return nil
@@ -1341,39 +1334,224 @@ local DynamicPlotInfoHelpers = {
         if not IS_XP2_TOOLTIP and data.Impassable then
             return nil
         end
-        return GetYieldLine(yieldType, data.Yields[yieldType])
+
+        local results = {}
+        for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
+            AddIfPresent(results, GetYieldLine(yieldType, data.Yields[yieldType]))
+        end
+        return #results > 0 and results or nil
     end,
 
-    building = function(data, _, indexArg)
-        if not data.IsVisible or data.BuildingNames == nil then return nil end
-
-        local index = tonumber(indexArg)
-        if index == nil or data.BuildingNames[index] == nil then
+    buildings = function(data)
+        if not data.IsVisible or data.BuildingNames == nil or data.WonderType ~= nil then
             return nil
         end
 
-        if data.WonderType == nil then
+        local results = {}
+        for index, buildingName in ipairs(data.BuildingNames) do
+            local label = Locale.Lookup(buildingName)
             if data.BuildingsPillaged[index] then
-                return "- " ..
-                    Locale.Lookup(data.BuildingNames[index]) .. " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_PILLAGED_TEXT")
+                label = label .. " " .. Locale.Lookup("LOC_TOOLTIP_PLOT_PILLAGED_TEXT")
             end
-            return "- " .. Locale.Lookup(data.BuildingNames[index])
+            table.insert(results, "- " .. label)
         end
 
+        return #results > 0 and results or nil
+    end,
+
+    greatWorks = function(data)
+        CacheGreatWorks(data)
+        if data._CAIGreatWorkCount > 0 then
+            return data._CAIGreatWorks
+        end
         return nil
     end,
-
-    greatWork = function(data, _, indexArg)
-        CacheGreatWorks(data)
-
-        local index = tonumber(indexArg)
-        if index == nil or data._CAIGreatWorks[index] == nil then
-            return nil
-        end
-
-        return data._CAIGreatWorks[index]
-    end,
 }
+
+local function HasDistrictDetails(data)
+    if data.DistrictID == -1 or data.DistrictType == nil then
+        return false
+    end
+
+    local districtInfo = GameInfo.Districts[data.DistrictType]
+    return districtInfo ~= nil and not districtInfo.InternalOnly
+end
+
+local function HasDistrictSpecialistDetails(data)
+    return HasDistrictDetails(data)
+        and data.Owner == Game.GetLocalPlayer()
+        and HasEntries(data.Yields)
+end
+
+PlotInfoBucketHelpers.cityYields = function(data)
+    if data.IsCity == true and data.DistrictType ~= nil then
+        return { "cityYields" }
+    end
+    return {}
+end
+
+PlotInfoBucketHelpers.districtSpecialistYields = function(data)
+    if HasDistrictSpecialistDetails(data) then
+        return { "districtSpecialistYields" }
+    end
+    return {}
+end
+
+PlotInfoBucketHelpers.districtYields = function(data)
+    if HasDistrictDetails(data) then
+        return { "districtYields" }
+    end
+    return {}
+end
+
+PlotInfoBucketHelpers.plotYields = function(data)
+    return { "plotYields" }
+end
+
+local function AppendPlotInfoBucketKeys(results, data, definitions)
+    if definitions == nil then
+        return results
+    end
+
+    for _, entry in ipairs(definitions) do
+        if type(entry) == "string" then
+            table.insert(results, entry)
+        elseif type(entry) == "table" then
+            local include = entry.when == nil or entry.when(data)
+            if include then
+                if entry.key ~= nil then
+                    table.insert(results, entry.key)
+                elseif entry.keys ~= nil then
+                    AppendPlotInfoBucketKeys(results, data, entry.keys)
+                elseif entry.bucket ~= nil then
+                    local helper = PlotInfoBucketHelpers[entry.bucket]
+                    if helper ~= nil then
+                        AppendPlotInfoBucketKeys(results, data, helper(data))
+                    end
+                end
+            end
+        end
+    end
+
+    return results
+end
+
+local DEFAULT_PLOT_INFO_BUCKET = {
+    "plotName",
+    "mapTac",
+    "owner",
+    "feature",
+    "nationalPark",
+    "resource",
+    "volcano",
+    "freshWater",
+    "river",
+    "cliff",
+    "territory",
+    "storm",
+    "drought",
+    "movement",
+    "waypoint",
+    "route",
+    "defense",
+    "appeal",
+    "continent",
+    "coastalLowland",
+    "wonderTitle",
+    "cityDistrictTitle",
+    { bucket = "cityYields" },
+    "cityResourceExtraction",
+    "districtSpecialistsHeader",
+    { bucket = "districtSpecialistYields" },
+    "districtTitle",
+    { bucket = "districtYields" },
+    "districtResourceExtraction",
+    "improvement",
+    { bucket = "plotYields" },
+    "barbarianClan",
+    "plotResourceExtraction",
+    "impassable",
+    "naturalWonder",
+    "buildingsHeader",
+    "buildings",
+    "greatWorksHeader",
+    "greatWorks",
+    "workers",
+    "fallout",
+    "units",
+    "interfaceInfo",
+    "lensInfo",
+}
+
+local DISTRICT_BUILDING_INFO_BUCKET = {
+    "wonderTitle",
+    "cityDistrictTitle",
+    "districtTitle",
+    "buildingsHeader",
+    "buildings",
+    "greatWorksHeader",
+    "greatWorks",
+}
+
+local CURSOR_MOVE_REQUEST_BUCKET = {
+    { keys = CURSOR_MOVE_INFO_PRIORITY },
+    "cityResourceExtraction",
+    "districtResourceExtraction",
+    "plotResourceExtraction",
+    "buildingsHeader",
+    "buildings",
+    "greatWorksHeader",
+    "greatWorks",
+}
+
+local CITY_YIELD_INFO_BUCKET = {
+    { bucket = "cityYields" },
+}
+
+local DISTRICT_YIELD_INFO_BUCKET = {
+    { key = "districtSpecialistsHeader", when = HasDistrictSpecialistDetails },
+    { bucket = "districtSpecialistYields" },
+    { bucket = "districtYields" },
+}
+
+local PLOT_YIELD_INFO_BUCKET = {
+    { bucket = "plotYields" },
+}
+
+local YIELD_RIVER_OWNER_INFO_BUCKET = {
+    { keys = CITY_YIELD_INFO_BUCKET, when = function(data) return data.IsCity == true and data.DistrictType ~= nil end },
+    { keys = DISTRICT_YIELD_INFO_BUCKET, when = HasDistrictDetails },
+    { keys = PLOT_YIELD_INFO_BUCKET, when = function(data) return not (data.IsCity == true and data.DistrictType ~= nil) and not HasDistrictDetails(data) end },
+    "workers",
+    "freshWater",
+    "owner",
+}
+
+local STATS_INFO_BUCKET = {
+    "fallout",
+    "movement",
+    "defense",
+    "appeal",
+}
+
+local GEOGRAPHY_INFO_BUCKET = {
+    "route",
+    "coastalLowland",
+    "volcano",
+    "storm",
+    "drought",
+    "continent",
+    "territory",
+    "cliff",
+    "naturalWonderTitle",
+    "naturalWonder",
+    "riverNamed",
+    "nationalPark",
+}
+
+local function BuildPlotInfoBucket(data, definitions)
+    return AppendPlotInfoBucketKeys({}, data, definitions)
+end
 
 local function ResolvePlotInfoHelper(key)
     local helper = info.PlotInfoHelpers[key]
@@ -1381,19 +1559,11 @@ local function ResolvePlotInfoHelper(key)
         return helper, nil
     end
 
-    local prefix, arg = string.match(key, "^([%a%d_]+)%:(.+)$")
-    if prefix ~= nil then
-        local dynamicHelper = DynamicPlotInfoHelpers[prefix]
-        if dynamicHelper ~= nil then
-            return dynamicHelper, arg
-        end
-    end
-
     return nil, nil
 end
 
 local function RequestPlotInfoFromData(plot, data, requestedKeys)
-    local keys = requestedKeys or BuildDefaultRequestedKeys(data)
+    local keys = requestedKeys or BuildPlotInfoBucket(data, DEFAULT_PLOT_INFO_BUCKET)
     local results = {}
 
     for _, key in ipairs(keys) do
@@ -1407,91 +1577,15 @@ local function RequestPlotInfoFromData(plot, data, requestedKeys)
 end
 
 local function BuildYieldInfoRequestKeys(data)
-    local keys = {}
-
-    if data.IsCity == true and data.DistrictType ~= nil then
-        for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
-            table.insert(keys, "cityYield:" .. yieldType)
-        end
-        return keys
-    end
-
-    if data.DistrictID ~= -1 and data.DistrictType ~= nil then
-        local districtInfo = GameInfo.Districts[data.DistrictType]
-        if districtInfo ~= nil and not districtInfo.InternalOnly then
-            if data.Owner == Game.GetLocalPlayer() and HasEntries(data.Yields) then
-                table.insert(keys, "districtSpecialistsHeader")
-                for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
-                    table.insert(keys, "districtSpecialistYield:" .. yieldType)
-                end
-            end
-
-            for _, yieldType in ipairs(GetOrderedYieldTypes(data.DistrictYields)) do
-                table.insert(keys, "districtYield:" .. yieldType)
-            end
-        end
-
-        return keys
-    end
-
-    for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
-        table.insert(keys, "plotYield:" .. yieldType)
-    end
-
-    return keys
+    return BuildPlotInfoBucket(data, YIELD_RIVER_OWNER_INFO_BUCKET)
 end
 
 local function BuildDistrictAndBuildingRequestKeys(data)
-    local keys = {
-        "wonderTitle",
-        "cityDistrictTitle",
-        "districtTitle",
-        "buildingsHeader",
-    }
-
-    if data.BuildingNames ~= nil then
-        for i = 1, #data.BuildingNames do
-            table.insert(keys, "building:" .. tostring(i))
-        end
-    end
-
-    CacheGreatWorks(data)
-    if data._CAIGreatWorkCount > 0 then
-        table.insert(keys, "greatWorksHeader")
-        for i = 1, data._CAIGreatWorkCount do
-            table.insert(keys, "greatWork:" .. tostring(i))
-        end
-    end
-
-    return keys
+    return BuildPlotInfoBucket(data, DISTRICT_BUILDING_INFO_BUCKET)
 end
 
 local function BuildCursorMoveRequestKeys(data)
-    local keys = {}
-    for _, key in ipairs(CURSOR_MOVE_INFO_PRIORITY) do
-        table.insert(keys, key)
-    end
-
-    table.insert(keys, "cityResourceExtraction")
-    table.insert(keys, "districtResourceExtraction")
-    table.insert(keys, "plotResourceExtraction")
-
-    table.insert(keys, "buildingsHeader")
-    if data.BuildingNames ~= nil then
-        for i = 1, #data.BuildingNames do
-            table.insert(keys, "building:" .. tostring(i))
-        end
-    end
-
-    CacheGreatWorks(data)
-    if data._CAIGreatWorkCount > 0 then
-        table.insert(keys, "greatWorksHeader")
-        for i = 1, data._CAIGreatWorkCount do
-            table.insert(keys, "greatWork:" .. tostring(i))
-        end
-    end
-
-    return keys
+    return BuildPlotInfoBucket(data, CURSOR_MOVE_REQUEST_BUCKET)
 end
 
 local function InitializePlotInfoActionRequestBuilders()
@@ -1503,18 +1597,14 @@ local function InitializePlotInfoActionRequestBuilders()
             }
         end,
         [Input.GetActionId("PlotReadYieldRiverOwner")] = function(plot, data)
-            local keys = BuildYieldInfoRequestKeys(data)
-            table.insert(keys, "workers")
-            table.insert(keys, "freshWater")
-            table.insert(keys, "owner")
             return {
-                keys = keys,
+                keys = BuildYieldInfoRequestKeys(data),
                 emptyLoc = "LOC_CAI_PLOT_NO_YIELD_RIVER_OWNER_INFO",
             }
         end,
         [Input.GetActionId("PlotReadStats")] = function(plot, data)
             return {
-                keys = { "fallout", "movement", "defense", "appeal" },
+                keys = STATS_INFO_BUCKET,
                 emptyLoc = "LOC_CAI_PLOT_NO_PHYSICAL_INFO",
             }
         end,
@@ -1532,18 +1622,7 @@ local function InitializePlotInfoActionRequestBuilders()
         end,
         [Input.GetActionId("PlotReadGeography")] = function(plot, data)
             return {
-                keys = {
-                    "route",
-                    "coastalLowland",
-                    "volcano",
-                    "storm",
-                    "drought",
-                    "continent",
-                    "territory",
-                    "cliff",
-                    "riverNamed",
-                    "nationalPark",
-                },
+                keys = GEOGRAPHY_INFO_BUCKET,
                 emptyLoc = "LOC_CAI_PLOT_NO_GEOGRAPHY_INFO",
             }
         end,
@@ -1551,7 +1630,7 @@ local function InitializePlotInfoActionRequestBuilders()
 end
 
 function info.GetCursorPlotInfoBucket()
-    return CURSOR_MOVE_INFO_PRIORITY
+    return CURSOR_MOVE_REQUEST_BUCKET
 end
 
 function info:RequestCursorMovePlotInfo(plot, explicitPlotId)
@@ -1568,25 +1647,22 @@ function info:RequestCursorMovePlotInfo(plot, explicitPlotId)
     return RequestPlotInfoFromData(targetPlot, data, keys)
 end
 
----@param plot Plot|nil
+---@param plotId integer|nil
 ---@param requestedKeys string[]|nil
----@param explicitPlotId integer|nil
 ---@return string[]
-function info:RequestPlotInfo(plot, requestedKeys, explicitPlotId)
-    local targetPlot = plot
-    if explicitPlotId ~= nil and Map.IsPlot(explicitPlotId) then
-        targetPlot = Map.GetPlotByIndex(explicitPlotId)
+function info:RequestPlotInfo(plotId, requestedKeys)
+    if plotId == nil or not Map.IsPlot(plotId) then
+        return { "No plot" }
     end
 
-    if not targetPlot then return { "No plot" } end
+    local targetPlot = Map.GetPlotByIndex(plotId)
+    if targetPlot == nil then
+        return { "No plot" }
+    end
 
     local data = BuildPlotInfoData(targetPlot)
     if data == nil then
         return {}
-    end
-
-    if requestedKeys == nil then
-        CacheGreatWorks(data)
     end
 
     return RequestPlotInfoFromData(targetPlot, data, requestedKeys)
@@ -1601,13 +1677,13 @@ function OnCAICursorMove(state)
     end
 
     if plotId == nil or plotId < 0 or not Map.IsPlot(plotId) then
-        print("CAI PlotToolTip received invalid cursor plot id: " .. tostring(plotId))
+        LogWarn("CAI PlotToolTip received invalid cursor plot id: " .. tostring(plotId))
         return
     end
 
     local current = Map.GetPlotByIndex(plotId)
     if current == nil then
-        print("CAI PlotToolTip could not resolve cursor plot id: " .. tostring(plotId))
+        LogWarn("CAI PlotToolTip could not resolve cursor plot id: " .. tostring(plotId))
         return
     end
     local data = BuildPlotInfoData(current)
