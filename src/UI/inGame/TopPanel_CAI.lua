@@ -24,11 +24,9 @@ local ACTION_OPEN_REPORTS = Input.GetActionId("UI_TopPanelOpenReports")
 local ACTION_OPEN_REPORTS_RESOURCES = Input.GetActionId("UI_TopPanelOpenReportsResources")
 local ACTION_OPEN_REPORTS_CITY_STATUS = Input.GetActionId("UI_TopPanelOpenReportsCityStatus")
 local ACTION_OPEN_REPORTS_GOSSIP = Input.GetActionId("UI_TopPanelOpenReportsGossip")
-local ACTION_OPEN_RESOURCE_LIST = Input.GetActionId("UI_TopPanelResourceInfoList")
 local ACTION_OPEN_GLOBAL_RESOURCES = Input.GetActionId("UI_OpenGlobalResourcePopup")
 
 local TOP_PANEL_YIELD_INFO_ID = "CAITopPanelYieldInfoTree"
-local TOP_PANEL_RESOURCE_INFO_ID = "CAITopPanelResourceInfoTree"
 
 local function GetLocalPlayer()
     local playerID = Game.GetLocalPlayer()
@@ -447,21 +445,13 @@ local function AddWMDTreeNode(tree)
     end
 end
 
-local function OpenYieldInfoList()
-    CloseTopPanelList()
-
-    local tree = mgr:CreateWidget(TOP_PANEL_YIELD_INFO_ID, "Tree", {
-        Label = function() return Locale.Lookup("LOC_CAI_TOP_PANEL_YIELD_INFO") end,
-    })
-    AddListEscapeBinding(tree)
-    AddTransientFocusLeave(tree, TOP_PANEL_YIELD_INFO_ID)
-
+local function AddYieldInfoTreeNodes(parent)
     local _, player = GetLocalPlayer()
     if player then
         if GameCapabilities.HasCapability("CAPABILITY_SCIENCE")
             and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
             local techs = player:GetTechs()
-            AddGenericYieldTreeNode(tree,
+            AddGenericYieldTreeNode(parent,
                 Locale.Lookup("LOC_TOP_PANEL_SCIENCE"),
                 FormatRatePerTurn(FormatValuePerTurn(techs:GetScienceYield())),
                 GetScienceTooltip())
@@ -470,19 +460,19 @@ local function OpenYieldInfoList()
         if GameCapabilities.HasCapability("CAPABILITY_CULTURE")
             and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
             local culture = player:GetCulture()
-            AddGenericYieldTreeNode(tree,
+            AddGenericYieldTreeNode(parent,
                 Locale.Lookup("LOC_TOP_PANEL_CULTURE"),
                 FormatRatePerTurn(FormatValuePerTurn(culture:GetCultureYield())),
                 GetCultureTooltip())
         end
 
-        AddGoldYieldTreeNode(tree)
-        AddTradeRouteTreeNode(tree)
+        AddGoldYieldTreeNode(parent)
+        AddTradeRouteTreeNode(parent)
 
         if GameCapabilities.HasCapability("CAPABILITY_FAITH")
             and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
             local religion = player:GetReligion()
-            AddGenericYieldTreeNode(tree,
+            AddGenericYieldTreeNode(parent,
                 Locale.Lookup("LOC_TOP_PANEL_FAITH"),
                 Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
                     FormatBalance(religion:GetFaithBalance()),
@@ -499,36 +489,24 @@ local function OpenYieldInfoList()
                 if tourismBreakdown and #tourismBreakdown > 0 then
                     tourismTooltip = tourismTooltip .. "[NEWLINE][NEWLINE]" .. tourismBreakdown
                 end
-                AddGenericYieldTreeNode(tree,
+                AddGenericYieldTreeNode(parent,
                     Locale.Lookup("LOC_TOP_PANEL_TOURISM"),
                     FormatRatePerTurn(FormatBalance(tourismRate)),
                     tourismTooltip)
             end
         end
 
-        AddFavorTreeNode(tree)
-        AddEnvoyTreeNode(tree)
-        AddWMDTreeNode(tree)
-    end
-
-    if tree.Children and #tree.Children > 0 then
-        m_caiTopPanelList = tree
-        mgr:Push(m_caiTopPanelList, { priority = PopupPriority.Low })
+        AddFavorTreeNode(parent)
+        AddEnvoyTreeNode(parent)
+        AddWMDTreeNode(parent)
     end
 end
 
 -- ===========================================================================
--- Strategic resource tree (Ctrl+Q)
+-- Strategic resource tree content
 -- ===========================================================================
-local function OpenResourceInfoTree()
-    CloseTopPanelList()
-
-    local tree = mgr:CreateWidget(TOP_PANEL_RESOURCE_INFO_ID, "Tree", {
-        Label = function() return Locale.Lookup("LOC_CAI_TOP_PANEL_RESOURCE_INFO") end,
-    })
-    AddListEscapeBinding(tree)
-    AddTransientFocusLeave(tree, TOP_PANEL_RESOURCE_INFO_ID)
-
+local function AddResourceInfoTreeNodes(parent)
+    local resourceCount = 0
     local _, player = GetLocalPlayer()
     if player then
         local pResources = player:GetResources()
@@ -601,24 +579,46 @@ local function OpenResourceInfoTree()
                             node:AddChild(conNode)
                         end
 
-                        tree:AddChild(node)
+                        parent:AddChild(node)
+                        resourceCount = resourceCount + 1
                     end
                 else
                     if stockpileAmount > 0 then
                         local resName = Locale.Lookup(resource.Name)
-                        tree:AddChild(MakeTreeItem(resName .. ": " .. stockpileAmount, nil))
+                        parent:AddChild(MakeTreeItem(resName .. ": " .. stockpileAmount, nil))
+                        resourceCount = resourceCount + 1
                     end
                 end
             end
         end
     end
 
-    if tree.Children and #tree.Children > 0 then
-        m_caiTopPanelList = tree
-        mgr:Push(m_caiTopPanelList, { priority = PopupPriority.Low })
-    else
-        Speak(Locale.Lookup("LOC_CAI_TOP_PANEL_NO_STRATEGIC_RESOURCES"))
+    if resourceCount == 0 then
+        parent:AddChild(MakeTreeItem(Locale.Lookup("LOC_CAI_TOP_PANEL_NO_STRATEGIC_RESOURCES"), nil))
     end
+end
+
+local function OpenYieldInfoList()
+    CloseTopPanelList()
+
+    local tree = mgr:CreateWidget(TOP_PANEL_YIELD_INFO_ID, "Tree", {
+        Label = function() return Locale.Lookup("LOC_CAI_TOP_PANEL_YIELD_INFO") end,
+    })
+    AddListEscapeBinding(tree)
+    AddTransientFocusLeave(tree, TOP_PANEL_YIELD_INFO_ID)
+
+    local yields = MakeTreeItem(Locale.Lookup("LOC_HUD_REPORTS_TAB_YIELDS"), nil)
+    AddYieldInfoTreeNodes(yields)
+    yields:Expand(true)
+    tree:AddChild(yields)
+
+    local resources = MakeTreeItem(Locale.Lookup("LOC_CAI_TOP_PANEL_RESOURCE_INFO"), nil)
+    AddResourceInfoTreeNodes(resources)
+    resources:Expand(true)
+    tree:AddChild(resources)
+
+    m_caiTopPanelList = tree
+    mgr:Push(m_caiTopPanelList, { priority = PopupPriority.Low })
 end
 
 -- ===========================================================================
@@ -640,8 +640,6 @@ local function OnCAITopPanelInputAction(actionId)
         SpeakNukes()
     elseif actionId == ACTION_OPEN_YIELD_LIST then
         OpenYieldInfoList()
-    elseif actionId == ACTION_OPEN_RESOURCE_LIST then
-        OpenResourceInfoTree()
     elseif actionId == ACTION_OPEN_DIPLOMACY then
         if GameCapabilities.HasCapability("CAPABILITY_DIPLOMACY") then
             LuaEvents.TopPanel_OpenDiplomacyActionView()
@@ -675,7 +673,7 @@ local function OnLocalPlayerTurnEnd()
 end
 
 function OnShutdown()
-    Events.InputActionTriggered.Remove(OnCAITopPanelInputAction)
+    Events.InputActionStarted.Remove(OnCAITopPanelInputAction)
     Events.TurnTimerUpdated.Remove(OnTurnTimerUpdated)
     Events.LocalPlayerTurnBegin.Remove(OnLocalPlayerTurnBegin)
     Events.LocalPlayerTurnEnd.Remove(OnLocalPlayerTurnEnd)
@@ -684,7 +682,7 @@ end
 
 ContextPtr:SetShutdown(OnShutdown)
 
-Events.InputActionTriggered.Add(OnCAITopPanelInputAction)
+Events.InputActionStarted.Add(OnCAITopPanelInputAction)
 Events.TurnTimerUpdated.Add(OnTurnTimerUpdated)
 Events.LocalPlayerTurnBegin.Add(OnLocalPlayerTurnBegin)
 Events.LocalPlayerTurnEnd.Add(OnLocalPlayerTurnEnd)

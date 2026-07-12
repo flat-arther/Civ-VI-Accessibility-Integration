@@ -607,7 +607,7 @@ local function CAI_PopPanel()
     m_caiPlayersList = nil
 end
 
-local function CAI_OnInputActionTriggered(actionId)
+local function CAI_OnInputActionStarted(actionId)
     if actionId ~= ACTION_OPEN_CHAT_PANEL then return end
     if not CAI_CanUseRealtimeChat() then return end
     CAI_PushPanel()
@@ -745,7 +745,7 @@ end)
 Controls.ChatEntry:RegisterCommitCallback(CAI_SendChat)
 CAI_UpdateVanillaTargetState()
 ContextPtr:SetInputHandler(CAI_HandleInput, true)
-Events.InputActionTriggered.Add(CAI_OnInputActionTriggered)
+Events.InputActionStarted.Add(CAI_OnInputActionStarted)
 Events.PlayerInfoChanged.Add(CAI_OnPlayerInfoChanged)
 Events.MultiplayerPingTimesChanged.Add(CAI_OnPingTimesChanged)
 Events.KickVoteStarted.Remove(m_vanillaKickVoteStarted)
@@ -758,7 +758,7 @@ LuaEvents.MapPinPopup_RequestChatPlayerTarget.Remove(m_vanillaMapPinTargetReques
 LuaEvents.MapPinPopup_RequestChatPlayerTarget.Add(CAI_OnMapPinPopupRequestTarget)
 
 OnShutdown = WrapFunc(OnShutdown, function(orig)
-    Events.InputActionTriggered.Remove(CAI_OnInputActionTriggered)
+    Events.InputActionStarted.Remove(CAI_OnInputActionStarted)
     Events.PlayerInfoChanged.Remove(CAI_OnPlayerInfoChanged)
     Events.MultiplayerPingTimesChanged.Remove(CAI_OnPingTimesChanged)
     Events.KickVoteStarted.Remove(OnKickVoteStarted)

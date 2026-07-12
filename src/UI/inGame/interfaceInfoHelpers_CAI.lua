@@ -249,6 +249,19 @@ local function GetCityOrDistrictOwner(plot)
     return nil
 end
 
+local function IsAttackableCombatTarget(unit, targetPlot)
+    local combatResults = CombatManager.SimulateAttackInto(unit:GetComponentID(), nil,
+        targetPlot:GetX(), targetPlot:GetY())
+    local defender = combatResults ~= nil and combatResults[CombatResultParameters.DEFENDER] or nil
+    local defenderID = defender ~= nil and defender[CombatResultParameters.ID] or nil
+    local combatType = combatResults ~= nil and combatResults[CombatResultParameters.COMBAT_TYPE] or nil
+    if defenderID == nil or combatType == nil then
+        return false
+    end
+
+    return CombatManager.CanAttackTarget(unit:GetComponentID(), defenderID, combatType)
+end
+
 local function GetTechNameKey(techType)
     local tech = techType ~= nil and GameInfo.Technologies[techType] or nil
     return tech ~= nil and tech.Name or nil
@@ -576,7 +589,7 @@ local function FinalizeMovementAnalysis(unit, targetPlot, pathInfo)
             local cityOwnerID = GetCityOrDistrictOwner(targetPlot)
             pathInfo.enemyCityAtEnd = IsAtWarWithLocalPlayer(cityOwnerID)
         end
-        pathInfo.combatAtEnd = pathInfo.arrivalTurn <= 1 and (unitIsAtWar or pathInfo.enemyCityAtEnd)
+        pathInfo.combatAtEnd = pathInfo.arrivalTurn <= 1 and IsAttackableCombatTarget(unit, targetPlot)
     end
 
     AnalyzePathFeatures(unit, targetPlot, pathInfo)

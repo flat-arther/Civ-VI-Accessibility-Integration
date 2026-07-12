@@ -51,6 +51,7 @@
 [x] Recommendation types in tech and civic trees should report the correct advisor
 [ ] redo the scanner categories for the tourism and power lenses. They are shit
 [ ] figure out tab bar count
-[ ] dedup difficulty tooltip, it repeats label. 
-[ ] change dropdowns that have simple on off options to checkboxes
+[x] dedup difficulty tooltip, it repeats label. 
+[x] change dropdowns that have simple on off options to checkboxes
 [ ] add custom locale for hotkey strings that are symbols
+[x] Make quick move keys not queue movement.

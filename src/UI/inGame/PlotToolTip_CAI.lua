@@ -1509,7 +1509,7 @@ local CITY_YIELD_INFO_BUCKET = {
 }
 
 local DISTRICT_YIELD_INFO_BUCKET = {
-    { key = "districtSpecialistsHeader", when = HasDistrictSpecialistDetails },
+    { key = "districtSpecialistsHeader",  when = HasDistrictSpecialistDetails },
     { bucket = "districtSpecialistYields" },
     { bucket = "districtYields" },
 }
@@ -1519,9 +1519,15 @@ local PLOT_YIELD_INFO_BUCKET = {
 }
 
 local YIELD_RIVER_OWNER_INFO_BUCKET = {
-    { keys = CITY_YIELD_INFO_BUCKET, when = function(data) return data.IsCity == true and data.DistrictType ~= nil end },
+    { keys = CITY_YIELD_INFO_BUCKET,     when = function(data) return data.IsCity == true and data.DistrictType ~= nil end },
     { keys = DISTRICT_YIELD_INFO_BUCKET, when = HasDistrictDetails },
-    { keys = PLOT_YIELD_INFO_BUCKET, when = function(data) return not (data.IsCity == true and data.DistrictType ~= nil) and not HasDistrictDetails(data) end },
+    {
+        keys = PLOT_YIELD_INFO_BUCKET,
+        when = function(data)
+            return not (data.IsCity == true and data.DistrictType ~= nil) and
+                not HasDistrictDetails(data)
+        end
+    },
     "workers",
     "freshWater",
     "owner",
@@ -1705,7 +1711,7 @@ function OnCAICursorMove(state)
     end
 end
 
-function OnPlotInfoInputActionTriggered(actionId)
+function OnPlotInfoInputActionStarted(actionId)
     local buildRequestKeys = PlotInfoActionRequestBuilders[actionId]
     if buildRequestKeys == nil then
         return
@@ -1743,5 +1749,5 @@ function OnPlotInfoInputActionTriggered(actionId)
 end
 
 InitializePlotInfoActionRequestBuilders()
-Events.InputActionTriggered.Add(OnPlotInfoInputActionTriggered)
+Events.InputActionStarted.Add(OnPlotInfoInputActionStarted)
 LuaEvents.CAICursorMoved.Add(OnCAICursorMove)

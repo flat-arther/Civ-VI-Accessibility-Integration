@@ -1634,7 +1634,7 @@ function info:RequestCityBannerInfo(requestedKeys)
     return results
 end
 
-local function OnCityBannerInfoInputActionTriggered(actionId)
+local function OnCityBannerInfoInputActionStarted(actionId)
     local plot = GetCurrentCursorPlot()
     local ctx = ResolveBannerContext(plot)
     if ctx == nil then
@@ -1669,7 +1669,7 @@ local function OnCAIOpenOverviewForEnemyCity(playerID, cityID)
 end
 
 local function OnShutdown()
-    Events.InputActionTriggered.Remove(OnCityBannerInfoInputActionTriggered)
+    Events.InputActionStarted.Remove(OnCityBannerInfoInputActionStarted)
     LuaEvents.CAICursorMoved.Remove(OnCAICursorMoved)
     if IsExpansion2Active() then
         LuaEvents.CAIOpenOverviewForEnemyCity.Remove(OnCAIOpenOverviewForEnemyCity)
@@ -1677,7 +1677,7 @@ local function OnShutdown()
 end
 
 ContextPtr:SetShutdown(OnShutdown)
-Events.InputActionTriggered.Add(OnCityBannerInfoInputActionTriggered)
+Events.InputActionStarted.Add(OnCityBannerInfoInputActionStarted)
 LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
 if IsExpansion2Active() then
     LuaEvents.CAIOpenOverviewForEnemyCity.Add(OnCAIOpenOverviewForEnemyCity)

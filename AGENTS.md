@@ -110,6 +110,7 @@ The UI manager is a class-based widget framework rebuilt on the `UIManagerRework
 ## Documentation Rules
 
 - After new code analysis or discovered Civ VI behavior, update `docs/game-api.md` immediately.
+- Update `changelog.md` whenever a significant player-facing change is made. Always follow [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/), placing new entries under `Unreleased` and the appropriate change-type heading. Write entries for players, not developers: describe only what players will notice, keep them concise and factual, and avoid implementation details, jargon, fluff, or colorful language.
 - Keep `project_status.md` compact: current focus, pending tests, next steps, durable decisions, and compressed history only.
 - Do not let `project_status.md` become a chronological scratch log again.
 - Put long API findings in `docs/game-api.md`, not in `project_status.md`.

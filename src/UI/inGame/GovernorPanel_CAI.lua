@@ -918,7 +918,7 @@ local function SpeakGovTitles()
     Speak(GetTitleCountsText(GetGovernerTitleCounts()))
 end
 
-local function OnInputActionTriggered(actionId)
+local function OnInputActionStarted(actionId)
     if actionId == Input.GetActionId("CAI_SpeakGovernerTitles") then SpeakGovTitles() end
 end
 
@@ -932,7 +932,7 @@ end)
 OnShutdown = WrapFunc(OnShutdown, function(orig)
     PopPanel()
     orig()
-    Events.InputActionTriggered.Remove(OnInputActionTriggered)
+    Events.InputActionStarted.Remove(OnInputActionStarted)
     Events.GovernorAppointed.Remove(OnCAIGovernorAppointed)
     Events.GovernorPromoted.Remove(OnCAIGovernorPromoted)
 end)
@@ -941,6 +941,6 @@ end)
 -- before our WrapFunc reassigned the globals.
 ContextPtr:SetInputHandler(OnInputHandler, true)
 ContextPtr:SetShutdown(OnShutdown)
-Events.InputActionTriggered.Add(OnInputActionTriggered)
+Events.InputActionStarted.Add(OnInputActionStarted)
 Events.GovernorAppointed.Add(OnCAIGovernorAppointed)
 Events.GovernorPromoted.Add(OnCAIGovernorPromoted)

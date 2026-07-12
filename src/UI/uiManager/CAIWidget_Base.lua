@@ -55,6 +55,7 @@ function UIWidget.New(class)
         Key = Keys.VK_F12,
         Description = "LOC_CAI_KB_OPEN_SETTINGS",
         Common = true,
+        MSG = KeyEvents.KeyDown,
         Action = function(self)
             CAIWidgetHelpers_Settings.OpenSettings(self.Manager)
             return true
@@ -63,9 +64,10 @@ function UIWidget.New(class)
 
     w:AddInputBinding({
         Key = Keys.I,
-        IsAlt = true,
+        IsControl = true,
         Description = "LOC_CAI_KB_PEDIA_LOOKUP",
         Common = true,
+        MSG = KeyEvents.KeyDown,
         Action = function(self) return PediaLookup.RunLookup(self) end,
     })
     w:AddInputBinding({
@@ -73,6 +75,7 @@ function UIWidget.New(class)
         IsControl = true,
         Description = "LOC_CAI_KB_INPUT_HELP",
         Common = true,
+        MSG = KeyEvents.KeyDown,
         Action = function(self)
             return InputHelp.RunHelp(self)
         end,
@@ -82,6 +85,7 @@ function UIWidget.New(class)
         IsShift = true,
         Description = "LOC_CAI_KB_SPEAK_FOCUSED_BINDINGS",
         Common = true,
+        MSG = KeyEvents.KeyDown,
         Action = function(self)
             return InputHelp.SpeakWidgetBindings(self)
         end,
@@ -91,6 +95,7 @@ function UIWidget.New(class)
         IsShift = true,
         Description = "LOC_CAI_KB_SPEAK_FOCUS_PATH",
         Common = true,
+        MSG = KeyEvents.KeyDown,
         Action = function(self)
             local mgr = self.Manager
             local path = mgr and mgr.CurrentPath
@@ -521,6 +526,7 @@ function UIWidget:GetInfoStrings()
         state = state ~= "" and (state .. "  " .. explicitState) or explicitState
     end
     local tooltip = self:GetTooltip()
+    if tooltip == label then tooltip = nil end
     return {
         label    = label ~= "" and label or nil,
         role     = role ~= "" and role or nil,

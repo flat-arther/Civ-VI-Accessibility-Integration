@@ -1146,10 +1146,10 @@
       <Text>Reads the count of nuclear and thermonuclear devices</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_YIELD_INFO" Language="en_US">
-      <Text>Yield breakdown</Text>
+      <Text>Yields and strategic resources</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_YIELD_INFO_TOOLTIP" Language="en_US">
-      <Text>Opens a tree of top panel yield breakdowns</Text>
+      <Text>Opens a tree of top panel yields and strategic resources</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_OPEN_DIPLOMACY" Language="en_US">
       <Text>Open diplomacy</Text>
@@ -3034,6 +3034,9 @@
     <Row Tag="LOC_CAI_MOVEMENT_BLOCKED_BORDERS" Language="en_US">
       <Text>Cannot enter this territory</Text>
     </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_NOT_ENOUGH_MOVEMENT" Language="en_US">
+      <Text>Not enough movement</Text>
+    </Row>
     <Row Tag="LOC_CAI_MOVEMENT_RESULT_MOVED_TO" Language="en_US">
       <Text>{1_Moves : plural 1?Moved, {1_Moves} move left; other?Moved, {1_Moves} moves left;}</Text>
     </Row>
@@ -4309,7 +4312,7 @@
       <Text>Opens the empire reports screen on the gossip tab</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_RESOURCE_INFO" Language="en_US">
-      <Text>Strategic Resources</Text>
+      <Text>Strategic resources</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_RESOURCE_INFO_TOOLTIP" Language="en_US">
       <Text>Opens a tree of strategic resource stockpiles and flow</Text>

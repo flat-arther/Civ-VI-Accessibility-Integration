@@ -259,7 +259,7 @@ function MovementActions_CAI:CommitMoveTarget(unit, targetPlotId)
     return committed
 end
 
-function MovementActions_CAI:TryActivateMoveTarget(unit, targetPlotId, useCursorCombatPreview)
+function MovementActions_CAI:TryActivateMoveTarget(unit, targetPlotId, useCursorCombatPreview, requireArrivalThisTurn)
     if unit == nil then
         self:ClearReadyForCombat()
         SpeakText(Locale.Lookup("LOC_CAI_QUICK_MOVE_NO_UNIT"), true)
@@ -291,6 +291,12 @@ function MovementActions_CAI:TryActivateMoveTarget(unit, targetPlotId, useCursor
         if not SpeakLines(BuildMovementSpeech(pathInfo, false), true) then
             SpeakText(Locale.Lookup("LOC_CAI_MOVEMENT_CANNOT_MOVE"), true)
         end
+        return false
+    end
+
+    if requireArrivalThisTurn == true and pathInfo.arrivalTurn > 1 then
+        self:ClearReadyForCombat()
+        SpeakText(Locale.Lookup("LOC_CAI_MOVEMENT_NOT_ENOUGH_MOVEMENT"), true)
         return false
     end
 
@@ -341,7 +347,7 @@ function MovementActions_CAI:TryQuickMoveDirection(direction)
         return false
     end
 
-    return self:TryActivateMoveTarget(unit, targetPlot:GetIndex(), false)
+    return self:TryActivateMoveTarget(unit, targetPlot:GetIndex(), false, true)
 end
 
 Events.UnitMoveComplete.Add(function(playerID, unitID, x, y)

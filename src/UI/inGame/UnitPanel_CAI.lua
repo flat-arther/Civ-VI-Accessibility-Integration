@@ -2338,7 +2338,7 @@ local function BuildUnitActionList(data)
         abilities:On("activate", function(w, ...)
             UI.PlaySound("Play_UI_Click")
             CloseUnitActionList()
-            OnUnitPanelSelectionActionInputTriggered(unitViewAbilitiesAction)
+            OnUnitPanelSelectionActionInputStarted(unitViewAbilitiesAction)
         end)
         list:AddChild(abilities)
     end
@@ -2549,7 +2549,7 @@ function InitializeUnitInfoActionMap()
     }
 end
 
-function OnUnitPanelSelectionInfoInputActionTriggered(actionId)
+function OnUnitPanelSelectionInfoInputActionStarted(actionId)
     if ContextPtr:IsHidden() or GetSelectedUnit() == nil then
         return
     end
@@ -2573,7 +2573,7 @@ function OnUnitPanelSelectionInfoInputActionTriggered(actionId)
     Speak(table.concat(results, ", "))
 end
 
-function OnUnitPanelSelectionActionInputTriggered(actionId)
+function OnUnitPanelSelectionActionInputStarted(actionId)
     if actionId == prevUnitAction then
         UI.SelectPrevUnit()
         UI.PlaySound("Play_UI_Click");
@@ -2825,8 +2825,8 @@ function info:RequestUnitInfo(unitID, requestedKeys, playerID)
 end
 
 InitializeUnitInfoActionMap()
-Events.InputActionTriggered.Add(OnUnitPanelSelectionInfoInputActionTriggered)
-Events.InputActionTriggered.Add(OnUnitPanelSelectionActionInputTriggered)
+Events.InputActionStarted.Add(OnUnitPanelSelectionInfoInputActionStarted)
+Events.InputActionStarted.Add(OnUnitPanelSelectionActionInputStarted)
 Events.LoadScreenClose.Add(OnLoadScreenClose)
 Events.UnitSelectionChanged.Add(OnCAIUnitSelectionChanged)
 Events.Combat.Add(OnCombatResolved)

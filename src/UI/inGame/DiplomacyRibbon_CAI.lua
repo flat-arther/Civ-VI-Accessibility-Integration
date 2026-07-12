@@ -339,7 +339,7 @@ UpdateLeaders = WrapFunc(UpdateLeaders, function(orig)
     RebuildIfPushed()
 end)
 
-local function OnInputActionTriggered(actionId)
+local function OnInputActionStarted(actionId)
     if ContextPtr:IsHidden() then return end
     if actionId == ACTION_OPEN_LIST then
         OpenList()
@@ -355,10 +355,10 @@ local function OnInputActionTriggered(actionId)
     end
 end
 
-Events.InputActionTriggered.Add(OnInputActionTriggered)
+Events.InputActionStarted.Add(OnInputActionStarted)
 
 OnShutdown = WrapFunc(OnShutdown, function(orig)
-    Events.InputActionTriggered.Remove(OnInputActionTriggered)
+    Events.InputActionStarted.Remove(OnInputActionStarted)
     CloseList()
     orig()
 end)

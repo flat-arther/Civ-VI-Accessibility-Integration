@@ -256,13 +256,13 @@ local function CloseVanillaMapSearch()
 end
 
 Events.InputActionTriggered.Remove(OnInputActionTriggered)
-OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionId)
+OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     if m_caiOpenMapSearchId ~= nil and actionId == m_caiOpenMapSearchId then
         orig(Input.GetActionId("OpenMapSearch"))
         return
     end
 end)
-Events.InputActionTriggered.Add(OnInputActionTriggered)
+Events.InputActionStarted.Add(OnInputActionStarted)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
     if mgr ~= nil then
@@ -299,6 +299,7 @@ local function ToggleAccessibleMapPinList()
 end
 
 OnShutdown = WrapFunc(OnShutdown, function(orig)
+    Events.InputActionStarted.Remove(OnInputActionStarted)
     LuaEvents.CAIMinimapLensListToggle.Remove(ToggleAccessibleLensList)
     LuaEvents.CAIMinimapMapPinListToggle.Remove(ToggleAccessibleMapPinList)
     LuaEvents.CAIMapPinList_RequestClose.Remove(CloseMapPinList)

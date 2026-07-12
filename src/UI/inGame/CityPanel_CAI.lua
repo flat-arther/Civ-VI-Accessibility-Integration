@@ -1320,7 +1320,7 @@ function OnHandleInput(inputStruct)
     return mgr:HandleInput(inputStruct)
 end
 
-function OnSelectionInfoInputActionTriggered(actionId)
+function OnSelectionInfoInputActionStarted(actionId)
     if ContextPtr:IsHidden() then return end
     local requestedKeys = CityInfoActionMap[actionId]
     local city = UI.GetHeadSelectedCity()
@@ -1344,7 +1344,7 @@ function OnSelectionInfoInputActionTriggered(actionId)
     Speak(table.concat(results, ", "))
 end
 
-function OnCityActionInputActionTriggered(actionId)
+function OnCityActionInputActionStarted(actionId)
     local action = CityActionMap[actionId]
 
     if action == nil or not action.IsEnabled() then
@@ -1437,7 +1437,7 @@ end
 InitializeCityActionMap()
 InitializeCityInfoActionMap()
 Events.CitySelectionChanged.Add(OnCitySelectionChanged)
-Events.InputActionTriggered.Add(OnCityActionInputActionTriggered)
-Events.InputActionTriggered.Add(OnSelectionInfoInputActionTriggered)
+Events.InputActionStarted.Add(OnCityActionInputActionStarted)
+Events.InputActionStarted.Add(OnSelectionInfoInputActionStarted)
 Events.LoadScreenClose.Add(OnLoadScreenClose)
 ContextPtr:SetInputHandler(OnHandleInput, true)

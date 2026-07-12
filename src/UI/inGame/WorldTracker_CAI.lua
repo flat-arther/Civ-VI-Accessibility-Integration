@@ -412,7 +412,7 @@ local function InitializeWorldTrackerActions()
     end
 end
 
-local function OnWorldTrackerInputActionTriggered(actionId)
+local function OnWorldTrackerInputActionStarted(actionId)
     if ContextPtr:IsHidden() then return end
     local action = m_caiWorldTrackerActions[actionId]
     if action == nil then return end
@@ -435,7 +435,7 @@ RealizeCurrentCivic = WrapFunc(RealizeCurrentCivic, function(orig, playerID, kDa
 end)
 
 OnShutdown = WrapFunc(OnShutdown, function(orig)
-    Events.InputActionTriggered.Remove(OnWorldTrackerInputActionTriggered)
+    Events.InputActionStarted.Remove(OnWorldTrackerInputActionStarted)
     LuaEvents.CAIWorldTrackerShowChat.Remove(ForceShowChatPanel)
     RemoveCrisisList()
     orig()
@@ -443,5 +443,5 @@ end)
 ContextPtr:SetShutdown(OnShutdown)
 
 InitializeWorldTrackerActions()
-Events.InputActionTriggered.Add(OnWorldTrackerInputActionTriggered)
+Events.InputActionStarted.Add(OnWorldTrackerInputActionStarted)
 LuaEvents.CAIWorldTrackerShowChat.Add(ForceShowChatPanel)

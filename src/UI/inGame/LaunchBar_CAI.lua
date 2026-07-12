@@ -42,7 +42,7 @@ if IsExpansion2Active() then
     m_vanillaToggleWorldClimate = Input.GetActionId("ToggleWorldClimate")
 end
 
-OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionId)
+OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     if m_caiOpenTechTreeId and actionId == m_caiOpenTechTreeId then
         orig(m_vanillaToggleTechTree)
         return
@@ -79,4 +79,15 @@ OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionI
         orig(m_vanillaToggleWorldClimate)
         return
     end
+end)
+
+Subscribe = WrapFunc(Subscribe, function(orig)
+    orig()
+    Events.InputActionTriggered.Remove(OnInputActionTriggered);
+    Events.InputActionStarted.Add(OnInputActionStarted);
+end)
+
+Unsubscribe = WrapFunc(Unsubscribe, function(orig)
+    orig()
+    Events.InputActionStarted.Remove(OnInputActionStarted)
 end)

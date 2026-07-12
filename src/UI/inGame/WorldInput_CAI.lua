@@ -475,7 +475,7 @@ end
 ---@type table<number, { Type: string, Action: fun(w:UIWidget, ...):boolean|nil }>
 local SharedInputActions = {
 	[ACTION_MESSAGE_BUFFER_MOVETO] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			local m_messageBuffer = MessageBuffer.GetActive()
 			if not m_messageBuffer then return end
@@ -587,67 +587,67 @@ local SharedInputActions = {
 		end,
 	},
 	[ACTION_CURSOR_JUMP_TO_SELECTION] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return JumpCursorToSelection()
 		end,
 	},
 	[ACTION_WORLD_SELECT_PREVIOUS_CITY] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return SelectPreviousCity()
 		end,
 	},
 	[ACTION_WORLD_SELECT_NEXT_CITY] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return SelectNextCity()
 		end,
 	},
 	[ACTION_WORLD_SELECT_CAPITAL_CITY] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return SelectCapitalCity()
 		end,
 	},
 	[ACTION_QUICK_MOVE_NORTHWEST] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return MovementActions_CAI:TryQuickMoveDirection(DirectionTypes.DIRECTION_NORTHWEST)
 		end,
 	},
 	[ACTION_QUICK_MOVE_NORTHEAST] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return MovementActions_CAI:TryQuickMoveDirection(DirectionTypes.DIRECTION_NORTHEAST)
 		end,
 	},
 	[ACTION_QUICK_MOVE_WEST] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return MovementActions_CAI:TryQuickMoveDirection(DirectionTypes.DIRECTION_WEST)
 		end,
 	},
 	[ACTION_QUICK_MOVE_EAST] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return MovementActions_CAI:TryQuickMoveDirection(DirectionTypes.DIRECTION_EAST)
 		end,
 	},
 	[ACTION_QUICK_MOVE_SOUTHWEST] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return MovementActions_CAI:TryQuickMoveDirection(DirectionTypes.DIRECTION_SOUTHWEST)
 		end,
 	},
 	[ACTION_QUICK_MOVE_SOUTHEAST] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return MovementActions_CAI:TryQuickMoveDirection(DirectionTypes.DIRECTION_SOUTHEAST)
 		end,
 	},
 	[ACTION_INTERFACE_INFO] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return SpeakActiveInterfacePlotInfo()
 		end,
@@ -719,19 +719,19 @@ local SharedInputActions = {
 		end,
 	},
 	[ACTION_SCANNER_JUMP] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			CAIWorldScanner:JumpToCurrent()
 		end,
 	},
 	[ACTION_SCANNER_RETURN] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			CAIWorldScanner:ReturnFromJump()
 		end,
 	},
 	[ACTION_SCANNER_SPEAK_DIRECTION] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			CAIWorldScanner:SpeakCurrentDirection()
 		end,
@@ -743,70 +743,70 @@ local SharedInputActions = {
 		end,
 	},
 	[ACTION_MINIMAP_LENS_LIST] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			LuaEvents.CAIMinimapLensListToggle()
 			return true
 		end,
 	},
 	[ACTION_MINIMAP_MAP_PIN_LIST] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			LuaEvents.CAIMinimapMapPinListToggle()
 			return true
 		end,
 	},
 	[ACTION_PLACE_MAP_PIN] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			PlaceMapPin()
 			return true
 		end,
 	},
 	[ACTION_SURVEYOR_GROW_RADIUS] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return CAISurveyor.SpeakResult(CAISurveyor.GrowRadius)
 		end,
 	},
 	[ACTION_SURVEYOR_SHRINK_RADIUS] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return CAISurveyor.SpeakResult(CAISurveyor.ShrinkRadius)
 		end,
 	},
 	[ACTION_SURVEYOR_READ_YIELDS] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return CAISurveyor.SpeakResult(CAISurveyor.ReadYields)
 		end,
 	},
 	[ACTION_SURVEYOR_READ_RESOURCES] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return CAISurveyor.SpeakResult(CAISurveyor.ReadResources)
 		end,
 	},
 	[ACTION_SURVEYOR_READ_TERRAIN] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return CAISurveyor.SpeakResult(CAISurveyor.ReadTerrain)
 		end,
 	},
 	[ACTION_SURVEYOR_READ_OWN_UNITS] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return CAISurveyor.SpeakResult(CAISurveyor.ReadOwnUnits)
 		end,
 	},
 	[ACTION_SURVEYOR_READ_ENEMY_UNITS] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return CAISurveyor.SpeakResult(CAISurveyor.ReadEnemyUnits)
 		end,
 	},
 	[ACTION_SURVEYOR_READ_CITIES] = {
-		Type = INPUT_ACTION_TRIGGERED,
+		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return CAISurveyor.SpeakResult(CAISurveyor.ReadCities)
 		end,

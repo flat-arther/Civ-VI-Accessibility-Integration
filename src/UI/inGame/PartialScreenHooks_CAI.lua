@@ -23,7 +23,7 @@ if IsExpansion1Active() or IsExpansion2Active() then
     m_caiOpenEraProgressId = Input.GetActionId("UI_CAIOpenEraProgress")
 end
 Events.InputActionTriggered.Remove(OnInputActionTriggered)
-OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionId)
+OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     if m_caiOpenCityStatesId and actionId == m_caiOpenCityStatesId then
         orig(m_vanillaToggleCityStates)
         return
@@ -45,4 +45,4 @@ OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionI
         return
     end
 end)
-Events.InputActionTriggered.Add(OnInputActionTriggered)
+Events.InputActionStarted.Add(OnInputActionStarted)

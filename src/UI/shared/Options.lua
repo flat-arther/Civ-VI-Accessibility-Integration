@@ -2167,7 +2167,7 @@ end
 
 PopulateComboBox = WrapFunc(PopulateComboBox, function(orig, ctrl, vals, sel, handler, locked)
     orig(ctrl, vals, sel, handler, locked)
-    m_ctrlData[ctrl] = { values = vals, handler = handler }
+    m_ctrlData[ctrl] = { values = vals, selected = sel, handler = handler }
 end)
 
 PopulateCheckBox = WrapFunc(PopulateCheckBox, function(orig, ctrl, val, handler, locked)
@@ -2418,6 +2418,44 @@ local function W_Checkbox(ctrl)
     return w
 end
 
+---Return the enabled and disabled values when a vanilla pulldown contains
+---exactly those two choices, regardless of their order.
+local function GetBooleanDropdownValues(values)
+    if not values or #values ~= 2 then return nil, nil end
+    local enabledValue, disabledValue
+    for _, opt in ipairs(values) do
+        if opt[1] == "LOC_OPTIONS_ENABLED" then
+            enabledValue = opt[2]
+        elseif opt[1] == "LOC_OPTIONS_DISABLED" then
+            disabledValue = opt[2]
+        else
+            return nil, nil
+        end
+    end
+    return enabledValue, disabledValue
+end
+
+---Checkbox backed by a PopulateComboBox-registered Enabled/Disabled control.
+local function W_BooleanDropdown(labelText, ctrl, data, enabledValue, disabledValue)
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIOpt_Checkbox"), "Checkbox", {
+        Label             = function() return labelText end,
+        Tooltip           = function() return ctrl:GetToolTipString() or "" end,
+        DisabledPredicate = function() return ctrl:IsDisabled() end,
+        HiddenPredicate   = function() return ctrl:IsHidden() end,
+    })
+    w:SetFocusSound("Main_Menu_Mouse_Over")
+    w:SetChecked(data.selected == enabledValue, true)
+    w:SetValueSetter(function(_, checked)
+        local value = checked and enabledValue or disabledValue
+        if data.handler then data.handler(value) end
+        if ctrl:GetButton() then
+            ctrl:GetButton():LocalizeAndSetText(checked and "LOC_OPTIONS_ENABLED" or "LOC_OPTIONS_DISABLED")
+        end
+        data.selected = value
+    end)
+    return w
+end
+
 ---Edit box backed by a PopulateEditBox-registered control.
 local function W_EditBox(labelText, ctrl)
     local data = m_ctrlData[ctrl]
@@ -2566,7 +2604,13 @@ local function BuildFromSpec(s)
     local lbl = s.label and Locale.Lookup(s.label) or (s.labelFn and s.labelFn()) or nil
     local w
     if s.type == "D" then
-        w = W_Dropdown(lbl, s.ctrl)
+        local data = m_ctrlData[s.ctrl]
+        local enabledValue, disabledValue = GetBooleanDropdownValues(data and data.values)
+        if enabledValue ~= nil and disabledValue ~= nil then
+            w = W_BooleanDropdown(lbl, s.ctrl, data, enabledValue, disabledValue)
+        else
+            w = W_Dropdown(lbl, s.ctrl)
+        end
     elseif s.type == "C" then
         w = W_Checkbox(s.ctrl)
     elseif s.type == "E" then
@@ -2775,10 +2819,6 @@ local interfaceTabSpecs = {
     },
     { type = "C", ctrl = Controls.TouchInputCheckbox },
     { type = "C", ctrl = Controls.HistoricMomentsAnimCheckbox },
-    {
-        type = "X",
-        build = function() return W_Button(Controls.SwitchUILayout, function() OnSwitchUILayout() end) end,
-    },
 }
 
 local appTabSpecs = {

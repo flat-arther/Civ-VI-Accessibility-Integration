@@ -2,6 +2,12 @@
 
 Documented APIs used by the CAI accessibility mod. Updated as new patterns are discovered.
 
+## Combined top-panel yields and strategic resources tree
+
+- `UI_TopPanelYieldInfoList` remains bound to Ctrl+Y and opens one CAI tree containing expanded `Yields` and `Strategic resources` categories.
+- The yields category uses the existing live top-panel yield APIs/tooltips. The strategic-resources category uses `Player:GetResources()` and preserves the existing XP2 stockpile, accumulation, reserve, and consumption breakdown; base game exposes flat resource amounts.
+- When the local player has no displayed strategic resources, the combined tree keeps the category and adds the localized `No strategic resources` child instead of replacing the tree with a direct speech message.
+
 ## Safe Mod Keys
 
 Keys confirmed safe to bind in mods without conflicting with game defaults:
@@ -1245,6 +1251,7 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - If active `MOVE_TO` interface info would immediately resolve as combat against an at-war visible unit, city, or district, CAI requests `LuaEvents.CAISpeakCombatPreview()` and suppresses movement speech. Queued-path reads keep speaking queued movement information instead of firing combat preview.
   - `MovementActions_CAI.lua` now owns shared move-target activation for both `MOVE_TO` primary action and the adjacent quick-move hotkeys. It analyzes destination plot ids directly with `BuildMovementPathInfo(...)`, arms one pending `{ owner, unitId, targetPlotId }` combat confirmation only for immediate move-to melee combat, silently syncs the CAI cursor to the target, then commits through the same vanilla `OnMouseMoveToEnd()` path used by mouse move confirmation.
   - Quick-move hotkeys are selection-driven, not cursor-driven. They resolve adjacency from the selected unit's live plot with `Map.GetAdjacentPlot(...)`, reuse the same movement-failure speech path as move mode, and only require a second press when the exact same unit and target plot are still immediate combat on a fresh re-analysis.
+  - Quick-move hotkeys reject otherwise valid adjacent paths when `pathInfo.arrivalTurn > 1`. They announce `Not enough movement` and return before `OnMouseMoveToEnd()`, preventing the engine from queueing that move for a later turn. Normal `MOVE_TO` activation still permits multi-turn orders.
   - When `GetMoveToPathEx(...)` fails and CAI synthesizes a bad-path result with no real path nodes, movement diagnostics must still read the unit's live `unit:GetPlotId()` as the origin. Using `pathInfo.plots[1]` in that case can silently replace the true start plot with the destination plot and break embark-tech failure diagnosis for coastal water targets.
   - Runtime dumps confirm `GetMoveToPathEx(...)` exposes only the keys vanilla uses (`plots`, `turns`, `obstacles`, `entrancePortals`, `exitPortals`), so CAI should not promise Civ V-style MP spent / MP remaining unless a future engine hook exposes per-node remaining movement.
   - 2026-05-19 comparison against Civ V Access `CivVAccess_PathDiagnostic.lua` / `CivVAccess_UnitControlMovement.lua`: that mod does not settle for a generic move failure. It re-runs the engine pathfinder with progressively relaxed flags, then names causes such as blocked borders / would declare war, friendly stacking, at-war enemy blocker, no embark tech, no deep-water tech, mountain or natural wonder, no naval connection, cannot attack from land, cannot attack from water, and cannot travel to land.
@@ -1255,6 +1262,7 @@ Wrapper for `CAI.output`. Use this for all TTS output.
   - Detailed path-step speech now honors turn breaks in both places that expose the full path. Explicit move preview splits visible steps into per-turn segments using `pathInfo.turns`, while queued-path speech splits cached visible steps at queued waypoint markers; both join segments with localized `then`.
   - Normal movement previews should not speak generic embark/disembark requirements at all. Access or tech requirements belong only to the failure diagnostic path, for example `Requires: <tech> technology` on an invalid target.
   - Delayed combat speech should be driven directly by hostile destination state plus arrival turn, not by a route-text fallback. If the destination will trigger combat after movement, CAI should say only `Encounters combat this turn` or `Encounters combat in n turns`; do not fall back to `Enemy at destination` for delayed hostile contact.
+  - Immediate movement combat confirmation must use the same engine-backed target test as vanilla `UnitPanel`: call `CombatManager.SimulateAttackInto(attackerComponentID, nil, x, y)`, take the returned defender component and combat type, then require `CombatManager.CanAttackTarget(attackerComponentID, defenderComponentID, combatType)`. Foreign plot ownership, an at-war owner, or the presence of a district is not sufficient because ordinary territory and some districts are not attackable targets.
   - Current practical parity judgement versus Civ V:
     - can match directly now: blocked visible unit, impassable terrain / mountain, land-vs-water attack incompatibility, sea unit cannot travel to land, ZOC entry, war-start warning, embark/disembark along a valid route, fog vs unexplored, swap, queued path, arrival turn, and combat-at-end preview suppression
     - can now approximate in CAI from start/target plot state: blocked foreign territory, unit-specific embark tech (`TECH_SAILING` for builders, `TECH_CELESTIAL_NAVIGATION` for traders, `TECH_SHIPBUILDING` for other land units), and `TECH_CARTOGRAPHY`-gated ocean travel when the destination plot itself is ocean once embark is already unlocked

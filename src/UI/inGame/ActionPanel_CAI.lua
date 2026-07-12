@@ -377,7 +377,7 @@ end
 -- ===========================================================================
 -- Input
 -- ===========================================================================
-OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionId)
+OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     if ContextPtr:IsHidden() then return end
 
     if actionId == CAI_OPEN_TURN_BLOCKERS_ACTION then
@@ -395,8 +395,6 @@ OnInputActionTriggered = WrapFunc(OnInputActionTriggered, function(orig, actionI
         orig(END_TURN_ACTION)
         return
     end
-
-    return orig(actionId)
 end)
 
 OnRefresh = WrapFunc(OnRefresh, function(orig, ...)
@@ -419,5 +417,11 @@ LuaEvents.CAI_TutorialActionPanelAllowed.Add(function(isAllowed)
     end
 end)
 
+LateInitialize = WrapFunc(LateInitialize, function(orig, ...)
+    orig(...)
+    Events.InputActionTriggered.Remove(OnInputActionTriggered)
+end)
+
 ContextPtr:SetRefreshHandler(OnRefresh)
 ContextPtr:SetInputHandler(OnCAIActionPanelInputHandler, true)
+Events.InputActionStarted.Add(OnInputActionStarted)

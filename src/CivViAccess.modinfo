@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Mod id="9f4b5c2e-1a2b-4c3d-8e9f-123456789abc" version="1">
+<Mod id="9f4b5c2e-1a2b-4c3d-8e9f-123456789abc" version="0.1.1">
   <Properties>
     <Name>Civ VI Accessibility Integration</Name>
     <Description>Adds blind accessibility to civ VI via text to speech</Description>
