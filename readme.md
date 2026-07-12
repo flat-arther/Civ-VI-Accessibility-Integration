@@ -42,7 +42,7 @@ These shortcuts are available from all accessible widgets unless the current scr
 - `Shift+F1` — read only the shortcuts available on the focused widget
 - `Shift+F2` — read the complete focus path
 - `F12` — open the accessibility settings
-- `Alt+I` — look up the focused item in the Civilopedia; available during a game, but not from the main menu or its child screens
+- `Ctrl+I` — look up the focused item in the Civilopedia; available during a game, but not from the main menu or its child screens
 - `Alt+Up` / `Alt+Down` — read the previous or next section of the focused item's help text; useful when an item and its description contain a lot of information
 - `Alt+Home` / `Alt+End` — read the first or last section of the focused item's help text
 - `Ctrl+F` — search the current container when it supports search
@@ -237,8 +237,7 @@ Empire information commands read important totals and progress without opening t
 - `G` — read the current gold balance, gold per turn, and trade-route capacity
 - `F` — read the current faith balance and faith per turn
 - `I` — read tourism per turn
-- `Ctrl+Y` — open the yield-breakdown tree. This provides detailed empire-wide information for science, culture, gold, faith, tourism, diplomatic favor, envoys, influence points, and other available top-panel yields.
-- `Ctrl+I` — open the strategic-resources tree, including stockpiles and resource flow
+- `Ctrl+Y` — open the yields and strategic resources tree. Its two categories provide detailed empire-wide information for science, culture, gold, faith, tourism, diplomatic favor, envoys, influence points, other available top-panel yields, and strategic-resource stockpiles and flow.
 
 #### Diplomacy and government
 

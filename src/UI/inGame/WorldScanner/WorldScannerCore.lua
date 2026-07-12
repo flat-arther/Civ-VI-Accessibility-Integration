@@ -3,6 +3,8 @@
 ---@field PlotIndex integer
 ---@field LabelKey string
 ---@field Item table
+---@field Distance number
+---@field ResolvedLabel string
 
 ---@class WorldScannerGroup
 ---@field Id string
@@ -11,6 +13,8 @@
 ---@field PlotIndex integer
 ---@field Items WorldScannerLeafItem[]
 ---@field TotalItems integer
+---@field Distance number
+---@field ResolvedLabel string
 
 ---@class WorldScannerSubCategory
 ---@field Id string
@@ -52,9 +56,7 @@ local function SafeCall(definition, phase, fn, ...)
     return true, result
 end
 
-local function CompareResolvedLabels(aLabelKey, bLabelKey)
-    local aLabel = Utils.ResolveText(aLabelKey)
-    local bLabel = Utils.ResolveText(bLabelKey)
+local function CompareResolvedLabels(aLabel, bLabel)
     if aLabel == bLabel then
         return 0
     end
@@ -64,13 +66,11 @@ end
 
 local function SortItems(items)
     table.sort(items, function(a, b)
-        local aDistance = Utils.GetDistance(nil, a.PlotIndex)
-        local bDistance = Utils.GetDistance(nil, b.PlotIndex)
-        if aDistance ~= bDistance then
-            return aDistance < bDistance
+        if a.Distance ~= b.Distance then
+            return a.Distance < b.Distance
         end
 
-        local labelCompare = CompareResolvedLabels(a.LabelKey, b.LabelKey)
+        local labelCompare = CompareResolvedLabels(a.ResolvedLabel, b.ResolvedLabel)
         if labelCompare ~= 0 then
             return labelCompare < 0
         end
@@ -128,13 +128,11 @@ local function SortGroups(groups, groupOrder, groupComparator)
             end
         end
 
-        local aDistance = Utils.GetDistance(nil, a.PlotIndex)
-        local bDistance = Utils.GetDistance(nil, b.PlotIndex)
-        if aDistance ~= bDistance then
-            return aDistance < bDistance
+        if a.Distance ~= b.Distance then
+            return a.Distance < b.Distance
         end
 
-        local labelCompare = CompareResolvedLabels(a.LabelKey, b.LabelKey)
+        local labelCompare = CompareResolvedLabels(a.ResolvedLabel, b.ResolvedLabel)
         if labelCompare ~= 0 then
             return labelCompare < 0
         end
@@ -143,18 +141,18 @@ local function SortGroups(groups, groupOrder, groupComparator)
     end)
 end
 
-local function BuildLeafItems(items, context)
+local function BuildLeafItems(items)
     local built = {}
 
     for _, item in ipairs(items) do
-        if item.Validate == nil or item.Validate(item, context) then
-            built[#built + 1] = {
-                Id = item.Id,
-                PlotIndex = item.PlotIndex,
-                LabelKey = item.LabelKey,
-                Item = item,
-            }
-        end
+        built[#built + 1] = {
+            Id = item.Id,
+            PlotIndex = item.PlotIndex,
+            LabelKey = item.LabelKey,
+            Item = item,
+            Distance = item._CAIDistance,
+            ResolvedLabel = item._CAIResolvedLabel,
+        }
     end
 
     SortItems(built)
@@ -183,7 +181,7 @@ local function ResolveGroupLabel(definition, groupId, firstItem)
     return firstItem and firstItem.LabelKey or "LOC_CAI_WORLD_SCANNER_UNKNOWN"
 end
 
-local function BuildGroups(definition, subCategoryId, items, context)
+local function BuildGroups(definition, subCategoryId, items)
     local buckets = {}
     for _, item in ipairs(items) do
         AddBucketItem(buckets, item.GroupId, item)
@@ -191,17 +189,20 @@ local function BuildGroups(definition, subCategoryId, items, context)
 
     local groups = {}
     for groupId, groupedItems in pairs(buckets) do
-        local leaves = BuildLeafItems(groupedItems, context)
+        local leaves = BuildLeafItems(groupedItems)
         if #leaves > 0 then
             local firstItem = leaves[1].Item
+            local labelKey = ResolveGroupLabel(definition, groupId, firstItem)
             groups[#groups + 1] = {
                 Id = groupId,
                 Key = groupId,
-                LabelKey = ResolveGroupLabel(definition, groupId, firstItem),
+                LabelKey = labelKey,
                 PlotIndex = leaves[1].PlotIndex,
                 Items = leaves,
                 TotalItems = #leaves,
                 SortValue = firstItem and firstItem.GroupSortValue or nil,
+                Distance = leaves[1].Distance,
+                ResolvedLabel = Utils.ResolveText(labelKey),
             }
         end
     end
@@ -222,15 +223,29 @@ local function BuildCategoryFromItems(definition, rawItems, context)
         return nil
     end
 
-    local subBuckets = {}
+    local validatedItems = {}
     for _, item in ipairs(rawItems) do
+        if item.Validate == nil or item.Validate(item, context) then
+            item._CAIDistance = Utils.GetDistance(context, item.PlotIndex)
+            item._CAIResolvedLabel = Utils.ResolveText(item.LabelKey)
+            validatedItems[#validatedItems + 1] = item
+        end
+    end
+
+    if #validatedItems == 0 then
+        LogMessage("World scanner BuildCategoryFromItems: no valid items for category " .. GetCategoryLogId(definition))
+        return nil
+    end
+
+    local subBuckets = {}
+    for _, item in ipairs(validatedItems) do
         AddBucketItem(subBuckets, item.SubCategoryId, item)
     end
 
     local subCategories = {}
     local subCategoryOrder = definition.SubCategoryOrder or {}
 
-    local allGroups = BuildGroups(definition, Core.AllSubCategoryId, rawItems, context)
+    local allGroups = BuildGroups(definition, Core.AllSubCategoryId, validatedItems)
     if #allGroups > 0 then
         local allCount = 0
         for _, group in ipairs(allGroups) do
@@ -251,7 +266,7 @@ local function BuildCategoryFromItems(definition, rawItems, context)
     for _, subCategoryId in ipairs(subCategoryOrder) do
         local groupedItems = subBuckets[subCategoryId]
         if groupedItems ~= nil and #groupedItems > 0 then
-            local groups = BuildGroups(definition, subCategoryId, groupedItems, context)
+            local groups = BuildGroups(definition, subCategoryId, groupedItems)
             if #groups > 0 then
                 local count = 0
                 for _, group in ipairs(groups) do
@@ -366,21 +381,36 @@ function Core.BuildAllCategories(definitions, context)
             end
         end
 
-        Utils.ForEachRevealedPlot(context, function(plotIndex, plot)
-            for _, entry in ipairs(plotExtractors) do
+        local plotIndexes = {}
+        local plots = {}
+        local revealedPlots = {}
+        Utils.ForEachPlot(function(plotIndex, plot)
+            local index = #plots + 1
+            plotIndexes[index] = plotIndex
+            plots[index] = plot
+            revealedPlots[index] = Utils.IsPlotRevealed(context, plot)
+        end)
+
+        for _, entry in ipairs(plotExtractors) do
+            if not failedDefinitions[entry.Definition.Id] then
                 local items = entry.RawItems
-                if failedDefinitions[entry.Definition.Id] then
-                    return
-                end
-                local ok = SafeCall(entry.Definition, "PlotExtract", entry.Definition.PlotExtract, plotIndex, plot, context, function(item)
+                local function Collect(item)
                     items[#items + 1] = item
+                end
+                local ok = SafeCall(entry.Definition, "PlotExtract", function()
+                    for index = 1, #plots do
+                        local isRevealed = revealedPlots[index]
+                        if entry.Definition.ExtractHiddenPlots or isRevealed then
+                            entry.Definition.PlotExtract(plotIndexes[index], plots[index], context, Collect, isRevealed)
+                        end
+                    end
                 end)
                 if not ok then
                     results[entry.Definition.Id] = nil
                     failedDefinitions[entry.Definition.Id] = true
                 end
             end
-        end)
+        end
 
         for _, entry in ipairs(plotExtractors) do
             if failedDefinitions[entry.Definition.Id] then
@@ -427,12 +457,23 @@ function Core.RefreshCategorySort(category)
     end
 
     local subCategories = category.SubCategories or {}
+    local distancesByPlot = {}
     for _, subCategory in ipairs(subCategories) do
         local groups = subCategory.Groups or {}
         for _, group in ipairs(groups) do
-            SortItems(group.Items or {})
+            local items = group.Items or {}
+            for _, item in ipairs(items) do
+                local distance = distancesByPlot[item.PlotIndex]
+                if distance == nil then
+                    distance = Utils.GetDistance(nil, item.PlotIndex)
+                    distancesByPlot[item.PlotIndex] = distance
+                end
+                item.Distance = distance
+            end
+            SortItems(items)
             local firstItem = group.Items and group.Items[1] or nil
             group.PlotIndex = firstItem and firstItem.PlotIndex or group.PlotIndex
+            group.Distance = firstItem and firstItem.Distance or group.Distance
         end
         SortGroups(groups, subCategory.GroupOrder, subCategory.GroupComparator)
     end

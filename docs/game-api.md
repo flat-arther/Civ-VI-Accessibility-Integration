@@ -329,6 +329,8 @@ Shared global table for cross-context communication:
 
 Wrapper for `CAI.output`. Use this for all TTS output.
 
+- `ProcessIcons(text)` also transliterates common accented Latin characters and ligatures to ASCII when `Locale.GetCurrentLanguage().Type` identifies an English display language. This keeps names such as `Nam Việt` readable by English screen readers that otherwise announce unsupported characters as question marks. Other display languages retain their original characters.
+
 ## Chat panel findings
 
 - `Assets/UI/Popups/ChatPanel.lua` owns four main behaviors: send/edit target handling, incoming chat history, clickable map-pin chat entries, and the player-action / kick-vote area.
@@ -512,7 +514,7 @@ Wrapper for `CAI.output`. Use this for all TTS output.
 
 ### World scanner reveal and object rules
 
-- Terrain scanner gates on revealed plots only. It intentionally emits separate entries for base terrain, feature, and elevation on the same revealed plot.
+- Terrain scanner emits separate entries for base terrain, feature, and elevation on the same revealed plot. It also scans hidden plots without inspecting their concealed terrain data and places them in a single Unexplored subcategory and group.
 - Resources should use `plot:GetResourceType()` together with the local player's `GetResources():IsResourceVisible(resource.Hash)` check so invisible strategic resources stay hidden.
 - Improvements use the same live plot getters as vanilla `PlotToolTip.lua`: `plot:GetImprovementType()`, `plot:IsImprovementPillaged()`, `plot:IsRoute()`, `plot:IsRoutePillaged()`, and `plot:GetRouteType()`. Civ VI models routes separately from improvements.
 - Decompiled route data confirms `GameInfo.Routes[...]` rows use `RouteType` and `SupportsBridges`. Base-game `ROUTE_ANCIENT_ROAD` has `SupportsBridges="false"`, while medieval / industrial / modern roads do support bridges; Gathering Storm adds `ROUTE_RAILROAD`, which also supports bridges in `DLC/Expansion2/Data/Expansion2_Routes.xml`.
@@ -531,7 +533,7 @@ Wrapper for `CAI.output`. Use this for all TTS output.
 - Unit scanner subcategories should stay broad for navigation. CAI now derives them from live unit metadata in this order: barbarians, religious, civilian, support, air, naval, siege, ranged, then melee fallback.
 - When classifying religious units from `GameInfo.Units`, do not treat Civ VI gameplay booleans or numeric stats as plain Lua truthy checks. Database booleans arrive as `0` or `1`, and `ReligiousStrength` / charge columns default to `0`; in Lua, `0` is truthy, so scanner logic must check `== 1` / `== true` or `> 0` explicitly.
 - Every scanner category now gets an implicit `All` subcategory from `WorldScannerCore.lua`. It is always inserted first and contains every validated item in that category, grouped through the same `GroupId` / `GroupLabelResolver` path as normal subcategories.
-- The Cities scanner category assigns each city a stable group key built from owner ID and city ID. Group navigation therefore advances one city at a time instead of grouping a civilization's cities by owner; relationship subcategories remain the only classification. Barbarian outposts retain their shared outpost group.
+- The Cities scanner category reads `ScannerGroupCitiesByCivilization`. Its default enabled state groups cities by owner; when disabled, each city receives a stable group key built from owner ID and city ID. Relationship subcategories are unchanged, and barbarian outposts retain their shared outpost group. `WorldScanner_CAI.lua` listens for `LuaEvents.CAISettingsChanged` and rebuilds Cities immediately when this preference changes.
 - `hexCoordUtils_CAI.lua` now owns shared original-capital lookup, relative-coordinate math, wrap-aware spoken hex geometry helpers, and reusable direction/path utilities (`directionString`, `stepListString`, `stepListFromPath`, `unitVector`, `cubeDistance`, `directionRank`, `plotsInRange`).
 - Plot tooltip relative coordinates should call `GetRelativeCoords(plot)` and format the returned `dx, dy` locally; world scanner item speech should call `GetDirectionString(cursorX, cursorY, targetX, targetY)` and speak direction text instead of tile distance.
 - Map tacs / map pins are read from `PlayerConfigurations[iPlayer]:GetMapPins()` and filtered with `mapPinCfg:IsVisible(localPlayerID)`. Shared label helpers live in `inGameHelpers_CAI.lua`: `BuildMapTacLabel(mapPinCfg)` returns name + icon, `BuildMapTacLabelWithOwner(mapPinCfg, playerID, localPlayerID)` appends the owner name for non-local tacs, `GetVisibleMapTacsAtPlot(plot)` returns visible tacs on a plot, and `GetMapTacIconLabel(iconName)` mirrors `MapTacks.IconOptions(...)` tooltip resolution plus CAI stock-icon localization fallbacks. The world scanner `mapTacs` category builds dynamic subcategories: `My` first, then one subcategory per other visible pin owner. Scanner groups use the item label as their normal group label. `PlotToolTip_CAI.lua` collects visible tack labels into one owner-aware list and speaks it through `LOC_CAI_PLOT_MAP_TACS` as `Map tacks: {list}`.
@@ -1673,10 +1675,23 @@ Wrapper for `CAI.output`. Use this for all TTS output.
 - `CAIWidgetHelpers_Navigation.Navigate` can determine a real wrap by comparing the resolved visible-child index with the focused starting index. It emits `navigation_wrap` only after a wrapped focus move succeeds.
 - `TabControlWidget:NextPage` / `PreviousPage` emit the same event when Ctrl+Tab page cycling crosses the first/last page boundary. Left/Right tab-strip wrapping uses the generic container path.
 - `UIScreenManager:CreateWidget` installs the default event listener and plays raw audio definition `UI_MENU_WRAP` at half the live `UI_NAVIGATION` tag volume; widgets remain responsible only for reporting the navigation event.
-- The non-widget world scanner reports category, subcategory, and group boundary crossings to the same `UIScreenManager:HandleNavigationWrap(...)` policy method. Initial group selection from index `0` is not a wrap, and item cycling does not use this cue.
+- The non-widget world scanner reports category, subcategory, group, and item boundary crossings to the same `UIScreenManager:HandleNavigationWrap(...)` policy method. Initial group or item selection from index `0` is not a wrap.
 
 ## World scanner city grouping and apparent distance loss
 
 - The Cities category does not apply a cursor-distance cutoff. It scans every plot revealed to the local observer and validates city centers with `Cities.GetCityInPlot(x, y)`.
-- Every city has its own stable group (`GroupId = "city:" .. ownerID .. ":" .. cityID`) and that group's label is the city label. Group navigation consequently visits every revealed city in nearest-first order.
+- `ScannerGroupCitiesByCivilization` defaults to enabled. Enabled uses `GroupId = "player:" .. ownerID` and the owning-player label; disabled uses `GroupId = "city:" .. ownerID .. ":" .. cityID` and the city label. Groups and their items remain nearest-first relative to the current cursor.
 - Cities are classified only by the implicit All subcategory and the relationship subcategories My, City-States, Neutral, and Enemy. Barbarian outposts use a separate subcategory and retain one shared outpost group.
+
+## World scanner category-switch performance
+
+- `CAIWorldScanner:CycleCategory(...)` calls `self:Rebuild()` before finding the next available category. This recreates every category slot and calls `Core.BuildAllCategories(...)`; a category switch therefore rebuilds the complete scanner rather than only the destination category.
+- The shared plot pass invokes every eligible plot extractor separately. With the current eight plot-extractor definitions, a fully revealed 6,000-plot map still makes about 48,000 extractor invocations, but extraction is protected once per category rather than wrapping every individual invocation in `pcall`.
+- The full rebuild snapshots plot references and reveal state into parallel arrays in one map pass. Every extractor reuses that snapshot, and terrain receives the cached reveal flag for its hidden-plot split. This avoids repeated visibility calls without caching scanner results between rebuilds.
+- Category construction still creates separate leaves/groups for implicit `All` and explicit subcategories, but every raw item is now validated once before either view is built.
+- Distance and resolved-label sort keys are computed once per validated raw item. Item and group comparators perform pure-Lua key comparisons instead of calling `Map.GetPlotByIndex(...)`, coordinate getters, `Map.GetPlotDistance(...)`, and `Locale.Lookup(...)` at `O(n log n)` comparison frequency.
+- Cursor-driven resorting recomputes distance once per unique plot in the current category, updates the duplicated leaves, and then uses the same pure-Lua comparators.
+- Each extracted item commonly allocates a table and a closure-backed `Validate` function. Rebuilding all categories discards and recreates those objects, and construction then creates additional leaf, group, and subcategory tables. The resulting allocation and garbage-collection pressure grows with revealed plots and late-game objects.
+- Non-plot categories also run during the same rebuild. Unit scanning is shared within one scanner context across My, Neutral, and Enemy categories, but still enumerates every alive player's units and validates the filtered results. Other categories independently query map tacs, waypoints, recommendations, and any currently active dynamic mode or lens.
+- Project decision: category switching must continue rebuilding the complete scanner; do not introduce category caching or dirty-category state.
+- The full-rebuild optimizations above preserve current category contents, validation, nearest-first ordering, and per-category extraction failure isolation. They do not introduce category caches or dirty state.

@@ -69,6 +69,9 @@ VALUES
     ('ScannerAutoFocusActiveLens', 'Navigation', 33, 'bool', 'checkbox', 'false',
      'LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_ACTIVE_LENS', 'LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_ACTIVE_LENS_TOOLTIP', NULL),
 
+    ('ScannerGroupCitiesByCivilization', 'Navigation', 34, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_SCANNER_GROUP_CITIES_BY_CIVILIZATION', 'LOC_CAI_SETTING_SCANNER_GROUP_CITIES_BY_CIVILIZATION_TOOLTIP', NULL),
+
     ('CursorCoordinates', 'Navigation', 40, 'string', 'dropdown', 'disabled',
      'LOC_CAI_SETTING_CURSOR_COORDINATES', 'LOC_CAI_SETTING_CURSOR_COORDINATES_TOOLTIP', NULL),
 

@@ -510,6 +510,9 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_ELEVATION" Language="en_US">
       <Text>Elevation</Text>
     </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_UNEXPLORED" Language="en_US">
+      <Text>Unexplored</Text>
+    </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BONUS" Language="en_US">
       <Text>Bonus</Text>
     </Row>
@@ -5440,6 +5443,13 @@
     </Row>
     <Row Tag="LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_ACTIVE_LENS_TOOLTIP" Language="en_US">
       <Text>Automatically switch scanner focus to the Active lens category when it becomes available.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SCANNER_GROUP_CITIES_BY_CIVILIZATION" Language="en_US">
+      <Text>Group scanner cities by civilization</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SCANNER_GROUP_CITIES_BY_CIVILIZATION_TOOLTIP" Language="en_US">
+      <Text>Group cities belonging to the same civilization together in the World Scanner. Disable this setting to make each city a separate group.</Text>
     </Row>
 
     <Row Tag="LOC_CAI_SETTING_CURSOR_COORDINATES" Language="en_US">

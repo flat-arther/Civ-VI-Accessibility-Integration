@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-07-12
+
+### Changed
+
+- English display-language speech now simplifies accented Latin letters and ligatures so names with unsupported characters remain readable.
+
+### Added
+
+- The World Scanner Terrain category now includes all hidden plots under Unexplored.
+
+### Fixed
+
+- World Scanner item navigation now plays the wrapping sound when crossing the first or last item.
+- Optimized the scanner so that it performs better on bigger maps
+
 ## [0.1.2] - 2026-07-12
 
 ### Added
@@ -13,7 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
-- Each city in the World Scanner is now a separate entry when navigating groups, while cities remain divided by relationship subcategory.
+- World Scanner cities can now be grouped by civilization or navigated as one group per city. Grouping by civilization is enabled by default.
 - Long tooltips and Great Person biographies are now divided into shorter, natural reading sections. The target length for splitting long text into spoken sections can be changed in mod Settings, under the UI category.
 - Movement cursor information now reports the selected unit's total movement cost and, when nonzero, movement remaining on arrival.
 - The geography tile readout now includes districts, buildings, and great works.

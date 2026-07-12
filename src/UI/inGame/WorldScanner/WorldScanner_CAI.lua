@@ -26,7 +26,8 @@ include("PlayerStateManager_CAI")
 ---@field CanScan fun(context:WorldScannerContext):boolean|nil
 ---@field BuildOncePerDynamicState boolean|nil
 ---@field Scan fun(context:WorldScannerContext):table[]|nil
----@field PlotExtract fun(plotIndex:integer, plot:table, context:WorldScannerContext, collect:fun(item:table))|nil
+---@field PlotExtract fun(plotIndex:integer, plot:table, context:WorldScannerContext, collect:fun(item:table), isRevealed:boolean)|nil
+---@field ExtractHiddenPlots boolean|nil
 ---@field BeginExtract fun()|nil
 ---@field AutoFocus boolean|nil
 
@@ -508,6 +509,12 @@ local function OnScannerInterfaceModeChanged(oldMode, newMode)
     CAIWorldScanner:RebuildCategory("validTargets")
 end
 
+local function OnScannerSettingsChanged(settingId)
+    if settingId == "ScannerGroupCitiesByCivilization" then
+        CAIWorldScanner:RebuildCategory("cities")
+    end
+end
+
 ---@param focusOverride WorldScannerFocus|nil
 function CAIWorldScanner:Rebuild(focusOverride)
     local scanner = GetScannerState()
@@ -627,6 +634,7 @@ function CAIWorldScanner:Initialize()
     Events.LensLayerOff.Add(OnScannerLensLayerChanged)
     Events.UnitSelectionChanged.Add(OnScannerUnitSelectionChanged)
     Events.InterfaceModeChanged.Add(OnScannerInterfaceModeChanged)
+    LuaEvents.CAISettingsChanged.Add(OnScannerSettingsChanged)
 
     EnsureCurrentCategory(scanner)
     LogMessage("World scanner initialized")
@@ -638,6 +646,7 @@ function CAIWorldScanner:ClearScanner()
     Events.LensLayerOff.Remove(OnScannerLensLayerChanged)
     Events.UnitSelectionChanged.Remove(OnScannerUnitSelectionChanged)
     Events.InterfaceModeChanged.Remove(OnScannerInterfaceModeChanged)
+    LuaEvents.CAISettingsChanged.Remove(OnScannerSettingsChanged)
 
     local scanner = GetScannerState()
     if scanner ~= nil then
@@ -801,6 +810,7 @@ function CAIWorldScanner:CycleItem(step)
         return
     end
 
+    local previousIndex = scanner.ItemIndex
     if scanner.ItemIndex == 0 then
         scanner.ItemIndex = step > 0 and 1 or count
     else
@@ -808,6 +818,11 @@ function CAIWorldScanner:CycleItem(step)
     end
 
     FocusCurrentItem(scanner)
+    local wrapped = previousIndex ~= 0 and (step > 0 and scanner.ItemIndex <= previousIndex
+        or step < 0 and scanner.ItemIndex >= previousIndex)
+    if wrapped then
+        ExposedMembers.CAI_UIManager:HandleNavigationWrap(self, step)
+    end
 end
 
 function CAIWorldScanner:JumpToCurrent()

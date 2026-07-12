@@ -7,19 +7,37 @@ local subCategoryLabels = {
     base = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BASE",
     features = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_FEATURES",
     elevation = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_ELEVATION",
+    unexplored = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_UNEXPLORED",
 }
 
 CAIWorldScannerCategory_Terrain = {
     Id = "terrain",
     LabelKey = "LOC_CAI_WORLD_SCANNER_CATEGORY_TERRAIN",
-    SubCategoryOrder = { "base", "features", "elevation" },
+    SubCategoryOrder = { "base", "features", "elevation", "unexplored" },
     SubCategoryLabels = subCategoryLabels,
+    ExtractHiddenPlots = true,
     GroupLabelResolver = function(_, firstItem)
         return firstItem ~= nil and firstItem.GroupLabelKey or "LOC_CAI_WORLD_SCANNER_UNKNOWN"
     end,
 }
 
-function CAIWorldScannerCategory_Terrain.PlotExtract(plotIndex, plot, context, collect)
+function CAIWorldScannerCategory_Terrain.PlotExtract(plotIndex, plot, context, collect, isRevealed)
+    if not isRevealed then
+        collect({
+            Id = "terrain:unexplored:" .. tostring(plotIndex),
+            PlotIndex = plotIndex,
+            LabelKey = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_UNEXPLORED",
+            SubCategoryId = "unexplored",
+            GroupId = "unexplored",
+            GroupLabelKey = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_UNEXPLORED",
+            Validate = function(item, validateContext)
+                local validatePlot = Map.GetPlotByIndex(item.PlotIndex)
+                return validatePlot ~= nil and not Utils.IsPlotRevealed(validateContext, validatePlot)
+            end,
+        })
+        return
+    end
+
     local terrainType = plot:GetTerrainType()
     local terrainInfo = GameInfo.Terrains[terrainType]
     if terrainInfo ~= nil then

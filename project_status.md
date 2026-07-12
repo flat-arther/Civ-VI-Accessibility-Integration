@@ -1,8 +1,20 @@
 # Project Status: Civ VI Accessibility Integration (CAI)
 
+Session note 2026-07-12: Rotated the changelog for release `0.1.3`, created a fresh empty `Unreleased` section, and updated `src/CivViAccess.modinfo` from version `0.1.2` to `0.1.3`.
+
+Session note 2026-07-12: Optimized the World Scanner's required complete rebuild without category caching or dirty state. Each rebuild now snapshots plots and reveal state once, protects extraction once per category instead of once per plot invocation, validates each raw item once across All and explicit subcategories, reuses one collector closure per extractor, and precomputes distance/localized-label sort keys. Cursor resorting recalculates distance once per unique plot. In-game test pending on a late-game large map: compare category-switch delay, verify every category's contents and nearest-first order, verify cursor movement resorts the current category, and check Lua.log for scanner extraction errors.
+
+Session note 2026-07-12: Fixed World Scanner item cycling so Alt+Page Up and Alt+Page Down report first/last-item boundary crossings to the shared wrap-audio policy, matching category, subcategory, and group cycling. Initial item selection from index 0 remains silent. In-game test pending: wrap items in both directions and confirm one half-volume wrap cue only at the boundary.
+
+Session note 2026-07-12: Added an Unexplored subcategory to the World Scanner Terrain category. It contains every hidden plot in one group without exposing concealed terrain data. In-game test pending: confirm Terrain > Unexplored lists all currently hidden plots, jumping works, and newly revealed plots leave the group after rebuilding the Terrain category.
+
+Session note 2026-07-12: Updated `readme.md` to match the released hotkey changes: Civilopedia lookup now uses `Ctrl+I`, `Ctrl+Y` is documented as the combined yields and strategic-resources tree, and the Surveyor controls use `Shift+W` / `Shift+X`.
+
+Session note 2026-07-12: The shared icon-processing speech pipeline now transliterates common accented Latin letters, Vietnamese characters, combining marks, and ligatures when the Civ VI display language is English. Other display languages preserve the original text. In-game test pending: with English display language confirm `Nam Việt` speaks as `Nam Viet`, representative ligatures such as `œ` and `æ` remain readable, and switching to a non-English display language preserves diacritics.
+
 Session note 2026-07-12: Rotated the changelog for release `0.1.2`, created a fresh empty `Unreleased` section, and updated `src/CivViAccess.modinfo` from version `0.1.1` to `0.1.2`.
 
-Current focus 2026-07-12: World Scanner cities now use one group per city instead of one group per owner, so group navigation advances through every city while preserving the My, City-States, Neutral, Enemy, and All subcategories. Barbarian outposts retain their existing shared group. In-game test pending with a revealed major civilization that owns multiple cities: cycle Cities groups in All and a relationship subcategory and confirm every city is reached in nearest-first order.
+Current focus 2026-07-12: World Scanner city grouping is controlled by the new Navigation setting `Group scanner cities by civilization`, enabled by default. Enabled groups cities by owner civilization; disabled makes every city its own group. My, City-States, Neutral, Enemy, All, and barbarian-outpost behavior remain unchanged. In-game test pending: confirm the setting appears below the other scanner settings, defaults on, groups a revealed multi-city civilization when on, and reaches every city by group navigation when off.
 
 In-game test passed 2026-07-12: Shared sentence-based text splitting in
 `caiUtils.lua` uses the configurable Token split length UI setting, defaults to
