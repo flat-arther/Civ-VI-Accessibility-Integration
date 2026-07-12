@@ -48,6 +48,9 @@ VALUES
     ('SearchTimeout', 'UI', 40, 'number', 'editbox', '1.0',
      'LOC_CAI_SETTING_SEARCH_TIMEOUT', 'LOC_CAI_SETTING_SEARCH_TIMEOUT_TOOLTIP', 'NumbersOnly'),
 
+    ('TokenSplitLength', 'UI', 50, 'number', 'editbox', '75',
+     'LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH', 'LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH_TOOLTIP', 'NumbersOnly'),
+
     ('AudioTagEnabled_CURSOR', 'Navigation', 10, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_CURSOR_AUDIO_ENABLED', 'LOC_CAI_SETTING_CURSOR_AUDIO_ENABLED_TOOLTIP', NULL),
 

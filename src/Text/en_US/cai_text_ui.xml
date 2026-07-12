@@ -2763,17 +2763,11 @@
     <Row Tag="LOC_CAI_PLOT_READ_RELATIVE_COORDS_TOOLTIP" Language="en_US">
       <Text>Reads the current tile coordinates relative to your original capital</Text>
     </Row>
-    <Row Tag="LOC_CAI_PLOT_READ_DISTRICT_BUILDINGS" Language="en_US">
-      <Text>Read district and buildings</Text>
-    </Row>
-    <Row Tag="LOC_CAI_PLOT_READ_DISTRICT_BUILDINGS_TOOLTIP" Language="en_US">
-      <Text>Reads district, building, and great work information for the current tile</Text>
-    </Row>
     <Row Tag="LOC_CAI_PLOT_READ_GEOGRAPHY" Language="en_US">
       <Text>Read geography</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_READ_GEOGRAPHY_TOOLTIP" Language="en_US">
-      <Text>Reads route, lowland, volcano, disaster, continent, territory, cliff, river, and national park information for the current tile</Text>
+      <Text>Reads route, lowland, volcano, disaster, continent, territory, cliff, river, national park, district, building, and great work information for the current tile</Text>
     </Row>
 
     <!-- Tile info fallback messages -->
@@ -2818,9 +2812,6 @@
     </Row>
     <Row Tag="LOC_CAI_PLOT_NO_COORDINATES" Language="en_US">
       <Text>No coordinates available</Text>
-    </Row>
-    <Row Tag="LOC_CAI_PLOT_NO_DISTRICTS_OR_BUILDINGS" Language="en_US">
-      <Text>No districts or buildings on this tile</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_NO_GEOGRAPHY_INFO" Language="en_US">
       <Text>No geography information for this tile</Text>
@@ -2957,7 +2948,7 @@
       <Text>This turn</Text>
     </Row>
     <Row Tag="LOC_CAI_MOVEMENT_TURNS" Language="en_US">
-      <Text>{1_Turns : plural 1?This turn; other?{1_Turns} turns;}</Text>
+      <Text>{1_Turns : plural 1?1 turn; other?{1_Turns} turns;}</Text>
     </Row>
     <Row Tag="LOC_CAI_MOVEMENT_CANNOT_MOVE" Language="en_US">
       <Text>Cannot move there</Text>
@@ -3008,7 +2999,7 @@
       <Text>Encounters combat this turn</Text>
     </Row>
     <Row Tag="LOC_CAI_MOVEMENT_ATTACK_AFTER_MOVE_TURNS" Language="en_US">
-      <Text>{1_Turns : plural 1?Encounters combat this turn; other?Encounters combat in {1_Turns} turns;}</Text>
+      <Text>{1_Turns : plural 1?Encounters combat in 1 turn; other?Encounters combat in {1_Turns} turns;}</Text>
     </Row>
     <Row Tag="LOC_CAI_MOVEMENT_PATH_STEPS" Language="en_US">
       <Text>{1_Steps}</Text>
@@ -3177,9 +3168,6 @@
     </Row>
     <Row Tag="LOC_CAI_UNIT_FLAG_QUEUED_MOVEMENT" Language="en_US">
       <Text>Queued movement: {1_Direction}</Text>
-    </Row>
-    <Row Tag="LOC_CAI_UNIT_FLAG_QUEUED_MOVE_NOT_SELECTED" Language="en_US">
-      <Text>Queued movement</Text>
     </Row>
     <Row Tag="LOC_CAI_VALID_TARGET_PLOT" Language="en_US">
       <Text>Target tile {1_X}, {2_Y}</Text>
@@ -5384,6 +5372,13 @@
       <Text>Number of seconds before type-to-find search text is cleared, set to 0 to never clear.</Text>
     </Row>
 
+    <Row Tag="LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH" Language="en_US">
+      <Text>Token split length</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH_TOOLTIP" Language="en_US">
+      <Text>Target number of characters in each spoken section when long text is split. Complete sentences longer than this value remain intact.</Text>
+    </Row>
+
     <Row Tag="LOC_CAI_SETTING_CURSOR_AUDIO_ENABLED" Language="en_US">
       <Text>Enable cursor audio</Text>
     </Row>
@@ -5573,5 +5568,11 @@
       <Text>Maximum number of entries kept in the message buffer before the oldest entries are discarded.</Text>
     </Row>
 
-  </LocalizedText>
+    <Row Tag="LOC_CAI_MOVEMENT_TOTAL_COST" Language="en_US">
+      <Text>Movement cost {1}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_ARRIVAL_REMAINING" Language="en_US">
+      <Text>{1} movement remaining on arrival</Text>
+    </Row>
+</LocalizedText>
 </GameData>

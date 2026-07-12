@@ -561,7 +561,7 @@ local function GetUnitInfoNextWaypoint(unit)
         return nil
     end
 
-    local waypointPlotId = info:GetNextUnitWaypoint()
+    local waypointPlotId = info:GetNextUnitWaypoint(unit:GetOwner(), unit:GetID())
     if waypointPlotId == nil or waypointPlotId == false or not Map.IsPlot(waypointPlotId) then
         return nil
     end
@@ -720,20 +720,21 @@ local function GetCachedQueuedPathVisibleText(entries, plotIds)
     return steps, entersFog, entersUnrevealed
 end
 
-local function FormatCachedQueuedPathArrivalTurn(arrivalTurn)
+local function FormatQueuedPathArrivalTurn(arrivalTurn)
     arrivalTurn = tonumber(arrivalTurn) or 1
     if arrivalTurn <= 1 then
         return Locale.Lookup("LOC_CAI_MOVEMENT_THIS_TURN")
     end
-    return Locale.Lookup("LOC_CAI_MOVEMENT_TURNS", arrivalTurn)
+    return Locale.Lookup("LOC_CAI_MOVEMENT_TURNS", arrivalTurn - 1)
 end
 
-local function GetQueuedPathInfo()
-    if info == nil or info.GetQueuedPath == nil then
+local function GetQueuedPathInfo(unit)
+    if unit == nil or info == nil or info.GetQueuedPathSnapshot == nil then
         return nil
     end
 
-    local entries = info:GetQueuedPath()
+    local snapshot = info:GetQueuedPathSnapshot(unit:GetOwner(), unit:GetID())
+    local entries = snapshot ~= nil and snapshot.Entries or nil
     if entries == nil or #entries < 2 then
         return nil
     end
@@ -741,19 +742,19 @@ local function GetQueuedPathInfo()
     return {
         Entries = entries,
         PlotIds = GetCachedQueuedPathPlotIds(entries),
-        ArrivalTurn = info.GetQueuedPathArrivalTurn ~= nil and info:GetQueuedPathArrivalTurn() or nil,
+        ArrivalTurn = snapshot.ArrivalTurn,
     }
 end
 
 local function GetUnitInfoQueuedPath(unit)
-    local queuedPath = GetQueuedPathInfo()
+    local queuedPath = GetQueuedPathInfo(unit)
     if queuedPath == nil then
         return nil
     end
 
     local results = {}
     AppendUnitInfo(results, Locale.Lookup("LOC_CAI_MOVEMENT_QUEUED"))
-    AppendUnitInfo(results, FormatCachedQueuedPathArrivalTurn(queuedPath.ArrivalTurn))
+    AppendUnitInfo(results, FormatQueuedPathArrivalTurn(queuedPath.ArrivalTurn))
 
     local steps, entersFog, entersUnrevealed = GetCachedQueuedPathVisibleText(queuedPath.Entries, queuedPath.PlotIds)
     if entersUnrevealed then

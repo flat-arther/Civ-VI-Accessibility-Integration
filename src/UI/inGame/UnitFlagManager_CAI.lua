@@ -493,12 +493,7 @@ info.UnitFlagInfo = {
     queuedMovement = function(unit)
         local player = Game.GetLocalPlayer()
         if player and player == unit:GetOwner() and UnitManager.GetQueuedDestination(unit) then
-            local isSelected = UI.GetHeadSelectedUnit() == unit
-            if isSelected then
-                return GetUnitFlagWaypoint(unit)
-            else
-                return Locale.Lookup("LOC_CAI_UNIT_FLAG_QUEUED_MOVE_NOT_SELECTED")
-            end
+            return GetUnitFlagWaypoint(unit)
         end
     end,
     status = function(unit)

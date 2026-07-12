@@ -5,25 +5,17 @@ ExposedMembers.CAIInfo = info
 ---@field PlotId integer
 ---@field IsWaypoint boolean
 
----@class UnitWaypoints
----@field _queuedPath QueuedPathEntry[]
----@field _queuedPathLookup table<integer, boolean>
----@field _waypointLookup table<integer, boolean>
----@field _arrivalTurn integer|nil
+---@class QueuedPathSnapshot
+---@field Entries QueuedPathEntry[]
+---@field ArrivalTurn integer
+---@field TurnsUntilArrival integer
+---@field DestinationPlotId integer
+---@field NextWaypointPlotId integer|nil
+---@field PathLookup table<integer, boolean>
+---@field WaypointLookup table<integer, boolean>
+
 CAIUnitWaypoints = CAIUnitWaypoints or {}
-
 local UnitWaypoints = CAIUnitWaypoints
-
-local function CopyQueuedPath(entries)
-    local out = {}
-    for i, entry in ipairs(entries or {}) do
-        out[i] = {
-            PlotId = entry.PlotId,
-            IsWaypoint = entry.IsWaypoint == true,
-        }
-    end
-    return out
-end
 
 local function RebuildQueuedPathScannerCategory()
     if CAIWorldScanner ~= nil and CAIWorldScanner.RebuildCategory ~= nil then
@@ -31,14 +23,10 @@ local function RebuildQueuedPathScannerCategory()
     end
 end
 
-function UnitWaypoints:Clear()
-    self._queuedPath = {}
-    self._queuedPathLookup = {}
-    self._waypointLookup = {}
-    self._arrivalTurn = nil
-end
-
-local function GetSelectedUnit()
+local function ResolveUnit(playerID, unitID)
+    if playerID ~= nil and unitID ~= nil then
+        return UnitManager.GetUnit(playerID, unitID)
+    end
     return UI.GetHeadSelectedUnit()
 end
 
@@ -50,214 +38,132 @@ local function GetQueuedDestinationPlotId(unit)
     return destinationPlotId
 end
 
-function UnitWaypoints:EnsureSelectedUnitStillQueued()
-    local unit = GetSelectedUnit()
+function UnitWaypoints:BuildSnapshot(unit)
     if unit == nil then
-        self:Clear()
         return nil
     end
 
     local destinationPlotId = GetQueuedDestinationPlotId(unit)
     if destinationPlotId == nil then
-        self:Clear()
         return nil
-    end
-
-    if #self._queuedPath == 0 then
-        return unit
-    end
-
-    local firstEntry = self._queuedPath[1]
-    if firstEntry == nil or firstEntry.PlotId ~= unit:GetPlotId() then
-        self:Clear()
-        return nil
-    end
-
-    return unit
-end
-
-function UnitWaypoints:RefreshForUnit(unit)
-    self:Clear()
-
-    if unit == nil then
-        return false
-    end
-
-    local destinationPlotId = GetQueuedDestinationPlotId(unit)
-    if destinationPlotId == nil then
-        return false
     end
 
     local pathInfo = UnitManager.GetMoveToPathEx(unit, destinationPlotId)
     local plots = pathInfo ~= nil and pathInfo.plots or nil
     local turns = pathInfo ~= nil and pathInfo.turns or nil
     if plots == nil or turns == nil or #plots <= 1 or #turns <= 1 then
-        return false
+        return nil
     end
+
+    local snapshot = {
+        Entries = {},
+        ArrivalTurn = tonumber(turns[#turns]) or 1,
+        DestinationPlotId = destinationPlotId,
+        NextWaypointPlotId = nil,
+        PathLookup = {},
+        WaypointLookup = {},
+    }
+    snapshot.TurnsUntilArrival = math.max(0, snapshot.ArrivalTurn - 1)
 
     for _, plotId in ipairs(plots) do
         if plotId ~= nil and plotId ~= false and Map.IsPlot(plotId) then
-            self._queuedPath[#self._queuedPath + 1] = {
+            snapshot.Entries[#snapshot.Entries + 1] = {
                 PlotId = plotId,
                 IsWaypoint = false,
             }
-            self._queuedPathLookup[plotId] = true
+            snapshot.PathLookup[plotId] = true
         end
     end
 
     local currentPlotId = unit:GetPlotId()
     local lastTurn = tonumber(turns[1]) or 1
-    for i = 2, math.min(#self._queuedPath, #turns) do
+    for i = 2, math.min(#snapshot.Entries, #turns) do
         local turn = tonumber(turns[i])
         if turn ~= nil and turn > lastTurn then
-            local previousEntry = self._queuedPath[i - 1]
-            if previousEntry ~= nil
-                and previousEntry.PlotId ~= nil
-                and previousEntry.PlotId ~= currentPlotId then
+            local previousEntry = snapshot.Entries[i - 1]
+            if previousEntry ~= nil and previousEntry.PlotId ~= currentPlotId then
                 previousEntry.IsWaypoint = true
-                self._waypointLookup[previousEntry.PlotId] = true
+                snapshot.WaypointLookup[previousEntry.PlotId] = true
+                snapshot.NextWaypointPlotId = snapshot.NextWaypointPlotId or previousEntry.PlotId
             end
             lastTurn = turn
         end
     end
 
-    self._arrivalTurn = tonumber(turns[#turns]) or nil
-    return #self._queuedPath > 1
+    if snapshot.WaypointLookup[destinationPlotId] ~= true then
+        snapshot.WaypointLookup[destinationPlotId] = true
+    end
+    snapshot.NextWaypointPlotId = snapshot.NextWaypointPlotId or destinationPlotId
+    return snapshot
 end
 
-function UnitWaypoints:RefreshSelectedUnit()
-    return self:RefreshForUnit(GetSelectedUnit())
+function UnitWaypoints:GetSnapshot(playerID, unitID)
+    return self:BuildSnapshot(ResolveUnit(playerID, unitID))
 end
 
-function UnitWaypoints:GetQueuedPath()
-    if self:EnsureSelectedUnitStillQueued() == nil then
-        return {}
+local function OnQueuedPathUnitSelectionChanged(playerID)
+    if playerID == Game.GetLocalPlayer() then
+        RebuildQueuedPathScannerCategory()
     end
-    return CopyQueuedPath(self._queuedPath)
 end
 
-function UnitWaypoints:GetQueuedPathArrivalTurn()
-    if self:EnsureSelectedUnitStillQueued() == nil then
-        return nil
-    end
-    return self._arrivalTurn
-end
-
-function UnitWaypoints:GetUnitWaypoints()
-    local unit = self:EnsureSelectedUnitStillQueued()
-    if unit == nil then
-        return {}
-    end
-
-    local out = {}
-    for _, entry in ipairs(self._queuedPath) do
-        if entry.IsWaypoint then
-            out[#out + 1] = entry.PlotId
-        end
-    end
-
-    local destinationPlotId = GetQueuedDestinationPlotId(unit)
-    if destinationPlotId ~= nil and self._waypointLookup[destinationPlotId] ~= true then
-        out[#out + 1] = destinationPlotId
-    end
-
-    return out
-end
-
-function UnitWaypoints:GetNext()
-    local unit = self:EnsureSelectedUnitStillQueued()
-    if unit == nil then
-        return nil
-    end
-
-    for _, entry in ipairs(self._queuedPath) do
-        if entry.IsWaypoint then
-            return entry.PlotId
-        end
-    end
-
-    return GetQueuedDestinationPlotId(unit)
-end
-
-function UnitWaypoints:IsQueuedPathPlot(plotId)
-    if self:EnsureSelectedUnitStillQueued() == nil then
-        return false
-    end
-    return plotId ~= nil and self._queuedPathLookup[plotId] == true or false
-end
-
-function UnitWaypoints:IsWaypointPlot(plotId)
-    local unit = self:EnsureSelectedUnitStillQueued()
-    if unit == nil then
-        return false
-    end
-
-    if plotId == nil then
-        return false
-    end
-
-    if self._waypointLookup[plotId] == true then
-        return true
-    end
-
-    return GetQueuedDestinationPlotId(unit) == plotId
-end
-
-local function OnQueuedPathUnitSelectionChanged(playerID, unitID, hexI, hexJ, hexK, isSelected, isEditable)
+local function OnQueuedPathUnitMoveComplete(playerID, unitID)
     if playerID ~= Game.GetLocalPlayer() then
         return
     end
 
-    UnitWaypoints:Clear()
-    if isSelected then
-        UnitWaypoints:RefreshSelectedUnit()
+    local selectedUnit = UI.GetHeadSelectedUnit()
+    if selectedUnit ~= nil and selectedUnit:GetOwner() == playerID and selectedUnit:GetID() == unitID then
+        RebuildQueuedPathScannerCategory()
     end
-
-    RebuildQueuedPathScannerCategory()
-end
-
-local function OnQueuedPathUnitMoveComplete(playerID, unitID, x, y)
-    if playerID ~= Game.GetLocalPlayer() then
-        return
-    end
-
-    local selectedUnit = GetSelectedUnit()
-    if selectedUnit == nil or selectedUnit:GetOwner() ~= playerID or selectedUnit:GetID() ~= unitID then
-        return
-    end
-
-    UnitWaypoints:RefreshSelectedUnit()
-    RebuildQueuedPathScannerCategory()
 end
 
 function UnitWaypoints:Shutdown()
     Events.UnitSelectionChanged.Remove(OnQueuedPathUnitSelectionChanged)
     Events.UnitMoveComplete.Remove(OnQueuedPathUnitMoveComplete)
-    self:Clear()
 end
 
-function info:GetQueuedPath()
-    return UnitWaypoints:GetQueuedPath()
+function info:GetQueuedPathSnapshot(playerID, unitID)
+    return UnitWaypoints:GetSnapshot(playerID, unitID)
 end
 
-function info:GetQueuedPathArrivalTurn()
-    return UnitWaypoints:GetQueuedPathArrivalTurn()
+function info:GetQueuedPath(playerID, unitID)
+    local snapshot = UnitWaypoints:GetSnapshot(playerID, unitID)
+    return snapshot ~= nil and snapshot.Entries or {}
 end
 
-function info:GetUnitWaypoints()
-    return UnitWaypoints:GetUnitWaypoints()
+function info:GetQueuedPathArrivalTurn(playerID, unitID)
+    local snapshot = UnitWaypoints:GetSnapshot(playerID, unitID)
+    return snapshot ~= nil and snapshot.ArrivalTurn or nil
 end
 
-function info:GetNextUnitWaypoint()
-    return UnitWaypoints:GetNext()
+function info:GetUnitWaypoints(playerID, unitID)
+    local snapshot = UnitWaypoints:GetSnapshot(playerID, unitID)
+    local out = {}
+    if snapshot == nil then
+        return out
+    end
+    for _, entry in ipairs(snapshot.Entries) do
+        if entry.IsWaypoint or entry.PlotId == snapshot.DestinationPlotId then
+            out[#out + 1] = entry.PlotId
+        end
+    end
+    return out
+end
+
+function info:GetNextUnitWaypoint(playerID, unitID)
+    local snapshot = UnitWaypoints:GetSnapshot(playerID, unitID)
+    return snapshot ~= nil and snapshot.NextWaypointPlotId or nil
 end
 
 function info:IsQueuedPathPlot(plotId)
-    return UnitWaypoints:IsQueuedPathPlot(plotId)
+    local snapshot = UnitWaypoints:GetSnapshot()
+    return snapshot ~= nil and plotId ~= nil and snapshot.PathLookup[plotId] == true or false
 end
 
 function info:IsWaypointPlot(plotId)
-    return UnitWaypoints:IsWaypointPlot(plotId)
+    local snapshot = UnitWaypoints:GetSnapshot()
+    return snapshot ~= nil and plotId ~= nil and snapshot.WaypointLookup[plotId] == true or false
 end
 
 Events.UnitSelectionChanged.Add(OnQueuedPathUnitSelectionChanged)

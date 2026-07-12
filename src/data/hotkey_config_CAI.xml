@@ -65,7 +65,6 @@
     <Row ActionId="PlotReadYieldRiverOwner" Name="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER" Description="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotReadStats" Name="LOC_CAI_PLOT_READ_STATS" Description="LOC_CAI_PLOT_READ_STATS_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotReadRelativeCoords" Name="LOC_CAI_PLOT_READ_RELATIVE_COORDS" Description="LOC_CAI_PLOT_READ_RELATIVE_COORDS_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="PlotReadDistrictBuildings" Name="LOC_CAI_PLOT_READ_DISTRICT_BUILDINGS" Description="LOC_CAI_PLOT_READ_DISTRICT_BUILDINGS_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotReadGeography" Name="LOC_CAI_PLOT_READ_GEOGRAPHY" Description="LOC_CAI_PLOT_READ_GEOGRAPHY_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SurveyorGrowRadius" Name="LOC_CAI_SURVEYOR_GROW_RADIUS" Description="LOC_CAI_SURVEYOR_GROW_RADIUS_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SurveyorShrinkRadius" Name="LOC_CAI_SURVEYOR_SHRINK_RADIUS" Description="LOC_CAI_SURVEYOR_SHRINK_RADIUS_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
@@ -280,10 +279,9 @@
     <Row ActionId="PlotReadStats" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_2" />
     <Row ActionId="PlotReadRelativeCoords" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_S" />
     <Row ActionId="PlotReadRelativeCoords" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_NP_5" />
-    <Row ActionId="PlotReadDistrictBuildings" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_X" />
     <Row ActionId="PlotReadGeography" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_B" />
-    <Row ActionId="SurveyorGrowRadius" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_W" />
-    <Row ActionId="SurveyorShrinkRadius" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_W" />
+    <Row ActionId="SurveyorGrowRadius" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_W" />
+    <Row ActionId="SurveyorShrinkRadius" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_X" />
     <Row ActionId="SurveyorReadYields" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_Q" />
     <Row ActionId="SurveyorReadResources" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_A" />
     <Row ActionId="SurveyorReadTerrain" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_Z" />

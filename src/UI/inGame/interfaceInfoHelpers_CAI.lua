@@ -1,6 +1,7 @@
 include("caiUtils")
 include("AdjacencyBonusSupport")
 include("hexCoordUtils_CAI")
+include("MovementCost_CAI")
 -- ===========================================================================
 -- Unit movement helpers (extracted from vanilla WorldInput so other contexts
 -- can reuse path-info / movement-speech without depending on WorldInput state).
@@ -30,6 +31,8 @@ local HexCoordUtils = CAIHexCoordUtils
 ---@field entrancePortals number[]
 ---@field exitPortals number[]
 ---@field arrivalTurn number
+---@field movementCost number|nil
+---@field arrivalMovesRemaining number|nil
 ---@field failureKind string|nil
 ---@field visiblePathNodes table[]|nil
 ---@field visiblePathText string|nil
@@ -594,6 +597,12 @@ local function FinalizeMovementAnalysis(unit, targetPlot, pathInfo)
 
     AnalyzePathFeatures(unit, targetPlot, pathInfo)
 
+    if pathInfo.hasPath and pathInfo.kind ~= "attack" and pathInfo.kind ~= "swap" then
+        local cost = MovementCost_CAI.Calculate(unit, pathInfo)
+        pathInfo.movementCost = cost ~= nil and cost.total or nil
+        pathInfo.arrivalMovesRemaining = cost ~= nil and cost.remaining or nil
+    end
+
     if pathInfo.kind == "bad" then
         pathInfo.failureKind = DiagnoseMoveTarget(unit, startPlot, targetPlot, pathInfo)
         LogMovementFailure(pathInfo, startPlot, targetPlot, unit)
@@ -611,7 +620,25 @@ local function FormatArrivalTurn(turn)
     if turn <= 1 then
         return Locale.Lookup("LOC_CAI_MOVEMENT_THIS_TURN")
     end
-    return Locale.Lookup("LOC_CAI_MOVEMENT_TURNS", turn)
+    return Locale.Lookup("LOC_CAI_MOVEMENT_TURNS", turn - 1)
+end
+
+local function FormatMovementNumber(value)
+    if value == nil then return nil end
+    local rounded = math.floor(value * 100 + 0.5) / 100
+    if math.abs(rounded - math.floor(rounded)) < 0.001 then return tostring(math.floor(rounded)) end
+    return tostring(rounded)
+end
+
+local function FormatMovementCost(pathInfo)
+    if pathInfo.movementCost == nil then return nil end
+    return Locale.Lookup("LOC_CAI_MOVEMENT_TOTAL_COST", FormatMovementNumber(pathInfo.movementCost))
+end
+
+local function FormatArrivalMovesRemaining(pathInfo)
+    if pathInfo.arrivalMovesRemaining == nil or pathInfo.arrivalMovesRemaining <= 0.0001 then return nil end
+    return Locale.Lookup("LOC_CAI_MOVEMENT_ARRIVAL_REMAINING",
+        FormatMovementNumber(pathInfo.arrivalMovesRemaining))
 end
 
 local function FormatObstacleCount(count)
@@ -659,7 +686,7 @@ local function FormatAttackAfterMove(pathInfo)
     if pathInfo.arrivalTurn <= 1 then
         return Locale.Lookup("LOC_CAI_MOVEMENT_ATTACK_AFTER_MOVE_THIS_TURN")
     end
-    return Locale.Lookup("LOC_CAI_MOVEMENT_ATTACK_AFTER_MOVE_TURNS", pathInfo.arrivalTurn)
+    return Locale.Lookup("LOC_CAI_MOVEMENT_ATTACK_AFTER_MOVE_TURNS", pathInfo.arrivalTurn - 1)
 end
 
 local function FormatFailure(pathInfo)
@@ -829,8 +856,9 @@ end
 
 ---@param pathInfo MovementPathInfo?
 ---@param isExplicitSpeech boolean|nil
+---@param includeMovementCost boolean|nil
 ---@return string[]
-function BuildMovementSpeech(pathInfo, isExplicitSpeech)
+function BuildMovementSpeech(pathInfo, isExplicitSpeech, includeMovementCost)
     local out = {}
     if not pathInfo then return out end
 
@@ -869,6 +897,10 @@ function BuildMovementSpeech(pathInfo, isExplicitSpeech)
 
     if pathInfo.kind ~= "bad" then
         AddLine(out, FormatArrivalTurn(pathInfo.arrivalTurn))
+        if includeMovementCost then
+            AddLine(out, FormatMovementCost(pathInfo))
+            AddLine(out, FormatArrivalMovesRemaining(pathInfo))
+        end
     end
 
     AddLine(out, FormatObstacleCount(pathInfo.obstacles and #pathInfo.obstacles or 0))
@@ -940,7 +972,7 @@ end
 local function BuildMoveToInterfaceInfo(plot, isExplicitSpeech)
     local unit = UI.GetHeadSelectedUnit()
     if not unit or not plot then return nil end
-    return BuildMovementSpeech(BuildMovementPathInfo(unit, plot:GetIndex(), false, true), isExplicitSpeech)
+    return BuildMovementSpeech(BuildMovementPathInfo(unit, plot:GetIndex(), false, true), isExplicitSpeech, true)
 end
 
 local function GetDistrictPlacementTargets(city, districtHash)

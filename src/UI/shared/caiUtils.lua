@@ -34,6 +34,65 @@ function SpeakLines(lines, interrupt, processTokens)
     end
 end
 
+local DEFAULT_LINE_LENGTH = 75
+
+local function GetConfiguredLineLength()
+    return math.max(1, math.floor(tonumber(CAISettings.GetNumber("TokenSplitLength")) or DEFAULT_LINE_LENGTH))
+end
+
+local function TrimText(text)
+    return text:match("^%s*(.-)%s*$")
+end
+
+local function IsSentenceEnd(word)
+    return word:match("[%.%!%?][\"')%]]*$") ~= nil
+end
+
+---Splits text into natural spoken lines. Existing newlines are preserved as
+---boundaries. Complete sentences are grouped up to the character target. A
+---sentence longer than the target remains intact on its own line.
+---@param text any
+---@param maxLength? integer
+---@return string[]
+function SplitTextIntoLines(text, maxLength)
+    local lines = {}
+    if text == nil then return lines end
+
+    maxLength = math.max(1, math.floor(tonumber(maxLength) or GetConfiguredLineLength()))
+    local normalized = tostring(text):gsub("\r\n", "\n"):gsub("\r", "\n")
+    normalized = normalized:gsub("%[NEWLINE%]", "\n")
+
+    for paragraph in (normalized .. "\n"):gmatch("(.-)\n") do
+        paragraph = TrimText(paragraph)
+        if paragraph ~= "" then
+            local sentenceWords = {}
+            local pendingLine = ""
+
+            local function FlushSentence()
+                if #sentenceWords == 0 then return end
+                local sentence = table.concat(sentenceWords, " ")
+                local combined = pendingLine == "" and sentence or pendingLine .. " " .. sentence
+                if pendingLine == "" or #combined <= maxLength then
+                    pendingLine = combined
+                else
+                    lines[#lines + 1] = pendingLine
+                    pendingLine = sentence
+                end
+                sentenceWords = {}
+            end
+
+            for word in paragraph:gmatch("%S+") do
+                sentenceWords[#sentenceWords + 1] = word
+                if IsSentenceEnd(word) then FlushSentence() end
+            end
+            FlushSentence()
+            if pendingLine ~= "" then lines[#lines + 1] = pendingLine end
+        end
+    end
+
+    return lines
+end
+
 ---@param msg any
 function LogMessage(msg)
     return CAILogging.Message(msg)

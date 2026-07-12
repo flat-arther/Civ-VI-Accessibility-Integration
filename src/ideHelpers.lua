@@ -82,6 +82,13 @@ function Speak(text, interrupt, processTokens) end
 ---@param processTokens? boolean
 function SpeakLines(lines, interrupt, processTokens) end
 
+---Split text into natural spoken lines by combining complete sentences up to
+---the requested character length. Oversized sentences remain intact.
+---@param text any
+---@param maxLength? integer Defaults to the configured token split length.
+---@return string[]
+function SplitTextIntoLines(text, maxLength) end
+
 ---Names of events emitted by widgets via UIWidget:Emit(name, ...).
 ---@alias CAIWidgetEvent
 ---| "focus_enter"     # widget or a descendant became part of the current focus path

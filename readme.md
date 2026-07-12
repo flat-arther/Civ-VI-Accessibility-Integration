@@ -163,8 +163,7 @@ The navigation cursor is an independent map cursor used to explore the world wit
 - `W` or `Numpad 8` — read yields, workers, fresh water, and ownership
 - `X` or `Numpad 2` — read contamination, movement cost, defense modifier, and appeal
 - `Shift+S` or `Shift+Numpad 5` — read coordinates relative to your original capital
-- `Shift+X` — read the district, buildings, and great works
-- `B` — read geography, including routes, lowlands, volcanoes, disasters, continents, territory, cliffs, rivers, and national parks
+- `B` — read geography, including routes, lowlands, volcanoes, disasters, continents, territory, cliffs, rivers, and national parks, followed by districts, buildings, and great works
 - `Space` — read information for the current interface target, especially during movement, combat previews, city management, and placement modes
 - `Enter` — perform the primary action at the cursor in the current interface mode
 - `Ctrl+Enter` — perform the secondary action at the cursor when one is available. This is mainly used in the city management interface, to swap ownership for tiles. The mod announces when this is possible
@@ -185,8 +184,8 @@ When the cursor is on a city or district banner, the number row reads sections o
 
 The Surveyor summarizes a circular area centered on the navigation cursor. Its radius can be set from one to five tiles. It reports only information your player is allowed to know; unexplored or hidden information is not revealed.
 
-- `Ctrl+Shift+W` — increase the Surveyor radius
-- `Shift+W` — decrease the Surveyor radius
+- `Shift+W` — increase the Surveyor radius
+- `Shift+X` — decrease the Surveyor radius
 - `Shift+Q` — read the total yields within the radius
 - `Shift+A` — read visible resources within the radius
 - `Shift+Z` — read revealed terrain within the radius

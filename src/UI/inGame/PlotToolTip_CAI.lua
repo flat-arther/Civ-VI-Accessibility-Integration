@@ -1483,16 +1483,6 @@ local DEFAULT_PLOT_INFO_BUCKET = {
     "lensInfo",
 }
 
-local DISTRICT_BUILDING_INFO_BUCKET = {
-    "wonderTitle",
-    "cityDistrictTitle",
-    "districtTitle",
-    "buildingsHeader",
-    "buildings",
-    "greatWorksHeader",
-    "greatWorks",
-}
-
 local CURSOR_MOVE_REQUEST_BUCKET = {
     { keys = CURSOR_MOVE_INFO_PRIORITY },
     "cityResourceExtraction",
@@ -1553,6 +1543,13 @@ local GEOGRAPHY_INFO_BUCKET = {
     "naturalWonder",
     "riverNamed",
     "nationalPark",
+    "wonderTitle",
+    "cityDistrictTitle",
+    { key = "districtTitle", when = function(data) return data.IsCity ~= true end },
+    "buildingsHeader",
+    "buildings",
+    "greatWorksHeader",
+    "greatWorks",
 }
 
 local function BuildPlotInfoBucket(data, definitions)
@@ -1586,10 +1583,6 @@ local function BuildYieldInfoRequestKeys(data)
     return BuildPlotInfoBucket(data, YIELD_RIVER_OWNER_INFO_BUCKET)
 end
 
-local function BuildDistrictAndBuildingRequestKeys(data)
-    return BuildPlotInfoBucket(data, DISTRICT_BUILDING_INFO_BUCKET)
-end
-
 local function BuildCursorMoveRequestKeys(data)
     return BuildPlotInfoBucket(data, CURSOR_MOVE_REQUEST_BUCKET)
 end
@@ -1618,12 +1611,6 @@ local function InitializePlotInfoActionRequestBuilders()
             return {
                 keys = { "relativeCoords" },
                 emptyLoc = "LOC_CAI_PLOT_NO_COORDINATES",
-            }
-        end,
-        [Input.GetActionId("PlotReadDistrictBuildings")] = function(plot, data)
-            return {
-                keys = BuildDistrictAndBuildingRequestKeys(data),
-                emptyLoc = "LOC_CAI_PLOT_NO_DISTRICTS_OR_BUILDINGS",
             }
         end,
         [Input.GetActionId("PlotReadGeography")] = function(plot, data)

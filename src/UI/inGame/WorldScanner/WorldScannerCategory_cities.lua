@@ -29,7 +29,7 @@ CAIWorldScannerCategory_Cities = {
         if groupId == "IMPROVEMENT_BARBARIAN_CAMP" then
             return "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BARBARIAN_OUTPOSTS"
         end
-        return firstItem ~= nil and Utils.GetPlayerLabel(firstItem.OwnerID) or "LOC_CAI_WORLD_SCANNER_UNKNOWN"
+        return firstItem ~= nil and firstItem.LabelKey or "LOC_CAI_WORLD_SCANNER_UNKNOWN"
     end,
 }
 
@@ -86,7 +86,7 @@ function CAIWorldScannerCategory_Cities.PlotExtract(plotIndex, plot, context, co
         PlotIndex = plotIndex,
         LabelKey = Utils.GetCityLabel(city),
         SubCategoryId = subCategoryId,
-        GroupId = "player:" .. tostring(ownerID),
+        GroupId = "city:" .. uniqueKey,
         OwnerID = ownerID,
         Validate = function(item, validateContext)
             local validatePlot = Map.GetPlotByIndex(item.PlotIndex)

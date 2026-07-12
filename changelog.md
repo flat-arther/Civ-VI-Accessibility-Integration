@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-07-12
+
+### Added
+- Movement cursor information now reports the selected unit's total movement cost and, when nonzero, movement remaining on arrival. It respects all known movement rules.
+
+### Changed
+
+- Each city in the World Scanner is now a separate entry when navigating groups, while cities remain divided by relationship subcategory.
+- Long tooltips and Great Person biographies are now divided into shorter, natural reading sections. The target length for splitting long text into spoken sections can be changed in mod Settings, under the UI category.
+- Movement cursor information now reports the selected unit's total movement cost and, when nonzero, movement remaining on arrival.
+- The geography tile readout now includes districts, buildings, and great works.
+- Surveyor radius controls now use Shift+W to grow and Shift+X to shrink. Note: You need to manually rebind this or clear your "%localappdata%\Firaxis Games\Sid Meier's Civilization VI\InputSettings.json"
+
+- Queued movement paths and waypoints now reflect the unit's current route whenever they are read, including on non-selected unit flags.
+
+### Fixed
+
+- Movement arriving next turn is now announced as taking 1 turn instead of 2 turns.
+
 ## [0.1.1] - 2026-07-12
 
 ### Changed

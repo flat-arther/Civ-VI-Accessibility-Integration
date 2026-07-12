@@ -178,6 +178,11 @@ from the divergence index downward, skipping any widget marked `Transparent`,
 and `SpeakLines(announcements, true)` speaks them — first line interrupts,
 rest queue.
 
+Tooltip section navigation uses the shared `SplitTextIntoLines(text, maxLength)`
+utility. It preserves explicit `[NEWLINE]` / physical-line boundaries and
+groups complete sentences up to the default 75-character target. A sentence
+longer than the target remains intact on its own line.
+
 ### Direction semantics
 
 - `direction = 1` (forward / Tab / Down / Right / PgDn): entering a container

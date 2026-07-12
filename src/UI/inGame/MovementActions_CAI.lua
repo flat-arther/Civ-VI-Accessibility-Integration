@@ -62,7 +62,8 @@ local function GetArrivalEstimate(unit, targetPlotId)
 
     local pathInfo = UnitManager.GetMoveToPathEx(unit, targetPlotId)
     local turns = pathInfo ~= nil and pathInfo.turns or nil
-    return turns ~= nil and #turns > 0 and turns[#turns] or nil
+    local arrivalTurn = turns ~= nil and #turns > 0 and tonumber(turns[#turns]) or nil
+    return arrivalTurn ~= nil and math.max(0, arrivalTurn - 1) or nil
 end
 
 function MovementActions_CAI:BuildMovementResultSpeech(unit, reachedTarget, turnsToArrival)

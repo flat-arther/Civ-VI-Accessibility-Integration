@@ -201,7 +201,7 @@ local function GetBiographyText(kPerson)
     end
     local text = table.concat(kPerson.BiographyTextTable, "[NEWLINE][NEWLINE]")
     if text == "" then return Locale.Lookup("LOC_CAI_GP_NO_BIOGRAPHY") end
-    return text
+    return table.concat(SplitTextIntoLines(text), "[NEWLINE]")
 end
 
 -- ===========================================================================

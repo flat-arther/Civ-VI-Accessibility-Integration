@@ -4,7 +4,7 @@
 --  Provides section-by-section reading of widget tooltips.
 --
 --  When a widget receives focus, the widget caches its tooltip split into
---  individual sections using the "[NEWLINE]" token. The helper then exposes
+--  natural spoken sections using SplitTextIntoLines(). The helper then exposes
 --  navigation functions for reading the previous, next, first and last
 --  section. Navigation clamps to the beginning/end of the tooltip, causing
 --  the current edge section to be reread if the user attempts to move past it.
@@ -18,30 +18,6 @@ local T = CAIWidgetHelpers_TooltipReader
 local TOOLTIP_UNAVAILABLE = "LOC_CAI_TOOLTIP_UNAVAILABLE"
 
 --#region Helpers
-
-local function Trim(text)
-    return text:match("^%s*(.-)%s*$")
-end
-
-local function SplitTooltipIntoSections(text)
-    local sections = {}
-
-    if not text or text == "" then
-        return sections
-    end
-
-    -- Add a trailing delimiter so the final section is captured naturally.
-    text = text .. "[NEWLINE]"
-
-    for section in text:gmatch("(.-)%[NEWLINE%]") do
-        section = Trim(section)
-        if section ~= "" then
-            sections[#sections + 1] = section
-        end
-    end
-
-    return sections
-end
 
 local function SpeakCurrentTooltipSection(widget)
     if not widget._ttSections or #widget._ttSections == 0 then
@@ -68,7 +44,7 @@ function T.CacheTooltipSections(widget)
         ["tooltip"]                                  -- Use this to still show tooltips in the readers even if speak tooltips is disabled
     end
 
-    widget._ttSections = SplitTooltipIntoSections(tooltip)
+    widget._ttSections = SplitTextIntoLines(tooltip)
     widget._ttSection = 1
 end
 

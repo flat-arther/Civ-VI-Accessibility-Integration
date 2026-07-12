@@ -1,5 +1,27 @@
 # Project Status: Civ VI Accessibility Integration (CAI)
 
+Session note 2026-07-12: Rotated the changelog for release `0.1.2`, created a fresh empty `Unreleased` section, and updated `src/CivViAccess.modinfo` from version `0.1.1` to `0.1.2`.
+
+Current focus 2026-07-12: World Scanner cities now use one group per city instead of one group per owner, so group navigation advances through every city while preserving the My, City-States, Neutral, Enemy, and All subcategories. Barbarian outposts retain their existing shared group. In-game test pending with a revealed major civilization that owns multiple cities: cycle Cities groups in All and a relationship subcategory and confirm every city is reached in nearest-first order.
+
+In-game test passed 2026-07-12: Shared sentence-based text splitting in
+`caiUtils.lua` uses the configurable Token split length UI setting, defaults to
+75 characters, and safely clamps invalid negative/zero values to 1. TooltipReader
+and the Great People read-only biography viewer split long text correctly while
+leaving oversized complete sentences intact.
+
+Current focus 2026-07-12: Movement interface-info cursor speech now replays the engine-selected route and reports total movement cost plus nonzero movement remaining on arrival. In-game test pending across ordinary/rough terrain, rivers, roads/railroads, embark/disembark, terrain-ignore promotions/abilities, tunnels, formations, and ZOC.
+
+Movement formation follow-up 2026-07-12: cost simulation now starts from the live formation movement pool when the unit is in a formation, and civilian/support arrival ZOC exhaustion uses engine-resolved `unit:IgnoresZOC()` so an escort's ZOC immunity is inherited correctly. In-game retest pending with an ordinary escort and a ZOC-immune cavalry escort.
+
+Conditional future-turn movement 2026-07-12: movement cost now records local units' real turn-start plots and recalculates deterministic terrain/ownership start bonuses at every engine path turn boundary. Clear-terrain chariot bonuses and Bà Triệu's feature/territory bonuses use active abilities and database amounts; formations recalculate every member and use the slowest future maximum. In-game test pending for gaining and losing each bonus across a multi-turn path, including formations.
+
+Queued-path and waypoint in-game test passed 2026-07-12: selected and non-selected unit waypoint speech, live route changes without reselection, scanner/plot waypoint membership, and relative arrival estimates work with fresh `GetMoveToPathEx(...)` snapshots.
+
+Movement-cost feasibility 2026-07-12: an exact pre-move MP total is feasible as a CAI rules replay over the engine-selected `GetMoveToPathEx(...)` plots. The path result lacks per-node MP values, so CAI must calculate each directed edge from terrain, feature, improvement, route/pillaging, river, embark/disembark, tunnel, ZOC, formation, and the unit's live abilities/promotions. UI Lua exposes the necessary unit ability/promotion lists and plot/route/river state; database tables supply modifier definitions. Keep this isolated in a shared movement-cost helper, distinguish nominal edge cost from movement actually consumed at turn boundaries, and validate a rule matrix in-game before presenting the result as exact.
+
+Session note 2026-07-12: Merged the plot-tooltip district, building, and great-work read bucket into the existing geography read on `B`, ordered after all geography information, removed the obsolete `PlotReadDistrictBuildings` input action and its localization, and reassigned Surveyor grow/shrink radius to `Shift+W` / `Shift+X`. The merged bucket now selects `cityDistrictTitle` for city centers and `districtTitle` only for non-city districts, preventing duplicate `City Center` speech. Documentation and changelog updated. In-game smoke test pending: verify `B` speaks geography first and then one structure title plus buildings/great works, Shift+X shrinks Surveyor radius, and Shift+W grows it.
+
 Session note 2026-07-12: Cycled the changelog for release `0.1.1`, recorded `0.1.0` as the prior initial release, and updated `src/CivViAccess.modinfo` from the incorrect version `1` to `0.1.1`. The new Unreleased section is empty.
 
 Session note 2026-07-12: World-input primary and secondary interface actions now dispatch from the triggered input-action event, including the primary overrides for targeting, move-to, district placement, and building placement modes. Per request, this internal input-routing correction was not added to the changelog. In-game smoke test passed: activate primary and secondary interface actions in normal world input and primary action in each affected interface mode, confirming each fires once on the completed input rather than on key-down.
