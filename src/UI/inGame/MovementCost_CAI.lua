@@ -1,3 +1,5 @@
+include("inGameHelpers_CAI")
+
 MovementCost_CAI = MovementCost_CAI or {}
 
 local RIVER_CROSSING_COST = 2
@@ -131,9 +133,7 @@ local function GetConditionalStartBonus(unit, rules, plot)
 end
 
 local function GetFormationMembers(unit)
-    local count = unit:GetFormationUnitCount()
-    if count == nil or count <= 1 then return { unit } end
-    local members = unit:GetFormationUnits() or {}
+    local members = GetFormationUnitsOnPlot(unit)
     return #members > 0 and members or { unit }
 end
 

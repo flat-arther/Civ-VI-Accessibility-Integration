@@ -1177,6 +1177,18 @@ local function ResolveActiveInterfacePlot(plot)
     return nil
 end
 
+local function IsActiveInterfacePlotRevealed(plot)
+    if plot == nil then return false end
+
+    local observer = Game.GetLocalObserver()
+    if observer == PlayerTypes.OBSERVER then
+        return true
+    end
+
+    local visibility = PlayersVisibility[observer]
+    return visibility ~= nil and visibility:IsRevealed(plot)
+end
+
 -- ===========================================================================
 -- LENS INFO HELPERS
 -- ===========================================================================
@@ -1515,6 +1527,7 @@ end
 
 function GetActiveLensPlotInfo(plot)
     if plot == nil then return nil end
+    if not IsActiveInterfacePlotRevealed(plot) then return nil end
     local helper = GetActiveLensHelper()
     if helper == nil then return nil end
     return helper(plot)
@@ -1553,6 +1566,7 @@ end
 
 function GetActiveInterfacePlotInfo(plot)
     if plot == nil then return nil end
+    if not IsActiveInterfacePlotRevealed(plot) then return nil end
     local helper = InterfaceInfoHelpers[UI.GetInterfaceMode()]
     if helper == nil then return nil end
     local lines = helper(plot, false)
@@ -1565,6 +1579,11 @@ function SpeakActiveInterfacePlotInfo(plot)
     if resolvedPlot == nil then
         Speak(Locale.Lookup("LOC_CAI_NO_INTERFACE_INFO"))
         return false
+    end
+
+    if not IsActiveInterfacePlotRevealed(resolvedPlot) then
+        Speak(Locale.Lookup("LOC_MINIMAP_FOG_OF_WAR_TOOLTIP"))
+        return true
     end
 
     local helper = InterfaceInfoHelpers[UI.GetInterfaceMode()]

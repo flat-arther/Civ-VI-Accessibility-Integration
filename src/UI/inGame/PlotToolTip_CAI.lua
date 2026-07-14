@@ -1247,6 +1247,23 @@ info.PlotInfoHelpers = {
         return #results > 0 and table.concat(results, ", ") or nil
     end,
 
+    detailedUnits = function(data)
+        local units = data.Units
+        if not units or #units == 0 or info.RequestDetailedUnitFlagInfo == nil then return nil end
+
+        local results = {}
+        local seen = {}
+        for _, unit in ipairs(units) do
+            local unitInfo = info:RequestDetailedUnitFlagInfo(unit:GetOwner(), unit:GetID())
+            if unitInfo ~= nil and not seen[unitInfo] then
+                seen[unitInfo] = true
+                table.insert(results, unitInfo)
+            end
+        end
+
+        return #results > 0 and table.concat(results, ", ") or nil
+    end,
+
     mapTac = function(data, plot)
         if not data.IsVisible or plot == nil then return nil end
 
@@ -1591,7 +1608,7 @@ local function InitializePlotInfoActionRequestBuilders()
     PlotInfoActionRequestBuilders = {
         [Input.GetActionId("PlotReadUnits")] = function(plot, data)
             return {
-                keys = { "units" },
+                keys = { "detailedUnits" },
                 emptyLoc = "LOC_CAI_PLOT_NO_UNITS",
             }
         end,

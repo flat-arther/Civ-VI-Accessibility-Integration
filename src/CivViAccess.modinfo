@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Mod id="9f4b5c2e-1a2b-4c3d-8e9f-123456789abc" version="0.1.3">
+<Mod id="9f4b5c2e-1a2b-4c3d-8e9f-123456789abc" version="0.1.4">
   <Properties>
     <Name>Civ VI Accessibility Integration</Name>
     <Description>Adds blind accessibility to civ VI via text to speech</Description>
@@ -54,6 +54,7 @@
     <File>UI/inGame/cursor_CAI.lua</File>
     <File>UI/inGame/cursorAudio_CAI.lua</File>
     <File>UI/inGame/MovementActions_CAI.lua</File>
+    <File>UI/inGame/UnitMoveLog_CAI.lua</File>
     <File>UI/inGame/MovementCost_CAI.lua</File>
     <File>UI/inGame/UnitWaypoints_CAI.lua</File>
     <File>UI/frontEnd/FrontEnd.lua</File>
@@ -361,6 +362,7 @@
       <File>UI/inGame/cursor_CAI.lua</File>
       <File>UI/inGame/cursorAudio_CAI.lua</File>
       <File>UI/inGame/MovementActions_CAI.lua</File>
+      <File>UI/inGame/UnitMoveLog_CAI.lua</File>
       <File>UI/inGame/MovementCost_CAI.lua</File>
       <File>UI/inGame/UnitWaypoints_CAI.lua</File>
       <File>UI/shared/iconsProcessing.lua</File>

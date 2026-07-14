@@ -60,6 +60,236 @@ local SimplePromotionList = nil
 local UnitNamePanel = nil
 local UnitNameEdit = nil
 
+local UNIT_ACTION_INTENT_TIMEOUT = 5
+local pendingUnitActionIntents = {}
+local unitOperationResults = {}
+local unitCommandResults = {}
+
+local actionResultLookups = {
+    feature = function(id) return GameInfo.Features[id] end,
+    improvement = function(id) return GameInfo.Improvements[id] end,
+    resource = function(id) return GameInfo.Resources[id] end,
+    route = function(id) return GameInfo.Routes[id] end,
+}
+
+local function StaticActionResult(key)
+    return { Key = key }
+end
+
+local function NamedActionResult(key, kind, id, fallbackKey)
+    if id == nil or id == -1 then
+        return StaticActionResult(fallbackKey)
+    end
+    return {
+        Key = key,
+        NameKind = kind,
+        NameID = id,
+        FallbackKey = fallbackKey,
+    }
+end
+
+local function GetUnitPlot(unit)
+    return Map.GetPlot(unit:GetX(), unit:GetY())
+end
+
+local function BuildImprovementResult(unit, action)
+    return NamedActionResult("LOC_CAI_UNIT_ACTION_BUILT", "improvement",
+        action ~= nil and action.Index or nil, "LOC_CAI_UNIT_ACTION_IMPROVEMENT_BUILT")
+end
+
+local function BuildRouteResult(unit, action, callbackVoid1, actionHash)
+    local canStart, results = UnitManager.CanStartOperation(
+        unit, actionHash, nil, false, OperationResultsTypes.NO_TARGETS)
+    local routeResultKey = UnitOperationResults.ROUTE_TYPE
+    local routeType = canStart and results ~= nil and routeResultKey ~= nil and results[routeResultKey] or nil
+    return NamedActionResult("LOC_CAI_UNIT_ACTION_BUILT", "route", routeType,
+        "LOC_CAI_UNIT_ACTION_ROUTE_BUILT")
+end
+
+local function BuildPlantedWoodsResult()
+    local woods = GameInfo.Features["FEATURE_FOREST"]
+    return NamedActionResult("LOC_CAI_UNIT_ACTION_PLANTED", "feature",
+        woods ~= nil and woods.Index or nil, "LOC_CAI_UNIT_ACTION_WOODS_PLANTED")
+end
+
+local function BuildRemovedFeatureResult(unit)
+    local plot = GetUnitPlot(unit)
+    return NamedActionResult("LOC_CAI_UNIT_ACTION_REMOVED", "feature",
+        plot ~= nil and plot:GetFeatureType() or nil, "LOC_CAI_UNIT_ACTION_FEATURE_REMOVED")
+end
+
+local function BuildHarvestedResourceResult(unit)
+    local plot = GetUnitPlot(unit)
+    return NamedActionResult("LOC_CAI_UNIT_ACTION_HARVESTED", "resource",
+        plot ~= nil and plot:GetResourceType() or nil, "LOC_CAI_UNIT_ACTION_RESOURCE_HARVESTED")
+end
+
+local function BuildRemovedImprovementResult(unit)
+    local plot = GetUnitPlot(unit)
+    return NamedActionResult("LOC_CAI_UNIT_ACTION_REMOVED", "improvement",
+        plot ~= nil and plot:GetImprovementType() or nil, "LOC_CAI_UNIT_ACTION_IMPROVEMENT_REMOVED")
+end
+
+local function BuildRepairedImprovementResult(unit)
+    local plot = GetUnitPlot(unit)
+    return NamedActionResult("LOC_CAI_UNIT_ACTION_REPAIRED", "improvement",
+        plot ~= nil and plot:GetImprovementType() or nil, "LOC_CAI_UNIT_ACTION_IMPROVEMENT_REPAIRED")
+end
+
+local function BuildRepairedRouteResult(unit)
+    local plot = GetUnitPlot(unit)
+    return NamedActionResult("LOC_CAI_UNIT_ACTION_REPAIRED", "route",
+        plot ~= nil and plot:GetRouteType() or nil, "LOC_CAI_UNIT_ACTION_ROUTE_REPAIRED")
+end
+
+local function AddOperationResult(operationType, config)
+    local row = GameInfo.UnitOperations[operationType]
+    if row ~= nil then
+        unitOperationResults[row.Hash] = config
+    end
+end
+
+local function AddCommandResult(commandType, config)
+    local row = GameInfo.UnitCommands[commandType]
+    if row ~= nil then
+        unitCommandResults[row.Hash] = config
+    end
+end
+
+AddOperationResult("UNITOPERATION_BUILD_IMPROVEMENT", { Build = BuildImprovementResult })
+AddOperationResult("UNITOPERATION_BUILD_ROUTE", { Build = BuildRouteResult })
+AddOperationResult("UNITOPERATION_CLEAR_CONTAMINATION", { Key = "LOC_CAI_UNIT_ACTION_CONTAMINATION_CLEARED" })
+AddOperationResult("UNITOPERATION_CONVERT_BARBARIANS", { Key = "LOC_CAI_UNIT_ACTION_BARBARIANS_CONVERTED" })
+AddOperationResult("UNITOPERATION_DESIGNATE_PARK", { Key = "LOC_CAI_UNIT_ACTION_PARK_DESIGNATED" })
+AddOperationResult("UNITOPERATION_FORTIFY", { Key = "LOC_CAI_UNIT_ACTIVITY_FORTIFIED" })
+AddOperationResult("UNITOPERATION_HEAL", { Key = "LOC_UNITFLAG_ACTIVITY_HEALING" })
+AddOperationResult("UNITOPERATION_HARVEST_RESOURCE", { Build = BuildHarvestedResourceResult })
+AddOperationResult("UNITOPERATION_PLANT_FOREST", { Build = BuildPlantedWoodsResult })
+AddOperationResult("UNITOPERATION_REMOVE_FEATURE", { Build = BuildRemovedFeatureResult })
+AddOperationResult("UNITOPERATION_REMOVE_HERESY", { Key = "LOC_CAI_UNIT_ACTION_HERESY_REMOVED" })
+AddOperationResult("UNITOPERATION_REMOVE_IMPROVEMENT", { Build = BuildRemovedImprovementResult })
+AddOperationResult("UNITOPERATION_REPAIR", { Build = BuildRepairedImprovementResult })
+AddOperationResult("UNITOPERATION_REPAIR_ROUTE", { Build = BuildRepairedRouteResult })
+AddOperationResult("UNITOPERATION_REST_REPAIR", { Key = "LOC_CAI_UNIT_ACTION_RESTING_REPAIRING" })
+AddOperationResult("UNITOPERATION_RETRAIN", { Key = "LOC_CAI_UNIT_ACTION_RETRAINED" })
+AddOperationResult("UNITOPERATION_SKIP_TURN", { Key = "LOC_CAI_UNIT_ACTIVITY_SKIP" })
+AddOperationResult("UNITOPERATION_SLEEP", { Key = "LOC_CAI_UNIT_ACTIVITY_SLEEP" })
+AddOperationResult("UNITOPERATION_SPREAD_RELIGION", { Key = "LOC_CAI_UNIT_ACTION_RELIGION_SPREAD" })
+AddOperationResult("UNITOPERATION_ALERT", { Key = "LOC_UNITOPERATION_ALERT_DESCRIPTION" })
+AddOperationResult("UNITOPERATION_RELIGIOUS_HEAL", { Key = "LOC_CAI_UNIT_ACTION_RELIGIOUS_UNITS_HEALED" })
+AddOperationResult("UNITOPERATION_UPGRADE", { Key = "LOC_CAI_UNIT_ACTION_UPGRADED" })
+
+AddCommandResult("UNITCOMMAND_WAKE", { Key = "LOC_UNITFLAG_ACTIVITY_AWAKE" })
+AddCommandResult("UNITCOMMAND_UPGRADE", { Key = "LOC_CAI_UNIT_ACTION_UPGRADED" })
+AddCommandResult("UNITCOMMAND_STOP_AUTOMATION", { Key = "LOC_CAI_UNIT_ACTION_AUTOMATION_STOPPED" })
+AddCommandResult("UNITCOMMAND_GIFT", { Key = "LOC_CAI_UNIT_ACTION_GIFTED" })
+AddCommandResult("UNITCOMMAND_ENTER_FORMATION", { Key = "LOC_CAI_UNIT_ACTION_FORMATION_JOINED" })
+AddCommandResult("UNITCOMMAND_EXIT_FORMATION", { Key = "LOC_CAI_UNIT_ACTION_FORMATION_LEFT" })
+AddCommandResult("UNITCOMMAND_ACTIVATE_GREAT_PERSON", { Key = "LOC_CAI_UNIT_ACTION_GREAT_PERSON_ACTIVATED" })
+AddCommandResult("UNITCOMMAND_DISTRICT_PRODUCTION", { Key = "LOC_CAI_UNIT_ACTION_DISTRICT_PRODUCTION_ADDED" })
+AddCommandResult("UNITCOMMAND_WONDER_PRODUCTION", { Key = "LOC_CAI_UNIT_ACTION_WONDER_PRODUCTION_ADDED" })
+AddCommandResult("UNITCOMMAND_HARVEST_WONDER", { Key = "LOC_CAI_UNIT_ACTION_WONDER_HARVESTED" })
+AddCommandResult("UNITCOMMAND_PET_THE_DOG", { Key = "LOC_CAI_UNIT_ACTION_DOG_PETTED" })
+
+local function GetUnitActionIntentKey(kind, playerID, unitID, actionHash)
+    return kind .. ":" .. tostring(playerID) .. ":" .. tostring(unitID) .. ":" .. tostring(actionHash)
+end
+
+local function ClearExpiredUnitActionIntents()
+    local now = Automation.GetTime()
+    for key, intent in pairs(pendingUnitActionIntents) do
+        if now - intent.StartTime > UNIT_ACTION_INTENT_TIMEOUT then
+            pendingUnitActionIntents[key] = nil
+        end
+    end
+end
+
+local function RecordUnitActionIntent(kind, actionHash, config, action, callbackVoid1)
+    local localPlayerID = Game.GetLocalPlayer()
+    local unit = UI.GetHeadSelectedUnit()
+    if localPlayerID == nil or localPlayerID == -1 or unit == nil or unit:GetOwner() ~= localPlayerID then
+        return
+    end
+
+    local result = config.Build ~= nil and config.Build(unit, action, callbackVoid1, actionHash)
+        or StaticActionResult(config.Key)
+    ClearExpiredUnitActionIntents()
+    local key = GetUnitActionIntentKey(kind, localPlayerID, unit:GetID(), actionHash)
+    local intent = {
+        Key = key,
+        PlayerID = localPlayerID,
+        UnitID = unit:GetID(),
+        StartTime = Automation.GetTime(),
+        Result = result,
+    }
+    pendingUnitActionIntents[key] = intent
+    return intent
+end
+
+local function ResolveUnitActionResult(result)
+    if result.NameKind == nil then
+        return Locale.Lookup(result.Key)
+    end
+
+    local lookup = actionResultLookups[result.NameKind]
+    local row = lookup(result.NameID)
+    if row == nil or row.Name == nil then
+        LogWarn("CAI UnitPanel could not resolve " .. result.NameKind .. " action result id " ..
+            tostring(result.NameID))
+        return Locale.Lookup(result.FallbackKey)
+    end
+    return Locale.Lookup(result.Key, Locale.Lookup(row.Name))
+end
+
+
+
+local function ConfirmUnitActionIntent(kind, playerID, unitID, actionHash)
+    if playerID ~= Game.GetLocalPlayer() then
+        return
+    end
+
+    ClearExpiredUnitActionIntents()
+    local key = GetUnitActionIntentKey(kind, playerID, unitID, actionHash)
+    local intent = pendingUnitActionIntents[key]
+    if intent == nil then
+        return
+    end
+
+    pendingUnitActionIntents[key] = nil
+    Speak(ResolveUnitActionResult(intent.Result))
+end
+
+local function ClearUnitActionIntents()
+    pendingUnitActionIntents = {}
+end
+
+AddActionToTable = WrapFunc(AddActionToTable, function(orig, actionsTable, action, disabled, toolTipString,
+                                                       actionHash, callbackFunc, callbackVoid1, callbackVoid2,
+                                                       overrideIcon)
+    local kind = nil
+    local config = unitOperationResults[actionHash]
+    if config ~= nil then
+        kind = "operation"
+    else
+        config = unitCommandResults[actionHash]
+        if config ~= nil then
+            kind = "command"
+        end
+    end
+
+    if kind ~= nil then
+        local originalCallback = callbackFunc
+        callbackFunc = function(...)
+            RecordUnitActionIntent(kind, actionHash, config, action, callbackVoid1)
+            local result = originalCallback(...)
+            return result
+        end
+    end
+
+    return orig(actionsTable, action, disabled, toolTipString, actionHash, callbackFunc,
+        callbackVoid1, callbackVoid2, overrideIcon)
+end)
+
 info = ExposedMembers.CAIInfo or {}
 ExposedMembers.CAIInfo = info
 
@@ -347,7 +577,7 @@ local function GetUnitInfoStats(data)
         (data.AntiAirCombat or 0) > 0 and
         Locale.Lookup("LOC_HUD_UNIT_PANEL_ANTI_AIR_STRENGTH") .. ", " .. tostring(data.AntiAirCombat) or nil)
     AppendUnitInfo(results,
-        (data.Range or 0) > 0 and Locale.Lookup("LOC_HUD_UNIT_PANEL_ATTACK_RANGE") .. ", " .. tostring(data.Range) or nil)
+        (data.Range or 0) > 0 and Locale.Lookup("LOC_CAI_ICON_RANGE_ALIAS") .. ", " .. tostring(data.Range) or nil)
 
     return results
 end
@@ -2530,6 +2760,11 @@ local function OpenUnitList()
     mgr:Push(UnitList, { priority = PopupPriority.Low, focus = focusHint })
 end
 
+Events.InputActionTriggered.Remove(OnInputActionTriggered)
+OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
+    orig(actionId)
+end)
+
 function OnHandleInput(inputStruct)
     if not mgr then return false end
     return mgr:HandleInput(inputStruct)
@@ -2788,6 +3023,23 @@ local function OnCAISpeakCombatPreviewForPlot(plotId)
     SpeakCurrentCombatPreview()
 end
 
+local function OnCAIUnitOperationStarted(playerID, unitID, operationID)
+    ConfirmUnitActionIntent("operation", playerID, unitID, operationID)
+end
+
+local function OnCAIUnitOperationAdded(playerID, unitID, unknown, operationType)
+    local operation = GameInfo.UnitOperations[operationType]
+    if operation == nil then
+        LogWarn("CAI UnitPanel could not resolve added unit operation index " .. tostring(operationType))
+        return
+    end
+    ConfirmUnitActionIntent("operation", playerID, unitID, operation.Hash)
+end
+
+local function OnCAIUnitCommandStarted(playerID, unitID, commandID)
+    ConfirmUnitActionIntent("command", playerID, unitID, commandID)
+end
+
 local resultStrings = SwapPairs(CombatResultParameters)
 local function OnCombatResolved(results)
     local text = BuildCombatResultText(results)
@@ -2830,7 +3082,12 @@ Events.InputActionStarted.Add(OnUnitPanelSelectionInfoInputActionStarted)
 Events.InputActionStarted.Add(OnUnitPanelSelectionActionInputStarted)
 Events.LoadScreenClose.Add(OnLoadScreenClose)
 Events.UnitSelectionChanged.Add(OnCAIUnitSelectionChanged)
+Events.UnitOperationStarted.Add(OnCAIUnitOperationStarted)
+Events.UnitOperationAdded.Add(OnCAIUnitOperationAdded)
+Events.UnitCommandStarted.Add(OnCAIUnitCommandStarted)
+Events.LocalPlayerTurnEnd.Add(ClearUnitActionIntents)
 Events.Combat.Add(OnCombatResolved)
+Events.InputActionStarted.Add(OnInputActionStarted)
 LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
 LuaEvents.CAISpeakCombatPreview.Add(OnCAISpeakCombatPreview)
 LuaEvents.CAISpeakCombatPreviewForPlot.Add(OnCAISpeakCombatPreviewForPlot)

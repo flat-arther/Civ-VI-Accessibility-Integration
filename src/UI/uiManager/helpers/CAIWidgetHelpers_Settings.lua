@@ -120,11 +120,23 @@ local function CreateDropdown(mgr, row)
 
     local currentValue = CAISettings.GetString(row.SettingId)
     local selectedIndex = 1
+    local foundCurrentValue = false
 
     for i, opt in ipairs(options) do
         if tostring(opt.value) == tostring(currentValue) then
             selectedIndex = i
+            foundCurrentValue = true
             break
+        end
+    end
+
+    if not foundCurrentValue then
+        local defaultValue = CAISettings.GetDefault(row.SettingId)
+        for i, opt in ipairs(options) do
+            if tostring(opt.value) == tostring(defaultValue) then
+                selectedIndex = i
+                break
+            end
         end
     end
 

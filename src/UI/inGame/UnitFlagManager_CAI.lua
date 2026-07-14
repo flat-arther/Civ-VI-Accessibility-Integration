@@ -64,6 +64,12 @@ local UNIT_FLAG_INFO_DEFAULT_KEYS = {
     "pirates",
 }
 
+local OWNED_UNIT_PANEL_DETAIL_KEYS = {
+    "Stats",
+    "Promotions",
+    "UpgradeHint",
+}
+
 local function AppendUnitFlagInfo(parts, value)
     if type(value) == "table" then
         for _, innerValue in ipairs(value) do
@@ -99,12 +105,17 @@ local function GetControlTooltip(control)
     return nil
 end
 
-local function FormatUnitFlagDisplayName(unit)
+local function FormatUnitFlagDisplayName(unit, count)
     if unit == nil then
         return nil
     end
 
-    return FormatOwnedUnitDisplayName(unit)
+    local name = FormatOwnedUnitDisplayName(unit)
+    if count ~= nil and count > 1 then
+        return Locale.Lookup("LOC_CAI_UNIT_FLAG_AGGREGATED_NAME", count, name)
+    end
+
+    return name
 end
 
 local function GetUnitFlagHealth(unit)
@@ -139,6 +150,100 @@ local function GetUnitFlagStatus(unit)
     end
 
     return nil
+end
+
+local function IsEnemyUnit(unit)
+    local owner = unit ~= nil and Players[unit:GetOwner()] or nil
+    if owner == nil then
+        return false
+    end
+
+    if owner:IsBarbarian() then
+        return true
+    end
+
+    local localPlayer = Players[Game.GetLocalPlayer()]
+    local diplomacy = localPlayer ~= nil and localPlayer:GetDiplomacy() or nil
+    return diplomacy ~= nil and diplomacy:IsAtWarWith(unit:GetOwner())
+end
+
+local function GetEnemyUnitCombatInfo(unit)
+    if not IsEnemyUnit(unit) then
+        return nil
+    end
+
+    local results = {}
+    local combat = unit:GetCombat()
+    local rangedCombat = unit:GetRangedCombat()
+    local range = unit:GetRange()
+
+    AppendUnitFlagInfo(results,
+        combat > 0 and Locale.Lookup("LOC_HUD_UNIT_PANEL_STRENGTH") .. ", " .. tostring(combat) or nil)
+    AppendUnitFlagInfo(results,
+        rangedCombat > 0 and
+        Locale.Lookup("LOC_HUD_UNIT_PANEL_RANGED_STRENGTH") .. ", " .. tostring(rangedCombat) or nil)
+    AppendUnitFlagInfo(results,
+        range > 0 and Locale.Lookup("LOC_CAI_ICON_RANGE_ALIAS") .. ", " .. tostring(range) or nil)
+
+    return #results > 0 and results or nil
+end
+
+local function GetOwnedUnitAircraftInfo(unit)
+    local aircraftData = GetHostedAircraftData(unit)
+    if aircraftData == nil then
+        return nil
+    end
+
+    local results = {
+        Locale.Lookup("LOC_CAI_UNIT_CARRIER_AIRCRAFT_CAPACITY", aircraftData.CurrentCount, aircraftData.MaxSlots),
+    }
+    local aircraftNames = GetHostedAircraftUnitNames(unit)
+    if aircraftNames ~= nil and #aircraftNames > 0 then
+        AppendUnitFlagInfo(results,
+            Locale.Lookup("LOC_CAI_UNIT_CARRIER_STATIONED_AIRCRAFT", table.concat(aircraftNames, ", ")))
+    end
+
+    return results
+end
+
+local function GetOwnedUnitFlagDetails(unit, count)
+    local results = {
+        FormatUnitFlagDisplayName(unit, count),
+        Locale.Lookup("LOC_CAI_UNIT_FLAG_HEALTH", unit:GetMaxDamage() - unit:GetDamage(), unit:GetMaxDamage()),
+        Locale.Lookup("LOC_CAI_UNIT_MOVES", unit:GetMovementMovesRemaining(), unit:GetMaxMoves()),
+    }
+    if unit:GetMovesRemaining() <= 0 then
+        AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_OUT_OF_MOVES"))
+    end
+    AppendUnitFlagInfo(results, GetUnitFlagStatus(unit))
+    AppendUnitFlagInfo(results, GetOwnedUnitAircraftInfo(unit))
+    if info.RequestUnitInfo ~= nil then
+        AppendUnitFlagInfo(results,
+            info:RequestUnitInfo(unit:GetID(), OWNED_UNIT_PANEL_DETAIL_KEYS, unit:GetOwner()))
+    end
+    return #results > 0 and results or nil
+end
+
+local function GetForeignUnitFlagDetails(unit, count)
+    local results = {}
+    if unit:IsEmbarked() then
+        AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_EMBARKED"))
+    end
+    AppendUnitFlagInfo(results, FormatUnitFlagDisplayName(unit, count))
+    AppendUnitFlagInfo(results, GetUnitFlagHealth(unit))
+    if not unit:IsEmbarked() and unit:GetFortifyTurns() > 0 then
+        AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_WORLDTRACKER_UNIT_FORTIFIED"))
+    end
+    AppendUnitFlagInfo(results, GetEnemyUnitCombatInfo(unit))
+    return #results > 0 and results or nil
+end
+
+local function GetDefaultUnitFlagDetails(unit, count)
+    if unit:GetOwner() == Game.GetLocalPlayer() then
+        return GetOwnedUnitFlagDetails(unit, count)
+    end
+
+    return GetForeignUnitFlagDetails(unit, count)
 end
 
 local function GetUnitFlagPromotionOrLevy(unit)
@@ -547,6 +652,38 @@ function info:RequestUnitFlagInfo(playerID, unitID, requestedKeys)
     end
 
     return table.concat(results, " ")
+end
+
+local function GetMatchingVisibleDetailedUnitCount(unit)
+    local plot = Map.GetPlot(unit:GetX(), unit:GetY())
+    local signatureParts = {}
+    AppendUnitFlagInfo(signatureParts, GetDefaultUnitFlagDetails(unit))
+    local signature = table.concat(signatureParts, ", ")
+    local matchingCount = 0
+
+    for _, otherUnit in ipairs(Units.GetUnitsInPlotLayerID(plot:GetX(), plot:GetY(), MapLayers.ANY)) do
+        local otherFlag = GetUnitFlag(otherUnit:GetOwner(), otherUnit:GetID())
+        local otherParts = {}
+        AppendUnitFlagInfo(otherParts, GetDefaultUnitFlagDetails(otherUnit))
+        if IsUnitFlagVisible(otherFlag, otherUnit) and table.concat(otherParts, ", ") == signature then
+            matchingCount = matchingCount + 1
+        end
+    end
+
+    return matchingCount > 1 and matchingCount or nil
+end
+
+function info:RequestDetailedUnitFlagInfo(playerID, unitID)
+    local flag = GetUnitFlag(playerID, unitID)
+    local unit = flag ~= nil and flag:GetUnit() or nil
+    if unit == nil or not IsUnitFlagVisible(flag, unit) then
+        return nil
+    end
+
+    local results = {}
+    local matchingCount = GetMatchingVisibleDetailedUnitCount(unit)
+    AppendUnitFlagInfo(results, GetDefaultUnitFlagDetails(unit, matchingCount))
+    return #results > 0 and table.concat(results, ", ") or nil
 end
 
 function info:RequestUnitNamesInPlot(x, y)

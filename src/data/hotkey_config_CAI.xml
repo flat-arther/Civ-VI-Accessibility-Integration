@@ -137,6 +137,7 @@
     <Row ActionId="ReplaceEndTurn_CAI" Name="LOC_CAI_END_TURN" Description="LOC_CAI_END_TURN_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ActionPanelOpenTurnBlockers" Name="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS" Description="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAICursorJumpToSelection" Name="LOC_CAI_CURSOR_JUMP_TO_SELECTION" Description="LOC_CAI_CURSOR_JUMP_TO_SELECTION_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAICursorJumpToCapital" Name="LOC_CAI_CURSOR_JUMP_TO_CAPITAL" Description="LOC_CAI_CURSOR_JUMP_TO_CAPITAL_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldSelectPreviousCity_CAI" Name="LOC_CAI_WORLD_SELECT_PREVIOUS_CITY" Description="LOC_CAI_WORLD_SELECT_PREVIOUS_CITY_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldSelectNextCity_CAI" Name="LOC_CAI_WORLD_SELECT_NEXT_CITY" Description="LOC_CAI_WORLD_SELECT_NEXT_CITY_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldSelectCapitalCity_CAI" Name="LOC_CAI_WORLD_SELECT_CAPITAL_CITY" Description="LOC_CAI_WORLD_SELECT_CAPITAL_CITY_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
@@ -310,9 +311,6 @@
 
     <!-- CAI_UI: Open/toggle screens -->
     <Row ActionId="UI_TopPanelOpenReports" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F2" />
-    <Row ActionId="UI_TopPanelOpenReportsResources" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_A" />
-    <Row ActionId="UI_TopPanelOpenReportsCityStatus" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_S" />
-    <Row ActionId="UI_TopPanelOpenReportsGossip" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_G" />
     <Row ActionId="UI_WorldTrackerOpenResearchChooser" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_R" />
     <Row ActionId="UI_WorldTrackerOpenCivicsChooser" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_C" />
     <Row ActionId="UI_NotificationPanelOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_N" />
@@ -351,6 +349,7 @@
     <Row ActionId="ReplaceEndTurn_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SPACE" />
     <Row ActionId="ActionPanelOpenTurnBlockers" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_SPACE" />
     <Row ActionId="CAICursorJumpToSelection" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SLASH" />
+    <Row ActionId="CAICursorJumpToCapital" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_S" />
     <Row ActionId="WorldSelectPreviousCity_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_LBRACKET" />
     <Row ActionId="WorldSelectNextCity_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_RBRACKET" />
     <Row ActionId="WorldSelectCapitalCity_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_BACKSLASH" />

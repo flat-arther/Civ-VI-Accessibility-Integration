@@ -46,7 +46,7 @@ function CAIWorldScannerCategory_ValidTargets.Scan(context)
             if ExposedMembers.CAIInfo ~= nil and ExposedMembers.CAIInfo.RequestPlotInfo ~= nil then
                 local requestedKeys = { "units", "cityName", "districtTitle", "improvement", "resource", "feature",
                     "plotName" }
-                local results = ExposedMembers.CAIInfo:RequestPlotInfo(nil, requestedKeys, action.PlotIndex)
+                local results = ExposedMembers.CAIInfo:RequestPlotInfo(action.PlotIndex, requestedKeys)
                 if results ~= nil and #results > 0 then
                     label = table.concat(results, ", ")
                 end

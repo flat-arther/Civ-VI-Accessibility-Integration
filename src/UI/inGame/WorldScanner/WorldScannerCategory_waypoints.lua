@@ -9,14 +9,14 @@ local function BuildQueuedPathScannerLabel(plotIndex)
         return "LOC_CAI_WORLD_SCANNER_UNKNOWN"
     end
 
-    local parts = info:RequestPlotInfo(nil, {
+    local parts = info:RequestPlotInfo(plotIndex, {
         "waypoint",
         "plotName",
         "feature",
         "cityName",
         "districtTitle",
         "cityDistrictTitle",
-    }, plotIndex)
+    })
 
     if parts == nil or #parts == 0 then
         return "LOC_CAI_WORLD_SCANNER_UNKNOWN"

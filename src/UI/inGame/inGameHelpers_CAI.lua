@@ -430,6 +430,25 @@ function GetVisibleMapTacsAtPlot(plot)
 end
 
 --#Unit info helpers
+---@param unit Unit|nil
+---@return Unit[]
+function GetFormationUnitsOnPlot(unit)
+    if unit == nil or unit:GetFormationUnitCount() <= 1 then
+        return {}
+    end
+
+    local formationID = unit:GetFormationID()
+    local units = Units.GetUnitsInPlotLayerID(unit:GetX(), unit:GetY(), MapLayers.ANY)
+    local formationUnits = {}
+    for _, plotUnit in ipairs(units or {}) do
+        if plotUnit:GetFormationID() == formationID then
+            formationUnits[#formationUnits + 1] = plotUnit
+        end
+    end
+
+    return formationUnits
+end
+
 ---Returns the player's civ prefix, as an adjective.
 ---@param playerID number|nil
 ---@return string|nil

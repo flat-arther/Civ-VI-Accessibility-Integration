@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-07-13
+
+### Added
+
+- World Scanner items can play a positional beacon from their map location when focused or when their direction is repeated via the end key (default binding). The beacon can be disabled in the World scanner settings.
+- `Ctrl+S` now moves the navigation cursor to your capital city without changing the current selection.
+- Successful immediate unit actions now announce their result, including stationary orders, improvements, feature and resource work, repairs, religious actions, support actions, and other direct commands. Improvement results identify what changed, such as `Farm built`, `Woods removed`, or `Farm repaired`.
+- Visible unit movements are recorded in the persistent message buffer with their exact visible path, or their net direction when the path is discontinuous, plus their last known location. As with any other buffer entries that carry locations, you may use shift backslash (default) to jump cursor to this tile. Units moving together in a formation produce one movement-log message listing all formation members. Event settings allow you to choose what to announce; Military units, civilian units, both, or neither for each owner relationship. Only barbarian movement is enabled by default.
+- Hotseat unit-movement announcements are held until the observing player's next turn begins.
+
+### Changed
+
+- Unit actions now trigger on key down instead of key release. This should solve the issue of them failing to execute due to releasing alt too quickly
+- Navigation settings are now organized into Cursor, World scanner, and Events sections. Existing values for the moved settings will reset to their defaults because their storage sections changed. Sorry
+- The Resources, City Status, and Gossip tabs in Empire Reports no longer have default key gestures. Their actions remain available for custom key bindings. You can still access the tabs from the reports screen, `f2` by default
+- Expanded unit information when pressing the s key: friendly units include movement, status, combat stats, experience, upgrades, promotions, and carried aircraft; enemy units include combat strength, ranged strength, and range.
+- Unit information now calls the unit's range value `Range` because it can represent noncombat capabilities such as an Observation Balloon's observation radius.
+
+### Fixed
+
+- - Interface information, spoken on cursor move or via space (default binding), now says that an area is uncharted without revealing hidden tile details.
+- Queued paths, waypoints, and unit-action targets in the World Scanner once again announce their tile information instead of the `No tile` debug message.
+- Formation movement is now tracked correctly in the unit-movement log and movement-cost previews.
+
 ## [0.1.3] - 2026-07-12
 
 ### Changed
@@ -14,7 +38,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- The World Scanner Terrain category now includes all hidden plots under Unexplored.
+- The World Scanner Terrain category now includes all hidden tiles under the new Unexplored sub-category.
 
 ### Fixed
 

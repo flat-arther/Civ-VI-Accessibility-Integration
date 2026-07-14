@@ -155,6 +155,7 @@ The navigation cursor is an independent map cursor used to explore the world wit
 - `Z` or `Numpad 1` — move southwest
 - `C` or `Numpad 3` — move southeast
 - `/` — jump the cursor to the selected unit or selected city. When a game begins with nothing selected, the cursor starts at your capital when possible.
+- `Ctrl+S` — jump the cursor to your capital city
 - `M` — place or edit a map tac at the cursor
 
 #### Reading the current tile
@@ -269,7 +270,7 @@ New notifications are spoken as they arrive. Notifications of the same type are 
 
 #### Message buffer
 
-The message buffer keeps a limited history for the current player. It can show all messages or filter them by notification, discovery, combat, gossip, movement, or chat. Changing category skips categories that currently contain no messages.
+The message buffer keeps a limited history for the current player. It can show all messages or filter them by notification, discovery, combat, gossip, movement, or chat. Changing category skips categories that currently contain no messages. Visible unit movements record the observed direction path and the unit's last known location, so the location-jump action returns to where that movement was last seen. Navigation settings provide separate movement-announcement dropdowns for your units, teammates, hostile civilizations, neutral civilizations, city-states, and barbarians. Each can announce military units, civilian units, both, or neither; only barbarian movement is enabled by default. These choices affect speech without removing history entries. In hotseat games, collected unit movements are announced only when the observing player's next turn begins.
 
 - `;` — read the previous message in the current category
 - `'` — read the next message in the current category
@@ -326,7 +327,7 @@ Only actions supported by the selected unit have an effect.
 - `Alt+F` — fortify
 - `Alt+H` — fortify until healed
 - `Alt+Delete` — delete the unit
-- `Alt+R` — begin a ranged attack
+- `Alt+R` — begin a ranged or air attack
 - `Alt+X` — automate exploration
 - `Alt+Space` — skip the unit's turn
 - `Alt+S` — sleep
@@ -381,9 +382,6 @@ Screens such as World Rankings, the Production Panel, and World Climate contain 
 #### Cities and empire management
 
 - `F2` — open Empire Reports
-- `Ctrl+A` — open Empire Reports on Resources
-- `Ctrl+S` — open Empire Reports on City Status
-- `Ctrl+G` — open Empire Reports on Gossip
 - `Ctrl+V` — open the City-States overview
 - `Ctrl+T` — open the Trade Routes overview
 - `Ctrl+E` — open the Espionage overview

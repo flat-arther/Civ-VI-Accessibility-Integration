@@ -294,6 +294,12 @@
     <Row Tag="LOC_CAI_CURSOR_JUMP_TO_SELECTION_TOOLTIP" Language="en_US">
       <Text>Moves the CAI map cursor to the selected unit or city</Text>
     </Row>
+    <Row Tag="LOC_CAI_CURSOR_JUMP_TO_CAPITAL" Language="en_US">
+      <Text>Jump cursor to capital</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CURSOR_JUMP_TO_CAPITAL_TOOLTIP" Language="en_US">
+      <Text>Moves the CAI map cursor to your capital city</Text>
+    </Row>
     <Row Tag="LOC_CAI_WORLD_SELECT_PREVIOUS_CITY" Language="en_US">
       <Text>Select previous city</Text>
     </Row>
@@ -2355,6 +2361,9 @@
     <Row Tag="LOC_CAI_UNIT_MOVES" Language="en_US">
       <Text>{1_Current} of {2_Moves} moves</Text>
     </Row>
+    <Row Tag="LOC_CAI_UNIT_OUT_OF_MOVES" Language="en_US">
+      <Text>Out of moves</Text>
+    </Row>
     <Row Tag="LOC_CAI_UNIT_CAT_ALL" Language="en_US">
       <Text>All units</Text>
     </Row>
@@ -2564,6 +2573,99 @@
     </Row>
     <Row Tag="LOC_CAI_UNIT_ACTIVITY_OPERATION" Language="en_US">
       <Text>Busy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_BUILT" Language="en_US">
+      <Text>{1_Name} built</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_PLANTED" Language="en_US">
+      <Text>{1_Name} planted</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_REMOVED" Language="en_US">
+      <Text>{1_Name} removed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_HARVESTED" Language="en_US">
+      <Text>{1_Name} harvested</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_REPAIRED" Language="en_US">
+      <Text>{1_Name} repaired</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_IMPROVEMENT_BUILT" Language="en_US">
+      <Text>Improvement built</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_ROUTE_BUILT" Language="en_US">
+      <Text>Route built</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_WOODS_PLANTED" Language="en_US">
+      <Text>Woods planted</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_FEATURE_REMOVED" Language="en_US">
+      <Text>Feature removed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_RESOURCE_HARVESTED" Language="en_US">
+      <Text>Resource harvested</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_IMPROVEMENT_REMOVED" Language="en_US">
+      <Text>Improvement removed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_IMPROVEMENT_REPAIRED" Language="en_US">
+      <Text>Improvement repaired</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_ROUTE_REPAIRED" Language="en_US">
+      <Text>Route repaired</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_CONTAMINATION_CLEARED" Language="en_US">
+      <Text>Contamination cleared</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_BARBARIANS_CONVERTED" Language="en_US">
+      <Text>Barbarians converted</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_PARK_DESIGNATED" Language="en_US">
+      <Text>National Park designated</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_HERESY_REMOVED" Language="en_US">
+      <Text>Heresy removed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_RETRAINED" Language="en_US">
+      <Text>Retrained</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_RELIGION_SPREAD" Language="en_US">
+      <Text>Religion spread</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_RELIGIOUS_UNITS_HEALED" Language="en_US">
+      <Text>Religious units healed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_UPGRADED" Language="en_US">
+      <Text>Unit upgraded</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_RESTING_REPAIRING" Language="en_US">
+      <Text>Resting and repairing</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_AUTOMATION_STOPPED" Language="en_US">
+      <Text>Automation stopped</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_GIFTED" Language="en_US">
+      <Text>Unit gifted</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_FORMATION_JOINED" Language="en_US">
+      <Text>Formation joined</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_FORMATION_LEFT" Language="en_US">
+      <Text>Formation left</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_GREAT_PERSON_ACTIVATED" Language="en_US">
+      <Text>Great Person activated</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_DISTRICT_PRODUCTION_ADDED" Language="en_US">
+      <Text>District production added</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_WONDER_PRODUCTION_ADDED" Language="en_US">
+      <Text>Wonder production added</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_WONDER_HARVESTED" Language="en_US">
+      <Text>Wonder harvested</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_DOG_PETTED" Language="en_US">
+      <Text>Dog petted</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_ACTIVITY_SPY_IDLE" Language="en_US">
       <Text>Awaiting spy assignment</Text>
@@ -3299,6 +3401,9 @@
     </Row>
     <Row Tag="LOC_CAI_ICON_RANGE_ALIAS" Language="en_US">
       <Text>Range</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_FLAG_AGGREGATED_NAME" Language="en_US">
+      <Text>{1} {2}</Text>
     </Row>
 
     <Row Tag="LOC_CAI_TUTORIAL_GOALS" Language="en_US">
@@ -5340,8 +5445,14 @@
     <Row Tag="LOC_CAI_SETTING_SECTION_UI" Language="en_US">
       <Text>UI</Text>
     </Row>
-    <Row Tag="LOC_CAI_SETTING_SECTION_NAVIGATION" Language="en_US">
-      <Text>Navigation</Text>
+    <Row Tag="LOC_CAI_SETTING_SECTION_CURSOR" Language="en_US">
+      <Text>Cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SECTION_EVENTS" Language="en_US">
+      <Text>Events</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SECTION_WORLDSCANNER" Language="en_US">
+      <Text>World scanner</Text>
     </Row>
     <Row Tag="LOC_CAI_SETTING_SECTION_MESSAGEBUFFER" Language="en_US">
       <Text>Message buffer</Text>
@@ -5394,6 +5505,13 @@
     </Row>
     <Row Tag="LOC_CAI_SETTING_CURSOR_AUDIO_VOLUME_TOOLTIP" Language="en_US">
       <Text>Volume level for navigation cursor audio.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SCANNER_BEACON_ENABLED" Language="en_US">
+      <Text>Enable scanner beacon</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SCANNER_BEACON_ENABLED_TOOLTIP" Language="en_US">
+      <Text>Play a positional beacon at the current World Scanner item's map location when it is focused or its direction is repeated.</Text>
     </Row>
 
     <Row Tag="LOC_CAI_SETTING_SCANNER_AUTO_MOVE_CURSOR" Language="en_US">
@@ -5529,6 +5647,76 @@
       <Text>Announce visibility changes caused by owned unit movement.</Text>
     </Row>
 
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_OWN" Language="en_US">
+      <Text>Announce your logged unit movements</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_OWN_TOOLTIP" Language="en_US">
+      <Text>Choose which of your queued, automated, and relocation movements are announced. Direct path movement uses its existing movement feedback instead.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_TEAMMATE" Language="en_US">
+      <Text>Announce teammate unit movements</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_TEAMMATE_TOOLTIP" Language="en_US">
+      <Text>Choose which visible unit movements made by civilizations on your team are announced.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_HOSTILE" Language="en_US">
+      <Text>Announce hostile civilization unit movements</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_HOSTILE_TOOLTIP" Language="en_US">
+      <Text>Choose which visible unit movements made by civilizations at war with you are announced.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_NEUTRAL" Language="en_US">
+      <Text>Announce neutral civilization unit movements</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_NEUTRAL_TOOLTIP" Language="en_US">
+      <Text>Choose which visible unit movements made by other major civilizations not at war with you are announced.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_CITY_STATE" Language="en_US">
+      <Text>Announce city-state unit movements</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_CITY_STATE_TOOLTIP" Language="en_US">
+      <Text>Choose which visible unit movements made by city-states are announced.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_BARBARIAN" Language="en_US">
+      <Text>Announce barbarian unit movements</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_BARBARIAN_TOOLTIP" Language="en_US">
+      <Text>Choose which visible unit movements made by barbarians are announced.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_UNIT_MOVE_FILTER_MILITARY" Language="en_US">
+      <Text>Military only</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_UNIT_MOVE_FILTER_MILITARY_TOOLTIP" Language="en_US">
+      <Text>Announce only movement by units with combat or ranged combat strength.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_UNIT_MOVE_FILTER_CIVILIAN" Language="en_US">
+      <Text>Civilian only</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_UNIT_MOVE_FILTER_CIVILIAN_TOOLTIP" Language="en_US">
+      <Text>Announce only movement by noncombat units.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_UNIT_MOVE_FILTER_BOTH" Language="en_US">
+      <Text>Military and civilian</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_UNIT_MOVE_FILTER_BOTH_TOOLTIP" Language="en_US">
+      <Text>Announce movement by both military and civilian units.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_UNIT_MOVE_FILTER_NONE" Language="en_US">
+      <Text>None</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_UNIT_MOVE_FILTER_NONE_TOOLTIP" Language="en_US">
+      <Text>Do not announce unit movement for this faction.</Text>
+    </Row>
+
     <Row Tag="LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_NOTIFICATIONS" Language="en_US">
       <Text>Speak notification messages</Text>
     </Row>
@@ -5583,6 +5771,19 @@
     </Row>
     <Row Tag="LOC_CAI_MOVEMENT_ARRIVAL_REMAINING" Language="en_US">
       <Text>{1} movement remaining on arrival</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_UNIT_MOVE_LOG_PATH" Language="en_US">
+      <Text>{1_Unit} moved {2_Path}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_MOVE_LOG_VISIBLE_PATH" Language="en_US">
+      <Text>{1_Unit} visible movement: {2_Path}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_MOVE_LOG_GENERIC" Language="en_US">
+      <Text>{1_Unit} moved</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_MOVE_LOG_RELOCATED" Language="en_US">
+      <Text>{1_Unit} relocated</Text>
     </Row>
 </LocalizedText>
 </GameData>

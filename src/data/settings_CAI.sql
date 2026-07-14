@@ -51,50 +51,71 @@ VALUES
     ('TokenSplitLength', 'UI', 50, 'number', 'editbox', '75',
      'LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH', 'LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH_TOOLTIP', 'NumbersOnly'),
 
-    ('AudioTagEnabled_CURSOR', 'Navigation', 10, 'bool', 'checkbox', 'true',
+    ('AudioTagEnabled_CURSOR', 'Cursor', 10, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_CURSOR_AUDIO_ENABLED', 'LOC_CAI_SETTING_CURSOR_AUDIO_ENABLED_TOOLTIP', NULL),
 
-    ('AudioTagVolume_CURSOR', 'Navigation', 20, 'number', 'slider', '100',
+    ('AudioTagVolume_CURSOR', 'Cursor', 20, 'number', 'slider', '100',
      'LOC_CAI_SETTING_CURSOR_AUDIO_VOLUME', 'LOC_CAI_SETTING_CURSOR_AUDIO_VOLUME_TOOLTIP', NULL),
 
-    ('ScannerAutoMoveCursor', 'Navigation', 30, 'bool', 'checkbox', 'false',
+    ('ScannerBeaconEnabled', 'WorldScanner', 10, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_SCANNER_BEACON_ENABLED', 'LOC_CAI_SETTING_SCANNER_BEACON_ENABLED_TOOLTIP', NULL),
+
+    ('ScannerAutoMoveCursor', 'WorldScanner', 20, 'bool', 'checkbox', 'false',
      'LOC_CAI_SETTING_SCANNER_AUTO_MOVE_CURSOR', 'LOC_CAI_SETTING_SCANNER_AUTO_MOVE_CURSOR_TOOLTIP', NULL),
 
-    ('ScannerCoordinates', 'Navigation', 31, 'string', 'dropdown', 'disabled',
+    ('ScannerCoordinates', 'WorldScanner', 30, 'string', 'dropdown', 'disabled',
      'LOC_CAI_SETTING_SCANNER_COORDINATES', 'LOC_CAI_SETTING_SCANNER_COORDINATES_TOOLTIP', NULL),
 
-    ('ScannerAutoFocusValidTargets', 'Navigation', 32, 'bool', 'checkbox', 'false',
+    ('ScannerAutoFocusValidTargets', 'WorldScanner', 40, 'bool', 'checkbox', 'false',
      'LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_VALID_TARGETS', 'LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_VALID_TARGETS_TOOLTIP', NULL),
 
-    ('ScannerAutoFocusActiveLens', 'Navigation', 33, 'bool', 'checkbox', 'false',
+    ('ScannerAutoFocusActiveLens', 'WorldScanner', 50, 'bool', 'checkbox', 'false',
      'LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_ACTIVE_LENS', 'LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_ACTIVE_LENS_TOOLTIP', NULL),
 
-    ('ScannerGroupCitiesByCivilization', 'Navigation', 34, 'bool', 'checkbox', 'true',
+    ('ScannerGroupCitiesByCivilization', 'WorldScanner', 60, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SCANNER_GROUP_CITIES_BY_CIVILIZATION', 'LOC_CAI_SETTING_SCANNER_GROUP_CITIES_BY_CIVILIZATION_TOOLTIP', NULL),
 
-    ('CursorCoordinates', 'Navigation', 40, 'string', 'dropdown', 'disabled',
+    ('CursorCoordinates', 'Cursor', 30, 'string', 'dropdown', 'disabled',
      'LOC_CAI_SETTING_CURSOR_COORDINATES', 'LOC_CAI_SETTING_CURSOR_COORDINATES_TOOLTIP', NULL),
 
-    ('SpeakOwnerZone', 'Navigation', 50, 'bool', 'checkbox', 'true',
+    ('SpeakOwnerZone', 'Cursor', 40, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_OWNER_ZONE', 'LOC_CAI_SETTING_SPEAK_OWNER_ZONE_TOOLTIP', NULL),
 
-    ('SpeakTerritoryZone', 'Navigation', 60, 'bool', 'checkbox', 'true',
+    ('SpeakTerritoryZone', 'Cursor', 50, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_TERRITORY_ZONE', 'LOC_CAI_SETTING_SPEAK_TERRITORY_ZONE_TOOLTIP', NULL),
 
-    ('SpeakContinentZone', 'Navigation', 70, 'bool', 'checkbox', 'true',
+    ('SpeakContinentZone', 'Cursor', 60, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_CONTINENT_ZONE', 'LOC_CAI_SETTING_SPEAK_CONTINENT_ZONE_TOOLTIP', NULL),
 
-    ('SpeakNationalParkZone', 'Navigation', 80, 'bool', 'checkbox', 'true',
+    ('SpeakNationalParkZone', 'Cursor', 70, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_NATIONAL_PARK_ZONE', 'LOC_CAI_SETTING_SPEAK_NATIONAL_PARK_ZONE_TOOLTIP', NULL),
 
-    ('AnnounceVisibilityChangesTurnStart', 'Navigation', 90, 'bool', 'checkbox', 'true',
+    ('AnnounceVisibilityChangesTurnStart', 'Events', 10, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_TURN_START', 'LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_TURN_START_TOOLTIP', NULL),
 
-    ('AnnounceVisibilityChangesOutsideTurn', 'Navigation', 100, 'bool', 'checkbox', 'false',
+    ('AnnounceVisibilityChangesOutsideTurn', 'Events', 20, 'bool', 'checkbox', 'false',
      'LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_OUTSIDE_TURN', 'LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_OUTSIDE_TURN_TOOLTIP', NULL),
 
-    ('AnnounceVisibilityChangesWhileMoving', 'Navigation', 110, 'bool', 'checkbox', 'true',
+    ('AnnounceVisibilityChangesWhileMoving', 'Events', 30, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_WHILE_MOVING', 'LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_WHILE_MOVING_TOOLTIP', NULL),
+
+    ('AnnounceUnitMovesOwn', 'Events', 40, 'string', 'dropdown', 'none',
+     'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_OWN', 'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_OWN_TOOLTIP', NULL),
+
+    ('AnnounceUnitMovesTeammate', 'Events', 50, 'string', 'dropdown', 'none',
+     'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_TEAMMATE', 'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_TEAMMATE_TOOLTIP', NULL),
+
+    ('AnnounceUnitMovesHostile', 'Events', 60, 'string', 'dropdown', 'none',
+     'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_HOSTILE', 'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_HOSTILE_TOOLTIP', NULL),
+
+    ('AnnounceUnitMovesNeutral', 'Events', 70, 'string', 'dropdown', 'none',
+     'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_NEUTRAL', 'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_NEUTRAL_TOOLTIP', NULL),
+
+    ('AnnounceUnitMovesCityState', 'Events', 80, 'string', 'dropdown', 'none',
+     'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_CITY_STATE', 'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_CITY_STATE_TOOLTIP', NULL),
+
+    ('AnnounceUnitMovesBarbarian', 'Events', 90, 'string', 'dropdown', 'both',
+     'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_BARBARIAN', 'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_BARBARIAN_TOOLTIP', NULL),
 
     ('SpeakMessageBufferNotifications', 'MessageBuffer', 10, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_NOTIFICATIONS', 'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_NOTIFICATIONS_TOOLTIP', NULL),
@@ -146,4 +167,34 @@ VALUES
 
     ('ScannerCoordinates', 'prepend',
      'LOC_CAI_SETTING_SCANNER_COORDINATES_PREPEND',
-     'LOC_CAI_SETTING_SCANNER_COORDINATES_PREPEND_TOOLTIP', 30);
+     'LOC_CAI_SETTING_SCANNER_COORDINATES_PREPEND_TOOLTIP', 30),
+
+    ('AnnounceUnitMovesOwn', 'military', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_MILITARY', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_MILITARY_TOOLTIP', 10),
+    ('AnnounceUnitMovesOwn', 'civilian', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_CIVILIAN', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_CIVILIAN_TOOLTIP', 20),
+    ('AnnounceUnitMovesOwn', 'both', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_BOTH', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_BOTH_TOOLTIP', 30),
+    ('AnnounceUnitMovesOwn', 'none', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_NONE', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_NONE_TOOLTIP', 40),
+
+    ('AnnounceUnitMovesTeammate', 'military', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_MILITARY', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_MILITARY_TOOLTIP', 10),
+    ('AnnounceUnitMovesTeammate', 'civilian', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_CIVILIAN', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_CIVILIAN_TOOLTIP', 20),
+    ('AnnounceUnitMovesTeammate', 'both', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_BOTH', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_BOTH_TOOLTIP', 30),
+    ('AnnounceUnitMovesTeammate', 'none', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_NONE', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_NONE_TOOLTIP', 40),
+
+    ('AnnounceUnitMovesHostile', 'military', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_MILITARY', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_MILITARY_TOOLTIP', 10),
+    ('AnnounceUnitMovesHostile', 'civilian', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_CIVILIAN', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_CIVILIAN_TOOLTIP', 20),
+    ('AnnounceUnitMovesHostile', 'both', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_BOTH', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_BOTH_TOOLTIP', 30),
+    ('AnnounceUnitMovesHostile', 'none', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_NONE', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_NONE_TOOLTIP', 40),
+
+    ('AnnounceUnitMovesNeutral', 'military', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_MILITARY', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_MILITARY_TOOLTIP', 10),
+    ('AnnounceUnitMovesNeutral', 'civilian', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_CIVILIAN', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_CIVILIAN_TOOLTIP', 20),
+    ('AnnounceUnitMovesNeutral', 'both', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_BOTH', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_BOTH_TOOLTIP', 30),
+    ('AnnounceUnitMovesNeutral', 'none', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_NONE', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_NONE_TOOLTIP', 40),
+
+    ('AnnounceUnitMovesCityState', 'military', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_MILITARY', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_MILITARY_TOOLTIP', 10),
+    ('AnnounceUnitMovesCityState', 'civilian', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_CIVILIAN', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_CIVILIAN_TOOLTIP', 20),
+    ('AnnounceUnitMovesCityState', 'both', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_BOTH', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_BOTH_TOOLTIP', 30),
+    ('AnnounceUnitMovesCityState', 'none', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_NONE', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_NONE_TOOLTIP', 40),
+
+    ('AnnounceUnitMovesBarbarian', 'military', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_MILITARY', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_MILITARY_TOOLTIP', 10),
+    ('AnnounceUnitMovesBarbarian', 'civilian', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_CIVILIAN', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_CIVILIAN_TOOLTIP', 20),
+    ('AnnounceUnitMovesBarbarian', 'both', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_BOTH', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_BOTH_TOOLTIP', 30),
+    ('AnnounceUnitMovesBarbarian', 'none', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_NONE', 'LOC_CAI_SETTING_UNIT_MOVE_FILTER_NONE_TOOLTIP', 40);

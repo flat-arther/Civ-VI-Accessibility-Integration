@@ -1037,7 +1037,7 @@ When migrating a screen from the old template-merged manager:
 |                | Left collapse-or-ascend; Enter toggle; Ctrl+F; chars → search |
 | SearchPanel    | Tab/Shift+Tab → edit/results; Esc → close; Enter → first result|
 | Checkbox       | Space / Enter → toggle                                        |
-| Slider         | Left/Right step; PgUp/PgDn page; Home/End bounds              |
+| Slider         | Left/Right step; PgUp/PgDn page; Home/End bounds; all consume even at bounds |
 | EditBox        | Enter → BeginEdit/Commit (EnterToCommit=false makes Enter bubble); Esc → Cancel; full text-editing set |
 | TabControl     | Ctrl+Tab / Ctrl+Shift+Tab → cycle pages                       |
 | Tab strip      | Left / Right (via HorizontalList) cycles tabs and switches    |

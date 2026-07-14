@@ -23,6 +23,9 @@ local NEIGHBOR_DIRS = {
 }
 
 local MAX_PLAYER_INDEX_FOR_CAPITAL = 64
+local SPATIAL_AUDIO_PAN_SATURATION_HEXES = 12
+local SPATIAL_AUDIO_MAX_PITCH_SEMITONES = 12
+local SPATIAL_AUDIO_DEFAULT_MAX_DISTANCE = 30
 
 local function FormatDirectionStep(count, directionKey)
     return Locale.Lookup("LOC_CAI_DIRECTION_STEP", count, Locale.Lookup(directionKey))
@@ -62,6 +65,41 @@ local function NearestWrappedTo(fromX, fromY, toX, toY)
         end
     end
     return fromX + dx, fromY + dy
+end
+
+---@param fromX integer
+---@param fromY integer
+---@param toX integer
+---@param toY integer
+---@return number dcol
+---@return number drow
+function HexCoordUtils.displacement(fromX, fromY, toX, toY)
+    toX, toY = NearestWrappedTo(fromX, fromY, toX, toY)
+    local dcol = (toX + 0.5 * (toY % 2)) - (fromX + 0.5 * (fromY % 2))
+    local drow = toY - fromY
+    return dcol, drow
+end
+
+---@param listenerX integer
+---@param listenerY integer
+---@param sourceX integer
+---@param sourceY integer
+---@param maxDistance? number
+---@return number pan
+---@return number pitch
+---@return number volume
+function HexCoordUtils.spatialAudioParameters(listenerX, listenerY, sourceX, sourceY, maxDistance)
+    local dcol, drow = HexCoordUtils.displacement(listenerX, listenerY, sourceX, sourceY)
+    local pan = math.max(-1, math.min(1, dcol / SPATIAL_AUDIO_PAN_SATURATION_HEXES))
+    local semitones = math.max(
+        -SPATIAL_AUDIO_MAX_PITCH_SEMITONES,
+        math.min(SPATIAL_AUDIO_MAX_PITCH_SEMITONES, drow)
+    )
+    local pitch = 2 ^ (semitones / 12)
+    local distance = Map.GetPlotDistance(listenerX, listenerY, sourceX, sourceY)
+    local audibleDistance = maxDistance or SPATIAL_AUDIO_DEFAULT_MAX_DISTANCE
+    local volume = math.max(0, math.min(1, 1 - distance / audibleDistance))
+    return pan, pitch, volume
 end
 
 local function DecomposeCube(dx, dy, dz)
@@ -187,6 +225,21 @@ function HexCoordUtils.stepListString(directions)
     return table.concat(parts, ", ")
 end
 
+function HexCoordUtils.stepDirection(fromX, fromY, toX, toY)
+    if fromX == nil or fromY == nil or toX == nil or toY == nil then
+        return nil
+    end
+
+    for _, direction in ipairs(NEIGHBOR_DIRS) do
+        local neighbor = Map.GetAdjacentPlot(fromX, fromY, direction)
+        if neighbor ~= nil and neighbor:GetX() == toX and neighbor:GetY() == toY then
+            return direction
+        end
+    end
+
+    return nil
+end
+
 function HexCoordUtils.stepListFromPath(path)
     if path == nil or #path < 2 then
         return ""
@@ -199,12 +252,9 @@ function HexCoordUtils.stepListFromPath(path)
         local toX = path[i + 1].x
         local toY = path[i + 1].y
 
-        for _, direction in ipairs(NEIGHBOR_DIRS) do
-            local neighbor = Map.GetAdjacentPlot(fromX, fromY, direction)
-            if neighbor ~= nil and neighbor:GetX() == toX and neighbor:GetY() == toY then
-                directions[#directions + 1] = direction
-                break
-            end
+        local direction = HexCoordUtils.stepDirection(fromX, fromY, toX, toY)
+        if direction ~= nil then
+            directions[#directions + 1] = direction
         end
     end
 

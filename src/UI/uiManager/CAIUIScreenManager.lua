@@ -109,7 +109,7 @@ end
 function UIScreenManager:HandleNavigationWrap(source, direction)
     local audio = self:GetAudioManager()
     if audio then
-        audio:SetSoundVolume("UI_MENU_WRAP", audio:GetTagVolumeScalar("UI_NAVIGATION") * 0.5)
+        audio:SetSoundVolume("UI_MENU_WRAP", 0.5)
         audio:Play("UI_MENU_WRAP")
     end
 end

@@ -1,5 +1,139 @@
 ---@meta
 
+---@alias SoundHandle integer
+---@alias AttenuationModel
+---| 0 # None
+---| 1 # Inverse
+---| 2 # Linear
+---| 3 # Exponential
+
+---@class CAIAttenuationModel
+---@field None 0
+---@field Inverse 1
+---@field Linear 2
+---@field Exponential 3
+
+---@class CAI
+---@field AttenuationModel CAIAttenuationModel
+CAI = {}
+
+---@param filePath string
+---@return SoundHandle|nil
+function CAI.LoadSound(filePath) end
+
+---@param handle SoundHandle
+---@return boolean
+function CAI.DestroySound(handle) end
+
+---@param handle SoundHandle
+function CAI.PlaySound(handle) end
+
+---@param handle SoundHandle
+function CAI.PauseSound(handle) end
+
+---@param handle SoundHandle
+function CAI.StopSound(handle) end
+
+---@param handle SoundHandle
+---@param volume number
+function CAI.SetSoundVolume(handle, volume) end
+
+---@param handle SoundHandle
+---@return number
+function CAI.GetSoundVolume(handle) end
+
+---@param handle SoundHandle
+---@param looping boolean
+function CAI.SetSoundLooping(handle, looping) end
+
+---@param handle SoundHandle
+---@return boolean
+function CAI.IsSoundLooping(handle) end
+
+---@param handle SoundHandle
+---@return boolean
+function CAI.IsSoundPlaying(handle) end
+
+---@param handle SoundHandle
+---@param pitch number
+function CAI.SetSoundPitch(handle, pitch) end
+
+---@param handle SoundHandle
+---@return number
+function CAI.GetSoundPitch(handle) end
+
+---@param handle SoundHandle
+---@param pan number
+function CAI.SetSoundPan(handle, pan) end
+
+---@param handle SoundHandle
+---@return number
+function CAI.GetSoundPan(handle) end
+
+---@param handle SoundHandle
+---@param x number
+---@param y number
+---@param z number
+function CAI.SetSoundPosition(handle, x, y, z) end
+
+---@param handle SoundHandle
+---@return number x
+---@return number y
+---@return number z
+function CAI.GetSoundPosition(handle) end
+
+---@param handle SoundHandle
+---@param x number
+---@param y number
+---@param z number
+function CAI.SetSoundDirection(handle, x, y, z) end
+
+---@param handle SoundHandle
+---@param x number
+---@param y number
+---@param z number
+function CAI.SetSoundVelocity(handle, x, y, z) end
+
+---@param handle SoundHandle
+---@param enabled boolean
+function CAI.SetSoundSpatializationEnabled(handle, enabled) end
+
+---@param handle SoundHandle
+---@return boolean
+function CAI.IsSoundSpatializationEnabled(handle) end
+
+---@param handle SoundHandle
+---@param distance number
+function CAI.SetSoundMinDistance(handle, distance) end
+
+---@param handle SoundHandle
+---@param distance number
+function CAI.SetSoundMaxDistance(handle, distance) end
+
+---@param handle SoundHandle
+---@param model AttenuationModel
+function CAI.SetSoundAttenuationModel(handle, model) end
+
+---@param x number
+---@param y number
+---@param z number
+function CAI.SetListenerPosition(x, y, z) end
+
+---@param x number
+---@param y number
+---@param z number
+function CAI.SetListenerDirection(x, y, z) end
+
+---@param x number
+---@param y number
+---@param z number
+function CAI.SetListenerUp(x, y, z) end
+
+---@param x number
+---@param y number
+---@param z number
+function CAI.SetListenerVelocity(x, y, z) end
+
 ---@alias PlotInfoType
 ---|"plotName"
 ---| "Owner"
@@ -138,11 +272,19 @@ EditModes = {}
 
 ---@class CAIAudioPlayOptions
 ---@field SkipIfPlaying? boolean Suppress playback when the sound handle is already playing.
+---@field ListenerPlot? integer|table Explicit listener plot id or Plot; defaults to the current CAI cursor.
+---@field MaxDistance? number Audible hex distance for positional falloff; defaults to 30.
 
 ---@class CAIAudioDefinitionRow
 ---@field SoundId string
 ---@field RelativePath string
 ---@field Tag string
+---@field IsPositional boolean
+
+---@class CAIAudioSpatialState
+---@field SourcePlotId integer
+---@field ListenerPlotId? integer
+---@field MaxDistance number
 
 ---@class CAIAudioRecord
 ---@field SoundId string
@@ -150,9 +292,15 @@ EditModes = {}
 ---@field FullPath string
 ---@field Tag string
 ---@field Handle SoundHandle
+---@field IsPositional boolean
+---@field IsSpatialAudioInitialized boolean
+---@field BaseGain number
+---@field SpatialGain number
+---@field SpatialState? CAIAudioSpatialState
 
 ---@class CAIAudioQueueItem
 ---@field SoundId string
+---@field SourcePlotId? integer
 ---@field DueTime number
 ---@field Options? CAIAudioPlayOptions
 
@@ -162,6 +310,7 @@ EditModes = {}
 ---@field IsInitialized boolean
 ---@field SettingsHooked boolean
 ---@field SettingsChangedListener fun(settingId:string)|nil
+---@field IsSpatialAudioInitialized boolean
 ---@field DefinitionsById table<string, CAIAudioDefinitionRow>
 ---@field LoadedSoundsById table<string, CAIAudioRecord>
 ---@field SoundsByTag table<string, CAIAudioRecord[]>
@@ -186,6 +335,13 @@ function CAIAudioManager:LoadDefinitions() end
 
 ---@param record CAIAudioRecord|nil
 function CAIAudioManager:ApplyTagVolume(record) end
+
+---Initialize in-game spatial audio after Events.LoadScreenClose.
+---@return boolean initialized
+function CAIAudioManager:InitializeSpatialAudio() end
+
+---@param record CAIAudioRecord
+function CAIAudioManager:InitializePositionalSound(record) end
 
 function CAIAudioManager:UnloadSounds() end
 
@@ -231,16 +387,42 @@ function CAIAudioManager:ClearQueuedTag(tag) end
 ---@return boolean
 function CAIAudioManager:ShouldSkipPlay(record, options) end
 
+---@param plotOrId integer|table
+---@return table|nil plot
+---@return integer|nil plotId
+function CAIAudioManager:ResolvePlot(plotOrId) end
+
+---@return table|nil plot
+---@return integer|nil plotId
+function CAIAudioManager:GetDefaultListenerPlot() end
+
+---@param record CAIAudioRecord
+---@return boolean
+function CAIAudioManager:ApplyPlotSpatialization(record) end
+
 ---@param soundId string
 ---@param options? CAIAudioPlayOptions
 ---@return boolean played True when playback was started.
 function CAIAudioManager:Play(soundId, options) end
 
 ---@param soundId string
+---@param sourcePlotOrId integer|table
+---@param options? CAIAudioPlayOptions
+---@return boolean played
+function CAIAudioManager:PlayAtPlot(soundId, sourcePlotOrId, options) end
+
+---@param soundId string
 ---@param delaySeconds? number
 ---@param options? CAIAudioPlayOptions
 ---@return boolean queued True when the sound was accepted into the queue.
 function CAIAudioManager:QueueSound(soundId, delaySeconds, options) end
+
+---@param soundId string
+---@param sourcePlotOrId integer|table
+---@param delaySeconds? number
+---@param options? CAIAudioPlayOptions
+---@return boolean queued
+function CAIAudioManager:QueueSoundAtPlot(soundId, sourcePlotOrId, delaySeconds, options) end
 
 ---@param soundId string
 ---@return boolean

@@ -838,7 +838,7 @@ local function PushPanel()
     if not m_ui.panel then return end
     RebuildTree()
     if not mgr:GetWidgetById(PANEL_ID) then
-        mgr:Push(m_ui.panel, PopupPriority.Low)
+        mgr:Push(m_ui.panel)
     end
 end
 
@@ -860,6 +860,8 @@ end
 -- Vanilla function wraps
 -- ===========================================================================
 
+LuaEvents.GovernorPanel_Open.Remove(Open)
+LuaEvents.GovernorPanel_CancelAssignment.Remove(Open)
 Open = WrapFunc(Open, function(orig, playerID, cityID)
     if playerID ~= nil and cityID ~= nil then
         m_cityBannerPlayerID = playerID
@@ -872,16 +874,17 @@ Open = WrapFunc(Open, function(orig, playerID, cityID)
     if not ContextPtr:IsHidden() then
         PushPanel()
         m_isReadOnly = IsReadOnly()
-        if m_isReadOnly then
-            Speak(Locale.Lookup("LOC_CAI_GOVERNOR_READONLY"))
-        end
     end
 end)
+LuaEvents.GovernorPanel_Open.Add(Open)
+LuaEvents.GovernorPanel_CancelAssignment.Add(Open);
 
+LuaEvents.GovernorPanel_Close.Remove(Close)
 Close = WrapFunc(Close, function(orig)
     PopPanel()
     orig()
 end)
+LuaEvents.GovernorPanel_Close.Add(Close)
 
 Refresh = WrapFunc(Refresh, function(orig)
     m_liveGovernorRows = {}

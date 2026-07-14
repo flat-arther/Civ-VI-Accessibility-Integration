@@ -11,6 +11,7 @@ include("WorldScanner_CAI")
 include("Surveyor_CAI")
 include("RevealAnnouncements_CAI")
 include("MessageBuffer_CAI")
+include("UnitMoveLog_CAI")
 include("EventSubs_CAI")
 include("Civ6Common")
 
@@ -52,6 +53,7 @@ local ACTION_CURSOR_EAST = Input.GetActionId("CAICursorMoveEast")
 local ACTION_CURSOR_SOUTHWEST = Input.GetActionId("CAICursorMoveSouthWest")
 local ACTION_CURSOR_SOUTHEAST = Input.GetActionId("CAICursorMoveSouthEast")
 local ACTION_CURSOR_JUMP_TO_SELECTION = Input.GetActionId("CAICursorJumpToSelection")
+local ACTION_CURSOR_JUMP_TO_CAPITAL = Input.GetActionId("CAICursorJumpToCapital")
 local ACTION_QUICK_MOVE_NORTHWEST = Input.GetActionId("QuickMoveNorthWest")
 local ACTION_QUICK_MOVE_NORTHEAST = Input.GetActionId("QuickMoveNorthEast")
 local ACTION_QUICK_MOVE_WEST = Input.GetActionId("QuickMoveWest")
@@ -120,6 +122,20 @@ local function JumpCursorToSelection()
 	end
 
 	return false
+end
+
+local function JumpCursorToCapital()
+	local playerID = Game.GetLocalPlayer()
+	if playerID == nil or playerID < 0 then return false end
+
+	local player = Players[playerID]
+	local cities = player ~= nil and player:GetCities() or nil
+	local capital = cities ~= nil and cities:GetCapitalCity() or nil
+	local capitalPlotId = GetObjectPlotIndex(capital)
+	if capitalPlotId == nil then return false end
+
+	LuaEvents.CAICursorMoveTo(capitalPlotId, "jump")
+	return true
 end
 
 local function SelectPreviousCity()
@@ -590,6 +606,12 @@ local SharedInputActions = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return JumpCursorToSelection()
+		end,
+	},
+	[ACTION_CURSOR_JUMP_TO_CAPITAL] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			return JumpCursorToCapital()
 		end,
 	},
 	[ACTION_WORLD_SELECT_PREVIOUS_CITY] = {
@@ -1210,6 +1232,7 @@ end
 
 local function OnUpdate()
 	MovementActions_CAI:UpdatePendingMovementResult()
+	UnitMoveLog_CAI.Update()
 	RevealAnnouncements_CAI.UpdateVisibility()
 	CheckInput()
 	if mgr ~= nil then
@@ -1244,6 +1267,10 @@ local function RegisterCAIEvents()
 	Events.UnitSelectionChanged.Add(OnUnitSelectionChanged)
 	LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
 	LuaEvents.CAIAppendToMessageBuffer.Add(OnCAIAppendToMessageBuffer)
+	if not mgr:GetAudioManager():InitializeSpatialAudio() then
+		LogError("CAI WorldInput could not initialize spatial audio after the load screen closed")
+	end
+	UnitMoveLog_CAI.Initialize()
 	CAICursorAudio.Initialize()
 	CAIRecommendationLogic.Initialize()
 end
@@ -1256,6 +1283,7 @@ local function UnregisterCAIEvents()
 	Events.UnitSelectionChanged.Remove(OnUnitSelectionChanged)
 	LuaEvents.CAICursorMoved.Remove(OnCAICursorMoved)
 	LuaEvents.CAIAppendToMessageBuffer.Remove(OnCAIAppendToMessageBuffer)
+	UnitMoveLog_CAI.Shutdown()
 	CAICursorAudio.Shutdown()
 end
 

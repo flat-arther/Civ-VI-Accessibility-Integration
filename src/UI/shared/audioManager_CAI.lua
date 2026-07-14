@@ -7,8 +7,11 @@
 
 CAIAudioManager = CAIAudioManager or {}
 
+local DEFAULT_SPATIAL_MAX_DISTANCE = 30
+local ATTENUATION_MODEL_NONE = 0
+
 local AUDIO_DEFINITION_QUERY = [[
-    SELECT SoundId, RelativePath, Tag
+    SELECT SoundId, RelativePath, Tag, IsPositional
     FROM CAI_AudioDefinitions
     ORDER BY Tag, SoundId
 ]]
@@ -33,6 +36,10 @@ local function ClampVolumeScalar(volume)
     if volume < 0 then return 0 end
     if volume > 1 then return 1 end
     return volume
+end
+
+local function IsTrue(value)
+    return value == true or value == 1 or value == "true" or value == "1"
 end
 
 local function GetTagCandidates(tag)
@@ -62,6 +69,7 @@ function CAIAudioManager:New()
     mgr.IsFocusMuted = false
     mgr.SettingsHooked = false
     mgr.SettingsChangedListener = nil
+    mgr.IsSpatialAudioInitialized = false
     mgr.DefinitionsById = {}
     mgr.LoadedSoundsById = {}
     mgr.SoundsByTag = {}
@@ -126,6 +134,7 @@ function CAIAudioManager:LoadDefinitions()
                 SoundId = row.SoundId,
                 RelativePath = NormalizePath(row.RelativePath),
                 Tag = row.Tag,
+                IsPositional = IsTrue(row.IsPositional),
             }
         end
     end
@@ -133,7 +142,46 @@ end
 
 function CAIAudioManager:ApplyTagVolume(record)
     if record == nil or record.Handle == nil then return end
-    CAI.SetSoundVolume(record.Handle, self:GetTagVolumeScalar(record.Tag))
+    local baseGain = record.BaseGain or 1
+    local spatialGain = record.SpatialGain or 1
+    CAI.SetSoundVolume(record.Handle, self:GetTagVolumeScalar(record.Tag) * baseGain * spatialGain)
+end
+
+function CAIAudioManager:InitializeSpatialAudio()
+    if self.IsSpatialAudioInitialized then
+        return true
+    end
+    if CAIHexCoordUtils == nil then
+        include("hexCoordUtils_CAI")
+    end
+
+    CAI.SetListenerPosition(0, 0, 0)
+    CAI.SetListenerDirection(0, 0, -1)
+    CAI.SetListenerUp(0, 1, 0)
+    CAI.SetListenerVelocity(0, 0, 0)
+    self.IsSpatialAudioInitialized = true
+    for _, record in pairs(self.LoadedSoundsById) do
+        if record.IsPositional then
+            self:InitializePositionalSound(record)
+        end
+    end
+    LogMessage("Audio manager spatial audio initialized")
+    return true
+end
+
+function CAIAudioManager:InitializePositionalSound(record)
+    if record.IsSpatialAudioInitialized then
+        return
+    end
+
+    CAI.SetSoundSpatializationEnabled(record.Handle, true)
+    CAI.SetSoundPosition(record.Handle, 0, 0, 0)
+    CAI.SetSoundDirection(record.Handle, 0, 0, -1)
+    CAI.SetSoundVelocity(record.Handle, 0, 0, 0)
+    CAI.SetSoundAttenuationModel(record.Handle, ATTENUATION_MODEL_NONE)
+    CAI.SetSoundPan(record.Handle, 0)
+    CAI.SetSoundPitch(record.Handle, 1)
+    record.IsSpatialAudioInitialized = true
 end
 
 function CAIAudioManager:UnloadSounds()
@@ -170,7 +218,16 @@ function CAIAudioManager:LoadSounds()
                     FullPath = fullPath,
                     Tag = def.Tag,
                     Handle = handle,
+                    IsPositional = def.IsPositional,
+                    IsSpatialAudioInitialized = false,
+                    BaseGain = 1,
+                    SpatialGain = 1,
+                    SpatialState = nil,
                 }
+
+                if self.IsSpatialAudioInitialized and record.IsPositional then
+                    self:InitializePositionalSound(record)
+                end
 
                 self.LoadedSoundsById[soundId] = record
                 if self.SoundsByTag[def.Tag] == nil then
@@ -257,6 +314,62 @@ function CAIAudioManager:ShouldSkipPlay(record, options)
     return false
 end
 
+function CAIAudioManager:ResolvePlot(plotOrId)
+    if type(plotOrId) == "number" then
+        local plot = Map.GetPlotByIndex(plotOrId)
+        if plot == nil then
+            return nil, nil
+        end
+        return plot, plotOrId
+    end
+
+    if plotOrId ~= nil and plotOrId.GetIndex ~= nil then
+        return plotOrId, plotOrId:GetIndex()
+    end
+
+    return nil, nil
+end
+
+function CAIAudioManager:GetDefaultListenerPlot()
+    local cursor = ExposedMembers.CAICursor
+    if cursor == nil then
+        return nil, nil
+    end
+
+    return self:ResolvePlot(cursor:GetPlotId())
+end
+
+function CAIAudioManager:ApplyPlotSpatialization(record)
+    local state = record.SpatialState
+    if state == nil then
+        return false
+    end
+
+    local sourcePlot = Map.GetPlotByIndex(state.SourcePlotId)
+    local listenerPlot
+    if state.ListenerPlotId ~= nil then
+        listenerPlot = Map.GetPlotByIndex(state.ListenerPlotId)
+    else
+        listenerPlot = self:GetDefaultListenerPlot()
+    end
+
+    if sourcePlot == nil or listenerPlot == nil then
+        LogWarn("Audio manager ApplyPlotSpatialization: source or listener plot is unavailable for " .. tostring(record.SoundId))
+        return false
+    end
+
+    local pan, pitch, volume = CAIHexCoordUtils.spatialAudioParameters(
+        listenerPlot:GetX(), listenerPlot:GetY(),
+        sourcePlot:GetX(), sourcePlot:GetY(),
+        state.MaxDistance
+    )
+    record.SpatialGain = volume
+    CAI.SetSoundPan(record.Handle, pan)
+    CAI.SetSoundPitch(record.Handle, pitch)
+    self:ApplyTagVolume(record)
+    return true
+end
+
 function CAIAudioManager:IsMuteFocusEnabled()
     return Options.GetAudioOption("Sound", "Mute Focus") == 1
 end
@@ -273,6 +386,8 @@ function CAIAudioManager:StopAllSoundsForFocusMute()
     for _, record in pairs(self.LoadedSoundsById) do
         if record.Handle ~= nil then
             CAI.StopSound(record.Handle)
+            record.SpatialState = nil
+            record.SpatialGain = 1
         end
     end
 end
@@ -281,6 +396,11 @@ function CAIAudioManager:Play(soundId, options)
     local record = self:GetSound(soundId)
     if record == nil then
         LogWarn("Audio manager Play: unknown or unloaded sound " .. tostring(soundId))
+        return false
+    end
+
+    if record.IsPositional then
+        LogWarn("Audio manager Play: positional sound requires PlayAtPlot: " .. tostring(soundId))
         return false
     end
 
@@ -300,10 +420,78 @@ function CAIAudioManager:Play(soundId, options)
     return true
 end
 
+function CAIAudioManager:PlayAtPlot(soundId, sourcePlotOrId, options)
+    local record = self:GetSound(soundId)
+    if record == nil then
+        LogWarn("Audio manager PlayAtPlot: unknown or unloaded sound " .. tostring(soundId))
+        return false
+    end
+    if not record.IsPositional then
+        LogWarn("Audio manager PlayAtPlot: sound is not positional: " .. tostring(soundId))
+        return false
+    end
+    if not self.IsSpatialAudioInitialized then
+        LogWarn("Audio manager PlayAtPlot: spatial audio has not been initialized")
+        return false
+    end
+    if not self:IsTagEnabled(record.Tag) or self:ShouldMuteForWindowFocus() then
+        return false
+    end
+    if self:ShouldSkipPlay(record, options) then
+        return false
+    end
+
+    local _, sourcePlotId = self:ResolvePlot(sourcePlotOrId)
+    if sourcePlotId == nil then
+        LogWarn("Audio manager PlayAtPlot: invalid source plot for " .. tostring(soundId))
+        return false
+    end
+
+    local listenerPlotId = nil
+    local maxDistance = DEFAULT_SPATIAL_MAX_DISTANCE
+    if options ~= nil then
+        if options.ListenerPlot ~= nil then
+            local _, resolvedListenerPlotId = self:ResolvePlot(options.ListenerPlot)
+            if resolvedListenerPlotId == nil then
+                LogWarn("Audio manager PlayAtPlot: invalid listener plot for " .. tostring(soundId))
+                return false
+            end
+            listenerPlotId = resolvedListenerPlotId
+        end
+        if options.MaxDistance ~= nil then
+            if type(options.MaxDistance) ~= "number" or options.MaxDistance <= 0 then
+                LogWarn("Audio manager PlayAtPlot: MaxDistance must be positive for " .. tostring(soundId))
+                return false
+            end
+            maxDistance = options.MaxDistance
+        end
+    end
+
+    record.SpatialState = {
+        SourcePlotId = sourcePlotId,
+        ListenerPlotId = listenerPlotId,
+        MaxDistance = maxDistance,
+    }
+    if CAI.IsSoundPlaying(record.Handle) then
+        CAI.StopSound(record.Handle)
+    end
+    if not self:ApplyPlotSpatialization(record) then
+        record.SpatialState = nil
+        return false
+    end
+
+    CAI.PlaySound(record.Handle)
+    return true
+end
+
 function CAIAudioManager:QueueSound(soundId, delaySeconds, options)
     local record = self:GetSound(soundId)
     if record == nil then
         LogWarn("Audio manager QueueSound: unknown or unloaded sound " .. tostring(soundId))
+        return false
+    end
+    if record.IsPositional then
+        LogWarn("Audio manager QueueSound: positional sound requires QueueSoundAtPlot: " .. tostring(soundId))
         return false
     end
 
@@ -319,6 +507,60 @@ function CAIAudioManager:QueueSound(soundId, delaySeconds, options)
     return true
 end
 
+function CAIAudioManager:QueueSoundAtPlot(soundId, sourcePlotOrId, delaySeconds, options)
+    local record = self:GetSound(soundId)
+    if record == nil then
+        LogWarn("Audio manager QueueSoundAtPlot: unknown or unloaded sound " .. tostring(soundId))
+        return false
+    end
+    if not record.IsPositional then
+        LogWarn("Audio manager QueueSoundAtPlot: sound is not positional: " .. tostring(soundId))
+        return false
+    end
+    if not self.IsSpatialAudioInitialized then
+        LogWarn("Audio manager QueueSoundAtPlot: spatial audio has not been initialized")
+        return false
+    end
+    if not self:IsTagEnabled(record.Tag) then
+        return false
+    end
+
+    local _, sourcePlotId = self:ResolvePlot(sourcePlotOrId)
+    if sourcePlotId == nil then
+        LogWarn("Audio manager QueueSoundAtPlot: invalid source plot for " .. tostring(soundId))
+        return false
+    end
+
+    local queuedOptions = options
+    if options ~= nil then
+        queuedOptions = {}
+        for key, value in pairs(options) do
+            queuedOptions[key] = value
+        end
+        if options.ListenerPlot ~= nil then
+            local _, listenerPlotId = self:ResolvePlot(options.ListenerPlot)
+            if listenerPlotId == nil then
+                LogWarn("Audio manager QueueSoundAtPlot: invalid listener plot for " .. tostring(soundId))
+                return false
+            end
+            queuedOptions.ListenerPlot = listenerPlotId
+        end
+        if options.MaxDistance ~= nil
+            and (type(options.MaxDistance) ~= "number" or options.MaxDistance <= 0) then
+            LogWarn("Audio manager QueueSoundAtPlot: MaxDistance must be positive for " .. tostring(soundId))
+            return false
+        end
+    end
+
+    table.insert(self.Queue, {
+        SoundId = soundId,
+        SourcePlotId = sourcePlotId,
+        DueTime = GetTime() + (delaySeconds or 0),
+        Options = queuedOptions,
+    })
+    return true
+end
+
 function CAIAudioManager:StopSound(soundId)
     local record = self:GetSound(soundId)
     if record == nil then
@@ -328,6 +570,8 @@ function CAIAudioManager:StopSound(soundId)
 
     self:ClearQueuedSound(soundId)
     CAI.StopSound(record.Handle)
+    record.SpatialState = nil
+    record.SpatialGain = 1
     return true
 end
 
@@ -340,6 +584,8 @@ function CAIAudioManager:PauseSound(soundId)
 
     self:ClearQueuedSound(soundId)
     CAI.PauseSound(record.Handle)
+    record.SpatialState = nil
+    record.SpatialGain = 1
     return true
 end
 
@@ -350,7 +596,8 @@ function CAIAudioManager:SetSoundVolume(soundId, volume)
         return false
     end
 
-    CAI.SetSoundVolume(record.Handle, volume)
+    record.BaseGain = ClampVolumeScalar(volume)
+    self:ApplyTagVolume(record)
     return true
 end
 
@@ -362,7 +609,7 @@ function CAIAudioManager:SetTagVolume(tag, volume)
     end
 
     for _, record in ipairs(bucket) do
-        CAI.SetSoundVolume(record.Handle, volume)
+        CAI.SetSoundVolume(record.Handle, volume * (record.BaseGain or 1) * (record.SpatialGain or 1))
     end
 
     return true
@@ -378,6 +625,8 @@ function CAIAudioManager:StopTag(tag)
     self:ClearQueuedTag(tag)
     for _, record in ipairs(bucket) do
         CAI.StopSound(record.Handle)
+        record.SpatialState = nil
+        record.SpatialGain = 1
     end
 
     return true
@@ -393,6 +642,8 @@ function CAIAudioManager:PauseTag(tag)
     self:ClearQueuedTag(tag)
     for _, record in ipairs(bucket) do
         CAI.PauseSound(record.Handle)
+        record.SpatialState = nil
+        record.SpatialGain = 1
     end
 
     return true
@@ -450,13 +701,36 @@ function CAIAudioManager:Update()
         self.IsFocusMuted = false
     end
 
+    if self.IsSpatialAudioInitialized then
+        for _, record in pairs(self.LoadedSoundsById) do
+            if record.SpatialState ~= nil then
+                if CAI.IsSoundPlaying(record.Handle) then
+                    if not self:ApplyPlotSpatialization(record) then
+                        CAI.StopSound(record.Handle)
+                        record.SpatialState = nil
+                        record.SpatialGain = 1
+                        self:ApplyTagVolume(record)
+                    end
+                else
+                    record.SpatialState = nil
+                    record.SpatialGain = 1
+                    self:ApplyTagVolume(record)
+                end
+            end
+        end
+    end
+
     if #self.Queue == 0 then return end
 
     local now = GetTime()
     for i = #self.Queue, 1, -1 do
         local item = self.Queue[i]
         if now >= item.DueTime then
-            self:Play(item.SoundId, item.Options)
+            if item.SourcePlotId ~= nil then
+                self:PlayAtPlot(item.SoundId, item.SourcePlotId, item.Options)
+            else
+                self:Play(item.SoundId, item.Options)
+            end
             table.remove(self.Queue, i)
         end
     end
@@ -491,6 +765,7 @@ function CAIAudioManager:Shutdown()
     self.Owner = nil
     self.ModRoot = nil
     self.IsFocusMuted = false
+    self.IsSpatialAudioInitialized = false
     self.IsInitialized = false
     LogMessage("Audio manager shut down")
 end

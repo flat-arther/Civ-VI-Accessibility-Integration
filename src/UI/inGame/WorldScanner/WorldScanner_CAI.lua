@@ -387,6 +387,26 @@ local function GetCurrentTargetPlotIndex(scanner)
     return nil
 end
 
+local function PlayCurrentItemBeacon(scanner)
+    if not CAISettings.GetBool("ScannerBeaconEnabled") then
+        return false
+    end
+
+    local plotIndex = GetCurrentTargetPlotIndex(scanner)
+    if plotIndex == nil or plotIndex < 0 then
+        return false
+    end
+
+    local audio = ExposedMembers.CAI_UIManager:GetAudioManager()
+    local listenerPlotIndex = CAICursor and CAICursor.GetPlotId and CAICursor:GetPlotId() or -1
+    local options = nil
+    if listenerPlotIndex ~= nil and listenerPlotIndex >= 0 then
+        options = { ListenerPlot = listenerPlotIndex }
+    end
+
+    return audio:PlayAtPlot("SCANNER_BEACON", plotIndex, options)
+end
+
 local function FollowCurrentTarget(scanner)
     if scanner == nil or not CAISettings.GetBool("ScannerAutoMoveCursor") then
         return false
@@ -406,6 +426,11 @@ local function FollowCurrentTarget(scanner)
     return true
 end
 
+local function CompleteCurrentItemFocus(scanner)
+    PlayCurrentItemBeacon(scanner)
+    FollowCurrentTarget(scanner)
+end
+
 local function FocusCurrentItem(scanner)
     local group = GetGroup(scanner)
     if group == nil or group.Items == nil or #group.Items == 0 then
@@ -415,7 +440,7 @@ local function FocusCurrentItem(scanner)
 
     local spoke = SpeakItemEntry(group.Items[scanner.ItemIndex], scanner.ItemIndex, group.TotalItems or #group.Items)
     if spoke then
-        FollowCurrentTarget(scanner)
+        CompleteCurrentItemFocus(scanner)
     end
     return spoke
 end
@@ -464,7 +489,7 @@ local function FocusCategory(scanner, categoryIndex)
 
     if line2 ~= nil then
         SpeakLines({ line1, line2 })
-        FollowCurrentTarget(scanner)
+        CompleteCurrentItemFocus(scanner)
     else
         SpeakLines({ line1 })
     end
@@ -746,7 +771,7 @@ function CAIWorldScanner:CycleSubCategory(step)
 
     if line2 ~= nil then
         SpeakLines({ line1, line2 })
-        FollowCurrentTarget(scanner)
+        CompleteCurrentItemFocus(scanner)
     else
         SpeakLines({ line1 })
     end
@@ -889,6 +914,7 @@ function CAIWorldScanner:SpeakCurrentDirection()
     end
 
     Speak(directionText)
+    PlayCurrentItemBeacon(scanner)
 end
 
 -- ==========================================================================
