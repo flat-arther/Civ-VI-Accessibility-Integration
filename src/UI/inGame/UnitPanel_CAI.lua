@@ -1,6 +1,7 @@
 include("caiUtils")
 include("inGameHelpers_CAI")
 include("interfaceInfoHelpers_CAI")
+include("hexCoordUtils_CAI")
 include("Civ6Common")
 
 if IsExpansion2Active ~= nil and IsExpansion2Active() then
@@ -10,8 +11,8 @@ else
 end
 
 local mgr = ExposedMembers.CAI_UIManager
+local CAICursor = ExposedMembers.CAICursor
 local m_IsGameStarted = false
-local HexCoordUtils = CAIHexCoordUtils
 
 local UNIT_ACTION_LIST_ID = "CAIUnitPanelActionList"
 local UNIT_LIST_ID = "CAIUnitPanelUnitList"
@@ -340,7 +341,7 @@ local function JoinUnitInfo(parts, separator)
             table.insert(results, part)
         end
     end
-    return table.concat(results, separator or ", ")
+    return table.concat(results, separator or "[NEWLINE]")
 end
 
 local function GetFirstUnitInfoLine(value)
@@ -363,9 +364,27 @@ local function GetSelectedUnit()
     return UI.GetHeadSelectedUnit()
 end
 
-local CloseUnitList            -- forward declaration; assigned below
-local CloseSimplePromotionList -- forward declaration; assigned below
-local CloseUnitNamePanel       -- forward declaration; assigned below
+local function RemoveUnitList()
+    if UnitList and mgr then
+        mgr:RemoveFromStack(UNIT_LIST_ID)
+    end
+    UnitList = nil
+end
+
+local function RemoveSimplePromotionList()
+    if SimplePromotionList and mgr then
+        mgr:RemoveFromStack(UNIT_SIMPLE_PROMOTION_LIST_ID)
+    end
+    SimplePromotionList = nil
+end
+
+local function RemoveUnitNamePanel()
+    if UnitNamePanel and mgr then
+        mgr:RemoveFromStack(UNIT_NAME_PANEL_ID)
+    end
+    UnitNamePanel = nil
+    UnitNameEdit = nil
+end
 
 local function ReadCurrentUnitData()
     local data = GetSubjectData ~= nil and GetSubjectData() or nil
@@ -396,7 +415,7 @@ local function BindCivilopediaShortcut(item, getUnitID)
 
             local unitInfo = GameInfo.Units[resolved:GetUnitType()]
             if unitInfo ~= nil then
-                CloseUnitList()
+                RemoveUnitList()
                 LuaEvents.OpenCivilopedia(unitInfo.UnitType)
             end
             return true
@@ -511,7 +530,7 @@ local function GetUnitInfoLifespan(data)
         return nil
     end
 
-    return Locale.Lookup("LOC_HUD_UNIT_PANEL_LIFESPAN") .. ", " .. tostring(data.Lifespan)
+    return Locale.Lookup("LOC_HUD_UNIT_PANEL_LIFESPAN") .. "[NEWLINE]" .. tostring(data.Lifespan)
 end
 
 local function GetUnitInfoHealth(data)
@@ -522,7 +541,7 @@ local function GetUnitInfoHealth(data)
     return JoinUnitInfo({
         Locale.Lookup("LOC_HUD_UNIT_PANEL_HEALTH_TOOLTIP", data.MaxDamage - data.Damage, data.MaxDamage),
         GetUnitInfoLifespan(data),
-    }, ", ")
+    }, "[NEWLINE]")
 end
 
 local function GetUnitInfoMovement(data)
@@ -556,28 +575,28 @@ local function GetUnitInfoStats(data)
     if data.IsTradeUnit then
         AppendUnitInfo(results, data.TradeRouteName)
         AppendUnitInfo(results,
-            Locale.Lookup("LOC_HUD_UNIT_PANEL_LAND_ROUTE_RANGE") .. ", " .. tostring(data.TradeLandRange or 0))
+            Locale.Lookup("LOC_HUD_UNIT_PANEL_LAND_ROUTE_RANGE") .. "[NEWLINE]" .. tostring(data.TradeLandRange or 0))
         AppendUnitInfo(results,
-            Locale.Lookup("LOC_HUD_UNIT_PANEL_SEA_ROUTE_RANGE") .. ", " .. tostring(data.TradeSeaRange or 0))
+            Locale.Lookup("LOC_HUD_UNIT_PANEL_SEA_ROUTE_RANGE") .. "[NEWLINE]" .. tostring(data.TradeSeaRange or 0))
         return results
     end
 
     AppendUnitInfo(results,
-        (data.Combat or 0) > 0 and Locale.Lookup("LOC_HUD_UNIT_PANEL_STRENGTH") .. ", " .. tostring(data.Combat) or nil)
+        (data.Combat or 0) > 0 and Locale.Lookup("LOC_HUD_UNIT_PANEL_STRENGTH") .. "[NEWLINE]" .. tostring(data.Combat) or nil)
     AppendUnitInfo(results,
         (data.RangedCombat or 0) > 0 and
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_RANGED_STRENGTH") .. ", " .. tostring(data.RangedCombat) or nil)
+        Locale.Lookup("LOC_HUD_UNIT_PANEL_RANGED_STRENGTH") .. "[NEWLINE]" .. tostring(data.RangedCombat) or nil)
     AppendUnitInfo(results,
         (data.BombardCombat or 0) > 0 and
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_BOMBARD_STRENGTH") .. ", " .. tostring(data.BombardCombat) or nil)
+        Locale.Lookup("LOC_HUD_UNIT_PANEL_BOMBARD_STRENGTH") .. "[NEWLINE]" .. tostring(data.BombardCombat) or nil)
     AppendUnitInfo(results,
         (data.ReligiousStrength or 0) > 0 and
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_RELIGIOUS_STRENGTH") .. ", " .. tostring(data.ReligiousStrength) or nil)
+        Locale.Lookup("LOC_HUD_UNIT_PANEL_RELIGIOUS_STRENGTH") .. "[NEWLINE]" .. tostring(data.ReligiousStrength) or nil)
     AppendUnitInfo(results,
         (data.AntiAirCombat or 0) > 0 and
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_ANTI_AIR_STRENGTH") .. ", " .. tostring(data.AntiAirCombat) or nil)
+        Locale.Lookup("LOC_HUD_UNIT_PANEL_ANTI_AIR_STRENGTH") .. "[NEWLINE]" .. tostring(data.AntiAirCombat) or nil)
     AppendUnitInfo(results,
-        (data.Range or 0) > 0 and Locale.Lookup("LOC_CAI_ICON_RANGE_ALIAS") .. ", " .. tostring(data.Range) or nil)
+        (data.Range or 0) > 0 and Locale.Lookup("LOC_CAI_ICON_RANGE_ALIAS") .. "[NEWLINE]" .. tostring(data.Range) or nil)
 
     return results
 end
@@ -603,28 +622,28 @@ local function GetUnitInfoCharges(data, unit)
     local results = {}
     AppendUnitInfo(results,
         (data.BuildCharges or 0) > 0 and
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_BUILDS") .. ", " .. tostring(data.BuildCharges) or nil)
+        Locale.Lookup("LOC_HUD_UNIT_PANEL_BUILDS") .. "[NEWLINE]" .. tostring(data.BuildCharges) or nil)
     AppendUnitInfo(results,
         (data.DisasterCharges or 0) > 0 and
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_CHARGES") .. ", " .. tostring(data.DisasterCharges) or nil)
+        Locale.Lookup("LOC_HUD_UNIT_PANEL_CHARGES") .. "[NEWLINE]" .. tostring(data.DisasterCharges) or nil)
     AppendUnitInfo(results,
         (data.SpreadCharges or 0) > 0 and
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_SPREADS") .. ", " .. tostring(data.SpreadCharges) or nil)
+        Locale.Lookup("LOC_HUD_UNIT_PANEL_SPREADS") .. "[NEWLINE]" .. tostring(data.SpreadCharges) or nil)
     AppendUnitInfo(results,
-        (data.HealCharges or 0) > 0 and Locale.Lookup("LOC_HUD_UNIT_PANEL_HEALS") .. ", " .. tostring(data.HealCharges) or
+        (data.HealCharges or 0) > 0 and Locale.Lookup("LOC_HUD_UNIT_PANEL_HEALS") .. "[NEWLINE]" .. tostring(data.HealCharges) or
         nil)
     AppendUnitInfo(results,
         (data.ActionCharges or 0) > 0 and
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_CHARGES") .. ", " .. tostring(data.ActionCharges) or nil)
+        Locale.Lookup("LOC_HUD_UNIT_PANEL_CHARGES") .. "[NEWLINE]" .. tostring(data.ActionCharges) or nil)
     AppendUnitInfo(results,
         (data.GreatPersonActionCharges or 0) > 0 and
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_GREAT_PERSON_ACTIONS") .. ", " .. tostring(data.GreatPersonActionCharges) or
+        Locale.Lookup("LOC_HUD_UNIT_PANEL_GREAT_PERSON_ACTIONS") .. "[NEWLINE]" .. tostring(data.GreatPersonActionCharges) or
         nil)
 
     local parkCharges = GetParkCharges(unit)
     AppendUnitInfo(results,
         parkCharges ~= nil and parkCharges > 0 and
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_PARK_CHARGES") .. ", " .. tostring(parkCharges) or nil)
+        Locale.Lookup("LOC_HUD_UNIT_PANEL_PARK_CHARGES") .. "[NEWLINE]" .. tostring(parkCharges) or nil)
 
     return results
 end
@@ -801,11 +820,8 @@ local function GetUnitInfoNextWaypoint(unit)
         return nil
     end
 
-    local direction = HexCoordUtils.directionString(unit:GetX(), unit:GetY(), waypointPlot:GetX(), waypointPlot:GetY())
-    if direction == nil or direction == "" then
-        direction = Locale.Lookup("LOC_CAI_HERE")
-    end
-
+    local direction = CAIHexCoordUtils.directionString(
+        unit:GetX(), unit:GetY(), waypointPlot:GetX(), waypointPlot:GetY())
     return Locale.Lookup("LOC_CAI_UNIT_NEXT_WAYPOINT", direction)
 end
 
@@ -898,7 +914,7 @@ local function BuildQueuedPathSegmentedText(entries, plotIds, endIndex)
         if previousEntry ~= nil and previousEntry.IsWaypoint then
             if segmentStart < i - 1 then
                 local segmentNodes = CachedPlotIdsToPathNodes(plotIds, segmentStart, i - 1)
-                local segmentText = HexCoordUtils.stepListFromPath(segmentNodes)
+                local segmentText = CAIHexCoordUtils.stepListFromPath(segmentNodes)
                 if segmentText ~= "" then
                     segments[#segments + 1] = segmentText
                 end
@@ -908,12 +924,12 @@ local function BuildQueuedPathSegmentedText(entries, plotIds, endIndex)
     end
 
     local finalNodes = CachedPlotIdsToPathNodes(plotIds, segmentStart, endIndex)
-    local finalText = HexCoordUtils.stepListFromPath(finalNodes)
+    local finalText = CAIHexCoordUtils.stepListFromPath(finalNodes)
     if finalText ~= "" then
         segments[#segments + 1] = finalText
     end
 
-    local text = HexCoordUtils.joinStepSegments(segments)
+    local text = CAIHexCoordUtils.joinStepSegments(segments)
     if text == "" then
         return nil
     end
@@ -1160,10 +1176,10 @@ local function GetUnitInfoSpecialInfo(data, unit)
     if data.IsRockbandUnit then
         AppendUnitInfo(results,
             (data.RockBandLevel or -1) >= 0 and
-            Locale.Lookup("LOC_HUD_UNIT_PANEL_ROCK_BAND_LEVEL") .. ", " .. tostring(data.RockBandLevel) or nil)
+            Locale.Lookup("LOC_HUD_UNIT_PANEL_ROCK_BAND_LEVEL") .. "[NEWLINE]" .. tostring(data.RockBandLevel) or nil)
         AppendUnitInfo(results,
             (data.AlbumSales or 0) > 0 and
-            Locale.Lookup("LOC_HUD_UNIT_PANEL_ROCK_BAND_ALBUM_SALES") .. ", " .. tostring(data.AlbumSales) or nil)
+            Locale.Lookup("LOC_HUD_UNIT_PANEL_ROCK_BAND_ALBUM_SALES") .. "[NEWLINE]" .. tostring(data.AlbumSales) or nil)
     end
 
     local hostedAircraftData = GetHostedAircraftData(unit)
@@ -1175,7 +1191,8 @@ local function GetUnitInfoSpecialInfo(data, unit)
         local hostedAircraftNames = GetHostedAircraftUnitNames(unit)
         if hostedAircraftNames ~= nil and #hostedAircraftNames > 0 then
             AppendUnitInfo(results,
-                Locale.Lookup("LOC_CAI_UNIT_CARRIER_STATIONED_AIRCRAFT", JoinUnitInfo(hostedAircraftNames, ", ")))
+                Locale.Lookup("LOC_CAI_UNIT_CARRIER_STATIONED_AIRCRAFT",
+                    JoinUnitInfo(hostedAircraftNames, "[NEWLINE]")))
         end
     end
 
@@ -1316,7 +1333,7 @@ local function AppendModifierTexts(results, labelTag, stack)
     local modifierTexts = {}
     AppendStackTexts(modifierTexts, stack)
     if #modifierTexts > 0 then
-        AppendLabeledText(results, labelTag, JoinUnitInfo(modifierTexts, ", "))
+        AppendLabeledText(results, labelTag, JoinUnitInfo(modifierTexts, "[NEWLINE]"))
     end
 end
 
@@ -1344,7 +1361,7 @@ local function GetTargetPreviewDamageText()
 
     if not Controls.TargetCityHealthMeters:IsHidden() then
         if cityDamage > 0 and wallDamage > 0 then
-            return GetPreviewDamageText(cityDamage) .. ", "
+            return GetPreviewDamageText(cityDamage) .. "[NEWLINE]"
                 .. Locale.Lookup(destroysWalls and "LOC_CAI_COMBAT_PREVIEW_WALLS_DESTROYED_SUFFIX"
                     or "LOC_CAI_COMBAT_PREVIEW_WALL_DAMAGE_SUFFIX", GetPreviewDamageText(wallDamage))
         end
@@ -1822,7 +1839,7 @@ local function BuildCombatResultText(results)
         return nil
     end
 
-    return JoinUnitInfo(parts, ", ")
+    return JoinUnitInfo(parts, "[NEWLINE]")
 end
 
 local function GetUnitInfoCombatPreview()
@@ -1878,7 +1895,7 @@ local function GetUnitInfoCombatPreview()
     AppendModifierTexts(results, "LOC_CAI_COMBAT_PREVIEW_INTERCEPTOR_MODIFIERS", Controls.InterceptorModifierStack)
     AppendModifierTexts(results, "LOC_CAI_COMBAT_PREVIEW_ANTI_AIR_MODIFIERS", Controls.AntiAirModifierStack)
 
-    return #results > 0 and JoinUnitInfo(results, ", ") or nil
+    return #results > 0 and JoinUnitInfo(results, "[NEWLINE]") or nil
 end
 
 UnitInfo = {
@@ -1894,7 +1911,7 @@ UnitInfo = {
         return JoinUnitInfo({
             GetUnitInfoName(data, unit),
             GetUnitTypeDetail(data, unit),
-        }, ", ")
+        }, "[NEWLINE]")
     end,
 
     Health = function(data, unit)
@@ -2061,7 +2078,7 @@ local function GetInputActionBindingText(actionId)
         return nil
     end
 
-    return table.concat(bindings, ", ")
+    return table.concat(bindings, "[NEWLINE]")
 end
 
 local function GetUnitActionLabelWithBinding(action)
@@ -2189,13 +2206,6 @@ local function CreateBuildImprovementsSubMenu(data)
     return submenu
 end
 
-CloseSimplePromotionList = function()
-    if SimplePromotionList ~= nil then
-        mgr:RemoveFromStack(UNIT_SIMPLE_PROMOTION_LIST_ID)
-        SimplePromotionList = nil
-    end
-end
-
 local function ShouldOpenSimplePromotionList()
     if mgr == nil or ContextPtr:IsHidden() then
         return false
@@ -2239,7 +2249,7 @@ local function GetSimplePromotionChoiceLabel(row)
     local tier = GetControlText(row.Tier)
     local name = GetControlText(row.Name)
 
-    return JoinUnitInfo({ tier, name }, ", ")
+    return JoinUnitInfo({ tier, name }, "[NEWLINE]")
 end
 
 local function GetSimplePromotionChoiceTooltip(row)
@@ -2263,7 +2273,7 @@ local function CreateSimplePromotionChoice(row)
     })
     item:SetFocusSound("Main_Menu_Mouse_Over")
     item:On("activate", function()
-        CloseSimplePromotionList()
+        RemoveSimplePromotionList()
         capturedRow.Slot:DoLeftClick()
     end)
     return item
@@ -2296,17 +2306,17 @@ end
 
 local function OpenSimplePromotionList()
     if not ShouldOpenSimplePromotionList() then
-        CloseSimplePromotionList()
+        RemoveSimplePromotionList()
         return
     end
 
     local rows = GetVanillaSimplePromotionRows()
     if #rows == 0 then
-        CloseSimplePromotionList()
+        RemoveSimplePromotionList()
         return
     end
 
-    CloseSimplePromotionList()
+    RemoveSimplePromotionList()
 
     local list = mgr:CreateWidget(UNIT_SIMPLE_PROMOTION_LIST_ID, "List", {
         GetLabel = function()
@@ -2317,7 +2327,7 @@ local function OpenSimplePromotionList()
         Key = Keys.VK_ESCAPE,
         Description = "LOC_CAI_KB_CLOSE",
         Action = function()
-            CloseSimplePromotionList()
+            RemoveSimplePromotionList()
             HidePromotionPanel()
             return true
         end,
@@ -2333,14 +2343,6 @@ local function OpenSimplePromotionList()
     if list.Children ~= nil and #list.Children > 0 then
         SimplePromotionList = list
         mgr:Push(SimplePromotionList, PopupPriority.Low)
-    end
-end
-
-CloseUnitNamePanel = function()
-    if UnitNamePanel ~= nil then
-        mgr:RemoveFromStack(UNIT_NAME_PANEL_ID)
-        UnitNamePanel = nil
-        UnitNameEdit = nil
     end
 end
 
@@ -2430,11 +2432,11 @@ end
 
 local function OpenUnitNamePanel()
     if not ShouldOpenUnitNamePanel() then
-        CloseUnitNamePanel()
+        RemoveUnitNamePanel()
         return
     end
 
-    CloseUnitNamePanel()
+    RemoveUnitNamePanel()
 
     local panel = mgr:CreateWidget(UNIT_NAME_PANEL_ID, "Panel", {
         GetLabel = function()
@@ -2516,13 +2518,6 @@ function CloseUnitActionList()
     end
 end
 
-CloseUnitList = function()
-    if UnitList ~= nil then
-        mgr:RemoveFromStack(UNIT_LIST_ID)
-        UnitList = nil
-    end
-end
-
 local function BuildUnitActionList(data)
     local selectedUnit = GetSelectedUnit()
     local unitName = GetUnitInfoName(data, selectedUnit) or Locale.Lookup("LOC_OPTIONS_HOTKEY_CATEGORY_UNIT")
@@ -2597,20 +2592,18 @@ local function OpenUnitActionList()
     end
 end
 
-
 local function CreateUnitListItem(unit)
-    local data = ReadUnitData ~= nil and ReadUnitData(unit) or nil
     local unitName = GetUnitListName(unit)
     local selectedUnit = GetSelectedUnit()
     local isSelected = selectedUnit ~= nil
         and selectedUnit:GetOwner() == unit:GetOwner()
         and selectedUnit:GetID() == unit:GetID()
     local value = isSelected and Locale.Lookup("LOC_CAI_STATE_SELECTED") or ""
-    local tooltip = JoinUnitInfo(GetUnitInfoActivity(data, unit) or {}, ", ")
     local unitID = unit:GetID()
+    local playerID = unit:GetOwner()
 
     local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitListItem"), "TreeItem", {
-        FocusKey = UnitFocusKey(unit:GetOwner(), unitID),
+        FocusKey = UnitFocusKey(playerID, unitID),
         GetLabel = function()
             return unitName
         end,
@@ -2618,7 +2611,39 @@ local function CreateUnitListItem(unit)
             return value
         end,
         GetTooltip = function()
-            return tooltip
+            local resolvedUnit = ResolveUnit(unitID, playerID)
+            if resolvedUnit == nil then
+                LogWarn("CAI UnitPanel unit list could not resolve unit " .. tostring(unitID))
+                return ""
+            end
+
+            local parts = {}
+            if CAICursor then
+                local cursorX, cursorY = CAICursor:GetCoords()
+                if cursorX ~= nil and cursorY ~= nil then
+                    local direction = CAIHexCoordUtils.directionString(
+                        cursorX, cursorY, resolvedUnit:GetX(), resolvedUnit:GetY())
+                    if direction ~= "" then
+                        parts[#parts + 1] = direction
+                    end
+                end
+            end
+
+            local summary = info:RequestUnitInfo(unitID, {
+                "Activity",
+                "NextWaypoint",
+                "Health",
+                "Moves",
+                "Charges",
+                "UpgradeHint",
+                "Promotions",
+                "BuilderRecommendation",
+                "Abilities",
+            }, playerID)
+            for _, summaryPart in ipairs(summary) do
+                parts[#parts + 1] = summaryPart
+            end
+            return table.concat(parts, "[NEWLINE]")
         end,
     })
     item:On("activate", function()
@@ -2627,7 +2652,7 @@ local function CreateUnitListItem(unit)
             return
         end
 
-        CloseUnitList()
+        RemoveUnitList()
         UI.SelectUnit(resolved)
     end)
     BindCivilopediaShortcut(item, function() return unitID end)
@@ -2697,7 +2722,7 @@ local function BuildUnitList()
         Key = Keys.VK_ESCAPE,
         Description = "LOC_CAI_KB_CLOSE",
         Action = function()
-            CloseUnitList()
+            RemoveUnitList()
             return true
         end,
     })
@@ -2742,7 +2767,7 @@ local function OpenUnitList()
     end
 
     if UnitList ~= nil then
-        CloseUnitList()
+        RemoveUnitList()
     end
 
     UnitList = BuildUnitList()
@@ -2806,7 +2831,7 @@ function OnUnitPanelSelectionInfoInputActionStarted(actionId)
         return
     end
 
-    Speak(table.concat(results, ", "))
+    Speak(table.concat(results, "[NEWLINE]"))
 end
 
 function OnUnitPanelSelectionActionInputStarted(actionId)
@@ -2897,8 +2922,8 @@ function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locatio
     if ContextPtr:IsHidden() or not isSelected then
         return
     end
-    CloseSimplePromotionList()
-    CloseUnitNamePanel()
+    RemoveSimplePromotionList()
+    RemoveUnitNamePanel()
 
     local plot = Map.GetPlot(locationX, locationY)
     if plot == nil then
@@ -2916,7 +2941,7 @@ function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locatio
             return
         end
 
-        Speak(table.concat(results, ", "))
+        Speak(table.concat(results, "[NEWLINE]"))
     end
 end
 
@@ -2931,7 +2956,7 @@ ShowPromotionsList = WrapFunc(ShowPromotionsList, function(orig, promotions)
 end)
 
 HidePromotionPanel = WrapFunc(HidePromotionPanel, function(orig)
-    CloseSimplePromotionList()
+    RemoveSimplePromotionList()
     orig()
 end)
 
@@ -2941,7 +2966,7 @@ ShowNameUnitPanel = WrapFunc(ShowNameUnitPanel, function(orig)
 end)
 
 HideNameUnitPanel = WrapFunc(HideNameUnitPanel, function(orig)
-    CloseUnitNamePanel()
+    RemoveUnitNamePanel()
     orig()
 end)
 

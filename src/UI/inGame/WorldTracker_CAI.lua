@@ -394,13 +394,25 @@ end
 
 local function InitializeWorldTrackerActions()
     RegisterWorldTrackerAction(ACTION_OPEN_RESEARCH_CHOOSER, function()
-        if IsTutorialRunning() then return end
-        if not IsTrackerChooserControlEnabled(m_caiResearchTrackerControl) then return end
+        if IsTutorialRunning() then
+            Speak(Locale.Lookup("LOC_CAI_UI_CHOOSER_BLOCKED_BY_TUTORIAL"))
+            return
+        end
+        if not IsTrackerChooserControlEnabled(m_caiResearchTrackerControl) then
+            Speak(Locale.Lookup("LOC_CAI_UI_RESEARCH_CHOOSER_UNAVAILABLE"))
+            return
+        end
         LuaEvents.WorldTracker_OpenChooseResearch()
     end)
     RegisterWorldTrackerAction(ACTION_OPEN_CIVICS_CHOOSER, function()
-        if IsTutorialRunning() then return end
-        if not IsTrackerChooserControlEnabled(m_caiCivicsTrackerControl) then return end
+        if IsTutorialRunning() then
+            Speak(Locale.Lookup("LOC_CAI_UI_CHOOSER_BLOCKED_BY_TUTORIAL"))
+            return
+        end
+        if not IsTrackerChooserControlEnabled(m_caiCivicsTrackerControl) then
+            Speak(Locale.Lookup("LOC_CAI_UI_CIVICS_CHOOSER_UNAVAILABLE"))
+            return
+        end
         LuaEvents.WorldTracker_OpenChooseCivic()
     end)
     RegisterWorldTrackerAction(ACTION_SPEAK_SCIENCE, SpeakScienceAndResearch)

@@ -643,20 +643,40 @@ local function OnCAITopPanelInputAction(actionId)
     elseif actionId == ACTION_OPEN_DIPLOMACY then
         if GameCapabilities.HasCapability("CAPABILITY_DIPLOMACY") then
             LuaEvents.TopPanel_OpenDiplomacyActionView()
+        else
+            Speak(Locale.Lookup("LOC_CAI_UI_DIPLOMACY_UNAVAILABLE"))
         end
     elseif actionId == ACTION_OPEN_REPORTS then
-        LuaEvents.TopPanel_OpenReportsScreen()
+        if GameCapabilities.HasCapability("CAPABILITY_REPORTS_LIST") then
+            LuaEvents.TopPanel_OpenReportsScreen()
+        else
+            Speak(Locale.Lookup("LOC_CAI_UI_REPORTS_UNAVAILABLE"))
+        end
     elseif actionId == ACTION_OPEN_REPORTS_RESOURCES then
-        LuaEvents.ReportsList_OpenResources()
+        if GameCapabilities.HasCapability("CAPABILITY_REPORTS_LIST") then
+            LuaEvents.ReportsList_OpenResources()
+        else
+            Speak(Locale.Lookup("LOC_CAI_UI_REPORTS_UNAVAILABLE"))
+        end
     elseif actionId == ACTION_OPEN_REPORTS_CITY_STATUS then
-        LuaEvents.ReportsList_OpenCityStatus()
+        if GameCapabilities.HasCapability("CAPABILITY_REPORTS_LIST") then
+            LuaEvents.ReportsList_OpenCityStatus()
+        else
+            Speak(Locale.Lookup("LOC_CAI_UI_REPORTS_UNAVAILABLE"))
+        end
     elseif actionId == ACTION_OPEN_REPORTS_GOSSIP then
-        if GameCapabilities.HasCapability("CAPABILITY_GOSSIP_REPORT") then
+        if not GameCapabilities.HasCapability("CAPABILITY_REPORTS_LIST") then
+            Speak(Locale.Lookup("LOC_CAI_UI_REPORTS_UNAVAILABLE"))
+        elseif GameCapabilities.HasCapability("CAPABILITY_GOSSIP_REPORT") then
             LuaEvents.ReportsList_OpenGossip()
+        else
+            Speak(Locale.Lookup("LOC_CAI_UI_GOSSIP_UNAVAILABLE"))
         end
     elseif actionId == ACTION_OPEN_GLOBAL_RESOURCES then
         if GameCapabilities.HasCapability("CAPABILITY_DIPLOMACY_DEALS") then
             LuaEvents.GlobalReportsList_OpenResources()
+        else
+            Speak(Locale.Lookup("LOC_CAI_UI_GLOBAL_RESOURCES_UNAVAILABLE"))
         end
     end
 end

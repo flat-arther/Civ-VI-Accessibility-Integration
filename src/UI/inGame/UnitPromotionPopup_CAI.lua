@@ -442,7 +442,7 @@ local function BuildPanel()
 end
 
 local function RemovePanel()
-    if mgr then mgr:RemoveFromStack(PANEL_ID) end
+    if m_panel and mgr then mgr:RemoveFromStack(PANEL_ID) end
     m_panel = nil
     m_tableView = nil
     m_treeView = nil

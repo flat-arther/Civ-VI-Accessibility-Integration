@@ -8,6 +8,47 @@ else
     include("LaunchBar")
 end
 
+local function ControlIsHidden(control)
+    return control == nil or control:IsHidden()
+end
+
+local function ControlIsDisabled(control)
+    return control ~= nil and control:IsDisabled()
+end
+
+local function SpeakControlFailure(control, fallbackTag)
+    if control and control.GetToolTipString then
+        local tooltip = control:GetToolTipString()
+        if tooltip and tooltip ~= "" then
+            Speak(tooltip)
+            return
+        end
+    end
+    Speak(Locale.Lookup(fallbackTag))
+end
+
+local function GetFeatureUnavailableTag(capability, fallbackTag)
+    if IsLocalPlayerObserving() then
+        return "LOC_CAI_UI_UNAVAILABLE_WHILE_OBSERVING"
+    end
+    if not GameCapabilities.HasCapability(capability) then
+        return "LOC_CAI_UI_UNAVAILABLE_IN_CURRENT_GAME"
+    end
+    return fallbackTag
+end
+
+local function TryOpen(orig, vanillaActionId, control, unavailableTag)
+    if ControlIsHidden(control) then
+        Speak(Locale.Lookup(unavailableTag))
+        return
+    end
+    if ControlIsDisabled(control) then
+        SpeakControlFailure(control, unavailableTag)
+        return
+    end
+    orig(vanillaActionId)
+end
+
 local m_caiOpenTechTreeId = Input.GetActionId("UI_CAIOpenTechTree")
 local m_caiOpenCivicsTreeId = Input.GetActionId("UI_CAIOpenCivicsTree")
 local m_caiOpenGovernmentId = Input.GetActionId("UI_CAIOpenGovernment")
@@ -22,61 +63,86 @@ local m_vanillaToggleReligion = Input.GetActionId("ToggleReligion")
 local m_vanillaToggleGreatPeople = Input.GetActionId("ToggleGreatPeople")
 local m_vanillaToggleGreatWorks = Input.GetActionId("ToggleGreatWorks")
 
-local m_caiOpenGovernorsId
-local m_caiOpenHistoricMomentsId
+local m_caiOpenGovernorsId = Input.GetActionId("UI_CAIOpenGovernors")
+local m_caiOpenHistoricMomentsId = Input.GetActionId("UI_CAIOpenHistoricMoments")
 local m_vanillaToggleGovernors
 local m_vanillaToggleTimeline
 
 if IsExpansion1Active() or IsExpansion2Active() then
-    m_caiOpenGovernorsId = Input.GetActionId("UI_CAIOpenGovernors")
-    m_caiOpenHistoricMomentsId = Input.GetActionId("UI_CAIOpenHistoricMoments")
     m_vanillaToggleGovernors = Input.GetActionId("ToggleGovernors")
     m_vanillaToggleTimeline = Input.GetActionId("ToggleTimeline")
 end
 
-local m_caiOpenWorldClimateId
+local m_caiOpenWorldClimateId = Input.GetActionId("UI_CAIOpenWorldClimate")
 local m_vanillaToggleWorldClimate
 
 if IsExpansion2Active() then
-    m_caiOpenWorldClimateId = Input.GetActionId("UI_CAIOpenWorldClimate")
     m_vanillaToggleWorldClimate = Input.GetActionId("ToggleWorldClimate")
 end
 
 OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     if m_caiOpenTechTreeId and actionId == m_caiOpenTechTreeId then
-        orig(m_vanillaToggleTechTree)
+        TryOpen(orig, m_vanillaToggleTechTree, Controls.ScienceButton,
+            "LOC_CAI_UI_TECH_TREE_UNAVAILABLE")
         return
     end
     if m_caiOpenCivicsTreeId and actionId == m_caiOpenCivicsTreeId then
-        orig(m_vanillaToggleCivicsTree)
+        TryOpen(orig, m_vanillaToggleCivicsTree, Controls.CultureButton,
+            "LOC_CAI_UI_CIVICS_TREE_UNAVAILABLE")
         return
     end
     if m_caiOpenGovernmentId and actionId == m_caiOpenGovernmentId then
-        orig(m_vanillaToggleGovernment)
+        TryOpen(orig, m_vanillaToggleGovernment, Controls.GovernmentButton,
+            GetFeatureUnavailableTag("CAPABILITY_GOVERNMENTS_VIEW", "LOC_CAI_UI_GOVERNMENT_LOCKED"))
         return
     end
     if m_caiOpenReligionId and actionId == m_caiOpenReligionId then
-        orig(m_vanillaToggleReligion)
+        TryOpen(orig, m_vanillaToggleReligion, Controls.ReligionButton,
+            GetFeatureUnavailableTag("CAPABILITY_RELIGION_VIEW", "LOC_CAI_UI_RELIGION_LOCKED"))
         return
     end
     if m_caiOpenGreatPeopleId and actionId == m_caiOpenGreatPeopleId then
-        orig(m_vanillaToggleGreatPeople)
+        if UI.QueryGlobalParameterInt("DISABLE_GREAT_PEOPLE_HOTKEY") == 1 then
+            Speak(Locale.Lookup("LOC_CAI_UI_GREAT_PEOPLE_HOTKEY_DISABLED"))
+        else
+            TryOpen(orig, m_vanillaToggleGreatPeople, Controls.GreatPeopleButton,
+                GetFeatureUnavailableTag("CAPABILITY_GREAT_PEOPLE_VIEW", "LOC_CAI_UI_GREAT_PEOPLE_UNAVAILABLE"))
+        end
         return
     end
     if m_caiOpenGreatWorksId and actionId == m_caiOpenGreatWorksId then
-        orig(m_vanillaToggleGreatWorks)
+        if UI.QueryGlobalParameterInt("DISABLE_GREAT_WORKS_HOTKEY") == 1 then
+            Speak(Locale.Lookup("LOC_CAI_UI_GREAT_WORKS_HOTKEY_DISABLED"))
+        else
+            TryOpen(orig, m_vanillaToggleGreatWorks, Controls.GreatWorksButton,
+                GetFeatureUnavailableTag("CAPABILITY_GREAT_WORKS_VIEW", "LOC_CAI_UI_NO_GREAT_WORKS"))
+        end
         return
     end
     if m_caiOpenGovernorsId and actionId == m_caiOpenGovernorsId then
-        orig(m_vanillaToggleGovernors)
+        if m_vanillaToggleGovernors then
+            orig(m_vanillaToggleGovernors)
+        else
+            Speak(Locale.Lookup("LOC_CAI_UI_REQUIRES_RISE_AND_FALL"))
+        end
         return
     end
     if m_caiOpenHistoricMomentsId and actionId == m_caiOpenHistoricMomentsId then
-        orig(m_vanillaToggleTimeline)
+        if m_vanillaToggleTimeline then
+            orig(m_vanillaToggleTimeline)
+        else
+            Speak(Locale.Lookup("LOC_CAI_UI_REQUIRES_RISE_AND_FALL"))
+        end
         return
     end
     if m_caiOpenWorldClimateId and actionId == m_caiOpenWorldClimateId then
-        orig(m_vanillaToggleWorldClimate)
+        if not IsExpansion2Active() then
+            Speak(Locale.Lookup("LOC_CAI_UI_REQUIRES_GATHERING_STORM"))
+        elseif not GameCapabilities.HasCapability("CAPABILITY_WORLD_CLIMATE_VIEW") then
+            Speak(Locale.Lookup("LOC_CAI_UI_CLIMATE_UNAVAILABLE"))
+        else
+            orig(m_vanillaToggleWorldClimate)
+        end
         return
     end
 end)

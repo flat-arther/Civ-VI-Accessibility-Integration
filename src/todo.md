@@ -44,7 +44,7 @@
 [x] turn status in chat panel
 [x] hamada: the government screen has repeating Empty slot 1, Empty slot 1
 [x] unit actions should not repeat name in tooltip
-[ ] should not stop player from moving if no combat stats are encountered. Game considers entering a city state teratory as a combat even though there is no enemy on the dest plot
+[x] should not stop player from moving if no combat stats are encountered. Game considers entering a city state teratory as a combat even though there is no enemy on the dest plot
 [x] Dedications popup should not duplicate dedication name in tooltip
 [x] governer panel is missing the biography. 
 [x] Rework the diplomacy screen
@@ -55,3 +55,17 @@
 [x] change dropdowns that have simple on off options to checkboxes
 [ ] add custom locale for hotkey strings that are symbols
 [x] Make quick move keys not queue movement.
+
+[x] Change label for friends list
+[ ] online status repeats in tooltip for friends list, fix it
+[x] Fix mp additional content missing dialog.
+[x] Popup dialog enter to commit should be disabled for edit boxes so that input can bubble to the dialog's default action
+[x] Fix dropdown focus restoration
+[x] Play a sound when changing volume for cursor audio
+[x] Have shift announce turn blocker info
+
+[x] offset the team numbering in team slot
+[ ] Add announcements for capturing units
+[x] Scanner sort should be based on cashed plot id
+[x] change scanner sound and add volume setting
+[x] Fix wc unknown participant string

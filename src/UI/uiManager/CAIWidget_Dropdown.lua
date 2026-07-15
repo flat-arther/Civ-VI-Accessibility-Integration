@@ -38,7 +38,10 @@ local function RebuildList(self)
     self._list:ClearChildren()
     local mgr = self.Manager
     for i, opt in ipairs(self._options) do
-        local props = { Label = function() return opt.label end }
+        local props = {
+            Label = function() return opt.label end,
+            FocusKey = (self.FocusKey or self.Id) .. ":option:" .. tostring(i),
+        }
         if opt.tooltip then
             props.Tooltip = function()
                 return (type(opt.tooltip) == "function" and (opt.tooltip() or "")) or
@@ -160,6 +163,12 @@ end
 ---@return boolean
 function DropdownWidget:IsOpen() return self._isOpen end
 
+---Open while the manager is preparing focus for a descendant without emitting
+---an opened event or moving focus to the committed selection.
+function DropdownWidget:OpenForDescendantFocus()
+    if #self._options > 0 then self._isOpen = true end
+end
+
 --#region Value surface (mirrors ValueWidget without inheriting from it)
 
 ---@param fn fun(w:DropdownWidget, value:any)
@@ -203,9 +212,16 @@ function DropdownWidget:Commit(index, silent)
 
     local mgr = self.Manager
     local focusKey = self.FocusKey
+    local previousRestoreOverride = mgr and mgr.FocusRestoreKeyOverride or nil
 
     self._selectedIndex = index
+    -- Commit must update live state before closing so the closed control reads
+    -- the new value. If the setter synchronously rebuilds this dropdown, make
+    -- capture/restore target its stable outer key rather than the focused
+    -- option; passive refreshes still restore to option keys normally.
+    if mgr and focusKey then mgr.FocusRestoreKeyOverride = focusKey end
     self:SetValue(self._options[index].value, silent)
+    if mgr then mgr.FocusRestoreKeyOverride = previousRestoreOverride end
 
     -- Some screens like hostGame can rebuild/destroy this dropdown during SetValue().
     -- their RestoreFocus is silent, so speak once here, only for this user action.

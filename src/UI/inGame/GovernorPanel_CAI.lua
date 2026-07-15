@@ -374,6 +374,14 @@ local function ShowPromoteDialog(governorIndex, promotionIndex)
     end)
 
     m_ui.promoConfirmDialog = mgr.WidgetHelpers.MakeGeneralDialog(titleFn, { confirmBtn, cancelBtn }, { descWidget }, 1)
+    m_ui.promoConfirmDialog:AddInputBinding({
+        Key = Keys.VK_ESCAPE,
+        Description = "LOC_CAI_KB_CLOSE",
+        Action = function()
+            RemovePromoDialog()
+            return true
+        end
+    })
     if m_ui.promoConfirmDialog then
         mgr:Push(m_ui.promoConfirmDialog)
     end

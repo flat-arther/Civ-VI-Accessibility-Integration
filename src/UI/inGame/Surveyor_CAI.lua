@@ -78,6 +78,10 @@ local function ResolveText(labelKey)
     return value
 end
 
+local function IsDatabaseTrue(value)
+    return value == true or value == 1 or value == "true" or value == "1"
+end
+
 local function AppendUnexplored(body, unexplored)
     if unexplored <= 0 then
         return body
@@ -133,9 +137,6 @@ local function FormatInstances(instances, centerX, centerY, labelDirectionSepara
     local parts = {}
     for _, instance in ipairs(instances) do
         local directionText = HexCoordUtils.directionString(centerX, centerY, instance.X, instance.Y)
-        if directionText == nil or directionText == "" then
-            directionText = Locale.Lookup("LOC_CAI_HERE")
-        end
         parts[#parts + 1] = instance.Label .. labelDirectionSeparator .. directionText
     end
 
@@ -243,6 +244,22 @@ local function IsEnemyUnit(unit)
     local localPlayer = Players[Game.GetLocalPlayer()]
     local diplomacy = localPlayer and localPlayer:GetDiplomacy()
     return diplomacy ~= nil and diplomacy:IsAtWarWith(ownerID)
+end
+
+local function IsNeutralUnit(unit)
+    if IsOwnOrTeamUnit(unit) then
+        return false
+    end
+
+    local ownerID = unit:GetOwner()
+    local owner = Players[ownerID]
+    if owner == nil or owner:IsBarbarian() or not IsKnownPlayer(ownerID) then
+        return false
+    end
+
+    local localPlayer = Players[Game.GetLocalPlayer()]
+    local diplomacy = localPlayer and localPlayer:GetDiplomacy()
+    return diplomacy ~= nil and not diplomacy:IsAtWarWith(ownerID)
 end
 
 local function IsUnitVisible(unit)
@@ -381,6 +398,91 @@ function Surveyor.ReadTerrain()
     return AppendUnexplored(body, survey.Range.unexplored)
 end
 
+function Surveyor.ReadImprovements()
+    local survey = GetSurveyRange()
+    if survey == nil then
+        return Locale.Lookup("LOC_CAI_SURVEYOR_CURSOR_UNAVAILABLE")
+    end
+
+    local buckets = {}
+    for _, plot in ipairs(survey.Range.plots) do
+        local improvementType = plot:GetImprovementType()
+        local improvementInfo = improvementType ~= nil and improvementType >= 0
+            and GameInfo.Improvements[improvementType] or nil
+        if improvementInfo ~= nil
+            and not IsDatabaseTrue(improvementInfo.BarbarianCamp)
+            and not IsDatabaseTrue(improvementInfo.Goody) then
+            local label = Locale.Lookup(improvementInfo.Name)
+            buckets[label] = (buckets[label] or 0) + 1
+        end
+    end
+
+    local entries = SortBucketEntries(buckets)
+    local body = #entries > 0
+        and FormatBucketEntries(entries)
+        or Locale.Lookup("LOC_CAI_SURVEYOR_EMPTY_IMPROVEMENTS")
+    return AppendUnexplored(body, survey.Range.unexplored)
+end
+
+function Surveyor.ReadDistricts()
+    local survey = GetSurveyRange()
+    if survey == nil then
+        return Locale.Lookup("LOC_CAI_SURVEYOR_CURSOR_UNAVAILABLE")
+    end
+
+    local buckets = {}
+    for _, plot in ipairs(survey.Range.plots) do
+        local districtType = plot:GetDistrictType()
+        local districtInfo = districtType ~= nil and districtType >= 0
+            and GameInfo.Districts[districtType] or nil
+        if districtInfo ~= nil
+            and not IsDatabaseTrue(districtInfo.InternalOnly)
+            and districtInfo.DistrictType ~= "DISTRICT_CITY_CENTER" then
+            local label = Locale.Lookup(districtInfo.Name)
+            buckets[label] = (buckets[label] or 0) + 1
+        end
+    end
+
+    local entries = SortBucketEntries(buckets)
+    local body = #entries > 0
+        and FormatBucketEntries(entries)
+        or Locale.Lookup("LOC_CAI_SURVEYOR_EMPTY_DISTRICTS")
+    return AppendUnexplored(body, survey.Range.unexplored)
+end
+
+function Surveyor.ReadOwnership()
+    local survey = GetSurveyRange()
+    if survey == nil then
+        return Locale.Lookup("LOC_CAI_SURVEYOR_CURSOR_UNAVAILABLE")
+    end
+
+    local localPlayerID = Game.GetLocalPlayer()
+    local buckets = {}
+    for _, plot in ipairs(survey.Range.plots) do
+        local ownerID = plot:GetOwner()
+        local label
+        if localPlayerID ~= nil and localPlayerID >= 0 and ownerID == localPlayerID then
+            label = Locale.Lookup("LOC_CAI_SURVEYOR_OWNERSHIP_YOURS")
+        elseif ownerID == nil or ownerID < 0 then
+            label = Locale.Lookup("LOC_MINIMAP_UNCLAIMED_TOOLTIP")
+        elseif IsKnownPlayer(ownerID) then
+            label = GetPlayerOwnershipPrefix(ownerID)
+        else
+            label = Locale.Lookup("LOC_CAI_SURVEYOR_OWNERSHIP_UNKNOWN")
+        end
+
+        if label ~= nil and label ~= "" then
+            buckets[label] = (buckets[label] or 0) + 1
+        end
+    end
+
+    local entries = SortBucketEntries(buckets)
+    local body = #entries > 0
+        and FormatBucketEntries(entries)
+        or Locale.Lookup("LOC_CAI_SURVEYOR_EMPTY_OWNERSHIP")
+    return AppendUnexplored(body, survey.Range.unexplored)
+end
+
 function Surveyor.ReadOwnUnits()
     local survey = GetSurveyRange()
     if survey == nil then
@@ -428,6 +530,32 @@ function Surveyor.ReadEnemyUnits()
     local body = #instances > 0
         and FormatInstances(instances, survey.X, survey.Y, ", ", ". ")
         or Locale.Lookup("LOC_CAI_SURVEYOR_EMPTY_ENEMY_UNITS")
+    return AppendUnexplored(body, survey.Range.unexplored)
+end
+
+function Surveyor.ReadNeutralUnits()
+    local survey = GetSurveyRange()
+    if survey == nil then
+        return Locale.Lookup("LOC_CAI_SURVEYOR_CURSOR_UNAVAILABLE")
+    end
+
+    local instances = {}
+    for _, plot in ipairs(survey.Range.plots) do
+        if IsVisiblePlot(plot) then
+            for _, unit in ipairs(GetUnitsOnPlot(plot)) do
+                if IsUnitVisible(unit) and IsNeutralUnit(unit) then
+                    local label = FormatOwnedUnitDisplayName(unit)
+                    if label ~= nil and label ~= "" then
+                        AddInstance(instances, survey.X, survey.Y, plot, label)
+                    end
+                end
+            end
+        end
+    end
+
+    local body = #instances > 0
+        and FormatInstances(instances, survey.X, survey.Y, ", ", ". ")
+        or Locale.Lookup("LOC_CAI_SURVEYOR_EMPTY_NEUTRAL_UNITS")
     return AppendUnexplored(body, survey.Range.unexplored)
 end
 

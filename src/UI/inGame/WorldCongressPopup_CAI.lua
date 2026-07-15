@@ -1,35 +1,38 @@
 include("caiUtils")
 include("WorldCongressPopup")
 
-local mgr               = ExposedMembers.CAI_UIManager
+local mgr                = ExposedMembers.CAI_UIManager
 
 -- =========================================================================
 -- Constants
 -- =========================================================================
-local PANEL_ID          = "CAIWorldCongress"
-local LEADERS_ID        = "CAIWorldCongress_Leaders"
-local BODY_ID           = "CAIWorldCongress_Body"
-local HOVER_SOUND       = "Main_Menu_Mouse_Over"
+local PANEL_ID           = "CAIWorldCongress"
+local LEADERS_ID         = "CAIWorldCongress_Leaders"
+local BODY_ID            = "CAIWorldCongress_Body"
+local HOVER_SOUND        = "Main_Menu_Mouse_Over"
 
-local CAI_TAB_RESULTS   = DB.MakeHash("REVIEW_TAB_RESULTS")
-local CAI_TAB_EFFECTS   = DB.MakeHash("REVIEW_TAB_CURRENT_EFFECTS")
-local CAI_TAB_PROPOSALS = DB.MakeHash("REVIEW_TAB_AVAILABLE_PROPOSALS")
+local CAI_TAB_RESULTS    = DB.MakeHash("REVIEW_TAB_RESULTS")
+local CAI_TAB_EFFECTS    = DB.MakeHash("REVIEW_TAB_CURRENT_EFFECTS")
+local CAI_TAB_PROPOSALS  = DB.MakeHash("REVIEW_TAB_AVAILABLE_PROPOSALS")
 
 -- =========================================================================
 -- State
 -- =========================================================================
-local m_panel           = nil ---@type UIWidget|nil
-local m_leadersList     = nil ---@type UIWidget|nil
-local m_body            = nil ---@type UIWidget|nil
-local m_caiStage        = 0
-local m_caiPhase        = 0
-local m_phase1Capture   = nil
-local m_capturedChoices = {}
-local m_confirmDialog   = nil ---@type UIWidget|nil
-local m_isBuilding      = false
-local m_activeSection   = 0 -- 1=results, 2=effects, 3=proposals
-local m_resultsItem     = nil ---@type UIWidget|nil
-local m_effectsItem     = nil ---@type UIWidget|nil
+local m_panel            = nil ---@type UIWidget|nil
+local m_leadersList      = nil ---@type UIWidget|nil
+local m_body             = nil ---@type UIWidget|nil
+local m_caiStage         = 0
+local m_caiPhase         = 0
+local m_phase1Capture    = nil
+local m_capturedChoices  = {}
+local m_confirmDialog    = nil ---@type UIWidget|nil
+local m_isBuilding       = false
+local m_activeSection    = 0 -- 1=results, 2=effects, 3=proposals
+local m_resultsItem      = nil ---@type UIWidget|nil
+local m_effectsItem      = nil ---@type UIWidget|nil
+local m_pendingTargets   = {}
+local m_targetCommits    = {}
+local m_nextRequirements = {}
 
 -- =========================================================================
 -- Utility: find a named child control by ID (shallow)
@@ -58,6 +61,16 @@ end
 local function IsNewVisible(instanceRoot)
     local iconNew = FindChildDeep(instanceRoot, "IconNew")
     return iconNew and not iconNew:IsHidden()
+end
+
+local function BindSelectBoxCheckbox(widget, selectBox)
+    widget:SetChecked(selectBox:IsSelected(), true)
+    widget:SetDisabledPredicate(function() return selectBox:IsDisabled() end)
+    widget:SetValueSetter(function(_, value)
+        if selectBox:IsSelected() ~= value then
+            selectBox:DoLeftClick()
+        end
+    end)
 end
 
 -- =========================================================================
@@ -107,7 +120,8 @@ local function RemovePanel()
     m_panel = nil
     m_leadersList = nil
     m_body = nil
-    m_capturedChoices = {}
+    m_targetCommits = {}
+    m_nextRequirements = {}
     m_activeSection = 0
     m_resultsItem = nil
     m_effectsItem = nil
@@ -161,7 +175,7 @@ local function BuildLeaders()
                 if hasMet then
                     return Locale.Lookup(pConfig:GetLeaderName())
                 end
-                return Locale.Lookup("LOC_DIPLO_UNKNOWN_LEADER")
+                return Locale.Lookup("LOC_DIPLOPANEL_UNMET_PLAYER")
             end,
             Tooltip = function()
                 if not hasMet then return "" end
@@ -215,13 +229,72 @@ local function MakeBtn(id, vanillaCtrl, activateFn)
 end
 
 -- =========================================================================
+-- Build the live list of requirements that still block the voting page.
+-- =========================================================================
+local function GetNextRequirementLines()
+    local lines = {}
+    for _, requirement in ipairs(m_nextRequirements) do
+        local blockers = requirement.GetBlockers()
+        if #blockers > 0 then
+            table.insert(lines, Locale.Lookup(
+                "LOC_CAI_WC_NEXT_BLOCKER_ITEM",
+                requirement.GetTitle(),
+                table.concat(blockers, Locale.Lookup("LOC_CAI_WC_NEXT_BLOCKER_SEPARATOR"))))
+        end
+    end
+    return lines
+end
+
+local function IsCAINextDisabled()
+    if m_caiStage < 3 and m_caiPhase == 1 then
+        return GameConfiguration.IsPaused() or #GetNextRequirementLines() > 0
+    end
+    return Controls.NextButton:IsDisabled()
+end
+
+local function GetCAINextTooltip()
+    if m_caiStage < 3 and m_caiPhase == 1 then
+        if GameConfiguration.IsPaused() then
+            return Locale.Lookup("LOC_WORLD_CONGRESS_TT_GAME_PAUSED")
+        end
+
+        local lines = GetNextRequirementLines()
+        if #lines > 0 then
+            table.insert(lines, 1, Locale.Lookup("LOC_WORLD_CONGRESS_TT_SELECT_ALL"))
+            return table.concat(lines, "[NEWLINE]")
+        end
+        return ""
+    end
+    return Controls.NextButton:GetToolTipString() or ""
+end
+
+local function ActivateNext()
+    if m_caiStage < 3 and m_caiPhase == 1 then
+        if IsCAINextDisabled() then return end
+        for _, commit in ipairs(m_targetCommits) do
+            commit()
+        end
+        UpdateNavButtons()
+    end
+    Controls.NextButton:DoLeftClick()
+end
+
+-- =========================================================================
 -- Build the bottom action buttons as direct panel children
 -- =========================================================================
 local function BuildButtons()
     if not m_panel then return end
 
     m_panel:AddChild(MakeBtn("CAIWC_Prev", Controls.PrevButton, function() Controls.PrevButton:DoLeftClick() end))
-    m_panel:AddChild(MakeBtn("CAIWC_Next", Controls.NextButton, function() Controls.NextButton:DoLeftClick() end))
+    local nextButton = mgr:CreateWidget("CAIWC_Next", "Button", {
+        Label = function() return Controls.NextButton:GetText() or "" end,
+        Tooltip = GetCAINextTooltip,
+    })
+    nextButton:SetHiddenPredicate(function() return Controls.NextButton:IsHidden() end)
+    nextButton:SetDisabledPredicate(IsCAINextDisabled)
+    nextButton:On("activate", ActivateNext)
+    nextButton:SetFocusSound(HOVER_SOUND)
+    m_panel:AddChild(nextButton)
     if m_caiStage ~= 4 then
         m_panel:AddChild(MakeBtn("CAIWC_Accept", Controls.AcceptButton,
             function() Controls.AcceptButton:DoLeftClick() end))
@@ -241,7 +314,7 @@ end
 -- =========================================================================
 -- Directly update the vanilla target selection without opening the pulldown
 -- =========================================================================
-local function ApplyTargetSelection(instanceRoot, outcome, resHash, gameIndex, displayText)
+local function CommitTargetSelection(instanceRoot, outcome, resHash, gameIndex, displayText)
     if outcome == 0 or not gameIndex or gameIndex <= 0 then return end
 
     local kChoice = m_capturedChoices[resHash]
@@ -341,6 +414,9 @@ local function BuildVotingBody()
     ClearBody()
     if not m_panel then return end
 
+    m_targetCommits = {}
+    m_nextRequirements = {}
+
     local localPlayerID = Game.GetLocalPlayer()
     if localPlayerID < 0 then return end
 
@@ -427,7 +503,7 @@ local function BuildVotingBody()
                         return table.concat(parts, "[NEWLINE]")
                     end,
                 })
-                resItem.FocusKey = "res:" .. instanceRoot:GetID()
+                resItem.FocusKey = "res:" .. tostring(resHash)
                 resItem:SetFocusSound(HOVER_SOUND)
 
                 local selectedOutcome = 0
@@ -457,6 +533,7 @@ local function BuildVotingBody()
                     {
                         label = Locale.Lookup("LOC_WORLD_CONGRESS_SELECT_AN_OUTCOME"),
                         value = 0,
+                        tooltip = Locale.Lookup("LOC_WORLD_CONGRESS_TT_NO_VOTING_DOWN"),
                     },
                     {
                         label = Locale.Lookup("LOC_CAI_WC_OPTION_A") .. ": " .. effectA,
@@ -477,9 +554,18 @@ local function BuildVotingBody()
                     outcomeDropdown:SetSelectedIndex(1, true)
                 end
                 outcomeDropdown:SetFocusSound(HOVER_SOUND)
-                outcomeDropdown:On("value_changed", function(_, value)
+                outcomeDropdown:SetValueSetter(function(_, value)
                     selectedOutcome = value
-                    if mgr then mgr:Refocus() end
+                    if value == 0 then return end
+
+                    local voteLabel = value == 1 and vote1Label or vote2Label
+                    local votes = tonumber((voteLabel and voteLabel:GetText() or "0"):match("%d+")) or 0
+                    if votes == 0 then
+                        local upButton = value == 1 and vote1UpBtn or vote2UpBtn
+                        if upButton and not upButton:IsDisabled() then
+                            upButton:DoLeftClick()
+                        end
+                    end
                 end)
                 resItem:AddChild(outcomeDropdown)
 
@@ -607,7 +693,8 @@ local function BuildVotingBody()
                 targetDropdown:SetOptions(targetOptions)
 
                 local initialTargetIdx = 1
-                if selectedOutcome > 0 then
+                local pendingTarget = m_pendingTargets[resHash]
+                if not pendingTarget and selectedOutcome > 0 then
                     local choiceId = selectedOutcome == 1 and "Choice1" or "Choice2"
                     local choiceRoot = FindChildDeep(instanceRoot, choiceId)
                     if choiceRoot then
@@ -619,46 +706,49 @@ local function BuildVotingBody()
                             for i, opt in ipairs(targetOptions) do
                                 if opt.label == btnText then
                                     initialTargetIdx = i
+                                    pendingTarget = { value = opt.value }
                                     break
                                 end
                             end
                         end
                     end
                 end
+                pendingTarget = pendingTarget or { value = 0 }
+                m_pendingTargets[resHash] = pendingTarget
+                for i, opt in ipairs(targetOptions) do
+                    if opt.value == pendingTarget.value then
+                        initialTargetIdx = i
+                        break
+                    end
+                end
                 targetDropdown:SetSelectedIndex(initialTargetIdx, true)
 
-                local function HasResVotes()
-                    local aText = vote1Label and vote1Label:GetText() or ""
-                    local bText = vote2Label and vote2Label:GetText() or ""
-                    local a = tonumber(aText:match("%d+")) or 0
-                    local b = tonumber(bText:match("%d+")) or 0
-                    return (a + b) > 0
-                end
-                targetDropdown:SetTooltip(function()
-                    if not HasResVotes() then
-                        return Locale.Lookup("LOC_CAI_WC_TARGET_VOTE_FIRST")
-                    end
-                    return ""
-                end)
-                targetDropdown:SetHiddenPredicate(function()
-                    return selectedOutcome == 0 or #targetOptions <= 1
-                end)
-                targetDropdown:SetDisabledPredicate(function()
-                    return not HasResVotes()
-                end)
-                targetDropdown:On("value_changed", function(_, value)
-                    if value > 0 then
-                        local idx = targetDropdown:GetSelectedIndex()
-                        local opt = targetOptions[idx]
-                        if opt then
-                            ApplyTargetSelection(
-                                instanceRoot, selectedOutcome, resHash,
-                                opt.value, opt.label)
-                        end
-                    end
-                    if mgr then mgr:Refocus() end
+                targetDropdown:SetValueSetter(function(_, value)
+                    pendingTarget.value = value
                 end)
                 resItem:AddChild(targetDropdown)
+
+                table.insert(m_targetCommits, function()
+                    local idx = targetDropdown:GetSelectedIndex()
+                    local opt = targetOptions[idx]
+                    CommitTargetSelection(
+                        instanceRoot, selectedOutcome, resHash,
+                        pendingTarget.value, opt and opt.label or "")
+                end)
+
+                table.insert(m_nextRequirements, {
+                    GetTitle = function() return titleCtrl:GetText() or "" end,
+                    GetBlockers = function()
+                        local blockers = {}
+                        if selectedOutcome == 0 then
+                            table.insert(blockers, Locale.Lookup("LOC_CAI_WC_MUST_CHOOSE_OUTCOME"))
+                        end
+                        if pendingTarget.value == 0 then
+                            table.insert(blockers, Locale.Lookup("LOC_CAI_WC_MUST_CHOOSE_TARGET"))
+                        end
+                        return blockers
+                    end,
+                })
 
                 m_body:AddChild(resItem)
             elseif titleCtrl and not vote1Root then
@@ -704,6 +794,19 @@ local function BuildVotingBody()
                         end
                         return votes, cost, direction
                     end
+
+                    table.insert(m_nextRequirements, {
+                        GetTitle = function() return titleCtrl:GetText() or "" end,
+                        GetBlockers = function()
+                            local votes = GetPropVoteState()
+                            if votes <= 0 and not (
+                                    voteUpBtn and voteUpBtn:IsDisabled()
+                                    and voteDownBtn and voteDownBtn:IsDisabled()) then
+                                return { Locale.Lookup("LOC_CAI_WC_MUST_ADD_VOTE") }
+                            end
+                            return {}
+                        end,
+                    })
 
                     if voteUpBtn then
                         local support = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWC_PropUp"), "Button", {
@@ -806,13 +909,7 @@ local function BuildVotingBody()
                             return table.concat(parts, "[NEWLINE]")
                         end,
                     })
-                    propItem:SetChecked(selectBox:IsSelected(), true)
-                    propItem:SetDisabledPredicate(function() return selectBox:IsDisabled() end)
-                    propItem:On("value_changed", function()
-                        selectBox:DoLeftClick()
-                        propItem:SetChecked(selectBox:IsSelected(), true)
-                        if mgr then mgr:Refocus() end
-                    end)
+                    BindSelectBoxCheckbox(propItem, selectBox)
                     propItem.FocusKey = "emergency:" .. instanceRoot:GetID()
                     propItem:SetFocusSound(HOVER_SOUND)
                     m_body:AddChild(propItem)
@@ -935,7 +1032,11 @@ local function BuildConfirmationDialog()
     })
     submitBtn:SetFocusSound(HOVER_SOUND)
     submitBtn:SetDisabledPredicate(function() return Controls.AcceptButton:IsDisabled() end)
-    submitBtn:On("activate", function() Controls.AcceptButton:DoLeftClick() end)
+    submitBtn:On("activate", function()
+        Controls.AcceptButton:DoLeftClick()
+        m_pendingTargets = {}
+        m_capturedChoices = {}
+    end)
 
     m_confirmDialog = mgr.WidgetHelpers.MakeGeneralDialog(
         function() return Controls.Description:GetText() or "" end,
@@ -1397,13 +1498,7 @@ local function BuildProposalsPage(page)
                                 return table.concat(parts, "[NEWLINE]")
                             end,
                         })
-                        epItem:SetChecked(selectBox:IsSelected(), true)
-                        epItem:SetDisabledPredicate(function() return selectBox:IsDisabled() end)
-                        epItem:On("value_changed", function()
-                            selectBox:DoLeftClick()
-                            epItem:SetChecked(selectBox:IsSelected(), true)
-                            if mgr then mgr:Refocus() end
-                        end)
+                        BindSelectBoxCheckbox(epItem, selectBox)
                         epItem.FocusKey = "emergency:" .. instanceRoot:GetID()
                         epItem:SetFocusSound(HOVER_SOUND)
                         proposalsList:AddChild(epItem)
@@ -1627,6 +1722,8 @@ OnAccept = WrapFunc(OnAccept, function(orig)
     orig()
     m_caiStage = 0
     m_caiPhase = 0
+    m_pendingTargets = {}
+    m_capturedChoices = {}
 end)
 
 ShowPopup = WrapFunc(ShowPopup, function(orig, delayShow, fromHotLoad)
@@ -1677,6 +1774,8 @@ SetStage = WrapFunc(SetStage, function(orig, stageNum, beginCongress)
         m_caiStage = stageNum
         if stageNum == 4 then
             m_caiPhase = 0
+            m_pendingTargets = {}
+            m_capturedChoices = {}
         end
         if m_panel then
             RebuildBody(stageNum, m_caiPhase)
@@ -1712,3 +1811,10 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
     return orig(pInputStruct)
 end)
 ContextPtr:SetInputHandler(OnInputHandler, true)
+
+Events.LocalPlayerTurnEnd.Add(function()
+    m_pendingTargets = {}
+    m_capturedChoices = {}
+    m_targetCommits = {}
+    m_nextRequirements = {}
+end)

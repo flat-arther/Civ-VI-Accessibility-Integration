@@ -281,7 +281,7 @@ EditModes = {}
 ---@field Tag string
 ---@field IsPositional boolean
 
----@class CAIAudioSpatialState
+---@class CAIAudioPlotState
 ---@field SourcePlotId integer
 ---@field ListenerPlotId? integer
 ---@field MaxDistance number
@@ -293,10 +293,9 @@ EditModes = {}
 ---@field Tag string
 ---@field Handle SoundHandle
 ---@field IsPositional boolean
----@field IsSpatialAudioInitialized boolean
 ---@field BaseGain number
----@field SpatialGain number
----@field SpatialState? CAIAudioSpatialState
+---@field PlotGain number
+---@field PlotState? CAIAudioPlotState
 
 ---@class CAIAudioQueueItem
 ---@field SoundId string
@@ -310,7 +309,6 @@ EditModes = {}
 ---@field IsInitialized boolean
 ---@field SettingsHooked boolean
 ---@field SettingsChangedListener fun(settingId:string)|nil
----@field IsSpatialAudioInitialized boolean
 ---@field DefinitionsById table<string, CAIAudioDefinitionRow>
 ---@field LoadedSoundsById table<string, CAIAudioRecord>
 ---@field SoundsByTag table<string, CAIAudioRecord[]>
@@ -335,13 +333,6 @@ function CAIAudioManager:LoadDefinitions() end
 
 ---@param record CAIAudioRecord|nil
 function CAIAudioManager:ApplyTagVolume(record) end
-
----Initialize in-game spatial audio after Events.LoadScreenClose.
----@return boolean initialized
-function CAIAudioManager:InitializeSpatialAudio() end
-
----@param record CAIAudioRecord
-function CAIAudioManager:InitializePositionalSound(record) end
 
 function CAIAudioManager:UnloadSounds() end
 
@@ -398,7 +389,7 @@ function CAIAudioManager:GetDefaultListenerPlot() end
 
 ---@param record CAIAudioRecord
 ---@return boolean
-function CAIAudioManager:ApplyPlotSpatialization(record) end
+function CAIAudioManager:ApplyPlotAudioParameters(record) end
 
 ---@param soundId string
 ---@param options? CAIAudioPlayOptions
@@ -810,6 +801,9 @@ function DropdownWidget:Close(silent) end
 ---@return boolean
 function DropdownWidget:IsOpen() end
 
+---Open silently while the manager prepares focus for a descendant.
+function DropdownWidget:OpenForDescendantFocus() end
+
 ---@param fn fun(w:DropdownWidget, value:any)
 function DropdownWidget:SetValueSetter(fn) end
 
@@ -883,9 +877,11 @@ function CheckboxWidget:Toggle() end
 
 ---@class SliderWidget : ValueWidget
 SliderWidget = {}
+---Configure the minimum; any resulting clamp is silent.
 ---@param n number
 function SliderWidget:SetMin(n) end
 
+---Configure the maximum; any resulting clamp is silent.
 ---@param n number
 function SliderWidget:SetMax(n) end
 
@@ -1112,6 +1108,7 @@ function SearchPanelWidget:SetResults(results) end
 ---@class UIScreenManager
 ---@field Stack UIWidget[]
 ---@field CurrentPath UIWidget[]
+---@field FocusRestoreKeyOverride? string Temporary logical target used during a synchronous action-driven rebuild.
 ---@field CAISettings table<string, any>
 ---@field AudioManager CAIAudioManager|nil
 ---@field WidgetHelpers CAIWidgetHelpers Manager-bound quick widget helpers (dialog builders, etc.).

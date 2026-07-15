@@ -44,6 +44,7 @@ include("CAIWidget_SearchPanel")
 ---@class UIScreenManager
 ---@field Stack UIWidget[]
 ---@field CurrentPath UIWidget[]
+---@field FocusRestoreKeyOverride? string Temporary logical target used while a widget action synchronously rebuilds its subtree.
 ---@field CAISettings table<string, any>
 ---@field WidgetHelpers table<string, function> Manager-bound quick widget helpers (dialog builders, etc.) installed by helper modules at init time.
 UIScreenManager = {
@@ -69,6 +70,7 @@ function UIScreenManager:New()
     mgr.WidgetHelpers = {}
     mgr.AppRegainedFocusTime = 0
     mgr.SearchBufferExpireTime = nil
+    mgr.FocusRestoreKeyOverride = nil
     return mgr
 end
 
@@ -289,13 +291,17 @@ function UIScreenManager.BuildFocusPath(widget, direction)
         table.insert(path, 1, node)
         node = node.Parent
     end
-    -- If the target sits inside collapsed expandable ancestors, expand them
-    -- (silently — no speech, no expand/collapse events) so the focus leaf is
-    -- actually reachable and visible. The target itself keeps its own state.
+    -- If the target sits inside collapsed expandable or closed dropdown
+    -- ancestors, open them silently so the focus leaf is actually reachable
+    -- and visible. The target itself keeps its own state.
     for i = 1, #path - 1 do
         local anc = path[i]
         if anc.IsExpanded == false and anc.Expand then
             anc:Expand(true)
+        end
+        if anc.Type == "Dropdown" and anc.IsOpen and not anc:IsOpen()
+            and anc.OpenForDescendantFocus then
+            anc:OpenForDescendantFocus()
         end
     end
     local leaf = path[#path]
@@ -531,6 +537,13 @@ function UIScreenManager:CaptureFocusKey(root)
     end
     if node ~= root then return nil end
     if #indices == 0 then return nil end
+    -- An action that must update live state before closing may synchronously
+    -- rebuild its focused subtree. During that action, prefer its requested
+    -- stable outer target over the descendant that initiated the action.
+    local overrideKey = self.FocusRestoreKeyOverride
+    if overrideKey and self:FindByFocusKey(root, overrideKey) then
+        key = overrideKey
+    end
     return { key = key, path = indices }
 end
 

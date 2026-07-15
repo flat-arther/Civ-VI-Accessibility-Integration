@@ -1671,7 +1671,9 @@ local function OnVanillaListModeChangedCAI(listMode)
         RebuildCityList()
     end
     if m_state.openPending then
-        PushPanelIfNeeded()
+        if ContextPtr:IsVisible() then
+            PushPanelIfNeeded()
+        end
         m_state.openPending = false
     end
 end

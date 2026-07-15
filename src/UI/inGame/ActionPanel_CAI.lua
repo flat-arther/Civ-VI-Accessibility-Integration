@@ -14,10 +14,11 @@ local mgr = ExposedMembers.CAI_UIManager
 local ACTION_PANEL_LIST_ID = "CAIActionPanelTurnBlockerList"
 local END_TURN_ACTION = Input.GetActionId("EndTurn")
 local CAI_END_TURN_ACTION = Input.GetActionId("ReplaceEndTurn_CAI")
+local CAI_SPEAK_TURN_BLOCKERS_ACTION = Input.GetActionId("ActionPanelSpeakTurnBlockers")
 local CAI_OPEN_TURN_BLOCKERS_ACTION = Input.GetActionId("ActionPanelOpenTurnBlockers")
 local CAI_SPEAK_ERA_AGE_ACTION = Input.GetActionId("ActionPanelSpeakEraAge")
 local m_caiTutorialActionPanelAllowed = false
-local m_caiLastSpokenActionTooltip = nil
+local m_caiLastObservedActionTooltip = nil
 local IsTutorialActionPanelAllowed = nil
 
 
@@ -55,15 +56,29 @@ local function CanSpeakCurrentAction()
     return true
 end
 
-local function SpeakCurrentActionTooltipIfChanged(force)
+local function IsBetweenTurns()
+    local player = Players[Game.GetLocalPlayer()]
+    return player ~= nil and not player:IsTurnActive()
+end
+
+local function ShouldAutoSpeakCurrentAction()
+    if IsBetweenTurns() then
+        return CAISettings.GetBool("SpeakBetweenTurnsMessage")
+    end
+    return CAISettings.GetBool("SpeakTurnBlockers")
+end
+
+local function SpeakCurrentActionTooltip(force, onDemand)
     if not CanSpeakCurrentAction() then return end
 
     local tooltip = ControlTooltip(Controls.EndTurnButton)
     if tooltip == "" then return end
-    if not force and tooltip == m_caiLastSpokenActionTooltip then return end
+    if not force and tooltip == m_caiLastObservedActionTooltip then return end
 
-    m_caiLastSpokenActionTooltip = tooltip
-    Speak(tooltip)
+    m_caiLastObservedActionTooltip = tooltip
+    if onDemand or ShouldAutoSpeakCurrentAction() then
+        Speak(tooltip)
+    end
 end
 
 IsTutorialActionPanelAllowed = function()
@@ -380,6 +395,11 @@ end
 OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     if ContextPtr:IsHidden() then return end
 
+    if actionId == CAI_SPEAK_TURN_BLOCKERS_ACTION then
+        SpeakCurrentActionTooltip(true, true)
+        return
+    end
+
     if actionId == CAI_OPEN_TURN_BLOCKERS_ACTION then
         OpenTurnBlockerList()
         return
@@ -399,7 +419,7 @@ end)
 
 OnRefresh = WrapFunc(OnRefresh, function(orig, ...)
     orig(...)
-    SpeakCurrentActionTooltipIfChanged()
+    SpeakCurrentActionTooltip(false, false)
 end)
 
 function OnCAIActionPanelInputHandler(inputStruct)
@@ -413,7 +433,7 @@ end
 LuaEvents.CAI_TutorialActionPanelAllowed.Add(function(isAllowed)
     m_caiTutorialActionPanelAllowed = isAllowed == true
     if m_caiTutorialActionPanelAllowed then
-        SpeakCurrentActionTooltipIfChanged(true)
+        SpeakCurrentActionTooltip(true, false)
     end
 end)
 

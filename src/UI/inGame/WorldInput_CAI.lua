@@ -1,5 +1,6 @@
 include("caiUtils")
 include("InputSupport")
+include("hexCoordUtils_CAI")
 include("CAIUIScreenManager")
 include("cursor_CAI")
 include("cursorAudio_CAI")
@@ -86,6 +87,10 @@ local ACTION_SURVEYOR_READ_TERRAIN = Input.GetActionId("SurveyorReadTerrain")
 local ACTION_SURVEYOR_READ_OWN_UNITS = Input.GetActionId("SurveyorReadOwnUnits")
 local ACTION_SURVEYOR_READ_ENEMY_UNITS = Input.GetActionId("SurveyorReadEnemyUnits")
 local ACTION_SURVEYOR_READ_CITIES = Input.GetActionId("SurveyorReadCities")
+local ACTION_SURVEYOR_READ_IMPROVEMENTS = Input.GetActionId("SurveyorReadImprovements")
+local ACTION_SURVEYOR_READ_NEUTRAL_UNITS = Input.GetActionId("SurveyorReadNeutralUnits")
+local ACTION_SURVEYOR_READ_OWNERSHIP = Input.GetActionId("SurveyorReadOwnership")
+local ACTION_SURVEYOR_READ_DISTRICTS = Input.GetActionId("SurveyorReadDistricts")
 local ACTION_WORLD_SELECT_PREVIOUS_CITY = Input.GetActionId("WorldSelectPreviousCity_CAI")
 local ACTION_WORLD_SELECT_NEXT_CITY = Input.GetActionId("WorldSelectNextCity_CAI")
 local ACTION_WORLD_SELECT_CAPITAL_CITY = Input.GetActionId("WorldSelectCapitalCity_CAI")
@@ -833,6 +838,30 @@ local SharedInputActions = {
 			return CAISurveyor.SpeakResult(CAISurveyor.ReadCities)
 		end,
 	},
+	[ACTION_SURVEYOR_READ_IMPROVEMENTS] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			return CAISurveyor.SpeakResult(CAISurveyor.ReadImprovements)
+		end,
+	},
+	[ACTION_SURVEYOR_READ_NEUTRAL_UNITS] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			return CAISurveyor.SpeakResult(CAISurveyor.ReadNeutralUnits)
+		end,
+	},
+	[ACTION_SURVEYOR_READ_OWNERSHIP] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			return CAISurveyor.SpeakResult(CAISurveyor.ReadOwnership)
+		end,
+	},
+	[ACTION_SURVEYOR_READ_DISTRICTS] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			return CAISurveyor.SpeakResult(CAISurveyor.ReadDistricts)
+		end,
+	},
 }
 
 -- ===========================================================================
@@ -1267,9 +1296,6 @@ local function RegisterCAIEvents()
 	Events.UnitSelectionChanged.Add(OnUnitSelectionChanged)
 	LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
 	LuaEvents.CAIAppendToMessageBuffer.Add(OnCAIAppendToMessageBuffer)
-	if not mgr:GetAudioManager():InitializeSpatialAudio() then
-		LogError("CAI WorldInput could not initialize spatial audio after the load screen closed")
-	end
 	UnitMoveLog_CAI.Initialize()
 	CAICursorAudio.Initialize()
 	CAIRecommendationLogic.Initialize()

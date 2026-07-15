@@ -101,10 +101,13 @@ local function GetPlotLabel(plotIndex)
     local plot = Map.GetPlotByIndex(plotIndex)
     local parts = {}
 
-    if CAICursor and CAICursor.curX and CAICursor.curY and plot then
-        local dir = HexCoordUtils.directionString(CAICursor.curX, CAICursor.curY, plot:GetX(), plot:GetY())
-        if dir ~= "" then
-            parts[#parts + 1] = dir
+    if CAICursor and plot then
+        local cursorX, cursorY = CAICursor:GetCoords()
+        if cursorX ~= nil and cursorY ~= nil then
+            local dir = HexCoordUtils.directionString(cursorX, cursorY, plot:GetX(), plot:GetY())
+            if dir ~= "" then
+                parts[#parts + 1] = dir
+            end
         end
     end
 
@@ -141,15 +144,17 @@ local function OnSearchComplete()
 
     Speak(Locale.Lookup("LOC_CAI_MAP_SEARCH_COMPLETE", totalPlots))
 
-    if CAICursor and CAICursor.curX and CAICursor.curY then
-        local cx, cy = CAICursor.curX, CAICursor.curY
-        table.sort(m_caiResultPlots, function(a, b)
-            local pa = Map.GetPlotByIndex(a)
-            local pb = Map.GetPlotByIndex(b)
-            if not pa or not pb then return false end
-            return Map.GetPlotDistance(cx, cy, pa:GetX(), pa:GetY())
-                < Map.GetPlotDistance(cx, cy, pb:GetX(), pb:GetY())
-        end)
+    if CAICursor then
+        local cursorX, cursorY = CAICursor:GetCoords()
+        if cursorX ~= nil and cursorY ~= nil then
+            table.sort(m_caiResultPlots, function(a, b)
+                local pa = Map.GetPlotByIndex(a)
+                local pb = Map.GetPlotByIndex(b)
+                if not pa or not pb then return false end
+                return Map.GetPlotDistance(cursorX, cursorY, pa:GetX(), pa:GetY())
+                    < Map.GetPlotDistance(cursorX, cursorY, pb:GetX(), pb:GetY())
+            end)
+        end
     end
 
     local results = {}

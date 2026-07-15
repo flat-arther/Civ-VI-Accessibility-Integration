@@ -594,9 +594,80 @@ local CAI_SaveTree = nil
 local CAI_DirList = nil
 local CAI_DirDropdown = nil
 local CAI_SortDropdown = nil
+local CAI_QuickLoadDialog = nil
+local m_CAIQuickloadId = Input.GetActionId("ReloadGame_CAI")
 CAI_LoadingFiles = false
 
+local function CloseQuickLoadDialog()
+	local dialog = CAI_QuickLoadDialog
+	CAI_QuickLoadDialog = nil
+	if mgr and dialog and mgr:GetWidgetById(dialog:GetId()) then
+		mgr:RemoveFromStack(dialog:GetId())
+	end
+end
+
+local function ShowQuickLoadDialog()
+	if not mgr then return end
+	if CAI_QuickLoadDialog and mgr:GetWidgetById(CAI_QuickLoadDialog:GetId()) then return end
+
+	local message = mgr:CreateWidget(mgr:GenerateWidgetId("CAIQuickLoad_Message"), "StaticText", {
+		Label = function() return Locale.Lookup("LOC_CAI_QUICK_LOAD_CONFIRMATION_BODY") end,
+	})
+
+	local yesButton = mgr:CreateWidget(mgr:GenerateWidgetId("CAIQuickLoad_Yes"), "Button", {
+		Label = function() return Locale.Lookup("LOC_YES") end,
+	})
+	yesButton:On("activate", function()
+		CloseQuickLoadDialog()
+		OnInputActionTriggered(m_QuickloadId)
+	end)
+
+	local noButton = mgr:CreateWidget(mgr:GenerateWidgetId("CAIQuickLoad_No"), "Button", {
+		Label = function() return Locale.Lookup("LOC_NO") end,
+	})
+	noButton:On("activate", function()
+		CloseQuickLoadDialog()
+	end)
+
+	CAI_QuickLoadDialog = mgr.WidgetHelpers.MakeGeneralDialog(
+		function() return Locale.Lookup("LOC_CAI_QUICK_LOAD_CONFIRMATION_TITLE") end,
+		{ yesButton, noButton },
+		{ message },
+		1
+	)
+	if not CAI_QuickLoadDialog then return end
+
+	CAI_QuickLoadDialog:On("focus_leave", function()
+		CloseQuickLoadDialog()
+	end)
+	CAI_QuickLoadDialog:AddInputBinding({
+		Key = Keys.VK_ESCAPE,
+		MSG = KeyEvents.KeyUp,
+		Description = "LOC_CAI_KB_CLOSE",
+		Action = function()
+			CloseQuickLoadDialog()
+			return true
+		end,
+	})
+	mgr:Push(CAI_QuickLoadDialog, { priority = PopupPriority.Low })
+end
+
+local function OnCAIInputActionStarted(actionId)
+	if actionId == m_CAIQuickloadId then
+		if not CanLocalPlayerLoadGame() then
+			Speak(Locale.Lookup("LOC_CAI_QUICK_LOAD_FAILED"))
+			return true
+		end
+
+		ShowQuickLoadDialog()
+		return true
+	end
+
+	return OnInputActionTriggered(actionId)
+end
+
 local function ClosePanel()
+	CloseQuickLoadDialog()
 	if CAI_Panel then
 		mgr:RemoveFromStack(CAI_Panel:GetId())
         CAI_Panel = nil
@@ -916,6 +987,12 @@ end)
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
 	if mgr:HandleInput(input) then return true end
 	return orig(input)
+end)
+
+Initialize = WrapFunc(Initialize, function(orig)
+	orig()
+	Events.InputActionTriggered.Remove(OnInputActionTriggered)
+	Events.InputActionStarted.Add(OnCAIInputActionStarted)
 end)
 --#End of accessibility integration
 Initialize();

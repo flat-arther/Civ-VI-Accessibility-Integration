@@ -358,6 +358,7 @@
       <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>
       <File>UI/uiManager/CAIWidget_SearchPanel.lua</File>
       <File>UI/uiManager/CAIUIScreenManager.lua</File>
+      <File>UI/inGame/InGame.lua</File>
       <File>UI/inGame/PlayerStateManager_CAI.lua</File>
       <File>UI/inGame/cursor_CAI.lua</File>
       <File>UI/inGame/cursorAudio_CAI.lua</File>

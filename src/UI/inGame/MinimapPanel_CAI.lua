@@ -234,6 +234,14 @@ end
 
 local function ToggleAccessibleLensList()
     if not IsLensListAvailable() then
+        if UI.GetInterfaceMode() == InterfaceModeTypes.DISTRICT_PLACEMENT then
+            Speak(Locale.Lookup("LOC_CAI_UI_LENSES_DISTRICT_PLACEMENT"))
+        elseif GameConfiguration.IsWorldBuilderEditor()
+            or not GameCapabilities.HasCapability("CAPABILITY_LENS_TOGGLING_UI") then
+            Speak(Locale.Lookup("LOC_CAI_UI_LENSES_UNAVAILABLE"))
+        else
+            Speak(Locale.Lookup("LOC_CAI_UI_LENSES_UNAVAILABLE_NOW"))
+        end
         return false
     end
 
@@ -258,7 +266,15 @@ end
 Events.InputActionTriggered.Remove(OnInputActionTriggered)
 OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     if m_caiOpenMapSearchId ~= nil and actionId == m_caiOpenMapSearchId then
-        orig(Input.GetActionId("OpenMapSearch"))
+        if Game.GetLocalPlayer() == -1 then
+            Speak(Locale.Lookup("LOC_CAI_UI_MAP_SEARCH_UNAVAILABLE"))
+        elseif UI.GetInterfaceMode() == InterfaceModeTypes.DISTRICT_PLACEMENT then
+            Speak(Locale.Lookup("LOC_CAI_UI_MAP_SEARCH_DISTRICT_PLACEMENT"))
+        elseif GameConfiguration.IsWorldBuilderEditor() then
+            Speak(Locale.Lookup("LOC_CAI_UI_MAP_SEARCH_WORLD_BUILDER"))
+        else
+            orig(Input.GetActionId("OpenMapSearch"))
+        end
         return
     end
 end)
@@ -289,9 +305,19 @@ end
 
 local function ToggleAccessibleMapPinList()
     if mgr == nil or Game.GetLocalPlayer() == -1 then
+        Speak(Locale.Lookup("LOC_CAI_UI_MAP_PINS_UNAVAILABLE"))
+        return false
+    end
+    if UI.GetInterfaceMode() == InterfaceModeTypes.DISTRICT_PLACEMENT then
+        Speak(Locale.Lookup("LOC_CAI_UI_MAP_PINS_DISTRICT_PLACEMENT"))
+        return false
+    end
+    if GameConfiguration.IsWorldBuilderEditor() then
+        Speak(Locale.Lookup("LOC_CAI_UI_MAP_PINS_WORLD_BUILDER"))
         return false
     end
     if ControlIsHidden(Controls.MapPinListButton) or ControlIsDisabled(Controls.MapPinListButton) then
+        Speak(Locale.Lookup("LOC_CAI_UI_MAP_PINS_UNAVAILABLE"))
         return false
     end
     ToggleMapPinMode()

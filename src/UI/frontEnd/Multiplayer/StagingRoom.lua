@@ -3717,7 +3717,10 @@ local function CAI_GetTeamLabel(playerID)
 	if GameConfiguration.GetGameState() == GameStateTypes.GAMESTATE_LAUNCHED and GameConfiguration.GetTeamPlayerCount(teamID) <= 1 then
 		teamID = TeamTypes.NO_TEAM
 	end
-	return GameConfiguration.GetTeamName(teamID)
+	if teamID == TeamTypes.NO_TEAM then
+		return GameConfiguration.GetTeamName(teamID)
+	end
+	return Locale.Lookup("LOC_WORLD_RANKINGS_TEAM", teamID + 1)
 end
 
 local CAI_HasColorConflictForTeam
@@ -4101,7 +4104,7 @@ local function CAI_MakeTeamDropdown(playerID, entry)
 					if teamID ~= TeamTypes.NO_TEAM then
 						table.insert(teams, {
 							teamID = teamID,
-							label = GameConfiguration.GetTeamName(teamID),
+							label = Locale.Lookup("LOC_WORLD_RANKINGS_TEAM", teamID + 1),
 						})
 					end
 				end
@@ -4112,7 +4115,7 @@ local function CAI_MakeTeamDropdown(playerID, entry)
 				end
 				table.insert(teams, {
 					teamID = newTeamID,
-					label = tostring(newTeamID),
+					label = Locale.Lookup("LOC_WORLD_RANKINGS_TEAM", newTeamID + 1),
 				})
 
 				table.sort(teams, function(a, b)
@@ -4764,8 +4767,7 @@ local function CAI_BuildPanel()
 	CAI_Panel:AddChild(CAI_MakeActionButton("CAIStagingRoom_QuitGame", "LOC_GAME_MENU_QUIT_GAME_TITLE", Controls.QuitGameButton, OnQuitGameAskAreYouSure))
 
 	CAI_FriendsList = mgr:CreateWidget("CAIStagingRoom_Friends", "List", {
-		Label = function() return CAI_Lookup("LOC_CAI_LOBBY_FRIENDS") end,
-		Tooltip = GetInviteTT,
+		Label = function() return CAI_Lookup("LOC_MULTIPLAYER_FRIENDS") end,
 		HiddenPredicate = function() return GameConfiguration.IsHotseat() end,
 	})
 	CAI_Panel:AddChild(CAI_FriendsList)

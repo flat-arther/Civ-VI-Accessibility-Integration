@@ -142,7 +142,7 @@ local function SpeakMoveDirection(fromX, fromY, toX, toY)
 
     local directionText = hexUtils.directionString(fromX, fromY, toX, toY)
     if directionText == nil or directionText == "" then
-        directionText = Locale.Lookup("LOC_CAI_HERE")
+        return
     end
 
     Speak(directionText)

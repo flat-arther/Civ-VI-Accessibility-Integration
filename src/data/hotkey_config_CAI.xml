@@ -74,6 +74,10 @@
     <Row ActionId="SurveyorReadOwnUnits" Name="LOC_CAI_SURVEYOR_READ_OWN_UNITS" Description="LOC_CAI_SURVEYOR_READ_OWN_UNITS_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SurveyorReadEnemyUnits" Name="LOC_CAI_SURVEYOR_READ_ENEMY_UNITS" Description="LOC_CAI_SURVEYOR_READ_ENEMY_UNITS_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SurveyorReadCities" Name="LOC_CAI_SURVEYOR_READ_CITIES" Description="LOC_CAI_SURVEYOR_READ_CITIES_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SurveyorReadImprovements" Name="LOC_CAI_SURVEYOR_READ_IMPROVEMENTS" Description="LOC_CAI_SURVEYOR_READ_IMPROVEMENTS_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SurveyorReadNeutralUnits" Name="LOC_CAI_SURVEYOR_READ_NEUTRAL_UNITS" Description="LOC_CAI_SURVEYOR_READ_NEUTRAL_UNITS_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SurveyorReadOwnership" Name="LOC_CAI_SURVEYOR_READ_OWNERSHIP" Description="LOC_CAI_SURVEYOR_READ_OWNERSHIP_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SurveyorReadDistricts" Name="LOC_CAI_SURVEYOR_READ_DISTRICTS" Description="LOC_CAI_SURVEYOR_READ_DISTRICTS_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityBannerReadIdentityStatus" Name="LOC_CAI_CITY_BANNER_READ_1" Description="LOC_CAI_CITY_BANNER_READ_1_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityBannerReadGrowthInfluence" Name="LOC_CAI_CITY_BANNER_READ_2" Description="LOC_CAI_CITY_BANNER_READ_2_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityBannerReadReligion" Name="LOC_CAI_CITY_BANNER_READ_3" Description="LOC_CAI_CITY_BANNER_READ_3_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
@@ -134,7 +138,10 @@
     <Row ActionId="NextUnitSelection" Name="LOC_CAI_NEXT_UNIT" Description="LOC_CAI_UNIT_NEXT_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PrevReadyUnitSelection" Name="LOC_CAI_PREV_READY_UNIT" Description="LOC_CAI_READY_UNIT_PREV_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="NextReadyUnitSelection" Name="LOC_CAI_NEXT_READY_UNIT" Description="LOC_CAI_READY_UNIT_NEXT_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SaveGame_CAI" Name="LOC_CAI_QUICK_SAVE" Description="LOC_CAI_QUICK_SAVE_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ReloadGame_CAI" Name="LOC_CAI_QUICK_LOAD" Description="LOC_CAI_QUICK_LOAD_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ReplaceEndTurn_CAI" Name="LOC_CAI_END_TURN" Description="LOC_CAI_END_TURN_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="ActionPanelSpeakTurnBlockers" Name="LOC_CAI_ACTION_PANEL_SPEAK_TURN_BLOCKERS" Description="LOC_CAI_ACTION_PANEL_SPEAK_TURN_BLOCKERS_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="ActionPanelOpenTurnBlockers" Name="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS" Description="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAICursorJumpToSelection" Name="LOC_CAI_CURSOR_JUMP_TO_SELECTION" Description="LOC_CAI_CURSOR_JUMP_TO_SELECTION_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAICursorJumpToCapital" Name="LOC_CAI_CURSOR_JUMP_TO_CAPITAL" Description="LOC_CAI_CURSOR_JUMP_TO_CAPITAL_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
@@ -289,6 +296,14 @@
     <Row ActionId="SurveyorReadOwnUnits" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_E" />
     <Row ActionId="SurveyorReadEnemyUnits" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_D" />
     <Row ActionId="SurveyorReadCities" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_C" />
+    <Row ActionId="SurveyorReadImprovements" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_A" />
+    <Row ActionId="SurveyorReadImprovements" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_NP_4" />
+    <Row ActionId="SurveyorReadNeutralUnits" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_D" />
+    <Row ActionId="SurveyorReadNeutralUnits" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_NP_6" />
+    <Row ActionId="SurveyorReadOwnership" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_Z" />
+    <Row ActionId="SurveyorReadOwnership" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_NP_1" />
+    <Row ActionId="SurveyorReadDistricts" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_Q" />
+    <Row ActionId="SurveyorReadDistricts" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_NP_7" />
     <Row ActionId="CityBannerReadIdentityStatus" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_1" />
     <Row ActionId="CityBannerReadGrowthInfluence" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_2" />
     <Row ActionId="CityBannerReadReligion" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_3" />
@@ -346,7 +361,10 @@
     <Row ActionId="NextUnitSelection" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_PERIOD" />
     <Row ActionId="PrevReadyUnitSelection" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_COMMA" />
     <Row ActionId="NextReadyUnitSelection" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_PERIOD" />
+    <Row ActionId="SaveGame_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F5" />
+    <Row ActionId="ReloadGame_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F6" />
     <Row ActionId="ReplaceEndTurn_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SPACE" />
+    <Row ActionId="ActionPanelSpeakTurnBlockers" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_SPACE" />
     <Row ActionId="ActionPanelOpenTurnBlockers" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_SPACE" />
     <Row ActionId="CAICursorJumpToSelection" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SLASH" />
     <Row ActionId="CAICursorJumpToCapital" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_S" />

@@ -193,6 +193,10 @@ The Surveyor summarizes a circular area centered on the navigation cursor. Its r
 - `Shift+E` — read friendly units within the radius
 - `Shift+D` — read visible enemy units within the radius
 - `Shift+C` — read known cities and barbarian outposts within the radius
+- `Ctrl+Shift+A` / `Ctrl+Shift+Numpad 4` — count improvements within the radius
+- `Ctrl+Shift+D` / `Ctrl+Shift+Numpad 6` — read visible neutral units within the radius
+- `Ctrl+Shift+Z` / `Ctrl+Shift+Numpad 1` — count tile ownership within the radius
+- `Ctrl+Shift+Q` / `Ctrl+Shift+Numpad 7` — count districts within the radius
 
 ### World Scanner
 
@@ -249,9 +253,10 @@ Empire information commands read important totals and progress without opening t
 
 ### Ending your turn
 
-The Action Panel tracks what must happen before the turn can end. When its next action changes, the mod automatically speaks the new action. This may be a prompt such as choosing production, selecting research, giving orders to a unit, resolving another turn blocker, or ending the turn. 
+The Action Panel tracks what must happen before the turn can end. By default, the mod automatically speaks a new action when it changes and announces the waiting message between turns. These two automatic announcements can be controlled independently in the Events settings. An action may be a prompt such as choosing production, selecting research, giving orders to a unit, resolving another turn blocker, or ending the turn.
 
 - `Ctrl+Space` — perform the spoken next action. If the turn is ready, this ends the turn. If something is blocking the turn, it cycles to or opens that required action instead.
+- `Shift+Space` — speak the current turn-blocking action or between-turn waiting message on demand.
 - `Ctrl+Shift+Space` — open the Turn Blockers list. This lists the current next action and the other distinct actions preventing the turn from ending. Use normal list navigation and activate an entry to go to or resolve that action. Press `Escape` to close the list.
 
 ### Notifications and message history
@@ -285,67 +290,22 @@ World actions operate on the current selection or on the map without requiring a
 
 - `M` — place or edit a map tac at the navigation cursor
 - `Ctrl+Space` — end the turn or go to the next turn-blocking action
+- `Shift+Space` — speak the current turn blocker or between-turn waiting message
 - `Ctrl+Shift+Space` — open the Turn Blockers list
 
 ### Selection
 
 In civ vi, selection is not only limited to units. You can have either one city or one unit selected at a time. The selection determines which information and actions are available. Selecting a city replaces the selected unit, and selecting a unit replaces the selected city.
 
-All city, unit, and selection actions are input actions and can be remapped from the game's key-binding options. The keys below are the defaults supplied by the mod. Press `Tab` with a city or unit selected to open a list containing the actions currently available to that selection; this is also the easiest way to discover actions that do not have a default key.
+All city, unit, and selection actions are input actions and can be remapped from the game's Key Bindings options tab. Press `Tab` with a city or unit selected to open the actions list for that selection. Most city and unit actions in this list have default bindings. You can discover the available actions and their keys from the list, by pressing `Ctrl+H` while focused in the map area, or from the Key Bindings tab in Options.
 
-#### Changing the selection
+#### Selection actions
 
 - `,` / `.` — select the previous / next unit that is ready for orders
 - `Shift+,` / `Shift+.` — select the previous / next unit, including units that have no orders remaining
 - `[` / `]` — select the previous / next city
 - `Backslash` — select your capital city
 - `Tab` — open the action list for the selected city or unit
-
-#### City actions
-
-- `Alt+Backslash` — choose production
-- `Alt+Right Bracket` — open the city overview, including growth, buildings, and religion
-- `Alt+Left Bracket` — open city management for worker assignment and tile purchases
-
-#### Unit movement
-
-Quick movement moves the selected unit one hex in the chosen direction. If the move would begin combat, it presents the combat preview before you confirm the attack by pressing the move action again.
-
-- `Alt+Q` or `Alt+Numpad 7` — move northwest
-- `Alt+E` or `Alt+Numpad 9` — move northeast
-- `Alt+A` or `Alt+Numpad 4` — move west
-- `Alt+D` or `Alt+Numpad 6` — move east
-- `Alt+Z` or `Alt+Numpad 1` — move southwest
-- `Alt+C` or `Alt+Numpad 3` — move southeast
-
-#### Unit actions
-
-Only actions supported by the selected unit have an effect.
-
-- `Alt+B` — found a city
-- `Alt+M` — enter move-to mode
-- `Alt+F` — fortify
-- `Alt+H` — fortify until healed
-- `Alt+Delete` — delete the unit
-- `Alt+R` — begin a ranged or air attack
-- `Alt+X` — automate exploration
-- `Alt+Space` — skip the unit's turn
-- `Alt+S` — sleep
-- `Alt+V` — set the unit to alert
-- `Alt+Y` — deploy
-- `Alt+J` — harvest a resource
-- `Alt+I` — establish a trade route
-- `Alt+L` — pillage
-- `Alt+K` — remove a feature
-- `Alt+O` — remove an improvement
-- `Alt+N` — repair
-- `Alt+G` — spread religion
-- `Alt+T` — transfer to a city where applicable
-- `Alt+U` — upgrade
-- `Alt+P` — promote
-- `Alt+W` — wake
-- `Alt+Backspace` — cancel the current unit command
-- `Alt+Slash` — open a list of the unit's passive abilities
 
 #### Selection information
 

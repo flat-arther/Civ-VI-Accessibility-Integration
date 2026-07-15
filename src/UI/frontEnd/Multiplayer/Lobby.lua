@@ -2120,8 +2120,7 @@ local function CAI_BuildPanel()
 	CAI_Panel:AddChild(hostButton)
 
 	CAI_FriendsList = mgr:CreateWidget("CAILobbyFriends", "List", {
-		Label = function() return CAI_Lookup("LOC_CAI_LOBBY_FRIENDS") end,
-		Tooltip = function() return CAI_ControlTooltip(Controls.FriendsButton) end,
+		Label = function() return CAI_Lookup("LOC_MULTIPLAYER_FRIENDS") end,
 		HiddenPredicate = function() return Controls.FriendsButton:IsHidden() end,
 	})
 	CAI_Panel:AddChild(CAI_FriendsList)
@@ -2247,6 +2246,18 @@ Close = WrapFunc(Close, function(orig)
 	CAI_PopLobby()
 	orig()
 end)
+
+-- I needed to replace this function because the original lays out the popup in such a way that does not allow for enter to click the join button from the edit box
+function OnJoinCodeButtonClick()
+	m_joinCodeText = "";
+	m_kPopupDialog:Close();
+	m_kPopupDialog:AddTitle( Locale.Lookup("LOC_JOIN_CODE_POPUP_TITLE") );
+	m_kPopupDialog:AddText( Locale.Lookup("LOC_JOIN_CODE_POPUP_TEXT"));
+	m_kPopupDialog:AddEditBox( Locale.Lookup("LOC_JOIN_CODE_POPUP_EDITBOX"), nil, OnJoinCodeStringChange, JOINCODE_EDITBOX_COMMAND );
+	m_kPopupDialog:AddButton( Locale.Lookup("LOC_MULTIPLAYER_JOIN_GAME"), OnJoinCodeOK );
+	m_kPopupDialog:AddButton( Locale.Lookup("LOC_CANCEL_BUTTON"), nil );
+	m_kPopupDialog:Open();
+end
 
 local function HandleInput(pInputStruct)
     if mgr and not ContextPtr:IsHidden() then 

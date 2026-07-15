@@ -19,10 +19,13 @@ local m_list   = nil
 
 local function BuildPinLabel(mapPinCfg)
     local dirText = ""
-    if CAICursor and CAICursor.curX and CAICursor.curY then
-        local hexX = mapPinCfg:GetHexX()
-        local hexY = mapPinCfg:GetHexY()
-        dirText = HexCoordUtils.directionString(CAICursor.curX, CAICursor.curY, hexX, hexY)
+    if CAICursor then
+        local cursorX, cursorY = CAICursor:GetCoords()
+        if cursorX ~= nil and cursorY ~= nil then
+            local hexX = mapPinCfg:GetHexX()
+            local hexY = mapPinCfg:GetHexY()
+            dirText = HexCoordUtils.directionString(cursorX, cursorY, hexX, hexY)
+        end
     end
 
     local parts = { BuildMapTacLabel(mapPinCfg) }

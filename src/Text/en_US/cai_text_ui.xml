@@ -849,6 +849,30 @@
     <Row Tag="LOC_CAI_SURVEYOR_READ_CITIES_TOOLTIP" Language="en_US">
       <Text>Reads known cities and barbarian camps within the Surveyor radius around the CAI cursor</Text>
     </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_IMPROVEMENTS" Language="en_US">
+      <Text>Surveyor read improvements</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_IMPROVEMENTS_TOOLTIP" Language="en_US">
+      <Text>Counts revealed improvements within the Surveyor radius around the CAI cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_NEUTRAL_UNITS" Language="en_US">
+      <Text>Surveyor read neutral units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_NEUTRAL_UNITS_TOOLTIP" Language="en_US">
+      <Text>Reads visible neutral units within the Surveyor radius around the CAI cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_OWNERSHIP" Language="en_US">
+      <Text>Surveyor read tile ownership</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_OWNERSHIP_TOOLTIP" Language="en_US">
+      <Text>Counts revealed tile ownership within the Surveyor radius around the CAI cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_DISTRICTS" Language="en_US">
+      <Text>Surveyor read districts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_DISTRICTS_TOOLTIP" Language="en_US">
+      <Text>Counts revealed districts within the Surveyor radius around the CAI cursor</Text>
+    </Row>
     <Row Tag="LOC_CAI_SURVEYOR_RADIUS" Language="en_US">
       <Text>Surveyor radius {1_Radius}</Text>
     </Row>
@@ -888,6 +912,24 @@
     <Row Tag="LOC_CAI_SURVEYOR_EMPTY_CITIES" Language="en_US">
       <Text>No known cities or camps</Text>
     </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_EMPTY_IMPROVEMENTS" Language="en_US">
+      <Text>No revealed improvements</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_EMPTY_NEUTRAL_UNITS" Language="en_US">
+      <Text>No visible neutral units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_EMPTY_OWNERSHIP" Language="en_US">
+      <Text>No revealed tile ownership</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_EMPTY_DISTRICTS" Language="en_US">
+      <Text>No revealed districts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_OWNERSHIP_YOURS" Language="en_US">
+      <Text>Yours</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_OWNERSHIP_UNKNOWN" Language="en_US">
+      <Text>Unknown owner</Text>
+    </Row>
     <Row Tag="LOC_CAI_SURVEYOR_HILLS" Language="en_US">
       <Text>Hills</Text>
     </Row>
@@ -907,6 +949,12 @@
     </Row>
     <Row Tag="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS_TOOLTIP" Language="en_US">
       <Text>Opens a list of turn blocking actions </Text>
+    </Row>
+    <Row Tag="LOC_CAI_ACTION_PANEL_SPEAK_TURN_BLOCKERS" Language="en_US">
+      <Text>Speak turn blockers</Text>
+    </Row>
+    <Row Tag="LOC_CAI_ACTION_PANEL_SPEAK_TURN_BLOCKERS_TOOLTIP" Language="en_US">
+      <Text>Speaks the current turn blocking action or between-turn message.</Text>
     </Row>
     <Row Tag="LOC_CAI_ACTION_PANEL_NO_TURN_BLOCKERS" Language="en_US">
       <Text>No current turn actions</Text>
@@ -3871,6 +3919,21 @@
     <Row Tag="LOC_CAI_WC_COST_LABEL" Language="en_US">
       <Text>Cost:</Text>
     </Row>
+    <Row Tag="LOC_CAI_WC_NEXT_BLOCKER_ITEM" Language="en_US">
+      <Text>{1_Name}: {2_Blockers}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_NEXT_BLOCKER_SEPARATOR" Language="en_US">
+      <Text>, </Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_MUST_CHOOSE_OUTCOME" Language="en_US">
+      <Text>Must choose an outcome</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_MUST_CHOOSE_TARGET" Language="en_US">
+      <Text>Must choose a target</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WC_MUST_ADD_VOTE" Language="en_US">
+      <Text>Must add a vote</Text>
+    </Row>
 
     <!-- Diplomacy Ribbon -->
     <Row Tag="LOC_CAI_DIPLO_RIBBON_LABEL" Language="en_US">
@@ -5493,6 +5556,20 @@
       <Text>Target number of characters in each spoken section when long text is split. Complete sentences longer than this value remain intact.</Text>
     </Row>
 
+    <Row Tag="LOC_CAI_SETTING_SPEAK_TURN_BLOCKERS" Language="en_US">
+      <Text>Announce turn blockers</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_TURN_BLOCKERS_TOOLTIP" Language="en_US">
+      <Text>Automatically speak the current turn blocking action when it changes. Even when disabled, you can still speak it using the Speak turn blockers key binding.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SPEAK_BETWEEN_TURNS_MESSAGE" Language="en_US">
+      <Text>Announce between turns message</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_BETWEEN_TURNS_MESSAGE_TOOLTIP" Language="en_US">
+      <Text>Automatically announce the message while other players are taking their turns. Even when disabled, you can still speak it using the Speak turn blockers key binding.</Text>
+    </Row>
+
     <Row Tag="LOC_CAI_SETTING_CURSOR_AUDIO_ENABLED" Language="en_US">
       <Text>Enable cursor audio</Text>
     </Row>
@@ -5512,6 +5589,13 @@
     </Row>
     <Row Tag="LOC_CAI_SETTING_SCANNER_BEACON_ENABLED_TOOLTIP" Language="en_US">
       <Text>Play a positional beacon at the current World Scanner item's map location when it is focused or its direction is repeated.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SCANNER_BEACON_VOLUME" Language="en_US">
+      <Text>World scanner beacon volume</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SCANNER_BEACON_VOLUME_TOOLTIP" Language="en_US">
+      <Text>Volume level for the World Scanner positional beacon.</Text>
     </Row>
 
     <Row Tag="LOC_CAI_SETTING_SCANNER_AUTO_MOVE_CURSOR" Language="en_US">
@@ -5785,5 +5869,144 @@
     <Row Tag="LOC_CAI_UNIT_MOVE_LOG_RELOCATED" Language="en_US">
       <Text>{1_Unit} relocated</Text>
     </Row>
-</LocalizedText>
+    <!-- UI-opening hotkey failure feedback -->
+    <Row Tag="LOC_CAI_UI_UNAVAILABLE_IN_CURRENT_GAME" Language="en_US">
+      <Text>This screen is not available in the current game.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_UNAVAILABLE_WHILE_OBSERVING" Language="en_US">
+      <Text>This screen is not available while you are observing.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_TECH_TREE_UNAVAILABLE" Language="en_US">
+      <Text>The Technology Tree is not available in the current game.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_CIVICS_TREE_UNAVAILABLE" Language="en_US">
+      <Text>The Civics Tree is not available in the current game.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_GOVERNMENT_LOCKED" Language="en_US">
+      <Text>Government is not available until you unlock your first policy.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_RELIGION_LOCKED" Language="en_US">
+      <Text>Religion is not available until your empire begins earning Faith.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_GREAT_PEOPLE_UNAVAILABLE" Language="en_US">
+      <Text>Great People are not available in the current game.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_GREAT_PEOPLE_HOTKEY_DISABLED" Language="en_US">
+      <Text>The Great People hotkey is disabled by the current game rules.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_NO_GREAT_WORKS" Language="en_US">
+      <Text>You currently have no Great Works in your empire.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_GREAT_WORKS_HOTKEY_DISABLED" Language="en_US">
+      <Text>The Great Works hotkey is disabled by the current game rules.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_NO_CITY_STATES_MET" Language="en_US">
+      <Text>You have not met any city-states yet.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_NO_SPY_CAPACITY" Language="en_US">
+      <Text>Espionage is not available because your empire has no spy capacity.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_ESPIONAGE_HOTKEY_DISABLED" Language="en_US">
+      <Text>The Espionage hotkey is disabled by the current game rules.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_NO_TRADE_ROUTE_CAPACITY" Language="en_US">
+      <Text>Trade Routes are not available because your empire has no trade-route capacity.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_WORLD_RANKINGS_UNAVAILABLE" Language="en_US">
+      <Text>World Rankings are not available in the current game.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_REQUIRES_RISE_AND_FALL" Language="en_US">
+      <Text>This screen requires Rise and Fall or Gathering Storm.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_REQUIRES_GATHERING_STORM" Language="en_US">
+      <Text>This screen requires Gathering Storm.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_CLIMATE_UNAVAILABLE" Language="en_US">
+      <Text>World Climate is not available in the current game.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_WORLD_CONGRESS_UNAVAILABLE" Language="en_US">
+      <Text>World Congress is not available in the current game.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_WORLD_CONGRESS_START_ERA" Language="en_US">
+      <Text>World Congress is available starting in the {1_Era}.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_DIPLOMACY_UNAVAILABLE" Language="en_US">
+      <Text>Diplomacy is not available in the current game.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_REPORTS_UNAVAILABLE" Language="en_US">
+      <Text>Reports are not available in the current game.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_GOSSIP_UNAVAILABLE" Language="en_US">
+      <Text>The Gossip report is not available in the current game.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_GLOBAL_RESOURCES_UNAVAILABLE" Language="en_US">
+      <Text>The Global Resources report is not available because diplomatic deals are disabled.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_CHOOSER_BLOCKED_BY_TUTORIAL" Language="en_US">
+      <Text>The tutorial is currently preventing this chooser from opening.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_RESEARCH_CHOOSER_UNAVAILABLE" Language="en_US">
+      <Text>You cannot choose new research at this time.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_CIVICS_CHOOSER_UNAVAILABLE" Language="en_US">
+      <Text>You cannot choose a new civic at this time.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_CHAT_NETWORK_ONLY" Language="en_US">
+      <Text>Chat is available only in a network multiplayer game.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_LENSES_DISTRICT_PLACEMENT" Language="en_US">
+      <Text>The lens list cannot open during district placement.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_LENSES_UNAVAILABLE" Language="en_US">
+      <Text>Lenses are not available in the current game mode.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_LENSES_UNAVAILABLE_NOW" Language="en_US">
+      <Text>The lens list is not available at this time.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_MAP_PINS_UNAVAILABLE" Language="en_US">
+      <Text>Map pins are not available at this time.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_MAP_PINS_DISTRICT_PLACEMENT" Language="en_US">
+      <Text>The map-pin list cannot open during district placement.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_MAP_PINS_WORLD_BUILDER" Language="en_US">
+      <Text>Map pins are not available in World Builder.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_MAP_SEARCH_UNAVAILABLE" Language="en_US">
+      <Text>Map Search is not available at this time.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_MAP_SEARCH_DISTRICT_PLACEMENT" Language="en_US">
+      <Text>Map Search cannot open during district placement.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_MAP_SEARCH_WORLD_BUILDER" Language="en_US">
+      <Text>Map Search is not available in World Builder.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_SAVE" Language="en_US">
+      <Text>Quick save</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_SAVE_TOOLTIP" Language="en_US">
+      <Text>Saves the current game to the quick-save slot.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_SAVE_COMPLETE" Language="en_US">
+      <Text>Game saved.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_SAVE_FAILED" Language="en_US">
+      <Text>The game cannot be saved at this time.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_LOAD" Language="en_US">
+      <Text>Quick load</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_LOAD_TOOLTIP" Language="en_US">
+      <Text>Loads the game in the quick-save slot after confirmation.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_LOAD_FAILED" Language="en_US">
+      <Text>A quick save cannot be loaded at this time.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_LOAD_CONFIRMATION_TITLE" Language="en_US">
+      <Text>Quick load</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QUICK_LOAD_CONFIRMATION_BODY" Language="en_US">
+      <Text>Load the game in the quick-save slot?</Text>
+    </Row>
+  </LocalizedText>
 </GameData>

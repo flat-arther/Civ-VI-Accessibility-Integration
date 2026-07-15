@@ -61,6 +61,21 @@ local function HasCongressButton()
     return true
 end
 
+local function GetCongressUnavailableReason()
+    if not IsExpansion2Active()
+        or not GameCapabilities.HasCapability("CAPABILITY_WORLD_CONGRESS") then
+        return Locale.Lookup("LOC_CAI_UI_WORLD_CONGRESS_UNAVAILABLE")
+    end
+
+    local initialEra = GlobalParameters.WORLD_CONGRESS_INITIAL_ERA
+    if Game.GetEras():GetCurrentEra() < initialEra then
+        local era = GameInfo.Eras[initialEra]
+        local eraName = era and Locale.Lookup(era.Name) or tostring(initialEra)
+        return Locale.Lookup("LOC_CAI_UI_WORLD_CONGRESS_START_ERA", eraName)
+    end
+    return nil
+end
+
 local function IsCongressInSession()
     local WORLD_CONGRESS_STAGE_1 = DB.MakeHash("TURNSEG_WORLDCONGRESS_1")
     local WORLD_CONGRESS_STAGE_2 = DB.MakeHash("TURNSEG_WORLDCONGRESS_2")
@@ -119,7 +134,7 @@ local function GetTeamLabel(playerID, localPlayerID)
     if not isMet then return nil end
     local teamID = PlayerConfigurations[playerID]:GetTeam()
     if #Teams[teamID] <= 1 then return nil end
-    return Locale.Lookup("LOC_CAI_DIPLO_RIBBON_TEAM", teamID + 1)
+    return Locale.Lookup("LOC_WORLD_RANKINGS_TEAM", teamID + 1)
 end
 
 local function GetRelationshipLabel(playerID, localPlayerID)
@@ -342,10 +357,17 @@ end)
 local function OnInputActionStarted(actionId)
     if ContextPtr:IsHidden() then return end
     if actionId == ACTION_OPEN_LIST then
-        OpenList()
+        local _, player = GetLocalPlayer()
+        if player then
+            OpenList()
+        else
+            Speak(Locale.Lookup("LOC_CAI_UI_DIPLOMACY_UNAVAILABLE"))
+        end
     elseif actionId == ACTION_OPEN_CONGRESS then
         if HasCongressButton() then
             ActivateCongress()
+        else
+            Speak(GetCongressUnavailableReason())
         end
     elseif actionId == ACTION_SPEAK_CONGRESS_INFO then
         local tt = GetCongressTooltip()

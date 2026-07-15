@@ -49,12 +49,12 @@ end
 function SliderWidget:SetMin(n)
     self._min = n
     local clamped = Clamp(self, self._value)
-    if clamped ~= self._value then self:SetValue(clamped) end
+    if clamped ~= self._value then self:SetValue(clamped, true) end
 end
 function SliderWidget:SetMax(n)
     self._max = n
     local clamped = Clamp(self, self._value)
-    if clamped ~= self._value then self:SetValue(clamped) end
+    if clamped ~= self._value then self:SetValue(clamped, true) end
 end
 function SliderWidget:SetStepSize(n) self._step = n end
 function SliderWidget:SetPageStep(n) self._pageStep = n end

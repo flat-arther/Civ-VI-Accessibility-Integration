@@ -9,6 +9,8 @@
 CAICursorAudio = CAICursorAudio or {}
 
 local STINGER_DELAY_SECONDS = 0.1
+local CURSOR_VOLUME_SETTING_ID = "AudioTagVolume_CURSOR"
+local CURSOR_VOLUME_PREVIEW_SOUND_ID = "CURSOR_GRASS"
 local CURSOR_AUDIO_TAGS = {
     "CURSOR_CROSSINGS",
     "CURSOR_FOG",
@@ -320,11 +322,27 @@ local function OnCAICursorMoved(data)
     CAICursorAudio.PlayPlotById(data.toPlotId, data.fromPlotId, data.reason)
 end
 
+local function OnCAISettingsChanged(settingId)
+    if settingId ~= CURSOR_VOLUME_SETTING_ID then return end
+
+    local audio = GetAudioManager()
+    if audio == nil then
+        LogWarn("CAICursorAudio.OnCAISettingsChanged: CAI_AudioManager is unavailable")
+        return
+    end
+
+    audio:ApplySettings()
+    StopCursorTags()
+    audio:Play(CURSOR_VOLUME_PREVIEW_SOUND_ID)
+end
+
 function CAICursorAudio.Initialize()
     LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
+    LuaEvents.CAISettingsChanged.Add(OnCAISettingsChanged)
 end
 
 function CAICursorAudio.Shutdown()
     LuaEvents.CAICursorMoved.Remove(OnCAICursorMoved)
+    LuaEvents.CAISettingsChanged.Remove(OnCAISettingsChanged)
     StopCursorTags()
 end

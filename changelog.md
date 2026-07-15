@@ -6,6 +6,39 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `F6` quick load now asks for confirmation before loading the quick-save slot and announces when loading is unavailable. The action is rebindable in the Key bindings tab.
+- `F5` quick save announces whether the game was saved or saving is currently unavailable. The action is rebindable in the Key bindings tab.
+- Added UI-opening key bindings announcements for why a screen cannot open, including unmet city-states, missing Great Works, unavailable spy or trade-route capacity, tutorial restrictions, disabled game capabilities, and the World Congress starting era.
+- Added Surveyor commands for counting nearby improvements (`Ctrl+Shift+A` / `Ctrl+Shift+Numpad 4`), districts (`Ctrl+Shift+Q` / `Ctrl+Shift+Numpad 7`), and tile ownership (`Ctrl+Shift+Z` / `Ctrl+Shift+Numpad 1`), as well as listing visible neutral units (`Ctrl+Shift+D` / `Ctrl+Shift+Numpad 6`). All of these are rebindable in the Key bindings tab in game options
+- `Shift+Space` (rebindable) speaks the current Action Panel turn blocker or between-turn waiting message. New Events settings independently control automatic turn-blocker and between-turn announcements.
+- Changing the cursor audio volume plays a cursor step sound as a preview. Only works in game. You can still change the volume from the main menu should you wish
+- World Scanner settings now include a beacon volume slider that plays a centered beacon preview when adjusted. Preview sound only works in game
+
+### Changed
+
+- Choosing a World Congress resolution outcome now automatically commits the free first vote. Special-session proposals still require an explicit vote to be added. This closely matches vanilla flow
+- In world congress, the order in which you fill in each resolution is no longer fixed. as long as you resolve all blockers, you will be able to click the next button.
+- World Congress target choices are always available and remain selected when changing outcomes. The Next button's tooltip now identifies every resolution or special proposal that still needs an outcome, target, or vote.
+- Relative direction text now says `Here` whenever the target is on the reference tile, including unit rows, map tacks, map search, and scanner results.
+- Unit-list row tooltips now report location followed by summary details.
+- World Scanner group and item navigation refreshes the current live category, reflecting newly added or removed map items.
+- Scanner sorting now stays anchored when inspecting or jumping to items. Changing category or subcategory resets the sorting origin to the current cursor, while spoken directions and distance continue using the cursor's live position. This should no longer jumble items around just because users moved the cursor.
+
+### Fixed
+
+- World Congress navigation now returns to the previously focused resolution after leaving and re-entering the resolution tree.
+- Multiplayer join failures restore accessibility mod before displaying their error dialog, including missing-content and failed content-configuration cases. This should solve the mod failing to read localized text or any UI widget roles
+- Map tacs now properly speak direction in the map-tacs list. This was broken
+- Fixed escape handling for the governer confirm promotion dialog.
+- Fixed an issue where the scanner tried to validate all items for every category on every scan. This caused it to lag in huge maps, or maps that are fully revealed. Woops
+- Made staging-room team choices display as Team 1, Team 2, and so on instead of exposing zero-based team numbers.
+- Fixed open dropdowns so that they keep focus on the same option when their screen content refreshes.
+- Play By Cloud game setup refreshes no longer announce a stray `2`.
+- Spatial sounds attenuate properly instead of playing at full volume regardless of posission
+- Fixed an issue with popup dialogs not letting you press enter to do default action while focused on an edit box
+
 ## [0.1.4] - 2026-07-13
 
 ### Added

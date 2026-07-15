@@ -609,7 +609,10 @@ end
 
 local function CAI_OnInputActionStarted(actionId)
     if actionId ~= ACTION_OPEN_CHAT_PANEL then return end
-    if not CAI_CanUseRealtimeChat() then return end
+    if not CAI_CanUseRealtimeChat() then
+        Speak(Locale.Lookup("LOC_CAI_UI_CHAT_NETWORK_ONLY"))
+        return
+    end
     CAI_PushPanel()
 end
 

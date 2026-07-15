@@ -23,9 +23,9 @@ local NEIGHBOR_DIRS = {
 }
 
 local MAX_PLAYER_INDEX_FOR_CAPITAL = 64
-local SPATIAL_AUDIO_PAN_SATURATION_HEXES = 12
-local SPATIAL_AUDIO_MAX_PITCH_SEMITONES = 12
-local SPATIAL_AUDIO_DEFAULT_MAX_DISTANCE = 30
+local PLOT_AUDIO_PAN_SATURATION_HEXES = 12
+local PLOT_AUDIO_MAX_PITCH_SEMITONES = 12
+local PLOT_AUDIO_DEFAULT_MAX_DISTANCE = 30
 
 local function FormatDirectionStep(count, directionKey)
     return Locale.Lookup("LOC_CAI_DIRECTION_STEP", count, Locale.Lookup(directionKey))
@@ -88,16 +88,16 @@ end
 ---@return number pan
 ---@return number pitch
 ---@return number volume
-function HexCoordUtils.spatialAudioParameters(listenerX, listenerY, sourceX, sourceY, maxDistance)
+function HexCoordUtils.plotAudioParameters(listenerX, listenerY, sourceX, sourceY, maxDistance)
     local dcol, drow = HexCoordUtils.displacement(listenerX, listenerY, sourceX, sourceY)
-    local pan = math.max(-1, math.min(1, dcol / SPATIAL_AUDIO_PAN_SATURATION_HEXES))
+    local pan = math.max(-1, math.min(1, dcol / PLOT_AUDIO_PAN_SATURATION_HEXES))
     local semitones = math.max(
-        -SPATIAL_AUDIO_MAX_PITCH_SEMITONES,
-        math.min(SPATIAL_AUDIO_MAX_PITCH_SEMITONES, drow)
+        -PLOT_AUDIO_MAX_PITCH_SEMITONES,
+        math.min(PLOT_AUDIO_MAX_PITCH_SEMITONES, drow)
     )
     local pitch = 2 ^ (semitones / 12)
     local distance = Map.GetPlotDistance(listenerX, listenerY, sourceX, sourceY)
-    local audibleDistance = maxDistance or SPATIAL_AUDIO_DEFAULT_MAX_DISTANCE
+    local audibleDistance = maxDistance or PLOT_AUDIO_DEFAULT_MAX_DISTANCE
     local volume = math.max(0, math.min(1, 1 - distance / audibleDistance))
     return pan, pitch, volume
 end
@@ -176,7 +176,7 @@ function HexCoordUtils.directionString(fromX, fromY, toX, toY)
     end
 
     if fromX == toX and fromY == toY then
-        return ""
+        return Locale.Lookup("LOC_CAI_HERE")
     end
 
     toX, toY = NearestWrappedTo(fromX, fromY, toX, toY)

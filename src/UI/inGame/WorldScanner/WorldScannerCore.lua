@@ -28,6 +28,7 @@
 ---@field LabelKey string
 ---@field SubCategories WorldScannerSubCategory[]
 ---@field TotalItems integer
+---@field LeafMemberships table<string, table[]>|nil
 
 ---@type table
 CAIWorldScannerCore = CAIWorldScannerCore or {}
@@ -223,29 +224,26 @@ local function BuildCategoryFromItems(definition, rawItems, context)
         return nil
     end
 
-    local validatedItems = {}
+    local builtItems = {}
     for _, item in ipairs(rawItems) do
-        if item.Validate == nil or item.Validate(item, context) then
-            item._CAIDistance = Utils.GetDistance(context, item.PlotIndex)
-            item._CAIResolvedLabel = Utils.ResolveText(item.LabelKey)
-            validatedItems[#validatedItems + 1] = item
-        end
-    end
-
-    if #validatedItems == 0 then
-        LogMessage("World scanner BuildCategoryFromItems: no valid items for category " .. GetCategoryLogId(definition))
-        return nil
+        -- PlotExtract / Scan just read authoritative live state. Re-running
+        -- every item's validator here duplicates those game API lookups on
+        -- every rebuild. Validation belongs at the current-item boundary,
+        -- where it closes the race between snapshot collection and use.
+        item._CAIDistance = Utils.GetDistance(context, item.PlotIndex)
+        item._CAIResolvedLabel = Utils.ResolveText(item.LabelKey)
+        builtItems[#builtItems + 1] = item
     end
 
     local subBuckets = {}
-    for _, item in ipairs(validatedItems) do
+    for _, item in ipairs(builtItems) do
         AddBucketItem(subBuckets, item.SubCategoryId, item)
     end
 
     local subCategories = {}
     local subCategoryOrder = definition.SubCategoryOrder or {}
 
-    local allGroups = BuildGroups(definition, Core.AllSubCategoryId, validatedItems)
+    local allGroups = BuildGroups(definition, Core.AllSubCategoryId, builtItems)
     if #allGroups > 0 then
         local allCount = 0
         for _, group in ipairs(allGroups) do
@@ -295,12 +293,14 @@ local function BuildCategoryFromItems(definition, rawItems, context)
         .. GetCategoryLogId(definition)
         .. ", subcategories=" .. tostring(#subCategories)
         .. ", totalItems=" .. tostring(subCategories[1] and subCategories[1].TotalItems or 0))
-    return {
+    local category = {
         Id = definition.Id,
         LabelKey = definition.LabelKey,
         SubCategories = subCategories,
         TotalItems = subCategories[1] and subCategories[1].TotalItems or 0,
     }
+    Core.IndexCategory(category)
+    return category
 end
 
 ---@param definition WorldScannerCategoryDefinition
@@ -324,7 +324,29 @@ function Core.BuildCategory(definition, context)
     end
 
     local rawItems = {}
-    if definition.Scan ~= nil then
+    if definition.PlotExtract ~= nil then
+        if definition.BeginExtract ~= nil then
+            local ok = SafeCall(definition, "BeginExtract", definition.BeginExtract)
+            if not ok then
+                return nil
+            end
+        end
+
+        local function Collect(item)
+            rawItems[#rawItems + 1] = item
+        end
+        local ok = SafeCall(definition, "PlotExtract", function()
+            Utils.ForEachPlot(function(plotIndex, plot)
+                local isRevealed = Utils.IsPlotRevealed(context, plot)
+                if definition.ExtractHiddenPlots or isRevealed then
+                    definition.PlotExtract(plotIndex, plot, context, Collect, isRevealed)
+                end
+            end)
+        end)
+        if not ok then
+            return nil
+        end
+    elseif definition.Scan ~= nil then
         local ok, result = SafeCall(definition, "Scan", definition.Scan, context)
         if not ok then
             return nil
@@ -451,7 +473,7 @@ function Core.BuildAllCategories(definitions, context)
 end
 
 ---@param category WorldScannerCategory|nil
-function Core.RefreshCategorySort(category)
+function Core.RefreshCategorySort(category, context)
     if category == nil then
         return
     end
@@ -465,7 +487,7 @@ function Core.RefreshCategorySort(category)
             for _, item in ipairs(items) do
                 local distance = distancesByPlot[item.PlotIndex]
                 if distance == nil then
-                    distance = Utils.GetDistance(nil, item.PlotIndex)
+                    distance = Utils.GetDistance(context, item.PlotIndex)
                     distancesByPlot[item.PlotIndex] = distance
                 end
                 item.Distance = distance
@@ -480,14 +502,112 @@ function Core.RefreshCategorySort(category)
 end
 
 ---@param categories WorldScannerCategory[]|nil
-function Core.RefreshSorts(categories)
+function Core.RefreshSorts(categories, context)
     if categories == nil then
         return
     end
 
     for _, entry in ipairs(categories) do
-        Core.RefreshCategorySort(ResolveCategoryEntry(entry))
+        Core.RefreshCategorySort(ResolveCategoryEntry(entry), context)
     end
+end
+
+---@param category WorldScannerCategory|nil
+function Core.IndexCategory(category)
+    if category == nil then
+        return
+    end
+
+    local memberships = {}
+    category.LeafMemberships = memberships
+    for _, subCategory in ipairs(category.SubCategories or {}) do
+        for _, group in ipairs(subCategory.Groups or {}) do
+            for _, leaf in ipairs(group.Items or {}) do
+                local byId = memberships[leaf.Id]
+                if byId == nil then
+                    byId = {}
+                    memberships[leaf.Id] = byId
+                end
+                local membership = {
+                    SubCategory = subCategory,
+                    Group = group,
+                    Leaf = leaf,
+                }
+                byId[#byId + 1] = membership
+            end
+        end
+    end
+end
+
+local function RemoveIdentity(items, target)
+    for index = #items, 1, -1 do
+        if items[index] == target then
+            table.remove(items, index)
+            return true
+        end
+    end
+    return false
+end
+
+local function RefreshGroupAfterPrune(group)
+    group.TotalItems = #group.Items
+    local firstItem = group.Items[1]
+    group.PlotIndex = firstItem and firstItem.PlotIndex or nil
+    group.Distance = firstItem and firstItem.Distance or math.huge
+end
+
+---@param category WorldScannerCategory|nil
+---@param itemId string|nil
+---@return boolean removed
+function Core.PruneItem(category, itemId)
+    if category == nil or itemId == nil then
+        return false
+    end
+    if category.LeafMemberships == nil then
+        Core.IndexCategory(category)
+    end
+
+    local memberships = category.LeafMemberships[itemId]
+    if memberships == nil then
+        return false
+    end
+
+    local affectedSubs = {}
+    for _, membership in ipairs(memberships) do
+        local group = membership.Group
+        local subCategory = membership.SubCategory
+        if RemoveIdentity(group.Items, membership.Leaf) then
+            subCategory.TotalItems = math.max(0, (subCategory.TotalItems or 1) - 1)
+            RefreshGroupAfterPrune(group)
+            affectedSubs[subCategory] = true
+            if #group.Items == 0 then
+                RemoveIdentity(subCategory.Groups, group)
+            end
+        end
+    end
+
+    category.LeafMemberships[itemId] = nil
+    for subCategory in pairs(affectedSubs) do
+        SortGroups(subCategory.Groups, subCategory.GroupOrder, subCategory.GroupComparator)
+        if subCategory.Id ~= Core.AllSubCategoryId and #subCategory.Groups == 0 then
+            RemoveIdentity(category.SubCategories, subCategory)
+        end
+    end
+
+    local allSub = category.SubCategories[1]
+    if allSub ~= nil and allSub.Id == Core.AllSubCategoryId then
+        category.TotalItems = allSub.TotalItems
+    else
+        local totalItems = 0
+        for _, subCategory in ipairs(category.SubCategories) do
+            totalItems = totalItems + (subCategory.TotalItems or 0)
+        end
+        category.TotalItems = totalItems
+    end
+    if category.TotalItems == 0 then
+        category.SubCategories = {}
+    end
+    return true
 end
 
 ---@param scanner WorldScanner

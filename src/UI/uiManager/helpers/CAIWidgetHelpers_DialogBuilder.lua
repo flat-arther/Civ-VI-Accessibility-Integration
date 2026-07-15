@@ -85,10 +85,13 @@ function DB.CreatePopupDialog(mgr, popup)
                 end,
             })
             w:SetText(item.Control:GetText() or "", true)
-            w:SetValueSetter(function(_, text) item.Control:SetText(text) end)
+            w:On("text_changed", function(w, text)
+                item.Control:SetText(text)
+            end)
             w:SetMaxCharacters(32) -- Tends to be the default for popupdialogs.
             w:SetAlwaysEdit(true)
             w:SetFocusSound("Main_Menu_Mouse_Over")
+            w:SetEnterToCommit(false)
         elseif kind == "Count" then
             w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDlgCount"), "StaticText", {
                 Label = function()
@@ -104,7 +107,7 @@ function DB.CreatePopupDialog(mgr, popup)
             })
             w:SetFocusSound("Main_Menu_Mouse_Over")
         elseif kind == "Button" then
-            w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDlgBtn"), "Button", {
+            w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDlgBtn " .. item.Control:GetText()), "Button", {
                 Label = function() return item.Control:GetText() or "" end,
                 Tooltip = function() return item.Control:GetToolTipString() or "" end,
             })
@@ -129,7 +132,7 @@ function DB.CreatePopupDialog(mgr, popup)
     local titleFn = function() return popup.Controls.PopupTitle:GetText() end
     LogMessage("DialogBuilder CreatePopupDialog converted popup controls, content="
         .. tostring(#content) .. ", buttons=" .. tostring(#buttons))
-    return DB.MakeGeneralDialog(mgr, titleFn, buttons, content)
+    return DB.MakeGeneralDialog(mgr, titleFn, buttons, content, 1)
 end
 
 ---Bind dialog builder methods onto `mgr.WidgetHelpers`. Called once during

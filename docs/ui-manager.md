@@ -255,6 +255,21 @@ hear where focus landed. The `path` walk also **stops at a collapsed expandable*
 subtree the rebuild left closed, so focus lands on the collapsed node rather than
 silently re-opening it (which previously auto-entered submenus / tree items).
 
+Dropdown option rows automatically use `<dropdown focus key or id>:option:<index>`
+as their `FocusKey`, preferring the dropdown's stable `FocusKey` when present.
+Setting focus to any dropdown descendant silently opens its dropdown
+ancestor, just as focusing inside a collapsed tree or submenu expands that
+ancestor. When an option key matches after a rebuild, `RestoreFocus` therefore
+returns to the option inside the open dropdown instead of landing on its outer
+control.
+
+Dropdown commit is deliberately different from passive refresh. It temporarily
+sets the manager's `FocusRestoreKeyOverride` to the outer dropdown's stable key
+while its value setter and `value_changed` handlers run. The new value is thus
+committed before close, but a synchronous rebuild restores directly to the
+closed replacement dropdown instead of reopening its option row. The prior
+override is restored afterward so the transaction remains scoped.
+
 A screen that is itself about to move focus elsewhere after a rebuild (e.g. the
 diplomacy ActionView rebuilds its statement list inside `SelectPlayer` and then
 hands focus to the conversation list) should skip the restore for that pass —
@@ -469,6 +484,11 @@ Direct methods are preferred over string-dispatched actions. EditBox exposes
 `Increment`, `Decrement`, `PageIncrement`, `PageDecrement`. Dropdown:
 `SetOptions`, `SetSelectedIndex`, `GetSelectedIndex`, `Commit`, `Open`,
 `Close`, `IsOpen`.
+
+Slider `SetMin` / `SetMax` are configuration operations. If a new bound clamps
+the current internal value, that clamp is silent: it does not call the backing
+setter, emit `value_changed`, or announce a value. Screens should seed the live
+value explicitly with `SetValue(value, true)` after configuring the bounds.
 
 ### Dropdown open / commit
 

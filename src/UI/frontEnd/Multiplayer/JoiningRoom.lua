@@ -343,10 +343,87 @@ end
 include("caiUtils")
 
 local mgr = ExposedMembers.CAI_UIManager
+local caiId = "9f4b5c2e-1a2b-4c3d-8e9f-123456789abc"
 
 local m_CAI_Dialog = nil
 local m_CAI_StatusText = nil
 local m_CAI_LastStatusText = nil
+local m_CAI_RecoveryPending = false
+local m_CAI_WaitingForRecoveryConfigure = false
+local m_CAI_PendingFailurePopup = nil
+
+local function CAI_RecoverAccessibilityMod(phase)
+	local caiHandle = Modding.GetModHandle(caiId)
+	if caiHandle == nil then
+		print("CAI JoiningRoom recovery failed: accessibility mod handle is unavailable.")
+		return
+	end
+
+	-- Joining a remote configuration can disable CAI before the engine reports
+	-- why the join failed. Restore it after leaving that failed configuration;
+	-- the failure popup remains deferred until content configuration completes.
+	local wasEnabled = Modding.IsModEnabled(caiId)
+	Modding.EnableMod(caiHandle, true)
+	local isEnabled = Modding.IsModEnabled(caiId)
+	print("CAI JoiningRoom recovery phase=" .. tostring(phase)
+		.. ", wasEnabled=" .. tostring(wasEnabled)
+		.. ", isEnabled=" .. tostring(isEnabled))
+end
+
+local function CAI_OnLeaveGameComplete()
+	if not m_CAI_RecoveryPending then return end
+	m_CAI_RecoveryPending = false
+
+	-- Network.LeaveGame rolls the failed remote content configuration back after
+	-- the failure event. Reapply CAI only after that rollback, then synchronize
+	-- the current game configuration with the enabled mod set. UpdateEnabledMods
+	-- completes asynchronously through FinishedGameplayContentConfigure.
+	CAI_RecoverAccessibilityMod("after_leave_complete")
+	m_CAI_WaitingForRecoveryConfigure = true
+	GameConfiguration.UpdateEnabledMods()
+	print("CAI JoiningRoom recovery synchronized game configuration, isEnabled="
+		.. tostring(Modding.IsModEnabled(caiId)))
+end
+
+local function CAI_ShowPendingFailurePopup()
+	local popup = m_CAI_PendingFailurePopup
+	m_CAI_PendingFailurePopup = nil
+	m_CAI_WaitingForRecoveryConfigure = false
+	if popup == nil then return end
+
+	print("CAI JoiningRoom recovery complete: raising deferred failure popup.")
+	LuaEvents.MultiplayerPopup(popup.Text, popup.Title)
+end
+
+local function CAI_GetJoinRoomFailurePopup(iExtendedError)
+	if iExtendedError == JoinGameErrorType.JOINGAME_ROOM_FULL then
+		return "LOC_MP_ROOM_FULL", "LOC_MP_ROOM_FULL_TITLE"
+	elseif iExtendedError == JoinGameErrorType.JOINGAME_GAME_STARTED then
+		return "LOC_MP_ROOM_GAME_STARTED", "LOC_MP_ROOM_GAME_STARTED_TITLE"
+	elseif iExtendedError == JoinGameErrorType.JOINGAME_TOO_MANY_MATCHES then
+		return "LOC_MP_ROOM_TOO_MANY_MATCHES", "LOC_MP_ROOM_TOO_MANY_MATCHES_TITLE"
+	end
+	return "LOC_MP_JOIN_FAILED", "LOC_MP_JOIN_FAILED_TITLE"
+end
+
+local function CAI_GetAbandonedFailurePopup(eReason)
+	if eReason == KickReason.KICK_HOST then
+		return "LOC_GAME_ABANDONED_KICKED", "LOC_GAME_ABANDONED_KICKED_TITLE"
+	elseif eReason == KickReason.KICK_NO_HOST then
+		return "LOC_GAME_ABANDONED_HOST_LOSTED", "LOC_GAME_ABANDONED_HOST_LOSTED_TITLE"
+	elseif eReason == KickReason.KICK_NO_ROOM then
+		return "LOC_GAME_ABANDONED_ROOM_FULL", "LOC_GAME_ABANDONED_ROOM_FULL_TITLE"
+	elseif eReason == KickReason.KICK_VERSION_MISMATCH then
+		return "LOC_GAME_ABANDONED_VERSION_MISMATCH", "LOC_GAME_ABANDONED_VERSION_MISMATCH_TITLE"
+	elseif eReason == KickReason.KICK_MOD_ERROR then
+		return "LOC_GAME_ABANDONED_MOD_ERROR", "LOC_GAME_ABANDONED_MOD_ERROR_TITLE"
+	elseif eReason == KickReason.KICK_MOD_MISSING then
+		return Modding.GetLastModErrorString(), "LOC_GAME_ABANDONED_MOD_MISSING_TITLE"
+	elseif eReason == KickReason.KICK_MATCH_DELETED then
+		return "LOC_GAME_ABANDONED_MATCH_DELETED", "LOC_GAME_ABANDONED_MATCH_DELETED_TITLE"
+	end
+	return "LOC_GAME_ABANDONED_JOIN_FAILED", "LOC_GAME_ABANDONED_JOIN_FAILED_TITLE"
+end
 
 local function CAI_GetControlText(control)
 	if control and control.GetText then
@@ -388,6 +465,21 @@ local function CAI_PopDialog()
 	m_CAI_Dialog = nil
 	m_CAI_StatusText = nil
 	m_CAI_LastStatusText = nil
+end
+
+local function CAI_DeferFailurePopup(popupText, popupTitle)
+	m_CAI_RecoveryPending = true
+	m_CAI_PendingFailurePopup = {
+		Text = popupText,
+		Title = popupTitle,
+	}
+
+	-- Do not raise MultiplayerPopup yet. The failed remote configuration still
+	-- owns the active settings database, so FrontEndPopup would be pushed before
+	-- CAI's speech settings (including SpeakRole) exist again.
+	CAI_PopDialog()
+	UIManager:DequeuePopup(ContextPtr)
+	Network.LeaveGame()
 end
 
 local function CAI_PushDialog()
@@ -434,6 +526,13 @@ OnJoinGameComplete = WrapFunc(OnJoinGameComplete, function(orig, ...)
 	CAI_SpeakStatusIfChanged()
 end)
 
+OnFinishedGameplayContentConfigure = WrapFunc(OnFinishedGameplayContentConfigure, function(orig, kEvent)
+	orig(kEvent)
+	if m_CAI_WaitingForRecoveryConfigure and kEvent.Success == true then
+		CAI_ShowPendingFailurePopup()
+	end
+end)
+
 OnModStatusUpdated = WrapFunc(OnModStatusUpdated, function(orig, ...)
 	orig(...)
 	CAI_SpeakStatusIfChanged()
@@ -445,24 +544,37 @@ OnConnectedToNetSessionHost = WrapFunc(OnConnectedToNetSessionHost, function(ori
 end)
 
 OnJoinRoomFailed = WrapFunc(OnJoinRoomFailed, function(orig, ...)
-	orig(...)
-	if ContextPtr:IsHidden() then-- Need to check if the context is hidden, because it is not certain that the popup will have been dequeued, as that is gated behind some if statements
-	CAI_PopDialog()
-end
+	local iExtendedError = ...
+	if ContextPtr:IsHidden() or Network.IsMatchMaking() then
+		orig(...)
+		return
+	end
+
+	local popupText, popupTitle = CAI_GetJoinRoomFailurePopup(iExtendedError)
+	print("JoiningRoom::OnJoinRoomFailed() deferring popup until CAI recovery completes.")
+	CAI_DeferFailurePopup(popupText, popupTitle)
 end)
 
 OnMultiplayerMatchmakingFailed = WrapFunc(OnMultiplayerMatchmakingFailed, function(orig, ...)
-	orig(...)
-	if ContextPtr:IsHidden() then-- Need to check if the context is hidden, because it is not certain that the popup will have been dequeued, as that is gated behind some if statements
-	CAI_PopDialog()
-end
+	if ContextPtr:IsHidden() then
+		orig(...)
+		return
+	end
+
+	print("JoiningRoom::OnMultiplayerMatchmakingFailed() deferring popup until CAI recovery completes.")
+	CAI_DeferFailurePopup("LOC_MP_JOIN_FAILED", "LOC_MP_JOIN_FAILED_TITLE")
 end)
 
 OnMultiplayerGameAbandoned = WrapFunc(OnMultiplayerGameAbandoned, function(orig, ...)
-	orig(...)
-	if ContextPtr:IsHidden() then-- Need to check if the context is hidden, because it is not certain that the popup will have been dequeued, as that is gated behind some if statements
-	CAI_PopDialog()
-end
+	local eReason = ...
+	if ContextPtr:IsHidden() or Network.IsMatchMaking() then
+		orig(...)
+		return
+	end
+
+	local popupText, popupTitle = CAI_GetAbandonedFailurePopup(eReason)
+	print("JoiningRoom::OnMultiplayerGameAbandoned() deferring popup until CAI recovery completes.")
+	CAI_DeferFailurePopup(popupText, popupTitle)
 end)
 
 OnBeforeMultiplayerInviteProcessing = WrapFunc(OnBeforeMultiplayerInviteProcessing, function(orig, ...)
@@ -470,9 +582,9 @@ OnBeforeMultiplayerInviteProcessing = WrapFunc(OnBeforeMultiplayerInviteProcessi
 	orig(...)
 end)
 
-
 Initialize = WrapFunc(Initialize, function(orig)
 	orig()
+	Events.LeaveGameComplete.Add(CAI_OnLeaveGameComplete)
 	ContextPtr:SetInputHandler(function(input)
 		if mgr:HandleInput(input) then
 			return true

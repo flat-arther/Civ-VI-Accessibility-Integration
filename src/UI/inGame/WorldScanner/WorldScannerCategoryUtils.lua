@@ -3,8 +3,6 @@
 CAIWorldScannerUtils = CAIWorldScannerUtils or {}
 
 local Utils = CAIWorldScannerUtils
-local m_currentCursorX = nil
-local m_currentCursorY = nil
 
 ---@param labelKey string|number|nil
 ---@return string
@@ -53,13 +51,6 @@ function Utils.GetPlotCoords(plotIndex)
     end
 
     return plot:GetX(), plot:GetY()
-end
-
----@param x integer
----@param y integer
-function Utils.SetCurrentCursorPosition(x, y)
-    m_currentCursorX = x
-    m_currentCursorY = y
 end
 
 ---@param context WorldScannerContext|nil
@@ -117,7 +108,9 @@ end
 ---@param plotIndex integer
 ---@return number
 function Utils.GetDistance(context, plotIndex)
-    if m_currentCursorX == nil or m_currentCursorY == nil then
+    local originX = context and context.SortOriginX or nil
+    local originY = context and context.SortOriginY or nil
+    if originX == nil or originY == nil then
         return math.huge
     end
 
@@ -126,7 +119,7 @@ function Utils.GetDistance(context, plotIndex)
         return math.huge
     end
 
-    return Map.GetPlotDistance(m_currentCursorX, m_currentCursorY, plot:GetX(), plot:GetY())
+    return Map.GetPlotDistance(originX, originY, plot:GetX(), plot:GetY())
 end
 
 ---@param context WorldScannerContext|nil

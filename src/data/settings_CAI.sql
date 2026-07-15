@@ -51,6 +51,12 @@ VALUES
     ('TokenSplitLength', 'UI', 50, 'number', 'editbox', '75',
      'LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH', 'LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH_TOOLTIP', 'NumbersOnly'),
 
+    ('SpeakTurnBlockers', 'Events', 10, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_SPEAK_TURN_BLOCKERS', 'LOC_CAI_SETTING_SPEAK_TURN_BLOCKERS_TOOLTIP', NULL),
+
+    ('SpeakBetweenTurnsMessage', 'Events', 20, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_SPEAK_BETWEEN_TURNS_MESSAGE', 'LOC_CAI_SETTING_SPEAK_BETWEEN_TURNS_MESSAGE_TOOLTIP', NULL),
+
     ('AudioTagEnabled_CURSOR', 'Cursor', 10, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_CURSOR_AUDIO_ENABLED', 'LOC_CAI_SETTING_CURSOR_AUDIO_ENABLED_TOOLTIP', NULL),
 
@@ -60,19 +66,22 @@ VALUES
     ('ScannerBeaconEnabled', 'WorldScanner', 10, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SCANNER_BEACON_ENABLED', 'LOC_CAI_SETTING_SCANNER_BEACON_ENABLED_TOOLTIP', NULL),
 
-    ('ScannerAutoMoveCursor', 'WorldScanner', 20, 'bool', 'checkbox', 'false',
+    ('AudioTagVolume_BEACONS', 'WorldScanner', 20, 'number', 'slider', '100',
+     'LOC_CAI_SETTING_SCANNER_BEACON_VOLUME', 'LOC_CAI_SETTING_SCANNER_BEACON_VOLUME_TOOLTIP', NULL),
+
+    ('ScannerAutoMoveCursor', 'WorldScanner', 30, 'bool', 'checkbox', 'false',
      'LOC_CAI_SETTING_SCANNER_AUTO_MOVE_CURSOR', 'LOC_CAI_SETTING_SCANNER_AUTO_MOVE_CURSOR_TOOLTIP', NULL),
 
-    ('ScannerCoordinates', 'WorldScanner', 30, 'string', 'dropdown', 'disabled',
+    ('ScannerCoordinates', 'WorldScanner', 40, 'string', 'dropdown', 'disabled',
      'LOC_CAI_SETTING_SCANNER_COORDINATES', 'LOC_CAI_SETTING_SCANNER_COORDINATES_TOOLTIP', NULL),
 
-    ('ScannerAutoFocusValidTargets', 'WorldScanner', 40, 'bool', 'checkbox', 'false',
+    ('ScannerAutoFocusValidTargets', 'WorldScanner', 50, 'bool', 'checkbox', 'false',
      'LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_VALID_TARGETS', 'LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_VALID_TARGETS_TOOLTIP', NULL),
 
-    ('ScannerAutoFocusActiveLens', 'WorldScanner', 50, 'bool', 'checkbox', 'false',
+    ('ScannerAutoFocusActiveLens', 'WorldScanner', 60, 'bool', 'checkbox', 'false',
      'LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_ACTIVE_LENS', 'LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_ACTIVE_LENS_TOOLTIP', NULL),
 
-    ('ScannerGroupCitiesByCivilization', 'WorldScanner', 60, 'bool', 'checkbox', 'true',
+    ('ScannerGroupCitiesByCivilization', 'WorldScanner', 70, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SCANNER_GROUP_CITIES_BY_CIVILIZATION', 'LOC_CAI_SETTING_SCANNER_GROUP_CITIES_BY_CIVILIZATION_TOOLTIP', NULL),
 
     ('CursorCoordinates', 'Cursor', 30, 'string', 'dropdown', 'disabled',
@@ -90,31 +99,31 @@ VALUES
     ('SpeakNationalParkZone', 'Cursor', 70, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_NATIONAL_PARK_ZONE', 'LOC_CAI_SETTING_SPEAK_NATIONAL_PARK_ZONE_TOOLTIP', NULL),
 
-    ('AnnounceVisibilityChangesTurnStart', 'Events', 10, 'bool', 'checkbox', 'true',
+    ('AnnounceVisibilityChangesTurnStart', 'Events', 30, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_TURN_START', 'LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_TURN_START_TOOLTIP', NULL),
 
-    ('AnnounceVisibilityChangesOutsideTurn', 'Events', 20, 'bool', 'checkbox', 'false',
+    ('AnnounceVisibilityChangesOutsideTurn', 'Events', 40, 'bool', 'checkbox', 'false',
      'LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_OUTSIDE_TURN', 'LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_OUTSIDE_TURN_TOOLTIP', NULL),
 
-    ('AnnounceVisibilityChangesWhileMoving', 'Events', 30, 'bool', 'checkbox', 'true',
+    ('AnnounceVisibilityChangesWhileMoving', 'Events', 50, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_WHILE_MOVING', 'LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_WHILE_MOVING_TOOLTIP', NULL),
 
-    ('AnnounceUnitMovesOwn', 'Events', 40, 'string', 'dropdown', 'none',
+    ('AnnounceUnitMovesOwn', 'Events', 60, 'string', 'dropdown', 'none',
      'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_OWN', 'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_OWN_TOOLTIP', NULL),
 
-    ('AnnounceUnitMovesTeammate', 'Events', 50, 'string', 'dropdown', 'none',
+    ('AnnounceUnitMovesTeammate', 'Events', 70, 'string', 'dropdown', 'none',
      'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_TEAMMATE', 'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_TEAMMATE_TOOLTIP', NULL),
 
-    ('AnnounceUnitMovesHostile', 'Events', 60, 'string', 'dropdown', 'none',
+    ('AnnounceUnitMovesHostile', 'Events', 80, 'string', 'dropdown', 'none',
      'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_HOSTILE', 'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_HOSTILE_TOOLTIP', NULL),
 
-    ('AnnounceUnitMovesNeutral', 'Events', 70, 'string', 'dropdown', 'none',
+    ('AnnounceUnitMovesNeutral', 'Events', 90, 'string', 'dropdown', 'none',
      'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_NEUTRAL', 'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_NEUTRAL_TOOLTIP', NULL),
 
-    ('AnnounceUnitMovesCityState', 'Events', 80, 'string', 'dropdown', 'none',
+    ('AnnounceUnitMovesCityState', 'Events', 100, 'string', 'dropdown', 'none',
      'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_CITY_STATE', 'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_CITY_STATE_TOOLTIP', NULL),
 
-    ('AnnounceUnitMovesBarbarian', 'Events', 90, 'string', 'dropdown', 'both',
+    ('AnnounceUnitMovesBarbarian', 'Events', 110, 'string', 'dropdown', 'both',
      'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_BARBARIAN', 'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_BARBARIAN_TOOLTIP', NULL),
 
     ('SpeakMessageBufferNotifications', 'MessageBuffer', 10, 'bool', 'checkbox', 'true',
@@ -140,7 +149,7 @@ VALUES
 
 UPDATE CAI_Settings
 SET MinValue = 0, MaxValue = 100, StepValue = 5, PageStepValue = 10
-WHERE SettingId = 'AudioTagVolume_CURSOR';
+WHERE SettingId IN ('AudioTagVolume_CURSOR', 'AudioTagVolume_BEACONS');
 
 INSERT OR REPLACE INTO CAI_SettingOptions
     (SettingId, Value, Label, Tooltip, SortIndex)

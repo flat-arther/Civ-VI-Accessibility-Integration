@@ -210,13 +210,15 @@ local function BuildMovementText(pending, label)
     label = label or pending.label
     local pathText = BuildPathText(pending)
     if pending.isRelocation or pending.hasVisibilityGap or pathText == "" then
+        if pending.startX ~= nil and pending.startY ~= nil
+            and pending.startX == pending.lastKnownX and pending.startY == pending.lastKnownY then
+            return nil
+        end
+
         local displacement = CAIHexCoordUtils.directionString(
             pending.startX, pending.startY, pending.lastKnownX, pending.lastKnownY)
         if displacement ~= "" then
             return Locale.Lookup("LOC_CAI_UNIT_MOVE_LOG_PATH", label, displacement)
-        elseif pending.startX ~= nil and pending.startY ~= nil
-            and pending.startX == pending.lastKnownX and pending.startY == pending.lastKnownY then
-            return nil
         elseif pending.isRelocation then
             return Locale.Lookup("LOC_CAI_UNIT_MOVE_LOG_RELOCATED", label)
         end
@@ -530,12 +532,14 @@ local function AppendTeleport(observerID, state, playerID, unitID, fromX, fromY,
     state.positions[key] = { x = x, y = y }
     state.visibility[key] = true
     state.pendingTeleports[key] = nil
+    if fromX ~= nil and fromY ~= nil and fromX == x and fromY == y then
+        return
+    end
+
     local displacement = CAIHexCoordUtils.directionString(fromX, fromY, x, y)
     local text
     if displacement ~= "" then
         text = Locale.Lookup("LOC_CAI_UNIT_MOVE_LOG_PATH", label, displacement)
-    elseif fromX ~= nil and fromY ~= nil and fromX == x and fromY == y then
-        return
     else
         text = Locale.Lookup("LOC_CAI_UNIT_MOVE_LOG_RELOCATED", label)
     end
