@@ -21,6 +21,7 @@ local m_currentData       = nil ---@type table|nil
 local m_currentControl    = nil ---@type table|nil
 local m_instanceByHash    = {} ---@type table<number, table>
 local m_modifierCache     = nil ---@type table|nil
+local m_leadsToByType     = nil ---@type table<string, string[]>|nil
 local m_openPending       = false
 
 local function GetModifierCache()
@@ -151,6 +152,39 @@ local function GetObsoletesText(obsoleteNames)
     return Locale.Lookup("LOC_CAI_CIVIC_OBSOLETES_HEADER", table.concat(obsoleteNames, ", "))
 end
 
+local function GetLeadsToText(kData)
+    local civicType = kData and kData.CivicType
+    if not civicType then return nil end
+
+    if not m_leadsToByType then
+        m_leadsToByType = {}
+        for prereq in GameInfo.CivicPrereqs() do
+            local leadsTo = m_leadsToByType[prereq.PrereqCivic]
+            if not leadsTo then
+                leadsTo = {}
+                m_leadsToByType[prereq.PrereqCivic] = leadsTo
+            end
+            leadsTo[#leadsTo + 1] = prereq.Civic
+        end
+    end
+
+    local localPlayer = Game.GetLocalPlayer()
+    local player = localPlayer ~= PlayerTypes.NONE and Players[localPlayer] or nil
+    local playerCulture = player and player:GetCulture() or nil
+    local names = {}
+    for _, targetType in ipairs(m_leadsToByType[civicType] or {}) do
+        local civic = GameInfo.Civics[targetType]
+        if civic then
+            local isRevealed = not playerCulture or not playerCulture.IsCivicRevealed
+                or playerCulture:IsCivicRevealed(civic.Index)
+            names[#names + 1] = isRevealed and Locale.Lookup(civic.Name)
+                or Locale.Lookup("LOC_CIVICS_TREE_NOT_REVEALED_CIVIC")
+        end
+    end
+    if #names == 0 then return nil end
+    return Locale.Lookup("LOC_CAI_CIVIC_LEADS_TO_HEADER", table.concat(names, ", "))
+end
+
 local function GetAwardNamesFor(kData)
     local civicType = kData and kData.CivicType
     if not civicType then return {} end
@@ -182,6 +216,7 @@ local function FormatTooltip(kData, unlocks, obsoleteNames, awardNames)
     AppendIfNonEmpty(parts, GetDescriptionText(kData))
     AppendIfNonEmpty(parts, GetBoostText(kData))
     AppendIfNonEmpty(parts, GetObsoletesText(obsoleteNames))
+    AppendIfNonEmpty(parts, GetLeadsToText(kData))
     AppendIfNonEmpty(parts, GetUnlocksText(unlocks))
     AppendIfNonEmpty(parts, GetCivicAwardsText(awardNames))
     return table.concat(parts, "[NEWLINE]")

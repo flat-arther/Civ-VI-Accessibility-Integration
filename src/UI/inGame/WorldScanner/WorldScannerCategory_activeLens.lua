@@ -18,6 +18,7 @@ local SUBCATEGORY_TOURISM_CITY = "tourismCity"
 local SUBCATEGORY_TOURISM_STRENGTH = "tourismStrength"
 local SUBCATEGORY_RELIGION = "religion"
 local SUBCATEGORY_LOYALTY_LENS = "loyaltyLens"
+local SUBCATEGORY_PLAGUE = "plague"
 
 local GROUP_WATER_VALID = "water:valid"
 local GROUP_WATER_FRESH = "water:fresh"
@@ -49,6 +50,7 @@ local LENS_POWER = "Power"
 local LENS_TOURISM = "Tourism"
 local LENS_RELIGION = "Religion"
 local LENS_LOYALTY = "Loyalty"
+local LENS_PLAGUE = "Plague"
 
 local LAYER_SETTLER = UILens.CreateLensLayerHash("Hex_Coloring_Water_Availablity")
 local LAYER_APPEAL = UILens.CreateLensLayerHash("Hex_Coloring_Appeal_Level")
@@ -111,6 +113,7 @@ local subCategoryLabels = {
     [SUBCATEGORY_TOURISM_STRENGTH] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TOURISM_STRENGTH",
     [SUBCATEGORY_RELIGION] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_RELIGION",
     [SUBCATEGORY_LOYALTY_LENS] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_LOYALTY",
+    [SUBCATEGORY_PLAGUE] = "LOC_HUD_PLAGUE_LENS",
 }
 
 local DISASTER_GROUP_ORDER = {
@@ -833,7 +836,57 @@ local function ScanLoyaltyLens(context)
     return out
 end
 
+local function ScanPlagueLens(context)
+    local out = {}
+    local falloutManager = Game.GetFalloutManager()
+    if falloutManager == nil then
+        return out
+    end
+
+    Utils.ForEachRevealedPlot(context, function(plotIndex, plot)
+        local plagueTurns = falloutManager:GetFalloutTurnsRemaining(plotIndex) or 0
+        if plagueTurns <= 0 then
+            return
+        end
+
+        local plagueLabel = Locale.Lookup("LOC_TOOLTIP_PLOT_CONTAMINATED_TEXT", plagueTurns)
+        AddItem(out, {
+            Id = "activeLens:" .. LENS_PLAGUE .. ":" .. SUBCATEGORY_PLAGUE .. ":" .. tostring(plotIndex),
+            PlotIndex = plotIndex,
+            LabelKey = plagueLabel,
+            SubCategoryId = SUBCATEGORY_PLAGUE,
+            GroupId = "plague:" .. tostring(plagueTurns),
+            GroupLabelKey = plagueLabel,
+            GroupSortValue = plagueTurns,
+            Validate = function(item, validateContext)
+                local validatePlot = Map.GetPlotByIndex(item.PlotIndex)
+                if validatePlot == nil or not Utils.IsPlotRevealed(validateContext, validatePlot) then
+                    return false
+                end
+
+                local validateFalloutManager = Game.GetFalloutManager()
+                if validateFalloutManager == nil then
+                    return false
+                end
+
+                local currentTurns = validateFalloutManager:GetFalloutTurnsRemaining(item.PlotIndex) or 0
+                return currentTurns > 0 and item.GroupId == "plague:" .. tostring(currentTurns)
+            end,
+        })
+    end)
+
+    return out
+end
+
 local supportedLenses = {
+    {
+        Id = LENS_PLAGUE,
+        IsActive = function()
+            return GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH"
+                and ExposedMembers.CAIPlagueLensActive == true
+        end,
+        Scan = ScanPlagueLens,
+    },
     {
         Id = LENS_SETTLER,
         IsActive = function()
@@ -931,6 +984,7 @@ CAIWorldScannerCategory_ActiveLens = {
         SUBCATEGORY_TOURISM_STRENGTH,
         SUBCATEGORY_RELIGION,
         SUBCATEGORY_LOYALTY_LENS,
+        SUBCATEGORY_PLAGUE,
     },
     SubCategoryLabels = subCategoryLabels,
     GroupOrderBySubCategory = {
@@ -949,6 +1003,15 @@ CAIWorldScannerCategory_ActiveLens = {
         return firstItem ~= nil and firstItem.GroupLabelKey or "LOC_CAI_WORLD_SCANNER_UNKNOWN"
     end,
     GroupComparatorBySubCategory = {
+        [SUBCATEGORY_PLAGUE] = function(a, b)
+            local aValue = a.SortValue or 0
+            local bValue = b.SortValue or 0
+            if aValue ~= bValue then
+                return aValue > bValue
+            end
+
+            return nil
+        end,
         [SUBCATEGORY_LOYALTY] = function(a, b)
             local aValue = a.SortValue or 0
             local bValue = b.SortValue or 0

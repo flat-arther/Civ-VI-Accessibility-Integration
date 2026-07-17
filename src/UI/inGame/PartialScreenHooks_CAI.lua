@@ -1,6 +1,10 @@
 include("caiUtils")
 include("Civ6Common")
-if IsExpansion2Active() then
+local m_isAustraliaScenario = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_AUSTRALIA"
+
+if m_isAustraliaScenario then
+    include("PartialScreenHooks_AustraliaScenario")
+elseif IsExpansion2Active() then
     include("PartialScreenHooks_Expansion2")
 elseif IsExpansion1Active() then
     include("PartialScreenHooks_Expansion1")
@@ -55,7 +59,9 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     end
     if m_caiOpenEspionageId and actionId == m_caiOpenEspionageId then
         local player = GetLocalPlayer()
-        if not GameCapabilities.HasCapability("CAPABILITY_ESPIONAGE_VIEW") then
+        if m_isAustraliaScenario then
+            Speak(Locale.Lookup("LOC_CAI_UI_UNAVAILABLE_IN_CURRENT_GAME"))
+        elseif not GameCapabilities.HasCapability("CAPABILITY_ESPIONAGE_VIEW") then
             Speak(Locale.Lookup("LOC_CAI_UI_UNAVAILABLE_IN_CURRENT_GAME"))
         elseif UI.QueryGlobalParameterInt("DISABLE_ESPIONAGE_HOTKEY") == 1 then
             Speak(Locale.Lookup("LOC_CAI_UI_ESPIONAGE_HOTKEY_DISABLED"))

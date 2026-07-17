@@ -1,6 +1,14 @@
 include("caiUtils")
 include("Civ6Common")
-if IsExpansion2Active() then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+    include("WorldRankings_BlackDeathScenario")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_AUSTRALIA" then
+    include("WorldRankings_AustraliaScenario")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_ALEXANDER" then
+    include("WorldRankings_AlexanderScenario")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_NUBIA" then
+    include("WorldRankings_NubiaScenario")
+elseif IsExpansion2Active() then
     include("WorldRankings_Expansion2")
 elseif IsExpansion1Active() then
     include("WorldRankings_Expansion1")
@@ -29,6 +37,11 @@ local m_capturedTabs              = {}
 local m_isMirroringTab            = false
 local m_currentGenericVictoryType = nil
 local m_pendingVictoryType        = nil
+local m_genericCapture            = nil
+local m_genericCapturedRows       = {}
+local m_scoreCapture              = nil
+local m_scoreCapturedRows         = nil
+local m_genericVictoryAdapters    = {}
 
 local m_isExp2                    = (IsExpansion2Active ~= nil and IsExpansion2Active())
 
@@ -73,6 +86,208 @@ local function JoinLines(parts)
     end
     return table.concat(filtered, "[NEWLINE]")
 end
+
+local function AddUniqueText(target, seen, text)
+    if text and text ~= "" and not seen[text] then
+        seen[text] = true
+        table.insert(target, text)
+    end
+end
+
+local function ReadVisibleControlText(control)
+    if not control or not control.IsHidden or not control.GetText or control:IsHidden() then
+        return nil
+    end
+    return control:GetText()
+end
+
+local function ReadVisibleControlTooltip(control)
+    if not control or not control.IsHidden or not control.GetToolTipString or control:IsHidden() then
+        return nil
+    end
+    return control:GetToolTipString()
+end
+
+local PRESENTATION_IGNORED_KEYS = {
+    CivilizationIcon = true,
+    CivName = true,
+    TeamName = true,
+    CivIcon = true,
+    CivIconBacking = true,
+    LeaderIcon = true,
+    TeamIcon = true,
+}
+
+local PRESENTATION_DETAIL_KEYS = {
+    Details = true,
+    Description = true,
+    Requirement = true,
+    Requirements = true,
+}
+
+local function CaptureInstancePresentation(instance)
+    local presentation = { Values = {}, Details = {}, Tooltips = {} }
+    local seenValues = {}
+    local seenDetails = {}
+    local seenTooltips = {}
+    local visited = {}
+
+    local function Visit(value, key, depth)
+        if type(value) ~= "table" or visited[value] or depth > 4 then return end
+        visited[value] = true
+
+        if value.IsHidden and value.GetText then
+            local text = ReadVisibleControlText(value)
+            if PRESENTATION_DETAIL_KEYS[key] then
+                AddUniqueText(presentation.Details, seenDetails, text)
+            else
+                AddUniqueText(presentation.Values, seenValues, text)
+            end
+            AddUniqueText(presentation.Tooltips, seenTooltips, ReadVisibleControlTooltip(value))
+            return
+        end
+
+        for childKey, child in pairs(value) do
+            local isInstanceManager = type(childKey) == "string" and string.sub(childKey, -2) == "IM"
+            if not PRESENTATION_IGNORED_KEYS[childKey] and not isInstanceManager then
+                Visit(child, childKey, depth + 1)
+            end
+        end
+    end
+
+    Visit(instance, nil, 0)
+    return presentation
+end
+
+local function GetCaptureTarget(capture)
+    local parent = capture.ParentStack[#capture.ParentStack]
+    return parent or capture.Rows
+end
+
+local function BeginGenericCapture(victoryType)
+    m_genericCapture = {
+        VictoryType = victoryType,
+        Rows = {},
+        ParentStack = {},
+    }
+end
+
+local function EndGenericCapture(victoryType)
+    local capture = m_genericCapture
+    m_genericCapture = nil
+    if capture and capture.VictoryType == victoryType and #capture.Rows > 0 then
+        m_genericCapturedRows[victoryType] = capture.Rows
+    else
+        m_genericCapturedRows[victoryType] = nil
+    end
+end
+
+local function BeginScoreCapture()
+    m_scoreCapture = { Rows = {}, ParentStack = {} }
+end
+
+local function EndScoreCapture()
+    local capture = m_scoreCapture
+    m_scoreCapture = nil
+    if capture and #capture.Rows > 0 then
+        m_scoreCapturedRows = capture.Rows
+    else
+        m_scoreCapturedRows = nil
+    end
+end
+
+local function RegisterGenericVictoryAdapter(victoryType, adapter)
+    if type(victoryType) ~= "string" or type(adapter) ~= "table"
+        or type(adapter.GetRows) ~= "function" then
+        print("CAI WorldRankings: invalid generic victory adapter registration")
+        return false
+    end
+    m_genericVictoryAdapters[victoryType] = adapter
+    return true
+end
+
+local function GetGenericVictoryRows(victoryType)
+    local capturedRows = m_genericCapturedRows[victoryType]
+    local adapter = m_genericVictoryAdapters[victoryType]
+    if not adapter then return capturedRows end
+
+    local ok, rows = pcall(adapter.GetRows, victoryType, capturedRows)
+    if not ok then
+        print("CAI WorldRankings: generic victory adapter failed for "
+            .. victoryType .. ": " .. tostring(rows))
+        return capturedRows
+    end
+    if rows ~= nil and type(rows) ~= "table" then
+        print("CAI WorldRankings: generic victory adapter returned invalid rows for " .. victoryType)
+        return capturedRows
+    end
+    return rows
+end
+
+ExposedMembers.CAIWorldRankings = ExposedMembers.CAIWorldRankings or {}
+ExposedMembers.CAIWorldRankings.RegisterGenericVictoryAdapter = RegisterGenericVictoryAdapter
+
+PopulateGenericInstance = WrapFunc(PopulateGenericInstance,
+    function(orig, instance, playerData, victoryType, showTeamDetails)
+        orig(instance, playerData, victoryType, showTeamDetails)
+        if m_genericCapture then
+            table.insert(GetCaptureTarget(m_genericCapture), {
+                Kind = "player",
+                PlayerData = playerData,
+                Presentation = CaptureInstancePresentation(instance),
+            })
+        end
+    end)
+
+PopulateGenericTeamInstance = WrapFunc(PopulateGenericTeamInstance,
+    function(orig, instance, teamData, victoryType)
+        if not m_genericCapture then
+            orig(instance, teamData, victoryType)
+            return
+        end
+
+        local record = {
+            Kind = "team",
+            TeamData = teamData,
+            Children = {},
+        }
+        table.insert(GetCaptureTarget(m_genericCapture), record)
+        table.insert(m_genericCapture.ParentStack, record.Children)
+        orig(instance, teamData, victoryType)
+        table.remove(m_genericCapture.ParentStack)
+        record.Presentation = CaptureInstancePresentation(instance)
+    end)
+
+PopulateScoreInstance = WrapFunc(PopulateScoreInstance,
+    function(orig, instance, playerData)
+        orig(instance, playerData)
+        if m_scoreCapture then
+            table.insert(GetCaptureTarget(m_scoreCapture), {
+                Kind = "player",
+                PlayerData = playerData,
+                Presentation = CaptureInstancePresentation(instance),
+            })
+        end
+    end)
+
+PopulateScoreTeamInstance = WrapFunc(PopulateScoreTeamInstance,
+    function(orig, instance, teamData)
+        if not m_scoreCapture then
+            orig(instance, teamData)
+            return
+        end
+
+        local record = {
+            Kind = "team",
+            TeamData = teamData,
+            Children = {},
+        }
+        table.insert(GetCaptureTarget(m_scoreCapture), record)
+        table.insert(m_scoreCapture.ParentStack, record.Children)
+        orig(instance, teamData)
+        table.remove(m_scoreCapture.ParentStack)
+        record.Presentation = CaptureInstancePresentation(instance)
+    end)
 
 local VIEW_CONTROL_TO_TAB = {
     { control = "OverallView",    label = TAB_OVERALL },
@@ -148,9 +363,105 @@ end
 -- ============================================================================
 -- Overall Tab
 -- ============================================================================
+local function GetAlexanderCityCounts()
+    local enemyCities = 0
+    local ownedCities = 0
+
+    for _, player in ipairs(PlayerManager.GetAlive()) do
+        for _, city in player:GetCities():Members() do
+            if player:GetID() > 0 then
+                enemyCities = enemyCities + 1
+            else
+                ownedCities = ownedCities + 1
+            end
+        end
+    end
+
+    return enemyCities, ownedCities
+end
+
+local AUSTRALIA_VICTORY_THRESHOLDS = { 200, 300, 400, 500, 600, 700, 800, 900 }
+
+local function GetAustraliaDifficultyScore(difficultyIndex)
+    local difficulty = GameInfo.Difficulties[difficultyIndex]
+    return Locale.Lookup(difficulty.Name) .. ", "
+        .. Locale.Lookup("LOC_SCENARIO_AUSTRALIA_SINGLE_PLAYER_SCORE",
+            AUSTRALIA_VICTORY_THRESHOLDS[difficultyIndex + 1])
+end
+
 local function RebuildOverallTree(tree)
     local capture = mgr:CaptureFocusKey(tree)
     tree:ClearChildren()
+
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_AUSTRALIA" then
+        AddLeaf(tree, "australia:description", function()
+            return Locale.Lookup("LOC_AUSTRALIA_SCENARIO_DESCRIPTION")
+        end)
+
+        AddLeaf(tree, "australia:outback", function()
+            return JoinLines({
+                Locale.Lookup("LOC_SCENARIO_AUSTRALIA_OUTBACK_TITLE"),
+                Locale.Lookup("LOC_SCENARIO_AUSTRALIA_OUTBACK_EFFECTS"),
+            })
+        end)
+
+        if not GameConfiguration.IsAnyMultiplayer() then
+            local currentGame = MakeTreeItem({
+                Label = function()
+                    local playerConfig = PlayerConfigurations[Game.GetLocalPlayer()]
+                    local difficulty = GameInfo.Difficulties[playerConfig:GetHandicapTypeID()]
+                    return JoinLines({
+                        Locale.Lookup("LOC_SCENARIO_AUSTRALIA_CURRENT_GAME_DIFFICULTY",
+                            Locale.Lookup(difficulty.Name)),
+                        Locale.Lookup("LOC_SCENARIO_AUSTRALIA_SINGLE_PLAYER_SCORE",
+                            AUSTRALIA_VICTORY_THRESHOLDS[difficulty.Index + 1]),
+                    })
+                end,
+                FocusKey = "australia:current",
+            })
+
+            for index = 7, 0, -1 do
+                local difficultyIndex = index
+                AddLeaf(currentGame, "australia:difficulty:" .. difficultyIndex, function()
+                    return GetAustraliaDifficultyScore(difficultyIndex)
+                end)
+            end
+
+            tree:AddChild(currentGame)
+        end
+
+        mgr:RestoreFocus(tree, capture)
+        return
+    end
+
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_ALEXANDER" then
+        AddLeaf(tree, "alexander:rules", function()
+            return JoinLines({
+                Locale.Lookup("LOC_ALEXANDER_SCENARIO_WORLD_RANKING_1"),
+                Locale.Lookup("LOC_ALEXANDER_SCENARIO_WORLD_RANKING_2"),
+                Locale.Lookup("LOC_ALEXANDER_SCENARIO_WORLD_RANKING_3"),
+            })
+        end)
+
+        AddLeaf(tree, "alexander:rewards", function()
+            return JoinLines({
+                Locale.Lookup("LOC_ALEXANDER_SCENARIO_WORLD_RANKING_4"),
+                Locale.Lookup("LOC_ALEXANDER_SCENARIO_WORLD_RANKING_5"),
+            })
+        end)
+
+        AddLeaf(tree, "alexander:progress", function()
+            local enemyCities, ownedCities = GetAlexanderCityCounts()
+            return JoinLines({
+                Locale.Lookup("LOC_ALEXANDER_SCENARIO_WORLD_RANKING_6", enemyCities),
+                Locale.Lookup("LOC_ALEXANDER_SCENARIO_WORLD_RANKING_8", ownedCities * 5),
+                Locale.Lookup("LOC_ALEXANDER_ENDGAME_RANKING_LEADER_QUOTE"),
+            })
+        end)
+
+        mgr:RestoreFocus(tree, capture)
+        return
+    end
 
     local teamIDs = GetAliveMajorTeamIDs()
 
@@ -306,29 +617,61 @@ local function RebuildScoreTree(tree)
     local capture = mgr:CaptureFocusKey(tree)
     tree:ClearChildren()
 
-    local scoreData = GatherScoreData()
-    table.sort(scoreData, function(a, b) return a.TeamScore > b.TeamScore end)
-
-    for _, teamData in ipairs(scoreData) do
-        if #teamData.PlayerData > 1 then
-            table.sort(teamData.PlayerData, function(a, b) return a.PlayerScore > b.PlayerScore end)
-            local teamItem = MakeTreeItem({
-                Label = function()
-                    return JoinLines({
-                        Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                            GameConfiguration.GetTeamName(teamData.TeamID)),
-                        tostring(teamData.TeamScore),
-                    })
-                end,
-                FocusKey = "team:" .. teamData.TeamID,
-            })
-            for _, pd in ipairs(teamData.PlayerData) do
-                local row = CreateScorePlayerRow(pd, "team:" .. teamData.TeamID .. ":")
-                teamItem:AddChild(row)
+    if m_scoreCapturedRows then
+        for _, record in ipairs(m_scoreCapturedRows) do
+            if record.Kind == "team" then
+                local teamData = record.TeamData
+                local teamItem = MakeTreeItem({
+                    Label = function()
+                        return JoinLines({
+                            Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
+                                GameConfiguration.GetTeamName(teamData.TeamID)),
+                            tostring(teamData.TeamScore),
+                        })
+                    end,
+                    FocusKey = "team:" .. teamData.TeamID,
+                })
+                if #record.Children > 0 then
+                    for _, child in ipairs(record.Children) do
+                        teamItem:AddChild(CreateScorePlayerRow(child.PlayerData,
+                            "team:" .. teamData.TeamID .. ":"))
+                    end
+                else
+                    for _, playerData in ipairs(teamData.PlayerData) do
+                        teamItem:AddChild(CreateScorePlayerRow(playerData,
+                            "team:" .. teamData.TeamID .. ":"))
+                    end
+                end
+                tree:AddChild(teamItem)
+            else
+                tree:AddChild(CreateScorePlayerRow(record.PlayerData, ""))
             end
-            tree:AddChild(teamItem)
-        elseif #teamData.PlayerData > 0 then
-            tree:AddChild(CreateScorePlayerRow(teamData.PlayerData[1], ""))
+        end
+    else
+        local scoreData = GatherScoreData()
+        table.sort(scoreData, function(a, b) return a.TeamScore > b.TeamScore end)
+
+        for _, teamData in ipairs(scoreData) do
+            if #teamData.PlayerData > 1 then
+                table.sort(teamData.PlayerData, function(a, b) return a.PlayerScore > b.PlayerScore end)
+                local teamItem = MakeTreeItem({
+                    Label = function()
+                        return JoinLines({
+                            Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
+                                GameConfiguration.GetTeamName(teamData.TeamID)),
+                            tostring(teamData.TeamScore),
+                        })
+                    end,
+                    FocusKey = "team:" .. teamData.TeamID,
+                })
+                for _, pd in ipairs(teamData.PlayerData) do
+                    local row = CreateScorePlayerRow(pd, "team:" .. teamData.TeamID .. ":")
+                    teamItem:AddChild(row)
+                end
+                tree:AddChild(teamItem)
+            elseif #teamData.PlayerData > 0 then
+                tree:AddChild(CreateScorePlayerRow(teamData.PlayerData[1], ""))
+            end
         end
     end
 
@@ -943,7 +1286,7 @@ end
 -- ============================================================================
 -- Generic / Diplomatic Tab
 -- ============================================================================
-local function CreateGenericPlayerRow(playerData, victoryType, parentFocusPrefix)
+local function CreateGenericPlayerRow(playerData, victoryType, parentFocusPrefix, presentation)
     local playerID = playerData.PlayerID
     local fk = (parentFocusPrefix or "") .. "player:" .. playerID
 
@@ -975,19 +1318,31 @@ local function CreateGenericPlayerRow(playerData, victoryType, parentFocusPrefix
         if innerReqs then
             for _, reqID in ipairs(innerReqs) do
                 local reqKey = GameEffects.GetRequirementTextKey(reqID, REQUIREMENT_CONTEXT)
-                local reqText = GameEffects.GetRequirementText(reqID, reqKey)
-                if reqText and reqText ~= "" then
-                    table.insert(requirementLines, { ReqID = reqID, Text = reqText })
+                if reqKey then
+                    local reqText = GameEffects.GetRequirementText(reqID, reqKey)
+                    if reqText and reqText ~= "" then
+                        table.insert(requirementLines, { ReqID = reqID, Text = reqText })
+                    end
                 end
             end
         end
     end
 
-    local rowFactory = (#diploLines > 0 or #requirementLines > 0) and MakeTreeItem or MakeStaticText
+    local capturedDetails = presentation and presentation.Details or {}
+    local hasCapturedDetails = #requirementLines == 0 and #capturedDetails > 0
+    local rowFactory = (#diploLines > 0 or #requirementLines > 0 or hasCapturedDetails)
+        and MakeTreeItem or MakeStaticText
 
     local item = rowFactory({
         Label = function()
             local parts = { GetPlayerLabel(playerID) }
+            if presentation and #presentation.Values > 0 then
+                for _, value in ipairs(presentation.Values) do
+                    table.insert(parts, value)
+                end
+            elseif playerData.PlayerScore ~= nil then
+                table.insert(parts, tostring(playerData.PlayerScore))
+            end
             if capturedVictoryType == "VICTORY_DIPLOMATIC" and m_isExp2 then
                 local pPlayer = Players[playerID]
                 if pPlayer and pPlayer:IsAlive() then
@@ -998,6 +1353,8 @@ local function CreateGenericPlayerRow(playerData, victoryType, parentFocusPrefix
             end
             return JoinLines(parts)
         end,
+        Tooltip = presentation and #presentation.Tooltips > 0
+            and function() return JoinLines(presentation.Tooltips) end or nil,
         FocusKey = fk,
     })
 
@@ -1019,7 +1376,63 @@ local function CreateGenericPlayerRow(playerData, victoryType, parentFocusPrefix
         end)
     end
 
+    if hasCapturedDetails then
+        for di, detail in ipairs(capturedDetails) do
+            local capturedDetail = detail
+            AddLeaf(item, fk .. ":detail:" .. di, function() return capturedDetail end)
+        end
+    end
+
     return item
+end
+
+local function CreateCapturedGenericRecord(record, victoryType, parentFocusPrefix)
+    if record.Kind == "player" then
+        return CreateGenericPlayerRow(record.PlayerData, victoryType,
+            parentFocusPrefix, record.Presentation)
+    end
+
+    local teamData = record.TeamData
+    local fk = "team:" .. teamData.TeamID
+    local presentation = record.Presentation
+    local teamItem = MakeTreeItem({
+        Label = function()
+            local parts = {
+                Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
+                    GameConfiguration.GetTeamName(teamData.TeamID)),
+            }
+            if presentation and #presentation.Values > 0 then
+                for _, value in ipairs(presentation.Values) do
+                    table.insert(parts, value)
+                end
+            elseif teamData.TeamScore ~= nil then
+                table.insert(parts, tostring(teamData.TeamScore))
+            end
+            return JoinLines(parts)
+        end,
+        Tooltip = presentation and #presentation.Tooltips > 0
+            and function() return JoinLines(presentation.Tooltips) end or nil,
+        FocusKey = fk,
+    })
+
+    if #record.Children > 0 then
+        for _, child in ipairs(record.Children) do
+            teamItem:AddChild(CreateCapturedGenericRecord(child, victoryType, fk .. ":"))
+        end
+    else
+        for _, playerData in ipairs(teamData.PlayerData) do
+            teamItem:AddChild(CreateGenericPlayerRow(playerData, victoryType, fk .. ":"))
+        end
+    end
+
+    if presentation then
+        for di, detail in ipairs(presentation.Details) do
+            local capturedDetail = detail
+            AddLeaf(teamItem, fk .. ":detail:" .. di, function() return capturedDetail end)
+        end
+    end
+
+    return teamItem
 end
 
 local function GetBestDiploScore(teamData)
@@ -1038,30 +1451,38 @@ local function RebuildGenericTree(tree, victoryType)
     local capture = mgr:CaptureFocusKey(tree)
     tree:ClearChildren()
 
-    local genericData = GatherGenericData()
-
-    if victoryType == "VICTORY_DIPLOMATIC" and m_isExp2 then
-        for _, td in ipairs(genericData) do
-            td.DiplomaticScore = GetBestDiploScore(td)
+    local capturedRows = GetGenericVictoryRows(victoryType)
+    if capturedRows then
+        for _, record in ipairs(capturedRows) do
+            tree:AddChild(CreateCapturedGenericRecord(record, victoryType, ""))
         end
-        table.sort(genericData, function(a, b) return a.DiplomaticScore > b.DiplomaticScore end)
-    end
+    else
+        local genericData = GatherGenericData()
 
-    for _, teamData in ipairs(genericData) do
-        if #teamData.PlayerData > 1 then
-            local teamItem = MakeTreeItem({
-                Label = function()
-                    return Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                        GameConfiguration.GetTeamName(teamData.TeamID))
-                end,
-                FocusKey = "team:" .. teamData.TeamID,
-            })
-            for _, pd in ipairs(teamData.PlayerData) do
-                teamItem:AddChild(CreateGenericPlayerRow(pd, victoryType, "team:" .. teamData.TeamID .. ":"))
+        if victoryType == "VICTORY_DIPLOMATIC" and m_isExp2 then
+            for _, td in ipairs(genericData) do
+                td.DiplomaticScore = GetBestDiploScore(td)
             end
-            tree:AddChild(teamItem)
-        elseif #teamData.PlayerData > 0 then
-            tree:AddChild(CreateGenericPlayerRow(teamData.PlayerData[1], victoryType, ""))
+            table.sort(genericData, function(a, b) return a.DiplomaticScore > b.DiplomaticScore end)
+        end
+
+        for _, teamData in ipairs(genericData) do
+            if #teamData.PlayerData > 1 then
+                local teamItem = MakeTreeItem({
+                    Label = function()
+                        return Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
+                            GameConfiguration.GetTeamName(teamData.TeamID))
+                    end,
+                    FocusKey = "team:" .. teamData.TeamID,
+                })
+                for _, pd in ipairs(teamData.PlayerData) do
+                    teamItem:AddChild(CreateGenericPlayerRow(pd, victoryType,
+                        "team:" .. teamData.TeamID .. ":"))
+                end
+                tree:AddChild(teamItem)
+            elseif #teamData.PlayerData > 0 then
+                tree:AddChild(CreateGenericPlayerRow(teamData.PlayerData[1], victoryType, ""))
+            end
         end
     end
 
@@ -1272,7 +1693,9 @@ ViewOverall = WrapFunc(ViewOverall, function(orig)
 end)
 
 ViewScore = WrapFunc(ViewScore, function(orig)
+    BeginScoreCapture()
     orig()
+    EndScoreCapture()
     local idx = FindTabIndex(TAB_SCORE)
     if idx then ViewSync(idx) end
 end)
@@ -1304,7 +1727,9 @@ end)
 local origViewGeneric = ViewGeneric
 ViewGeneric = function(victoryType)
     m_currentGenericVictoryType = victoryType
+    BeginGenericCapture(victoryType)
     origViewGeneric(victoryType)
+    EndGenericCapture(victoryType)
     for i, tabDef in ipairs(m_capturedTabs) do
         if tabDef.victoryType == victoryType then
             ViewSync(i, victoryType)

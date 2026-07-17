@@ -4,7 +4,7 @@
 
 Civilization VI Accessibility Integration makes Sid Meier's Civilization VI playable with a screen reader. It adds spoken information and keyboard navigation to the game's menus, dialogs, screens, and other user-interface elements.
 
-The mod supports all three standard rulesets: the base game, Rise and Fall, and Gathering Storm. Scenarios are not currently supported.
+The mod supports all three standard rulesets: the base game, Rise and Fall, and Gathering Storm. It also supports the Conquests of Alexander, Outback Tycoon, and Black Death scenarios; other scenarios remain unsupported or untested.
 
 ## Installing the mod
 
@@ -72,7 +72,7 @@ Lists contain a single vertical sequence of items.
 - `Home` / `End` — first / last item
 - `Page Up` / `Page Down` — move backward / forward by several items
 - `Ctrl+F` — open list search
-- Typing letters or numbers — find a matching item
+- Typing text — use type-to-find to move to a matching item
 
 
 
@@ -94,7 +94,7 @@ Treeviews organize information into branches and child items. Unlike lists, tree
 - `Enter` — expand or collapse a branch; activate a selectable item with no children
 - `Home` / `End` — first / last visible item
 - `Page Up` / `Page Down` — move backward / forward by several visible items
-- Typing letters or numbers — find a matching item
+- Typing text — use type-to-find to move to a matching item
 - `Ctrl+F` — open tree search. 
 
 #### Dropdowns
@@ -135,6 +135,34 @@ After navigating to an item, its role tells you how it behaves.
 - **Static text** — provides information and has no action. Appears in dialog body text mostly
 
 Disabled controls remain in navigation when their information may be useful. The screen reader announces that they are unavailable, and activation has no effect.
+
+### Type-to-find search
+
+Type-to-find provides quick navigation in lists and treeviews without opening a separate search panel. It searches item names without regard to capitalization and supports exact words, word beginnings, text found anywhere in a name, and prefixes for consecutive words. For example, `war mon` matches `Warrior Monk`, and `monk` can also find `Warrior Monk`.
+
+- More direct matches are preferred over broader partial or multi-word-prefix matches.
+- In a treeview, type-to-find can locate an item inside collapsed branches and reveal its path.
+- Repeating the same single character cycles through matching items and wraps from the last match to the first.
+- Hidden items are skipped. Disabled items may still be found when their information is useful.
+- If nothing matches, `No match` is announced and the search text remains available for correction.
+- `Backspace` removes the last character from the current search text.
+- `Escape` clears the current search text.
+- The Search timeout option under accessibility settings controls how long search text remains active. Set it to `0` to keep the text until you clear it.
+
+### Search panel
+
+Press `Ctrl+F` in a supported container to open its search panel. Lists and treeviews support it by default, and some screens provide searches covering additional content. Search results update as the query changes and may include labels, descriptive text, and screen-specific information.
+
+- Enter multiple terms to find items matching all of them. Note: the civilopedia screen matches by full query instead of single terms. This is necessary to provide full search, which allows you to lookup any text that appears in the body of an artical.
+- Prefix a term with `--` to exclude matching items. For example, `warrior --monk` finds results matching `warrior` but excludes results matching `monk`. Note: term exclusion does not work in the civilopedia for the reason mentioned above.
+- Use `Tab` and `Shift+Tab` to move between the search edit box and results.
+- Use normal list-navigation commands to review results.
+- Typing or pressing `Backspace` while reviewing results continues editing the search query.
+- Press `Enter` from the edit box to activate the first result.
+- Press `Enter` on a result to activate it, open it, or move focus to the matching item. In map search, pressing enter on a result moves the navigation cursor to that tile.
+- Use `Page Up` and `Page Down` from the edit box to review up to ten recent searches whose result you activated.
+- Press `Escape` to close the search panel.
+- The Auto focus first search result option under accessibility settings controls whether the first matching result receives focus automatically.
 
 ## Gameplay
 
@@ -221,10 +249,17 @@ While a lens is active, the mod includes additional lens-specific information in
 
 ### Map tacs
 
-Map tacs are Civilization VI's native system for placing labeled markers on the map. The mod speaks tacs as part of the navigation cursor's tile information and provides a Map Tacs category in the World Scanner.
+Map tacs are Civilization VI's native system for placing labeled markers on the map. The mod speaks tacs as part of the navigation cursor's tile information and provides a Map Tacs category in the World Scanner. You may also asign map tacs to bookmark slots for quick navigation.
+
+There are ten bookmark slots, numbered 1 through 10, and each populated slot stores one of your map tacs. The slot mapping is stored in the player configuration, so bookmarks belong to the current player and save.
+
+Assigning a bookmark on a tile that already contains one of your map tacs uses that tac and renames it to `Bookmark 1`, `Bookmark 2`, and so on. If the tile has no map tac owned by you, the mod creates one. Reassigning a populated slot deletes the map tac previously stored in that slot. Assigning the same map tac to another slot clears its former slot, so one tac cannot represent two bookmarks. If a bookmarked tac is deleted manually, its slot is treated as empty the next time it is used.
 
 - `M` — place a new map tac at the navigation cursor, or edit the existing tac at that location
 - `Ctrl+M` — open or close the list of available map tacs. Press enter on a map tac in the list to jump cursor to it.
+- `Ctrl+Shift+1` through `Ctrl+Shift+0` — assign Bookmark 1 through Bookmark 10 at the navigation cursor. An existing owned map tac is renamed and assigned; otherwise a new one is created. Reassigning a slot deletes its previous map tac.
+- `Ctrl+1` through `Ctrl+0` — jump the navigation cursor to Bookmark 1 through Bookmark 10.
+- `Alt+1` through `Alt+0` — read the direction from the navigation cursor to Bookmark 1 through Bookmark 10.
 
 ### Empire information
 
@@ -378,7 +413,7 @@ The Mods and Credits screens are inaccessible. Do not go there.
 
 Do not click the Additional Content button in multiplayer lobbies.
 
-Scenarios, including online scenarios such as Red Death and Pirates, are not supported as of yet.
+Only Conquests of Alexander, Outback Tycoon, and Black Death are currently supported. Other scenarios, including Red Death and Pirates, are not yet supported.
 
 The tutorial is still not supported currently.
 

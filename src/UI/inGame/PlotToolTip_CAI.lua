@@ -11,6 +11,10 @@ local function IsBarbarianClansModeActive()
 end
 
 local function GetPlotToolTipIncludeName()
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+        return "PlotToolTip_BlackDeathScenario"
+    end
+
     if IsExpansion2Active() then
         if IsBarbarianClansModeActive() then
             return "PlotTooltip_Expansion2_BarbarianClansMode"
@@ -28,6 +32,7 @@ end
 local PLOT_TOOLTIP_INCLUDE = GetPlotToolTipIncludeName()
 local IS_XP2_TOOLTIP = PLOT_TOOLTIP_INCLUDE == "PlotTooltip_Expansion2"
     or PLOT_TOOLTIP_INCLUDE == "PlotTooltip_Expansion2_BarbarianClansMode"
+    or PLOT_TOOLTIP_INCLUDE == "PlotToolTip_BlackDeathScenario"
 local IS_BARBARIAN_CLANS_TOOLTIP = PLOT_TOOLTIP_INCLUDE == "PlotToolTip_BarbarianClansMode"
     or PLOT_TOOLTIP_INCLUDE == "PlotTooltip_Expansion2_BarbarianClansMode"
 
@@ -74,6 +79,7 @@ local STATIC_INFO_PRIORITY = {
     "greatWorksHeader",
     "workers",
     "fallout",
+    "coerceTurns",
     "units",
     "interfaceInfo",
     "lensInfo",
@@ -87,6 +93,7 @@ local CURSOR_MOVE_INFO_PRIORITY = {
     "lensInfo",
     "waypoint",
     "fallout",
+    "coerceTurns",
     "coastalLowland",
     "volcano",
     "storm",
@@ -1230,6 +1237,20 @@ info.PlotInfoHelpers = {
         return Locale.Lookup("LOC_TOOLTIP_PLOT_CONTAMINATED_TEXT", data.Fallout)
     end,
 
+    coerceTurns = function(data)
+        if not data.IsVisible or data.CoerceTurns == nil or data.Owner ~= Game.GetLocalPlayer() then
+            return nil
+        end
+
+        local playerConfig = PlayerConfigurations[data.Owner]
+        if playerConfig == nil
+            or playerConfig:GetCivilizationTypeName() ~= "CIVILIZATION_BLACKDEATH_SCENARIO_ENGLAND" then
+            return nil
+        end
+
+        return Locale.Lookup("LOC_PLOTINFO_COERCED_TURNS_LABEL", data.CoerceTurns)
+    end,
+
     units = function(data)
         local units = data.Units
         if not units or #units == 0 or info.RequestUnitFlagInfo == nil then return nil end
@@ -1495,6 +1516,7 @@ local DEFAULT_PLOT_INFO_BUCKET = {
     "greatWorks",
     "workers",
     "fallout",
+    "coerceTurns",
     "units",
     "interfaceInfo",
     "lensInfo",
@@ -1542,6 +1564,7 @@ local YIELD_RIVER_OWNER_INFO_BUCKET = {
 
 local STATS_INFO_BUCKET = {
     "fallout",
+    "coerceTurns",
     "movement",
     "defense",
     "appeal",

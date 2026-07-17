@@ -300,47 +300,51 @@ function E.InsertText(w, text)
 end
 
 ---@param w EditBoxWidget
+---@return string deleted
 function E.BackspaceChar(w)
     local pos = w._cursor or 0
-    if pos <= 0 then return end
+    if pos <= 0 then return "" end
     local buf = w._buffer or ""
     local deleted = string.sub(buf, pos, pos)
     w._buffer = string.sub(buf, 1, pos - 1) .. string.sub(buf, pos + 1)
     w._cursor = pos - 1
-    Speak(MaskIfNeeded(w, deleted), true)
+    return deleted
 end
 
 ---@param w EditBoxWidget
+---@return string deleted
 function E.DeleteChar(w)
     local pos = w._cursor or 0
     local buf = w._buffer or ""
-    if pos >= #buf then return end
+    if pos >= #buf then return "" end
     local deleted = string.sub(buf, pos + 1, pos + 1)
     w._buffer = string.sub(buf, 1, pos) .. string.sub(buf, pos + 2)
-    Speak(MaskIfNeeded(w, deleted), true)
+    return deleted
 end
 
 ---@param w EditBoxWidget
+---@return string deleted
 function E.BackspaceWord(w)
     local pos = w._cursor or 0
-    if pos <= 0 then return end
+    if pos <= 0 then return "" end
     local buf = w._buffer or ""
     local deleteStart = E.FindDeleteLeft(buf, pos)
     local deleted = string.sub(buf, deleteStart + 1, pos)
     w._buffer = string.sub(buf, 1, deleteStart) .. string.sub(buf, pos + 1)
     w._cursor = deleteStart
-    Speak(MaskIfNeeded(w, deleted), true)
+    return deleted
 end
 
 ---@param w EditBoxWidget
+---@return string deleted
 function E.DeleteWordForward(w)
     local pos = w._cursor or 0
     local buf = w._buffer or ""
-    if pos >= #buf then return end
+    if pos >= #buf then return "" end
     local wordEnd = E.FindWordRight(buf, pos)
     local deleted = string.sub(buf, pos + 1, wordEnd)
     w._buffer = string.sub(buf, 1, pos) .. string.sub(buf, wordEnd + 1)
-    Speak(MaskIfNeeded(w, deleted), true)
+    return deleted
 end
 
 --#endregion

@@ -69,3 +69,4 @@
 [x] Scanner sort should be based on cashed plot id
 [x] change scanner sound and add volume setting
 [x] Fix wc unknown participant string
+[x] Selection cursor move should be a setting

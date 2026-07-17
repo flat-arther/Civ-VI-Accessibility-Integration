@@ -149,6 +149,36 @@
     <Row ActionId="WorldSelectNextCity_CAI" Name="LOC_CAI_WORLD_SELECT_NEXT_CITY" Description="LOC_CAI_WORLD_SELECT_NEXT_CITY_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldSelectCapitalCity_CAI" Name="LOC_CAI_WORLD_SELECT_CAPITAL_CITY" Description="LOC_CAI_WORLD_SELECT_CAPITAL_CITY_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAIPlaceMapPin" Name="LOC_CAI_PLACE_MAP_PIN" Description="LOC_CAI_PLACE_MAP_PIN_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkAssign1" Name="LOC_CAI_BOOKMARK_ASSIGN_1" Description="LOC_CAI_BOOKMARK_ASSIGN_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkAssign2" Name="LOC_CAI_BOOKMARK_ASSIGN_2" Description="LOC_CAI_BOOKMARK_ASSIGN_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkAssign3" Name="LOC_CAI_BOOKMARK_ASSIGN_3" Description="LOC_CAI_BOOKMARK_ASSIGN_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkAssign4" Name="LOC_CAI_BOOKMARK_ASSIGN_4" Description="LOC_CAI_BOOKMARK_ASSIGN_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkAssign5" Name="LOC_CAI_BOOKMARK_ASSIGN_5" Description="LOC_CAI_BOOKMARK_ASSIGN_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkAssign6" Name="LOC_CAI_BOOKMARK_ASSIGN_6" Description="LOC_CAI_BOOKMARK_ASSIGN_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkAssign7" Name="LOC_CAI_BOOKMARK_ASSIGN_7" Description="LOC_CAI_BOOKMARK_ASSIGN_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkAssign8" Name="LOC_CAI_BOOKMARK_ASSIGN_8" Description="LOC_CAI_BOOKMARK_ASSIGN_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkAssign9" Name="LOC_CAI_BOOKMARK_ASSIGN_9" Description="LOC_CAI_BOOKMARK_ASSIGN_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkAssign10" Name="LOC_CAI_BOOKMARK_ASSIGN_10" Description="LOC_CAI_BOOKMARK_ASSIGN_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkJump1" Name="LOC_CAI_BOOKMARK_JUMP_1" Description="LOC_CAI_BOOKMARK_JUMP_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkJump2" Name="LOC_CAI_BOOKMARK_JUMP_2" Description="LOC_CAI_BOOKMARK_JUMP_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkJump3" Name="LOC_CAI_BOOKMARK_JUMP_3" Description="LOC_CAI_BOOKMARK_JUMP_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkJump4" Name="LOC_CAI_BOOKMARK_JUMP_4" Description="LOC_CAI_BOOKMARK_JUMP_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkJump5" Name="LOC_CAI_BOOKMARK_JUMP_5" Description="LOC_CAI_BOOKMARK_JUMP_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkJump6" Name="LOC_CAI_BOOKMARK_JUMP_6" Description="LOC_CAI_BOOKMARK_JUMP_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkJump7" Name="LOC_CAI_BOOKMARK_JUMP_7" Description="LOC_CAI_BOOKMARK_JUMP_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkJump8" Name="LOC_CAI_BOOKMARK_JUMP_8" Description="LOC_CAI_BOOKMARK_JUMP_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkJump9" Name="LOC_CAI_BOOKMARK_JUMP_9" Description="LOC_CAI_BOOKMARK_JUMP_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkJump10" Name="LOC_CAI_BOOKMARK_JUMP_10" Description="LOC_CAI_BOOKMARK_JUMP_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkDirection1" Name="LOC_CAI_BOOKMARK_DIRECTION_1" Description="LOC_CAI_BOOKMARK_DIRECTION_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkDirection2" Name="LOC_CAI_BOOKMARK_DIRECTION_2" Description="LOC_CAI_BOOKMARK_DIRECTION_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkDirection3" Name="LOC_CAI_BOOKMARK_DIRECTION_3" Description="LOC_CAI_BOOKMARK_DIRECTION_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkDirection4" Name="LOC_CAI_BOOKMARK_DIRECTION_4" Description="LOC_CAI_BOOKMARK_DIRECTION_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkDirection5" Name="LOC_CAI_BOOKMARK_DIRECTION_5" Description="LOC_CAI_BOOKMARK_DIRECTION_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkDirection6" Name="LOC_CAI_BOOKMARK_DIRECTION_6" Description="LOC_CAI_BOOKMARK_DIRECTION_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkDirection7" Name="LOC_CAI_BOOKMARK_DIRECTION_7" Description="LOC_CAI_BOOKMARK_DIRECTION_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkDirection8" Name="LOC_CAI_BOOKMARK_DIRECTION_8" Description="LOC_CAI_BOOKMARK_DIRECTION_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkDirection9" Name="LOC_CAI_BOOKMARK_DIRECTION_9" Description="LOC_CAI_BOOKMARK_DIRECTION_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIMapPinBookmarkDirection10" Name="LOC_CAI_BOOKMARK_DIRECTION_10" Description="LOC_CAI_BOOKMARK_DIRECTION_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
 
     <!-- ===== CAI_UNIT: Unit commands and operations ===== -->
     <Row ActionId="CAIFoundCity" Name="LOC_OPTIONS_HOTKEY_UNIT_FOUNDCITY" Description="LOC_OPTIONS_HOTKEY_UNIT_FOUNDCITY_HELP" CategoryId="CAI_UNIT" ContextId="World" LayoutType="PC"/>
@@ -372,6 +402,36 @@
     <Row ActionId="WorldSelectNextCity_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_RBRACKET" />
     <Row ActionId="WorldSelectCapitalCity_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_BACKSLASH" />
     <Row ActionId="CAIPlaceMapPin" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_M" />
+    <Row ActionId="CAIMapPinBookmarkAssign1" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_1" />
+    <Row ActionId="CAIMapPinBookmarkAssign2" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_2" />
+    <Row ActionId="CAIMapPinBookmarkAssign3" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_3" />
+    <Row ActionId="CAIMapPinBookmarkAssign4" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_4" />
+    <Row ActionId="CAIMapPinBookmarkAssign5" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_5" />
+    <Row ActionId="CAIMapPinBookmarkAssign6" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_6" />
+    <Row ActionId="CAIMapPinBookmarkAssign7" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_7" />
+    <Row ActionId="CAIMapPinBookmarkAssign8" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_8" />
+    <Row ActionId="CAIMapPinBookmarkAssign9" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_9" />
+    <Row ActionId="CAIMapPinBookmarkAssign10" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_0" />
+    <Row ActionId="CAIMapPinBookmarkJump1" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_1" />
+    <Row ActionId="CAIMapPinBookmarkJump2" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_2" />
+    <Row ActionId="CAIMapPinBookmarkJump3" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_3" />
+    <Row ActionId="CAIMapPinBookmarkJump4" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_4" />
+    <Row ActionId="CAIMapPinBookmarkJump5" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_5" />
+    <Row ActionId="CAIMapPinBookmarkJump6" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_6" />
+    <Row ActionId="CAIMapPinBookmarkJump7" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_7" />
+    <Row ActionId="CAIMapPinBookmarkJump8" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_8" />
+    <Row ActionId="CAIMapPinBookmarkJump9" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_9" />
+    <Row ActionId="CAIMapPinBookmarkJump10" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_0" />
+    <Row ActionId="CAIMapPinBookmarkDirection1" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_1" />
+    <Row ActionId="CAIMapPinBookmarkDirection2" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_2" />
+    <Row ActionId="CAIMapPinBookmarkDirection3" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_3" />
+    <Row ActionId="CAIMapPinBookmarkDirection4" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_4" />
+    <Row ActionId="CAIMapPinBookmarkDirection5" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_5" />
+    <Row ActionId="CAIMapPinBookmarkDirection6" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_6" />
+    <Row ActionId="CAIMapPinBookmarkDirection7" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_7" />
+    <Row ActionId="CAIMapPinBookmarkDirection8" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_8" />
+    <Row ActionId="CAIMapPinBookmarkDirection9" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_9" />
+    <Row ActionId="CAIMapPinBookmarkDirection10" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_0" />
     <Row ActionId="CityChangeProduction" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_BACKSLASH" />
     <Row ActionId="CityToggleOverview" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_RBRACKET" />
     <Row ActionId="CityManageCity" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_LBRACKET" />

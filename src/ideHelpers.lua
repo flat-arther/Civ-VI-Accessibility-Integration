@@ -229,6 +229,7 @@ function SplitTextIntoLines(text, maxLength) end
 ---| "focus_leave"     # widget left the focus path
 ---| "activate"        # button / menu item / tree-leaf activation
 ---| "value_changed"   # ValueWidget value changed (Toggle, Increment, EditBox Commit, SetValue without silent)
+---| "text_changed"    # EditBox buffer changed; emitted after the edit is spoken
 ---| "expanded"        # TreeItem or SubMenu was expanded
 ---| "collapsed"       # TreeItem or SubMenu was collapsed
 ---| "navigation_wrap" # navigation crossed a wrapping container or tab-control boundary; extra arg is direction (+1/-1)
@@ -251,6 +252,8 @@ EditModes = {}
 ---@field IsControl? boolean
 ---@field IsAlt? boolean
 ---@field Description? string  LOC tag describing the binding for the input help overlay
+---@field Common? boolean  Runs even when the widget is disabled
+---@field BubbleWhenDisabled? boolean  Lets a matching non-common binding bubble instead of being consumed while disabled
 
 ---One option in a Dropdown.
 ---@class DropdownOption
@@ -641,6 +644,7 @@ function UIWidget:GetInfoStrings() end
 ---@field WrapAround boolean
 ---@field PageSize integer
 ---@field AllowSearch boolean
+---@field _searchQueryMode "terms"|"raw"
 ContainerWidget = {}
 
 ---@param b boolean
@@ -659,13 +663,22 @@ function ContainerWidget:DisableSearch() end
 ---Set a custom query handler for Ctrl+F search on this container.
 ---Implicitly enables search. The handler receives (query, maxResults)
 ---and must return a list of {key, label, onActivate?, widget?, tooltip?}.
----Multi-term AND and "-term" exclusion are handled by the SearchPanel
----internally — the handler is called once per term.
+---In the default "terms" mode, multi-term AND and "--term" exclusion are
+---handled by the SearchPanel and the handler is called once per term. In
+---"raw" mode, the handler receives the complete edit-box query once.
 ---@param handler fun(query:string, maxResults:integer):table[]
 function ContainerWidget:SetSearchQueryHandler(handler) end
 
 ---@return fun(query:string, maxResults:integer):table[]|nil
 function ContainerWidget:GetSearchQueryHandler() end
+
+---Choose how Ctrl+F passes text to the query handler. "terms" is the default;
+---"raw" passes the complete query once without CAI term/exclusion parsing.
+---@param mode "terms"|"raw"
+function ContainerWidget:SetSearchQueryMode(mode) end
+
+---@return "terms"|"raw"
+function ContainerWidget:GetSearchQueryMode() end
 
 ---Set the history context name for search on this container. Defaults to
 ---the container's Id. Containers sharing a context name share history.
@@ -907,7 +920,8 @@ function SliderWidget:PageDecrement() end
 
 ---@class EditBoxWidget : ValueWidget
 EditBoxWidget = {}
----Normalizes [NEWLINE]/\r\n then SetValue.
+---Normalizes [NEWLINE]/\r\n, updates the edit buffer, and emits text_changed
+---after any non-silent value announcement.
 ---@param text string
 ---@param silent? boolean
 function EditBoxWidget:SetText(text, silent) end
@@ -1070,9 +1084,9 @@ InterfaceModeWidget = {}
 ---Indexes the container's descendants (or uses a custom query handler) through
 ---the game's Search.* API, presents results as a navigable list, and jumps to
 ---the selected widget (or fires onActivate) on Enter.
----Supports multi-term AND queries and "-term" exclusion syntax. The SearchPanel
----handles parsing and intersect/subtract internally; handlers receive a single
----query string per call (same as before).
+---The default "terms" mode supports multi-term AND queries and "--term"
+---exclusion syntax. "raw" mode sends the complete query to the handler or
+---Search.Search once, which is useful for full-text indexes.
 ---Per-context search history is navigable with PageUp/PageDown in the edit box.
 ---Emits "search_open", "search_close", and "search_text_changed" events.
 ---@class SearchPanelWidget : PanelWidget
@@ -1080,6 +1094,7 @@ InterfaceModeWidget = {}
 ---@field _resultList ListWidget
 ---@field _targetContainer ContainerWidget
 ---@field _queryHandler? fun(query:string, maxResults:integer):table[]
+---@field _queryMode "terms"|"raw"
 ---@field _contextReady boolean
 ---@field _historyContext string
 ---@field _historyIndex integer
@@ -1093,6 +1108,9 @@ function SearchPanelWidget:Close(skipFocusRestore) end
 
 ---@param handler fun(query:string, maxResults:integer):table[]
 function SearchPanelWidget:SetQueryHandler(handler) end
+
+---@param mode "terms"|"raw"
+function SearchPanelWidget:SetQueryMode(mode) end
 
 ---@param context string
 function SearchPanelWidget:SetHistoryContext(context) end
@@ -1212,7 +1230,7 @@ function UIScreenManager:AppendSearchChar(c) end
 function UIScreenManager:GetSearchBuffer() end
 
 ---Open the Ctrl+F search overlay on a container. Applies the container's
----query handler (if any) to the shared SearchPanel before opening.
+---query handler and query mode to the shared SearchPanel before opening.
 ---@param container ContainerWidget
 function UIScreenManager:OpenSearch(container) end
 

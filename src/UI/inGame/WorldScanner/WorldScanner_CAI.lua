@@ -62,6 +62,8 @@ local FindCategorySlotById
 local AUTO_FOCUS_SETTING_BY_CATEGORY_ID = {
     validTargets = "ScannerAutoFocusValidTargets",
     activeLens = "ScannerAutoFocusActiveLens",
+    cityManagement = "ScannerAutoFocusCityManagement",
+    recommendations = "ScannerAutoFocusRecommendations",
 }
 
 local m_PlayerState = PlayerStateManager.Init(function(playerID)
@@ -582,17 +584,21 @@ local function OnScannerLensLayerChanged(layerNum)
     CAIWorldScanner:RebuildCategory("activeLens")
 end
 
-local function OnScannerUnitSelectionChanged(playerID, unitID, locationX, locationY, locationZ, isSelected, isEditable)
-    if not isSelected then
-        return
-    end
+local function OnScannerPlagueLensChanged(isActive)
+    _lastActiveLensId = isActive and "activeLens" or nil
+    CAIWorldScanner:RebuildCategory("activeLens")
+end
 
+local function OnScannerUnitSelectionChanged(playerID, unitID, locationX, locationY, locationZ, isSelected, isEditable)
     if playerID == Game.GetLocalPlayer() then
         if CAIInterfaceTargets ~= nil and CAIInterfaceTargets.ClearCache ~= nil then
             CAIInterfaceTargets.ClearCache()
         end
 
-        CAIWorldScanner:RebuildCategory("validTargets")
+        if isSelected then
+            CAIWorldScanner:RebuildCategory("validTargets")
+        end
+        CAIWorldScanner:RebuildCategory("recommendations")
     end
 end
 
@@ -602,6 +608,7 @@ local function OnScannerInterfaceModeChanged(oldMode, newMode)
     end
 
     CAIWorldScanner:RebuildCategory("validTargets")
+    CAIWorldScanner:RebuildCategory("cityManagement")
 end
 
 local function OnScannerSettingsChanged(settingId)
@@ -739,6 +746,7 @@ function CAIWorldScanner:Initialize()
 
     Events.LensLayerOn.Add(OnScannerLensLayerChanged)
     Events.LensLayerOff.Add(OnScannerLensLayerChanged)
+    LuaEvents.CAIPlagueLensChanged.Add(OnScannerPlagueLensChanged)
     Events.UnitSelectionChanged.Add(OnScannerUnitSelectionChanged)
     Events.InterfaceModeChanged.Add(OnScannerInterfaceModeChanged)
     LuaEvents.CAISettingsChanged.Add(OnScannerSettingsChanged)
@@ -750,6 +758,7 @@ end
 function CAIWorldScanner:ClearScanner()
     Events.LensLayerOn.Remove(OnScannerLensLayerChanged)
     Events.LensLayerOff.Remove(OnScannerLensLayerChanged)
+    LuaEvents.CAIPlagueLensChanged.Remove(OnScannerPlagueLensChanged)
     Events.UnitSelectionChanged.Remove(OnScannerUnitSelectionChanged)
     Events.InterfaceModeChanged.Remove(OnScannerInterfaceModeChanged)
     LuaEvents.CAISettingsChanged.Remove(OnScannerSettingsChanged)

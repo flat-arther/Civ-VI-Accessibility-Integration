@@ -787,6 +787,8 @@ function UIScreenManager:OpenSearch(container)
     self._searchPanel = panel
     local handler = container.GetSearchQueryHandler and container:GetSearchQueryHandler() or nil
     panel:SetQueryHandler(handler)
+    local queryMode = container.GetSearchQueryMode and container:GetSearchQueryMode() or "terms"
+    panel:SetQueryMode(queryMode)
     local historyCtx = container.GetSearchHistoryContext and container:GetSearchHistoryContext()
     panel:SetHistoryContext(historyCtx or container.Id or "default")
     panel:Open(container)

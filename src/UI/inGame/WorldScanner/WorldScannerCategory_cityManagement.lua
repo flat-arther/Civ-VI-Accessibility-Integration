@@ -8,6 +8,7 @@ local SUBCATEGORY_ORDER = {
     "swappable",
     "purchasable",
     "tooExpensive",
+    "coerced",
 }
 
 CAIWorldScannerCategory_CityManagement = {
@@ -23,6 +24,7 @@ CAIWorldScannerCategory_CityManagement = {
         swappable = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_SWAPPABLE",
         purchasable = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_PURCHASABLE",
         tooExpensive = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_TOO_EXPENSIVE",
+        coerced = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_COERCED",
     },
     GroupLabelResolver = function(groupId)
         return CAIWorldScannerCategory_CityManagement.SubCategoryLabels[groupId]

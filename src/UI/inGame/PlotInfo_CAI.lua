@@ -1,6 +1,10 @@
 include("caiUtils")
 include("cityManagementInterfaceHelpers_CAI")
-include("PlotInfo")
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+    include("PlotInfo_BlackDeathScenario")
+else
+    include("PlotInfo")
+end
 
 local CITY_MANAGEMENT_WIDGET_ID = "CAIWorldInputCityManagement"
 local m_lastHoverAnimatedPlotId = nil
@@ -171,8 +175,15 @@ OnClickCitizen = WrapFunc(OnClickCitizen, function(orig, plotId)
 end)
 
 OnClickPurchasePlot = WrapFunc(OnClickPurchasePlot, function(orig, plotId)
+    local state = CAICityManagementInterface.GetPlotState(plotId)
+    local isCoerce = state ~= nil and state.Purchase ~= nil and state.Purchase.IsCoerce == true
     SetPendingCityManagementAction("purchase", plotId)
-    return orig(plotId)
+    local result = orig(plotId)
+    if isCoerce then
+        ClearPendingCityManagementAction()
+        Speak(Locale.Lookup("LOC_PLOTINFO_COERCED_TURNS_LABEL", RULES.CoerceTurns))
+    end
+    return result
 end)
 
 OnClickSwapTile = WrapFunc(OnClickSwapTile, function(orig, plotId)

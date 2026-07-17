@@ -32,6 +32,7 @@ local m_availableRows         = {} ---@type table[]
 local m_currentData           = nil ---@type table|nil
 local m_currentControl        = nil ---@type table|nil
 local m_instanceByHash        = {} ---@type table<number, table>
+local m_leadsToByType         = nil ---@type table<string, string[]>|nil
 local m_openPending           = false
 local m_isTutorial            = nil ---@type boolean|nil
 local m_tutorialTechs         = nil ---@type table<number, number>|nil
@@ -199,6 +200,39 @@ local function GetAllianceText(kData)
     return Locale.Lookup("LOC_CAI_RESEARCH_ALLIANCE_BONUS", tip)
 end
 
+local function GetLeadsToText(kData)
+    local techType = kData and kData.TechType
+    if not techType then return nil end
+
+    if not m_leadsToByType then
+        m_leadsToByType = {}
+        for prereq in GameInfo.TechnologyPrereqs() do
+            local leadsTo = m_leadsToByType[prereq.PrereqTech]
+            if not leadsTo then
+                leadsTo = {}
+                m_leadsToByType[prereq.PrereqTech] = leadsTo
+            end
+            leadsTo[#leadsTo + 1] = prereq.Technology
+        end
+    end
+
+    local localPlayer = Game.GetLocalPlayer()
+    local player = localPlayer ~= PlayerTypes.NONE and Players[localPlayer] or nil
+    local playerTechs = player and player:GetTechs() or nil
+    local names = {}
+    for _, targetType in ipairs(m_leadsToByType[techType] or {}) do
+        local tech = GameInfo.Technologies[targetType]
+        if tech then
+            local isRevealed = not playerTechs or not playerTechs.IsTechRevealed
+                or playerTechs:IsTechRevealed(tech.Index)
+            names[#names + 1] = isRevealed and Locale.Lookup(tech.Name)
+                or Locale.Lookup("LOC_TECH_TREE_NOT_REVEALED_TECH")
+        end
+    end
+    if #names == 0 then return nil end
+    return Locale.Lookup("LOC_CAI_RESEARCH_LEADS_TO_HEADER", table.concat(names, ", "))
+end
+
 local function GetRevealsText(group)
     local reveals = group and group.Reveals or nil
     if not reveals or #reveals == 0 then return nil end
@@ -242,6 +276,7 @@ local function FormatTooltip(kData, group)
     AppendIfNonEmpty(parts, GetDescriptionText(kData))
     AppendIfNonEmpty(parts, GetBoostText(kData))
     AppendIfNonEmpty(parts, GetAllianceText(kData))
+    AppendIfNonEmpty(parts, GetLeadsToText(kData))
     AppendIfNonEmpty(parts, GetRevealsText(group))
     AppendIfNonEmpty(parts, GetUnlocksText(group))
     return table.concat(parts, "[NEWLINE]")

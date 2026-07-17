@@ -4,17 +4,20 @@
 -- Search.* API, presents results as a navigable list, and jumps to the
 -- selected widget on activation.
 --
--- Supports multi-term AND queries and term exclusion via "-" prefix.
+-- Default term mode supports multi-term AND queries and term exclusion via
+-- "--" prefix. Raw mode passes the complete edit-box query through once.
 -- Per-context search history is navigable with PageUp/PageDown.
 
 local SEARCH_CONTEXT = "CAI_SearchPanel"
 local MAX_RESULTS = 50
+local CUSTOM_MULTI_TERM_QUERY_MAX = 2000
 
 ---@class SearchPanelWidget : ContainerWidget
 ---@field _editBox EditBoxWidget
 ---@field _resultList ListWidget
 ---@field _targetContainer ContainerWidget
 ---@field _queryHandler? fun(query:string, maxResults:integer):table[]
+---@field _queryMode "terms"|"raw"
 ---@field _contextReady boolean
 ---@field _historyContext string
 ---@field _historyIndex integer
@@ -80,6 +83,7 @@ function SearchPanelWidget.Create(mgr, id, props)
     w.Transparent = true
     w._contextReady = false
     w._queryHandler = nil
+    w._queryMode = "terms"
     w._widgetIndex = {}
     w._historyContext = "default"
     w._historyIndex = 0
@@ -183,6 +187,7 @@ function SearchPanelWidget:Open(container)
     end
 
     root:AddChild(self)
+    self:SetResults({})
     mgr:SetFocus(self._editBox)
     self:Emit("search_open", container)
 end
@@ -213,6 +218,11 @@ function SearchPanelWidget:SetQueryHandler(handler)
     self._queryHandler = handler
 end
 
+---@param mode "terms"|"raw"
+function SearchPanelWidget:SetQueryMode(mode)
+    self._queryMode = mode == "raw" and "raw" or "terms"
+end
+
 ---@param context string
 function SearchPanelWidget:SetHistoryContext(context)
     self._historyContext = context or "default"
@@ -232,9 +242,17 @@ function SearchPanelWidget:SetResults(results)
         local empty = mgr:CreateWidget(
             mgr:GenerateWidgetId("searchEmpty"),
             "StaticText",
-            { Label = function() return Locale.Lookup("LOC_CAI_SEARCH_NO_RESULTS") end }
+            {
+                Label = function()
+                    if self._editBox:GetText() == "" then
+                        return Locale.Lookup("LOC_CAI_SEARCH_TYPE_TO_SEARCH")
+                    end
+                    return Locale.Lookup("LOC_CAI_SEARCH_NO_RESULTS")
+                end,
+            }
         )
         self._resultList:AddChild(empty)
+        return
     else
         for _, entry in ipairs(results) do
             local btn = mgr:CreateWidget(
@@ -264,7 +282,9 @@ function SearchPanelWidget:SetResults(results)
     end
 
     local first = Nav.First(self._resultList)
-    if first then mgr:SetFocus(first, { direction = 1 }) end
+    if first and CAISettings.GetBool("AutoFocusFirstSearchResult") then
+        mgr:SetFocus(first, { direction = 1 })
+    end
 end
 
 --#endregion
@@ -315,17 +335,26 @@ function SearchPanelWidget:_MultiTermQuery(whitelist, blacklist)
     local resultsByKey = {}
 
     for _, term in ipairs(whitelist) do
-        local hits = self._queryHandler(term, MAX_RESULTS * 3) or {}
+        local hits = self._queryHandler(term, CUSTOM_MULTI_TERM_QUERY_MAX) or {}
         if #hits == 0 then return {} end
-        for _, r in ipairs(hits) do
+        for rank, r in ipairs(hits) do
             local k = r.key
             hitCounts[k] = (hitCounts[k] or 0) + 1
-            if not resultsByKey[k] then resultsByKey[k] = r end
+            local existing = resultsByKey[k]
+            if not existing then
+                resultsByKey[k] = r
+                r._multiRank = rank
+            elseif existing.useFirstTooltip
+                and (not existing.tooltip or existing.tooltip == "")
+                and r.tooltip and r.tooltip ~= "" then
+                existing.tooltip = r.tooltip
+            end
+            if existing then existing._multiRank = (existing._multiRank or 0) + rank end
         end
     end
 
     for _, term in ipairs(blacklist) do
-        local hits = self._queryHandler(term, MAX_RESULTS * 3) or {}
+        local hits = self._queryHandler(term, CUSTOM_MULTI_TERM_QUERY_MAX) or {}
         for _, r in ipairs(hits) do
             hitCounts[r.key] = -1
         end
@@ -336,9 +365,25 @@ function SearchPanelWidget:_MultiTermQuery(whitelist, blacklist)
     for k, count in pairs(hitCounts) do
         if count >= needed and resultsByKey[k] then
             results[#results + 1] = resultsByKey[k]
-            if #results >= MAX_RESULTS then break end
         end
     end
+
+    local fullQuery = string.lower(table.concat(whitelist, " "))
+    local function titleTier(result)
+        local title = result.searchTitle and string.lower(result.searchTitle) or ""
+        if title == fullQuery then return 0 end
+        if fullQuery ~= "" and string.find(title, fullQuery, 1, true) == 1 then return 1 end
+        if fullQuery ~= "" and string.find(title, fullQuery, 1, true) then return 2 end
+        return 3
+    end
+    table.sort(results, function(a, b)
+        local aTier, bTier = titleTier(a), titleTier(b)
+        if aTier ~= bTier then return aTier < bTier end
+        local aRank, bRank = a._multiRank or math.huge, b._multiRank or math.huge
+        if aRank ~= bRank then return aRank < bRank end
+        return Locale.Compare(a.label or a.key, b.label or b.key) == -1
+    end)
+    while #results > MAX_RESULTS do table.remove(results) end
     return results
 end
 
@@ -347,6 +392,16 @@ function SearchPanelWidget:_RunQuery(rawQuery)
     if not self._queryHandler and not self._contextReady then return end
     if not rawQuery or rawQuery == "" then
         self:SetResults({})
+        return
+    end
+
+    if self._queryMode == "raw" then
+        if self._queryHandler then
+            self:SetResults(self._queryHandler(rawQuery, MAX_RESULTS) or {})
+        else
+            local raw = Search.Search(SEARCH_CONTEXT, rawQuery, MAX_RESULTS) or {}
+            self:SetResults(self:_ResolveWidgetResults(raw))
+        end
         return
     end
 
@@ -397,13 +452,14 @@ end
 --#region Input forwarding
 
 ---Forward printable characters and Backspace from the result list to the edit box.
+---Keep normal edit speech so typing while reviewing results is still echoed.
 ---@param char string
 ---@return boolean
 function SearchPanelWidget:OnCharInput(char)
     local mgr = self.Manager
     local focused = mgr:GetFocusedWidget()
     if focused == self._editBox then return false end
-    return self._editBox:OnCharInput(char, true)
+    return self._editBox:OnCharInput(char)
 end
 
 ---@param input InputStruct

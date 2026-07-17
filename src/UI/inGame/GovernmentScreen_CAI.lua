@@ -10,7 +10,9 @@ end
 -- exact vanilla script that would otherwise win; otherwise a sighted hotseat
 -- player loses that variant's visuals (e.g. the Golden card art and filter tab).
 
-if IsExpansion2Active() then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+    include("GovernmentScreen_BlackDeathScenario")
+elseif IsExpansion2Active() then
     if IsDramaticAgesActive() then
         include("GovernmentScreen_Byzantium_Gaul_Expansion2_MODE")
     else
@@ -146,7 +148,27 @@ end
 -- ---------------------------------------------------------------------------
 
 local function GetPolicyData(policyType)
-    return policyType and GetPolicyFromCatalog(policyType) or nil
+    if not policyType then return nil end
+    if GetPolicyFromCatalog then return GetPolicyFromCatalog(policyType) end
+
+    -- Black Death's GovernmentScreen predates the vanilla catalog accessor,
+    -- although it builds the same catalog shape internally.
+    local policy = GameInfo.Policies[policyType]
+    local policyTypeRow = GameInfo.Types[policyType]
+    if not policy or not policyTypeRow then return nil end
+    return {
+        Description = Locale.Lookup(policy.Description),
+        Name = Locale.Lookup(policy.Name),
+        PolicyHash = policyTypeRow.Hash,
+        SlotType = policy.GovernmentSlotType,
+        UniqueID = policy.Index,
+    }
+end
+
+local function IsGovernmentReadOnly()
+    -- Black Death has no World Congress policy-lock state and predates this
+    -- vanilla extension point.
+    return IsReadOnly and IsReadOnly() or false
 end
 
 local function GetPolicyName(policyType)
@@ -182,6 +204,23 @@ local function GetPolicyTooltip(policyType)
         GetPolicyAgeIndicator(policyType),
         GetPolicyDescription(policyType),
     }, "[NEWLINE]")
+end
+
+local function IsBlackDeathPapalSlot(slotIndex)
+    if GameConfiguration.GetRuleSet() ~= "RULESET_SCENARIO_BLACKDEATH"
+        or RULES == nil or RULES.PapalSlotIndex == nil then
+        return false
+    end
+
+    local playerID = Game.GetLocalPlayer()
+    local playerConfig = playerID ~= nil and playerID >= 0 and PlayerConfigurations[playerID] or nil
+    return playerConfig ~= nil
+        and playerConfig:GetCivilizationTypeName() == "CIVILIZATION_BLACKDEATH_SCENARIO_FRANCE"
+        and slotIndex == RULES.PapalSlotIndex - 1
+end
+
+local function GetBlackDeathPapalSlotDescription()
+    return Locale.Lookup("LOC_GOVT_PAPAL_SLOT_DESC", RULES.PapalSlotUpkeep)
 end
 
 local function IsPolicyAvailableForPlayer(policyType)
@@ -589,24 +628,37 @@ local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
     local widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovScreenPolicySlot"), "TreeItem", {
         Label    = function()
             local policyType = GetPolicyTypeForSlot(slotIndex)
+            local policyLabel
             if policyType == CAI_EMPTY_POLICY_TYPE then
-                return Locale.Lookup("LOC_CAI_GOVERNMENT_EMPTY_SLOT", slotOrdinal)
+                policyLabel = Locale.Lookup("LOC_CAI_GOVERNMENT_EMPTY_SLOT", slotOrdinal)
+            else
+                policyLabel = GetPolicyName(policyType)
             end
-            return GetPolicyName(policyType)
+            if IsBlackDeathPapalSlot(slotIndex) then
+                return JoinNonEmpty({
+                    Locale.Lookup("LOC_GOVT_PAPAL_SLOT_NAME"),
+                    policyLabel,
+                }, "[NEWLINE]")
+            end
+            return policyLabel
         end,
         Tooltip  = function()
             local policyType = GetPolicyTypeForSlot(slotIndex)
-            if policyType == CAI_EMPTY_POLICY_TYPE then
-                return ""
+            local parts = {}
+            if IsBlackDeathPapalSlot(slotIndex) then
+                table.insert(parts, GetBlackDeathPapalSlotDescription())
             end
-            return GetPolicyTooltip(policyType)
+            if policyType ~= CAI_EMPTY_POLICY_TYPE then
+                table.insert(parts, GetPolicyTooltip(policyType))
+            end
+            return JoinNonEmpty(parts, "[NEWLINE]")
         end,
         FocusKey = "slot:" .. tostring(slotIndex),
     })
     widget:SetFocusSound("Main_Menu_Mouse_Over")
 
     widget:On("activate", function()
-        if IsReadOnly() then
+        if IsGovernmentReadOnly() then
             Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_CONGRESS_LOCKED"))
             return
         end
@@ -625,7 +677,7 @@ local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
             Action      = function()
                 local currentPolicyType = GetPolicyTypeForSlot(slotIndex)
                 if currentPolicyType == CAI_EMPTY_POLICY_TYPE then return true end
-                if IsReadOnly() then
+                if IsGovernmentReadOnly() then
                     Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_CONGRESS_LOCKED"))
                     return true
                 end
@@ -718,7 +770,7 @@ local function BuildGovernmentsTreeContent(tree)
 
         item:On("activate", function(w)
             if w:IsDisabled() then return end
-            if IsReadOnly() then
+            if IsGovernmentReadOnly() then
                 Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_CONGRESS_LOCKED"))
                 return
             end

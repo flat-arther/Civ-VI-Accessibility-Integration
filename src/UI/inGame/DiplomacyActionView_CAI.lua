@@ -23,6 +23,17 @@ else
 end
 
 local mgr = ExposedMembers.CAI_UIManager
+local m_alwaysReceivesInput = false
+
+local function SetAlwaysReceivesInput(enabled)
+    if m_alwaysReceivesInput == enabled then return end
+    if enabled then
+        UITutorialManager:AddControlToAlwaysReceiveInput(ContextPtr)
+    else
+        UITutorialManager:RemoveControlToAlwaysReceiveInput(ContextPtr)
+    end
+    m_alwaysReceivesInput = enabled
+end
 
 local CAI_OVERVIEW_MODE = 0
 local CAI_CONVERSATION_MODE = 1
@@ -2351,12 +2362,14 @@ OnDiplomacySessionClosed = WrapFunc(OnDiplomacySessionClosed, function(orig, ...
 end)
 
 OnHide = WrapFunc(OnHide, function(orig)
+    SetAlwaysReceivesInput(false)
     DestroyRoot()
     orig()
 end)
 ContextPtr:SetHideHandler(OnHide)
 
 OnShutdown = WrapFunc(OnShutdown, function(orig)
+    SetAlwaysReceivesInput(false)
     DestroyRoot()
     orig()
 end)
@@ -2455,6 +2468,9 @@ LateInitialize = WrapFunc(LateInitialize, function(orig)
 end)
 
 OnShow = WrapFunc(OnShow, function(orig)
+    -- AdvisorPopup can enable tutorial-wide input filtering after diplomacy has
+    -- already opened. Keep the live diplomacy context reachable in that state.
+    SetAlwaysReceivesInput(true)
     orig()
     EnsureRootBuilt()
     -- Only push here if a leader is already selected (so we can focus that row).

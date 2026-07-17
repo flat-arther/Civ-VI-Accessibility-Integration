@@ -13,6 +13,17 @@
 include("caiUtils")
 
 local mgr = ExposedMembers.CAI_UIManager
+local m_alwaysReceivesInput = false
+
+local function SetAlwaysReceivesInput(enabled)
+    if m_alwaysReceivesInput == enabled then return end
+    if enabled then
+        UITutorialManager:AddControlToAlwaysReceiveInput(ContextPtr)
+    else
+        UITutorialManager:RemoveControlToAlwaysReceiveInput(ContextPtr)
+    end
+    m_alwaysReceivesInput = enabled
+end
 
 local SIDE_LOCAL = "local"
 local SIDE_OTHER = "other"
@@ -1333,6 +1344,9 @@ UpdateDealStatus = WrapFunc(UpdateDealStatus, function(orig, ...)
 end)
 
 OnShow = WrapFunc(OnShow, function(orig)
+    -- Deals share the diplomacy flow and must remain reachable if an advisor
+    -- enables tutorial-wide input filtering while the screen is open.
+    SetAlwaysReceivesInput(true)
     orig()
     if Game.GetLocalPlayer() == -1 then return end
     if not m_players.local_ then
@@ -1343,11 +1357,13 @@ OnShow = WrapFunc(OnShow, function(orig)
 end)
 
 OnHide = WrapFunc(OnHide, function(orig)
+    SetAlwaysReceivesInput(false)
     DestroyRoot()
     orig()
 end)
 
 OnShutdown = WrapFunc(OnShutdown, function(orig)
+    SetAlwaysReceivesInput(false)
     DestroyRoot()
     orig()
 end)

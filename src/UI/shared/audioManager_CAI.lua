@@ -642,6 +642,7 @@ function CAIAudioManager:UnhookSettingsChanged()
 end
 
 function CAIAudioManager:Update()
+    CAI.AudioUpdate()
     local isFocusMuted = self:ShouldMuteForWindowFocus()
     if isFocusMuted then
         if not self.IsFocusMuted then

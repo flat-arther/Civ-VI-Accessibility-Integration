@@ -1,6 +1,8 @@
 include("caiUtils")
 include("Civ6Common")
-if IsExpansion2Active() then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+    include("MinimapPanel_BlackDeathScenario")
+elseif IsExpansion2Active() then
     include("MinimapPanel_Expansion2")
 elseif IsExpansion1Active() then
     include("MinimapPanel_Expansion1")
@@ -12,6 +14,35 @@ local mgr = ExposedMembers.CAI_UIManager
 
 local LENS_LIST_WIDGET_ID = "CAIMinimapLensList"
 local m_caiLensList = nil ---@type UIWidget|nil
+local m_isBlackDeathScenario = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH"
+
+ExposedMembers.CAIPlagueLensActive = false
+
+local function PublishPlagueLensState(isActive)
+    if ExposedMembers.CAIPlagueLensActive == isActive then
+        return
+    end
+
+    ExposedMembers.CAIPlagueLensActive = isActive
+    LuaEvents.CAIPlagueLensChanged(isActive)
+end
+
+if m_isBlackDeathScenario then
+    RefreshInterfaceMode = WrapFunc(RefreshInterfaceMode, function(orig, ...)
+        orig(...)
+        PublishPlagueLensState(UILens.IsLensActive("Plague"))
+    end)
+
+    TurnPlagueLensOn = WrapFunc(TurnPlagueLensOn, function(orig, ...)
+        orig(...)
+        PublishPlagueLensState(true)
+    end)
+
+    TurnPlagueLensOff = WrapFunc(TurnPlagueLensOff, function(orig, ...)
+        orig(...)
+        PublishPlagueLensState(false)
+    end)
+end
 
 local function ControlIsHidden(control)
     return control == nil or (control.IsHidden ~= nil and control:IsHidden())
@@ -145,6 +176,18 @@ if IsExpansion2Active() and Controls.PowerLensButton ~= nil then
     })
 end
 
+if m_isBlackDeathScenario then
+    table.insert(lensEntries, {
+        Id = "Plague",
+        GetControl = function()
+            return GetBlackDeathPlagueLensButton()
+        end,
+        Toggle = function()
+            LuaEvents.OnViewPlagueLens()
+        end,
+    })
+end
+
 local function GetLensEntryLabel(entry)
     local control = entry.GetControl()
     local text = ControlText(control)
@@ -263,7 +306,6 @@ local function CloseVanillaMapSearch()
     end
 end
 
-Events.InputActionTriggered.Remove(OnInputActionTriggered)
 OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     if m_caiOpenMapSearchId ~= nil and actionId == m_caiOpenMapSearchId then
         if Game.GetLocalPlayer() == -1 then
@@ -277,8 +319,15 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
         end
         return
     end
+
+    orig(actionId)
 end)
 Events.InputActionStarted.Add(OnInputActionStarted)
+
+LateInitialize = WrapFunc(LateInitialize, function(orig, ...)
+    orig(...)
+    Events.InputActionTriggered.Remove(OnInputActionTriggered)
+end)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
     if mgr ~= nil then
@@ -326,6 +375,7 @@ end
 
 OnShutdown = WrapFunc(OnShutdown, function(orig)
     Events.InputActionStarted.Remove(OnInputActionStarted)
+    PublishPlagueLensState(false)
     LuaEvents.CAIMinimapLensListToggle.Remove(ToggleAccessibleLensList)
     LuaEvents.CAIMinimapMapPinListToggle.Remove(ToggleAccessibleMapPinList)
     LuaEvents.CAIMapPinList_RequestClose.Remove(CloseMapPinList)

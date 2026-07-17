@@ -45,10 +45,13 @@ VALUES
     ('SpeakRole', 'UI', 30, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_ROLE', 'LOC_CAI_SETTING_SPEAK_ROLE_TOOLTIP', NULL),
 
-    ('SearchTimeout', 'UI', 40, 'number', 'editbox', '1.0',
+    ('AutoFocusFirstSearchResult', 'UI', 40, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_AUTO_FOCUS_FIRST_SEARCH_RESULT', 'LOC_CAI_SETTING_AUTO_FOCUS_FIRST_SEARCH_RESULT_TOOLTIP', NULL),
+
+    ('SearchTimeout', 'UI', 50, 'number', 'editbox', '1.0',
      'LOC_CAI_SETTING_SEARCH_TIMEOUT', 'LOC_CAI_SETTING_SEARCH_TIMEOUT_TOOLTIP', 'NumbersOnly'),
 
-    ('TokenSplitLength', 'UI', 50, 'number', 'editbox', '75',
+    ('TokenSplitLength', 'UI', 60, 'number', 'editbox', '75',
      'LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH', 'LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH_TOOLTIP', 'NumbersOnly'),
 
     ('SpeakTurnBlockers', 'Events', 10, 'bool', 'checkbox', 'true',
@@ -62,6 +65,12 @@ VALUES
 
     ('AudioTagVolume_CURSOR', 'Cursor', 20, 'number', 'slider', '100',
      'LOC_CAI_SETTING_CURSOR_AUDIO_VOLUME', 'LOC_CAI_SETTING_CURSOR_AUDIO_VOLUME_TOOLTIP', NULL),
+
+    ('AutoMoveCursorToSelectedCity', 'Cursor', 30, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_AUTO_MOVE_CURSOR_TO_SELECTED_CITY', 'LOC_CAI_SETTING_AUTO_MOVE_CURSOR_TO_SELECTED_CITY_TOOLTIP', NULL),
+
+    ('AutoMoveCursorToSelectedUnit', 'Cursor', 40, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_AUTO_MOVE_CURSOR_TO_SELECTED_UNIT', 'LOC_CAI_SETTING_AUTO_MOVE_CURSOR_TO_SELECTED_UNIT_TOOLTIP', NULL),
 
     ('ScannerBeaconEnabled', 'WorldScanner', 10, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SCANNER_BEACON_ENABLED', 'LOC_CAI_SETTING_SCANNER_BEACON_ENABLED_TOOLTIP', NULL),
@@ -81,22 +90,28 @@ VALUES
     ('ScannerAutoFocusActiveLens', 'WorldScanner', 60, 'bool', 'checkbox', 'false',
      'LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_ACTIVE_LENS', 'LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_ACTIVE_LENS_TOOLTIP', NULL),
 
-    ('ScannerGroupCitiesByCivilization', 'WorldScanner', 70, 'bool', 'checkbox', 'true',
+    ('ScannerAutoFocusCityManagement', 'WorldScanner', 70, 'bool', 'checkbox', 'false',
+     'LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_CITY_MANAGEMENT', 'LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_CITY_MANAGEMENT_TOOLTIP', NULL),
+
+    ('ScannerAutoFocusRecommendations', 'WorldScanner', 80, 'bool', 'checkbox', 'false',
+     'LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_RECOMMENDATIONS', 'LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_RECOMMENDATIONS_TOOLTIP', NULL),
+
+    ('ScannerGroupCitiesByCivilization', 'WorldScanner', 90, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SCANNER_GROUP_CITIES_BY_CIVILIZATION', 'LOC_CAI_SETTING_SCANNER_GROUP_CITIES_BY_CIVILIZATION_TOOLTIP', NULL),
 
-    ('CursorCoordinates', 'Cursor', 30, 'string', 'dropdown', 'disabled',
+    ('CursorCoordinates', 'Cursor', 50, 'string', 'dropdown', 'disabled',
      'LOC_CAI_SETTING_CURSOR_COORDINATES', 'LOC_CAI_SETTING_CURSOR_COORDINATES_TOOLTIP', NULL),
 
-    ('SpeakOwnerZone', 'Cursor', 40, 'bool', 'checkbox', 'true',
+    ('SpeakOwnerZone', 'Cursor', 60, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_OWNER_ZONE', 'LOC_CAI_SETTING_SPEAK_OWNER_ZONE_TOOLTIP', NULL),
 
-    ('SpeakTerritoryZone', 'Cursor', 50, 'bool', 'checkbox', 'true',
+    ('SpeakTerritoryZone', 'Cursor', 70, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_TERRITORY_ZONE', 'LOC_CAI_SETTING_SPEAK_TERRITORY_ZONE_TOOLTIP', NULL),
 
-    ('SpeakContinentZone', 'Cursor', 60, 'bool', 'checkbox', 'true',
+    ('SpeakContinentZone', 'Cursor', 80, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_CONTINENT_ZONE', 'LOC_CAI_SETTING_SPEAK_CONTINENT_ZONE_TOOLTIP', NULL),
 
-    ('SpeakNationalParkZone', 'Cursor', 70, 'bool', 'checkbox', 'true',
+    ('SpeakNationalParkZone', 'Cursor', 90, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_NATIONAL_PARK_ZONE', 'LOC_CAI_SETTING_SPEAK_NATIONAL_PARK_ZONE_TOOLTIP', NULL),
 
     ('AnnounceVisibilityChangesTurnStart', 'Events', 30, 'bool', 'checkbox', 'true',

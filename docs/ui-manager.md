@@ -366,7 +366,9 @@ cached/default child on entry.
   expand/collapse don't speak a value at all — the focus change announces.
 - `EditBoxWidget` speaks per-keystroke characters, deleted text, selection
   changes, line content on Up/Down, etc. — all routed through `Speak(.., true)`
-  for the interrupting feel.
+  for the interrupting feel. A successful buffer mutation speaks its typed,
+  pasted, deleted, cancelled, or programmatic value feedback before emitting
+  `text_changed`, so listener work cannot interrupt the edit echo.
 
 ### Speech setting precedence
 
@@ -551,6 +553,13 @@ widget:AddInputBindings({
 Binding defaults: `IsShift=false`, `IsControl=false`, `IsAlt=false`,
 `MSG=KeyEvents.KeyUp`.
 
+Non-common bindings are normally consumed without running their action when the
+focused widget is disabled. Set `BubbleWhenDisabled=true` on navigation
+bindings that should instead continue to an ancestor. Disabled EditBoxes use
+this for unmodified Up/Down and Home/End so an inactive field cannot trap
+navigation belonging to its containing List; editing and activation bindings
+remain blocked.
+
 ---
 
 ## 9. Navigation
@@ -643,9 +652,12 @@ myPanel:SetAllowSearch(true)
 
 -- Enable with a custom query handler (implicitly sets AllowSearch = true):
 myTree:SetSearchQueryHandler(function(query, maxResults)
-    -- Return a list of { key, label, onActivate?, widget? }
+    -- Return a list of { key, label, onActivate?, widget?, tooltip? }
     return results
 end)
+
+-- Full-text contexts can receive the complete query once:
+myTree:SetSearchQueryMode("raw")
 
 -- Disable:
 myPanel:DisableSearch()
@@ -665,6 +677,17 @@ tables. Each result has:
 When no custom handler is set, the SearchPanel walks the container's descendants,
 collects their speech text, builds a `Search.*` context, and matches against it.
 
+The default query mode is `"terms"`. The panel parses the edit text into
+whitelisted terms, intersects their result sets, and subtracts `--term` matches.
+A custom handler is therefore called once for each parsed term. This behavior is
+well suited to labels in maps, trees, and ordinary lists.
+
+Call `container:SetSearchQueryMode("raw")` for a full-text index. Raw mode passes
+the complete edit-box string to the custom handler once, without CAI term or
+exclusion parsing, and preserves the search provider's phrase ranking and
+preview. If no custom handler is installed, the full string is passed once to
+the panel's `Search.*` context.
+
 #### Accessing the search panel from a screen
 
 ```lua
@@ -677,7 +700,16 @@ local panel = container:GetSearchPanel()
 
 The manager owns a single shared `SearchPanelWidget` instance. When
 `mgr:OpenSearch(container)` is called, it applies the container's stored query
-handler (if any) to the panel before opening it.
+handler and query mode to the panel before opening it.
+
+The result list always contains an empty-state row when there are no results.
+It reads `Type text to search` while the edit box is empty and `No results`
+after a nonempty query. The empty-state row is never auto-focused. If a rebuild
+destroys a focused result, focus remains on the result-list container.
+
+The UI setting `AutoFocusFirstSearchResult` controls whether a successful
+result rebuild moves focus to the first result. It defaults to enabled. When
+disabled, rebuilding results does not explicitly move focus.
 
 ### Manager-bound widget helpers
 
@@ -1030,7 +1062,7 @@ When migrating a screen from the old template-merged manager:
 | DropdownWidget | value_changed, opened, closed                  |
 | CheckboxWidget | value_changed                                  |
 | SliderWidget   | value_changed                                  |
-| EditBoxWidget  | value_changed (on Commit only — no per-keystroke event) |
+| EditBoxWidget  | text_changed (every buffer mutation, after edit speech); value_changed (on Commit) |
 | TreeItemWidget | activate (leaf only), expanded, collapsed      |
 | SubMenuWidget  | expanded, collapsed                            |
 | TabControlWidget | value_changed (page index)                   |

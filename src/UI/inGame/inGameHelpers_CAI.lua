@@ -199,6 +199,11 @@ local AWARD_LOC_TAGS = {
     MODIFIER_PLAYER_ADD_FAVOR = "LOC_HUD_CIVICS_TREE_AWARD_FAVOR",
 }
 
+local AWARD_MODIFIER_ID_LOC_TAGS = {
+    CIVIC_AWARD_ONE_SETTLER = "LOC_CIVIC_SCENARIO_CROWN_COLONY_DESCRIPTION",
+    CIVIC_AWARD_TWO_SETTLERS = "LOC_CIVIC_SCENARIO_GOLD_RUSH_DESCRIPTION",
+}
+
 function GetAwardNames(modifierList)
     local names = {}
     if not modifierList then return names end
@@ -208,8 +213,11 @@ function GetAwardNames(modifierList)
     local extra = g_ExtraIconData
     for _, m in ipairs(modifierList) do
         local tag = AWARD_LOC_TAGS[m.ModifierType]
+        local modifierIdTag = AWARD_MODIFIER_ID_LOC_TAGS[m.ModifierId]
         local hasIconData = extra and extra[m.ModifierType] ~= nil
-        if tag and hasIconData then
+        if modifierIdTag and hasIconData then
+            table.insert(names, Locale.Lookup(modifierIdTag))
+        elseif tag and hasIconData then
             local num = tonumber(m.ModifierValue)
             if num then
                 table.insert(names, Locale.Lookup(tag, num))
@@ -449,7 +457,8 @@ function GetFormationUnitsOnPlot(unit)
     return formationUnits
 end
 
----Returns the player's civ prefix, as an adjective.
+---Returns the player's localized civilization ownership prefix.
+---Prefers the adjective and falls back to the short name when its localization is missing.
 ---@param playerID number|nil
 ---@return string|nil
 function GetPlayerOwnershipPrefix(playerID)
@@ -459,11 +468,19 @@ function GetPlayerOwnershipPrefix(playerID)
 
     local playerConfig = PlayerConfigurations[playerID]
     if playerConfig ~= nil then
-        local civName = playerConfig:GetCivilizationShortDescription()
-        if civName ~= nil and civName ~= "" then
-            local adjective = civName:gsub("_NAME", "_ADJECTIVE")
-            if adjective ~= nil and adjective ~= "" then
-                return Locale.Lookup(adjective)
+        local civInfo = GameInfo.Civilizations[playerConfig:GetCivilizationTypeID()]
+        if civInfo ~= nil and civInfo.Adjective ~= nil and civInfo.Adjective ~= "" then
+            local adjective = Locale.Lookup(civInfo.Adjective)
+            if adjective ~= civInfo.Adjective then
+                return adjective
+            end
+        end
+
+        local shortDescription = playerConfig:GetCivilizationShortDescription()
+        if shortDescription ~= nil and shortDescription ~= "" then
+            local civilizationName = Locale.Lookup(shortDescription)
+            if civilizationName ~= shortDescription then
+                return civilizationName
             end
         end
     end
@@ -471,7 +488,7 @@ function GetPlayerOwnershipPrefix(playerID)
     return Locale.Lookup("LOC_TOOLTIP_PLAYER_ID", playerID)
 end
 
----Returns the unit's owner civ prefix, as an adjective.
+---Returns the unit owner's localized civilization ownership prefix.
 ---@param unit Unit
 ---@return string|nil
 function GetUnitOwnershipPrefix(unit)

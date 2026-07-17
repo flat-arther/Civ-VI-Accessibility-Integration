@@ -3,11 +3,14 @@ include("inGameHelpers_CAI")
 include("ToolTipHelper")
 include("Civ6Common")
 
--- Expansion-aware include chain. XP1 adds AllianceResearchSupport (per-node
+-- Ruleset/expansion-aware include chain. Australia's wrapper preserves its
+-- native scenario layout behavior. XP1 adds AllianceResearchSupport (per-node
 -- alliance research icon/tooltip); XP2 includes XP1 and adds revealed-only
 -- search. CAI replaces the screen context outright, so it must load the exact
 -- variant vanilla would.
-if IsExpansion2Active and IsExpansion2Active() then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_AUSTRALIA" then
+    include("TechTree_AustraliaScenario")
+elseif IsExpansion2Active and IsExpansion2Active() then
     include("TechTree_Expansion2")
 elseif IsExpansion1Active and IsExpansion1Active() then
     include("TechTree_Expansion1")

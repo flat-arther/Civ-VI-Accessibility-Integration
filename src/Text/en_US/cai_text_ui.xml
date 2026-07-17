@@ -442,7 +442,7 @@
       <Text>Enemy units</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_SPECIAL_MAP_OBJECTS" Language="en_US">
-      <Text>Special map objects</Text>
+      <Text>Special</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_WAYPOINTS" Language="en_US">
       <Text>Waypoints</Text>
@@ -969,7 +969,7 @@
       <Text>Reads the current era score, age, thresholds, and active commemorations</Text>
     </Row>
     <Row Tag="LOC_CAI_ACTION_PANEL_ERA_NOT_AVAILABLE" Language="en_US">
-      <Text>Era ages not available in base game</Text>
+      <Text>Era ages are not available</Text>
     </Row>
     <Row Tag="LOC_CAI_ACTION_PANEL_ERA_THRESHOLDS" Language="en_US">
       <Text>Dark age threshold: {1_Dark}, Golden age threshold: {2_Golden}</Text>
@@ -1668,6 +1668,9 @@
     </Row>
     <Row Tag="LOC_CAI_SEARCH_NO_RESULTS" Language="en_US">
       <Text>No results</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SEARCH_TYPE_TO_SEARCH" Language="en_US">
+      <Text>Type text to search</Text>
     </Row>
     <Row Tag="LOC_CAI_SEARCH_HISTORY_EMPTY" Language="en_US">
       <Text>No search history</Text>
@@ -3310,6 +3313,9 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_TOO_EXPENSIVE" Language="en_US">
       <Text>Too expensive</Text>
     </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_COERCED" Language="en_US">
+      <Text>Coerced tiles</Text>
+    </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TARGET_PLOTS" Language="en_US">
       <Text>Target tiles</Text>
     </Row>
@@ -4731,6 +4737,117 @@
     <Row Tag="LOC_CAI_PLACE_MAP_PIN_TOOLTIP" Language="en_US">
       <Text>Place or edit a map tac at the current cursor location</Text>
     </Row>
+    <Row Tag="LOC_CAI_BOOKMARK" Language="en_US">
+      <Text>Bookmark {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_ASSIGNED" Language="en_US">
+      <Text>Bookmark {1_Num} assigned.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_EMPTY" Language="en_US">
+      <Text>Bookmark {1_Num} is empty.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_UNAVAILABLE" Language="en_US">
+      <Text>Map-tac bookmarks are not available at this time.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_ASSIGN_TOOLTIP" Language="en_US">
+      <Text>Assigns the map tac at the navigation cursor to this bookmark slot, creating one if necessary.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_JUMP_TOOLTIP" Language="en_US">
+      <Text>Moves the navigation cursor to this map-tac bookmark.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_DIRECTION_TOOLTIP" Language="en_US">
+      <Text>Reads this map-tac bookmark's direction from the navigation cursor.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_ASSIGN_1" Language="en_US">
+      <Text>Assign map-tac bookmark 1</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_ASSIGN_2" Language="en_US">
+      <Text>Assign map-tac bookmark 2</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_ASSIGN_3" Language="en_US">
+      <Text>Assign map-tac bookmark 3</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_ASSIGN_4" Language="en_US">
+      <Text>Assign map-tac bookmark 4</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_ASSIGN_5" Language="en_US">
+      <Text>Assign map-tac bookmark 5</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_ASSIGN_6" Language="en_US">
+      <Text>Assign map-tac bookmark 6</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_ASSIGN_7" Language="en_US">
+      <Text>Assign map-tac bookmark 7</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_ASSIGN_8" Language="en_US">
+      <Text>Assign map-tac bookmark 8</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_ASSIGN_9" Language="en_US">
+      <Text>Assign map-tac bookmark 9</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_ASSIGN_10" Language="en_US">
+      <Text>Assign map-tac bookmark 10</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_JUMP_1" Language="en_US">
+      <Text>Jump to map-tac bookmark 1</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_JUMP_2" Language="en_US">
+      <Text>Jump to map-tac bookmark 2</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_JUMP_3" Language="en_US">
+      <Text>Jump to map-tac bookmark 3</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_JUMP_4" Language="en_US">
+      <Text>Jump to map-tac bookmark 4</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_JUMP_5" Language="en_US">
+      <Text>Jump to map-tac bookmark 5</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_JUMP_6" Language="en_US">
+      <Text>Jump to map-tac bookmark 6</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_JUMP_7" Language="en_US">
+      <Text>Jump to map-tac bookmark 7</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_JUMP_8" Language="en_US">
+      <Text>Jump to map-tac bookmark 8</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_JUMP_9" Language="en_US">
+      <Text>Jump to map-tac bookmark 9</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_JUMP_10" Language="en_US">
+      <Text>Jump to map-tac bookmark 10</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_DIRECTION_1" Language="en_US">
+      <Text>Read direction to map-tac bookmark 1</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_DIRECTION_2" Language="en_US">
+      <Text>Read direction to map-tac bookmark 2</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_DIRECTION_3" Language="en_US">
+      <Text>Read direction to map-tac bookmark 3</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_DIRECTION_4" Language="en_US">
+      <Text>Read direction to map-tac bookmark 4</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_DIRECTION_5" Language="en_US">
+      <Text>Read direction to map-tac bookmark 5</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_DIRECTION_6" Language="en_US">
+      <Text>Read direction to map-tac bookmark 6</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_DIRECTION_7" Language="en_US">
+      <Text>Read direction to map-tac bookmark 7</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_DIRECTION_8" Language="en_US">
+      <Text>Read direction to map-tac bookmark 8</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_DIRECTION_9" Language="en_US">
+      <Text>Read direction to map-tac bookmark 9</Text>
+    </Row>
+    <Row Tag="LOC_CAI_BOOKMARK_DIRECTION_10" Language="en_US">
+      <Text>Read direction to map-tac bookmark 10</Text>
+    </Row>
 
     <!-- Map Pin Popup -->
     <Row Tag="LOC_CAI_MAP_PIN_ICON_LABEL" Language="en_US">
@@ -4974,6 +5091,9 @@
     </Row>
     <Row Tag="LOC_CAI_KB_DELETE_FORWARD" Language="en_US">
       <Text>Delete forward</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_DELETE_PLAYER" Language="en_US">
+      <Text>Delete player</Text>
     </Row>
     <Row Tag="LOC_CAI_KB_DELETE_SAVE" Language="en_US">
       <Text>Delete save</Text>
@@ -5542,6 +5662,13 @@
       <Text>Speak the role of focused controls, such as button, checkbox, slider, or dropdown.</Text>
     </Row>
 
+    <Row Tag="LOC_CAI_SETTING_AUTO_FOCUS_FIRST_SEARCH_RESULT" Language="en_US">
+      <Text>Auto focus first search result</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_AUTO_FOCUS_FIRST_SEARCH_RESULT_TOOLTIP" Language="en_US">
+      <Text>Automatically focus the first result when a search returns results.</Text>
+    </Row>
+
     <Row Tag="LOC_CAI_SETTING_SEARCH_TIMEOUT" Language="en_US">
       <Text>Search timeout</Text>
     </Row>
@@ -5582,6 +5709,20 @@
     </Row>
     <Row Tag="LOC_CAI_SETTING_CURSOR_AUDIO_VOLUME_TOOLTIP" Language="en_US">
       <Text>Volume level for navigation cursor audio.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_AUTO_MOVE_CURSOR_TO_SELECTED_CITY" Language="en_US">
+      <Text>Auto move cursor to selected city</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_AUTO_MOVE_CURSOR_TO_SELECTED_CITY_TOOLTIP" Language="en_US">
+      <Text>Automatically move the navigation cursor to a city's tile when the city is selected.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_AUTO_MOVE_CURSOR_TO_SELECTED_UNIT" Language="en_US">
+      <Text>Auto move cursor to selected unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_AUTO_MOVE_CURSOR_TO_SELECTED_UNIT_TOOLTIP" Language="en_US">
+      <Text>Automatically move the navigation cursor to a unit's tile when the unit is selected.</Text>
     </Row>
 
     <Row Tag="LOC_CAI_SETTING_SCANNER_BEACON_ENABLED" Language="en_US">
@@ -5645,6 +5786,20 @@
     </Row>
     <Row Tag="LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_ACTIVE_LENS_TOOLTIP" Language="en_US">
       <Text>Automatically switch scanner focus to the Active lens category when it becomes available.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_CITY_MANAGEMENT" Language="en_US">
+      <Text>Auto focus city management category when available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_CITY_MANAGEMENT_TOOLTIP" Language="en_US">
+      <Text>Automatically switch scanner focus to the City management category when it becomes available.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_RECOMMENDATIONS" Language="en_US">
+      <Text>Auto focus recommendations category when available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SCANNER_AUTO_FOCUS_RECOMMENDATIONS_TOOLTIP" Language="en_US">
+      <Text>Automatically switch scanner focus to the Recommendations category when it becomes available.</Text>
     </Row>
 
     <Row Tag="LOC_CAI_SETTING_SCANNER_GROUP_CITIES_BY_CIVILIZATION" Language="en_US">
@@ -5964,13 +6119,13 @@
       <Text>The lens list is not available at this time.</Text>
     </Row>
     <Row Tag="LOC_CAI_UI_MAP_PINS_UNAVAILABLE" Language="en_US">
-      <Text>Map pins are not available at this time.</Text>
+      <Text>Map tacs are not available at this time.</Text>
     </Row>
     <Row Tag="LOC_CAI_UI_MAP_PINS_DISTRICT_PLACEMENT" Language="en_US">
-      <Text>The map-pin list cannot open during district placement.</Text>
+      <Text>The map-tac list cannot open during district placement.</Text>
     </Row>
     <Row Tag="LOC_CAI_UI_MAP_PINS_WORLD_BUILDER" Language="en_US">
-      <Text>Map pins are not available in World Builder.</Text>
+      <Text>Map tacs are not available in World Builder.</Text>
     </Row>
     <Row Tag="LOC_CAI_UI_MAP_SEARCH_UNAVAILABLE" Language="en_US">
       <Text>Map Search is not available at this time.</Text>

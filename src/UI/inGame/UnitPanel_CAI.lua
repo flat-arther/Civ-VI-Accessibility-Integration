@@ -4,7 +4,9 @@ include("interfaceInfoHelpers_CAI")
 include("hexCoordUtils_CAI")
 include("Civ6Common")
 
-if IsExpansion2Active ~= nil and IsExpansion2Active() then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+    include("UnitPanel_BlackDeathScenario")
+elseif IsExpansion2Active ~= nil and IsExpansion2Active() then
     include("UnitPanel_Expansion2")
 else
     include("UnitPanel")
@@ -145,15 +147,19 @@ end
 
 local function AddOperationResult(operationType, config)
     local row = GameInfo.UnitOperations[operationType]
-    if row ~= nil then
+    if row ~= nil and row.Hash ~= nil then
         unitOperationResults[row.Hash] = config
+    elseif row ~= nil then
+        LogWarn("CAI UnitPanel skipped operation result without a hash: " .. operationType)
     end
 end
 
 local function AddCommandResult(commandType, config)
     local row = GameInfo.UnitCommands[commandType]
-    if row ~= nil then
+    if row ~= nil and row.Hash ~= nil then
         unitCommandResults[row.Hash] = config
+    elseif row ~= nil then
+        LogWarn("CAI UnitPanel skipped command result without a hash: " .. commandType)
     end
 end
 
@@ -644,6 +650,16 @@ local function GetUnitInfoCharges(data, unit)
     AppendUnitInfo(results,
         parkCharges ~= nil and parkCharges > 0 and
         Locale.Lookup("LOC_HUD_UNIT_PANEL_PARK_CHARGES") .. "[NEWLINE]" .. tostring(parkCharges) or nil)
+
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" and unit ~= nil
+        and g_PropertyKeys ~= nil and g_PropertyKeys.Charges ~= nil and g_PropertyKeys.MaxCharges ~= nil then
+        local usedCharges = unit:GetProperty(g_PropertyKeys.Charges)
+        local maxCharges = unit:GetProperty(g_PropertyKeys.MaxCharges)
+        if usedCharges ~= nil and maxCharges ~= nil then
+            AppendUnitInfo(results,
+                Locale.Lookup("LOC_SCENARIO_HUD_CHARGES") .. "[NEWLINE]" .. tostring(maxCharges - usedCharges))
+        end
+    end
 
     return results
 end
@@ -2811,7 +2827,8 @@ function InitializeUnitInfoActionMap()
 end
 
 function OnUnitPanelSelectionInfoInputActionStarted(actionId)
-    if ContextPtr:IsHidden() or GetSelectedUnit() == nil then
+    local selectedUnit = GetSelectedUnit()
+    if ContextPtr:IsHidden() or selectedUnit == nil then
         return
     end
 
@@ -2831,7 +2848,18 @@ function OnUnitPanelSelectionInfoInputActionStarted(actionId)
         return
     end
 
-    Speak(table.concat(results, "[NEWLINE]"))
+    local summary = table.concat(results, "[NEWLINE]")
+    if actionId == Input.GetActionId("ReadSelectionSummary") and CAICursor ~= nil then
+        local cursorX, cursorY = CAICursor:GetCoords()
+        if cursorX ~= nil and cursorY ~= nil then
+            local direction = CAIHexCoordUtils.directionString(
+                cursorX, cursorY, selectedUnit:GetX(), selectedUnit:GetY())
+            SpeakLines({ direction, summary })
+            return
+        end
+    end
+
+    Speak(summary)
 end
 
 function OnUnitPanelSelectionActionInputStarted(actionId)
@@ -2925,14 +2953,16 @@ function OnCAIUnitSelectionChanged(player, unitId, locationX, locationY, locatio
     RemoveSimplePromotionList()
     RemoveUnitNamePanel()
 
-    local plot = Map.GetPlot(locationX, locationY)
-    if plot == nil then
-        LogWarn("CAI UnitPanel could not resolve selected unit plot: " ..
-            tostring(locationX) .. ", " .. tostring(locationY))
-        return
-    end
     if not m_IsGameStarted then return end
-    LuaEvents.CAICursorMoveTo(plot:GetIndex(), "select")
+    if CAISettings.GetBool("AutoMoveCursorToSelectedUnit") then
+        local plot = Map.GetPlot(locationX, locationY)
+        if plot == nil then
+            LogWarn("CAI UnitPanel could not resolve selected unit plot: " ..
+                tostring(locationX) .. ", " .. tostring(locationY))
+            return
+        end
+        LuaEvents.CAICursorMoveTo(plot:GetIndex(), "select")
+    end
     local focused = mgr:GetFocusedWidget()
     local isInWorld = focused and (focused.Type == "GameView" or focused.Type == "InterfaceMode")
     if isInWorld then

@@ -3,6 +3,10 @@ include("hexCoordUtils_CAI")
 include("Civ6Common")
 
 local function GetCityPanelIncludeName()
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+        return "CityPanel_BlackDeathScenario"
+    end
+
     if IsExpansion2Active() then
         return "CityPanel_Expansion2"
     end
@@ -1341,7 +1345,21 @@ function OnSelectionInfoInputActionStarted(actionId)
         return
     end
 
-    Speak(table.concat(results, ", "))
+    local summary = table.concat(results, ", ")
+    if actionId == Input.GetActionId("ReadSelectionSummary") then
+        local cursor = ExposedMembers.CAICursor
+        if cursor ~= nil then
+            local cursorX, cursorY = cursor:GetCoords()
+            if cursorX ~= nil and cursorY ~= nil then
+                local direction = HexCoordUtils.directionString(
+                    cursorX, cursorY, city:GetX(), city:GetY())
+                SpeakLines({ direction, summary })
+                return
+            end
+        end
+    end
+
+    Speak(summary)
 end
 
 function OnCityActionInputActionStarted(actionId)
@@ -1365,13 +1383,15 @@ m_IsGameStarted = true
 function OnCitySelectionChanged(ownerPlayerID, cityID, i, j, k, isSelected, isEditable)
     if ContextPtr:IsHidden() then return end
     if not isSelected then return end
-    local plot = Map.GetPlot(i, j)
-    if plot == nil then
-        LogWarn("CAI CityPanel could not resolve selected city plot: " .. tostring(i) .. ", " .. tostring(j))
-        return
-    end
     if not m_IsGameStarted then return end
-    LuaEvents.CAICursorMoveTo(plot:GetIndex(), "select")
+    if CAISettings.GetBool("AutoMoveCursorToSelectedCity") then
+        local plot = Map.GetPlot(i, j)
+        if plot == nil then
+            LogWarn("CAI CityPanel could not resolve selected city plot: " .. tostring(i) .. ", " .. tostring(j))
+            return
+        end
+        LuaEvents.CAICursorMoveTo(plot:GetIndex(), "select")
+    end
     local results = info:RequestCityInfo(cityID, CITY_INFO_BUCKETS.Summary, ownerPlayerID)
     local focused = mgr:GetFocusedWidget()
     local isInWorld = focused and (focused.Type == "GameView" or focused.Type == "InterfaceMode")

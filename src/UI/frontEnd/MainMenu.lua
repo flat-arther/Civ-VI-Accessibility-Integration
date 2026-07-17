@@ -1846,7 +1846,6 @@ local EXCLUDED_MAIN_CALLBACKS = {
     [OnWorldBuilder] = true,
 }
 local EXCLUDED_SUB_CALLBACKS = {
-    [OnScenarioSetup] = true,
 }
 
 -- Vanilla highlight reuse: mirrors what mouse hover does in vanilla so the

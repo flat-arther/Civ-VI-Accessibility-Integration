@@ -492,6 +492,18 @@ local function GetStatusList(ctx)
     return table.concat(statuses, ", ")
 end
 
+local function GetBlackDeathIndicatorText(ctx)
+    local plagueInstances = GetAllocatedInstances(ctx and ctx.banner and ctx.banner.m_StatPlagueIM)
+    for i = 1, #plagueInstances do
+        local indicator = plagueInstances[i].PlagueIndicator
+        if IsControlVisible(indicator) then
+            return GetControlTooltip(indicator)
+        end
+    end
+
+    return nil
+end
+
 local function GetPopulationStatInstance(ctx)
     if ctx == nil or ctx.banner == nil then
         return nil
@@ -1083,6 +1095,9 @@ info.CityBannerInfo = {
 
         return statuses
     end,
+    blackDeathIndicator = function(ctx)
+        return GetBlackDeathIndicatorText(ctx)
+    end,
     rangeStrike = function(ctx)
         return GetBannerStrikeTooltip(ctx)
     end,
@@ -1518,6 +1533,7 @@ local BannerBucketActions = {
             "outerDefense",
             "defense",
             "statuses",
+            "blackDeathIndicator",
             "rangeStrike",
         },
         district = {

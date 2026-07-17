@@ -280,11 +280,13 @@ function EditBoxWidget:Commit()
 end
 
 function EditBoxWidget:Cancel()
+    local changed = (self._buffer or "") ~= (self._original or "")
     self._active = false
     self._selStart = nil
     self._buffer = self._original or ""
     self._cursor = #self._buffer
     Speak(Locale.Lookup("LOC_CAI_EDIT_CANCELLED"), false, false)
+    if changed then self:_FireTextChanged() end
 end
 
 --#endregion
@@ -305,10 +307,10 @@ function EditBoxWidget:OnCharInput(char, silent)
     if self._readOnly then return true end
     if not CharAllowed(self._editMode, char) then return true end
     if not E.InsertText(self, char) then return true end
-    self:_FireTextChanged()
     if not silent then
         Speak(self._passwordMask and "*" or char, true, false)
     end
+    self:_FireTextChanged()
     return true
 end
 
@@ -348,13 +350,16 @@ function EditBoxWidget._BuildBindings()
             Description = "LOC_CAI_KB_DELETE_BACK",
             Action = function(self)
                 if not active(self) or self._readOnly then return false end
+                local d
                 if self._selStart then
-                    local d = E.DeleteSelection(self)
-                    if d ~= "" then Speak(self._passwordMask and string.rep("*", #d) or d, true, false) end
+                    d = E.DeleteSelection(self)
                 else
-                    E.BackspaceChar(self)
+                    d = E.BackspaceChar(self)
                 end
-                self:_FireTextChanged()
+                if d ~= "" then
+                    Speak(self._passwordMask and string.rep("*", #d) or d, true, false)
+                    self:_FireTextChanged()
+                end
                 return true
             end,
         },
@@ -365,13 +370,16 @@ function EditBoxWidget._BuildBindings()
             Description = "LOC_CAI_KB_DELETE_WORD_BACK",
             Action = function(self)
                 if not active(self) or self._readOnly then return false end
+                local d
                 if self._selStart then
-                    local d = E.DeleteSelection(self)
-                    if d ~= "" then Speak(self._passwordMask and string.rep("*", #d) or d, true, false) end
+                    d = E.DeleteSelection(self)
                 else
-                    E.BackspaceWord(self)
+                    d = E.BackspaceWord(self)
                 end
-                self:_FireTextChanged()
+                if d ~= "" then
+                    Speak(self._passwordMask and string.rep("*", #d) or d, true, false)
+                    self:_FireTextChanged()
+                end
                 return true
             end,
         },
@@ -381,13 +389,16 @@ function EditBoxWidget._BuildBindings()
             Description = "LOC_CAI_KB_DELETE_FORWARD",
             Action = function(self)
                 if not active(self) or self._readOnly then return false end
+                local d
                 if self._selStart then
-                    local d = E.DeleteSelection(self)
-                    if d ~= "" then Speak(self._passwordMask and string.rep("*", #d) or d, true, false) end
+                    d = E.DeleteSelection(self)
                 else
-                    E.DeleteChar(self)
+                    d = E.DeleteChar(self)
                 end
-                self:_FireTextChanged()
+                if d ~= "" then
+                    Speak(self._passwordMask and string.rep("*", #d) or d, true, false)
+                    self:_FireTextChanged()
+                end
                 return true
             end,
         },
@@ -398,13 +409,16 @@ function EditBoxWidget._BuildBindings()
             Description = "LOC_CAI_KB_DELETE_WORD_FORWARD",
             Action = function(self)
                 if not active(self) or self._readOnly then return false end
+                local d
                 if self._selStart then
-                    local d = E.DeleteSelection(self)
-                    if d ~= "" then Speak(self._passwordMask and string.rep("*", #d) or d, true, false) end
+                    d = E.DeleteSelection(self)
                 else
-                    E.DeleteWordForward(self)
+                    d = E.DeleteWordForward(self)
                 end
-                self:_FireTextChanged()
+                if d ~= "" then
+                    Speak(self._passwordMask and string.rep("*", #d) or d, true, false)
+                    self:_FireTextChanged()
+                end
                 return true
             end,
         },
@@ -499,6 +513,7 @@ function EditBoxWidget._BuildBindings()
         {
             Key = Keys.VK_HOME,
             MSG = kd,
+            BubbleWhenDisabled = true,
             Description = "LOC_CAI_KB_LINE_START",
             Action = function(self)
                 if not active(self) then return false end
@@ -520,6 +535,7 @@ function EditBoxWidget._BuildBindings()
         {
             Key = Keys.VK_END,
             MSG = kd,
+            BubbleWhenDisabled = true,
             Description = "LOC_CAI_KB_LINE_END",
             Action = function(self)
                 if not active(self) then return false end
@@ -592,6 +608,7 @@ function EditBoxWidget._BuildBindings()
         {
             Key = Keys.VK_UP,
             MSG = kd,
+            BubbleWhenDisabled = true,
             Description = "LOC_CAI_KB_LINE_UP",
             Action = function(self)
                 if not active(self) then return false end
@@ -607,6 +624,7 @@ function EditBoxWidget._BuildBindings()
         {
             Key = Keys.VK_DOWN,
             MSG = kd,
+            BubbleWhenDisabled = true,
             Description = "LOC_CAI_KB_LINE_DOWN",
             Action = function(self)
                 if not active(self) then return false end
@@ -687,8 +705,8 @@ function EditBoxWidget._BuildBindings()
                 local text = CAI.GetClipboardText()
                 if text and text ~= "" then
                     if E.InsertText(self, text) then
-                        self:_FireTextChanged()
                         Speak(E.FormatPasted(self, text), true, false)
+                        self:_FireTextChanged()
                     end
                 end
                 return true

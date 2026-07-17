@@ -5,6 +5,9 @@ local mgr         = ExposedMembers.CAI_UIManager
 
 local PANEL_ID    = "CAIPediaPanel"
 local HOVER_SOUND = "Main_Menu_Mouse_Over"
+local BODY_SEARCH_CONTEXT = "CAI_CivilopediaBody"
+local BODY_PREVIEW_RADIUS = 180
+local m_bodySearchText = {}
 
 
 local m_state            = {
@@ -41,6 +44,225 @@ end
 
 local function PageKey(sid, pid)
     return tostring(sid) .. "::" .. tostring(pid)
+end
+
+-- ===========================================================================
+-- Article title + body search index
+-- ===========================================================================
+-- CacheData() has already populated every page and page-layout mapping by the
+-- time include("CivilopediaScreen") returns.  The page bodies themselves are
+-- emitted only when a PageLayouts renderer runs, so execute each renderer with
+-- its visual output helpers temporarily replaced by capture/no-op functions.
+-- This builds the complete context during UI initialization rather than on the
+-- first Ctrl+F search.
+local function PopulateBodySearchData()
+    Search.DestroyContext(BODY_SEARCH_CONTEXT)
+    m_bodySearchText = {}
+    if not Search.CreateContext(BODY_SEARCH_CONTEXT, "", "", "...") then
+        LogWarn("Civilopedia body search failed to create context")
+        return false
+    end
+
+    local body = nil
+    local originals = {
+        ShowFrontPageHeader = ShowFrontPageHeader,
+        SetPageHeader = SetPageHeader,
+        SetPageSubHeader = SetPageSubHeader,
+        AddChapter = AddChapter,
+        AddFullWidthChapter = AddFullWidthChapter,
+        AddLeftColumnChapter = AddLeftColumnChapter,
+        AddHeader = AddHeader,
+        AddFullWidthHeader = AddFullWidthHeader,
+        AddLeftColumnHeader = AddLeftColumnHeader,
+        AddParagraph = AddParagraph,
+        AddFullWidthParagraph = AddFullWidthParagraph,
+        AddLeftColumnParagraph = AddLeftColumnParagraph,
+        AddParagraphs = AddParagraphs,
+        AddFullWidthParagraphs = AddFullWidthParagraphs,
+        AddLeftColumnParagraphs = AddLeftColumnParagraphs,
+        AddHeaderBody = AddHeaderBody,
+        AddFullWidthHeaderBody = AddFullWidthHeaderBody,
+        AddLeftColumnHeaderBody = AddLeftColumnHeaderBody,
+        AddIconHeaderBody = AddIconHeaderBody,
+        AddFullWidthIconHeaderBody = AddFullWidthIconHeaderBody,
+        AddLeftColumnIconHeaderBody = AddLeftColumnIconHeaderBody,
+        AddImage = AddImage,
+        AddPortrait = AddPortrait,
+        AddTallImage = AddTallImage,
+        AddTallImageNoScale = AddTallImageNoScale,
+        AddTallPortrait = AddTallPortrait,
+        AddQuote = AddQuote,
+        AddRightColumnStatBox = AddRightColumnStatBox,
+    }
+
+    local function append(value)
+        if type(value) == "table" then
+            for _, item in ipairs(value) do append(item) end
+            return
+        end
+        if type(value) ~= "string" or value == "" then return end
+        local text = Locale.StripTags(LookupOrEmpty(value))
+        if text and text ~= "" then body[#body + 1] = text end
+    end
+
+    local function noOp() end
+    local function captureChapter(_, paragraphs) append(paragraphs) end
+    local function captureParagraph(paragraph) append(paragraph) end
+    local function captureHeaderBody(_, paragraph) append(paragraph) end
+    local function captureIconHeaderBody(_, _, paragraph) append(paragraph) end
+    local function captureStatBox(_, populate)
+        if not populate then return end
+        local statBox = {}
+        function statBox:AddSeparator() end
+        function statBox:AddHeader() end
+        function statBox:AddLabel(caption) append(caption) end
+        function statBox:AddSmallLabel(caption) append(caption) end
+        function statBox:AddIconLabel(_, caption) append(caption) end
+        function statBox:AddIconNumberLabel(_, value, caption)
+            append(caption)
+            if value ~= nil then append(tostring(value)) end
+        end
+        function statBox:AddIconList(...)
+            for i = 1, select("#", ...) do
+                local icon = select(i, ...)
+                if type(icon) == "table" then append(icon[2]) end
+            end
+        end
+        populate(statBox)
+    end
+
+    ShowFrontPageHeader = noOp
+    SetPageHeader = noOp
+    SetPageSubHeader = noOp
+    AddChapter = captureChapter
+    AddFullWidthChapter = captureChapter
+    AddLeftColumnChapter = captureChapter
+    AddHeader = noOp
+    AddFullWidthHeader = noOp
+    AddLeftColumnHeader = noOp
+    AddParagraph = captureParagraph
+    AddFullWidthParagraph = captureParagraph
+    AddLeftColumnParagraph = captureParagraph
+    AddParagraphs = captureParagraph
+    AddFullWidthParagraphs = captureParagraph
+    AddLeftColumnParagraphs = captureParagraph
+    AddHeaderBody = captureHeaderBody
+    AddFullWidthHeaderBody = captureHeaderBody
+    AddLeftColumnHeaderBody = captureHeaderBody
+    AddIconHeaderBody = captureIconHeaderBody
+    AddFullWidthIconHeaderBody = captureIconHeaderBody
+    AddLeftColumnIconHeaderBody = captureIconHeaderBody
+    AddImage = noOp
+    AddPortrait = noOp
+    AddTallImage = noOp
+    AddTallImageNoScale = noOp
+    AddTallPortrait = noOp
+    AddQuote = captureParagraph
+    AddRightColumnStatBox = captureStatBox
+
+    local indexed = 0
+    local failed = 0
+    local buildOk, buildErr = pcall(function()
+        for _, section in ipairs(GetSections() or {}) do
+            for _, page in ipairs(GetPages(section.SectionId) or {}) do
+                body = {}
+                local template = _PageLayoutScriptTemplates[page.PageLayoutId]
+                local view = template and PageLayouts[template] or nil
+                local ok, err = false, "missing page layout"
+                if view then ok, err = pcall(view, page) end
+
+                if not ok then
+                    failed = failed + 1
+                    LogWarn("Civilopedia body search layout failed for "
+                        .. tostring(page.SectionId) .. "|" .. tostring(page.PageId)
+                        .. ": " .. tostring(err))
+                end
+
+                -- A failed/custom layout can still expose its standard
+                -- configured chapter paragraphs through the support cache.
+                if not ok or #body == 0 then
+                    for _, chapter in ipairs(GetPageChapters(page.PageLayoutId) or {}) do
+                        append(GetChapterBody(page.SectionId, page.PageId, chapter.ChapterId))
+                    end
+                end
+
+                local key = page.SectionId .. "|" .. page.PageId
+                local title = Locale.StripTags(LookupOrEmpty(page.Title or page.TabName))
+                local bodyText = table.concat(body, " ")
+                Search.AddData(
+                    BODY_SEARCH_CONTEXT,
+                    key,
+                    title,
+                    bodyText,
+                    {})
+                m_bodySearchText[key] = bodyText
+                indexed = indexed + 1
+            end
+        end
+    end)
+
+    ShowFrontPageHeader = originals.ShowFrontPageHeader
+    SetPageHeader = originals.SetPageHeader
+    SetPageSubHeader = originals.SetPageSubHeader
+    AddChapter = originals.AddChapter
+    AddFullWidthChapter = originals.AddFullWidthChapter
+    AddLeftColumnChapter = originals.AddLeftColumnChapter
+    AddHeader = originals.AddHeader
+    AddFullWidthHeader = originals.AddFullWidthHeader
+    AddLeftColumnHeader = originals.AddLeftColumnHeader
+    AddParagraph = originals.AddParagraph
+    AddFullWidthParagraph = originals.AddFullWidthParagraph
+    AddLeftColumnParagraph = originals.AddLeftColumnParagraph
+    AddParagraphs = originals.AddParagraphs
+    AddFullWidthParagraphs = originals.AddFullWidthParagraphs
+    AddLeftColumnParagraphs = originals.AddLeftColumnParagraphs
+    AddHeaderBody = originals.AddHeaderBody
+    AddFullWidthHeaderBody = originals.AddFullWidthHeaderBody
+    AddLeftColumnHeaderBody = originals.AddLeftColumnHeaderBody
+    AddIconHeaderBody = originals.AddIconHeaderBody
+    AddFullWidthIconHeaderBody = originals.AddFullWidthIconHeaderBody
+    AddLeftColumnIconHeaderBody = originals.AddLeftColumnIconHeaderBody
+    AddImage = originals.AddImage
+    AddPortrait = originals.AddPortrait
+    AddTallImage = originals.AddTallImage
+    AddTallImageNoScale = originals.AddTallImageNoScale
+    AddTallPortrait = originals.AddTallPortrait
+    AddQuote = originals.AddQuote
+    AddRightColumnStatBox = originals.AddRightColumnStatBox
+    if not buildOk then
+        Search.DestroyContext(BODY_SEARCH_CONTEXT)
+        LogWarn("Civilopedia body search build failed: " .. tostring(buildErr))
+        return false
+    end
+    Search.Optimize(BODY_SEARCH_CONTEXT)
+    LogMessage("Civilopedia body search indexed " .. tostring(indexed)
+        .. " pages; layout failures=" .. tostring(failed))
+    return true
+end
+
+local function BuildBodySearchPreview(key, query, enginePreview)
+    local text = m_bodySearchText[key]
+    if not text or text == "" or not query or query == "" then return enginePreview end
+
+    local matchStart, matchEnd = string.find(string.lower(text), string.lower(query), 1, true)
+    if not matchStart then return enginePreview end
+
+    local previewStart = math.max(1, matchStart - BODY_PREVIEW_RADIUS)
+    if previewStart > 1 then
+        local nextSpace = string.find(text, " ", previewStart, true)
+        if nextSpace and nextSpace < matchStart then previewStart = nextSpace + 1 end
+    end
+
+    local previewEnd = math.min(#text, matchEnd + BODY_PREVIEW_RADIUS)
+    if previewEnd < #text then
+        local nextSpace = string.find(text, " ", previewEnd, true)
+        if nextSpace then previewEnd = nextSpace - 1 end
+    end
+
+    local preview = string.sub(text, previewStart, previewEnd)
+    if previewStart > 1 then preview = "... " .. preview end
+    if previewEnd < #text then preview = preview .. " ..." end
+    return preview
 end
 
 -- ===========================================================================
@@ -713,7 +935,7 @@ local function EnsureRootBuilt()
         local results = {}
         local seen = {}
 
-        local function addResult(sectionId, pageId)
+        local function addResult(sectionId, pageId, preview)
             local k = sectionId .. "|" .. pageId
             if seen[k] then return end
             seen[k] = true
@@ -721,9 +943,25 @@ local function EnsureRootBuilt()
             if not page then return end
             local title = LookupOrEmpty(page.Title or page.TabName)
             if title == "" then return end
+            local labelParts = { title }
+            for _, section in ipairs(GetSections() or {}) do
+                if section.SectionId == sectionId then
+                    local sectionName = LookupOrEmpty(section.TabName or section.Name)
+                    if sectionName ~= "" then labelParts[#labelParts + 1] = sectionName end
+                    break
+                end
+            end
+            if page.PageGroupId then
+                local group = GetPageGroup(sectionId, page.PageGroupId)
+                local groupName = group and LookupOrEmpty(group.TabName or group.Name) or ""
+                if groupName ~= "" then labelParts[#labelParts + 1] = groupName end
+            end
             results[#results + 1] = {
                 key = k,
-                label = title,
+                label = table.concat(labelParts, ", "),
+                searchTitle = Locale.StripTags(title),
+                tooltip = preview and preview ~= "" and preview or nil,
+                useFirstTooltip = true,
                 onActivate = function() NavigateTo(sectionId, pageId) end,
             }
         end
@@ -743,13 +981,14 @@ local function EnsureRootBuilt()
             if #results >= maxResults then return results end
         end
 
-        if Search.HasContext("Civilopedia") then
-            local raw = Search.Search("Civilopedia", query)
+        if Search.HasContext(BODY_SEARCH_CONTEXT) then
+            local raw = Search.Search(BODY_SEARCH_CONTEXT, query, maxResults)
             if raw then
                 for _, hit in ipairs(raw) do
                     local sectionId, pageId = string.match(hit[1], "([^|]+)|([^|]+)")
                     if sectionId and pageId then
-                        addResult(sectionId, pageId)
+                        addResult(sectionId, pageId,
+                            BuildBodySearchPreview(hit[1], query, hit[3]))
                     end
                     if #results >= maxResults then return results end
                 end
@@ -758,6 +997,7 @@ local function EnsureRootBuilt()
 
         return results
     end)
+    m_ui.sectionsTree:SetSearchQueryMode("raw")
 
     m_ui.historyList = mgr:CreateWidget("CAIPediaHistoryList", "List", {
         Label = function() return Locale.Lookup("LOC_CAI_PEDIA_HISTORY") end,
@@ -1044,6 +1284,13 @@ end)
 
 Events.InputActionStarted.Add(OnInputActionStarted)
 
+Shutdown = WrapFunc(Shutdown, function(orig)
+    Search.DestroyContext(BODY_SEARCH_CONTEXT)
+    orig()
+end)
+ContextPtr:SetShutdown(Shutdown)
+
+PopulateBodySearchData()
 
 
 Controls.WindowCloseButton:RegisterCallback(Mouse.eLClick, OnClose)

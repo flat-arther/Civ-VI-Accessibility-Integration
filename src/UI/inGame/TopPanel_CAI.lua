@@ -1,7 +1,9 @@
 include("caiUtils")
 include("Civ6Common")
 
-if IsExpansion2Active() then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+    include("TopPanel_BlackDeathScenario")
+elseif IsExpansion2Active() then
     include("TopPanel_Expansion2")
 elseif IsExpansion1Active() then
     include("TopPanel_Expansion1")
@@ -40,6 +42,16 @@ end
 
 local function FormatRatePerTurn(value)
     return Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", value)
+end
+
+local function GetDisplayedFaithYield(player)
+    local faithYield = player:GetReligion():GetFaithYield()
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH"
+        and IsFranceLocalPlayer ~= nil and IsFranceLocalPlayer()
+        and RULES ~= nil and RULES.IsPapalSlotFilled ~= nil and RULES.IsPapalSlotFilled() then
+        faithYield = faithYield - RULES.PapalSlotUpkeep
+    end
+    return faithYield
 end
 
 -- ===========================================================================
@@ -86,7 +98,7 @@ local function SpeakFaith()
     local religion = player:GetReligion()
     local value = Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
         FormatBalance(religion:GetFaithBalance()),
-        FormatRatePerTurn(FormatValuePerTurn(religion:GetFaithYield())))
+        FormatRatePerTurn(FormatValuePerTurn(GetDisplayedFaithYield(player))))
     Speak(Locale.Lookup("LOC_TOP_PANEL_FAITH") .. ": " .. value)
 end
 
@@ -476,7 +488,7 @@ local function AddYieldInfoTreeNodes(parent)
                 Locale.Lookup("LOC_TOP_PANEL_FAITH"),
                 Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
                     FormatBalance(religion:GetFaithBalance()),
-                    FormatRatePerTurn(FormatValuePerTurn(religion:GetFaithYield()))),
+                    FormatRatePerTurn(FormatValuePerTurn(GetDisplayedFaithYield(player)))),
                 GetFaithTooltip())
         end
 

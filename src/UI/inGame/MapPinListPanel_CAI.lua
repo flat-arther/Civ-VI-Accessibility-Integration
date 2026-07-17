@@ -10,8 +10,169 @@ local HexCoordUtils   = CAIHexCoordUtils
 local PANEL_ID = "CAIMapPin_Panel"
 local LIST_ID  = "CAIMapPin_List"
 
+local BOOKMARK_SLOT_COUNT = 10
+local BOOKMARK_CONFIG_PREFIX = "CAI_MAP_PIN_BOOKMARK_SLOT_"
+
+local m_bookmarkActions = {}
+
 local m_panel  = nil
 local m_list   = nil
+
+-- ============================================================================
+-- Map-pin bookmarks
+-- ============================================================================
+
+local function GetLocalPlayerConfig()
+    local playerID = Game.GetLocalPlayer()
+    if playerID == nil or playerID < 0 then return nil end
+    return PlayerConfigurations[playerID]
+end
+
+local function GetBookmarkConfigKey(slot)
+    return BOOKMARK_CONFIG_PREFIX .. tostring(slot)
+end
+
+local function GetBookmarkPinID(playerConfig, slot)
+    -- An unset PlayerConfiguration value returns no values rather than one nil.
+    -- Capture it first so tonumber always receives an argument.
+    local rawPinID = playerConfig:GetValue(GetBookmarkConfigKey(slot))
+    local pinID = tonumber(rawPinID)
+    if pinID == nil or pinID < 0 then return nil end
+    return pinID
+end
+
+local function SetBookmarkPinID(playerConfig, slot, pinID)
+    playerConfig:SetValue(GetBookmarkConfigKey(slot), pinID or -1)
+end
+
+local function GetBookmarkName(slot)
+    return Locale.Lookup("LOC_CAI_BOOKMARK", slot)
+end
+
+local function ClearOtherSlotsForPin(playerConfig, slot, pinID)
+    for otherSlot = 1, BOOKMARK_SLOT_COUNT do
+        if otherSlot ~= slot and GetBookmarkPinID(playerConfig, otherSlot) == pinID then
+            SetBookmarkPinID(playerConfig, otherSlot, nil)
+        end
+    end
+end
+
+local function AssignBookmark(slot)
+    local playerConfig = GetLocalPlayerConfig()
+    local cursorX, cursorY = nil, nil
+    if CAICursor ~= nil then
+        cursorX, cursorY = CAICursor:GetCoords()
+    end
+    if playerConfig == nil or cursorX == nil or cursorY == nil then
+        Speak(Locale.Lookup("LOC_CAI_BOOKMARK_UNAVAILABLE"))
+        return
+    end
+
+    -- Vanilla MapPinPopup uses GetMapPin(x, y) for both editing an existing
+    -- owned pin and creating the default pin when the tile has none.
+    local targetPin = playerConfig:GetMapPin(cursorX, cursorY)
+    if targetPin == nil then
+        Speak(Locale.Lookup("LOC_CAI_BOOKMARK_UNAVAILABLE"))
+        return
+    end
+
+    local targetPinID = targetPin:GetID()
+    local previousPinID = GetBookmarkPinID(playerConfig, slot)
+
+    -- Mutate the live object before deleting another pin; DeleteMapPin may
+    -- invalidate MapPinConfiguration objects returned earlier in this call.
+    targetPin:SetName(GetBookmarkName(slot))
+    ClearOtherSlotsForPin(playerConfig, slot, targetPinID)
+
+    if previousPinID ~= nil and previousPinID ~= targetPinID then
+        local previousPin = playerConfig:GetMapPinID(previousPinID)
+        if previousPin ~= nil then
+            playerConfig:DeleteMapPin(previousPinID)
+        end
+    end
+
+    SetBookmarkPinID(playerConfig, slot, targetPinID)
+    Network.BroadcastPlayerInfo()
+    UI.PlaySound("Map_Pin_Add")
+    Speak(Locale.Lookup("LOC_CAI_BOOKMARK_ASSIGNED", slot))
+end
+
+local function ResolveBookmark(slot)
+    local playerConfig = GetLocalPlayerConfig()
+    if playerConfig == nil then
+        Speak(Locale.Lookup("LOC_CAI_BOOKMARK_UNAVAILABLE"))
+        return nil
+    end
+
+    local pinID = GetBookmarkPinID(playerConfig, slot)
+    local mapPin = pinID ~= nil and playerConfig:GetMapPinID(pinID) or nil
+    if mapPin == nil then
+        if pinID ~= nil then
+            SetBookmarkPinID(playerConfig, slot, nil)
+            Network.BroadcastPlayerInfo()
+        end
+        Speak(Locale.Lookup("LOC_CAI_BOOKMARK_EMPTY", slot))
+        return nil
+    end
+
+    return mapPin
+end
+
+local function JumpToBookmark(slot)
+    local mapPin = ResolveBookmark(slot)
+    if mapPin == nil then return end
+
+    local plot = Map.GetPlot(mapPin:GetHexX(), mapPin:GetHexY())
+    if plot == nil then
+        Speak(Locale.Lookup("LOC_CAI_BOOKMARK_UNAVAILABLE"))
+        return
+    end
+
+    LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
+end
+
+local function SpeakBookmarkDirection(slot)
+    local mapPin = ResolveBookmark(slot)
+    if mapPin == nil then return end
+
+    local cursorX, cursorY = nil, nil
+    if CAICursor ~= nil then
+        cursorX, cursorY = CAICursor:GetCoords()
+    end
+    if cursorX == nil or cursorY == nil then
+        Speak(Locale.Lookup("LOC_CAI_BOOKMARK_UNAVAILABLE"))
+        return
+    end
+
+    local direction = HexCoordUtils.directionString(
+        cursorX,
+        cursorY,
+        mapPin:GetHexX(),
+        mapPin:GetHexY()
+    )
+    Speak(direction)
+end
+
+local function OnBookmarkInputActionStarted(actionID)
+    local action = m_bookmarkActions[actionID]
+    if action ~= nil then action() end
+end
+
+for slot = 1, BOOKMARK_SLOT_COUNT do
+    local capturedSlot = slot
+    local assignActionID = Input.GetActionId("CAIMapPinBookmarkAssign" .. tostring(slot))
+    local jumpActionID = Input.GetActionId("CAIMapPinBookmarkJump" .. tostring(slot))
+    local directionActionID = Input.GetActionId("CAIMapPinBookmarkDirection" .. tostring(slot))
+    if assignActionID ~= nil then
+        m_bookmarkActions[assignActionID] = function() AssignBookmark(capturedSlot) end
+    end
+    if jumpActionID ~= nil then
+        m_bookmarkActions[jumpActionID] = function() JumpToBookmark(capturedSlot) end
+    end
+    if directionActionID ~= nil then
+        m_bookmarkActions[directionActionID] = function() SpeakBookmarkDirection(capturedSlot) end
+    end
+end
 
 -- ============================================================================
 -- Pin label: name, icon, direction
@@ -175,8 +336,12 @@ end
 LuaEvents.CAIMapPinList_VisibilityChanged.Add(OnVisibilityChanged)
 LuaEvents.CAIMapPinList_Refresh.Add(OnRefreshRequest)
 
-ContextPtr:SetShutdown(function()
+local function OnShutdown()
+    Events.InputActionStarted.Remove(OnBookmarkInputActionStarted)
     LuaEvents.CAIMapPinList_VisibilityChanged.Remove(OnVisibilityChanged)
     LuaEvents.CAIMapPinList_Refresh.Remove(OnRefreshRequest)
     PopPanel()
-end)
+end
+
+Events.InputActionStarted.Add(OnBookmarkInputActionStarted)
+ContextPtr:SetShutdown(OnShutdown)

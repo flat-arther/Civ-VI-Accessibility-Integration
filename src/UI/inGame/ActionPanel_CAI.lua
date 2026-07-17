@@ -1,7 +1,9 @@
 include("caiUtils")
 include("Civ6Common")
 
-if IsExpansion2Active() then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+    include("ActionPanel_BlackDeathScenario")
+elseif IsExpansion2Active() then
     include("ActionPanel_Expansion2")
 elseif IsExpansion1Active() then
     include("ActionPanel_Expansion1")
@@ -406,7 +408,11 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     end
 
     if actionId == CAI_SPEAK_ERA_AGE_ACTION then
-        SpeakEraAge()
+        if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+            Speak(Locale.Lookup("LOC_CAI_ACTION_PANEL_ERA_NOT_AVAILABLE"))
+        else
+            SpeakEraAge()
+        end
         return
     end
 

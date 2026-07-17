@@ -6,6 +6,7 @@ local SUBCATEGORY_SETTLER = "settler"
 CAIWorldScannerCategory_Recommendations = {
     Id = "recommendations",
     LabelKey = "LOC_CAI_WORLD_SCANNER_CATEGORY_RECOMMENDATIONS",
+    AutoFocus = true,
     SubCategoryOrder = { SUBCATEGORY_BUILDER, SUBCATEGORY_SETTLER },
     SubCategoryLabels = {
         [SUBCATEGORY_BUILDER] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BUILDER_RECOMMENDATIONS",

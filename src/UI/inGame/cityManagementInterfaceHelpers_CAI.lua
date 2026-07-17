@@ -6,6 +6,24 @@ local CityManagement = CAICityManagementInterface
 local LENS_CITIZEN_MANAGEMENT = UILens.CreateLensLayerHash("Citizen_Management")
 local LENS_PURCHASE_PLOT = UILens.CreateLensLayerHash("Purchase_Plot")
 
+local function IsBlackDeathEngland()
+    if GameConfiguration.GetRuleSet() ~= "RULESET_SCENARIO_BLACKDEATH" then
+        return false
+    end
+
+    local playerID = Game.GetLocalPlayer()
+    local playerConfig = playerID ~= nil and playerID >= 0 and PlayerConfigurations[playerID] or nil
+    return playerConfig ~= nil
+        and playerConfig:GetCivilizationTypeName() == "CIVILIZATION_BLACKDEATH_SCENARIO_ENGLAND"
+end
+
+local function ReadBlackDeathPlotProperty(plot, propertyName)
+    if RefreshObjectState ~= nil then
+        return RefreshObjectState(plot, propertyName)
+    end
+    return plot:GetProperty(propertyName)
+end
+
 local function IsCityManagementMode()
     return UI.GetInterfaceMode() == InterfaceModeTypes.CITY_MANAGEMENT and UI.GetHeadSelectedCity() ~= nil
 end
@@ -84,27 +102,51 @@ function CityManagement.GetStateData()
     end
 
     if CityManagement.IsPurchaseActive() then
-        local purchaseParameters = {}
-        purchaseParameters[CityCommandTypes.PARAM_PLOT_PURCHASE] =
-            UI.GetInterfaceModeParameter(CityCommandTypes.PARAM_PLOT_PURCHASE)
-
-        local purchaseResults = CityManager.GetCommandTargets(city, CityCommandTypes.PURCHASE, purchaseParameters)
-        local purchasePlots = purchaseResults and purchaseResults[CityCommandResults.PLOTS] or nil
         local playerTreasury = Players[Game.GetLocalPlayer()] and Players[Game.GetLocalPlayer()]:GetTreasury() or nil
         local playerGold = playerTreasury and playerTreasury:GetGoldBalance() or 0
-        local cityGold = city:GetGold()
+        if IsBlackDeathEngland() then
+            local coerceCost = RULES ~= nil and RULES.CoerceBaseCost or 10
+            local purchasePlots = Map.GetCityPlots():GetPurchasedPlots(city)
+            if purchasePlots ~= nil then
+                for _, plotId in pairs(purchasePlots) do
+                    local plot = Map.GetPlotByIndex(plotId)
+                    local plague = ReadBlackDeathPlotProperty(plot, "Plague") or 0
+                    if plague > 0 then
+                        local coercedTurns = ReadBlackDeathPlotProperty(plot, "Coerce") or 0
+                        local missingGold = coerceCost > playerGold and (coerceCost - math.floor(playerGold)) or 0
+                        out.PurchasePlots[plotId] = {
+                            PlotId = plotId,
+                            Cost = coerceCost,
+                            Affordable = coercedTurns <= 0 and coerceCost <= playerGold,
+                            MissingGold = missingGold,
+                            IsCoerce = true,
+                            CoercedTurns = coercedTurns,
+                        }
+                        out.ActivePlots[plotId] = true
+                    end
+                end
+            end
+        else
+            local purchaseParameters = {}
+            purchaseParameters[CityCommandTypes.PARAM_PLOT_PURCHASE] =
+                UI.GetInterfaceModeParameter(CityCommandTypes.PARAM_PLOT_PURCHASE)
 
-        if purchasePlots ~= nil and cityGold ~= nil then
-            for _, plotId in pairs(purchasePlots) do
-                local cost = cityGold:GetPlotPurchaseCost(plotId)
-                local missingGold = cost > playerGold and (cost - math.floor(playerGold)) or 0
-                out.PurchasePlots[plotId] = {
-                    PlotId = plotId,
-                    Cost = cost,
-                    Affordable = cost <= playerGold,
-                    MissingGold = missingGold,
-                }
-                out.ActivePlots[plotId] = true
+            local purchaseResults = CityManager.GetCommandTargets(city, CityCommandTypes.PURCHASE, purchaseParameters)
+            local purchasePlots = purchaseResults and purchaseResults[CityCommandResults.PLOTS] or nil
+            local cityGold = city:GetGold()
+
+            if purchasePlots ~= nil and cityGold ~= nil then
+                for _, plotId in pairs(purchasePlots) do
+                    local cost = cityGold:GetPlotPurchaseCost(plotId)
+                    local missingGold = cost > playerGold and (cost - math.floor(playerGold)) or 0
+                    out.PurchasePlots[plotId] = {
+                        PlotId = plotId,
+                        Cost = cost,
+                        Affordable = cost <= playerGold,
+                        MissingGold = missingGold,
+                    }
+                    out.ActivePlots[plotId] = true
+                end
             end
         end
     end
@@ -178,14 +220,29 @@ function CityManagement.BuildSpeechPartsFromState(state)
 
     local purchase = state.Purchase
     if purchase ~= nil then
-        local purchaseText = Locale.Lookup("LOC_HUD_CITY_PURCHASE_NEW_PLOT") .. Locale.ToNumber(purchase.Cost)
-        parts[#parts + 1] = purchaseText
+        if purchase.IsCoerce then
+            if purchase.CoercedTurns > 0 then
+                parts[#parts + 1] = Locale.Lookup("LOC_PLOTINFO_COERCED_TURNS_LABEL", purchase.CoercedTurns)
+            else
+                parts[#parts + 1] = Locale.Lookup("LOC_PLOTINFO_COERCE_LABEL", purchase.Cost)
+                parts[#parts + 1] = Locale.Lookup("LOC_PLOTINFO_COERCE_TT", RULES ~= nil and RULES.CoerceTurns or 10)
+                if not purchase.Affordable then
+                    parts[#parts + 1] = Locale.Lookup(
+                        "LOC_PLOTINFO_YOU_NEED_MORE_GOLD_TO_COERCE",
+                        purchase.MissingGold
+                    )
+                end
+            end
+        else
+            local purchaseText = Locale.Lookup("LOC_HUD_CITY_PURCHASE_NEW_PLOT") .. Locale.ToNumber(purchase.Cost)
+            parts[#parts + 1] = purchaseText
 
-        if not purchase.Affordable then
-            parts[#parts + 1] = Locale.Lookup(
-                "LOC_PLOTINFO_YOU_NEED_MORE_GOLD_TO_PURCHASE",
-                purchase.MissingGold
-            )
+            if not purchase.Affordable then
+                parts[#parts + 1] = Locale.Lookup(
+                    "LOC_PLOTINFO_YOU_NEED_MORE_GOLD_TO_PURCHASE",
+                    purchase.MissingGold
+                )
+            end
         end
     end
 
@@ -270,6 +327,9 @@ function CityManagement.GetScannerSubCategoryId(plotOrPlotId, stateData)
 
     local purchase = state.Purchase
     if purchase ~= nil then
+        if purchase.IsCoerce and purchase.CoercedTurns > 0 then
+            return "coerced"
+        end
         if purchase.Affordable then
             return "purchasable"
         end

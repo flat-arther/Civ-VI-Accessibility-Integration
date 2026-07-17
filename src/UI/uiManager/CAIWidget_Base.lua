@@ -32,6 +32,7 @@ UIWidget.__index = UIWidget
 ---@field MSG? KeyEvents
 ---@field Description? string
 ---@field Common? boolean
+---@field BubbleWhenDisabled? boolean
 local baseInputBinding = { IsShift = false, IsControl = false, IsAlt = false, MSG = KeyEvents.KeyUp }
 
 ---Constructs a new widget instance bound to its class metatable.
@@ -430,7 +431,10 @@ function UIWidget:OnHandleInput(input)
             and isShift == b.IsShift and isControl == b.IsControl and isAlt == b.IsAlt then
             if b.Action ~= nil then
                 if CAI then CAI.Silence() end
-                if not b.Common and self:IsDisabled() then return true end
+                if not b.Common and self:IsDisabled() then
+                    if b.BubbleWhenDisabled then return false end
+                    return true
+                end
                 local result = b.Action(self)
                 if result ~= nil then
                     return result == true
@@ -526,7 +530,7 @@ function UIWidget:GetInfoStrings()
         state = state ~= "" and (state .. "  " .. explicitState) or explicitState
     end
     local tooltip = self:GetTooltip()
-    if tooltip == label then tooltip = nil end
+    if tooltip == label or tooltip == value then tooltip = nil end
     return {
         label    = label ~= "" and label or nil,
         role     = role ~= "" and role or nil,

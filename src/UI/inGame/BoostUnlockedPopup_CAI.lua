@@ -11,41 +11,61 @@ local function RemoveBoostDialog()
 end
 
 local function GetBoostProgressPair(entry)
-	if not entry then return 0.0, 0.0 end
+	if not entry then return 0.0, 0.0, false end
 
 	local localPlayer = Players[Game.GetLocalPlayer()]
-	if localPlayer == nil then return 0.0, 0.0 end
+	if localPlayer == nil then return 0.0, 0.0, false end
 
 	local startPercent = 0.0
 	local endPercent = 0.0
+	local isComplete = false
 
 	if entry.techIndex ~= nil then
 		local playerTechs = localPlayer:GetTechs()
 		local totalCost = playerTechs:GetResearchCost(entry.techIndex)
 		local totalProgress = playerTechs:GetResearchProgress(entry.techIndex)
+		isComplete = playerTechs:HasTech(entry.techIndex)
 
 		if totalCost > 0 then
-			startPercent = math.max(0.0, entry.iTechProgress / totalCost)
-			endPercent = math.min(1.0, totalProgress / totalCost)
+			startPercent = math.min(1.0, math.max(0.0, entry.iTechProgress / totalCost))
+			endPercent = isComplete and 1.0 or math.min(1.0, totalProgress / totalCost)
 		end
 	else
 		local playerCulture = localPlayer:GetCulture()
 		local totalCost = playerCulture:GetCultureCost(entry.civicIndex)
 		local totalProgress = playerCulture:GetCulturalProgress(entry.civicIndex)
+		isComplete = playerCulture:HasCivic(entry.civicIndex)
 
 		if totalCost > 0 then
-			startPercent = math.max(0.0, entry.iCivicProgress / totalCost)
-			endPercent = math.min(1.0, totalProgress / totalCost)
+			startPercent = math.min(1.0, math.max(0.0, entry.iCivicProgress / totalCost))
+			endPercent = isComplete and 1.0 or math.min(1.0, totalProgress / totalCost)
 		end
 	end
 
-	return startPercent, endPercent
+	return startPercent, endPercent, isComplete
+end
+
+local function SetCompletedBoostDescription(entry)
+	if entry.techIndex ~= nil then
+		local tech = GameInfo.Technologies[entry.techIndex]
+		Controls.BoostDescString:SetText(Locale.Lookup("LOC_TECH_BOOST_COMPLETE", tech.Name))
+	else
+		local civic = GameInfo.Civics[entry.civicIndex]
+		Controls.BoostDescString:SetText(Locale.Lookup("LOC_CIVIC_BOOST_COMPLETE", Locale.Lookup(civic.Name)))
+	end
 end
 
 local function BuildBoostDialog(entry)
 	RemoveBoostDialog()
+	local startProgress, endProgress, isComplete = GetBoostProgressPair(entry)
+	if isComplete then
+		-- Completed items may already report zero live progress because the game
+		-- has advanced to the next research selection.
+		SetCompletedBoostDescription(entry)
+		Controls.ProgressBar:SetPercent(1.0)
+		Controls.BoostBar:SetPercent(1.0)
+	end
 	if not mgr then return end
-	local startProgress, endProgress = GetBoostProgressPair(entry)
 	local startInt = math.floor(startProgress * 100 + 0.5)
 	local endInt = math.floor(endProgress * 100 + 0.5)
 

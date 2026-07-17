@@ -9,6 +9,7 @@
     <CompatibleVersions>2.0</CompatibleVersions>
   </Properties>
   <Files>
+    <File>UI/Replacements/MinimapPanel_BlackDeathScenario.lua</File>
     <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion1_MODE.lua</File>
     <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion2_MODE.lua</File>
     <File>UI/shared/CAI_logging.lua</File>
@@ -69,6 +70,7 @@
     <File>UI/frontEnd/Multiplayer/ConfirmKick.lua</File>
     <File>UI/frontEnd/Multiplayer/EditHotseatPlayer.lua</File>
     <File>UI/frontEnd/AdvancedSetup.lua</File>
+    <File>UI/frontEnd/ScenarioSetup.lua</File>
     <File>UI/frontEnd/MapSelect.lua</File>
     <File>UI/frontEnd/LeaderPicker.lua</File>
     <File>UI/frontEnd/CityStatePicker.lua</File>
@@ -100,6 +102,7 @@
     <File>UI/inGame/NaturalWonderPopup_CAI.lua</File>
     <File>UI/inGame/WonderBuiltPopup_CAI.lua</File>
     <File>UI/inGame/ProjectBuiltPopup_CAI.lua</File>
+    <File>UI/inGame/EventPopup_CAI.lua</File>
     <File>UI/inGame/RockBandMoviePopup_CAI.lua</File>
     <File>UI/inGame/RockBandPopup_CAI.lua</File>
     <File>UI/inGame/ChooseArtifact_CAI.lua</File>
@@ -276,6 +279,7 @@
       <File>UI/frontEnd/Multiplayer/ConfirmKick.lua</File>
       <File>UI/frontEnd/Multiplayer/EditHotseatPlayer.lua</File>
       <File>UI/frontEnd/AdvancedSetup.lua</File>
+      <File>UI/frontEnd/ScenarioSetup.lua</File>
       <File>UI/frontEnd/MapSelect.lua</File>
       <File>UI/frontEnd/MultiSelectWindow.lua</File>
       <File>UI/frontEnd/LeaderPicker.lua</File>
@@ -306,6 +310,9 @@
 
     <ImportFiles id="DramaticAges_GovernmentsScreen_CAI" criteria="DramaticAges_Expansion1_Mode">
       <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion1_MODE.lua</File>
+    </ImportFiles>
+    <ImportFiles id="BlackDeathScenario_MinimapPanel_CAI" criteria="BlackDeathScenario">
+      <File>UI/Replacements/MinimapPanel_BlackDeathScenario.lua</File>
     </ImportFiles>
     <ImportFiles id="DramaticAges_GovernmentsScreen_Exp2CAI" criteria="DramaticAges_Expansion2_Mode">
       <Properties>
@@ -1001,6 +1008,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>ProjectBuiltPopup</LuaContext>
         <LuaReplace>UI/inGame/ProjectBuiltPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_EventPopup">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>EventPopup</LuaContext>
+        <LuaReplace>UI/inGame/EventPopup_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

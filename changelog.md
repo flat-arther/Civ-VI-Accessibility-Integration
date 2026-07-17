@@ -6,6 +6,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added mod support for the Nubia scenario. 
+- Added mod support to the Black Death scenario
+- Added mod support to the Conquests of Alexander scenario
+- Added mod support to the Outback Tycoon scenario
+- Added mod support to scenario event popups, including their descriptions, effects, unlocks, and mandatory choices.
+- Added the single-player Scenarios option to the accessible Main Menu and mod support for scenario Setup. Note that this is in preparation for adding support to official scenarios. While some might work currently, keep in mind that they are untested, and others are simply not yet integrated
+- Added World Scanner settings to control whether City management and Recommendations automatically receive scanner focus when they become available. Both settings are disabled by default.
+- Added Cursor settings to independently control whether selecting a city or unit automatically moves the navigation cursor to its tile. Both settings are enabled by default.
+- Added ten save-specific map-tac bookmarks. `Ctrl+Shift+1` through `Ctrl+Shift+0` assigns or replaces bookmarks at the navigation cursor, `Ctrl+1` through `Ctrl+0` jumps to them, and `Alt+1` through `Alt+0` reads their direction. All bookmark actions are rebindable.
+- Civilopedia Ctrl+F now searches article titles and body text using the complete entered phrase and shows one extended excerpt in the tooltip. Article-title matches retain the game's relevance priority over body matches. Section, group, Chapter and stat headings are not included in the searchable text. Note: this feature invalidates search term exclusion
+- Added a UI setting to control whether search panels automatically focus their first result. It is enabled by default.
+
+### Changed
+
+- In world rankings, custom-victory and Score tabs now follow the rows, order, values, details, and tooltips produced by the active scenario or mod instead of assuming the standard game layout. This was done to avoid having to handle every separat case manually, since these tabs are dynamic
+- Research and civic chooser tooltips now identify the technologies or civics they lead to.
+- Reading the selected city or unit summary using the key binding (tilde by default) speaks its direction from the navigation cursor first, followed by the summary.
+- Control f to open the search panel executes on key-down, same as all other input bindings
+- Documented the search panel and type ahead in the readme
+
+### Fixed
+
+- Tech and civic boost popups now report 100% and say the item was completed when a boost finishes it, instead of reporting that progress fell to 0%.
+- Policies can now be viewed, selected, replaced, and removed from the Government screen in the Black Death scenario.
+- Diplomacy and deal screens remain navigable when an advisor message appears while they are open.
+- Input help now identifies the Delete shortcut for removing an AI player in Advanced Setup and Scenario Setup.
+- Create game now shows Map Type in the Basic view and opens the full map-selection screen from both Basic and Advanced views. Setup options expose their specific invalid-reason explanations, AI leader changes reset incompatible alternate colors, unavailable sections and choices stay hidden or disabled, and options removed by a configuration refresh no longer remain in the CAI list.
+- Unit and city ownership labels now use the civilization's defined adjective and fall back to its localized name when the adjective is missing, fixing raw localization tags in Outback Tycoon and other scenarios.
+- Fixed the unit panel failing to load in scenarios that remove unit-operation definitions, including the Alexander scenario. This caused a bug where you couldn't cycle units, or read their info
+- Fixed certain UI widgets trapping navigation input if they are disabled
+- Fixed an issue with the search pannel, where typed character echo interrupted the search result speech
+- Search panels no longer move focus when a search has no results. An empty search now displays `Type text to search` instead of `No results`.
+
 ## [0.1.5] - 2026-07-15
 
 ### Added

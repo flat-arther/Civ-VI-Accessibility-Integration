@@ -7,6 +7,7 @@
 ---@field PageSize integer
 ---@field AllowSearch boolean
 ---@field _searchQueryHandler? fun(query:string, maxResults:integer):table[]
+---@field _searchQueryMode "terms"|"raw"
 ---@field _searchHistoryContext? string
 ContainerWidget = setmetatable({}, { __index = UIWidget })
 ContainerWidget.__index = ContainerWidget
@@ -23,11 +24,14 @@ function ContainerWidget.New(class)
     w.PageSize = 10
     w.AllowSearch = false
     w._searchQueryHandler = nil
+    w._searchQueryMode = "terms"
     w._searchHistoryContext = nil
     w:AddInputBinding({
-        Key = Keys.F, IsControl = true,
+        Key = Keys.F,
+        IsControl = true,
         Description = "LOC_CAI_KB_SEARCH",
         Common = true,
+        MSG = KeyEvents.KeyDown,
         Action = function(self)
             if not self.AllowSearch then return false end
             if self.Manager then self.Manager:OpenSearch(self) end
@@ -47,6 +51,7 @@ function ContainerWidget:SetPageSize(n) self.PageSize = n end
 function ContainerWidget:SetAllowSearch(b) self.AllowSearch = b and true or false end
 
 function ContainerWidget:EnableSearch() self.AllowSearch = true end
+
 function ContainerWidget:DisableSearch() self.AllowSearch = false end
 
 ---@param handler fun(query:string, maxResults:integer):table[]
@@ -58,6 +63,16 @@ end
 ---@return fun(query:string, maxResults:integer):table[]|nil
 function ContainerWidget:GetSearchQueryHandler()
     return self._searchQueryHandler
+end
+
+---@param mode "terms"|"raw"
+function ContainerWidget:SetSearchQueryMode(mode)
+    self._searchQueryMode = mode == "raw" and "raw" or "terms"
+end
+
+---@return "terms"|"raw"
+function ContainerWidget:GetSearchQueryMode()
+    return self._searchQueryMode
 end
 
 ---@param context string
@@ -110,8 +125,11 @@ end
 function ContainerWidget:Navigate(direction) return Nav.Navigate(self, direction) end
 
 function ContainerWidget:NavigateNext() return Nav.Navigate(self, 1) end
+
 function ContainerWidget:NavigatePrev() return Nav.Navigate(self, -1) end
+
 function ContainerWidget:NavigateToFirst() return Nav.NavigateToFirst(self) end
+
 function ContainerWidget:NavigateToLast() return Nav.NavigateToLast(self) end
 
 ---@param direction 1|-1
