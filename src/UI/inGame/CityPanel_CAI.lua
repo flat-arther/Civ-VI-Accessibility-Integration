@@ -164,17 +164,12 @@ function GetCityInfoYieldState(data, yieldType)
     return data.YieldFilters[yieldType]
 end
 
-function GetCityInfoYieldEntry(data, yieldType, value, icon)
+function GetCityInfoYieldEntry(data, value, icon)
     if data == nil then
         return nil
     end
 
-    local yieldInfo = GameInfo.Yields[yieldType]
-    if yieldInfo == nil then
-        return nil
-    end
-
-    return Locale.Lookup(yieldInfo.Name) .. ", " .. GetCityInfoYieldText(value, icon)
+    return GetCityInfoYieldText(value, icon)
 end
 
 function GetCityInfoCultureYield(data)
@@ -228,13 +223,12 @@ end
 function GetCityInfoVisibleYields(data)
     local results = {}
 
-    AppendCityInfo(results, GetCityInfoYieldEntry(data, YieldTypes.CULTURE, data.CulturePerTurn, "[ICON_Culture]"))
-    AppendCityInfo(results, GetCityInfoYieldEntry(data, YieldTypes.FOOD, data.FoodPerTurn, "[ICON_Food]"))
-    AppendCityInfo(results,
-        GetCityInfoYieldEntry(data, YieldTypes.PRODUCTION, data.ProductionPerTurn, "[ICON_Production]"))
-    AppendCityInfo(results, GetCityInfoYieldEntry(data, YieldTypes.SCIENCE, data.SciencePerTurn, "[ICON_Science]"))
-    AppendCityInfo(results, GetCityInfoYieldEntry(data, YieldTypes.FAITH, data.FaithPerTurn, "[ICON_Faith]"))
-    AppendCityInfo(results, GetCityInfoYieldEntry(data, YieldTypes.GOLD, data.GoldPerTurn, "[ICON_Gold]"))
+    AppendCityInfo(results, GetCityInfoYieldEntry(data, data.CulturePerTurn, "[ICON_Culture]"))
+    AppendCityInfo(results, GetCityInfoYieldEntry(data, data.FoodPerTurn, "[ICON_Food]"))
+    AppendCityInfo(results, GetCityInfoYieldEntry(data, data.ProductionPerTurn, "[ICON_Production]"))
+    AppendCityInfo(results, GetCityInfoYieldEntry(data, data.SciencePerTurn, "[ICON_Science]"))
+    AppendCityInfo(results, GetCityInfoYieldEntry(data, data.FaithPerTurn, "[ICON_Faith]"))
+    AppendCityInfo(results, GetCityInfoYieldEntry(data, data.GoldPerTurn, "[ICON_Gold]"))
 
     return results
 end
@@ -258,10 +252,10 @@ function GetCityInfoFilteredYields(data, filterState)
         local yieldState = GetCityInfoYieldState(data, yieldData.Type)
         if filterState == nil then
             if yieldState ~= YIELD_STATE.FAVORED and yieldState ~= YIELD_STATE.IGNORED then
-                AppendCityInfo(results, GetCityInfoYieldEntry(data, yieldData.Type, yieldData.Value, yieldData.Icon))
+                AppendCityInfo(results, GetCityInfoYieldEntry(data, yieldData.Value, yieldData.Icon))
             end
         elseif yieldState == filterState then
-            AppendCityInfo(results, GetCityInfoYieldEntry(data, yieldData.Type, yieldData.Value, yieldData.Icon))
+            AppendCityInfo(results, GetCityInfoYieldEntry(data, yieldData.Value, yieldData.Icon))
         end
     end
 

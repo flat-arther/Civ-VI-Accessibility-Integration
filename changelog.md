@@ -2,12 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-07-18
+
 ### Added
 
+- Added support for the previously missing map-tac visibility selector in multiplayer. Visibility changes take effect immediately so shareable tacs can be sent to chat, while cancelling restores changes that have not already been sent or confirmed.
 - CAI now supports all official scenarios both single player or multiplayer, including their setup flows, rules, objectives, scoring, rankings, and event popups, except Pirates and Red Death. Support for those two is planned, though it may take a while
 - Added World Scanner settings to control whether City management and Recommendations automatically receive scanner focus when they become available. Both settings are disabled by default.
 - Added Cursor settings to independently control whether selecting a city or unit automatically moves the navigation cursor to its tile. Both settings are enabled by default.
@@ -17,6 +20,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 
+- Tree Home and End navigation now stays at the current depth, while Ctrl+Home and Ctrl+End move to the beginning and visible end of the full tree.
+- Changed English hotkey names to speak punctuation keys as words, such as `Slash`, `Tilde`, and `Left bracket`, so screen readers do not need all-symbol verbosity to identify them.
+- The Production panel now identifies the selected city, remembers that city when focus enters its city list, includes city yields in city-row details, and can sort cities by each yield.
 - District placement, wonder placement, and city management now keep the navigation cursor on tiles assigned to the selected city and current purchasable, placeable, or swappable targets.
 - In world rankings, custom-victory and Score tabs now follow the rows, order, values, details, and tooltips produced by the active scenario or mod instead of assuming the standard game layout. This was done to avoid having to handle every separat case manually, since these tabs are dynamic
 - Research and civic chooser tooltips now identify the technologies or civics they lead to.
@@ -26,12 +32,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- Fixed an issue with mod sounds no longer playing after the computer wakes from sleep
+- Map-tac buttons in the chat history now move the navigation cursor to the tac, and chat entries for map tacs retain their location for message-buffer jumping.
+- Selected-city yield information no longer repeats each yield name before its per-turn value.
 - Natural wonder, city-state, and leader pickers in create game report and toggle checkbox state correctly.
 - The City State Picker count slider now uses the available range and current count, instead of setting current to 0 and max range to 100.
 - Fixed the label for the map selection filter dropdown
 - Religion belief counts and locked slots now follow the active game's Religion Screen instead of always assuming four slots.
 - Made tech and civic boost popups report 100% and say the item was completed when a boost finishes it, instead of reporting that progress fell to 0%.
-- Policies can now be viewed, selected, replaced, and removed from the Government screen in the Black Death scenario.
+- Policies can now be viewed, selected, replaced, and removed properly from the Government screen in the Black Death scenario.
 - Diplomacy and deal screens remain navigable when an advisor message appears while they are open.
 - Input help now identifies the Delete shortcut for removing an AI player in Advanced Setup and Scenario Setup.
 - Create game now shows Map Type in the Basic view and opens the full map-selection screen from both Basic and Advanced views. Setup options expose their specific invalid-reason explanations, AI leader changes reset incompatible alternate colors, unavailable sections and choices stay hidden or disabled, and options removed by a configuration refresh no longer remain in the CAI list.
@@ -41,7 +50,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Fixed an issue with the search pannel, where typed character echo interrupted the search result speech
 - Search panels no longer move focus when a search has no results. An empty search now displays `Type text to search` instead of `No results`.
 
-## [0.1.5] - 2026-07-15
+## [0.6.0] - 2026-07-15
 
 ### Added
 
@@ -76,7 +85,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Spatial sounds attenuate properly instead of playing at full volume regardless of posission
 - Fixed an issue with popup dialogs not letting you press enter to do default action while focused on an edit box
 
-## [0.1.4] - 2026-07-13
+## [0.5.0] - 2026-07-13
 
 ### Added
 
@@ -100,7 +109,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Queued paths, waypoints, and unit-action targets in the World Scanner once again announce their tile information instead of the `No tile` debug message.
 - Formation movement is now tracked correctly in the unit-movement log and movement-cost previews.
 
-## [0.1.3] - 2026-07-12
+## [0.4.0] - 2026-07-12
 
 ### Changed
 
@@ -115,7 +124,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - World Scanner item navigation now plays the wrapping sound when crossing the first or last item.
 - Optimized the scanner so that it performs better on bigger maps
 
-## [0.1.2] - 2026-07-12
+## [0.3.0] - 2026-07-12
 
 ### Added
 - Movement cursor information now reports the selected unit's total movement cost and, when nonzero, movement remaining on arrival. It respects all known movement rules.
@@ -134,7 +143,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Movement arriving next turn is now announced as taking 1 turn instead of 2 turns.
 
-## [0.1.1] - 2026-07-12
+## [0.2.0] - 2026-07-12
 
 ### Changed
 

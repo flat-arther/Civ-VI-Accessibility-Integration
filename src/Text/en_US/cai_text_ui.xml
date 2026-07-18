@@ -2040,6 +2040,9 @@
     <Row Tag="LOC_CAI_PRODUCTION_PANEL_TITLE" Language="en_US">
       <Text>Production</Text>
     </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_PANEL_CITY_TITLE" Language="en_US">
+      <Text>{1_Title}, {2_City}</Text>
+    </Row>
     <Row Tag="LOC_CAI_PRODUCTION_TAB_PRODUCTION" Language="en_US">
       <Text>Production</Text>
     </Row>
@@ -2054,6 +2057,9 @@
     </Row>
     <Row Tag="LOC_CAI_PRODUCTION_CITY_LIST" Language="en_US">
       <Text>Cities</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CITY_YIELD" Language="en_US">
+      <Text>{1_Yield}: {2_Amount}</Text>
     </Row>
     <Row Tag="LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS" Language="en_US">
       <Text>Districts</Text>
@@ -4856,6 +4862,9 @@
     <Row Tag="LOC_CAI_MAP_PIN_ICON_LABEL" Language="en_US">
       <Text>Icon</Text>
     </Row>
+    <Row Tag="LOC_CAI_MAP_PIN_VISIBILITY_LABEL" Language="en_US">
+      <Text>Visible to</Text>
+    </Row>
     <Row Tag="LOC_CAI_MAP_PIN_ICON_STRENGTH" Language="en_US">
       <Text>Strength</Text>
     </Row>
@@ -5193,6 +5202,12 @@
     </Row>
     <Row Tag="LOC_CAI_KB_MOVE_TO_LAST" Language="en_US">
       <Text>Move to last</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_TO_TREE_START" Language="en_US">
+      <Text>Move to start of tree</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_TO_TREE_END" Language="en_US">
+      <Text>Move to end of tree</Text>
     </Row>
     <Row Tag="LOC_CAI_KB_MOVE_TO_ROW_END" Language="en_US">
       <Text>Move to row end</Text>

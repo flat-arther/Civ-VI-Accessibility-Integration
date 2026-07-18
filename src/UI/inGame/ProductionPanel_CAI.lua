@@ -156,19 +156,46 @@ local function CurrentTabSupportsQueue()
     return not IsProductionTutorialMode()
 end
 
+local function GetCityYield(city, yieldIndex)
+    return math.floor(city:GetYield(yieldIndex) * 10) / 10
+end
+
+local function CompareCitiesByName(a, b)
+    local aName = Locale.Lookup(a:GetName())
+    local bName = Locale.Lookup(b:GetName())
+    if aName ~= bName then return aName < bName end
+    return a:GetID() < b:GetID()
+end
+
+local function MakeYieldSort(yieldIndex)
+    return function(a, b)
+        local aYield = GetCityYield(a, yieldIndex)
+        local bYield = GetCityYield(b, yieldIndex)
+        if aYield ~= bYield then return aYield > bYield end
+        return CompareCitiesByName(a, b)
+    end
+end
+
 local CITY_SORT_OPTIONS = {
     {
         label = "LOC_PRODUCTION_MANAGER_FILTER_FOUNDING",
     },
     {
         label = "LOC_PRODUCTION_MANAGER_FILTER_NAME",
-        sort = function(a, b) return Locale.Lookup(a:GetName()) < Locale.Lookup(b:GetName()) end,
+        sort = CompareCitiesByName,
     },
     {
         label = "LOC_PRODUCTION_MANAGER_FILTER_POPULATION",
         sort = function(a, b) return a:GetPopulation() > b:GetPopulation() end,
     },
 }
+
+for yield in GameInfo.Yields() do
+    table.insert(CITY_SORT_OPTIONS, {
+        label = yield.Name,
+        sort = MakeYieldSort(yield.Index),
+    })
+end
 
 local function GetLocalPlayerCities()
     local playerID = Game.GetLocalPlayer()
@@ -1079,6 +1106,22 @@ function FormatCityListRow(city)
     return table.concat(parts, ", ")
 end
 
+local function FormatCityYieldsTooltip(city)
+    local parts = {}
+    for yield in GameInfo.Yields() do
+        table.insert(parts, Locale.Lookup("LOC_CAI_PRODUCTION_CITY_YIELD",
+            Locale.Lookup(yield.Name), GetCityYield(city, yield.Index)))
+    end
+    return table.concat(parts, "[NEWLINE]")
+end
+
+local function GetPanelLabel()
+    local title = Locale.Lookup("LOC_CAI_PRODUCTION_PANEL_TITLE")
+    local city = UI.GetHeadSelectedCity and UI.GetHeadSelectedCity() or nil
+    if not city then return title end
+    return Locale.Lookup("LOC_CAI_PRODUCTION_PANEL_CITY_TITLE", title, Locale.Lookup(city:GetName()))
+end
+
 local function ReadCurrentProductionTooltip()
     if not HasActiveCurrentProduction() then return "" end
     local item, formation = GetCurrentProductionItem()
@@ -1360,6 +1403,10 @@ local function CreateCityRow(city)
             local liveCity = CityManager.GetCity(cityOwner, cityID)
             return liveCity and FormatCityListRow(liveCity) or ""
         end,
+        Tooltip = function()
+            local liveCity = CityManager.GetCity(cityOwner, cityID)
+            return liveCity and FormatCityYieldsTooltip(liveCity) or ""
+        end,
         FocusKey = GetCityFocusKey(cityOwner, cityID),
     })
     row:SetFocusSound("Main_Menu_Mouse_Over")
@@ -1522,7 +1569,7 @@ local function EnsurePanelBuilt()
     if m_ui.panel then return end
 
     m_ui.panel = mgr:CreateWidget(PANEL_ID, "Panel", {
-        Label = function() return Locale.Lookup("LOC_CAI_PRODUCTION_PANEL_TITLE") end,
+        Label = GetPanelLabel,
     })
     m_ui.panel:AddInputBindings({
         {
@@ -1628,6 +1675,8 @@ end
 local function PushPanelIfNeeded()
     if not m_ui.panel or not mgr then return end
     if mgr:GetWidgetById(PANEL_ID) then return end
+    local selectedCity = UI.GetHeadSelectedCity and UI.GetHeadSelectedCity() or nil
+    if selectedCity then PrepareCityListFocus(selectedCity) end
     mgr:Push(m_ui.panel, {
         priority = PopupPriority.Low,
         focus = m_ui.pageTrees[m_state.activeTab]

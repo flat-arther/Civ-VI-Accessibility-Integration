@@ -228,9 +228,9 @@ local function CAI_AppendChatEntry(entry)
     return entry
 end
 
-local function CAI_AppendBuffer(text)
+local function CAI_AppendBuffer(text, location)
     if text ~= nil and text ~= "" then
-        LuaEvents.CAIAppendToMessageBuffer(text, "chat")
+        LuaEvents.CAIAppendToMessageBuffer(text, "chat", location)
     end
 end
 
@@ -257,17 +257,20 @@ local function CAI_RecordPinEntry(prefix, pinPlayerID, pinID, appendToBuffer)
 
     local line = CAI_Lookup("LOC_CAI_STAGING_CHAT_LINE", prefix, pinLabel)
     local tooltip = line
+    local location = {
+        x = mapPinCfg:GetHexX(),
+        y = mapPinCfg:GetHexY(),
+    }
     local entry = CAI_AppendChatEntry({
         Kind = "pin",
         Label = line,
         Tooltip = tooltip,
         PlayerID = pinPlayerID,
         PinID = pinID,
-        HexX = mapPinCfg:GetHexX(),
-        HexY = mapPinCfg:GetHexY(),
+        Location = location,
     })
     if appendToBuffer then
-        CAI_AppendBuffer(line)
+        CAI_AppendBuffer(line, location)
     end
     return entry
 end
@@ -288,9 +291,20 @@ local function CAI_RebuildChatHistory()
             })
             widget:SetFocusSound(HOVER_SOUND)
             widget:On("activate", function()
-                if entry.HexX ~= nil and entry.HexY ~= nil then
-                    UI.LookAtPlot(entry.HexX, entry.HexY)
+                local mapPinCfg = GetMapPinConfig(entry.PlayerID, entry.PinID)
+                if mapPinCfg == nil then
+                    LogWarn("CAI ChatPanel could not resolve map pin " ..
+                        tostring(entry.PlayerID) .. ", " .. tostring(entry.PinID))
+                    return
                 end
+
+                local plot = Map.GetPlot(mapPinCfg:GetHexX(), mapPinCfg:GetHexY())
+                if plot == nil then
+                    LogWarn("CAI ChatPanel could not resolve the map pin plot")
+                    return
+                end
+
+                LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
             end)
         else
             widget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIChatLine"), "StaticText", {

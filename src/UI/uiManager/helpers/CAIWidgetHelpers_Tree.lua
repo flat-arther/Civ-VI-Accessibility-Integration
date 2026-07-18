@@ -155,9 +155,66 @@ function T.NavigatePage(root, direction, pageSize)
     return true
 end
 
+---Find the visible tree row containing the current focus. This also supports
+---plain non-TreeItem leaves, which are valid rows in a tree.
+---@param root UIWidget
+---@param flat UIWidget[]
+---@return UIWidget|nil
+local function GetFocusedVisibleRow(root, flat)
+    local node = root.Manager:GetFocusedWidget()
+    while node and node ~= root do
+        for _, item in ipairs(flat) do
+            if item == node then return item end
+        end
+        node = node.Parent
+    end
+    return nil
+end
+
+---Home / End: jump to the first / last visible sibling at the focused row's
+---current tree depth. If focus is not already on a visible row, use the tree's
+---top level.
+---@param root UIWidget
+---@param direction 1|-1
+---@return boolean
+local function NavigateLevelEdge(root, direction)
+    local flat = T.Flatten(root)
+    if #flat == 0 then return false end
+    local current = GetFocusedVisibleRow(root, flat)
+    local level = current and current.Parent or root
+    local target
+    if direction > 0 then
+        for _, child in ipairs(level.Children or {}) do
+            if not child:IsHidden() then target = child; break end
+        end
+    else
+        for i = #(level.Children or {}), 1, -1 do
+            local child = level.Children[i]
+            if not child:IsHidden() then target = child; break end
+        end
+    end
+    if not target then return false end
+    ClearDescent(target)
+    root.Manager:SetFocus(target, { direction = direction })
+    return true
+end
+
 ---@param root UIWidget
 ---@return boolean
 function T.NavigateFirst(root)
+    return NavigateLevelEdge(root, 1)
+end
+
+---@param root UIWidget
+---@return boolean
+function T.NavigateLast(root)
+    return NavigateLevelEdge(root, -1)
+end
+
+---Ctrl+Home: jump to the first row in the whole visible tree.
+---@param root UIWidget
+---@return boolean
+function T.NavigateTreeFirst(root)
     local flat = T.Flatten(root)
     if #flat == 0 then return false end
     ClearDescent(flat[1])
@@ -165,9 +222,10 @@ function T.NavigateFirst(root)
     return true
 end
 
+---Ctrl+End: jump to the deepest last row in the whole visible tree.
 ---@param root UIWidget
 ---@return boolean
-function T.NavigateLast(root)
+function T.NavigateTreeLast(root)
     local flat = T.Flatten(root)
     if #flat == 0 then return false end
     local last = flat[#flat]

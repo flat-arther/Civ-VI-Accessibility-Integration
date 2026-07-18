@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Mod id="9f4b5c2e-1a2b-4c3d-8e9f-123456789abc" version="0.1.5">
+<Mod id="9f4b5c2e-1a2b-4c3d-8e9f-123456789abc" version="0.7.0">
   <Properties>
     <Name>Civ VI Accessibility Integration</Name>
     <Description>Adds blind accessibility to civ VI via text to speech</Description>
@@ -210,11 +210,13 @@
     <File>data/settings_CAI.sql</File>
     <File>data/audioDefinitions_CAI.sql</File>
     <File>Text/en_US/cai_text_ui.xml</File>
+    <File>Text/en_US/hotkey_symbol_names.sql</File>
   </Files>
   <!-- FRONTEND -->
   <FrontEndActions>
     <UpdateText id="CAI_LOC_FrontEnd">
       <File>Text/en_US/cai_text_ui.xml</File>
+      <File>Text/en_US/hotkey_symbol_names.sql</File>
     </UpdateText>
 
     <UpdateDatabase id="FRONTEND_CAI_CONFIG">
@@ -302,6 +304,7 @@
   <InGameActions>
     <UpdateText id="CAI_LOC_Ingame">
       <File>Text/en_US/cai_text_ui.xml</File>
+      <File>Text/en_US/hotkey_symbol_names.sql</File>
     </UpdateText>
     <UpdateDatabase id="INGAME_CAI_CONFIG">
       <File>data/unitOperationConfig_CAI.sql</File>

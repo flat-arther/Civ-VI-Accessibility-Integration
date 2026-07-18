@@ -11,6 +11,17 @@ local m_panel       = nil
 local m_nameEdit    = nil
 local m_iconDD      = nil
 local m_iconOptions = nil
+local m_visibilityDD = nil
+local m_visibilityOptions = nil
+local m_visibilityCommitted = nil
+local m_visibilityPending = nil
+local m_editPinPlayerID = nil
+local m_editPinID = nil
+local m_visibilityChangedByCAI = false
+local m_nativeConfirmInProgress = false
+
+local m_vanillaOnOk = OnOk
+local m_vanillaOnSendToChatButton = OnSendToChatButton
 
 -- ============================================================================
 -- Build flattened icon option list for the dropdown
@@ -40,6 +51,89 @@ local function FindIconIndex(iconName)
 end
 
 -- ============================================================================
+-- Multiplayer visibility transaction
+-- ============================================================================
+
+local function BuildVisibilityOptions()
+    local options = {
+        {
+            label = Locale.Lookup("LOC_DIPLO_TO_ALL"),
+            value = ChatTargetTypes.CHATTARGET_ALL,
+        },
+    }
+
+    local localPlayerID = Game.GetLocalPlayer()
+    local localPlayer = PlayerConfigurations[localPlayerID]
+    local localTeam = localPlayer and localPlayer:GetTeam() or TeamTypes.NO_TEAM
+    if localTeam ~= TeamTypes.NO_TEAM and GameConfiguration.GetTeamPlayerCount(localTeam, true) > 1 then
+        table.insert(options, {
+            label = Locale.Lookup("LOC_DIPLO_TO_TEAM"),
+            value = ChatTargetTypes.CHATTARGET_TEAM,
+        })
+    end
+
+    table.insert(options, {
+        label = Locale.Lookup("LOC_DIPLO_TO_SELF"),
+        value = localPlayerID,
+    })
+
+    for _, playerID in ipairs(GameConfiguration.GetParticipatingPlayerIDs()) do
+        local playerConfig = PlayerConfigurations[playerID]
+        if playerID ~= localPlayerID and playerConfig and playerConfig:IsHuman() then
+            table.insert(options, {
+                label = Locale.Lookup("LOC_DIPLO_TO_PLAYER", playerConfig:GetPlayerName()),
+                value = playerID,
+            })
+        end
+    end
+
+    return options
+end
+
+local function FindVisibilityIndex(visibility)
+    for index, option in ipairs(m_visibilityOptions or {}) do
+        if option.value == visibility then return index end
+    end
+    return 1
+end
+
+local function GetTransactionPin()
+    if m_editPinPlayerID == nil or m_editPinID == nil then return nil end
+    local playerConfig = PlayerConfigurations[m_editPinPlayerID]
+    return playerConfig and playerConfig:GetMapPinID(m_editPinID) or nil
+end
+
+local function SetLiveVisibility(visibility)
+    m_visibilityChangedByCAI = true
+    m_visibilityPending = visibility
+
+    local editPin = GetTransactionPin()
+    if editPin and editPin:GetVisibility() ~= visibility then
+        editPin:SetVisibility(visibility)
+        Network.BroadcastPlayerInfo()
+    end
+
+    ShowHideSendToChatButton()
+end
+
+local function CommitCurrentVisibility()
+    local editPin = GetTransactionPin()
+    if editPin then
+        m_visibilityPending = editPin:GetVisibility()
+        m_visibilityCommitted = m_visibilityPending
+    end
+end
+
+local function RestoreCommittedVisibility()
+    local editPin = GetTransactionPin()
+    if editPin and m_visibilityCommitted ~= nil
+        and editPin:GetVisibility() ~= m_visibilityCommitted then
+        editPin:SetVisibility(m_visibilityCommitted)
+        Network.BroadcastPlayerInfo()
+    end
+end
+
+-- ============================================================================
 -- Panel build/teardown
 -- ============================================================================
 
@@ -47,6 +141,18 @@ local function CommitName()
     if m_nameEdit then
         m_nameEdit:Commit()
     end
+end
+
+local function ConfirmAndClose()
+    CommitName()
+    m_visibilityCommitted = m_visibilityPending
+    m_vanillaOnOk()
+end
+
+local function SendToChat()
+    CommitName()
+    CommitCurrentVisibility()
+    m_vanillaOnSendToChatButton()
 end
 
 local function BuildPanel()
@@ -59,7 +165,7 @@ local function BuildPanel()
             MSG = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_CLOSE",
             Action = function()
-                Controls.OkButton:DoLeftClick()
+                OnCancel()
                 return true
             end
         },
@@ -68,8 +174,7 @@ local function BuildPanel()
             MSG = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_CONFIRM_MAP_PIN",
             Action = function()
-                CommitName()
-                Controls.OkButton:DoLeftClick()
+                ConfirmAndClose()
                 return true
             end
         },
@@ -108,13 +213,28 @@ local function BuildPanel()
     end)
     m_panel:AddChild(m_iconDD)
 
+    -- Visibility commits to the live pin immediately so the native Send to
+    -- Chat state can react. Closing without OK restores the last committed
+    -- value; sending the pin advances that committed baseline.
+    if GameConfiguration.IsAnyMultiplayer() then
+        m_visibilityOptions = BuildVisibilityOptions()
+        m_visibilityDD = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapPinPopup_Visibility"), "Dropdown", {
+            Label = function() return Locale.Lookup("LOC_CAI_MAP_PIN_VISIBILITY_LABEL") end,
+        })
+        m_visibilityDD:SetOptions(m_visibilityOptions)
+        m_visibilityDD:SetSelectedIndex(FindVisibilityIndex(m_visibilityPending), true)
+        m_visibilityDD:SetValueSetter(function(_, visibility)
+            SetLiveVisibility(visibility)
+        end)
+        m_panel:AddChild(m_visibilityDD)
+    end
+
     -- OK button
     local okBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapPinPopup_OK"), "Button", {
         Label = function() return Controls.OkButton:GetText() or Locale.Lookup("LOC_OK_BUTTON") end,
     })
     okBtn:On("activate", function()
-        CommitName()
-        Controls.OkButton:DoLeftClick()
+        ConfirmAndClose()
     end)
     m_panel:AddChild(okBtn)
 
@@ -127,8 +247,7 @@ local function BuildPanel()
         chatBtn:SetHiddenPredicate(function() return Controls.SendToChatButton:IsHidden() end)
         chatBtn:SetDisabledPredicate(function() return Controls.SendToChatButton:IsDisabled() end)
         chatBtn:On("activate", function()
-            CommitName()
-            Controls.SendToChatButton:DoLeftClick()
+            SendToChat()
         end)
         m_panel:AddChild(chatBtn)
     end
@@ -145,19 +264,62 @@ end
 
 local function PushPanel()
     if m_panel then return end
+
+    local editPin = GetEditPinConfig()
+    if editPin then
+        m_editPinPlayerID = editPin:GetPlayerID()
+        m_editPinID = editPin:GetID()
+        m_visibilityCommitted = editPin:GetVisibility()
+        m_visibilityPending = m_visibilityCommitted
+    end
+
     BuildPanel()
     mgr:Push(m_panel, { focus = m_nameEdit or m_iconDD })
 end
 
 local function PopPanel()
     if not m_panel then return end
+    if not m_nativeConfirmInProgress then
+        RestoreCommittedVisibility()
+    end
     LuaEvents.CAIMapPinList_Refresh()
     mgr:RemoveFromStack(PANEL_ID)
     m_panel = nil
     m_nameEdit = nil
     m_iconDD = nil
     m_iconOptions = nil
+    m_visibilityDD = nil
+    m_visibilityOptions = nil
+    m_visibilityCommitted = nil
+    m_visibilityPending = nil
+    m_editPinPlayerID = nil
+    m_editPinID = nil
+    m_visibilityChangedByCAI = false
+    m_nativeConfirmInProgress = false
 end
+
+-- Preserve the native mouse/keyboard confirmation path. It owns its private
+-- visibility target and should not be rolled back by the CAI transaction.
+local function NativeConfirmAndClose()
+    if m_visibilityChangedByCAI then
+        m_visibilityCommitted = m_visibilityPending
+        m_vanillaOnOk()
+        return
+    end
+
+    m_nativeConfirmInProgress = true
+    m_vanillaOnOk()
+    if m_panel then m_nativeConfirmInProgress = false end
+end
+
+local function NativeSendToChat()
+    CommitCurrentVisibility()
+    m_vanillaOnSendToChatButton()
+end
+
+Controls.OkButton:RegisterCallback(Mouse.eLClick, NativeConfirmAndClose)
+Controls.PinName:RegisterCommitCallback(NativeConfirmAndClose)
+Controls.SendToChatButton:RegisterCallback(Mouse.eLClick, NativeSendToChat)
 
 -- ============================================================================
 -- Open/close detection

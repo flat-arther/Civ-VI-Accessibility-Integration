@@ -1,5 +1,5 @@
 -- CAIWidget_Tree.lua
--- Container that owns flat navigation over its TreeItem descendants.
+-- Container that owns depth-aware and flat navigation over its TreeItem descendants.
 -- WrapAround is false because tree boundaries are meaningful.
 
 ---@class TreeWidget : ContainerWidget
@@ -32,6 +32,8 @@ function TreeWidget.Create(mgr, id, props)
         { Key = Keys.VK_LEFT,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_COLLAPSE",       Action = function(self) return Tree.CollapseOrAscend(self) end },
         { Key = Keys.VK_HOME,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_TO_FIRST",  Action = function(self) return Tree.NavigateFirst(self) end },
         { Key = Keys.VK_END,    MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_TO_LAST",   Action = function(self) return Tree.NavigateLast(self) end },
+        { Key = Keys.VK_HOME,   MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_MOVE_TO_TREE_START", Action = function(self) return Tree.NavigateTreeFirst(self) end },
+        { Key = Keys.VK_END,    MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_MOVE_TO_TREE_END",   Action = function(self) return Tree.NavigateTreeLast(self) end },
         { Key = Keys.VK_PRIOR,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_PAGE_UP",        Action = function(self) return Tree.NavigatePage(self, -1, self.PageSize) end },
         { Key = Keys.VK_NEXT,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_PAGE_DOWN",      Action = function(self) return Tree.NavigatePage(self, 1, self.PageSize) end },
         { Key = Keys.VK_RETURN,                          Description = "LOC_CAI_KB_TOGGLE_EXPAND",  Action = function(self) return Tree.ToggleFocused(self) end },

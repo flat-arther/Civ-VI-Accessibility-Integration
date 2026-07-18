@@ -1,0 +1,12 @@
+UPDATE LocalizedText SET Text = 'Underscore' WHERE Tag = 'LOC_OPTIONS_KEY_UNDERSCORE' AND Language = 'en_US';
+UPDATE LocalizedText SET Text = 'Semicolon' WHERE Tag = 'LOC_OPTIONS_KEY_SEMICOLON' AND Language = 'en_US';
+UPDATE LocalizedText SET Text = 'Equals' WHERE Tag = 'LOC_OPTIONS_KEY_PLUS' AND Language = 'en_US';
+UPDATE LocalizedText SET Text = 'Comma' WHERE Tag = 'LOC_OPTIONS_KEY_COMMA' AND Language = 'en_US';
+UPDATE LocalizedText SET Text = 'Minus' WHERE Tag = 'LOC_OPTIONS_KEY_MINUS' AND Language = 'en_US';
+UPDATE LocalizedText SET Text = 'Period' WHERE Tag = 'LOC_OPTIONS_KEY_PERIOD' AND Language = 'en_US';
+UPDATE LocalizedText SET Text = 'Slash' WHERE Tag = 'LOC_OPTIONS_KEY_SLASH' AND Language = 'en_US';
+UPDATE LocalizedText SET Text = 'Tilde' WHERE Tag = 'LOC_OPTIONS_KEY_TILDE' AND Language = 'en_US';
+UPDATE LocalizedText SET Text = 'Left bracket' WHERE Tag = 'LOC_OPTIONS_KEY_LBRACKET' AND Language = 'en_US';
+UPDATE LocalizedText SET Text = 'Backslash' WHERE Tag = 'LOC_OPTIONS_KEY_BACKSLASH' AND Language = 'en_US';
+UPDATE LocalizedText SET Text = 'Right bracket' WHERE Tag = 'LOC_OPTIONS_KEY_RBRACKET' AND Language = 'en_US';
+UPDATE LocalizedText SET Text = 'Quote' WHERE Tag = 'LOC_OPTIONS_KEY_QUOTE' AND Language = 'en_US';

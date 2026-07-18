@@ -92,7 +92,8 @@ Treeviews organize information into branches and child items. Unlike lists, tree
 - `Right Arrow` — expand a branch, or move into its children if already expanded
 - `Left Arrow` — collapse a branch, or move to its parent if already collapsed
 - `Enter` — expand or collapse a branch; activate a selectable item with no children
-- `Home` / `End` — first / last visible item
+- `Home` / `End` — first / last visible item at the current depth
+- `Ctrl+Home` / `Ctrl+End` — beginning / visible end of the full tree
 - `Page Up` / `Page Down` — move backward / forward by several visible items
 - Typing text — use type-to-find to move to a matching item
 - `Ctrl+F` — open tree search. 

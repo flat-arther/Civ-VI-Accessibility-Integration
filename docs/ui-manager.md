@@ -587,14 +587,16 @@ the **last** button (Cancel), not the first (OK).
 
 ### Tree navigation
 
-Trees navigate **flat**, not by sibling. The helper module
+Trees use flat visible order for Up/Down and paging, while Home/End operate on
+the focused row's sibling level. The helper module
 `CAIWidgetHelpers_Tree`:
 
 - `Flatten(root)` — pre-order list of every visible TreeItem reachable from
   root, descending only into expanded nodes.
 - `NavigateFlat(root, dir)` — Up/Down moves through the flat list.
 - `NavigatePage(root, dir, pageSize)` — PgUp/PgDn jumps PageSize positions.
-- `NavigateFirst/Last(root)` — Home/End.
+- `NavigateFirst/Last(root)` — Home/End moves to the first/last visible sibling at the focused row's current depth.
+- `NavigateTreeFirst/Last(root)` — Ctrl+Home/Ctrl+End moves to the first/last row in the flattened visible tree; the last row may be a deep descendant of an expanded final branch.
 - `ExpandOrDescend(root)` — Right key: expand if collapsed; descend to first
   child if already expanded.
 - `CollapseOrAscend(root)` — Left key: collapse if expanded; jump to parent
@@ -1085,7 +1087,7 @@ When migrating a screen from the old template-merged manager:
 | HorizontalList | Left/Right/Home/End/PgUp/PgDn                                 |
 | SubMenu        | Enter / Right → expand-enter; Left → collapse-exit;            |
 |                | when expanded: Up/Down/Home/End/PgUp/PgDn                     |
-| Tree           | Up/Down/Home/End/PgUp/PgDn flat; Right expand-or-descend;     |
+| Tree           | Up/Down/PgUp/PgDn flat; Home/End current depth; Ctrl+Home/End tree edge; Right expand-or-descend; |
 |                | Left collapse-or-ascend; Enter toggle; Ctrl+F; chars → search |
 | SearchPanel    | Tab/Shift+Tab → edit/results; Esc → close; Enter → first result|
 | Checkbox       | Space / Enter → toggle                                        |

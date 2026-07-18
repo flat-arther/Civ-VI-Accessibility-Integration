@@ -2,6 +2,13 @@
 
 ## Current focus
 
+- Release metadata is rotated to version 0.7.0 dated 2026-07-18. Historical changelog releases were corrected from patch-style numbering to the pre-1.0 minor sequence 0.1.0 through 0.6.0. The README Treeviews reference documents depth-local Home/End and full-tree Ctrl+Home/Ctrl+End navigation.
+- Tree navigation now keeps plain Home/End within the focused row's visible sibling level and reserves Ctrl+Home/Ctrl+End for the first/last row of the flattened visible tree. Binding/routing/localization invariants, localization XML parsing, and `git diff --check` pass; in-game confirmation is pending.
+- English symbol-only hotkey names are replaced with spoken words through a localization SQL override registered for both front-end and in-game text loading. Static validation passes; in-game confirmation is pending.
+- Chat map-tac navigation is corrected and statically verified: activating an accessible pin row resolves the live pin and jumps the navigation cursor, while the corresponding chat message-buffer entry carries the pin coordinates for buffer move-to.
+- Map Pin Popup visibility is implemented and statically verified: the accessible multiplayer dropdown applies visibility immediately and refreshes Send to Chat; Cancel restores the last committed value, Send commits the visibility it uses, OK commits the pending value, and native confirmation retains vanilla ownership. Hotseat still has visibility choices but intentionally no real-time chat-send button.
+- City-panel yield readers now rely on the localized names produced from their existing yield icons instead of manually prepending the same names. This removes output such as `Culture, Culture +30.8`; helper call-site invariants and `git diff --check` pass.
+- Production Panel city context improvements are implemented and statically verified: the live panel label includes the selected city, the city list remembers that city while initial panel focus remains on the active production tree, row details include live yields, and the sort dropdown covers every registered yield. Lua Language Server, localization XML, prepare-focus/tree-focus invariants, and `git diff --check` verification pass.
 - Nav-cursor scoping for district placement, wonder placement, and city management admits plots assigned to the selected city plus live build, purchase, manage, and swap targets. The first radius-only implementation incorrectly admitted nearby foreign territory; the corrected live city-assignment predicate passes Lua Language Server, ownership/target/no-radius, XML/tag, choke-point, and `git diff --check` verification.
 - Front-end picker checkbox bindings, City State Picker slider setup, and the MapSelect filter label are corrected and statically verified; in-game validation is pending.
 - War Machine scenario integration is implemented and statically verified. In-game validation is the next task.
@@ -9,6 +16,12 @@
 
 ## Pending tests
 
+- Tree navigation: in a multi-level tree with expanded first and last branches, confirm Home/End move to the first/last visible sibling at the current depth; confirm a focused top-level row stays at the top level; confirm Ctrl+Home reaches the first top-level row and Ctrl+End reaches the deepest final visible descendant.
+- Hotkey symbol names: open key bindings and confirm punctuation gestures are announced as words, including Slash, Equals, Tilde, Left bracket, Backslash, Right bracket, and Quote; verify the same names appear in in-game input help.
+- Chat map tacs: receive a shared tac, activate its accessible chat-history button and confirm the navigation cursor/camera jumps to it; close chat, select the same chat entry in the message buffer, and confirm move-to jumps to the same plot. Delete or hide the tac afterward and confirm the chat button fails safely while the buffered location remains usable.
+- Map Pin Popup: in Internet/LAN multiplayer, change a new private pin to All, Team, self, and another player and verify Send to Chat becomes hidden/enabled/disabled according to the current chat target without reopening. Verify Cancel restores the opening value, Send then Cancel retains the sent value, OK retains the selected value, Escape cancels, name/icon edits keep vanilla behavior, remote players gain/lose visibility promptly, and Hotseat offers visibility without Send to Chat.
+- City panel: read visible, normal-focus, favored-focus, and ignored-focus yields and confirm every entry says the localized yield name once followed by its signed per-turn value.
+- Production Panel: open it from several cities and confirm initial focus remains on the active production tree, then navigate to the city list and confirm it lands on the selected city's row; confirm the panel announces the selected city and every registered city yield appears live in row tooltips; select every yield sort option and confirm descending order, stable name ordering for ties, and correct city selection/focus after resorting.
 - City-interface cursor scope: first retest the reported nearby foreign capital/Ngazargamu tile and confirm it is blocked. Then enter district and wonder placement on owned and purchasable targets; enter citizen management, tile purchase, and tile swapping; traverse invalid selected-city plots; confirm directional movement, scanner jumps, bookmarks, selection/capital jumps, and other cursor jumps cannot leave; confirm a rejected move says the city boundary; test an unaffordable purchase, a neighboring-city swappable tile, an outside-current-territory placement target, city switching, Black Death England Coerce if available, close/reopen, and ordinary unrestricted cursor movement after exit.
 - Front-end pickers: retest City State Picker count slider minimum, maximum, initial value, arrow/page steps, Home/End, and visual/config synchronization. Also verify MultiSelect, City State Picker, and Leader Picker announce their initial checked states, toggle each item once without double changes, preserve Select All/None and leader presets, and confirm MapSelect says `Filter by` while all three filter choices still work.
 - War Machine: multiplayer/Hotseat setup and launch; official turn/date calendar; unavailable Era/Age read; two Overall rows with no redundant title and live Control of Paris Score; France/Germany victory and defeat paths; EndGame styling with no One More Turn or Ranking tab; scenario technologies, military systems, Luxembourg, disabled capabilities, hotseat handoff, and ordinary Expansion 2 regressions. Full matrix is in `docs/game-api.md`.
@@ -16,9 +29,16 @@
 
 ## Next steps
 
+- In-game verify tree Home/End and Ctrl+Home/Ctrl+End at both top-level and nested rows.
+- In-game verify the spoken punctuation key names in key bindings and input help.
+- In-game test the Map Pin Popup visibility transaction across Internet/LAN and Hotseat using the matrix above.
 - In-game test the city-interface cursor scope in district placement, wonder placement, citizen management, tile purchase, and tile swapping, including off-scope jumps and targets outside the selected city's current territory.
 - Run the front-end picker in-game matrix above and report any incorrect checkbox state, double toggle, or filter behavior.
 - Run the War Machine in-game matrix documented in `docs/game-api.md` and report any mismatches or Lua errors.
+
+## Durable release versioning decision
+
+- Until version 1.0.0, each release increments the minor component and resets the patch component to zero (for example, 0.6.0 to 0.7.0).
 
 ## Durable War Machine scenario decisions
 
@@ -121,7 +141,7 @@ Fix 2026-07-16: First map-pin bookmark test failed after creating a pin but befo
 
 Change 2026-07-16: Added ten player/save-specific map-pin bookmark slots in `MapPinListPanel_CAI.lua`. `Ctrl+Shift+1..0` assigns the owned pin at the navigation cursor or creates one, renames it to localized `Bookmark 1..10`, clears any other slot using that pin, deletes the replaced slot's prior pin, stores the new pin ID in `PlayerConfiguration`, broadcasts the change, and speaks confirmation. `Ctrl+1..0` resolves the live pin ID and jumps the CAI cursor; `Alt+1..0` speaks its live direction from the cursor. Missing/deleted pins clear stale slots and speak that the slot is empty. All thirty actions are rebindable. Hotkey and localization XML parse; all 30 action/gesture registrations, exact modifier mappings including slot 10 on `0`, action/tag uniqueness, localization references, gesture-collision checks, and `git diff --check` pass. No Lua compiler is available. In-game testing required for creation, existing-pin assignment, replacement/deletion, duplicate-slot transfer, save/load, hotseat/player scoping, direction speech including `Here`, empty/deleted slots, remapping, and all digit/zero bindings.
 
-Session note 2026-07-15: Rotated the changelog for release `0.1.5`, created a fresh empty `Unreleased` section, and updated `src/CivViAccess.modinfo` from version `0.1.4` to `0.1.5`.
+Session note 2026-07-15: Rotated the changelog for release `0.6.0`, created a fresh empty `Unreleased` section, and updated `src/CivViAccess.modinfo` from version `0.5.0` to `0.6.0`.
 
 Change 2026-07-15: Added the rebindable `ReloadGame_CAI` quick-load action on `F6`; its `R` sorts after vanilla `QuickLoad`. `LoadGameMenu.lua` now moves its hotkey listener from `InputActionTriggered` to `InputActionStarted`, speaks when loading is unavailable, and otherwise pushes a low-priority CAI Yes/No confirmation dialog. Yes closes the dialog and delegates to vanilla's original handler with the original quick-load id; No, Escape, and dialog `focus_leave` close it without loading. Modinfo, hotkey, and localization XML parse successfully; action/tag uniqueness, one-for-one event replacement, dialog handler/delegation counts, and `git diff --check` pass. No Lua compiler is available. In-game test required for unavailable loading, Yes/No/Escape, focus-leave cleanup, the actual quick-load flow, and binding remapping.
 
@@ -185,7 +205,7 @@ Fix 2026-07-14: Interface-mode and active-lens information no longer exposes det
 
 Fix 2026-07-14: Slider Left/Right, Page Up/Page Down, Home, and End input is always consumed by the focused slider, including at its minimum or maximum, so boundary input cannot leak into a parent widget. In-game smoke test pending at both slider bounds.
 
-Session note 2026-07-13: Rotated the changelog for release `0.1.4`, created a fresh empty `Unreleased` section, and updated `src/CivViAccess.modinfo` from version `0.1.3` to `0.1.4`.
+Session note 2026-07-13: Rotated the changelog for release `0.5.0`, created a fresh empty `Unreleased` section, and updated `src/CivViAccess.modinfo` from version `0.4.0` to `0.5.0`.
 
 Session note 2026-07-13: Split the former Navigation settings category into Cursor, World scanner, and Events. Cursor contains cursor audio, coordinates, and zone announcements; World scanner contains all scanner preferences including the beacon; Events contains visibility and unit-movement announcements. Because configuration storage uses both section and setting ID as its key, existing values for every moved setting reset to defaults. Settings-tree smoke test pending: confirm all three sections, their setting membership and order, and defaults after the change.
 
@@ -215,7 +235,7 @@ Session note 2026-07-13: Removed the default `Ctrl+A`, `Ctrl+S`, and `Ctrl+G` ge
 
 Current focus 2026-07-13: Unit stat speech now labels every positive `GetRange()` value generically as `Range`, because the value is not exclusively an attack capability: an Observation Balloon returns `10`. UnitFlagManager's detailed map `S` aggregation now localizes count and name as one field (`2 Roman Trader`) instead of separating them with a comma. In-game test pending with identical stacked traders and combat/noncombat ranged units; the broader detailed-unit-info test remains pending with cursor movement, an embarked/fortified neutral unit, melee/ranged enemies, a promoted owned unit with an upgrade, and an aircraft carrier with cargo.
 
-Session note 2026-07-12: Rotated the changelog for release `0.1.3`, created a fresh empty `Unreleased` section, and updated `src/CivViAccess.modinfo` from version `0.1.2` to `0.1.3`.
+Session note 2026-07-12: Rotated the changelog for release `0.4.0`, created a fresh empty `Unreleased` section, and updated `src/CivViAccess.modinfo` from version `0.3.0` to `0.4.0`.
 
 Session note 2026-07-12: Fixed World Scanner item cycling so Alt+Page Up and Alt+Page Down report first/last-item boundary crossings to the shared wrap-audio policy, matching category, subcategory, and group cycling. Initial item selection from index 0 remains silent. In-game test pending: wrap items in both directions and confirm one half-volume wrap cue only at the boundary.
 
@@ -225,7 +245,7 @@ Session note 2026-07-12: Updated `readme.md` to match the released hotkey change
 
 Session note 2026-07-12: The shared icon-processing speech pipeline now transliterates common accented Latin letters, Vietnamese characters, combining marks, and ligatures when the Civ VI display language is English. Other display languages preserve the original text. In-game test pending: with English display language confirm `Nam Việt` speaks as `Nam Viet`, representative ligatures such as `œ` and `æ` remain readable, and switching to a non-English display language preserves diacritics.
 
-Session note 2026-07-12: Rotated the changelog for release `0.1.2`, created a fresh empty `Unreleased` section, and updated `src/CivViAccess.modinfo` from version `0.1.1` to `0.1.2`.
+Session note 2026-07-12: Rotated the changelog for release `0.3.0`, created a fresh empty `Unreleased` section, and updated `src/CivViAccess.modinfo` from version `0.2.0` to `0.3.0`.
 
 Current focus 2026-07-12: World Scanner city grouping is controlled by the World scanner setting `Group scanner cities by civilization`, enabled by default. Enabled groups cities by owner civilization; disabled makes every city its own group. My, City-States, Neutral, Enemy, All, and barbarian-outpost behavior remain unchanged. In-game test pending: confirm the setting appears below the other scanner settings, defaults on, groups a revealed multi-city civilization when on, and reaches every city by group navigation when off.
 
@@ -247,7 +267,7 @@ Movement-cost feasibility 2026-07-12: an exact pre-move MP total is feasible as 
 
 Session note 2026-07-12: Merged the plot-tooltip district, building, and great-work read bucket into the existing geography read on `B`, ordered after all geography information, removed the obsolete `PlotReadDistrictBuildings` input action and its localization, and reassigned Surveyor grow/shrink radius to `Shift+W` / `Shift+X`. The merged bucket now selects `cityDistrictTitle` for city centers and `districtTitle` only for non-city districts, preventing duplicate `City Center` speech. Documentation and changelog updated. In-game smoke test pending: verify `B` speaks geography first and then one structure title plus buildings/great works, Shift+X shrinks Surveyor radius, and Shift+W grows it.
 
-Session note 2026-07-12: Cycled the changelog for release `0.1.1`, recorded `0.1.0` as the prior initial release, and updated `src/CivViAccess.modinfo` from the incorrect version `1` to `0.1.1`. The new Unreleased section is empty.
+Session note 2026-07-12: Cycled the changelog for release `0.2.0`, recorded `0.1.0` as the prior initial release, and updated `src/CivViAccess.modinfo` from the incorrect version `1` to `0.2.0`. The new Unreleased section is empty.
 
 Session note 2026-07-12: World-input primary and secondary interface actions now dispatch from the triggered input-action event, including the primary overrides for targeting, move-to, district placement, and building placement modes. Per request, this internal input-routing correction was not added to the changelog. In-game smoke test passed: activate primary and secondary interface actions in normal world input and primary action in each affected interface mode, confirming each fires once on the completed input rather than on key-down.
 

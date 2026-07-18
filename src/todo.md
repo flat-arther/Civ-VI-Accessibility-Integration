@@ -70,4 +70,4 @@
 [x] change scanner sound and add volume setting
 [x] Fix wc unknown participant string
 [x] Selection cursor move should be a setting
-[ ] Make home end in treeviews take you to the start or end of a node, control home end can take you to the top or bottom
+[x] Make home end in treeviews take you to the start or end of a node, control home end can take you to the top or bottom
