@@ -61,6 +61,7 @@ local UNIT_FLAG_INFO_DEFAULT_KEYS = {
     "aircraftCapacity",
     "markers",
     "barbarianClan",
+    "polandInvasion",
     "pirates",
 }
 
@@ -224,12 +225,31 @@ local function GetOwnedUnitFlagDetails(unit, count)
     return #results > 0 and results or nil
 end
 
+local function GetUnitFlagPolandInvasion(unit)
+    if unit == nil or not IsRuleSetActive("RULESET_SCENARIO_POLAND") then
+        return nil
+    end
+
+    local owner = Players[unit:GetOwner()]
+    if owner == nil or not owner:IsBarbarian() then
+        return nil
+    end
+
+    local tribeIndex = unit:GetBarbarianTribeIndex()
+    if tribeIndex == nil or tribeIndex < 0 then
+        return nil
+    end
+
+    return GetTribeName(tribeIndex)
+end
+
 local function GetForeignUnitFlagDetails(unit, count)
     local results = {}
     if unit:IsEmbarked() then
         AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_EMBARKED"))
     end
     AppendUnitFlagInfo(results, FormatUnitFlagDisplayName(unit, count))
+    AppendUnitFlagInfo(results, GetUnitFlagPolandInvasion(unit))
     AppendUnitFlagInfo(results, GetUnitFlagHealth(unit))
     if not unit:IsEmbarked() and unit:GetFortifyTurns() > 0 then
         AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_WORLDTRACKER_UNIT_FORTIFIED"))
@@ -529,6 +549,7 @@ local function GetUnitFlagSignature(unit, flag)
     local aircraftCapacity = GetUnitFlagAircraftCapacity(unit, flag)
     local markers = GetUnitFlagMarkers(unit, flag)
     local barbarianClan = GetUnitFlagBarbarianClan(unit)
+    local polandInvasion = GetUnitFlagPolandInvasion(unit)
     local pirates = GetUnitFlagPiratesText(unit)
 
     local parts = {}
@@ -542,6 +563,7 @@ local function GetUnitFlagSignature(unit, flag)
     AppendUnitFlagInfo(parts, aircraftCapacity)
     AppendUnitFlagInfo(parts, markers)
     AppendUnitFlagInfo(parts, barbarianClan)
+    AppendUnitFlagInfo(parts, polandInvasion)
     AppendUnitFlagInfo(parts, pirates)
 
     return table.concat(parts, " ")
@@ -621,6 +643,9 @@ info.UnitFlagInfo = {
     end,
     barbarianClan = function(unit)
         return GetUnitFlagBarbarianClan(unit)
+    end,
+    polandInvasion = function(unit)
+        return GetUnitFlagPolandInvasion(unit)
     end,
     pirates = function(unit)
         return GetUnitFlagPiratesText(unit)

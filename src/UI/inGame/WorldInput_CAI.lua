@@ -1121,6 +1121,8 @@ local function OnInterfaceChanged(oldMode, newMode)
 		m_caiCurrentInterfaceWidget = nil
 	end
 
+	CAICursor:InvalidateCityScope()
+
 	local newData = interfaceWidgets[newMode]
 	if not newData then return end
 
@@ -1130,6 +1132,12 @@ local function OnInterfaceChanged(oldMode, newMode)
 
 	m_caiCurrentInterfaceWidget = mode
 	mgr:Push(mode)
+	CAICursor:EnsureCityScopePosition()
+end
+
+local function OnCityScopeStateChanged()
+	CAICursor:InvalidateCityScope()
+	CAICursor:EnsureCityScopePosition()
 end
 
 -- ===========================================================================
@@ -1291,6 +1299,11 @@ end
 
 local function RegisterCAIEvents()
 	Events.InterfaceModeChanged.Add(OnInterfaceChanged)
+	Events.CitySelectionChanged.Add(OnCityScopeStateChanged)
+	Events.CityWorkerChanged.Add(OnCityScopeStateChanged)
+	Events.CityMadePurchase.Add(OnCityScopeStateChanged)
+	Events.CityTileOwnershipChanged.Add(OnCityScopeStateChanged)
+	Events.LocalPlayerChanged.Add(OnCityScopeStateChanged)
 	Events.InputActionStarted.Add(OnCAIInputActionStarted)
 	Events.LocalPlayerTurnBegin.Add(OnLocalPlayerTurnBegin)
 	Events.UnitSelectionChanged.Add(OnUnitSelectionChanged)
@@ -1303,6 +1316,11 @@ end
 
 local function UnregisterCAIEvents()
 	Events.InterfaceModeChanged.Remove(OnInterfaceChanged)
+	Events.CitySelectionChanged.Remove(OnCityScopeStateChanged)
+	Events.CityWorkerChanged.Remove(OnCityScopeStateChanged)
+	Events.CityMadePurchase.Remove(OnCityScopeStateChanged)
+	Events.CityTileOwnershipChanged.Remove(OnCityScopeStateChanged)
+	Events.LocalPlayerChanged.Remove(OnCityScopeStateChanged)
 	Events.InputActionStarted.Remove(OnCAIInputActionStarted)
 	Events.InputActionTriggered.Remove(OnInputActionTriggered)
 	Events.LocalPlayerTurnBegin.Remove(OnLocalPlayerTurnBegin)

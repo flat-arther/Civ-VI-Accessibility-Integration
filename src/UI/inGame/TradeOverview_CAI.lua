@@ -1,5 +1,9 @@
 include("caiUtils")
-include("TradeOverview")
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_INDONESIA_KHMER" then
+    include("TradeOverview_Indonesia_KhmerScenario")
+else
+    include("TradeOverview")
+end
 
 ContextPtr.SetInputHandler = origSetInputHandler
 

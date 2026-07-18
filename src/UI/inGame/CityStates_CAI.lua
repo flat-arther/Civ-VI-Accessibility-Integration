@@ -2,7 +2,9 @@ include("caiUtils")
 include("Civ6Common")
 include("GameCapabilities")
 
-if IsExpansion2Active() then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_INDONESIA_KHMER" then
+    include("CityStates_Indonesia_KhmerScenario")
+elseif IsExpansion2Active() then
     include("CityStates_Expansion2")
 elseif IsExpansion1Active() then
     include("CityStates_Expansion1")

@@ -1,5 +1,52 @@
 # Project Status: Civ VI Accessibility Integration (CAI)
 
+## Current focus
+
+- Nav-cursor scoping for district placement, wonder placement, and city management admits plots assigned to the selected city plus live build, purchase, manage, and swap targets. The first radius-only implementation incorrectly admitted nearby foreign territory; the corrected live city-assignment predicate passes Lua Language Server, ownership/target/no-radius, XML/tag, choke-point, and `git diff --check` verification.
+- Front-end picker checkbox bindings, City State Picker slider setup, and the MapSelect filter label are corrected and statically verified; in-game validation is pending.
+- War Machine scenario integration is implemented and statically verified. In-game validation is the next task.
+- All previously pending in-game tests, retests, regression checks, and optional fixture checks were closed as successful at the user's direction on 2026-07-17.
+
+## Pending tests
+
+- City-interface cursor scope: first retest the reported nearby foreign capital/Ngazargamu tile and confirm it is blocked. Then enter district and wonder placement on owned and purchasable targets; enter citizen management, tile purchase, and tile swapping; traverse invalid selected-city plots; confirm directional movement, scanner jumps, bookmarks, selection/capital jumps, and other cursor jumps cannot leave; confirm a rejected move says the city boundary; test an unaffordable purchase, a neighboring-city swappable tile, an outside-current-territory placement target, city switching, Black Death England Coerce if available, close/reopen, and ordinary unrestricted cursor movement after exit.
+- Front-end pickers: retest City State Picker count slider minimum, maximum, initial value, arrow/page steps, Home/End, and visual/config synchronization. Also verify MultiSelect, City State Picker, and Leader Picker announce their initial checked states, toggle each item once without double changes, preserve Select All/None and leader presets, and confirm MapSelect says `Filter by` while all three filter choices still work.
+- War Machine: multiplayer/Hotseat setup and launch; official turn/date calendar; unavailable Era/Age read; two Overall rows with no redundant title and live Control of Paris Score; France/Germany victory and defeat paths; EndGame styling with no One More Turn or Ranking tab; scenario technologies, military systems, Luxembourg, disabled capabilities, hotseat handoff, and ordinary Expansion 2 regressions. Full matrix is in `docs/game-api.md`.
+- All tests that predated this War Machine implementation remain closed and successful at the user's direction. Older pending-test wording in compressed history is not active work.
+
+## Next steps
+
+- In-game test the city-interface cursor scope in district placement, wonder placement, citizen management, tile purchase, and tile swapping, including off-scope jumps and targets outside the selected city's current territory.
+- Run the front-end picker in-game matrix above and report any incorrect checkbox state, double toggle, or filter behavior.
+- Run the War Machine in-game matrix documented in `docs/game-api.md` and report any mismatches or Lua errors.
+
+## Durable War Machine scenario decisions
+
+- CAI must explicitly include the official War Machine ActionPanel, TopPanel, and WorldRankings wrappers because its load-order-100 replacements win those contexts. No copied scenario files or CAI modinfo entries are needed.
+- Accessible World Rankings Overall omits the redundant scenario-name row and exposes only the scenario description and France/Germany Paris objective. Existing Score capture remains authoritative for the Control of Paris category.
+- Era/Age speech should follow the live `CAPABILITY_ERAS` capability instead of a scenario-name list. Turn/date speech should refresh and read the official TopPanel controls so the August/September 1914 calendar remains authoritative.
+- The scenario's EndGame addition composes through the existing wildcard. Historic-ranking localization is unused because the scenario deletes all ranking rows; the accessible Ranking tab should remain absent.
+- War Machine is multiplayer-only. HostGame/Hotseat and StagingRoom are the correct accessible setup path; single-player Scenario Setup exclusion is expected.
+- Static verification passes: Lua Language Server reports no problems in the three changed Lua files, War Machine include/order/localization/capability/wildcard assertions pass, and `git diff --check` passes.
+
+## Durable Vikings scenario decisions
+
+- Vikings uses ruleset-first composition in PartialScreenHooks and World Rankings, three accessible Overall rows, explicit Espionage suppression, and read-only Religion Screen behavior with a two-religion maximum.
+- Its same-name Religion Screen and custom World Rankings XML already arrive through the DLC import action; no scenario files or CAI modinfo entries should be added.
+- Shared Score capture should expose the live scenario categories. Immediate visual score-floater speech is a separate enhancement and should not be implemented by duplicating the gameplay script's scoring rules in UI code.
+
+## Durable Poland scenario decisions
+
+- Only World Rankings is a formal scenario UI replacement; ReligionScreen and UnitFlagManager are imported same-name files that CAI already reaches through their ordinary includes.
+- Reuse the official `GetTribeName()` exported by the Poland UnitFlagManager instead of duplicating its tribe-index mapping.
+- Event popups, Scenario Setup, LoadScreen, Score, EndGame, Great People/Works, Civilopedia, and ordinary data-driven units/buildings require regression testing but no planned scenario-specific branches.
+
+Fix iteration 2026-07-17: Path to Nirvana testing exposed a false fourth locked belief slot. CAI now counts the visible belief instances created by the active Religion Screen, excluding hidden recycled instances, and uses that live total for both the section summary and locked rows. If a full mod replacement lacks the standard live presentation, CAI falls back to known unlocked beliefs without inventing slots. Lua Language Server reports no errors; nine live-stack/fallback/official-wrapper assertions and `git diff --check` pass. In-game retest Path to Nirvana own and other religions plus an ordinary religion with an evangelizable fourth slot.
+
+Change 2026-07-17: Path to Nirvana World Rankings Overall now groups its ten official display lines into two accessible rows joined with `[NEWLINE]`: rules lines 1-6 and scoring lines 7-10. Lua Language Server reports no errors; two-row/two-join/order assertions and `git diff --check` pass. In-game retest both rows and their line order.
+
+Change 2026-07-17: Implemented Path to Nirvana / Indonesia-Khmer scenario UI composition. CityStates, TradeOverview, ReligionScreen, and WorldRankings now select the official scenario wrappers before expansion/base files. Maritime city-state type and envoy bonuses flow into the accessible City States tree, official trade-route icons and preset-belief behavior are preserved, and World Rankings exposes the ten scenario rules in official order while retaining generic live Score capture. Civilopedia and EndGame remain automatic wildcard compositions; the DLC's missing GreatWorks file is only a stale manifest entry. Lua Language Server reports no errors for the four changed Lua files; 14 include/import/wildcard/order assertions, six installed/decompiled hash comparisons, score-multiplier checks, and `git diff --check` pass. In-game testing is required across the matrix in `docs/game-api.md`.
+
 Fix iteration 2026-07-17: First Nubia World Rankings test crashed while building the Temple-victory row because `HAS_7_TEMPLES` has no `VictoryProgress` requirement-text key and CAI passed the legitimate nil lookup result to `GameEffects.GetRequirementText`, which requires a string. Structured requirement text is now requested only when a key exists; the captured official `<Temple count>/7` value and victory description remain available. Lua Language Server reports no warnings or errors, the targeted guard invariant and `git diff --check` pass. In-game reopen the Temple tab and continue the Nubia matrix.
 
 Change 2026-07-17: Implemented Nubia scenario World Rankings composition and generalized scenario/mod victory capture. Custom-victory and Score rebuilds now consume the exact player/team rows populated by the included official wrapper, preserving wrapper-owned filtering, order, computed values, visible details, and tooltips while retaining requirement and score-category fallbacks. Nubia therefore exposes live Temple-to-Amun totals and only the official Egypt/Nubia competitors without a ruleset-specific accessible branch; Australia Score filtering benefits from the same path. An adapter registry covers replacements that bypass the global population hooks. Lua Language Server reports no warnings or errors for `WorldRankings_CAI.lua`; include/capture/adapter invariants, modinfo XML parsing, and `git diff --check` pass. In-game test the full Nubia matrix in `docs/game-api.md`, plus ordinary custom victory, Score, Australia Score, and Black Death custom-victory regressions.

@@ -160,7 +160,7 @@ function CAI.SetListenerVelocity(x, y, z) end
 ---@field fromY integer Y coordinate before the move.
 ---@field toX integer X coordinate after the move.
 ---@field toY integer Y coordinate after the move.
----@field reason "step"|"jump"|"select"|"snap" Why the cursor moved.
+---@field reason "step"|"jump"|"select"|"snap"|"scope" Why the cursor moved.
 
 ---@class CAICursor
 ---@field curX integer The current X coordinate of the cursor.
@@ -178,11 +178,18 @@ CAICursor = {}
 ---@return boolean moved True if coordinates were set successfully.
 function CAICursor:SetCoords(x, y) end
 
----Unified move entry point. Resolves plotId, updates coordinates and zones,
----speaks direction on "jump" and "select" reasons, fires LuaEvents.CAICursorMoved(state).
+---Unified move entry point. Resolves plotId, enforces an active city-interface scope,
+---updates coordinates and zones, speaks direction on "jump" and "select" reasons,
+---and fires LuaEvents.CAICursorMoved(state).
 ---@param plotId integer Target plot index.
----@param reason "step"|"jump"|"select"|"snap" Why the cursor is moving.
+---@param reason "step"|"jump"|"select"|"snap"|"scope" Why the cursor is moving.
 function CAICursor:MoveTo(plotId, reason) end
+
+---Clears the cached city-management, district-placement, or wonder-placement cursor scope.
+function CAICursor:InvalidateCityScope() end
+
+---Moves the cursor to the selected city center when it is outside the active city-interface scope.
+function CAICursor:EnsureCityScopePosition() end
 
 ---Moves to the adjacent plot in the given hex direction. Calls MoveTo with reason "step".
 ---@param dir DirectionTypes The direction index (0-5).

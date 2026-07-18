@@ -1,7 +1,9 @@
 include("caiUtils")
 include("Civ6Common")
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_WARMACHINE" then
+    include("TopPanel_WarMachineScenario")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
     include("TopPanel_BlackDeathScenario")
 elseif IsExpansion2Active() then
     include("TopPanel_Expansion2")
@@ -694,9 +696,9 @@ local function OnCAITopPanelInputAction(actionId)
 end
 
 local function OnLocalPlayerTurnBegin()
+    RefreshTurnsRemaining()
     RefreshTime()
-    local turn = Game.GetCurrentGameTurn()
-    Speak(Locale.Lookup("LOC_TOP_PANEL_CURRENT_TURN") .. " " .. turn
+    Speak(Locale.Lookup("LOC_TOP_PANEL_CURRENT_TURN") .. " " .. Controls.Turns:GetText()
         .. ", " .. Controls.CurrentDate:GetText())
 end
 

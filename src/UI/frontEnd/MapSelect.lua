@@ -249,13 +249,13 @@ local function BuildPanel()
 	end})
 
 	CAI_FilterDD = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapSelectFilterDD"), "Dropdown", {
-		Label = function() return Locale.Lookup("LOC_SETUP_MAP_ALL_MAPS") end,
+		Label = function() return Locale.Lookup("LOC_CAI_MAP_SELECT_FILTER") end,
 	})
 	local options, idx = BuildFilterDropdownOptions()
 	CAI_FilterDD:SetOptions(options)
 	if idx > 0 then CAI_FilterDD:SetSelectedIndex(idx, true) end
 	CAI_FilterDD:SetFocusSound("Main_Menu_Mouse_Over")
-	CAI_FilterDD:On("value_changed", function(_, val)
+	CAI_FilterDD:SetValueSetter(function(_, val)
 		for _, spec in ipairs(kSortOptions) do
 			if spec[1] == val then
 				OnSortButton(val, spec[3]())

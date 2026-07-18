@@ -209,14 +209,14 @@ local function RebuildItemList()
 					OnItemFocus(item)
 					return Controls.FocusedItemDescription:GetText() or ""
 				end,
-				ValueGetter = function()
-					return checkBox:IsChecked()
-						and Locale.Lookup("LOC_OPTIONS_ENABLED")
-						or Locale.Lookup("LOC_OPTIONS_DISABLED")
-				end,
 				FocusKey = "msw:item:" .. tostring(idx),
 			})
-			child:On("value_changed", function() OnItemSelect(item, checkBox) end)
+			child:SetChecked(checkBox:IsChecked(), true)
+			child:SetValueSetter(function(_, value)
+				if checkBox:IsChecked() ~= value then
+					checkBox:DoLeftClick()
+				end
+			end)
 			child:On("focus_enter", function()
 				UI.PlaySound("Main_Menu_Mouse_Over")
 				OnItemFocus(item)

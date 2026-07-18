@@ -1,5 +1,9 @@
 include("caiUtils")
-include("ReligionScreen")
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_INDONESIA_KHMER" then
+    include("ReligionScreen_Indonesia_KhmerScenario")
+else
+    include("ReligionScreen")
+end
 
 local mgr                      = ExposedMembers.CAI_UIManager
 
@@ -176,6 +180,11 @@ local function IsObserverMode()
 end
 
 local function GetSetupState()
+    local ruleSet = GameConfiguration.GetRuleSet()
+    if ruleSet == "RULESET_SCENARIO_POLAND" or ruleSet == "RULESET_SCENARIO_VIKINGS" then
+        return nil
+    end
+
     if cai.pantheonBelief >= 0 and cai.numBeliefsEarned > 0 and cai.playerReligionType < 0 then
         return "RELIGION"
     elseif cai.playerReligionType >= 0 and cai.numBeliefsEarned > cai.numBeliefsEquipped then
@@ -367,6 +376,43 @@ end
 -- Beliefs category builder
 -- ============================================================================
 
+local function GetBeliefSlotCount(religion, religionType)
+    local unlockedCount = #religion.Beliefs
+    if m_selectedReligionType ~= religionType
+        or not Controls.ViewReligionBeliefs
+        or (Controls.ViewReligion and Controls.ViewReligion:IsHidden()) then
+        return unlockedCount
+    end
+
+    local visibleCount = 0
+    for _, control in ipairs(Controls.ViewReligionBeliefs:GetChildren() or {}) do
+        if not control:IsHidden() then
+            visibleCount = visibleCount + 1
+        end
+    end
+    return math.max(unlockedCount, visibleCount)
+end
+
+local function GetMaximumFoundedReligions()
+    local ruleSet = GameConfiguration.GetRuleSet()
+    if ruleSet == "RULESET_SCENARIO_POLAND" or ruleSet == "RULESET_SCENARIO_VIKINGS" then
+        return 2
+    end
+
+    local maxReligions = 0
+    local mapSizeIndex = Map.GetMapSize()
+    local mapSize = GameInfo.Maps[mapSizeIndex]
+    if mapSize then
+        for row in GameInfo.Map_GreatPersonClasses() do
+            if row.MapSizeType == mapSize.MapSizeType
+                and row.GreatPersonClassType == "GREAT_PERSON_CLASS_PROPHET" then
+                maxReligions = row.MaxWorldInstances
+            end
+        end
+    end
+    return maxReligions
+end
+
 local function BuildBeliefsSection(parent, religion, religionType)
     for _, beliefIndex in ipairs(religion.Beliefs) do
         local belief = GameInfo.Beliefs[beliefIndex]
@@ -383,8 +429,7 @@ local function BuildBeliefsSection(parent, religion, religionType)
     end
 
     local isOwnReligion = religion.Founder == Game.GetLocalPlayer()
-    local maxBeliefs = 4
-    local locked = maxBeliefs - #religion.Beliefs
+    local locked = GetBeliefSlotCount(religion, religionType) - #religion.Beliefs
     for i = 1, locked do
         parent:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAIRel_LockedBelief"), "StaticText", {
             Label   = function() return Locale.Lookup("LOC_CAI_RELIGION_LOCKED_BELIEF") end,
@@ -582,7 +627,8 @@ local function CreateReligionRow(religionInfo)
     -- 1. Beliefs
     local beliefsSection = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRel_Beliefs"), "TreeItem", {
         Label = function()
-            return Locale.Lookup("LOC_CAI_RELIGION_BELIEFS_COUNT", #religionInfo.Beliefs, 4)
+            return Locale.Lookup("LOC_CAI_RELIGION_BELIEFS_COUNT", #religionInfo.Beliefs,
+                GetBeliefSlotCount(religionInfo, religionType))
         end,
         FocusKey = "rel:" .. religionType .. ":beliefs",
     })
@@ -720,7 +766,8 @@ local function CreateMyReligionRow()
     -- Beliefs
     local beliefsSection = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRel_MyBeliefs"), "TreeItem", {
         Label = function()
-            return Locale.Lookup("LOC_CAI_RELIGION_BELIEFS_COUNT", #religionInfo.Beliefs, 4)
+            return Locale.Lookup("LOC_CAI_RELIGION_BELIEFS_COUNT", #religionInfo.Beliefs,
+                GetBeliefSlotCount(religionInfo, religionType))
         end,
         FocusKey = "rel:my:beliefs",
     })
@@ -1406,18 +1453,7 @@ local function EnsurePanelBuilt()
                     count = count + 1
                 end
             end
-            local maxReligions = 0
-            local mapSizeIndex = Map.GetMapSize()
-            local mapSize = GameInfo.Maps[mapSizeIndex]
-            if mapSize then
-                for row in GameInfo.Map_GreatPersonClasses() do
-                    if row.MapSizeType == mapSize.MapSizeType
-                        and row.GreatPersonClassType == "GREAT_PERSON_CLASS_PROPHET" then
-                        maxReligions = row.MaxWorldInstances
-                    end
-                end
-            end
-            return Locale.Lookup("LOC_UI_RELIGION_ALL_RELIGIONS", count .. "/" .. maxReligions)
+            return Locale.Lookup("LOC_UI_RELIGION_ALL_RELIGIONS", count .. "/" .. GetMaximumFoundedReligions())
         end,
     })
     m_ui.panel:AddChild(m_ui.tree)

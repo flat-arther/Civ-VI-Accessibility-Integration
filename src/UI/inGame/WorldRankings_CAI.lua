@@ -1,6 +1,14 @@
 include("caiUtils")
 include("Civ6Common")
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_WARMACHINE" then
+    include("WorldRankings_WarMachineScenario")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_VIKINGS" then
+    include("WorldRankings_VikingsScenario")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_POLAND" then
+    include("WorldRankings_PolandScenario")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_INDONESIA_KHMER" then
+    include("WorldRankings_Indonesia_KhmerScenario")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
     include("WorldRankings_BlackDeathScenario")
 elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_AUSTRALIA" then
     include("WorldRankings_AustraliaScenario")
@@ -17,6 +25,12 @@ else
 end
 
 local mgr                         = ExposedMembers.CAI_UIManager
+local CAI_TAB_SCORE               = TAB_SCORE or Locale.Lookup("LOC_WORLD_RANKINGS_SCORE_TAB")
+local CAI_TAB_OVERALL             = TAB_OVERALL or Locale.Lookup("LOC_WORLD_RANKINGS_OVERALL_TAB")
+local CAI_TAB_SCIENCE             = TAB_SCIENCE or Locale.Lookup("LOC_WORLD_RANKINGS_SCIENCE_TAB")
+local CAI_TAB_CULTURE             = TAB_CULTURE or Locale.Lookup("LOC_WORLD_RANKINGS_CULTURE_TAB")
+local CAI_TAB_RELIGION            = TAB_RELIGION or Locale.Lookup("LOC_WORLD_RANKINGS_RELIGION_TAB")
+local CAI_TAB_DOMINATION          = TAB_DOMINATION or Locale.Lookup("LOC_WORLD_RANKINGS_DOMINATION_TAB")
 
 -- ============================================================================
 -- Constants
@@ -290,12 +304,12 @@ PopulateScoreTeamInstance = WrapFunc(PopulateScoreTeamInstance,
     end)
 
 local VIEW_CONTROL_TO_TAB = {
-    { control = "OverallView",    label = TAB_OVERALL },
-    { control = "ScoreView",      label = TAB_SCORE },
-    { control = "ScienceView",    label = TAB_SCIENCE },
-    { control = "CultureView",    label = TAB_CULTURE },
-    { control = "DominationView", label = TAB_DOMINATION },
-    { control = "ReligionView",   label = TAB_RELIGION },
+    { control = "OverallView",    label = CAI_TAB_OVERALL },
+    { control = "ScoreView",      label = CAI_TAB_SCORE },
+    { control = "ScienceView",    label = CAI_TAB_SCIENCE },
+    { control = "CultureView",    label = CAI_TAB_CULTURE },
+    { control = "DominationView", label = CAI_TAB_DOMINATION },
+    { control = "ReligionView",   label = CAI_TAB_RELIGION },
 }
 
 local function DetectActiveTab()
@@ -392,6 +406,78 @@ end
 local function RebuildOverallTree(tree)
     local capture = mgr:CaptureFocusKey(tree)
     tree:ClearChildren()
+
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_WARMACHINE" then
+        AddLeaf(tree, "war-machine:description", function()
+            return Locale.Lookup("LOC_WARMACHINE_SCENARIO_ERA_INDUSTRIAL_DESCRIPTION")
+        end)
+
+        AddLeaf(tree, "war-machine:objective", function()
+            return Locale.Lookup("LOC_VICTORY_WARMACHINE_SCENARIO_TT")
+        end)
+
+        mgr:RestoreFocus(tree, capture)
+        return
+    end
+
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_VIKINGS" then
+        AddLeaf(tree, "vikings:description", function()
+            return Locale.Lookup("LOC_VIKING_SCENARIO_DESCRIPTION")
+        end)
+
+        AddLeaf(tree, "vikings:religion", function()
+            return Locale.Lookup("LOC_VIKING_SCENARIO_RELIGION_DESCRIPTION")
+        end)
+
+        AddLeaf(tree, "vikings:scoring", function()
+            return JoinLines({
+                Locale.Lookup("LOC_VIKING_SCENARIO_SCORING_DESCRIPTION1", 25, 10, 50, 25, 10),
+                Locale.Lookup("LOC_VIKING_SCENARIO_SCORING_DESCRIPTION2", 1000, 500, 300, 100),
+                Locale.Lookup("LOC_VIKING_SCENARIO_SCORING_DESCRIPTION3", 50, 50, 1, 10, 1, 5),
+            })
+        end)
+
+        mgr:RestoreFocus(tree, capture)
+        return
+    end
+
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_POLAND" then
+        AddLeaf(tree, "poland:overall", function()
+            return JoinLines({
+                Locale.Lookup("LOC_PEDIA_CITYSTATES_PAGE_CIVILIZATION_VIENNA_CHAPTER_HISTORY_PARA_1"),
+                Locale.Lookup("LOC_PEDIA_CITYSTATES_PAGE_CIVILIZATION_VIENNA_CHAPTER_HISTORY_PARA_2"),
+                Locale.Lookup("LOC_PEDIA_UNITS_PAGE_UNIT_OTTOMAN_JANISSARY_CHAPTER_HISTORY_PARA_1"),
+                Locale.Lookup("LOC_PEDIA_UNITS_PAGE_UNIT_OTTOMAN_JANISSARY_CHAPTER_HISTORY_PARA_2"),
+            })
+        end)
+
+        mgr:RestoreFocus(tree, capture)
+        return
+    end
+
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_INDONESIA_KHMER" then
+        AddLeaf(tree, "indonesia-khmer:rules", function()
+            return JoinLines({
+                Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_1"),
+                Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_2"),
+                Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_3"),
+                Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_4"),
+                Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_10"),
+                Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_5"),
+            })
+        end)
+        AddLeaf(tree, "indonesia-khmer:scoring", function()
+            return JoinLines({
+                Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_6"),
+                Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_7", 1, 1),
+                Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_8", 20, 20),
+                Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_9", 1, 1),
+            })
+        end)
+
+        mgr:RestoreFocus(tree, capture)
+        return
+    end
 
     if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_AUSTRALIA" then
         AddLeaf(tree, "australia:description", function()
@@ -1610,17 +1696,17 @@ local function ResolveTabRebuilds()
         tabDef.rebuildFn = nil
         tabDef.victoryType = nil
 
-        if tabDef.label == TAB_OVERALL then
+        if tabDef.label == CAI_TAB_OVERALL then
             tabDef.rebuildFn = RebuildOverallTree
-        elseif tabDef.label == TAB_SCORE then
+        elseif tabDef.label == CAI_TAB_SCORE then
             tabDef.rebuildFn = RebuildScoreTree
-        elseif tabDef.label == TAB_SCIENCE then
+        elseif tabDef.label == CAI_TAB_SCIENCE then
             tabDef.rebuildFn = RebuildScienceTree
-        elseif tabDef.label == TAB_CULTURE then
+        elseif tabDef.label == CAI_TAB_CULTURE then
             tabDef.rebuildFn = RebuildCultureTree
-        elseif tabDef.label == TAB_DOMINATION then
+        elseif tabDef.label == CAI_TAB_DOMINATION then
             tabDef.rebuildFn = RebuildDominationTree
-        elseif tabDef.label == TAB_RELIGION then
+        elseif tabDef.label == CAI_TAB_RELIGION then
             tabDef.rebuildFn = RebuildReligionTree
         else
             tabDef.rebuildFn = RebuildGenericTree
@@ -1688,7 +1774,7 @@ end
 
 ViewOverall = WrapFunc(ViewOverall, function(orig)
     orig()
-    local idx = FindTabIndex(TAB_OVERALL)
+    local idx = FindTabIndex(CAI_TAB_OVERALL)
     if idx then ViewSync(idx) end
 end)
 
@@ -1696,31 +1782,31 @@ ViewScore = WrapFunc(ViewScore, function(orig)
     BeginScoreCapture()
     orig()
     EndScoreCapture()
-    local idx = FindTabIndex(TAB_SCORE)
+    local idx = FindTabIndex(CAI_TAB_SCORE)
     if idx then ViewSync(idx) end
 end)
 
 ViewScience = WrapFunc(ViewScience, function(orig)
     orig()
-    local idx = FindTabIndex(TAB_SCIENCE)
+    local idx = FindTabIndex(CAI_TAB_SCIENCE)
     if idx then ViewSync(idx) end
 end)
 
 ViewCulture = WrapFunc(ViewCulture, function(orig)
     orig()
-    local idx = FindTabIndex(TAB_CULTURE)
+    local idx = FindTabIndex(CAI_TAB_CULTURE)
     if idx then ViewSync(idx) end
 end)
 
 ViewDomination = WrapFunc(ViewDomination, function(orig)
     orig()
-    local idx = FindTabIndex(TAB_DOMINATION)
+    local idx = FindTabIndex(CAI_TAB_DOMINATION)
     if idx then ViewSync(idx) end
 end)
 
 ViewReligion = WrapFunc(ViewReligion, function(orig)
     orig()
-    local idx = FindTabIndex(TAB_RELIGION)
+    local idx = FindTabIndex(CAI_TAB_RELIGION)
     if idx then ViewSync(idx) end
 end)
 

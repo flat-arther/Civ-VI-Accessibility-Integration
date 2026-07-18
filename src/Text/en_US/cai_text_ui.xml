@@ -2987,6 +2987,9 @@
     <Row Tag="LOC_CAI_NAV_CURSOR_NATIONAL_PARK_ZONE" Language="en_US">
       <Text>National Park</Text>
     </Row>
+    <Row Tag="LOC_CAI_NAV_CURSOR_CITY_SCOPE_BOUNDARY" Language="en_US">
+      <Text>Edge of {1_CityName} management area</Text>
+    </Row>
     <Row Tag="LOC_CAI_PLOT_NO_PHYSICAL_INFO" Language="en_US">
       <Text>No physical modifiers</Text>
     </Row>
@@ -6006,10 +6009,10 @@
     </Row>
 
     <Row Tag="LOC_CAI_MOVEMENT_TOTAL_COST" Language="en_US">
-      <Text>Movement cost {1}</Text>
+      <Text>{1} MP</Text>
     </Row>
     <Row Tag="LOC_CAI_MOVEMENT_ARRIVAL_REMAINING" Language="en_US">
-      <Text>{1} movement remaining on arrival</Text>
+      <Text>{1} remaining on arrival</Text>
     </Row>
 
     <Row Tag="LOC_CAI_UNIT_MOVE_LOG_PATH" Language="en_US">
@@ -6162,6 +6165,9 @@
     </Row>
     <Row Tag="LOC_CAI_QUICK_LOAD_CONFIRMATION_BODY" Language="en_US">
       <Text>Load the game in the quick-save slot?</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_SELECT_FILTER" Language="en_US">
+      <Text>Filter by</Text>
     </Row>
   </LocalizedText>
 </GameData>

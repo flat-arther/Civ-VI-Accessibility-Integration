@@ -1,8 +1,11 @@
 include("caiUtils")
 include("Civ6Common")
 local m_isAustraliaScenario = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_AUSTRALIA"
+local m_isVikingsScenario = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_VIKINGS"
 
-if m_isAustraliaScenario then
+if m_isVikingsScenario then
+    include("PartialScreenHooks_VikingsScenario")
+elseif m_isAustraliaScenario then
     include("PartialScreenHooks_AustraliaScenario")
 elseif IsExpansion2Active() then
     include("PartialScreenHooks_Expansion2")
@@ -59,7 +62,7 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     end
     if m_caiOpenEspionageId and actionId == m_caiOpenEspionageId then
         local player = GetLocalPlayer()
-        if m_isAustraliaScenario then
+        if m_isAustraliaScenario or m_isVikingsScenario then
             Speak(Locale.Lookup("LOC_CAI_UI_UNAVAILABLE_IN_CURRENT_GAME"))
         elseif not GameCapabilities.HasCapability("CAPABILITY_ESPIONAGE_VIEW") then
             Speak(Locale.Lookup("LOC_CAI_UI_UNAVAILABLE_IN_CURRENT_GAME"))

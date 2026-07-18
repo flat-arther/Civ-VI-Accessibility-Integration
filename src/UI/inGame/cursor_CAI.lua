@@ -20,6 +20,13 @@ local function GetState()
 end
 
 local HexCoordUtils = nil
+local m_cityScopeCache = nil
+
+local CITY_SCOPE_MODES = {
+    [InterfaceModeTypes.CITY_MANAGEMENT] = true,
+    [InterfaceModeTypes.DISTRICT_PLACEMENT] = true,
+    [InterfaceModeTypes.BUILDING_PLACEMENT] = true,
+}
 
 local function GetHexCoordUtils()
     if HexCoordUtils == nil then
@@ -36,6 +43,100 @@ local function ResolvePlotById(plotId)
     end
 
     return Map.GetPlotByIndex(plotId)
+end
+
+local function AddScopeActionPlot(scope, plotId)
+    if ResolvePlotById(plotId) ~= nil then
+        scope.ActionPlots[plotId] = true
+    end
+end
+
+local function BuildCityScopeSignature(mode, city)
+    local parts = {
+        tostring(mode),
+        tostring(Game.GetLocalPlayer()),
+        tostring(city:GetOwner()),
+        tostring(city:GetID()),
+    }
+
+    if mode == InterfaceModeTypes.CITY_MANAGEMENT then
+        parts[#parts + 1] = tostring(CAICityManagementInterface.IsCitizenManagementActive())
+        parts[#parts + 1] = tostring(CAICityManagementInterface.IsPurchaseActive())
+    elseif mode == InterfaceModeTypes.DISTRICT_PLACEMENT then
+        parts[#parts + 1] = tostring(UI.GetInterfaceModeParameter(CityOperationTypes.PARAM_DISTRICT_TYPE))
+        parts[#parts + 1] = tostring(UI.GetInterfaceModeParameter(CityCommandTypes.PARAM_PLOT_PURCHASE))
+    elseif mode == InterfaceModeTypes.BUILDING_PLACEMENT then
+        parts[#parts + 1] = tostring(UI.GetInterfaceModeParameter(CityOperationTypes.PARAM_BUILDING_TYPE))
+        parts[#parts + 1] = tostring(UI.GetInterfaceModeParameter(CityCommandTypes.PARAM_PLOT_PURCHASE))
+    end
+
+    return table.concat(parts, ":")
+end
+
+local function BuildCityScope(mode, city, signature)
+    local centerPlot = Map.GetPlot(city:GetX(), city:GetY())
+    if centerPlot == nil then
+        LogWarn("Cursor city scope could not resolve selected city center")
+        return nil
+    end
+
+    local scope = {
+        Signature = signature,
+        CenterPlotId = centerPlot:GetIndex(),
+        CityOwner = city:GetOwner(),
+        CityID = city:GetID(),
+        CityName = Locale.Lookup(city:GetName()),
+        ActionPlots = {
+            [centerPlot:GetIndex()] = true,
+        },
+    }
+
+    if mode == InterfaceModeTypes.CITY_MANAGEMENT then
+        local stateData = CAICityManagementInterface.GetStateData()
+        if stateData ~= nil then
+            for plotId in pairs(stateData.ActivePlots) do
+                AddScopeActionPlot(scope, plotId)
+            end
+        end
+    else
+        for _, item in ipairs(CAIInterfaceTargets.GetActiveTargetItems()) do
+            AddScopeActionPlot(scope, item.PlotIndex)
+        end
+    end
+
+    return scope
+end
+
+local function GetActiveCityScope()
+    local mode = UI.GetInterfaceMode()
+    if CITY_SCOPE_MODES[mode] ~= true then
+        m_cityScopeCache = nil
+        return nil
+    end
+
+    local city = UI.GetHeadSelectedCity()
+    if city == nil then
+        LogWarn("Cursor city scope has no selected city")
+        return nil
+    end
+
+    local signature = BuildCityScopeSignature(mode, city)
+    if m_cityScopeCache == nil or m_cityScopeCache.Signature ~= signature then
+        m_cityScopeCache = BuildCityScope(mode, city, signature)
+    end
+
+    return m_cityScopeCache
+end
+
+local function IsPlotInsideCityScope(plot, scope)
+    if scope.ActionPlots[plot:GetIndex()] == true then
+        return true
+    end
+
+    local owningCity = Cities.GetPlotPurchaseCity(plot)
+    return owningCity ~= nil
+        and owningCity:GetOwner() == scope.CityOwner
+        and owningCity:GetID() == scope.CityID
 end
 
 -- =========================================================================
@@ -160,6 +261,20 @@ function CAICursor:GetStateForPlayer(playerID)
     return m_PlayerState:Get(playerID)
 end
 
+function CAICursor:InvalidateCityScope()
+    m_cityScopeCache = nil
+end
+
+function CAICursor:EnsureCityScopePosition()
+    local scope = GetActiveCityScope()
+    if scope == nil then return end
+
+    local plot = ResolvePlotById(self:GetPlotId())
+    if plot == nil or not IsPlotInsideCityScope(plot, scope) then
+        self:MoveTo(scope.CenterPlotId, "scope")
+    end
+end
+
 function CAICursor:UpdateZones()
     local state = GetState()
     if state == nil then return end
@@ -252,6 +367,19 @@ function CAICursor:MoveTo(plotId, reason)
     local plot = ResolvePlotById(plotId)
     if plot == nil then
         LogWarn("Cursor MoveTo unable to resolve plot id: " .. tostring(plotId))
+        return
+    end
+
+    local scope = GetActiveCityScope()
+    local currentPlot = ResolvePlotById(self:GetPlotId())
+    if scope ~= nil and reason ~= "scope" and
+        (currentPlot == nil or not IsPlotInsideCityScope(currentPlot, scope)) then
+        self:MoveTo(scope.CenterPlotId, "scope")
+        return
+    end
+
+    if scope ~= nil and not IsPlotInsideCityScope(plot, scope) then
+        Speak(Locale.Lookup("LOC_CAI_NAV_CURSOR_CITY_SCOPE_BOUNDARY", scope.CityName))
         return
     end
 

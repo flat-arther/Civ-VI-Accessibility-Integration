@@ -388,14 +388,14 @@ local function RebuildItemList()
 					if civ ~= "" then return leader .. ", " .. civ end
 					return leader
 				end,
-				ValueGetter = function()
-					return checkBox:IsChecked()
-						and Locale.Lookup("LOC_OPTIONS_ENABLED")
-						or Locale.Lookup("LOC_OPTIONS_DISABLED")
-				end,
 				FocusKey = "lp:item:" .. tostring(idx),
 			})
-			child:On("value_changed", function() OnItemSelect(item, checkBox) end)
+			child:SetChecked(checkBox:IsChecked(), true)
+			child:SetValueSetter(function(_, value)
+				if checkBox:IsChecked() ~= value then
+					checkBox:DoLeftClick()
+				end
+			end)
 			child:On("focus_enter", function()
 				UI.PlaySound("Main_Menu_Mouse_Over")
 				OnItemFocus(item)
@@ -422,7 +422,7 @@ local function BuildPanel()
 	CAI_PresetDD:SetOptions(options)
 	if idx > 0 then CAI_PresetDD:SetSelectedIndex(idx, true) end
 	CAI_PresetDD:SetFocusSound("Main_Menu_Mouse_Over")
-	CAI_PresetDD:On("value_changed", function(_, val)
+	CAI_PresetDD:SetValueSetter(function(_, val)
 		local pulldown = Controls.PresetPulldown
 		if val == "all" then
 			pulldown:GetButton():SetText(Locale.Lookup("LOC_LEADER_PICK_PRESET_ALL"))

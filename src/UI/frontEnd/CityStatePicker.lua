@@ -376,6 +376,17 @@ local CAI_SortDD = nil
 local CAI_Slider = nil
 local m_cachedGameParameters = nil
 
+local function SyncCityStateCountSlider()
+	if not CAI_Slider or not m_kCityStateCountParam then return end
+	local kValues = m_kCityStateCountParam.Values
+	local range = kValues.MaximumValue - kValues.MinimumValue
+	CAI_Slider:SetMin(kValues.MinimumValue)
+	CAI_Slider:SetMax(kValues.MaximumValue)
+	CAI_Slider:SetStepSize(1)
+	CAI_Slider:SetPageStep(math.max(1, math.floor(range / 10)))
+	CAI_Slider:SetValue(m_kCityStateCountParam.Value, true)
+end
+
 local function BuildSortDropdownOptions()
 	local options = {
 		{ label = Locale.Lookup("LOC_CITY_STATE_PICKER_SORT_NAME"), value = "name" },
@@ -408,14 +419,14 @@ local function RebuildItemList()
 				OnItemFocus(item)
 				return Controls.FocusedItemDescription:GetText() or ""
 			end,
-			ValueGetter = function()
-				return checkBox:IsChecked()
-					and Locale.Lookup("LOC_OPTIONS_ENABLED")
-					or Locale.Lookup("LOC_OPTIONS_DISABLED")
-			end,
 			FocusKey = "csp:item:" .. tostring(idx),
 		})
-		child:On("value_changed", function() OnItemSelect(item, checkBox) end)
+		child:SetChecked(checkBox:IsChecked(), true)
+		child:SetValueSetter(function(_, value)
+			if checkBox:IsChecked() ~= value then
+				checkBox:DoLeftClick()
+			end
+		end)
 		child:On("focus_enter", function()
 			UI.PlaySound("Main_Menu_Mouse_Over")
 			OnItemFocus(item)
@@ -442,7 +453,7 @@ local function BuildPanel()
 	CAI_SortDD:SetOptions(options)
 	if idx > 0 then CAI_SortDD:SetSelectedIndex(idx, true) end
 	CAI_SortDD:SetFocusSound("Main_Menu_Mouse_Over")
-	CAI_SortDD:On("value_changed", function(_, val)
+	CAI_SortDD:SetValueSetter(function(_, val)
 		local pulldown = Controls.SortByPulldown
 		if val == "name" then
 			pulldown:GetButton():SetText(Locale.Lookup("LOC_CITY_STATE_PICKER_SORT_NAME"))
@@ -456,11 +467,9 @@ local function BuildPanel()
 
 	CAI_Slider = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStatePickerSlider"), "Slider", {
 		Label = function() return m_kCityStateCountParam and m_kCityStateCountParam.Name or "" end,
-		ValueGetter = function()
-			return tostring(m_kCityStateCountParam and m_kCityStateCountParam.Value or "")
-		end,
 	})
-	CAI_Slider:On("value_changed", function(_, newVal)
+	SyncCityStateCountSlider()
+	CAI_Slider:SetValueSetter(function(_, newVal)
 		if m_kCityStateCountParam and m_cachedGameParameters then
 			local kValues = m_kCityStateCountParam.Values
 			if m_kCityStateCountParam.Value ~= newVal then
@@ -530,10 +539,7 @@ ParameterInitialize = WrapFunc(ParameterInitialize, function(orig, kParameter, p
 		if idx > 0 then CAI_SortDD:SetSelectedIndex(idx, true) end
 	end
 	if CAI_Slider and m_kCityStateCountParam then
-		local kValues = m_kCityStateCountParam.Values
-		CAI_Slider:SetMin(kValues.MinimumValue)
-		CAI_Slider:SetMax(kValues.MaximumValue)
-		CAI_Slider:SetValue(m_kCityStateCountParam.Value, true)
+		SyncCityStateCountSlider()
 	end
 	RebuildItemList()
 end)
