@@ -8,7 +8,7 @@ local mgr = ExposedMembers.CAI_UIManager
 
 local PANEL_ID = "CAIGreatWorkShowcase_Panel"
 
-local m_ui = { panel = nil }
+local m_ui = { panel = nil, details = nil }
 
 -- ---------------------------------------------------------------------------
 -- Content helper — reads from vanilla controls after they are updated
@@ -61,10 +61,10 @@ local function BuildPanel()
         end,
     })
 
-    local details = mgr:CreateWidget("CAIGWShowcase_Details", "StaticText", {
+    m_ui.details = mgr:CreateWidget("CAIGWShowcase_Details", "StaticText", {
         Label = function() return GetWorkDetailsLabel() end,
     })
-    m_ui.panel:AddChild(details)
+    m_ui.panel:AddChild(m_ui.details)
 
     local prevBtn = mgr:CreateWidget("CAIGWShowcase_Prev", "Button", {
         Label           = function()
@@ -106,6 +106,32 @@ local function BuildPanel()
     m_ui.panel:AddInputBindings({
         {
             Key    = Keys.VK_LEFT,
+            IsAlt  = true,
+            MSG    = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_PREVIOUS_GREAT_WORK",
+            Action = function()
+                if not Controls.PreviousGreatWork:IsHidden() then
+                    OnPreviousGreatWork()
+                    return true
+                end
+                return false
+            end,
+        },
+        {
+            Key    = Keys.VK_RIGHT,
+            IsAlt  = true,
+            MSG    = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_NEXT_GREAT_WORK",
+            Action = function()
+                if not Controls.NextGreatWork:IsHidden() then
+                    OnNextGreatWork()
+                    return true
+                end
+                return false
+            end,
+        },
+        {
+            Key    = Keys.VK_LEFT,
             MSG    = KeyEvents.KeyDown,
             Description = "LOC_CAI_KB_PREVIOUS_GREAT_WORK",
             Action = function()
@@ -140,7 +166,7 @@ end
 
 local function PopPanel()
     if mgr and m_ui.panel then mgr:RemoveFromStack(PANEL_ID) end
-    m_ui = { panel = nil }
+    m_ui = { panel = nil, details = nil }
 end
 
 -- ---------------------------------------------------------------------------
@@ -160,15 +186,15 @@ end)
 
 OnPreviousGreatWork = WrapFunc(OnPreviousGreatWork, function(orig)
     orig()
-    if m_ui.panel and not ContextPtr:IsHidden() then
-        mgr:Refocus()
+    if m_ui.details and not ContextPtr:IsHidden() then
+        mgr:SetFocus(m_ui.details)
     end
 end)
 
 OnNextGreatWork = WrapFunc(OnNextGreatWork, function(orig)
     orig()
-    if m_ui.panel and not ContextPtr:IsHidden() then
-        mgr:Refocus()
+    if m_ui.details and not ContextPtr:IsHidden() then
+        mgr:SetFocus(m_ui.details)
     end
 end)
 

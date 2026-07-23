@@ -14,7 +14,6 @@ else
 end
 
 local mgr = ExposedMembers.CAI_UIManager
-local m_caiTopPanelList = nil
 
 local ACTION_SPEAK_TURN_TIME_DATE = Input.GetActionId("UI_TopPanelSpeakTurnTimeDate")
 local ACTION_SPEAK_GOLD = Input.GetActionId("UI_TopPanelSpeakGold")
@@ -30,7 +29,6 @@ local ACTION_OPEN_REPORTS_CITY_STATUS = Input.GetActionId("UI_TopPanelOpenReport
 local ACTION_OPEN_REPORTS_GOSSIP = Input.GetActionId("UI_TopPanelOpenReportsGossip")
 local ACTION_OPEN_GLOBAL_RESOURCES = Input.GetActionId("UI_OpenGlobalResourcePopup")
 
-local TOP_PANEL_YIELD_INFO_ID = "CAITopPanelYieldInfoTree"
 
 local function GetLocalPlayer()
     local playerID = Game.GetLocalPlayer()
@@ -314,37 +312,6 @@ local function FormatNodeLabel(label, value)
     return nodeLabel
 end
 
-local function CloseTopPanelList(id)
-    local list = m_caiTopPanelList
-    if not list then return end
-
-    local listId = id or list.Id
-    if not listId or listId == "" then
-        m_caiTopPanelList = nil
-        return
-    end
-
-    m_caiTopPanelList = nil
-    mgr:RemoveFromStack(listId)
-end
-
-local function AddListEscapeBinding(list)
-    list:AddInputBinding({
-        Key = Keys.VK_ESCAPE,
-        Description = "LOC_CAI_KB_CLOSE",
-        Action = function()
-            CloseTopPanelList()
-            return true
-        end,
-    })
-end
-
-local function AddTransientFocusLeave(list, id)
-    list:On("focus_leave", function()
-        CloseTopPanelList(id)
-    end)
-end
-
 local function AddGenericYieldTreeNode(tree, label, value, tooltip)
     local node = MakeTreeItem(FormatNodeLabel(label, value), nil)
     local detailLines = GetTooltipDetailLines(tooltip)
@@ -612,29 +579,6 @@ local function AddResourceInfoTreeNodes(parent)
     end
 end
 
-local function OpenYieldInfoList()
-    CloseTopPanelList()
-
-    local tree = mgr:CreateWidget(TOP_PANEL_YIELD_INFO_ID, "Tree", {
-        Label = function() return Locale.Lookup("LOC_CAI_TOP_PANEL_YIELD_INFO") end,
-    })
-    AddListEscapeBinding(tree)
-    AddTransientFocusLeave(tree, TOP_PANEL_YIELD_INFO_ID)
-
-    local yields = MakeTreeItem(Locale.Lookup("LOC_HUD_REPORTS_TAB_YIELDS"), nil)
-    AddYieldInfoTreeNodes(yields)
-    yields:Expand(true)
-    tree:AddChild(yields)
-
-    local resources = MakeTreeItem(Locale.Lookup("LOC_CAI_TOP_PANEL_RESOURCE_INFO"), nil)
-    AddResourceInfoTreeNodes(resources)
-    resources:Expand(true)
-    tree:AddChild(resources)
-
-    m_caiTopPanelList = tree
-    mgr:Push(m_caiTopPanelList, { priority = PopupPriority.Low })
-end
-
 -- ===========================================================================
 -- Input handler
 -- ===========================================================================
@@ -653,7 +597,13 @@ local function OnCAITopPanelInputAction(actionId)
     elseif actionId == ACTION_SPEAK_NUKES then
         SpeakNukes()
     elseif actionId == ACTION_OPEN_YIELD_LIST then
-        OpenYieldInfoList()
+        if GameCapabilities.HasCapability("CAPABILITY_REPORTS_LIST") then
+            ExposedMembers.CAIReports = ExposedMembers.CAIReports or {}
+            ExposedMembers.CAIReports.PendingFocusKey = "yield:economy"
+            LuaEvents.TopPanel_OpenReportsScreen()
+        else
+            Speak(Locale.Lookup("LOC_CAI_UI_REPORTS_UNAVAILABLE"))
+        end
     elseif actionId == ACTION_OPEN_DIPLOMACY then
         if GameCapabilities.HasCapability("CAPABILITY_DIPLOMACY") then
             LuaEvents.TopPanel_OpenDiplomacyActionView()
@@ -711,7 +661,6 @@ function OnShutdown()
     Events.TurnTimerUpdated.Remove(OnTurnTimerUpdated)
     Events.LocalPlayerTurnBegin.Remove(OnLocalPlayerTurnBegin)
     Events.LocalPlayerTurnEnd.Remove(OnLocalPlayerTurnEnd)
-    CloseTopPanelList()
 end
 
 ContextPtr:SetShutdown(OnShutdown)

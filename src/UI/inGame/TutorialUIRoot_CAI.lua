@@ -85,7 +85,6 @@ local escapePassthroughIds = {
     "CAIActionPanelTurnBlockerList",
     "CAIUnitPanelActionList",
     "CAICityPanelList",
-    "CAITopPanelYieldInfoTree",
     "CAITopPanelResourceInfoTree",
     "CAIWorldInputInterfaceMode",
     "CAICivicsTreePanel",

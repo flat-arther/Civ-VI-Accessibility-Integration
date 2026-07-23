@@ -2,10 +2,17 @@ include("caiUtils")
 
 local mgr                              = ExposedMembers.CAI_UIManager
 
-local NOTIFICATION_CENTER_ID           = "CAINotificationCenter_Tree"
+local NOTIFICATION_CENTER_ID           = "CAINotificationCenter_Panel"
+local NOTIFICATION_TABS_ID             = "CAINotificationCenter_Tabs"
+local NOTIFICATION_TREE_ID             = "CAINotificationCenter_Tree"
 local EMPTY_NODE_ID                    = "CAINotificationCenter_Empty"
 local GROUP_ID_PREFIX                  = "CAINotificationCenter_Group_"
 local LEAF_ID_PREFIX                   = "CAINotificationCenter_Leaf_"
+local MESSAGE_FILTER_ID                = "CAINotificationCenter_MessageFilter"
+local MESSAGE_COPY_ID                  = "CAINotificationCenter_MessageCopy"
+local MESSAGE_LIST_ID                  = "CAINotificationCenter_MessageList"
+local MESSAGE_EMPTY_ID                 = "CAINotificationCenter_MessageEmpty"
+local MESSAGE_ID_PREFIX                = "CAINotificationCenter_Message_"
 local m_IsGameStarted                  = false
 local ACTION_OPEN_NOTIFICATION_CENTER  = Input.GetActionId("UI_NotificationPanelOpenList")
 local CAI_TUTORIAL_GOAL_ADDED_TYPE     = DB.MakeHash("NOTIFICATION_CAI_TUTORIAL_GOAL_ADDED")
@@ -15,7 +22,9 @@ local DEFAULT_SOUND_EXCLUDED_TYPES     = {
     [NotificationTypes.PLAYER_MET] = true,
 }
 
-local m_centerTree                     = nil ---@type UIWidget|nil
+local m_centerPanel                    = nil ---@type PanelWidget|nil
+local m_centerTree                     = nil ---@type TreeWidget|nil
+local m_messageList                    = nil ---@type ListWidget|nil
 local m_caiAnnouncedNotificationIDs    = {}
 local m_caiDeferedNotificationAnnounce = {}
 
@@ -106,13 +115,15 @@ local function SpeakUnavailable()
 end
 
 local function CloseNotificationCenter()
+    m_centerPanel = nil
     m_centerTree = nil
+    m_messageList = nil
     if mgr then mgr:RemoveFromStack(NOTIFICATION_CENTER_ID) end
 end
 
 LookAtNotification = WrapFunc(LookAtNotification, function(orig, pNotification)
     orig(pNotification)
-    if m_centerTree then return end
+    if m_centerPanel then return end
     if pNotification and pNotification:IsLocationValid() then
         local x, y = pNotification:GetLocation()
         local plot = Map.GetPlot(x, y)
@@ -314,7 +325,7 @@ local function PopulateTree(tree, playerID)
     return lastLeafKey
 end
 
-local function RebuildTree()
+local function RebuildNotificationTree()
     if not m_centerTree then return end
     local playerID = GetLocalPlayer()
     if not playerID then return end
@@ -323,6 +334,127 @@ local function RebuildTree()
     m_centerTree:ClearChildren()
     PopulateTree(m_centerTree, playerID)
     mgr:RestoreFocus(m_centerTree, capture)
+end
+
+local function GetMessageBuffer()
+    if not CAI or not CAI.GetMessageBuffer then
+        LogError("NotificationPanel: message buffer getter is unavailable")
+        return nil
+    end
+    return CAI.GetMessageBuffer()
+end
+
+local function FormatMessageTurn(turn)
+    return Locale.Lookup("LOC_CAI_MESSAGE_BUFFER_TURN", turn)
+end
+
+local function FormatMessageEntry(buffer, entry, includeLocation)
+    local turnText = FormatMessageTurn(entry.turn)
+    if includeLocation then
+        local locationText = buffer:GetEntryLocationText(entry)
+        if locationText and locationText ~= "" then
+            return Locale.Lookup(
+                "LOC_CAI_MESSAGE_BUFFER_LIST_ENTRY_WITH_LOCATION",
+                entry.text,
+                locationText,
+                turnText
+            )
+        end
+    end
+    return Locale.Lookup("LOC_CAI_MESSAGE_BUFFER_LIST_ENTRY", entry.text, turnText)
+end
+
+local function BuildMessageTooltip(entry)
+    return Locale.Lookup("LOC_CAI_MESSAGE_BUFFER_CAT_" .. string.upper(entry.category))
+end
+
+local function ActivateMessageLocation(buffer, entry)
+    CloseNotificationCenter()
+    buffer:JumpToEntryLocation(entry)
+    return true
+end
+
+local function PopulateMessageList(list, buffer)
+    local entries = buffer:GetEntries()
+    if #entries == 0 then
+        list:AddChild(mgr:CreateWidget(MESSAGE_EMPTY_ID, "StaticText", {
+            Label = function() return Locale.Lookup("LOC_CAI_MESSAGE_BUFFER_EMPTY") end,
+            FocusKey = "message:empty",
+        }))
+        return
+    end
+
+    for _, entry in ipairs(entries) do
+        local messageEntry = entry
+        local hasLocation = messageEntry.location ~= nil
+            and messageEntry.location.x ~= nil
+            and messageEntry.location.y ~= nil
+        local widgetType = hasLocation and "Button" or "StaticText"
+        local row = mgr:CreateWidget(MESSAGE_ID_PREFIX .. tostring(messageEntry.id), widgetType, {
+            Label = function() return FormatMessageEntry(buffer, messageEntry, true) end,
+            Tooltip = function() return BuildMessageTooltip(messageEntry) end,
+            FocusKey = "message:" .. tostring(messageEntry.id),
+        })
+        if hasLocation then
+            row:On("activate", function() return ActivateMessageLocation(buffer, messageEntry) end)
+        end
+        list:AddChild(row)
+    end
+    list:SetDefaultIndex(#list.Children)
+end
+
+local function RebuildMessageList()
+    if not m_messageList then return end
+    local buffer = GetMessageBuffer()
+    if not buffer then return end
+
+    local capture = mgr:CaptureFocusKey(m_messageList)
+    m_messageList:ClearChildren()
+    PopulateMessageList(m_messageList, buffer)
+    mgr:RestoreFocus(m_messageList, capture)
+end
+
+local function CreateMessageFilter(buffer)
+    local dropdown = mgr:CreateWidget(MESSAGE_FILTER_ID, "Dropdown", {
+        Label = function() return Locale.Lookup("LOC_CAI_MESSAGE_BUFFER_FILTER") end,
+    })
+    local options = {}
+    local selectedIndex = 1
+    for i, category in ipairs(buffer.GetCategories()) do
+        options[i] = {
+            label = Locale.Lookup("LOC_CAI_MESSAGE_BUFFER_CAT_" .. string.upper(category)),
+            value = category,
+        }
+        if category == buffer:GetFilter() then selectedIndex = i end
+    end
+    dropdown:SetOptions(options)
+    dropdown:SetSelectedIndex(selectedIndex, true)
+    dropdown:SetValueSetter(function(_, category)
+        buffer:SetFilter(category)
+        RebuildMessageList()
+    end)
+    return dropdown
+end
+
+local function CopyMessageBuffer(buffer)
+    local lines = {}
+    for _, entry in ipairs(buffer:GetEntries()) do
+        local line = FormatMessageEntry(buffer, entry, false):gsub("%[NEWLINE%]", "\r\n")
+        table.insert(lines, ProcessIcons(line))
+    end
+    UIManager:SetClipboardString(table.concat(lines, "\r\n"))
+    Speak(Locale.Lookup("LOC_CAI_MESSAGE_BUFFER_COPIED"))
+    return true
+end
+
+local function CreateCopyBufferButton(buffer)
+    local button = mgr:CreateWidget(MESSAGE_COPY_ID, "Button", {
+        Label = function() return Locale.Lookup("LOC_CAI_MESSAGE_BUFFER_COPY") end,
+        Tooltip = function() return Locale.Lookup("LOC_CAI_MESSAGE_BUFFER_COPY_TOOLTIP") end,
+        DisabledPredicate = function() return #buffer:GetEntries() == 0 end,
+    })
+    button:On("activate", function() return CopyMessageBuffer(buffer) end)
+    return button
 end
 
 local function OpenNotificationCenter()
@@ -335,10 +467,10 @@ local function OpenNotificationCenter()
         return
     end
 
-    local tree = mgr:CreateWidget(NOTIFICATION_CENTER_ID, "Tree", {
+    local panel = mgr:CreateWidget(NOTIFICATION_CENTER_ID, "Panel", {
         Label = function() return Locale.Lookup("LOC_CAI_NOTIFICATION_CENTER") end,
     })
-    tree:AddInputBinding({
+    panel:AddInputBinding({
         Key         = Keys.VK_ESCAPE,
         MSG         = KeyEvents.KeyUp,
         Description = "LOC_CAI_KB_CLOSE",
@@ -348,9 +480,35 @@ local function OpenNotificationCenter()
         end,
     })
 
+    local tabs = mgr:CreateWidget(NOTIFICATION_TABS_ID, "TabControl", {})
+    local notificationsPage = tabs:AddPage(function()
+        return Locale.Lookup("LOC_CAI_MESSAGE_BUFFER_CAT_NOTIFICATION")
+    end)
+    local tree = mgr:CreateWidget(NOTIFICATION_TREE_ID, "Tree", {})
+    notificationsPage:AddChild(tree)
     local latestKey = PopulateTree(tree, playerID)
+
+    local messagesPage = tabs:AddPage(function()
+        return Locale.Lookup("LOC_CAI_MESSAGE_BUFFER")
+    end)
+    local buffer = GetMessageBuffer()
+    if buffer then
+        local messageList = mgr:CreateWidget(MESSAGE_LIST_ID, "List", {})
+        messagesPage:AddChild(messageList)
+        PopulateMessageList(messageList, buffer)
+        m_messageList = messageList
+        messagesPage:AddChild(CreateMessageFilter(buffer))
+        messagesPage:AddChild(CreateCopyBufferButton(buffer))
+    else
+        messagesPage:AddChild(mgr:CreateWidget(MESSAGE_EMPTY_ID, "StaticText", {
+            Label = function() return Locale.Lookup("LOC_CAI_MESSAGE_BUFFER_EMPTY") end,
+        }))
+    end
+
+    panel:AddChild(tabs)
+    m_centerPanel = panel
     m_centerTree = tree
-    mgr:Push(tree, latestKey and { focus = latestKey } or nil)
+    mgr:Push(panel, latestKey and { focus = latestKey } or nil)
 end
 
 
@@ -429,7 +587,7 @@ OnNotificationAdded = WrapFunc(OnNotificationAdded, function(orig, playerID, not
     orig(playerID, notificationID)
     PlayDefaultNotificationSound(playerID, notificationID)
     if playerID == GetLocalPlayer() and m_centerTree then
-        RebuildTree()
+        RebuildNotificationTree()
     end
     SpeakNotificationAdded(playerID, notificationID)
 end)
@@ -438,9 +596,13 @@ OnNotificationDismissed = WrapFunc(OnNotificationDismissed, function(orig, playe
     orig(playerID, notificationID)
     if playerID == GetLocalPlayer() then
         m_caiAnnouncedNotificationIDs[notificationID] = nil
-        if m_centerTree then RebuildTree() end
+        if m_centerTree then RebuildNotificationTree() end
     end
 end)
+
+local function OnMessageBufferEntryAdded()
+    RebuildMessageList()
+end
 
 local function OnCAINotificationInputAction(actionId)
     if actionId == ACTION_OPEN_NOTIFICATION_CENTER then
@@ -463,6 +625,7 @@ end
 OnShutdown = WrapFunc(OnShutdown, function(orig)
     Events.InputActionStarted.Remove(OnCAINotificationInputAction)
     Events.LoadScreenClose.Remove(OnLoadScreenClose)
+    LuaEvents.CAIAppendToMessageBuffer.Remove(OnMessageBufferEntryAdded)
     CloseNotificationCenter()
     orig()
 end)
@@ -470,3 +633,4 @@ end)
 
 Events.InputActionStarted.Add(OnCAINotificationInputAction)
 Events.LoadScreenClose.Add(OnLoadScreenClose)
+LuaEvents.CAIAppendToMessageBuffer.Add(OnMessageBufferEntryAdded)

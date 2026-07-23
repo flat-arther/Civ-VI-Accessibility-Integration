@@ -1,5 +1,7 @@
 include("caiUtils")
 include("Civ6Common")
+include("hexCoordUtils_CAI")
+include("inGameHelpers_CAI")
 if IsExpansion2Active() then
     include("ReportScreen_Expansion2")
 elseif IsExpansion1Active() then
@@ -9,10 +11,14 @@ else
 end
 
 local mgr                  = ExposedMembers.CAI_UIManager
+local CAICursor            = ExposedMembers.CAICursor
+local HexCoordUtils        = CAIHexCoordUtils
 
 local PANEL_ID             = "CAIReports_Panel"
 local TABS_ID              = "CAIReports_Tabs"
 local HOVER_SOUND          = "Main_Menu_Mouse_Over"
+local BLACK_DEATH_PAPAL_SLOT_INDEX = 2
+local BLACK_DEATH_PAPAL_SLOT_UPKEEP = 4
 
 local m_panel              = nil
 local m_tabs               = nil
@@ -38,12 +44,75 @@ local m_caiGossipFiltered  = {}
 local m_caiLeaderFilter    = -1
 local m_caiGroupFilter     = "ALL"
 local m_cityStatusSort     = "name"
+local m_pendingOpenFocusKey = nil
+
+local function GetRelativePlotLocation(plotIndex)
+    if plotIndex == nil then return "" end
+    local plot = Map.GetPlotByIndex(plotIndex)
+    if plot == nil then return "" end
+    CAICursor = CAICursor or ExposedMembers.CAICursor
+    if CAICursor == nil then return "" end
+    local cursorX, cursorY = CAICursor:GetCoords()
+    if cursorX == nil or cursorY == nil then return "" end
+    return HexCoordUtils.directionString(cursorX, cursorY, plot:GetX(), plot:GetY())
+end
+
+local function AppendRelativePlotLocation(label, plotIndex)
+    local location = GetRelativePlotLocation(plotIndex)
+    if location == "" then return label end
+    return label .. ", " .. location
+end
+
+local function IndexCityComponentPlots(cityData)
+    local city = cityData.City
+    local cityPlot = Map.GetPlot(city:GetX(), city:GetY())
+    cityData.CAIPlotIndex = cityPlot and cityPlot:GetIndex() or nil
+    cityData.CAIBuildingPlotIndices = {}
+
+    local districtPlotIndices = {}
+    for _, district in city:GetDistricts():Members() do
+        local districtInfo = GameInfo.Districts[district:GetType()]
+        local districtPlot = Map.GetPlot(district:GetX(), district:GetY())
+        if districtInfo and districtPlot then
+            districtPlotIndices[districtInfo.DistrictType] = districtPlot:GetIndex()
+        end
+    end
+
+    for _, districtData in ipairs(cityData.BuildingsAndDistricts or {}) do
+        districtData.CAIPlotIndex = districtPlotIndices[districtData.Type]
+    end
+
+    local purchasedPlots = Map.GetCityPlots():GetPurchasedPlots(city)
+    if purchasedPlots then
+        local cityBuildings = city:GetBuildings()
+        for _, plotIndex in pairs(purchasedPlots) do
+            for _, buildingIndex in ipairs(cityBuildings:GetBuildingsAtLocation(plotIndex)) do
+                local buildingInfo = GameInfo.Buildings[buildingIndex]
+                if buildingInfo then
+                    cityData.CAIBuildingPlotIndices[buildingInfo.BuildingType] = plotIndex
+                end
+            end
+        end
+    end
+
+    for _, districtData in ipairs(cityData.BuildingsAndDistricts or {}) do
+        for _, buildingData in ipairs(districtData.Buildings or {}) do
+            buildingData.CAIPlotIndex = cityData.CAIBuildingPlotIndices[buildingData.Type]
+        end
+    end
+    for _, wonderData in ipairs(cityData.Wonders or {}) do
+        wonderData.CAIPlotIndex = cityData.CAIBuildingPlotIndices[wonderData.Type]
+    end
+end
 
 local function RefreshCAIData()
     m_localPlayerID = Game.GetLocalPlayer()
     if m_localPlayerID == -1 then return end
     m_caiCityData, m_caiCityTotalData, m_caiResourceData, m_caiUnitData, m_caiDealData = GetData()
     table.sort(m_caiCityData, function(a, b) return a.Order < b.Order end)
+    for _, cityData in ipairs(m_caiCityData) do
+        IndexCityComponentPlots(cityData)
+    end
 end
 
 local function GatherGossip()
@@ -102,12 +171,14 @@ local function MakeStaticText(props)
     return text
 end
 
-local function AddLeaf(parent, focusKey, labelFn, tooltipFn)
-    local item = MakeStaticText({
+local function AddLeaf(parent, focusKey, labelFn, tooltipFn, activateFn)
+    local factory = activateFn and MakeTreeItem or MakeStaticText
+    local item = factory({
         Label = labelFn,
         Tooltip = tooltipFn,
         FocusKey = focusKey,
     })
+    if activateFn then item:On("activate", activateFn) end
     parent:AddChild(item)
     return item
 end
@@ -120,6 +191,280 @@ local function JoinLines(parts)
         end
     end
     return table.concat(filtered, "[NEWLINE]")
+end
+
+local function FormatBalance(value)
+    return Locale.ToNumber(value, "#,###.#")
+end
+
+local function FormatValuePerTurn(value)
+    if value == 0 then
+        return Locale.ToNumber(value)
+    end
+    return Locale.Lookup("{1: number +#,###.#;-#,###.#}", value)
+end
+
+local function FormatRatePerTurn(value)
+    return Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", value)
+end
+
+local function NormalizeTooltipNewlines(tooltip)
+    if tooltip == nil or tooltip == "" then return "" end
+    tooltip = string.gsub(tooltip, "%[NEWLINE%]", "\n")
+    tooltip = string.gsub(tooltip, "\r\n", "\n")
+    return string.gsub(tooltip, "\r", "\n")
+end
+
+local function SplitTooltipLines(tooltip)
+    local lines = {}
+    tooltip = NormalizeTooltipNewlines(tooltip)
+    if tooltip == "" then return lines end
+
+    for line in string.gmatch(tooltip .. "\n", "(.-)\n") do
+        if line ~= "" then
+            table.insert(lines, line)
+        end
+    end
+    return lines
+end
+
+local function TrimLeadingWhitespace(text)
+    if text == nil then return "" end
+    return string.gsub(text, "^%s+", "")
+end
+
+local function AddBreakdownRows(parent, lines, focusKeyPrefix, enhancers)
+    local roots = {}
+    local stack = {}
+    for _, line in ipairs(lines) do
+        local whitespace = string.match(line, "^%s*") or ""
+        local normalizedWhitespace = string.gsub(whitespace, "\t", "    ")
+        local row = {
+            label = TrimLeadingWhitespace(line),
+            indent = string.len(normalizedWhitespace),
+            children = {},
+        }
+        while #stack > 0 and stack[#stack].indent >= row.indent do
+            table.remove(stack)
+        end
+        if #stack > 0 then
+            row.parent = stack[#stack]
+            table.insert(stack[#stack].children, row)
+        else
+            table.insert(roots, row)
+        end
+        table.insert(stack, row)
+    end
+
+    local appliedEnhancers = {}
+    local function ResolveEnhancer(label)
+        local exactEnhancer = enhancers and enhancers[label] or nil
+        if exactEnhancer ~= nil then return exactEnhancer, label end
+        for _, matcher in ipairs((enhancers and enhancers.Matchers) or {}) do
+            if matcher.Matches(label) then
+                return matcher.Enhance, matcher.Key
+            end
+        end
+        return nil, nil
+    end
+    local function ResolveDecorator(row)
+        for _, decorator in ipairs((enhancers and enhancers.Decorators) or {}) do
+            if decorator.Matches(row.label, row) then return decorator.Decorate end
+        end
+        return nil
+    end
+    local function AddRows(rowParent, rows, rowPrefix)
+        for rowIndex, row in ipairs(rows) do
+            local rowKey = rowPrefix .. ":row:" .. rowIndex
+            local enhancer, enhancerKey = ResolveEnhancer(row.label)
+            local decorator = ResolveDecorator(row)
+            if #row.children == 0 and enhancer == nil and decorator == nil then
+                local rowLabel = row.label
+                AddLeaf(rowParent, rowKey, function() return rowLabel end)
+            else
+                local rowLabel = row.label
+                local rowNode = MakeTreeItem({
+                    Label = function() return rowLabel end,
+                    FocusKey = rowKey,
+                })
+                rowParent:AddChild(rowNode)
+                if decorator then decorator(rowNode, rowLabel) end
+                if enhancer then
+                    enhancer(rowNode)
+                    appliedEnhancers[row.label] = true
+                    if enhancerKey ~= nil then appliedEnhancers[enhancerKey] = true end
+                else
+                    AddRows(rowNode, row.children, rowKey)
+                end
+            end
+        end
+    end
+
+    AddRows(parent, roots, focusKeyPrefix)
+    return appliedEnhancers
+end
+
+local function AddBreakdownNode(parent, focusKey, label, detailText, tooltipFn, enhancers)
+    local lines = SplitTooltipLines(detailText)
+    if #lines == 0 and enhancers == nil then
+        return AddLeaf(parent, focusKey, function() return label end, tooltipFn), {}
+    end
+
+    local node = MakeTreeItem({
+        Label = function() return label end,
+        Tooltip = tooltipFn,
+        FocusKey = focusKey,
+    })
+    parent:AddChild(node)
+    local appliedEnhancers = AddBreakdownRows(node, lines, focusKey, enhancers)
+    return node, appliedEnhancers
+end
+
+local function LookupNamedValue(tag, value)
+    return Locale.Lookup(tag, { Name = "Value", Value = value })
+end
+
+local function MakeNamedValueMatcher(tag)
+    local first = LookupNamedValue(tag, 123456.7)
+    local second = LookupNamedValue(tag, 89012.3)
+    local prefixLength = 0
+    local maxPrefix = math.min(string.len(first), string.len(second))
+    while prefixLength < maxPrefix
+        and string.sub(first, prefixLength + 1, prefixLength + 1)
+            == string.sub(second, prefixLength + 1, prefixLength + 1) do
+        prefixLength = prefixLength + 1
+    end
+
+    local suffixLength = 0
+    local maxSuffix = math.min(string.len(first), string.len(second)) - prefixLength
+    while suffixLength < maxSuffix
+        and string.sub(first, -suffixLength - 1, -suffixLength - 1)
+            == string.sub(second, -suffixLength - 1, -suffixLength - 1) do
+        suffixLength = suffixLength + 1
+    end
+
+    local prefix = string.sub(first, 1, prefixLength)
+    local suffix = suffixLength > 0 and string.sub(first, -suffixLength) or ""
+    local usePrefix = string.len(prefix) >= 3
+    local useSuffix = string.len(suffix) >= 3
+    return function(label)
+        if not usePrefix and not useSuffix then return false end
+        return (not usePrefix or string.sub(label, 1, string.len(prefix)) == prefix)
+            and (not useSuffix or string.sub(label, -string.len(suffix)) == suffix)
+    end
+end
+
+local ActivatePlot
+local ActivateCity
+
+local function BuildCityComponentDecorators(cityData)
+    local decorators = {}
+    local buildingSummaryMatcher = MakeNamedValueMatcher(
+        "LOC_CITY_YIELD_FROM_BUILDINGS_SUMMARY_TOOLTIP")
+    local districtSummaryMatcher = MakeNamedValueMatcher(
+        "LOC_CITY_YIELD_FROM_DISTRICTS_SUMMARY_TOOLTIP")
+
+    local function HasMatchingAncestor(row, matcher)
+        local ancestor = row.parent
+        while ancestor ~= nil do
+            if matcher(ancestor.label) then return true end
+            ancestor = ancestor.parent
+        end
+        return false
+    end
+
+    local function AddComponent(name, plotIndex, summaryMatcher)
+        local localizedName = Locale.Lookup(name)
+        if localizedName == "" or plotIndex == nil then return end
+        table.insert(decorators, {
+            NameLength = string.len(localizedName),
+            Matches = function(label, row)
+                return HasMatchingAncestor(row, summaryMatcher)
+                    and string.find(label, localizedName, 1, true) ~= nil
+            end,
+            Decorate = function(node, label)
+                node:SetLabel(function()
+                    return AppendRelativePlotLocation(label, plotIndex)
+                end)
+                node:On("activate", function() ActivatePlot(plotIndex) end)
+            end,
+        })
+    end
+
+    for _, district in ipairs(cityData.BuildingsAndDistricts or {}) do
+        AddComponent(district.Name, district.CAIPlotIndex, districtSummaryMatcher)
+        for _, building in ipairs(district.Buildings or {}) do
+            AddComponent(building.Name, building.CAIPlotIndex, buildingSummaryMatcher)
+        end
+    end
+    for _, wonder in ipairs(cityData.Wonders or {}) do
+        AddComponent(wonder.Name, wonder.CAIPlotIndex, buildingSummaryMatcher)
+    end
+    table.sort(decorators, function(a, b) return a.NameLength > b.NameLength end)
+    return decorators
+end
+
+local function AddCityYieldRows(parent, focusPrefix, amountField, tooltipField)
+    for _, cityData in ipairs(m_caiCityData) do
+        local amount = cityData[amountField] or 0
+        if amount ~= 0 then
+            local capturedCity = cityData
+            local cityID = capturedCity.City:GetID()
+            local cityFocusKey = focusPrefix .. ":city:" .. cityID
+            local tooltipLines = tooltipField and SplitTooltipLines(capturedCity[tooltipField]) or {}
+            local cityNode = MakeTreeItem({
+                Label = function()
+                    local label = Locale.Lookup("LOC_CAI_REPORTS_YIELD_FROM_CITY",
+                        FormatValuePerTurn(capturedCity[amountField] or 0),
+                        Locale.Lookup(capturedCity.CityName))
+                    return AppendRelativePlotLocation(label, capturedCity.CAIPlotIndex)
+                end,
+                FocusKey = cityFocusKey,
+            })
+            cityNode:On("activate", function() ActivateCity(capturedCity.City) end)
+            parent:AddChild(cityNode)
+            if #tooltipLines > 0 then
+                AddBreakdownRows(cityNode, tooltipLines, cityFocusKey, {
+                    Decorators = BuildCityComponentDecorators(capturedCity),
+                })
+            end
+        end
+    end
+end
+
+local function AddYieldWithCityBreakdown(parent, focusKey, label, detailText,
+    cityGroupTag, cityTotal, amountField, tooltipField)
+    local cityLabel = LookupNamedValue(cityGroupTag, cityTotal)
+    local enhancers = {
+        [cityLabel] = function(cityNode)
+            AddCityYieldRows(cityNode, focusKey .. ":cities", amountField, tooltipField)
+        end,
+    }
+    local yieldNode, applied = AddBreakdownNode(parent, focusKey, label, detailText, nil, enhancers)
+    if not applied[cityLabel] then
+        local cityNode = MakeTreeItem({
+            Label = function() return cityLabel end,
+            FocusKey = focusKey .. ":cities",
+        })
+        yieldNode:AddChild(cityNode)
+        AddCityYieldRows(cityNode, focusKey .. ":cities", amountField, tooltipField)
+    end
+    return yieldNode
+end
+
+local function GetDisplayedFaithYield(localPlayer)
+    local faithYield = localPlayer:GetReligion():GetFaithYield()
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+        local playerConfig = PlayerConfigurations[m_localPlayerID]
+        local isFrance = playerConfig ~= nil
+            and playerConfig:GetCivilizationTypeName() == "CIVILIZATION_BLACKDEATH_SCENARIO_FRANCE"
+        local playerCulture = localPlayer:GetCulture()
+        if isFrance and playerCulture
+            and playerCulture:GetSlotPolicy(BLACK_DEATH_PAPAL_SLOT_INDEX) >= 0 then
+            faithYield = faithYield - BLACK_DEATH_PAPAL_SLOT_UPKEEP
+        end
+    end
+    return faithYield
 end
 
 local function FormatYields(production, food, gold, faith, science, culture, tourism)
@@ -249,19 +594,28 @@ local function BuildDistrictTotalTooltip(district, greatWorks)
     )
 end
 
-local function ActivateCity(pCity)
+ActivatePlot = function(plotIndex)
+    if plotIndex == nil then return end
+    Close()
+    LuaEvents.CAICursorMoveTo(plotIndex, "jump")
+end
+
+ActivateCity = function(pCity)
     if pCity == nil then return end
-    local ownerID = pCity:GetOwner()
-    if ownerID == m_localPlayerID then
-        UI.SelectCity(pCity)
-        Close()
-    else
-        local plot = Map.GetPlot(pCity:GetX(), pCity:GetY())
-        if plot then
-            LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
-        end
-        Close()
-    end
+    local plot = Map.GetPlot(pCity:GetX(), pCity:GetY())
+    if plot then ActivatePlot(plot:GetIndex()) end
+end
+
+local function GetUnitPlotIndex(playerID, unitID)
+    local player = Players[playerID]
+    local unit = player and player:GetUnits():FindID(unitID) or nil
+    if unit == nil then return nil end
+    local plot = Map.GetPlot(unit:GetX(), unit:GetY())
+    return plot and plot:GetIndex() or nil
+end
+
+local function ActivateUnit(playerID, unitID)
+    ActivatePlot(GetUnitPlotIndex(playerID, unitID))
 end
 
 local function GetGrowthStatus(kCityData)
@@ -310,7 +664,7 @@ local function RebuildYieldsTree(tree)
                         table.insert(parts, Locale.Lookup("LOC_CAI_PRODUCTION_TURNS", capturedCity.CurrentTurnsLeft))
                     end
                 end
-                return JoinLines(parts)
+                return AppendRelativePlotLocation(JoinLines(parts), capturedCity.CAIPlotIndex)
             end,
             Tooltip = function()
                 return FormatYields(
@@ -337,8 +691,7 @@ local function RebuildYieldsTree(tree)
             local districtHasChildren = HasAdjacencyChildren(capturedDistrict.AdjacencyBonus)
                 or #(capturedDistrict.Buildings or {}) > 0
 
-            local districtFactory = districtHasChildren and MakeTreeItem or MakeStaticText
-            local districtItem = districtFactory({
+            local districtItem = MakeTreeItem({
                 Label = function()
                     local parts = { Locale.Lookup(capturedDistrict.Name) }
                     local yieldStr = FormatYields(
@@ -348,13 +701,16 @@ local function RebuildYieldsTree(tree)
                     if yieldStr ~= "" then
                         table.insert(parts, yieldStr)
                     end
-                    return JoinLines(parts)
+                    return AppendRelativePlotLocation(JoinLines(parts), capturedDistrict.CAIPlotIndex)
                 end,
                 Tooltip = districtHasChildren and function()
                     return BuildDistrictTotalTooltip(capturedDistrict, greatWorks)
                 end or nil,
                 FocusKey = "yield:city:" .. cityID .. ":dist:" .. tostring(capturedDistrict.Type),
             })
+            districtItem:On("activate", function()
+                ActivatePlot(capturedDistrict.CAIPlotIndex)
+            end)
             cityItem:AddChild(districtItem)
 
             if districtHasChildren then
@@ -386,8 +742,11 @@ local function RebuildYieldsTree(tree)
                             if yieldStr ~= "" then
                                 table.insert(parts, yieldStr)
                             end
-                            return JoinLines(parts)
-                        end)
+                            return AppendRelativePlotLocation(
+                                JoinLines(parts), capturedBuilding.CAIPlotIndex)
+                        end,
+                        nil,
+                        function() ActivatePlot(capturedBuilding.CAIPlotIndex) end)
 
                     if greatWorks[capturedBuilding.Type] then
                         for gwIdx, kGreatWork in ipairs(greatWorks[capturedBuilding.Type]) do
@@ -425,8 +784,7 @@ local function RebuildYieldsTree(tree)
                 if capturedWonder.Yields[1] or (greatWorks[capturedWonder.Type]) then
                     local wonderHasChildren = greatWorks[capturedWonder.Type] ~= nil and
                         #greatWorks[capturedWonder.Type] > 0
-                    local wonderFactory = wonderHasChildren and MakeTreeItem or MakeStaticText
-                    local wonderItem = wonderFactory({
+                    local wonderItem = MakeTreeItem({
                         Label = function()
                             local parts = {}
                             for _, yield in ipairs(capturedWonder.Yields) do
@@ -442,10 +800,13 @@ local function RebuildYieldsTree(tree)
                             if #parts > 0 then
                                 text = JoinLines({ text, table.concat(parts, "[NEWLINE]") })
                             end
-                            return text
+                            return AppendRelativePlotLocation(text, capturedWonder.CAIPlotIndex)
                         end,
                         FocusKey = "yield:city:" .. cityID .. ":wonder:" .. tostring(capturedWonder.Type),
                     })
+                    wonderItem:On("activate", function()
+                        ActivatePlot(capturedWonder.CAIPlotIndex)
+                    end)
                     cityItem:AddChild(wonderItem)
 
                     if wonderHasChildren then
@@ -563,160 +924,69 @@ local function RebuildYieldsTree(tree)
         end
     end
 
-    -- Building Expenses group — compute total first so the label can show it
-    local iTotalBuildingMaintenance = 0
+    -- Preserve Reports instance detail for the authoritative maintenance tree below.
+    local buildingMaintenanceDetail = { Total = 0, ByType = {} }
+    local districtMaintenanceDetail = { Total = 0, ByType = {} }
+    local cityYieldTotals = { Science = 0, Culture = 0, Gold = 0, Faith = 0, Tourism = 0 }
     for _, kCityData in ipairs(m_caiCityData) do
-        for _, kBuilding in ipairs(kCityData.Buildings) do
-            if kBuilding.Maintenance > 0 and kBuilding.isPillaged == false then
-                iTotalBuildingMaintenance = iTotalBuildingMaintenance + kBuilding.Maintenance
-            end
-        end
-        for _, kDistrict in ipairs(kCityData.BuildingsAndDistricts) do
-            if kDistrict.Maintenance > 0 and kDistrict.isPillaged == false and kDistrict.isBuilt == true then
-                iTotalBuildingMaintenance = iTotalBuildingMaintenance + kDistrict.Maintenance
-            end
-        end
-    end
-
-    local buildingExpGroup = MakeTreeItem({
-        Label = function()
-            return JoinLines({
-                Locale.Lookup("LOC_HUD_REPORTS_ROW_BUILDING_EXPENSES"),
-                Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -iTotalBuildingMaintenance)
-            })
-        end,
-        FocusKey = "yield:group:buildingexp",
-    })
-    tree:AddChild(buildingExpGroup)
-
-    local expByType = {}
-    for _, kCityData in ipairs(m_caiCityData) do
+        kCityData.CAIScienceYield = kCityData.City:GetYield(YieldTypes.SCIENCE)
+        kCityData.CAICultureYield = kCityData.City:GetYield(YieldTypes.CULTURE)
+        kCityData.CAIGoldYield = kCityData.City:GetYield(YieldTypes.GOLD)
+        kCityData.CAIFaithYield = kCityData.City:GetYield(YieldTypes.FAITH)
+        kCityData.CAITourismYield = kCityData.WorkedTileYields["TOURISM"] or 0
+        cityYieldTotals.Science = cityYieldTotals.Science + kCityData.CAIScienceYield
+        cityYieldTotals.Culture = cityYieldTotals.Culture + kCityData.CAICultureYield
+        cityYieldTotals.Gold = cityYieldTotals.Gold + kCityData.CAIGoldYield
+        cityYieldTotals.Faith = cityYieldTotals.Faith + kCityData.CAIFaithYield
+        cityYieldTotals.Tourism = cityYieldTotals.Tourism + kCityData.CAITourismYield
         local cityName = kCityData.CityName
-        for _, kBuilding in ipairs(kCityData.Buildings) do
-            if kBuilding.Maintenance > 0 and kBuilding.isPillaged == false then
-                local key = tostring(kBuilding.Type)
-                if not expByType[key] then
-                    expByType[key] = { Name = kBuilding.Name, Total = 0, Entries = {} }
+        local cityBuildings = kCityData.City:GetBuildings()
+        for buildingInfo in GameInfo.Buildings() do
+            if buildingInfo.Maintenance > 0
+                and cityBuildings:HasBuilding(buildingInfo.Index)
+                and cityBuildings:IsPillaged(buildingInfo.Index) == false then
+                local key = buildingInfo.BuildingType
+                local detail = buildingMaintenanceDetail.ByType[key]
+                if detail == nil then
+                    detail = { Name = buildingInfo.Name, Total = 0, Entries = {} }
+                    buildingMaintenanceDetail.ByType[key] = detail
                 end
-                expByType[key].Total = expByType[key].Total + kBuilding.Maintenance
-                table.insert(expByType[key].Entries, { CityName = cityName, Maintenance = kBuilding.Maintenance })
+                detail.Total = detail.Total + buildingInfo.Maintenance
+                table.insert(detail.Entries, {
+                    CityName = cityName,
+                    Maintenance = buildingInfo.Maintenance,
+                    PlotIndex = kCityData.CAIBuildingPlotIndices[buildingInfo.BuildingType],
+                })
+                buildingMaintenanceDetail.Total = buildingMaintenanceDetail.Total + buildingInfo.Maintenance
             end
         end
         for _, kDistrict in ipairs(kCityData.BuildingsAndDistricts) do
             if kDistrict.Maintenance > 0 and kDistrict.isPillaged == false and kDistrict.isBuilt == true then
                 local key = tostring(kDistrict.Type)
-                if not expByType[key] then
-                    expByType[key] = { Name = kDistrict.Name, Total = 0, Entries = {} }
+                local detail = districtMaintenanceDetail.ByType[key]
+                if detail == nil then
+                    detail = { Name = kDistrict.Name, Total = 0, Entries = {} }
+                    districtMaintenanceDetail.ByType[key] = detail
                 end
-                expByType[key].Total = expByType[key].Total + kDistrict.Maintenance
-                table.insert(expByType[key].Entries, { CityName = cityName, Maintenance = kDistrict.Maintenance })
+                detail.Total = detail.Total + kDistrict.Maintenance
+                table.insert(detail.Entries, {
+                    CityName = cityName,
+                    Maintenance = kDistrict.Maintenance,
+                    PlotIndex = kDistrict.CAIPlotIndex,
+                })
+                districtMaintenanceDetail.Total = districtMaintenanceDetail.Total + kDistrict.Maintenance
             end
         end
     end
 
-    local sortedExpTypes = {}
-    for key, data in pairs(expByType) do
-        table.insert(sortedExpTypes, { key = key, data = data })
-    end
-    table.sort(sortedExpTypes, function(a, b)
-        return a.data.Total > b.data.Total
-    end)
-
-    for _, typeEntry in ipairs(sortedExpTypes) do
-        local capturedData = typeEntry.data
-        local capturedKey = typeEntry.key
-        local typeItem = MakeTreeItem({
-            Label = function()
-                return JoinLines({
-                    Locale.Lookup(capturedData.Name),
-                    Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -capturedData.Total)
-                })
-            end,
-            FocusKey = "yield:bldgexp:type:" .. capturedKey,
-        })
-        buildingExpGroup:AddChild(typeItem)
-
-        for ei, entry in ipairs(capturedData.Entries) do
-            local capturedEntry = entry
-            local capturedEI = ei
-            AddLeaf(typeItem,
-                "yield:bldgexp:type:" .. capturedKey .. ":city:" .. capturedEI,
-                function()
-                    return JoinLines({
-                        Locale.Lookup(capturedEntry.CityName),
-                        Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -capturedEntry.Maintenance)
-                    })
-                end)
-        end
-    end
-
-    -- Unit Expenses group
+    local sortedUnits = {}
+    local detailedUnitMaintenance = 0
     if GameCapabilities.HasCapability("CAPABILITY_REPORTS_UNIT_EXPENSES") then
-        local unitExpGroup = MakeTreeItem({
-            Label = function()
-                local total = 0
-                for _, kUnitData in pairs(m_caiUnitData) do
-                    total = total + kUnitData.Maintenance
-                end
-                return JoinLines({
-                    Locale.Lookup("LOC_HUD_REPORTS_ROW_UNIT_EXPENSES"),
-                    Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -total)
-                })
-            end,
-            FocusKey = "yield:group:unitexp",
-        })
-        tree:AddChild(unitExpGroup)
-
-        local sortedUnits = {}
         for unitType, kUnitData in pairs(m_caiUnitData) do
             table.insert(sortedUnits, { type = unitType, data = kUnitData })
+            detailedUnitMaintenance = detailedUnitMaintenance + kUnitData.Maintenance
         end
         table.sort(sortedUnits, function(a, b) return a.data.Maintenance > b.data.Maintenance end)
-
-        for _, unitEntry in ipairs(sortedUnits) do
-            local capturedUnit = unitEntry.data
-            local capturedType = unitEntry.type
-            AddLeaf(unitExpGroup,
-                "yield:unitexp:" .. capturedType,
-                function()
-                    return JoinLines({
-                        Locale.Lookup(capturedUnit.Name),
-                        Locale.Lookup("LOC_CAI_REPORTS_UNIT_COUNT", capturedUnit.Count),
-                        Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -capturedUnit.Maintenance)
-                    })
-                end)
-        end
-    end
-
-    -- Diplomatic Deals group
-    if GameCapabilities.HasCapability("CAPABILITY_REPORTS_DIPLOMATIC_DEALS") then
-        local dealGroup = MakeTreeItem({
-            Label = function() return Locale.Lookup("LOC_HUD_REPORTS_ROW_DIPLOMATIC_DEALS") end,
-            FocusKey = "yield:group:deals",
-        })
-        tree:AddChild(dealGroup)
-
-        for di, kDeal in ipairs(m_caiDealData) do
-            if kDeal.Type == DealItemTypes.GOLD then
-                local capturedDeal = kDeal
-                local capturedDI = di
-                AddLeaf(dealGroup,
-                    "yield:deal:" .. capturedDI,
-                    function()
-                        local amtStr
-                        if capturedDeal.IsOutgoing then
-                            amtStr = Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -capturedDeal.Amount)
-                        else
-                            amtStr = Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", capturedDeal.Amount)
-                        end
-                        return JoinLines({
-                            capturedDeal.Name,
-                            Locale.Lookup("LOC_REPORTS_NUMBER_OF_TURNS", capturedDeal.Duration),
-                            amtStr
-                        })
-                    end)
-            end
-        end
     end
 
     -- Empire Economy
@@ -725,67 +995,479 @@ local function RebuildYieldsTree(tree)
         local economyGroup = MakeTreeItem({
             Label = function() return Locale.Lookup("LOC_CAI_REPORTS_EMPIRE_ECONOMY") end,
             Tooltip = function()
-                local playerTreasury = localPlayer:GetTreasury()
-                local playerReligion = localPlayer:GetReligion()
-                local playerTechs = localPlayer:GetTechs()
-                local playerCulture = localPlayer:GetCulture()
-                local goldNet = playerTreasury:GetGoldYield() - playerTreasury:GetTotalMaintenance()
                 local parts = {}
-                table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", toPlusMinus(Round(goldNet, 1))))
-                table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_YIELD_FAITH",
-                    toPlusMinus(Round(playerReligion:GetFaithYield(), 1))))
-                table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_YIELD_SCIENCE",
-                    toPlusMinus(Round(playerTechs:GetScienceYield(), 1))))
-                table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_YIELD_CULTURE",
-                    toPlusMinus(Round(playerCulture:GetCultureYield(), 1))))
-                table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_YIELD_TOURISM",
-                    toPlusMinus(Round(m_caiCityTotalData.Income["TOURISM"] or 0, 1))))
-                return table.concat(parts, "[NEWLINE]")
+                if GameCapabilities.HasCapability("CAPABILITY_GOLD")
+                    and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+                    local treasury = localPlayer:GetTreasury()
+                    local goldNet = treasury:GetGoldYield() - treasury:GetTotalMaintenance()
+                    table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD",
+                        toPlusMinus(Round(goldNet, 1))))
+                end
+                if GameCapabilities.HasCapability("CAPABILITY_FAITH")
+                    and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+                    table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_YIELD_FAITH",
+                        toPlusMinus(Round(GetDisplayedFaithYield(localPlayer), 1))))
+                end
+                if GameCapabilities.HasCapability("CAPABILITY_SCIENCE")
+                    and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+                    table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_YIELD_SCIENCE",
+                        toPlusMinus(Round(localPlayer:GetTechs():GetScienceYield(), 1))))
+                end
+                if GameCapabilities.HasCapability("CAPABILITY_CULTURE")
+                    and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+                    table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_YIELD_CULTURE",
+                        toPlusMinus(Round(localPlayer:GetCulture():GetCultureYield(), 1))))
+                end
+                if GameCapabilities.HasCapability("CAPABILITY_TOURISM")
+                    and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+                    table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_YIELD_TOURISM",
+                        toPlusMinus(Round(localPlayer:GetStats():GetTourism(), 1))))
+                end
+                if m_isExp2 then
+                    table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_YIELD_FAVOR",
+                        Round(localPlayer:GetFavor(), 1)))
+                end
+                if GameCapabilities.HasCapability("CAPABILITY_TOP_PANEL_ENVOYS") then
+                    local influence = localPlayer:GetInfluence()
+                    table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_YIELD_ENVOYS",
+                        influence:GetTokensToGive()))
+                end
+                if GameCapabilities.HasCapability("CAPABILITY_TRADE") then
+                    local trade = localPlayer:GetTrade()
+                    local capacity = trade:GetOutgoingRouteCapacity()
+                    if capacity > 0 then
+                        table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_YIELD_TRADE_ROUTES",
+                            trade:GetNumOutgoingRoutes(), capacity))
+                    end
+                end
+                return JoinLines(parts)
             end,
             FocusKey = "yield:economy",
         })
         tree:AddChild(economyGroup)
 
-        AddLeaf(economyGroup, "yield:economy:gold",
-            function()
-                local playerTreasury = localPlayer:GetTreasury()
-                local goldIncome = playerTreasury:GetGoldYield()
-                local goldExpense = playerTreasury:GetTotalMaintenance()
-                local goldNet = goldIncome - goldExpense
-                return Locale.Lookup("LOC_CAI_REPORTS_GOLD_BREAKDOWN",
-                    toPlusMinus(Round(goldIncome, 1)),
-                    toPlusMinus(Round(-goldExpense, 1)),
-                    toPlusMinus(Round(goldNet, 1)),
-                    Round(m_caiCityTotalData.Treasury[YieldTypes.GOLD] or 0, 1))
-            end)
+        if GameCapabilities.HasCapability("CAPABILITY_SCIENCE")
+            and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+            local techs = localPlayer:GetTechs()
+            local scienceYield = techs:GetScienceYield()
+            local scienceTooltip = techs:GetScienceYieldToolTip()
+            local scienceLabel = Locale.Lookup("LOC_TOP_PANEL_SCIENCE") .. ": "
+                .. FormatRatePerTurn(FormatValuePerTurn(Round(scienceYield, 1)))
+            AddYieldWithCityBreakdown(economyGroup, "yield:economy:science", scienceLabel, scienceTooltip,
+                "LOC_PLAYER_YIELD_SCIENCE_FROM_CITIES",
+                cityYieldTotals.Science,
+                "CAIScienceYield", "SciencePerTurnToolTip")
+        end
 
-        AddLeaf(economyGroup, "yield:economy:faith",
-            function()
-                local playerReligion = localPlayer:GetReligion()
-                return Locale.Lookup("LOC_CAI_REPORTS_FAITH_BREAKDOWN",
-                    toPlusMinus(Round(playerReligion:GetFaithYield(), 1)),
-                    Round(m_caiCityTotalData.Treasury[YieldTypes.FAITH] or 0, 1))
-            end)
+        if GameCapabilities.HasCapability("CAPABILITY_CULTURE")
+            and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+            local culture = localPlayer:GetCulture()
+            AddYieldWithCityBreakdown(economyGroup, "yield:economy:culture",
+                Locale.Lookup("LOC_TOP_PANEL_CULTURE") .. ": "
+                    .. FormatRatePerTurn(FormatValuePerTurn(Round(culture:GetCultureYield(), 1))),
+                culture:GetCultureYieldToolTip(),
+                "LOC_PLAYER_YIELD_CULTURE_FROM_CITIES",
+                cityYieldTotals.Culture,
+                "CAICultureYield", "CulturePerTurnToolTip")
+        end
 
-        AddLeaf(economyGroup, "yield:economy:science",
-            function()
-                local playerTechs = localPlayer:GetTechs()
-                return Locale.Lookup("LOC_CAI_REPORTS_SCIENCE_INCOME",
-                    toPlusMinus(Round(playerTechs:GetScienceYield(), 1)))
-            end)
+        if GameCapabilities.HasCapability("CAPABILITY_GOLD")
+            and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+            local treasury = localPlayer:GetTreasury()
+            local goldYield = treasury:GetGoldYield() - treasury:GetTotalMaintenance()
+            local goldValue = Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
+                FormatBalance(math.floor(treasury:GetGoldBalance())),
+                FormatRatePerTurn(FormatValuePerTurn(Round(goldYield, 1))))
+            local goldNode = MakeTreeItem({
+                Label = function() return Locale.Lookup("LOC_TOP_PANEL_GOLD") .. ": " .. goldValue end,
+                FocusKey = "yield:economy:gold",
+            })
+            economyGroup:AddChild(goldNode)
 
-        AddLeaf(economyGroup, "yield:economy:culture",
-            function()
-                local playerCulture = localPlayer:GetCulture()
-                return Locale.Lookup("LOC_CAI_REPORTS_CULTURE_INCOME",
-                    toPlusMinus(Round(playerCulture:GetCultureYield(), 1)))
-            end)
+            local goldIncomeFocusKey = "yield:economy:gold:income"
+            local goldCityTotal = cityYieldTotals.Gold
+            local goldCityLabel = LookupNamedValue("LOC_PLAYER_YIELD_GOLD_FROM_CITIES", goldCityTotal)
+            local incomingDealTotal = 0
+            local outgoingDealTotal = 0
+            local canReportDeals = GameCapabilities.HasCapability("CAPABILITY_REPORTS_DIPLOMATIC_DEALS")
+            if canReportDeals then
+                for _, deal in ipairs(m_caiDealData) do
+                    if deal.Type == DealItemTypes.GOLD then
+                        if deal.IsOutgoing then
+                            outgoingDealTotal = outgoingDealTotal + deal.Amount
+                        else
+                            incomingDealTotal = incomingDealTotal + deal.Amount
+                        end
+                    end
+                end
+            end
+            local incomingDealsLabel = LookupNamedValue("LOC_PLAYER_YIELD_GOLD_FROM_DEALS", incomingDealTotal)
+            local outgoingDealsLabel = LookupNamedValue("LOC_PLAYER_GOLD_COST_FROM_DEALS", outgoingDealTotal)
 
-        AddLeaf(economyGroup, "yield:economy:tourism",
-            function()
-                return Locale.Lookup("LOC_CAI_REPORTS_TOURISM_INCOME",
-                    toPlusMinus(Round(m_caiCityTotalData.Income["TOURISM"] or 0, 1)))
+            local function AddDealRows(parent, focusPrefix, isOutgoing)
+                for dealIndex, deal in ipairs(m_caiDealData) do
+                    if deal.Type == DealItemTypes.GOLD and deal.IsOutgoing == isOutgoing then
+                        local capturedDeal = deal
+                        local capturedDealIndex = dealIndex
+                        AddLeaf(parent, focusPrefix .. ":" .. capturedDealIndex, function()
+                            local amount = capturedDeal.IsOutgoing and -capturedDeal.Amount or capturedDeal.Amount
+                            return JoinLines({
+                                capturedDeal.Name,
+                                Locale.Lookup("LOC_REPORTS_NUMBER_OF_TURNS", capturedDeal.Duration),
+                                Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", amount)
+                            })
+                        end)
+                    end
+                end
+            end
+
+            local incomeEnhancers = {
+                [goldCityLabel] = function(cityNode)
+                    AddCityYieldRows(cityNode, goldIncomeFocusKey .. ":cities",
+                        "CAIGoldYield", "GoldPerTurnToolTip")
+                end,
+            }
+            if incomingDealTotal ~= 0 then
+                incomeEnhancers[incomingDealsLabel] = function(dealsNode)
+                    AddDealRows(dealsNode, goldIncomeFocusKey .. ":deals:incoming", false)
+                end
+            end
+            if outgoingDealTotal ~= 0 then
+                incomeEnhancers[outgoingDealsLabel] = function(dealsNode)
+                    AddDealRows(dealsNode, goldIncomeFocusKey .. ":deals:outgoing", true)
+                end
+            end
+
+            local incomeNode, appliedIncomeEnhancers = AddBreakdownNode(goldNode, goldIncomeFocusKey,
+                Locale.Lookup("LOC_TOP_PANEL_GOLD_INCOME", treasury:GetGoldYield()),
+                treasury:GetGoldYieldToolTip(), nil, incomeEnhancers)
+            if not appliedIncomeEnhancers[goldCityLabel] then
+                local cityNode = MakeTreeItem({
+                    Label = function() return goldCityLabel end,
+                    FocusKey = goldIncomeFocusKey .. ":cities",
+                })
+                incomeNode:AddChild(cityNode)
+                AddCityYieldRows(cityNode, goldIncomeFocusKey .. ":cities",
+                    "CAIGoldYield", "GoldPerTurnToolTip")
+            end
+            if incomingDealTotal ~= 0 and not appliedIncomeEnhancers[incomingDealsLabel] then
+                local dealsNode = MakeTreeItem({
+                    Label = function() return incomingDealsLabel end,
+                    FocusKey = goldIncomeFocusKey .. ":deals:incoming",
+                })
+                incomeNode:AddChild(dealsNode)
+                AddDealRows(dealsNode, goldIncomeFocusKey .. ":deals:incoming", false)
+            end
+            if outgoingDealTotal ~= 0 and not appliedIncomeEnhancers[outgoingDealsLabel] then
+                local dealsNode = MakeTreeItem({
+                    Label = function() return outgoingDealsLabel end,
+                    FocusKey = goldIncomeFocusKey .. ":deals:outgoing",
+                })
+                incomeNode:AddChild(dealsNode)
+                AddDealRows(dealsNode, goldIncomeFocusKey .. ":deals:outgoing", true)
+            end
+
+            local function AddMaintenanceTypes(parent, focusPrefix, detail)
+                local sortedTypes = {}
+                for key, data in pairs(detail.ByType) do
+                    table.insert(sortedTypes, { key = key, data = data })
+                end
+                table.sort(sortedTypes, function(a, b)
+                    if a.data.Total ~= b.data.Total then return a.data.Total > b.data.Total end
+                    return Locale.Lookup(a.data.Name) < Locale.Lookup(b.data.Name)
+                end)
+
+                for _, typeEntry in ipairs(sortedTypes) do
+                    local capturedData = typeEntry.data
+                    local capturedKey = typeEntry.key
+                    local typeItem = MakeTreeItem({
+                        Label = function()
+                            return JoinLines({
+                                Locale.Lookup(capturedData.Name),
+                                Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -capturedData.Total)
+                            })
+                        end,
+                        FocusKey = focusPrefix .. ":type:" .. capturedKey,
+                    })
+                    parent:AddChild(typeItem)
+
+                    for entryIndex, entry in ipairs(capturedData.Entries) do
+                        local capturedEntry = entry
+                        local capturedEntryIndex = entryIndex
+                        AddLeaf(typeItem,
+                            focusPrefix .. ":type:" .. capturedKey .. ":city:" .. capturedEntryIndex,
+                            function()
+                                local label = JoinLines({
+                                    Locale.Lookup(capturedEntry.CityName),
+                                    Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -capturedEntry.Maintenance)
+                                })
+                                return AppendRelativePlotLocation(label, capturedEntry.PlotIndex)
+                            end,
+                            nil,
+                            function() ActivatePlot(capturedEntry.PlotIndex) end)
+                    end
+                end
+            end
+
+            local unitInstancesByType = {}
+            if GameCapabilities.HasCapability("CAPABILITY_REPORTS_UNIT_EXPENSES") then
+                for _, unit in localPlayer:GetUnits():Members() do
+                    local unitInfo = GameInfo.Units[unit:GetUnitType()]
+                    local unitTypeKey = unitInfo.UnitType .. unit:GetMilitaryFormation()
+                    if m_caiUnitData[unitTypeKey] ~= nil then
+                        local instances = unitInstancesByType[unitTypeKey]
+                        if instances == nil then
+                            instances = {}
+                            unitInstancesByType[unitTypeKey] = instances
+                        end
+                        table.insert(instances, {
+                            PlayerID = m_localPlayerID,
+                            UnitID = unit:GetID(),
+                            Name = FormatOwnedName(nil, Locale.Lookup(unit:GetName()),
+                                GetUnitFormationSuffix(unit)) or Locale.Lookup(unit:GetName()),
+                        })
+                    end
+                end
+                for _, instances in pairs(unitInstancesByType) do
+                    table.sort(instances, function(a, b)
+                        local aName = a.Name
+                        local bName = b.Name
+                        if aName ~= bName then return aName < bName end
+                        return a.UnitID < b.UnitID
+                    end)
+                end
+            end
+
+            local detailedWMDMaintenance = 0
+            local wmdRows = {}
+            local playerWMDs = localPlayer:GetWMDs()
+            for wmd in GameInfo.WMDs() do
+                local count = playerWMDs:GetWeaponCount(wmd.Index)
+                local maintenance = (wmd.Maintenance or 0) * count
+                if count > 0 and maintenance > 0 then
+                    detailedWMDMaintenance = detailedWMDMaintenance + maintenance
+                    table.insert(wmdRows, { WMD = wmd, Count = count, Maintenance = maintenance })
+                end
+            end
+            local expenseEnhancers = {}
+            if districtMaintenanceDetail.Total ~= 0 or buildingMaintenanceDetail.Total ~= 0 then
+                local function EnhanceCitiesMaintenance(citiesNode)
+                    if districtMaintenanceDetail.Total ~= 0 then
+                        local districtsNode = MakeTreeItem({
+                            Label = function()
+                                return LookupNamedValue("LOC_PLAYER_YIELD_GOLD_MAINTENANCE_FROM_DISTRICTS",
+                                    districtMaintenanceDetail.Total)
+                            end,
+                            FocusKey = "yield:economy:gold:expense:cities:districts",
+                        })
+                        citiesNode:AddChild(districtsNode)
+                        AddMaintenanceTypes(districtsNode,
+                            "yield:economy:gold:expense:cities:districts", districtMaintenanceDetail)
+                    end
+                    if buildingMaintenanceDetail.Total ~= 0 then
+                        local buildingsNode = MakeTreeItem({
+                            Label = function()
+                                return LookupNamedValue("LOC_PLAYER_YIELD_GOLD_MAINTENANCE_FROM_BUILDINGS",
+                                    buildingMaintenanceDetail.Total)
+                            end,
+                            FocusKey = "yield:economy:gold:expense:cities:buildings",
+                        })
+                        citiesNode:AddChild(buildingsNode)
+                        AddMaintenanceTypes(buildingsNode,
+                            "yield:economy:gold:expense:cities:buildings", buildingMaintenanceDetail)
+                    end
+                end
+                expenseEnhancers.Matchers = expenseEnhancers.Matchers or {}
+                table.insert(expenseEnhancers.Matchers, {
+                    Key = "expense:cities",
+                    Matches = MakeNamedValueMatcher("LOC_PLAYER_YIELD_GOLD_MAINTENANCE_FROM_CITIES"),
+                    Enhance = EnhanceCitiesMaintenance,
+                })
+            end
+            if detailedUnitMaintenance ~= 0 then
+                local function EnhanceUnitMaintenance(unitsNode)
+                    for _, unitEntry in ipairs(sortedUnits) do
+                        local capturedUnit = unitEntry.data
+                        local capturedType = unitEntry.type
+                        local instances = unitInstancesByType[capturedType] or {}
+                        local unitTypeNode = MakeTreeItem({
+                            Label = function()
+                                return JoinLines({
+                                    Locale.Lookup(capturedUnit.Name),
+                                    Locale.Lookup("LOC_CAI_REPORTS_UNIT_COUNT", capturedUnit.Count),
+                                    Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -capturedUnit.Maintenance)
+                                })
+                            end,
+                            FocusKey = "yield:economy:gold:expense:units:type:" .. capturedType,
+                        })
+                        unitsNode:AddChild(unitTypeNode)
+
+                        local instanceMaintenance = capturedUnit.Maintenance / capturedUnit.Count
+                        for _, unitInstance in ipairs(instances) do
+                            local capturedInstance = unitInstance
+                            AddLeaf(unitTypeNode,
+                                "yield:economy:gold:expense:units:type:" .. capturedType
+                                    .. ":unit:" .. capturedInstance.UnitID,
+                                function()
+                                    local label = JoinLines({
+                                        capturedInstance.Name,
+                                        Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -instanceMaintenance)
+                                    })
+                                    return AppendRelativePlotLocation(label,
+                                        GetUnitPlotIndex(capturedInstance.PlayerID, capturedInstance.UnitID))
+                                end,
+                                nil,
+                                function()
+                                    ActivateUnit(capturedInstance.PlayerID, capturedInstance.UnitID)
+                                end)
+                        end
+                    end
+                end
+                expenseEnhancers.Matchers = expenseEnhancers.Matchers or {}
+                table.insert(expenseEnhancers.Matchers, {
+                    Key = "expense:units",
+                    Matches = MakeNamedValueMatcher("LOC_PLAYER_YIELD_GOLD_MAINTENANCE_FROM_UNITS"),
+                    Enhance = EnhanceUnitMaintenance,
+                })
+            end
+            if detailedWMDMaintenance ~= 0 then
+                local function EnhanceWMDMaintenance(wmdNode)
+                    for _, wmdRow in ipairs(wmdRows) do
+                        local capturedRow = wmdRow
+                        AddLeaf(wmdNode,
+                            "yield:economy:gold:expense:wmd:type:" .. capturedRow.WMD.WeaponType,
+                            function()
+                                return Locale.Lookup("LOC_CAI_REPORTS_WMD_MAINTENANCE",
+                                    Locale.Lookup(capturedRow.WMD.Name), capturedRow.Count,
+                                    -capturedRow.Maintenance)
+                            end)
+                    end
+                end
+                expenseEnhancers.Matchers = expenseEnhancers.Matchers or {}
+                table.insert(expenseEnhancers.Matchers, {
+                    Key = "expense:wmds",
+                    Matches = MakeNamedValueMatcher("LOC_PLAYER_YIELD_GOLD_MAINTENANCE_FROM_WMDS"),
+                    Enhance = EnhanceWMDMaintenance,
+                })
+            end
+
+            AddBreakdownNode(goldNode, "yield:economy:gold:expense",
+                Locale.Lookup("LOC_TOP_PANEL_GOLD_EXPENSE", -treasury:GetTotalMaintenance()),
+                treasury:GetTotalMaintenanceToolTip(), nil, expenseEnhancers)
+        end
+
+        if GameCapabilities.HasCapability("CAPABILITY_FAITH")
+            and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+            local religion = localPlayer:GetReligion()
+            local faithValue = Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
+                FormatBalance(religion:GetFaithBalance()),
+                FormatRatePerTurn(FormatValuePerTurn(Round(GetDisplayedFaithYield(localPlayer), 1))))
+            local faithDetails = religion:GetFaithYieldToolTip()
+            if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH"
+                and GetDisplayedFaithYield(localPlayer) ~= religion:GetFaithYield() then
+                faithDetails = JoinLines({ faithDetails,
+                    Locale.Lookup("LOC_GOVT_PAPAL_SLOT_FAITH_TT", -BLACK_DEATH_PAPAL_SLOT_UPKEEP) })
+            end
+            AddYieldWithCityBreakdown(economyGroup, "yield:economy:faith",
+                Locale.Lookup("LOC_TOP_PANEL_FAITH") .. ": " .. faithValue, faithDetails,
+                "LOC_PLAYER_YIELD_FAITH_FROM_CITIES",
+                cityYieldTotals.Faith,
+                "CAIFaithYield", "FaithPerTurnToolTip")
+        end
+
+        if GameCapabilities.HasCapability("CAPABILITY_TOURISM")
+            and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+            local tourismRate = Round(localPlayer:GetStats():GetTourism(), 1)
+            if tourismRate > 0 then
+                local tourismCityTotal = cityYieldTotals.Tourism
+                local tourismCityLabel = LookupNamedValue(
+                    "LOC_PLAYER_YIELD_CULTURE_FROM_CITIES", tourismRate)
+                local tourismEnhancers = {
+                    [tourismCityLabel] = function(tourismCities)
+                        AddCityYieldRows(tourismCities, "yield:economy:tourism:cities",
+                            "CAITourismYield", nil)
+                        local otherCityTourism = tourismRate - tourismCityTotal
+                        if math.abs(otherCityTourism) >= 0.05 then
+                            AddLeaf(tourismCities, "yield:economy:tourism:cities:other", function()
+                                return Locale.Lookup("LOC_CAI_REPORTS_OTHER_CITY_YIELD",
+                                    FormatValuePerTurn(otherCityTourism))
+                            end)
+                        end
+                    end,
+                }
+                AddBreakdownNode(economyGroup, "yield:economy:tourism",
+                    Locale.Lookup("LOC_TOP_PANEL_TOURISM") .. ": "
+                        .. FormatRatePerTurn(FormatBalance(tourismRate)),
+                    localPlayer:GetStats():GetTourismToolTip(), nil, tourismEnhancers)
+            end
+        end
+
+        if m_isExp2 then
+            local favorValue = Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
+                FormatBalance(localPlayer:GetFavor()),
+                FormatRatePerTurn(FormatValuePerTurn(localPlayer:GetFavorPerTurn())))
+            AddBreakdownNode(economyGroup, "yield:economy:favor",
+                Locale.Lookup("LOC_CAI_TOP_PANEL_FAVOR") .. ": " .. favorValue,
+                localPlayer:GetFavorPerTurnToolTip(), function()
+                    return Locale.Lookup("LOC_WORLD_CONGRESS_TOP_PANEL_FAVOR_TOOLTIP")
+                end)
+        end
+
+        if GameCapabilities.HasCapability("CAPABILITY_TOP_PANEL_ENVOYS") then
+            local influence = localPlayer:GetInfluence()
+            local envoyNode = MakeTreeItem({
+                Label = function()
+                    return Locale.Lookup("LOC_CAI_TOP_PANEL_ENVOYS_SUMMARY",
+                        influence:GetTokensToGive(), Round(influence:GetPointsEarned(), 1),
+                        influence:GetPointsThreshold())
+                end,
+                Tooltip = function()
+                    return Locale.Lookup("LOC_TOP_PANEL_INFLUENCE_TOOLTIP_SOURCES_HELP")
+                end,
+                FocusKey = "yield:economy:envoys",
+            })
+            economyGroup:AddChild(envoyNode)
+            AddLeaf(envoyNode, "yield:economy:envoys:rate", function()
+                return Locale.Lookup("LOC_TOP_PANEL_INFLUENCE_TOOLTIP_POINTS_RATE",
+                    Round(influence:GetPointsPerTurn(), 1))
             end)
+            AddLeaf(envoyNode, "yield:economy:envoys:threshold", function()
+                return Locale.Lookup("LOC_TOP_PANEL_INFLUENCE_TOOLTIP_POINTS_THRESHOLD",
+                    influence:GetTokensPerThreshold(), influence:GetPointsThreshold())
+            end)
+        end
+
+        local playerWMDs = localPlayer:GetWMDs()
+        for entry in GameInfo.WMDs() do
+            if entry.WeaponType == "WMD_NUCLEAR_DEVICE" then
+                local count = playerWMDs:GetWeaponCount(entry.Index)
+                if count > 0 then
+                    AddLeaf(economyGroup, "yield:economy:wmd:nuclear", function()
+                        return Locale.Lookup("LOC_CAI_TOP_PANEL_NUCLEAR_DEVICES", count)
+                    end)
+                end
+            elseif entry.WeaponType == "WMD_THERMONUCLEAR_DEVICE" then
+                local count = playerWMDs:GetWeaponCount(entry.Index)
+                if count > 0 then
+                    AddLeaf(economyGroup, "yield:economy:wmd:thermonuclear", function()
+                        return Locale.Lookup("LOC_CAI_TOP_PANEL_THERMONUCLEAR_DEVICES", count)
+                    end)
+                end
+            end
+        end
+
+        if GameCapabilities.HasCapability("CAPABILITY_TRADE") then
+            local trade = localPlayer:GetTrade()
+            local capacity = trade:GetOutgoingRouteCapacity()
+            if capacity > 0 then
+                AddLeaf(economyGroup, "yield:economy:trade", function()
+                    return Locale.Lookup("LOC_CAI_TOP_PANEL_TRADE_ROUTES",
+                        trade:GetNumOutgoingRoutes(), capacity)
+                end, function()
+                    return Locale.Lookup("LOC_TOP_PANEL_TRADE_ROUTES_TOOLTIP_SOURCES_HELP")
+                end)
+            end
+        end
     end
 
     mgr:RestoreFocus(tree, capture)
@@ -803,27 +1485,70 @@ local function GetXP2ResourceFlowData(eResourceType)
     local kResource = GameInfo.Resources[eResourceType]
     if not kResource then return nil end
 
-    local accumulation = pResources:GetResourceAccumulationPerTurn(kResource.ResourceType)
-    local unitCost = pResources:GetUnitResourceDemandPerTurn(kResource.Hash)
-    local powerCost = pResources:GetPowerResourceDemandPerTurn(kResource.Hash)
-    local reserved = pResources:GetReservedResourceAmount(kResource.Hash)
-    local imports = pResources:GetResourceImportPerTurn(kResource.Hash)
-    local delta = accumulation - unitCost - powerCost
+    local resourceType = kResource.ResourceType
+    local extracted = pResources:GetResourceAccumulationPerTurn(resourceType)
+    local imports = pResources:GetResourceImportPerTurn(resourceType)
+    local bonus = pResources:GetBonusResourcePerTurn(resourceType)
+    local unitCost = pResources:GetUnitResourceDemandPerTurn(resourceType)
+    local powerCost = pResources:GetPowerResourceDemandPerTurn(resourceType)
+    local reserved = pResources:GetReservedResourceAmount(resourceType)
+    local accumulation = extracted + imports + bonus
+    local consumption = unitCost + powerCost
 
     return {
         Accumulation = accumulation,
+        Extracted = extracted,
+        Imports = imports,
+        Bonus = bonus,
         UnitCost = unitCost,
         PowerCost = powerCost,
+        Consumption = consumption,
         Reserved = reserved,
-        Imports = imports,
-        Delta = delta,
+        Delta = accumulation - consumption,
     }
+end
+
+local function FormatResourceEntryLabel(kEntry)
+    local source = Locale.Lookup(kEntry.EntryText)
+    local control = kEntry.ControlText ~= "-" and Locale.Lookup(kEntry.ControlText) or nil
+    local parts = { source }
+    if control ~= nil and control ~= "" then
+        table.insert(parts, control)
+    end
+    table.insert(parts, toPlusMinus(kEntry.Amount))
+    return table.concat(parts, ", ")
 end
 
 local function BuildResourceItem(parent, eResourceType, kSingleResourceData)
     local capturedResType = eResourceType
     local capturedResData = kSingleResourceData
     local kResource = GameInfo.Resources[capturedResType]
+    local flow = m_isExp2 and capturedResData.IsStrategic and GetXP2ResourceFlowData(capturedResType) or nil
+    local extractionEntries = {}
+    local cityStateEntries = {}
+    local fallbackEntries = {}
+    local namedExtractionTotal = 0
+    local namedCityStateTotal = 0
+
+    if flow then
+        for ei, kEntry in ipairs(capturedResData.EntryList or {}) do
+            local classifiedEntry = { Entry = kEntry, Index = ei }
+            if kEntry.ControlText == "LOC_HUD_REPORTS_TRADE_OWNED" then
+                table.insert(extractionEntries, classifiedEntry)
+                namedExtractionTotal = namedExtractionTotal + kEntry.Amount
+            elseif kEntry.ControlText == "LOC_CITY_STATES_SUZERAIN" then
+                table.insert(cityStateEntries, classifiedEntry)
+                namedCityStateTotal = namedCityStateTotal + kEntry.Amount
+            elseif kEntry.EntryText ~= "LOC_PRODUCTION_PANEL_UNITS_TOOLTIP"
+                and kEntry.EntryText ~= "LOC_UI_PEDIA_POWER_COST"
+                and kEntry.EntryText ~= "LOC_RESOURCE_REPORTS_ITEM_IN_RESERVE"
+                and kEntry.EntryText ~= "LOC_RESOURCE_REPORTS_CITY_STATES"
+                and kEntry.EntryText ~= "LOC_HUD_REPORTS_MISC_RESOURCE_SOURCE"
+                and not (kEntry.EntryText == "" and kEntry.ControlText == "" and kEntry.Amount == 0) then
+                table.insert(fallbackEntries, classifiedEntry)
+            end
+        end
+    end
 
     local resItem = MakeTreeItem({
         Label = function()
@@ -831,7 +1556,6 @@ local function BuildResourceItem(parent, eResourceType, kSingleResourceData)
             if m_isExp2 and capturedResData.IsStrategic and capturedResData.Stockpile then
                 local text = Locale.Lookup("LOC_CAI_REPORTS_RESOURCE_STOCKPILE",
                     name, capturedResData.Stockpile, capturedResData.Maximum or 0)
-                local flow = GetXP2ResourceFlowData(capturedResType)
                 if flow then
                     text = JoinLines({ text, Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", toPlusMinus(flow.Delta)) })
                 end
@@ -864,21 +1588,142 @@ local function BuildResourceItem(parent, eResourceType, kSingleResourceData)
         end,
         FocusKey = "res:" .. tostring(capturedResType),
     })
-    local resourceHasChildren = #(capturedResData.EntryList or {}) > 0
+    local resourceHasChildren = #(capturedResData.EntryList or {}) > 0 or flow ~= nil
     if resourceHasChildren then
         parent:AddChild(resItem)
 
-        for ei, kEntry in ipairs(capturedResData.EntryList) do
-            local capturedEntry = kEntry
-            local capturedEI = ei
-            AddLeaf(resItem,
-                "res:" .. tostring(capturedResType) .. ":entry:" .. capturedEI,
-                function()
-                    local source = Locale.Lookup(capturedEntry.EntryText)
-                    local amt = capturedEntry.Amount
-                    local amtStr = (amt <= 0) and tostring(amt) or ("+" .. tostring(amt))
-                    return JoinLines({ source, amtStr })
+        if flow then
+            if flow.Reserved > 0 then
+                AddLeaf(resItem, "res:" .. tostring(capturedResType) .. ":reserved", function()
+                    return "-" .. flow.Reserved .. " " .. Locale.Lookup("LOC_RESOURCE_ITEM_IN_RESERVE")
                 end)
+            end
+
+            local hasAccumulationDetails = flow.Extracted > 0 or flow.Imports > 0 or flow.Bonus > 0
+            if hasAccumulationDetails then
+                local accumulationNode = MakeTreeItem({
+                    Label = function()
+                        return Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN", flow.Accumulation)
+                    end,
+                    FocusKey = "res:" .. tostring(capturedResType) .. ":accumulation",
+                })
+                resItem:AddChild(accumulationNode)
+                if flow.Extracted > 0 then
+                    local miscellaneousExtraction = math.max(0, flow.Extracted - namedExtractionTotal)
+                    if #extractionEntries > 0 or miscellaneousExtraction > 0 then
+                        local extractionNode = MakeTreeItem({
+                            Label = function()
+                                return Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN_EXTRACTED", flow.Extracted)
+                            end,
+                            FocusKey = "res:" .. tostring(capturedResType) .. ":accumulation:extracted",
+                        })
+                        accumulationNode:AddChild(extractionNode)
+                        for _, classifiedEntry in ipairs(extractionEntries) do
+                            local capturedEntry = classifiedEntry.Entry
+                            local capturedEI = classifiedEntry.Index
+                            AddLeaf(extractionNode,
+                                "res:" .. tostring(capturedResType) .. ":entry:" .. capturedEI,
+                                function() return FormatResourceEntryLabel(capturedEntry) end)
+                        end
+                        if miscellaneousExtraction > 0 then
+                            AddLeaf(extractionNode,
+                                "res:" .. tostring(capturedResType) .. ":accumulation:extracted:misc",
+                                function()
+                                    return Locale.Lookup("LOC_HUD_REPORTS_MISC_RESOURCE_SOURCE")
+                                        .. ", " .. toPlusMinus(miscellaneousExtraction)
+                                end)
+                        end
+                    else
+                        AddLeaf(accumulationNode,
+                            "res:" .. tostring(capturedResType) .. ":accumulation:extracted",
+                            function()
+                                return Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN_EXTRACTED", flow.Extracted)
+                            end)
+                    end
+                end
+                if flow.Imports > 0 then
+                    local miscellaneousCityStates = math.max(0, flow.Imports - namedCityStateTotal)
+                    if #cityStateEntries > 0 then
+                        local cityStateNode = MakeTreeItem({
+                            Label = function()
+                                return Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN_FROM_CITY_STATES", flow.Imports)
+                            end,
+                            FocusKey = "res:" .. tostring(capturedResType) .. ":accumulation:imports",
+                        })
+                        accumulationNode:AddChild(cityStateNode)
+                        for _, classifiedEntry in ipairs(cityStateEntries) do
+                            local capturedEntry = classifiedEntry.Entry
+                            local capturedEI = classifiedEntry.Index
+                            AddLeaf(cityStateNode,
+                                "res:" .. tostring(capturedResType) .. ":entry:" .. capturedEI,
+                                function() return FormatResourceEntryLabel(capturedEntry) end)
+                        end
+                        if miscellaneousCityStates > 0 then
+                            AddLeaf(cityStateNode,
+                                "res:" .. tostring(capturedResType) .. ":accumulation:imports:misc",
+                                function()
+                                    return Locale.Lookup("LOC_HUD_REPORTS_MISC_RESOURCE_SOURCE")
+                                        .. ", " .. toPlusMinus(miscellaneousCityStates)
+                                end)
+                        end
+                    else
+                        AddLeaf(accumulationNode,
+                            "res:" .. tostring(capturedResType) .. ":accumulation:imports",
+                            function()
+                                return Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN_FROM_CITY_STATES", flow.Imports)
+                            end)
+                    end
+                end
+                if flow.Bonus > 0 then
+                    AddLeaf(accumulationNode, "res:" .. tostring(capturedResType) .. ":accumulation:bonus",
+                        function()
+                            return Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN_FROM_BONUS_SOURCES", flow.Bonus)
+                        end)
+                end
+            else
+                AddLeaf(resItem, "res:" .. tostring(capturedResType) .. ":accumulation", function()
+                    return Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN", flow.Accumulation)
+                end)
+            end
+
+            if flow.Consumption > 0 then
+                local consumptionNode = MakeTreeItem({
+                    Label = function() return Locale.Lookup("LOC_RESOURCE_CONSUMPTION", flow.Consumption) end,
+                    FocusKey = "res:" .. tostring(capturedResType) .. ":consumption",
+                })
+                resItem:AddChild(consumptionNode)
+                if flow.UnitCost > 0 then
+                    AddLeaf(consumptionNode, "res:" .. tostring(capturedResType) .. ":consumption:units",
+                        function()
+                            return Locale.Lookup("LOC_RESOURCE_UNIT_CONSUMPTION_PER_TURN", flow.UnitCost)
+                        end)
+                end
+                if flow.PowerCost > 0 then
+                    AddLeaf(consumptionNode, "res:" .. tostring(capturedResType) .. ":consumption:power",
+                        function()
+                            return Locale.Lookup("LOC_RESOURCE_POWER_CONSUMPTION_PER_TURN", flow.PowerCost)
+                        end)
+                end
+            end
+        end
+
+        local detailEntries = flow and fallbackEntries or capturedResData.EntryList or {}
+        if #detailEntries > 0 then
+            local detailsNode = MakeTreeItem({
+                Label = function() return Locale.Lookup("LOC_CAI_REPORTS_RESOURCE_DETAILS") end,
+                FocusKey = "res:" .. tostring(capturedResType) .. ":details",
+            })
+            resItem:AddChild(detailsNode)
+
+            for ei, detailEntry in ipairs(detailEntries) do
+                local capturedEntry = flow and detailEntry.Entry or detailEntry
+                local capturedEI = flow and detailEntry.Index or ei
+                local detail = MakeStaticText({
+                    Label = function() return FormatResourceEntryLabel(capturedEntry) end,
+                    FocusKey = "res:" .. tostring(capturedResType) .. ":entry:" .. capturedEI,
+                })
+                detailsNode:AddChild(detail)
+            end
         end
     else
         local leafLabel = function()
@@ -904,15 +1749,50 @@ local function RebuildResourcesTree(tree)
     local luxury = {}
     local bonus = {}
 
+    local includedResourceTypes = {}
     for eResourceType, kSingleResourceData in pairs(m_caiResourceData) do
+        local flow = m_isExp2 and kSingleResourceData.IsStrategic and GetXP2ResourceFlowData(eResourceType) or nil
+        local hasStrategicFlow = flow ~= nil
+            and (flow.Accumulation ~= 0 or flow.Consumption ~= 0 or flow.Reserved ~= 0)
         if next(kSingleResourceData.EntryList) or
-            (m_isExp2 and kSingleResourceData.IsStrategic and kSingleResourceData.Stockpile and kSingleResourceData.Stockpile > 0) then
+            (m_isExp2 and kSingleResourceData.IsStrategic
+                and ((kSingleResourceData.Stockpile and kSingleResourceData.Stockpile > 0) or hasStrategicFlow)) then
+            includedResourceTypes[eResourceType] = true
             if kSingleResourceData.IsStrategic then
                 table.insert(strategic, { type = eResourceType, data = kSingleResourceData })
             elseif kSingleResourceData.IsLuxury then
                 table.insert(luxury, { type = eResourceType, data = kSingleResourceData })
             else
                 table.insert(bonus, { type = eResourceType, data = kSingleResourceData })
+            end
+        end
+    end
+
+    if m_isExp2 then
+        local localPlayer = Players[m_localPlayerID]
+        local playerResources = localPlayer and localPlayer:GetResources() or nil
+        if playerResources then
+            for resource in GameInfo.Resources() do
+                if resource.ResourceClassType == "RESOURCECLASS_STRATEGIC"
+                    and not includedResourceTypes[resource.Index] then
+                    local flow = GetXP2ResourceFlowData(resource.Index)
+                    local stockpile = playerResources:GetResourceAmount(resource.ResourceType)
+                    if stockpile > 0 or (flow and (flow.Accumulation ~= 0 or flow.Consumption ~= 0
+                        or flow.Reserved ~= 0)) then
+                        table.insert(strategic, {
+                            type = resource.Index,
+                            data = {
+                                EntryList = {},
+                                IsStrategic = true,
+                                IsLuxury = false,
+                                IsBonus = false,
+                                Total = flow and flow.Delta or 0,
+                                Maximum = playerResources:GetResourceStockpileCap(resource.ResourceType),
+                                Stockpile = stockpile,
+                            },
+                        })
+                    end
+                end
             end
         end
     end
@@ -1002,7 +1882,7 @@ local function RebuildCityStatusList(list)
                 if capturedCity.IsCapital then
                     table.insert(parts, Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL"))
                 end
-                return JoinLines(parts)
+                return AppendRelativePlotLocation(JoinLines(parts), capturedCity.CAIPlotIndex)
             end,
             Tooltip = function()
                 local parts = {}
@@ -1362,7 +2242,12 @@ local function PushPanel()
     m_isMirroringTab = false
 
     RebuildActiveTab()
-    mgr:Push(m_panel, PopupPriority.Medium)
+    local options = { priority = PopupPriority.Medium }
+    if m_pendingOpenFocusKey ~= nil then
+        options.focus = m_pendingOpenFocusKey
+    end
+    m_pendingOpenFocusKey = nil
+    mgr:Push(m_panel, options)
 end
 
 local function PopPanel()
@@ -1465,13 +2350,20 @@ end)
 -- Lifecycle
 -- ============================================================================
 Open = WrapFunc(Open, function(orig, tabToOpen)
-    orig(tabToOpen)
-    if mgr then
-        RefreshCAIData()
-        GatherGossip()
-        FilterCAIGossip()
-        PushPanel()
+    mgr = assert(ExposedMembers.CAI_UIManager,
+        "CAI Report Screen opened before the accessibility UI manager was available")
+
+    local reportsRequest = ExposedMembers.CAIReports
+    if reportsRequest and reportsRequest.PendingFocusKey then
+        m_pendingOpenFocusKey = reportsRequest.PendingFocusKey
+        reportsRequest.PendingFocusKey = nil
     end
+
+    orig(tabToOpen)
+    RefreshCAIData()
+    GatherGossip()
+    FilterCAIGossip()
+    PushPanel()
 end)
 
 Close = WrapFunc(Close, function(orig)

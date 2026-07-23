@@ -37,6 +37,7 @@ local m_ui              = { panel = nil, tree = nil, rename = nil }
 local m_caiShowing      = false
 local m_caiSelectedTab  = nil
 local m_caiEspionageVM  = EspionageViewManager:CreateManager()
+local m_pendingRename   = nil
 
 -- ===========================================================================
 -- Tab switch guard
@@ -929,7 +930,18 @@ end
 -- ===========================================================================
 
 local function PopRenameEdit()
+    m_pendingRename = nil
     mgr:RemoveFromStack(RENAME_EDIT_ID)
+end
+
+local function OnCAICityNameChanged(playerID, cityID)
+    if not m_pendingRename
+        or playerID ~= m_pendingRename.PlayerID
+        or cityID ~= m_pendingRename.CityID then
+        return
+    end
+
+    PopRenameEdit()
 end
 
 local function PushRenameEdit()
@@ -947,6 +959,16 @@ local function PushRenameEdit()
     edit:SetValueSetter(function(_, text)
         local c = GetCurrentCity()
         if c and text and text ~= "" then
+            local oldName = c:GetName()
+            if text ~= oldName and text ~= Locale.Lookup(oldName) then
+                m_pendingRename = {
+                    PlayerID = c:GetOwner(),
+                    CityID = c:GetID(),
+                }
+                edit:SetReadOnly(true)
+                RenameCity(c, text)
+                return
+            end
             RenameCity(c, text)
         end
         PopRenameEdit()
@@ -1121,6 +1143,7 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
 end)
 
 OnShutdown = WrapFunc(OnShutdown, function(orig)
+    Events.CityNameChanged.Remove(OnCAICityNameChanged)
     PopPanel()
     orig()
 end)
@@ -1153,6 +1176,8 @@ OnSelectPowerTab     = WrapTabSelect(OnSelectPowerTab, "tab:power")
 -- pre-wrap globals. Re-register everything with our wrapped versions.
 ContextPtr:SetInputHandler(OnInputHandler, true)
 ContextPtr:SetShutdown(OnShutdown)
+
+Events.CityNameChanged.Add(OnCAICityNameChanged)
 
 LuaEvents.CityPanel_ShowOverviewPanel.Remove(orig_OnShowOverviewPanel)
 LuaEvents.CityPanel_ShowOverviewPanel.Add(OnShowOverviewPanel)

@@ -98,6 +98,8 @@ Treeviews organize information into branches and child items. Unlike lists, tree
 - Typing text — use type-to-find to move to a matching item
 - `Ctrl+F` — open tree search. 
 
+The UI setting `Keep tree Home and End at current depth` is enabled by default. Disable it to make plain `Home` / `End` use the legacy full-tree behavior. `Ctrl+Home` / `Ctrl+End` always navigate the full tree.
+
 #### Dropdowns
 
 A dropdown is a collapsed list used to choose one value.
@@ -144,11 +146,12 @@ Type-to-find provides quick navigation in lists and treeviews without opening a 
 - More direct matches are preferred over broader partial or multi-word-prefix matches.
 - In a treeview, type-to-find can locate an item inside collapsed branches and reveal its path.
 - Repeating the same single character cycles through matching items and wraps from the last match to the first.
+- The Navigate type-to-find results option is enabled by default. While search text is active, `Up` and `Down` move through the ranked matches and wrap at either end.
 - Hidden items are skipped. Disabled items may still be found when their information is useful.
 - If nothing matches, `No match` is announced and the search text remains available for correction.
 - `Backspace` removes the last character from the current search text.
 - `Escape` clears the current search text.
-- The Search timeout option under accessibility settings controls how long search text remains active. Set it to `0` to keep the text until you clear it.
+- With result navigation enabled, search text remains active until focus leaves its list or tree, or you clear it manually. When result navigation is disabled, the Search timeout option controls how long search text remains active; set it to `0` to never clear automatically.
 
 ### Search panel
 
@@ -226,6 +229,7 @@ The Surveyor summarizes a circular area centered on the navigation cursor. Its r
 - `Ctrl+Shift+D` / `Ctrl+Shift+Numpad 6` — read visible neutral units within the radius
 - `Ctrl+Shift+Z` / `Ctrl+Shift+Numpad 1` — count tile ownership within the radius
 - `Ctrl+Shift+Q` / `Ctrl+Shift+Numpad 7` — count districts within the radius
+- `Ctrl+Shift+X` / `Ctrl+Shift+Numpad 2` — count revealed land tiles by appeal within the radius
 
 ### World Scanner
 
@@ -278,7 +282,7 @@ Empire information commands read important totals and progress without opening t
 - `G` — read the current gold balance, gold per turn, and trade-route capacity
 - `F` — read the current faith balance and faith per turn
 - `I` — read tourism per turn
-- `Ctrl+Y` — open the yields and strategic resources tree. Its two categories provide detailed empire-wide information for science, culture, gold, faith, tourism, diplomatic favor, envoys, influence points, other available top-panel yields, and strategic-resource stockpiles and flow.
+- `Ctrl+Y` — open Reports on the Yields tab with Empire Economy focused. This node provides detailed empire-wide information for science, culture, gold, faith, tourism, diplomatic favor, envoys, influence points, and other available top-panel yields. Strategic-resource stockpiles and flow are consolidated under Strategic resources on the Resources tab.
 
 #### Diplomacy and government
 

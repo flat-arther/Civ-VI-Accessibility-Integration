@@ -3,20 +3,22 @@ include("MapPinListPanel")
 include("inGameHelpers_CAI")
 include("hexCoordUtils_CAI")
 
-local mgr            = ExposedMembers.CAI_UIManager
-local CAICursor       = ExposedMembers.CAICursor
-local HexCoordUtils   = CAIHexCoordUtils
+local mgr                    = ExposedMembers.CAI_UIManager
+local CAICursor              = ExposedMembers.CAICursor
+local HexCoordUtils          = CAIHexCoordUtils
 
-local PANEL_ID = "CAIMapPin_Panel"
-local LIST_ID  = "CAIMapPin_List"
+local PANEL_ID               = "CAIMapPin_Panel"
+local LIST_ID                = "CAIMapPin_List"
 
-local BOOKMARK_SLOT_COUNT = 10
+local BOOKMARK_SLOT_COUNT    = 10
 local BOOKMARK_CONFIG_PREFIX = "CAI_MAP_PIN_BOOKMARK_SLOT_"
 
-local m_bookmarkActions = {}
+local m_mapPinActions        = {}
 
-local m_panel  = nil
-local m_list   = nil
+local m_panel                = nil
+local m_list                 = nil
+local m_deleteDialog         = nil
+local RefreshPanelList
 
 -- ============================================================================
 -- Map-pin bookmarks
@@ -53,6 +55,14 @@ local function ClearOtherSlotsForPin(playerConfig, slot, pinID)
     for otherSlot = 1, BOOKMARK_SLOT_COUNT do
         if otherSlot ~= slot and GetBookmarkPinID(playerConfig, otherSlot) == pinID then
             SetBookmarkPinID(playerConfig, otherSlot, nil)
+        end
+    end
+end
+
+local function ClearBookmarksForPin(playerConfig, pinID)
+    for slot = 1, BOOKMARK_SLOT_COUNT do
+        if GetBookmarkPinID(playerConfig, slot) == pinID then
+            SetBookmarkPinID(playerConfig, slot, nil)
         end
     end
 end
@@ -153,8 +163,8 @@ local function SpeakBookmarkDirection(slot)
     Speak(direction)
 end
 
-local function OnBookmarkInputActionStarted(actionID)
-    local action = m_bookmarkActions[actionID]
+local function OnMapPinInputActionStarted(actionID)
+    local action = m_mapPinActions[actionID]
     if action ~= nil then action() end
 end
 
@@ -164,13 +174,13 @@ for slot = 1, BOOKMARK_SLOT_COUNT do
     local jumpActionID = Input.GetActionId("CAIMapPinBookmarkJump" .. tostring(slot))
     local directionActionID = Input.GetActionId("CAIMapPinBookmarkDirection" .. tostring(slot))
     if assignActionID ~= nil then
-        m_bookmarkActions[assignActionID] = function() AssignBookmark(capturedSlot) end
+        m_mapPinActions[assignActionID] = function() AssignBookmark(capturedSlot) end
     end
     if jumpActionID ~= nil then
-        m_bookmarkActions[jumpActionID] = function() JumpToBookmark(capturedSlot) end
+        m_mapPinActions[jumpActionID] = function() JumpToBookmark(capturedSlot) end
     end
     if directionActionID ~= nil then
-        m_bookmarkActions[directionActionID] = function() SpeakBookmarkDirection(capturedSlot) end
+        m_mapPinActions[directionActionID] = function() SpeakBookmarkDirection(capturedSlot) end
     end
 end
 
@@ -195,10 +205,127 @@ local function BuildPinLabel(mapPinCfg)
 end
 
 -- ============================================================================
+-- Delete confirmation
+-- ============================================================================
+
+local function CloseDeleteDialog()
+    local dialog = m_deleteDialog
+    m_deleteDialog = nil
+    if mgr and dialog and mgr:GetWidgetById(dialog:GetId()) then
+        mgr:RemoveFromStack(dialog:GetId())
+    end
+end
+
+local function DeleteOwnedMapPin(pinID)
+    local playerConfig = GetLocalPlayerConfig()
+    local mapPin = playerConfig and playerConfig:GetMapPinID(pinID) or nil
+    if mapPin == nil then
+        Speak(Locale.Lookup("LOC_CAI_MAP_TAC_UNAVAILABLE"))
+        return
+    end
+
+    ClearBookmarksForPin(playerConfig, pinID)
+    playerConfig:DeleteMapPin(pinID)
+    Network.BroadcastPlayerInfo()
+    UI.PlaySound("Map_Pin_Remove")
+    if m_panel then RefreshPanelList() end
+end
+
+local function ShowDeleteConfirmation(pinID)
+    if not mgr then return end
+    if m_deleteDialog and mgr:GetWidgetById(m_deleteDialog:GetId()) then return end
+
+    local playerConfig = GetLocalPlayerConfig()
+    local mapPin = playerConfig and playerConfig:GetMapPinID(pinID) or nil
+    if mapPin == nil then
+        Speak(Locale.Lookup("LOC_CAI_MAP_TAC_UNAVAILABLE"))
+        return
+    end
+    local pinLabel = BuildMapTacLabel(mapPin)
+
+    local message = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapPinDelete_Message"), "StaticText", {
+        Label = function() return Locale.Lookup("LOC_CAI_MAP_TAC_DELETE_CONFIRMATION_BODY", pinLabel) end,
+    })
+
+    local yesButton = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapPinDelete_Yes"), "Button", {
+        Label = function() return Locale.Lookup("LOC_YES") end,
+    })
+    yesButton:On("activate", function()
+        CloseDeleteDialog()
+        DeleteOwnedMapPin(pinID)
+    end)
+
+    local noButton = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMapPinDelete_No"), "Button", {
+        Label = function() return Locale.Lookup("LOC_NO") end,
+    })
+    noButton:On("activate", function()
+        CloseDeleteDialog()
+    end)
+
+    m_deleteDialog = mgr.WidgetHelpers.MakeGeneralDialog(
+        function() return Locale.Lookup("LOC_CAI_MAP_TAC_DELETE_CONFIRMATION_TITLE") end,
+        { yesButton, noButton },
+        { message },
+        1
+    )
+    if not m_deleteDialog then return end
+
+    m_deleteDialog:On("focus_leave", function()
+        CloseDeleteDialog()
+    end)
+    m_deleteDialog:AddInputBinding({
+        Key = Keys.VK_ESCAPE,
+        MSG = KeyEvents.KeyUp,
+        Description = "LOC_CAI_KB_CLOSE",
+        Action = function()
+            CloseDeleteDialog()
+            return true
+        end,
+    })
+    mgr:Push(m_deleteDialog, { priority = PopupPriority.Current })
+end
+
+local function FindOwnedMapPinAtCursor()
+    local playerConfig = GetLocalPlayerConfig()
+    local cursorX, cursorY = nil, nil
+    if CAICursor ~= nil then
+        cursorX, cursorY = CAICursor:GetCoords()
+    end
+    if playerConfig == nil or cursorX == nil or cursorY == nil then return nil end
+
+    local mapPins = playerConfig:GetMapPins()
+    if mapPins == nil then return nil end
+    for _, mapPin in pairs(mapPins) do
+        if mapPin:GetHexX() == cursorX and mapPin:GetHexY() == cursorY then
+            return mapPin
+        end
+    end
+    return nil
+end
+
+local function DeleteMapTacUnderCursor()
+    -- The focused list row owns raw Delete while the list is open. Do not let
+    -- the world action open a second dialog for the navigation-cursor plot.
+    if m_panel then return end
+
+    local mapPin = FindOwnedMapPinAtCursor()
+    if mapPin == nil then
+        Speak(Locale.Lookup("LOC_CAI_MAP_TAC_NONE_AT_CURSOR"))
+        return
+    end
+    ShowDeleteConfirmation(mapPin:GetID())
+end
+
+local deleteMapTacActionID = Input.GetActionId("CAIDeleteMapTac")
+if deleteMapTacActionID ~= nil then
+    m_mapPinActions[deleteMapTacActionID] = DeleteMapTacUnderCursor
+end
+
+-- ============================================================================
 -- Panel
 -- ============================================================================
 
-local function RefreshPanelList()
+RefreshPanelList = function()
     if not m_list then return end
 
     local capture = mgr:CaptureFocusKey(m_list)
@@ -240,6 +367,15 @@ local function RefreshPanelList()
                                     Description = "LOC_CAI_KB_EDIT_MAP_PIN",
                                     Action = function()
                                         OnMapPinEntryEdit(iPlayer, pinID)
+                                        return true
+                                    end
+                                },
+                                {
+                                    Key = Keys.VK_DELETE,
+                                    MSG = KeyEvents.KeyUp,
+                                    Description = "LOC_CAI_KB_DELETE_MAP_TAC",
+                                    Action = function()
+                                        ShowDeleteConfirmation(pinID)
                                         return true
                                     end
                                 }
@@ -291,6 +427,7 @@ local function PushPanel()
 end
 
 local function PopPanel()
+    CloseDeleteDialog()
     if mgr and m_panel then
         mgr:RemoveFromStack(PANEL_ID)
     end
@@ -337,11 +474,11 @@ LuaEvents.CAIMapPinList_VisibilityChanged.Add(OnVisibilityChanged)
 LuaEvents.CAIMapPinList_Refresh.Add(OnRefreshRequest)
 
 local function OnShutdown()
-    Events.InputActionStarted.Remove(OnBookmarkInputActionStarted)
+    Events.InputActionStarted.Remove(OnMapPinInputActionStarted)
     LuaEvents.CAIMapPinList_VisibilityChanged.Remove(OnVisibilityChanged)
     LuaEvents.CAIMapPinList_Refresh.Remove(OnRefreshRequest)
     PopPanel()
 end
 
-Events.InputActionStarted.Add(OnBookmarkInputActionStarted)
+Events.InputActionStarted.Add(OnMapPinInputActionStarted)
 ContextPtr:SetShutdown(OnShutdown)

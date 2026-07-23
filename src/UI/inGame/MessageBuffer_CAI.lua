@@ -1,9 +1,11 @@
 include("caiUtils")
+include("hexCoordUtils_CAI")
 include("PlayerStateManager_CAI")
 ---@class MessageBuffer
 ---@field _entries MessageBufferEntry[]
 ---@field _filter MessageCategory|"all"
 ---@field _position integer
+---@field _nextEntryId integer
 MessageBuffer = {}
 MessageBuffer.__index = MessageBuffer
 
@@ -17,6 +19,8 @@ local VALID_CATEGORIES = {
 }
 
 ---@class MessageBufferEntry
+---@field id integer
+---@field turn integer
 ---@field text string
 ---@field category string
 ---@field location? table<string, number>|nil
@@ -29,6 +33,7 @@ function MessageBuffer.Create()
     self._entries = {}
     self._filter = "all"
     self._position = 0
+    self._nextEntryId = 1
 
     return self
 end
@@ -54,10 +59,13 @@ function MessageBuffer:Append(text, category, location)
     end
 
     table.insert(self._entries, {
+        id = self._nextEntryId,
+        turn = Game.GetCurrentGameTurn(),
         text = text,
         category = category,
         location = location
     })
+    self._nextEntryId = self._nextEntryId + 1
 
     local capacity = GetCapacity()
     while #self._entries > capacity do
@@ -98,6 +106,28 @@ local FILTER_CYCLE = {
 
 local function MatchesFilter(entry, filter)
     return filter == "all" or entry.category == filter
+end
+
+---@return string[]
+function MessageBuffer.GetCategories()
+    local categories = {}
+    for i, category in ipairs(FILTER_CYCLE) do
+        categories[i] = category
+    end
+    return categories
+end
+
+---@param filter MessageCategory|"all"|nil
+---@return MessageBufferEntry[]
+function MessageBuffer:GetEntries(filter)
+    filter = filter or self._filter
+    local entries = {}
+    for _, entry in ipairs(self._entries) do
+        if MatchesFilter(entry, filter) then
+            table.insert(entries, entry)
+        end
+    end
+    return entries
 end
 
 ---@param index integer
@@ -201,6 +231,19 @@ function MessageBuffer:GetFilter()
     return self._filter
 end
 
+---@param filter MessageCategory|"all"
+---@return MessageBufferEntry?
+function MessageBuffer:SetFilter(filter)
+    if filter ~= "all" and not VALID_CATEGORIES[filter] then
+        LogWarn("MessageBuffer: unknown filter '" .. tostring(filter) .. "'")
+        return nil
+    end
+
+    self._filter = filter
+    self._position = 0
+    return self:GetCurrentEntry()
+end
+
 function MessageBuffer:_RotateFilter(direction)
     local count = #FILTER_CYCLE
 
@@ -239,6 +282,29 @@ end
 --#endregion
 
 --#region entryInteraction
+---@param entry MessageBufferEntry
+---@return string?
+function MessageBuffer:GetEntryLocationText(entry)
+    local loc = entry.location
+    if not loc or loc.x == nil or loc.y == nil then
+        return nil
+    end
+
+    local cursor = ExposedMembers.CAICursor
+    if not cursor or not cursor.GetCoords then
+        LogError("MessageBuffer: CAI cursor is unavailable while resolving an entry location")
+        return nil
+    end
+
+    local cursorX, cursorY = cursor:GetCoords()
+    if cursorX == nil or cursorY == nil then
+        LogWarn("MessageBuffer: CAI cursor has no coordinates while resolving an entry location")
+        return nil
+    end
+
+    return CAIHexCoordUtils.directionString(cursorX, cursorY, loc.x, loc.y)
+end
+
 function MessageBuffer:SpeakEntry()
     local entry = self:GetCurrentEntry()
 
@@ -247,7 +313,12 @@ function MessageBuffer:SpeakEntry()
         return
     end
 
-    Speak(entry.text)
+    local locationText = self:GetEntryLocationText(entry)
+    if locationText and locationText ~= "" then
+        Speak(Locale.Lookup("LOC_CAI_MESSAGE_BUFFER_MESSAGE_WITH_LOCATION", entry.text, locationText))
+    else
+        Speak(entry.text)
+    end
 end
 
 function MessageBuffer:SpeakFilter()
@@ -258,8 +329,9 @@ function MessageBuffer:SpeakFilter()
     Speak(category)
 end
 
-function MessageBuffer:JumpToEntryLocation()
-    local entry = self:GetCurrentEntry()
+---@param entry? MessageBufferEntry
+function MessageBuffer:JumpToEntryLocation(entry)
+    entry = entry or self:GetCurrentEntry()
     if not entry then
         LogWarn("MessageBuffer: JumpToEntryLocation called with no current entry")
         return
@@ -335,3 +407,5 @@ function MessageBuffer.ClearActive()
         LogWarn("MessageBuffer: ClearActive called without an active buffer")
     end
 end
+
+ExposedMembers.CAI.GetMessageBuffer = MessageBuffer.GetActive

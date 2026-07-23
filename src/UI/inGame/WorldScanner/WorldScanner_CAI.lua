@@ -1045,9 +1045,7 @@ end
 -- Scanner Search
 -- ==========================================================================
 
-local SCANNER_SEARCH_CONTEXT = "CAI_ScannerSearch"
 local SCANNER_SEARCH_HISTORY_CONTEXT = "WorldScanner"
-local SCANNER_SEARCH_MAX_RESULTS = 200
 
 local SearchUtils = CAIWidgetHelpers_Search
 local mgr = ExposedMembers.CAI_UIManager
@@ -1055,7 +1053,7 @@ local mgr = ExposedMembers.CAI_UIManager
 local m_searchEditBox = nil
 
 ---Walk all built scanner categories and collect a flat snapshot of every leaf item.
----@return table[] Array of { key, text, categoryLabel, groupLabel, item }
+---@return table[]
 local function BuildSearchSnapshot(scanner)
     local snapshot = {}
 
@@ -1066,16 +1064,11 @@ local function BuildSearchSnapshot(scanner)
             local categoryLabel = Utils.ResolveText(category.LabelKey)
 
             for _, subCategory in ipairs(category.SubCategories or {}) do
-                if subCategory.Id ~= Core.AllSubCategoryId then
+                if subCategory.Id == Core.AllSubCategoryId then
                     for _, group in ipairs(subCategory.Groups or {}) do
-                        local groupLabel = Utils.ResolveText(group.LabelKey)
-
                         for _, leaf in ipairs(group.Items or {}) do
-                            local itemLabel = Utils.ResolveText(leaf.LabelKey)
-                            local searchText = itemLabel .. " " .. groupLabel .. " " .. categoryLabel
+                            local itemLabel = leaf.ResolvedLabel or Utils.ResolveText(leaf.LabelKey)
                             local key = category.Id
-                                .. "|"
-                                .. (subCategory.Id or "")
                                 .. "|"
                                 .. (group.Id or "")
                                 .. "|"
@@ -1083,10 +1076,9 @@ local function BuildSearchSnapshot(scanner)
 
                             snapshot[#snapshot + 1] = {
                                 key = key,
-                                text = searchText,
                                 label = itemLabel,
+                                categoryId = category.Id,
                                 categoryLabel = categoryLabel,
-                                groupLabel = groupLabel,
                                 plotIndex = leaf.PlotIndex,
                                 item = leaf,
                             }
@@ -1100,97 +1092,193 @@ local function BuildSearchSnapshot(scanner)
     return snapshot
 end
 
-local function BuildSearchContext(snapshot)
-    Search.DestroyContext(SCANNER_SEARCH_CONTEXT)
-
-    if not Search.CreateContext(SCANNER_SEARCH_CONTEXT, "", "", "...") then
-        return false
-    end
-
-    for _, entry in ipairs(snapshot) do
-        Search.AddData(SCANNER_SEARCH_CONTEXT, entry.key, entry.text, "", {})
-    end
-
-    Search.Optimize(SCANNER_SEARCH_CONTEXT)
-    return true
+local function TrimSearchQuery(query)
+    return (query or ""):match("^%s*(.-)%s*$")
 end
 
-local function DestroySearchContext()
-    Search.DestroyContext(SCANNER_SEARCH_CONTEXT)
+local function CloneSearchLeaf(entry)
+    local leaf = entry.item
+    return {
+        Id = entry.key,
+        PlotIndex = leaf.PlotIndex,
+        LabelKey = leaf.LabelKey,
+        Item = leaf.Item,
+        Distance = leaf.Distance,
+        ResolvedLabel = leaf.ResolvedLabel,
+    }
 end
 
-local function BuildSnapshotLookup(snapshot)
-    local lookup = {}
+local function CompareSearchBuckets(a, b)
+    if a.Tier ~= b.Tier then
+        return a.Tier < b.Tier
+    end
+    if a.Distance ~= b.Distance then
+        return a.Distance < b.Distance
+    end
+    return a.Id < b.Id
+end
 
-    for _, entry in ipairs(snapshot or {}) do
-        lookup[entry.key] = entry
+local function BuildSearchGroup(bucket)
+    local leaves = {}
+    for _, hit in ipairs(bucket.Hits) do
+        leaves[#leaves + 1] = CloneSearchLeaf(hit.Entry)
     end
 
-    return lookup
+    return {
+        Id = bucket.Id,
+        Key = bucket.Id,
+        LabelKey = bucket.Label,
+        PlotIndex = leaves[1].PlotIndex,
+        Items = leaves,
+        TotalItems = #leaves,
+        Distance = bucket.Distance,
+        ResolvedLabel = bucket.Label,
+    }
 end
 
-local function CommitSearch(scanner, rawQuery)
-    if not rawQuery or rawQuery == "" then
+local function BuildSearchSubCategories(hits)
+    local categoriesById = {}
+    local orderedCategories = {}
+
+    for _, hit in ipairs(hits) do
+        local entry = hit.Entry
+        local category = categoriesById[entry.categoryId]
+        if category == nil then
+            category = {
+                Id = entry.categoryId,
+                Label = entry.categoryLabel,
+                BucketsByLabel = {},
+                Buckets = {},
+                TotalItems = 0,
+            }
+            categoriesById[entry.categoryId] = category
+            orderedCategories[#orderedCategories + 1] = category
+        end
+
+        local bucket = category.BucketsByLabel[entry.label]
+        if bucket == nil then
+            bucket = {
+                Id = entry.categoryId .. "|" .. entry.label,
+                Label = entry.label,
+                Tier = hit.Match.Tier,
+                Distance = entry.item.Distance or math.huge,
+                Hits = {},
+            }
+            category.BucketsByLabel[entry.label] = bucket
+            category.Buckets[#category.Buckets + 1] = bucket
+        end
+
+        bucket.Hits[#bucket.Hits + 1] = hit
+        category.TotalItems = category.TotalItems + 1
+    end
+
+    local allBuckets = {}
+    local totalItems = 0
+    for _, category in ipairs(orderedCategories) do
+        for _, bucket in ipairs(category.Buckets) do
+            table.sort(bucket.Hits, function(a, b)
+                local aDistance = a.Entry.item.Distance or math.huge
+                local bDistance = b.Entry.item.Distance or math.huge
+                if aDistance ~= bDistance then
+                    return aDistance < bDistance
+                end
+                return a.Entry.key < b.Entry.key
+            end)
+            bucket.Distance = bucket.Hits[1].Entry.item.Distance or math.huge
+            allBuckets[#allBuckets + 1] = bucket
+        end
+        table.sort(category.Buckets, CompareSearchBuckets)
+        totalItems = totalItems + category.TotalItems
+    end
+    table.sort(allBuckets, CompareSearchBuckets)
+
+    local allGroups = {}
+    for _, bucket in ipairs(allBuckets) do
+        allGroups[#allGroups + 1] = BuildSearchGroup(bucket)
+    end
+
+    local subCategories = {
+        {
+            Id = Core.AllSubCategoryId,
+            Key = Core.AllSubCategoryId,
+            LabelKey = Core.AllSubCategoryLabelKey,
+            Groups = allGroups,
+            TotalItems = totalItems,
+        },
+    }
+
+    for _, category in ipairs(orderedCategories) do
+        local groups = {}
+        for _, bucket in ipairs(category.Buckets) do
+            groups[#groups + 1] = BuildSearchGroup(bucket)
+        end
+        subCategories[#subCategories + 1] = {
+            Id = category.Id,
+            Key = category.Id,
+            LabelKey = category.Label,
+            Groups = groups,
+            TotalItems = category.TotalItems,
+        }
+    end
+
+    return subCategories, totalItems
+end
+
+local function CommitSearch(rawQuery)
+    local query = TrimSearchQuery(rawQuery)
+    if query == "" then
         Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_SEARCH_NO_RESULTS"))
         return
     end
 
-    local whitelist, blacklist = SearchUtils.ParseQuery(rawQuery)
-    if #whitelist == 0 then
+    local whitelist, blacklist = SearchUtils.ParseQuery(query)
+    local positiveQuery = table.concat(whitelist, " ")
+    if positiveQuery == "" then
         Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_SEARCH_NO_RESULTS"))
         return
     end
 
-    SearchUtils.AddHistory(SCANNER_SEARCH_HISTORY_CONTEXT, rawQuery)
+    SearchUtils.AddHistory(SCANNER_SEARCH_HISTORY_CONTEXT, query)
+    CaptureSortOrigin(GetScannerState())
+    CAIWorldScanner:Rebuild()
 
-    local hits = SearchUtils.MultiTermSearch(SCANNER_SEARCH_CONTEXT, whitelist, blacklist, SCANNER_SEARCH_MAX_RESULTS)
+    local scanner = GetScannerState()
+    if scanner == nil then
+        return
+    end
+
+    scanner.SearchSnapshot = BuildSearchSnapshot(scanner)
+    local hits = {}
+    for _, entry in ipairs(scanner.SearchSnapshot) do
+        local excluded = false
+        for _, term in ipairs(blacklist) do
+            if SearchUtils.MatchSearchText(entry.label, term) ~= nil then
+                excluded = true
+                break
+            end
+        end
+
+        local match = not excluded and SearchUtils.MatchSearchText(entry.label, positiveQuery) or nil
+        if match ~= nil then
+            hits[#hits + 1] = {
+                Entry = entry,
+                Match = match,
+            }
+        end
+    end
+
     if #hits == 0 then
         Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_SEARCH_NO_RESULTS"))
         return
     end
 
-    local lookup = BuildSnapshotLookup(scanner.SearchSnapshot)
-
-    local groups = {}
-
-    for _, hit in ipairs(hits) do
-        local entry = lookup[hit.key]
-
-        if entry then
-            groups[#groups + 1] = {
-                Id = hit.key,
-                Key = hit.key,
-                LabelKey = entry.label,
-                PlotIndex = entry.plotIndex,
-                Items = { entry.item },
-                TotalItems = 1,
-                Distance = entry.item.Distance,
-            }
-        end
-    end
-
-    if #groups == 0 then
-        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_SEARCH_NO_RESULTS"))
-        return
-    end
-
-    table.sort(groups, function(a, b)
-        return (a.Distance or math.huge) < (b.Distance or math.huge)
-    end)
+    local subCategories, totalItems = BuildSearchSubCategories(hits)
 
     local searchCategory = {
         Id = SCANNER_SEARCH_CATEGORY_ID,
         LabelKey = "LOC_CAI_WORLD_SCANNER_CATEGORY_SEARCH_RESULTS",
-        SubCategories = {
-            {
-                Id = "results",
-                Key = "results",
-                LabelKey = "LOC_CAI_WORLD_SCANNER_CATEGORY_SEARCH_RESULTS",
-                Groups = groups,
-                TotalItems = #groups,
-            },
-        },
-        TotalItems = #groups,
+        SubCategories = subCategories,
+        TotalItems = totalItems,
     }
     Core.IndexCategory(searchCategory)
 
@@ -1222,23 +1310,8 @@ function CAIWorldScanner:OpenSearch()
         return
     end
 
-    CaptureSortOrigin(GetScannerState())
-    self:Rebuild()
-
     local scanner = GetScannerState()
     if scanner == nil then
-        return
-    end
-
-    scanner.SearchSnapshot = BuildSearchSnapshot(scanner)
-
-    if #scanner.SearchSnapshot == 0 then
-        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_EMPTY"))
-        return
-    end
-
-    if not BuildSearchContext(scanner.SearchSnapshot) then
-        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_EMPTY"))
         return
     end
 
@@ -1254,8 +1327,7 @@ function CAIWorldScanner:OpenSearch()
 
     editBox:On("value_changed", function(_, text)
         CloseSearchEditBox()
-        CommitSearch(scanner, text)
-        DestroySearchContext()
+        CommitSearch(text)
     end)
 
     editBox:AddInputBindings({
@@ -1264,7 +1336,6 @@ function CAIWorldScanner:OpenSearch()
             Description = "LOC_CAI_KB_CLOSE",
             Action = function()
                 CloseSearchEditBox()
-                DestroySearchContext()
                 return true
             end,
         },

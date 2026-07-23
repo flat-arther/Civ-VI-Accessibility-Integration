@@ -166,6 +166,15 @@ local SEARCH_MATCH = {
     WORD_PREFIX_ABBREVIATION = 5,
 }
 
+local SEARCH_ORDER = {
+    SEARCH_MATCH.START_WHOLE_WORD,
+    SEARCH_MATCH.START_PREFIX,
+    SEARCH_MATCH.WHOLE_WORD,
+    SEARCH_MATCH.PREFIX,
+    SEARCH_MATCH.SUBSTRING,
+    SEARCH_MATCH.WORD_PREFIX_ABBREVIATION,
+}
+
 local WORD_SEPARATORS = {
     [" "] = true,
     ["-"] = true,
@@ -547,15 +556,6 @@ function S.FindSearchResults(root, query, maxDepth)
 
     local candidates = S.CollectSearchCandidates(root, maxDepth)
 
-    local SEARCH_ORDER = {
-        SEARCH_MATCH.START_WHOLE_WORD,
-        SEARCH_MATCH.START_PREFIX,
-        SEARCH_MATCH.WHOLE_WORD,
-        SEARCH_MATCH.PREFIX,
-        SEARCH_MATCH.SUBSTRING,
-        SEARCH_MATCH.WORD_PREFIX_ABBREVIATION,
-    }
-
     for _, tier in ipairs(SEARCH_ORDER) do
         local results = {}
 
@@ -592,6 +592,102 @@ function S.FindNextSearchResult(results, focused)
     return 1
 end
 
+---@param results SearchResult[]
+---@param focused UIWidget|nil
+---@param root UIWidget
+---@return integer|nil
+local function FindFocusedSearchResult(results, focused, root)
+    local node = focused
+    while node and node ~= root do
+        for i, result in ipairs(results) do
+            if result.Candidate.Widget == node then
+                return i
+            end
+        end
+        node = node.Parent
+    end
+    return nil
+end
+
+---Classify one label against a query using the shared type-to-find tiers.
+---Returns the best matching tier for this label, or nil when it does not match.
+---@param label string
+---@param query string
+---@return SearchResult|nil
+function S.MatchSearchText(label, query)
+    if label == nil or label == "" or query == nil or query == "" then
+        return nil
+    end
+
+    local candidate = {
+        Label = label,
+        LabelLower = label:lower(),
+        BFSIndex = 0,
+    }
+    local lowerQuery = query:lower()
+
+    for _, tier in ipairs(SEARCH_ORDER) do
+        local result = S.ScoreSearchCandidate(candidate, lowerQuery, tier)
+        if result ~= nil then
+            return result
+        end
+    end
+
+    return nil
+end
+
+---Navigate the current type-to-find result set without changing its existing
+---collection, match-tier, or ranking behavior. Returns false when persistent
+---result navigation is not active so the container can use ordinary Up/Down.
+---@param root UIWidget
+---@param direction 1|-1
+---@param maxDepth? integer
+---@return boolean
+function S.NavigateResults(root, direction, maxDepth)
+    local mgr = root.Manager
+    if not mgr then
+        LogWarn("Search helper NavigateResults called without manager")
+        return false
+    end
+    if not CAISettings.GetBool("TypeToFindResultNavigation")
+        or mgr.TypeToFindTarget ~= root
+        or mgr:GetSearchBuffer() == "" then
+        return false
+    end
+
+    local results = S.FindSearchResults(root, mgr:GetSearchBuffer(), maxDepth or 5)
+    if #results == 0 then
+        Speak(Locale.Lookup("LOC_CAI_SEARCH_NO_MATCH"))
+        return true
+    end
+
+    local currentIndex = FindFocusedSearchResult(results, mgr:GetFocusedWidget(), root)
+    local resultIndex
+    local wrapped = false
+    if currentIndex then
+        resultIndex = currentIndex + direction
+        if resultIndex < 1 then
+            resultIndex = #results
+            wrapped = true
+        elseif resultIndex > #results then
+            resultIndex = 1
+            wrapped = true
+        end
+    else
+        resultIndex = direction > 0 and 1 or #results
+    end
+
+    local target = results[resultIndex].Candidate.Widget
+    if target.IsTreeItem then
+        CAIWidgetHelpers_Tree.ClearDescent(target)
+    end
+    mgr:SetFocus(target)
+    if wrapped then root:Emit("navigation_wrap", direction) end
+    LogMessage("Search helper NavigateResults focused search result " .. tostring(resultIndex)
+        .. " of " .. tostring(#results))
+    return true
+end
+
 ---@param root UIWidget
 ---@param maxDepth integer
 ---@param repeatSearch boolean
@@ -625,9 +721,9 @@ end
 ---Convenience: handle a single char input on the widget for search.
 ---Returns true if a match was focused; speaks the no-match message otherwise.
 ---
----Same-letter cycling: pressing the same single letter twice within the
----search timeout keeps the search buffer unchanged but advances to the next
----matching widget, wrapping when necessary.
+---Same-letter cycling: pressing the same single letter again while that
+---single-character search remains active keeps the buffer unchanged but
+---advances to the next matching widget, wrapping when necessary.
 ---@param root UIWidget
 ---@param char string
 ---@param maxDepth? integer
@@ -644,6 +740,11 @@ function S.HandleChar(root, char, maxDepth)
     if #prev == 0 and not S.IsValidSearchStartCharacter(char) then
         LogMessage("Search helper rejected invalid search start character '" .. tostring(char) .. "'")
         return false
+    end
+
+    if CAISettings.GetBool("TypeToFindResultNavigation") then
+        mgr:BeginTypeToFind(root)
+        prev = mgr:GetSearchBuffer()
     end
 
     local repeatSearch = #prev == 1 and prev == char:lower()

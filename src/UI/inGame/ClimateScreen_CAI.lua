@@ -1,4 +1,5 @@
 include("caiUtils")
+include("hexCoordUtils_CAI")
 if GameConfiguration.GetValue("GAMEMODE_APOCALYPSE") then
     include("ClimateScreen_GranColombia_Maya")
 else
@@ -6,6 +7,8 @@ else
 end
 
 local mgr              = ExposedMembers.CAI_UIManager
+local CAICursor        = ExposedMembers.CAICursor
+local HexCoordUtils    = CAIHexCoordUtils
 
 local PANEL_ID         = "CAIClimate_Panel"
 local HOVER_SOUND      = "Main_Menu_Mouse_Over"
@@ -42,6 +45,31 @@ local function MakeId(prefix)
     return mgr:GenerateWidgetId(prefix)
 end
 
+local function GetRelativePlotLocation(plotIndex)
+    if plotIndex == nil then return "" end
+    local plot = Map.GetPlotByIndex(plotIndex)
+    if plot == nil then return "" end
+    CAICursor = CAICursor or ExposedMembers.CAICursor
+    if CAICursor == nil then return "" end
+    local cursorX, cursorY = CAICursor:GetCoords()
+    if cursorX == nil or cursorY == nil then return "" end
+    return HexCoordUtils.directionString(cursorX, cursorY, plot:GetX(), plot:GetY())
+end
+
+local function AppendRelativePlotLocation(label, plotIndex)
+    local location = GetRelativePlotLocation(plotIndex)
+    if location == "" then return label end
+    return label .. ", " .. location
+end
+
+local function MoveCursorToEvent(plotIndex)
+    if plotIndex == nil or Map.GetPlotByIndex(plotIndex) == nil then
+        LogWarn("Climate Screen cannot move cursor: event plot is unavailable")
+        return
+    end
+    LuaEvents.CAICursorMoveTo(plotIndex, "jump")
+end
+
 local function MakeLeaf(focusKey, labelFn, tooltipFn)
     local props = { FocusKey = focusKey }
     if tooltipFn then
@@ -56,6 +84,19 @@ local function MakeLeaf(focusKey, labelFn, tooltipFn)
     end
     local w = mgr:CreateWidget(MakeId("CAIClm_"), "StaticText", props)
     w:SetFocusSound(HOVER_SOUND)
+    return w
+end
+
+local function MakeActionLeaf(focusKey, widgetType, labelFn, tooltipFn, plotIndex)
+    local w = mgr:CreateWidget(MakeId("CAIClm_"), widgetType, {
+        FocusKey = focusKey,
+        Label = labelFn,
+        Tooltip = tooltipFn,
+    })
+    w:SetFocusSound(HOVER_SOUND)
+    w:On("activate", function()
+        MoveCursorToEvent(plotIndex)
+    end)
     return w
 end
 
@@ -100,8 +141,11 @@ local function BuildOverviewTree()
 
     -- 1. Current Weather Event
     local kCurrentEvent = GameRandomEvents.GetCurrentTurnEvent()
+    local isCurrentSeaLevelEvent = false
     if kCurrentEvent then
         local kCurrentEventDef = GameInfo.RandomEvents[kCurrentEvent.RandomEvent]
+        isCurrentSeaLevelEvent = kCurrentEventDef ~= nil
+            and kCurrentEventDef.EffectOperatorType == "SEA_LEVEL"
         if kCurrentEventDef and kCurrentEventDef.EffectOperatorType ~= "SEA_LEVEL"
             and kCurrentEventDef.EffectOperatorType ~= "NUCLEAR_ACCIDENT" then
             local pCurrentPlot = Map.GetPlotByIndex(kCurrentEvent.CurrentLocation)
@@ -113,7 +157,12 @@ local function BuildOverviewTree()
                 end
             end
 
-            local eventLeaf = MakeLeaf("climate:current_event", function()
+            local currentEventPlotIndex = nil
+            if bIsEventVisible and not kCurrentEventDef.Global and pCurrentPlot then
+                currentEventPlotIndex = kCurrentEvent.CurrentLocation
+            end
+
+            local function GetCurrentEventLabel()
                 local parts = {}
                 table.insert(parts, Locale.Lookup(kCurrentEventDef.Name))
 
@@ -153,8 +202,14 @@ local function BuildOverviewTree()
                     end
                 end
 
-                return JoinNonEmpty(parts, "[NEWLINE]")
-            end, function()
+                local label = JoinNonEmpty(parts, "[NEWLINE]")
+                if currentEventPlotIndex then
+                    label = AppendRelativePlotLocation(label, currentEventPlotIndex)
+                end
+                return label
+            end
+
+            local function GetCurrentEventDetails()
                 local parts = {}
                 if kCurrentEventDef.EffectString then
                     table.insert(parts, Locale.Lookup(kCurrentEventDef.EffectString))
@@ -196,7 +251,11 @@ local function BuildOverviewTree()
                         if pOwner and pLocalPlayerDiplo:HasMet(ac.CityOwner) then
                             local pCity = pOwner:GetCities():FindID(ac.CityID)
                             if pCity then
-                                table.insert(cityNames, Locale.Lookup(pCity:GetName()))
+                                local pOwnerConfig = PlayerConfigurations[ac.CityOwner]
+                                table.insert(cityNames, JoinNonEmpty({
+                                    Locale.Lookup(pCity:GetName()),
+                                    Locale.Lookup(pOwnerConfig:GetCivilizationDescription()),
+                                }, ", "))
                             end
                         end
                     end
@@ -207,7 +266,16 @@ local function BuildOverviewTree()
                 end
 
                 return JoinNonEmpty(parts, "[NEWLINE]")
-            end)
+            end
+
+            local eventLeaf
+            if currentEventPlotIndex then
+                eventLeaf = MakeActionLeaf("climate:current_event", "TreeItem",
+                    GetCurrentEventLabel, GetCurrentEventDetails, currentEventPlotIndex)
+            else
+                eventLeaf = MakeLeaf("climate:current_event",
+                    GetCurrentEventLabel, GetCurrentEventDetails)
+            end
             tree:AddChild(eventLeaf)
         end
     end
@@ -458,10 +526,14 @@ local function BuildOverviewTree()
     local nextIceLostTurns = GameClimate.GetNextIceLossTurns()
 
     tree:AddChild(MakeLeaf("climate:ice", function()
-        return JoinNonEmpty({
+        local parts = {
             Locale.Lookup("LOC_CLIMATE_POLAR_ICE"),
             NormalizeText(Locale.Lookup("LOC_CLIMATE_LOST", iIceLoss)),
-        }, "[NEWLINE]")
+        }
+        if isCurrentSeaLevelEvent then
+            table.insert(parts, Locale.Lookup("LOC_CLIMATE_POLAR_ICE_MELT_ALERT_TOOLTIP"))
+        end
+        return JoinNonEmpty(parts, "[NEWLINE]")
     end, function()
         local parts = {}
         if nextIceLostTurns > 0 and currentSeaLevelPhase < 7 then
@@ -481,10 +553,14 @@ local function BuildOverviewTree()
     end
 
     tree:AddChild(MakeLeaf("climate:sea", function()
-        return JoinNonEmpty({
+        local parts = {
             Locale.Lookup("LOC_CLIMATE_SEA_LEVEL"),
             NormalizeText(Locale.Lookup("LOC_CLIMATE_SEA_LEVEL_RISE", Locale.Lookup(szSeaLevel))),
-        }, "[NEWLINE]")
+        }
+        if isCurrentSeaLevelEvent then
+            table.insert(parts, Locale.Lookup("LOC_CLIMATE_SEA_LEVEL_RISE_ALERT_TOOLTIP"))
+        end
+        return JoinNonEmpty(parts, "[NEWLINE]")
     end, function()
         local parts = {
             NormalizeText(Locale.Lookup("LOC_CLIMATE_COASTAL_TILES_FLOODED_NUM", tilesFlooded)),
@@ -534,11 +610,16 @@ local function BuildCO2Tree()
 
     local pLocalPlayer = Players[localPlayerID]
     local pPlayerDiplomacy = pLocalPlayer:GetDiplomacy()
+    local pLocalPlayerConfig = PlayerConfigurations[localPlayerID]
 
     -- Your contribution first (expandable, with per-resource breakdown)
     local yourNode = MakeNode("co2:yours", function()
         return JoinNonEmpty({
             Locale.Lookup("LOC_CLIMATE_YOUR_CO2_CONTRIBUTION"),
+            JoinNonEmpty({
+                Locale.Lookup(pLocalPlayerConfig:GetLeaderName()),
+                Locale.Lookup(pLocalPlayerConfig:GetCivilizationDescription()),
+            }, ", "),
             NormalizeText(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM", CO2Player)),
         }, "[NEWLINE]")
     end)
@@ -575,7 +656,10 @@ local function BuildCO2Tree()
             if not pPlayerDiplomacy:HasMet(playerID) then
                 civName = Locale.Lookup("LOC_WORLD_RANKING_UNMET_PLAYER")
             else
-                civName = Locale.Lookup(pPlayerConfig:GetCivilizationDescription())
+                civName = JoinNonEmpty({
+                    Locale.Lookup(pPlayerConfig:GetLeaderName()),
+                    Locale.Lookup(pPlayerConfig:GetCivilizationDescription()),
+                }, ", ")
             end
             local capturedName = civName
             local capturedFootprint = footprint
@@ -658,11 +742,12 @@ local function BuildEventHistoryList()
             local kEventDef = GameInfo.RandomEvents[kEvent.RandomEvent]
             if kEventDef and kEventDef.EffectOperatorType ~= "NUCLEAR_ACCIDENT" then
                 local isClimateChange = kEventDef.ClimateChangePoints > 0
-                local pEventPlot = Map.GetPlotByIndex(kEvent.StartLocation)
+                local pCurrentEventPlot = Map.GetPlotByIndex(kEvent.CurrentLocation)
                 local isVisible = kEventDef.Global
-                if not isVisible and pEventPlot then
+                if not isVisible and pCurrentEventPlot then
                     local pLocalPlayerVis = PlayersVisibility[localPlayerID]
-                    if pLocalPlayerVis and pLocalPlayerVis:IsRevealed(pEventPlot:GetX(), pEventPlot:GetY()) then
+                    if pLocalPlayerVis
+                        and pLocalPlayerVis:IsRevealed(pCurrentEventPlot:GetX(), pCurrentEventPlot:GetY()) then
                         isVisible = true
                     end
                 end
@@ -672,10 +757,14 @@ local function BuildEventHistoryList()
                     local capturedDef = kEventDef
                     local capturedTurn = i
                     local capturedCC = isClimateChange
+                    local historyPlotIndex = nil
+                    if not capturedCC and Map.GetPlotByIndex(capturedEvent.StartLocation) then
+                        historyPlotIndex = capturedEvent.StartLocation
+                    end
 
                     local strDate = Calendar.MakeYearStr(capturedTurn)
 
-                    local eventWidget = MakeLeaf("climate:event:" .. capturedTurn, function()
+                    local function GetHistoryEventLabel()
                         local parts = {}
                         table.insert(parts, Locale.Lookup("LOC_CAI_CLIMATE_TURN", capturedTurn, strDate))
                         table.insert(parts, Locale.Lookup(capturedDef.Name))
@@ -703,8 +792,14 @@ local function BuildEventHistoryList()
                             end
                         end
 
-                        return JoinNonEmpty(parts, "[NEWLINE]")
-                    end, function()
+                        local label = JoinNonEmpty(parts, "[NEWLINE]")
+                        if historyPlotIndex then
+                            label = AppendRelativePlotLocation(label, historyPlotIndex)
+                        end
+                        return label
+                    end
+
+                    local function GetHistoryEventDetails()
                         if capturedCC then return "" end
 
                         local parts = {}
@@ -737,7 +832,17 @@ local function BuildEventHistoryList()
                             table.insert(parts, Locale.Lookup("LOC_CAI_CLIMATE_POP_LOST", capturedEvent.PopLost))
                         end
                         return JoinNonEmpty(parts, "[NEWLINE]")
-                    end)
+                    end
+
+                    local eventWidget
+                    if historyPlotIndex then
+                        eventWidget = MakeActionLeaf("climate:event:" .. capturedTurn,
+                            "Button", GetHistoryEventLabel, GetHistoryEventDetails,
+                            historyPlotIndex)
+                    else
+                        eventWidget = MakeLeaf("climate:event:" .. capturedTurn,
+                            GetHistoryEventLabel, GetHistoryEventDetails)
+                    end
                     list:AddChild(eventWidget)
                 end
             end

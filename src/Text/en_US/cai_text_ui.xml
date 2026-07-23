@@ -77,7 +77,7 @@
       <Text>Collapsed</Text>
     </Row>
     <Row Tag="LOC_CAI_TREEVIEW_ITEM_COUNT" Language="en_US">
-      <Text>{1_Count} items</Text>
+      <Text>{1_Count} {1_Count : plural 1?item; other?items;}</Text>
     </Row>
     <Row Tag="LOC_UIWidget_Role_GameView" Language="en_US">
       <Text>Game View</Text>
@@ -404,6 +404,33 @@
     </Row>
     <Row Tag="LOC_CAI_MESSAGE_BUFFER_EMPTY_LOCATION" Language="en_US">
       <Text>No location for this buffer message</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER" Language="en_US">
+      <Text>Message buffer</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_FILTER" Language="en_US">
+      <Text>Message category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_LIST_ENTRY" Language="en_US">
+      <Text>{1_Message}, {2_Turn}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_LIST_ENTRY_WITH_LOCATION" Language="en_US">
+      <Text>{1_Message}, {2_Location}, {3_Turn}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_MESSAGE_WITH_LOCATION" Language="en_US">
+      <Text>{1_Message}, {2_Location}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_TURN" Language="en_US">
+      <Text>Turn {1_Turn}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_COPY" Language="en_US">
+      <Text>Copy buffer</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_COPY_TOOLTIP" Language="en_US">
+      <Text>Copies the messages in the selected category to the clipboard.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_COPIED" Language="en_US">
+      <Text>Message buffer copied to the clipboard.</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_CITIES" Language="en_US">
       <Text>Cities</Text>
@@ -873,6 +900,12 @@
     <Row Tag="LOC_CAI_SURVEYOR_READ_DISTRICTS_TOOLTIP" Language="en_US">
       <Text>Counts revealed districts within the Surveyor radius around the CAI cursor</Text>
     </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_APPEAL" Language="en_US">
+      <Text>Surveyor read appeal</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_READ_APPEAL_TOOLTIP" Language="en_US">
+      <Text>Counts revealed land tiles by appeal within the Surveyor radius around the CAI cursor</Text>
+    </Row>
     <Row Tag="LOC_CAI_SURVEYOR_RADIUS" Language="en_US">
       <Text>Surveyor radius {1_Radius}</Text>
     </Row>
@@ -924,6 +957,12 @@
     <Row Tag="LOC_CAI_SURVEYOR_EMPTY_DISTRICTS" Language="en_US">
       <Text>No revealed districts</Text>
     </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_EMPTY_APPEAL" Language="en_US">
+      <Text>No revealed land appeal</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SURVEYOR_APPEAL_UNAVAILABLE" Language="en_US">
+      <Text>Appeal is unavailable in this game</Text>
+    </Row>
     <Row Tag="LOC_CAI_SURVEYOR_OWNERSHIP_YOURS" Language="en_US">
       <Text>Yours</Text>
     </Row>
@@ -942,7 +981,7 @@
       <Text>Notification center</Text>
     </Row>
     <Row Tag="LOC_CAI_NOTIFICATION_CENTER_TOOLTIP" Language="en_US">
-      <Text>Opens an accessible tree of current notifications</Text>
+      <Text>Opens current notifications and the message buffer</Text>
     </Row>
     <Row Tag="LOC_CAI_ACTION_PANEL_TURN_BLOCKERS" Language="en_US">
       <Text>Turn blockers</Text>
@@ -1027,8 +1066,17 @@
     <Row Tag="LOC_CAI_GOVERNMENT_ACTIVE" Language="en_US">
       <Text>Currently active</Text>
     </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_TIER" Language="en_US">
+      <Text>Tier {1_Tier}</Text>
+    </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_CONFIRM_POLICIES" Language="en_US">
       <Text>Confirm policies</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_BLOCKER_SLOT" Language="en_US">
+      <Text>Must fill slot {1_Num} for {2_Category}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_NEW_POLICY" Language="en_US">
+      <Text>New</Text>
     </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_POLICY_ALREADY_ACTIVE" Language="en_US">
       <Text>{1_Policy} is already active</Text>
@@ -1072,19 +1120,18 @@
     <Row Tag="LOC_CAI_GOVERNMENT_SLOTS" Language="en_US">
       <Text>Slots: {1_Slots}</Text>
     </Row>
-    <Row Tag="LOC_CAI_GOVERNMENT_INHERENT_BONUS" Language="en_US">
-      <Text>Inherent bonus: {1_Bonus}</Text>
+    <Row Tag="LOC_CAI_GOVERNMENT_NAMED_BONUS" Language="en_US">
+      <Text>{1_Label}: {2_Bonus}</Text>
     </Row>
-    <Row Tag="LOC_CAI_GOVERNMENT_LEGACY_BONUS" Language="en_US">
-      <Text>Legacy bonus: {1_Bonus}</Text>
+    <Row Tag="LOC_CAI_GOVERNMENT_NO_POLICY_CHANGES" Language="en_US">
+      <Text>You have not made any policy changes to confirm.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_HERITAGE_EFFECT" Language="en_US">
+      <Text>{1_Effect} Current accumulated bonus: {2_Value}%. {3_Source}</Text>
     </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_STATS" Language="en_US">
       <Text>Stats: {1_Stats}</Text>
     </Row>
-    <Row Tag="LOC_CAI_GOVERNMENT_FLAT_BONUS" Language="en_US">
-      <Text>Flat bonus: {1_Value}</Text>
-    </Row>
-
     <!-- Great People popup -->
     <Row Tag="LOC_CAI_GP_PERSON_LABEL" Language="en_US">
       <Text>{1_Name}, {2_Class}</Text>
@@ -1203,10 +1250,10 @@
       <Text>Reads the count of nuclear and thermonuclear devices</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_YIELD_INFO" Language="en_US">
-      <Text>Yields and strategic resources</Text>
+      <Text>Empire economy report</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_YIELD_INFO_TOOLTIP" Language="en_US">
-      <Text>Opens a tree of top panel yields and strategic resources</Text>
+      <Text>Opens the reports screen on Yields and focuses Empire Economy</Text>
     </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_OPEN_DIPLOMACY" Language="en_US">
       <Text>Open diplomacy</Text>
@@ -4362,6 +4409,12 @@
     <Row Tag="LOC_CAI_GREAT_WORKS_NO_WORK_SELECTED" Language="en_US">
       <Text>No great work selected</Text>
     </Row>
+    <Row Tag="LOC_CAI_GREAT_WORKS_GROUP_BY_BUILDINGS" Language="en_US">
+      <Text>Group by buildings</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GREAT_WORKS_GROUP_BY_BUILDINGS_TOOLTIP" Language="en_US">
+      <Text>When checked, Great Works are grouped by building, then city, then slot. When unchecked, they are grouped by city, then building, then slot.</Text>
+    </Row>
 
     <!-- Great Work Showcase -->
     <Row Tag="LOC_CAI_GREAT_WORKS_PREVIOUS" Language="en_US">
@@ -4414,6 +4467,21 @@
     <Row Tag="LOC_CAI_WORLD_RANKINGS_TURNS_VICTORY" Language="en_US">
       <Text>{1_Turns} turns to victory</Text>
     </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_PLACE" Language="en_US">
+      <Text>{1_Place} place</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_VICTORY_PROGRESS" Language="en_US">
+      <Text>Victory progress: {1_Percent}%</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_HUMAN_PLAYER_NAME" Language="en_US">
+      <Text>Player: {1_PlayerName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_LOCAL_PLAYER" Language="en_US">
+      <Text>You</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_YOUR_TEAM" Language="en_US">
+      <Text>Your team</Text>
+    </Row>
     <Row Tag="LOC_CAI_WORLD_RANKINGS_DIPLO_POINTS" Language="en_US">
       <Text>{1_Current} of {2_Required} Diplomatic Victory Points</Text>
     </Row>
@@ -4443,18 +4511,6 @@
     </Row>
     <Row Tag="LOC_CAI_WORLD_RANKINGS_NEXT_STEP" Language="en_US">
       <Text>Next step: {1_Step}</Text>
-    </Row>
-    <Row Tag="LOC_CAI_WORLD_RANKINGS_CULTURE_WE_DOMINATE" Language="en_US">
-      <Text>You dominate {1_Count} civilizations</Text>
-    </Row>
-    <Row Tag="LOC_CAI_WORLD_RANKINGS_CULTURE_DOMINATE_US" Language="en_US">
-      <Text>{1_Count} civilizations dominate you</Text>
-    </Row>
-    <Row Tag="LOC_CAI_WORLD_RANKINGS_CULTURE_WE_ARE_DOMINANT" Language="en_US">
-      <Text>You are culturally dominant over them</Text>
-    </Row>
-    <Row Tag="LOC_CAI_WORLD_RANKINGS_CULTURE_THEY_ARE_DOMINANT" Language="en_US">
-      <Text>They are culturally dominant over you</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_RANKINGS_DIPLO_TOOLTIP" Language="en_US">
       <Text>{1_Tooltip}</Text>
@@ -4518,8 +4574,26 @@
     <Row Tag="LOC_CAI_REPORTS_YIELD_TOURISM" Language="en_US">
       <Text>Tourism {1_Amount}</Text>
     </Row>
+    <Row Tag="LOC_CAI_REPORTS_YIELD_FAVOR" Language="en_US">
+      <Text>Diplomatic Favor {1_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_YIELD_ENVOYS" Language="en_US">
+      <Text>Envoys {1_Count}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_YIELD_TRADE_ROUTES" Language="en_US">
+      <Text>Trade Routes {1_Active}/{2_Capacity}</Text>
+    </Row>
     <Row Tag="LOC_CAI_REPORTS_UNIT_COUNT" Language="en_US">
-      <Text>{1_Count} units</Text>
+      <Text>{1_Count} {1_Count : plural 1?unit; other?units;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_YIELD_FROM_CITY" Language="en_US">
+      <Text>{1_Amount} from {2_CityName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_OTHER_CITY_YIELD" Language="en_US">
+      <Text>Other city tourism: {1_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_WMD_MAINTENANCE" Language="en_US">
+      <Text>{1_WMDName}, {2_Count} {2_Count : plural 1?device; other?devices;}, Gold {3_Amount}</Text>
     </Row>
     <Row Tag="LOC_CAI_REPORTS_EMPIRE_ECONOMY" Language="en_US">
       <Text>Empire Economy</Text>
@@ -4547,6 +4621,9 @@
     </Row>
     <Row Tag="LOC_CAI_REPORTS_RESOURCE_COUNT" Language="en_US">
       <Text>{1_Count} resources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_RESOURCE_DETAILS" Language="en_US">
+      <Text>Detailed sources and commitments</Text>
     </Row>
     <Row Tag="LOC_CAI_REPORTS_AMENITIES_PROVIDED" Language="en_US">
       <Text>providing amenities to {1_Count} cities</Text>
@@ -4745,6 +4822,12 @@
     </Row>
     <Row Tag="LOC_CAI_PLACE_MAP_PIN_TOOLTIP" Language="en_US">
       <Text>Place or edit a map tac at the current cursor location</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DELETE_MAP_TAC" Language="en_US">
+      <Text>Delete map tac</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DELETE_MAP_TAC_TOOLTIP" Language="en_US">
+      <Text>Deletes an owned map tac at the navigation cursor after confirmation.</Text>
     </Row>
     <Row Tag="LOC_CAI_BOOKMARK" Language="en_US">
       <Text>Bookmark {1_Num}</Text>
@@ -5137,6 +5220,9 @@
     <Row Tag="LOC_CAI_KB_EDIT_MAP_PIN" Language="en_US">
       <Text>Edit map tac</Text>
     </Row>
+    <Row Tag="LOC_CAI_KB_DELETE_MAP_TAC" Language="en_US">
+      <Text>Delete map tac</Text>
+    </Row>
     <Row Tag="LOC_CAI_KB_ENTER_SUBMENU" Language="en_US">
       <Text>Enter submenu</Text>
     </Row>
@@ -5160,6 +5246,9 @@
     </Row>
     <Row Tag="LOC_CAI_KB_INPUT_HELP" Language="en_US">
       <Text>Input help</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_JUMP_CURSOR_TO_UNIT" Language="en_US">
+      <Text>Jump cursor to unit</Text>
     </Row>
     <Row Tag="LOC_CAI_KB_SPEAK_FOCUSED_BINDINGS" Language="en_US">
       <Text>Speak input bindings for the focused widget</Text>
@@ -5687,11 +5776,25 @@
       <Text>Automatically focus the first result when a search returns results.</Text>
     </Row>
 
+    <Row Tag="LOC_CAI_SETTING_TREE_HOME_END_CURRENT_DEPTH" Language="en_US">
+      <Text>Keep tree Home and End at current depth</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_TREE_HOME_END_CURRENT_DEPTH_TOOLTIP" Language="en_US">
+      <Text>When enabled, Home and End move to the first and last visible item at the current tree depth. When disabled, they move to the beginning and visible end of the full tree.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_TYPE_TO_FIND_RESULT_NAVIGATION" Language="en_US">
+      <Text>Navigate type-to-find results</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_TYPE_TO_FIND_RESULT_NAVIGATION_TOOLTIP" Language="en_US">
+      <Text>When enabled, Up and Down move through type-to-find results. The search clears when you activate, change, open, enter, expand, or collapse a widget; leave its list or tree; remove it with Backspace; or clear it with Escape.</Text>
+    </Row>
+
     <Row Tag="LOC_CAI_SETTING_SEARCH_TIMEOUT" Language="en_US">
       <Text>Search timeout</Text>
     </Row>
     <Row Tag="LOC_CAI_SETTING_SEARCH_TIMEOUT_TOOLTIP" Language="en_US">
-      <Text>Number of seconds before type-to-find search text is cleared, set to 0 to never clear.</Text>
+      <Text>Number of seconds before type-to-find search text is cleared when result navigation is disabled. Set to 0 to never clear.</Text>
     </Row>
 
     <Row Tag="LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH" Language="en_US">
@@ -5946,6 +6049,13 @@
       <Text>Choose which visible unit movements made by barbarians are announced.</Text>
     </Row>
 
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_UNOWNED_COMBAT_RESULTS" Language="en_US">
+      <Text>Announce unowned combat results</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_ANNOUNCE_UNOWNED_COMBAT_RESULTS_TOOLTIP" Language="en_US">
+      <Text>Announce visible combat results when none of your units, cities, districts, interceptors, or anti-air defenses participate. Disable this to announce only combat involving your own forces or defenses.</Text>
+    </Row>
+
     <Row Tag="LOC_CAI_SETTING_UNIT_MOVE_FILTER_MILITARY" Language="en_US">
       <Text>Military only</Text>
     </Row>
@@ -6180,6 +6290,18 @@
     </Row>
     <Row Tag="LOC_CAI_QUICK_LOAD_CONFIRMATION_BODY" Language="en_US">
       <Text>Load the game in the quick-save slot?</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_TAC_DELETE_CONFIRMATION_TITLE" Language="en_US">
+      <Text>Delete map tac</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_TAC_DELETE_CONFIRMATION_BODY" Language="en_US">
+      <Text>Delete {1_MapTacName}?</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_TAC_UNAVAILABLE" Language="en_US">
+      <Text>That map tac is no longer available.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MAP_TAC_NONE_AT_CURSOR" Language="en_US">
+      <Text>There is no owned map tac at the navigation cursor.</Text>
     </Row>
     <Row Tag="LOC_CAI_MAP_SELECT_FILTER" Language="en_US">
       <Text>Filter by</Text>

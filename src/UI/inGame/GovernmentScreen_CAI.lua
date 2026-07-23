@@ -35,7 +35,7 @@ ExposedMembers.CAIInfo      = info
 
 local PANEL_ID              = "CAIGovernmentScreen_Panel"
 local TABS_ID               = "CAIGovernmentScreen_Tabs"
-local GOV_TREE_ID           = "CAIGovernmentScreen_GovernmentsTree"
+local GOV_LIST_ID           = "CAIGovernmentScreen_GovernmentsList"
 local POL_TREE_ID           = "CAIGovernmentScreen_PoliciesTree"
 local PICKER_ID             = "CAIGovernmentScreen_PolicyPicker"
 local ALL_POLICIES_ID       = "CAIGovernmentScreen_AllPoliciesTree"
@@ -61,7 +61,7 @@ local m_ui                  = {
     tabs = nil,
     govPage = nil,
     polPage = nil,
-    govTree = nil,
+    govList = nil,
     polTree = nil,
     polRows = {},
     picker = nil,
@@ -104,6 +104,15 @@ local function JoinNonEmpty(parts, separator)
         if part and part ~= "" then table.insert(out, part) end
     end
     return table.concat(out, separator)
+end
+
+local function CollapseTooltipNewlines(text)
+    if not text or text == "" then return "" end
+    return (text:gsub("%[NEWLINE%]%s*%[NEWLINE%]", "[NEWLINE]"))
+end
+
+local function ComparableText(text)
+    return CollapseTooltipNewlines(text):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
 end
 
 local function GetLocalPlayerCulture()
@@ -196,6 +205,29 @@ local function GetPolicyAgeIndicator(policyType)
     if def.RequiresDarkAge then return Locale.Lookup("LOC_CAI_GOVERNMENT_DARK_AGE_POLICY") end
     if def.RequiresGoldenAge then return Locale.Lookup("LOC_CAI_GOVERNMENT_GOLDEN_AGE_POLICY") end
     return ""
+end
+
+local function IsPolicyNewThisTurn(policyType)
+    local culture = GetLocalPlayerCulture()
+    local policy = GameInfo.Policies[policyType]
+    if not culture or not policy then return false end
+
+    if culture:CivicCompletedThisTurn() then
+        local civic = GameInfo.Civics[culture:GetCivicCompletedThisTurn()]
+        if civic and policy.PrereqCivic == civic.CivicType then return true end
+    end
+
+    if GameInfo.Policies_XP1 then
+        local expansionPolicy = GameInfo.Policies_XP1[policyType]
+        local playerID = Game.GetLocalPlayer()
+        local eras = Game.GetEras()
+        if expansionPolicy and expansionPolicy.RequiresDarkAge
+            and eras:HasDarkAge(playerID)
+            and Game.GetCurrentGameTurn() == eras:GetCurrentEraStartTurn() then
+            return true
+        end
+    end
+    return false
 end
 
 local function GetPolicyTooltip(policyType)
@@ -368,8 +400,25 @@ local function GetGovernmentBonusIndex(governmentType)
     return bonusRow and bonusRow.Index or nil
 end
 
+local function HasGovernmentLegacyBonuses()
+    return HasCapability("CAPABILITY_GOVERNMENTS_LEGACY_BONUSES")
+end
+
+local function FormatGovernmentBonus(labelTag, bonusText)
+    return Locale.Lookup("LOC_CAI_GOVERNMENT_NAMED_BONUS", Locale.Lookup(labelTag), bonusText)
+end
+
+local function FormatGovernmentHeritageEffect(government, value)
+    return Locale.Lookup("LOC_CAI_GOVERNMENT_HERITAGE_EFFECT",
+        Locale.Lookup(government.BonusAccumulatedText),
+        value,
+        Locale.Lookup("LOC_GOVT_HERITAGE_BONUS_PREV", Locale.Lookup(government.Name)))
+end
+
 local function GetCurrentGovernmentHeritageParts(governmentType)
     local parts = {}
+    if not HasGovernmentLegacyBonuses() then return parts end
+
     local culture = GetLocalPlayerCulture()
     if not culture then return parts end
 
@@ -377,16 +426,12 @@ local function GetCurrentGovernmentHeritageParts(governmentType)
     if not bonusIndex then return parts end
 
     local government = g_kGovernments and g_kGovernments[governmentType] or nil
-    local flat = culture:GetFlatBonus(bonusIndex)
     local accumulated = culture:GetIncrementingBonus(bonusIndex)
     local increment = culture:GetIncrementingBonusIncrement(bonusIndex)
     local turnsTillNext = culture:GetIncrementingBonusTurnsUntilNext(bonusIndex)
 
-    if flat and flat > 0 then
-        table.insert(parts, Locale.Lookup("LOC_CAI_GOVERNMENT_FLAT_BONUS", flat))
-    end
-    if accumulated and accumulated > 0 then
-        table.insert(parts, Locale.Lookup("LOC_CAI_GOVERNMENT_LEGACY_BONUS", accumulated))
+    if accumulated and accumulated > 0 and government then
+        table.insert(parts, FormatGovernmentHeritageEffect(government, accumulated))
     end
     if increment and increment > 0 and government then
         local nextDesc = Locale.Lookup("LOC_GOVT_HERITAGE_BONUS_NEXT", turnsTillNext or 0,
@@ -398,6 +443,8 @@ end
 
 local function GetCarryoverBonusParts(currentGovernmentType)
     local parts = {}
+    if not HasGovernmentLegacyBonuses() then return parts end
+
     local culture = GetLocalPlayerCulture()
     if not culture then return parts end
 
@@ -407,9 +454,7 @@ local function GetCarryoverBonusParts(currentGovernmentType)
             if bonusIndex then
                 local stored = culture:GetIncrementingBonus(bonusIndex)
                 if stored and stored > 0 then
-                    table.insert(parts,
-                        "+" .. tostring(stored) .. " " ..
-                        Locale.Lookup("LOC_GOVT_HERITAGE_BONUS_PREV", Locale.Lookup(government.Name)))
+                    table.insert(parts, FormatGovernmentHeritageEffect(government, stored))
                 end
             end
         end
@@ -427,15 +472,22 @@ local function GetGovernmentDetailParts(governmentType)
         table.insert(parts, Locale.Lookup("LOC_CAI_GOVERNMENT_SLOTS", slots))
     end
     if government.BonusInherentText and government.BonusInherentText ~= "" then
-        table.insert(parts,
-            Locale.Lookup("LOC_CAI_GOVERNMENT_INHERENT_BONUS", Locale.Lookup(government.BonusInherentText)))
+        table.insert(parts, FormatGovernmentBonus("LOC_GOVERNMENT_INHERENT_BONUS",
+            Locale.Lookup(government.BonusInherentText)))
     end
     if government.BonusAccumulatedText and government.BonusAccumulatedText ~= "" then
-        table.insert(parts,
-            Locale.Lookup("LOC_CAI_GOVERNMENT_LEGACY_BONUS", Locale.Lookup(government.BonusAccumulatedText)))
+        local shortText = Locale.Lookup(government.BonusAccumulatedText)
+        local fullText = government.BonusAccumulatedTooltip and
+            CollapseTooltipNewlines(Locale.Lookup(government.BonusAccumulatedTooltip)) or ""
+        local displayText = shortText
+        if fullText ~= "" and ComparableText(fullText) ~= ComparableText(shortText) then
+            displayText = fullText
+        end
+        table.insert(parts, FormatGovernmentBonus("LOC_GOVERNMENT_ACCUMULATED_BONUS", displayText))
     end
     if government.StatsTooltip and government.StatsTooltip ~= "" then
-        table.insert(parts, Locale.Lookup("LOC_CAI_GOVERNMENT_STATS", government.StatsTooltip))
+        table.insert(parts,
+            Locale.Lookup("LOC_CAI_GOVERNMENT_STATS", CollapseTooltipNewlines(government.StatsTooltip)))
     elseif government.StatsText and government.StatsText ~= "" then
         table.insert(parts, Locale.Lookup("LOC_CAI_GOVERNMENT_STATS", government.StatsText))
     end
@@ -446,9 +498,65 @@ local function GetGovernmentDetailParts(governmentType)
         if prereqCivic and GameInfo.Civics[prereqCivic] then
             table.insert(parts,
                 Locale.Lookup("LOC_GOVT_CIVIC_REQUIRED", Locale.Lookup(GameInfo.Civics[prereqCivic].Name)))
+            local culture = GetLocalPlayerCulture()
+            local progressingCivic = culture and culture:GetProgressingCivic() or -1
+            if progressingCivic == GameInfo.Civics[prereqCivic].Index then
+                local cost = culture:GetCultureCost(progressingCivic)
+                if cost and cost > 0 then
+                    local progress = culture:GetCulturalProgress(progressingCivic)
+                    local percent = math.floor((progress / cost) * 100 + 0.5)
+                    table.insert(parts, Locale.Lookup("LOC_CAI_CIVIC_PROGRESS", percent))
+                end
+            end
         end
     end
     return parts
+end
+
+local function GetGovernmentTooltip(governmentType)
+    local parts = GetGovernmentDetailParts(governmentType)
+    if IsGovernmentSelected(governmentType) and HasGovernmentLegacyBonuses() then
+        for _, text in ipairs(GetCurrentGovernmentHeritageParts(governmentType)) do
+            table.insert(parts, text)
+        end
+        local carryover = GetCarryoverBonusParts(governmentType)
+        if #carryover == 0 then
+            table.insert(parts, Locale.Lookup("LOC_GOVT_NO_LEGACY_BONUS"))
+        else
+            for _, text in ipairs(carryover) do table.insert(parts, text) end
+        end
+    end
+    return table.concat(parts, "[NEWLINE]")
+end
+
+local function GetGovernmentTier(governmentType)
+    local row = GameInfo.Governments[governmentType]
+    if row and row.Tier then
+        local tier = GameInfo.GovernmentTiers and GameInfo.GovernmentTiers[row.Tier] or nil
+        if tier and tier.Sorting then return tier.Sorting end
+        local number = tonumber(string.match(tostring(row.Tier), "%d+"))
+        if number then return number end
+    end
+
+    local government = g_kGovernments and g_kGovernments[governmentType] or nil
+    if not government then return nil end
+    local totalSlots = (government.NumSlotMilitary or 0) + (government.NumSlotEconomic or 0)
+        + (government.NumSlotDiplomatic or 0) + (government.NumSlotWildcard or 0)
+    if totalSlots < 4 or totalSlots % 2 ~= 0 then return nil end
+    return (totalSlots / 2) - 1
+end
+
+local function GetUnfilledPolicySlotBlockers()
+    local blockers = {}
+    for _, row in ipairs(CAI_ROW_ORDER) do
+        for slotOrdinal, slot in ipairs(GetLiveSlotDataForRow(row.Index)) do
+            if GetPolicyTypeForSlot(slot.SlotIndex) == CAI_EMPTY_POLICY_TYPE then
+                table.insert(blockers, Locale.Lookup("LOC_CAI_GOVERNMENT_BLOCKER_SLOT", slotOrdinal,
+                    GetRowName(row.Index)))
+            end
+        end
+    end
+    return blockers
 end
 
 local function SortGovernmentsBySlotsThenName(a, b)
@@ -480,7 +588,8 @@ end
 
 local BuildPolicyCategoryTree
 
-local function ClosePicker()
+local function ClosePicker(playDropSound)
+    if playDropSound and m_ui.picker then UI.PlaySound("UI_Policies_Card_Drop") end
     if mgr and m_ui.picker then mgr:RemoveFromStack(PICKER_ID) end
     m_ui.picker = nil
 end
@@ -492,7 +601,13 @@ end
 
 local function CreatePolicyTreeItem(policyType, action)
     local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovScreenPolicyItem"), "TreeItem", {
-        Label   = function() return GetPolicyName(policyType) end,
+        Label   = function()
+            local name = GetPolicyName(policyType)
+            if IsPolicyNewThisTurn(policyType) then
+                return name .. ", " .. Locale.Lookup("LOC_CAI_GOVERNMENT_NEW_POLICY")
+            end
+            return name
+        end,
         Tooltip = function() return GetPolicyTooltip(policyType) end,
     })
     item:SetFocusSound("Main_Menu_Mouse_Over")
@@ -571,7 +686,7 @@ local function CreatePolicyPicker(slotIndex, rowIndex)
             MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_CLOSE",
             Action      = function()
-                ClosePicker()
+                ClosePicker(true)
                 return true
             end,
         },
@@ -589,10 +704,11 @@ local function CreatePolicyPicker(slotIndex, rowIndex)
             m_state.slotPolicyTypes[slotIndex] = policyType
             Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_POLICY_ASSIGNED", GetPolicyName(policyType), GetRowName(rowIndex)))
             RefreshVanillaPolicyControlsOnly()
-            ClosePicker()
+            ClosePicker(true)
         end,
     })
 
+    UI.PlaySound("UI_Policies_Card_Take")
     mgr:Push(m_ui.picker, PopupPriority.Current)
     return true
 end
@@ -740,7 +856,7 @@ local function BuildPoliciesTreeContent(tree)
     end
 end
 
-local function BuildGovernmentsTreeContent(tree)
+local function BuildGovernmentsListContent(list)
     local governments = {}
     for governmentType in pairs(g_kGovernments or {}) do
         table.insert(governments, governmentType)
@@ -749,20 +865,21 @@ local function BuildGovernmentsTreeContent(tree)
 
     for _, governmentType in ipairs(governments) do
         local government = g_kGovernments[governmentType]
-        local selected = IsGovernmentSelected(governmentType)
         local govType = governmentType
 
-        local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovScreenGovernmentItem"), "TreeItem", {
+        local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovScreenGovernmentItem"), "Button", {
             Label             = function()
                 local name = Locale.Lookup(government.Name)
+                local tier = GetGovernmentTier(govType)
+                if tier then
+                    name = name .. ", " .. Locale.Lookup("LOC_CAI_GOVERNMENT_TIER", tier)
+                end
                 if IsGovernmentSelected(govType) then
                     return name .. ", " .. Locale.Lookup("LOC_CAI_GOVERNMENT_ACTIVE")
                 end
                 return name
             end,
-            Tooltip           = function()
-                return table.concat(GetGovernmentDetailParts(govType), "[NEWLINE]")
-            end,
+            Tooltip           = function() return GetGovernmentTooltip(govType) end,
             DisabledPredicate = function() return not IsGovernmentUnlockedForPlayer(govType) end,
             FocusKey          = "gov:" .. tostring(governmentType),
         })
@@ -777,33 +894,21 @@ local function BuildGovernmentsTreeContent(tree)
             OnGovernmentSelected(govType)
         end)
 
-        for _, detailText in ipairs(GetGovernmentDetailParts(governmentType)) do
-            item:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovScreenGovDetail"), "TreeItem", {
-                Label = function() return detailText end,
-            }))
-        end
+        item:AddInputBindings({
+            {
+                Key         = Keys.VK_RETURN,
+                IsShift     = true,
+                MSG         = KeyEvents.KeyUp,
+                Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
+                Action      = function()
+                    if IsTutorialRunning and IsTutorialRunning() then return true end
+                    LuaEvents.OpenCivilopedia(govType)
+                    return true
+                end,
+            },
+        })
 
-        if selected then
-            for _, detailText in ipairs(GetCurrentGovernmentHeritageParts(governmentType)) do
-                item:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovScreenHeritage"), "TreeItem", {
-                    Label = function() return detailText end,
-                }))
-            end
-            local carryover = GetCarryoverBonusParts(governmentType)
-            if #carryover > 0 then
-                for _, detailText in ipairs(carryover) do
-                    item:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovScreenCarryover"), "TreeItem", {
-                        Label = function() return detailText end,
-                    }))
-                end
-            else
-                item:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovScreenCarryover"), "TreeItem", {
-                    Label = function() return Locale.Lookup("LOC_GOVT_NO_LEGACY_BONUS") end,
-                }))
-            end
-        end
-
-        tree:AddChild(item)
+        list:AddChild(item)
     end
 end
 
@@ -811,12 +916,12 @@ end
 -- Refresh
 -- ---------------------------------------------------------------------------
 
-local function RefreshGovernmentsTree()
-    if not m_ui.govTree then return end
-    local capture = mgr:CaptureFocusKey(m_ui.govTree)
-    m_ui.govTree:ClearChildren()
-    BuildGovernmentsTreeContent(m_ui.govTree)
-    mgr:RestoreFocus(m_ui.govTree, capture)
+local function RefreshGovernmentsList()
+    if not m_ui.govList then return end
+    local capture = mgr:CaptureFocusKey(m_ui.govList)
+    m_ui.govList:ClearChildren()
+    BuildGovernmentsListContent(m_ui.govList)
+    mgr:RestoreFocus(m_ui.govList, capture)
 end
 
 local function RefreshPoliciesTree()
@@ -833,8 +938,19 @@ end
 
 local function BuildPolicyFooter(page)
     local confirm = mgr:CreateWidget("CAIGovScreenConfirm", "Button", {
-        Label             = function() return Locale.Lookup("LOC_CAI_GOVERNMENT_CONFIRM_POLICIES") end,
-        Tooltip           = function() return Controls.ConfirmPolicies:GetToolTipString() or "" end,
+        Label             = function()
+            local text = GetConfirmPoliciesText and GetConfirmPoliciesText() or ""
+            if text ~= "" then return text end
+            return Locale.Lookup("LOC_CAI_GOVERNMENT_CONFIRM_POLICIES")
+        end,
+        Tooltip           = function()
+            if Controls.ConfirmPolicies:IsDisabled() then
+                local blockers = GetUnfilledPolicySlotBlockers()
+                if #blockers > 0 then return table.concat(blockers, "[NEWLINE]") end
+                return Locale.Lookup("LOC_CAI_GOVERNMENT_NO_POLICY_CHANGES")
+            end
+            return Controls.ConfirmPolicies:GetToolTipString() or ""
+        end,
         HiddenPredicate   = function() return Controls.ConfirmPolicies:IsHidden() end,
         DisabledPredicate = function() return Controls.ConfirmPolicies:IsDisabled() end,
     })
@@ -876,7 +992,7 @@ local function BuildGovernmentFooter(page)
     unlock:SetFocusSound("Main_Menu_Mouse_Over")
     unlock:On("activate", function()
         Controls.UnlockGovernments:DoLeftClick()
-        if m_ui.govTree then mgr:SetFocus(m_ui.govTree) end
+        if m_ui.govList then mgr:SetFocus(m_ui.govList) end
     end)
     page:AddChild(unlock)
 end
@@ -894,10 +1010,10 @@ local function BuildPanel()
     m_ui.govPage = m_ui.tabs:AddPage(function() return ControlText(Controls.ButtonGovernments) end)
     m_ui.polPage = m_ui.tabs:AddPage(function() return ControlText(Controls.ButtonPolicies) end)
 
-    m_ui.govTree = mgr:CreateWidget(GOV_TREE_ID, "Tree", {
+    m_ui.govList = mgr:CreateWidget(GOV_LIST_ID, "List", {
         Label = function() return ControlText(Controls.ButtonGovernments) end,
     })
-    m_ui.govPage:AddChild(m_ui.govTree)
+    m_ui.govPage:AddChild(m_ui.govList)
     BuildGovernmentFooter(m_ui.govPage)
 
     m_ui.polTree = mgr:CreateWidget(POL_TREE_ID, "Tree", {
@@ -906,7 +1022,7 @@ local function BuildPanel()
     m_ui.polPage:AddChild(m_ui.polTree)
     BuildPolicyFooter(m_ui.polPage)
 
-    BuildGovernmentsTreeContent(m_ui.govTree)
+    BuildGovernmentsListContent(m_ui.govList)
     BuildPoliciesTreeContent(m_ui.polTree)
 
     m_ui.tabs:On("value_changed", function(_, idx)
@@ -951,7 +1067,7 @@ local function PopPanel()
         tabs = nil,
         govPage = nil,
         polPage = nil,
-        govTree = nil,
+        govList = nil,
         polTree = nil,
         polRows = {},
         picker = nil,
@@ -1011,7 +1127,7 @@ end
 RealizeGovernmentsPage = WrapFunc(RealizeGovernmentsPage, function(orig)
     orig()
     if m_ui.panel and not ContextPtr:IsHidden() then
-        RefreshGovernmentsTree()
+        RefreshGovernmentsList()
     end
 end)
 
@@ -1033,7 +1149,7 @@ RefreshAllData = WrapFunc(RefreshAllData, function(orig)
     orig()
     if m_ui.panel and not ContextPtr:IsHidden() then
         SyncSlotPolicyTypesFromLive()
-        RefreshGovernmentsTree()
+        RefreshGovernmentsList()
         RefreshPoliciesTree()
         MirrorActiveTabToCAI()
     end
@@ -1059,8 +1175,13 @@ function info.GetGovernmentInfo()
 
     local lines = {}
 
+    local isInAnarchy = culture:IsInAnarchy()
     local govRowId = culture:GetCurrentGovernment()
-    if govRowId ~= -1 then
+    if isInAnarchy then
+        table.insert(lines, Locale.Lookup("LOC_GOVT_GOVERNMENT"))
+        local turnsLeft = culture:GetAnarchyEndTurn() - Game.GetCurrentGameTurn()
+        table.insert(lines, Locale.Lookup("LOC_GOVERNMENT_ANARCHY_TURNS", turnsLeft))
+    elseif govRowId ~= -1 then
         local govRow = GameInfo.Governments[govRowId]
         if govRow then
             table.insert(lines, Locale.Lookup("LOC_GOVT_GOVERNMENT"))
@@ -1077,10 +1198,7 @@ function info.GetGovernmentInfo()
         table.insert(lines, Locale.Lookup("LOC_GOVERNMENT_DOESNT_UNLOCK"))
     end
 
-    if culture:IsInAnarchy() then
-        local turnsLeft = culture:GetAnarchyEndTurn() - Game.GetCurrentGameTurn()
-        table.insert(lines, Locale.Lookup("LOC_GOVERNMENT_ANARCHY_TURNS", turnsLeft))
-    elseif culture:GetCostToUnlockPolicies() == 0 and not culture:PolicyChangeMade() then
+    if not isInAnarchy and culture:GetCostToUnlockPolicies() == 0 and not culture:PolicyChangeMade() then
         table.insert(lines, Locale.Lookup("LOC_HUD_GOVT_FREE_CHANGES"))
     end
 

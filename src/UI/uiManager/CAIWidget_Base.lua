@@ -370,6 +370,16 @@ function UIWidget:IsDisabled() return self._disabledFn and self._disabledFn(self
 -- self._listeners[event] = { [token] = fn }
 -- token is a unique table returned by On() and consumed by Off().
 
+local TYPE_TO_FIND_CLEAR_EVENTS = {
+    activate = true,
+    value_changed = true,
+    text_changed = true,
+    expanded = true,
+    collapsed = true,
+    opened = true,
+    closed = true,
+}
+
 ---@param event string
 ---@param fn function
 ---@return table token
@@ -393,6 +403,11 @@ end
 
 ---@param event string
 function UIWidget:Emit(event, ...)
+    if TYPE_TO_FIND_CLEAR_EVENTS[event]
+        and self.Manager
+        and self.Manager:GetSearchBuffer() ~= "" then
+        self.Manager:ClearSearchBuffer(false)
+    end
     local bucket = self._listeners and self._listeners[event]
     if not bucket then return end
     -- Snapshot so handlers can add/remove listeners during dispatch.

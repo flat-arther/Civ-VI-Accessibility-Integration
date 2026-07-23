@@ -227,6 +227,9 @@ function EditBoxWidget:SetEditMode(mode) self._editMode = mode or EditModes.Norm
 ---and SetAlwaysEdit so the normal focus announcement isn't doubled up.
 ---@param silent? boolean
 function EditBoxWidget:BeginEdit(silent)
+    if not silent and self.Manager then
+        self.Manager:ClearSearchBuffer(false)
+    end
     local text = self._value or ""
     self._buffer = text
     self._active = true

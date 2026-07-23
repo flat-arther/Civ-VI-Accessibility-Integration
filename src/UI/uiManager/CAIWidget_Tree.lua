@@ -26,12 +26,22 @@ function TreeWidget.Create(mgr, id, props)
     w.AllowSearch = true
 
     w:AddInputBindings({
-        { Key = Keys.VK_UP,     MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_UP",        Action = function(self) return Tree.NavigateFlat(self, -1) end },
-        { Key = Keys.VK_DOWN,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_DOWN",      Action = function(self) return Tree.NavigateFlat(self,  1) end },
+        { Key = Keys.VK_UP,     MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_UP",        Action = function(self)
+            return Search.NavigateResults(self, -1, self.SearchDepth) or Tree.NavigateFlat(self, -1)
+        end },
+        { Key = Keys.VK_DOWN,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_DOWN",      Action = function(self)
+            return Search.NavigateResults(self, 1, self.SearchDepth) or Tree.NavigateFlat(self, 1)
+        end },
         { Key = Keys.VK_RIGHT,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_EXPAND",         Action = function(self) return Tree.ExpandOrDescend(self) end },
         { Key = Keys.VK_LEFT,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_COLLAPSE",       Action = function(self) return Tree.CollapseOrAscend(self) end },
-        { Key = Keys.VK_HOME,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_TO_FIRST",  Action = function(self) return Tree.NavigateFirst(self) end },
-        { Key = Keys.VK_END,    MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_TO_LAST",   Action = function(self) return Tree.NavigateLast(self) end },
+        { Key = Keys.VK_HOME,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_TO_FIRST",  Action = function(self)
+            if CAISettings.GetBool("TreeHomeEndCurrentDepth") then return Tree.NavigateFirst(self) end
+            return Tree.NavigateTreeFirst(self)
+        end },
+        { Key = Keys.VK_END,    MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_TO_LAST",   Action = function(self)
+            if CAISettings.GetBool("TreeHomeEndCurrentDepth") then return Tree.NavigateLast(self) end
+            return Tree.NavigateTreeLast(self)
+        end },
         { Key = Keys.VK_HOME,   MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_MOVE_TO_TREE_START", Action = function(self) return Tree.NavigateTreeFirst(self) end },
         { Key = Keys.VK_END,    MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_MOVE_TO_TREE_END",   Action = function(self) return Tree.NavigateTreeLast(self) end },
         { Key = Keys.VK_PRIOR,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_PAGE_UP",        Action = function(self) return Tree.NavigatePage(self, -1, self.PageSize) end },

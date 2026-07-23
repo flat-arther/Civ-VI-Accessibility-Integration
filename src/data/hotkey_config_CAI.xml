@@ -78,6 +78,7 @@
     <Row ActionId="SurveyorReadNeutralUnits" Name="LOC_CAI_SURVEYOR_READ_NEUTRAL_UNITS" Description="LOC_CAI_SURVEYOR_READ_NEUTRAL_UNITS_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SurveyorReadOwnership" Name="LOC_CAI_SURVEYOR_READ_OWNERSHIP" Description="LOC_CAI_SURVEYOR_READ_OWNERSHIP_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
     <Row ActionId="SurveyorReadDistricts" Name="LOC_CAI_SURVEYOR_READ_DISTRICTS" Description="LOC_CAI_SURVEYOR_READ_DISTRICTS_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="SurveyorReadAppeal" Name="LOC_CAI_SURVEYOR_READ_APPEAL" Description="LOC_CAI_SURVEYOR_READ_APPEAL_TOOLTIP" CategoryId="CAI_SURVEYOR" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityBannerReadIdentityStatus" Name="LOC_CAI_CITY_BANNER_READ_1" Description="LOC_CAI_CITY_BANNER_READ_1_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityBannerReadGrowthInfluence" Name="LOC_CAI_CITY_BANNER_READ_2" Description="LOC_CAI_CITY_BANNER_READ_2_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CityBannerReadReligion" Name="LOC_CAI_CITY_BANNER_READ_3" Description="LOC_CAI_CITY_BANNER_READ_3_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
@@ -149,6 +150,7 @@
     <Row ActionId="WorldSelectNextCity_CAI" Name="LOC_CAI_WORLD_SELECT_NEXT_CITY" Description="LOC_CAI_WORLD_SELECT_NEXT_CITY_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldSelectCapitalCity_CAI" Name="LOC_CAI_WORLD_SELECT_CAPITAL_CITY" Description="LOC_CAI_WORLD_SELECT_CAPITAL_CITY_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAIPlaceMapPin" Name="LOC_CAI_PLACE_MAP_PIN" Description="LOC_CAI_PLACE_MAP_PIN_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIDeleteMapTac" Name="LOC_CAI_DELETE_MAP_TAC" Description="LOC_CAI_DELETE_MAP_TAC_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAIMapPinBookmarkAssign1" Name="LOC_CAI_BOOKMARK_ASSIGN_1" Description="LOC_CAI_BOOKMARK_ASSIGN_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAIMapPinBookmarkAssign2" Name="LOC_CAI_BOOKMARK_ASSIGN_2" Description="LOC_CAI_BOOKMARK_ASSIGN_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
     <Row ActionId="CAIMapPinBookmarkAssign3" Name="LOC_CAI_BOOKMARK_ASSIGN_3" Description="LOC_CAI_BOOKMARK_ASSIGN_TOOLTIP" CategoryId="CAI_NAVIGATION_CURSOR" ContextId="World" LayoutType="PC"/>
@@ -334,6 +336,8 @@
     <Row ActionId="SurveyorReadOwnership" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_NP_1" />
     <Row ActionId="SurveyorReadDistricts" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_Q" />
     <Row ActionId="SurveyorReadDistricts" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_NP_7" />
+    <Row ActionId="SurveyorReadAppeal" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_X" />
+    <Row ActionId="SurveyorReadAppeal" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_NP_2" />
     <Row ActionId="CityBannerReadIdentityStatus" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_1" />
     <Row ActionId="CityBannerReadGrowthInfluence" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_2" />
     <Row ActionId="CityBannerReadReligion" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_3" />
@@ -402,6 +406,7 @@
     <Row ActionId="WorldSelectNextCity_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_RBRACKET" />
     <Row ActionId="WorldSelectCapitalCity_CAI" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_BACKSLASH" />
     <Row ActionId="CAIPlaceMapPin" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_M" />
+    <Row ActionId="CAIDeleteMapTac" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_DELETE" />
     <Row ActionId="CAIMapPinBookmarkAssign1" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_1" />
     <Row ActionId="CAIMapPinBookmarkAssign2" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_2" />
     <Row ActionId="CAIMapPinBookmarkAssign3" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_3" />

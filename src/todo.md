@@ -53,7 +53,7 @@
 [ ] figure out tab bar count
 [x] dedup difficulty tooltip, it repeats label. 
 [x] change dropdowns that have simple on off options to checkboxes
-[ ] add custom locale for hotkey strings that are symbols
+[x] add custom locale for hotkey strings that are symbols
 [x] Make quick move keys not queue movement.
 
 [x] Change label for friends list
@@ -65,9 +65,23 @@
 [x] Have shift announce turn blocker info
 
 [x] offset the team numbering in team slot
-[ ] Add announcements for capturing units
 [x] Scanner sort should be based on cashed plot id
 [x] change scanner sound and add volume setting
 [x] Fix wc unknown participant string
 [x] Selection cursor move should be a setting
 [x] Make home end in treeviews take you to the start or end of a node, control home end can take you to the top or bottom
+[x] Add a config for treeview for whether home and end takes you to the end of node
+[x] Make current production node function same as queue items
+[x] Fix issue with city details panel not updating before the rename popup closes
+[x] Add announcements for capturing units
+[x] del on map pins in the list deletes them
+[x] ctrl enter in unit list to jump cursor without selection
+[x] tie mod audio volume to game master volume
+[x] Add setting for announcing combats that are not yours
+[x ] Religious units that don't share a religion with the player should be enemies
+[x] Add buffer messages tab to notifications
+[x] typeahead settings
+[ ] Fix civilopedia lookup to support colon separators
+[ ] Add fresh water to the shift z terrain count
+[ ] Fix the Surveyor terrain counts to remove mountain terrain from the list, since it is already counting how many mountains there are
+[ ] Group mountains by range in the scanner

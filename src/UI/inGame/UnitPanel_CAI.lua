@@ -588,7 +588,8 @@ local function GetUnitInfoStats(data)
     end
 
     AppendUnitInfo(results,
-        (data.Combat or 0) > 0 and Locale.Lookup("LOC_HUD_UNIT_PANEL_STRENGTH") .. "[NEWLINE]" .. tostring(data.Combat) or nil)
+        (data.Combat or 0) > 0 and Locale.Lookup("LOC_HUD_UNIT_PANEL_STRENGTH") .. "[NEWLINE]" .. tostring(data.Combat) or
+        nil)
     AppendUnitInfo(results,
         (data.RangedCombat or 0) > 0 and
         Locale.Lookup("LOC_HUD_UNIT_PANEL_RANGED_STRENGTH") .. "[NEWLINE]" .. tostring(data.RangedCombat) or nil)
@@ -636,14 +637,16 @@ local function GetUnitInfoCharges(data, unit)
         (data.SpreadCharges or 0) > 0 and
         Locale.Lookup("LOC_HUD_UNIT_PANEL_SPREADS") .. "[NEWLINE]" .. tostring(data.SpreadCharges) or nil)
     AppendUnitInfo(results,
-        (data.HealCharges or 0) > 0 and Locale.Lookup("LOC_HUD_UNIT_PANEL_HEALS") .. "[NEWLINE]" .. tostring(data.HealCharges) or
+        (data.HealCharges or 0) > 0 and
+        Locale.Lookup("LOC_HUD_UNIT_PANEL_HEALS") .. "[NEWLINE]" .. tostring(data.HealCharges) or
         nil)
     AppendUnitInfo(results,
         (data.ActionCharges or 0) > 0 and
         Locale.Lookup("LOC_HUD_UNIT_PANEL_CHARGES") .. "[NEWLINE]" .. tostring(data.ActionCharges) or nil)
     AppendUnitInfo(results,
         (data.GreatPersonActionCharges or 0) > 0 and
-        Locale.Lookup("LOC_HUD_UNIT_PANEL_GREAT_PERSON_ACTIONS") .. "[NEWLINE]" .. tostring(data.GreatPersonActionCharges) or
+        Locale.Lookup("LOC_HUD_UNIT_PANEL_GREAT_PERSON_ACTIONS") ..
+        "[NEWLINE]" .. tostring(data.GreatPersonActionCharges) or
         nil)
 
     local parkCharges = GetParkCharges(unit)
@@ -1427,7 +1430,7 @@ local function DoesCombatComponentBelongToLocalPlayer(componentData)
     return componentId ~= nil and componentId.player == localPlayer
 end
 
-local function IsCombatVisibleToLocalPlayer(results)
+local function IsCombatVisibleToLocalPlayer(results, requireLocalParticipant)
     if results == nil then
         return false
     end
@@ -1437,6 +1440,10 @@ local function IsCombatVisibleToLocalPlayer(results)
         or DoesCombatComponentBelongToLocalPlayer(results[CombatResultParameters.INTERCEPTOR])
         or DoesCombatComponentBelongToLocalPlayer(results[CombatResultParameters.ANTI_AIR]) then
         return true
+    end
+
+    if requireLocalParticipant then
+        return false
     end
 
     return IsCombatLocationVisibleToLocalPlayer(results)
@@ -1770,7 +1777,8 @@ local function BuildCombatResultIntroClause(attackerName, defenderName)
 end
 
 local function BuildCombatResultText(results)
-    if results == nil or IsWMDCombatResult(results) or not IsCombatVisibleToLocalPlayer(results) then
+    if results == nil or IsWMDCombatResult(results)
+        or not IsCombatVisibleToLocalPlayer(results, not CAISettings.GetBool("AnnounceUnownedCombatResults")) then
         return nil
     end
 
@@ -2671,6 +2679,31 @@ local function CreateUnitListItem(unit)
         RemoveUnitList()
         UI.SelectUnit(resolved)
     end)
+    item:AddInputBindings({
+        {
+            Key         = Keys.VK_RETURN,
+            IsControl   = true,
+            MSG         = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_JUMP_CURSOR_TO_UNIT",
+            Action      = function()
+                local resolved = ResolveUnit(unitID, playerID)
+                if resolved == nil then
+                    LogWarn("CAI UnitPanel unit-list cursor jump could not resolve unit " .. tostring(unitID))
+                    return true
+                end
+
+                local plot = Map.GetPlot(resolved:GetX(), resolved:GetY())
+                if plot == nil then
+                    LogWarn("CAI UnitPanel unit-list cursor jump could not resolve unit plot: " ..
+                        tostring(resolved:GetX()) .. ", " .. tostring(resolved:GetY()))
+                    return true
+                end
+
+                LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
+                return true
+            end,
+        },
+    })
     BindCivilopediaShortcut(item, function() return unitID end)
 
     return item
@@ -2803,6 +2836,7 @@ end
 
 Events.InputActionTriggered.Remove(OnInputActionTriggered)
 OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
+    if actionId == Input.GetActionId("DeleteUnit") or actionId == Input.GetActionId("Attack") then return end
     orig(actionId)
 end)
 

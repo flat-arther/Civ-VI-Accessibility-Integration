@@ -374,6 +374,35 @@ local function GetPlayerLabel(playerID)
         playerConfig:GetCivilizationDescription())
 end
 
+local function IsLocalPlayerOnTeam(teamID)
+    for _, playerID in ipairs(Teams[teamID]) do
+        if playerID == g_LocalPlayerID then return true end
+    end
+    return false
+end
+
+local function GetRankingsPlayerLabel(playerID)
+    local parts = { GetPlayerLabel(playerID) }
+    if IsPlayerKnownToLocal(playerID) then
+        local playerConfig = PlayerConfigurations[playerID]
+        if GameConfiguration.IsAnyMultiplayer() and playerConfig:IsHuman() then
+            table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_HUMAN_PLAYER_NAME",
+                Locale.Lookup(playerConfig:GetPlayerName())))
+        end
+        if playerID == g_LocalPlayerID then
+            table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_LOCAL_PLAYER"))
+        end
+    end
+    return JoinLines(parts)
+end
+
+local function GetRankingsTeamLabel(teamID)
+    return JoinLines({
+        Locale.Lookup("LOC_WORLD_RANKINGS_TEAM", GameConfiguration.GetTeamName(teamID)),
+        IsLocalPlayerOnTeam(teamID) and Locale.Lookup("LOC_CAI_WORLD_RANKINGS_YOUR_TEAM") or nil,
+    })
+end
+
 -- ============================================================================
 -- Overall Tab
 -- ============================================================================
@@ -549,107 +578,219 @@ local function RebuildOverallTree(tree)
         return
     end
 
-    local teamIDs = GetAliveMajorTeamIDs()
-
-    local function AddOverallVictory(victoryType, displayName)
-        if not Game.IsVictoryEnabled(victoryType) then return end
-
+    local function GatherOverallVictoryData(victoryType)
         local victoryData = g_victoryData[victoryType]
-        if not victoryData then return end
+        local firstTiebreaker = victoryData.Primary or victoryData
+        local secondTiebreaker = victoryData.Secondary or victoryData
+        local results = {}
 
-        local teamData = {}
-        for _, teamID in ipairs(teamIDs) do
-            local team = Teams[teamID]
-            if team then
-                local progress = Game.GetVictoryProgressForTeam(victoryType, teamID)
-                if progress then
-                    local firstTiebreaker = victoryData.Primary or victoryData
-                    local bestScore = 0
-                    local bestPlayerID = nil
-                    local playerCount = 0
-                    local localInTeam = false
-                    for _, playerID in ipairs(team) do
-                        if IsAliveAndMajor(playerID) then
-                            playerCount = playerCount + 1
-                            local s = firstTiebreaker.GetScore(Players[playerID])
-                            if s > bestScore or bestPlayerID == nil then
-                                bestScore = s
-                                bestPlayerID = playerID
-                            end
-                            if playerID == g_LocalPlayerID then
-                                localInTeam = true
-                            end
-                        end
+        for _, teamID in ipairs(GetAliveMajorTeamIDs()) do
+            local progress = Game.GetVictoryProgressForTeam(victoryType, teamID)
+            if progress ~= nil then
+                local entry = {
+                    TeamID = teamID,
+                    Progress = progress,
+                    GenericScore = 0,
+                    FirstTeamScore = 0,
+                    SecondTeamScore = 0,
+                    PlayerData = {},
+                    LocalInTeam = false,
+                }
+
+                for _, playerID in ipairs(Teams[teamID]) do
+                    if IsAliveAndMajor(playerID) then
+                        local player = Players[playerID]
+                        local firstScore = firstTiebreaker.GetScore(player)
+                        local secondScore = secondTiebreaker.GetScore(player)
+                        local additionalSummary = victoryData.AdditionalSummary
+                            and victoryData.AdditionalSummary(player) or ""
+                        local playerData = {
+                            PlayerID = playerID,
+                            GenericScore = player:GetScore(),
+                            FirstScore = firstScore,
+                            SecondScore = secondScore,
+                            FirstSummary = Locale.Lookup(firstTiebreaker.GetText(player), Round(firstScore, 1)),
+                            SecondSummary = Locale.Lookup(secondTiebreaker.GetText(player), Round(secondScore, 1)),
+                            AdditionalSummary = Locale.Lookup(additionalSummary),
+                        }
+                        table.insert(entry.PlayerData, playerData)
+                        entry.GenericScore = math.max(entry.GenericScore, playerData.GenericScore)
+                        entry.FirstTeamScore = entry.FirstTeamScore + firstScore
+                        entry.SecondTeamScore = entry.SecondTeamScore + secondScore
+                        if playerID == g_LocalPlayerID then entry.LocalInTeam = true end
                     end
-                    table.insert(teamData, {
-                        TeamID = teamID,
-                        Progress = progress,
-                        BestPlayerID = bestPlayerID,
-                        PlayerCount = playerCount,
-                        LocalInTeam = localInTeam,
-                        TiebreakScore = bestScore,
-                    })
                 end
+
+                local playerCount = #entry.PlayerData
+                entry.PlayerCount = playerCount
+                entry.FirstTeamScore = entry.FirstTeamScore / playerCount
+                entry.SecondTeamScore = entry.SecondTeamScore / playerCount
+                table.sort(entry.PlayerData, function(a, b)
+                    if a.FirstScore ~= b.FirstScore then return a.FirstScore > b.FirstScore end
+                    if a.SecondScore ~= b.SecondScore then return a.SecondScore > b.SecondScore end
+                    if a.GenericScore ~= b.GenericScore then return a.GenericScore > b.GenericScore end
+                    return a.PlayerID < b.PlayerID
+                end)
+                table.insert(results, entry)
             end
         end
 
-        table.sort(teamData, function(a, b)
+        table.sort(results, function(a, b)
             if a.Progress ~= b.Progress then return a.Progress > b.Progress end
-            return a.TiebreakScore > b.TiebreakScore
+            if a.FirstTeamScore ~= b.FirstTeamScore then
+                return a.FirstTeamScore > b.FirstTeamScore
+            end
+            if a.SecondTeamScore ~= b.SecondTeamScore then
+                return a.SecondTeamScore > b.SecondTeamScore
+            end
+            if a.GenericScore ~= b.GenericScore then return a.GenericScore > b.GenericScore end
+            return a.TeamID < b.TeamID
         end)
+        return results
+    end
 
+    local function FindOverallTeam(victoryType, teamID)
+        for rank, entry in ipairs(GatherOverallVictoryData(victoryType)) do
+            if entry.TeamID == teamID then return entry, rank end
+        end
+        return nil, nil
+    end
+
+    local function GetOverallPlayerDetails(victoryType, playerID)
+        if not IsPlayerKnownToLocal(playerID) then return nil end
+        local teamID = Players[playerID]:GetTeam()
+        local teamData = FindOverallTeam(victoryType, teamID)
+        if not teamData then return nil end
+
+        for _, playerData in ipairs(teamData.PlayerData) do
+            if playerData.PlayerID == playerID then
+                return JoinLines({
+                    playerData.FirstSummary,
+                    playerData.SecondSummary ~= playerData.FirstSummary
+                    and playerData.SecondSummary or nil,
+                    playerData.AdditionalSummary,
+                })
+            end
+        end
+        return nil
+    end
+
+    local function GetOverallPlace(rank)
+        local place = Locale.Lookup("LOC_WORLD_RANKINGS_" .. rank .. "_PLACE")
+        return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_PLACE", place)
+    end
+
+    local function GetOverallProgress(progress)
+        local percent = Round(math.max(0, math.min(progress, 1)) * 100, 1)
+        return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_VICTORY_PROGRESS", percent)
+    end
+
+    local function GetOverallPlayerLabel(playerID)
+        return GetRankingsPlayerLabel(playerID)
+    end
+
+    local function AddOverallVictory(victoryType, displayName)
+        if not Game.IsVictoryEnabled(victoryType) then return end
+        if not g_victoryData[victoryType] then return end
+
+        local teamData = GatherOverallVictoryData(victoryType)
+        local fk = "overall:" .. victoryType
         if #teamData == 0 then
-            local item = MakeStaticText({
+            tree:AddChild(MakeStaticText({
                 Label = function()
                     return JoinLines({
                         displayName,
                         Locale.Lookup("LOC_WORLD_RANKINGS_VICTORY_DISABLED"),
                     })
                 end,
-                FocusKey = "overall:" .. victoryType,
-            })
-            tree:AddChild(item)
+                FocusKey = fk,
+            }))
             return
         end
 
-        local leaderEntry = teamData[1]
-        local localRank = nil
-        for rank, entry in ipairs(teamData) do
-            if entry.LocalInTeam then
-                localRank = rank
-                break
-            end
-        end
-
-        local labelFn = function()
-            local parts = { displayName }
-            if leaderEntry.LocalInTeam then
-                if leaderEntry.PlayerCount > 1 then
-                    table.insert(parts, Locale.Lookup("LOC_WORLD_RANKINGS_FIRST_PLACE_TEAM_SIMPLE"))
+        local victoryItem = MakeTreeItem({
+            Label = function()
+                local currentData = GatherOverallVictoryData(victoryType)
+                if #currentData == 0 then
+                    return JoinLines({
+                        displayName,
+                        Locale.Lookup("LOC_WORLD_RANKINGS_VICTORY_DISABLED"),
+                    })
+                end
+                local leader = currentData[1]
+                local parts = { displayName }
+                if leader.LocalInTeam then
+                    table.insert(parts, Locale.Lookup(leader.PlayerCount > 1
+                        and "LOC_WORLD_RANKINGS_FIRST_PLACE_TEAM_SIMPLE"
+                        or "LOC_WORLD_RANKINGS_FIRST_PLACE_YOU_SIMPLE"))
                 else
-                    table.insert(parts, Locale.Lookup("LOC_WORLD_RANKINGS_FIRST_PLACE_YOU_SIMPLE"))
+                    local topName = leader.PlayerCount > 1
+                        and Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
+                            GameConfiguration.GetTeamName(leader.TeamID))
+                        or GetPlayerLabel(leader.PlayerData[1].PlayerID)
+                    table.insert(parts, Locale.Lookup("LOC_WORLD_RANKINGS_FIRST_PLACE_OTHER_SIMPLE", topName))
+                    for rank, entry in ipairs(currentData) do
+                        if entry.LocalInTeam then
+                            local posText = Locale.Lookup("LOC_WORLD_RANKINGS_" .. rank .. "_PLACE")
+                            table.insert(parts, Locale.Lookup(entry.PlayerCount > 1
+                                and "LOC_WORLD_RANKINGS_OTHER_PLACE_TEAM_SIMPLE"
+                                or "LOC_WORLD_RANKINGS_OTHER_PLACE_SIMPLE", posText))
+                            break
+                        end
+                    end
                 end
-            else
-                local topName
-                if leaderEntry.PlayerCount > 1 then
-                    topName = Locale.Lookup("LOC_WORLD_RANKINGS_TEAM", GameConfiguration.GetTeamName(leaderEntry.TeamID))
-                else
-                    topName = GetPlayerLabel(leaderEntry.BestPlayerID)
-                end
-                table.insert(parts, Locale.Lookup("LOC_WORLD_RANKINGS_FIRST_PLACE_OTHER_SIMPLE", topName))
-                if localRank then
-                    local posText = Locale.Lookup("LOC_WORLD_RANKINGS_" .. localRank .. "_PLACE")
-                    table.insert(parts, Locale.Lookup("LOC_WORLD_RANKINGS_OTHER_PLACE_SIMPLE", posText))
-                end
-            end
-            return JoinLines(parts)
-        end
-
-        local item = MakeStaticText({
-            Label = labelFn,
-            FocusKey = "overall:" .. victoryType,
+                return JoinLines(parts)
+            end,
+            FocusKey = fk,
         })
-        tree:AddChild(item)
+
+        for rank, entry in ipairs(teamData) do
+            local capturedTeamID = entry.TeamID
+            local capturedRank = rank
+            if entry.PlayerCount > 1 then
+                local teamItem = MakeTreeItem({
+                    Label = function()
+                        local liveEntry, liveRank = FindOverallTeam(victoryType, capturedTeamID)
+                        return JoinLines({
+                            GetRankingsTeamLabel(capturedTeamID),
+                            GetOverallPlace(liveRank or capturedRank),
+                            liveEntry and GetOverallProgress(liveEntry.Progress) or nil,
+                        })
+                    end,
+                    FocusKey = fk .. ":team:" .. capturedTeamID,
+                })
+                for _, playerData in ipairs(entry.PlayerData) do
+                    local capturedPlayerID = playerData.PlayerID
+                    teamItem:AddChild(MakeStaticText({
+                        Label = function() return GetOverallPlayerLabel(capturedPlayerID) end,
+                        Tooltip = function()
+                            return GetOverallPlayerDetails(victoryType, capturedPlayerID)
+                        end,
+                        FocusKey = fk .. ":team:" .. capturedTeamID
+                            .. ":player:" .. capturedPlayerID,
+                    }))
+                end
+                victoryItem:AddChild(teamItem)
+            else
+                local capturedPlayerID = entry.PlayerData[1].PlayerID
+                victoryItem:AddChild(MakeStaticText({
+                    Label = function()
+                        local liveEntry, liveRank = FindOverallTeam(victoryType, capturedTeamID)
+                        return JoinLines({
+                            GetOverallPlayerLabel(capturedPlayerID),
+                            GetOverallPlace(liveRank or capturedRank),
+                            liveEntry and GetOverallProgress(liveEntry.Progress) or nil,
+                        })
+                    end,
+                    Tooltip = function()
+                        return GetOverallPlayerDetails(victoryType, capturedPlayerID)
+                    end,
+                    FocusKey = fk .. ":player:" .. capturedPlayerID,
+                }))
+            end
+        end
+
+        tree:AddChild(victoryItem)
     end
 
     AddOverallVictory("VICTORY_TECHNOLOGY", Locale.Lookup("LOC_WORLD_RANKINGS_SCIENCE_VICTORY"))
@@ -677,7 +818,7 @@ local function CreateScorePlayerRow(playerData, parentFocusPrefix)
     local item = rowFactory({
         Label = function()
             return JoinLines({
-                GetPlayerLabel(playerID),
+                GetRankingsPlayerLabel(playerID),
                 tostring(playerData.PlayerScore),
             })
         end,
@@ -710,8 +851,7 @@ local function RebuildScoreTree(tree)
                 local teamItem = MakeTreeItem({
                     Label = function()
                         return JoinLines({
-                            Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                                GameConfiguration.GetTeamName(teamData.TeamID)),
+                            GetRankingsTeamLabel(teamData.TeamID),
                             tostring(teamData.TeamScore),
                         })
                     end,
@@ -743,8 +883,7 @@ local function RebuildScoreTree(tree)
                 local teamItem = MakeTreeItem({
                     Label = function()
                         return JoinLines({
-                            Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                                GameConfiguration.GetTeamName(teamData.TeamID)),
+                            GetRankingsTeamLabel(teamData.TeamID),
                             tostring(teamData.TeamScore),
                         })
                     end,
@@ -761,7 +900,10 @@ local function RebuildScoreTree(tree)
         end
     end
 
-    AddAdvisorLeaf(tree, Locale.Lookup("LOC_WORLD_RANKINGS_SCORE_DETAILS"))
+    AddAdvisorLeaf(tree, JoinLines({
+        Locale.Lookup("LOC_WORLD_RANKINGS_SCORE_DETAILS"),
+        Locale.Lookup("LOC_WORLD_RANKINGS_SCORE_CONDITION", Game.GetMaxGameTurns())
+    }))
 
     mgr:RestoreFocus(tree, capture)
 end
@@ -777,7 +919,15 @@ local function GetScienceNextStep(pPlayer, projectSets, bHasSpaceport, finishedP
 
     local playerTech = pPlayer:GetTechs()
     for mi, projGroup in ipairs(projectSets) do
-        if not finishedProjects[mi] then
+        local projectCompletion = finishedProjects[mi]
+        local hasUnfinishedProject = false
+        for pi, _ in ipairs(projGroup) do
+            if not projectCompletion[pi] then
+                hasUnfinishedProject = true
+                break
+            end
+        end
+        if hasUnfinishedProject then
             for _, projInfo in ipairs(projGroup) do
                 if projInfo and projInfo.PrereqTech then
                     local tech = GameInfo.Technologies[projInfo.PrereqTech]
@@ -786,8 +936,8 @@ local function GetScienceNextStep(pPlayer, projectSets, bHasSpaceport, finishedP
                     end
                 end
             end
-            for _, projInfo in ipairs(projGroup) do
-                if projInfo then
+            for pi, projInfo in ipairs(projGroup) do
+                if projInfo and not projectCompletion[pi] then
                     return Locale.Lookup(projInfo.Name)
                 end
             end
@@ -844,21 +994,40 @@ local function GatherSciencePlayerData(pPlayer)
     local milestones = {}
     local completedCount = 0
     local milestoneComplete = {}
+    local finishedProjects = {}
 
     for mi, projGroup in ipairs(projectSets) do
         local totalCost = 0
         local totalProgress = 0
+        finishedProjects[mi] = {}
+        for pi, _ in ipairs(projGroup) do
+            finishedProjects[mi][pi] = false
+        end
         for _, city in pPlayer:GetCities():Members() do
             local bq = city:GetBuildQueue()
-            for _, projInfo in ipairs(projGroup) do
+            for pi, projInfo in ipairs(projGroup) do
                 if projInfo then
                     local cost = bq:GetProjectCost(projInfo.Index)
                     local progress = cost
                     if pStats:GetNumProjectsAdvanced(projInfo.Index) == 0 then
                         progress = bq:GetProjectProgress(projInfo.Index)
                     end
-                    totalCost = totalCost + cost
-                    totalProgress = totalProgress + progress
+                    -- Vanilla omits idle-city costs for the first two stages, but
+                    -- includes every city cost for the later Mars/Exoplanet stages.
+                    if mi <= 2 then
+                        if progress ~= 0 then
+                            totalCost = totalCost + cost
+                            totalProgress = totalProgress + progress
+                        end
+                    else
+                        totalCost = totalCost + cost
+                        if progress ~= 0 then
+                            totalProgress = totalProgress + progress
+                        end
+                    end
+                    if progress ~= 0 and progress == cost then
+                        finishedProjects[mi][pi] = true
+                    end
                 end
             end
         end
@@ -876,6 +1045,9 @@ local function GatherSciencePlayerData(pPlayer)
             Name = milestoneNames[mi],
             Percent = pct,
             IsComplete = isComplete,
+            ProjectInfos = projGroup,
+            FinishedProjects = finishedProjects[mi],
+            IncludeSpaceport = (mi == 1),
         })
     end
 
@@ -890,7 +1062,7 @@ local function GatherSciencePlayerData(pPlayer)
 
     local nextStep = nil
     if playerID == g_LocalPlayerID then
-        nextStep = GetScienceNextStep(pPlayer, projectSets, bHasSpaceport, milestoneComplete)
+        nextStep = GetScienceNextStep(pPlayer, projectSets, bHasSpaceport, finishedProjects)
     end
 
     return {
@@ -902,6 +1074,7 @@ local function GatherSciencePlayerData(pPlayer)
         LightYears = lightYears,
         LightYearsTotal = lightYearsTotal,
         LightYearsRate = lightYearsRate,
+        HasLaunchedExpedition = m_isExp2 and milestoneComplete[4] or false,
         NextStep = nextStep,
     }
 end
@@ -929,7 +1102,7 @@ local function CreateSciencePlayerRow(sciData, parentFocusPrefix)
     local item = MakeTreeItem({
         Label = function()
             return JoinLines({
-                GetPlayerLabel(playerID),
+                GetRankingsPlayerLabel(playerID),
                 Locale.Lookup("LOC_CAI_WORLD_RANKINGS_MILESTONES_DONE",
                     sciData.CompletedCount, sciData.TotalMilestones),
             })
@@ -941,18 +1114,27 @@ local function CreateSciencePlayerRow(sciData, parentFocusPrefix)
     for mi, ms in ipairs(sciData.Milestones) do
         local capturedMs = ms
         local capturedMi = mi
-        AddLeaf(item, fk .. ":ms:" .. capturedMi, function()
-            if capturedMs.IsComplete then
-                return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_MILESTONE_COMPLETE", capturedMs.Name)
-            elseif capturedMs.Percent > 0 then
-                return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_MILESTONE_PROGRESS", capturedMs.Name, capturedMs.Percent)
-            else
-                return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_MILESTONE_NONE", capturedMs.Name)
-            end
-        end)
+        item:AddChild(MakeStaticText({
+            Label = function()
+                if capturedMs.IsComplete then
+                    return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_MILESTONE_COMPLETE", capturedMs.Name)
+                elseif capturedMs.Percent > 0 then
+                    return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_MILESTONE_PROGRESS", capturedMs.Name, capturedMs
+                    .Percent)
+                else
+                    return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_MILESTONE_NONE", capturedMs.Name)
+                end
+            end,
+            Tooltip = function()
+                return GetTooltipForScienceProject(Players[playerID], capturedMs.ProjectInfos,
+                    capturedMs.IncludeSpaceport and sciData.HasSpaceport or nil,
+                    capturedMs.FinishedProjects)
+            end,
+            FocusKey = fk .. ":ms:" .. capturedMi,
+        }))
     end
 
-    if m_isExp2 and sciData.LightYears then
+    if m_isExp2 and sciData.HasLaunchedExpedition then
         AddLeaf(item, fk .. ":lightyears", function()
             local ly = sciData.LightYears
             local lyTotal = sciData.LightYearsTotal
@@ -979,7 +1161,7 @@ local function RebuildScienceTree(tree)
             if #team > 1 then
                 local teamItem = MakeTreeItem({
                     Label = function()
-                        return Locale.Lookup("LOC_WORLD_RANKINGS_TEAM", GameConfiguration.GetTeamName(teamID))
+                        return GetRankingsTeamLabel(teamID)
                     end,
                     FocusKey = "team:" .. teamID,
                 })
@@ -1006,6 +1188,10 @@ local function RebuildScienceTree(tree)
     for i = 1, milestoneCount do
         table.insert(parts, Locale.Lookup("LOC_WORLD_RANKINGS_SCIENCE_REQUIREMENT_" .. i))
     end
+    if m_isExp2 and g_LocalPlayer then
+        table.insert(parts, Locale.Lookup("LOC_WORLD_RANKINGS_SCIENCE_REQUIREMENT_FINAL",
+            g_LocalPlayer:GetStats():GetScienceVictoryPointsTotalNeeded()))
+    end
     AddAdvisorLeaf(tree, table.concat(parts, "[NEWLINE]"))
 
     mgr:RestoreFocus(tree, capture)
@@ -1019,147 +1205,191 @@ local function RebuildCultureTree(tree)
     tree:ClearChildren()
 
     local cultureData = GatherCultureData()
+    local playerData = {}
+    for _, teamData in ipairs(cultureData) do
+        for _, data in ipairs(teamData.PlayerData) do
+            table.insert(playerData, data)
+        end
+    end
+    table.sort(playerData, function(a, b)
+        local aScore = a.NumVisitingUs / math.max(a.NumRequiredTourists, 1)
+        local bScore = b.NumVisitingUs / math.max(b.NumRequiredTourists, 1)
+        if aScore ~= bScore then return aScore > bScore end
+        if a.NumRequiredTourists ~= b.NumRequiredTourists then
+            return a.NumRequiredTourists > b.NumRequiredTourists
+        end
+        return a.PlayerID < b.PlayerID
+    end)
+
     table.sort(cultureData, function(a, b)
-        return a.BestNumVisitingUs / a.BestNumRequiredTourists >
-            b.BestNumVisitingUs / b.BestNumRequiredTourists
+        local aScore = a.BestNumVisitingUs / math.max(a.BestNumRequiredTourists, 1)
+        local bScore = b.BestNumVisitingUs / math.max(b.BestNumRequiredTourists, 1)
+        if aScore ~= bScore then return aScore > bScore end
+        if a.BestNumRequiredTourists ~= b.BestNumRequiredTourists then
+            return a.BestNumRequiredTourists > b.BestNumRequiredTourists
+        end
+        return a.TeamID < b.TeamID
     end)
 
     for _, teamData in ipairs(cultureData) do
+        table.sort(teamData.PlayerData, function(a, b)
+            local aScore = a.NumVisitingUs / math.max(a.NumRequiredTourists, 1)
+            local bScore = b.NumVisitingUs / math.max(b.NumRequiredTourists, 1)
+            if aScore ~= bScore then return aScore > bScore end
+            if a.NumRequiredTourists ~= b.NumRequiredTourists then
+                return a.NumRequiredTourists > b.NumRequiredTourists
+            end
+            return a.PlayerID < b.PlayerID
+        end)
+
         if #teamData.PlayerData > 1 then
+            local capturedTeamID = teamData.TeamID
             local teamItem = MakeTreeItem({
                 Label = function()
+                    local liveTeamData = CAIGetCultureTeamData(capturedTeamID)
                     return JoinLines({
-                        Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                            GameConfiguration.GetTeamName(teamData.TeamID)),
+                        GetRankingsTeamLabel(capturedTeamID),
                         Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TOURISTS",
-                            teamData.BestNumVisitingUs, teamData.BestNumRequiredTourists),
+                            liveTeamData.BestNumVisitingUs, liveTeamData.BestNumRequiredTourists),
                     })
                 end,
-                FocusKey = "team:" .. teamData.TeamID,
+                FocusKey = "team:" .. capturedTeamID,
             })
-            for _, pd in ipairs(teamData.PlayerData) do
-                local row = CreateCulturePlayerRow(pd, "team:" .. teamData.TeamID .. ":")
-                teamItem:AddChild(row)
+            for _, data in ipairs(teamData.PlayerData) do
+                teamItem:AddChild(CreateCulturePlayerRow(data, playerData,
+                    "team:" .. capturedTeamID .. ":"))
             end
             tree:AddChild(teamItem)
-        elseif #teamData.PlayerData > 0 then
-            tree:AddChild(CreateCulturePlayerRow(teamData.PlayerData[1], ""))
+        else
+            tree:AddChild(CreateCulturePlayerRow(teamData.PlayerData[1], playerData, ""))
         end
     end
 
-    AddAdvisorLeaf(tree, Locale.Lookup("LOC_WORLD_RANKINGS_CULTURE_VICTORY_DETAILS"))
+    AddAdvisorLeaf(tree, JoinLines({
+        Locale.Lookup("LOC_WORLD_RANKINGS_CULTURE_VICTORY_DETAILS"),
+        Locale.Lookup("LOC_WORLD_RANKINGS_CULTURE_DETAILS_DOMESTIC_TOURISTS"),
+        Locale.Lookup("LOC_WORLD_RANKINGS_CULTURE_DETAILS_VISITING_TOURISTS"),
+    }))
 
     mgr:RestoreFocus(tree, capture)
 end
 
-local function GetCultureDominanceTooltip(playerID)
-    if not m_isExp2 or not g_LocalPlayer then return nil end
-    local pLocalCulture = g_LocalPlayer:GetCulture()
-    if not pLocalCulture then return nil end
+function CAIGetCulturePlayerData(playerID)
+    local player = Players[playerID]
+    local culture = player:GetCulture()
+    local requiredTourists = 0
+    local teamID = player:GetTeam()
 
-    local parts = {}
-    if playerID == g_LocalPlayerID then
-        local numWeDominate = 0
-        local numDominateUs = 0
-        for _, loopID in ipairs(PlayerManager.GetAliveMajorIDs()) do
-            if loopID ~= g_LocalPlayerID then
-                if pLocalCulture:IsDominantOver(loopID) then
-                    numWeDominate = numWeDominate + 1
-                else
-                    local pLoopCulture = Players[loopID]:GetCulture()
-                    if pLoopCulture and pLoopCulture:IsDominantOver(g_LocalPlayerID) then
-                        numDominateUs = numDominateUs + 1
-                    end
-                end
-            end
-        end
-        if numWeDominate > 0 then
-            table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CULTURE_WE_DOMINATE", numWeDominate))
-        end
-        if numDominateUs > 0 then
-            table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CULTURE_DOMINATE_US", numDominateUs))
-        end
-    else
-        if pLocalCulture:IsDominantOver(playerID) then
-            table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CULTURE_WE_ARE_DOMINANT"))
-        else
-            local pOtherCulture = Players[playerID]:GetCulture()
-            if pOtherCulture and pOtherCulture:IsDominantOver(g_LocalPlayerID) then
-                table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CULTURE_THEY_ARE_DOMINANT"))
-            end
+    for otherID, otherPlayer in ipairs(Players) do
+        if otherID ~= playerID and IsAliveAndMajor(otherID) and otherPlayer:GetTeam() ~= teamID then
+            requiredTourists = math.max(requiredTourists, otherPlayer:GetCulture():GetStaycationers() + 1)
         end
     end
 
-    if #parts > 0 then
-        return table.concat(parts, "[NEWLINE]")
-    end
-    return nil
+    return {
+        PlayerID = playerID,
+        NumRequiredTourists = requiredTourists,
+        NumStaycationers = culture:GetStaycationers(),
+        NumVisitingUs = culture:GetTouristsTo(),
+        TurnsTillCulturalVictory = culture.GetTurnsUntilVictory and culture:GetTurnsUntilVictory() or -1,
+    }
 end
 
-function CreateCulturePlayerRow(playerData, parentFocusPrefix)
+function CAIGetCultureTeamData(teamID)
+    local bestVisiting = 0
+    local bestRequired = 1
+
+    for _, playerID in ipairs(Teams[teamID]) do
+        if IsAliveAndMajor(playerID) then
+            local data = CAIGetCulturePlayerData(playerID)
+            local bestScore = bestVisiting / math.max(bestRequired, 1)
+            local playerScore = data.NumVisitingUs / math.max(data.NumRequiredTourists, 1)
+            if playerScore > bestScore
+                or (playerScore == bestScore and data.NumRequiredTourists > bestRequired) then
+                bestVisiting = data.NumVisitingUs
+                bestRequired = data.NumRequiredTourists
+            end
+        end
+    end
+
+    return {
+        BestNumVisitingUs = bestVisiting,
+        BestNumRequiredTourists = bestRequired,
+    }
+end
+
+function CreateCulturePlayerRow(playerData, allPlayerData, parentFocusPrefix)
     local playerID = playerData.PlayerID
     local fk = (parentFocusPrefix or "") .. "player:" .. playerID
 
     local capturedPlayerID = playerID
-    local item = MakeTreeItem({
+    local props = {
         Label = function()
+            local liveData = CAIGetCulturePlayerData(capturedPlayerID)
             return JoinLines({
-                GetPlayerLabel(capturedPlayerID),
+                GetRankingsPlayerLabel(capturedPlayerID),
                 Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TOURISTS",
-                    playerData.NumVisitingUs, playerData.NumRequiredTourists),
+                    liveData.NumVisitingUs, liveData.NumRequiredTourists),
             })
         end,
         Tooltip = function()
-            return GetCultureDominanceTooltip(capturedPlayerID)
+            local liveData = CAIGetCulturePlayerData(capturedPlayerID)
+            local parts = {
+                Locale.Lookup("LOC_CAI_WORLD_RANKINGS_DOMESTIC", liveData.NumStaycationers),
+            }
+            if liveData.TurnsTillCulturalVictory > 0 then
+                table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TURNS_VICTORY",
+                    liveData.TurnsTillCulturalVictory))
+            end
+            return JoinLines(parts)
         end,
         FocusKey = fk,
-    })
+    }
 
-    local capturedData = playerData
-    AddLeaf(item, fk .. ":domestic", function()
-        return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_DOMESTIC", capturedData.NumStaycationers)
-    end)
-
-    if playerID ~= g_LocalPlayerID and g_LocalPlayer then
-        local visitLeaf = MakeTreeItem({
-            Label = function()
-                local pCulture = g_LocalPlayer:GetCulture()
-                return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_VISITING_US",
-                    pCulture:GetTouristsFrom(capturedData.PlayerID))
-            end,
-            Tooltip = function()
-                local pCulture = g_LocalPlayer:GetCulture()
-                local tt = pCulture:GetTouristsFromTooltip(capturedData.PlayerID)
-                if not tt then return nil end
-                local lines = {}
-                for segment in (tt .. "[NEWLINE]"):gmatch("(.-)%[NEWLINE%]") do
-                    local trimmed = segment:match("^%s*(.-)%s*$")
-                    if trimmed and trimmed ~= "" then
-                        table.insert(lines, trimmed)
-                    end
-                end
-                if #lines >= 2 then
-                    local current = lines[1]:match("[%d,%.]+")
-                    local lifetime = lines[2]:match("[%d,%.]+")
-                    if current then
-                        lines[1] = Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TOURISM_CURRENT", current)
-                    end
-                    if lifetime then
-                        lines[2] = Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TOURISM_LIFETIME", lifetime)
-                    end
-                end
-                return table.concat(lines, "[NEWLINE]")
-            end,
-            FocusKey = fk .. ":visiting_us",
-        })
-        item:AddChild(visitLeaf)
+    if playerID ~= g_LocalPlayerID or not g_LocalPlayer then
+        return MakeStaticText(props)
     end
 
-    if m_isExp2 and capturedData.TurnsTillCulturalVictory and capturedData.TurnsTillCulturalVictory > 0 then
-        AddLeaf(item, fk .. ":turns", function()
-            return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TURNS_VICTORY",
-                capturedData.TurnsTillCulturalVictory)
-        end)
+    local item = MakeTreeItem(props)
+    for _, sourceData in ipairs(allPlayerData) do
+        if sourceData.PlayerID ~= g_LocalPlayerID then
+            local capturedSourceID = sourceData.PlayerID
+            local visitLeaf = MakeStaticText({
+                Label = function()
+                    local pCulture = g_LocalPlayer:GetCulture()
+                    return JoinLines({
+                        GetPlayerLabel(capturedSourceID),
+                        Locale.Lookup("LOC_CAI_WORLD_RANKINGS_VISITING_US",
+                            pCulture:GetTouristsFrom(capturedSourceID)),
+                    })
+                end,
+                Tooltip = function()
+                    local pCulture = g_LocalPlayer:GetCulture()
+                    local tt = pCulture:GetTouristsFromTooltip(capturedSourceID)
+                    if not tt then return nil end
+                    local lines = {}
+                    for segment in (tt .. "[NEWLINE]"):gmatch("(.-)%[NEWLINE%]") do
+                        local trimmed = segment:match("^%s*(.-)%s*$")
+                        if trimmed and trimmed ~= "" then
+                            table.insert(lines, trimmed)
+                        end
+                    end
+                    if #lines >= 2 then
+                        local current = lines[1]:match("[%d,%.]+")
+                        local lifetime = lines[2]:match("[%d,%.]+")
+                        if current then
+                            lines[1] = Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TOURISM_CURRENT", current)
+                        end
+                        if lifetime then
+                            lines[2] = Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TOURISM_LIFETIME", lifetime)
+                        end
+                    end
+                    return table.concat(lines, "[NEWLINE]")
+                end,
+                FocusKey = fk .. ":source:" .. capturedSourceID,
+            })
+            item:AddChild(visitLeaf)
+        end
     end
 
     return item
@@ -1225,7 +1455,7 @@ local function CreateDominationPlayerRow(playerData, parentFocusPrefix)
     local item = rowFactory({
         Label = function()
             local parts = {
-                GetPlayerLabel(playerID),
+                GetRankingsPlayerLabel(playerID),
                 Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CAPITALS_CAPTURED", #playerData.CapturedCapitals),
             }
             if playerData.HasOriginalCapital then
@@ -1259,8 +1489,7 @@ local function RebuildDominationTree(tree)
             local teamItem = MakeTreeItem({
                 Label = function()
                     return JoinLines({
-                        Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                            GameConfiguration.GetTeamName(teamData.TeamID)),
+                        GetRankingsTeamLabel(teamData.TeamID),
                         Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CAPITALS_CAPTURED", teamData.TotalCapturedCapitals),
                     })
                 end,
@@ -1293,9 +1522,9 @@ local function CreateReligionPlayerRow(playerData, totalCivs, parentFocusPrefix)
     local item = rowFactory({
         Label = function()
             return JoinLines({
-                GetPlayerLabel(playerID),
-                religionName,
-                #playerData.ConvertedCivs .. "/" .. totalCivs,
+                GetRankingsPlayerLabel(playerID),
+                Locale.Lookup("LOC_WORLD_RANKINGS_RELIGION_CONVERT_SUMMARY",
+                    #playerData.ConvertedCivs .. "/" .. totalCivs, religionName),
             })
         end,
         FocusKey = fk,
@@ -1346,9 +1575,10 @@ local function RebuildReligionTree(tree)
             local teamItem = MakeTreeItem({
                 Label = function()
                     return JoinLines({
-                        Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                            GameConfiguration.GetTeamName(teamData.TeamID)),
-                        #teamData.ConvertedCivs .. "/" .. totalCivs,
+                        GetRankingsTeamLabel(teamData.TeamID),
+                        Locale.Lookup("LOC_WORLD_RANKINGS_RELIGION_CONVERT_SUMMARY",
+                            #teamData.ConvertedCivs .. "/" .. totalCivs,
+                            "LOC_WORLD_RANKINGS_RELIGION_TEAMS_RELIGIONS"),
                     })
                 end,
                 FocusKey = "team:" .. teamData.TeamID,
@@ -1421,7 +1651,7 @@ local function CreateGenericPlayerRow(playerData, victoryType, parentFocusPrefix
 
     local item = rowFactory({
         Label = function()
-            local parts = { GetPlayerLabel(playerID) }
+            local parts = { GetRankingsPlayerLabel(playerID) }
             if presentation and #presentation.Values > 0 then
                 for _, value in ipairs(presentation.Values) do
                     table.insert(parts, value)
@@ -1484,8 +1714,7 @@ local function CreateCapturedGenericRecord(record, victoryType, parentFocusPrefi
     local teamItem = MakeTreeItem({
         Label = function()
             local parts = {
-                Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                    GameConfiguration.GetTeamName(teamData.TeamID)),
+                GetRankingsTeamLabel(teamData.TeamID),
             }
             if presentation and #presentation.Values > 0 then
                 for _, value in ipairs(presentation.Values) do
@@ -1556,8 +1785,7 @@ local function RebuildGenericTree(tree, victoryType)
             if #teamData.PlayerData > 1 then
                 local teamItem = MakeTreeItem({
                     Label = function()
-                        return Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                            GameConfiguration.GetTeamName(teamData.TeamID))
+                        return GetRankingsTeamLabel(teamData.TeamID)
                     end,
                     FocusKey = "team:" .. teamData.TeamID,
                 })

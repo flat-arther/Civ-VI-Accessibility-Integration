@@ -17,6 +17,17 @@
 ---@field AttenuationModel CAIAttenuationModel
 CAI = {}
 
+---@param section string
+---@param key string
+---@param defaultValue string
+---@return string|nil
+function CAI.GetConfigValue(section, key, defaultValue) end
+
+---@param section string
+---@param key string
+---@param value string
+function CAI.SetConfigValue(section, key, value) end
+
 ---@param filePath string
 ---@return SoundHandle|nil
 function CAI.LoadSound(filePath) end
@@ -314,6 +325,7 @@ EditModes = {}
 ---@field Options? CAIAudioPlayOptions
 
 ---@class CAIAudioManager
+---@field MasterVolumeScalar number|nil
 ---@field Owner any
 ---@field ModRoot string|nil
 ---@field IsInitialized boolean
@@ -328,6 +340,12 @@ CAIAudioManager = {}
 ---@param owner? any
 ---@return CAIAudioManager
 function CAIAudioManager:New(owner) end
+
+---@return number
+function CAIAudioManager:GetMasterVolumeScalar() end
+
+---@return boolean changed
+function CAIAudioManager:SyncMasterVolume() end
 
 ---@return string|nil
 function CAIAudioManager:ResolveModRoot() end
@@ -1134,6 +1152,7 @@ function SearchPanelWidget:SetResults(results) end
 ---@field Stack UIWidget[]
 ---@field CurrentPath UIWidget[]
 ---@field FocusRestoreKeyOverride? string Temporary logical target used during a synchronous action-driven rebuild.
+---@field TypeToFindTarget? UIWidget Container that owns the persistent type-to-find session.
 ---@field CAISettings table<string, any>
 ---@field AudioManager CAIAudioManager|nil
 ---@field WidgetHelpers CAIWidgetHelpers Manager-bound quick widget helpers (dialog builders, etc.).
@@ -1233,6 +1252,9 @@ function UIScreenManager:GetWidgetById(id, recurse) end
 ---@param c string
 function UIScreenManager:AppendSearchChar(c) end
 
+---@param target UIWidget
+function UIScreenManager:BeginTypeToFind(target) end
+
 ---@return string
 function UIScreenManager:GetSearchBuffer() end
 
@@ -1317,3 +1339,9 @@ function CAIWidgetHelpers_DialogBuilder.CreatePopupDialog(mgr, popup) end
 ---@field Tier integer
 ---@field MatchPosition integer
 ---@field LabelLength integer
+
+---Classify one label against a query using the shared type-to-find tiers.
+---@param label string
+---@param query string
+---@return SearchResult|nil
+function CAIWidgetHelpers_Search.MatchSearchText(label, query) end

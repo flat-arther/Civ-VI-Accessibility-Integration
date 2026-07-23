@@ -91,6 +91,7 @@ local ACTION_SURVEYOR_READ_IMPROVEMENTS = Input.GetActionId("SurveyorReadImprove
 local ACTION_SURVEYOR_READ_NEUTRAL_UNITS = Input.GetActionId("SurveyorReadNeutralUnits")
 local ACTION_SURVEYOR_READ_OWNERSHIP = Input.GetActionId("SurveyorReadOwnership")
 local ACTION_SURVEYOR_READ_DISTRICTS = Input.GetActionId("SurveyorReadDistricts")
+local ACTION_SURVEYOR_READ_APPEAL = Input.GetActionId("SurveyorReadAppeal")
 local ACTION_WORLD_SELECT_PREVIOUS_CITY = Input.GetActionId("WorldSelectPreviousCity_CAI")
 local ACTION_WORLD_SELECT_NEXT_CITY = Input.GetActionId("WorldSelectNextCity_CAI")
 local ACTION_WORLD_SELECT_CAPITAL_CITY = Input.GetActionId("WorldSelectCapitalCity_CAI")
@@ -860,6 +861,12 @@ local SharedInputActions = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return CAISurveyor.SpeakResult(CAISurveyor.ReadDistricts)
+		end,
+	},
+	[ACTION_SURVEYOR_READ_APPEAL] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			return CAISurveyor.SpeakResult(CAISurveyor.ReadAppeal)
 		end,
 	},
 }

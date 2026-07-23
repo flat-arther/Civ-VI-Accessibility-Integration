@@ -82,6 +82,76 @@ local function IsDatabaseTrue(value)
     return value == true or value == 1 or value == "true" or value == "1"
 end
 
+local function GetOnlySetValue(values)
+    local onlyValue = nil
+    for value in pairs(values) do
+        if onlyValue ~= nil then
+            return nil
+        end
+        onlyValue = value
+    end
+    return onlyValue
+end
+
+-- Cache the active ruleset's terrain relationships once. Feature validity
+-- rows include expansion and mod data, so suppression follows live content.
+local function BuildTerrainShapeMetadata()
+    local terrainClassByType = {}
+    for terrainClass in GameInfo.TerrainClass_Terrains() do
+        terrainClassByType[terrainClass.TerrainType] = terrainClass.TerrainClassType
+    end
+
+    local flatTerrainByClass = {}
+    for terrainInfo in GameInfo.Terrains() do
+        local terrainClassType = terrainClassByType[terrainInfo.TerrainType]
+        if terrainClassType ~= nil
+            and not IsDatabaseTrue(terrainInfo.Hills)
+            and not IsDatabaseTrue(terrainInfo.Mountain)
+            and flatTerrainByClass[terrainClassType] == nil then
+            flatTerrainByClass[terrainClassType] = terrainInfo
+        end
+    end
+
+    local validFactsByFeature = {}
+    for validTerrain in GameInfo.Feature_ValidTerrains() do
+        local terrainInfo = GameInfo.Terrains[validTerrain.TerrainType]
+        local featureFacts = validFactsByFeature[validTerrain.FeatureType]
+        if featureFacts == nil then
+            featureFacts = {
+                BaseClasses = {},
+                Elevations = {},
+            }
+            validFactsByFeature[validTerrain.FeatureType] = featureFacts
+        end
+
+        local terrainClassType = terrainClassByType[terrainInfo.TerrainType]
+        if terrainClassType ~= nil then
+            featureFacts.BaseClasses[terrainClassType] = true
+        end
+
+        local elevation = "flat"
+        if IsDatabaseTrue(terrainInfo.Mountain) then
+            elevation = "mountain"
+        elseif IsDatabaseTrue(terrainInfo.Hills) then
+            elevation = "hills"
+        end
+        featureFacts.Elevations[elevation] = true
+    end
+
+    local suppressionsByFeature = {}
+    for featureType, featureFacts in pairs(validFactsByFeature) do
+        local elevation = GetOnlySetValue(featureFacts.Elevations)
+        suppressionsByFeature[featureType] = {
+            BaseClass = GetOnlySetValue(featureFacts.BaseClasses),
+            Elevation = elevation ~= "flat" and elevation or nil,
+        }
+    end
+
+    return flatTerrainByClass, suppressionsByFeature, terrainClassByType
+end
+
+local m_FlatTerrainByClass, m_TerrainSuppressionsByFeature, m_TerrainClassByType = BuildTerrainShapeMetadata()
+
 local function AppendUnexplored(body, unexplored)
     if unexplored <= 0 then
         return body
@@ -373,28 +443,87 @@ function Surveyor.ReadTerrain()
 
     for _, plot in ipairs(survey.Range.plots) do
         local terrainInfo = GameInfo.Terrains[plot:GetTerrainType()]
-        if terrainInfo ~= nil then
-            if terrainInfo.TerrainType == "TERRAIN_COAST" then
-                AddBucket(plot:IsLake() and "LOC_TOOLTIP_LAKE" or "LOC_TOOLTIP_COAST")
+        local featureInfo = GameInfo.Features[plot:GetFeatureType()]
+
+        -- Natural wonders replace the ordinary terrain-shape description.
+        if featureInfo ~= nil and IsDatabaseTrue(featureInfo.NaturalWonder) then
+            AddBucket(featureInfo.Name)
+        else
+            local suppression = featureInfo ~= nil
+                and m_TerrainSuppressionsByFeature[featureInfo.FeatureType] or nil
+            if featureInfo ~= nil then
+                AddBucket(featureInfo.Name)
+            end
+
+            if plot:IsLake() then
+                AddBucket("LOC_TOOLTIP_LAKE")
+            elseif plot:IsMountain() then
+                if suppression == nil or suppression.Elevation ~= "mountain" then
+                    AddBucket("LOC_CAI_SURVEYOR_MOUNTAINS")
+                end
             else
-                AddBucket(terrainInfo.Name)
+                local terrainClassType = terrainInfo ~= nil
+                    and m_TerrainClassByType[terrainInfo.TerrainType] or nil
+                if terrainInfo ~= nil
+                    and (suppression == nil or suppression.BaseClass ~= terrainClassType) then
+                    local baseTerrainInfo = plot:IsHills()
+                        and m_FlatTerrainByClass[terrainClassType] or terrainInfo
+                    if baseTerrainInfo == nil then
+                        baseTerrainInfo = terrainInfo
+                    end
+
+                    if baseTerrainInfo.TerrainType == "TERRAIN_COAST" then
+                        AddBucket("LOC_TOOLTIP_COAST")
+                    else
+                        AddBucket(baseTerrainInfo.Name)
+                    end
+                end
+
+                if plot:IsHills()
+                    and (suppression == nil or suppression.Elevation ~= "hills") then
+                    AddBucket("LOC_CAI_SURVEYOR_HILLS")
+                end
             end
         end
 
-        local featureInfo = GameInfo.Features[plot:GetFeatureType()]
-        if featureInfo ~= nil then
-            AddBucket(featureInfo.Name)
-        end
-
-        if plot:IsMountain() then
-            AddBucket("LOC_CAI_SURVEYOR_MOUNTAINS")
-        elseif plot:IsHills() then
-            AddBucket("LOC_CAI_SURVEYOR_HILLS")
+        if plot:IsFreshWater() then
+            AddBucket("LOC_SETTLEMENT_RECOMMENDATION_FRESH_WATER")
         end
     end
 
     local entries = SortBucketEntries(buckets)
     local body = #entries > 0 and FormatBucketEntries(entries) or Locale.Lookup("LOC_CAI_SURVEYOR_EMPTY_TERRAIN")
+    return AppendUnexplored(body, survey.Range.unexplored)
+end
+
+function Surveyor.ReadAppeal()
+    if not GameCapabilities.HasCapability("CAPABILITY_LENS_APPEAL") then
+        return Locale.Lookup("LOC_CAI_SURVEYOR_APPEAL_UNAVAILABLE")
+    end
+
+    local survey = GetSurveyRange()
+    if survey == nil then
+        return Locale.Lookup("LOC_CAI_SURVEYOR_CURSOR_UNAVAILABLE")
+    end
+
+    local buckets = {}
+    for _, plot in ipairs(survey.Range.plots) do
+        if not plot:IsWater() then
+            local appeal = plot:GetAppeal()
+            for row in GameInfo.AppealHousingChanges() do
+                if appeal >= row.MinimumValue then
+                    local label = Locale.Lookup(row.Description)
+                    buckets[label] = (buckets[label] or 0) + 1
+                    break
+                end
+            end
+        end
+    end
+
+    local entries = SortBucketEntries(buckets)
+    local body = #entries > 0
+        and FormatBucketEntries(entries)
+        or Locale.Lookup("LOC_CAI_SURVEYOR_EMPTY_APPEAL")
     return AppendUnexplored(body, survey.Range.unexplored)
 end
 

@@ -52,7 +52,32 @@ CAIWorldScannerCategory_NeutralUnits = CreateUnitsCategory(CATEGORY_IDS.Neutral,
 CAIWorldScannerCategory_EnemyUnits = CreateUnitsCategory(CATEGORY_IDS.Enemy, "LOC_CAI_WORLD_SCANNER_CATEGORY_ENEMY_UNITS")
 
 
-local function GetUnitCategoryId(context, ownerID)
+local function IsReligiousUnit(unit)
+    return unit ~= nil and unit:GetReligiousStrength() > 0
+end
+
+local function IsReligiousAlliance(diplomacy, ownerID)
+    local religiousAlliance = GameInfo.Alliances ~= nil
+        and GameInfo.Alliances["ALLIANCE_RELIGIOUS"] or nil
+    return religiousAlliance ~= nil
+        and diplomacy ~= nil
+        and diplomacy:GetAllianceType(ownerID) == religiousAlliance.Index
+end
+
+local function HasLocalMajorityReligion(unit, localPlayerID)
+    local localPlayer = localPlayerID ~= nil and Players[localPlayerID] or nil
+    local localReligion = localPlayer ~= nil and localPlayer:GetReligion() or nil
+    if localReligion == nil then
+        return false
+    end
+
+    local religionType = unit:GetReligionType()
+    local localReligionType = localReligion:GetReligionInMajorityOfCities()
+    return religionType ~= nil and religionType >= 0 and religionType == localReligionType
+end
+
+local function GetUnitCategoryId(context, unit)
+    local ownerID = unit ~= nil and unit:GetOwner() or nil
     local localPlayerID = Utils.GetLocalPlayerID(context)
     if ownerID == nil or ownerID == -1 then
         return CATEGORY_IDS.Neutral
@@ -77,6 +102,15 @@ local function GetUnitCategoryId(context, ownerID)
     end
 
     local diplomacy = Utils.GetDiplomacy(context)
+    if IsReligiousUnit(unit) then
+        if IsReligiousAlliance(diplomacy, ownerID)
+            or HasLocalMajorityReligion(unit, localPlayerID) then
+            return CATEGORY_IDS.Neutral
+        end
+
+        return CATEGORY_IDS.Enemy
+    end
+
     if diplomacy ~= nil and diplomacy:IsAtWarWith(ownerID) then
         return CATEGORY_IDS.Enemy
     end
@@ -166,7 +200,7 @@ local function BuildUnitScannerItems(context)
                         local unitInfo = GameInfo.Units[unitType]
                         if unitInfo ~= nil then
                             local unitLabel = FormatOwnedUnitDisplayName(unit) or Locale.Lookup(unitInfo.Name)
-                            local categoryId = GetUnitCategoryId(context, ownerID)
+                            local categoryId = GetUnitCategoryId(context, unit)
                             local subCategoryId = GetUnitSubCategoryId(unit, unitInfo)
                             out[#out + 1] = {
                                 Id = "unit:" .. uniqueKey,
@@ -199,7 +233,7 @@ local function BuildUnitScannerItems(context)
                                     local validateUnitInfo = GameInfo.Units[validateUnit:GetUnitType()]
                                     return validateVisible
                                         and (validatePlayer:IsBarbarian() or Utils.CanKnowPlayer(validateContext, ownerID))
-                                        and GetUnitCategoryId(validateContext, ownerID) == item.CategoryId
+                                        and GetUnitCategoryId(validateContext, validateUnit) == item.CategoryId
                                         and GetUnitSubCategoryId(validateUnit, validateUnitInfo) == item.SubCategoryId
                                         and validateUnit:GetUnitType() == unitType
                                 end,

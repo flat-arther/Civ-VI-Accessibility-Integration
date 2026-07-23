@@ -48,10 +48,16 @@ VALUES
     ('AutoFocusFirstSearchResult', 'UI', 40, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_AUTO_FOCUS_FIRST_SEARCH_RESULT', 'LOC_CAI_SETTING_AUTO_FOCUS_FIRST_SEARCH_RESULT_TOOLTIP', NULL),
 
-    ('SearchTimeout', 'UI', 50, 'number', 'editbox', '1.0',
+    ('TreeHomeEndCurrentDepth', 'UI', 50, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_TREE_HOME_END_CURRENT_DEPTH', 'LOC_CAI_SETTING_TREE_HOME_END_CURRENT_DEPTH_TOOLTIP', NULL),
+
+    ('TypeToFindResultNavigation', 'UI', 60, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_TYPE_TO_FIND_RESULT_NAVIGATION', 'LOC_CAI_SETTING_TYPE_TO_FIND_RESULT_NAVIGATION_TOOLTIP', NULL),
+
+    ('SearchTimeout', 'UI', 70, 'number', 'editbox', '1.0',
      'LOC_CAI_SETTING_SEARCH_TIMEOUT', 'LOC_CAI_SETTING_SEARCH_TIMEOUT_TOOLTIP', 'NumbersOnly'),
 
-    ('TokenSplitLength', 'UI', 60, 'number', 'editbox', '75',
+    ('TokenSplitLength', 'UI', 80, 'number', 'editbox', '75',
      'LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH', 'LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH_TOOLTIP', 'NumbersOnly'),
 
     ('SpeakTurnBlockers', 'Events', 10, 'bool', 'checkbox', 'true',
@@ -140,6 +146,9 @@ VALUES
 
     ('AnnounceUnitMovesBarbarian', 'Events', 110, 'string', 'dropdown', 'both',
      'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_BARBARIAN', 'LOC_CAI_SETTING_ANNOUNCE_UNIT_MOVES_BARBARIAN_TOOLTIP', NULL),
+
+    ('AnnounceUnownedCombatResults', 'Events', 120, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_ANNOUNCE_UNOWNED_COMBAT_RESULTS', 'LOC_CAI_SETTING_ANNOUNCE_UNOWNED_COMBAT_RESULTS_TOOLTIP', NULL),
 
     ('SpeakMessageBufferNotifications', 'MessageBuffer', 10, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_NOTIFICATIONS', 'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_NOTIFICATIONS_TOOLTIP', NULL),

@@ -257,6 +257,7 @@ function T.ExpandOrDescend(root)
         LogWarn("Tree helper ExpandOrDescend found expanded tree item with no visible children")
         return false
     end
+    root.Manager:ClearSearchBuffer(false)
     root.Manager:SetFocus(first)
     return true
 end

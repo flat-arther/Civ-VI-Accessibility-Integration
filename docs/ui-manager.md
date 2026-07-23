@@ -597,6 +597,7 @@ the focused row's sibling level. The helper module
 - `NavigatePage(root, dir, pageSize)` — PgUp/PgDn jumps PageSize positions.
 - `NavigateFirst/Last(root)` — Home/End moves to the first/last visible sibling at the focused row's current depth.
 - `NavigateTreeFirst/Last(root)` — Ctrl+Home/Ctrl+End moves to the first/last row in the flattened visible tree; the last row may be a deep descendant of an expanded final branch.
+- The `TreeHomeEndCurrentDepth` UI setting selects which pair plain Home/End uses. It defaults to current-depth navigation; disabling it restores legacy full-tree navigation. Ctrl+Home/Ctrl+End remain full-tree regardless.
 - `ExpandOrDescend(root)` — Right key: expand if collapsed; descend to first
   child if already expanded.
 - `CollapseOrAscend(root)` — Left key: collapse if expanded; jump to parent
@@ -609,18 +610,32 @@ the focused row's sibling level. The helper module
 `CAIWidgetHelpers_Search.HandleChar(root, char, maxDepth)`:
 
 - Appends the char to `Manager.SearchBuffer`, with timeout behavior controlled
-  by the `SearchTimeout` setting. If that setting is `<= 0`, the buffer does
-  not expire automatically and only explicit user actions clear it.
-- DFS from root to find the first widget whose label (lowercased) starts with
-  the buffer, depth-limited.
-- Cycles forward — search starts after the currently focused child.
-- **Same-letter cycling**: pressing the same single letter twice within the
-  timeout doesn't extend the buffer. The next search starts after the focused
+  by the `SearchTimeout` setting when persistent result navigation is disabled.
+- Collects depth-limited candidates and applies the existing match-tier and
+  relevance ordering before focusing the first result.
+- **Same-letter cycling**: pressing the same single letter again while that
+  one-character search remains active doesn't extend the buffer. The next
+  search starts after the focused
   match, cycling through every item starting with that letter. Matches the
   JAWS/NVDA convention.
+- The default-enabled `TypeToFindResultNavigation` UI setting turns the ranked
+  matches into a persistent flat result list. While its buffer is non-empty,
+  Up/Down move to the previous/next result and wrap at the ends. The timeout is
+  suspended without changing result collection or sorting.
+- A persistent search is owned by the List or Tree where typing began. Moving
+  focus outside that container clears it silently. A successful widget
+  interaction also clears it silently: activation, value or text changes,
+  dropdown open/close, TreeItem or SubMenu expand/collapse, and entering an
+  EditBox or an already-expanded TreeItem. Programmatic silent refreshes do not
+  clear it. After clearing, ordinary widget navigation resumes immediately.
 - When the type-to-find buffer is non-empty, manager-level `Escape` clears it
   and speaks `Search cleared`. `Backspace` removes the last character; if that
   empties the buffer, it also speaks `Search cleared`.
+- `CAIWidgetHelpers_Search.MatchSearchText(label, query)` exposes the same
+  start-whole-word, start-prefix, whole-word, word-prefix, substring, and
+  word-prefix-abbreviation classifier to non-widget consumers. It returns the
+  best `SearchResult` tier for that label or `nil` when the label does not
+  match; callers retain ownership of result grouping and tie-breaking.
 
 Wire it up on a container:
 

@@ -291,11 +291,6 @@ ShowMissionCompletedPopup = WrapFunc(ShowMissionCompletedPopup, function(orig, p
     orig(playerID, missionID)
 end)
 
-Refresh = WrapFunc(Refresh, function(orig, ...)
-    orig(...)
-    BuildDialog()
-end)
-
 OnShowMissionBriefing = WrapFunc(OnShowMissionBriefing, function(orig, ...)
     m_spyCanPromote = false
     orig(...)
@@ -330,11 +325,3 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
     return orig(pInputStruct)
 end)
 ContextPtr:SetInputHandler(OnInputHandler, true)
-
-ContextPtr:SetShowHandler(function()
-    BuildDialog()
-end)
-
-ContextPtr:SetHideHandler(function()
-    RemoveDialog()
-end)

@@ -1332,7 +1332,7 @@ local function MoveQueueSelection(direction)
     if idx == -1 then return false end
 
     local target = idx + direction
-    if target < 1 or target > GetQueueRowCount() then
+    if target < 0 or target > GetQueueRowCount() then
         if name ~= "" then
             local key = direction < 0 and "LOC_CAI_PRODUCTION_QUEUE_ALREADY_FIRST" or
                 "LOC_CAI_PRODUCTION_QUEUE_ALREADY_LAST"
@@ -1380,14 +1380,31 @@ local function CreateQueueRow(queueIndex, name)
 end
 
 local function CreateQueueCurrentRow()
+    local currentName = ControlText(Controls.CurrentProductionName)
     local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIProductionPanelQueueCurrent"), "MenuItem", {
         Label    = function() return ReadCurrentProductionLabel() end,
         Tooltip  = ReadCurrentProductionTooltip,
         FocusKey = "current",
     })
     row:SetFocusSound("Main_Menu_Mouse_Over")
+    row._caiQueueIndex = 0
+    row._caiQueueName = currentName
     row:AddInputBindings({
         { Key = Keys.VK_DELETE, MSG = KeyEvents.KeyUp, Description = "LOC_CAI_KB_REMOVE_FROM_QUEUE", Action = RemoveCurrentProductionFromQueue },
+        {
+            Key = Keys.VK_UP,
+            IsShift = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_MOVE_QUEUE_UP",
+            Action = function() return MoveQueueSelection(-1) end,
+        },
+        {
+            Key = Keys.VK_DOWN,
+            IsShift = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_MOVE_QUEUE_DOWN",
+            Action = function() return MoveQueueSelection(1) end,
+        },
     })
     return row
 end

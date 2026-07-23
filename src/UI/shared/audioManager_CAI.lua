@@ -66,6 +66,7 @@ function CAIAudioManager:New()
     mgr.ModRoot = nil
     mgr.IsInitialized = false
     mgr.IsFocusMuted = false
+    mgr.MasterVolumeScalar = nil
     mgr.SettingsHooked = false
     mgr.SettingsChangedListener = nil
     mgr.DefinitionsById = {}
@@ -73,6 +74,23 @@ function CAIAudioManager:New()
     mgr.SoundsByTag = {}
     mgr.Queue = {}
     return mgr
+end
+
+function CAIAudioManager:GetMasterVolumeScalar()
+    return ClampVolumeScalar(Options.GetAudioOption("Sound", "Master Volume") / 100)
+end
+
+function CAIAudioManager:SyncMasterVolume()
+    local masterVolumeScalar = self:GetMasterVolumeScalar()
+    if self.MasterVolumeScalar == masterVolumeScalar then
+        return false
+    end
+
+    self.MasterVolumeScalar = masterVolumeScalar
+    for _, record in pairs(self.LoadedSoundsById) do
+        self:ApplyTagVolume(record)
+    end
+    return true
 end
 
 function CAIAudioManager:ResolveModRoot()
@@ -141,9 +159,10 @@ end
 
 function CAIAudioManager:ApplyTagVolume(record)
     if record == nil or record.Handle == nil then return end
+    local masterGain = self.MasterVolumeScalar or self:GetMasterVolumeScalar()
     local baseGain = record.BaseGain or 1
     local plotGain = record.PlotGain or 1
-    CAI.SetSoundVolume(record.Handle, self:GetTagVolumeScalar(record.Tag) * baseGain * plotGain)
+    CAI.SetSoundVolume(record.Handle, masterGain * self:GetTagVolumeScalar(record.Tag) * baseGain * plotGain)
 end
 
 function CAIAudioManager:UnloadSounds()
@@ -559,8 +578,10 @@ function CAIAudioManager:SetTagVolume(tag, volume)
         return false
     end
 
+    self:SyncMasterVolume()
     for _, record in ipairs(bucket) do
-        CAI.SetSoundVolume(record.Handle, volume * (record.BaseGain or 1) * (record.PlotGain or 1))
+        CAI.SetSoundVolume(record.Handle,
+            self.MasterVolumeScalar * volume * (record.BaseGain or 1) * (record.PlotGain or 1))
     end
 
     return true
@@ -643,6 +664,7 @@ end
 
 function CAIAudioManager:Update()
     CAI.AudioUpdate()
+    self:SyncMasterVolume()
     local isFocusMuted = self:ShouldMuteForWindowFocus()
     if isFocusMuted then
         if not self.IsFocusMuted then
@@ -689,12 +711,14 @@ end
 function CAIAudioManager:Initialize(owner)
     if self.IsInitialized then
         self.Owner = owner
+        self:SyncMasterVolume()
         self:ApplySettings()
         LogMessage("Audio manager reinitialized with existing state")
         return
     end
 
     self.Owner = owner
+    self.MasterVolumeScalar = self:GetMasterVolumeScalar()
     self.ModRoot = self:ResolveModRoot()
     if self.ModRoot == nil then
         LogError("Audio manager Initialize: audio manager has no mod root")
@@ -715,6 +739,7 @@ function CAIAudioManager:Shutdown()
     self.Owner = nil
     self.ModRoot = nil
     self.IsFocusMuted = false
+    self.MasterVolumeScalar = nil
     self.IsInitialized = false
     LogMessage("Audio manager shut down")
 end

@@ -1,13 +1,13 @@
 include("caiUtils")
 include("CivilopediaScreen")
 
-local mgr         = ExposedMembers.CAI_UIManager
+local mgr                 = ExposedMembers.CAI_UIManager
 
-local PANEL_ID    = "CAIPediaPanel"
-local HOVER_SOUND = "Main_Menu_Mouse_Over"
+local PANEL_ID            = "CAIPediaPanel"
+local HOVER_SOUND         = "Main_Menu_Mouse_Over"
 local BODY_SEARCH_CONTEXT = "CAI_CivilopediaBody"
 local BODY_PREVIEW_RADIUS = 180
-local m_bodySearchText = {}
+local m_bodySearchText    = {}
 
 
 local m_state            = {
@@ -114,20 +114,27 @@ local function PopulateBodySearchData()
         if not populate then return end
         local statBox = {}
         function statBox:AddSeparator() end
+
         function statBox:AddHeader() end
+
         function statBox:AddLabel(caption) append(caption) end
+
         function statBox:AddSmallLabel(caption) append(caption) end
+
         function statBox:AddIconLabel(_, caption) append(caption) end
+
         function statBox:AddIconNumberLabel(_, value, caption)
             append(caption)
             if value ~= nil then append(tostring(value)) end
         end
+
         function statBox:AddIconList(...)
             for i = 1, select("#", ...) do
                 local icon = select(i, ...)
                 if type(icon) == "table" then append(icon[2]) end
             end
         end
+
         populate(statBox)
     end
 
@@ -1038,7 +1045,7 @@ end
 local function PushPanel()
     if mgr:GetTop() ~= m_ui.panel then
         mgr:Push(m_ui.panel,
-            { priority = PopupPriority.Civilopedia, focus = ResolveInitialFocus() })
+            { priority = PopupPriority.Current, focus = ResolveInitialFocus() })
     end
     m_state.isOpeningOnHistoryPage = false
 end

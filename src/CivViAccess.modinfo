@@ -92,6 +92,7 @@
     <File>UI/inGame/InGame.lua</File>
     <File>UI/inGame/ActionPanel_CAI.lua</File>
     <File>UI/inGame/AdvisorPopup_CAI.lua</File>
+    <File>UI/inGame/UnitCaptured_CAI.lua</File>
     <File>UI/inGame/ExpansionIntro_CAI.lua</File>
     <File>UI/inGame/TechCivicCompletedPopup_CAI.lua</File>
     <File>UI/inGame/BoostUnlockedPopup_CAI.lua</File>
@@ -552,6 +553,14 @@
         <LoadOrder>100</LoadOrder>
         <LuaContext>AdvisorPopup</LuaContext>
         <LuaReplace>UI/inGame/AdvisorPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_UnitCaptured">
+      <Properties>
+        <LoadOrder>100</LoadOrder>
+        <LuaContext>UnitCaptured</LuaContext>
+        <LuaReplace>UI/inGame/UnitCaptured_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

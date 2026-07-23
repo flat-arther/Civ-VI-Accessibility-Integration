@@ -7,9 +7,27 @@ local P = CAIWidgetHelpers_PediaLookup
 
 local MAX_RESULTS = 20
 
-local function StripIconTokens(text)
+local function CollapseWhitespace(text)
     if not text or text == "" then return "" end
-    return text:gsub("%[([^%]]-)%]", ""):gsub("%s+", " "):match("^%s*(.-)%s*$") or ""
+    return text:gsub("%s+", " "):match("^%s*(.-)%s*$") or ""
+end
+
+local function NormalizeSearchText(text)
+    if not text or text == "" then return "" end
+    return CollapseWhitespace(ProcessIcons(text))
+end
+
+local function RemoveParentheticalText(text)
+    if not text or text == "" then return "" end
+    return text:gsub("%b()", " ")
+end
+
+local function NormalizeSearchQuery(text)
+    return CollapseWhitespace(RemoveParentheticalText(ProcessIcons(text)))
+end
+
+local function NormalizeSearchComparison(text)
+    return Locale.ToUpper(NormalizeSearchQuery(text))
 end
 
 local function IsGameWorldType(wType)
@@ -261,27 +279,32 @@ local function SearchPedia(terms)
     local seen = {}
     local results = {}
     for _, term in ipairs(terms) do
-        local raw = Search.Search("Civilopedia", term, MAX_RESULTS)
+        local query = NormalizeSearchQuery(term)
+        local queryComparison = NormalizeSearchComparison(query)
+        local raw = query ~= "" and Search.Search("Civilopedia", query, MAX_RESULTS) or nil
         if raw then
             for _, hit in ipairs(raw) do
                 local key = hit[1]
                 if not seen[key] then
-                    seen[key] = true
                     local sectionId, pageId = string.match(key, "([^|]+)|([^|]+)")
                     if sectionId and pageId then
-                        local pageTitle = Locale.Lookup(pageId)
-                        if pageTitle == pageId then
-                            pageTitle = StripIconTokens(hit[2] or key)
-                        else
-                            pageTitle = StripIconTokens(pageTitle)
+                        -- Vanilla indexes its localized, tag-stripped page.Title
+                        -- as hit[2]. Use that authoritative display title instead
+                        -- of trying to derive a localization key from PageId.
+                        local pageTitle = NormalizeSearchText(hit[2] or key)
+                        -- Search.Search is designed for live type-ahead and can
+                        -- return prefix/substring candidates. Ctrl+I represents
+                        -- an already complete identity component, so retain only
+                        -- an exact localized title match.
+                        if pageTitle ~= ""
+                            and NormalizeSearchComparison(pageTitle) == queryComparison then
+                            seen[key] = true
+                            results[#results + 1] = {
+                                sectionId = sectionId,
+                                pageId = pageId,
+                                label = FormatResultLabel(pageTitle, sectionId, pageId),
+                            }
                         end
-                        if pageTitle == "" then pageTitle = pageId end
-
-                        results[#results + 1] = {
-                            sectionId = sectionId,
-                            pageId = pageId,
-                            label = FormatResultLabel(pageTitle, sectionId, pageId),
-                        }
                     end
                 end
                 if #results >= MAX_RESULTS then return results end
@@ -308,11 +331,14 @@ function P.CollectTerms(widget)
     local speech = widget:BuildSpeech({ "label" })
     if not speech or speech == "" then return {} end
 
+    -- Process icons first so icon-only labels become searchable concepts and
+    -- markup such as [NEWLINE] becomes the punctuation used by speech.
+    speech = RemoveParentheticalText(ProcessIcons(speech))
     local terms = {}
     for raw in speech:gmatch("[^,]+") do
-        local term = raw:match("^%s*(.-)%s*$")
+        local term = CollapseWhitespace(raw)
         if term and term ~= "" then
-            terms[#terms + 1] = StripIconTokens(term)
+            terms[#terms + 1] = term
         end
     end
     return terms

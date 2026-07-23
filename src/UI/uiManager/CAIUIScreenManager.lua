@@ -45,6 +45,7 @@ include("CAIWidget_SearchPanel")
 ---@field Stack UIWidget[]
 ---@field CurrentPath UIWidget[]
 ---@field FocusRestoreKeyOverride? string Temporary logical target used while a widget action synchronously rebuilds its subtree.
+---@field TypeToFindTarget? UIWidget Container that owns the persistent type-to-find session.
 ---@field CAISettings table<string, any>
 ---@field WidgetHelpers table<string, function> Manager-bound quick widget helpers (dialog builders, etc.) installed by helper modules at init time.
 UIScreenManager = {
@@ -55,6 +56,7 @@ UIScreenManager = {
         speakPosition = true,
         speakState = true,
         speakTooltip = true,
+        TypeToFindResultNavigation = true,
         SearchTimeout = 1.0,
         ValidateWidgetIds = false,
     },
@@ -70,6 +72,7 @@ function UIScreenManager:New()
     mgr.WidgetHelpers = {}
     mgr.AppRegainedFocusTime = 0
     mgr.SearchBufferExpireTime = nil
+    mgr.TypeToFindTarget = nil
     mgr.FocusRestoreKeyOverride = nil
     return mgr
 end
@@ -345,6 +348,20 @@ function UIScreenManager:ApplyFocus(newPath)
     -- vanilla state before TTS reads it. The old path is still available via
     -- the focus_leave event's extra arg for handlers that need it.
     self.CurrentPath = newPath
+
+    local searchTarget = self.TypeToFindTarget
+    if searchTarget then
+        local remainsInsideSearchTarget = false
+        for _, widget in ipairs(newPath) do
+            if widget == searchTarget then
+                remainsInsideSearchTarget = true
+                break
+            end
+        end
+        if not remainsInsideSearchTarget then
+            self:ClearSearchBuffer(false)
+        end
+    end
 
     for i = #oldPath, diverge, -1 do
         local w = oldPath[i]
@@ -645,6 +662,9 @@ end
 ---stops at the deepest surviving ancestor.
 ---@param w UIWidget
 function UIScreenManager:NotifyDestroy(w)
+    if self.TypeToFindTarget == w then
+        self:ClearSearchBuffer(false)
+    end
     local path = self.CurrentPath
     if not path or #path == 0 then return end
     for i = 1, #path do
@@ -665,6 +685,7 @@ function UIScreenManager:ExpireSearchBufferIfNeeded()
         self.SearchBuffer = ""
         self.LastTypeTime = nil
         self.SearchBufferExpireTime = nil
+        self.TypeToFindTarget = nil
         return true
     end
     return false
@@ -675,12 +696,23 @@ function UIScreenManager:TouchSearchBufferTimer()
     local buffer = self.SearchBuffer or ""
     local timeout = CAISettings.GetNumber("SearchTimeout")
 
-    if buffer == "" or timeout <= 0 then
+    if buffer == ""
+        or timeout <= 0
+        or (self.TypeToFindTarget and CAISettings.GetBool("TypeToFindResultNavigation")) then
         self.SearchBufferExpireTime = nil
         return
     end
 
     self.SearchBufferExpireTime = Automation.GetTime() + timeout
+end
+
+---@param target UIWidget
+function UIScreenManager:BeginTypeToFind(target)
+    if self.TypeToFindTarget and self.TypeToFindTarget ~= target then
+        self:ClearSearchBuffer(false)
+    end
+    self.TypeToFindTarget = target
+    self.SearchBufferExpireTime = nil
 end
 
 function UIScreenManager:OnUpdate()
@@ -692,19 +724,18 @@ end
 ---@return boolean
 function UIScreenManager:ClearSearchBuffer(announce)
     local buffer = self:GetSearchBuffer()
-    if buffer == "" then
-        return false
-    end
+    local hadBuffer = buffer ~= ""
 
     self.SearchBuffer = ""
     self.LastTypeTime = nil
     self.SearchBufferExpireTime = nil
+    self.TypeToFindTarget = nil
 
-    if announce then
+    if announce and hadBuffer then
         Speak(Locale.Lookup("LOC_CAI_SEARCH_CLEARED"))
     end
 
-    return true
+    return hadBuffer
 end
 
 ---@return string
@@ -718,6 +749,7 @@ function UIScreenManager:RemoveSearchChar()
         self.SearchBuffer = ""
         self.LastTypeTime = nil
         self.SearchBufferExpireTime = nil
+        self.TypeToFindTarget = nil
         return ""
     end
 
