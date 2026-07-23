@@ -442,13 +442,16 @@
       <Text>Improvements and routes</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_DISTRICTS" Language="en_US">
-      <Text>Districts</Text>
+      <Text>Districts and wonders</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_WONDERS" Language="en_US">
       <Text>Wonders</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TERRAIN" Language="en_US">
       <Text>Terrain</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_GEOGRAPHY" Language="en_US">
+      <Text>Geography</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_ACTIVE_LENS" Language="en_US">
       <Text>Active lens</Text>
@@ -543,8 +546,14 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_ELEVATION" Language="en_US">
       <Text>Elevation</Text>
     </Row>
-    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_UNEXPLORED" Language="en_US">
-      <Text>Unexplored</Text>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_FRESH_WATER" Language="en_US">
+      <Text>Fresh water</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_LANDMASSES" Language="en_US">
+      <Text>Landmasses</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_OCEANS" Language="en_US">
+      <Text>Oceans</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BONUS" Language="en_US">
       <Text>Bonus</Text>
@@ -617,6 +626,42 @@
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_GOVERNMENT_GROUP_WITH_CITY" Language="en_US">
       <Text>{1_Government}, {2_Player}, {3_City}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_UNEXPLORED_REGION" Language="en_US">
+      <Text>Unexplored region</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_UNEXPLORED_REGION_TILES" Language="en_US">
+      <Text>Unexplored region, {1_Count : plural 1?1 tile; other?{1_Count} tiles;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_MOUNTAIN_RANGE" Language="en_US">
+      <Text>Mountain range</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_LANDMASS" Language="en_US">
+      <Text>Landmass</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_HOME_LANDMASS" Language="en_US">
+      <Text>Home landmass</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_LANDMASS_CONTINENTS" Language="en_US">
+      <Text>Landmass, {1_Continents}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_HOME_LANDMASS_CONTINENTS" Language="en_US">
+      <Text>Home landmass, {1_Continents}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_LANDMASS_CONTINENT_SEPARATOR" Language="en_US">
+      <Text>, </Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_OCEAN_ZONE" Language="en_US">
+      <Text>Ocean</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_WATER_NAME_SEPARATOR" Language="en_US">
+      <Text>, </Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_GEOGRAPHY_DIRECTION_FROM_HOME" Language="en_US">
+      <Text>{1_Label}, {2_Direction} from home</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_GEOGRAPHY_NUMBERED_FALLBACK" Language="en_US">
+      <Text>{1_Label} {2_Number}</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_POWER_RANGE_CITY" Language="en_US">
       <Text>{1_City} power range</Text>
@@ -1737,7 +1782,7 @@
       <Text>{1_Num : plural 1?1 result;other?{1_Num} results;} found</Text>
     </Row>
     <Row Tag="LOC_CAI_MAP_SEARCH_GROUP" Language="en_US">
-      <Text>Group {1_Num}, {2_Plots : plural 1?1 plot;other?{2_Plots} plots;}</Text>
+      <Text>Group {1_Num}, {2_Plots : plural 1?1 tile;other?{2_Plots} tiles;}</Text>
     </Row>
 
     <!-- Create Game (Advanced Setup) -->
@@ -5783,6 +5828,20 @@
       <Text>When enabled, Home and End move to the first and last visible item at the current tree depth. When disabled, they move to the beginning and visible end of the full tree.</Text>
     </Row>
 
+    <Row Tag="LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH" Language="en_US">
+      <Text>Token split length</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH_TOOLTIP" Language="en_US">
+      <Text>Target number of characters in each spoken section when long text is split. Complete sentences longer than this value remain intact.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_TYPE_TO_FIND_INCLUDE_TOOLTIPS" Language="en_US">
+      <Text>Include tooltips in type-to-find</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_TYPE_TO_FIND_INCLUDE_TOOLTIPS_TOOLTIP" Language="en_US">
+      <Text>When enabled, type-to-find also matches control tooltips. Results found only in tooltips follow results found in control labels.</Text>
+    </Row>
+
     <Row Tag="LOC_CAI_SETTING_TYPE_TO_FIND_RESULT_NAVIGATION" Language="en_US">
       <Text>Navigate type-to-find results</Text>
     </Row>
@@ -5795,13 +5854,6 @@
     </Row>
     <Row Tag="LOC_CAI_SETTING_SEARCH_TIMEOUT_TOOLTIP" Language="en_US">
       <Text>Number of seconds before type-to-find search text is cleared when result navigation is disabled. Set to 0 to never clear.</Text>
-    </Row>
-
-    <Row Tag="LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH" Language="en_US">
-      <Text>Token split length</Text>
-    </Row>
-    <Row Tag="LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH_TOOLTIP" Language="en_US">
-      <Text>Target number of characters in each spoken section when long text is split. Complete sentences longer than this value remain intact.</Text>
     </Row>
 
     <Row Tag="LOC_CAI_SETTING_SPEAK_TURN_BLOCKERS" Language="en_US">
@@ -6305,6 +6357,177 @@
     </Row>
     <Row Tag="LOC_CAI_MAP_SELECT_FILTER" Language="en_US">
       <Text>Filter by</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_MANAGE_SCANNER_CATEGORIES" Language="en_US">
+      <Text>Manage scanner categories</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_MANAGE_SCANNER_CATEGORIES_TOOLTIP" Language="en_US">
+      <Text>Opens scanner category ordering, visibility, and custom category management.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_MANAGER" Language="en_US">
+      <Text>Scanner category management</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_LIST" Language="en_US">
+      <Text>Scanner categories</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_ROW" Language="en_US">
+      <Text>{1_Category}, {2_CategoryType}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_MANAGEMENT_CATEGORY_ROW" Language="en_US">
+      <Text>{1_Category}, {2_CategoryType}, {3_State}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_STATE_ENABLED" Language="en_US">
+      <Text>Enabled</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_STATE_DISABLED" Language="en_US">
+      <Text>Disabled</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TYPE_BUILT_IN" Language="en_US">
+      <Text>Built-in</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TYPE_CONTEXTUAL" Language="en_US">
+      <Text>Contextual</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TYPE_CUSTOM" Language="en_US">
+      <Text>Custom</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_CITIES" Language="en_US">
+      <Text>Contains revealed cities and barbarian camps, categorized by relationship and civilization.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_IMPROVEMENTS" Language="en_US">
+      <Text>Contains revealed tile improvements and routes, categorized by relationship and type.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_RECOMMENDATIONS" Language="en_US">
+      <Text>Appears when the selected builder or settler has recommended tiles, and contains those build or settlement recommendations.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_MY_UNITS" Language="en_US">
+      <Text>Contains your units, categorized by military, naval, air, support, civilian, and trade roles.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_NEUTRAL_UNITS" Language="en_US">
+      <Text>Contains visible foreign units that are not currently enemies for ordinary or theological combat.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_ENEMY_UNITS" Language="en_US">
+      <Text>Contains visible foreign units that are enemies for ordinary or theological combat.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_RESOURCES" Language="en_US">
+      <Text>Contains revealed bonus, luxury, strategic, and artifact resources, categorized by resource type.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_DISTRICTS_AND_WONDERS" Language="en_US">
+      <Text>Contains revealed districts and constructed wonders, categorized by relationship and type, with your pillaged districts listed separately.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_SPECIAL_MAP_OBJECTS" Language="en_US">
+      <Text>Contains revealed natural wonders and tribal villages.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_TERRAIN" Language="en_US">
+      <Text>Contains revealed terrain, features, hills, named or generic mountain ranges, fresh-water access, lakes, coasts, and connected unexplored regions.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_GEOGRAPHY" Language="en_US">
+      <Text>Contains connected revealed landmasses and oceans. Landmass names use revealed continent information without exposing unexplored connections.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_QUEUED_PATH" Language="en_US">
+      <Text>Appears when a unit has a queued movement path, and contains the remaining path tiles and its waypoints.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_MAP_TACS" Language="en_US">
+      <Text>Contains map tacs visible to you, categorized by their owning player and label.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_CITY_MANAGEMENT" Language="en_US">
+      <Text>Appears while city citizen management, tile purchase, or tile swapping is active, and contains the tiles available in that mode.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_VALID_TARGETS" Language="en_US">
+      <Text>Contains valid target tiles. It can appear when placing a district or wonder, choosing a ranged attack target, or using a unit action with selectable tiles.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_ACTIVE_LENS" Language="en_US">
+      <Text>Contains the tiles and values shown by a supported active map lens, such as the Settler, Appeal, Religion, Loyalty, or Power lens.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_CUSTOM" Language="en_US">
+      <Text>Sources: {1_Sources}[NEWLINE]Included keywords: {2_Included}[NEWLINE]Excluded keywords: {3_Excluded}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_TOOLTIP_SOURCE_ALL" Language="en_US">
+      <Text>{1_Category}, all</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_TOOLTIP_SOURCE_SUBCATEGORIES" Language="en_US">
+      <Text>{1_Category}: {2_Subcategories}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_TOOLTIP_NONE" Language="en_US">
+      <Text>None</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_ENABLED" Language="en_US">
+      <Text>Enabled</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_ENABLED_TOOLTIP" Language="en_US">
+      <Text>Controls whether this category appears in the scanner cycle when it has results.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_ADD" Language="en_US">
+      <Text>Add custom category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_DEFAULT_NAME" Language="en_US">
+      <Text>Custom {1_Number}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_NAME" Language="en_US">
+      <Text>Name</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_NAME_EMPTY" Language="en_US">
+      <Text>The category name cannot be blank.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_SOURCES" Language="en_US">
+      <Text>Sources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_INCLUDE_NAMES" Language="en_US">
+      <Text>Include names</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_EXCLUDE_NAMES" Language="en_US">
+      <Text>Exclude names</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_ADD_TERM" Language="en_US">
+      <Text>Add term</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_ADD_TERM_TOOLTIP" Language="en_US">
+      <Text>Enter a name search term. Included terms add matching scanner items; excluded terms remove matching items.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_TERM_EMPTY" Language="en_US">
+      <Text>The search term cannot be blank.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_TERM_DUPLICATE" Language="en_US">
+      <Text>That search term is already present.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_REMOVE_TERM" Language="en_US">
+      <Text>Remove {1_Term}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_DELETE" Language="en_US">
+      <Text>Delete custom category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_DELETE_CONFIRMATION_TITLE" Language="en_US">
+      <Text>Delete custom category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CUSTOM_DELETE_CONFIRMATION_BODY" Language="en_US">
+      <Text>Delete {1_CategoryName}?</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CREATE_CUSTOM_FROM_CATEGORY" Language="en_US">
+      <Text>Create custom category from this</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_MOVE_DEFAULT_POSITION" Language="en_US">
+      <Text>Move to default position</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_RESET_BUILT_INS" Language="en_US">
+      <Text>Reset built-in order and visibility</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_RESET_BUILT_INS_TOOLTIP" Language="en_US">
+      <Text>Restores built-in categories to their default relative order and enables them. Custom categories are unchanged.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_RESET_CONFIRMATION_TITLE" Language="en_US">
+      <Text>Reset scanner categories</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_RESET_CONFIRMATION_BODY" Language="en_US">
+      <Text>Reset built-in category order and visibility?</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_CATEGORY_UP" Language="en_US">
+      <Text>Move category up</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_CATEGORY_DOWN" Language="en_US">
+      <Text>Move category down</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_DELETE_SCANNER_CATEGORY" Language="en_US">
+      <Text>Delete custom category</Text>
     </Row>
   </LocalizedText>
 </GameData>

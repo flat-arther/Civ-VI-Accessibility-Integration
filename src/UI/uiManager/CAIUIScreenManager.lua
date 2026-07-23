@@ -56,6 +56,7 @@ UIScreenManager = {
         speakPosition = true,
         speakState = true,
         speakTooltip = true,
+        TypeToFindIncludeTooltips = true,
         TypeToFindResultNavigation = true,
         SearchTimeout = 1.0,
         ValidateWidgetIds = false,

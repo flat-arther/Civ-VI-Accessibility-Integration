@@ -1328,6 +1328,8 @@ function CAIWidgetHelpers_DialogBuilder.CreatePopupDialog(mgr, popup) end
 ---@field Widget UIWidget
 ---@field Label string
 ---@field LabelLower string
+---@field Tooltip string
+---@field TooltipLower string
 ---@field BFSIndex integer
 
 ---@class SearchWord
@@ -1337,6 +1339,7 @@ function CAIWidgetHelpers_DialogBuilder.CreatePopupDialog(mgr, popup) end
 ---@class SearchResult
 ---@field Candidate SearchCandidate
 ---@field Tier integer
+---@field SourceRank integer 0 for a label match, 1 for a tooltip-only match.
 ---@field MatchPosition integer
 ---@field LabelLength integer
 

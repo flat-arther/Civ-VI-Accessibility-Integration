@@ -8,6 +8,8 @@ CAIWidgetHelpers_Settings = {}
 local S = CAIWidgetHelpers_Settings
 
 local g_settingsOpen = false
+local SETTINGS_PANEL_ID = "CAISettingsPanel"
+local SETTINGS_TREE_ID = "CAISettingsTree"
 local EDITBOX_EDIT_MODES = {
     Normal = 0,
     LettersOnly = 1,
@@ -170,6 +172,27 @@ local function CreateText(mgr, row)
     return w
 end
 
+local function IsInGame()
+    return Game ~= nil and Game.GetLocalPlayer ~= nil and Game.GetLocalPlayer() >= 0
+end
+
+local function CreateButton(mgr, row)
+    local w = mgr:CreateWidget("CAISetting_" .. SafeId(row.SettingId), "Button", {
+        Label = SettingLabel(row),
+        Tooltip = SettingTooltip(row),
+        FocusKey = "setting:" .. row.SettingId,
+    })
+
+    if row.DisplayContext == "InGame" then
+        w:SetHiddenPredicate(function() return not IsInGame() end)
+    end
+
+    w:On("activate", function()
+        CAISettings.Invoke(row.SettingId, row.ActionValue)
+    end)
+    return w
+end
+
 local function CreateSettingWidget(mgr, row)
     if row.UIType == "checkbox" then
         return CreateCheckbox(mgr, row)
@@ -187,13 +210,26 @@ local function CreateSettingWidget(mgr, row)
         return CreateText(mgr, row)
     end
 
+    if row.UIType == "button" then
+        return CreateButton(mgr, row)
+    end
+
     LogWarn("Settings helper unsupported UIType " .. tostring(row.UIType) .. " for " .. tostring(row.SettingId))
     return nil
 end
 
-local function CloseTree(mgr)
-    local tree = mgr:GetWidgetById("CAISettingsTree")
-    if tree then mgr:RemoveFromStack("CAISettingsTree") end
+local function ClosePanel(mgr, panel, restoreOwnerFocus)
+    if panel == nil then return end
+    local ownerRoot = panel.Parent
+    local previousFocus = panel._settingsPreviousFocus
+    panel:Destroy()
+    if ownerRoot ~= nil and mgr:GetTop() == ownerRoot then
+        if restoreOwnerFocus ~= false and previousFocus ~= nil then
+            mgr:SetFocus(previousFocus)
+        else
+            mgr:SetFocus(ownerRoot)
+        end
+    end
     LogMessage("Settings helper closed settings tree")
 end
 
@@ -206,7 +242,7 @@ function S.BuildSettingsTree(mgr)
         LogWarn("Settings helper BuildSettingsTree called with nil manager")
         return nil
     end
-    local tree = mgr:CreateWidget("CAISettingsTree", "Tree", {
+    local tree = mgr:CreateWidget(SETTINGS_TREE_ID, "Tree", {
         Label = function()
             return Locale.Lookup("LOC_CAI_SETTINGS_TITLE")
         end,
@@ -216,8 +252,6 @@ function S.BuildSettingsTree(mgr)
         LogError("Settings helper failed to create settings tree widget")
         return nil
     end
-
-    tree.TrapInput = true
 
     local categories = {}
     local rowCount = 0
@@ -247,19 +281,33 @@ function S.BuildSettingsTree(mgr)
         end
     end
 
-    tree:AddInputBinding({
-        Key = Keys.VK_ESCAPE,
-        Description = "LOC_CAI_KB_CLOSE",
-        Action = function(w)
-            CloseTree(w.Manager)
-            return true
-        end
-    })
-
     LogMessage("Settings helper built settings tree, rows="
         .. tostring(rowCount) .. ", widgets=" .. tostring(widgetCount)
         .. ", sections=" .. tostring(GetKeys(categories) and #GetKeys(categories) or 0))
     return tree
+end
+
+function S.GetSettingsOwnerRoot(mgr)
+    if mgr == nil then return nil end
+    local panel = mgr:GetWidgetById(SETTINGS_PANEL_ID, true)
+    return panel and panel.Parent or nil
+end
+
+function S.GetSettingsReturnFocus(mgr)
+    if mgr == nil then return nil end
+    local panel = mgr:GetWidgetById(SETTINGS_PANEL_ID, true)
+    if panel == nil then return nil end
+    return {
+        PreviousFocus = panel._settingsPreviousFocus,
+    }
+end
+
+function S.CloseSettings(mgr, restoreOwnerFocus)
+    if mgr == nil then return false end
+    local panel = mgr:GetWidgetById(SETTINGS_PANEL_ID, true)
+    if panel == nil then return false end
+    ClosePanel(mgr, panel, restoreOwnerFocus)
+    return true
 end
 
 function S.OpenSettings(mgr)
@@ -267,19 +315,42 @@ function S.OpenSettings(mgr)
         LogWarn("Settings helper OpenSettings ignored because settings UI is already open")
         return false
     end
+    local ownerRoot = mgr and mgr:GetTop() or nil
+    if ownerRoot == nil then
+        LogError("Settings helper OpenSettings failed because there is no active root")
+        return false
+    end
+    local previousFocus = mgr:GetFocusedWidget()
     local tree = S.BuildSettingsTree(mgr)
     if not tree then
         LogError("Settings helper OpenSettings failed because tree creation returned nil")
         return false
     end
 
-    tree:On("destroy", function()
+    local panel = mgr:CreateWidget(SETTINGS_PANEL_ID, "Panel", {
+        Transparent = true,
+        WrapAround = true,
+        TrapInput = true,
+    })
+    panel._settingsPreviousFocus = previousFocus
+    panel:On("focus_enter", function() Input.SetActiveContext(InputContext.Shell) end)
+    panel:On("destroy", function()
         g_settingsOpen = false
-        LogMessage("Settings helper settings tree destroyed")
+        LogMessage("Settings helper settings panel destroyed")
     end)
+    panel:AddChild(tree)
+    panel:AddInputBindings({ {
+        Key = Keys.VK_ESCAPE,
+        Description = "LOC_CAI_KB_CLOSE",
+        Action = function()
+            ClosePanel(mgr, panel)
+            return true
+        end,
+    } })
 
     g_settingsOpen = true
-    mgr:Push(tree)
+    ownerRoot:AddChild(panel)
+    mgr:SetFocus(tree)
     LogMessage("Settings helper opened settings UI")
 
     return true

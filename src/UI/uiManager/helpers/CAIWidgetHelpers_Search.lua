@@ -203,10 +203,14 @@ end
 ---The returned list is used by the search engine for scoring and ranking.
 ---@param root UIWidget
 ---@param maxDepth integer
+---@param includeTooltips? boolean
 ---@return SearchCandidate[]
-function S.CollectSearchCandidates(root, maxDepth)
+function S.CollectSearchCandidates(root, maxDepth, includeTooltips)
     if not root or not root.Children then
         return {}
+    end
+    if includeTooltips == nil then
+        includeTooltips = CAISettings.GetBool("TypeToFindIncludeTooltips")
     end
 
     ---@type SearchCandidate[]
@@ -236,10 +240,16 @@ function S.CollectSearchCandidates(root, maxDepth)
             local label = widget:GetLabel()
 
             if label and label ~= "" then
+                local tooltip = ""
+                if includeTooltips then
+                    tooltip = widget:GetTooltip() or ""
+                end
                 candidates[#candidates + 1] = {
                     Widget = widget,
                     Label = label,
                     LabelLower = label:lower(),
+                    Tooltip = tooltip,
+                    TooltipLower = tooltip:lower(),
                     BFSIndex = bfsIndex,
                 }
 
@@ -415,10 +425,14 @@ end
 ---@param candidate SearchCandidate
 ---@param query string
 ---@param tier integer
+---@param textLower? string
+---@param textLength? integer
+---@param sourceRank? integer
 ---@return SearchResult|nil
-function S.ScoreSearchCandidate(candidate, query, tier)
-    local label = candidate.LabelLower
-    local singleChar = #query == 1
+function S.ScoreSearchCandidate(candidate, query, tier, textLower, textLength, sourceRank)
+    local label = textLower or candidate.LabelLower
+    local matchLength = textLength or #candidate.Label
+    local matchSourceRank = sourceRank or 0
     local pos
     if tier == SEARCH_MATCH.START_WHOLE_WORD then
         pos = MatchStartWholeWord(label, query)
@@ -426,8 +440,9 @@ function S.ScoreSearchCandidate(candidate, query, tier)
             return {
                 Candidate = candidate,
                 Tier = SEARCH_MATCH.START_WHOLE_WORD,
+                SourceRank = matchSourceRank,
                 MatchPosition = pos,
-                LabelLength = #candidate.Label,
+                LabelLength = matchLength,
             }
         end
     end
@@ -437,8 +452,9 @@ function S.ScoreSearchCandidate(candidate, query, tier)
             return {
                 Candidate = candidate,
                 Tier = SEARCH_MATCH.START_PREFIX,
+                SourceRank = matchSourceRank,
                 MatchPosition = pos,
-                LabelLength = #candidate.Label,
+                LabelLength = matchLength,
             }
         end
     end
@@ -449,8 +465,9 @@ function S.ScoreSearchCandidate(candidate, query, tier)
             return {
                 Candidate = candidate,
                 Tier = SEARCH_MATCH.WHOLE_WORD,
+                SourceRank = matchSourceRank,
                 MatchPosition = pos,
-                LabelLength = #candidate.Label,
+                LabelLength = matchLength,
             }
         end
     end
@@ -461,8 +478,9 @@ function S.ScoreSearchCandidate(candidate, query, tier)
             return {
                 Candidate = candidate,
                 Tier = SEARCH_MATCH.PREFIX,
+                SourceRank = matchSourceRank,
                 MatchPosition = pos,
-                LabelLength = #candidate.Label,
+                LabelLength = matchLength,
             }
         end
     end
@@ -473,8 +491,9 @@ function S.ScoreSearchCandidate(candidate, query, tier)
             return {
                 Candidate = candidate,
                 Tier = SEARCH_MATCH.SUBSTRING,
+                SourceRank = matchSourceRank,
                 MatchPosition = pos,
-                LabelLength = #candidate.Label,
+                LabelLength = matchLength,
             }
         end
     end
@@ -485,8 +504,9 @@ function S.ScoreSearchCandidate(candidate, query, tier)
             return {
                 Candidate = candidate,
                 Tier = SEARCH_MATCH.WORD_PREFIX_ABBREVIATION,
+                SourceRank = matchSourceRank,
                 MatchPosition = pos,
-                LabelLength = #candidate.Label,
+                LabelLength = matchLength,
             }
         end
     end
@@ -499,6 +519,10 @@ end
 ---@param b SearchResult
 ---@return boolean
 function S.CompareSearchResults(a, b)
+    if a.SourceRank ~= b.SourceRank then
+        return a.SourceRank < b.SourceRank
+    end
+
     if a.Tier ~= b.Tier then
         return a.Tier < b.Tier
     end
@@ -544,6 +568,53 @@ function S.IsValidSearchStartCharacter(char)
     return not INVALID_SEARCH_START_CHARS[char]
 end
 
+---@param candidates SearchCandidate[]
+---@param query string
+---@param useTooltip boolean
+---@param excludedWidgets? table<UIWidget, boolean>
+---@return SearchResult[], table<UIWidget, boolean>
+local function FindBestTierResults(candidates, query, useTooltip, excludedWidgets)
+    ---@type table<integer, SearchResult[]>
+    local resultsByTier = {}
+    local matchedWidgets = {}
+    local sourceRank = useTooltip and 1 or 0
+
+    for _, candidate in ipairs(candidates) do
+        if not excludedWidgets or not excludedWidgets[candidate.Widget] then
+            local textLower = useTooltip and candidate.TooltipLower or candidate.LabelLower
+            local textLength = useTooltip and #candidate.Tooltip or #candidate.Label
+            if textLower ~= "" then
+                for _, tier in ipairs(SEARCH_ORDER) do
+                    local result = S.ScoreSearchCandidate(
+                        candidate,
+                        query,
+                        tier,
+                        textLower,
+                        textLength,
+                        sourceRank
+                    )
+                    if result then
+                        if not resultsByTier[tier] then resultsByTier[tier] = {} end
+                        resultsByTier[tier][#resultsByTier[tier] + 1] = result
+                        matchedWidgets[candidate.Widget] = true
+                        break
+                    end
+                end
+            end
+        end
+    end
+
+    for _, tier in ipairs(SEARCH_ORDER) do
+        local results = resultsByTier[tier]
+        if results and #results > 0 then
+            table.sort(results, S.CompareSearchResults)
+            return results, matchedWidgets
+        end
+    end
+
+    return {}, matchedWidgets
+end
+
 ---Find all matching widgets sorted from best to worst.
 ---@param root UIWidget
 ---@param query string
@@ -554,25 +625,18 @@ function S.FindSearchResults(root, query, maxDepth)
         return {}
     end
 
-    local candidates = S.CollectSearchCandidates(root, maxDepth)
+    local includeTooltips = CAISettings.GetBool("TypeToFindIncludeTooltips")
+    local candidates = S.CollectSearchCandidates(root, maxDepth, includeTooltips)
+    local labelResults, labelMatches = FindBestTierResults(candidates, query, false)
 
-    for _, tier in ipairs(SEARCH_ORDER) do
-        local results = {}
-
-        for _, candidate in ipairs(candidates) do
-            local result = S.ScoreSearchCandidate(candidate, query, tier)
-            if result then
-                results[#results + 1] = result
-            end
-        end
-
-        if #results > 0 then
-            table.sort(results, S.CompareSearchResults)
-            return results
+    if includeTooltips then
+        local tooltipResults = FindBestTierResults(candidates, query, true, labelMatches)
+        for _, result in ipairs(tooltipResults) do
+            labelResults[#labelResults + 1] = result
         end
     end
 
-    return {}
+    return labelResults
 end
 
 ---@param results SearchResult[]

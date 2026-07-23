@@ -80,8 +80,8 @@
 [x] Add setting for announcing combats that are not yours
 [x ] Religious units that don't share a religion with the player should be enemies
 [x] Add buffer messages tab to notifications
-[x] typeahead settings
-[ ] Fix civilopedia lookup to support colon separators
-[ ] Add fresh water to the shift z terrain count
-[ ] Fix the Surveyor terrain counts to remove mountain terrain from the list, since it is already counting how many mountains there are
-[ ] Group mountains by range in the scanner
+[x] typeahead settings for result nav and tooltip search
+[x] Fix civilopedia lookup to support colon separators
+[x] Add fresh water to the shift z terrain count
+[x] Fix the Surveyor terrain counts to remove mountain terrain from the list, since it is already counting how many mountains there are
+[x] Group mountains by range in the scanner

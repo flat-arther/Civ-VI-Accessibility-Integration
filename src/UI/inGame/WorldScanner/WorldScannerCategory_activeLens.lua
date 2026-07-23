@@ -1,6 +1,7 @@
 include("Civ6Common")
 
 local Utils = CAIWorldScannerUtils
+local ZoneUtils = CAIWorldScannerZoneUtils
 
 local SUBCATEGORY_WATER = "settlerWater"
 local SUBCATEGORY_LOYALTY = "settlerLoyalty"
@@ -410,7 +411,30 @@ local function ScanContinentLens(context)
         if continent ~= nil then
             local labelKey = continent.Description
             local plots = Map.GetVisibleContinentPlots(continentId)
-            AddPlotListWithSharedLabel(out, LENS_CONTINENT, SUBCATEGORY_CONTINENT, plots, "continent:" .. tostring(continentId), labelKey, context)
+            local revealedPlots = {}
+            for _, plotIndex in ipairs(plots or {}) do
+                local plot = Map.GetPlotByIndex(plotIndex)
+                if plot ~= nil and Utils.IsPlotRevealed(context, plot) then
+                    revealedPlots[#revealedPlots + 1] = plotIndex
+                end
+            end
+            for _, zone in ipairs(ZoneUtils.PartitionPlotIndices(revealedPlots)) do
+                local zoneContinentId = continentId
+                AddItem(out, {
+                    Id = "activeLens:" .. LENS_CONTINENT .. ":"
+                        .. tostring(zoneContinentId) .. ":" .. tostring(zone.MinPlotIndex),
+                    PlotIndex = zone.MinPlotIndex,
+                    ZonePlotIndices = zone.PlotIndices,
+                    ZoneValidatePlot = function(_, plot, validateContext)
+                        return Utils.IsPlotRevealed(validateContext, plot)
+                            and plot:GetContinentType() == zoneContinentId
+                    end,
+                    LabelKey = labelKey,
+                    SubCategoryId = SUBCATEGORY_CONTINENT,
+                    GroupId = "continent:" .. tostring(zoneContinentId),
+                    GroupLabelKey = labelKey,
+                })
+            end
         end
     end
 
@@ -419,6 +443,7 @@ end
 
 local function ScanOwnerLens(context)
     local out = {}
+    local buckets = {}
 
     Utils.ForEachRevealedPlot(context, function(plotIndex, plot)
         local ownerID = plot:GetOwner()
@@ -428,31 +453,48 @@ local function ScanOwnerLens(context)
 
         local stance = Utils.GetTeamStance(context, ownerID)
         local labelKey = Utils.GetPlayerLabel(ownerID)
-        AddItem(out, {
-            Id = "activeLens:" .. LENS_OWNER .. ":" .. stance .. ":" .. tostring(ownerID) .. ":" .. tostring(plotIndex),
-            PlotIndex = plotIndex,
-            LabelKey = labelKey,
-            SubCategoryId = stance,
-            GroupId = "player:" .. tostring(ownerID),
-            GroupLabelKey = labelKey,
-            Validate = function(item, validateContext)
-                local validatePlot = Map.GetPlotByIndex(item.PlotIndex)
-                if validatePlot == nil or not Utils.IsPlotRevealed(validateContext, validatePlot) then
-                    return false
-                end
-
-                return validatePlot:GetOwner() == ownerID
-                    and CanIdentifyPlayer(validateContext, ownerID)
-                    and Utils.GetTeamStance(validateContext, ownerID) == item.SubCategoryId
-            end,
-        })
+        local key = stance .. ":" .. tostring(ownerID)
+        local bucket = buckets[key]
+        if bucket == nil then
+            bucket = {
+                PlotIndices = {},
+                OwnerID = ownerID,
+                Stance = stance,
+                LabelKey = labelKey,
+            }
+            buckets[key] = bucket
+        end
+        bucket.PlotIndices[#bucket.PlotIndices + 1] = plotIndex
     end)
+
+    for key, bucket in pairs(buckets) do
+        for _, zone in ipairs(ZoneUtils.PartitionPlotIndices(bucket.PlotIndices)) do
+            local ownerID = bucket.OwnerID
+            local stance = bucket.Stance
+            AddItem(out, {
+                Id = "activeLens:" .. LENS_OWNER .. ":" .. key .. ":" .. tostring(zone.MinPlotIndex),
+                PlotIndex = zone.MinPlotIndex,
+                ZonePlotIndices = zone.PlotIndices,
+                ZoneValidatePlot = function(_, plot, validateContext)
+                    return Utils.IsPlotRevealed(validateContext, plot)
+                        and plot:GetOwner() == ownerID
+                        and CanIdentifyPlayer(validateContext, ownerID)
+                        and Utils.GetTeamStance(validateContext, ownerID) == stance
+                end,
+                LabelKey = bucket.LabelKey,
+                SubCategoryId = stance,
+                GroupId = "player:" .. tostring(ownerID),
+                GroupLabelKey = bucket.LabelKey,
+            })
+        end
+    end
 
     return out
 end
 
 local function ScanGovernmentLens(context)
     local out = {}
+    local buckets = {}
 
     Utils.ForEachRevealedPlot(context, function(plotIndex, plot)
         local ownerID = plot:GetOwner()
@@ -471,35 +513,60 @@ local function ScanGovernmentLens(context)
         end
 
         local stance = Utils.GetTeamStance(context, ownerID)
-        AddItem(out, {
-            Id = "activeLens:" .. LENS_GOVERNMENT .. ":" .. stance .. ":" .. tostring(groupId) .. ":" .. tostring(plotIndex),
-            PlotIndex = plotIndex,
-            LabelKey = labelKey,
-            SubCategoryId = stance,
-            GroupId = groupId,
-            GroupLabelKey = labelKey,
-            Validate = function(item, validateContext)
-                local validatePlot = Map.GetPlotByIndex(item.PlotIndex)
-                if validatePlot == nil or not Utils.IsPlotRevealed(validateContext, validatePlot) then
-                    return false
-                end
-
-                local validateOwnerID = validatePlot:GetOwner()
-                if validateOwnerID ~= ownerID or not CanIdentifyPlayer(validateContext, validateOwnerID) then
-                    return false
-                end
-
-                local validateGovernmentGroupId, validateGovernmentLabelKey = GetGovernmentGroupData(validateOwnerID)
-                if validateGovernmentGroupId ~= governmentGroupId or validateGovernmentLabelKey ~= governmentLabelKey then
-                    return false
-                end
-
-                local validateCompositeGroupId = MakeGovernmentPlotLabel(validateGovernmentLabelKey, validateOwnerID, validatePlot)
-                return validateCompositeGroupId == groupId
-                    and Utils.GetTeamStance(validateContext, validateOwnerID) == item.SubCategoryId
-            end,
-        })
+        local key = stance .. ":" .. tostring(groupId)
+        local bucket = buckets[key]
+        if bucket == nil then
+            bucket = {
+                PlotIndices = {},
+                OwnerID = ownerID,
+                Stance = stance,
+                GovernmentGroupId = governmentGroupId,
+                GovernmentLabelKey = governmentLabelKey,
+                GroupId = groupId,
+                LabelKey = labelKey,
+            }
+            buckets[key] = bucket
+        end
+        bucket.PlotIndices[#bucket.PlotIndices + 1] = plotIndex
     end)
+
+    for key, bucket in pairs(buckets) do
+        for _, zone in ipairs(ZoneUtils.PartitionPlotIndices(bucket.PlotIndices)) do
+            local ownerID = bucket.OwnerID
+            local stance = bucket.Stance
+            local governmentGroupId = bucket.GovernmentGroupId
+            local governmentLabelKey = bucket.GovernmentLabelKey
+            local groupId = bucket.GroupId
+            AddItem(out, {
+                Id = "activeLens:" .. LENS_GOVERNMENT .. ":" .. key .. ":" .. tostring(zone.MinPlotIndex),
+                PlotIndex = zone.MinPlotIndex,
+                ZonePlotIndices = zone.PlotIndices,
+                ZoneValidatePlot = function(_, plot, validateContext)
+                    if not Utils.IsPlotRevealed(validateContext, plot)
+                        or plot:GetOwner() ~= ownerID
+                        or not CanIdentifyPlayer(validateContext, ownerID) then
+                        return false
+                    end
+
+                    local validateGovernmentGroupId, validateGovernmentLabelKey =
+                        GetGovernmentGroupData(ownerID)
+                    if validateGovernmentGroupId ~= governmentGroupId
+                        or validateGovernmentLabelKey ~= governmentLabelKey then
+                        return false
+                    end
+
+                    local validateCompositeGroupId =
+                        MakeGovernmentPlotLabel(validateGovernmentLabelKey, ownerID, plot)
+                    return validateCompositeGroupId == groupId
+                        and Utils.GetTeamStance(validateContext, ownerID) == stance
+                end,
+                LabelKey = bucket.LabelKey,
+                SubCategoryId = stance,
+                GroupId = groupId,
+                GroupLabelKey = bucket.LabelKey,
+            })
+        end
+    end
 
     return out
 end
@@ -519,18 +586,42 @@ local function ScanPowerLens(context)
             local poweredPlots = cityPower.GetPlotsCoveredByRegionalPower ~= nil and cityPower:GetPlotsCoveredByRegionalPower() or nil
             if poweredPlots ~= nil then
                 local groupLabel = MakePowerCityGroupLabel("LOC_CAI_WORLD_SCANNER_POWER_RANGE_CITY", city)
+                local revealedPlots = {}
                 for plotIndex, isPowered in pairs(poweredPlots) do
                     local plot = Map.GetPlotByIndex(plotIndex)
                     if isPowered and plot ~= nil and Utils.IsPlotRevealed(context, plot) then
-                        AddItem(out, {
-                            Id = "activeLens:" .. LENS_POWER .. ":" .. SUBCATEGORY_POWER_RANGE .. ":" .. cityGroupId .. ":" .. tostring(plotIndex),
-                            PlotIndex = plotIndex,
-                            LabelKey = groupLabel,
-                            SubCategoryId = SUBCATEGORY_POWER_RANGE,
-                            GroupId = cityGroupId,
-                            GroupLabelKey = groupLabel,
-                        })
+                        revealedPlots[#revealedPlots + 1] = plotIndex
                     end
+                end
+
+                for _, zone in ipairs(ZoneUtils.PartitionPlotIndices(revealedPlots)) do
+                    local ownerID = city:GetOwner()
+                    local cityID = city:GetID()
+                    AddItem(out, {
+                        Id = "activeLens:" .. LENS_POWER .. ":" .. SUBCATEGORY_POWER_RANGE
+                            .. ":" .. cityGroupId .. ":" .. tostring(zone.MinPlotIndex),
+                        PlotIndex = zone.MinPlotIndex,
+                        ZonePlotIndices = zone.PlotIndices,
+                        ZoneValidatePlot = function(_, plot, validateContext)
+                            if not Utils.IsPlotRevealed(validateContext, plot) then
+                                return false
+                            end
+                            local liveCity = CityManager.GetCity(ownerID, cityID)
+                            local livePower = liveCity ~= nil
+                                and liveCity.GetPower ~= nil
+                                and liveCity:GetPower()
+                                or nil
+                            local livePlots = livePower ~= nil
+                                and livePower.GetPlotsCoveredByRegionalPower ~= nil
+                                and livePower:GetPlotsCoveredByRegionalPower()
+                                or nil
+                            return livePlots ~= nil and livePlots[plot:GetIndex()]
+                        end,
+                        LabelKey = groupLabel,
+                        SubCategoryId = SUBCATEGORY_POWER_RANGE,
+                        GroupId = cityGroupId,
+                        GroupLabelKey = groupLabel,
+                    })
                 end
             end
 
@@ -965,6 +1056,8 @@ end
 CAIWorldScannerCategory_ActiveLens = {
     Id = "activeLens",
     LabelKey = "LOC_CAI_WORLD_SCANNER_CATEGORY_ACTIVE_LENS",
+    Contextual = true,
+    ManagementSettings = { "ScannerAutoFocusActiveLens" },
     BuildOncePerDynamicState = true,
     AutoFocus = true,
     SubCategoryOrder = {

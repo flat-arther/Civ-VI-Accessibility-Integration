@@ -111,6 +111,26 @@ mgr:RemoveFromStack("ScreenRoot_City")
   `FocusedChild` to pre-position focus.
 - The active root is always the top of the stack. Focus follows automatically.
 
+### Settings and replacement child views
+
+Mod Settings belongs to the current accessible screen instead of becoming
+another stack root. Follow the Input Help and Civilopedia lookup pattern:
+`OpenSettings(mgr)` saves `mgr:GetFocusedWidget()`, creates a transparent,
+wrapping, input-trapping Panel containing `CAISettingsTree`, adds the Panel to
+the current root, and focuses the Tree directly. The Panel owns Escape and
+switches to the Shell input context on focus. Ordinary closure destroys the
+Panel and focuses the saved widget directly. Any code that must rediscover
+these child widgets through the manager uses `GetWidgetById(id, true)`;
+the default nonrecursive lookup checks stack roots only.
+
+A view replacing Settings follows the same ownership. Resolve the parent with
+`CAIWidgetHelpers_Settings.GetSettingsOwnerRoot(mgr)` and obtain the original
+screen focus through `GetSettingsReturnFocus(mgr)`. Add the replacement panel
+to that root and call `mgr:PrepareFocus(ownerRoot, initialChild)` before calling
+`CloseSettings(mgr, false)`. The `false` preserves the replacement's prepared
+focus rather than restoring the screen immediately. The replacement should
+trap input and owns the saved widget so it can focus that widget when it closes.
+
 ### Destroy
 
 ```lua
@@ -622,6 +642,11 @@ the focused row's sibling level. The helper module
   matches into a persistent flat result list. While its buffer is non-empty,
   Up/Down move to the previous/next result and wrap at the ends. The timeout is
   suspended without changing result collection or sorting.
+- The default-enabled `TypeToFindIncludeTooltips` UI setting adds tooltip-only
+  matches after label matches. Labels and tooltips retain the same six-tier
+  classifier independently, so a strong tooltip match never displaces or
+  outranks an available label match. Widgets whose labels match at any tier are
+  not duplicated through their tooltips.
 - A persistent search is owned by the List or Tree where typing began. Moving
   focus outside that container clears it silently. A successful widget
   interaction also clears it silently: activation, value or text changes,

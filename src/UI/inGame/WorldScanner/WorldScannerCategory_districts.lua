@@ -28,6 +28,8 @@ local function GetPlotStanceKey(context, plot, isPillaged)
 end
 
 function CAIWorldScannerCategory_Districts.PlotExtract(plotIndex, plot, context, collect)
+    CAIWorldScannerCategory_Wonders.PlotExtract(plotIndex, plot, context, collect)
+
     local districtType = plot:GetDistrictType()
     if districtType == nil or districtType < 0 then
         return

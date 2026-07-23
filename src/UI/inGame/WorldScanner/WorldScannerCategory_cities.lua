@@ -23,6 +23,7 @@ end
 CAIWorldScannerCategory_Cities = {
     Id = "cities",
     LabelKey = "LOC_CAI_WORLD_SCANNER_CATEGORY_CITIES",
+    ManagementSettings = { "ScannerGroupCitiesByCivilization" },
     SubCategoryOrder = { "my", "cityStates", "neutral", "enemy", "barbarianCamps" },
     SubCategoryLabels = subCategoryLabels,
     GroupLabelResolver = function(groupId, firstItem)

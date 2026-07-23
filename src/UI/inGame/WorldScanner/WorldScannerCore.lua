@@ -35,6 +35,7 @@ CAIWorldScannerCore = CAIWorldScannerCore or {}
 
 local Core = CAIWorldScannerCore
 local Utils = CAIWorldScannerUtils
+local ZoneUtils = CAIWorldScannerZoneUtils
 
 Core.AllSubCategoryId = "__all"
 Core.AllSubCategoryLabelKey = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_ALL"
@@ -218,7 +219,7 @@ end
 ---@param rawItems table[]
 ---@param context WorldScannerContext
 ---@return WorldScannerCategory|nil
-local function BuildCategoryFromItems(definition, rawItems, context)
+function Core.BuildCategoryFromItems(definition, rawItems, context)
     if rawItems == nil or #rawItems == 0 then
         LogMessage("World scanner BuildCategoryFromItems: no raw items for category " .. GetCategoryLogId(definition))
         return nil
@@ -230,14 +231,25 @@ local function BuildCategoryFromItems(definition, rawItems, context)
         -- every item's validator here duplicates those game API lookups on
         -- every rebuild. Validation belongs at the current-item boundary,
         -- where it closes the race between snapshot collection and use.
-        item._CAIDistance = Utils.GetDistance(context, item.PlotIndex)
-        item._CAIResolvedLabel = Utils.ResolveText(item.LabelKey)
-        builtItems[#builtItems + 1] = item
+        if item.ZonePlotIndices ~= nil then
+            ZoneUtils.ResolveItemTarget(item, context, false)
+        end
+        if item.PlotIndex ~= nil then
+            item._CAIDistance = Utils.GetDistance(context, item.PlotIndex)
+            item._CAIResolvedLabel = Utils.ResolveText(item.LabelKey)
+            builtItems[#builtItems + 1] = item
+        end
     end
 
     local subBuckets = {}
     for _, item in ipairs(builtItems) do
-        AddBucketItem(subBuckets, item.SubCategoryId, item)
+        if item.SubCategoryIds ~= nil then
+            for _, subCategoryId in ipairs(item.SubCategoryIds) do
+                AddBucketItem(subBuckets, subCategoryId, item)
+            end
+        else
+            AddBucketItem(subBuckets, item.SubCategoryId, item)
+        end
     end
 
     local subCategories = {}
@@ -346,6 +358,12 @@ function Core.BuildCategory(definition, context)
         if not ok then
             return nil
         end
+        if definition.EndExtract ~= nil then
+            local ok = SafeCall(definition, "EndExtract", definition.EndExtract, context, Collect)
+            if not ok then
+                return nil
+            end
+        end
     elseif definition.Scan ~= nil then
         local ok, result = SafeCall(definition, "Scan", definition.Scan, context)
         if not ok then
@@ -357,7 +375,7 @@ function Core.BuildCategory(definition, context)
     LogMessage("World scanner BuildCategory scanned category "
         .. GetCategoryLogId(definition)
         .. ", rawItems=" .. tostring(#rawItems))
-    return BuildCategoryFromItems(definition, rawItems, context)
+    return Core.BuildCategoryFromItems(definition, rawItems, context)
 end
 
 ---@param definitions WorldScannerCategoryDefinition[]
@@ -435,13 +453,33 @@ function Core.BuildAllCategories(definitions, context)
         end
 
         for _, entry in ipairs(plotExtractors) do
+            if not failedDefinitions[entry.Definition.Id] and entry.Definition.EndExtract ~= nil then
+                local items = entry.RawItems
+                local function Collect(item)
+                    items[#items + 1] = item
+                end
+                local ok = SafeCall(
+                    entry.Definition,
+                    "EndExtract",
+                    entry.Definition.EndExtract,
+                    context,
+                    Collect
+                )
+                if not ok then
+                    results[entry.Definition.Id] = nil
+                    failedDefinitions[entry.Definition.Id] = true
+                end
+            end
+        end
+
+        for _, entry in ipairs(plotExtractors) do
             if failedDefinitions[entry.Definition.Id] then
                 LogWarn("World scanner BuildAllCategories skipping failed extractor category " .. GetCategoryLogId(entry.Definition))
             else
                 LogMessage("World scanner BuildAllCategories extracted category "
                     .. GetCategoryLogId(entry.Definition)
                     .. ", rawItems=" .. tostring(#entry.RawItems))
-                results[entry.Definition.Id] = BuildCategoryFromItems(entry.Definition, entry.RawItems, context)
+                results[entry.Definition.Id] = Core.BuildCategoryFromItems(entry.Definition, entry.RawItems, context)
             end
         end
     end
@@ -465,7 +503,7 @@ function Core.BuildAllCategories(definitions, context)
         LogMessage("World scanner BuildAllCategories scanned category "
             .. GetCategoryLogId(definition)
             .. ", rawItems=" .. tostring(#rawItems))
-            results[definition.Id] = BuildCategoryFromItems(definition, rawItems, context)
+            results[definition.Id] = Core.BuildCategoryFromItems(definition, rawItems, context)
         end
     end
 
@@ -485,6 +523,12 @@ function Core.RefreshCategorySort(category, context)
         for _, group in ipairs(groups) do
             local items = group.Items or {}
             for _, item in ipairs(items) do
+                if item.Item ~= nil and item.Item.ZonePlotIndices ~= nil then
+                    local plotIndex = ZoneUtils.ResolveItemTarget(item.Item, context, false)
+                    if plotIndex ~= nil then
+                        item.PlotIndex = plotIndex
+                    end
+                end
                 local distance = distancesByPlot[item.PlotIndex]
                 if distance == nil then
                     distance = Utils.GetDistance(context, item.PlotIndex)

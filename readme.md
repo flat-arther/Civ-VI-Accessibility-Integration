@@ -4,11 +4,11 @@
 
 Civilization VI Accessibility Integration makes Sid Meier's Civilization VI playable with a screen reader. It adds spoken information and keyboard navigation to the game's menus, dialogs, screens, and other user-interface elements.
 
-The mod supports all three standard rulesets: the base game, Rise and Fall, and Gathering Storm. It also supports the Conquests of Alexander, Outback Tycoon, and Black Death scenarios; other scenarios remain unsupported or untested.
+The mod supports all three standard rulesets: the base game, Rise and Fall, and Gathering Storm, as well as all scenarios. 
 
 ## Installing the mod
 
-1. Copy the included `binaries` folder into the Civilization VI installation folder.
+1. Copy the included `base` folder into the Civilization VI installation folder.
 
    Steam's default installation folder is:
 
@@ -233,7 +233,7 @@ The Surveyor summarizes a circular area centered on the navigation cursor. Its r
 
 ### World Scanner
 
-The World Scanner finds known objects across the map without requiring you to inspect every tile. Results are organized into four levels: category, subcategory, group, and item. Categories cover information such as cities, units, resources, terrain, districts, wonders, improvements, valid targets, and other known map objects. Empty categories are skipped.
+The World Scanner finds known objects across the map without requiring you to inspect every tile. Results are organized into four levels: category, subcategory, group, and item. Categories cover information such as cities, units, resources, terrain, districts and wonders, improvements, valid targets, and other known map objects. Empty categories are skipped.
 
 Moving through the Scanner reads the current result and its direction and distance from the navigation cursor. Category, subcategory, group, and item navigation wraps with a click sound. 
 
@@ -245,6 +245,28 @@ Moving through the Scanner reads the current result and its direction and distan
 - `Backspace` — return the navigation cursor to its position before the last Scanner jump
 - `End` — read the direction from the navigation cursor to the current Scanner item
 - `Ctrl+F` — search across all Scanner categories
+
+#### Managing Scanner categories
+
+During a game, press `F12`, open the World Scanner settings section, and activate `Manage scanner categories`. The management list announces each category's name, type, and Enabled or Disabled state:
+
+- **Built-in** categories are the Scanner's normal sources, such as Cities, Resources, Terrain, and My Units.
+- **Contextual** categories appear only while their information is relevant, such as City management, Valid targets, Recommendations, and Active lens.
+- **Custom** categories combine selected Scanner sources and name searches into a personal view.
+
+The order in this list is the order used when cycling Scanner categories. Focus a category row and press `Shift+Up` or `Shift+Down` to move it. Enter the submenu to change its Enabled checkbox. A disabled category is skipped during Scanner navigation even when it has results. Changes are saved automatically and remain in effect across games.
+
+Built-in and contextual rows also provide `Create custom category from this`, which creates a custom category with that complete source selected, and `Move to default position`. Some contextual rows contain their related automatic-focus setting.
+
+You can tab to and activate `Add custom category` to create an enabled category named `Custom N`, then configure it through the expanded row:
+
+- **Name** changes the name spoken in the Scanner.
+- **Sources** selects complete built-in categories through their All checkbox or selects individual subcategories.
+- **Include names** adds items whose names match any entered term, including items outside the selected sources.
+- **Exclude names** removes matching items from the combined result.
+- **Delete custom category** removes the category after confirmation. You may also press `Delete` while focused on its category row.
+
+Include and exclude terms use the Scanner's case-insensitive name matching, including word prefixes and partial matches. Each selected source or include term becomes a subcategory inside the custom category. If nothing is selected or nothing currently matches, the custom category is skipped like any other empty category.
 
 ### Lenses
 
@@ -282,7 +304,6 @@ Empire information commands read important totals and progress without opening t
 - `G` — read the current gold balance, gold per turn, and trade-route capacity
 - `F` — read the current faith balance and faith per turn
 - `I` — read tourism per turn
-- `Ctrl+Y` — open Reports on the Yields tab with Empire Economy focused. This node provides detailed empire-wide information for science, culture, gold, faith, tourism, diplomatic favor, envoys, influence points, and other available top-panel yields. Strategic-resource stockpiles and flow are consolidated under Strategic resources on the Resources tab.
 
 #### Diplomacy and government
 
@@ -328,6 +349,8 @@ The message buffer keeps a limited history for the current player. It can show a
 
 World actions operate on the current selection or on the map without requiring a separate screen.
 
+- `F5` — quick save
+- `F6` — quick load, asks for confirmation
 - `M` — place or edit a map tac at the navigation cursor
 - `Ctrl+Space` — end the turn or go to the next turn-blocking action
 - `Shift+Space` — speak the current turn blocker or between-turn waiting message
@@ -349,7 +372,7 @@ All city, unit, and selection actions are input actions and can be remapped from
 
 #### Selection information
 
-The grave-accent key, usually located to the left of `1`, reads a short summary of the selected city or unit. `Shift+1` through `Shift+0` read individual information sections.
+The grave-accent key, usually located to the left of `1`, reads a short summary of the selected city or unit, including relative direction from the navigation cursor. `Shift+1` through `Shift+0` read individual information sections.
 
 - `` ` `` — city name, population, health, production, and growth; or the unit summary
 - `Shift+1` — city name and health; or unit identity and health
@@ -418,7 +441,7 @@ The Mods and Credits screens are inaccessible. Do not go there.
 
 Do not click the Additional Content button in multiplayer lobbies.
 
-Only Conquests of Alexander, Outback Tycoon, and Black Death are currently supported. Other scenarios, including Red Death and Pirates, are not yet supported.
+Red death and pirates scenarios are not yet supported
 
 The tutorial is still not supported currently.
 
@@ -431,4 +454,4 @@ Civilization VI Accessibility Integration was developed by Flat-Arther and Hamad
 Special thanks to:
 
 - bsg-smoke and Nibar Sito for funding the project.
-- Rashad for allowing me to steal ideas from his Civilization V accessibility mod and for answering my numerous questions.
+- Rashad for allowing me to steal from his Civilization V accessibility mod and for answering my numerous questions.

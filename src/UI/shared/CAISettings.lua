@@ -153,6 +153,29 @@ function CAISettings.Reset(settingId)
     return CAISettings.Set(settingId, def.DefaultValue)
 end
 
+---Invoke a metadata action without persisting a meaningless setting value.
+---@param settingId string
+---@param actionValue? any
+---@return boolean
+function CAISettings.Invoke(settingId, actionValue)
+    local def = GetDefinition(settingId)
+    if def == nil then
+        print("CAISettings.Invoke: unknown setting " .. tostring(settingId))
+        return false
+    end
+    if def.UIType ~= "button" then
+        print("CAISettings.Invoke: setting is not a button " .. tostring(settingId))
+        return false
+    end
+
+    local value = actionValue
+    if value == nil then value = def.ActionValue or def.DefaultValue end
+    if LuaEvents.CAISettingsChanged ~= nil then
+        LuaEvents.CAISettingsChanged(settingId, value)
+    end
+    return true
+end
+
 -- ===========================================================================
 -- Typed helpers
 -- ===========================================================================

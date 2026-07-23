@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Mod id="9f4b5c2e-1a2b-4c3d-8e9f-123456789abc" version="0.7.0">
+<Mod id="9f4b5c2e-1a2b-4c3d-8e9f-123456789abc" version="0.8.0">
   <Properties>
     <Name>Civ VI Accessibility Integration</Name>
     <Description>Adds blind accessibility to civ VI via text to speech</Description>
@@ -139,13 +139,17 @@
     <File>UI/inGame/RecommendationLogic_CAI.lua</File>
     <File>UI/inGame/WorldScanner/WorldScanner_CAI.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategoryUtils.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerZoneUtils.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCore.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategoryConfig.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategoryManager.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_cities.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_barbarianCamps.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_improvements.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_districts.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_wonders.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_terrain.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_geography.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_activeLens.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_resources.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_units.lua</File>
@@ -420,13 +424,17 @@
       <File>UI/inGame/RecommendationLogic_CAI.lua</File>
       <File>UI/inGame/WorldScanner/WorldScanner_CAI.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategoryUtils.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerZoneUtils.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCore.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategoryConfig.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategoryManager.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_cities.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_barbarianCamps.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_improvements.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_districts.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_wonders.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_terrain.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_geography.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_activeLens.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_resources.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_units.lua</File>

@@ -1,6 +1,9 @@
 include("hexCoordUtils_CAI")
 include("WorldScannerCategoryUtils")
+include("WorldScannerZoneUtils")
 include("WorldScannerCore")
+include("WorldScannerCategoryConfig")
+include("WorldScannerCategoryManager")
 include("PlayerStateManager_CAI")
 
 ---@class WorldScannerContext
@@ -31,11 +34,15 @@ include("PlayerStateManager_CAI")
 ---@field PlotExtract fun(plotIndex:integer, plot:table, context:WorldScannerContext, collect:fun(item:table), isRevealed:boolean)|nil
 ---@field ExtractHiddenPlots boolean|nil
 ---@field BeginExtract fun()|nil
+---@field EndExtract fun(context:WorldScannerContext, collect:fun(item:table))|nil
 ---@field AutoFocus boolean|nil
+---@field Contextual boolean|nil
+---@field ManagementSettings string[]|nil
 
 ---@class WorldScanner
 ---@field Categories table[]
 ---@field CategoryDefinitions WorldScannerCategoryDefinition[]
+---@field SourceCategories table<string, WorldScannerCategory|nil>
 ---@field CategoryIndex integer
 ---@field SubCategoryIndex integer
 ---@field GroupIndex integer
@@ -52,6 +59,9 @@ CAIWorldScanner = CAIWorldScanner or {}
 local HexCoordUtils = CAIHexCoordUtils
 local Core = CAIWorldScannerCore
 local Utils = CAIWorldScannerUtils
+local CategoryConfig = CAIWorldScannerCategoryConfig
+local CategoryManager = CAIWorldScannerCategoryManager
+local mgr = ExposedMembers.CAI_UIManager
 
 ---@type WorldScannerCategoryDefinition[]
 local RegisteredCategoryDefinitions = {}
@@ -70,6 +80,7 @@ local m_PlayerState = PlayerStateManager.Init(function(playerID)
     return {
         Categories = {},
         CategoryDefinitions = RegisteredCategoryDefinitions,
+        SourceCategories = {},
 
         CategoryIndex = 1,
         SubCategoryIndex = 1,
@@ -160,34 +171,29 @@ local function ShouldAutoFocusCategory(definition)
     return CAISettings.GetBool(settingId)
 end
 
-local function CreateCategorySlots(definitions)
-    local autoFocusSlots = {}
-    local normalSlots = {}
-
-    for _, definition in ipairs(definitions or {}) do
-        local slot = {
-            Definition = definition,
+local function CreateCategorySlots()
+    local slots = {}
+    for _, entry in ipairs(CategoryConfig.GetEntries()) do
+        slots[#slots + 1] = {
+            Definition = entry.Definition or {
+                Id = entry.Id,
+                LabelKey = entry.Custom and entry.Custom.Name or "LOC_CAI_WORLD_SCANNER_UNKNOWN",
+            },
+            Custom = entry.Custom,
+            IsCustom = entry.IsCustom,
+            Enabled = entry.Enabled,
             Category = nil,
         }
-
-        if ShouldAutoFocusCategory(definition) then
-            autoFocusSlots[#autoFocusSlots + 1] = slot
-        else
-            normalSlots[#normalSlots + 1] = slot
-        end
     end
-
-    local slots = {}
-
-    for _, slot in ipairs(autoFocusSlots) do
-        slots[#slots + 1] = slot
-    end
-
-    for _, slot in ipairs(normalSlots) do
-        slots[#slots + 1] = slot
-    end
-
     return slots
+end
+
+local function BuildLiveTargetContext(scanner)
+    local context = BuildScannerContext(scanner)
+    local cursorX, cursorY = GetCursorCoords()
+    context.SortOriginX = cursorX
+    context.SortOriginY = cursorY
+    return context
 end
 
 local function GetCategorySlot(scanner, index)
@@ -210,12 +216,14 @@ end
 local function BuildAllIntoSlots(scanner)
     local context = BuildScannerContext(scanner)
     local builtMap = Core.BuildAllCategories(scanner.CategoryDefinitions, context)
+    scanner.SourceCategories = builtMap
+    local customMap = CategoryConfig.BuildCustomCategories(builtMap, context, Core)
 
     for _, slot in ipairs(scanner.Categories) do
         local definition = slot.Definition
         if definition ~= nil then
-            local built = builtMap[definition.Id]
-            slot.Category = built or EMPTY_CATEGORY
+            local built = slot.IsCustom and customMap[definition.Id] or builtMap[definition.Id]
+            slot.Category = slot.Enabled and (built or EMPTY_CATEGORY) or EMPTY_CATEGORY
             if built ~= nil then
                 LogMessage("World scanner slot built category "
                     .. tostring(definition.Id)
@@ -479,7 +487,19 @@ local function EnsureCurrentItemValid(scanner)
         end
 
         local item = leaf.Item
-        if item == nil or item.Validate == nil or item.Validate(item, BuildScannerContext(scanner)) then
+        local context = BuildLiveTargetContext(scanner)
+        local isValid = item == nil or item.Validate == nil or item.Validate(item, context)
+        if isValid and item ~= nil and item.ZonePlotIndices ~= nil then
+            local plotIndex = CAIWorldScannerZoneUtils.ResolveItemTarget(item, context, true)
+            isValid = plotIndex ~= nil
+            if isValid then
+                leaf.PlotIndex = plotIndex
+                leaf.Distance = Utils.GetDistance(context, plotIndex)
+                leaf.LabelKey = item.LabelKey
+                leaf.ResolvedLabel = Utils.ResolveText(item.LabelKey)
+            end
+        end
+        if isValid then
             return true
         end
 
@@ -611,11 +631,18 @@ local function OnScannerInterfaceModeChanged(oldMode, newMode)
     CAIWorldScanner:RebuildCategory("cityManagement")
 end
 
-local function OnScannerSettingsChanged(settingId)
+local function OnScannerSettingsChanged(settingId, value)
     if settingId == "ScannerGroupCitiesByCivilization" then
         CAIWorldScanner:RebuildCategory("cities")
     elseif settingId == "AudioTagVolume_BEACONS" then
         PlayBeaconVolumePreview()
+    elseif settingId == "ManageScannerCategories" and value == "open" then
+        local settingsHelper = CAIWidgetHelpers_Settings
+        local parentRoot = settingsHelper.GetSettingsOwnerRoot(mgr)
+        local returnFocus = settingsHelper.GetSettingsReturnFocus(mgr)
+        if CategoryManager.Open(mgr, parentRoot, returnFocus) then
+            settingsHelper.CloseSettings(mgr, false)
+        end
     end
 end
 
@@ -630,7 +657,7 @@ function CAIWorldScanner:Rebuild(focusOverride)
     local focus = focusOverride or Core.CaptureFocus(scanner)
 
     scanner.CategoryDefinitions = RegisteredCategoryDefinitions
-    scanner.Categories = CreateCategorySlots(scanner.CategoryDefinitions)
+    scanner.Categories = CreateCategorySlots()
 
     BuildAllIntoSlots(scanner)
 
@@ -666,6 +693,8 @@ function CAIWorldScanner:RebuildCategory(categoryId, suppressAutoFocus)
     local slot = scanner.Categories[index]
     local definition = slot.Definition
     local shouldAutoFocus = not suppressAutoFocus
+        and slot.Enabled
+        and not slot.IsCustom
         and definition ~= nil
         and ShouldAutoFocusCategory(definition)
     if shouldAutoFocus then
@@ -673,7 +702,17 @@ function CAIWorldScanner:RebuildCategory(categoryId, suppressAutoFocus)
     end
 
     local context = BuildScannerContext(scanner)
-    slot.Category = Core.BuildCategory(definition, context) or EMPTY_CATEGORY
+    local built = Core.BuildCategory(definition, context)
+    scanner.SourceCategories[categoryId] = built
+    slot.Category = slot.Enabled and (built or EMPTY_CATEGORY) or EMPTY_CATEGORY
+
+    local customMap = CategoryConfig.BuildCustomCategories(scanner.SourceCategories, context, Core)
+    for _, customSlot in ipairs(scanner.Categories) do
+        if customSlot.IsCustom then
+            local customBuilt = customMap[customSlot.Definition.Id]
+            customSlot.Category = customSlot.Enabled and (customBuilt or EMPTY_CATEGORY) or EMPTY_CATEGORY
+        end
+    end
 
     if definition ~= nil
         and shouldAutoFocus
@@ -726,7 +765,8 @@ function CAIWorldScanner:Initialize()
     end
 
     scanner.CategoryDefinitions = RegisteredCategoryDefinitions
-    scanner.Categories = CreateCategorySlots(scanner.CategoryDefinitions)
+    scanner.Categories = CreateCategorySlots()
+    scanner.SourceCategories = {}
     scanner.CategoryIndex = 1
     scanner.SubCategoryIndex = 1
     scanner.GroupIndex = 0
@@ -767,6 +807,7 @@ function CAIWorldScanner:ClearScanner()
     if scanner ~= nil then
         scanner.Categories = {}
         scanner.CategoryDefinitions = {}
+        scanner.SourceCategories = {}
         scanner.CategoryIndex = 1
         scanner.SubCategoryIndex = 1
         scanner.GroupIndex = 0
@@ -1048,7 +1089,6 @@ end
 local SCANNER_SEARCH_HISTORY_CONTEXT = "WorldScanner"
 
 local SearchUtils = CAIWidgetHelpers_Search
-local mgr = ExposedMembers.CAI_UIManager
 
 local m_searchEditBox = nil
 
@@ -1057,8 +1097,8 @@ local m_searchEditBox = nil
 local function BuildSearchSnapshot(scanner)
     local snapshot = {}
 
-    for _, slot in ipairs(scanner.Categories or {}) do
-        local category = slot.Category
+    for _, definition in ipairs(scanner.CategoryDefinitions or {}) do
+        local category = scanner.SourceCategories and scanner.SourceCategories[definition.Id] or nil
 
         if category and category ~= false then
             local categoryLabel = Utils.ResolveText(category.LabelKey)
@@ -1469,3 +1509,7 @@ end
 -- Category files should define their CAIWorldScannerCategory_* globals without including this file.
 RegisteredCategoryDefinitions = {}
 include("WorldScannerCategory_", true)
+CategoryConfig.Configure(RegisteredCategoryDefinitions)
+CategoryManager.SetChangedCallback(function()
+    CAIWorldScanner:Rebuild()
+end)

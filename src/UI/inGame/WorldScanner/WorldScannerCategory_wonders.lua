@@ -53,4 +53,4 @@ function CAIWorldScannerCategory_Wonders.PlotExtract(plotIndex, plot, context, c
     })
 end
 
-CAIWorldScanner:RegisterCategoryDefinition(CAIWorldScannerCategory_Wonders)
+-- Wonders are extracted into the combined Districts and wonders category.

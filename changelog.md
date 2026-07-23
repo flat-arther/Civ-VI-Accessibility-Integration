@@ -6,49 +6,59 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-07-24
+
 ### Added
 
+- Added scanner category management, open from under mod settings / world scanner. Categories can be toggled and reordered. Allows creating persistent custom categories from pre-built scanner sources and name filters. Note: filters function the same as scanner search queries, meaning that sub-strings and prefixes are accepted. You may choose to add terms to include or exclude.
+- The World Scanner includes a Geography category for connected revealed landmasses and non-lake bodies of water. Landmass labels use revealed continent names; Gathering Storm water regions use official ocean or sea names. Directions relative to the home landmass are used to distinguish duplicates.
 - The Surveyor can count revealed nearby land tiles by Breathtaking, Charming, Average, Uninviting, and Disgusting appeal using Ctrl+Shift+X or Ctrl+Shift+Numpad 2.
-- Great Works and their work picker can now be grouped by building or by city using a checkbox on the Great Works screen; building grouping is enabled by default.
-- The Notification Panel now has separate tabs for current notifications and message buffer history.
+- Great Works and their work picker can be grouped by building or by city using a checkbox on the Great Works screen; building grouping is enabled by default.
+- The Notification Panel has separate tabs for current notifications and message buffer history.
 - Capturing another player's unit in multiplayer adds the capture message to message buffer.
-- Unit-list rows now let players jump the navigation cursor to a unit with Ctrl+Enter without selecting it.
+- Unit-list rows let players jump the navigation cursor to a unit with Ctrl+Enter without selecting it.
 - Added an Events setting to suppress visible combat-result announcements when none of the player's units, cities, or districts participate.
 - Added a UI setting to choose whether Tree Home and End stay at the current depth or use the legacy full-tree behavior.
 - Added a default-enabled UI setting that makes Up and Down cycle through type-to-find results and keeps the search active until focus leaves its list or tree or the search is cleared manually.
-- Map tacs owned by the current player can now be deleted after confirmation, either from the Map Pin List with Delete or at the navigation cursor with a rebindable action that also defaults to Delete.
+- Added a default-enabled UI setting that includes control tooltips in type-to-find. Tooltip-only matches follow label matches.
+- Map tacs owned by the current player can be deleted after confirmation, either from the Map Pin List with Delete or at the navigation cursor with a rebindable action that also defaults to Delete.
 
 ### Changed
 
-- Surveyor terrain counts now report hills as their underlying flat terrain plus Hills, report ordinary mountains only as Mountains, omit terrain details already implied by features such as oasis, marsh, floodplains, reef, volcano, and natural wonders, and include the number of tiles with fresh-water access.
+- World Scanner now groups connected unexplored regions, mountain ranges, and Continent, Political, Government, and Power lens areas into regions that target their nearest tile. Unexplored regions appear under Base terrain and include their tile count. Gathering Storm mountain ranges use their official names; other rulesets use generic names. Terrain also identifies every revealed tile with fresh-water access.
+- Mod Settings opens within the current accessible screen and returns focus there when closed, instead of opening as a separate screen layer. This is mainly done to avoid input mis-haps, and you will likely not notice any change in functionality.
+- Merged districts and constructed wonders into one scanner category.
+- Surveyor terrain counts report hills as their underlying flat terrain plus Hills, report ordinary mountains only as Mountains, omit terrain details already implied by features such as oasis, marsh, floodplains, reef, volcano, and natural wonders, and include the number of tiles with fresh-water access.
 - Climate event rows with a revealed map location include their direction from the navigation cursor. Activating one moves the cursor to the event without closing the Climate Screen.
-- Great Works building instances now include their direction from the navigation cursor. Activating one moves the cursor to its plot while keeping the Great Works screen open.
-- Governments are now presented as a flat list whose row labels identify the government tier, with concise government, bonus, heritage, prerequisite, and civic-progress information in each row's details. Newly available policies are identified in their row labels, and policy selection uses vanilla's card take/drop sounds.
+- Great Works building instances include their direction from the navigation cursor. Activating one moves the cursor to its tile while keeping the Great Works screen open.
+- Governments are presented as a flat list whose row labels identify the government tier, with concise government, bonus, heritage, prerequisite, and civic-progress information in each row's details. Newly available policies are identified in their row labels, and policy selection uses vanilla's card take/drop sounds.
 - When the confirm policies button is disabled in the governments screen, its tooltip identifies every policy slot that still needs to be filled or explains that no policy changes have been made to confirm.
-- Merged the yields and resources breakdown tree with the reports screen under Empire Economy and strategic resources. Empire Economy contains the complete yield, trade-route, favor, envoy, influence, and nuclear-stockpile breakdown. Strategic resource rows in the resources tab now combine stockpile and per-turn flow with the existing named source details.
-- Empire Economy now contains all details about gold expenses. Cities lists Districts first and Buildings second, with each type expanding into its city instances; Units expands into its unit types.
-- Concrete city, district, building, wonder, and unit rows in Reports include their location relative to the navigation cursor. Activating one closes Reports before moving the cursor to its plot.
+- Merged the yields and resources breakdown tree with the reports screen under Empire Economy and strategic resources. Empire Economy contains the complete yield, trade-route, favor, envoy, influence, and nuclear-stockpile breakdown. Strategic resource rows in the resources tab combine stockpile and per-turn flow with the existing named source details.
+- Empire Economy contains all details about gold expenses. Cities lists Districts first and Buildings second, with each type expanding into its city instances; Units expands into its unit types.
+- Concrete city, district, building, wonder, and unit rows in Reports include their location relative to the navigation cursor. Activating one closes Reports before moving the cursor to its tile.
 - Empire Economy's collapsed summary includes Favor, Envoys, and trade-route usage when available. Science, Culture, Gold, Faith, and Tourism properly expand their city contributions into individual cities and each available city-level source breakdown. Gold deal income and costs expand into individual deals, and WMD maintenance expands by device type.
-- World Rankings Overall victories now expand into the complete ranked team and civilization list. Team rows expand into their members, and known-player details include victory progress, victory-specific tiebreak values, and additional status such as cultural dominance.
-- Cultural World Rankings now groups allied civilizations under team rows while leaving civilizations without teammates at the top level. Player details include domestic tourists and estimated turns to victory; expanding your civilization shows how many tourists each other civilization sends you, along with its tourism rate, lifetime tourism, and modifiers. The advisor also explains domestic and visiting tourists.
+- World Rankings Overall victories expand into the complete ranked team and civilization list. Team rows expand into their members, and known-player details include victory progress, victory-specific tiebreak values, and additional status such as cultural dominance.
+- Cultural World Rankings groups allied civilizations under team rows while leaving civilizations without teammates at the top level. Player details include domestic tourists and estimated turns to victory; expanding your civilization shows how many tourists each other civilization sends you, along with its tourism rate, lifetime tourism, and modifiers. The advisor text at the bottom also explains domestic and visiting tourists.
 - World Rankings identifies the local civilization, local team, and multiplayer human names throughout its detailed victory tabs. Score advisor text contains the configured game-turn limit. Science milestones include Spaceport, technology, and project details, and Gathering Storm includes the final light-year requirement while withholding light-year progress until launch. Religion progress uses the full vanilla conversion wording.
-- Mod sound effects now follow the game's master volume setting.
+- Mod sound effects follow the game's master volume setting.
 - Religious units that can engage the player's religion in theological combat appear under enemy units even during diplomatic peace; same-religion units and Religious Alliance partners remain neutral.
-- Civilopedia lookup now recognizes icon meanings, ignores parenthetical qualifiers in focused labels, and keeps only complete article-title matches instead of including partial-title suggestions.
+- Civilopedia lookup now recognizes icon meanings, ignores parenthetical qualifiers in focused labels, and keeps only complete article-title matches instead of including partial-title suggestions. Seeriously, how do you get Francis from france!
 
 ### Fixed
 
+- Civilopedia lookup recognizes article names after colon-prefixed labels, including technology and civic completion popups.
 - Espionage mission dialogs no longer open and close repeatedly or briefly announce the placeholder mission title.
-- The Climate Screen now matches vanilla event visibility, identifies affected-city owners and CO2-contributing leaders, and announces recent polar-ice and sea-level updates.
-- The Culture and civic summary now identifies anarchy and its remaining turns without incorrectly saying that governments are still locked behind Code of Laws.
+- The Climate Screen matches vanilla event visibility, identifies affected-city owners and CO2-contributing leaders, and announces recent polar-ice and sea-level updates.
+- The Culture and civic summary (p by default) identifies anarchy and its remaining turns without incorrectly saying that governments are still locked behind Code of Laws.
 - Government details no longer repeat base-game legacy descriptions, expose raw flat-bonus values, or announce disabled legacy-progression information in expansion games. Accumulated heritage identifies its complete effect, percentage, and source government, while expansion governments use their Major and Minor bonus labels.
-- Monopolies and Corporations Products now include their corporation and product benefit in Great Works details. Great Works gallery navigation focuses and announces the newly selected work, supports Alt+Left and Alt+Right, and retains theming feedback after moves.
-- Empire Economy summary and expanded Science, Culture, Gold, and Faith rates now use consistent one-decimal rounding.
-- Singular tree counts, unit counts, and nuclear-device counts now use singular wording.
-- Type-to-find now clears after activating or changing a widget, opening a dropdown, or expanding or collapsing a tree or submenu, so ordinary navigation resumes after interaction.
+- Monopolies and Corporations Products include their corporation and product benefit in Great Works details.
+- Fixed a bug where Great Works gallery did not focus the entry's summary when manually pressing the previous next buttons
+- Empire Economy summary and expanded Science, Culture, Gold, and Faith rates use consistent one-decimal rounding.
+- Singular tree counts, unit counts, and nuclear-device counts use singular wording.
+- Made type-to-find clear after activating or changing a widget, opening a dropdown, or expanding or collapsing a tree or submenu, so ordinary navigation resumes after interaction.
 - World Scanner search opens immediately instead of rebuilding and indexing the world before accepting input. Submitted searches use ranked item-name matching
-- Renaming a city from City Details now waits for the game to apply the new name before returning focus, so the updated name is announced.
-- The production panel queue properly allows you to swap the item currently being produced with the first queued item, and vice versa. Delete on currently produced item removes it and moves up the first queued item
+- Renaming a city from City Details waits for the game to apply the new name before returning focus, so the updated name is announced.
+- The production panel queue now properly allows you to swap the item currently being produced with the first queued item, and vice versa. Delete on currently produced item removes it and moves up the first queued item
 
 ## [0.7.0] - 2026-07-18
 

@@ -335,7 +335,7 @@ function P.CollectTerms(widget)
     -- markup such as [NEWLINE] becomes the punctuation used by speech.
     speech = RemoveParentheticalText(ProcessIcons(speech))
     local terms = {}
-    for raw in speech:gmatch("[^,]+") do
+    for raw in speech:gmatch("[^,:]+") do
         local term = CollapseWhitespace(raw)
         if term and term ~= "" then
             terms[#terms + 1] = term

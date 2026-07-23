@@ -20,7 +20,9 @@ CREATE TABLE IF NOT EXISTS CAI_Settings (
     StepValue       REAL,
     PageStepValue   REAL,
 
-    EditMode        TEXT
+    EditMode        TEXT,
+    ActionValue     TEXT,
+    DisplayContext  TEXT NOT NULL DEFAULT 'Any'
 );
 
 CREATE TABLE IF NOT EXISTS CAI_SettingOptions (
@@ -51,14 +53,17 @@ VALUES
     ('TreeHomeEndCurrentDepth', 'UI', 50, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_TREE_HOME_END_CURRENT_DEPTH', 'LOC_CAI_SETTING_TREE_HOME_END_CURRENT_DEPTH_TOOLTIP', NULL),
 
-    ('TypeToFindResultNavigation', 'UI', 60, 'bool', 'checkbox', 'true',
+    ('TokenSplitLength', 'UI', 60, 'number', 'editbox', '75',
+     'LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH', 'LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH_TOOLTIP', 'NumbersOnly'),
+
+    ('TypeToFindIncludeTooltips', 'UI', 70, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_TYPE_TO_FIND_INCLUDE_TOOLTIPS', 'LOC_CAI_SETTING_TYPE_TO_FIND_INCLUDE_TOOLTIPS_TOOLTIP', NULL),
+
+    ('TypeToFindResultNavigation', 'UI', 80, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_TYPE_TO_FIND_RESULT_NAVIGATION', 'LOC_CAI_SETTING_TYPE_TO_FIND_RESULT_NAVIGATION_TOOLTIP', NULL),
 
-    ('SearchTimeout', 'UI', 70, 'number', 'editbox', '1.0',
+    ('SearchTimeout', 'UI', 90, 'number', 'editbox', '1.0',
      'LOC_CAI_SETTING_SEARCH_TIMEOUT', 'LOC_CAI_SETTING_SEARCH_TIMEOUT_TOOLTIP', 'NumbersOnly'),
-
-    ('TokenSplitLength', 'UI', 80, 'number', 'editbox', '75',
-     'LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH', 'LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH_TOOLTIP', 'NumbersOnly'),
 
     ('SpeakTurnBlockers', 'Events', 10, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_TURN_BLOCKERS', 'LOC_CAI_SETTING_SPEAK_TURN_BLOCKERS_TOOLTIP', NULL),
@@ -170,6 +175,14 @@ VALUES
 
     ('MessageBufferLimit', 'MessageBuffer', 70, 'number', 'editbox', '5000',
      'LOC_CAI_SETTING_MESSAGE_BUFFER_LIMIT', 'LOC_CAI_SETTING_MESSAGE_BUFFER_LIMIT_TOOLTIP', 'NumbersOnly');
+
+INSERT OR REPLACE INTO CAI_Settings
+    (SettingId, Section, SortIndex, ValueType, UIType, DefaultValue, Label, Tooltip,
+     EditMode, ActionValue, DisplayContext)
+VALUES
+    ('ManageScannerCategories', 'WorldScanner', 100, 'action', 'button', 'open',
+     'LOC_CAI_SETTING_MANAGE_SCANNER_CATEGORIES',
+     'LOC_CAI_SETTING_MANAGE_SCANNER_CATEGORIES_TOOLTIP', NULL, 'open', 'InGame');
 
 UPDATE CAI_Settings
 SET MinValue = 0, MaxValue = 100, StepValue = 5, PageStepValue = 10
