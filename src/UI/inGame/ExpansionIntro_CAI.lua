@@ -5,6 +5,7 @@ local m_CAI_DIALOG      = nil ---@ type UIWidget
 local m_CurrentPriority = PopupPriority.TutorialHigh
 local OPTIONS_HIDE_KEY  = "HideXP2FeaturesScreen";
 local m_IsGameStarted   = false
+local m_IsCivRoyale = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE"
 
 local function RemoveDialog()
 	if not mgr or not m_CAI_DIALOG then return end
@@ -38,17 +39,21 @@ local function BuildDialog()
 	local function GetTitle() return Locale.Lookup("LOC_MAIN_MENU_TUTORIAL") end
 
 	local desc = MakeText(Controls.Description)
-	local desc2 = MakeText(Controls.Description2)
-	desc2:SetHiddenPredicate(function() return Controls.FrameDeco:IsHidden() end)
-	local prevBtn = MakeButton(Controls.Previous)
-	local nextBtn = MakeButton(Controls.Next)
-	local checkbox = mgr:CreateWidget("CAIExpIntroCheck", "Checkbox", {
-		Label = function() return Locale.Lookup("LOC_XP_INTRO_HIDETHIS") end,
-	})
-	checkbox:SetChecked(Options.GetUserOption("Tutorial", OPTIONS_HIDE_KEY) == 1, true)
-	checkbox:SetValueSetter(function(val) return Controls.DontShowAgain:DoLeftClick() end)
-	checkbox:SetFocusSound("Main_Menu_Mouse_Over")
-	m_CAI_DIALOG = mgr.WidgetHelpers.MakeGeneralDialog(GetTitle, { prevBtn, nextBtn }, { desc, desc2, checkbox }, 2)
+    local desc2 = MakeText(Controls.Description2)
+    desc2:SetHiddenPredicate(function() return Controls.FrameDeco:IsHidden() end)
+    local prevBtn = MakeButton(Controls.Previous)
+    local nextBtn = MakeButton(Controls.Next)
+    local content = { desc, desc2 }
+    if not m_IsCivRoyale then
+        local checkbox = mgr:CreateWidget("CAIExpIntroCheck", "Checkbox", {
+            Label = function() return Locale.Lookup("LOC_XP_INTRO_HIDETHIS") end,
+        })
+        checkbox:SetChecked(Options.GetUserOption("Tutorial", OPTIONS_HIDE_KEY) == 1, true)
+        checkbox:SetValueSetter(function(val) return Controls.DontShowAgain:DoLeftClick() end)
+        checkbox:SetFocusSound("Main_Menu_Mouse_Over")
+        table.insert(content, checkbox)
+    end
+    m_CAI_DIALOG = mgr.WidgetHelpers.MakeGeneralDialog(GetTitle, { prevBtn, nextBtn }, content, 2)
 	if m_CAI_DIALOG then
 		if not mgr:GetWidgetById(m_CAI_DIALOG:GetId(), false) then
 			mgr:Push(m_CAI_DIALOG, m_CurrentPriority)
@@ -65,7 +70,9 @@ Realize = WrapFunc(Realize, function(orig)
 	end
 end)
 
-Events.LoadGameViewStateDone.Remove(OnLoadGameViewStateDone);
+if OnLoadGameViewStateDone ~= nil then
+    Events.LoadGameViewStateDone.Remove(OnLoadGameViewStateDone)
+end
 OnShow = WrapFunc(OnShow, function(orig)
 	m_CurrentPriority = PopupPriority.TutorialHigh
 	orig()
@@ -106,4 +113,6 @@ Controls.Next:RegisterCallback(Mouse.eLClick, OnNext);
 Controls.Previous:RegisterCallback(Mouse.eLClick, OnPrevious);
 
 LuaEvents.InGameTopOptionsMenu_ShowExpansionIntro.Add(OnShowFromMenu);
-Events.LoadGameViewStateDone.Add(OnLoadGameViewStateDone);
+if OnLoadGameViewStateDone ~= nil then
+    Events.LoadGameViewStateDone.Add(OnLoadGameViewStateDone)
+end

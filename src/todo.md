@@ -85,3 +85,5 @@
 [x] Add fresh water to the shift z terrain count
 [x] Fix the Surveyor terrain counts to remove mountain terrain from the list, since it is already counting how many mountains there are
 [x] Group mountains by range in the scanner
+
+[ ] APpend unit type to named units

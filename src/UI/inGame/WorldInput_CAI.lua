@@ -18,6 +18,9 @@ include("Civ6Common")
 
 local mgr = ExposedMembers.CAI_UIManager
 local function GetWorldInputIncludeName()
+	if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+		return "WorldInput_CivRoyaleScenario"
+	end
 	if IsExpansion2Active ~= nil and IsExpansion2Active() then
 		return "WorldInput_Expansion2"
 	end
@@ -1106,6 +1109,33 @@ local interfaceWidgets = {
 		},
 	},
 }
+
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+	interfaceWidgets[InterfaceModeTypes.GRIEVING_GIFT] =
+		CreateTargetingWidgetData("LOC_GRIEVING_GIFT_NAME", function()
+			local plotId = CAICursor:GetPlotId()
+			if not IsSelectionAllowedAt(plotId) then
+				Speak(Locale.Lookup("LOC_CAI_PLOT_INTERFACE_INVALID_TARGET"))
+				return
+			end
+
+			local plot = Map.GetPlotByIndex(plotId)
+			local unit = UI.GetHeadSelectedUnit()
+			if plot == nil or unit == nil then
+				Speak(Locale.Lookup("LOC_CAI_PLOT_INTERFACE_INVALID_TARGET"))
+				return
+			end
+
+			local parameters = {
+				[UnitCommandTypes.PARAM_X] = plot:GetX(),
+				[UnitCommandTypes.PARAM_Y] = plot:GetY(),
+				[UnitCommandTypes.PARAM_NAME] = "ScenarioCommand_GrievingGift",
+				CommandSubType = "GrievingGift",
+			}
+			UnitManager.RequestCommand(unit, UnitCommandTypes.EXECUTE_SCRIPT, parameters)
+			UI.SetInterfaceMode(InterfaceModeTypes.SELECTION)
+		end)
+end
 
 local function GetInterfaceWidgetData()
 	return interfaceWidgets[UI.GetInterfaceMode()]

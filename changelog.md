@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ## [Unreleased]
 
+### Added
+
+- Added Red Death scenario support, including faction unit actions, turn and global-ability status, Ctrl+W global-ability activation, safe-zone and Red Death cursor speech, scenario map objects in plot information and World Scanner, Grieving Gift targeting, eliminated-player chat and diplomacy state, accessible front-end and in-game tutorials, and observer controls.
+
+### Fixed
+
+- Fixed the accessible End Game panel not reopening when a player in observer mode reaches the final result screen.
+
 ## [0.8.0] - 2026-07-24
 
 ### Added

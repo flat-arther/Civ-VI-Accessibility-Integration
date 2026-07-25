@@ -1324,6 +1324,57 @@
     <Row Tag="LOC_CAI_TOP_PANEL_THERMONUCLEAR_DEVICES" Language="en_US">
       <Text>Thermonuclear devices: {1_Count}</Text>
     </Row>
+    <Row Tag="LOC_CAI_CIV_ROYALE_HAIL_MARY_DEVICES" Language="en_US">
+      <Text>Hail Mary devices: {1_Count}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIV_ROYALE_SAFE_ZONE" Language="en_US">
+      <Text>Safe zone</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIV_ROYALE_SAFE_ZONE_CENTER_DIRECTION" Language="en_US">
+      <Text>Center is {1_Direction}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIV_ROYALE_OUTSIDE_SAFE_ZONE" Language="en_US">
+      <Text>Outside of safe zone</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIV_ROYALE_RED_DEATH" Language="en_US">
+      <Text>Red Death</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIV_ROYALE_MUTANT_FALLOUT" Language="en_US">
+      <Text>Mutant fallout</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIV_ROYALE_OWN_GRIEVING_GIFT" Language="en_US">
+      <Text>Your placed Grieving Gift</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIV_ROYALE_INCOMING_GRIEVING_GIFT" Language="en_US">
+      <Text>Your incoming Grieving Gift</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIV_ROYALE_PIRATE_TREASURE" Language="en_US">
+      <Text>Your buried treasure</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIV_ROYALE_ZOMBIE_HUNGER" Language="en_US">
+      <Text>Zombie hunger signal</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_CIV_ROYALE" Language="en_US">
+      <Text>Red Death scenario</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_CIV_ROYALE" Language="en_US">
+      <Text>Safe zone and its center, Red Death, faction-visible fallout, traps, gifts, treasure, and hunger signals.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CIV_ROYALE_SAFE_ZONE_CENTER" Language="en_US">
+      <Text>Safe zone center</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CIV_ROYALE_RED_DEATH" Language="en_US">
+      <Text>Red Death</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CIV_ROYALE_OBJECTS" Language="en_US">
+      <Text>Scenario map objects</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_ACTIVE" Language="en_US">
+      <Text>Active</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_INACTIVE" Language="en_US">
+      <Text>Inactive</Text>
+    </Row>
     <Row Tag="LOC_CAI_TOP_PANEL_NO_NUKES" Language="en_US">
       <Text>No nuclear weapons</Text>
     </Row>
@@ -4794,11 +4845,17 @@
     <Row Tag="LOC_CAI_CRISIS_PARTICIPANTS" Language="en_US">
       <Text>Participants:</Text>
     </Row>
-    <Row Tag="LOC_CAI_OPEN_CRISIS_TRACKER" Language="en_US">
-      <Text>Open Emergencies List</Text>
+    <Row Tag="LOC_CAI_OPEN_CRISIS_OR_ROYALE_ABILITY" Language="en_US">
+      <Text>Open Emergencies List or Activate Red Death Global Ability</Text>
     </Row>
-    <Row Tag="LOC_CAI_OPEN_CRISIS_TRACKER_TOOLTIP" Language="en_US">
-      <Text>Open a navigable list of active emergencies and competitions</Text>
+    <Row Tag="LOC_CAI_OPEN_CRISIS_OR_ROYALE_ABILITY_TOOLTIP" Language="en_US">
+      <Text>Open a navigable list of active emergencies and competitions. In Red Death, activate your faction's global ability or enter its target-selection mode.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIV_ROYALE_GLOBAL_ABILITY_UNAVAILABLE" Language="en_US">
+      <Text>No global ability is available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIV_ROYALE_GLOBAL_ABILITY_ACTIVATED" Language="en_US">
+      <Text>{1_AbilityName} activated</Text>
     </Row>
     <Row Tag="LOC_CAI_CRISIS_STATUS_WON" Language="en_US">
       <Text>Won</Text>

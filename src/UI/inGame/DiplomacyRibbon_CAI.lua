@@ -3,7 +3,9 @@ include("Civ6Common")
 local info             = ExposedMembers.CAIInfo or {}
 ExposedMembers.CAIInfo = info
 
-if IsExpansion2Active() then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+    include("DiplomacyRibbon_CivRoyaleScenario_CAIBase")
+elseif IsExpansion2Active() then
     include("DiplomacyRibbon_Expansion2")
 elseif IsExpansion1Active() then
     include("DiplomacyRibbon_Expansion1")
@@ -194,6 +196,10 @@ local function GetLeaderLabel(playerID, localPlayerID)
     if Players[playerID]:IsTurnActive() then
         table.insert(parts, Locale.Lookup("LOC_CAI_DIPLO_RIBBON_ACTIVE_TURN"))
     end
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE"
+        and not pConfig:IsAlive() then
+        table.insert(parts, Locale.Lookup("LOC_HUD_RIBBON_REDDEATH_ELIMINATED"))
+    end
 
     return JoinNonEmpty(parts, ", ")
 end
@@ -259,7 +265,9 @@ local function PopulateList(list)
     local localPlayer = Players[localPlayerID]
     local localDiplomacy = localPlayer:GetDiplomacy()
 
-    local kPlayers = PlayerManager.GetAliveMajors()
+    local kPlayers = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE"
+        and PlayerManager.GetWasEverAliveMajors()
+        or PlayerManager.GetAliveMajors()
     table.sort(kPlayers,
         function(a, b) return localDiplomacy:GetMetTurn(a:GetID()) < localDiplomacy:GetMetTurn(b:GetID()) end)
 
@@ -286,7 +294,9 @@ local function PopulateList(list)
             local isMet = localDiplomacy:HasMet(playerID)
             local pConfig = PlayerConfigurations[playerID]
             local isHumanMP = GameConfiguration.IsAnyMultiplayer() and pConfig:IsHuman()
-            if isMet or isHumanMP then
+            if isMet or isHumanMP
+                or GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE"
+                    and not pConfig:IsAlive() then
                 AddLeaderItem(playerID)
             end
         end

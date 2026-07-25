@@ -1,7 +1,9 @@
 include("caiUtils")
 include("Civ6Common")
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_WARMACHINE" then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+    include("ActionPanel_CivRoyaleScenario")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_WARMACHINE" then
     include("ActionPanel_WarMachineScenario")
 elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
     include("ActionPanel_BlackDeathScenario")

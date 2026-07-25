@@ -10,6 +10,7 @@ local PANEL_ID       = "CAIEndGame_Panel"
 local MOVIE_PANEL_ID = "CAIEndGame_Movie"
 local TABS_ID        = "CAIEndGame_Tabs"
 local HOVER_SOUND    = "Main_Menu_Mouse_Over"
+local IS_CIV_ROYALE  = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE"
 
 -- ============================================================================
 -- State
@@ -336,7 +337,7 @@ local function UpdateVanillaChatTargetState()
         Controls.ChatPull:SetToolTipString(label)
     end
 
-    PlayerTargetChanged(m_chatTargetState)
+    LuaEvents.ChatPanel_PlayerTargetChanged(m_chatTargetState)
 end
 
 local function RebuildChatTarget()
@@ -470,6 +471,9 @@ local function AddActionButtons()
     end
     if Controls.ExportHistoricMoments then
         table.insert(buttons, { control = Controls.ExportHistoricMoments, key = "exportmoments" })
+    end
+    if Controls.ObserveButton then
+        table.insert(buttons, { control = Controls.ObserveButton, key = "observe" })
     end
 
     table.insert(buttons, { control = Controls.MainMenuButton, key = "mainmenu" })
@@ -682,6 +686,26 @@ end
 -- ============================================================================
 -- Lifecycle wraps
 -- ============================================================================
+OnShow = WrapFunc(OnShow, function(orig, ...)
+    local result = orig(...)
+
+    -- Royale bypasses BASE_OnShow/ShowComplete when a defeated player is
+    -- already observing and the final result screen is shown. Restore the CAI
+    -- panel at the context's actual show boundary for that observer-only path.
+    if IS_CIV_ROYALE
+        and Game.GetLocalObserver() == PlayerTypes.OBSERVER
+        and not ContextPtr:IsHidden()
+        and not m_isBuilt then
+        if not m_WasShowing then
+            UITutorialManager:AddControlToAlwaysReceiveInput(ContextPtr)
+            m_WasShowing = true
+        end
+        PushPanel()
+    end
+
+    return result
+end)
+
 OnReplayMovie = WrapFunc(OnReplayMovie, function(orig)
     orig()
     if not m_WasShowing then

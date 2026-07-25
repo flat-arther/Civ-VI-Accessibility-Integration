@@ -1,6 +1,8 @@
 include("caiUtils")
 include("Civ6Common")
-if IsExpansion2Active() then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+    include("WorldTracker_CivRoyaleScenario_CAIBase")
+elseif IsExpansion2Active() then
     include("WorldTracker_Expansion1")
 elseif IsExpansion1Active() then
     include("WorldTracker_Expansion1")
@@ -17,6 +19,7 @@ local ACTION_OPEN_RESEARCH_CHOOSER = Input.GetActionId("UI_WorldTrackerOpenResea
 local ACTION_OPEN_CIVICS_CHOOSER   = Input.GetActionId("UI_WorldTrackerOpenCivicsChooser")
 local ACTION_SPEAK_SCIENCE         = Input.GetActionId("UI_TopPanelSpeakScience")
 local ACTION_SPEAK_CULTURE         = Input.GetActionId("UI_TopPanelSpeakCulture")
+local ACTION_OPEN_TRACKER          = Input.GetActionId("UI_OpenWorldCrisisTracker")
 
 local m_caiWorldTrackerActions     = {}
 local m_caiResearchTrackerControl  = nil
@@ -392,6 +395,38 @@ local function IsTrackerChooserControlEnabled(control)
         and not ControlIsDisabled(control.TitleButton)
 end
 
+local function ActivateRoyaleGlobalAbility()
+    if not PlayerHasGlobalAbility() then
+        Speak(Locale.Lookup("LOC_CAI_CIV_ROYALE_GLOBAL_ABILITY_UNAVAILABLE"))
+        return
+    end
+
+    local ability = GetGlobalAbilityData()
+    if ability == nil or ability.Unit == nil then
+        Speak(Locale.Lookup("LOC_CAI_CIV_ROYALE_GLOBAL_ABILITY_UNAVAILABLE"))
+        return
+    end
+
+    local abilityName = Locale.Lookup(ability.Name)
+    if ability.DisabledToolTip ~= nil then
+        Speak(abilityName .. ", " .. ability.DisabledToolTip)
+        return
+    end
+
+    if ability.EventName ~= nil then
+        local parameters = {
+            [UnitCommandTypes.PARAM_NAME] = ability.EventName,
+        }
+        UnitManager.RequestCommand(ability.Unit, UnitCommandTypes.EXECUTE_SCRIPT, parameters)
+        Speak(Locale.Lookup("LOC_CAI_CIV_ROYALE_GLOBAL_ABILITY_ACTIVATED", abilityName))
+    elseif ability.InterfaceMode ~= nil then
+        if UI.GetHeadSelectedUnit() == nil then
+            UI.SelectUnit(ability.Unit)
+        end
+        UI.SetInterfaceMode(ability.InterfaceMode)
+    end
+end
+
 local function InitializeWorldTrackerActions()
     RegisterWorldTrackerAction(ACTION_OPEN_RESEARCH_CHOOSER, function()
         if IsTutorialRunning() then
@@ -418,8 +453,9 @@ local function InitializeWorldTrackerActions()
     RegisterWorldTrackerAction(ACTION_SPEAK_SCIENCE, SpeakScienceAndResearch)
     RegisterWorldTrackerAction(ACTION_SPEAK_CULTURE, SpeakCultureDetails)
 
-    if IsExpansion1Active() or IsExpansion2Active() then
-        local ACTION_OPEN_TRACKER = Input.GetActionId("UI_OpenWorldCrisisTracker")
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+        RegisterWorldTrackerAction(ACTION_OPEN_TRACKER, ActivateRoyaleGlobalAbility)
+    elseif IsExpansion1Active() or IsExpansion2Active() then
         RegisterWorldTrackerAction(ACTION_OPEN_TRACKER, ToggleCrisisList)
     end
 end

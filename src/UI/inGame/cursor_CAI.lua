@@ -1,4 +1,5 @@
 include("PlayerStateManager_CAI")
+include("CivRoyaleMapInfo_CAI")
 
 CAICursor = CAICursor or {}
 
@@ -12,6 +13,7 @@ local m_PlayerState = PlayerStateManager.Init(function(playerID)
         lastTerritoryZone = nil,
         lastVolcanoZone = nil,
         lastNationalParkZone = nil,
+        lastCivRoyaleZone = nil,
     }
 end)
 
@@ -284,6 +286,12 @@ function CAICursor:UpdateZones()
 
     local plot = Map.GetPlotByIndex(plotId)
     if plot == nil then return end
+
+    local royaleZone = CAICivRoyaleMapInfo.GetZoneSpeech(plot, Game.GetLocalPlayer())
+    if royaleZone ~= nil and royaleZone ~= state.lastCivRoyaleZone then
+        Speak(royaleZone)
+    end
+    state.lastCivRoyaleZone = royaleZone
 
     if not CanUpdateZonesForPlot(plot) then
         return

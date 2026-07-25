@@ -1,6 +1,10 @@
 include("caiUtils")
 include("Civ6Common")
-include("ChatPanel")
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+    include("ChatPanel_CivRoyaleScenario")
+else
+    include("ChatPanel")
+end
 include("InGameHelpers_CAI")
 
 local mgr = ExposedMembers.CAI_UIManager
@@ -202,6 +206,10 @@ local function CAI_MakeChatPrefix(fromPlayer, toPlayer, eTargetType)
     if not fromConfig then return nil end
 
     local playerName = CAI_Lookup(fromConfig:GetPlayerName())
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE"
+        and fromConfig:GetSlotStatus() == SlotStatus.SS_OBSERVER then
+        playerName = playerName .. " " .. Locale.Lookup("LOC_ACTION_PANEL_OBSERVING")
+    end
     if eTargetType == ChatTargetTypes.CHATTARGET_PLAYER then
         local targetConfig = PlayerConfigurations[toPlayer]
         if targetConfig then
@@ -703,6 +711,16 @@ end
 
 OnChat = WrapFunc(OnChat, function(orig, fromPlayer, toPlayer, text, eTargetType, playSounds)
     local result = orig(fromPlayer, toPlayer, text, eTargetType, playSounds)
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+        local fromConfig = PlayerConfigurations[fromPlayer]
+        local localConfig = PlayerConfigurations[Game.GetLocalPlayer()]
+        if fromConfig ~= nil
+            and fromConfig:GetSlotStatus() == SlotStatus.SS_OBSERVER
+            and localConfig ~= nil
+            and localConfig:IsAlive() then
+            return result
+        end
+    end
     CAI_RecordIncomingChat(fromPlayer, toPlayer, text, eTargetType, true)
     CAI_RebuildChatHistory()
     return result

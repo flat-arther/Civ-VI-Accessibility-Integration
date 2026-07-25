@@ -306,6 +306,20 @@ local PLOT_TARGET_MODES = {
     }
 }
 
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+    PLOT_TARGET_MODES[0x1D7FAB3F] = {
+        CustomGetTargets = function()
+            local out = {}
+            for plotIndex = 0, Map.GetPlotCount() - 1 do
+                if IsSelectionAllowedAt(plotIndex) then
+                    out[plotIndex] = "grievingGift"
+                end
+            end
+            return out
+        end,
+    }
+end
+
 local UNIT_TARGET_MODES = {
     [InterfaceModeTypes.FORM_CORPS] = UnitCommandTypes.FORM_CORPS,
     [InterfaceModeTypes.FORM_ARMY] = UnitCommandTypes.FORM_ARMY,
@@ -415,6 +429,12 @@ local PLOT_INFO_KEYS_BY_MODE = {
     [InterfaceModeTypes.RESTORE_UNIT_MOVES] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
     [InterfaceModeTypes.NAVAL_GOLD_RAID] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
 }
+
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+    PLOT_INFO_KEYS_BY_MODE[0x1D7FAB3F] = {
+        "civRoyaleZone", "civRoyaleObjects", "improvement", "resource", "feature", "plotName"
+    }
+end
 
 local function ResolvePlotTargetLabel(mode, plotIndex)
     if not Map.IsPlot(plotIndex) then return nil end

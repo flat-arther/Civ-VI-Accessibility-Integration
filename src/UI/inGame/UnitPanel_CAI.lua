@@ -4,7 +4,9 @@ include("interfaceInfoHelpers_CAI")
 include("hexCoordUtils_CAI")
 include("Civ6Common")
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+    include("UnitPanel_CivRoyaleScenario")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
     include("UnitPanel_BlackDeathScenario")
 elseif IsExpansion2Active ~= nil and IsExpansion2Active() then
     include("UnitPanel_Expansion2")
@@ -2041,10 +2043,19 @@ GetUnitActionTooltip = function(action)
     local tooltip = action.helpString or ""
     local label = GetUnitActionLabel(action) or ""
     if tooltip == label then
-        return ""
+        tooltip = ""
+    else
+        tooltip = tooltip:gsub(label, "")
     end
 
-    return tooltip:gsub(label, "")
+    if action.IsActive ~= nil then
+        local state = action.IsActive(action.OwnerID, action.UnitID)
+            and Locale.Lookup("LOC_CAI_UNIT_ACTION_ACTIVE")
+            or Locale.Lookup("LOC_CAI_UNIT_ACTION_INACTIVE")
+        if tooltip == "" then return state end
+        return tooltip .. "[NEWLINE]" .. state
+    end
+    return tooltip
 end
 
 local function BuildUnitActionHotkeyIds()

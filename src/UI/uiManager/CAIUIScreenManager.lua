@@ -227,6 +227,10 @@ end
 ---@param id string
 ---@return UIWidget|nil
 function UIScreenManager:RemoveFromStack(id)
+    -- Context shutdown order is not deterministic. Once the context that owns
+    -- the manager has shut down, other UI contexts may still run their hide
+    -- handlers against a stale local reference.
+    if ExposedMembers.CAI_UIManager ~= self then return nil end
     if not id or id == "" then return nil end
     for i = #self.Stack, 1, -1 do
         local w = self.Stack[i]

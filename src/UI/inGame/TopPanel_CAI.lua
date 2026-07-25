@@ -1,7 +1,9 @@
 include("caiUtils")
 include("Civ6Common")
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_WARMACHINE" then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+    include("TopPanel_CivRoyaleScenario_CAIBase")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_WARMACHINE" then
     include("TopPanel_WarMachineScenario")
 elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
     include("TopPanel_BlackDeathScenario")
@@ -198,22 +200,151 @@ local function GetTurnTimerString()
         FormatTimeRemaining(remaining, true))
 end
 
-local function SpeakTurnTimeDate()
+local function AddRoyaleWMDParts(parts, player)
+    local playerWMDs = player:GetWMDs()
+    for entry in GameInfo.WMDs() do
+        local count = playerWMDs:GetWeaponCount(entry.Index)
+        if count > 0 then
+            if entry.WeaponType == "WMD_NUCLEAR_DEVICE" then
+                table.insert(parts, Locale.Lookup("LOC_CAI_TOP_PANEL_NUCLEAR_DEVICES", count))
+            elseif entry.WeaponType == "WMD_THERMONUCLEAR_DEVICE" then
+                table.insert(parts, Locale.Lookup("LOC_CAI_TOP_PANEL_THERMONUCLEAR_DEVICES", count))
+            elseif entry.WeaponType == "WMD_HAIL_MARY" then
+                table.insert(parts, Locale.Lookup("LOC_CAI_CIV_ROYALE_HAIL_MARY_DEVICES", count))
+            end
+        end
+    end
+end
+
+local function AddRoyaleSettlerWarning(parts, playerID, player)
+    local playerConfig = PlayerConfigurations[playerID]
+    for _, unit in player:GetUnits():Members() do
+        if UnitManager.GetTypeName(unit) == "UNIT_SETTLER" then
+            local plot = Map.GetPlot(unit:GetX(), unit:GetY())
+            if not CheckUnitFalloutStatus(plot, playerConfig) then
+                table.insert(parts, Locale.Lookup("LOC_CIV_ROYALE_HUD_CIVILIAN_WARNING"))
+                return
+            end
+        end
+    end
+end
+
+local function GetRoyaleAbilityParts(playerID, player)
+    local config = PlayerConfigurations[playerID]
+    if config == nil then return nil end
+
+    local civType = config:GetCivilizationTypeName()
+    local nameTag = nil
+    local tooltipTag = nil
+    local status = nil
+    local currentTurn = Game.GetCurrentGameTurn()
+
+    if civType == g_CivTypeNames.Wanderers then
+        nameTag = "LOC_ROAD_VISION_NAME"
+        tooltipTag = "LOC_ROAD_VISION_TT"
+        local lastTurn = player:GetProperty(g_playerPropertyKeys.RoadVisionTurn)
+        if lastTurn ~= nil and currentTurn < lastTurn + WANDERER_ROAD_VISION_DURATION then
+            status = Locale.Lookup("LOC_ROAD_VISION_ACTIVE_TT",
+                lastTurn + WANDERER_ROAD_VISION_DURATION - currentTurn)
+        elseif lastTurn ~= nil
+            and currentTurn < lastTurn + WANDERER_ROAD_VISION_DURATION + WANDERER_ROAD_VISION_DEBOUNCE then
+            status = Locale.Lookup("LOC_ROAD_VISION_RECHARGING_TT",
+                lastTurn + WANDERER_ROAD_VISION_DURATION + WANDERER_ROAD_VISION_DEBOUNCE - currentTurn)
+        end
+    elseif civType == g_CivTypeNames.Pirates then
+        nameTag = "LOC_BURN_TREASURE_MAP_NAME"
+        tooltipTag = "LOC_BURN_TREASURE_MAP_TT"
+        local lastTurn = player:GetProperty(g_playerPropertyKeys.BurnTreasureTurn)
+        if lastTurn ~= nil and currentTurn < lastTurn + PIRATES_BURN_TREASURE_MAP_DEBOUNCE then
+            status = Locale.Lookup("LOC_BURN_TREASURE_MAP_RECHARGING_TT",
+                lastTurn + PIRATES_BURN_TREASURE_MAP_DEBOUNCE - currentTurn)
+        end
+    elseif civType == g_CivTypeNames.EdgeLords then
+        nameTag = "LOC_GRIEVING_GIFT_NAME"
+        tooltipTag = "LOC_GRIEVING_GIFT_TT"
+        local charges = player:GetProperty(g_playerPropertyKeys.GrievingGiftCount) or 0
+        status = Locale.Lookup("LOC_CIV_ROYALE_GLOBAL_ABILITY_CHARGES",
+            charges, EDGELORDS_GRIEVING_GIFT_MAX_COUNT)
+        local rechargeTurn = player:GetProperty(g_playerPropertyKeys.GrievingGiftTurn)
+        if rechargeTurn ~= nil and currentTurn < rechargeTurn + EDGELORDS_GRIEVING_GIFT_DEBOUNCE then
+            status = status .. ", " .. Locale.Lookup("LOC_GRIEVING_GIFT_RECHARGING_TT",
+                rechargeTurn + EDGELORDS_GRIEVING_GIFT_DEBOUNCE - currentTurn)
+        elseif charges <= 0 then
+            status = status .. ", " .. Locale.Lookup("LOC_GRIEVING_GIFT_EMPTY_TT")
+        end
+    end
+
+    if nameTag == nil then return nil end
+    if status == nil then
+        status = Locale.Lookup("LOC_CIV_ROYALE_GLOBAL_ABILITY_AVAILABLE")
+    end
+
+    local tooltip = Locale.Lookup(tooltipTag)
+    tooltip = string.gsub(tooltip, "%[NEWLINE%]", ", ")
+    tooltip = string.gsub(tooltip, ",%s*,", ",")
+    local name = Locale.Lookup(nameTag)
+    if string.sub(tooltip, 1, string.len(name)) == name then
+        tooltip = string.sub(tooltip, string.len(name) + 1)
+        tooltip = string.gsub(tooltip, "^%s*,%s*", "")
+    end
+    return name .. ", " .. tooltip .. ", " .. status
+end
+
+local function AddRoyaleTurnInfo(parts)
+    if GameConfiguration.GetRuleSet() ~= "RULESET_SCENARIO_CIV_ROYALE" then return end
+
+    local currentTurn = Game.GetCurrentGameTurn()
+    local nextSafeZoneTurn = Game:GetProperty(g_ObjectStateKeys.NextSafeZoneTurn)
+    if nextSafeZoneTurn == -1 then
+        table.insert(parts, Locale.Lookup("LOC_CIV_ROYALE_HUD_TURNS_UNTIL_RING_SHRINKS_MIN_SIZE"))
+    elseif nextSafeZoneTurn ~= nil then
+        table.insert(parts, Locale.Lookup("LOC_CIV_ROYALE_HUD_TURNS_UNTIL_RING_SHRINKS_B",
+            math.max(0, nextSafeZoneTurn - currentTurn)))
+    end
+
+    local safeZonePhase = Game:GetProperty(g_ObjectStateKeys.SafeZonePhase) or 0
+    local falloutDamage = Game.GetFalloutManager():GetFalloutDamageOverride()
+    if falloutDamage == FalloutDamages.USE_FALLOUT_DEFAULT or falloutDamage == nil then
+        falloutDamage = 0
+    end
+    table.insert(parts, Locale.Lookup("LOC_CIV_ROYALE_HUD_STORM_STRENGTH",
+        safeZonePhase, falloutDamage))
+
+    local playerID, player = GetLocalPlayer()
+    if player == nil then return end
+    AddRoyaleWMDParts(parts, player)
+    AddRoyaleSettlerWarning(parts, playerID, player)
+
+    local ability = GetRoyaleAbilityParts(playerID, player)
+    if ability ~= nil then
+        table.insert(parts, ability)
+    end
+end
+
+local function BuildTurnTimeDateParts(includeClock)
     RefreshTurnsRemaining()
     RefreshTime()
 
     local parts = {}
     table.insert(parts, Locale.Lookup("LOC_TOP_PANEL_CURRENT_TURN") .. " " .. Controls.Turns:GetText())
 
-    local timerStr = GetTurnTimerString()
-    if timerStr then
-        table.insert(parts, timerStr)
+    if GameConfiguration.GetRuleSet() ~= "RULESET_SCENARIO_CIV_ROYALE" then
+        local timerStr = GetTurnTimerString()
+        if timerStr then
+            table.insert(parts, timerStr)
+        end
     end
 
     table.insert(parts, Controls.CurrentDate:GetText())
-    table.insert(parts, Controls.Time:GetText())
+    if includeClock then
+        table.insert(parts, Controls.Time:GetText())
+    end
+    AddRoyaleTurnInfo(parts)
+    return parts
+end
 
-    Speak(table.concat(parts, ", "))
+local function SpeakTurnTimeDate()
+    Speak(table.concat(BuildTurnTimeDateParts(true), ", "))
 end
 
 -- ===========================================================================
@@ -646,10 +777,7 @@ local function OnCAITopPanelInputAction(actionId)
 end
 
 local function OnLocalPlayerTurnBegin()
-    RefreshTurnsRemaining()
-    RefreshTime()
-    Speak(Locale.Lookup("LOC_TOP_PANEL_CURRENT_TURN") .. " " .. Controls.Turns:GetText()
-        .. ", " .. Controls.CurrentDate:GetText())
+    Speak(table.concat(BuildTurnTimeDateParts(false), ", "))
 end
 
 local function OnLocalPlayerTurnEnd()

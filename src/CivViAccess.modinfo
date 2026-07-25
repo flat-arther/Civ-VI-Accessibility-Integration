@@ -9,9 +9,9 @@
     <CompatibleVersions>2.0</CompatibleVersions>
   </Properties>
   <Files>
-    <File>UI/Replacements/MinimapPanel_BlackDeathScenario.lua</File>
-    <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion1_MODE.lua</File>
-    <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion2_MODE.lua</File>
+    <File>UI/Replacements/BlackDeathScenario/MinimapPanel_BlackDeathScenario.lua</File>
+    <File>UI/Replacements/Byzantium_Gaul/GovernmentScreen_Byzantium_Gaul_Expansion1_MODE.lua</File>
+    <File>UI/Replacements/Byzantium_Gaul/GovernmentScreen_Byzantium_Gaul_Expansion2_MODE.lua</File>
     <File>UI/shared/CAI_logging.lua</File>
     <File>UI/shared/caiUtils.lua</File>
     <File>UI/shared/CAISettings.lua</File>
@@ -53,6 +53,12 @@
     <File>UI/uiManager/CAIWidget_SearchPanel.lua</File>
     <File>UI/uiManager/CAIUIScreenManager.lua</File>
     <File>UI/inGame/cursor_CAI.lua</File>
+    <File>UI/inGame/CivRoyaleMapInfo_CAI.lua</File>
+    <File>UI/Replacements/CivRoyaleScenario/DiplomacyRibbon_CivRoyaleScenario_CAIBase.lua</File>
+    <File>UI/Replacements/CivRoyaleScenario/InGameTopOptionsMenu_CivRoyaleScenario_CAIBase.lua</File>
+    <File>UI/Replacements/CivRoyaleScenario/MinimapPanel_CivRoyaleScenario_CAIBase.lua</File>
+    <File>UI/Replacements/CivRoyaleScenario/TopPanel_CivRoyaleScenario_CAIBase.lua</File>
+    <File>UI/Replacements/CivRoyaleScenario/WorldTracker_CivRoyaleScenario_CAIBase.lua</File>
     <File>UI/inGame/cursorAudio_CAI.lua</File>
     <File>UI/inGame/MovementActions_CAI.lua</File>
     <File>UI/inGame/UnitMoveLog_CAI.lua</File>
@@ -65,6 +71,7 @@
     <File>UI/frontEnd/Multiplayer/Lobby.lua</File>
     <File>UI/frontEnd/Multiplayer/HostGame.lua</File>
     <File>UI/frontEnd/Multiplayer/JoiningRoom.lua</File>
+    <File>UI/frontEnd/Multiplayer/CivRoyaleIntro.lua</File>
     <File>UI/frontEnd/Multiplayer/PBCNotifyRemind.lua</File>
     <File>UI/frontEnd/Multiplayer/StagingRoom.lua</File>
     <File>UI/frontEnd/Multiplayer/ConfirmKick.lua</File>
@@ -155,6 +162,7 @@
     <File>UI/inGame/WorldScanner/WorldScannerCategory_units.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_validTargets.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_specialMapObjects.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_civRoyale.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>
@@ -281,6 +289,7 @@
       <File>UI/frontEnd/Multiplayer/Lobby.lua</File>
       <File>UI/frontEnd/Multiplayer/HostGame.lua</File>
       <File>UI/frontEnd/Multiplayer/JoiningRoom.lua</File>
+      <File>UI/frontEnd/Multiplayer/CivRoyaleIntro.lua</File>
       <File>UI/frontEnd/Multiplayer/PBCNotifyRemind.lua</File>
       <File>UI/frontEnd/Multiplayer/StagingRoom.lua</File>
       <File>UI/frontEnd/Multiplayer/ConfirmKick.lua</File>
@@ -317,16 +326,16 @@
     </UpdateDatabase>
 
     <ImportFiles id="DramaticAges_GovernmentsScreen_CAI" criteria="DramaticAges_Expansion1_Mode">
-      <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion1_MODE.lua</File>
+      <File>UI/Replacements/Byzantium_Gaul/GovernmentScreen_Byzantium_Gaul_Expansion1_MODE.lua</File>
     </ImportFiles>
     <ImportFiles id="BlackDeathScenario_MinimapPanel_CAI" criteria="BlackDeathScenario">
-      <File>UI/Replacements/MinimapPanel_BlackDeathScenario.lua</File>
+      <File>UI/Replacements/BlackDeathScenario/MinimapPanel_BlackDeathScenario.lua</File>
     </ImportFiles>
     <ImportFiles id="DramaticAges_GovernmentsScreen_Exp2CAI" criteria="DramaticAges_Expansion2_Mode">
       <Properties>
         <LoadOrder>50</LoadOrder>
       </Properties>
-      <File>UI/Replacements/GovernmentScreen_Byzantium_Gaul_Expansion2_MODE.lua</File>
+      <File>UI/Replacements/Byzantium_Gaul/GovernmentScreen_Byzantium_Gaul_Expansion2_MODE.lua</File>
     </ImportFiles>
 
     <ImportFiles id="CAIInGame">
@@ -376,6 +385,12 @@
       <File>UI/inGame/InGame.lua</File>
       <File>UI/inGame/PlayerStateManager_CAI.lua</File>
       <File>UI/inGame/cursor_CAI.lua</File>
+      <File>UI/inGame/CivRoyaleMapInfo_CAI.lua</File>
+      <File>UI/Replacements/CivRoyaleScenario/DiplomacyRibbon_CivRoyaleScenario_CAIBase.lua</File>
+      <File>UI/Replacements/CivRoyaleScenario/InGameTopOptionsMenu_CivRoyaleScenario_CAIBase.lua</File>
+      <File>UI/Replacements/CivRoyaleScenario/MinimapPanel_CivRoyaleScenario_CAIBase.lua</File>
+      <File>UI/Replacements/CivRoyaleScenario/TopPanel_CivRoyaleScenario_CAIBase.lua</File>
+      <File>UI/Replacements/CivRoyaleScenario/WorldTracker_CivRoyaleScenario_CAIBase.lua</File>
       <File>UI/inGame/cursorAudio_CAI.lua</File>
       <File>UI/inGame/MovementActions_CAI.lua</File>
       <File>UI/inGame/UnitMoveLog_CAI.lua</File>
@@ -440,6 +455,7 @@
       <File>UI/inGame/WorldScanner/WorldScannerCategory_units.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_validTargets.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_specialMapObjects.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_civRoyale.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>

@@ -2,6 +2,9 @@ include("caiUtils")
 include("Civ6Common")
 
 local function GetInGameTopOptionsMenuIncludeName()
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+        return "InGameTopOptionsMenu_CivRoyaleScenario_CAIBase"
+    end
     if IsExpansion2Active ~= nil and IsExpansion2Active() then
         return "Expansion1_InGameTopOptionsMenu"
     end

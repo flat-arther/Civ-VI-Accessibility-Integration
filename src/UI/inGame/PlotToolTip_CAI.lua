@@ -3,6 +3,7 @@ include("interfaceInfoHelpers_CAI")
 include("inGameHelpers_CAI")
 include("hexCoordUtils_CAI")
 include("Civ6Common")
+include("CivRoyaleMapInfo_CAI")
 
 local HexCoordUtils = CAIHexCoordUtils
 
@@ -92,6 +93,8 @@ local CURSOR_MOVE_INFO_PRIORITY = {
     "interfaceInfo",
     "lensInfo",
     "waypoint",
+    "civRoyaleSafeZoneCenter",
+    "civRoyaleObjects",
     "fallout",
     "coerceTurns",
     "coastalLowland",
@@ -799,6 +802,22 @@ info.PlotInfoHelpers = {
         return nil
     end,
 
+    civRoyaleZone = function(data, plot)
+        return CAICivRoyaleMapInfo.GetZoneSpeech(plot, Game.GetLocalPlayer())
+    end,
+
+    civRoyaleZoneDetail = function(data, plot)
+        return CAICivRoyaleMapInfo.GetZoneDetailSpeech(plot, Game.GetLocalPlayer())
+    end,
+
+    civRoyaleObjects = function(data, plot)
+        return CAICivRoyaleMapInfo.GetObjectSpeech(plot, Game.GetLocalPlayer(), true)
+    end,
+
+    civRoyaleSafeZoneCenter = function(data, plot)
+        return CAICivRoyaleMapInfo.GetSafeZoneCenterSpeech(plot)
+    end,
+
     plotName = function(data)
         if not data.IsVisible then
             return Locale.Lookup("LOC_MINIMAP_FOG_OF_WAR_TOOLTIP")
@@ -1233,6 +1252,7 @@ info.PlotInfoHelpers = {
     end,
 
     fallout = function(data)
+        if CAICivRoyaleMapInfo.IsActive() then return nil end
         if not data.IsVisible or data.Fallout <= 0 then return nil end
         return Locale.Lookup("LOC_TOOLTIP_PLOT_CONTAMINATED_TEXT", data.Fallout)
     end,
@@ -1476,6 +1496,8 @@ end
 
 local DEFAULT_PLOT_INFO_BUCKET = {
     "plotName",
+    "civRoyaleZone",
+    "civRoyaleObjects",
     "mapTac",
     "owner",
     "feature",
@@ -1563,6 +1585,7 @@ local YIELD_RIVER_OWNER_INFO_BUCKET = {
 }
 
 local STATS_INFO_BUCKET = {
+    "civRoyaleObjects",
     "fallout",
     "coerceTurns",
     "movement",
@@ -1571,6 +1594,7 @@ local STATS_INFO_BUCKET = {
 }
 
 local GEOGRAPHY_INFO_BUCKET = {
+    "civRoyaleZoneDetail",
     "route",
     "coastalLowland",
     "volcano",

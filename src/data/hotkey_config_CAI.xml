@@ -113,7 +113,7 @@
     <Row ActionId="UI_DiplomacyRibbonOpenList" Name="LOC_CAI_DIPLO_RIBBON_OPEN_LIST" Description="LOC_CAI_DIPLO_RIBBON_OPEN_LIST_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_DiplomacyRibbonOpenWorldCongress" Name="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS" Description="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_DiplomacyRibbonSpeakWorldCongressInfo" Name="LOC_CAI_DIPLO_RIBBON_SPEAK_CONGRESS" Description="LOC_CAI_DIPLO_RIBBON_SPEAK_CONGRESS_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="UI_OpenWorldCrisisTracker" Name="LOC_CAI_OPEN_CRISIS_TRACKER" Description="LOC_CAI_OPEN_CRISIS_TRACKER_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="UI_OpenWorldCrisisTracker" Name="LOC_CAI_OPEN_CRISIS_OR_ROYALE_ABILITY" Description="LOC_CAI_OPEN_CRISIS_OR_ROYALE_ABILITY_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_OpenGlobalResourcePopup" Name="LOC_CAI_GLOBAL_RES_OPEN" Description="LOC_CAI_GLOBAL_RES_OPEN_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_OpenChatPanel" Name="LOC_CAI_OPEN_CHAT_PANEL" Description="LOC_CAI_OPEN_CHAT_PANEL_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_CAIOpenMapSearch" Name="LOC_CAI_OPEN_MAP_SEARCH" Description="LOC_CAI_OPEN_MAP_SEARCH_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>

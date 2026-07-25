@@ -1841,7 +1841,7 @@ local m_animGateUntil = 0
 local function IsAnimating() return Automation.GetTime() < m_animGateUntil end
 
 local EXCLUDED_MAIN_CALLBACKS = {
-    [OnTutorial] = true,
+    --[OnTutorial] = true,
     [OnBenchmark] = true,
     [OnWorldBuilder] = true,
 }
