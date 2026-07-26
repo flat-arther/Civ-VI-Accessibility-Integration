@@ -473,6 +473,15 @@ local function GetStatusList(ctx)
     AddStatus(instance.CityHousingInsufficientIcon, "LOC_CITY_BANNER_HOUSING_INSUFFICIENT")
     AddStatus(instance.CityAmenitiesInsufficientIcon, "LOC_CITY_BANNER_AMENITIES_INSUFFICIENT")
 
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+        if IsControlVisible(instance.TavernIndicator) then
+            AddStatus(instance.VisitTavernIcon)
+        end
+        if IsControlVisible(instance.SackedIndicator) then
+            AddStatus(instance.SackedIcon)
+        end
+    end
+
     if IsControlVisible(instance.UnderConstructionIcon) then
         table.insert(statuses, Locale.Lookup("LOC_TOOLTIP_PLOT_CONSTRUCTION_TEXT"))
     end

@@ -1,6 +1,8 @@
 include("caiUtils")
 include("Civ6Common")
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+    include("MinimapPanel_PiratesScenario_CAIBase")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
     include("MinimapPanel_CivRoyaleScenario_CAIBase")
 elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
     include("MinimapPanel_BlackDeathScenario")

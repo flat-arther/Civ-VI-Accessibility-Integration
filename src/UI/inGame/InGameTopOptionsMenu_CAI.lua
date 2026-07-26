@@ -2,6 +2,9 @@ include("caiUtils")
 include("Civ6Common")
 
 local function GetInGameTopOptionsMenuIncludeName()
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+        return "InGameTopOptionsMenu_PiratesScenario"
+    end
     if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
         return "InGameTopOptionsMenu_CivRoyaleScenario_CAIBase"
     end
@@ -41,13 +44,20 @@ local function StripVersionHeader(text)
     return text
 end
 
+local function ControlTooltip(control)
+    if control and control.GetToolTipString then
+        return control:GetToolTipString() or ""
+    end
+    return ""
+end
+
 local function BuildDetailsText()
     local parts = {
-        Controls.CivIcon:GetToolTipString() or "",
-        Controls.LeaderIcon:GetToolTipString() or "",
-        Controls.GameDifficulty:GetToolTipString() or "",
-        Controls.GameSpeed:GetToolTipString() or "",
-        StripVersionHeader(Controls.VersionLabel:GetToolTipString() or ""),
+        ControlTooltip(Controls.CivIcon),
+        ControlTooltip(Controls.LeaderIcon),
+        ControlTooltip(Controls.GameDifficulty),
+        ControlTooltip(Controls.GameSpeed),
+        StripVersionHeader(ControlTooltip(Controls.VersionLabel)),
     }
     -- EditBox SetText normalizes [NEWLINE] to \n; no manual replacement needed.
     return table.concat(parts, "[NEWLINE]")

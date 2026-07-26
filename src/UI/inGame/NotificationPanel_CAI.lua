@@ -133,6 +133,33 @@ LookAtNotification = WrapFunc(LookAtNotification, function(orig, pNotification)
     end
 end)
 
+local function MoveCursorToPiratesInfamousZone(notification)
+    if GameConfiguration.GetRuleSet() ~= "RULESET_SCENARIO_PIRATES"
+        or notification == nil
+        or g_NotificationsData == nil
+        or notification:GetType() ~= g_NotificationsData.NewInfamousPirate.Type then
+        return
+    end
+
+    local searchZoneID = notification:GetValue(g_notificationKeys.InfamousSearchZoneID)
+    if searchZoneID == nil then return end
+
+    for _, zone in ipairs(Game:GetProperty(g_gamePropertyKeys.InfamousPirateSearchZones) or {}) do
+        if zone.ZoneID == searchZoneID and zone.CenterPlotIndex ~= nil then
+            LuaEvents.CAICursorMoveTo(zone.CenterPlotIndex, "jump")
+            return
+        end
+    end
+end
+
+if OnNewInfamousPirateActivate ~= nil then
+    OnNewInfamousPirateActivate = WrapFunc(OnNewInfamousPirateActivate, function(orig, notificationEntry)
+        orig(notificationEntry)
+        if notificationEntry == nil then return end
+        MoveCursorToPiratesInfamousZone(GetActiveNotificationFromEntry(notificationEntry))
+    end)
+end
+
 function OnCAITutorialGoalNotificationActivate(notificationEntry, notificationID, activatedByUser)
     if notificationEntry == nil or notificationEntry.m_PlayerID ~= Game.GetLocalPlayer() then return end
 

@@ -18,6 +18,9 @@ include("Civ6Common")
 
 local mgr = ExposedMembers.CAI_UIManager
 local function GetWorldInputIncludeName()
+	if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+		return "WorldInput_PiratesScenario"
+	end
 	if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
 		return "WorldInput_CivRoyaleScenario"
 	end
@@ -890,6 +893,7 @@ local function CreateTargetingWidgetData(labelKey, primaryAction, cancelAction)
 		WidgetId = "CAIWorldInputTargetingMode",
 		Properties = {
 			GetLabel = function()
+				if type(labelKey) == "function" then return labelKey() end
 				return Locale.Lookup(labelKey)
 			end,
 			OnDestroy = function()
@@ -1135,6 +1139,85 @@ if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
 			UnitManager.RequestCommand(unit, UnitCommandTypes.EXECUTE_SCRIPT, parameters)
 			UI.SetInterfaceMode(InterfaceModeTypes.SELECTION)
 		end)
+end
+
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+	local function GetPiratesModeLabel(tag)
+		local tooltip = Locale.Lookup(tag)
+		return tooltip:match("^(.-)%[NEWLINE%]") or tooltip
+	end
+
+	local function ActivatePiratesTarget(eventName, commandSubType)
+		local plotId = CAICursor:GetPlotId()
+		if not Map.IsPlot(plotId)
+			or not IsSelectionAllowedAt(plotId)
+			or not IsTargetPlot(plotId) then
+			Speak(Locale.Lookup("LOC_CAI_PLOT_INTERFACE_INVALID_TARGET"))
+			return
+		end
+
+		local plot = Map.GetPlotByIndex(plotId)
+		local unit = UI.GetHeadSelectedUnit()
+		if plot == nil or unit == nil then
+			Speak(Locale.Lookup("LOC_CAI_PLOT_INTERFACE_INVALID_TARGET"))
+			return
+		end
+
+		local parameters = {
+			[UnitCommandTypes.PARAM_X] = plot:GetX(),
+			[UnitCommandTypes.PARAM_Y] = plot:GetY(),
+			[UnitCommandTypes.PARAM_NAME] = eventName,
+			CommandSubType = commandSubType,
+		}
+		UnitManager.RequestCommand(unit, UnitCommandTypes.EXECUTE_SCRIPT, parameters)
+		UI.SetInterfaceMode(InterfaceModeTypes.SELECTION)
+	end
+
+	local piratesModes = {
+		{
+			Mode = INTERFACEMODE_CAPTURE_BOAT,
+			Label = "LOC_CAPTURE_BOAT_TOOLTIP",
+			Event = "ScenarioCommand_CaptureBoat",
+			SubType = g_unitCommandSubTypeNames.CAPTURE_BOAT,
+		},
+		{
+			Mode = INTERFACEMODE_SHORE_PARTY,
+			Label = "LOC_SHORE_PARTY_TOOLTIP",
+			Event = "ScenarioCommand_ShoreParty",
+			SubType = g_unitCommandSubTypeNames.SHORE_PARTY,
+		},
+		{
+			Mode = INTERFACEMODE_SHORE_PARTY_EMBARK,
+			Label = "LOC_SHORE_PARTY_EMBARK_TOOLTIP",
+			Event = "ScenarioCommand_ShorePartyEmbark",
+			SubType = g_unitCommandSubTypeNames.SHORE_PARTY_EMBARK,
+		},
+		{
+			Mode = INTERFACEMODE_DREAD_PIRATE_ACTIVE,
+			Label = "LOC_DREAD_PIRATE_UNIT_ACTIVE_TOOLTIP",
+			Event = "ScenarioCommand_DreadPirateActive",
+			SubType = g_unitCommandSubTypeNames.DREAD_PIRATE_ACTIVE,
+		},
+		{
+			Mode = INTERFACEMODE_PRIVATEER_ACTIVE,
+			Label = "LOC_PRIVATEER_UNIT_ACTIVE_TOOLTIP",
+			Event = "ScenarioCommand_PrivateerActive",
+			SubType = g_unitCommandSubTypeNames.PRIVATEER_ACTIVE,
+		},
+		{
+			Mode = INTERFACEMODE_HOARDER_ACTIVE,
+			Label = "LOC_HOARDER_UNIT_ACTIVE_TOOLTIP",
+			Event = "ScenarioCommand_HoarderActive",
+			SubType = g_unitCommandSubTypeNames.HOARDER_ACTIVE,
+		},
+	}
+
+	for _, config in ipairs(piratesModes) do
+		local current = config
+		interfaceWidgets[current.Mode] = CreateTargetingWidgetData(
+			function() return GetPiratesModeLabel(current.Label) end,
+			function() ActivatePiratesTarget(current.Event, current.SubType) end)
+	end
 end
 
 local function GetInterfaceWidgetData()

@@ -786,7 +786,7 @@
       <Text>Open Great People</Text>
     </Row>
     <Row Tag="LOC_CAI_OPEN_GREAT_PEOPLE_TOOLTIP" Language="en_US">
-      <Text>Open the Great People panel</Text>
+      <Text>Open the Great People panel. When Heroes &amp; Legends mode is enabled, a heroes tab appears in this screen </Text>
     </Row>
     <Row Tag="LOC_CAI_OPEN_GREAT_WORKS" Language="en_US">
       <Text>Open Great Works</Text>
@@ -1352,10 +1352,10 @@
       <Text>Your buried treasure</Text>
     </Row>
     <Row Tag="LOC_CAI_CIV_ROYALE_ZOMBIE_HUNGER" Language="en_US">
-      <Text>Zombie hunger signal</Text>
+      <Text>Zombie hunger target</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_CIV_ROYALE" Language="en_US">
-      <Text>Red Death scenario</Text>
+      <Text>Red Death</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_CIV_ROYALE" Language="en_US">
       <Text>Safe zone and its center, Red Death, faction-visible fallout, traps, gifts, treasure, and hunger signals.</Text>
@@ -1367,7 +1367,7 @@
       <Text>Red Death</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CIV_ROYALE_OBJECTS" Language="en_US">
-      <Text>Scenario map objects</Text>
+      <Text>Objects</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_ACTION_ACTIVE" Language="en_US">
       <Text>Active</Text>
@@ -4918,6 +4918,17 @@
       <Text>No game history</Text>
     </Row>
 
+    <!-- Credits -->
+    <Row Tag="LOC_CAI_CREDITS_PACKAGE" Language="en_US">
+      <Text>Credits package</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CREDITS_PAUSED" Language="en_US">
+      <Text>Credits paused</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CREDITS_RESUMED" Language="en_US">
+      <Text>Credits resumed</Text>
+    </Row>
+
     <!-- Map Pin -->
     <Row Tag="LOC_CAI_PLACE_MAP_PIN" Language="en_US">
       <Text>Place Map tac</Text>
@@ -6585,6 +6596,132 @@
     </Row>
     <Row Tag="LOC_CAI_KB_DELETE_SCANNER_CATEGORY" Language="en_US">
       <Text>Delete custom category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PIRATES_RELIC_SLOT" Language="en_US">
+      <Text>Relic slot {1_SlotNumber}: {2_RelicName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PIRATES_NO_AVAILABLE_RELICS" Language="en_US">
+      <Text>No available relics</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PIRATES_NO_RELICS" Language="en_US">
+      <Text>No relics discovered</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PIRATES_RELICS_CHANGED_THIS_TURN" Language="en_US">
+      <Text>Relics have already been changed this turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PIRATES_NO_RELIC_SLOTS" Language="en_US">
+      <Text>No relic slots</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PIRATES_VIEW_ALL_RELICS" Language="en_US">
+      <Text>View all relics</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PIRATES_SCORE_CATEGORY" Language="en_US">
+      <Text>{1_Category}: {2_Score}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_PIRATES" Language="en_US">
+      <Text>Pirates scenario</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_PIRATES" Language="en_US">
+      <Text>Treasure information and enemy activity.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PIRATES_TREASURE" Language="en_US">
+      <Text>Treasure</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PIRATES_INFAMOUS" Language="en_US">
+      <Text>Enemy activity</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PIRATES_TREASURE_SEARCH" Language="en_US">
+      <Text>Treasure search area</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PIRATES_FLEET_PATH" Language="en_US">
+      <Text>Treasure fleet path</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PIRATES_TREASURE_LOCATION" Language="en_US">
+      <Text>Treasure location</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PIRATES_INFAMOUS_SEARCH" Language="en_US">
+      <Text>Infamous pirate search area</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PIRATES_POINTER" Language="en_US">
+      <Text>English Pointer signal</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PIRATES_DOWSING" Language="en_US">
+      <Text>Dowsing Rod signal</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PIRATES_SENSORS" Language="en_US">
+      <Text>Relic sensor signals</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PIRATES_POINTER_SIGNAL" Language="en_US">
+      <Text>English Pointer on {1_Unit}: unseen enemy ship is {2_Distance} {2_Distance : plural 1?tile; other?tiles;} from this ship</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_PIRATES_DOWSING_SIGNAL" Language="en_US">
+      <Text>Dowsing Rod on {1_Unit}: treasure is {2_Distance} {2_Distance : plural 1?tile; other?tiles;} from this ship</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PIRATES_MORALE_TITLE" Language="en_US">
+      <Text>Crew morale</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PIRATES_MORALE_GOLD" Language="en_US">
+      <Text>{1_Gold} gold</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PIRATES_MORALE_RATE" Language="en_US">
+      <Text>{1_Rate} per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_INSTALLED_TREE" Language="en_US">
+      <Text>Installed mods</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_SUBSCRIPTIONS_LIST" Language="en_US">
+      <Text>Mod subscriptions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_GROUP" Language="en_US">
+      <Text>Mod group</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_CREATE_GROUP" Language="en_US">
+      <Text>Create mod group</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_DELETE_GROUP" Language="en_US">
+      <Text>Delete mod group</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_CONTENT_TYPE" Language="en_US">
+      <Text>Content type</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_ID" Language="en_US">
+      <Text>Mod ID</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_DESCRIPTION" Language="en_US">
+      <Text>Description</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_SORT_NAME" Language="en_US">
+      <Text>Name</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_SORT_ENABLED" Language="en_US">
+      <Text>Enabled</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_STATE_CHANGED" Language="en_US">
+      <Text>{1_Name} {2_State}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_UNSUBSCRIBED" Language="en_US">
+      <Text>Unsubscribed from {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_GROUP_DELETED" Language="en_US">
+      <Text>{1_Name} deleted</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_ENABLED_COUNT" Language="en_US">
+      <Text>{1_Count : plural 1?1 mod enabled; other?{1_Count} mods enabled;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_DISABLED_COUNT" Language="en_US">
+      <Text>{1_Count : plural 1?1 mod disabled; other?{1_Count} mods disabled;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_NONE_ENABLED" Language="en_US">
+      <Text>No mods were enabled</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_NONE_DISABLED" Language="en_US">
+      <Text>No mods were disabled</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_ENABLE_FAILED" Language="en_US">
+      <Text>The mod could not be enabled</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MODS_DISABLE_FAILED" Language="en_US">
+      <Text>The mod could not be disabled</Text>
     </Row>
   </LocalizedText>
 </GameData>

@@ -1,6 +1,11 @@
 include("caiUtils")
 include("inGameHelpers_CAI")
-include("TechCivicCompletedPopup")
+local IS_PIRATES_SCENARIO = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
+if IS_PIRATES_SCENARIO then
+    include("TechCivicCompletedPopup_PiratesScenario")
+else
+    include("TechCivicCompletedPopup")
+end
 local mgr = ExposedMembers.CAI_UIManager
 
 local m_dialog = nil ---@type UIWidget|nil
@@ -32,22 +37,31 @@ local function BuildDialog()
     })
     table.insert(contentRows, nameRow)
 
-    if not Controls.CivicMsgLabel:IsHidden() then
+    if IS_PIRATES_SCENARIO then
+        table.insert(contentRows, mgr:CreateWidget(mgr:GenerateWidgetId("CAIRelicEffect"), "StaticText", {
+            Label = function() return Controls.RelicInfoLabel:GetText() or "" end,
+        }))
+        table.insert(contentRows, mgr:CreateWidget(mgr:GenerateWidgetId("CAIRelicFlavor"), "StaticText", {
+            Label = function() return Controls.QuoteLabel:GetText() or "" end,
+        }))
+    elseif not Controls.CivicMsgLabel:IsHidden() then
         local civicMsg = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechCivicMsg"), "StaticText", {
             Label = function() return Controls.CivicMsgLabel:GetText() or "" end,
         })
         table.insert(contentRows, civicMsg)
     end
 
-    local unlockCount = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechCivicUnlockCount"), "StaticText", {
-        Label = function() return Controls.UnlockCountLabel:GetText() or "" end,
-    })
-    table.insert(contentRows, unlockCount)
+    if not IS_PIRATES_SCENARIO then
+        local unlockCount = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechCivicUnlockCount"), "StaticText", {
+            Label = function() return Controls.UnlockCountLabel:GetText() or "" end,
+        })
+        table.insert(contentRows, unlockCount)
+    end
 
     local unlockables
-    if m_currentCivicType then
+    if not IS_PIRATES_SCENARIO and m_currentCivicType then
         unlockables = GetUnlockablesForCivic_Cached(m_currentCivicType, m_currentPlayerID) or {}
-    elseif m_currentTechType then
+    elseif not IS_PIRATES_SCENARIO and m_currentTechType then
         unlockables = GetUnlockablesForTech_Cached(m_currentTechType, m_currentPlayerID) or {}
     end
     for _, u in ipairs(unlockables or {}) do
@@ -61,7 +75,7 @@ local function BuildDialog()
         end
     end
 
-    if not Controls.QuoteButton:IsHidden() then
+    if not IS_PIRATES_SCENARIO and not Controls.QuoteButton:IsHidden() then
         local quoteRow = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechCivicQuote"), "StaticText", {
             Label = function() return Controls.QuoteLabel:GetText() or "" end,
         })

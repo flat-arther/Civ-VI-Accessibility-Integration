@@ -4,7 +4,9 @@ include("interfaceInfoHelpers_CAI")
 include("hexCoordUtils_CAI")
 include("Civ6Common")
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+    include("UnitPanel_PiratesScenario")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
     include("UnitPanel_CivRoyaleScenario")
 elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
     include("UnitPanel_BlackDeathScenario")
@@ -570,7 +572,7 @@ local function IsSelectedUnit(unit)
         and selectedUnit:GetID() == unit:GetID()
 end
 
-local function GetUnitInfoStats(data)
+local function GetUnitInfoStats(data, unit)
     if data == nil then
         return nil
     end
@@ -606,6 +608,15 @@ local function GetUnitInfoStats(data)
         Locale.Lookup("LOC_HUD_UNIT_PANEL_ANTI_AIR_STRENGTH") .. "[NEWLINE]" .. tostring(data.AntiAirCombat) or nil)
     AppendUnitInfo(results,
         (data.Range or 0) > 0 and Locale.Lookup("LOC_CAI_ICON_RANGE_ALIAS") .. "[NEWLINE]" .. tostring(data.Range) or nil)
+
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
+        and unit ~= nil and g_unitPropertyKeys ~= nil and g_unitPropertyKeys.Crew ~= nil then
+        local crew = unit:GetProperty(g_unitPropertyKeys.Crew)
+        if crew ~= nil then
+            AppendUnitInfo(results,
+                Locale.Lookup("LOC_HUD_UNIT_PANEL_CREW") .. "[NEWLINE]" .. tostring(crew))
+        end
+    end
 
     return results
 end
@@ -1961,7 +1972,7 @@ UnitInfo = {
     end,
 
     Stats = function(data, unit)
-        return GetUnitInfoStats(data)
+        return GetUnitInfoStats(data, unit)
     end,
 
     Charges = function(data, unit)
@@ -2580,7 +2591,14 @@ local function BuildUnitActionList(data)
     AddSyntheticPromoteActionIfNeeded(actions, data)
 
     for _, action in ipairs(actions) do
-        list:AddChild(CreateUnitActionMenuItem(action))
+        local hidePiratesNavalRepair = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
+            and selectedUnit ~= nil
+            and GameInfo.Units[selectedUnit:GetUnitType()] ~= nil
+            and GameInfo.Units[selectedUnit:GetUnitType()].Domain == "DOMAIN_SEA"
+            and action.IconId == "ICON_UNITOPERATION_HEAL"
+        if not hidePiratesNavalRepair then
+            list:AddChild(CreateUnitActionMenuItem(action))
+        end
     end
 
     if data ~= nil and data.Ability ~= nil and #data.Ability > 0 then

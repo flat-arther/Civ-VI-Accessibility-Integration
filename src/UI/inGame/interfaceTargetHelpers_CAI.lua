@@ -320,6 +320,30 @@ if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
     }
 end
 
+local PIRATES_TARGET_MODES = {
+    DB.MakeHash("INTERFACEMODE_CAPTURE_BOAT"),
+    DB.MakeHash("INTERFACEMODE_SHORE_PARTY"),
+    DB.MakeHash("INTERFACEMODE_SHORE_PARTY_EMBARK"),
+    DB.MakeHash("INTERFACEMODE_DREAD_PIRATE_ACTIVE"),
+    DB.MakeHash("INTERFACEMODE_PRIVATEER_ACTIVE"),
+    DB.MakeHash("INTERFACEMODE_HOARDER_ACTIVE"),
+}
+
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+    for _, mode in ipairs(PIRATES_TARGET_MODES) do
+        PLOT_TARGET_MODES[mode] = {
+            LiveCustomTargets = true,
+            CustomGetTargets = function()
+                local out = {}
+                for _, plotIndex in ipairs(g_targetPlots or {}) do
+                    out[plotIndex] = "piratesAction"
+                end
+                return out
+            end,
+        }
+    end
+end
+
 local UNIT_TARGET_MODES = {
     [InterfaceModeTypes.FORM_CORPS] = UnitCommandTypes.FORM_CORPS,
     [InterfaceModeTypes.FORM_ARMY] = UnitCommandTypes.FORM_ARMY,
@@ -434,6 +458,15 @@ if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
     PLOT_INFO_KEYS_BY_MODE[0x1D7FAB3F] = {
         "civRoyaleZone", "civRoyaleObjects", "improvement", "resource", "feature", "plotName"
     }
+end
+
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+    local piratesPlotInfoKeys = {
+        "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName"
+    }
+    for _, mode in ipairs(PIRATES_TARGET_MODES) do
+        PLOT_INFO_KEYS_BY_MODE[mode] = piratesPlotInfoKeys
+    end
 end
 
 local function ResolvePlotTargetLabel(mode, plotIndex)
@@ -567,7 +600,12 @@ function CAIInterfaceTargets.GetTargetAtPlot(plot)
 
     local mode = UI.GetInterfaceMode()
     local signature = BuildTargetCacheSignature(mode)
-    if m_targetCache == nil or m_targetCache.Mode ~= mode or m_targetCache.Signature ~= signature then
+    local plotConfig = PLOT_TARGET_MODES[mode]
+    local requiresLiveTargets = plotConfig ~= nil and plotConfig.LiveCustomTargets == true
+    if requiresLiveTargets
+        or m_targetCache == nil
+        or m_targetCache.Mode ~= mode
+        or m_targetCache.Signature ~= signature then
         m_targetCache = BuildTargetCache()
     end
 

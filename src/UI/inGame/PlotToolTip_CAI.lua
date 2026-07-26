@@ -12,6 +12,9 @@ local function IsBarbarianClansModeActive()
 end
 
 local function GetPlotToolTipIncludeName()
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+        return "PlotToolTip_PiratesScenario"
+    end
     if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
         return "PlotToolTip_BlackDeathScenario"
     end
@@ -38,6 +41,11 @@ local IS_BARBARIAN_CLANS_TOOLTIP = PLOT_TOOLTIP_INCLUDE == "PlotToolTip_Barbaria
     or PLOT_TOOLTIP_INCLUDE == "PlotTooltip_Expansion2_BarbarianClansMode"
 
 include(PLOT_TOOLTIP_INCLUDE)
+
+local IS_PIRATES_TOOLTIP = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
+if IS_PIRATES_TOOLTIP then
+    include("PiratesScenarioMapInfo_CAI")
+end
 
 local currentPlot = -1
 local info = ExposedMembers.CAIInfo or {}
@@ -72,6 +80,10 @@ local STATIC_INFO_PRIORITY = {
     "districtTitle",
     "districtResourceExtraction",
     "improvement",
+    "piratesTreasureSearch",
+    "piratesInfamousSearch",
+    "piratesFleetRoute",
+    "piratesTreasureOwner",
     "barbarianClan",
     "plotResourceExtraction",
     "impassable",
@@ -87,6 +99,7 @@ local STATIC_INFO_PRIORITY = {
 }
 
 local CURSOR_MOVE_INFO_PRIORITY = {
+    "piratesFocusName",
     "isFog",
     "units",
     "mapTac",
@@ -95,6 +108,10 @@ local CURSOR_MOVE_INFO_PRIORITY = {
     "waypoint",
     "civRoyaleSafeZoneCenter",
     "civRoyaleObjects",
+    "piratesTreasureSearch",
+    "piratesInfamousSearch",
+    "piratesFleetRoute",
+    "piratesTreasureOwner",
     "fallout",
     "coerceTurns",
     "coastalLowland",
@@ -818,6 +835,66 @@ info.PlotInfoHelpers = {
         return CAICivRoyaleMapInfo.GetSafeZoneCenterSpeech(plot)
     end,
 
+    piratesFocusName = function(data, plot)
+        if not IS_PIRATES_TOOLTIP or plot == nil then return nil end
+
+        local labels = {}
+        local plotIndex = plot:GetIndex()
+        for _, target in ipairs(CAIPiratesMapInfo.GetSensorTargets(Game.GetLocalPlayer())) do
+            if target.PlotIndex == plotIndex then
+                labels[#labels + 1] = Locale.Lookup(target.Kind == "enemy"
+                    and "LOC_CAI_WORLD_SCANNER_PIRATES_POINTER"
+                    or "LOC_CAI_WORLD_SCANNER_PIRATES_DOWSING")
+            end
+        end
+        if CAIPiratesMapInfo.IsTreasureSearchPlot(plot, Game.GetLocalPlayer()) then
+            labels[#labels + 1] = Locale.Lookup("LOC_CAI_WORLD_SCANNER_PIRATES_TREASURE_SEARCH")
+        end
+        if CAIPiratesMapInfo.IsTreasureFleetRoutePlot(plot) then
+            labels[#labels + 1] = Locale.Lookup("LOC_CAI_WORLD_SCANNER_PIRATES_FLEET_PATH")
+        end
+        if data.IsVisible and CAIPiratesMapInfo.IsTreasurePlot(plot) then
+            labels[#labels + 1] = Locale.Lookup("LOC_CAI_WORLD_SCANNER_PIRATES_TREASURE_LOCATION")
+        end
+        if CAIPiratesMapInfo.IsInfamousSearchPlot(plot) then
+            labels[#labels + 1] = Locale.Lookup("LOC_CAI_WORLD_SCANNER_PIRATES_INFAMOUS_SEARCH")
+        end
+        return #labels > 0 and labels or nil
+    end,
+
+    piratesTreasureSearch = function(data, plot)
+        if data.TreasureSearchTooltip ~= nil then return data.TreasureSearchTooltip end
+        if IS_PIRATES_TOOLTIP
+            and CAIPiratesMapInfo.IsTreasureSearchPlot(plot, Game.GetLocalPlayer()) then
+            return Locale.Lookup("LOC_PIRATES_PLOT_TOOLTIP_TREASURE_MAP")
+        end
+        return nil
+    end,
+
+    piratesInfamousSearch = function(data, plot)
+        if data.InfamousPirateTooltip ~= nil then return data.InfamousPirateTooltip end
+        if IS_PIRATES_TOOLTIP and CAIPiratesMapInfo.IsInfamousSearchPlot(plot) then
+            return Locale.Lookup("LOC_PIRATES_PLOT_TOOLTIP_INFAMOUS_PIRATE")
+        end
+        return nil
+    end,
+
+    piratesFleetRoute = function(data, plot)
+        if data.TreasureFleetTooltip ~= nil then return data.TreasureFleetTooltip end
+        if IS_PIRATES_TOOLTIP and CAIPiratesMapInfo.IsTreasureFleetRoutePlot(plot) then
+            return Locale.Lookup("LOC_PIRATES_PLOT_TOOLTIP_TREASURE_FLEET")
+        end
+        return nil
+    end,
+
+    piratesTreasureOwner = function(data, plot)
+        if data.TreasureOwnerTooltip ~= nil then return data.TreasureOwnerTooltip end
+        if IS_PIRATES_TOOLTIP and data.IsVisible then
+            return CAIPiratesMapInfo.GetTreasureOwnerSpeech(plot)
+        end
+        return nil
+    end,
+
     plotName = function(data)
         if not data.IsVisible then
             return Locale.Lookup("LOC_MINIMAP_FOG_OF_WAR_TOOLTIP")
@@ -1498,6 +1575,10 @@ local DEFAULT_PLOT_INFO_BUCKET = {
     "plotName",
     "civRoyaleZone",
     "civRoyaleObjects",
+    "piratesTreasureSearch",
+    "piratesInfamousSearch",
+    "piratesFleetRoute",
+    "piratesTreasureOwner",
     "mapTac",
     "owner",
     "feature",
@@ -1586,6 +1667,10 @@ local YIELD_RIVER_OWNER_INFO_BUCKET = {
 
 local STATS_INFO_BUCKET = {
     "civRoyaleObjects",
+    "piratesTreasureSearch",
+    "piratesInfamousSearch",
+    "piratesFleetRoute",
+    "piratesTreasureOwner",
     "fallout",
     "coerceTurns",
     "movement",
@@ -1595,6 +1680,11 @@ local STATS_INFO_BUCKET = {
 
 local GEOGRAPHY_INFO_BUCKET = {
     "civRoyaleZoneDetail",
+    "piratesFocusName",
+    "piratesTreasureSearch",
+    "piratesInfamousSearch",
+    "piratesFleetRoute",
+    "piratesTreasureOwner",
     "route",
     "coastalLowland",
     "volcano",

@@ -2092,35 +2092,22 @@ BuildSubMenu = WrapFunc(BuildSubMenu, function(orig, menuOptions)
                 if data.callback == OnPlayByCloud then m_CloudRowIdx = i end
                 local labelText = control.ButtonLabel:GetText()
                 if data.helpCallback ~= nil then
-                    local group = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_SubMenu"), "SubMenu", {
-                        Label = function() return labelText end,
-                        HiddenPredicate = function() return control.Top:IsHidden() end,
-                        FocusKey = "sub:" .. tostring(i),
-                    })
-                    group:On("focus_enter", function() HighlightSubmenuInstance(control) end)
-                    group:On("focus_leave", function() ClearSubmenuHighlight(control) end)
-
-                    local playBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_PlayBtn"), "Button", {
-                        Label = function() return Locale.Lookup("LOC_PLAY_CIVILIZATION_6") end,
-                        Tooltip = function() return control.Top:GetToolTipString() end,
-                        DisabledPredicate = function() return control.OptionButton:IsDisabled() end,
-                    })
-                    playBtn:On("activate", function() control.OptionButton:DoLeftClick() end)
-                    playBtn:On("focus_enter", function() HighlightSubmenuInstance(control) end)
-                    group:AddChild(playBtn)
-
+                    -- Scenario matchmaking disables CAI, so expose only the
+                    -- tutorial action and use its descriptive tooltip as the label.
                     local helpBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_HelpBtn"), "Button", {
-                        Label = function() return Locale.Lookup("LOC_CAI_HELP") end,
-                        Tooltip = function() return control.HelpButton:GetToolTipString() end,
+                        Label = function() return control.HelpButton:GetToolTipString() end,
                         DisabledPredicate = function() return control.HelpButton:IsDisabled() end,
-                        HiddenPredicate = function() return control.HelpButton:IsHidden() end,
+                        HiddenPredicate = function()
+                            return control.Top:IsHidden() or control.HelpButton:IsHidden()
+                        end,
+                        FocusKey = "sub:" .. tostring(i),
                     })
                     helpBtn:On("activate", function()
                         control.HelpButton:DoLeftClick()
                     end)
-                    group:AddChild(helpBtn)
-
-                    m_SubmenuList:AddChild(group)
+                    helpBtn:On("focus_enter", function() HighlightSubmenuInstance(control) end)
+                    helpBtn:On("focus_leave", function() ClearSubmenuHighlight(control) end)
+                    m_SubmenuList:AddChild(helpBtn)
                 else
                     local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMainMenu_SubItem"), "Button", {
                         Label = function() return labelText end,

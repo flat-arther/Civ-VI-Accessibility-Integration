@@ -433,15 +433,10 @@ Screens such as World Rankings, the Production Panel, and World Climate contain 
 - `Ctrl+Slash` — open in-game chat
 - `Ctrl+N` — open the Notification Center
 
+
 ## Expectations
 
 Tables: more UIs need tables. Unfortunately, by the time the idea came up, I was too far into development to justify slowing down and redoing previous UIs. This is planned for next.
-
-The Mods and Credits screens are inaccessible. Do not go there.
-
-Do not click the Additional Content button in multiplayer lobbies.
-
-Red death and pirates scenarios are not yet supported
 
 The tutorial is still not supported currently.
 
@@ -449,7 +444,7 @@ World Builder: don't even ask. It is not important right now, but it might be a 
 
 ## Credits
 
-Civilization VI Accessibility Integration was developed by Flat-Arther and Hamada, with assistance from Claude.
+Civilization VI Accessibility Integration was developed by Flat-Arther and Hamada, with assistance from Claude AI.
 
 Special thanks to:
 

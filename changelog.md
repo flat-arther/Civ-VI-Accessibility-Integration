@@ -8,7 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ### Added
 
+- Added support for the Credits screen with package selection, a treeview for manual reading, and automatic narration synchronized with the visual credits roll. The automatic roll is paused while the treeview is focused. You can also manually pause and unpause it while not focusing the treeview
+- Added support  for the mods screen. Allows browsing and toggling installed mods, inspecting mod details, managing mod groups and compatibility warnings, and managing Steam Workshop subscriptions. Note that for subscriptions, the only actions allowed are updating, by pressing enter on a mod that has a pending update, or unsubscribing by pressing delete. Viewing or browsing the workshop uses the steam overlay, which is not accessible.
+- Added Pirates scenario support, including relic loadouts and discoveries, Crew Morale in the T readout, ship crew values, scenario unit actions and targeting, Infamy score categories, treasure and infamous-pirate map information, relic sensor signals, Tavern and Sack status, and accessible Main Menu and in-game How to Play pages.
 - Added Red Death scenario support, including faction unit actions, turn and global-ability status, Ctrl+W global-ability activation, safe-zone and Red Death cursor speech, scenario map objects in plot information and World Scanner, Grieving Gift targeting, eliminated-player chat and diplomacy state, accessible front-end and in-game tutorials, and observer controls.
+
+### Changed
+
+- The Multiplayer menu now exposes only the Civ Royale and Pirates tutorials instead of the match making play buttons, and each tutorial ends with Close instead of Play, preventing scenario matchmaking from disabling the accessibility mod. If you want to play any of the two scenarios, manually start a game or join a lobby. 
+- The tooltip for the great people hotkey now menntions the heroes tab appearing in Heroes & Legends mode
 
 ### Fixed
 

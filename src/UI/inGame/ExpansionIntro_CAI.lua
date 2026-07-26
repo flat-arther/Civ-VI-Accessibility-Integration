@@ -6,6 +6,8 @@ local m_CurrentPriority = PopupPriority.TutorialHigh
 local OPTIONS_HIDE_KEY  = "HideXP2FeaturesScreen";
 local m_IsGameStarted   = false
 local m_IsCivRoyale = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE"
+local m_IsPirates = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
+local m_IsScenarioIntro = m_IsCivRoyale or m_IsPirates
 
 local function RemoveDialog()
 	if not mgr or not m_CAI_DIALOG then return end
@@ -36,7 +38,10 @@ end
 local function BuildDialog()
 	if not m_IsGameStarted then return end
 	if not mgr then return end
-	local function GetTitle() return Locale.Lookup("LOC_MAIN_MENU_TUTORIAL") end
+	local function GetTitle()
+        if m_IsPirates then return Locale.Lookup("LOC_PIRATES_RULESET_TITLE") end
+        return Locale.Lookup("LOC_MAIN_MENU_TUTORIAL")
+    end
 
 	local desc = MakeText(Controls.Description)
     local desc2 = MakeText(Controls.Description2)
@@ -44,7 +49,7 @@ local function BuildDialog()
     local prevBtn = MakeButton(Controls.Previous)
     local nextBtn = MakeButton(Controls.Next)
     local content = { desc, desc2 }
-    if not m_IsCivRoyale then
+    if not m_IsScenarioIntro then
         local checkbox = mgr:CreateWidget("CAIExpIntroCheck", "Checkbox", {
             Label = function() return Locale.Lookup("LOC_XP_INTRO_HIDETHIS") end,
         })

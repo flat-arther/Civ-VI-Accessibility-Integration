@@ -6,11 +6,15 @@ local function IsDramaticAgesActive()
     return false
 end
 
+local IS_PIRATES_SCENARIO = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
+
 -- CAI replaces the GovernmentScreen context outright, so it must re-include the
 -- exact vanilla script that would otherwise win; otherwise a sighted hotseat
 -- player loses that variant's visuals (e.g. the Golden card art and filter tab).
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+if IS_PIRATES_SCENARIO then
+    include("GovernmentScreen_PiratesScenario")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
     include("GovernmentScreen_BlackDeathScenario")
 elseif IsExpansion2Active() then
     if IsDramaticAgesActive() then
@@ -284,7 +288,9 @@ local function GetAllAvailablePolicyTypes()
     local policies = {}
     for row in GameInfo.Policies() do
         local policyType = row.PolicyType
-        if policyType and GetPolicyData(policyType) and IsPolicyAvailableForPlayer(policyType) then
+        local isRelevantPolicy = not IS_PIRATES_SCENARIO
+            or string.sub(policyType or "", 1, 13) == "POLICY_RELIC_"
+        if isRelevantPolicy and policyType and GetPolicyData(policyType) and IsPolicyAvailableForPlayer(policyType) then
             table.insert(policies, policyType)
         end
     end
@@ -620,19 +626,21 @@ local function CreatePolicyTreeItem(policyType, action)
         end)
     end
 
-    item:AddInputBindings({
-        {
-            Key         = Keys.VK_RETURN,
-            IsShift     = true,
-            MSG         = KeyEvents.KeyUp,
-            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action      = function()
-                if IsTutorialRunning and IsTutorialRunning() then return true end
-                LuaEvents.OpenCivilopedia(policyType)
-                return true
-            end,
-        },
-    })
+    if not IS_PIRATES_SCENARIO then
+        item:AddInputBindings({
+            {
+                Key         = Keys.VK_RETURN,
+                IsShift     = true,
+                MSG         = KeyEvents.KeyUp,
+                Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
+                Action      = function()
+                    if IsTutorialRunning and IsTutorialRunning() then return true end
+                    LuaEvents.OpenCivilopedia(policyType)
+                    return true
+                end,
+            },
+        })
+    end
 
     return item
 end
@@ -692,10 +700,7 @@ local function CreatePolicyPicker(slotIndex, rowIndex)
         },
     })
 
-    BuildPolicyCategoryTree(m_ui.picker, {
-        RowIndex = rowIndex,
-        StartExpanded = true,
-        Action = function(policyType)
+    local function AssignPolicy(policyType)
             if not IsPolicyAssignableToRow(policyType, rowIndex) then
                 Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_NO_LEGAL_SLOT", GetPolicyName(policyType)))
                 return
@@ -705,8 +710,26 @@ local function CreatePolicyPicker(slotIndex, rowIndex)
             Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_POLICY_ASSIGNED", GetPolicyName(policyType), GetRowName(rowIndex)))
             RefreshVanillaPolicyControlsOnly()
             ClosePicker(true)
-        end,
-    })
+    end
+
+    if IS_PIRATES_SCENARIO then
+        for _, policyType in ipairs(GetAllAvailablePolicyTypes()) do
+            if IsPolicyAssignableToRow(policyType, rowIndex) then
+                m_ui.picker:AddChild(CreatePolicyTreeItem(policyType, AssignPolicy))
+            end
+        end
+        if #m_ui.picker.Children == 0 then
+            m_ui.picker:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovScreenStatic"), "StaticText", {
+                Label = function() return Locale.Lookup("LOC_CAI_PIRATES_NO_AVAILABLE_RELICS") end,
+            }))
+        end
+    else
+        BuildPolicyCategoryTree(m_ui.picker, {
+            RowIndex = rowIndex,
+            StartExpanded = true,
+            Action = AssignPolicy,
+        })
+    end
 
     UI.PlaySound("UI_Policies_Card_Take")
     mgr:Push(m_ui.picker, PopupPriority.Current)
@@ -717,7 +740,11 @@ local function OpenAllPoliciesTree()
     CloseAllPolicies()
 
     m_ui.allPolicies = mgr:CreateWidget(ALL_POLICIES_ID, "Tree", {
-        Label = function() return Locale.Lookup("LOC_CAI_GOVERNMENT_VIEW_ALL_POLICIES") end,
+        Label = function()
+            return Locale.Lookup(IS_PIRATES_SCENARIO
+                and "LOC_CAI_PIRATES_VIEW_ALL_RELICS"
+                or "LOC_CAI_GOVERNMENT_VIEW_ALL_POLICIES")
+        end,
     })
     m_ui.allPolicies:AddInputBindings({
         {
@@ -731,7 +758,18 @@ local function OpenAllPoliciesTree()
         },
     })
 
-    BuildPolicyCategoryTree(m_ui.allPolicies, { IncludeActive = true })
+    if IS_PIRATES_SCENARIO then
+        for _, policyType in ipairs(GetAllAvailablePolicyTypes()) do
+            m_ui.allPolicies:AddChild(CreatePolicyTreeItem(policyType))
+        end
+        if #m_ui.allPolicies.Children == 0 then
+            m_ui.allPolicies:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovScreenStatic"), "StaticText", {
+                Label = function() return Locale.Lookup("LOC_CAI_PIRATES_NO_RELICS") end,
+            }))
+        end
+    else
+        BuildPolicyCategoryTree(m_ui.allPolicies, { IncludeActive = true })
+    end
     mgr:Push(m_ui.allPolicies, PopupPriority.Current)
     return true
 end
@@ -750,7 +788,9 @@ local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
             else
                 policyLabel = GetPolicyName(policyType)
             end
-            if IsBlackDeathPapalSlot(slotIndex) then
+            if IS_PIRATES_SCENARIO then
+                return Locale.Lookup("LOC_CAI_PIRATES_RELIC_SLOT", slotOrdinal, policyLabel)
+            elseif IsBlackDeathPapalSlot(slotIndex) then
                 return JoinNonEmpty({
                     Locale.Lookup("LOC_GOVT_PAPAL_SLOT_NAME"),
                     policyLabel,
@@ -779,7 +819,10 @@ local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
             return
         end
         if not IsAbleToChangePolicies() then
-            Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_POLICIES_LOCKED"))
+            local lockedTag = IS_PIRATES_SCENARIO
+                and "LOC_CAI_PIRATES_RELICS_CHANGED_THIS_TURN"
+                or "LOC_CAI_GOVERNMENT_POLICIES_LOCKED"
+            Speak(Locale.Lookup(lockedTag))
             return
         end
         CreatePolicyPicker(slotIndex, rowIndex)
@@ -798,7 +841,10 @@ local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
                     return true
                 end
                 if not IsAbleToChangePolicies() then
-                    Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_POLICIES_LOCKED"))
+                    local lockedTag = IS_PIRATES_SCENARIO
+                        and "LOC_CAI_PIRATES_RELICS_CHANGED_THIS_TURN"
+                        or "LOC_CAI_GOVERNMENT_POLICIES_LOCKED"
+                    Speak(Locale.Lookup(lockedTag))
                     return true
                 end
                 RemoveActivePolicyAtSlotIndex(slotIndex)
@@ -808,7 +854,7 @@ local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
                 return true
             end,
         },
-        {
+        not IS_PIRATES_SCENARIO and {
             Key         = Keys.VK_RETURN,
             IsShift     = true,
             MSG         = KeyEvents.KeyUp,
@@ -820,7 +866,7 @@ local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
                 LuaEvents.OpenCivilopedia(policyType)
                 return true
             end,
-        },
+        } or nil,
     })
 
     return widget
@@ -832,6 +878,20 @@ end
 
 local function BuildPoliciesTreeContent(tree)
     m_ui.polRows = {}
+    if IS_PIRATES_SCENARIO then
+        local wildcardRowIndex = GetRowIndexForSlotType("SLOT_WILDCARD")
+        local liveSlots = GetLiveSlotDataForRow(wildcardRowIndex)
+        for slotOrdinal, slotData in ipairs(liveSlots) do
+            tree:AddChild(CreatePolicySlotWidget(slotData.SlotIndex, wildcardRowIndex, slotOrdinal))
+        end
+        if #liveSlots == 0 then
+            tree:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovScreenStatic"), "StaticText", {
+                Label = function() return Locale.Lookup("LOC_CAI_PIRATES_NO_RELIC_SLOTS") end,
+            }))
+        end
+        return
+    end
+
     for _, row in ipairs(CAI_ROW_ORDER) do
         local rowIndex = row.Index
         local rowWidget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovScreenPolicyRow"), "TreeItem", {
@@ -962,7 +1022,11 @@ local function BuildPolicyFooter(page)
     page:AddChild(confirm)
 
     local viewAll = mgr:CreateWidget("CAIGovScreenViewAllPolicies", "Button", {
-        Label = function() return Locale.Lookup("LOC_CAI_GOVERNMENT_VIEW_ALL_POLICIES") end,
+        Label = function()
+            return Locale.Lookup(IS_PIRATES_SCENARIO
+                and "LOC_CAI_PIRATES_VIEW_ALL_RELICS"
+                or "LOC_CAI_GOVERNMENT_VIEW_ALL_POLICIES")
+        end,
     })
     viewAll:SetFocusSound("Main_Menu_Mouse_Over")
     viewAll:On("activate", function() OpenAllPoliciesTree() end)
@@ -1001,8 +1065,23 @@ local function BuildPanel()
     if not mgr then return end
 
     m_ui.panel = mgr:CreateWidget(PANEL_ID, "Panel", {
-        Label = function() return ControlText(Controls.ModalScreenTitle) end,
+        Label = function()
+            if IS_PIRATES_SCENARIO then return Locale.Lookup("LOC_RELIC_SCREEN_TITLE") end
+            return ControlText(Controls.ModalScreenTitle)
+        end,
     })
+
+    if IS_PIRATES_SCENARIO then
+        m_ui.polPage = m_ui.panel
+        m_ui.polTree = mgr:CreateWidget(POL_TREE_ID, "Tree", {
+            Label = function() return Locale.Lookup("LOC_RELIC_SCREEN_ACTIVE_RELICS") end,
+        })
+        m_ui.panel:AddChild(m_ui.polTree)
+        BuildPolicyFooter(m_ui.panel)
+        BuildPoliciesTreeContent(m_ui.polTree)
+        m_state.activeTab = 2
+        return
+    end
 
     m_ui.tabs = mgr:CreateWidget(TABS_ID, "TabControl", {})
     m_ui.panel:AddChild(m_ui.tabs)
@@ -1036,6 +1115,7 @@ local function BuildPanel()
 end
 
 local function MirrorActiveTabToCAI()
+    if IS_PIRATES_SCENARIO then return end
     if not m_ui.tabs then return end
     if m_ui.tabs:GetActivePageIndex() == m_state.activeTab then return end
     m_state.isMirroringTab = true

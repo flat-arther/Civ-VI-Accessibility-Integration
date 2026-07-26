@@ -1158,6 +1158,15 @@ InterfaceInfoHelpers[InterfaceModeTypes.TRANSFORM_UNIT] = BuildTargetValidityInt
 InterfaceInfoHelpers[InterfaceModeTypes.RESTORE_UNIT_MOVES] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.NAVAL_GOLD_RAID] = BuildTargetValidityInterfaceInfo
 
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+    InterfaceInfoHelpers[DB.MakeHash("INTERFACEMODE_CAPTURE_BOAT")] = BuildTargetValidityInterfaceInfo
+    InterfaceInfoHelpers[DB.MakeHash("INTERFACEMODE_SHORE_PARTY")] = BuildTargetValidityInterfaceInfo
+    InterfaceInfoHelpers[DB.MakeHash("INTERFACEMODE_SHORE_PARTY_EMBARK")] = BuildTargetValidityInterfaceInfo
+    InterfaceInfoHelpers[DB.MakeHash("INTERFACEMODE_DREAD_PIRATE_ACTIVE")] = BuildTargetValidityInterfaceInfo
+    InterfaceInfoHelpers[DB.MakeHash("INTERFACEMODE_PRIVATEER_ACTIVE")] = BuildTargetValidityInterfaceInfo
+    InterfaceInfoHelpers[DB.MakeHash("INTERFACEMODE_HOARDER_ACTIVE")] = BuildTargetValidityInterfaceInfo
+end
+
 local function ResolveActiveInterfacePlot(plot)
     if plot ~= nil then return plot end
 

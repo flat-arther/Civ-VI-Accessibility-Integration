@@ -10,6 +10,8 @@
   </Properties>
   <Files>
     <File>UI/Replacements/BlackDeathScenario/MinimapPanel_BlackDeathScenario.lua</File>
+    <File>UI/Replacements/PiratesScenario/MinimapPanel_PiratesScenario_CAIBase.lua</File>
+    <File>UI/inGame/PiratesScenarioMapInfo_CAI.lua</File>
     <File>UI/Replacements/Byzantium_Gaul/GovernmentScreen_Byzantium_Gaul_Expansion1_MODE.lua</File>
     <File>UI/Replacements/Byzantium_Gaul/GovernmentScreen_Byzantium_Gaul_Expansion2_MODE.lua</File>
     <File>UI/shared/CAI_logging.lua</File>
@@ -68,10 +70,13 @@
     <File>UI/frontEnd/IntroScreen.lua</File>
     <File>UI/frontEnd/FrontEndPopup.lua</File>
     <File>UI/frontEnd/MainMenu.lua</File>
+    <File>UI/frontEnd/Mods.lua</File>
+    <File>UI/frontEnd/CreditsScreen.lua</File>
     <File>UI/frontEnd/Multiplayer/Lobby.lua</File>
     <File>UI/frontEnd/Multiplayer/HostGame.lua</File>
     <File>UI/frontEnd/Multiplayer/JoiningRoom.lua</File>
     <File>UI/frontEnd/Multiplayer/CivRoyaleIntro.lua</File>
+    <File>UI/frontEnd/Multiplayer/PiratesIntro.lua</File>
     <File>UI/frontEnd/Multiplayer/PBCNotifyRemind.lua</File>
     <File>UI/frontEnd/Multiplayer/StagingRoom.lua</File>
     <File>UI/frontEnd/Multiplayer/ConfirmKick.lua</File>
@@ -163,6 +168,7 @@
     <File>UI/inGame/WorldScanner/WorldScannerCategory_validTargets.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_specialMapObjects.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_civRoyale.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_pirates.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>
@@ -286,10 +292,13 @@
       <File>UI/frontEnd/FrontEndPopup.lua</File>
       <File>UI/frontEnd/FrontEnd.lua</File>
       <File>UI/frontEnd/MainMenu.lua</File>
+      <File>UI/frontEnd/Mods.lua</File>
+      <File>UI/frontEnd/CreditsScreen.lua</File>
       <File>UI/frontEnd/Multiplayer/Lobby.lua</File>
       <File>UI/frontEnd/Multiplayer/HostGame.lua</File>
       <File>UI/frontEnd/Multiplayer/JoiningRoom.lua</File>
       <File>UI/frontEnd/Multiplayer/CivRoyaleIntro.lua</File>
+      <File>UI/frontEnd/Multiplayer/PiratesIntro.lua</File>
       <File>UI/frontEnd/Multiplayer/PBCNotifyRemind.lua</File>
       <File>UI/frontEnd/Multiplayer/StagingRoom.lua</File>
       <File>UI/frontEnd/Multiplayer/ConfirmKick.lua</File>
@@ -330,6 +339,10 @@
     </ImportFiles>
     <ImportFiles id="BlackDeathScenario_MinimapPanel_CAI" criteria="BlackDeathScenario">
       <File>UI/Replacements/BlackDeathScenario/MinimapPanel_BlackDeathScenario.lua</File>
+    </ImportFiles>
+    <ImportFiles id="PiratesScenario_MinimapPanel_CAI" criteria="PiratesScenario">
+      <File>UI/Replacements/PiratesScenario/MinimapPanel_PiratesScenario_CAIBase.lua</File>
+      <File>UI/inGame/PiratesScenarioMapInfo_CAI.lua</File>
     </ImportFiles>
     <ImportFiles id="DramaticAges_GovernmentsScreen_Exp2CAI" criteria="DramaticAges_Expansion2_Mode">
       <Properties>
@@ -456,6 +469,7 @@
       <File>UI/inGame/WorldScanner/WorldScannerCategory_validTargets.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_specialMapObjects.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_civRoyale.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_pirates.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>

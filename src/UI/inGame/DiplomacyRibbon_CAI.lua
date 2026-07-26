@@ -3,7 +3,9 @@ include("Civ6Common")
 local info             = ExposedMembers.CAIInfo or {}
 ExposedMembers.CAIInfo = info
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+    include("DiplomacyRibbon_PiratesScenario")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
     include("DiplomacyRibbon_CivRoyaleScenario_CAIBase")
 elseif IsExpansion2Active() then
     include("DiplomacyRibbon_Expansion2")
@@ -14,6 +16,22 @@ else
 end
 
 local mgr = ExposedMembers.CAI_UIManager
+local IS_PIRATES_SCENARIO = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
+local PIRATES_SCORE_CATEGORIES = {}
+if IS_PIRATES_SCENARIO then
+    local scoreCategories = GameInfo.ScoringCategories
+    for i = 0, #scoreCategories - 1 do
+        local category = scoreCategories[i]
+        if category.PrimaryKey == "CATEGORY_SCENARIO1"
+            or category.PrimaryKey == "CATEGORY_SCENARIO2"
+            or category.PrimaryKey == "CATEGORY_SCENARIO3" then
+            PIRATES_SCORE_CATEGORIES[#PIRATES_SCORE_CATEGORIES + 1] = {
+                Index = i,
+                Name = category.Name,
+            }
+        end
+    end
+end
 
 local LIST_ID = "CAIDiploRibbon_List"
 
@@ -170,6 +188,20 @@ local function GetLeaderLabel(playerID, localPlayerID)
     local pConfig = PlayerConfigurations[playerID]
     if not pConfig then return "?" end
 
+    if IS_PIRATES_SCENARIO then
+        local parts = {
+            Locale.Lookup(pConfig:GetPlayerName()),
+            Locale.Lookup(pConfig:GetCivilizationShortDescription()),
+        }
+        if playerID == localPlayerID then
+            table.insert(parts, Locale.Lookup("LOC_HUD_CITY_YOU"))
+        end
+        if Players[playerID]:IsTurnActive() then
+            table.insert(parts, Locale.Lookup("LOC_CAI_DIPLO_RIBBON_ACTIVE_TURN"))
+        end
+        return JoinNonEmpty(parts, ", ")
+    end
+
     local parts = {}
     if not IsMaskedPlayer(playerID, localPlayerID) then
         local name = Locale.Lookup(pConfig:GetLeaderName())
@@ -205,6 +237,19 @@ local function GetLeaderLabel(playerID, localPlayerID)
 end
 
 local function GetLeaderTooltip(playerID, localPlayerID)
+    if IS_PIRATES_SCENARIO then
+        local pPlayer = Players[playerID]
+        if not pPlayer then return "" end
+
+        local parts = {}
+        for _, category in ipairs(PIRATES_SCORE_CATEGORIES) do
+            table.insert(parts, Locale.Lookup("LOC_CAI_PIRATES_SCORE_CATEGORY",
+                Locale.Lookup(category.Name), pPlayer:GetCategoryScore(category.Index)))
+        end
+        table.insert(parts, Locale.Lookup("LOC_CAI_DIPLO_RIBBON_SCORE", Round(pPlayer:GetScore())))
+        return JoinNonEmpty(parts, "[NEWLINE]")
+    end
+
     if IsMaskedPlayer(playerID, localPlayerID) then return "" end
 
     local pPlayer = Players[playerID]
@@ -263,13 +308,17 @@ local function PopulateList(list)
     if localPlayerID == -1 then return nil end
 
     local localPlayer = Players[localPlayerID]
-    local localDiplomacy = localPlayer:GetDiplomacy()
+    local localDiplomacy = IS_PIRATES_SCENARIO and nil or localPlayer:GetDiplomacy()
 
     local kPlayers = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE"
         and PlayerManager.GetWasEverAliveMajors()
         or PlayerManager.GetAliveMajors()
-    table.sort(kPlayers,
-        function(a, b) return localDiplomacy:GetMetTurn(a:GetID()) < localDiplomacy:GetMetTurn(b:GetID()) end)
+    if IS_PIRATES_SCENARIO then
+        table.sort(kPlayers, function(a, b) return a:GetID() < b:GetID() end)
+    else
+        table.sort(kPlayers,
+            function(a, b) return localDiplomacy:GetMetTurn(a:GetID()) < localDiplomacy:GetMetTurn(b:GetID()) end)
+    end
 
     local function AddLeaderItem(playerID)
         local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDiploRibbon_L"), "MenuItem", {
@@ -277,12 +326,14 @@ local function PopulateList(list)
             Tooltip = function() return GetLeaderTooltip(playerID, localPlayerID) end,
         })
         item.FocusKey = "leader:" .. playerID
-        item:On("activate", function()
-            local uiLeader = GetUILeadersByID()[playerID]
-            if uiLeader then
-                uiLeader.SelectButton:DoLeftClick()
-            end
-        end)
+        if not IS_PIRATES_SCENARIO then
+            item:On("activate", function()
+                local uiLeader = GetUILeadersByID()[playerID]
+                if uiLeader then
+                    uiLeader.SelectButton:DoLeftClick()
+                end
+            end)
+        end
         list:AddChild(item)
     end
 
@@ -290,7 +341,10 @@ local function PopulateList(list)
 
     for _, pPlayer in ipairs(kPlayers) do
         local playerID = pPlayer:GetID()
-        if playerID ~= localPlayerID then
+        if playerID ~= localPlayerID and (not IS_PIRATES_SCENARIO or IsPiratePlayer(playerID)) then
+            if IS_PIRATES_SCENARIO then
+                AddLeaderItem(playerID)
+            else
             local isMet = localDiplomacy:HasMet(playerID)
             local pConfig = PlayerConfigurations[playerID]
             local isHumanMP = GameConfiguration.IsAnyMultiplayer() and pConfig:IsHuman()
@@ -298,6 +352,7 @@ local function PopulateList(list)
                 or GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE"
                     and not pConfig:IsAlive() then
                 AddLeaderItem(playerID)
+            end
             end
         end
     end

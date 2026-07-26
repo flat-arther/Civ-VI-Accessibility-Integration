@@ -1,7 +1,10 @@
 include("caiUtils")
 include("Civ6Common")
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+    include("PiratesScenario_PropKeys")
+    include("TopPanel_PiratesScenario")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
     include("TopPanel_CivRoyaleScenario_CAIBase")
 elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_WARMACHINE" then
     include("TopPanel_WarMachineScenario")
@@ -321,6 +324,45 @@ local function AddRoyaleTurnInfo(parts)
     end
 end
 
+local function AddPiratesTurnInfo(parts)
+    if GameConfiguration.GetRuleSet() ~= "RULESET_SCENARIO_PIRATES" then return end
+
+    local _, player = GetLocalPlayer()
+    if player == nil then return end
+
+    local treasury = player:GetTreasury()
+    local goldPerTurn = math.floor(treasury:GetGoldYield() - treasury:GetTotalMaintenance())
+    local goldBalance = math.floor(treasury:GetGoldBalance())
+    table.insert(parts, Locale.Lookup("LOC_CAI_PIRATES_MORALE_TITLE"))
+    table.insert(parts, Locale.Lookup("LOC_CAI_PIRATES_MORALE_GOLD", goldBalance))
+    table.insert(parts, Locale.Lookup("LOC_CAI_PIRATES_MORALE_RATE", goldPerTurn))
+
+    if goldPerTurn > 0 then
+        table.insert(parts, Locale.Lookup("LOC_PIRATES_MORALE_TRACKER_PROFIT"))
+        return
+    elseif goldPerTurn == 0 then
+        table.insert(parts, Locale.Lookup("LOC_PIRATES_MORALE_TRACKER_STABLE"))
+        return
+    end
+
+    local currentTurn = Game.GetCurrentGameTurn()
+    local lastHadGoldTurn = player:GetProperty(g_playerPropertyKeys.LastHadGoldTurn) or currentTurn
+    if goldBalance > 0 then
+        local turnsUntilMutiny = math.ceil(goldBalance / -goldPerTurn) + PIRATE_BANKRUPTCY_MUTINY_DELAY
+        table.insert(parts, Locale.Lookup("LOC_PIRATES_MORALE_TRACKER_MUTINY_TURNS", turnsUntilMutiny))
+    elseif currentTurn < lastHadGoldTurn + PIRATE_BANKRUPTCY_MUTINY_DELAY then
+        local turnsUntilMutiny = lastHadGoldTurn + PIRATE_BANKRUPTCY_MUTINY_DELAY - currentTurn
+        table.insert(parts, Locale.Lookup("LOC_PIRATES_MORALE_TRACKER_MUTINY_TURNS", turnsUntilMutiny))
+    else
+        local mutinyTurns = player:GetUnits():GetCount() - 1
+        if mutinyTurns > 0 then
+            table.insert(parts, Locale.Lookup("LOC_PIRATES_MORALE_TRACKER_TOTAL_MUTINY_TURNS", mutinyTurns))
+        else
+            table.insert(parts, Locale.Lookup("LOC_PIRATES_MORALE_TRACKER_NO_MORE_UNITS"))
+        end
+    end
+end
+
 local function BuildTurnTimeDateParts(includeClock)
     RefreshTurnsRemaining()
     RefreshTime()
@@ -340,6 +382,7 @@ local function BuildTurnTimeDateParts(includeClock)
         table.insert(parts, Controls.Time:GetText())
     end
     AddRoyaleTurnInfo(parts)
+    AddPiratesTurnInfo(parts)
     return parts
 end
 

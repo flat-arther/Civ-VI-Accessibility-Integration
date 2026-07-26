@@ -1,6 +1,8 @@
 include("caiUtils")
 include("Civ6Common")
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+    include("WorldTracker_PiratesScenario")
+elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
     include("WorldTracker_CivRoyaleScenario_CAIBase")
 elseif IsExpansion2Active() then
     include("WorldTracker_Expansion1")
