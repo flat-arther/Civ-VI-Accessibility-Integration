@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-08-01
+
 ### Added
 
 - Tables and grids now support type-ahead. Grids search all cells, while tables search row labels and preserve the current column; standard result cycling, Up/Down navigation, Backspace, Escape, and grid tooltip matching behavior applies.
