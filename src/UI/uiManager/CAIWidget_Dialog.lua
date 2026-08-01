@@ -3,7 +3,7 @@
 -- dialog's rows (content rows + the action button row, in that order).
 -- SetButtons() auto-creates a Transparent horizontal button row appended as
 -- the last child; Left/Right and Up/Down inside the row all cycle the buttons
--- (sticky — Tab/Shift+Tab is the way to escape the row).
+-- until the row edge, where Up/Down bubble to dialog-row navigation.
 -- Enter on the dialog fires the designated default action button's activate.
 
 ---@class DialogWidget : ContainerWidget

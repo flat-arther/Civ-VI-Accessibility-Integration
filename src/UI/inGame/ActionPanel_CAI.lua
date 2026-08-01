@@ -442,9 +442,6 @@ end
 
 LuaEvents.CAI_TutorialActionPanelAllowed.Add(function(isAllowed)
     m_caiTutorialActionPanelAllowed = isAllowed == true
-    if m_caiTutorialActionPanelAllowed then
-        SpeakCurrentActionTooltip(true, false)
-    end
 end)
 
 LateInitialize = WrapFunc(LateInitialize, function(orig, ...)

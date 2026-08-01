@@ -247,6 +247,7 @@ local function CollectPlotInteractions(plotId)
 
 	local plot = Map.GetPlotByIndex(plotId)
 	if plot == nil then return results end
+	if not IsCAITutorialPlotSelectionAllowed(plotId) then return results end
 
 	local localPlayerID = Game.GetLocalPlayer()
 	if localPlayerID == nil or localPlayerID < 0 then return results end
@@ -1399,6 +1400,7 @@ end
 
 local MESSAGE_BUFFER_SPEECH_SETTINGS = {
 	notification = "SpeakMessageBufferNotifications",
+	tutorial = "SpeakMessageBufferTutorials",
 	reveal = "SpeakMessageBufferReveals",
 	combat = "SpeakMessageBufferCombat",
 	movement = "SpeakMessageBufferMovement",
@@ -1406,15 +1408,20 @@ local MESSAGE_BUFFER_SPEECH_SETTINGS = {
 	gossip = "SpeakMessageBufferGossip",
 }
 
-local function OnCAIAppendToMessageBuffer(text, category, location)
+local function OnCAIAppendToMessageBuffer(text, category, location, shouldSpeak)
 	local m_messageBuffer = MessageBuffer.GetActive()
 	if not m_messageBuffer then return end
 	m_messageBuffer:Append(text, category, location)
+	if shouldSpeak == false then return end
 	local settingId = MESSAGE_BUFFER_SPEECH_SETTINGS[category]
 	if settingId ~= nil and not CAISettings.GetBool(settingId) then
 		return
 	end
 	Speak(text)
+end
+
+local function OnCAITutorialWorldAnchorChanged()
+	CAIWorldScanner:RebuildCategory("tutorial")
 end
 
 local function RegisterCAIEvents()
@@ -1429,6 +1436,7 @@ local function RegisterCAIEvents()
 	Events.UnitSelectionChanged.Add(OnUnitSelectionChanged)
 	LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
 	LuaEvents.CAIAppendToMessageBuffer.Add(OnCAIAppendToMessageBuffer)
+	LuaEvents.CAI_TutorialWorldAnchorChanged.Add(OnCAITutorialWorldAnchorChanged)
 	UnitMoveLog_CAI.Initialize()
 	CAICursorAudio.Initialize()
 	CAIRecommendationLogic.Initialize()
@@ -1447,6 +1455,7 @@ local function UnregisterCAIEvents()
 	Events.UnitSelectionChanged.Remove(OnUnitSelectionChanged)
 	LuaEvents.CAICursorMoved.Remove(OnCAICursorMoved)
 	LuaEvents.CAIAppendToMessageBuffer.Remove(OnCAIAppendToMessageBuffer)
+	LuaEvents.CAI_TutorialWorldAnchorChanged.Remove(OnCAITutorialWorldAnchorChanged)
 	UnitMoveLog_CAI.Shutdown()
 	CAICursorAudio.Shutdown()
 end

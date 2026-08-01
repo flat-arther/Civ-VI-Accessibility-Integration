@@ -2143,13 +2143,11 @@ local function BuildPanel()
     m_localPlayerID = Game.GetLocalPlayer()
     if m_localPlayerID == -1 then return end
 
-    m_panel = mgr:CreateWidget(MakeId("CAIRPT_"), "Panel", {
-        Id = PANEL_ID,
+    m_panel = mgr:CreateWidget(PANEL_ID, "Panel", {
         Label = function() return Locale.Lookup("LOC_HUD_REPORTS_TITLE") end,
     })
 
-    m_tabs = mgr:CreateWidget(MakeId("CAIRPT_"), "TabControl", {
-        Id = TABS_ID,
+    m_tabs = mgr:CreateWidget(TABS_ID, "TabControl", {
         FocusKey = "reports:tabs",
     })
     m_panel:AddChild(m_tabs)
@@ -2354,6 +2352,10 @@ Open = WrapFunc(Open, function(orig, tabToOpen)
         "CAI Report Screen opened before the accessibility UI manager was available")
 
     local reportsRequest = ExposedMembers.CAIReports
+    if not IsCAITutorialControlAllowed("LaunchBar_Hook_Reports") then
+        if reportsRequest then reportsRequest.PendingFocusKey = nil end
+        return
+    end
     if reportsRequest and reportsRequest.PendingFocusKey then
         m_pendingOpenFocusKey = reportsRequest.PendingFocusKey
         reportsRequest.PendingFocusKey = nil

@@ -1,10 +1,10 @@
 include("caiUtils")
 include("PantheonChooser")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr              = ExposedMembers.CAI_UIManager
 
-local PANEL_ID = "CAIPantheon_Panel"
-local LIST_ID  = "CAIPantheon_List"
+local PANEL_ID         = "CAIPantheon_Panel"
+local LIST_ID          = "CAIPantheon_List"
 
 local m_panel          = nil
 local m_list           = nil
@@ -82,7 +82,7 @@ local function OpenConfirmDialog(beliefRow, vanillaButton)
                 end,
             },
         })
-        mgr:Push(m_dialog, PopupPriority.Current)
+        mgr:Push(m_dialog)
     end
 end
 
@@ -107,8 +107,8 @@ local function BuildPanel()
             local beliefIdx = idx
             local beliefRow = row
             local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIPan_Belief"), "MenuItem", {
-                Label   = function() return Locale.Lookup(beliefRow.Name) end,
-                Tooltip = function() return NormalizeText(Locale.Lookup(beliefRow.Description)) end,
+                Label    = function() return Locale.Lookup(beliefRow.Name) end,
+                Tooltip  = function() return NormalizeText(Locale.Lookup(beliefRow.Description)) end,
                 FocusKey = "pantheon:" .. tostring(beliefRow.Index),
             })
             w:On("activate", function()
@@ -131,7 +131,7 @@ end
 
 local function PushPanel()
     BuildPanel()
-    mgr:Push(m_panel, PopupPriority.Current)
+    mgr:Push(m_panel, PopupPriority.Low)
 end
 
 local function PopPanel()
@@ -165,6 +165,11 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
         if mgr:HandleInput(input) then
             return true
         end
+    end
+    if IsCAIEscapeKeyUp(input)
+        and not IsCAITutorialScreenCloseAllowed("ModalControls") then
+        AnnounceCAITutorialScreenCloseBlocked()
+        return true
     end
     return orig(input)
 end)

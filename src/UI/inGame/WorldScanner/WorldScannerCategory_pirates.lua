@@ -77,6 +77,7 @@ local function CollectZones(
                 zone.PlotIndices, context.SortOriginX, context.SortOriginY),
             ZonePlotIndices = zone.PlotIndices,
             ZoneValidatePlot = validator,
+            ZoneTileCountMode = "revealedOfTotal",
             LabelKey = labelKey,
             SubCategoryId = subCategoryId,
             GroupId = groupId,

@@ -11,6 +11,26 @@ local m_readyForCombat = {
 local m_pendingMovementResult = nil
 local PENDING_MOVEMENT_WATCH_DELAY_FRAMES = 2
 
+local function ParameterContainsValue(parameter, expectedValue)
+    if parameter == nil then return false end
+    for index = 0, parameter:GetCount() - 1 do
+        if parameter:GetValueAt(index) == expectedValue then return true end
+    end
+    return false
+end
+
+local function IsMoveToDisabledByTutorial(unit)
+    if unit == nil then return false end
+    local gameParameters = UI.GetGameParameters()
+    local restrictions = gameParameters ~= nil and gameParameters:Get("UnitActionRestrictions") or nil
+    if restrictions == nil then return false end
+    if ParameterContainsValue(restrictions:Get("_ALL"), "UNITOPERATION_MOVE_TO") then return true end
+
+    local unitInfo = GameInfo.Units[unit:GetUnitType()]
+    return unitInfo ~= nil
+        and ParameterContainsValue(restrictions:Get(unitInfo.UnitType), "UNITOPERATION_MOVE_TO")
+end
+
 local function SpeakText(text, interrupt)
     if text == nil or text == "" then
         return false
@@ -261,6 +281,11 @@ function MovementActions_CAI:CommitMoveTarget(unit, targetPlotId)
 end
 
 function MovementActions_CAI:TryActivateMoveTarget(unit, targetPlotId, useCursorCombatPreview, requireArrivalThisTurn)
+    if IsMoveToDisabledByTutorial(unit) then
+        self:ClearReadyForCombat()
+        return false
+    end
+
     if unit == nil then
         self:ClearReadyForCombat()
         SpeakText(Locale.Lookup("LOC_CAI_QUICK_MOVE_NO_UNIT"), true)

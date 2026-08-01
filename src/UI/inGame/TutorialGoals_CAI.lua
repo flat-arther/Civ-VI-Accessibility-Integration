@@ -50,11 +50,12 @@ local function RemoveGoalFromMirror(goalId)
 end
 
 local function BuildGoalsList()
-    local list = mgr:CreateUIWidget(TUTORIAL_GOALS_LIST_ID, "List", {
-        GetLabel = function() return Locale.Lookup("LOC_CAI_TUTORIAL_GOALS") end,
+    local list = mgr:CreateWidget(TUTORIAL_GOALS_LIST_ID, "List", {
+        Label = function() return Locale.Lookup("LOC_CAI_TUTORIAL_GOALS") end,
     })
     list:AddInputBinding({
         Key = Keys.VK_ESCAPE,
+        MSG = KeyEvents.KeyUp,
         Description = "LOC_CAI_KB_CLOSE",
         Action = function()
             CloseGoalsList()
@@ -65,22 +66,20 @@ local function BuildGoalsList()
     for _, id in ipairs(m_caiGoalOrder) do
         local goal = m_caiGoals[id]
         if goal then
-            list:AddChild(mgr:CreateUIWidget(mgr:GenerateWidgetId("CAITutorialGoalEntry"), "StaticText", {
-                GetLabel = function()
+            list:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAITutorialGoalEntry"), "StaticText", {
+                Label = function()
                     local g = m_caiGoals[id]
-                    return g and (g.Text or "") or ""
+                    if not g then return "" end
+                    local status = g.IsCompleted
+                        and Locale.Lookup("LOC_CAI_TUTORIAL_GOAL_COMPLETE")
+                        or Locale.Lookup("LOC_CAI_TUTORIAL_GOAL_INCOMPLETE")
+                    return Locale.Lookup(g.Text or "") .. "[NEWLINE]" .. status
                 end,
-                GetValue = function()
+                Tooltip = function()
                     local g = m_caiGoals[id]
-                    if g and g.IsCompleted then
-                        return Locale.Lookup("LOC_CAI_TUTORIAL_GOAL_COMPLETE")
-                    end
-                    return Locale.Lookup("LOC_CAI_TUTORIAL_GOAL_INCOMPLETE")
+                    return g and Locale.Lookup(g.Tooltip or "") or ""
                 end,
-                GetTooltip = function()
-                    local g = m_caiGoals[id]
-                    return g and (g.Tooltip or "") or ""
-                end,
+                FocusKey = "goal:" .. tostring(id),
             }))
         end
     end
@@ -96,21 +95,22 @@ local function OpenGoalsList()
     end
 
     m_caiGoalsList = BuildGoalsList()
-    m_caiGoalsList:SetDefaultIndex(#m_caiGoalsList.Children)
-    mgr:Push(m_caiGoalsList, PopupPriority.Low)
+    local lastGoalId = m_caiGoalOrder[#m_caiGoalOrder]
+    mgr:Push(m_caiGoalsList, {
+        priority = PopupPriority.Low,
+        focus = "goal:" .. tostring(lastGoalId),
+    })
 end
 
 local function OpenGoalsListFocusedOn(goalId)
     CloseGoalsList()
     if #m_caiGoalOrder == 0 then return end
 
-    local list = BuildGoalsList()
-    -- Per spec: clear current focus, then set default index to the goal that
-    -- is the subject of the notification.
-    list.FocusedChild = nil
-    local idx = FindGoalIndex(goalId) or #list.Children
-    list:SetDefaultIndex(idx)
-    mgr:Push(list, PopupPriority.Low)
+    m_caiGoalsList = BuildGoalsList()
+    mgr:Push(m_caiGoalsList, {
+        priority = PopupPriority.Low,
+        focus = "goal:" .. tostring(goalId),
+    })
 end
 
 local function SendGoalNotification(goalId, notificationType)
@@ -218,14 +218,11 @@ local function OnCAITutorialGoalsInputAction(actionId)
 end
 
 
---#Context input handler: manager handles input, otherwise simply return true.
+--#Context input handler: consume only input handled by the open goals list.
 
 function OnCAITutorialGoalsInputHandler(inputStruct)
-    if mgr then
-        if mgr:GetTop() ~= m_caiGoalsList then return false end
-        mgr:HandleInput(inputStruct)
-    end
-    return true
+    if not mgr or mgr:GetTop() ~= m_caiGoalsList then return false end
+    return mgr:HandleInput(inputStruct)
 end
 
 --#Wire everything up

@@ -8,19 +8,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ### Added
 
-- Added support for the Credits screen with package selection, a treeview for manual reading, and automatic narration synchronized with the visual credits roll. The automatic roll is paused while the treeview is focused. You can also manually pause and unpause it while not focusing the treeview
+- Tables and grids now support type-ahead. Grids search all cells, while tables search row labels and preserve the current column; standard result cycling, Up/Down navigation, Backspace, Escape, and grid tooltip matching behavior applies.
+- Added support for the in-game tutorial. Tutorial screen-control callouts are spoken when their instruction appears and saved in a dedicated Tutorial category in the message buffer. The World Scanner shows the current world-located tutorial callout by its header and removes it when that instruction ends. Note that such callouts only appear in mods that utilize the tutorial system, and may not necessarily appear in a normal game.
+- Added an event-driven accessibility tutorial system. Unseen tutorials can open inside the current screen, include a Show mod tutorials checkbox, and are remembered after Continue is pressed. Mod Settings can enable tutorials or reset all tutorial progress without closing Settings. These are mostly meant to explain the layout and input bindings of certain screens
+- The Main Menu now introduces the accessibility interface, list, tree, table, and grid navigation, activation, type-ahead, tooltip reading, Input Help, and Mod Settings the first time it opens.
+- Added detailed tutorials for complex in-game screens, Hall of Fame, and Additional Content. They describe each screen's actual control order, alternate table, grid, and tree views, contextual actions, and available bindings. Production includes separate queue guidance, while World Congress explains resolution voting, special-session voting, and submitting a proposal at the relevant stages.
+- The Civilopedia begins with a new Accessibility Mod section before Basic Concepts. It contains an introduction, a key bindings reference, a search and type-ahead guide, a Screen Tutorials group with every catalog tutorial, and a detailed UI Widgets group organized into Leaf, Value, and Container widget articles. Included widgets have their own titled chapters. The section also contains gameplay articals.
+- Added support for the Credits screen with package selection, a treeview for manual reading, and automatic narration synchronized with the visual credits roll. The automatic roll is paused while the treeview is focused. You can also press space to manually pause and unpause it while not focusing the treeview
 - Added support  for the mods screen. Allows browsing and toggling installed mods, inspecting mod details, managing mod groups and compatibility warnings, and managing Steam Workshop subscriptions. Note that for subscriptions, the only actions allowed are updating, by pressing enter on a mod that has a pending update, or unsubscribing by pressing delete. Viewing or browsing the workshop uses the steam overlay, which is not accessible.
 - Added Pirates scenario support, including relic loadouts and discoveries, Crew Morale in the T readout, ship crew values, scenario unit actions and targeting, Infamy score categories, treasure and infamous-pirate map information, relic sensor signals, Tavern and Sack status, and accessible Main Menu and in-game How to Play pages.
 - Added Red Death scenario support, including faction unit actions, turn and global-ability status, Ctrl+W global-ability activation, safe-zone and Red Death cursor speech, scenario map objects in plot information and World Scanner, Grieving Gift targeting, eliminated-player chat and diplomacy state, accessible front-end and in-game tutorials, and observer controls.
 
 ### Changed
 
-- The Multiplayer menu now exposes only the Civ Royale and Pirates tutorials instead of the match making play buttons, and each tutorial ends with Close instead of Play, preventing scenario matchmaking from disabling the accessibility mod. If you want to play any of the two scenarios, manually start a game or join a lobby. 
+- The navigation cursor now announces when a directional move reaches the edge of the map.
+- District and wonder placement no longer restrict the navigation cursor to the selected city's area or move it to the city center. Existing placement-target navigation and information remain available.
+- World Scanner region entries now state how many tiles have been explored. Unexplored regions state their unexplored count, while Pirates and Red Death regions compare explored tiles with the officially shown full region. Geography uses differing explored sizes to distinguish matching names before adding a direction.
+- Technology, Civics, Governor Promotions, and Unit Promotions now identify their spatial layouts as grids instead of tables. Record-oriented views such as City-States remain tables and can expose sortable headers.
+- City-States defaults to a sortable overview table followed by details for the selected city-state. The table compares city-state type, relationship, envoys, suzerain, quests, and each known foreign civilization's envoy influence; unmet civilizations remain anonymous. Selected-state details mirror its expanded tree-view row except for the redundant Influence section. A button or Alt+2 switches to the original expandable tree view, Alt+1 returns to the table, and the selected view is remembered. Envoy adjustment and confirmation shortcuts work from both table and details-tree content.
+- Hall of Fame graphs now organize recorded data by player, then turns containing changes, then the individual values that changed. Repeated values are omitted until they change again.
+- In-game chat properly appears in the Online key-binding category.
+- End-game results graph data is organized by player and turn. Expanding a player shows only turns containing recorded data, and expanding a turn shows every available replay value for that turn.
+- The Tourism lens World Scanner now represents each tourism banner once, grouped by its visible High, Medium, or Low strength. Entries state the tourism value, strength, and international tourists, while cursor tile information reads the same. The interface info binding (space by default) on a tourism tile reads the entire breakdown.
+- Government lens World Scanner results are grouped by government type while retaining separate civilization and city territory entries.
+- The Multiplayer menu now exposes only the Civ Royale and Pirates tutorials instead of the match making play buttons, and each tutorial ends with Close instead of Play, preventing scenario matchmaking from disabling the accessibility mod. If you want to play any of the two scenarios, manually start a game or join a lobby. This was done to prevent the game from having you join a lobby that does not allow the accessibility mod, due to the host not having it installed
 - The tooltip for the great people hotkey now menntions the heroes tab appearing in Heroes & Legends mode
 
 ### Fixed
 
-- Fixed the accessible End Game panel not reopening when a player in observer mode reaches the final result screen.
+- The Production Panel no longer remains open after the visual panel closes for City Management or another modal view. Cancelling district or wonder placement returns to the same production item.
+- Returning from Hall of Fame game details now properly refreshes the accessible ruleset, tab, sort method, Overview, and History. Focus moves directly to Overview. This is a vanilla design choice, and it was previously causing desync issues
+- Espionage mission dialogs remain accessible when advisor messages appear above them.
+- Fixed the End Game panel not reopening when a player in observer mode reaches the final result screen.
 
 ## [0.8.0] - 2026-07-24
 

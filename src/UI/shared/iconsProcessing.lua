@@ -174,6 +174,9 @@ local COLLAPSE_ALIAS_KEYS = {
     ["Range"]          = { "LOC_CAI_ICON_RANGE_ALIAS" },
     ["Range_Large"]    = { "LOC_CAI_ICON_RANGE_ALIAS" },
     ["RANGE"]          = { "LOC_CAI_ICON_RANGE_ALIAS" },
+    ["Culture"]        = { "LOC_CAI_ICON_CULTURE_ALIAS_CULTURAL" },
+    ["Culture_Large"]  = { "LOC_CAI_ICON_CULTURE_ALIAS_CULTURAL" },
+    ["CULTURE"]        = { "LOC_CAI_ICON_CULTURE_ALIAS_CULTURAL" },
 }
 
 local function ResolveCollapseAliases(lookupKey)

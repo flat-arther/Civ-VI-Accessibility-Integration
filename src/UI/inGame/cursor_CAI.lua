@@ -24,12 +24,6 @@ end
 local HexCoordUtils = nil
 local m_cityScopeCache = nil
 
-local CITY_SCOPE_MODES = {
-    [InterfaceModeTypes.CITY_MANAGEMENT] = true,
-    [InterfaceModeTypes.DISTRICT_PLACEMENT] = true,
-    [InterfaceModeTypes.BUILDING_PLACEMENT] = true,
-}
-
 local function GetHexCoordUtils()
     if HexCoordUtils == nil then
         include("hexCoordUtils_CAI")
@@ -61,16 +55,8 @@ local function BuildCityScopeSignature(mode, city)
         tostring(city:GetID()),
     }
 
-    if mode == InterfaceModeTypes.CITY_MANAGEMENT then
-        parts[#parts + 1] = tostring(CAICityManagementInterface.IsCitizenManagementActive())
-        parts[#parts + 1] = tostring(CAICityManagementInterface.IsPurchaseActive())
-    elseif mode == InterfaceModeTypes.DISTRICT_PLACEMENT then
-        parts[#parts + 1] = tostring(UI.GetInterfaceModeParameter(CityOperationTypes.PARAM_DISTRICT_TYPE))
-        parts[#parts + 1] = tostring(UI.GetInterfaceModeParameter(CityCommandTypes.PARAM_PLOT_PURCHASE))
-    elseif mode == InterfaceModeTypes.BUILDING_PLACEMENT then
-        parts[#parts + 1] = tostring(UI.GetInterfaceModeParameter(CityOperationTypes.PARAM_BUILDING_TYPE))
-        parts[#parts + 1] = tostring(UI.GetInterfaceModeParameter(CityCommandTypes.PARAM_PLOT_PURCHASE))
-    end
+    parts[#parts + 1] = tostring(CAICityManagementInterface.IsCitizenManagementActive())
+    parts[#parts + 1] = tostring(CAICityManagementInterface.IsPurchaseActive())
 
     return table.concat(parts, ":")
 end
@@ -93,16 +79,10 @@ local function BuildCityScope(mode, city, signature)
         },
     }
 
-    if mode == InterfaceModeTypes.CITY_MANAGEMENT then
-        local stateData = CAICityManagementInterface.GetStateData()
-        if stateData ~= nil then
-            for plotId in pairs(stateData.ActivePlots) do
-                AddScopeActionPlot(scope, plotId)
-            end
-        end
-    else
-        for _, item in ipairs(CAIInterfaceTargets.GetActiveTargetItems()) do
-            AddScopeActionPlot(scope, item.PlotIndex)
+    local stateData = CAICityManagementInterface.GetStateData()
+    if stateData ~= nil then
+        for plotId in pairs(stateData.ActivePlots) do
+            AddScopeActionPlot(scope, plotId)
         end
     end
 
@@ -111,7 +91,7 @@ end
 
 local function GetActiveCityScope()
     local mode = UI.GetInterfaceMode()
-    if CITY_SCOPE_MODES[mode] ~= true then
+    if mode ~= InterfaceModeTypes.CITY_MANAGEMENT then
         m_cityScopeCache = nil
         return nil
     end
@@ -434,9 +414,12 @@ function CAICursor:MoveDirection(dir)
     if state == nil then return end
 
     local plot = Map.GetAdjacentPlot(state.curX, state.curY, dir)
-    if plot ~= nil then
-        self:MoveTo(plot:GetIndex(), "step")
+    if plot == nil then
+        Speak(Locale.Lookup("LOC_CAI_NAV_CURSOR_MAP_EDGE"))
+        return
     end
+
+    self:MoveTo(plot:GetIndex(), "step")
 end
 
 -- =========================================================================

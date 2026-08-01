@@ -1662,31 +1662,13 @@ local function RebuildDetailOverview()
 end
 
 -- ============================================================================
--- Graphs tab: Player → Graph Type (final value) → Turn samples
+-- Graphs tab: Player -> changed turn -> changed graph values
 -- ============================================================================
-local function AddTurnSamples(parentNode, ds, minX, maxX, idPrefix)
-    local step = math.max(1, math.floor((maxX - minX) / 10))
-    for turn = minX, maxX, step do
-        local val = ds[turn]
-        if val ~= nil then
-            local capTurnLabel = Locale.Lookup("LOC_GAMESUMMARY_TURNS", turn) .. ": " .. tostring(math.floor(val))
-            local turnLeaf = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "StaticText", {
-                Label = function() return capTurnLabel end,
-                FocusKey = idPrefix .. ":t:" .. turn,
-            })
-            turnLeaf:SetFocusSound(HOVER_SOUND)
-            parentNode:AddChild(turnLeaf)
-        end
+local function FormatGraphValue(value)
+    if type(value) == "number" then
+        return Locale.ToNumber(value, "#,###.##")
     end
-end
-
-local function GetLastValue(ds, minX, maxX)
-    for turn = maxX, minX, -1 do
-        if ds[turn] ~= nil then
-            return ds[turn]
-        end
-    end
-    return nil
+    return tostring(value)
 end
 
 local function RebuildGraphsTree()
@@ -1705,120 +1687,146 @@ local function RebuildGraphsTree()
         return
     end
 
-    local function AddGraphEntry(parentNode, graphName, ds, minX, maxX, idBase)
-        local lastVal = GetLastValue(ds, minX, maxX)
-        local valStr = lastVal and tostring(math.floor(lastVal)) or "0"
-        local capLabel = graphName .. ": " .. valStr
-        local node = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
-            Label = function() return capLabel end,
-            FocusKey = idBase,
-        })
-        node:SetFocusSound(HOVER_SOUND)
-        parentNode:AddChild(node)
-        AddTurnSamples(node, ds, minX, maxX, idBase)
+    local playerEntries = {}
+    local playerEntriesByObjectId = {}
+    for _, context in ipairs(g_AvailableContexts or {}) do
+        if context.ObjectId ~= nil then
+            local entry = {
+                Name = context.Name,
+                ObjectId = context.ObjectId,
+                Turns = {},
+                TurnsByNumber = {},
+            }
+            table.insert(playerEntries, entry)
+            playerEntriesByObjectId[context.ObjectId] = entry
+        end
     end
 
-    local function FindOrCreateEntity(parentNode, entityName, entityKey)
-        local existing = mgr:FindByFocusKey(parentNode, entityKey)
-        if existing then return existing end
-        local node = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
-            Label = function() return entityName end,
-            FocusKey = entityKey,
-        })
-        node:SetFocusSound(HOVER_SOUND)
-        parentNode:AddChild(node)
-        return node
-    end
-
-    if #g_Graphs > 1 then
-        -- Merge Overall (group 1) into per-player groups (2+)
-        -- Step 1: create player nodes with Overall subcategories
-        local playerNodes = {}
-        local overallNodes = {}
-        for gi = 2, #g_Graphs do
-            local group = g_Graphs[gi]
-            local playerName = group.Name or ""
-            local playerNode = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
-                Label = function() return playerName end,
-                FocusKey = "hofdetail:graph:player:" .. gi,
-            })
-            playerNode:SetFocusSound(HOVER_SOUND)
-            m_graphsTree:AddChild(playerNode)
-
-            local overallLabel = Locale.Lookup("LOC_GAMESUMMARY_OVERVIEW")
-            local overallNode = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
-                Label = function() return overallLabel end,
-                FocusKey = "hofdetail:graph:player:" .. gi .. ":ov",
-            })
-            overallNode:SetFocusSound(HOVER_SOUND)
-            playerNode:AddChild(overallNode)
-
-            playerNodes[gi] = playerNode
-            overallNodes[gi] = overallNode
-            overallNodes[playerName] = overallNode
+    local function ResolvePlayerEntry(group, ds)
+        local directPlayer = playerEntriesByObjectId[ds.ObjectId]
+        if directPlayer then
+            return directPlayer, nil
         end
 
-        -- Step 2: distribute Overall group datasets into player Overall subcategories
-        local overallGroup = g_Graphs[1]
-        for gri, graph in ipairs(overallGroup) do
+        local object = ds.ObjectId and g_GameObjects[ds.ObjectId] or nil
+        if object and object.PlayerObjectId then
+            local owner = playerEntriesByObjectId[object.PlayerObjectId]
+            if owner then
+                return owner, ds.Name and Locale.Lookup(ds.Name) or nil
+            end
+        end
+
+        local groupObjectId = group[1] and group[1].ObjectId or nil
+        local groupPlayer = groupObjectId and playerEntriesByObjectId[groupObjectId] or nil
+        if groupPlayer then
+            return groupPlayer, ds.Name and Locale.Lookup(ds.Name) or nil
+        end
+
+        return nil, nil
+    end
+
+    local function AddMessage(entry, turn, label, focusKey)
+        local turnEntry = entry.TurnsByNumber[turn]
+        if not turnEntry then
+            turnEntry = {
+                Number = turn,
+                Messages = {},
+            }
+            entry.TurnsByNumber[turn] = turnEntry
+            table.insert(entry.Turns, turnEntry)
+        end
+        table.insert(turnEntry.Messages, {
+            Label = label,
+            FocusKey = focusKey,
+        })
+    end
+
+    for groupIndex, group in ipairs(g_Graphs) do
+        for graphIndex, graph in ipairs(group) do
             local graphName = graph.Name or ""
-            local minX = graph.MinX
-            local maxX = graph.MaxX
-            for dsi, ds in ipairs(graph) do
-                if ds.Name then
-                    local dsName = Locale.Lookup(ds.Name)
-                    local target = overallNodes[dsName]
-                    if target then
-                        AddGraphEntry(target, graphName, ds, minX, maxX,
-                            "hofdetail:graph:1:" .. gri .. ":" .. dsi)
+            if graph.XUnit == "GameTurn" then
+                for dataSetIndex, ds in ipairs(graph) do
+                    local entry, entityName = ResolvePlayerEntry(group, ds)
+                    if entry then
+                        local messagePrefix = entityName and (entityName .. ", " .. graphName) or graphName
+                        local hasPreviousValue = false
+                        local previousValue = nil
+                        for turn = graph.MinX, graph.MaxX do
+                            local value = ds[turn]
+                            if value ~= nil then
+                                if not hasPreviousValue or value ~= previousValue then
+                                    AddMessage(
+                                        entry,
+                                        turn,
+                                        messagePrefix .. ": " .. FormatGraphValue(value),
+                                        "hofdetail:graph:player:" .. entry.ObjectId ..
+                                            ":turn:" .. turn ..
+                                            ":message:" .. groupIndex .. ":" .. graphIndex .. ":" .. dataSetIndex
+                                    )
+                                end
+                                previousValue = value
+                                hasPreviousValue = true
+                            end
+                        end
                     end
                 end
             end
         end
+    end
 
-        -- Step 3: process per-player groups — named datasets under city nodes,
-        -- nameless datasets under the Overall subcategory
-        for gi = 2, #g_Graphs do
-            local group = g_Graphs[gi]
-            local playerNode = playerNodes[gi]
-            local overallNode = overallNodes[gi]
-
-            for gri, graph in ipairs(group) do
-                local graphName = graph.Name or ""
-                local minX = graph.MinX
-                local maxX = graph.MaxX
-
-                for dsi, ds in ipairs(graph) do
-                    local idBase = "hofdetail:graph:" .. gi .. ":" .. gri .. ":" .. dsi
-                    if ds.Name then
-                        local cityName = Locale.Lookup(ds.Name)
-                        local cityKey = "hofdetail:graph:city:" .. gi .. ":" .. dsi
-                        local cityNode = FindOrCreateEntity(playerNode, cityName, cityKey)
-                        AddGraphEntry(cityNode, graphName, ds, minX, maxX, idBase)
-                    else
-                        AddGraphEntry(overallNode, graphName, ds, minX, maxX, idBase)
-                    end
-                end
+    local playersWithData = {}
+    for _, entry in ipairs(playerEntries) do
+        if #entry.Turns > 0 then
+            table.sort(entry.Turns, function(a, b)
+                return a.Number < b.Number
+            end)
+            for _, turnEntry in ipairs(entry.Turns) do
+                table.sort(turnEntry.Messages, function(a, b)
+                    return Locale.Compare(a.Label, b.Label) == -1
+                end)
             end
+            table.insert(playersWithData, entry)
         end
-    else
-        -- Single group — flat display with entity nesting
-        local group = g_Graphs[1]
-        for gri, graph in ipairs(group) do
-            local graphName = graph.Name or ""
-            local minX = graph.MinX
-            local maxX = graph.MaxX
+    end
 
-            for dsi, ds in ipairs(graph) do
-                local idBase = "hofdetail:graph:1:" .. gri .. ":" .. dsi
-                if ds.Name then
-                    local dsName = Locale.Lookup(ds.Name)
-                    local entityKey = "hofdetail:graph:e:1:" .. dsi
-                    local entityNode = FindOrCreateEntity(m_graphsTree, dsName, entityKey)
-                    AddGraphEntry(entityNode, graphName, ds, minX, maxX, idBase)
-                else
-                    AddGraphEntry(m_graphsTree, graphName, ds, minX, maxX, idBase)
-                end
+    if #playersWithData == 0 then
+        local noData = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "StaticText", {
+            Label = function() return Locale.Lookup("LOC_GAMESUMMARY_NOGRAPHDATA") end,
+            FocusKey = "hofdetail:graph:nodata",
+        })
+        noData:SetFocusSound(HOVER_SOUND)
+        m_graphsTree:AddChild(noData)
+        mgr:RestoreFocus(m_graphsTree, capture)
+        return
+    end
+
+    for _, entry in ipairs(playersWithData) do
+        local playerName = entry.Name
+        local playerNode = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
+            Label = function() return playerName end,
+            FocusKey = "hofdetail:graph:player:" .. entry.ObjectId,
+        })
+        playerNode:SetFocusSound(HOVER_SOUND)
+        m_graphsTree:AddChild(playerNode)
+
+        for _, turnEntry in ipairs(entry.Turns) do
+            local turn = turnEntry.Number
+            local turnLabel = Locale.Lookup("LOC_CAI_TIMELINE_TURN", turn)
+            local turnNode = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
+                Label = function() return turnLabel end,
+                FocusKey = "hofdetail:graph:player:" .. entry.ObjectId .. ":turn:" .. turn,
+            })
+            turnNode:SetFocusSound(HOVER_SOUND)
+            playerNode:AddChild(turnNode)
+
+            for _, message in ipairs(turnEntry.Messages) do
+                local messageLabel = message.Label
+                local messageNode = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
+                    Label = function() return messageLabel end,
+                    FocusKey = message.FocusKey,
+                })
+                messageNode:SetFocusSound(HOVER_SOUND)
+                turnNode:AddChild(messageNode)
             end
         end
     end
@@ -1996,7 +2004,10 @@ end
 
 local function DestroyDetailPanel()
     if m_isDetailBuilt then
-        mgr:RemoveFromStack(DETAIL_PANEL_ID)
+        -- Vanilla immediately re-shows and resets the parent Hall of Fame to
+        -- Overview. Restore the parent silently here so that reset announces
+        -- Overview directly instead of first speaking the old History focus.
+        mgr:RemoveFromStack(DETAIL_PANEL_ID, false)
         m_detailPanel = nil
         m_detailTabs = nil
         m_overviewTree = nil

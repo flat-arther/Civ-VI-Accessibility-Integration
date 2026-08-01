@@ -1,0 +1,908 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+  <LocalizedText>
+    <!-- Civilopedia structure -->
+    <Row Tag="LOC_CAI_PEDIA_ACCESSIBILITY_SECTION_NAME" Language="en_US">
+      <Text>Accessibility Mod</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SCREEN_TUTORIALS_GROUP_NAME" Language="en_US">
+      <Text>Screen Tutorials</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_UI_WIDGETS_GROUP_NAME" Language="en_US">
+      <Text>UI Widgets</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_GROUP_NAME" Language="en_US">
+      <Text>Gameplay</Text>
+    </Row>
+
+    <!-- Gameplay: navigation cursor -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_TITLE" Language="en_US">
+      <Text>Navigation cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_OVERVIEW_TITLE" Language="en_US">
+      <Text>Overview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_OVERVIEW" Language="en_US">
+      <Text>The navigation cursor is an independent map cursor. It lets you explore and act on plots without replacing the selected city or unit. Civilization VI uses six adjacent directions on its hexagonal map, so the cursor has northwest, northeast, west, east, southwest, and southeast movement commands. Moving the cursor also moves the camera and announces the most important known information about the destination plot.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_VISIBILITY" Language="en_US">
+      <Text>Cursor information obeys the local player's visibility. An unrevealed plot is announced as uncharted instead of exposing its contents; a revealed plot may retain known geography while hidden units and other currently invisible information remain concealed. Cursor position, remembered geography zones, and Surveyor state are isolated between local players in hotseat games.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_MOVING_TITLE" Language="en_US">
+      <Text>Moving the cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_MOVING" Language="en_US">
+      <Text>Default movement keys are Q or Numpad 7 for northwest, E or Numpad 9 for northeast, A or Numpad 4 for west, D or Numpad 6 for east, Z or Numpad 1 for southwest, and C or Numpad 3 for southeast. These commands can be changed in Key Bindings. Movement follows the current map's wrapping and edge rules.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_JUMPS" Language="en_US">
+      <Text>Press Slash to jump to the selected unit, or to the selected city when no unit is selected. Press Control plus S to jump to your capital. At game start the cursor also begins at an available selection or your capital. Jumping from Scanner results, messages, notifications, map tacs, or bookmarks moves both the cursor and the camera. Later direction readings use the new cursor position.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_READING_TITLE" Language="en_US">
+      <Text>Reading the current tile</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_READING_PRIMARY" Language="en_US">
+      <Text>Press S or Numpad 5 for units. Press W or Numpad 8 for yields, worker state, fresh water, and ownership. Press X or Numpad 2 for contamination, movement cost, defense modifier, and appeal. Press Shift plus S or Shift plus Numpad 5 for coordinates relative to your original capital. These readings reflect the current condition of the plot and your civilization.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_READING_GEOGRAPHY" Language="en_US">
+      <Text>Press B for geography and constructed contents. The result can include routes, coastal lowlands, volcano and disaster state, continent, political territory, cliffs, rivers, national parks, districts, buildings, and great works. Scenario-specific public map information is included when its disclosure rules allow it. Normal movement speech is intentionally shorter than these on-demand readouts.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_INTERFACE" Language="en_US">
+      <Text>Press Space for information about the active interface target at the cursor. This is especially useful for movement, combat previews, city management, plot purchase, placement, and other targeting modes. Press Enter for the mode's primary action. Press Control plus Enter for its secondary action when one exists, such as swapping a city-management tile. Target legality comes from the active vanilla operation or command rather than from accessibility guesses.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_BANNERS_TITLE" Language="en_US">
+      <Text>Reading city, district, barbarian, and industry banners</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_BANNERS" Language="en_US">
+      <Text>When the cursor is on a visible city or district banner, the number-row commands read its available sections. The identity command also covers supported barbarian-clan, industry, and corporation banners. Information belonging to an expansion is omitted when that expansion is not active.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_BANNER_KEYS" Language="en_US">
+      <Text>Press 1 for identity, health, and status; 2 for growth and production; 3 for religion; 4 for ownership, diplomacy, quests, and trading-post state; 5 for loyalty; 6 for governors; and 7 for power. Loyalty and governors require Rise and Fall or Gathering Storm data, while power requires Gathering Storm.</Text>
+    </Row>
+
+    <!-- Gameplay: Surveyor -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_TITLE" Language="en_US">
+      <Text>Surveyor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_OVERVIEW_TITLE" Language="en_US">
+      <Text>Area and radius</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_OVERVIEW" Language="en_US">
+      <Text>The Surveyor summarizes the circular hex area centered on the navigation cursor. Its radius is clamped from one to five plots and is remembered separately for each local player. Press Shift plus W to increase the radius and Shift plus X to decrease it; the spoken response identifies the new radius and when the minimum or maximum has been reached.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_PRIVACY" Language="en_US">
+      <Text>Surveyor reports only information your civilization is allowed to know. Unrevealed plots contribute only to the unexplored count. Undiscovered strategic resources, hidden enemy units, unmet identities, and other private information are not revealed. Most results are summarized as counts, while individual cities and units are ordered by distance and direction from the cursor.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_BASIC_TITLE" Language="en_US">
+      <Text>Core readouts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_BASIC" Language="en_US">
+      <Text>Press Shift plus Q to total yields; Shift plus A for resources visible to your player; Shift plus Z for terrain, features, elevation, fresh-water plots, and unexplored plots; Shift plus E for friendly units; Shift plus D for currently visible enemies; and Shift plus C for known cities and barbarian outposts.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_COUNTS_TITLE" Language="en_US">
+      <Text>Additional counts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_COUNTS" Language="en_US">
+      <Text>Press Control plus Shift plus A, or Control plus Shift plus Numpad 4, for improvements. Use the same modifiers with D or Numpad 6 for visible neutral units, Z or Numpad 1 for tile ownership, Q or Numpad 7 for districts, and X or Numpad 2 for appeal. Improvements exclude barbarian camps, tribal villages, and routes. Districts exclude city centers. Appeal counts revealed non-water plots by the game's Breathtaking through Disgusting bands and is unavailable when the Appeal lens is not part of the current game.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_DETAILS_TITLE" Language="en_US">
+      <Text>How results are classified</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_DETAILS" Language="en_US">
+      <Text>Ownership groups plots as Yours, Unclaimed, a known civilization adjective, or Unknown owner without revealing an unmet civilization. Neutral units must belong to a met, non-barbarian player who is neither friendly nor at war with you; foreign religious units are classified using theological relationships where applicable. Resources are included only after your civilization has discovered them.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_TERRAIN" Language="en_US">
+      <Text>Terrain results separate useful facts without counting the same fact twice. Hills add both the underlying flat terrain and Hills. Ordinary mountains contribute only Mountains, and natural wonders contribute only their wonder name. When a feature always implies a particular terrain or elevation, Surveyor omits that redundant label. Fresh water is counted independently even when another feature dominates the terrain description.</Text>
+    </Row>
+
+    <!-- Gameplay: World Scanner -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_TITLE" Language="en_US">
+      <Text>World Scanner</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_OVERVIEW_TITLE" Language="en_US">
+      <Text>Overview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_OVERVIEW" Language="en_US">
+      <Text>The World Scanner finds known map objects without moving plot by plot. Results have four levels: category, subcategory, group, and item. Built-in sources cover cities, units, terrain and geography regions, resources, districts and wonders, improvements, map tacs, and other map objects. Contextual sources appear for active lenses, valid targets, recommendations, city management, queued paths, and supported scenarios. Empty categories and empty subcategories are skipped.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_LIVE_DATA" Language="en_US">
+      <Text>The Scanner refreshes its results as you browse. Objects that no longer exist or are no longer visible disappear automatically, while newly available objects appear the next time their category is refreshed. It follows normal exploration, diplomacy, unit-visibility, and resource-discovery rules, so it does not reveal information your civilization should not know.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_NAVIGATION_TITLE" Language="en_US">
+      <Text>Navigating results</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_NAVIGATION" Language="en_US">
+      <Text>Press Control plus Page Up or Page Down for the previous or next category. Press Shift plus Page Up or Page Down for subcategories, Page Up or Page Down for groups, and Alt plus Page Up or Page Down for items. Each level wraps and plays a click at its boundary. Every ordinary category begins with an All subcategory containing all of that category's items.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_LOCATION" Language="en_US">
+      <Text>Results keep the order they had when you began browsing, so inspecting or jumping does not reorder the list underneath you. Direction and distance are always measured from the navigation cursor's current position. Press Home to move the cursor to the current item or the nearest plot in a region group, Backspace to return to the position before the last Scanner jump, and End to repeat the current direction. Settings can prepend or append coordinates and can make the cursor follow each selected item after its announcement.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_SEARCH_TITLE" Language="en_US">
+      <Text>Searching</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_SEARCH" Language="en_US">
+      <Text>Press Control plus F to open Scanner search. Entering a query checks the current world and ranks names by whole-word, prefix, word-prefix, substring, and abbreviation matches. Identical names are grouped with nearest instances first, and their original Scanner categories become result subcategories. Prefix a term with two hyphens to exclude matching names. Page Up and Page Down in the search box recall recent Scanner queries.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_MANAGEMENT_TITLE" Language="en_US">
+      <Text>Managing Scanner categories</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_MANAGEMENT" Language="en_US">
+      <Text>Press F12, open World Scanner settings, and activate Manage scanner categories. Each row announces its name, type, and Enabled or Disabled state. Press Shift plus Up or Shift plus Down to change order. Open the row submenu to toggle Enabled, create a custom category from a complete built-in or contextual category, or move it back to its default position. Changes are saved automatically and persist across games.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_TYPES" Language="en_US">
+      <Text>Built-in categories are normal persistent sources. Contextual categories exist only while their game information is relevant and may expose an automatic-focus setting. Custom categories combine selected sources and name rules. Disabled categories remain configured but are skipped during navigation. Reset restores the built-in order and enabled state without deleting custom categories.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_CUSTOM_TITLE" Language="en_US">
+      <Text>Custom categories</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_CUSTOM" Language="en_US">
+      <Text>Activate Add custom category to create an enabled Custom N row. Rename it, select a source's complete All view or individual subcategories, and add Include names or Exclude names terms. Each selected source or include term becomes a subcategory in the custom result. Delete removes the custom category after confirmation; Delete on its management row opens the same confirmation.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_MATCHING" Language="en_US">
+      <Text>Name matching ignores capitalization and recognizes whole words, prefixes, partial words, and abbreviations. An include term can add matching items even when their original source was not selected. Exclude terms are applied to the combined result. The same item can appear under more than one selected subcategory.</Text>
+    </Row>
+
+    <!-- Gameplay: lenses -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_TITLE" Language="en_US">
+      <Text>Lenses</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_OVERVIEW_TITLE" Language="en_US">
+      <Text>Overview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_OVERVIEW" Language="en_US">
+      <Text>Lenses show one kind of map information at a time, such as religion, appeal, political borders, or power. Press Control plus J to open the lens list, move to the lens you want, and press Enter. Press escape, or open the list and activate the active lens again to turn it off. The available lenses depend on your ruleset and expansions.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_ACTIVATION" Language="en_US">
+      <Text>Moving the navigation cursor across a supported lens speaks information for the current plot. Press Space for a fuller reading when one is available. The World Scanner may also add an Active Lens category so you can browse matching plots throughout the known world. Some game actions turn a lens on automatically.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_RELIGION_TITLE" Language="en_US">
+      <Text>Religion lens</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_RELIGION" Language="en_US">
+      <Text>The Religion lens shows religious pressure in cities and the territory influenced by them. On a city plot or one of its purchased plots, cursor information names the majority religion and its follower count, then lists followers of other religions. A city without a majority is identified as having no majority religion. The Active Lens Scanner groups cities by their majority religion.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_CONTINENT_TITLE" Language="en_US">
+      <Text>Continents lens</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_CONTINENT" Language="en_US">
+      <Text>The Continents lens divides revealed land by continent. The navigation cursor's normal geography reading names the continent beneath it. The Active Lens Scanner groups revealed plots by continent and combines connected plots into regions, allowing you to move to the nearest part of each continent.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_APPEAL_TITLE" Language="en_US">
+      <Text>Appeal lens</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_APPEAL" Language="en_US">
+      <Text>The Appeal lens classifies revealed land as Breathtaking, Charming, Average, Uninviting, or Disgusting. Cursor information gives both the class and exact appeal value. The Active Lens Scanner groups plots by those five classes. Appeal affects Neighborhood housing, Seaside Resorts, National Parks, and several other abilities and improvements.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SETTLER_TITLE" Language="en_US">
+      <Text>Settler lens</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SETTLER" Language="en_US">
+      <Text>The Settler lens evaluates land for founding a city. Cursor information says Fresh Water, Coastal Water, No Water, or Cannot Settle. With Rise and Fall or Gathering Storm it also gives the expected loyalty change for a new city. With Gathering Storm it identifies flood, volcano, and coastal-lowland risks.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SETTLER_SCANNER" Language="en_US">
+      <Text>The Active Lens Scanner separates water availability, loyalty, and disaster warnings into subcategories. Water groups are Fresh Water, Coastal Water, No Water, and Cannot Settle. Loyalty groups use the exact expected loyalty change. Disaster groups distinguish floodplains, volcanoes, and the three coastal-lowland levels.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_GOVERNMENT_TITLE" Language="en_US">
+      <Text>Government lens</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_GOVERNMENT" Language="en_US">
+      <Text>The Government lens identifies the current government of the civilization that owns each revealed plot. Anarchy is named when applicable. The Active Lens Scanner separates your territory, friendly territory, neutral territory, and enemy territory, then groups results by government. Connected territory belonging to different civilizations or cities remains separate.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_POLITICAL_TITLE" Language="en_US">
+      <Text>Political lens</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_POLITICAL" Language="en_US">
+      <Text>The Political lens shows who owns revealed territory. Cursor plot information names the known owner. The Active Lens Scanner separates your territory, friendly territory, neutral territory, and enemy territory, groups it by civilization, and combines connected plots into regions. Unmet civilizations are not identified.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_TOURISM_TITLE" Language="en_US">
+      <Text>Tourism lens</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_TOURISM" Language="en_US">
+      <Text>The Tourism lens marks tourism-producing plots in your cities. Cursor information says the tourism value, its High, Medium, or Low strength, and the number of international tourists. High means at least 16 tourism, Medium means at least 8, and lower positive values are Low.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_TOURISM_DETAILS" Language="en_US">
+      <Text>Press Space on a tourism banner for its complete breakdown, including the sources and modifiers shown by the game. The Active Lens Scanner contains one item per tourism banner and groups banners by High, Medium, or Low strength. A plot with no tourism banner is reported as having no banner when you request detailed information.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_EMPIRE_TITLE" Language="en_US">
+      <Text>Empire lens</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_EMPIRE" Language="en_US">
+      <Text>The Empire lens is deliberately omitted from the Control plus J accessible lens list. Its useful information about your cities, districts, wonders, and worked territory is already included in navigation-cursor information and city or district banner readouts. The normal World Scanner categories also provide direct navigation to these objects, so an additional Empire lens presentation would only repeat the same information.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_LOYALTY_TITLE" Language="en_US">
+      <Text>Loyalty lens</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_LOYALTY" Language="en_US">
+      <Text>The Loyalty lens is available with Rise and Fall or Gathering Storm. On a city plot or one of its purchased plots, cursor information gives the city's loyalty level, current loyalty out of its maximum, loyalty change per turn, and whether the city is gaining, losing, at risk, or always loyal. The Active Lens Scanner groups cities by those loyalty states.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_POWER_TITLE" Language="en_US">
+      <Text>Power lens</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_POWER" Language="en_US">
+      <Text>The Power lens is available in Gathering Storm. Cursor information identifies power-source plots and whether the owning city is powered or unpowered. The Active Lens Scanner provides Power Sources, Power Range, Powered City Plots, and Unpowered City Plots. Power ranges remain grouped by the city providing regional power.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_PLAGUE_TITLE" Language="en_US">
+      <Text>Plague lens</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_PLAGUE" Language="en_US">
+      <Text>The Plague lens appears only in the Black Death scenario. It identifies plots currently affected by plague and the number of plague turns remaining. The Active Lens Scanner groups affected plots by their remaining duration. This lens is absent from ordinary games.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SCANNER_TITLE" Language="en_US">
+      <Text>Active Lens Scanner category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SCANNER" Language="en_US">
+      <Text>Only the active lens appears in this contextual Scanner category. Empty results are skipped. By default, turning on a lens does not move Scanner focus; you can enable automatic focus for Active Lens in World Scanner settings. Scanner results include only information your player is allowed to know.</Text>
+    </Row>
+
+    <!-- Gameplay: map tacs -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_TITLE" Language="en_US">
+      <Text>Map tacs</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_OVERVIEW_TITLE" Language="en_US">
+      <Text>Overview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_OVERVIEW" Language="en_US">
+      <Text>Map tacs are Civilization VI's native labeled map markers. Visible tacs are included in navigation-cursor plot information and in the World Scanner's Map Tacs category. Other players' tacs are identified by owner when visible to you. Press M at the navigation cursor to create a tac or edit your existing tac on that plot.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_LIST" Language="en_US">
+      <Text>Press Control plus M to open or close the accessible map-tac list. Activating a row jumps the navigation cursor to that live tac. Your own rows can be deleted with Delete after confirmation; deletion uses the game's normal player-configuration update and clears any bookmark slot that referenced the tac.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_BOOKMARKS_TITLE" Language="en_US">
+      <Text>Bookmarks</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_BOOKMARKS" Language="en_US">
+      <Text>Ten bookmark slots store the IDs of your map tacs in the current player's saved configuration. Assigning on a plot with your tac renames and reuses it. Assigning on a plot without one creates a tac. A manually deleted or otherwise missing tac makes its saved slot empty the next time the slot is resolved.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_BOOKMARK_RULES" Language="en_US">
+      <Text>Reassigning a populated slot deletes its previous tac. Assigning the same tac to another slot clears the former slot, so one tac cannot represent two bookmarks. Because slots and tac ownership are player-specific, local players in the same save do not share bookmark mappings unless they share the underlying tac through normal multiplayer visibility.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_KEYS_TITLE" Language="en_US">
+      <Text>Bookmark commands</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_KEYS" Language="en_US">
+      <Text>Press Control plus Shift plus 1 through 0 to assign Bookmarks 1 through 10 at the cursor. Press Control plus 1 through 0 to jump to a bookmark, and Alt plus 1 through 0 to read its live direction from the cursor. Digit 0 represents slot 10. These commands resolve the tac again before use instead of caching its displayed name or coordinates.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_SHARING_TITLE" Language="en_US">
+      <Text>Multiplayer visibility</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_SHARING" Language="en_US">
+      <Text>In multiplayer, the accessible map-tac editor mirrors the game's Visible to choices and updates the live tac immediately. Network multiplayer can also expose Send to Chat for a nonprivate tac visible to the current chat target. Hotseat supports tac visibility targets but not the real-time Send to Chat control.</Text>
+    </Row>
+
+    <!-- Gameplay: empire information -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_TITLE" Language="en_US">
+      <Text>Empire information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_OVERVIEW_TITLE" Language="en_US">
+      <Text>Overview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_OVERVIEW" Language="en_US">
+      <Text>Empire-information commands read frequently needed totals and progress without opening their full screens. Values are read when you press the key, so they reflect the current game. A value is omitted or announced unavailable when the ruleset does not use that system or you have not unlocked it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_PROGRESS_TITLE" Language="en_US">
+      <Text>Time, research, and culture</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_PROGRESS" Language="en_US">
+      <Text>Press T for current turn, clock time, game date, and an active turn timer. Press R for science per turn and current technology progress. Press P for culture per turn and current civic progress; during anarchy this reports anarchy and its remaining turns instead of a government-unlock message. Press Y for era score, age, thresholds, and active commemorations where the age system exists.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_YIELDS_TITLE" Language="en_US">
+      <Text>Treasury, yields, and resources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_YIELDS" Language="en_US">
+      <Text>Press G for gold balance, gold per turn, and trade-route capacity. Press F for faith balance and faith per turn. Press I for tourism per turn. These readouts preserve the active ruleset's official formatting and do not open Reports or another popup.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_DIPLOMACY_TITLE" Language="en_US">
+      <Text>Diplomacy and government</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_DIPLOMACY" Language="en_US">
+      <Text>Press V for available envoys, current influence, and progress toward the next envoy. Press K for diplomatic Favor income and World Congress timing or session information. Press O for available and spent Governor Titles. Press N for owned nuclear and thermonuclear devices. A command announces that it is unavailable when the current scenario does not use that empire system.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_RULESETS_TITLE" Language="en_US">
+      <Text>Ruleset-specific readouts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_RULESETS" Language="en_US">
+      <Text>Scenario readouts replace information that does not apply to that scenario. In Red Death, T also reads safe-zone timing, fallout damage, weapons, endangered Settlers, and faction-ability status. In Pirates, T also reads Crew Morale. Normal science, culture, government, or diplomacy information remains unavailable in scenarios that remove those systems.</Text>
+    </Row>
+
+    <!-- Gameplay: ending the turn -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_TITLE" Language="en_US">
+      <Text>Ending your turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_OVERVIEW_TITLE" Language="en_US">
+      <Text>What must happen before the turn ends</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_OVERVIEW" Language="en_US">
+      <Text>The game keeps track of the next action required before your turn can end. It may ask you to give orders to a unit, choose production, select research or a civic, respond to a notification, resolve another blocker, or end the turn when nothing remains.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_AUTOMATIC" Language="en_US">
+      <Text>By default, a changed next action is spoken automatically, and the waiting message is spoken between turns. Separate Events settings control those two announcements. Press Shift plus Space at any time to repeat the current blocker or waiting message.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_ACTIONS_TITLE" Language="en_US">
+      <Text>Performing the next action</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_ACTIONS" Language="en_US">
+      <Text>Press Control plus Space to perform the current next action. When the turn is ready, this ends the turn. When something is blocking the turn, it selects, cycles to, or opens what you need to handle. The command checks again when pressed, so it uses the current requirement even if the game state changed after the last announcement.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_LIST_TITLE" Language="en_US">
+      <Text>Turn Blockers list</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_LIST" Language="en_US">
+      <Text>Press Control plus Shift plus Space to open a list containing the current next action followed by the other distinct active blockers. Use ordinary list navigation and activate a row to go to or resolve it. The list updates as requirements are completed. Press Escape to close it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_TUTORIAL" Language="en_US">
+      <Text>During the built-in Civilization VI tutorial, these shortcuts follow the current tutorial step and cannot skip ahead when ending the turn is not yet allowed. Scenario-specific requirements are included automatically.</Text>
+    </Row>
+
+    <!-- Gameplay: notifications and history -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_TITLE" Language="en_US">
+      <Text>Notifications and message history</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_OVERVIEW_TITLE" Language="en_US">
+      <Text>Overview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_OVERVIEW" Language="en_US">
+      <Text>The Notification Center and message buffer solve different problems. The Notification Center presents currently active game notifications and their actions. The message buffer keeps a limited per-player history of spoken events, including notifications, discoveries, combat, gossip, movement, and chat. Use the Center to act; use history to review or revisit.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_CENTER_TITLE" Language="en_US">
+      <Text>Notification Center</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_CENTER" Language="en_US">
+      <Text>New visible notifications are spoken and appended to history. Press Control plus N to open the Center with focus on the newest notification. Multiple notifications of one type form an expandable tree group. The Center reads each live notification's summary and description and can include a valid location without moving the cursor automatically.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_CENTER_ACTIONS" Language="en_US">
+      <Text>Press Enter or Space to perform the notification's normal action. Press Delete to dismiss it when the game allows dismissal; Delete on a group dismisses every dismissible notification in that group. A location action also moves the navigation cursor where appropriate. Escape closes the Center.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS_TITLE" Language="en_US">
+      <Text>Reveal announcements</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS" Language="en_US">
+      <Text>Reveal announcements summarize changes to what your civilization can see. They can be announced after your units move, at the start of your turn, and while other players are taking their turns. Press F12 and open Events settings to control each of those three times separately. Newly explored tiles are counted. Newly discovered foreign cities, visible resources, districts, improvements, enemy units, and other foreign units are named when the game makes them known. Repeated names are combined into counts.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS_LINES" Language="en_US">
+      <Text>A Revealed line contains newly explored tiles and newly seen objects. A Hidden line names foreign units that still exist but have left your sight. A Gone line reports barbarian outposts or tribal villages that were previously known and are now visibly absent. Natural wonders, newly found outposts, and newly found tribal villages use their own game announcements and are not repeated in the ordinary Revealed line.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS_SETTINGS" Language="en_US">
+      <Text>In F12, Events settings, Announce visibility changes on start of your turn and Announce visibility changes while moving are enabled by default. Announce visibility changes outside of your turn is disabled by default and is always deferred in hotseat. Announcements that are produced are stored in the Reveals category of the message buffer. In F12, Message Buffer settings, Speak reveal messages controls whether those new history entries are spoken automatically; disabling it keeps the entries available for review.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_BUFFER_TITLE" Language="en_US">
+      <Text>Message buffer</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_BUFFER" Language="en_US">
+      <Text>The message buffer belongs to the current local player and keeps new entries up to the history limit chosen in settings. It supports All plus nonempty Notification, Discovery, Combat, Gossip, Movement, and Chat filters. Changing category skips empty filters and reads the newest matching message. A message may retain map coordinates even after the screen that produced it has closed.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_BUFFER_KEYS" Language="en_US">
+      <Text>Press Semicolon or Apostrophe for the previous or next message, Control plus Semicolon for the oldest, and Control plus Apostrophe for the newest. Press Shift plus Semicolon or Shift plus Apostrophe for the previous or next nonempty category. Press Shift plus Backslash to move the navigation cursor to the current message's location when one exists.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_MOVEMENT_TITLE" Language="en_US">
+      <Text>Movement history and speech</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_MOVEMENT" Language="en_US">
+      <Text>Visible unit movement records the observed direction path and last known plot. The jump command therefore returns to the last observed location rather than following a unit that is no longer visible. Hotseat movement collected for another local observer is announced only when that observer's next turn begins.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_SETTINGS" Language="en_US">
+      <Text>Navigation settings independently choose whether your units, teammates, hostile civilizations, neutral civilizations, city-states, and barbarians announce military units, civilian units, both, or neither. Only barbarian movement is enabled by default. Message Buffer settings separately choose which categories speak automatically and the maximum retained entry count; disabling speech does not remove history entries.</Text>
+    </Row>
+
+    <!-- Gameplay: world actions -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_TITLE" Language="en_US">
+      <Text>World actions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_OVERVIEW_TITLE" Language="en_US">
+      <Text>Overview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_OVERVIEW" Language="en_US">
+      <Text>World actions are commands available from the main map. They work without opening a separate accessibility menu and can be changed in Options, Key Bindings.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_SAVES_TITLE" Language="en_US">
+      <Text>Quick save and quick load</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_SAVES" Language="en_US">
+      <Text>Press F5 to quick save. Press F6 to request quick load; accessibility asks for confirmation before replacing the current session. Availability still follows the game's multiplayer, tutorial, and scenario save restrictions.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_MAP_TITLE" Language="en_US">
+      <Text>Map action</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_MAP" Language="en_US">
+      <Text>Press M to create a map tac at the navigation cursor or edit your existing tac there. The normal editor lets you choose its icon, label, and multiplayer visibility.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_TURN_TITLE" Language="en_US">
+      <Text>Turn actions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_TURN" Language="en_US">
+      <Text>Press Control plus Space to perform the current next action, Shift plus Space to read the current blocker or waiting state, and Control plus Shift plus Space to open the Turn Blockers list. The Ending your turn article explains these commands in detail.</Text>
+    </Row>
+
+    <!-- Gameplay: selection -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_TITLE" Language="en_US">
+      <Text>Selection</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_OVERVIEW_TITLE" Language="en_US">
+      <Text>Overview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_OVERVIEW" Language="en_US">
+      <Text>Civilization VI can have one selected unit or one selected city. Selecting one replaces the other and changes the actions, information, and targets available to you. Selection is separate from the navigation cursor, so you can inspect distant plots without losing the selected object.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_ACTION_LIST" Language="en_US">
+      <Text>Press Tab with a city or unit selected to open its accessible action list. Rows are built from the current vanilla city actions, unit operations, and unit commands, including their live disabled explanations and bound gestures. Activate a row to use the existing action. Press Control plus H from the map area for the currently available commands, or review and remap them in Options, Key Bindings.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_MOVING_TITLE" Language="en_US">
+      <Text>Selection actions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_MOVING" Language="en_US">
+      <Text>Press Comma or Period to select the previous or next unit ready for orders. Add Shift to include units with no orders remaining. Press Left Bracket or Right Bracket for the previous or next city, and Backslash for your capital.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_SUMMARY_TITLE" Language="en_US">
+      <Text>Selection information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_SUMMARY" Language="en_US">
+      <Text>Press Grave Accent, normally left of 1, for a short selection summary and its direction from the navigation cursor. Press Shift plus 1 through Shift plus 0 for individual information buckets. Each bucket reads the selected object again, so health, movement, production, growth, charges, and other changing values are current.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_CITY_TITLE" Language="en_US">
+      <Text>Selected city readouts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_CITY" Language="en_US">
+      <Text>For a city, Shift plus 1 reads identity and health; 2 production; 3 growth; 4 border growth; 5 religion; 6 population, housing, and buildings or loyalty; 7 yields; 8 normal yield-focus entries; 9 favored yield-focus entries; and 0 ignored yield-focus entries. The summary combines city name, population, health, production, and growth.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_UNIT_TITLE" Language="en_US">
+      <Text>Selected unit readouts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_UNIT" Language="en_US">
+      <Text>For a unit, Shift plus 1 reads identity and health; 2 movement; 3 activity; 4 charges; 5 promotions; 6 statistics; 7 abilities; 8 special information; and 9 the queued path. Shift plus 0 currently has no unit section. These readings include the unit's current formation, owner, visibility, combat preview, and any details specific to its present activity.</Text>
+    </Row>
+
+    <!-- Gameplay: user interfaces -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_TITLE" Language="en_US">
+      <Text>User interfaces</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_OVERVIEW_TITLE" Language="en_US">
+      <Text>Screen structure</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_OVERVIEW" Language="en_US">
+      <Text>Most accessible game screens are panels whose main body is a tree, list, or table. Use that container's normal navigation commands. Tab and Shift plus Tab move between the main body and action controls outside it. Focus speech reports the nested path, role, state, position, and useful tooltip information supplied by each screen.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_TABS" Language="en_US">
+      <Text>Multi-page screens such as World Rankings, Production, Reports, and World Climate use tab controls. Press Control plus Tab or Control plus Shift plus Tab anywhere inside the control for the next or previous page. On the tab strip, Left and Right also switch pages. Only the active page participates in focus and search. The Screen Tutorials group contains screen-specific layouts and commands.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_RESEARCH_TITLE" Language="en_US">
+      <Text>Research, civics, and government</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_RESEARCH" Language="en_US">
+      <Text>Default open commands are Control plus R for Research Chooser, Control plus C for Civics Chooser, Control plus Shift plus R for Technology Tree, Control plus Shift plus C for Civics Tree, Control plus P for Government, Control plus O for Governors, and Control plus L for Religion.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_EMPIRE_TITLE" Language="en_US">
+      <Text>Cities and empire management</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_EMPIRE" Language="en_US">
+      <Text>Press F2 for Empire Reports, Control plus V for City-States, Control plus T for Trade Routes, Control plus E for Espionage, Control plus U for your Units list, and Control plus Q for Global Resources across known civilizations.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_WORLD_TITLE" Language="en_US">
+      <Text>World information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_WORLD" Language="en_US">
+      <Text>Press F1 for Civilopedia, F3 for Great People, F7 for Great Works, F8 for World Rankings, F9 for World Climate, F10 for Era Progress, and F11 for Historic Moments. Press F4 for the Diplomacy Ribbon, Control plus K for World Congress, Control plus W for active emergencies and competitions, and Control plus Shift plus T for current tutorial goals.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_MAP_TITLE" Language="en_US">
+      <Text>Map and communication</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_MAP" Language="en_US">
+      <Text>Press Control plus J for the lens list, Control plus M for map tacs, Control plus Shift plus F for Map Search, Control plus Slash for in-game chat, and Control plus N for the Notification Center. Map Search and Scanner search are separate: Map Search searches known map concepts and locations, while Scanner search searches the current live Scanner sources.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_AVAILABILITY_TITLE" Language="en_US">
+      <Text>Availability and remapping</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_AVAILABILITY" Language="en_US">
+      <Text>These are default bindings and can be changed in Options, Key Bindings. Scenarios may remove science, culture, government, diplomacy, religion, climate, Congress, or the Civilopedia. When a screen does not exist in the current game, its command announces that it is unavailable.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_FAMILY_LEAF_TITLE" Language="en_US">
+      <Text>Leaf widgets</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_FAMILY_VALUE_TITLE" Language="en_US">
+      <Text>Value widgets</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_FAMILY_CONTAINER_TITLE" Language="en_US">
+      <Text>Container widgets</Text>
+    </Row>
+
+    <!-- General reference -->
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_TITLE" Language="en_US">
+      <Text>Key bindings reference</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_USING_TITLE" Language="en_US">
+      <Text>Using commands</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_COMMON" Language="en_US">
+      <Text>The following commands are available from every focused accessibility widget. Press F12 to open Accessibility Mod settings. Press Control plus I to look up the focused item in the Civilopedia.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_HELP" Language="en_US">
+      <Text>Press Control plus H to open context-sensitive Input Help. It collects the currently available commands from the focused widget and its containing controls; activating a command in Input Help runs that command. Press Shift plus F1 to speak the same available commands without opening the help view. Press Shift plus F2 to speak the complete focus path from the screen to the focused control.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_TOOLTIPS" Language="en_US">
+      <Text>For a focused control with a structured tooltip, press Alt plus Up or Alt plus Down to read the previous or next tooltip section. Press Alt plus Home or Alt plus End to read the first or last tooltip section.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_NAVIGATION" Language="en_US">
+      <Text>Tab and Shift plus Tab normally move between groups or controls. Lists use Up and Down; tables use all four arrow keys; trees use Up and Down between visible items and Left and Right for hierarchy. Home, End, Page Up, and Page Down provide larger moves where the focused widget supports them. Tab controls also support Control plus Tab and Control plus Shift plus Tab.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_ACTIVATION" Language="en_US">
+      <Text>Buttons and checkboxes accept Enter or Space. A tree item with an action accepts Enter; a non-action tree branch lets Enter toggle its expansion. Disabled controls remain readable when a screen exposes useful information, but their actions do not run.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CONTEXT" Language="en_US">
+      <Text>Screens can add commands for their own actions, and the playable world uses Civilization VI's normal bound gameplay actions. Use Control plus H or Shift plus F1 on the relevant control for the live command set. The Screen Tutorials group documents the layout and contextual commands of each supported screen.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_REMAPPING_TITLE" Language="en_US">
+      <Text>Remapping key bindings</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_REMAPPING_OPEN" Language="en_US">
+      <Text>Open the game menu with Escape, choose Options, and choose the Key Bindings tab. You can also reach Options from the main menu. Commands are arranged under the same category names used in the chapters below.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_REMAPPING_CHANGE" Language="en_US">
+      <Text>Each command has a primary binding and an alternate binding. Choose either binding, then press the key or key combination you want to use. While the game is waiting for a key, choose Clear Binding to leave that slot unbound, or press Escape to cancel without changing it. Choose Confirm when you have finished so the new bindings are saved.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_REMAPPING_CONFLICTS" Language="en_US">
+      <Text>Before reusing a key, check whether it already appears beside another command. A shared key can be useful when the commands are available in different situations, but it can be ambiguous when both commands are available together. Clear or change one of the bindings if the wrong command runs. Restore Defaults on other Options tabs does not replace the bindings shown on the Key Bindings tab.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_MESSAGE_BUFFER_TITLE" Language="en_US">
+      <Text>Message Buffer</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_MESSAGE_BUFFER" Language="en_US">
+      <Text>Press Semicolon or Apostrophe for the previous or next message. Add Control to jump to the oldest or newest message, or add Shift to move to the previous or next message category. Press Shift plus Backslash to move the navigation cursor to the location attached to the current message.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_NAVIGATION_CURSOR_TITLE" Language="en_US">
+      <Text>Navigation Cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_NAVIGATION_CURSOR_MOVEMENT" Language="en_US">
+      <Text>Move northwest with Q or Numpad 7, northeast with E or Numpad 9, west with A or Numpad 4, east with D or Numpad 6, southwest with Z or Numpad 1, and southeast with C or Numpad 3.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_NAVIGATION_CURSOR_ACTIONS" Language="en_US">
+      <Text>Press Enter for the primary action on the cursor plot and Control plus Enter for its secondary action. Press Slash to jump to the current selection, Control plus S to jump to your capital, and Delete to remove your own map tac at the cursor.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_NAVIGATION_CURSOR_BOOKMARKS" Language="en_US">
+      <Text>Press Control plus Shift plus a number from 1 through 0 to assign that bookmark. Press Control plus the number to return to it. Press Alt plus the number to hear the bookmark's direction and distance without moving.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_WORLD_SCANNER_TITLE" Language="en_US">
+      <Text>World Scanner</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_WORLD_SCANNER" Language="en_US">
+      <Text>Press Control plus Page Up or Page Down for categories, Shift plus Page Up or Page Down for subcategories, Page Up or Page Down for groups, and Alt plus Page Up or Page Down for individual results. Press Home to jump to the current result, Backspace to return to the previous cursor location, End to hear direction and distance, and Control plus F to search Scanner results.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_SURVEYOR_TITLE" Language="en_US">
+      <Text>Surveyor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_SURVEYOR_BASIC" Language="en_US">
+      <Text>Press Shift plus W or Shift plus X to increase or decrease the survey radius. Press Shift plus Q for yields, Shift plus A for resources, Shift plus Z for terrain, Shift plus E for your units, Shift plus D for enemy units, and Shift plus C for cities.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_SURVEYOR_ADDITIONAL" Language="en_US">
+      <Text>Press Control plus Shift plus A or Numpad 4 for improvements, Control plus Shift plus D or Numpad 6 for neutral units, Control plus Shift plus Z or Numpad 1 for ownership, Control plus Shift plus Q or Numpad 7 for districts, and Control plus Shift plus X or Numpad 2 for appeal.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_TITLE" Language="en_US">
+      <Text>Information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_SELECTION" Language="en_US">
+      <Text>Press Grave, also called Tilde, for a summary of the selected unit or city. Press Shift plus a number from 1 through 0 for a particular section of the selection. Press Space for information about the current world interaction.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_EMPIRE" Language="en_US">
+      <Text>Press Y for era and age, O for Governor titles, T for time and turn, R for science, P for culture, G for gold, F for faith, I for tourism, V for influence, N for nuclear weapons, Control plus Y for the yield information list, and K for World Congress or diplomatic favor.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_PLOT" Language="en_US">
+      <Text>At the navigation cursor, press S or Numpad 5 for units; W or Numpad 8 for yields, workers, fresh water, and ownership; X or Numpad 2 for plot statistics; Shift plus S or Shift plus Numpad 5 for coordinates relative to your original capital; and B for geography.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_BANNERS" Language="en_US">
+      <Text>Number keys 1 through 7 read the corresponding city, district, encampment, airbase, missile silo, improvement, or village and outpost banner information available at the cursor.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_CITY_TITLE" Language="en_US">
+      <Text>City</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_CITY" Language="en_US">
+      <Text>Press Alt plus Right Bracket for the city overview, Alt plus Left Bracket to manage citizens, and Alt plus Backslash for production. Purchase with Gold, purchase with Faith, and change yield focus have no default bindings; assign them on the Key Bindings tab if you want direct commands for them.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_TITLE" Language="en_US">
+      <Text>User Interface</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_CORE" Language="en_US">
+      <Text>Press F1 for the Civilopedia, F2 for Reports, F3 for Great People, F4 for Diplomacy, F7 for Great Works, F8 for Rankings, F9 for Climate, F10 for Era Progress, and F11 for the Historic Moments timeline.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_RESEARCH" Language="en_US">
+      <Text>Press Control plus R for Choose Research, Control plus C for Choose Civic, Control plus Shift plus R for the Technology Tree, Control plus Shift plus C for the Civics Tree, Control plus P for Government, Control plus L for Religion, and Control plus O for Governors.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_WORLD" Language="en_US">
+      <Text>Press Control plus V for City-States, Control plus E for Espionage, Control plus T for Trade Routes, Control plus U for Units, Control plus K for World Congress, Control plus W for Emergencies and Competitions, and Control plus Q for Global Resources.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_MAP" Language="en_US">
+      <Text>Press Control plus N for the Notification Center, Control plus Shift plus T for tutorial goals, Control plus J for the accessible lens list, Control plus M for map tacs, and Control plus Shift plus F for Map Search. Reports for Resources, City Status, and Gossip have no default bindings.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UNIT_TITLE" Language="en_US">
+      <Text>Unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UNIT_MOVEMENT" Language="en_US">
+      <Text>Hold Alt and press Q, E, A, D, Z, or C to move the selected unit one hex in that direction. The matching Numpad keys 7, 9, 4, 6, 1, and 3 also work. Press Alt plus M for Move To.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UNIT_ACTIONS" Language="en_US">
+      <Text>Press Alt plus B to found a city, F to fortify, H to fortify until healed, R for ranged attack, X for automatic exploration, Space to skip, S to sleep, V for alert, U to upgrade, P to promote, W to wake, Delete to delete the unit, and Backspace to cancel its current order.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UNIT_OTHER" Language="en_US">
+      <Text>Other defaults are Alt plus Y to deploy, J to harvest, I to begin a trade route, L to pillage, K to remove a feature, O to remove an improvement, N to repair, G to spread religion, T for spy travel or teleport, and Slash to list unit abilities. Many specialized unit actions have no default binding; press Tab to browse the actions currently available to the selected unit.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_GLOBAL_TITLE" Language="en_US">
+      <Text>Global</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_GLOBAL_SELECTION" Language="en_US">
+      <Text>Press Tab to browse selection actions. Press Comma or Period for the previous or next unit ready for orders, or add Shift to include all units. Press Left Bracket or Right Bracket for the previous or next city, and Backslash for your capital.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_GLOBAL_WORLD" Language="en_US">
+      <Text>Press Control plus Space to perform the next required action or end the turn. Press Shift plus Space to hear the current blocker or waiting state, and Control plus Shift plus Space for the complete blocker list. Press M for map tacs, F5 for Quick Save, and F6 for Quick Load.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_ONLINE_TITLE" Language="en_US">
+      <Text>Online</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_ONLINE" Language="en_US">
+      <Text>Press Control plus Slash to open or close in-game chat.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_LENSES_TITLE" Language="en_US">
+      <Text>Lenses</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_LENSES" Language="en_US">
+      <Text>There are currently no commands with default bindings in the Lenses category. The accessible lens list is Control plus J under User Interface. Lens-specific details are in the Lenses article in the Gameplay group.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_TITLE" Language="en_US">
+      <Text>Search and type-ahead</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_TYPEAHEAD" Language="en_US">
+      <Text>Lists, trees, tables, and grids support type-ahead. Start typing while an item is focused to search its owning container. Matches are ranked by label: text at the start of a whole word, a starting prefix, a complete word, a word prefix, a substring, and then a word-prefix abbreviation. Lists and trees include nested row information. Tables search their primary row labels, while grids search every cell.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_CYCLING" Language="en_US">
+      <Text>If the active search contains one letter, pressing that same letter again cycles to the next item beginning with it instead of producing a doubled-letter query.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_RESULTS" Language="en_US">
+      <Text>By default, the active type-ahead query keeps a ranked result list. Up and Down move through those results and wrap at the ends. Tooltip-only matches follow label matches when the Include tooltips in type-to-find setting is enabled.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_CLEARING" Language="en_US">
+      <Text>Backspace removes the last typed character. Escape clears a nonempty type-ahead query and announces that it was cleared. Moving outside the owning container, or successfully activating or changing a control, clears it silently. If persistent result navigation is disabled, the query instead expires after the configured search timeout.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_PANEL" Language="en_US">
+      <Text>Press Control plus F on a searchable container to open its search panel. Lists and trees are searchable by default; some screens also enable search on other containers or provide their own search index. The default search indexes descendant labels, values, and tooltips and can jump focus to the selected result.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_QUERY" Language="en_US">
+      <Text>In the standard search mode, separate words are required terms: every entered term must match. Prefix a term with two hyphens to exclude its matches, for example cavalry --light. A screen using a full-text search provider may pass the complete query through instead, preserving that provider's phrase ranking and preview.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_PANEL_KEYS" Language="en_US">
+      <Text>In the search panel, type in the edit box to update results. Tab and Shift plus Tab move between the edit box and results. Enter from the edit box activates the first result; Enter on a result activates that result. Page Up and Page Down in the edit box move through up to ten recent searches for that search context. Escape closes the panel, and typing or Backspace while reviewing results is forwarded to the edit box.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_SETTINGS" Language="en_US">
+      <Text>Accessibility Mod settings control whether type-ahead includes tooltips, whether Up and Down navigate persistent results, the nonpersistent search timeout, and whether the first Control plus F result receives focus automatically.</Text>
+    </Row>
+
+    <!-- UI widgets -->
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_BUTTON_TITLE" Language="en_US">
+      <Text>Button</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_BUTTON_FUNCTION" Language="en_US">
+      <Text>A button represents an action. Focus speech can include its label, button role, disabled state, position, and tooltip. Press Enter or Space to perform the action. A disabled button remains readable but cannot be activated.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_BUTTON_KEYS" Language="en_US">
+      <Text>Press Enter or Space to activate. A disabled button consumes activation without running its action.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_CHECKBOX_TITLE" Language="en_US">
+      <Text>Checkbox</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_CHECKBOX_FUNCTION" Language="en_US">
+      <Text>A checkbox represents a Boolean setting or option and announces Checked or Unchecked as its value. Changing it updates the underlying screen value and announces the new value.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_CHECKBOX_KEYS" Language="en_US">
+      <Text>Press Enter or Space to toggle the checkbox. A disabled checkbox remains readable but does not change.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_DIALOG_TITLE" Language="en_US">
+      <Text>Dialog</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_DIALOG_FUNCTION" Language="en_US">
+      <Text>A dialog is a modal group of content rows followed by an action-button row. The button row is a navigation aid and is not announced as an extra container.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_DIALOG_NAVIGATION" Language="en_US">
+      <Text>Use Tab or Down to move to the next dialog row and Shift plus Tab or Up to move to the previous row. The dialog's button row groups the available actions at the end of its content.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_DIALOG_ACTIONS" Language="en_US">
+      <Text>Press Enter from dialog content to run the designated default button when it is visible and enabled. Enter or Space on a focused button runs that button. Escape closes the majority of dialogs, although an individual dialog can reserve or block it when closing is not allowed.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_DROPDOWN_TITLE" Language="en_US">
+      <Text>Dropdown</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_DROPDOWN_FUNCTION" Language="en_US">
+      <Text>A closed dropdown announces its label and committed option. Opening it presents the options as a list and initially focuses the committed option, or the first option when no committed item is available.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_DROPDOWN_KEYS" Language="en_US">
+      <Text>Press Enter on the closed dropdown to open it. In the open list, use Up, Down, Home, End, Page Up, Page Down, or type-ahead to find an option. Press Escape to close without changing the committed value.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_DROPDOWN_COMMIT" Language="en_US">
+      <Text>Press Enter on an option to commit it, update the underlying value, close the list, and return focus to the dropdown. Hidden options are skipped. Disabled options remain readable but cannot be committed. Leaving the dropdown closes an open list without changing focus.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_TITLE" Language="en_US">
+      <Text>Edit box</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_FUNCTION" Language="en_US">
+      <Text>An edit box holds text and tracks an editing buffer, cursor, and selection. Focus speech reads the current selection or the line containing the cursor instead of repeating an entire multi-line value. Password fields speak masking characters.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_ENTRY" Language="en_US">
+      <Text>Edit boxes have two interaction styles. An always-active edit box enters editing as soon as it receives focus and remains active, so you can type immediately. An activation-required edit box is read without editing until you press Enter; press Enter again to commit or Escape to cancel.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_HINT" Language="en_US">
+      <Text>The tooltip identifies the interaction style. An always-active edit box begins its tooltip with Type text. An inactive activation-required edit box begins its tooltip with Press enter to edit. Once that box is actively being edited, the activation hint is no longer included.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_MOVEMENT" Language="en_US">
+      <Text>Left and Right move by character; Control plus Left or Right moves by word. Up and Down move between lines. Home and End move to the start or end of the current line; Control plus Home or End moves to the start or end of the text.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_SELECTION" Language="en_US">
+      <Text>Add Shift to Left, Right, Up, Down, Home, or End to extend the selection by that movement. Control plus Shift plus Left or Right selects by word, and Control plus Shift plus Home or End selects to the start or end of the text. Control plus A selects all text.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_EDITING" Language="en_US">
+      <Text>Backspace and Delete remove one character or the selection. Control plus Backspace and Control plus Delete remove by word. Control plus C copies the selection, or the character at the cursor when nothing is selected. Control plus V pastes when the field is writable. Read-only edit boxes allow movement, selection, and copying but do not accept changes.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_GAMEVIEW_TITLE" Language="en_US">
+      <Text>Game view</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_GAMEVIEW_FUNCTION" Language="en_US">
+      <Text>The game view is the accessibility focus stop for the playable world map. Entering it switches input from menu controls to Civilization VI's World input context; leaving it returns input to the accessibility Shell context.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_GAMEVIEW_KEYS" Language="en_US">
+      <Text>The game view adds no navigation keys of its own. While it is focused, use the normal bound gameplay actions and the contextual controls exposed inside the world view. Use Control plus H or Shift plus F1 for the commands currently available at that focus location.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_INTERFACEMODE_TITLE" Language="en_US">
+      <Text>Interface mode</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_INTERFACEMODE_FUNCTION" Language="en_US">
+      <Text>An interface mode represents a temporary task on the world map, such as choosing a target, destination, or placement. While it is focused, use the normal world controls to complete or cancel that task.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_INTERFACEMODE_KEYS" Language="en_US">
+      <Text>The widget itself adds no universal action keys. Its children and the active game mode define confirm, cancel, targeting, or placement commands. Use Control plus H or Shift plus F1 for the live command set.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_LIST_TITLE" Language="en_US">
+      <Text>List</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_LIST_FUNCTION" Language="en_US">
+      <Text>A list presents a vertical sequence of visible items. Hidden items are skipped. Disabled items can remain in the sequence so their information and disabled state can be read.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_LIST_KEYS" Language="en_US">
+      <Text>Use Up and Down to move one item, Home and End to move to the first or last item, and Page Up or Page Down to move by the list's configured page size. Lists wrap at the ends by default, although a screen can turn wrapping off.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_LIST_SEARCH" Language="en_US">
+      <Text>Lists enable type-ahead and Control plus F search by default. Type-ahead examines each row and its nested row information. While a persistent query is active, Up and Down move through ranked matches instead of ordinary adjacent items.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_PANEL_TITLE" Language="en_US">
+      <Text>Panel</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_PANEL_FUNCTION" Language="en_US">
+      <Text>A panel groups related child controls and is typically the main container for a screen. Panels can also be nested to divide a screen into smaller groups. When entered with Tab a panel starts at its first visible child; when entered backward with Shift plus Tab it starts at its last. Programmatic re-entry can restore its remembered child.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_PANEL_KEYS" Language="en_US">
+      <Text>Use Tab and Shift plus Tab to navigate between the panel's visible children; this is the usual top-level navigation on accessibility screens. Panels wrap at their ends by default unless a screen turns wrapping off. A layout-only transparent panel contributes no extra speech.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SEARCHPANEL_TITLE" Language="en_US">
+      <Text>Search panel</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SEARCHPANEL_FUNCTION" Language="en_US">
+      <Text>The search panel is the overlay opened by Control plus F on a searchable container. It contains an always-edit search field and a result list. Standard searches index descendant labels, values, and tooltips; a screen may supply a specialized search provider.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SEARCHPANEL_QUERY" Language="en_US">
+      <Text>Standard searches require every space-separated term and exclude a term prefixed with two hyphens. Results update as the edit buffer changes. Activating a result closes the panel and either moves focus to the matched widget or runs the result's screen-defined action.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SEARCHPANEL_KEYS" Language="en_US">
+      <Text>Use Tab and Shift plus Tab between the edit box and results. Enter in the edit box activates the first result; Enter on a result activates that result. Page Up and Page Down in the edit box browse older and newer searches. Escape closes the panel. Printable characters and Backspace typed from the result list are forwarded to the edit box.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SLIDER_TITLE" Language="en_US">
+      <Text>Slider</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SLIDER_FUNCTION" Language="en_US">
+      <Text>A slider represents a numeric value with a minimum, maximum, normal step, and page step. Each change is clamped to the permitted range, written to the underlying screen value, and announced.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SLIDER_KEYS" Language="en_US">
+      <Text>Use Left and Right to decrease or increase by one step. Page Down and Page Up decrease or increase by the page step. Home sets the minimum and End sets the maximum. These keys are consumed even when the value is already at a boundary.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_STATICTEXT_TITLE" Language="en_US">
+      <Text>Static text</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_STATICTEXT_FUNCTION" Language="en_US">
+      <Text>Static text is a read-only focus stop for headings, descriptions, status lines, and other information. Its role is intentionally not spoken. If a screen supplies both text and a tooltip, the tooltip is appended to the text as another line instead of becoming a separate tooltip-reading channel.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_STATICTEXT_KEYS" Language="en_US">
+      <Text>Static text has no widget-specific activation or navigation keys. Use the containing panel, list, tree, table, tab page, or dialog to move to the next item.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SUBMENU_TITLE" Language="en_US">
+      <Text>Submenu</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SUBMENU_FUNCTION" Language="en_US">
+      <Text>A submenu is a collapsible menu group. When collapsed it is one focus stop and its descendants are not entered. When expanded it exposes its child controls and can restore a previously focused child on re-entry.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SUBMENU_KEYS" Language="en_US">
+      <Text>Press Enter or Right to expand and enter the first child. Press Left from anywhere in the expanded submenu to collapse the whole descendant subtree and return focus to the submenu. While expanded, use Up, Down, Home, End, Page Up, and Page Down to navigate its children.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TAB_TITLE" Language="en_US">
+      <Text>Tab</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TAB_FUNCTION" Language="en_US">
+      <Text>A tab is a focusable header paired with one page in a tab control. Focusing a tab immediately makes its page active; no separate activation command is required.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TAB_KEYS" Language="en_US">
+      <Text>In the tab strip, use Left and Right to focus the previous or next tab and switch pages. Home and End move to the first or last tab, and Page Up or Page Down move by the strip's page size. Tab enters the active page; Shift plus Tab leaves the tab control backward.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABCONTROL_TITLE" Language="en_US">
+      <Text>Tab control</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABCONTROL_FUNCTION" Language="en_US">
+      <Text>A tab control owns a tab strip and several paired pages. Only the active page is mounted in the accessible tree, so navigation and search do not enter hidden pages. Moving focus to a tab changes the active page immediately.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABCONTROL_KEYS" Language="en_US">
+      <Text>Press Control plus Tab to select the next page and Control plus Shift plus Tab to select the previous page from anywhere inside the control. Page cycling wraps from the last page to the first and from the first to the last.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABCONTROL_TRAVERSAL" Language="en_US">
+      <Text>Forward Tab entry lands in the tab strip. Tab from the strip enters the first control on the active page. Shift plus Tab from the page returns to its active tab. Tab from the page's last control leaves the tab control forward, and Shift plus Tab from the strip leaves it backward.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABPAGE_TITLE" Language="en_US">
+      <Text>Tab page</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABPAGE_FUNCTION" Language="en_US">
+      <Text>A tab page is the container for one tab's controls. It is available only while its paired tab is active. The page does not announce a position among sibling pages because inactive pages are outside the current accessible tree.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABPAGE_KEYS" Language="en_US">
+      <Text>Use Tab and Shift plus Tab between the page's visible children. Forward entry starts at the first child and backward entry starts at the last. The page does not wrap: boundary movement is passed to the tab control so focus can return to the tab strip or leave the control.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABLE_TITLE" Language="en_US">
+      <Text>Tables and grids</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABLE_FUNCTION" Language="en_US">
+      <Text>Tables and grids both organize information into cells, support directional movement, skip hidden cells, do not wrap during ordinary navigation, and support type-ahead with ranked Up and Down results. Their difference is the structure they represent.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABLE_TABLES" Language="en_US">
+      <Text>A table contains uniform records arranged as rows and labeled columns. Up and Down move between records in the current column; Left and Right change columns. Home and End move to the first or last record in the column, and Control plus Home or Control plus End move to the first or last cell. A table can expose sortable column headers: press Enter or Space on one to cycle its available sort orders. Type-ahead searches only primary row labels and keeps the current column.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABLE_GRIDS" Language="en_US">
+      <Text>A grid represents a visual or progression layout whose columns can contain several side-by-side tiers and whose cells can have different roles. Up and Down move within a tier; Left and Right cross tiers while retaining the nearest row position. Home and End move to tier boundaries. Control plus Left or Control plus Right jumps between columns, while Control plus Home or Control plus End moves to the first or last cell in the grid. Crossing a column announces its header. Grids do not provide sorting.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABLE_TYPEAHEAD" Language="en_US">
+      <Text>Start typing to find content. A table searches row labels without searching its individual values, states, headers, or tooltips. A grid searches every cell and includes tooltip-only matches when that setting is enabled. While a query is active, Up and Down move through ranked matches and wrap at the ends. Repeating one initial letter cycles its matches, Backspace edits the query, and Escape clears it.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREE_TITLE" Language="en_US">
+      <Text>Tree</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREE_FUNCTION" Language="en_US">
+      <Text>A tree presents hierarchical rows as one visible pre-order sequence. Collapsed descendants are excluded. Branch rows announce Collapsed, or Expanded plus their visible child count; leaf rows have no expansion state.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREE_KEYS" Language="en_US">
+      <Text>Use Up and Down to move between visible rows and Page Up or Page Down to move by a page. Right expands a collapsed branch or descends into an expanded branch. Left collapses an expanded branch or moves to its parent. Tree navigation does not wrap.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREE_EDGES" Language="en_US">
+      <Text>Home and End move to the first or last row at the current depth when the Current-depth Home and End setting is enabled; otherwise they move to the first or last row in the whole tree. Control plus Home and Control plus End always move to the whole-tree edges.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREE_SEARCH" Language="en_US">
+      <Text>Trees enable type-ahead and Control plus F search by default, examining nested information. While a persistent query is active, Up and Down move among ranked matches. Enter is resolved by the focused tree item: it activates an actionable item, or toggles a non-action branch.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREEITEM_TITLE" Language="en_US">
+      <Text>Tree item</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREEITEM_FUNCTION" Language="en_US">
+      <Text>A tree item is one row in a tree and may be a branch or leaf. A branch announces whether it is expanded; an expanded branch also announces its visible child count. Collapsing a branch recursively collapses its descendants so later expansion starts with one clean level.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREEITEM_KEYS" Language="en_US">
+      <Text>Hierarchy movement belongs to the containing tree: Right expands or enters, Left collapses or ascends, and Up or Down moves through visible rows. These commands remain available even when a branch also has an action.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREEITEM_ACTION" Language="en_US">
+      <Text>Press Enter on a tree item with a screen-defined action to run that action. Otherwise Enter bubbles to the tree and toggles the branch. This means an actionable branch is activated with Enter and expanded or collapsed with Right and Left. Disabled actionable items do not run.</Text>
+    </Row>
+  </LocalizedText>
+</GameData>

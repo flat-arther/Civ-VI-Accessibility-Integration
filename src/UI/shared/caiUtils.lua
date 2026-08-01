@@ -5,7 +5,6 @@ include("iconsProcessing")
 include("CAISettings")
 include("CAI_logging")
 
-
 ---Utility wrapper for 'CAI.output'
 ---@param text string -- the text to speak
 ---@param interrupt? boolean -- whether to interrupt any currently speaking text. False by default
@@ -132,6 +131,80 @@ function WrapFunc(orig, wrapper)
     return function(...)
         return wrapper(orig, ...)
     end
+end
+
+-- TutorialUIRoot_CAI publishes the current detailed item's enabled controls
+-- here. CAI-only hotkeys use this state to mirror the controls that vanilla's
+-- tutorial overlay permits instead of bypassing that overlay.
+function IsCAITutorialControlAllowed(controlId)
+    if not IsTutorialRunning or not IsTutorialRunning() then return true end
+    local state = ExposedMembers.CAI_TutorialState
+    if not state then return false end
+    if state.HasDetailedItem then
+        if state.EnabledControlIds and state.EnabledControlIds[controlId] then return true end
+        local hash = UITutorialManager:GetHash(controlId)
+        return state.EnabledControlHashes and state.EnabledControlHashes[hash] == true
+    end
+    return state.ActiveItemId == nil
+end
+
+function IsCAITutorialControlHashAllowed(controlHash)
+    if not IsTutorialRunning or not IsTutorialRunning() then return true end
+    local state = ExposedMembers.CAI_TutorialState
+    if not state then return false end
+    if state.HasDetailedItem then
+        return state.EnabledControlHashes ~= nil
+            and state.EnabledControlHashes[controlHash] == true
+    end
+    return state.ActiveItemId == nil
+end
+
+function IsCAITutorialDetailedItem(itemId)
+    if not IsTutorialRunning or not IsTutorialRunning() then return false end
+    local state = ExposedMembers.CAI_TutorialState
+    return state ~= nil and state.DetailedItemId == itemId
+end
+
+---Returns whether the player may dismiss the current full-screen surface.
+---During an active tutorial item, closing is allowed only when that detailed
+---item explicitly enables one of the supplied vanilla close controls. With no
+---controls supplied, closing is restricted until tutorial free roam.
+---@param ... string|number Vanilla close-control IDs or hashes
+---@return boolean
+function IsCAITutorialScreenCloseAllowed(...)
+    if not IsTutorialRunning or not IsTutorialRunning() then return true end
+    local state = ExposedMembers.CAI_TutorialState
+    if not state then return false end
+    if state.ActiveItemId == nil then return true end
+    if not state.HasDetailedItem then return false end
+
+    for i = 1, select("#", ...) do
+        local control = select(i, ...)
+        if type(control) == "number" then
+            if state.EnabledControlHashes and state.EnabledControlHashes[control] then
+                return true
+            end
+        elseif type(control) == "string" then
+            if state.EnabledControlIds and state.EnabledControlIds[control] then
+                return true
+            end
+            local hash = UITutorialManager:GetHash(control)
+            if state.EnabledControlHashes and state.EnabledControlHashes[hash] then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+function AnnounceCAITutorialScreenCloseBlocked()
+    Speak(Locale.Lookup("LOC_CAI_UI_CLOSE_BLOCKED_BY_TUTORIAL"))
+end
+
+function IsCAIEscapeKeyUp(input)
+    return input ~= nil
+        and input:GetMessageType() == KeyEvents.KeyUp
+        and input:GetKey() == Keys.VK_ESCAPE
 end
 
 ---Civ VI's tables are read only, meaning that you cannot overright their pairs. This is a workaround by using a proxy for the native table

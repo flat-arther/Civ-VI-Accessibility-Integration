@@ -427,6 +427,10 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
             return true
         end
     end
+    if IsCAIEscapeKeyUp(input) and not IsCAITutorialScreenCloseAllowed() then
+        AnnounceCAITutorialScreenCloseBlocked()
+        return true
+    end
     return orig(input)
 end)
 ContextPtr:SetInputHandler(OnInputHandler, true)

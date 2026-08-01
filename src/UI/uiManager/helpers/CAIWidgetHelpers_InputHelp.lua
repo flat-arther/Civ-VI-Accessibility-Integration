@@ -253,12 +253,13 @@ end
 --#region Binding collection
 
 local function GetWidgetLabel(widget)
-    local label
-    if widget.GetLabel then
-        label = widget:GetLabel()
-    end
-    local role = Locale.Lookup("LOC_UIWidget_Role_" .. widget.Role or widget.Type)
-    return label .. ", " .. role
+    local label = widget.GetLabel and widget:GetLabel() or ""
+    local roleName = widget.Role or widget.Type or ""
+    if roleName == "" then return label end
+    local roleTag = "LOC_UIWidget_Role_" .. roleName
+    local role = Locale.Lookup(roleTag)
+    if role == roleTag then return label end
+    return label ~= "" and (label .. ", " .. role) or role
 end
 
 local function MergeBindings(bindings)

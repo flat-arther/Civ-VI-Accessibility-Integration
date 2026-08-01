@@ -1108,6 +1108,10 @@ end
 -- Capture pre-wrap references so we can swap them out of event listeners.
 local orig_OnShowOverviewPanel = OnShowOverviewPanel
 OnShowOverviewPanel = WrapFunc(OnShowOverviewPanel, function(orig, isShowing)
+    if isShowing and not IsCAITutorialControlAllowed("ToggleOverviewPanel") then
+        LuaEvents.CityPanel_SetOverViewState(false)
+        return
+    end
     orig(isShowing)
     if isShowing then
         m_caiShowing = true

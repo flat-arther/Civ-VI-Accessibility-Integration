@@ -39,7 +39,11 @@ local function GetFeatureUnavailableTag(capability, fallbackTag)
     return fallbackTag
 end
 
-local function TryOpen(orig, vanillaActionId, control, unavailableTag)
+local function TryOpen(orig, vanillaActionId, control, controlId, unavailableTag)
+    if not IsCAITutorialControlAllowed(controlId) then
+        Speak(Locale.Lookup("LOC_CAI_UI_BLOCKED_BY_TUTORIAL"))
+        return
+    end
     if ControlIsHidden(control) then
         Speak(Locale.Lookup(unavailableTag))
         return
@@ -84,22 +88,22 @@ end
 
 OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     if m_caiOpenTechTreeId and actionId == m_caiOpenTechTreeId then
-        TryOpen(orig, m_vanillaToggleTechTree, Controls.ScienceButton,
+        TryOpen(orig, m_vanillaToggleTechTree, Controls.ScienceButton, "ScienceButton",
             "LOC_CAI_UI_TECH_TREE_UNAVAILABLE")
         return
     end
     if m_caiOpenCivicsTreeId and actionId == m_caiOpenCivicsTreeId then
-        TryOpen(orig, m_vanillaToggleCivicsTree, Controls.CultureButton,
+        TryOpen(orig, m_vanillaToggleCivicsTree, Controls.CultureButton, "CultureButton",
             "LOC_CAI_UI_CIVICS_TREE_UNAVAILABLE")
         return
     end
     if m_caiOpenGovernmentId and actionId == m_caiOpenGovernmentId then
-        TryOpen(orig, m_vanillaToggleGovernment, Controls.GovernmentButton,
+        TryOpen(orig, m_vanillaToggleGovernment, Controls.GovernmentButton, "GovernmentButton",
             GetFeatureUnavailableTag("CAPABILITY_GOVERNMENTS_VIEW", "LOC_CAI_UI_GOVERNMENT_LOCKED"))
         return
     end
     if m_caiOpenReligionId and actionId == m_caiOpenReligionId then
-        TryOpen(orig, m_vanillaToggleReligion, Controls.ReligionButton,
+        TryOpen(orig, m_vanillaToggleReligion, Controls.ReligionButton, "ReligionButton",
             GetFeatureUnavailableTag("CAPABILITY_RELIGION_VIEW", "LOC_CAI_UI_RELIGION_LOCKED"))
         return
     end
@@ -107,7 +111,7 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
         if UI.QueryGlobalParameterInt("DISABLE_GREAT_PEOPLE_HOTKEY") == 1 then
             Speak(Locale.Lookup("LOC_CAI_UI_GREAT_PEOPLE_HOTKEY_DISABLED"))
         else
-            TryOpen(orig, m_vanillaToggleGreatPeople, Controls.GreatPeopleButton,
+            TryOpen(orig, m_vanillaToggleGreatPeople, Controls.GreatPeopleButton, "GreatPeopleButton",
                 GetFeatureUnavailableTag("CAPABILITY_GREAT_PEOPLE_VIEW", "LOC_CAI_UI_GREAT_PEOPLE_UNAVAILABLE"))
         end
         return
@@ -116,13 +120,15 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
         if UI.QueryGlobalParameterInt("DISABLE_GREAT_WORKS_HOTKEY") == 1 then
             Speak(Locale.Lookup("LOC_CAI_UI_GREAT_WORKS_HOTKEY_DISABLED"))
         else
-            TryOpen(orig, m_vanillaToggleGreatWorks, Controls.GreatWorksButton,
+            TryOpen(orig, m_vanillaToggleGreatWorks, Controls.GreatWorksButton, "GreatWorksButton",
                 GetFeatureUnavailableTag("CAPABILITY_GREAT_WORKS_VIEW", "LOC_CAI_UI_NO_GREAT_WORKS"))
         end
         return
     end
     if m_caiOpenGovernorsId and actionId == m_caiOpenGovernorsId then
-        if m_vanillaToggleGovernors then
+        if not IsCAITutorialControlAllowed("GovernorButton") then
+            Speak(Locale.Lookup("LOC_CAI_UI_BLOCKED_BY_TUTORIAL"))
+        elseif m_vanillaToggleGovernors then
             orig(m_vanillaToggleGovernors)
         else
             Speak(Locale.Lookup("LOC_CAI_UI_REQUIRES_RISE_AND_FALL"))
@@ -130,7 +136,9 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
         return
     end
     if m_caiOpenHistoricMomentsId and actionId == m_caiOpenHistoricMomentsId then
-        if m_vanillaToggleTimeline then
+        if not IsCAITutorialControlAllowed("HistoricMomentsButton") then
+            Speak(Locale.Lookup("LOC_CAI_UI_BLOCKED_BY_TUTORIAL"))
+        elseif m_vanillaToggleTimeline then
             orig(m_vanillaToggleTimeline)
         else
             Speak(Locale.Lookup("LOC_CAI_UI_REQUIRES_RISE_AND_FALL"))
@@ -138,7 +146,9 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
         return
     end
     if m_caiOpenWorldClimateId and actionId == m_caiOpenWorldClimateId then
-        if not IsExpansion2Active() then
+        if not IsCAITutorialControlAllowed("WorldClimateButton") then
+            Speak(Locale.Lookup("LOC_CAI_UI_BLOCKED_BY_TUTORIAL"))
+        elseif not IsExpansion2Active() then
             Speak(Locale.Lookup("LOC_CAI_UI_REQUIRES_GATHERING_STORM"))
         elseif not GameCapabilities.HasCapability("CAPABILITY_WORLD_CLIMATE_VIEW") then
             Speak(Locale.Lookup("LOC_CAI_UI_CLIMATE_UNAVAILABLE"))

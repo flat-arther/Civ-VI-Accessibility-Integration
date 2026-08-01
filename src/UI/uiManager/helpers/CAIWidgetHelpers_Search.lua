@@ -199,6 +199,25 @@ local function IsWordSeparator(ch)
     return WORD_SEPARATORS[ch] or false
 end
 
+---Build a normalized type-to-find candidate for a custom candidate source.
+---@param widget UIWidget
+---@param label string
+---@param bfsIndex integer
+---@param tooltip? string
+---@return SearchCandidate
+function S.MakeSearchCandidate(widget, label, bfsIndex, tooltip)
+    label = label or ""
+    tooltip = tooltip or ""
+    return {
+        Widget = widget,
+        Label = label,
+        LabelLower = label:lower(),
+        Tooltip = tooltip,
+        TooltipLower = tooltip:lower(),
+        BFSIndex = bfsIndex,
+    }
+end
+
 ---Collect all searchable widgets in breadth-first order.
 ---The returned list is used by the search engine for scoring and ranking.
 ---@param root UIWidget
@@ -244,14 +263,7 @@ function S.CollectSearchCandidates(root, maxDepth, includeTooltips)
                 if includeTooltips then
                     tooltip = widget:GetTooltip() or ""
                 end
-                candidates[#candidates + 1] = {
-                    Widget = widget,
-                    Label = label,
-                    LabelLower = label:lower(),
-                    Tooltip = tooltip,
-                    TooltipLower = tooltip:lower(),
-                    BFSIndex = bfsIndex,
-                }
+                candidates[#candidates + 1] = S.MakeSearchCandidate(widget, label, bfsIndex, tooltip)
 
                 bfsIndex = bfsIndex + 1
             end
@@ -621,12 +633,17 @@ end
 ---@param maxDepth integer
 ---@return SearchResult[]
 function S.FindSearchResults(root, query, maxDepth)
-    if not root or not root.Children then
+    if not root then
         return {}
     end
 
     local includeTooltips = CAISettings.GetBool("TypeToFindIncludeTooltips")
-    local candidates = S.CollectSearchCandidates(root, maxDepth, includeTooltips)
+    local candidates
+    if type(root.GetTypeToFindCandidates) == "function" then
+        candidates = root:GetTypeToFindCandidates(includeTooltips)
+    else
+        candidates = S.CollectSearchCandidates(root, maxDepth, includeTooltips)
+    end
     local labelResults, labelMatches = FindBestTierResults(candidates, query, false)
 
     if includeTooltips then

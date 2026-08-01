@@ -37,3 +37,6 @@ StartEraShow = WrapFunc(StartEraShow, function(orig)
 
 	Speak(text)
 end)
+
+
+ContextPtr:RemoveInputHandler()

@@ -4,20 +4,20 @@ include("UnitPromotionPopup")
 local mgr               = ExposedMembers.CAI_UIManager
 
 local PANEL_ID          = "CAIUnitPromotionPopup_Panel"
-local TABLE_ID          = "CAIUnitPromotionPopup_Table"
+local GRID_ID           = "CAIUnitPromotionPopup_Grid"
 local TREE_ID           = "CAIUnitPromotionPopup_Tree"
 local CHANGE_VIEW_ID    = "CAIUnitPromotionPopup_ChangeView"
 
 local HOVER_SOUND       = "Main_Menu_Mouse_Over"
 
 local m_panel           = nil
-local m_tableView       = nil
+local m_gridView        = nil
 local m_treeView        = nil
 local m_changeViewBtn   = nil
-local m_viewMode        = "table"
+local m_viewMode        = "grid"
 
 local m_model           = nil
-local m_tablePromotions = {}
+local m_gridPromotions = {}
 local m_treePromotions  = {}
 
 local function JoinNonEmpty(parts, sep)
@@ -241,7 +241,7 @@ local function GetFocusedPromotionType()
 end
 
 local function GetActivePromotionWidget(promotionType)
-    if m_viewMode == "table" then return m_tablePromotions[promotionType] end
+    if m_viewMode == "grid" then return m_gridPromotions[promotionType] end
     return m_treePromotions[promotionType]
 end
 
@@ -257,11 +257,11 @@ end
 
 local function ToggleViewMode()
     local focusedType = GetFocusedPromotionType()
-    m_viewMode = (m_viewMode == "tree") and "table" or "tree"
+    m_viewMode = (m_viewMode == "tree") and "grid" or "tree"
 
     if FocusPromotionInActiveView(focusedType) then return end
 
-    local active = (m_viewMode == "table") and m_tableView or m_treeView
+    local active = (m_viewMode == "grid") and m_gridView or m_treeView
     if active then mgr:SetFocus(active) end
 end
 
@@ -300,15 +300,15 @@ local function MakeSpacer()
     })
 end
 
-local function BuildTableView()
-    if not m_tableView or not m_model then return end
+local function BuildGridView()
+    if not m_gridView or not m_model then return end
 
-    m_tableView:ClearChildren()
-    m_tablePromotions = {}
+    m_gridView:ClearChildren()
+    m_gridPromotions = {}
 
     for _, level in ipairs(m_model.levels) do
         local capturedLevel = level
-        local column = m_tableView:AddColumn({
+        local column = m_gridView:AddColumn({
             header = function() return Locale.Lookup("LOC_CAI_TREE_TIER", capturedLevel) end,
         })
 
@@ -326,11 +326,11 @@ local function BuildTableView()
             if promo then
                 local cell = CreatePromotionButton(promo)
                 if cell then
-                    m_tablePromotions[promo.UnitPromotionType] = cell
-                    m_tableView:AddItem(column, 1, cell)
+                    m_gridPromotions[promo.UnitPromotionType] = cell
+                    m_gridView:AddItem(column, 1, cell)
                 end
             else
-                m_tableView:AddItem(column, 1, MakeSpacer())
+                m_gridView:AddItem(column, 1, MakeSpacer())
             end
         end
     end
@@ -400,7 +400,7 @@ local function BuildTreeView()
 end
 
 local function BuildViews()
-    BuildTableView()
+    BuildGridView()
     BuildTreeView()
 end
 
@@ -412,12 +412,12 @@ local function BuildPanel()
     })
     if not m_panel then return end
 
-    m_tableView = mgr:CreateWidget(TABLE_ID, "Table", {
+    m_gridView = mgr:CreateWidget(GRID_ID, "Grid", {
         Label = function() return Locale.Lookup("LOC_HUD_UNIT_CHOOSE_PROMOTION_TEXT") end,
-        HiddenPredicate = function() return m_viewMode ~= "table" end,
+        HiddenPredicate = function() return m_viewMode ~= "grid" end,
     })
-    if not m_tableView then return end
-    m_panel:AddChild(m_tableView)
+    if not m_gridView then return end
+    m_panel:AddChild(m_gridView)
 
     m_treeView = mgr:CreateWidget(TREE_ID, "Tree", {
         Label = function() return Locale.Lookup("LOC_HUD_UNIT_CHOOSE_PROMOTION_TEXT") end,
@@ -429,9 +429,9 @@ local function BuildPanel()
 
     m_changeViewBtn = mgr:CreateWidget(CHANGE_VIEW_ID, "Button", {
         Label = function()
-            return Locale.Lookup(m_viewMode == "table"
+            return Locale.Lookup(m_viewMode == "grid"
                 and "LOC_CAI_TREE_SWITCH_TO_TREE"
-                or "LOC_CAI_TREE_SWITCH_TO_TABLE")
+                or "LOC_CAI_TREE_SWITCH_TO_GRID")
         end,
     })
     if not m_changeViewBtn then return end
@@ -444,12 +444,12 @@ end
 local function RemovePanel()
     if m_panel and mgr then mgr:RemoveFromStack(PANEL_ID) end
     m_panel = nil
-    m_tableView = nil
+    m_gridView = nil
     m_treeView = nil
     m_changeViewBtn = nil
-    m_viewMode = "table"
+    m_viewMode = "grid"
     m_model = nil
-    m_tablePromotions = {}
+    m_gridPromotions = {}
     m_treePromotions = {}
 end
 

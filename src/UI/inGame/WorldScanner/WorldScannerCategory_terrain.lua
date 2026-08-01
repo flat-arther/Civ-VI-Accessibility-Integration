@@ -187,16 +187,8 @@ function CAIWorldScannerCategory_Terrain.EndExtract(_, collect)
             ZoneValidatePlot = function(_, plot, validateContext)
                 return not Utils.IsPlotRevealed(validateContext, plot)
             end,
-            ZoneUpdateLabel = function(item)
-                item.LabelKey = Locale.Lookup(
-                    "LOC_CAI_WORLD_SCANNER_UNEXPLORED_REGION_TILES",
-                    #item.ZonePlotIndices
-                )
-            end,
-            LabelKey = Locale.Lookup(
-                "LOC_CAI_WORLD_SCANNER_UNEXPLORED_REGION_TILES",
-                #zone.PlotIndices
-            ),
+            ZoneTileCountMode = "unexplored",
+            LabelKey = "LOC_CAI_WORLD_SCANNER_UNEXPLORED_REGION",
             SubCategoryId = "base",
             GroupId = "unexplored",
             GroupLabelKey = "LOC_CAI_WORLD_SCANNER_UNEXPLORED_REGION",

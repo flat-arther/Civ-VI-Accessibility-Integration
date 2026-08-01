@@ -43,7 +43,9 @@ end
 
 local function OnCAIOpenCityStates()
     local player = GetLocalPlayer()
-    if not GameCapabilities.HasCapability("CAPABILITY_CITY_STATES_VIEW") then
+    if not IsCAITutorialControlAllowed("CityStatesButton") then
+        Speak(Locale.Lookup("LOC_CAI_UI_BLOCKED_BY_TUTORIAL"))
+    elseif not GameCapabilities.HasCapability("CAPABILITY_CITY_STATES_VIEW") then
         Speak(Locale.Lookup("LOC_CAI_UI_UNAVAILABLE_IN_CURRENT_GAME"))
     elseif not HasMetCityState(player) then
         Speak(Locale.Lookup("LOC_CAI_UI_NO_CITY_STATES_MET"))
@@ -62,7 +64,9 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     end
     if m_caiOpenEspionageId and actionId == m_caiOpenEspionageId then
         local player = GetLocalPlayer()
-        if m_isAustraliaScenario or m_isVikingsScenario then
+        if not IsCAITutorialControlAllowed("EspionageButton") then
+            Speak(Locale.Lookup("LOC_CAI_UI_BLOCKED_BY_TUTORIAL"))
+        elseif m_isAustraliaScenario or m_isVikingsScenario then
             Speak(Locale.Lookup("LOC_CAI_UI_UNAVAILABLE_IN_CURRENT_GAME"))
         elseif not GameCapabilities.HasCapability("CAPABILITY_ESPIONAGE_VIEW") then
             Speak(Locale.Lookup("LOC_CAI_UI_UNAVAILABLE_IN_CURRENT_GAME"))
@@ -76,7 +80,9 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
         return
     end
     if m_caiOpenWorldRankingsId and actionId == m_caiOpenWorldRankingsId then
-        if GameCapabilities.HasCapability("CAPABILITY_DISPLAY_HUD_WORLD_RANKINGS") then
+        if not IsCAITutorialControlAllowed("WorldRankingsButton") then
+            Speak(Locale.Lookup("LOC_CAI_UI_BLOCKED_BY_TUTORIAL"))
+        elseif GameCapabilities.HasCapability("CAPABILITY_DISPLAY_HUD_WORLD_RANKINGS") then
             orig(m_vanillaToggleRankings)
         else
             Speak(Locale.Lookup("LOC_CAI_UI_WORLD_RANKINGS_UNAVAILABLE"))
@@ -85,7 +91,9 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     end
     if m_caiOpenTradeOverviewId and actionId == m_caiOpenTradeOverviewId then
         local player = GetLocalPlayer()
-        if not GameCapabilities.HasCapability("CAPABILITY_TRADE_VIEW") then
+        if not IsCAITutorialControlAllowed("TradeRoutesButton") then
+            Speak(Locale.Lookup("LOC_CAI_UI_BLOCKED_BY_TUTORIAL"))
+        elseif not GameCapabilities.HasCapability("CAPABILITY_TRADE_VIEW") then
             Speak(Locale.Lookup("LOC_CAI_UI_UNAVAILABLE_IN_CURRENT_GAME"))
         elseif player == nil or player:GetTrade():GetOutgoingRouteCapacity() <= 0 then
             Speak(Locale.Lookup("LOC_CAI_UI_NO_TRADE_ROUTE_CAPACITY"))
@@ -95,7 +103,9 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
         return
     end
     if m_caiOpenEraProgressId and actionId == m_caiOpenEraProgressId then
-        if not (IsExpansion1Active() or IsExpansion2Active()) then
+        if not IsCAITutorialControlAllowed("EraProgressButton") then
+            Speak(Locale.Lookup("LOC_CAI_UI_BLOCKED_BY_TUTORIAL"))
+        elseif not (IsExpansion1Active() or IsExpansion2Active()) then
             Speak(Locale.Lookup("LOC_CAI_UI_REQUIRES_RISE_AND_FALL"))
         elseif GameCapabilities.HasCapability("CAPABILITY_ERAS") then
             OnToggleEraProgress()

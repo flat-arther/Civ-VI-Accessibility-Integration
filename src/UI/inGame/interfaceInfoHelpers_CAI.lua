@@ -53,6 +53,7 @@ local HexCoordUtils = CAIHexCoordUtils
 local m_constrainToPlotID = 0
 local m_kTutorialUnitMoveRestrictions = nil
 local m_kTutorialUnitHexRestrictions = nil
+local m_kTutorialPermittedSelectionPlots = nil
 
 -- ===========================================================================
 -- TUTORIAL RESTRICTION EVENT HANDLERS
@@ -128,6 +129,17 @@ function OnTutorial_ClearAllUnitHexRestrictions()
     m_kTutorialUnitHexRestrictions = nil
 end
 
+function OnCAI_TutorialDisableMapSelect(isDisabled, exceptionPlotIds)
+    if not isDisabled then
+        m_kTutorialPermittedSelectionPlots = nil
+        return
+    end
+    m_kTutorialPermittedSelectionPlots = {}
+    for _, plotId in ipairs(exceptionPlotIds or {}) do
+        m_kTutorialPermittedSelectionPlots[plotId] = true
+    end
+end
+
 -- ===========================================================================
 -- RESTRICTION QUERIES
 -- ===========================================================================
@@ -142,6 +154,11 @@ function IsUnitTypeAllowedToMoveToPlot(unitType, plotId)
         end
     end
     return true
+end
+
+function IsCAITutorialPlotSelectionAllowed(plotId)
+    return m_kTutorialPermittedSelectionPlots == nil
+        or m_kTutorialPermittedSelectionPlots[plotId] == true
 end
 
 local function IsPlotPathRestrictedForUnit(kPlotPath, kTurnsList, pUnit)
@@ -1344,7 +1361,37 @@ local function BuildPowerLensPlotInfo(plot)
     return #lines > 0 and lines or nil
 end
 
-local function BuildTourismLensPlotInfo(plot)
+local function GetTourismStrengthLabel(tourismValue)
+    if tourismValue >= 16 then
+        return Locale.Lookup("LOC_CAI_TOURISM_STRENGTH_HIGH")
+    end
+    if tourismValue >= 8 then
+        return Locale.Lookup("LOC_CAI_TOURISM_STRENGTH_MEDIUM")
+    end
+
+    return Locale.Lookup("LOC_CAI_TOURISM_STRENGTH_LOW")
+end
+
+local function SplitTourismTooltipLines(tooltip)
+    local lines = {}
+    if tooltip == nil or tooltip == "" then
+        return lines
+    end
+
+    local normalized = string.gsub(tooltip, "%[NEWLINE%]", "\n")
+    normalized = string.gsub(normalized, "\r\n", "\n")
+    normalized = string.gsub(normalized, "\r", "\n")
+    for line in string.gmatch(normalized .. "\n", "(.-)\n") do
+        local trimmed = string.gsub(line, "^%s*(.-)%s*$", "%1")
+        if trimmed ~= "" then
+            lines[#lines + 1] = trimmed
+        end
+    end
+
+    return lines
+end
+
+local function BuildTourismLensPlotInfo(plot, detailed)
     local localPlayerID = Game.GetLocalPlayer()
     if localPlayerID == nil or localPlayerID < 0 then
         return nil
@@ -1363,11 +1410,26 @@ local function BuildTourismLensPlotInfo(plot)
     local plotIndex = plot:GetIndex()
     local tourismValue = culture.GetTourismAt ~= nil and culture:GetTourismAt(plotIndex) or 0
     if tourismValue <= 0 then
-        return nil
+        return detailed and Locale.Lookup("LOC_CAI_LENS_TOURISM_NO_BANNER") or nil
     end
 
     local touristCount = culture.GetTouristsAt ~= nil and culture:GetTouristsAt(plotIndex) or 0
-    return Locale.Lookup("LOC_CAI_WORLD_SCANNER_TOURISM_ITEM", tostring(tourismValue), tostring(touristCount))
+    local summary = Locale.Lookup(
+        "LOC_CAI_TOURISM_SUMMARY",
+        tourismValue,
+        GetTourismStrengthLabel(tourismValue),
+        touristCount
+    )
+    if not detailed or culture.GetTourismTooltipAt == nil then
+        return summary
+    end
+
+    local lines = { summary }
+    local tooltipLines = SplitTourismTooltipLines(culture:GetTourismTooltipAt(plotIndex))
+    for _, line in ipairs(tooltipLines) do
+        lines[#lines + 1] = line
+    end
+    return lines
 end
 
 local function BuildAppealLensPlotInfo(plot)
@@ -1534,12 +1596,12 @@ local function GetActiveLensHelper()
     return nil
 end
 
-function GetActiveLensPlotInfo(plot)
+function GetActiveLensPlotInfo(plot, detailed)
     if plot == nil then return nil end
     if not IsActiveInterfacePlotRevealed(plot) then return nil end
     local helper = GetActiveLensHelper()
     if helper == nil then return nil end
-    return helper(plot)
+    return helper(plot, detailed == true)
 end
 
 local function SpeakActiveLensPlotInfo(plot)
@@ -1548,7 +1610,7 @@ local function SpeakActiveLensPlotInfo(plot)
         return false
     end
 
-    local lines = GetActiveLensPlotInfo(resolvedPlot)
+    local lines = GetActiveLensPlotInfo(resolvedPlot, true)
     if lines == nil then
         return false
     end
@@ -1627,14 +1689,3 @@ function SpeakActiveInterfacePlotInfo(plot)
     Speak(Locale.Lookup("LOC_CAI_NO_INTERFACE_INFO"))
     return false
 end
-
--- ===========================================================================
--- EVENT WIRING
--- ===========================================================================
-
-LuaEvents.Tutorial_AddUnitMoveRestriction.Add(OnTutorial_AddUnitMoveRestriction)
-LuaEvents.Tutorial_RemoveUnitMoveRestrictions.Add(OnTutorial_RemoveUnitMoveRestrictions)
-LuaEvents.Tutorial_ConstrainMovement.Add(OnTutorial_ConstrainMovement)
-LuaEvents.Tutorial_AddUnitHexRestriction.Add(OnTutorial_AddUnitHexRestriction)
-LuaEvents.Tutorial_RemoveUnitHexRestriction.Add(OnTutorial_RemoveUnitHexRestriction)
-LuaEvents.Tutorial_ClearAllHexMoveRestrictions.Add(OnTutorial_ClearAllUnitHexRestrictions)

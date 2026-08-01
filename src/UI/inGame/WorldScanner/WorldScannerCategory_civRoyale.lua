@@ -81,6 +81,7 @@ local function CollectZones(plotIndices, subCategoryId, labelKey, context, colle
                 zone.PlotIndices, context.SortOriginX, context.SortOriginY),
             ZonePlotIndices = zone.PlotIndices,
             ZoneValidatePlot = validator,
+            ZoneTileCountMode = "revealedOfTotal",
             LabelKey = labelKey,
             SubCategoryId = subCategoryId,
             GroupId = subCategoryId,

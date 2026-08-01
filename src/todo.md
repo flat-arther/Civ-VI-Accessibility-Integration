@@ -62,7 +62,7 @@
 [x] Popup dialog enter to commit should be disabled for edit boxes so that input can bubble to the dialog's default action
 [x] Fix dropdown focus restoration
 [x] Play a sound when changing volume for cursor audio
-[x] Have shift announce turn blocker info
+[x] Have shift space announce turn blocker info
 
 [x] offset the team numbering in team slot
 [x] Scanner sort should be based on cashed plot id

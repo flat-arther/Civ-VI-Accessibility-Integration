@@ -49,10 +49,13 @@
     <File>UI/uiManager/CAIWidget_Tab.lua</File>
     <File>UI/uiManager/CAIWidget_TabPage.lua</File>
     <File>UI/uiManager/CAIWidget_TabControl.lua</File>
-    <File>UI/uiManager/CAIWidget_Table.lua</File>
+    <File>UI/uiManager/CAIWidget_Grid.lua</File>
+    <File>UI/uiManager/CAIWidget_DataTable.lua</File>
     <File>UI/uiManager/CAIWidget_GameView.lua</File>
     <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>
     <File>UI/uiManager/CAIWidget_SearchPanel.lua</File>
+    <File>UI/uiManager/CAIUITutorialManager.lua</File>
+    <File>UI/uiManager/CAIUITutorialCatalog.lua</File>
     <File>UI/uiManager/CAIUIScreenManager.lua</File>
     <File>UI/inGame/cursor_CAI.lua</File>
     <File>UI/inGame/CivRoyaleMapInfo_CAI.lua</File>
@@ -172,6 +175,7 @@
     <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_tutorial.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_mapTacs.lua</File>
     <File>UI/inGame/CityStates_CAI.lua</File>
     <File>UI/inGame/ReligionScreen_CAI.lua</File>
@@ -228,13 +232,19 @@
     <File>data/unitOperationConfig_CAI.sql</File>
     <File>data/settings_CAI.sql</File>
     <File>data/audioDefinitions_CAI.sql</File>
+    <File>data/tutorial_civilopedia_CAI.xml</File>
     <File>Text/en_US/cai_text_ui.xml</File>
+    <File>Text/en_US/AccessibilityPediaText_CAI.xml</File>
+    <File>Text/en_US/TutorialText_CAI.xml</File>
     <File>Text/en_US/hotkey_symbol_names.sql</File>
+    <File>Text/en_US/tutorial_advisor_text_CAI.sql</File>
   </Files>
   <!-- FRONTEND -->
   <FrontEndActions>
     <UpdateText id="CAI_LOC_FrontEnd">
       <File>Text/en_US/cai_text_ui.xml</File>
+      <File>Text/en_US/AccessibilityPediaText_CAI.xml</File>
+      <File>Text/en_US/TutorialText_CAI.xml</File>
       <File>Text/en_US/hotkey_symbol_names.sql</File>
     </UpdateText>
 
@@ -283,10 +293,13 @@
       <File>UI/uiManager/CAIWidget_Tab.lua</File>
       <File>UI/uiManager/CAIWidget_TabPage.lua</File>
       <File>UI/uiManager/CAIWidget_TabControl.lua</File>
-      <File>UI/uiManager/CAIWidget_Table.lua</File>
+      <File>UI/uiManager/CAIWidget_Grid.lua</File>
+      <File>UI/uiManager/CAIWidget_DataTable.lua</File>
       <File>UI/uiManager/CAIWidget_GameView.lua</File>
       <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>
       <File>UI/uiManager/CAIWidget_SearchPanel.lua</File>
+      <File>UI/uiManager/CAIUITutorialManager.lua</File>
+      <File>UI/uiManager/CAIUITutorialCatalog.lua</File>
       <File>UI/uiManager/CAIUIScreenManager.lua</File>
       <File>UI/frontEnd/IntroScreen.lua</File>
       <File>UI/frontEnd/FrontEndPopup.lua</File>
@@ -327,11 +340,15 @@
   <InGameActions>
     <UpdateText id="CAI_LOC_Ingame">
       <File>Text/en_US/cai_text_ui.xml</File>
+      <File>Text/en_US/AccessibilityPediaText_CAI.xml</File>
+      <File>Text/en_US/TutorialText_CAI.xml</File>
       <File>Text/en_US/hotkey_symbol_names.sql</File>
+      <File>Text/en_US/tutorial_advisor_text_CAI.sql</File>
     </UpdateText>
     <UpdateDatabase id="INGAME_CAI_CONFIG">
       <File>data/unitOperationConfig_CAI.sql</File>
       <File>data/notifications_CAI.xml</File>
+      <File>data/tutorial_civilopedia_CAI.xml</File>
     </UpdateDatabase>
 
     <ImportFiles id="DramaticAges_GovernmentsScreen_CAI" criteria="DramaticAges_Expansion1_Mode">
@@ -390,10 +407,13 @@
       <File>UI/uiManager/CAIWidget_Tab.lua</File>
       <File>UI/uiManager/CAIWidget_TabPage.lua</File>
       <File>UI/uiManager/CAIWidget_TabControl.lua</File>
-      <File>UI/uiManager/CAIWidget_Table.lua</File>
+      <File>UI/uiManager/CAIWidget_Grid.lua</File>
+      <File>UI/uiManager/CAIWidget_DataTable.lua</File>
       <File>UI/uiManager/CAIWidget_GameView.lua</File>
       <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>
       <File>UI/uiManager/CAIWidget_SearchPanel.lua</File>
+      <File>UI/uiManager/CAIUITutorialManager.lua</File>
+      <File>UI/uiManager/CAIUITutorialCatalog.lua</File>
       <File>UI/uiManager/CAIUIScreenManager.lua</File>
       <File>UI/inGame/InGame.lua</File>
       <File>UI/inGame/PlayerStateManager_CAI.lua</File>
@@ -473,6 +493,7 @@
       <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_tutorial.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_mapTacs.lua</File>
       <File>UI/inGame/NaturalDisasterPopup_CAI.lua</File>
       <!-- EndGameMenu is a wildcard host (include("EndGameMenu_", true)),

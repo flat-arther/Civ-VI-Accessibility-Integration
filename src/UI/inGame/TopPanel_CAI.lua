@@ -34,6 +34,15 @@ local ACTION_OPEN_REPORTS_CITY_STATUS = Input.GetActionId("UI_TopPanelOpenReport
 local ACTION_OPEN_REPORTS_GOSSIP = Input.GetActionId("UI_TopPanelOpenReportsGossip")
 local ACTION_OPEN_GLOBAL_RESOURCES = Input.GetActionId("UI_OpenGlobalResourcePopup")
 
+local function IsReportOpeningAction(actionId)
+    return actionId == ACTION_OPEN_YIELD_LIST
+        or actionId == ACTION_OPEN_REPORTS
+        or actionId == ACTION_OPEN_REPORTS_RESOURCES
+        or actionId == ACTION_OPEN_REPORTS_CITY_STATUS
+        or actionId == ACTION_OPEN_REPORTS_GOSSIP
+        or actionId == ACTION_OPEN_GLOBAL_RESOURCES
+end
+
 
 local function GetLocalPlayer()
     local playerID = Game.GetLocalPlayer()
@@ -758,6 +767,11 @@ end
 -- ===========================================================================
 local function OnCAITopPanelInputAction(actionId)
     if ContextPtr:IsHidden() then return end
+    if IsReportOpeningAction(actionId)
+        and not IsCAITutorialControlAllowed("LaunchBar_Hook_Reports") then
+        Speak(Locale.Lookup("LOC_CAI_UI_BLOCKED_BY_TUTORIAL"))
+        return
+    end
     if actionId == ACTION_SPEAK_TURN_TIME_DATE then
         SpeakTurnTimeDate()
     elseif actionId == ACTION_SPEAK_GOLD then

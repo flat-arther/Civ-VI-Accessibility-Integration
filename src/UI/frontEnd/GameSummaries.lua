@@ -1029,6 +1029,13 @@ local m_historyList    = nil
 local m_sortDropdown       = nil
 local m_rulesetDropdown = nil
 local m_isBuilt        = false
+local m_sortFunctions  = {
+    History_SortByScore,
+    History_SortByLeader,
+    History_SortByResult,
+    History_SortByVictor,
+    History_SortByLastPlayed,
+}
 
 local function MakeId(prefix)
     return mgr:GenerateWidgetId(prefix)
@@ -1345,6 +1352,9 @@ local function BuildHoFPanel()
         FocusKey = "hof:ruleset",
     })
     m_rulesetDropdown:SetFocusSound(HOVER_SOUND)
+    m_rulesetDropdown:On("value_changed", function(_, val)
+        SelectRuleset(val)
+    end)
     m_hofPanel:AddChild(m_rulesetDropdown)
 
     -- Tabs
@@ -1362,13 +1372,6 @@ local function BuildHoFPanel()
     m_historyList = mgr:CreateWidget(MakeId("CAIHoF_hist_"), "List", {})
     historyPage:AddChild(m_historyList)
 
-    local sortFuncs = {
-        History_SortByScore,
-        History_SortByLeader,
-        History_SortByResult,
-        History_SortByVictor,
-        History_SortByLastPlayed,
-    }
     m_sortDropdown = mgr:CreateWidget(MakeId("CAIHoF_sort_"), "Dropdown", {
         Label = function() return Locale.Lookup("LOC_CAI_HOF_SORT_BY") end,
         FocusKey = "hof:sort",
@@ -1383,7 +1386,7 @@ local function BuildHoFPanel()
     })
     m_sortDropdown:SetSelectedIndex(1, true)
     m_sortDropdown:On("value_changed", function(_, val)
-        g_GameListingsSortFunction = sortFuncs[val]
+        g_GameListingsSortFunction = m_sortFunctions[val]
         g_SortDirectionReversed = false
         History_PopulateGames()
     end)
@@ -1403,6 +1406,20 @@ local function BuildHoFPanel()
     m_isBuilt = true
 end
 
+local function SyncRulesetDropdownSelection()
+    if not m_rulesetDropdown then return end
+    local selectedIndex = 0
+    for i, v in ipairs(g_AvailableRulesets or {}) do
+        if v == g_CurrentRuleset then
+            selectedIndex = i
+            break
+        end
+    end
+    if #(g_AvailableRulesets or {}) > 0 then
+        m_rulesetDropdown:SetSelectedIndex(selectedIndex > 0 and selectedIndex or 1, true)
+    end
+end
+
 local function PopulateRulesetDropdown()
     if not m_rulesetDropdown then return end
     local options = {}
@@ -1410,21 +1427,33 @@ local function PopulateRulesetDropdown()
         table.insert(options, { label = v.DisplayName, value = i })
     end
     m_rulesetDropdown:SetOptions(options)
-    if #options > 0 then
-        m_rulesetDropdown:SetSelectedIndex(1, true)
+    SyncRulesetDropdownSelection()
+end
+
+local function SyncSortDropdown()
+    if not m_sortDropdown then return end
+    local selectedIndex = 1
+    if g_GameListingsSortFunction then
+        for i, sortFunction in ipairs(m_sortFunctions) do
+            if sortFunction == g_GameListingsSortFunction then
+                selectedIndex = i
+                break
+            end
+        end
     end
-    m_rulesetDropdown:On("value_changed", function(_, val)
-        SelectRuleset(val)
-        RebuildOverviewTree()
-        RebuildHistoryList()
-    end)
+    m_sortDropdown:SetSelectedIndex(selectedIndex, true)
+end
+
+local function RefreshHoFPanel()
+    PopulateRulesetDropdown()
+    SyncSortDropdown()
+    RebuildOverviewTree()
+    RebuildHistoryList()
 end
 
 local function PushHoFPanel()
     BuildHoFPanel()
-    PopulateRulesetDropdown()
-    RebuildOverviewTree()
-    RebuildHistoryList()
+    RefreshHoFPanel()
     mgr:Push(m_hofPanel, PopupPriority.Current)
 end
 
@@ -1457,14 +1486,27 @@ end)
 -- Wrap History_PopulateGames so CAI list stays in sync when vanilla sorts
 History_PopulateGames = WrapFunc(History_PopulateGames, function(orig)
     orig()
+    SyncSortDropdown()
     RebuildHistoryList()
 end)
 
--- Wrap SelectRuleset so overview rebuilds on ruleset change from vanilla dropdown
+-- Keep CAI controls synchronized with every vanilla refresh/reset path.
+PopulateAvailableRulesets = WrapFunc(PopulateAvailableRulesets, function(orig)
+    orig()
+    PopulateRulesetDropdown()
+end)
+
 SelectRuleset = WrapFunc(SelectRuleset, function(orig, index)
     orig(index)
+    SyncRulesetDropdownSelection()
     RebuildOverviewTree()
-    RebuildHistoryList()
+end)
+
+SelectTab = WrapFunc(SelectTab, function(orig, index)
+    orig(index)
+    if m_hofTabs then
+        m_hofTabs:SetActivePage(index, true)
+    end
 end)
 
 -- Re-register input handler with InputStruct signature

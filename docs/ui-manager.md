@@ -18,7 +18,7 @@ The manager has four layers:
    class inheritance via metatable chains; not the old template-merging model.
 3. **Concrete widgets** — Button, MenuItem, StaticText, Panel, Dialog,
    Dropdown, List, HorizontalList, SubMenu, Tree, TreeItem, Checkbox, Slider,
-   EditBox, TabControl, Tab, TabPage, Table, GameView, InterfaceMode. Each is
+   EditBox, TabControl, Tab, TabPage, Grid, DataTable, GameView, InterfaceMode. Each is
    one file under `src/UI/uiManager/`.
 4. **Helpers** (`src/UI/uiManager/helpers/`) — stateless utilities used by
    widgets and the manager: navigation, search, tree walks, edit-box logic,
@@ -56,6 +56,8 @@ UIWidget                       identity, tree, events, input, speech
 │   ├── TabPageWidget
 │   ├── TabControlWidget
 │   ├── DropdownWidget         container of an inner List of MenuItems
+│   ├── GridWidget             spatial columns/tiers; arbitrary widget cells
+│   ├── DataTableWidget        sortable homogeneous rows; player role Table
 │   ├── GameViewWidget
 │   └── InterfaceModeWidget
 ├── ValueWidget                stateful value with bound setter
@@ -65,8 +67,7 @@ UIWidget                       identity, tree, events, input, speech
 ├── ButtonWidget               leaf
 ├── MenuItemWidget             leaf
 ├── StaticTextWidget           leaf
-├── TabWidget                  leaf, parented to a TabControl
-└── TableWidget                row-major; cells are arbitrary widgets
+└── TabWidget                  leaf, parented to a TabControl
 ```
 
 Inheritance is real: each concrete class has its own metatable that chains up
@@ -103,12 +104,17 @@ local w = mgr:CreateWidget(id, "Button", props)
 mgr:Push(root, { priority = PopupPriority.Current, focus = "edit:name" })
 mgr:Pop()
 mgr:RemoveFromStack("ScreenRoot_City")
+mgr:RemoveFromStack("ModalRoot", false) -- parent refresh immediately chooses final focus
 ```
 
 - `priority` controls stack sort. Ties resolve by push order (FIFO).
 - `focus` is a widget reference or a `FocusKey` string. Applied only when the
   pushed widget becomes the new top. Avoids screens reaching into
   `FocusedChild` to pre-position focus.
+- `RemoveFromStack(id, false)` restores the next root silently. Use it only
+  when the same synchronous close path immediately refreshes that parent and
+  moves focus to the final destination; this prevents speaking an obsolete
+  intermediate focus before the parent refresh completes.
 - The active root is always the top of the stack. Focus follows automatically.
 
 ### Settings and replacement child views
@@ -130,6 +136,138 @@ to that root and call `mgr:PrepareFocus(ownerRoot, initialChild)` before calling
 `CloseSettings(mgr, false)`. The `false` preserves the replacement's prepared
 focus rather than restoring the screen immediately. The replacement should
 trap input and owns the saved widget so it can focus that widget when it closes.
+
+### Event-driven tutorials
+
+Each UI manager owns a `CAIUITutorialManager`, available through
+`mgr:GetTutorialManager()`. Tutorial items are registered data definitions and
+react to named checks in the same broad style as vanilla
+`TutorialCheck(listenerName)`, but they do not use Firaxis advisor overlays,
+tutorial priorities, or control filtering.
+
+The first production item is `MAIN_MENU_UI_NAVIGATION`. The Main Menu checks
+its `MainMenuOpened` event after its route is pushed, and the tutorial
+introduces the mod interface and the manager's core keyboard navigation.
+All localization owned by the mod tutorial system, including shared dialog and
+settings text as well as item titles and content, belongs in
+`src/Text/en_US/TutorialText_CAI.xml`. Keep unrelated accessibility strings,
+including support for the game's own tutorial mode, in their existing locale
+files.
+
+`CAIUITutorialCatalog` owns stable screen-level definitions and matches them to
+CAI stack-root ids after `UIScreenManager:Push()` has established focus. This
+keeps one-time screen guidance centralized while still passing the live screen
+root as the explicit tutorial owner. Contextual states which are not separate
+stack roots must check their own named events: Production checks
+`ProductionQueueOpened` when its Queue page becomes active, and World Congress
+checks separate events for resolution voting, emergency-proposal voting, and
+selecting a proposal for a future special session.
+
+Every catalog definition also has a matching article in the Civilopedia's
+dedicated `Accessibility Mod` section under `Screen Tutorials`. Screen
+definitions derive their shared static title tag as
+`LOC_CAI_TUTORIAL_<item id>_TITLE`; contextual definitions already declare
+their title tag. The generated gameplay database file reuses each definition's
+ordered `Content` tags as `Simple` article paragraphs.
+
+The same section has ungrouped introduction, key-binding, and search/type-ahead
+guides plus a `UI Widgets` group. That group has one article for each concrete
+inheritance family: Leaf, Value, and Container widgets. Each included widget is
+a titled chapter within its family article. The generated data defines a
+family-specific page layout that uses the stock `Simple` script template, then
+maps its ordered chapter ids through `CivilopediaPageLayoutChapters`,
+`CivilopediaPageChapterHeaders`, and
+`CivilopediaPageChapterParagraphs`.
+
+The widget inventory is deliberately concrete: it documents widget types
+exposed by in-game CAI screens, with `MenuItem` intentionally omitted from the
+reference. Abstract base classes and the internal `HorizontalList` used to
+implement tab strips also do not get player-facing chapters. Widget prose must
+be audited against the class input maps, focus behavior, speech behavior, and
+concrete in-game usage before it changes. Its localized text lives in
+`src/Text/en_US/AccessibilityPediaText_CAI.xml`.
+
+After changing catalog ids, titles, order or content, or the Civilopedia guide
+and widget inventories, run `scripts/Generate-TutorialCivilopedia.ps1`.
+
+A contextual tutorial raised by a tab or focus-change callback must be deferred
+until the next context update. `TabControl` emits `value_changed` before every
+focus path has finished settling, including the focus move performed after a
+keyboard tab switch. Raising a child tutorial synchronously from that event can
+let the remainder of the tab transaction steal focus back from the tutorial.
+Schedule the check for the next update, cancel that pending update when the
+screen closes, and make the tutorial check the final focus-affecting operation.
+
+```lua
+local tutorials = mgr:GetTutorialManager()
+
+tutorials:RegisterItem({
+    Id = "PRODUCTION_PANEL_INTRO",
+    RaiseEvents = { "ProductionPanelOpened" },
+    Order = 10,
+    Queueable = false,
+    Prerequisites = {},
+    Title = "LOC_CAI_TUTORIAL_PRODUCTION_TITLE",
+    Content = {
+        "LOC_CAI_TUTORIAL_PRODUCTION_OVERVIEW",
+        "LOC_CAI_TUTORIAL_PRODUCTION_NAVIGATION",
+    },
+    CanRaise = function(context)
+        return context.cityId ~= nil
+    end,
+})
+
+tutorials:Check("ProductionPanelOpened", productionRoot, {
+    cityId = selectedCityId,
+})
+```
+
+`Check(eventName, owner, context?)` requires the owning widget explicitly.
+Eligible dialogs are added beneath that owner as a transparent, input-trapping
+Panel containing a Dialog. They are not pushed as stack roots, so they remain
+inside the current route and inherit the owning screen's popup priority just
+like Settings and Civilopedia lookup. Always pass a live owner from the screen
+which fires the check; do not infer ownership from whichever popup happens to
+be on top.
+
+Every dialog contains the definition's ordered StaticText rows, the shared
+`Show mod tutorials` Checkbox, and one `Continue` action. Escape is consumed;
+Continue is the completion path. Continue persists
+the current reset generation to `Tutorials/Seen_<item.Id>` through
+`CAI.SetConfigValue`, invokes optional
+`OnContinue(context, item)`, closes the child Panel, and restores the prior
+focus. If persistence fails, the dialog remains open and announces the failure.
+Destroying the owner closes the dialog without marking it seen.
+
+The UI section of Mod Settings contains two tutorial controls:
+
+- `Show mod tutorials` is the default-enabled `ShowTutorials` Checkbox. When
+  false, new checks do nothing and queued items are cleared.
+- `Reset mod tutorials` is the `ResetModTutorials` action Button. It emits
+  `LuaEvents.CAISettingsChanged("ResetModTutorials", "reset")`, advances the
+  persisted tutorial reset generation, and speaks `Tutorials reset`. It does
+  not close Settings or move focus.
+
+Generation-based reset makes every older completion record logically unseen,
+including tutorials whose defining screens are not currently loaded. Seen
+state is profile-global, not save-game state. String `Title` and `Content`
+entries are localization tags; functions must return already-localized text
+and receive `(context, item)`.
+
+Items with the same raise event are evaluated by ascending `Order`, then
+registration order. Only one tutorial is active. `Queueable` defaults to false,
+matching vanilla's conservative behavior; queued items open only if their owner
+is still live and becomes the current stack route. `Prerequisites` contains
+stable item ids which must already be seen.
+
+Public methods:
+
+- `RegisterItem(definition)` / `RegisterItems(definitions)`
+- `Check(eventName, owner, context?)`
+- `IsSeen(itemId)` / `MarkSeen(itemId)`
+- `ResetSeen(itemId)` / `ResetAllSeen()`
+- `AreTutorialsEnabled()` / `IsActive()`
+- `Continue()` / `ClearQueue()`
 
 ### Destroy
 
@@ -300,7 +438,7 @@ When vanilla refreshes part of a screen, CAI refreshes only the mirrored widget
 container for that same vanilla-owned area. Do not remove and re-push the whole
 CAI root, and do not rebuild unrelated sibling widgets, unless the user
 explicitly asks for that behavior or vanilla has actually closed/reopened the
-whole screen. For list/tree/table refreshes, keep the root mounted and use the
+whole screen. For list/tree/table/grid refreshes, keep the root mounted and use the
 container-local focus tools above (`CaptureFocusKey` / `RestoreFocus`, or
 `PrepareFocus` when the rebuilt container is not currently focused). This avoids
 spurious root-focus resets such as tab-strip focus bouncing into a refreshed
@@ -551,6 +689,26 @@ installs `Manager:HandleInput(input)` for the active context. It:
 4. For each node with an `OnHandleInput`, calls it.
 5. Returns true the first time a handler returns true (consumed).
 
+Enter activation is focus-owned across its physical key lifecycle only when the
+focused path has a matching CAI `InputMap` binding. The manager records the
+focused leaf on that binding's first Enter key-down and permits the matching
+key-up only while that leaf still owns focus. Civ VI may deliver the same raw
+event through multiple always-active contexts, and an activation can
+synchronously replace the focused surface between those deliveries. The
+down/up ownership rule rejects a duplicate orphaned key-up when the newly
+focused path also owns Enter, without retaining an `InputStruct`, delaying the
+new surface, or affecting a later complete Enter press. If the recorded owner
+leaves `CurrentPath` before CAI receives the release, the manager cancels the
+held state during focus application or destroy pruning. This is required for
+contexts such as Tutorial Setup, where vanilla consumes the movie-skip Enter
+key-up while synchronously removing the CAI movie panel.
+
+Do not apply this ownership rule to paths without an Enter binding. World and
+interface-mode actions such as confirming a Move To destination are dispatched
+through `Events.InputActionTriggered` and can reach the raw context handler
+without a matching key-down. Consuming such an unmatched raw key-up prevents
+the game action from firing.
+
 `UIWidget:OnHandleInput` does the default: walks `InputMap` for a binding
 whose key, modifier mask, and message type match the incoming event, then
 calls its `Action(self)`. Return `true` to consume, `false` to bubble up
@@ -647,7 +805,7 @@ the focused row's sibling level. The helper module
   classifier independently, so a strong tooltip match never displaces or
   outranks an available label match. Widgets whose labels match at any tier are
   not duplicated through their tooltips.
-- A persistent search is owned by the List or Tree where typing began. Moving
+- A persistent search is owned by the container where typing began. Moving
   focus outside that container clears it silently. A successful widget
   interaction also clears it silently: activation, value or text changes,
   dropdown open/close, TreeItem or SubMenu expand/collapse, and entering an
@@ -671,6 +829,15 @@ end
 ```
 
 `SearchDepth` defaults: List = 2, Tree = 3.
+
+A container can implement `GetTypeToFindCandidates(includeTooltips)` to replace
+the normal depth-limited descendant collection while retaining the shared
+buffer, six-tier ranking, repeat-letter cycling, Backspace/Escape behavior, and
+persistent Up/Down result navigation. Build each custom candidate with
+`CAIWidgetHelpers_Search.MakeSearchCandidate(widget, label, order, tooltip)`.
+`Grid` uses this hook to search every visible item cell across all
+columns and tiers. `DataTable` uses it to search only its primary row labels;
+each result targets that row's cell in the currently focused column.
 
 ### Ctrl+F search panel
 
@@ -830,9 +997,9 @@ detached from the children list. `SetActivePage(i)` swaps slot 2.
 
 ---
 
-## 11. Table
+## 11. Grid and DataTable
 
-Three-level hierarchy: **Table → Column → Tier → item cell**.
+`Grid` uses a three-level hierarchy: **Grid → Column → Tier → item cell**.
 
 - **Column** is a labeled group (e.g. a civics-tree era). It speaks only its
   header label — role and position are muted — and owns its cells through
@@ -845,23 +1012,23 @@ Three-level hierarchy: **Table → Column → Tier → item cell**.
 - **Item cell** is an arbitrary widget stacked vertically inside a tier. Its
   position element reads as its vertical index within the tier ("3 of 7").
 
-A plain data grid is the degenerate case: every column has one tier (`width`
+A plain grid is the degenerate case: every column has one tier (`width`
 defaults to 1), so Left/Right walks columns and Up/Down walks rows, and each
 column header is announced as you move across.
 
 ```lua
 -- Plain grid
-local tbl = mgr:CreateWidget(id, "Table", { Label = ... })
-tbl:AddColumn({ header = "Unit" })
-tbl:AddColumn({ header = "Health" })
+local grid = mgr:CreateWidget(id, "Grid", { Label = ... })
+grid:AddColumn({ header = "Unit" })
+grid:AddColumn({ header = "Health" })
 for _, unit in ipairs(units) do
-    tbl:AddRow({ cellStaticText(unit.name), cellStaticText(unit.healthString) })
+    grid:AddRow({ cellStaticText(unit.name), cellStaticText(unit.healthString) })
 end
 
 -- Multi-tier (civics tree: era column with several tiers side by side)
-local era = tbl:AddColumn({ header = eraName, width = 3 })
-tbl:AddItem(era, 1, civicWidget)   -- tier 1, appended vertically
-tbl:AddItem(era, 2, otherCivic)    -- tier 2
+local era = grid:AddColumn({ header = eraName, width = 3 })
+grid:AddItem(era, 1, civicWidget)   -- tier 1, appended vertically
+grid:AddItem(era, 2, otherCivic)    -- tier 2
 ```
 
 | Method                          | What                                          |
@@ -879,7 +1046,7 @@ tbl:AddItem(era, 2, otherCivic)    -- tier 2
 
 ### Grid navigation
 
-All navigation lives on the `TableWidget` (it reads the live focus leaf via
+All navigation lives on the `GridWidget` (it reads the live focus leaf via
 `Manager:GetFocusedWidget()`). Hidden and empty cells are **skipped in the
 direction of travel** — never landed on. There is no wrap; reaching an edge
 with no candidate returns false so input bubbles to the parent.
@@ -889,9 +1056,123 @@ with no candidate returns false so input bubbles to the parent.
   (across all columns), landing on the cell at the same vertical index
   (clamped). Crossing a column boundary triggers the header announce.
 - **Home / End** — first / last visible cell in the current tier.
-- **Ctrl+Home / Ctrl+End** — table-wide first / last navigable cell.
+- **Ctrl+Home / Ctrl+End** — grid-wide first / last navigable cell.
 - **Ctrl+Left / Ctrl+Right** — jump to the first cell of the previous / next
   column.
+
+Typing searches every visible item cell in every column and tier. The shared
+type-to-find result set applies: repeated initial letters cycle matches,
+Backspace edits the query, Escape clears it, and Up/Down move through ranked
+results while the query remains active. Tooltip-only cell matches participate
+when the global type-to-find tooltip setting is enabled.
+
+### Data tables
+
+`DataTableWidget` is the homogeneous-row companion to `GridWidget`.
+They share cell navigation and type-to-find behavior, but expose distinct
+localized player-facing roles: `Table` and `Grid`.
+Use `DataTable` when every row represents one stable record and columns expose
+live comparable values. Use `Grid` for technology/civic layouts and other
+spatial or multi-tier arrangements whose cells are arbitrary widgets. Sorting
+belongs to `DataTable`; `Grid` does not define a sorting model.
+
+The screen supplies row records, stable row keys, a primary row label, and
+column definitions. A record should normally be a stable game id or a small
+table of ids; every label, tooltip, state, disabled predicate, and sort key is
+read live through its getter.
+
+```lua
+local tableView = mgr:CreateWidget("CAICities_Data", "DataTable", {
+    Label = function() return Locale.Lookup("LOC_REPORTS_CITIES") end,
+})
+
+tableView:SetColumns({
+    {
+        key = "name",
+        header = GetLocalizedNameHeader,
+        getCell = function(cityID) return GetLiveCityName(cityID) end,
+        sortKey = function(cityID) return GetLiveCityName(cityID) end,
+    },
+    {
+        key = "population",
+        header = GetLocalizedPopulationHeader,
+        getCell = function(cityID) return tostring(GetLivePopulation(cityID)) end,
+        sortKey = function(cityID) return GetLivePopulation(cityID) end,
+    },
+})
+tableView:SetRowsProvider(GetLiveCityIDs)
+tableView:SetRowKeyGetter(function(cityID) return cityID end)
+tableView:SetRowLabelGetter(GetLiveCityName)
+tableView:SetDefaultSort({ column = "name", ascending = true })
+tableView:Rebuild()
+```
+
+Column fields are:
+
+- `key`: required stable string identity.
+- `header`: required localized string or live getter.
+- `getCell(row)`: required live spoken cell value.
+- `sortKey(row)`: optional live sortable value. Its presence makes the header
+  a sort button.
+- `getTooltip(row)`, `getState(row)`, and `isDisabled(row)`: optional live
+  widget metadata.
+- `activatable`: optional boolean. When true, data cells receive the localized
+  Button role and emit the table's `cell_activate` event on Enter or Space.
+  Attach the screen behavior with `tableView:On("cell_activate", fn)`.
+- `role`: optional role override for data cells. Ordinary data cells have the
+  localized `TableCell` role, but suppress it from routine focus speech. An
+  activatable cell uses the spoken Button role instead.
+
+`Rebuild()` re-reads the row provider, applies the current sort, recreates the
+grid, and restores the logical cell by its generated row-key/column-key
+`FocusKey`. Sorts are stable: equal values retain the row provider's order,
+localized strings use `Locale.Compare`, and nil values remain last in either
+direction. `SetDefaultSort(...)` seeds the initial active sort; clearing a sort
+returns to the provider's natural order. `GetSort()` returns the active column
+key (or `nil`) and its ascending flag, which lets a screen retain a sort while
+replacing dynamic column definitions.
+
+The header is a real row above the data. Enter or Space on a sortable header
+cycles descending, ascending, then natural order. Up/Down moves through the
+header and data rows; Left/Right moves through columns. Home/End moves to the
+first/last data row in the current column. Ctrl+Home/Ctrl+End moves to the
+first/last table cell, and Ctrl+Left/Ctrl+Right moves to the adjacent column's
+header. Navigation does not wrap.
+
+Typing searches only the primary label supplied by `SetRowLabelGetter`; cell
+values, headers, states, and tooltips are intentionally excluded. A match lands
+on that row in the currently focused column, so finding a record does not
+discard column context. The standard repeat-letter, Backspace, Escape, and
+persistent Up/Down result behavior applies.
+
+Speech tracks logical coordinates independently from the widget ancestry:
+
+- Initial entry speaks row label, column header, and cell value.
+- A vertical move speaks the new row label and cell value without repeating
+  the unchanged column.
+- A horizontal move speaks the new column header and cell value without
+  repeating the unchanged row label.
+- Exact duplicate row-label/header/value fragments are omitted.
+- Position speech reports both data-row and column coordinates. Header
+  position speech reports its column coordinate.
+
+Non-sortable headers also carry the silent `TableCell` role. Sortable headers
+carry the spoken Button role and are the only header cells with activation
+bindings. A sortable column does not make its ordinary data cells activatable.
+
+The widget emits the following events. As with all widget events, the DataTable
+itself is the first listener argument.
+
+- `row_focus_enter(row, rowIndex, cell)` when focus enters a different logical
+  row. Header focus supplies nil row and index 0.
+- `cell_focus_enter(row, column, cell)` on every cell focus entry.
+- `cell_activate(row, column, cell)` for an activatable data cell.
+- `sort_changed(columnKey, ascending)` after a header changes the sort. Natural
+  order supplies nil column key.
+- `rebuilt(rowCount)` after a completed rebuild.
+
+`GetFocusedRow()` and `GetFocusedColumn()` let table-level input bindings
+resolve their current live record.
 
 ---
 
@@ -908,9 +1189,10 @@ mgr:Push(d, { priority = PopupPriority.Current })
 ```
 
 `SetButtons(buttons, defaultIndex)` auto-creates a `Transparent` Panel as the
-last child of the dialog, wires Left/Right + Up/Down (all four cycle buttons
-within the row — Tab escapes), and sets the default action widget. Enter on
-the dialog fires that widget's `activate`.
+last child of the dialog and wires Left/Right + Up/Down across its buttons.
+Because the row does not wrap, Up/Down at its edges bubble back to dialog-row
+navigation. The method also sets the default action widget; Enter on the dialog
+fires that widget's `activate`.
 
 `GetActionButtons()` and `GetContent()` return the button-row children and
 all other (non-button-row) children respectively.
@@ -1024,7 +1306,8 @@ src/UI/uiManager/
   CAIWidget_TabControl.lua
   CAIWidget_Tab.lua
   CAIWidget_TabPage.lua
-  CAIWidget_Table.lua
+  CAIWidget_Grid.lua
+  CAIWidget_DataTable.lua
   CAIWidget_GameView.lua
   CAIWidget_InterfaceMode.lua
   CAIWidget_SearchPanel.lua
@@ -1122,7 +1405,7 @@ When migrating a screen from the old template-merged manager:
 | MenuItem       | Enter → activate                                              |
 | Panel          | Tab / Shift+Tab → next/prev                                   |
 | Dialog         | Tab / Shift+Tab / Up / Down → next/prev row; Enter → default  |
-| Dialog buttons | Left / Right / Up / Down → cycle (sticky)                     |
+| Dialog buttons | Left / Right / Up / Down → move across buttons; Up/Down bubble at row edges |
 | List           | Up/Down/Home/End/PgUp/PgDn; Ctrl+F → search; chars → search  |
 | HorizontalList | Left/Right/Home/End/PgUp/PgDn                                 |
 | SubMenu        | Enter / Right → expand-enter; Left → collapse-exit;            |
@@ -1137,5 +1420,7 @@ When migrating a screen from the old template-merged manager:
 | Tab strip      | Left / Right (via HorizontalList) cycles tabs and switches    |
 | Dropdown       | Closed: Enter → open. Open: List nav on inner items;           |
 |                | Enter on item → commit + close; Esc → close without commit     |
-| Table          | Up/Down → within tier; Left/Right → across tiers; Home/End →  |
-|                | tier edge; Ctrl+Home/End → table edge; Ctrl+Left/Right → column |
+| Grid           | Up/Down → within tier; Left/Right → across tiers; Home/End →  |
+|                | tier edge; Ctrl+Home/End → grid edge; Ctrl+Left/Right → column |
+| DataTable      | Up/Down → rows; Left/Right → columns; sortable headers activate; |
+|                | Ctrl+Home/End → table edge; Ctrl+Left/Right → column header |

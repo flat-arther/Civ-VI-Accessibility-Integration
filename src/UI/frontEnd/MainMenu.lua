@@ -1823,6 +1823,7 @@ local MOTD_ID          = "CAIMainMenu_MotD"
 local VERSION_ID       = "CAIMainMenu_Version"
 local MY2K_ID          = "CAIMainMenu_My2K"
 local SUBMENU_LIST_ID  = "CAIMainMenu_SubmenuList"
+local MAIN_MENU_TUTORIAL_EVENT = "MainMenuOpened"
 
 local m_MainPanel       ---@type UIWidget|nil
 local m_MenuList        ---@type UIWidget|nil
@@ -1836,6 +1837,25 @@ local m_PendingParent   = nil       -- optionIndex captured in ToggleOption pre-
 local m_LastMotDText    = ""        -- prior MotD text, for change-driven Announce
 local m_CloudRowIdx     = nil       -- vanilla index of the Cloud Games row inside the current submenu
 local m_MultiplayerIdx  = nil       -- vanilla optionIndex of the top-level Multiplayer row
+
+local tutorialMgr = mgr:GetTutorialManager()
+tutorialMgr:RegisterItem({
+    Id = "MAIN_MENU_UI_NAVIGATION",
+    RaiseEvents = { MAIN_MENU_TUTORIAL_EVENT },
+    Order = 10,
+    Title = "LOC_CAI_TUTORIAL_MAIN_MENU_TITLE",
+    Content = {
+        "LOC_CAI_TUTORIAL_MAIN_MENU_INTERFACE",
+        "LOC_CAI_TUTORIAL_MAIN_MENU_NESTING",
+        "LOC_CAI_TUTORIAL_MAIN_MENU_FOCUS_SPEECH",
+        "LOC_CAI_TUTORIAL_MAIN_MENU_NAVIGATION",
+        "LOC_CAI_TUTORIAL_MAIN_MENU_ACTIVATION",
+        "LOC_CAI_TUTORIAL_MAIN_MENU_SEARCH",
+        "LOC_CAI_TUTORIAL_MAIN_MENU_TOOLTIPS",
+        "LOC_CAI_TUTORIAL_MAIN_MENU_HELP",
+        "LOC_CAI_TUTORIAL_MAIN_MENU_SETTINGS",
+    },
+})
 
 local m_animGateUntil = 0
 local function IsAnimating() return Automation.GetTime() < m_animGateUntil end
@@ -2031,6 +2051,7 @@ BuildMenu = WrapFunc(BuildMenu, function(orig, menuOptions)
     if mgr:GetWidgetById(MAIN_PANEL_ID) ~= m_MainPanel then
         mgr:Push(m_MainPanel)
     end
+    tutorialMgr:Check(MAIN_MENU_TUTORIAL_EVENT, m_MainPanel)
 end)
 
 -- ToggleOption is vanilla's single entry point for selecting/deselecting a

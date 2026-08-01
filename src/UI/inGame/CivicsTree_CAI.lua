@@ -19,7 +19,7 @@ local PANEL_ID            = "CAICivicsTree_Panel"
 local QUEUE_LIST_ID       = "CAICivicsTree_QueueList"
 local FILTER_LIST_ID      = "CAICivicsTree_FilterList"
 local MAIN_TREE_ID        = "CAICivicsTree_MainTree"
-local TABLE_VIEW_ID       = "CAICivicsTree_TableView"
+local GRID_VIEW_ID        = "CAICivicsTree_GridView"
 local UNLOCKS_LIST_ID     = "CAICivicsTree_UnlocksList"
 local GOV_EDIT_ID         = "CAICivicsTree_GovEdit"
 local CHANGE_VIEW_ID      = "CAICivicsTree_ChangeView"
@@ -32,18 +32,18 @@ local m_panel             = nil ---@type UIWidget|nil
 local m_queueList         = nil ---@type UIWidget|nil
 local m_filterList        = nil ---@type UIWidget|nil
 local m_mainTree          = nil ---@type UIWidget|nil
-local m_tableView         = nil ---@type UIWidget|nil
+local m_gridView          = nil ---@type UIWidget|nil
 local m_unlocksList       = nil ---@type UIWidget|nil
 local m_govEdit           = nil ---@type UIWidget|nil
 local m_changeViewBtn     = nil ---@type UIWidget|nil
 local m_filterResults     = nil ---@type UIWidget|nil
 
--- "table" (default) or "tree". The toggle button swaps between them; the
+-- "grid" (default) or "tree". The toggle button swaps between them; the
 -- inactive view is hidden so navigation skips it.
-local m_viewMode          = "table"
+local m_viewMode          = "grid"
 
 local m_treeCivics        = {} ---@type table<string, UIWidget> civicType -> tree node
-local m_tableCivics       = {} ---@type table<string, UIWidget> civicType -> table cell
+local m_gridCivics        = {} ---@type table<string, UIWidget> civicType -> grid cell
 local m_leadsToByType     = {} ---@type table<string, string[]>
 local m_civicIndexToType  = {} ---@type table<integer, string>
 local m_civicTierByType   = {} ---@type table<string, integer> civicType -> tier number within its era
@@ -395,7 +395,7 @@ local function BuildStaticMaps()
 
     -- Collect each era's distinct Column values so we can rank a civic's tier
     -- (1-based position of its Column among the era's columns). Mirrors the
-    -- Column grouping used when building the tree/table tiers.
+    -- Column grouping used when building the tree/grid tiers.
     local eraColumnSet = {} ---@type table<string, table<integer, boolean>>
     for civicType, kEntry in pairs(g_kItemDefaults) do
         local row = GameInfo.Civics[civicType]
@@ -522,7 +522,7 @@ end
 
 -- The focusable widget for a civic in the currently active view.
 local function GetActiveCivicWidget(civicType)
-    if m_viewMode == "table" then return m_tableCivics[civicType] end
+    if m_viewMode == "grid" then return m_gridCivics[civicType] end
     return m_treeCivics[civicType]
 end
 
@@ -557,7 +557,7 @@ local function JumpToCivic(civicType, recordBreadcrumb)
     -- Tree mode: era/tier nodes are IgnoreWhenNotFocused, so focus speech won't
     -- mention them on a jump. Fold the diverging era/tier into the spoken line,
     -- announcing only what actually changed (compared by widget, so Tier 1 of a
-    -- different era still counts as different). Table mode gets the era for free
+    -- different era still counts as different). Grid mode gets the era for free
     -- via the column header's natural focus speech, so it just says the civic.
     local parts = { GetCivicName(civicType) or "" }
     if m_viewMode == "tree" then
@@ -802,7 +802,7 @@ end
 -- ===========================================================================
 
 -- Rebuild the unlocks list to mirror the focused civic. Focus stays on the
--- table cell; the list is a passive sibling, so no capture/restore is needed.
+-- grid cell; the list is a passive sibling, so no capture/restore is needed.
 local function RebuildUnlocksList(civicType)
     if not m_unlocksList then return end
     m_unlocksList:ClearChildren()
@@ -810,14 +810,14 @@ local function RebuildUnlocksList(civicType)
     if not IsCivicRevealed(civicType) then return end
     for _, unlock in ipairs(GetCivicUnlockObjects(CivicKData(civicType))) do
         if unlock.Description then
-            m_unlocksList:AddChild(CreateUnlockChild(mgr, unlock, "CAICivicsTableUnlock"))
+            m_unlocksList:AddChild(CreateUnlockChild(mgr, unlock, "CAICivicsGridUnlock"))
         end
     end
 end
 
 local function BuildCivicCell(civicType)
     local capturedType = civicType
-    local cell = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTableCivic"), "Button", {
+    local cell = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsGridCivic"), "Button", {
         Label             = function() return FormatRowLabel(capturedType) end,
         Tooltip           = function() return FormatRowTooltip(capturedType) end,
         DisabledPredicate = function()
@@ -867,18 +867,18 @@ local function BuildCivicCell(civicType)
     return cell
 end
 
-local function MakeTableSpacer()
-    return mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicTableSpacer"), "StaticText", {
+local function MakeGridSpacer()
+    return mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicGridSpacer"), "StaticText", {
         HiddenPredicate = function() return true end,
     })
 end
 
-local function RebuildTableView()
-    if not m_tableView then return end
+local function RebuildGridView()
+    if not m_gridView then return end
 
-    local capture = mgr:CaptureFocusKey(m_tableView)
-    m_tableView:ClearChildren()
-    m_tableCivics = {}
+    local capture = mgr:CaptureFocusKey(m_gridView)
+    m_gridView:ClearChildren()
+    m_gridCivics = {}
 
     for _, era in ipairs(g_kEras) do
         -- Group this era's filtered civics by their tree Column; each distinct
@@ -900,7 +900,7 @@ local function RebuildTableView()
         if #colValues > 0 then
             table.sort(colValues)
             local capturedDescription = era.Description
-            local column = m_tableView:AddColumn({
+            local column = m_gridView:AddColumn({
                 header = function() return Locale.Lookup(capturedDescription) end,
                 width  = #colValues,
             })
@@ -915,29 +915,29 @@ local function RebuildTableView()
                     local entry = byRow[r]
                     if entry then
                         local cell = BuildCivicCell(entry.civicType)
-                        m_tableCivics[entry.civicType] = cell
-                        m_tableView:AddItem(column, tierIndex, cell)
+                        m_gridCivics[entry.civicType] = cell
+                        m_gridView:AddItem(column, tierIndex, cell)
                     else
-                        m_tableView:AddItem(column, tierIndex, MakeTableSpacer())
+                        m_gridView:AddItem(column, tierIndex, MakeGridSpacer())
                     end
                 end
             end
         end
     end
 
-    mgr:RestoreFocus(m_tableView, capture)
+    mgr:RestoreFocus(m_gridView, capture)
 end
 
 -- Rebuild whichever civic views exist, keeping both in sync with game/filter
 -- state so jumps land correctly regardless of the active mode.
 local function RebuildCivicsViews()
     RebuildMainTree()
-    RebuildTableView()
+    RebuildGridView()
 end
 
 local function ToggleViewMode()
-    m_viewMode = (m_viewMode == "tree") and "table" or "tree"
-    local active = (m_viewMode == "table") and m_tableView or m_mainTree
+    m_viewMode = (m_viewMode == "tree") and "grid" or "tree"
+    local active = (m_viewMode == "grid") and m_gridView or m_mainTree
     if active then mgr:SetFocus(active) end
 end
 
@@ -1246,7 +1246,7 @@ local function EnsurePanelBuilt()
     m_panel:AddChild(m_filterList)
     BuildFilterList()
 
-    -- 3) Main tree (hidden in table mode)
+    -- 3) Main tree (hidden in grid mode)
     m_mainTree = mgr:CreateWidget(MAIN_TREE_ID, "Tree", {
         Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_MAIN_LIST") end,
         HiddenPredicate = function() return m_viewMode ~= "tree" end,
@@ -1270,20 +1270,20 @@ local function EnsurePanelBuilt()
     })
     m_panel:AddChild(m_mainTree)
 
-    -- 4) Table view (hidden in tree mode): eras = columns, tiers = Column-groups
-    m_tableView = mgr:CreateWidget(TABLE_VIEW_ID, "Table", {
+    -- 4) Grid view (hidden in tree mode): eras = columns, tiers = Column-groups
+    m_gridView = mgr:CreateWidget(GRID_VIEW_ID, "Grid", {
         Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_MAIN_LIST") end,
-        HiddenPredicate = function() return m_viewMode ~= "table" end,
+        HiddenPredicate = function() return m_viewMode ~= "grid" end,
     })
-    m_tableView:SetSearchQueryHandler(CivicsSearchHandler)
-    m_panel:AddChild(m_tableView)
+    m_gridView:SetSearchQueryHandler(CivicsSearchHandler)
+    m_panel:AddChild(m_gridView)
 
-    -- 5) Unlocks list beside the table; mirrors the focused civic (table mode
+    -- 5) Unlocks list beside the grid; mirrors the focused civic (grid mode
     --    only, and only when the focused civic has described unlocks)
     m_unlocksList = mgr:CreateWidget(UNLOCKS_LIST_ID, "List", {
         Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_UNLOCKS") end,
         HiddenPredicate = function(w)
-            return m_viewMode ~= "table" or not w.Children or #w.Children == 0
+            return m_viewMode ~= "grid" or not w.Children or #w.Children == 0
         end,
         SearchDepth     = 0,
     })
@@ -1301,9 +1301,9 @@ local function EnsurePanelBuilt()
     --    switches *to*.
     m_changeViewBtn = mgr:CreateWidget(CHANGE_VIEW_ID, "Button", {
         Label = function()
-            return Locale.Lookup(m_viewMode == "table"
+            return Locale.Lookup(m_viewMode == "grid"
                 and "LOC_CAI_TREE_SWITCH_TO_TREE"
-                or "LOC_CAI_TREE_SWITCH_TO_TABLE")
+                or "LOC_CAI_TREE_SWITCH_TO_GRID")
         end,
     })
     m_changeViewBtn:On("activate", function() ToggleViewMode() end)
@@ -1321,7 +1321,7 @@ local function PushPanel()
 
     local playerCulture = GetLocalPlayerCulture()
     local hasCurrent = playerCulture and playerCulture:GetProgressingCivic() ~= -1
-    local activeView = (m_viewMode == "table") and m_tableView or m_mainTree
+    local activeView = (m_viewMode == "grid") and m_gridView or m_mainTree
     local focusChild = hasCurrent and m_queueList or activeView
     mgr:Push(m_panel, { focus = focusChild })
 end
@@ -1335,14 +1335,14 @@ local function OnPanelClosedCAI()
     m_queueList         = nil
     m_filterList        = nil
     m_mainTree          = nil
-    m_tableView         = nil
+    m_gridView          = nil
     m_unlocksList       = nil
     m_govEdit           = nil
     m_changeViewBtn     = nil
     m_filterResults     = nil
-    m_viewMode          = "table"
+    m_viewMode          = "grid"
     m_treeCivics        = {}
-    m_tableCivics       = {}
+    m_gridCivics        = {}
     m_leadsToByType     = {}
     m_civicIndexToType  = {}
     m_civicTierByType   = {}
@@ -1390,6 +1390,11 @@ end)
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
     if mgr and IsPanelOnStack() then
         if mgr:HandleInput(pInputStruct) then return true end
+    end
+    if IsCAIEscapeKeyUp(pInputStruct)
+        and not IsCAITutorialScreenCloseAllowed("CivicsTreeModal") then
+        AnnounceCAITutorialScreenCloseBlocked()
+        return true
     end
     return orig(pInputStruct)
 end)

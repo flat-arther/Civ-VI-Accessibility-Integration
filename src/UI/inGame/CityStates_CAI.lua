@@ -24,25 +24,33 @@ local MODE               = {
 }
 
 local DIPLO_PIP_INFO     = {
-    ["DIPLO_STATE_PROTECTOR"]       = { Tooltip = "LOC_CITY_STATES_DIPLO_SUZERAIN", Short = "LOC_CAI_CITYSTATES_REL_SUZERAIN" },
-    ["DIPLO_STATE_PATRON"]          = { Tooltip = "LOC_CITY_STATES_DIPLO_GOOD", Short = "LOC_CAI_CITYSTATES_REL_PATRON" },
-    ["DIPLO_STATE_AWARE"]           = { Tooltip = "LOC_CITY_STATES_DIPLO_AWARE", Short = "LOC_CAI_CITYSTATES_REL_AWARE" },
-    ["DIPLO_STATE_WAR_WITH_MAJOR"]  = { Tooltip = "LOC_CITY_STATES_DIPLO_WAR", Short = "LOC_CAI_CITYSTATES_REL_AT_WAR" },
-    ["DIPLO_STATE_WAR_WITH_MINOR"]  = { Tooltip = "LOC_CITY_STATES_DIPLO_WAR", Short = "LOC_CAI_CITYSTATES_REL_AT_WAR" },
-    ["DIPLO_STATE_MINOR_MINOR_WAR"] = { Tooltip = "LOC_CITY_STATES_DIPLO_WAR", Short = "LOC_CAI_CITYSTATES_REL_AT_WAR" },
+    ["DIPLO_STATE_PROTECTOR"]       = { Tooltip = "LOC_CITY_STATES_DIPLO_SUZERAIN", Short = "LOC_CAI_CITYSTATES_REL_SUZERAIN", Sort = 4 },
+    ["DIPLO_STATE_PATRON"]          = { Tooltip = "LOC_CITY_STATES_DIPLO_GOOD", Short = "LOC_CAI_CITYSTATES_REL_PATRON", Sort = 3 },
+    ["DIPLO_STATE_AWARE"]           = { Tooltip = "LOC_CITY_STATES_DIPLO_AWARE", Short = "LOC_CAI_CITYSTATES_REL_AWARE", Sort = 2 },
+    ["DIPLO_STATE_WAR_WITH_MAJOR"]  = { Tooltip = "LOC_CITY_STATES_DIPLO_WAR", Short = "LOC_CAI_CITYSTATES_REL_AT_WAR", Sort = 1 },
+    ["DIPLO_STATE_WAR_WITH_MINOR"]  = { Tooltip = "LOC_CITY_STATES_DIPLO_WAR", Short = "LOC_CAI_CITYSTATES_REL_AT_WAR", Sort = 1 },
+    ["DIPLO_STATE_MINOR_MINOR_WAR"] = { Tooltip = "LOC_CITY_STATES_DIPLO_WAR", Short = "LOC_CAI_CITYSTATES_REL_AT_WAR", Sort = 1 },
 }
 
 local PANEL_ID           = "CAICityStates_Panel"
-local TREE_ID            = "CAICityStates_Tree"
+local OVERVIEW_TABLE_ID  = "CAICityStates_OverviewTable"
+local DETAILS_TREE_ID    = "CAICityStates_DetailsTree"
+local TREE_VIEW_ID       = "CAICityStates_TreeView"
+local SWITCH_VIEW_ID     = "CAICityStates_SwitchView"
 local ENVOY_SLIDER_ID    = "CAICityStates_EnvoySlider"
 local CONFIRM_ENVOY_ID   = "CAICityStates_ConfirmEnvoy"
 local LOOK_AT_ID         = "CAICityStates_LookAt"
 local WAR_PEACE_ID       = "CAICityStates_WarPeace"
 local LEVY_ID            = "CAICityStates_Levy"
+local VIEW_SETTING_SECTION = "UI"
+local VIEW_SETTING_ID      = "CityStatesViewMode"
 
 local m_ui               = {
     panel        = nil,
-    tree         = nil,
+    overview     = nil,
+    detailsTree  = nil,
+    treeView     = nil,
+    switchView   = nil,
     envoySlider  = nil,
     confirmEnvoy = nil,
     lookAt       = nil,
@@ -50,7 +58,25 @@ local m_ui               = {
     levy         = nil,
 }
 
+local function LoadViewModeSetting()
+    local stored = tostring(CAI.GetConfigValue(
+        VIEW_SETTING_SECTION, VIEW_SETTING_ID, "table")):lower()
+    if stored == "tree" then return "tree" end
+    if stored ~= "table" then
+        LogWarn("City-States ignored invalid saved view mode " .. tostring(stored))
+    end
+    return "table"
+end
+
+local function SaveViewModeSetting(viewMode)
+    if not CAI.SetConfigValue(VIEW_SETTING_SECTION, VIEW_SETTING_ID, viewMode) then
+        LogError("City-States failed to save view mode " .. tostring(viewMode))
+    end
+end
+
 local m_selectedPlayerID = -1
+local m_overviewPlayerIDs = {}
+local m_viewMode          = LoadViewModeSetting()
 local m_hasGovernors     = (IsExpansion1Active() or IsExpansion2Active())
 local m_caiEnvoyChanges  = {}
 local m_caiMode          = MODE.Overview
@@ -122,7 +148,11 @@ local function GetPendingForPlayer(playerID)
 end
 
 local function GetCityStateFocusKey(playerID)
-    return "cs:" .. tostring(playerID)
+    return OVERVIEW_TABLE_ID .. ":row:" .. tostring(playerID) .. ":name"
+end
+
+local function GetTreeCityStateFocusKey(playerID)
+    return "tree:cs:" .. tostring(playerID)
 end
 
 -- ============================================================================
@@ -334,44 +364,27 @@ local function GetAmbassadorForPlayer(cityStatePlayerID, majorPlayerID)
 end
 
 -- ============================================================================
--- Row label and tooltip
+-- Overview table data
 -- ============================================================================
 
-local function HasActiveQuests(playerID)
-    local localPlayerID = Game.GetLocalPlayer()
-    if localPlayerID == -1 then return false end
-    local questsManager = Game.GetQuestsManager()
-    if not questsManager then return false end
-    for questInfo in GameInfo.Quests() do
-        if questsManager:HasActiveQuestFromPlayer(localPlayerID, playerID, questInfo.Index) then
-            return true
-        end
-    end
-    return false
+local function GetGovernorName(cityStatePlayerID, majorPlayerID)
+    local governor = GetAmbassadorForPlayer(cityStatePlayerID, majorPlayerID)
+    if not governor then return "" end
+    local definition = GameInfo.Governors[governor:GetType()]
+    if definition and definition.Name then return Locale.Lookup(definition.Name) end
+    return Locale.Lookup("LOC_CAI_CITYSTATES_AMBASSADOR")
 end
 
-local function FormatRowLabel(playerID)
+local function GetEnvoyCell(playerID)
     local kCS = GetCityStateData(playerID)
     if not kCS then return "" end
 
     local parts = {}
-    table.insert(parts, Locale.Lookup(kCS.Name))
-    if not kCS.isAlive then
-        table.insert(parts, Locale.Lookup("LOC_CITY_STATES_DESTROYED"))
-    end
-    table.insert(parts, GetTypeName(kCS))
-
-    local diploShort = GetDiploShort(kCS)
-    if diploShort ~= "" then
-        table.insert(parts, diploShort)
-    end
-
     if kCS.isBonusSuzerain then
         table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", kCS.Tokens))
         table.insert(parts, Locale.Lookup("LOC_CITY_STATES_SUZERAIN"))
     else
-        local needed = kCS.SuzerainTokensNeeded
-        if needed < 3 then needed = 3 end
+        local needed = math.max(3, kCS.SuzerainTokensNeeded)
         if kCS.SuzerainID ~= -1 then needed = needed + 1 end
         table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_OF", kCS.Tokens, needed))
     end
@@ -381,50 +394,228 @@ local function FormatRowLabel(playerID)
         table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_PENDING", pending))
     end
 
-    if not kCS.isBonusSuzerain and kCS.SuzerainID ~= -1 then
-        table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_CURRENT_SUZERAIN", kCS.SuzerainName))
+    local governorName = GetGovernorName(playerID, Game.GetLocalPlayer())
+    if governorName ~= "" then
+        table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_AMBASSADOR_ASSIGNED", governorName))
     end
+    return JoinNonEmpty(parts, ", ")
+end
 
-    if m_hasGovernors then
-        local localPlayerID = Game.GetLocalPlayer()
-        if localPlayerID ~= -1 then
-            local pGov = GetAmbassadorForPlayer(playerID, localPlayerID)
-            if pGov then
-                local govDef = GameInfo.Governors[pGov:GetType()]
-                local govName = (govDef and govDef.Name) and Locale.Lookup(govDef.Name)
-                    or Locale.Lookup("LOC_CAI_CITYSTATES_AMBASSADOR")
-                table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_AMBASSADOR_ASSIGNED", govName))
+local function GetInfluenceCell(playerID, majorPlayerID)
+    local kCS = GetCityStateData(playerID)
+    if not kCS then return "" end
+    local influence = kCS.Influence[majorPlayerID] or 0
+    local governorName = GetGovernorName(playerID, majorPlayerID)
+    return JoinNonEmpty({ Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", influence), governorName }, ", ")
+end
+
+local function GetUnmetInfluence(playerID)
+    local kCS = GetCityStateData(playerID)
+    local localPlayerID = Game.GetLocalPlayer()
+    if not kCS or localPlayerID == -1 then return {}, 0 end
+    local diplomacy = Players[localPlayerID]:GetDiplomacy()
+    local values = {}
+    local total = 0
+    for majorPlayerID, influence in pairs(kCS.Influence) do
+        if majorPlayerID ~= localPlayerID and not diplomacy:HasMet(majorPlayerID) then
+            table.insert(values, influence)
+            total = total + influence
+        end
+    end
+    table.sort(values, function(a, b) return a > b end)
+    return values, total
+end
+
+local function GetUnmetInfluenceCell(playerID)
+    local values = GetUnmetInfluence(playerID)
+    if #values == 0 then return Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", 0) end
+    local parts = {}
+    for _, influence in ipairs(values) do
+        table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", influence))
+    end
+    return table.concat(parts, ", ")
+end
+
+local function BuildOverviewColumns(allData)
+    local columns = {
+        {
+            key = "name",
+            header = function() return Locale.Lookup("LOC_CAI_CITYSTATES_COLUMN_CITY_STATE") end,
+            getCell = function(playerID)
+                local kCS = GetCityStateData(playerID)
+                return kCS and Locale.Lookup(kCS.Name) or ""
+            end,
+            sortKey = function(playerID)
+                local kCS = GetCityStateData(playerID)
+                return kCS and Locale.Lookup(kCS.Name) or nil
+            end,
+        },
+        {
+            key = "type",
+            header = function() return Locale.Lookup("LOC_CITY_STATES_TYPE") end,
+            getCell = function(playerID)
+                local kCS = GetCityStateData(playerID)
+                return kCS and GetTypeName(kCS) or ""
+            end,
+            sortKey = function(playerID)
+                local kCS = GetCityStateData(playerID)
+                return kCS and GetTypeName(kCS) or nil
+            end,
+        },
+        {
+            key = "relationship",
+            header = function() return Locale.Lookup("LOC_CAI_CITYSTATES_COLUMN_RELATIONSHIP") end,
+            getCell = function(playerID)
+                local kCS = GetCityStateData(playerID)
+                return kCS and GetDiploShort(kCS) or ""
+            end,
+            getTooltip = function(playerID)
+                local kCS = GetCityStateData(playerID)
+                return kCS and GetDiploLong(kCS) or ""
+            end,
+            sortKey = function(playerID)
+                local kCS = GetCityStateData(playerID)
+                local info = kCS and DIPLO_PIP_INFO[kCS.DiplomaticState] or nil
+                return info and info.Sort or 0
+            end,
+        },
+        {
+            key = "envoys",
+            header = function() return Locale.Lookup("LOC_CITY_STATES_ENVOYS") end,
+            getCell = function(playerID) return GetEnvoyCell(playerID) end,
+            sortKey = function(playerID)
+                local kCS = GetCityStateData(playerID)
+                return kCS and (kCS.Tokens + GetPendingForPlayer(playerID)) or nil
+            end,
+        },
+        {
+            key = "suzerain",
+            header = function() return Locale.Lookup("LOC_CITY_STATES_SUZERAIN") end,
+            getCell = function(playerID)
+                local kCS = GetCityStateData(playerID)
+                return kCS and kCS.SuzerainName or ""
+            end,
+            sortKey = function(playerID)
+                local kCS = GetCityStateData(playerID)
+                return kCS and kCS.SuzerainName or nil
+            end,
+        },
+        {
+            key = "quests",
+            header = function() return Locale.Lookup("LOC_CITY_STATES_QUESTS") end,
+            getCell = function(playerID)
+                local kCS = GetCityStateData(playerID)
+                return Locale.Lookup("LOC_CAI_CITYSTATES_ACTIVE", kCS and CountTable(kCS.Quests) or 0)
+            end,
+            sortKey = function(playerID)
+                local kCS = GetCityStateData(playerID)
+                return kCS and CountTable(kCS.Quests) or nil
+            end,
+        },
+    }
+
+    local localPlayerID = Game.GetLocalPlayer()
+    local diplomacy = Players[localPlayerID]:GetDiplomacy()
+    local knownMajors = {}
+    local hasUnmetInfluence = false
+    for _, kCS in pairs(allData) do
+        for majorPlayerID in pairs(kCS.Influence) do
+            if majorPlayerID ~= localPlayerID then
+                if diplomacy:HasMet(majorPlayerID) then
+                    knownMajors[majorPlayerID] = true
+                else
+                    hasUnmetInfluence = true
+                end
             end
         end
     end
 
-    if HasActiveQuests(playerID) then
-        table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_QUEST_AVAILABLE"))
+    local sortedMajors = {}
+    for majorPlayerID in pairs(knownMajors) do table.insert(sortedMajors, majorPlayerID) end
+    table.sort(sortedMajors, function(a, b)
+        local aName = Locale.Lookup(PlayerConfigurations[a]:GetPlayerName())
+        local bName = Locale.Lookup(PlayerConfigurations[b]:GetPlayerName())
+        return Locale.Compare(aName, bName) < 0
+    end)
+
+    for _, id in ipairs(sortedMajors) do
+        local majorPlayerID = id
+        table.insert(columns, {
+            key = "influence:" .. tostring(majorPlayerID),
+            header = function()
+                local name = Locale.Lookup(PlayerConfigurations[majorPlayerID]:GetPlayerName())
+                return Locale.Lookup("LOC_CAI_CITYSTATES_INFLUENCE_COLUMN", name)
+            end,
+            getCell = function(playerID) return GetInfluenceCell(playerID, majorPlayerID) end,
+            sortKey = function(playerID)
+                local kCS = GetCityStateData(playerID)
+                return kCS and (kCS.Influence[majorPlayerID] or 0) or nil
+            end,
+        })
     end
 
+    if hasUnmetInfluence then
+        table.insert(columns, {
+            key = "influence:unmet",
+            header = function() return Locale.Lookup("LOC_CAI_CITYSTATES_UNMET_INFLUENCE_COLUMN") end,
+            getCell = function(playerID) return GetUnmetInfluenceCell(playerID) end,
+            sortKey = function(playerID)
+                local _, total = GetUnmetInfluence(playerID)
+                return total
+            end,
+        })
+    end
+    return columns
+end
+
+local function FormatTreeRowLabel(playerID)
+    local kCS = GetCityStateData(playerID)
+    if not kCS then return "" end
+
+    local parts = { Locale.Lookup(kCS.Name), GetTypeName(kCS), GetDiploShort(kCS) }
+    if kCS.isBonusSuzerain then
+        table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", kCS.Tokens))
+        table.insert(parts, Locale.Lookup("LOC_CITY_STATES_SUZERAIN"))
+    else
+        local needed = math.max(3, kCS.SuzerainTokensNeeded)
+        if kCS.SuzerainID ~= -1 then needed = needed + 1 end
+        table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_OF", kCS.Tokens, needed))
+    end
+
+    local pending = GetPendingForPlayer(playerID)
+    if pending > 0 then
+        table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_PENDING", pending))
+    end
+    if not kCS.isBonusSuzerain and kCS.SuzerainID ~= -1 then
+        table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_CURRENT_SUZERAIN", kCS.SuzerainName))
+    end
+
+    local governorName = GetGovernorName(playerID, Game.GetLocalPlayer())
+    if governorName ~= "" then
+        table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_AMBASSADOR_ASSIGNED", governorName))
+    end
+    if CountTable(kCS.Quests) > 0 then
+        table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_QUEST_AVAILABLE"))
+    end
     return JoinNonEmpty(parts, ", ")
 end
 
-local function FormatRowTooltip(playerID)
+local function FormatTreeRowTooltip(playerID)
     local kCS = GetCityStateData(playerID)
     if not kCS then return "" end
     FillBonuses(kCS)
     local parts = {}
-
-    local tiers = { 1, 3, 6 }
-    for _, tier in ipairs(tiers) do
+    for _, tier in ipairs({ 1, 3, 6 }) do
         local bonus = kCS.Bonuses[tier]
         if bonus then
             table.insert(parts,
                 Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_TIER", tier) .. ", " .. NormalizeText(bonus.Details))
         end
     end
-
-    local suzerainUniqueAndRes = GetSuzerainUniqueBonusAndResources(kCS.iPlayer)
-    if suzerainUniqueAndRes ~= "" then
-        table.insert(parts, Locale.Lookup("LOC_CITY_STATES_SUZERAIN") .. ", " .. suzerainUniqueAndRes)
+    local uniqueBonusAndResources = GetSuzerainUniqueBonusAndResources(playerID)
+    if uniqueBonusAndResources ~= "" then
+        table.insert(parts, Locale.Lookup("LOC_CITY_STATES_SUZERAIN") .. ", " .. uniqueBonusAndResources)
     end
-
     return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
@@ -464,6 +655,10 @@ local function BuildBonusesSection(parent, playerID)
         end
         local tooltip = Locale.Lookup("LOC_CAI_CITYSTATES_REQUIRES_SUZERAIN") ..
             ", " .. NormalizeText(suzerainBonus.Details)
+        local uniqueBonusAndResources = GetSuzerainUniqueBonusAndResources(playerID)
+        if uniqueBonusAndResources ~= "" then
+            tooltip = tooltip .. ", " .. uniqueBonusAndResources
+        end
         parent:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_BonusSuz"), "StaticText", {
             Label   = function() return label end,
             Tooltip = function() return tooltip end,
@@ -476,38 +671,29 @@ local function BuildInfluenceSection(parent, playerID)
     if not kCS then return end
 
     local localPlayerID = Game.GetLocalPlayer()
-    local pLocalDiplomacy = Players[localPlayerID]:GetDiplomacy()
-
+    local diplomacy = Players[localPlayerID]:GetDiplomacy()
     local sorted = {}
-    for otherPlayerID, influence in pairs(kCS.Influence) do
-        table.insert(sorted, { playerID = otherPlayerID, influence = influence })
+    for majorPlayerID, influence in pairs(kCS.Influence) do
+        table.insert(sorted, { playerID = majorPlayerID, influence = influence })
     end
     table.sort(sorted, function(a, b) return a.influence > b.influence end)
 
     for _, entry in ipairs(sorted) do
-        local pConfig = PlayerConfigurations[entry.playerID]
         local civName
         if entry.playerID == localPlayerID then
-            civName = Locale.Lookup(pConfig:GetPlayerName()) .. " (" .. Locale.Lookup("LOC_CITY_STATES_YOU") .. ")"
-        elseif pLocalDiplomacy:HasMet(entry.playerID) then
-            civName = Locale.Lookup(pConfig:GetPlayerName())
+            civName = Locale.Lookup(PlayerConfigurations[entry.playerID]:GetPlayerName()) ..
+                " (" .. Locale.Lookup("LOC_CITY_STATES_YOU") .. ")"
+        elseif diplomacy:HasMet(entry.playerID) then
+            civName = Locale.Lookup(PlayerConfigurations[entry.playerID]:GetPlayerName())
         else
             civName = Locale.Lookup("LOC_LOYALTY_PANEL_UNMET_CIV")
         end
 
         local label = civName .. ": " .. Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", entry.influence)
-
-        local pGov = GetAmbassadorForPlayer(playerID, entry.playerID)
-        if pGov then
-            local eType = pGov:GetType()
-            local govDef = GameInfo.Governors[eType]
-            if govDef and govDef.Name then
-                label = label .. ", " .. Locale.Lookup(govDef.Name)
-            else
-                label = label .. ", " .. Locale.Lookup("LOC_CAI_CITYSTATES_AMBASSADOR")
-            end
+        if entry.playerID == localPlayerID or diplomacy:HasMet(entry.playerID) then
+            local governorName = GetGovernorName(playerID, entry.playerID)
+            if governorName ~= "" then label = label .. ", " .. governorName end
         end
-
         parent:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_Inf"), "StaticText", {
             Label = function() return label end,
         }))
@@ -670,6 +856,8 @@ local function SpeakPendingEnvoys(playerID)
     Speak(Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", GetPendingForPlayer(playerID)))
 end
 
+local CAI_RebuildViews
+
 local function TryAdjustEnvoysForPlayer(playerID, delta)
     if delta == 0 then return false end
     if not IsSendEnvoysMode() or not m_caiIsLocalTurn then return true end
@@ -688,6 +876,7 @@ local function TryAdjustEnvoysForPlayer(playerID, delta)
     end
 
     SyncEnvoySlider()
+    CAI_RebuildViews()
     SpeakPendingEnvoys(playerID)
     return true
 end
@@ -701,140 +890,188 @@ local function TryConfirmEnvoys()
 end
 
 -- ============================================================================
--- Tree row creation
+-- Selected city-state details
 -- ============================================================================
 
-local function CreateCityStateRow(playerID)
-    local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_Row"), "TreeItem", {
-        Label    = function() return FormatRowLabel(playerID) end,
-        Tooltip  = function() return FormatRowTooltip(playerID) end,
-        FocusKey = GetCityStateFocusKey(playerID),
+local function AddLazyDetailsSection(label, focusKey, buildChildren)
+    local section = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_DetailSection"), "TreeItem", {
+        Label = label,
+        FocusKey = focusKey,
+    })
+    section._csBuilt = false
+    section:On("focus_enter", function(w)
+        if not w._csBuilt then
+            w._csBuilt = true
+            buildChildren(w)
+        end
+    end)
+    m_ui.detailsTree:AddChild(section)
+end
+
+local function GetRelationshipDetailLabel(playerID)
+    local kCS = GetCityStateData(playerID)
+    if not kCS then return "" end
+    local short = GetDiploShort(kCS)
+    local long = GetDiploLong(kCS)
+    if short == "" then return "" end
+    return long ~= "" and Locale.Lookup("LOC_CAI_CITYSTATES_RELATIONSHIP", short, long) or short
+end
+
+local function BuildDetailsTree()
+    if not m_ui.detailsTree then return end
+    local capture = mgr:CaptureFocusKey(m_ui.detailsTree)
+    m_ui.detailsTree:ClearChildren()
+
+    local playerID = m_selectedPlayerID
+    local kCS = GetSelectedCityState()
+    if not kCS then
+        m_ui.detailsTree:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_NoSelection"), "StaticText", {
+            Label = function() return Locale.Lookup("LOC_CAI_CITYSTATES_NO_SELECTION") end,
+        }))
+        mgr:RestoreFocus(m_ui.detailsTree, capture)
+        return
+    end
+
+    m_ui.detailsTree:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_DetailRelationship"), "StaticText", {
+        Label = function() return GetRelationshipDetailLabel(playerID) end,
+        FocusKey = "details:cs:" .. tostring(playerID) .. ":relationship-status",
+    }))
+
+    AddLazyDetailsSection(function()
+        local live = GetCityStateData(playerID)
+        if not live then return Locale.Lookup("LOC_CITY_STATES_BONUSES", "") end
+        local count = 0
+        if live.isBonus1 then count = count + 1 end
+        if live.isBonus3 then count = count + 1 end
+        if live.isBonus6 then count = count + 1 end
+        if live.isBonusSuzerain then count = count + 1 end
+        return Locale.Lookup("LOC_CITY_STATES_BONUSES", Locale.Lookup(live.Name)) ..
+            ", " .. Locale.Lookup("LOC_CAI_CITYSTATES_BONUS_COUNT", count, 4)
+    end, "details:cs:" .. tostring(playerID) .. ":bonuses", function(parent)
+        BuildBonusesSection(parent, playerID)
+    end)
+
+    local questLabel = function()
+        local live = GetCityStateData(playerID)
+        return Locale.Lookup("LOC_CITY_STATES_QUESTS") ..
+            ", " .. Locale.Lookup("LOC_CAI_CITYSTATES_ACTIVE", live and CountTable(live.Quests) or 0)
+    end
+    AddLazyDetailsSection(questLabel, "details:cs:" .. tostring(playerID) .. ":quests", function(parent)
+        BuildQuestsSection(parent, playerID)
+    end)
+
+    local relationshipLabel = function()
+        local live = GetCityStateData(playerID)
+        local count = GetVisibleRelationshipCount(live)
+        return Locale.Lookup("LOC_CITY_STATES_RELATIONSHIPS") ..
+            ", " .. Locale.Lookup("LOC_CITY_STATES_CIVILIZATIONS", count)
+    end
+    AddLazyDetailsSection(relationshipLabel, "details:cs:" .. tostring(playerID) .. ":relationships", function(parent)
+        BuildRelationshipsSection(parent, playerID)
+    end)
+
+    mgr:RestoreFocus(m_ui.detailsTree, capture)
+end
+
+local function SelectCityState(playerID)
+    if not playerID or playerID == m_selectedPlayerID then return end
+    m_selectedPlayerID = playerID
+    SyncVanillaControlsForCityState(playerID)
+    SyncEnvoySlider()
+    BuildDetailsTree()
+end
+
+local function AddLazyTreeSection(parent, label, focusKey, buildChildren)
+    local section = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_TreeSection"), "TreeItem", {
+        Label = label,
+        FocusKey = focusKey,
+    })
+    section._csBuilt = false
+    section:On("focus_enter", function(w)
+        if not w._csBuilt then
+            w._csBuilt = true
+            buildChildren(w)
+        end
+    end)
+    parent:AddChild(section)
+end
+
+local function CreateTreeViewCityStateRow(playerID)
+    local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_TreeRow"), "TreeItem", {
+        Label = function() return FormatTreeRowLabel(playerID) end,
+        Tooltip = function() return FormatTreeRowTooltip(playerID) end,
+        FocusKey = GetTreeCityStateFocusKey(playerID),
     })
     row:SetFocusSound("Main_Menu_Mouse_Over")
-
     row:On("focus_enter", function(w)
-        if w:IsFocused() and playerID ~= m_selectedPlayerID then
-            m_selectedPlayerID = playerID
-            SyncVanillaControlsForCityState(playerID)
-            SyncEnvoySlider()
-        end
+        if w:IsFocused() then SelectCityState(playerID) end
     end)
-
     row:AddInputBindings({
         {
-            Key         = Keys.VK_LEFT,
-            IsShift     = true,
-            MSG         = KeyEvents.KeyDown,
+            Key = Keys.VK_LEFT,
+            IsShift = true,
+            MSG = KeyEvents.KeyDown,
             Description = "LOC_CAI_KB_REMOVE_CITYSTATE_ENVOY",
-            Action      = function() return TryAdjustEnvoysForPlayer(playerID, -1) end,
+            Action = function() return TryAdjustEnvoysForPlayer(playerID, -1) end,
         },
         {
-            Key         = Keys.VK_RIGHT,
-            IsShift     = true,
-            MSG         = KeyEvents.KeyDown,
+            Key = Keys.VK_RIGHT,
+            IsShift = true,
+            MSG = KeyEvents.KeyDown,
             Description = "LOC_CAI_KB_ADD_CITYSTATE_ENVOY",
-            Action      = function() return TryAdjustEnvoysForPlayer(playerID, 1) end,
+            Action = function() return TryAdjustEnvoysForPlayer(playerID, 1) end,
         },
         {
-            Key         = Keys.VK_RETURN,
-            IsControl   = true,
-            MSG         = KeyEvents.KeyUp,
+            Key = Keys.VK_RETURN,
+            IsControl = true,
+            MSG = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_CONFIRM_CITYSTATE_ENVOYS",
-            Action      = function() return TryConfirmEnvoys() end,
+            Action = function() return TryConfirmEnvoys() end,
         },
     })
 
-    local relDetailWidget = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_RelDetail"), "StaticText", {
-        Label = function()
-            local kCS = GetCityStateData(playerID)
-            if not kCS then return "" end
-            local short = GetDiploShort(kCS)
-            local long = GetDiploLong(kCS)
-            if short == "" then return "" end
-            if long ~= "" then
-                return Locale.Lookup("LOC_CAI_CITYSTATES_RELATIONSHIP", short, long)
-            end
-            return short
-        end,
-    })
-    row:AddChild(relDetailWidget)
+    row:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_RelDetail"), "StaticText", {
+        Label = function() return GetRelationshipDetailLabel(playerID) end,
+    }))
 
-    local bonusesSection = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_BonusSec"), "TreeItem", {
-        Label = function()
-            local kCS = GetCityStateData(playerID)
-            if not kCS then return Locale.Lookup("LOC_CITY_STATES_BONUSES", "") end
-            local count = 0
-            if kCS.isBonus1 then count = count + 1 end
-            if kCS.isBonus3 then count = count + 1 end
-            if kCS.isBonus6 then count = count + 1 end
-            if kCS.isBonusSuzerain then count = count + 1 end
-            return Locale.Lookup("LOC_CITY_STATES_BONUSES", Locale.Lookup(kCS.Name)) ..
-                ", " .. Locale.Lookup("LOC_CAI_CITYSTATES_BONUS_COUNT", count, 4)
-        end,
-        FocusKey = "cs:" .. tostring(playerID) .. ":bonuses",
-    })
-    bonusesSection._csBuilt = false
-    bonusesSection:On("focus_enter", function(w)
-        if not w._csBuilt then
-            w._csBuilt = true
-            BuildBonusesSection(w, playerID)
-        end
+    local prefix = "tree:cs:" .. tostring(playerID)
+    AddLazyTreeSection(row, function()
+        local kCS = GetCityStateData(playerID)
+        if not kCS then return Locale.Lookup("LOC_CITY_STATES_BONUSES", "") end
+        local count = 0
+        if kCS.isBonus1 then count = count + 1 end
+        if kCS.isBonus3 then count = count + 1 end
+        if kCS.isBonus6 then count = count + 1 end
+        if kCS.isBonusSuzerain then count = count + 1 end
+        return Locale.Lookup("LOC_CITY_STATES_BONUSES", Locale.Lookup(kCS.Name)) ..
+            ", " .. Locale.Lookup("LOC_CAI_CITYSTATES_BONUS_COUNT", count, 4)
+    end, prefix .. ":bonuses", function(parent)
+        BuildBonusesSection(parent, playerID)
     end)
-    row:AddChild(bonusesSection)
 
-    local influenceSection = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_InfSec"), "TreeItem", {
-        Label = function()
-            local kCS = GetCityStateData(playerID)
-            local count = kCS and CountTable(kCS.Influence) or 0
-            return Locale.Lookup("LOC_CITY_STATES_INFLUENCED_BY") ..
-                ", " .. Locale.Lookup("LOC_CITY_STATES_CIVILIZATIONS", count)
-        end,
-        FocusKey = "cs:" .. tostring(playerID) .. ":influence",
-    })
-    influenceSection._csBuilt = false
-    influenceSection:On("focus_enter", function(w)
-        if not w._csBuilt then
-            w._csBuilt = true
-            BuildInfluenceSection(w, playerID)
-        end
+    AddLazyTreeSection(row, function()
+        local kCS = GetCityStateData(playerID)
+        return Locale.Lookup("LOC_CITY_STATES_INFLUENCED_BY") .. ", " ..
+            Locale.Lookup("LOC_CITY_STATES_CIVILIZATIONS", kCS and CountTable(kCS.Influence) or 0)
+    end, prefix .. ":influence", function(parent)
+        BuildInfluenceSection(parent, playerID)
     end)
-    row:AddChild(influenceSection)
 
-    local questsSection = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_QuestSec"), "TreeItem", {
-        Label = function()
-            local kCS = GetCityStateData(playerID)
-            local count = kCS and CountTable(kCS.Quests) or 0
-            return Locale.Lookup("LOC_CITY_STATES_QUESTS") .. ", " .. Locale.Lookup("LOC_CAI_CITYSTATES_ACTIVE", count)
-        end,
-        FocusKey = "cs:" .. tostring(playerID) .. ":quests",
-    })
-    questsSection._csBuilt = false
-    questsSection:On("focus_enter", function(w)
-        if not w._csBuilt then
-            w._csBuilt = true
-            BuildQuestsSection(w, playerID)
-        end
+    AddLazyTreeSection(row, function()
+        local kCS = GetCityStateData(playerID)
+        return Locale.Lookup("LOC_CITY_STATES_QUESTS") .. ", " ..
+            Locale.Lookup("LOC_CAI_CITYSTATES_ACTIVE", kCS and CountTable(kCS.Quests) or 0)
+    end, prefix .. ":quests", function(parent)
+        BuildQuestsSection(parent, playerID)
     end)
-    row:AddChild(questsSection)
 
-    local relSection = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_RelSec"), "TreeItem", {
-        Label = function()
-            local kCS = GetCityStateData(playerID)
-            local count = GetVisibleRelationshipCount(kCS)
-            return Locale.Lookup("LOC_CITY_STATES_RELATIONSHIPS") ..
-                ", " .. Locale.Lookup("LOC_CITY_STATES_CIVILIZATIONS", count)
-        end,
-        FocusKey = "cs:" .. tostring(playerID) .. ":relationships",
-    })
-    relSection._csBuilt = false
-    relSection:On("focus_enter", function(w)
-        if not w._csBuilt then
-            w._csBuilt = true
-            BuildRelationshipsSection(w, playerID)
-        end
+    AddLazyTreeSection(row, function()
+        local kCS = GetCityStateData(playerID)
+        return Locale.Lookup("LOC_CITY_STATES_RELATIONSHIPS") .. ", " ..
+            Locale.Lookup("LOC_CITY_STATES_CIVILIZATIONS", GetVisibleRelationshipCount(kCS))
+    end, prefix .. ":relationships", function(parent)
+        BuildRelationshipsSection(parent, playerID)
     end)
-    row:AddChild(relSection)
-
     return row
 end
 
@@ -867,49 +1104,96 @@ end
 -- Rebuild
 -- ============================================================================
 
-local function CAI_RebuildTree()
-    if not m_ui.tree then return end
+local function RebuildTreeView(sortedPlayers)
+    local capture = mgr:CaptureFocusKey(m_ui.treeView)
+    m_ui.treeView:ClearChildren()
+    for _, entry in ipairs(sortedPlayers) do
+        m_ui.treeView:AddChild(CreateTreeViewCityStateRow(entry.id))
+    end
+    if #sortedPlayers == 0 then
+        m_ui.treeView:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_NoneMet"), "StaticText", {
+            Label = function() return Locale.Lookup("LOC_CITY_STATES_NONE_MET") end,
+        }))
+    elseif not capture and m_selectedPlayerID ~= -1 then
+        mgr:PrepareFocus(m_ui.treeView, GetTreeCityStateFocusKey(m_selectedPlayerID))
+    end
+    mgr:RestoreFocus(m_ui.treeView, capture)
+end
+
+CAI_RebuildViews = function(preferredPlayerID)
+    if not m_ui.overview or not m_ui.detailsTree or not m_ui.treeView then return end
     if ContextPtr:IsHidden() then return end
 
-    local selectedPlayerID = m_selectedPlayerID
-    local capture = mgr:CaptureFocusKey(m_ui.tree)
-    m_ui.tree:ClearChildren()
-
     local allData = GetAllCityStatesData()
-    if selectedPlayerID ~= -1 and not allData[selectedPlayerID] then
-        selectedPlayerID = -1
-    end
     local sortedPlayers = {}
     for playerID, kCS in pairs(allData) do
         table.insert(sortedPlayers, { id = playerID, name = Locale.Lookup(kCS.Name) })
     end
-    table.sort(sortedPlayers, function(a, b) return a.name < b.name end)
+    table.sort(sortedPlayers, function(a, b) return Locale.Compare(a.name, b.name) < 0 end)
 
+    m_overviewPlayerIDs = {}
     for _, entry in ipairs(sortedPlayers) do
-        m_ui.tree:AddChild(CreateCityStateRow(entry.id))
+        table.insert(m_overviewPlayerIDs, entry.id)
     end
 
-    if #sortedPlayers == 0 then
-        m_ui.tree:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_NoneMet"), "StaticText", {
-            Label = function() return Locale.Lookup("LOC_CITY_STATES_NONE_MET") end,
-        }))
+    local selectedPlayerID = preferredPlayerID or m_selectedPlayerID
+    if not allData[selectedPlayerID] then
+        selectedPlayerID = m_overviewPlayerIDs[1] or -1
     end
-
     m_selectedPlayerID = selectedPlayerID
+
+    local capture = mgr:CaptureFocusKey(m_ui.overview)
+    m_ui.overview:SetColumns(BuildOverviewColumns(allData))
+    local sortColumn = m_ui.overview:GetSort()
+    if sortColumn and not m_ui.overview:GetColumnIndex(sortColumn) then
+        m_ui.overview:SetDefaultSort(nil)
+    end
+    m_ui.overview:Rebuild()
+
     if m_selectedPlayerID ~= -1 then
         SyncVanillaControlsForCityState(m_selectedPlayerID)
         SyncEnvoySlider()
         if not capture then
-            mgr:PrepareFocus(m_ui.tree, GetCityStateFocusKey(m_selectedPlayerID))
+            mgr:PrepareFocus(m_ui.overview, GetCityStateFocusKey(m_selectedPlayerID))
         end
     end
-
-    mgr:RestoreFocus(m_ui.tree, capture)
+    BuildDetailsTree()
+    RebuildTreeView(sortedPlayers)
 end
 
 -- ============================================================================
 -- Panel construction
 -- ============================================================================
+
+local function GetActiveView()
+    return m_viewMode == "tree" and m_ui.treeView or m_ui.overview
+end
+
+local function SetViewMode(viewMode)
+    if viewMode ~= "table" and viewMode ~= "tree" then
+        LogError("City-States received invalid view mode " .. tostring(viewMode))
+        return false
+    end
+    if m_viewMode ~= viewMode then
+        m_viewMode = viewMode
+        SaveViewModeSetting(viewMode)
+    end
+    local activeView = GetActiveView()
+    if activeView then
+        if m_selectedPlayerID ~= -1 then
+            local focusKey = viewMode == "tree"
+                and GetTreeCityStateFocusKey(m_selectedPlayerID)
+                or GetCityStateFocusKey(m_selectedPlayerID)
+            mgr:PrepareFocus(activeView, focusKey)
+        end
+        mgr:SetFocus(activeView)
+    end
+    return true
+end
+
+local function ToggleViewMode()
+    return SetViewMode(m_viewMode == "table" and "tree" or "table")
+end
 
 local function EnsurePanelBuilt()
     if m_ui.panel then
@@ -925,13 +1209,120 @@ local function EnsurePanelBuilt()
             return title .. ", " .. Locale.Lookup("LOC_CITY_STATES_OVERVIEW")
         end,
     })
-
-    m_ui.tree = mgr:CreateWidget(TREE_ID, "Tree", {
-        Label = function()
-            return JoinNonEmpty(GetInfoBoxLines(), ", ")
-        end,
+    m_ui.panel:AddInputBindings({
+        {
+            Key = Keys["1"],
+            IsAlt = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_TREE_SWITCH_TO_TABLE",
+            Action = function() return SetViewMode("table") end,
+        },
+        {
+            Key = Keys["2"],
+            IsAlt = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_TREE_SWITCH_TO_TREE",
+            Action = function() return SetViewMode("tree") end,
+        },
     })
-    m_ui.panel:AddChild(m_ui.tree)
+
+    m_ui.overview = mgr:CreateWidget(OVERVIEW_TABLE_ID, "DataTable", {
+        Label = function()
+            local lines = GetInfoBoxLines()
+            if #m_overviewPlayerIDs == 0 then
+                table.insert(lines, Locale.Lookup("LOC_CITY_STATES_NONE_MET"))
+            end
+            return JoinNonEmpty(lines, ", ")
+        end,
+        HiddenPredicate = function() return m_viewMode ~= "table" end,
+    })
+    m_ui.overview:SetRowsProvider(function() return m_overviewPlayerIDs end)
+    m_ui.overview:SetRowKeyGetter(function(playerID) return playerID end)
+    m_ui.overview:SetRowLabelGetter(function(playerID)
+        local kCS = GetCityStateData(playerID)
+        return kCS and Locale.Lookup(kCS.Name) or ""
+    end)
+    m_ui.overview:SetDefaultSort(nil)
+    m_ui.overview:On("row_focus_enter", function(_, playerID, rowIndex)
+        if rowIndex > 0 then SelectCityState(playerID) end
+    end)
+    m_ui.overview:AddInputBindings({
+        {
+            Key         = Keys.VK_LEFT,
+            IsShift     = true,
+            MSG         = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_REMOVE_CITYSTATE_ENVOY",
+            Action      = function(w)
+                local playerID = w:GetFocusedRow()
+                if not playerID then return false end
+                return TryAdjustEnvoysForPlayer(playerID, -1)
+            end,
+        },
+        {
+            Key         = Keys.VK_RIGHT,
+            IsShift     = true,
+            MSG         = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_ADD_CITYSTATE_ENVOY",
+            Action      = function(w)
+                local playerID = w:GetFocusedRow()
+                if not playerID then return false end
+                return TryAdjustEnvoysForPlayer(playerID, 1)
+            end,
+        },
+        {
+            Key         = Keys.VK_RETURN,
+            IsControl   = true,
+            MSG         = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CONFIRM_CITYSTATE_ENVOYS",
+            Action      = function() return TryConfirmEnvoys() end,
+        },
+    })
+    m_ui.panel:AddChild(m_ui.overview)
+
+    m_ui.detailsTree = mgr:CreateWidget(DETAILS_TREE_ID, "Tree", {
+        Label = function()
+            local kCS = GetSelectedCityState()
+            if not kCS then return Locale.Lookup("LOC_CAI_CITYSTATES_DETAILS") end
+            return Locale.Lookup("LOC_CAI_CITYSTATES_DETAILS_FOR", Locale.Lookup(kCS.Name))
+        end,
+        HiddenPredicate = function() return m_viewMode ~= "table" end,
+    })
+    m_ui.detailsTree:AddInputBindings({
+        {
+            Key = Keys.VK_LEFT,
+            IsShift = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_REMOVE_CITYSTATE_ENVOY",
+            Action = function()
+                if m_selectedPlayerID == -1 then return false end
+                return TryAdjustEnvoysForPlayer(m_selectedPlayerID, -1)
+            end,
+        },
+        {
+            Key = Keys.VK_RIGHT,
+            IsShift = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_ADD_CITYSTATE_ENVOY",
+            Action = function()
+                if m_selectedPlayerID == -1 then return false end
+                return TryAdjustEnvoysForPlayer(m_selectedPlayerID, 1)
+            end,
+        },
+        {
+            Key = Keys.VK_RETURN,
+            IsControl = true,
+            MSG = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_CONFIRM_CITYSTATE_ENVOYS",
+            Action = function() return TryConfirmEnvoys() end,
+        },
+    })
+    m_ui.panel:AddChild(m_ui.detailsTree)
+
+    m_ui.treeView = mgr:CreateWidget(TREE_VIEW_ID, "Tree", {
+        Label = function() return JoinNonEmpty(GetInfoBoxLines(), ", ") end,
+        HiddenPredicate = function() return m_viewMode ~= "tree" end,
+    })
+    m_ui.panel:AddChild(m_ui.treeView)
 
     m_ui.envoySlider = mgr:CreateWidget(ENVOY_SLIDER_ID, "Slider", {
         Label = function()
@@ -970,6 +1361,7 @@ local function EnsurePanelBuilt()
             for _ = 1, -delta do OnLessEnvoyTokens(m_selectedPlayerID) end
         end
         SyncEnvoySlider()
+        CAI_RebuildViews()
     end)
     m_ui.panel:AddChild(m_ui.envoySlider)
 
@@ -1064,6 +1456,16 @@ local function EnsurePanelBuilt()
     end)
     m_ui.panel:AddChild(m_ui.levy)
 
+    m_ui.switchView = mgr:CreateWidget(SWITCH_VIEW_ID, "Button", {
+        Label = function()
+            return Locale.Lookup(m_viewMode == "table"
+                and "LOC_CAI_TREE_SWITCH_TO_TREE"
+                or "LOC_CAI_TREE_SWITCH_TO_TABLE")
+        end,
+    })
+    m_ui.switchView:On("activate", function() ToggleViewMode() end)
+    m_ui.panel:AddChild(m_ui.switchView)
+
 end
 
 -- ============================================================================
@@ -1072,11 +1474,14 @@ end
 
 local function PushPanel(focusPlayerID)
     EnsurePanelBuilt()
-    CAI_RebuildTree()
+    CAI_RebuildViews(focusPlayerID)
     if focusPlayerID and focusPlayerID ~= -1 then
-        mgr:Push(m_ui.panel, { focus = "cs:" .. tostring(focusPlayerID) })
+        local focusKey = m_viewMode == "tree"
+            and GetTreeCityStateFocusKey(focusPlayerID)
+            or GetCityStateFocusKey(focusPlayerID)
+        mgr:Push(m_ui.panel, { focus = focusKey })
     else
-        mgr:Push(m_ui.panel)
+        mgr:Push(m_ui.panel, { focus = GetActiveView() })
     end
 end
 
@@ -1112,7 +1517,7 @@ Refresh = WrapFunc(Refresh, function(orig)
     m_caiEnvoyChanges = {}
     orig()
     if mgr:GetWidgetById(PANEL_ID) then
-        CAI_RebuildTree()
+        CAI_RebuildViews()
         SyncEnvoySlider()
     end
 end)

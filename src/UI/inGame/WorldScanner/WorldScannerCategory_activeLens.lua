@@ -15,8 +15,7 @@ local SUBCATEGORY_POWER_SOURCES = "powerSources"
 local SUBCATEGORY_POWER_RANGE = "powerRange"
 local SUBCATEGORY_POWERED = "poweredCityPlots"
 local SUBCATEGORY_UNPOWERED = "unpoweredCityPlots"
-local SUBCATEGORY_TOURISM_CITY = "tourismCity"
-local SUBCATEGORY_TOURISM_STRENGTH = "tourismStrength"
+local SUBCATEGORY_TOURISM = "tourism"
 local SUBCATEGORY_RELIGION = "religion"
 local SUBCATEGORY_LOYALTY_LENS = "loyaltyLens"
 local SUBCATEGORY_PLAGUE = "plague"
@@ -97,6 +96,12 @@ local TOURISM_GROUP_LABEL_KEYS = {
     [GROUP_TOURISM_LOW] = "LOC_CAI_WORLD_SCANNER_TOURISM_LOW",
 }
 
+local TOURISM_STRENGTH_LABEL_KEYS = {
+    [GROUP_TOURISM_HIGH] = "LOC_CAI_TOURISM_STRENGTH_HIGH",
+    [GROUP_TOURISM_MEDIUM] = "LOC_CAI_TOURISM_STRENGTH_MEDIUM",
+    [GROUP_TOURISM_LOW] = "LOC_CAI_TOURISM_STRENGTH_LOW",
+}
+
 local subCategoryLabels = {
     [SUBCATEGORY_WATER] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_SETTLER_WATER",
     [SUBCATEGORY_LOYALTY] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_SETTLER_LOYALTY",
@@ -110,8 +115,7 @@ local subCategoryLabels = {
     [SUBCATEGORY_POWER_RANGE] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_POWER_RANGE",
     [SUBCATEGORY_POWERED] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_POWERED_CITY_PLOTS",
     [SUBCATEGORY_UNPOWERED] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_UNPOWERED_CITY_PLOTS",
-    [SUBCATEGORY_TOURISM_CITY] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TOURISM_CITY",
-    [SUBCATEGORY_TOURISM_STRENGTH] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TOURISM_STRENGTH",
+    [SUBCATEGORY_TOURISM] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TOURISM",
     [SUBCATEGORY_RELIGION] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_RELIGION",
     [SUBCATEGORY_LOYALTY_LENS] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_LOYALTY",
     [SUBCATEGORY_PLAGUE] = "LOC_HUD_PLAGUE_LENS",
@@ -269,11 +273,12 @@ local function GetTourismStrengthGroupId(tourismValue)
     return GROUP_TOURISM_LOW
 end
 
-local function MakeTourismItemLabel(tourismValue, touristCount)
+local function MakeTourismItemLabel(tourismValue, strengthGroupId, touristCount)
     return Locale.Lookup(
-        "LOC_CAI_WORLD_SCANNER_TOURISM_ITEM",
-        tostring(tourismValue),
-        tostring(touristCount)
+        "LOC_CAI_TOURISM_SUMMARY",
+        tourismValue,
+        Utils.ResolveText(TOURISM_STRENGTH_LABEL_KEYS[strengthGroupId]),
+        touristCount
     )
 end
 
@@ -507,13 +512,13 @@ local function ScanGovernmentLens(context)
             return
         end
 
-        local groupId, labelKey = MakeGovernmentPlotLabel(governmentLabelKey, ownerID, plot)
-        if groupId == nil or labelKey == nil then
+        local zoneClassId, labelKey = MakeGovernmentPlotLabel(governmentLabelKey, ownerID, plot)
+        if zoneClassId == nil or labelKey == nil then
             return
         end
 
         local stance = Utils.GetTeamStance(context, ownerID)
-        local key = stance .. ":" .. tostring(groupId)
+        local key = stance .. ":" .. tostring(zoneClassId)
         local bucket = buckets[key]
         if bucket == nil then
             bucket = {
@@ -522,7 +527,7 @@ local function ScanGovernmentLens(context)
                 Stance = stance,
                 GovernmentGroupId = governmentGroupId,
                 GovernmentLabelKey = governmentLabelKey,
-                GroupId = groupId,
+                ZoneClassId = zoneClassId,
                 LabelKey = labelKey,
             }
             buckets[key] = bucket
@@ -536,7 +541,7 @@ local function ScanGovernmentLens(context)
             local stance = bucket.Stance
             local governmentGroupId = bucket.GovernmentGroupId
             local governmentLabelKey = bucket.GovernmentLabelKey
-            local groupId = bucket.GroupId
+            local zoneClassId = bucket.ZoneClassId
             AddItem(out, {
                 Id = "activeLens:" .. LENS_GOVERNMENT .. ":" .. key .. ":" .. tostring(zone.MinPlotIndex),
                 PlotIndex = zone.MinPlotIndex,
@@ -557,13 +562,13 @@ local function ScanGovernmentLens(context)
 
                     local validateCompositeGroupId =
                         MakeGovernmentPlotLabel(validateGovernmentLabelKey, ownerID, plot)
-                    return validateCompositeGroupId == groupId
+                    return validateCompositeGroupId == zoneClassId
                         and Utils.GetTeamStance(validateContext, ownerID) == stance
                 end,
                 LabelKey = bucket.LabelKey,
                 SubCategoryId = stance,
-                GroupId = groupId,
-                GroupLabelKey = bucket.LabelKey,
+                GroupId = governmentGroupId,
+                GroupLabelKey = governmentLabelKey,
             })
         end
     end
@@ -690,32 +695,21 @@ local function ScanTourismLens(context)
     for _, city in localPlayer:GetCities():Members() do
         local cityPlots = Map.GetCityPlots():GetPurchasedPlots(city)
         if cityPlots ~= nil then
-            local cityGroupId = "city:" .. tostring(city:GetID())
-            local cityLabel = Utils.GetCityLabel(city)
             for _, plotIndex in ipairs(cityPlots) do
                 local plot = Map.GetPlotByIndex(plotIndex)
                 if plot ~= nil and Utils.IsPlotRevealed(context, plot) then
                     local tourismValue = culture.GetTourismAt ~= nil and culture:GetTourismAt(plotIndex) or 0
                     if tourismValue > 0 then
                         local touristCount = culture.GetTouristsAt ~= nil and culture:GetTouristsAt(plotIndex) or 0
-                        local itemLabel = MakeTourismItemLabel(tourismValue, touristCount)
                         local strengthGroupId = GetTourismStrengthGroupId(tourismValue)
                         local strengthLabel = TOURISM_GROUP_LABEL_KEYS[strengthGroupId]
+                        local itemLabel = MakeTourismItemLabel(tourismValue, strengthGroupId, touristCount)
 
                         AddItem(out, {
-                            Id = "activeLens:" .. LENS_TOURISM .. ":" .. SUBCATEGORY_TOURISM_CITY .. ":" .. cityGroupId .. ":" .. tostring(plotIndex),
+                            Id = "activeLens:" .. LENS_TOURISM .. ":" .. tostring(plotIndex),
                             PlotIndex = plotIndex,
                             LabelKey = itemLabel,
-                            SubCategoryId = SUBCATEGORY_TOURISM_CITY,
-                            GroupId = cityGroupId,
-                            GroupLabelKey = cityLabel,
-                        })
-
-                        AddItem(out, {
-                            Id = "activeLens:" .. LENS_TOURISM .. ":" .. SUBCATEGORY_TOURISM_STRENGTH .. ":" .. strengthGroupId .. ":" .. tostring(plotIndex),
-                            PlotIndex = plotIndex,
-                            LabelKey = itemLabel,
-                            SubCategoryId = SUBCATEGORY_TOURISM_STRENGTH,
+                            SubCategoryId = SUBCATEGORY_TOURISM,
                             GroupId = strengthGroupId,
                             GroupLabelKey = strengthLabel,
                         })
@@ -1073,8 +1067,7 @@ CAIWorldScannerCategory_ActiveLens = {
         SUBCATEGORY_POWER_RANGE,
         SUBCATEGORY_POWERED,
         SUBCATEGORY_UNPOWERED,
-        SUBCATEGORY_TOURISM_CITY,
-        SUBCATEGORY_TOURISM_STRENGTH,
+        SUBCATEGORY_TOURISM,
         SUBCATEGORY_RELIGION,
         SUBCATEGORY_LOYALTY_LENS,
         SUBCATEGORY_PLAGUE,
@@ -1090,7 +1083,7 @@ CAIWorldScannerCategory_ActiveLens = {
         },
         [SUBCATEGORY_DISASTERS] = DISASTER_GROUP_ORDER,
         [SUBCATEGORY_APPEAL] = APPEAL_GROUP_ORDER,
-        [SUBCATEGORY_TOURISM_STRENGTH] = TOURISM_GROUP_ORDER,
+        [SUBCATEGORY_TOURISM] = TOURISM_GROUP_ORDER,
     },
     GroupLabelResolver = function(_, firstItem)
         return firstItem ~= nil and firstItem.GroupLabelKey or "LOC_CAI_WORLD_SCANNER_UNKNOWN"

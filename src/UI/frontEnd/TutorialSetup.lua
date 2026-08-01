@@ -311,6 +311,8 @@ end
 include ("caiUtils")
 local mgr = ExposedMembers.CAI_UIManager
 local caiId = "9f4b5c2e-1a2b-4c3d-8e9f-123456789abc"
+local CAI_MOVIE_PANEL_ID = "CAITutorialSetupMovie"
+local HOVER_SOUND = "Main_Menu_Mouse_Over"
 local CAI_Dialog = nil
 local CAI_Movie = nil
 EnsureTutorialIsEnabled = WrapFunc(EnsureTutorialIsEnabled, function(orig)
@@ -323,12 +325,42 @@ end)
 
 local function GetTitle() return Controls.TitleLabel:GetText() end
 
-local function MakeButton(idPrefix, labelCtrl, onClick)
+local function MakeButton(idPrefix, control)
 	local b = mgr:CreateWidget(mgr:GenerateWidgetId(idPrefix), "Button", {
-		Label = function() return labelCtrl:GetText() end,
+		Label = function() return control:GetText() end,
 	})
-	b:On("activate", onClick)
+	b:SetFocusSound(HOVER_SOUND)
+	b:On("activate", function()
+		control:DoLeftClick()
+	end)
 	return b
+end
+
+local function PushMoviePanel()
+	if CAI_Movie then return end
+
+	CAI_Movie = mgr:CreateWidget(CAI_MOVIE_PANEL_ID, "Panel", {
+		Label = function() return Locale.Lookup("LOC_CAI_ENDGAME_MOVIE_PLAYING") end,
+	})
+
+	local skipButton = mgr:CreateWidget(mgr:GenerateWidgetId("CAITutorialSetupMovieButton"), "Button", {
+		Label = function() return Locale.Lookup("LOC_CAI_ENDGAME_MOVIE_SKIP") end,
+		FocusKey = "tutorial-setup:movie:skip",
+	})
+	skipButton:SetFocusSound(HOVER_SOUND)
+	skipButton:On("activate", function()
+		Controls.IntroMovieContainer:DoLeftClick()
+	end)
+	CAI_Movie:AddChild(skipButton)
+
+	mgr:Push(CAI_Movie, { priority = PopupPriority.Current })
+end
+
+local function RemoveMoviePanel()
+	if CAI_Movie then
+		mgr:RemoveFromStack(CAI_MOVIE_PANEL_ID)
+		CAI_Movie = nil
+	end
 end
 
 OnShow = WrapFunc(OnShow, function(orig)
@@ -344,24 +376,17 @@ OnShow = WrapFunc(OnShow, function(orig)
 		}),
 	}
 	local btns = {
-		MakeButton("CAITutorialSetupButton", Controls.Leader1Start, function() OnLeader1() end),
-		MakeButton("CAITutorialSetupButton", Controls.Leader2Start, function() OnLeader2() end),
-		MakeButton("CAITutorialSetupButton", Controls.CloseButton,  function() OnBackButton() end),
+		MakeButton("CAITutorialSetupButton", Controls.Leader1Start),
+		MakeButton("CAITutorialSetupButton", Controls.Leader2Start),
 	}
 	CAI_Dialog = mgr.WidgetHelpers.MakeGeneralDialog(GetTitle, btns, content)
-	CAI_Movie = mgr:CreateWidget(mgr:GenerateWidgetId("CAITutorialSetupPanel"), "Panel", {
-		Label = function() return Locale.Lookup("CAI_TUT_MOVIE") end,
-	})
-	mgr:Push(CAI_Movie, { priority = PopupPriority.Current })
+	PushMoviePanel()
 	mgr:Push(CAI_Dialog, { priority = PopupPriority.High })
 end)
 
 StopMovie = WrapFunc(StopMovie, function(orig)
 	orig()
-	if CAI_Movie then
-		mgr:RemoveFromStack(CAI_Movie:GetId())
-		CAI_Movie = nil
-	end
+	RemoveMoviePanel()
 end)
 
 OnHide = WrapFunc(OnHide, function(orig)
@@ -370,10 +395,7 @@ OnHide = WrapFunc(OnHide, function(orig)
 		mgr:RemoveFromStack(CAI_Dialog:GetId())
 		CAI_Dialog = nil
 	end
-	if CAI_Movie then
-		mgr:RemoveFromStack(CAI_Movie:GetId())
-		CAI_Movie = nil
-	end
+	RemoveMoviePanel()
 end)
 --#End of accessibility integration
 Initialize();

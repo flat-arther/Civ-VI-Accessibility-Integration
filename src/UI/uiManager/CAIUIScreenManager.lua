@@ -36,17 +36,24 @@ include("CAIWidget_EditBox")
 include("CAIWidget_Tab")
 include("CAIWidget_TabPage")
 include("CAIWidget_TabControl")
-include("CAIWidget_Table")
+include("CAIWidget_Grid")
+include("CAIWidget_DataTable")
 include("CAIWidget_GameView")
 include("CAIWidget_InterfaceMode")
 include("CAIWidget_SearchPanel")
+include("CAIUITutorialManager")
+include("CAIUITutorialCatalog")
 
 ---@class UIScreenManager
 ---@field Stack UIWidget[]
 ---@field CurrentPath UIWidget[]
+---@field EnterKeyIsDown boolean Whether this manager has observed an unmatched Enter key-down.
+---@field EnterKeyDownOwner? UIWidget Focused leaf that received the current Enter key-down.
 ---@field FocusRestoreKeyOverride? string Temporary logical target used while a widget action synchronously rebuilds its subtree.
 ---@field TypeToFindTarget? UIWidget Container that owns the persistent type-to-find session.
 ---@field CAISettings table<string, any>
+---@field TutorialManager? CAIUITutorialManager
+---@field TutorialCatalog? CAIUITutorialCatalog
 ---@field WidgetHelpers table<string, function> Manager-bound quick widget helpers (dialog builders, etc.) installed by helper modules at init time.
 UIScreenManager = {
     CAISettings = {
@@ -75,6 +82,8 @@ function UIScreenManager:New()
     mgr.SearchBufferExpireTime = nil
     mgr.TypeToFindTarget = nil
     mgr.FocusRestoreKeyOverride = nil
+    mgr.EnterKeyIsDown = false
+    mgr.EnterKeyDownOwner = nil
     return mgr
 end
 
@@ -177,7 +186,10 @@ function UIScreenManager:Push(w, opts)
         .. ", newTop=" .. self:DescribeWidget(newTop))
 
     -- Ignore updating focus if ops.ignoreFocus is true. This is used by screens that want to push a widget but not expect you to interact with it currently. Normally priority would take care of this, but some screens push on async events and so priority is not effective.
-    if opts.ignoreFocus then return end
+    if opts.ignoreFocus then
+        if self.TutorialCatalog then self.TutorialCatalog:OnRootPushed(w) end
+        return
+    end
     -- Resolve opts.focus up-front. When we have a specific target we set
     -- focus straight to it so the full path [root, ..., target] speaks in a
     -- single announcement; otherwise fall back to the default root entry.
@@ -193,18 +205,22 @@ function UIScreenManager:Push(w, opts)
         if announce == nil then announce = true end
         self:UpdateRootFocus(announce)
     end
+    if self.TutorialCatalog then self.TutorialCatalog:OnRootPushed(w) end
 end
 
 ---@param announce? boolean defaults true; pass false to suppress speech
 function UIScreenManager:UpdateRootFocus(announce)
     if #self.Stack == 0 then
         self.CurrentPath = {}
+        self:CancelEnterKeyOwnership()
         return
     end
     local top = self:GetTop()
     if not top or self.CurrentPath[1] == top then return end
     if CAI and CAI.Silence then CAI.Silence() end
     self:SetFocus(top, { announce = announce ~= false })
+    local tutorialMgr = self:GetTutorialManager()
+    if tutorialMgr then tutorialMgr:OnRouteChanged() end
 end
 
 ---@return UIWidget|nil
@@ -225,8 +241,9 @@ function UIScreenManager:Pop()
 end
 
 ---@param id string
+---@param announce? boolean defaults true; pass false when a synchronous parent refresh will choose and announce the final return focus
 ---@return UIWidget|nil
-function UIScreenManager:RemoveFromStack(id)
+function UIScreenManager:RemoveFromStack(id, announce)
     -- Context shutdown order is not deterministic. Once the context that owns
     -- the manager has shut down, other UI contexts may still run their hide
     -- handlers against a stale local reference.
@@ -240,7 +257,7 @@ function UIScreenManager:RemoveFromStack(id)
             w.__priority = nil
             w.__stackOrder = nil
             w:Destroy()
-            self:UpdateRootFocus()
+            self:UpdateRootFocus(announce)
             LogMessage("UI manager RemoveFromStack " .. description
                 .. ", stackSize=" .. tostring(#self.Stack)
                 .. ", newTop=" .. self:DescribeWidget(self:GetTop()))
@@ -259,6 +276,7 @@ function UIScreenManager:IsEmpty() return #self.Stack == 0 end
 function UIScreenManager:Clear()
     LogMessage("UI manager Clear start, stackSize=" .. tostring(#self.Stack))
     self.CurrentPath = {}
+    self:CancelEnterKeyOwnership()
     while #self.Stack > 0 do
         local root = table.remove(self.Stack)
         local description = self:DescribeWidget(root)
@@ -353,6 +371,7 @@ function UIScreenManager:ApplyFocus(newPath)
     -- vanilla state before TTS reads it. The old path is still available via
     -- the focus_leave event's extra arg for handlers that need it.
     self.CurrentPath = newPath
+    self:CancelEnterKeyOwnershipOutsidePath(newPath)
 
     local searchTarget = self.TypeToFindTarget
     if searchTarget then
@@ -471,12 +490,49 @@ end
 ---Resets the timer for app regained focus. Used to prevent input from leaking when focus lands on the window, causing you to accidentally escape screens or trigger input actions
 function UIScreenManager:TouchAppRegainedFocusTimer() self.AppRegainedFocusTime = Automation.GetTime() end
 
+function UIScreenManager:CancelEnterKeyOwnership()
+    self.EnterKeyIsDown = false
+    self.EnterKeyDownOwner = nil
+end
+
+---@param path UIWidget[]
+function UIScreenManager:CancelEnterKeyOwnershipOutsidePath(path)
+    if not self.EnterKeyIsDown then return end
+    local owner = self.EnterKeyDownOwner
+    if owner ~= nil then
+        for _, widget in ipairs(path) do
+            if widget == owner then return end
+        end
+    end
+    self:CancelEnterKeyOwnership()
+end
+
+local function PathOwnsEnterBinding(node, input)
+    local isShift = input:IsShiftDown()
+    local isControl = input:IsControlDown()
+    local isAlt = input:IsAltDown()
+    while node do
+        if not node:IsHidden() then
+            for _, binding in ipairs(node.InputMap or {}) do
+                if binding.Action and binding.Key == Keys.VK_RETURN
+                    and binding.IsShift == isShift
+                    and binding.IsControl == isControl
+                    and binding.IsAlt == isAlt then
+                    return true
+                end
+            end
+        end
+        node = node.Parent
+    end
+    return false
+end
+
 ---@param input InputStruct
 ---@return boolean
 function UIScreenManager:HandleInput(input)
     local msg = input:GetMessageType()
+    local key = input:GetKey()
     if msg == KeyEvents.KeyUp then
-        local key = input:GetKey()
         if key == Keys.VK_ESCAPE and self:ClearSearchBuffer(true) then
             return true
         end
@@ -492,6 +548,31 @@ function UIScreenManager:HandleInput(input)
     end
     if self.AppRegainedFocusTime > 0 and (Automation.GetTime() - self.AppRegainedFocusTime) <= 0.25 then return true end
     local node = self:GetFocusedWidget()
+
+    -- Civ VI can deliver one physical key event to multiple always-active UI
+    -- contexts. Apply down/up ownership only when the focused widget path
+    -- actually owns an Enter binding. World/interface-mode Enter actions are
+    -- dispatched separately through InputActionTriggered and may reach this
+    -- handler without a matching key-down; consuming those key-ups prevents
+    -- their game action from firing.
+    if key == Keys.VK_RETURN then
+        local pathOwnsEnter = PathOwnsEnterBinding(node, input)
+        if msg == KeyEvents.KeyDown then
+            if pathOwnsEnter and not self.EnterKeyIsDown then
+                self.EnterKeyIsDown = true
+                self.EnterKeyDownOwner = node
+            end
+        elseif msg == KeyEvents.KeyUp then
+            if self.EnterKeyIsDown then
+                local ownsKeyUp = self.EnterKeyDownOwner == node
+                self:CancelEnterKeyOwnership()
+                if not ownsKeyUp then return true end
+            elseif pathOwnsEnter then
+                return true
+            end
+        end
+    end
+
     while node do
         if not node:IsHidden() and node.OnHandleInput then
             if node:OnHandleInput(input) or node.TrapInput then
@@ -675,6 +756,7 @@ function UIScreenManager:NotifyDestroy(w)
     for i = 1, #path do
         if path[i] == w then
             for k = #path, i, -1 do path[k] = nil end
+            self:CancelEnterKeyOwnershipOutsidePath(path)
             return
         end
     end
@@ -844,6 +926,25 @@ function UIScreenManager:GetAudioManager()
     return self.AudioManager
 end
 
+---@return CAIUITutorialManager|nil
+function UIScreenManager:GetTutorialManager()
+    return self.TutorialManager
+end
+
+function UIScreenManager:InitializeTutorialManager()
+    self.TutorialManager = CAIUITutorialManager:New(self)
+    self.TutorialCatalog = CAIUITutorialCatalog:New(self)
+    LogMessage("UI manager tutorial manager initialized")
+end
+
+function UIScreenManager:ShutdownTutorialManager()
+    local tutorialMgr = self:GetTutorialManager()
+    if tutorialMgr then tutorialMgr:Shutdown() end
+    self.TutorialCatalog = nil
+    self.TutorialManager = nil
+    LogMessage("UI manager tutorial manager shut down")
+end
+
 function UIScreenManager:InitializeAudioManager()
     if self.AudioManager == nil then
         self.AudioManager = CAIAudioManager:New()
@@ -881,6 +982,7 @@ function UIScreenManager:Init()
     if CAIWidgetHelpers_DialogBuilder and CAIWidgetHelpers_DialogBuilder.Install then
         CAIWidgetHelpers_DialogBuilder.Install(mgr)
     end
+    mgr:InitializeTutorialManager()
     if CAI and CAI.RegisterGlobalCharInputHandler then
         CAI.RegisterGlobalCharInputHandler(function(char)
             return mgr:HandleCharInput(char)
@@ -892,6 +994,7 @@ end
 
 function UIScreenManager:ShutDown(unregCharInput, preserveAudio)
     if preserveAudio ~= true then
+        self:ShutdownTutorialManager()
         self:ShutdownAudioManager()
     end
     if preserveAudio ~= true then

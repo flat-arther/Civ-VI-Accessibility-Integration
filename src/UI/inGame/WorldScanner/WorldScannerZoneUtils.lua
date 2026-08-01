@@ -17,6 +17,72 @@ local NEIGHBOR_DIRECTIONS = {
     DirectionTypes.DIRECTION_NORTHWEST,
 }
 
+local TILE_COUNT_REVEALED = "revealed"
+local TILE_COUNT_UNEXPLORED = "unexplored"
+local TILE_COUNT_REVEALED_OF_TOTAL = "revealedOfTotal"
+
+---@param plotIndices integer[]
+---@param context WorldScannerContext|nil
+---@return integer
+local function CountRevealedPlots(plotIndices, context)
+    local count = 0
+    for _, plotIndex in ipairs(plotIndices) do
+        local plot = Map.GetPlotByIndex(plotIndex)
+        if CAIWorldScannerUtils.IsPlotRevealed(context, plot) then
+            count = count + 1
+        end
+    end
+    return count
+end
+
+---@param labelKey string
+---@param plotIndices integer[]
+---@param context WorldScannerContext|nil
+---@param mode string|nil
+---@return string
+function ZoneUtils.MakeTileCountLabel(labelKey, plotIndices, context, mode)
+    local resolvedLabel = CAIWorldScannerUtils.ResolveText(labelKey)
+    if mode == TILE_COUNT_UNEXPLORED then
+        return Locale.Lookup(
+            "LOC_CAI_WORLD_SCANNER_ZONE_UNEXPLORED_TILES",
+            resolvedLabel,
+            #plotIndices
+        )
+    end
+
+    local revealedCount = CountRevealedPlots(plotIndices, context)
+    if mode == TILE_COUNT_REVEALED_OF_TOTAL then
+        return Locale.Lookup(
+            "LOC_CAI_WORLD_SCANNER_ZONE_REVEALED_OF_TOTAL_TILES",
+            resolvedLabel,
+            revealedCount,
+            #plotIndices
+        )
+    end
+
+    return Locale.Lookup(
+        "LOC_CAI_WORLD_SCANNER_ZONE_REVEALED_TILES",
+        resolvedLabel,
+        revealedCount
+    )
+end
+
+---@param item table
+---@param context WorldScannerContext|nil
+local function UpdateTileCountLabel(item, context)
+    if item.ZoneTileCountEmbedded then
+        return
+    end
+
+    item._CAIZoneTileCountBaseLabel = item._CAIZoneTileCountBaseLabel or item.LabelKey
+    item.LabelKey = ZoneUtils.MakeTileCountLabel(
+        item._CAIZoneTileCountBaseLabel,
+        item.ZonePlotIndices,
+        context,
+        item.ZoneTileCountMode or TILE_COUNT_REVEALED
+    )
+end
+
 ---@param plotIndices integer[]|nil
 ---@return WorldScannerZone[]
 function ZoneUtils.PartitionPlotIndices(plotIndices)
@@ -139,6 +205,8 @@ function ZoneUtils.ResolveItemTarget(item, context, pruneInvalid)
     item.PlotIndex = nearestPlotIndex
     if item.ZoneUpdateLabel ~= nil then
         item.ZoneUpdateLabel(item, context)
+    else
+        UpdateTileCountLabel(item, context)
     end
     return nearestPlotIndex
 end

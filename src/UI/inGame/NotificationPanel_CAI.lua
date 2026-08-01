@@ -1,4 +1,5 @@
 include("caiUtils")
+include("Civ6Common")
 
 local mgr                              = ExposedMembers.CAI_UIManager
 
@@ -25,6 +26,7 @@ local DEFAULT_SOUND_EXCLUDED_TYPES     = {
 local m_centerPanel                    = nil ---@type PanelWidget|nil
 local m_centerTree                     = nil ---@type TreeWidget|nil
 local m_messageList                    = nil ---@type ListWidget|nil
+local m_tutorialAlwaysReceiveInput     = false
 local m_caiAnnouncedNotificationIDs    = {}
 local m_caiDeferedNotificationAnnounce = {}
 
@@ -114,11 +116,22 @@ local function SpeakUnavailable()
     Speak(Locale.Lookup("LOC_CAI_NOTIFICATION_UNAVAILABLE"))
 end
 
+local function SetTutorialAlwaysReceiveInput(enabled)
+    if enabled and not m_tutorialAlwaysReceiveInput and IsTutorialRunning() then
+        UITutorialManager:AddControlToAlwaysReceiveInput(ContextPtr)
+        m_tutorialAlwaysReceiveInput = true
+    elseif not enabled and m_tutorialAlwaysReceiveInput then
+        UITutorialManager:RemoveControlToAlwaysReceiveInput(ContextPtr)
+        m_tutorialAlwaysReceiveInput = false
+    end
+end
+
 local function CloseNotificationCenter()
+    SetTutorialAlwaysReceiveInput(false)
+    if mgr then mgr:RemoveFromStack(NOTIFICATION_CENTER_ID) end
     m_centerPanel = nil
     m_centerTree = nil
     m_messageList = nil
-    if mgr then mgr:RemoveFromStack(NOTIFICATION_CENTER_ID) end
 end
 
 LookAtNotification = WrapFunc(LookAtNotification, function(orig, pNotification)
@@ -535,7 +548,13 @@ local function OpenNotificationCenter()
     panel:AddChild(tabs)
     m_centerPanel = panel
     m_centerTree = tree
+    SetTutorialAlwaysReceiveInput(true)
     mgr:Push(panel, latestKey and { focus = latestKey } or nil)
+end
+
+local function OnCAINotificationInputHandler(input)
+    if not mgr or not m_centerPanel or mgr:GetTop() ~= m_centerPanel then return false end
+    return mgr:HandleInput(input)
 end
 
 
@@ -661,3 +680,4 @@ end)
 Events.InputActionStarted.Add(OnCAINotificationInputAction)
 Events.LoadScreenClose.Add(OnLoadScreenClose)
 LuaEvents.CAIAppendToMessageBuffer.Add(OnMessageBufferEntryAdded)
+ContextPtr:SetInputHandler(OnCAINotificationInputHandler, true)

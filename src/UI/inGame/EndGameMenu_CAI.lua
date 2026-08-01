@@ -171,10 +171,18 @@ local function RebuildRankingList()
 end
 
 -- ============================================================================
--- Tab 3: Graphs (numeric data per player)
+-- Tab 3: Replay data (player -> non-empty turn -> recorded values)
 -- ============================================================================
+local function FormatReplayValue(value)
+    if type(value) == "number" then
+        return Locale.ToNumber(value, "#,###.##")
+    end
+    return tostring(value)
+end
+
 local function RebuildGraphsTree()
     if not m_graphsTree then return end
+    local capture = mgr:CaptureFocusKey(m_graphsTree)
     m_graphsTree:ClearChildren()
 
     local initialTurn = g_InitialTurn or GameConfiguration.GetStartTurn()
@@ -188,6 +196,7 @@ local function RebuildGraphsTree()
         })
         noData:SetFocusSound(HOVER_SOUND)
         m_graphsTree:AddChild(noData)
+        mgr:RestoreFocus(m_graphsTree, capture)
         return
     end
 
@@ -209,9 +218,53 @@ local function RebuildGraphsTree()
         coalescedData[ds.name] = GameSummary.CoalesceDataSet(ds.index, initialTurn, finalTurn)
     end
 
+    local playersWithTurns = {}
     for _, pInfo in ipairs(playerInfos) do
-        local pName = pInfo.Name and Locale.Lookup(pInfo.Name) or ("Player " .. pInfo.Id)
+        local turns = {}
+        for turn = initialTurn, finalTurn do
+            local values = {}
+            for _, ds in ipairs(dataSets) do
+                local graphData = coalescedData[ds.name]
+                local playerData = graphData and graphData[pInfo.Id]
+                local value = playerData and playerData[turn]
+                if value ~= nil then
+                    table.insert(values, {
+                        dataSetName = ds.name,
+                        label = ds.display .. ": " .. FormatReplayValue(value),
+                    })
+                end
+            end
+            if #values > 0 then
+                table.insert(turns, {
+                    number = turn,
+                    values = values,
+                })
+            end
+        end
 
+        if #turns > 0 then
+            table.insert(playersWithTurns, {
+                info = pInfo,
+                turns = turns,
+            })
+        end
+    end
+
+    if #playersWithTurns == 0 then
+        local noData = mgr:CreateWidget(MakeId("CAIEG_graph_"), "StaticText", {
+            Label = function() return Locale.Lookup("LOC_UI_ENDGAME_REPLAY_NOGRAPHDATA") end,
+            FocusKey = "endgame:graph:nodata",
+        })
+        noData:SetFocusSound(HOVER_SOUND)
+        m_graphsTree:AddChild(noData)
+        mgr:RestoreFocus(m_graphsTree, capture)
+        return
+    end
+
+    for _, playerEntry in ipairs(playersWithTurns) do
+        local pInfo = playerEntry.info
+        local pName = pInfo.Name and Locale.Lookup(pInfo.Name)
+            or (Locale.Lookup("LOC_CAI_PLAYER") .. " " .. tostring(pInfo.Id))
         local playerNode = mgr:CreateWidget(MakeId("CAIEG_graph_"), "TreeItem", {
             Label = function() return pName end,
             FocusKey = "endgame:graph:player:" .. pInfo.Id,
@@ -219,31 +272,30 @@ local function RebuildGraphsTree()
         playerNode:SetFocusSound(HOVER_SOUND)
         m_graphsTree:AddChild(playerNode)
 
-        for _, ds in ipairs(dataSets) do
-            local graphData = coalescedData[ds.name]
-            local data = graphData and graphData[pInfo.Id]
-            local finalValue = nil
-            if data then
-                for turn = finalTurn, initialTurn, -1 do
-                    if data[turn] ~= nil then
-                        finalValue = data[turn]
-                        break
-                    end
-                end
-            end
-
-            local valueStr = finalValue and tostring(math.floor(finalValue)) or
-                Locale.Lookup("LOC_UI_ENDGAME_REPLAY_NOGRAPHDATA")
-            local leafLabel = ds.display .. ": " .. valueStr
-
-            local leaf = mgr:CreateWidget(MakeId("CAIEG_graph_"), "TreeItem", {
-                Label = function() return leafLabel end,
-                FocusKey = "endgame:graph:" .. pInfo.Id .. ":" .. ds.name,
+        for _, turnEntry in ipairs(playerEntry.turns) do
+            local turn = turnEntry.number
+            local turnLabel = Locale.Lookup("LOC_CAI_TIMELINE_TURN", turn)
+            local turnNode = mgr:CreateWidget(MakeId("CAIEG_graph_"), "TreeItem", {
+                Label = function() return turnLabel end,
+                FocusKey = "endgame:graph:player:" .. pInfo.Id .. ":turn:" .. turn,
             })
-            leaf:SetFocusSound(HOVER_SOUND)
-            playerNode:AddChild(leaf)
+            turnNode:SetFocusSound(HOVER_SOUND)
+            playerNode:AddChild(turnNode)
+
+            for _, valueEntry in ipairs(turnEntry.values) do
+                local valueLabel = valueEntry.label
+                local leaf = mgr:CreateWidget(MakeId("CAIEG_graph_"), "TreeItem", {
+                    Label = function() return valueLabel end,
+                    FocusKey = "endgame:graph:player:" .. pInfo.Id ..
+                        ":turn:" .. turn .. ":dataset:" .. valueEntry.dataSetName,
+                })
+                leaf:SetFocusSound(HOVER_SOUND)
+                turnNode:AddChild(leaf)
+            end
         end
     end
+
+    mgr:RestoreFocus(m_graphsTree, capture)
 end
 
 -- ============================================================================

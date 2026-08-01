@@ -33,6 +33,25 @@ local m_effectsItem      = nil ---@type UIWidget|nil
 local m_pendingTargets   = {}
 local m_targetCommits    = {}
 local m_nextRequirements = {}
+local m_tutorialCheckPending = false
+local m_tutorialUpdateArmed = false
+local CheckActionTutorial
+
+local function FlushActionTutorial()
+    ContextPtr:ClearUpdate()
+    m_tutorialUpdateArmed = false
+    if not m_tutorialCheckPending then return end
+    m_tutorialCheckPending = false
+    CheckActionTutorial()
+end
+
+local function ScheduleActionTutorial()
+    m_tutorialCheckPending = true
+    if not m_tutorialUpdateArmed then
+        m_tutorialUpdateArmed = true
+        ContextPtr:SetUpdate(FlushActionTutorial)
+    end
+end
 
 -- =========================================================================
 -- Utility: find a named child control by ID (shallow)
@@ -114,6 +133,11 @@ end
 -- =========================================================================
 local function RemovePanel()
     if not mgr then return end
+    m_tutorialCheckPending = false
+    if m_tutorialUpdateArmed then
+        ContextPtr:ClearUpdate()
+        m_tutorialUpdateArmed = false
+    end
     DismissConfirmDialog()
     if not m_panel then return end
     mgr:RemoveFromStack(PANEL_ID)
@@ -1616,6 +1640,7 @@ local function BuildReviewBody()
         elseif pageIndex == 2 and proposalsPage then
             SwitchReviewTab(3)
             BuildProposalsPage(proposalsPage)
+            ScheduleActionTutorial()
         end
     end)
 
@@ -1642,6 +1667,28 @@ local function BuildShell()
     m_panel = mgr:CreateWidget(PANEL_ID, "Panel", {
         Label = function() return Controls.Title:GetText() or "" end,
     })
+end
+
+CheckActionTutorial = function()
+    if not m_panel or not mgr then return end
+    local tutorials = mgr:GetTutorialManager()
+    if not tutorials then return end
+
+    if m_caiStage == 1 and m_caiPhase == 1 then
+        tutorials:Check("WorldCongressResolutionVote", m_panel, {
+            IsActive = function() return m_caiStage == 1 and m_caiPhase == 1 end,
+        })
+    elseif m_caiStage == 2 and m_caiPhase == 1 then
+        tutorials:Check("WorldCongressProposalVote", m_panel, {
+            IsActive = function() return m_caiStage == 2 and m_caiPhase == 1 end,
+        })
+    elseif m_caiStage == 4 and m_activeSection == 3 then
+        tutorials:Check("WorldCongressSpecialSessionProposal", m_panel, {
+            IsActive = function()
+                return m_caiStage == 4 and m_activeSection == 3
+            end,
+        })
+    end
 end
 
 -- =========================================================================
@@ -1679,6 +1726,7 @@ local function BuildAndPush(stage, phase)
         BuildConfirmationDialog()
     end
     mgr:Push(m_panel, { priority = PopupPriority.WorldCongressPopup })
+    ScheduleActionTutorial()
 
     m_isBuilding = false
 end
@@ -1706,6 +1754,7 @@ local function RebuildBody(stage, phase)
     if capture and m_body then
         mgr:RestoreFocus(m_body, capture)
     end
+    ScheduleActionTutorial()
 end
 
 -- =========================================================================

@@ -350,7 +350,10 @@ local function EnsurePanelBuilt()
     local treeBtn = mgr:CreateWidget(OPEN_TREE_BUTTON_ID, "Button", {
         Label             = function() return ControlText(Controls.OpenTreeButton) end,
         HiddenPredicate   = function() return ControlIsHidden(Controls.OpenTreeButton) end,
-        DisabledPredicate = function() return ControlIsDisabled(Controls.OpenTreeButton) end,
+        DisabledPredicate = function()
+            return ControlIsDisabled(Controls.OpenTreeButton)
+                or not IsCAITutorialControlAllowed("OpenTreeButton")
+        end,
     })
     treeBtn:SetFocusSound("Main_Menu_Mouse_Over")
     treeBtn:On("activate", function(w)
@@ -454,6 +457,10 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
             end
             return true
         end
+    end
+    if IsCAIEscapeKeyUp(input) and not IsCAITutorialScreenCloseAllowed() then
+        AnnounceCAITutorialScreenCloseBlocked()
+        return true
     end
     return orig(input)
 end)

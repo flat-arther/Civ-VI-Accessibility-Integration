@@ -2458,6 +2458,14 @@ end)
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
     local handled = mgr and mgr:HandleInput(input) or false
     if handled then return true end
+    -- Vanilla Escape first backs out of dialogs, conversations, cinema, or
+    -- deals. Only the overview-state Escape actually dismisses the screen.
+    if IsCAIEscapeKeyUp(input) and mgr and mgr:GetTop() == m_ui.root
+        and IsFocusInOverview()
+        and not IsCAITutorialScreenCloseAllowed() then
+        AnnounceCAITutorialScreenCloseBlocked()
+        return true
+    end
     return orig(input)
 end)
 ContextPtr:SetInputHandler(OnInputHandler, true)

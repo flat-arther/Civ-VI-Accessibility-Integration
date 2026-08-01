@@ -65,6 +65,9 @@ VALUES
     ('SearchTimeout', 'UI', 90, 'number', 'editbox', '1.0',
      'LOC_CAI_SETTING_SEARCH_TIMEOUT', 'LOC_CAI_SETTING_SEARCH_TIMEOUT_TOOLTIP', 'NumbersOnly'),
 
+    ('ShowTutorials', 'UI', 100, 'bool', 'checkbox', 'true',
+     'LOC_CAI_TUTORIAL_SHOW_TUTORIALS', 'LOC_CAI_TUTORIAL_SHOW_TUTORIALS_TOOLTIP', NULL),
+
     ('SpeakTurnBlockers', 'Events', 10, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_TURN_BLOCKERS', 'LOC_CAI_SETTING_SPEAK_TURN_BLOCKERS_TOOLTIP', NULL),
 
@@ -158,28 +161,35 @@ VALUES
     ('SpeakMessageBufferNotifications', 'MessageBuffer', 10, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_NOTIFICATIONS', 'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_NOTIFICATIONS_TOOLTIP', NULL),
 
-    ('SpeakMessageBufferReveals', 'MessageBuffer', 20, 'bool', 'checkbox', 'true',
+    ('SpeakMessageBufferTutorials', 'MessageBuffer', 20, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_TUTORIALS', 'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_TUTORIALS_TOOLTIP', NULL),
+
+    ('SpeakMessageBufferReveals', 'MessageBuffer', 30, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_REVEALS', 'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_REVEALS_TOOLTIP', NULL),
 
-    ('SpeakMessageBufferCombat', 'MessageBuffer', 30, 'bool', 'checkbox', 'true',
+    ('SpeakMessageBufferCombat', 'MessageBuffer', 40, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_COMBAT', 'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_COMBAT_TOOLTIP', NULL),
 
-    ('SpeakMessageBufferMovement', 'MessageBuffer', 40, 'bool', 'checkbox', 'true',
+    ('SpeakMessageBufferMovement', 'MessageBuffer', 50, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_MOVEMENT', 'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_MOVEMENT_TOOLTIP', NULL),
 
-    ('SpeakMessageBufferChat', 'MessageBuffer', 50, 'bool', 'checkbox', 'true',
+    ('SpeakMessageBufferChat', 'MessageBuffer', 60, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_CHAT', 'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_CHAT_TOOLTIP', NULL),
 
-    ('SpeakMessageBufferGossip', 'MessageBuffer', 60, 'bool', 'checkbox', 'true',
+    ('SpeakMessageBufferGossip', 'MessageBuffer', 70, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_GOSSIP', 'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_GOSSIP_TOOLTIP', NULL),
 
-    ('MessageBufferLimit', 'MessageBuffer', 70, 'number', 'editbox', '5000',
+    ('MessageBufferLimit', 'MessageBuffer', 80, 'number', 'editbox', '5000',
      'LOC_CAI_SETTING_MESSAGE_BUFFER_LIMIT', 'LOC_CAI_SETTING_MESSAGE_BUFFER_LIMIT_TOOLTIP', 'NumbersOnly');
 
 INSERT OR REPLACE INTO CAI_Settings
     (SettingId, Section, SortIndex, ValueType, UIType, DefaultValue, Label, Tooltip,
      EditMode, ActionValue, DisplayContext)
 VALUES
+    ('ResetModTutorials', 'UI', 110, 'action', 'button', 'reset',
+     'LOC_CAI_TUTORIAL_RESET', 'LOC_CAI_TUTORIAL_RESET_TOOLTIP',
+     NULL, 'reset', 'Any'),
+
     ('ManageScannerCategories', 'WorldScanner', 100, 'action', 'button', 'open',
      'LOC_CAI_SETTING_MANAGE_SCANNER_CATEGORIES',
      'LOC_CAI_SETTING_MANAGE_SCANNER_CATEGORIES_TOOLTIP', NULL, 'open', 'InGame');

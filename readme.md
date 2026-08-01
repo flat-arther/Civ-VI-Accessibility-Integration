@@ -117,15 +117,17 @@ Tabs divide a screen into pages.
 - `Ctrl+Tab` / `Ctrl+Shift+Tab` — next / previous page from anywhere in the tab control; also wraps with a click sound
 - `Tab` / `Shift+Tab` — next previous control; also wraps with a click sound
 
-#### Tables
+#### Tables and grids
 
-Tables arrange items vertically and horizontally. They do not wrap at their boundaries.
+Tables and grids arrange items vertically and horizontally and do not wrap at their boundaries. Tables contain uniform records and may have sortable column headers. Grids represent spatial or progression layouts whose columns may contain several tiers.
 
-- `Up` / `Down` — previous / next item in the current vertical tier
-- `Left` / `Right` — previous / next tier
-- `Home` / `End` — first / last item in the current tier
+- `Up` / `Down` — previous / next row in a table, or item in the current grid tier
+- `Left` / `Right` — previous / next table column or grid tier
+- `Home` / `End` — first / last row in a table column or item in a grid tier
 - `Ctrl+Left` / `Ctrl+Right` — previous / next column
-- `Ctrl+Home` / `Ctrl+End` — first / last item in the entire table
+- `Ctrl+Home` / `Ctrl+End` — first / last item in the entire table or grid
+- `Enter` / `Space` on a sortable table header — cycle sort order
+- Type-ahead — tables search row labels; grids search every cell
 
 ### Activation and values
 
@@ -322,7 +324,7 @@ The Action Panel tracks what must happen before the turn can end. By default, th
 
 ### Notifications and message history
 
-The Notification Center contains the game's current active notifications. The message buffer is a separate history of spoken events, including notifications, discoveries, combat, gossip, movement, and chat. Use the Notification Center when you want to act on a current notification; use the message buffer when you want to review something that was spoken earlier.
+The Notification Center contains the game's current active notifications. The message buffer is a separate history of spoken events, including notifications, tutorial advisor callouts, discoveries, combat, gossip, movement, and chat. Use the Notification Center when you want to act on a current notification; use the message buffer when you want to review something that was spoken earlier.
 
 #### Notification Center
 
@@ -336,7 +338,7 @@ New notifications are spoken as they arrive. Notifications of the same type are 
 
 #### Message buffer
 
-The message buffer keeps a limited history for the current player. It can show all messages or filter them by notification, discovery, combat, gossip, movement, or chat. Changing category skips categories that currently contain no messages. Visible unit movements record the observed direction path and the unit's last known location, so the location-jump action returns to where that movement was last seen. Navigation settings provide separate movement-announcement dropdowns for your units, teammates, hostile civilizations, neutral civilizations, city-states, and barbarians. Each can announce military units, civilian units, both, or neither; only barbarian movement is enabled by default. These choices affect speech without removing history entries. In hotseat games, collected unit movements are announced only when the observing player's next turn begins.
+The message buffer keeps a limited history for the current player. It can show all messages or filter them by notification, tutorial, discovery, combat, gossip, movement, or chat. Changing category skips categories that currently contain no messages. Tutorial advisor callouts are recorded when their detailed instruction appears. Visible unit movements record the observed direction path and the unit's last known location, so the location-jump action returns to where that movement was last seen. Navigation settings provide separate movement-announcement dropdowns for your units, teammates, hostile civilizations, neutral civilizations, city-states, and barbarians. Each can announce military units, civilian units, both, or neither; only barbarian movement is enabled by default. These choices affect speech without removing history entries. In hotseat games, collected unit movements are announced only when the observing player's next turn begins.
 
 - `;` — read the previous message in the current category
 - `'` — read the next message in the current category
@@ -436,7 +438,7 @@ Screens such as World Rankings, the Production Panel, and World Climate contain 
 
 ## Expectations
 
-Tables: more UIs need tables. Unfortunately, by the time the idea came up, I was too far into development to justify slowing down and redoing previous UIs. This is planned for next.
+Tables and grids: more UIs can benefit from record-oriented tables or spatial grids. Expanding their use remains planned.
 
 The tutorial is still not supported currently.
 

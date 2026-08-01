@@ -506,7 +506,7 @@ end
 
 local function PushPanel()
     BuildPanel()
-    mgr:Push(m_panel)
+    mgr:Push(m_panel, PopupPriority.Low)
 end
 
 local function PopPanel()

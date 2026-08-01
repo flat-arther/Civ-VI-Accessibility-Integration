@@ -196,7 +196,7 @@ function CAICursor:SetCoords(x, y) end
 ---@param reason "step"|"jump"|"select"|"snap"|"scope" Why the cursor is moving.
 function CAICursor:MoveTo(plotId, reason) end
 
----Clears the cached city-management, district-placement, or wonder-placement cursor scope.
+---Clears the cached city-management cursor scope.
 function CAICursor:InvalidateCityScope() end
 
 ---Moves the cursor to the selected city center when it is outside the active city-interface scope.
@@ -280,9 +280,9 @@ EditModes = {}
 ---@field tooltip? string|fun(...):string
 ---@field extraEvents? table<string,fun(UIWidget, ...):string>
 
----One column in a TableWidget. `width` is the number of side-by-side tiers
+---One column in a GridWidget. `width` is the number of side-by-side tiers
 ---the column holds (default 1).
----@class TableColumn
+---@class GridColumn
 ---@field header string|fun():string
 ---@field width? integer
 
@@ -484,6 +484,119 @@ function CAIAudioManager:Update() end
 function CAIAudioManager:Initialize(owner) end
 
 function CAIAudioManager:Shutdown() end
+
+-- -----------------------------------------------------------------------------
+-- CAIUITutorialManager
+-- -----------------------------------------------------------------------------
+
+---@alias CAITutorialLocalizedText string|fun(context:any, item:CAITutorialItemDefinition):string
+
+---@class CAITutorialItemDefinition
+---@field Id string Stable persistence identifier.
+---@field RaiseEvents string[] Named events which may raise this item.
+---@field Title CAITutorialLocalizedText Localization tag or live localized-text getter.
+---@field Content CAITutorialLocalizedText[] Ordered static-text rows.
+---@field Order? number Lower values are evaluated first.
+---@field Queueable? boolean Whether the item may wait behind another tutorial.
+---@field Prerequisites? string[] Item ids which must already be seen.
+---@field CanRaise? fun(context:any, item:CAITutorialItemDefinition):boolean
+---@field OnOpen? fun(context:any, item:CAITutorialItemDefinition)
+---@field OnContinue? fun(context:any, item:CAITutorialItemDefinition)
+---@field private _registrationOrder? integer
+
+---@class CAITutorialQueueItem
+---@field Item CAITutorialItemDefinition
+---@field Owner UIWidget
+---@field Context? any
+
+---@class CAITutorialActiveState : CAITutorialQueueItem
+---@field Host PanelWidget
+---@field Dialog DialogWidget
+---@field PreviousFocus? UIWidget
+
+---@class CAIUITutorialManager
+---@field Manager? UIScreenManager
+---@field Items table<string, CAITutorialItemDefinition>
+---@field Listeners table<string, CAITutorialItemDefinition[]>
+---@field Queue CAITutorialQueueItem[]
+---@field Active? CAITutorialActiveState
+---@field NextRegistrationOrder integer
+---@field IsClosing boolean
+---@field SettingsChangedListener? fun(settingId:string, value:any)
+---@field SettingsHooked boolean
+CAIUITutorialManager = {}
+
+---@param mgr UIScreenManager
+---@return CAIUITutorialManager
+function CAIUITutorialManager:New(mgr) end
+
+---@param item CAITutorialItemDefinition
+---@return boolean
+function CAIUITutorialManager:RegisterItem(item) end
+
+---@param items CAITutorialItemDefinition[]
+---@return boolean
+function CAIUITutorialManager:RegisterItems(items) end
+
+---@param eventName string
+---@param owner UIWidget
+---@param context? any
+---@return boolean opened
+function CAIUITutorialManager:Check(eventName, owner, context) end
+
+---@param itemId string
+---@return boolean
+function CAIUITutorialManager:IsSeen(itemId) end
+
+---@param itemId string
+---@return boolean
+function CAIUITutorialManager:MarkSeen(itemId) end
+
+---@param itemId string
+---@return boolean
+function CAIUITutorialManager:ResetSeen(itemId) end
+
+---@return boolean
+function CAIUITutorialManager:ResetAllSeen() end
+
+---@return integer
+function CAIUITutorialManager:GetResetGeneration() end
+
+---@return boolean
+function CAIUITutorialManager:AreTutorialsEnabled() end
+
+---@return boolean
+function CAIUITutorialManager:IsActive() end
+
+---@return boolean
+function CAIUITutorialManager:Continue() end
+
+function CAIUITutorialManager:ClearQueue() end
+
+---@param settingId string
+---@param value? any
+function CAIUITutorialManager:OnSettingsChanged(settingId, value) end
+
+function CAIUITutorialManager:HookSettingsChanged() end
+
+function CAIUITutorialManager:UnhookSettingsChanged() end
+
+---@return boolean opened
+function CAIUITutorialManager:OnRouteChanged() end
+
+function CAIUITutorialManager:Shutdown() end
+
+---@class CAIUITutorialCatalog
+---@field Manager UIScreenManager
+---@field ByRoot table[]
+CAIUITutorialCatalog = {}
+
+---@param mgr UIScreenManager
+---@return CAIUITutorialCatalog
+function CAIUITutorialCatalog:New(mgr) end
+
+---@param root UIWidget
+function CAIUITutorialCatalog:OnRootPushed(root) end
 
 -- -----------------------------------------------------------------------------
 -- UIWidget — base class
@@ -1043,57 +1156,144 @@ TabWidget = {}
 ---@class TabPageWidget : ContainerWidget
 TabPageWidget = {}
 
----Three-level table: Table -> Column -> Tier -> item cell. A column speaks
+---Three-level grid: Grid -> Column -> Tier -> item cell. A column speaks
 ---only its header label (role/position muted) and owns its cells through
 ---tiers, so the column header is announced when focus crosses into it.
----@class TableWidget : ContainerWidget
-TableWidget = {}
+---@class GridWidget : ContainerWidget
+GridWidget = {}
 ---Append a column holding `width` side-by-side tiers. Returns the column widget.
----@param col TableColumn
+---@param col GridColumn
 ---@return ContainerWidget column
-function TableWidget:AddColumn(col) end
+function GridWidget:AddColumn(col) end
 
 ---@return integer
-function TableWidget:GetColumnCount() end
+function GridWidget:GetColumnCount() end
 
 ---@param i integer
 ---@return ContainerWidget|nil
-function TableWidget:GetColumnWidget(i) end
+function GridWidget:GetColumnWidget(i) end
 
 ---@param column ContainerWidget|integer
 ---@param tierIndex? integer
 ---@return ContainerWidget|nil
-function TableWidget:GetTier(column, tierIndex) end
+function GridWidget:GetTier(column, tierIndex) end
 
 ---Append an item cell to a column's tier (vertical stack).
 ---@param column ContainerWidget|integer
 ---@param tierIndex integer|nil
 ---@param widget UIWidget
 ---@return integer itemIndex
-function TableWidget:AddItem(column, tierIndex, widget) end
+function GridWidget:AddItem(column, tierIndex, widget) end
 
 ---Grid convenience: one cell into each column's first tier, in column order.
 ---@param cells (UIWidget|nil)[]
 ---@return integer rowIndex
-function TableWidget:AddRow(cells) end
+function GridWidget:AddRow(cells) end
 
 ---@param row integer
 ---@param col integer
 ---@param widget UIWidget|nil
-function TableWidget:SetCell(row, col, widget) end
+function GridWidget:SetCell(row, col, widget) end
 
 ---@param row integer
 ---@param col integer
 ---@return UIWidget|nil
-function TableWidget:GetCell(row, col) end
+function GridWidget:GetCell(row, col) end
 
 ---@return integer
-function TableWidget:GetRowCount() end
+function GridWidget:GetRowCount() end
 
 ---@param row integer
-function TableWidget:RemoveRow(row) end
+function GridWidget:RemoveRow(row) end
 
-function TableWidget:ClearRows() end
+function GridWidget:ClearRows() end
+
+---Type-to-find candidates are every visible item cell across all tiers.
+---@param includeTooltips boolean
+---@return SearchCandidate[]
+function GridWidget:GetTypeToFindCandidates(includeTooltips) end
+
+---@class DataTableColumn
+---@field key string Stable column identity.
+---@field header string|fun():string Live localized column header.
+---@field getCell fun(row:any):string Live displayed value.
+---@field getTooltip? fun(row:any):string
+---@field getState? fun(row:any):string
+---@field isDisabled? fun(row:any):boolean
+---@field sortKey? fun(row:any):any Presence makes the header sortable.
+---@field activatable? boolean Whether data cells emit `cell_activate`.
+---@field role? string Optional localized widget role for data cells.
+
+---@class DataTableSort
+---@field column string Stable DataTableColumn key.
+---@field ascending? boolean
+
+---@class DataTableCellWidget : UIWidget
+---@field Table DataTableWidget
+---@field Column DataTableColumn
+---@field ColumnIndex integer
+---@field Row any|nil Nil for a header cell.
+---@field RowIndex integer Zero for a header cell.
+---@field RowKey any|nil
+DataTableCellWidget = {}
+
+---Sortable homogeneous-row table. Its player-facing role remains `Table`.
+---@class DataTableWidget : ContainerWidget
+DataTableWidget = {}
+
+---@param columns DataTableColumn[]
+function DataTableWidget:SetColumns(columns) end
+
+---@param provider fun():any[]
+function DataTableWidget:SetRowsProvider(provider) end
+
+---@param getter fun(row:any):any
+function DataTableWidget:SetRowKeyGetter(getter) end
+
+---@param getter fun(row:any):string
+function DataTableWidget:SetRowLabelGetter(getter) end
+
+---@param sort DataTableSort|nil
+function DataTableWidget:SetDefaultSort(sort) end
+
+---Re-read, sort, and rebuild the table while preserving a stable focused cell.
+function DataTableWidget:Rebuild() end
+
+---@return integer
+function DataTableWidget:GetColumnCount() end
+
+---@return integer
+function DataTableWidget:GetRowCount() end
+
+---@param column string|integer
+---@return integer|nil
+function DataTableWidget:GetColumnIndex(column) end
+
+---@return string|nil columnKey, boolean ascending
+function DataTableWidget:GetSort() end
+
+---@param rowIndex integer One-based data row index.
+---@param column string|integer
+---@return DataTableCellWidget|nil
+function DataTableWidget:GetCell(rowIndex, column) end
+
+---@param column string|integer
+---@return DataTableCellWidget|nil
+function DataTableWidget:GetHeader(column) end
+
+---@return any|nil row, any|nil rowKey, integer|nil rowIndex
+function DataTableWidget:GetFocusedRow() end
+
+---@return DataTableColumn|nil column, integer|nil columnIndex
+function DataTableWidget:GetFocusedColumn() end
+
+---@param columnKey string
+function DataTableWidget:CycleSort(columnKey) end
+
+---Type-to-find candidates are row labels only, targeted at the active column.
+---@param includeTooltips boolean
+---@return SearchCandidate[]
+function DataTableWidget:GetTypeToFindCandidates(includeTooltips) end
 
 ---@class GameViewWidget : ContainerWidget
 GameViewWidget = {}
@@ -1151,10 +1351,14 @@ function SearchPanelWidget:SetResults(results) end
 ---@class UIScreenManager
 ---@field Stack UIWidget[]
 ---@field CurrentPath UIWidget[]
+---@field EnterKeyIsDown boolean Whether the manager has observed an unmatched Enter key-down.
+---@field EnterKeyDownOwner? UIWidget Focused leaf that received the current Enter key-down.
 ---@field FocusRestoreKeyOverride? string Temporary logical target used during a synchronous action-driven rebuild.
 ---@field TypeToFindTarget? UIWidget Container that owns the persistent type-to-find session.
 ---@field CAISettings table<string, any>
 ---@field AudioManager CAIAudioManager|nil
+---@field TutorialManager CAIUITutorialManager|nil
+---@field TutorialCatalog CAIUITutorialCatalog|nil
 ---@field WidgetHelpers CAIWidgetHelpers Manager-bound quick widget helpers (dialog builders, etc.).
 UIScreenManager = {}
 
@@ -1188,10 +1392,12 @@ function UIScreenManager:Push(w, opts) end
 ---@return UIWidget|nil
 function UIScreenManager:Pop() end
 
----Remove a specific widget root by id.
+---Remove a specific widget root by id. Pass announce=false when a synchronous
+---parent refresh will choose and announce the final return focus.
 ---@param id string
+---@param announce? boolean
 ---@return UIWidget|nil
-function UIScreenManager:RemoveFromStack(id) end
+function UIScreenManager:RemoveFromStack(id, announce) end
 
 ---@return UIWidget|nil
 function UIScreenManager:GetTop() end
@@ -1236,6 +1442,13 @@ function UIScreenManager:RestoreFocus(root, capture) end
 ---@param w UIWidget
 function UIScreenManager:NotifyDestroy(w) end
 
+---Clears any unmatched Enter key-down and its focus owner.
+function UIScreenManager:CancelEnterKeyOwnership() end
+
+---Clears Enter ownership when its recorded focus leaf is absent from path.
+---@param path UIWidget[]
+function UIScreenManager:CancelEnterKeyOwnershipOutsidePath(path) end
+
 ---@param input InputStruct
 ---@return boolean
 function UIScreenManager:HandleInput(input) end
@@ -1268,6 +1481,13 @@ function UIScreenManager:GetSearchPanel() end
 
 ---@return CAIAudioManager|nil
 function UIScreenManager:GetAudioManager() end
+
+---@return CAIUITutorialManager|nil
+function UIScreenManager:GetTutorialManager() end
+
+function UIScreenManager:InitializeTutorialManager() end
+
+function UIScreenManager:ShutdownTutorialManager() end
 
 ---@param source? table
 ---@param direction? integer
@@ -1348,3 +1568,11 @@ function CAIWidgetHelpers_DialogBuilder.CreatePopupDialog(mgr, popup) end
 ---@param query string
 ---@return SearchResult|nil
 function CAIWidgetHelpers_Search.MatchSearchText(label, query) end
+
+---Build a normalized candidate for a custom type-to-find candidate source.
+---@param widget UIWidget
+---@param label string
+---@param bfsIndex integer
+---@param tooltip? string
+---@return SearchCandidate
+function CAIWidgetHelpers_Search.MakeSearchCandidate(widget, label, bfsIndex, tooltip) end

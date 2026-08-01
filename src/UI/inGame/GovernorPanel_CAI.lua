@@ -18,7 +18,7 @@ if not HasCapability("CAPABILITY_GOVERNORS") then return end
 
 local PANEL_ID       = "CAIGovernorPanel_Panel"
 local TREE_ID        = "CAIGovernorPanel_Tree"
-local PROMO_TABLE_ID = "CAIGovernorPanel_PromoTable"
+local PROMO_GRID_ID = "CAIGovernorPanel_PromoGrid"
 local PROMO_LIST_ID  = "CAIGovernorPanel_PromoList"
 
 
@@ -31,7 +31,7 @@ local HOVER_SOUND                     = "Main_Menu_Mouse_Over"
 local m_ui                            = {
     panel              = nil,
     tree               = nil,
-    promoTable         = nil,
+    promoGrid         = nil,
     promoList          = nil,
     promoConfirmDialog = nil
 }
@@ -388,7 +388,7 @@ local function ShowPromoteDialog(governorIndex, promotionIndex)
 end
 
 -- ===========================================================================
--- Promotion cell creation (shared by table and list)
+-- Promotion cell creation (shared by grid and list)
 -- ===========================================================================
 
 local function CreatePromotionCell(promoDef, governor, governorDef, playerGovernors, localPlayerID, showHidden)
@@ -473,7 +473,7 @@ for promoSet in GameInfo.GovernorPromotionSets() do
 end
 
 -- ===========================================================================
--- Promotion view helpers — persistent Table + List, swapped via HiddenPredicate
+-- Promotion view helpers — persistent Grid + List, swapped via HiddenPredicate
 -- ===========================================================================
 
 local function IsFocusedGovernorSecret()
@@ -495,23 +495,23 @@ end
 
 local function FocusFirstPromotion(root)
     if not root then return false end
-    if root.Type == "Table" then
+    if root.Type == "Grid" then
         return mgr:RestoreFocus(root, { path = { 1, 1, 1 } })
     end
     return mgr:RestoreFocus(root, { path = { 1 } })
 end
 
 local function BuildPromoWidgets()
-    m_ui.promoTable = mgr:CreateWidget(PROMO_TABLE_ID, "Table", {
+    m_ui.promoGrid = mgr:CreateWidget(PROMO_GRID_ID, "Grid", {
         Label = function() return Locale.Lookup("LOC_CAI_GOVERNOR_PROMOTIONS") end,
         HiddenPredicate = function() return m_focusedGovernorIndex < 0 or IsFocusedGovernorSecret() end,
     })
-    m_ui.promoTable:AddColumn({
+    m_ui.promoGrid:AddColumn({
         header = function() return Locale.Lookup("LOC_CAI_GOVERNOR_BASE_ABILITY") end,
     })
     for level = 1, m_maxLevel do
         local capturedLevel = level
-        m_ui.promoTable:AddColumn({
+        m_ui.promoGrid:AddColumn({
             header = function() return Locale.Lookup("LOC_CAI_GOVERNOR_TIER", capturedLevel) end,
         })
     end
@@ -522,9 +522,9 @@ local function BuildPromoWidgets()
     })
 end
 
-local function PopulatePromotionTable(governorIndex)
-    if not m_ui.promoTable then return end
-    m_ui.promoTable:ClearRows()
+local function PopulatePromotionGrid(governorIndex)
+    if not m_ui.promoGrid then return end
+    m_ui.promoGrid:ClearRows()
 
     local governorDef = GameInfo.Governors[governorIndex]
     if not governorDef then return end
@@ -555,7 +555,7 @@ local function PopulatePromotionTable(governorIndex)
     -- Column 1: Base Ability
     if basePromo then
         local cell = CreatePromotionCell(basePromo, governor, governorDef, playerGovernors, localPlayerID)
-        m_ui.promoTable:AddItem(1, 1, cell)
+        m_ui.promoGrid:AddItem(1, 1, cell)
     end
 
     -- Columns 2..N: progression tiers
@@ -566,12 +566,12 @@ local function PopulatePromotionTable(governorIndex)
             local promoDef = levelPromos[column]
             if promoDef then
                 local cell = CreatePromotionCell(promoDef, governor, governorDef, playerGovernors, localPlayerID, false)
-                m_ui.promoTable:AddItem(colIdx, 1, cell)
+                m_ui.promoGrid:AddItem(colIdx, 1, cell)
             else
                 local spacer = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGov_Spacer"), "StaticText", {
                     HiddenPredicate = function() return true end,
                 })
-                m_ui.promoTable:AddItem(colIdx, 1, spacer)
+                m_ui.promoGrid:AddItem(colIdx, 1, spacer)
             end
         end
     end
@@ -603,13 +603,13 @@ end
 local function RefreshPromotionsView(governorIndex, resetFocus, pendingFocusKey)
     local governorDef = GameInfo.Governors[governorIndex]
     if not governorDef then return end
-    local root = IsCannotAssign(governorDef) and m_ui.promoList or m_ui.promoTable
+    local root = IsCannotAssign(governorDef) and m_ui.promoList or m_ui.promoGrid
     local capture = (root and not pendingFocusKey) and mgr:CaptureFocusKey(root) or nil
 
     if IsCannotAssign(governorDef) then
         PopulatePromotionList(governorIndex)
     else
-        PopulatePromotionTable(governorIndex)
+        PopulatePromotionGrid(governorIndex)
     end
 
     if not root then return end
@@ -836,7 +836,7 @@ local function BuildPanel()
     m_ui.panel:AddChild(m_ui.tree)
 
     BuildPromoWidgets()
-    m_ui.panel:AddChild(m_ui.promoTable)
+    m_ui.panel:AddChild(m_ui.promoGrid)
     m_ui.panel:AddChild(m_ui.promoList)
 end
 
@@ -857,7 +857,7 @@ local function PopPanel()
     m_ui = {
         panel = nil,
         tree = nil,
-        promoTable = nil,
+        promoGrid = nil,
         promoList = nil,
     }
     m_focusedGovernorIndex = -1

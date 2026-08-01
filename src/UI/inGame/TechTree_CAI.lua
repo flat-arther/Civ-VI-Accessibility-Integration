@@ -24,7 +24,7 @@ local PANEL_ID            = "CAITechTree_Panel"
 local QUEUE_LIST_ID       = "CAITechTree_QueueList"
 local FILTER_LIST_ID      = "CAITechTree_FilterList"
 local MAIN_TREE_ID        = "CAITechTree_MainTree"
-local TABLE_VIEW_ID       = "CAITechTree_TableView"
+local GRID_VIEW_ID        = "CAITechTree_GridView"
 local UNLOCKS_LIST_ID     = "CAITechTree_UnlocksList"
 local CHANGE_VIEW_ID      = "CAITechTree_ChangeView"
 local FILTER_RESULTS_ID   = "CAITechTree_FilterResults"
@@ -36,17 +36,17 @@ local m_panel             = nil ---@type UIWidget|nil
 local m_queueList         = nil ---@type UIWidget|nil
 local m_filterList        = nil ---@type UIWidget|nil
 local m_mainTree          = nil ---@type UIWidget|nil
-local m_tableView         = nil ---@type UIWidget|nil
+local m_gridView          = nil ---@type UIWidget|nil
 local m_unlocksList       = nil ---@type UIWidget|nil
 local m_changeViewBtn     = nil ---@type UIWidget|nil
 local m_filterResults     = nil ---@type UIWidget|nil
 
--- "table" (default) or "tree". The toggle button swaps between them; the
+-- "grid" (default) or "tree". The toggle button swaps between them; the
 -- inactive view is hidden so navigation skips it.
-local m_viewMode          = "table"
+local m_viewMode          = "grid"
 
 local m_treeTechs         = {} ---@type table<string, UIWidget> techType -> tree node
-local m_tableTechs        = {} ---@type table<string, UIWidget> techType -> table cell
+local m_gridTechs         = {} ---@type table<string, UIWidget> techType -> grid cell
 local m_leadsToByType     = {} ---@type table<string, string[]>
 local m_techIndexToType   = {} ---@type table<integer, string>
 local m_techTierByType    = {} ---@type table<string, integer> techType -> tier number within its era
@@ -560,7 +560,7 @@ end
 
 -- The focusable widget for a tech in the currently active view.
 local function GetActiveTechWidget(techType)
-    if m_viewMode == "table" then return m_tableTechs[techType] end
+    if m_viewMode == "grid" then return m_gridTechs[techType] end
     return m_treeTechs[techType]
 end
 
@@ -595,7 +595,7 @@ local function JumpToTech(techType, recordBreadcrumb)
     -- Tree mode: era/tier nodes are IgnoreWhenNotFocused, so focus speech won't
     -- mention them on a jump. Fold the diverging era/tier into the spoken line,
     -- announcing only what actually changed (compared by widget, so Tier 1 of a
-    -- different era still counts as different). Table mode gets the era for free
+    -- different era still counts as different). Grid mode gets the era for free
     -- via the column header's natural focus speech, so it just says the tech.
     local parts = { GetTechName(techType) or "" }
     if m_viewMode == "tree" then
@@ -839,7 +839,7 @@ end
 -- ===========================================================================
 
 -- Rebuild the unlocks list to mirror the focused tech. Focus stays on the
--- table cell; the list is a passive sibling, so no capture/restore is needed.
+-- grid cell; the list is a passive sibling, so no capture/restore is needed.
 local function RebuildUnlocksList(techType)
     if not m_unlocksList then return end
     m_unlocksList:ClearChildren()
@@ -847,14 +847,14 @@ local function RebuildUnlocksList(techType)
     if not IsTechRevealed(techType) then return end
     for _, unlock in ipairs(GetTechUnlockObjects(TechKData(techType)).Unlocks) do
         if unlock.Description then
-            m_unlocksList:AddChild(CreateUnlockChild(mgr, unlock, "CAITechTableUnlock"))
+            m_unlocksList:AddChild(CreateUnlockChild(mgr, unlock, "CAITechGridUnlock"))
         end
     end
 end
 
 local function BuildTechCell(techType)
     local capturedType = techType
-    local cell = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTableTech"), "Button", {
+    local cell = mgr:CreateWidget(mgr:GenerateWidgetId("CAITechGridTech"), "Button", {
         Label             = function() return FormatRowLabel(capturedType) end,
         Tooltip           = function() return FormatRowTooltip(capturedType) end,
         DisabledPredicate = function()
@@ -904,18 +904,18 @@ local function BuildTechCell(techType)
     return cell
 end
 
-local function MakeTableSpacer()
-    return mgr:CreateWidget(mgr:GenerateWidgetId("CAITechTableSpacer"), "StaticText", {
+local function MakeGridSpacer()
+    return mgr:CreateWidget(mgr:GenerateWidgetId("CAITechGridSpacer"), "StaticText", {
         HiddenPredicate = function() return true end,
     })
 end
 
-local function RebuildTableView()
-    if not m_tableView then return end
+local function RebuildGridView()
+    if not m_gridView then return end
 
-    local capture = mgr:CaptureFocusKey(m_tableView)
-    m_tableView:ClearChildren()
-    m_tableTechs = {}
+    local capture = mgr:CaptureFocusKey(m_gridView)
+    m_gridView:ClearChildren()
+    m_gridTechs = {}
 
     for _, era in ipairs(g_kEras) do
         -- Group this era's filtered techs by their prereq column; each distinct
@@ -937,7 +937,7 @@ local function RebuildTableView()
         if #colValues > 0 then
             table.sort(colValues)
             local capturedDescription = era.Description
-            local column = m_tableView:AddColumn({
+            local column = m_gridView:AddColumn({
                 header = function() return Locale.Lookup(capturedDescription) end,
                 width  = #colValues,
             })
@@ -952,29 +952,29 @@ local function RebuildTableView()
                     local entry = byRow[r]
                     if entry then
                         local cell = BuildTechCell(entry.techType)
-                        m_tableTechs[entry.techType] = cell
-                        m_tableView:AddItem(column, tierIndex, cell)
+                        m_gridTechs[entry.techType] = cell
+                        m_gridView:AddItem(column, tierIndex, cell)
                     else
-                        m_tableView:AddItem(column, tierIndex, MakeTableSpacer())
+                        m_gridView:AddItem(column, tierIndex, MakeGridSpacer())
                     end
                 end
             end
         end
     end
 
-    mgr:RestoreFocus(m_tableView, capture)
+    mgr:RestoreFocus(m_gridView, capture)
 end
 
 -- Rebuild whichever tech views exist, keeping both in sync with game/filter
 -- state so jumps land correctly regardless of the active mode.
 local function RebuildTechViews()
     RebuildMainTree()
-    RebuildTableView()
+    RebuildGridView()
 end
 
 local function ToggleViewMode()
-    m_viewMode = (m_viewMode == "tree") and "table" or "tree"
-    local active = (m_viewMode == "table") and m_tableView or m_mainTree
+    m_viewMode = (m_viewMode == "tree") and "grid" or "tree"
+    local active = (m_viewMode == "grid") and m_gridView or m_mainTree
     if active then mgr:SetFocus(active) end
 end
 
@@ -1229,7 +1229,7 @@ local function EnsurePanelBuilt()
     m_panel:AddChild(m_filterList)
     BuildFilterList()
 
-    -- Main tree (hidden in table mode)
+    -- Main tree (hidden in grid mode)
     m_mainTree = mgr:CreateWidget(MAIN_TREE_ID, "Tree", {
         Label           = function() return Locale.Lookup("LOC_CAI_TECH_TREE_MAIN_LIST") end,
         HiddenPredicate = function() return m_viewMode ~= "tree" end,
@@ -1251,20 +1251,20 @@ local function EnsurePanelBuilt()
     })
     m_panel:AddChild(m_mainTree)
 
-    -- Table view (hidden in tree mode): eras = columns, tiers = Column-groups
-    m_tableView = mgr:CreateWidget(TABLE_VIEW_ID, "Table", {
+    -- Grid view (hidden in tree mode): eras = columns, tiers = Column-groups
+    m_gridView = mgr:CreateWidget(GRID_VIEW_ID, "Grid", {
         Label           = function() return Locale.Lookup("LOC_CAI_TECH_TREE_MAIN_LIST") end,
-        HiddenPredicate = function() return m_viewMode ~= "table" end,
+        HiddenPredicate = function() return m_viewMode ~= "grid" end,
     })
-    m_tableView:SetSearchQueryHandler(TechSearchHandler)
-    m_panel:AddChild(m_tableView)
+    m_gridView:SetSearchQueryHandler(TechSearchHandler)
+    m_panel:AddChild(m_gridView)
 
-    -- Unlocks list beside the table; mirrors the focused tech (table mode only,
+    -- Unlocks list beside the grid; mirrors the focused tech (grid mode only,
     -- and only when the focused tech has described unlocks)
     m_unlocksList = mgr:CreateWidget(UNLOCKS_LIST_ID, "List", {
         Label           = function() return Locale.Lookup("LOC_CAI_TECH_TREE_UNLOCKS") end,
         HiddenPredicate = function(w)
-            return m_viewMode ~= "table" or not w.Children or #w.Children == 0
+            return m_viewMode ~= "grid" or not w.Children or #w.Children == 0
         end,
         SearchDepth     = 0,
     })
@@ -1274,9 +1274,9 @@ local function EnsurePanelBuilt()
     -- switches *to*.
     m_changeViewBtn = mgr:CreateWidget(CHANGE_VIEW_ID, "Button", {
         Label = function()
-            return Locale.Lookup(m_viewMode == "table"
+            return Locale.Lookup(m_viewMode == "grid"
                 and "LOC_CAI_TREE_SWITCH_TO_TREE"
-                or "LOC_CAI_TREE_SWITCH_TO_TABLE")
+                or "LOC_CAI_TREE_SWITCH_TO_GRID")
         end,
     })
     m_changeViewBtn:On("activate", function() ToggleViewMode() end)
@@ -1293,7 +1293,7 @@ local function PushPanel()
 
     local playerTechs = GetLocalPlayerTechs()
     local hasCurrent = playerTechs and playerTechs:GetResearchingTech() ~= -1
-    local activeView = (m_viewMode == "table") and m_tableView or m_mainTree
+    local activeView = (m_viewMode == "grid") and m_gridView or m_mainTree
     local focusChild = hasCurrent and m_queueList or activeView
     mgr:Push(m_panel, { focus = focusChild })
 end
@@ -1307,13 +1307,13 @@ local function OnPanelClosedCAI()
     m_queueList         = nil
     m_filterList        = nil
     m_mainTree          = nil
-    m_tableView         = nil
+    m_gridView          = nil
     m_unlocksList       = nil
     m_changeViewBtn     = nil
     m_filterResults     = nil
-    m_viewMode          = "table"
+    m_viewMode          = "grid"
     m_treeTechs         = {}
-    m_tableTechs        = {}
+    m_gridTechs         = {}
     m_leadsToByType     = {}
     m_techIndexToType   = {}
     m_techTierByType    = {}
@@ -1359,6 +1359,11 @@ end)
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
     if mgr and IsPanelOnStack() then
         if mgr:HandleInput(pInputStruct) then return true end
+    end
+    if IsCAIEscapeKeyUp(pInputStruct)
+        and not IsCAITutorialScreenCloseAllowed("TechTreeModal") then
+        AnnounceCAITutorialScreenCloseBlocked()
+        return true
     end
     return orig(pInputStruct)
 end)

@@ -210,7 +210,7 @@ end
 
 local function BuildDialog()
     RemoveDialog()
-    if not mgr or ContextPtr:IsHidden() then return end
+    if not mgr then return end
 
     local buttons = BuildButtons()
     if #buttons == 0 then return end
@@ -223,7 +223,7 @@ local function BuildDialog()
     )
     if not m_dialog then return end
 
-    mgr:Push(m_dialog, { priority = PopupPriority.Low })
+    mgr:Push(m_dialog, { priority = 101 })
 end
 
 local function IsDialogActive()

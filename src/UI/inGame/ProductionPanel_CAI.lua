@@ -36,6 +36,11 @@ local m_state        = {
     queueFocusIndexAfterRebuild = nil, ---@type integer|nil
     citySortIndex               = 1,
     cityFocusKeyAfterSelection  = nil, ---@type string|nil
+    queueTutorialPending        = false,
+    placementRetained           = false,
+    placementFocusCapture       = nil, ---@type table|nil
+    placementReconcilePending   = false,
+    pendingUpdateArmed          = false,
 }
 
 local m_ui           = {
@@ -152,8 +157,35 @@ local function IsProductionTutorialMode()
     return running or m_isTutorialRunning == true or m_tutorialTestMode == true
 end
 
+local function IsProductionPlacementMode(mode)
+    return mode == InterfaceModeTypes.DISTRICT_PLACEMENT
+        or mode == InterfaceModeTypes.BUILDING_PLACEMENT
+end
+
+local function CanUserCloseProductionPanel()
+    return IsCAITutorialScreenCloseAllowed()
+end
+
+local function TryUserCloseProductionPanel()
+    if not CanUserCloseProductionPanel() then
+        AnnounceCAITutorialScreenCloseBlocked()
+        return true
+    end
+    OnClose()
+    return true
+end
+
 local function CurrentTabSupportsQueue()
     return not IsProductionTutorialMode()
+end
+
+local function IsTutorialProductionItemAllowed(item)
+    if not IsProductionTutorialMode() then return true end
+    local tutorialState = ExposedMembers.CAI_TutorialState
+    if not tutorialState or not tutorialState.HasDetailedItem then return true end
+    if not item then return false end
+    if item.Type and IsCAITutorialControlAllowed(item.Type) then return true end
+    return item.Hash ~= nil and IsCAITutorialControlHashAllowed(item.Hash)
 end
 
 local function GetCityYield(city, yieldIndex)
@@ -963,7 +995,10 @@ local function CreateItemRow(item, tab, formation)
         Label             = function() return FormatRowLabel(item, formation, tab) end,
         Tooltip           = function() return FormatTooltip(BuildItemDetail(item, formation, tab)) end,
         HiddenPredicate   = function() return IsItemRowHidden(item, tab, formation) end,
-        DisabledPredicate = function() return IsItemRowDisabled(item, tab, formation) end,
+        DisabledPredicate = function()
+            return IsItemRowDisabled(item, tab, formation)
+                or not IsTutorialProductionItemAllowed(item)
+        end,
         FocusKey          = focusKey,
     })
     row:SetFocusSound("Main_Menu_Mouse_Over")
@@ -1579,6 +1614,52 @@ local function SetCAITabSilent(tab)
     m_settingTab = false
 end
 
+local function CheckQueueTutorial()
+    if m_state.activeTab ~= TAB.QUEUE or not m_ui.panel or not mgr then return end
+    local tutorials = mgr:GetTutorialManager()
+    if tutorials then
+        tutorials:Check("ProductionQueueOpened", m_ui.panel, {
+            IsActive = function() return m_state.activeTab == TAB.QUEUE end,
+        })
+    end
+end
+
+local ReconcilePlacementPanel
+
+local function FlushPendingUpdate()
+    if m_state.queueTutorialPending then
+        m_state.queueTutorialPending = false
+        CheckQueueTutorial()
+    end
+
+    if m_state.placementReconcilePending
+        and Controls.SlideIn:IsStopped()
+        and Controls.PauseDismissWindow:IsStopped() then
+        m_state.placementReconcilePending = false
+        ReconcilePlacementPanel()
+    end
+
+    if not m_state.queueTutorialPending and not m_state.placementReconcilePending then
+        ContextPtr:ClearUpdate()
+        m_state.pendingUpdateArmed = false
+    end
+end
+
+local function ArmPendingUpdate()
+    if m_state.pendingUpdateArmed then return end
+    m_state.pendingUpdateArmed = true
+    ContextPtr:SetUpdate(FlushPendingUpdate)
+end
+
+local function ScheduleQueueTutorial()
+    if m_state.activeTab ~= TAB.QUEUE then
+        m_state.queueTutorialPending = false
+        return
+    end
+    m_state.queueTutorialPending = true
+    ArmPendingUpdate()
+end
+
 -- ===========================================================================
 -- Panel build
 -- ===========================================================================
@@ -1588,6 +1669,19 @@ local function EnsurePanelBuilt()
     m_ui.panel = mgr:CreateWidget(PANEL_ID, "Panel", {
         Label = GetPanelLabel,
     })
+
+    if IsProductionTutorialMode() then
+        m_state.activeTab = TAB.PRODUCTION
+        local tree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIProductionPanelTutorialTree"), "Tree", {
+            Label = function() return ReadCurrentProductionLabel(true) end,
+            SearchDepth = 2,
+        })
+        m_ui.panel:AddChild(tree)
+        m_ui.pages[TAB.PRODUCTION] = m_ui.panel
+        m_ui.pageTrees[TAB.PRODUCTION] = tree
+        return
+    end
+
     m_ui.panel:AddInputBindings({
         {
             Key = Keys.VK_LEFT,
@@ -1683,6 +1777,7 @@ local function EnsurePanelBuilt()
             m_state.activeTab = TAB.QUEUE; OnTabChangeQueue()
         end
         m_settingTab = false
+        ScheduleQueueTutorial()
     end)
 end
 
@@ -1698,11 +1793,10 @@ local function PushPanelIfNeeded()
         priority = PopupPriority.Low,
         focus = m_ui.pageTrees[m_state.activeTab]
     })
+    ScheduleQueueTutorial()
 end
 
-local function OnPanelClosedCAI(wasCanceled)
-    if wasCanceled == nil then wasCanceled = false end
-    if wasCanceled or UI.GetInterfaceMode() ~= InterfaceModeTypes.SELECTION then return end
+local function RemovePanelCAI()
     if m_ui.panel and mgr and mgr:GetWidgetById(PANEL_ID) then
         mgr:RemoveFromStack(PANEL_ID)
     end
@@ -1713,6 +1807,14 @@ local function OnPanelClosedCAI(wasCanceled)
     m_state.isQueueActionActive = false
     m_state.queueFocusIndexAfterRebuild = nil
     m_state.cityFocusKeyAfterSelection = nil
+    m_state.queueTutorialPending = false
+    m_state.placementRetained = false
+    m_state.placementFocusCapture = nil
+    m_state.placementReconcilePending = false
+    if m_state.pendingUpdateArmed then
+        ContextPtr:ClearUpdate()
+        m_state.pendingUpdateArmed = false
+    end
     m_state.activeTab = TAB.PRODUCTION
     m_vanilla = {
         instanceByHash = {},
@@ -1720,6 +1822,42 @@ local function OnPanelClosedCAI(wasCanceled)
         categoryListsByMode = {},
         captureListMode = nil,
     }
+end
+
+local function OnPanelClosedCAI()
+    if IsProductionPlacementMode(UI.GetInterfaceMode()) then
+        m_state.placementRetained = true
+        return
+    end
+    RemovePanelCAI()
+end
+
+ReconcilePlacementPanel = function()
+    if m_state.placementRetained and ContextPtr:IsHidden() then
+        RemovePanelCAI()
+        return
+    end
+
+    if m_ui.panel and m_state.placementFocusCapture and m_state.placementFocusCapture.key then
+        mgr:PrepareFocus(m_ui.panel, m_state.placementFocusCapture.key)
+    end
+    m_state.placementRetained = false
+    m_state.placementFocusCapture = nil
+end
+
+local function SchedulePlacementReconcile()
+    if not m_state.placementRetained and not m_state.placementFocusCapture then return end
+    m_state.placementReconcilePending = true
+    ArmPendingUpdate()
+end
+
+local function OnPlacementInterfaceModeChangedCAI(oldMode, newMode)
+    if not IsProductionPlacementMode(oldMode) then return end
+    if newMode == InterfaceModeTypes.VIEW_MODAL_LENS then
+        RemovePanelCAI()
+        return
+    end
+    SchedulePlacementReconcile()
 end
 
 local function OnPanelOpenedCAI()
@@ -1735,6 +1873,9 @@ local function OnVanillaListModeChangedCAI(listMode)
     if m_ui.panel then
         RefreshActivePage()
         RebuildCityList()
+        if m_state.placementFocusCapture and m_state.placementFocusCapture.key then
+            mgr:PrepareFocus(m_ui.panel, m_state.placementFocusCapture.key)
+        end
     end
     if m_state.openPending then
         if ContextPtr:IsVisible() then
@@ -1742,6 +1883,12 @@ local function OnVanillaListModeChangedCAI(listMode)
         end
         m_state.openPending = false
     end
+end
+
+
+local function CapturePlacementFocus()
+    if not m_ui.panel or not mgr then return end
+    m_state.placementFocusCapture = mgr:CaptureFocusKey(m_ui.panel)
 end
 
 -- ===========================================================================
@@ -1902,13 +2049,21 @@ BuildBuilding = WrapFunc(BuildBuilding, function(orig, city, entry)
     if not m_state.isQueueActionActive and entry and entry.Name then
         Speak(Locale.Lookup("LOC_CAI_PRODUCTION_CHOSEN", Locale.Lookup(entry.Name)))
     end
+    CapturePlacementFocus()
     orig(city, entry)
+    if not IsProductionPlacementMode(UI.GetInterfaceMode()) then
+        m_state.placementFocusCapture = nil
+    end
 end)
 ZoneDistrict = WrapFunc(ZoneDistrict, function(orig, city, entry)
     if not m_state.isQueueActionActive and entry and entry.Name then
         Speak(Locale.Lookup("LOC_CAI_PRODUCTION_CHOSEN", Locale.Lookup(entry.Name)))
     end
+    CapturePlacementFocus()
     orig(city, entry)
+    if not IsProductionPlacementMode(UI.GetInterfaceMode()) then
+        m_state.placementFocusCapture = nil
+    end
 end)
 BuildUnit = WrapFunc(BuildUnit, function(orig, city, entry)
     if not m_state.isQueueActionActive and entry and entry.Name then
@@ -1966,20 +2121,30 @@ PurchaseDistrict = WrapFunc(PurchaseDistrict, function(orig, city, entry)
     if entry and entry.Name then
         Speak(Locale.Lookup("LOC_CAI_PRODUCTION_PURCHASED", Locale.Lookup(entry.Name)))
     end
+    CapturePlacementFocus()
     orig(city, entry)
+    if not IsProductionPlacementMode(UI.GetInterfaceMode()) then
+        m_state.placementFocusCapture = nil
+    end
 end)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
-    if mgr and mgr:GetTop() ~= m_ui.panel then return orig(pInputStruct) end
-    if mgr and mgr:HandleInput(pInputStruct) then return true end
+    if mgr and mgr:GetTop() == m_ui.panel then
+        if mgr:HandleInput(pInputStruct) then return true end
+    end
+    if IsCAIEscapeKeyUp(pInputStruct) and not CanUserCloseProductionPanel() then
+        return TryUserCloseProductionPanel()
+    end
     return orig(pInputStruct)
 end)
 ContextPtr:SetInputHandler(OnInputHandler, true)
+Controls.CloseButton:RegisterCallback(Mouse.eLClick, TryUserCloseProductionPanel)
 
 LuaEvents.ProductionPanel_Open.Add(OnPanelOpenedCAI)
-LuaEvents.StrageticView_MapPlacement_ProductionOpen.Add(OnPanelClosedCAI)
+LuaEvents.StrageticView_MapPlacement_ProductionOpen.Add(SchedulePlacementReconcile)
 LuaEvents.ProductionPanel_Close.Add(OnPanelClosedCAI)
 LuaEvents.ProductionPanel_ListModeChanged.Add(OnVanillaListModeChangedCAI)
+Events.InterfaceModeChanged.Add(OnPlacementInterfaceModeChangedCAI)
 
 local function RefreshIfOpen()
     if m_ui.panel and mgr and mgr:GetWidgetById(PANEL_ID) and Refresh then

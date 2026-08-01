@@ -151,10 +151,15 @@ local function GetGatheringStormWaterLabel(plotIndices)
     return table.concat(names, Locale.Lookup("LOC_CAI_WORLD_SCANNER_WATER_NAME_SEPARATOR"))
 end
 
-local function DisambiguateLabels(entries, anchorX, anchorY)
+local function DisambiguateLabels(entries, context, anchorX, anchorY)
     local counts = {}
     for _, entry in ipairs(entries) do
-        entry.LabelKey = Utils.ResolveText(entry.LabelKey)
+        entry.LabelKey = ZoneUtils.MakeTileCountLabel(
+            entry.LabelKey,
+            entry.ZonePlotIndices,
+            context
+        )
+        entry.ZoneTileCountEmbedded = true
         counts[entry.LabelKey] = (counts[entry.LabelKey] or 0) + 1
     end
 
@@ -226,7 +231,7 @@ function CAIWorldScannerCategory_Geography.EndExtract(context, collect)
             GroupLabelKey = subCategoryLabels[SUBCATEGORY_LANDMASSES],
         }
     end
-    DisambiguateLabels(entries, anchorX, anchorY)
+    DisambiguateLabels(entries, context, anchorX, anchorY)
     for _, entry in ipairs(entries) do
         collect(entry)
     end
@@ -247,7 +252,7 @@ function CAIWorldScannerCategory_Geography.EndExtract(context, collect)
             GroupLabelKey = subCategoryLabels[SUBCATEGORY_OCEANS],
         }
     end
-    DisambiguateLabels(entries, anchorX, anchorY)
+    DisambiguateLabels(entries, context, anchorX, anchorY)
     for _, entry in ipairs(entries) do
         collect(entry)
     end

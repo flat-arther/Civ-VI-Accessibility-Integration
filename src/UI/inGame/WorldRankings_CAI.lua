@@ -1837,6 +1837,10 @@ local function BuildPanel()
             MSG = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_CLOSE",
             Action = function()
+                if not IsCAITutorialScreenCloseAllowed() then
+                    AnnounceCAITutorialScreenCloseBlocked()
+                    return true
+                end
                 Close()
                 return true
             end,

@@ -64,6 +64,12 @@
     <Row Tag="LOC_UIWidget_Role_Table" Language="en_US">
       <Text>Table</Text>
     </Row>
+    <Row Tag="LOC_UIWidget_Role_Grid" Language="en_US">
+      <Text>Grid</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_TableCell" Language="en_US">
+      <Text>Table Cell</Text>
+    </Row>
     <Row Tag="LOC_UIWidget_Role_Tree" Language="en_US">
       <Text>Tree View</Text>
     </Row>
@@ -89,6 +95,24 @@
     <!-- Widget position -->
     <Row Tag="LOC_UIWidget_Element_Pos" Language="en_US">
       <Text>{1} of {2}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DATATABLE_HEADER_POSITION" Language="en_US">
+      <Text>Column {1} of {2}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DATATABLE_CELL_POSITION" Language="en_US">
+      <Text>Row {1} of {2}, column {3} of {4}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DATATABLE_SORT_ASCENDING" Language="en_US">
+      <Text>Sorted ascending</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DATATABLE_SORT_DESCENDING" Language="en_US">
+      <Text>Sorted descending</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DATATABLE_SORT_NATURAL" Language="en_US">
+      <Text>Natural order</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DATATABLE_SORT_HELP" Language="en_US">
+      <Text>Activate to change the sort order</Text>
     </Row>
 
     <!-- Widget states -->
@@ -141,7 +165,6 @@
     <Row Tag="LOC_CAI_HELP" Language="en_US">
       <Text>Help</Text>
     </Row>
-
     <!-- Carousel -->
     <Row Tag="LOC_CAI_CAROUSEL" Language="en_US">
       <Text>Challenges</Text>
@@ -380,6 +403,10 @@
       <Text>Notifications</Text>
     </Row>
 
+    <Row Tag="LOC_CAI_MESSAGE_BUFFER_CAT_TUTORIAL" Language="en_US">
+      <Text>Tutorial</Text>
+    </Row>
+
     <Row Tag="LOC_CAI_MESSAGE_BUFFER_CAT_REVEAL" Language="en_US">
       <Text>Reveals</Text>
     </Row>
@@ -458,6 +485,9 @@
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_RESOURCES" Language="en_US">
       <Text>Resources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TUTORIAL_LOCATIONS" Language="en_US">
+      <Text>Tutorial locations</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_UNITS" Language="en_US">
       <Text>Units</Text>
@@ -594,11 +624,8 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_UNPOWERED_CITY_PLOTS" Language="en_US">
       <Text>Unpowered city tiles</Text>
     </Row>
-    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TOURISM_CITY" Language="en_US">
-      <Text>By city</Text>
-    </Row>
-    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TOURISM_STRENGTH" Language="en_US">
-      <Text>By strength</Text>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TOURISM" Language="en_US">
+      <Text>Tourism</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_UNKNOWN" Language="en_US">
       <Text>Unknown</Text>
@@ -630,8 +657,14 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_UNEXPLORED_REGION" Language="en_US">
       <Text>Unexplored region</Text>
     </Row>
-    <Row Tag="LOC_CAI_WORLD_SCANNER_UNEXPLORED_REGION_TILES" Language="en_US">
-      <Text>Unexplored region, {1_Count : plural 1?1 tile; other?{1_Count} tiles;}</Text>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_ZONE_REVEALED_TILES" Language="en_US">
+      <Text>{1_Label}, {2_Count : plural 1?1 tile explored; other?{2_Count} tiles explored;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_ZONE_UNEXPLORED_TILES" Language="en_US">
+      <Text>{1_Label}, {2_Count : plural 1?1 tile unexplored; other?{2_Count} tiles unexplored;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_ZONE_REVEALED_OF_TOTAL_TILES" Language="en_US">
+      <Text>{1_Label}, {2_Revealed} of {3_Total} {3_Total : plural 1?tile; other?tiles;} explored</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_MOUNTAIN_RANGE" Language="en_US">
       <Text>Mountain range</Text>
@@ -672,8 +705,17 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_POWER_PLOTS_UNPOWERED" Language="en_US">
       <Text>{1_City} unpowered tiles</Text>
     </Row>
-    <Row Tag="LOC_CAI_WORLD_SCANNER_TOURISM_ITEM" Language="en_US">
-      <Text>{1_Tourism} tourism, {2_Tourists} tourists</Text>
+    <Row Tag="LOC_CAI_TOURISM_SUMMARY" Language="en_US">
+      <Text>{1_Tourism} tourism, {2_Strength}, {3_Tourists : plural 1?1 international tourist; other?{3_Tourists} international tourists;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOURISM_STRENGTH_HIGH" Language="en_US">
+      <Text>High</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOURISM_STRENGTH_MEDIUM" Language="en_US">
+      <Text>Medium</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TOURISM_STRENGTH_LOW" Language="en_US">
+      <Text>Low</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_TOURISM_HIGH" Language="en_US">
       <Text>High tourism</Text>
@@ -2052,8 +2094,8 @@
     <Row Tag="LOC_CAI_CIVICS_TREE_MAIN_LIST" Language="en_US">
       <Text>All civics</Text>
     </Row>
-    <Row Tag="LOC_CAI_CIVICS_TREE_TABLE" Language="en_US">
-      <Text>Civics table</Text>
+    <Row Tag="LOC_CAI_CIVICS_TREE_GRID" Language="en_US">
+      <Text>Civics grid</Text>
     </Row>
     <!-- Shared by civics + tech trees (see LOC_CAI_TREE_* below). -->
     <Row Tag="LOC_CAI_TREE_TIER" Language="en_US">
@@ -2061,6 +2103,9 @@
     </Row>
     <Row Tag="LOC_CAI_TREE_SWITCH_TO_TABLE" Language="en_US">
       <Text>Switch to table view</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TREE_SWITCH_TO_GRID" Language="en_US">
+      <Text>Switch to grid view</Text>
     </Row>
     <Row Tag="LOC_CAI_TREE_SWITCH_TO_TREE" Language="en_US">
       <Text>Switch to tree view</Text>
@@ -2114,8 +2159,8 @@
     <Row Tag="LOC_CAI_TECH_TREE_MAIN_LIST" Language="en_US">
       <Text>All technologies</Text>
     </Row>
-    <Row Tag="LOC_CAI_TECH_TREE_TABLE" Language="en_US">
-      <Text>Technology table</Text>
+    <Row Tag="LOC_CAI_TECH_TREE_GRID" Language="en_US">
+      <Text>Technology grid</Text>
     </Row>
     <Row Tag="LOC_CAI_TECH_TREE_FILTER" Language="en_US">
       <Text>Filter</Text>
@@ -2405,7 +2450,7 @@
       <Text>Hero</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_FLAG_THREAT_SHORT" Language="en_US">
-      <Text>Threat</Text>
+      <Text>Spotted city</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_FLAG_FLAGSHIP_SHORT" Language="en_US">
       <Text>Flagship</Text>
@@ -3136,6 +3181,9 @@
     <Row Tag="LOC_CAI_NAV_CURSOR_NATIONAL_PARK_ZONE" Language="en_US">
       <Text>National Park</Text>
     </Row>
+    <Row Tag="LOC_CAI_NAV_CURSOR_MAP_EDGE" Language="en_US">
+      <Text>Edge of map</Text>
+    </Row>
     <Row Tag="LOC_CAI_NAV_CURSOR_CITY_SCOPE_BOUNDARY" Language="en_US">
       <Text>Edge of {1_CityName} management area</Text>
     </Row>
@@ -3224,6 +3272,9 @@
     </Row>
     <Row Tag="LOC_CAI_LENS_RELIGION_NO_MAJORITY" Language="en_US">
       <Text>No majority religion</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LENS_TOURISM_NO_BANNER" Language="en_US">
+      <Text>No tourism banner on this tile</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_RELIGION" Language="en_US">
       <Text>By religion</Text>
@@ -3608,6 +3659,9 @@
     <Row Tag="LOC_CAI_ICON_RANGE_ALIAS" Language="en_US">
       <Text>Range</Text>
     </Row>
+    <Row Tag="LOC_CAI_ICON_CULTURE_ALIAS_CULTURAL" Language="en_US">
+      <Text>Cultural</Text>
+    </Row>
     <Row Tag="LOC_CAI_UNIT_FLAG_AGGREGATED_NAME" Language="en_US">
       <Text>{1} {2}</Text>
     </Row>
@@ -3730,6 +3784,27 @@
     </Row>
 
     <!-- City-States screen -->
+    <Row Tag="LOC_CAI_CITYSTATES_COLUMN_CITY_STATE" Language="en_US">
+      <Text>City-State</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_COLUMN_RELATIONSHIP" Language="en_US">
+      <Text>Relationship</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_INFLUENCE_COLUMN" Language="en_US">
+      <Text>{1_Civilization} influence</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_UNMET_INFLUENCE_COLUMN" Language="en_US">
+      <Text>Unmet civilizations influence</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_DETAILS" Language="en_US">
+      <Text>City-State details</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_DETAILS_FOR" Language="en_US">
+      <Text>{1_CityState} details</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_NO_SELECTION" Language="en_US">
+      <Text>No city-state selected</Text>
+    </Row>
     <Row Tag="LOC_CAI_CITYSTATES_ENVOYS_TO_SEND" Language="en_US">
       <Text>Envoys to send: {1_Num} remaining</Text>
     </Row>
@@ -5423,6 +5498,12 @@
     <Row Tag="LOC_CAI_KB_MOVE_TO_TABLE_START" Language="en_US">
       <Text>Move to table start</Text>
     </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_TO_GRID_END" Language="en_US">
+      <Text>Move to grid end</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_TO_GRID_START" Language="en_US">
+      <Text>Move to grid start</Text>
+    </Row>
     <Row Tag="LOC_CAI_KB_MOVE_UP" Language="en_US">
       <Text>Move up</Text>
     </Row>
@@ -6211,6 +6292,13 @@
       <Text>Speak new message buffer entries from the Notifications category as they are added.</Text>
     </Row>
 
+    <Row Tag="LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_TUTORIALS" Language="en_US">
+      <Text>Speak tutorial messages</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_TUTORIALS_TOOLTIP" Language="en_US">
+      <Text>Speak tutorial advisor callouts when they are added to the message buffer.</Text>
+    </Row>
+
     <Row Tag="LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_REVEALS" Language="en_US">
       <Text>Speak reveal messages</Text>
     </Row>
@@ -6348,6 +6436,12 @@
     <Row Tag="LOC_CAI_UI_CHOOSER_BLOCKED_BY_TUTORIAL" Language="en_US">
       <Text>The tutorial is currently preventing this chooser from opening.</Text>
     </Row>
+    <Row Tag="LOC_CAI_UI_BLOCKED_BY_TUTORIAL" Language="en_US">
+      <Text>The tutorial is currently preventing this screen from opening.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UI_CLOSE_BLOCKED_BY_TUTORIAL" Language="en_US">
+      <Text>The tutorial is currently preventing this screen from closing.</Text>
+    </Row>
     <Row Tag="LOC_CAI_UI_RESEARCH_CHOOSER_UNAVAILABLE" Language="en_US">
       <Text>You cannot choose new research at this time.</Text>
     </Row>
@@ -6467,6 +6561,9 @@
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_RECOMMENDATIONS" Language="en_US">
       <Text>Appears when the selected builder or settler has recommended tiles, and contains those build or settlement recommendations.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_TUTORIAL" Language="en_US">
+      <Text>Appears when a tutorial world marker has a map location, and contains the plots identified by those markers.</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_MY_UNITS" Language="en_US">
       <Text>Contains your units, categorized by military, naval, air, support, civilian, and trade roles.</Text>

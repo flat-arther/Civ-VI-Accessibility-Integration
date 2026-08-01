@@ -1,5 +1,5 @@
--- CAIWidget_Table.lua
--- Three-level table: Table -> Column -> Tier -> item cell.
+-- CAIWidget_Grid.lua
+-- Three-level grid: Grid -> Column -> Tier -> item cell.
 --
 --   Column = a labeled group (e.g. a civics-tree era). Speaks only its header
 --            label; role and position are muted. Holds one or more tiers.
@@ -8,30 +8,31 @@
 --   Item   = an arbitrary cell widget stacked vertically inside a tier,
 --            navigated Up/Down.
 --
--- A plain data grid is the degenerate case: every column has exactly one tier,
+-- A plain grid is the degenerate case: every column has exactly one tier,
 -- so Left/Right walks columns and Up/Down walks rows. Because the column owns
 -- its cells through the tier, the manager's focus-divergence machinery speaks
 -- the column header automatically when (and only when) focus crosses into a
 -- new column.
 
 local Nav = CAIWidgetHelpers_Navigation
+local Search = CAIWidgetHelpers_Search
 
----@class TableColumn
+---@class GridColumn
 ---@field header string|fun():string
 ---@field width? integer Number of side-by-side tiers (default 1).
 
----@class TableWidget : ContainerWidget
-TableWidget = setmetatable({}, { __index = ContainerWidget })
-TableWidget.__index = TableWidget
+---@class GridWidget : ContainerWidget
+GridWidget = setmetatable({}, { __index = ContainerWidget })
+GridWidget.__index = GridWidget
 
 ---Internal container for a tier (a vertical stack of cells). Transparent so it
----contributes nothing to speech; navigation is driven entirely by the table.
+---contributes nothing to speech; navigation is driven entirely by the grid.
 ---@param mgr UIScreenManager
 ---@return ContainerWidget
 local function makeTier(mgr)
     local tier = ContainerWidget.New(ContainerWidget)
     tier.Manager = mgr
-    tier.Type = "TableTier"
+    tier.Type = "GridTier"
     tier.WrapAround = false
     tier.Transparent = true
     tier.UseDirectionalEntry = false
@@ -39,15 +40,15 @@ local function makeTier(mgr)
 end
 
 ---Internal container for a column. Speaks only its header label (role and
----position muted, per the table convention). Owns `width` tiers up front.
+---position muted, per the grid convention). Owns `width` tiers up front.
 ---@param mgr UIScreenManager
----@param col TableColumn
+---@param col GridColumn
 ---@return ContainerWidget
 local function makeColumn(mgr, col)
     local c = ContainerWidget.New(ContainerWidget)
     c.Manager = mgr
-    c.Type = "TableColumn"
-    c.Role = "TableColumn"
+    c.Type = "GridColumn"
+    c.Role = "GridColumn"
     c.WrapAround = false
     c:SetLabel(col.header)
     c.SpeechSettings = { Role = false, Position = false }
@@ -64,23 +65,23 @@ end
 ---@param mgr UIScreenManager
 ---@param id string
 ---@param props? table
----@return TableWidget
-function TableWidget.Create(mgr, id, props)
-    local w = ContainerWidget.New(TableWidget)
+---@return GridWidget
+function GridWidget.Create(mgr, id, props)
+    local w = ContainerWidget.New(GridWidget)
     w.Id = id
-    w.Type = "Table"
-    w.Role = "Table"
+    w.Type = "Grid"
+    w.Role = "Grid"
     w.Manager = mgr
     w.WrapAround = false
     w:AddInputBindings({
-        { Key = Keys.VK_UP,    MSG = KeyEvents.KeyDown,                   Description = "LOC_CAI_KB_MOVE_UP",             Action = function(self) return self:_NavigateVertical(-1) end },
-        { Key = Keys.VK_DOWN,  MSG = KeyEvents.KeyDown,                   Description = "LOC_CAI_KB_MOVE_DOWN",           Action = function(self) return self:_NavigateVertical( 1) end },
+        { Key = Keys.VK_UP,    MSG = KeyEvents.KeyDown,                   Description = "LOC_CAI_KB_MOVE_UP",             Action = function(self) return Search.NavigateResults(self, -1) or self:_NavigateVertical(-1) end },
+        { Key = Keys.VK_DOWN,  MSG = KeyEvents.KeyDown,                   Description = "LOC_CAI_KB_MOVE_DOWN",           Action = function(self) return Search.NavigateResults(self, 1) or self:_NavigateVertical( 1) end },
         { Key = Keys.VK_LEFT,  MSG = KeyEvents.KeyDown,                   Description = "LOC_CAI_KB_MOVE_LEFT",           Action = function(self) return self:_NavigateHorizontal(-1) end },
         { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown,                   Description = "LOC_CAI_KB_MOVE_RIGHT",          Action = function(self) return self:_NavigateHorizontal( 1) end },
         { Key = Keys.VK_HOME,  MSG = KeyEvents.KeyDown,                   Description = "LOC_CAI_KB_MOVE_TO_ROW_START",   Action = function(self) return self:_NavigateTierEdge(-1) end },
         { Key = Keys.VK_END,   MSG = KeyEvents.KeyDown,                   Description = "LOC_CAI_KB_MOVE_TO_ROW_END",     Action = function(self) return self:_NavigateTierEdge( 1) end },
-        { Key = Keys.VK_HOME,  MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_MOVE_TO_TABLE_START", Action = function(self) return self:_NavigateTableEdge(-1) end },
-        { Key = Keys.VK_END,   MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_MOVE_TO_TABLE_END",   Action = function(self) return self:_NavigateTableEdge( 1) end },
+        { Key = Keys.VK_HOME,  MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_MOVE_TO_GRID_START", Action = function(self) return self:_NavigateGridEdge(-1) end },
+        { Key = Keys.VK_END,   MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_MOVE_TO_GRID_END",   Action = function(self) return self:_NavigateGridEdge( 1) end },
         { Key = Keys.VK_LEFT,  MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_PREVIOUS_COLUMN",     Action = function(self) return self:_NavigateColumn(-1) end },
         { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_NEXT_COLUMN",         Action = function(self) return self:_NavigateColumn( 1) end },
     })
@@ -88,28 +89,60 @@ function TableWidget.Create(mgr, id, props)
     return w
 end
 
+---Search every grid item cell, excluding structural column and tier widgets.
+---@param includeTooltips boolean
+---@return SearchCandidate[]
+function GridWidget:GetTypeToFindCandidates(includeTooltips)
+    local candidates = {}
+    local index = 1
+    for _, tier in ipairs(self:_AllTiers()) do
+        for _, cell in ipairs(tier.Children) do
+            if not cell:IsHidden() then
+                local label = cell:GetLabel()
+                if label and label ~= "" then
+                    local tooltip = includeTooltips and (cell:GetTooltip() or "") or ""
+                    candidates[#candidates + 1] = Search.MakeSearchCandidate(cell, label, index, tooltip)
+                    index = index + 1
+                end
+            end
+        end
+    end
+    return candidates
+end
+
+---@param char string
+---@return boolean
+function GridWidget:OnCharInput(char)
+    return Search.HandleChar(self, char)
+end
+
+---@return boolean
+function GridWidget:OnSearchBackspace()
+    return Search.HandleBackspace(self)
+end
+
 --#region Schema
 
 ---Append a column. `width` is the number of side-by-side tiers it holds.
----@param col TableColumn
+---@param col GridColumn
 ---@return ContainerWidget column
-function TableWidget:AddColumn(col)
+function GridWidget:AddColumn(col)
     local column = makeColumn(self.Manager, col or {})
     self:AddChild(column)
     return column
 end
 
 ---@return integer
-function TableWidget:GetColumnCount() return #self.Children end
+function GridWidget:GetColumnCount() return #self.Children end
 
 ---@param i integer
 ---@return ContainerWidget|nil
-function TableWidget:GetColumnWidget(i) return self.Children[i] end
+function GridWidget:GetColumnWidget(i) return self.Children[i] end
 
 ---@param column ContainerWidget|integer
 ---@param tierIndex? integer 1-based; defaults to 1.
 ---@return ContainerWidget|nil
-function TableWidget:GetTier(column, tierIndex)
+function GridWidget:GetTier(column, tierIndex)
     local c = type(column) == "number" and self.Children[column] or column
     return c and c._tiers and c._tiers[tierIndex or 1] or nil
 end
@@ -119,7 +152,7 @@ end
 ---@param tierIndex integer|nil 1-based; defaults to 1.
 ---@param widget UIWidget
 ---@return integer itemIndex
-function TableWidget:AddItem(column, tierIndex, widget)
+function GridWidget:AddItem(column, tierIndex, widget)
     local tier = self:GetTier(column, tierIndex)
     if not tier then return 0 end
     if widget then tier:AddChild(widget) end
@@ -129,7 +162,7 @@ end
 ---Grid convenience: one cell into each column's first tier, in column order.
 ---@param cells (UIWidget|nil)[]
 ---@return integer rowIndex
-function TableWidget:AddRow(cells)
+function GridWidget:AddRow(cells)
     if cells then
         for c = 1, #self.Children do
             local widget = cells[c]
@@ -141,7 +174,7 @@ end
 
 ---Grid row count: the longest first-tier stack across columns.
 ---@return integer
-function TableWidget:GetRowCount()
+function GridWidget:GetRowCount()
     local n = 0
     for _, column in ipairs(self.Children) do
         local tier = column._tiers and column._tiers[1]
@@ -154,7 +187,7 @@ end
 ---@param row integer
 ---@param col integer
 ---@return UIWidget|nil
-function TableWidget:GetCell(row, col)
+function GridWidget:GetCell(row, col)
     local tier = self:GetTier(col, 1)
     return tier and tier.Children[row] or nil
 end
@@ -163,7 +196,7 @@ end
 ---@param row integer
 ---@param col integer
 ---@param widget UIWidget|nil
-function TableWidget:SetCell(row, col, widget)
+function GridWidget:SetCell(row, col, widget)
     local tier = self:GetTier(col, 1)
     if not tier then return end
     local existing = tier.Children[row]
@@ -179,7 +212,7 @@ end
 
 ---Remove a grid row: the `row`-th item from every column's first tier.
 ---@param row integer
-function TableWidget:RemoveRow(row)
+function GridWidget:RemoveRow(row)
     for _, column in ipairs(self.Children) do
         local tier = column._tiers and column._tiers[1]
         if tier and tier.Children[row] then tier.Children[row]:Destroy() end
@@ -187,7 +220,7 @@ function TableWidget:RemoveRow(row)
 end
 
 ---Destroy every item cell, keeping the column/tier structure intact.
-function TableWidget:ClearRows()
+function GridWidget:ClearRows()
     for _, column in ipairs(self.Children) do
         if column._tiers then
             for _, tier in ipairs(column._tiers) do tier:ClearChildren() end
@@ -201,7 +234,7 @@ end
 
 ---Flatten every tier across all columns, in document order.
 ---@return ContainerWidget[]
-function TableWidget:_AllTiers()
+function GridWidget:_AllTiers()
     local out = {}
     for _, column in ipairs(self.Children) do
         if column._tiers then
@@ -213,7 +246,7 @@ end
 
 ---The currently focused item cell and its tier, or nil if focus isn't on one.
 ---@return UIWidget|nil cell, ContainerWidget|nil tier
-function TableWidget:_FocusedCell()
+function GridWidget:_FocusedCell()
     local cell = self.Manager and self.Manager:GetFocusedWidget()
     if not cell then return nil, nil end
     return cell, cell.Parent
@@ -247,7 +280,7 @@ end
 ---Up/Down within the focused cell's tier. No wrap.
 ---@param dir 1|-1
 ---@return boolean
-function TableWidget:_NavigateVertical(dir)
+function GridWidget:_NavigateVertical(dir)
     local cell, tier = self:_FocusedCell()
     if not tier then return false end
     local idx = tier:GetChildIndex(cell)
@@ -263,7 +296,7 @@ end
 ---Uses raw child index so hidden spacers keep tiers aligned.
 ---@param dir 1|-1
 ---@return boolean
-function TableWidget:_NavigateHorizontal(dir)
+function GridWidget:_NavigateHorizontal(dir)
     local cell, tier = self:_FocusedCell()
     if not tier then return false end
     local tiers = self:_AllTiers()
@@ -288,7 +321,7 @@ end
 ---Home / End: first / last visible cell in the focused tier.
 ---@param dir 1|-1 -1 = first (top), 1 = last (bottom)
 ---@return boolean
-function TableWidget:_NavigateTierEdge(dir)
+function GridWidget:_NavigateTierEdge(dir)
     local cell, tier = self:_FocusedCell()
     if not tier then return false end
     local target = dir < 0 and Nav.First(tier) or Nav.Last(tier)
@@ -299,10 +332,10 @@ function TableWidget:_NavigateTierEdge(dir)
     return false
 end
 
----Ctrl+Home / Ctrl+End: table-wide first / last navigable cell.
+---Ctrl+Home / Ctrl+End: grid-wide first / last navigable cell.
 ---@param dir 1|-1
 ---@return boolean
-function TableWidget:_NavigateTableEdge(dir)
+function GridWidget:_NavigateGridEdge(dir)
     local tiers = self:_AllTiers()
     if dir < 0 then
         for i = 1, #tiers do
@@ -321,7 +354,7 @@ end
 ---Ctrl+Left / Ctrl+Right: jump to the first cell of the prev / next column.
 ---@param dir 1|-1
 ---@return boolean
-function TableWidget:_NavigateColumn(dir)
+function GridWidget:_NavigateColumn(dir)
     local _, tier = self:_FocusedCell()
     if not tier then return false end
     local column = tier.Parent
@@ -342,7 +375,7 @@ end
 ---First visible cell of a column, scanning its tiers in order.
 ---@param column ContainerWidget
 ---@return UIWidget|nil
-function TableWidget:_FirstCellInColumn(column)
+function GridWidget:_FirstCellInColumn(column)
     if column:IsHidden() or not column._tiers then return nil end
     for _, t in ipairs(column._tiers) do
         local cell = Nav.First(t)
@@ -353,4 +386,4 @@ end
 
 --#endregion
 
-CAIWidgetRegistry.Register("Table", TableWidget.Create)
+CAIWidgetRegistry.Register("Grid", GridWidget.Create)

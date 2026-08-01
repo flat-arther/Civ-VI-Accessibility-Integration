@@ -1,0 +1,797 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+  <LocalizedText>
+    <!-- Shared tutorial interface -->
+    <Row Tag="LOC_CAI_TUTORIAL_SHOW_TUTORIALS" Language="en_US">
+      <Text>Show mod tutorials</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_SHOW_TUTORIALS_TOOLTIP" Language="en_US">
+      <Text>Show unseen accessibility tutorials when their related events occur.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RESET" Language="en_US">
+      <Text>Reset mod tutorials</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RESET_TOOLTIP" Language="en_US">
+      <Text>Make all accessibility tutorials available to appear again.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIALS_RESET" Language="en_US">
+      <Text>Tutorials reset</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_SAVE_FAILED" Language="en_US">
+      <Text>The tutorial setting could not be saved.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESCAPE_BLOCKED" Language="en_US">
+      <Text>Use Continue to close the tutorial</Text>
+    </Row>
+
+    <!-- Main Menu -->
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_TITLE" Language="en_US">
+      <Text>Accessibility mod interface</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_INTERFACE" Language="en_US">
+      <Text>Welcome to Civilization VI. These short tutorials explain how to use each accessible screen when you first encounter it. To turn them off, uncheck Show mod tutorials in one of the tutorial dialogs, or disable them later in Mod Settings, under the UI section.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_NESTING" Language="en_US">
+      <Text>The interface is built from nested widgets. Most screens are panels containing controls and other containers such as lists, trees, tables, grids, tabs, and dialogs. Moving into a container adds it to the focus path, and moving out returns to its parent.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_FOCUS_SPEECH" Language="en_US">
+      <Text>As focus moves, the mod speaks the control's label, role, value, position, state, and tooltip according to your settings.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_NAVIGATION" Language="en_US">
+      <Text>Use Tab and Shift plus Tab to move between groups of controls. In lists, tree views, tables, and grids, use the arrow keys to move between items, and Home and End to move to boundaries. Lists and trees also support Page Up and Page Down.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_ACTIVATION" Language="en_US">
+      <Text>Use Enter or Space to activate the focused control.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_SEARCH" Language="en_US">
+      <Text>In lists, trees, tables, and grids, start typing to find an item. Tables search row labels, while grids search every cell. Backspace deletes the last typed character, and Escape clears it. Press Control plus F where available to open the search panel for more detailed search.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_TOOLTIPS" Language="en_US">
+      <Text>Use Alt plus Up and Alt plus Down to read the previous and next sections of the focused control's tooltip. Use Alt plus Home and Alt plus End to read its first and last sections.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_HELP" Language="en_US">
+      <Text>Press Control plus H for context-sensitive Input Help. Press Shift plus F1 to hear the available commands for the focused control.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_SETTINGS" Language="en_US">
+      <Text>Press F12 to open accessibility mod settings. You can change speech and navigation preferences, disable mod tutorials, or reset them there.</Text>
+    </Row>
+
+    <!-- Shared screen guidance -->
+    <Row Tag="LOC_CAI_TUTORIAL_SCREEN_TITLE" Language="en_US">
+      <Text>{1_Name} tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_SCREEN_FALLBACK" Language="en_US">
+      <Text>Screen</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GAME_SUMMARIES_TITLE" Language="en_US">
+      <Text>Hall of Fame tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GAME_SUMMARY_DETAILS_TITLE" Language="en_US">
+      <Text>Hall of Fame game details tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MODS_SCREEN_TITLE" Language="en_US">
+      <Text>Additional Content tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_OVERVIEW_TITLE" Language="en_US">
+      <Text>City overview tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_STATES_TITLE" Language="en_US">
+      <Text>City-States tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_TITLE" Language="en_US">
+      <Text>Choose Civic tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_TITLE" Language="en_US">
+      <Text>Civics Tree tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA_TITLE" Language="en_US">
+      <Text>Civilopedia tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CLIMATE_SCREEN_TITLE" Language="en_US">
+      <Text>Climate tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_VIEW_TITLE" Language="en_US">
+      <Text>Diplomacy tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DIPLOMACY_DEAL_VIEW_TITLE" Language="en_US">
+      <Text>Deal negotiation tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_END_GAME_TITLE" Language="en_US">
+      <Text>Game results tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ERA_PROGRESS_TITLE" Language="en_US">
+      <Text>Era progress tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_TITLE" Language="en_US">
+      <Text>Espionage chooser tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_OVERVIEW_TITLE" Language="en_US">
+      <Text>Espionage overview tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_TITLE" Language="en_US">
+      <Text>Global resources tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNMENT_SCREEN_TITLE" Language="en_US">
+      <Text>Government tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNOR_PANEL_TITLE" Language="en_US">
+      <Text>Governors tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNOR_ASSIGNMENT_TITLE" Language="en_US">
+      <Text>Governor assignment tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_TITLE" Language="en_US">
+      <Text>Great People tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORKS_OVERVIEW_TITLE" Language="en_US">
+      <Text>Great Works tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORK_SHOWCASE_TITLE" Language="en_US">
+      <Text>Great Work showcase tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_HISTORIC_MOMENTS_TITLE" Language="en_US">
+      <Text>Historic Moments tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAP_PIN_LIST_TITLE" Language="en_US">
+      <Text>Map tac list tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAP_PIN_EDITOR_TITLE" Language="en_US">
+      <Text>Map tac editor tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NOTIFICATION_CENTER_TITLE" Language="en_US">
+      <Text>Notifications tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_PRODUCTION_PANEL_TITLE" Language="en_US">
+      <Text>Production tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_SCREEN_TITLE" Language="en_US">
+      <Text>Religion tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_REPORTS_SCREEN_TITLE" Language="en_US">
+      <Text>Reports tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RESEARCH_CHOOSER_TITLE" Language="en_US">
+      <Text>Choose Research tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_TITLE" Language="en_US">
+      <Text>Technology Tree tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_TITLE" Language="en_US">
+      <Text>Trade overview tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_ROUTE_CHOOSER_TITLE" Language="en_US">
+      <Text>Trade route chooser tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_ORIGIN_CHOOSER_TITLE" Language="en_US">
+      <Text>Trade route origin tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS_TITLE" Language="en_US">
+      <Text>Unit promotions tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_RANKINGS_TITLE" Language="en_US">
+      <Text>World Rankings tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAV_LIST" Language="en_US">
+      <Text>In a list, use Up and Down to move one item, Home and End for the first and last item, and Page Up and Page Down to move by pages. Enter or Space activates buttons and menu items. Start typing to find an item, or use Control plus F for the search panel when the list supports search.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAV_TREE" Language="en_US">
+      <Text>In a tree, Up and Down move through visible rows. Right expands or enters children; Left collapses or returns to the parent. Home and End move within the current depth; Control plus Home and Control plus End move to the beginning or end of the whole tree. Enter activates a leaf or toggles a branch. Page Up and Page Down move by pages. Start typing to find an item, or press Control plus F for search.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAV_TABS" Language="en_US">
+      <Text>Use Tab and Shift plus Tab to navigate through tab pages. Left and Right switch tabs while the tab row is focused. Control plus Tab and Control plus Shift plus Tab switch tabs from anywhere inside the tab control.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GRID_NAVIGATION" Language="en_US">
+      <Text>In a grid, Up and Down move within the current tier. Left and Right move to the adjacent tier while keeping a similar row. Home and End move to the first and last item in the tier. Control plus Home and Control plus End move to the first and last item in the grid. Control plus Left and Control plus Right jump to the previous or next era or column. Start typing to search every cell.</Text>
+    </Row>
+
+    <!-- Front-end screens -->
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GAME_SUMMARIES" Language="en_US">
+      <Text>Hall of Fame</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GAME_SUMMARY_DETAILS" Language="en_US">
+      <Text>Hall of Fame game details</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_MODS" Language="en_US">
+      <Text>Additional Content</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GAME_SUMMARIES_LAYOUT" Language="en_US">
+      <Text>The first control is a Ruleset dropdown. It filters all displayed records. After it is a two-page tab control containing Overview and History.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GAME_SUMMARIES_OVERVIEW" Language="en_US">
+      <Text>Overview is a tree. Victory Progress expands into victory types and achieved counts. Leader Progress expands into leaders with win and play counts. Additional statistic categories follow as expandable groups.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GAME_SUMMARIES_HISTORY" Language="en_US">
+      <Text>History contains a list of completed games followed by a Sort By dropdown. Each game states score, leader, civilization, result, and turns. Enter opens that game's detail screen.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GAME_SUMMARY_DETAILS_OVERVIEW" Language="en_US">
+      <Text>The Overview tab begins with an Overall branch containing game-wide statistics and game modes. It then provides one branch per player with leader, civilization, score, result, and that player's statistic categories.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GAME_SUMMARY_DETAILS_REPORTS" Language="en_US">
+      <Text>The Reports tab is a tree. When multiple report contexts exist, context branches contain report types. Report types contain rows; short rows are read together, while rows with more than three columns expand into individual cells.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GAME_SUMMARY_DETAILS_GRAPHS" Language="en_US">
+      <Text>The Graphs tab converts visual graph data into a change tree. Expand a player to find only turns where at least one recorded value changed, then expand a turn to read the values that changed there. Repeated values are omitted until their next change. City and religion values include the relevant city or religion name in the message.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MODS_OVERVIEW" Language="en_US">
+      <Text>This screen has Installed and, when Steam is available, Subscriptions tabs. Escape closes the screen and applies the currently selected mod group's enabled state to game configuration.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MODS_INSTALLED" Language="en_US">
+      <Text>The Installed page contains, in order: the installed-mod tree, Sort By dropdown, Official Content checkbox, Community Content checkbox, a conditional Ignore Compatibility Warning checkbox, Mod Group dropdown, Create Group, Delete Group, Enable All, and Disable All.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MODS_ROWS" Language="en_US">
+      <Text>Each mod is one tree row. Its label states name, enabled or disabled state, content type, and any ownership or compatibility warning. Enter enables or disables that mod. Right expands read-only details such as description, author, saved-game and multiplayer support, and true dependencies; Left collapses them.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MODS_GROUPS" Language="en_US">
+      <Text>Mod groups are separate saved enabled-mod configurations. Switching the Mod Group from the dropdown changes which configuration you are editing. Create Group asks for a name and clones the current group's enabled state. Delete Group immediately deletes the selected group when that group is allowed to be deleted; there is no confirmation.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MODS_BULK" Language="en_US">
+      <Text>Sort By offers Name and Enabled. Official and Community checkboxes filter the tree. Control plus F searches localized mod names and teasers. Enable All and Disable All affect only the currently filtered result set, including search and content filters.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MODS_SUBSCRIPTIONS" Language="en_US">
+      <Text>The Subscriptions page is a name-only list followed by Browse Workshop. A row's tooltip contains status and last-updated information. Download progress updates automatically without taking focus.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MODS_BINDINGS" Language="en_US">
+      <Text>On a subscription, Enter runs Update when one is available; otherwise it opens View in Workshop when available. Control plus Enter always tries View. Delete unsubscribes and removes the row. Escape closes the Create Group dialog or the Mods screen.</Text>
+    </Row>
+
+    <!-- In-game screen names -->
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_CITY_OVERVIEW" Language="en_US">
+      <Text>City overview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_CITY_STATES" Language="en_US">
+      <Text>City-States</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_CIVICS_CHOOSER" Language="en_US">
+      <Text>Choose Civic</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_CIVICS_TREE" Language="en_US">
+      <Text>Civics Tree</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_CIVILOPEDIA" Language="en_US">
+      <Text>Civilopedia</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_CLIMATE" Language="en_US">
+      <Text>Climate</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_DIPLOMACY" Language="en_US">
+      <Text>Diplomacy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_DEAL" Language="en_US">
+      <Text>Deal negotiation</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_END_GAME" Language="en_US">
+      <Text>Game results</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_ERA_PROGRESS" Language="en_US">
+      <Text>Era progress</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_ESPIONAGE_CHOOSER" Language="en_US">
+      <Text>Choose Spy Mission</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_ESPIONAGE_OVERVIEW" Language="en_US">
+      <Text>Espionage overview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GLOBAL_RESOURCES" Language="en_US">
+      <Text>Global resources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GOVERNMENT" Language="en_US">
+      <Text>Government</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GOVERNORS" Language="en_US">
+      <Text>Governors</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GOVERNOR_ASSIGNMENT" Language="en_US">
+      <Text>Governor assignment</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GREAT_PEOPLE" Language="en_US">
+      <Text>Great People</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GREAT_WORKS" Language="en_US">
+      <Text>Great Works</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GREAT_WORK_SHOWCASE" Language="en_US">
+      <Text>Great Work showcase</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_HISTORIC_MOMENTS" Language="en_US">
+      <Text>Historic Moments</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_MAP_PINS" Language="en_US">
+      <Text>Map tac list</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_MAP_PIN_EDITOR" Language="en_US">
+      <Text>Map tac editor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_NOTIFICATIONS" Language="en_US">
+      <Text>Notifications</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_PRODUCTION" Language="en_US">
+      <Text>Production</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_RELIGION" Language="en_US">
+      <Text>Religion</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_REPORTS" Language="en_US">
+      <Text>Reports</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_RESEARCH" Language="en_US">
+      <Text>Choose Research</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_TECH_TREE" Language="en_US">
+      <Text>Technology Tree</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_TRADE_OVERVIEW" Language="en_US">
+      <Text>Trade overview</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_TRADE_ROUTE" Language="en_US">
+      <Text>Trade route chooser</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_TRADE_ORIGIN" Language="en_US">
+      <Text>Trade route origin</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_UNIT_PROMOTIONS" Language="en_US">
+      <Text>Unit promotions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_WORLD_RANKINGS" Language="en_US">
+      <Text>World Rankings</Text>
+    </Row>
+
+    <!-- In-game screen tutorials -->
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_OVERVIEW" Language="en_US">
+      <Text>This screen is one city-detail tree followed by a Rename City button when renaming is permitted.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_OVERVIEW_LAYOUT" Language="en_US">
+      <Text>The tree's top-level sections are Citizens, Buildings, Religion, Loyalty when available, and Power when available. Citizens contains food, growth, housing, amenities, worked tiles, and yield details. Buildings contains districts, their buildings, and wonders. The remaining sections contain their complete live breakdowns.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_OVERVIEW_ACTIONS" Language="en_US">
+      <Text>Expand sections and rows to read their details. Tab past the tree to Rename City. The rename editor uses Enter to commit and Escape to cancel. Escape outside the editor closes the overview.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_STATES" Language="en_US">
+      <Text>The default table view has one row for every met city-state. Its columns compare type, your relationship, your envoys, the current suzerain, active quests, and foreign influence. Focusing any cell selects that city-state and updates the details and controls that follow the table.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_STATES_SECTIONS" Language="en_US">
+      <Text>Use the table headers to sort city-states. Each known foreign civilization with envoys has its own influence column, whose cells give that civilization's envoy count. Unmet civilizations remain anonymous in a combined influence column. Tab from the table to the selected city-state's details tree. It mirrors that city-state's expanded tree-view row with relationship status, Bonuses, Quests, and Relationships, but omits Influence because influence is already in the table.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_STATES_ENVOYS" Language="en_US">
+      <Text>On any table data cell or anywhere in the details tree, Shift plus Left removes one pending envoy and Shift plus Right adds one. Control plus Enter confirms all pending envoy changes. The Envoy slider and Confirm Envoys button after the details tree provide the same operations.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_STATES_ACTIONS" Language="en_US">
+      <Text>After the envoy controls are View City-State, Declare War or Make Peace, Levy Military when available, and the view-switch button. Tree view restores one expandable row per city-state with relationship status plus bonus, influence, quest, and relationships sections. Alt plus 1 selects table view and Alt plus 2 selects tree view; the selected view is remembered. Enter activates the focused button. Escape closes the screen.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER" Language="en_US">
+      <Text>The first tree contains the current civic and queued civics. The second tree contains available civics. Each civic expands into its unlocks. The final button opens the full Civics Tree.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_ACTIONS" Language="en_US">
+      <Text>Enter on an available civic makes it the current civic. Current and queued rows are read-only and inspectable; this chooser deliberately does not add a queue shortcut.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_BINDINGS" Language="en_US">
+      <Text>Shift plus Enter on a revealed civic opens its Civilopedia article. Use Tab to move from the queue tree to available civics and then to Open Civics Tree.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_LAYOUT" Language="en_US">
+      <Text>Controls appear in this order: the current and queued civics list when nonempty, a filter list, the active civic view, a grid-only unlocks list, a read-only government and slotted-policy summary, and the Switch View button.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_VIEWS" Language="en_US">
+      <Text>The default Grid View arranges eras as columns, prerequisite tiers from left to right, and civics vertically within each tier. Switch to Tree View for an era, tier, civic hierarchy. Switching views keeps the same civic focused when possible.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_TREE_VIEW" Language="en_US">
+      <Text>In Tree View, expand an era to expose its already-expanded tiers, then its civics. Civic children contain Unlocks, Prerequisites, Leads To, and the calculated path to that civic. Activate a reference to jump to it. Backspace returns through prior reference jumps.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_ACTIONS" Language="en_US">
+      <Text>Enter on a researchable civic makes it current. Control plus Enter appends it to the civic queue. Shift plus Enter opens its Civilopedia article. The same three bindings work on grid cells and filter results. Enter on a queue row jumps to that civic; Shift plus Enter opens its article.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_FILTERS" Language="en_US">
+      <Text>Enter on a filter opens a temporary results list. In results, Enter closes the list and jumps to the civic, Control plus Enter queues it, Shift plus Enter opens the Civilopedia, and Escape closes results and clears the filter. Control plus F searches civics by the game's Civics search index from either main view.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_GOVERNMENT" Language="en_US">
+      <Text>In Grid View, focusing a civic rebuilds the sibling Unlocks list for that civic. The following read-only edit field summarizes the current government, slot counts, and every slotted policy.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA" Language="en_US">
+      <Text>The Civilopedia has three sibling controls: a Sections tree, an Article tree, and a History list. Tab moves between them.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA_LAYOUT" Language="en_US">
+      <Text>The Sections tree contains categories and pages. Focusing a page loads it. The Article tree contains headers, paragraphs, statistic groups, quotes, and related-page links. Activating a related page or history entry loads that article.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA_SEARCH" Language="en_US">
+      <Text>Control plus F on the Sections tree performs full-text Civilopedia search using the complete query, including article body text. Search results open the matching page. The History list records visited pages.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA_BINDINGS" Language="en_US">
+      <Text>Alt plus Left navigates backward and Alt plus Right navigates forward through article history. Escape closes the Civilopedia.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CLIMATE" Language="en_US">
+      <Text>The Climate screen has Overview, CO2 Levels, and Event History tabs.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CLIMATE_OVERVIEW" Language="en_US">
+      <Text>Overview is a tree containing the current climate phase and effects, contributing CO2 and temperature, disaster-intensity settings, forecasts for each disaster type, polar ice, and sea-level status.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CLIMATE_CO2" Language="en_US">
+      <Text>CO2 Levels is a tree grouped first by civilization and then by resource. It includes your resource contributions and known global contributors with live totals.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CLIMATE_HISTORY" Language="en_US">
+      <Text>Event History is a chronological list. Located, revealed events include their direction from the navigation cursor. Enter moves the cursor to the event's start location without closing the screen. Escape closes the Climate screen.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_OVERVIEW" Language="en_US">
+      <Text>The normal overview contains a Leaders tree followed by an Actions list. Focusing another leader selects that leader in the game and refreshes the actions that follow.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_FLOW" Language="en_US">
+      <Text>Expand a leader to inspect every known intelligence section, including relationship, access, agendas, agreements, gossip, alliances, emergencies, grievances, government, and secret society data when available. Some intelligence sections have further expandable breakdowns and reference rows.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_CONVERSATION" Language="en_US">
+      <Text>When diplomacy enters conversation mode, the overview is hidden and replaced by a conversation list. It contains the leader's statement, reason, and your available replies. Enter or Space activates a reply. During a leader cinematic, the interface waits silently until the conversation controls become available.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_NAVIGATION" Language="en_US">
+      <Text>Use full tree navigation in the Leaders tree, then Tab to Actions. An action may be a button or a submenu; Right or Enter opens a submenu, Left closes it, and Up or Down moves within it. Escape follows the game's normal diplomacy exit or conversation behavior.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DEAL_LAYOUT" Language="en_US">
+      <Text>The deal has My Offer and Their Offer tabs. Each page contains, in order, an Offers tree, an Inventory tree, and an Actions list. The two pages show opposite sides of the same live deal.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DEAL_EDITING" Language="en_US">
+      <Text>Inventory is grouped by deal-item type, such as gold, resources, agreements, cities, Great Works, or captives when available. Enter on an inventory item adds it. Items needing an amount, duration, city, or other choice open an editor or choice list; Enter commits and Escape cancels that temporary editor.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DEAL_BINDINGS" Language="en_US">
+      <Text>In Offers, Delete removes the focused offered item. Shift plus Delete stops offering an item the other leader requested from you. Right expands offered items that contain city or other child detail; Left collapses them. Control plus Tab switches between My Offer and Their Offer.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DEAL_ACTIONS" Language="en_US">
+      <Text>Tab past Inventory to Actions. The first disabled row reads the leader's current reaction. The following live buttons can include Accept Deal, Demand, Make This Deal More Equitable, Refuse Deal, and Resume Game.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DEAL_NAVIGATION" Language="en_US">
+      <Text>Use tree navigation in Offers and Inventory, list navigation in Actions, and Tab between those three groups. Enter or Space activates available controls. Escape closes a temporary editor first; otherwise it follows the game's normal deal exit path.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_END_GAME" Language="en_US">
+      <Text>The end-game panel contains Results, Ranking when supported, graphs, and multiplayer Chat when available, followed by the game's live end-game action buttons.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_END_GAME_RESULTS" Language="en_US">
+      <Text>Results is a list containing the victory or defeat banner, winner and civilization information, victory description, and other result text. Ranking is a list containing score thresholds, your score and quote, and the matching historic leader statement.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_END_GAME_REPLAY" Language="en_US">
+      <Text>graphs is a three-level tree: player, turn, then every recorded dataset and value for that turn. Players and turns without data are omitted. Use full tree navigation to inspect the complete replay record.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_END_GAME_CHAT_ACTIONS" Language="en_US">
+      <Text>Chat contains a message edit box, target dropdown, and history list; Enter in the edit box sends. After the tabs, available actions can include Replay Movie, Historic Moments, Export History, Observe, Main Menu, Next Player, and One More Turn.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ERA_PROGRESS" Language="en_US">
+      <Text>This screen is one tree. Escape closes it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ERA_PROGRESS_LAYOUT" Language="en_US">
+      <Text>The tree begins with an era-score summary and prior dedication or age information. It then contains Dark, Normal, and Golden Age threshold and dedication sections when applicable, followed by known civilization era-status information.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_MODES" Language="en_US">
+      <Text>The Espionage Chooser has two separate modes, and only the current mode is available for navigation. Destination mode is a tree for assigning the spy to a city. Mission mode is a list for choosing what a spy already established in a city will do. The panel announces the current mode and moves focus to the correct tree or list when the mode changes.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_DESTINATIONS" Language="en_US">
+      <Text>In destination mode, each tree row identifies a city and its civilization and marks capitals. Its tooltip reports the travel and establishment time, the number of possible missions, and the city's completed non-wonder districts. The available cities follow the live game rules, including visibility, diplomatic restrictions, and expansion handling for Free Cities.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_PREVIEWS" Language="en_US">
+      <Text>Press Right on a destination row to expand its read-only possible-mission children. These previews identify the operation and, when applicable, its target district, duration, success probability, effect details, or failure reasons. They are information only; selecting a destination is done from the city row itself.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_PLACEMENT" Language="en_US">
+      <Text>Activate a city row to select that destination, move the game camera there, and open Confirm Spy Placement. Review the city and timing summary, then choose Confirm or Reselect Destination. Confirm sends the spy to travel and establish in another city. If you confirm the local city the spy already occupies, the chooser changes to mission mode so you can select a Counterspy district instead. Reselect Destination or Escape returns to the destination tree without committing.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_MISSIONS" Language="en_US">
+      <Text>Mission mode contains one list of live mission buttons for the spy's current city; the destination tree is hidden. The panel also announces whether Gain Sources is active and, when active, how many turns remain. In a foreign city, each mission states its operation, target district when applicable, duration, and success probability, with complete mission details in the tooltip. Disabled missions remain readable and their tooltips explain why they cannot start.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_MISSION_ACTIONS" Language="en_US">
+      <Text>Activate an enabled offensive mission to open the separate vanilla mission confirmation popup; choosing the list row does not itself accept the mission. Review its mission briefing, duration, possible outcomes, and success chances, then choose Accept Mission or Cancel. In one of your own cities, mission mode instead lists Counterspy once for each valid district. Activating a Counterspy row immediately assigns that district and does not open the confirmation popup.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_CLOSE" Language="en_US">
+      <Text>Press Escape on the main destination tree or mission list to close the Espionage Chooser without making another selection.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_OVERVIEW" Language="en_US">
+      <Text>The Operatives tab and Mission History tab each contain a tree. Operatives also has a View City Details button in Gathering Storm.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_OVERVIEW_OPERATIVES" Language="en_US">
+      <Text>Operatives groups spies in travel, captured owned spies, and cities. City rows contain assigned spies and their mission, promotion, and status detail. Mission History groups completed activity by captured enemy agents and mission location.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_OVERVIEW_BINDINGS" Language="en_US">
+      <Text>On supported city or spy rows, Control plus Enter opens that city's details. The View City Details button provides the same action for the selected location. On a captured spy row, enter initiates a trade for the captured agent. Escape closes the screen.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES" Language="en_US">
+      <Text>This screen contains a resource tree followed by Sort By and Sort Order dropdowns.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_LAYOUT" Language="en_US">
+      <Text>The tree groups resources by class. Expand a class and resource to inspect global totals, known owners, imports, exports, stockpiles, accumulation, consumption, and other details supported by the current ruleset.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_ACTIONS" Language="en_US">
+      <Text>Known resource owners appear as leader rows beneath each resource. Press Enter on a leader row to close Global Resources and open the Diplomacy view for that leader.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_SORT" Language="en_US">
+      <Text>The first dropdown chooses the resource sort field; the second chooses ascending or descending order. Changing either rebuilds the tree while preserving focus when possible. Escape closes the screen.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNMENT" Language="en_US">
+      <Text>Outside the Pirates scenario, this screen has Governments and Policies tabs. In Pirates, the policy layout is repurposed for the three relic slots.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNMENT_GOVERNMENTS" Language="en_US">
+      <Text>Governments is a flat list. Each row states tier, policy-slot mix, bonuses, legacy information, unlock requirements, and current status. Enter adopts an available government. Shift plus Enter opens its Civilopedia article.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNMENT_POLICIES" Language="en_US">
+      <Text>Policies is a tree of policy rows and slots. Enter on a slot opens a temporary policy-picker tree grouped by Military, Economic, Diplomatic, and Wildcard categories as applicable. Enter on a policy assigns it and closes the picker; Escape cancels the picker.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNMENT_POLICY_ACTIONS" Language="en_US">
+      <Text>On a filled slot, Delete removes the policy and Shift plus Enter opens its Civilopedia article. Policy-picker entries also support Shift plus Enter for Civilopedia. Slots remain readable when changes are locked, but activation explains or honors the live lock.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNMENT_BOTTOM_ACTIONS" Language="en_US">
+      <Text>After the policy tree are Confirm Policies, View All Policies, and unlock-related actions when available. View All Policies opens another categorized tree; Escape closes it. Confirm applies the complete slot arrangement and explains empty slots or unchanged policy sets when disabled.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNORS" Language="en_US">
+      <Text>This screen has three persistent sibling controls: a Governors tree, a Promotions grid, and a secret-governor Promotions list. Only the promotion view appropriate to the focused governor is visible.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNORS_TREE" Language="en_US">
+      <Text>The Governors tree contains appointed, available, and secret governors. Each row states appointment, assignment, establishment, title count, and available action. Expand an appointed governor to read already-earned promotions. Focusing a governor refreshes the sibling promotion view.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNORS_PROMOTION_GRID" Language="en_US">
+      <Text>For ordinary governors, promotions use a grid. The first column is Base Ability and later columns are promotion tiers. Use grid navigation to follow progression across tiers. Available cells activate a confirmation dialog; earned, locked, base, and read-only cells remain readable but do not activate.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNORS_SECRET_VIEW" Language="en_US">
+      <Text>Secret governors use a flat Promotions list because their titles can be hidden rather than arranged as a visible progression tree. Hidden entries remain readable as unrevealed with the game's live unlock explanation.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNORS_ACTIONS" Language="en_US">
+      <Text>Enter on a governor row performs its live action, such as appoint, assign, or reassign. Doing the same on a secret society joins it. Tab moves from the Governors tree to the currently visible promotion grid or list. Enter on an available promotion opens a confirmation dialog.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNOR_ASSIGNMENT" Language="en_US">
+      <Text>This chooser is a city list for the governor currently being assigned or reassigned. Each row states city, current governor status, establishment information, and assignment restrictions.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNOR_ASSIGNMENT_CONFIRM" Language="en_US">
+      <Text>Enter selects a city and opens a summary dialog with Confirm and Reselect. Confirm commits the assignment; Reselect returns to the city list; Escape cancels the dialog or chooser.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE" Language="en_US">
+      <Text>The screen has Great People, Previously Recruited, and, when Heroes and Legends is active, Heroes tabs.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_CURRENT" Language="en_US">
+      <Text>Great People is a tree. Each person row states class, recruit cost, your progress, patronage costs, and availability. Expand it to compare every known civilization's points. Focusing a person updates the read-only biography and action buttons that follow the tree.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_ACTIONS" Language="en_US">
+      <Text>Enter on a recruitable person recruits them; otherwise it reads your progress. Delete passes when passing is available. After the tree are Recruit, Pass, Patronage with Gold, Patronage with Faith, and the biography field, each shown only when relevant.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_PAST" Language="en_US">
+      <Text>Previously Recruited is a flat list of claimed Great People, their class, recruiter, and relevant status. It is for inspection only.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_HEROES" Language="en_US">
+      <Text>Heroes is a list of available and claimed heroes followed by Recall Hero when available. Enter performs the live hero action. Shift plus Enter opens the focused hero's Civilopedia article.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORKS" Language="en_US">
+      <Text>The overview contains a Great Works tree followed by View Great Work, View Gallery, and a Group By Buildings checkbox.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORKS_GROUPING" Language="en_US">
+      <Text>With Group By Buildings off, the tree is City, Building, then Slots. With it on, the tree is Building type, City instance, then Slots. Building instances state yields, tourism, theming progress, and direction from the navigation cursor.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORKS_SLOTS" Language="en_US">
+      <Text>Each slot states its slot type and contained Great Work. Its tooltip includes work details, theming fit, and any movement lock. Enter opens a temporary picker tree of compatible works grouped by the opposite city or building hierarchy; Enter on a work moves it and Escape cancels.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORKS_ACTIONS" Language="en_US">
+      <Text>Control plus Enter on a filled slot opens that work's showcase. View Great Work opens the last focused filled slot, View Gallery opens the game's gallery, and the checkbox rebuilds the hierarchy. Enter on a building instance moves the map cursor to it without closing the overview.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORK_SHOWCASE" Language="en_US">
+      <Text>The showcase contains one complete details row followed by Previous, Next, and Back buttons when those actions are available.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORK_SHOWCASE_BINDINGS" Language="en_US">
+      <Text>Left or Up selects the previous Great Work. Right or Down selects the next. The buttons perform the same actions. Back returns to the overview and stops the showcase audio as the game normally does.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_HISTORIC_MOMENTS" Language="en_US">
+      <Text>This screen is one chronological tree. Escape closes it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_HISTORIC_MOMENTS_LAYOUT" Language="en_US">
+      <Text>Top-level rows are eras. Each era contains Major Moments and Minor Moments groups when present. Their children are read-only moment entries containing the recorded title, description, date, era score, and other live details.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAP_PINS" Language="en_US">
+      <Text>This is a list of every map pin visible to you, including pins owned by other players when shared visibility permits.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAP_PINS_ACTIONS" Language="en_US">
+      <Text>Enter moves the navigation cursor to the focused pin. On your own pin, Control plus Enter opens the editor and Delete opens a Yes or No deletion confirmation. Pins owned by other players cannot be edited or deleted.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAP_PINS_BINDINGS" Language="en_US">
+      <Text>Escape closes the pin list. In the deletion dialog, Enter activates the focused answer and Escape selects No.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAP_PIN_EDITOR" Language="en_US">
+      <Text>The editor creates or changes one map pin. Which fields and buttons appear depends on whether the pin is new, existing, local, or shared.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAP_PIN_EDITOR_LAYOUT" Language="en_US">
+      <Text>Controls appear in order: Name edit box when editable, Icon dropdown, multiplayer Visibility dropdown when available, Confirm, Share to Chat when available, and Delete for an existing local pin.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAP_PIN_EDITOR_BINDINGS" Language="en_US">
+      <Text>Enter commits an edit field or activates the focused control. Control plus Enter confirms the complete pin from anywhere in the editor. Escape cancels and closes. Dropdowns use Enter to open, arrows to choose, Enter to commit, and Escape to close without changing.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NOTIFICATIONS" Language="en_US">
+      <Text>The Notifications tab is a tree. Single notifications appear directly; multiple notifications of one type appear inside an expandable group.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NOTIFICATIONS_ACTIONS" Language="en_US">
+      <Text>Enter or Space activates a notification using its normal game action. Delete dismisses the focused notification when allowed. Delete on a group dismisses every dismissible notification in that group. Tooltips state type, dismissibility, expiration turn, and location details when known.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MESSAGES" Language="en_US">
+      <Text>The Messages tab is a history list followed by a type filter dropdown and Copy Message Buffer. Message rows may be read-only text or actionable map-pin links; Enter on an actionable message jumps to its location.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MESSAGES_ACTIONS" Language="en_US">
+      <Text>Change the filter to show the desired message types. Copy Message Buffer copies the currently filtered accessible history to the clipboard. Escape closes the notification center.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_PRODUCTION_OVERVIEW" Language="en_US">
+      <Text>This panel controls the selected city's production and purchases. Its tabs are Production, Purchase with Gold, Purchase with Faith when available, and Queue.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_PRODUCTION_LAYOUT" Language="en_US">
+      <Text>Each page is a tree of categories and items. Expanding an item exposes bonuses and unlocks when available. After the tab control are the city list and Sort By dropdown.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_PRODUCTION_BINDINGS" Language="en_US">
+      <Text>Enter on an item produces or purchases it. On Production items, Control plus Enter appends it to the queue. Shift plus Enter opens its Civilopedia article. Alt plus Left and Alt plus Right select the previous or next city. Focusing on a city row selects that city and refreshes the panel.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION" Language="en_US">
+      <Text>This screen alternates between a religion-overview tree and a founding or enhancement setup panel. Only the view appropriate to the current religion state is visible.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_OVERVIEW" Language="en_US">
+      <Text>The overview begins with your religion when founded, followed by other known religions. Each religion row contains Beliefs, Cities, and Religious Units sections with live follower, pressure, majority, unit, and belief details.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_CITY_FILTERS" Language="en_US">
+      <Text>Inside Cities are Following This Religion and Religion Present filter branches, containing the cities that match each filter. City rows can expand into the complete religion breakdown for that city.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_OPEN" Language="en_US">
+      <Text>Religion Setup appears after you earn the right to found a religion or add beliefs to an existing religion. Select My Religion in the overview tree to reach it. Pantheons are chosen in their separate chooser, not on this screen.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_IDENTITY" Language="en_US">
+      <Text>When founding, the setup panel is visible. Its first control is the parameters list. It contains a religion icon dropdown. Open it, choose an available religion symbol, and confirm the choice. </Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_BELIEFS" Language="en_US">
+      <Text>After the icon are the belief rows. Your existing pantheon and any beliefs already in the religion are read-only review rows. Each empty required row must be filled. The first new belief when founding is specifically a Follower belief; any later rows offer only belief classes that the religion has not already used.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_PICKER" Language="en_US">
+      <Text>Activate an empty or filled belief row to open its belief-category tree. Expand a category, read each belief's effect in its tooltip, and activate the belief you want; the picker closes and the setup row reports the selection. Press Delete on a pending belief row to clear it, or Escape in the picker to return without changing that row.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_ENHANCE" Language="en_US">
+      <Text>When enhancing an existing religion, its icon, name, pantheon, and equipped beliefs remain read-only. Work only with the new empty belief rows. A belief class already represented by an equipped or pending belief is unavailable in the other pickers, so each new selection must use an eligible class.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_CONFIRM" Language="en_US">
+      <Text>After the parameters list is a name edit box. If the chosen religion icon permits a custom name, this field becomes editable. The last control is Found Religion or Confirm Changes. It remains disabled until the required icon, valid custom name, and every new belief are complete; its tooltip lists anything still missing. Activate it to open the summary dialog, review the icon, name, and beliefs, then choose Yes to commit them or No to return without founding or enhancing.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_REPORTS" Language="en_US">
+      <Text>The Reports screen has Yields, Resources, City Status, and, when supported, Gossip tabs. Yields and Resources are trees; City Status and Gossip are lists.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_REPORTS_YIELDS" Language="en_US">
+      <Text>Yields contains City Income and Empire Economy. City branches contain district, building, Great Work, trade-route, wonder, and other yield breakdowns. Empire Economy contains yield totals and detailed sources; under Gold, deal income and costs expand into individual gold deals.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_REPORTS_RESOURCES" Language="en_US">
+      <Text>Resources contains one expandable row per resource. It exposes stockpile or total, accumulation and extraction sources, city-state sources, consumption, diplomatic-deal imports and exports, and additional ruleset-specific details.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_REPORTS_CITY_STATUS" Language="en_US">
+      <Text>City Status is a list of city buttons containing population, growth, amenities, defense, damage, and expansion-specific loyalty and governor status. Enter selects an owned city or looks at a known foreign city and closes Reports.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_REPORTS_GOSSIP" Language="en_US">
+      <Text>Gossip contains a flat chronological list of every matching visible gossip entry, followed by Player and Type filter dropdowns. Change either dropdown to rebuild the list. Escape closes Reports.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RESEARCH" Language="en_US">
+      <Text>The first tree contains current and queued technologies. The second tree contains available technologies. Each technology expands into its unlocks. The final button opens the full Technology Tree.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RESEARCH_ACTIONS" Language="en_US">
+      <Text>Enter on an available technology makes it current. Current and queued rows are read-only and inspectable; this chooser deliberately does not add a queue shortcut.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RESEARCH_BINDINGS" Language="en_US">
+      <Text>Shift plus Enter on a revealed technology opens its Civilopedia article. Use Tab to move from the queue tree to available technologies and then to Open Technology Tree.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_LAYOUT" Language="en_US">
+      <Text>Controls appear in this order: the current and queued technologies list when nonempty, a filter list, the active technology view, a grid-only unlocks list, and the Switch View button.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_VIEWS" Language="en_US">
+      <Text>The default Grid View arranges eras as columns, prerequisite tiers from left to right, and technologies vertically within each tier. Switch to Tree View for an era, tier, technology hierarchy. Switching views keeps the same technology focused when possible.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_TREE_VIEW" Language="en_US">
+      <Text>In Tree View, expand an era to expose its already-expanded tiers, then its technologies. Technology children contain Unlocks, Prerequisites, Leads To, and the calculated path to that technology. Activate a reference to jump to it. Backspace returns through prior reference jumps.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_ACTIONS" Language="en_US">
+      <Text>Enter on a researchable technology makes it current. Control plus Enter appends it to the research queue. Shift plus Enter opens its Civilopedia article. The same three bindings work on grid cells and filter results. Enter on a queue row jumps to that technology; Shift plus Enter opens its article.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_FILTERS" Language="en_US">
+      <Text>Enter on a filter opens a temporary results list. In results, Enter closes the list and jumps to the technology, Control plus Enter queues it, Shift plus Enter opens the Civilopedia, and Escape closes results and clears the filter. Control plus F searches the game's Technologies index from either main view.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_UNLOCKS" Language="en_US">
+      <Text>In Grid View, focusing a technology rebuilds the sibling Unlocks list for that technology. Tab reaches that list after the grid when it contains entries, then reaches Switch View.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW" Language="en_US">
+      <Text>The Trade Overview has My Routes, Routes to My Cities, and Available Routes tabs. Every page is a tree grouped by civilization, city-state, or other live route category.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_ACTIVE" Language="en_US">
+      <Text>My Routes states used and available route capacity. Route rows contain origin, destination, duration or turns, trading-post and yield information. Expand a route for separate origin and destination yield breakdowns.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_AVAILABLE" Language="en_US">
+      <Text>Routes to My Cities shows incoming traders from other civilizations. Available Routes shows traders and destinations that can be chosen. Some rows are Choose Route actions; Produce Trader rows are informational when no trader is available.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_ACTIONS" Language="en_US">
+      <Text>Enter on an active route selects its trader and may move the cursor to it. Enter on Choose Route selects that trader and opens route selection. Escape closes the overview.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_ROUTE" Language="en_US">
+      <Text>This chooser is a destination tree followed by a route-filter dropdown.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_ROUTE_LAYOUT" Language="en_US">
+      <Text>Destinations are grouped into Your Cities, Other Civilizations, and City-States. Each route row states destination and summary yields; expanding it exposes separate origin and destination yield details. The filter dropdown changes which route yields are emphasized or included.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_ROUTE_ACTIONS" Language="en_US">
+      <Text>Enter on a route opens a summary dialog with Confirm and Cancel. Confirm establishes the route; Cancel or Escape returns to the chooser. Escape on the chooser follows the game's normal close path.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_ORIGIN" Language="en_US">
+      <Text>This screen is a flat list of cities that can serve as the selected trader's origin.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_ORIGIN_ACTIONS" Language="en_US">
+      <Text>Each row states the city and relevant route capacity or trader information. Enter moves the trader's origin to that city through the normal game action and closes the chooser.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS" Language="en_US">
+      <Text>This screen has alternate Grid and Tree views followed by a Switch View button. It opens in Grid View.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS_VIEWS" Language="en_US">
+      <Text>Grid View uses one column per promotion tier and places alternative promotions vertically within that tier. Switching to Tree View keeps the same promotion focused when possible.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS_TREE" Language="en_US">
+      <Text>Tree View groups promotions by already-expanded tier. Expand a promotion to inspect Prerequisites and Leads To branches; activating a reference jumps to the related promotion.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS_ACTIONS" Language="en_US">
+      <Text>Enter or Space applies an available promotion through the game's normal promotion request. Locked promotions remain readable but do not activate. Use the Switch View button to change presentation.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_RANKINGS" Language="en_US">
+      <Text>World Rankings creates one tab and tree for every ranking page available in the current ruleset.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_RANKINGS_LAYOUT" Language="en_US">
+      <Text>Standard tabs can include Overall, Score, Science, Culture, Domination, and Religion. Expansions and mods can add Diplomatic Victory or other victory tabs. Only pages captured from the live game are shown.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_RANKINGS_CONTENT" Language="en_US">
+      <Text>Each tree presents the selected victory's current game summary, objectives, team or civilization rows, milestone progress, scores, known rival information, and advisor explanation. Expand teams and players for their detailed conditions. Escape closes the screen.</Text>
+    </Row>
+
+    <!-- Production queue -->
+    <Row Tag="LOC_CAI_TUTORIAL_PRODUCTION_QUEUE_TITLE" Language="en_US">
+      <Text>Production queue tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_PRODUCTION_QUEUE_LAYOUT" Language="en_US">
+      <Text>The queue is an ordered list. Current production is first when the city is already building something, followed by each queued item in the order the city will start it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_PRODUCTION_QUEUE_ADD" Language="en_US">
+      <Text>To add something, return to the Production tab and press Control plus Enter on a production choice. Enter alone replaces or starts normal production instead of appending to the queue.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_PRODUCTION_QUEUE_BINDINGS" Language="en_US">
+      <Text>In the queue, press Shift plus Up or Shift plus Down to move the focused item, or Delete to remove it. The current item can also be removed, which makes the next queued item current.</Text>
+    </Row>
+
+    <!-- World Congress action stages -->
+    <Row Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_TITLE" Language="en_US">
+      <Text>Voting on resolutions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_LAYOUT" Language="en_US">
+      <Text>The ballot begins with your remaining Diplomatic Favor, followed by one expandable row for each resolution. Read a row's description and previous-session information, then expand it. Its children are the Outcome dropdown, Add Vote, Remove Vote, and Target dropdown.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_OUTCOME" Language="en_US">
+      <Text>Open the Outcome dropdown and choose option A or option B after reading both effects. Committing either option automatically gives that resolution its free first vote. If you switch outcomes, the vote moves to the new outcome instead of charging for an extra vote.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_TARGET" Language="en_US">
+      <Text>Open the Target dropdown and choose the civilization, leader, unit class, district, resource, or other subject that the selected effect should apply to. You may choose the target before or after the outcome, and it remains selected if you change between option A and option B.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_FAVOR" Language="en_US">
+      <Text>After choosing an outcome, activate Add Vote to strengthen it beyond the free vote. Each additional vote spends Diplomatic Favor and becomes progressively more expensive. Remove Vote refunds the removable vote's Favor. The button tooltips report the current vote count and cost, while the first item on the ballot reports your remaining Favor.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_COMPLETE" Language="en_US">
+      <Text>Repeat the outcome and target choices for every resolution; extra paid votes are optional. Next remains disabled while any resolution lacks either choice. Focus Next to hear a list naming every incomplete resolution and whether its outcome or target is missing.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_SUBMIT" Language="en_US">
+      <Text>Activate Next when the ballot is complete. A confirmation dialog lists each selected result, target, vote count, and cost. Choose Previous to return to the editable ballot, or Submit to commit all votes and end your Congress turn. After submission, the waiting screen reports which members have submitted; processed results later appear in the World Congress review.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_PROPOSAL_TITLE" Language="en_US">
+      <Text>Voting on a special-session proposal</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_PROPOSAL_LAYOUT" Language="en_US">
+      <Text>The ballot begins with remaining Diplomatic Favor and then an expandable row for each proposal. The row tooltip describes the emergency, target, participants, rewards, and outcome. Expand it to reach Support, Oppose, and any turns-remaining information.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_PROPOSAL_DIRECTION" Language="en_US">
+      <Text>Activate Support or Oppose to cast an explicit first vote in that direction. To reverse direction, use the opposite control: while votes remain it is announced as Remove Vote. Remove the current votes to zero, then activate the now-available Support or Oppose control to begin voting the other way.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_PROPOSAL_FAVOR" Language="en_US">
+      <Text>Activate the selected direction again to add more votes. Additional votes spend progressively more Diplomatic Favor; the opposite control removes votes and refunds their removable cost. Tooltips report the active direction, current vote count, and cost, and the ballot's first item reports remaining Favor.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_PROPOSAL_COMPLETE" Language="en_US">
+      <Text>Unlike an ordinary resolution, every actionable proposal requires you to add a vote explicitly. Repeat this for all proposal rows. Next remains disabled until each required proposal has at least one support or oppose vote; focus Next to hear which proposal is incomplete.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_TITLE" Language="en_US">
+      <Text>Submitting a special-session proposal</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_LAYOUT" Language="en_US">
+      <Text>Available Proposals is a page of the World Congress review screen. It lists emergencies you are currently eligible to propose for a future special session. This page selects what to propose; it is not the later support-or-oppose vote.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_DETAILS" Language="en_US">
+      <Text>Move through the proposal list and read each checkbox row's tooltip. It includes the proposal description, crisis details, rewards, and any live restriction or cost reported by the game. Category names are spoken before the proposal title when the page groups several emergency types.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_SELECT" Language="en_US">
+      <Text>Activate a proposal checkbox to select or clear it. Continue through the list and confirm the checked state of the proposal you intend to send. Disabled or unavailable proposals remain readable but cannot be selected.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_SUBMIT" Language="en_US">
+      <Text>After the proposal list are the live submission and Pass buttons. Activate the submission button to send the checked proposal. Activate Pass only when you want to submit no proposal. If the special session begins, its separate ballot will later require every member to vote Support or Oppose.</Text>
+    </Row>
+  </LocalizedText>
+</GameData>

@@ -11,6 +11,7 @@ MessageBuffer.__index = MessageBuffer
 
 local VALID_CATEGORIES = {
     notification = true,
+    tutorial = true,
     reveal = true,
     combat = true,
     movement = true,
@@ -97,6 +98,7 @@ end
 local FILTER_CYCLE = {
     "all",
     "notification",
+    "tutorial",
     "reveal",
     "combat",
     "gossip",

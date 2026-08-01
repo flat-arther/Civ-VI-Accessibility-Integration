@@ -1,0 +1,651 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameInfo>
+  <CivilopediaSections>
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" Name="LOC_CAI_PEDIA_ACCESSIBILITY_SECTION_NAME" Icon="ICON_CIVILOPEDIA_CONCEPTS" SortIndex="-10" />
+  </CivilopediaSections>
+  <CivilopediaPageGroups>
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageGroupId="CAI_SCREEN_TUTORIALS" Name="LOC_CAI_PEDIA_SCREEN_TUTORIALS_GROUP_NAME" Tooltip="" VisibleIfEmpty="false" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageGroupId="CAI_GAMEPLAY" Name="LOC_CAI_PEDIA_GAMEPLAY_GROUP_NAME" Tooltip="" VisibleIfEmpty="false" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageGroupId="CAI_UI_WIDGETS" Name="LOC_CAI_PEDIA_UI_WIDGETS_GROUP_NAME" Tooltip="" VisibleIfEmpty="false" SortIndex="30" />
+  </CivilopediaPageGroups>
+  <CivilopediaPageLayouts>
+    <Row PageLayoutId="CAIKeyBindings" ScriptTemplate="Simple" />
+    <Row PageLayoutId="CAIGameplayNavigationCursor" ScriptTemplate="Simple" />
+    <Row PageLayoutId="CAIGameplaySurveyor" ScriptTemplate="Simple" />
+    <Row PageLayoutId="CAIGameplayWorldScanner" ScriptTemplate="Simple" />
+    <Row PageLayoutId="CAIGameplayLenses" ScriptTemplate="Simple" />
+    <Row PageLayoutId="CAIGameplayMapTacs" ScriptTemplate="Simple" />
+    <Row PageLayoutId="CAIGameplayEmpireInformation" ScriptTemplate="Simple" />
+    <Row PageLayoutId="CAIGameplayEndingTurn" ScriptTemplate="Simple" />
+    <Row PageLayoutId="CAIGameplayNotificationsHistory" ScriptTemplate="Simple" />
+    <Row PageLayoutId="CAIGameplayWorldActions" ScriptTemplate="Simple" />
+    <Row PageLayoutId="CAIGameplaySelection" ScriptTemplate="Simple" />
+    <Row PageLayoutId="CAIGameplayUserInterfaces" ScriptTemplate="Simple" />
+    <Row PageLayoutId="CAIWidgetLeaf" ScriptTemplate="Simple" />
+    <Row PageLayoutId="CAIWidgetValue" ScriptTemplate="Simple" />
+    <Row PageLayoutId="CAIWidgetContainer" ScriptTemplate="Simple" />
+  </CivilopediaPageLayouts>
+  <CivilopediaPageLayoutChapters>
+    <Row PageLayoutId="CAIKeyBindings" ChapterId="USING" SortIndex="10" />
+    <Row PageLayoutId="CAIKeyBindings" ChapterId="REMAPPING" SortIndex="20" />
+    <Row PageLayoutId="CAIKeyBindings" ChapterId="MESSAGE_BUFFER" SortIndex="30" />
+    <Row PageLayoutId="CAIKeyBindings" ChapterId="NAVIGATION_CURSOR" SortIndex="40" />
+    <Row PageLayoutId="CAIKeyBindings" ChapterId="WORLD_SCANNER" SortIndex="50" />
+    <Row PageLayoutId="CAIKeyBindings" ChapterId="SURVEYOR" SortIndex="60" />
+    <Row PageLayoutId="CAIKeyBindings" ChapterId="INFORMATION" SortIndex="70" />
+    <Row PageLayoutId="CAIKeyBindings" ChapterId="CITY" SortIndex="80" />
+    <Row PageLayoutId="CAIKeyBindings" ChapterId="UI" SortIndex="90" />
+    <Row PageLayoutId="CAIKeyBindings" ChapterId="UNIT" SortIndex="100" />
+    <Row PageLayoutId="CAIKeyBindings" ChapterId="GLOBAL" SortIndex="110" />
+    <Row PageLayoutId="CAIKeyBindings" ChapterId="ONLINE" SortIndex="120" />
+    <Row PageLayoutId="CAIKeyBindings" ChapterId="LENSES" SortIndex="130" />
+    <Row PageLayoutId="CAIGameplayNavigationCursor" ChapterId="OVERVIEW" SortIndex="10" />
+    <Row PageLayoutId="CAIGameplayNavigationCursor" ChapterId="MOVING" SortIndex="20" />
+    <Row PageLayoutId="CAIGameplayNavigationCursor" ChapterId="READING" SortIndex="30" />
+    <Row PageLayoutId="CAIGameplayNavigationCursor" ChapterId="BANNERS" SortIndex="40" />
+    <Row PageLayoutId="CAIGameplaySurveyor" ChapterId="OVERVIEW" SortIndex="10" />
+    <Row PageLayoutId="CAIGameplaySurveyor" ChapterId="BASIC" SortIndex="20" />
+    <Row PageLayoutId="CAIGameplaySurveyor" ChapterId="COUNTS" SortIndex="30" />
+    <Row PageLayoutId="CAIGameplaySurveyor" ChapterId="DETAILS" SortIndex="40" />
+    <Row PageLayoutId="CAIGameplayWorldScanner" ChapterId="OVERVIEW" SortIndex="10" />
+    <Row PageLayoutId="CAIGameplayWorldScanner" ChapterId="NAVIGATION" SortIndex="20" />
+    <Row PageLayoutId="CAIGameplayWorldScanner" ChapterId="SEARCH" SortIndex="30" />
+    <Row PageLayoutId="CAIGameplayWorldScanner" ChapterId="MANAGEMENT" SortIndex="40" />
+    <Row PageLayoutId="CAIGameplayWorldScanner" ChapterId="CUSTOM" SortIndex="50" />
+    <Row PageLayoutId="CAIGameplayLenses" ChapterId="OVERVIEW" SortIndex="10" />
+    <Row PageLayoutId="CAIGameplayLenses" ChapterId="RELIGION" SortIndex="20" />
+    <Row PageLayoutId="CAIGameplayLenses" ChapterId="CONTINENT" SortIndex="30" />
+    <Row PageLayoutId="CAIGameplayLenses" ChapterId="APPEAL" SortIndex="40" />
+    <Row PageLayoutId="CAIGameplayLenses" ChapterId="SETTLER" SortIndex="50" />
+    <Row PageLayoutId="CAIGameplayLenses" ChapterId="GOVERNMENT" SortIndex="60" />
+    <Row PageLayoutId="CAIGameplayLenses" ChapterId="POLITICAL" SortIndex="70" />
+    <Row PageLayoutId="CAIGameplayLenses" ChapterId="TOURISM" SortIndex="80" />
+    <Row PageLayoutId="CAIGameplayLenses" ChapterId="EMPIRE" SortIndex="90" />
+    <Row PageLayoutId="CAIGameplayLenses" ChapterId="LOYALTY" SortIndex="100" />
+    <Row PageLayoutId="CAIGameplayLenses" ChapterId="POWER" SortIndex="110" />
+    <Row PageLayoutId="CAIGameplayLenses" ChapterId="PLAGUE" SortIndex="120" />
+    <Row PageLayoutId="CAIGameplayLenses" ChapterId="SCANNER" SortIndex="130" />
+    <Row PageLayoutId="CAIGameplayMapTacs" ChapterId="OVERVIEW" SortIndex="10" />
+    <Row PageLayoutId="CAIGameplayMapTacs" ChapterId="BOOKMARKS" SortIndex="20" />
+    <Row PageLayoutId="CAIGameplayMapTacs" ChapterId="KEYS" SortIndex="30" />
+    <Row PageLayoutId="CAIGameplayMapTacs" ChapterId="SHARING" SortIndex="40" />
+    <Row PageLayoutId="CAIGameplayEmpireInformation" ChapterId="OVERVIEW" SortIndex="10" />
+    <Row PageLayoutId="CAIGameplayEmpireInformation" ChapterId="PROGRESS" SortIndex="20" />
+    <Row PageLayoutId="CAIGameplayEmpireInformation" ChapterId="YIELDS" SortIndex="30" />
+    <Row PageLayoutId="CAIGameplayEmpireInformation" ChapterId="DIPLOMACY" SortIndex="40" />
+    <Row PageLayoutId="CAIGameplayEmpireInformation" ChapterId="RULESETS" SortIndex="50" />
+    <Row PageLayoutId="CAIGameplayEndingTurn" ChapterId="OVERVIEW" SortIndex="10" />
+    <Row PageLayoutId="CAIGameplayEndingTurn" ChapterId="ACTIONS" SortIndex="20" />
+    <Row PageLayoutId="CAIGameplayEndingTurn" ChapterId="LIST" SortIndex="30" />
+    <Row PageLayoutId="CAIGameplayNotificationsHistory" ChapterId="OVERVIEW" SortIndex="10" />
+    <Row PageLayoutId="CAIGameplayNotificationsHistory" ChapterId="CENTER" SortIndex="20" />
+    <Row PageLayoutId="CAIGameplayNotificationsHistory" ChapterId="REVEALS" SortIndex="30" />
+    <Row PageLayoutId="CAIGameplayNotificationsHistory" ChapterId="BUFFER" SortIndex="40" />
+    <Row PageLayoutId="CAIGameplayNotificationsHistory" ChapterId="MOVEMENT" SortIndex="50" />
+    <Row PageLayoutId="CAIGameplayWorldActions" ChapterId="OVERVIEW" SortIndex="10" />
+    <Row PageLayoutId="CAIGameplayWorldActions" ChapterId="SAVES" SortIndex="20" />
+    <Row PageLayoutId="CAIGameplayWorldActions" ChapterId="MAP" SortIndex="30" />
+    <Row PageLayoutId="CAIGameplayWorldActions" ChapterId="TURN" SortIndex="40" />
+    <Row PageLayoutId="CAIGameplaySelection" ChapterId="OVERVIEW" SortIndex="10" />
+    <Row PageLayoutId="CAIGameplaySelection" ChapterId="MOVING" SortIndex="20" />
+    <Row PageLayoutId="CAIGameplaySelection" ChapterId="SUMMARY" SortIndex="30" />
+    <Row PageLayoutId="CAIGameplaySelection" ChapterId="CITY" SortIndex="40" />
+    <Row PageLayoutId="CAIGameplaySelection" ChapterId="UNIT" SortIndex="50" />
+    <Row PageLayoutId="CAIGameplayUserInterfaces" ChapterId="OVERVIEW" SortIndex="10" />
+    <Row PageLayoutId="CAIGameplayUserInterfaces" ChapterId="RESEARCH" SortIndex="20" />
+    <Row PageLayoutId="CAIGameplayUserInterfaces" ChapterId="EMPIRE" SortIndex="30" />
+    <Row PageLayoutId="CAIGameplayUserInterfaces" ChapterId="WORLD" SortIndex="40" />
+    <Row PageLayoutId="CAIGameplayUserInterfaces" ChapterId="MAP" SortIndex="50" />
+    <Row PageLayoutId="CAIGameplayUserInterfaces" ChapterId="AVAILABILITY" SortIndex="60" />
+    <Row PageLayoutId="CAIWidgetLeaf" ChapterId="BUTTON" SortIndex="10" />
+    <Row PageLayoutId="CAIWidgetLeaf" ChapterId="STATICTEXT" SortIndex="20" />
+    <Row PageLayoutId="CAIWidgetLeaf" ChapterId="TAB" SortIndex="30" />
+    <Row PageLayoutId="CAIWidgetValue" ChapterId="CHECKBOX" SortIndex="10" />
+    <Row PageLayoutId="CAIWidgetValue" ChapterId="EDITBOX" SortIndex="20" />
+    <Row PageLayoutId="CAIWidgetValue" ChapterId="SLIDER" SortIndex="30" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="DIALOG" SortIndex="10" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="DROPDOWN" SortIndex="20" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="GAMEVIEW" SortIndex="30" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="INTERFACEMODE" SortIndex="40" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="LIST" SortIndex="50" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="PANEL" SortIndex="60" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="SEARCHPANEL" SortIndex="70" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="SUBMENU" SortIndex="80" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="TABCONTROL" SortIndex="90" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="TABPAGE" SortIndex="100" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="TABLE" SortIndex="110" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="TREE" SortIndex="120" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="TREEITEM" SortIndex="130" />
+  </CivilopediaPageLayoutChapters>
+  <CivilopediaPages>
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_MAIN_MENU_TITLE" Tooltip="" SortIndex="0" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="SEARCH_TYPEAHEAD" PageLayoutId="Simple" Name="LOC_CAI_PEDIA_SEARCH_TITLE" Tooltip="" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" PageLayoutId="CAIKeyBindings" Name="LOC_CAI_PEDIA_KEY_BINDINGS_TITLE" Tooltip="" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GAME_SUMMARIES" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_GAME_SUMMARIES_TITLE" Tooltip="" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GAME_SUMMARY_DETAILS" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_GAME_SUMMARY_DETAILS_TITLE" Tooltip="" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MODS_SCREEN" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_MODS_SCREEN_TITLE" Tooltip="" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CITY_OVERVIEW" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_CITY_OVERVIEW_TITLE" Tooltip="" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CITY_STATES" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_CITY_STATES_TITLE" Tooltip="" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_CHOOSER" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_TITLE" Tooltip="" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_CIVICS_TREE_TITLE" Tooltip="" SortIndex="70" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVILOPEDIA" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_CIVILOPEDIA_TITLE" Tooltip="" SortIndex="80" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CLIMATE_SCREEN" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_CLIMATE_SCREEN_TITLE" Tooltip="" SortIndex="90" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_DIPLOMACY_ACTION_VIEW" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_VIEW_TITLE" Tooltip="" SortIndex="100" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_DIPLOMACY_DEAL_VIEW" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_DIPLOMACY_DEAL_VIEW_TITLE" Tooltip="" SortIndex="110" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_END_GAME" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_END_GAME_TITLE" Tooltip="" SortIndex="120" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ERA_PROGRESS" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_ERA_PROGRESS_TITLE" Tooltip="" SortIndex="130" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ESPIONAGE_CHOOSER" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_TITLE" Tooltip="" SortIndex="140" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ESPIONAGE_OVERVIEW" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_ESPIONAGE_OVERVIEW_TITLE" Tooltip="" SortIndex="150" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GLOBAL_RESOURCES" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_TITLE" Tooltip="" SortIndex="160" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNMENT_SCREEN" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_GOVERNMENT_SCREEN_TITLE" Tooltip="" SortIndex="170" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNOR_PANEL" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_GOVERNOR_PANEL_TITLE" Tooltip="" SortIndex="180" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNOR_ASSIGNMENT" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_GOVERNOR_ASSIGNMENT_TITLE" Tooltip="" SortIndex="190" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_PEOPLE" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_GREAT_PEOPLE_TITLE" Tooltip="" SortIndex="200" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_WORKS_OVERVIEW" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_GREAT_WORKS_OVERVIEW_TITLE" Tooltip="" SortIndex="210" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_WORK_SHOWCASE" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_GREAT_WORK_SHOWCASE_TITLE" Tooltip="" SortIndex="220" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_HISTORIC_MOMENTS" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_HISTORIC_MOMENTS_TITLE" Tooltip="" SortIndex="230" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MAP_PIN_LIST" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_MAP_PIN_LIST_TITLE" Tooltip="" SortIndex="240" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MAP_PIN_EDITOR" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_MAP_PIN_EDITOR_TITLE" Tooltip="" SortIndex="250" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_NOTIFICATION_CENTER" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_NOTIFICATION_CENTER_TITLE" Tooltip="" SortIndex="260" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_PRODUCTION_PANEL" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_PRODUCTION_PANEL_TITLE" Tooltip="" SortIndex="270" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_RELIGION_SCREEN" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_RELIGION_SCREEN_TITLE" Tooltip="" SortIndex="280" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_REPORTS_SCREEN" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_REPORTS_SCREEN_TITLE" Tooltip="" SortIndex="290" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_RESEARCH_CHOOSER" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_RESEARCH_CHOOSER_TITLE" Tooltip="" SortIndex="300" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_TECH_TREE_TITLE" Tooltip="" SortIndex="310" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_OVERVIEW" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_TITLE" Tooltip="" SortIndex="320" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_ROUTE_CHOOSER" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_TRADE_ROUTE_CHOOSER_TITLE" Tooltip="" SortIndex="330" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_ORIGIN_CHOOSER" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_TRADE_ORIGIN_CHOOSER_TITLE" Tooltip="" SortIndex="340" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_UNIT_PROMOTIONS" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS_TITLE" Tooltip="" SortIndex="350" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_RANKINGS" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_WORLD_RANKINGS_TITLE" Tooltip="" SortIndex="360" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_PRODUCTION_QUEUE" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_PRODUCTION_QUEUE_TITLE" Tooltip="" SortIndex="370" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_RESOLUTION_VOTE" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_WC_RESOLUTION_TITLE" Tooltip="" SortIndex="380" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_PROPOSAL_VOTE" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_WC_PROPOSAL_TITLE" Tooltip="" SortIndex="390" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_SPECIAL_SESSION_PROPOSAL" PageGroupId="CAI_SCREEN_TUTORIALS" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_WC_SPECIAL_TITLE" Tooltip="" SortIndex="400" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NAVIGATION_CURSOR" PageGroupId="CAI_GAMEPLAY" PageLayoutId="CAIGameplayNavigationCursor" Name="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_TITLE" Tooltip="" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SURVEYOR" PageGroupId="CAI_GAMEPLAY" PageLayoutId="CAIGameplaySurveyor" Name="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_TITLE" Tooltip="" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_SCANNER" PageGroupId="CAI_GAMEPLAY" PageLayoutId="CAIGameplayWorldScanner" Name="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_TITLE" Tooltip="" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" PageGroupId="CAI_GAMEPLAY" PageLayoutId="CAIGameplayLenses" Name="LOC_CAI_PEDIA_GAMEPLAY_LENSES_TITLE" Tooltip="" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_MAP_TACS" PageGroupId="CAI_GAMEPLAY" PageLayoutId="CAIGameplayMapTacs" Name="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_TITLE" Tooltip="" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_EMPIRE_INFORMATION" PageGroupId="CAI_GAMEPLAY" PageLayoutId="CAIGameplayEmpireInformation" Name="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_TITLE" Tooltip="" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_ENDING_TURN" PageGroupId="CAI_GAMEPLAY" PageLayoutId="CAIGameplayEndingTurn" Name="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_TITLE" Tooltip="" SortIndex="70" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NOTIFICATIONS_HISTORY" PageGroupId="CAI_GAMEPLAY" PageLayoutId="CAIGameplayNotificationsHistory" Name="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_TITLE" Tooltip="" SortIndex="80" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_ACTIONS" PageGroupId="CAI_GAMEPLAY" PageLayoutId="CAIGameplayWorldActions" Name="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_TITLE" Tooltip="" SortIndex="90" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SELECTION" PageGroupId="CAI_GAMEPLAY" PageLayoutId="CAIGameplaySelection" Name="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_TITLE" Tooltip="" SortIndex="100" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_USER_INTERFACES" PageGroupId="CAI_GAMEPLAY" PageLayoutId="CAIGameplayUserInterfaces" Name="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_TITLE" Tooltip="" SortIndex="110" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_LEAF_WIDGETS" PageGroupId="CAI_UI_WIDGETS" PageLayoutId="CAIWidgetLeaf" Name="LOC_CAI_PEDIA_WIDGET_FAMILY_LEAF_TITLE" Tooltip="" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_VALUE_WIDGETS" PageGroupId="CAI_UI_WIDGETS" PageLayoutId="CAIWidgetValue" Name="LOC_CAI_PEDIA_WIDGET_FAMILY_VALUE_TITLE" Tooltip="" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" PageGroupId="CAI_UI_WIDGETS" PageLayoutId="CAIWidgetContainer" Name="LOC_CAI_PEDIA_WIDGET_FAMILY_CONTAINER_TITLE" Tooltip="" SortIndex="30" />
+  </CivilopediaPages>
+  <CivilopediaPageChapterHeaders>
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="USING" Header="LOC_CAI_PEDIA_KEY_BINDINGS_USING_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="REMAPPING" Header="LOC_CAI_PEDIA_KEY_BINDINGS_REMAPPING_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="MESSAGE_BUFFER" Header="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_MESSAGE_BUFFER_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="NAVIGATION_CURSOR" Header="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_NAVIGATION_CURSOR_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="WORLD_SCANNER" Header="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_WORLD_SCANNER_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="SURVEYOR" Header="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_SURVEYOR_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="INFORMATION" Header="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="CITY" Header="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_CITY_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="UI" Header="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="UNIT" Header="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UNIT_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="GLOBAL" Header="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_GLOBAL_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="ONLINE" Header="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_ONLINE_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="LENSES" Header="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_LENSES_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NAVIGATION_CURSOR" ChapterId="OVERVIEW" Header="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_OVERVIEW_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NAVIGATION_CURSOR" ChapterId="MOVING" Header="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_MOVING_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NAVIGATION_CURSOR" ChapterId="READING" Header="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_READING_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NAVIGATION_CURSOR" ChapterId="BANNERS" Header="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_BANNERS_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SURVEYOR" ChapterId="OVERVIEW" Header="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_OVERVIEW_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SURVEYOR" ChapterId="BASIC" Header="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_BASIC_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SURVEYOR" ChapterId="COUNTS" Header="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_COUNTS_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SURVEYOR" ChapterId="DETAILS" Header="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_DETAILS_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_SCANNER" ChapterId="OVERVIEW" Header="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_OVERVIEW_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_SCANNER" ChapterId="NAVIGATION" Header="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_NAVIGATION_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_SCANNER" ChapterId="SEARCH" Header="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_SEARCH_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_SCANNER" ChapterId="MANAGEMENT" Header="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_MANAGEMENT_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_SCANNER" ChapterId="CUSTOM" Header="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_CUSTOM_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="OVERVIEW" Header="LOC_CAI_PEDIA_GAMEPLAY_LENSES_OVERVIEW_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="RELIGION" Header="LOC_CAI_PEDIA_GAMEPLAY_LENSES_RELIGION_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="CONTINENT" Header="LOC_CAI_PEDIA_GAMEPLAY_LENSES_CONTINENT_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="APPEAL" Header="LOC_CAI_PEDIA_GAMEPLAY_LENSES_APPEAL_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="SETTLER" Header="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SETTLER_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="GOVERNMENT" Header="LOC_CAI_PEDIA_GAMEPLAY_LENSES_GOVERNMENT_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="POLITICAL" Header="LOC_CAI_PEDIA_GAMEPLAY_LENSES_POLITICAL_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="TOURISM" Header="LOC_CAI_PEDIA_GAMEPLAY_LENSES_TOURISM_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="EMPIRE" Header="LOC_CAI_PEDIA_GAMEPLAY_LENSES_EMPIRE_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="LOYALTY" Header="LOC_CAI_PEDIA_GAMEPLAY_LENSES_LOYALTY_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="POWER" Header="LOC_CAI_PEDIA_GAMEPLAY_LENSES_POWER_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="PLAGUE" Header="LOC_CAI_PEDIA_GAMEPLAY_LENSES_PLAGUE_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="SCANNER" Header="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SCANNER_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_MAP_TACS" ChapterId="OVERVIEW" Header="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_OVERVIEW_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_MAP_TACS" ChapterId="BOOKMARKS" Header="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_BOOKMARKS_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_MAP_TACS" ChapterId="KEYS" Header="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_KEYS_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_MAP_TACS" ChapterId="SHARING" Header="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_SHARING_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_EMPIRE_INFORMATION" ChapterId="OVERVIEW" Header="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_OVERVIEW_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_EMPIRE_INFORMATION" ChapterId="PROGRESS" Header="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_PROGRESS_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_EMPIRE_INFORMATION" ChapterId="YIELDS" Header="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_YIELDS_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_EMPIRE_INFORMATION" ChapterId="DIPLOMACY" Header="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_DIPLOMACY_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_EMPIRE_INFORMATION" ChapterId="RULESETS" Header="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_RULESETS_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_ENDING_TURN" ChapterId="OVERVIEW" Header="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_OVERVIEW_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_ENDING_TURN" ChapterId="ACTIONS" Header="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_ACTIONS_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_ENDING_TURN" ChapterId="LIST" Header="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_LIST_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NOTIFICATIONS_HISTORY" ChapterId="OVERVIEW" Header="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_OVERVIEW_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NOTIFICATIONS_HISTORY" ChapterId="CENTER" Header="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_CENTER_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NOTIFICATIONS_HISTORY" ChapterId="REVEALS" Header="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NOTIFICATIONS_HISTORY" ChapterId="BUFFER" Header="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_BUFFER_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NOTIFICATIONS_HISTORY" ChapterId="MOVEMENT" Header="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_MOVEMENT_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_ACTIONS" ChapterId="OVERVIEW" Header="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_OVERVIEW_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_ACTIONS" ChapterId="SAVES" Header="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_SAVES_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_ACTIONS" ChapterId="MAP" Header="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_MAP_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_ACTIONS" ChapterId="TURN" Header="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_TURN_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SELECTION" ChapterId="OVERVIEW" Header="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_OVERVIEW_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SELECTION" ChapterId="MOVING" Header="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_MOVING_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SELECTION" ChapterId="SUMMARY" Header="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_SUMMARY_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SELECTION" ChapterId="CITY" Header="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_CITY_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SELECTION" ChapterId="UNIT" Header="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_UNIT_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_USER_INTERFACES" ChapterId="OVERVIEW" Header="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_OVERVIEW_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_USER_INTERFACES" ChapterId="RESEARCH" Header="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_RESEARCH_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_USER_INTERFACES" ChapterId="EMPIRE" Header="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_EMPIRE_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_USER_INTERFACES" ChapterId="WORLD" Header="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_WORLD_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_USER_INTERFACES" ChapterId="MAP" Header="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_MAP_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_USER_INTERFACES" ChapterId="AVAILABILITY" Header="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_AVAILABILITY_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_LEAF_WIDGETS" ChapterId="BUTTON" Header="LOC_CAI_PEDIA_WIDGET_BUTTON_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_LEAF_WIDGETS" ChapterId="STATICTEXT" Header="LOC_CAI_PEDIA_WIDGET_STATICTEXT_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_LEAF_WIDGETS" ChapterId="TAB" Header="LOC_CAI_PEDIA_WIDGET_TAB_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_VALUE_WIDGETS" ChapterId="CHECKBOX" Header="LOC_CAI_PEDIA_WIDGET_CHECKBOX_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_VALUE_WIDGETS" ChapterId="EDITBOX" Header="LOC_CAI_PEDIA_WIDGET_EDITBOX_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_VALUE_WIDGETS" ChapterId="SLIDER" Header="LOC_CAI_PEDIA_WIDGET_SLIDER_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="DIALOG" Header="LOC_CAI_PEDIA_WIDGET_DIALOG_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="DROPDOWN" Header="LOC_CAI_PEDIA_WIDGET_DROPDOWN_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="GAMEVIEW" Header="LOC_CAI_PEDIA_WIDGET_GAMEVIEW_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="INTERFACEMODE" Header="LOC_CAI_PEDIA_WIDGET_INTERFACEMODE_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="LIST" Header="LOC_CAI_PEDIA_WIDGET_LIST_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="PANEL" Header="LOC_CAI_PEDIA_WIDGET_PANEL_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="SEARCHPANEL" Header="LOC_CAI_PEDIA_WIDGET_SEARCHPANEL_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="SUBMENU" Header="LOC_CAI_PEDIA_WIDGET_SUBMENU_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TABCONTROL" Header="LOC_CAI_PEDIA_WIDGET_TABCONTROL_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TABPAGE" Header="LOC_CAI_PEDIA_WIDGET_TABPAGE_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TABLE" Header="LOC_CAI_PEDIA_WIDGET_TABLE_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TREE" Header="LOC_CAI_PEDIA_WIDGET_TREE_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TREEITEM" Header="LOC_CAI_PEDIA_WIDGET_TREEITEM_TITLE" />
+  </CivilopediaPageChapterHeaders>
+  <CivilopediaPageChapterParagraphs>
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAIN_MENU_INTERFACE" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAIN_MENU_NESTING" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAIN_MENU_FOCUS_SPEECH" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAIN_MENU_NAVIGATION" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAIN_MENU_ACTIVATION" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAIN_MENU_SEARCH" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAIN_MENU_TOOLTIPS" SortIndex="70" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAIN_MENU_HELP" SortIndex="80" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAIN_MENU_SETTINGS" SortIndex="90" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="SEARCH_TYPEAHEAD" ChapterId="CONTENT" Paragraph="LOC_CAI_PEDIA_SEARCH_TYPEAHEAD" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="SEARCH_TYPEAHEAD" ChapterId="CONTENT" Paragraph="LOC_CAI_PEDIA_SEARCH_CYCLING" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="SEARCH_TYPEAHEAD" ChapterId="CONTENT" Paragraph="LOC_CAI_PEDIA_SEARCH_RESULTS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="SEARCH_TYPEAHEAD" ChapterId="CONTENT" Paragraph="LOC_CAI_PEDIA_SEARCH_CLEARING" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="SEARCH_TYPEAHEAD" ChapterId="CONTENT" Paragraph="LOC_CAI_PEDIA_SEARCH_PANEL" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="SEARCH_TYPEAHEAD" ChapterId="CONTENT" Paragraph="LOC_CAI_PEDIA_SEARCH_QUERY" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="SEARCH_TYPEAHEAD" ChapterId="CONTENT" Paragraph="LOC_CAI_PEDIA_SEARCH_PANEL_KEYS" SortIndex="70" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="SEARCH_TYPEAHEAD" ChapterId="CONTENT" Paragraph="LOC_CAI_PEDIA_SEARCH_SETTINGS" SortIndex="80" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="USING" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_COMMON" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="USING" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_HELP" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="USING" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_TOOLTIPS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="USING" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_NAVIGATION" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="USING" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_ACTIVATION" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="USING" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CONTEXT" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="REMAPPING" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_REMAPPING_OPEN" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="REMAPPING" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_REMAPPING_CHANGE" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="REMAPPING" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_REMAPPING_CONFLICTS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="MESSAGE_BUFFER" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_MESSAGE_BUFFER" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="NAVIGATION_CURSOR" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_NAVIGATION_CURSOR_MOVEMENT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="NAVIGATION_CURSOR" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_NAVIGATION_CURSOR_ACTIONS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="NAVIGATION_CURSOR" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_NAVIGATION_CURSOR_BOOKMARKS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="WORLD_SCANNER" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_WORLD_SCANNER" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="SURVEYOR" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_SURVEYOR_BASIC" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="SURVEYOR" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_SURVEYOR_ADDITIONAL" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="INFORMATION" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_SELECTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="INFORMATION" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_EMPIRE" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="INFORMATION" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_PLOT" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="INFORMATION" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_BANNERS" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="CITY" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_CITY" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="UI" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_CORE" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="UI" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_RESEARCH" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="UI" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_WORLD" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="UI" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_MAP" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="UNIT" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UNIT_MOVEMENT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="UNIT" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UNIT_ACTIONS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="UNIT" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UNIT_OTHER" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="GLOBAL" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_GLOBAL_SELECTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="GLOBAL" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_GLOBAL_WORLD" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="ONLINE" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_ONLINE" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="LENSES" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_LENSES" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GAME_SUMMARIES" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GAME_SUMMARIES_LAYOUT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GAME_SUMMARIES" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GAME_SUMMARIES_OVERVIEW" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GAME_SUMMARIES" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GAME_SUMMARIES_HISTORY" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GAME_SUMMARIES" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TABS" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GAME_SUMMARY_DETAILS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GAME_SUMMARY_DETAILS_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GAME_SUMMARY_DETAILS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GAME_SUMMARY_DETAILS_REPORTS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GAME_SUMMARY_DETAILS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GAME_SUMMARY_DETAILS_GRAPHS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GAME_SUMMARY_DETAILS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TABS" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MODS_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MODS_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MODS_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MODS_INSTALLED" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MODS_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MODS_ROWS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MODS_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MODS_GROUPS" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MODS_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MODS_BULK" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MODS_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MODS_SUBSCRIPTIONS" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MODS_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TABS" SortIndex="70" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MODS_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MODS_BINDINGS" SortIndex="80" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CITY_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CITY_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CITY_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CITY_OVERVIEW_LAYOUT" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CITY_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CITY_OVERVIEW_ACTIONS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CITY_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TREE" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CITY_STATES" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CITY_STATES" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CITY_STATES" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CITY_STATES_SECTIONS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CITY_STATES" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CITY_STATES_ENVOYS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CITY_STATES" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CITY_STATES_ACTIONS" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CITY_STATES" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TREE" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_CHOOSER" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_ACTIONS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_BINDINGS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TREE" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_TREE_LAYOUT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_TREE_VIEWS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_TREE_TREE_VIEW" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GRID_NAVIGATION" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_TREE_ACTIONS" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_TREE_FILTERS" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_TREE_GOVERNMENT" SortIndex="70" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVILOPEDIA" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVILOPEDIA" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVILOPEDIA" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVILOPEDIA_LAYOUT" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVILOPEDIA" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVILOPEDIA_SEARCH" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVILOPEDIA" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVILOPEDIA_BINDINGS" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CLIMATE_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CLIMATE" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CLIMATE_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CLIMATE_OVERVIEW" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CLIMATE_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CLIMATE_CO2" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CLIMATE_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CLIMATE_HISTORY" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CLIMATE_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TABS" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_DIPLOMACY_ACTION_VIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_DIPLOMACY_ACTION_VIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_FLOW" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_DIPLOMACY_ACTION_VIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_CONVERSATION" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_DIPLOMACY_ACTION_VIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_NAVIGATION" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_DIPLOMACY_DEAL_VIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_DEAL_LAYOUT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_DIPLOMACY_DEAL_VIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_DEAL_EDITING" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_DIPLOMACY_DEAL_VIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_DEAL_BINDINGS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_DIPLOMACY_DEAL_VIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_DEAL_ACTIONS" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_DIPLOMACY_DEAL_VIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_DEAL_NAVIGATION" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_END_GAME" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_END_GAME" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_END_GAME" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_END_GAME_RESULTS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_END_GAME" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_END_GAME_REPLAY" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_END_GAME" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_END_GAME_CHAT_ACTIONS" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_END_GAME" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TABS" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ERA_PROGRESS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_ERA_PROGRESS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ERA_PROGRESS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_ERA_PROGRESS_LAYOUT" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ERA_PROGRESS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TREE" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ESPIONAGE_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_MODES" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ESPIONAGE_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_DESTINATIONS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ESPIONAGE_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_PREVIEWS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ESPIONAGE_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_PLACEMENT" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ESPIONAGE_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_MISSIONS" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ESPIONAGE_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_MISSION_ACTIONS" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ESPIONAGE_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_CLOSE" SortIndex="70" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ESPIONAGE_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TREE" SortIndex="80" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ESPIONAGE_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_LIST" SortIndex="90" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ESPIONAGE_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_ESPIONAGE_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ESPIONAGE_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_ESPIONAGE_OVERVIEW_OPERATIVES" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ESPIONAGE_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_ESPIONAGE_OVERVIEW_BINDINGS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_ESPIONAGE_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TABS" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GLOBAL_RESOURCES" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GLOBAL_RESOURCES" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_LAYOUT" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GLOBAL_RESOURCES" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_ACTIONS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GLOBAL_RESOURCES" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_SORT" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GLOBAL_RESOURCES" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TREE" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNMENT_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GOVERNMENT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNMENT_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GOVERNMENT_GOVERNMENTS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNMENT_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GOVERNMENT_POLICIES" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNMENT_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GOVERNMENT_POLICY_ACTIONS" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNMENT_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GOVERNMENT_BOTTOM_ACTIONS" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNMENT_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TABS" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNOR_PANEL" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GOVERNORS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNOR_PANEL" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GOVERNORS_TREE" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNOR_PANEL" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GOVERNORS_PROMOTION_GRID" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNOR_PANEL" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GOVERNORS_SECRET_VIEW" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNOR_PANEL" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GOVERNORS_ACTIONS" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNOR_ASSIGNMENT" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GOVERNOR_ASSIGNMENT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNOR_ASSIGNMENT" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GOVERNOR_ASSIGNMENT_CONFIRM" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GOVERNOR_ASSIGNMENT" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_LIST" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_PEOPLE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GREAT_PEOPLE" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_PEOPLE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GREAT_PEOPLE_CURRENT" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_PEOPLE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GREAT_PEOPLE_ACTIONS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_PEOPLE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GREAT_PEOPLE_PAST" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_PEOPLE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GREAT_PEOPLE_HEROES" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_PEOPLE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TABS" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_WORKS_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GREAT_WORKS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_WORKS_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GREAT_WORKS_GROUPING" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_WORKS_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GREAT_WORKS_SLOTS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_WORKS_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GREAT_WORKS_ACTIONS" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_WORKS_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TREE" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_WORK_SHOWCASE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GREAT_WORK_SHOWCASE" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_WORK_SHOWCASE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GREAT_WORK_SHOWCASE_BINDINGS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_GREAT_WORK_SHOWCASE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_LIST" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_HISTORIC_MOMENTS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_HISTORIC_MOMENTS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_HISTORIC_MOMENTS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_HISTORIC_MOMENTS_LAYOUT" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_HISTORIC_MOMENTS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TREE" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MAP_PIN_LIST" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAP_PINS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MAP_PIN_LIST" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAP_PINS_ACTIONS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MAP_PIN_LIST" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAP_PINS_BINDINGS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MAP_PIN_LIST" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_LIST" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MAP_PIN_EDITOR" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAP_PIN_EDITOR" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MAP_PIN_EDITOR" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAP_PIN_EDITOR_LAYOUT" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MAP_PIN_EDITOR" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAP_PIN_EDITOR_BINDINGS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_MAP_PIN_EDITOR" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_LIST" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_NOTIFICATION_CENTER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NOTIFICATIONS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_NOTIFICATION_CENTER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NOTIFICATIONS_ACTIONS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_NOTIFICATION_CENTER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MESSAGES" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_NOTIFICATION_CENTER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MESSAGES_ACTIONS" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_NOTIFICATION_CENTER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TABS" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_PRODUCTION_PANEL" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_PRODUCTION_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_PRODUCTION_PANEL" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_PRODUCTION_LAYOUT" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_PRODUCTION_PANEL" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_PRODUCTION_BINDINGS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_PRODUCTION_PANEL" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TABS" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_RELIGION_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_RELIGION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_RELIGION_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_RELIGION_OVERVIEW" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_RELIGION_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_RELIGION_CITY_FILTERS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_RELIGION_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_RELIGION_SETUP_OPEN" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_RELIGION_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_RELIGION_SETUP_IDENTITY" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_RELIGION_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_RELIGION_SETUP_BELIEFS" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_RELIGION_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_RELIGION_SETUP_PICKER" SortIndex="70" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_RELIGION_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_RELIGION_SETUP_ENHANCE" SortIndex="80" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_RELIGION_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_RELIGION_SETUP_CONFIRM" SortIndex="90" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_RELIGION_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TREE" SortIndex="100" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_REPORTS_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_REPORTS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_REPORTS_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_REPORTS_YIELDS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_REPORTS_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_REPORTS_RESOURCES" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_REPORTS_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_REPORTS_CITY_STATUS" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_REPORTS_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_REPORTS_GOSSIP" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_REPORTS_SCREEN" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TABS" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_RESEARCH_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_RESEARCH" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_RESEARCH_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_RESEARCH_ACTIONS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_RESEARCH_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_RESEARCH_BINDINGS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_RESEARCH_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TREE" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TECH_TREE_LAYOUT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TECH_TREE_VIEWS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TECH_TREE_TREE_VIEW" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GRID_NAVIGATION" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TECH_TREE_ACTIONS" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TECH_TREE_FILTERS" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TECH_TREE_UNLOCKS" SortIndex="70" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TRADE_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_ACTIVE" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_AVAILABLE" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_ACTIONS" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TABS" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_ROUTE_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TRADE_ROUTE" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_ROUTE_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TRADE_ROUTE_LAYOUT" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_ROUTE_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TRADE_ROUTE_ACTIONS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_ROUTE_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TREE" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_ORIGIN_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TRADE_ORIGIN" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_ORIGIN_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TRADE_ORIGIN_ACTIONS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_ORIGIN_CHOOSER" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_LIST" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_UNIT_PROMOTIONS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_UNIT_PROMOTIONS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS_VIEWS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_UNIT_PROMOTIONS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GRID_NAVIGATION" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_UNIT_PROMOTIONS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS_TREE" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_UNIT_PROMOTIONS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS_ACTIONS" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_RANKINGS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WORLD_RANKINGS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_RANKINGS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WORLD_RANKINGS_LAYOUT" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_RANKINGS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WORLD_RANKINGS_CONTENT" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_RANKINGS" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_NAV_TABS" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_PRODUCTION_QUEUE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_PRODUCTION_QUEUE_LAYOUT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_PRODUCTION_QUEUE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_PRODUCTION_QUEUE_ADD" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_PRODUCTION_QUEUE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_PRODUCTION_QUEUE_BINDINGS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_RESOLUTION_VOTE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WC_RESOLUTION_LAYOUT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_RESOLUTION_VOTE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WC_RESOLUTION_OUTCOME" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_RESOLUTION_VOTE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WC_RESOLUTION_TARGET" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_RESOLUTION_VOTE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WC_RESOLUTION_FAVOR" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_RESOLUTION_VOTE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WC_RESOLUTION_COMPLETE" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_RESOLUTION_VOTE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WC_SUBMIT" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_PROPOSAL_VOTE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WC_PROPOSAL_LAYOUT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_PROPOSAL_VOTE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WC_PROPOSAL_DIRECTION" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_PROPOSAL_VOTE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WC_PROPOSAL_FAVOR" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_PROPOSAL_VOTE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WC_PROPOSAL_COMPLETE" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_PROPOSAL_VOTE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WC_SUBMIT" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_SPECIAL_SESSION_PROPOSAL" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WC_SPECIAL_LAYOUT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_SPECIAL_SESSION_PROPOSAL" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WC_SPECIAL_DETAILS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_SPECIAL_SESSION_PROPOSAL" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WC_SPECIAL_SELECT" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_WORLD_CONGRESS_SPECIAL_SESSION_PROPOSAL" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_WC_SPECIAL_SUBMIT" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NAVIGATION_CURSOR" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NAVIGATION_CURSOR" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_VISIBILITY" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NAVIGATION_CURSOR" ChapterId="MOVING" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_MOVING" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NAVIGATION_CURSOR" ChapterId="MOVING" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_JUMPS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NAVIGATION_CURSOR" ChapterId="READING" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_READING_PRIMARY" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NAVIGATION_CURSOR" ChapterId="READING" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_READING_GEOGRAPHY" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NAVIGATION_CURSOR" ChapterId="READING" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_INTERFACE" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NAVIGATION_CURSOR" ChapterId="BANNERS" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_BANNERS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NAVIGATION_CURSOR" ChapterId="BANNERS" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_BANNER_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SURVEYOR" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SURVEYOR" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_PRIVACY" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SURVEYOR" ChapterId="BASIC" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_BASIC" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SURVEYOR" ChapterId="COUNTS" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_COUNTS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SURVEYOR" ChapterId="DETAILS" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_DETAILS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SURVEYOR" ChapterId="DETAILS" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_TERRAIN" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_SCANNER" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_SCANNER" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_LIVE_DATA" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_SCANNER" ChapterId="NAVIGATION" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_NAVIGATION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_SCANNER" ChapterId="NAVIGATION" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_LOCATION" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_SCANNER" ChapterId="SEARCH" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_SEARCH" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_SCANNER" ChapterId="MANAGEMENT" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_MANAGEMENT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_SCANNER" ChapterId="MANAGEMENT" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_TYPES" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_SCANNER" ChapterId="CUSTOM" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_CUSTOM" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_SCANNER" ChapterId="CUSTOM" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_MATCHING" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_LENSES_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_LENSES_ACTIVATION" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="RELIGION" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_LENSES_RELIGION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="CONTINENT" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_LENSES_CONTINENT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="APPEAL" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_LENSES_APPEAL" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="SETTLER" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SETTLER" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="SETTLER" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SETTLER_SCANNER" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="GOVERNMENT" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_LENSES_GOVERNMENT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="POLITICAL" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_LENSES_POLITICAL" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="TOURISM" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_LENSES_TOURISM" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="TOURISM" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_LENSES_TOURISM_DETAILS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="EMPIRE" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_LENSES_EMPIRE" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="LOYALTY" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_LENSES_LOYALTY" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="POWER" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_LENSES_POWER" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="PLAGUE" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_LENSES_PLAGUE" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_LENSES" ChapterId="SCANNER" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SCANNER" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_MAP_TACS" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_MAP_TACS" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_LIST" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_MAP_TACS" ChapterId="BOOKMARKS" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_BOOKMARKS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_MAP_TACS" ChapterId="BOOKMARKS" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_BOOKMARK_RULES" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_MAP_TACS" ChapterId="KEYS" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_KEYS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_MAP_TACS" ChapterId="SHARING" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_SHARING" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_EMPIRE_INFORMATION" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_EMPIRE_INFORMATION" ChapterId="PROGRESS" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_PROGRESS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_EMPIRE_INFORMATION" ChapterId="YIELDS" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_YIELDS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_EMPIRE_INFORMATION" ChapterId="DIPLOMACY" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_DIPLOMACY" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_EMPIRE_INFORMATION" ChapterId="RULESETS" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_RULESETS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_ENDING_TURN" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_ENDING_TURN" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_AUTOMATIC" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_ENDING_TURN" ChapterId="ACTIONS" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_ACTIONS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_ENDING_TURN" ChapterId="LIST" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_LIST" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_ENDING_TURN" ChapterId="LIST" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_TUTORIAL" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NOTIFICATIONS_HISTORY" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NOTIFICATIONS_HISTORY" ChapterId="CENTER" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_CENTER" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NOTIFICATIONS_HISTORY" ChapterId="CENTER" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_CENTER_ACTIONS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NOTIFICATIONS_HISTORY" ChapterId="REVEALS" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NOTIFICATIONS_HISTORY" ChapterId="REVEALS" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS_LINES" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NOTIFICATIONS_HISTORY" ChapterId="REVEALS" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS_SETTINGS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NOTIFICATIONS_HISTORY" ChapterId="BUFFER" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_BUFFER" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NOTIFICATIONS_HISTORY" ChapterId="BUFFER" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_BUFFER_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NOTIFICATIONS_HISTORY" ChapterId="MOVEMENT" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_MOVEMENT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_NOTIFICATIONS_HISTORY" ChapterId="MOVEMENT" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_SETTINGS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_ACTIONS" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_ACTIONS" ChapterId="SAVES" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_SAVES" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_ACTIONS" ChapterId="MAP" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_MAP" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_WORLD_ACTIONS" ChapterId="TURN" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_TURN" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SELECTION" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SELECTION" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_ACTION_LIST" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SELECTION" ChapterId="MOVING" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_MOVING" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SELECTION" ChapterId="SUMMARY" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_SUMMARY" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SELECTION" ChapterId="CITY" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_CITY" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_SELECTION" ChapterId="UNIT" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_UNIT" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_USER_INTERFACES" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_OVERVIEW" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_USER_INTERFACES" ChapterId="OVERVIEW" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_TABS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_USER_INTERFACES" ChapterId="RESEARCH" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_RESEARCH" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_USER_INTERFACES" ChapterId="EMPIRE" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_EMPIRE" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_USER_INTERFACES" ChapterId="WORLD" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_WORLD" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_USER_INTERFACES" ChapterId="MAP" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_MAP" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_GAMEPLAY_USER_INTERFACES" ChapterId="AVAILABILITY" Paragraph="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_AVAILABILITY" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_LEAF_WIDGETS" ChapterId="BUTTON" Paragraph="LOC_CAI_PEDIA_WIDGET_BUTTON_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_LEAF_WIDGETS" ChapterId="BUTTON" Paragraph="LOC_CAI_PEDIA_WIDGET_BUTTON_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_LEAF_WIDGETS" ChapterId="STATICTEXT" Paragraph="LOC_CAI_PEDIA_WIDGET_STATICTEXT_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_LEAF_WIDGETS" ChapterId="STATICTEXT" Paragraph="LOC_CAI_PEDIA_WIDGET_STATICTEXT_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_LEAF_WIDGETS" ChapterId="TAB" Paragraph="LOC_CAI_PEDIA_WIDGET_TAB_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_LEAF_WIDGETS" ChapterId="TAB" Paragraph="LOC_CAI_PEDIA_WIDGET_TAB_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_VALUE_WIDGETS" ChapterId="CHECKBOX" Paragraph="LOC_CAI_PEDIA_WIDGET_CHECKBOX_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_VALUE_WIDGETS" ChapterId="CHECKBOX" Paragraph="LOC_CAI_PEDIA_WIDGET_CHECKBOX_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_VALUE_WIDGETS" ChapterId="EDITBOX" Paragraph="LOC_CAI_PEDIA_WIDGET_EDITBOX_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_VALUE_WIDGETS" ChapterId="EDITBOX" Paragraph="LOC_CAI_PEDIA_WIDGET_EDITBOX_ENTRY" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_VALUE_WIDGETS" ChapterId="EDITBOX" Paragraph="LOC_CAI_PEDIA_WIDGET_EDITBOX_HINT" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_VALUE_WIDGETS" ChapterId="EDITBOX" Paragraph="LOC_CAI_PEDIA_WIDGET_EDITBOX_MOVEMENT" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_VALUE_WIDGETS" ChapterId="EDITBOX" Paragraph="LOC_CAI_PEDIA_WIDGET_EDITBOX_SELECTION" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_VALUE_WIDGETS" ChapterId="EDITBOX" Paragraph="LOC_CAI_PEDIA_WIDGET_EDITBOX_EDITING" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_VALUE_WIDGETS" ChapterId="SLIDER" Paragraph="LOC_CAI_PEDIA_WIDGET_SLIDER_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_VALUE_WIDGETS" ChapterId="SLIDER" Paragraph="LOC_CAI_PEDIA_WIDGET_SLIDER_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="DIALOG" Paragraph="LOC_CAI_PEDIA_WIDGET_DIALOG_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="DIALOG" Paragraph="LOC_CAI_PEDIA_WIDGET_DIALOG_NAVIGATION" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="DIALOG" Paragraph="LOC_CAI_PEDIA_WIDGET_DIALOG_ACTIONS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="DROPDOWN" Paragraph="LOC_CAI_PEDIA_WIDGET_DROPDOWN_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="DROPDOWN" Paragraph="LOC_CAI_PEDIA_WIDGET_DROPDOWN_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="DROPDOWN" Paragraph="LOC_CAI_PEDIA_WIDGET_DROPDOWN_COMMIT" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="GAMEVIEW" Paragraph="LOC_CAI_PEDIA_WIDGET_GAMEVIEW_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="GAMEVIEW" Paragraph="LOC_CAI_PEDIA_WIDGET_GAMEVIEW_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="INTERFACEMODE" Paragraph="LOC_CAI_PEDIA_WIDGET_INTERFACEMODE_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="INTERFACEMODE" Paragraph="LOC_CAI_PEDIA_WIDGET_INTERFACEMODE_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="LIST" Paragraph="LOC_CAI_PEDIA_WIDGET_LIST_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="LIST" Paragraph="LOC_CAI_PEDIA_WIDGET_LIST_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="LIST" Paragraph="LOC_CAI_PEDIA_WIDGET_LIST_SEARCH" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="PANEL" Paragraph="LOC_CAI_PEDIA_WIDGET_PANEL_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="PANEL" Paragraph="LOC_CAI_PEDIA_WIDGET_PANEL_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="SEARCHPANEL" Paragraph="LOC_CAI_PEDIA_WIDGET_SEARCHPANEL_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="SEARCHPANEL" Paragraph="LOC_CAI_PEDIA_WIDGET_SEARCHPANEL_QUERY" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="SEARCHPANEL" Paragraph="LOC_CAI_PEDIA_WIDGET_SEARCHPANEL_KEYS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="SUBMENU" Paragraph="LOC_CAI_PEDIA_WIDGET_SUBMENU_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="SUBMENU" Paragraph="LOC_CAI_PEDIA_WIDGET_SUBMENU_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TABCONTROL" Paragraph="LOC_CAI_PEDIA_WIDGET_TABCONTROL_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TABCONTROL" Paragraph="LOC_CAI_PEDIA_WIDGET_TABCONTROL_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TABCONTROL" Paragraph="LOC_CAI_PEDIA_WIDGET_TABCONTROL_TRAVERSAL" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TABPAGE" Paragraph="LOC_CAI_PEDIA_WIDGET_TABPAGE_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TABPAGE" Paragraph="LOC_CAI_PEDIA_WIDGET_TABPAGE_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TABLE" Paragraph="LOC_CAI_PEDIA_WIDGET_TABLE_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TABLE" Paragraph="LOC_CAI_PEDIA_WIDGET_TABLE_TABLES" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TABLE" Paragraph="LOC_CAI_PEDIA_WIDGET_TABLE_GRIDS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TABLE" Paragraph="LOC_CAI_PEDIA_WIDGET_TABLE_TYPEAHEAD" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TREE" Paragraph="LOC_CAI_PEDIA_WIDGET_TREE_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TREE" Paragraph="LOC_CAI_PEDIA_WIDGET_TREE_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TREE" Paragraph="LOC_CAI_PEDIA_WIDGET_TREE_EDGES" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TREE" Paragraph="LOC_CAI_PEDIA_WIDGET_TREE_SEARCH" SortIndex="40" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TREEITEM" Paragraph="LOC_CAI_PEDIA_WIDGET_TREEITEM_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TREEITEM" Paragraph="LOC_CAI_PEDIA_WIDGET_TREEITEM_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="TREEITEM" Paragraph="LOC_CAI_PEDIA_WIDGET_TREEITEM_ACTION" SortIndex="30" />
+  </CivilopediaPageChapterParagraphs>
+</GameInfo>

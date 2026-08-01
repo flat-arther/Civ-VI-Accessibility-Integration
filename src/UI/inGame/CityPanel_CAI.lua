@@ -664,11 +664,23 @@ function OpenOrToggleCityProduction()
         return
     end
 
-    if not IsVanillaProductionPanelVisible() then
-        if LuaEvents.CityPanel_ProductionOpen ~= nil then
-            LuaEvents.CityPanel_ProductionOpen()
+    if IsVanillaProductionPanelVisible() then
+        if not IsCAITutorialScreenCloseAllowed() then
+            AnnounceCAITutorialScreenCloseBlocked()
             return
         end
+        ToggleCityPanelCheck(Controls.ChangeProductionCheck)
+        return
+    end
+
+    if not IsCAITutorialControlAllowed("ChangeProductionCheck") then
+        Speak(Locale.Lookup("LOC_CAI_UI_BLOCKED_BY_TUTORIAL"))
+        return
+    end
+
+    if LuaEvents.CityPanel_ProductionOpen ~= nil then
+        LuaEvents.CityPanel_ProductionOpen()
+        return
     end
 
     ToggleCityPanelCheck(Controls.ChangeProductionCheck)
@@ -1253,7 +1265,8 @@ function InitializeCityActionMap()
                 ToggleCityPanelCheck(Controls.ToggleOverviewPanel)
             end,
             function()
-                return IsCityPanelActionAvailable(Controls.ToggleOverviewPanel)
+                return IsCAITutorialControlAllowed("ToggleOverviewPanel")
+                    and IsCityPanelActionAvailable(Controls.ToggleOverviewPanel)
             end
         ),
         [Input.GetActionId("CityManageCity")] = BuildCityActionData(
