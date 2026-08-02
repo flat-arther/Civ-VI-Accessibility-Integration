@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-08-02
+
+### Fixed
+
+- Completing ordinary district or wonder placement no longer leaves the accessible Production Panel open after the visual panel closes.
+
 ## [0.9.0] - 2026-08-01
 
 ### Added

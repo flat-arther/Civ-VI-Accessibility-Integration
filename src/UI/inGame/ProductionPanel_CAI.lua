@@ -1847,6 +1847,10 @@ end
 
 local function SchedulePlacementReconcile()
     if not m_state.placementRetained and not m_state.placementFocusCapture then return end
+    if ContextPtr:IsHidden() then
+        ReconcilePlacementPanel()
+        return
+    end
     m_state.placementReconcilePending = true
     ArmPendingUpdate()
 end
@@ -2154,3 +2158,17 @@ end
 Events.CityProductionChanged.Add(RefreshIfOpen)
 Events.CityProductionUpdated.Add(RefreshIfOpen)
 Events.CityProductionQueueChanged.Add(RefreshIfOpen)
+
+OnShutdown = WrapFunc(OnShutdown, function(orig)
+    LuaEvents.ProductionPanel_Open.Remove(OnPanelOpenedCAI)
+    LuaEvents.StrageticView_MapPlacement_ProductionOpen.Remove(SchedulePlacementReconcile)
+    LuaEvents.ProductionPanel_Close.Remove(OnPanelClosedCAI)
+    LuaEvents.ProductionPanel_ListModeChanged.Remove(OnVanillaListModeChangedCAI)
+    Events.InterfaceModeChanged.Remove(OnPlacementInterfaceModeChangedCAI)
+    Events.CityProductionChanged.Remove(RefreshIfOpen)
+    Events.CityProductionUpdated.Remove(RefreshIfOpen)
+    Events.CityProductionQueueChanged.Remove(RefreshIfOpen)
+    RemovePanelCAI()
+    orig()
+end)
+ContextPtr:SetShutdown(OnShutdown)
