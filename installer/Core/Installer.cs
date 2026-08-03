@@ -12,10 +12,12 @@ internal sealed class Installer
         IProgress<ProgressInfo> progress,
         CancellationToken cancellationToken)
     {
-        if (!GameDetector.LooksLikeSteamInstall(gameDirectory))
+        EnsureGameIsNotRunning();
+
+        if (!GameDetector.LooksLikeSupportedInstall(gameDirectory))
         {
             throw new InvalidDataException(
-                "The selected directory is not a supported Steam installation of Civilization VI.");
+                "The selected directory is not a supported Steam or Epic Games installation of Civilization VI.");
         }
 
         using var github = new GitHubReleaseClient();
@@ -103,6 +105,14 @@ internal sealed class Installer
 
     public void Uninstall(string gameDirectory, IProgress<ProgressInfo> progress)
     {
+        EnsureGameIsNotRunning();
+
+        if (!GameDetector.LooksLikeSupportedInstall(gameDirectory))
+        {
+            throw new InvalidDataException(
+                "The selected directory is not a supported Steam or Epic Games installation of Civilization VI.");
+        }
+
         var layout = new GameLayout(gameDirectory);
 
         progress.Report(new ProgressInfo("Removing the mod...", 250));
@@ -113,6 +123,15 @@ internal sealed class Installer
 
         InstallManifest.Delete();
         progress.Report(new ProgressInfo("Uninstall complete.", 1000));
+    }
+
+    private static void EnsureGameIsNotRunning()
+    {
+        if (GameDetector.IsGameRunning())
+        {
+            throw new InvalidOperationException(
+                "Civilization VI is currently running. Close the game before installing or uninstalling.");
+        }
     }
 
     private static void ValidatePackage(
@@ -140,14 +159,14 @@ internal sealed class Installer
 
     private static void InstallRuntime(string packageBinaries, GameLayout layout)
     {
-        Directory.CreateDirectory(layout.SteamBinaryDirectory);
+        Directory.CreateDirectory(layout.BinaryDirectory);
 
         // Preserve a stock or third-party LightFX.dll once. If both Tolk runtime
         // companions are already present, treat LightFX.dll as an earlier manual
         // installation of this integration rather than as the game's original DLL.
         var appearsToBeExistingIntegration =
-            File.Exists(Path.Combine(layout.SteamBinaryDirectory, "nvdaControllerClient64.dll")) &&
-            File.Exists(Path.Combine(layout.SteamBinaryDirectory, "SAAPI64.dll"));
+            File.Exists(Path.Combine(layout.BinaryDirectory, "nvdaControllerClient64.dll")) &&
+            File.Exists(Path.Combine(layout.BinaryDirectory, "SAAPI64.dll"));
 
         if (File.Exists(layout.LightFxDll) &&
             !File.Exists(layout.LightFxBackup) &&
@@ -160,7 +179,7 @@ internal sealed class Installer
         {
             File.Copy(
                 Path.Combine(packageBinaries, dll),
-                Path.Combine(layout.SteamBinaryDirectory, dll),
+                Path.Combine(layout.BinaryDirectory, dll),
                 overwrite: true);
         }
     }
@@ -169,7 +188,7 @@ internal sealed class Installer
     {
         foreach (var dll in GameLayout.RuntimeDllNames)
         {
-            var path = Path.Combine(layout.SteamBinaryDirectory, dll);
+            var path = Path.Combine(layout.BinaryDirectory, dll);
             if (File.Exists(path)) File.Delete(path);
         }
 

@@ -5,10 +5,10 @@ internal sealed class GameLayout
     public const string ModFolderName = "CivVi-Accessibility-Integration";
 
     public string Root { get; }
-    public string SteamBinaryDirectory => Path.Combine(Root, "Base", "Binaries", "Win64Steam");
-    public string CivilizationExe => Path.Combine(SteamBinaryDirectory, "CivilizationVI.exe");
-    public string LightFxDll => Path.Combine(SteamBinaryDirectory, "LightFX.dll");
-    public string LightFxBackup => Path.Combine(SteamBinaryDirectory, "LightFX.cai-original.dll");
+    public string BinaryDirectory { get; }
+    public string CivilizationExe => Path.Combine(BinaryDirectory, "CivilizationVI.exe");
+    public string LightFxDll => Path.Combine(BinaryDirectory, "LightFX.dll");
+    public string LightFxBackup => Path.Combine(BinaryDirectory, "LightFX.cai-original.dll");
 
     public string ModsDirectory => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
@@ -16,7 +16,23 @@ internal sealed class GameLayout
 
     public string ModDirectory => Path.Combine(ModsDirectory, ModFolderName);
 
-    public GameLayout(string root) => Root = Path.GetFullPath(root);
+    public GameLayout(string root)
+    {
+        Root = Path.GetFullPath(root);
+        BinaryDirectory = FindBinaryDirectory(Root);
+    }
+
+    private static string FindBinaryDirectory(string root)
+    {
+        var steam = Path.Combine(root, "Base", "Binaries", "Win64Steam");
+        if (File.Exists(Path.Combine(steam, "CivilizationVI.exe"))) return steam;
+
+        var epic = Path.Combine(root, "Base", "Binaries", "Win64EOS");
+        if (File.Exists(Path.Combine(epic, "CivilizationVI.exe"))) return epic;
+
+        throw new InvalidDataException(
+            "The selected folder is not a supported Steam or Epic Games installation of Civilization VI.");
+    }
 
     public static readonly string[] RuntimeDllNames =
     {

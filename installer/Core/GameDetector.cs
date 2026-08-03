@@ -1,4 +1,5 @@
 using Microsoft.Win32;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace CivVIAccessInstaller.Core;
@@ -22,21 +23,55 @@ internal static class GameDetector
             Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
             "Steam", "steamapps", "common", "Sid Meier's Civilization VI"));
 
+        Add(candidates, Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+            "Epic Games", "SidMeiersCivilizationVI"));
+
         return candidates
             .Distinct(StringComparer.OrdinalIgnoreCase)
-            .FirstOrDefault(LooksLikeSteamInstall);
+            .FirstOrDefault(LooksLikeSupportedInstall);
     }
 
-    public static bool LooksLikeSteamInstall(string? path)
+    public static bool LooksLikeSupportedInstall(string? path)
     {
         if (string.IsNullOrWhiteSpace(path)) return false;
+
         try
         {
             return File.Exists(Path.Combine(
-                path, "Base", "Binaries", "Win64Steam", "CivilizationVI.exe"));
+                       path, "Base", "Binaries", "Win64Steam", "CivilizationVI.exe")) ||
+                   File.Exists(Path.Combine(
+                       path, "Base", "Binaries", "Win64EOS", "CivilizationVI.exe"));
         }
         catch
         {
+            return false;
+        }
+    }
+
+    public static bool IsGameRunning()
+    {
+        return IsProcessRunning("CivilizationVI") ||
+               IsProcessRunning("CivilizationVI_DX12");
+    }
+
+    private static bool IsProcessRunning(string processName)
+    {
+        try
+        {
+            var processes = Process.GetProcessesByName(processName);
+            try
+            {
+                return processes.Length > 0;
+            }
+            finally
+            {
+                foreach (var process in processes) process.Dispose();
+            }
+        }
+        catch
+        {
+            // If process enumeration fails, do not block the installer permanently.
             return false;
         }
     }

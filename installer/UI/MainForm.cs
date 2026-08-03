@@ -162,7 +162,7 @@ internal sealed class MainForm : Form
     {
         var manifest = InstallManifest.Load();
         var detected = manifest?.GameDirectory;
-        if (string.IsNullOrWhiteSpace(detected) || !GameDetector.LooksLikeSteamInstall(detected))
+        if (string.IsNullOrWhiteSpace(detected) || !GameDetector.LooksLikeSupportedInstall(detected))
         {
             detected = GameDetector.AutoDetect();
         }
@@ -281,12 +281,14 @@ internal sealed class MainForm : Form
 
     private void InstallClicked(object? sender, EventArgs e)
     {
+        if (WarnIfGameIsRunning()) return;
+
         var gameDirectory = _gameDirectory.Text.Trim();
-        if (!GameDetector.LooksLikeSteamInstall(gameDirectory))
+        if (!GameDetector.LooksLikeSupportedInstall(gameDirectory))
         {
             MessageBox.Show(
                 this,
-                "The selected folder is not a supported Steam installation of Civilization VI. Select the folder containing the Base directory.",
+                "The selected folder is not a supported Steam or Epic Games installation of Civilization VI. Select the folder containing the Base directory.",
                 Text,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
@@ -336,7 +338,20 @@ internal sealed class MainForm : Form
 
     private void UninstallClicked(object? sender, EventArgs e)
     {
+        if (WarnIfGameIsRunning()) return;
+
         var gameDirectory = _gameDirectory.Text.Trim();
+        if (!GameDetector.LooksLikeSupportedInstall(gameDirectory))
+        {
+            MessageBox.Show(
+                this,
+                "The selected folder is not a supported Steam or Epic Games installation of Civilization VI. Select the folder containing the Base directory.",
+                Text,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+            _gameDirectory.Focus();
+            return;
+        }
         if (MessageBox.Show(
                 this,
                 "Remove the accessibility mod and restore the original LightFX DLL if it was backed up?",
@@ -367,6 +382,20 @@ internal sealed class MainForm : Form
 
         LoadExistingState();
         _ = RefreshReleaseInformationAsync();
+    }
+
+    private bool WarnIfGameIsRunning()
+    {
+        if (!GameDetector.IsGameRunning()) return false;
+
+        MessageBox.Show(
+            this,
+            "Civilization VI is currently running. Close the game before installing, updating, or uninstalling the mod.",
+            Text,
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Warning);
+
+        return true;
     }
 
     private void SetControlsEnabled(bool enabled)

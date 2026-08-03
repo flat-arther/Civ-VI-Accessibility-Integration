@@ -1,16 +1,19 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - "v*"
-
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag, for example v1.1.0"
+        required: true
+        type: string
 
 permissions:
   contents: write
 
 env:
+  RELEASE_BRANCH: main
+  CHANGELOG_FILE: changelog.md
   MOD_SOURCE: src
   MOD_FOLDER_NAME: CivVi-Accessibility-Integration
   MODINFO_FILE: src/CivViAccess.modinfo
@@ -21,13 +24,14 @@ env:
 
 jobs:
   release:
-    name: Build and package
+    name: Prepare, build, and publish
     runs-on: windows-latest
 
     steps:
       - name: Check out repository and submodules
         uses: actions/checkout@v4
         with:
+          ref: ${{ env.RELEASE_BRANCH }}
           submodules: recursive
           fetch-depth: 0
 
@@ -35,11 +39,13 @@ jobs:
         shell: pwsh
         run: |
           $requiredPaths = @(
+              $env:CHANGELOG_FILE,
               $env:MOD_SOURCE,
               $env:MODINFO_FILE,
               $env:INTEGRATION_SOURCE,
               "$env:INTEGRATION_SOURCE/CMakeLists.txt",
-              "$env:INTEGRATION_SOURCE/CMakePresets.json"
+              "$env:INTEGRATION_SOURCE/CMakePresets.json",
+              $env:INSTALLER_PROJECT
           )
 
           foreach ($path in $requiredPaths) {
@@ -51,44 +57,171 @@ jobs:
           Write-Host "Integration submodule commit:"
           git -C $env:INTEGRATION_SOURCE rev-parse HEAD
 
-      - name: Determine version
+      - name: Prepare release metadata
         id: version
         shell: pwsh
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
         run: |
-          $contents = Get-Content $env:MODINFO_FILE -Raw
+          $tag = $env:RELEASE_TAG.Trim()
 
-          $match = [regex]::Match(
-              $contents,
-              '<Mod\s+[^>]*version="([^"]+)"'
-          )
-
-          if (-not $match.Success) {
-              throw "Could not read version from $env:MODINFO_FILE"
+          if ($tag -notmatch '^v(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)$') {
+              throw "Release tag must look like v1.2.3 or v1.2.3-beta.1. Received: '$tag'"
           }
 
-          $version = $match.Groups[1].Value
-
-          if ($env:GITHUB_REF_TYPE -eq "tag") {
-              $tag = $env:GITHUB_REF_NAME
-
-              if (-not $tag.StartsWith("v")) {
-                  throw "Release tag must start with v: $tag"
-              }
-
-              $tagVersion = $tag.Substring(1)
-
-              if ($tagVersion -ne $version) {
-                  throw "Tag version '$tagVersion' does not match modinfo version '$version'."
-              }
-          }
-
+          $version = $Matches.version
           $archiveName = "$env:PACKAGE_PREFIX-$version.zip"
 
+          git fetch origin --tags
+
+          git show-ref --verify --quiet "refs/tags/$tag"
+          if ($LASTEXITCODE -eq 0) {
+              throw "Tag '$tag' already exists. Use a new version."
+          }
+
+          $baseCommit = (git rev-parse HEAD).Trim()
+
+          "tag=$tag" >> $env:GITHUB_OUTPUT
           "version=$version" >> $env:GITHUB_OUTPUT
           "archive_name=$archiveName" >> $env:GITHUB_OUTPUT
+          "base_commit=$baseCommit" >> $env:GITHUB_OUTPUT
 
+          Write-Host "Tag: $tag"
           Write-Host "Version: $version"
           Write-Host "Archive: $archiveName"
+          Write-Host "Base commit: $baseCommit"
+
+      - name: Update modinfo version
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $path = $env:MODINFO_FILE
+          $contents = Get-Content $path -Raw
+
+          $pattern = '(<Mod\s+id="9f4b5c2e-1a2b-4c3d-8e9f-123456789abc"\s+version=")[^"]+(">)'
+          $matches = [regex]::Matches($contents, $pattern)
+
+          if ($matches.Count -ne 1) {
+              throw "Expected exactly one matching <Mod> version line in $path, found $($matches.Count)."
+          }
+
+          $updated = [regex]::Replace(
+              $contents,
+              $pattern,
+              "`${1}$env:VERSION`${2}",
+              1
+          )
+
+          [System.IO.File]::WriteAllText(
+              (Resolve-Path $path),
+              $updated,
+              [System.Text.UTF8Encoding]::new($false)
+          )
+
+          [xml]$document = Get-Content $path -Raw
+          $actualVersion = [string]$document.Mod.version
+
+          if ($actualVersion -ne $env:VERSION) {
+              throw "Modinfo update failed. Expected '$env:VERSION', found '$actualVersion'."
+          }
+
+          Write-Host "Updated $path to version $actualVersion."
+
+      - name: Rotate changelog
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $path = $env:CHANGELOG_FILE
+          $contents = Get-Content $path -Raw
+          $normalized = $contents -replace "`r`n", "`n"
+
+          $versionHeadingPattern = "(?m)^## \[$([regex]::Escape($env:VERSION))\](?:\s+-\s+.*)?\s*$"
+          if ([regex]::IsMatch($normalized, $versionHeadingPattern)) {
+              throw "The changelog already contains a section for version $env:VERSION."
+          }
+
+          $unreleasedMatch = [regex]::Match(
+              $normalized,
+              '(?m)^## \[Unreleased\]\s*$'
+          )
+
+          if (-not $unreleasedMatch.Success) {
+              throw "Could not find '## [Unreleased]' in $path."
+          }
+
+          $bodyStart = $unreleasedMatch.Index + $unreleasedMatch.Length
+          $nextHeading = [regex]::Match(
+              $normalized.Substring($bodyStart),
+              '(?m)^## \[[^\]]+\](?:\s+-\s+.*)?\s*$'
+          )
+
+          if ($nextHeading.Success) {
+              $bodyEnd = $bodyStart + $nextHeading.Index
+              $existingHistory = $normalized.Substring($bodyEnd).TrimStart("`n")
+          }
+          else {
+              $bodyEnd = $normalized.Length
+              $existingHistory = ""
+          }
+
+          $unreleasedBody = $normalized.Substring(
+              $bodyStart,
+              $bodyEnd - $bodyStart
+          ).Trim()
+
+          if ([string]::IsNullOrWhiteSpace($unreleasedBody)) {
+              throw "The Unreleased changelog section is empty."
+          }
+
+          $releaseDate = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd")
+
+          $parts = @(
+              "## [Unreleased]",
+              "",
+              "## [$env:VERSION] - $releaseDate",
+              "",
+              $unreleasedBody
+          )
+
+          if (-not [string]::IsNullOrWhiteSpace($existingHistory)) {
+              $parts += ""
+              $parts += $existingHistory.TrimEnd()
+          }
+
+          $rotated = ($parts -join "`n").TrimEnd() + "`n"
+
+          [System.IO.File]::WriteAllText(
+              (Resolve-Path $path),
+              ($rotated -replace "`n", "`r`n"),
+              [System.Text.UTF8Encoding]::new($false)
+          )
+
+          Write-Host "Moved Unreleased entries to version $env:VERSION dated $releaseDate."
+
+      - name: Commit release metadata locally
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -- $env:MODINFO_FILE $env:CHANGELOG_FILE
+
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) {
+              throw "Neither the modinfo nor changelog changed."
+          }
+
+          git commit -m "Prepare release $env:VERSION"
+          if ($LASTEXITCODE -ne 0) {
+              throw "Failed to commit release metadata."
+          }
+
+          Write-Host "Created local release commit:"
+          git log -1 --oneline
 
       - name: Configure integration DLL
         working-directory: ${{ env.INTEGRATION_SOURCE }}
@@ -159,7 +292,6 @@ jobs:
         id: package
         shell: pwsh
         env:
-          VERSION: ${{ steps.version.outputs.version }}
           ARCHIVE_NAME: ${{ steps.version.outputs.archive_name }}
           DLL_OUTPUT: ${{ steps.dll_output.outputs.directory }}
         run: |
@@ -182,7 +314,6 @@ jobs:
               -Recurse `
               -Force
 
-          # Development-only files.
           Remove-Item `
               (Join-Path $modDestination "ideHelpers.lua") `
               -Force `
@@ -236,10 +367,6 @@ jobs:
         id: installer
         shell: pwsh
         run: |
-          if (-not (Test-Path $env:INSTALLER_PROJECT)) {
-              throw "Installer project does not exist: $env:INSTALLER_PROJECT"
-          }
-
           $publishDirectory = Join-Path $env:RUNNER_TEMP "installer-publish"
           $releaseDirectory = Join-Path $env:GITHUB_WORKSPACE "release"
           $installerPath = Join-Path $releaseDirectory $env:INSTALLER_FILE_NAME
@@ -271,11 +398,6 @@ jobs:
           }
 
           Copy-Item $publishedExe $installerPath -Force
-
-          if (-not (Test-Path $installerPath)) {
-              throw "Installer was not copied to the release directory."
-          }
-
           "exe_path=$installerPath" >> $env:GITHUB_OUTPUT
 
           $file = Get-Item $installerPath
@@ -291,11 +413,51 @@ jobs:
             ${{ steps.installer.outputs.exe_path }}
           if-no-files-found: error
 
+      - name: Publish release commit and tag
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+          BASE_COMMIT: ${{ steps.version.outputs.base_commit }}
+        run: |
+          git fetch origin $env:RELEASE_BRANCH --tags
+
+          $remoteCommit = (git rev-parse "origin/$env:RELEASE_BRANCH").Trim()
+
+          if ($remoteCommit -ne $env:BASE_COMMIT) {
+              throw @"
+          The remote $env:RELEASE_BRANCH branch changed while the release was building.
+          Expected: $env:BASE_COMMIT
+          Current:  $remoteCommit
+          No commit or tag was pushed. Run the workflow again.
+          "@
+          }
+
+          git show-ref --verify --quiet "refs/tags/$env:RELEASE_TAG"
+          if ($LASTEXITCODE -eq 0) {
+              throw "Tag '$env:RELEASE_TAG' was created while the release was building."
+          }
+
+          git push origin "HEAD:$env:RELEASE_BRANCH"
+          if ($LASTEXITCODE -ne 0) {
+              throw "Failed to push the release commit to $env:RELEASE_BRANCH."
+          }
+
+          git tag -a $env:RELEASE_TAG -m "Release $env:VERSION"
+          if ($LASTEXITCODE -ne 0) {
+              throw "Failed to create tag $env:RELEASE_TAG."
+          }
+
+          git push origin $env:RELEASE_TAG
+          if ($LASTEXITCODE -ne 0) {
+              throw "Failed to push tag $env:RELEASE_TAG."
+          }
+
       - name: Create GitHub release
-        if: github.ref_type == 'tag'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
           VERSION: ${{ steps.version.outputs.version }}
           ARCHIVE_PATH: ${{ steps.package.outputs.archive_path }}
           INSTALLER_PATH: ${{ steps.installer.outputs.exe_path }}
@@ -303,7 +465,7 @@ jobs:
           $arguments = @(
               "release",
               "create",
-              $env:GITHUB_REF_NAME,
+              $env:RELEASE_TAG,
               $env:ARCHIVE_PATH,
               $env:INSTALLER_PATH,
               "--verify-tag",
