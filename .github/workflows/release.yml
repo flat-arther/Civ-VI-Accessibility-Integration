@@ -4,9 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag, for example v1.1.0"
+        description: "Version tag to simulate or release, for example v1.1.0"
         required: true
         type: string
+      publish_release:
+        description: "Commit changes, create the tag, and publish the GitHub Release"
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -413,7 +418,18 @@ jobs:
             ${{ steps.installer.outputs.exe_path }}
           if-no-files-found: error
 
+      - name: Summarize test build
+        if: ${{ !inputs.publish_release }}
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          Write-Host "Test build completed for version $env:VERSION."
+          Write-Host "No commit, tag, or GitHub Release was created."
+          Write-Host "Download the workflow artifact to inspect the ZIP and installer."
+
       - name: Publish release commit and tag
+        if: ${{ inputs.publish_release }}
         shell: pwsh
         env:
           RELEASE_TAG: ${{ steps.version.outputs.tag }}
@@ -454,6 +470,7 @@ jobs:
           }
 
       - name: Create GitHub release
+        if: ${{ inputs.publish_release }}
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
