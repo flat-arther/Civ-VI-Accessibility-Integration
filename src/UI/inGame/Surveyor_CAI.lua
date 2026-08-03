@@ -188,7 +188,7 @@ local function FormatBucketEntries(entries)
     for _, entry in ipairs(entries) do
         parts[#parts + 1] = Locale.Lookup("LOC_CAI_SURVEYOR_COUNT", entry.Count, entry.Label)
     end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function CompareInstances(a, b)
@@ -395,7 +395,7 @@ function Surveyor.ReadYields()
         end
     end
 
-    local body = #parts > 0 and table.concat(parts, ", ") or Locale.Lookup("LOC_CAI_SURVEYOR_EMPTY_YIELDS")
+    local body = #parts > 0 and table.concat(parts, "[NEWLINE]") or Locale.Lookup("LOC_CAI_SURVEYOR_EMPTY_YIELDS")
     return AppendUnexplored(body, survey.Range.unexplored)
 end
 

@@ -498,7 +498,7 @@ local function GetStatusList(ctx)
         return nil
     end
 
-    return table.concat(statuses, ", ")
+    return table.concat(statuses, "[NEWLINE]")
 end
 
 local function GetBlackDeathIndicatorText(ctx)
@@ -777,7 +777,7 @@ local function GetAerodromeUnitNames(ctx)
         return nil
     end
 
-    return Locale.Lookup("LOC_CAI_CITY_BANNER_AIR_UNITS", table.concat(names, ", "))
+    return Locale.Lookup("LOC_CAI_CITY_BANNER_AIR_UNITS", table.concat(names, "[NEWLINE]"))
 end
 
 local function GetBannerStrikeTooltip(ctx)
@@ -1316,7 +1316,7 @@ info.CityBannerInfo = {
             return nil
         end
 
-        return table.concat(tooltips, ", ")
+        return table.concat(tooltips, "[NEWLINE]")
     end,
     powerSummary = function(ctx)
         return GetPowerSummaryText(ctx)
@@ -1680,7 +1680,7 @@ local function OnCityBannerInfoInputActionStarted(actionId)
         return
     end
 
-    Speak(table.concat(results, ", "))
+    Speak(table.concat(results, "[NEWLINE]"))
 end
 
 

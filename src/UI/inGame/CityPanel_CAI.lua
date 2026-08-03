@@ -70,7 +70,7 @@ function JoinCityInfo(parts, separator)
         end
     end
 
-    return table.concat(results, separator or ", ")
+    return table.concat(results, separator or "[NEWLINE]")
 end
 
 function GetCityInfoName(data)
@@ -591,7 +591,7 @@ function GetActionBindingText(actionId)
         return nil
     end
 
-    return table.concat(bindings, ", ")
+    return table.concat(bindings, "[NEWLINE]")
 end
 
 function GetActionNameWithBindingText(actionId)
@@ -1352,7 +1352,7 @@ function OnSelectionInfoInputActionStarted(actionId)
         return
     end
 
-    local summary = table.concat(results, ", ")
+    local summary = table.concat(results, "[NEWLINE]")
     if actionId == Input.GetActionId("ReadSelectionSummary") then
         local cursor = ExposedMembers.CAICursor
         if cursor ~= nil then
@@ -1407,7 +1407,7 @@ function OnCitySelectionChanged(ownerPlayerID, cityID, i, j, k, isSelected, isEd
             return
         end
 
-        Speak(table.concat(results, ", "))
+        Speak(table.concat(results, "[NEWLINE]"))
     end
 end
 

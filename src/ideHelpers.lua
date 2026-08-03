@@ -250,6 +250,11 @@ function SplitTextIntoLines(text, maxLength) end
 ---| "text_changed"    # EditBox buffer changed; emitted after the edit is spoken
 ---| "expanded"        # TreeItem or SubMenu was expanded
 ---| "collapsed"       # TreeItem or SubMenu was collapsed
+---| "row_focus_enter" # DataTable focus entered a different logical row
+---| "cell_focus_enter" # DataTable focus entered a cell
+---| "row_activate"    # DataTable actionable row activated from one of its cells
+---| "sort_changed"    # DataTable sort column or direction changed
+---| "rebuilt"         # DataTable completed a rebuild
 ---| "navigation_wrap" # navigation crossed a wrapping container or tab-control boundary; extra arg is direction (+1/-1)
 ---| "destroy"         # widget is being destroyed; clean up subscriptions
 
@@ -285,6 +290,13 @@ EditModes = {}
 ---@class GridColumn
 ---@field header string|fun():string
 ---@field width? integer
+
+---@class GraphGroup
+---@field key string|number Stable group identity.
+---@field label string|fun():string Live localized group label.
+
+---@class GraphNodeOptions
+---@field group? string|number Optional GraphGroup key.
 
 ---Opaque value returned by Manager:CaptureFocusKey and consumed by RestoreFocus.
 ---@class FocusCapture
@@ -660,6 +672,11 @@ function UIWidget:GetVisibleChildren() end
 ---@return integer|nil visibleIndex, integer visibleTotal
 function UIWidget:GetVisiblePosition() end
 
+---Localized spoken position supplied only by an ordered navigation container.
+---Returns nil for widgets under ordinary layout parents.
+---@return string|nil
+function UIWidget:GetPositionString() end
+
 ---Manager-derived: the child currently in this widget's segment of CurrentPath,
 ---or the cached _lastFocusedChild hint when the widget is off-path.
 ---@return UIWidget|nil
@@ -752,10 +769,13 @@ function UIWidget:OnHandleInput(input) end
 function UIWidget:SetPriority(priority) end
 
 ---Build the spoken description for this widget. Pass an explicit subset of keys
----("label","role","value","position","state","tooltip") to limit output.
+---("label","role","state","value","tooltip","position") to limit output.
 ---@param elements? string[]
 ---@return string|nil
 function UIWidget:BuildSpeech(elements) end
+
+---@return string[]
+function UIWidget:GetSpeechOrder() end
 
 ---Speak this widget's info on demand. Used by screens after a value updates
 ---outside the focus path.
@@ -1203,6 +1223,12 @@ function GridWidget:GetCell(row, col) end
 ---@return integer
 function GridWidget:GetRowCount() end
 
+---Table-style row/column position for a direct grid cell. Every visible tier
+---counts as one column.
+---@param widget UIWidget
+---@return string|nil
+function GridWidget:GetCellPositionString(widget) end
+
 ---@param row integer
 function GridWidget:RemoveRow(row) end
 
@@ -1213,6 +1239,63 @@ function GridWidget:ClearRows() end
 ---@return SearchCandidate[]
 function GridWidget:GetTypeToFindCandidates(includeTooltips) end
 
+---Directed relationship graph containing arbitrary node widgets. The manager's
+---focus path owns the focused node; Graph caches only the alternatives created
+---by the last incoming/outgoing traversal.
+---@class GraphWidget : ContainerWidget
+GraphWidget = {}
+
+---@param group GraphGroup
+---@return ContainerWidget groupWidget
+function GraphWidget:AddGroup(group) end
+
+---@param key string|number
+---@param widget UIWidget
+---@param options? GraphNodeOptions
+---@return UIWidget
+function GraphWidget:AddNode(key, widget, options) end
+
+---@param fromKey string|number
+---@param toKey string|number
+function GraphWidget:AddEdge(fromKey, toKey) end
+
+---@param key string|number
+---@return UIWidget|nil
+function GraphWidget:GetNode(key) end
+
+---@return string|number|nil
+function GraphWidget:GetFocusedNodeKey() end
+
+---@param key string|number
+function GraphWidget:SetDefaultNode(key) end
+
+---@param key string|number
+---@param options? boolean|{ direction?: 1|-1, announce?: boolean }
+---@return boolean
+function GraphWidget:FocusNode(key, options) end
+
+---@param key string|number
+---@return (string|number)[]
+function GraphWidget:GetIncoming(key) end
+
+---@param key string|number
+---@return (string|number)[]
+function GraphWidget:GetOutgoing(key) end
+
+---@return (string|number)[]
+function GraphWidget:GetRoots() end
+
+---Position of a registered node in the live Up/Down alternative set.
+---@param widget UIWidget
+---@return string|nil
+function GraphWidget:GetNodePositionString(widget) end
+
+function GraphWidget:ClearGraph() end
+
+---@param includeTooltips boolean
+---@return SearchCandidate[]
+function GraphWidget:GetTypeToFindCandidates(includeTooltips) end
+
 ---@class DataTableColumn
 ---@field key string Stable column identity.
 ---@field header string|fun():string Live localized column header.
@@ -1221,8 +1304,8 @@ function GridWidget:GetTypeToFindCandidates(includeTooltips) end
 ---@field getState? fun(row:any):string
 ---@field isDisabled? fun(row:any):boolean
 ---@field sortKey? fun(row:any):any Presence makes the header sortable.
----@field activatable? boolean Whether data cells emit `cell_activate`.
----@field role? string Optional localized widget role for data cells.
+---@field sortAscendingDescription? string Localization tag describing ascending order.
+---@field sortDescendingDescription? string Localization tag describing descending order.
 
 ---@class DataTableSort
 ---@field column string Stable DataTableColumn key.
@@ -1237,7 +1320,10 @@ function GridWidget:GetTypeToFindCandidates(includeTooltips) end
 ---@field RowKey any|nil
 DataTableCellWidget = {}
 
----Sortable homogeneous-row table. Its player-facing role remains `Table`.
+---Sortable homogeneous-row table. Its player-facing role remains `Table`;
+---transparent row containers use `TableRow` and focusable cells use `TableCell`.
+---Register `row_activate` before Rebuild to make Enter or Space on any cell
+---activate its owning row.
 ---@class DataTableWidget : ContainerWidget
 DataTableWidget = {}
 

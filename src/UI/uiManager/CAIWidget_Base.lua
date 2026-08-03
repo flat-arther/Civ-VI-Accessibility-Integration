@@ -6,9 +6,19 @@ include("InputSupport")
 
 local SPEECH_ORDER = { "label", "role", "state", "value", "tooltip", "position" }
 
+-- Only containers whose navigation presents an ordered set of peer choices
+-- contribute the ordinary "x of y" position. Spatial containers provide
+-- their own richer position strings through the methods checked below.
+local POSITION_PARENT_TYPES = {
+    List = true,
+    Tree = true,
+    TreeItem = true,
+    SubMenu = true,
+}
+
 local PediaLookup = CAIWidgetHelpers_PediaLookup
 local InputHelp = CAIWidgetHelpers_InputHelp
-local TooltipReader = CAIWidgetHelpers_TooltipReader
+local WidgetReader = CAIWidgetHelpers_FocusedWidgetReader
 
 ---@class UIWidget
 ---@field Id? string
@@ -46,11 +56,11 @@ function UIWidget.New(class)
     w.SpeechSettings = {}
     w._listeners = {}
     w:On("focus_enter", function(self)
-        TooltipReader.CacheTooltipSections(self)
+        WidgetReader.CacheSections(self)
     end)
 
     w:On("focus_leave", function(self)
-        TooltipReader.ClearTooltipSections(self)
+        WidgetReader.ClearSections(self)
     end)
     w:AddInputBinding({
         Key = Keys.VK_F12,
@@ -108,41 +118,41 @@ function UIWidget.New(class)
     w:AddInputBinding({
         Key = Keys.VK_UP,
         IsAlt = true,
-        Description = "LOC_CAI_KB_TOOLTIP_PREVIOUS_SECTION",
+        Description = "LOC_CAI_KB_FOCUSED_WIDGET_READER_PREVIOUS_SECTION",
         Common = true,
         MSG = KeyEvents.KeyDown,
         Action = function(self)
-            return TooltipReader.ReadPreviousTooltipSection(self)
+            return WidgetReader.ReadPreviousSection(self)
         end,
     })
     w:AddInputBinding({
         Key = Keys.VK_DOWN,
         IsAlt = true,
-        Description = "LOC_CAI_KB_TOOLTIP_NEXT_SECTION",
+        Description = "LOC_CAI_KB_FOCUSED_WIDGET_READER_NEXT_SECTION",
         Common = true,
         MSG = KeyEvents.KeyDown,
         Action = function(self)
-            return TooltipReader.ReadNextTooltipSection(self)
+            return WidgetReader.ReadNextSection(self)
         end,
     })
     w:AddInputBinding({
         Key = Keys.VK_HOME,
         IsAlt = true,
-        Description = "LOC_CAI_KB_TOOLTIP_FIRST_SECTION",
+        Description = "LOC_CAI_KB_FOCUSED_WIDGET_READER_FIRST_SECTION",
         Common = true,
         MSG = KeyEvents.KeyDown,
         Action = function(self)
-            return TooltipReader.ReadFirstTooltipSection(self)
+            return WidgetReader.ReadFirstSection(self)
         end,
     })
     w:AddInputBinding({
         Key = Keys.VK_END,
         IsAlt = true,
-        Description = "LOC_CAI_KB_TOOLTIP_LAST_SECTION",
+        Description = "LOC_CAI_KB_FOCUSED_WIDGET_READER_FIRST_SECTION",
         Common = true,
         MSG = KeyEvents.KeyDown,
         Action = function(self)
-            return TooltipReader.ReadLastTooltipSection(self)
+            return WidgetReader.ReadLastSection(self)
         end,
     })
     w.TrapInput = false
@@ -278,6 +288,33 @@ function UIWidget:GetVisiblePosition()
     return idx > 0 and idx or nil, total
 end
 
+---Return the position this widget should contribute to speech. Position is a
+---navigation-container concept, not a generic parent/child property: ordinary
+---layout parents deliberately contribute no position.
+---@return string|nil
+function UIWidget:GetPositionString()
+    local parent = self.Parent
+    if parent and (POSITION_PARENT_TYPES[parent.Type] or parent.IsTabStrip) then
+        local visIdx, visTotal = self:GetVisiblePosition()
+        if visIdx and visTotal > 0 then
+            return Locale.Lookup("LOC_UIWidget_Element_Pos", visIdx, visTotal)
+        end
+        return nil
+    end
+
+    local ancestor = parent
+    while ancestor do
+        if ancestor.Type == "Grid" and ancestor.GetCellPositionString then
+            return ancestor:GetCellPositionString(self)
+        end
+        if ancestor.Type == "Graph" and ancestor.GetNodePositionString then
+            return ancestor:GetNodePositionString(self)
+        end
+        ancestor = ancestor.Parent
+    end
+    return nil
+end
+
 --#endregion
 
 --#region Focus access (manager is authoritative)
@@ -363,6 +400,8 @@ function UIWidget:IsHidden()
 end
 
 function UIWidget:IsDisabled() return self._disabledFn and self._disabledFn(self) or false end
+
+function UIWidget:GetSpeechOrder() return self.SpeechOrder or SPEECH_ORDER end
 
 --#endregion
 
@@ -535,8 +574,7 @@ function UIWidget:GetInfoStrings()
         -- so we don't speak the raw LOC tag.
         if lookup ~= tag then role = lookup end
     end
-    local visIdx, visTotal = self:GetVisiblePosition()
-    local position = (visIdx and visTotal > 0) and Locale.Lookup("LOC_UIWidget_Element_Pos", visIdx, visTotal) or ""
+    local position = self:GetPositionString() or ""
     local value = self:GetValue()
     local state = ""
     if self:IsDisabled() then state = Locale.Lookup("LOC_CAI_STATE_DISABLED") end

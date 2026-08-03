@@ -230,7 +230,7 @@ local function GetLeadsToText(kData)
         end
     end
     if #names == 0 then return nil end
-    return Locale.Lookup("LOC_CAI_RESEARCH_LEADS_TO_HEADER", table.concat(names, ", "))
+    return Locale.Lookup("LOC_CAI_RESEARCH_LEADS_TO_HEADER", table.concat(names, "[NEWLINE]"))
 end
 
 local function GetRevealsText(group)
@@ -240,7 +240,7 @@ local function GetRevealsText(group)
     for _, r in ipairs(reveals) do
         table.insert(entries, Locale.Lookup("LOC_TOOLTIP_UNLOCKS_RESOURCE", r.Name))
     end
-    return table.concat(entries, ", ")
+    return table.concat(entries, "[NEWLINE]")
 end
 
 local function GetUnlocksText(group)
@@ -248,7 +248,7 @@ local function GetUnlocksText(group)
     if not unlocks or #unlocks == 0 then return nil end
     local names = {}
     for _, u in ipairs(unlocks) do table.insert(names, u.Name) end
-    return Locale.Lookup("LOC_CAI_RESEARCH_UNLOCKS_HEADER", table.concat(names, ", "))
+    return Locale.Lookup("LOC_CAI_RESEARCH_UNLOCKS_HEADER", table.concat(names, "[NEWLINE]"))
 end
 
 -- ===========================================================================
@@ -265,7 +265,7 @@ local function FormatLabel(kData)
         AppendIfNonEmpty(parts, kData.Name)
     end
     AppendIfNonEmpty(parts, GetRecommendedPart(kData, RowIsDisabled(kData)))
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function FormatTooltip(kData, group)

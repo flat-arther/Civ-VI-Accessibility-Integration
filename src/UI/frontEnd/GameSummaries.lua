@@ -1161,7 +1161,7 @@ local function RebuildOverviewTree()
             elseif tonumber(v.PlayCount) > 0 then
                 table.insert(parts, Locale.Lookup("LOC_GAMESUMMARY_LEADERPROGRESS_PLAYCOUNT", v.PlayCount))
             end
-            local capturedLabel = table.concat(parts, ", ")
+            local capturedLabel = table.concat(parts, "[NEWLINE]")
             local leaf = mgr:CreateWidget(MakeId("CAIHoF_lp_"), "StaticText", {
                 Label = function() return capturedLabel end,
                 FocusKey = "hof:overview:leader:" .. idx,
@@ -1307,7 +1307,7 @@ local function RebuildHistoryList()
         end
         table.insert(tipParts, Locale.Lookup("LOC_GAMESUMMARY_LAST_PLAYED", game.LastPlayed))
 
-        local capturedLabel = table.concat(parts, ", ")
+        local capturedLabel = table.concat(parts, "[NEWLINE]")
         local capturedTip = #tipParts > 0 and table.concat(tipParts, "[NEWLINE]") or nil
         local capturedGameId = game.GameId
 

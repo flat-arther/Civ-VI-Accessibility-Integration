@@ -74,7 +74,7 @@ local function BuildDialog()
         end
     end
 
-    local contentLabel = table.concat(parts, ", ")
+    local contentLabel = table.concat(parts, "[NEWLINE]")
 
     local contentRow = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDisaster_Content"), "StaticText", {
         Label = contentLabel,

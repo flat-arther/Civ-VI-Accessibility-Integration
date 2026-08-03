@@ -25,9 +25,38 @@ local QUEUE_LIST_ID       = "CAITechTree_QueueList"
 local FILTER_LIST_ID      = "CAITechTree_FilterList"
 local MAIN_TREE_ID        = "CAITechTree_MainTree"
 local GRID_VIEW_ID        = "CAITechTree_GridView"
+local GRAPH_VIEW_ID       = "CAITechTree_GraphView"
 local UNLOCKS_LIST_ID     = "CAITechTree_UnlocksList"
 local CHANGE_VIEW_ID      = "CAITechTree_ChangeView"
 local FILTER_RESULTS_ID   = "CAITechTree_FilterResults"
+local VIEW_SETTING_SECTION = "UI"
+local VIEW_SETTING_ID      = "TechTreeViewMode"
+local VIEW_MODES           = { "grid", "graph", "tree" }
+
+---@param viewMode string
+---@return integer|nil
+local function GetViewModeIndex(viewMode)
+    for index, mode in ipairs(VIEW_MODES) do
+        if mode == viewMode then return index end
+    end
+    return nil
+end
+
+---@return string
+local function LoadViewModeSetting()
+    local stored = tostring(CAI.GetConfigValue(
+        VIEW_SETTING_SECTION, VIEW_SETTING_ID, "grid")):lower()
+    if GetViewModeIndex(stored) then return stored end
+    LogWarn("Technology Tree ignored invalid saved view mode " .. tostring(stored))
+    return "grid"
+end
+
+---@param viewMode string
+local function SaveViewModeSetting(viewMode)
+    if not CAI.SetConfigValue(VIEW_SETTING_SECTION, VIEW_SETTING_ID, viewMode) then
+        LogError("Technology Tree failed to save view mode " .. tostring(viewMode))
+    end
+end
 
 -- ===========================================================================
 -- MODULE STATE
@@ -37,16 +66,19 @@ local m_queueList         = nil ---@type UIWidget|nil
 local m_filterList        = nil ---@type UIWidget|nil
 local m_mainTree          = nil ---@type UIWidget|nil
 local m_gridView          = nil ---@type UIWidget|nil
+local m_graphView         = nil ---@type GraphWidget|nil
 local m_unlocksList       = nil ---@type UIWidget|nil
-local m_changeViewBtn     = nil ---@type UIWidget|nil
+local m_viewDropdown      = nil ---@type DropdownWidget|nil
 local m_filterResults     = nil ---@type UIWidget|nil
 
--- "grid" (default) or "tree". The toggle button swaps between them; the
--- inactive view is hidden so navigation skips it.
-local m_viewMode          = "grid"
+-- "grid" (default), "graph", or "tree". The inactive views are hidden so
+-- navigation skips them.
+local m_viewMode          = LoadViewModeSetting()
 
 local m_treeTechs         = {} ---@type table<string, UIWidget> techType -> tree node
 local m_gridTechs         = {} ---@type table<string, UIWidget> techType -> grid cell
+local m_graphTechs        = {} ---@type table<string, UIWidget> techType -> graph node
+local m_lastFocusedTech   = nil ---@type string|nil
 local m_leadsToByType     = {} ---@type table<string, string[]>
 local m_techIndexToType   = {} ---@type table<integer, string>
 local m_techTierByType    = {} ---@type table<string, integer> techType -> tier number within its era
@@ -247,7 +279,7 @@ local function GetRelatedTechLabel(techType, currentEraType)
     if not IsTechHidden(techType) then return GetTechName(techType) end
     local prefix = UnrevealedLocationPrefix(techType, currentEraType)
     local notRevealed = Locale.Lookup("LOC_TECH_TREE_NOT_REVEALED_TECH")
-    if #prefix > 0 then return table.concat(prefix, ", ") .. " " .. notRevealed end
+    if #prefix > 0 then return table.concat(prefix, "[NEWLINE]") .. " " .. notRevealed end
     return notRevealed
 end
 
@@ -272,7 +304,7 @@ local function FormatRelatedTechNames(techTypes, currentEraType)
     end
     local notRevealed = Locale.Lookup("LOC_TECH_TREE_NOT_REVEALED_TECH")
     for _, g in ipairs(groupOrder) do
-        local prefixStr = table.concat(g.prefix, ", ")
+        local prefixStr = table.concat(g.prefix, "[NEWLINE]")
         if g.count == 1 then
             -- "Future Era, Tier 1 Not revealed"
             table.insert(out, prefixStr ~= "" and (prefixStr .. " " .. notRevealed) or notRevealed)
@@ -280,7 +312,7 @@ local function FormatRelatedTechNames(techTypes, currentEraType)
             -- "Tier 1: Not revealed, Not revealed"
             local items = {}
             for _ = 1, g.count do table.insert(items, notRevealed) end
-            local joined = table.concat(items, ", ")
+            local joined = table.concat(items, "[NEWLINE]")
             table.insert(out, prefixStr ~= "" and (prefixStr .. ": " .. joined) or joined)
         end
     end
@@ -304,7 +336,7 @@ local function FormatRowLabel(techType)
     if qpos then
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_QUEUED", qpos))
     end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function FormatRowTooltip(techType)
@@ -334,13 +366,13 @@ local function FormatRowTooltip(techType)
         end
         if #prereqTypes > 0 then
             local names = FormatRelatedTechNames(prereqTypes, currentEraType)
-            AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_PREREQS_HEADER", table.concat(names, ", ")))
+            AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_PREREQS_HEADER", table.concat(names, "[NEWLINE]")))
         end
 
         local leadsTo = m_leadsToByType[techType]
         if leadsTo and #leadsTo > 0 then
             local names = FormatRelatedTechNames(leadsTo, currentEraType)
-            AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_LEADS_TO_HEADER", table.concat(names, ", ")))
+            AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_LEADS_TO_HEADER", table.concat(names, "[NEWLINE]")))
         end
 
         local group = GetTechUnlockObjects(TechKData(techType))
@@ -349,12 +381,12 @@ local function FormatRowTooltip(techType)
             for _, r in ipairs(group.Reveals) do
                 table.insert(names, Locale.Lookup("LOC_TOOLTIP_UNLOCKS_RESOURCE", r.Name))
             end
-            AppendIfNonEmpty(parts, table.concat(names, ", "))
+            AppendIfNonEmpty(parts, table.concat(names, "[NEWLINE]"))
         end
         if #group.Unlocks > 0 then
             local names = {}
             for _, u in ipairs(group.Unlocks) do table.insert(names, u.Name) end
-            AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_UNLOCKS_HEADER", table.concat(names, ", ")))
+            AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_UNLOCKS_HEADER", table.concat(names, "[NEWLINE]")))
         end
     end
 
@@ -561,7 +593,14 @@ end
 -- The focusable widget for a tech in the currently active view.
 local function GetActiveTechWidget(techType)
     if m_viewMode == "grid" then return m_gridTechs[techType] end
+    if m_viewMode == "graph" then return m_graphTechs[techType] end
     return m_treeTechs[techType]
+end
+
+local function GetActiveTechView()
+    if m_viewMode == "grid" then return m_gridView end
+    if m_viewMode == "graph" then return m_graphView end
+    return m_mainTree
 end
 
 -- Walk a widget's ancestor chain for the enclosing tree era and tier nodes
@@ -605,7 +644,7 @@ local function JumpToTech(techType, recordBreadcrumb)
         if tgtEra and tgtEra ~= srcEra then AppendIfNonEmpty(parts, tgtEra:GetLabel()) end
     end
 
-    Speak(Locale.Lookup("LOC_CAI_TECH_TREE_JUMPING", table.concat(parts, ", ")), true)
+    Speak(Locale.Lookup("LOC_CAI_TECH_TREE_JUMPING", table.concat(parts, "[NEWLINE]")), true)
     mgr:SetFocus(target)
 end
 
@@ -726,6 +765,10 @@ local function BuildTechNode(techType)
         FocusKey          = "tech:" .. tostring(capturedType),
     })
     techItem:SetFocusSound("Main_Menu_Mouse_Over")
+
+    techItem:On("focus_enter", function(w)
+        m_lastFocusedTech = capturedType
+    end)
 
     techItem:On("activate", function(w)
         if w:IsDisabled() then return end
@@ -873,7 +916,8 @@ local function BuildTechCell(techType)
 
     -- Keep the unlocks list in step with the focused tech.
     cell:On("focus_enter", function(w)
-        if w:IsFocused() then RebuildUnlocksList(capturedType) end
+        m_lastFocusedTech = capturedType
+        RebuildUnlocksList(capturedType)
     end)
 
     cell:AddInputBindings({
@@ -965,17 +1009,81 @@ local function RebuildGridView()
     mgr:RestoreFocus(m_gridView, capture)
 end
 
--- Rebuild whichever tech views exist, keeping both in sync with game/filter
+local function RebuildGraphView()
+    if not m_graphView then return end
+
+    local capture = mgr:CaptureFocusKey(m_graphView)
+    m_graphView:ClearGraph()
+    m_graphTechs = {}
+
+    for _, era in ipairs(g_kEras) do
+        local eraTechs = {}
+        for techType, kEntry in pairs(g_kItemDefaults) do
+            if kEntry.EraType == era.EraType and FilterMatchesTech(techType) then
+                eraTechs[#eraTechs + 1] = {
+                    techType = techType,
+                    column = m_techColumnByType[techType] or 1,
+                    row = kEntry.UITreeRow or 0,
+                }
+            end
+        end
+        table.sort(eraTechs, function(a, b)
+            if a.column ~= b.column then return a.column < b.column end
+            if a.row ~= b.row then return a.row < b.row end
+            return a.techType < b.techType
+        end)
+        if #eraTechs > 0 then
+            local capturedDescription = era.Description
+            m_graphView:AddGroup({
+                key = era.EraType,
+                label = function() return Locale.Lookup(capturedDescription) end,
+            })
+            for _, entry in ipairs(eraTechs) do
+                local node = BuildTechCell(entry.techType)
+                m_graphTechs[entry.techType] = node
+                m_graphView:AddNode(entry.techType, node, { group = era.EraType })
+            end
+        end
+    end
+
+    for techType, kEntry in pairs(g_kItemDefaults) do
+        if m_graphTechs[techType] then
+            for _, prereqType in ipairs(kEntry.Prereqs or {}) do
+                if prereqType ~= PREREQ_ID_TREE_START and m_graphTechs[prereqType] then
+                    m_graphView:AddEdge(prereqType, techType)
+                end
+            end
+        end
+    end
+
+    mgr:RestoreFocus(m_graphView, capture)
+end
+
+-- Rebuild every tech view, keeping them in sync with game/filter
 -- state so jumps land correctly regardless of the active mode.
 local function RebuildTechViews()
     RebuildMainTree()
     RebuildGridView()
+    RebuildGraphView()
 end
 
-local function ToggleViewMode()
-    m_viewMode = (m_viewMode == "tree") and "grid" or "tree"
-    local active = (m_viewMode == "grid") and m_gridView or m_mainTree
-    if active then mgr:SetFocus(active) end
+---@param viewMode string
+---@return boolean
+local function SetViewMode(viewMode)
+    local selectedIndex = GetViewModeIndex(viewMode)
+    assert(selectedIndex ~= nil, "Technology Tree received invalid view mode " .. tostring(viewMode))
+
+    if m_viewMode ~= viewMode then
+        m_viewMode = viewMode
+        SaveViewModeSetting(viewMode)
+    end
+    if m_viewDropdown and m_viewDropdown:GetSelectedIndex() ~= selectedIndex then
+        m_viewDropdown:SetSelectedIndex(selectedIndex, true)
+    end
+    local active = GetActiveTechView()
+    local target = m_lastFocusedTech and GetActiveTechWidget(m_lastFocusedTech) or nil
+    if target then mgr:SetFocus(target) elseif active then mgr:SetFocus(active) end
+    return true
 end
 
 -- ===========================================================================
@@ -1214,6 +1322,23 @@ local function EnsurePanelBuilt()
     m_panel = mgr:CreateWidget(PANEL_ID, "Panel", {
         Label = function() return ControlText(Controls.ModalScreenTitle) end,
     })
+    m_panel:AddInputBindings({
+        {
+            Key = Keys["1"], IsAlt = true, MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_TREE_SWITCH_TO_GRID",
+            Action = function() return SetViewMode("grid") end,
+        },
+        {
+            Key = Keys["2"], IsAlt = true, MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_TREE_SWITCH_TO_GRAPH",
+            Action = function() return SetViewMode("graph") end,
+        },
+        {
+            Key = Keys["3"], IsAlt = true, MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_TREE_SWITCH_TO_TREE",
+            Action = function() return SetViewMode("tree") end,
+        },
+    })
 
     m_queueList = mgr:CreateWidget(QUEUE_LIST_ID, "List", {
         Label           = function() return Locale.Lookup("LOC_CAI_TECH_TREE_QUEUE_LIST") end,
@@ -1259,28 +1384,40 @@ local function EnsurePanelBuilt()
     m_gridView:SetSearchQueryHandler(TechSearchHandler)
     m_panel:AddChild(m_gridView)
 
-    -- Unlocks list beside the grid; mirrors the focused tech (grid mode only,
-    -- and only when the focused tech has described unlocks)
+    -- Graph view (hidden outside graph mode): Left/Right follows prerequisite
+    -- edges and Up/Down moves among the alternatives from the last traversal.
+    m_graphView = mgr:CreateWidget(GRAPH_VIEW_ID, "Graph", {
+        Label           = function() return Locale.Lookup("LOC_CAI_TECH_TREE_MAIN_LIST") end,
+        HiddenPredicate = function() return m_viewMode ~= "graph" end,
+    })
+    m_graphView:SetSearchQueryHandler(TechSearchHandler)
+    m_panel:AddChild(m_graphView)
+
+    -- Unlocks list beside the grid or graph; mirrors the focused tech and
+    -- appears only when the focused tech has described unlocks.
     m_unlocksList = mgr:CreateWidget(UNLOCKS_LIST_ID, "List", {
         Label           = function() return Locale.Lookup("LOC_CAI_TECH_TREE_UNLOCKS") end,
         HiddenPredicate = function(w)
-            return m_viewMode ~= "grid" or not w.Children or #w.Children == 0
+            return (m_viewMode ~= "grid" and m_viewMode ~= "graph")
+                or not w.Children or #w.Children == 0
         end,
         SearchDepth     = 0,
     })
     m_panel:AddChild(m_unlocksList)
 
-    -- View toggle — must remain the last child. Label reflects the mode it
-    -- switches *to*.
-    m_changeViewBtn = mgr:CreateWidget(CHANGE_VIEW_ID, "Button", {
-        Label = function()
-            return Locale.Lookup(m_viewMode == "grid"
-                and "LOC_CAI_TREE_SWITCH_TO_TREE"
-                or "LOC_CAI_TREE_SWITCH_TO_GRID")
-        end,
+    -- View selector remains the last child and uses the Alt+1-3 order.
+    m_viewDropdown = mgr:CreateWidget(CHANGE_VIEW_ID, "Dropdown", {
+        Label = function() return Locale.Lookup("LOC_CAI_TREE_VIEW_MODE") end,
+        FocusKey = "tech-tree:view",
     })
-    m_changeViewBtn:On("activate", function() ToggleViewMode() end)
-    m_panel:AddChild(m_changeViewBtn)
+    m_viewDropdown:SetOptions({
+        { label = Locale.Lookup("LOC_CAI_TREE_VIEW_GRID"), value = "grid" },
+        { label = Locale.Lookup("LOC_CAI_TREE_VIEW_GRAPH"), value = "graph" },
+        { label = Locale.Lookup("LOC_CAI_TREE_VIEW_TREE"), value = "tree" },
+    })
+    m_viewDropdown:SetSelectedIndex(GetViewModeIndex(m_viewMode), true)
+    m_viewDropdown:On("value_changed", function(_, viewMode) SetViewMode(viewMode) end)
+    m_panel:AddChild(m_viewDropdown)
 
     RebuildTechViews()
     RebuildQueueList()
@@ -1293,7 +1430,7 @@ local function PushPanel()
 
     local playerTechs = GetLocalPlayerTechs()
     local hasCurrent = playerTechs and playerTechs:GetResearchingTech() ~= -1
-    local activeView = (m_viewMode == "grid") and m_gridView or m_mainTree
+    local activeView = GetActiveTechView()
     local focusChild = hasCurrent and m_queueList or activeView
     mgr:Push(m_panel, { focus = focusChild })
 end
@@ -1308,12 +1445,14 @@ local function OnPanelClosedCAI()
     m_filterList        = nil
     m_mainTree          = nil
     m_gridView          = nil
+    m_graphView         = nil
     m_unlocksList       = nil
-    m_changeViewBtn     = nil
+    m_viewDropdown      = nil
     m_filterResults     = nil
-    m_viewMode          = "grid"
     m_treeTechs         = {}
     m_gridTechs         = {}
+    m_graphTechs        = {}
+    m_lastFocusedTech   = nil
     m_leadsToByType     = {}
     m_techIndexToType   = {}
     m_techTierByType    = {}

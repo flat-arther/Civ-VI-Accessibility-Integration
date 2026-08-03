@@ -27,7 +27,7 @@ local function BuildRockBandDialog()
             if level ~= "" then table.insert(parts, level) end
             if desc ~= "" then table.insert(parts, desc) end
 
-            return table.concat(parts, ", ")
+            return table.concat(parts, "[NEWLINE]")
         end,
     })
     table.insert(contentRows, tierInfoRow)
@@ -55,7 +55,7 @@ local function BuildRockBandDialog()
                 table.insert(parts, Locale.Lookup("LOC_ROCK_CONCERT_RESULT_UNIT_LOST"))
             end
 
-            return table.concat(parts, ", ")
+            return table.concat(parts, "[NEWLINE]")
         end,
     })
     table.insert(contentRows, rewardsInfoRow)

@@ -106,16 +106,17 @@
     <Row PageLayoutId="CAIWidgetContainer" ChapterId="DIALOG" SortIndex="10" />
     <Row PageLayoutId="CAIWidgetContainer" ChapterId="DROPDOWN" SortIndex="20" />
     <Row PageLayoutId="CAIWidgetContainer" ChapterId="GAMEVIEW" SortIndex="30" />
-    <Row PageLayoutId="CAIWidgetContainer" ChapterId="INTERFACEMODE" SortIndex="40" />
-    <Row PageLayoutId="CAIWidgetContainer" ChapterId="LIST" SortIndex="50" />
-    <Row PageLayoutId="CAIWidgetContainer" ChapterId="PANEL" SortIndex="60" />
-    <Row PageLayoutId="CAIWidgetContainer" ChapterId="SEARCHPANEL" SortIndex="70" />
-    <Row PageLayoutId="CAIWidgetContainer" ChapterId="SUBMENU" SortIndex="80" />
-    <Row PageLayoutId="CAIWidgetContainer" ChapterId="TABCONTROL" SortIndex="90" />
-    <Row PageLayoutId="CAIWidgetContainer" ChapterId="TABPAGE" SortIndex="100" />
-    <Row PageLayoutId="CAIWidgetContainer" ChapterId="TABLE" SortIndex="110" />
-    <Row PageLayoutId="CAIWidgetContainer" ChapterId="TREE" SortIndex="120" />
-    <Row PageLayoutId="CAIWidgetContainer" ChapterId="TREEITEM" SortIndex="130" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="GRAPH" SortIndex="40" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="INTERFACEMODE" SortIndex="50" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="LIST" SortIndex="60" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="PANEL" SortIndex="70" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="SEARCHPANEL" SortIndex="80" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="SUBMENU" SortIndex="90" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="TABCONTROL" SortIndex="100" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="TABPAGE" SortIndex="110" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="TABLE" SortIndex="120" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="TREE" SortIndex="130" />
+    <Row PageLayoutId="CAIWidgetContainer" ChapterId="TREEITEM" SortIndex="140" />
   </CivilopediaPageLayoutChapters>
   <CivilopediaPages>
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" PageLayoutId="Simple" Name="LOC_CAI_TUTORIAL_MAIN_MENU_TITLE" Tooltip="" SortIndex="0" />
@@ -257,6 +258,7 @@
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="DIALOG" Header="LOC_CAI_PEDIA_WIDGET_DIALOG_TITLE" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="DROPDOWN" Header="LOC_CAI_PEDIA_WIDGET_DROPDOWN_TITLE" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="GAMEVIEW" Header="LOC_CAI_PEDIA_WIDGET_GAMEVIEW_TITLE" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="GRAPH" Header="LOC_CAI_PEDIA_WIDGET_GRAPH_TITLE" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="INTERFACEMODE" Header="LOC_CAI_PEDIA_WIDGET_INTERFACEMODE_TITLE" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="LIST" Header="LOC_CAI_PEDIA_WIDGET_LIST_TITLE" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="PANEL" Header="LOC_CAI_PEDIA_WIDGET_PANEL_TITLE" />
@@ -275,7 +277,7 @@
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAIN_MENU_NAVIGATION" SortIndex="40" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAIN_MENU_ACTIVATION" SortIndex="50" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAIN_MENU_SEARCH" SortIndex="60" />
-    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAIN_MENU_TOOLTIPS" SortIndex="70" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAIN_MENU_FOCUSED_WIDGET_READER" SortIndex="70" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAIN_MENU_HELP" SortIndex="80" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="INTRO" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_MAIN_MENU_SETTINGS" SortIndex="90" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="SEARCH_TYPEAHEAD" ChapterId="CONTENT" Paragraph="LOC_CAI_PEDIA_SEARCH_TYPEAHEAD" SortIndex="10" />
@@ -288,7 +290,7 @@
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="SEARCH_TYPEAHEAD" ChapterId="CONTENT" Paragraph="LOC_CAI_PEDIA_SEARCH_SETTINGS" SortIndex="80" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="USING" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_COMMON" SortIndex="10" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="USING" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_HELP" SortIndex="20" />
-    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="USING" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_TOOLTIPS" SortIndex="30" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="USING" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_FOCUSED_WIDGET_READER" SortIndex="30" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="USING" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_NAVIGATION" SortIndex="40" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="USING" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_ACTIVATION" SortIndex="50" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="KEY_BINDINGS" ChapterId="USING" Paragraph="LOC_CAI_PEDIA_KEY_BINDINGS_CONTEXT" SortIndex="60" />
@@ -351,9 +353,10 @@
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_TREE_VIEWS" SortIndex="20" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_TREE_TREE_VIEW" SortIndex="30" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GRID_NAVIGATION" SortIndex="40" />
-    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_TREE_ACTIONS" SortIndex="50" />
-    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_TREE_FILTERS" SortIndex="60" />
-    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_TREE_GOVERNMENT" SortIndex="70" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GRAPH_NAVIGATION" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_TREE_ACTIONS" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_TREE_FILTERS" SortIndex="70" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVICS_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVICS_TREE_GOVERNMENT" SortIndex="80" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVILOPEDIA" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVILOPEDIA" SortIndex="10" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVILOPEDIA" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVILOPEDIA_LAYOUT" SortIndex="20" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_CIVILOPEDIA" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_CIVILOPEDIA_SEARCH" SortIndex="30" />
@@ -470,9 +473,10 @@
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TECH_TREE_VIEWS" SortIndex="20" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TECH_TREE_TREE_VIEW" SortIndex="30" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GRID_NAVIGATION" SortIndex="40" />
-    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TECH_TREE_ACTIONS" SortIndex="50" />
-    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TECH_TREE_FILTERS" SortIndex="60" />
-    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TECH_TREE_UNLOCKS" SortIndex="70" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_GRAPH_NAVIGATION" SortIndex="50" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TECH_TREE_ACTIONS" SortIndex="60" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TECH_TREE_FILTERS" SortIndex="70" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TECH_TREE" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TECH_TREE_UNLOCKS" SortIndex="80" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TRADE_OVERVIEW" SortIndex="10" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_ACTIVE" SortIndex="20" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_TUTORIAL_TRADE_OVERVIEW" ChapterId="CONTENT" Paragraph="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_AVAILABLE" SortIndex="30" />
@@ -619,6 +623,9 @@
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="DROPDOWN" Paragraph="LOC_CAI_PEDIA_WIDGET_DROPDOWN_COMMIT" SortIndex="30" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="GAMEVIEW" Paragraph="LOC_CAI_PEDIA_WIDGET_GAMEVIEW_FUNCTION" SortIndex="10" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="GAMEVIEW" Paragraph="LOC_CAI_PEDIA_WIDGET_GAMEVIEW_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="GRAPH" Paragraph="LOC_CAI_PEDIA_WIDGET_GRAPH_FUNCTION" SortIndex="10" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="GRAPH" Paragraph="LOC_CAI_PEDIA_WIDGET_GRAPH_KEYS" SortIndex="20" />
+    <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="GRAPH" Paragraph="LOC_CAI_PEDIA_WIDGET_GRAPH_SEARCH" SortIndex="30" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="INTERFACEMODE" Paragraph="LOC_CAI_PEDIA_WIDGET_INTERFACEMODE_FUNCTION" SortIndex="10" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="INTERFACEMODE" Paragraph="LOC_CAI_PEDIA_WIDGET_INTERFACEMODE_KEYS" SortIndex="20" />
     <Row SectionId="CAI_ACCESSIBILITY_MOD" PageId="CAI_WIDGET_FAMILY_CONTAINER_WIDGETS" ChapterId="LIST" Paragraph="LOC_CAI_PEDIA_WIDGET_LIST_FUNCTION" SortIndex="10" />

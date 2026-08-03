@@ -122,7 +122,7 @@ local function AppendResearchSummary(parts, playerID, player)
         table.insert(inner, allianceText)
     end
 
-    AppendIfText(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_RESEARCH_LINE", table.concat(inner, ", ")))
+    AppendIfText(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_RESEARCH_LINE", table.concat(inner, "[NEWLINE]")))
 end
 
 local function AppendCivicSummary(parts, playerID, player)
@@ -140,7 +140,7 @@ local function AppendCivicSummary(parts, playerID, player)
 
     AppendIfText(inner, GetBoostText(data))
 
-    AppendIfText(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_CIVIC_LINE", table.concat(inner, ", ")))
+    AppendIfText(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_CIVIC_LINE", table.concat(inner, "[NEWLINE]")))
 end
 
 local function FormatYieldPerTurn(value)
@@ -168,7 +168,7 @@ local function SpeakScienceAndResearch()
             .. Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", FormatYieldPerTurn(techs:GetScienceYield())))
     end
     AppendResearchSummary(parts, playerID, player)
-    Speak(table.concat(parts, ", "))
+    Speak(table.concat(parts, "[NEWLINE]"))
 end
 
 local function SpeakCultureDetails()
@@ -187,7 +187,7 @@ local function SpeakCultureDetails()
     local govInfo = info.GetGovernmentInfo and info.GetGovernmentInfo()
     if govInfo then table.insert(parts, govInfo) end
 
-    Speak(table.concat(parts, ", "))
+    Speak(table.concat(parts, "[NEWLINE]"))
 end
 
 -- =============================================
@@ -263,7 +263,7 @@ local function BuildCrisisLabel(crisis, localPlayerID)
         table.insert(parts, Locale.Lookup("LOC_EMERGENCY_TURNS_REMAINING", crisis.TurnsLeft))
     end
 
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildCrisisTooltip(crisis, localPlayerID)
@@ -295,7 +295,7 @@ local function BuildCrisisTooltip(crisis, localPlayerID)
     end
 
     if #parts == 0 then return nil end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function RemoveCrisisList()

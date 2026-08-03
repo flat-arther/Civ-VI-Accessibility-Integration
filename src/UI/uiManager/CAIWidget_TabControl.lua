@@ -24,6 +24,10 @@ local function MakeTabStrip(mgr, ownerId)
     local strip = mgr:CreateWidget(ownerId .. "_Strip", "HorizontalList", {
         Label = function() return Locale.Lookup("LOC_CAI_TAB_STRIP_LABEL") end,
     })
+    -- Position speech is intentionally limited to tab strips rather than all
+    -- HorizontalLists. Keep its concrete widget type intact and mark only this
+    -- private instance as the TabControl's strip.
+    strip.IsTabStrip = true
     strip.SpeechSettings = { Role = false, Position = false }
     return strip
 end

@@ -1,4 +1,4 @@
-﻿-- ===========================================================================
+-- ===========================================================================
 -- Internet Lobby Screen
 -- ===========================================================================
 include( "InstanceManager" );	--InstanceManager
@@ -1743,7 +1743,7 @@ local function CAI_GetGameLabel(listing)
 		CAI_AddPart(status, gameStartedTooltip)
 	end
 	if #status > 0 then
-		return CAI_Lookup("LOC_CAI_LOBBY_GAME_ROW_LABEL", name, table.concat(status, ", "))
+		return CAI_Lookup("LOC_CAI_LOBBY_GAME_ROW_LABEL", name, table.concat(status, "[NEWLINE]"))
 	end
 	return name
 end

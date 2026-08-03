@@ -92,7 +92,7 @@ local function BuildRowLabel(row)
     if not ControlIsHidden(row.CapitalIcon) then
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL"))
     end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildRowTooltip(row)
@@ -136,7 +136,7 @@ local function BuildGovernorPreviewText(governorInst)
             end
         end
         if #promoTips > 0 then
-            AppendIfNonEmpty(parts, table.concat(promoTips, ", "))
+            AppendIfNonEmpty(parts, table.concat(promoTips, "[NEWLINE]"))
         end
     end
 
@@ -185,7 +185,7 @@ local function OpenConfirmDialog(rowIndex)
 
     local cityText = ControlText(Controls.CityName)
     if not ControlIsHidden(Controls.CapitalIcon) then
-        cityText = table.concat({ cityText, Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL") }, ", ")
+        cityText = table.concat({ cityText, Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL") }, "[NEWLINE]")
     end
     summaryWidgets[#summaryWidgets + 1] = mgr:CreateWidget(
         mgr:GenerateWidgetId("CAIGovAssign_City"),

@@ -258,7 +258,7 @@ local function BuildDestinationTooltip(cap)
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_AVAILABLE_MISSIONS", cap.missionCount))
     end
     if #cap.districts > 0 then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_CITY_DISTRICTS", table.concat(cap.districts, ", ")))
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_CITY_DISTRICTS", table.concat(cap.districts, "[NEWLINE]")))
     end
     return table.concat(parts, "[NEWLINE]")
 end
@@ -275,7 +275,7 @@ local function BuildMissionLabel(mis)
     if mis.probability then
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_MISSION_PROBABILITY", mis.probability .. "%"))
     end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildMissionTooltip(mis)

@@ -73,7 +73,7 @@ local function RebuildResultsList()
         local playerName = SafeGetText(Controls.VictoryPlayerName)
         if playerName then table.insert(parts, playerName) end
         if #parts > 0 then
-            local label = table.concat(parts, ", ")
+            local label = table.concat(parts, "[NEWLINE]")
             local blurb = SafeGetText(Controls.VictoryBlurb)
             local item = mgr:CreateWidget(MakeId("CAIEG_res_"), "StaticText", {
                 Label = function() return label end,
@@ -92,7 +92,7 @@ local function RebuildResultsList()
         local playerName = SafeGetText(Controls.DefeatedPlayerName)
         if playerName then table.insert(parts, playerName) end
         if #parts > 0 then
-            local label = table.concat(parts, ", ")
+            local label = table.concat(parts, "[NEWLINE]")
             local item = mgr:CreateWidget(MakeId("CAIEG_res_"), "StaticText", {
                 Label = function() return label end,
                 FocusKey = "endgame:result:defeated",

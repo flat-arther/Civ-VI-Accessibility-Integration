@@ -1639,7 +1639,7 @@ local function RebuildDetailOverview()
         else
             table.insert(parts, Locale.Lookup("LOC_GAMESUMMARY_DEFEAT"))
         end
-        local capLabel = table.concat(parts, ", ")
+        local capLabel = table.concat(parts, "[NEWLINE]")
 
         local playerNode = mgr:CreateWidget(MakeId("CAIHoFD_pl_"), "TreeItem", {
             Label = function() return capLabel end,
@@ -1899,7 +1899,7 @@ local function RebuildReportsTree()
                     for _, cp in ipairs(cellParts) do
                         table.insert(parts, cp.name .. ": " .. cp.value)
                     end
-                    local capLabel = table.concat(parts, ", ")
+                    local capLabel = table.concat(parts, "[NEWLINE]")
                     local rowLeaf = mgr:CreateWidget(MakeId("CAIHoFD_rep_"), "StaticText", {
                         Label = function() return capLabel end,
                         FocusKey = "hofdetail:report:" .. gi .. ":" .. rpi .. ":r:" .. ri,

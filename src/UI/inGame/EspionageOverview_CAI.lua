@@ -219,7 +219,7 @@ local function BuildSpyLabel(entry)
         parts[#parts + 1] = Locale.Lookup(entry.operationInfo.Description)
     end
 
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildSpyTooltip(entry)
@@ -261,7 +261,7 @@ local function BuildOffMapLabel(entry)
     if entry.targetCityName then
         parts[#parts + 1] = Locale.Lookup("LOC_ESPIONAGEOVERVIEW_TRANSIT_TO", entry.targetCityName)
     end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildOffMapTooltip(entry)
@@ -276,7 +276,7 @@ local function BuildCapturedOwnLabel(entry)
     parts[#parts + 1] = Locale.Lookup(GetSpyRankNameByLevel(entry.level))
     parts[#parts + 1] = Locale.Lookup("LOC_ESPIONAGEOVERVIEW_SPYCAUGHT")
     parts[#parts + 1] = entry.capturingPlayerName
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildCapturedOwnTooltip(entry)
@@ -294,7 +294,7 @@ local function BuildCapturedEnemyLabel(entry)
     local parts = {}
     parts[#parts + 1] = entry.name
     parts[#parts + 1] = entry.owningCivName
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildCapturedEnemyTooltip(entry)
@@ -319,7 +319,7 @@ local function BuildMissionLabel(entry)
         end
     end
     parts[#parts + 1] = Locale.Lookup("LOC_ESPIONAGEOVERVIEW_TURNS_AGO", entry.turnsSince)
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildMissionTooltip(entry)
@@ -404,7 +404,7 @@ local function BuildCityCategoryLabel(group)
         parts[#parts + 1] = Locale.Lookup("LOC_CAI_ESPIONAGE_OPERATIVE_COUNT", count)
     end
 
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildCityCategoryTooltip(group)
@@ -449,12 +449,12 @@ local function BuildCityCategoryTooltip(group)
 
     if #districtsWithOps > 0 then
         parts[#parts + 1] = Locale.Lookup("LOC_CAI_ESPIONAGE_DISTRICTS_WITH_OPERATIVES") ..
-            " " .. table.concat(districtsWithOps, ", ")
+            " " .. table.concat(districtsWithOps, "[NEWLINE]")
     end
 
     if #otherDistricts > 0 then
         parts[#parts + 1] = Locale.Lookup("LOC_CAI_ESPIONAGE_OTHER_DISTRICTS") ..
-            " " .. table.concat(otherDistricts, ", ")
+            " " .. table.concat(otherDistricts, "[NEWLINE]")
     end
 
     return JoinNonEmpty(parts, "[NEWLINE]")

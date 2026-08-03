@@ -34,7 +34,7 @@ local DIPLO_PIP_INFO     = {
 
 local PANEL_ID           = "CAICityStates_Panel"
 local OVERVIEW_TABLE_ID  = "CAICityStates_OverviewTable"
-local DETAILS_TREE_ID    = "CAICityStates_DetailsTree"
+local TREE_SORT_ID       = "CAICityStates_TreeSort"
 local TREE_VIEW_ID       = "CAICityStates_TreeView"
 local SWITCH_VIEW_ID     = "CAICityStates_SwitchView"
 local ENVOY_SLIDER_ID    = "CAICityStates_EnvoySlider"
@@ -48,7 +48,7 @@ local VIEW_SETTING_ID      = "CityStatesViewMode"
 local m_ui               = {
     panel        = nil,
     overview     = nil,
-    detailsTree  = nil,
+    treeSort     = nil,
     treeView     = nil,
     switchView   = nil,
     envoySlider  = nil,
@@ -76,6 +76,11 @@ end
 
 local m_selectedPlayerID = -1
 local m_overviewPlayerIDs = {}
+local m_treePlayerEntries = {}
+local m_treeColumns       = {}
+local m_treeSortOptions   = {}
+local m_treeSortColumn    = nil
+local m_treeSortAscending = false
 local m_viewMode          = LoadViewModeSetting()
 local m_hasGovernors     = (IsExpansion1Active() or IsExpansion2Active())
 local m_caiEnvoyChanges  = {}
@@ -159,6 +164,25 @@ end
 -- Live game-state readers
 -- ============================================================================
 
+local function GetRelationshipsWithPlayerIDs(cityStatePlayerID)
+    local relationships = GetRelationships(cityStatePlayerID)
+
+    local function AttachPlayerIDs(entries, playerIDs)
+        local entryIndex = 1
+        for _, playerID in ipairs(playerIDs) do
+            local diplomaticAI = Players[playerID]:GetDiplomaticAI()
+            if diplomaticAI:GetDiplomaticStateIndex(cityStatePlayerID) ~= -1 then
+                entries[entryIndex].PlayerID = playerID
+                entryIndex = entryIndex + 1
+            end
+        end
+    end
+
+    AttachPlayerIDs(relationships.CivRelationships, PlayerManager.GetAliveMajorIDs())
+    AttachPlayerIDs(relationships.CityStateRelationships, PlayerManager.GetAliveMinorIDs())
+    return relationships
+end
+
 local function GetCityStateData(playerID)
     local localPlayerID = Game.GetLocalPlayer()
     if localPlayerID == -1 then return nil end
@@ -229,7 +253,7 @@ local function GetCityStateData(playerID)
         iTurnChanged          = pLocalDiplomacy:GetAtWarChangeTurn(playerID),
         DiplomaticState       = diplomaticState,
         Quests                = GetQuests(playerID),
-        Relationships         = GetRelationships(playerID),
+        Relationships         = GetRelationshipsWithPlayerIDs(playerID),
         Bonuses               = {},
         CivType               = pConfig:GetCivilizationTypeName(),
     }
@@ -339,13 +363,109 @@ local function GetSuzerainUniqueBonusAndResources(playerID)
             end
         end
         if #resList > 0 then
-            table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_RESOURCES", table.concat(resList, ", ")))
+            table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_RESOURCES", table.concat(resList, "[NEWLINE]")))
         else
             table.insert(parts, Locale.Lookup("LOC_CITY_STATES_SUZERAIN_NO_RESOURCES_AVAILABLE"))
         end
     end
 
     return table.concat(parts, "[NEWLINE]")
+end
+
+local function GetBonusBreakdownParts(kCS)
+    FillBonuses(kCS)
+    local parts = {}
+    for _, tier in ipairs({ 1, 3, 6 }) do
+        local bonus = kCS.Bonuses[tier]
+        if bonus then
+            local active = (tier == 1 and kCS.isBonus1) or
+                (tier == 3 and kCS.isBonus3) or
+                (tier == 6 and kCS.isBonus6)
+            local label = Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_TIER", tier)
+            if active then
+                label = label .. " (" .. Locale.Lookup("LOC_CAI_CITYSTATES_BONUS_ACTIVE") .. ")"
+            end
+            table.insert(parts, label .. "[NEWLINE]" .. NormalizeText(bonus.Details))
+        end
+    end
+
+    local suzerainBonus = kCS.Bonuses["Suzerain"]
+    if suzerainBonus then
+        local label = Locale.Lookup("LOC_CITY_STATES_SUZERAIN")
+        if kCS.isBonusSuzerain then
+            label = label .. " (" .. Locale.Lookup("LOC_CAI_CITYSTATES_BONUS_ACTIVE") .. ")"
+        end
+        local details = NormalizeText(suzerainBonus.Details)
+        table.insert(parts, JoinNonEmpty({ label, details }, "[NEWLINE]"))
+    end
+    return parts
+end
+
+local function GetQuestEntryLabel(kQuest)
+    local reward = kQuest.Reward and kQuest.Reward ~= "" and
+        (Locale.Lookup("LOC_CITY_STATES_REWARD") .. " " .. NormalizeText(kQuest.Reward)) or ""
+    return JoinNonEmpty({ kQuest.Name, NormalizeText(kQuest.Description), reward }, "[NEWLINE]")
+end
+
+local function GetRelationshipEntryLabel(entry)
+    local name = Locale.Lookup(entry.PlayerName)
+    local pipInfo = DIPLO_PIP_INFO[entry.DiploState]
+    local statusText = pipInfo and Locale.Lookup(pipInfo.Short) or ""
+    return JoinNonEmpty({ name, statusText }, "[NEWLINE]")
+end
+
+local function ShouldIncludeRelationshipEntry(entry, cityStatePlayerID, isCityStateRelationship)
+    if not entry or not entry.HasMet then return false end
+    if isCityStateRelationship and entry.PlayerID == cityStatePlayerID then
+        return false
+    end
+    return true
+end
+
+local function IsWarRelationship(entry)
+    return entry.DiploState == "DIPLO_STATE_WAR_WITH_MAJOR" or
+        entry.DiploState == "DIPLO_STATE_WAR_WITH_MINOR" or
+        entry.DiploState == "DIPLO_STATE_MINOR_MINOR_WAR"
+end
+
+local function GetVisibleRelationshipEntries(kCS, excludeLocalPlayer)
+    local entries = {}
+    if not kCS or not kCS.Relationships then return entries end
+
+    local function AddEntries(source, isCityStateRelationship)
+        for _, entry in ipairs(source or {}) do
+            if ShouldIncludeRelationshipEntry(entry, kCS.iPlayer, isCityStateRelationship) and
+                (not excludeLocalPlayer or entry.PlayerID ~= Game.GetLocalPlayer()) then
+                table.insert(entries, {
+                    label = GetRelationshipEntryLabel(entry),
+                    name = Locale.Lookup(entry.PlayerName),
+                    atWar = IsWarRelationship(entry),
+                })
+            end
+        end
+    end
+
+    AddEntries(kCS.Relationships.CivRelationships, false)
+    AddEntries(kCS.Relationships.CityStateRelationships, true)
+    table.sort(entries, function(a, b)
+        if a.atWar ~= b.atWar then return a.atWar end
+        local comparison = Locale.Compare(a.name, b.name)
+        if comparison ~= 0 then return comparison < 0 end
+        return Locale.Compare(a.label, b.label) < 0
+    end)
+    return entries
+end
+
+local function GetVisibleRelationshipCount(kCS)
+    return #GetVisibleRelationshipEntries(kCS, false)
+end
+
+local function GetForeignRelationshipsCell(playerID)
+    local entries = GetVisibleRelationshipEntries(GetCityStateData(playerID), true)
+    if #entries == 0 then return Locale.Lookup("LOC_CITY_STATES_NONE") end
+    local parts = {}
+    for _, entry in ipairs(entries) do table.insert(parts, entry.label) end
+    return JoinNonEmpty(parts, "; ")
 end
 
 local function GetAmbassadorForPlayer(cityStatePlayerID, majorPlayerID)
@@ -382,11 +502,14 @@ local function GetEnvoyCell(playerID)
     local parts = {}
     if kCS.isBonusSuzerain then
         table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", kCS.Tokens))
-        table.insert(parts, Locale.Lookup("LOC_CITY_STATES_SUZERAIN"))
     else
         local needed = math.max(3, kCS.SuzerainTokensNeeded)
         if kCS.SuzerainID ~= -1 then needed = needed + 1 end
         table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_OF", kCS.Tokens, needed))
+    end
+
+    for _, bonus in ipairs(GetBonusBreakdownParts(kCS)) do
+        table.insert(parts, bonus)
     end
 
     local pending = GetPendingForPlayer(playerID)
@@ -398,7 +521,7 @@ local function GetEnvoyCell(playerID)
     if governorName ~= "" then
         table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_AMBASSADOR_ASSIGNED", governorName))
     end
-    return JoinNonEmpty(parts, ", ")
+    return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function GetInfluenceCell(playerID, majorPlayerID)
@@ -406,7 +529,7 @@ local function GetInfluenceCell(playerID, majorPlayerID)
     if not kCS then return "" end
     local influence = kCS.Influence[majorPlayerID] or 0
     local governorName = GetGovernorName(playerID, majorPlayerID)
-    return JoinNonEmpty({ Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", influence), governorName }, ", ")
+    return JoinNonEmpty({ Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", influence), governorName }, "[NEWLINE]")
 end
 
 local function GetUnmetInfluence(playerID)
@@ -433,7 +556,7 @@ local function GetUnmetInfluenceCell(playerID)
     for _, influence in ipairs(values) do
         table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", influence))
     end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildOverviewColumns(allData)
@@ -449,6 +572,8 @@ local function BuildOverviewColumns(allData)
                 local kCS = GetCityStateData(playerID)
                 return kCS and Locale.Lookup(kCS.Name) or nil
             end,
+            sortAscendingDescription = "LOC_CAI_SORT_A_TO_Z",
+            sortDescendingDescription = "LOC_CAI_SORT_Z_TO_A",
         },
         {
             key = "type",
@@ -461,10 +586,12 @@ local function BuildOverviewColumns(allData)
                 local kCS = GetCityStateData(playerID)
                 return kCS and GetTypeName(kCS) or nil
             end,
+            sortAscendingDescription = "LOC_CAI_SORT_A_TO_Z",
+            sortDescendingDescription = "LOC_CAI_SORT_Z_TO_A",
         },
         {
             key = "relationship",
-            header = function() return Locale.Lookup("LOC_CAI_CITYSTATES_COLUMN_RELATIONSHIP") end,
+            header = function() return Locale.Lookup("LOC_CAI_CITYSTATES_COLUMN_YOUR_RELATIONSHIP") end,
             getCell = function(playerID)
                 local kCS = GetCityStateData(playerID)
                 return kCS and GetDiploShort(kCS) or ""
@@ -478,6 +605,8 @@ local function BuildOverviewColumns(allData)
                 local info = kCS and DIPLO_PIP_INFO[kCS.DiplomaticState] or nil
                 return info and info.Sort or 0
             end,
+            sortAscendingDescription = "LOC_CAI_SORT_AT_WAR_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_SUZERAIN_FIRST",
         },
         {
             key = "envoys",
@@ -487,6 +616,8 @@ local function BuildOverviewColumns(allData)
                 local kCS = GetCityStateData(playerID)
                 return kCS and (kCS.Tokens + GetPendingForPlayer(playerID)) or nil
             end,
+            sortAscendingDescription = "LOC_CAI_SORT_FEWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_MOST_FIRST",
         },
         {
             key = "suzerain",
@@ -499,18 +630,40 @@ local function BuildOverviewColumns(allData)
                 local kCS = GetCityStateData(playerID)
                 return kCS and kCS.SuzerainName or nil
             end,
+            sortAscendingDescription = "LOC_CAI_SORT_A_TO_Z",
+            sortDescendingDescription = "LOC_CAI_SORT_Z_TO_A",
         },
         {
             key = "quests",
-            header = function() return Locale.Lookup("LOC_CITY_STATES_QUESTS") end,
+            header = function() return Locale.Lookup("LOC_CAI_CITYSTATES_COLUMN_ACTIVE_QUESTS") end,
             getCell = function(playerID)
                 local kCS = GetCityStateData(playerID)
-                return Locale.Lookup("LOC_CAI_CITYSTATES_ACTIVE", kCS and CountTable(kCS.Quests) or 0)
+                if not kCS then return "" end
+                local parts = { Locale.Lookup("LOC_CAI_CITYSTATES_ACTIVE", CountTable(kCS.Quests)) }
+                local quests = {}
+                for _, kQuest in pairs(kCS.Quests) do
+                    table.insert(quests, NormalizeText(kQuest.Description))
+                end
+                table.sort(quests, function(a, b) return Locale.Compare(a, b) < 0 end)
+                for _, quest in ipairs(quests) do table.insert(parts, quest) end
+                return JoinNonEmpty(parts, "; ")
             end,
             sortKey = function(playerID)
                 local kCS = GetCityStateData(playerID)
                 return kCS and CountTable(kCS.Quests) or nil
             end,
+            sortAscendingDescription = "LOC_CAI_SORT_FEWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_MOST_FIRST",
+        },
+        {
+            key = "foreign-relationships",
+            header = function() return Locale.Lookup("LOC_CAI_CITYSTATES_COLUMN_FOREIGN_RELATIONSHIPS") end,
+            getCell = function(playerID) return GetForeignRelationshipsCell(playerID) end,
+            sortKey = function(playerID)
+                return #GetVisibleRelationshipEntries(GetCityStateData(playerID), true)
+            end,
+            sortAscendingDescription = "LOC_CAI_SORT_FEWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_MOST_FIRST",
         },
     }
 
@@ -551,6 +704,8 @@ local function BuildOverviewColumns(allData)
                 local kCS = GetCityStateData(playerID)
                 return kCS and (kCS.Influence[majorPlayerID] or 0) or nil
             end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
         })
     end
 
@@ -563,9 +718,101 @@ local function BuildOverviewColumns(allData)
                 local _, total = GetUnmetInfluence(playerID)
                 return total
             end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
         })
     end
     return columns
+end
+
+local function ResolveColumnHeader(column)
+    return type(column.header) == "function" and column.header() or column.header or ""
+end
+
+local function BuildTreeSortOptions(columns)
+    local options = {
+        {
+            label = Locale.Lookup("LOC_CAI_DATATABLE_SORT_NATURAL"),
+            value = { column = nil, ascending = false },
+        },
+    }
+    for _, column in ipairs(columns) do
+        if column.sortKey then
+            local header = ResolveColumnHeader(column)
+            table.insert(options, {
+                label = header .. "[NEWLINE]" .. Locale.Lookup(column.sortAscendingDescription),
+                value = { column = column.key, ascending = true },
+            })
+            table.insert(options, {
+                label = header .. "[NEWLINE]" .. Locale.Lookup(column.sortDescendingDescription),
+                value = { column = column.key, ascending = false },
+            })
+        end
+    end
+    return options
+end
+
+local function SyncTreeSortDropdown()
+    if not m_ui.treeSort then return end
+    for index, option in ipairs(m_treeSortOptions) do
+        local sort = option.value
+        if sort.column == m_treeSortColumn and
+            (sort.column == nil or sort.ascending == m_treeSortAscending) then
+            m_ui.treeSort:SetSelectedIndex(index, true)
+            return
+        end
+    end
+end
+
+local function CompareTreeSortValues(a, b)
+    if a == b then return 0 end
+    if a == nil then return 1 end
+    if b == nil then return -1 end
+    if type(a) == "number" and type(b) == "number" then return a < b and -1 or 1 end
+    if type(a) == "boolean" and type(b) == "boolean" then return a and 1 or -1 end
+    return Locale.Compare(tostring(a), tostring(b))
+end
+
+local function GetOrderedTreePlayers()
+    local ordered = {}
+    for _, entry in ipairs(m_treePlayerEntries) do
+        table.insert(ordered, entry)
+    end
+    if not m_treeSortColumn then return ordered end
+
+    local sortColumn = nil
+    for _, column in ipairs(m_treeColumns) do
+        if column.key == m_treeSortColumn then
+            sortColumn = column
+            break
+        end
+    end
+    if not sortColumn or not sortColumn.sortKey then return ordered end
+
+    local decorated = {}
+    for naturalIndex, entry in ipairs(ordered) do
+        table.insert(decorated, {
+            entry = entry,
+            naturalIndex = naturalIndex,
+            value = sortColumn.sortKey(entry.id),
+        })
+    end
+    table.sort(decorated, function(a, b)
+        if a.value == nil or b.value == nil then
+            if a.value == b.value then return a.naturalIndex < b.naturalIndex end
+            return a.value ~= nil
+        end
+        local comparison = CompareTreeSortValues(a.value, b.value)
+        if comparison == 0 then return a.naturalIndex < b.naturalIndex end
+        if m_treeSortAscending then return comparison < 0 end
+        return comparison > 0
+    end)
+
+    ordered = {}
+    for _, decoratedEntry in ipairs(decorated) do
+        table.insert(ordered, decoratedEntry.entry)
+    end
+    return ordered
 end
 
 local function FormatTreeRowLabel(playerID)
@@ -597,7 +844,7 @@ local function FormatTreeRowLabel(playerID)
     if CountTable(kCS.Quests) > 0 then
         table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_QUEST_AVAILABLE"))
     end
-    return JoinNonEmpty(parts, ", ")
+    return JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function FormatTreeRowTooltip(playerID)
@@ -609,12 +856,12 @@ local function FormatTreeRowTooltip(playerID)
         local bonus = kCS.Bonuses[tier]
         if bonus then
             table.insert(parts,
-                Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_TIER", tier) .. ", " .. NormalizeText(bonus.Details))
+                Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_TIER", tier) .. "[NEWLINE]" .. NormalizeText(bonus.Details))
         end
     end
     local uniqueBonusAndResources = GetSuzerainUniqueBonusAndResources(playerID)
     if uniqueBonusAndResources ~= "" then
-        table.insert(parts, Locale.Lookup("LOC_CITY_STATES_SUZERAIN") .. ", " .. uniqueBonusAndResources)
+        table.insert(parts, Locale.Lookup("LOC_CITY_STATES_SUZERAIN") .. "[NEWLINE]" .. uniqueBonusAndResources)
     end
     return JoinNonEmpty(parts, "[NEWLINE]")
 end
@@ -638,7 +885,7 @@ local function BuildBonusesSection(parent, playerID)
                 label = label .. " (" .. Locale.Lookup("LOC_CAI_CITYSTATES_BONUS_ACTIVE") .. ")"
             end
             local tooltip = Locale.Lookup("LOC_CAI_CITYSTATES_REQUIRES_ENVOYS", tier) ..
-                ", " .. NormalizeText(bonus.Details)
+                "[NEWLINE]" .. NormalizeText(bonus.Details)
             parent:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_Bonus"), "StaticText", {
                 Label   = function() return label end,
                 Tooltip = function() return tooltip end,
@@ -654,10 +901,10 @@ local function BuildBonusesSection(parent, playerID)
             label = label .. " (" .. Locale.Lookup("LOC_CAI_CITYSTATES_BONUS_ACTIVE") .. ")"
         end
         local tooltip = Locale.Lookup("LOC_CAI_CITYSTATES_REQUIRES_SUZERAIN") ..
-            ", " .. NormalizeText(suzerainBonus.Details)
+            "[NEWLINE]" .. NormalizeText(suzerainBonus.Details)
         local uniqueBonusAndResources = GetSuzerainUniqueBonusAndResources(playerID)
         if uniqueBonusAndResources ~= "" then
-            tooltip = tooltip .. ", " .. uniqueBonusAndResources
+            tooltip = tooltip .. "[NEWLINE]" .. uniqueBonusAndResources
         end
         parent:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_BonusSuz"), "StaticText", {
             Label   = function() return label end,
@@ -692,7 +939,7 @@ local function BuildInfluenceSection(parent, playerID)
         local label = civName .. ": " .. Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", entry.influence)
         if entry.playerID == localPlayerID or diplomacy:HasMet(entry.playerID) then
             local governorName = GetGovernorName(playerID, entry.playerID)
-            if governorName ~= "" then label = label .. ", " .. governorName end
+            if governorName ~= "" then label = label .. "[NEWLINE]" .. governorName end
         end
         parent:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_Inf"), "StaticText", {
             Label = function() return label end,
@@ -705,58 +952,11 @@ local function BuildQuestsSection(parent, playerID)
     if not kCS then return end
 
     for _, kQuest in pairs(kCS.Quests) do
-        local reward = kQuest.Reward and kQuest.Reward ~= "" and
-            (Locale.Lookup("LOC_CITY_STATES_REWARD") .. " " .. NormalizeText(kQuest.Reward)) or ""
-        local label = JoinNonEmpty({ kQuest.Name, NormalizeText(kQuest.Description), reward }, ", ")
+        local label = GetQuestEntryLabel(kQuest)
         parent:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_Quest"), "StaticText", {
             Label = function() return label end,
         }))
     end
-end
-
-local function GetRelationshipEntryLabel(entry)
-    local name
-    if entry.HasMet then
-        name = Locale.Lookup(entry.PlayerName)
-    else
-        name = Locale.Lookup("LOC_LOYALTY_PANEL_UNMET_CIV")
-    end
-    local pipInfo = DIPLO_PIP_INFO[entry.DiploState]
-    local statusText = pipInfo and Locale.Lookup(pipInfo.Short) or ""
-    return JoinNonEmpty({ name, statusText }, ", ")
-end
-
-local function IsSameCityStateRelationship(entry, cityStatePlayerID)
-    local cityStateName = PlayerConfigurations[cityStatePlayerID] and
-        PlayerConfigurations[cityStatePlayerID]:GetCivilizationShortDescription() or nil
-    if not cityStateName or not entry or not entry.PlayerName then return false end
-    if entry.PlayerName == cityStateName then return true end
-    return Locale.Lookup(entry.PlayerName) == Locale.Lookup(cityStateName)
-end
-
-local function ShouldIncludeRelationshipEntry(entry, cityStatePlayerID, isCityStateRelationship)
-    if not entry or not entry.HasMet then return false end
-    if isCityStateRelationship and IsSameCityStateRelationship(entry, cityStatePlayerID) then
-        return false
-    end
-    return true
-end
-
-local function GetVisibleRelationshipCount(kCS)
-    if not kCS or not kCS.Relationships then return 0 end
-
-    local count = 0
-    for _, entry in ipairs(kCS.Relationships.CivRelationships or {}) do
-        if ShouldIncludeRelationshipEntry(entry, kCS.iPlayer, false) then
-            count = count + 1
-        end
-    end
-    for _, entry in ipairs(kCS.Relationships.CityStateRelationships or {}) do
-        if ShouldIncludeRelationshipEntry(entry, kCS.iPlayer, true) then
-            count = count + 1
-        end
-    end
-    return count
 end
 
 local function BuildRelationshipEntry(parent, entry, idPrefix)
@@ -890,23 +1090,8 @@ local function TryConfirmEnvoys()
 end
 
 -- ============================================================================
--- Selected city-state details
+-- Selected city-state and alternate tree
 -- ============================================================================
-
-local function AddLazyDetailsSection(label, focusKey, buildChildren)
-    local section = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_DetailSection"), "TreeItem", {
-        Label = label,
-        FocusKey = focusKey,
-    })
-    section._csBuilt = false
-    section:On("focus_enter", function(w)
-        if not w._csBuilt then
-            w._csBuilt = true
-            buildChildren(w)
-        end
-    end)
-    m_ui.detailsTree:AddChild(section)
-end
 
 local function GetRelationshipDetailLabel(playerID)
     local kCS = GetCityStateData(playerID)
@@ -917,68 +1102,11 @@ local function GetRelationshipDetailLabel(playerID)
     return long ~= "" and Locale.Lookup("LOC_CAI_CITYSTATES_RELATIONSHIP", short, long) or short
 end
 
-local function BuildDetailsTree()
-    if not m_ui.detailsTree then return end
-    local capture = mgr:CaptureFocusKey(m_ui.detailsTree)
-    m_ui.detailsTree:ClearChildren()
-
-    local playerID = m_selectedPlayerID
-    local kCS = GetSelectedCityState()
-    if not kCS then
-        m_ui.detailsTree:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_NoSelection"), "StaticText", {
-            Label = function() return Locale.Lookup("LOC_CAI_CITYSTATES_NO_SELECTION") end,
-        }))
-        mgr:RestoreFocus(m_ui.detailsTree, capture)
-        return
-    end
-
-    m_ui.detailsTree:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_DetailRelationship"), "StaticText", {
-        Label = function() return GetRelationshipDetailLabel(playerID) end,
-        FocusKey = "details:cs:" .. tostring(playerID) .. ":relationship-status",
-    }))
-
-    AddLazyDetailsSection(function()
-        local live = GetCityStateData(playerID)
-        if not live then return Locale.Lookup("LOC_CITY_STATES_BONUSES", "") end
-        local count = 0
-        if live.isBonus1 then count = count + 1 end
-        if live.isBonus3 then count = count + 1 end
-        if live.isBonus6 then count = count + 1 end
-        if live.isBonusSuzerain then count = count + 1 end
-        return Locale.Lookup("LOC_CITY_STATES_BONUSES", Locale.Lookup(live.Name)) ..
-            ", " .. Locale.Lookup("LOC_CAI_CITYSTATES_BONUS_COUNT", count, 4)
-    end, "details:cs:" .. tostring(playerID) .. ":bonuses", function(parent)
-        BuildBonusesSection(parent, playerID)
-    end)
-
-    local questLabel = function()
-        local live = GetCityStateData(playerID)
-        return Locale.Lookup("LOC_CITY_STATES_QUESTS") ..
-            ", " .. Locale.Lookup("LOC_CAI_CITYSTATES_ACTIVE", live and CountTable(live.Quests) or 0)
-    end
-    AddLazyDetailsSection(questLabel, "details:cs:" .. tostring(playerID) .. ":quests", function(parent)
-        BuildQuestsSection(parent, playerID)
-    end)
-
-    local relationshipLabel = function()
-        local live = GetCityStateData(playerID)
-        local count = GetVisibleRelationshipCount(live)
-        return Locale.Lookup("LOC_CITY_STATES_RELATIONSHIPS") ..
-            ", " .. Locale.Lookup("LOC_CITY_STATES_CIVILIZATIONS", count)
-    end
-    AddLazyDetailsSection(relationshipLabel, "details:cs:" .. tostring(playerID) .. ":relationships", function(parent)
-        BuildRelationshipsSection(parent, playerID)
-    end)
-
-    mgr:RestoreFocus(m_ui.detailsTree, capture)
-end
-
 local function SelectCityState(playerID)
     if not playerID or playerID == m_selectedPlayerID then return end
     m_selectedPlayerID = playerID
     SyncVanillaControlsForCityState(playerID)
     SyncEnvoySlider()
-    BuildDetailsTree()
 end
 
 local function AddLazyTreeSection(parent, label, focusKey, buildChildren)
@@ -1044,14 +1172,14 @@ local function CreateTreeViewCityStateRow(playerID)
         if kCS.isBonus6 then count = count + 1 end
         if kCS.isBonusSuzerain then count = count + 1 end
         return Locale.Lookup("LOC_CITY_STATES_BONUSES", Locale.Lookup(kCS.Name)) ..
-            ", " .. Locale.Lookup("LOC_CAI_CITYSTATES_BONUS_COUNT", count, 4)
+            "[NEWLINE]" .. Locale.Lookup("LOC_CAI_CITYSTATES_BONUS_COUNT", count, 4)
     end, prefix .. ":bonuses", function(parent)
         BuildBonusesSection(parent, playerID)
     end)
 
     AddLazyTreeSection(row, function()
         local kCS = GetCityStateData(playerID)
-        return Locale.Lookup("LOC_CITY_STATES_INFLUENCED_BY") .. ", " ..
+        return Locale.Lookup("LOC_CITY_STATES_INFLUENCED_BY") .. "[NEWLINE]" ..
             Locale.Lookup("LOC_CITY_STATES_CIVILIZATIONS", kCS and CountTable(kCS.Influence) or 0)
     end, prefix .. ":influence", function(parent)
         BuildInfluenceSection(parent, playerID)
@@ -1059,7 +1187,7 @@ local function CreateTreeViewCityStateRow(playerID)
 
     AddLazyTreeSection(row, function()
         local kCS = GetCityStateData(playerID)
-        return Locale.Lookup("LOC_CITY_STATES_QUESTS") .. ", " ..
+        return Locale.Lookup("LOC_CITY_STATES_QUESTS") .. "[NEWLINE]" ..
             Locale.Lookup("LOC_CAI_CITYSTATES_ACTIVE", kCS and CountTable(kCS.Quests) or 0)
     end, prefix .. ":quests", function(parent)
         BuildQuestsSection(parent, playerID)
@@ -1067,7 +1195,7 @@ local function CreateTreeViewCityStateRow(playerID)
 
     AddLazyTreeSection(row, function()
         local kCS = GetCityStateData(playerID)
-        return Locale.Lookup("LOC_CITY_STATES_RELATIONSHIPS") .. ", " ..
+        return Locale.Lookup("LOC_CITY_STATES_RELATIONSHIPS") .. "[NEWLINE]" ..
             Locale.Lookup("LOC_CITY_STATES_CIVILIZATIONS", GetVisibleRelationshipCount(kCS))
     end, prefix .. ":relationships", function(parent)
         BuildRelationshipsSection(parent, playerID)
@@ -1121,7 +1249,7 @@ local function RebuildTreeView(sortedPlayers)
 end
 
 CAI_RebuildViews = function(preferredPlayerID)
-    if not m_ui.overview or not m_ui.detailsTree or not m_ui.treeView then return end
+    if not m_ui.overview or not m_ui.treeView then return end
     if ContextPtr:IsHidden() then return end
 
     local allData = GetAllCityStatesData()
@@ -1130,6 +1258,7 @@ CAI_RebuildViews = function(preferredPlayerID)
         table.insert(sortedPlayers, { id = playerID, name = Locale.Lookup(kCS.Name) })
     end
     table.sort(sortedPlayers, function(a, b) return Locale.Compare(a.name, b.name) < 0 end)
+    m_treePlayerEntries = sortedPlayers
 
     m_overviewPlayerIDs = {}
     for _, entry in ipairs(sortedPlayers) do
@@ -1143,10 +1272,30 @@ CAI_RebuildViews = function(preferredPlayerID)
     m_selectedPlayerID = selectedPlayerID
 
     local capture = mgr:CaptureFocusKey(m_ui.overview)
-    m_ui.overview:SetColumns(BuildOverviewColumns(allData))
-    local sortColumn = m_ui.overview:GetSort()
+    local columns = BuildOverviewColumns(allData)
+    m_treeColumns = columns
+    m_ui.overview:SetColumns(columns)
+    local sortColumn, sortAscending = m_ui.overview:GetSort()
+    local resetSort = false
     if sortColumn and not m_ui.overview:GetColumnIndex(sortColumn) then
         m_ui.overview:SetDefaultSort(nil)
+        sortColumn = nil
+        sortAscending = false
+        resetSort = true
+    end
+    m_treeSortColumn = sortColumn
+    m_treeSortAscending = sortAscending == true
+    m_treeSortOptions = BuildTreeSortOptions(columns)
+    if m_ui.treeSort then
+        local dropdownCapture = mgr:CaptureFocusKey(m_ui.treeSort)
+        m_ui.treeSort:SetOptions(m_treeSortOptions)
+        SyncTreeSortDropdown()
+        if dropdownCapture then
+            if resetSort then
+                dropdownCapture = { key = m_ui.treeSort.FocusKey, path = {} }
+            end
+            mgr:RestoreFocus(m_ui.treeSort, dropdownCapture)
+        end
     end
     m_ui.overview:Rebuild()
 
@@ -1157,8 +1306,7 @@ CAI_RebuildViews = function(preferredPlayerID)
             mgr:PrepareFocus(m_ui.overview, GetCityStateFocusKey(m_selectedPlayerID))
         end
     end
-    BuildDetailsTree()
-    RebuildTreeView(sortedPlayers)
+    RebuildTreeView(GetOrderedTreePlayers())
 end
 
 -- ============================================================================
@@ -1242,9 +1390,17 @@ local function EnsurePanelBuilt()
         local kCS = GetCityStateData(playerID)
         return kCS and Locale.Lookup(kCS.Name) or ""
     end)
-    m_ui.overview:SetDefaultSort(nil)
+    m_ui.overview:SetDefaultSort(m_treeSortColumn
+        and { column = m_treeSortColumn, ascending = m_treeSortAscending }
+        or nil)
     m_ui.overview:On("row_focus_enter", function(_, playerID, rowIndex)
         if rowIndex > 0 then SelectCityState(playerID) end
+    end)
+    m_ui.overview:On("sort_changed", function(_, columnKey, ascending)
+        m_treeSortColumn = columnKey
+        m_treeSortAscending = ascending == true
+        SyncTreeSortDropdown()
+        RebuildTreeView(GetOrderedTreePlayers())
     end)
     m_ui.overview:AddInputBindings({
         {
@@ -1279,44 +1435,23 @@ local function EnsurePanelBuilt()
     })
     m_ui.panel:AddChild(m_ui.overview)
 
-    m_ui.detailsTree = mgr:CreateWidget(DETAILS_TREE_ID, "Tree", {
-        Label = function()
-            local kCS = GetSelectedCityState()
-            if not kCS then return Locale.Lookup("LOC_CAI_CITYSTATES_DETAILS") end
-            return Locale.Lookup("LOC_CAI_CITYSTATES_DETAILS_FOR", Locale.Lookup(kCS.Name))
-        end,
-        HiddenPredicate = function() return m_viewMode ~= "table" end,
+    m_ui.treeSort = mgr:CreateWidget(TREE_SORT_ID, "Dropdown", {
+        Label = function() return Locale.Lookup("LOC_CAI_CITYSTATES_ORDER_BY") end,
+        FocusKey = "city-states:tree-sort",
+        HiddenPredicate = function() return m_viewMode ~= "tree" end,
     })
-    m_ui.detailsTree:AddInputBindings({
-        {
-            Key = Keys.VK_LEFT,
-            IsShift = true,
-            MSG = KeyEvents.KeyDown,
-            Description = "LOC_CAI_KB_REMOVE_CITYSTATE_ENVOY",
-            Action = function()
-                if m_selectedPlayerID == -1 then return false end
-                return TryAdjustEnvoysForPlayer(m_selectedPlayerID, -1)
-            end,
-        },
-        {
-            Key = Keys.VK_RIGHT,
-            IsShift = true,
-            MSG = KeyEvents.KeyDown,
-            Description = "LOC_CAI_KB_ADD_CITYSTATE_ENVOY",
-            Action = function()
-                if m_selectedPlayerID == -1 then return false end
-                return TryAdjustEnvoysForPlayer(m_selectedPlayerID, 1)
-            end,
-        },
-        {
-            Key = Keys.VK_RETURN,
-            IsControl = true,
-            MSG = KeyEvents.KeyUp,
-            Description = "LOC_CAI_KB_CONFIRM_CITYSTATE_ENVOYS",
-            Action = function() return TryConfirmEnvoys() end,
-        },
-    })
-    m_ui.panel:AddChild(m_ui.detailsTree)
+    m_ui.treeSort:SetOptions(m_treeSortOptions)
+    SyncTreeSortDropdown()
+    m_ui.treeSort:On("value_changed", function(_, sort)
+        m_treeSortColumn = sort.column
+        m_treeSortAscending = sort.ascending == true
+        m_ui.overview:SetDefaultSort(sort.column
+            and { column = sort.column, ascending = sort.ascending }
+            or nil)
+        m_ui.overview:Rebuild()
+        RebuildTreeView(GetOrderedTreePlayers())
+    end)
+    m_ui.panel:AddChild(m_ui.treeSort)
 
     m_ui.treeView = mgr:CreateWidget(TREE_VIEW_ID, "Tree", {
         Label = function() return JoinNonEmpty(GetInfoBoxLines(), ", ") end,

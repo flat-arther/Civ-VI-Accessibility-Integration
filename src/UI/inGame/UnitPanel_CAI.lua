@@ -172,7 +172,7 @@ AddOperationResult("UNITOPERATION_BUILD_ROUTE", { Build = BuildRouteResult })
 AddOperationResult("UNITOPERATION_CLEAR_CONTAMINATION", { Key = "LOC_CAI_UNIT_ACTION_CONTAMINATION_CLEARED" })
 AddOperationResult("UNITOPERATION_CONVERT_BARBARIANS", { Key = "LOC_CAI_UNIT_ACTION_BARBARIANS_CONVERTED" })
 AddOperationResult("UNITOPERATION_DESIGNATE_PARK", { Key = "LOC_CAI_UNIT_ACTION_PARK_DESIGNATED" })
-AddOperationResult("UNITOPERATION_FORTIFY", { Key = "LOC_CAI_UNIT_ACTIVITY_FORTIFIED" })
+AddOperationResult("UNITOPERATION_FORTIFY", { Key = "LOC_CAI_WORLDTRACKER_UNIT_FORTIFIED" })
 AddOperationResult("UNITOPERATION_HEAL", { Key = "LOC_UNITFLAG_ACTIVITY_HEALING" })
 AddOperationResult("UNITOPERATION_HARVEST_RESOURCE", { Build = BuildHarvestedResourceResult })
 AddOperationResult("UNITOPERATION_PLANT_FOREST", { Build = BuildPlantedWoodsResult })
@@ -183,8 +183,8 @@ AddOperationResult("UNITOPERATION_REPAIR", { Build = BuildRepairedImprovementRes
 AddOperationResult("UNITOPERATION_REPAIR_ROUTE", { Build = BuildRepairedRouteResult })
 AddOperationResult("UNITOPERATION_REST_REPAIR", { Key = "LOC_CAI_UNIT_ACTION_RESTING_REPAIRING" })
 AddOperationResult("UNITOPERATION_RETRAIN", { Key = "LOC_CAI_UNIT_ACTION_RETRAINED" })
-AddOperationResult("UNITOPERATION_SKIP_TURN", { Key = "LOC_CAI_UNIT_ACTIVITY_SKIP" })
-AddOperationResult("UNITOPERATION_SLEEP", { Key = "LOC_CAI_UNIT_ACTIVITY_SLEEP" })
+AddOperationResult("UNITOPERATION_SKIP_TURN", { Key = "LOC_UNITOPERATION_SKIP_TURN_DESCRIPTION" })
+AddOperationResult("UNITOPERATION_SLEEP", { Key = "LOC_CAI_WORLDTRACKER_UNIT_SLEEP" })
 AddOperationResult("UNITOPERATION_SPREAD_RELIGION", { Key = "LOC_CAI_UNIT_ACTION_RELIGION_SPREAD" })
 AddOperationResult("UNITOPERATION_ALERT", { Key = "LOC_UNITOPERATION_ALERT_DESCRIPTION" })
 AddOperationResult("UNITOPERATION_RELIGIOUS_HEAL", { Key = "LOC_CAI_UNIT_ACTION_RELIGIOUS_UNITS_HEALED" })
@@ -331,11 +331,12 @@ local UnitSummaryRequestedKeys = {
     "NextWaypoint",
     "Health",
     "Moves",
+    "Stats",
+    "AdjacentEnemies",
     "Charges",
     "UpgradeHint",
     "Promotions",
     "BuilderRecommendation",
-    "Abilities",
 }
 
 local function AppendUnitInfo(results, value)
@@ -379,6 +380,16 @@ local function RemoveUnitList()
         mgr:RemoveFromStack(UNIT_LIST_ID)
     end
     UnitList = nil
+    if CAIUnitList ~= nil then
+        CAIUnitList.Panel = nil
+        CAIUnitList.Table = nil
+        CAIUnitList.List = nil
+        CAIUnitList.FilterDropdown = nil
+        CAIUnitList.SortDropdown = nil
+        CAIUnitList.SwitchButton = nil
+        CAIUnitList.Records = {}
+        CAIUnitList.LastRecord = nil
+    end
 end
 
 local function RemoveSimplePromotionList()
@@ -621,6 +632,114 @@ local function GetUnitInfoStats(data, unit)
     return results
 end
 
+function CAI_CountAdjacentEnemies(unit)
+    if unit == nil then
+        return 0
+    end
+
+    local localPlayerID = Game.GetLocalPlayer()
+    local localPlayer = localPlayerID ~= nil and localPlayerID >= 0 and Players[localPlayerID] or nil
+    if localPlayer == nil then
+        return 0
+    end
+
+    local diplomacy = localPlayer:GetDiplomacy()
+    local observer = Game.GetLocalObserver()
+    local visibility = observer ~= PlayerTypes.OBSERVER and PlayersVisibility[observer] or nil
+    local count = 0
+
+    for direction = 0, DirectionTypes.NUM_DIRECTION_TYPES - 1 do
+        local plot = Map.GetAdjacentPlot(unit:GetX(), unit:GetY(), direction)
+        local plotVisible = plot ~= nil
+            and (observer == PlayerTypes.OBSERVER
+                or (visibility ~= nil and visibility:IsVisible(plot:GetIndex())))
+        if plotVisible then
+            for _, adjacentUnit in ipairs(
+                Units.GetUnitsInPlotLayerID(plot:GetX(), plot:GetY(), MapLayers.ANY) or {}) do
+                local ownerID = adjacentUnit:GetOwner()
+                local owner = Players[ownerID]
+                local unitVisible = observer == PlayerTypes.OBSERVER
+                    or (visibility ~= nil and visibility:IsUnitVisible(adjacentUnit))
+                local isEnemy = owner ~= nil and (owner:IsBarbarian()
+                    or (diplomacy ~= nil
+                        and diplomacy:HasMet(ownerID)
+                        and diplomacy:IsAtWarWith(ownerID)))
+                if unitVisible and isEnemy then
+                    count = count + 1
+                end
+            end
+        end
+    end
+
+    return count
+end
+
+function CAI_GetUnitInfoAdjacentEnemies(data, unit)
+    if unit == nil then
+        return nil
+    end
+    return Locale.Lookup("LOC_CAI_UNIT_ADJACENT_ENEMIES", CAI_CountAdjacentEnemies(unit))
+end
+
+function CAI_HasQueuedMovement(unit)
+    local destinationPlotId = unit ~= nil and UnitManager.GetQueuedDestination(unit) or nil
+    return destinationPlotId ~= nil and destinationPlotId ~= false and Map.IsPlot(destinationPlotId)
+end
+
+function CAI_GetUnitActivityStatus(unit)
+    if unit == nil then
+        return nil
+    end
+
+    local activityType = UnitManager.GetActivityType(unit)
+    if unit:IsEmbarked() then
+        return Locale.Lookup("LOC_CAI_UNIT_EMBARKED")
+    elseif unit:IsAutomated() then
+        return Locale.Lookup("LOC_UNITCOMMAND_AUTOMATE_DESCRIPTION")
+    elseif activityType == ActivityTypes.ACTIVITY_HEAL then
+        return Locale.Lookup("LOC_UNITFLAG_ACTIVITY_HEALING")
+    elseif activityType == ActivityTypes.ACTIVITY_SLEEP then
+        return Locale.Lookup("LOC_CAI_WORLDTRACKER_UNIT_SLEEP")
+    elseif activityType == ActivityTypes.ACTIVITY_HOLD then
+        return Locale.Lookup("LOC_UNITOPERATION_SKIP_TURN_DESCRIPTION")
+    elseif activityType ~= ActivityTypes.ACTIVITY_AWAKE and unit:GetFortifyTurns() > 0 then
+        return Locale.Lookup("LOC_CAI_WORLDTRACKER_UNIT_FORTIFIED")
+    elseif CAI_HasQueuedMovement(unit) then
+        return Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_MOVING")
+    end
+
+    -- Visible readiness is broader than raw movement. In particular, an
+    -- ongoing trade route may retain movement while not awaiting player input.
+    return Locale.Lookup(unit:IsReadyToMove()
+        and "LOC_READY_BUTTON"
+        or "LOC_NOT_READY")
+end
+
+-- Preserve Civ V's three-band shape while making each Civ VI band agree with
+-- the Activity text the player hears. Named activity states occupy the middle;
+-- the same IsReadyToMove() fallback used by the display separates Ready from
+-- Not Ready. This is required for traders, spies, and units which can still
+-- perform a non-movement action after spending their movement.
+function CAI_GetUnitActivitySortRank(unit)
+    if unit == nil then
+        return 9
+    end
+
+    local activityType = UnitManager.GetActivityType(unit)
+    local hasExplicitAssignment = unit:IsEmbarked()
+        or unit:IsAutomated()
+        or activityType == ActivityTypes.ACTIVITY_HEAL
+        or (activityType ~= ActivityTypes.ACTIVITY_AWAKE and unit:GetFortifyTurns() > 0)
+        or activityType == ActivityTypes.ACTIVITY_SLEEP
+        or activityType == ActivityTypes.ACTIVITY_HOLD
+        or CAI_HasQueuedMovement(unit)
+    if hasExplicitAssignment then
+        return 5
+    end
+
+    return unit:IsReadyToMove() and 1 or 9
+end
+
 local function GetParkCharges(unit)
     if unit == nil then
         return nil
@@ -811,30 +930,11 @@ local function GetUpgradeHintText(data)
 end
 
 local function GetUnitInfoActivity(data, unit)
-    if data == nil or unit == nil then
+    if unit == nil then
         return nil
     end
-
-    local results = {}
-
-    local activityType = UnitManager.GetActivityType(unit)
-    if activityType == ActivityTypes.ACTIVITY_SLEEP then
-        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_SLEEP"))
-    elseif activityType == ActivityTypes.ACTIVITY_HOLD then
-        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_SKIP"))
-    elseif activityType ~= ActivityTypes.ACTIVITY_AWAKE and unit:GetFortifyTurns() > 0 then
-        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_FORTIFIED"))
-    elseif activityType == ActivityTypes.ACTIVITY_OPERATION and not data.IsSpy and not data.IsTradeUnit then
-        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_OPERATION"))
-    end
-
-    if unit:IsReadyToMove() then
-        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_READY"))
-    else
-        AppendUnitInfo(results, Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_NOT_READY"))
-    end
-
-    return results
+    local status = CAI_GetUnitActivityStatus(unit)
+    return status ~= nil and { status } or nil
 end
 
 local function GetUnitInfoNextWaypoint(unit)
@@ -1975,6 +2075,10 @@ UnitInfo = {
         return GetUnitInfoStats(data, unit)
     end,
 
+    AdjacentEnemies = function(data, unit)
+        return CAI_GetUnitInfoAdjacentEnemies(data, unit)
+    end,
+
     Charges = function(data, unit)
         return GetUnitInfoCharges(data, unit)
     end,
@@ -2645,210 +2749,772 @@ local function OpenUnitActionList()
     end
 end
 
-local function CreateUnitListItem(unit)
-    local unitName = GetUnitListName(unit)
-    local selectedUnit = GetSelectedUnit()
-    local isSelected = selectedUnit ~= nil
-        and selectedUnit:GetOwner() == unit:GetOwner()
-        and selectedUnit:GetID() == unit:GetID()
-    local value = isSelected and Locale.Lookup("LOC_CAI_STATE_SELECTED") or ""
-    local unitID = unit:GetID()
-    local playerID = unit:GetOwner()
+CAIUnitList = {
+    ViewMode = "table",
+    FilterKey = "all",
+    SortColumn = "name",
+    SortAscending = true,
+    LastRecord = nil,
+    Records = {},
+    Columns = {},
+    FilterDefinitions = {
+        { Key = "all",      Label = "LOC_CAI_UNIT_CAT_ALL" },
+        { Key = "military", Label = "LOC_CAI_UNIT_DOMAIN_MILITARY" },
+        { Key = "naval",    Label = "LOC_CAI_UNIT_DOMAIN_NAVAL" },
+        { Key = "air",      Label = "LOC_CAI_UNIT_DOMAIN_AIR" },
+        { Key = "support",  Label = "LOC_CAI_UNIT_DOMAIN_SUPPORT" },
+        { Key = "civilian", Label = "LOC_CAI_UNIT_DOMAIN_CIVILIAN" },
+        { Key = "trade",    Label = "LOC_CAI_UNIT_DOMAIN_TRADE" },
+    },
+}
 
-    local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitListItem"), "TreeItem", {
-        FocusKey = UnitFocusKey(playerID, unitID),
-        GetLabel = function()
-            return unitName
-        end,
-        GetValue = function()
-            return value
-        end,
-        GetTooltip = function()
-            local resolvedUnit = ResolveUnit(unitID, playerID)
-            if resolvedUnit == nil then
-                LogWarn("CAI UnitPanel unit list could not resolve unit " .. tostring(unitID))
-                return ""
-            end
+function CAIUnitList.RecordKey(record)
+    return UnitFocusKey(record.PlayerID, record.UnitID)
+end
 
-            local parts = {}
-            if CAICursor then
-                local cursorX, cursorY = CAICursor:GetCoords()
-                if cursorX ~= nil and cursorY ~= nil then
-                    local direction = CAIHexCoordUtils.directionString(
-                        cursorX, cursorY, resolvedUnit:GetX(), resolvedUnit:GetY())
-                    if direction ~= "" then
-                        parts[#parts + 1] = direction
-                    end
-                end
-            end
+function CAIUnitList.Resolve(record)
+    return record ~= nil and ResolveUnit(record.UnitID, record.PlayerID) or nil
+end
 
-            local summary = info:RequestUnitInfo(unitID, {
-                "Activity",
-                "NextWaypoint",
-                "Health",
-                "Moves",
-                "Charges",
-                "UpgradeHint",
-                "Promotions",
-                "BuilderRecommendation",
-                "Abilities",
-            }, playerID)
-            for _, summaryPart in ipairs(summary) do
-                parts[#parts + 1] = summaryPart
-            end
-            return table.concat(parts, "[NEWLINE]")
-        end,
-    })
-    item:On("activate", function()
-        local resolved = Players[Game.GetLocalPlayer()]:GetUnits():FindID(unitID)
-        if resolved == nil then
-            return
-        end
+function CAIUnitList.GetCategory(unit)
+    if unit == nil then return nil end
+    local unitInfo = GameInfo.Units[unit:GetUnitType()]
+    if unitInfo == nil then return nil end
+    if unitInfo.MakeTradeRoute == true or unitInfo.MakeTradeRoute == 1 then return "trade" end
+    if unitInfo.Domain == "DOMAIN_AIR" then return "air" end
+    if unitInfo.Domain == "DOMAIN_SEA" then return "naval" end
+    if unitInfo.FormationClass == "FORMATION_CLASS_SUPPORT" then return "support" end
+    if unit:GetCombat() > 0 or unit:GetRangedCombat() > 0 then return "military" end
+    return "civilian"
+end
 
-        RemoveUnitList()
-        UI.SelectUnit(resolved)
+function CAIUnitList.BuildRecords()
+    local playerID = Game.GetLocalPlayer()
+    local player = playerID ~= nil and playerID >= 0 and Players[playerID] or nil
+    local records = {}
+    if player == nil then return records end
+
+    for _, unit in player:GetUnits():Members() do
+        records[#records + 1] = {
+            PlayerID = playerID,
+            UnitID = unit:GetID(),
+            NaturalIndex = #records + 1,
+        }
+    end
+    table.sort(records, function(a, b)
+        local aUnit = CAIUnitList.Resolve(a)
+        local bUnit = CAIUnitList.Resolve(b)
+        local aInfo = aUnit ~= nil and GameInfo.Units[aUnit:GetUnitType()] or nil
+        local bInfo = bUnit ~= nil and GameInfo.Units[bUnit:GetUnitType()] or nil
+        local aType = aInfo ~= nil and aInfo.UnitType or ""
+        local bType = bInfo ~= nil and bInfo.UnitType or ""
+        if aType ~= bType then return aType < bType end
+        return a.UnitID < b.UnitID
     end)
-    item:AddInputBindings({
+    for index, record in ipairs(records) do record.NaturalIndex = index end
+    return records
+end
+
+function CAIUnitList.GetFilteredRecords()
+    local records = {}
+    for _, record in ipairs(CAIUnitList.Records) do
+        local unit = CAIUnitList.Resolve(record)
+        if unit ~= nil and (CAIUnitList.FilterKey == "all"
+            or CAIUnitList.GetCategory(unit) == CAIUnitList.FilterKey) then
+            records[#records + 1] = record
+        end
+    end
+    return records
+end
+
+function CAIUnitList.GetName(record)
+    local unit = CAIUnitList.Resolve(record)
+    return unit ~= nil and GetUnitListName(unit) or ""
+end
+
+function CAIUnitList.GetSelectedState(record)
+    local unit = CAIUnitList.Resolve(record)
+    local selected = GetSelectedUnit()
+    if unit ~= nil and selected ~= nil
+        and selected:GetOwner() == unit:GetOwner()
+        and selected:GetID() == unit:GetID() then
+        return Locale.Lookup("LOC_CAI_STATE_SELECTED")
+    end
+    return ""
+end
+
+function CAIUnitList.GetDirection(record)
+    local unit = CAIUnitList.Resolve(record)
+    if unit == nil or CAICursor == nil then return "" end
+    local cursorX, cursorY = CAICursor:GetCoords()
+    if cursorX == nil or cursorY == nil then return "" end
+    return CAIHexCoordUtils.directionString(cursorX, cursorY, unit:GetX(), unit:GetY())
+end
+
+function CAIUnitList.GetDistance(record)
+    local unit = CAIUnitList.Resolve(record)
+    if unit == nil or CAICursor == nil then return nil end
+    local cursorX, cursorY = CAICursor:GetCoords()
+    if cursorX == nil or cursorY == nil then return nil end
+    return Map.GetPlotDistance(cursorX, cursorY, unit:GetX(), unit:GetY())
+end
+
+function CAIUnitList.GetActivity(record)
+    local unit = CAIUnitList.Resolve(record)
+    local status = CAI_GetUnitActivityStatus(unit)
+    return status or ""
+end
+
+function CAIUnitList.GetActivityStatusOrder(status)
+    if CAIUnitList.ActivityStatusOrder == nil then
+        local labels = {
+            Locale.Lookup("LOC_CAI_UNIT_EMBARKED"),
+            Locale.Lookup("LOC_UNITCOMMAND_AUTOMATE_DESCRIPTION"),
+            Locale.Lookup("LOC_UNITFLAG_ACTIVITY_HEALING"),
+            Locale.Lookup("LOC_CAI_WORLDTRACKER_UNIT_SLEEP"),
+            Locale.Lookup("LOC_UNITOPERATION_SKIP_TURN_DESCRIPTION"),
+            Locale.Lookup("LOC_CAI_WORLDTRACKER_UNIT_FORTIFIED"),
+            Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_MOVING"),
+            Locale.Lookup("LOC_READY_BUTTON"),
+            Locale.Lookup("LOC_NOT_READY"),
+        }
+        table.sort(labels, function(a, b) return Locale.Compare(a, b) < 0 end)
+        CAIUnitList.ActivityStatusOrder = {}
+        for index, label in ipairs(labels) do
+            if CAIUnitList.ActivityStatusOrder[label] == nil then
+                CAIUnitList.ActivityStatusOrder[label] = index
+            end
+        end
+    end
+    return CAIUnitList.ActivityStatusOrder[status] or 99
+end
+
+function CAIUnitList.GetActivitySortKey(record)
+    local unit = CAIUnitList.Resolve(record)
+    if unit == nil then return nil end
+    local status = CAI_GetUnitActivityStatus(unit)
+    local rank = CAI_GetUnitActivitySortRank(unit)
+    return rank * 100 + CAIUnitList.GetActivityStatusOrder(status)
+end
+
+function CAIUnitList.GetHealth(record)
+    local unit = CAIUnitList.Resolve(record)
+    if unit == nil then return nil end
+    local maximum = unit:GetMaxDamage()
+    if maximum == nil or maximum <= 0 then return 0 end
+    return maximum - (unit:GetDamage() or 0)
+end
+
+function CAIUnitList.GetCurrentMoves(record)
+    local unit = CAIUnitList.Resolve(record)
+    return unit ~= nil and unit:GetMovementMovesRemaining() or nil
+end
+
+function CAIUnitList.GetMaxMoves(record)
+    local unit = CAIUnitList.Resolve(record)
+    return unit ~= nil and unit:GetMaxMoves() or nil
+end
+
+function CAIUnitList.GetMeleeStrength(record)
+    local unit = CAIUnitList.Resolve(record)
+    return unit ~= nil and (unit:GetCombat() or 0) or nil
+end
+
+function CAIUnitList.GetRangedStrength(record)
+    local unit = CAIUnitList.Resolve(record)
+    return unit ~= nil and (unit:GetRangedCombat() or 0) or nil
+end
+
+function CAIUnitList.GetBombardStrength(record)
+    local unit = CAIUnitList.Resolve(record)
+    return unit ~= nil and (unit:GetBombardCombat() or 0) or nil
+end
+
+function CAIUnitList.GetReligiousStrength(record)
+    local unit = CAIUnitList.Resolve(record)
+    return unit ~= nil and (unit:GetReligiousStrength() or 0) or nil
+end
+
+function CAIUnitList.GetAntiAirStrength(record)
+    local unit = CAIUnitList.Resolve(record)
+    return unit ~= nil and (unit:GetAntiAirCombat() or 0) or nil
+end
+
+function CAIUnitList.GetRange(record)
+    local unit = CAIUnitList.Resolve(record)
+    return unit ~= nil and (unit:GetRange() or 0) or nil
+end
+
+function CAIUnitList.GetChargeCount(record)
+    local unit = CAIUnitList.Resolve(record)
+    if unit == nil then return nil end
+    local greatPerson = unit:GetGreatPerson()
+    local count = math.max(unit:GetBuildCharges() or 0, unit:GetDisasterCharges() or 0,
+        unit:GetSpreadCharges() or 0, unit:GetReligiousHealCharges() or 0,
+        unit:GetActionCharges() or 0,
+        greatPerson ~= nil and (greatPerson:GetActionCharges() or 0) or 0,
+        GetParkCharges(unit) or 0)
+    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH"
+        and g_PropertyKeys ~= nil and g_PropertyKeys.Charges ~= nil and g_PropertyKeys.MaxCharges ~= nil then
+        local usedCharges = unit:GetProperty(g_PropertyKeys.Charges)
+        local maxCharges = unit:GetProperty(g_PropertyKeys.MaxCharges)
+        if usedCharges ~= nil and maxCharges ~= nil then count = math.max(count, maxCharges - usedCharges) end
+    end
+    return math.max(0, count)
+end
+
+function CAIUnitList.GetPromotionCount(record)
+    local unit = CAIUnitList.Resolve(record)
+    local experience = unit ~= nil and unit:GetExperience() or nil
+    local promotions = experience ~= nil and experience:GetPromotions() or nil
+    return promotions ~= nil and #promotions or 0
+end
+
+function CAIUnitList.GetAdjacentEnemies(record)
+    return CAI_CountAdjacentEnemies(CAIUnitList.Resolve(record))
+end
+
+function CAIUnitList.GetTooltip(record)
+    local unit = CAIUnitList.Resolve(record)
+    if unit == nil then
+        LogWarn("CAI UnitPanel unit list could not resolve unit " .. tostring(record.UnitID))
+        return ""
+    end
+    local parts = {}
+    local direction = CAIUnitList.GetDirection(record)
+    if direction ~= "" then parts[#parts + 1] = direction end
+    local summary = info:RequestUnitInfo(record.UnitID, { "Summary" }, record.PlayerID)
+    for summaryIndex, summaryPart in ipairs(summary) do
+        if summaryIndex > 1 then parts[#parts + 1] = summaryPart end
+    end
+    return table.concat(parts, "[NEWLINE]")
+end
+
+function CAIUnitList.ActivateRecord(record)
+    local unit = CAIUnitList.Resolve(record)
+    if unit == nil then return true end
+    RemoveUnitList()
+    UI.SelectUnit(unit)
+    return true
+end
+
+function CAIUnitList.JumpToRecord(record)
+    local unit = CAIUnitList.Resolve(record)
+    if unit == nil then
+        LogWarn("CAI UnitPanel unit-list cursor jump could not resolve unit " .. tostring(record.UnitID))
+        return true
+    end
+    local plot = Map.GetPlot(unit:GetX(), unit:GetY())
+    if plot == nil then
+        LogWarn("CAI UnitPanel unit-list cursor jump could not resolve unit plot: " ..
+            tostring(unit:GetX()) .. ", " .. tostring(unit:GetY()))
+        return true
+    end
+    LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
+    return true
+end
+
+function CAIUnitList.OpenCivilopedia(record)
+    local unit = CAIUnitList.Resolve(record)
+    local unitInfo = unit ~= nil and GameInfo.Units[unit:GetUnitType()] or nil
+    if unitInfo ~= nil then
+        RemoveUnitList()
+        LuaEvents.OpenCivilopedia(unitInfo.UnitType)
+    end
+    return true
+end
+
+function CAIUnitList.BuildColumns()
+    local columns = {
         {
-            Key         = Keys.VK_RETURN,
-            IsControl   = true,
-            MSG         = KeyEvents.KeyUp,
-            Description = "LOC_CAI_KB_JUMP_CURSOR_TO_UNIT",
-            Action      = function()
-                local resolved = ResolveUnit(unitID, playerID)
-                if resolved == nil then
-                    LogWarn("CAI UnitPanel unit-list cursor jump could not resolve unit " .. tostring(unitID))
-                    return true
-                end
-
-                local plot = Map.GetPlot(resolved:GetX(), resolved:GetY())
-                if plot == nil then
-                    LogWarn("CAI UnitPanel unit-list cursor jump could not resolve unit plot: " ..
-                        tostring(resolved:GetX()) .. ", " .. tostring(resolved:GetY()))
-                    return true
-                end
-
-                LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
-                return true
-            end,
+            key = "name",
+            header = function() return Locale.Lookup("LOC_CAI_UNIT_LIST_COLUMN_NAME") end,
+            getCell = CAIUnitList.GetName,
+            sortKey = CAIUnitList.GetName,
+            sortAscendingDescription = "LOC_CAI_SORT_A_TO_Z",
+            sortDescendingDescription = "LOC_CAI_SORT_Z_TO_A",
         },
-    })
-    BindCivilopediaShortcut(item, function() return unitID end)
+        {
+            key = "distance",
+            header = function() return Locale.Lookup("LOC_CAI_REPORTS_DISTANCE") end,
+            getCell = CAIUnitList.GetDirection,
+            getTooltip = function(record)
+                local distance = CAIUnitList.GetDistance(record)
+                return distance ~= nil and Locale.Lookup("LOC_CAI_WORLD_SCANNER_DISTANCE", distance) or ""
+            end,
+            sortKey = CAIUnitList.GetDistance,
+            sortAscendingDescription = "LOC_CAI_SORT_NEAREST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_FARTHEST_FIRST",
+        },
+        {
+            key = "activity",
+            header = function() return Locale.Lookup("LOC_CAI_UNIT_LIST_COLUMN_ACTIVITY") end,
+            getCell = CAIUnitList.GetActivity,
+            sortKey = CAIUnitList.GetActivitySortKey,
+            sortAscendingDescription = "LOC_CAI_SORT_READY_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_NOT_READY_FIRST",
+        },
+        {
+            key = "health",
+            header = function() return Locale.Lookup("LOC_CAI_UNIT_LIST_COLUMN_HEALTH") end,
+            getCell = function(record)
+                local value = CAIUnitList.GetHealth(record)
+                return value ~= nil and tostring(value) or ""
+            end,
+            sortKey = CAIUnitList.GetHealth,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+        {
+            key = "current_moves",
+            header = function() return Locale.Lookup("LOC_CAI_UNIT_LIST_COLUMN_CURRENT_MOVES") end,
+            getCell = function(record)
+                local value = CAIUnitList.GetCurrentMoves(record)
+                return value ~= nil and tostring(value) or ""
+            end,
+            sortKey = CAIUnitList.GetCurrentMoves,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+        {
+            key = "max_moves",
+            header = function() return Locale.Lookup("LOC_CAI_UNIT_LIST_COLUMN_MAX_MOVES") end,
+            getCell = function(record)
+                local value = CAIUnitList.GetMaxMoves(record)
+                return value ~= nil and tostring(value) or ""
+            end,
+            sortKey = CAIUnitList.GetMaxMoves,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+        -- Civ V Access's Military Overview keeps combat and ranged strength
+        -- in independent raw-number columns. Civ VI exposes three additional
+        -- native strength types, so each gets the same independent treatment;
+        -- never combine these values into a sum or highest-strength proxy.
+        {
+            key = "melee_strength",
+            header = function() return Locale.Lookup("LOC_HUD_UNIT_PANEL_STRENGTH") end,
+            getCell = function(record)
+                local value = CAIUnitList.GetMeleeStrength(record)
+                return value ~= nil and tostring(value) or ""
+            end,
+            sortKey = CAIUnitList.GetMeleeStrength,
+            sortAscendingDescription = "LOC_CAI_SORT_WEAKEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_STRONGEST_FIRST",
+        },
+        {
+            key = "ranged_strength",
+            header = function() return Locale.Lookup("LOC_HUD_UNIT_PANEL_RANGED_STRENGTH") end,
+            getCell = function(record)
+                local value = CAIUnitList.GetRangedStrength(record)
+                return value ~= nil and tostring(value) or ""
+            end,
+            sortKey = CAIUnitList.GetRangedStrength,
+            sortAscendingDescription = "LOC_CAI_SORT_WEAKEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_STRONGEST_FIRST",
+        },
+        {
+            key = "bombard_strength",
+            header = function() return Locale.Lookup("LOC_HUD_UNIT_PANEL_BOMBARD_STRENGTH") end,
+            getCell = function(record)
+                local value = CAIUnitList.GetBombardStrength(record)
+                return value ~= nil and tostring(value) or ""
+            end,
+            sortKey = CAIUnitList.GetBombardStrength,
+            sortAscendingDescription = "LOC_CAI_SORT_WEAKEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_STRONGEST_FIRST",
+        },
+        {
+            key = "religious_strength",
+            header = function() return Locale.Lookup("LOC_HUD_UNIT_PANEL_RELIGIOUS_STRENGTH") end,
+            getCell = function(record)
+                local value = CAIUnitList.GetReligiousStrength(record)
+                return value ~= nil and tostring(value) or ""
+            end,
+            sortKey = CAIUnitList.GetReligiousStrength,
+            sortAscendingDescription = "LOC_CAI_SORT_WEAKEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_STRONGEST_FIRST",
+        },
+        {
+            key = "anti_air_strength",
+            header = function() return Locale.Lookup("LOC_HUD_UNIT_PANEL_ANTI_AIR_STRENGTH") end,
+            getCell = function(record)
+                local value = CAIUnitList.GetAntiAirStrength(record)
+                return value ~= nil and tostring(value) or ""
+            end,
+            sortKey = CAIUnitList.GetAntiAirStrength,
+            sortAscendingDescription = "LOC_CAI_SORT_WEAKEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_STRONGEST_FIRST",
+        },
+        {
+            key = "range",
+            header = function() return Locale.Lookup("LOC_CAI_ICON_RANGE_ALIAS") end,
+            getCell = function(record)
+                local value = CAIUnitList.GetRange(record)
+                return value ~= nil and tostring(value) or ""
+            end,
+            sortKey = CAIUnitList.GetRange,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+        {
+            key = "charges",
+            header = function() return Locale.Lookup("LOC_HUD_UNIT_PANEL_CHARGES") end,
+            getCell = function(record)
+                local value = CAIUnitList.GetChargeCount(record)
+                return value ~= nil and tostring(value) or ""
+            end,
+            sortKey = CAIUnitList.GetChargeCount,
+            sortAscendingDescription = "LOC_CAI_SORT_FEWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_MOST_FIRST",
+        },
+        {
+            key = "promotions",
+            header = function() return Locale.Lookup("LOC_CAI_UNIT_LIST_COLUMN_PROMOTIONS") end,
+            getCell = function(record) return tostring(CAIUnitList.GetPromotionCount(record)) end,
+            sortKey = CAIUnitList.GetPromotionCount,
+            sortAscendingDescription = "LOC_CAI_SORT_FEWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_MOST_FIRST",
+        },
+        {
+            key = "adjacent_enemies",
+            header = function() return Locale.Lookup("LOC_CAI_UNIT_LIST_COLUMN_ADJACENT_ENEMIES") end,
+            getCell = function(record) return tostring(CAIUnitList.GetAdjacentEnemies(record)) end,
+            sortKey = CAIUnitList.GetAdjacentEnemies,
+            sortAscendingDescription = "LOC_CAI_SORT_FEWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_MOST_FIRST",
+        },
+    }
+    return columns
+end
 
+function CAIUnitList.GetColumn(columnKey)
+    for _, column in ipairs(CAIUnitList.Columns) do
+        if column.key == columnKey then return column end
+    end
+    return nil
+end
+
+function CAIUnitList.SortRecords(records)
+    local column = CAIUnitList.GetColumn(CAIUnitList.SortColumn)
+    if column == nil or column.sortKey == nil then return records end
+    local decorated = {}
+    for naturalIndex, record in ipairs(records) do
+        decorated[#decorated + 1] = {
+            Record = record,
+            NaturalIndex = naturalIndex,
+            Value = column.sortKey(record),
+        }
+    end
+    table.sort(decorated, function(a, b)
+        local aValue = a.Value
+        local bValue = b.Value
+        if aValue == nil or bValue == nil then
+            if aValue == bValue then return a.NaturalIndex < b.NaturalIndex end
+            return aValue ~= nil
+        end
+        local comparison = 0
+        if type(aValue) == "number" and type(bValue) == "number" then
+            comparison = aValue == bValue and 0 or (aValue < bValue and -1 or 1)
+        else
+            comparison = Locale.Compare(tostring(aValue), tostring(bValue))
+        end
+        if comparison == 0 then return a.NaturalIndex < b.NaturalIndex end
+        if CAIUnitList.SortAscending then return comparison < 0 end
+        return comparison > 0
+    end)
+    for index, entry in ipairs(decorated) do records[index] = entry.Record end
+    return records
+end
+
+function CAIUnitList.CreateListItem(record)
+    local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitListItem"), "MenuItem", {
+        FocusKey = CAIUnitList.RecordKey(record),
+        Label = function() return CAIUnitList.GetName(record) end,
+        Tooltip = function() return CAIUnitList.GetTooltip(record) end,
+        StateGetter = function() return CAIUnitList.GetSelectedState(record) end,
+    })
+    item.UnitListRecord = record
+    item:On("focus_enter", function() CAIUnitList.LastRecord = record end)
+    item:On("activate", function() return CAIUnitList.ActivateRecord(record) end)
+    item:AddInputBinding({
+        Key = Keys.VK_RETURN,
+        IsControl = true,
+        MSG = KeyEvents.KeyUp,
+        Description = "LOC_CAI_KB_JUMP_CURSOR_TO_UNIT",
+        Action = function() return CAIUnitList.JumpToRecord(record) end,
+    })
+    BindCivilopediaShortcut(item, function() return record.UnitID end)
     return item
 end
 
-local UnitListDomains = {
-    { Key = "military", Label = "LOC_CAI_UNIT_DOMAIN_MILITARY" },
-    { Key = "naval",    Label = "LOC_CAI_UNIT_DOMAIN_NAVAL" },
-    { Key = "air",      Label = "LOC_CAI_UNIT_DOMAIN_AIR" },
-    { Key = "support",  Label = "LOC_CAI_UNIT_DOMAIN_SUPPORT" },
-    { Key = "civilian", Label = "LOC_CAI_UNIT_DOMAIN_CIVILIAN" },
-    { Key = "trade",    Label = "LOC_CAI_UNIT_DOMAIN_TRADE" },
-}
-
-local function ClassifyPlayerUnits(player)
-    local buckets = {
-        military = {}, naval = {}, air = {}, support = {}, civilian = {}, trade = {},
-    }
-
-    for _, unit in player:GetUnits():Members() do
-        local unitInfo = GameInfo.Units[unit:GetUnitType()]
-        if unitInfo.MakeTradeRoute == true then
-            table.insert(buckets.trade, unit)
-        elseif unit:GetCombat() == 0 and unit:GetRangedCombat() == 0 then
-            table.insert(buckets.civilian, unit)
-        elseif unitInfo.Domain == "DOMAIN_LAND" then
-            table.insert(buckets.military, unit)
-        elseif unitInfo.Domain == "DOMAIN_SEA" then
-            table.insert(buckets.naval, unit)
-        elseif unitInfo.Domain == "DOMAIN_AIR" then
-            table.insert(buckets.air, unit)
-        else
-            table.insert(buckets.support, unit)
-        end
+function CAIUnitList.RebuildList()
+    if CAIUnitList.List == nil then return end
+    local capture = mgr:CaptureFocusKey(CAIUnitList.List)
+    CAIUnitList.List:ClearChildren()
+    for _, record in ipairs(CAIUnitList.SortRecords(CAIUnitList.GetFilteredRecords())) do
+        CAIUnitList.List:AddChild(CAIUnitList.CreateListItem(record))
     end
-
-    local function sortFunc(a, b)
-        return GameInfo.Units[a:GetUnitType()].UnitType < GameInfo.Units[b:GetUnitType()].UnitType
-    end
-    for _, units in pairs(buckets) do
-        table.sort(units, sortFunc)
-    end
-
-    return buckets
+    mgr:RestoreFocus(CAIUnitList.List, capture)
 end
 
-local function BuildUnitList()
-    local playerID = Game.GetLocalPlayer()
-    if playerID == nil or playerID < 0 then
-        return nil
-    end
-
-    local player = Players[playerID]
-    if player == nil then
-        return nil
-    end
-
-    local tree = mgr:CreateWidget(UNIT_LIST_ID, "Tree", {
-        GetLabel = function()
-            return Locale.Lookup("LOC_CAI_UNIT_LIST")
-        end,
-    })
-
-    tree:AddInputBinding({
-        Key = Keys.VK_ESCAPE,
-        Description = "LOC_CAI_KB_CLOSE",
-        Action = function()
+function CAIUnitList.RebuildViews(rebuildRecords)
+    if UnitList == nil then return end
+    if rebuildRecords then
+        CAIUnitList.Records = CAIUnitList.BuildRecords()
+        if #CAIUnitList.Records == 0 then
             RemoveUnitList()
-            return true
-        end,
-    })
-
-    local buckets = ClassifyPlayerUnits(player)
-    local total = 0
-
-    for _, domain in ipairs(UnitListDomains) do
-        local units = buckets[domain.Key]
-        if #units > 0 then
-            local domainNode = mgr:CreateWidget(
-                mgr:GenerateWidgetId("CAIUnitListDomain_" .. domain.Key),
-                "TreeItem",
-                {
-                    GetLabel = function()
-                        return Locale.Lookup(domain.Label)
-                    end,
-                }
-            )
-            for _, unit in ipairs(units) do
-                domainNode:AddChild(CreateUnitListItem(unit))
-                total = total + 1
-            end
-            -- Start expanded without triggering Expand()'s speech, since the
-            -- push will speak the focused leaf and any expand chatter would
-            -- just be interrupted.
-            domainNode.IsExpanded = true
-            tree:AddChild(domainNode)
+            Speak(Locale.Lookup("LOC_CAI_UNIT_NO_UNITS"))
+            return
         end
     end
-
-    if total == 0 then
-        return nil
+    if CAIUnitList.ViewMode == "table" then
+        if CAIUnitList.Table ~= nil then CAIUnitList.Table:Rebuild() end
+    else
+        CAIUnitList.RebuildList()
     end
+end
 
-    return tree
+function CAIUnitList.GetFocusedRecord()
+    if CAIUnitList.ViewMode == "table" and CAIUnitList.Table ~= nil then
+        return CAIUnitList.Table:GetFocusedRow() or CAIUnitList.LastRecord
+    end
+    local focused = mgr:GetFocusedWidget()
+    return focused ~= nil and focused.UnitListRecord or CAIUnitList.LastRecord
+end
+
+function CAIUnitList.SetViewMode(viewMode)
+    if viewMode ~= "table" and viewMode ~= "list" then return false end
+    local record = CAIUnitList.GetFocusedRecord()
+    CAIUnitList.ViewMode = viewMode
+    local target = viewMode == "table" and CAIUnitList.Table or CAIUnitList.List
+    if target == nil then return false end
+    if viewMode == "table" then
+        CAIUnitList.Table:Rebuild()
+    else
+        CAIUnitList.RebuildList()
+    end
+    if record ~= nil then
+        local focusKey = viewMode == "table"
+            and (tostring(CAIUnitList.Table.Id) .. ":row:" .. CAIUnitList.RecordKey(record) .. ":name")
+            or CAIUnitList.RecordKey(record)
+        mgr:PrepareFocus(target, focusKey)
+    end
+    mgr:SetFocus(target)
+    return true
+end
+
+function CAIUnitList.BuildFilterOptions()
+    local options = {}
+    for _, definition in ipairs(CAIUnitList.FilterDefinitions) do
+        options[#options + 1] = { label = Locale.Lookup(definition.Label), value = definition.Key }
+    end
+    return options
+end
+
+function CAIUnitList.GetFilterLabel()
+    for _, definition in ipairs(CAIUnitList.FilterDefinitions) do
+        if definition.Key == CAIUnitList.FilterKey then
+            return Locale.Lookup(definition.Label)
+        end
+    end
+    return Locale.Lookup("LOC_CAI_UNIT_CAT_ALL")
+end
+
+function CAIUnitList.BuildSortOptions()
+    local options = {
+        { label = Locale.Lookup("LOC_CAI_DATATABLE_SORT_NATURAL"), value = { column = nil, ascending = false } },
+    }
+    for _, column in ipairs(CAIUnitList.Columns) do
+        if column.sortKey ~= nil then
+            local header = type(column.header) == "function" and column.header() or column.header
+            options[#options + 1] = {
+                label = header .. ", " .. Locale.Lookup(column.sortAscendingDescription),
+                value = { column = column.key, ascending = true },
+            }
+            options[#options + 1] = {
+                label = header .. ", " .. Locale.Lookup(column.sortDescendingDescription),
+                value = { column = column.key, ascending = false },
+            }
+        end
+    end
+    return options
+end
+
+function CAIUnitList.SyncSortDropdown()
+    if CAIUnitList.SortDropdown == nil then return end
+    for index, option in ipairs(CAIUnitList.SortOptions or {}) do
+        local value = option.value
+        if value.column == CAIUnitList.SortColumn
+            and (value.column == nil or value.ascending == CAIUnitList.SortAscending) then
+            CAIUnitList.SortDropdown:SetSelectedIndex(index, true)
+            return
+        end
+    end
+end
+
+function CAIUnitList.BuildPanel()
+    local playerID = Game.GetLocalPlayer()
+    if playerID == nil or playerID < 0 or Players[playerID] == nil then return nil end
+    CAIUnitList.Records = CAIUnitList.BuildRecords()
+    if #CAIUnitList.Records == 0 then return nil end
+
+    CAIUnitList.ViewMode = "table"
+    CAIUnitList.LastRecord = nil
+    CAIUnitList.Columns = CAIUnitList.BuildColumns()
+    if CAIUnitList.GetColumn(CAIUnitList.SortColumn) == nil then
+        CAIUnitList.SortColumn = "name"
+        CAIUnitList.SortAscending = true
+    end
+    local panel = mgr:CreateWidget(UNIT_LIST_ID, "Panel", {
+        Label = function() return Locale.Lookup("LOC_TECH_FILTER_UNITS") end,
+    })
+    CAIUnitList.Panel = panel
+
+    CAIUnitList.Table = mgr:CreateWidget(UNIT_LIST_ID .. "_Table", "DataTable", {
+        Label = CAIUnitList.GetFilterLabel,
+        HiddenPredicate = function() return CAIUnitList.ViewMode ~= "table" end,
+    })
+    CAIUnitList.Table:SetColumns(CAIUnitList.Columns)
+    CAIUnitList.Table:SetRowsProvider(CAIUnitList.GetFilteredRecords)
+    CAIUnitList.Table:SetRowKeyGetter(CAIUnitList.RecordKey)
+    CAIUnitList.Table:SetRowLabelGetter(CAIUnitList.GetName)
+    CAIUnitList.Table:SetDefaultSort(CAIUnitList.SortColumn ~= nil
+        and { column = CAIUnitList.SortColumn, ascending = CAIUnitList.SortAscending }
+        or nil)
+    CAIUnitList.Table:On("row_activate", function(_, record) return CAIUnitList.ActivateRecord(record) end)
+    CAIUnitList.Table:On("row_focus_enter", function(_, record)
+        if record ~= nil then CAIUnitList.LastRecord = record end
+    end)
+    CAIUnitList.Table:On("sort_changed", function(_, columnKey, ascending)
+        CAIUnitList.SortColumn = columnKey
+        CAIUnitList.SortAscending = ascending == true
+        CAIUnitList.SyncSortDropdown()
+    end)
+    CAIUnitList.Table:AddInputBindings({
+        {
+            Key = Keys.VK_RETURN,
+            IsControl = true,
+            MSG = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_JUMP_CURSOR_TO_UNIT",
+            Action = function(w)
+                local record = w:GetFocusedRow()
+                return record ~= nil and CAIUnitList.JumpToRecord(record) or false
+            end,
+        },
+        {
+            Key = Keys.VK_RETURN,
+            IsShift = true,
+            MSG = KeyEvents.KeyUp,
+            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
+            Action = function(w)
+                local record = w:GetFocusedRow()
+                return record ~= nil and CAIUnitList.OpenCivilopedia(record) or false
+            end,
+        },
+    })
+    CAIUnitList.Table:Rebuild()
+    panel:AddChild(CAIUnitList.Table)
+
+    CAIUnitList.List = mgr:CreateWidget(UNIT_LIST_ID .. "_List", "List", {
+        Label = CAIUnitList.GetFilterLabel,
+        HiddenPredicate = function() return CAIUnitList.ViewMode ~= "list" end,
+    })
+    panel:AddChild(CAIUnitList.List)
+
+    CAIUnitList.FilterDropdown = mgr:CreateWidget(UNIT_LIST_ID .. "_Filter", "Dropdown", {
+        Label = function() return Locale.Lookup("LOC_CAI_UNIT_LIST_FILTER") end,
+        FocusKey = "unit:list:filter",
+    })
+    local filterOptions = CAIUnitList.BuildFilterOptions()
+    CAIUnitList.FilterDropdown:SetOptions(filterOptions)
+    for index, option in ipairs(filterOptions) do
+        if option.value == CAIUnitList.FilterKey then
+            CAIUnitList.FilterDropdown:SetSelectedIndex(index, true)
+            break
+        end
+    end
+    CAIUnitList.FilterDropdown:On("value_changed", function(_, filterKey)
+        CAIUnitList.FilterKey = filterKey
+        CAIUnitList.RebuildViews(false)
+    end)
+    panel:AddChild(CAIUnitList.FilterDropdown)
+
+    CAIUnitList.SortDropdown = mgr:CreateWidget(UNIT_LIST_ID .. "_Sort", "Dropdown", {
+        Label = function() return Locale.Lookup("LOC_CAI_UNIT_LIST_SORT") end,
+        FocusKey = "unit:list:sort",
+        HiddenPredicate = function() return CAIUnitList.ViewMode ~= "list" end,
+    })
+    CAIUnitList.SortOptions = CAIUnitList.BuildSortOptions()
+    CAIUnitList.SortDropdown:SetOptions(CAIUnitList.SortOptions)
+    CAIUnitList.SyncSortDropdown()
+    CAIUnitList.SortDropdown:On("value_changed", function(_, sort)
+        CAIUnitList.SortColumn = sort.column
+        CAIUnitList.SortAscending = sort.ascending == true
+        CAIUnitList.Table:SetDefaultSort(sort.column ~= nil
+            and { column = sort.column, ascending = sort.ascending }
+            or nil)
+        CAIUnitList.RebuildList()
+    end)
+    panel:AddChild(CAIUnitList.SortDropdown)
+
+    CAIUnitList.SwitchButton = mgr:CreateWidget(UNIT_LIST_ID .. "_Switch", "Button", {
+        Label = function()
+            return Locale.Lookup(CAIUnitList.ViewMode == "table"
+                and "LOC_CAI_REPORTS_SWITCH_TO_LIST"
+                or "LOC_CAI_REPORTS_SWITCH_TO_TABLE")
+        end,
+        FocusKey = "unit:list:switch",
+    })
+    CAIUnitList.SwitchButton:On("activate", function()
+        return CAIUnitList.SetViewMode(CAIUnitList.ViewMode == "table" and "list" or "table")
+    end)
+    panel:AddChild(CAIUnitList.SwitchButton)
+
+    panel:AddInputBindings({
+        {
+            Key = Keys.VK_ESCAPE,
+            Description = "LOC_CAI_KB_CLOSE",
+            Action = function() RemoveUnitList(); return true end,
+        },
+        {
+            Key = Keys["1"],
+            IsAlt = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_REPORTS_SWITCH_TO_TABLE",
+            Action = function() return CAIUnitList.SetViewMode("table") end,
+        },
+        {
+            Key = Keys["2"],
+            IsAlt = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_REPORTS_SWITCH_TO_LIST",
+            Action = function() return CAIUnitList.SetViewMode("list") end,
+        },
+    })
+    return panel
+end
+
+function CAIUnitList.OnUnitsChanged(playerID)
+    if UnitList == nil then return end
+    if playerID == Game.GetLocalPlayer() then
+        CAIUnitList.RebuildViews(true)
+    elseif CAIUnitList.SortColumn == "adjacent_enemies" then
+        CAIUnitList.RebuildViews(false)
+    end
+end
+
+function CAIUnitList.OnUnitStateChanged(playerID)
+    if UnitList ~= nil and (playerID == nil or playerID == Game.GetLocalPlayer()
+        or CAIUnitList.SortColumn == "adjacent_enemies") then
+        CAIUnitList.RebuildViews(false)
+    end
 end
 
 local function OpenUnitList()
-    if mgr == nil then
-        return
-    end
-
-    if UnitList ~= nil then
-        RemoveUnitList()
-    end
-
-    UnitList = BuildUnitList()
+    if mgr == nil then return end
+    if UnitList ~= nil then RemoveUnitList() end
+    UnitList = CAIUnitList.BuildPanel()
     if UnitList == nil then
         Speak(Locale.Lookup("LOC_CAI_UNIT_NO_UNITS"))
         return
@@ -2857,9 +3523,9 @@ local function OpenUnitList()
     local selectedUnit = GetSelectedUnit()
     local focusHint = nil
     if selectedUnit ~= nil and selectedUnit:GetOwner() == Game.GetLocalPlayer() then
-        focusHint = UnitFocusKey(selectedUnit:GetOwner(), selectedUnit:GetID())
+        focusHint = tostring(CAIUnitList.Table.Id) .. ":row:"
+            .. UnitFocusKey(selectedUnit:GetOwner(), selectedUnit:GetID()) .. ":name"
     end
-
     mgr:Push(UnitList, { priority = PopupPriority.Low, focus = focusHint })
 end
 
@@ -2886,6 +3552,7 @@ function InitializeUnitInfoActionMap()
         [Input.GetActionId("ReadSelectionInfo7")] = { "Abilities" },
         [Input.GetActionId("ReadSelectionInfo8")] = { "SpecialInfo" },
         [Input.GetActionId("ReadSelectionInfo9")] = { "QueuedPath" },
+        [Input.GetActionId("ReadSelectionInfo10")] = { "AdjacentEnemies" },
     }
 end
 
@@ -3077,6 +3744,9 @@ Controls.RandomNameButton:RegisterCallback(Mouse.eLClick, RandomizeName)
 
 local function OnCAICursorMoved(state)
     InspectWhatsBelowTheCursor()
+    if UnitList ~= nil and CAIUnitList.SortColumn == "distance" then
+        CAIUnitList.RebuildViews(false)
+    end
 end
 
 local function SpeakCurrentCombatPreview()
@@ -3143,6 +3813,7 @@ end
 
 local function OnCAIUnitOperationStarted(playerID, unitID, operationID)
     ConfirmUnitActionIntent("operation", playerID, unitID, operationID)
+    CAIUnitList.OnUnitStateChanged(playerID)
 end
 
 local function OnCAIUnitOperationAdded(playerID, unitID, unknown, operationType)
@@ -3152,10 +3823,12 @@ local function OnCAIUnitOperationAdded(playerID, unitID, unknown, operationType)
         return
     end
     ConfirmUnitActionIntent("operation", playerID, unitID, operation.Hash)
+    CAIUnitList.OnUnitStateChanged(playerID)
 end
 
 local function OnCAIUnitCommandStarted(playerID, unitID, commandID)
     ConfirmUnitActionIntent("command", playerID, unitID, commandID)
+    CAIUnitList.OnUnitStateChanged(playerID)
 end
 
 local resultStrings = SwapPairs(CombatResultParameters)
@@ -3203,6 +3876,12 @@ Events.UnitSelectionChanged.Add(OnCAIUnitSelectionChanged)
 Events.UnitOperationStarted.Add(OnCAIUnitOperationStarted)
 Events.UnitOperationAdded.Add(OnCAIUnitOperationAdded)
 Events.UnitCommandStarted.Add(OnCAIUnitCommandStarted)
+Events.UnitAddedToMap.Add(CAIUnitList.OnUnitsChanged)
+Events.UnitRemovedFromMap.Add(CAIUnitList.OnUnitsChanged)
+Events.UnitMoveComplete.Add(CAIUnitList.OnUnitStateChanged)
+Events.UnitDamageChanged.Add(CAIUnitList.OnUnitStateChanged)
+Events.UnitOperationDeactivated.Add(CAIUnitList.OnUnitStateChanged)
+Events.UnitOperationsCleared.Add(CAIUnitList.OnUnitStateChanged)
 Events.LocalPlayerTurnEnd.Add(ClearUnitActionIntents)
 Events.Combat.Add(OnCombatResolved)
 Events.InputActionStarted.Add(OnInputActionStarted)

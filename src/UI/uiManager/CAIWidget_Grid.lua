@@ -244,6 +244,41 @@ function GridWidget:_AllTiers()
     return out
 end
 
+---Return table-style row/column speech for a direct grid cell. Tiers are an
+---internal layout detail, so each visible tier counts as one spoken column.
+---Raw child indices preserve spatial row alignment across uneven tiers and
+---hidden spacer cells.
+---@param widget UIWidget
+---@return string|nil
+function GridWidget:GetCellPositionString(widget)
+    local tier = widget and widget.Parent or nil
+    if not tier or tier.Type ~= "GridTier" or not tier.Parent or tier.Parent.Parent ~= self then
+        return nil
+    end
+
+    local tiers = {}
+    for _, candidate in ipairs(self:_AllTiers()) do
+        if not candidate:IsHidden() then tiers[#tiers + 1] = candidate end
+    end
+
+    local columnIndex = 0
+    local rowTotal = 0
+    for index, candidate in ipairs(tiers) do
+        if candidate == tier then columnIndex = index end
+        rowTotal = math.max(rowTotal, #candidate.Children)
+    end
+    local rowIndex = tier:GetChildIndex(widget)
+    if rowIndex == 0 or columnIndex == 0 or rowTotal == 0 then return nil end
+
+    return Locale.Lookup(
+        "LOC_CAI_DATATABLE_CELL_POSITION",
+        rowIndex,
+        rowTotal,
+        columnIndex,
+        #tiers
+    )
+end
+
 ---The currently focused item cell and its tier, or nil if focus isn't on one.
 ---@return UIWidget|nil cell, ContainerWidget|nil tier
 function GridWidget:_FocusedCell()

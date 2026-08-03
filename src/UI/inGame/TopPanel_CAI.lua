@@ -98,7 +98,7 @@ local function SpeakGold()
         end
     end
 
-    Speak(table.concat(parts, ", "))
+    Speak(table.concat(parts, "[NEWLINE]"))
 end
 
 local function SpeakFaith()
@@ -170,7 +170,7 @@ local function SpeakNukes()
     if #parts == 0 then
         Speak(Locale.Lookup("LOC_CAI_TOP_PANEL_NO_NUKES"))
     else
-        Speak(table.concat(parts, ", "))
+        Speak(table.concat(parts, "[NEWLINE]"))
     end
 end
 
@@ -396,7 +396,7 @@ local function BuildTurnTimeDateParts(includeClock)
 end
 
 local function SpeakTurnTimeDate()
-    Speak(table.concat(BuildTurnTimeDateParts(true), ", "))
+    Speak(table.concat(BuildTurnTimeDateParts(true), "[NEWLINE]"))
 end
 
 -- ===========================================================================
@@ -705,7 +705,7 @@ local function AddResourceInfoTreeNodes(parent)
                         if totalConsumptionPerTurn > 0 then
                             table.insert(tooltipParts, Locale.Lookup("LOC_RESOURCE_CONSUMPTION", totalConsumptionPerTurn))
                         end
-                        local node = MakeTreeItem(nodeLabel, table.concat(tooltipParts, ", "))
+                        local node = MakeTreeItem(nodeLabel, table.concat(tooltipParts, "[NEWLINE]"))
 
                         if reservedAmount > 0 then
                             node:AddChild(MakeTreeItem(
@@ -834,7 +834,7 @@ local function OnCAITopPanelInputAction(actionId)
 end
 
 local function OnLocalPlayerTurnBegin()
-    Speak(table.concat(BuildTurnTimeDateParts(false), ", "))
+    Speak(table.concat(BuildTurnTimeDateParts(false), "[NEWLINE]"))
 end
 
 local function OnLocalPlayerTurnEnd()

@@ -141,7 +141,7 @@ local SIDE_CHANGED_LOC = {
 
 local function BuildSideLine(locTag, labels)
     if not labels or #labels == 0 then return nil end
-    return Locale.Lookup(locTag) .. ": " .. table.concat(labels, ", ")
+    return Locale.Lookup(locTag) .. ": " .. table.concat(labels, "[NEWLINE]")
 end
 
 -- Side text: the per-side add/remove offer changes. Spoken as its own

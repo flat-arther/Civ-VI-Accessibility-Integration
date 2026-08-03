@@ -1138,7 +1138,7 @@ function FormatCityListRow(city)
     local parts = { Locale.Lookup(city:GetName()) }
     table.insert(parts, Locale.Lookup("LOC_CAI_CITY_POPULATION", city:GetPopulation()))
     table.insert(parts, ReadCurrentProductionLabel(false, city))
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function FormatCityYieldsTooltip(city)

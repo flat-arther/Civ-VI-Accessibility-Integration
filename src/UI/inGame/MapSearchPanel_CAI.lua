@@ -122,7 +122,7 @@ local function GetPlotLabel(plotIndex)
     end
 
     if #parts > 0 then
-        return table.concat(parts, ", ")
+        return table.concat(parts, "[NEWLINE]")
     end
 
     if plot then

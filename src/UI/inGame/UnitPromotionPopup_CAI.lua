@@ -67,7 +67,7 @@ local function FormatPromotionList(names, conjunctionTag)
     if #names <= 1 then return table.concat(names) end
 
     local finalName = table.remove(names)
-    return table.concat(names, ", ") .. ", " .. Locale.Lookup(conjunctionTag) .. " " .. finalName
+    return table.concat(names, "[NEWLINE]") .. ", " .. Locale.Lookup(conjunctionTag) .. " " .. finalName
 end
 
 local function FormatPromotionPrereqs(types)

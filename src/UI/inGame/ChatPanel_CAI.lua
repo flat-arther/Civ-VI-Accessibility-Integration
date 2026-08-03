@@ -81,7 +81,7 @@ local function CAI_JoinNonEmpty(parts, separator)
             table.insert(results, part)
         end
     end
-    return table.concat(results, separator or ", ")
+    return table.concat(results, separator or "[NEWLINE]")
 end
 
 local function CAI_GetChatInputTooltip()

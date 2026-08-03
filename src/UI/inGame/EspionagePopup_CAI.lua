@@ -28,7 +28,7 @@ local function JoinNonEmpty(parts)
             table.insert(out, part)
         end
     end
-    return table.concat(out, ", ")
+    return table.concat(out, "[NEWLINE]")
 end
 
 local function LabelValue(label, value)

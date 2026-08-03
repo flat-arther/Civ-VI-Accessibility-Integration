@@ -14,7 +14,7 @@ include("CAIWidgetHelpers_DialogBuilder")
 include("CAIWidgetHelpers_PediaLookup")
 include("CAIWidgetHelpers_Settings")
 include("CAIWidgetHelpers_InputHelp")
-include("CAIWidgetHelpers_TooltipReader")
+include("CAIWidgetHelpers_FocusedWidgetReader")
 include("CAIWidget_Base")
 include("CAIWidget_Container")
 include("CAIWidget_Value")
@@ -37,6 +37,7 @@ include("CAIWidget_Tab")
 include("CAIWidget_TabPage")
 include("CAIWidget_TabControl")
 include("CAIWidget_Grid")
+include("CAIWidget_Graph")
 include("CAIWidget_DataTable")
 include("CAIWidget_GameView")
 include("CAIWidget_InterfaceMode")
@@ -453,6 +454,15 @@ end
 function UIScreenManager:SetFocus(widget, opts)
     if type(opts) == "boolean" then opts = { announce = opts } end
     opts = opts or {}
+    local tutorialManager = self:GetTutorialManager()
+
+    if tutorialManager
+        and tutorialManager:IsActive()
+        and not tutorialManager:IsWidgetInsideActiveTutorial(widget) then
+        tutorialManager:DeferFocus(widget, opts)
+        return false
+    end
+
     local path = self.BuildFocusPath(widget, opts.direction)
     return self:SetFocusPath(path, nil, opts.announce)
 end

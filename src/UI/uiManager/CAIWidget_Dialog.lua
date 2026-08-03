@@ -1,6 +1,7 @@
 -- CAIWidget_Dialog.lua
 -- ContainerWidget for modal popups. Tab/Shift+Tab and Up/Down cycle the
 -- dialog's rows (content rows + the action button row, in that order).
+-- Home jumps to the first content control; End jumps to the last action.
 -- SetButtons() auto-creates a Transparent horizontal button row appended as
 -- the last child; Left/Right and Up/Down inside the row all cycle the buttons
 -- until the row edge, where Up/Down bubble to dialog-row navigation.
@@ -28,6 +29,8 @@ function DialogWidget.Create(mgr, id, props)
             self) return self:NavigatePrev() end },
         { Key = Keys.VK_DOWN, MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_NEXT_CONTROL",     Action = function(self) return self:NavigateNext() end },
         { Key = Keys.VK_UP,   MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_PREVIOUS_CONTROL", Action = function(self) return self:NavigatePrev() end },
+        { Key = Keys.VK_HOME, MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_FIRST_CONTROL",    Action = function(self) return self:NavigateToFirst() end },
+        { Key = Keys.VK_END,  MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_LAST_CONTROL",     Action = function(self) return self:NavigateToLast() end },
         {
             Key = Keys.VK_RETURN,
             Description = "LOC_CAI_KB_DEFAULT_ACTION",

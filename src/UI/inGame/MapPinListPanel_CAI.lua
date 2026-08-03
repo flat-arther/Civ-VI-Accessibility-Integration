@@ -201,7 +201,7 @@ local function BuildPinLabel(mapPinCfg)
 
     local parts = { BuildMapTacLabel(mapPinCfg) }
     if dirText ~= "" then table.insert(parts, dirText) end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 -- ============================================================================

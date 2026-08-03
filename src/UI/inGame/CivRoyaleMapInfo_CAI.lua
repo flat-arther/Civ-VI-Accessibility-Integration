@@ -192,7 +192,7 @@ function CAICivRoyaleMapInfo.GetZoneDetailSpeech(plot, playerID)
     if shrinkStatus ~= nil then
         parts[#parts + 1] = shrinkStatus
     end
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 function CAICivRoyaleMapInfo.GetObjectSpeech(plot, playerID, refreshHunger)

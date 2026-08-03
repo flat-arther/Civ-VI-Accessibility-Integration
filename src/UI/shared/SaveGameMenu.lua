@@ -520,7 +520,7 @@ local function RebuildFileListAccessibility()
                     local parts = {}
                     if saveHasError then
                         if #errorModNames > 0 then
-                            table.insert(parts, Locale.Lookup("LOC_GAME_START_ERROR_TITLE") .. ": " .. table.concat(errorModNames, ", "))
+                            table.insert(parts, Locale.Lookup("LOC_GAME_START_ERROR_TITLE") .. ": " .. table.concat(errorModNames, "[NEWLINE]"))
                         else
                             table.insert(parts, Locale.Lookup("LOC_GAME_START_ERROR_TITLE"))
                         end

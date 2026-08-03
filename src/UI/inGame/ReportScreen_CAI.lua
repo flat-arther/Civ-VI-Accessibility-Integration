@@ -16,9 +16,28 @@ local HexCoordUtils        = CAIHexCoordUtils
 
 local PANEL_ID             = "CAIReports_Panel"
 local TABS_ID              = "CAIReports_Tabs"
+local CITY_STATUS_TABLE_ID = "CAIReports_CityStatusTable"
 local HOVER_SOUND          = "Main_Menu_Mouse_Over"
 local BLACK_DEATH_PAPAL_SLOT_INDEX = 2
 local BLACK_DEATH_PAPAL_SLOT_UPKEEP = 4
+local VIEW_SETTING_SECTION = "UI"
+local CITY_STATUS_VIEW_SETTING_ID = "ReportsCityStatusViewMode"
+
+local function LoadCityStatusViewMode()
+    local stored = tostring(CAI.GetConfigValue(
+        VIEW_SETTING_SECTION, CITY_STATUS_VIEW_SETTING_ID, "table")):lower()
+    if stored == "list" then return "list" end
+    if stored ~= "table" then
+        LogWarn("Reports ignored invalid saved City Status view mode " .. tostring(stored))
+    end
+    return "table"
+end
+
+local function SaveCityStatusViewMode(viewMode)
+    if not CAI.SetConfigValue(VIEW_SETTING_SECTION, CITY_STATUS_VIEW_SETTING_ID, viewMode) then
+        LogError("Reports failed to save City Status view mode " .. tostring(viewMode))
+    end
+end
 
 local m_panel              = nil
 local m_tabs               = nil
@@ -44,6 +63,8 @@ local m_caiGossipFiltered  = {}
 local m_caiLeaderFilter    = -1
 local m_caiGroupFilter     = "ALL"
 local m_cityStatusSort     = "name"
+local m_cityStatusViewMode = LoadCityStatusViewMode()
+local m_cityStatusSelectedCityID = nil
 local m_pendingOpenFocusKey = nil
 
 local function GetRelativePlotLocation(plotIndex)
@@ -1516,7 +1537,7 @@ local function FormatResourceEntryLabel(kEntry)
         table.insert(parts, control)
     end
     table.insert(parts, toPlusMinus(kEntry.Amount))
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildResourceItem(parent, eResourceType, kSingleResourceData)
@@ -1630,7 +1651,7 @@ local function BuildResourceItem(parent, eResourceType, kSingleResourceData)
                                 "res:" .. tostring(capturedResType) .. ":accumulation:extracted:misc",
                                 function()
                                     return Locale.Lookup("LOC_HUD_REPORTS_MISC_RESOURCE_SOURCE")
-                                        .. ", " .. toPlusMinus(miscellaneousExtraction)
+                                        .. "[NEWLINE]" .. toPlusMinus(miscellaneousExtraction)
                                 end)
                         end
                     else
@@ -1663,7 +1684,7 @@ local function BuildResourceItem(parent, eResourceType, kSingleResourceData)
                                 "res:" .. tostring(capturedResType) .. ":accumulation:imports:misc",
                                 function()
                                     return Locale.Lookup("LOC_HUD_REPORTS_MISC_RESOURCE_SOURCE")
-                                        .. ", " .. toPlusMinus(miscellaneousCityStates)
+                                        .. "[NEWLINE]" .. toPlusMinus(miscellaneousCityStates)
                                 end)
                         end
                     else
@@ -1844,25 +1865,137 @@ local function GetCityLoyalty(kCityData)
     return 0
 end
 
+local function GetCityStatusYield(kCityData, yieldIndex)
+    return math.floor(kCityData.City:GetYield(yieldIndex) * 10) / 10
+end
+
+local function GetCityStatusDistance(kCityData)
+    local plot = kCityData.CAIPlotIndex and Map.GetPlotByIndex(kCityData.CAIPlotIndex) or nil
+    if not plot then return nil end
+    CAICursor = CAICursor or ExposedMembers.CAICursor
+    if not CAICursor then return nil end
+    local cursorX, cursorY = CAICursor:GetCoords()
+    if cursorX == nil or cursorY == nil then return nil end
+    return Map.GetPlotDistance(cursorX, cursorY, plot:GetX(), plot:GetY())
+end
+
+local function GetCityStatusDirection(kCityData)
+    return GetRelativePlotLocation(kCityData.CAIPlotIndex)
+end
+
+local function GetCityStatusDamage(kCityData)
+    if m_isExp1 or m_isExp2 then
+        return kCityData.HitpointsTotal - kCityData.HitpointsCurrent
+    end
+    return kCityData.Damage
+end
+
+local function GetCityStatusName(kCityData)
+    return Locale.Lookup(kCityData.CityName)
+end
+
+local function GetCityStatusHappiness(kCityData)
+    return Locale.Lookup(GameInfo.Happinesses[kCityData.Happiness].Name)
+end
+
+local function GetCityStatusText(kCityData)
+    return Locale.Lookup(kCityData.IsUnderSiege
+        and "LOC_HUD_REPORTS_STATUS_UNDER_SEIGE"
+        or "LOC_HUD_REPORTS_STATUS_NORMAL")
+end
+
+local function GetCityStatusLoyaltyText(kCityData)
+    local pCulturalIdentity = kCityData.City:GetCulturalIdentity()
+    if not pCulturalIdentity then return "" end
+    local loyaltyPerTurn = pCulturalIdentity:GetLoyaltyPerTurn()
+    local trend
+    if loyaltyPerTurn > 0 then
+        trend = Locale.Lookup("LOC_CAI_REPORTS_LOYALTY_RISING")
+    elseif loyaltyPerTurn < 0 then
+        trend = Locale.Lookup("LOC_CAI_REPORTS_LOYALTY_FALLING")
+    else
+        trend = Locale.Lookup("LOC_CAI_REPORTS_LOYALTY_STABLE")
+    end
+    return Locale.Lookup("LOC_CAI_REPORTS_LOYALTY",
+        Round(pCulturalIdentity:GetLoyalty(), 1), pCulturalIdentity:GetMaxLoyalty(), trend)
+end
+
+local function GetCityStatusGovernorText(kCityData)
+    local governor = kCityData.City:GetAssignedGovernor()
+    if not governor then return Locale.Lookup("LOC_CAI_REPORTS_NO_GOVERNOR") end
+    local governorDef = GameInfo.Governors[governor:GetType()]
+    local governorName = Locale.Lookup(governorDef.Name)
+    return Locale.Lookup(governor:IsEstablished()
+        and "LOC_CAI_REPORTS_GOVERNOR_ASSIGNED"
+        or "LOC_CAI_REPORTS_GOVERNOR_TRAVELING", governorName)
+end
+
+local function GetCityStatusRowLabel(kCityData)
+    local parts = { GetCityStatusName(kCityData) }
+    if kCityData.IsUnderSiege then
+        table.insert(parts, GetCityStatusText(kCityData))
+    end
+    if m_isExp1 or m_isExp2 then
+        table.insert(parts, GetCityStatusGovernorText(kCityData))
+    end
+    return table.concat(parts, "[NEWLINE]")
+end
+
+local function CompareCityStatusByName(a, b)
+    local aName = Locale.Lookup(a.CityName)
+    local bName = Locale.Lookup(b.CityName)
+    if aName ~= bName then return Locale.Compare(aName, bName) < 0 end
+    return a.City:GetID() < b.City:GetID()
+end
+
+local function CompareCityStatusValues(a, b, getValue)
+    local aValue = getValue(a)
+    local bValue = getValue(b)
+    if aValue ~= bValue then return aValue > bValue end
+    return CompareCityStatusByName(a, b)
+end
+
 local function GetSortedCityData()
     local sorted = {}
     for _, kCityData in ipairs(m_caiCityData) do
         table.insert(sorted, kCityData)
     end
-    if m_cityStatusSort == "population" then
-        table.sort(sorted, function(a, b) return a.Population > b.Population end)
-    elseif m_cityStatusSort == "defense" then
-        table.sort(sorted, function(a, b) return a.Defense > b.Defense end)
-    elseif m_cityStatusSort == "happiness" then
-        table.sort(sorted, function(a, b) return a.Happiness > b.Happiness end)
-    elseif m_cityStatusSort == "growth" then
-        table.sort(sorted, function(a, b) return a.HousingMultiplier > b.HousingMultiplier end)
-    elseif m_cityStatusSort == "loyalty" then
-        table.sort(sorted, function(a, b) return GetCityLoyalty(a) > GetCityLoyalty(b) end)
-    else
+    if m_cityStatusSort == "distance" then
         table.sort(sorted, function(a, b)
-            return Locale.Lookup(a.CityName) < Locale.Lookup(b.CityName)
+            local aDistance = GetCityStatusDistance(a) or math.huge
+            local bDistance = GetCityStatusDistance(b) or math.huge
+            if aDistance ~= bDistance then return aDistance < bDistance end
+            return CompareCityStatusByName(a, b)
         end)
+    elseif m_cityStatusSort == "population" then
+        table.sort(sorted, function(a, b)
+            return CompareCityStatusValues(a, b, function(cityData) return cityData.Population end)
+        end)
+    elseif m_cityStatusSort == "defense" then
+        table.sort(sorted, function(a, b)
+            return CompareCityStatusValues(a, b, function(cityData) return cityData.Defense end)
+        end)
+    elseif m_cityStatusSort == "happiness" then
+        table.sort(sorted, function(a, b)
+            return CompareCityStatusValues(a, b, function(cityData) return cityData.Happiness end)
+        end)
+    elseif m_cityStatusSort == "growth" then
+        table.sort(sorted, function(a, b)
+            return CompareCityStatusValues(a, b, function(cityData) return cityData.HousingMultiplier end)
+        end)
+    elseif m_cityStatusSort == "loyalty" then
+        table.sort(sorted, function(a, b)
+            return CompareCityStatusValues(a, b, GetCityLoyalty)
+        end)
+    elseif GameInfo.Yields[m_cityStatusSort] then
+        local yieldIndex = GameInfo.Yields[m_cityStatusSort].Index
+        table.sort(sorted, function(a, b)
+            return CompareCityStatusValues(a, b, function(cityData)
+                return GetCityStatusYield(cityData, yieldIndex)
+            end)
+        end)
+    else
+        table.sort(sorted, CompareCityStatusByName)
     end
     return sorted
 end
@@ -1904,6 +2037,11 @@ local function RebuildCityStatusList(list)
                 end
 
                 table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_DEFENSE", capturedCity.Defense))
+
+                for yield in GameInfo.Yields() do
+                    table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_CITY_YIELD",
+                        Locale.Lookup(yield.Name), GetCityStatusYield(capturedCity, yield.Index)))
+                end
 
                 local damage
                 if m_isExp1 or m_isExp2 then
@@ -1960,48 +2098,270 @@ local function RebuildCityStatusList(list)
         btn:On("activate", function()
             ActivateCity(capturedCity.City)
         end)
+        btn:On("focus_enter", function(w)
+            if w:IsFocused() then m_cityStatusSelectedCityID = capturedCity.City:GetID() end
+        end)
         list:AddChild(btn)
     end
 
     mgr:RestoreFocus(list, capture)
 end
 
-local function RebuildCityStatusTab(entry)
-    RebuildCityStatusList(entry.tree)
+local function GetCityStatusTableFocusKey(cityID)
+    return CITY_STATUS_TABLE_ID .. ":row:" .. tostring(cityID) .. ":name"
+end
 
+local function BuildCityStatusTableColumns()
+    local columns = {
+        {
+            key = "name",
+            header = function() return Locale.Lookup("LOC_CAI_REPORTS_SORT_NAME") end,
+            getCell = GetCityStatusRowLabel,
+            getState = function(kCityData)
+                return kCityData.IsCapital and Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL") or ""
+            end,
+            sortKey = GetCityStatusName,
+            sortAscendingDescription = "LOC_CAI_SORT_A_TO_Z",
+            sortDescendingDescription = "LOC_CAI_SORT_Z_TO_A",
+        },
+        {
+            key = "distance",
+            header = function() return Locale.Lookup("LOC_CAI_REPORTS_DISTANCE") end,
+            getCell = GetCityStatusDirection,
+            getTooltip = function(kCityData)
+                local distance = GetCityStatusDistance(kCityData)
+                return distance and Locale.Lookup("LOC_CAI_WORLD_SCANNER_DISTANCE", distance) or ""
+            end,
+            sortKey = GetCityStatusDistance,
+            sortAscendingDescription = "LOC_CAI_SORT_NEAREST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_FARTHEST_FIRST",
+        },
+        {
+            key = "population",
+            header = function() return Locale.Lookup("LOC_HUD_REPORTS_HEADER_POPULATION") end,
+            getCell = function(kCityData) return tostring(kCityData.Population) end,
+            sortKey = function(kCityData) return kCityData.Population end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+        {
+            key = "housing",
+            header = function() return Locale.Lookup("LOC_HUD_REPORTS_HEADER_HOUSING") end,
+            getCell = function(kCityData) return tostring(kCityData.Housing) end,
+            sortKey = function(kCityData) return kCityData.Housing end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+        {
+            key = "growth",
+            header = function() return Locale.Lookup("LOC_CAI_REPORTS_SORT_GROWTH") end,
+            getCell = GetGrowthStatus,
+            sortKey = function(kCityData) return kCityData.HousingMultiplier end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+        {
+            key = "amenities",
+            header = function() return Locale.Lookup("LOC_HUD_REPORTS_HEADER_AMENITIES") end,
+            getCell = function(kCityData)
+                return Locale.Lookup("LOC_CAI_REPORTS_AMENITIES",
+                    kCityData.AmenitiesNum, kCityData.AmenitiesRequiredNum)
+            end,
+            sortKey = function(kCityData)
+                return kCityData.AmenitiesNum - kCityData.AmenitiesRequiredNum
+            end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+        {
+            key = "happiness",
+            header = function() return Locale.Lookup("LOC_CAI_REPORTS_SORT_HAPPINESS") end,
+            getCell = GetCityStatusHappiness,
+            sortKey = function(kCityData) return kCityData.Happiness end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+        {
+            key = "war_weariness",
+            header = function() return Locale.Lookup("LOC_HUD_REPORTS_HEADER_WAR_WEARINESS") end,
+            getCell = function(kCityData) return tostring(kCityData.AmenitiesLostFromWarWeariness) end,
+            sortKey = function(kCityData) return kCityData.AmenitiesLostFromWarWeariness end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+        {
+            key = "defense",
+            header = function() return Locale.Lookup("LOC_CAI_REPORTS_SORT_DEFENSE") end,
+            getCell = function(kCityData) return tostring(kCityData.Defense) end,
+            sortKey = function(kCityData) return kCityData.Defense end,
+            sortAscendingDescription = "LOC_CAI_SORT_WEAKEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_STRONGEST_FIRST",
+        },
+        {
+            key = "damage",
+            header = function() return Locale.Lookup("LOC_HUD_REPORTS_HEADER_DAMAGE") end,
+            getCell = function(kCityData) return tostring(GetCityStatusDamage(kCityData)) end,
+            sortKey = GetCityStatusDamage,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+    }
+
+    if m_isExp1 or m_isExp2 then
+        table.insert(columns, {
+            key = "loyalty",
+            header = function() return Locale.Lookup("LOC_REPORTS_LOYALTY") end,
+            getCell = GetCityStatusLoyaltyText,
+            sortKey = GetCityLoyalty,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        })
+    end
+
+    for yield in GameInfo.Yields() do
+        local yieldIndex = yield.Index
+        local yieldName = yield.Name
+        table.insert(columns, {
+            key = yield.YieldType,
+            header = function() return Locale.Lookup(yieldName) end,
+            getCell = function(kCityData)
+                return FormatBalance(GetCityStatusYield(kCityData, yieldIndex))
+            end,
+            sortKey = function(kCityData)
+                return GetCityStatusYield(kCityData, yieldIndex)
+            end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        })
+    end
+    return columns
+end
+
+local function SetCityStatusViewMode(entry, viewMode)
+    if viewMode ~= "table" and viewMode ~= "list" then
+        LogError("Reports received invalid City Status view mode " .. tostring(viewMode))
+        return false
+    end
+    if m_cityStatusViewMode ~= viewMode then
+        m_cityStatusViewMode = viewMode
+        SaveCityStatusViewMode(viewMode)
+    end
+    local activeView = viewMode == "table" and entry.table or entry.tree
+    if activeView then
+        if m_cityStatusSelectedCityID ~= nil then
+            local focusKey = viewMode == "table"
+                and GetCityStatusTableFocusKey(m_cityStatusSelectedCityID)
+                or "status:city:" .. tostring(m_cityStatusSelectedCityID)
+            mgr:PrepareFocus(activeView, focusKey)
+        end
+        mgr:SetFocus(activeView)
+    end
+    return true
+end
+
+local function EnsureCityStatusControls(entry)
+    if entry.table then return end
     local page = entry.page
     if not page then return end
 
-    if entry.sortDropdown then return end
+    entry.table = mgr:CreateWidget(CITY_STATUS_TABLE_ID, "DataTable", {
+        Label = function() return Locale.Lookup("LOC_HUD_REPORTS_TAB_CITY_STATUS") end,
+        HiddenPredicate = function() return m_cityStatusViewMode ~= "table" end,
+    })
+    entry.table:SetColumns(BuildCityStatusTableColumns())
+    entry.table:SetRowsProvider(function() return m_caiCityData end)
+    entry.table:SetRowKeyGetter(function(kCityData) return kCityData.City:GetID() end)
+    entry.table:SetRowLabelGetter(GetCityStatusRowLabel)
+    entry.table:SetDefaultSort({ column = "name", ascending = true })
+    entry.table:On("row_focus_enter", function(_, kCityData, rowIndex)
+        if rowIndex > 0 then m_cityStatusSelectedCityID = kCityData.City:GetID() end
+    end)
+    entry.table:On("row_activate", function(_, kCityData)
+        ActivateCity(kCityData.City)
+    end)
+    page:AddChild(entry.table)
 
+    local function SortOption(headerTag, descriptionTag)
+        return Locale.Lookup(headerTag) .. ", " .. Locale.Lookup(descriptionTag)
+    end
     local sortOptions = {
-        { label = Locale.Lookup("LOC_CAI_REPORTS_SORT_NAME"),         value = "name" },
-        { label = Locale.Lookup("LOC_HUD_REPORTS_HEADER_POPULATION"), value = "population" },
-        { label = Locale.Lookup("LOC_CAI_REPORTS_SORT_DEFENSE"),      value = "defense" },
-        { label = Locale.Lookup("LOC_CAI_REPORTS_SORT_HAPPINESS"),    value = "happiness" },
-        { label = Locale.Lookup("LOC_CAI_REPORTS_SORT_GROWTH"),       value = "growth" },
+        { label = SortOption("LOC_CAI_REPORTS_SORT_NAME", "LOC_CAI_SORT_A_TO_Z"), value = "name" },
+        { label = SortOption("LOC_CAI_REPORTS_DISTANCE", "LOC_CAI_SORT_NEAREST_FIRST"), value = "distance" },
+        { label = SortOption("LOC_HUD_REPORTS_HEADER_POPULATION", "LOC_CAI_SORT_HIGHEST_FIRST"), value = "population" },
+        { label = SortOption("LOC_CAI_REPORTS_SORT_DEFENSE", "LOC_CAI_SORT_STRONGEST_FIRST"), value = "defense" },
+        { label = SortOption("LOC_CAI_REPORTS_SORT_HAPPINESS", "LOC_CAI_SORT_HIGHEST_FIRST"), value = "happiness" },
+        { label = SortOption("LOC_CAI_REPORTS_SORT_GROWTH", "LOC_CAI_SORT_HIGHEST_FIRST"), value = "growth" },
     }
     if m_isExp1 or m_isExp2 then
         table.insert(sortOptions,
-            { label = Locale.Lookup("LOC_REPORTS_LOYALTY"), value = "loyalty" })
+            { label = SortOption("LOC_REPORTS_LOYALTY", "LOC_CAI_SORT_HIGHEST_FIRST"), value = "loyalty" })
+    end
+    for yield in GameInfo.Yields() do
+        table.insert(sortOptions, {
+            label = Locale.Lookup(yield.Name) .. ", " .. Locale.Lookup("LOC_CAI_SORT_HIGHEST_FIRST"),
+            value = yield.YieldType,
+        })
     end
 
-    local sortDropdown = mgr:CreateWidget(MakeId("CAIRPT_"), "Dropdown", {
+    entry.sortDropdown = mgr:CreateWidget(MakeId("CAIRPT_"), "Dropdown", {
         Label = function() return Locale.Lookup("LOC_CAI_REPORTS_SORT_BY") end,
         FocusKey = "status:sort",
+        HiddenPredicate = function() return m_cityStatusViewMode ~= "list" end,
     })
-    sortDropdown:SetOptions(sortOptions)
+    entry.sortDropdown:SetOptions(sortOptions)
     for si, opt in ipairs(sortOptions) do
         if opt.value == m_cityStatusSort then
-            sortDropdown:SetSelectedIndex(si, true); break
+            entry.sortDropdown:SetSelectedIndex(si, true)
+            break
         end
     end
-    sortDropdown:On("value_changed", function(w, val)
-        m_cityStatusSort = val
+    entry.sortDropdown:On("value_changed", function(_, value)
+        m_cityStatusSort = value
         RebuildCityStatusList(entry.tree)
     end)
-    page:AddChild(sortDropdown)
-    entry.sortDropdown = sortDropdown
+    page:AddChild(entry.sortDropdown)
+
+    entry.switchView = mgr:CreateWidget(MakeId("CAIRPT_"), "Button", {
+        Label = function()
+            return Locale.Lookup(m_cityStatusViewMode == "table"
+                and "LOC_CAI_REPORTS_SWITCH_TO_LIST"
+                or "LOC_CAI_REPORTS_SWITCH_TO_TABLE")
+        end,
+        FocusKey = "status:switch-view",
+    })
+    entry.switchView:On("activate", function()
+        return SetCityStatusViewMode(entry, m_cityStatusViewMode == "table" and "list" or "table")
+    end)
+    page:AddChild(entry.switchView)
+
+    page:AddInputBindings({
+        {
+            Key = Keys["1"], IsAlt = true, MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_REPORTS_SWITCH_TO_TABLE",
+            Action = function() return SetCityStatusViewMode(entry, "table") end,
+        },
+        {
+            Key = Keys["2"], IsAlt = true, MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_REPORTS_SWITCH_TO_LIST",
+            Action = function() return SetCityStatusViewMode(entry, "list") end,
+        },
+    })
+end
+
+local function RebuildCityStatusTab(entry)
+    EnsureCityStatusControls(entry)
+    local selectedExists = false
+    for _, kCityData in ipairs(m_caiCityData) do
+        if kCityData.City:GetID() == m_cityStatusSelectedCityID then
+            selectedExists = true
+            break
+        end
+    end
+    if not selectedExists then
+        m_cityStatusSelectedCityID = m_caiCityData[1] and m_caiCityData[1].City:GetID() or nil
+    end
+    RebuildCityStatusList(entry.tree)
+    if entry.table then entry.table:Rebuild() end
 end
 
 
@@ -2162,7 +2522,10 @@ local function BuildPanel()
 
         local tree
         if capturedI == 3 then
-            tree = mgr:CreateWidget(MakeId("CAIRPT_"), "List", { FocusKey = "reports:tab:" .. capturedI .. ":list" })
+            tree = mgr:CreateWidget(MakeId("CAIRPT_"), "List", {
+                FocusKey = "reports:tab:" .. capturedI .. ":list",
+                HiddenPredicate = function() return m_cityStatusViewMode ~= "list" end,
+            })
         elseif capturedI == 4 then
             tree = mgr:CreateWidget(MakeId("CAIRPT_"), "List", {
                 FocusKey = "reports:tab:" .. capturedI .. ":list",

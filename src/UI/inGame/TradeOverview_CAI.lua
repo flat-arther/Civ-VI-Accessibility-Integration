@@ -74,7 +74,7 @@ local function BuildRouteLabelFromCache(entry)
         table.insert(parts, Locale.Lookup("LOC_CAI_TRADE_ROUTE_PATH_BONUS"))
     end
 
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildRouteTooltip(entry)

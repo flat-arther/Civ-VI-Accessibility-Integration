@@ -644,7 +644,7 @@ local function CreateStatBoxNode(box)
                 for _, v in ipairs(g.values) do
                     table.insert(parts, v.text)
                 end
-                local line = g.header .. ": " .. table.concat(parts, ", ")
+                local line = g.header .. ": " .. table.concat(parts, "[NEWLINE]")
                 node:AddChild(CreateStaticText("CAIPediaStatLine", line))
             end
         elseif g.header and g.header ~= "" then
@@ -965,7 +965,7 @@ local function EnsureRootBuilt()
             end
             results[#results + 1] = {
                 key = k,
-                label = table.concat(labelParts, ", "),
+                label = table.concat(labelParts, "[NEWLINE]"),
                 searchTitle = Locale.StripTags(title),
                 tooltip = preview and preview ~= "" and preview or nil,
                 useFirstTooltip = true,

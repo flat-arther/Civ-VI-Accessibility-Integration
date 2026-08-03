@@ -64,8 +64,14 @@
     <Row Tag="LOC_UIWidget_Role_Table" Language="en_US">
       <Text>Table</Text>
     </Row>
+    <Row Tag="LOC_UIWidget_Role_TableRow" Language="en_US">
+      <Text>Table Row</Text>
+    </Row>
     <Row Tag="LOC_UIWidget_Role_Grid" Language="en_US">
       <Text>Grid</Text>
+    </Row>
+    <Row Tag="LOC_UIWidget_Role_Graph" Language="en_US">
+      <Text>Graph</Text>
     </Row>
     <Row Tag="LOC_UIWidget_Role_TableCell" Language="en_US">
       <Text>Table Cell</Text>
@@ -102,11 +108,77 @@
     <Row Tag="LOC_CAI_DATATABLE_CELL_POSITION" Language="en_US">
       <Text>Row {1} of {2}, column {3} of {4}</Text>
     </Row>
-    <Row Tag="LOC_CAI_DATATABLE_SORT_ASCENDING" Language="en_US">
-      <Text>Sorted ascending</Text>
+    <Row Tag="LOC_CAI_SORT_A_TO_Z" Language="en_US">
+      <Text>A to Z</Text>
     </Row>
-    <Row Tag="LOC_CAI_DATATABLE_SORT_DESCENDING" Language="en_US">
-      <Text>Sorted descending</Text>
+    <Row Tag="LOC_CAI_SORT_Z_TO_A" Language="en_US">
+      <Text>Z to A</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_LOWEST_FIRST" Language="en_US">
+      <Text>lowest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_HIGHEST_FIRST" Language="en_US">
+      <Text>highest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_CLOSEST_TO_VICTORY_FIRST" Language="en_US">
+      <Text>closest to victory first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_FARTHEST_FROM_VICTORY_FIRST" Language="en_US">
+      <Text>farthest from victory first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_NEAREST_FIRST" Language="en_US">
+      <Text>nearest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_FARTHEST_FIRST" Language="en_US">
+      <Text>farthest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_READY_FIRST" Language="en_US">
+      <Text>ready first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_NOT_READY_FIRST" Language="en_US">
+      <Text>not ready first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_ACTIVE_FIRST" Language="en_US">
+      <Text>active first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_UNAVAILABLE_FIRST" Language="en_US">
+      <Text>unavailable first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_FASTEST_FIRST" Language="en_US">
+      <Text>fastest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_SLOWEST_FIRST" Language="en_US">
+      <Text>slowest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_FEWEST_FIRST" Language="en_US">
+      <Text>fewest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_MOST_FIRST" Language="en_US">
+      <Text>most first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_AT_WAR_FIRST" Language="en_US">
+      <Text>at war first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_SUZERAIN_FIRST" Language="en_US">
+      <Text>Suzerain first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_WEAKEST_FIRST" Language="en_US">
+      <Text>weakest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_STRONGEST_FIRST" Language="en_US">
+      <Text>strongest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_LOWEST_PROGRESS_FIRST" Language="en_US">
+      <Text>lowest progress first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_HIGHEST_PROGRESS_FIRST" Language="en_US">
+      <Text>highest progress first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_DISCOVERED_HEROES_FIRST" Language="en_US">
+      <Text>discovered heroes first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_OTHER_DECEASED_HEROES_FIRST" Language="en_US">
+      <Text>other civilizations' deceased heroes first</Text>
     </Row>
     <Row Tag="LOC_CAI_DATATABLE_SORT_NATURAL" Language="en_US">
       <Text>Natural order</Text>
@@ -1229,6 +1301,24 @@
     <Row Tag="LOC_CAI_GP_LOCAL_PROGRESS" Language="en_US">
       <Text>Your progress: {1_Points} of {2_Cost}, {3_PerTurn} per turn</Text>
     </Row>
+    <Row Tag="LOC_CAI_GP_PROGRESS_TABLE" Language="en_US">
+      <Text>Great People progress</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_CIVILIZATION_NAME" Language="en_US">
+      <Text>Civilization name</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_TABLE_PROGRESS" Language="en_US">
+      <Text>{1_Points} of {2_Cost}, {3_PerTurn} per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_LOCAL_CIVILIZATION" Language="en_US">
+      <Text>{1_CivName}, You</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_ABILITY_EFFECT" Language="en_US">
+      <Text>{1_Name}: {2_Effect}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_ABILITY_WITH_CHARGES" Language="en_US">
+      <Text>{1_Name} ({2_Charges})</Text>
+    </Row>
     <Row Tag="LOC_CAI_GP_NO_BIOGRAPHY" Language="en_US">
       <Text>No biography available</Text>
     </Row>
@@ -1252,6 +1342,21 @@
     </Row>
     <Row Tag="LOC_CAI_GP_HEROES_COMMANDS" Language="en_US">
       <Text>Commands</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_HEROES_STATUS" Language="en_US">
+      <Text>Status</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_HEROES_SORT" Language="en_US">
+      <Text>Sort heroes</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_HERO_STATUS_DISCOVERED" Language="en_US">
+      <Text>Discovered</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_HERO_STATUS_RECRUITED" Language="en_US">
+      <Text>Recruited by {1_CivName}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GP_HERO_STATUS_DECEASED" Language="en_US">
+      <Text>Recruited by {1_CivName}, Deceased</Text>
     </Row>
     <Row Tag="LOC_CAI_GP_HERO_LABEL_DISCOVERED" Language="en_US">
       <Text>{1_Name}, Discovered</Text>
@@ -2110,6 +2215,21 @@
     <Row Tag="LOC_CAI_TREE_SWITCH_TO_TREE" Language="en_US">
       <Text>Switch to tree view</Text>
     </Row>
+    <Row Tag="LOC_CAI_TREE_SWITCH_TO_GRAPH" Language="en_US">
+      <Text>Switch to graph view</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TREE_VIEW_MODE" Language="en_US">
+      <Text>View</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TREE_VIEW_GRID" Language="en_US">
+      <Text>Grid</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TREE_VIEW_GRAPH" Language="en_US">
+      <Text>Graph</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TREE_VIEW_TREE" Language="en_US">
+      <Text>Tree</Text>
+    </Row>
     <Row Tag="LOC_CAI_CIVICS_TREE_FILTER" Language="en_US">
       <Text>Filter</Text>
     </Row>
@@ -2691,10 +2811,37 @@
       <Text>Open unit list</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_OPEN_LIST_TOOLTIP" Language="en_US">
-      <Text>Opens a list of your units</Text>
+      <Text>Opens your units in a sortable table or flat list</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_LIST" Language="en_US">
       <Text>Unit list</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_LIST_FILTER" Language="en_US">
+      <Text>Filter by unit category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_LIST_SORT" Language="en_US">
+      <Text>Sort units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_LIST_COLUMN_NAME" Language="en_US">
+      <Text>Name</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_LIST_COLUMN_ACTIVITY" Language="en_US">
+      <Text>Activity</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_LIST_COLUMN_HEALTH" Language="en_US">
+      <Text>Health</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_LIST_COLUMN_CURRENT_MOVES" Language="en_US">
+      <Text>Current moves</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_LIST_COLUMN_MAX_MOVES" Language="en_US">
+      <Text>Maximum moves</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_LIST_COLUMN_PROMOTIONS" Language="en_US">
+      <Text>Promotions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_LIST_COLUMN_ADJACENT_ENEMIES" Language="en_US">
+      <Text>Adjacent enemies</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_DOMAIN_MILITARY" Language="en_US">
       <Text>Military</Text>
@@ -2801,23 +2948,8 @@
     <Row Tag="LOC_CAI_UNIT_RELATIVE_COORDS" Language="en_US">
       <Text>Location {1_Text}</Text>
     </Row>
-    <Row Tag="LOC_CAI_UNIT_ACTIVITY_READY" Language="en_US">
-      <Text>Ready for orders</Text>
-    </Row>
-    <Row Tag="LOC_CAI_UNIT_ACTIVITY_NOT_READY" Language="en_US">
-      <Text>Not ready</Text>
-    </Row>
-    <Row Tag="LOC_CAI_UNIT_ACTIVITY_SLEEP" Language="en_US">
-      <Text>Sleeping</Text>
-    </Row>
-    <Row Tag="LOC_CAI_UNIT_ACTIVITY_SKIP" Language="en_US">
-      <Text>Skipping turn</Text>
-    </Row>
-    <Row Tag="LOC_CAI_UNIT_ACTIVITY_FORTIFIED" Language="en_US">
-      <Text>Fortified</Text>
-    </Row>
-    <Row Tag="LOC_CAI_UNIT_ACTIVITY_OPERATION" Language="en_US">
-      <Text>Busy</Text>
+    <Row Tag="LOC_CAI_UNIT_ACTIVITY_MOVING" Language="en_US">
+      <Text>Moving</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_ACTION_BUILT" Language="en_US">
       <Text>{1_Name} built</Text>
@@ -3561,7 +3693,7 @@
       <Text>Read selection summary</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_SUMMARY_TOOLTIP" Language="en_US">
-      <Text>Reads the current selection summary. If a city is selected, reads city name, population, health, production, and growth. If a unit is selected, reads the unit summary.</Text>
+      <Text>Reads the current selection summary. If a city is selected, reads city name, population, health, production, and growth. If a unit is selected, reads current status, available statistics, and the number of visible adjacent enemies.</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO1" Language="en_US">
       <Text>Read selection info 1</Text>
@@ -3620,11 +3752,14 @@
     <Row Tag="LOC_CAI_UNIT_NO_QUEUED_PATH" Language="en_US">
       <Text>No queued path.</Text>
     </Row>
+    <Row Tag="LOC_CAI_UNIT_ADJACENT_ENEMIES" Language="en_US">
+      <Text>{1_Count : plural 1?1 adjacent enemy; other?{1_Count} adjacent enemies;}</Text>
+    </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO10" Language="en_US">
       <Text>Read selection info 10</Text>
     </Row>
     <Row Tag="LOC_CAI_READ_SELECTION_INFO10_TOOLTIP" Language="en_US">
-      <Text>If a city is selected, reads ignored yield focus entries. If a unit is selected, this hotkey currently has no unit readout.</Text>
+      <Text>If a city is selected, reads ignored yield focus entries. If a unit is selected, counts visible enemy units in adjacent hexes.</Text>
     </Row>
     <Row Tag="LOC_CAI_SELECTION_ACTIONS" Language="en_US">
       <Text>Selection actions</Text>
@@ -3787,23 +3922,23 @@
     <Row Tag="LOC_CAI_CITYSTATES_COLUMN_CITY_STATE" Language="en_US">
       <Text>City-State</Text>
     </Row>
-    <Row Tag="LOC_CAI_CITYSTATES_COLUMN_RELATIONSHIP" Language="en_US">
-      <Text>Relationship</Text>
+    <Row Tag="LOC_CAI_CITYSTATES_COLUMN_YOUR_RELATIONSHIP" Language="en_US">
+      <Text>Your relationship</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_COLUMN_FOREIGN_RELATIONSHIPS" Language="en_US">
+      <Text>Foreign relationships</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_COLUMN_ACTIVE_QUESTS" Language="en_US">
+      <Text>Active quests</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_ORDER_BY" Language="en_US">
+      <Text>Order city-states by</Text>
     </Row>
     <Row Tag="LOC_CAI_CITYSTATES_INFLUENCE_COLUMN" Language="en_US">
       <Text>{1_Civilization} influence</Text>
     </Row>
     <Row Tag="LOC_CAI_CITYSTATES_UNMET_INFLUENCE_COLUMN" Language="en_US">
       <Text>Unmet civilizations influence</Text>
-    </Row>
-    <Row Tag="LOC_CAI_CITYSTATES_DETAILS" Language="en_US">
-      <Text>City-State details</Text>
-    </Row>
-    <Row Tag="LOC_CAI_CITYSTATES_DETAILS_FOR" Language="en_US">
-      <Text>{1_CityState} details</Text>
-    </Row>
-    <Row Tag="LOC_CAI_CITYSTATES_NO_SELECTION" Language="en_US">
-      <Text>No city-state selected</Text>
     </Row>
     <Row Tag="LOC_CAI_CITYSTATES_ENVOYS_TO_SEND" Language="en_US">
       <Text>Envoys to send: {1_Num} remaining</Text>
@@ -4285,6 +4420,27 @@
     <Row Tag="LOC_CAI_GOVERNOR_SUMMARY" Language="en_US">
       <Text>{1_Num} titles available, {2_Num} titles spent</Text>
     </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_COLUMN_NAME" Language="en_US">
+      <Text>Name</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_COLUMN_STATUS" Language="en_US">
+      <Text>Status</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_COLUMN_EARNED_PROMOTIONS" Language="en_US">
+      <Text>Earned promotions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_STATUS_APPOINTED" Language="en_US">
+      <Text>Appointed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_STATUS_AVAILABLE" Language="en_US">
+      <Text>Available for appointment</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_STATUS_UNAVAILABLE" Language="en_US">
+      <Text>Unavailable</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_ORDER_BY" Language="en_US">
+      <Text>Order governors by</Text>
+    </Row>
     <Row Tag="LOC_CAI_GOVERNOR_PROMOTIONS" Language="en_US">
       <Text>Promotions</Text>
     </Row>
@@ -4686,6 +4842,84 @@
     <Row Tag="LOC_CAI_WORLD_RANKINGS_DIPLO_TOOLTIP" Language="en_US">
       <Text>{1_Tooltip}</Text>
     </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_COMPETITOR" Language="en_US">
+      <Text>Competitor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_TEAM_MEMBER" Language="en_US">
+      <Text>Member: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_CONTRIBUTION" Language="en_US">
+      <Text>{1_Name}: {2_Value}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_PERCENT" Language="en_US">
+      <Text>{1_Value}%</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_NOT_AVAILABLE" Language="en_US">
+      <Text>Not available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_NOT_STARTED" Language="en_US">
+      <Text>Not started</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_COMPLETE" Language="en_US">
+      <Text>Complete</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_TOTAL_SCORE" Language="en_US">
+      <Text>Total score</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_SCIENCE_PROGRESS" Language="en_US">
+      <Text>Science victory progress</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_SPACEPORT" Language="en_US">
+      <Text>Spaceport</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_DISTANCE_TRAVELED" Language="en_US">
+      <Text>Distance traveled</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_SPEED_PER_TURN" Language="en_US">
+      <Text>Speed per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_VISITING_TOURISTS" Language="en_US">
+      <Text>Visiting tourists</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_TOURISTS_REQUIRED" Language="en_US">
+      <Text>Tourists required</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_VICTORY_PROGRESS_HEADER" Language="en_US">
+      <Text>Victory progress</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_DOMESTIC_TOURISTS" Language="en_US">
+      <Text>Domestic tourists</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_TURNS_TO_VICTORY" Language="en_US">
+      <Text>Turns to victory</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_ORIGINAL_CAPITALS_HELD" Language="en_US">
+      <Text>Original capitals held</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_CAPITALS_CAPTURED_HEADER" Language="en_US">
+      <Text>Capitals captured</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_VALUE_OF_TOTAL" Language="en_US">
+      <Text>{1_Value} of {2_Total}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_RELIGION" Language="en_US">
+      <Text>Religion</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_CIVILIZATIONS_CONVERTED" Language="en_US">
+      <Text>Civilizations converted</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_DIPLOMATIC_POINTS" Language="en_US">
+      <Text>Diplomatic Victory points</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_SWITCH_ALL_TO_TREE" Language="en_US">
+      <Text>Switch all rankings to tree view</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_SWITCH_SUPPORTED_TO_TABLE" Language="en_US">
+      <Text>Switch supported rankings to table view</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_TABLE_UNAVAILABLE" Language="en_US">
+      <Text>Table view is not available for this ranking. Showing tree view.</Text>
+    </Row>
 
     <!-- Reports Screen -->
     <Row Tag="LOC_CAI_TOP_PANEL_OPEN_REPORTS" Language="en_US">
@@ -4856,6 +5090,21 @@
     <Row Tag="LOC_CAI_REPORTS_SORT_GROWTH" Language="en_US">
       <Text>Growth</Text>
     </Row>
+    <Row Tag="LOC_CAI_REPORTS_DISTANCE" Language="en_US">
+      <Text>Distance</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_CITY_YIELD" Language="en_US">
+      <Text>{1_Yield}: {2_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_SWITCH_TO_TABLE" Language="en_US">
+      <Text>Switch to table</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_SWITCH_TO_LIST" Language="en_US">
+      <Text>Switch to list view</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_SELECT_CITY" Language="en_US">
+      <Text>Select city</Text>
+    </Row>
     <Row Tag="LOC_CAI_REPORTS_FILTER_PLAYER" Language="en_US">
       <Text>Filter by player</Text>
     </Row>
@@ -4980,6 +5229,18 @@
     </Row>
     <Row Tag="LOC_CAI_GLOBAL_RES_OPEN_TOOLTIP" Language="en_US">
       <Text>Opens the global resources popup showing resource ownership across all known civilizations</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GLOBAL_RES_RESOURCE_COLUMN" Language="en_US">
+      <Text>Resource</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GLOBAL_RES_CLASS_COLUMN" Language="en_US">
+      <Text>Class</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GLOBAL_RES_TOTAL_AMOUNT" Language="en_US">
+      <Text>Total amount</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GLOBAL_RES_ORDER_BY" Language="en_US">
+      <Text>Order resources by</Text>
     </Row>
 
     <!-- Hall of Fame / Game Summaries -->
@@ -5420,6 +5681,30 @@
     <Row Tag="LOC_CAI_KB_EXPAND" Language="en_US">
       <Text>Expand</Text>
     </Row>
+    <Row Tag="LOC_CAI_KB_GRAPH_PREVIOUS_ALTERNATIVE" Language="en_US">
+      <Text>Previous graph alternative</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_GRAPH_NEXT_ALTERNATIVE" Language="en_US">
+      <Text>Next graph alternative</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_GRAPH_INCOMING" Language="en_US">
+      <Text>Follow incoming connection</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_GRAPH_OUTGOING" Language="en_US">
+      <Text>Follow outgoing connection</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_GRAPH_FIRST_ALTERNATIVE" Language="en_US">
+      <Text>First graph alternative</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_GRAPH_LAST_ALTERNATIVE" Language="en_US">
+      <Text>Last graph alternative</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_GRAPH_FIRST_ROOT" Language="en_US">
+      <Text>First graph root</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_GRAPH_LAST_ROOT" Language="en_US">
+      <Text>Last graph root</Text>
+    </Row>
     <Row Tag="LOC_CAI_KB_GO_BACK" Language="en_US">
       <Text>Go back</Text>
     </Row>
@@ -5476,6 +5761,12 @@
     </Row>
     <Row Tag="LOC_CAI_KB_MOVE_TO_FIRST" Language="en_US">
       <Text>Move to first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_FIRST_CONTROL" Language="en_US">
+      <Text>Jump to first control</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_LAST_CONTROL" Language="en_US">
+      <Text>Jump to last control</Text>
     </Row>
     <Row Tag="LOC_CAI_KB_MOVE_TO_LAST" Language="en_US">
       <Text>Move to last</Text>
@@ -5671,20 +5962,20 @@
     <Row Tag="LOC_CAI_KB_DESELECT_ALL" Language="en_US">
       <Text>Deselect all</Text>
     </Row>
-    <Row Tag="LOC_CAI_KB_TOOLTIP_PREVIOUS_SECTION" Language="en_US">
-      <Text>Read previous tooltip section</Text>
+    <Row Tag="LOC_CAI_KB_FOCUSED_WIDGET_READER_PREVIOUS_SECTION" Language="en_US">
+      <Text>Focused Widget Reader: move to previous section</Text>
     </Row>
-    <Row Tag="LOC_CAI_KB_TOOLTIP_NEXT_SECTION" Language="en_US">
-      <Text>Read next tooltip section</Text>
+    <Row Tag="LOC_CAI_KB_FOCUSED_WIDGET_READER_NEXT_SECTION" Language="en_US">
+      <Text>Focused Widget Reader: move to next section</Text>
     </Row>
-    <Row Tag="LOC_CAI_KB_TOOLTIP_FIRST_SECTION" Language="en_US">
-      <Text>Read first tooltip section</Text>
+    <Row Tag="LOC_CAI_KB_FOCUSED_WIDGET_READER_FIRST_SECTION" Language="en_US">
+      <Text>Focused Widget Reader: jump to first section</Text>
     </Row>
-    <Row Tag="LOC_CAI_KB_TOOLTIP_LAST_SECTION" Language="en_US">
-      <Text>Read last tooltip section</Text>
+    <Row Tag="LOC_CAI_KB_FOCUSED_WIDGET_READER_LAST_SECTION" Language="en_US">
+      <Text>Focused Widget Reader: jump to last section</Text>
     </Row>
-    <Row Tag="LOC_CAI_TOOLTIP_UNAVAILABLE" Language="en_US">
-      <Text>Tooltip unavailable.</Text>
+    <Row Tag="LOC_CAI_FOCUSED_WIDGET_READER_UNAVAILABLE" Language="en_US">
+      <Text>Focused widget information unavailable.</Text>
     </Row>
     <Row Tag="LOC_CAI_ALL_SELECTED" Language="en_US">
       <Text>All selected</Text>

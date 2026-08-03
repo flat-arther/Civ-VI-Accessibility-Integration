@@ -32,22 +32,22 @@
       <Text>Welcome to Civilization VI. These short tutorials explain how to use each accessible screen when you first encounter it. To turn them off, uncheck Show mod tutorials in one of the tutorial dialogs, or disable them later in Mod Settings, under the UI section.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_NESTING" Language="en_US">
-      <Text>The interface is built from nested widgets. Most screens are panels containing controls and other containers such as lists, trees, tables, grids, tabs, and dialogs. Moving into a container adds it to the focus path, and moving out returns to its parent.</Text>
+      <Text>The interface is built from nested widgets. Most screens are panels containing controls and other containers such as lists, trees, tables, grids, graphs, tabs, and dialogs. Moving into a container adds it to the focus path, and moving out returns to its parent.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_FOCUS_SPEECH" Language="en_US">
       <Text>As focus moves, the mod speaks the control's label, role, value, position, state, and tooltip according to your settings.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_NAVIGATION" Language="en_US">
-      <Text>Use Tab and Shift plus Tab to move between groups of controls. In lists, tree views, tables, and grids, use the arrow keys to move between items, and Home and End to move to boundaries. Lists and trees also support Page Up and Page Down.</Text>
+      <Text>Use Tab and Shift plus Tab to move between groups of controls. In lists, tree views, tables, grids, and graphs, use the arrow keys to move between items, and Home and End to move to boundaries. In dialogs, Home and End jump to the first and last control. Lists and trees also support Page Up and Page Down.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_ACTIVATION" Language="en_US">
       <Text>Use Enter or Space to activate the focused control.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_SEARCH" Language="en_US">
-      <Text>In lists, trees, tables, and grids, start typing to find an item. Tables search row labels, while grids search every cell. Backspace deletes the last typed character, and Escape clears it. Press Control plus F where available to open the search panel for more detailed search.</Text>
+      <Text>In lists, trees, tables, grids, and graphs, start typing to find an item. Tables search row labels, while grids search every cell and graphs search every visible node. Backspace deletes the last typed character, and Escape clears it. Press Control plus F where available to open the search panel for more detailed search.</Text>
     </Row>
-    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_TOOLTIPS" Language="en_US">
-      <Text>Use Alt plus Up and Alt plus Down to read the previous and next sections of the focused control's tooltip. Use Alt plus Home and Alt plus End to read its first and last sections.</Text>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_FOCUSED_WIDGET_READER" Language="en_US">
+      <Text>The Focused Widget Reader lets you hear detailed information about the control that currently has focus, one section at a time. Use Alt plus Up and Alt plus Down to move to and read the previous or next section. Use Alt plus Home and Alt plus End to jump to and read the first or last section.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_HELP" Language="en_US">
       <Text>Press Control plus H for context-sensitive Input Help. Press Shift plus F1 to hear the available commands for the focused control.</Text>
@@ -182,6 +182,9 @@
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GRID_NAVIGATION" Language="en_US">
       <Text>In a grid, Up and Down move within the current tier. Left and Right move to the adjacent tier while keeping a similar row. Home and End move to the first and last item in the tier. Control plus Home and Control plus End move to the first and last item in the grid. Control plus Left and Control plus Right jump to the previous or next era or column. Start typing to search every cell.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GRAPH_NAVIGATION" Language="en_US">
+      <Text>In Graph View, Right follows the first civic or technology unlocked by the focused item, and Left follows its first prerequisite. After either move, Up and Down cycle the other choices from that same connection. When Left lands on an item with no prerequisite, Up and Down instead cycle all such root items. Home and End move to the first and last current alternative. Control plus Home and Control plus End move to the first and last root. Start typing to search every graph node.</Text>
     </Row>
 
     <!-- Front-end screens -->
@@ -346,16 +349,16 @@
       <Text>Expand sections and rows to read their details. Tab past the tree to Rename City. The rename editor uses Enter to commit and Escape to cancel. Escape outside the editor closes the overview.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CITY_STATES" Language="en_US">
-      <Text>The default table view has one row for every met city-state. Its columns compare type, your relationship, your envoys, the current suzerain, active quests, and foreign influence. Focusing any cell selects that city-state and updates the details and controls that follow the table.</Text>
+      <Text>The default table view has one row for every met city-state. Its columns compare type, your relationship, your envoys and bonuses, the current suzerain, active quests, foreign relationships, and foreign influence. Focusing any cell selects that city-state and updates the controls that follow the table.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CITY_STATES_SECTIONS" Language="en_US">
-      <Text>Use the table headers to sort city-states. Each known foreign civilization with envoys has its own influence column, whose cells give that civilization's envoy count. Unmet civilizations remain anonymous in a combined influence column. Tab from the table to the selected city-state's details tree. It mirrors that city-state's expanded tree-view row with relationship status, Bonuses, Quests, and Relationships, but omits Influence because influence is already in the table.</Text>
+      <Text>Use the table headers to sort city-states. The Envoys cell gives your envoy count followed by every 1, 3, 6, and Suzerain bonus breakdown. Active Quests gives the count followed by each quest description. Foreign Relationships combines every met non-player civilization and city-state relationship, listing those at war with the city-state first and ordering each group alphabetically. Each known foreign civilization with envoys also has its own influence column, while unmet civilizations remain anonymous in one combined influence column.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CITY_STATES_ENVOYS" Language="en_US">
-      <Text>On any table data cell or anywhere in the details tree, Shift plus Left removes one pending envoy and Shift plus Right adds one. Control plus Enter confirms all pending envoy changes. The Envoy slider and Confirm Envoys button after the details tree provide the same operations.</Text>
+      <Text>On any table data cell, Shift plus Left removes one pending envoy and Shift plus Right adds one. Control plus Enter confirms all pending envoy changes. The Envoy slider and Confirm Envoys button after the table provide the same operations.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CITY_STATES_ACTIONS" Language="en_US">
-      <Text>After the envoy controls are View City-State, Declare War or Make Peace, Levy Military when available, and the view-switch button. Tree view restores one expandable row per city-state with relationship status plus bonus, influence, quest, and relationships sections. Alt plus 1 selects table view and Alt plus 2 selects tree view; the selected view is remembered. Enter activates the focused button. Escape closes the screen.</Text>
+      <Text>After the envoy controls are View City-State, Declare War or Make Peace, Levy Military when available, and the view-switch button. Tree view begins with an Order city-states by dropdown, then one expandable row per city-state with relationship status plus bonus, influence, quest, and relationships sections. The dropdown offers natural order plus two explicitly described choices for every current table column, such as A to Z, at war first, or most first. Table headers use the same descriptions, and both views share the selected sort. Alt plus 1 selects table view and Alt plus 2 selects tree view; the selected view is remembered. Enter activates the focused button. Escape closes the screen.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER" Language="en_US">
       <Text>The first tree contains the current civic and queued civics. The second tree contains available civics. Each civic expands into its unlocks. The final button opens the full Civics Tree.</Text>
@@ -367,22 +370,22 @@
       <Text>Shift plus Enter on a revealed civic opens its Civilopedia article. Use Tab to move from the queue tree to available civics and then to Open Civics Tree.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_LAYOUT" Language="en_US">
-      <Text>Controls appear in this order: the current and queued civics list when nonempty, a filter list, the active civic view, a grid-only unlocks list, a read-only government and slotted-policy summary, and the Switch View button.</Text>
+      <Text>Controls appear in this order: the current and queued civics list when nonempty, a filter list, the active Grid, Graph, or Tree civic view, an Unlocks list in Grid and Graph views, a read-only government and slotted-policy summary, and the View dropdown.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_VIEWS" Language="en_US">
-      <Text>The default Grid View arranges eras as columns, prerequisite tiers from left to right, and civics vertically within each tier. Switch to Tree View for an era, tier, civic hierarchy. Switching views keeps the same civic focused when possible.</Text>
+      <Text>The View dropdown contains Grid, Graph, and Tree in that order. Grid arranges eras as columns, prerequisite tiers from left to right, and civics vertically within each tier. Graph follows prerequisite connections directly. Tree presents an era, tier, civic hierarchy. Alt plus 1 selects Grid, Alt plus 2 selects Graph, and Alt plus 3 selects Tree. Switching views keeps the same civic focused when possible, and the selected view is remembered the next time the Civics Tree opens.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_TREE_VIEW" Language="en_US">
       <Text>In Tree View, expand an era to expose its already-expanded tiers, then its civics. Civic children contain Unlocks, Prerequisites, Leads To, and the calculated path to that civic. Activate a reference to jump to it. Backspace returns through prior reference jumps.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_ACTIONS" Language="en_US">
-      <Text>Enter on a researchable civic makes it current. Control plus Enter appends it to the civic queue. Shift plus Enter opens its Civilopedia article. The same three bindings work on grid cells and filter results. Enter on a queue row jumps to that civic; Shift plus Enter opens its article.</Text>
+      <Text>Enter on a researchable civic makes it current. Control plus Enter appends it to the civic queue. Shift plus Enter opens its Civilopedia article. The same three bindings work in Grid and Graph views and on filter results. Enter on a queue row jumps to that civic; Shift plus Enter opens its article.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_FILTERS" Language="en_US">
-      <Text>Enter on a filter opens a temporary results list. In results, Enter closes the list and jumps to the civic, Control plus Enter queues it, Shift plus Enter opens the Civilopedia, and Escape closes results and clears the filter. Control plus F searches civics by the game's Civics search index from either main view.</Text>
+      <Text>Enter on a filter opens a temporary results list. In results, Enter closes the list and jumps to the civic, Control plus Enter queues it, Shift plus Enter opens the Civilopedia, and Escape closes results and clears the filter. Control plus F searches civics by the game's Civics search index from any main view.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_GOVERNMENT" Language="en_US">
-      <Text>In Grid View, focusing a civic rebuilds the sibling Unlocks list for that civic. The following read-only edit field summarizes the current government, slot counts, and every slotted policy.</Text>
+      <Text>In Grid or Graph View, focusing a civic rebuilds the sibling Unlocks list for that civic. The following read-only edit field summarizes the current government, slot counts, and every slotted policy.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA" Language="en_US">
       <Text>The Civilopedia has three sibling controls: a Sections tree, an Article tree, and a History list. Tab moves between them.</Text>
@@ -484,16 +487,16 @@
       <Text>On supported city or spy rows, Control plus Enter opens that city's details. The View City Details button provides the same action for the selected location. On a captured spy row, enter initiates a trade for the captured agent. Escape closes the screen.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES" Language="en_US">
-      <Text>This screen contains a resource tree followed by Sort By and Sort Order dropdowns.</Text>
+      <Text>This screen defaults to a sortable comparison table. Press Alt plus 2 for a tree view, or Alt plus 1 to return to the table. The selected view is remembered.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_LAYOUT" Language="en_US">
-      <Text>The tree groups resources by class. Expand a class and resource to inspect global totals, known owners, imports, exports, stockpiles, accumulation, consumption, and other details supported by the current ruleset.</Text>
+      <Text>Each table row is a resource. The first columns give its name, class, and total amount, followed by one amount column for each known civilization. The tree groups the same resources by class and retains the owner details.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_ACTIONS" Language="en_US">
-      <Text>Known resource owners appear as leader rows beneath each resource. Press Enter on a leader row to close Global Resources and open the Diplomacy view for that leader.</Text>
+      <Text>In the table, press Enter or Space in a civilization column to close Global Resources and open Diplomacy with that leader. In the tree, press Enter on a leader row for the same action.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_SORT" Language="en_US">
-      <Text>The first dropdown chooses the resource sort field; the second chooses ascending or descending order. Changing either rebuilds the tree while preserving focus when possible. Escape closes the screen.</Text>
+      <Text>Activate a sortable table header to cycle its order. Tree view has one Order resources by dropdown with natural order, both name directions, both total-amount directions, and both amount directions for every known civilization. Escape closes the screen.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GOVERNMENT" Language="en_US">
       <Text>Outside the Pirates scenario, this screen has Governments and Policies tabs. In Pirates, the policy layout is repurposed for the three relic slots.</Text>
@@ -511,10 +514,10 @@
       <Text>After the policy tree are Confirm Policies, View All Policies, and unlock-related actions when available. View All Policies opens another categorized tree; Escape closes it. Confirm applies the complete slot arrangement and explains empty slots or unchanged policy sets when disabled.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GOVERNORS" Language="en_US">
-      <Text>This screen has three persistent sibling controls: a Governors tree, a Promotions grid, and a secret-governor Promotions list. Only the promotion view appropriate to the focused governor is visible.</Text>
+      <Text>This screen starts with a sortable Governors table followed by a Promotions grid or secret-governor Promotions list. Alt plus 2 selects a tree view, and Alt plus 1 returns to the table view. Only the promotion view appropriate to the focused governor is visible.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GOVERNORS_TREE" Language="en_US">
-      <Text>The Governors tree contains appointed, available, and secret governors. Each row states appointment, assignment, establishment, title count, and available action. Expand an appointed governor to read already-earned promotions. Focusing a governor refreshes the sibling promotion view.</Text>
+      <Text>The table compares Name, Status, the vanilla establishment-speed statistic, the vanilla identity-pressure statistic, and Earned promotions. The Name cell's tooltip contains the governor's title, description, and base ability; other columns do not repeat it. The alternate tree begins with an Order governors by dropdown and lets you expand an appointed governor to inspect earned promotions. Sorted table headers and dropdown options describe their actual order, such as active first, fastest first, or most first. Both views share the same sort. Focusing a governor in either view refreshes the sibling promotion view.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GOVERNORS_PROMOTION_GRID" Language="en_US">
       <Text>For ordinary governors, promotions use a grid. The first column is Base Ability and later columns are promotion tiers. Use grid navigation to follow progression across tiers. Available cells activate a confirmation dialog; earned, locked, base, and read-only cells remain readable but do not activate.</Text>
@@ -523,7 +526,7 @@
       <Text>Secret governors use a flat Promotions list because their titles can be hidden rather than arranged as a visible progression tree. Hidden entries remain readable as unrevealed with the game's live unlock explanation.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GOVERNORS_ACTIONS" Language="en_US">
-      <Text>Enter on a governor row performs its live action, such as appoint, assign, or reassign. Doing the same on a secret society joins it. Tab moves from the Governors tree to the currently visible promotion grid or list. Enter on an available promotion opens a confirmation dialog.</Text>
+      <Text>Enter on any governor table cell or governor tree row performs its live action, such as appoint, assign, or reassign. Doing the same on an available secret society joins it. Tab moves from the roster view to the currently visible promotion grid or list. Enter on an available promotion opens a confirmation dialog.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GOVERNOR_ASSIGNMENT" Language="en_US">
       <Text>This chooser is a city list for the governor currently being assigned or reassigned. Each row states city, current governor status, establishment information, and assignment restrictions.</Text>
@@ -535,16 +538,16 @@
       <Text>The screen has Great People, Previously Recruited, and, when Heroes and Legends is active, Heroes tabs.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_CURRENT" Language="en_US">
-      <Text>Great People is a tree. Each person row states class, recruit cost, your progress, patronage costs, and availability. Expand it to compare every known civilization's points. Focusing a person updates the read-only biography and action buttons that follow the tree.</Text>
+      <Text>Great People defaults to a comparison table. Civilizations are rows and current Great People are columns. Each Great Person column identifies the person, class, era, abilities, charges, activation requirements, and any recruitment restriction. Each data cell gives that civilization's current points, recruitment cost, and points per turn. Alt plus 2 switches to a tree view, where Order Civilizations by offers natural order, Civilization name from A to Z or Z to A, and each Great Person class with lowest or highest progress first. Sorted table headers use the same descriptions. Alt plus 1 returns to the table. Both views share the selected sort. Focusing a Great Person column updates the read-only biography and action buttons that follow the current view.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_ACTIONS" Language="en_US">
-      <Text>Enter on a recruitable person recruits them; otherwise it reads your progress. Delete passes when passing is available. After the tree are Recruit, Pass, Patronage with Gold, Patronage with Faith, and the biography field, each shown only when relevant.</Text>
+      <Text>In either view, Enter or Space on a recruitable Great Person recruits them; otherwise it reads your progress. Delete passes when passing is available. In the table, these commands follow the focused Great Person column regardless of which civilization row is focused. After the current view are the contextual Recruit, Pass, Patronage with Gold, and Patronage with Faith actions, followed by the biography field and view-switch button. Unavailable contextual actions are hidden.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_PAST" Language="en_US">
       <Text>Previously Recruited is a flat list of claimed Great People, their class, recruiter, and relevant status. It is for inspection only.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_HEROES" Language="en_US">
-      <Text>Heroes is a list of available and claimed heroes followed by Recall Hero when available. Enter performs the live hero action. Shift plus Enter opens the focused hero's Civilopedia article.</Text>
+      <Text>Heroes defaults to a sortable table with Name, Status, Lifespan, Movement, Strength, Ranged Strength, Attack Range, Charges, Passive abilities, and Commands columns. Alt plus 2 switches to the detailed list followed by its Sort heroes dropdown; Alt plus 1 returns to the table, and the selected view is remembered. There is no Heroes filter. Both views share the selected sort. Enter or Space performs the live hero action, Shift plus Enter opens the focused hero's Civilopedia article, and Recall with Faith follows the current view when available.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORKS" Language="en_US">
       <Text>The overview contains a Great Works tree followed by View Great Work, View Gallery, and a Group By Buildings checkbox.</Text>
@@ -637,7 +640,7 @@
       <Text>After the parameters list is a name edit box. If the chosen religion icon permits a custom name, this field becomes editable. The last control is Found Religion or Confirm Changes. It remains disabled until the required icon, valid custom name, and every new belief are complete; its tooltip lists anything still missing. Activate it to open the summary dialog, review the icon, name, and beliefs, then choose Yes to commit them or No to return without founding or enhancing.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_REPORTS" Language="en_US">
-      <Text>The Reports screen has Yields, Resources, City Status, and, when supported, Gossip tabs. Yields and Resources are trees; City Status and Gossip are lists.</Text>
+      <Text>The Reports screen has Yields, Resources, City Status, and, when supported, Gossip tabs. Yields and Resources are trees, City Status has table and detailed-list views, and Gossip is a list.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_REPORTS_YIELDS" Language="en_US">
       <Text>Yields contains City Income and Empire Economy. City branches contain district, building, Great Work, trade-route, wonder, and other yield breakdowns. Empire Economy contains yield totals and detailed sources; under Gold, deal income and costs expand into individual gold deals.</Text>
@@ -646,7 +649,7 @@
       <Text>Resources contains one expandable row per resource. It exposes stockpile or total, accumulation and extraction sources, city-state sources, consumption, diplomatic-deal imports and exports, and additional ruleset-specific details.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_REPORTS_CITY_STATUS" Language="en_US">
-      <Text>City Status is a list of city buttons containing population, growth, amenities, defense, damage, and expansion-specific loyalty and governor status. Enter selects an owned city or looks at a known foreign city and closes Reports.</Text>
+      <Text>City Status defaults to a sortable table containing city name, direction and distance from the navigation cursor, population, housing, growth, amenities, happiness, war weariness, defense, damage, every available yield, and expansion-specific loyalty. A city's row label also identifies a non-normal status and its governor state when available. Activate a sortable header to cycle its order; the focused header says how it is sorted, such as A to Z, nearest first, strongest first, or highest first. Enter or Space from any data cell selects the city and closes Reports. Alt plus 2 switches to the detailed city-button list, whose dropdown labels also state the exact order used for distance, city values, or yields; Alt plus 1 returns to the table. The selected view is remembered.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_REPORTS_GOSSIP" Language="en_US">
       <Text>Gossip contains a flat chronological list of every matching visible gossip entry, followed by Player and Type filter dropdowns. Change either dropdown to rebuild the list. Escape closes Reports.</Text>
@@ -661,22 +664,22 @@
       <Text>Shift plus Enter on a revealed technology opens its Civilopedia article. Use Tab to move from the queue tree to available technologies and then to Open Technology Tree.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_LAYOUT" Language="en_US">
-      <Text>Controls appear in this order: the current and queued technologies list when nonempty, a filter list, the active technology view, a grid-only unlocks list, and the Switch View button.</Text>
+      <Text>Controls appear in this order: the current and queued technologies list when nonempty, a filter list, the active Grid, Graph, or Tree technology view, an Unlocks list in Grid and Graph views, and the View dropdown.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_VIEWS" Language="en_US">
-      <Text>The default Grid View arranges eras as columns, prerequisite tiers from left to right, and technologies vertically within each tier. Switch to Tree View for an era, tier, technology hierarchy. Switching views keeps the same technology focused when possible.</Text>
+      <Text>The View dropdown contains Grid, Graph, and Tree in that order. Grid arranges eras as columns, prerequisite tiers from left to right, and technologies vertically within each tier. Graph follows prerequisite connections directly. Tree presents an era, tier, technology hierarchy. Alt plus 1 selects Grid, Alt plus 2 selects Graph, and Alt plus 3 selects Tree. Switching views keeps the same technology focused when possible, and the selected view is remembered the next time the Technology Tree opens.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_TREE_VIEW" Language="en_US">
       <Text>In Tree View, expand an era to expose its already-expanded tiers, then its technologies. Technology children contain Unlocks, Prerequisites, Leads To, and the calculated path to that technology. Activate a reference to jump to it. Backspace returns through prior reference jumps.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_ACTIONS" Language="en_US">
-      <Text>Enter on a researchable technology makes it current. Control plus Enter appends it to the research queue. Shift plus Enter opens its Civilopedia article. The same three bindings work on grid cells and filter results. Enter on a queue row jumps to that technology; Shift plus Enter opens its article.</Text>
+      <Text>Enter on a researchable technology makes it current. Control plus Enter appends it to the research queue. Shift plus Enter opens its Civilopedia article. The same three bindings work in Grid and Graph views and on filter results. Enter on a queue row jumps to that technology; Shift plus Enter opens its article.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_FILTERS" Language="en_US">
-      <Text>Enter on a filter opens a temporary results list. In results, Enter closes the list and jumps to the technology, Control plus Enter queues it, Shift plus Enter opens the Civilopedia, and Escape closes results and clears the filter. Control plus F searches the game's Technologies index from either main view.</Text>
+      <Text>Enter on a filter opens a temporary results list. In results, Enter closes the list and jumps to the technology, Control plus Enter queues it, Shift plus Enter opens the Civilopedia, and Escape closes results and clears the filter. Control plus F searches the game's Technologies index from any main view.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_UNLOCKS" Language="en_US">
-      <Text>In Grid View, focusing a technology rebuilds the sibling Unlocks list for that technology. Tab reaches that list after the grid when it contains entries, then reaches Switch View.</Text>
+      <Text>In Grid or Graph View, focusing a technology rebuilds the sibling Unlocks list for that technology. Tab reaches that list after the active view when it contains entries, then reaches the View dropdown.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW" Language="en_US">
       <Text>The Trade Overview has My Routes, Routes to My Cities, and Available Routes tabs. Every page is a tree grouped by civilization, city-state, or other live route category.</Text>
@@ -718,13 +721,13 @@
       <Text>Enter or Space applies an available promotion through the game's normal promotion request. Locked promotions remain readable but do not activate. Use the Switch View button to change presentation.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_WORLD_RANKINGS" Language="en_US">
-      <Text>World Rankings creates one tab and tree for every ranking page available in the current ruleset.</Text>
+      <Text>World Rankings creates one tab for every ranking page available in the current ruleset. It defaults to table view and remembers one shared view choice for the entire screen. The Switch View button, Alt+1 for tables, and Alt+2 for trees change every supported tab together.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_WORLD_RANKINGS_LAYOUT" Language="en_US">
-      <Text>Standard tabs can include Overall, Score, Science, Culture, Domination, and Religion. Expansions and mods can add Diplomatic Victory or other victory tabs. Only pages captured from the live game are shown.</Text>
+      <Text>Overall, Score, Science, Culture, Domination, Religion, and Diplomatic Victory use sortable tables when their structured data is available. Narrative scenario pages and arbitrary custom victories remain trees; selecting table view on one of those tabs announces that its tree is being shown instead.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_WORLD_RANKINGS_CONTENT" Language="en_US">
-      <Text>Each tree presents the selected victory's current game summary, objectives, team or civilization rows, milestone progress, scores, known rival information, and advisor explanation. Expand teams and players for their detailed conditions. Escape closes the screen.</Text>
+      <Text>Each table has one row per competitor: a civilization when it competes alone or a team when several civilizations compete together. The Competitor tooltip lists team members. Metric cells show the team result and their tooltips give the per-civilization breakdown. Trees retain the expandable team, civilization, objective, and advisor details. Escape closes the screen.</Text>
     </Row>
 
     <!-- Production queue -->

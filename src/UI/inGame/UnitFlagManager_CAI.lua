@@ -201,7 +201,7 @@ local function GetOwnedUnitAircraftInfo(unit)
     local aircraftNames = GetHostedAircraftUnitNames(unit)
     if aircraftNames ~= nil and #aircraftNames > 0 then
         AppendUnitFlagInfo(results,
-            Locale.Lookup("LOC_CAI_UNIT_CARRIER_STATIONED_AIRCRAFT", table.concat(aircraftNames, ", ")))
+            Locale.Lookup("LOC_CAI_UNIT_CARRIER_STATIONED_AIRCRAFT", table.concat(aircraftNames, "[NEWLINE]")))
     end
 
     return results
@@ -683,14 +683,14 @@ local function GetMatchingVisibleDetailedUnitCount(unit)
     local plot = Map.GetPlot(unit:GetX(), unit:GetY())
     local signatureParts = {}
     AppendUnitFlagInfo(signatureParts, GetDefaultUnitFlagDetails(unit))
-    local signature = table.concat(signatureParts, ", ")
+    local signature = table.concat(signatureParts, "[NEWLINE]")
     local matchingCount = 0
 
     for _, otherUnit in ipairs(Units.GetUnitsInPlotLayerID(plot:GetX(), plot:GetY(), MapLayers.ANY)) do
         local otherFlag = GetUnitFlag(otherUnit:GetOwner(), otherUnit:GetID())
         local otherParts = {}
         AppendUnitFlagInfo(otherParts, GetDefaultUnitFlagDetails(otherUnit))
-        if IsUnitFlagVisible(otherFlag, otherUnit) and table.concat(otherParts, ", ") == signature then
+        if IsUnitFlagVisible(otherFlag, otherUnit) and table.concat(otherParts, "[NEWLINE]") == signature then
             matchingCount = matchingCount + 1
         end
     end
@@ -708,7 +708,7 @@ function info:RequestDetailedUnitFlagInfo(playerID, unitID)
     local results = {}
     local matchingCount = GetMatchingVisibleDetailedUnitCount(unit)
     AppendUnitFlagInfo(results, GetDefaultUnitFlagDetails(unit, matchingCount))
-    return #results > 0 and table.concat(results, ", ") or nil
+    return #results > 0 and table.concat(results, "[NEWLINE]") or nil
 end
 
 function info:RequestUnitNamesInPlot(x, y)

@@ -326,7 +326,7 @@ local function SpeakEraAge()
     end
 
     if not (IsExpansion1Active() or IsExpansion2Active()) then
-        Speak(table.concat(parts, ", "))
+        Speak(table.concat(parts, "[NEWLINE]"))
         return
     end
 
@@ -392,7 +392,7 @@ local function SpeakEraAge()
         end
     end
 
-    Speak(table.concat(parts, ", "))
+    Speak(table.concat(parts, "[NEWLINE]"))
 end
 
 -- ===========================================================================

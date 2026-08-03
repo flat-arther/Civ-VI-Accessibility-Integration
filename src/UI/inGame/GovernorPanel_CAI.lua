@@ -3,7 +3,8 @@
 -- Accessibility layer for the Governor Panel.
 -- Replaces the vanilla GovernorPanel LuaContext. Re-includes the correct
 -- expansion version, then wraps Open/Close/Refresh to overlay a single
--- CAI browsing surface: a governor Tree with a sibling promotions view.
+-- CAI browsing surface: a sortable governor table or detailed Tree with a
+-- sibling promotions view.
 
 include("caiUtils")
 include("GameCapabilities")
@@ -16,10 +17,15 @@ if not HasCapability("CAPABILITY_GOVERNORS") then return end
 -- Constants
 -- ===========================================================================
 
-local PANEL_ID       = "CAIGovernorPanel_Panel"
-local TREE_ID        = "CAIGovernorPanel_Tree"
-local PROMO_GRID_ID = "CAIGovernorPanel_PromoGrid"
-local PROMO_LIST_ID  = "CAIGovernorPanel_PromoList"
+local PANEL_ID         = "CAIGovernorPanel_Panel"
+local TABLE_ID         = "CAIGovernorPanel_Table"
+local TREE_SORT_ID     = "CAIGovernorPanel_TreeSort"
+local TREE_ID          = "CAIGovernorPanel_Tree"
+local PROMO_GRID_ID    = "CAIGovernorPanel_PromoGrid"
+local PROMO_LIST_ID    = "CAIGovernorPanel_PromoList"
+local SWITCH_VIEW_ID   = "CAIGovernorPanel_SwitchView"
+local VIEW_SETTING_SECTION = "UI"
+local VIEW_SETTING_ID      = "GovernorPanelViewMode"
 
 
 local HOVER_SOUND                     = "Main_Menu_Mouse_Over"
@@ -30,11 +36,30 @@ local HOVER_SOUND                     = "Main_Menu_Mouse_Over"
 
 local m_ui                            = {
     panel              = nil,
+    tableView          = nil,
+    treeSort           = nil,
     tree               = nil,
     promoGrid         = nil,
     promoList          = nil,
-    promoConfirmDialog = nil
+    promoConfirmDialog = nil,
+    switchView         = nil,
 }
+
+local function LoadViewModeSetting()
+    local stored = tostring(CAI.GetConfigValue(
+        VIEW_SETTING_SECTION, VIEW_SETTING_ID, "table")):lower()
+    if stored == "tree" then return "tree" end
+    if stored ~= "table" then
+        LogWarn("Governors ignored invalid saved view mode " .. tostring(stored))
+    end
+    return "table"
+end
+
+local function SaveViewModeSetting(viewMode)
+    if not CAI.SetConfigValue(VIEW_SETTING_SECTION, VIEW_SETTING_ID, viewMode) then
+        LogError("Governors failed to save view mode " .. tostring(viewMode))
+    end
+end
 
 local m_focusedGovernorIndex          = -1
 local m_isReadOnly                    = false
@@ -43,6 +68,12 @@ local m_cityBannerCityID              = -1
 local m_liveGovernorRows              = {}
 local m_pendingPromotionFocusKey      = nil
 local m_pendingPromotionGovernorIndex = -1
+local m_governorIndices               = {}
+local m_governorColumns               = {}
+local m_treeSortOptions               = {}
+local m_treeSortColumn                = nil
+local m_treeSortAscending             = false
+local m_viewMode                      = LoadViewModeSetting()
 
 -- ===========================================================================
 -- Helpers
@@ -60,7 +91,7 @@ local function FormatPromotionList(names, conjunctionTag)
     if #names <= 1 then return table.concat(names) end
 
     local finalName = table.remove(names)
-    return table.concat(names, ", ") .. ", " .. Locale.Lookup(conjunctionTag) .. " " .. finalName
+    return table.concat(names, "[NEWLINE]") .. ", " .. Locale.Lookup(conjunctionTag) .. " " .. finalName
 end
 
 local function NormalizeText(text)
@@ -142,6 +173,25 @@ local function GetLiveGovernorRow(governorIndex)
     return m_liveGovernorRows[governorIndex]
 end
 
+local function GetLiveGovernorStatHeader(controlName, fallbackTag)
+    for _, liveRow in pairs(m_liveGovernorRows) do
+        local control = liveRow and liveRow[controlName]
+        local tooltip = ControlTooltip(control)
+        if tooltip ~= "" then return NormalizeText(tooltip) end
+    end
+    return NormalizeText(Locale.Lookup(fallbackTag))
+end
+
+local function GetEstablishSpeedHeader()
+    return GetLiveGovernorStatHeader(
+        "TransitionStrengthLabel", "LOC_GOVERNOR_TRANSITION_STRENGTH_TOOLTIP")
+end
+
+local function GetLoyaltyPressureHeader()
+    return GetLiveGovernorStatHeader(
+        "IdentityPressureLabel", "LOC_GOVERNOR_IDENTITY_PRESSURE_TOOLTIP")
+end
+
 local function GetGovernorName(governorIndex)
     local governorDef = GameInfo.Governors[governorIndex]
     if not governorDef then return "" end
@@ -164,6 +214,178 @@ local function GetPromotionNameAndDescription(promoDef, localPlayerID, governorI
     end
 
     return Locale.Lookup(promoDef.Name), Locale.Lookup(promoDef.Description)
+end
+
+local function GetGovernorData(governorIndex)
+    local governorDef = GameInfo.Governors[governorIndex]
+    local localPlayerID = Game.GetLocalPlayer()
+    local player = Players[localPlayerID]
+    local playerGovernors = player and player:GetGovernors()
+    local governor = governorDef and GetAppointedGovernor(localPlayerID, governorIndex) or nil
+    return governorDef, governor, playerGovernors, localPlayerID
+end
+
+local function GetGovernorBaseAbilityTooltip(governorDef, localPlayerID)
+    local abilities = {}
+    for promotionSet in GameInfo.GovernorPromotionSets() do
+        if promotionSet.GovernorType == governorDef.GovernorType then
+            local promoDef = GameInfo.GovernorPromotions[promotionSet.GovernorPromotion]
+            if promoDef and promoDef.BaseAbility then
+                local name, description = GetPromotionNameAndDescription(
+                    promoDef, localPlayerID, governorDef.Index)
+                abilities[#abilities + 1] = JoinNonEmpty({ name, description }, ": ")
+            end
+        end
+    end
+    if #abilities == 0 then return "" end
+    return Locale.Lookup("LOC_CAI_GOVERNOR_BASE_ABILITY") .. "[NEWLINE]"
+        .. table.concat(abilities, "[NEWLINE]")
+end
+
+local function GetGovernorNameTooltip(governorIndex)
+    local governorDef, _, _, localPlayerID = GetGovernorData(governorIndex)
+    if not governorDef then return "" end
+    return JoinNonEmpty({
+        Locale.Lookup(governorDef.Title),
+        Locale.Lookup(governorDef.Description),
+        GetGovernorBaseAbilityTooltip(governorDef, localPlayerID),
+    }, "[NEWLINE]")
+end
+
+local function GetEarnedPromotions(governorIndex)
+    local governorDef, governor, _, localPlayerID = GetGovernorData(governorIndex)
+    local earned = {}
+    if not governorDef or not governor then return earned end
+
+    for promotionSet in GameInfo.GovernorPromotionSets() do
+        if promotionSet.GovernorType == governorDef.GovernorType then
+            local promoDef = GameInfo.GovernorPromotions[promotionSet.GovernorPromotion]
+            if promoDef and not promoDef.BaseAbility and governor:HasPromotion(promoDef.Hash) then
+                local name, description = GetPromotionNameAndDescription(
+                    promoDef, localPlayerID, governorIndex)
+                earned[#earned + 1] = JoinNonEmpty({ name, description }, ": ")
+            end
+        end
+    end
+    return earned
+end
+
+local function GetEarnedPromotionsCell(governorIndex)
+    local earned = GetEarnedPromotions(governorIndex)
+    local parts = { tostring(#earned) }
+    for _, promotion in ipairs(earned) do parts[#parts + 1] = promotion end
+    return table.concat(parts, "[NEWLINE]")
+end
+
+local function GetGovernorStatusData(governorIndex)
+    local governorDef, governor, playerGovernors = GetGovernorData(governorIndex)
+    if not governorDef or not playerGovernors then return "", nil end
+
+    if not governor then
+        if not m_isReadOnly and playerGovernors:CanAppoint() then
+            return Locale.Lookup("LOC_CAI_GOVERNOR_STATUS_AVAILABLE"), 600000
+        end
+        return Locale.Lookup("LOC_CAI_GOVERNOR_STATUS_UNAVAILABLE"), 700000
+    end
+
+    if IsCannotAssign(governorDef) then
+        return Locale.Lookup("LOC_CAI_GOVERNOR_STATUS_APPOINTED"), 200000
+    end
+
+    local neutralizedTurns = governor:GetNeutralizedTurns()
+    if neutralizedTurns > 0 then
+        return JoinNonEmpty({
+            Locale.Lookup("LOC_GOVERNORS_SCREEN_NEUTRALIZED"),
+            Locale.Lookup("LOC_GOVERNORS_SCREEN_NEUTRALIZED_TURNS_REMAINING", neutralizedTurns),
+        }, ", "), 500000 + neutralizedTurns
+    end
+
+    local city = governor:GetAssignedCity()
+    if not city then
+        return Locale.Lookup("LOC_GOVERNORS_SCREEN_GOVERNOR_NEEDS_ASSIGNMENT"), 400000
+    end
+
+    local cityName = Locale.Lookup(city:GetName())
+    if governor:IsEstablished() then
+        return JoinNonEmpty({
+            Locale.Lookup("LOC_GOVERNORS_SCREEN_GOVERNOR_ESTABLISHED_IN"),
+            cityName,
+        }, " "), 100000
+    end
+
+    local remainingTurns = governor:GetTurnsToEstablish() - governor:GetTurnsOnSite()
+    return JoinNonEmpty({
+        Locale.Lookup("LOC_GOVERNORS_SCREEN_GOVERNOR_TRANSITIONING_TO"),
+        Locale.Lookup("LOC_GOVERNORS_SCREEN_GOVERNOR_NAME_WITH_TURNS", cityName, remainingTurns),
+    }, " "), 300000 + remainingTurns
+end
+
+local function GetEstablishSpeed(governorIndex)
+    local governorDef, _, playerGovernors = GetGovernorData(governorIndex)
+    if not governorDef or not playerGovernors or IsCannotAssign(governorDef) then return nil end
+    return playerGovernors:GetTurnsToEstablish(governorDef.Hash)
+end
+
+local function GetLoyaltyPressure(governorIndex)
+    local governorDef = GameInfo.Governors[governorIndex]
+    if not governorDef or IsCannotAssign(governorDef) then return nil end
+    return governorDef.IdentityPressure
+end
+
+local function BuildGovernorColumns()
+    return {
+        {
+            key = "name",
+            header = function() return Locale.Lookup("LOC_CAI_GOVERNOR_COLUMN_NAME") end,
+            getCell = GetGovernorName,
+            getTooltip = GetGovernorNameTooltip,
+            sortKey = GetGovernorName,
+            sortAscendingDescription = "LOC_CAI_SORT_A_TO_Z",
+            sortDescendingDescription = "LOC_CAI_SORT_Z_TO_A",
+        },
+        {
+            key = "status",
+            header = function() return Locale.Lookup("LOC_CAI_GOVERNOR_COLUMN_STATUS") end,
+            getCell = function(governorIndex) return GetGovernorStatusData(governorIndex) end,
+            sortKey = function(governorIndex)
+                local _, rank = GetGovernorStatusData(governorIndex)
+                return rank
+            end,
+            sortAscendingDescription = "LOC_CAI_SORT_ACTIVE_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_UNAVAILABLE_FIRST",
+        },
+        {
+            key = "establish_speed",
+            header = GetEstablishSpeedHeader,
+            getCell = function(governorIndex)
+                local turns = GetEstablishSpeed(governorIndex)
+                return turns and Locale.Lookup(
+                    "LOC_GOVERNORS_SCREEN_GOVERNOR_TRANSITION_TURNS", turns) or ""
+            end,
+            sortKey = GetEstablishSpeed,
+            sortAscendingDescription = "LOC_CAI_SORT_FASTEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_SLOWEST_FIRST",
+        },
+        {
+            key = "loyalty",
+            header = GetLoyaltyPressureHeader,
+            getCell = function(governorIndex)
+                local loyalty = GetLoyaltyPressure(governorIndex)
+                return loyalty and tostring(loyalty) or ""
+            end,
+            sortKey = GetLoyaltyPressure,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+        {
+            key = "earned_promotions",
+            header = function() return Locale.Lookup("LOC_CAI_GOVERNOR_COLUMN_EARNED_PROMOTIONS") end,
+            getCell = GetEarnedPromotionsCell,
+            sortKey = function(governorIndex) return #GetEarnedPromotions(governorIndex) end,
+            sortAscendingDescription = "LOC_CAI_SORT_FEWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_MOST_FIRST",
+        },
+    }
 end
 
 -- ===========================================================================
@@ -261,7 +483,7 @@ local function GetGovernorRowTooltip(governorDef, governor, playerGovernors, loc
         end
     end
     if #earnedNames > 0 then
-        parts[#parts + 1] = Locale.Lookup("LOC_CAI_GOVERNOR_EARNED_PROMOS", table.concat(earnedNames, ", "))
+        parts[#parts + 1] = Locale.Lookup("LOC_CAI_GOVERNOR_EARNED_PROMOS", table.concat(earnedNames, "[NEWLINE]"))
     end
 
     return JoinNonEmpty(parts, "[NEWLINE]")
@@ -276,7 +498,7 @@ local function GetPromotionCellTooltip(promoDef, governorDef, localPlayerID)
     parts[#parts + 1] = Locale.Lookup(promoDef.Description)
 
     if IsCannotAssign(governorDef) then
-        return JoinNonEmpty(parts, ", ")
+        return JoinNonEmpty(parts, "[NEWLINE]")
     end
 
     local prereqNames = {}
@@ -653,30 +875,51 @@ end)
 -- Governor tree building
 -- ===========================================================================
 
-local function CreateGovernorRow(governorDef, governor, playerGovernors, canAppoint, localPlayerID)
-    local isSecret = IsCannotAssign(governorDef)
-    local govIndex = governorDef.Index
+local function GetTreeGovernorFocusKey(governorIndex)
+    return "gov:" .. tostring(governorIndex)
+end
 
-    local function CanActivateGovernorRow()
-        if m_isReadOnly then return false end
+local function GetTableGovernorFocusKey(governorIndex)
+    return TABLE_ID .. ":row:" .. tostring(governorIndex) .. ":name"
+end
 
-        local player = Players[localPlayerID]
-        if not player then return false end
+local function CanActivateGovernor(governorIndex, localPlayerID)
+    if m_isReadOnly then return false end
 
-        local pg = player:GetGovernors()
-        if not pg then return false end
+    local governorDef = GameInfo.Governors[governorIndex]
+    local player = Players[localPlayerID]
+    local playerGovernors = player and player:GetGovernors()
+    if not governorDef or not playerGovernors then return false end
 
-        local gov = GetAppointedGovernor(localPlayerID, govIndex)
-        if not gov then
-            return pg:CanAppoint()
-        end
+    local governor = GetAppointedGovernor(localPlayerID, governorIndex)
+    if not governor then return playerGovernors:CanAppoint() end
+    if IsCannotAssign(governorDef) then return false end
+    return governor:GetNeutralizedTurns() == 0
+end
 
-        if isSecret then
-            return false
-        end
+local function ActivateGovernor(governorIndex, localPlayerID)
+    if not CanActivateGovernor(governorIndex, localPlayerID) then return false end
 
-        return gov:GetNeutralizedTurns() == 0
+    local governorDef = GameInfo.Governors[governorIndex]
+    local governor = GetAppointedGovernor(localPlayerID, governorIndex)
+    if not governor then
+        OnAppointGovernor(governorIndex)
+    elseif not IsCannotAssign(governorDef) then
+        OnAssignButton(governorIndex, m_cityBannerPlayerID, m_cityBannerCityID)
     end
+    return true
+end
+
+local function FocusGovernorPromotions(governorIndex)
+    if governorIndex == m_focusedGovernorIndex then return end
+    local previousGovernorIndex = m_focusedGovernorIndex
+    m_focusedGovernorIndex = governorIndex
+    RefreshPromotionsView(governorIndex, previousGovernorIndex ~= governorIndex)
+end
+
+local function CreateGovernorRow(governorIndex, localPlayerID)
+    local governorDef, governor = GetGovernorData(governorIndex)
+    local govIndex = governorIndex
 
     local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGov_Row"), "TreeItem", {
         Label = function()
@@ -689,27 +932,17 @@ local function CreateGovernorRow(governorDef, governor, playerGovernors, canAppo
             local pg = Players[localPlayerID]:GetGovernors()
             return GetGovernorRowTooltip(governorDef, gov, pg, localPlayerID)
         end,
-        DisabledPredicate = function() return not CanActivateGovernorRow() end,
-        FocusKey = "gov:" .. tostring(govIndex),
+        DisabledPredicate = function() return not CanActivateGovernor(govIndex, localPlayerID) end,
+        FocusKey = GetTreeGovernorFocusKey(govIndex),
     })
     row:SetFocusSound(HOVER_SOUND)
 
     row:On("focus_enter", function(w)
-        if w:IsFocused() and govIndex ~= m_focusedGovernorIndex then
-            local previousGovernorIndex = m_focusedGovernorIndex
-            m_focusedGovernorIndex = govIndex
-            RefreshPromotionsView(govIndex, previousGovernorIndex ~= govIndex)
-        end
+        if w:IsFocused() then FocusGovernorPromotions(govIndex) end
     end)
 
     row:On("activate", function()
-        if not CanActivateGovernorRow() then return end
-        local gov = GetAppointedGovernor(localPlayerID, govIndex)
-        if not gov then
-            OnAppointGovernor(govIndex)
-        elseif not isSecret then
-            OnAssignButton(govIndex, m_cityBannerPlayerID, m_cityBannerCityID)
-        end
+        ActivateGovernor(govIndex, localPlayerID)
     end)
 
     if governor then
@@ -739,40 +972,17 @@ local function CreateGovernorRow(governorDef, governor, playerGovernors, canAppo
     return row
 end
 
-local function RebuildTree()
-    if not m_ui.tree then return end
-    if ContextPtr:IsHidden() then return end
-
-    local capture = mgr:CaptureFocusKey(m_ui.tree)
-    m_ui.tree:ClearChildren()
-
+local function BuildNaturalGovernorIndices()
+    local indices = {}
     local localPlayerID = Game.GetLocalPlayer()
-    if localPlayerID == -1 or localPlayerID == PlayerTypes.NONE then
-        mgr:RestoreFocus(m_ui.tree, capture)
-        return
-    end
-
+    if localPlayerID == -1 or localPlayerID == PlayerTypes.NONE then return indices end
     local pPlayer = Players[localPlayerID]
-    if not pPlayer then
-        mgr:RestoreFocus(m_ui.tree, capture)
-        return
-    end
-
+    if not pPlayer then return indices end
     local playerGovernors = pPlayer:GetGovernors()
-    if not playerGovernors then
-        mgr:RestoreFocus(m_ui.tree, capture)
-        return
-    end
-
-    local governorPointsObtained = playerGovernors:GetGovernorPoints()
-    local governorPointsSpent = playerGovernors:GetGovernorPointsSpent()
-    local canAppoint = playerGovernors:CanAppoint()
-    local bHasGovernors, tGovernorList = playerGovernors:GetGovernorList()
+    if not playerGovernors then return indices end
+    local _, tGovernorList = playerGovernors:GetGovernorList()
 
     m_isReadOnly = IsReadOnly()
-
-    local capturedAvailable = governorPointsObtained - governorPointsSpent
-    local capturedSpent = governorPointsSpent
 
     -- Secret society governors: appointed first, then candidates
     if tGovernorList then
@@ -780,7 +990,7 @@ local function RebuildTree()
             local eGovernorType = pGovernor:GetType()
             local kGovernorDef = GameInfo.Governors[eGovernorType]
             if kGovernorDef and IsCannotAssign(kGovernorDef) then
-                m_ui.tree:AddChild(CreateGovernorRow(kGovernorDef, pGovernor, playerGovernors, false, localPlayerID))
+                indices[#indices + 1] = kGovernorDef.Index
             end
         end
     end
@@ -789,7 +999,7 @@ local function RebuildTree()
         if not playerGovernors:HasGovernor(kGovernorDef.Hash) then
             if playerGovernors:CanEverAppointGovernor(kGovernorDef.Hash) then
                 if IsCannotAssign(kGovernorDef) then
-                    m_ui.tree:AddChild(CreateGovernorRow(kGovernorDef, nil, playerGovernors, canAppoint, localPlayerID))
+                    indices[#indices + 1] = kGovernorDef.Index
                 end
             end
         end
@@ -801,7 +1011,7 @@ local function RebuildTree()
             local eGovernorType = pGovernor:GetType()
             local kGovernorDef = GameInfo.Governors[eGovernorType]
             if kGovernorDef and not IsCannotAssign(kGovernorDef) then
-                m_ui.tree:AddChild(CreateGovernorRow(kGovernorDef, pGovernor, playerGovernors, false, localPlayerID))
+                indices[#indices + 1] = kGovernorDef.Index
             end
         end
     end
@@ -810,10 +1020,105 @@ local function RebuildTree()
         if not playerGovernors:HasGovernor(kGovernorDef.Hash) then
             if playerGovernors:CanEverAppointGovernor(kGovernorDef.Hash) then
                 if not IsCannotAssign(kGovernorDef) then
-                    m_ui.tree:AddChild(CreateGovernorRow(kGovernorDef, nil, playerGovernors, canAppoint, localPlayerID))
+                    indices[#indices + 1] = kGovernorDef.Index
                 end
             end
         end
+    end
+
+    return indices
+end
+
+
+local function BuildTreeSortOptions(columns)
+    local options = {
+        {
+            label = Locale.Lookup("LOC_CAI_DATATABLE_SORT_NATURAL"),
+            value = { column = nil, ascending = false },
+        },
+    }
+    for _, column in ipairs(columns) do
+        if column.sortKey then
+            local header = type(column.header) == "function" and column.header() or column.header or ""
+            options[#options + 1] = {
+                label = header .. ", " .. Locale.Lookup(column.sortAscendingDescription),
+                value = { column = column.key, ascending = true },
+            }
+            options[#options + 1] = {
+                label = header .. ", " .. Locale.Lookup(column.sortDescendingDescription),
+                value = { column = column.key, ascending = false },
+            }
+        end
+    end
+    return options
+end
+
+local function SyncTreeSortDropdown()
+    if not m_ui.treeSort then return end
+    for index, option in ipairs(m_treeSortOptions) do
+        local sort = option.value
+        if sort.column == m_treeSortColumn and
+            (sort.column == nil or sort.ascending == m_treeSortAscending) then
+            m_ui.treeSort:SetSelectedIndex(index, true)
+            return
+        end
+    end
+end
+
+local function CompareSortValues(a, b)
+    if a == b then return 0 end
+    if a == nil then return 1 end
+    if b == nil then return -1 end
+    if type(a) == "number" and type(b) == "number" then return a < b and -1 or 1 end
+    return Locale.Compare(tostring(a), tostring(b))
+end
+
+local function GetOrderedGovernorIndices()
+    local ordered = {}
+    for _, governorIndex in ipairs(m_governorIndices) do ordered[#ordered + 1] = governorIndex end
+    if not m_treeSortColumn then return ordered end
+
+    local sortColumn = nil
+    for _, column in ipairs(m_governorColumns) do
+        if column.key == m_treeSortColumn then
+            sortColumn = column
+            break
+        end
+    end
+    if not sortColumn or not sortColumn.sortKey then return ordered end
+
+    local decorated = {}
+    for naturalIndex, governorIndex in ipairs(ordered) do
+        decorated[#decorated + 1] = {
+            governorIndex = governorIndex,
+            naturalIndex = naturalIndex,
+            value = sortColumn.sortKey(governorIndex),
+        }
+    end
+    table.sort(decorated, function(a, b)
+        if a.value == nil or b.value == nil then
+            if a.value == b.value then return a.naturalIndex < b.naturalIndex end
+            return a.value ~= nil
+        end
+        local comparison = CompareSortValues(a.value, b.value)
+        if comparison == 0 then return a.naturalIndex < b.naturalIndex end
+        if m_treeSortAscending then return comparison < 0 end
+        return comparison > 0
+    end)
+
+    ordered = {}
+    for _, entry in ipairs(decorated) do ordered[#ordered + 1] = entry.governorIndex end
+    return ordered
+end
+
+local function RebuildTree()
+    if not m_ui.tree or ContextPtr:IsHidden() then return end
+    local capture = mgr:CaptureFocusKey(m_ui.tree)
+    m_ui.tree:ClearChildren()
+
+    local localPlayerID = Game.GetLocalPlayer()
+    for _, governorIndex in ipairs(GetOrderedGovernorIndices()) do
+        m_ui.tree:AddChild(CreateGovernorRow(governorIndex, localPlayerID))
     end
 
     mgr:RestoreFocus(m_ui.tree, capture)
@@ -823,30 +1128,159 @@ end
 -- Panel construction and lifecycle
 -- ===========================================================================
 
+local function GetActiveGovernorView()
+    return m_viewMode == "tree" and m_ui.tree or m_ui.tableView
+end
+
+local function SetViewMode(viewMode)
+    if viewMode ~= "table" and viewMode ~= "tree" then
+        LogError("Governors received invalid view mode " .. tostring(viewMode))
+        return false
+    end
+    if m_viewMode ~= viewMode then
+        m_viewMode = viewMode
+        SaveViewModeSetting(viewMode)
+    end
+
+    local activeView = GetActiveGovernorView()
+    if activeView then
+        if m_focusedGovernorIndex >= 0 then
+            mgr:PrepareFocus(activeView, viewMode == "tree"
+                and GetTreeGovernorFocusKey(m_focusedGovernorIndex)
+                or GetTableGovernorFocusKey(m_focusedGovernorIndex))
+        end
+        mgr:SetFocus(activeView)
+    end
+    return true
+end
+
+local function ToggleViewMode()
+    return SetViewMode(m_viewMode == "table" and "tree" or "table")
+end
+
+local function RebuildViews()
+    if not m_ui.tableView or not m_ui.tree or ContextPtr:IsHidden() then return end
+
+    m_governorIndices = BuildNaturalGovernorIndices()
+    m_ui.tableView:Rebuild()
+    RebuildTree()
+
+    if m_focusedGovernorIndex >= 0 then
+        local stillPresent = false
+        for _, governorIndex in ipairs(m_governorIndices) do
+            if governorIndex == m_focusedGovernorIndex then
+                stillPresent = true
+                break
+            end
+        end
+        if not stillPresent then
+            m_focusedGovernorIndex = -1
+        end
+    end
+end
+
 local function BuildPanel()
     if not mgr then return end
 
     m_ui.panel = mgr:CreateWidget(PANEL_ID, "Panel", {
         Label = GetPanelTitle,
     })
+    m_ui.panel:AddInputBindings({
+        {
+            Key = Keys["1"],
+            IsAlt = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_TREE_SWITCH_TO_TABLE",
+            Action = function() return SetViewMode("table") end,
+        },
+        {
+            Key = Keys["2"],
+            IsAlt = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_TREE_SWITCH_TO_TREE",
+            Action = function() return SetViewMode("tree") end,
+        },
+    })
+
+    m_governorColumns = BuildGovernorColumns()
+    for _, column in ipairs(m_governorColumns) do
+        column.isDisabled = function(governorIndex)
+            return not CanActivateGovernor(governorIndex, Game.GetLocalPlayer())
+        end
+    end
+    m_treeSortOptions = BuildTreeSortOptions(m_governorColumns)
+
+    m_ui.tableView = mgr:CreateWidget(TABLE_ID, "DataTable", {
+        Label = function() return GetTitleCountsText(GetGovernerTitleCounts()) end,
+        HiddenPredicate = function() return m_viewMode ~= "table" end,
+    })
+    m_ui.tableView:SetColumns(m_governorColumns)
+    m_ui.tableView:SetRowsProvider(function() return m_governorIndices end)
+    m_ui.tableView:SetRowKeyGetter(function(governorIndex) return governorIndex end)
+    m_ui.tableView:SetRowLabelGetter(GetGovernorName)
+    m_ui.tableView:SetDefaultSort(m_treeSortColumn
+        and { column = m_treeSortColumn, ascending = m_treeSortAscending }
+        or nil)
+    m_ui.tableView:On("row_focus_enter", function(_, governorIndex, rowIndex)
+        if rowIndex > 0 then FocusGovernorPromotions(governorIndex) end
+    end)
+    m_ui.tableView:On("row_activate", function(_, governorIndex)
+        ActivateGovernor(governorIndex, Game.GetLocalPlayer())
+    end)
+    m_ui.tableView:On("sort_changed", function(_, columnKey, ascending)
+        m_treeSortColumn = columnKey
+        m_treeSortAscending = ascending == true
+        SyncTreeSortDropdown()
+        RebuildTree()
+    end)
+    m_ui.panel:AddChild(m_ui.tableView)
+
+    m_ui.treeSort = mgr:CreateWidget(TREE_SORT_ID, "Dropdown", {
+        Label = function() return Locale.Lookup("LOC_CAI_GOVERNOR_ORDER_BY") end,
+        FocusKey = "governors:tree-sort",
+        HiddenPredicate = function() return m_viewMode ~= "tree" end,
+    })
+    m_ui.treeSort:SetOptions(m_treeSortOptions)
+    SyncTreeSortDropdown()
+    m_ui.treeSort:On("value_changed", function(_, sort)
+        m_treeSortColumn = sort.column
+        m_treeSortAscending = sort.ascending == true
+        m_ui.tableView:SetDefaultSort(sort.column
+            and { column = sort.column, ascending = sort.ascending }
+            or nil)
+        m_ui.tableView:Rebuild()
+        RebuildTree()
+    end)
+    m_ui.panel:AddChild(m_ui.treeSort)
 
     m_ui.tree = mgr:CreateWidget(TREE_ID, "Tree", {
         Label = function() return GetTitleCountsText(GetGovernerTitleCounts()) end,
+        HiddenPredicate = function() return m_viewMode ~= "tree" end,
     })
     m_ui.panel:AddChild(m_ui.tree)
 
     BuildPromoWidgets()
     m_ui.panel:AddChild(m_ui.promoGrid)
     m_ui.panel:AddChild(m_ui.promoList)
+
+    m_ui.switchView = mgr:CreateWidget(SWITCH_VIEW_ID, "Button", {
+        Label = function()
+            return Locale.Lookup(m_viewMode == "table"
+                and "LOC_CAI_TREE_SWITCH_TO_TREE"
+                or "LOC_CAI_TREE_SWITCH_TO_TABLE")
+        end,
+    })
+    m_ui.switchView:On("activate", function() ToggleViewMode() end)
+    m_ui.panel:AddChild(m_ui.switchView)
 end
 
 local function PushPanel()
     if not mgr then return end
     if not m_ui.panel then BuildPanel() end
     if not m_ui.panel then return end
-    RebuildTree()
+    RebuildViews()
     if not mgr:GetWidgetById(PANEL_ID) then
-        mgr:Push(m_ui.panel)
+        mgr:Push(m_ui.panel, { focus = GetActiveGovernorView() })
     end
 end
 
@@ -856,12 +1290,17 @@ local function PopPanel()
     end
     m_ui = {
         panel = nil,
+        tableView = nil,
+        treeSort = nil,
         tree = nil,
         promoGrid = nil,
         promoList = nil,
+        promoConfirmDialog = nil,
+        switchView = nil,
     }
     m_focusedGovernorIndex = -1
     m_liveGovernorRows = {}
+    m_governorIndices = {}
 end
 
 -- ===========================================================================
@@ -899,7 +1338,7 @@ Refresh = WrapFunc(Refresh, function(orig)
     orig()
     m_isReadOnly = IsReadOnly()
     if mgr and mgr:GetWidgetById(PANEL_ID) then
-        RebuildTree()
+        RebuildViews()
     end
 end)
 

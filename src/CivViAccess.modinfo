@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Mod id="9f4b5c2e-1a2b-4c3d-8e9f-123456789abc" version="0.9.1">
+<Mod id="9f4b5c2e-1a2b-4c3d-8e9f-123456789abc" version="1.0.0">
   <Properties>
     <Name>Civ VI Accessibility Integration</Name>
-    <Description>Adds blind accessibility to civ VI via text to speech</Description>
-    <Teaser>Accessibility mod</Teaser>
+    <Description>Civilization VI Accessibility Integration makes Sid Meier's Civilization VI playable with a screen reader. It adds spoken information and keyboard navigation to the game's menus, dialogs, screens, and other user-interface elements.</Description>
+    <Teaser>Blind accessibility mod for civilization VI</Teaser>
     <Authors>FlatArther and Hamada</Authors>
-    <AffectsSavedGames>0</AffectsSavedGames>
+    <AffectsSavedGames>1</AffectsSavedGames>
     <CompatibleVersions>2.0</CompatibleVersions>
   </Properties>
   <Files>
@@ -27,7 +27,7 @@
     <File>UI/uiManager/helpers/CAIWidgetHelpers_DialogBuilder.lua</File>
     <File>UI/uiManager/helpers/CAIWidgetHelpers_PediaLookup.lua</File>
     <File>UI/uiManager/helpers/CAIWidgetHelpers_InputHelp.lua</File>
-    <File>UI/uiManager/helpers/CAIWidgetHelpers_TooltipReader.lua</File>
+    <File>UI/uiManager/helpers/CAIWidgetHelpers_FocusedWidgetReader.lua</File>
     <File>UI/uiManager/CAIWidget_Base.lua</File>
     <File>UI/uiManager/CAIWidget_Container.lua</File>
     <File>UI/uiManager/CAIWidget_Value.lua</File>
@@ -50,6 +50,7 @@
     <File>UI/uiManager/CAIWidget_TabPage.lua</File>
     <File>UI/uiManager/CAIWidget_TabControl.lua</File>
     <File>UI/uiManager/CAIWidget_Grid.lua</File>
+    <File>UI/uiManager/CAIWidget_Graph.lua</File>
     <File>UI/uiManager/CAIWidget_DataTable.lua</File>
     <File>UI/uiManager/CAIWidget_GameView.lua</File>
     <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>
@@ -271,7 +272,7 @@
       <File>UI/uiManager/helpers/CAIWidgetHelpers_DialogBuilder.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_PediaLookup.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_InputHelp.lua</File>
-      <File>UI/uiManager/helpers/CAIWidgetHelpers_TooltipReader.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_FocusedWidgetReader.lua</File>
       <File>UI/uiManager/CAIWidget_Base.lua</File>
       <File>UI/uiManager/CAIWidget_Container.lua</File>
       <File>UI/uiManager/CAIWidget_Value.lua</File>
@@ -294,6 +295,7 @@
       <File>UI/uiManager/CAIWidget_TabPage.lua</File>
       <File>UI/uiManager/CAIWidget_TabControl.lua</File>
       <File>UI/uiManager/CAIWidget_Grid.lua</File>
+      <File>UI/uiManager/CAIWidget_Graph.lua</File>
       <File>UI/uiManager/CAIWidget_DataTable.lua</File>
       <File>UI/uiManager/CAIWidget_GameView.lua</File>
       <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>
@@ -385,7 +387,7 @@
       <File>UI/uiManager/helpers/CAIWidgetHelpers_DialogBuilder.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_PediaLookup.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_InputHelp.lua</File>
-      <File>UI/uiManager/helpers/CAIWidgetHelpers_TooltipReader.lua</File>
+      <File>UI/uiManager/helpers/CAIWidgetHelpers_FocusedWidgetReader.lua</File>
       <File>UI/uiManager/CAIWidget_Base.lua</File>
       <File>UI/uiManager/CAIWidget_Container.lua</File>
       <File>UI/uiManager/CAIWidget_Value.lua</File>
@@ -408,6 +410,7 @@
       <File>UI/uiManager/CAIWidget_TabPage.lua</File>
       <File>UI/uiManager/CAIWidget_TabControl.lua</File>
       <File>UI/uiManager/CAIWidget_Grid.lua</File>
+      <File>UI/uiManager/CAIWidget_Graph.lua</File>
       <File>UI/uiManager/CAIWidget_DataTable.lua</File>
       <File>UI/uiManager/CAIWidget_GameView.lua</File>
       <File>UI/uiManager/CAIWidget_InterfaceMode.lua</File>

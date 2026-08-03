@@ -10,8 +10,8 @@
 ---@field getState? fun(row:any):string
 ---@field isDisabled? fun(row:any):boolean
 ---@field sortKey? fun(row:any):any Presence makes the header sortable.
----@field activatable? boolean Whether data cells emit `cell_activate`.
----@field role? string Optional localized widget role for data cells.
+---@field sortAscendingDescription? string Localization tag describing ascending order.
+---@field sortDescendingDescription? string Localization tag describing descending order.
 
 ---@class DataTableSort
 ---@field column string Stable DataTableColumn key.
@@ -26,6 +26,16 @@
 ---@field RowKey any|nil
 DataTableCellWidget = setmetatable({}, { __index = UIWidget })
 DataTableCellWidget.__index = DataTableCellWidget
+
+local DataTableRowWidget = setmetatable({}, { __index = ContainerWidget })
+DataTableRowWidget.__index = DataTableRowWidget
+
+---@return boolean
+function DataTableRowWidget:Activate()
+    if self.Row == nil then return true end
+    self.Table:Emit("row_activate", self.Row, self)
+    return true
+end
 
 ---@class DataTableWidget : ContainerWidget
 ---@field Columns DataTableColumn[]
@@ -88,17 +98,14 @@ local function makeCell(tableWidget, row, rowIndex, rowKey, column, columnIndex)
     cell.SpeechSettings = { Role = false }
 
     if rowIndex == 0 then
-        if column.sortKey then
-            cell.Role = "Button"
-            cell.SpeechSettings = {}
-        end
         cell.FocusKey = tostring(tableWidget.Id) .. ":header:" .. column.key
         cell:SetLabel(function()
             local label = resolve(column.header) or ""
             if tableWidget.SortColumnKey == column.key then
-                local state = tableWidget.SortAscending
-                    and Locale.Lookup("LOC_CAI_DATATABLE_SORT_ASCENDING")
-                    or Locale.Lookup("LOC_CAI_DATATABLE_SORT_DESCENDING")
+                local descriptionTag = tableWidget.SortAscending
+                    and column.sortAscendingDescription
+                    or column.sortDescendingDescription
+                local state = Locale.Lookup(descriptionTag)
                 return label .. ", " .. state
             end
             if tableWidget._sortFeedbackColumnKey == column.key then
@@ -110,13 +117,6 @@ local function makeCell(tableWidget, row, rowIndex, rowKey, column, columnIndex)
             cell:SetTooltip(function() return Locale.Lookup("LOC_CAI_DATATABLE_SORT_HELP") end)
         end
     else
-        if column.role then
-            cell.Role = column.role
-            cell.SpeechSettings = {}
-        elseif column.activatable then
-            cell.Role = "Button"
-            cell.SpeechSettings = {}
-        end
         cell.FocusKey = tostring(tableWidget.Id) .. ":row:" .. tostring(rowKey) .. ":" .. column.key
         cell:SetLabel(function() return column.getCell(row) or "" end)
         if column.getTooltip then
@@ -130,7 +130,7 @@ local function makeCell(tableWidget, row, rowIndex, rowKey, column, columnIndex)
         end
     end
 
-    if (rowIndex == 0 and column.sortKey) or (rowIndex > 0 and column.activatable) then
+    if rowIndex == 0 and column.sortKey then
         cell:AddInputBindings({
             { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyUp, Description = "LOC_CAI_KB_ACTIVATE", Action = function(self) return self:Activate() end },
             { Key = Keys.VK_SPACE, Description = "LOC_CAI_KB_ACTIVATE", Action = function(self) return self:Activate() end },
@@ -150,16 +150,13 @@ end
 
 ---@return boolean
 function DataTableCellWidget:Activate()
+    if self.RowIndex > 0 then
+        return self.Parent and self.Parent:Activate() or true
+    end
     if self:IsDisabled() then return true end
     self:Emit("activate", self.Row, self.Column)
     if not self.Manager then return true end
-    if self.RowIndex == 0 then
-        if self.Column.sortKey then self.Table:CycleSort(self.Column.key) end
-        return true
-    end
-    if self.Column.activatable then
-        self.Table:Emit("cell_activate", self.Row, self.Column, self)
-    end
+    if self.Column.sortKey then self.Table:CycleSort(self.Column.key) end
     return true
 end
 
@@ -237,6 +234,8 @@ function DataTableWidget.Create(mgr, id, props)
         { Key = Keys.VK_RIGHT, MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_RIGHT", Action = function(self) return self:_NavigateHorizontal(1) end },
         { Key = Keys.VK_HOME, MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_TO_ROW_START", Action = function(self) return self:_NavigateDataEdge(-1) end },
         { Key = Keys.VK_END, MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_TO_ROW_END", Action = function(self) return self:_NavigateDataEdge(1) end },
+        { Key = Keys.VK_HOME, MSG = KeyEvents.KeyDown, IsShift = true, Description = "LOC_CAI_KB_MOVE_TO_ROW_START", Action = function(self) return self:_NavigateRowEdge(-1) end },
+        { Key = Keys.VK_END, MSG = KeyEvents.KeyDown, IsShift = true, Description = "LOC_CAI_KB_MOVE_TO_ROW_END", Action = function(self) return self:_NavigateRowEdge(1) end },
         { Key = Keys.VK_HOME, MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_MOVE_TO_TABLE_START", Action = function(self) return self:_NavigateTableEdge(-1) end },
         { Key = Keys.VK_END, MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_MOVE_TO_TABLE_END", Action = function(self) return self:_NavigateTableEdge(1) end },
         { Key = Keys.VK_LEFT, MSG = KeyEvents.KeyDown, IsControl = true, Description = "LOC_CAI_KB_PREVIOUS_COLUMN", Action = function(self) return self:_NavigateHeaderColumn(-1) end },
@@ -296,8 +295,12 @@ function DataTableWidget:SetColumns(columns)
         check(column.getState == nil or type(column.getState) == "function", "column getState must be a function")
         check(column.isDisabled == nil or type(column.isDisabled) == "function", "column isDisabled must be a function")
         check(column.sortKey == nil or type(column.sortKey) == "function", "column sortKey must be a function")
-        check(column.activatable == nil or type(column.activatable) == "boolean", "column activatable must be a boolean")
-        check(column.role == nil or type(column.role) == "string", "column role must be a string")
+        if column.sortKey then
+            check(type(column.sortAscendingDescription) == "string",
+                "sortable column sortAscendingDescription must be a localization tag")
+            check(type(column.sortDescendingDescription) == "string",
+                "sortable column sortDescendingDescription must be a localization tag")
+        end
         keys[column.key] = true
     end
     self.Columns = columns
@@ -427,20 +430,40 @@ function DataTableWidget:_SortRows(rows)
         end
         local comparison = compareValues(a.value, b.value)
         if comparison == 0 then return a.naturalIndex < b.naturalIndex end
-        return ascending and comparison < 0 or comparison > 0
+        if ascending then return comparison < 0 end
+        return comparison > 0
     end)
     local sorted = {}
     for _, entry in ipairs(decorated) do sorted[#sorted + 1] = entry.row end
     return sorted
 end
 
-local function makeRow(tableWidget)
-    local row = ContainerWidget.New(ContainerWidget)
+local function makeRow(tableWidget, rowData)
+    local row = ContainerWidget.New(DataTableRowWidget)
     row.Manager = tableWidget.Manager
     row.Type = "DataTableRow"
+    row.Role = "TableRow"
+    row.Table = tableWidget
+    row.Row = rowData
     row.Transparent = true
     row.UseDirectionalEntry = false
     row.WrapAround = false
+    local listeners = tableWidget._listeners and tableWidget._listeners["row_activate"] or nil
+    if rowData ~= nil and listeners and next(listeners) ~= nil then
+        row:AddInputBindings({
+            {
+                Key = Keys.VK_RETURN,
+                MSG = KeyEvents.KeyUp,
+                Description = "LOC_CAI_KB_ACTIVATE",
+                Action = function(self) return self:Activate() end,
+            },
+            {
+                Key = Keys.VK_SPACE,
+                Description = "LOC_CAI_KB_ACTIVATE",
+                Action = function(self) return self:Activate() end,
+            },
+        })
+    end
     return row
 end
 
@@ -458,7 +481,7 @@ function DataTableWidget:Rebuild()
     local capture = self.Manager:CaptureFocusKey(self)
     self:ClearChildren()
 
-    local headerRow = makeRow(self)
+    local headerRow = makeRow(self, nil)
     for columnIndex, column in ipairs(self.Columns) do
         headerRow:AddChild(makeCell(self, nil, 0, nil, column, columnIndex))
     end
@@ -475,7 +498,7 @@ function DataTableWidget:Rebuild()
         check(not rowKeys[rowKeyString], "duplicate row key: " .. rowKeyString)
         rowKeys[rowKeyString] = true
 
-        local rowWidget = makeRow(self)
+        local rowWidget = makeRow(self, rowData)
         for columnIndex, column in ipairs(self.Columns) do
             rowWidget:AddChild(makeCell(self, rowData, rowIndex, rowKey, column, columnIndex))
         end
@@ -549,6 +572,25 @@ function DataTableWidget:_NavigateHorizontal(direction)
             return true
         end
         columnIndex = columnIndex + direction
+    end
+    return false
+end
+
+---@param direction 1|-1
+---@return boolean
+function DataTableWidget:_NavigateRowEdge(direction)
+    local cell = self:_FocusedCell()
+    if not cell then return false end
+    local rowChildIndex = cell.RowIndex + 1
+    local columnIndex = direction < 0 and 1 or #self.Columns
+    while columnIndex >= 1 and columnIndex <= #self.Columns do
+        local target = self:_CellAt(rowChildIndex, columnIndex)
+        if target then
+            if target == cell then return false end
+            self.Manager:SetFocus(target, { direction = direction })
+            return true
+        end
+        columnIndex = columnIndex - direction
     end
     return false
 end

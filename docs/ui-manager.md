@@ -18,7 +18,7 @@ The manager has four layers:
    class inheritance via metatable chains; not the old template-merging model.
 3. **Concrete widgets** — Button, MenuItem, StaticText, Panel, Dialog,
    Dropdown, List, HorizontalList, SubMenu, Tree, TreeItem, Checkbox, Slider,
-   EditBox, TabControl, Tab, TabPage, Grid, DataTable, GameView, InterfaceMode. Each is
+   EditBox, TabControl, Tab, TabPage, Grid, Graph, DataTable, GameView, InterfaceMode. Each is
    one file under `src/UI/uiManager/`.
 4. **Helpers** (`src/UI/uiManager/helpers/`) — stateless utilities used by
    widgets and the manager: navigation, search, tree walks, edit-box logic,
@@ -57,6 +57,7 @@ UIWidget                       identity, tree, events, input, speech
 │   ├── TabControlWidget
 │   ├── DropdownWidget         container of an inner List of MenuItems
 │   ├── GridWidget             spatial columns/tiers; arbitrary widget cells
+│   ├── GraphWidget            directed nodes/edges; relationship navigation
 │   ├── DataTableWidget        sortable homogeneous rows; player role Table
 │   ├── GameViewWidget
 │   └── InterfaceModeWidget
@@ -336,10 +337,22 @@ from the divergence index downward, skipping any widget marked `Transparent`,
 and `SpeakLines(announcements, true)` speaks them — first line interrupts,
 rest queue.
 
-Tooltip section navigation uses the shared `SplitTextIntoLines(text, maxLength)`
-utility. It preserves explicit `[NEWLINE]` / physical-line boundaries and
-groups complete sentences up to the default 75-character target. A sentence
-longer than the target remains intact on its own line.
+The Focused Widget Reader caches the focused widget's eligible speech elements
+in the canonical `BuildSpeech()` order, deliberately excluding role, state,
+and position and bypassing normal per-widget/global speech suppression for the
+included elements. It joins them with `[NEWLINE]`, guaranteeing that one element
+can never be merged into the same reader section as another. It then uses the
+shared `SplitTextIntoLines(text, maxLength)` utility to provide
+previous, next, first, and last section navigation. The splitter preserves
+explicit `[NEWLINE]` / physical-line boundaries and groups complete sentences
+up to the default 75-character target. A sentence longer than the target
+remains intact on its own line. Every widget follows this path, including
+`StaticText`; there are no type-specific reader exceptions.
+
+Screen Lua may likewise join player-facing speech sections with `[NEWLINE]`.
+This convention is screen-scoped: UI-manager speech composition and utility,
+helper, logic, and data modules retain separators appropriate to their own
+contracts.
 
 ### Direction semantics
 
@@ -483,10 +496,16 @@ elements, in order:
 
 1. `label` — `GetLabel()`
 2. `role` — `Locale.Lookup("LOC_UIWidget_Role_" .. (Role or Type))`
-3. `value` — `GetValue()`
-4. `position` — `Locale.Lookup("LOC_UIWidget_Element_Pos", visIdx, visTotal)`
-5. `state` — disabled marker + `GetState()`
-6. `tooltip` — `GetTooltip()`
+3. `state` — disabled marker + `GetState()`
+4. `value` — `GetValue()`
+5. `tooltip` — `GetTooltip()`
+6. `position` — supplied only by an ordered navigation container. Direct
+   items in `List`, `Tree`, `TreeItem`, `SubMenu`, and a `TabControl`'s tab
+   strip use `Locale.Lookup("LOC_UIWidget_Element_Pos", visIdx, visTotal)`.
+   `DataTable` and `Grid` cells use row/column coordinates, while `Graph`
+   nodes use their index in the live Up/Down alternative set. Widgets under
+   ordinary layout containers, including generic `Container`, `Panel`,
+   `Dialog`, and `HorizontalList`, do not speak a position.
 
 Each element is included only if non-empty. The widget's `SpeechSettings`
 table can mute individual elements (`SpeechSettings = { Role = false }`),
@@ -997,7 +1016,7 @@ detached from the children list. `SetActivePage(i)` swaps slot 2.
 
 ---
 
-## 11. Grid and DataTable
+## 11. Grid, Graph, and DataTable
 
 `Grid` uses a three-level hierarchy: **Grid → Column → Tier → item cell**.
 
@@ -1010,7 +1029,11 @@ detached from the children list. `SetActivePage(i)` swaps slot 2.
   holds N tiers laid out left-to-right. Tiers are `Transparent` — they
   contribute nothing of their own to speech.
 - **Item cell** is an arbitrary widget stacked vertically inside a tier. Its
-  position element reads as its vertical index within the tier ("3 of 7").
+  position element uses the same row/column wording as a data-table cell.
+  Tiers are internal only: each visible tier counts as one spoken column, in
+  flattened left-to-right order across the grid. The row coordinate retains
+  the raw spatial child index so uneven tiers and hidden alignment spacers do
+  not shift cells into a different reported row.
 
 A plain grid is the degenerate case: every column has one tier (`width`
 defaults to 1), so Left/Right walks columns and Up/Down walks rows, and each
@@ -1066,6 +1089,81 @@ Backspace edits the query, Escape clears it, and Up/Down move through ranked
 results while the query remains active. Tooltip-only cell matches participate
 when the global type-to-find tooltip setting is enabled.
 
+### Graphs
+
+`GraphWidget` presents arbitrary widgets as nodes in a directed relationship
+graph. The screen adds every node first, then adds edges with
+`AddEdge(fromKey, toKey)`. Graph owns adjacency, deterministic neighbor order,
+relationship navigation, optional labeled groups, and type-to-find; the node
+widget retains its normal role, live label/tooltip/state, activation listeners,
+and screen-specific `focus_enter` behavior.
+
+```lua
+local graph = mgr:CreateWidget(id, "Graph", { Label = graphLabel })
+graph:AddGroup({ key = eraType, label = eraLabel })
+graph:AddNode(itemType, itemButton, { group = eraType })
+graph:AddEdge(prerequisiteType, itemType)
+```
+
+Node insertion order is the stable order used for incoming, outgoing, root,
+and alternative sets. `AddEdge` requires both endpoints to exist. Duplicate
+edges are ignored. The graph does not assume acyclic data: it follows only one
+edge per command, so reciprocal relationships are safe.
+
+Optional groups are internal `GraphGroup` containers. They speak only their
+label and own their nodes in the real widget ancestry. Moving between eras or
+other groups therefore announces the new group through normal focus divergence;
+Graph never calls `Speak()` for focus movement. Nodes without an explicit group
+are placed in one transparent default group. Screens should add a group only
+when they will add at least one node to it. A group must not derive its own
+hidden state by calling `GetVisibleChildren()`: child visibility includes the
+parent hidden state, so that predicate would recurse through parent and child.
+
+Manager focus remains authoritative. `GetFocusedNodeKey()` walks from
+`Manager:GetFocusedWidget()` through its ancestors to the registered graph
+node. Every navigation command resolves that live key. Graph caches only the
+alternative set established by the previous incoming/outgoing traversal; when
+focus changes externally through search, `RestoreFocus`, or `SetFocus`, the
+next command detects the new key and reseeds alternatives.
+
+A graph node's position is its index in that same live alternative set, so the
+spoken total is exactly the set Up/Down can traverse. Groups are structural and
+do not contribute a position. A node reached outside ordinary edge navigation
+reseeds its alternatives before its focus announcement is built.
+
+Navigation:
+
+- **Right** follows the first visible outgoing edge; all visible outgoing
+  nodes from the source become the alternative set.
+- **Left** follows the first visible incoming edge; all visible incoming nodes
+  to the source become the alternative set. If the selected incoming node is a
+  root, the alternative set changes to all visible roots, matching Civ V's
+  root-swap behavior.
+- **Up / Down** moves through the previous/next alternative. `WrapAround`
+  controls alternative wrapping and defaults to true.
+- **Home / End** moves to the first/last current alternative.
+- **Ctrl+Home / Ctrl+End** moves to the first/last visible root.
+
+Hidden nodes are excluded from navigation, roots, alternatives, and search;
+Graph does not traverse through them to invent shortcut edges. Disabled nodes
+remain readable and focusable, while their own widgets continue to govern
+activation. Type-to-find searches every visible graph node, including tooltip
+matches when enabled, and Up/Down browses ranked search results before ordinary
+alternative navigation.
+
+For rebuilds, use the standard container focus contract:
+
+```lua
+local capture = mgr:CaptureFocusKey(graph)
+graph:ClearGraph()
+-- Add groups, nodes in stable order, then edges.
+mgr:RestoreFocus(graph, capture)
+```
+
+Public methods are `AddGroup`, `AddNode`, `AddEdge`, `GetNode`,
+`GetFocusedNodeKey`, `SetDefaultNode`, `FocusNode`, `GetIncoming`,
+`GetOutgoing`, `GetRoots`, `GetNodePositionString`, and `ClearGraph`.
+
 ### Data tables
 
 `DataTableWidget` is the homogeneous-row companion to `GridWidget`.
@@ -1092,12 +1190,16 @@ tableView:SetColumns({
         header = GetLocalizedNameHeader,
         getCell = function(cityID) return GetLiveCityName(cityID) end,
         sortKey = function(cityID) return GetLiveCityName(cityID) end,
+        sortAscendingDescription = "LOC_CAI_SORT_A_TO_Z",
+        sortDescendingDescription = "LOC_CAI_SORT_Z_TO_A",
     },
     {
         key = "population",
         header = GetLocalizedPopulationHeader,
         getCell = function(cityID) return tostring(GetLivePopulation(cityID)) end,
         sortKey = function(cityID) return GetLivePopulation(cityID) end,
+        sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+        sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
     },
 })
 tableView:SetRowsProvider(GetLiveCityIDs)
@@ -1113,15 +1215,22 @@ Column fields are:
 - `header`: required localized string or live getter.
 - `getCell(row)`: required live spoken cell value.
 - `sortKey(row)`: optional live sortable value. Its presence makes the header
-  a sort button.
+  cell sortable.
+- `sortAscendingDescription` and `sortDescendingDescription`: required
+  localization tags whenever `sortKey` is present. They describe the actual
+  player-facing order, such as `A to Z`, `nearest first`, `weakest first`, or
+  `ready first`. The active header appends this semantic description instead
+  of exposing the implementation terms ascending and descending. Companion
+  sort dropdowns should build their option labels from the same fields.
 - `getTooltip(row)`, `getState(row)`, and `isDisabled(row)`: optional live
   widget metadata.
-- `activatable`: optional boolean. When true, data cells receive the localized
-  Button role and emit the table's `cell_activate` event on Enter or Space.
-  Attach the screen behavior with `tableView:On("cell_activate", fn)`.
-- `role`: optional role override for data cells. Ordinary data cells have the
-  localized `TableCell` role, but suppress it from routine focus speech. An
-  activatable cell uses the spoken Button role instead.
+
+Every header and data widget retains the localized `TableCell` role. Its
+transparent parent has the localized `TableRow` role. To make rows actionable,
+register `tableView:On("row_activate", fn)` before the first `Rebuild()`. The
+row container then owns Enter and Space, input bubbles from every cell in that
+row, and the event receives `(row, rowWidget)`. Cells never change role or own
+a screen action merely because their row is actionable.
 
 `Rebuild()` re-reads the row provider, applies the current sort, recreates the
 grid, and restores the logical cell by its generated row-key/column-key
@@ -1133,11 +1242,14 @@ key (or `nil`) and its ascending flag, which lets a screen retain a sort while
 replacing dynamic column definitions.
 
 The header is a real row above the data. Enter or Space on a sortable header
-cycles descending, ascending, then natural order. Up/Down moves through the
+cycles descending, ascending, then natural order, while speaking the column's
+semantic order description for the first two states. Up/Down moves through the
 header and data rows; Left/Right moves through columns. Home/End moves to the
-first/last data row in the current column. Ctrl+Home/Ctrl+End moves to the
-first/last table cell, and Ctrl+Left/Ctrl+Right moves to the adjacent column's
-header. Navigation does not wrap.
+first/last data row in the current column. Shift+Home/Shift+End moves to the
+first/last column on the current row, including the header row.
+Ctrl+Home/Ctrl+End moves to the first/last table cell, and
+Ctrl+Left/Ctrl+Right moves to the adjacent column's header. Navigation does
+not wrap.
 
 Typing searches only the primary label supplied by `SetRowLabelGetter`; cell
 values, headers, states, and tooltips are intentionally excluded. A match lands
@@ -1156,9 +1268,9 @@ Speech tracks logical coordinates independently from the widget ancestry:
 - Position speech reports both data-row and column coordinates. Header
   position speech reports its column coordinate.
 
-Non-sortable headers also carry the silent `TableCell` role. Sortable headers
-carry the spoken Button role and are the only header cells with activation
-bindings. A sortable column does not make its ordinary data cells activatable.
+Every header carries the silent `TableCell` role. Sortable headers retain that
+role and add activation bindings only for cycling their sort. When a table has
+a `row_activate` listener, every data cell reaches the same row-owned action.
 
 The widget emits the following events. As with all widget events, the DataTable
 itself is the first listener argument.
@@ -1166,7 +1278,8 @@ itself is the first listener argument.
 - `row_focus_enter(row, rowIndex, cell)` when focus enters a different logical
   row. Header focus supplies nil row and index 0.
 - `cell_focus_enter(row, column, cell)` on every cell focus entry.
-- `cell_activate(row, column, cell)` for an activatable data cell.
+- `row_activate(row, rowWidget)` when Enter or Space bubbles from any cell in
+  an actionable row.
 - `sort_changed(columnKey, ascending)` after a header changes the sort. Natural
   order supplies nil column key.
 - `rebuilt(rowCount)` after a completed rebuild.
@@ -1179,7 +1292,10 @@ resolve their current live record.
 ## 12. Dialog
 
 `DialogWidget` is the host for modal popups. Tab / Shift+Tab / Up / Down all
-navigate dialog rows (content rows + the button row, in that order).
+navigate dialog rows (content rows + the button row, in that order). Home moves
+to the first visible content control, while End moves to the final visible
+action button. If a focused descendant owns Home or End, such as a List or
+EditBox, that specialized binding handles the key before it reaches the dialog.
 
 ```lua
 local d = mgr:CreateWidget(id, "Dialog", { Label = titleFn })
@@ -1307,6 +1423,7 @@ src/UI/uiManager/
   CAIWidget_Tab.lua
   CAIWidget_TabPage.lua
   CAIWidget_Grid.lua
+  CAIWidget_Graph.lua
   CAIWidget_DataTable.lua
   CAIWidget_GameView.lua
   CAIWidget_InterfaceMode.lua
@@ -1391,6 +1508,7 @@ When migrating a screen from the old template-merged manager:
 | TreeItemWidget | activate (leaf only), expanded, collapsed      |
 | SubMenuWidget  | expanded, collapsed                            |
 | TabControlWidget | value_changed (page index)                   |
+| DataTableWidget | row_focus_enter, cell_focus_enter, row_activate, sort_changed, rebuilt |
 | (all)          | focus_enter, focus_leave, destroy, navigation_wrap |
 
 ---
@@ -1404,7 +1522,7 @@ When migrating a screen from the old template-merged manager:
 | Button         | Enter, Space → activate                                       |
 | MenuItem       | Enter → activate                                              |
 | Panel          | Tab / Shift+Tab → next/prev                                   |
-| Dialog         | Tab / Shift+Tab / Up / Down → next/prev row; Enter → default  |
+| Dialog         | Tab / Shift+Tab / Up / Down → next/prev row; Home / End → first/last control; Enter → default |
 | Dialog buttons | Left / Right / Up / Down → move across buttons; Up/Down bubble at row edges |
 | List           | Up/Down/Home/End/PgUp/PgDn; Ctrl+F → search; chars → search  |
 | HorizontalList | Left/Right/Home/End/PgUp/PgDn                                 |
@@ -1422,5 +1540,7 @@ When migrating a screen from the old template-merged manager:
 |                | Enter on item → commit + close; Esc → close without commit     |
 | Grid           | Up/Down → within tier; Left/Right → across tiers; Home/End →  |
 |                | tier edge; Ctrl+Home/End → grid edge; Ctrl+Left/Right → column |
+| Graph          | Left/Right → incoming/outgoing edge; Up/Down → alternatives;   |
+|                | Home/End → alternative edge; Ctrl+Home/End → root edge         |
 | DataTable      | Up/Down → rows; Left/Right → columns; sortable headers activate; |
 |                | Ctrl+Home/End → table edge; Ctrl+Left/Right → column header |

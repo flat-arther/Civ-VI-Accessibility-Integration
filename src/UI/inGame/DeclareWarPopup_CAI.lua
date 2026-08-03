@@ -93,7 +93,7 @@ local function GetTargetLine()
     end
 
     if #names == 0 then return message end
-    local joined = table.concat(names, ", ")
+    local joined = table.concat(names, "[NEWLINE]")
     if message == "" then return joined end
     return message .. " " .. joined
 end

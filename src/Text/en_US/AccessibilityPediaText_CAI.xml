@@ -446,7 +446,7 @@
       <Text>Selected unit readouts</Text>
     </Row>
     <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_UNIT" Language="en_US">
-      <Text>For a unit, Shift plus 1 reads identity and health; 2 movement; 3 activity; 4 charges; 5 promotions; 6 statistics; 7 abilities; 8 special information; and 9 the queued path. Shift plus 0 currently has no unit section. These readings include the unit's current formation, owner, visibility, combat preview, and any details specific to its present activity.</Text>
+      <Text>For a unit, Shift plus 1 reads identity and health; 2 movement; 3 activity; 4 charges; 5 promotions; 6 statistics; 7 abilities; 8 special information; 9 the queued path; and 0 the number of visible enemy units in adjacent hexes. Activity reports Moving when the unit has a queued destination. The unit summary includes statistics when the unit has any, omits abilities, and ends with the adjacent-enemy count. These readings include the unit's current formation, owner, visibility, combat preview, and any details specific to its present activity.</Text>
     </Row>
 
     <!-- Gameplay: user interfaces -->
@@ -472,7 +472,7 @@
       <Text>Cities and empire management</Text>
     </Row>
     <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_EMPIRE" Language="en_US">
-      <Text>Press F2 for Empire Reports, Control plus V for City-States, Control plus T for Trade Routes, Control plus E for Espionage, Control plus U for your Units list, and Control plus Q for Global Resources across known civilizations.</Text>
+      <Text>Press F2 for Empire Reports, Control plus V for City-States, Control plus T for Trade Routes, Control plus E for Espionage, Control plus U for your Units list, and Control plus Q for Global Resources across known civilizations. The Units list defaults to a sortable table with current health, current and maximum moves, separate melee, ranged, bombard, religious, and anti-air strength, range, charges, promotions, and adjacent enemies. Zero-valued numeric cells are spoken as zero. Its category filter applies to both views. Alt plus 2 switches to a flat list with a sort dropdown, and Alt plus 1 returns to the table.</Text>
     </Row>
     <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_WORLD_TITLE" Language="en_US">
       <Text>World information</Text>
@@ -516,8 +516,8 @@
     <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_HELP" Language="en_US">
       <Text>Press Control plus H to open context-sensitive Input Help. It collects the currently available commands from the focused widget and its containing controls; activating a command in Input Help runs that command. Press Shift plus F1 to speak the same available commands without opening the help view. Press Shift plus F2 to speak the complete focus path from the screen to the focused control.</Text>
     </Row>
-    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_TOOLTIPS" Language="en_US">
-      <Text>For a focused control with a structured tooltip, press Alt plus Up or Alt plus Down to read the previous or next tooltip section. Press Alt plus Home or Alt plus End to read the first or last tooltip section.</Text>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_FOCUSED_WIDGET_READER" Language="en_US">
+      <Text>The Focused Widget Reader lets you hear detailed information about the control that currently has focus, one section at a time. Press Alt plus Up or Alt plus Down to move to and read the previous or next section. Press Alt plus Home or Alt plus End to jump to and read the first or last section.</Text>
     </Row>
     <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_NAVIGATION" Language="en_US">
       <Text>Tab and Shift plus Tab normally move between groups or controls. Lists use Up and Down; tables use all four arrow keys; trees use Up and Down between visible items and Left and Right for hierarchy. Home, End, Page Up, and Page Down provide larger moves where the focused widget supports them. Tab controls also support Control plus Tab and Control plus Shift plus Tab.</Text>
@@ -605,7 +605,7 @@
       <Text>Press Control plus R for Choose Research, Control plus C for Choose Civic, Control plus Shift plus R for the Technology Tree, Control plus Shift plus C for the Civics Tree, Control plus P for Government, Control plus L for Religion, and Control plus O for Governors.</Text>
     </Row>
     <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_WORLD" Language="en_US">
-      <Text>Press Control plus V for City-States, Control plus E for Espionage, Control plus T for Trade Routes, Control plus U for Units, Control plus K for World Congress, Control plus W for Emergencies and Competitions, and Control plus Q for Global Resources.</Text>
+      <Text>Press Control plus V for City-States, Control plus E for Espionage, Control plus T for Trade Routes, Control plus U for Units, Control plus K for World Congress, Control plus W for Emergencies and Competitions, and Control plus Q for Global Resources. In Units, Alt plus 1 selects the table and Alt plus 2 selects the flat list.</Text>
     </Row>
     <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_MAP" Language="en_US">
       <Text>Press Control plus N for the Notification Center, Control plus Shift plus T for tutorial goals, Control plus J for the accessible lens list, Control plus M for map tacs, and Control plus Shift plus F for Map Search. Reports for Resources, City Status, and Gossip have no default bindings.</Text>
@@ -700,7 +700,7 @@
       <Text>A dialog is a modal group of content rows followed by an action-button row. The button row is a navigation aid and is not announced as an extra container.</Text>
     </Row>
     <Row Tag="LOC_CAI_PEDIA_WIDGET_DIALOG_NAVIGATION" Language="en_US">
-      <Text>Use Tab or Down to move to the next dialog row and Shift plus Tab or Up to move to the previous row. The dialog's button row groups the available actions at the end of its content.</Text>
+      <Text>Use Tab or Down to move to the next dialog row and Shift plus Tab or Up to move to the previous row. Press Home to jump to the first control and End to jump to the last control. The dialog's button row groups the available actions at the end of its content.</Text>
     </Row>
     <Row Tag="LOC_CAI_PEDIA_WIDGET_DIALOG_ACTIONS" Language="en_US">
       <Text>Press Enter from dialog content to run the designated default button when it is visible and enabled. Enter or Space on a focused button runs that button. Escape closes the majority of dialogs, although an individual dialog can reserve or block it when closing is not allowed.</Text>
@@ -863,11 +863,23 @@
     <Row Tag="LOC_CAI_PEDIA_WIDGET_TABLE_TITLE" Language="en_US">
       <Text>Tables and grids</Text>
     </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_GRAPH_TITLE" Language="en_US">
+      <Text>Graph</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_GRAPH_FUNCTION" Language="en_US">
+      <Text>A graph represents directed relationships between items. In Technology and Civics Graph Views, each connection runs from a prerequisite to an item it unlocks. Era groups are part of the focus path, so entering another era announces it automatically.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_GRAPH_KEYS" Language="en_US">
+      <Text>Press Right to follow the first outgoing connection and Left to follow the first incoming connection. After either move, Up and Down cycle the other alternatives from that same connection and wrap at the ends. When Left lands on a root with no incoming connection, the alternatives become all visible roots. Home and End move to the first and last current alternative. Control plus Home and Control plus End move to the first and last visible root.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_GRAPH_SEARCH" Language="en_US">
+      <Text>Start typing to search visible graph nodes, including tooltip text when that setting is enabled. While a query is active, Up and Down browse ranked search matches before ordinary graph alternatives. Search, focus restoration, and direct jumps all move normal UI-manager focus; the next graph command continues from the item that is actually focused.</Text>
+    </Row>
     <Row Tag="LOC_CAI_PEDIA_WIDGET_TABLE_FUNCTION" Language="en_US">
       <Text>Tables and grids both organize information into cells, support directional movement, skip hidden cells, do not wrap during ordinary navigation, and support type-ahead with ranked Up and Down results. Their difference is the structure they represent.</Text>
     </Row>
     <Row Tag="LOC_CAI_PEDIA_WIDGET_TABLE_TABLES" Language="en_US">
-      <Text>A table contains uniform records arranged as rows and labeled columns. Up and Down move between records in the current column; Left and Right change columns. Home and End move to the first or last record in the column, and Control plus Home or Control plus End move to the first or last cell. A table can expose sortable column headers: press Enter or Space on one to cycle its available sort orders. Type-ahead searches only primary row labels and keeps the current column.</Text>
+      <Text>A table contains uniform records arranged as rows and labeled columns. Up and Down move between records in the current column; Left and Right change columns. Home and End move to the first or last record in the column. Shift plus Home and Shift plus End move to the first or last column on the current row, while Control plus Home or Control plus End move to the first or last cell. A table can expose sortable column headers: press Enter or Space on one to cycle its available sort orders. A sorted header states the actual order, such as A to Z, nearest first, or highest first. Type-ahead searches only primary row labels and keeps the current column.</Text>
     </Row>
     <Row Tag="LOC_CAI_PEDIA_WIDGET_TABLE_GRIDS" Language="en_US">
       <Text>A grid represents a visual or progression layout whose columns can contain several side-by-side tiers and whose cells can have different roles. Up and Down move within a tier; Left and Right cross tiers while retaining the nearest row position. Home and End move to tier boundaries. Control plus Left or Control plus Right jumps between columns, while Control plus Home or Control plus End moves to the first or last cell in the grid. Crossing a column announces its header. Grids do not provide sorting.</Text>

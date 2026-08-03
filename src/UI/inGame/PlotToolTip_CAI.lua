@@ -762,7 +762,7 @@ local function FormatNamedRiverString(riverNames, directionString)
         return nil
     end
 
-    return table.concat(localizedNames, ", ")
+    return table.concat(localizedNames, "[NEWLINE]")
 end
 
 local function GetPlainRiverString(data, plot)
@@ -922,7 +922,7 @@ info.PlotInfoHelpers = {
             table.insert(parts, Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL"))
         end
 
-        return table.concat(parts, ", ")
+        return table.concat(parts, "[NEWLINE]")
     end,
 
     owner = function(data)
@@ -1362,7 +1362,7 @@ info.PlotInfoHelpers = {
             end
         end
 
-        return #results > 0 and table.concat(results, ", ") or nil
+        return #results > 0 and table.concat(results, "[NEWLINE]") or nil
     end,
 
     detailedUnits = function(data)
@@ -1379,7 +1379,7 @@ info.PlotInfoHelpers = {
             end
         end
 
-        return #results > 0 and table.concat(results, ", ") or nil
+        return #results > 0 and table.concat(results, "[NEWLINE]") or nil
     end,
 
     mapTac = function(data, plot)
@@ -1402,7 +1402,7 @@ info.PlotInfoHelpers = {
             return nil
         end
 
-        return Locale.Lookup("LOC_CAI_PLOT_MAP_TACS", table.concat(labels, ", "))
+        return Locale.Lookup("LOC_CAI_PLOT_MAP_TACS", table.concat(labels, "[NEWLINE]"))
     end,
 
     interfaceInfo = function(data, plot)
@@ -1848,7 +1848,7 @@ function OnCAICursorMove(state)
     end
 
     if #results > 0 then
-        Speak(table.concat(results, ", "))
+        Speak(table.concat(results, "[NEWLINE]"))
     end
 end
 
@@ -1886,7 +1886,7 @@ function OnPlotInfoInputActionStarted(actionId)
         return
     end
 
-    Speak(table.concat(results, ", "))
+    Speak(table.concat(results, "[NEWLINE]"))
 end
 
 InitializePlotInfoActionRequestBuilders()

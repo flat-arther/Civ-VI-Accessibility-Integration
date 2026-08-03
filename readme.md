@@ -4,26 +4,19 @@
 
 Civilization VI Accessibility Integration makes Sid Meier's Civilization VI playable with a screen reader. It adds spoken information and keyboard navigation to the game's menus, dialogs, screens, and other user-interface elements.
 
-The mod supports all three standard rulesets: the base game, Rise and Fall, and Gathering Storm, as well as all scenarios. 
+The mod supports all three standard rulesets: the base game, Rise and Fall, and Gathering Storm, as well as all scenarios, including the tutorial. 
+It is recommended that you launch the game on dx 11. Normally the game asks you to choose the first time you run it; however, you are able to change this from steam library, under civ vi / manage / properties
 
 ## Installing the mod
 
+The mod comes with an installer, simply download and launch it.
+
+For a manual install, read the following steps:
+
 1. Copy the included `base` folder into the Civilization VI installation folder.
-
-   Steam's default installation folder is:
-
-   `C:\Program Files (x86)\Steam\steamapps\common\Sid Meier's Civilization VI`
-
-   Epic Games' default installation folder is:
-
-   `C:\Program Files\Epic Games\SidMeiersCivilizationVI`
-
-2. Copy the `CivVi-Accessibility-Integration` folder into:
-
-   `%USERPROFILE%\Documents\My Games\Sid Meier's Civilization VI\Mods`. Note that sometimes the documents folder is in one drive
-
-   If the `Sid Meier's Civilization VI` folder does not exist, launch the game once and then close it.
-
+Steam's default installation folder is: `C:\Program Files (x86)\Steam\steamapps\common\Sid Meier's Civilization VI`
+Epic Games' default installation folder is: `C:\Program Files\Epic Games\SidMeiersCivilizationVI`
+2. Copy the `CivVi-Accessibility-Integration` folder into: `%USERPROFILE%\Documents\My Games\Sid Meier's Civilization VI\Mods`. Note that sometimes the documents folder is in one drive. If the `Sid Meier's Civilization VI` folder does not exist, launch the game once and then close it. You may also create the folders yourself
 3. Launch Civilization VI. The mod is enabled automatically.
 
 ## Using the UI
@@ -43,8 +36,8 @@ These shortcuts are available from all accessible widgets unless the current scr
 - `Shift+F2` — read the complete focus path
 - `F12` — open the accessibility settings
 - `Ctrl+I` — look up the focused item in the Civilopedia; available during a game, but not from the main menu or its child screens
-- `Alt+Up` / `Alt+Down` — read the previous or next section of the focused item's help text; useful when an item and its description contain a lot of information
-- `Alt+Home` / `Alt+End` — read the first or last section of the focused item's help text
+- `Alt+Up` / `Alt+Down` — hear detailed information about the focused control one section at a time by moving to and reading the previous or next section
+- `Alt+Home` / `Alt+End` — jump to and read the first or last Focused Widget Reader section
 - `Ctrl+F` — search the current container when it supports search
 
 ### Container navigation
@@ -61,7 +54,8 @@ Dialogs are temporary panels that ask for a choice or display a message.
 
 - `Tab` / `Shift+Tab` — next / previous row
 - `Up` / `Down` — previous / next row
-- `Enter` — activate the default button, usually ok / continue, even when not focused
+- `Home` / `End` — first / last control
+- `Enter` — activate a button when focused. If not focused, activates the default button, usually ok / continue
 
 
 #### Lists
@@ -72,7 +66,7 @@ Lists contain a single vertical sequence of items.
 - `Home` / `End` — first / last item
 - `Page Up` / `Page Down` — move backward / forward by several items
 - `Ctrl+F` — open list search
-- Typing text — use type-to-find to move to a matching item
+- Typing text — use type-ahead to move to a matching item
 
 
 
@@ -119,14 +113,14 @@ Tabs divide a screen into pages.
 
 #### Tables and grids
 
-Tables and grids arrange items vertically and horizontally and do not wrap at their boundaries. Tables contain uniform records and may have sortable column headers. Grids represent spatial or progression layouts whose columns may contain several tiers.
+Tables and grids arrange items vertically and horizontally and do not wrap at their boundaries. Tables contain uniform records and may have sortable column headers. Grids represent spatial or progression layouts, such as the tech and civic trees.
 
-- `Up` / `Down` — previous / next row in a table, or item in the current grid tier
-- `Left` / `Right` — previous / next table column or grid tier
-- `Home` / `End` — first / last row in a table column or item in a grid tier
-- `Ctrl+Left` / `Ctrl+Right` — previous / next column
+- `Up` / `Down` — previous / next row in a table or grid
+- `Left` / `Right` — previous / next column
+- `Home` / `End` — first / last row in a column
+- `Ctrl+Left` / `Ctrl+Right` — previous / next column. Note that a grid's column may have multiple sub columns. Use `left` and `right` to navigate those
 - `Ctrl+Home` / `Ctrl+End` — first / last item in the entire table or grid
-- `Enter` / `Space` on a sortable table header — cycle sort order
+- `Enter` on a sortable table header — cycle sort order
 - Type-ahead — tables search row labels; grids search every cell
 
 ### Activation and values
@@ -141,14 +135,14 @@ After navigating to an item, its role tells you how it behaves.
 
 Disabled controls remain in navigation when their information may be useful. The screen reader announces that they are unavailable, and activation has no effect.
 
-### Type-to-find search
+### Type-ahead search
 
-Type-to-find provides quick navigation in lists and treeviews without opening a separate search panel. It searches item names without regard to capitalization and supports exact words, word beginnings, text found anywhere in a name, and prefixes for consecutive words. For example, `war mon` matches `Warrior Monk`, and `monk` can also find `Warrior Monk`.
+Type-ahead provides quick navigation in lists and treeviews without opening a separate search panel. It searches item names without regard to capitalization and supports exact words, word beginnings, text found anywhere in a name, and prefixes for consecutive words. For example, `war mon` matches `Warrior Monk`, and `monk` can also find `Warrior Monk`.
 
 - More direct matches are preferred over broader partial or multi-word-prefix matches.
-- In a treeview, type-to-find can locate an item inside collapsed branches and reveal its path.
+- In a treeview, type-ahead can locate an item inside collapsed branches and reveal its path.
 - Repeating the same single character cycles through matching items and wraps from the last match to the first.
-- The Navigate type-to-find results option is enabled by default. While search text is active, `Up` and `Down` move through the ranked matches and wrap at either end.
+- The Navigate type-ahead results option is enabled by default. While search text is active, `Up` and `Down` move through the ranked matches and wrap at either end.
 - Hidden items are skipped. Disabled items may still be found when their information is useful.
 - If nothing matches, `No match` is announced and the search text remains available for correction.
 - `Backspace` removes the last character from the current search text.
@@ -376,7 +370,7 @@ All city, unit, and selection actions are input actions and can be remapped from
 
 The grave-accent key, usually located to the left of `1`, reads a short summary of the selected city or unit, including relative direction from the navigation cursor. `Shift+1` through `Shift+0` read individual information sections.
 
-- `` ` `` — city name, population, health, production, and growth; or the unit summary
+- `` ` `` — city name, population, health, production, and growth; or the unit summary, including available statistics and the adjacent-enemy count
 - `Shift+1` — city name and health; or unit identity and health
 - `Shift+2` — city production; or unit movement
 - `Shift+3` — city growth; or unit activity
@@ -386,11 +380,11 @@ The grave-accent key, usually located to the left of `1`, reads a short summary 
 - `Shift+7` — city yields; or unit abilities
 - `Shift+8` — normal city yield-focus entries; or special unit information
 - `Shift+9` — favored city yield-focus entries; or the unit's queued path
-- `Shift+0` — ignored city yield-focus entries; there is currently no unit readout for this key
+- `Shift+0` — ignored city yield-focus entries; or the number of visible enemy units in hexes adjacent to the selected unit
 
 ### User interfaces
 
-Most accessible game screens are panels whose main body is a tree or list. Use the normal tree or list commands to browse the screen. Some screens also have action buttons outside the main body; use `Tab` and `Shift+Tab` to move between the main tree or list and those buttons.
+Most accessible game screens are panels whose main body is a table, tree, or list. Some screens also have other controls outside the main body; use the arrow keys, `Home` and `End`, as well as `tab` and `shift plus tab` to navigate screens.
 
 Screens such as World Rankings, the Production Panel, and World Climate contain multiple tabs. Use `Ctrl+Tab` and `Ctrl+Shift+Tab` to switch to the next or previous tab. When focus is on the tab strip, `Left` and `Right` also switch tabs. The newly selected page becomes the active navigation container.
 
@@ -410,7 +404,7 @@ Screens such as World Rankings, the Production Panel, and World Climate contain 
 - `Ctrl+V` — open the City-States overview
 - `Ctrl+T` — open the Trade Routes overview
 - `Ctrl+E` — open the Espionage overview
-- `Ctrl+U` — open the list of your units
+- `Ctrl+U` — open your units in the default sortable table. Its numeric columns include current health, current and maximum moves, each separate strength type, range, charges, promotions, and adjacent enemies. Use the category filter in either view, Alt+2 for the flat list and its sort dropdown, or Alt+1 to return to the table
 - `Ctrl+Q` — open Global Resources, showing resource ownership across known civilizations
 
 #### World information
@@ -418,14 +412,14 @@ Screens such as World Rankings, the Production Panel, and World Climate contain 
 - `F1` — open the Civilopedia
 - `F3` — open the Great People screen
 - `F7` — open the Great Works screen
-- `F8` — open World Rankings
+- `F8` — open World Rankings, for scores and victory types
 - `F9` — open World Climate
 - `F10` — open Era Progress
 - `F11` — open Historic Moments
 - `F4` — open the Diplomacy Ribbon to browse known leaders and enter diplomacy. Pressing enter on a leader opens the diplomacy screen on them. Here you can see a treeview of leaders, expand each to view information. Tab for the list of actions
 - `Ctrl+K` — open the World Congress
 - `Ctrl+W` — open the active emergencies and competitions list
-- `Ctrl+Shift+T` — open the current tutorial goals
+- `Ctrl+Shift+T` — open the current tutorial goals. Only applicable in the tutorial
 
 #### Map and communication
 
@@ -434,15 +428,6 @@ Screens such as World Rankings, the Production Panel, and World Climate contain 
 - `Ctrl+Shift+F` — open Map Search
 - `Ctrl+Slash` — open in-game chat
 - `Ctrl+N` — open the Notification Center
-
-
-## Expectations
-
-Tables and grids: more UIs can benefit from record-oriented tables or spatial grids. Expanding their use remains planned.
-
-The tutorial is still not supported currently.
-
-World Builder: don't even ask. It is not important right now, but it might be a fun future project.
 
 ## Credits
 

@@ -1185,7 +1185,7 @@ local function AddOverviewChildren(node)
         if #emergencyNames > 0 then
             node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyOverviewEmergency"),
                 Locale.Lookup("LOC_CAI_DIPLOMACY_OVERVIEW_EMERGENCY",
-                    table.concat(emergencyNames, ", ")), nil))
+                    table.concat(emergencyNames, "[NEWLINE]")), nil))
         end
     end
 
@@ -1434,7 +1434,7 @@ local function AddAllianceDetailNode(parent, allianceDefinition, allianceLevel)
     parent:AddChild(CreateReadOnlyText(mgr:GenerateWidgetId("CAIDiplomacyAllianceDetail"),
         Locale.Lookup(allianceDefinition.Name) .. ": " ..
         Locale.Lookup("LOC_DIPLOACTION_ALLIANCE_LEVEL", allianceLevel),
-        table.concat(bonuses, ", ")))
+        table.concat(bonuses, "[NEWLINE]")))
 end
 
 local function AddAllianceChildren(node)

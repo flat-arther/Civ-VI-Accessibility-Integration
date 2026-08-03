@@ -38,19 +38,17 @@
 [ ] River flow direction reporting
 [x] / to jump back to selection
 [x] Speaking input binding next to city and unit actions if any are bound
-[ ] Ad great person passive effects to map info, configurable
 [x] Roads should be mentioned in plot info
 -[x] Capital city should say capital
 [x] turn status in chat panel
-[x] hamada: the government screen has repeating Empty slot 1, Empty slot 1
+[x] the government screen has repeating Empty slot 1, Empty slot 1
 [x] unit actions should not repeat name in tooltip
 [x] should not stop player from moving if no combat stats are encountered. Game considers entering a city state teratory as a combat even though there is no enemy on the dest plot
 [x] Dedications popup should not duplicate dedication name in tooltip
 [x] governer panel is missing the biography. 
 [x] Rework the diplomacy screen
 [x] Recommendation types in tech and civic trees should report the correct advisor
-[ ] redo the scanner categories for the tourism and power lenses. They are shit
-[ ] figure out tab bar count
+[x] redo the scanner categories for the tourism and power lenses. They are shit
 [x] dedup difficulty tooltip, it repeats label. 
 [x] change dropdowns that have simple on off options to checkboxes
 [x] add custom locale for hotkey strings that are symbols
@@ -85,5 +83,11 @@
 [x] Add fresh water to the shift z terrain count
 [x] Fix the Surveyor terrain counts to remove mountain terrain from the list, since it is already counting how many mountains there are
 [x] Group mountains by range in the scanner
-
 [ ] APpend unit type to named units
+[x] Merge city-state details in to table
+[x] Add graph mode to tech and civic trees.
+[ ] Add amenities to the city banners
+[x] Fix issue with tutorials losing focus in diplomacy
+[ ] Tutorial text that is too long should be split in to multiple rows
+[ ] Item pos should only be spoken in containers
+[ ] Look in to coastal raide yield reporting

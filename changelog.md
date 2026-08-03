@@ -6,6 +6,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-08-03
+
+### Added
+
+- Dialogs support Home and End to jump to the first and last control.
+- Tables support Shift+Home and Shift+End to jump to the first and last column of the current row.
+- Technology and Civics Trees include a Graph view for navigating prerequisite relationships directly. Right follows unlocked items, Left follows prerequisites, and Up or Down cycles between alternative branches. A View dropdown or Alt+1, Alt+2, and Alt+3 switches between Grid, Graph, and Tree views while preserving the current selection. Each screen remembers its selected view.
+- The following screens now default to sortable comparison tables while retaining their existing alternative views, selectable with Alt+1 and Alt+2:
+  - Great People — compares civilization progress toward recruiting each available Great Person.
+  - Heroes — compares hero statistics, abilities, and commands.
+  - Global Resources — compares known civilizations' resource totals.
+  - Governors — compares governor status, promotions, and vanilla statistics.
+  - Units List — compares unit status, movement, combat statistics, promotions, and nearby enemies.
+  - City Status — compares city population, growth, defense, loyalty, yields, and other important statistics.
+- Unit summaries now report the number of visible adjacent enemy units. The same information is available with Shift+0.
+
+### Changed
+
+- Widget positions are announced only within navigable containers such as lists, trees, tables, graphs, tab strips, submenus, and grids. Graphs announce position relative to the available Up/Down alternatives, while grids report row and column coordinates.
+- The former Tooltip Section Reader has been expanded into the Focused Widget Reader, allowing it to read more than just tooltips.
+- Sorted table headers and companion sort dropdowns now announce the actual sort order (for example, A to Z, Nearest First, or Strongest First) instead of simply Ascending or Descending.
+- Units with queued movement now report Moving instead of Busy in the Unit Panel.
+- Unit summaries now include available combat statistics. Abilities have been removed from summaries but remain available with Shift+7 or Alt slash when a unit is selected.
+- City Status entries now include all city yields in their tooltips and can be sorted by distance or any available yield.
+
+### Fixed
+
+- Fixed a bug where the diplomacy screen could prematurely exit tutorial dialogs by moving focus to the conversation list.
+- Fixed the Recall with Faith button on the Heroes screen.
+- Fixed ascending table sorting producing inconsistent row order.
+
 ## [0.9.1] - 2026-08-02
 
 ### Fixed
@@ -33,7 +64,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 - District and wonder placement no longer restrict the navigation cursor to the selected city's area or move it to the city center. Existing placement-target navigation and information remain available.
 - World Scanner region entries now state how many tiles have been explored. Unexplored regions state their unexplored count, while Pirates and Red Death regions compare explored tiles with the officially shown full region. Geography uses differing explored sizes to distinguish matching names before adding a direction.
 - Technology, Civics, Governor Promotions, and Unit Promotions now identify their spatial layouts as grids instead of tables. Record-oriented views such as City-States remain tables and can expose sortable headers.
-- City-States defaults to a sortable overview table followed by details for the selected city-state. The table compares city-state type, relationship, envoys, suzerain, quests, and each known foreign civilization's envoy influence; unmet civilizations remain anonymous. Selected-state details mirror its expanded tree-view row except for the redundant Influence section. A button or Alt+2 switches to the original expandable tree view, Alt+1 returns to the table, and the selected view is remembered. Envoy adjustment and confirmation shortcuts work from both table and details-tree content.
+- City-States defaults to a sortable overview table containing the complete comparison. Envoy cells include every bonus breakdown, Active Quests cells include each quest description, and one Foreign Relationships column combines all met non-player relationships. Tree view offers natural order and both explicitly described directions for every current table column and shares its selected sort with the table. A button or Alt+2 switches to the original expandable tree view, Alt+1 returns to the table, and the selected view is remembered.
 - Hall of Fame graphs now organize recorded data by player, then turns containing changes, then the individual values that changed. Repeated values are omitted until they change again.
 - In-game chat properly appears in the Online key-binding category.
 - End-game results graph data is organized by player and turn. Expanding a player shows only turns containing recorded data, and expanding a turn shows every available replay value for that turn.

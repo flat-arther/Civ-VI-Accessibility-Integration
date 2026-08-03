@@ -386,7 +386,7 @@ local function BuildItemEntryText(item, itemIndex, itemTotal)
         parts[#parts + 1] = coordsText
     end
 
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function SpeakItemEntry(item, itemIndex, itemTotal)

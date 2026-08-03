@@ -26,7 +26,7 @@ local function JoinNonEmpty(parts, sep)
     for _, p in ipairs(parts) do
         if p and p ~= "" then table.insert(out, p) end
     end
-    return table.concat(out, sep or ", ")
+    return table.concat(out, sep or "[NEWLINE]")
 end
 
 local function RemoveDialog()
@@ -45,11 +45,11 @@ local function BuildDetailLines(detailsTable)
         if currentHeader then
             local groupParts = { currentHeader }
             if #currentItems > 0 then
-                table.insert(groupParts, table.concat(currentItems, ", "))
+                table.insert(groupParts, table.concat(currentItems, "[NEWLINE]"))
             end
             table.insert(lines, table.concat(groupParts, " "))
         elseif #currentItems > 0 then
-            table.insert(lines, table.concat(currentItems, ", "))
+            table.insert(lines, table.concat(currentItems, "[NEWLINE]"))
         end
         currentHeader = nil
         currentItems = {}
@@ -104,7 +104,7 @@ local function BuildParticipantsText(kData)
             table.insert(names, pName)
         end
     end
-    return table.concat(names, ", ")
+    return table.concat(names, "[NEWLINE]")
 end
 
 local function BuildDialog()

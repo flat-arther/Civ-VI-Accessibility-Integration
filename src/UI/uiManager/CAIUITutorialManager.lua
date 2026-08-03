@@ -323,6 +323,67 @@ function CAIUITutorialManager:IsActive()
     return self.Active ~= nil
 end
 
+---@param widget UIWidget|nil
+---@return boolean
+function CAIUITutorialManager:IsWidgetInsideActiveTutorial(widget)
+    local active = self.Active
+    if not active or not active.Host or not widget then
+        return false
+    end
+
+    local current = widget
+    while current do
+        if current == active.Host then
+            return true
+        end
+        current = current.Parent
+    end
+
+    return false
+end
+
+---@param widget UIWidget|nil
+---@return boolean
+function CAIUITutorialManager:CanFocus(widget)
+    -- With no active tutorial, normal focus behaviour applies.
+    if not self.Active then
+        return true
+    end
+
+    -- While active, only the tutorial host and its descendants may receive focus.
+    return self:IsWidgetInsideActiveTutorial(widget)
+end
+
+---@param widget UIWidget
+---@param opts? table
+function CAIUITutorialManager:DeferFocus(widget, opts)
+    local active = self.Active
+    if not active or not widget then
+        return
+    end
+
+    active.PendingFocus = widget
+
+    -- Copy the options so the caller cannot mutate the saved table afterward.
+    if type(opts) == "table" then
+        active.PendingFocusOptions = {
+            direction = opts.direction,
+            announce = opts.announce,
+        }
+    else
+        active.PendingFocusOptions = nil
+    end
+end
+
+---@param widget UIWidget|nil
+---@return boolean
+function CAIUITutorialManager:IsValidRestoreTarget(widget)
+    return self:IsLiveWidget(widget)
+        and self:GetStackRoot(widget) == self.Manager:GetTop()
+        and not widget.Hidden
+        and not widget.Disabled
+end
+
 ---@param item CAITutorialItemDefinition
 ---@param owner UIWidget
 ---@param context? any
@@ -419,14 +480,30 @@ function CAIUITutorialManager:Activate(item, owner, context)
         Host = host,
         Dialog = dialog,
         PreviousFocus = previousFocus,
+        -- A focus request made by the underlying screen while the tutorial was
+        -- modal. This takes priority when the tutorial closes.
+        PendingFocus = nil,
+        PendingFocusOptions = nil,
     }
 
     host:On("destroy", function()
-        if self.Active and self.Active.Host == host then
-            LogMessage("Tutorial manager owner removed active item " .. self.Active.Item.Id)
-            self.Active = nil
-            if not self.IsClosing then self:ProcessQueue() end
+        if not self.Active or self.Active.Host ~= host then
+            return
         end
+
+        -- CloseActive is intentionally destroying the tutorial. It still needs
+        -- Active to remain set until destruction callbacks have completed.
+        if self.IsClosing then
+            return
+        end
+
+        LogMessage(
+            "Tutorial manager owner removed active item "
+            .. self.Active.Item.Id
+        )
+
+        self.Active = nil
+        self:ProcessQueue()
     end)
 
     host:AddChild(dialog)
@@ -441,22 +518,41 @@ end
 ---@param restoreFocus? boolean
 function CAIUITutorialManager:CloseActive(restoreFocus)
     local active = self.Active
-    if not active then return end
+    if not active then
+        return
+    end
 
-    self.Active = nil
     self.IsClosing = true
-    if active.Host and active.Host.Children then active.Host:Destroy() end
+
+    -- Keep Active set while destroying the tutorial. Any focus requests caused
+    -- by destruction callbacks remain blocked and may update PendingFocus.
+    if active.Host and active.Host.Children then
+        active.Host:Destroy()
+    end
+
+    -- Release the modal focus restriction before restoring the chosen target.
+    self.Active = nil
     self.IsClosing = false
 
     if restoreFocus ~= false then
-        if self:IsLiveWidget(active.PreviousFocus)
-            and self:GetStackRoot(active.PreviousFocus) == self.Manager:GetTop() then
-            self.Manager:SetFocus(active.PreviousFocus)
-        elseif self:IsLiveWidget(active.Owner)
-            and self:GetStackRoot(active.Owner) == self.Manager:GetTop() then
+        local restored = false
+
+        if self:IsValidRestoreTarget(active.PendingFocus) then
+            restored = self.Manager:SetFocus(
+                active.PendingFocus,
+                active.PendingFocusOptions
+            )
+        end
+
+        if not restored and self:IsValidRestoreTarget(active.PreviousFocus) then
+            restored = self.Manager:SetFocus(active.PreviousFocus)
+        end
+
+        if not restored and self:IsValidRestoreTarget(active.Owner) then
             self.Manager:SetFocus(active.Owner)
         end
     end
+
     self:ProcessQueue()
 end
 

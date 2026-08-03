@@ -144,12 +144,12 @@ local function GetUnlocksText(unlocks)
     if not unlocks or #unlocks == 0 then return nil end
     local names = {}
     for _, u in ipairs(unlocks) do table.insert(names, u.Name) end
-    return Locale.Lookup("LOC_CAI_CIVIC_UNLOCKS_HEADER", table.concat(names, ", "))
+    return Locale.Lookup("LOC_CAI_CIVIC_UNLOCKS_HEADER", table.concat(names, "[NEWLINE]"))
 end
 
 local function GetObsoletesText(obsoleteNames)
     if not obsoleteNames or #obsoleteNames == 0 then return nil end
-    return Locale.Lookup("LOC_CAI_CIVIC_OBSOLETES_HEADER", table.concat(obsoleteNames, ", "))
+    return Locale.Lookup("LOC_CAI_CIVIC_OBSOLETES_HEADER", table.concat(obsoleteNames, "[NEWLINE]"))
 end
 
 local function GetLeadsToText(kData)
@@ -182,7 +182,7 @@ local function GetLeadsToText(kData)
         end
     end
     if #names == 0 then return nil end
-    return Locale.Lookup("LOC_CAI_CIVIC_LEADS_TO_HEADER", table.concat(names, ", "))
+    return Locale.Lookup("LOC_CAI_CIVIC_LEADS_TO_HEADER", table.concat(names, "[NEWLINE]"))
 end
 
 local function GetAwardNamesFor(kData)
@@ -205,7 +205,7 @@ local function FormatLabel(kData)
         AppendIfNonEmpty(parts, kData.Name)
     end
     AppendIfNonEmpty(parts, GetRecommendedPart(kData, RowIsDisabled(kData)))
-    return table.concat(parts, ", ")
+    return table.concat(parts, "[NEWLINE]")
 end
 
 local function FormatTooltip(kData, unlocks, obsoleteNames, awardNames)

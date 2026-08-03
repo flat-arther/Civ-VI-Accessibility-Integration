@@ -1185,7 +1185,7 @@ local function CAI_GetModLabel(handle)
 		table.insert(parts, Locale.Lookup("LOC_MODS_DETAILS_COMPATIBLE_NOT"))
 	end
 
-	return table.concat(parts, ", ")
+	return table.concat(parts, "[NEWLINE]")
 end
 
 local function CAI_GetModTeaser(handle)
@@ -1794,7 +1794,7 @@ local function CAI_GetSubscriptionTooltip(item)
 	for _, part in ipairs(parts) do
 		if part ~= "" then table.insert(result, part) end
 	end
-	return table.concat(result, ", ")
+	return table.concat(result, "[NEWLINE]")
 end
 
 local function CAI_FilterPendingUnsubscriptions()
