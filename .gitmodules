@@ -1,0 +1,3 @@
+[submodule "extern/civ6-accessibility-lua-integration"]
+	path = extern/civ6-accessibility-lua-integration
+	url = https://github.com/hamadatrichine/civ6-accessibility-lua-integration.git
