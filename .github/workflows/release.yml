@@ -16,6 +16,8 @@ env:
   MODINFO_FILE: src/CivViAccess.modinfo
   INTEGRATION_SOURCE: extern/civ6-accessibility-lua-integration
   PACKAGE_PREFIX: Civ-VI-Accessibility-Integration
+  INSTALLER_PROJECT: installer/CivVIAccessInstaller.csproj
+  INSTALLER_FILE_NAME: CivVIAccessInstaller.exe
 
 jobs:
   release:
@@ -225,11 +227,68 @@ jobs:
           Get-ChildItem $stagingRoot -Recurse |
               Select-Object FullName
 
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Publish installer
+        id: installer
+        shell: pwsh
+        run: |
+          if (-not (Test-Path $env:INSTALLER_PROJECT)) {
+              throw "Installer project does not exist: $env:INSTALLER_PROJECT"
+          }
+
+          $publishDirectory = Join-Path $env:RUNNER_TEMP "installer-publish"
+          $releaseDirectory = Join-Path $env:GITHUB_WORKSPACE "release"
+          $installerPath = Join-Path $releaseDirectory $env:INSTALLER_FILE_NAME
+
+          Remove-Item $publishDirectory -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force $publishDirectory | Out-Null
+          New-Item -ItemType Directory -Force $releaseDirectory | Out-Null
+
+          dotnet publish $env:INSTALLER_PROJECT `
+              --configuration Release `
+              --runtime win-x64 `
+              --self-contained true `
+              --output $publishDirectory `
+              -p:PublishSingleFile=true `
+              -p:IncludeNativeLibrariesForSelfExtract=true
+
+          if ($LASTEXITCODE -ne 0) {
+              throw "Installer publish failed with exit code $LASTEXITCODE."
+          }
+
+          $publishedExe = Join-Path $publishDirectory $env:INSTALLER_FILE_NAME
+
+          if (-not (Test-Path $publishedExe)) {
+              Write-Host "Published files:"
+              Get-ChildItem $publishDirectory -Recurse -File |
+                  Select-Object FullName
+
+              throw "Published installer was not found: $publishedExe"
+          }
+
+          Copy-Item $publishedExe $installerPath -Force
+
+          if (-not (Test-Path $installerPath)) {
+              throw "Installer was not copied to the release directory."
+          }
+
+          "exe_path=$installerPath" >> $env:GITHUB_OUTPUT
+
+          $file = Get-Item $installerPath
+          Write-Host "Installer: $($file.FullName)"
+          Write-Host "Size: $([Math]::Round($file.Length / 1MB, 2)) MB"
+
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: Civ-VI-Accessibility-Integration-${{ steps.version.outputs.version }}
-          path: ${{ steps.package.outputs.archive_path }}
+          path: |
+            ${{ steps.package.outputs.archive_path }}
+            ${{ steps.installer.outputs.exe_path }}
           if-no-files-found: error
 
       - name: Create GitHub release
@@ -239,12 +298,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
           ARCHIVE_PATH: ${{ steps.package.outputs.archive_path }}
+          INSTALLER_PATH: ${{ steps.installer.outputs.exe_path }}
         run: |
           $arguments = @(
               "release",
               "create",
               $env:GITHUB_REF_NAME,
               $env:ARCHIVE_PATH,
+              $env:INSTALLER_PATH,
               "--verify-tag",
               "--title",
               "Civ VI Accessibility Integration $env:VERSION",
