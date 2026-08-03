@@ -1,0 +1,262 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  MOD_SOURCE: src
+  MOD_FOLDER_NAME: CivVi-Accessibility-Integration
+  MODINFO_FILE: src/CivViAccess.modinfo
+  INTEGRATION_SOURCE: extern/civ6-accessibility-lua-integration
+  PACKAGE_PREFIX: Civ-VI-Accessibility-Integration
+
+jobs:
+  release:
+    name: Build and package
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository and submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Validate repository
+        shell: pwsh
+        run: |
+          $requiredPaths = @(
+              $env:MOD_SOURCE,
+              $env:MODINFO_FILE,
+              $env:INTEGRATION_SOURCE,
+              "$env:INTEGRATION_SOURCE/CMakeLists.txt",
+              "$env:INTEGRATION_SOURCE/CMakePresets.json"
+          )
+
+          foreach ($path in $requiredPaths) {
+              if (-not (Test-Path $path)) {
+                  throw "Required path does not exist: $path"
+              }
+          }
+
+          Write-Host "Integration submodule commit:"
+          git -C $env:INTEGRATION_SOURCE rev-parse HEAD
+
+      - name: Determine version
+        id: version
+        shell: pwsh
+        run: |
+          $contents = Get-Content $env:MODINFO_FILE -Raw
+
+          $match = [regex]::Match(
+              $contents,
+              '<Mod\s+[^>]*version="([^"]+)"'
+          )
+
+          if (-not $match.Success) {
+              throw "Could not read version from $env:MODINFO_FILE"
+          }
+
+          $version = $match.Groups[1].Value
+
+          if ($env:GITHUB_REF_TYPE -eq "tag") {
+              $tag = $env:GITHUB_REF_NAME
+
+              if (-not $tag.StartsWith("v")) {
+                  throw "Release tag must start with v: $tag"
+              }
+
+              $tagVersion = $tag.Substring(1)
+
+              if ($tagVersion -ne $version) {
+                  throw "Tag version '$tagVersion' does not match modinfo version '$version'."
+              }
+          }
+
+          $archiveName = "$env:PACKAGE_PREFIX-$version.zip"
+
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "archive_name=$archiveName" >> $env:GITHUB_OUTPUT
+
+          Write-Host "Version: $version"
+          Write-Host "Archive: $archiveName"
+
+      - name: Configure integration DLL
+        working-directory: ${{ env.INTEGRATION_SOURCE }}
+        shell: pwsh
+        run: cmake --preset windows
+
+      - name: Build integration DLL
+        working-directory: ${{ env.INTEGRATION_SOURCE }}
+        shell: pwsh
+        run: cmake --build --preset release
+
+      - name: Locate build output
+        id: dll_output
+        shell: pwsh
+        run: |
+          $expectedFiles = @(
+              "LightFX.dll",
+              "nvdaControllerClient64.dll",
+              "SAAPI64.dll"
+          )
+
+          $possibleDirectories = @(
+              "$env:INTEGRATION_SOURCE/build/Release",
+              "$env:INTEGRATION_SOURCE/build/release",
+              "$env:INTEGRATION_SOURCE/build"
+          )
+
+          $outputDirectory = $null
+
+          foreach ($directory in $possibleDirectories) {
+              if (-not (Test-Path $directory)) {
+                  continue
+              }
+
+              $allFound = $true
+
+              foreach ($file in $expectedFiles) {
+                  if (-not (Test-Path (Join-Path $directory $file))) {
+                      $allFound = $false
+                      break
+                  }
+              }
+
+              if ($allFound) {
+                  $outputDirectory = $directory
+                  break
+              }
+          }
+
+          if (-not $outputDirectory) {
+              Write-Host "Files found beneath build directory:"
+
+              if (Test-Path "$env:INTEGRATION_SOURCE/build") {
+                  Get-ChildItem `
+                      "$env:INTEGRATION_SOURCE/build" `
+                      -Recurse `
+                      -File |
+                      Select-Object FullName
+              }
+
+              throw "Could not locate all required runtime DLLs."
+          }
+
+          "directory=$outputDirectory" >> $env:GITHUB_OUTPUT
+          Write-Host "DLL output: $outputDirectory"
+
+      - name: Create release package
+        id: package
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          ARCHIVE_NAME: ${{ steps.version.outputs.archive_name }}
+          DLL_OUTPUT: ${{ steps.dll_output.outputs.directory }}
+        run: |
+          $stagingRoot = Join-Path $env:RUNNER_TEMP "civ6-accessibility-package"
+          $modDestination = Join-Path $stagingRoot $env:MOD_FOLDER_NAME
+          $binaryDestination = Join-Path $stagingRoot "Base/Binaries/Win64Steam"
+          $releaseDirectory = Join-Path $env:GITHUB_WORKSPACE "release"
+          $archivePath = Join-Path $releaseDirectory $env:ARCHIVE_NAME
+
+          Remove-Item $stagingRoot -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item $releaseDirectory -Recurse -Force -ErrorAction SilentlyContinue
+
+          New-Item -ItemType Directory -Force $stagingRoot | Out-Null
+          New-Item -ItemType Directory -Force $binaryDestination | Out-Null
+          New-Item -ItemType Directory -Force $releaseDirectory | Out-Null
+
+          Copy-Item `
+              -Path $env:MOD_SOURCE `
+              -Destination $modDestination `
+              -Recurse `
+              -Force
+
+          # Development-only files.
+          Remove-Item `
+              (Join-Path $modDestination "ideHelpers.lua") `
+              -Force `
+              -ErrorAction SilentlyContinue
+
+          Remove-Item `
+              (Join-Path $modDestination "todo.md") `
+              -Force `
+              -ErrorAction SilentlyContinue
+
+          $runtimeDlls = @(
+              "LightFX.dll",
+              "nvdaControllerClient64.dll",
+              "SAAPI64.dll"
+          )
+
+          foreach ($dll in $runtimeDlls) {
+              $sourcePath = Join-Path $env:DLL_OUTPUT $dll
+
+              if (-not (Test-Path $sourcePath)) {
+                  throw "Required DLL does not exist: $sourcePath"
+              }
+
+              Copy-Item `
+                  -Path $sourcePath `
+                  -Destination $binaryDestination `
+                  -Force
+          }
+
+          Compress-Archive `
+              -Path "$stagingRoot/*" `
+              -DestinationPath $archivePath `
+              -CompressionLevel Optimal
+
+          if (-not (Test-Path $archivePath)) {
+              throw "Release archive was not created."
+          }
+
+          "archive_path=$archivePath" >> $env:GITHUB_OUTPUT
+
+          Write-Host "Package contents:"
+          Get-ChildItem $stagingRoot -Recurse |
+              Select-Object FullName
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Civ-VI-Accessibility-Integration-${{ steps.version.outputs.version }}
+          path: ${{ steps.package.outputs.archive_path }}
+          if-no-files-found: error
+
+      - name: Create GitHub release
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          ARCHIVE_PATH: ${{ steps.package.outputs.archive_path }}
+        run: |
+          $arguments = @(
+              "release",
+              "create",
+              $env:GITHUB_REF_NAME,
+              $env:ARCHIVE_PATH,
+              "--verify-tag",
+              "--title",
+              "Civ VI Accessibility Integration $env:VERSION",
+              "--generate-notes"
+          )
+
+          if ($env:VERSION.Contains("-")) {
+              $arguments += "--prerelease"
+          }
+
+          & gh @arguments
+
+          if ($LASTEXITCODE -ne 0) {
+              throw "GitHub release creation failed."
+          }

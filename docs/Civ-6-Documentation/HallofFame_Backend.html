@@ -1,0 +1,116 @@
+<h1>Hall of Fame (Back-end)</h1>
+<h1>Objects vs Types</h1>
+<p>Before diving in, I'd like to explain object references and type references.  There are plenty of times when data needs to be associated with more than just a game or even a player.  Sometimes it needs to be associated with a city, or religion, or some arbitrary game concept.  These are 'objects'.  Objects are a chunk of meta-data that additional data points and data sets can reference.  Objects contain information such as name, description, owning player, plot index, type, icons, etc.  We can then reference this object using a simple integer and associate data with it.  For example, if we wanted to track the number of units trained by a player, we would pass in something like &quot;PlayerUnitsTrained&quot;, an object id (let's say '5'), and the number of units trained (let's say '100').</p>
+<p>However, there are some cases where objects just aren't as abstract as we'd like.  For example, if we're tracking the number of units trained by a player for each unit type.  In that case we need both the player's object id as well as a specific unit type such as UNIT_WARRIOR.  We <em>could</em> make an additional object that represents this, or we could just specify both the player object and an additional 'Type' field, which simplifies things quite a bit.  So, for example, our &quot;PlayerUnitsTrainedByType&quot; would then have the object id of the player (5) along with the type (UNIT_WARRIOR).</p>
+<h1>Back-End</h1>
+<p>The back-end consists of collecting data while a game is running and persisting this data in the saved game.  The front-end section is all about visualizing and presenting that data in the hall of fame section.  These aspects are loosely tied to each other to ensure plenty of flexibility.</p>
+<p>At present, there are two main types of data that is stored for the Hall of Fame; data points and data sets.</p>
+<h2>Data points</h2>
+<p>Data points are name-value pairs that can be associated with a ruleset, a game, or a specific object.  Data points are identified with a string and associate with a value that can be a number, a string, an object reference or a type.  Data points are typically visualized via statistics or reports.</p>
+<p>Here are some examples:
+|Data Point | Object Id | Value Numeric|Value Type|
+|---|---|---|---|
+|PlayerUnitsTrained|5|100||
+|PlayerUnitsTrainedByType|5|30|UNIT_WARRIOR|
+|FavoriteUnit|5| |UNIT_WARRIOR|
+|CityProduction| 12 | 500|</p>
+<h2>Data Sets</h2>
+<p>Data sets are similar to points but rather than have a single value, they have X,Y integer pairs as values.  These are typically used to track per-turn values or per-era etc.  Just like data points, the data sets can be arbitrarily named and associated with games, objects, or types.  However, unlike data points, only numeric values can be used.  Data sets are typically visualized via graphs.</p>
+<p>|Data  Set | Object Id | X | Y|
+|---|---|---|---|
+|CityProductionPerTurn| 12 | 1 | 20 |
+|CityProductionPerTurn| 12| 2 | 25  |
+|CityProductionPerTurn| 12 | 3 | 30 |</p>
+<h1>Modding / Providing Data to the back-end</h1>
+<h2>Game Database</h2>
+<p>At present, no additional data is needed in the gameplay database when it comes to providing/recording additional data for the hall-of-fame.  However, when recording data that references a type, that type needs to be provided as well in order for the front-end to understand the name, icon, and other meta-data about that type.</p>
+<h2>Lua</h2>
+<p>Recording data can be done via Lua in the form of gameplay scripts.  Most of the functionality is exposed via a new API that resides in the global 'HallofFame'.   While this API is subject to change, here's it in its current form.</p>
+<h3>Ruleset Types</h3>
+<p><strong>HallofFame.GetRulesetTypes() -&gt; ruleset_types:array</strong>
+Returns an array of all recorded ruleset types.  The structure is as follows:
+|Field|Type|Description|
+|---|---|---|
+|Type|string|The type of the item (e.g UNIT_WARRIOR)|
+Kind|string|The kind of the item (e.g KIND_UNIT)|
+Name|string|The name of the item.|
+Icon|[string]|The icon tag to use for the item.|</p>
+<p><strong>HallofFame.SetRulesetType(type:string, kind:string, name:string, [icon:string])</strong>
+Records the meta-data for a ruleset type.
+If the type already exists, it will be replaced with the new data.</p>
+<h3>Objects</h3>
+<p><strong>HallofFame.CreateObject(type:string, [player_id:int], [name:string], [plot_index:int], [extra_data:string], [icon:string]) -&gt; object_id:int</strong>
+Creates a new object w/ the specified data and returns the object id.</p>
+<p><strong>HallofFame.GetObjects([type:string]) -&gt; objects:array</strong>
+Returns an array of integers representing object id's.
+The table structure is that of HallofFame.GetObject(objectId).</p>
+<p><strong>HallofFame.GetCityObject([type:string]) -&gt; objects:array</strong>
+Returns an array of integers representing object id's.
+The table structure is that of HallofFame.GetObject(objectId).</p>
+<p><strong>HallofFame.GetPlayerObject(playerId:int) -&gt; objects:array</strong>
+Returns an array of integers representing object id's.
+The table structure is that of HallofFame.GetObject(objectId).</p>
+<h3>Data Points</h3>
+<p><strong>HallofFame.FindDataPoint(data_point:string, [object_id:int], [type:string]) -&gt; result:int</strong>
+Attempts to find a datapoint.
+The result is the lookup id of the data point or nil if one does not exist.</p>
+<p><strong>HallofFame.GetOrCreateDataPoint(data_point:string, [object_id:int], [type:string]) -&gt; result:int</strong>
+Attempts to find a datapoint or creates one if it does not exist.
+The result is the lookup id of the data point.</p>
+<p><strong>HallofFame.GetDataPoints([object_id:int],[type:string]) -&gt; data_points:int_array</strong>
+Returns an array of all data point lookup ids that matches the specified criteria.</p>
+<p><strong>HallofFame.SetDataPoint(data_point:string, [object_id:int], [type:string], value:table) -&gt; result:bool</strong>
+Creates or updates a datapoint with the specified value.
+The structure of 'value' is as follows:
+|Field|Type|Description|
+|---|---|---|
+|ValueNumeric|[int]|The numeric value associated with the data point.|
+|ValueString|[string]|A string value associated with the data point.|
+|ValueObjectId|[int]|An object id associated with the data point.|</p>
+<p><strong>HallofFame.UpdateDataPoint(lookup_id:int, value:table) -&gt; result:bool</strong>
+Updates a datapoint with the specified value.
+The structure of 'value' is as follows:
+|Field|Type|Description|
+|---|---|---|
+|ValueNumeric|[int]|The numeric value associated with the data point.|
+|ValueString|[string]|A string value associated with the data point.|
+|ValueObjectId|[int]|An object id associated with the data point.|</p>
+<p><strong>HallofFame.LookupDataPoint(lookup_id:int) -&gt; result:int</strong>
+Attempts to find a datapoint, returns nil if none can be found.
+The structure of 'result' is as follows:
+|Field|Type|Description|
+|---|---|---|
+|DataPoint|string|The identifier of the data point.|
+|ObjectId|[int]|The object associated with the data point.|
+|Type|[string]|The type associated with the data point.|
+|ValueNumeric|[int]|The numeric value associated with the data point.|
+|ValueString|[string]|A string value associated with the data point.|
+|ValueObjectId|[int]|An object id associated with the data point.|</p>
+<h3>Data Sets</h3>
+<p><strong>HallofFame.FindDataSet(data_set:string, [object_id:int], [type:string]) -&gt; result:int</strong>
+Attempts to lookup a specific data set.
+The result is either the integer lookup id or nil.</p>
+<p><strong>HallofFame.GetOrCreateDataSet(data_set:string, [object_id:int], [type:string]) -&gt; result:int</strong>
+Attempts to lookup a specific data set or create one if it does not exist.
+The result is an integer lookup Id.</p>
+<p><strong>HallofFame.GetDataSets([object_id:int], [type:string]) -&gt; result:int_array</strong>
+Returns all data set lookup id's for a game or given object id.</p>
+<p><strong>HallofFame.GetDataSetValue(lookup_id:int, x:int) -&gt; Y:int</strong>
+Returns a single integer representing the Y value or nil if not exist.</p>
+<p><strong>HallofFame.GetLastDataSetValue(lookup_id:int) -&gt; X:int,Y:int</strong>
+Returns two integers representing the x and y value or nil if dataset is invalid or empty.</p>
+<p><strong>HallofFame.SetDataSetValue(lookup_id:int, x:int, y:int)</strong>
+Assigns the x,y value of a dataset.</p>
+<p><strong>HallofFame.AdjustDataSetValue(lookup_id:int, x:int, y:int) -&gt; value:int</strong>
+Assigns or offsets the y value for a given x value in a dataset.
+Returns the adjusted value.</p>
+<p><strong>HallofFame.LookupDataSet(lookup_id:int) -&gt; result:table_array</strong>
+Attempts to lookup a specific data set or create one if it does not exist.
+The result is a combination table/array.
+The array of the result contains the X,Y values, ordered by X.
+The table structure is as follows.
+|Field|Type|Description|
+|---|---|---|
+|DataSet|string|The data set id.|
+|ObjectId|[int]|The object id associated.|
+|Type|[string]|The type associated.|</p>
