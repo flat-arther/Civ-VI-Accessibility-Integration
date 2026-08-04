@@ -103,7 +103,10 @@ internal sealed class Installer
         }
     }
 
-    public void Uninstall(string gameDirectory, IProgress<ProgressInfo> progress)
+    public void Uninstall(
+        string gameDirectory,
+        bool removeConfiguration,
+        IProgress<ProgressInfo> progress)
     {
         EnsureGameIsNotRunning();
 
@@ -121,8 +124,28 @@ internal sealed class Installer
         progress.Report(new ProgressInfo("Removing screen-reader integration...", 650));
         RemoveRuntime(layout);
 
+        if (removeConfiguration)
+        {
+            progress.Report(new ProgressInfo("Removing mod configuration...", 850));
+            RemoveConfiguration();
+        }
+
         InstallManifest.Delete();
         progress.Report(new ProgressInfo("Uninstall complete.", 1000));
+    }
+
+    private static void RemoveConfiguration()
+    {
+        var configurationPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Firaxis Games",
+            "Sid Meier's Civilization VI",
+            "civ6-accessibility-integration.ini");
+
+        if (File.Exists(configurationPath))
+        {
+            File.Delete(configurationPath);
+        }
     }
 
     private static void EnsureGameIsNotRunning()

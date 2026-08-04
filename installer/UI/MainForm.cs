@@ -362,11 +362,26 @@ internal sealed class MainForm : Form
             return;
         }
 
+        var configurationAnswer = MessageBox.Show(
+            this,
+            "Do you also want to remove the mod configuration?\n\n" +
+            "Selecting Yes deletes your saved accessibility settings. " +
+            "Selecting No preserves them for a future installation.",
+            "Remove mod configuration?",
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxIcon.Question);
+
+        if (configurationAnswer == DialogResult.Cancel)
+        {
+            return;
+        }
+
+        var removeConfiguration = configurationAnswer == DialogResult.Yes;
         var installer = new Installer();
         SetControlsEnabled(false);
         var result = ProgressForm.Run(this, "Uninstalling", (progress, _) =>
         {
-            installer.Uninstall(gameDirectory, progress);
+            installer.Uninstall(gameDirectory, removeConfiguration, progress);
             return Task.CompletedTask;
         });
         SetControlsEnabled(true);

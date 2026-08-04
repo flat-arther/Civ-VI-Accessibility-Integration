@@ -1814,6 +1814,7 @@ function Initialize()
 end
 --#Accessibility integration
 include("caiUtils")
+include("version_CAI")
 local mgr = ExposedMembers.CAI_UIManager
 
 local MAIN_PANEL_ID    = "CAIMainMenu_Panel"
@@ -1825,6 +1826,7 @@ local MY2K_ID          = "CAIMainMenu_My2K"
 local SUBMENU_LIST_ID  = "CAIMainMenu_SubmenuList"
 local MAIN_MENU_TUTORIAL_EVENT = "MainMenuOpened"
 
+local m_UpdateDialog       ---@type UIWidget|nil
 local m_MainPanel       ---@type UIWidget|nil
 local m_MenuList        ---@type UIWidget|nil
 -- local m_CarouselList    ---@type UIWidget|nil
@@ -1867,6 +1869,94 @@ local EXCLUDED_MAIN_CALLBACKS = {
 }
 local EXCLUDED_SUB_CALLBACKS = {
 }
+
+-- version check
+
+local function ParseVersion(version)
+    if type(version) ~= "string" then
+        return nil
+    end
+
+    local major, minor, patch = version:match("^%s*(%d+)%.(%d+)%.(%d+)%s*$")
+    if not major then
+        return nil
+    end
+
+    return {
+        major = tonumber(major),
+        minor = tonumber(minor),
+        patch = tonumber(patch),
+    }
+end
+
+---Returns:
+--- -1 when a < b
+---  0 when a == b
+---  1 when a > b
+local function CompareVersions(a, b)
+    local parsedA = ParseVersion(a)
+    local parsedB = ParseVersion(b)
+
+    if not parsedA or not parsedB then
+        return nil
+    end
+
+    if parsedA.major ~= parsedB.major then
+        return parsedA.major < parsedB.major and -1 or 1
+    end
+
+    if parsedA.minor ~= parsedB.minor then
+        return parsedA.minor < parsedB.minor and -1 or 1
+    end
+
+    if parsedA.patch ~= parsedB.patch then
+        return parsedA.patch < parsedB.patch and -1 or 1
+    end
+
+    return 0
+end
+
+local function CheckForCAIUpdate()
+	if not CAI then return false end
+	local installedVersion =  CAI.__version
+	local latestVersion = CAI.GetLatestVersion()
+	local comparison = CompareVersions(installedVersion, latestVersion)
+	if comparison == nil then
+		LogWarn("Failed to compare CAI versions: installed=" .. tostring(installedVersion) .. ", latest=" .. tostring(latestVersion))
+		return false
+		elseif comparison < 0 then
+			return true
+			elseif comparison == 0 then
+				LogMessage("CAI is up to date: version " .. tostring(installedVersion))
+				return false
+	end
+	return false
+end
+
+local function RemoveCAIUpdateDialog()
+	if m_UpdateDialog then 
+		mgr:RemoveFromStack(m_UpdateDialog:GetId())
+	end
+end
+
+local function ShowCAIUpdateDialog()
+	if m_UpdateDialog then return end
+	local txt = mgr:CreateWidget("CAI_MAINMENU_UPDATE_DIALOG_TXT", "StaticText", {
+		Label = function()
+			local installedVersion =  CAI.__version
+			local latestVersion = CAI.GetLatestVersion()
+			return Locale.Lookup("LOC_CAI_UPDATE_AVAILABLE", installedVersion, latestVersion)
+		end,
+	})
+	local btn = mgr:CreateWidget("CAI_MAINMENU_UPDATE_DIALOG_BTN", "Button", {
+		Label = function() return Locale.Lookup("LOC_COPYRIGHT_ACCEPT") end,
+	})
+	btn:On("activate", function(w)
+		RemoveCAIUpdateDialog()
+	end)
+	m_UpdateDialog = mgr.WidgetHelpers.MakeGeneralDialog(function() return Locale.Lookup("LOC_CAI_UPDATE_AVAILABLE_TITLE") end, {btn}, {txt})
+	if m_UpdateDialog then mgr:Push(m_UpdateDialog, PopupPriority.Current) end
+end
 
 -- Vanilla highlight reuse: mirrors what mouse hover does in vanilla so the
 -- sighted-mirror UI looks right while a CAI row is focused. Trigger from
@@ -2025,6 +2115,7 @@ local function RebuildMenuRows(menuOptions)
     mgr:RestoreFocus(m_MenuList, capture)
 end
 
+
 -- Hook the input handler onto the screen.
 Initialize = WrapFunc(Initialize, function(orig)
     orig()
@@ -2052,6 +2143,10 @@ BuildMenu = WrapFunc(BuildMenu, function(orig, menuOptions)
         mgr:Push(m_MainPanel)
     end
     tutorialMgr:Check(MAIN_MENU_TUTORIAL_EVENT, m_MainPanel)
+	local isUpdateAvailable = CheckForCAIUpdate()
+		if isUpdateAvailable then
+			ShowCAIUpdateDialog()
+		end
 end)
 
 -- ToggleOption is vanilla's single entry point for selecting/deselecting a

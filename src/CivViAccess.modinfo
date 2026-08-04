@@ -9,6 +9,7 @@
     <CompatibleVersions>2.0</CompatibleVersions>
   </Properties>
   <Files>
+    <File>version_CAI.lua</File>
     <File>UI/Replacements/BlackDeathScenario/MinimapPanel_BlackDeathScenario.lua</File>
     <File>UI/Replacements/PiratesScenario/MinimapPanel_PiratesScenario_CAIBase.lua</File>
     <File>UI/inGame/PiratesScenarioMapInfo_CAI.lua</File>
@@ -259,6 +260,7 @@
       <Properties>
         <LoadOrder>1</LoadOrder>
       </Properties>
+      <File>version_CAI.lua</File>
       <File>UI/shared/CAI_logging.lua</File>
       <File>UI/shared/caiUtils.lua</File>
       <File>UI/shared/CAISettings.lua</File>
@@ -374,6 +376,7 @@
       <Properties>
         <LoadOrder>50</LoadOrder>
       </Properties>
+      <File>version_CAI.lua</File>
       <File>UI/shared/CAI_logging.lua</File>
       <File>UI/shared/caiUtils.lua</File>
       <File>UI/shared/CAISettings.lua</File>

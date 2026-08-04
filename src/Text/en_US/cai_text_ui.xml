@@ -225,6 +225,12 @@
     </Row>
 
     <!-- Main menu -->
+    <Row Tag="LOC_CAI_UPDATE_AVAILABLE_TITLE" Language="en_US">
+      <Text>Accessibility Mod Update</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UPDATE_AVAILABLE" Language="en_US">
+      <Text>A newer version of Civilization VI Accessibility Integration is available. Installed version: {1_Installed}. Latest version: {2_Latest}. Please run the installer again or redownload the mod.</Text>
+    </Row>
     <Row Tag="LOC_CAI_MAIN_MENU" Language="en_US">
       <Text>Main Menu</Text>
     </Row>

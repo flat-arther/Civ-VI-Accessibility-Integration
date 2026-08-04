@@ -22,6 +22,7 @@ env:
   MOD_SOURCE: src
   MOD_FOLDER_NAME: CivVi-Accessibility-Integration
   MODINFO_FILE: src/CivViAccess.modinfo
+  LUA_VERSION_FILE: src/version_CAI.lua
   INTEGRATION_SOURCE: extern/civ6-accessibility-lua-integration
   PACKAGE_PREFIX: Civ-VI-Accessibility-Integration
   INSTALLER_PROJECT: installer/CivVIAccessInstaller.csproj
@@ -47,6 +48,7 @@ jobs:
               $env:CHANGELOG_FILE,
               $env:MOD_SOURCE,
               $env:MODINFO_FILE,
+              $env:LUA_VERSION_FILE,
               $env:INTEGRATION_SOURCE,
               "$env:INTEGRATION_SOURCE/CMakeLists.txt",
               "$env:INTEGRATION_SOURCE/CMakePresets.json",
@@ -133,6 +135,52 @@ jobs:
 
           Write-Host "Updated $path to version $actualVersion."
 
+      - name: Update Lua version
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $path = $env:LUA_VERSION_FILE
+          $contents = Get-Content $path -Raw
+
+          $pattern = '(?m)^(\s*local\s+mod_version\s*=\s*")[^"]+("\s*)$'
+          $matches = [regex]::Matches($contents, $pattern)
+
+          if ($matches.Count -ne 1) {
+              throw "Expected exactly one local mod_version assignment in $path, found $($matches.Count)."
+          }
+
+          $updated = [regex]::Replace(
+              $contents,
+              $pattern,
+              "`${1}$env:VERSION`${2}",
+              1
+          )
+
+          [System.IO.File]::WriteAllText(
+              (Resolve-Path $path),
+              $updated,
+              [System.Text.UTF8Encoding]::new($false)
+          )
+
+          $verificationContents = Get-Content $path -Raw
+          $verificationMatch = [regex]::Match(
+              $verificationContents,
+              '(?m)^\s*local\s+mod_version\s*=\s*"([^"]+)"\s*$'
+          )
+
+          if (-not $verificationMatch.Success) {
+              throw "Could not verify the Lua version in $path."
+          }
+
+          $actualVersion = $verificationMatch.Groups[1].Value
+
+          if ($actualVersion -ne $env:VERSION) {
+              throw "Lua version update failed. Expected '$env:VERSION', found '$actualVersion'."
+          }
+
+          Write-Host "Updated $path to version $actualVersion."
+
       - name: Rotate changelog
         shell: pwsh
         env:
@@ -213,11 +261,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add -- $env:MODINFO_FILE $env:CHANGELOG_FILE
+          git add -- $env:MODINFO_FILE $env:LUA_VERSION_FILE $env:CHANGELOG_FILE
 
           git diff --cached --quiet
           if ($LASTEXITCODE -eq 0) {
-              throw "Neither the modinfo nor changelog changed."
+              throw "The modinfo, Lua version file, and changelog did not change."
           }
 
           git commit -m "Prepare release $env:VERSION"
