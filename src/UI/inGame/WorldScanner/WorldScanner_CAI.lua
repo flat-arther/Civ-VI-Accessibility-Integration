@@ -1133,7 +1133,7 @@ local function BuildSearchSnapshot(scanner)
 end
 
 local function TrimSearchQuery(query)
-    return (query or ""):match("^%s*(.-)%s*$")
+    return CAI_TrimAsciiWhitespace(query)
 end
 
 local function CloneSearchLeaf(entry)

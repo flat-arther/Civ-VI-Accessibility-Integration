@@ -374,7 +374,7 @@ function GetCityBorderGrowthPerTurnText(currentYield)
     return currentYieldText ..
         " " ..
         Locale.ToLower(Locale.Lookup("LOC_HUD_CITY_CULTURE_PER_TURN", currentYieldText)):gsub(
-            "^" .. currentYieldText .. "%s*", "")
+            "^" .. currentYieldText .. "[ \t\r\n]*", "")
 end
 
 function GetCityBorderGrowth(data, city)

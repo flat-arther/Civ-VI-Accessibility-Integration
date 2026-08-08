@@ -1369,7 +1369,7 @@ function CreateCulturePlayerRow(playerData, allPlayerData, parentFocusPrefix)
                     if not tt then return nil end
                     local lines = {}
                     for segment in (tt .. "[NEWLINE]"):gmatch("(.-)%[NEWLINE%]") do
-                        local trimmed = segment:match("^%s*(.-)%s*$")
+                        local trimmed = CAI_TrimAsciiWhitespace(segment)
                         if trimmed and trimmed ~= "" then
                             table.insert(lines, trimmed)
                         end
@@ -1616,7 +1616,7 @@ local function CreateGenericPlayerRow(playerData, victoryType, parentFocusPrefix
                 local tt = pStats:GetDiplomaticVictoryPointsTooltip()
                 if tt and tt ~= "" then
                     for segment in (tt .. "[NEWLINE]"):gmatch("(.-)%[NEWLINE%]") do
-                        local trimmed = segment:match("^%s*(.-)%s*$")
+                        local trimmed = CAI_TrimAsciiWhitespace(segment)
                         if trimmed and trimmed ~= "" then
                             table.insert(diploLines, trimmed)
                         end

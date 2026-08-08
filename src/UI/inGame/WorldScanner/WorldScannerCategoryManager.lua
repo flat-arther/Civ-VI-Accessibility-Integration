@@ -323,7 +323,7 @@ local function CreateCustomChildren(entry, row)
     )
     nameEdit:SetText(custom.Name, true)
     nameEdit:SetCommitValidator(function(text)
-        if tostring(text or ""):match("^%s*$") then
+        if CAI_TrimAsciiWhitespace(text) == "" then
             return Locale.Lookup("LOC_CAI_WORLD_SCANNER_CUSTOM_NAME_EMPTY")
         end
         return nil

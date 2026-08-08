@@ -219,6 +219,9 @@ These are methods on Civ VI's native XML-backed UI controls:
 - `ctrl:RegisterCommitCallback(fn)` — fires on Enter
 - `ctrl:RegisterStringChangedCallback(fn)` — fires on text change
 - `ctrl:GetText()` — current text
+- Civ VI Lua string indexes are byte offsets. CAI's EditBox keeps byte offsets internally for `string.sub`, but cursor and selection positions must stay on UTF-8 code-point boundaries. Character movement, deletion, character-count limits, masking, and spoken slices must operate on complete code points; slicing one byte from Chinese text sends an invalid UTF-8 sequence to the screen reader as a replacement character.
+- Vertical EditBox movement converts the current line's code-point column to a byte boundary on the target line, so mixed Chinese/ASCII lines keep their logical character column. The no-selection copy action also extracts one complete code point.
+- Civ VI's locale-sensitive Lua `%s` and `%S` pattern classes can classify byte `0xA0` as whitespace. Because that byte occurs inside valid Chinese UTF-8 sequences, text-processing code must split or trim localized text with explicit ASCII whitespace classes such as `[ \t\r\n]`, never `%s`/`%S` over arbitrary localized strings.
 
 ### Mouse Events
 

@@ -17,7 +17,7 @@ local g_SearchHistory = {}
 function S.ParseQuery(rawQuery)
     local whitelist = {}
     local blacklist = {}
-    for term in (rawQuery or ""):gmatch("%S+") do
+    for _, term in ipairs(CAI_SplitAsciiWords(rawQuery)) do
         if term:sub(1, 2) == "--" and #term > 2 then
             blacklist[#blacklist + 1] = term:sub(3)
         else
@@ -567,7 +567,7 @@ function S.IsValidSearchStartCharacter(char)
     end
 
     -- Reject whitespace.
-    if char:match("%s") then
+    if char:match("[ \t\r\n]") then
         return false
     end
 

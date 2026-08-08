@@ -293,11 +293,11 @@ local function GetRoyaleAbilityParts(playerID, player)
 
     local tooltip = Locale.Lookup(tooltipTag)
     tooltip = string.gsub(tooltip, "%[NEWLINE%]", ", ")
-    tooltip = string.gsub(tooltip, ",%s*,", ",")
+    tooltip = string.gsub(tooltip, ",[ \t\r\n]*,", ",")
     local name = Locale.Lookup(nameTag)
     if string.sub(tooltip, 1, string.len(name)) == name then
         tooltip = string.sub(tooltip, string.len(name) + 1)
-        tooltip = string.gsub(tooltip, "^%s*,%s*", "")
+        tooltip = string.gsub(tooltip, "^[ \t\r\n]*,[ \t\r\n]*", "")
     end
     return name .. ", " .. tooltip .. ", " .. status
 end
@@ -467,11 +467,11 @@ end
 
 local function TrimLeadingWhitespace(text)
     if text == nil then return "" end
-    return string.gsub(text, "^%s+", "")
+    return string.gsub(text, "^[ \t]+", "")
 end
 
 local function IsIndentedTooltipLine(text)
-    return text ~= nil and string.match(text, "^%s") ~= nil
+    return text ~= nil and string.match(text, "^[ \t]") ~= nil
 end
 
 local function AddBreakdownTree(parent, lines)

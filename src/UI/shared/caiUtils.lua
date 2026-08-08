@@ -39,8 +39,25 @@ local function GetConfiguredLineLength()
     return math.max(1, math.floor(tonumber(CAISettings.GetNumber("TokenSplitLength")) or DEFAULT_LINE_LENGTH))
 end
 
+function CAI_TrimAsciiWhitespace(text)
+    return tostring(text or ""):match("^[ \t\r\n]*(.-)[ \t\r\n]*$")
+end
+
+function CAI_CollapseAsciiWhitespace(text)
+    local collapsed = tostring(text or ""):gsub("[ \t\r\n]+", " ")
+    return collapsed
+end
+
+function CAI_SplitAsciiWords(text)
+    local words = {}
+    for word in tostring(text or ""):gmatch("[^ \t\r\n]+") do
+        words[#words + 1] = word
+    end
+    return words
+end
+
 local function TrimText(text)
-    return text:match("^%s*(.-)%s*$")
+    return CAI_TrimAsciiWhitespace(text)
 end
 
 local function IsSentenceEnd(word)
@@ -80,7 +97,7 @@ function SplitTextIntoLines(text, maxLength)
                 sentenceWords = {}
             end
 
-            for word in paragraph:gmatch("%S+") do
+            for _, word in ipairs(CAI_SplitAsciiWords(paragraph)) do
                 sentenceWords[#sentenceWords + 1] = word
                 if IsSentenceEnd(word) then FlushSentence() end
             end

@@ -251,14 +251,14 @@ end
 
 local function TrimLeadingWhitespace(text)
     if text == nil then return "" end
-    return string.gsub(text, "^%s+", "")
+    return string.gsub(text, "^[ \t]+", "")
 end
 
 local function AddBreakdownRows(parent, lines, focusKeyPrefix, enhancers)
     local roots = {}
     local stack = {}
     for _, line in ipairs(lines) do
-        local whitespace = string.match(line, "^%s*") or ""
+        local whitespace = string.match(line, "^[ \t]*") or ""
         local normalizedWhitespace = string.gsub(whitespace, "\t", "    ")
         local row = {
             label = TrimLeadingWhitespace(line),

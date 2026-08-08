@@ -1382,7 +1382,7 @@ local function SplitTourismTooltipLines(tooltip)
     normalized = string.gsub(normalized, "\r\n", "\n")
     normalized = string.gsub(normalized, "\r", "\n")
     for line in string.gmatch(normalized .. "\n", "(.-)\n") do
-        local trimmed = string.gsub(line, "^%s*(.-)%s*$", "%1")
+        local trimmed = CAI_TrimAsciiWhitespace(line)
         if trimmed ~= "" then
             lines[#lines + 1] = trimmed
         end

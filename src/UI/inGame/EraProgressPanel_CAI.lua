@@ -41,11 +41,11 @@ local function NormalizeText(text)
     text = tostring(text)
     text = string.gsub(text, "%[ENDCOLOR%]", "")
     text = string.gsub(text, "%[COLOR_[^%]]+%]", "")
-    text = string.gsub(text, "%[COLOR:%s*[^%]]+%]", "")
+    text = string.gsub(text, "%[COLOR:[ \t\r\n]*[^%]]+%]", "")
     text = string.gsub(text, "%[ICON_[^%]]+%]", "")
-    text = string.gsub(text, "[,%s]+,", ",")
-    text = string.gsub(text, "^[,%s]+", "")
-    text = string.gsub(text, "[,%s]+$", "")
+    text = string.gsub(text, "[ \t\r\n,]+,", ",")
+    text = string.gsub(text, "^[ \t\r\n,]+", "")
+    text = string.gsub(text, "[ \t\r\n,]+$", "")
     return text
 end
 

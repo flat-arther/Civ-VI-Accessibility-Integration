@@ -78,7 +78,7 @@ local function ToBool(value, defaultValue)
 end
 
 local function Trim(value)
-    return tostring(value or ""):match("^%s*(.-)%s*$")
+    return CAI_TrimAsciiWhitespace(value)
 end
 
 local function NormalizeCategoryId(id)

@@ -4,6 +4,12 @@
 
 - Added complete Simplified Chinese text for interface speech, input help, accessibility tutorials, Civilopedia articles, and accessible tutorial advisor instructions.
 
+### Fixed
+
+- Fixed character navigation, selection, and deletion in Chinese and other UTF-8 text so screen readers no longer receive partial characters.
+- Fixed vertical EditBox navigation, password masking, copy, and long-selection counts to use complete UTF-8 characters instead of byte positions.
+- Fixed some Chinese characters being replaced by invalid-character symbols in long text.
+
 ## [1.0.1] - 2026-08-04
 
 ### Added

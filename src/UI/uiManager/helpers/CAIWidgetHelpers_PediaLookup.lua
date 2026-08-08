@@ -9,7 +9,7 @@ local MAX_RESULTS = 20
 
 local function CollapseWhitespace(text)
     if not text or text == "" then return "" end
-    return text:gsub("%s+", " "):match("^%s*(.-)%s*$") or ""
+    return CAI_TrimAsciiWhitespace(CAI_CollapseAsciiWhitespace(text))
 end
 
 local function NormalizeSearchText(text)
