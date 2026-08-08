@@ -9,7 +9,7 @@ Notes.
 
 1. Set the Civilization VI language to Simplified Chinese in Steam.
 2. Enable only the development build of Civ VI Accessibility Integration.
-3. Start NVDA and confirm Tolk output is reaching the selected synthesizer.
+3. Start ZDSR (Zhengdu Screen Reader / 争渡读屏) and confirm Tolk output is reaching the selected synthesizer.
 4. Start Civilization VI with DX 11.
 5. After each front-end and in-game test pass, exit the game before reading the logs.
 
