@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Added
+
+- Added complete Simplified Chinese text for interface speech, input help, accessibility tutorials, Civilopedia articles, and accessible tutorial advisor instructions.
+
 ## [1.0.1] - 2026-08-04
 
 ### Added

@@ -7117,5 +7117,52 @@
     <Row Tag="LOC_CAI_MODS_DISABLE_FAILED" Language="en_US">
       <Text>The mod could not be disabled</Text>
     </Row>
+
+    <!-- Extracted loaded UI text -->
+    <Row Tag="LOC_CAI_MY2K_OPENING_CREATE_USER" Language="en_US">
+      <Text>Opening create new user</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_LOAD_ERROR" Language="en_US">
+      <Text>[COLOR_RED]There was an error loading the tutorial.[ENDCOLOR]</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ENABLING_MOD" Language="en_US">
+      <Text>Enabling the Tutorial Mod...</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MOD_NOT_FOUND" Language="en_US">
+      <Text>[COLOR_RED]The tutorial mod could not be found.[ENDCOLOR]</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIV_ROYALE_DATE" Language="en_US">
+      <Text>30XX AD</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MY2K_TEST_LEGAL_TITLE" Language="en_US">
+      <Text>Accessibility Test: Legal Agreements</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MY2K_TEST_LEGAL_MESSAGE" Language="en_US">
+      <Text>Please review the following terms.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MY2K_TEST_LEGAL_DECLINE_ALL" Language="en_US">
+      <Text>Decline All</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MY2K_TEST_LEGAL_ACCEPT_ALL" Language="en_US">
+      <Text>Accept All</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MY2K_TEST_LEGAL_EULA_TEXT" Language="en_US">
+      <Text>Section 1: Accessibility Testing.[NEWLINE]Section 2: Testing screen reader speech output queue.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MY2K_TEST_LEGAL_PRIVACY_NAME" Language="en_US">
+      <Text>Privacy Policy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MY2K_TEST_LEGAL_PRIVACY_TEXT" Language="en_US">
+      <Text>This is the second test document.[NEWLINE]Confirming layout flow works.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOD_NAME" Language="en_US">
+      <Text>Civ VI Accessibility Integration</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOD_DESCRIPTION" Language="en_US">
+      <Text>Civilization VI Accessibility Integration makes Sid Meier's Civilization VI playable with a screen reader. It adds spoken information and keyboard navigation to the game's menus, dialogs, screens, and other user-interface elements.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOD_TEASER" Language="en_US">
+      <Text>Blind accessibility mod for civilization VI</Text>
+    </Row>
   </LocalizedText>
 </GameData>

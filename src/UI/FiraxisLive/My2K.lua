@@ -1013,7 +1013,7 @@ end)
 
 CreateNewUserDialog = WrapFunc(CreateNewUserDialog, function(orig)
 	orig()
-	Speak("Opening create new user	")
+	Speak(Locale.Lookup("LOC_CAI_MY2K_OPENING_CREATE_USER"))
 	if not mgr or not m_currentDialog then return end
 	local emailEdit = CreateEdit(m_currentDialog.EMailTitle, m_currentDialog.Email, true)
 	emailEdit:SetTooltip(function() return m_currentDialog.Message:GetText() or "" end)
@@ -1143,21 +1143,20 @@ end
 
 function forceLegalDialog()
 	local testDialogData = {
-		title     = "Accessibility Test: Legal Agreements",                                    -- instance.Title
-		message   = "Please review the following terms.",                                      -- instance.Message
-		disagree  = "Decline All",                                                             -- instance.DisagreeAllText[cite: 1]
-		agree     = "Accept All",                                                              -- instance.AgreeAllText[cite: 1]
+		title     = Locale.Lookup("LOC_CAI_MY2K_TEST_LEGAL_TITLE"),                              -- instance.Title
+		message   = Locale.Lookup("LOC_CAI_MY2K_TEST_LEGAL_MESSAGE"),                            -- instance.Message
+		disagree  = Locale.Lookup("LOC_CAI_MY2K_TEST_LEGAL_DECLINE_ALL"),                        -- instance.DisagreeAllText[cite: 1]
+		agree     = Locale.Lookup("LOC_CAI_MY2K_TEST_LEGAL_ACCEPT_ALL"),                         -- instance.AgreeAllText[cite: 1]
 		documents = {                                                                          -- m_currentDialogData.documents[cite: 1]
 			{
 				ID = "TEST_DOC_EULA",                                                          -- Passed back in the agree list[cite: 1]
-				Name = "End User License Agreement",                                           -- docInstance.ReadText[cite: 1]
-				Text =
-				"Section 1: Accessibility Testing.\nSection 2: Testing screen reader speech output queue." -- Parsed by \n[cite: 1]
+				Name = Locale.Lookup("LOC_CAI_EULA_PANEL"),                                     -- docInstance.ReadText[cite: 1]
+				Text = Locale.Lookup("LOC_CAI_MY2K_TEST_LEGAL_EULA_TEXT")                       -- Parsed by [NEWLINE][cite: 1]
 			},
 			{
 				ID = "TEST_DOC_PRIVACY",
-				Name = "Privacy Policy",
-				Text = "This is the second test document.\nConfirming layout flow works."
+				Name = Locale.Lookup("LOC_CAI_MY2K_TEST_LEGAL_PRIVACY_NAME"),
+				Text = Locale.Lookup("LOC_CAI_MY2K_TEST_LEGAL_PRIVACY_TEXT")
 			}
 		}
 	}
