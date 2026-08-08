@@ -7163,5 +7163,55 @@
     <Row Tag="LOC_CAI_MOD_TEASER" Language="zh_Hans_CN">
       <Text>面向盲人玩家的《文明 VI》无障碍模组</Text>
     </Row>
+
+    <!-- Correct official Simplified Chinese mid-phrase line breaks. -->
+    <Replace Tag="LOC_META_98_BODY" Language="zh_Hans_CN">
+      <Text>同样，通过您城市产生的 [ICON_Science] 科技值来研究新技术，通过产生的 [ICON_Culture] 文化值解锁市政。[NEWLINE][NEWLINE]您已解锁了市政法典，由此可创建您的第一个政体。</Text>
+    </Replace>
+    <Replace Tag="LOC_META_105_BODY" Language="zh_Hans_CN">
+      <Text>您文明里的每座城市最终如何发展扩张都必须由您决定，如何改良土地，在国境内建造何种建筑和区域。</Text>
+    </Replace>
+    <Replace Tag="ADVISOR_LINE_FTUE_12ALT" Language="zh_Hans_CN">
+      <Text>我们应该好好利用战争中的间歇。勇士已做好准备，我们可把生产力集中用于城市本身。</Text>
+    </Replace>
+    <Replace Tag="LOC_WORLD_RANKINGS_SCIENCE_DETAILS" Language="zh_Hans_CN">
+      <Text>为获得[COLOR:ResScienceLabelCS]科技[ENDCOLOR]胜利，您必须完成3个重要的里程碑事件：</Text>
+    </Replace>
+    <Replace Tag="LOC_WORLD_RANKINGS_CULTURE_DETAILS_DOMESTIC_TOURISTS" Language="zh_Hans_CN">
+      <Text>您的[COLOR:ResCultureLabelCS]国内游客[ENDCOLOR]代表了来自您文明的旅游者，目前正在您国内开心地度假。</Text>
+    </Replace>
+    <Replace Tag="LOC_TECH_MINING_QUOTE_1" Language="zh_Hans_CN">
+      <Text>有谁能比矿工妻子更值得信任？[NEWLINE]——莫尔·特拉维斯 </Text>
+    </Replace>
+    <Replace Tag="LOC_CIVIC_CODE_OF_LAWS_QUOTE_2" Language="zh_Hans_CN">
+      <Text>人在状态最好时，是最高贵的动物；但如果违背法律和正义，他会变成最恶劣的动物。[NEWLINE]——亚里士多德</Text>
+    </Replace>
+    <Replace Tag="LOC_CIVIC_MERCENARIES_QUOTE_1" Language="zh_Hans_CN">
+      <Text>和平时期，老百姓受到雇佣兵掠夺；战争时期，受到敌人掠夺。[NEWLINE]——尼可罗·马基亚维利</Text>
+    </Replace>
+    <Replace Tag="LOC_CIVIC_OPERA_BALLET_QUOTE_1" Language="zh_Hans_CN">
+      <Text>歌剧是，当一个人背后被捅了一刀，他不流血，他唱歌剧。[NEWLINE]——罗伯特·本奇利</Text>
+    </Replace>
+    <Replace Tag="LOC_CIVIC_URBANIZATION_QUOTE_2" Language="zh_Hans_CN">
+      <Text>我喜欢城市里所有的东西都很巨大，一切的美丽和丑陋。[NEWLINE]——约瑟夫·布罗茨基</Text>
+    </Replace>
+    <Replace Tag="LOC_GREATWORK_CHAUCER_1_QUOTE" Language="zh_Hans_CN">
+      <Text>这位骑士是勇敢的男子汉，[NEWLINE]从他一开始骑着马闯荡世界，[NEWLINE]就热爱着骑士精神[NEWLINE]和正义忠诚，就讲究慷慨豁达与温文尔雅。</Text>
+    </Replace>
+    <Replace Tag="LOC_GREATWORK_SHAKESPEARE_2_QUOTE" Language="zh_Hans_CN">
+      <Text>生存还是毁灭？这是个问题——[NEWLINE]是否应默默忍受坎苛命运的无情打击，[NEWLINE]还是应同深如大海的无涯苦难奋然为敌，[NEWLINE]并将其克服？</Text>
+    </Replace>
+    <Replace Tag="LOC_GREATWORK_PUSHKIN_2_QUOTE" Language="zh_Hans_CN">
+      <Text>就像办公室里两鬓斑白的地方法官一样，[NEWLINE]他进行了冷静的思考，他意识到了里面的不公正和冷漠[NEWLINE]邪恶和高尚，也知道不应表达出愤怒和同情。</Text>
+    </Replace>
+    <Replace Tag="LOC_GREATWORK_GOETHE_2_QUOTE" Language="zh_Hans_CN">
+      <Text>“人类生活真是单调乏味。为了生存，很多人把自己最好的时光用来工作，剩下的那点小小的自由让他们感到恐惧，于是他们又开始寻找其他方式来设法摆脱恐惧。”</Text>
+    </Replace>
+    <Replace Tag="LOC_GREATWORK_DICKINSON_1_QUOTE" Language="zh_Hans_CN">
+      <Text>一只鸟儿来到人行道——[NEWLINE]他没有发现我的注视——[NEWLINE]他一口将蚯蚓咬成两半，生吞了那家伙。</Text>
+    </Replace>
+    <Replace Tag="LOC_GREATWORK_DICKINSON_2_QUOTE" Language="zh_Hans_CN">
+      <Text>从未成功的人认为成功的滋味甜美无比。[NEWLINE]那些经历千辛万苦的人才能品尝出甘露的滋味。</Text>
+    </Replace>
   </LocalizedText>
 </GameData>
