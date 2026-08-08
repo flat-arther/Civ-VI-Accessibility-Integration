@@ -100,7 +100,7 @@ local function NormalizeText(text)
     s = s:gsub("%[NEWLINE%]", " ")
     s = s:gsub("%[ICON_[^%]]*%]", "")
     s = s:gsub("  +", " ")
-    return s:match("^%s*(.-)%s*$") or ""
+    return CAI_TrimAsciiWhitespace(s)
 end
 
 local function AppendIfNonEmpty(parts, value)

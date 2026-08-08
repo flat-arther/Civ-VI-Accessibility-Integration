@@ -343,7 +343,7 @@ local function ExtractFailureReasons(item)
     if not item or not item.ToolTip then return out end
     for reason in string.gmatch(item.ToolTip, "%[COLOR:Red%](.-)%[ENDCOLOR%]") do
         local t = string.gsub(reason, "%[NEWLINE%]", " ")
-        t = string.gsub(t, "^%s*(.-)%s*$", "%1")
+        t = CAI_TrimAsciiWhitespace(t)
         if t ~= "" then table.insert(out, t) end
     end
     return out

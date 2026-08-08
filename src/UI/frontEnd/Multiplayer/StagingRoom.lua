@@ -3463,8 +3463,8 @@ local function CAI_NormalizeText(text)
 	text = text:gsub("\r", "")
 	text = text:gsub("[ \t]+", " ")
 	text = text:gsub(" *\n *", "\n")
-	text = text:gsub("^%s+", "")
-	text = text:gsub("%s+$", "")
+	text = text:gsub("^[ \t\r\n]+", "")
+	text = text:gsub("[ \t\r\n]+$", "")
 	return text
 end
 

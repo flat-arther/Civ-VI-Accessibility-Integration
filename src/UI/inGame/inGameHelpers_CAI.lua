@@ -40,8 +40,7 @@ end
 function NormalizeFormattedText(text)
     text = text or ""
     text = string.gsub(text, "%[NEWLINE%]", ", ")
-    text = string.gsub(text, "%s+", " ")
-    return text
+    return CAI_CollapseAsciiWhitespace(text)
 end
 
 function SplitFormattedLines(text)
@@ -49,7 +48,7 @@ function SplitFormattedLines(text)
     text = text or ""
     text = string.gsub(text, "%[NEWLINE%]", "\n")
     for line in string.gmatch(text, "([^\n]+)") do
-        local trimmed = string.gsub(line, "^%s*(.-)%s*$", "%1")
+        local trimmed = CAI_TrimAsciiWhitespace(line)
         if trimmed ~= "" then
             table.insert(lines, trimmed)
         end
@@ -558,7 +557,7 @@ function FormatOwnedName(ownerPrefix, name, suffix)
 
     local formatted = Locale.Lookup("LOC_CAI_UNIT_FLAG_NAME_PATTERN", ownerPrefix or "", name, suffix or "")
     local normalized = NormalizeFormattedText(formatted)
-    normalized = string.gsub(normalized, "^%s*(.-)%s*$", "%1")
+    normalized = CAI_TrimAsciiWhitespace(normalized)
     if normalized == "" then
         return nil
     end

@@ -119,7 +119,7 @@ local function BuildEulaPanel()
 		AlwaysEdit = true,
 		HighlightOnEdit = false,
 	})
-	edit:SetText(Controls.CopyrightText:GetText():gsub("%.%s", "[NEWLINE]"), true)
+	edit:SetText(Controls.CopyrightText:GetText():gsub("%.[ \t\r\n]", "[NEWLINE]"), true)
 	m_eulaPanel:AddChild(edit)
 
 	local acceptBtn = mgr:CreateWidget("CAIIntro_AcceptBtn", "Button", {

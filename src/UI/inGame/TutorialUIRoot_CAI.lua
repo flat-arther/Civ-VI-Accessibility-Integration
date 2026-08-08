@@ -258,7 +258,7 @@ local function CollectLeafControlText(control, lines, seenText)
         elseif child.GetText ~= nil then
             local text = child:GetText()
             if type(text) == "string"
-                and text:match("%S") ~= nil
+                and text:match("[^ \t\r\n]") ~= nil
                 and not seenText[text] then
                 seenText[text] = true
                 table.insert(lines, text)

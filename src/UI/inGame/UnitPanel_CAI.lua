@@ -1883,10 +1883,8 @@ local function BuildCombatResultIntroClause(attackerName, defenderName)
         return nil
     end
 
-    text = string.gsub(text, ":%s*%.$", ".")
-    text = string.gsub(text, "%s+", " ")
-    text = string.gsub(text, "^%s*(.-)%s*$", "%1")
-    return text
+    text = string.gsub(text, ":[ \t\r\n]*%.$", ".")
+    return CAI_TrimAsciiWhitespace(CAI_CollapseAsciiWhitespace(text))
 end
 
 local function BuildCombatResultText(results)

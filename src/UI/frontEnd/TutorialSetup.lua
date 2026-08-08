@@ -32,7 +32,7 @@ Events.FinishedGameplayContentConfigure.Add(function(result)
 			Controls.TutorialPanel:SetHide(false);		
 		end
 	else
-		 Controls.Status:SetText("[COLOR_RED]There was an error loading the tutorial.[ENDCOLOR]");	
+		 Controls.Status:SetText(Locale.Lookup("LOC_CAI_TUTORIAL_LOAD_ERROR"));
 	end
 end);
 
@@ -42,12 +42,12 @@ function EnsureTutorialIsEnabled()
 	 --Configure UI first
 	 Controls.TutorialPanel:SetHide(true);
 	 Controls.StatusPanel:SetHide(false);
-	 Controls.Status:SetText("Enabling the Tutorial Mod...");
+	 Controls.Status:SetText(Locale.Lookup("LOC_CAI_TUTORIAL_ENABLING_MOD"));
 
 	 -- Configure Mods
 	local tutorialHandle = Modding.GetModHandle(g_TutorialModId);
 	if(tutorialHandle == nil) then
-		 Controls.Status:SetText("[COLOR_RED]The tutorial mod could not be found.[ENDCOLOR]");
+		 Controls.Status:SetText(Locale.Lookup("LOC_CAI_TUTORIAL_MOD_NOT_FOUND"));
 	else
 		if(not tutorialEnabled) then
 			GameConfiguration.AddEnabledMods(tutorialHandle, true);

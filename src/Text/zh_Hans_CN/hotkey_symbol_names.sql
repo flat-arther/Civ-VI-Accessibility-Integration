@@ -1,0 +1,12 @@
+UPDATE LocalizedText SET Text = '下划线' WHERE Tag = 'LOC_OPTIONS_KEY_UNDERSCORE' AND Language = 'zh_Hans_CN';
+UPDATE LocalizedText SET Text = '分号' WHERE Tag = 'LOC_OPTIONS_KEY_SEMICOLON' AND Language = 'zh_Hans_CN';
+UPDATE LocalizedText SET Text = '等号' WHERE Tag = 'LOC_OPTIONS_KEY_PLUS' AND Language = 'zh_Hans_CN';
+UPDATE LocalizedText SET Text = '逗号' WHERE Tag = 'LOC_OPTIONS_KEY_COMMA' AND Language = 'zh_Hans_CN';
+UPDATE LocalizedText SET Text = '减号' WHERE Tag = 'LOC_OPTIONS_KEY_MINUS' AND Language = 'zh_Hans_CN';
+UPDATE LocalizedText SET Text = '句点' WHERE Tag = 'LOC_OPTIONS_KEY_PERIOD' AND Language = 'zh_Hans_CN';
+UPDATE LocalizedText SET Text = '斜杠' WHERE Tag = 'LOC_OPTIONS_KEY_SLASH' AND Language = 'zh_Hans_CN';
+UPDATE LocalizedText SET Text = '波浪号' WHERE Tag = 'LOC_OPTIONS_KEY_TILDE' AND Language = 'zh_Hans_CN';
+UPDATE LocalizedText SET Text = '左方括号' WHERE Tag = 'LOC_OPTIONS_KEY_LBRACKET' AND Language = 'zh_Hans_CN';
+UPDATE LocalizedText SET Text = '反斜杠' WHERE Tag = 'LOC_OPTIONS_KEY_BACKSLASH' AND Language = 'zh_Hans_CN';
+UPDATE LocalizedText SET Text = '右方括号' WHERE Tag = 'LOC_OPTIONS_KEY_RBRACKET' AND Language = 'zh_Hans_CN';
+UPDATE LocalizedText SET Text = '引号' WHERE Tag = 'LOC_OPTIONS_KEY_QUOTE' AND Language = 'zh_Hans_CN';

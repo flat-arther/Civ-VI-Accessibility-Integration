@@ -7117,5 +7117,102 @@
     <Row Tag="LOC_CAI_MODS_DISABLE_FAILED" Language="en_US">
       <Text>The mod could not be disabled</Text>
     </Row>
+
+    <!-- Extracted loaded UI text -->
+    <Row Tag="LOC_CAI_MY2K_OPENING_CREATE_USER" Language="en_US">
+      <Text>Opening create new user</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_LOAD_ERROR" Language="en_US">
+      <Text>[COLOR_RED]There was an error loading the tutorial.[ENDCOLOR]</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ENABLING_MOD" Language="en_US">
+      <Text>Enabling the Tutorial Mod...</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MOD_NOT_FOUND" Language="en_US">
+      <Text>[COLOR_RED]The tutorial mod could not be found.[ENDCOLOR]</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CIV_ROYALE_DATE" Language="en_US">
+      <Text>30XX AD</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MY2K_TEST_LEGAL_TITLE" Language="en_US">
+      <Text>Accessibility Test: Legal Agreements</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MY2K_TEST_LEGAL_MESSAGE" Language="en_US">
+      <Text>Please review the following terms.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MY2K_TEST_LEGAL_DECLINE_ALL" Language="en_US">
+      <Text>Decline All</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MY2K_TEST_LEGAL_ACCEPT_ALL" Language="en_US">
+      <Text>Accept All</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MY2K_TEST_LEGAL_EULA_TEXT" Language="en_US">
+      <Text>Section 1: Accessibility Testing.[NEWLINE]Section 2: Testing screen reader speech output queue.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MY2K_TEST_LEGAL_PRIVACY_NAME" Language="en_US">
+      <Text>Privacy Policy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MY2K_TEST_LEGAL_PRIVACY_TEXT" Language="en_US">
+      <Text>This is the second test document.[NEWLINE]Confirming layout flow works.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOD_NAME" Language="en_US">
+      <Text>Civ VI Accessibility Integration</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOD_DESCRIPTION" Language="en_US">
+      <Text>Civilization VI Accessibility Integration makes Sid Meier's Civilization VI playable with a screen reader. It adds spoken information and keyboard navigation to the game's menus, dialogs, screens, and other user-interface elements.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOD_TEASER" Language="en_US">
+      <Text>Blind accessibility mod for civilization VI</Text>
+    </Row>
+
+    <!-- Correct official Simplified Chinese mid-phrase line breaks. -->
+    <Replace Tag="LOC_META_98_BODY" Language="en_US">
+      <Text>Much in the same way you research new technologies by generating [ICON_Science] Science in your cities, you unlock civics by generating [ICON_Culture] Culture.[NEWLINE][NEWLINE]You have already unlocked the Code of Laws civic which enabled you to establish your first government.</Text>
+    </Replace>
+    <Replace Tag="LOC_META_105_BODY" Language="en_US">
+      <Text>You must choose how each city in your civilization is to grow and expand over time, improving the land you control and creating new buildings and districts within your borders.</Text>
+    </Replace>
+    <Replace Tag="ADVISOR_LINE_FTUE_12ALT" Language="en_US">
+      <Text>We should take advantage of this lull in hostilities. With our Warriors now prepared, we may focus our production capabilities towards the city itself.</Text>
+    </Replace>
+    <Replace Tag="LOC_WORLD_RANKINGS_SCIENCE_DETAILS" Language="en_US">
+      <Text>To achieve a [COLOR:ResScienceLabelCS]SCIENCE[ENDCOLOR] victory, you must accomplish 3 major milestones:</Text>
+    </Replace>
+    <Replace Tag="LOC_WORLD_RANKINGS_CULTURE_DETAILS_DOMESTIC_TOURISTS" Language="en_US">
+      <Text>Your [COLOR:ResCultureLabelCS]DOMESTIC TOURISTS[ENDCOLOR] represent the tourists from your civilization that are currently happy vacationing within your borders.</Text>
+    </Replace>
+    <Replace Tag="LOC_TECH_MINING_QUOTE_1" Language="en_US">
+      <Text>"Who deserves more credit than the wife of a coal miner?” [NEWLINE]– Merle Travis</Text>
+    </Replace>
+    <Replace Tag="LOC_CIVIC_CODE_OF_LAWS_QUOTE_2" Language="en_US">
+      <Text>“At his best, man is the noblest of all animals; separated from law and justice he is the worst.” [NEWLINE]– Aristotle</Text>
+    </Replace>
+    <Replace Tag="LOC_CIVIC_MERCENARIES_QUOTE_1" Language="en_US">
+      <Text>“In peace one is despoiled by mercenaries; in war by one’s enemies.” [NEWLINE]– Niccolo Machiavelli</Text>
+    </Replace>
+    <Replace Tag="LOC_CIVIC_OPERA_BALLET_QUOTE_1" Language="en_US">
+      <Text>“Opera is when a guy gets stabbed in the back and, instead of bleeding, he sings.” [NEWLINE]- Robert Benchley</Text>
+    </Replace>
+    <Replace Tag="LOC_CIVIC_URBANIZATION_QUOTE_2" Language="en_US">
+      <Text>“What I like about cities is that everything is king size, the beauty and the ugliness.” [NEWLINE]– Joseph Brodsky</Text>
+    </Replace>
+    <Replace Tag="LOC_GREATWORK_CHAUCER_1_QUOTE" Language="en_US">
+      <Text> A KNYGHT ther was, and that a worthy man,[NEWLINE]That fro the tyme that he first bigan[NEWLINE]To riden out, he loved chivalrie,[NEWLINE]Trouthe and honour, fredom and curteisie.</Text>
+    </Replace>
+    <Replace Tag="LOC_GREATWORK_SHAKESPEARE_2_QUOTE" Language="en_US">
+      <Text>To be, or not to be? That is the question—[NEWLINE]Whether ’tis nobler in the mind to suffer[NEWLINE]The slings and arrows of outrageous fortune,[NEWLINE]Or to take arms against a sea of troubles,[NEWLINE]And, by opposing, end them?</Text>
+    </Replace>
+    <Replace Tag="LOC_GREATWORK_PUSHKIN_2_QUOTE" Language="en_US">
+      <Text>Like some magistrate grown gray in office,[NEWLINE]Calmly he contemplates alike the just[NEWLINE]And unjust, with indifference he notes[NEWLINE]Evil and good, and knows not wrath nor pity.</Text>
+    </Replace>
+    <Replace Tag="LOC_GREATWORK_GOETHE_2_QUOTE" Language="en_US">
+      <Text>“The human race is a monotonous affair. Most people spend the greatest part of their time working in order to live, and what little freedom remains so fills them with fear that they seek out any and every means to be rid of it.”</Text>
+    </Replace>
+    <Replace Tag="LOC_GREATWORK_DICKINSON_1_QUOTE" Language="en_US">
+      <Text>A Bird came down the Walk—[NEWLINE]He did not know I saw—[NEWLINE]He bit an Angleworm in halves[NEWLINE]And ate the fellow, raw.</Text>
+    </Replace>
+    <Replace Tag="LOC_GREATWORK_DICKINSON_2_QUOTE" Language="en_US">
+      <Text>Success is counted sweetest[NEWLINE]By those who ne'er succeed.[NEWLINE]To comprehend a nectar[NEWLINE]Requires sorest need.</Text>
+    </Replace>
   </LocalizedText>
 </GameData>

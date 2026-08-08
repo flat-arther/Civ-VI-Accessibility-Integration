@@ -1,0 +1,800 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+  <LocalizedText>
+    <!-- 通用教程界面 -->
+    <Row Tag="LOC_CAI_TUTORIAL_SHOW_TUTORIALS" Language="zh_Hans_CN">
+      <Text>显示模组教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_SHOW_TUTORIALS_TOOLTIP" Language="zh_Hans_CN">
+      <Text>相关事件发生时，显示尚未看过的无障碍教程。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RESET" Language="zh_Hans_CN">
+      <Text>重置模组教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RESET_TOOLTIP" Language="zh_Hans_CN">
+      <Text>让所有无障碍教程都可以再次出现。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIALS_RESET" Language="zh_Hans_CN">
+      <Text>教程已重置</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_SAVE_FAILED" Language="zh_Hans_CN">
+      <Text>无法保存教程设置。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESCAPE_BLOCKED" Language="zh_Hans_CN">
+      <Text>请使用“继续”关闭教程</Text>
+    </Row>
+
+    <!-- 主菜单 -->
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_TITLE" Language="zh_Hans_CN">
+      <Text>无障碍模组界面</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_INTERFACE" Language="zh_Hans_CN">
+      <Text>欢迎来到《文明 VI》。首次进入每个无障碍界面时，这些简短教程会说明其使用方法。若要关闭教程，请在任意教程对话框中取消选中“显示模组教程”，也可以稍后前往“模组设置”的“用户界面”区域将其禁用。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_NESTING" Language="zh_Hans_CN">
+      <Text>界面由相互嵌套的控件构成。大多数界面都是面板，其中包含控件和列表、树视图、表格、网格、关系图、选项卡、对话框等其他容器。进入容器会将其加入焦点路径，离开容器则会返回其父级。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_FOCUS_SPEECH" Language="zh_Hans_CN">
+      <Text>焦点移动时，模组会根据你的设置播报控件的标签、角色、数值、位置、状态和工具提示。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_NAVIGATION" Language="zh_Hans_CN">
+      <Text>使用 Tab 和 Shift 加 Tab 在各组控件之间移动。在列表、树视图、表格、网格和关系图中，使用方向键在项目之间移动，并使用 Home 和 End 移到边界。在对话框中，Home 和 End 会跳到第一个和最后一个控件。列表和树视图还支持 Page Up 和 Page Down。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_ACTIVATION" Language="zh_Hans_CN">
+      <Text>使用 Enter 或空格激活当前焦点控件。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_SEARCH" Language="zh_Hans_CN">
+      <Text>在列表、树视图、表格、网格和关系图中，直接输入文字即可查找项目。表格会搜索行标签，网格会搜索每个单元格，关系图会搜索每个可见节点。Backspace 删除最后输入的字符，Escape 清除搜索文字。在支持的界面中按 Control 加 F，可以打开搜索面板进行更详细的搜索。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_FOCUSED_WIDGET_READER" Language="zh_Hans_CN">
+      <Text>焦点控件阅读器可让你逐节听取当前焦点控件的详细信息。使用 Alt 加上方向键和 Alt 加下方向键移动并朗读上一节或下一节。使用 Alt 加 Home 和 Alt 加 End 跳转并朗读第一节或最后一节。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_HELP" Language="zh_Hans_CN">
+      <Text>按 Control 加 H 打开与当前界面相关的快捷键参考。按 Shift 加 F1 可听取焦点控件可用的命令。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAIN_MENU_SETTINGS" Language="zh_Hans_CN">
+      <Text>按 F12 打开无障碍模组设置。你可以在其中更改播报和导航偏好，或禁用、重置模组教程。</Text>
+    </Row>
+
+    <!-- 通用界面指导 -->
+    <Row Tag="LOC_CAI_TUTORIAL_SCREEN_TITLE" Language="zh_Hans_CN">
+      <Text>{1_Name}教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_SCREEN_FALLBACK" Language="zh_Hans_CN">
+      <Text>界面</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GAME_SUMMARIES_TITLE" Language="zh_Hans_CN">
+      <Text>名人堂教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GAME_SUMMARY_DETAILS_TITLE" Language="zh_Hans_CN">
+      <Text>名人堂游戏详情教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MODS_SCREEN_TITLE" Language="zh_Hans_CN">
+      <Text>附加内容教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_OVERVIEW_TITLE" Language="zh_Hans_CN">
+      <Text>城市概览教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_STATES_TITLE" Language="zh_Hans_CN">
+      <Text>城邦教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_TITLE" Language="zh_Hans_CN">
+      <Text>选择市政教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_TITLE" Language="zh_Hans_CN">
+      <Text>市政树教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA_TITLE" Language="zh_Hans_CN">
+      <Text>文明百科教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CLIMATE_SCREEN_TITLE" Language="zh_Hans_CN">
+      <Text>气候教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_VIEW_TITLE" Language="zh_Hans_CN">
+      <Text>外交教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DIPLOMACY_DEAL_VIEW_TITLE" Language="zh_Hans_CN">
+      <Text>交易谈判教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_END_GAME_TITLE" Language="zh_Hans_CN">
+      <Text>游戏结果教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ERA_PROGRESS_TITLE" Language="zh_Hans_CN">
+      <Text>时代进度教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_TITLE" Language="zh_Hans_CN">
+      <Text>间谍活动选择器教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_OVERVIEW_TITLE" Language="zh_Hans_CN">
+      <Text>间谍活动概览教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_TITLE" Language="zh_Hans_CN">
+      <Text>全球资源教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNMENT_SCREEN_TITLE" Language="zh_Hans_CN">
+      <Text>政体教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNOR_PANEL_TITLE" Language="zh_Hans_CN">
+      <Text>总督教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNOR_ASSIGNMENT_TITLE" Language="zh_Hans_CN">
+      <Text>总督任命教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_TITLE" Language="zh_Hans_CN">
+      <Text>伟人教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORKS_OVERVIEW_TITLE" Language="zh_Hans_CN">
+      <Text>巨作教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORK_SHOWCASE_TITLE" Language="zh_Hans_CN">
+      <Text>巨作展示教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_HISTORIC_MOMENTS_TITLE" Language="zh_Hans_CN">
+      <Text>历史时刻教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAP_PIN_LIST_TITLE" Language="zh_Hans_CN">
+      <Text>地图标记列表教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAP_PIN_EDITOR_TITLE" Language="zh_Hans_CN">
+      <Text>地图标记编辑器教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NOTIFICATION_CENTER_TITLE" Language="zh_Hans_CN">
+      <Text>通知教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_PRODUCTION_PANEL_TITLE" Language="zh_Hans_CN">
+      <Text>生产教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_SCREEN_TITLE" Language="zh_Hans_CN">
+      <Text>宗教教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_REPORTS_SCREEN_TITLE" Language="zh_Hans_CN">
+      <Text>报告教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RESEARCH_CHOOSER_TITLE" Language="zh_Hans_CN">
+      <Text>选择研究教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_TITLE" Language="zh_Hans_CN">
+      <Text>科技树教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_TITLE" Language="zh_Hans_CN">
+      <Text>贸易概览教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_ROUTE_CHOOSER_TITLE" Language="zh_Hans_CN">
+      <Text>贸易路线选择器教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_ORIGIN_CHOOSER_TITLE" Language="zh_Hans_CN">
+      <Text>贸易路线起点教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS_TITLE" Language="zh_Hans_CN">
+      <Text>单位晋升教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_RANKINGS_TITLE" Language="zh_Hans_CN">
+      <Text>世界排名教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAV_LIST" Language="zh_Hans_CN">
+      <Text>在列表中，使用上、下方向键逐项移动，使用 Home 和 End 移到第一个和最后一个项目，使用 Page Up 和 Page Down 按页移动。Enter 或空格可激活按钮和菜单项。直接输入文字可以查找项目；列表支持搜索时，也可以按 Control 加 F 打开搜索面板。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAV_TREE" Language="zh_Hans_CN">
+      <Text>在树视图中，上、下方向键会在可见行之间移动。右方向键会展开分支或进入子项目；左方向键会折叠分支或返回父级。Home 和 End 在当前层级内移动；Control 加 Home 和 Control 加 End 移到整棵树的起点或末端。Enter 可激活叶项目或切换分支的展开状态。Page Up 和 Page Down 按页移动。直接输入文字可以查找项目，也可以按 Control 加 F 搜索。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAV_TABS" Language="zh_Hans_CN">
+      <Text>使用 Tab 和 Shift 加 Tab 浏览选项卡页面。焦点位于选项卡行时，使用左、右方向键切换选项卡。在选项卡控件内的任意位置，都可以使用 Control 加 Tab 和 Control 加 Shift 加 Tab 切换选项卡。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GRID_NAVIGATION" Language="zh_Hans_CN">
+      <Text>在网格中，上、下方向键在当前层级内移动。左、右方向键会移动到相邻层级，并尽量保持在相近的行。Home 和 End 移到该层级的第一个和最后一个项目。Control 加 Home 和 Control 加 End 移到整个网格的第一个和最后一个项目。Control 加左方向键和 Control 加右方向键跳到上一个或下一个时代或列。直接输入文字可搜索每个单元格。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GRAPH_NAVIGATION" Language="zh_Hans_CN">
+      <Text>在关系图视图中，右方向键会前往焦点项目解锁的第一项市政或科技，左方向键会前往其第一项前置条件。完成其中任意一种移动后，上、下方向键会在同一连接的其他选项间循环。按左方向键到达没有前置条件的项目时，上、下方向键会改为在所有此类根项目间循环。Home 和 End 移到当前备选项的第一个和最后一个。Control 加 Home 和 Control 加 End 移到第一个和最后一个根项目。直接输入文字可搜索每个关系图节点。</Text>
+    </Row>
+
+    <!-- 前端界面 -->
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GAME_SUMMARIES" Language="zh_Hans_CN">
+      <Text>名人堂</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GAME_SUMMARY_DETAILS" Language="zh_Hans_CN">
+      <Text>名人堂游戏详情</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_MODS" Language="zh_Hans_CN">
+      <Text>附加内容</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GAME_SUMMARIES_LAYOUT" Language="zh_Hans_CN">
+      <Text>第一个控件是“规则集”下拉框，用于筛选所有显示的记录。其后是包含“概览”和“历史”两个页面的选项卡控件。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GAME_SUMMARIES_OVERVIEW" Language="zh_Hans_CN">
+      <Text>“概览”是一棵树。“胜利进度”可展开为各种胜利类型及达成次数。“领袖进度”可展开为各领袖的胜利次数和游戏次数。之后还有其他可展开的统计类别。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GAME_SUMMARIES_HISTORY" Language="zh_Hans_CN">
+      <Text>“历史”包含已完成游戏的列表，之后是“排序方式”下拉框。每场游戏都会说明分数、领袖、文明、结果和回合数。按 Enter 可打开该场游戏的详情界面。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GAME_SUMMARY_DETAILS_OVERVIEW" Language="zh_Hans_CN">
+      <Text>“概览”选项卡以“总体”分支开始，其中包含整场游戏的统计数据和游戏模式。之后每位玩家各有一个分支，包含领袖、文明、分数、结果和该玩家的统计类别。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GAME_SUMMARY_DETAILS_REPORTS" Language="zh_Hans_CN">
+      <Text>“报告”选项卡是一棵树。存在多个报告上下文时，上下文分支中会包含报告类型。报告类型中包含各行；较短的行会合并朗读，超过三列的行则可展开为单独的单元格。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GAME_SUMMARY_DETAILS_GRAPHS" Language="zh_Hans_CN">
+      <Text>“图表”选项卡会将视觉图表数据转换为变化树。展开玩家后，只会看到至少有一项记录值发生变化的回合；再展开回合，即可读取当时变化的数值。重复数值会被省略，直到再次发生变化。城市和宗教数值的消息中会包含相关城市或宗教的名称。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MODS_OVERVIEW" Language="zh_Hans_CN">
+      <Text>此界面包含“已安装”选项卡；Steam 可用时还会显示“订阅”选项卡。按 Escape 会关闭界面，并将当前所选模组组的启用状态应用到游戏配置。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MODS_INSTALLED" Language="zh_Hans_CN">
+      <Text>“已安装”页面依次包含：已安装模组树、“排序方式”下拉框、“官方内容”复选框、“社区内容”复选框、按条件显示的“忽略兼容性警告”复选框、“模组组”下拉框、“创建组”、“删除组”、“全部启用”和“全部禁用”。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MODS_ROWS" Language="zh_Hans_CN">
+      <Text>每个模组占树中的一行。其标签会说明名称、启用或禁用状态、内容类型，以及所有权或兼容性警告。按 Enter 可启用或禁用该模组。右方向键展开只读详情，例如描述、作者、存档和多人游戏支持情况，以及实际依赖项；左方向键将其折叠。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MODS_GROUPS" Language="zh_Hans_CN">
+      <Text>模组组是分别保存的模组启用配置。在下拉框中切换“模组组”，会改变当前编辑的配置。“创建组”会要求输入名称，并复制当前组的启用状态。所选组允许删除时，“删除组”会立即将其删除，不会要求确认。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MODS_BULK" Language="zh_Hans_CN">
+      <Text>“排序方式”提供“名称”和“已启用”选项。“官方内容”和“社区内容”复选框用于筛选树。Control 加 F 会搜索本地化后的模组名称和简介。“全部启用”和“全部禁用”只会影响当前筛选结果，包括搜索和内容筛选器共同得出的结果。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MODS_SUBSCRIPTIONS" Language="zh_Hans_CN">
+      <Text>“订阅”页面是一个仅显示名称的列表，之后是“浏览创意工坊”。每行的工具提示包含状态和最后更新时间。下载进度会自动更新，不会夺取焦点。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MODS_BINDINGS" Language="zh_Hans_CN">
+      <Text>焦点位于订阅项目时，如果有可用更新，按 Enter 会执行“更新”；否则会在可用时执行“在创意工坊中查看”。Control 加 Enter 始终尝试执行“查看”。Delete 会取消订阅并移除该行。Escape 会关闭“创建组”对话框或模组界面。</Text>
+    </Row>
+
+    <!-- 游戏内界面名称 -->
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_CITY_OVERVIEW" Language="zh_Hans_CN">
+      <Text>城市概览</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_CITY_STATES" Language="zh_Hans_CN">
+      <Text>城邦</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_CIVICS_CHOOSER" Language="zh_Hans_CN">
+      <Text>选择市政</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_CIVICS_TREE" Language="zh_Hans_CN">
+      <Text>市政树</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_CIVILOPEDIA" Language="zh_Hans_CN">
+      <Text>文明百科</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_CLIMATE" Language="zh_Hans_CN">
+      <Text>气候</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_DIPLOMACY" Language="zh_Hans_CN">
+      <Text>外交</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_DEAL" Language="zh_Hans_CN">
+      <Text>交易谈判</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_END_GAME" Language="zh_Hans_CN">
+      <Text>游戏结果</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_ERA_PROGRESS" Language="zh_Hans_CN">
+      <Text>时代进度</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_ESPIONAGE_CHOOSER" Language="zh_Hans_CN">
+      <Text>选择间谍任务</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_ESPIONAGE_OVERVIEW" Language="zh_Hans_CN">
+      <Text>间谍活动概览</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GLOBAL_RESOURCES" Language="zh_Hans_CN">
+      <Text>全球资源</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GOVERNMENT" Language="zh_Hans_CN">
+      <Text>政体</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GOVERNORS" Language="zh_Hans_CN">
+      <Text>总督</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GOVERNOR_ASSIGNMENT" Language="zh_Hans_CN">
+      <Text>总督任命</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GREAT_PEOPLE" Language="zh_Hans_CN">
+      <Text>伟人</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GREAT_WORKS" Language="zh_Hans_CN">
+      <Text>巨作</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_GREAT_WORK_SHOWCASE" Language="zh_Hans_CN">
+      <Text>巨作展示</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_HISTORIC_MOMENTS" Language="zh_Hans_CN">
+      <Text>历史时刻</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_MAP_PINS" Language="zh_Hans_CN">
+      <Text>地图标记列表</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_MAP_PIN_EDITOR" Language="zh_Hans_CN">
+      <Text>地图标记编辑器</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_NOTIFICATIONS" Language="zh_Hans_CN">
+      <Text>通知</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_PRODUCTION" Language="zh_Hans_CN">
+      <Text>生产</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_RELIGION" Language="zh_Hans_CN">
+      <Text>宗教</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_REPORTS" Language="zh_Hans_CN">
+      <Text>报告</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_RESEARCH" Language="zh_Hans_CN">
+      <Text>选择研究</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_TECH_TREE" Language="zh_Hans_CN">
+      <Text>科技树</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_TRADE_OVERVIEW" Language="zh_Hans_CN">
+      <Text>贸易概览</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_TRADE_ROUTE" Language="zh_Hans_CN">
+      <Text>贸易路线选择器</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_TRADE_ORIGIN" Language="zh_Hans_CN">
+      <Text>贸易路线起点</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_UNIT_PROMOTIONS" Language="zh_Hans_CN">
+      <Text>单位晋升</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_WORLD_RANKINGS" Language="zh_Hans_CN">
+      <Text>世界排名</Text>
+    </Row>
+
+    <!-- 游戏内界面教程 -->
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_OVERVIEW" Language="zh_Hans_CN">
+      <Text>此界面包含一棵城市详情树；允许重命名时，树后还会显示“重命名城市”按钮。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_OVERVIEW_LAYOUT" Language="zh_Hans_CN">
+      <Text>树的顶层区域依次为“市民”“建筑”“宗教”，以及可用时的“忠诚度”和“电力”。“市民”包含食物、成长、住房、宜居度、工作单元格和产出详情。“建筑”包含区域、区域中的建筑和奇观。其余区域包含对应数据的完整实时明细。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_OVERVIEW_ACTIONS" Language="zh_Hans_CN">
+      <Text>展开区域和行即可阅读详情。按 Tab 越过树可到达“重命名城市”。在重命名编辑器中，Enter 提交，Escape 取消。在编辑器外按 Escape 会关闭概览。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_STATES" Language="zh_Hans_CN">
+      <Text>默认的表格视图会为每个已遇见城邦提供一行。各列会比较类型、你与城邦的关系、你的使者及加成、当前宗主国、当前任务、对外关系和外国影响力。将焦点移到任意单元格，都会选中对应城邦并更新表格之后的控件。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_STATES_SECTIONS" Language="zh_Hans_CN">
+      <Text>使用表头可对城邦排序。“使者”单元格先给出你的使者数量，再列出所有 1、3、6 名使者加成和宗主国加成明细。“当前任务”先给出数量，再列出每项任务的描述。“对外关系”合并所有已遇见的非玩家文明与城邦关系，先列出正在与该城邦交战者，并按字母顺序排列各组。每个派有使者的已知外国文明也有独立的影响力列；尚未遇见的文明则匿名合并在一个影响力列中。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_STATES_ENVOYS" Language="zh_Hans_CN">
+      <Text>在任意表格数据单元格上，Shift 加左方向键会减少一名待分配使者，Shift 加右方向键会增加一名。Control 加 Enter 确认所有待处理的使者变更。表格之后的“使者”滑块和“确认使者”按钮提供相同操作。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CITY_STATES_ACTIONS" Language="zh_Hans_CN">
+      <Text>使者控件之后依次是“查看城邦”、“宣战”或“讲和”、可用时的“征用军队”，以及切换视图按钮。树视图以“城邦排序方式”下拉框开始，之后每个城邦各有一个可展开行，其中包含关系状态、加成、影响力、任务和关系区域。对于当前表格的每一列，下拉框都会提供自然顺序和两个明确说明的排序方向，例如 A 到 Z、交战者优先或数量最多者优先。表头使用相同说明，两个视图共享所选排序。Alt 加 1 选择表格视图，Alt 加 2 选择树视图；所选视图会被记住。Enter 激活焦点按钮。Escape 关闭界面。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER" Language="zh_Hans_CN">
+      <Text>第一棵树包含当前市政和队列中的市政。第二棵树包含可用市政。每项市政都可展开查看其解锁内容。最后一个按钮会打开完整的市政树。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_ACTIONS" Language="zh_Hans_CN">
+      <Text>在可用市政上按 Enter，会将其设为当前市政。当前市政和队列行可以查看但为只读；此选择器特意没有添加队列快捷键。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_BINDINGS" Language="zh_Hans_CN">
+      <Text>在已揭示市政上按 Shift 加 Enter，可打开对应的文明百科文章。使用 Tab 从队列树移到可用市政，再移到“打开市政树”。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_LAYOUT" Language="zh_Hans_CN">
+      <Text>控件按以下顺序排列：非空时显示的当前及队列市政列表、筛选列表、当前启用的市政网格、关系图或树视图、网格和关系图视图中的“解锁”列表、只读的当前政体与已插入政策摘要，以及“视图”下拉框。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_VIEWS" Language="zh_Hans_CN">
+      <Text>“视图”下拉框依次包含“网格”“关系图”和“树视图”。网格将时代排列成列，将前置层级从左到右排列，并在每个层级内纵向排列市政。关系图直接沿前置条件连接导航。树视图呈现时代、层级、市政的层次结构。Alt 加 1 选择网格，Alt 加 2 选择关系图，Alt 加 3 选择树视图。切换视图时会尽可能保持焦点位于同一市政；下次打开市政树时还会记住所选视图。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_TREE_VIEW" Language="zh_Hans_CN">
+      <Text>在树视图中，展开时代会显示已经展开的层级及其中的市政。市政的子项目包含“解锁”“前置条件”“通向”和计算得出的前往该市政路径。激活引用可跳转到对应项目。Backspace 按先前的引用跳转路径返回。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_ACTIONS" Language="zh_Hans_CN">
+      <Text>在可研究市政上按 Enter 会将其设为当前市政。Control 加 Enter 将其加入市政队列末尾。Shift 加 Enter 打开对应的文明百科文章。这三组按键同样适用于网格视图、关系图视图和筛选结果。在队列行上按 Enter 会跳到对应市政；Shift 加 Enter 打开其文章。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_FILTERS" Language="zh_Hans_CN">
+      <Text>在筛选器上按 Enter 会打开临时结果列表。在结果中，Enter 关闭列表并跳到对应市政，Control 加 Enter 将其加入队列，Shift 加 Enter 打开文明百科，Escape 关闭结果并清除筛选器。在任意主要视图中按 Control 加 F，都会使用游戏的市政搜索索引查找市政。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_GOVERNMENT" Language="zh_Hans_CN">
+      <Text>在网格或关系图视图中，将焦点移到市政，会为该市政重新生成相邻的“解锁”列表。之后的只读编辑框会概述当前政体、政策槽数量和每项已插入政策。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA" Language="zh_Hans_CN">
+      <Text>文明百科包含三个同级控件：“章节”树、“文章”树和“历史”列表。使用 Tab 在它们之间移动。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA_LAYOUT" Language="zh_Hans_CN">
+      <Text>“章节”树包含类别和页面。将焦点移到页面即可加载。“文章”树包含标题、段落、统计组、引文和相关页面链接。激活相关页面或历史记录会加载对应文章。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA_SEARCH" Language="zh_Hans_CN">
+      <Text>在“章节”树上按 Control 加 F，会使用完整查询进行文明百科全文搜索，搜索范围包括文章正文。搜索结果会打开匹配页面。“历史”列表记录访问过的页面。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA_BINDINGS" Language="zh_Hans_CN">
+      <Text>Alt 加左方向键会在文章历史中后退，Alt 加右方向键会前进。Escape 关闭文明百科。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CLIMATE" Language="zh_Hans_CN">
+      <Text>气候界面包含“概览”“二氧化碳水平”和“事件历史”选项卡。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CLIMATE_OVERVIEW" Language="zh_Hans_CN">
+      <Text>“概览”是一棵树，其中包含当前气候阶段及效果、二氧化碳贡献与温度、灾害强度设置、各类灾害预测、极地冰盖和海平面状态。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CLIMATE_CO2" Language="zh_Hans_CN">
+      <Text>“二氧化碳水平”是一棵先按文明、再按资源分组的树。它包含你的各项资源贡献，以及已知全球贡献者的实时总量。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_CLIMATE_HISTORY" Language="zh_Hans_CN">
+      <Text>“事件历史”是按时间顺序排列的列表。已定位且已揭示的事件会包含其相对于导航光标的方向。按 Enter 将光标移到事件起始位置，但不会关闭界面。Escape 关闭气候界面。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_OVERVIEW" Language="zh_Hans_CN">
+      <Text>普通概览包含“领袖”树，之后是“行动”列表。将焦点移到另一位领袖，会在游戏中选中该领袖并刷新之后的行动。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_FLOW" Language="zh_Hans_CN">
+      <Text>展开领袖可以查看所有已知情报区域，包括关系、外交能见度、议程、协议、流言、联盟、紧急状况、不满、政体，以及可用时的秘密结社数据。部分情报区域还包含可继续展开的明细和引用行。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_CONVERSATION" Language="zh_Hans_CN">
+      <Text>外交进入对话模式时，概览会被隐藏并由对话列表取代。列表包含领袖的发言、理由和你可用的回应。Enter 或空格可激活回应。播放领袖动画期间，界面会静默等待，直到对话控件可用。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_NAVIGATION" Language="zh_Hans_CN">
+      <Text>在“领袖”树中使用完整的树视图导航，然后按 Tab 移到“行动”。行动可能是按钮或子菜单；右方向键或 Enter 打开子菜单，左方向键将其关闭，上、下方向键在其中移动。Escape 会遵循游戏原有的外交退出或对话行为。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DEAL_LAYOUT" Language="zh_Hans_CN">
+      <Text>交易包含“我的提议”和“对方提议”选项卡。每个页面依次包含“提议”树、“库存”树和“行动”列表。两个页面显示同一项实时交易的双方内容。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DEAL_EDITING" Language="zh_Hans_CN">
+      <Text>库存按交易项目类型分组，例如金币、资源、协议、城市、巨作，以及可用时的俘虏。在库存项目上按 Enter 会将其加入交易。需要选择数量、持续时间、城市或其他选项的项目会打开编辑器或选择列表；Enter 提交，Escape 取消该临时编辑器。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DEAL_BINDINGS" Language="zh_Hans_CN">
+      <Text>在“出价”中，Delete 会移除当前焦点处的出价项目。Shift 加 Delete 会停止提供另一位领袖向你索要的项目。右方向键可展开包含城市或其他子级详情的出价项目；左方向键可将其折叠。Control 加 Tab 可在“我的出价”和“对方出价”之间切换。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DEAL_ACTIONS" Language="zh_Hans_CN">
+      <Text>按 Tab 越过“库存”可到达“行动”。第一条已禁用的行会读出领袖当前的反应。其后的可用按钮可能包括“接受交易”“索取”“使此交易更公平”“拒绝交易”和“返回游戏”。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_DEAL_NAVIGATION" Language="zh_Hans_CN">
+      <Text>在“出价”和“库存”中使用树视图导航，在“行动”中使用列表导航，并用 Tab 在这三组之间移动。Enter 或空格可激活可用控件。Escape 会先关闭临时编辑器；否则会按照游戏通常的方式退出交易。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_END_GAME" Language="zh_Hans_CN">
+      <Text>游戏结束面板依次包含“结果”、规则支持时显示的“排名”、图表、可用时显示的多人游戏“聊天”，以及游戏当前可用的结束游戏行动按钮。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_END_GAME_RESULTS" Language="zh_Hans_CN">
+      <Text>“结果”是一个列表，其中包含胜利或失败横幅、获胜者与文明信息、胜利说明和其他结果文本。“排名”是一个列表，其中包含分数门槛、你的分数与引语，以及对应的历史领袖评价。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_END_GAME_REPLAY" Language="zh_Hans_CN">
+      <Text>“图表”是一个三级树视图：依次为玩家、回合，以及该回合记录的每项数据和数值。没有数据的玩家和回合会被省略。使用完整的树视图导航检查全部游戏回放记录。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_END_GAME_CHAT_ACTIONS" Language="zh_Hans_CN">
+      <Text>“聊天”包含消息编辑框、目标下拉框和历史记录列表；在编辑框中按 Enter 即可发送。选项卡之后的可用行动可能包括“重播影片”“历史时刻”“导出历史”“观战”“主菜单”“下一位玩家”和“再来一回合”。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ERA_PROGRESS" Language="zh_Hans_CN">
+      <Text>此界面是一个树视图。按 Escape 可将其关闭。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ERA_PROGRESS_LAYOUT" Language="zh_Hans_CN">
+      <Text>树视图开头是时代得分摘要和上一项着力点或时代信息。接下来会在适用时列出黑暗时代、普通时代和黄金时代的门槛与着力点区域，最后是已知文明的时代状态信息。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_MODES" Language="zh_Hans_CN">
+      <Text>“间谍活动选择器”有两种独立模式，只有当前模式可供导航。“目的地”模式是一个树视图，用于将间谍派往城市；“任务”模式是一个列表，用于选择已在城市中建立情报网的间谍要执行的行动。模式改变时，面板会播报当前模式，并将焦点移到正确的树视图或列表。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_DESTINATIONS" Language="zh_Hans_CN">
+      <Text>在“目的地”模式下，每个树视图行都会标明城市及其所属文明，并标记首都。工具提示会报告旅行与建立情报网所需的时间、可执行任务的数量，以及该城市已建成的非奇观区域。可用城市遵循当前游戏规则，包括可见性、外交限制以及资料片对自由城市的处理。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_PREVIEWS" Language="zh_Hans_CN">
+      <Text>在目的地行上按右方向键，可展开只读的潜在任务子项。这些预览会标明行动，并在适用时列出目标区域、持续时间、成功概率、效果详情或失败原因。它们仅供查看；必须在城市行本身选择目的地。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_PLACEMENT" Language="zh_Hans_CN">
+      <Text>激活城市行即可选择该目的地、将游戏镜头移至那里，并打开“确认间谍部署”。查看城市和时间摘要，然后选择“确认”或“重新选择目的地”。“确认”会派遣间谍前往另一座城市并建立情报网。如果确认间谍当前所在的己方城市，选择器会切换到“任务”模式，供你选择执行反间谍行动的区域。“重新选择目的地”或 Escape 会返回目的地树视图，不会提交选择。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_MISSIONS" Language="zh_Hans_CN">
+      <Text>“任务”模式包含一个列表，列出间谍当前所在城市的实时任务按钮；目的地树视图会被隐藏。面板还会播报“获取情报”是否生效，并在生效时播报剩余回合数。在外国城市中，每项任务都会说明行动、适用时的目标区域、持续时间和成功概率，工具提示中则包含完整任务详情。已禁用的任务仍可阅读，其工具提示会说明无法开始的原因。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_MISSION_ACTIONS" Language="zh_Hans_CN">
+      <Text>激活可用的进攻任务会打开游戏本体的独立任务确认弹窗；选择列表行本身并不会接受任务。查看任务简报、持续时间、可能结果和成功概率，然后选择“接受任务”或“取消”。在己方城市中，“任务”模式会为每个有效区域分别列出一项“反间谍”。激活“反间谍”行会立即指派该区域，不会打开确认弹窗。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_CLOSE" Language="zh_Hans_CN">
+      <Text>在主要目的地树视图或任务列表中按 Escape，可关闭“间谍活动选择器”且不再进行选择。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_OVERVIEW" Language="zh_Hans_CN">
+      <Text>“间谍”选项卡和“任务历史”选项卡各包含一个树视图。在《风云变幻》中，“间谍”还包含“查看城市详情”按钮。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_OVERVIEW_OPERATIVES" Language="zh_Hans_CN">
+      <Text>“间谍”会将正在旅行的间谍、己方被俘间谍和城市分组。城市行包含已指派的间谍及其任务、晋升和状态详情。“任务历史”会按被俘敌方特工和任务地点，对已完成的活动进行分组。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_ESPIONAGE_OVERVIEW_BINDINGS" Language="zh_Hans_CN">
+      <Text>在支持此操作的城市或间谍行上，Control 加 Enter 可打开该城市的详情。“查看城市详情”按钮可对选中地点执行相同操作。在被俘间谍行上按 Enter，会发起换回被俘特工的交易。Escape 可关闭界面。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES" Language="zh_Hans_CN">
+      <Text>此界面默认显示可排序的比较表格。按 Alt 加 2 切换到树视图，或按 Alt 加 1 返回表格。系统会记住所选视图。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_LAYOUT" Language="zh_Hans_CN">
+      <Text>表格中的每一行代表一种资源。前几列给出资源名称、类别和总量，随后为每个已知文明各列出一个数量列。树视图会按类别对相同资源进行分组，并保留所有者详情。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_ACTIONS" Language="zh_Hans_CN">
+      <Text>在表格的文明列中按 Enter 或空格，会关闭“全球资源”并打开与该领袖的“外交”界面。在树视图的领袖行上按 Enter 可执行相同操作。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_SORT" Language="zh_Hans_CN">
+      <Text>激活可排序的表头可循环切换排序方式。树视图中有一个“资源排序方式”下拉框，其中包含自然顺序、名称正序与倒序、总量升序与降序，以及按每个已知文明的数量升序与降序。Escape 可关闭界面。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNMENT" Language="zh_Hans_CN">
+      <Text>除“海盗”情景外，此界面包含“政体”和“政策”选项卡。在“海盗”中，政策布局会改用于三个遗物槽位。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNMENT_GOVERNMENTS" Language="zh_Hans_CN">
+      <Text>“政体”是一个平面列表。每行都会说明等级、政策槽位组合、加成、传承信息、解锁要求和当前状态。按 Enter 可采用可用政体。Shift 加 Enter 可打开其“文明百科”条目。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNMENT_POLICIES" Language="zh_Hans_CN">
+      <Text>“政策”是由政策行和槽位构成的树视图。在槽位上按 Enter 会打开临时政策选择树视图，并按适用的军事、经济、外交和通配符类别分组。在政策上按 Enter 会将其指派到槽位并关闭选择器；Escape 会取消选择。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNMENT_POLICY_ACTIONS" Language="zh_Hans_CN">
+      <Text>在已填充的槽位上，Delete 会移除政策，Shift 加 Enter 会打开其“文明百科”条目。政策选择器中的条目也支持用 Shift 加 Enter 打开“文明百科”。政策变更被锁定时，槽位仍可阅读；激活槽位时会说明或遵循当前锁定状态。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNMENT_BOTTOM_ACTIONS" Language="zh_Hans_CN">
+      <Text>政策树视图之后是“确认政策”“查看所有政策”，以及可用时与解锁相关的行动。“查看所有政策”会打开另一个分类树视图；按 Escape 可将其关闭。“确认政策”会应用完整的槽位配置；按钮禁用时，会说明存在空槽位或政策组合未发生变化。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNORS" Language="zh_Hans_CN">
+      <Text>此界面以可排序的“总督”表格开头，后面是“晋升”网格，或秘密总督的“晋升”列表。按 Alt 加 2 选择树视图，按 Alt 加 1 返回表格视图。只有适合当前焦点总督的晋升视图才会显示。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNORS_TREE" Language="zh_Hans_CN">
+      <Text>表格会比较“名称”“状态”、游戏本体的就任速度数值、游戏本体的忠诚度压力数值，以及“已获得晋升”。“名称”单元格的工具提示包含总督头衔、说明和基础能力；其他列不会重复这些信息。备用树视图以“总督排序方式”下拉框开头，并可展开已任命的总督来查看已获得的晋升。已排序的表头和下拉框选项会说明实际顺序，例如在职优先、最快优先或最多优先。两个视图共用同一种排序。无论在哪个视图中聚焦总督，都会刷新相邻的晋升视图。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNORS_PROMOTION_GRID" Language="zh_Hans_CN">
+      <Text>普通总督的晋升使用网格。第一列是“基础能力”，后续各列是晋升等级。使用网格导航沿各等级查看晋升路线。可用单元格会激活确认对话框；已获得、已锁定、基础和只读单元格仍可阅读，但无法激活。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNORS_SECRET_VIEW" Language="zh_Hans_CN">
+      <Text>秘密总督使用平面的“晋升”列表，因为其头衔可能处于隐藏状态，无法排列成可见的晋升树。隐藏条目仍可作为“尚未揭示”阅读，并带有游戏当前提供的解锁说明。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNORS_ACTIONS" Language="zh_Hans_CN">
+      <Text>在任意总督表格单元格或总督树视图行上按 Enter，会执行当前可用的行动，例如任命、指派或重新指派。对可用的秘密结社执行相同操作即可加入该结社。Tab 会从总督名册视图移至当前可见的晋升网格或列表。在可用晋升上按 Enter 会打开确认对话框。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNOR_ASSIGNMENT" Language="zh_Hans_CN">
+      <Text>此选择器是一个城市列表，用于当前正在指派或重新指派的总督。每行都会说明城市、当前总督状态、就任信息和指派限制。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GOVERNOR_ASSIGNMENT_CONFIRM" Language="zh_Hans_CN">
+      <Text>按 Enter 可选择城市，并打开包含“确认”和“重新选择”的摘要对话框。“确认”会提交指派；“重新选择”会返回城市列表；Escape 会取消对话框或选择器。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE" Language="zh_Hans_CN">
+      <Text>此界面包含“伟人”“已招募伟人”，以及启用“英雄与传奇”时显示的“英雄”选项卡。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_CURRENT" Language="zh_Hans_CN">
+      <Text>“伟人”默认显示比较表格。文明为行，当前伟人为列。每个伟人列都会标明人物、类别、时代、能力、使用次数、激活要求以及任何招募限制。每个数据单元格会给出该文明的当前点数、招募花费和每回合获得的点数。按 Alt 加 2 切换到树视图，其中的“文明排序方式”提供自然顺序、文明名称从 A 到 Z 或从 Z 到 A，以及按各伟人类别的进度从最低或最高者开始排序。已排序表头使用相同说明。按 Alt 加 1 返回表格。两个视图共用所选排序方式。聚焦伟人列会更新当前视图之后的只读生平和行动按钮。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_ACTIONS" Language="zh_Hans_CN">
+      <Text>在任一视图中，对可招募的伟人按 Enter 或空格即可将其招募；否则会读出你的进度。可跳过伟人时，按 Delete 即可跳过。在表格中，无论焦点位于哪个文明行，这些命令都以当前焦点处的伟人列为准。当前视图之后依次是视具体情况显示的“招募”“跳过”“用金币赞助”和“用信仰值赞助”行动，以及生平字段和视图切换按钮。不可用的情境行动会被隐藏。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_PAST" Language="zh_Hans_CN">
+      <Text>“已招募伟人”是一个平面列表，列出已被招募的伟人、其类别、招募者和相关状态。此列表仅供查看。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_HEROES" Language="zh_Hans_CN">
+      <Text>“英雄”默认显示可排序的表格，其中包含“名称”“状态”“寿命”“移动力”“战斗力”“远程战斗力”“攻击范围”“使用次数”“被动能力”和“命令”列。按 Alt 加 2 切换到详细列表，列表后有“英雄排序方式”下拉框；按 Alt 加 1 返回表格，系统会记住所选视图。这里没有“英雄”筛选器。两个视图共用所选排序方式。按 Enter 或空格可执行当前英雄行动，Shift 加 Enter 可打开焦点英雄的“文明百科”条目；可用时，“用信仰值召回”会跟随当前视图。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORKS" Language="zh_Hans_CN">
+      <Text>概览包含一个“巨作”树视图，后面依次是“查看巨作”“查看陈列馆”和“按建筑分组”复选框。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORKS_GROUPING" Language="zh_Hans_CN">
+      <Text>关闭“按建筑分组”时，树视图的层级依次为城市、建筑、槽位。开启后，层级依次为建筑类型、城市中的建筑实例、槽位。建筑实例会说明产出、旅游业绩、主题化进度，以及相对于导航光标的方向。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORKS_SLOTS" Language="zh_Hans_CN">
+      <Text>每个槽位都会说明槽位类型和其中的巨作。其工具提示包含巨作详情、是否符合主题化条件，以及任何移动锁定。在槽位上按 Enter 会打开临时选择树视图，其中会按与当前分组相反的城市或建筑层级列出兼容巨作；在巨作上按 Enter 会将其移动，按 Escape 会取消。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORKS_ACTIONS" Language="zh_Hans_CN">
+      <Text>在已填充的槽位上按 Control 加 Enter，会打开该巨作的展示界面。“查看巨作”会打开最后聚焦的已填充槽位，“查看陈列馆”会打开游戏的陈列馆，复选框则会重新构建层级。在建筑实例上按 Enter 会将地图光标移到该建筑处，而不会关闭概览。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORK_SHOWCASE" Language="zh_Hans_CN">
+      <Text>展示界面包含一个完整详情行，后面会在相应行动可用时显示“上一个”“下一个”和“返回”按钮。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_GREAT_WORK_SHOWCASE_BINDINGS" Language="zh_Hans_CN">
+      <Text>按左方向键或上方向键选择上一件巨作，按右方向键或下方向键选择下一件。按钮可执行相同操作。“返回”会回到概览，并按游戏的正常方式停止展示音频。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_HISTORIC_MOMENTS" Language="zh_Hans_CN">
+      <Text>此界面是一个按时间顺序排列的树视图。按 Escape 可将其关闭。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_HISTORIC_MOMENTS_LAYOUT" Language="zh_Hans_CN">
+      <Text>顶层行为时代。每个时代会在存在相应内容时包含“重大时刻”和“普通时刻”分组。其子项是只读的历史时刻条目，包含记录的标题、说明、日期、时代得分和其他当前详情。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAP_PINS" Language="zh_Hans_CN">
+      <Text>此列表包含你能看到的所有地图标记；共享可见性允许时，也包括其他玩家拥有的标记。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAP_PINS_ACTIONS" Language="zh_Hans_CN">
+      <Text>按 Enter 可将导航光标移到当前焦点标记。对于自己的标记，Control 加 Enter 会打开编辑器，Delete 会打开包含“是”与“否”的删除确认框。其他玩家拥有的标记无法编辑或删除。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAP_PINS_BINDINGS" Language="zh_Hans_CN">
+      <Text>Escape 可关闭标记列表。在删除对话框中，Enter 会激活当前焦点答案，Escape 会选择“否”。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAP_PIN_EDITOR" Language="zh_Hans_CN">
+      <Text>编辑器用于创建或更改一个地图标记。显示哪些字段和按钮，取决于该标记是新建还是已有、属于本地还是共享。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAP_PIN_EDITOR_LAYOUT" Language="zh_Hans_CN">
+      <Text>控件按以下顺序显示：可编辑时的“名称”编辑框、“图标”下拉框、可用时的多人游戏“可见性”下拉框、“确认”、可用时的“分享到聊天”，以及已有本地标记的“删除”。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MAP_PIN_EDITOR_BINDINGS" Language="zh_Hans_CN">
+      <Text>Enter 会提交编辑字段或激活当前焦点控件。在编辑器中的任何位置按 Control 加 Enter，都会确认整个标记。Escape 会取消并关闭。对于下拉框，使用 Enter 打开、方向键选择、Enter 提交，或用 Escape 关闭且不作更改。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NOTIFICATIONS" Language="zh_Hans_CN">
+      <Text>“通知”选项卡是一个树视图。单条通知会直接显示；同一类型的多条通知会显示在可展开的分组中。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NOTIFICATIONS_ACTIONS" Language="zh_Hans_CN">
+      <Text>按 Enter 或空格会使用游戏的正常行动激活通知。允许时，Delete 会关闭当前焦点通知。在分组上按 Delete，会关闭该组中所有可关闭的通知。工具提示会说明类型、能否关闭、到期回合，以及已知时的地点详情。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MESSAGES" Language="zh_Hans_CN">
+      <Text>“消息”选项卡包含一个历史记录列表，后面是类型筛选下拉框和“复制消息缓冲区”。消息行可能是只读文本，也可能是可操作的地图标记链接；在可操作消息上按 Enter 会跳转到其地点。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_MESSAGES_ACTIONS" Language="zh_Hans_CN">
+      <Text>更改筛选器以显示所需的消息类型。“复制消息缓冲区”会将当前筛选后的无障碍历史记录复制到剪贴板。Escape 可关闭通知中心。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_PRODUCTION_OVERVIEW" Language="zh_Hans_CN">
+      <Text>此面板控制所选城市的生产和购买。其选项卡包括“生产”“用金币购买”、可用时的“用信仰值购买”，以及“队列”。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_PRODUCTION_LAYOUT" Language="zh_Hans_CN">
+      <Text>每个页面都是由类别和项目构成的树视图。展开项目会在有相应内容时显示加成和解锁项。选项卡控件之后是城市列表和“排序方式”下拉框。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_PRODUCTION_BINDINGS" Language="zh_Hans_CN">
+      <Text>在项目上按 Enter 会生产或购买该项目。在“生产”项目上按 Control 加 Enter 会将其添加到队列末尾。Shift 加 Enter 会打开其“文明百科”条目。Alt 加左方向键和 Alt 加右方向键可选择上一座或下一座城市。聚焦城市行会选择该城市并刷新面板。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION" Language="zh_Hans_CN">
+      <Text>此界面会在宗教概览树视图与创立或强化宗教的设置面板之间切换。只有适合当前宗教状态的视图才会显示。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_OVERVIEW" Language="zh_Hans_CN">
+      <Text>创立宗教后，概览会先列出你的宗教，再列出其他已知宗教。每个宗教行都包含“信条”“城市”和“宗教单位”区域，其中提供当前的信徒、宗教压力、主流宗教、单位和信条详情。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_CITY_FILTERS" Language="zh_Hans_CN">
+      <Text>“城市”中包含“信奉此宗教”和“存在此宗教”两个筛选分支，分别列出符合各筛选条件的城市。城市行可以展开，显示该城市完整的宗教构成。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_OPEN" Language="zh_Hans_CN">
+      <Text>获得创立宗教或为现有宗教添加信条的权利后，“宗教设置”会出现。在概览树视图中选择“我的宗教”即可进入。万神殿需要在单独的选择器中选择，而不是在此界面中选择。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_IDENTITY" Language="zh_Hans_CN">
+      <Text>创立宗教时，设置面板会显示。第一个控件是参数列表，其中包含宗教图标下拉框。将其打开，选择可用的宗教符号，然后确认选择。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_BELIEFS" Language="zh_Hans_CN">
+      <Text>图标之后是信条行。你已有的万神殿，以及宗教中已有的任何信条，都是只读的查看行。每个必填空行都必须填充。创立宗教时选择的第一个新信条必须是追随者信条；之后的行只会提供该宗教尚未采用的信条类别。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_PICKER" Language="zh_Hans_CN">
+      <Text>激活空白或已填充的信条行，可打开其信条类别树视图。展开类别，在工具提示中阅读每项信条的效果，并激活所需信条；选择器随即关闭，设置行会报告所选内容。在待确认的信条行上按 Delete 可将其清除；在选择器中按 Escape 会返回，且不更改该行。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_ENHANCE" Language="zh_Hans_CN">
+      <Text>强化现有宗教时，其图标、名称、万神殿和已采用的信条仍为只读。只需处理新的空白信条行。已由采用中或待确认信条占用的信条类别，在其他选择器中不可用，因此每个新选择都必须采用符合条件的类别。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_CONFIRM" Language="zh_Hans_CN">
+      <Text>参数列表之后是名称编辑框。如果所选宗教图标允许自定义名称，此字段会变为可编辑。最后一个控件是“创立宗教”或“确认更改”。在必需图标、有效自定义名称和每项新信条全部完成前，此控件会保持禁用；其工具提示会列出仍缺少的内容。激活该控件可打开摘要对话框；查看图标、名称和信条后，选择“是”提交，或选择“否”返回而不创立或强化宗教。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_REPORTS" Language="zh_Hans_CN">
+      <Text>“报告”界面包含“产出”“资源”“城市状态”，以及规则支持时显示的“传闻”选项卡。“产出”和“资源”为树视图，“城市状态”有表格和详细列表视图，“传闻”为列表。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_REPORTS_YIELDS" Language="zh_Hans_CN">
+      <Text>“产出”包含“城市收入”和“帝国经济”。城市分支包含区域、建筑、巨作、贸易路线、奇观及其他产出的明细。“帝国经济”包含产出总量和详细来源；在“金币”下，交易收入和支出可以展开为各项金币交易。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_REPORTS_RESOURCES" Language="zh_Hans_CN">
+      <Text>“资源”为每种资源提供一个可展开行。其中会显示库存或总量、积累与开采来源、城邦来源、消耗、外交交易的进口与出口，以及当前规则特有的其他详情。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_REPORTS_CITY_STATUS" Language="zh_Hans_CN">
+      <Text>“城市状态”默认显示可排序的表格，其中包含城市名称、相对于导航光标的方向和距离、人口、住房、增长、宜居度、幸福度、厌战情绪、防御力、受损情况、所有可用产出，以及资料片特有的忠诚度。可用时，城市的行标签还会标明异常状态和总督状态。激活可排序的表头可循环切换排序方式；当前焦点表头会说明排序方式，例如从 A 到 Z、最近优先、最强优先或最高优先。在任意数据单元格中按 Enter 或空格，会选择该城市并关闭“报告”。按 Alt 加 2 切换到详细城市按钮列表，其中的下拉框标签也会说明距离、城市数值或产出所用的确切顺序；按 Alt 加 1 返回表格。系统会记住所选视图。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_REPORTS_GOSSIP" Language="zh_Hans_CN">
+      <Text>“传闻”包含一个按时间顺序排列的平面列表，其中列出所有符合条件且可见的传闻条目，后面是“玩家”和“类型”筛选下拉框。更改任一下拉框都会重新构建列表。Escape 可关闭“报告”。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RESEARCH" Language="zh_Hans_CN">
+      <Text>第一个树视图包含当前研究和已加入队列的科技。第二个树视图包含可用科技。每项科技均可展开以显示其解锁项。最后一个按钮会打开完整的“科技树”。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RESEARCH_ACTIONS" Language="zh_Hans_CN">
+      <Text>在可用科技上按 Enter 会将其设为当前研究。当前研究和队列中的行均为只读，但可供查看；此选择器特意没有添加加入队列的快捷键。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_RESEARCH_BINDINGS" Language="zh_Hans_CN">
+      <Text>在已揭示科技上按 Shift 加 Enter，可打开其“文明百科”条目。使用 Tab 从队列树视图移到可用科技，再移到“打开科技树”。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_LAYOUT" Language="zh_Hans_CN">
+      <Text>控件按以下顺序显示：非空时的当前研究与队列科技列表、筛选器列表、当前启用的科技“网格”“关系图”或“树视图”、在“网格”和“关系图”视图中显示的“解锁项”列表，以及“视图”下拉框。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_VIEWS" Language="zh_Hans_CN">
+      <Text>“视图”下拉框依次包含“网格”“关系图”和“树视图”。“网格”以时代为列，从左到右排列前置层级，并在各层级内纵向排列科技。“关系图”直接沿前置科技连接排列。“树视图”以时代、层级、科技的层次呈现。按 Alt 加 1 选择“网格”，Alt 加 2 选择“关系图”，Alt 加 3 选择“树视图”。切换视图时会尽可能保持焦点位于同一项科技；下次打开“科技树”时，系统会记住所选视图。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_TREE_VIEW" Language="zh_Hans_CN">
+      <Text>在“树视图”中，展开时代可显示其中已经展开的层级，再显示其中的科技。科技子项包含“解锁项”“前置科技”“后续科技”，以及计算得到的通往该科技的路径。激活引用即可跳转到相应项目。Backspace 会沿先前的引用跳转记录返回。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_ACTIONS" Language="zh_Hans_CN">
+      <Text>在可研究科技上按 Enter 会将其设为当前研究。Control 加 Enter 会将其添加到研究队列末尾。Shift 加 Enter 会打开其“文明百科”条目。这三个快捷键在“网格”和“关系图”视图及筛选结果中同样有效。在队列行上按 Enter 会跳转到相应科技；Shift 加 Enter 会打开其条目。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_FILTERS" Language="zh_Hans_CN">
+      <Text>在筛选器上按 Enter 会打开临时结果列表。在结果中，Enter 会关闭列表并跳转到相应科技，Control 加 Enter 会将其加入队列，Shift 加 Enter 会打开“文明百科”，Escape 会关闭结果并清除筛选器。在任一主要视图中按 Control 加 F，均可搜索游戏的科技索引。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_UNLOCKS" Language="zh_Hans_CN">
+      <Text>在“网格”或“关系图”视图中，聚焦一项科技会为该科技重新构建相邻的“解锁项”列表。列表包含条目时，按 Tab 会从当前视图移到该列表，再移到“视图”下拉框。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW" Language="zh_Hans_CN">
+      <Text>“贸易概览”包含“我的路线”“通往我方城市的路线”和“可用路线”选项卡。每个页面都是按文明、城邦或其他当前路线类别分组的树视图。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_ACTIVE" Language="zh_Hans_CN">
+      <Text>“我的路线”会说明已用和可用的贸易路线容量。路线行包含起点、目的地、持续时间或回合数、贸易站和产出信息。展开路线可分别查看起点与目的地的产出明细。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_AVAILABLE" Language="zh_Hans_CN">
+      <Text>“通往我方城市的路线”显示来自其他文明、正在进入我方城市的商人。“可用路线”显示可以选择的商人和目的地。有些行是“选择路线”行动；没有可用商人时，“生产商人”行为信息项。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_ACTIONS" Language="zh_Hans_CN">
+      <Text>在当前贸易路线上按 Enter 会选择相应商人，并可能将光标移到该单位。在“选择路线”上按 Enter 会选择相应商人并打开路线选择。Escape 可关闭概览。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_ROUTE" Language="zh_Hans_CN">
+      <Text>此选择器包含一个目的地树视图，后面是路线筛选下拉框。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_ROUTE_LAYOUT" Language="zh_Hans_CN">
+      <Text>目的地分为“你的城市”“其他文明”和“城邦”三组。每条路线行都会说明目的地和产出摘要；将其展开可分别显示起点与目的地的产出详情。筛选下拉框会更改重点显示或包含哪些路线产出。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_ROUTE_ACTIONS" Language="zh_Hans_CN">
+      <Text>在路线上按 Enter 会打开包含“确认”和“取消”的摘要对话框。“确认”会建立路线；“取消”或 Escape 会返回选择器。在选择器中按 Escape 会按游戏通常的方式将其关闭。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_ORIGIN" Language="zh_Hans_CN">
+      <Text>此界面是一个平面列表，列出可作为所选商人起点的城市。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_TRADE_ORIGIN_ACTIONS" Language="zh_Hans_CN">
+      <Text>每行都会说明城市及相关贸易路线容量或商人信息。按 Enter 会通过游戏的正常行动将商人的起点移到该城市，并关闭选择器。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS" Language="zh_Hans_CN">
+      <Text>此界面提供可相互切换的“网格”和“树视图”，后面是“切换视图”按钮。界面打开时会显示“网格”视图。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS_VIEWS" Language="zh_Hans_CN">
+      <Text>“网格”视图的每个晋升等级各占一列，同一等级的备选晋升会纵向排列。切换到“树视图”时会尽可能保持焦点位于同一项晋升。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS_TREE" Language="zh_Hans_CN">
+      <Text>“树视图”按已经展开的等级对晋升进行分组。展开晋升可查看“前置晋升”和“后续晋升”分支；激活引用会跳转到相关晋升。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS_ACTIONS" Language="zh_Hans_CN">
+      <Text>按 Enter 或空格会通过游戏的正常晋升请求应用可用晋升。已锁定晋升仍可阅读，但无法激活。使用“切换视图”按钮可更改呈现方式。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_RANKINGS" Language="zh_Hans_CN">
+      <Text>“世界排名”会为当前规则集中可用的每个排名页面创建一个选项卡。界面默认为表格视图，并会为整个界面记住一项共用视图选择。“切换视图”按钮、切换到表格的 Alt 加 1，以及切换到树视图的 Alt 加 2，会同时更改所有支持的选项卡。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_RANKINGS_LAYOUT" Language="zh_Hans_CN">
+      <Text>存在结构化数据时，“总览”“分数”“科技胜利”“文化胜利”“统治胜利”“宗教胜利”和“外交胜利”会使用可排序的表格。叙事型情景页面和任意自定义胜利仍使用树视图；在这些选项卡中选择表格视图时，系统会播报当前改为显示其树视图。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_RANKINGS_CONTENT" Language="zh_Hans_CN">
+      <Text>每张表格都为每个竞争者设置一行：单独竞争时为文明，多个文明共同竞争时为团队。“竞争者”工具提示会列出团队成员。指标单元格显示团队结果，其工具提示提供各文明的明细。树视图则保留可展开的团队、文明、目标和顾问详情。Escape 可关闭界面。</Text>
+    </Row>
+
+    <!-- 生产队列 -->
+    <Row Tag="LOC_CAI_TUTORIAL_PRODUCTION_QUEUE_TITLE" Language="zh_Hans_CN">
+      <Text>生产队列教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_PRODUCTION_QUEUE_LAYOUT" Language="zh_Hans_CN">
+      <Text>队列是一个有序列表。城市正在生产项目时，当前生产项目排在最前面，随后按城市开始生产的先后顺序列出各个队列项目。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_PRODUCTION_QUEUE_ADD" Language="zh_Hans_CN">
+      <Text>若要添加项目，请返回“生产”选项卡，并在生产选项上按 Control 加 Enter。只按 Enter 会替换或开始正常生产，而不会将项目添加到队列末尾。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_PRODUCTION_QUEUE_BINDINGS" Language="zh_Hans_CN">
+      <Text>在队列中，按 Shift 加上方向键或 Shift 加下方向键可移动当前焦点项目，按 Delete 可将其移除。当前项目也可以移除；移除后，队列中的下一项会成为当前项目。</Text>
+    </Row>
+
+    <!-- 世界议会行动阶段 -->
+    <Row Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_TITLE" Language="zh_Hans_CN">
+      <Text>对决议进行投票</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_LAYOUT" Language="zh_Hans_CN">
+      <Text>选票开头是你剩余的外交支持，随后每项决议各有一个可展开行。阅读行中的说明和上次会议信息，然后将其展开。其子项包括“结果”下拉框、“增加票数”“减少票数”和“目标”下拉框。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_OUTCOME" Language="zh_Hans_CN">
+      <Text>打开“结果”下拉框，阅读两种效果后选择选项 A 或选项 B。提交任一选项都会自动为该决议投下免费的第一票。如果切换结果，这一票会移到新结果，不会作为额外票数收费。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_TARGET" Language="zh_Hans_CN">
+      <Text>打开“目标”下拉框，选择要应用所选效果的文明、领袖、单位类别、区域、资源或其他对象。你可以在选择结果之前或之后选择目标；在选项 A 和选项 B 之间切换时，目标仍会保持选中。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_FAVOR" Language="zh_Hans_CN">
+      <Text>选择结果后，激活“增加票数”可在免费票之外增强对该结果的支持。每张额外选票都会消耗外交支持，且费用逐渐增加。“减少票数”会退还可移除选票所花费的外交支持。按钮工具提示会报告当前票数和费用，选票中的第一项则会报告你剩余的外交支持。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_COMPLETE" Language="zh_Hans_CN">
+      <Text>为每项决议重复选择结果和目标；额外付费选票并非必需。任何决议缺少其中一项选择时，“下一步”都会保持禁用。聚焦“下一步”可听取所有未完成决议的列表，并得知每项决议缺少结果还是目标。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_SUBMIT" Language="zh_Hans_CN">
+      <Text>选票完成后激活“下一步”。确认对话框会列出每项所选结果、目标、票数和费用。选择“上一步”可返回可编辑选票，选择“提交”可提交所有选票并结束你的世界议会回合。提交后，等待界面会报告哪些成员已经提交；处理完成的结果稍后会显示在“世界议会”概览中。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_PROPOSAL_TITLE" Language="zh_Hans_CN">
+      <Text>对特别会议提案进行投票</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_PROPOSAL_LAYOUT" Language="zh_Hans_CN">
+      <Text>选票开头是剩余的外交支持，随后每项提案各有一个可展开行。行的工具提示会说明紧急事件、目标、参与者、奖励和结果。将其展开可到达“支持”“反对”，以及任何剩余回合信息。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_PROPOSAL_DIRECTION" Language="zh_Hans_CN">
+      <Text>激活“支持”或“反对”，可明确投下该立场的第一票。若要反转立场，请使用相反的控件：仍有选票时，该控件会播报为“减少票数”。先将当前票数减至零，再激活此时可用的“支持”或“反对”控件，开始投票给另一立场。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_PROPOSAL_FAVOR" Language="zh_Hans_CN">
+      <Text>再次激活所选立场可增加票数。额外选票会消耗逐渐增加的外交支持；相反立场的控件会减少票数，并退还可移除选票的费用。工具提示会报告当前立场、票数和费用，选票中的第一项会报告剩余外交支持。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_PROPOSAL_COMPLETE" Language="zh_Hans_CN">
+      <Text>与普通决议不同，每项可操作的提案都要求你明确增加一票。请对所有提案行重复此操作。在每项必选提案至少获得一张支持票或反对票之前，“下一步”会保持禁用；聚焦“下一步”可听取哪项提案尚未完成。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_TITLE" Language="zh_Hans_CN">
+      <Text>提交特别会议提案</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_LAYOUT" Language="zh_Hans_CN">
+      <Text>“可用提案”是“世界议会”概览界面中的一个页面。它会列出你当前有资格为未来特别会议提议的紧急事件。此页面用于选择要提出的内容，并不是稍后进行的支持或反对投票。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_DETAILS" Language="zh_Hans_CN">
+      <Text>在提案列表中移动，并阅读每个复选框行的工具提示。其中包含提案说明、危机详情、奖励，以及游戏当前报告的任何限制或费用。页面将多种紧急事件类型分组时，会先播报类别名称，再播报提案标题。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_SELECT" Language="zh_Hans_CN">
+      <Text>激活提案复选框可将其选中或清除。继续浏览列表，并确认准备发送的提案处于已选中状态。已禁用或不可用的提案仍可阅读，但无法选择。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_SUBMIT" Language="zh_Hans_CN">
+      <Text>提案列表之后是当前可用的提交按钮和“放弃”按钮。激活提交按钮可发送已选中的提案。只有不想提交任何提案时，才应激活“放弃”。特别会议开始后，其独立选票将要求每位成员投票“支持”或“反对”。</Text>
+    </Row>
+  </LocalizedText>
+</GameData>

@@ -99,7 +99,7 @@ function RefreshTurnsRemaining()
 	end
 
 	local strDate = Calendar.MakeYearStr(turn);
-	Controls.CurrentDate:SetText("30XX AD");
+	Controls.CurrentDate:SetText(Locale.Lookup("LOC_CAI_CIV_ROYALE_DATE"));
 end
 
 -- ===========================================================================

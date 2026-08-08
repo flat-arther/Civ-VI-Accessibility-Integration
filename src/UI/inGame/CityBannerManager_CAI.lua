@@ -25,7 +25,7 @@ local function TrimString(value)
         return nil
     end
 
-    local trimmed = tostring(value):gsub("^%s+", ""):gsub("%s+$", "")
+    local trimmed = CAI_TrimAsciiWhitespace(value)
     if trimmed == "" then
         return nil
     end

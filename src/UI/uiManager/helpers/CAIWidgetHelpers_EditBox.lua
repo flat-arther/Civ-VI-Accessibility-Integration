@@ -7,6 +7,98 @@
 CAIWidgetHelpers_EditBox = {}
 local E = CAIWidgetHelpers_EditBox
 
+-- Lua string offsets are byte offsets. Keep that representation internally,
+-- but only allow cursor and selection positions at UTF-8 code-point boundaries.
+local function IsContinuationByte(byte)
+    return byte ~= nil and byte >= 0x80 and byte <= 0xBF
+end
+
+local function CodePointLengthAt(text, pos)
+    local first = string.byte(text, pos + 1)
+    if first == nil or first < 0x80 then return 1 end
+    if first >= 0xC2 and first <= 0xDF then return 2 end
+    if first >= 0xE0 and first <= 0xEF then return 3 end
+    if first >= 0xF0 and first <= 0xF4 then return 4 end
+    return 1
+end
+
+local function ClampToCodePointBoundary(text, pos)
+    local length = #text
+    pos = math.max(0, math.min(pos or 0, length))
+    while pos < length and IsContinuationByte(string.byte(text, pos + 1)) do
+        pos = pos + 1
+    end
+    return pos
+end
+
+local function PreviousCodePointBoundary(text, pos)
+    local length = #text
+    pos = math.max(0, math.min(pos or 0, length))
+    while pos > 0 and IsContinuationByte(string.byte(text, pos + 1)) do
+        pos = pos - 1
+    end
+    return pos
+end
+
+local function NextCodePointBoundary(text, pos)
+    local length = #text
+    pos = ClampToCodePointBoundary(text, pos)
+    if pos >= length then return length end
+    return math.min(length, pos + CodePointLengthAt(text, pos))
+end
+
+local function Utf8Length(text)
+    local count, pos = 0, 0
+    while pos < #text do
+        local nextPos = NextCodePointBoundary(text, pos)
+        if nextPos <= pos then nextPos = pos + 1 end
+        pos = nextPos
+        count = count + 1
+    end
+    return count
+end
+
+local function TruncateToCodePoints(text, maxCount)
+    if maxCount <= 0 then return "" end
+    local count, pos = 0, 0
+    while pos < #text and count < maxCount do
+        local nextPos = NextCodePointBoundary(text, pos)
+        if nextPos <= pos then nextPos = pos + 1 end
+        pos = nextPos
+        count = count + 1
+    end
+    return string.sub(text, 1, pos)
+end
+
+function E.GetCharacterAt(text, pos)
+    text = tostring(text or "")
+    local startPos = ClampToCodePointBoundary(text, pos)
+    local endPos = NextCodePointBoundary(text, startPos)
+    return string.sub(text, startPos + 1, endPos)
+end
+
+local function CodePointColumn(text, lineStart, pos)
+    local cursor = ClampToCodePointBoundary(text, pos)
+    local column = 0
+    local current = lineStart
+    while current < cursor do
+        local nextPos = NextCodePointBoundary(text, current)
+        if nextPos > cursor then break end
+        current = nextPos
+        column = column + 1
+    end
+    return column
+end
+
+local function OffsetForCodePointColumn(text, lineStart, lineEnd, column)
+    local current = lineStart
+    for _ = 1, column do
+        if current >= lineEnd then return lineEnd end
+        current = NextCodePointBoundary(text, current)
+    end
+    return current
+end
+
 -- Above this length, selection/deselection speech collapses to a count so the
 -- screen reader doesn't lag piping thousands of chars through TTS.
 local SELECTION_SPEAK_LIMIT = 500
@@ -15,7 +107,15 @@ local function IsWordBoundary(ch) return ch == " " or ch == "\n" or ch == "\t" e
 
 local function MaskIfNeeded(w, text)
     if not w._passwordMask or not text or text == "" then return text end
-    return string.rep("*", #text)
+    return string.rep("*", Utf8Length(text))
+end
+
+function E.GetCharacterCount(text)
+    return Utf8Length(tostring(text or ""))
+end
+
+function E.MaskText(w, text)
+    return MaskIfNeeded(w, tostring(text or ""))
 end
 
 ---Format a "selected" announcement, swapping in a character-count message when
@@ -24,8 +124,9 @@ end
 ---@param text string
 ---@return string
 function E.FormatSelected(w, text)
-    if #text > SELECTION_SPEAK_LIMIT then
-        return Locale.Lookup("LOC_CAI_EDIT_SELECTED_COUNT", #text)
+    local length = Utf8Length(text)
+    if length > SELECTION_SPEAK_LIMIT then
+        return Locale.Lookup("LOC_CAI_EDIT_SELECTED_COUNT", length)
     end
     return Locale.Lookup("LOC_CAI_EDIT_SELECTED", MaskIfNeeded(w, text))
 end
@@ -34,8 +135,9 @@ end
 ---@param text string
 ---@return string
 function E.FormatUnselected(w, text)
-    if #text > SELECTION_SPEAK_LIMIT then
-        return Locale.Lookup("LOC_CAI_EDIT_UNSELECTED_COUNT", #text)
+    local length = Utf8Length(text)
+    if length > SELECTION_SPEAK_LIMIT then
+        return Locale.Lookup("LOC_CAI_EDIT_UNSELECTED_COUNT", length)
     end
     return Locale.Lookup("LOC_CAI_EDIT_UNSELECTED", MaskIfNeeded(w, text))
 end
@@ -44,8 +146,9 @@ end
 ---@param text string
 ---@return string
 function E.FormatCopied(w, text)
-    if #text > SELECTION_SPEAK_LIMIT then
-        return Locale.Lookup("LOC_CAI_EDIT_COPIED_COUNT", #text)
+    local length = Utf8Length(text)
+    if length > SELECTION_SPEAK_LIMIT then
+        return Locale.Lookup("LOC_CAI_EDIT_COPIED_COUNT", length)
     end
     return Locale.Lookup("LOC_CAI_EDIT_COPIED", MaskIfNeeded(w, text))
 end
@@ -54,8 +157,9 @@ end
 ---@param text string
 ---@return string
 function E.FormatPasted(w, text)
-    if #text > SELECTION_SPEAK_LIMIT then
-        return Locale.Lookup("LOC_CAI_EDIT_PASTED_COUNT", #text)
+    local length = Utf8Length(text)
+    if length > SELECTION_SPEAK_LIMIT then
+        return Locale.Lookup("LOC_CAI_EDIT_PASTED_COUNT", length)
     end
     return Locale.Lookup("LOC_CAI_EDIT_PASTED", MaskIfNeeded(w, text))
 end
@@ -236,14 +340,14 @@ end
 function E.PrevLinePos(buf, pos)
     local ls = E.LineStart(buf, pos)
     if ls <= 0 then return nil end
-    local col = pos - ls
+    local col = CodePointColumn(buf, ls, pos)
     local prevLineEnd = ls - 1
     if prevLineEnd > 0 and string.sub(buf, prevLineEnd, prevLineEnd) == "\n" then
         return prevLineEnd
     end
     local prevLineStart = E.LineStart(buf, prevLineEnd - 1)
-    local prevLineLen = prevLineEnd - prevLineStart
-    return prevLineStart + math.min(col, prevLineLen)
+    local prevLineLen = CodePointColumn(buf, prevLineStart, prevLineEnd)
+    return OffsetForCodePointColumn(buf, prevLineStart, prevLineEnd, math.min(col, prevLineLen))
 end
 
 ---@param buf string
@@ -255,9 +359,9 @@ function E.NextLinePos(buf, pos)
     if le >= len then return nil end
     local nextLineStart = le + 1
     local nextLineEnd = E.LineEnd(buf, nextLineStart)
-    local col = pos - E.LineStart(buf, pos)
-    local nextLineLen = nextLineEnd - nextLineStart
-    return nextLineStart + math.min(col, nextLineLen)
+    local col = CodePointColumn(buf, E.LineStart(buf, pos), pos)
+    local nextLineLen = CodePointColumn(buf, nextLineStart, nextLineEnd)
+    return OffsetForCodePointColumn(buf, nextLineStart, nextLineEnd, math.min(col, nextLineLen))
 end
 
 --#endregion
@@ -278,15 +382,15 @@ function E.InsertText(w, text)
     local origSelStart = w._selStart
     if w._selStart then E.DeleteSelection(w) end
     local buf = w._buffer or ""
-    local pos = w._cursor or 0
-    if w._maxChars and (#buf + #text) > w._maxChars then
-        local room = w._maxChars - #buf
+    local pos = PreviousCodePointBoundary(buf, w._cursor or 0)
+    if w._maxChars and (Utf8Length(buf) + Utf8Length(text)) > w._maxChars then
+        local room = w._maxChars - Utf8Length(buf)
         if room <= 0 then
             w._buffer, w._cursor, w._selStart = origBuffer, origCursor, origSelStart
             LogMessage("EditBox helper InsertText blocked by max character limit on widget " .. tostring(w.Id or "?"))
             return false
         end
-        text = string.sub(text, 1, room)
+        text = TruncateToCodePoints(text, room)
     end
     local proposed = string.sub(buf, 1, pos) .. text .. string.sub(buf, pos + 1)
     if w._validator and not w._validator(proposed) then
@@ -302,23 +406,25 @@ end
 ---@param w EditBoxWidget
 ---@return string deleted
 function E.BackspaceChar(w)
-    local pos = w._cursor or 0
+    local pos = PreviousCodePointBoundary(w._buffer or "", w._cursor or 0)
     if pos <= 0 then return "" end
     local buf = w._buffer or ""
-    local deleted = string.sub(buf, pos, pos)
-    w._buffer = string.sub(buf, 1, pos - 1) .. string.sub(buf, pos + 1)
-    w._cursor = pos - 1
+    local previous = PreviousCodePointBoundary(buf, pos - 1)
+    local deleted = string.sub(buf, previous + 1, pos)
+    w._buffer = string.sub(buf, 1, previous) .. string.sub(buf, pos + 1)
+    w._cursor = previous
     return deleted
 end
 
 ---@param w EditBoxWidget
 ---@return string deleted
 function E.DeleteChar(w)
-    local pos = w._cursor or 0
     local buf = w._buffer or ""
+    local pos = PreviousCodePointBoundary(buf, w._cursor or 0)
     if pos >= #buf then return "" end
-    local deleted = string.sub(buf, pos + 1, pos + 1)
-    w._buffer = string.sub(buf, 1, pos) .. string.sub(buf, pos + 2)
+    local nextPos = NextCodePointBoundary(buf, pos)
+    local deleted = string.sub(buf, pos + 1, nextPos)
+    w._buffer = string.sub(buf, 1, pos) .. string.sub(buf, nextPos + 1)
     return deleted
 end
 
@@ -367,7 +473,8 @@ function E.SpeakSelectionChange(w, oldSelStart, oldCursor)
     -- Speak the landing char first, then queue the unselected notice so the
     -- user hears where the cursor went before the housekeeping line.
     if oldA and not newA then
-        local ch = string.sub(buf, w._cursor + 1, w._cursor + 1)
+        local nextPos = NextCodePointBoundary(buf, w._cursor)
+        local ch = string.sub(buf, w._cursor + 1, nextPos)
         if ch == "" or ch == "\n" then ch = Locale.Lookup("LOC_CAI_EDIT_BLANK") end
         local primary = MaskIfNeeded(w, ch)
         local deselected = string.sub(buf, oldA + 1, oldB)
@@ -379,7 +486,8 @@ function E.SpeakSelectionChange(w, oldSelStart, oldCursor)
         return
     end
     if not newA then
-        local ch = string.sub(buf, w._cursor + 1, w._cursor + 1)
+        local nextPos = NextCodePointBoundary(buf, w._cursor)
+        local ch = string.sub(buf, w._cursor + 1, nextPos)
         if ch == "" then ch = Locale.Lookup("LOC_CAI_EDIT_BLANK") end
         Speak(MaskIfNeeded(w, ch), true)
         return
@@ -430,7 +538,8 @@ function E.MoveCursor(w, direction, shift, ctrl)
             local word = E.GetWordAt(buf, newPos)
             primary = (word == "") and Locale.Lookup("LOC_CAI_EDIT_BLANK") or MaskIfNeeded(w, word)
         else
-            local ch = string.sub(buf, newPos + 1, newPos + 1)
+            local nextPos = NextCodePointBoundary(buf, newPos)
+            local ch = string.sub(buf, newPos + 1, nextPos)
             if ch == "" or ch == "\n" then ch = Locale.Lookup("LOC_CAI_EDIT_BLANK") end
             primary = MaskIfNeeded(w, ch)
         end
@@ -448,7 +557,9 @@ function E.MoveCursor(w, direction, shift, ctrl)
     if ctrl then
         newPos = direction < 0 and E.FindWordLeft(buf, pos) or E.FindWordRight(buf, pos)
     else
-        newPos = pos + direction
+        newPos = direction < 0
+            and PreviousCodePointBoundary(buf, pos - 1)
+            or NextCodePointBoundary(buf, pos)
     end
     if newPos < 0 then newPos = 0 end
     if newPos > #buf then newPos = #buf end
@@ -462,7 +573,8 @@ function E.MoveCursor(w, direction, shift, ctrl)
         if word == "" then word = Locale.Lookup("LOC_CAI_EDIT_BLANK") end
         Speak(MaskIfNeeded(w, word), true)
     else
-        local ch = string.sub(buf, newPos + 1, newPos + 1)
+        local nextPos = NextCodePointBoundary(buf, newPos)
+        local ch = string.sub(buf, newPos + 1, nextPos)
         if ch == "" or ch == "\n" then ch = Locale.Lookup("LOC_CAI_EDIT_BLANK") end
         Speak(MaskIfNeeded(w, ch), true)
     end
@@ -476,7 +588,7 @@ function E.MoveToEdge(w, targetPos, shift)
     local oldSelStart = w._selStart
     local oldCursor = pos
     if shift and not w._selStart then w._selStart = pos end
-    w._cursor = targetPos
+    w._cursor = ClampToCodePointBoundary(w._buffer or "", targetPos)
     if not shift then w._selStart = nil end
     E.SpeakSelectionChange(w, oldSelStart, oldCursor)
 end

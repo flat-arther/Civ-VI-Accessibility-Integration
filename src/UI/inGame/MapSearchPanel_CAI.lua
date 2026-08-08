@@ -59,7 +59,7 @@ local function OnDebounceUpdate()
 
         local whitelist = {}
         local blacklist = {}
-        for term in m_pendingQuery:gmatch("%S+") do
+        for _, term in ipairs(CAI_SplitAsciiWords(m_pendingQuery)) do
             if term:sub(1, 2) == "--" and #term > 2 then
                 blacklist[#blacklist + 1] = term:sub(3)
             else
@@ -316,8 +316,8 @@ function OnSearchCommit()
     local szSearchString = Controls.MapSearchBox:GetText()
     local szFilterString = Controls.MapSearchFilterBox:GetText()
 
-    m_caiSearch.Whitelist = szSearchString and Locale.SplitString(szSearchString) or {}
-    m_caiSearch.Blacklist = szFilterString and Locale.SplitString(szFilterString) or {}
+    m_caiSearch.Whitelist = CAI_SplitAsciiWords(szSearchString)
+    m_caiSearch.Blacklist = CAI_SplitAsciiWords(szFilterString)
     Controls.MapSearchBox:DropFocus()
     Controls.MapSearchFilterBox:DropFocus()
 
@@ -325,7 +325,7 @@ function OnSearchCommit()
         if m_searchPanel then
             local combined = szSearchString or ""
             if szFilterString and szFilterString ~= "" then
-                for term in szFilterString:gmatch("%S+") do
+                for _, term in ipairs(CAI_SplitAsciiWords(szFilterString)) do
                     combined = combined .. " --" .. term
                 end
             end

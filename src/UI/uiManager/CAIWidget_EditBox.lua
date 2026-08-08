@@ -101,7 +101,7 @@ function EditBoxWidget.Create(mgr, id, props)
         else
             out = E.GetCurrentLine(buf, cursor)
         end
-        if self._passwordMask then return string.rep("*", #out) end
+        if self._passwordMask then return E.MaskText(self, out) end
         return out
     end)
 
@@ -244,16 +244,17 @@ function EditBoxWidget:BeginEdit(silent)
         local a, b = self._selStart, self._cursor
         if a > b then a, b = b, a end
         local raw = string.sub(buf, a + 1, b)
-        if #raw > 500 then
-            Speak(Locale.Lookup("LOC_CAI_EDIT_ACTIVATE_SELECTED_COUNT", label, #raw), true, false)
+        local rawLength = E.GetCharacterCount(raw)
+        if rawLength > 500 then
+            Speak(Locale.Lookup("LOC_CAI_EDIT_ACTIVATE_SELECTED_COUNT", label, rawLength), true, false)
         else
-            spoken = self._passwordMask and string.rep("*", #raw) or raw
+            spoken = E.MaskText(self, raw)
             if spoken == "" then spoken = Locale.Lookup("LOC_CAI_EDIT_BLANK") end
             Speak(Locale.Lookup("LOC_CAI_EDIT_ACTIVATE_SELECTED", label, spoken), true, false)
         end
     else
         spoken = E.GetCurrentLine(buf, self._cursor)
-        if self._passwordMask then spoken = string.rep("*", #spoken) end
+        spoken = E.MaskText(self, spoken)
         if spoken == "" then spoken = Locale.Lookup("LOC_CAI_EDIT_BLANK") end
         Speak(Locale.Lookup("LOC_CAI_EDIT_ACTIVATE", label, spoken), true, false)
     end
@@ -277,7 +278,7 @@ function EditBoxWidget:Commit()
     -- "committed" every time becomes noise. Listeners can announce their own
     -- confirmation if they need one.
     if not self._alwaysEdit then
-        Speak(Locale.Lookup("LOC_CAI_EDIT_COMMITTED", self._passwordMask and string.rep("*", #text) or text), false,
+        Speak(Locale.Lookup("LOC_CAI_EDIT_COMMITTED", E.MaskText(self, text)), false,
             false)
     end
 end
@@ -311,7 +312,7 @@ function EditBoxWidget:OnCharInput(char, silent)
     if not CharAllowed(self._editMode, char) then return true end
     if not E.InsertText(self, char) then return true end
     if not silent then
-        Speak(self._passwordMask and "*" or char, true, false)
+        Speak(E.MaskText(self, char), true, false)
     end
     self:_FireTextChanged()
     return true
@@ -360,7 +361,7 @@ function EditBoxWidget._BuildBindings()
                     d = E.BackspaceChar(self)
                 end
                 if d ~= "" then
-                    Speak(self._passwordMask and string.rep("*", #d) or d, true, false)
+                    Speak(E.MaskText(self, d), true, false)
                     self:_FireTextChanged()
                 end
                 return true
@@ -380,7 +381,7 @@ function EditBoxWidget._BuildBindings()
                     d = E.BackspaceWord(self)
                 end
                 if d ~= "" then
-                    Speak(self._passwordMask and string.rep("*", #d) or d, true, false)
+                    Speak(E.MaskText(self, d), true, false)
                     self:_FireTextChanged()
                 end
                 return true
@@ -399,7 +400,7 @@ function EditBoxWidget._BuildBindings()
                     d = E.DeleteChar(self)
                 end
                 if d ~= "" then
-                    Speak(self._passwordMask and string.rep("*", #d) or d, true, false)
+                    Speak(E.MaskText(self, d), true, false)
                     self:_FireTextChanged()
                 end
                 return true
@@ -419,7 +420,7 @@ function EditBoxWidget._BuildBindings()
                     d = E.DeleteWordForward(self)
                 end
                 if d ~= "" then
-                    Speak(self._passwordMask and string.rep("*", #d) or d, true, false)
+                    Speak(E.MaskText(self, d), true, false)
                     self:_FireTextChanged()
                 end
                 return true
@@ -689,7 +690,7 @@ function EditBoxWidget._BuildBindings()
                 else
                     local buf = self._buffer or ""
                     local pos = self._cursor or 0
-                    local ch = string.sub(buf, pos + 1, pos + 1)
+                    local ch = E.GetCharacterAt(buf, pos)
                     if ch ~= "" then
                         UIManager:SetClipboardString(ch)
                         Speak(E.FormatCopied(self, ch), true, false)

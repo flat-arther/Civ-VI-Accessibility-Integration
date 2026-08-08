@@ -1,0 +1,3 @@
+# Add tags here only when CAI must reuse a complete Firaxis translation exactly.
+# The punctuation-key overrides are intentionally absent: Firaxis uses glyphs,
+# while CAI needs spoken names for screen-reader output.

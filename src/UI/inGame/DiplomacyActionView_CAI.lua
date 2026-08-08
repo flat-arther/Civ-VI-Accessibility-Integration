@@ -117,7 +117,7 @@ local function NormalizeText(text)
     text = tostring(text)
     text = string.gsub(text, "%[ENDCOLOR%]", "")
     text = string.gsub(text, "%[COLOR_[^%]]+%]", "")
-    text = string.gsub(text, "%[COLOR:%s*[^%]]+%]", "")
+    text = string.gsub(text, "%[COLOR:[ \t\r\n]*[^%]]+%]", "")
     return text
 end
 
@@ -1607,7 +1607,7 @@ local function AddGrievancesChildren(node)
         for _, line in ipairs(breakdownLines) do
             -- Skip the "LOSING / Grievances per turn from:" header line; the
             -- parent label already states the net change. Header lines end in ":".
-            if not string.match(line, ":%s*$") then
+            if not string.match(line, ":[ \t\r\n]*$") then
                 breakdownNode:AddChild(CreateReadOnlyText(mgr:GenerateWidgetId("CAIDiplomacyGrievanceBreakdownEntry"),
                     line, nil))
             end
