@@ -86,8 +86,12 @@
 [ ] APpend unit type to named units
 [x] Merge city-state details in to table
 [x] Add graph mode to tech and civic trees.
-[ ] Add amenities to the city banners
 [x] Fix issue with tutorials losing focus in diplomacy
+[x] Item pos should only be spoken in containers
+[x] Mod tutorials interrupt focus even when tutorial widget is not the top. 
 [ ] Tutorial text that is too long should be split in to multiple rows
-[ ] Item pos should only be spoken in containers
+[ ] Add amenities to the city banners
 [ ] Look in to coastal raide yield reporting
+[ ] Builders allow you to form escort formations in tutorial. Disable this when not in free roam
+[ ] Add support for better reports, detailed map tacs, extended policy cards, better balanced game
+[ ] Add custom category keybindings

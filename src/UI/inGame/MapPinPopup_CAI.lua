@@ -1,26 +1,30 @@
 include("caiUtils")
-include("MapPinPopup")
+if Modding.IsModActive("4ecfcc62-5471-4435-b295-590df213e8d8") then
+    include("mappinpopup_dmt")
+else
+    include("MapPinPopup")
+end
 include("MapTacks")
 include("inGameHelpers_CAI")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr                         = ExposedMembers.CAI_UIManager
 
-local PANEL_ID = "CAIMapPinPopup_Panel"
+local PANEL_ID                    = "CAIMapPinPopup_Panel"
 
-local m_panel       = nil
-local m_nameEdit    = nil
-local m_iconDD      = nil
-local m_iconOptions = nil
-local m_visibilityDD = nil
-local m_visibilityOptions = nil
-local m_visibilityCommitted = nil
-local m_visibilityPending = nil
-local m_editPinPlayerID = nil
-local m_editPinID = nil
-local m_visibilityChangedByCAI = false
-local m_nativeConfirmInProgress = false
+local m_panel                     = nil
+local m_nameEdit                  = nil
+local m_iconDD                    = nil
+local m_iconOptions               = nil
+local m_visibilityDD              = nil
+local m_visibilityOptions         = nil
+local m_visibilityCommitted       = nil
+local m_visibilityPending         = nil
+local m_editPinPlayerID           = nil
+local m_editPinID                 = nil
+local m_visibilityChangedByCAI    = false
+local m_nativeConfirmInProgress   = false
 
-local m_vanillaOnOk = OnOk
+local m_vanillaOnOk               = OnOk
 local m_vanillaOnSendToChatButton = OnSendToChatButton
 
 -- ============================================================================

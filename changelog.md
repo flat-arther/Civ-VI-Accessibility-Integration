@@ -1,5 +1,13 @@
 ## [Unreleased]
 
+### Added
+
+- Added support for the following mods: Detailed map tacs, yet, not another maps pack
+
+### Fixed
+
+- Fixed a bug with mod tutorials that caused the game to stop speaking if an advisor dialog appeared at the same time
+
 ## [1.0.1] - 2026-08-04
 
 ### Added

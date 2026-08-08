@@ -1383,16 +1383,21 @@ info.PlotInfoHelpers = {
     end,
 
     mapTac = function(data, plot)
-        if not data.IsVisible or plot == nil then return nil end
+        if not data.IsVisible or plot == nil then
+            return nil
+        end
 
         local mapTacs = GetVisibleMapTacsAtPlot(plot)
+
         if #mapTacs == 0 then
             return nil
         end
 
         local labels = {}
+
         for _, entry in ipairs(mapTacs) do
             local label = entry.LabelWithOwner or entry.Label
+
             if label ~= nil and label ~= "" then
                 table.insert(labels, label)
             end
@@ -1402,7 +1407,10 @@ info.PlotInfoHelpers = {
             return nil
         end
 
-        return Locale.Lookup("LOC_CAI_PLOT_MAP_TACS", table.concat(labels, "[NEWLINE]"))
+        return Locale.Lookup(
+            "LOC_CAI_PLOT_MAP_TACS",
+            table.concat(labels, "[NEWLINE]")
+        )
     end,
 
     interfaceInfo = function(data, plot)

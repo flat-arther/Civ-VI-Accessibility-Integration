@@ -250,11 +250,11 @@ function CreateUnlockChild(mgr, unlock, idPrefix)
     })
     child:AddInputBindings({
         {
-            Key     = Keys.VK_RETURN,
-            IsShift = true,
-            MSG     = KeyEvents.KeyUp,
+            Key         = Keys.VK_RETURN,
+            IsShift     = true,
+            MSG         = KeyEvents.KeyUp,
             Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action  = function()
+            Action      = function()
                 if IsTutorialRunning and IsTutorialRunning() then return true end
                 if unlock.TypeName then LuaEvents.OpenCivilopedia(unlock.TypeName) end
                 return true
@@ -388,7 +388,12 @@ end
 ---@param localPlayerID number|nil
 ---@return string|nil
 function BuildMapTacLabelWithOwner(mapPinCfg, playerID, localPlayerID)
-    local label = BuildMapTacLabel(mapPinCfg)
+    local label = BuildMapTacLabelWithDMT(
+        mapPinCfg,
+        playerID,
+        localPlayerID
+    )
+
     if label == nil or label == "" or playerID == localPlayerID then
         return label
     end
@@ -399,6 +404,55 @@ function BuildMapTacLabelWithOwner(mapPinCfg, playerID, localPlayerID)
     end
 
     return label .. ", " .. ownerLabel
+end
+
+---@param mapPinCfg table|nil
+---@param playerID number|nil
+---@param localPlayerID number|nil
+---@return string|nil
+function BuildMapTacLabelWithDMT(mapPinCfg, playerID, localPlayerID)
+    local label = BuildMapTacLabel(mapPinCfg)
+
+    if label == nil or label == "" then
+        return label
+    end
+
+    -- DMT compatibility.
+    -- DMT only maintains MapPinSubjects for the local player's pins.
+    if playerID ~= localPlayerID then
+        return label
+    end
+
+    if ExposedMembers.CAIInfo == nil or ExposedMembers.CAIInfo.GetMapPinSubject == nil then
+        return label
+    end
+
+    local subject = ExposedMembers.CAIInfo.GetMapPinSubject(
+        playerID,
+        mapPinCfg:GetHexX(),
+        mapPinCfg:GetHexY()
+    )
+
+    if subject == nil then
+        return label
+    end
+
+    if subject.YieldToolTip ~= nil
+        and subject.YieldToolTip ~= "" then
+        label = label
+            .. "[NEWLINE]"
+            .. subject.YieldToolTip
+    end
+
+    if subject.CanPlace == false
+        and subject.CanPlaceToolTip ~= nil
+        and subject.CanPlaceToolTip ~= "" then
+        label = label
+            .. "[NEWLINE]"
+            .. subject.CanPlaceToolTip
+    end
+
+    return label
 end
 
 ---@param plot table|nil
@@ -426,7 +480,7 @@ function GetVisibleMapTacsAtPlot(plot)
                         PlayerID = iPlayer,
                         PinID = mapPinCfg:GetID(),
                         Config = mapPinCfg,
-                        Label = BuildMapTacLabel(mapPinCfg),
+                        Label = BuildMapTacLabelWithDMT(mapPinCfg, iPlayer, localPlayerID),
                         LabelWithOwner = BuildMapTacLabelWithOwner(mapPinCfg, iPlayer, localPlayerID),
                     })
                 end

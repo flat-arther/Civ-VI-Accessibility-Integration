@@ -209,19 +209,54 @@ function UIScreenManager:Push(w, opts)
     if self.TutorialCatalog then self.TutorialCatalog:OnRootPushed(w) end
 end
 
----@param announce? boolean defaults true; pass false to suppress speech
+---@param announce? boolean
 function UIScreenManager:UpdateRootFocus(announce)
     if #self.Stack == 0 then
         self.CurrentPath = {}
         self:CancelEnterKeyOwnership()
         return
     end
+
     local top = self:GetTop()
-    if not top or self.CurrentPath[1] == top then return end
-    if CAI and CAI.Silence then CAI.Silence() end
-    self:SetFocus(top, { announce = announce ~= false })
-    local tutorialMgr = self:GetTutorialManager()
-    if tutorialMgr then tutorialMgr:OnRouteChanged() end
+    if not top then return end
+
+    local tutorialManager = self:GetTutorialManager()
+
+    -- A popup above the tutorial owner has closed. The owner is top again,
+    -- so restore focus to the active tutorial rather than its underlying root.
+    if tutorialManager
+        and tutorialManager:IsActiveForCurrentTop() then
+        local active = tutorialManager.Active
+        local target = active and (active.Dialog or active.Host)
+
+        if target then
+            if CAI and CAI.Silence then
+                CAI.Silence()
+            end
+
+            self:SetFocus(target, {
+                announce = announce ~= false,
+            })
+        end
+
+        return
+    end
+
+    if self.CurrentPath[1] == top then
+        return
+    end
+
+    if CAI and CAI.Silence then
+        CAI.Silence()
+    end
+
+    self:SetFocus(top, {
+        announce = announce ~= false,
+    })
+
+    if tutorialManager then
+        tutorialManager:OnRouteChanged()
+    end
 end
 
 ---@return UIWidget|nil
@@ -457,12 +492,11 @@ function UIScreenManager:SetFocus(widget, opts)
     local tutorialManager = self:GetTutorialManager()
 
     if tutorialManager
-        and tutorialManager:IsActive()
+        and tutorialManager:IsActiveForCurrentTop()
         and not tutorialManager:IsWidgetInsideActiveTutorial(widget) then
         tutorialManager:DeferFocus(widget, opts)
         return false
     end
-
     local path = self.BuildFocusPath(widget, opts.direction)
     return self:SetFocusPath(path, nil, opts.announce)
 end

@@ -515,6 +515,32 @@ function CAIUITutorialManager:Activate(item, owner, context)
     return true
 end
 
+---@return boolean
+function CAIUITutorialManager:IsActiveForCurrentTop()
+    local active = self.Active
+    if not active or not active.Owner then
+        return false
+    end
+
+    local top = self.Manager:GetTop()
+    if not top then
+        return false
+    end
+
+    -- Owner may itself be the root.
+    if active.Owner == top then
+        return true
+    end
+
+    -- Or Owner may be a descendant of the root.
+    local node = active.Owner
+    while node and node.Parent do
+        node = node.Parent
+    end
+
+    return node == top
+end
+
 ---@param restoreFocus? boolean
 function CAIUITutorialManager:CloseActive(restoreFocus)
     local active = self.Active
