@@ -1,0 +1,920 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+  <LocalizedText>
+    <!-- 文明百科结构 -->
+    <Row Tag="LOC_CAI_PEDIA_ACCESSIBILITY_SECTION_NAME" Language="zh_Hans_CN">
+      <Text>无障碍模组</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SCREEN_TUTORIALS_GROUP_NAME" Language="zh_Hans_CN">
+      <Text>界面教程</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_UI_WIDGETS_GROUP_NAME" Language="zh_Hans_CN">
+      <Text>用户界面控件</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_GROUP_NAME" Language="zh_Hans_CN">
+      <Text>游戏玩法</Text>
+    </Row>
+
+    <!-- 游戏玩法：导航光标 -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_TITLE" Language="zh_Hans_CN">
+      <Text>导航光标</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_OVERVIEW_TITLE" Language="zh_Hans_CN">
+      <Text>概述</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_OVERVIEW" Language="zh_Hans_CN">
+      <Text>导航光标是一种独立的地图光标。你可以用它探索单元格并执行操作，而不会更改所选城市或单位。《文明 VI》的六边形地图使用六个相邻方向，因此光标提供西北、东北、西、东、西南和东南移动命令。移动光标也会移动镜头，并播报目的地单元格中最重要的已知信息。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_VISIBILITY" Language="zh_Hans_CN">
+      <Text>光标信息遵循本地玩家的可见性。未揭示单元格会播报为“未探索”，不会暴露其中的内容；已揭示单元格可能保留已知地理信息，但隐藏单位和其他当前不可见的信息仍会被隐去。在热座模式游戏中，各本地玩家的光标位置、记忆的地理区域和测绘仪状态相互独立。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_MOVING_TITLE" Language="zh_Hans_CN">
+      <Text>移动光标</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_MOVING" Language="zh_Hans_CN">
+      <Text>默认移动键为：Q 或数字键盘 7 向西北移动，E 或数字键盘 9 向东北移动，A 或数字键盘 4 向西移动，D 或数字键盘 6 向东移动，Z 或数字键盘 1 向西南移动，C 或数字键盘 3 向东南移动。这些命令可以在“按键绑定”中更改。移动会遵循当前地图的环绕和边缘规则。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_JUMPS" Language="zh_Hans_CN">
+      <Text>按斜杠键可跳转到所选单位；未选择单位时则跳转到所选城市。按 Control 加 S 可跳转到你的首都。游戏开始时，光标也会位于可用的选择对象或你的首都。从扫描器结果、消息、通知、地图标记或书签跳转时，光标和镜头都会移动。之后播报的方向会以新的光标位置为准。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_READING_TITLE" Language="zh_Hans_CN">
+      <Text>读取当前单元格</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_READING_PRIMARY" Language="zh_Hans_CN">
+      <Text>按 S 或数字键盘 5 读取单位。按 W 或数字键盘 8 读取产出、工作状态、淡水和所有权。按 X 或数字键盘 2 读取污染、移动力消耗、防御修正和魅力。按 Shift 加 S 或 Shift 加数字键盘 5，读取相对于你初始首都的坐标。这些读数会反映单元格和你文明的当前状态。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_READING_GEOGRAPHY" Language="zh_Hans_CN">
+      <Text>按 B 读取地理与建造内容。结果可能包括道路、沿海低地、火山与灾害状态、大陆、政治领土、悬崖、河流、国家公园、区域、建筑和巨作。情景特有的公开地图信息会在其披露规则允许时包含在内。正常移动时的播报会有意比这些按需读数更简短。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_INTERFACE" Language="zh_Hans_CN">
+      <Text>按空格可读取光标处当前界面目标的信息。这对于移动、战斗预览、城市管理、购买单元格、放置及其他目标选择模式尤其有用。按 Enter 执行该模式的主要行动。存在次要行动时，按 Control 加 Enter 执行，例如交换城市管理的单元格。目标是否合法由当前游戏本体的行动或命令决定，而不是由无障碍功能推测。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_BANNERS_TITLE" Language="zh_Hans_CN">
+      <Text>读取城市、区域、蛮族与产业横幅</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_BANNERS" Language="zh_Hans_CN">
+      <Text>光标位于可见的城市或区域横幅上时，数字行命令会读取其中可用的区域。身份命令也支持相应的蛮族氏族、产业和公司横幅。某个资料片未启用时，属于该资料片的信息会被省略。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_BANNER_KEYS" Language="zh_Hans_CN">
+      <Text>按 1 读取身份、生命值和状态；按 2 读取增长和生产；按 3 读取宗教；按 4 读取所有权、外交、任务和贸易站状态；按 5 读取忠诚度；按 6 读取总督；按 7 读取电力。忠诚度和总督需要《迭起兴衰》或《风云变幻》的数据，电力则需要《风云变幻》。</Text>
+    </Row>
+
+    <!-- 游戏玩法：测绘仪 -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_TITLE" Language="zh_Hans_CN">
+      <Text>测绘仪</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_OVERVIEW_TITLE" Language="zh_Hans_CN">
+      <Text>区域与半径</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_OVERVIEW" Language="zh_Hans_CN">
+      <Text>测绘仪会汇总以导航光标为中心的圆形六边形区域。其半径限制为一到五个单元格，并会为每位本地玩家分别记忆。按 Shift 加 W 增大半径，按 Shift 加 X 减小半径；播报反馈会说明新半径，并在达到最小值或最大值时予以提示。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_PRIVACY" Language="zh_Hans_CN">
+      <Text>测绘仪只会报告你的文明有权得知的信息。未揭示单元格只计入未探索数量。尚未发现的战略资源、隐藏的敌方单位、未接触对象的身份及其他私密信息都不会被揭示。大多数结果会汇总为数量；各个城市和单位则按相对于光标的距离与方向排序。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_BASIC_TITLE" Language="zh_Hans_CN">
+      <Text>核心读数</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_BASIC" Language="zh_Hans_CN">
+      <Text>按 Shift 加 Q 汇总产出；按 Shift 加 A 统计你的玩家可见的资源；按 Shift 加 Z 统计地形、地貌、海拔、有淡水的单元格和未探索单元格；按 Shift 加 E 统计友方单位；按 Shift 加 D 统计当前可见的敌人；按 Shift 加 C 统计已知城市和蛮族哨站。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_COUNTS_TITLE" Language="zh_Hans_CN">
+      <Text>其他计数</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_COUNTS" Language="zh_Hans_CN">
+      <Text>按 Control 加 Shift 加 A，或 Control 加 Shift 加数字键盘 4，统计改良设施。使用相同修饰键配合 D 或数字键盘 6 统计可见的中立单位，配合 Z 或数字键盘 1 统计单元格所有权，配合 Q 或数字键盘 7 统计区域，配合 X 或数字键盘 2 统计魅力。改良设施不包括蛮族营地、部落村庄和道路。区域不包括市中心。魅力会按游戏中从“惊艳的”到“令人厌恶的”等级统计已揭示的非水域单元格；当前游戏中没有“魅力”滤镜时，此项不可用。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_DETAILS_TITLE" Language="zh_Hans_CN">
+      <Text>结果分类方式</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_DETAILS" Language="zh_Hans_CN">
+      <Text>所有权会将单元格分为“你的”“无主”、已知文明的形容词，或“所有者未知”；不会揭示尚未接触的文明。中立单位必须属于已经接触且并非蛮族的玩家，该玩家既不与你友好，也未与你交战；适用时，外国宗教单位会根据神学关系分类。资源只有在你的文明发现后才会计入。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_TERRAIN" Language="zh_Hans_CN">
+      <Text>地形结果会分别列出有用信息，而不会重复统计同一事实。丘陵会同时计入其下方的平坦地形和“丘陵”。普通山脉只计入“山脉”，自然奇观只计入其奇观名称。当地貌必然意味着某种特定地形或海拔时，测绘仪会省略这一重复标签。即使其他地貌在地形说明中占主导，淡水仍会独立统计。</Text>
+    </Row>
+
+    <!-- 游戏玩法：世界扫描器 -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_TITLE" Language="zh_Hans_CN">
+      <Text>世界扫描器</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_OVERVIEW_TITLE" Language="zh_Hans_CN">
+      <Text>概述</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_OVERVIEW" Language="zh_Hans_CN">
+      <Text>世界扫描器无需逐个单元格移动，即可查找已知地图对象。结果分为四个层级：类别、子类别、组和项目。内置来源涵盖城市、单位、地形与地理区域、资源、区域与奇观、改良设施、地图标记和其他地图对象。当前滤镜、有效目标、推荐项、城市管理、排队路径和受支持情景会提供情境来源。空类别和空子类别会被跳过。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_LIVE_DATA" Language="zh_Hans_CN">
+      <Text>扫描器会在你浏览时刷新结果。已不存在或不再可见的对象会自动消失，新出现的可用对象则会在下次刷新所属类别时显示。扫描器遵循正常的探索、外交、单位可见性和资源发现规则，因此不会揭示你的文明不应得知的信息。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_NAVIGATION_TITLE" Language="zh_Hans_CN">
+      <Text>浏览结果</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_NAVIGATION" Language="zh_Hans_CN">
+      <Text>按 Control 加 Page Up 或 Page Down 移到上一个或下一个类别。按 Shift 加 Page Up 或 Page Down 在子类别间移动，按 Page Up 或 Page Down 在组间移动，按 Alt 加 Page Up 或 Page Down 在项目间移动。每个层级都可循环移动，并会在边界处播放咔嗒声。每个普通类别都以“全部”子类别开头，其中包含该类别的所有项目。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_LOCATION" Language="zh_Hans_CN">
+      <Text>结果会保持你开始浏览时的顺序，因此查看或跳转不会在操作过程中重新排列列表。方向和距离始终以导航光标的当前位置为基准。按 Home 可将光标移到当前项目，或区域组中最近的单元格；按 Backspace 可返回上次扫描器跳转前的位置；按 End 可再次播报当前方向。设置可以在读数之前或之后添加坐标，也可以让光标在播报后跟随每个选中项目。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_SEARCH_TITLE" Language="zh_Hans_CN">
+      <Text>搜索</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_SEARCH" Language="zh_Hans_CN">
+      <Text>按 Control 加 F 打开扫描器搜索。输入查询后，系统会检查当前世界，并按完整单词、前缀、单词前缀、子字符串和缩写匹配对名称排序。同名对象会被分组，最近的实例排在最前；其原始扫描器类别会成为结果子类别。在词语前加两个连字符可排除匹配的名称。在搜索框中按 Page Up 和 Page Down 可调出最近的扫描器查询。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_MANAGEMENT_TITLE" Language="zh_Hans_CN">
+      <Text>管理扫描器类别</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_MANAGEMENT" Language="zh_Hans_CN">
+      <Text>按 F12，打开“世界扫描器”设置，然后激活“管理扫描器类别”。每行都会播报其名称、类型和“已启用”或“已禁用”状态。按 Shift 加上方向键或 Shift 加下方向键可更改顺序。打开行的子菜单，可以切换“已启用”状态、从完整的内置或情境类别创建自定义类别，或将该类别移回默认位置。更改会自动保存，并在不同游戏之间保留。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_TYPES" Language="zh_Hans_CN">
+      <Text>内置类别是正常的持久来源。情境类别只会在其游戏信息相关时存在，并可能提供自动聚焦设置。自定义类别会组合所选来源和名称规则。已禁用类别仍会保留配置，但在导航时会被跳过。“重置”会恢复内置顺序和启用状态，而不会删除自定义类别。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_CUSTOM_TITLE" Language="zh_Hans_CN">
+      <Text>自定义类别</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_CUSTOM" Language="zh_Hans_CN">
+      <Text>激活“添加自定义类别”可创建一个已启用的“自定义 N”行。为其重命名，选择某个来源的完整“全部”视图或个别子类别，并添加“包含名称”或“排除名称”词语。每个所选来源或包含词语都会成为自定义结果中的一个子类别。按 Delete 会在确认后移除自定义类别；在其管理行上按 Delete 会打开同一个确认框。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_MATCHING" Language="zh_Hans_CN">
+      <Text>名称匹配不区分大小写，并可识别完整单词、前缀、部分单词和缩写。即使没有选择项目的原始来源，包含词语也可以添加匹配项目。排除词语会应用于合并后的结果。同一项目可以出现在多个所选子类别下。</Text>
+    </Row>
+
+    <!-- 游戏玩法：滤镜 -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_TITLE" Language="zh_Hans_CN">
+      <Text>滤镜</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_OVERVIEW_TITLE" Language="zh_Hans_CN">
+      <Text>概述</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_OVERVIEW" Language="zh_Hans_CN">
+      <Text>滤镜每次显示一种地图信息，例如宗教、魅力、政治边界或电力。按 Control 加 J 打开滤镜列表，移到所需滤镜并按 Enter。按 Escape，或打开列表并再次激活当前滤镜，即可将其关闭。可用滤镜取决于你的规则集和资料片。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_ACTIVATION" Language="zh_Hans_CN">
+      <Text>在受支持的滤镜中移动导航光标，会播报当前单元格的信息。存在更完整读数时，按空格即可听取。世界扫描器还可能添加“当前滤镜”类别，让你浏览已知世界中所有匹配的单元格。某些游戏行动会自动开启滤镜。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_RELIGION_TITLE" Language="zh_Hans_CN">
+      <Text>宗教滤镜</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_RELIGION" Language="zh_Hans_CN">
+      <Text>“宗教”滤镜显示城市中的宗教压力及其影响的领土。在城市单元格或该城市购买的单元格上，光标信息会先说明主流宗教及其信徒人数，再列出其他宗教的信徒人数。没有主流宗教的城市会被标明为“无主流宗教”。“当前滤镜”扫描器会按主流宗教对城市分组。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_CONTINENT_TITLE" Language="zh_Hans_CN">
+      <Text>大陆滤镜</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_CONTINENT" Language="zh_Hans_CN">
+      <Text>“大陆”滤镜按大陆划分已揭示陆地。导航光标的正常地理读数会说明光标下方的大陆。“当前滤镜”扫描器按大陆对已揭示单元格分组，并将相连的单元格合并为区域，让你可以移到每块大陆距离最近的部分。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_APPEAL_TITLE" Language="zh_Hans_CN">
+      <Text>魅力滤镜</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_APPEAL" Language="zh_Hans_CN">
+      <Text>“魅力”滤镜将已揭示陆地分为“惊艳的”“迷人的”“平均的”“无吸引力的”或“令人厌恶的”。光标信息会同时给出等级和确切魅力值。“当前滤镜”扫描器按这五个等级对单元格分组。魅力会影响社区的住房、海滨度假区、国家公园及其他多种能力和改良设施。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SETTLER_TITLE" Language="zh_Hans_CN">
+      <Text>移民滤镜</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SETTLER" Language="zh_Hans_CN">
+      <Text>“移民”滤镜会评估陆地是否适合建立城市。光标信息会播报“淡水”“沿海水域”“无水源”或“无法定居”。启用《迭起兴衰》或《风云变幻》时，还会给出新城市预计的忠诚度变化。启用《风云变幻》时，则会标明洪水、火山和沿海低地风险。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SETTLER_SCANNER" Language="zh_Hans_CN">
+      <Text>“当前滤镜”扫描器会将水源情况、忠诚度和灾害警告分为不同子类别。水源组包括“淡水”“沿海水域”“无水源”和“无法定居”。忠诚度组使用确切的预计忠诚度变化。灾害组会区分泛滥平原、火山和三级沿海低地。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_GOVERNMENT_TITLE" Language="zh_Hans_CN">
+      <Text>政体滤镜</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_GOVERNMENT" Language="zh_Hans_CN">
+      <Text>“政体”滤镜会标明每个已揭示单元格所属文明的当前政体。适用时会标明“无政府状态”。“当前滤镜”扫描器会区分你的领土、友方领土、中立领土和敌方领土，再按政体对结果分组。属于不同文明或城市的相连领土仍会分别显示。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_POLITICAL_TITLE" Language="zh_Hans_CN">
+      <Text>政治滤镜</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_POLITICAL" Language="zh_Hans_CN">
+      <Text>“政治”滤镜显示已揭示领土的所有者。单元格光标信息会说明已知所有者。“当前滤镜”扫描器会区分你的领土、友方领土、中立领土和敌方领土，按文明对其分组，并将相连的单元格合并为区域。尚未接触的文明不会被识别。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_TOURISM_TITLE" Language="zh_Hans_CN">
+      <Text>旅游业绩滤镜</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_TOURISM" Language="zh_Hans_CN">
+      <Text>“旅游业绩”滤镜会标记你城市中产生旅游业绩的单元格。光标信息会说明旅游业绩值、其“高”“中”或“低”等级，以及国际游客数量。“高”表示至少 16 点旅游业绩，“中”表示至少 8 点，更低的正数值则为“低”。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_TOURISM_DETAILS" Language="zh_Hans_CN">
+      <Text>在旅游业绩横幅上按空格可听取完整明细，包括游戏显示的来源和修正值。“当前滤镜”扫描器会为每个旅游业绩横幅提供一个项目，并按“高”“中”或“低”等级对横幅分组。请求详细信息时，没有旅游业绩横幅的单元格会被报告为“无横幅”。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_EMPIRE_TITLE" Language="zh_Hans_CN">
+      <Text>帝国滤镜</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_EMPIRE" Language="zh_Hans_CN">
+      <Text>Control 加 J 打开的无障碍滤镜列表特意省略了“帝国”滤镜。其中关于你的城市、区域、奇观和已工作领土的有用信息，已包含在导航光标信息以及城市或区域横幅读数中。世界扫描器的普通类别也提供前往这些对象的直接导航，因此额外呈现“帝国”滤镜只会重复相同信息。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_LOYALTY_TITLE" Language="zh_Hans_CN">
+      <Text>忠诚度滤镜</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_LOYALTY" Language="zh_Hans_CN">
+      <Text>启用《迭起兴衰》或《风云变幻》时可使用“忠诚度”滤镜。在城市单元格或该城市购买的单元格上，光标信息会给出城市的忠诚度等级、当前忠诚度与上限、每回合忠诚度变化，以及城市正在上升、下降、处于危险中还是始终忠诚。“当前滤镜”扫描器会按这些忠诚度状态对城市分组。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_POWER_TITLE" Language="zh_Hans_CN">
+      <Text>电力滤镜</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_POWER" Language="zh_Hans_CN">
+      <Text>《风云变幻》中可以使用“电力”滤镜。光标信息会标明电力来源单元格，以及所属城市是否通电。“当前滤镜”扫描器提供“电力来源”“电力范围”“已通电城市单元格”和“未通电城市单元格”。电力范围会按提供区域电力的城市保持分组。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_PLAGUE_TITLE" Language="zh_Hans_CN">
+      <Text>瘟疫滤镜</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_PLAGUE" Language="zh_Hans_CN">
+      <Text>“瘟疫”滤镜只会在“黑死病”情景中出现。它会标明当前受到瘟疫影响的单元格和剩余瘟疫回合数。“当前滤镜”扫描器按剩余持续时间对受影响单元格分组。普通游戏中没有此滤镜。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SCANNER_TITLE" Language="zh_Hans_CN">
+      <Text>当前滤镜扫描器类别</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SCANNER" Language="zh_Hans_CN">
+      <Text>此情境扫描器类别只会显示当前滤镜。空结果会被跳过。默认情况下，开启滤镜不会移动扫描器焦点；你可以在“世界扫描器”设置中为“当前滤镜”启用自动聚焦。扫描器结果只包含你的玩家有权得知的信息。</Text>
+    </Row>
+
+    <!-- 游戏玩法：地图标记 -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_TITLE" Language="zh_Hans_CN">
+      <Text>地图标记</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_OVERVIEW_TITLE" Language="zh_Hans_CN">
+      <Text>概述</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_OVERVIEW" Language="zh_Hans_CN">
+      <Text>地图标记是《文明 VI》本身提供的带标签地图标记。可见标记会包含在导航光标的单元格信息，以及世界扫描器的“地图标记”类别中。其他玩家的标记对你可见时，会标明其所有者。在导航光标处按 M，可创建标记或编辑你在该单元格上已有的标记。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_LIST" Language="zh_Hans_CN">
+      <Text>按 Control 加 M 可打开或关闭无障碍地图标记列表。激活一行会将导航光标跳转到当前存在的相应标记。你自己的标记行可以在确认后用 Delete 删除；删除操作使用游戏正常的玩家配置更新方式，并会清除引用该标记的所有书签槽位。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_BOOKMARKS_TITLE" Language="zh_Hans_CN">
+      <Text>书签</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_BOOKMARKS" Language="zh_Hans_CN">
+      <Text>十个书签槽位会在当前玩家的已保存配置中存储你的地图标记标识符。在已有自己标记的单元格上分配书签，会重命名并重复使用该标记；在没有标记的单元格上分配书签，则会创建标记。手动删除或因其他原因缺失的标记，会在下次解析相应槽位时使其已保存槽位变为空白。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_BOOKMARK_RULES" Language="zh_Hans_CN">
+      <Text>重新分配已有内容的槽位会删除其原有标记。将同一标记分配给另一个槽位会清除原槽位，因此一个标记不能代表两个书签。由于槽位和标记所有权均为玩家专属，同一存档中的本地玩家不会共享书签映射；只有通过正常多人游戏可见性共享底层标记时例外。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_KEYS_TITLE" Language="zh_Hans_CN">
+      <Text>书签命令</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_KEYS" Language="zh_Hans_CN">
+      <Text>按 Control 加 Shift 加 1 至 0，可在光标处分配书签 1 至 10。按 Control 加 1 至 0 可跳转到书签，按 Alt 加 1 至 0 可读取书签相对于光标的当前方向。数字 0 代表槽位 10。这些命令会在使用前重新解析标记，而不会缓存其显示名称或坐标。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_SHARING_TITLE" Language="zh_Hans_CN">
+      <Text>多人游戏可见性</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_SHARING" Language="zh_Hans_CN">
+      <Text>在多人游戏中，无障碍地图标记编辑器会采用游戏的“对谁可见”选项，并立即更新当前标记。对于当前聊天目标可见的非私密标记，网络多人游戏还可以提供“发送到聊天”。热座模式支持标记可见性目标，但不支持实时的“发送到聊天”控件。</Text>
+    </Row>
+
+    <!-- 游戏玩法：帝国信息 -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_TITLE" Language="zh_Hans_CN">
+      <Text>帝国信息</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_OVERVIEW_TITLE" Language="zh_Hans_CN">
+      <Text>概述</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_OVERVIEW" Language="zh_Hans_CN">
+      <Text>帝国信息命令无需打开完整界面，即可读取经常需要的总量和进度。数值会在你按键时读取，因此会反映当前游戏状态。如果规则集不使用相应系统，或你尚未将其解锁，该数值会被省略或播报为不可用。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_PROGRESS_TITLE" Language="zh_Hans_CN">
+      <Text>时间、研究与文化</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_PROGRESS" Language="zh_Hans_CN">
+      <Text>按 T 读取当前回合、时钟时间、游戏日期和生效中的回合计时器。按 R 读取每回合科技值和当前科技进度。按 P 读取每回合文化值和当前市政进度；处于无政府状态时，会改为报告无政府状态及其剩余回合数，而不是政体解锁消息。在存在时代系统的游戏中，按 Y 读取时代得分、所处时代、门槛和当前生效的纪念事项。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_YIELDS_TITLE" Language="zh_Hans_CN">
+      <Text>国库、产出与资源</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_YIELDS" Language="zh_Hans_CN">
+      <Text>按 G 读取金币余额、每回合金币和贸易路线容量。按 F 读取信仰值余额和每回合信仰值。按 I 读取每回合旅游业绩。这些读数会保留当前规则集的官方格式，并且不会打开“报告”或其他弹窗。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_DIPLOMACY_TITLE" Language="zh_Hans_CN">
+      <Text>外交与政体</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_DIPLOMACY" Language="zh_Hans_CN">
+      <Text>按 V 读取可用使者、当前影响力和获得下一位使者的进度。按 K 读取外交支持收入，以及世界议会的时间或会议信息。按 O 读取可用和已花费的总督头衔。按 N 读取拥有的核武器和热核武器。当前情景不使用相应帝国系统时，命令会播报为不可用。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_RULESETS_TITLE" Language="zh_Hans_CN">
+      <Text>规则集专属读数</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_RULESETS" Language="zh_Hans_CN">
+      <Text>情景读数会替换不适用于相应情景的信息。在“红死风暴”中，T 还会读取安全区时间、放射性尘降伤害、武器、处于危险中的移民，以及派系能力状态。在“海盗”中，T 还会读取船员士气。在移除相应系统的情景中，正常的科技、文化、政体或外交信息仍不可用。</Text>
+    </Row>
+
+    <!-- 游戏玩法：结束回合 -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_TITLE" Language="zh_Hans_CN">
+      <Text>结束你的回合</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_OVERVIEW_TITLE" Language="zh_Hans_CN">
+      <Text>结束回合前必须完成的事项</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_OVERVIEW" Language="zh_Hans_CN">
+      <Text>游戏会追踪结束你的回合前必须执行的下一项行动。它可能要求你向单位下达命令、选择生产项目、选择研究或市政、响应通知、解决其他阻塞事项，或在没有剩余事项时结束回合。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_AUTOMATIC" Language="zh_Hans_CN">
+      <Text>默认情况下，下一项行动发生变化时会自动播报，并会在回合之间播报等待消息。“事件”中的两项独立设置分别控制这两种播报。随时按 Shift 加空格，都可以重复当前回合阻塞事项或等待消息。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_ACTIONS_TITLE" Language="zh_Hans_CN">
+      <Text>执行下一项行动</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_ACTIONS" Language="zh_Hans_CN">
+      <Text>按 Control 加空格执行当前的下一项行动。回合准备就绪时，此命令会结束回合。有事项阻塞回合时，此命令会选择、循环移到或打开需要你处理的内容。按下命令时会重新检查，因此即使游戏状态在上次播报后发生变化，也会采用当前要求。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_LIST_TITLE" Language="zh_Hans_CN">
+      <Text>回合阻塞事项列表</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_LIST" Language="zh_Hans_CN">
+      <Text>按 Control 加 Shift 加空格打开列表，其中先列出当前的下一项行动，再列出其他各项当前阻塞事项。使用普通列表导航，并激活一行以前往或解决该事项。完成各项要求后，列表会随之更新。按 Escape 可将其关闭。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_TUTORIAL" Language="zh_Hans_CN">
+      <Text>在《文明 VI》内置教程中，这些快捷键会遵循当前教程步骤；尚不允许结束回合时，无法用它们跳过当前步骤。情景专属要求会自动包含在内。</Text>
+    </Row>
+
+    <!-- 游戏玩法：通知与历史记录 -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_TITLE" Language="zh_Hans_CN">
+      <Text>通知与消息历史记录</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_OVERVIEW_TITLE" Language="zh_Hans_CN">
+      <Text>概述</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_OVERVIEW" Language="zh_Hans_CN">
+      <Text>通知中心和消息缓冲区解决不同问题。通知中心会呈现当前生效的游戏通知及其行动。消息缓冲区则为每位玩家保留数量有限的已播报事件历史记录，包括通知、发现、战斗、传闻、移动和聊天。使用通知中心执行行动；使用历史记录回顾或再次前往相关内容。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_CENTER_TITLE" Language="zh_Hans_CN">
+      <Text>通知中心</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_CENTER" Language="zh_Hans_CN">
+      <Text>新的可见通知会被播报并添加到历史记录末尾。按 Control 加 N 打开通知中心，焦点会位于最新通知。同一类型的多条通知会构成一个可展开的树视图组。通知中心会读取每条当前通知的摘要和说明，还可以包含有效地点，而不会自动移动光标。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_CENTER_ACTIONS" Language="zh_Hans_CN">
+      <Text>按 Enter 或空格执行通知的正常行动。游戏允许关闭通知时，按 Delete 可将其关闭；在分组上按 Delete，会关闭该组中所有可关闭的通知。适用时，地点行动还会移动导航光标。Escape 可关闭通知中心。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS_TITLE" Language="zh_Hans_CN">
+      <Text>可见性变化播报</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS" Language="zh_Hans_CN">
+      <Text>可见性变化播报会汇总你的文明所见内容发生的变化。它们可以在你的单位移动后、你的回合开始时，以及其他玩家进行其回合期间播报。按 F12 并打开“事件”设置，可分别控制这三个时机。新探索的单元格会被计数。游戏让你得知新发现的外国城市、可见资源、区域、改良设施、敌方单位和其他外国单位时，会播报其名称。重复名称会合并为数量。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS_LINES" Language="zh_Hans_CN">
+      <Text>“已揭示”行包含新探索的单元格和新看到的对象。“已隐藏”行会列出仍然存在但已离开你视野的外国单位。“已消失”行会报告先前已知、当前能确认已经不在的蛮族哨站或部落村庄。自然奇观、新发现的哨站和新发现的部落村庄会使用各自的游戏播报，不会在普通“已揭示”行中重复。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS_SETTINGS" Language="zh_Hans_CN">
+      <Text>在 F12 的“事件”设置中，“在你的回合开始时播报可见性变化”和“移动时播报可见性变化”默认启用。“在你的回合外播报可见性变化”默认禁用，并且在热座模式中始终延后。生成的播报会存储在消息缓冲区的“可见性变化”类别中。在 F12 的“消息缓冲区”设置中，“播报可见性变化消息”控制是否自动播报这些新的历史记录条目；将其禁用后，条目仍可供回顾。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_BUFFER_TITLE" Language="zh_Hans_CN">
+      <Text>消息缓冲区</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_BUFFER" Language="zh_Hans_CN">
+      <Text>消息缓冲区属于当前本地玩家，并会保留新条目，直至达到设置中选择的历史记录上限。它支持“全部”，以及非空的“通知”“发现”“战斗”“传闻”“移动”和“聊天”筛选器。更改类别时会跳过空筛选器，并读取最新的匹配消息。即使产生消息的界面已经关闭，消息仍可能保留地图坐标。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_BUFFER_KEYS" Language="zh_Hans_CN">
+      <Text>按分号或引号移到上一条或下一条消息，按 Control 加分号移到最早消息，按 Control 加引号移到最新消息。按 Shift 加分号或 Shift 加引号移到上一个或下一个非空类别。当前消息存在地点时，按 Shift 加反斜杠可将导航光标移到该地点。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_MOVEMENT_TITLE" Language="zh_Hans_CN">
+      <Text>移动历史与播报</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_MOVEMENT" Language="zh_Hans_CN">
+      <Text>可见单位移动会记录观察到的方向路径和最后已知单元格。因此，跳转命令会返回最后观察到的地点，而不会追踪已经不可见的单位。在热座模式中，为另一位本地观察者收集的移动信息只会在该观察者的下一回合开始时播报。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_SETTINGS" Language="zh_Hans_CN">
+      <Text>“导航”设置可分别选择是否为你的单位、队友、敌对文明、中立文明、城邦和蛮族播报军事单位、平民单位、两者或均不播报。默认只启用蛮族移动播报。“消息缓冲区”设置则分别选择哪些类别自动播报，以及保留条目的最大数量；禁用播报不会移除历史记录条目。</Text>
+    </Row>
+
+    <!-- 游戏玩法：世界行动 -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_TITLE" Language="zh_Hans_CN">
+      <Text>世界行动</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_OVERVIEW_TITLE" Language="zh_Hans_CN">
+      <Text>概述</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_OVERVIEW" Language="zh_Hans_CN">
+      <Text>世界行动是在主地图上可以使用的命令。它们无需打开单独的无障碍菜单即可使用，并可在“选项”的“按键绑定”中更改。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_SAVES_TITLE" Language="zh_Hans_CN">
+      <Text>快速保存与快速载入</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_SAVES" Language="zh_Hans_CN">
+      <Text>按 F5 快速保存。按 F6 请求快速载入；替换当前游戏进程之前，无障碍功能会要求确认。能否使用这些命令仍遵循游戏对多人游戏、教程和情景的保存限制。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_MAP_TITLE" Language="zh_Hans_CN">
+      <Text>地图行动</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_MAP" Language="zh_Hans_CN">
+      <Text>按 M 可在导航光标处创建地图标记，或编辑你在那里已有的标记。常规编辑器可让你选择其图标、标签和多人游戏可见性。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_TURN_TITLE" Language="zh_Hans_CN">
+      <Text>回合行动</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_TURN" Language="zh_Hans_CN">
+      <Text>按 Control 加空格执行当前的下一项行动，按 Shift 加空格读取当前阻塞事项或等待状态，按 Control 加 Shift 加空格打开“回合阻塞事项”列表。“结束你的回合”条目详细说明了这些命令。</Text>
+    </Row>
+
+    <!-- 游戏玩法：选择 -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_TITLE" Language="zh_Hans_CN">
+      <Text>选择</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_OVERVIEW_TITLE" Language="zh_Hans_CN">
+      <Text>概述</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_OVERVIEW" Language="zh_Hans_CN">
+      <Text>《文明 VI》中可以选中一个单位或一座城市。选中其中一者会取代另一者，并改变可用的行动、信息和目标。选择对象与导航光标相互独立，因此你可以查看远处的单元格，而不会失去当前选择对象。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_ACTION_LIST" Language="zh_Hans_CN">
+      <Text>选中城市或单位时按 Tab，可打开其无障碍行动列表。列表行根据当前游戏本体的城市行动、单位行动和单位命令构建，其中包括当前禁用原因和已绑定按键。激活一行即可使用现有行动。在地图区域按 Control 加 H 可查看当前可用命令；也可以在“选项”的“按键绑定”中查看并重新映射这些命令。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_MOVING_TITLE" Language="zh_Hans_CN">
+      <Text>选择行动</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_MOVING" Language="zh_Hans_CN">
+      <Text>按逗号或句点选择上一个或下一个等待命令的单位。加按 Shift 可包括没有剩余命令的单位。按左方括号或右方括号选择上一座或下一座城市，按反斜杠选择你的首都。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_SUMMARY_TITLE" Language="zh_Hans_CN">
+      <Text>选择对象信息</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_SUMMARY" Language="zh_Hans_CN">
+      <Text>按反引号键（通常位于 1 左侧）可听取简短的选择对象摘要，以及该对象相对于导航光标的方向。按 Shift 加 1 至 Shift 加 0 可分别读取各类信息。每类信息都会重新读取选择对象，因此生命值、移动力、生产、增长、使用次数和其他变化数值均为当前值。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_CITY_TITLE" Language="zh_Hans_CN">
+      <Text>所选城市读数</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_CITY" Language="zh_Hans_CN">
+      <Text>对于城市，Shift 加 1 读取身份和生命值；2 读取生产；3 读取增长；4 读取边界扩张；5 读取宗教；6 读取人口、住房，以及建筑或忠诚度；7 读取产出；8 读取普通产出关注项目；9 读取优先产出关注项目；0 读取忽略的产出关注项目。摘要会合并城市名称、人口、生命值、生产和增长。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_UNIT_TITLE" Language="zh_Hans_CN">
+      <Text>所选单位读数</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_UNIT" Language="zh_Hans_CN">
+      <Text>对于单位，Shift 加 1 读取身份和生命值；2 读取移动力；3 读取活动；4 读取使用次数；5 读取晋升；6 读取数值；7 读取能力；8 读取特殊信息；9 读取排队路径；0 读取相邻六边形中可见敌方单位的数量。单位有排队目的地时，活动会报告为“移动中”。单位摘要会在单位具有数值时包含这些数值，省略能力，并以相邻敌人数量结尾。这些读数包括单位当前的编队、所有者、可见性、战斗预览，以及其当前活动特有的任何详情。</Text>
+    </Row>
+
+    <!-- 游戏玩法：用户界面 -->
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_TITLE" Language="zh_Hans_CN">
+      <Text>用户界面</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_OVERVIEW_TITLE" Language="zh_Hans_CN">
+      <Text>界面结构</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_OVERVIEW" Language="zh_Hans_CN">
+      <Text>大多数无障碍游戏界面都是面板，其主体为树视图、列表或表格。请使用相应容器的正常导航命令。Tab 和 Shift 加 Tab 可在主体与其外部的行动控件之间移动。焦点播报会报告嵌套路径、角色、状态、位置，以及各界面提供的有用工具提示信息。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_TABS" Language="zh_Hans_CN">
+      <Text>“世界排名”“生产”“报告”和“世界气候”等多页面界面使用选项卡控件。在控件内的任何位置按 Control 加 Tab 或 Control 加 Shift 加 Tab，可移到下一页或上一页。在选项卡栏上，左方向键和右方向键也可切换页面。只有当前页面会参与焦点移动和搜索。“界面教程”组包含各界面专属的布局和命令。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_RESEARCH_TITLE" Language="zh_Hans_CN">
+      <Text>科技、市政与政体</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_RESEARCH" Language="zh_Hans_CN">
+      <Text>默认打开命令为：Control 加 R 打开“研究选择器”，Control 加 C 打开“市政选择器”，Control 加 Shift 加 R 打开“科技树”，Control 加 Shift 加 C 打开“市政树”，Control 加 P 打开“政体”，Control 加 O 打开“总督”，Control 加 L 打开“宗教”。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_EMPIRE_TITLE" Language="zh_Hans_CN">
+      <Text>城市与帝国管理</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_EMPIRE" Language="zh_Hans_CN">
+      <Text>按 F2 打开“帝国报告”，Control 加 V 打开“城邦”，Control 加 T 打开“贸易路线”，Control 加 E 打开“间谍活动”，Control 加 U 打开你的“单位”列表，Control 加 Q 打开已知文明的“全球资源”。“单位”列表默认显示可排序的表格，其中包含当前生命值、当前与最大移动力，以及分别列出的近战、远程、轰炸、宗教和防空战斗力、射程、使用次数、晋升和相邻敌人。数值为零的单元格会播报为零。其类别筛选器会应用于两个视图。按 Alt 加 2 切换到带有排序下拉框的平面列表，按 Alt 加 1 返回表格。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_WORLD_TITLE" Language="zh_Hans_CN">
+      <Text>世界信息</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_WORLD" Language="zh_Hans_CN">
+      <Text>按 F1 打开“文明百科”，F3 打开“伟人”，F7 打开“巨作”，F8 打开“世界排名”，F9 打开“世界气候”，F10 打开“时代进度”，F11 打开“历史时刻”。按 F4 打开“外交界面”，Control 加 K 打开“世界议会”，Control 加 W 打开当前紧急事件与竞赛，Control 加 Shift 加 T 打开当前教程目标。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_MAP_TITLE" Language="zh_Hans_CN">
+      <Text>地图与通信</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_MAP" Language="zh_Hans_CN">
+      <Text>按 Control 加 J 打开滤镜列表，Control 加 M 打开地图标记，Control 加 Shift 加 F 打开“地图搜索”，Control 加斜杠打开游戏内聊天，Control 加 N 打开通知中心。“地图搜索”和扫描器搜索相互独立：“地图搜索”会搜索已知的地图概念和地点，扫描器搜索则会搜索扫描器当前的实时来源。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_AVAILABILITY_TITLE" Language="zh_Hans_CN">
+      <Text>可用性与重新映射</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_AVAILABILITY" Language="zh_Hans_CN">
+      <Text>这些是默认按键绑定，可以在“选项”的“按键绑定”中更改。情景可能移除科技、文化、政体、外交、宗教、气候、世界议会或文明百科。当前游戏中不存在某个界面时，其命令会播报该界面不可用。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_FAMILY_LEAF_TITLE" Language="zh_Hans_CN">
+      <Text>叶控件</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_FAMILY_VALUE_TITLE" Language="zh_Hans_CN">
+      <Text>值控件</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_FAMILY_CONTAINER_TITLE" Language="zh_Hans_CN">
+      <Text>容器控件</Text>
+    </Row>
+
+    <!-- 常规参考 -->
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_TITLE" Language="zh_Hans_CN">
+      <Text>按键绑定参考</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_USING_TITLE" Language="zh_Hans_CN">
+      <Text>使用命令</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_COMMON" Language="zh_Hans_CN">
+      <Text>以下命令可用于每个获得焦点的无障碍控件。按 F12 打开“无障碍模组”设置。按 Control 加 I 在“文明百科”中查找当前焦点项目。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_HELP" Language="zh_Hans_CN">
+      <Text>按 Control 加 H 打开与当前界面相关的“快捷键参考”。它会收集焦点控件及其所属控件当前可用的命令；在“快捷键参考”中激活命令即会运行该命令。按 Shift 加 F1 可播报相同的可用命令，而不打开帮助视图。按 Shift 加 F2 可播报从界面到焦点控件的完整焦点路径。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_FOCUSED_WIDGET_READER" Language="zh_Hans_CN">
+      <Text>焦点控件阅读器可让你逐节听取当前焦点控件的详细信息。按 Alt 加上方向键或 Alt 加下方向键，可移到并读取上一节或下一节。按 Alt 加 Home 或 Alt 加 End，可跳转并读取第一节或最后一节。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_NAVIGATION" Language="zh_Hans_CN">
+      <Text>Tab 和 Shift 加 Tab 通常用于在各组或控件之间移动。列表使用上方向键和下方向键；表格使用四个方向键；树视图使用上方向键和下方向键在可见项目之间移动，使用左方向键和右方向键浏览层级。焦点控件支持时，Home、End、Page Up 和 Page Down 可进行更大范围的移动。选项卡控件还支持 Control 加 Tab 和 Control 加 Shift 加 Tab。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_ACTIVATION" Language="zh_Hans_CN">
+      <Text>按钮和复选框可使用 Enter 或空格。带有行动的树视图项目可使用 Enter；对于不带行动的树视图分支，Enter 会切换其展开状态。界面提供有用信息时，已禁用控件仍可阅读，但不会运行其行动。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CONTEXT" Language="zh_Hans_CN">
+      <Text>界面可以为自身行动添加命令，可游玩的世界则使用《文明 VI》正常绑定的游戏行动。在相关控件上按 Control 加 H 或 Shift 加 F1，可查看当前命令集。“界面教程”组记录了各受支持界面的布局和情境命令。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_REMAPPING_TITLE" Language="zh_Hans_CN">
+      <Text>重新映射按键绑定</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_REMAPPING_OPEN" Language="zh_Hans_CN">
+      <Text>按 Escape 打开游戏菜单，选择“选项”，再选择“按键绑定”选项卡。也可以从主菜单进入“选项”。命令按照与下文章节相同的类别名称排列。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_REMAPPING_CHANGE" Language="zh_Hans_CN">
+      <Text>每项命令都有主要绑定和备用绑定。选择任一绑定，然后按下要使用的按键或组合键。游戏等待按键时，选择“清除绑定”可让该槽位保持未绑定；按 Escape 则会取消且不作更改。完成后选择“确认”，以保存新的绑定。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_REMAPPING_CONFLICTS" Language="zh_Hans_CN">
+      <Text>重复使用按键前，请检查该按键是否已显示在另一项命令旁。命令在不同情况下可用时，共用按键可能很有用；但两项命令同时可用时，则可能产生歧义。如果运行了错误命令，请清除或更改其中一项绑定。其他“选项”选项卡中的“恢复默认”不会替换“按键绑定”选项卡上显示的绑定。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_MESSAGE_BUFFER_TITLE" Language="zh_Hans_CN">
+      <Text>消息缓冲区</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_MESSAGE_BUFFER" Language="zh_Hans_CN">
+      <Text>按分号或引号移到上一条或下一条消息。加按 Control 可跳转到最早或最新消息；加按 Shift 可移到上一个或下一个消息类别。按 Shift 加反斜杠可将导航光标移到当前消息所附的地点。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_NAVIGATION_CURSOR_TITLE" Language="zh_Hans_CN">
+      <Text>导航光标</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_NAVIGATION_CURSOR_MOVEMENT" Language="zh_Hans_CN">
+      <Text>按 Q 或数字键盘 7 向西北移动，按 E 或数字键盘 9 向东北移动，按 A 或数字键盘 4 向西移动，按 D 或数字键盘 6 向东移动，按 Z 或数字键盘 1 向西南移动，按 C 或数字键盘 3 向东南移动。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_NAVIGATION_CURSOR_ACTIONS" Language="zh_Hans_CN">
+      <Text>按 Enter 执行光标单元格上的主要行动，按 Control 加 Enter 执行其次要行动。按斜杠跳转到当前选择对象，按 Control 加 S 跳转到你的首都，按 Delete 移除光标处你自己的地图标记。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_NAVIGATION_CURSOR_BOOKMARKS" Language="zh_Hans_CN">
+      <Text>按 Control 加 Shift 加 1 至 0 中的数字，可分配相应书签。按 Control 加该数字可返回书签。按 Alt 加该数字可听取书签的方向和距离，而不会移动。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_WORLD_SCANNER_TITLE" Language="zh_Hans_CN">
+      <Text>世界扫描器</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_WORLD_SCANNER" Language="zh_Hans_CN">
+      <Text>按 Control 加 Page Up 或 Page Down 在类别间移动，按 Shift 加 Page Up 或 Page Down 在子类别间移动，按 Page Up 或 Page Down 在组间移动，按 Alt 加 Page Up 或 Page Down 在各个结果间移动。按 Home 跳转到当前结果，按 Backspace 返回上一光标位置，按 End 听取方向和距离，按 Control 加 F 搜索扫描器结果。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_SURVEYOR_TITLE" Language="zh_Hans_CN">
+      <Text>测绘仪</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_SURVEYOR_BASIC" Language="zh_Hans_CN">
+      <Text>按 Shift 加 W 或 Shift 加 X 增大或减小测绘半径。按 Shift 加 Q 读取产出，Shift 加 A 读取资源，Shift 加 Z 读取地形，Shift 加 E 读取你的单位，Shift 加 D 读取敌方单位，Shift 加 C 读取城市。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_SURVEYOR_ADDITIONAL" Language="zh_Hans_CN">
+      <Text>按 Control 加 Shift 加 A 或数字键盘 4 读取改良设施，Control 加 Shift 加 D 或数字键盘 6 读取中立单位，Control 加 Shift 加 Z 或数字键盘 1 读取所有权，Control 加 Shift 加 Q 或数字键盘 7 读取区域，Control 加 Shift 加 X 或数字键盘 2 读取魅力。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_TITLE" Language="zh_Hans_CN">
+      <Text>信息</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_SELECTION" Language="zh_Hans_CN">
+      <Text>按反引号键（也称波浪号键）读取所选单位或城市的摘要。按 Shift 加 1 至 0 中的数字，读取选择对象的特定信息类别。按空格读取当前世界交互的信息。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_EMPIRE" Language="zh_Hans_CN">
+      <Text>按 Y 读取时代与纪元，O 读取总督头衔，T 读取时间与回合，R 读取科技，P 读取文化，G 读取金币，F 读取信仰值，I 读取旅游业绩，V 读取影响力，N 读取核武器，Control 加 Y 打开产出信息列表，K 读取世界议会或外交支持。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_PLOT" Language="zh_Hans_CN">
+      <Text>在导航光标处，按 S 或数字键盘 5 读取单位；W 或数字键盘 8 读取产出、工作状态、淡水和所有权；X 或数字键盘 2 读取单元格数值；Shift 加 S 或 Shift 加数字键盘 5 读取相对于你初始首都的坐标；B 读取地理信息。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_BANNERS" Language="zh_Hans_CN">
+      <Text>数字键 1 至 7 会读取光标处可用的相应城市、区域、军营、空军基地、导弹发射井、改良设施，或村庄与哨站横幅信息。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_CITY_TITLE" Language="zh_Hans_CN">
+      <Text>城市</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_CITY" Language="zh_Hans_CN">
+      <Text>按 Alt 加右方括号打开城市概览，Alt 加左方括号管理公民，Alt 加反斜杠打开生产。“用金币购买”“用信仰值购买”和“更改产出关注”没有默认绑定；如果想直接使用这些命令，请在“按键绑定”选项卡上为其分配按键。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_TITLE" Language="zh_Hans_CN">
+      <Text>用户界面</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_CORE" Language="zh_Hans_CN">
+      <Text>按 F1 打开“文明百科”，F2 打开“报告”，F3 打开“伟人”，F4 打开“外交”，F7 打开“巨作”，F8 打开“排名”，F9 打开“气候”，F10 打开“时代进度”，F11 打开“历史时刻”时间线。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_RESEARCH" Language="zh_Hans_CN">
+      <Text>按 Control 加 R 打开“选择研究”，Control 加 C 打开“选择市政”，Control 加 Shift 加 R 打开“科技树”，Control 加 Shift 加 C 打开“市政树”，Control 加 P 打开“政体”，Control 加 L 打开“宗教”，Control 加 O 打开“总督”。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_WORLD" Language="zh_Hans_CN">
+      <Text>按 Control 加 V 打开“城邦”，Control 加 E 打开“间谍活动”，Control 加 T 打开“贸易路线”，Control 加 U 打开“单位”，Control 加 K 打开“世界议会”，Control 加 W 打开“紧急事件与竞赛”，Control 加 Q 打开“全球资源”。在“单位”中，按 Alt 加 1 选择表格，按 Alt 加 2 选择平面列表。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_MAP" Language="zh_Hans_CN">
+      <Text>按 Control 加 N 打开通知中心，Control 加 Shift 加 T 打开教程目标，Control 加 J 打开无障碍滤镜列表，Control 加 M 打开地图标记，Control 加 Shift 加 F 打开“地图搜索”。“资源”“城市状态”和“传闻”报告没有默认绑定。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UNIT_TITLE" Language="zh_Hans_CN">
+      <Text>单位</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UNIT_MOVEMENT" Language="zh_Hans_CN">
+      <Text>按住 Alt，再按 Q、E、A、D、Z 或 C，可将所选单位沿相应方向移动一个六边形。对应的数字键盘 7、9、4、6、1 和 3 也可使用。按 Alt 加 M 执行“移动至”。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UNIT_ACTIONS" Language="zh_Hans_CN">
+      <Text>按 Alt 加 B 建立城市，F 驻防，H 驻防直至恢复，R 进行远程攻击，X 自动探索，空格跳过，S 休眠，V 警戒，U 升级，P 晋升，W 唤醒，Delete 删除单位，Backspace 取消其当前命令。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UNIT_OTHER" Language="zh_Hans_CN">
+      <Text>其他默认命令为：Alt 加 Y 部署，J 收获，I 开始贸易路线，L 劫掠，K 移除地貌，O 移除改良设施，N 修复，G 传播宗教，T 进行间谍旅行或传送，斜杠列出单位能力。许多特殊单位行动没有默认绑定；按 Tab 可浏览所选单位当前可用的行动。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_GLOBAL_TITLE" Language="zh_Hans_CN">
+      <Text>全局</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_GLOBAL_SELECTION" Language="zh_Hans_CN">
+      <Text>按 Tab 浏览选择对象行动。按逗号或句点选择上一个或下一个等待命令的单位；加按 Shift 可包括所有单位。按左方括号或右方括号选择上一座或下一座城市，按反斜杠选择你的首都。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_GLOBAL_WORLD" Language="zh_Hans_CN">
+      <Text>按 Control 加空格执行下一项必需行动或结束回合。按 Shift 加空格听取当前阻塞事项或等待状态，按 Control 加 Shift 加空格打开完整阻塞事项列表。按 M 打开地图标记，F5 快速保存，F6 快速载入。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_ONLINE_TITLE" Language="zh_Hans_CN">
+      <Text>在线</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_ONLINE" Language="zh_Hans_CN">
+      <Text>按 Control 加斜杠打开或关闭游戏内聊天。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_LENSES_TITLE" Language="zh_Hans_CN">
+      <Text>滤镜</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_LENSES" Language="zh_Hans_CN">
+      <Text>“滤镜”类别中目前没有带默认绑定的命令。无障碍滤镜列表是“用户界面”类别下的 Control 加 J。各滤镜的具体详情位于“游戏玩法”组中的“滤镜”条目。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_TITLE" Language="zh_Hans_CN">
+      <Text>搜索与按键搜索</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_TYPEAHEAD" Language="zh_Hans_CN">
+      <Text>列表、树视图、表格和网格支持按键搜索。在项目获得焦点时开始输入，即可搜索其所属容器。匹配项会按标签排序：依次考虑完整单词开头的文字、起始前缀、完整单词、单词前缀、子字符串，最后是单词前缀缩写。列表和树视图会包括嵌套行信息。表格搜索其主要行标签，网格则搜索每个单元格。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_CYCLING" Language="zh_Hans_CN">
+      <Text>当前搜索只包含一个字母时，再次按下同一字母会循环移到下一个以该字母开头的项目，而不会生成重复字母查询。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_RESULTS" Language="zh_Hans_CN">
+      <Text>默认情况下，当前按键搜索查询会保留按排名排列的结果列表。上方向键和下方向键可在这些结果中移动，并在两端循环。启用“按键查找时包括工具提示”设置后，只在工具提示中匹配的结果会排在标签匹配结果之后。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_CLEARING" Language="zh_Hans_CN">
+      <Text>Backspace 会移除最后输入的字符。Escape 会清除非空的按键搜索查询，并播报查询已清除。移到所属容器之外，或成功激活、更改控件时，查询会静默清除。如果已禁用持久结果导航，查询会在配置的搜索超时后失效。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_PANEL" Language="zh_Hans_CN">
+      <Text>在可搜索容器上按 Control 加 F，可打开其搜索面板。列表和树视图默认可搜索；某些界面还会为其他容器启用搜索，或提供自己的搜索索引。默认搜索会索引后代控件的标签、值和工具提示，并可将焦点跳转到所选结果。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_QUERY" Language="zh_Hans_CN">
+      <Text>在标准搜索模式中，分开的词语均为必需条件：输入的每个词语都必须匹配。在词语前加两个连字符可排除其匹配项，例如 cavalry --light。使用全文搜索提供器的界面可能会改为直接传递完整查询，并保留该提供器的短语排名和预览。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_PANEL_KEYS" Language="zh_Hans_CN">
+      <Text>在搜索面板中，在编辑框内输入即可更新结果。Tab 和 Shift 加 Tab 可在编辑框与结果之间移动。在编辑框中按 Enter 会激活第一个结果；在结果上按 Enter 会激活该结果。在编辑框中按 Page Up 和 Page Down，可浏览当前搜索情境中最近最多十次搜索。Escape 会关闭面板；查看结果时输入文字或按 Backspace，会将操作转发到编辑框。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_SEARCH_SETTINGS" Language="zh_Hans_CN">
+      <Text>“无障碍模组”设置可以控制按键搜索是否包含工具提示、上方向键和下方向键是否浏览持久结果、非持久搜索的超时时间，以及第一个 Control 加 F 结果是否自动获得焦点。</Text>
+    </Row>
+
+    <!-- 用户界面控件 -->
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_BUTTON_TITLE" Language="zh_Hans_CN">
+      <Text>按钮</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_BUTTON_FUNCTION" Language="zh_Hans_CN">
+      <Text>按钮代表一项行动。焦点播报可能包括其标签、按钮角色、禁用状态、位置和工具提示。按 Enter 或空格可执行行动。已禁用按钮仍可阅读，但无法激活。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_BUTTON_KEYS" Language="zh_Hans_CN">
+      <Text>按 Enter 或空格激活。已禁用按钮会接收激活操作，但不会运行其行动。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_CHECKBOX_TITLE" Language="zh_Hans_CN">
+      <Text>复选框</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_CHECKBOX_FUNCTION" Language="zh_Hans_CN">
+      <Text>复选框代表布尔设置或选项，并会将“已选中”或“未选中”作为其值播报。更改复选框会更新界面的底层数值，并播报新值。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_CHECKBOX_KEYS" Language="zh_Hans_CN">
+      <Text>按 Enter 或空格切换复选框。已禁用复选框仍可阅读，但不会改变。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_DIALOG_TITLE" Language="zh_Hans_CN">
+      <Text>对话框</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_DIALOG_FUNCTION" Language="zh_Hans_CN">
+      <Text>对话框是一组模态内容行，后面带有一个行动按钮行。按钮行用于辅助导航，不会作为额外容器播报。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_DIALOG_NAVIGATION" Language="zh_Hans_CN">
+      <Text>使用 Tab 或下方向键移到对话框的下一行，使用 Shift 加 Tab 或上方向键移到上一行。按 Home 跳转到第一个控件，按 End 跳转到最后一个控件。对话框的按钮行会在内容末尾对可用行动进行分组。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_DIALOG_ACTIONS" Language="zh_Hans_CN">
+      <Text>在对话框内容中按 Enter，会在指定的默认按钮可见且已启用时运行该按钮。在焦点按钮上按 Enter 或空格会运行该按钮。Escape 可以关闭大多数对话框，但个别对话框可以在不允许关闭时保留或阻止此按键。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_DROPDOWN_TITLE" Language="zh_Hans_CN">
+      <Text>下拉框</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_DROPDOWN_FUNCTION" Language="zh_Hans_CN">
+      <Text>关闭的下拉框会播报其标签和已提交选项。将其打开后，选项会以列表形式呈现，初始焦点位于已提交选项；没有可用的已提交项目时，则位于第一个选项。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_DROPDOWN_KEYS" Language="zh_Hans_CN">
+      <Text>在关闭的下拉框上按 Enter 可将其打开。在打开的列表中，使用上方向键、下方向键、Home、End、Page Up、Page Down 或按键搜索来查找选项。按 Escape 可关闭下拉框，而不更改已提交值。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_DROPDOWN_COMMIT" Language="zh_Hans_CN">
+      <Text>在选项上按 Enter 会将其提交、更新底层数值、关闭列表，并将焦点返回下拉框。隐藏选项会被跳过。已禁用选项仍可阅读，但无法提交。离开下拉框会关闭已打开的列表，而不会更改焦点。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_TITLE" Language="zh_Hans_CN">
+      <Text>编辑框</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_FUNCTION" Language="zh_Hans_CN">
+      <Text>编辑框保存文本，并追踪编辑缓冲区、光标和选择范围。焦点播报会读取当前选择范围或光标所在行，而不会重复整个多行值。密码字段会播报掩码字符。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_ENTRY" Language="zh_Hans_CN">
+      <Text>编辑框有两种交互方式。始终启用的编辑框一获得焦点就会进入编辑状态并保持启用，因此可以立即输入。需要激活的编辑框在你按 Enter 前只会被读取，不会进入编辑；再次按 Enter 可提交，按 Escape 可取消。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_HINT" Language="zh_Hans_CN">
+      <Text>工具提示会说明交互方式。始终启用的编辑框，其工具提示以“输入文本”开头。尚未启用且需要激活的编辑框，其工具提示以“按 Enter 编辑”开头。该编辑框进入编辑状态后，激活提示便不再包含在内。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_MOVEMENT" Language="zh_Hans_CN">
+      <Text>左方向键和右方向键按字符移动；Control 加左方向键或右方向键按词语移动。上方向键和下方向键在各行之间移动。Home 和 End 移到当前行开头或末尾；Control 加 Home 或 End 移到文本开头或末尾。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_SELECTION" Language="zh_Hans_CN">
+      <Text>为左方向键、右方向键、上方向键、下方向键、Home 或 End 加按 Shift，可按相应移动方式扩展选择范围。Control 加 Shift 加左方向键或右方向键可按词语选择；Control 加 Shift 加 Home 或 End 可选择至文本开头或末尾。Control 加 A 可选择所有文本。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_EDITING" Language="zh_Hans_CN">
+      <Text>Backspace 和 Delete 会移除一个字符或选择内容。Control 加 Backspace 和 Control 加 Delete 会按词语移除。Control 加 C 会复制选择内容；没有选择内容时，则复制光标处的字符。字段可写时，Control 加 V 会粘贴。只读编辑框允许移动、选择和复制，但不接受更改。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_GAMEVIEW_TITLE" Language="zh_Hans_CN">
+      <Text>游戏视图</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_GAMEVIEW_FUNCTION" Language="zh_Hans_CN">
+      <Text>游戏视图是可游玩世界地图的无障碍焦点停靠点。进入游戏视图会将输入从菜单控件切换到《文明 VI》的“世界”输入上下文；离开后，输入会返回无障碍“外壳”上下文。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_GAMEVIEW_KEYS" Language="zh_Hans_CN">
+      <Text>游戏视图本身不添加导航键。它获得焦点时，请使用正常绑定的游戏行动，以及世界视图中提供的情境控件。使用 Control 加 H 或 Shift 加 F1 可查看该焦点位置当前可用的命令。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_INTERFACEMODE_TITLE" Language="zh_Hans_CN">
+      <Text>界面模式</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_INTERFACEMODE_FUNCTION" Language="zh_Hans_CN">
+      <Text>界面模式代表世界地图上的一项临时任务，例如选择目标、目的地或放置位置。它获得焦点时，请使用正常的世界控件完成或取消该任务。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_INTERFACEMODE_KEYS" Language="zh_Hans_CN">
+      <Text>该控件本身不添加通用行动键。其子控件和当前游戏模式会定义确认、取消、选择目标或放置命令。使用 Control 加 H 或 Shift 加 F1 可查看当前命令集。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_LIST_TITLE" Language="zh_Hans_CN">
+      <Text>列表</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_LIST_FUNCTION" Language="zh_Hans_CN">
+      <Text>列表以垂直序列呈现可见项目。隐藏项目会被跳过。已禁用项目可以保留在序列中，以便读取其信息和禁用状态。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_LIST_KEYS" Language="zh_Hans_CN">
+      <Text>使用上方向键和下方向键移动一个项目，使用 Home 和 End 移到第一个或最后一个项目，使用 Page Up 或 Page Down 按列表配置的页面大小移动。列表默认会在两端循环，但界面可以关闭循环。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_LIST_SEARCH" Language="zh_Hans_CN">
+      <Text>列表默认启用按键搜索和 Control 加 F 搜索。按键搜索会检查每行及其嵌套行信息。持久查询生效时，上方向键和下方向键会在按排名排列的匹配项中移动，而不是在普通相邻项目间移动。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_PANEL_TITLE" Language="zh_Hans_CN">
+      <Text>面板</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_PANEL_FUNCTION" Language="zh_Hans_CN">
+      <Text>面板会对相关子控件进行分组，通常是界面的主要容器。面板也可以相互嵌套，将界面划分为较小的组。使用 Tab 进入面板时，会从第一个可见子控件开始；使用 Shift 加 Tab 向后进入时，则从最后一个开始。通过程序重新进入时，可以恢复面板记忆的子控件。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_PANEL_KEYS" Language="zh_Hans_CN">
+      <Text>使用 Tab 和 Shift 加 Tab 在面板的可见子控件之间导航；这是无障碍界面通常采用的顶层导航方式。除非界面关闭循环，否则面板默认会在两端循环。仅用于布局的透明面板不会产生额外播报。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SEARCHPANEL_TITLE" Language="zh_Hans_CN">
+      <Text>搜索面板</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SEARCHPANEL_FUNCTION" Language="zh_Hans_CN">
+      <Text>搜索面板是在可搜索容器上按 Control 加 F 打开的叠加层。它包含始终处于编辑状态的搜索字段和结果列表。标准搜索会索引后代控件的标签、值和工具提示；界面也可以提供专用搜索提供器。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SEARCHPANEL_QUERY" Language="zh_Hans_CN">
+      <Text>标准搜索要求每个以空格分隔的词语都匹配，并会排除前面带有两个连字符的词语。结果会随编辑缓冲区的变化而更新。激活结果会关闭面板，并将焦点移到匹配控件，或运行界面为该结果定义的行动。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SEARCHPANEL_KEYS" Language="zh_Hans_CN">
+      <Text>使用 Tab 和 Shift 加 Tab 在编辑框与结果之间移动。在编辑框中按 Enter 会激活第一个结果；在结果上按 Enter 会激活该结果。在编辑框中按 Page Up 和 Page Down 可浏览较早和较新的搜索。Escape 会关闭面板。在结果列表中输入可打印字符或按 Backspace，会将操作转发到编辑框。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SLIDER_TITLE" Language="zh_Hans_CN">
+      <Text>滑块</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SLIDER_FUNCTION" Language="zh_Hans_CN">
+      <Text>滑块代表一个数值，带有最小值、最大值、普通步长和翻页步长。每次更改都会限制在允许范围内，写入界面的底层数值并播报。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SLIDER_KEYS" Language="zh_Hans_CN">
+      <Text>使用左方向键和右方向键减小或增大一个步长。Page Down 和 Page Up 按翻页步长减小或增大。Home 设置为最小值，End 设置为最大值。即使数值已经位于边界，这些按键也会被控件接收。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_STATICTEXT_TITLE" Language="zh_Hans_CN">
+      <Text>静态文本</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_STATICTEXT_FUNCTION" Language="zh_Hans_CN">
+      <Text>静态文本是用于标题、说明、状态行和其他信息的只读焦点停靠点。它的角色有意不予播报。如果界面同时提供文本和工具提示，工具提示会作为另一行附加到文本，而不会成为单独的工具提示读取通道。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_STATICTEXT_KEYS" Language="zh_Hans_CN">
+      <Text>静态文本没有控件专属的激活键或导航键。请使用所属面板、列表、树视图、表格、选项卡页面或对话框移到下一项目。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SUBMENU_TITLE" Language="zh_Hans_CN">
+      <Text>子菜单</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SUBMENU_FUNCTION" Language="zh_Hans_CN">
+      <Text>子菜单是可折叠的菜单组。折叠时，它是一个焦点停靠点，不会进入其后代控件。展开时，它会显示子控件，并可在重新进入时恢复先前聚焦的子控件。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_SUBMENU_KEYS" Language="zh_Hans_CN">
+      <Text>按 Enter 或右方向键展开并进入第一个子控件。在已展开子菜单中的任何位置按左方向键，会折叠整个后代子树，并将焦点返回子菜单。展开时，使用上方向键、下方向键、Home、End、Page Up 和 Page Down 浏览其子控件。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TAB_TITLE" Language="zh_Hans_CN">
+      <Text>选项卡</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TAB_FUNCTION" Language="zh_Hans_CN">
+      <Text>选项卡是可聚焦的标题，与选项卡控件中的一个页面配对。聚焦选项卡会立即启用其页面；无需单独的激活命令。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TAB_KEYS" Language="zh_Hans_CN">
+      <Text>在选项卡栏中，使用左方向键和右方向键聚焦上一个或下一个选项卡并切换页面。Home 和 End 移到第一个或最后一个选项卡，Page Up 或 Page Down 按选项卡栏的页面大小移动。Tab 进入当前页面；Shift 加 Tab 向后离开选项卡控件。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABCONTROL_TITLE" Language="zh_Hans_CN">
+      <Text>选项卡控件</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABCONTROL_FUNCTION" Language="zh_Hans_CN">
+      <Text>选项卡控件拥有一个选项卡栏和多个配对页面。只有当前页面会挂载到无障碍树中，因此导航和搜索不会进入隐藏页面。将焦点移到选项卡会立即更改当前页面。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABCONTROL_KEYS" Language="zh_Hans_CN">
+      <Text>在控件内的任何位置按 Control 加 Tab 可选择下一页，按 Control 加 Shift 加 Tab 可选择上一页。页面循环会从最后一页回到第一页，也会从第一页回到最后一页。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABCONTROL_TRAVERSAL" Language="zh_Hans_CN">
+      <Text>使用 Tab 向前进入时，焦点会落在选项卡栏。从选项卡栏按 Tab 会进入当前页面的第一个控件。从页面按 Shift 加 Tab 会返回当前选项卡。从页面的最后一个控件按 Tab 会向前离开选项卡控件，从选项卡栏按 Shift 加 Tab 会向后离开。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABPAGE_TITLE" Language="zh_Hans_CN">
+      <Text>选项卡页面</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABPAGE_FUNCTION" Language="zh_Hans_CN">
+      <Text>选项卡页面是一个选项卡中各控件的容器。只有配对选项卡处于当前状态时，该页面才可用。页面不会播报其在同级页面中的位置，因为非当前页面位于当前无障碍树之外。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABPAGE_KEYS" Language="zh_Hans_CN">
+      <Text>使用 Tab 和 Shift 加 Tab 在页面的可见子控件之间移动。向前进入时从第一个子控件开始，向后进入时从最后一个开始。页面不会循环：到达边界后的移动会传递给选项卡控件，使焦点可以返回选项卡栏或离开控件。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABLE_TITLE" Language="zh_Hans_CN">
+      <Text>表格与网格</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_GRAPH_TITLE" Language="zh_Hans_CN">
+      <Text>关系图</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_GRAPH_FUNCTION" Language="zh_Hans_CN">
+      <Text>关系图表示项目之间的有向关系。在科技和市政“关系图”视图中，每条连接都从前置项目指向由其解锁的项目。时代组是焦点路径的一部分，因此进入另一时代时会自动播报。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_GRAPH_KEYS" Language="zh_Hans_CN">
+      <Text>按右方向键沿第一条传出连接移动，按左方向键沿第一条传入连接移动。执行任一移动后，上方向键和下方向键会在同一连接方向的其他备选项之间循环，并在两端回绕。按左方向键到达没有传入连接的根节点时，备选项会变为所有可见根节点。Home 和 End 移到当前第一个和最后一个备选项。Control 加 Home 和 Control 加 End 移到第一个和最后一个可见根节点。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_GRAPH_SEARCH" Language="zh_Hans_CN">
+      <Text>开始输入即可搜索可见的关系图节点；启用相应设置时，搜索还包括工具提示文本。查询生效时，上方向键和下方向键会先浏览按排名排列的搜索匹配项，再浏览普通关系图备选项。搜索、焦点恢复和直接跳转都会移动正常的用户界面管理器焦点；下一项关系图命令会从实际获得焦点的项目继续。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABLE_FUNCTION" Language="zh_Hans_CN">
+      <Text>表格和网格都会将信息组织到单元格中，支持方向移动，跳过隐藏单元格，在普通导航时不会循环，并支持按键搜索以及用上方向键和下方向键浏览按排名排列的结果。两者的区别在于所表示的结构。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABLE_TABLES" Language="zh_Hans_CN">
+      <Text>表格包含结构一致的记录，并将其排列为行和带标签的列。上方向键和下方向键在当前列的记录之间移动；左方向键和右方向键切换列。Home 和 End 移到该列的第一条或最后一条记录。Shift 加 Home 和 Shift 加 End 移到当前行的第一列或最后一列，Control 加 Home 或 Control 加 End 则移到第一个或最后一个单元格。表格可以提供可排序的列标题：在标题上按 Enter 或空格，可循环切换其可用排序方式。已排序标题会说明实际顺序，例如从 A 到 Z、最近优先或最高优先。按键搜索只会搜索主要行标签，并保持当前列不变。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABLE_GRIDS" Language="zh_Hans_CN">
+      <Text>网格表示视觉布局或进度布局，其列可以包含多个并列层级，单元格也可以具有不同角色。上方向键和下方向键在层级内移动；左方向键和右方向键跨越层级，同时保持最接近的行位置。Home 和 End 移到层级边界。Control 加左方向键或 Control 加右方向键在列之间跳转，Control 加 Home 或 Control 加 End 则移到网格中的第一个或最后一个单元格。跨入新列时会播报其标题。网格不提供排序。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TABLE_TYPEAHEAD" Language="zh_Hans_CN">
+      <Text>开始输入即可查找内容。表格会搜索行标签，但不会搜索各个值、状态、标题或工具提示。网格会搜索每个单元格，并在启用相应设置时包括只在工具提示中匹配的项目。查询生效时，上方向键和下方向键会在按排名排列的匹配项中移动，并在两端循环。重复输入一个首字母会循环浏览其匹配项，Backspace 会编辑查询，Escape 会将其清除。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREE_TITLE" Language="zh_Hans_CN">
+      <Text>树视图</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREE_FUNCTION" Language="zh_Hans_CN">
+      <Text>树视图会将分层行呈现为一个可见的前序遍历序列。已折叠的后代行不会包含在内。分支行会播报“已折叠”，或播报“已展开”及其可见子项数量；叶行没有展开状态。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREE_KEYS" Language="zh_Hans_CN">
+      <Text>使用上方向键和下方向键在可见行之间移动，使用 Page Up 或 Page Down 按页移动。右方向键会展开已折叠分支，或进入已展开分支。左方向键会折叠已展开分支，或移到其父项。树视图导航不会循环。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREE_EDGES" Language="zh_Hans_CN">
+      <Text>启用“Home 和 End 仅限当前深度”设置时，Home 和 End 会移到当前深度的第一行或最后一行；否则会移到整个树视图的第一行或最后一行。Control 加 Home 和 Control 加 End 始终移到整个树视图的边界。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREE_SEARCH" Language="zh_Hans_CN">
+      <Text>树视图默认启用按键搜索和 Control 加 F 搜索，并会检查嵌套信息。持久查询生效时，上方向键和下方向键会在按排名排列的匹配项中移动。Enter 的作用由焦点树项目决定：它会激活可操作项目，或切换不带行动的分支。</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREEITEM_TITLE" Language="zh_Hans_CN">
+      <Text>树项目</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREEITEM_FUNCTION" Language="zh_Hans_CN">
+      <Text>树项目是树视图中的一行，可以是分支或叶。分支会播报是否已展开；已展开分支还会播报其可见子项数量。折叠分支会递归折叠其后代，因此稍后再次展开时会从一个整洁的层级开始。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREEITEM_KEYS" Language="zh_Hans_CN">
+      <Text>层级移动由所属树视图处理：右方向键展开或进入，左方向键折叠或上移，上方向键或下方向键在可见行中移动。即使分支本身也带有行动，这些命令仍然可用。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PEDIA_WIDGET_TREEITEM_ACTION" Language="zh_Hans_CN">
+      <Text>在带有界面定义行动的树项目上按 Enter，会运行该行动。否则，Enter 会向上传递到树视图并切换分支。也就是说，可操作分支使用 Enter 激活，使用右方向键和左方向键展开或折叠。已禁用的可操作项目不会运行。</Text>
+    </Row>
+  </LocalizedText>
+</GameData>
