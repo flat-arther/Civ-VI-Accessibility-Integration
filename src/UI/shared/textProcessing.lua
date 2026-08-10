@@ -1,7 +1,20 @@
--- Icon-to-speech registry and adjacency deduplication.
+-- Central text processor for speech output.
+--
+-- This is the ONE place CAI filters text for the screen reader. Speak() (and the
+-- edit-box SetText path) call ProcessText; individual screens must NOT strip
+-- COLOR/NEWLINE/ICON tokens or normalize whitespace themselves -- ProcessText
+-- already resolves every bracket token and tidies the result.
+--
+-- Locale note: never use the %s / %S pattern classes on localized text here or
+-- anywhere downstream. The Civ VI Lua runtime resolves them against the game
+-- locale, which under Simplified Chinese classifies byte 0xA0 as whitespace.
+-- 0xA0 is also a UTF-8 continuation byte inside common characters (e.g. 张 =
+-- E5 BC A0), so %s/%S trimming or splitting can slice a multibyte character and
+-- corrupt it into the replacement character. All whitespace handling below uses
+-- explicit ASCII byte sets instead.
 --
 -- Each registered icon has a spoken form (resolved from a LOC_ key or a
--- literal string) and an optional list of adjacency aliases. ProcessIcons
+-- literal string) and an optional list of adjacency aliases. ProcessText
 -- resolves bracket tokens and deduplicates in two ways:
 --
 -- 1. Spoken-form match: when the icon's spoken form already appears adjacent
@@ -327,13 +340,30 @@ local function FindAdjacentPhrase(text, bracketStart, bracketEnd, phrase)
     return false
 end
 
+-- ASCII-safe speech tidy-up. Applied as the final step for spoken output so
+-- individual screens never have to collapse whitespace or commas themselves.
+-- Uses explicit ASCII whitespace bytes only (see the locale note at the top);
+-- lone commas (e.g. "1,000") and newlines are preserved.
+local function NormalizeSpeechText(text)
+    text = text:gsub("[ \t]+", " ")        -- collapse horizontal whitespace runs
+    text = text:gsub(" *\n *", "\n")       -- trim spaces around newlines
+    text = text:gsub("[, \t\r\n]+,", ",")  -- collapse comma/whitespace clusters
+    text = text:gsub("^[, \t\r\n]+", "")   -- trim leading whitespace/commas
+    text = text:gsub("[, \t\r\n]+$", "")   -- trim trailing whitespace/commas
+    return text
+end
+
 ---Replaces any Civ VI bracket token ([text]) with a matching spoken form, or
 ---removes it when no replacement exists. When the spoken form or a collapse
 ---alias appears adjacent to the bracket, the icon collapses (adjacent label
----stays, icon is redundant).
+---stays, icon is redundant). This is the single text-filtering entry point for
+---the screen reader -- do not replicate tag stripping or whitespace tidy in
+---individual screens.
 ---@param text string
+---@param tidy? boolean Apply ASCII-safe speech whitespace/comma tidy-up. Default
+---true. Pass false to preserve layout (e.g. multi-line edit-box display).
 ---@return string
-function ProcessIcons(text)
+function ProcessText(text, tidy)
     if not text or text == "" then
         return text
     end
@@ -385,5 +415,9 @@ function ProcessIcons(text)
         pos = bracketEnd + 1
     end
 
-    return TransliterateForEnglishTTS(table.concat(result))
+    local processed = TransliterateForEnglishTTS(table.concat(result))
+    if tidy ~= false then
+        processed = NormalizeSpeechText(processed)
+    end
+    return processed
 end

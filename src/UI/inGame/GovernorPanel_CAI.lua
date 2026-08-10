@@ -95,12 +95,10 @@ local function FormatPromotionList(names, conjunctionTag)
 end
 
 local function NormalizeText(text)
+    -- Tags and whitespace are filtered centrally in Speak()/ProcessText; keep
+    -- only nil-safety here so composed strings never concatenate a nil.
     if not text then return "" end
-    local s = tostring(text)
-    s = s:gsub("%[NEWLINE%]", " ")
-    s = s:gsub("%[ICON_[^%]]*%]", "")
-    s = s:gsub("  +", " ")
-    return s:match("^%s*(.-)%s*$") or ""
+    return tostring(text)
 end
 
 local function AppendIfNonEmpty(parts, value)

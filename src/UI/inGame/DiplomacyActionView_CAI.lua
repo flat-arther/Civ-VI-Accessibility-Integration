@@ -113,12 +113,10 @@ local function ControlTooltip(control)
 end
 
 local function NormalizeText(text)
+    -- Color/tag stripping happens centrally in Speak()/ProcessText; keep only
+    -- nil-safety here. SplitLines still splits on newlines (ASCII-safe) below.
     if not text then return "" end
-    text = tostring(text)
-    text = string.gsub(text, "%[ENDCOLOR%]", "")
-    text = string.gsub(text, "%[COLOR_[^%]]+%]", "")
-    text = string.gsub(text, "%[COLOR:%s*[^%]]+%]", "")
-    return text
+    return tostring(text)
 end
 
 local function SplitLines(text)
@@ -1607,7 +1605,7 @@ local function AddGrievancesChildren(node)
         for _, line in ipairs(breakdownLines) do
             -- Skip the "LOSING / Grievances per turn from:" header line; the
             -- parent label already states the net change. Header lines end in ":".
-            if not string.match(line, ":%s*$") then
+            if not string.match(line, ":[ \t\r\n]*$") then
                 breakdownNode:AddChild(CreateReadOnlyText(mgr:GenerateWidgetId("CAIDiplomacyGrievanceBreakdownEntry"),
                     line, nil))
             end

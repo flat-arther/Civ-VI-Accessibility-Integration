@@ -18,6 +18,67 @@ local function MaskIfNeeded(w, text)
     return string.rep("*", #text)
 end
 
+--#region UTF-8 codepoint stepping
+-- Cursor positions are 0-based byte offsets ("before this byte index"). These
+-- helpers advance/retreat by a whole UTF-8 character so multi-byte text (e.g.
+-- CJK) is never split, mid-stepped, or read one partial byte at a time. A
+-- continuation byte is 0x80-0xBF; every other byte begins a character.
+
+---Byte offset just past the character that begins at `pos`.
+---@param buf string
+---@param pos integer
+---@return integer
+function E.NextCharPos(buf, pos)
+    local len = #buf
+    if pos >= len then return len end
+    local i = pos + 2
+    while i <= len do
+        local b = string.byte(buf, i)
+        if b < 0x80 or b >= 0xC0 then break end
+        i = i + 1
+    end
+    return i - 1
+end
+
+---Byte offset at the start of the character immediately before `pos`.
+---@param buf string
+---@param pos integer
+---@return integer
+function E.PrevCharPos(buf, pos)
+    if pos <= 0 then return 0 end
+    local i = pos
+    while i > 1 do
+        local b = string.byte(buf, i)
+        if b < 0x80 or b >= 0xC0 then break end
+        i = i - 1
+    end
+    return i - 1
+end
+
+---Whole UTF-8 character whose first byte is at `pos + 1` (empty at end of buf).
+---@param buf string
+---@param pos integer
+---@return string
+function E.CharAt(buf, pos)
+    return string.sub(buf, pos + 1, E.NextCharPos(buf, pos))
+end
+
+---Snap a byte offset to the nearest character boundary at or before it, so a
+---byte-column landing (vertical movement) never sits mid-character.
+---@param buf string
+---@param pos integer
+---@return integer
+function E.SnapToCharStart(buf, pos)
+    if pos <= 0 then return 0 end
+    local len = #buf
+    if pos >= len then return len end
+    local b = string.byte(buf, pos + 1)
+    if b < 0x80 or b >= 0xC0 then return pos end
+    return E.PrevCharPos(buf, pos)
+end
+
+--#endregion
+
 ---Format a "selected" announcement, swapping in a character-count message when
 ---the selection is too large to speak verbatim.
 ---@param w EditBoxWidget
@@ -243,7 +304,7 @@ function E.PrevLinePos(buf, pos)
     end
     local prevLineStart = E.LineStart(buf, prevLineEnd - 1)
     local prevLineLen = prevLineEnd - prevLineStart
-    return prevLineStart + math.min(col, prevLineLen)
+    return E.SnapToCharStart(buf, prevLineStart + math.min(col, prevLineLen))
 end
 
 ---@param buf string
@@ -257,7 +318,7 @@ function E.NextLinePos(buf, pos)
     local nextLineEnd = E.LineEnd(buf, nextLineStart)
     local col = pos - E.LineStart(buf, pos)
     local nextLineLen = nextLineEnd - nextLineStart
-    return nextLineStart + math.min(col, nextLineLen)
+    return E.SnapToCharStart(buf, nextLineStart + math.min(col, nextLineLen))
 end
 
 --#endregion
@@ -305,9 +366,10 @@ function E.BackspaceChar(w)
     local pos = w._cursor or 0
     if pos <= 0 then return "" end
     local buf = w._buffer or ""
-    local deleted = string.sub(buf, pos, pos)
-    w._buffer = string.sub(buf, 1, pos - 1) .. string.sub(buf, pos + 1)
-    w._cursor = pos - 1
+    local prev = E.PrevCharPos(buf, pos)
+    local deleted = string.sub(buf, prev + 1, pos)
+    w._buffer = string.sub(buf, 1, prev) .. string.sub(buf, pos + 1)
+    w._cursor = prev
     return deleted
 end
 
@@ -317,8 +379,9 @@ function E.DeleteChar(w)
     local pos = w._cursor or 0
     local buf = w._buffer or ""
     if pos >= #buf then return "" end
-    local deleted = string.sub(buf, pos + 1, pos + 1)
-    w._buffer = string.sub(buf, 1, pos) .. string.sub(buf, pos + 2)
+    local nextPos = E.NextCharPos(buf, pos)
+    local deleted = string.sub(buf, pos + 1, nextPos)
+    w._buffer = string.sub(buf, 1, pos) .. string.sub(buf, nextPos + 1)
     return deleted
 end
 
@@ -367,7 +430,7 @@ function E.SpeakSelectionChange(w, oldSelStart, oldCursor)
     -- Speak the landing char first, then queue the unselected notice so the
     -- user hears where the cursor went before the housekeeping line.
     if oldA and not newA then
-        local ch = string.sub(buf, w._cursor + 1, w._cursor + 1)
+        local ch = E.CharAt(buf, w._cursor)
         if ch == "" or ch == "\n" then ch = Locale.Lookup("LOC_CAI_EDIT_BLANK") end
         local primary = MaskIfNeeded(w, ch)
         local deselected = string.sub(buf, oldA + 1, oldB)
@@ -379,7 +442,7 @@ function E.SpeakSelectionChange(w, oldSelStart, oldCursor)
         return
     end
     if not newA then
-        local ch = string.sub(buf, w._cursor + 1, w._cursor + 1)
+        local ch = E.CharAt(buf, w._cursor)
         if ch == "" then ch = Locale.Lookup("LOC_CAI_EDIT_BLANK") end
         Speak(MaskIfNeeded(w, ch), true)
         return
@@ -430,7 +493,7 @@ function E.MoveCursor(w, direction, shift, ctrl)
             local word = E.GetWordAt(buf, newPos)
             primary = (word == "") and Locale.Lookup("LOC_CAI_EDIT_BLANK") or MaskIfNeeded(w, word)
         else
-            local ch = string.sub(buf, newPos + 1, newPos + 1)
+            local ch = E.CharAt(buf, newPos)
             if ch == "" or ch == "\n" then ch = Locale.Lookup("LOC_CAI_EDIT_BLANK") end
             primary = MaskIfNeeded(w, ch)
         end
@@ -448,7 +511,7 @@ function E.MoveCursor(w, direction, shift, ctrl)
     if ctrl then
         newPos = direction < 0 and E.FindWordLeft(buf, pos) or E.FindWordRight(buf, pos)
     else
-        newPos = pos + direction
+        newPos = direction < 0 and E.PrevCharPos(buf, pos) or E.NextCharPos(buf, pos)
     end
     if newPos < 0 then newPos = 0 end
     if newPos > #buf then newPos = #buf end
@@ -462,7 +525,7 @@ function E.MoveCursor(w, direction, shift, ctrl)
         if word == "" then word = Locale.Lookup("LOC_CAI_EDIT_BLANK") end
         Speak(MaskIfNeeded(w, word), true)
     else
-        local ch = string.sub(buf, newPos + 1, newPos + 1)
+        local ch = E.CharAt(buf, newPos)
         if ch == "" or ch == "\n" then ch = Locale.Lookup("LOC_CAI_EDIT_BLANK") end
         Speak(MaskIfNeeded(w, ch), true)
     end

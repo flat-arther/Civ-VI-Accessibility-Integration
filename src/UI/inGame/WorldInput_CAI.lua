@@ -419,6 +419,7 @@ end
 
 local function DismissPlotInteractList()
 	mgr:RemoveFromStack(PLOT_INTERACT_LIST_ID)
+	UITutorialManager:RemoveControlToAlwaysReceiveInput(ContextPtr)
 end
 
 local function PushPlotInteractList(interactions)
@@ -451,7 +452,7 @@ local function PushPlotInteractList(interactions)
 		end)
 		list:AddChild(btn)
 	end
-
+	UITutorialManager:AddControlToAlwaysReceiveInput(ContextPtr)
 	mgr:Push(list)
 end
 
@@ -1485,6 +1486,7 @@ end)
 -- Context hooks
 -- ===========================================================================
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, inputStruct)
+	if ContextPtr:IsHidden() then return false end
 	if mgr then
 		local handled = mgr:HandleInput(inputStruct)
 		if handled then return handled end

@@ -112,11 +112,12 @@ end
 
 local function CollapseTooltipNewlines(text)
     if not text or text == "" then return "" end
-    return (text:gsub("%[NEWLINE%]%s*%[NEWLINE%]", "[NEWLINE]"))
+    return (text:gsub("%[NEWLINE%][ \t\r\n]*%[NEWLINE%]", "[NEWLINE]"))
 end
 
 local function ComparableText(text)
-    return CollapseTooltipNewlines(text):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+    -- ASCII whitespace only; %s is locale-sensitive and corrupts UTF-8 (0xA0).
+    return CollapseTooltipNewlines(text):gsub("[ \t\r\n]+", " "):gsub("^[ \t\r\n]+", ""):gsub("[ \t\r\n]+$", "")
 end
 
 local function GetLocalPlayerCulture()

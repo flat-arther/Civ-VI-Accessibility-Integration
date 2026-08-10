@@ -876,7 +876,18 @@ function UIScreenManager:RemoveSearchChar()
         return ""
     end
 
-    if #buffer <= 1 then
+    -- Remove one full UTF-8 character, not one byte. Scan back over trailing
+    -- continuation bytes (0x80-0xBF) so multi-byte characters (e.g. CJK) are
+    -- deleted whole instead of leaving a truncated, corrupt sequence.
+    local i = #buffer
+    while i > 1 do
+        local b = string.byte(buffer, i)
+        if b < 0x80 or b >= 0xC0 then break end
+        i = i - 1
+    end
+    local nextBuffer = string.sub(buffer, 1, i - 1)
+
+    if nextBuffer == "" then
         self.SearchBuffer = ""
         self.LastTypeTime = nil
         self.SearchBufferExpireTime = nil
@@ -884,7 +895,7 @@ function UIScreenManager:RemoveSearchChar()
         return ""
     end
 
-    self.SearchBuffer = string.sub(buffer, 1, #buffer - 1)
+    self.SearchBuffer = nextBuffer
     self.LastTypeTime = Automation.GetTime()
     self:TouchSearchBufferTimer()
     return self.SearchBuffer
@@ -895,7 +906,10 @@ function UIScreenManager:AppendSearchChar(c)
     self:ExpireSearchBufferIfNeeded()
     local now = Automation.GetTime()
     self.LastTypeTime = now
-    self.SearchBuffer = (self.SearchBuffer or "") .. c:lower()
+    -- ASCII-only fold: string.lower is locale-sensitive on bytes >= 0x80 and
+    -- would corrupt multi-byte UTF-8 characters (e.g. CJK), which have no case.
+    -- Same fold as the matched labels/query so the buffer stays comparable.
+    self.SearchBuffer = (self.SearchBuffer or "") .. CAIWidgetHelpers_Search.AsciiLower(c)
     self:TouchSearchBufferTimer()
 end
 

@@ -96,7 +96,7 @@
     <File>UI/frontEnd/GameSummaries.lua</File>
     <File>UI/frontEnd/GameSummaries_GameDetails.lua</File>
     <File>UI/FiraxisLive/My2K.lua</File>
-    <File>UI/shared/iconsProcessing.lua</File>
+    <File>UI/shared/textProcessing.lua</File>
     <File>UI/shared/LoadSaveHelpers_CAI.lua</File>
     <File>UI/shared/LoadGameMenu.lua</File>
     <File>UI/shared/SaveGameMenu.lua</File>
@@ -333,7 +333,7 @@
       <File>UI/frontEnd/GameSummaries.lua</File>
       <File>UI/frontEnd/GameSummaries_GameDetails.lua</File>
       <File>UI/FiraxisLive/My2K.lua</File>
-      <File>UI/shared/iconsProcessing.lua</File>
+      <File>UI/shared/textProcessing.lua</File>
       <File>UI/shared/LoadSaveHelpers_CAI.lua</File>
       <File>UI/shared/LoadGameMenu.lua</File>
       <File>UI/shared/SaveGameMenu.lua</File>
@@ -438,7 +438,7 @@
       <File>UI/inGame/UnitMoveLog_CAI.lua</File>
       <File>UI/inGame/MovementCost_CAI.lua</File>
       <File>UI/inGame/UnitWaypoints_CAI.lua</File>
-      <File>UI/shared/iconsProcessing.lua</File>
+      <File>UI/shared/textProcessing.lua</File>
       <File>UI/shared/PopupDialog.lua</File>
       <File>UI/shared/LoadSaveHelpers_CAI.lua</File>
       <File>UI/shared/LoadGameMenu.lua</File>

@@ -17,7 +17,9 @@ local g_SearchHistory = {}
 function S.ParseQuery(rawQuery)
     local whitelist = {}
     local blacklist = {}
-    for term in (rawQuery or ""):gmatch("%S+") do
+    -- ASCII whitespace split only; %S is locale-sensitive and would break CJK
+    -- queries mid-character. Space-less scripts stay as a single term.
+    for term in (rawQuery or ""):gmatch("[^ \t\r\n]+") do
         if term:sub(1, 2) == "--" and #term > 2 then
             blacklist[#blacklist + 1] = term:sub(3)
         else
@@ -121,6 +123,22 @@ end
 --#endregion
 
 --#region Type-to-find (widget tree prefix search)
+
+---Lowercase ASCII A-Z only, leaving every byte >= 0x80 untouched. string.lower
+---is locale-sensitive and can transform UTF-8 continuation/lead bytes that fall
+---in the Latin-1 uppercase range (0xC0-0xDE), corrupting multi-byte characters
+---(e.g. CJK). The [A-Z] pattern range is a literal byte range, not a %-class, so
+---it is locale-independent. Query and label are folded through this same path so
+---they stay byte-for-byte comparable.
+---@param s string
+---@return string
+function S.AsciiLower(s)
+    return (s:gsub("[A-Z]", function(c)
+        return string.char(string.byte(c) + 32)
+    end))
+end
+local AsciiLower = S.AsciiLower
+
 -- Array of common invalid search start chars
 local INVALID_SEARCH_START_CHARS = {
     ['"'] = true,
@@ -211,9 +229,9 @@ function S.MakeSearchCandidate(widget, label, bfsIndex, tooltip)
     return {
         Widget = widget,
         Label = label,
-        LabelLower = label:lower(),
+        LabelLower = AsciiLower(label),
         Tooltip = tooltip,
-        TooltipLower = tooltip:lower(),
+        TooltipLower = AsciiLower(tooltip),
         BFSIndex = bfsIndex,
     }
 end
@@ -311,7 +329,7 @@ local function SplitWords(text)
         if IsWordSeparator(ch) then
             if start then
                 words[#words + 1] = {
-                    Text = text:sub(start, i - 1):lower(),
+                    Text = AsciiLower(text:sub(start, i - 1)),
                     StartPos = start,
                 }
                 start = nil
@@ -323,7 +341,7 @@ local function SplitWords(text)
 
     if start then
         words[#words + 1] = {
-            Text = text:sub(start):lower(),
+            Text = AsciiLower(text:sub(start)),
             StartPos = start,
         }
     end
@@ -555,8 +573,15 @@ end
 ---@param char string
 ---@return boolean
 function S.IsValidSearchStartCharacter(char)
-    if not char or #char ~= 1 then
+    if not char or char == "" then
         return false
+    end
+
+    -- Multi-byte input is a UTF-8 character (e.g. CJK); it is always a valid
+    -- search start. The control/whitespace/digit/punctuation filter below only
+    -- applies to single-byte ASCII.
+    if #char ~= 1 then
+        return true
     end
 
     local byte = string.byte(char)
@@ -566,8 +591,9 @@ function S.IsValidSearchStartCharacter(char)
         return false
     end
 
-    -- Reject whitespace.
-    if char:match("%s") then
+    -- Reject whitespace. Control chars are already rejected above; space is the
+    -- only remaining ASCII whitespace. Avoid %s (locale-sensitive on raw bytes).
+    if char == " " then
         return false
     end
 
@@ -702,10 +728,10 @@ function S.MatchSearchText(label, query)
 
     local candidate = {
         Label = label,
-        LabelLower = label:lower(),
+        LabelLower = AsciiLower(label),
         BFSIndex = 0,
     }
-    local lowerQuery = query:lower()
+    local lowerQuery = AsciiLower(query)
 
     for _, tier in ipairs(SEARCH_ORDER) do
         local result = S.ScoreSearchCandidate(candidate, lowerQuery, tier)
@@ -828,7 +854,10 @@ function S.HandleChar(root, char, maxDepth)
         prev = mgr:GetSearchBuffer()
     end
 
-    local repeatSearch = #prev == 1 and prev == char:lower()
+    -- Same-letter cycling is a single-byte concept, so this comparison stays
+    -- false for multi-byte characters, which is correct. AsciiLower matches the
+    -- fold used when the buffer was built.
+    local repeatSearch = #prev == 1 and #char == 1 and prev == AsciiLower(char)
 
     if repeatSearch then
         -- Keep the buffer at the single letter; just refresh the timeout.

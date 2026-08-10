@@ -90,8 +90,8 @@
 [x] Item pos should only be spoken in containers
 [x] Mod tutorials interrupt focus even when tutorial widget is not the top. 
 [ ] Tutorial text that is too long should be split in to multiple rows
-[ ] Add amenities to the city banners
+[x] Add amenities to the city banners
 [ ] Look in to coastal raide yield reporting
-[ ] Builders allow you to form escort formations in tutorial. Disable this when not in free roam
+[x] Builders allow you to form escort formations in tutorial. Disable this when not in free roam
 [ ] Add support for better reports, detailed map tacs, extended policy cards, better balanced game
 [ ] Add custom category keybindings

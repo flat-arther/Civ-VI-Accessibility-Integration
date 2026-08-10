@@ -144,7 +144,8 @@ end
 ---@param text string
 ---@param silent? boolean
 function EditBoxWidget:SetText(text, silent)
-    local normalized = ProcessIcons(NormalizeText(text))
+    -- tidy=false: resolve tokens for display but preserve multi-line layout.
+    local normalized = ProcessText(NormalizeText(text), false)
     self._buffer = normalized
     -- Read-only viewers anchor at the top so refreshes don't drop the cursor on
     -- the last line of newly loaded content.
@@ -689,7 +690,7 @@ function EditBoxWidget._BuildBindings()
                 else
                     local buf = self._buffer or ""
                     local pos = self._cursor or 0
-                    local ch = string.sub(buf, pos + 1, pos + 1)
+                    local ch = E.CharAt(buf, pos)
                     if ch ~= "" then
                         UIManager:SetClipboardString(ch)
                         Speak(E.FormatCopied(self, ch), true, false)

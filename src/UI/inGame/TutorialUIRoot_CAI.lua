@@ -40,6 +40,12 @@ local function EnableFirstSettlerMovement()
     EnableUnitAction("UNITOPERATION_MOVE_TO", "UNIT_SETTLER")
 end
 
+local function EnableBuilderFormation()
+    EnableUnitAction("UNITCOMMAND_ENTER_FORMATION", "UNIT_BUILDER")
+end
+
+DisableUnitAction("UNITCOMMAND_ENTER_FORMATION", "UNIT_BUILDER")
+
 --- Table of hooks for tutorial items, keyed by item ID, then by event name (OnActivate / OnDeactivate). These functions will be called when the corresponding event happens for the item with the matching ID. The functions will be passed the item as a parameter.
 --- They are mostly used to set certain controls to always receive input when specific tutorial items are active, since some tutorial items only activate a portion of the UI, like the production panel, and we need to make sure they receive input in those cases.
 local TutorialItemHooks    = { ---@type table<string,TutItemEvents>
@@ -76,6 +82,9 @@ local TutorialItemHooks    = { ---@type table<string,TutItemEvents>
     ["FOUND_FIRST_CITY"] = {
         OnActivate = DisableFirstSettlerMovement,
         OnDeactivate = EnableFirstSettlerMovement,
+    },
+    ["SETTLER_FORMATION"] = {
+        OnActivate = EnableBuilderFormation,
     },
     ["FOUND_SECOND_CITY_D"] = {
         OnActivate = EnableWarriorFreeRoamActions,
@@ -258,7 +267,7 @@ local function CollectLeafControlText(control, lines, seenText)
         elseif child.GetText ~= nil then
             local text = child:GetText()
             if type(text) == "string"
-                and text:match("%S") ~= nil
+                and text:match("[^ \t\r\n]") ~= nil -- non-blank; ASCII-safe (not %S)
                 and not seenText[text] then
                 seenText[text] = true
                 table.insert(lines, text)

@@ -59,7 +59,7 @@ local function OnDebounceUpdate()
 
         local whitelist = {}
         local blacklist = {}
-        for term in m_pendingQuery:gmatch("%S+") do
+        for term in m_pendingQuery:gmatch("[^ \t\r\n]+") do
             if term:sub(1, 2) == "--" and #term > 2 then
                 blacklist[#blacklist + 1] = term:sub(3)
             else
@@ -325,7 +325,7 @@ function OnSearchCommit()
         if m_searchPanel then
             local combined = szSearchString or ""
             if szFilterString and szFilterString ~= "" then
-                for term in szFilterString:gmatch("%S+") do
+                for term in szFilterString:gmatch("[^ \t\r\n]+") do
                     combined = combined .. " --" .. term
                 end
             end

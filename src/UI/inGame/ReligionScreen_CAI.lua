@@ -162,17 +162,10 @@ end
 -- ============================================================================
 
 local function NormalizeText(text)
+    -- Tags and whitespace are filtered centrally in Speak()/ProcessText; keep
+    -- only nil-safety here so composed strings never concatenate a nil.
     if not text then return "" end
-    text = tostring(text)
-    text = string.gsub(text, "%[ENDCOLOR%]", "")
-    text = string.gsub(text, "%[COLOR_[^%]]+%]", "")
-    text = string.gsub(text, "%[COLOR:%s*[^%]]+%]", "")
-    text = string.gsub(text, "%[NEWLINE%]", ", ")
-    text = string.gsub(text, "%[ICON_[^%]]+%]", "")
-    text = string.gsub(text, "[,%s]+,", ",")
-    text = string.gsub(text, "^[,%s]+", "")
-    text = string.gsub(text, "[,%s]+$", "")
-    return text
+    return tostring(text)
 end
 
 local function IsObserverMode()

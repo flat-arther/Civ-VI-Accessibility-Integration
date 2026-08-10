@@ -36,7 +36,7 @@ local CITY_INFO_BUCKETS = {
     Info3 = { "Growth" },
     Info4 = { "BorderGrowth" },
     Info5 = { "Religion" },
-    Info6 = { "Population", "Housing", "BuildingsOrLoyalty" },
+    Info6 = { "Population", "Housing", "BuildingCount", "Loyalty", "AmenitiesSummary" },
     Info7 = { "VisibleYields" },
     Info8 = { "NormalFocusYields" },
     Info9 = { "FavoredFocusYields" },
@@ -282,17 +282,26 @@ function GetCityInfoReligionFollowers(data)
     return Locale.Lookup("LOC_HUD_CITY_RELIGIOUS_CITIZENS") .. ", " .. tostring(data.ReligionFollowers)
 end
 
-function GetCityInfoAmenities(data)
-    if data == nil then
+-- Shared amenities summary matching the city overview panel, e.g. "Amenities: Content, 6/4".
+-- Exposed on info (ExposedMembers.CAIInfo) so the city panel and city banner stay in sync.
+function info.GetCityAmenitiesSummary(city)
+    if city == nil then
         return nil
     end
 
-    local amenitiesNumText = data.AmenitiesNetAmount
-    if data.AmenitiesNetAmount > 0 then
-        amenitiesNumText = "+" .. amenitiesNumText
+    local cityGrowth = city:GetGrowth()
+    if cityGrowth == nil then
+        return nil
     end
 
-    return Locale.Lookup("LOC_HUD_CITY_AMENITIES") .. ", " .. tostring(amenitiesNumText)
+    local mood = ""
+    local happiness = GameInfo.Happinesses[cityGrowth:GetHappiness()]
+    if happiness ~= nil then
+        mood = Locale.Lookup(happiness.Name)
+    end
+
+    return Locale.Lookup("LOC_HUD_CITY_AMENITIES") .. ": " .. mood ..
+        ", " .. tostring(cityGrowth:GetAmenities()) .. "/" .. tostring(cityGrowth:GetAmenitiesNeeded())
 end
 
 function GetCityInfoHousing(data)
@@ -300,7 +309,8 @@ function GetCityInfoHousing(data)
         return nil
     end
 
-    return Locale.Lookup("LOC_HUD_CITY_HOUSING") .. ", " .. tostring(data.Population) .. " of " .. tostring(data.Housing)
+    return Locale.Lookup("LOC_HUD_CITY_HOUSING") .. ", " ..
+        Locale.Lookup("LOC_CAI_CITY_HOUSING_LINE", data.Population, data.Housing)
 end
 
 function GetCityInfoGrowth(data)
@@ -466,6 +476,21 @@ function GetCityInfoBuildingsOrLoyalty(data, city)
     return Locale.Lookup("LOC_HUD_CITY_BUILDINGS") .. ", " .. tostring(data.BuildingsNum)
 end
 
+-- Loyalty summary, expansion-only. Returns nil in the base game so it contributes nothing.
+function GetCityInfoLoyalty(data, city)
+    if not (IsExpansion2Active() or IsExpansion1Active()) or city == nil then
+        return nil
+    end
+
+    local culturalIdentity = city:GetCulturalIdentity()
+    if culturalIdentity == nil then
+        return nil
+    end
+
+    return Locale.Lookup("LOC_CULTURAL_IDENTITY_LOYALTY_SUBSECTION") .. ", " ..
+        tostring(Round(culturalIdentity:GetLoyalty(), 1))
+end
+
 --#City Info Registry
 
 CityInfo = {
@@ -522,16 +547,17 @@ CityInfo = {
     end,
 }
 
-CityInfo.BuildingCount = CityInfo.BuildingsOrLoyalty
+CityInfo.BuildingCount = function(data, city) return GetCityInfoBuildings(data) end
+CityInfo.Loyalty = function(data, city) return GetCityInfoLoyalty(data, city) end
 CityInfo.ReligiousFollowersCount = CityInfo.Religion
-CityInfo.AmenitiesSummary = function(data, city) return GetCityInfoAmenities(data) end
+CityInfo.AmenitiesSummary = function(data, city) return info.GetCityAmenitiesSummary(city) end
 CityInfo.HousingSummary = CityInfo.Housing
 CityInfo.GrowthSummary = CityInfo.Growth
 CityInfo.ProductionSummary = CityInfo.Production
 CityInfo.BuildingsAmenitiesSummary = function(data, city)
     return {
-        GetCityInfoBuildingsOrLoyalty(data, city),
-        GetCityInfoAmenities(data),
+        GetCityInfoBuildings(data),
+        info.GetCityAmenitiesSummary(city),
     }
 end
 

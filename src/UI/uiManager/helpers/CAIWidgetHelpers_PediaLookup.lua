@@ -9,12 +9,13 @@ local MAX_RESULTS = 20
 
 local function CollapseWhitespace(text)
     if not text or text == "" then return "" end
-    return text:gsub("%s+", " "):match("^%s*(.-)%s*$") or ""
+    -- Explicit ASCII whitespace only; %s is locale-sensitive and corrupts UTF-8.
+    return (text:gsub("[ \t\r\n]+", " "):gsub("^[ \t\r\n]+", ""):gsub("[ \t\r\n]+$", ""))
 end
 
 local function NormalizeSearchText(text)
     if not text or text == "" then return "" end
-    return CollapseWhitespace(ProcessIcons(text))
+    return CollapseWhitespace(ProcessText(text))
 end
 
 local function RemoveParentheticalText(text)
@@ -23,7 +24,7 @@ local function RemoveParentheticalText(text)
 end
 
 local function NormalizeSearchQuery(text)
-    return CollapseWhitespace(RemoveParentheticalText(ProcessIcons(text)))
+    return CollapseWhitespace(RemoveParentheticalText(ProcessText(text)))
 end
 
 local function NormalizeSearchComparison(text)
@@ -333,7 +334,7 @@ function P.CollectTerms(widget)
 
     -- Process icons first so icon-only labels become searchable concepts and
     -- markup such as [NEWLINE] becomes the punctuation used by speech.
-    speech = RemoveParentheticalText(ProcessIcons(speech))
+    speech = RemoveParentheticalText(ProcessText(speech))
     local terms = {}
     for raw in speech:gmatch("[^,:]+") do
         local term = CollapseWhitespace(raw)

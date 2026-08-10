@@ -1769,6 +1769,9 @@
     <Row Tag="LOC_CAI_CITY_HOUSING_SUMMARY" Language="en_US">
       <Text>{1_Population} citizens, {2_Housing} housing</Text>
     </Row>
+    <Row Tag="LOC_CAI_CITY_HOUSING_LINE" Language="en_US">
+      <Text>{1_Population} of {2_Housing}</Text>
+    </Row>
     <Row Tag="LOC_CAI_CITY_PRODUCTION_STATS" Language="en_US">
       <Text>Production stats: {1_Text}</Text>
     </Row>
@@ -4842,6 +4845,12 @@
     <Row Tag="LOC_CAI_WORLD_RANKINGS_SPACEPORT_NOT_BUILT" Language="en_US">
       <Text>Spaceport: Not Built</Text>
     </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_BUILT" Language="en_US">
+      <Text>Built</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_NOT_BUILT" Language="en_US">
+      <Text>Not Built</Text>
+    </Row>
     <Row Tag="LOC_CAI_WORLD_RANKINGS_NEXT_STEP" Language="en_US">
       <Text>Next step: {1_Step}</Text>
     </Row>
@@ -4853,6 +4862,9 @@
     </Row>
     <Row Tag="LOC_CAI_WORLD_RANKINGS_TEAM_MEMBER" Language="en_US">
       <Text>Member: {1_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_RANKINGS_TEAM_MEMBERS" Language="en_US">
+      <Text>Members: {1_Names}</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_RANKINGS_CONTRIBUTION" Language="en_US">
       <Text>{1_Name}: {2_Value}</Text>

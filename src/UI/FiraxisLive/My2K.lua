@@ -1013,7 +1013,7 @@ end)
 
 CreateNewUserDialog = WrapFunc(CreateNewUserDialog, function(orig)
 	orig()
-	Speak("Opening create new user	")
+
 	if not mgr or not m_currentDialog then return end
 	local emailEdit = CreateEdit(m_currentDialog.EMailTitle, m_currentDialog.Email, true)
 	emailEdit:SetTooltip(function() return m_currentDialog.Message:GetText() or "" end)
@@ -1139,29 +1139,6 @@ function OnHandleInput(pInputStruct)
 		end
 	end
 	return true
-end
-
-function forceLegalDialog()
-	local testDialogData = {
-		title     = "Accessibility Test: Legal Agreements",                                    -- instance.Title
-		message   = "Please review the following terms.",                                      -- instance.Message
-		disagree  = "Decline All",                                                             -- instance.DisagreeAllText[cite: 1]
-		agree     = "Accept All",                                                              -- instance.AgreeAllText[cite: 1]
-		documents = {                                                                          -- m_currentDialogData.documents[cite: 1]
-			{
-				ID = "TEST_DOC_EULA",                                                          -- Passed back in the agree list[cite: 1]
-				Name = "End User License Agreement",                                           -- docInstance.ReadText[cite: 1]
-				Text =
-				"Section 1: Accessibility Testing.\nSection 2: Testing screen reader speech output queue." -- Parsed by \n[cite: 1]
-			},
-			{
-				ID = "TEST_DOC_PRIVACY",
-				Name = "Privacy Policy",
-				Text = "This is the second test document.\nConfirming layout flow works."
-			}
-		}
-	}
-	ShowLegalDialog(testDialogData)
 end
 
 ContextPtr:SetInputHandler(OnHandleInput, true)

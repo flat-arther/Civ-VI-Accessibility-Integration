@@ -2,11 +2,23 @@
 
 ### Added
 
+- Added a table view for world rankings
 - Added support for the following mods: Detailed map tacs, yet, not another maps pack
+
+### Changed
+
+- World Rankings team numbering now matches the staging room and diplomacy ribbon, starting from Team 1 instead of Team 0.
+- The city selection info now reports amenities, and its building count is always spoken regardless of which expansion is active. Bound to `Shift plus 6` by default
+- The city banner loyalty summary (default binding `5`) also reports amenities for your own cities, and in the base game it reads amenities instead of announcing that no information is available.
 
 ### Fixed
 
 - Fixed a bug with mod tutorials that caused the game to stop speaking if an advisor dialog appeared at the same time
+- Fixed builders being able to form escort formations during the on-rails tutorial before the settler formation step
+- Fixed a bug in the tutorial where opening the tile interaction list during the civic or tech tree steps prevented the game from receiving input, there by locking you out of completing the tutorial entirely
+- Fixed Chinese and other non-Latin text being announced with stray replacement characters, most noticeably in long descriptions such as Great Person biographies
+- Fixed typeahead search rejecting Chinese and other non-Latin characters, and Backspace no longer garbles multi-byte characters.
+- Fixed editing text fields with Chinese and other non-Latin characters: arrow keys, Delete, and Backspace now move and delete a whole character at a time instead of splitting it, and each character is announced correctly
 
 ## [1.0.1] - 2026-08-04
 

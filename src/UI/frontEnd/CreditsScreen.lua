@@ -319,7 +319,8 @@ local BASE_OnInputHandler = OnInputHandler
 local function CAI_TrimCreditText(text)
 	text = tostring(text or "")
 	text = string.gsub(text, "\194\160", " ")
-	return string.match(text, "^%s*(.-)%s*$") or ""
+	-- ASCII whitespace only; %s is locale-sensitive and corrupts UTF-8 (0xA0).
+	return (text:gsub("^[ \t\r\n]+", ""):gsub("[ \t\r\n]+$", ""))
 end
 
 local function CAI_IsFocusWithin(widget)

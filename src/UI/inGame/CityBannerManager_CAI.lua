@@ -25,7 +25,8 @@ local function TrimString(value)
         return nil
     end
 
-    local trimmed = tostring(value):gsub("^%s+", ""):gsub("%s+$", "")
+    -- ASCII whitespace only; %s is locale-sensitive and corrupts UTF-8 (0xA0).
+    local trimmed = tostring(value):gsub("^[ \t\r\n]+", ""):gsub("[ \t\r\n]+$", "")
     if trimmed == "" then
         return nil
     end
@@ -1445,10 +1446,21 @@ info.CityBannerInfo = {
 
         return BuildProgressLine(GetBannerMeterPercent(ctx.instance.ConversionBar))
     end,
+    amenities = function(ctx)
+        if ctx == nil or ctx.kind ~= "city" or ctx.city == nil then
+            return nil
+        end
+
+        return info.GetCityAmenitiesSummary(ctx.city)
+    end,
 }
 
 local function IsForeignCityContext(ctx)
     return ctx ~= nil and ctx.kind == "city" and ctx.banner ~= nil and not ctx.banner:IsTeam()
+end
+
+local function IsOwnCityContext(ctx)
+    return ctx ~= nil and ctx.kind == "city" and ctx.banner ~= nil and ctx.banner:IsTeam()
 end
 
 local function HasPopulationGrowthTooltip(ctx)
@@ -1600,6 +1612,7 @@ local BannerBucketActions = {
     [ACTION_BANNER_LOYALTY_SUMMARY] = {
         emptyLoc = CITY_BANNER_INFO_UNAVAILABLE,
         city = {
+            { key = "amenities",                 when = IsOwnCityContext },
             { key = "loyaltyPercent",            when = IsCityLoyaltyContext },
             { key = "loyaltyPerTurn",            when = IsCityLoyaltyContext },
             { key = "loyaltyPopulationPressure", when = IsCityLoyaltyContext },

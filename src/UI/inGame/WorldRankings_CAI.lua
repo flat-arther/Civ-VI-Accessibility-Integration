@@ -37,6 +37,9 @@ local CAI_TAB_DOMINATION          = TAB_DOMINATION or Locale.Lookup("LOC_WORLD_R
 -- ============================================================================
 local PANEL_ID                    = "CAIWorldRank_Panel"
 local TABS_ID                     = "CAIWorldRank_Tabs"
+local SWITCH_VIEW_ID              = "CAIWorldRank_SwitchView"
+local VIEW_SETTING_SECTION        = "UI"
+local VIEW_SETTING_ID             = "WorldRankingsViewMode"
 local HOVER_SOUND                 = "Main_Menu_Mouse_Over"
 
 local REQUIREMENT_CONTEXT         = "VictoryProgress"
@@ -47,6 +50,7 @@ local REQUIREMENT_CONTEXT         = "VictoryProgress"
 local m_panel                     = nil
 local m_tabs                      = nil
 local m_trees                     = {}
+local m_switchView                = nil
 local m_capturedTabs              = {}
 local m_isMirroringTab            = false
 local m_currentGenericVictoryType = nil
@@ -56,6 +60,24 @@ local m_genericCapturedRows       = {}
 local m_scoreCapture              = nil
 local m_scoreCapturedRows         = nil
 local m_genericVictoryAdapters    = {}
+
+local function LoadViewModeSetting()
+    local stored = tostring(CAI.GetConfigValue(
+        VIEW_SETTING_SECTION, VIEW_SETTING_ID, "table")):lower()
+    if stored == "tree" then return "tree" end
+    if stored ~= "table" then
+        LogWarn("World Rankings ignored invalid saved view mode " .. tostring(stored))
+    end
+    return "table"
+end
+
+local function SaveViewModeSetting(viewMode)
+    if not CAI.SetConfigValue(VIEW_SETTING_SECTION, VIEW_SETTING_ID, viewMode) then
+        LogError("World Rankings failed to save view mode " .. tostring(viewMode))
+    end
+end
+
+local m_viewMode                  = LoadViewModeSetting()
 
 local m_isExp2                    = (IsExpansion2Active ~= nil and IsExpansion2Active())
 
@@ -398,9 +420,95 @@ end
 
 local function GetRankingsTeamLabel(teamID)
     return JoinLines({
-        Locale.Lookup("LOC_WORLD_RANKINGS_TEAM", GameConfiguration.GetTeamName(teamID)),
+        Locale.Lookup("LOC_WORLD_RANKINGS_TEAM", teamID + 1),
         IsLocalPlayerOnTeam(teamID) and Locale.Lookup("LOC_CAI_WORLD_RANKINGS_YOUR_TEAM") or nil,
     })
+end
+
+local function GetCompetitorKey(competitor)
+    return "team:" .. competitor.TeamID
+end
+
+local function GetCompetitorLabel(competitor)
+    if #competitor.PlayerIDs == 1 then
+        return GetRankingsPlayerLabel(competitor.PlayerIDs[1])
+    end
+    return GetRankingsTeamLabel(competitor.TeamID)
+end
+
+local function GetCompetitorTooltip(competitor)
+    if #competitor.PlayerIDs <= 1 then return nil end
+    local names = {}
+    for _, playerID in ipairs(competitor.PlayerIDs) do
+        table.insert(names, GetRankingsPlayerLabel(playerID))
+    end
+    return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TEAM_MEMBERS", JoinLines(names))
+end
+
+local function GetAliveCompetitors()
+    local competitors = {}
+    for _, teamID in ipairs(GetAliveMajorTeamIDs()) do
+        local playerIDs = {}
+        for _, playerID in ipairs(Teams[teamID]) do
+            if IsAliveAndMajor(playerID) then
+                table.insert(playerIDs, playerID)
+            end
+        end
+        if #playerIDs > 0 then
+            table.insert(competitors, { TeamID = teamID, PlayerIDs = playerIDs })
+        end
+    end
+    return competitors
+end
+
+local function FindCompetitor(competitors, teamID)
+    for _, competitor in ipairs(competitors) do
+        if competitor.TeamID == teamID then return competitor end
+    end
+    return nil
+end
+
+local function FormatContribution(playerID, value)
+    return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CONTRIBUTION",
+        GetRankingsPlayerLabel(playerID), tostring(value))
+end
+
+local function FormatPercent(value)
+    return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_PERCENT", Round(value, 1))
+end
+
+local function MakeCompetitorColumn()
+    return {
+        key = "competitor",
+        header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_COMPETITOR") end,
+        getCell = GetCompetitorLabel,
+        getTooltip = GetCompetitorTooltip,
+        sortKey = GetCompetitorLabel,
+        sortAscendingDescription = "LOC_CAI_SORT_A_TO_Z",
+        sortDescendingDescription = "LOC_CAI_SORT_Z_TO_A",
+    }
+end
+
+local function ConfigureRankingTable(tableView, columns, rows, defaultSort)
+    local previousColumn, previousAscending = tableView:GetSort()
+    local hasPreviousColumn = false
+    for _, column in ipairs(columns) do
+        if column.key == previousColumn and column.sortKey then
+            hasPreviousColumn = true
+            break
+        end
+    end
+
+    tableView:SetColumns(columns)
+    tableView:SetRowsProvider(function() return rows end)
+    tableView:SetRowKeyGetter(GetCompetitorKey)
+    tableView:SetRowLabelGetter(GetCompetitorLabel)
+    if hasPreviousColumn then
+        tableView:SetDefaultSort({ column = previousColumn, ascending = previousAscending })
+    else
+        tableView:SetDefaultSort(defaultSort)
+    end
+    tableView:Rebuild()
 end
 
 -- ============================================================================
@@ -725,8 +833,7 @@ local function RebuildOverallTree(tree)
                         or "LOC_WORLD_RANKINGS_FIRST_PLACE_YOU_SIMPLE"))
                 else
                     local topName = leader.PlayerCount > 1
-                        and Locale.Lookup("LOC_WORLD_RANKINGS_TEAM",
-                            GameConfiguration.GetTeamName(leader.TeamID))
+                        and Locale.Lookup("LOC_WORLD_RANKINGS_TEAM", leader.TeamID + 1)
                         or GetPlayerLabel(leader.PlayerData[1].PlayerID)
                     table.insert(parts, Locale.Lookup("LOC_WORLD_RANKINGS_FIRST_PLACE_OTHER_SIMPLE", topName))
                     for rank, entry in ipairs(currentData) do
@@ -1044,6 +1151,7 @@ local function GatherSciencePlayerData(pPlayer)
         table.insert(milestones, {
             Name = milestoneNames[mi],
             Percent = pct,
+            ProgressRatio = totalCost > 0 and totalProgress / totalCost or 0,
             IsComplete = isComplete,
             ProjectInfos = projGroup,
             FinishedProjects = finishedProjects[mi],
@@ -1809,6 +1917,1031 @@ local function RebuildGenericTree(tree, victoryType)
 end
 
 -- ============================================================================
+-- Comparison Tables
+-- ============================================================================
+local function GatherOverallTableVictoryData(victoryType)
+    local victoryData = g_victoryData[victoryType]
+    if not victoryData then return {} end
+    local firstTiebreaker = victoryData.Primary or victoryData
+    local secondTiebreaker = victoryData.Secondary or victoryData
+    local results = {}
+
+    for _, competitor in ipairs(GetAliveCompetitors()) do
+        local progress = Game.GetVictoryProgressForTeam(victoryType, competitor.TeamID)
+        if progress ~= nil then
+            local entry = {
+                TeamID = competitor.TeamID,
+                Progress = progress,
+                GenericScore = 0,
+                FirstTeamScore = 0,
+                SecondTeamScore = 0,
+                PlayerData = {},
+            }
+            for _, playerID in ipairs(competitor.PlayerIDs) do
+                local player = Players[playerID]
+                local firstScore = firstTiebreaker.GetScore(player)
+                local secondScore = secondTiebreaker.GetScore(player)
+                local additionalSummary = victoryData.AdditionalSummary
+                    and victoryData.AdditionalSummary(player) or ""
+                table.insert(entry.PlayerData, {
+                    PlayerID = playerID,
+                    GenericScore = player:GetScore(),
+                    FirstScore = firstScore,
+                    SecondScore = secondScore,
+                    FirstSummary = Locale.Lookup(firstTiebreaker.GetText(player), Round(firstScore, 1)),
+                    SecondSummary = Locale.Lookup(secondTiebreaker.GetText(player), Round(secondScore, 1)),
+                    AdditionalSummary = Locale.Lookup(additionalSummary),
+                })
+                entry.GenericScore = math.max(entry.GenericScore, player:GetScore())
+                entry.FirstTeamScore = entry.FirstTeamScore + firstScore
+                entry.SecondTeamScore = entry.SecondTeamScore + secondScore
+            end
+            local playerCount = #entry.PlayerData
+            entry.FirstTeamScore = entry.FirstTeamScore / playerCount
+            entry.SecondTeamScore = entry.SecondTeamScore / playerCount
+            table.insert(results, entry)
+        end
+    end
+
+    table.sort(results, function(a, b)
+        if a.Progress ~= b.Progress then return a.Progress > b.Progress end
+        if a.FirstTeamScore ~= b.FirstTeamScore then return a.FirstTeamScore > b.FirstTeamScore end
+        if a.SecondTeamScore ~= b.SecondTeamScore then return a.SecondTeamScore > b.SecondTeamScore end
+        if a.GenericScore ~= b.GenericScore then return a.GenericScore > b.GenericScore end
+        return a.TeamID < b.TeamID
+    end)
+    return results
+end
+
+local function GetOverallTableVictoryTypes()
+    local result = {}
+    local seen = {}
+    local function Add(victoryType, label)
+        if not seen[victoryType] and Game.IsVictoryEnabled(victoryType)
+            and g_victoryData[victoryType] then
+            seen[victoryType] = true
+            table.insert(result, { VictoryType = victoryType, Label = label })
+        end
+    end
+    Add("VICTORY_TECHNOLOGY", Locale.Lookup("LOC_WORLD_RANKINGS_SCIENCE_VICTORY"))
+    Add("VICTORY_CULTURE", Locale.Lookup("LOC_WORLD_RANKINGS_CULTURE_VICTORY"))
+    Add("VICTORY_CONQUEST", Locale.Lookup("LOC_WORLD_RANKINGS_DOMINATION_VICTORY"))
+    Add("VICTORY_RELIGIOUS", Locale.Lookup("LOC_WORLD_RANKINGS_RELIGION_VICTORY"))
+    for row in GameInfo.Victories() do
+        if IsCustomVictoryType(row.VictoryType) then
+            Add(row.VictoryType, Locale.Lookup(row.Name))
+        end
+    end
+    return result
+end
+
+local function RebuildOverallTable(tableView)
+    local rows = GetAliveCompetitors()
+    local columns = { MakeCompetitorColumn() }
+    local victoryTypes = GetOverallTableVictoryTypes()
+
+    for _, victory in ipairs(victoryTypes) do
+        local ranked = GatherOverallTableVictoryData(victory.VictoryType)
+        local byTeam = {}
+        for rank, entry in ipairs(ranked) do
+            entry.Rank = rank
+            byTeam[entry.TeamID] = entry
+        end
+        for _, competitor in ipairs(rows) do
+            competitor.Overall = competitor.Overall or {}
+            competitor.Overall[victory.VictoryType] = byTeam[competitor.TeamID]
+        end
+
+        local capturedVictoryType = victory.VictoryType
+        table.insert(columns, {
+            key = "victory:" .. capturedVictoryType,
+            header = victory.Label,
+            getCell = function(competitor)
+                local entry = competitor.Overall[capturedVictoryType]
+                if not entry then return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_NOT_AVAILABLE") end
+                local place = Locale.Lookup("LOC_WORLD_RANKINGS_" .. entry.Rank .. "_PLACE")
+                return JoinLines({
+                    Locale.Lookup("LOC_CAI_WORLD_RANKINGS_PLACE", place),
+                    Locale.Lookup("LOC_CAI_WORLD_RANKINGS_VICTORY_PROGRESS",
+                        Round(math.max(0, math.min(entry.Progress, 1)) * 100, 1)),
+                })
+            end,
+            getTooltip = function(competitor)
+                local entry = competitor.Overall[capturedVictoryType]
+                if not entry then return nil end
+                if #competitor.PlayerIDs <= 1 then
+                    local pd = entry.PlayerData[1]
+                    if not pd or not IsPlayerKnownToLocal(pd.PlayerID) then return nil end
+                    return JoinLines({
+                        pd.FirstSummary,
+                        pd.SecondSummary ~= pd.FirstSummary and pd.SecondSummary or nil,
+                        pd.AdditionalSummary,
+                    })
+                end
+                local lines = {}
+                for _, playerData in ipairs(entry.PlayerData) do
+                    if IsPlayerKnownToLocal(playerData.PlayerID) then
+                        local details = JoinLines({
+                            playerData.FirstSummary,
+                            playerData.SecondSummary ~= playerData.FirstSummary
+                                and playerData.SecondSummary or nil,
+                            playerData.AdditionalSummary,
+                        })
+                        table.insert(lines, FormatContribution(playerData.PlayerID, details))
+                    end
+                end
+                return JoinLines(lines)
+            end,
+            sortKey = function(competitor)
+                local entry = competitor.Overall[capturedVictoryType]
+                return entry and entry.Rank or nil
+            end,
+            sortAscendingDescription = "LOC_CAI_SORT_CLOSEST_TO_VICTORY_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_FARTHEST_FROM_VICTORY_FIRST",
+        })
+    end
+
+    local defaultSort = #victoryTypes > 0
+        and { column = "victory:" .. victoryTypes[1].VictoryType, ascending = true }
+        or { column = "competitor", ascending = true }
+    ConfigureRankingTable(tableView, columns, rows, defaultSort)
+end
+
+local function GatherScoreTableRows()
+    local rows = {}
+    local scoreData = {}
+    if m_scoreCapturedRows then
+        for _, record in ipairs(m_scoreCapturedRows) do
+            if record.Kind == "team" then
+                local playerData = {}
+                for _, child in ipairs(record.Children) do
+                    table.insert(playerData, child.PlayerData)
+                end
+                table.insert(scoreData, {
+                    TeamID = record.TeamData.TeamID,
+                    TeamScore = record.TeamData.TeamScore,
+                    PlayerData = #playerData > 0 and playerData or record.TeamData.PlayerData,
+                })
+            else
+                local playerData = record.PlayerData
+                table.insert(scoreData, {
+                    TeamID = Players[playerData.PlayerID]:GetTeam(),
+                    TeamScore = playerData.PlayerScore,
+                    PlayerData = { playerData },
+                })
+            end
+        end
+    else
+        scoreData = GatherScoreData()
+    end
+
+    for _, teamData in ipairs(scoreData) do
+        local playerIDs = {}
+        local categoryTotals = {}
+        for _, playerData in ipairs(teamData.PlayerData) do
+            table.insert(playerIDs, playerData.PlayerID)
+            for _, category in ipairs(playerData.Categories) do
+                categoryTotals[category.CategoryID] =
+                    (categoryTotals[category.CategoryID] or 0) + category.CategoryScore
+            end
+        end
+        if #playerIDs > 0 then
+            table.insert(rows, {
+                TeamID = teamData.TeamID,
+                PlayerIDs = playerIDs,
+                PlayerData = teamData.PlayerData,
+                TeamScore = teamData.TeamScore,
+                CategoryTotals = categoryTotals,
+            })
+        end
+    end
+    return rows
+end
+
+local function GetScoreContributionTooltip(competitor, categoryID)
+    if #competitor.PlayerData <= 1 then return nil end
+    local lines = {}
+    for _, playerData in ipairs(competitor.PlayerData) do
+        local value = playerData.PlayerScore
+        if categoryID ~= nil then
+            value = 0
+            for _, category in ipairs(playerData.Categories) do
+                if category.CategoryID == categoryID then
+                    value = category.CategoryScore
+                    break
+                end
+            end
+        end
+        table.insert(lines, FormatContribution(playerData.PlayerID, value))
+    end
+    return JoinLines(lines)
+end
+
+local function RebuildScoreTable(tableView)
+    local rows = GatherScoreTableRows()
+    local columns = {
+        MakeCompetitorColumn(),
+        {
+            key = "total",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TOTAL_SCORE") end,
+            getCell = function(row) return tostring(row.TeamScore) end,
+            getTooltip = function(row) return GetScoreContributionTooltip(row, nil) end,
+            sortKey = function(row) return row.TeamScore end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+    }
+
+    local categoryIDs = {}
+    for _, row in ipairs(rows) do
+        for categoryID, _ in pairs(row.CategoryTotals) do categoryIDs[categoryID] = true end
+    end
+    for categoryInfo in GameInfo.ScoringCategories() do
+        if categoryIDs[categoryInfo.Index] then
+            local categoryID = categoryInfo.Index
+            table.insert(columns, {
+                key = "category:" .. categoryID,
+                header = function() return Locale.Lookup(GameInfo.ScoringCategories[categoryID].Name) end,
+                getCell = function(row) return tostring(row.CategoryTotals[categoryID] or 0) end,
+                getTooltip = function(row) return GetScoreContributionTooltip(row, categoryID) end,
+                sortKey = function(row) return row.CategoryTotals[categoryID] or 0 end,
+                sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+                sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+            })
+        end
+    end
+    ConfigureRankingTable(tableView, columns, rows, { column = "total", ascending = false })
+end
+
+local function IsScienceDataAhead(a, b)
+    for index = 1, math.min(3, #a.Milestones, #b.Milestones) do
+        local aProgress = a.Milestones[index].ProgressRatio
+        local bProgress = b.Milestones[index].ProgressRatio
+        if aProgress ~= bProgress then return aProgress > bProgress end
+    end
+    return a.PlayerID < b.PlayerID
+end
+
+local function GatherScienceTableRows()
+    local rows = GetAliveCompetitors()
+    for _, competitor in ipairs(rows) do
+        competitor.SciencePlayers = {}
+        for _, playerID in ipairs(competitor.PlayerIDs) do
+            table.insert(competitor.SciencePlayers, GatherSciencePlayerData(Players[playerID]))
+        end
+        table.sort(competitor.SciencePlayers, IsScienceDataAhead)
+        competitor.ScienceLeader = competitor.SciencePlayers[1]
+    end
+    local ranked = {}
+    for _, competitor in ipairs(rows) do table.insert(ranked, competitor) end
+    table.sort(ranked, function(a, b)
+        if IsScienceDataAhead(a.ScienceLeader, b.ScienceLeader) then return true end
+        if IsScienceDataAhead(b.ScienceLeader, a.ScienceLeader) then return false end
+        return a.TeamID < b.TeamID
+    end)
+    for rank, competitor in ipairs(ranked) do competitor.ScienceRank = rank end
+    return rows
+end
+
+local function GetScienceProgressText(scienceData)
+    return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_MILESTONES_DONE",
+        scienceData.CompletedCount, scienceData.TotalMilestones)
+end
+
+local function GetScienceMilestoneText(milestone)
+    if milestone.IsComplete then return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_COMPLETE") end
+    if milestone.Percent > 0 then return FormatPercent(milestone.Percent) end
+    return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_NOT_STARTED")
+end
+
+local function GetScienceContributionTooltip(row, getter)
+    local lines = {}
+    for _, scienceData in ipairs(row.SciencePlayers) do
+        table.insert(lines, FormatContribution(scienceData.PlayerID, getter(scienceData)))
+    end
+    return #row.SciencePlayers > 1 and JoinLines(lines) or nil
+end
+
+local function RebuildScienceTable(tableView)
+    local rows = GatherScienceTableRows()
+    local columns = {
+        MakeCompetitorColumn(),
+        {
+            key = "progress",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_SCIENCE_PROGRESS") end,
+            getCell = function(row) return GetScienceProgressText(row.ScienceLeader) end,
+            getTooltip = function(row)
+                local leader = row.ScienceLeader
+                return JoinLines({
+                    GetScienceContributionTooltip(row, GetScienceProgressText),
+                    leader.PlayerID == g_LocalPlayerID and leader.NextStep
+                        and Locale.Lookup("LOC_CAI_WORLD_RANKINGS_NEXT_STEP", leader.NextStep) or nil,
+                })
+            end,
+            sortKey = function(row) return row.ScienceRank end,
+            sortAscendingDescription = "LOC_CAI_SORT_CLOSEST_TO_VICTORY_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_FARTHEST_FROM_VICTORY_FIRST",
+        },
+        {
+            key = "spaceport",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_SPACEPORT") end,
+            getCell = function(row)
+                return Locale.Lookup(row.ScienceLeader.HasSpaceport
+                    and "LOC_CAI_WORLD_RANKINGS_BUILT"
+                    or "LOC_CAI_WORLD_RANKINGS_NOT_BUILT")
+            end,
+            getTooltip = function(row)
+                return GetScienceContributionTooltip(row, function(data)
+                    return Locale.Lookup(data.HasSpaceport
+                        and "LOC_CAI_WORLD_RANKINGS_SPACEPORT_BUILT"
+                        or "LOC_CAI_WORLD_RANKINGS_SPACEPORT_NOT_BUILT")
+                end)
+            end,
+            sortKey = function(row) return row.ScienceLeader.HasSpaceport and 1 or 0 end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+    }
+
+    local milestoneCount = m_isExp2 and 4 or 3
+    for milestoneIndex = 1, milestoneCount do
+        local capturedIndex = milestoneIndex
+        local header = rows[1] and rows[1].ScienceLeader.Milestones[capturedIndex].Name
+            or Locale.Lookup("LOC_WORLD_RANKINGS_SCIENCE_REQUIREMENT_" .. capturedIndex)
+        table.insert(columns, {
+            key = "milestone:" .. capturedIndex,
+            header = header,
+            getCell = function(row)
+                return GetScienceMilestoneText(row.ScienceLeader.Milestones[capturedIndex])
+            end,
+            getTooltip = function(row)
+                if #row.SciencePlayers <= 1 then
+                    local milestone = row.ScienceLeader.Milestones[capturedIndex]
+                    return GetTooltipForScienceProject(Players[row.ScienceLeader.PlayerID],
+                        milestone.ProjectInfos,
+                        milestone.IncludeSpaceport and row.ScienceLeader.HasSpaceport or nil,
+                        milestone.FinishedProjects)
+                end
+                local lines = {}
+                for _, scienceData in ipairs(row.SciencePlayers) do
+                    local milestone = scienceData.Milestones[capturedIndex]
+                    local contribution = FormatContribution(scienceData.PlayerID,
+                        GetScienceMilestoneText(milestone))
+                    local details = GetTooltipForScienceProject(Players[scienceData.PlayerID],
+                        milestone.ProjectInfos,
+                        milestone.IncludeSpaceport and scienceData.HasSpaceport or nil,
+                        milestone.FinishedProjects)
+                    table.insert(lines, JoinLines({ contribution, details }))
+                end
+                return JoinLines(lines)
+            end,
+            sortKey = function(row) return row.ScienceLeader.Milestones[capturedIndex].Percent end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        })
+    end
+
+    if m_isExp2 then
+        table.insert(columns, {
+            key = "distance",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_DISTANCE_TRAVELED") end,
+            getCell = function(row)
+                local data = row.ScienceLeader
+                if not data.HasLaunchedExpedition then
+                    return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_NOT_STARTED")
+                end
+                return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_LIGHT_YEARS",
+                    math.min(data.LightYears, data.LightYearsTotal), data.LightYearsTotal)
+            end,
+            getTooltip = function(row)
+                return GetScienceContributionTooltip(row, function(data)
+                    if not data.HasLaunchedExpedition then
+                        return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_NOT_STARTED")
+                    end
+                    return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_LIGHT_YEARS",
+                        math.min(data.LightYears, data.LightYearsTotal), data.LightYearsTotal)
+                end)
+            end,
+            sortKey = function(row)
+                return row.ScienceLeader.HasLaunchedExpedition and row.ScienceLeader.LightYears or nil
+            end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        })
+        table.insert(columns, {
+            key = "speed",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_SPEED_PER_TURN") end,
+            getCell = function(row)
+                local data = row.ScienceLeader
+                return data.HasLaunchedExpedition and tostring(data.LightYearsRate or 0)
+                    or Locale.Lookup("LOC_CAI_WORLD_RANKINGS_NOT_STARTED")
+            end,
+            getTooltip = function(row)
+                return GetScienceContributionTooltip(row, function(data)
+                    return data.HasLaunchedExpedition and tostring(data.LightYearsRate or 0)
+                        or Locale.Lookup("LOC_CAI_WORLD_RANKINGS_NOT_STARTED")
+                end)
+            end,
+            sortKey = function(row)
+                return row.ScienceLeader.HasLaunchedExpedition and row.ScienceLeader.LightYearsRate or nil
+            end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        })
+    end
+    ConfigureRankingTable(tableView, columns, rows, { column = "progress", ascending = true })
+end
+
+local function GatherCultureTableRows()
+    local rows = {}
+    for _, teamData in ipairs(GatherCultureData()) do
+        local playerIDs = {}
+        local bestData = nil
+        for _, playerData in ipairs(teamData.PlayerData) do
+            table.insert(playerIDs, playerData.PlayerID)
+            local score = playerData.NumVisitingUs / math.max(playerData.NumRequiredTourists, 1)
+            local bestScore = bestData
+                and bestData.NumVisitingUs / math.max(bestData.NumRequiredTourists, 1) or -1
+            if not bestData or score > bestScore
+                or (score == bestScore
+                    and playerData.NumRequiredTourists > bestData.NumRequiredTourists) then
+                bestData = playerData
+            end
+        end
+        if bestData then
+            table.insert(rows, {
+                TeamID = teamData.TeamID,
+                PlayerIDs = playerIDs,
+                PlayerData = teamData.PlayerData,
+                CultureLeader = bestData,
+            })
+        end
+    end
+    return rows
+end
+
+local function GetCultureContributionTooltip(row, getter)
+    local lines = {}
+    for _, playerData in ipairs(row.PlayerData) do
+        table.insert(lines, FormatContribution(playerData.PlayerID, getter(playerData)))
+    end
+    return #row.PlayerData > 1 and JoinLines(lines) or nil
+end
+
+local function RebuildCultureTable(tableView)
+    local rows = GatherCultureTableRows()
+    local allPlayerData = {}
+    for _, row in ipairs(rows) do
+        for _, playerData in ipairs(row.PlayerData) do table.insert(allPlayerData, playerData) end
+    end
+    local columns = {
+        MakeCompetitorColumn(),
+        {
+            key = "progress",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_VICTORY_PROGRESS_HEADER") end,
+            getCell = function(row)
+                return FormatPercent(row.CultureLeader.NumVisitingUs
+                    / math.max(row.CultureLeader.NumRequiredTourists, 1) * 100)
+            end,
+            getTooltip = function(row)
+                return GetCultureContributionTooltip(row, function(data)
+                    return FormatPercent(data.NumVisitingUs
+                        / math.max(data.NumRequiredTourists, 1) * 100)
+                end)
+            end,
+            sortKey = function(row)
+                return row.CultureLeader.NumVisitingUs
+                    / math.max(row.CultureLeader.NumRequiredTourists, 1)
+            end,
+            sortAscendingDescription = "LOC_CAI_SORT_FARTHEST_FROM_VICTORY_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_CLOSEST_TO_VICTORY_FIRST",
+        },
+        {
+            key = "visiting",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_VISITING_TOURISTS") end,
+            getCell = function(row) return tostring(row.CultureLeader.NumVisitingUs) end,
+            getTooltip = function(row)
+                local parts = {
+                    GetCultureContributionTooltip(row,
+                        function(data) return tostring(data.NumVisitingUs) end),
+                }
+                local containsLocalPlayer = false
+                for _, playerID in ipairs(row.PlayerIDs) do
+                    if playerID == g_LocalPlayerID then containsLocalPlayer = true; break end
+                end
+                if containsLocalPlayer and g_LocalPlayer then
+                    local culture = g_LocalPlayer:GetCulture()
+                    local sourceLines = {}
+                    for _, sourceData in ipairs(allPlayerData) do
+                        if sourceData.PlayerID ~= g_LocalPlayerID then
+                            table.insert(sourceLines, FormatContribution(sourceData.PlayerID, JoinLines({
+                                Locale.Lookup("LOC_CAI_WORLD_RANKINGS_VISITING_US",
+                                    culture:GetTouristsFrom(sourceData.PlayerID)),
+                                culture:GetTouristsFromTooltip(sourceData.PlayerID),
+                            })))
+                        end
+                    end
+                    table.insert(parts, JoinLines(sourceLines))
+                end
+                return JoinLines(parts)
+            end,
+            sortKey = function(row) return row.CultureLeader.NumVisitingUs end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+        {
+            key = "required",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TOURISTS_REQUIRED") end,
+            getCell = function(row) return tostring(row.CultureLeader.NumRequiredTourists) end,
+            getTooltip = function(row)
+                return GetCultureContributionTooltip(row,
+                    function(data) return tostring(data.NumRequiredTourists) end)
+            end,
+            sortKey = function(row) return row.CultureLeader.NumRequiredTourists end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+        {
+            key = "domestic",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_DOMESTIC_TOURISTS") end,
+            getCell = function(row) return tostring(row.CultureLeader.NumStaycationers) end,
+            getTooltip = function(row)
+                return GetCultureContributionTooltip(row,
+                    function(data) return tostring(data.NumStaycationers) end)
+            end,
+            sortKey = function(row) return row.CultureLeader.NumStaycationers end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+        {
+            key = "turns",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TURNS_TO_VICTORY") end,
+            getCell = function(row)
+                local turns = row.CultureLeader.TurnsTillCulturalVictory
+                return turns and turns > 0 and tostring(turns)
+                    or Locale.Lookup("LOC_CAI_WORLD_RANKINGS_NOT_AVAILABLE")
+            end,
+            getTooltip = function(row)
+                return GetCultureContributionTooltip(row, function(data)
+                    return data.TurnsTillCulturalVictory and data.TurnsTillCulturalVictory > 0
+                        and tostring(data.TurnsTillCulturalVictory)
+                        or Locale.Lookup("LOC_CAI_WORLD_RANKINGS_NOT_AVAILABLE")
+                end)
+            end,
+            sortKey = function(row)
+                local turns = row.CultureLeader.TurnsTillCulturalVictory
+                return turns and turns > 0 and turns or nil
+            end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+    }
+    ConfigureRankingTable(tableView, columns, rows, { column = "progress", ascending = false })
+end
+
+local function GetDominationCapturedTooltip(row)
+    local captured = {}
+    for _, playerData in ipairs(row.PlayerData) do
+        for _, playerID in ipairs(playerData.CapturedCapitals) do
+            table.insert(captured, GetPlayerLabel(playerID))
+        end
+    end
+    if #captured == 0 then return nil end
+    if #row.PlayerData <= 1 then return JoinLines(captured) end
+    local lines = {}
+    for _, playerData in ipairs(row.PlayerData) do
+        local playerCaptured = {}
+        for _, playerID in ipairs(playerData.CapturedCapitals) do
+            table.insert(playerCaptured, GetPlayerLabel(playerID))
+        end
+        local value = tostring(#playerData.CapturedCapitals)
+        if #playerCaptured > 0 then value = JoinLines({ value, JoinLines(playerCaptured) }) end
+        table.insert(lines, FormatContribution(playerData.PlayerID, value))
+    end
+    return JoinLines(lines)
+end
+
+local function GetDominationContributionTooltip(row)
+    if #row.PlayerData <= 1 then return nil end
+    local lines = {}
+    for _, playerData in ipairs(row.PlayerData) do
+        local value = Locale.Lookup(playerData.HasOriginalCapital
+            and "LOC_CAI_WORLD_RANKINGS_HAS_CAPITAL"
+            or "LOC_CAI_WORLD_RANKINGS_LOST_CAPITAL")
+        table.insert(lines, FormatContribution(playerData.PlayerID, value))
+    end
+    return JoinLines(lines)
+end
+
+local function RebuildDominationTable(tableView)
+    local rows = GatherDominationData()
+    local competitors = GetAliveCompetitors()
+    for _, row in ipairs(rows) do
+        local competitor = FindCompetitor(competitors, row.TeamID)
+        row.PlayerIDs = competitor and competitor.PlayerIDs or {}
+        row.OriginalCapitalsHeld = 0
+        for _, playerData in ipairs(row.PlayerData) do
+            if playerData.HasOriginalCapital then
+                row.OriginalCapitalsHeld = row.OriginalCapitalsHeld + 1
+            end
+        end
+        row.Progress = Game.GetVictoryProgressForTeam("VICTORY_CONQUEST", row.TeamID)
+    end
+    local columns = {
+        MakeCompetitorColumn(),
+        {
+            key = "progress",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_VICTORY_PROGRESS_HEADER") end,
+            getCell = function(row)
+                return row.Progress ~= nil and FormatPercent(row.Progress * 100)
+                    or Locale.Lookup("LOC_CAI_WORLD_RANKINGS_NOT_AVAILABLE")
+            end,
+            getTooltip = function(row)
+                if #row.PlayerData <= 1 then return nil end
+                return JoinLines({
+                    GetDominationContributionTooltip(row),
+                    GetDominationCapturedTooltip(row),
+                })
+            end,
+            sortKey = function(row) return row.Progress end,
+            sortAscendingDescription = "LOC_CAI_SORT_FARTHEST_FROM_VICTORY_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_CLOSEST_TO_VICTORY_FIRST",
+        },
+        {
+            key = "originals",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_ORIGINAL_CAPITALS_HELD") end,
+            getCell = function(row)
+                return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_VALUE_OF_TOTAL",
+                    row.OriginalCapitalsHeld, #row.PlayerData)
+            end,
+            getTooltip = function(row) return GetDominationContributionTooltip(row) end,
+            sortKey = function(row) return row.OriginalCapitalsHeld end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+        {
+            key = "captured",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CAPITALS_CAPTURED_HEADER") end,
+            getCell = function(row) return tostring(row.TotalCapturedCapitals) end,
+            getTooltip = function(row) return GetDominationCapturedTooltip(row) end,
+            sortKey = function(row) return row.TotalCapturedCapitals end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+    }
+    ConfigureRankingTable(tableView, columns, rows, { column = "progress", ascending = false })
+end
+
+local function GetReligionNames(row)
+    local names = {}
+    for _, religionType in ipairs(row.ReligionTypes) do
+        table.insert(names, Game.GetReligion():GetName(religionType))
+    end
+    return JoinLines(names)
+end
+
+local function GetReligionTooltip(row)
+    if #row.PlayerData <= 1 then return nil end
+    local lines = {}
+    for _, playerData in ipairs(row.PlayerData) do
+        if playerData.ReligionType and playerData.ReligionType > 0 then
+            table.insert(lines, FormatContribution(playerData.PlayerID,
+                Game.GetReligion():GetName(playerData.ReligionType)))
+        end
+    end
+    return JoinLines(lines)
+end
+
+local function GetReligionConversionTooltip(row)
+    if #row.PlayerData <= 1 then
+        local pd = row.PlayerData[1]
+        if not pd or not pd.ConvertedCivs or #pd.ConvertedCivs == 0 then return nil end
+        local converted = {}
+        for _, playerID in ipairs(pd.ConvertedCivs) do
+            table.insert(converted, GetPlayerLabel(playerID))
+        end
+        return JoinLines(converted)
+    end
+    local lines = {}
+    for _, playerData in ipairs(row.PlayerData) do
+        if playerData.ReligionType and playerData.ReligionType > 0 then
+            local converted = {}
+            for _, playerID in ipairs(playerData.ConvertedCivs) do
+                table.insert(converted, GetPlayerLabel(playerID))
+            end
+            table.insert(lines, FormatContribution(playerData.PlayerID,
+                JoinLines({ tostring(#playerData.ConvertedCivs), JoinLines(converted) })))
+        end
+    end
+    return JoinLines(lines)
+end
+
+local function RebuildReligionTable(tableView)
+    local religionData, totalCivs = GatherReligionData()
+    local rows = {}
+    for _, row in ipairs(religionData) do
+        if #row.ReligionTypes > 0 then
+            row.PlayerIDs = {}
+            for _, playerData in ipairs(row.PlayerData) do
+                table.insert(row.PlayerIDs, playerData.PlayerID)
+            end
+            row.TotalCivs = totalCivs
+            table.insert(rows, row)
+        end
+    end
+    local columns = {
+        MakeCompetitorColumn(),
+        {
+            key = "progress",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_VICTORY_PROGRESS_HEADER") end,
+            getCell = function(row) return FormatPercent(#row.ConvertedCivs / math.max(row.TotalCivs, 1) * 100) end,
+            getTooltip = GetReligionConversionTooltip,
+            sortKey = function(row) return #row.ConvertedCivs / math.max(row.TotalCivs, 1) end,
+            sortAscendingDescription = "LOC_CAI_SORT_FARTHEST_FROM_VICTORY_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_CLOSEST_TO_VICTORY_FIRST",
+        },
+        {
+            key = "religion",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_RELIGION") end,
+            getCell = GetReligionNames,
+            getTooltip = GetReligionTooltip,
+            sortKey = GetReligionNames,
+            sortAscendingDescription = "LOC_CAI_SORT_A_TO_Z",
+            sortDescendingDescription = "LOC_CAI_SORT_Z_TO_A",
+        },
+        {
+            key = "converted",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CIVILIZATIONS_CONVERTED") end,
+            getCell = function(row)
+                return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_VALUE_OF_TOTAL",
+                    #row.ConvertedCivs, row.TotalCivs)
+            end,
+            getTooltip = GetReligionConversionTooltip,
+            sortKey = function(row) return #row.ConvertedCivs end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+    }
+    ConfigureRankingTable(tableView, columns, rows, { column = "progress", ascending = false })
+end
+
+local function RebuildDiplomaticTable(tableView, victoryType)
+    local rows = {}
+    local total = GlobalParameters.DIPLOMATIC_VICTORY_POINTS_REQUIRED
+    for _, teamData in ipairs(GatherGenericData()) do
+        local playerIDs = {}
+        local bestPlayerID = nil
+        local bestPoints = -1
+        local points = {}
+        for _, playerData in ipairs(teamData.PlayerData) do
+            local playerID = playerData.PlayerID
+            local value = Players[playerID]:GetStats():GetDiplomaticVictoryPoints()
+            table.insert(playerIDs, playerID)
+            points[playerID] = value
+            if value > bestPoints or (value == bestPoints
+                and (bestPlayerID == nil or playerID < bestPlayerID)) then
+                bestPoints = value
+                bestPlayerID = playerID
+            end
+        end
+        if #playerIDs > 0 then
+            table.insert(rows, {
+                TeamID = teamData.TeamID,
+                PlayerIDs = playerIDs,
+                Points = points,
+                BestPoints = bestPoints,
+                BestPlayerID = bestPlayerID,
+                TotalPoints = total,
+                Progress = Game.GetVictoryProgressForTeam(victoryType, teamData.TeamID),
+            })
+        end
+    end
+    local function GetDiploBreakdown(playerID)
+        local pPlayer = Players[playerID]
+        if not pPlayer or not pPlayer:IsAlive() then return nil end
+        local pStats = pPlayer:GetStats()
+        if not pStats or not pStats.GetDiplomaticVictoryPointsTooltip then return nil end
+        local tt = pStats:GetDiplomaticVictoryPointsTooltip()
+        if not tt or tt == "" then return nil end
+        local lines = {}
+        for segment in (tt .. "[NEWLINE]"):gmatch("(.-)%[NEWLINE%]") do
+            local trimmed = segment:match("^%s*(.-)%s*$")
+            if trimmed and trimmed ~= "" then
+                table.insert(lines, trimmed)
+            end
+        end
+        return #lines > 0 and JoinLines(lines) or nil
+    end
+    local columns = {
+        MakeCompetitorColumn(),
+        {
+            key = "progress",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_VICTORY_PROGRESS_HEADER") end,
+            getCell = function(row)
+                return row.Progress ~= nil and FormatPercent(row.Progress * 100)
+                    or Locale.Lookup("LOC_CAI_WORLD_RANKINGS_NOT_AVAILABLE")
+            end,
+            getTooltip = function(row)
+                if #row.PlayerIDs <= 1 then return nil end
+                local lines = {}
+                for _, playerID in ipairs(row.PlayerIDs) do
+                    table.insert(lines, FormatContribution(playerID, row.Points[playerID]))
+                end
+                return JoinLines(lines)
+            end,
+            sortKey = function(row) return row.Progress end,
+            sortAscendingDescription = "LOC_CAI_SORT_FARTHEST_FROM_VICTORY_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_CLOSEST_TO_VICTORY_FIRST",
+        },
+        {
+            key = "points",
+            header = function() return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_DIPLOMATIC_POINTS") end,
+            getCell = function(row)
+                return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_VALUE_OF_TOTAL",
+                    row.BestPoints, row.TotalPoints)
+            end,
+            getTooltip = function(row)
+                if #row.PlayerIDs <= 1 then
+                    return GetDiploBreakdown(row.BestPlayerID)
+                end
+                local lines = {}
+                for _, playerID in ipairs(row.PlayerIDs) do
+                    local breakdown = GetDiploBreakdown(playerID)
+                    table.insert(lines, FormatContribution(playerID,
+                        JoinLines({ tostring(row.Points[playerID]), breakdown })))
+                end
+                return JoinLines(lines)
+            end,
+            sortKey = function(row) return row.BestPoints end,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        },
+    }
+    ConfigureRankingTable(tableView, columns, rows, { column = "points", ascending = false })
+end
+
+local function GetTableKind(tabDef)
+    if tabDef.label == CAI_TAB_OVERALL then
+        local ruleset = GameConfiguration.GetRuleSet()
+        if ruleset == "RULESET_SCENARIO_WARMACHINE"
+            or ruleset == "RULESET_SCENARIO_VIKINGS"
+            or ruleset == "RULESET_SCENARIO_POLAND"
+            or ruleset == "RULESET_SCENARIO_INDONESIA_KHMER"
+            or ruleset == "RULESET_SCENARIO_AUSTRALIA"
+            or ruleset == "RULESET_SCENARIO_ALEXANDER" then
+            return nil
+        end
+        return "overall"
+    elseif tabDef.label == CAI_TAB_SCORE then return "score"
+    elseif tabDef.label == CAI_TAB_SCIENCE then return "science"
+    elseif tabDef.label == CAI_TAB_CULTURE then return "culture"
+    elseif tabDef.label == CAI_TAB_DOMINATION then return "domination"
+    elseif tabDef.label == CAI_TAB_RELIGION then return "religion"
+    elseif tabDef.victoryType == "VICTORY_DIPLOMATIC" and m_isExp2 then return "diplomatic"
+    end
+    return nil
+end
+
+local function RebuildTable(entry, victoryType)
+    if entry.tableKind == "overall" then RebuildOverallTable(entry.dataTable)
+    elseif entry.tableKind == "score" then RebuildScoreTable(entry.dataTable)
+    elseif entry.tableKind == "science" then RebuildScienceTable(entry.dataTable)
+    elseif entry.tableKind == "culture" then RebuildCultureTable(entry.dataTable)
+    elseif entry.tableKind == "domination" then RebuildDominationTable(entry.dataTable)
+    elseif entry.tableKind == "religion" then RebuildReligionTable(entry.dataTable)
+    elseif entry.tableKind == "diplomatic" then
+        RebuildDiplomaticTable(entry.dataTable, victoryType or entry.victoryType)
+    end
+end
+
+local function GetTableAdvisorText(entry)
+    if entry.tableKind == "score" then
+        return JoinLines({
+            Locale.Lookup("LOC_WORLD_RANKINGS_SCORE_DETAILS"),
+            Locale.Lookup("LOC_WORLD_RANKINGS_SCORE_CONDITION", Game.GetMaxGameTurns()),
+        })
+    elseif entry.tableKind == "science" then
+        local count = m_isExp2 and 4 or 3
+        local detailsKey = m_isExp2
+            and "LOC_WORLD_RANKINGS_SCIENCE_DETAILS_EXP2"
+            or "LOC_WORLD_RANKINGS_SCIENCE_DETAILS"
+        local parts = { Locale.Lookup(detailsKey) }
+        for index = 1, count do
+            table.insert(parts, Locale.Lookup("LOC_WORLD_RANKINGS_SCIENCE_REQUIREMENT_" .. index))
+        end
+        if m_isExp2 and g_LocalPlayer then
+            table.insert(parts, Locale.Lookup("LOC_WORLD_RANKINGS_SCIENCE_REQUIREMENT_FINAL",
+                g_LocalPlayer:GetStats():GetScienceVictoryPointsTotalNeeded()))
+        end
+        return JoinLines(parts)
+    elseif entry.tableKind == "culture" then
+        return JoinLines({
+            Locale.Lookup("LOC_WORLD_RANKINGS_CULTURE_VICTORY_DETAILS"),
+            Locale.Lookup("LOC_WORLD_RANKINGS_CULTURE_DETAILS_DOMESTIC_TOURISTS"),
+            Locale.Lookup("LOC_WORLD_RANKINGS_CULTURE_DETAILS_VISITING_TOURISTS"),
+        })
+    elseif entry.tableKind == "domination" then
+        return Locale.Lookup("LOC_WORLD_RANKINGS_DOMINATION_DETAILS")
+    elseif entry.tableKind == "religion" then
+        return Locale.Lookup("LOC_WORLD_RANKINGS_RELIGION_DETAILS")
+    elseif entry.tableKind == "diplomatic" then
+        local info = GameInfo.Victories[entry.victoryType]
+        return info and info.Description and Locale.Lookup(info.Description) or nil
+    end
+    return nil
+end
+
+local function RebuildActiveEntry(entry, victoryType)
+    local resolvedVictoryType = victoryType or entry.victoryType
+    if m_viewMode == "table" and entry.dataTable then
+        RebuildTable(entry, resolvedVictoryType)
+    else
+        entry.rebuildFn(entry.tree, resolvedVictoryType)
+    end
+end
+
+local function GetFocusedCompetitorTeamID(entry)
+    if m_viewMode == "table" and entry and entry.dataTable then
+        local row = entry.dataTable:GetFocusedRow()
+        local column = entry.dataTable:GetFocusedColumn()
+        if column and column.key then
+            entry.focusedVictoryType = column.key:match("^victory:(.+)$")
+                or entry.focusedVictoryType
+        end
+        if row and row.TeamID ~= nil then
+            entry.focusedTeamID = row.TeamID
+            return row.TeamID
+        end
+    end
+    local focused = mgr:GetFocusedWidget()
+    local focusKey = focused and focused.FocusKey and tostring(focused.FocusKey) or ""
+    if entry and entry.tableKind == "overall" then
+        entry.focusedVictoryType = focusKey:match("^overall:([^:]+)")
+            or entry.focusedVictoryType
+    end
+    local teamID = tonumber(focusKey:match("team:(%d+)"))
+    if teamID ~= nil then
+        entry.focusedTeamID = teamID
+        return teamID
+    end
+    local playerID = tonumber(focusKey:match("player:(%d+)"))
+    local player = playerID ~= nil and Players[playerID] or nil
+    if player then
+        entry.focusedTeamID = player:GetTeam()
+        return entry.focusedTeamID
+    end
+    return entry and entry.focusedTeamID or nil
+end
+
+local function PrepareCompetitorFocus(entry, teamID)
+    if teamID == nil then return end
+    if m_viewMode == "table" and entry.dataTable then
+        local columnKey = entry.tableKind == "overall" and entry.focusedVictoryType
+            and "victory:" .. entry.focusedVictoryType or "competitor"
+        mgr:PrepareFocus(entry.dataTable, entry.dataTable.Id
+            .. ":row:team:" .. teamID .. ":" .. columnKey)
+        return
+    end
+
+    local alivePlayerIDs = {}
+    for _, playerID in ipairs(Teams[teamID]) do
+        if IsAliveAndMajor(playerID) then table.insert(alivePlayerIDs, playerID) end
+    end
+    local focusKey = #alivePlayerIDs > 1 and "team:" .. teamID
+        or (#alivePlayerIDs == 1 and "player:" .. alivePlayerIDs[1] or nil)
+    if entry.tableKind == "overall" and entry.focusedVictoryType and focusKey then
+        focusKey = "overall:" .. entry.focusedVictoryType .. ":" .. focusKey
+    end
+    if focusKey then mgr:PrepareFocus(entry.tree, focusKey) end
+end
+
+local function SetViewMode(viewMode)
+    if viewMode ~= "table" and viewMode ~= "tree" then
+        LogError("World Rankings received invalid view mode " .. tostring(viewMode))
+        return false
+    end
+    local index = m_tabs and m_tabs:GetActivePageIndex() or 0
+    local entry = m_trees[index]
+    local teamID = GetFocusedCompetitorTeamID(entry)
+    if m_viewMode ~= viewMode then
+        m_viewMode = viewMode
+        SaveViewModeSetting(viewMode)
+    end
+    if entry then
+        RebuildActiveEntry(entry, entry.victoryType)
+        PrepareCompetitorFocus(entry, teamID)
+        local activeView = m_viewMode == "table" and entry.dataTable or entry.tree
+        if not activeView then activeView = entry.tree end
+        mgr:SetFocus(activeView)
+    end
+    return true
+end
+
+local function ToggleViewMode()
+    return SetViewMode(m_viewMode == "table" and "tree" or "table")
+end
+
+-- ============================================================================
 -- Panel Build
 -- ============================================================================
 local function BuildPanel()
@@ -1823,15 +2956,78 @@ local function BuildPanel()
 
     for i, tabDef in ipairs(m_capturedTabs) do
         local page = m_tabs:AddPage(function() return tabDef.label end)
+        local entry = {
+            rebuildFn = tabDef.rebuildFn,
+            victoryType = tabDef.victoryType,
+            tableKind = GetTableKind(tabDef),
+        }
         local treeId = "CAIWorldRank_Tree" .. i
-        local tree = mgr:CreateWidget(treeId, "Tree", {})
-        page:AddChild(tree)
-        m_trees[i] = { tree = tree, rebuildFn = tabDef.rebuildFn, victoryType = tabDef.victoryType }
+        entry.tree = mgr:CreateWidget(treeId, "Tree", {
+            Label = function()
+                return JoinLines({
+                    tabDef.label,
+                    entry.tableKind == nil and m_viewMode == "table"
+                        and Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TABLE_UNAVAILABLE") or nil,
+                })
+            end,
+            HiddenPredicate = function()
+                return entry.tableKind ~= nil and m_viewMode == "table"
+            end,
+        })
+        if entry.tableKind then
+            entry.dataTable = mgr:CreateWidget("CAIWorldRank_Table" .. i, "DataTable", {
+                Label = function() return tabDef.label end,
+                HiddenPredicate = function() return m_viewMode ~= "table" end,
+            })
+            entry.dataTable:On("row_focus_enter", function(_, row)
+                if row then entry.focusedTeamID = row.TeamID end
+            end)
+            entry.dataTable:On("cell_focus_enter", function(_, _, column)
+                if column and column.key then
+                    entry.focusedVictoryType = column.key:match("^victory:(.+)$")
+                        or entry.focusedVictoryType
+                end
+            end)
+            page:AddChild(entry.dataTable)
+        end
+        page:AddChild(entry.tree)
+        if entry.tableKind and entry.tableKind ~= "overall" then
+            entry.advisor = mgr:CreateWidget("CAIWorldRank_TableAdvisor" .. i, "StaticText", {
+                Label = function() return GetTableAdvisorText(entry) end,
+                HiddenPredicate = function() return m_viewMode ~= "table" end,
+            })
+            page:AddChild(entry.advisor)
+        end
+        m_trees[i] = entry
     end
 
     m_panel:AddChild(m_tabs)
 
+    m_switchView = mgr:CreateWidget(SWITCH_VIEW_ID, "Button", {
+        Label = function()
+            return Locale.Lookup(m_viewMode == "table"
+                and "LOC_CAI_WORLD_RANKINGS_SWITCH_ALL_TO_TREE"
+                or "LOC_CAI_WORLD_RANKINGS_SWITCH_SUPPORTED_TO_TABLE")
+        end,
+    })
+    m_switchView:On("activate", function() ToggleViewMode() end)
+    m_panel:AddChild(m_switchView)
+
     m_panel:AddInputBindings({
+        {
+            Key = Keys["1"],
+            IsAlt = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_TREE_SWITCH_TO_TABLE",
+            Action = function() return SetViewMode("table") end,
+        },
+        {
+            Key = Keys["2"],
+            IsAlt = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_TREE_SWITCH_TO_TREE",
+            Action = function() return SetViewMode("tree") end,
+        },
         {
             Key = Keys.VK_ESCAPE,
             MSG = KeyEvents.KeyUp,
@@ -1874,7 +3070,7 @@ local function PushPanel()
         m_tabs:SetActivePage(idx, true)
         m_isMirroringTab = false
         local entry = m_trees[idx]
-        entry.rebuildFn(entry.tree, vt or entry.victoryType)
+        RebuildActiveEntry(entry, vt or entry.victoryType)
     end
 
     mgr:Push(m_panel, PopupPriority.Low)
@@ -1887,6 +3083,7 @@ local function PopPanel()
     m_panel = nil
     m_tabs = nil
     m_trees = {}
+    m_switchView = nil
 end
 
 -- ============================================================================
@@ -1994,7 +3191,8 @@ local function ViewSync(tabIdx, victoryType)
     m_tabs:SetActivePage(tabIdx, true)
     m_isMirroringTab = false
     local entry = m_trees[tabIdx]
-    entry.rebuildFn(entry.tree, victoryType or entry.victoryType)
+    entry.victoryType = victoryType or entry.victoryType
+    RebuildActiveEntry(entry, entry.victoryType)
 end
 
 local function FindTabIndex(label)

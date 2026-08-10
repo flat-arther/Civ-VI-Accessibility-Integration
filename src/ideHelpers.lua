@@ -224,7 +224,7 @@ function CAICursor:UpdateZones() end
 ---Speak a string through the TTS pipeline.
 ---@param text string
 ---@param interrupt? boolean Interrupt any speech in flight. Default false.
----@param processTokens? boolean Run ProcessIcons on text before speaking. Default true.
+---@param processTokens? boolean Run ProcessText on text before speaking. Default true.
 function Speak(text, interrupt, processTokens) end
 
 ---Speak each line in turn. When interrupt is true only the first line cuts
@@ -1648,6 +1648,12 @@ function CAIWidgetHelpers_DialogBuilder.CreatePopupDialog(mgr, popup) end
 ---@field SourceRank integer 0 for a label match, 1 for a tooltip-only match.
 ---@field MatchPosition integer
 ---@field LabelLength integer
+
+---Lowercase ASCII A-Z only, leaving bytes >= 0x80 untouched. Locale-safe fold
+---for type-to-find so multi-byte UTF-8 (e.g. CJK) is never corrupted.
+---@param s string
+---@return string
+function CAIWidgetHelpers_Search.AsciiLower(s) end
 
 ---Classify one label against a query using the shared type-to-find tiers.
 ---@param label string

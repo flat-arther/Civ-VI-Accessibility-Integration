@@ -1,18 +1,18 @@
 -- global access to the 'CAI' table, lives on 'ExposedMembers' and created by the dll
 CAI = ExposedMembers.CAI
 
-include("iconsProcessing")
+include("textProcessing")
 include("CAISettings")
 include("CAI_logging")
 
 ---Utility wrapper for 'CAI.output'
 ---@param text string -- the text to speak
 ---@param interrupt? boolean -- whether to interrupt any currently speaking text. False by default
----@param processTokens? boolean -- run ProcessIcons on text before speaking. True by default
+---@param processTokens? boolean -- run ProcessText on text before speaking. True by default
 function Speak(text, interrupt, processTokens)
     if CAI and CAI.Output then
         local out = tostring(text)
-        if processTokens ~= false then out = ProcessIcons(out) end
+        if processTokens ~= false then out = ProcessText(out) end
         CAI.Output(out, interrupt)
     end
 end
@@ -40,7 +40,10 @@ local function GetConfiguredLineLength()
 end
 
 local function TrimText(text)
-    return text:match("^%s*(.-)%s*$")
+    -- Explicit ASCII whitespace only. %s is locale-sensitive in Civ VI Lua and
+    -- classifies UTF-8 byte 0xA0 as whitespace under Simplified Chinese, which
+    -- would trim a byte off multibyte characters (e.g. 张) and corrupt them.
+    return (text:gsub("^[ \t\r\n]+", ""):gsub("[ \t\r\n]+$", ""))
 end
 
 local function IsSentenceEnd(word)
@@ -80,7 +83,10 @@ function SplitTextIntoLines(text, maxLength)
                 sentenceWords = {}
             end
 
-            for word in paragraph:gmatch("%S+") do
+            -- Split on ASCII whitespace only; %S is locale-sensitive and would
+            -- break on byte 0xA0 inside multibyte characters. Scripts without
+            -- spaces (e.g. Chinese) stay whole, which is fine for speech.
+            for word in paragraph:gmatch("[^ \t\r\n]+") do
                 sentenceWords[#sentenceWords + 1] = word
                 if IsSentenceEnd(word) then FlushSentence() end
             end

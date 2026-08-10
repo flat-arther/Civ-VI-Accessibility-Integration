@@ -6,7 +6,7 @@ User:
 
 - Blind screen-reader user.
 - Experienced programmer/modder.
-- User directs; Claude codes and explains.
+- User directs; Codex codes and explains.
 - If uncertain, ask briefly, then act.
 - Do not use `|` tables in responses.
 
@@ -50,7 +50,7 @@ If `project_status.md` says a user test is pending, ask for that result before l
 
 ## File Creation Rules
 
-- **In-game screens** are partial replacements. Create a file named `{OriginalName}_CAI.lua`. At the top, include the base file conditionally: if the original has DLC replacements, include those with `if IsExpansion2Active() then include("X_Expansion2") elseif IsExpansion1Active() then include("X_Expansion1") else include("X") end`. If the base Lua file does not already `include("Civ6Common")`, add `include("Civ6Common")` before the conditional block so that `IsExpansion1Active()` / `IsExpansion2Active()` are available. Register the file in `CivViAccess.modinfo` as a `<ReplaceUIScript>` with `<LuaContext>` matching the vanilla context name and `<LuaReplace>` pointing to the new file.
+- **In-game screens** are partial replacements. Create a file named `{OriginalName}_CAI.lua`. At the top, include the base file conditionally: if the original has DLC replacements, include those with `if IsExpansion2Active() then include("X_Expansion2") elseif IsExpansion1Active() then include("X_Expansion1") else include("X") end`. Register the file in `CivViAccess.modinfo` as a `<ReplaceUIScript>` with `<LuaContext>` matching the vanilla context name and `<LuaReplace>` pointing to the new file.
 - **Front-end or shared UI** (main menu, options menu) are full replacements. Copy the vanilla file into the mod, then add accessibility code directly before the `Initialize()` call at the end, between `--#Accessibility integration` and `--#End of accessibility integration` comments.
 - Every new CAI screen file must be added to both the top-level `<File>` list (which registers it on the VFS) and as a `<ReplaceUIScript>` entry in `src/CivViAccess.modinfo` or it will not load. The top-level `<File>` list is separate from `<ImportFiles>` — even `<ReplaceUIScript>` files need a top-level `<File>` entry.
 - If the original vanilla file uses a wildcard-style `include()` (e.g. `include("FileName")`  resolved at runtime from any loaded context), the CAI file must also be added to the `<ImportFiles>` section under `<ImportFiles id="CAIInGame">` in addition to the `<File>` list. This makes it available for wildcard resolution.
@@ -62,6 +62,8 @@ If `project_status.md` says a user test is pending, ask for that result before l
 - Prefer existing control text and tooltips through `control:GetText()` and `control:GetToolTipString()`.
 - Use `Locale.Lookup()` when no existing control exposes the text or for CAI-specific localization tags. Add new `LOC_CAI_` tags to `src/Text/en_US/cai_text_ui.xml` when vanilla has no suitable key.
 - TTS output must always go through `Speak()` in `caiUtils.lua`; never call `CAI.output` directly.
+- All text processing (stripping `[COLOR]`/`[NEWLINE]`/`[ICON_...]` tokens, resolving icons, collapsing whitespace/commas) already happens centrally in `Speak()` via `ProcessText()` in `src/UI/shared/textProcessing.lua` (and in the edit-box `SetText` path). Do NOT re-strip tags or normalize whitespace in individual screens — pass raw localized text straight to `Speak`/widget text and let the central path handle it. The only per-screen text handling that is allowed is splitting into lines on `[NEWLINE]`/`\n` for multi-line widgets.
+- Never use the `%s` or `%S` Lua pattern classes on localized text. They are locale-sensitive in Civ VI Lua and, under Simplified Chinese, classify UTF-8 byte `0xA0` as whitespace; since `0xA0` is a continuation byte inside common characters (e.g. 张 = `E5 BC A0`), trimming/collapsing/splitting with `%s`/`%S` corrupts multibyte text. Use explicit ASCII sets like `[ \t\r\n]` / `[^ \t\r\n]` instead.
 - Work with vanilla game mechanics. Preserve vanilla callbacks, events, input contexts, dialogs, and state changes where possible.
 - Do not override vanilla game keys casually. Use safe mod keys or bindable input actions.
 - Cache references or ids, not displayed values. Always read live data before speaking or rendering state.
@@ -110,6 +112,7 @@ The UI manager is a class-based widget framework rebuilt on the `UIManagerRework
 ## Documentation Rules
 
 - After new code analysis or discovered Civ VI behavior, update `docs/game-api.md` immediately.
+- Update `changelog.md` whenever a significant player-facing change is made. Always follow [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/), placing new entries under `Unreleased` and the appropriate change-type heading. Write entries for players, not developers: describe only what players will notice, keep them concise and factual, and avoid implementation details, jargon, fluff, or colorful language.
 - Keep `project_status.md` compact: current focus, pending tests, next steps, durable decisions, and compressed history only.
 - Do not let `project_status.md` become a chronological scratch log again.
 - Put long API findings in `docs/game-api.md`, not in `project_status.md`.

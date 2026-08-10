@@ -480,7 +480,7 @@ local function CopyMessageBuffer(buffer)
     local lines = {}
     for _, entry in ipairs(buffer:GetEntries()) do
         local line = FormatMessageEntry(buffer, entry, false):gsub("%[NEWLINE%]", "\r\n")
-        table.insert(lines, ProcessIcons(line))
+        table.insert(lines, ProcessText(line))
     end
     UIManager:SetClipboardString(table.concat(lines, "\r\n"))
     Speak(Locale.Lookup("LOC_CAI_MESSAGE_BUFFER_COPIED"))

@@ -1883,9 +1883,9 @@ local function BuildCombatResultIntroClause(attackerName, defenderName)
         return nil
     end
 
-    text = string.gsub(text, ":%s*%.$", ".")
-    text = string.gsub(text, "%s+", " ")
-    text = string.gsub(text, "^%s*(.-)%s*$", "%1")
+    text = string.gsub(text, ":[ \t\r\n]*%.$", ".")
+    text = string.gsub(text, "[ \t\r\n]+", " ") -- ASCII only; %s corrupts UTF-8 (0xA0)
+    text = string.gsub(text, "^[ \t\r\n]*(.-)[ \t\r\n]*$", "%1")
     return text
 end
 
