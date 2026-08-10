@@ -242,6 +242,11 @@
     <File>Text/en_US/TutorialText_CAI.xml</File>
     <File>Text/en_US/hotkey_symbol_names.sql</File>
     <File>Text/en_US/tutorial_advisor_text_CAI.sql</File>
+    <File>Text/zh_Hans_CN/cai_text_ui.xml</File>
+    <File>Text/zh_Hans_CN/AccessibilityPediaText_CAI.xml</File>
+    <File>Text/zh_Hans_CN/TutorialText_CAI.xml</File>
+    <File>Text/zh_Hans_CN/hotkey_symbol_names.sql</File>
+    <File>Text/zh_Hans_CN/tutorial_advisor_text_CAI.sql</File>
   </Files>
   <!-- FRONTEND -->
   <FrontEndActions>
@@ -250,6 +255,10 @@
       <File>Text/en_US/AccessibilityPediaText_CAI.xml</File>
       <File>Text/en_US/TutorialText_CAI.xml</File>
       <File>Text/en_US/hotkey_symbol_names.sql</File>
+      <File>Text/zh_Hans_CN/cai_text_ui.xml</File>
+      <File>Text/zh_Hans_CN/AccessibilityPediaText_CAI.xml</File>
+      <File>Text/zh_Hans_CN/TutorialText_CAI.xml</File>
+      <File>Text/zh_Hans_CN/hotkey_symbol_names.sql</File>
     </UpdateText>
 
     <UpdateDatabase id="FRONTEND_CAI_CONFIG">
@@ -351,6 +360,11 @@
       <File>Text/en_US/TutorialText_CAI.xml</File>
       <File>Text/en_US/hotkey_symbol_names.sql</File>
       <File>Text/en_US/tutorial_advisor_text_CAI.sql</File>
+      <File>Text/zh_Hans_CN/cai_text_ui.xml</File>
+      <File>Text/zh_Hans_CN/AccessibilityPediaText_CAI.xml</File>
+      <File>Text/zh_Hans_CN/TutorialText_CAI.xml</File>
+      <File>Text/zh_Hans_CN/hotkey_symbol_names.sql</File>
+      <File>Text/zh_Hans_CN/tutorial_advisor_text_CAI.sql</File>
     </UpdateText>
     <UpdateDatabase id="INGAME_CAI_CONFIG">
       <File>data/unitOperationConfig_CAI.sql</File>
