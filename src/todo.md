@@ -93,5 +93,5 @@
 [x] Add amenities to the city banners
 [ ] Look in to coastal raide yield reporting
 [x] Builders allow you to form escort formations in tutorial. Disable this when not in free roam
-[ ] Add support for better reports, detailed map tacs, extended policy cards, better balanced game
+[ ] Add support for better reports, detailed map tacs, extended policy cards, better balanced game, better trade screen
 [ ] Add custom category keybindings
