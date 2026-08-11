@@ -4,6 +4,8 @@
 
 - Added a table view for world rankings
 - Added support for the following mods: Detailed map tacs, yet, not another maps pack
+- The mod's name and description in the game's Additional Content list now appear in your game language, with translations for all supported languages
+- Added a full French translation. All accessibility text, screen tutorials, spoken key names, and command descriptions now appear in French when the game is set to French.
 
 ### Changed
 
@@ -19,6 +21,7 @@
 - Fixed Chinese and other non-Latin text being announced with stray replacement characters, most noticeably in long descriptions such as Great Person biographies
 - Fixed typeahead search rejecting Chinese and other non-Latin characters, and Backspace no longer garbles multi-byte characters.
 - Fixed editing text fields with Chinese and other non-Latin characters: arrow keys, Delete, and Backspace now move and delete a whole character at a time instead of splitting it, and each character is announced correctly
+- Fixed the city housing readout being announced in English for Simplified Chinese players
 
 ## [1.0.1] - 2026-08-04
 

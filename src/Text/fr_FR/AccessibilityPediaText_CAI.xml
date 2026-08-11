@@ -1,0 +1,920 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+  <LocalizedText>
+    <!-- Civilopedia structure -->
+    <Replace Tag="LOC_CAI_PEDIA_ACCESSIBILITY_SECTION_NAME" Language="fr_FR">
+      <Text>Mod d'accessibilité</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_SCREEN_TUTORIALS_GROUP_NAME" Language="fr_FR">
+      <Text>Tutoriels des écrans</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_UI_WIDGETS_GROUP_NAME" Language="fr_FR">
+      <Text>Widgets d'interface</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_GROUP_NAME" Language="fr_FR">
+      <Text>Jeu</Text>
+    </Replace>
+
+    <!-- Gameplay: navigation cursor -->
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_TITLE" Language="fr_FR">
+      <Text>Curseur de navigation</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_OVERVIEW_TITLE" Language="fr_FR">
+      <Text>Vue d'ensemble</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_OVERVIEW" Language="fr_FR">
+      <Text>Le curseur de navigation est un curseur de carte indépendant. Il vous permet d'explorer les cases et d'agir sur elles sans remplacer la ville ou l'unité sélectionnée. Civilization VI utilise six directions adjacentes sur sa carte hexagonale, si bien que le curseur dispose de commandes de déplacement vers le nord-ouest, le nord-est, l'ouest, l'est, le sud-ouest et le sud-est. Déplacer le curseur déplace aussi la caméra et annonce les informations connues les plus importantes sur la case de destination.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_VISIBILITY" Language="fr_FR">
+      <Text>Les informations du curseur respectent la visibilité du joueur local. Une case non révélée est annoncée comme inexplorée plutôt que d'exposer son contenu ; une case révélée peut conserver la géographie connue tandis que les unités cachées et les autres informations actuellement invisibles restent dissimulées. La position du curseur, les zones de géographie mémorisées et l'état de l'Arpenteur sont isolés entre les joueurs locaux dans les parties en chaise musicale.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_MOVING_TITLE" Language="fr_FR">
+      <Text>Déplacer le curseur</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_MOVING" Language="fr_FR">
+      <Text>Les touches de déplacement par défaut sont Q ou Pavé numérique 7 pour le nord-ouest, E ou Pavé numérique 9 pour le nord-est, A ou Pavé numérique 4 pour l'ouest, D ou Pavé numérique 6 pour l'est, Z ou Pavé numérique 1 pour le sud-ouest, et C ou Pavé numérique 3 pour le sud-est. Ces commandes peuvent être modifiées dans les Assignations. Le déplacement suit les règles d'enroulement et de bordure de la carte actuelle.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_JUMPS" Language="fr_FR">
+      <Text>Appuyez sur Barre oblique pour sauter à l'unité sélectionnée, ou à la ville sélectionnée quand aucune unité n'est sélectionnée. Appuyez sur Ctrl plus S pour sauter à votre capitale. Au début de la partie, le curseur commence lui aussi sur une sélection disponible ou sur votre capitale. Sauter depuis les résultats du Scanner, les messages, les notifications, les marqueurs de carte ou les signets déplace à la fois le curseur et la caméra. Les lectures de direction ultérieures utilisent la nouvelle position du curseur.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_READING_TITLE" Language="fr_FR">
+      <Text>Lire la case actuelle</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_READING_PRIMARY" Language="fr_FR">
+      <Text>Appuyez sur S ou Pavé numérique 5 pour les unités. Appuyez sur W ou Pavé numérique 8 pour les rendements, l'état des ouvriers, l'eau douce et la propriété. Appuyez sur X ou Pavé numérique 2 pour la contamination, le coût de déplacement, le modificateur de défense et l'attrait. Appuyez sur Maj plus S ou Maj plus Pavé numérique 5 pour les coordonnées relatives à votre capitale d'origine. Ces lectures reflètent l'état actuel de la case et de votre civilisation.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_READING_GEOGRAPHY" Language="fr_FR">
+      <Text>Appuyez sur B pour la géographie et les éléments construits. Le résultat peut inclure les routes, les basses terres côtières, l'état des volcans et des catastrophes, le continent, le territoire politique, les falaises, les rivières, les parcs nationaux, les quartiers, les bâtiments et les chefs-d'œuvre. Les informations publiques propres à un scénario sont incluses lorsque ses règles de divulgation le permettent. La lecture normale lors du déplacement est volontairement plus courte que ces lectures à la demande.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_INTERFACE" Language="fr_FR">
+      <Text>Appuyez sur Espace pour obtenir des informations sur la cible d'interface active au niveau du curseur. C'est particulièrement utile pour le déplacement, les aperçus de combat, la gestion de ville, l'achat de case, le placement et les autres modes de ciblage. Appuyez sur Entrée pour l'action principale du mode. Appuyez sur Ctrl plus Entrée pour son action secondaire lorsqu'elle existe, comme échanger une case de gestion de ville. La légalité de la cible provient de l'opération ou de la commande vanilla active, et non de suppositions du mod d'accessibilité.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_BANNERS_TITLE" Language="fr_FR">
+      <Text>Lire les bannières de ville, de quartier, de barbares et d'industrie</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_BANNERS" Language="fr_FR">
+      <Text>Lorsque le curseur se trouve sur une bannière de ville ou de quartier visible, les commandes de la rangée de chiffres lisent ses sections disponibles. La commande d'identité couvre également les bannières prises en charge de clans barbares, d'industries et de sociétés. Les informations appartenant à une extension sont omises lorsque cette extension n'est pas active.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_BANNER_KEYS" Language="fr_FR">
+      <Text>Appuyez sur 1 pour l'identité, la santé et le statut ; 2 pour la croissance et la production ; 3 pour la religion ; 4 pour la propriété, la diplomatie, les quêtes et l'état des comptoirs commerciaux ; 5 pour la loyauté ; 6 pour les gouverneurs ; et 7 pour l'énergie. La loyauté et les gouverneurs nécessitent les données de Rise and Fall ou Gathering Storm, tandis que l'énergie nécessite Gathering Storm.</Text>
+    </Replace>
+
+    <!-- Gameplay: Surveyor -->
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_TITLE" Language="fr_FR">
+      <Text>Arpenteur</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_OVERVIEW_TITLE" Language="fr_FR">
+      <Text>Zone et rayon</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_OVERVIEW" Language="fr_FR">
+      <Text>L'Arpenteur résume la zone hexagonale circulaire centrée sur le curseur de navigation. Son rayon est limité de une à cinq cases et est mémorisé séparément pour chaque joueur local. Appuyez sur Maj plus W pour augmenter le rayon et Maj plus X pour le diminuer ; la réponse vocale indique le nouveau rayon et signale quand le minimum ou le maximum est atteint.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_PRIVACY" Language="fr_FR">
+      <Text>L'Arpenteur ne rapporte que les informations que votre civilisation est autorisée à connaître. Les cases non révélées ne comptent que dans le total des cases inexplorées. Les ressources stratégiques non découvertes, les unités ennemies cachées, les identités non rencontrées et les autres informations privées ne sont pas révélées. La plupart des résultats sont résumés sous forme de totaux, tandis que les villes et unités individuelles sont classées par distance et direction depuis le curseur.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_BASIC_TITLE" Language="fr_FR">
+      <Text>Lectures principales</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_BASIC" Language="fr_FR">
+      <Text>Appuyez sur Maj plus Q pour le total des rendements ; Maj plus A pour les ressources visibles par votre joueur ; Maj plus Z pour le terrain, les caractéristiques, l'altitude, les cases d'eau douce et les cases inexplorées ; Maj plus E pour les unités alliées ; Maj plus D pour les ennemis actuellement visibles ; et Maj plus C pour les villes connues et les avant-postes barbares.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_COUNTS_TITLE" Language="fr_FR">
+      <Text>Totaux supplémentaires</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_COUNTS" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus Maj plus A, ou Ctrl plus Maj plus Pavé numérique 4, pour les aménagements. Utilisez les mêmes touches de modification avec D ou Pavé numérique 6 pour les unités neutres visibles, Z ou Pavé numérique 1 pour la propriété des cases, Q ou Pavé numérique 7 pour les quartiers, et X ou Pavé numérique 2 pour l'attrait. Les aménagements excluent les camps barbares, les villages tribaux et les routes. Les quartiers excluent les centres-villes. L'attrait compte les cases révélées hors eau selon les niveaux Époustouflant à Repoussant du jeu et n'est pas disponible lorsque le filtre d'attrait ne fait pas partie de la partie en cours.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_DETAILS_TITLE" Language="fr_FR">
+      <Text>Comment les résultats sont classés</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_DETAILS" Language="fr_FR">
+      <Text>La propriété regroupe les cases comme Vôtres, Non revendiquées, un adjectif de civilisation connue, ou Propriétaire inconnu sans révéler une civilisation non rencontrée. Les unités neutres doivent appartenir à un joueur rencontré, non barbare, qui n'est ni allié ni en guerre avec vous ; les unités religieuses étrangères sont classées selon les relations théologiques le cas échéant. Les ressources ne sont incluses qu'après que votre civilisation les a découvertes.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SURVEYOR_TERRAIN" Language="fr_FR">
+      <Text>Les résultats de terrain distinguent les faits utiles sans compter deux fois le même fait. Les collines ajoutent à la fois le terrain plat sous-jacent et les Collines. Les montagnes ordinaires ne comptent que comme Montagnes, et les merveilles naturelles ne comptent que sous leur nom de merveille. Lorsqu'une caractéristique implique toujours un terrain ou une altitude particulière, l'Arpenteur omet cette étiquette redondante. L'eau douce est comptée indépendamment même lorsqu'une autre caractéristique domine la description du terrain.</Text>
+    </Replace>
+
+    <!-- Gameplay: World Scanner -->
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_TITLE" Language="fr_FR">
+      <Text>Scanner de monde</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_OVERVIEW_TITLE" Language="fr_FR">
+      <Text>Vue d'ensemble</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_OVERVIEW" Language="fr_FR">
+      <Text>Le Scanner de monde trouve les objets connus de la carte sans se déplacer case par case. Les résultats comportent quatre niveaux : catégorie, sous-catégorie, groupe et élément. Les sources intégrées couvrent les villes, les unités, les régions de terrain et de géographie, les ressources, les quartiers et merveilles, les aménagements, les marqueurs de carte et les autres objets de la carte. Des sources contextuelles apparaissent pour les filtres actifs, les cibles valides, les recommandations, la gestion de ville, les trajets en file d'attente et les scénarios pris en charge. Les catégories et sous-catégories vides sont ignorées.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_LIVE_DATA" Language="fr_FR">
+      <Text>Le Scanner actualise ses résultats au fil de votre navigation. Les objets qui n'existent plus ou ne sont plus visibles disparaissent automatiquement, tandis que les objets nouvellement disponibles apparaissent lors de la prochaine actualisation de leur catégorie. Il respecte les règles normales d'exploration, de diplomatie, de visibilité des unités et de découverte des ressources, de sorte qu'il ne révèle pas d'informations que votre civilisation ne devrait pas connaître.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_NAVIGATION_TITLE" Language="fr_FR">
+      <Text>Naviguer dans les résultats</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_NAVIGATION" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus Page précédente ou Page suivante pour la catégorie précédente ou suivante. Appuyez sur Maj plus Page précédente ou Page suivante pour les sous-catégories, Page précédente ou Page suivante pour les groupes, et Alt plus Page précédente ou Page suivante pour les éléments. Chaque niveau s'enroule et joue un clic à sa limite. Chaque catégorie ordinaire commence par une sous-catégorie Tous contenant tous les éléments de cette catégorie.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_LOCATION" Language="fr_FR">
+      <Text>Les résultats conservent l'ordre qu'ils avaient au début de votre navigation, de sorte qu'inspecter ou sauter ne réorganise pas la liste sous vos yeux. La direction et la distance sont toujours mesurées depuis la position actuelle du curseur de navigation. Appuyez sur Début pour déplacer le curseur vers l'élément actuel ou la case la plus proche d'un groupe de région, sur Retour arrière pour revenir à la position précédant le dernier saut du Scanner, et sur Fin pour répéter la direction actuelle. Les paramètres peuvent ajouter les coordonnées en début ou en fin, et faire suivre chaque élément sélectionné par le curseur après son annonce.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_SEARCH_TITLE" Language="fr_FR">
+      <Text>Recherche</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_SEARCH" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus F pour ouvrir la recherche du Scanner. La saisie d'une requête examine le monde actuel et classe les noms selon les correspondances de mot entier, de préfixe, de préfixe de mot, de sous-chaîne et d'abréviation. Les noms identiques sont regroupés avec les instances les plus proches en premier, et leurs catégories d'origine du Scanner deviennent des sous-catégories de résultats. Faites précéder un terme de deux traits d'union pour exclure les noms correspondants. Page précédente et Page suivante dans la zone de recherche rappellent les requêtes récentes du Scanner.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_MANAGEMENT_TITLE" Language="fr_FR">
+      <Text>Gérer les catégories du Scanner</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_MANAGEMENT" Language="fr_FR">
+      <Text>Appuyez sur F12, ouvrez les paramètres du Scanner de monde et activez Gérer les catégories du scanner. Chaque ligne annonce son nom, son type et son état Activé ou Désactivé. Appuyez sur Maj plus Haut ou Maj plus Bas pour changer l'ordre. Ouvrez le sous-menu de la ligne pour basculer Activé, créer une catégorie personnalisée à partir d'une catégorie intégrée ou contextuelle complète, ou la remettre à sa position par défaut. Les modifications sont enregistrées automatiquement et persistent d'une partie à l'autre.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_TYPES" Language="fr_FR">
+      <Text>Les catégories intégrées sont des sources persistantes normales. Les catégories contextuelles n'existent que tant que leurs informations de jeu sont pertinentes et peuvent exposer un paramètre de focus automatique. Les catégories personnalisées combinent des sources et des règles de nom sélectionnées. Les catégories désactivées restent configurées mais sont ignorées pendant la navigation. La réinitialisation restaure l'ordre intégré et l'état activé sans supprimer les catégories personnalisées.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_CUSTOM_TITLE" Language="fr_FR">
+      <Text>Catégories personnalisées</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_CUSTOM" Language="fr_FR">
+      <Text>Activez Ajouter une catégorie personnalisée pour créer une ligne Personnalisée N activée. Renommez-la, sélectionnez la vue Tous complète d'une source ou des sous-catégories individuelles, et ajoutez des termes Inclure les noms ou Exclure les noms. Chaque source sélectionnée ou terme d'inclusion devient une sous-catégorie dans le résultat personnalisé. Supprimer retire la catégorie personnalisée après confirmation ; Supprimer sur sa ligne de gestion ouvre la même confirmation.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_SCANNER_MATCHING" Language="fr_FR">
+      <Text>La correspondance des noms ignore la casse et reconnaît les mots entiers, les préfixes, les mots partiels et les abréviations. Un terme d'inclusion peut ajouter des éléments correspondants même lorsque leur source d'origine n'a pas été sélectionnée. Les termes d'exclusion sont appliqués au résultat combiné. Un même élément peut apparaître dans plusieurs sous-catégories sélectionnées.</Text>
+    </Replace>
+
+    <!-- Gameplay: lenses -->
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_TITLE" Language="fr_FR">
+      <Text>Filtres</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_OVERVIEW_TITLE" Language="fr_FR">
+      <Text>Vue d'ensemble</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_OVERVIEW" Language="fr_FR">
+      <Text>Les filtres affichent un seul type d'information de carte à la fois, comme la religion, l'attrait, les frontières politiques ou l'énergie. Appuyez sur Ctrl plus J pour ouvrir la liste des filtres, déplacez-vous jusqu'au filtre voulu et appuyez sur Entrée. Appuyez sur Échap, ou ouvrez la liste et réactivez le filtre actif pour le désactiver. Les filtres disponibles dépendent de votre ensemble de règles et de vos extensions.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_ACTIVATION" Language="fr_FR">
+      <Text>Déplacer le curseur de navigation sur un filtre pris en charge énonce les informations de la case actuelle. Appuyez sur Espace pour une lecture plus complète lorsqu'elle est disponible. Le Scanner de monde peut aussi ajouter une catégorie Filtre actif pour vous permettre de parcourir les cases correspondantes dans tout le monde connu. Certaines actions de jeu activent un filtre automatiquement.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_RELIGION_TITLE" Language="fr_FR">
+      <Text>Filtre religieux</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_RELIGION" Language="fr_FR">
+      <Text>Le filtre religieux montre la pression religieuse dans les villes et le territoire qu'elles influencent. Sur une case de ville ou l'une de ses cases achetées, les informations du curseur nomment la religion majoritaire et son nombre de fidèles, puis répertorient les fidèles des autres religions. Une ville sans majorité est identifiée comme n'ayant aucune religion majoritaire. Le Scanner du filtre actif regroupe les villes selon leur religion majoritaire.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_CONTINENT_TITLE" Language="fr_FR">
+      <Text>Filtre des continents</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_CONTINENT" Language="fr_FR">
+      <Text>Le filtre des continents divise les terres révélées par continent. La lecture géographique normale du curseur de navigation nomme le continent situé sous lui. Le Scanner du filtre actif regroupe les cases révélées par continent et combine les cases connectées en régions, ce qui vous permet de vous déplacer vers la partie la plus proche de chaque continent.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_APPEAL_TITLE" Language="fr_FR">
+      <Text>Filtre d'attrait</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_APPEAL" Language="fr_FR">
+      <Text>Le filtre d'attrait classe les terres révélées comme Époustouflant, Charmant, Moyen, Peu accueillant ou Repoussant. Les informations du curseur donnent à la fois la classe et la valeur d'attrait exacte. Le Scanner du filtre actif regroupe les cases selon ces cinq classes. L'attrait affecte les habitations de quartier, les stations balnéaires, les parcs nationaux et plusieurs autres capacités et aménagements.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SETTLER_TITLE" Language="fr_FR">
+      <Text>Filtre du colon</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SETTLER" Language="fr_FR">
+      <Text>Le filtre du colon évalue les terres pour fonder une ville. Les informations du curseur indiquent Eau douce, Eau côtière, Pas d'eau ou Impossible de s'installer. Avec Rise and Fall ou Gathering Storm, il donne aussi le changement de loyauté attendu pour une nouvelle ville. Avec Gathering Storm, il identifie les risques d'inondation, de volcan et de basses terres côtières.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SETTLER_SCANNER" Language="fr_FR">
+      <Text>Le Scanner du filtre actif sépare la disponibilité en eau, la loyauté et les avertissements de catastrophe en sous-catégories. Les groupes d'eau sont Eau douce, Eau côtière, Pas d'eau et Impossible de s'installer. Les groupes de loyauté utilisent le changement de loyauté attendu exact. Les groupes de catastrophe distinguent les plaines inondables, les volcans et les trois niveaux de basses terres côtières.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_GOVERNMENT_TITLE" Language="fr_FR">
+      <Text>Filtre de gouvernement</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_GOVERNMENT" Language="fr_FR">
+      <Text>Le filtre de gouvernement identifie le gouvernement actuel de la civilisation qui possède chaque case révélée. L'anarchie est nommée le cas échéant. Le Scanner du filtre actif sépare votre territoire, le territoire allié, le territoire neutre et le territoire ennemi, puis regroupe les résultats par gouvernement. Le territoire connecté appartenant à des civilisations ou villes différentes reste séparé.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_POLITICAL_TITLE" Language="fr_FR">
+      <Text>Filtre politique</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_POLITICAL" Language="fr_FR">
+      <Text>Le filtre politique montre à qui appartient le territoire révélé. Les informations de case du curseur nomment le propriétaire connu. Le Scanner du filtre actif sépare votre territoire, le territoire allié, le territoire neutre et le territoire ennemi, les regroupe par civilisation et combine les cases connectées en régions. Les civilisations non rencontrées ne sont pas identifiées.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_TOURISM_TITLE" Language="fr_FR">
+      <Text>Filtre de tourisme</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_TOURISM" Language="fr_FR">
+      <Text>Le filtre de tourisme marque les cases produisant du tourisme dans vos villes. Les informations du curseur indiquent la valeur de tourisme, sa force Élevée, Moyenne ou Faible, et le nombre de touristes internationaux. Élevée signifie au moins 16 de tourisme, Moyenne signifie au moins 8, et les valeurs positives inférieures sont Faibles.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_TOURISM_DETAILS" Language="fr_FR">
+      <Text>Appuyez sur Espace sur une bannière de tourisme pour son détail complet, y compris les sources et modificateurs affichés par le jeu. Le Scanner du filtre actif contient un élément par bannière de tourisme et regroupe les bannières par force Élevée, Moyenne ou Faible. Une case sans bannière de tourisme est signalée comme n'ayant aucune bannière lorsque vous demandez des informations détaillées.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_EMPIRE_TITLE" Language="fr_FR">
+      <Text>Filtre d'empire</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_EMPIRE" Language="fr_FR">
+      <Text>Le filtre d'empire est volontairement omis de la liste accessible des filtres de Ctrl plus J. Ses informations utiles sur vos villes, quartiers, merveilles et territoire exploité sont déjà incluses dans les informations du curseur de navigation et dans les lectures des bannières de ville ou de quartier. Les catégories normales du Scanner de monde offrent aussi une navigation directe vers ces objets, si bien qu'une présentation supplémentaire par le filtre d'empire ne ferait que répéter les mêmes informations.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_LOYALTY_TITLE" Language="fr_FR">
+      <Text>Filtre de loyauté</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_LOYALTY" Language="fr_FR">
+      <Text>Le filtre de loyauté est disponible avec Rise and Fall ou Gathering Storm. Sur une case de ville ou l'une de ses cases achetées, les informations du curseur donnent le niveau de loyauté de la ville, la loyauté actuelle sur son maximum, le changement de loyauté par tour, et si la ville gagne, perd, est en danger ou est toujours loyale. Le Scanner du filtre actif regroupe les villes selon ces états de loyauté.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_POWER_TITLE" Language="fr_FR">
+      <Text>Filtre d'énergie</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_POWER" Language="fr_FR">
+      <Text>Le filtre d'énergie est disponible dans Gathering Storm. Les informations du curseur identifient les cases sources d'énergie et indiquent si la ville propriétaire est alimentée ou non. Le Scanner du filtre actif fournit Sources d'énergie, Portée d'énergie, Cases de ville alimentées et Cases de ville non alimentées. Les portées d'énergie restent regroupées selon la ville fournissant l'énergie régionale.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_PLAGUE_TITLE" Language="fr_FR">
+      <Text>Filtre de peste</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_PLAGUE" Language="fr_FR">
+      <Text>Le filtre de peste n'apparaît que dans le scénario de la Peste noire. Il identifie les cases actuellement touchées par la peste et le nombre de tours de peste restants. Le Scanner du filtre actif regroupe les cases touchées selon leur durée restante. Ce filtre est absent des parties ordinaires.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SCANNER_TITLE" Language="fr_FR">
+      <Text>Catégorie Scanner du filtre actif</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SCANNER" Language="fr_FR">
+      <Text>Seul le filtre actif apparaît dans cette catégorie contextuelle du Scanner. Les résultats vides sont ignorés. Par défaut, activer un filtre ne déplace pas le focus du Scanner ; vous pouvez activer le focus automatique pour le Filtre actif dans les paramètres du Scanner de monde. Les résultats du Scanner n'incluent que les informations que votre joueur est autorisé à connaître.</Text>
+    </Replace>
+
+    <!-- Gameplay: map tacs -->
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_TITLE" Language="fr_FR">
+      <Text>Marqueurs de carte</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_OVERVIEW_TITLE" Language="fr_FR">
+      <Text>Vue d'ensemble</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_OVERVIEW" Language="fr_FR">
+      <Text>Les marqueurs de carte sont les repères étiquetés natifs de Civilization VI. Les marqueurs visibles sont inclus dans les informations de case du curseur de navigation et dans la catégorie Marqueurs de carte du Scanner de monde. Les marqueurs des autres joueurs sont identifiés par leur propriétaire lorsqu'ils vous sont visibles. Appuyez sur M au niveau du curseur de navigation pour créer un marqueur ou modifier votre marqueur existant sur cette case.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_LIST" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus M pour ouvrir ou fermer la liste accessible des marqueurs de carte. Activer une ligne fait sauter le curseur de navigation vers ce marqueur en direct. Vos propres lignes peuvent être supprimées avec Suppr après confirmation ; la suppression utilise la mise à jour normale de configuration du joueur du jeu et vide tout emplacement de signet qui référençait le marqueur.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_BOOKMARKS_TITLE" Language="fr_FR">
+      <Text>Signets</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_BOOKMARKS" Language="fr_FR">
+      <Text>Dix emplacements de signets stockent les identifiants de vos marqueurs de carte dans la configuration enregistrée du joueur actuel. Assigner sur une case portant votre marqueur le renomme et le réutilise. Assigner sur une case sans marqueur en crée un. Un marqueur supprimé manuellement ou manquant vide son emplacement enregistré la prochaine fois que l'emplacement est résolu.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_BOOKMARK_RULES" Language="fr_FR">
+      <Text>Réassigner un emplacement occupé supprime son marqueur précédent. Assigner le même marqueur à un autre emplacement vide l'ancien emplacement, de sorte qu'un marqueur ne peut pas représenter deux signets. Comme les emplacements et la propriété des marqueurs sont propres à chaque joueur, les joueurs locaux d'une même sauvegarde ne partagent pas les associations de signets à moins de partager le marqueur sous-jacent via la visibilité multijoueur normale.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_KEYS_TITLE" Language="fr_FR">
+      <Text>Commandes de signets</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_KEYS" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus Maj plus 1 à 0 pour assigner les Signets 1 à 10 au niveau du curseur. Appuyez sur Ctrl plus 1 à 0 pour sauter à un signet, et Alt plus 1 à 0 pour lire sa direction en direct depuis le curseur. Le chiffre 0 représente l'emplacement 10. Ces commandes résolvent à nouveau le marqueur avant utilisation au lieu de mettre en cache son nom ou ses coordonnées affichés.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_SHARING_TITLE" Language="fr_FR">
+      <Text>Visibilité multijoueur</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_SHARING" Language="fr_FR">
+      <Text>En multijoueur, l'éditeur accessible de marqueurs de carte reflète les choix Visible par du jeu et met à jour le marqueur en direct immédiatement. Le multijoueur en réseau peut aussi exposer Envoyer via chat pour un marqueur non privé visible par la cible de discussion actuelle. La chaise musicale prend en charge les cibles de visibilité des marqueurs mais pas la commande Envoyer via chat en temps réel.</Text>
+    </Replace>
+
+    <!-- Gameplay: empire information -->
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_TITLE" Language="fr_FR">
+      <Text>Informations de l'empire</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_OVERVIEW_TITLE" Language="fr_FR">
+      <Text>Vue d'ensemble</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_OVERVIEW" Language="fr_FR">
+      <Text>Les commandes d'informations de l'empire lisent les totaux et progressions fréquemment nécessaires sans ouvrir leurs écrans complets. Les valeurs sont lues au moment où vous appuyez sur la touche, si bien qu'elles reflètent la partie en cours. Une valeur est omise ou annoncée comme indisponible lorsque l'ensemble de règles n'utilise pas ce système ou que vous ne l'avez pas débloqué.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_PROGRESS_TITLE" Language="fr_FR">
+      <Text>Temps, recherche et culture</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_PROGRESS" Language="fr_FR">
+      <Text>Appuyez sur T pour le tour actuel, l'heure, la date de jeu et un éventuel minuteur de tour actif. Appuyez sur R pour la science par tour et la progression de la technologie actuelle. Appuyez sur P pour la culture par tour et la progression du dogme actuel ; pendant l'anarchie, cela signale l'anarchie et ses tours restants au lieu d'un message de déblocage de gouvernement. Appuyez sur Y pour le score d'ère, l'âge, les seuils et les commémorations actives là où le système d'âges existe.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_YIELDS_TITLE" Language="fr_FR">
+      <Text>Trésorerie, rendements et ressources</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_YIELDS" Language="fr_FR">
+      <Text>Appuyez sur G pour le solde d'or, l'or par tour et la capacité de routes commerciales. Appuyez sur F pour le solde de foi et la foi par tour. Appuyez sur I pour le tourisme par tour. Ces lectures préservent la mise en forme officielle de l'ensemble de règles actif et n'ouvrent pas les Rapports ni une autre fenêtre.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_DIPLOMACY_TITLE" Language="fr_FR">
+      <Text>Diplomatie et gouvernement</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_DIPLOMACY" Language="fr_FR">
+      <Text>Appuyez sur V pour les émissaires disponibles, l'influence actuelle et la progression vers le prochain émissaire. Appuyez sur K pour les revenus de faveur diplomatique et le calendrier ou les informations de session du Congrès mondial. Appuyez sur O pour les titres de gouverneur disponibles et dépensés. Appuyez sur N pour les engins nucléaires et thermonucléaires possédés. Une commande annonce qu'elle est indisponible lorsque le scénario en cours n'utilise pas ce système d'empire.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_RULESETS_TITLE" Language="fr_FR">
+      <Text>Lectures propres à l'ensemble de règles</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_RULESETS" Language="fr_FR">
+      <Text>Les lectures de scénario remplacent les informations qui ne s'appliquent pas à ce scénario. Dans Red Death, T lit aussi le calendrier de la zone sûre, les dégâts de radiations, les armes, les colons en danger et l'état des capacités de faction. Dans Pirates, T lit aussi le moral de l'équipage. Les informations normales de science, culture, gouvernement ou diplomatie restent indisponibles dans les scénarios qui suppriment ces systèmes.</Text>
+    </Replace>
+
+    <!-- Gameplay: ending the turn -->
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_TITLE" Language="fr_FR">
+      <Text>Terminer votre tour</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_OVERVIEW_TITLE" Language="fr_FR">
+      <Text>Ce qui doit arriver avant la fin du tour</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_OVERVIEW" Language="fr_FR">
+      <Text>Le jeu garde la trace de la prochaine action requise avant que votre tour puisse se terminer. Il peut vous demander de donner des ordres à une unité, de choisir une production, de sélectionner une recherche ou un dogme, de répondre à une notification, de résoudre un autre blocage, ou de terminer le tour lorsqu'il ne reste rien.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_AUTOMATIC" Language="fr_FR">
+      <Text>Par défaut, une prochaine action modifiée est annoncée automatiquement, et le message d'attente est annoncé entre les tours. Deux paramètres d'Événements distincts contrôlent ces deux annonces. Appuyez sur Maj plus Espace à tout moment pour répéter le blocage actuel ou le message d'attente.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_ACTIONS_TITLE" Language="fr_FR">
+      <Text>Effectuer la prochaine action</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_ACTIONS" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus Espace pour effectuer la prochaine action actuelle. Lorsque le tour est prêt, cela termine le tour. Lorsque quelque chose bloque le tour, cela sélectionne, fait défiler jusqu'à, ou ouvre ce que vous devez traiter. La commande vérifie de nouveau à chaque pression, si bien qu'elle utilise l'exigence actuelle même si l'état du jeu a changé depuis la dernière annonce.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_LIST_TITLE" Language="fr_FR">
+      <Text>Liste des blocages de tour</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_LIST" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus Maj plus Espace pour ouvrir une liste contenant la prochaine action actuelle, suivie des autres blocages actifs distincts. Utilisez la navigation de liste ordinaire et activez une ligne pour vous y rendre ou la résoudre. La liste se met à jour à mesure que les exigences sont satisfaites. Appuyez sur Échap pour la fermer.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_ENDING_TURN_TUTORIAL" Language="fr_FR">
+      <Text>Pendant le tutoriel intégré de Civilization VI, ces raccourcis suivent l'étape actuelle du tutoriel et ne peuvent pas la devancer lorsque terminer le tour n'est pas encore autorisé. Les exigences propres à un scénario sont incluses automatiquement.</Text>
+    </Replace>
+
+    <!-- Gameplay: notifications and history -->
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_TITLE" Language="fr_FR">
+      <Text>Notifications et historique des messages</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_OVERVIEW_TITLE" Language="fr_FR">
+      <Text>Vue d'ensemble</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_OVERVIEW" Language="fr_FR">
+      <Text>Le Centre de notifications et le tampon de messages résolvent des problèmes différents. Le Centre de notifications présente les notifications de jeu actuellement actives et leurs actions. Le tampon de messages conserve un historique limité, propre à chaque joueur, des événements énoncés, y compris les notifications, découvertes, combats, ragots, déplacements et discussions. Utilisez le Centre pour agir ; utilisez l'historique pour revoir ou revisiter.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_CENTER_TITLE" Language="fr_FR">
+      <Text>Centre de notifications</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_CENTER" Language="fr_FR">
+      <Text>Les nouvelles notifications visibles sont énoncées et ajoutées à l'historique. Appuyez sur Ctrl plus N pour ouvrir le Centre avec le focus sur la notification la plus récente. Plusieurs notifications d'un même type forment un groupe d'arborescence déployable. Le Centre lit le résumé et la description de chaque notification en direct et peut inclure un emplacement valide sans déplacer le curseur automatiquement.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_CENTER_ACTIONS" Language="fr_FR">
+      <Text>Appuyez sur Entrée ou Espace pour effectuer l'action normale de la notification. Appuyez sur Suppr pour l'ignorer lorsque le jeu autorise le rejet ; Suppr sur un groupe ignore toutes les notifications rejetables de ce groupe. Une action d'emplacement déplace aussi le curseur de navigation lorsque c'est approprié. Échap ferme le Centre.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS_TITLE" Language="fr_FR">
+      <Text>Annonces de révélation</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS" Language="fr_FR">
+      <Text>Les annonces de révélation résument les changements de ce que votre civilisation peut voir. Elles peuvent être annoncées après le déplacement de vos unités, au début de votre tour, et pendant que les autres joueurs jouent leur tour. Appuyez sur F12 et ouvrez les paramètres d'Événements pour contrôler séparément chacun de ces trois moments. Les cases nouvellement explorées sont comptées. Les villes étrangères, ressources visibles, quartiers, aménagements, unités ennemies et autres unités étrangères nouvellement découverts sont nommés lorsque le jeu les fait connaître. Les noms répétés sont regroupés en totaux.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS_LINES" Language="fr_FR">
+      <Text>Une ligne Révélé contient les cases nouvellement explorées et les objets nouvellement vus. Une ligne Caché nomme les unités étrangères qui existent toujours mais ont quitté votre champ de vision. Une ligne Disparu signale les avant-postes barbares ou villages tribaux auparavant connus et désormais visiblement absents. Les merveilles naturelles, les avant-postes nouvellement trouvés et les villages tribaux nouvellement trouvés utilisent leurs propres annonces du jeu et ne sont pas répétés dans la ligne Révélé ordinaire.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS_SETTINGS" Language="fr_FR">
+      <Text>Dans F12, paramètres d'Événements, Annoncer les changements de visibilité au début de votre tour et Annoncer les changements de visibilité lors du déplacement sont activés par défaut. Annoncer les changements de visibilité en dehors de votre tour est désactivé par défaut et est toujours différé en chaise musicale. Les annonces produites sont stockées dans la catégorie Révélations du tampon de messages. Dans F12, paramètres du Tampon de messages, Énoncer les messages de révélation contrôle si ces nouvelles entrées d'historique sont énoncées automatiquement ; le désactiver conserve les entrées disponibles pour consultation.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_BUFFER_TITLE" Language="fr_FR">
+      <Text>Tampon de messages</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_BUFFER" Language="fr_FR">
+      <Text>Le tampon de messages appartient au joueur local actuel et conserve les nouvelles entrées jusqu'à la limite d'historique choisie dans les paramètres. Il prend en charge le filtre Tous ainsi que les filtres non vides Notification, Découverte, Combat, Ragots, Déplacement et Discussion. Changer de catégorie ignore les filtres vides et lit le message correspondant le plus récent. Un message peut conserver des coordonnées de carte même après la fermeture de l'écran qui l'a produit.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_BUFFER_KEYS" Language="fr_FR">
+      <Text>Appuyez sur Point-virgule ou Apostrophe pour le message précédent ou suivant, Ctrl plus Point-virgule pour le plus ancien, et Ctrl plus Apostrophe pour le plus récent. Appuyez sur Maj plus Point-virgule ou Maj plus Apostrophe pour la catégorie non vide précédente ou suivante. Appuyez sur Maj plus Barre oblique inverse pour déplacer le curseur de navigation vers l'emplacement du message actuel lorsqu'il en existe un.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_MOVEMENT_TITLE" Language="fr_FR">
+      <Text>Historique et énoncé des déplacements</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_MOVEMENT" Language="fr_FR">
+      <Text>Le déplacement visible d'une unité enregistre le trajet de direction observé et la dernière case connue. La commande de saut renvoie donc au dernier emplacement observé plutôt que de suivre une unité qui n'est plus visible. Le déplacement en chaise musicale collecté pour un autre observateur local n'est annoncé qu'au début du prochain tour de cet observateur.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_SETTINGS" Language="fr_FR">
+      <Text>Les paramètres de navigation choisissent indépendamment si vos unités, vos coéquipiers, les civilisations hostiles, les civilisations neutres, les cités-États et les barbares annoncent les unités militaires, les unités civiles, les deux, ou aucune. Seul le déplacement des barbares est activé par défaut. Les paramètres du Tampon de messages choisissent séparément quelles catégories s'énoncent automatiquement et le nombre maximal d'entrées conservées ; désactiver l'énoncé ne supprime pas les entrées d'historique.</Text>
+    </Replace>
+
+    <!-- Gameplay: world actions -->
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_TITLE" Language="fr_FR">
+      <Text>Actions du monde</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_OVERVIEW_TITLE" Language="fr_FR">
+      <Text>Vue d'ensemble</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_OVERVIEW" Language="fr_FR">
+      <Text>Les actions du monde sont des commandes disponibles depuis la carte principale. Elles fonctionnent sans ouvrir un menu d'accessibilité séparé et peuvent être modifiées dans Options, Assignations.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_SAVES_TITLE" Language="fr_FR">
+      <Text>Sauvegarde et chargement rapides</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_SAVES" Language="fr_FR">
+      <Text>Appuyez sur F5 pour une sauvegarde rapide. Appuyez sur F6 pour demander un chargement rapide ; l'accessibilité demande confirmation avant de remplacer la session en cours. La disponibilité suit toujours les restrictions de sauvegarde du jeu en multijoueur, en tutoriel et en scénario.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_MAP_TITLE" Language="fr_FR">
+      <Text>Action de carte</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_MAP" Language="fr_FR">
+      <Text>Appuyez sur M pour créer un marqueur de carte au niveau du curseur de navigation ou modifier votre marqueur existant à cet endroit. L'éditeur normal vous permet de choisir son icône, son étiquette et sa visibilité multijoueur.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_TURN_TITLE" Language="fr_FR">
+      <Text>Actions de tour</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_WORLD_ACTIONS_TURN" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus Espace pour effectuer la prochaine action actuelle, Maj plus Espace pour lire le blocage actuel ou l'état d'attente, et Ctrl plus Maj plus Espace pour ouvrir la liste des blocages de tour. L'article Terminer votre tour explique ces commandes en détail.</Text>
+    </Replace>
+
+    <!-- Gameplay: selection -->
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_TITLE" Language="fr_FR">
+      <Text>Sélection</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_OVERVIEW_TITLE" Language="fr_FR">
+      <Text>Vue d'ensemble</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_OVERVIEW" Language="fr_FR">
+      <Text>Civilization VI peut avoir une unité sélectionnée ou une ville sélectionnée. En sélectionner une remplace l'autre et modifie les actions, informations et cibles à votre disposition. La sélection est distincte du curseur de navigation, de sorte que vous pouvez inspecter des cases lointaines sans perdre l'objet sélectionné.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_ACTION_LIST" Language="fr_FR">
+      <Text>Appuyez sur Tab avec une ville ou une unité sélectionnée pour ouvrir sa liste d'actions accessible. Les lignes sont construites à partir des actions de ville, opérations d'unité et commandes d'unité vanilla actuelles, y compris leurs explications de désactivation en direct et leurs gestes assignés. Activez une ligne pour utiliser l'action existante. Appuyez sur Ctrl plus H depuis la zone de carte pour les commandes actuellement disponibles, ou consultez-les et réassignez-les dans Options, Assignations.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_MOVING_TITLE" Language="fr_FR">
+      <Text>Actions de sélection</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_MOVING" Language="fr_FR">
+      <Text>Appuyez sur Virgule ou Point pour sélectionner l'unité précédente ou suivante prête à recevoir des ordres. Ajoutez Maj pour inclure les unités n'ayant plus d'ordres. Appuyez sur Crochet gauche ou Crochet droit pour la ville précédente ou suivante, et Barre oblique inverse pour votre capitale.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_SUMMARY_TITLE" Language="fr_FR">
+      <Text>Informations de sélection</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_SUMMARY" Language="fr_FR">
+      <Text>Appuyez sur Accent grave, normalement à gauche du 1, pour un bref résumé de la sélection et sa direction depuis le curseur de navigation. Appuyez sur Maj plus 1 à Maj plus 0 pour les différents blocs d'informations. Chaque bloc relit l'objet sélectionné, si bien que la santé, le déplacement, la production, la croissance, les charges et les autres valeurs changeantes sont à jour.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_CITY_TITLE" Language="fr_FR">
+      <Text>Lectures de la ville sélectionnée</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_CITY" Language="fr_FR">
+      <Text>Pour une ville, Maj plus 1 lit l'identité et la santé ; 2 la production ; 3 la croissance ; 4 la croissance des frontières ; 5 la religion ; 6 la population, les habitations et les bâtiments ou la loyauté ; 7 les rendements ; 8 les entrées normales de priorité de rendement ; 9 les entrées de priorité de rendement favorisées ; et 0 les entrées de priorité de rendement ignorées. Le résumé combine le nom de la ville, la population, la santé, la production et la croissance.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_UNIT_TITLE" Language="fr_FR">
+      <Text>Lectures de l'unité sélectionnée</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_SELECTION_UNIT" Language="fr_FR">
+      <Text>Pour une unité, Maj plus 1 lit l'identité et la santé ; 2 le déplacement ; 3 l'activité ; 4 les charges ; 5 les promotions ; 6 les statistiques ; 7 les capacités ; 8 les informations spéciales ; 9 le trajet en file d'attente ; et 0 le nombre d'unités ennemies visibles dans les hexagones adjacents. L'activité signale En déplacement lorsque l'unité a une destination en file d'attente. Le résumé de l'unité inclut les statistiques lorsque l'unité en possède, omet les capacités et se termine par le nombre d'ennemis adjacents. Ces lectures incluent la formation actuelle de l'unité, son propriétaire, sa visibilité, l'aperçu de combat et tout détail propre à son activité présente.</Text>
+    </Replace>
+
+    <!-- Gameplay: user interfaces -->
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_TITLE" Language="fr_FR">
+      <Text>Interfaces utilisateur</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_OVERVIEW_TITLE" Language="fr_FR">
+      <Text>Structure des écrans</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_OVERVIEW" Language="fr_FR">
+      <Text>La plupart des écrans de jeu accessibles sont des panneaux dont le corps principal est une arborescence, une liste ou un tableau. Utilisez les commandes de navigation normales de ce conteneur. Tab et Maj plus Tab se déplacent entre le corps principal et les commandes d'action situées en dehors. L'énoncé du focus signale le chemin imbriqué, le rôle, l'état, la position et les informations d'info-bulle utiles fournies par chaque écran.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_TABS" Language="fr_FR">
+      <Text>Les écrans à plusieurs pages tels que Classements mondiaux, Production, Rapports et Climat mondial utilisent des contrôles à onglets. Appuyez sur Ctrl plus Tab ou Ctrl plus Maj plus Tab n'importe où à l'intérieur du contrôle pour la page suivante ou précédente. Sur la bande d'onglets, Gauche et Droite changent aussi de page. Seule la page active participe au focus et à la recherche. Le groupe Tutoriels des écrans contient les dispositions et commandes propres à chaque écran.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_RESEARCH_TITLE" Language="fr_FR">
+      <Text>Recherche, dogmes et gouvernement</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_RESEARCH" Language="fr_FR">
+      <Text>Les commandes d'ouverture par défaut sont Ctrl plus R pour le sélecteur de recherche, Ctrl plus C pour le sélecteur de dogme, Ctrl plus Maj plus R pour l'arbre technologique, Ctrl plus Maj plus C pour l'arbre des dogmes, Ctrl plus P pour le gouvernement, Ctrl plus O pour les gouverneurs, et Ctrl plus L pour la religion.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_EMPIRE_TITLE" Language="fr_FR">
+      <Text>Villes et gestion de l'empire</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_EMPIRE" Language="fr_FR">
+      <Text>Appuyez sur F2 pour les Rapports de l'empire, Ctrl plus V pour les Cités-États, Ctrl plus T pour les Routes commerciales, Ctrl plus E pour l'Espionnage, Ctrl plus U pour votre liste d'Unités, et Ctrl plus Q pour les Ressources mondiales de toutes les civilisations connues. La liste d'Unités s'ouvre par défaut sur un tableau triable indiquant la santé actuelle, les déplacements actuels et maximaux, les forces distinctes de mêlée, à distance, de bombardement, religieuse et antiaérienne, la portée, les charges, les promotions et les ennemis adjacents. Les cellules numériques à valeur nulle sont énoncées comme zéro. Son filtre de catégorie s'applique aux deux vues. Alt plus 2 bascule vers une liste simple avec un menu déroulant de tri, et Alt plus 1 revient au tableau.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_WORLD_TITLE" Language="fr_FR">
+      <Text>Informations sur le monde</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_WORLD" Language="fr_FR">
+      <Text>Appuyez sur F1 pour la Civilopédia, F3 pour les Personnages illustres, F7 pour les Chefs-d'œuvre, F8 pour les Classements mondiaux, F9 pour le Climat mondial, F10 pour la Progression de l'ère, et F11 pour les Moments historiques. Appuyez sur F4 pour le Ruban diplomatique, Ctrl plus K pour le Congrès mondial, Ctrl plus W pour les urgences et compétitions actives, et Ctrl plus Maj plus T pour les objectifs actuels du tutoriel.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_MAP_TITLE" Language="fr_FR">
+      <Text>Carte et communication</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_MAP" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus J pour la liste des filtres, Ctrl plus M pour les marqueurs de carte, Ctrl plus Maj plus F pour la Recherche de carte, Ctrl plus Barre oblique pour la discussion en jeu, et Ctrl plus N pour le Centre de notifications. La Recherche de carte et la recherche du Scanner sont distinctes : la Recherche de carte cherche parmi les concepts et emplacements connus de la carte, tandis que la recherche du Scanner cherche parmi les sources en direct actuelles du Scanner.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_AVAILABILITY_TITLE" Language="fr_FR">
+      <Text>Disponibilité et réassignation</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_AVAILABILITY" Language="fr_FR">
+      <Text>Ce sont les assignations par défaut, modifiables dans Options, Assignations. Les scénarios peuvent supprimer la science, la culture, le gouvernement, la diplomatie, la religion, le climat, le Congrès ou la Civilopédia. Lorsqu'un écran n'existe pas dans la partie en cours, sa commande annonce qu'elle est indisponible.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_FAMILY_LEAF_TITLE" Language="fr_FR">
+      <Text>Widgets terminaux</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_FAMILY_VALUE_TITLE" Language="fr_FR">
+      <Text>Widgets de valeur</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_FAMILY_CONTAINER_TITLE" Language="fr_FR">
+      <Text>Widgets conteneurs</Text>
+    </Replace>
+
+    <!-- General reference -->
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_TITLE" Language="fr_FR">
+      <Text>Référence des assignations de touches</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_USING_TITLE" Language="fr_FR">
+      <Text>Utiliser les commandes</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_COMMON" Language="fr_FR">
+      <Text>Les commandes suivantes sont disponibles depuis chaque widget d'accessibilité ciblé. Appuyez sur F12 pour ouvrir les paramètres du mod d'accessibilité. Appuyez sur Ctrl plus I pour rechercher l'élément ciblé dans la Civilopédia.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_HELP" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus H pour ouvrir l'Aide aux commandes contextuelle. Elle rassemble les commandes actuellement disponibles depuis le widget ciblé et ses contrôles conteneurs ; activer une commande dans l'Aide aux commandes exécute cette commande. Appuyez sur Maj plus F1 pour énoncer ces mêmes commandes disponibles sans ouvrir la vue d'aide. Appuyez sur Maj plus F2 pour énoncer le chemin de focus complet, de l'écran jusqu'au contrôle ciblé.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_FOCUSED_WIDGET_READER" Language="fr_FR">
+      <Text>Le Lecteur de widget ciblé vous permet d'entendre des informations détaillées sur le contrôle qui a actuellement le focus, une section à la fois. Appuyez sur Alt plus Haut ou Alt plus Bas pour aller à la section précédente ou suivante et la lire. Appuyez sur Alt plus Début ou Alt plus Fin pour sauter à la première ou dernière section et la lire.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_NAVIGATION" Language="fr_FR">
+      <Text>Tab et Maj plus Tab se déplacent normalement entre les groupes ou les contrôles. Les listes utilisent Haut et Bas ; les tableaux utilisent les quatre touches fléchées ; les arborescences utilisent Haut et Bas entre les éléments visibles et Gauche et Droite pour la hiérarchie. Début, Fin, Page précédente et Page suivante offrent des déplacements plus larges lorsque le widget ciblé les prend en charge. Les contrôles à onglets prennent aussi en charge Ctrl plus Tab et Ctrl plus Maj plus Tab.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_ACTIVATION" Language="fr_FR">
+      <Text>Les boutons et cases à cocher acceptent Entrée ou Espace. Un élément d'arborescence doté d'une action accepte Entrée ; une branche d'arborescence sans action laisse Entrée basculer son déploiement. Les contrôles désactivés restent lisibles lorsqu'un écran expose des informations utiles, mais leurs actions ne s'exécutent pas.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CONTEXT" Language="fr_FR">
+      <Text>Les écrans peuvent ajouter des commandes pour leurs propres actions, et le monde jouable utilise les actions de jeu assignées normales de Civilization VI. Utilisez Ctrl plus H ou Maj plus F1 sur le contrôle concerné pour l'ensemble des commandes en direct. Le groupe Tutoriels des écrans documente la disposition et les commandes contextuelles de chaque écran pris en charge.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_REMAPPING_TITLE" Language="fr_FR">
+      <Text>Réassigner les touches</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_REMAPPING_OPEN" Language="fr_FR">
+      <Text>Ouvrez le menu du jeu avec Échap, choisissez Options, puis choisissez l'onglet Assignations. Vous pouvez aussi atteindre les Options depuis le menu principal. Les commandes sont organisées sous les mêmes noms de catégorie que ceux utilisés dans les chapitres ci-dessous.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_REMAPPING_CHANGE" Language="fr_FR">
+      <Text>Chaque commande possède une assignation principale et une assignation secondaire. Choisissez l'une des deux, puis appuyez sur la touche ou la combinaison de touches que vous voulez utiliser. Pendant que le jeu attend une touche, choisissez Effacer l'assignation pour laisser cet emplacement libre, ou appuyez sur Échap pour annuler sans le modifier. Choisissez Confirmer une fois terminé pour enregistrer les nouvelles assignations.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_REMAPPING_CONFLICTS" Language="fr_FR">
+      <Text>Avant de réutiliser une touche, vérifiez si elle apparaît déjà à côté d'une autre commande. Une touche partagée peut être utile lorsque les commandes sont disponibles dans des situations différentes, mais elle peut être ambiguë lorsque les deux commandes sont disponibles ensemble. Effacez ou modifiez l'une des assignations si la mauvaise commande s'exécute. Restaurer les valeurs par défaut sur les autres onglets d'Options ne remplace pas les assignations affichées sur l'onglet Assignations.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_MESSAGE_BUFFER_TITLE" Language="fr_FR">
+      <Text>Tampon de messages</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_MESSAGE_BUFFER" Language="fr_FR">
+      <Text>Appuyez sur Point-virgule ou Apostrophe pour le message précédent ou suivant. Ajoutez Ctrl pour sauter au message le plus ancien ou le plus récent, ou ajoutez Maj pour aller à la catégorie de message précédente ou suivante. Appuyez sur Maj plus Barre oblique inverse pour déplacer le curseur de navigation vers l'emplacement rattaché au message actuel.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_NAVIGATION_CURSOR_TITLE" Language="fr_FR">
+      <Text>Curseur de navigation</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_NAVIGATION_CURSOR_MOVEMENT" Language="fr_FR">
+      <Text>Déplacez-vous vers le nord-ouest avec Q ou Pavé numérique 7, le nord-est avec E ou Pavé numérique 9, l'ouest avec A ou Pavé numérique 4, l'est avec D ou Pavé numérique 6, le sud-ouest avec Z ou Pavé numérique 1, et le sud-est avec C ou Pavé numérique 3.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_NAVIGATION_CURSOR_ACTIONS" Language="fr_FR">
+      <Text>Appuyez sur Entrée pour l'action principale sur la case du curseur et Ctrl plus Entrée pour son action secondaire. Appuyez sur Barre oblique pour sauter à la sélection actuelle, Ctrl plus S pour sauter à votre capitale, et Suppr pour retirer votre propre marqueur de carte au niveau du curseur.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_NAVIGATION_CURSOR_BOOKMARKS" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus Maj plus un chiffre de 1 à 0 pour assigner ce signet. Appuyez sur Ctrl plus le chiffre pour y revenir. Appuyez sur Alt plus le chiffre pour entendre la direction et la distance du signet sans vous déplacer.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_WORLD_SCANNER_TITLE" Language="fr_FR">
+      <Text>Scanner de monde</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_WORLD_SCANNER" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus Page précédente ou Page suivante pour les catégories, Maj plus Page précédente ou Page suivante pour les sous-catégories, Page précédente ou Page suivante pour les groupes, et Alt plus Page précédente ou Page suivante pour les résultats individuels. Appuyez sur Début pour sauter au résultat actuel, Retour arrière pour revenir à l'emplacement précédent du curseur, Fin pour entendre la direction et la distance, et Ctrl plus F pour rechercher dans les résultats du Scanner.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_SURVEYOR_TITLE" Language="fr_FR">
+      <Text>Arpenteur</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_SURVEYOR_BASIC" Language="fr_FR">
+      <Text>Appuyez sur Maj plus W ou Maj plus X pour augmenter ou diminuer le rayon d'arpentage. Appuyez sur Maj plus Q pour les rendements, Maj plus A pour les ressources, Maj plus Z pour le terrain, Maj plus E pour vos unités, Maj plus D pour les unités ennemies, et Maj plus C pour les villes.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_SURVEYOR_ADDITIONAL" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus Maj plus A ou Pavé numérique 4 pour les aménagements, Ctrl plus Maj plus D ou Pavé numérique 6 pour les unités neutres, Ctrl plus Maj plus Z ou Pavé numérique 1 pour la propriété, Ctrl plus Maj plus Q ou Pavé numérique 7 pour les quartiers, et Ctrl plus Maj plus X ou Pavé numérique 2 pour l'attrait.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_TITLE" Language="fr_FR">
+      <Text>Informations</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_SELECTION" Language="fr_FR">
+      <Text>Appuyez sur Accent grave, aussi appelé Tilde, pour un résumé de l'unité ou de la ville sélectionnée. Appuyez sur Maj plus un chiffre de 1 à 0 pour une section particulière de la sélection. Appuyez sur Espace pour des informations sur l'interaction actuelle avec le monde.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_EMPIRE" Language="fr_FR">
+      <Text>Appuyez sur Y pour l'ère et l'âge, O pour les titres de gouverneur, T pour l'heure et le tour, R pour la science, P pour la culture, G pour l'or, F pour la foi, I pour le tourisme, V pour l'influence, N pour les armes nucléaires, Ctrl plus Y pour la liste d'informations de rendement, et K pour le Congrès mondial ou la faveur diplomatique.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_PLOT" Language="fr_FR">
+      <Text>Au niveau du curseur de navigation, appuyez sur S ou Pavé numérique 5 pour les unités ; W ou Pavé numérique 8 pour les rendements, les ouvriers, l'eau douce et la propriété ; X ou Pavé numérique 2 pour les statistiques de la case ; Maj plus S ou Maj plus Pavé numérique 5 pour les coordonnées relatives à votre capitale d'origine ; et B pour la géographie.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_BANNERS" Language="fr_FR">
+      <Text>Les touches de chiffres 1 à 7 lisent les informations correspondantes de bannière de ville, quartier, campement, base aérienne, silo de missiles, aménagement, ou village et avant-poste disponibles au niveau du curseur.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_CITY_TITLE" Language="fr_FR">
+      <Text>Ville</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_CITY" Language="fr_FR">
+      <Text>Appuyez sur Alt plus Crochet droit pour la vue d'ensemble de la ville, Alt plus Crochet gauche pour gérer les citoyens, et Alt plus Barre oblique inverse pour la production. Acheter avec de l'or, acheter avec de la foi et changer la priorité de rendement n'ont pas d'assignation par défaut ; assignez-les sur l'onglet Assignations si vous voulez des commandes directes pour elles.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_TITLE" Language="fr_FR">
+      <Text>Interface utilisateur</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_CORE" Language="fr_FR">
+      <Text>Appuyez sur F1 pour la Civilopédia, F2 pour les Rapports, F3 pour les Personnages illustres, F4 pour la Diplomatie, F7 pour les Chefs-d'œuvre, F8 pour les Classements, F9 pour le Climat, F10 pour la Progression de l'ère, et F11 pour la chronologie des Moments historiques.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_RESEARCH" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus R pour Choisir une recherche, Ctrl plus C pour Choisir un dogme, Ctrl plus Maj plus R pour l'arbre technologique, Ctrl plus Maj plus C pour l'arbre des dogmes, Ctrl plus P pour le Gouvernement, Ctrl plus L pour la Religion, et Ctrl plus O pour les Gouverneurs.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_WORLD" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus V pour les Cités-États, Ctrl plus E pour l'Espionnage, Ctrl plus T pour les Routes commerciales, Ctrl plus U pour les Unités, Ctrl plus K pour le Congrès mondial, Ctrl plus W pour les Urgences et compétitions, et Ctrl plus Q pour les Ressources mondiales. Dans Unités, Alt plus 1 sélectionne le tableau et Alt plus 2 sélectionne la liste simple.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_MAP" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus N pour le Centre de notifications, Ctrl plus Maj plus T pour les objectifs du tutoriel, Ctrl plus J pour la liste accessible des filtres, Ctrl plus M pour les marqueurs de carte, et Ctrl plus Maj plus F pour la Recherche de carte. Les rapports de Ressources, État des villes et Ragots n'ont pas d'assignation par défaut.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UNIT_TITLE" Language="fr_FR">
+      <Text>Unité</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UNIT_MOVEMENT" Language="fr_FR">
+      <Text>Maintenez Alt et appuyez sur Q, E, A, D, Z ou C pour déplacer l'unité sélectionnée d'un hexagone dans cette direction. Les touches correspondantes du pavé numérique 7, 9, 4, 6, 1 et 3 fonctionnent aussi. Appuyez sur Alt plus M pour Se déplacer vers.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UNIT_ACTIONS" Language="fr_FR">
+      <Text>Appuyez sur Alt plus B pour fonder une ville, F pour se fortifier, H pour se fortifier jusqu'à guérison, R pour une attaque à distance, X pour l'exploration automatique, Espace pour passer, S pour dormir, V pour l'alerte, U pour améliorer, P pour promouvoir, W pour réveiller, Suppr pour supprimer l'unité, et Retour arrière pour annuler son ordre actuel.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UNIT_OTHER" Language="fr_FR">
+      <Text>Les autres valeurs par défaut sont Alt plus Y pour déployer, J pour récolter, I pour lancer une route commerciale, L pour piller, K pour retirer une caractéristique, O pour retirer un aménagement, N pour réparer, G pour propager une religion, T pour le voyage ou la téléportation d'espion, et Barre oblique pour lister les capacités de l'unité. De nombreuses actions d'unité spécialisées n'ont pas d'assignation par défaut ; appuyez sur Tab pour parcourir les actions actuellement disponibles pour l'unité sélectionnée.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_GLOBAL_TITLE" Language="fr_FR">
+      <Text>Global</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_GLOBAL_SELECTION" Language="fr_FR">
+      <Text>Appuyez sur Tab pour parcourir les actions de sélection. Appuyez sur Virgule ou Point pour l'unité précédente ou suivante prête à recevoir des ordres, ou ajoutez Maj pour inclure toutes les unités. Appuyez sur Crochet gauche ou Crochet droit pour la ville précédente ou suivante, et Barre oblique inverse pour votre capitale.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_GLOBAL_WORLD" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus Espace pour effectuer la prochaine action requise ou terminer le tour. Appuyez sur Maj plus Espace pour entendre le blocage actuel ou l'état d'attente, et Ctrl plus Maj plus Espace pour la liste complète des blocages. Appuyez sur M pour les marqueurs de carte, F5 pour la Sauvegarde rapide, et F6 pour le Chargement rapide.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_ONLINE_TITLE" Language="fr_FR">
+      <Text>En ligne</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_ONLINE" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus Barre oblique pour ouvrir ou fermer la discussion en jeu.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_LENSES_TITLE" Language="fr_FR">
+      <Text>Filtres</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_LENSES" Language="fr_FR">
+      <Text>Il n'y a actuellement aucune commande avec assignation par défaut dans la catégorie Filtres. La liste accessible des filtres est Ctrl plus J sous Interface utilisateur. Les détails propres à chaque filtre se trouvent dans l'article Filtres du groupe Jeu.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_SEARCH_TITLE" Language="fr_FR">
+      <Text>Recherche et recherche à la frappe</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_SEARCH_TYPEAHEAD" Language="fr_FR">
+      <Text>Les listes, arborescences, tableaux et grilles prennent en charge la recherche à la frappe. Commencez à taper pendant qu'un élément est ciblé pour rechercher dans son conteneur propriétaire. Les correspondances sont classées par étiquette : texte au début d'un mot entier, préfixe de départ, mot complet, préfixe de mot, sous-chaîne, puis abréviation par préfixe de mot. Les listes et arborescences incluent les informations des lignes imbriquées. Les tableaux recherchent leurs étiquettes de ligne principales, tandis que les grilles recherchent dans chaque cellule.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_SEARCH_CYCLING" Language="fr_FR">
+      <Text>Si la recherche active contient une seule lettre, appuyer de nouveau sur cette même lettre passe à l'élément suivant commençant par elle au lieu de produire une requête à lettre doublée.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_SEARCH_RESULTS" Language="fr_FR">
+      <Text>Par défaut, la requête de recherche à la frappe active conserve une liste de résultats classée. Haut et Bas parcourent ces résultats et s'enroulent aux extrémités. Les correspondances d'info-bulle uniquement suivent les correspondances d'étiquette lorsque le paramètre Inclure les info-bulles dans la recherche à la frappe est activé.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_SEARCH_CLEARING" Language="fr_FR">
+      <Text>Retour arrière supprime le dernier caractère tapé. Échap efface une requête de recherche à la frappe non vide et annonce qu'elle a été effacée. Sortir du conteneur propriétaire, ou activer ou modifier un contrôle avec succès, l'efface silencieusement. Si la navigation persistante dans les résultats est désactivée, la requête expire à la place après le délai de recherche configuré.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_SEARCH_PANEL" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus F sur un conteneur recherchable pour ouvrir son panneau de recherche. Les listes et arborescences sont recherchables par défaut ; certains écrans activent aussi la recherche sur d'autres conteneurs ou fournissent leur propre index de recherche. La recherche par défaut indexe les étiquettes, valeurs et info-bulles descendantes et peut déplacer le focus vers le résultat sélectionné.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_SEARCH_QUERY" Language="fr_FR">
+      <Text>Dans le mode de recherche standard, les mots séparés sont des termes requis : chaque terme saisi doit correspondre. Faites précéder un terme de deux traits d'union pour exclure ses correspondances, par exemple cavalerie --légère. Un écran utilisant un fournisseur de recherche en texte intégral peut à la place transmettre la requête complète, préservant le classement par phrase et l'aperçu de ce fournisseur.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_SEARCH_PANEL_KEYS" Language="fr_FR">
+      <Text>Dans le panneau de recherche, tapez dans la zone d'édition pour mettre à jour les résultats. Tab et Maj plus Tab se déplacent entre la zone d'édition et les résultats. Entrée depuis la zone d'édition active le premier résultat ; Entrée sur un résultat active ce résultat. Page précédente et Page suivante dans la zone d'édition parcourent jusqu'à dix recherches récentes pour ce contexte de recherche. Échap ferme le panneau, et taper ou Retour arrière pendant la consultation des résultats est transféré à la zone d'édition.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_SEARCH_SETTINGS" Language="fr_FR">
+      <Text>Les paramètres du mod d'accessibilité contrôlent si la recherche à la frappe inclut les info-bulles, si Haut et Bas naviguent dans les résultats persistants, le délai de recherche non persistante, et si le premier résultat de Ctrl plus F reçoit le focus automatiquement.</Text>
+    </Replace>
+
+    <!-- UI widgets -->
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_BUTTON_TITLE" Language="fr_FR">
+      <Text>Bouton</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_BUTTON_FUNCTION" Language="fr_FR">
+      <Text>Un bouton représente une action. L'énoncé du focus peut inclure son étiquette, son rôle de bouton, son état désactivé, sa position et son info-bulle. Appuyez sur Entrée ou Espace pour effectuer l'action. Un bouton désactivé reste lisible mais ne peut pas être activé.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_BUTTON_KEYS" Language="fr_FR">
+      <Text>Appuyez sur Entrée ou Espace pour activer. Un bouton désactivé consomme l'activation sans exécuter son action.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_CHECKBOX_TITLE" Language="fr_FR">
+      <Text>Case à cocher</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_CHECKBOX_FUNCTION" Language="fr_FR">
+      <Text>Une case à cocher représente un paramètre ou une option booléenne et annonce Cochée ou Décochée comme valeur. La modifier met à jour la valeur sous-jacente de l'écran et annonce la nouvelle valeur.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_CHECKBOX_KEYS" Language="fr_FR">
+      <Text>Appuyez sur Entrée ou Espace pour basculer la case à cocher. Une case à cocher désactivée reste lisible mais ne change pas.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_DIALOG_TITLE" Language="fr_FR">
+      <Text>Boîte de dialogue</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_DIALOG_FUNCTION" Language="fr_FR">
+      <Text>Une boîte de dialogue est un groupe modal de lignes de contenu suivi d'une rangée de boutons d'action. La rangée de boutons est une aide à la navigation et n'est pas annoncée comme un conteneur supplémentaire.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_DIALOG_NAVIGATION" Language="fr_FR">
+      <Text>Utilisez Tab ou Bas pour aller à la ligne de dialogue suivante et Maj plus Tab ou Haut pour aller à la ligne précédente. Appuyez sur Début pour sauter au premier contrôle et Fin pour sauter au dernier contrôle. La rangée de boutons de la boîte de dialogue regroupe les actions disponibles à la fin de son contenu.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_DIALOG_ACTIONS" Language="fr_FR">
+      <Text>Appuyez sur Entrée depuis le contenu d'une boîte de dialogue pour exécuter le bouton par défaut désigné lorsqu'il est visible et activé. Entrée ou Espace sur un bouton ciblé exécute ce bouton. Échap ferme la majorité des boîtes de dialogue, bien qu'une boîte de dialogue individuelle puisse le réserver ou le bloquer lorsque la fermeture n'est pas autorisée.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_DROPDOWN_TITLE" Language="fr_FR">
+      <Text>Menu déroulant</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_DROPDOWN_FUNCTION" Language="fr_FR">
+      <Text>Un menu déroulant fermé annonce son étiquette et l'option validée. L'ouvrir présente les options sous forme de liste et cible d'abord l'option validée, ou la première option lorsqu'aucun élément validé n'est disponible.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_DROPDOWN_KEYS" Language="fr_FR">
+      <Text>Appuyez sur Entrée sur le menu déroulant fermé pour l'ouvrir. Dans la liste ouverte, utilisez Haut, Bas, Début, Fin, Page précédente, Page suivante ou la recherche à la frappe pour trouver une option. Appuyez sur Échap pour fermer sans changer la valeur validée.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_DROPDOWN_COMMIT" Language="fr_FR">
+      <Text>Appuyez sur Entrée sur une option pour la valider, mettre à jour la valeur sous-jacente, fermer la liste et rendre le focus au menu déroulant. Les options cachées sont ignorées. Les options désactivées restent lisibles mais ne peuvent pas être validées. Quitter le menu déroulant ferme une liste ouverte sans changer le focus.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_TITLE" Language="fr_FR">
+      <Text>Zone d'édition</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_FUNCTION" Language="fr_FR">
+      <Text>Une zone d'édition contient du texte et suit un tampon d'édition, un curseur et une sélection. L'énoncé du focus lit la sélection actuelle ou la ligne contenant le curseur au lieu de répéter une valeur multiligne entière. Les champs de mot de passe énoncent des caractères de masquage.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_ENTRY" Language="fr_FR">
+      <Text>Les zones d'édition ont deux styles d'interaction. Une zone d'édition toujours active entre en édition dès qu'elle reçoit le focus et le reste, de sorte que vous pouvez taper immédiatement. Une zone d'édition nécessitant une activation est lue sans édition jusqu'à ce que vous appuyiez sur Entrée ; appuyez de nouveau sur Entrée pour valider ou Échap pour annuler.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_HINT" Language="fr_FR">
+      <Text>L'info-bulle identifie le style d'interaction. Une zone d'édition toujours active commence son info-bulle par Tapez du texte. Une zone d'édition inactive nécessitant une activation commence son info-bulle par Appuyez sur Entrée pour modifier. Une fois cette zone en cours d'édition active, l'indication d'activation n'est plus incluse.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_MOVEMENT" Language="fr_FR">
+      <Text>Gauche et Droite se déplacent par caractère ; Ctrl plus Gauche ou Droite se déplace par mot. Haut et Bas se déplacent entre les lignes. Début et Fin se déplacent au début ou à la fin de la ligne actuelle ; Ctrl plus Début ou Fin se déplace au début ou à la fin du texte.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_SELECTION" Language="fr_FR">
+      <Text>Ajoutez Maj à Gauche, Droite, Haut, Bas, Début ou Fin pour étendre la sélection par ce déplacement. Ctrl plus Maj plus Gauche ou Droite sélectionne par mot, et Ctrl plus Maj plus Début ou Fin sélectionne jusqu'au début ou à la fin du texte. Ctrl plus A sélectionne tout le texte.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_EDITBOX_EDITING" Language="fr_FR">
+      <Text>Retour arrière et Suppr retirent un caractère ou la sélection. Ctrl plus Retour arrière et Ctrl plus Suppr retirent par mot. Ctrl plus C copie la sélection, ou le caractère au niveau du curseur lorsque rien n'est sélectionné. Ctrl plus V colle lorsque le champ est modifiable. Les zones d'édition en lecture seule autorisent le déplacement, la sélection et la copie mais n'acceptent pas de modifications.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_GAMEVIEW_TITLE" Language="fr_FR">
+      <Text>Vue de jeu</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_GAMEVIEW_FUNCTION" Language="fr_FR">
+      <Text>La vue de jeu est l'arrêt de focus d'accessibilité pour la carte du monde jouable. Y entrer bascule l'entrée des contrôles de menu vers le contexte d'entrée Monde de Civilization VI ; en sortir rend l'entrée au contexte Shell d'accessibilité.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_GAMEVIEW_KEYS" Language="fr_FR">
+      <Text>La vue de jeu n'ajoute aucune touche de navigation propre. Tant qu'elle est ciblée, utilisez les actions de jeu assignées normales et les contrôles contextuels exposés dans la vue du monde. Utilisez Ctrl plus H ou Maj plus F1 pour les commandes actuellement disponibles à cet emplacement de focus.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_INTERFACEMODE_TITLE" Language="fr_FR">
+      <Text>Mode d'interface</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_INTERFACEMODE_FUNCTION" Language="fr_FR">
+      <Text>Un mode d'interface représente une tâche temporaire sur la carte du monde, comme choisir une cible, une destination ou un placement. Tant qu'il est ciblé, utilisez les contrôles du monde normaux pour accomplir ou annuler cette tâche.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_INTERFACEMODE_KEYS" Language="fr_FR">
+      <Text>Le widget lui-même n'ajoute aucune touche d'action universelle. Ses enfants et le mode de jeu actif définissent les commandes de confirmation, d'annulation, de ciblage ou de placement. Utilisez Ctrl plus H ou Maj plus F1 pour l'ensemble des commandes en direct.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_LIST_TITLE" Language="fr_FR">
+      <Text>Liste</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_LIST_FUNCTION" Language="fr_FR">
+      <Text>Une liste présente une séquence verticale d'éléments visibles. Les éléments cachés sont ignorés. Les éléments désactivés peuvent rester dans la séquence afin que leurs informations et leur état désactivé puissent être lus.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_LIST_KEYS" Language="fr_FR">
+      <Text>Utilisez Haut et Bas pour déplacer d'un élément, Début et Fin pour aller au premier ou dernier élément, et Page précédente ou Page suivante pour déplacer de la taille de page configurée de la liste. Les listes s'enroulent aux extrémités par défaut, bien qu'un écran puisse désactiver l'enroulement.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_LIST_SEARCH" Language="fr_FR">
+      <Text>Les listes activent la recherche à la frappe et la recherche Ctrl plus F par défaut. La recherche à la frappe examine chaque ligne et les informations de ses lignes imbriquées. Tant qu'une requête persistante est active, Haut et Bas parcourent les correspondances classées au lieu des éléments adjacents ordinaires.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_PANEL_TITLE" Language="fr_FR">
+      <Text>Panneau</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_PANEL_FUNCTION" Language="fr_FR">
+      <Text>Un panneau regroupe des contrôles enfants liés et constitue généralement le conteneur principal d'un écran. Les panneaux peuvent aussi être imbriqués pour diviser un écran en groupes plus petits. Lorsqu'il est entré avec Tab, un panneau commence à son premier enfant visible ; lorsqu'il est entré en arrière avec Maj plus Tab, il commence au dernier. Une réentrée programmée peut restaurer son enfant mémorisé.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_PANEL_KEYS" Language="fr_FR">
+      <Text>Utilisez Tab et Maj plus Tab pour naviguer entre les enfants visibles du panneau ; c'est la navigation de premier niveau habituelle sur les écrans d'accessibilité. Les panneaux s'enroulent à leurs extrémités par défaut à moins qu'un écran ne désactive l'enroulement. Un panneau transparent uniquement de mise en page n'apporte aucun énoncé supplémentaire.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_SEARCHPANEL_TITLE" Language="fr_FR">
+      <Text>Panneau de recherche</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_SEARCHPANEL_FUNCTION" Language="fr_FR">
+      <Text>Le panneau de recherche est la surcouche ouverte par Ctrl plus F sur un conteneur recherchable. Il contient un champ de recherche toujours en édition et une liste de résultats. Les recherches standard indexent les étiquettes, valeurs et info-bulles descendantes ; un écran peut fournir un fournisseur de recherche spécialisé.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_SEARCHPANEL_QUERY" Language="fr_FR">
+      <Text>Les recherches standard exigent chaque terme séparé par une espace et excluent un terme précédé de deux traits d'union. Les résultats se mettent à jour à mesure que le tampon d'édition change. Activer un résultat ferme le panneau et déplace le focus vers le widget correspondant ou exécute l'action définie par l'écran pour ce résultat.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_SEARCHPANEL_KEYS" Language="fr_FR">
+      <Text>Utilisez Tab et Maj plus Tab entre la zone d'édition et les résultats. Entrée dans la zone d'édition active le premier résultat ; Entrée sur un résultat active ce résultat. Page précédente et Page suivante dans la zone d'édition parcourent les recherches plus anciennes et plus récentes. Échap ferme le panneau. Les caractères imprimables et Retour arrière tapés depuis la liste de résultats sont transférés à la zone d'édition.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_SLIDER_TITLE" Language="fr_FR">
+      <Text>Curseur de réglage</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_SLIDER_FUNCTION" Language="fr_FR">
+      <Text>Un curseur de réglage représente une valeur numérique avec un minimum, un maximum, un pas normal et un pas de page. Chaque changement est limité à la plage autorisée, écrit dans la valeur sous-jacente de l'écran et annoncé.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_SLIDER_KEYS" Language="fr_FR">
+      <Text>Utilisez Gauche et Droite pour diminuer ou augmenter d'un pas. Page suivante et Page précédente diminuent ou augmentent du pas de page. Début règle le minimum et Fin règle le maximum. Ces touches sont consommées même lorsque la valeur est déjà à une limite.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_STATICTEXT_TITLE" Language="fr_FR">
+      <Text>Texte statique</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_STATICTEXT_FUNCTION" Language="fr_FR">
+      <Text>Le texte statique est un arrêt de focus en lecture seule pour les titres, descriptions, lignes d'état et autres informations. Son rôle n'est volontairement pas énoncé. Si un écran fournit à la fois du texte et une info-bulle, l'info-bulle est ajoutée au texte comme une ligne supplémentaire au lieu de devenir un canal de lecture d'info-bulle distinct.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_STATICTEXT_KEYS" Language="fr_FR">
+      <Text>Le texte statique n'a pas de touches d'activation ou de navigation propres au widget. Utilisez le panneau, la liste, l'arborescence, le tableau, la page d'onglet ou la boîte de dialogue qui le contient pour aller à l'élément suivant.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_SUBMENU_TITLE" Language="fr_FR">
+      <Text>Sous-menu</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_SUBMENU_FUNCTION" Language="fr_FR">
+      <Text>Un sous-menu est un groupe de menu repliable. Replié, il constitue un seul arrêt de focus et ses descendants ne sont pas entrés. Déplié, il expose ses contrôles enfants et peut restaurer un enfant précédemment ciblé lors de la réentrée.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_SUBMENU_KEYS" Language="fr_FR">
+      <Text>Appuyez sur Entrée ou Droite pour déplier et entrer dans le premier enfant. Appuyez sur Gauche depuis n'importe où dans le sous-menu déplié pour replier tout le sous-arbre de descendants et rendre le focus au sous-menu. Une fois déplié, utilisez Haut, Bas, Début, Fin, Page précédente et Page suivante pour naviguer entre ses enfants.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TAB_TITLE" Language="fr_FR">
+      <Text>Onglet</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TAB_FUNCTION" Language="fr_FR">
+      <Text>Un onglet est un en-tête ciblable associé à une page dans un contrôle à onglets. Cibler un onglet rend immédiatement sa page active ; aucune commande d'activation distincte n'est requise.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TAB_KEYS" Language="fr_FR">
+      <Text>Dans la bande d'onglets, utilisez Gauche et Droite pour cibler l'onglet précédent ou suivant et changer de page. Début et Fin vont au premier ou dernier onglet, et Page précédente ou Page suivante déplacent de la taille de page de la bande. Tab entre dans la page active ; Maj plus Tab quitte le contrôle à onglets en arrière.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TABCONTROL_TITLE" Language="fr_FR">
+      <Text>Contrôle à onglets</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TABCONTROL_FUNCTION" Language="fr_FR">
+      <Text>Un contrôle à onglets possède une bande d'onglets et plusieurs pages associées. Seule la page active est montée dans l'arborescence accessible, si bien que la navigation et la recherche n'entrent pas dans les pages cachées. Déplacer le focus vers un onglet change immédiatement la page active.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TABCONTROL_KEYS" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus Tab pour sélectionner la page suivante et Ctrl plus Maj plus Tab pour sélectionner la page précédente depuis n'importe où à l'intérieur du contrôle. Le défilement des pages s'enroule de la dernière page à la première et de la première à la dernière.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TABCONTROL_TRAVERSAL" Language="fr_FR">
+      <Text>L'entrée avant par Tab arrive dans la bande d'onglets. Tab depuis la bande entre dans le premier contrôle de la page active. Maj plus Tab depuis la page revient à son onglet actif. Tab depuis le dernier contrôle de la page quitte le contrôle à onglets vers l'avant, et Maj plus Tab depuis la bande le quitte en arrière.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TABPAGE_TITLE" Language="fr_FR">
+      <Text>Page d'onglet</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TABPAGE_FUNCTION" Language="fr_FR">
+      <Text>Une page d'onglet est le conteneur des contrôles d'un onglet. Elle n'est disponible que tant que son onglet associé est actif. La page n'annonce pas de position parmi les pages sœurs car les pages inactives sont hors de l'arborescence accessible actuelle.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TABPAGE_KEYS" Language="fr_FR">
+      <Text>Utilisez Tab et Maj plus Tab entre les enfants visibles de la page. L'entrée avant commence au premier enfant et l'entrée arrière commence au dernier. La page ne s'enroule pas : le déplacement aux limites est transmis au contrôle à onglets afin que le focus puisse revenir à la bande d'onglets ou quitter le contrôle.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TABLE_TITLE" Language="fr_FR">
+      <Text>Tableaux et grilles</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_GRAPH_TITLE" Language="fr_FR">
+      <Text>Graphe</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_GRAPH_FUNCTION" Language="fr_FR">
+      <Text>Un graphe représente des relations dirigées entre éléments. Dans les vues Graphe des technologies et des dogmes, chaque connexion va d'un prérequis à un élément qu'il débloque. Les groupes d'ère font partie du chemin de focus, si bien qu'entrer dans une autre ère l'annonce automatiquement.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_GRAPH_KEYS" Language="fr_FR">
+      <Text>Appuyez sur Droite pour suivre la première connexion sortante et Gauche pour suivre la première connexion entrante. Après l'un ou l'autre déplacement, Haut et Bas font défiler les autres alternatives de cette même connexion et s'enroulent aux extrémités. Lorsque Gauche arrive sur une racine sans connexion entrante, les alternatives deviennent toutes les racines visibles. Début et Fin vont à la première et à la dernière alternative actuelle. Ctrl plus Début et Ctrl plus Fin vont à la première et à la dernière racine visible.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_GRAPH_SEARCH" Language="fr_FR">
+      <Text>Commencez à taper pour rechercher les nœuds de graphe visibles, y compris le texte d'info-bulle lorsque ce paramètre est activé. Tant qu'une requête est active, Haut et Bas parcourent les correspondances de recherche classées avant les alternatives de graphe ordinaires. La recherche, la restauration du focus et les sauts directs déplacent tous le focus normal du gestionnaire d'interface ; la commande de graphe suivante continue depuis l'élément réellement ciblé.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TABLE_FUNCTION" Language="fr_FR">
+      <Text>Les tableaux et les grilles organisent tous deux les informations en cellules, prennent en charge le déplacement directionnel, ignorent les cellules cachées, ne s'enroulent pas pendant la navigation ordinaire, et prennent en charge la recherche à la frappe avec des résultats classés par Haut et Bas. Leur différence réside dans la structure qu'ils représentent.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TABLE_TABLES" Language="fr_FR">
+      <Text>Un tableau contient des enregistrements uniformes disposés en lignes et en colonnes étiquetées. Haut et Bas se déplacent entre les enregistrements de la colonne actuelle ; Gauche et Droite changent de colonne. Début et Fin vont au premier ou dernier enregistrement de la colonne. Maj plus Début et Maj plus Fin vont à la première ou dernière colonne de la ligne actuelle, tandis que Ctrl plus Début ou Ctrl plus Fin vont à la première ou dernière cellule. Un tableau peut exposer des en-têtes de colonne triables : appuyez sur Entrée ou Espace sur l'un d'eux pour faire défiler ses ordres de tri disponibles. Un en-tête trié indique l'ordre réel, comme de A à Z, du plus proche au plus lointain, ou du plus élevé au plus bas. La recherche à la frappe ne cherche que dans les étiquettes de ligne principales et conserve la colonne actuelle.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TABLE_GRIDS" Language="fr_FR">
+      <Text>Une grille représente une disposition visuelle ou de progression dont les colonnes peuvent contenir plusieurs niveaux côte à côte et dont les cellules peuvent avoir des rôles différents. Haut et Bas se déplacent au sein d'un niveau ; Gauche et Droite traversent les niveaux en conservant la position de ligne la plus proche. Début et Fin vont aux limites du niveau. Ctrl plus Gauche ou Ctrl plus Droite saute entre les colonnes, tandis que Ctrl plus Début ou Ctrl plus Fin va à la première ou dernière cellule de la grille. Traverser une colonne annonce son en-tête. Les grilles ne proposent pas de tri.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TABLE_TYPEAHEAD" Language="fr_FR">
+      <Text>Commencez à taper pour trouver du contenu. Un tableau cherche dans les étiquettes de ligne sans chercher dans ses valeurs, états, en-têtes ou info-bulles individuels. Une grille cherche dans chaque cellule et inclut les correspondances d'info-bulle uniquement lorsque ce paramètre est activé. Tant qu'une requête est active, Haut et Bas parcourent les correspondances classées et s'enroulent aux extrémités. Répéter une lettre initiale fait défiler ses correspondances, Retour arrière modifie la requête, et Échap l'efface.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TREE_TITLE" Language="fr_FR">
+      <Text>Arborescence</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TREE_FUNCTION" Language="fr_FR">
+      <Text>Une arborescence présente des lignes hiérarchiques sous forme d'une seule séquence visible en ordre préfixe. Les descendants repliés sont exclus. Les lignes de branche annoncent Replié, ou Déplié plus leur nombre d'enfants visibles ; les lignes terminales n'ont pas d'état de déploiement.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TREE_KEYS" Language="fr_FR">
+      <Text>Utilisez Haut et Bas pour vous déplacer entre les lignes visibles et Page précédente ou Page suivante pour vous déplacer d'une page. Droite déplie une branche repliée ou descend dans une branche dépliée. Gauche replie une branche dépliée ou va à son parent. La navigation dans l'arborescence ne s'enroule pas.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TREE_EDGES" Language="fr_FR">
+      <Text>Début et Fin vont à la première ou dernière ligne de la profondeur actuelle lorsque le paramètre Début et Fin à la profondeur actuelle est activé ; sinon, ils vont à la première ou dernière ligne de toute l'arborescence. Ctrl plus Début et Ctrl plus Fin vont toujours aux extrémités de toute l'arborescence.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TREE_SEARCH" Language="fr_FR">
+      <Text>Les arborescences activent la recherche à la frappe et la recherche Ctrl plus F par défaut, en examinant les informations imbriquées. Tant qu'une requête persistante est active, Haut et Bas parcourent les correspondances classées. Entrée est résolu par l'élément d'arborescence ciblé : il active un élément actionnable, ou bascule une branche sans action.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TREEITEM_TITLE" Language="fr_FR">
+      <Text>Élément d'arborescence</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TREEITEM_FUNCTION" Language="fr_FR">
+      <Text>Un élément d'arborescence est une ligne d'une arborescence et peut être une branche ou une feuille. Une branche annonce si elle est dépliée ; une branche dépliée annonce aussi son nombre d'enfants visibles. Replier une branche replie récursivement ses descendants afin qu'un déploiement ultérieur commence par un seul niveau propre.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TREEITEM_KEYS" Language="fr_FR">
+      <Text>Le déplacement dans la hiérarchie appartient à l'arborescence conteneur : Droite déplie ou entre, Gauche replie ou remonte, et Haut ou Bas se déplace entre les lignes visibles. Ces commandes restent disponibles même lorsqu'une branche possède aussi une action.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PEDIA_WIDGET_TREEITEM_ACTION" Language="fr_FR">
+      <Text>Appuyez sur Entrée sur un élément d'arborescence doté d'une action définie par l'écran pour exécuter cette action. Sinon, Entrée remonte vers l'arborescence et bascule la branche. Cela signifie qu'une branche actionnable est activée avec Entrée et dépliée ou repliée avec Droite et Gauche. Les éléments actionnables désactivés ne s'exécutent pas.</Text>
+    </Replace>
+  </LocalizedText>
+</GameData>

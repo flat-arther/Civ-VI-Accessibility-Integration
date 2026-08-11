@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Localized mod metadata (Name / Teaser / Description / Authors) shown in the
+     in-game Additional Content / Mods browser. Referenced from
+     CivViAccess.modinfo <Properties>. -->
+<GameData>
+  <LocalizedText>
+    <!-- ENGLISH -->
+    <Row Tag="LOC_CAI_MOD_TITLE" Language="en_US">
+      <Text>Civ VI Accessibility Integration</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOD_TEASER" Language="en_US">
+      <Text>Blind accessibility mod for Civilization VI</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOD_DESCRIPTION" Language="en_US">
+      <Text>Civilization VI Accessibility Integration makes Sid Meier's Civilization VI playable with a screen reader. It adds spoken information and keyboard navigation to the game's menus, dialogs, screens, and other user-interface elements.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOD_AUTHORS" Language="en_US">
+      <Text>FlatArther and Hamada</Text>
+    </Row>
+  </LocalizedText>
+</GameData>

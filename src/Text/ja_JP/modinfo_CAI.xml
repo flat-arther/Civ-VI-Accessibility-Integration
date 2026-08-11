@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Localized mod metadata (Name / Teaser / Description / Authors) shown in the
+     in-game Additional Content / Mods browser. Referenced from
+     CivViAccess.modinfo <Properties>. -->
+<GameData>
+  <LocalizedText>
+    <!-- JAPANESE -->
+    <Replace Tag="LOC_CAI_MOD_TITLE" Language="ja_JP">
+      <Text>Civ VI アクセシビリティ統合</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOD_TEASER" Language="ja_JP">
+      <Text>Civilization VI 用の視覚障害者向けアクセシビリティMOD</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOD_DESCRIPTION" Language="ja_JP">
+      <Text>Civ VI アクセシビリティ統合は、『Sid Meier's Civilization VI』をスクリーンリーダーでプレイできるようにします。ゲームのメニュー、ダイアログ、画面、その他のユーザーインターフェース要素に、音声情報とキーボード操作を追加します。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOD_AUTHORS" Language="ja_JP">
+      <Text>FlatArther と Hamada</Text>
+    </Replace>
+  </LocalizedText>
+</GameData>

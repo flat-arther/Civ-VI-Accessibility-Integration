@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Localized mod metadata (Name / Teaser / Description / Authors) shown in the
+     in-game Additional Content / Mods browser. Referenced from
+     CivViAccess.modinfo <Properties>. -->
+<GameData>
+  <LocalizedText>
+    <!-- 简体中文 -->
+    <Replace Tag="LOC_CAI_MOD_TITLE" Language="zh_Hans_CN">
+      <Text>文明VI无障碍集成</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOD_TEASER" Language="zh_Hans_CN">
+      <Text>《文明VI》盲人无障碍模组</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOD_DESCRIPTION" Language="zh_Hans_CN">
+      <Text>文明VI无障碍集成让《席德·梅尔的文明VI》能够通过屏幕阅读器进行游戏。它为游戏的菜单、对话框、界面以及其他用户界面元素添加了语音信息和键盘导航。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOD_AUTHORS" Language="zh_Hans_CN">
+      <Text>FlatArther 和 Hamada</Text>
+    </Replace>
+  </LocalizedText>
+</GameData>

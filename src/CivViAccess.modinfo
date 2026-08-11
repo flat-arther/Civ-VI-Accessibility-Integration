@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Mod id="9f4b5c2e-1a2b-4c3d-8e9f-123456789abc" version="1.0.1">
   <Properties>
-    <Name>Civ VI Accessibility Integration</Name>
-    <Description>Civilization VI Accessibility Integration makes Sid Meier's Civilization VI playable with a screen reader. It adds spoken information and keyboard navigation to the game's menus, dialogs, screens, and other user-interface elements.</Description>
-    <Teaser>Blind accessibility mod for civilization VI</Teaser>
-    <Authors>FlatArther and Hamada</Authors>
+    <Name>LOC_CAI_MOD_TITLE</Name>
+    <Description>LOC_CAI_MOD_DESCRIPTION</Description>
+    <Teaser>LOC_CAI_MOD_TEASER</Teaser>
+    <Authors>LOC_CAI_MOD_AUTHORS</Authors>
     <AffectsSavedGames>0</AffectsSavedGames>
     <CompatibleVersions>2.0</CompatibleVersions>
   </Properties>
@@ -247,6 +247,24 @@
     <File>Text/zh_Hans_CN/TutorialText_CAI.xml</File>
     <File>Text/zh_Hans_CN/hotkey_symbol_names.sql</File>
     <File>Text/zh_Hans_CN/tutorial_advisor_text_CAI.sql</File>
+    <File>Text/fr_FR/cai_text_ui.xml</File>
+    <File>Text/fr_FR/AccessibilityPediaText_CAI.xml</File>
+    <File>Text/fr_FR/TutorialText_CAI.xml</File>
+    <File>Text/fr_FR/hotkey_symbol_names.sql</File>
+    <File>Text/fr_FR/tutorial_advisor_text_CAI.sql</File>
+    <!-- Localized mod metadata (Name/Teaser/Description/Authors) -->
+    <File>Text/en_US/modinfo_CAI.xml</File>
+    <File>Text/de_DE/modinfo_CAI.xml</File>
+    <File>Text/es_ES/modinfo_CAI.xml</File>
+    <File>Text/fr_FR/modinfo_CAI.xml</File>
+    <File>Text/it_IT/modinfo_CAI.xml</File>
+    <File>Text/ja_JP/modinfo_CAI.xml</File>
+    <File>Text/ko_KR/modinfo_CAI.xml</File>
+    <File>Text/pl_PL/modinfo_CAI.xml</File>
+    <File>Text/pt_BR/modinfo_CAI.xml</File>
+    <File>Text/ru_RU/modinfo_CAI.xml</File>
+    <File>Text/zh_Hans_CN/modinfo_CAI.xml</File>
+    <File>Text/zh_Hant_HK/modinfo_CAI.xml</File>
   </Files>
   <!-- FRONTEND -->
   <FrontEndActions>
@@ -259,6 +277,22 @@
       <File>Text/zh_Hans_CN/AccessibilityPediaText_CAI.xml</File>
       <File>Text/zh_Hans_CN/TutorialText_CAI.xml</File>
       <File>Text/zh_Hans_CN/hotkey_symbol_names.sql</File>
+      <File>Text/fr_FR/cai_text_ui.xml</File>
+      <File>Text/fr_FR/AccessibilityPediaText_CAI.xml</File>
+      <File>Text/fr_FR/TutorialText_CAI.xml</File>
+      <File>Text/fr_FR/hotkey_symbol_names.sql</File>
+      <File>Text/en_US/modinfo_CAI.xml</File>
+      <File>Text/de_DE/modinfo_CAI.xml</File>
+      <File>Text/es_ES/modinfo_CAI.xml</File>
+      <File>Text/fr_FR/modinfo_CAI.xml</File>
+      <File>Text/it_IT/modinfo_CAI.xml</File>
+      <File>Text/ja_JP/modinfo_CAI.xml</File>
+      <File>Text/ko_KR/modinfo_CAI.xml</File>
+      <File>Text/pl_PL/modinfo_CAI.xml</File>
+      <File>Text/pt_BR/modinfo_CAI.xml</File>
+      <File>Text/ru_RU/modinfo_CAI.xml</File>
+      <File>Text/zh_Hans_CN/modinfo_CAI.xml</File>
+      <File>Text/zh_Hant_HK/modinfo_CAI.xml</File>
     </UpdateText>
 
     <UpdateDatabase id="FRONTEND_CAI_CONFIG">
@@ -365,6 +399,23 @@
       <File>Text/zh_Hans_CN/TutorialText_CAI.xml</File>
       <File>Text/zh_Hans_CN/hotkey_symbol_names.sql</File>
       <File>Text/zh_Hans_CN/tutorial_advisor_text_CAI.sql</File>
+      <File>Text/fr_FR/cai_text_ui.xml</File>
+      <File>Text/fr_FR/AccessibilityPediaText_CAI.xml</File>
+      <File>Text/fr_FR/TutorialText_CAI.xml</File>
+      <File>Text/fr_FR/hotkey_symbol_names.sql</File>
+      <File>Text/fr_FR/tutorial_advisor_text_CAI.sql</File>
+      <File>Text/en_US/modinfo_CAI.xml</File>
+      <File>Text/de_DE/modinfo_CAI.xml</File>
+      <File>Text/es_ES/modinfo_CAI.xml</File>
+      <File>Text/fr_FR/modinfo_CAI.xml</File>
+      <File>Text/it_IT/modinfo_CAI.xml</File>
+      <File>Text/ja_JP/modinfo_CAI.xml</File>
+      <File>Text/ko_KR/modinfo_CAI.xml</File>
+      <File>Text/pl_PL/modinfo_CAI.xml</File>
+      <File>Text/pt_BR/modinfo_CAI.xml</File>
+      <File>Text/ru_RU/modinfo_CAI.xml</File>
+      <File>Text/zh_Hans_CN/modinfo_CAI.xml</File>
+      <File>Text/zh_Hant_HK/modinfo_CAI.xml</File>
     </UpdateText>
     <UpdateDatabase id="INGAME_CAI_CONFIG">
       <File>data/unitOperationConfig_CAI.sql</File>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Localized mod metadata (Name / Teaser / Description / Authors) shown in the
+     in-game Additional Content / Mods browser. Referenced from
+     CivViAccess.modinfo <Properties>. -->
+<GameData>
+  <LocalizedText>
+    <!-- KOREAN -->
+    <Replace Tag="LOC_CAI_MOD_TITLE" Language="ko_KR">
+      <Text>Civ VI 접근성 통합</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOD_TEASER" Language="ko_KR">
+      <Text>Civilization VI를 위한 시각 장애인용 접근성 모드</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOD_DESCRIPTION" Language="ko_KR">
+      <Text>Civ VI 접근성 통합은 『시드 마이어의 문명 VI』를 스크린 리더로 플레이할 수 있게 해 줍니다. 게임의 메뉴, 대화 상자, 화면 및 기타 사용자 인터페이스 요소에 음성 정보와 키보드 탐색을 추가합니다.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOD_AUTHORS" Language="ko_KR">
+      <Text>FlatArther 및 Hamada</Text>
+    </Replace>
+  </LocalizedText>
+</GameData>

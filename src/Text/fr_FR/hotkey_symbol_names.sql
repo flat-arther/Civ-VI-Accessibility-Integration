@@ -1,0 +1,12 @@
+UPDATE LocalizedText SET Text = 'Trait de soulignement' WHERE Tag = 'LOC_OPTIONS_KEY_UNDERSCORE' AND Language = 'fr_FR';
+UPDATE LocalizedText SET Text = 'Point-virgule' WHERE Tag = 'LOC_OPTIONS_KEY_SEMICOLON' AND Language = 'fr_FR';
+UPDATE LocalizedText SET Text = 'Égal' WHERE Tag = 'LOC_OPTIONS_KEY_PLUS' AND Language = 'fr_FR';
+UPDATE LocalizedText SET Text = 'Virgule' WHERE Tag = 'LOC_OPTIONS_KEY_COMMA' AND Language = 'fr_FR';
+UPDATE LocalizedText SET Text = 'Moins' WHERE Tag = 'LOC_OPTIONS_KEY_MINUS' AND Language = 'fr_FR';
+UPDATE LocalizedText SET Text = 'Point' WHERE Tag = 'LOC_OPTIONS_KEY_PERIOD' AND Language = 'fr_FR';
+UPDATE LocalizedText SET Text = 'Barre oblique' WHERE Tag = 'LOC_OPTIONS_KEY_SLASH' AND Language = 'fr_FR';
+UPDATE LocalizedText SET Text = 'Tilde' WHERE Tag = 'LOC_OPTIONS_KEY_TILDE' AND Language = 'fr_FR';
+UPDATE LocalizedText SET Text = 'Crochet gauche' WHERE Tag = 'LOC_OPTIONS_KEY_LBRACKET' AND Language = 'fr_FR';
+UPDATE LocalizedText SET Text = 'Barre oblique inverse' WHERE Tag = 'LOC_OPTIONS_KEY_BACKSLASH' AND Language = 'fr_FR';
+UPDATE LocalizedText SET Text = 'Crochet droit' WHERE Tag = 'LOC_OPTIONS_KEY_RBRACKET' AND Language = 'fr_FR';
+UPDATE LocalizedText SET Text = 'Guillemet' WHERE Tag = 'LOC_OPTIONS_KEY_QUOTE' AND Language = 'fr_FR';

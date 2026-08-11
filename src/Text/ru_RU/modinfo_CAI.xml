@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Localized mod metadata (Name / Teaser / Description / Authors) shown in the
+     in-game Additional Content / Mods browser. Referenced from
+     CivViAccess.modinfo <Properties>. -->
+<GameData>
+  <LocalizedText>
+    <!-- RUSSIAN -->
+    <Replace Tag="LOC_CAI_MOD_TITLE" Language="ru_RU">
+      <Text>Интеграция специальных возможностей для Civ VI</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOD_TEASER" Language="ru_RU">
+      <Text>Мод доступности для незрячих игроков Civilization VI</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOD_DESCRIPTION" Language="ru_RU">
+      <Text>«Интеграция специальных возможностей для Civilization VI» позволяет играть в Sid Meier's Civilization VI с помощью программы чтения с экрана. Она добавляет озвучивание и навигацию с клавиатуры в меню, диалоги, экраны и другие элементы интерфейса игры.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOD_AUTHORS" Language="ru_RU">
+      <Text>FlatArther и Hamada</Text>
+    </Replace>
+  </LocalizedText>
+</GameData>
