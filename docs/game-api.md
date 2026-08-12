@@ -2018,7 +2018,25 @@ CAI implementation:
 ## Modding
 
 - `Modding.IsModInstalled(modGuid)` — checks if a mod is active
+- `Modding.IsModActive(modGuid)` — used by `Civ6Common.IsExpansion1Active`/`IsExpansion2Active`; `caiUtils.IsBetterTradeScreenActive()` uses it with the Better Trade Screen UUID `8d4fa23a-ef43-440c-8422-2bec11f8f5d7`.
 - `Modding.CheckRequirements(mods, saveType)` — validates mod compatibility
+
+## Better Trade Screen (mod) integration
+
+Better Trade Screen (astog, UUID `8d4fa23a-ef43-440c-8422-2bec11f8f5d7`) is a full rewrite of the three vanilla trade contexts. It does not use `ReplaceUIScript`; its `<ImportFiles>` overrides the vanilla files under the same VFS leaf names (`TradeRouteChooser`, `TradeOverview`, `TradeOriginChooser`) plus a new shared `TradeSupport.lua`. So a CAI `include("TradeRouteChooser")` resolves to the BTS rewrite when the mod is active. The CAI trade `_CAI.lua` files branch on `IsBetterTradeScreenActive()`: when true they `return` after including a mod-specific layer (`TradeRouteChooser_BetterTradeScreen_CAI.lua`), which must be registered in both the top-level `<File>` list and `<ImportFiles id="CAIInGame">` because it is pulled by a runtime `include()`.
+
+BTS API differences from vanilla (all break the vanilla wraps):
+- Route chooser populates via `AddRouteToDestinationStack(routeInfo)`, not `AddCityToDestinationStack(city)`; there is no `GetOriginCity()` or `GetYieldsForRoute()`.
+- Overview uses `AddRouteInstanceFromRouteInfo(routeInfo)`, `AddChooseRouteButtonInstance`, `AddProduceTradeUnitButtonInstance` (vanilla names without the `Instance` suffix are gone) and adds a group-by pulldown.
+- Origin chooser `AddCity(cityID:number)` takes a city id, not a city table.
+
+Shared `TradeSupport.lua` globals reused by the CAI layer (all non-`local`):
+- `SORT_BY_ID` (FOOD=1..FAITH=6, TURNS_TO_COMPLETE=7, ORIGIN_NAME=8, DESTINATION_NAME=9), `SORT_ASCENDING=1`, `SORT_DESCENDING=2`, `START_INDEX`/`END_INDEX`.
+- `InsertSortEntry(id, order, settings)` / `RemoveSortEntry(id, settings)` mutate a passed sort-settings table; `SortTradeRoutes(routes, settings)` returns a sorted copy (or the original when settings is empty).
+- `GetYieldsForOriginCity(routeInfo, buildTooltip)` / `GetYieldsForDestinationCity(...)` return `(values, tooltips)` arrays keyed `START_INDEX..END_INDEX`. `GetAdvancedRouteInfo(routeInfo)` returns `pathLength, trips, turnsToComplete`. `GetRouteHasTradingPost(routeInfo)`.
+- Automation: `AutomateTrader(traderID, isAutomated[, sortSettings])`, `CancelAutomatedTrader(traderID)`, `IsTraderAutomated(traderID)`. `RequestTradeRoute()` reads the live `Controls.RepeatRouteCheckbox`/`Controls.FromTopSortEntryCheckbox` and the selected destination.
+
+CAI sort design: because BTS keeps its sort state in a file-`local` (`m_SortBySettings`) we cannot reach, the CAI layer owns its own settings table, mutates it directly with `InsertSortEntry`/`RemoveSortEntry`, and re-sorts the captured route list with `SortTradeRoutes` — no dependence on the visual sort bar or shift chording. The exposed sort keys are the six yields, `TURNS_TO_COMPLETE`, and `DESTINATION_NAME` (`ORIGIN_NAME` is omitted since the chooser has a single origin); `SortTradeRoutes`/`ScoreRoute` handle string score keys (descending via `invert_string`), so name sorting honors the direction button like the numeric keys. The "repeat the best route by your sort" automation is exposed as a panel button (not a checkbox): rather than binding to the inaccessible `m_SortBySettings`, it passes the CAI-owned `BuildCaiSortSettings()` to `AutomateTrader(traderID, true, sortSettings)`, so the trader keeps re-picking the top route by the CAI sort.
 
 ## Game State
 

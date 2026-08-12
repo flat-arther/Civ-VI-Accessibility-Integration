@@ -1,6 +1,14 @@
 include("caiUtils")
 include("TradeRouteChooser")
 
+-- Better Trade Screen (astog) replaces this context with a different API. When it
+-- is active, hand off to the mod-specific accessibility layer and skip the
+-- vanilla wrappers below.
+if IsBetterTradeScreenActive() then
+    include("TradeRouteChooser_BetterTradeScreen_CAI")
+    return
+end
+
 local mgr                 = ExposedMembers.CAI_UIManager
 
 local PANEL_ID            = "CAITradeRoute_Panel"

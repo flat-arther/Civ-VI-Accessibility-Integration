@@ -3,7 +3,7 @@
 ### Added
 
 - Added a table view for world rankings
-- Added support for the following mods: Detailed map tacs, yet, not another maps pack
+- Added support for the following mods: Better trade screen, Detailed map tacs, yet, not another maps pack. Better balanced map was already supported
 - The mod's name and description in the game's Additional Content list now appear in your game language, with translations for all supported languages
 - Added a full French translation. All accessibility text, screen tutorials, spoken key names, and command descriptions now appear in French when the game is set to French.
 - Added a full Brazilian Portuguese translation. All accessibility text, screen tutorials, spoken key names, and command descriptions now appear in Portuguese when the game is set to Portuguese (Brazil).

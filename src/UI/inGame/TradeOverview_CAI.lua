@@ -5,6 +5,16 @@ else
     include("TradeOverview")
 end
 
+-- Better Trade Screen (astog) replaces this context with a different API
+-- (routes come through AddRouteInstanceFromRouteInfo, plus group-by/filter).
+-- Hand off to the mod-specific accessibility layer when it is active. The
+-- AddRouteInstanceFromRouteInfo guard keeps the vanilla path for the rare case
+-- where a scenario ruleset base was included instead of BTS's rewrite.
+if IsBetterTradeScreenActive() and AddRouteInstanceFromRouteInfo ~= nil then
+    include("TradeOverview_BetterTradeScreen_CAI")
+    return
+end
+
 ContextPtr.SetInputHandler = origSetInputHandler
 
 local mgr                  = ExposedMembers.CAI_UIManager

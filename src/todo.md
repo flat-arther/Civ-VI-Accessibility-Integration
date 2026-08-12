@@ -91,7 +91,10 @@
 [x] Mod tutorials interrupt focus even when tutorial widget is not the top. 
 [ ] Tutorial text that is too long should be split in to multiple rows
 [x] Add amenities to the city banners
-[ ] Look in to coastal raide yield reporting
 [x] Builders allow you to form escort formations in tutorial. Disable this when not in free roam
+[x] Add scanner category quick slot bindings
+[ ] Look in to coastal raide yield reporting
 [ ] Add support for better reports, detailed map tacs, extended policy cards, better balanced game, better trade screen
-[ ] Add custom category keybindings
+[ ] City status should show production items and turns
+[ ] Surveyor  should show religious enemy units
+[ ] Shift required envoy total up by one in city-state screen

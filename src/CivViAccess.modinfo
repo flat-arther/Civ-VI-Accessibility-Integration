@@ -203,7 +203,9 @@
     <File>UI/inGame/EspionageEscape_CAI.lua</File>
     <File>UI/inGame/EspionageOverview_CAI.lua</File>
     <File>UI/inGame/TradeRouteChooser_CAI.lua</File>
+    <File>UI/inGame/TradeRouteChooser_BetterTradeScreen_CAI.lua</File>
     <File>UI/inGame/TradeOverview_CAI.lua</File>
+    <File>UI/inGame/TradeOverview_BetterTradeScreen_CAI.lua</File>
     <File>UI/inGame/WorldRankings_CAI.lua</File>
     <File>UI/inGame/GlobalResourcePopup_CAI.lua</File>
     <File>UI/inGame/ReportScreen_CAI.lua</File>
@@ -214,6 +216,7 @@
     <File>UI/inGame/WorldCrisisPopup_CAI.lua</File>
     <File>UI/inGame/EndGameMenu_CAI.lua</File>
     <File>UI/inGame/TradeOriginChooser_CAI.lua</File>
+    <File>UI/inGame/TradeOriginChooser_BetterTradeScreen_CAI.lua</File>
     <File>UI/inGame/CivicsChooser_CAI.lua</File>
     <File>UI/inGame/CivicsTree_CAI.lua</File>
     <File>UI/inGame/TechTree_CAI.lua</File>
@@ -585,6 +588,11 @@
       <File>UI/inGame/WorldScanner/WorldScannerCategory_tutorial.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_mapTacs.lua</File>
       <File>UI/inGame/NaturalDisasterPopup_CAI.lua</File>
+      <!-- Better Trade Screen variants are pulled by a runtime include() from
+           the trade dispatchers, so they must be resolvable via ImportFiles. -->
+      <File>UI/inGame/TradeRouteChooser_BetterTradeScreen_CAI.lua</File>
+      <File>UI/inGame/TradeOverview_BetterTradeScreen_CAI.lua</File>
+      <File>UI/inGame/TradeOriginChooser_BetterTradeScreen_CAI.lua</File>
       <!-- EndGameMenu is a wildcard host (include("EndGameMenu_", true)),
            so the CAI layer rides that wildcard as an imported file. -->
       <File>UI/inGame/EndGameMenu_CAI.lua</File>

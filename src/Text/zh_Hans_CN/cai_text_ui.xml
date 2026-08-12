@@ -4604,6 +4604,36 @@
     <Replace Tag="LOC_CAI_TRADE_ROUTE_CANCEL" Language="zh_Hans_CN">
       <Text>取消</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_TRADE_ROUTE_TURNS_TO_COMPLETE" Language="zh_Hans_CN">
+      <Text>完成需 {1_Num} 回合</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_SORT_LIST" Language="zh_Hans_CN">
+      <Text>排序方式</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_SORT_TURNS" Language="zh_Hans_CN">
+      <Text>完成回合数</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_SORT_PRIORITY" Language="zh_Hans_CN">
+      <Text>优先级 {1_Num}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_SORT_DIR_DESCENDING" Language="zh_Hans_CN">
+      <Text>排序方向：降序</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_SORT_DIR_ASCENDING" Language="zh_Hans_CN">
+      <Text>排序方向：升序</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_REPEAT_ROUTE" Language="zh_Hans_CN">
+      <Text>重复此贸易路线</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_REPEAT_TOP" Language="zh_Hans_CN">
+      <Text>按你的排序重复最佳路线</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_KB_MOVE_PRIORITY_UP" Language="zh_Hans_CN">
+      <Text>提升排序优先级</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_KB_MOVE_PRIORITY_DOWN" Language="zh_Hans_CN">
+      <Text>降低排序优先级</Text>
+    </Replace>
 
     <!-- 贸易概览 -->
     <Replace Tag="LOC_CAI_TRADE_OVERVIEW_ACTIVE_ROUTES" Language="zh_Hans_CN">
@@ -4614,6 +4644,21 @@
     </Replace>
     <Replace Tag="LOC_CAI_TRADE_OVERVIEW_PRODUCE_TRADER" Language="zh_Hans_CN">
       <Text>生产贸易单位</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_OVERVIEW_FILTER" Language="zh_Hans_CN">
+      <Text>筛选</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_OVERVIEW_GROUP_BY" Language="zh_Hans_CN">
+      <Text>分组方式</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_OVERVIEW_AUTOMATED" Language="zh_Hans_CN">
+      <Text>已自动化</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_OVERVIEW_CANCEL_AUTOMATION" Language="zh_Hans_CN">
+      <Text>取消自动化</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_OVERVIEW_NO_FREE_TRADER" Language="zh_Hans_CN">
+      <Text>该城市没有可用的空闲贸易单位</Text>
     </Replace>
 
     <!-- 间谍活动选择器 -->

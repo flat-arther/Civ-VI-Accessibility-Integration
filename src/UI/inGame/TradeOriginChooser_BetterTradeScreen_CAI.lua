@@ -1,13 +1,12 @@
-include("caiUtils")
-include("TradeOriginChooser")
-
--- Better Trade Screen (astog) replaces this context with a different API
--- (notably AddCity takes a city id, not a city table). Hand off to the
--- mod-specific accessibility layer and skip the vanilla wrappers below.
-if IsBetterTradeScreenActive() then
-    include("TradeOriginChooser_BetterTradeScreen_CAI")
-    return
-end
+-- Accessibility layer for the Change Origin City screen as rewritten by the
+-- Better Trade Screen mod (astog). Included by TradeOriginChooser_CAI.lua when
+-- that mod is active. The base context script is already included by the
+-- dispatcher.
+--
+-- The only meaningful difference from the vanilla screen is that BTS's AddCity
+-- takes a city id (number) instead of a city table; everything else (the
+-- Controls.CityStack button scan, Refresh/Open/Close lifecycle, TeleportToCity)
+-- matches, so this mirrors the vanilla CAI layer with an adapted AddCity wrap.
 
 local mgr        = ExposedMembers.CAI_UIManager
 
@@ -94,7 +93,7 @@ local function PopulateList(capture)
             if button then
                 button:DoLeftClick()
             else
-                LogWarn("CAI TradeOriginChooser: missing live city button; falling back to TeleportToCity")
+                LogWarn("CAI TradeOriginChooser (BTS): missing live city button; falling back to TeleportToCity")
                 TeleportToCity(city)
             end
         end)
@@ -138,8 +137,12 @@ local function PopPanel()
     m_list = nil
 end
 
-AddCity = WrapFunc(AddCity, function(orig, city)
-    orig(city)
+-- BTS AddCity takes a city id, not a city table.
+AddCity = WrapFunc(AddCity, function(orig, cityID)
+    orig(cityID)
+
+    local city = Players[Game.GetLocalPlayer()]:GetCities():FindID(cityID)
+    if not city then return end
 
     local usedControls = {}
     for _, row in ipairs(m_rows) do

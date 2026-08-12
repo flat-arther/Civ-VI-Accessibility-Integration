@@ -4606,6 +4606,38 @@
       <Text>Cancel</Text>
     </Row>
 
+    <!-- Better Trade Screen: sort / automation -->
+    <Row Tag="LOC_CAI_TRADE_ROUTE_TURNS_TO_COMPLETE" Language="en_US">
+      <Text>{1_Num} turns to complete</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_SORT_LIST" Language="en_US">
+      <Text>Sort by</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_SORT_TURNS" Language="en_US">
+      <Text>Turns to complete</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_SORT_PRIORITY" Language="en_US">
+      <Text>priority {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_SORT_DIR_DESCENDING" Language="en_US">
+      <Text>Sort direction: descending</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_SORT_DIR_ASCENDING" Language="en_US">
+      <Text>Sort direction: ascending</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_REPEAT_ROUTE" Language="en_US">
+      <Text>Repeat this route</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_REPEAT_TOP" Language="en_US">
+      <Text>Repeat the best route by your sort</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_PRIORITY_UP" Language="en_US">
+      <Text>Move up in sort priority</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KB_MOVE_PRIORITY_DOWN" Language="en_US">
+      <Text>Move down in sort priority</Text>
+    </Row>
+
     <!-- Trade Overview -->
     <Row Tag="LOC_CAI_TRADE_OVERVIEW_ACTIVE_ROUTES" Language="en_US">
       <Text>{1_Active} of {2_Capacity} routes active</Text>
@@ -4615,6 +4647,21 @@
     </Row>
     <Row Tag="LOC_CAI_TRADE_OVERVIEW_PRODUCE_TRADER" Language="en_US">
       <Text>Produce Trade Unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_OVERVIEW_FILTER" Language="en_US">
+      <Text>Filter</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_OVERVIEW_GROUP_BY" Language="en_US">
+      <Text>Group by</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_OVERVIEW_AUTOMATED" Language="en_US">
+      <Text>automated</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_OVERVIEW_CANCEL_AUTOMATION" Language="en_US">
+      <Text>Cancel automation</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TRADE_OVERVIEW_NO_FREE_TRADER" Language="en_US">
+      <Text>No free trade unit is available in this city</Text>
     </Row>
 
     <!-- Espionage Chooser -->

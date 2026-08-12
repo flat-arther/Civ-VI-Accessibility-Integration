@@ -139,6 +139,14 @@ function WrapFunc(orig, wrapper)
     end
 end
 
+-- Better Trade Screen (astog) rewrites the three vanilla trade contexts with a
+-- different API, so the trade CAI screens branch on this. UUID from the mod's
+-- .modinfo. Mirrors the IsExpansion1Active/IsExpansion2Active pattern.
+local BETTER_TRADE_SCREEN_UUID = "8d4fa23a-ef43-440c-8422-2bec11f8f5d7"
+function IsBetterTradeScreenActive()
+    return Modding.IsModActive(BETTER_TRADE_SCREEN_UUID)
+end
+
 -- TutorialUIRoot_CAI publishes the current detailed item's enabled controls
 -- here. CAI-only hotkeys use this state to mirror the controls that vanilla's
 -- tutorial overlay permits instead of bypassing that overlay.

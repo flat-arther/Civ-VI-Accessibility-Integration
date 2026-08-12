@@ -4595,6 +4595,36 @@
     <Replace Tag="LOC_CAI_TRADE_ROUTE_CANCEL" Language="fr_FR">
       <Text>Annuler</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_TRADE_ROUTE_TURNS_TO_COMPLETE" Language="fr_FR">
+      <Text>{1_Num} tours pour terminer</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_SORT_LIST" Language="fr_FR">
+      <Text>Trier par</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_SORT_TURNS" Language="fr_FR">
+      <Text>Tours pour terminer</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_SORT_PRIORITY" Language="fr_FR">
+      <Text>priorité {1_Num}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_SORT_DIR_DESCENDING" Language="fr_FR">
+      <Text>Sens du tri : décroissant</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_SORT_DIR_ASCENDING" Language="fr_FR">
+      <Text>Sens du tri : croissant</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_REPEAT_ROUTE" Language="fr_FR">
+      <Text>Répéter cette route</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_REPEAT_TOP" Language="fr_FR">
+      <Text>Répéter la meilleure route selon votre tri</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_KB_MOVE_PRIORITY_UP" Language="fr_FR">
+      <Text>Monter dans la priorité de tri</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_KB_MOVE_PRIORITY_DOWN" Language="fr_FR">
+      <Text>Descendre dans la priorité de tri</Text>
+    </Replace>
 
     <!-- Trade Overview -->
     <Replace Tag="LOC_CAI_TRADE_OVERVIEW_ACTIVE_ROUTES" Language="fr_FR">
@@ -4605,6 +4635,21 @@
     </Replace>
     <Replace Tag="LOC_CAI_TRADE_OVERVIEW_PRODUCE_TRADER" Language="fr_FR">
       <Text>Produire une unité commerciale</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_OVERVIEW_FILTER" Language="fr_FR">
+      <Text>Filtrer</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_OVERVIEW_GROUP_BY" Language="fr_FR">
+      <Text>Grouper par</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_OVERVIEW_AUTOMATED" Language="fr_FR">
+      <Text>automatisée</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_OVERVIEW_CANCEL_AUTOMATION" Language="fr_FR">
+      <Text>Annuler l'automatisation</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TRADE_OVERVIEW_NO_FREE_TRADER" Language="fr_FR">
+      <Text>Aucune unité commerciale disponible dans cette ville</Text>
     </Replace>
 
     <!-- Espionage Chooser -->
