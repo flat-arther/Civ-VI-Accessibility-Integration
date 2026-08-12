@@ -888,6 +888,48 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_SEARCH_RESULTS" Language="zh_Hans_CN">
       <Text>搜索结果</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT_BOUND" Language="zh_Hans_CN">
+      <Text>已将{1_Subcategory}绑定到槽位{2_Number}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT_UNBOUND" Language="zh_Hans_CN">
+      <Text>没有子类别绑定到槽位{1_Number}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT1_ASSIGN" Language="zh_Hans_CN">
+      <Text>将子类别绑定到世界扫描器槽位1</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT1_ASSIGN_TOOLTIP" Language="zh_Hans_CN">
+      <Text>将当前世界扫描器子类别绑定到槽位1以便快速访问</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT1_NEXT" Language="zh_Hans_CN">
+      <Text>世界扫描器槽位1中的下一个项目</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT1_NEXT_TOOLTIP" Language="zh_Hans_CN">
+      <Text>移到绑定至槽位1的子类别中的下一个项目，按由近到远排序</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT1_PREV" Language="zh_Hans_CN">
+      <Text>世界扫描器槽位1中的上一个项目</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT1_PREV_TOOLTIP" Language="zh_Hans_CN">
+      <Text>移到绑定至槽位1的子类别中的上一个项目，按由近到远排序</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT2_ASSIGN" Language="zh_Hans_CN">
+      <Text>将子类别绑定到世界扫描器槽位2</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT2_ASSIGN_TOOLTIP" Language="zh_Hans_CN">
+      <Text>将当前世界扫描器子类别绑定到槽位2以便快速访问</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT2_NEXT" Language="zh_Hans_CN">
+      <Text>世界扫描器槽位2中的下一个项目</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT2_NEXT_TOOLTIP" Language="zh_Hans_CN">
+      <Text>移到绑定至槽位2的子类别中的下一个项目，按由近到远排序</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT2_PREV" Language="zh_Hans_CN">
+      <Text>世界扫描器槽位2中的上一个项目</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT2_PREV_TOOLTIP" Language="zh_Hans_CN">
+      <Text>移到绑定至槽位2的子类别中的上一个项目，按由近到远排序</Text>
+    </Replace>
 
     <!-- 启动栏、局部界面钩子与文明百科界面快捷键 -->
     <Replace Tag="LOC_CAI_OPEN_CIVILOPEDIA" Language="zh_Hans_CN">
@@ -3938,6 +3980,9 @@
     </Replace>
     <Replace Tag="LOC_CAI_CITYSTATES_COLUMN_ACTIVE_QUESTS" Language="zh_Hans_CN">
       <Text>当前任务</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CITYSTATES_COLUMN_BONUSES" Language="zh_Hans_CN">
+      <Text>加成</Text>
     </Replace>
     <Replace Tag="LOC_CAI_CITYSTATES_ORDER_BY" Language="zh_Hans_CN">
       <Text>城邦排序方式</Text>

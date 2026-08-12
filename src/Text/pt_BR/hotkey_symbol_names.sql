@@ -1,0 +1,12 @@
+UPDATE LocalizedText SET Text = 'Sublinhado' WHERE Tag = 'LOC_OPTIONS_KEY_UNDERSCORE' AND Language = 'pt_BR';
+UPDATE LocalizedText SET Text = 'Ponto e vírgula' WHERE Tag = 'LOC_OPTIONS_KEY_SEMICOLON' AND Language = 'pt_BR';
+UPDATE LocalizedText SET Text = 'Igual' WHERE Tag = 'LOC_OPTIONS_KEY_PLUS' AND Language = 'pt_BR';
+UPDATE LocalizedText SET Text = 'Vírgula' WHERE Tag = 'LOC_OPTIONS_KEY_COMMA' AND Language = 'pt_BR';
+UPDATE LocalizedText SET Text = 'Menos' WHERE Tag = 'LOC_OPTIONS_KEY_MINUS' AND Language = 'pt_BR';
+UPDATE LocalizedText SET Text = 'Ponto' WHERE Tag = 'LOC_OPTIONS_KEY_PERIOD' AND Language = 'pt_BR';
+UPDATE LocalizedText SET Text = 'Barra' WHERE Tag = 'LOC_OPTIONS_KEY_SLASH' AND Language = 'pt_BR';
+UPDATE LocalizedText SET Text = 'Til' WHERE Tag = 'LOC_OPTIONS_KEY_TILDE' AND Language = 'pt_BR';
+UPDATE LocalizedText SET Text = 'Colchete esquerdo' WHERE Tag = 'LOC_OPTIONS_KEY_LBRACKET' AND Language = 'pt_BR';
+UPDATE LocalizedText SET Text = 'Barra invertida' WHERE Tag = 'LOC_OPTIONS_KEY_BACKSLASH' AND Language = 'pt_BR';
+UPDATE LocalizedText SET Text = 'Colchete direito' WHERE Tag = 'LOC_OPTIONS_KEY_RBRACKET' AND Language = 'pt_BR';
+UPDATE LocalizedText SET Text = 'Aspas' WHERE Tag = 'LOC_OPTIONS_KEY_QUOTE' AND Language = 'pt_BR';

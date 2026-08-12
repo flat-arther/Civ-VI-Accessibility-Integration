@@ -37,6 +37,39 @@ function DataTableRowWidget:Activate()
     return true
 end
 
+---A row entered without its own focus cache (fresh after a rebuild, or entered
+---programmatically by row key) resolves to the table's remembered column so the
+---user keeps the column they were reading. Returns nil when the row already has
+---a live cache (its own memory wins) or the remembered column is not present, so
+---the normal entry path takes over. Both GetDefaultChild (programmatic focus)
+---and GetEntryChild (directional navigation) route through this, because
+---directional entry uses the Navigation helper directly and never calls the
+---GetDefaultChild method. Vertical navigation keeps the column on its own, so
+---this only governs entry into the row from outside.
+---@return UIWidget|nil
+function DataTableRowWidget:_RememberedColumnCell()
+    if self._lastFocusedChild or self._lastFocusedKey then return nil end
+    local columnKey = self.Table and self.Table._lastFocusedColumnKey
+    if not columnKey then return nil end
+    for _, cell in ipairs(self.Children) do
+        if cell.Column and cell.Column.key == columnKey and not cell:IsHidden() then
+            return cell
+        end
+    end
+    return nil
+end
+
+---@return UIWidget|nil
+function DataTableRowWidget:GetDefaultChild()
+    return self:_RememberedColumnCell() or ContainerWidget.GetDefaultChild(self)
+end
+
+---@param direction 1|-1|0|nil
+---@return UIWidget|nil
+function DataTableRowWidget:GetEntryChild(direction)
+    return self:_RememberedColumnCell() or ContainerWidget.GetEntryChild(self, direction)
+end
+
 ---@class DataTableWidget : ContainerWidget
 ---@field Columns DataTableColumn[]
 ---@field RowsProvider? fun():any[]
@@ -138,6 +171,7 @@ local function makeCell(tableWidget, row, rowIndex, rowKey, column, columnIndex)
     end
     cell:On("focus_enter", function(self)
         local owner = self.Table
+        owner._lastFocusedColumnKey = self.Column.key
         local focusRowKey = self.RowIndex == 0 and HEADER_ROW_KEY or self.RowKey
         if owner._lastFocusedRowKey ~= focusRowKey then
             owner._lastFocusedRowKey = focusRowKey
@@ -226,6 +260,7 @@ function DataTableWidget.Create(mgr, id, props)
     w._lastSpokenRowKey = nil
     w._lastSpokenColumnKey = nil
     w._lastFocusedRowKey = nil
+    w._lastFocusedColumnKey = nil
     w._sortFeedbackColumnKey = nil
     w:AddInputBindings({
         { Key = Keys.VK_UP, MSG = KeyEvents.KeyDown, Description = "LOC_CAI_KB_MOVE_UP", Action = function(self) return Search.NavigateResults(self, -1) or self:_NavigateVertical(-1) end },
@@ -499,6 +534,10 @@ function DataTableWidget:Rebuild()
         rowKeys[rowKeyString] = true
 
         local rowWidget = makeRow(self, rowData)
+        -- Stable row-level FocusKey so a screen can re-seed focus onto a record
+        -- (mgr:PrepareFocus(table, id .. ":row:" .. rowKey)) after an external
+        -- rebuild; row descent then picks the remembered column on its own.
+        rowWidget.FocusKey = tostring(self.Id) .. ":row:" .. rowKeyString
         for columnIndex, column in ipairs(self.Columns) do
             rowWidget:AddChild(makeCell(self, rowData, rowIndex, rowKey, column, columnIndex))
         end

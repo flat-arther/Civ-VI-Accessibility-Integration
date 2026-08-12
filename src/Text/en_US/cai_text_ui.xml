@@ -888,6 +888,48 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_SEARCH_RESULTS" Language="en_US">
       <Text>Search Results</Text>
     </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT_BOUND" Language="en_US">
+      <Text>Bound {1_Subcategory} to slot {2_Number}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT_UNBOUND" Language="en_US">
+      <Text>No subcategory bound to slot {1_Number}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT1_ASSIGN" Language="en_US">
+      <Text>Bind subcategory to scanner slot 1</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT1_ASSIGN_TOOLTIP" Language="en_US">
+      <Text>Binds the current world scanner subcategory to slot 1 for quick access</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT1_NEXT" Language="en_US">
+      <Text>Next item in scanner slot 1</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT1_NEXT_TOOLTIP" Language="en_US">
+      <Text>Moves to the next item in the subcategory bound to slot 1, sorted nearest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT1_PREV" Language="en_US">
+      <Text>Previous item in scanner slot 1</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT1_PREV_TOOLTIP" Language="en_US">
+      <Text>Moves to the previous item in the subcategory bound to slot 1, sorted nearest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT2_ASSIGN" Language="en_US">
+      <Text>Bind subcategory to scanner slot 2</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT2_ASSIGN_TOOLTIP" Language="en_US">
+      <Text>Binds the current world scanner subcategory to slot 2 for quick access</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT2_NEXT" Language="en_US">
+      <Text>Next item in scanner slot 2</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT2_NEXT_TOOLTIP" Language="en_US">
+      <Text>Moves to the next item in the subcategory bound to slot 2, sorted nearest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT2_PREV" Language="en_US">
+      <Text>Previous item in scanner slot 2</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT2_PREV_TOOLTIP" Language="en_US">
+      <Text>Moves to the previous item in the subcategory bound to slot 2, sorted nearest first</Text>
+    </Row>
 
     <!-- LaunchBar / PartialScreenHooks / Civilopedia screen shortcuts -->
     <Row Tag="LOC_CAI_OPEN_CIVILOPEDIA" Language="en_US">
@@ -3939,6 +3981,9 @@
     </Row>
     <Row Tag="LOC_CAI_CITYSTATES_COLUMN_ACTIVE_QUESTS" Language="en_US">
       <Text>Active quests</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CITYSTATES_COLUMN_BONUSES" Language="en_US">
+      <Text>Bonuses</Text>
     </Row>
     <Row Tag="LOC_CAI_CITYSTATES_ORDER_BY" Language="en_US">
       <Text>Order city-states by</Text>

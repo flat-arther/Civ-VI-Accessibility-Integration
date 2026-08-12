@@ -6,22 +6,27 @@
 - Added support for the following mods: Detailed map tacs, yet, not another maps pack
 - The mod's name and description in the game's Additional Content list now appear in your game language, with translations for all supported languages
 - Added a full French translation. All accessibility text, screen tutorials, spoken key names, and command descriptions now appear in French when the game is set to French.
+- Added a full Brazilian Portuguese translation. All accessibility text, screen tutorials, spoken key names, and command descriptions now appear in Portuguese when the game is set to Portuguese (Brazil).
+- Added localization for Chinese (Simplified) thanks to Woody52169 for the contribution
+- The world scanner now has two quick-access slots. Press `Ctrl plus Minus` or `Ctrl plus Equals` to bind the subcategory you are currently on to a slot. After that, press `Minus` or `Equals` to step to the next item in that subcategory, or add `Shift` to step to the previous one. Slot items are listed nearest first, ignoring the usual grouping, and bound slots are remembered between sessions. Both custom and builtin categories are supported
+- The world scanner jump command can now also be triggered with `0` on the number row, in addition to `Home`. 
 
 ### Changed
 
+- The City-States table now has a separate Bonuses column, split out from the Envoys column. You can sort city-states by how many of their bonuses you currently have active.
 - World Rankings team numbering now matches the staging room and diplomacy ribbon, starting from Team 1 instead of Team 0.
 - The city selection info now reports amenities, and its building count is always spoken regardless of which expansion is active. Bound to `Shift plus 6` by default
 - The city banner loyalty summary (default binding `5`) also reports amenities for your own cities, and in the base game it reads amenities instead of announcing that no information is available.
 
 ### Fixed
 
+- In tables such as the City-States overview, confirming an action while outside the table keeps you on the same column you were on, instead of jumping back to the first column.
 - Fixed a bug with mod tutorials that caused the game to stop speaking if an advisor dialog appeared at the same time
 - Fixed builders being able to form escort formations during the on-rails tutorial before the settler formation step
 - Fixed a bug in the tutorial where opening the tile interaction list during the civic or tech tree steps prevented the game from receiving input, there by locking you out of completing the tutorial entirely
 - Fixed Chinese and other non-Latin text being announced with stray replacement characters, most noticeably in long descriptions such as Great Person biographies
 - Fixed typeahead search rejecting Chinese and other non-Latin characters, and Backspace no longer garbles multi-byte characters.
 - Fixed editing text fields with Chinese and other non-Latin characters: arrow keys, Delete, and Backspace now move and delete a whole character at a time instead of splitting it, and each character is announced correctly
-- Fixed the city housing readout being announced in English for Simplified Chinese players
 
 ## [1.0.1] - 2026-08-04
 

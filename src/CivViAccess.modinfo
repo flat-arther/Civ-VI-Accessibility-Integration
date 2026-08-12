@@ -5,6 +5,7 @@
     <Description>LOC_CAI_MOD_DESCRIPTION</Description>
     <Teaser>LOC_CAI_MOD_TEASER</Teaser>
     <Authors>LOC_CAI_MOD_AUTHORS</Authors>
+    <SpecialThanks>bsg-smoke, LordLundin, Nibar Sito, Rashad, Woody52169</SpecialThanks>
     <AffectsSavedGames>0</AffectsSavedGames>
     <CompatibleVersions>2.0</CompatibleVersions>
   </Properties>
@@ -252,6 +253,11 @@
     <File>Text/fr_FR/TutorialText_CAI.xml</File>
     <File>Text/fr_FR/hotkey_symbol_names.sql</File>
     <File>Text/fr_FR/tutorial_advisor_text_CAI.sql</File>
+    <File>Text/pt_BR/cai_text_ui.xml</File>
+    <File>Text/pt_BR/AccessibilityPediaText_CAI.xml</File>
+    <File>Text/pt_BR/TutorialText_CAI.xml</File>
+    <File>Text/pt_BR/hotkey_symbol_names.sql</File>
+    <File>Text/pt_BR/tutorial_advisor_text_CAI.sql</File>
     <!-- Localized mod metadata (Name/Teaser/Description/Authors) -->
     <File>Text/en_US/modinfo_CAI.xml</File>
     <File>Text/de_DE/modinfo_CAI.xml</File>
@@ -281,6 +287,10 @@
       <File>Text/fr_FR/AccessibilityPediaText_CAI.xml</File>
       <File>Text/fr_FR/TutorialText_CAI.xml</File>
       <File>Text/fr_FR/hotkey_symbol_names.sql</File>
+      <File>Text/pt_BR/cai_text_ui.xml</File>
+      <File>Text/pt_BR/AccessibilityPediaText_CAI.xml</File>
+      <File>Text/pt_BR/TutorialText_CAI.xml</File>
+      <File>Text/pt_BR/hotkey_symbol_names.sql</File>
       <File>Text/en_US/modinfo_CAI.xml</File>
       <File>Text/de_DE/modinfo_CAI.xml</File>
       <File>Text/es_ES/modinfo_CAI.xml</File>
@@ -404,6 +414,11 @@
       <File>Text/fr_FR/TutorialText_CAI.xml</File>
       <File>Text/fr_FR/hotkey_symbol_names.sql</File>
       <File>Text/fr_FR/tutorial_advisor_text_CAI.sql</File>
+      <File>Text/pt_BR/cai_text_ui.xml</File>
+      <File>Text/pt_BR/AccessibilityPediaText_CAI.xml</File>
+      <File>Text/pt_BR/TutorialText_CAI.xml</File>
+      <File>Text/pt_BR/hotkey_symbol_names.sql</File>
+      <File>Text/pt_BR/tutorial_advisor_text_CAI.sql</File>
       <File>Text/en_US/modinfo_CAI.xml</File>
       <File>Text/de_DE/modinfo_CAI.xml</File>
       <File>Text/es_ES/modinfo_CAI.xml</File>

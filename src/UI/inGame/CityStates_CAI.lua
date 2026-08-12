@@ -146,7 +146,8 @@ local function GetPendingForPlayer(playerID)
 end
 
 local function GetCityStateFocusKey(playerID)
-    return OVERVIEW_TABLE_ID .. ":row:" .. tostring(playerID) .. ":name"
+    -- Row-level key: the table restores the column the user was on internally.
+    return OVERVIEW_TABLE_ID .. ":row:" .. tostring(playerID)
 end
 
 local function GetTreeCityStateFocusKey(playerID)
@@ -394,6 +395,15 @@ local function GetBonusBreakdownParts(kCS)
     return parts
 end
 
+local function CountActiveBonuses(kCS)
+    local count = 0
+    if kCS.isBonus1 then count = count + 1 end
+    if kCS.isBonus3 then count = count + 1 end
+    if kCS.isBonus6 then count = count + 1 end
+    if kCS.isBonusSuzerain then count = count + 1 end
+    return count
+end
+
 local function GetQuestEntryLabel(kQuest)
     local reward = kQuest.Reward and kQuest.Reward ~= "" and
         (Locale.Lookup("LOC_CITY_STATES_REWARD") .. " " .. NormalizeText(kQuest.Reward)) or ""
@@ -501,10 +511,6 @@ local function GetEnvoyCell(playerID)
         table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_OF", kCS.Tokens, needed))
     end
 
-    for _, bonus in ipairs(GetBonusBreakdownParts(kCS)) do
-        table.insert(parts, bonus)
-    end
-
     local pending = GetPendingForPlayer(playerID)
     if pending > 0 then
         table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_PENDING", pending))
@@ -513,6 +519,17 @@ local function GetEnvoyCell(playerID)
     local governorName = GetGovernorName(playerID, Game.GetLocalPlayer())
     if governorName ~= "" then
         table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_AMBASSADOR_ASSIGNED", governorName))
+    end
+    return JoinNonEmpty(parts, "[NEWLINE]")
+end
+
+local function GetBonusesCell(playerID)
+    local kCS = GetCityStateData(playerID)
+    if not kCS then return "" end
+
+    local parts = { Locale.Lookup("LOC_CAI_CITYSTATES_BONUS_COUNT", CountActiveBonuses(kCS), 4) }
+    for _, bonus in ipairs(GetBonusBreakdownParts(kCS)) do
+        table.insert(parts, bonus)
     end
     return JoinNonEmpty(parts, "[NEWLINE]")
 end
@@ -608,6 +625,17 @@ local function BuildOverviewColumns(allData)
             sortKey = function(playerID)
                 local kCS = GetCityStateData(playerID)
                 return kCS and (kCS.Tokens + GetPendingForPlayer(playerID)) or nil
+            end,
+            sortAscendingDescription = "LOC_CAI_SORT_FEWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_MOST_FIRST",
+        },
+        {
+            key = "bonuses",
+            header = function() return Locale.Lookup("LOC_CAI_CITYSTATES_COLUMN_BONUSES") end,
+            getCell = function(playerID) return GetBonusesCell(playerID) end,
+            sortKey = function(playerID)
+                local kCS = GetCityStateData(playerID)
+                return kCS and CountActiveBonuses(kCS) or nil
             end,
             sortAscendingDescription = "LOC_CAI_SORT_FEWEST_FIRST",
             sortDescendingDescription = "LOC_CAI_SORT_MOST_FIRST",

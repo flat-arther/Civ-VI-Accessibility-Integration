@@ -1287,6 +1287,16 @@ itself is the first listener argument.
 `GetFocusedRow()` and `GetFocusedColumn()` let table-level input bindings
 resolve their current live record.
 
+Each data row carries a stable row-level FocusKey, `<tableId>:row:<rowKey>`, in
+addition to the per-cell keys `<tableId>:row:<rowKey>:<columnKey>`. To restore
+focus onto a record after an external rebuild, target the row key, not a cell:
+`mgr:PrepareFocus(table, tableId .. ":row:" .. tostring(rowKey))`. The table
+remembers the last focused column (persisted across focus leaving and
+returning), and a freshly rebuilt row with no focus cache of its own descends to
+that remembered column, so the user keeps the column they were reading instead
+of snapping back to column one. Vertical navigation keeps the column on its own;
+this only governs entry into a row from outside.
+
 ---
 
 ## 12. Dialog

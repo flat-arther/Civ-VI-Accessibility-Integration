@@ -436,4 +436,7 @@ Civilization VI Accessibility Integration was developed by Flat-Arther and Hamad
 Special thanks to:
 
 - bsg-smoke and Nibar Sito for funding the project.
+- bsg-smoke again for the audio design
+- LordLundin for extensively testing the mod
 - Rashad for allowing me to steal from his Civilization V accessibility mod and for answering my numerous questions.
+- Woody52169 for the simplified Chinese localization

@@ -52,6 +52,12 @@ include("PlayerStateManager_CAI")
 ---@field SearchHistoryIndex integer
 ---@field SortOriginX integer|nil
 ---@field SortOriginY integer|nil
+---@field ScannerSlots WorldScannerSlotBinding[]
+
+---@class WorldScannerSlotBinding
+---@field CategoryId string|nil
+---@field SubCategoryId string|nil
+---@field LastItemId string|nil
 
 ---@type WorldScanner
 CAIWorldScanner = CAIWorldScanner or {}
@@ -68,6 +74,8 @@ local RegisteredCategoryDefinitions = {}
 
 local EMPTY_CATEGORY = false
 local SCANNER_SEARCH_CATEGORY_ID = "__searchResults"
+local SCANNER_SLOT_COUNT = 2
+local SCANNER_SLOT_CONFIG_SECTION = "WorldScannerSlots"
 local FindCategorySlotById
 local AUTO_FOCUS_SETTING_BY_CATEGORY_ID = {
     validTargets = "ScannerAutoFocusValidTargets",
@@ -92,6 +100,8 @@ local m_PlayerState = PlayerStateManager.Init(function(playerID)
 
         SearchSnapshot = nil,
         SearchHistoryIndex = 0,
+
+        ScannerSlots = { {}, {} },
     }
 end)
 
@@ -592,6 +602,136 @@ local function FocusCategory(scanner, categoryIndex)
     end
 end
 
+---@param scanner WorldScanner|nil
+---@param slotIndex integer
+---@return WorldScannerSlotBinding|nil
+local function GetSlotBinding(scanner, slotIndex)
+    if scanner == nil or slotIndex < 1 or slotIndex > SCANNER_SLOT_COUNT then
+        return nil
+    end
+
+    scanner.ScannerSlots = scanner.ScannerSlots or {}
+    local binding = scanner.ScannerSlots[slotIndex]
+    if binding == nil then
+        binding = {}
+        scanner.ScannerSlots[slotIndex] = binding
+    end
+
+    return binding
+end
+
+-- Slot bindings persist globally in the CAI config (like the custom-category
+-- layout) so a bound subcategory survives reloads. Only the binding is stored;
+-- the in-list position (LastItemId) is transient and resets each session.
+local function GetSlotConfigKey(slotIndex)
+    return "Slot" .. tostring(slotIndex)
+end
+
+---@param slotIndex integer
+---@param binding WorldScannerSlotBinding|nil
+local function SaveSlotBinding(slotIndex, binding)
+    local encoded = ""
+    if binding ~= nil and binding.CategoryId ~= nil and binding.SubCategoryId ~= nil then
+        encoded = tostring(binding.CategoryId) .. "|" .. tostring(binding.SubCategoryId)
+    end
+
+    CAI.SetConfigValue(SCANNER_SLOT_CONFIG_SECTION, GetSlotConfigKey(slotIndex), encoded)
+end
+
+---@param scanner WorldScanner|nil
+local function LoadSlotBindings(scanner)
+    if scanner == nil then
+        return
+    end
+
+    scanner.ScannerSlots = {}
+    for slotIndex = 1, SCANNER_SLOT_COUNT do
+        local binding = {}
+        local encoded = tostring(CAI.GetConfigValue(SCANNER_SLOT_CONFIG_SECTION, GetSlotConfigKey(slotIndex), "") or "")
+        local categoryId, subCategoryId = encoded:match("^([^|]+)|(.+)$")
+        if categoryId ~= nil and subCategoryId ~= nil then
+            binding.CategoryId = categoryId
+            binding.SubCategoryId = subCategoryId
+        end
+        scanner.ScannerSlots[slotIndex] = binding
+    end
+end
+
+-- Slot navigation ignores the subcategory's group structure and presents a
+-- single list sorted by nearest distance, so a bound subcategory reads as one
+-- flat "closest first" sequence rather than the grouped scanner view.
+---@param subCategory WorldScannerSubCategory|nil
+---@return WorldScannerLeafItem[]
+local function BuildFlatSubCategoryItems(subCategory)
+    local flat = {}
+    if subCategory == nil then
+        return flat
+    end
+
+    for _, group in ipairs(subCategory.Groups or {}) do
+        for _, leaf in ipairs(group.Items or {}) do
+            flat[#flat + 1] = leaf
+        end
+    end
+
+    table.sort(flat, function(a, b)
+        if a.Distance ~= b.Distance then
+            return a.Distance < b.Distance
+        end
+
+        local labelCompare = Locale.Compare(a.ResolvedLabel or "", b.ResolvedLabel or "")
+        if labelCompare ~= 0 then
+            return labelCompare < 0
+        end
+
+        return tostring(a.Id) < tostring(b.Id)
+    end)
+
+    return flat
+end
+
+---@param category WorldScannerCategory|nil
+---@param subCategoryId string|nil
+---@return WorldScannerSubCategory|nil, integer
+local function FindSubCategoryById(category, subCategoryId)
+    if category == nil or subCategoryId == nil then
+        return nil, 0
+    end
+
+    for index, subCategory in ipairs(category.SubCategories or {}) do
+        if subCategory.Id == subCategoryId then
+            return subCategory, index
+        end
+    end
+
+    return nil, 0
+end
+
+-- Point the scanner's live cursor (category/sub/group/item indices) at a leaf
+-- so Jump, direction reading, and the beacon all target the slot's current
+-- item. The leaf still belongs to a real group; we just resolve its position.
+---@param scanner WorldScanner
+---@param categoryIndex integer
+---@param subCategoryIndex integer
+---@param subCategory WorldScannerSubCategory
+---@param leaf WorldScannerLeafItem
+local function PointScannerAtLeaf(scanner, categoryIndex, subCategoryIndex, subCategory, leaf)
+    scanner.CategoryIndex = categoryIndex
+    scanner.SubCategoryIndex = subCategoryIndex
+    scanner.GroupIndex = 0
+    scanner.ItemIndex = 0
+
+    for groupIndex, group in ipairs(subCategory.Groups or {}) do
+        for itemIndex, groupItem in ipairs(group.Items or {}) do
+            if groupItem == leaf then
+                scanner.GroupIndex = groupIndex
+                scanner.ItemIndex = itemIndex
+                return
+            end
+        end
+    end
+end
+
 local _lastActiveLensId = nil
 
 local function OnScannerLensLayerChanged(layerNum)
@@ -776,6 +916,7 @@ function CAIWorldScanner:Initialize()
     scanner.SortOriginY = nil
     scanner.SearchSnapshot = nil
     scanner.SearchHistoryIndex = 0
+    LoadSlotBindings(scanner)
 
     local cursorX, cursorY = GetCursorCoords()
     if cursorX ~= nil and cursorY ~= nil then
@@ -1008,6 +1149,125 @@ function CAIWorldScanner:CycleItem(step)
     FocusCurrentItem(scanner)
     local wrapped = previousIndex ~= 0 and (step > 0 and scanner.ItemIndex <= previousIndex
         or step < 0 and scanner.ItemIndex >= previousIndex)
+    if wrapped then
+        ExposedMembers.CAI_UIManager:HandleNavigationWrap(self, step)
+    end
+end
+
+-- Bind the subcategory the scanner is currently on to a quick-access slot.
+-- Later presses of the slot key step through that subcategory's items without
+-- navigating the category/subcategory hierarchy.
+---@param slotIndex integer
+function CAIWorldScanner:AssignSlot(slotIndex)
+    local scanner = GetScannerState()
+    if scanner == nil then
+        return
+    end
+
+    local category = GetCategory(scanner)
+    local subCategory = GetSubCategory(scanner)
+    if category == nil or subCategory == nil then
+        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_EMPTY"))
+        return
+    end
+
+    local binding = GetSlotBinding(scanner, slotIndex)
+    if binding == nil then
+        return
+    end
+
+    binding.CategoryId = category.Id
+    binding.SubCategoryId = subCategory.Id
+    binding.LastItemId = nil
+    SaveSlotBinding(slotIndex, binding)
+
+    Speak(Locale.Lookup(
+        "LOC_CAI_WORLD_SCANNER_SLOT_BOUND",
+        Utils.ResolveText(subCategory.LabelKey),
+        slotIndex
+    ))
+end
+
+-- Step through the flattened, nearest-first item list of the subcategory bound
+-- to a slot. Positive step is next, negative is previous.
+---@param slotIndex integer
+---@param step integer
+function CAIWorldScanner:CycleSlot(slotIndex, step)
+    local scanner = GetScannerState()
+    if scanner == nil then
+        return
+    end
+
+    local binding = GetSlotBinding(scanner, slotIndex)
+    if binding == nil or binding.CategoryId == nil or binding.SubCategoryId == nil then
+        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_SLOT_UNBOUND", slotIndex))
+        return
+    end
+
+    -- Sort by nearest to the live cursor, and rebuild the bound category from
+    -- live state so distances and membership are current (search results are a
+    -- transient snapshot and cannot be rebuilt).
+    CaptureSortOrigin(scanner)
+    if binding.CategoryId ~= SCANNER_SEARCH_CATEGORY_ID then
+        self:RebuildCategory(binding.CategoryId, true)
+        scanner = GetScannerState()
+    end
+
+    local categoryIndex = FindCategorySlotById(scanner, binding.CategoryId)
+    local category = categoryIndex ~= nil and GetSlotCategory(GetCategorySlot(scanner, categoryIndex)) or nil
+    local subCategory, subCategoryIndex = FindSubCategoryById(category, binding.SubCategoryId)
+    if subCategory == nil then
+        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_UNAVAILABLE"))
+        return
+    end
+
+    local flat = BuildFlatSubCategoryItems(subCategory)
+    local count = #flat
+    if count == 0 then
+        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_UNAVAILABLE"))
+        return
+    end
+
+    local previousPosition = nil
+    if binding.LastItemId ~= nil then
+        for index, leaf in ipairs(flat) do
+            if leaf.Id == binding.LastItemId then
+                previousPosition = index
+                break
+            end
+        end
+    end
+
+    local position
+    if previousPosition == nil then
+        position = step > 0 and 1 or count
+    else
+        position = ((previousPosition - 1 + step) % count) + 1
+    end
+
+    local leaf = flat[position]
+    PointScannerAtLeaf(scanner, categoryIndex, subCategoryIndex, subCategory, leaf)
+
+    if not EnsureCurrentItemValid(scanner) then
+        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_UNAVAILABLE"))
+        return
+    end
+
+    local current = GetCurrentItem(scanner)
+    if current == nil then
+        Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_UNAVAILABLE"))
+        return
+    end
+
+    binding.LastItemId = current.Id
+
+    local spoke = SpeakItemEntry(current, position, count)
+    if spoke then
+        CompleteCurrentItemFocus(scanner)
+    end
+
+    local wrapped = previousPosition ~= nil and (step > 0 and position <= previousPosition
+        or step < 0 and position >= previousPosition)
     if wrapped then
         ExposedMembers.CAI_UIManager:HandleNavigationWrap(self, step)
     end

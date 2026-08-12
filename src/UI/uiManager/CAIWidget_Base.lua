@@ -148,7 +148,7 @@ function UIWidget.New(class)
     w:AddInputBinding({
         Key = Keys.VK_END,
         IsAlt = true,
-        Description = "LOC_CAI_KB_FOCUSED_WIDGET_READER_FIRST_SECTION",
+        Description = "LOC_CAI_KB_FOCUSED_WIDGET_READER_LAST_SECTION",
         Common = true,
         MSG = KeyEvents.KeyDown,
         Action = function(self)

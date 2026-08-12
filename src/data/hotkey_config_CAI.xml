@@ -98,6 +98,12 @@
     <Row ActionId="WorldScannerReturnFromJump" Name="LOC_CAI_WORLD_SCANNER_RETURN" Description="LOC_CAI_WORLD_SCANNER_RETURN_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldScannerSpeakCurrentDirection" Name="LOC_CAI_WORLD_SCANNER_SPEAK_DIRECTION" Description="LOC_CAI_WORLD_SCANNER_SPEAK_DIRECTION_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="WorldOrFullScreenMap" LayoutType="PC"/>
     <Row ActionId="WorldScannerSearch" Name="LOC_CAI_WORLD_SCANNER_SEARCH" Description="LOC_CAI_WORLD_SCANNER_SEARCH_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSlot1Assign" Name="LOC_CAI_WORLD_SCANNER_SLOT1_ASSIGN" Description="LOC_CAI_WORLD_SCANNER_SLOT1_ASSIGN_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSlot1Next" Name="LOC_CAI_WORLD_SCANNER_SLOT1_NEXT" Description="LOC_CAI_WORLD_SCANNER_SLOT1_NEXT_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSlot1Prev" Name="LOC_CAI_WORLD_SCANNER_SLOT1_PREV" Description="LOC_CAI_WORLD_SCANNER_SLOT1_PREV_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSlot2Assign" Name="LOC_CAI_WORLD_SCANNER_SLOT2_ASSIGN" Description="LOC_CAI_WORLD_SCANNER_SLOT2_ASSIGN_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSlot2Next" Name="LOC_CAI_WORLD_SCANNER_SLOT2_NEXT" Description="LOC_CAI_WORLD_SCANNER_SLOT2_NEXT_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSlot2Prev" Name="LOC_CAI_WORLD_SCANNER_SLOT2_PREV" Description="LOC_CAI_WORLD_SCANNER_SLOT2_PREV_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
 
     <!-- ===== CAI_UI: Open/toggle screens and panels ===== -->
     <Row ActionId="UI_TopPanelOpenReports" Name="LOC_CAI_TOP_PANEL_OPEN_REPORTS" Description="LOC_CAI_TOP_PANEL_OPEN_REPORTS_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
@@ -356,9 +362,16 @@
     <Row ActionId="WorldScannerPrevItem" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_PAGEUP" />
     <Row ActionId="WorldScannerNextItem" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_PAGEDOWN" />
     <Row ActionId="WorldScannerJumpToCurrent" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_HOME" />
+    <Row ActionId="WorldScannerJumpToCurrent" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_0" />
     <Row ActionId="WorldScannerReturnFromJump" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_BACKSPACE" />
     <Row ActionId="WorldScannerSpeakCurrentDirection" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_END" />
     <Row ActionId="WorldScannerSearch" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_F" />
+    <Row ActionId="WorldScannerSlot1Assign" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_MINUS" />
+    <Row ActionId="WorldScannerSlot1Next" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_MINUS" />
+    <Row ActionId="WorldScannerSlot1Prev" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_MINUS" />
+    <Row ActionId="WorldScannerSlot2Assign" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_PLUS" />
+    <Row ActionId="WorldScannerSlot2Next" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_PLUS" />
+    <Row ActionId="WorldScannerSlot2Prev" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_PLUS" />
 
     <!-- CAI_UI: Open/toggle screens -->
     <Row ActionId="UI_TopPanelOpenReports" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F2" />

@@ -888,6 +888,48 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_SEARCH_RESULTS" Language="fr_FR">
       <Text>Résultats de recherche</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT_BOUND" Language="fr_FR">
+      <Text>{1_Subcategory} affectée à l'emplacement {2_Number}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT_UNBOUND" Language="fr_FR">
+      <Text>Aucune sous-catégorie affectée à l'emplacement {1_Number}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT1_ASSIGN" Language="fr_FR">
+      <Text>Affecter la sous-catégorie à l'emplacement 1 du scanner</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT1_ASSIGN_TOOLTIP" Language="fr_FR">
+      <Text>Affecte la sous-catégorie actuelle du scanner de monde à l'emplacement 1 pour un accès rapide</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT1_NEXT" Language="fr_FR">
+      <Text>Élément suivant de l'emplacement 1 du scanner</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT1_NEXT_TOOLTIP" Language="fr_FR">
+      <Text>Passe à l'élément suivant de la sous-catégorie affectée à l'emplacement 1, du plus proche au plus éloigné</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT1_PREV" Language="fr_FR">
+      <Text>Élément précédent de l'emplacement 1 du scanner</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT1_PREV_TOOLTIP" Language="fr_FR">
+      <Text>Passe à l'élément précédent de la sous-catégorie affectée à l'emplacement 1, du plus proche au plus éloigné</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT2_ASSIGN" Language="fr_FR">
+      <Text>Affecter la sous-catégorie à l'emplacement 2 du scanner</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT2_ASSIGN_TOOLTIP" Language="fr_FR">
+      <Text>Affecte la sous-catégorie actuelle du scanner de monde à l'emplacement 2 pour un accès rapide</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT2_NEXT" Language="fr_FR">
+      <Text>Élément suivant de l'emplacement 2 du scanner</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT2_NEXT_TOOLTIP" Language="fr_FR">
+      <Text>Passe à l'élément suivant de la sous-catégorie affectée à l'emplacement 2, du plus proche au plus éloigné</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT2_PREV" Language="fr_FR">
+      <Text>Élément précédent de l'emplacement 2 du scanner</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT2_PREV_TOOLTIP" Language="fr_FR">
+      <Text>Passe à l'élément précédent de la sous-catégorie affectée à l'emplacement 2, du plus proche au plus éloigné</Text>
+    </Replace>
     <!-- LaunchBar / PartialScreenHooks / Civilopedia screen shortcuts -->
     <Replace Tag="LOC_CAI_OPEN_CIVILOPEDIA" Language="fr_FR">
       <Text>Ouvrir la Civilopédia</Text>
@@ -3931,6 +3973,9 @@
     </Replace>
     <Replace Tag="LOC_CAI_CITYSTATES_COLUMN_ACTIVE_QUESTS" Language="fr_FR">
       <Text>Quêtes actives</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CITYSTATES_COLUMN_BONUSES" Language="fr_FR">
+      <Text>Bonus</Text>
     </Replace>
     <Replace Tag="LOC_CAI_CITYSTATES_ORDER_BY" Language="fr_FR">
       <Text>Trier les cités-États par</Text>
