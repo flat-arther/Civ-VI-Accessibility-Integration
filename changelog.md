@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Fixed
+
+- With the Better Trade Screen mod enabled, selecting a city in the trade unit's change-origin panel now moves the trade unit to that city instead of doing nothing.
+
 ## [1.1.0] - 2026-08-13
 
 ### Added

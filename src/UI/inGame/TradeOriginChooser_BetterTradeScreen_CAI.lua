@@ -3,10 +3,13 @@
 -- that mod is active. The base context script is already included by the
 -- dispatcher.
 --
--- The only meaningful difference from the vanilla screen is that BTS's AddCity
--- takes a city id (number) instead of a city table; everything else (the
--- Controls.CityStack button scan, Refresh/Open/Close lifecycle, TeleportToCity)
--- matches, so this mirrors the vanilla CAI layer with an adapted AddCity wrap.
+-- Two meaningful differences from the vanilla screen:
+--   1. BTS's AddCity takes a city id (number) instead of a city table.
+--   2. BTS's city button click only marks a pending new origin and shows a
+--      confirm button, instead of teleporting on click like vanilla. So the
+--      row activation calls TeleportToCity directly rather than DoLeftClick.
+-- Everything else (the Controls.CityStack button scan, Refresh/Open/Close
+-- lifecycle, TeleportToCity) matches the vanilla CAI layer.
 
 local mgr        = ExposedMembers.CAI_UIManager
 
@@ -90,12 +93,12 @@ local function PopulateList(capture)
         })
         item:SetFocusSound(HOVER_SOUND)
         item:On("activate", function()
-            if button then
-                button:DoLeftClick()
-            else
-                LogWarn("CAI TradeOriginChooser (BTS): missing live city button; falling back to TeleportToCity")
-                TeleportToCity(city)
-            end
+            -- BTS's city button click only marks a pending origin and shows a
+            -- separate confirm button (ChangeOriginCityButton) instead of
+            -- teleporting like vanilla does. Call TeleportToCity directly so
+            -- activating a city performs the move in one step, matching the
+            -- vanilla CAI screen behavior.
+            TeleportToCity(city)
         end)
         m_list:AddChild(item)
     end
