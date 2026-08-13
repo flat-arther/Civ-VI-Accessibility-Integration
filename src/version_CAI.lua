@@ -1,5 +1,5 @@
 include("caiUtils")
-local mod_version = "1.0.1"
+local mod_version = "1.1.0"
 if CAI then
     CAI.__version = mod_version
 end
