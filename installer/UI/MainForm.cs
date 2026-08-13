@@ -125,7 +125,7 @@ internal sealed class MainForm : Form
             Text = "Create a desktop shortcut to this installer",
             Location = new Point(16, 525),
             Size = new Size(400, 24),
-            Checked = true,
+            Checked = false,
         };
 
         var donate = new Button
