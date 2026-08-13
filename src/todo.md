@@ -93,8 +93,8 @@
 [x] Add amenities to the city banners
 [x] Builders allow you to form escort formations in tutorial. Disable this when not in free roam
 [x] Add scanner category quick slot bindings
+[x] City status should show production items and turns
+[x] Shift required envoy total up by one in city-state screen
+[x] Surveyor  should show religious enemy units
 [ ] Look in to coastal raide yield reporting
 [ ] Add support for better reports, detailed map tacs, extended policy cards, better balanced game, better trade screen
-[ ] City status should show production items and turns
-[ ] Surveyor  should show religious enemy units
-[ ] Shift required envoy total up by one in city-state screen

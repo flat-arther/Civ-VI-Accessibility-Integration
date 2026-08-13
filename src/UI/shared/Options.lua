@@ -2346,6 +2346,70 @@ local function RebuildKeyBindingsTree()
 end
 
 -- ---------------------------------------------------------------------------
+-- Reset key bindings to default
+-- ---------------------------------------------------------------------------
+
+local keysResetDialog ---@type UIWidget|nil
+
+local function CloseKeysResetDialog()
+    if keysResetDialog then
+        mgr:RemoveFromStack(keysResetDialog:GetId())
+        keysResetDialog = nil
+    end
+end
+
+---Confirm dialog for resetting every key binding to its default. Because the
+---game only reads InputSettings.json at startup, deleting it takes effect on
+---the next launch; the dialog states that a game restart is required. OK routes
+---to the mod DLL's ResetInputBindings, which removes the file.
+local function OpenKeysResetDialog()
+    CloseKeysResetDialog()
+
+    local okBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIKeys_ResetOK"), "Button", {
+        Label = function() return Locale.Lookup("LOC_OK_BUTTON") end,
+    })
+    okBtn:On("activate", function()
+        CloseKeysResetDialog()
+        if ExposedMembers.CAI.ResetInputBindings() then
+            Speak(Locale.Lookup("LOC_CAI_KEYBINDS_RESET_DONE"))
+        else
+            Speak(Locale.Lookup("LOC_CAI_KEYBINDS_RESET_FAILED"))
+        end
+    end)
+
+    local cancelBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIKeys_ResetCancel"), "Button", {
+        Label = function() return Locale.Lookup("LOC_CANCEL_BUTTON") end,
+    })
+    cancelBtn:On("activate", CloseKeysResetDialog)
+
+    local body = mgr:CreateWidget(mgr:GenerateWidgetId("CAIKeys_ResetBody"), "StaticText", {
+        Label = function() return Locale.Lookup("LOC_CAI_KEYBINDS_RESET_CONFIRM") end,
+    })
+
+    -- Default to Cancel: this discards all custom bindings and cannot be undone.
+    keysResetDialog = mgr.WidgetHelpers.MakeGeneralDialog(
+        function() return Locale.Lookup("LOC_CAI_KEYBINDS_RESET_DEFAULT") end,
+        { okBtn, cancelBtn },
+        { body },
+        2
+    )
+    if keysResetDialog then
+        keysResetDialog:AddInputBindings({
+            {
+                Key = Keys.VK_ESCAPE,
+                MSG = KeyEvents.KeyUp,
+                Description = "LOC_CAI_KB_CLOSE",
+                Action = function()
+                    CloseKeysResetDialog()
+                    return true
+                end,
+            },
+        })
+        mgr:Push(keysResetDialog)
+    end
+end
+
+-- ---------------------------------------------------------------------------
 -- Widget factories
 -- ---------------------------------------------------------------------------
 
@@ -2864,6 +2928,14 @@ local function PopulateTabPage(tabEntry, tabPage, tabIdx)
         end
     end
     tabPage:AddChild(primary)
+    if panel == Controls.KeyBindings then
+        local resetDefaultBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIKeys_ResetDefault"), "Button", {
+            Label = function() return Locale.Lookup("LOC_CAI_KEYBINDS_RESET_DEFAULT") end,
+        })
+        resetDefaultBtn:SetFocusSound("Main_Menu_Mouse_Over")
+        resetDefaultBtn:On("activate", OpenKeysResetDialog)
+        tabPage:AddChild(resetDefaultBtn)
+    end
     tabPage:AddChild(W_Button(Controls.ConfirmButton, function() Controls.ConfirmButton:DoLeftClick() end))
     tabPage:AddChild(W_Button(Controls.ResetButton,   function() Controls.ResetButton:DoLeftClick() end))
 end
@@ -2907,6 +2979,7 @@ local function BuildOptionsRoot()
 end
 
 CloseOptions = function()
+    CloseKeysResetDialog()
     if rootPushed and optionsRoot then
         mgr:RemoveFromStack(optionsRoot:GetId())
     end

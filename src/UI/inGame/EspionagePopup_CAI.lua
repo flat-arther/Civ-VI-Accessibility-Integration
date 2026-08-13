@@ -54,6 +54,8 @@ local function RemoveDialog()
     if not mgr or not m_dialog then return end
     mgr:RemoveFromStack(m_dialog:GetId())
     m_dialog = nil
+    -- Stop advertising this popup as a "keep above me" target for the chooser.
+    if ExposedMembers then ExposedMembers.CAI_EspionagePopupDialogId = nil end
 end
 
 local function MakeButton(native, idPrefix)
@@ -223,7 +225,10 @@ local function BuildDialog()
     )
     if not m_dialog then return end
 
-    mgr:Push(m_dialog, { priority = 101 })
+    mgr:Push(m_dialog, { priority = PopupPriority.Low })
+    -- Advertise this popup so a later-opening EspionageChooser drops below it
+    -- instead of covering it (mission-completed popup opens before the chooser).
+    if ExposedMembers then ExposedMembers.CAI_EspionagePopupDialogId = m_dialog:GetId() end
 end
 
 local function IsDialogActive()

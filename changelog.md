@@ -4,22 +4,34 @@
 
 - Added a table view for world rankings
 - Added support for the following mods: Better trade screen, Detailed map tacs, yet, not another maps pack. Better balanced map was already supported
-- The mod's name and description in the game's Additional Content list now appear in your game language, with translations for all supported languages
 - Added a full French translation. All accessibility text, screen tutorials, spoken key names, and command descriptions now appear in French when the game is set to French.
 - Added a full Brazilian Portuguese translation. All accessibility text, screen tutorials, spoken key names, and command descriptions now appear in Portuguese when the game is set to Portuguese (Brazil).
 - Added localization for Chinese (Simplified) thanks to Woody52169 for the contribution
 - The world scanner now has two quick-access slots. Press `Ctrl plus Minus` or `Ctrl plus Equals` to bind the subcategory you are currently on to a slot. After that, press `Minus` or `Equals` to step to the next item in that subcategory, or add `Shift` to step to the previous one. Slot items are listed nearest first, ignoring the usual grouping, and bound slots are remembered between sessions. Both custom and builtin categories are supported
 - The world scanner jump command can now also be triggered with `0` on the number row, in addition to `Home`. 
+- Added support for languages that use an input method editor for typing complex characters
+- switched to using Prism instead of Tolk for better screen reader support
+- The Key Bindings options page now has a "Reset key bindings to default" button below the list of bindings. It asks for confirmation, explains that the change takes effect after a game restart, and restores all default key bindings.
+- The tile actions list on your missile silos now offers Nuclear Strike and Thermonuclear Strike actions, one for each type of bomb you have stockpiled and can currently launch from that silo.
 
 ### Changed
 
+- The Reports City Status tab now reports each city's current production. In the table it appears in the production column's cell tooltip, and in the list view it is read first in each city's details.
+- The Reports City Status table now has a separate Governor column, instead of appending the governor to each city's name.
+- The City Status sort menu IN treeview MODE offers every option shown in the table, each with both an ascending and a descending option.
 - The City-States table now has a separate Bonuses column, split out from the Envoys column. You can sort city-states by how many of their bonuses you currently have active.
-- World Rankings team numbering now matches the staging room and diplomacy ribbon, starting from Team 1 instead of Team 0.
+- Changed World Rankings team numbering so that it matches the staging room and diplomacy ribbon, starting from Team 1 instead of Team 0.
 - The city selection info now reports amenities, and its building count is always spoken regardless of which expansion is active. Bound to `Shift plus 6` by default
 - The city banner loyalty summary (default binding `5`) also reports amenities for your own cities, and in the base game it reads amenities instead of announcing that no information is available.
+- In the City-States table, pressing `Enter` on a city-state now views that city-state on the map, the same as the Look At button.
+- In tables, moving past the first or last column with the Left and Right arrows now wraps around to the other end instead of stopping
 
 ### Fixed
 
+- Fixed an issue with espionage choosers opening on top of espionage popups, steeling focus and causing errors
+- The Surveyor's enemy units reading (`Shift plus D`) now includes hostile religious units, matching how the world scanner's enemies category lists them.
+- In the Governor assignment chooser, a city with no governor no longer incorrectly announces that a governor is established there.
+- In the Reports Yields tab, made it so that a city with an empty production queue reads "Nothing being produced" instead of "producing Nothing being produced".
 - In tables such as the City-States overview, confirming an action while outside the table keeps you on the same column you were on, instead of jumping back to the first column.
 - Fixed a bug with mod tutorials that caused the game to stop speaking if an advisor dialog appeared at the same time
 - Fixed builders being able to form escort formations during the on-rails tutorial before the settler formation step
@@ -27,6 +39,9 @@
 - Fixed Chinese and other non-Latin text being announced with stray replacement characters, most noticeably in long descriptions such as Great Person biographies
 - Fixed typeahead search rejecting Chinese and other non-Latin characters, and Backspace no longer garbles multi-byte characters.
 - Fixed editing text fields with Chinese and other non-Latin characters: arrow keys, Delete, and Backspace now move and delete a whole character at a time instead of splitting it, and each character is announced correctly
+- Fixed the City-States envoy count showing the wrong number of envoys needed for suzerain, which could read "6 of 6" while you were not yet the suzerain; it now shows the count you must actually reach to take suzerain
+- The era change popup once again announces the new era and whether you have entered a golden, dark, or heroic age
+- Fixed a runtime error that could occur when closing the notifications list or the chat panel
 
 ## [1.0.1] - 2026-08-04
 

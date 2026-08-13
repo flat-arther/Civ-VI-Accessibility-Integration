@@ -97,7 +97,9 @@ end
 
 local function BuildRowTooltip(row)
     local parts = {}
-    AppendIfNonEmpty(parts, ControlTooltip(row.GovernorIcon))
+    if not ControlIsHidden(row.GovernorIcon) then
+        AppendIfNonEmpty(parts, ControlTooltip(row.GovernorIcon))
+    end
     AppendIfNonEmpty(parts,
         TooltipWithValue(row.IdentityPressureBefore, row.IdentityPressureBefore,
             "LOC_GOVERNOR_ASSIGNMENT_CURRENT_IDENTITY_PRESSURE_TOOLTIP"))

@@ -205,6 +205,10 @@ internal sealed class Installer
                 Path.Combine(layout.BinaryDirectory, dll),
                 overwrite: true);
         }
+
+        // Remove companion DLLs left by a pre-2.0 integration; the current
+        // build no longer needs them alongside LightFX.dll.
+        DeleteLegacyRuntime(layout);
     }
 
     private static void RemoveRuntime(GameLayout layout)
@@ -215,9 +219,20 @@ internal sealed class Installer
             if (File.Exists(path)) File.Delete(path);
         }
 
+        DeleteLegacyRuntime(layout);
+
         if (File.Exists(layout.LightFxBackup))
         {
             File.Move(layout.LightFxBackup, layout.LightFxDll, overwrite: true);
+        }
+    }
+
+    private static void DeleteLegacyRuntime(GameLayout layout)
+    {
+        foreach (var dll in GameLayout.LegacyRuntimeDllNames)
+        {
+            var path = Path.Combine(layout.BinaryDirectory, dll);
+            if (File.Exists(path)) File.Delete(path);
         }
     }
 

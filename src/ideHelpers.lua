@@ -1471,7 +1471,7 @@ function UIScreenManager:CreateWidget(id, type, props) end
 ---Push a widget root onto the stack. opts.focus may be a widget or a FocusKey
 ---string; only applied when the pushed widget becomes the new top.
 ---@param w UIWidget
----@param opts? { priority?: PopupPriority, focus?: UIWidget|string }|PopupPriority
+---@param opts? { priority?: PopupPriority, focus?: UIWidget|string, ignoreFocus?: boolean, announce?: boolean, stickyTop?: boolean, below?: string }|PopupPriority
 function UIScreenManager:Push(w, opts) end
 
 ---Pop the top of the stack.

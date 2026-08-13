@@ -12,6 +12,7 @@ internal sealed class MainForm : Form
     private readonly Label _installedStatus;
     private readonly Label _availableStatus;
     private readonly TextBox _changes;
+    private readonly CheckBox _desktopShortcut;
 
     private string? _installedVersion;
     private string? _latestVersion;
@@ -111,13 +112,30 @@ internal sealed class MainForm : Form
         _changes = new TextBox
         {
             Location = new Point(16, 345),
-            Size = new Size(688, 205),
+            Size = new Size(688, 170),
             Multiline = true,
             ReadOnly = true,
             ScrollBars = ScrollBars.Vertical,
             AccessibleName = "Changes since your installed version",
             Text = "Checking for changes...",
         };
+
+        _desktopShortcut = new CheckBox
+        {
+            Text = "Create a desktop shortcut to this installer",
+            Location = new Point(16, 525),
+            Size = new Size(400, 24),
+            Checked = true,
+        };
+
+        var donate = new Button
+        {
+            Text = "Donate",
+            Location = new Point(16, 565),
+            Size = new Size(100, 30),
+            AccessibleName = "Donate on Ko-fi",
+        };
+        donate.Click += DonateClicked;
 
         _install = new Button
         {
@@ -148,7 +166,7 @@ internal sealed class MainForm : Form
         {
             heading, intro, gameLabel, _gameDirectory, browse, modeGroup,
             _installedStatus, _availableStatus, changesLabel, _changes,
-            _install, _uninstall, close,
+            _desktopShortcut, _install, _uninstall, donate, close,
         });
 
         AcceptButton = _install;
@@ -220,6 +238,19 @@ internal sealed class MainForm : Form
         {
             using var github = new GitHubReleaseClient();
             var latest = await github.GetLatestAsync(CancellationToken.None);
+
+            var latestMajor = ModInfoVersion.Parse(latest.Version).Major;
+            if (latestMajor > AppVersion.SupportedMaxModMajor)
+            {
+                _latestVersion = null;
+                _availableStatus.Text =
+                    $"This installer is out of date. The latest release ({latest.Version}) requires a newer installer.";
+                _changes.Text =
+                    "A newer version of the accessibility mod is available that this installer cannot install. " +
+                    "Download the latest installer from the project's releases page, then try again.";
+                _install.Enabled = false;
+                return;
+            }
 
             _latestVersion = latest.Version;
             var comparison = _installedVersion == null
@@ -330,10 +361,49 @@ internal sealed class MainForm : Form
         else
         {
             MessageBox.Show(this, "Installation completed successfully.", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (_desktopShortcut.Checked) CreateDesktopShortcut();
         }
 
         LoadExistingState();
         _ = RefreshReleaseInformationAsync();
+    }
+
+    private void CreateDesktopShortcut()
+    {
+        try
+        {
+            DesktopShortcut.Create();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                this,
+                $"The mod was installed, but the desktop shortcut could not be created: {ex.Message}",
+                Text,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+        }
+    }
+
+    private void DonateClicked(object? sender, EventArgs e)
+    {
+        const string url = "https://ko-fi.com/hamadatr";
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url)
+            {
+                UseShellExecute = true,
+            });
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                this,
+                $"Could not open the donation page. Visit {url} in your browser.\n\n{ex.Message}",
+                Text,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+        }
     }
 
     private void UninstallClicked(object? sender, EventArgs e)

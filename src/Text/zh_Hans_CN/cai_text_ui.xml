@@ -3964,6 +3964,18 @@
     <Replace Tag="LOC_CAI_KEYBINDS_ACTION_LINE" Language="zh_Hans_CN">
       <Text>{1_Name}：主要绑定{2_P}，备用绑定{3_S}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_KEYBINDS_RESET_DEFAULT" Language="zh_Hans_CN">
+      <Text>将按键绑定重置为默认值</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_KEYBINDS_RESET_CONFIRM" Language="zh_Hans_CN">
+      <Text>此操作会将所有按键绑定重置为默认值。更改仅在重新启动游戏后生效。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_KEYBINDS_RESET_DONE" Language="zh_Hans_CN">
+      <Text>按键绑定已重置。请重新启动游戏以应用更改。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_KEYBINDS_RESET_FAILED" Language="zh_Hans_CN">
+      <Text>无法重置按键绑定。</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_TAB_STRIP_LABEL" Language="zh_Hans_CN">
       <Text>选项卡控件</Text>
     </Replace>
@@ -4934,6 +4946,12 @@
     <Replace Tag="LOC_CAI_WORLD_RANKINGS_SPACEPORT_NOT_BUILT" Language="zh_Hans_CN">
       <Text>宇航中心：未建造</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_RANKINGS_BUILT" Language="zh_Hans_CN">
+      <Text>已建造</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_RANKINGS_NOT_BUILT" Language="zh_Hans_CN">
+      <Text>未建造</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_RANKINGS_NEXT_STEP" Language="zh_Hans_CN">
       <Text>下一步：{1_Step}</Text>
     </Replace>
@@ -4945,6 +4963,9 @@
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_RANKINGS_TEAM_MEMBER" Language="zh_Hans_CN">
       <Text>成员：{1_Name}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_RANKINGS_TEAM_MEMBERS" Language="zh_Hans_CN">
+      <Text>成员：{1_Names}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_RANKINGS_CONTRIBUTION" Language="zh_Hans_CN">
       <Text>{1_Name}：{2_Value}</Text>
@@ -5565,6 +5586,15 @@
     </Replace>
     <Replace Tag="LOC_CAI_TILE_INTERACT_DISTRICT_STRIKE" Language="zh_Hans_CN">
       <Text>{1_DistrictName}，远程攻击</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TILE_INTERACT_MISSILE_SILO" Language="zh_Hans_CN">
+      <Text>导弹发射井</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TILE_INTERACT_NUCLEAR_STRIKE" Language="zh_Hans_CN">
+      <Text>{1_ImprovementName}，核打击</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TILE_INTERACT_THERMONUCLEAR_STRIKE" Language="zh_Hans_CN">
+      <Text>{1_ImprovementName}，热核打击</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TILE_INTERACT_LIST_TITLE" Language="zh_Hans_CN">
       <Text>单元格操作</Text>

@@ -247,6 +247,64 @@ local function IsCityCenterDistrict(district)
 	return district ~= nil and district:GetType() == GameInfo.Districts["DISTRICT_CITY_CENTER"].Index
 end
 
+-- Mirrors the missile silo (WMD) city banner: a nuclear strike action per WMD type
+-- the local player has stockpiled and can currently fire from this silo. See vanilla
+-- CityBanner:UpdateWMDBanner / OnICBMStrikeButtonClick in CityBannerManager.lua.
+local function CollectMissileSiloInteractions(results, plot, plotX, plotY, localPlayerID)
+	local improvementIndex = plot:GetImprovementType()
+	if improvementIndex == nil or improvementIndex < 0 then return end
+	local improvementInfo = GameInfo.Improvements[improvementIndex]
+	if improvementInfo == nil or improvementInfo.WeaponSlots == nil or improvementInfo.WeaponSlots == 0 then
+		return
+	end
+
+	local pCity = Cities.GetPlotPurchaseCity(plotX, plotY)
+	if pCity == nil or pCity:GetOwner() ~= localPlayerID then return end
+
+	local improvementName = improvementInfo.Name ~= nil and Locale.Lookup(improvementInfo.Name) or
+		Locale.Lookup("LOC_CAI_TILE_INTERACT_MISSILE_SILO")
+
+	local pLocalPlayer = Players[localPlayerID]
+	if pLocalPlayer == nil then return end
+	local playerWMDs = pLocalPlayer:GetWMDs()
+	if playerWMDs == nil then return end
+
+	local strikeLabels = {
+		WMD_NUCLEAR_DEVICE = "LOC_CAI_TILE_INTERACT_NUCLEAR_STRIKE",
+		WMD_THERMONUCLEAR_DEVICE = "LOC_CAI_TILE_INTERACT_THERMONUCLEAR_STRIKE",
+	}
+
+	for entry in GameInfo.WMDs() do
+		local labelTag = strikeLabels[entry.WeaponType]
+		if labelTag ~= nil and playerWMDs:GetWeaponCount(entry.Index) > 0 then
+			local tParameters = {}
+			tParameters[CityCommandTypes.PARAM_WMD_TYPE] = entry.Index
+			tParameters[CityCommandTypes.PARAM_X0] = plotX
+			tParameters[CityCommandTypes.PARAM_Y0] = plotY
+			local tResults = CityManager.GetCommandTargets(pCity, CityCommandTypes.WMD_STRIKE, tParameters)
+			if tResults ~= nil and tResults[CityCommandResults.PLOTS] ~= nil then
+				local eWMD = entry.Index
+				table.insert(results, {
+					Label = Locale.Lookup(labelTag, improvementName),
+					Action = function()
+						-- Force recalculation of reachable area if we're already in strike mode.
+						if UI.GetInterfaceMode() == InterfaceModeTypes.ICBM_STRIKE then
+							UI.SetInterfaceMode(InterfaceModeTypes.SELECTION)
+						end
+						UI.SelectCity(pCity)
+						UILens.SetActive("Default")
+						local tStrikeParameters = {}
+						tStrikeParameters[CityCommandTypes.PARAM_WMD_TYPE] = eWMD
+						tStrikeParameters[CityCommandTypes.PARAM_X0] = plotX
+						tStrikeParameters[CityCommandTypes.PARAM_Y0] = plotY
+						UI.SetInterfaceMode(InterfaceModeTypes.ICBM_STRIKE, tStrikeParameters)
+					end,
+				})
+			end
+		end
+	end
+end
+
 local function CollectPlotInteractions(plotId)
 	local results = {}
 	if plotId == nil or plotId < 0 then return results end
@@ -412,6 +470,8 @@ local function CollectPlotInteractions(plotId)
 			end
 		end
 	end
+
+	CollectMissileSiloInteractions(results, plot, plotX, plotY, localPlayerID)
 
 	return results
 end

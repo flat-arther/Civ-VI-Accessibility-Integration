@@ -298,6 +298,33 @@ local function IsOwnOrTeamUnit(unit)
     return localPlayer ~= nil and owner ~= nil and localPlayer:GetTeam() == owner:GetTeam()
 end
 
+-- Religious units are treated as hostile unless a religious alliance protects
+-- their owner or they already spread the local player's majority religion. This
+-- mirrors the World Scanner's enemy classification so both tools agree.
+local function IsReligiousUnit(unit)
+    return unit ~= nil and unit:GetReligiousStrength() > 0
+end
+
+local function IsReligiousAlliance(diplomacy, ownerID)
+    local religiousAlliance = GameInfo.Alliances ~= nil
+        and GameInfo.Alliances["ALLIANCE_RELIGIOUS"] or nil
+    return religiousAlliance ~= nil
+        and diplomacy ~= nil
+        and diplomacy:GetAllianceType(ownerID) == religiousAlliance.Index
+end
+
+local function HasLocalMajorityReligion(unit, localPlayerID)
+    local localPlayer = localPlayerID ~= nil and Players[localPlayerID] or nil
+    local localReligion = localPlayer ~= nil and localPlayer:GetReligion() or nil
+    if localReligion == nil then
+        return false
+    end
+
+    local religionType = unit:GetReligionType()
+    local localReligionType = localReligion:GetReligionInMajorityOfCities()
+    return religionType ~= nil and religionType >= 0 and religionType == localReligionType
+end
+
 local function IsEnemyUnit(unit)
     local ownerID = unit:GetOwner()
     local owner = Players[ownerID]
@@ -307,13 +334,26 @@ local function IsEnemyUnit(unit)
     if owner:IsBarbarian() then
         return true
     end
-    if not IsKnownPlayer(ownerID) then
+    if not IsKnownPlayer(ownerID) or IsOwnOrTeamUnit(unit) then
         return false
     end
 
-    local localPlayer = Players[Game.GetLocalPlayer()]
+    local localPlayerID = Game.GetLocalPlayer()
+    local localPlayer = Players[localPlayerID]
     local diplomacy = localPlayer and localPlayer:GetDiplomacy()
-    return diplomacy ~= nil and diplomacy:IsAtWarWith(ownerID)
+    if diplomacy == nil then
+        return false
+    end
+
+    if IsReligiousUnit(unit) then
+        if IsReligiousAlliance(diplomacy, ownerID)
+            or HasLocalMajorityReligion(unit, localPlayerID) then
+            return false
+        end
+        return true
+    end
+
+    return diplomacy:IsAtWarWith(ownerID)
 end
 
 local function IsNeutralUnit(unit)
@@ -327,9 +367,7 @@ local function IsNeutralUnit(unit)
         return false
     end
 
-    local localPlayer = Players[Game.GetLocalPlayer()]
-    local diplomacy = localPlayer and localPlayer:GetDiplomacy()
-    return diplomacy ~= nil and not diplomacy:IsAtWarWith(ownerID)
+    return not IsEnemyUnit(unit)
 end
 
 local function IsUnitVisible(unit)

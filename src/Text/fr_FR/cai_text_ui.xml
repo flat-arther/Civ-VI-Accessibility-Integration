@@ -3957,6 +3957,18 @@
     <Replace Tag="LOC_CAI_KEYBINDS_ACTION_LINE" Language="fr_FR">
       <Text>{1_Name} : principale {2_P}, secondaire {3_S}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_KEYBINDS_RESET_DEFAULT" Language="fr_FR">
+      <Text>Réinitialiser les raccourcis clavier par défaut</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_KEYBINDS_RESET_CONFIRM" Language="fr_FR">
+      <Text>Ceci réinitialise tous les raccourcis clavier à leurs valeurs par défaut. La modification ne prend effet qu'après le redémarrage du jeu.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_KEYBINDS_RESET_DONE" Language="fr_FR">
+      <Text>Raccourcis clavier réinitialisés. Redémarrez le jeu pour appliquer.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_KEYBINDS_RESET_FAILED" Language="fr_FR">
+      <Text>Impossible de réinitialiser les raccourcis clavier.</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_TAB_STRIP_LABEL" Language="fr_FR">
       <Text>Contrôle à onglets</Text>
     </Replace>
@@ -5562,6 +5574,15 @@
     </Replace>
     <Replace Tag="LOC_CAI_TILE_INTERACT_DISTRICT_STRIKE" Language="fr_FR">
       <Text>{1_DistrictName}, Attaque à distance</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TILE_INTERACT_MISSILE_SILO" Language="fr_FR">
+      <Text>Silo à missiles</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TILE_INTERACT_NUCLEAR_STRIKE" Language="fr_FR">
+      <Text>{1_ImprovementName}, Frappe nucléaire</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TILE_INTERACT_THERMONUCLEAR_STRIKE" Language="fr_FR">
+      <Text>{1_ImprovementName}, Frappe thermonucléaire</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TILE_INTERACT_LIST_TITLE" Language="fr_FR">
       <Text>Actions de la case</Text>

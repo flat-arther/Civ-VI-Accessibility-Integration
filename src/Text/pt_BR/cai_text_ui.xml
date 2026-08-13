@@ -3954,6 +3954,18 @@
     <Replace Tag="LOC_CAI_KEYBINDS_ACTION_LINE" Language="pt_BR">
       <Text>{1_Name}: primário {2_P}, secundário {3_S}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_KEYBINDS_RESET_DEFAULT" Language="pt_BR">
+      <Text>Redefinir teclas de atalho para o padrão</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_KEYBINDS_RESET_CONFIRM" Language="pt_BR">
+      <Text>Isto redefine todas as teclas de atalho para o padrão. A alteração só entra em vigor após reiniciar o jogo.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_KEYBINDS_RESET_DONE" Language="pt_BR">
+      <Text>Teclas de atalho redefinidas. Reinicie o jogo para aplicar.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_KEYBINDS_RESET_FAILED" Language="pt_BR">
+      <Text>Não foi possível redefinir as teclas de atalho.</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_TAB_STRIP_LABEL" Language="pt_BR">
       <Text>Controle de abas</Text>
     </Replace>
@@ -5567,6 +5579,15 @@
     </Replace>
     <Replace Tag="LOC_CAI_TILE_INTERACT_DISTRICT_STRIKE" Language="pt_BR">
       <Text>{1_DistrictName}, Ataque a Distância</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TILE_INTERACT_MISSILE_SILO" Language="pt_BR">
+      <Text>Silo de Mísseis</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TILE_INTERACT_NUCLEAR_STRIKE" Language="pt_BR">
+      <Text>{1_ImprovementName}, Ataque Nuclear</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TILE_INTERACT_THERMONUCLEAR_STRIKE" Language="pt_BR">
+      <Text>{1_ImprovementName}, Ataque Termonuclear</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TILE_INTERACT_LIST_TITLE" Language="pt_BR">
       <Text>Ações do Hexágono</Text>

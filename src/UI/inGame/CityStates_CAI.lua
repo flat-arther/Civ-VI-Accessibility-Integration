@@ -220,6 +220,17 @@ local function GetCityStateData(playerID)
         end
     end
 
+    -- Envoys needed to become suzerain, matching vanilla CityStates.lua: clamp to
+    -- the 3-envoy minimum, and if the local player is not already the suzerain,
+    -- require one more than the current leader (you must exceed, not tie).
+    local isBonusSuzerain = (suzerainID == localPlayerID)
+    local suzerainTokensNeeded = pPlayerInfluence:GetMostTokensReceived()
+    if suzerainTokensNeeded < 3 then
+        suzerainTokensNeeded = 3
+    elseif not isBonusSuzerain then
+        suzerainTokensNeeded = suzerainTokensNeeded + 1
+    end
+
     return {
         iPlayer               = playerID,
         Name                  = pConfig:GetCivilizationShortDescription(),
@@ -228,7 +239,7 @@ local function GetCityStateData(playerID)
         Influence             = influence,
         SuzerainID            = suzerainID,
         SuzerainName          = suzerainName,
-        SuzerainTokensNeeded  = pPlayerInfluence:GetMostTokensReceived(),
+        SuzerainTokensNeeded  = suzerainTokensNeeded,
         isAlive               = pPlayer:IsAlive(),
         isHasMet              = pLocalDiplomacy:HasMet(playerID),
         isAtWar               = pLocalDiplomacy:IsAtWarWith(playerID),
@@ -506,9 +517,7 @@ local function GetEnvoyCell(playerID)
     if kCS.isBonusSuzerain then
         table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", kCS.Tokens))
     else
-        local needed = math.max(3, kCS.SuzerainTokensNeeded)
-        if kCS.SuzerainID ~= -1 then needed = needed + 1 end
-        table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_OF", kCS.Tokens, needed))
+        table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_OF", kCS.Tokens, kCS.SuzerainTokensNeeded))
     end
 
     local pending = GetPendingForPlayer(playerID)
@@ -845,9 +854,7 @@ local function FormatTreeRowLabel(playerID)
         table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", kCS.Tokens))
         table.insert(parts, Locale.Lookup("LOC_CITY_STATES_SUZERAIN"))
     else
-        local needed = math.max(3, kCS.SuzerainTokensNeeded)
-        if kCS.SuzerainID ~= -1 then needed = needed + 1 end
-        table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_OF", kCS.Tokens, needed))
+        table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_OF", kCS.Tokens, kCS.SuzerainTokensNeeded))
     end
 
     local pending = GetPendingForPlayer(playerID)
@@ -1416,6 +1423,12 @@ local function EnsurePanelBuilt()
         or nil)
     m_ui.overview:On("row_focus_enter", function(_, playerID, rowIndex)
         if rowIndex > 0 then SelectCityState(playerID) end
+    end)
+    -- Enter on a city-state row triggers the same "view on the map" action as the
+    -- Look At button. Row focus has already selected the city-state, so reuse the
+    -- button's activate handler to keep behavior identical.
+    m_ui.overview:On("row_activate", function(_, playerID)
+        if playerID and m_ui.lookAt then m_ui.lookAt:Emit("activate") end
     end)
     m_ui.overview:On("sort_changed", function(_, columnKey, ascending)
         m_treeSortColumn = columnKey

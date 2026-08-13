@@ -109,6 +109,15 @@ mgr:RemoveFromStack("ModalRoot", false) -- parent refresh immediately chooses fi
 ```
 
 - `priority` controls stack sort. Ties resolve by push order (FIFO).
+- `stickyTop` floats this widget above *all* same-priority non-sticky widgets,
+  regardless of push order. Use sparingly — it out-ranks every other root at the
+  same priority, so it is easy to trap unrelated later pushes beneath it.
+- `below` is a widget id. If that widget is on the stack at the same priority,
+  the pushed widget is placed directly beneath it (only `stackOrder` is adjusted,
+  so the sort remains a valid total order). This scopes ordering to one specific
+  widget without the broad side effects of `stickyTop`. Example: the espionage
+  chooser opens *after* a mission-completed `EspionagePopup`; passing
+  `below = <popup id>` keeps the popup on top while both stay at `Low`.
 - `focus` is a widget reference or a `FocusKey` string. Applied only when the
   pushed widget becomes the new top. Avoids screens reaching into
   `FocusedChild` to pre-position focus.

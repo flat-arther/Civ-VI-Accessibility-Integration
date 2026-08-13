@@ -39,4 +39,6 @@ StartEraShow = WrapFunc(StartEraShow, function(orig)
 end)
 
 
-ContextPtr:RemoveInputHandler()
+-- Detach the vanilla popup input handler. ContextPtr has no RemoveInputHandler
+-- (that method lives on Automation); passing nil clears the handler.
+ContextPtr:SetInputHandler(nil, true)

@@ -291,9 +291,7 @@ jobs:
         shell: pwsh
         run: |
           $expectedFiles = @(
-              "LightFX.dll",
-              "nvdaControllerClient64.dll",
-              "SAAPI64.dll"
+              "LightFX.dll"
           )
 
           $possibleDirectories = @(
@@ -378,9 +376,7 @@ jobs:
               -ErrorAction SilentlyContinue
 
           $runtimeDlls = @(
-              "LightFX.dll",
-              "nvdaControllerClient64.dll",
-              "SAAPI64.dll"
+              "LightFX.dll"
           )
 
           foreach ($dll in $runtimeDlls) {

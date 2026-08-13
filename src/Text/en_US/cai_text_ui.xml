@@ -3965,6 +3965,18 @@
     <Row Tag="LOC_CAI_KEYBINDS_ACTION_LINE" Language="en_US">
       <Text>{1_Name}: primary {2_P}, secondary {3_S}</Text>
     </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_RESET_DEFAULT" Language="en_US">
+      <Text>Reset key bindings to default</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_RESET_CONFIRM" Language="en_US">
+      <Text>This resets all key bindings to their defaults. The change takes effect only after you restart the game.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_RESET_DONE" Language="en_US">
+      <Text>Key bindings reset. Restart the game to apply.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_KEYBINDS_RESET_FAILED" Language="en_US">
+      <Text>Could not reset key bindings.</Text>
+    </Row>
     <Row Tag="LOC_CAI_TAB_STRIP_LABEL" Language="en_US">
       <Text>Tab control</Text>
     </Row>
@@ -5577,6 +5589,15 @@
     </Row>
     <Row Tag="LOC_CAI_TILE_INTERACT_DISTRICT_STRIKE" Language="en_US">
       <Text>{1_DistrictName}, Ranged Strike</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TILE_INTERACT_MISSILE_SILO" Language="en_US">
+      <Text>Missile Silo</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TILE_INTERACT_NUCLEAR_STRIKE" Language="en_US">
+      <Text>{1_ImprovementName}, Nuclear Strike</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TILE_INTERACT_THERMONUCLEAR_STRIKE" Language="en_US">
+      <Text>{1_ImprovementName}, Thermonuclear Strike</Text>
     </Row>
     <Row Tag="LOC_CAI_TILE_INTERACT_LIST_TITLE" Language="en_US">
       <Text>Tile Actions</Text>

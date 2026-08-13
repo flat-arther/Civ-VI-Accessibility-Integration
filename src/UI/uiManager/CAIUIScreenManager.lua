@@ -155,6 +155,12 @@ function UIScreenManager:SortStack()
         local ap = a and a.__priority or PopupPriority.Low
         local bp = b and b.__priority or PopupPriority.Low
         if ap ~= bp then return ap < bp end
+        -- At equal priority, sticky-top widgets float above non-sticky ones so
+        -- a widget pushed first (e.g. a vanilla modal popup) can still sit atop
+        -- a same-priority panel pushed later.
+        local asticky = a and a.__stickyTop and 1 or 0
+        local bsticky = b and b.__stickyTop and 1 or 0
+        if asticky ~= bsticky then return asticky < bsticky end
         local ao = a and a.__stackOrder or 0
         local bo = b and b.__stackOrder or 0
         return ao < bo
@@ -168,8 +174,16 @@ end
 ---            FocusedChild to pre-position focus.
 --- ignoreFocus: boolean, if true focus is not updated (used by screens that push a widget but don't expect you to interact with it currently).
 --- announce:  boolean, if true the new focus path is spoken (default true).
+--- stickyTop: boolean, if true this widget floats above same-priority non-sticky
+---            widgets regardless of push order (mirrors a vanilla modal popup
+---            layered above an ordinary panel).
+--- below:     widget id (string). If a widget with that id is on the stack at the
+---            same priority, this widget is placed directly below it instead of on
+---            top. Scoped ordering against one specific widget without affecting any
+---            other same-priority root (unlike stickyTop). Adjusts only stackOrder,
+---            so the sort stays a valid total order.
 ---@param w UIWidget
----@param opts? { priority?: PopupPriority, focus?: UIWidget|string, ignoreFocus?: boolean, announce?: boolean }
+---@param opts? { priority?: PopupPriority, focus?: UIWidget|string, ignoreFocus?: boolean, announce?: boolean, stickyTop?: boolean, below?: string }
 function UIScreenManager:Push(w, opts)
     if not w then return end
     opts = opts or {}
@@ -179,8 +193,21 @@ function UIScreenManager:Push(w, opts)
     self.NextStackOrder = (self.NextStackOrder or 0) + 1
     w.__priority = opts.priority or w.__priority or oldPriority or PopupPriority.Low
     w.__stackOrder = self.NextStackOrder
+    if opts.stickyTop ~= nil then w.__stickyTop = opts.stickyTop end
     table.insert(self.Stack, w)
     self:SortStack()
+    -- Scoped ordering: drop directly below one specific same-priority widget.
+    -- Only stackOrder is touched, so the comparator remains a valid total order.
+    if opts.below then
+        for _, other in ipairs(self.Stack) do
+            if other ~= w and other.__priority == w.__priority
+                and other.GetId and other:GetId() == opts.below then
+                w.__stackOrder = (other.__stackOrder or 0) - 0.5
+                self:SortStack()
+                break
+            end
+        end
+    end
     local newTop = self:GetTop()
     LogMessage("UI manager Push " .. self:DescribeWidget(w)
         .. ", stackSize=" .. tostring(#self.Stack)
@@ -267,6 +294,7 @@ function UIScreenManager:Pop()
     if w then
         w.__priority = nil
         w.__stackOrder = nil
+        w.__stickyTop = nil
         w:Destroy()
     end
     self:UpdateRootFocus()
@@ -283,7 +311,9 @@ function UIScreenManager:RemoveFromStack(id, announce)
     -- Context shutdown order is not deterministic. Once the context that owns
     -- the manager has shut down, other UI contexts may still run their hide
     -- handlers against a stale local reference.
-    if ExposedMembers.CAI_UIManager ~= self then return nil end
+    -- ExposedMembers itself can be nil in a foreign context whose shutdown runs
+    -- after the manager's owning context has already torn down.
+    if ExposedMembers == nil or ExposedMembers.CAI_UIManager ~= self then return nil end
     if not id or id == "" then return nil end
     for i = #self.Stack, 1, -1 do
         local w = self.Stack[i]
@@ -292,6 +322,7 @@ function UIScreenManager:RemoveFromStack(id, announce)
             local description = self:DescribeWidget(w)
             w.__priority = nil
             w.__stackOrder = nil
+            w.__stickyTop = nil
             w:Destroy()
             self:UpdateRootFocus(announce)
             LogMessage("UI manager RemoveFromStack " .. description
@@ -319,6 +350,7 @@ function UIScreenManager:Clear()
         if root then
             root.__priority = nil
             root.__stackOrder = nil
+            root.__stickyTop = nil
             root:Destroy()
         end
         LogMessage("UI manager Clear removed " .. description)

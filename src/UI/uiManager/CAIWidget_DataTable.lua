@@ -249,7 +249,7 @@ function DataTableWidget.Create(mgr, id, props)
     w.Type = "DataTable"
     w.Role = "Table"
     w.Manager = mgr
-    w.WrapAround = false
+    w.WrapAround = true
     w.Columns = {}
     w.RowsProvider = nil
     w.RowKeyGetter = nil
@@ -597,20 +597,37 @@ function DataTableWidget:_NavigateVertical(direction)
     return false
 end
 
+---Left/Right within a row. When WrapAround is set, stepping past the first or
+---last column continues from the opposite edge so the user never dead-ends at a
+---table boundary. The bounded scan (at most one pass over the columns) skips
+---hidden cells and never returns to the origin, so a single-visible-column row
+---no-ops instead of looping.
 ---@param direction 1|-1
 ---@return boolean
 function DataTableWidget:_NavigateHorizontal(direction)
     local cell = self:_FocusedCell()
     if not cell then return false end
-    local columnIndex = cell.ColumnIndex + direction
+    local count = #self.Columns
     local rowChildIndex = cell.RowIndex + 1
-    while columnIndex >= 1 and columnIndex <= #self.Columns do
+    local columnIndex = cell.ColumnIndex
+    local wrapped = false
+    for _ = 1, count do
+        columnIndex = columnIndex + direction
+        if columnIndex < 1 then
+            if not self.WrapAround then return false end
+            columnIndex = count
+            wrapped = true
+        elseif columnIndex > count then
+            if not self.WrapAround then return false end
+            columnIndex = 1
+            wrapped = true
+        end
         local target = self:_CellAt(rowChildIndex, columnIndex)
-        if target then
+        if target and target ~= cell then
+            if wrapped then self:Emit("navigation_wrap", direction) end
             self.Manager:SetFocus(target, { direction = direction })
             return true
         end
-        columnIndex = columnIndex + direction
     end
     return false
 end
