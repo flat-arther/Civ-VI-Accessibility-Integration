@@ -534,7 +534,11 @@ end
 -- Promote dialog
 -- ===========================================================================
 
+local g_promoDialogSuspendToken = nil
+
 local function RemovePromoDialog()
+    if mgr then mgr:UnregisterSuspendCloser(g_promoDialogSuspendToken) end
+    g_promoDialogSuspendToken = nil
     if mgr and m_ui.promoConfirmDialog and mgr:GetWidgetById(m_ui.promoConfirmDialog:GetId()) then
         mgr:RemoveFromStack(
             m_ui.promoConfirmDialog:GetId())
@@ -604,6 +608,7 @@ local function ShowPromoteDialog(governorIndex, promotionIndex)
     })
     if m_ui.promoConfirmDialog then
         mgr:Push(m_ui.promoConfirmDialog)
+        g_promoDialogSuspendToken = mgr:RegisterSuspendCloser(RemovePromoDialog)
     end
 end
 

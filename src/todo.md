@@ -35,7 +35,6 @@
 [x] Add map pins to plot info and scanner
 [x] city actions should not repeat the names in the tooltip
 [x] add mod config
-[ ] River flow direction reporting
 [x] / to jump back to selection
 [x] Speaking input binding next to city and unit actions if any are bound
 [x] Roads should be mentioned in plot info
@@ -96,5 +95,9 @@
 [x] City status should show production items and turns
 [x] Shift required envoy total up by one in city-state screen
 [x] Surveyor  should show religious enemy units
+[x] Add a way to toggle the mod for hotseat
+[ ] Typeahead should prioritize current depth
+[ ] Auto announce yields in city management interface
 [ ] Look in to coastal raide yield reporting
-[ ] Add support for better reports, detailed map tacs, extended policy cards, better balanced game, better trade screen
+[ ] River flow direction reporting
+[ ] Add support for better reports, detailed map tacs, extended policy cards, better balanced game, better trade screen, real Era Tracker

@@ -1,0 +1,12 @@
+UPDATE LocalizedText SET Text = 'Podkreślenie' WHERE Tag = 'LOC_OPTIONS_KEY_UNDERSCORE' AND Language = 'pl_PL';
+UPDATE LocalizedText SET Text = 'Średnik' WHERE Tag = 'LOC_OPTIONS_KEY_SEMICOLON' AND Language = 'pl_PL';
+UPDATE LocalizedText SET Text = 'Znak równości' WHERE Tag = 'LOC_OPTIONS_KEY_PLUS' AND Language = 'pl_PL';
+UPDATE LocalizedText SET Text = 'Przecinek' WHERE Tag = 'LOC_OPTIONS_KEY_COMMA' AND Language = 'pl_PL';
+UPDATE LocalizedText SET Text = 'Minus' WHERE Tag = 'LOC_OPTIONS_KEY_MINUS' AND Language = 'pl_PL';
+UPDATE LocalizedText SET Text = 'Kropka' WHERE Tag = 'LOC_OPTIONS_KEY_PERIOD' AND Language = 'pl_PL';
+UPDATE LocalizedText SET Text = 'Ukośnik' WHERE Tag = 'LOC_OPTIONS_KEY_SLASH' AND Language = 'pl_PL';
+UPDATE LocalizedText SET Text = 'Tylda' WHERE Tag = 'LOC_OPTIONS_KEY_TILDE' AND Language = 'pl_PL';
+UPDATE LocalizedText SET Text = 'Lewy nawias kwadratowy' WHERE Tag = 'LOC_OPTIONS_KEY_LBRACKET' AND Language = 'pl_PL';
+UPDATE LocalizedText SET Text = 'Ukośnik wsteczny' WHERE Tag = 'LOC_OPTIONS_KEY_BACKSLASH' AND Language = 'pl_PL';
+UPDATE LocalizedText SET Text = 'Prawy nawias kwadratowy' WHERE Tag = 'LOC_OPTIONS_KEY_RBRACKET' AND Language = 'pl_PL';
+UPDATE LocalizedText SET Text = 'Apostrof' WHERE Tag = 'LOC_OPTIONS_KEY_QUOTE' AND Language = 'pl_PL';

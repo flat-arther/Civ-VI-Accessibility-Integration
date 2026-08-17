@@ -2596,6 +2596,9 @@
     <Row Tag="LOC_CAI_UNIT_FLAG_NAME_PATTERN" Language="en_US">
       <Text>{1_Owner} {2_Name} {3_FormationSuffix}</Text>
     </Row>
+    <Row Tag="LOC_CAI_UNIT_NUMBER_SUFFIX" Language="en_US">
+      <Text>{1_Name} {2_Number}</Text>
+    </Row>
     <Row Tag="LOC_CAI_UNIT_FLAG_HEALTH" Language="en_US">
       <Text>{1_CurrentHp}/{2_MaxHp} hp</Text>
     </Row>
@@ -2995,6 +2998,18 @@
     </Row>
     <Row Tag="LOC_CAI_UNIT_NO_UNITS" Language="en_US">
       <Text>No units available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NO_READY_UNITS" Language="en_US">
+      <Text>No ready units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NO_MORE_UNITS" Language="en_US">
+      <Text>No more units, {1_Name} already selected</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NO_CITIES" Language="en_US">
+      <Text>No cities</Text>
+    </Row>
+    <Row Tag="LOC_CAI_NO_MORE_CITIES" Language="en_US">
+      <Text>No more cities, {1_Name} already selected</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_RELATIVE_COORDS" Language="en_US">
       <Text>Location {1_Text}</Text>
@@ -5692,6 +5707,15 @@
     </Row>
 
     <!-- Input binding descriptions -->
+    <Row Tag="LOC_CAI_KB_TOGGLE_MOD" Language="en_US">
+      <Text>Suspend or resume the accessibility mod</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOD_SUSPENDED" Language="en_US">
+      <Text>Accessibility mod suspended</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOD_RESUMED" Language="en_US">
+      <Text>Accessibility mod resumed</Text>
+    </Row>
     <Row Tag="LOC_CAI_KB_OPEN_SETTINGS" Language="en_US">
       <Text>Open accessibility mod settings</Text>
     </Row>
@@ -6362,6 +6386,33 @@
     </Row>
     <Row Tag="LOC_CAI_SETTING_SECTION_MESSAGEBUFFER" Language="en_US">
       <Text>Message buffer</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SECTION_GAMEPLAY" Language="en_US">
+      <Text>Gameplay</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_WRAP_UNIT_CYCLING" Language="en_US">
+      <Text>Wrap unit cycling</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_WRAP_UNIT_CYCLING_TOOLTIP" Language="en_US">
+      <Text>When on, cycling past the last unit returns to the first, and cycling before the first jumps to the last. When off, cycling stops at the ends of the list and tells you there are no more units.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_UNIT_CYCLING_FOLLOW_SORT" Language="en_US">
+      <Text>Cycle units in the unit panel's sort order</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_UNIT_CYCLING_FOLLOW_SORT_TOOLTIP" Language="en_US">
+      <Text>When on, the unit cycling keys follow the sort you chose in the unit list. When off, they always cycle by distance, nearest first.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_WRAP_CITY_CYCLING" Language="en_US">
+      <Text>Wrap city cycling</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_WRAP_CITY_CYCLING_TOOLTIP" Language="en_US">
+      <Text>When on, cycling past the last city returns to the first, and cycling before the first jumps to the last. When off, cycling stops at the ends of the list and tells you there are no more cities.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_CITY_CYCLING_FOLLOW_SORT" Language="en_US">
+      <Text>Cycle cities in the city status report's sort order</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_CITY_CYCLING_FOLLOW_SORT_TOOLTIP" Language="en_US">
+      <Text>When on, the city cycling keys follow the sort you chose in the city status report. When off, they cycle in the default order.</Text>
     </Row>
 
     <Row Tag="LOC_CAI_SETTING_SPEAK_TOOLTIP" Language="en_US">

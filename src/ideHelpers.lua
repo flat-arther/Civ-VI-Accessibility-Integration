@@ -225,7 +225,17 @@ function CAICursor:UpdateZones() end
 ---@param text string
 ---@param interrupt? boolean Interrupt any speech in flight. Default false.
 ---@param processTokens? boolean Run ProcessText on text before speaking. Default true.
-function Speak(text, interrupt, processTokens) end
+---@param force? boolean Speak even while the mod is suspended. Default false.
+function Speak(text, interrupt, processTokens, force) end
+
+---@return boolean -- true when the accessibility mod is active (not suspended)
+function IsCAIActive() end
+
+---@return boolean -- true when the mod is persisted as suspended
+function LoadCAISuspendedFlag() end
+
+---@param suspended boolean
+function SaveCAISuspendedFlag(suspended) end
 
 ---Speak each line in turn. When interrupt is true only the first line cuts
 ---ongoing speech; the rest queue so per-widget lines don't trample each other.
@@ -276,6 +286,7 @@ EditModes = {}
 ---@field IsAlt? boolean
 ---@field Description? string  LOC tag describing the binding for the input help overlay
 ---@field Common? boolean  Runs even when the widget is disabled
+---@field Global? boolean  Honored even while the mod is suspended (mod-toggle binding only)
 ---@field BubbleWhenDisabled? boolean  Lets a matching non-common binding bubble instead of being consumed while disabled
 
 ---One option in a Dropdown.
@@ -761,8 +772,9 @@ function UIWidget:AddInputBindings(bindings) end
 
 ---Base input handler. Walks InputMap; returns true to consume.
 ---@param input InputStruct
+---@param globalOnly? boolean When true, only Global bindings are considered (suspended mode)
 ---@return boolean
-function UIWidget:OnHandleInput(input) end
+function UIWidget:OnHandleInput(input, globalOnly) end
 
 ---Set the popup priority used by the manager's stack sort. Root widgets only.
 ---@param priority PopupPriority
@@ -1542,6 +1554,23 @@ function UIScreenManager:HandleInput(input) end
 ---@param char string
 ---@return boolean
 function UIScreenManager:HandleCharInput(char) end
+
+---@return boolean -- true when the accessibility mod is active (not suspended)
+function UIScreenManager:IsCAIActive() end
+
+---@param active boolean
+function UIScreenManager:SetCAIActive(active) end
+
+function UIScreenManager:ToggleCAIActive() end
+
+---@param closer fun()
+---@return integer token
+function UIScreenManager:RegisterSuspendCloser(closer) end
+
+---@param token integer|nil
+function UIScreenManager:UnregisterSuspendCloser(token) end
+
+function UIScreenManager:CloseSuspendModals() end
 
 ---@param id string
 ---@param recurse? boolean

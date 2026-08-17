@@ -62,11 +62,19 @@ local m_caiGossipLog       = {}
 local m_caiGossipFiltered  = {}
 local m_caiLeaderFilter    = -1
 local m_caiGroupFilter     = "ALL"
-local m_cityStatusSort     = "name"
+-- "natural" keeps the report's own city order (m_caiCityData sorted by .Order).
+-- Sort state lives on these module locals and is written back from the table's
+-- sort_changed handler so it survives closing and reopening the report.
+local m_cityStatusSort     = "natural"
 local m_cityStatusSortAscending = true
 local m_cityStatusColumns  = nil
 local m_cityStatusViewMode = LoadCityStatusViewMode()
 local m_cityStatusSelectedCityID = nil
+-- World city cycling anchors its distance origin so the sorted order stays stable
+-- as the selection (and cursor) moves; see OnCAICycleSelectedCity.
+local m_cityCycleOrigin = nil
+local m_cityCycleAnchorKey = nil
+local m_cityCycleDistanceOrigin = nil
 local m_pendingOpenFocusKey = nil
 
 local function GetRelativePlotLocation(plotIndex)
@@ -1261,8 +1269,8 @@ local function RebuildYieldsTree(tree)
                         table.insert(instances, {
                             PlayerID = m_localPlayerID,
                             UnitID = unit:GetID(),
-                            Name = FormatOwnedName(nil, Locale.Lookup(unit:GetName()),
-                                GetUnitFormationSuffix(unit)) or Locale.Lookup(unit:GetName()),
+                            Name = GetNumberedUnitName(unit, FormatOwnedName(nil, Locale.Lookup(unit:GetName()),
+                                GetUnitFormationSuffix(unit)) or Locale.Lookup(unit:GetName())),
                         })
                     end
                 end
@@ -1889,11 +1897,18 @@ end
 local function GetCityStatusDistance(kCityData)
     local plot = kCityData.CAIPlotIndex and Map.GetPlotByIndex(kCityData.CAIPlotIndex) or nil
     if not plot then return nil end
-    CAICursor = CAICursor or ExposedMembers.CAICursor
-    if not CAICursor then return nil end
-    local cursorX, cursorY = CAICursor:GetCoords()
-    if cursorX == nil or cursorY == nil then return nil end
-    return Map.GetPlotDistance(cursorX, cursorY, plot:GetX(), plot:GetY())
+    -- Cycling temporarily overrides the origin with a fixed anchor; the table
+    -- otherwise measures from the cursor.
+    local originX, originY
+    if m_cityCycleDistanceOrigin ~= nil then
+        originX, originY = m_cityCycleDistanceOrigin.X, m_cityCycleDistanceOrigin.Y
+    else
+        CAICursor = CAICursor or ExposedMembers.CAICursor
+        if not CAICursor then return nil end
+        originX, originY = CAICursor:GetCoords()
+    end
+    if originX == nil or originY == nil then return nil end
+    return Map.GetPlotDistance(originX, originY, plot:GetX(), plot:GetY())
 end
 
 local function GetCityStatusDirection(kCityData)
@@ -2125,18 +2140,27 @@ local function CompareCityStatusColumnValues(av, bv)
     return Locale.Compare(tostring(av), tostring(bv))
 end
 
-local function GetSortedCityData()
+-- sortColumn/sortAscending default to the table's remembered sort. World city
+-- cycling passes an override; passing "natural" keeps m_caiCityData's own order
+-- (already sorted by .Order), which is the cycling default when not following
+-- the report's sort.
+local function GetSortedCityData(sortColumn, sortAscending)
+    if sortColumn == nil then sortColumn = m_cityStatusSort end
+    if sortAscending == nil then sortAscending = m_cityStatusSortAscending end
     local sorted = {}
     for _, kCityData in ipairs(m_caiCityData) do
         table.insert(sorted, kCityData)
     end
-    local column = FindCityStatusColumn(m_cityStatusSort)
+    if sortColumn == "natural" then
+        return sorted
+    end
+    local column = FindCityStatusColumn(sortColumn)
     if not column or not column.sortKey then
         table.sort(sorted, CompareCityStatusByName)
         return sorted
     end
     local sortKey = column.sortKey
-    local ascending = m_cityStatusSortAscending
+    local ascending = sortAscending
     table.sort(sorted, function(a, b)
         local av = sortKey(a)
         local bv = sortKey(b)
@@ -2292,6 +2316,17 @@ local function SetCityStatusViewMode(entry, viewMode)
     return true
 end
 
+local function SyncCityStatusSortDropdown(entry)
+    if not entry or not entry.sortDropdown or not entry.sortOptions then return end
+    for si, opt in ipairs(entry.sortOptions) do
+        if opt.value.column == m_cityStatusSort
+            and (m_cityStatusSort == "natural" or opt.value.ascending == m_cityStatusSortAscending) then
+            entry.sortDropdown:SetSelectedIndex(si, true)
+            return
+        end
+    end
+end
+
 local function EnsureCityStatusControls(entry)
     if entry.table then return end
     local page = entry.page
@@ -2305,18 +2340,32 @@ local function EnsureCityStatusControls(entry)
     entry.table:SetRowsProvider(function() return m_caiCityData end)
     entry.table:SetRowKeyGetter(function(kCityData) return kCityData.City:GetID() end)
     entry.table:SetRowLabelGetter(GetCityStatusRowLabel)
-    entry.table:SetDefaultSort({ column = "name", ascending = true })
+    -- Seed from the remembered sort (nil column = natural order) instead of a
+    -- hardcoded default, so the choice persists across reopening the report.
+    entry.table:SetDefaultSort(m_cityStatusSort ~= "natural"
+        and { column = m_cityStatusSort, ascending = m_cityStatusSortAscending }
+        or nil)
     entry.table:On("row_focus_enter", function(_, kCityData, rowIndex)
         if rowIndex > 0 then m_cityStatusSelectedCityID = kCityData.City:GetID() end
     end)
     entry.table:On("row_activate", function(_, kCityData)
         ActivateCity(kCityData.City)
     end)
+    entry.table:On("sort_changed", function(_, columnKey, ascending)
+        m_cityStatusSort = columnKey or "natural"
+        m_cityStatusSortAscending = ascending == true
+        SyncCityStatusSortDropdown(entry)
+    end)
     page:AddChild(entry.table)
 
     -- Sort options mirror the table columns: one ascending and one descending
     -- entry per sortable column, sharing the columns' own direction labels.
-    local sortOptions = {}
+    local sortOptions = {
+        {
+            label = Locale.Lookup("LOC_CAI_DATATABLE_SORT_NATURAL"),
+            value = { column = "natural", ascending = true },
+        },
+    }
     for _, column in ipairs(GetCityStatusColumns()) do
         if column.sortKey then
             local header = type(column.header) == "function" and column.header() or column.header
@@ -2336,16 +2385,15 @@ local function EnsureCityStatusControls(entry)
         FocusKey = "status:sort",
         HiddenPredicate = function() return m_cityStatusViewMode ~= "list" end,
     })
+    entry.sortOptions = sortOptions
     entry.sortDropdown:SetOptions(sortOptions)
-    for si, opt in ipairs(sortOptions) do
-        if opt.value.column == m_cityStatusSort and opt.value.ascending == m_cityStatusSortAscending then
-            entry.sortDropdown:SetSelectedIndex(si, true)
-            break
-        end
-    end
+    SyncCityStatusSortDropdown(entry)
     entry.sortDropdown:On("value_changed", function(_, value)
         m_cityStatusSort = value.column
         m_cityStatusSortAscending = value.ascending
+        entry.table:SetDefaultSort(value.column ~= "natural"
+            and { column = value.column, ascending = value.ascending }
+            or nil)
         RebuildCityStatusList(entry.tree)
     end)
     page:AddChild(entry.sortDropdown)
@@ -2764,6 +2812,96 @@ Close = WrapFunc(Close, function(orig)
     PopPanel()
     orig()
 end)
+
+local function CityKey(city)
+    return city ~= nil and (tostring(city:GetOwner()) .. ":" .. tostring(city:GetID())) or nil
+end
+
+-- Owns next/previous city selection. WorldInput_CAI forwards the input actions
+-- here as a Lua event; cycling walks the city status report's sort order (or the
+-- natural order when the follow-report-sort setting is off). direction is -1
+-- (previous) or 1 (next).
+local function OnCAICycleSelectedCity(direction)
+    RefreshCAIData()
+
+    local followSort = CAISettings.GetBool("CityCyclingFollowReportSort")
+    local sortColumn, sortAscending
+    if followSort then
+        sortColumn = m_cityStatusSort
+        sortAscending = m_cityStatusSortAscending
+    else
+        sortColumn = "natural"
+        sortAscending = true
+    end
+
+    local selected = UI.GetHeadSelectedCity()
+
+    -- Distance sort needs a fixed origin during a cycling run; anchor it on the
+    -- selected city (cursor when nothing is selected) and hold it until the
+    -- selection changes by something other than this cycling.
+    if sortColumn == "distance" then
+        if selected == nil then
+            m_cityCycleOrigin = nil
+            m_cityCycleAnchorKey = nil
+            m_cityCycleDistanceOrigin = nil
+        else
+            local selectedKey = CityKey(selected)
+            if m_cityCycleOrigin == nil or m_cityCycleAnchorKey ~= selectedKey then
+                m_cityCycleOrigin = { X = selected:GetX(), Y = selected:GetY() }
+            end
+            m_cityCycleDistanceOrigin = m_cityCycleOrigin
+        end
+    end
+
+    local sorted = GetSortedCityData(sortColumn, sortAscending)
+    m_cityCycleDistanceOrigin = nil
+
+    if #sorted == 0 then
+        m_cityCycleOrigin = nil
+        m_cityCycleAnchorKey = nil
+        Speak(Locale.Lookup("LOC_CAI_NO_CITIES"))
+        return
+    end
+
+    local currentIndex = nil
+    if selected ~= nil then
+        for index, kCityData in ipairs(sorted) do
+            if kCityData.City:GetID() == selected:GetID()
+                and kCityData.City:GetOwner() == selected:GetOwner() then
+                currentIndex = index
+                break
+            end
+        end
+    end
+
+    local wrap = CAISettings.GetBool("WrapCityCycling")
+    local nextIndex
+    if currentIndex == nil then
+        nextIndex = direction > 0 and 1 or #sorted
+    else
+        nextIndex = currentIndex + direction
+        if nextIndex < 1 or nextIndex > #sorted then
+            if not wrap then
+                Speak(Locale.Lookup("LOC_CAI_NO_MORE_CITIES", GetCityStatusName(sorted[currentIndex])))
+                return
+            end
+            nextIndex = ((nextIndex - 1) % #sorted) + 1
+        end
+    end
+
+    local chosen = sorted[nextIndex]
+    if selected ~= nil and chosen.City:GetID() == selected:GetID()
+        and chosen.City:GetOwner() == selected:GetOwner() then
+        Speak(Locale.Lookup("LOC_CAI_NO_MORE_CITIES", GetCityStatusName(chosen)))
+        return
+    end
+
+    UI.SelectCity(chosen.City)
+    UI.PlaySound("Play_UI_Click")
+
+    m_cityCycleAnchorKey = CityKey(chosen.City)
+end
+LuaEvents.CAICycleSelectedCity.Add(OnCAICycleSelectedCity)
 
 local origOnInputHandler = OnInputHandler
 OnInputHandler = function(pInputStruct)

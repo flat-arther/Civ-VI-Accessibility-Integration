@@ -880,7 +880,12 @@ function Overview_UpdateMajorCivs()
 					
 					local name, icons = GetVictoryDetails(g_GameData.VictoryType);
 
-					instance.VictoryName:SetText(HallofFame.GetLocalizedVictoryTypeText(name));
+					if HallofFame.GetLocalizedVictoryTypeText then
+						instance.VictoryName:SetText(HallofFame.GetLocalizedVictoryTypeText(name));
+					else
+						-- Older Epic build lacks the helper; set the localized victory name directly.
+						instance.VictoryName:LocalizeAndSetText(name);
+					end
 					SetControlIcon(instance.VictoryIcon, icons);
 				else
 					instance.VictoryIcon:SetIcon("ICON_DEFEAT_GENERIC");

@@ -142,6 +142,7 @@
     <File>UI/inGame/GovernmentScreen_CAI.lua</File>
     <File>UI/inGame/ResearchChooser_CAI.lua</File>
     <File>UI/inGame/inGameHelpers_CAI.lua</File>
+    <File>UI/inGame/CAIUnitNumbers.lua</File>
     <File>UI/inGame/interfaceTargetHelpers_CAI.lua</File>
     <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>
     <File>UI/inGame/cityManagementInterfaceHelpers_CAI.lua</File>
@@ -251,6 +252,11 @@
     <File>Text/zh_Hans_CN/TutorialText_CAI.xml</File>
     <File>Text/zh_Hans_CN/hotkey_symbol_names.sql</File>
     <File>Text/zh_Hans_CN/tutorial_advisor_text_CAI.sql</File>
+    <File>Text/pl_PL/cai_text_ui.xml</File>
+    <File>Text/pl_PL/AccessibilityPediaText_CAI.xml</File>
+    <File>Text/pl_PL/TutorialText_CAI.xml</File>
+    <File>Text/pl_PL/hotkey_symbol_names.sql</File>
+    <File>Text/pl_PL/tutorial_advisor_text_CAI.sql</File>
     <File>Text/fr_FR/cai_text_ui.xml</File>
     <File>Text/fr_FR/AccessibilityPediaText_CAI.xml</File>
     <File>Text/fr_FR/TutorialText_CAI.xml</File>
@@ -294,6 +300,10 @@
       <File>Text/pt_BR/AccessibilityPediaText_CAI.xml</File>
       <File>Text/pt_BR/TutorialText_CAI.xml</File>
       <File>Text/pt_BR/hotkey_symbol_names.sql</File>
+      <File>Text/pl_PL/cai_text_ui.xml</File>
+      <File>Text/pl_PL/AccessibilityPediaText_CAI.xml</File>
+      <File>Text/pl_PL/TutorialText_CAI.xml</File>
+      <File>Text/pl_PL/hotkey_symbol_names.sql</File>
       <File>Text/en_US/modinfo_CAI.xml</File>
       <File>Text/de_DE/modinfo_CAI.xml</File>
       <File>Text/es_ES/modinfo_CAI.xml</File>
@@ -412,6 +422,11 @@
       <File>Text/zh_Hans_CN/TutorialText_CAI.xml</File>
       <File>Text/zh_Hans_CN/hotkey_symbol_names.sql</File>
       <File>Text/zh_Hans_CN/tutorial_advisor_text_CAI.sql</File>
+      <File>Text/pl_PL/cai_text_ui.xml</File>
+      <File>Text/pl_PL/AccessibilityPediaText_CAI.xml</File>
+      <File>Text/pl_PL/TutorialText_CAI.xml</File>
+      <File>Text/pl_PL/hotkey_symbol_names.sql</File>
+      <File>Text/pl_PL/tutorial_advisor_text_CAI.sql</File>
       <File>Text/fr_FR/cai_text_ui.xml</File>
       <File>Text/fr_FR/AccessibilityPediaText_CAI.xml</File>
       <File>Text/fr_FR/TutorialText_CAI.xml</File>
@@ -546,6 +561,7 @@
            so the CAI layer rides that wildcard as an imported file. -->
       <File>UI/inGame/GreatWorkShowcase_CAI.lua</File>
       <File>UI/inGame/inGameHelpers_CAI.lua</File>
+      <File>UI/inGame/CAIUnitNumbers.lua</File>
       <File>UI/inGame/ChatPanel_CAI.lua</File>
       <File>UI/inGame/interfaceTargetHelpers_CAI.lua</File>
       <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>

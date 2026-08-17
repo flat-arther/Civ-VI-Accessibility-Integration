@@ -32,7 +32,8 @@ end
 function OnLoadConfirmModCompatibility()
 
 	-- Disallow loading challenge games in multiplayers	
-	if(serverType ~= ServerType.SERVER_TYPE_NONE and 
+	-- Challenges is absent on the older Epic build; it has no challenge saves to block.
+	if(serverType ~= ServerType.SERVER_TYPE_NONE and Challenges ~= nil and
 	   not Challenges.IsNullChallengeUuid(m_thisLoadFile.GameChallengeUuid)) then
 		m_kPopupDialog:AddText(Locale.Lookup("LOC_CHALLENGE_MP_SAVEGAME_START_ERROR"));
 		m_kPopupDialog:AddTitle(Locale.ToUpper(Locale.Lookup("LOC_GAME_START_ERROR_TITLE")));
@@ -147,7 +148,7 @@ function OnActionButton()
 				if (g_GameType == SaveTypes.TILED_MAP) then
 					MapConfiguration.SetImportFilename(m_thisLoadFile.Path);
 					UI.SetWorldRenderView( WorldRenderView.VIEW_2D );
-					Events.SetGameEntryMethod("Load Saved Game");
+					if Events.SetGameEntryMethod then Events.SetGameEntryMethod("Load Saved Game"); end	-- absent on the older Epic build
 					Network.HostGame(ServerType.SERVER_TYPE_NONE);
 				end
 			end
@@ -731,7 +732,7 @@ local function RebuildFileListAccessibility()
 				mods = entry.RequiredMods or {}
 			end
 			local modErrors = Modding.CheckRequirements(mods, g_GameType)
-			if entry.GameChallengeUuid and not Challenges.IsNullChallengeUuid(entry.GameChallengeUuid) then
+			if entry.GameChallengeUuid and Challenges ~= nil and not Challenges.IsNullChallengeUuid(entry.GameChallengeUuid) then
 				for _, v in ipairs(mods) do
 					if modErrors and modErrors[v.Id] == "NotAllowed" then
 						modErrors[v.Id] = nil

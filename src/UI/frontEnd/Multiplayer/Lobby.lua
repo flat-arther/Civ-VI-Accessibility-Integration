@@ -228,7 +228,9 @@ function CheckServerVersion(serverID)
 		return true;
 	end
 
-	local localGameVersion :string = UI.GetNetworkVersion();		-- Use the specific Network Version string, not the App Verison
+	-- Use the specific Network Version string, not the App Version. GetNetworkVersion is
+	-- absent on the older Epic Games build, so fall back to the app version there.
+	local localGameVersion :string = UI.GetNetworkVersion and UI.GetNetworkVersion() or UI.GetAppVersion();
 	local serverListing = GetServerListing(serverID);
 	if(serverListing ~= nil 
 		and (serverListing.GameVersion == nil or serverListing.GameVersion ~= localGameVersion)) then
@@ -870,7 +872,8 @@ function SortAndDisplayListings(resetSelection:boolean)
 		local textColor = ColorSet_Default;
 		local rowTooltip = "";
 		local gameName = listing.ServerName;
-		local localGameVersion :string = UI.GetNetworkVersion();		-- Use the specific Network Version string, not the App Verison
+		-- GetNetworkVersion is absent on the older Epic Games build; fall back to the app version.
+		local localGameVersion :string = UI.GetNetworkVersion and UI.GetNetworkVersion() or UI.GetAppVersion();
 		g_InstanceList[serverID] = controlTable;
 
 		-- Row color and tooltip is determined by game state.

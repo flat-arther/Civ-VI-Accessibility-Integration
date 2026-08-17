@@ -1,0 +1,800 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+  <LocalizedText>
+    <!-- POLISH -->
+    <!-- Shared tutorial interface -->
+    <Replace Tag="LOC_CAI_TUTORIAL_SHOW_TUTORIALS" Language="pl_PL">
+      <Text>Pokazuj samouczki moda</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_SHOW_TUTORIALS_TOOLTIP" Language="pl_PL">
+      <Text>Pokazuj niewidziane samouczki ułatwień dostępu, gdy wystąpią powiązane z nimi wydarzenia.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_RESET" Language="pl_PL">
+      <Text>Zresetuj samouczki moda</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_RESET_TOOLTIP" Language="pl_PL">
+      <Text>Udostępnij wszystkie samouczki ułatwień dostępu, aby mogły pojawić się ponownie.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIALS_RESET" Language="pl_PL">
+      <Text>Samouczki zresetowane</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_SAVE_FAILED" Language="pl_PL">
+      <Text>Nie udało się zapisać ustawienia samouczka.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_ESCAPE_BLOCKED" Language="pl_PL">
+      <Text>Użyj Kontynuuj, aby zamknąć samouczek</Text>
+    </Replace>
+
+    <!-- Main Menu -->
+    <Replace Tag="LOC_CAI_TUTORIAL_MAIN_MENU_TITLE" Language="pl_PL">
+      <Text>Interfejs moda ułatwień dostępu</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAIN_MENU_INTERFACE" Language="pl_PL">
+      <Text>Witaj w Civilization VI. Te krótkie samouczki wyjaśniają, jak korzystać z każdego dostępnego ekranu przy pierwszym zetknięciu z nim. Aby je wyłączyć, odznacz Pokazuj samouczki moda w jednym z okien dialogowych samouczka lub wyłącz je później w Ustawieniach moda, w sekcji Interfejs.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAIN_MENU_NESTING" Language="pl_PL">
+      <Text>Interfejs jest zbudowany z zagnieżdżonych widżetów. Większość ekranów to panele zawierające kontrolki i inne kontenery, takie jak listy, drzewa, tabele, siatki, grafy, karty i okna dialogowe. Wejście do kontenera dodaje go do ścieżki fokusu, a wyjście wraca do jego rodzica.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAIN_MENU_FOCUS_SPEECH" Language="pl_PL">
+      <Text>W miarę przemieszczania się fokusu mod odczytuje etykietę, rolę, wartość, pozycję, stan i podpowiedź kontrolki zgodnie z twoimi ustawieniami.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAIN_MENU_NAVIGATION" Language="pl_PL">
+      <Text>Użyj Tab i Shift plus Tab, aby przechodzić między grupami kontrolek. Na listach, w widokach drzewa, tabelach, siatkach i grafach użyj klawiszy strzałek, aby przechodzić między elementami, oraz Home i End, aby przechodzić do granic. W oknach dialogowych Home i End przeskakują do pierwszej i ostatniej kontrolki. Listy i drzewa obsługują także Page Up i Page Down.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAIN_MENU_ACTIVATION" Language="pl_PL">
+      <Text>Użyj Enter lub Spacji, aby aktywować aktywną kontrolkę.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAIN_MENU_SEARCH" Language="pl_PL">
+      <Text>Na listach, w drzewach, tabelach, siatkach i grafach zacznij pisać, aby znaleźć element. Tabele przeszukują etykiety wierszy, natomiast siatki przeszukują każdą komórkę, a grafy przeszukują każdy widoczny węzeł. Backspace usuwa ostatnio wpisany znak, a Escape go czyści. Naciśnij Ctrl plus F tam, gdzie jest dostępne, aby otworzyć panel wyszukiwania dla bardziej szczegółowego wyszukiwania.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAIN_MENU_FOCUSED_WIDGET_READER" Language="pl_PL">
+      <Text>Czytnik aktywnego widżetu pozwala usłyszeć szczegółowe informacje o kontrolce, która obecnie ma fokus, po jednej sekcji naraz. Użyj Alt plus W górę i Alt plus W dół, aby przejść do poprzedniej lub następnej sekcji i ją odczytać. Użyj Alt plus Home i Alt plus End, aby przeskoczyć do pierwszej lub ostatniej sekcji i ją odczytać.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAIN_MENU_HELP" Language="pl_PL">
+      <Text>Naciśnij Ctrl plus H, aby uzyskać kontekstową Pomoc dotyczącą sterowania. Naciśnij Shift plus F1, aby usłyszeć dostępne polecenia dla aktywnej kontrolki.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAIN_MENU_SETTINGS" Language="pl_PL">
+      <Text>Naciśnij F12, aby otworzyć ustawienia moda ułatwień dostępu. Możesz tam zmienić preferencje mowy i nawigacji, wyłączyć samouczki moda lub je zresetować.</Text>
+    </Replace>
+
+    <!-- Shared screen guidance -->
+    <Replace Tag="LOC_CAI_TUTORIAL_SCREEN_TITLE" Language="pl_PL">
+      <Text>Samouczek: {1_Name}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_SCREEN_FALLBACK" Language="pl_PL">
+      <Text>Ekran</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GAME_SUMMARIES_TITLE" Language="pl_PL">
+      <Text>Samouczek Galerii sław</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GAME_SUMMARY_DETAILS_TITLE" Language="pl_PL">
+      <Text>Samouczek szczegółów gry Galerii sław</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MODS_SCREEN_TITLE" Language="pl_PL">
+      <Text>Samouczek Dodatkowej zawartości</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CITY_OVERVIEW_TITLE" Language="pl_PL">
+      <Text>Samouczek przeglądu miasta</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CITY_STATES_TITLE" Language="pl_PL">
+      <Text>Samouczek miast-państw</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_TITLE" Language="pl_PL">
+      <Text>Samouczek wyboru idei</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_TITLE" Language="pl_PL">
+      <Text>Samouczek drzewa idei</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA_TITLE" Language="pl_PL">
+      <Text>Samouczek Civilopedii</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CLIMATE_SCREEN_TITLE" Language="pl_PL">
+      <Text>Samouczek klimatu</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_VIEW_TITLE" Language="pl_PL">
+      <Text>Samouczek dyplomacji</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_DIPLOMACY_DEAL_VIEW_TITLE" Language="pl_PL">
+      <Text>Samouczek negocjacji umowy</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_END_GAME_TITLE" Language="pl_PL">
+      <Text>Samouczek wyników gry</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_ERA_PROGRESS_TITLE" Language="pl_PL">
+      <Text>Samouczek postępu ery</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_TITLE" Language="pl_PL">
+      <Text>Samouczek okna wyboru szpiegostwa</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_ESPIONAGE_OVERVIEW_TITLE" Language="pl_PL">
+      <Text>Samouczek przeglądu szpiegostwa</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_TITLE" Language="pl_PL">
+      <Text>Samouczek zasobów globalnych</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GOVERNMENT_SCREEN_TITLE" Language="pl_PL">
+      <Text>Samouczek ustroju</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GOVERNOR_PANEL_TITLE" Language="pl_PL">
+      <Text>Samouczek gubernatorów</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GOVERNOR_ASSIGNMENT_TITLE" Language="pl_PL">
+      <Text>Samouczek przydziału gubernatora</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_TITLE" Language="pl_PL">
+      <Text>Samouczek wielkich ludzi</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GREAT_WORKS_OVERVIEW_TITLE" Language="pl_PL">
+      <Text>Samouczek wielkich dzieł</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GREAT_WORK_SHOWCASE_TITLE" Language="pl_PL">
+      <Text>Samouczek prezentacji wielkiego dzieła</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_HISTORIC_MOMENTS_TITLE" Language="pl_PL">
+      <Text>Samouczek Momentów historycznych</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAP_PIN_LIST_TITLE" Language="pl_PL">
+      <Text>Samouczek listy znaczników mapy</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAP_PIN_EDITOR_TITLE" Language="pl_PL">
+      <Text>Samouczek edytora znaczników mapy</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NOTIFICATION_CENTER_TITLE" Language="pl_PL">
+      <Text>Samouczek powiadomień</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_PRODUCTION_PANEL_TITLE" Language="pl_PL">
+      <Text>Samouczek produkcji</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_RELIGION_SCREEN_TITLE" Language="pl_PL">
+      <Text>Samouczek religii</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_REPORTS_SCREEN_TITLE" Language="pl_PL">
+      <Text>Samouczek raportów</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH_CHOOSER_TITLE" Language="pl_PL">
+      <Text>Samouczek wyboru badania</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_TITLE" Language="pl_PL">
+      <Text>Samouczek drzewa technologii</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_TITLE" Language="pl_PL">
+      <Text>Samouczek przeglądu handlu</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TRADE_ROUTE_CHOOSER_TITLE" Language="pl_PL">
+      <Text>Samouczek okna wyboru szlaku handlowego</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TRADE_ORIGIN_CHOOSER_TITLE" Language="pl_PL">
+      <Text>Samouczek początku szlaku handlowego</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS_TITLE" Language="pl_PL">
+      <Text>Samouczek awansów jednostki</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_RANKINGS_TITLE" Language="pl_PL">
+      <Text>Samouczek Rankingów świata</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAV_LIST" Language="pl_PL">
+      <Text>Na liście użyj W górę i W dół, aby przejść o jeden element, Home i End dla pierwszego i ostatniego elementu oraz Page Up i Page Down, aby przechodzić o strony. Enter lub Spacja aktywuje przyciski i elementy menu. Zacznij pisać, aby znaleźć element, lub użyj Ctrl plus F dla panelu wyszukiwania, gdy lista obsługuje wyszukiwanie.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAV_TREE" Language="pl_PL">
+      <Text>W drzewie W górę i W dół przechodzą przez widoczne wiersze. W prawo rozwija lub wchodzi do elementów potomnych; W lewo zwija lub wraca do rodzica. Home i End przechodzą w obrębie bieżącej głębokości; Ctrl plus Home i Ctrl plus End przechodzą do początku lub końca całego drzewa. Enter aktywuje liść lub przełącza gałąź. Page Up i Page Down przechodzą o strony. Zacznij pisać, aby znaleźć element, lub naciśnij Ctrl plus F, aby wyszukać.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAV_TABS" Language="pl_PL">
+      <Text>Użyj Tab i Shift plus Tab, aby nawigować po stronach kart. W lewo i W prawo przełączają karty, gdy fokus jest na rzędzie kart. Ctrl plus Tab i Ctrl plus Shift plus Tab przełączają karty z dowolnego miejsca wewnątrz kontrolki kart.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GRID_NAVIGATION" Language="pl_PL">
+      <Text>W siatce W górę i W dół przechodzą w obrębie bieżącego poziomu. W lewo i W prawo przechodzą do sąsiedniego poziomu, zachowując podobny wiersz. Home i End przechodzą do pierwszego i ostatniego elementu w poziomie. Ctrl plus Home i Ctrl plus End przechodzą do pierwszego i ostatniego elementu w siatce. Ctrl plus W lewo i Ctrl plus W prawo przeskakują do poprzedniej lub następnej ery lub kolumny. Zacznij pisać, aby przeszukać każdą komórkę.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GRAPH_NAVIGATION" Language="pl_PL">
+      <Text>W widoku grafu W prawo podąża za pierwszą ideą lub technologią odblokowaną przez aktywny element, a W lewo podąża za jego pierwszym wymogiem. Po którymkolwiek ruchu W górę i W dół przełączają pozostałe wybory z tego samego połączenia. Gdy W lewo ląduje na elemencie bez wymogu, W górę i W dół zamiast tego przełączają wszystkie takie elementy korzeniowe. Home i End przechodzą do pierwszej i ostatniej bieżącej alternatywy. Ctrl plus Home i Ctrl plus End przechodzą do pierwszego i ostatniego korzenia. Zacznij pisać, aby przeszukać każdy węzeł grafu.</Text>
+    </Replace>
+
+    <!-- Front-end screens -->
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_GAME_SUMMARIES" Language="pl_PL">
+      <Text>Galeria sław</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_GAME_SUMMARY_DETAILS" Language="pl_PL">
+      <Text>Szczegóły gry Galerii sław</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_MODS" Language="pl_PL">
+      <Text>Dodatkowa zawartość</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GAME_SUMMARIES_LAYOUT" Language="pl_PL">
+      <Text>Pierwszą kontrolką jest menu rozwijane Zestaw zasad. Filtruje ono wszystkie wyświetlane rekordy. Za nim znajduje się dwustronicowa kontrolka kart zawierająca Przegląd i Historię.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GAME_SUMMARIES_OVERVIEW" Language="pl_PL">
+      <Text>Przegląd to drzewo. Postęp zwycięstwa rozwija się na typy zwycięstw i osiągnięte liczby. Postęp przywódców rozwija się na przywódców z liczbami zwycięstw i rozgrywek. Dalej następują dodatkowe kategorie statystyk jako rozwijalne grupy.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GAME_SUMMARIES_HISTORY" Language="pl_PL">
+      <Text>Historia zawiera listę ukończonych gier, po której następuje menu rozwijane Sortuj według. Każda gra podaje wynik, przywódcę, cywilizację, rezultat i liczbę tur. Enter otwiera ekran szczegółów tej gry.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GAME_SUMMARY_DETAILS_OVERVIEW" Language="pl_PL">
+      <Text>Karta Przegląd zaczyna się od gałęzi Ogólne zawierającej statystyki całej gry i tryby gry. Następnie zapewnia po jednej gałęzi na gracza z przywódcą, cywilizacją, wynikiem, rezultatem i kategoriami statystyk tego gracza.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GAME_SUMMARY_DETAILS_REPORTS" Language="pl_PL">
+      <Text>Karta Raporty to drzewo. Gdy istnieje wiele kontekstów raportów, gałęzie kontekstów zawierają typy raportów. Typy raportów zawierają wiersze; krótkie wiersze są odczytywane razem, natomiast wiersze z więcej niż trzema kolumnami rozwijają się na poszczególne komórki.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GAME_SUMMARY_DETAILS_GRAPHS" Language="pl_PL">
+      <Text>Karta Wykresy przekształca wizualne dane wykresów w drzewo zmian. Rozwiń gracza, aby znaleźć tylko tury, w których zmieniła się co najmniej jedna zarejestrowana wartość, a następnie rozwiń turę, aby odczytać wartości, które się w niej zmieniły. Powtarzające się wartości są pomijane aż do ich następnej zmiany. Wartości miast i religii zawierają w komunikacie odpowiednią nazwę miasta lub religii.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MODS_OVERVIEW" Language="pl_PL">
+      <Text>Ten ekran ma karty Zainstalowane oraz, gdy dostępny jest Steam, Subskrypcje. Escape zamyka ekran i stosuje stan włączenia obecnie wybranej grupy modów do konfiguracji gry.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MODS_INSTALLED" Language="pl_PL">
+      <Text>Strona Zainstalowane zawiera w kolejności: drzewo zainstalowanych modów, menu rozwijane Sortuj według, pole wyboru Oficjalna zawartość, pole wyboru Zawartość społecznościowa, warunkowe pole wyboru Ignoruj ostrzeżenie o zgodności, menu rozwijane Grupa modów, Utwórz grupę, Usuń grupę, Włącz wszystkie oraz Wyłącz wszystkie.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MODS_ROWS" Language="pl_PL">
+      <Text>Każdy mod to jeden wiersz drzewa. Jego etykieta podaje nazwę, stan włączenia lub wyłączenia, typ zawartości oraz wszelkie ostrzeżenia o własności lub zgodności. Enter włącza lub wyłącza dany mod. W prawo rozwija szczegóły tylko do odczytu, takie jak opis, autor, obsługa zapisanych gier i trybu wieloosobowego oraz rzeczywiste zależności; W lewo je zwija.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MODS_GROUPS" Language="pl_PL">
+      <Text>Grupy modów to osobne zapisane konfiguracje włączonych modów. Zmiana Grupy modów z menu rozwijanego zmienia, którą konfigurację edytujesz. Utwórz grupę prosi o nazwę i klonuje stan włączenia bieżącej grupy. Usuń grupę natychmiast usuwa wybraną grupę, gdy dozwolone jest jej usunięcie; nie ma potwierdzenia.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MODS_BULK" Language="pl_PL">
+      <Text>Sortuj według oferuje Nazwę i Włączone. Pola wyboru Oficjalna i Społecznościowa filtrują drzewo. Ctrl plus F przeszukuje zlokalizowane nazwy modów i ich zajawki. Włącz wszystkie i Wyłącz wszystkie wpływają tylko na obecnie przefiltrowany zestaw wyników, w tym filtry wyszukiwania i zawartości.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MODS_SUBSCRIPTIONS" Language="pl_PL">
+      <Text>Strona Subskrypcje to lista zawierająca tylko nazwy, po której następuje Przeglądaj Warsztat. Podpowiedź wiersza zawiera informacje o stanie i ostatniej aktualizacji. Postęp pobierania aktualizuje się automatycznie bez przejmowania fokusu.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MODS_BINDINGS" Language="pl_PL">
+      <Text>Na subskrypcji Enter uruchamia Aktualizuj, gdy jest dostępna; w przeciwnym razie otwiera Wyświetl w Warsztacie, gdy jest dostępne. Ctrl plus Enter zawsze próbuje Wyświetl. Delete anuluje subskrypcję i usuwa wiersz. Escape zamyka okno dialogowe Utwórz grupę lub ekran Mody.</Text>
+    </Replace>
+    <!-- In-game screen names -->
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_CITY_OVERVIEW" Language="pl_PL">
+      <Text>Przegląd miasta</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_CITY_STATES" Language="pl_PL">
+      <Text>Miasta-państwa</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_CIVICS_CHOOSER" Language="pl_PL">
+      <Text>Wybierz ideę</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_CIVICS_TREE" Language="pl_PL">
+      <Text>Drzewo idei</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_CIVILOPEDIA" Language="pl_PL">
+      <Text>Civilopedia</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_CLIMATE" Language="pl_PL">
+      <Text>Klimat</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_DIPLOMACY" Language="pl_PL">
+      <Text>Dyplomacja</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_DEAL" Language="pl_PL">
+      <Text>Negocjacje umowy</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_END_GAME" Language="pl_PL">
+      <Text>Wyniki gry</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_ERA_PROGRESS" Language="pl_PL">
+      <Text>Postęp ery</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_ESPIONAGE_CHOOSER" Language="pl_PL">
+      <Text>Wybierz misję szpiega</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_ESPIONAGE_OVERVIEW" Language="pl_PL">
+      <Text>Przegląd szpiegostwa</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_GLOBAL_RESOURCES" Language="pl_PL">
+      <Text>Zasoby globalne</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_GOVERNMENT" Language="pl_PL">
+      <Text>Ustrój</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_GOVERNORS" Language="pl_PL">
+      <Text>Gubernatorzy</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_GOVERNOR_ASSIGNMENT" Language="pl_PL">
+      <Text>Przydział gubernatora</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_GREAT_PEOPLE" Language="pl_PL">
+      <Text>Wielcy ludzie</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_GREAT_WORKS" Language="pl_PL">
+      <Text>Wielkie dzieła</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_GREAT_WORK_SHOWCASE" Language="pl_PL">
+      <Text>Prezentacja wielkiego dzieła</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_HISTORIC_MOMENTS" Language="pl_PL">
+      <Text>Momenty historyczne</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_MAP_PINS" Language="pl_PL">
+      <Text>Lista znaczników mapy</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_MAP_PIN_EDITOR" Language="pl_PL">
+      <Text>Edytor znaczników mapy</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_NOTIFICATIONS" Language="pl_PL">
+      <Text>Powiadomienia</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_PRODUCTION" Language="pl_PL">
+      <Text>Produkcja</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_RELIGION" Language="pl_PL">
+      <Text>Religia</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_REPORTS" Language="pl_PL">
+      <Text>Raporty</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_RESEARCH" Language="pl_PL">
+      <Text>Wybierz badanie</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_TECH_TREE" Language="pl_PL">
+      <Text>Drzewo technologii</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_TRADE_OVERVIEW" Language="pl_PL">
+      <Text>Przegląd handlu</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_TRADE_ROUTE" Language="pl_PL">
+      <Text>Wybór szlaku handlowego</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_TRADE_ORIGIN" Language="pl_PL">
+      <Text>Początek szlaku handlowego</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_UNIT_PROMOTIONS" Language="pl_PL">
+      <Text>Awanse jednostki</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WORLD_RANKINGS" Language="pl_PL">
+      <Text>Rankingi świata</Text>
+    </Replace>
+
+    <!-- In-game screen tutorials -->
+    <Replace Tag="LOC_CAI_TUTORIAL_CITY_OVERVIEW" Language="pl_PL">
+      <Text>Ten ekran to jedno drzewo szczegółów miasta, po którym następuje przycisk Zmień nazwę miasta, gdy zmiana nazwy jest dozwolona.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CITY_OVERVIEW_LAYOUT" Language="pl_PL">
+      <Text>Sekcje najwyższego poziomu drzewa to Obywatele, Budowle, Religia, Lojalność (gdy dostępna) oraz Energia (gdy dostępna). Obywatele zawierają żywność, wzrost, obszary mieszkalne, udogodnienia, obrabiane pola i szczegóły plonów. Budowle zawierają dzielnice, ich budowle i cuda. Pozostałe sekcje zawierają swoje pełne, aktualne zestawienia.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CITY_OVERVIEW_ACTIONS" Language="pl_PL">
+      <Text>Rozwiń sekcje i wiersze, aby odczytać ich szczegóły. Przejdź klawiszem Tab za drzewo do Zmień nazwę miasta. Edytor nazwy używa Enter do zatwierdzenia i Escape do anulowania. Escape poza edytorem zamyka przegląd.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CITY_STATES" Language="pl_PL">
+      <Text>Domyślny widok tabeli ma jeden wiersz dla każdego poznanego miasta-państwa. Jego kolumny porównują typ, twoją relację, twoich wysłanników i bonusy, obecnego suzerena, aktywne zadania, relacje zagraniczne i wpływy zagraniczne. Ustawienie fokusu na dowolnej komórce wybiera to miasto-państwo i aktualizuje kontrolki znajdujące się za tabelą.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CITY_STATES_SECTIONS" Language="pl_PL">
+      <Text>Użyj nagłówków tabeli, aby posortować miasta-państwa. Komórka Wysłannicy podaje twoją liczbę wysłanników, po której następuje zestawienie każdego bonusu za 1, 3, 6 wysłanników i za suzerena. Aktywne zadania podają liczbę, po której następuje opis każdego zadania. Relacje zagraniczne łączą wszystkie relacje z poznanymi cywilizacjami niebędącymi graczami i miastami-państwami, wymieniając najpierw te w stanie wojny z miastem-państwem i porządkując każdą grupę alfabetycznie. Każda znana obca cywilizacja z wysłannikami ma też własną kolumnę wpływów, natomiast niepoznane cywilizacje pozostają anonimowe w jednej połączonej kolumnie wpływów.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CITY_STATES_ENVOYS" Language="pl_PL">
+      <Text>Na dowolnej komórce danych tabeli Shift plus W lewo usuwa jednego oczekującego wysłannika, a Shift plus W prawo dodaje jednego. Ctrl plus Enter potwierdza wszystkie oczekujące zmiany wysłanników. Suwak wysłanników i przycisk Potwierdź wysłanników za tabelą zapewniają te same operacje.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CITY_STATES_ACTIONS" Language="pl_PL">
+      <Text>Za kontrolkami wysłanników znajdują się Wyświetl miasto-państwo, Wypowiedz wojnę lub Zawrzyj pokój, Zaciągnij wojsko (gdy dostępne) oraz przycisk przełączania widoku. Widok drzewa zaczyna się od menu rozwijanego Sortuj miasta-państwa według, a następnie po jednym rozwijalnym wierszu na miasto-państwo ze statusem relacji oraz sekcjami bonusów, wpływów, zadań i relacji. Menu rozwijane oferuje kolejność naturalną oraz dwa jawnie opisane wybory dla każdej bieżącej kolumny tabeli, takie jak od A do Z, od będących w stanie wojny czy od największej liczby. Nagłówki tabeli używają tych samych opisów, a oba widoki współdzielą wybrane sortowanie. Alt plus 1 wybiera widok tabeli, a Alt plus 2 wybiera widok drzewa; wybrany widok jest zapamiętywany. Enter aktywuje aktywny przycisk. Escape zamyka ekran.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER" Language="pl_PL">
+      <Text>Pierwsze drzewo zawiera bieżącą ideę i zakolejkowane idee. Drugie drzewo zawiera dostępne idee. Każda idea rozwija się na swoje odblokowania. Ostatni przycisk otwiera pełne drzewo idei.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_ACTIONS" Language="pl_PL">
+      <Text>Enter na dostępnej idei czyni ją bieżącą ideą. Wiersze bieżące i zakolejkowane są tylko do odczytu i można je sprawdzić; to okno wyboru celowo nie dodaje skrótu do kolejki.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_BINDINGS" Language="pl_PL">
+      <Text>Shift plus Enter na odsłoniętej idei otwiera jej artykuł w Civilopedii. Użyj Tab, aby przejść z drzewa kolejki do dostępnych idei, a następnie do Otwórz drzewo idei.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_LAYOUT" Language="pl_PL">
+      <Text>Kontrolki pojawiają się w tej kolejności: lista bieżących i zakolejkowanych idei (gdy niepusta), lista filtrów, aktywny widok idei Siatka, Graf lub Drzewo, lista Odblokowania w widokach Siatki i Grafu, tylko do odczytu podsumowanie ustroju i wstawionych doktryn oraz menu rozwijane Widok.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_VIEWS" Language="pl_PL">
+      <Text>Menu rozwijane Widok zawiera Siatkę, Graf i Drzewo w tej kolejności. Siatka układa ery jako kolumny, poziomy wymogów od lewej do prawej, a idee pionowo w obrębie każdego poziomu. Graf podąża bezpośrednio za połączeniami wymogów. Drzewo prezentuje hierarchię ery, poziomu i idei. Alt plus 1 wybiera Siatkę, Alt plus 2 wybiera Graf, a Alt plus 3 wybiera Drzewo. Przełączanie widoków zachowuje w miarę możliwości fokus na tej samej idei, a wybrany widok jest zapamiętywany przy następnym otwarciu drzewa idei.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_TREE_VIEW" Language="pl_PL">
+      <Text>W widoku drzewa rozwiń erę, aby odsłonić jej już rozwinięte poziomy, a następnie jej idee. Elementy potomne idei zawierają Odblokowania, Wymogi, Prowadzi do oraz obliczoną ścieżkę do tej idei. Aktywuj odniesienie, aby do niego przeskoczyć. Backspace wraca przez poprzednie przeskoki odniesień.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_ACTIONS" Language="pl_PL">
+      <Text>Enter na możliwej do zbadania idei czyni ją bieżącą. Ctrl plus Enter dołącza ją do kolejki idei. Shift plus Enter otwiera jej artykuł w Civilopedii. Te same trzy przypisania działają w widokach Siatki i Grafu oraz na wynikach filtrów. Enter na wierszu kolejki przeskakuje do tej idei; Shift plus Enter otwiera jej artykuł.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_FILTERS" Language="pl_PL">
+      <Text>Enter na filtrze otwiera tymczasową listę wyników. W wynikach Enter zamyka listę i przeskakuje do idei, Ctrl plus Enter dodaje ją do kolejki, Shift plus Enter otwiera Civilopedię, a Escape zamyka wyniki i czyści filtr. Ctrl plus F wyszukuje idee według indeksu wyszukiwania idei w grze z dowolnego głównego widoku.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_GOVERNMENT" Language="pl_PL">
+      <Text>W widoku Siatki lub Grafu ustawienie fokusu na idei odbudowuje siostrzaną listę Odblokowania dla tej idei. Następujące po niej pole edycji tylko do odczytu podsumowuje bieżący ustrój, liczby gniazd i każdą wstawioną doktrynę.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA" Language="pl_PL">
+      <Text>Civilopedia ma trzy siostrzane kontrolki: drzewo Sekcje, drzewo Artykuł i listę Historia. Tab przechodzi między nimi.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA_LAYOUT" Language="pl_PL">
+      <Text>Drzewo Sekcje zawiera kategorie i strony. Ustawienie fokusu na stronie wczytuje ją. Drzewo Artykuł zawiera nagłówki, akapity, grupy statystyk, cytaty i łącza do powiązanych stron. Aktywacja powiązanej strony lub wpisu historii wczytuje ten artykuł.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA_SEARCH" Language="pl_PL">
+      <Text>Ctrl plus F na drzewie Sekcje wykonuje pełnotekstowe wyszukiwanie w Civilopedii przy użyciu całego zapytania, w tym tekstu treści artykułów. Wyniki wyszukiwania otwierają pasującą stronę. Lista Historia rejestruje odwiedzone strony.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA_BINDINGS" Language="pl_PL">
+      <Text>Alt plus W lewo nawiguje wstecz, a Alt plus W prawo nawiguje do przodu przez historię artykułów. Escape zamyka Civilopedię.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CLIMATE" Language="pl_PL">
+      <Text>Ekran Klimatu ma karty Przegląd, Poziomy CO2 i Historia wydarzeń.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CLIMATE_OVERVIEW" Language="pl_PL">
+      <Text>Przegląd to drzewo zawierające bieżącą fazę klimatu i jej efekty, wnoszony CO2 i temperaturę, ustawienia intensywności katastrof, prognozy dla każdego typu katastrofy, lód polarny oraz stan poziomu morza.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CLIMATE_CO2" Language="pl_PL">
+      <Text>Poziomy CO2 to drzewo pogrupowane najpierw według cywilizacji, a następnie według zasobu. Zawiera twój wkład zasobów oraz znanych globalnych współtwórców z aktualnymi sumami.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_CLIMATE_HISTORY" Language="pl_PL">
+      <Text>Historia wydarzeń to lista chronologiczna. Zlokalizowane, odsłonięte wydarzenia zawierają swój kierunek od kursora nawigacji. Enter przesuwa kursor do lokalizacji początkowej wydarzenia bez zamykania ekranu. Escape zamyka ekran Klimatu.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_OVERVIEW" Language="pl_PL">
+      <Text>Zwykły przegląd zawiera drzewo Przywódcy, po którym następuje lista Działania. Ustawienie fokusu na innym przywódcy wybiera tego przywódcę w grze i odświeża następujące po nim działania.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_FLOW" Language="pl_PL">
+      <Text>Rozwiń przywódcę, aby sprawdzić każdą znaną sekcję wywiadu, w tym relację, dostęp, cele, porozumienia, plotki, sojusze, sytuacje kryzysowe, pretensje, ustrój oraz dane tajnego stowarzyszenia, gdy są dostępne. Niektóre sekcje wywiadu mają dalsze rozwijalne zestawienia i wiersze odniesień.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_CONVERSATION" Language="pl_PL">
+      <Text>Gdy dyplomacja wchodzi w tryb rozmowy, przegląd jest ukrywany i zastępowany listą rozmowy. Zawiera ona wypowiedź przywódcy, jej powód oraz twoje dostępne odpowiedzi. Enter lub Spacja aktywuje odpowiedź. Podczas filmu z przywódcą interfejs czeka w ciszy, aż kontrolki rozmowy staną się dostępne.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_NAVIGATION" Language="pl_PL">
+      <Text>Użyj pełnej nawigacji po drzewie w drzewie Przywódcy, a następnie Tab do Działań. Działanie może być przyciskiem lub podmenu; W prawo lub Enter otwiera podmenu, W lewo je zamyka, a W górę lub W dół przemieszcza się w jego obrębie. Escape podąża za zwykłym zachowaniem gry przy wyjściu z dyplomacji lub rozmowy.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_DEAL_LAYOUT" Language="pl_PL">
+      <Text>Umowa ma karty Moja oferta i Ich oferta. Każda strona zawiera w kolejności drzewo Oferty, drzewo Zapasy i listę Działania. Obie strony pokazują przeciwne strony tej samej aktualnej umowy.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_DEAL_EDITING" Language="pl_PL">
+      <Text>Zapasy są pogrupowane według typu elementu umowy, takiego jak złoto, zasoby, porozumienia, miasta, wielkie dzieła lub jeńcy, gdy są dostępne. Enter na elemencie zapasów dodaje go. Elementy wymagające ilości, czasu trwania, miasta lub innego wyboru otwierają edytor lub listę wyboru; Enter zatwierdza, a Escape anuluje ten tymczasowy edytor.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_DEAL_BINDINGS" Language="pl_PL">
+      <Text>W Ofertach Delete usuwa aktywny oferowany element. Shift plus Delete przestaje oferować element, o który poprosił cię drugi przywódca. W prawo rozwija oferowane elementy zawierające szczegóły miasta lub inne szczegóły potomne; W lewo je zwija. Ctrl plus Tab przełącza między Moją ofertą a Ich ofertą.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_DEAL_ACTIONS" Language="pl_PL">
+      <Text>Przejdź klawiszem Tab za Zapasy do Działań. Pierwszy wyłączony wiersz odczytuje bieżącą reakcję przywódcy. Następujące po nim aktualne przyciski mogą obejmować Zaakceptuj umowę, Zażądaj, Uczyń tę umowę bardziej sprawiedliwą, Odrzuć umowę oraz Wznów grę.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_DEAL_NAVIGATION" Language="pl_PL">
+      <Text>Użyj nawigacji po drzewie w Ofertach i Zapasach, nawigacji po liście w Działaniach oraz Tab między tymi trzema grupami. Enter lub Spacja aktywuje dostępne kontrolki. Escape najpierw zamyka tymczasowy edytor; w przeciwnym razie podąża za zwykłą ścieżką wyjścia z umowy w grze.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_END_GAME" Language="pl_PL">
+      <Text>Panel końca gry zawiera Wyniki, Ranking (gdy obsługiwany), wykresy oraz czat wieloosobowy (gdy dostępny), po których następują aktualne przyciski działań końca gry.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_END_GAME_RESULTS" Language="pl_PL">
+      <Text>Wyniki to lista zawierająca baner zwycięstwa lub porażki, informacje o zwycięzcy i cywilizacji, opis zwycięstwa oraz inny tekst wyniku. Ranking to lista zawierająca progi wyników, twój wynik i cytat oraz pasującą historyczną wypowiedź przywódcy.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_END_GAME_REPLAY" Language="pl_PL">
+      <Text>wykresy to trzypoziomowe drzewo: gracz, tura, a następnie każdy zarejestrowany zestaw danych i wartość dla tej tury. Gracze i tury bez danych są pomijani. Użyj pełnej nawigacji po drzewie, aby sprawdzić kompletny zapis powtórki.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_END_GAME_CHAT_ACTIONS" Language="pl_PL">
+      <Text>Czat zawiera pole edycji wiadomości, menu rozwijane odbiorcy i listę historii; Enter w polu edycji wysyła. Za kartami dostępne działania mogą obejmować Odtwórz film, Momenty historyczne, Eksportuj historię, Obserwuj, Menu główne, Następny gracz oraz Jeszcze jedna tura.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_ERA_PROGRESS" Language="pl_PL">
+      <Text>Ten ekran to jedno drzewo. Escape je zamyka.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_ERA_PROGRESS_LAYOUT" Language="pl_PL">
+      <Text>Drzewo zaczyna się od podsumowania wyniku ery oraz informacji o poprzedniej dedykacji lub wieku. Następnie zawiera sekcje progów i dedykacji Mrocznego, Normalnego i Złotego wieku, gdy mają zastosowanie, a po nich informacje o statusie ery znanych cywilizacji.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_MODES" Language="pl_PL">
+      <Text>Okno wyboru szpiegostwa ma dwa oddzielne tryby, a do nawigacji dostępny jest tylko bieżący tryb. Tryb miejsca docelowego to drzewo do przydzielania szpiega do miasta. Tryb misji to lista do wyboru, co zrobi szpieg już ustanowiony w mieście. Panel ogłasza bieżący tryb i przenosi fokus do właściwego drzewa lub listy, gdy tryb się zmienia.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_DESTINATIONS" Language="pl_PL">
+      <Text>W trybie miejsca docelowego każdy wiersz drzewa identyfikuje miasto i jego cywilizację oraz oznacza stolice. Jego podpowiedź podaje czas podróży i ustanowienia, liczbę możliwych misji oraz ukończone dzielnice miasta niebędące cudami. Dostępne miasta podlegają aktualnym zasadom gry, w tym widoczności, ograniczeniom dyplomatycznym i obsłudze wolnych miast przez dodatek.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_PREVIEWS" Language="pl_PL">
+      <Text>Naciśnij W prawo na wierszu miejsca docelowego, aby rozwinąć jego elementy potomne możliwych misji tylko do odczytu. Te podglądy identyfikują operację oraz, gdy ma to zastosowanie, jej docelową dzielnicę, czas trwania, prawdopodobieństwo powodzenia, szczegóły efektu lub powody niepowodzenia. Są to tylko informacje; wybór miejsca docelowego odbywa się z samego wiersza miasta.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_PLACEMENT" Language="pl_PL">
+      <Text>Aktywuj wiersz miasta, aby wybrać to miejsce docelowe, przesunąć tam kamerę gry i otworzyć Potwierdź umieszczenie szpiega. Przejrzyj podsumowanie miasta i czasu, a następnie wybierz Potwierdź lub Wybierz cel ponownie. Potwierdź wysyła szpiega, aby podróżował i ustanowił się w innym mieście. Jeśli potwierdzisz lokalne miasto, które szpieg już zajmuje, okno wyboru zmienia się na tryb misji, abyś mógł zamiast tego wybrać dzielnicę kontrwywiadu. Wybierz cel ponownie lub Escape wraca do drzewa miejsc docelowych bez zatwierdzania.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_MISSIONS" Language="pl_PL">
+      <Text>Tryb misji zawiera jedną listę aktualnych przycisków misji dla bieżącego miasta szpiega; drzewo miejsc docelowych jest ukryte. Panel ogłasza także, czy Zdobywanie źródeł jest aktywne, a gdy jest aktywne, ile tur pozostało. W obcym mieście każda misja podaje swoją operację, docelową dzielnicę (gdy ma to zastosowanie), czas trwania i prawdopodobieństwo powodzenia, przy czym pełne szczegóły misji znajdują się w podpowiedzi. Wyłączone misje pozostają czytelne, a ich podpowiedzi wyjaśniają, dlaczego nie mogą się rozpocząć.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_MISSION_ACTIONS" Language="pl_PL">
+      <Text>Aktywuj włączoną misję ofensywną, aby otworzyć osobne standardowe okno potwierdzenia misji; wybranie wiersza listy samo w sobie nie akceptuje misji. Przejrzyj jej odprawę, czas trwania, możliwe wyniki i szanse powodzenia, a następnie wybierz Zaakceptuj misję lub Anuluj. W jednym z twoich własnych miast tryb misji zamiast tego wymienia Kontrwywiad raz dla każdej prawidłowej dzielnicy. Aktywacja wiersza Kontrwywiad natychmiast przydziela tę dzielnicę i nie otwiera okna potwierdzenia.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_CLOSE" Language="pl_PL">
+      <Text>Naciśnij Escape na głównym drzewie miejsc docelowych lub liście misji, aby zamknąć okno wyboru szpiegostwa bez dokonywania kolejnego wyboru.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_ESPIONAGE_OVERVIEW" Language="pl_PL">
+      <Text>Karta Agenci i karta Historia misji zawierają po jednym drzewie. Agenci mają także przycisk Pokaż szczegóły miasta w dodatku Gathering Storm.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_ESPIONAGE_OVERVIEW_OPERATIVES" Language="pl_PL">
+      <Text>Agenci grupują szpiegów w podróży, pojmanych własnych szpiegów oraz miasta. Wiersze miast zawierają przydzielonych szpiegów oraz szczegóły ich misji, awansu i statusu. Historia misji grupuje ukończoną aktywność według pojmanych wrogich agentów i lokalizacji misji.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_ESPIONAGE_OVERVIEW_BINDINGS" Language="pl_PL">
+      <Text>Na obsługiwanych wierszach miast lub szpiegów Ctrl plus Enter otwiera szczegóły tego miasta. Przycisk Pokaż szczegóły miasta zapewnia to samo działanie dla wybranej lokalizacji. Na wierszu pojmanego szpiega Enter inicjuje wymianę za pojmanego agenta. Escape zamyka ekran.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES" Language="pl_PL">
+      <Text>Ten ekran domyślnie jest sortowalną tabelą porównawczą. Naciśnij Alt plus 2 dla widoku drzewa lub Alt plus 1, aby wrócić do tabeli. Wybrany widok jest zapamiętywany.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_LAYOUT" Language="pl_PL">
+      <Text>Każdy wiersz tabeli to zasób. Pierwsze kolumny podają jego nazwę, klasę i łączną ilość, po których następuje jedna kolumna ilości dla każdej znanej cywilizacji. Drzewo grupuje te same zasoby według klasy i zachowuje szczegóły właścicieli.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_ACTIONS" Language="pl_PL">
+      <Text>W tabeli naciśnij Enter lub Spację w kolumnie cywilizacji, aby zamknąć Zasoby globalne i otworzyć Dyplomację z tym przywódcą. W drzewie naciśnij Enter na wierszu przywódcy, aby wykonać to samo działanie.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GLOBAL_RESOURCES_SORT" Language="pl_PL">
+      <Text>Aktywuj sortowalny nagłówek tabeli, aby przełączać jego kolejność. Widok drzewa ma jedno menu rozwijane Sortuj zasoby według z kolejnością naturalną, obydwoma kierunkami nazwy, obydwoma kierunkami łącznej ilości oraz obydwoma kierunkami ilości dla każdej znanej cywilizacji. Escape zamyka ekran.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GOVERNMENT" Language="pl_PL">
+      <Text>Poza scenariuszem Piraci ten ekran ma karty Ustroje i Doktryny. W scenariuszu Piraci układ doktryn jest przeznaczony do trzech gniazd relikwii.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GOVERNMENT_GOVERNMENTS" Language="pl_PL">
+      <Text>Ustroje to prosta lista. Każdy wiersz podaje poziom, zestaw gniazd doktryn, bonusy, informacje o dziedzictwie, wymagania odblokowania oraz bieżący status. Enter przyjmuje dostępny ustrój. Shift plus Enter otwiera jego artykuł w Civilopedii.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GOVERNMENT_POLICIES" Language="pl_PL">
+      <Text>Doktryny to drzewo wierszy doktryn i gniazd. Enter na gnieździe otwiera tymczasowe drzewo wyboru doktryn pogrupowane według kategorii Wojskowe, Ekonomiczne, Dyplomatyczne i Uniwersalne, gdy mają zastosowanie. Enter na doktrynie przypisuje ją i zamyka okno wyboru; Escape anuluje okno wyboru.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GOVERNMENT_POLICY_ACTIONS" Language="pl_PL">
+      <Text>Na wypełnionym gnieździe Delete usuwa doktrynę, a Shift plus Enter otwiera jej artykuł w Civilopedii. Wpisy okna wyboru doktryn również obsługują Shift plus Enter dla Civilopedii. Gniazda pozostają czytelne, gdy zmiany są zablokowane, ale aktywacja wyjaśnia lub respektuje aktualną blokadę.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GOVERNMENT_BOTTOM_ACTIONS" Language="pl_PL">
+      <Text>Za drzewem doktryn znajdują się Potwierdź doktryny, Pokaż wszystkie doktryny oraz działania związane z odblokowaniem, gdy są dostępne. Pokaż wszystkie doktryny otwiera kolejne skategoryzowane drzewo; Escape je zamyka. Potwierdź stosuje kompletny układ gniazd i wyjaśnia puste gniazda lub niezmienione zestawy doktryn, gdy jest wyłączony.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GOVERNORS" Language="pl_PL">
+      <Text>Ten ekran zaczyna się od sortowalnej tabeli Gubernatorzy, po której następuje siatka Awanse lub lista Awanse tajnego gubernatora. Alt plus 2 wybiera widok drzewa, a Alt plus 1 wraca do widoku tabeli. Widoczny jest tylko widok awansów odpowiedni dla aktywnego gubernatora.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GOVERNORS_TREE" Language="pl_PL">
+      <Text>Tabela porównuje Nazwę, Status, standardową statystykę szybkości ustanawiania, standardową statystykę nacisku tożsamości oraz Zdobyte awanse. Podpowiedź komórki Nazwa zawiera tytuł, opis i zdolność podstawową gubernatora; inne kolumny tego nie powtarzają. Alternatywne drzewo zaczyna się od menu rozwijanego Sortuj gubernatorów według i pozwala rozwinąć mianowanego gubernatora, aby sprawdzić zdobyte awanse. Posortowane nagłówki tabeli i opcje menu rozwijanego opisują swoją faktyczną kolejność, taką jak od aktywnych, od najszybszych czy od największej liczby. Oba widoki współdzielą to samo sortowanie. Ustawienie fokusu na gubernatorze w którymkolwiek widoku odświeża siostrzany widok awansów.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GOVERNORS_PROMOTION_GRID" Language="pl_PL">
+      <Text>W przypadku zwykłych gubernatorów awanse korzystają z siatki. Pierwsza kolumna to Zdolność podstawowa, a dalsze kolumny to poziomy awansów. Użyj nawigacji po siatce, aby śledzić progresję między poziomami. Dostępne komórki aktywują okno potwierdzenia; komórki zdobyte, zablokowane, podstawowe i tylko do odczytu pozostają czytelne, ale nie aktywują się.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GOVERNORS_SECRET_VIEW" Language="pl_PL">
+      <Text>Tajni gubernatorzy korzystają z prostej listy Awanse, ponieważ ich tytuły mogą być ukryte, a nie ułożone jako widoczne drzewo progresji. Ukryte wpisy pozostają czytelne jako nieodkryte wraz z aktualnym wyjaśnieniem odblokowania w grze.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GOVERNORS_ACTIONS" Language="pl_PL">
+      <Text>Enter na dowolnej komórce tabeli gubernatorów lub wierszu drzewa gubernatorów wykonuje jego aktualne działanie, takie jak mianowanie, przydział lub ponowny przydział. To samo na dostępnym tajnym stowarzyszeniu powoduje dołączenie do niego. Tab przechodzi z widoku listy do obecnie widocznej siatki lub listy awansów. Enter na dostępnym awansie otwiera okno potwierdzenia.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GOVERNOR_ASSIGNMENT" Language="pl_PL">
+      <Text>To okno wyboru to lista miast dla gubernatora obecnie przydzielanego lub ponownie przydzielanego. Każdy wiersz podaje miasto, bieżący status gubernatora, informacje o ustanowieniu oraz ograniczenia przydziału.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GOVERNOR_ASSIGNMENT_CONFIRM" Language="pl_PL">
+      <Text>Enter wybiera miasto i otwiera okno podsumowania z Potwierdź i Wybierz ponownie. Potwierdź zatwierdza przydział; Wybierz ponownie wraca do listy miast; Escape anuluje okno lub okno wyboru.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE" Language="pl_PL">
+      <Text>Ekran ma karty Wielcy ludzie, Wcześniej zrekrutowani oraz, gdy tryb Bohaterowie i legendy jest aktywny, Bohaterowie.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_CURRENT" Language="pl_PL">
+      <Text>Wielcy ludzie domyślnie są tabelą porównawczą. Cywilizacje to wiersze, a bieżący wielcy ludzie to kolumny. Każda kolumna wielkiej osoby identyfikuje osobę, klasę, erę, zdolności, ładunki, wymagania aktywacji oraz wszelkie ograniczenia rekrutacji. Każda komórka danych podaje bieżące punkty danej cywilizacji, koszt rekrutacji i punkty na turę. Alt plus 2 przełącza na widok drzewa, w którym Sortuj cywilizacje według oferuje kolejność naturalną, nazwę cywilizacji od A do Z lub od Z do A oraz każdą klasę wielkiej osoby od najmniejszego lub największego postępu. Posortowane nagłówki tabeli używają tych samych opisów. Alt plus 1 wraca do tabeli. Oba widoki współdzielą wybrane sortowanie. Ustawienie fokusu na kolumnie wielkiej osoby aktualizuje biografię tylko do odczytu i przyciski działań następujące po bieżącym widoku.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_ACTIONS" Language="pl_PL">
+      <Text>W którymkolwiek widoku Enter lub Spacja na możliwej do zrekrutowania wielkiej osobie rekrutuje ją; w przeciwnym razie odczytuje twój postęp. Delete pomija, gdy pominięcie jest dostępne. W tabeli te polecenia podążają za aktywną kolumną wielkiej osoby niezależnie od tego, który wiersz cywilizacji ma fokus. Za bieżącym widokiem znajdują się kontekstowe działania Rekrutuj, Pomiń, Wesprzyj złotem oraz Wesprzyj wiarą, po których następuje pole biografii i przycisk przełączania widoku. Niedostępne działania kontekstowe są ukryte.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_PAST" Language="pl_PL">
+      <Text>Wcześniej zrekrutowani to prosta lista zdobytych wielkich ludzi, ich klasy, rekrutującego i odpowiedniego statusu. Służy tylko do przeglądania.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GREAT_PEOPLE_HEROES" Language="pl_PL">
+      <Text>Bohaterowie domyślnie są sortowalną tabelą z kolumnami Nazwa, Status, Okres życia, Ruch, Siła, Siła dystansowa, Zasięg ataku, Ładunki, Zdolności pasywne i Rozkazy. Alt plus 2 przełącza na szczegółową listę, po której następuje jej menu rozwijane Sortuj bohaterów; Alt plus 1 wraca do tabeli, a wybrany widok jest zapamiętywany. Nie ma filtra Bohaterów. Oba widoki współdzielą wybrane sortowanie. Enter lub Spacja wykonuje aktualne działanie bohatera, Shift plus Enter otwiera artykuł Civilopedii aktywnego bohatera, a Przywołaj wiarą podąża za bieżącym widokiem, gdy jest dostępne.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GREAT_WORKS" Language="pl_PL">
+      <Text>Przegląd zawiera drzewo Wielkie dzieła, po którym następują Pokaż wielkie dzieło, Pokaż galerię oraz pole wyboru Grupuj według budowli.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GREAT_WORKS_GROUPING" Language="pl_PL">
+      <Text>Gdy Grupuj według budowli jest wyłączone, drzewo to Miasto, Budowla, a następnie Gniazda. Gdy jest włączone, drzewo to typ Budowli, instancja Miasta, a następnie Gniazda. Instancje budowli podają plony, turystykę, postęp tematyczny i kierunek od kursora nawigacji.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GREAT_WORKS_SLOTS" Language="pl_PL">
+      <Text>Każde gniazdo podaje swój typ gniazda i zawarte wielkie dzieło. Jego podpowiedź zawiera szczegóły dzieła, dopasowanie tematyczne oraz wszelkie blokady przenoszenia. Enter otwiera tymczasowe drzewo wyboru zgodnych dzieł pogrupowanych według przeciwnej hierarchii miasta lub budowli; Enter na dziele przenosi je, a Escape anuluje.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GREAT_WORKS_ACTIONS" Language="pl_PL">
+      <Text>Ctrl plus Enter na wypełnionym gnieździe otwiera prezentację tego dzieła. Pokaż wielkie dzieło otwiera ostatnio aktywne wypełnione gniazdo, Pokaż galerię otwiera galerię gry, a pole wyboru odbudowuje hierarchię. Enter na instancji budowli przesuwa do niej kursor mapy bez zamykania przeglądu.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GREAT_WORK_SHOWCASE" Language="pl_PL">
+      <Text>Prezentacja zawiera jeden pełny wiersz szczegółów, po którym następują przyciski Poprzednie, Następne i Wstecz, gdy te działania są dostępne.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_GREAT_WORK_SHOWCASE_BINDINGS" Language="pl_PL">
+      <Text>W lewo lub W górę wybiera poprzednie wielkie dzieło. W prawo lub W dół wybiera następne. Przyciski wykonują te same działania. Wstecz wraca do przeglądu i zatrzymuje dźwięk prezentacji, jak zwykle robi to gra.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_HISTORIC_MOMENTS" Language="pl_PL">
+      <Text>Ten ekran to jedno chronologiczne drzewo. Escape je zamyka.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_HISTORIC_MOMENTS_LAYOUT" Language="pl_PL">
+      <Text>Wiersze najwyższego poziomu to ery. Każda era zawiera grupy Ważne momenty i Drobne momenty, gdy występują. Ich elementy potomne to wpisy momentów tylko do odczytu zawierające zarejestrowany tytuł, opis, datę, wynik ery i inne aktualne szczegóły.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAP_PINS" Language="pl_PL">
+      <Text>To lista wszystkich znaczników mapy widocznych dla ciebie, w tym znaczników należących do innych graczy, gdy współdzielona widoczność na to pozwala.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAP_PINS_ACTIONS" Language="pl_PL">
+      <Text>Enter przesuwa kursor nawigacji do aktywnego znacznika. Na twoim własnym znaczniku Ctrl plus Enter otwiera edytor, a Delete otwiera potwierdzenie usunięcia Tak lub Nie. Znaczników należących do innych graczy nie można edytować ani usuwać.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAP_PINS_BINDINGS" Language="pl_PL">
+      <Text>Escape zamyka listę znaczników. W oknie usunięcia Enter aktywuje aktywną odpowiedź, a Escape wybiera Nie.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAP_PIN_EDITOR" Language="pl_PL">
+      <Text>Edytor tworzy lub zmienia jeden znacznik mapy. To, które pola i przyciski się pojawiają, zależy od tego, czy znacznik jest nowy, istniejący, lokalny czy współdzielony.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAP_PIN_EDITOR_LAYOUT" Language="pl_PL">
+      <Text>Kontrolki pojawiają się w kolejności: pole edycji Nazwa (gdy edytowalne), menu rozwijane Ikona, menu rozwijane Widoczność w trybie wieloosobowym (gdy dostępne), Potwierdź, Udostępnij na czacie (gdy dostępne) oraz Usuń dla istniejącego lokalnego znacznika.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MAP_PIN_EDITOR_BINDINGS" Language="pl_PL">
+      <Text>Enter zatwierdza pole edycji lub aktywuje aktywną kontrolkę. Ctrl plus Enter potwierdza cały znacznik z dowolnego miejsca w edytorze. Escape anuluje i zamyka. Menu rozwijane używają Enter do otwarcia, strzałek do wyboru, Enter do zatwierdzenia i Escape do zamknięcia bez zmiany.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NOTIFICATIONS" Language="pl_PL">
+      <Text>Karta Powiadomienia to drzewo. Pojedyncze powiadomienia pojawiają się bezpośrednio; wiele powiadomień jednego typu pojawia się wewnątrz rozwijalnej grupy.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NOTIFICATIONS_ACTIONS" Language="pl_PL">
+      <Text>Enter lub Spacja aktywuje powiadomienie przy użyciu jego zwykłego działania w grze. Delete odrzuca aktywne powiadomienie, gdy jest to dozwolone. Delete na grupie odrzuca każde możliwe do odrzucenia powiadomienie w tej grupie. Podpowiedzi podają typ, możliwość odrzucenia, turę wygaśnięcia oraz szczegóły lokalizacji, gdy są znane.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MESSAGES" Language="pl_PL">
+      <Text>Karta Wiadomości to lista historii, po której następuje menu rozwijane filtra typu oraz Kopiuj bufor wiadomości. Wiersze wiadomości mogą być tekstem tylko do odczytu lub aktywnymi łączami do znaczników mapy; Enter na aktywnej wiadomości przeskakuje do jej lokalizacji.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_MESSAGES_ACTIONS" Language="pl_PL">
+      <Text>Zmień filtr, aby pokazać żądane typy wiadomości. Kopiuj bufor wiadomości kopiuje obecnie przefiltrowaną dostępną historię do schowka. Escape zamyka centrum powiadomień.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_PRODUCTION_OVERVIEW" Language="pl_PL">
+      <Text>Ten panel steruje produkcją i zakupami wybranego miasta. Jego karty to Produkcja, Kup za złoto, Kup za wiarę (gdy dostępne) oraz Kolejka.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_PRODUCTION_LAYOUT" Language="pl_PL">
+      <Text>Każda strona to drzewo kategorii i elementów. Rozwinięcie elementu odsłania bonusy i odblokowania, gdy są dostępne. Za kontrolką kart znajdują się lista miast i menu rozwijane Sortuj według.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_PRODUCTION_BINDINGS" Language="pl_PL">
+      <Text>Enter na elemencie produkuje lub kupuje go. Na elementach Produkcji Ctrl plus Enter dołącza go do kolejki. Shift plus Enter otwiera jego artykuł w Civilopedii. Alt plus W lewo i Alt plus W prawo wybierają poprzednie lub następne miasto. Ustawienie fokusu na wierszu miasta wybiera to miasto i odświeża panel.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_RELIGION" Language="pl_PL">
+      <Text>Ten ekran przełącza się między drzewem przeglądu religii a panelem konfiguracji założenia lub wzmocnienia. Widoczny jest tylko widok odpowiedni dla bieżącego stanu religii.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_RELIGION_OVERVIEW" Language="pl_PL">
+      <Text>Przegląd zaczyna się od twojej religii, gdy jest założona, po której następują inne znane religie. Każdy wiersz religii zawiera sekcje Wierzenia, Miasta i Jednostki religijne z aktualnymi szczegółami wyznawców, nacisku, większości, jednostek i wierzeń.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_RELIGION_CITY_FILTERS" Language="pl_PL">
+      <Text>Wewnątrz Miast znajdują się gałęzie filtrów Wyznawana religia i Religia obecna, zawierające miasta pasujące do każdego filtra. Wiersze miast można rozwinąć na pełne zestawienie religii dla danego miasta.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_OPEN" Language="pl_PL">
+      <Text>Konfiguracja religii pojawia się po zdobyciu prawa do założenia religii lub dodania wierzeń do istniejącej religii. Wybierz Moja religia w drzewie przeglądu, aby do niej dotrzeć. Panteony wybiera się w ich osobnym oknie wyboru, a nie na tym ekranie.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_IDENTITY" Language="pl_PL">
+      <Text>Podczas zakładania panel konfiguracji jest widoczny. Jego pierwszą kontrolką jest lista parametrów. Zawiera ona menu rozwijane ikony religii. Otwórz je, wybierz dostępny symbol religii i potwierdź wybór. </Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_BELIEFS" Language="pl_PL">
+      <Text>Za ikoną znajdują się wiersze wierzeń. Twój istniejący panteon i wszelkie wierzenia już obecne w religii to wiersze przeglądu tylko do odczytu. Każdy pusty wymagany wiersz musi zostać wypełniony. Pierwsze nowe wierzenie podczas zakładania to konkretnie wierzenie wyznawcy; wszelkie późniejsze wiersze oferują tylko klasy wierzeń, których religia jeszcze nie wykorzystała.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_PICKER" Language="pl_PL">
+      <Text>Aktywuj puste lub wypełnione wierzenie, aby otworzyć jego drzewo kategorii wierzeń. Rozwiń kategorię, odczytaj efekt każdego wierzenia w jego podpowiedzi i aktywuj żądane wierzenie; okno wyboru zamyka się, a wiersz konfiguracji zgłasza wybór. Naciśnij Delete na oczekującym wierszu wierzenia, aby go wyczyścić, lub Escape w oknie wyboru, aby wrócić bez zmiany tego wiersza.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_ENHANCE" Language="pl_PL">
+      <Text>Podczas wzmacniania istniejącej religii jej ikona, nazwa, panteon i wyposażone wierzenia pozostają tylko do odczytu. Pracuj tylko z nowymi pustymi wierszami wierzeń. Klasa wierzenia już reprezentowana przez wyposażone lub oczekujące wierzenie jest niedostępna w pozostałych oknach wyboru, więc każdy nowy wybór musi używać kwalifikującej się klasy.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_RELIGION_SETUP_CONFIRM" Language="pl_PL">
+      <Text>Za listą parametrów znajduje się pole edycji nazwy. Jeśli wybrana ikona religii pozwala na niestandardową nazwę, to pole staje się edytowalne. Ostatnią kontrolką jest Załóż religię lub Potwierdź zmiany. Pozostaje wyłączona, dopóki wymagana ikona, prawidłowa niestandardowa nazwa i każde nowe wierzenie nie są kompletne; jej podpowiedź wymienia wszystko, czego jeszcze brakuje. Aktywuj ją, aby otworzyć okno podsumowania, przejrzyj ikonę, nazwę i wierzenia, a następnie wybierz Tak, aby je zatwierdzić, lub Nie, aby wrócić bez zakładania lub wzmacniania.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_REPORTS" Language="pl_PL">
+      <Text>Ekran Raportów ma karty Plony, Zasoby, Stan miast oraz, gdy jest obsługiwana, Plotki. Plony i Zasoby to drzewa, Stan miast ma widoki tabeli i szczegółowej listy, a Plotki to lista.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_REPORTS_YIELDS" Language="pl_PL">
+      <Text>Plony zawierają Dochód miast i Gospodarkę imperium. Gałęzie miast zawierają zestawienia plonów dzielnic, budowli, wielkich dzieł, szlaków handlowych, cudów i inne. Gospodarka imperium zawiera sumy plonów i szczegółowe źródła; w sekcji Złoto dochód i koszty umów rozwijają się na poszczególne umowy dotyczące złota.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_REPORTS_RESOURCES" Language="pl_PL">
+      <Text>Zasoby zawierają po jednym rozwijalnym wierszu na zasób. Odsłania on zapas lub sumę, źródła gromadzenia i wydobycia, źródła z miast-państw, zużycie, import i eksport z umów dyplomatycznych oraz dodatkowe szczegóły specyficzne dla zestawu zasad.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_REPORTS_CITY_STATUS" Language="pl_PL">
+      <Text>Stan miast domyślnie jest sortowalną tabelą zawierającą nazwę miasta, kierunek i odległość od kursora nawigacji, populację, obszary mieszkalne, wzrost, udogodnienia, zadowolenie, zmęczenie wojną, obronę, obrażenia, każdy dostępny plon oraz lojalność specyficzną dla dodatku. Etykieta wiersza miasta identyfikuje także status inny niż normalny oraz stan jego gubernatora, gdy jest dostępny. Aktywuj sortowalny nagłówek, aby przełączać jego kolejność; aktywny nagłówek podaje, jak jest posortowany, np. od A do Z, od najbliższych, od najsilniejszych czy od najwyższych. Enter lub Spacja z dowolnej komórki danych wybiera miasto i zamyka Raporty. Alt plus 2 przełącza na szczegółową listę przycisków miast, której etykiety menu rozwijanego również podają dokładną kolejność używaną dla odległości, wartości miast lub plonów; Alt plus 1 wraca do tabeli. Wybrany widok jest zapamiętywany.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_REPORTS_GOSSIP" Language="pl_PL">
+      <Text>Plotki zawierają prostą, chronologiczną listę każdego pasującego widocznego wpisu plotki, po której następują menu rozwijane filtrów Gracz i Typ. Zmień jedno z menu rozwijanych, aby odbudować listę. Escape zamyka Raporty.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH" Language="pl_PL">
+      <Text>Pierwsze drzewo zawiera bieżące i zakolejkowane technologie. Drugie drzewo zawiera dostępne technologie. Każda technologia rozwija się na swoje odblokowania. Ostatni przycisk otwiera pełne drzewo technologii.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH_ACTIONS" Language="pl_PL">
+      <Text>Enter na dostępnej technologii czyni ją bieżącą. Wiersze bieżące i zakolejkowane są tylko do odczytu i można je sprawdzić; to okno wyboru celowo nie dodaje skrótu do kolejki.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH_BINDINGS" Language="pl_PL">
+      <Text>Shift plus Enter na odsłoniętej technologii otwiera jej artykuł w Civilopedii. Użyj Tab, aby przejść z drzewa kolejki do dostępnych technologii, a następnie do Otwórz drzewo technologii.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_LAYOUT" Language="pl_PL">
+      <Text>Kontrolki pojawiają się w tej kolejności: lista bieżących i zakolejkowanych technologii (gdy niepusta), lista filtrów, aktywny widok technologii Siatka, Graf lub Drzewo, lista Odblokowania w widokach Siatki i Grafu oraz menu rozwijane Widok.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_VIEWS" Language="pl_PL">
+      <Text>Menu rozwijane Widok zawiera Siatkę, Graf i Drzewo w tej kolejności. Siatka układa ery jako kolumny, poziomy wymogów od lewej do prawej, a technologie pionowo w obrębie każdego poziomu. Graf podąża bezpośrednio za połączeniami wymogów. Drzewo prezentuje hierarchię ery, poziomu i technologii. Alt plus 1 wybiera Siatkę, Alt plus 2 wybiera Graf, a Alt plus 3 wybiera Drzewo. Przełączanie widoków zachowuje w miarę możliwości fokus na tej samej technologii, a wybrany widok jest zapamiętywany przy następnym otwarciu drzewa technologii.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_TREE_VIEW" Language="pl_PL">
+      <Text>W widoku drzewa rozwiń erę, aby odsłonić jej już rozwinięte poziomy, a następnie jej technologie. Elementy potomne technologii zawierają Odblokowania, Wymogi, Prowadzi do oraz obliczoną ścieżkę do tej technologii. Aktywuj odniesienie, aby do niego przeskoczyć. Backspace wraca przez poprzednie przeskoki odniesień.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_ACTIONS" Language="pl_PL">
+      <Text>Enter na możliwej do zbadania technologii czyni ją bieżącą. Ctrl plus Enter dołącza ją do kolejki badań. Shift plus Enter otwiera jej artykuł w Civilopedii. Te same trzy przypisania działają w widokach Siatki i Grafu oraz na wynikach filtrów. Enter na wierszu kolejki przeskakuje do tej technologii; Shift plus Enter otwiera jej artykuł.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_FILTERS" Language="pl_PL">
+      <Text>Enter na filtrze otwiera tymczasową listę wyników. W wynikach Enter zamyka listę i przeskakuje do technologii, Ctrl plus Enter dodaje ją do kolejki, Shift plus Enter otwiera Civilopedię, a Escape zamyka wyniki i czyści filtr. Ctrl plus F wyszukuje w indeksie Technologii gry z dowolnego głównego widoku.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_UNLOCKS" Language="pl_PL">
+      <Text>W widoku Siatki lub Grafu ustawienie fokusu na technologii odbudowuje siostrzaną listę Odblokowania dla tej technologii. Tab dociera do tej listy po aktywnym widoku, gdy zawiera ona wpisy, a następnie dociera do menu rozwijanego Widok.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW" Language="pl_PL">
+      <Text>Przegląd handlu ma karty Moje szlaki, Szlaki do moich miast oraz Dostępne szlaki. Każda strona to drzewo pogrupowane według cywilizacji, miasta-państwa lub innej aktualnej kategorii szlaku.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_ACTIVE" Language="pl_PL">
+      <Text>Moje szlaki podają wykorzystaną i dostępną pojemność szlaków. Wiersze szlaków zawierają początek, cel, czas trwania lub liczbę tur, informacje o placówce handlowej i plonach. Rozwiń szlak, aby uzyskać oddzielne zestawienia plonów początku i celu.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_AVAILABLE" Language="pl_PL">
+      <Text>Szlaki do moich miast pokazują przybywających kupców z innych cywilizacji. Dostępne szlaki pokazują kupców i cele, które można wybrać. Niektóre wiersze to działania Wybierz szlak; wiersze Wyprodukuj kupca mają charakter informacyjny, gdy żaden kupiec nie jest dostępny.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW_ACTIONS" Language="pl_PL">
+      <Text>Enter na aktywnym szlaku wybiera jego kupca i może przesunąć do niego kursor. Enter na Wybierz szlak wybiera tego kupca i otwiera wybór szlaku. Escape zamyka przegląd.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TRADE_ROUTE" Language="pl_PL">
+      <Text>To okno wyboru to drzewo miejsc docelowych, po którym następuje menu rozwijane filtra szlaku.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TRADE_ROUTE_LAYOUT" Language="pl_PL">
+      <Text>Miejsca docelowe są pogrupowane w Twoje miasta, Inne cywilizacje i Miasta-państwa. Każdy wiersz szlaku podaje cel i zbiorcze plony; jego rozwinięcie odsłania oddzielne szczegóły plonów początku i celu. Menu rozwijane filtra zmienia, które plony szlaku są uwydatniane lub uwzględniane.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TRADE_ROUTE_ACTIONS" Language="pl_PL">
+      <Text>Enter na szlaku otwiera okno podsumowania z Potwierdź i Anuluj. Potwierdź ustanawia szlak; Anuluj lub Escape wraca do okna wyboru. Escape w oknie wyboru podąża za zwykłą ścieżką zamknięcia w grze.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TRADE_ORIGIN" Language="pl_PL">
+      <Text>Ten ekran to prosta lista miast, które mogą być początkiem wybranego kupca.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_TRADE_ORIGIN_ACTIONS" Language="pl_PL">
+      <Text>Każdy wiersz podaje miasto oraz odpowiednią pojemność szlaku lub informacje o kupcu. Enter przenosi początek kupca do tego miasta poprzez zwykłe działanie w grze i zamyka okno wyboru.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS" Language="pl_PL">
+      <Text>Ten ekran ma alternatywne widoki Siatki i Drzewa, po których następuje przycisk Przełącz widok. Otwiera się w widoku Siatki.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS_VIEWS" Language="pl_PL">
+      <Text>Widok Siatki używa jednej kolumny na poziom awansu i umieszcza alternatywne awanse pionowo w obrębie tego poziomu. Przełączenie na widok Drzewa zachowuje w miarę możliwości fokus na tym samym awansie.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS_TREE" Language="pl_PL">
+      <Text>Widok Drzewa grupuje awanse według już rozwiniętych poziomów. Rozwiń awans, aby sprawdzić gałęzie Wymogi i Prowadzi do; aktywacja odniesienia przeskakuje do powiązanego awansu.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_UNIT_PROMOTIONS_ACTIONS" Language="pl_PL">
+      <Text>Enter lub Spacja stosuje dostępny awans poprzez zwykłe żądanie awansu w grze. Zablokowane awanse pozostają czytelne, ale nie aktywują się. Użyj przycisku Przełącz widok, aby zmienić prezentację.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_RANKINGS" Language="pl_PL">
+      <Text>Rankingi świata tworzą jedną kartę dla każdej strony rankingu dostępnej w bieżącym zestawie zasad. Domyślnie jest to widok tabeli i zapamiętywany jest jeden wspólny wybór widoku dla całego ekranu. Przycisk Przełącz widok, Alt+1 dla tabel oraz Alt+2 dla drzew zmieniają wszystkie obsługiwane karty jednocześnie.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_RANKINGS_LAYOUT" Language="pl_PL">
+      <Text>Ogólne, Wynik, Nauka, Kultura, Dominacja, Religia i Zwycięstwo dyplomatyczne używają sortowalnych tabel, gdy ich uporządkowane dane są dostępne. Strony scenariuszy narracyjnych i dowolne niestandardowe zwycięstwa pozostają drzewami; wybranie widoku tabeli na jednej z tych kart ogłasza, że zamiast tego wyświetlane jest jej drzewo.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_RANKINGS_CONTENT" Language="pl_PL">
+      <Text>Każda tabela ma po jednym wierszu na konkurenta: cywilizację, gdy rywalizuje samodzielnie, lub drużynę, gdy kilka cywilizacji rywalizuje razem. Podpowiedź Konkurent wymienia członków drużyny. Komórki metryk pokazują wynik drużyny, a ich podpowiedzi podają zestawienie dla poszczególnych cywilizacji. Drzewa zachowują rozwijalne szczegóły drużyny, cywilizacji, celu i doradcy. Escape zamyka ekran.</Text>
+    </Replace>
+
+    <!-- Production queue -->
+    <Replace Tag="LOC_CAI_TUTORIAL_PRODUCTION_QUEUE_TITLE" Language="pl_PL">
+      <Text>Samouczek kolejki produkcji</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_PRODUCTION_QUEUE_LAYOUT" Language="pl_PL">
+      <Text>Kolejka to uporządkowana lista. Bieżąca produkcja jest pierwsza, gdy miasto już coś buduje, po czym następuje każdy zakolejkowany element w kolejności, w jakiej miasto go rozpocznie.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_PRODUCTION_QUEUE_ADD" Language="pl_PL">
+      <Text>Aby coś dodać, wróć do karty Produkcja i naciśnij Ctrl plus Enter na wyborze produkcji. Sam Enter zastępuje lub rozpoczyna zwykłą produkcję zamiast dołączać do kolejki.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_PRODUCTION_QUEUE_BINDINGS" Language="pl_PL">
+      <Text>W kolejce naciśnij Shift plus W górę lub Shift plus W dół, aby przenieść aktywny element, lub Delete, aby go usunąć. Bieżący element również można usunąć, co czyni bieżącym następny zakolejkowany element.</Text>
+    </Replace>
+
+    <!-- World Congress action stages -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_TITLE" Language="pl_PL">
+      <Text>Głosowanie nad rezolucjami</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_LAYOUT" Language="pl_PL">
+      <Text>Karta do głosowania zaczyna się od twojej pozostałej przychylności dyplomatycznej, po której następuje po jednym rozwijalnym wierszu na każdą rezolucję. Odczytaj opis wiersza i informacje z poprzedniej sesji, a następnie rozwiń go. Jego elementy potomne to menu rozwijane Wynik, Dodaj głos, Usuń głos oraz menu rozwijane Cel.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_OUTCOME" Language="pl_PL">
+      <Text>Otwórz menu rozwijane Wynik i wybierz opcję A lub opcję B po odczytaniu obu efektów. Zatwierdzenie którejkolwiek opcji automatycznie przyznaje tej rezolucji jej darmowy pierwszy głos. Jeśli zmienisz wyniki, głos przechodzi na nowy wynik zamiast naliczać opłatę za dodatkowy głos.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_TARGET" Language="pl_PL">
+      <Text>Otwórz menu rozwijane Cel i wybierz cywilizację, przywódcę, klasę jednostki, dzielnicę, zasób lub inny podmiot, do którego wybrany efekt ma się odnosić. Cel możesz wybrać przed lub po wyborze wyniku, a pozostaje on wybrany, jeśli zmienisz między opcją A a opcją B.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_FAVOR" Language="pl_PL">
+      <Text>Po wybraniu wyniku aktywuj Dodaj głos, aby wzmocnić go ponad darmowy głos. Każdy dodatkowy głos wydaje przychylność dyplomatyczną i staje się stopniowo droższy. Usuń głos zwraca przychylność za usuwalny głos. Podpowiedzi przycisków podają bieżącą liczbę głosów i koszt, a pierwszy element karty do głosowania podaje twoją pozostałą przychylność.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_RESOLUTION_COMPLETE" Language="pl_PL">
+      <Text>Powtórz wybory wyniku i celu dla każdej rezolucji; dodatkowe płatne głosy są opcjonalne. Dalej pozostaje wyłączony, dopóki którakolwiek rezolucja nie ma jednego z wyborów. Ustaw fokus na Dalej, aby usłyszeć listę wymieniającą każdą nieukończoną rezolucję oraz to, czy brakuje jej wyniku czy celu.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_SUBMIT" Language="pl_PL">
+      <Text>Aktywuj Dalej, gdy karta do głosowania jest kompletna. Okno potwierdzenia wymienia każdy wybrany wynik, cel, liczbę głosów i koszt. Wybierz Wstecz, aby wrócić do edytowalnej karty do głosowania, lub Prześlij, aby zatwierdzić wszystkie głosy i zakończyć swoją turę Kongresu. Po przesłaniu ekran oczekiwania informuje, którzy członkowie przesłali głosy; przetworzone wyniki pojawiają się później w przeglądzie Kongresu Światowego.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_PROPOSAL_TITLE" Language="pl_PL">
+      <Text>Głosowanie nad propozycją sesji specjalnej</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_PROPOSAL_LAYOUT" Language="pl_PL">
+      <Text>Karta do głosowania zaczyna się od pozostałej przychylności dyplomatycznej, a następnie zawiera rozwijalny wiersz dla każdej propozycji. Podpowiedź wiersza opisuje sytuację kryzysową, cel, uczestników, nagrody i wynik. Rozwiń go, aby dotrzeć do Popieraj, Sprzeciwiaj się oraz informacji o pozostałych turach.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_PROPOSAL_DIRECTION" Language="pl_PL">
+      <Text>Aktywuj Popieraj lub Sprzeciwiaj się, aby oddać jawny pierwszy głos w tym kierunku. Aby odwrócić kierunek, użyj przeciwnej kontrolki: dopóki pozostają głosy, jest ona ogłaszana jako Usuń głos. Usuń bieżące głosy do zera, a następnie aktywuj teraz dostępną kontrolkę Popieraj lub Sprzeciwiaj się, aby zacząć głosować w drugą stronę.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_PROPOSAL_FAVOR" Language="pl_PL">
+      <Text>Aktywuj ponownie wybrany kierunek, aby dodać więcej głosów. Dodatkowe głosy wydają stopniowo więcej przychylności dyplomatycznej; przeciwna kontrolka usuwa głosy i zwraca ich usuwalny koszt. Podpowiedzi podają aktywny kierunek, bieżącą liczbę głosów i koszt, a pierwszy element karty do głosowania podaje pozostałą przychylność.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_PROPOSAL_COMPLETE" Language="pl_PL">
+      <Text>W przeciwieństwie do zwykłej rezolucji każda propozycja, na którą można oddać głos, wymaga jawnego dodania głosu. Powtórz to dla wszystkich wierszy propozycji. Dalej pozostaje wyłączony, dopóki każda wymagana propozycja nie ma co najmniej jednego głosu poparcia lub sprzeciwu; ustaw fokus na Dalej, aby usłyszeć, która propozycja jest nieukończona.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_TITLE" Language="pl_PL">
+      <Text>Przesyłanie propozycji sesji specjalnej</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_LAYOUT" Language="pl_PL">
+      <Text>Dostępne propozycje to strona ekranu przeglądu Kongresu Światowego. Wymienia sytuacje kryzysowe, które możesz obecnie zaproponować na przyszłą sesję specjalną. Ta strona wybiera, co zaproponować; nie jest to późniejsze głosowanie za lub przeciw.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_DETAILS" Language="pl_PL">
+      <Text>Przejdź przez listę propozycji i odczytaj podpowiedź każdego wiersza z polem wyboru. Zawiera ona opis propozycji, szczegóły kryzysu, nagrody oraz wszelkie aktualne ograniczenia lub koszty podawane przez grę. Nazwy kategorii są odczytywane przed tytułem propozycji, gdy strona grupuje kilka typów sytuacji kryzysowych.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_SELECT" Language="pl_PL">
+      <Text>Aktywuj pole wyboru propozycji, aby je zaznaczyć lub wyczyścić. Przejdź dalej przez listę i potwierdź stan zaznaczenia propozycji, którą zamierzasz wysłać. Wyłączone lub niedostępne propozycje pozostają czytelne, ale nie można ich wybrać.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_SUBMIT" Language="pl_PL">
+      <Text>Za listą propozycji znajdują się aktualne przyciski przesyłania i Pomiń. Aktywuj przycisk przesyłania, aby wysłać zaznaczoną propozycję. Aktywuj Pomiń tylko wtedy, gdy nie chcesz przesyłać żadnej propozycji. Jeśli sesja specjalna się rozpocznie, jej osobna karta do głosowania będzie później wymagać, aby każdy członek zagłosował za lub przeciw.</Text>
+    </Replace>
+  </LocalizedText>
+</GameData>

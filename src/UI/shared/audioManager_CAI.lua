@@ -9,6 +9,10 @@ CAIAudioManager = CAIAudioManager or {}
 
 local DEFAULT_PLOT_MAX_DISTANCE = 30
 
+-- Root folder (relative to the mod root) that holds all raw sound files.
+-- Definition RelativePath values are resolved beneath this folder.
+local SOUNDS_ROOT = "sounds"
+
 local AUDIO_DEFINITION_QUERY = [[
     SELECT SoundId, RelativePath, Tag, IsPositional
     FROM CAI_AudioDefinitions
@@ -121,7 +125,7 @@ function CAIAudioManager:BuildFullPath(relativePath)
         return nil
     end
 
-    return self.ModRoot .. "/" .. NormalizePath(relativePath)
+    return self.ModRoot .. "/" .. SOUNDS_ROOT .. "/" .. NormalizePath(relativePath)
 end
 
 function CAIAudioManager:GetDefinitionRows()
@@ -371,6 +375,7 @@ function CAIAudioManager:StopAllSoundsForFocusMute()
 end
 
 function CAIAudioManager:Play(soundId, options)
+    if ExposedMembers.CAI_Active == false then return false end
     local record = self:GetSound(soundId)
     if record == nil then
         LogWarn("Audio manager Play: unknown or unloaded sound " .. tostring(soundId))
@@ -399,6 +404,7 @@ function CAIAudioManager:Play(soundId, options)
 end
 
 function CAIAudioManager:PlayAtPlot(soundId, sourcePlotOrId, options)
+    if ExposedMembers.CAI_Active == false then return false end
     local record = self:GetSound(soundId)
     if record == nil then
         LogWarn("Audio manager PlayAtPlot: unknown or unloaded sound " .. tostring(soundId))
@@ -459,6 +465,7 @@ function CAIAudioManager:PlayAtPlot(soundId, sourcePlotOrId, options)
 end
 
 function CAIAudioManager:QueueSound(soundId, delaySeconds, options)
+    if ExposedMembers.CAI_Active == false then return false end
     local record = self:GetSound(soundId)
     if record == nil then
         LogWarn("Audio manager QueueSound: unknown or unloaded sound " .. tostring(soundId))
@@ -482,6 +489,7 @@ function CAIAudioManager:QueueSound(soundId, delaySeconds, options)
 end
 
 function CAIAudioManager:QueueSoundAtPlot(soundId, sourcePlotOrId, delaySeconds, options)
+    if ExposedMembers.CAI_Active == false then return false end
     local record = self:GetSound(soundId)
     if record == nil then
         LogWarn("Audio manager QueueSoundAtPlot: unknown or unloaded sound " .. tostring(soundId))

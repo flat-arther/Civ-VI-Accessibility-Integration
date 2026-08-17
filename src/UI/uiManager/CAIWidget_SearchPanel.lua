@@ -187,6 +187,7 @@ function SearchPanelWidget:Open(container)
     end
 
     root:AddChild(self)
+    self._suspendToken = mgr:RegisterSuspendCloser(function() self:Close() end)
     self:SetResults({})
     mgr:SetFocus(self._editBox)
     self:Emit("search_open", container)
@@ -194,6 +195,8 @@ end
 
 function SearchPanelWidget:Close(skipFocusRestore)
     local mgr = self.Manager
+    if mgr then mgr:UnregisterSuspendCloser(self._suspendToken) end
+    self._suspendToken = nil
     local restoreTarget = self._previousFocus
     DestroySearchContext()
     self._contextReady = false
@@ -463,19 +466,22 @@ function SearchPanelWidget:OnCharInput(char)
 end
 
 ---@param input InputStruct
+---@param globalOnly? boolean
 ---@return boolean
-function SearchPanelWidget:OnHandleInput(input)
-    local mgr = self.Manager
-    local focused = mgr:GetFocusedWidget()
-    if focused ~= self._editBox then
-        local key = input:GetKey()
-        local msg = input:GetMessageType()
-        if key == Keys.VK_BACK and msg == KeyEvents.KeyDown then
-            local handled = self._editBox:OnHandleInput(input)
-            if handled then return true end
+function SearchPanelWidget:OnHandleInput(input, globalOnly)
+    if not globalOnly then
+        local mgr = self.Manager
+        local focused = mgr:GetFocusedWidget()
+        if focused ~= self._editBox then
+            local key = input:GetKey()
+            local msg = input:GetMessageType()
+            if key == Keys.VK_BACK and msg == KeyEvents.KeyDown then
+                local handled = self._editBox:OnHandleInput(input)
+                if handled then return true end
+            end
         end
     end
-    return UIWidget.OnHandleInput(self, input)
+    return UIWidget.OnHandleInput(self, input, globalOnly)
 end
 
 --#endregion

@@ -1756,6 +1756,11 @@ LuaEvents.NotificationPanel_OpenCityStatesSendEnvoys.Add(CAI_OnOpenSendEnvoys)
 local baseOnRaiseMinorCivicsPanel = OnRaiseMinorCivicsPanel
 LuaEvents.CityBannerManager_RaiseMinorCivPanel.Remove(baseOnRaiseMinorCivicsPanel)
 local function CAI_OnRaiseMinorCivicsPanel(playerID)
+    -- Suspended: let the vanilla banner click open its own detailed view.
+    if ExposedMembers.CAI_Active == false then
+        baseOnRaiseMinorCivicsPanel(playerID)
+        return
+    end
     baseOnOpenCityStates()
     PushPanel(playerID)
 end

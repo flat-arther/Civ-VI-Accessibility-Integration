@@ -115,7 +115,8 @@ function PopulateTreeItemDetails(treeItem, entry)
 
     if #mods > 0 then
         local modErrors = Modding.CheckRequirements(mods, g_GameType)
-        if not Challenges.IsNullChallengeUuid(entry.GameChallengeUuid) then
+        -- Challenges is absent on the older Epic build; gate on the save's challenge id first.
+        if entry.GameChallengeUuid and Challenges ~= nil and not Challenges.IsNullChallengeUuid(entry.GameChallengeUuid) then
             for _, v in ipairs(mods) do
                 if modErrors and modErrors[v.Id] == "NotAllowed" then
                     modErrors[v.Id] = nil

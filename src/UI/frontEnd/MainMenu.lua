@@ -10,8 +10,15 @@ include("PopupDialog");
 -- ===========================================================================
 local m_mainOptionIM :	table = InstanceManager:new( "MenuOption", "Top", Controls.MainMenuOptionStack );
 local m_subOptionIM :	table = InstanceManager:new( "MenuOption", "Top", Controls.SubMenuOptionStack );
-local m_carouselEntryIM : table = InstanceManager:new( "CarouselEntry", "Top", Controls.ChallengeStack );
-local m_carouselIndicatorIM : table = InstanceManager:new( "CarouselEntryIndicator", "Top", Controls.ChallengeIndicatorStack );
+-- Compatibility: Epic's MainMenu.xml omits the online Challenge carousel entirely
+-- (the Challenge* controls and the CarouselEntry/CarouselEntryIndicator instance
+-- templates); Steam's ships it. Because the mod replaces only the Lua context and not
+-- the XML, on Epic this Steam-based carousel code would index nil Challenge* controls
+-- (or a missing InstanceManager template) and abort the whole MainMenu load. Detect the
+-- carousel once from a representative control and no-op all carousel logic when absent.
+local m_hasChallengeCarousel : boolean = Controls.ChallengeStack ~= nil;
+local m_carouselEntryIM : table = m_hasChallengeCarousel and InstanceManager:new( "CarouselEntry", "Top", Controls.ChallengeStack ) or nil;
+local m_carouselIndicatorIM : table = m_hasChallengeCarousel and InstanceManager:new( "CarouselEntryIndicator", "Top", Controls.ChallengeIndicatorStack ) or nil;
 local m_currentCarouselEntry = 1;
 local m_carouselDisplayDurationMS = 8000;
 local m_carouselCurrentSlideDurationMS = 0;
@@ -42,7 +49,20 @@ local m_isQuitting :boolean = false;	-- Is the application shutting down (after 
 g_LogoTexture = nil;	-- Custom Logo texture override.
 g_LogoMovie = nil;		-- Custom Logo movie override.
 
-g_PopupDialog = PopupDialog:new("MainMenuPopupDialog");
+-- Compatibility: the Epic Games Store ships an older MainMenu.xml that includes
+-- the PopupDialog instance template but never instantiates it. Steam's MainMenu.xml
+-- ends with <MakeInstance Name="PopupDialog" />; Epic's does not. Without that,
+-- this context's Controls has no PopupRoot, so PopupDialog:new -> SetSize -> IsOpen
+-- indexes a nil value and aborts the entire MainMenu load. When the vanilla controls
+-- are absent, build the instance from the included template ourselves (the Lua
+-- equivalent of <MakeInstance>) and hand it to the dialog explicitly.
+if Controls.PopupRoot then
+	g_PopupDialog = PopupDialog:new("MainMenuPopupDialog");
+else
+	local kPopupControls:table = {};
+	ContextPtr:BuildInstance("PopupDialog", kPopupControls);
+	g_PopupDialog = PopupDialog:new("MainMenuPopupDialog", kPopupControls);
+end
 
 -- ===========================================================================
 --	Constants
@@ -155,9 +175,9 @@ function OnStateTransition( who:string )
 
 		if (_StartChallengeEntry == nil) then
 			if (_ClickedPlayNow) then
-				Events.SetGameEntryMethod("Play Now");
+				if Events.SetGameEntryMethod then Events.SetGameEntryMethod("Play Now"); end	-- absent on the older Epic build
 			else
-				Events.SetGameEntryMethod("Unknown");
+				if Events.SetGameEntryMethod then Events.SetGameEntryMethod("Unknown"); end	-- absent on the older Epic build
 			end
 			-- Many game setup values are driven by Lua-implemented parameter logic.
 			BuildHeadlessGameSetup();
@@ -170,7 +190,7 @@ function OnStateTransition( who:string )
 
 			Network.HostGame(ServerType.SERVER_TYPE_NONE);
 		else
-			Events.SetGameEntryMethod("GoTM");
+			if Events.SetGameEntryMethod then Events.SetGameEntryMethod("GoTM"); end	-- absent on the older Epic build
 
 			Challenges.LoadCarouselEntry(_StartChallengeEntry);
 			_StartChallengeEntry = nil;
@@ -1338,6 +1358,7 @@ function BuildAllMenus()
 end
 
 function SetCarouselEnabled(enabled)
+	if not m_hasChallengeCarousel then return end
 	Controls.ChallengeLButton:SetEnabled(enabled);
 	Controls.ChallengeRButton:SetEnabled(enabled);
 	local children = Controls.ChallengeStack:GetChildren();
@@ -1349,6 +1370,7 @@ function SetCarouselEnabled(enabled)
 end
 
 function CarouselSetSelectedEntry(index, scrollType)
+	if not m_hasChallengeCarousel then return end
 	m_currentCarouselEntry = index;
 
 	Challenges.PublishCarouselEntryImpression(m_currentCarouselEntry - 1, scrollType);
@@ -1367,6 +1389,7 @@ function CarouselSetSelectedEntry(index, scrollType)
 end
 
 function CarouselGetOffsetValue(index)
+	if not m_hasChallengeCarousel then return 0 end
 	local svWidth = Controls.ChallengeStack:GetSizeX();
 
 	local dummyInstance = Controls.ChallengeStack:GetChildren()[1];
@@ -1378,6 +1401,7 @@ function CarouselGetOffsetValue(index)
 end
 
 function UpdateChallengeCarousel()
+	if not m_hasChallengeCarousel then return end
 	if not FiraxisLive.IsCOPPALocked() then
 		local entryCount = Challenges.GetCarouselEntryCount();
 		m_carouselDisplayDurationMS = Challenges.GetCarouselDisplayDurationMS();
@@ -1454,6 +1478,7 @@ function UpdateChallengeCarousel()
 end
 
 function CarouselScrollToEntry(index, scrollType)
+	if not m_hasChallengeCarousel then return end
 	if index == m_currentCarouselEntry then return end;
 
 	m_carouselAnimation.active = true;
@@ -1468,6 +1493,7 @@ function CarouselScrollToEntry(index, scrollType)
 end
 
 function CarouselFinishedScrollingToEntry(index, scrollType)
+	if not m_hasChallengeCarousel then return end
 	local entryCount = Challenges.GetCarouselEntryCount();
 	if index == (entryCount + 1) then
 		index = 1;
@@ -1513,6 +1539,7 @@ function OnChallengePackageUpdated()
 end
 
 function ShowNewChallengeAvailablePopup()
+	if not m_hasChallengeCarousel then return end
 	if (Challenges.ShouldShowNewPackageAvailablePopup()) then
 		local popupText = Challenges.GetLocalizedNewChallengePackagePopupText();
 		g_PopupDialog:ShowOkDialog(popupText, function() end); 
@@ -1710,6 +1737,7 @@ end
 
 -- ===========================================================================
 function OnUpdate( fDeltaTime )
+	if m_hasChallengeCarousel then
 	if not FiraxisLive.IsCOPPALocked() then
 		if (Challenges.ShouldShowRestartToGetNewPackagePopup(g_PopupDialog:IsOpen())) then
 			g_PopupDialog:ShowOkDialog(Locale.Lookup("LOC_NEW_PACKAGE_ON_SERVER"));
@@ -1746,6 +1774,7 @@ function OnUpdate( fDeltaTime )
 
 		Controls.ChallengeContainer:SetShow(false);
 	end
+	end
 
 	if mgr ~= nil then
 		mgr:OnUpdate()
@@ -1779,7 +1808,7 @@ function Initialize()
 		Controls.MotDLogo:RegisterCallback( Mouse.eLClick, OnCycleMotD );
 	end
 
-	if not FiraxisLive.IsCOPPALocked() then
+	if m_hasChallengeCarousel and not FiraxisLive.IsCOPPALocked() then
 		Controls.ChallengeLButton:RegisterCallback( Mouse.eLClick, OnCarouselButtonLClicked );
 		Controls.ChallengeRButton:RegisterCallback( Mouse.eLClick, OnCarouselButtonRClicked );
 	end

@@ -2596,6 +2596,9 @@
     <Replace Tag="LOC_CAI_UNIT_FLAG_NAME_PATTERN" Language="zh_Hans_CN">
       <Text>{1_Owner}{2_Name}{3_FormationSuffix}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_UNIT_NUMBER_SUFFIX" Language="zh_Hans_CN">
+      <Text>{1_Name} {2_Number}</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_UNIT_FLAG_HEALTH" Language="zh_Hans_CN">
       <Text>生命值{1_CurrentHp}/{2_MaxHp}</Text>
     </Replace>
@@ -2995,6 +2998,18 @@
     </Replace>
     <Replace Tag="LOC_CAI_UNIT_NO_UNITS" Language="zh_Hans_CN">
       <Text>没有可用单位</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_NO_READY_UNITS" Language="zh_Hans_CN">
+      <Text>没有待命单位</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_NO_MORE_UNITS" Language="zh_Hans_CN">
+      <Text>没有更多单位，已选择{1_Name}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_NO_CITIES" Language="zh_Hans_CN">
+      <Text>没有城市</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_NO_MORE_CITIES" Language="zh_Hans_CN">
+      <Text>没有更多城市，已选择{1_Name}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_UNIT_RELATIVE_COORDS" Language="zh_Hans_CN">
       <Text>地点{1_Text}</Text>
@@ -5689,6 +5704,15 @@
     </Replace>
 
     <!-- 按键绑定说明 -->
+    <Replace Tag="LOC_CAI_KB_TOGGLE_MOD" Language="zh_Hans_CN">
+      <Text>暂停或恢复无障碍模组</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOD_SUSPENDED" Language="zh_Hans_CN">
+      <Text>无障碍模组已暂停</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOD_RESUMED" Language="zh_Hans_CN">
+      <Text>无障碍模组已恢复</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_KB_OPEN_SETTINGS" Language="zh_Hans_CN">
       <Text>打开无障碍模组设置</Text>
     </Replace>
@@ -6359,6 +6383,33 @@
     </Replace>
     <Replace Tag="LOC_CAI_SETTING_SECTION_MESSAGEBUFFER" Language="zh_Hans_CN">
       <Text>消息缓冲区</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_SECTION_GAMEPLAY" Language="zh_Hans_CN">
+      <Text>游戏</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_WRAP_UNIT_CYCLING" Language="zh_Hans_CN">
+      <Text>循环切换单位</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_WRAP_UNIT_CYCLING_TOOLTIP" Language="zh_Hans_CN">
+      <Text>开启时，越过最后一个单位会回到第一个，在第一个之前则跳到最后一个。关闭时，切换会停在列表两端，并提示没有更多单位。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_UNIT_CYCLING_FOLLOW_SORT" Language="zh_Hans_CN">
+      <Text>按单位面板的排序切换单位</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_UNIT_CYCLING_FOLLOW_SORT_TOOLTIP" Language="zh_Hans_CN">
+      <Text>开启时，单位切换键将遵循你在单位列表中选择的排序。关闭时，始终按距离切换，由近及远。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_WRAP_CITY_CYCLING" Language="zh_Hans_CN">
+      <Text>循环切换城市</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_WRAP_CITY_CYCLING_TOOLTIP" Language="zh_Hans_CN">
+      <Text>开启时，越过最后一个城市会回到第一个，在第一个之前则跳到最后一个。关闭时，切换会停在列表两端，并提示没有更多城市。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CITY_CYCLING_FOLLOW_SORT" Language="zh_Hans_CN">
+      <Text>按城市状态报告的排序切换城市</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CITY_CYCLING_FOLLOW_SORT_TOOLTIP" Language="zh_Hans_CN">
+      <Text>开启时，城市切换键将遵循你在城市状态报告中选择的排序。关闭时，按默认顺序切换。</Text>
     </Replace>
 
     <Replace Tag="LOC_CAI_SETTING_SPEAK_TOOLTIP" Language="zh_Hans_CN">

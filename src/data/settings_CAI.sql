@@ -180,7 +180,19 @@ VALUES
      'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_GOSSIP', 'LOC_CAI_SETTING_SPEAK_MESSAGE_BUFFER_GOSSIP_TOOLTIP', NULL),
 
     ('MessageBufferLimit', 'MessageBuffer', 80, 'number', 'editbox', '5000',
-     'LOC_CAI_SETTING_MESSAGE_BUFFER_LIMIT', 'LOC_CAI_SETTING_MESSAGE_BUFFER_LIMIT_TOOLTIP', 'NumbersOnly');
+     'LOC_CAI_SETTING_MESSAGE_BUFFER_LIMIT', 'LOC_CAI_SETTING_MESSAGE_BUFFER_LIMIT_TOOLTIP', 'NumbersOnly'),
+
+    ('WrapUnitCycling', 'Gameplay', 10, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_WRAP_UNIT_CYCLING', 'LOC_CAI_SETTING_WRAP_UNIT_CYCLING_TOOLTIP', NULL),
+
+    ('UnitCyclingFollowPanelSort', 'Gameplay', 20, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_UNIT_CYCLING_FOLLOW_SORT', 'LOC_CAI_SETTING_UNIT_CYCLING_FOLLOW_SORT_TOOLTIP', NULL),
+
+    ('WrapCityCycling', 'Gameplay', 30, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_WRAP_CITY_CYCLING', 'LOC_CAI_SETTING_WRAP_CITY_CYCLING_TOOLTIP', NULL),
+
+    ('CityCyclingFollowReportSort', 'Gameplay', 40, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_CITY_CYCLING_FOLLOW_SORT', 'LOC_CAI_SETTING_CITY_CYCLING_FOLLOW_SORT_TOOLTIP', NULL);
 
 INSERT OR REPLACE INTO CAI_Settings
     (SettingId, Section, SortIndex, ValueType, UIType, DefaultValue, Label, Tooltip,

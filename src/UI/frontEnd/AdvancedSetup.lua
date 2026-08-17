@@ -1444,7 +1444,7 @@ function OnStartButton()
 		else
 			UI.SetWorldRenderView( WorldRenderView.VIEW_2D );
 			UI.PlaySound("Set_View_2D");
-			Events.SetGameEntryMethod("Create A Game - WorldBuilder");
+			if Events.SetGameEntryMethod then Events.SetGameEntryMethod("Create A Game - WorldBuilder"); end	-- absent on the older Epic build
 			Network.HostGame(ServerType.SERVER_TYPE_NONE);
 		end
     else
@@ -1476,7 +1476,7 @@ end
 
 -- ===========================================================================
 function HostGame()
-	Events.SetGameEntryMethod("Create a Game");
+	if Events.SetGameEntryMethod then Events.SetGameEntryMethod("Create a Game"); end	-- absent on the older Epic build
 	-- Start a normal game
 	UI.PlaySound("Set_View_3D");
 	Network.HostGame(ServerType.SERVER_TYPE_NONE);

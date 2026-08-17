@@ -484,7 +484,7 @@ local function RebuildFileListAccessibility()
                 mods = entry.RequiredMods or {}
             end
             local modErrors = Modding.CheckRequirements(mods, g_GameType)
-            if entry.GameChallengeUuid and not Challenges.IsNullChallengeUuid(entry.GameChallengeUuid) then
+            if entry.GameChallengeUuid and Challenges ~= nil and not Challenges.IsNullChallengeUuid(entry.GameChallengeUuid) then
                 for _, v in ipairs(mods) do
                     if modErrors and modErrors[v.Id] == "NotAllowed" then
                         modErrors[v.Id] = nil

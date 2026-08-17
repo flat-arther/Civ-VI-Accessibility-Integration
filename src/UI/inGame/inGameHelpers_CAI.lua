@@ -3,12 +3,23 @@ include("hexCoordUtils_CAI")
 include("MapTacks")
 -- Shared function for overriding the base game's GetCursorPlot functions
 local CAICursor = ExposedMembers.CAICursor
+-- Vanilla implementations captured before hijacking, so queries fall back to
+-- the real cursor position while the mod is suspended.
+local originalGetCursorPlotID
+local originalGetCursorPlotCoord
+
 local function GetCAICursorPlotId()
+    if ExposedMembers.CAI_Active == false and originalGetCursorPlotID then
+        return originalGetCursorPlotID()
+    end
     if not CAICursor then return -1 end
     return CAICursor:GetPlotId()
 end
 
 local function GetCAICursorPlotCoord()
+    if ExposedMembers.CAI_Active == false and originalGetCursorPlotCoord then
+        return originalGetCursorPlotCoord()
+    end
     local plotId = GetCAICursorPlotId()
     local plot = Map.GetPlotByIndex(plotId)
     if not plot then return -1, -1 end
@@ -16,6 +27,8 @@ local function GetCAICursorPlotCoord()
 end
 
 function InstallUIOverrides()
+    originalGetCursorPlotID = UI.GetCursorPlotID
+    originalGetCursorPlotCoord = UI.GetCursorPlotCoord
     UI = HijackTable(UI, {
         GetCursorPlotCoord = GetCAICursorPlotCoord,
         GetCursorPlotID = GetCAICursorPlotId,
@@ -620,6 +633,62 @@ function FormatOwnedName(ownerPrefix, name, suffix)
     return normalized
 end
 
+-- Unit numbering (e.g. "Warrior 2"). All numbering lives in the shared
+-- CAIUnitNumbers registry (CAIUnitNumbers.lua); here we only read it for display.
+-- A number is shown only when 2+ units of that owner and type are known, so a
+-- lone unit reads just its name.
+
+---Returns the slot number to display for a unit, or nil when none should be
+---shown (no number yet, or the unit is currently the only known one of its type).
+---@param unit Unit
+---@return number|nil
+local function GetUnitDisplayNumber(unit)
+    local registry = ExposedMembers.CAIUnitNumbers
+    if registry == nil then
+        return nil
+    end
+
+    local ownerID = unit:GetOwner()
+    local number = registry:Get(ownerID, unit:GetID())
+    if number == nil then
+        return nil
+    end
+
+    if registry:CountKnownOfType(ownerID, unit:GetUnitType(), unit:GetMilitaryFormation()) < 2 then
+        return nil
+    end
+
+    return number
+end
+
+---Appends the unit's slot number to an already-localized unit name when
+---appropriate: the owner has 2+ living units of that type and the unit has no
+---custom (veteran) name. Route any spoken unit-name string through this so
+---numbering is consistent everywhere (unit panel, units list, report breakdowns,
+---flags, etc.). Returns the name unchanged when no number should be shown.
+---@param unit Unit|nil
+---@param localizedName string|nil
+---@return string|nil
+function GetNumberedUnitName(unit, localizedName)
+    if unit == nil or localizedName == nil or localizedName == "" then
+        return localizedName
+    end
+
+    local unitInfo = GameInfo.Units[unit:GetUnitType()]
+    local rawName = unit:GetName()
+    local hasCustomName = unitInfo ~= nil and rawName ~= nil and rawName ~= "" and rawName ~= unitInfo.Name
+    if hasCustomName then
+        return localizedName
+    end
+
+    local number = GetUnitDisplayNumber(unit)
+    if number == nil then
+        return localizedName
+    end
+
+    return Locale.Lookup("LOC_CAI_UNIT_NUMBER_SUFFIX", localizedName, number)
+end
+
 ---Formats a unit display name as owner adjective + localized unit name + optional formation suffix.
 ---Uses a CAI localization pattern so translators can reorder the pieces by language.
 ---@param unit Unit
@@ -640,7 +709,9 @@ function FormatOwnedUnitDisplayName(unit, formationSuffix)
         end
     end
 
-    return FormatOwnedName(owner, name, formationSuffix or GetUnitFormationSuffix(unit))
+    -- Number after the formation suffix, e.g. "Field Cannon Corps 1".
+    local formatted = FormatOwnedName(owner, name, formationSuffix or GetUnitFormationSuffix(unit))
+    return GetNumberedUnitName(unit, formatted)
 end
 
 ---@param playerID number|nil

@@ -5,11 +5,44 @@ include("textProcessing")
 include("CAISettings")
 include("CAI_logging")
 
+-- ===========================================================================
+-- Mod suspend/resume (hotseat)
+-- The authoritative live flag lives on ExposedMembers so every Lua context
+-- reads one shared value; ExposedMembers.CAI_Active == false means suspended.
+-- Persistence is the raw CAI config store (the same backend CAISettings uses).
+-- ===========================================================================
+local CAI_SUSPEND_SECTION = "CAI"
+local CAI_SUSPEND_KEY = "Suspended"
+
+---Returns whether the mod is currently active (not suspended). Defaults to
+---active when the flag has never been set.
+---@return boolean
+function IsCAIActive()
+    return ExposedMembers.CAI_Active ~= false
+end
+
+---Reads the persisted suspend flag from the CAI config store.
+---@return boolean -- true when persisted as suspended
+function LoadCAISuspendedFlag()
+    if not (CAI and CAI.GetConfigValue) then return false end
+    local raw = tostring(CAI.GetConfigValue(CAI_SUSPEND_SECTION, CAI_SUSPEND_KEY, "false")):lower()
+    return raw == "true" or raw == "1" or raw == "yes" or raw == "on"
+end
+
+---Persists the suspend flag to the CAI config store.
+---@param suspended boolean
+function SaveCAISuspendedFlag(suspended)
+    if not (CAI and CAI.SetConfigValue) then return end
+    CAI.SetConfigValue(CAI_SUSPEND_SECTION, CAI_SUSPEND_KEY, suspended and "true" or "false")
+end
+
 ---Utility wrapper for 'CAI.output'
 ---@param text string -- the text to speak
 ---@param interrupt? boolean -- whether to interrupt any currently speaking text. False by default
 ---@param processTokens? boolean -- run ProcessText on text before speaking. True by default
-function Speak(text, interrupt, processTokens)
+---@param force? boolean -- speak even while the mod is suspended (toggle confirmations only)
+function Speak(text, interrupt, processTokens, force)
+    if not force and ExposedMembers.CAI_Active == false then return end
     if CAI and CAI.Output then
         local out = tostring(text)
         if processTokens ~= false then out = ProcessText(out) end

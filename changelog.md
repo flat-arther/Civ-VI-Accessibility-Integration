@@ -1,5 +1,23 @@
 ## [Unreleased]
 
+### Added
+
+- You can now suspend and resume the accessibility mod during play with `Ctrl plus Shift plus F12`, which is useful for passing the keyboard between players in hotseat games. While suspended, speech, accessibility navigation, and the map cursor go quiet and the game behaves as it does without the mod; pressing the keys again resumes it. The mod tells you each time you suspend or resume, and remembers the setting between sessions.
+- Added a full Polish translation. All accessibility text, screen tutorials, spoken key names, and command descriptions now appear in Polish when the game is set to Polish.
+- When you have more than one unit of the same type, each now reads with a number (for example "Warrior 1", "Warrior 2") so they can be told apart. Numbers are assigned when a unit is first seen and stay with that unit; if a unit is lost, its number becomes available for the next unit of that type. A unit that is the only one of its type reads with no number, and units you have given a custom name keep that name. This applies to your own units and to other players' units.
+- The city status report open action can be triggered with `Ctrl plus Backslash`. Requires key bindings reset
+
+### Changed
+
+- Cycling units in the world now follows the same order as the units panel ( defaults to ctrl u). `Comma` and `Period` still step through ready units and `Shift plus Comma` / `Shift plus Period` through all units, but they now move in the panel's sort order instead of the game's default order. You can disable this under the gameplay section in mod settings.
+- The units panel now sorts by distance (nearest first) by default, and remembers your chosen sort after you close it.
+- Cycling cities in the world (`left bracket` and `right bracket`) follows the city status sort in the reports screen. 
+- The city status report now opens in its natural order (founding) by default and remembers your chosen sort after you close it.
+
+### Fixed
+
+- The mod now works on the Epic Games Store version of Civilization VI. The installer places the mod in the correct folder, and the main menu, loading screen, game setup screens (single-player, scenario, tutorial, and host-a-multiplayer-game), lobby, and hall of fame screens should no longer fail to load. If you are an epic user and you encounter an issue with one of these screens, please report it.
+
 ## [1.1.1] - 2026-08-13
 
 ### Fixed

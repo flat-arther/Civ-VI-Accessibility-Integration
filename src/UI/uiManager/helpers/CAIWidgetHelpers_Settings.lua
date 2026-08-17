@@ -334,8 +334,10 @@ function S.OpenSettings(mgr)
     })
     panel._settingsPreviousFocus = previousFocus
     panel:On("focus_enter", function() Input.SetActiveContext(InputContext.Shell) end)
+    local suspendToken = mgr:RegisterSuspendCloser(function() ClosePanel(mgr, panel) end)
     panel:On("destroy", function()
         g_settingsOpen = false
+        mgr:UnregisterSuspendCloser(suspendToken)
         LogMessage("Settings helper settings panel destroyed")
     end)
     panel:AddChild(tree)

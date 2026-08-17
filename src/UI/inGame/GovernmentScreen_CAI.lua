@@ -58,6 +58,10 @@ local m_state               = {
     isInternalVanillaRefresh = false,
     isMirroringTab = false,
     activeTab = 1,
+    -- True when the player parked the vanilla screen on the My Government tab
+    -- while the mod was suspended. CAI has no My-Government tab, so on resume
+    -- that state collapses to the Governments tab.
+    onVanillaMyGovernment = false,
 }
 
 local m_ui                  = {
@@ -1181,6 +1185,7 @@ end)
 SwitchTabToPolicies = WrapFunc(SwitchTabToPolicies, function(orig)
     orig()
     m_state.activeTab = 2
+    m_state.onVanillaMyGovernment = false
     if m_ui.tabs and not m_state.isMirroringTab then
         m_state.isMirroringTab = true
         m_ui.tabs:SetActivePage(2, true)
@@ -1191,6 +1196,7 @@ end)
 SwitchTabToGovernments = WrapFunc(SwitchTabToGovernments, function(orig)
     orig()
     m_state.activeTab = 1
+    m_state.onVanillaMyGovernment = false
     if m_ui.tabs and not m_state.isMirroringTab then
         m_state.isMirroringTab = true
         m_ui.tabs:SetActivePage(1, true)
@@ -1201,6 +1207,12 @@ end)
 if SwitchTabToMyGovernment then
     SwitchTabToMyGovernment = WrapFunc(SwitchTabToMyGovernment, function(orig)
         orig()
+        -- Suspended: let vanilla stay on My Government; just remember the drift
+        -- so resume can collapse it into the Governments tab.
+        if ExposedMembers.CAI_Active == false then
+            m_state.onVanillaMyGovernment = true
+            return
+        end
         if SwitchTabToGovernments then SwitchTabToGovernments() end
     end)
 end
@@ -1234,6 +1246,24 @@ RefreshAllData = WrapFunc(RefreshAllData, function(orig)
         RefreshPoliciesTree()
         MirrorActiveTabToCAI()
     end
+end)
+
+-- On resume, replay the on-open normalization against the tab vanilla is
+-- currently showing: a My-Government drift collapses into the Governments tab,
+-- otherwise mirror the live tab, then refresh CAI widgets from live data.
+LuaEvents.CAIStatusChanged.Add(function(active)
+    if not active then return end
+    if ContextPtr:IsHidden() then return end
+    if not m_ui.panel then BuildPanel() end
+    SyncSlotPolicyTypesFromLive()
+    if m_state.onVanillaMyGovernment and SwitchTabToGovernments then
+        SwitchTabToGovernments()
+    else
+        MirrorActiveTabToCAI()
+    end
+    m_state.onVanillaMyGovernment = false
+    RefreshGovernmentsList()
+    RefreshPoliciesTree()
 end)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)

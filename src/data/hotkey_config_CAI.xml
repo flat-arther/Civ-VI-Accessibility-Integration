@@ -375,6 +375,7 @@
 
     <!-- CAI_UI: Open/toggle screens -->
     <Row ActionId="UI_TopPanelOpenReports" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F2" />
+    <Row ActionId="UI_TopPanelOpenReportsCityStatus" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_BACKSLASH" />
     <Row ActionId="UI_WorldTrackerOpenResearchChooser" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_R" />
     <Row ActionId="UI_WorldTrackerOpenCivicsChooser" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_C" />
     <Row ActionId="UI_NotificationPanelOpenList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_N" />

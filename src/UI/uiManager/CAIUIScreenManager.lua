@@ -85,6 +85,8 @@ function UIScreenManager:New()
     mgr.FocusRestoreKeyOverride = nil
     mgr.EnterKeyIsDown = false
     mgr.EnterKeyDownOwner = nil
+    mgr._suspendClosers = {}
+    mgr._suspendCloserSeq = 0
     return mgr
 end
 
@@ -339,6 +341,68 @@ end
 function UIScreenManager:GetTop() return self.Stack[#self.Stack] end
 
 function UIScreenManager:IsEmpty() return #self.Stack == 0 end
+
+--#region Mod suspend/resume
+
+---@return boolean -- true when the accessibility mod is active (not suspended)
+function UIScreenManager:IsCAIActive()
+    return ExposedMembers.CAI_Active ~= false
+end
+
+---Set the active/suspended state, persist it, announce the change (the
+---confirmation bypasses the speech guard), then broadcast CAIStatusChanged so
+---every context can reconcile its own overrides. No-ops when already in state.
+---@param active boolean
+function UIScreenManager:SetCAIActive(active)
+    active = active and true or false
+    if self:IsCAIActive() == active then return end
+
+    ExposedMembers.CAI_Active = active
+    SaveCAISuspendedFlag(not active)
+
+    -- Toggle confirmation is the one line that must speak while suspended.
+    Speak(Locale.Lookup(active and "LOC_CAI_MOD_RESUMED" or "LOC_CAI_MOD_SUSPENDED"), true, nil, true)
+
+    -- Tear down CAI-only overlays before broadcasting, so other contexts'
+    -- listeners reconcile against an already-clean stack.
+    if not active then self:CloseSuspendModals() end
+
+    LogMessage("CAI mod " .. (active and "resumed" or "suspended"))
+    LuaEvents.CAIStatusChanged(active)
+end
+
+function UIScreenManager:ToggleCAIActive()
+    self:SetCAIActive(not self:IsCAIActive())
+end
+
+---Register a close callback for a CAI-only overlay that maps to no vanilla UI
+---(settings, pedia lookup, input help, search, action menus). On suspend the
+---manager invokes every registered closer so the game is left vanilla-clean.
+---@param closer fun()
+---@return integer token -- pass to UnregisterSuspendCloser
+function UIScreenManager:RegisterSuspendCloser(closer)
+    self._suspendCloserSeq = (self._suspendCloserSeq or 0) + 1
+    local token = self._suspendCloserSeq
+    self._suspendClosers[token] = closer
+    return token
+end
+
+---@param token integer|nil
+function UIScreenManager:UnregisterSuspendCloser(token)
+    if token ~= nil then self._suspendClosers[token] = nil end
+end
+
+---Invoke and clear every registered suspend closer. Snapshot first so a
+---closer's own UnregisterSuspendCloser call during teardown is harmless.
+function UIScreenManager:CloseSuspendModals()
+    local closers = self._suspendClosers or {}
+    self._suspendClosers = {}
+    for _, closer in pairs(closers) do
+        closer()
+    end
+end
+
+--#endregion
 
 function UIScreenManager:Clear()
     LogMessage("UI manager Clear start, stackSize=" .. tostring(#self.Stack))
@@ -608,6 +672,20 @@ end
 function UIScreenManager:HandleInput(input)
     local msg = input:GetMessageType()
     local key = input:GetKey()
+
+    -- Suspended: the manager is inert. Only global bindings (the mod-toggle)
+    -- are evaluated; everything else returns false so vanilla input proceeds.
+    if not self:IsCAIActive() then
+        local node = self:GetFocusedWidget()
+        while node do
+            if not node:IsHidden() and node.OnHandleInput then
+                if node:OnHandleInput(input, true) then return true end
+            end
+            node = node.Parent
+        end
+        return false
+    end
+
     if msg == KeyEvents.KeyUp then
         if key == Keys.VK_ESCAPE and self:ClearSearchBuffer(true) then
             return true
@@ -623,6 +701,7 @@ function UIScreenManager:HandleInput(input)
         end
     end
     if self.AppRegainedFocusTime > 0 and (Automation.GetTime() - self.AppRegainedFocusTime) <= 0.25 then return true end
+    if CAI and CAI.IsImeComposing() then return true end
     local node = self:GetFocusedWidget()
 
     -- Civ VI can deliver one physical key event to multiple always-active UI
@@ -663,6 +742,8 @@ end
 ---@param char string
 ---@return boolean
 function UIScreenManager:HandleCharInput(char)
+    -- Suspended: char input is a no-op so vanilla text entry proceeds.
+    if not self:IsCAIActive() then return false end
     local node = self:GetFocusedWidget()
     while node do
         if not node:IsHidden() and node.OnCharInput then
@@ -1066,6 +1147,9 @@ function UIScreenManager:ShutdownAudioManager()
 end
 
 function UIScreenManager:Init()
+    -- Seed the shared active flag from the persisted suspend setting so state
+    -- survives restarts. Reseed every Init to stay consistent with the store.
+    ExposedMembers.CAI_Active = not LoadCAISuspendedFlag()
     ExposedMembers.CAI_UIManager = self:New()
     local mgr = ExposedMembers.CAI_UIManager
     mgr:InitializeAudioManager()

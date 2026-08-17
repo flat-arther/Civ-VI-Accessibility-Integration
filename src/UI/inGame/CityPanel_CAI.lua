@@ -714,8 +714,12 @@ end
 
 local CITY_ACTION_LIST_ID = "CAICityPanel_ActionList"
 
+local g_cityActionSuspendToken = nil
+
 function CloseCityActionList()
     if CityActionList ~= nil then
+        mgr:UnregisterSuspendCloser(g_cityActionSuspendToken)
+        g_cityActionSuspendToken = nil
         mgr:RemoveFromStack(CITY_ACTION_LIST_ID)
         CityActionList = nil
     end
@@ -1155,6 +1159,7 @@ function OpenCityActionList()
     CityActionList = BuildCityActionList()
     if CityActionList ~= nil and CityActionList.Children ~= nil and #CityActionList.Children > 0 then
         mgr:Push(CityActionList, { priority = PopupPriority.Low })
+        g_cityActionSuspendToken = mgr:RegisterSuspendCloser(CloseCityActionList)
     else
         CityActionList = nil
     end

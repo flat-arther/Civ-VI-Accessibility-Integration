@@ -29,6 +29,10 @@ local UNIT_SIMPLE_PROMOTION_LIST_ID = "CAIUnitPanelSimplePromotionList"
 local UNIT_NAME_PANEL_ID = "CAIUnitPanelNamePanel"
 local UNIT_NAME_EDIT_ID = "CAIUnitPanelNameEdit"
 
+local prevUnitAction = Input.GetActionId("PrevUnitSelection")
+local nextUnitAction = Input.GetActionId("NextUnitSelection")
+local prevReadyUnitAction = Input.GetActionId("PrevReadyUnitSelection")
+local nextReadyUnitAction = Input.GetActionId("NextReadyUnitSelection")
 local openUnitListAction = Input.GetActionId("UI_UnitPanelOpenUnitList")
 local unitViewAbilitiesAction = Input.GetActionId("UnitViewAbilities")
 local selectionActionsAction = Input.GetActionId("SelectionActions")
@@ -43,6 +47,20 @@ local deleteActionHash = GameInfo.UnitCommands["UNITCOMMAND_DELETE"] ~= nil and
     GameInfo.UnitCommands["UNITCOMMAND_DELETE"].Hash or
     UnitCommandTypes.DELETE
 
+local UnitCategories = {
+    {
+        Name = "LOC_CAI_UNIT_CAT_ALL",
+        Prev = UI.SelectPrevUnit,
+        Next = UI.SelectNextUnit
+    },
+    {
+        Name = "LOC_CAI_UNIT_CAT_READY",
+        Prev = UI.SelectPrevReadyUnit,
+        Next = UI.SelectNextReadyUnit
+    }
+}
+
+local activeCategoryIdx = 1
 local UnitActionList = nil
 local UnitList = nil
 local SimplePromotionList = nil
@@ -505,8 +523,7 @@ local function GetUnitListName(unit)
         end
     end
 
-    local formatted = FormatOwnedName(nil, localizedName, GetUnitFormationSuffix(unit))
-    return GetNumberedUnitName(unit, formatted)
+    return FormatOwnedName(nil, localizedName, GetUnitFormationSuffix(unit))
 end
 
 local function GetUnitTypeDetail(data, unit)
@@ -2644,12 +2661,8 @@ local function OpenUnitNamePanel()
     mgr:Push(UnitNamePanel, { priority = PopupPriority.Low, focus = UnitNameEdit })
 end
 
-local g_unitActionSuspendToken = nil
-
 function CloseUnitActionList()
     if UnitActionList ~= nil then
-        mgr:UnregisterSuspendCloser(g_unitActionSuspendToken)
-        g_unitActionSuspendToken = nil
         mgr:RemoveFromStack(UNIT_ACTION_LIST_ID)
         UnitActionList = nil
     end
@@ -2680,6 +2693,7 @@ local function BuildUnitActionList(data)
 
     local actions = GetUnitActionEntries(data)
     AddSyntheticPromoteActionIfNeeded(actions, data)
+    AddSyntheticNameActionIfNeeded(actions, data)
 
     for _, action in ipairs(actions) do
         local hidePiratesNavalRepair = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
@@ -2731,7 +2745,6 @@ local function OpenUnitActionList()
     UnitActionList = BuildUnitActionList(data)
     if UnitActionList ~= nil and UnitActionList.Children ~= nil and #UnitActionList.Children > 0 then
         mgr:Push(UnitActionList, PopupPriority.Low)
-        g_unitActionSuspendToken = mgr:RegisterSuspendCloser(CloseUnitActionList)
     else
         UnitActionList = nil
     end
@@ -2740,10 +2753,7 @@ end
 CAIUnitList = {
     ViewMode = "table",
     FilterKey = "all",
-    -- Distance is the default so world unit cycling starts from nearest-first.
-    -- Sort state lives on this module-level table and is intentionally never
-    -- reset on close, so the player's chosen sort is remembered.
-    SortColumn = "distance",
+    SortColumn = "name",
     SortAscending = true,
     LastRecord = nil,
     Records = {},
@@ -2844,18 +2854,10 @@ end
 
 function CAIUnitList.GetDistance(record)
     local unit = CAIUnitList.Resolve(record)
-    if unit == nil then return nil end
-    -- The panel measures from the cursor. Unit cycling temporarily overrides the
-    -- origin (CAIUnitList.DistanceOrigin) with a fixed anchor so its ordering is
-    -- stable while the selection/cursor moves; see OnCAICycleSelectedUnit.
-    local originX, originY
-    if CAIUnitList.DistanceOrigin ~= nil then
-        originX, originY = CAIUnitList.DistanceOrigin.X, CAIUnitList.DistanceOrigin.Y
-    elseif CAICursor ~= nil then
-        originX, originY = CAICursor:GetCoords()
-    end
-    if originX == nil or originY == nil then return nil end
-    return Map.GetPlotDistance(originX, originY, unit:GetX(), unit:GetY())
+    if unit == nil or CAICursor == nil then return nil end
+    local cursorX, cursorY = CAICursor:GetCoords()
+    if cursorX == nil or cursorY == nil then return nil end
+    return Map.GetPlotDistance(cursorX, cursorY, unit:GetX(), unit:GetY())
 end
 
 function CAIUnitList.GetActivity(record)
@@ -3194,36 +3196,8 @@ function CAIUnitList.GetColumn(columnKey)
     return nil
 end
 
--- World unit cycling reads the sorted list even when the panel was never
--- opened, so the columns (which own the sort keys) must be available on demand.
-function CAIUnitList.EnsureColumns()
-    if CAIUnitList.Columns == nil or #CAIUnitList.Columns == 0 then
-        CAIUnitList.Columns = CAIUnitList.BuildColumns()
-    end
-end
-
--- Returns the local player's units in the current sort order. When readyOnly is
--- true the pool is limited to units awaiting orders (comma/period); otherwise it
--- includes every unit (shift+comma/period). The panel's category filter is not
--- applied here; that filter is a panel-only view setting.
-function CAIUnitList.GetSortedUnits(readyOnly, sortColumn, sortAscending)
-    CAIUnitList.EnsureColumns()
-    local units = {}
-    for _, record in ipairs(CAIUnitList.SortRecords(CAIUnitList.BuildRecords(), sortColumn, sortAscending)) do
-        local unit = CAIUnitList.Resolve(record)
-        if unit ~= nil and (not readyOnly or unit:IsReadyToMove()) then
-            units[#units + 1] = unit
-        end
-    end
-    return units
-end
-
--- sortColumn/sortAscending default to the panel's remembered sort. World unit
--- cycling passes an override when the follow-panel-sort setting is off.
-function CAIUnitList.SortRecords(records, sortColumn, sortAscending)
-    if sortColumn == nil then sortColumn = CAIUnitList.SortColumn end
-    if sortAscending == nil then sortAscending = CAIUnitList.SortAscending end
-    local column = CAIUnitList.GetColumn(sortColumn)
+function CAIUnitList.SortRecords(records)
+    local column = CAIUnitList.GetColumn(CAIUnitList.SortColumn)
     if column == nil or column.sortKey == nil then return records end
     local decorated = {}
     for naturalIndex, record in ipairs(records) do
@@ -3247,7 +3221,7 @@ function CAIUnitList.SortRecords(records, sortColumn, sortAscending)
             comparison = Locale.Compare(tostring(aValue), tostring(bValue))
         end
         if comparison == 0 then return a.NaturalIndex < b.NaturalIndex end
-        if sortAscending then return comparison < 0 end
+        if CAIUnitList.SortAscending then return comparison < 0 end
         return comparison > 0
     end)
     for index, entry in ipairs(decorated) do records[index] = entry.Record end
@@ -3390,7 +3364,7 @@ function CAIUnitList.BuildPanel()
     CAIUnitList.LastRecord = nil
     CAIUnitList.Columns = CAIUnitList.BuildColumns()
     if CAIUnitList.GetColumn(CAIUnitList.SortColumn) == nil then
-        CAIUnitList.SortColumn = "distance"
+        CAIUnitList.SortColumn = "name"
         CAIUnitList.SortAscending = true
     end
     local panel = mgr:CreateWidget(UNIT_LIST_ID, "Panel", {
@@ -3620,6 +3594,25 @@ function OnUnitPanelSelectionInfoInputActionStarted(actionId)
 end
 
 function OnUnitPanelSelectionActionInputStarted(actionId)
+    if actionId == prevUnitAction then
+        UI.SelectPrevUnit()
+        UI.PlaySound("Play_UI_Click");
+        return
+    elseif actionId == nextUnitAction then
+        UI.SelectNextUnit()
+        UI.PlaySound("Play_UI_Click");
+        return
+    end
+    if actionId == prevReadyUnitAction then
+        UI.SelectPrevReadyUnit()
+        UI.PlaySound("Play_UI_Click");
+        return
+    elseif actionId == nextReadyUnitAction then
+        UI.SelectNextReadyUnit()
+        UI.PlaySound("Play_UI_Click");
+        return
+    end
+
     if actionId == selectionActionsAction then
         OpenUnitActionList()
         return
@@ -3755,98 +3748,6 @@ local function OnCAICursorMoved(state)
     if UnitList ~= nil and CAIUnitList.SortColumn == "distance" then
         CAIUnitList.RebuildViews(false)
     end
-end
-
--- Owns next/previous unit selection. WorldInput_CAI receives the raw input
--- actions and forwards them here as a Lua event; the actual cycling walks the
--- unit list's remembered sort order. direction is -1 (previous) or 1 (next);
--- readyOnly limits the pool to units awaiting orders.
-local function OnCAICycleSelectedUnit(direction, readyOnly)
-    local selected = GetSelectedUnit()
-
-    -- The follow-panel-sort setting decides whether cycling honours the panel's
-    -- remembered sort or always falls back to distance (nearest first).
-    local followSort = CAISettings.GetBool("UnitCyclingFollowPanelSort")
-    local sortColumn, sortAscending
-    if followSort then
-        sortColumn = CAIUnitList.SortColumn
-        sortAscending = CAIUnitList.SortAscending
-    else
-        sortColumn = "distance"
-        sortAscending = true
-    end
-
-    -- Distance sort needs a fixed origin during a cycling run; otherwise the list
-    -- re-centres on each newly selected unit and cycling stalls on the two
-    -- mutually-nearest units. With no selection yet, measure from the cursor and
-    -- start a fresh run; once a unit is selected, anchor on it and keep that
-    -- origin until the selection changes by something other than this cycling.
-    if sortColumn == "distance" then
-        if selected == nil then
-            CAIUnitList.CycleOrigin = nil
-            CAIUnitList.CycleAnchorKey = nil
-            CAIUnitList.DistanceOrigin = nil
-        else
-            local selectedKey = tostring(selected:GetOwner()) .. ":" .. tostring(selected:GetID())
-            if CAIUnitList.CycleOrigin == nil or CAIUnitList.CycleAnchorKey ~= selectedKey then
-                CAIUnitList.CycleOrigin = { X = selected:GetX(), Y = selected:GetY() }
-            end
-            CAIUnitList.DistanceOrigin = CAIUnitList.CycleOrigin
-        end
-    end
-
-    local units = CAIUnitList.GetSortedUnits(readyOnly, sortColumn, sortAscending)
-    CAIUnitList.DistanceOrigin = nil
-
-    if #units == 0 then
-        CAIUnitList.CycleOrigin = nil
-        CAIUnitList.CycleAnchorKey = nil
-        Speak(Locale.Lookup(readyOnly and "LOC_CAI_NO_READY_UNITS" or "LOC_CAI_UNIT_NO_UNITS"))
-        return
-    end
-
-    local currentIndex = nil
-    if selected ~= nil then
-        for index, unit in ipairs(units) do
-            if unit:GetOwner() == selected:GetOwner() and unit:GetID() == selected:GetID() then
-                currentIndex = index
-                break
-            end
-        end
-    end
-
-    local wrap = CAISettings.GetBool("WrapUnitCycling")
-    local nextIndex
-    if currentIndex == nil then
-        -- Selection is outside this pool (e.g. cycling ready units while a
-        -- non-ready unit is selected); step in from the appropriate end.
-        nextIndex = direction > 0 and 1 or #units
-    else
-        nextIndex = currentIndex + direction
-        if nextIndex < 1 or nextIndex > #units then
-            if not wrap then
-                -- No further unit in this direction; keep the current selection.
-                Speak(Locale.Lookup("LOC_CAI_NO_MORE_UNITS", GetUnitListName(selected)))
-                return
-            end
-            nextIndex = ((nextIndex - 1) % #units) + 1
-        end
-    end
-
-    local chosen = units[nextIndex]
-    if selected ~= nil and chosen:GetOwner() == selected:GetOwner()
-        and chosen:GetID() == selected:GetID() then
-        -- Only the current unit qualifies (e.g. a single unit in the pool).
-        Speak(Locale.Lookup("LOC_CAI_NO_MORE_UNITS", GetUnitListName(selected)))
-        return
-    end
-
-    UI.SelectUnit(chosen)
-    UI.PlaySound("Play_UI_Click")
-
-    -- Remember what we selected so the next press is recognised as a continuation
-    -- of the same cycling run and keeps the anchored distance origin.
-    CAIUnitList.CycleAnchorKey = tostring(chosen:GetOwner()) .. ":" .. tostring(chosen:GetID())
 end
 
 local function SpeakCurrentCombatPreview()
@@ -3986,7 +3887,6 @@ Events.LocalPlayerTurnEnd.Add(ClearUnitActionIntents)
 Events.Combat.Add(OnCombatResolved)
 Events.InputActionStarted.Add(OnInputActionStarted)
 LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
-LuaEvents.CAICycleSelectedUnit.Add(OnCAICycleSelectedUnit)
 LuaEvents.CAISpeakCombatPreview.Add(OnCAISpeakCombatPreview)
 LuaEvents.CAISpeakCombatPreviewForPlot.Add(OnCAISpeakCombatPreviewForPlot)
 ContextPtr:SetInputHandler(OnHandleInput, true)

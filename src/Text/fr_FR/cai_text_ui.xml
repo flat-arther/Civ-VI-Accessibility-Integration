@@ -2591,6 +2591,9 @@
     <Replace Tag="LOC_CAI_UNIT_FLAG_NAME_PATTERN" Language="fr_FR">
       <Text>{1_Owner} {2_Name} {3_FormationSuffix}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_UNIT_NUMBER_SUFFIX" Language="fr_FR">
+      <Text>{1_Name} {2_Number}</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_UNIT_FLAG_HEALTH" Language="fr_FR">
       <Text>{1_CurrentHp}/{2_MaxHp} PV</Text>
     </Replace>
@@ -2989,6 +2992,18 @@
     </Replace>
     <Replace Tag="LOC_CAI_UNIT_NO_UNITS" Language="fr_FR">
       <Text>Aucune unité disponible</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_NO_READY_UNITS" Language="fr_FR">
+      <Text>Aucune unité prête</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_NO_MORE_UNITS" Language="fr_FR">
+      <Text>Aucune autre unité, {1_Name} déjà sélectionnée</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_NO_CITIES" Language="fr_FR">
+      <Text>Aucune ville</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_NO_MORE_CITIES" Language="fr_FR">
+      <Text>Aucune autre ville, {1_Name} déjà sélectionnée</Text>
     </Replace>
     <Replace Tag="LOC_CAI_UNIT_RELATIVE_COORDS" Language="fr_FR">
       <Text>Emplacement {1_Text}</Text>
@@ -5676,6 +5691,15 @@
     </Replace>
 
     <!-- Input binding descriptions -->
+    <Replace Tag="LOC_CAI_KB_TOGGLE_MOD" Language="fr_FR">
+      <Text>Suspendre ou reprendre le mod d'accessibilité</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOD_SUSPENDED" Language="fr_FR">
+      <Text>Mod d'accessibilité suspendu</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOD_RESUMED" Language="fr_FR">
+      <Text>Mod d'accessibilité repris</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_KB_OPEN_SETTINGS" Language="fr_FR">
       <Text>Ouvrir les paramètres du mod d'accessibilité</Text>
     </Replace>
@@ -6344,6 +6368,33 @@
     </Replace>
     <Replace Tag="LOC_CAI_SETTING_SECTION_MESSAGEBUFFER" Language="fr_FR">
       <Text>Tampon de messages</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_SECTION_GAMEPLAY" Language="fr_FR">
+      <Text>Jeu</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_WRAP_UNIT_CYCLING" Language="fr_FR">
+      <Text>Boucler le défilement des unités</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_WRAP_UNIT_CYCLING_TOOLTIP" Language="fr_FR">
+      <Text>Si activé, passer après la dernière unité revient à la première, et avant la première renvoie à la dernière. Si désactivé, le défilement s'arrête aux extrémités de la liste et vous indique qu'il n'y a plus d'unités.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_UNIT_CYCLING_FOLLOW_SORT" Language="fr_FR">
+      <Text>Faire défiler les unités selon le tri du panneau d'unités</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_UNIT_CYCLING_FOLLOW_SORT_TOOLTIP" Language="fr_FR">
+      <Text>Si activé, les touches de défilement des unités suivent le tri choisi dans la liste des unités. Si désactivé, elles défilent toujours par distance, de la plus proche à la plus éloignée.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_WRAP_CITY_CYCLING" Language="fr_FR">
+      <Text>Boucler le défilement des villes</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_WRAP_CITY_CYCLING_TOOLTIP" Language="fr_FR">
+      <Text>Si activé, passer après la dernière ville revient à la première, et avant la première renvoie à la dernière. Si désactivé, le défilement s'arrête aux extrémités de la liste et vous indique qu'il n'y a plus de villes.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CITY_CYCLING_FOLLOW_SORT" Language="fr_FR">
+      <Text>Faire défiler les villes selon le tri du rapport sur l'état des villes</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CITY_CYCLING_FOLLOW_SORT_TOOLTIP" Language="fr_FR">
+      <Text>Si activé, les touches de défilement des villes suivent le tri choisi dans le rapport sur l'état des villes. Si désactivé, elles défilent dans l'ordre par défaut.</Text>
     </Replace>
 
     <Replace Tag="LOC_CAI_SETTING_SPEAK_TOOLTIP" Language="fr_FR">

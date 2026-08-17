@@ -529,7 +529,7 @@ end
 
 -- ===========================================================================
 function HostGame(serverType:number)
-	Events.SetGameEntryMethod("Host Multiplayer");
+	if Events.SetGameEntryMethod then Events.SetGameEntryMethod("Host Multiplayer"); end	-- absent on the older Epic build
 	Network.HostGame(serverType);
 end
 

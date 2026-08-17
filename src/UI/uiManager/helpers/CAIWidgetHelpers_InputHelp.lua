@@ -406,12 +406,15 @@ function H.RunHelp(widget)
         Label = function() return Locale.Lookup("LOC_CAI_INPUT_HELP_TITLE") end,
     })
 
+    local suspendToken
     local function CloseHelp()
         g_helpOpen = false
+        mgr:UnregisterSuspendCloser(suspendToken)
         panel:Destroy()
         if previousFocus then mgr:SetFocus(previousFocus) end
         LogMessage("InputHelp closed help UI")
     end
+    suspendToken = mgr:RegisterSuspendCloser(CloseHelp)
 
     local function MakeBindingItem(entry)
         local itemId = mgr:GenerateWidgetId("CAI_InputHelpItem")

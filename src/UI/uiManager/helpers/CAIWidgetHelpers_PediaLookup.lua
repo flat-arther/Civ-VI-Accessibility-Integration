@@ -402,12 +402,15 @@ function P.RunLookup(widget)
 
     g_lookupOpen = true
 
+    local suspendToken
     local function CloseLookup()
         g_lookupOpen = false
+        mgr:UnregisterSuspendCloser(suspendToken)
         panel:Destroy()
         if previousFocus then mgr:SetFocus(previousFocus) end
         LogMessage("PediaLookup closed lookup UI")
     end
+    suspendToken = mgr:RegisterSuspendCloser(CloseLookup)
 
     for _, r in ipairs(results) do
         local itemId = mgr:GenerateWidgetId("CAI_PediaLookupItem")

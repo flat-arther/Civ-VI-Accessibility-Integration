@@ -11,6 +11,7 @@ include("RecommendationLogic_CAI")
 include("WorldScanner_CAI")
 include("Surveyor_CAI")
 include("RevealAnnouncements_CAI")
+include("CAIUnitNumbers")
 include("MessageBuffer_CAI")
 include("UnitMoveLog_CAI")
 include("EventSubs_CAI")
@@ -107,6 +108,10 @@ local ACTION_SURVEYOR_READ_APPEAL = Input.GetActionId("SurveyorReadAppeal")
 local ACTION_WORLD_SELECT_PREVIOUS_CITY = Input.GetActionId("WorldSelectPreviousCity_CAI")
 local ACTION_WORLD_SELECT_NEXT_CITY = Input.GetActionId("WorldSelectNextCity_CAI")
 local ACTION_WORLD_SELECT_CAPITAL_CITY = Input.GetActionId("WorldSelectCapitalCity_CAI")
+local ACTION_PREV_UNIT_SELECTION = Input.GetActionId("PrevUnitSelection")
+local ACTION_NEXT_UNIT_SELECTION = Input.GetActionId("NextUnitSelection")
+local ACTION_PREV_READY_UNIT_SELECTION = Input.GetActionId("PrevReadyUnitSelection")
+local ACTION_NEXT_READY_UNIT_SELECTION = Input.GetActionId("NextReadyUnitSelection")
 -- ===========================================================================
 -- Shared input actions
 -- ===========================================================================
@@ -153,20 +158,6 @@ local function JumpCursorToCapital()
 	if capitalPlotId == nil then return false end
 
 	LuaEvents.CAICursorMoveTo(capitalPlotId, "jump")
-	return true
-end
-
-local function SelectPreviousCity()
-	local curCity = UI.GetHeadSelectedCity()
-	UI.SelectPrevCity(curCity)
-	UI.PlaySound("Play_UI_Click")
-	return true
-end
-
-local function SelectNextCity()
-	local curCity = UI.GetHeadSelectedCity()
-	UI.SelectNextCity(curCity)
-	UI.PlaySound("Play_UI_Click")
 	return true
 end
 
@@ -483,7 +474,11 @@ local function ExecutePlotInteraction(interaction)
 	end
 end
 
+local g_plotInteractSuspendToken = nil
+
 local function DismissPlotInteractList()
+	mgr:UnregisterSuspendCloser(g_plotInteractSuspendToken)
+	g_plotInteractSuspendToken = nil
 	mgr:RemoveFromStack(PLOT_INTERACT_LIST_ID)
 	UITutorialManager:RemoveControlToAlwaysReceiveInput(ContextPtr)
 end
@@ -520,6 +515,7 @@ local function PushPlotInteractList(interactions)
 	end
 	UITutorialManager:AddControlToAlwaysReceiveInput(ContextPtr)
 	mgr:Push(list)
+	g_plotInteractSuspendToken = mgr:RegisterSuspendCloser(DismissPlotInteractList)
 end
 
 local function OnPlotPrimaryAction()
@@ -697,19 +693,51 @@ local SharedInputActions = {
 	[ACTION_WORLD_SELECT_PREVIOUS_CITY] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
-			return SelectPreviousCity()
+			LuaEvents.CAICycleSelectedCity(-1)
+			return true
 		end,
 	},
 	[ACTION_WORLD_SELECT_NEXT_CITY] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
-			return SelectNextCity()
+			LuaEvents.CAICycleSelectedCity(1)
+			return true
 		end,
 	},
 	[ACTION_WORLD_SELECT_CAPITAL_CITY] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			return SelectCapitalCity()
+		end,
+	},
+	-- Unit cycling is owned by UnitPanel_CAI, which walks the unit list's
+	-- remembered sort order. WorldInput only forwards the input actions.
+	[ACTION_PREV_READY_UNIT_SELECTION] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			LuaEvents.CAICycleSelectedUnit(-1, true)
+			return true
+		end,
+	},
+	[ACTION_NEXT_READY_UNIT_SELECTION] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			LuaEvents.CAICycleSelectedUnit(1, true)
+			return true
+		end,
+	},
+	[ACTION_PREV_UNIT_SELECTION] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			LuaEvents.CAICycleSelectedUnit(-1, false)
+			return true
+		end,
+	},
+	[ACTION_NEXT_UNIT_SELECTION] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			LuaEvents.CAICycleSelectedUnit(1, false)
+			return true
 		end,
 	},
 	[ACTION_QUICK_MOVE_NORTHWEST] = {
@@ -1386,11 +1414,14 @@ local function DispatchInputAction(actionId, actionType, ...)
 end
 
 local function OnCAIInputActionStarted(actionId, x, y)
+	-- Suspended: CAI world actions stop reacting so the key falls to vanilla.
+	if ExposedMembers.CAI_Active == false then return false end
 	if CAI then CAI.Silence() end
 	return DispatchInputAction(actionId, INPUT_ACTION_STARTED, x, y)
 end
 
 function OnInputActionTriggered(actionId)
+	if ExposedMembers.CAI_Active == false then return end
 	DispatchInputAction(actionId, INPUT_ACTION_TRIGGERED)
 end
 

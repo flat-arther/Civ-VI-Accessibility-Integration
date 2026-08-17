@@ -42,6 +42,7 @@ UIWidget.__index = UIWidget
 ---@field MSG? KeyEvents
 ---@field Description? string
 ---@field Common? boolean
+---@field Global? boolean -- honored even while the mod is suspended (mod-toggle only)
 ---@field BubbleWhenDisabled? boolean
 local baseInputBinding = { IsShift = false, IsControl = false, IsAlt = false, MSG = KeyEvents.KeyUp }
 
@@ -62,6 +63,23 @@ function UIWidget.New(class)
     w:On("focus_leave", function(self)
         WidgetReader.ClearSections(self)
     end)
+    -- Global mod suspend/resume. Marked Global so it is the one binding the
+    -- manager still evaluates while the mod is suspended; Ctrl+Shift+F12 does
+    -- not collide with the unmodified F12 settings binding below.
+    w:AddInputBinding({
+        Key = Keys.VK_F12,
+        IsControl = true,
+        IsShift = true,
+        Description = "LOC_CAI_KB_TOGGLE_MOD",
+        Common = true,
+        Global = true,
+        MSG = KeyEvents.KeyUp,
+        Action = function(self)
+            if self.Manager then self.Manager:ToggleCAIActive() end
+            return true
+        end,
+    })
+
     w:AddInputBinding({
         Key = Keys.VK_F12,
         Description = "LOC_CAI_KB_OPEN_SETTINGS",
@@ -473,8 +491,9 @@ function UIWidget:AddInputBindings(bindings)
 end
 
 ---@param input InputStruct
+---@param globalOnly? boolean -- when true, only Global bindings are considered (suspended mode)
 ---@return boolean
-function UIWidget:OnHandleInput(input)
+function UIWidget:OnHandleInput(input, globalOnly)
     local key = input:GetKey()
     local msg = input:GetMessageType()
     local isShift = input:IsShiftDown()
@@ -482,7 +501,8 @@ function UIWidget:OnHandleInput(input)
     local isAlt = input:IsAltDown()
     for _, b in ipairs(self.InputMap) do
         if b.Action and b.Key == key and b.MSG == msg
-            and isShift == b.IsShift and isControl == b.IsControl and isAlt == b.IsAlt then
+            and isShift == b.IsShift and isControl == b.IsControl and isAlt == b.IsAlt
+            and (not globalOnly or b.Global) then
             if b.Action ~= nil then
                 if CAI then CAI.Silence() end
                 if not b.Common and self:IsDisabled() then

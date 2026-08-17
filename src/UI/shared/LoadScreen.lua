@@ -272,7 +272,10 @@ function OnLoadScreenContentReady()
 		local challengeName;
 		local challengeInfoText;
 
-		local isChallengeActive = Challenges.IsChallengeActive();
+		-- Compatibility: the Epic build strips the online Challenges system; the mod
+		-- ships the Steam-based LoadScreen, so guard the global. When absent this falls
+		-- through to the normal leader text/audio path (Epic's vanilla behavior).
+		local isChallengeActive = Challenges ~= nil and Challenges.IsChallengeActive();
 		if isChallengeActive then
 			challengeName = Challenges.GetLocalizedChallengeNameText();
 			challengeInfoText = Challenges.GetLocalizedChallengeLoadingScreenDescriptionText();
@@ -368,7 +371,7 @@ function OnLoadScreenContentReady()
 				dawnOfManEraHash = DB.MakeHash(loadingInfo.DawnOfManEraId);
 			end
 
-			if (Challenges.IsChallengeActive()) then
+			if (Challenges ~= nil and Challenges.IsChallengeActive()) then
 				-- Don't play leader/civilization for challenge games as those have the text missing.
 				-- Setting this to the "NO_LEADER" values will cause sound not to play
 				-- and override any stale values for the switch.
