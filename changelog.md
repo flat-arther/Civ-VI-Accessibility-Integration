@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [1.2.0] - 2026-08-19
+
 ### Added
 
 - Added support for the Better Balanced Game mod (version 7.4.6). Note that better balanced game expanded also works, as it is a content mod only
