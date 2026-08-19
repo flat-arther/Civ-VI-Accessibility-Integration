@@ -255,6 +255,11 @@
     <File>Text/zh_Hans_CN/TutorialText_CAI.xml</File>
     <File>Text/zh_Hans_CN/hotkey_symbol_names.sql</File>
     <File>Text/zh_Hans_CN/tutorial_advisor_text_CAI.sql</File>
+    <File>Text/es_ES/cai_text_ui.xml</File>
+    <File>Text/es_ES/AccessibilityPediaText_CAI.xml</File>
+    <File>Text/es_ES/TutorialText_CAI.xml</File>
+    <File>Text/es_ES/hotkey_symbol_names.sql</File>
+    <File>Text/es_ES/tutorial_advisor_text_CAI.sql</File>
     <File>Text/pl_PL/cai_text_ui.xml</File>
     <File>Text/pl_PL/AccessibilityPediaText_CAI.xml</File>
     <File>Text/pl_PL/TutorialText_CAI.xml</File>
@@ -295,6 +300,10 @@
       <File>Text/zh_Hans_CN/AccessibilityPediaText_CAI.xml</File>
       <File>Text/zh_Hans_CN/TutorialText_CAI.xml</File>
       <File>Text/zh_Hans_CN/hotkey_symbol_names.sql</File>
+      <File>Text/es_ES/cai_text_ui.xml</File>
+      <File>Text/es_ES/AccessibilityPediaText_CAI.xml</File>
+      <File>Text/es_ES/TutorialText_CAI.xml</File>
+      <File>Text/es_ES/hotkey_symbol_names.sql</File>
       <File>Text/fr_FR/cai_text_ui.xml</File>
       <File>Text/fr_FR/AccessibilityPediaText_CAI.xml</File>
       <File>Text/fr_FR/TutorialText_CAI.xml</File>
@@ -425,6 +434,11 @@
       <File>Text/zh_Hans_CN/TutorialText_CAI.xml</File>
       <File>Text/zh_Hans_CN/hotkey_symbol_names.sql</File>
       <File>Text/zh_Hans_CN/tutorial_advisor_text_CAI.sql</File>
+      <File>Text/es_ES/cai_text_ui.xml</File>
+      <File>Text/es_ES/AccessibilityPediaText_CAI.xml</File>
+      <File>Text/es_ES/TutorialText_CAI.xml</File>
+      <File>Text/es_ES/hotkey_symbol_names.sql</File>
+      <File>Text/es_ES/tutorial_advisor_text_CAI.sql</File>
       <File>Text/pl_PL/cai_text_ui.xml</File>
       <File>Text/pl_PL/AccessibilityPediaText_CAI.xml</File>
       <File>Text/pl_PL/TutorialText_CAI.xml</File>
