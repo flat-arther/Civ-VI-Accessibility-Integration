@@ -12,6 +12,11 @@ local TABS_ID        = "CAIEndGame_Tabs"
 local HOVER_SOUND    = "Main_Menu_Mouse_Over"
 local IS_CIV_ROYALE  = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE"
 
+-- Shared with the Hall of Fame game-details screen so the replay graph grouping
+-- preference carries between the victory screen and the front-end summaries.
+local GRAPH_GROUP_SETTING_SECTION = "UI"
+local GRAPH_GROUP_SETTING_ID      = "ReplayGraphGroupByValue"
+
 -- ============================================================================
 -- State
 -- ============================================================================
@@ -20,6 +25,7 @@ local m_tabs         = nil
 local m_resultsList  = nil
 local m_rankingList  = nil
 local m_graphsTree   = nil
+local m_graphsGroupCheckbox = nil
 local m_chatHistory  = nil
 local m_chatInput    = nil
 local m_chatTarget   = nil
@@ -171,7 +177,9 @@ local function RebuildRankingList()
 end
 
 -- ============================================================================
--- Tab 3: Replay data (player -> non-empty turn -> recorded values)
+-- Tab 3: Replay data
+--   Group by turn (default): player -> non-empty turn -> recorded values
+--   Group by value:          player -> value -> turns where it changed
 -- ============================================================================
 local function FormatReplayValue(value)
     if type(value) == "number" then
@@ -180,8 +188,116 @@ local function FormatReplayValue(value)
     return tostring(value)
 end
 
+local function LoadGraphGroupByValueSetting()
+    if CAI == nil or CAI.GetConfigValue == nil then return false end
+    local stored = CAI.GetConfigValue(
+        GRAPH_GROUP_SETTING_SECTION, GRAPH_GROUP_SETTING_ID, "false")
+    if stored == nil then return false end
+    local normalized = tostring(stored):lower()
+    if normalized == "true" or normalized == "1"
+        or normalized == "yes" or normalized == "on" then
+        return true
+    end
+    return false
+end
+
+local function SaveGraphGroupByValueSetting(value)
+    if CAI ~= nil and CAI.SetConfigValue ~= nil then
+        CAI.SetConfigValue(GRAPH_GROUP_SETTING_SECTION, GRAPH_GROUP_SETTING_ID,
+            value and "true" or "false")
+    end
+end
+
+local m_graphGroupByValue = LoadGraphGroupByValueSetting()
+
+-- Build player -> turn -> value leaves (default grouping).
+local function BuildTurnGroups(playerNode, playerId, points)
+    local turnOrder = {}
+    local turnMap = {}
+    for _, pt in ipairs(points) do
+        local bucket = turnMap[pt.turn]
+        if not bucket then
+            bucket = {}
+            turnMap[pt.turn] = bucket
+            table.insert(turnOrder, pt.turn)
+        end
+        table.insert(bucket, pt)
+    end
+
+    for _, turn in ipairs(turnOrder) do
+        local turnLabel = Locale.Lookup("LOC_CAI_TIMELINE_TURN", turn)
+        local turnNode = mgr:CreateWidget(MakeId("CAIEG_graph_"), "TreeItem", {
+            Label = function() return turnLabel end,
+            FocusKey = "endgame:graph:player:" .. playerId .. ":turn:" .. turn,
+        })
+        turnNode:SetFocusSound(HOVER_SOUND)
+        playerNode:AddChild(turnNode)
+
+        for _, pt in ipairs(turnMap[turn]) do
+            local valueLabel = pt.display .. ": " .. FormatReplayValue(pt.value)
+            local leaf = mgr:CreateWidget(MakeId("CAIEG_graph_"), "TreeItem", {
+                Label = function() return valueLabel end,
+                FocusKey = "endgame:graph:player:" .. playerId ..
+                    ":turn:" .. turn .. ":dataset:" .. pt.dataSetName,
+            })
+            leaf:SetFocusSound(HOVER_SOUND)
+            turnNode:AddChild(leaf)
+        end
+    end
+end
+
+-- Build player -> value -> turn leaves (alternative grouping).
+local function BuildValueGroups(playerNode, playerId, points)
+    local dsOrder = {}
+    local dsMap = {}
+    for _, pt in ipairs(points) do
+        local bucket = dsMap[pt.dataSetName]
+        if not bucket then
+            bucket = { display = pt.display, points = {} }
+            dsMap[pt.dataSetName] = bucket
+            table.insert(dsOrder, pt.dataSetName)
+        end
+        table.insert(bucket.points, pt)
+    end
+    table.sort(dsOrder, function(a, b)
+        return Locale.Compare(dsMap[a].display, dsMap[b].display) == -1
+    end)
+
+    for _, dsName in ipairs(dsOrder) do
+        local bucket = dsMap[dsName]
+        local valueDisplay = bucket.display
+        local valueNode = mgr:CreateWidget(MakeId("CAIEG_graph_"), "TreeItem", {
+            Label = function() return valueDisplay end,
+            FocusKey = "endgame:graph:player:" .. playerId .. ":dataset:" .. dsName,
+        })
+        valueNode:SetFocusSound(HOVER_SOUND)
+        playerNode:AddChild(valueNode)
+
+        for _, pt in ipairs(bucket.points) do
+            local turnLabel = Locale.Lookup("LOC_CAI_TIMELINE_TURN", pt.turn)
+            local leaf = mgr:CreateWidget(MakeId("CAIEG_graph_"), "TreeItem", {
+                Label = function()
+                    return turnLabel .. ": " .. FormatReplayValue(pt.value)
+                end,
+                FocusKey = "endgame:graph:player:" .. playerId ..
+                    ":dataset:" .. dsName .. ":turn:" .. pt.turn,
+            })
+            leaf:SetFocusSound(HOVER_SOUND)
+            valueNode:AddChild(leaf)
+        end
+    end
+end
+
 local function RebuildGraphsTree()
     if not m_graphsTree then return end
+
+    -- Re-read the shared preference so a toggle made in the Hall of Fame screen
+    -- is honored here, and keep the checkbox in sync with it.
+    m_graphGroupByValue = LoadGraphGroupByValueSetting()
+    if m_graphsGroupCheckbox then
+        m_graphsGroupCheckbox:SetChecked(m_graphGroupByValue, true)
+    end
+
     local capture = mgr:CaptureFocusKey(m_graphsTree)
     m_graphsTree:ClearChildren()
 
@@ -218,39 +334,40 @@ local function RebuildGraphsTree()
         coalescedData[ds.name] = GameSummary.CoalesceDataSet(ds.index, initialTurn, finalTurn)
     end
 
-    local playersWithTurns = {}
+    -- Collect raw points per player, ordered by turn then value display. Only
+    -- record a point where a value actually changes from its previous turn (the
+    -- same change-only view the Hall of Fame graphs use), so a value that stays
+    -- flat for many turns is not repeated once per turn.
+    local playersWithData = {}
     for _, pInfo in ipairs(playerInfos) do
-        local turns = {}
+        local points = {}
+        local prevByDataSet = {}
+        local seenByDataSet = {}
         for turn = initialTurn, finalTurn do
-            local values = {}
             for _, ds in ipairs(dataSets) do
                 local graphData = coalescedData[ds.name]
                 local playerData = graphData and graphData[pInfo.Id]
                 local value = playerData and playerData[turn]
                 if value ~= nil then
-                    table.insert(values, {
-                        dataSetName = ds.name,
-                        label = ds.display .. ": " .. FormatReplayValue(value),
-                    })
+                    if not seenByDataSet[ds.name] or value ~= prevByDataSet[ds.name] then
+                        table.insert(points, {
+                            turn = turn,
+                            dataSetName = ds.name,
+                            display = ds.display,
+                            value = value,
+                        })
+                    end
+                    prevByDataSet[ds.name] = value
+                    seenByDataSet[ds.name] = true
                 end
             end
-            if #values > 0 then
-                table.insert(turns, {
-                    number = turn,
-                    values = values,
-                })
-            end
         end
-
-        if #turns > 0 then
-            table.insert(playersWithTurns, {
-                info = pInfo,
-                turns = turns,
-            })
+        if #points > 0 then
+            table.insert(playersWithData, { info = pInfo, points = points })
         end
     end
 
-    if #playersWithTurns == 0 then
+    if #playersWithData == 0 then
         local noData = mgr:CreateWidget(MakeId("CAIEG_graph_"), "StaticText", {
             Label = function() return Locale.Lookup("LOC_UI_ENDGAME_REPLAY_NOGRAPHDATA") end,
             FocusKey = "endgame:graph:nodata",
@@ -261,7 +378,7 @@ local function RebuildGraphsTree()
         return
     end
 
-    for _, playerEntry in ipairs(playersWithTurns) do
+    for _, playerEntry in ipairs(playersWithData) do
         local pInfo = playerEntry.info
         local pName = pInfo.Name and Locale.Lookup(pInfo.Name)
             or (Locale.Lookup("LOC_CAI_PLAYER") .. " " .. tostring(pInfo.Id))
@@ -272,26 +389,10 @@ local function RebuildGraphsTree()
         playerNode:SetFocusSound(HOVER_SOUND)
         m_graphsTree:AddChild(playerNode)
 
-        for _, turnEntry in ipairs(playerEntry.turns) do
-            local turn = turnEntry.number
-            local turnLabel = Locale.Lookup("LOC_CAI_TIMELINE_TURN", turn)
-            local turnNode = mgr:CreateWidget(MakeId("CAIEG_graph_"), "TreeItem", {
-                Label = function() return turnLabel end,
-                FocusKey = "endgame:graph:player:" .. pInfo.Id .. ":turn:" .. turn,
-            })
-            turnNode:SetFocusSound(HOVER_SOUND)
-            playerNode:AddChild(turnNode)
-
-            for _, valueEntry in ipairs(turnEntry.values) do
-                local valueLabel = valueEntry.label
-                local leaf = mgr:CreateWidget(MakeId("CAIEG_graph_"), "TreeItem", {
-                    Label = function() return valueLabel end,
-                    FocusKey = "endgame:graph:player:" .. pInfo.Id ..
-                        ":turn:" .. turn .. ":dataset:" .. valueEntry.dataSetName,
-                })
-                leaf:SetFocusSound(HOVER_SOUND)
-                turnNode:AddChild(leaf)
-            end
+        if m_graphGroupByValue then
+            BuildValueGroups(playerNode, pInfo.Id, playerEntry.points)
+        else
+            BuildTurnGroups(playerNode, pInfo.Id, playerEntry.points)
         end
     end
 
@@ -625,8 +726,24 @@ local function BuildPanel()
     -- Tab 3: Graphs
     tabIndex = tabIndex + 1
     local graphsPage = m_tabs:AddPage(function() return Locale.Lookup("LOC_UI_ENDGAME_REPLAY") end)
+
     m_graphsTree = mgr:CreateWidget(MakeId("CAIEG_"), "Tree", {})
     graphsPage:AddChild(m_graphsTree)
+
+    m_graphsGroupCheckbox = mgr:CreateWidget(MakeId("CAIEG_graphgroup_"), "Checkbox", {
+        Label = function() return Locale.Lookup("LOC_CAI_REPLAY_GROUP_BY_VALUE") end,
+        Tooltip = function() return Locale.Lookup("LOC_CAI_REPLAY_GROUP_BY_VALUE_TOOLTIP") end,
+        FocusKey = "endgame:graph:groupbyvalue",
+    })
+    m_graphsGroupCheckbox:SetValueSetter(function(_, value)
+        SaveGraphGroupByValueSetting(value)
+        m_graphGroupByValue = value and true or false
+        RebuildGraphsTree()
+    end)
+    m_graphsGroupCheckbox:SetChecked(m_graphGroupByValue, true)
+    m_graphsGroupCheckbox:SetFocusSound(HOVER_SOUND)
+    graphsPage:AddChild(m_graphsGroupCheckbox)
+
     vanillaTabButtons[tabIndex] = Controls.ReplayButton
 
     -- Tab 4: Chat (multiplayer only)
@@ -726,6 +843,7 @@ local function DestroyPanel()
         m_resultsList = nil
         m_rankingList = nil
         m_graphsTree = nil
+        m_graphsGroupCheckbox = nil
         m_chatHistory = nil
         m_chatInput = nil
         m_chatTarget = nil

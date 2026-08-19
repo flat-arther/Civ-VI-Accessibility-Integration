@@ -93,7 +93,31 @@ local function IsQueuedOrCurrent(kData)
     return kData.IsCurrent or HasQueuePosition(kData)
 end
 
+-- The just-completed civic is captured through RealizeCurrentCivic (like the
+-- active one) but is not being progressed anymore; vanilla labels it "Just
+-- completed!" rather than showing turns.
+local function IsJustCompleted(kData)
+    return kData and kData.IsLastCompleted and not kData.IsCurrent or false
+end
+
+-- Progress-aware remaining turns for the active civic. Vanilla fills the row
+-- control (and kData.TurnsLeft) from GetTurnsToProgressCivic, a from-scratch
+-- estimate that runs one turn high near completion; its own civics tree uses
+-- GetTurnsLeft for the current item, so we do the same.
+local function GetCurrentTurnsLeft()
+    local ePlayer = Game.GetLocalPlayer()
+    local culture = ePlayer and ePlayer ~= -1 and Players[ePlayer]:GetCulture() or nil
+    return culture and culture:GetTurnsLeft() or nil
+end
+
 local function GetTurnsText(kData)
+    -- A just-completed civic has no remaining turns; reporting a count reads as
+    -- a still-pending queue item.
+    if IsJustCompleted(kData) then return nil end
+    if kData.IsCurrent then
+        local n = GetCurrentTurnsLeft()
+        if n and n >= 0 then return Locale.Lookup("LOC_CAI_RESEARCH_TURNS", n) end
+    end
     local inst = DisplayControl(kData)
     if inst then
         local t = ControlText(inst.TurnsLeft)
@@ -198,6 +222,8 @@ local function FormatLabel(kData)
     local parts = {}
     if kData.IsCurrent then
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_CURRENT", kData.Name))
+    elseif IsJustCompleted(kData) then
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_JUST_COMPLETED", kData.Name))
     elseif HasQueuePosition(kData) then
         AppendIfNonEmpty(parts, kData.Name)
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_QUEUE_POSITION", kData.ResearchQueuePosition))

@@ -1493,16 +1493,44 @@ local mgr = ExposedMembers.CAI_UIManager
 local DETAIL_PANEL_ID = "CAIHoFDetail_Panel"
 local HOVER_SOUND     = "Main_Menu_Mouse_Over"
 
+-- Shared with the in-game victory (End Game) screen so the replay graph grouping
+-- preference carries between the front-end summaries and the victory screen.
+local GRAPH_GROUP_SETTING_SECTION = "UI"
+local GRAPH_GROUP_SETTING_ID      = "ReplayGraphGroupByValue"
+
 local m_detailPanel     = nil
 local m_detailTabs      = nil
 local m_overviewTree    = nil
 local m_reportsTree     = nil
 local m_graphsTree      = nil
+local m_graphsGroupCheckbox = nil
 local m_isDetailBuilt   = false
 
 local function MakeId(prefix)
     return mgr:GenerateWidgetId(prefix)
 end
+
+local function LoadGraphGroupByValueSetting()
+    if CAI == nil or CAI.GetConfigValue == nil then return false end
+    local stored = CAI.GetConfigValue(
+        GRAPH_GROUP_SETTING_SECTION, GRAPH_GROUP_SETTING_ID, "false")
+    if stored == nil then return false end
+    local normalized = tostring(stored):lower()
+    if normalized == "true" or normalized == "1"
+        or normalized == "yes" or normalized == "on" then
+        return true
+    end
+    return false
+end
+
+local function SaveGraphGroupByValueSetting(value)
+    if CAI ~= nil and CAI.SetConfigValue ~= nil then
+        CAI.SetConfigValue(GRAPH_GROUP_SETTING_SECTION, GRAPH_GROUP_SETTING_ID,
+            value and "true" or "false")
+    end
+end
+
+local m_graphGroupByValue = LoadGraphGroupByValueSetting()
 
 -- ============================================================================
 -- Overview tab: statistics tree
@@ -1667,7 +1695,9 @@ local function RebuildDetailOverview()
 end
 
 -- ============================================================================
--- Graphs tab: Player -> changed turn -> changed graph values
+-- Graphs tab
+--   Group by turn (default): player -> changed turn -> changed graph values
+--   Group by value:          player -> graph value -> turns where it changed
 -- ============================================================================
 local function FormatGraphValue(value)
     if type(value) == "number" then
@@ -1676,8 +1706,100 @@ local function FormatGraphValue(value)
     return tostring(value)
 end
 
+-- Build player -> turn -> value leaves (default grouping).
+local function BuildGraphTurnGroups(playerNode, entry)
+    local turnOrder = {}
+    local turnMap = {}
+    for _, pt in ipairs(entry.Points) do
+        local turnEntry = turnMap[pt.Turn]
+        if not turnEntry then
+            turnEntry = { Number = pt.Turn, Points = {} }
+            turnMap[pt.Turn] = turnEntry
+            table.insert(turnOrder, turnEntry)
+        end
+        table.insert(turnEntry.Points, pt)
+    end
+    table.sort(turnOrder, function(a, b) return a.Number < b.Number end)
+
+    for _, turnEntry in ipairs(turnOrder) do
+        local turn = turnEntry.Number
+        table.sort(turnEntry.Points, function(a, b)
+            return Locale.Compare(a.Prefix, b.Prefix) == -1
+        end)
+        local turnLabel = Locale.Lookup("LOC_CAI_TIMELINE_TURN", turn)
+        local turnNode = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
+            Label = function() return turnLabel end,
+            FocusKey = "hofdetail:graph:player:" .. entry.ObjectId .. ":turn:" .. turn,
+        })
+        turnNode:SetFocusSound(HOVER_SOUND)
+        playerNode:AddChild(turnNode)
+
+        for _, pt in ipairs(turnEntry.Points) do
+            local messageLabel = pt.Prefix .. ": " .. FormatGraphValue(pt.Value)
+            local messageNode = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
+                Label = function() return messageLabel end,
+                FocusKey = "hofdetail:graph:player:" .. entry.ObjectId ..
+                    ":turn:" .. turn .. ":message:" .. pt.KeySuffix,
+            })
+            messageNode:SetFocusSound(HOVER_SOUND)
+            turnNode:AddChild(messageNode)
+        end
+    end
+end
+
+-- Build player -> value -> turn leaves (alternative grouping).
+local function BuildGraphValueGroups(playerNode, entry)
+    local valueOrder = {}
+    local valueMap = {}
+    for _, pt in ipairs(entry.Points) do
+        local valueEntry = valueMap[pt.Prefix]
+        if not valueEntry then
+            valueEntry = { Prefix = pt.Prefix, Points = {} }
+            valueMap[pt.Prefix] = valueEntry
+            table.insert(valueOrder, valueEntry)
+        end
+        table.insert(valueEntry.Points, pt)
+    end
+    table.sort(valueOrder, function(a, b)
+        return Locale.Compare(a.Prefix, b.Prefix) == -1
+    end)
+
+    for _, valueEntry in ipairs(valueOrder) do
+        table.sort(valueEntry.Points, function(a, b) return a.Turn < b.Turn end)
+        local valueLabel = valueEntry.Prefix
+        local valueNode = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
+            Label = function() return valueLabel end,
+            FocusKey = "hofdetail:graph:player:" .. entry.ObjectId ..
+                ":value:" .. valueEntry.Prefix,
+        })
+        valueNode:SetFocusSound(HOVER_SOUND)
+        playerNode:AddChild(valueNode)
+
+        for _, pt in ipairs(valueEntry.Points) do
+            local turnLabel = Locale.Lookup("LOC_CAI_TIMELINE_TURN", pt.Turn)
+            local leafLabel = turnLabel .. ": " .. FormatGraphValue(pt.Value)
+            local leaf = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
+                Label = function() return leafLabel end,
+                FocusKey = "hofdetail:graph:player:" .. entry.ObjectId ..
+                    ":value:" .. valueEntry.Prefix .. ":turn:" .. pt.Turn ..
+                    ":message:" .. pt.KeySuffix,
+            })
+            leaf:SetFocusSound(HOVER_SOUND)
+            valueNode:AddChild(leaf)
+        end
+    end
+end
+
 local function RebuildGraphsTree()
     if not m_graphsTree then return end
+
+    -- Re-read the shared preference so a toggle made in the End Game screen is
+    -- honored here, and keep the checkbox in sync with it.
+    m_graphGroupByValue = LoadGraphGroupByValueSetting()
+    if m_graphsGroupCheckbox then
+        m_graphsGroupCheckbox:SetChecked(m_graphGroupByValue, true)
+    end
+
     local capture = mgr:CaptureFocusKey(m_graphsTree)
     m_graphsTree:ClearChildren()
 
@@ -1699,8 +1821,7 @@ local function RebuildGraphsTree()
             local entry = {
                 Name = context.Name,
                 ObjectId = context.ObjectId,
-                Turns = {},
-                TurnsByNumber = {},
+                Points = {},
             }
             table.insert(playerEntries, entry)
             playerEntriesByObjectId[context.ObjectId] = entry
@@ -1730,22 +1851,6 @@ local function RebuildGraphsTree()
         return nil, nil
     end
 
-    local function AddMessage(entry, turn, label, focusKey)
-        local turnEntry = entry.TurnsByNumber[turn]
-        if not turnEntry then
-            turnEntry = {
-                Number = turn,
-                Messages = {},
-            }
-            entry.TurnsByNumber[turn] = turnEntry
-            table.insert(entry.Turns, turnEntry)
-        end
-        table.insert(turnEntry.Messages, {
-            Label = label,
-            FocusKey = focusKey,
-        })
-    end
-
     for groupIndex, group in ipairs(g_Graphs) do
         for graphIndex, graph in ipairs(group) do
             local graphName = graph.Name or ""
@@ -1760,14 +1865,12 @@ local function RebuildGraphsTree()
                             local value = ds[turn]
                             if value ~= nil then
                                 if not hasPreviousValue or value ~= previousValue then
-                                    AddMessage(
-                                        entry,
-                                        turn,
-                                        messagePrefix .. ": " .. FormatGraphValue(value),
-                                        "hofdetail:graph:player:" .. entry.ObjectId ..
-                                            ":turn:" .. turn ..
-                                            ":message:" .. groupIndex .. ":" .. graphIndex .. ":" .. dataSetIndex
-                                    )
+                                    table.insert(entry.Points, {
+                                        Turn = turn,
+                                        Prefix = messagePrefix,
+                                        Value = value,
+                                        KeySuffix = groupIndex .. ":" .. graphIndex .. ":" .. dataSetIndex,
+                                    })
                                 end
                                 previousValue = value
                                 hasPreviousValue = true
@@ -1781,15 +1884,7 @@ local function RebuildGraphsTree()
 
     local playersWithData = {}
     for _, entry in ipairs(playerEntries) do
-        if #entry.Turns > 0 then
-            table.sort(entry.Turns, function(a, b)
-                return a.Number < b.Number
-            end)
-            for _, turnEntry in ipairs(entry.Turns) do
-                table.sort(turnEntry.Messages, function(a, b)
-                    return Locale.Compare(a.Label, b.Label) == -1
-                end)
-            end
+        if #entry.Points > 0 then
             table.insert(playersWithData, entry)
         end
     end
@@ -1814,25 +1909,10 @@ local function RebuildGraphsTree()
         playerNode:SetFocusSound(HOVER_SOUND)
         m_graphsTree:AddChild(playerNode)
 
-        for _, turnEntry in ipairs(entry.Turns) do
-            local turn = turnEntry.Number
-            local turnLabel = Locale.Lookup("LOC_CAI_TIMELINE_TURN", turn)
-            local turnNode = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
-                Label = function() return turnLabel end,
-                FocusKey = "hofdetail:graph:player:" .. entry.ObjectId .. ":turn:" .. turn,
-            })
-            turnNode:SetFocusSound(HOVER_SOUND)
-            playerNode:AddChild(turnNode)
-
-            for _, message in ipairs(turnEntry.Messages) do
-                local messageLabel = message.Label
-                local messageNode = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
-                    Label = function() return messageLabel end,
-                    FocusKey = message.FocusKey,
-                })
-                messageNode:SetFocusSound(HOVER_SOUND)
-                turnNode:AddChild(messageNode)
-            end
+        if m_graphGroupByValue then
+            BuildGraphValueGroups(playerNode, entry)
+        else
+            BuildGraphTurnGroups(playerNode, entry)
         end
     end
 
@@ -1982,8 +2062,23 @@ local function BuildDetailPanel()
 
     -- Tab 3: Graphs
     local graphsPage = m_detailTabs:AddPage(function() return Locale.Lookup("LOC_GAMESUMMARY_GRAPHS") end)
+
     m_graphsTree = mgr:CreateWidget(MakeId("CAIHoFD_grt_"), "Tree", {})
     graphsPage:AddChild(m_graphsTree)
+
+    m_graphsGroupCheckbox = mgr:CreateWidget(MakeId("CAIHoFD_grgroup_"), "Checkbox", {
+        Label = function() return Locale.Lookup("LOC_CAI_REPLAY_GROUP_BY_VALUE") end,
+        Tooltip = function() return Locale.Lookup("LOC_CAI_REPLAY_GROUP_BY_VALUE_TOOLTIP") end,
+        FocusKey = "hofdetail:graph:groupbyvalue",
+    })
+    m_graphsGroupCheckbox:SetValueSetter(function(_, value)
+        SaveGraphGroupByValueSetting(value)
+        m_graphGroupByValue = value and true or false
+        RebuildGraphsTree()
+    end)
+    m_graphsGroupCheckbox:SetChecked(m_graphGroupByValue, true)
+    m_graphsGroupCheckbox:SetFocusSound(HOVER_SOUND)
+    graphsPage:AddChild(m_graphsGroupCheckbox)
 
     -- Tab sync
     local vanillaTabButtons = { Controls.OverviewTab, Controls.ReportsTab, Controls.GraphsTab }
@@ -2018,6 +2113,7 @@ local function DestroyDetailPanel()
         m_overviewTree = nil
         m_reportsTree = nil
         m_graphsTree = nil
+        m_graphsGroupCheckbox = nil
         m_isDetailBuilt = false
     end
 end

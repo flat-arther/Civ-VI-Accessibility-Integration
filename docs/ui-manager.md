@@ -819,6 +819,17 @@ the focused row's sibling level. The helper module
   by the `SearchTimeout` setting when persistent result navigation is disabled.
 - Collects depth-limited candidates and applies the existing match-tier and
   relevance ordering before focusing the first result.
+- **Proximity bias**: results are grouped by how close each candidate sits to
+  the current tree depth, and the closest group that has any match wins outright
+  over stronger matches farther away — the search only broadens outward when
+  nothing closer matches. Closeness is the depth of the deepest ancestor a
+  candidate shares with the *anchor*: the widget focused when the current query
+  began (`Manager.SearchAnchor`, captured on the first character and held fixed
+  for the whole query so result cycling stays stable even as focus moves).
+  Within the winning proximity group, the usual match-tier / position / length /
+  BFS ordering decides. When there is no anchor inside `root` (e.g. focus is
+  elsewhere), proximity is uniform and ordering falls back to the plain global
+  behavior.
 - **Same-letter cycling**: pressing the same single letter again while that
   one-character search remains active doesn't extend the buffer. The next
   search starts after the focused

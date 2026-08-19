@@ -96,8 +96,11 @@
 [x] Shift required envoy total up by one in city-state screen
 [x] Surveyor  should show religious enemy units
 [x] Add a way to toggle the mod for hotseat
-[ ] Typeahead should prioritize current depth
-[ ] Auto announce yields in city management interface
+[x] Typeahead should prioritize current depth
+[x] Auto announce yields in city management interface
+[x]Add support for detailed map tacs
+[x] Add support for better balanced game
+[x] Add support for better trade screen
+[ ] Add support for better reports, extended policy cards, quick deals, real Era Tracker
 [ ] Look in to coastal raide yield reporting
 [ ] River flow direction reporting
-[ ] Add support for better reports, detailed map tacs, extended policy cards, better balanced game, better trade screen, real Era Tracker

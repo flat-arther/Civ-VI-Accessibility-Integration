@@ -1,6 +1,27 @@
 include("caiUtils")
+
+-- Better Balanced Game (BBG) also replaces the TradeOverview context with its own
+-- wrapper (tradeoverview_bbg.lua) that overrides ViewAvailableRoutes() to regroup
+-- the Available Routes tab (city-states vs. civs by influence eligibility). Only
+-- one ReplaceUIScript wins per context, so when BBG is active we chain-include a
+-- vendored verbatim copy instead of vanilla and layer CAI accessibility on top of
+-- it. CAI wraps CreatePlayerHeader/CreateCityStateHeader/AddRoute, which BBG's
+-- ViewAvailableRoutes calls, so the accessibility layer captures BBG's grouping.
+local BBG_MOD_IDS = {
+    "cb84075d-5007-4207-b662-c35a5f7be240", -- iElden (current)
+    "cb84075d-5007-4207-b662-c35a5f7be217", -- codenaugh
+    "cb84075d-5007-4207-b662-c35a5f7be231", -- beta
+}
+local function IsBBGActive()
+    for _, id in ipairs(BBG_MOD_IDS) do
+        if Modding.IsModActive(id) then return true end
+    end
+    return false
+end
 if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_INDONESIA_KHMER" then
     include("TradeOverview_Indonesia_KhmerScenario")
+elseif IsBBGActive() then
+    include("TradeOverview_BetterBalancedGame_CAIBase")
 else
     include("TradeOverview")
 end

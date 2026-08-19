@@ -549,6 +549,15 @@ end
 ---@param b SearchResult
 ---@return boolean
 function S.CompareSearchResults(a, b)
+    -- Closer to the current tree depth wins first. Within a single proximity
+    -- bucket (the normal case after FindBestTierResults) these are equal, so the
+    -- remaining keys decide; the guard keeps ordering stable if buckets ever mix.
+    local pa = a.Proximity or 0
+    local pb = b.Proximity or 0
+    if pa ~= pb then
+        return pa > pb
+    end
+
     if a.SourceRank ~= b.SourceRank then
         return a.SourceRank < b.SourceRank
     end
@@ -606,14 +615,70 @@ function S.IsValidSearchStartCharacter(char)
     return not INVALID_SEARCH_START_CHARS[char]
 end
 
+---Map every widget on the path from the anchor up to (and including) root to its
+---depth from root, so a deeper shared ancestor means a closer candidate. Returns
+---nil when there is no usable anchor inside root, which disables proximity bias
+---and preserves the plain global ordering.
+---@param anchor UIWidget|nil
+---@param root UIWidget
+---@return table<UIWidget, integer>|nil
+local function BuildFocusDepths(anchor, root)
+    if not anchor then
+        return nil
+    end
+    local chain = {}
+    local node = anchor
+    local reachedRoot = false
+    while node do
+        chain[#chain + 1] = node
+        if node == root then
+            reachedRoot = true
+            break
+        end
+        node = node.Parent
+    end
+    -- Anchor is not inside this tree; nothing to bias toward.
+    if not reachedRoot then
+        return nil
+    end
+    -- chain[1] = anchor (deepest), chain[#chain] = root (depth 0).
+    local depths = {}
+    local n = #chain
+    for i, w in ipairs(chain) do
+        depths[w] = n - i
+    end
+    return depths
+end
+
+---Proximity of a candidate to the anchor: the depth of the deepest ancestor it
+---shares with the anchor path. Larger is closer. Candidates outside the anchor
+---path score below root (-1) so they only surface when nothing closer matches.
+---@param widget UIWidget
+---@param focusDepths table<UIWidget, integer>
+---@return integer
+local function CandidateProximity(widget, focusDepths)
+    local node = widget
+    while node do
+        local d = focusDepths[node]
+        if d then return d end
+        node = node.Parent
+    end
+    return -1
+end
+
 ---@param candidates SearchCandidate[]
 ---@param query string
 ---@param useTooltip boolean
 ---@param excludedWidgets? table<UIWidget, boolean>
+---@param focusDepths? table<UIWidget, integer>
 ---@return SearchResult[], table<UIWidget, boolean>
-local function FindBestTierResults(candidates, query, useTooltip, excludedWidgets)
-    ---@type table<integer, SearchResult[]>
-    local resultsByTier = {}
+local function FindBestTierResults(candidates, query, useTooltip, excludedWidgets, focusDepths)
+    -- Bucket matches by proximity first, then by tier within each proximity, so
+    -- the closest tree depth that has any match wins outright over stronger
+    -- matches further away; broaden outward only when nothing closer matched.
+    ---@type table<integer, table<integer, SearchResult[]>>
+    local byProximity = {}
+    local bestProximity
     local matchedWidgets = {}
     local sourceRank = useTooltip and 1 or 0
 
@@ -632,9 +697,18 @@ local function FindBestTierResults(candidates, query, useTooltip, excludedWidget
                         sourceRank
                     )
                     if result then
-                        if not resultsByTier[tier] then resultsByTier[tier] = {} end
-                        resultsByTier[tier][#resultsByTier[tier] + 1] = result
+                        local proximity = focusDepths
+                            and CandidateProximity(candidate.Widget, focusDepths)
+                            or 0
+                        result.Proximity = proximity
+                        local tiers = byProximity[proximity]
+                        if not tiers then tiers = {}; byProximity[proximity] = tiers end
+                        if not tiers[tier] then tiers[tier] = {} end
+                        tiers[tier][#tiers[tier] + 1] = result
                         matchedWidgets[candidate.Widget] = true
+                        if not bestProximity or proximity > bestProximity then
+                            bestProximity = proximity
+                        end
                         break
                     end
                 end
@@ -642,8 +716,13 @@ local function FindBestTierResults(candidates, query, useTooltip, excludedWidget
         end
     end
 
+    if not bestProximity then
+        return {}, matchedWidgets
+    end
+
+    local tiers = byProximity[bestProximity]
     for _, tier in ipairs(SEARCH_ORDER) do
-        local results = resultsByTier[tier]
+        local results = tiers[tier]
         if results and #results > 0 then
             table.sort(results, S.CompareSearchResults)
             return results, matchedWidgets
@@ -670,10 +749,18 @@ function S.FindSearchResults(root, query, maxDepth)
     else
         candidates = S.CollectSearchCandidates(root, maxDepth, includeTooltips)
     end
-    local labelResults, labelMatches = FindBestTierResults(candidates, query, false)
+
+    -- Bias results toward where focus was when the query began (the current tree
+    -- depth). Falls back to live focus, then to no bias, so plain callers are
+    -- unaffected.
+    local mgr = root.Manager
+    local anchor = mgr and (mgr:GetSearchAnchor() or mgr:GetFocusedWidget())
+    local focusDepths = BuildFocusDepths(anchor, root)
+
+    local labelResults, labelMatches = FindBestTierResults(candidates, query, false, nil, focusDepths)
 
     if includeTooltips then
-        local tooltipResults = FindBestTierResults(candidates, query, true, labelMatches)
+        local tooltipResults = FindBestTierResults(candidates, query, true, labelMatches, focusDepths)
         for _, result in ipairs(tooltipResults) do
             labelResults[#labelResults + 1] = result
         end

@@ -155,15 +155,690 @@ function GetUnlockDescription(typeName)
     return nil
 end
 
+-- ===========================================================================
+-- Shared production/unlock detail builders (moved here from ProductionPanel_CAI
+-- so the production panel and the tech/civic unlock lists build item
+-- descriptions the same way). The builders read a "detail" table from a bare
+-- { Type = ... } item -- the production panel additionally fills in
+-- cost/turns/progress/failures, while the unlock lists pass none of those so
+-- FormatTooltip renders static info only (description, stats, bonuses,
+-- requirements). BuildBuildingDetail takes the city as a parameter (nil in the
+-- unlock context) instead of reading production-panel module state.
+-- ===========================================================================
+
+function NewDetail()
+    return {
+        repairNeeded        = false,
+        cannotAfford        = false,
+        cost                = nil,
+        costYield           = nil,
+        turnsLeft           = nil,
+        progressPct         = nil,
+        maintenance         = nil,
+        resourceUpkeep      = nil,
+        description         = nil,
+        promotionClass      = nil, ---@type string|nil (units only; rendered last)
+        stats               = {}, ---@type string[]
+        citizenYields       = {}, ---@type string[]
+        citizenYieldsHeader = nil, ---@type string|nil (loc tag emitted before citizenYields)
+        failures            = {}, ---@type string[]
+        bonuses             = {}, ---@type string[]
+        requirements        = {}, ---@type string[]
+        policyUnlocks       = {}, ---@type table[] -- { {name=, description=}, ... }
+    }
+end
+
+local GREAT_WORK_SLOT_LOC = {
+    GREATWORKSLOT_PALACE    = "LOC_TYPE_TRAIT_GREAT_WORKS_PALACE_SLOTS",
+    GREATWORKSLOT_ART       = "LOC_TYPE_TRAIT_GREAT_WORKS_ART_SLOTS",
+    GREATWORKSLOT_WRITING   = "LOC_TYPE_TRAIT_GREAT_WORKS_WRITING_SLOTS",
+    GREATWORKSLOT_MUSIC     = "LOC_TYPE_TRAIT_GREAT_WORKS_MUSIC_SLOTS",
+    GREATWORKSLOT_RELIC     = "LOC_TYPE_TRAIT_GREAT_WORKS_RELIC_SLOTS",
+    GREATWORKSLOT_ARTIFACT  = "LOC_TYPE_TRAIT_GREAT_WORKS_ARTIFACT_SLOTS",
+    GREATWORKSLOT_CATHEDRAL = "LOC_TYPE_TRAIT_GREAT_WORKS_CATHEDRAL_SLOTS",
+    GREATWORKSLOT_PRODUCT   = "LOC_TYPE_TRAIT_GREAT_WORKS_PRODUCT_SLOTS",
+}
+
+local function FormatYieldChange(amount, yieldType)
+    local y = yieldType and GameInfo.Yields[yieldType] or nil
+    if not y then return nil end
+    return Locale.Lookup("LOC_TYPE_TRAIT_YIELD", amount, y.IconString, y.Name)
+end
+
+local function SetCost(detail, cost, yieldType)
+    if not cost or cost <= 0 then return end
+    detail.cost = cost
+    detail.costYield = yieldType or "YIELD_PRODUCTION"
+end
+
+local function SetMaintenance(detail, maintenance, yieldType)
+    if not maintenance or maintenance <= 0 then return end
+    local y = GameInfo.Yields[yieldType or "YIELD_GOLD"]
+    if not y then return end
+    detail.maintenance = Locale.Lookup("LOC_TOOLTIP_MAINTENANCE", maintenance, y.IconString, y.Name)
+end
+
+-- Units
+function BuildUnitDetail(item, formation)
+    local d = NewDetail()
+    local def = item.Type and GameInfo.Units[item.Type] or nil
+    if not def then return d end
+
+    local cost = item.Cost
+    if formation == "corps" then
+        cost = item.CorpsCost
+    elseif formation == "army" then
+        cost = item.ArmyCost
+    end
+    SetCost(d, cost, item.Yield)
+    if item.TurnsLeft and item.TurnsLeft >= 0 then d.turnsLeft = item.TurnsLeft end
+
+    if def.Description and def.Description ~= "" then
+        d.description = Locale.Lookup(def.Description)
+    end
+
+    local promo = def.PromotionClass and GameInfo.UnitPromotionClasses[def.PromotionClass] or nil
+    if promo and promo.Name and not (def.UnitType and string.find(def.UnitType, "UNIT_HERO")) then
+        d.promotionClass = Locale.Lookup("LOC_UNIT_PROMOTION_CLASS", promo.Name)
+    end
+
+    SetMaintenance(d, def.Maintenance)
+
+    local function S(key, ...) table.insert(d.stats, Locale.Lookup(key, ...)) end
+    if def.Combat and def.Combat > 0 then S("LOC_UNIT_COMBAT_STRENGTH", def.Combat) end
+    if def.RangedCombat and def.RangedCombat > 0 and def.Range and def.Range > 0 then
+        S("LOC_UNIT_RANGED_STRENGTH", def.RangedCombat, def.Range)
+    end
+    if def.Bombard and def.Bombard > 0 and def.Range and def.Range > 0 then
+        S("LOC_UNIT_BOMBARD_STRENGTH", def.Bombard, def.Range)
+    end
+    if UnitManager and UnitManager.GetUnitTypeBaseLifespan then
+        local life = UnitManager.GetUnitTypeBaseLifespan(def.Index)
+        if life and life > 0 then S("LOC_UNIT_LIFESPAN", life) end
+    end
+    if def.BaseMoves and def.BaseMoves > 0 then S("LOC_UNIT_MOVEMENT", def.BaseMoves) end
+    if def.AirSlots and def.AirSlots ~= 0 then S("LOC_TYPE_TRAIT_AIRSLOTS", def.AirSlots) end
+
+    if def.StrategicResource then
+        local r = GameInfo.Resources[def.StrategicResource]
+        if r then
+            table.insert(d.requirements, "[ICON_" .. r.ResourceType .. "] " .. Locale.Lookup(r.Name))
+        end
+    end
+
+    if GameInfo.UnitConsumption then
+        for row in GameInfo.UnitConsumption() do
+            if row.UnitType == def.UnitType and row.ResourceMaintenanceAmount and row.ResourceMaintenanceAmount > 0 then
+                local r = GameInfo.Resources[row.ResourceType]
+                if r then
+                    d.resourceUpkeep = Locale.Lookup("LOC_CAI_PRODUCTION_RESOURCE_UPKEEP",
+                        row.ResourceMaintenanceAmount, Locale.Lookup(r.Name))
+                end
+            end
+        end
+    end
+
+    return d
+end
+
+-- Buildings (incl. Wonders)
+function BuildBuildingDetail(item, pCity)
+    local d = NewDetail()
+    local def = item.Type and GameInfo.Buildings[item.Type] or nil
+    if not def then return d end
+
+    local bt = def.BuildingType
+    local playerID = Game.GetLocalPlayer()
+
+    SetCost(d, item.Cost, item.Yield)
+    if item.TurnsLeft and item.TurnsLeft >= 0 then d.turnsLeft = item.TurnsLeft end
+    if def.Description and def.Description ~= "" then
+        d.description = Locale.Lookup(def.Description)
+    end
+    SetMaintenance(d, def.Maintenance)
+
+    d.citizenYieldsHeader = "LOC_TOOLTIP_BUILDING_CITIZEN_YIELDS_HEADER"
+
+    local district = nil
+    if pCity then
+        district = pCity:GetDistricts():GetDistrict(def.PrereqDistrict)
+    end
+
+    if pCity then
+        for yield in GameInfo.Yields() do
+            local change = pCity:GetBuildingPotentialYield(def.Hash, yield.YieldType)
+            if change and change ~= 0 then
+                local line = FormatYieldChange(change, yield.YieldType)
+                if line then table.insert(d.bonuses, line) end
+            end
+        end
+    else
+        for row in GameInfo.Building_YieldChanges() do
+            if row.BuildingType == bt then
+                local line = FormatYieldChange(row.YieldChange, row.YieldType)
+                if line then table.insert(d.bonuses, line) end
+            end
+        end
+    end
+
+    for row in GameInfo.Building_YieldDistrictCopies() do
+        if row.BuildingType == bt then
+            local from = GameInfo.Yields[row.OldYieldType]
+            local to = GameInfo.Yields[row.NewYieldType]
+            if from and to then
+                table.insert(d.bonuses,
+                    Locale.Lookup("LOC_TOOLTIP_BUILDING_DISTRICT_COPY",
+                        to.IconString, to.Name, from.IconString, from.Name))
+            end
+        end
+    end
+
+    if def.Housing and def.Housing ~= 0 then
+        table.insert(d.bonuses, Locale.Lookup("LOC_TYPE_TRAIT_HOUSING", def.Housing))
+    end
+
+    local entertainment = def.Entertainment or 0
+    if entertainment ~= 0 then
+        if district and def.RegionalRange and def.RegionalRange ~= 0 then
+            entertainment = entertainment + district:GetExtraRegionalEntertainment()
+        end
+        table.insert(d.bonuses, Locale.Lookup("LOC_TYPE_TRAIT_AMENITY_ENTERTAINMENT", entertainment))
+    end
+
+    if def.CitizenSlots and def.CitizenSlots ~= 0 then
+        table.insert(d.bonuses, Locale.Lookup("LOC_TYPE_TRAIT_CITIZENS", def.CitizenSlots))
+    end
+    if def.OuterDefenseHitPoints and def.OuterDefenseHitPoints ~= 0 then
+        table.insert(d.bonuses, Locale.Lookup("LOC_TYPE_TRAIT_OUTER_DEFENSE", def.OuterDefenseHitPoints))
+    end
+    for row in GameInfo.Building_GreatPersonPoints() do
+        if row.BuildingType == bt then
+            local cls = GameInfo.GreatPersonClasses[row.GreatPersonClassType]
+            if cls then
+                table.insert(d.bonuses, Locale.Lookup("LOC_TYPE_TRAIT_GREAT_PERSON_POINTS",
+                    row.PointsPerTurn, cls.IconString, cls.Name))
+            end
+        end
+    end
+    for row in GameInfo.Building_GreatWorks() do
+        if row.BuildingType == bt then
+            local key = GREAT_WORK_SLOT_LOC[row.GreatWorkSlotType]
+            if key then
+                table.insert(d.bonuses, Locale.Lookup(key, row.NumSlots))
+            end
+        end
+    end
+
+    if district and def.RegionalRange and def.RegionalRange ~= 0 then
+        local extra = district:GetExtraRegionalRange()
+        if extra and extra ~= 0 then
+            table.insert(d.bonuses, Locale.Lookup("LOC_TOOLTIP_EXTRA_REGIONAL_RANGE", extra))
+        end
+    end
+
+    for row in GameInfo.Building_CitizenYieldChanges() do
+        if row.BuildingType == bt then
+            local line = FormatYieldChange(row.YieldChange, row.YieldType)
+            if line then table.insert(d.citizenYields, line) end
+        end
+    end
+
+    if def.UnlocksGovernmentPolicy and playerID ~= -1 then
+        local pCulture = Players[playerID] and Players[playerID]:GetCulture() or nil
+        local slot = pCulture and pCulture:GetPolicyToUnlock(def.Index) or -1
+        if slot and slot ~= -1 then
+            local policy = GameInfo.Policies[slot]
+            if policy then
+                table.insert(d.policyUnlocks, {
+                    name = Locale.Lookup(policy.Name),
+                    description = policy.Description and Locale.Lookup(policy.Description) or nil,
+                })
+            end
+        end
+    end
+
+    if def.RequiresReligion then
+        table.insert(d.requirements, Locale.Lookup("LOC_TOOLTIP_PLACEMENT_REQUIRES_RELIGION"))
+    end
+    for row in GameInfo.MutuallyExclusiveBuildings() do
+        if row.Building == bt then
+            local ex = GameInfo.Buildings[row.MutuallyExclusiveBuilding]
+            if ex then
+                table.insert(d.requirements,
+                    Locale.Lookup("LOC_TOOLTIP_BUILDING_MUTUALLY_EXCLUSIVE_WITH", ex.Name))
+            end
+        end
+    end
+    local required_buildings = {}
+    for row in GameInfo.BuildingPrereqs() do
+        if row.Building == bt then
+            local pre = GameInfo.Buildings[row.PrereqBuilding]
+            if pre then
+                local preD = GameInfo.Districts[pre.PrereqDistrict]
+                if preD and preD.DistrictType ~= "DISTRICT_CITY_CENTER"
+                    and preD.DistrictType ~= def.PrereqDistrict then
+                    table.insert(required_buildings, Locale.Lookup(
+                        "LOC_TOOLTIP_BUILDING_REQUIRES_BUILDING_WITH_DISTRICT", pre.Name, preD.Name))
+                else
+                    table.insert(required_buildings, Locale.Lookup(
+                        "LOC_TOOLTIP_BUILDING_REQUIRES_BUILDING", pre.Name))
+                end
+            end
+        end
+    end
+    if #required_buildings == 1 then
+        table.insert(d.requirements, required_buildings[1])
+    elseif #required_buildings == 2 then
+        table.insert(d.requirements, Locale.Lookup(
+            "LOC_TOOLTIP_BUILDING_REQUIRES_BUILDING_OR", required_buildings[1], required_buildings[2]))
+    elseif #required_buildings > 2 then
+        table.insert(d.requirements, Locale.Lookup("LOC_TOOLTIP_BUILDING_REQUIRES_ONE_OF_FOLLOWING"))
+        for _, line in ipairs(required_buildings) do
+            table.insert(d.requirements, line)
+        end
+    end
+    if def.PrereqDistrict then
+        local dist = GameInfo.Districts[def.PrereqDistrict]
+        if dist and dist.DistrictType ~= "DISTRICT_CITY_CENTER" then
+            table.insert(d.requirements, Locale.Lookup("LOC_TOOLTIP_BUILDING_REQUIRES_DISTRICT", dist.Name))
+        end
+    end
+    if def.AdjacentDistrict then
+        local adj = GameInfo.Districts[def.AdjacentDistrict]
+        if adj then
+            table.insert(d.requirements,
+                Locale.Lookup("LOC_TOOLTIP_BUILDING_REQUIRES_ADJACENT_DISTRICT", adj.Name))
+        end
+    end
+    if def.AdjacentImprovement then
+        local imp = GameInfo.Improvements[def.AdjacentImprovement]
+        if imp then
+            table.insert(d.requirements,
+                Locale.Lookup("LOC_TOOLTIP_BUILDING_REQUIRES_ADJACENT_DISTRICT", imp.Name))
+        end
+    end
+    if def.AdjacentResource then
+        local r = GameInfo.Resources[def.AdjacentResource]
+        if r then
+            table.insert(d.requirements,
+                Locale.Lookup("LOC_TOOLTIP_BUILDING_REQUIRES_ADJACENT_RESOURCE", r.Name))
+        end
+    end
+    if def.RequiresRiver or def.RequiresAdjacentRiver then
+        table.insert(d.requirements, Locale.Lookup("LOC_TOOLTIP_PLACEMENT_REQUIRES_ADJACENT_RIVER"))
+    end
+    if def.MustBeLake then table.insert(d.requirements, Locale.Lookup("LOC_TOOLTIP_PLACEMENT_REQUIRES_LAKE")) end
+    if def.MustNotBeLake then table.insert(d.requirements, Locale.Lookup("LOC_TOOLTIP_PLACEMENT_REQUIRES_NOT_LAKE")) end
+    if def.AdjacentToMountain then
+        table.insert(d.requirements, Locale.Lookup("LOC_TOOLTIP_PLACEMENT_REQUIRES_ADJACENT_MOUNTAIN"))
+    end
+    if def.Coast or def.MustBeAdjacentLand then
+        table.insert(d.requirements, Locale.Lookup("LOC_TOOLTIP_PLACEMENT_REQUIRES_COAST"))
+    end
+
+    return d
+end
+
+-- Districts
+function BuildDistrictDetail(item)
+    local d = NewDetail()
+    local def = item.Type and GameInfo.Districts[item.Type] or nil
+    if not def then return d end
+
+    SetCost(d, item.Cost, item.Yield)
+    if item.TurnsLeft and item.TurnsLeft >= 0 then d.turnsLeft = item.TurnsLeft end
+    if def.Description and def.Description ~= "" then
+        d.description = Locale.Lookup(def.Description)
+    end
+    SetMaintenance(d, def.Maintenance)
+
+    d.citizenYieldsHeader = "LOC_TOOLTIP_DISTRICT_CITIZEN_YIELDS_HEADER"
+
+    for row in GameInfo.District_GreatPersonPoints() do
+        if row.DistrictType == def.DistrictType then
+            local cls = GameInfo.GreatPersonClasses[row.GreatPersonClassType]
+            if cls then
+                table.insert(d.bonuses, Locale.Lookup("LOC_TYPE_TRAIT_GREAT_PERSON_POINTS",
+                    row.PointsPerTurn, cls.IconString, cls.Name))
+            end
+        end
+    end
+    if def.Housing and def.Housing ~= 0 then
+        table.insert(d.bonuses, Locale.Lookup("LOC_TYPE_TRAIT_HOUSING", def.Housing))
+    end
+    if def.Entertainment and def.Entertainment ~= 0 then
+        table.insert(d.bonuses, Locale.Lookup("LOC_TYPE_TRAIT_AMENITY_ENTERTAINMENT", def.Entertainment))
+    end
+    local air = tonumber(def.AirSlots) or 0
+    if air ~= 0 then table.insert(d.bonuses, Locale.Lookup("LOC_TYPE_TRAIT_AIRSLOTS", air)) end
+    local cit = tonumber(def.CitizenSlots) or 0
+    if cit ~= 0 then table.insert(d.bonuses, Locale.Lookup("LOC_TYPE_TRAIT_CITIZENSLOTS", cit)) end
+
+    if type(ToolTipHelper) == "table" and type(ToolTipHelper.GetAdjacencyBonuses) == "function" then
+        local lines = ToolTipHelper.GetAdjacencyBonuses(GameInfo.District_Adjacencies, "DistrictType", def.DistrictType)
+        if type(lines) == "table" then
+            for _, line in ipairs(lines) do
+                if line and line ~= "" then table.insert(d.bonuses, line) end
+            end
+        end
+    end
+
+    for row in GameInfo.District_CitizenYieldChanges() do
+        if row.DistrictType == def.DistrictType then
+            local line = FormatYieldChange(row.YieldChange, row.YieldType)
+            if line then table.insert(d.citizenYields, line) end
+        end
+    end
+
+    if def.NoAdjacentCity then
+        table.insert(d.requirements, Locale.Lookup("LOC_DISTRICT_REQUIRE_NOT_ADJACENT_TO_CITY"))
+    end
+
+    return d
+end
+
+-- Projects
+function BuildProjectDetail(item)
+    local d = NewDetail()
+    local def = item.Type and GameInfo.Projects[item.Type] or nil
+    if not def then return d end
+
+    SetCost(d, item.Cost, item.Yield)
+    if item.TurnsLeft and item.TurnsLeft >= 0 then d.turnsLeft = item.TurnsLeft end
+    local desc = def.ShortDescription or def.Description
+    if desc and desc ~= "" then
+        d.description = Locale.Lookup(desc)
+    end
+
+    if def.AmenitiesWhileActive and def.AmenitiesWhileActive > 0 then
+        table.insert(d.bonuses,
+            Locale.Lookup("LOC_PROJECT_AMENITIES_WHILE_ACTIVE", def.AmenitiesWhileActive))
+    end
+    for row in GameInfo.Project_YieldConversions() do
+        if row.ProjectType == def.ProjectType then
+            local y = GameInfo.Yields[row.YieldType]
+            if y then
+                table.insert(d.bonuses,
+                    Locale.Lookup("LOC_PROJECT_YIELD_CONVERSIONS",
+                        y.IconString, y.Name, row.PercentOfProductionRate))
+            end
+        end
+    end
+    for row in GameInfo.Project_GreatPersonPoints() do
+        if row.ProjectType == def.ProjectType then
+            local cls = GameInfo.GreatPersonClasses[row.GreatPersonClassType]
+            if cls then
+                table.insert(d.bonuses, Locale.Lookup("LOC_PROJECT_GREAT_PERSON_POINTS",
+                    cls.IconString, cls.Name))
+            end
+        end
+    end
+
+    return d
+end
+
+local function FormatCostLine(detail)
+    if not detail.cost or not detail.costYield then return nil end
+    if detail.costYield == "YIELD_GOLD" then
+        return Locale.Lookup("LOC_CAI_PRODUCTION_COST_GOLD", detail.cost)
+    elseif detail.costYield == "YIELD_FAITH" then
+        return Locale.Lookup("LOC_CAI_PRODUCTION_COST_FAITH", detail.cost)
+    end
+    return Locale.Lookup("LOC_CAI_PRODUCTION_COST_PRODUCTION", detail.cost)
+end
+
+function FormatTooltip(detail)
+    local parts = {}
+    AppendIfNonEmpty(parts, FormatCostLine(detail))
+    if detail.turnsLeft and detail.turnsLeft > 0 then
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_TURNS", detail.turnsLeft))
+    end
+    if detail.progressPct then
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_PROGRESS", detail.progressPct))
+    end
+    AppendIfNonEmpty(parts, detail.maintenance)
+    AppendIfNonEmpty(parts, detail.resourceUpkeep)
+    AppendIfNonEmpty(parts, detail.description)
+
+    if detail.repairNeeded then AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_REPAIR_NEEDED")) end
+    for _, s in ipairs(detail.stats) do AppendIfNonEmpty(parts, s) end
+
+    if #detail.citizenYields > 0 then
+        if detail.citizenYieldsHeader then
+            AppendIfNonEmpty(parts, Locale.Lookup(detail.citizenYieldsHeader))
+        end
+        for _, c in ipairs(detail.citizenYields) do AppendIfNonEmpty(parts, c) end
+    end
+
+    if #detail.requirements > 0 then
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_TOOLTIP_BUILDING_REQUIRES"))
+        for _, r in ipairs(detail.requirements) do AppendIfNonEmpty(parts, r) end
+    end
+
+    if detail.cannotAfford then AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_CANNOT_AFFORD")) end
+    if #detail.failures > 0 then
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_FAILURE_REASONS_LABEL"))
+        for _, f in ipairs(detail.failures) do AppendIfNonEmpty(parts, f) end
+    end
+
+    AppendIfNonEmpty(parts, detail.promotionClass)
+
+    if #detail.bonuses > 0 then
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_BONUSES_LABEL"))
+        for _, b in ipairs(detail.bonuses) do AppendIfNonEmpty(parts, b) end
+    end
+
+    if #detail.policyUnlocks > 0 then
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_UNLOCKS_LABEL"))
+        for _, u in ipairs(detail.policyUnlocks) do
+            AppendIfNonEmpty(parts, u.name)
+            AppendIfNonEmpty(parts, u.description)
+        end
+    end
+
+    return table.concat(parts, "[NEWLINE]")
+end
+
+-- Split on the literal [NEWLINE] token (plain find; not a Lua pattern) so we
+-- never touch the locale-sensitive %s class on multibyte text.
+local function SplitNewlineToken(text)
+    local lines = {}
+    local pos = 1
+    while true do
+        local s, e = string.find(text, "[NEWLINE]", pos, true)
+        if not s then
+            lines[#lines + 1] = string.sub(text, pos)
+            return lines
+        end
+        lines[#lines + 1] = string.sub(text, pos, s - 1)
+        pos = e + 1
+    end
+end
+
+local function TrimAscii(s)
+    return (string.gsub(s or "", "^[ \t\r\n]*(.-)[ \t\r\n]*$", "%1"))
+end
+
+-- The category word vanilla puts on the tooltip's second line for each unlock
+-- kind ("Policy", "Building", ...). Built lazily and cached; used to lift the
+-- category into the widget label and drop it from the spoken tooltip body.
+local UNLOCK_CATEGORY_TAGS = {
+    "LOC_BUILDING_NAME", "LOC_WONDER_NAME", "LOC_UNIT_NAME", "LOC_DISTRICT_NAME",
+    "LOC_IMPROVEMENT_NAME", "LOC_PROJECT_NAME", "LOC_POLICY_NAME",
+    "LOC_GOVERNMENT_NAME",
+}
+local m_unlockCategorySet = nil
+local function UnlockCategorySet()
+    if m_unlockCategorySet then return m_unlockCategorySet end
+    m_unlockCategorySet = {}
+    for _, tag in ipairs(UNLOCK_CATEGORY_TAGS) do
+        local s = Locale.Lookup(tag)
+        -- Locale.Lookup echoes the tag on a miss; skip those.
+        if s and s ~= "" and s ~= tag then m_unlockCategorySet[s] = true end
+    end
+    return m_unlockCategorySet
+end
+
+-- Normalized form for substring comparison: drop bracket tokens ([ICON_x],
+-- [COLOR_x], [NEWLINE], ...) and collapse ASCII whitespace. Used only to detect
+-- duplicated lines, never for display, so token stripping here is safe (the
+-- central ProcessText still handles display text). ASCII-only sets avoid the
+-- locale-sensitive %s pitfall on multibyte text.
+local function NormalizeForCompare(s)
+    s = string.gsub(s or "", "%[[^%]]*%]", " ")
+    s = string.gsub(s, "[ \t\r\n]+", " ")
+    return TrimAscii(s)
+end
+
+-- Some vanilla improvement descriptions restate the improvement's base yields in
+-- prose, and GetImprovementToolTip then appends those same yields again as
+-- separate stat lines (e.g. Offshore Wind Farm reads "... +2 Production ..." and
+-- then "+2 Production"). Drop a trailing line whose text already appears in an
+-- earlier line so the yield is not spoken twice. Lines that are not already in
+-- the description (e.g. yields the prose never mentioned) are kept.
+local function DropDuplicateLines(body)
+    local out = {}
+    for i, line in ipairs(body) do
+        local norm = NormalizeForCompare(line)
+        local dup = false
+        if norm ~= "" and i > 1 then
+            local earlier = NormalizeForCompare(table.concat(body, " ", 1, i - 1))
+            if string.find(earlier, norm, 1, true) then dup = true end
+        end
+        if not dup then out[#out + 1] = line end
+    end
+    return out
+end
+
+-- Fallback for unlock kinds with no CAI detail builder (policies, improvements,
+-- governments, ...): reshape the vanilla tooltip. Vanilla lays every unlock
+-- tooltip out as line 1 = NAME (optionally with a "(Slot)" suffix for
+-- policies), line 2 = category word, then the description and stats. Lift the
+-- name/category (and slot) into the label and keep only the body as the tooltip.
+local function BuildUnlockDisplayFromVanilla(typeName, name, playerID, kind)
+    local tip = typeName and ToolTipHelper.GetToolTip(typeName, playerID) or nil
+    if not tip or tip == "" then
+        return name, GetUnlockDescription(typeName) or ""
+    end
+
+    local lines = SplitNewlineToken(tip)
+    -- Line 1 is the upper-cased name; only policies append a "(Slot)" suffix.
+    local slot = string.match(TrimAscii(lines[1]), "%(([^()]*)%)$")
+
+    -- Line 2 is the category for every generator we care about, except unique
+    -- variants whose line reads "replaces X"; keep those in the body instead.
+    local category = TrimAscii(lines[2])
+    local bodyStart = 2
+    if UnlockCategorySet()[category] then
+        bodyStart = 3
+    else
+        category = nil
+    end
+
+    local label = name
+    if category then label = label .. ", " .. category end
+    if slot and slot ~= "" then label = label .. " (" .. slot .. ")" end
+
+    local body = {}
+    for i = bodyStart, #lines do
+        if TrimAscii(lines[i]) ~= "" then body[#body + 1] = lines[i] end
+    end
+
+    -- Improvement descriptions often restate their base yields, which vanilla
+    -- then appends again; drop those duplicates.
+    if kind == "KIND_IMPROVEMENT" then
+        body = DropDuplicateLines(body)
+    end
+
+    return label, table.concat(body, "[NEWLINE]")
+end
+
+-- Category loc tag for the label ("Catapult, Unit") of producible kinds.
+local UNLOCK_KIND_CATEGORY = {
+    KIND_UNIT        = "LOC_UNIT_NAME",
+    KIND_DISTRICT    = "LOC_DISTRICT_NAME",
+    KIND_PROJECT     = "LOC_PROJECT_NAME",
+}
+
+-- Build a static CAI detail for the producible kinds the shared builders cover;
+-- nil for anything else. The item carries the base production cost from the
+-- database (not the player-adjusted build-queue cost) so the tooltip opens with
+-- a base production line, but no dynamic turns/progress.
+local function BuildStaticUnlockDetail(typeName, kind)
+    local item = { Type = typeName }
+    if kind == "KIND_UNIT" then
+        local def = GameInfo.Units[typeName]
+        item.Cost = def and def.Cost or nil
+        return BuildUnitDetail(item, nil)
+    end
+    if kind == "KIND_BUILDING" then
+        local def = GameInfo.Buildings[typeName]
+        item.Cost = def and def.Cost or nil
+        return BuildBuildingDetail(item, nil)
+    end
+    if kind == "KIND_DISTRICT" then
+        local def = GameInfo.Districts[typeName]
+        item.Cost = def and def.Cost or nil
+        return BuildDistrictDetail(item)
+    end
+    if kind == "KIND_PROJECT" then
+        local def = GameInfo.Projects[typeName]
+        item.Cost = def and def.Cost or nil
+        return BuildProjectDetail(item)
+    end
+    return nil
+end
+
+-- Build a label + tooltip for one unlock, matching how CAI describes producible
+-- items in the production panel: name and type on the label ("Catapult, Unit"),
+-- the static description and stats in the tooltip. Producible kinds go through
+-- the shared detail builders (static fields only); other kinds fall back to the
+-- reshaped vanilla tooltip.
+---@param typeName string
+---@param name string localized proper-case name
+---@param playerID number
+---@return string label, string tooltip
+function BuildUnlockDisplay(typeName, name, playerID)
+    local t = typeName and GameInfo.Types[typeName] or nil
+    local kind = t and t.Kind or nil
+
+    local detail = BuildStaticUnlockDetail(typeName, kind)
+    if not detail then
+        return BuildUnlockDisplayFromVanilla(typeName, name, playerID, kind)
+    end
+
+    local catTag
+    if kind == "KIND_BUILDING" then
+        local b = GameInfo.Buildings[typeName]
+        catTag = (b and b.IsWonder) and "LOC_WONDER_NAME" or "LOC_BUILDING_NAME"
+    else
+        catTag = UNLOCK_KIND_CATEGORY[kind]
+    end
+
+    local label = name
+    if catTag then
+        local cat = Locale.Lookup(catTag)
+        if cat and cat ~= "" and cat ~= catTag then label = label .. ", " .. cat end
+    end
+    return label, FormatTooltip(detail)
+end
+
 function GetCivicUnlockObjects(kData)
     local unlocks = {}
+    local playerID = Game.GetLocalPlayer()
     for _, u in ipairs(GetCivicUnlockables(kData)) do
         local typeName, locName = u[1], u[2]
         if locName and locName ~= "" then
+            local name = Locale.Lookup(locName)
+            local label, tooltip = BuildUnlockDisplay(typeName, name, playerID)
             table.insert(unlocks, {
                 TypeName = typeName,
-                Name = Locale.Lookup(locName),
+                Name = name,
                 Description = GetUnlockDescription(typeName),
+                -- Name/category (and policy slot) in the label; description and
+                -- stats in the tooltip, matching the production panel layout.
+                DisplayLabel = label,
+                DisplayTooltip = tooltip,
             })
         end
     end
@@ -189,10 +864,16 @@ function GetTechUnlockObjects(kData)
                     Name = Locale.Lookup(locName),
                 })
             else
+                local name = Locale.Lookup(locName)
+                local label, tooltip = BuildUnlockDisplay(typeName, name, playerID)
                 table.insert(unlocks, {
                     TypeName = typeName,
-                    Name = Locale.Lookup(locName),
+                    Name = name,
                     Description = GetUnlockDescription(typeName),
+                    -- Name/category (and policy slot) in the label; description
+                    -- and stats in the tooltip, matching the production panel.
+                    DisplayLabel = label,
+                    DisplayTooltip = tooltip,
                 })
             end
         end
@@ -257,8 +938,10 @@ end
 function CreateUnlockChild(mgr, unlock, idPrefix)
     local prefix = idPrefix or "CAIUnlock"
     local child = mgr:CreateWidget(mgr:GenerateWidgetId(prefix), "TreeItem", {
-        Label    = function() return unlock.Name end,
-        Tooltip  = function() return unlock.Description or "" end,
+        -- Label carries name + category (+ policy slot); tooltip carries the
+        -- static description and stats with the header stripped.
+        Label    = function() return unlock.DisplayLabel or unlock.Name end,
+        Tooltip  = function() return unlock.DisplayTooltip or unlock.Description or "" end,
         FocusKey = "unlock:" .. tostring(unlock.TypeName),
     })
     child:AddInputBindings({

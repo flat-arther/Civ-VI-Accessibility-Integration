@@ -5239,6 +5239,9 @@
     <Replace Tag="LOC_CAI_REPORTS_SELECT_CITY" Language="zh_Hans_CN">
       <Text>选择城市</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_OPEN_PRODUCTION" Language="zh_Hans_CN">
+      <Text>选择城市并打开生产面板</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_REPORTS_FILTER_PLAYER" Language="zh_Hans_CN">
       <Text>按玩家筛选</Text>
     </Replace>
@@ -7289,6 +7292,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_MODS_DISABLE_FAILED" Language="zh_Hans_CN">
       <Text>无法禁用模组</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPLAY_GROUP_BY_VALUE" Language="zh_Hans_CN">
+      <Text>按数值分组</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPLAY_GROUP_BY_VALUE_TOOLTIP" Language="zh_Hans_CN">
+      <Text>勾选后，回放图表数据按数值分组，展开某个数值会列出其发生变化的回合。取消勾选后，数据按回合分组，每个回合内显示发生变化的数值。</Text>
     </Replace>
 
   </LocalizedText>

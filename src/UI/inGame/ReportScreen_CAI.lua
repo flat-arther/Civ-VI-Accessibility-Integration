@@ -637,6 +637,17 @@ ActivateCity = function(pCity)
     if plot then ActivatePlot(plot:GetIndex()) end
 end
 
+-- Ctrl+Enter path from the City Status tab: close the report, select the city,
+-- and open its production panel. The production panel reads the head selected
+-- city synchronously in its Open(), so selecting first is enough.
+local function SelectCityAndOpenProduction(pCity)
+    if pCity == nil then return false end
+    Close()
+    UI.SelectCity(pCity)
+    LuaEvents.CityPanel_ProductionOpen()
+    return true
+end
+
 local function GetUnitPlotIndex(playerID, unitID)
     local player = Players[playerID]
     local unit = player and player:GetUnits():FindID(unitID) or nil
@@ -2092,6 +2103,9 @@ local function BuildCityStatusTableColumns()
         })
     end
 
+    -- Production is appended last so it becomes the final table column; every
+    -- other yield keeps GameInfo.Yields() order.
+    local productionColumn = nil
     for yield in GameInfo.Yields() do
         local yieldIndex = yield.Index
         local yieldName = yield.Name
@@ -2111,8 +2125,13 @@ local function BuildCityStatusTableColumns()
             column.getTooltip = function(kCityData)
                 return GetCityStatusProductionText(kCityData)
             end
+            productionColumn = column
+        else
+            table.insert(columns, column)
         end
-        table.insert(columns, column)
+    end
+    if productionColumn then
+        table.insert(columns, productionColumn)
     end
     return columns
 end
@@ -2421,6 +2440,19 @@ local function EnsureCityStatusControls(entry)
             Key = Keys["2"], IsAlt = true, MSG = KeyEvents.KeyDown,
             Description = "LOC_CAI_REPORTS_SWITCH_TO_LIST",
             Action = function() return SetCityStatusViewMode(entry, "list") end,
+        },
+        {
+            Key = Keys.VK_RETURN, IsControl = true,
+            Description = "LOC_CAI_REPORTS_OPEN_PRODUCTION",
+            Action = function()
+                if m_cityStatusSelectedCityID == nil then return false end
+                for _, kCityData in ipairs(m_caiCityData) do
+                    if kCityData.City:GetID() == m_cityStatusSelectedCityID then
+                        return SelectCityAndOpenProduction(kCityData.City)
+                    end
+                end
+                return false
+            end,
         },
     })
 end

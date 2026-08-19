@@ -1586,6 +1586,9 @@ function UIScreenManager:BeginTypeToFind(target) end
 ---@return string
 function UIScreenManager:GetSearchBuffer() end
 
+---@return UIWidget|nil
+function UIScreenManager:GetSearchAnchor() end
+
 ---Open the Ctrl+F search overlay on a container. Applies the container's
 ---query handler and query mode to the shared SearchPanel before opening.
 ---@param container ContainerWidget
@@ -1677,6 +1680,7 @@ function CAIWidgetHelpers_DialogBuilder.CreatePopupDialog(mgr, popup) end
 ---@field SourceRank integer 0 for a label match, 1 for a tooltip-only match.
 ---@field MatchPosition integer
 ---@field LabelLength integer
+---@field Proximity? integer Depth of the deepest ancestor shared with the type-to-find anchor; larger is closer. Used to prefer matches at the current tree depth.
 
 ---Lowercase ASCII A-Z only, leaving bytes >= 0x80 untouched. Locale-safe fold
 ---for type-to-find so multi-byte UTF-8 (e.g. CJK) is never corrupted.

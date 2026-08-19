@@ -5238,6 +5238,9 @@
     <Replace Tag="LOC_CAI_REPORTS_SELECT_CITY" Language="pl_PL">
       <Text>Wybierz miasto</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_OPEN_PRODUCTION" Language="pl_PL">
+      <Text>Wybierz miasto i otwórz produkcję</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_REPORTS_FILTER_PLAYER" Language="pl_PL">
       <Text>Filtruj według gracza</Text>
     </Replace>
@@ -7285,6 +7288,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_MODS_DISABLE_FAILED" Language="pl_PL">
       <Text>Nie udało się wyłączyć moda</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPLAY_GROUP_BY_VALUE" Language="pl_PL">
+      <Text>Grupuj według wartości</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPLAY_GROUP_BY_VALUE_TOOLTIP" Language="pl_PL">
+      <Text>Gdy zaznaczone, dane wykresu powtórki są grupowane według wartości, a rozwinięcie wartości pokazuje tury, w których się zmieniła. Gdy niezaznaczone, dane są grupowane według tury, z wartościami, które zmieniły się w danej turze.</Text>
     </Replace>
   </LocalizedText>
 </GameData>

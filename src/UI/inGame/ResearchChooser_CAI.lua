@@ -144,7 +144,31 @@ local function IsQueuedOrCurrent(kData)
     return kData.IsCurrent or HasQueuePosition(kData)
 end
 
+-- The just-completed tech is captured through RealizeCurrentResearch (like the
+-- active one) but is not being researched anymore; vanilla labels it "Just
+-- completed!" rather than showing turns.
+local function IsJustCompleted(kData)
+    return kData and kData.IsLastCompleted and not kData.IsCurrent or false
+end
+
+-- Progress-aware remaining turns for the active research. Vanilla fills the row
+-- control (and kData.TurnsLeft) from GetTurnsToResearch, a from-scratch estimate
+-- that runs one turn high near completion; its own tech tree uses GetTurnsLeft
+-- for the current item, so we do the same.
+local function GetCurrentTurnsLeft()
+    local ePlayer = Game.GetLocalPlayer()
+    local techs = ePlayer and ePlayer ~= -1 and Players[ePlayer]:GetTechs() or nil
+    return techs and techs:GetTurnsLeft() or nil
+end
+
 local function GetTurnsText(kData)
+    -- A just-completed tech has no remaining turns; reporting a count reads as
+    -- a still-pending queue item.
+    if IsJustCompleted(kData) then return nil end
+    if kData.IsCurrent then
+        local n = GetCurrentTurnsLeft()
+        if n and n >= 0 then return Locale.Lookup("LOC_CAI_RESEARCH_TURNS", n) end
+    end
     local inst = DisplayControl(kData)
     if inst then
         local t = ControlText(inst.TurnsLeft)
@@ -258,6 +282,8 @@ local function FormatLabel(kData)
     local parts = {}
     if kData.IsCurrent then
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_CURRENT", kData.Name))
+    elseif IsJustCompleted(kData) then
+        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_JUST_COMPLETED", kData.Name))
     elseif HasQueuePosition(kData) then
         AppendIfNonEmpty(parts, kData.Name)
         AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_QUEUED", kData.ResearchQueuePosition))

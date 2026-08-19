@@ -65,7 +65,12 @@ local function GetCurrentResearchData(playerID, player)
     local tech = GameInfo.Technologies[techID]
     if tech == nil then return nil end
 
-    return GetResearchData(playerID, techs, tech)
+    local data = GetResearchData(playerID, techs, tech)
+    -- GetResearchData fills TurnsLeft from GetTurnsToResearch, a from-scratch
+    -- estimate that overshoots by a turn near completion. Use the progress-aware
+    -- GetTurnsLeft for the active research, matching vanilla's tech tree.
+    if data then data.TurnsLeft = techs:GetTurnsLeft() end
+    return data
 end
 
 local function GetCurrentCivicData(playerID, player)
@@ -78,7 +83,11 @@ local function GetCurrentCivicData(playerID, player)
     local civic = GameInfo.Civics[civicID]
     if civic == nil then return nil end
 
-    return GetCivicData(playerID, culture, civic)
+    local data = GetCivicData(playerID, culture, civic)
+    -- See GetCurrentResearchData: use the progress-aware GetTurnsLeft for the
+    -- active civic rather than GetCivicData's from-scratch GetTurnsToProgressCivic.
+    if data then data.TurnsLeft = culture:GetTurnsLeft() end
+    return data
 end
 
 local function GetAllianceResearchText(data)

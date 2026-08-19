@@ -208,6 +208,9 @@
     <File>UI/inGame/TradeOverview_CAI.lua</File>
     <File>UI/inGame/TradeOverview_BetterTradeScreen_CAI.lua</File>
     <File>UI/inGame/WorldRankings_CAI.lua</File>
+    <File>UI/Replacements/BetterBalancedGame/WorldRankings_BetterBalancedGame_CAIBase.lua</File>
+    <File>UI/Replacements/BetterBalancedGame/ProductionPanel_BetterBalancedGame_CAIBase.lua</File>
+    <File>UI/Replacements/BetterBalancedGame/TradeOverview_BetterBalancedGame_CAIBase.lua</File>
     <File>UI/inGame/GlobalResourcePopup_CAI.lua</File>
     <File>UI/inGame/ReportScreen_CAI.lua</File>
     <File>UI/inGame/EraProgressPanel_CAI.lua</File>
@@ -609,6 +612,16 @@
       <File>UI/inGame/TradeRouteChooser_BetterTradeScreen_CAI.lua</File>
       <File>UI/inGame/TradeOverview_BetterTradeScreen_CAI.lua</File>
       <File>UI/inGame/TradeOriginChooser_BetterTradeScreen_CAI.lua</File>
+      <!-- Better Balanced Game does not export its worldrankings_bbg.lua via
+           <ImportFiles>, so a runtime include() cannot reach it. We vendor a
+           verbatim copy and import it here; WorldRankings_CAI.lua includes it
+           when BBG is active. -->
+      <File>UI/Replacements/BetterBalancedGame/WorldRankings_BetterBalancedGame_CAIBase.lua</File>
+      <!-- Same vendoring rationale for BBG's ProductionPanel (GetData override)
+           and TradeOverview (ViewAvailableRoutes override); ProductionPanel_CAI.lua
+           and TradeOverview_CAI.lua include these when BBG is active. -->
+      <File>UI/Replacements/BetterBalancedGame/ProductionPanel_BetterBalancedGame_CAIBase.lua</File>
+      <File>UI/Replacements/BetterBalancedGame/TradeOverview_BetterBalancedGame_CAIBase.lua</File>
       <!-- EndGameMenu is a wildcard host (include("EndGameMenu_", true)),
            so the CAI layer rides that wildcard as an imported file. -->
       <File>UI/inGame/EndGameMenu_CAI.lua</File>

@@ -112,6 +112,27 @@ local function ControlTooltip(control)
     return control:GetToolTipString() or ""
 end
 
+-- Read a button's on-screen label. The conversation SelectionButton keeps its
+-- text in a child "SelectionText" Label, not in the button's intrinsic text
+-- control, so GetTextControl() misses it -- fall back to the first visible child
+-- that reports text. Used so a live button announces its real label even when it
+-- has no paired re-derived selection (e.g. a disabled war reply CAI's extraction
+-- dropped but vanilla still renders).
+local function ControlButtonText(control)
+    if not control then return "" end
+    if control.GetTextControl then
+        local text = ControlText(control:GetTextControl())
+        if text ~= "" then return text end
+    end
+    if control.GetChildren then
+        for _, child in ipairs(control:GetChildren()) do
+            local text = ControlText(child)
+            if text ~= "" then return text end
+        end
+    end
+    return ""
+end
+
 local function NormalizeText(text)
     -- Color/tag stripping happens centrally in Speak()/ProcessText; keep only
     -- nil-safety here. SplitLines still splits on newlines (ASCII-safe) below.
@@ -2033,8 +2054,10 @@ local function UpdateConversationBindings(handler, statementTypeName, statementS
         kStatement.Initiator)
     handler.RemoveInvalidSelections(parsed, ms_LocalPlayerID, ms_OtherPlayerID)
 
+    -- Selections are kept only to recover a reply's label/tooltip fallback and to
+    -- spot the explicit exit choice; activation fires the live button's own
+    -- vanilla callback via DoLeftClick, so the handler is no longer stored.
     m_vanilla.conversationBindings = {
-        Handler = handler,
         Selections = FilterConversationSelections(parsed.Selections),
     }
 end
@@ -2064,41 +2087,89 @@ local function RefreshConversationPanel()
         }))
     end
 
-    local liveButtons = Controls.ConversationSelectionStack
+    -- The ConversationSelectionInstance pool re-parents each reused instance to
+    -- the BOTTOM of the stack on GetInstance and hides the ones it does not reuse
+    -- (see InstanceManager:GetInstance / :ResetInstances). So whenever a prior
+    -- statement created more selection buttons than the current one,
+    -- GetChildren() returns stale hidden leftovers AHEAD of the live buttons.
+    -- Indexing the raw child list then maps a selection onto a hidden leftover
+    -- and inherits its stale label/disabled state (e.g. an active "Goodbye"
+    -- reading "unavailable"). Keep only the visible children: they line up, in
+    -- order, with the filtered selection list -- both are exactly what vanilla
+    -- renders this pass.
+    local rawButtons = Controls.ConversationSelectionStack
         and Controls.ConversationSelectionStack.GetChildren
         and Controls.ConversationSelectionStack:GetChildren()
         or {}
-    local visibleIndex = 0
+    local liveButtons = {}
+    for _, button in ipairs(rawButtons) do
+        if not ControlIsHidden(button) then
+            table.insert(liveButtons, button)
+        end
+    end
 
-    for _, selection in ipairs(m_vanilla.conversationBindings and m_vanilla.conversationBindings.Selections or {}) do
-        visibleIndex = visibleIndex + 1
-        local buttonControl = liveButtons[visibleIndex]
-        local labelControl = buttonControl and buttonControl.GetTextControl and buttonControl:GetTextControl() or nil
-        local currentSelection = selection
+    -- Drive the list off the visible buttons, not off the re-extracted selection
+    -- list, so CAI exposes exactly the choices vanilla renders -- never a phantom
+    -- row for a selection vanilla dropped, never one short. The live button
+    -- supplies label/tooltip/disabled; the selection supplies only the choice Key
+    -- for activation. Pair the two by matching the button's on-screen label to the
+    -- selection's localized Text (vanilla sets the label from exactly that Text),
+    -- NOT by index: CAI's re-derivation is not always identical to vanilla's
+    -- render -- a disabled reply can survive in the rendered stack while
+    -- RemoveInvalidSelections drops it here -- which would shift every index after
+    -- it. Enabled replies are always valid, so their selection survives and
+    -- matches, giving activation its Key; a disabled button that fails to match
+    -- stays readable and inert (it needs no Key).
+    local selections = m_vanilla.conversationBindings and m_vanilla.conversationBindings.Selections or {}
+    local remainingSelections = {}
+    for _, selection in ipairs(selections) do
+        table.insert(remainingSelections, selection)
+    end
+    local function TakeSelectionForLabel(label)
+        if label == "" then return nil end
+        for i, selection in ipairs(remainingSelections) do
+            if Locale.Lookup(selection.Text or "") == label then
+                table.remove(remainingSelections, i)
+                return selection
+            end
+        end
+        return nil
+    end
+
+    for _, buttonControl in ipairs(liveButtons) do
+        local currentSelection = TakeSelectionForLabel(ControlButtonText(buttonControl))
 
         local choice = mgr:CreateWidget(
             mgr:GenerateWidgetId("CAIDiplomacyConversationButton"), "Button", {
                 Label = function()
-                    local liveText = labelControl and ControlText(labelControl) or ""
+                    local liveText = ControlButtonText(buttonControl)
                     if liveText ~= "" then return liveText end
-                    return Locale.Lookup(currentSelection.Text or "")
+                    return currentSelection and Locale.Lookup(currentSelection.Text or "") or ""
                 end,
                 Tooltip = function()
-                    local liveTooltip = buttonControl and ControlTooltip(buttonControl) or ""
+                    local liveTooltip = ControlTooltip(buttonControl)
                     if liveTooltip ~= "" then return liveTooltip end
-                    return GetConversationSelectionTooltip(currentSelection)
+                    return currentSelection and GetConversationSelectionTooltip(currentSelection) or ""
                 end,
                 DisabledPredicate = function()
-                    return buttonControl and buttonControl:IsDisabled() or currentSelection.IsDisabled == true
+                    return ControlIsDisabled(buttonControl)
                 end,
             })
         PlayHoverSound(choice)
         choice:On("activate", function()
-            if m_vanilla.conversationBindings and m_vanilla.conversationBindings.Handler then
-                m_vanilla.conversationBindings.Handler.OnSelectionButtonClicked(currentSelection.Key)
-                if currentSelection.Key == "CHOICE_EXIT" then
-                    ClearConversationState()
-                end
+            -- Fire the button's own vanilla click callback (the exact
+            -- OnSelectionButtonClicked closure, including any war-confirm or
+            -- stop-asking popup it wires) instead of re-dispatching a re-derived
+            -- key -- so activation is always correct even when the pairing above
+            -- found no selection. Disabled buttons register no callback, and the
+            -- manager already no-ops Activate on them, so this stays safe.
+            if buttonControl.DoLeftClick then
+                buttonControl:DoLeftClick()
+            end
+            -- Leaving the conversation tears the CAI list down; the session-closed
+            -- wrap clears it too, this just keeps parity on the explicit exit.
+            if currentSelection and currentSelection.Key == "CHOICE_EXIT" then
+                ClearConversationState()
             end
         end)
         m_ui.conversationList:AddChild(choice)

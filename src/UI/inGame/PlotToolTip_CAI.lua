@@ -1658,7 +1658,9 @@ local PLOT_YIELD_INFO_BUCKET = {
     { bucket = "plotYields" },
 }
 
-local YIELD_RIVER_OWNER_INFO_BUCKET = {
+-- Yield-selection portion of the W (yield/river/owner) bucket: city, district
+-- (incl. specialist header + specialist yields), or plain plot yields.
+local CURSOR_MOVE_YIELDS_INFO_BUCKET = {
     { keys = CITY_YIELD_INFO_BUCKET,     when = function(data) return data.IsCity == true and data.DistrictType ~= nil end },
     { keys = DISTRICT_YIELD_INFO_BUCKET, when = HasDistrictDetails },
     {
@@ -1668,6 +1670,10 @@ local YIELD_RIVER_OWNER_INFO_BUCKET = {
                 not HasDistrictDetails(data)
         end
     },
+}
+
+local YIELD_RIVER_OWNER_INFO_BUCKET = {
+    { keys = CURSOR_MOVE_YIELDS_INFO_BUCKET },
     "workers",
     "freshWater",
     "owner",
@@ -1745,8 +1751,34 @@ local function BuildYieldInfoRequestKeys(data)
     return BuildPlotInfoBucket(data, YIELD_RIVER_OWNER_INFO_BUCKET)
 end
 
+local function InsertKeysAfter(keys, anchor, extraKeys)
+    for i = 1, #keys do
+        if keys[i] == anchor then
+            for j = #extraKeys, 1, -1 do
+                table.insert(keys, i + 1, extraKeys[j])
+            end
+            return
+        end
+    end
+    -- Anchor absent: append so the info is still spoken.
+    for _, key in ipairs(extraKeys) do
+        table.insert(keys, key)
+    end
+end
+
 local function BuildCursorMoveRequestKeys(data)
-    return BuildPlotInfoBucket(data, CURSOR_MOVE_REQUEST_BUCKET)
+    local keys = BuildPlotInfoBucket(data, CURSOR_MOVE_REQUEST_BUCKET)
+
+    -- In the city management interface, speak the plot's yields (and specialist
+    -- yields) on cursor move, right after the interface info line.
+    if UI.GetInterfaceMode() == InterfaceModeTypes.CITY_MANAGEMENT then
+        local yieldKeys = BuildPlotInfoBucket(data, CURSOR_MOVE_YIELDS_INFO_BUCKET)
+        if #yieldKeys > 0 then
+            InsertKeysAfter(keys, "interfaceInfo", yieldKeys)
+        end
+    end
+
+    return keys
 end
 
 local function InitializePlotInfoActionRequestBuilders()

@@ -1,5 +1,6 @@
 include("caiUtils")
 include("inGameHelpers_CAI")
+include("ToolTipHelper")
 local IS_PIRATES_SCENARIO = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
 if IS_PIRATES_SCENARIO then
     include("TechCivicCompletedPopup_PiratesScenario")
@@ -14,10 +15,14 @@ local m_currentTechType = nil ---@type string|nil
 local m_currentPlayerID = nil ---@type number|nil
 
 local function FormatUnlockLabel(typeName, locName)
-    local name = Locale.Lookup(locName)
-    local desc = GetUnlockDescription(typeName)
-    if desc then return name .. ": " .. desc end
-    return name
+    -- Name + category (+ policy slot) followed by the static description and
+    -- stats, with the repeated name/category header stripped -- the same clean
+    -- layout used by the tech/civic trees and choosers.
+    local label, tooltip = BuildUnlockDisplay(typeName, Locale.Lookup(locName), m_currentPlayerID)
+    if tooltip and tooltip ~= "" then
+        return label .. "[NEWLINE]" .. tooltip
+    end
+    return label
 end
 
 local function RemoveDialog()

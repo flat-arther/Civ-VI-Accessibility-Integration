@@ -5232,6 +5232,9 @@
     <Replace Tag="LOC_CAI_REPORTS_SELECT_CITY" Language="pt_BR">
       <Text>Selecionar cidade</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_OPEN_PRODUCTION" Language="pt_BR">
+      <Text>Selecionar cidade e abrir produção</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_REPORTS_FILTER_PLAYER" Language="pt_BR">
       <Text>Filtrar por jogador</Text>
     </Replace>
@@ -7285,6 +7288,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_MODS_DISABLE_FAILED" Language="pt_BR">
       <Text>Não foi possível desativar o mod</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPLAY_GROUP_BY_VALUE" Language="pt_BR">
+      <Text>Agrupar por valor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPLAY_GROUP_BY_VALUE_TOOLTIP" Language="pt_BR">
+      <Text>Quando marcado, os dados do gráfico de replay são agrupados por valor, e expandir um valor mostra os turnos em que ele mudou. Quando desmarcado, os dados são agrupados por turno, com os valores que mudaram dentro de cada turno.</Text>
     </Replace>
   </LocalizedText>
 </GameData>

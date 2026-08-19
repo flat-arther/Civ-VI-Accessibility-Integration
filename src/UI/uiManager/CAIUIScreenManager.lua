@@ -52,6 +52,7 @@ include("CAIUITutorialCatalog")
 ---@field EnterKeyDownOwner? UIWidget Focused leaf that received the current Enter key-down.
 ---@field FocusRestoreKeyOverride? string Temporary logical target used while a widget action synchronously rebuilds its subtree.
 ---@field TypeToFindTarget? UIWidget Container that owns the persistent type-to-find session.
+---@field SearchAnchor? UIWidget Focused widget captured when the current type-to-find query began; used to bias results toward the current tree depth.
 ---@field CAISettings table<string, any>
 ---@field TutorialManager? CAIUITutorialManager
 ---@field TutorialCatalog? CAIUITutorialCatalog
@@ -82,6 +83,7 @@ function UIScreenManager:New()
     mgr.AppRegainedFocusTime = 0
     mgr.SearchBufferExpireTime = nil
     mgr.TypeToFindTarget = nil
+    mgr.SearchAnchor = nil
     mgr.FocusRestoreKeyOverride = nil
     mgr.EnterKeyIsDown = false
     mgr.EnterKeyDownOwner = nil
@@ -930,6 +932,7 @@ function UIScreenManager:ExpireSearchBufferIfNeeded()
         self.LastTypeTime = nil
         self.SearchBufferExpireTime = nil
         self.TypeToFindTarget = nil
+        self.SearchAnchor = nil
         return true
     end
     return false
@@ -974,6 +977,7 @@ function UIScreenManager:ClearSearchBuffer(announce)
     self.LastTypeTime = nil
     self.SearchBufferExpireTime = nil
     self.TypeToFindTarget = nil
+    self.SearchAnchor = nil
 
     if announce and hadBuffer then
         Speak(Locale.Lookup("LOC_CAI_SEARCH_CLEARED"))
@@ -1005,6 +1009,7 @@ function UIScreenManager:RemoveSearchChar()
         self.LastTypeTime = nil
         self.SearchBufferExpireTime = nil
         self.TypeToFindTarget = nil
+        self.SearchAnchor = nil
         return ""
     end
 
@@ -1017,6 +1022,13 @@ end
 ---@param c string
 function UIScreenManager:AppendSearchChar(c)
     self:ExpireSearchBufferIfNeeded()
+    -- Capture where focus was when this query began, so type-to-find can bias
+    -- results toward the current tree depth. The anchor stays fixed for the
+    -- whole query (even as focus moves through results) and is cleared when the
+    -- buffer empties or expires.
+    if (self.SearchBuffer or "") == "" then
+        self.SearchAnchor = self:GetFocusedWidget()
+    end
     local now = Automation.GetTime()
     self.LastTypeTime = now
     -- ASCII-only fold: string.lower is locale-sensitive on bytes >= 0x80 and
@@ -1029,6 +1041,15 @@ end
 function UIScreenManager:GetSearchBuffer()
     self:ExpireSearchBufferIfNeeded()
     return self.SearchBuffer or ""
+end
+
+---Focused widget captured when the current query began, used to bias
+---type-to-find results toward the current tree depth. Nil when no query is
+---active (buffer empty/expired).
+---@return UIWidget|nil
+function UIScreenManager:GetSearchAnchor()
+    self:ExpireSearchBufferIfNeeded()
+    return self.SearchAnchor
 end
 
 --#endregion

@@ -1,5 +1,23 @@
 include("caiUtils")
 include("Civ6Common")
+
+-- Better Balanced Game (BBG) also replaces the WorldRankings context with its own
+-- wrapper (worldrankings_bbg.lua) that adds a Traditional Domination victory tab.
+-- Only one ReplaceUIScript wins per context, so when BBG is active we chain-include
+-- its file instead of vanilla and layer CAI accessibility on top of it. BBG has
+-- shipped under three historical mod IDs.
+local BBG_MOD_IDS = {
+    "cb84075d-5007-4207-b662-c35a5f7be240", -- iElden (current)
+    "cb84075d-5007-4207-b662-c35a5f7be217", -- codenaugh
+    "cb84075d-5007-4207-b662-c35a5f7be231", -- beta
+}
+local function IsBBGActive()
+    for _, id in ipairs(BBG_MOD_IDS) do
+        if Modding.IsModActive(id) then return true end
+    end
+    return false
+end
+
 if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_WARMACHINE" then
     include("WorldRankings_WarMachineScenario")
 elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_VIKINGS" then
@@ -16,6 +34,13 @@ elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_ALEXANDER" then
     include("WorldRankings_AlexanderScenario")
 elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_NUBIA" then
     include("WorldRankings_NubiaScenario")
+elseif IsBBGActive() then
+    -- BBG registers worldrankings_bbg.lua only in <Files> and a losing
+    -- <ReplaceUIScript>, never in <ImportFiles>, so a runtime include() cannot
+    -- resolve BBG's own copy. We instead include CAI's vendored verbatim copy
+    -- (registered in CAI's <Files> + <ImportFiles>). It internally includes
+    -- WorldRankings_Expansion2 or vanilla WorldRankings just like BBG's original.
+    include("WorldRankings_BetterBalancedGame_CAIBase")
 elseif IsExpansion2Active() then
     include("WorldRankings_Expansion2")
 elseif IsExpansion1Active() then
@@ -80,6 +105,12 @@ end
 local m_viewMode                  = LoadViewModeSetting()
 
 local m_isExp2                    = (IsExpansion2Active ~= nil and IsExpansion2Active())
+local m_isBBG                     = IsBBGActive()
+
+-- BBG's Traditional Domination custom victory. Its tab label is the button tooltip
+-- string (not the victory Name), so it needs bespoke matching like diplomatic does.
+local BBG_TRAD_DOM_VICTORY        = "VICTORY_TRADITIONAL_DOMINATION"
+local BBG_TRAD_DOM_BUTTON_KEY     = "LOC_TOOLTIP_TRADITIONAL_DOMINATION_BUTTON"
 
 -- ============================================================================
 -- Helpers
@@ -324,6 +355,45 @@ PopulateScoreTeamInstance = WrapFunc(PopulateScoreTeamInstance,
         table.remove(m_scoreCapture.ParentStack)
         record.Presentation = CaptureInstancePresentation(instance)
     end)
+
+-- BBG renders Traditional Domination rows through its own populators rather than
+-- the vanilla generic ones wrapped above, so those capture wraps never fire for
+-- that tab. Mirror them onto BBG's functions so the per-row domination progress
+-- text and tile-count tooltip reach the reader. Guarded because these globals only
+-- exist when BBG is loaded.
+if PopulateTradDomInstance then
+    PopulateTradDomInstance = WrapFunc(PopulateTradDomInstance,
+        function(orig, instance, playerData, victoryType, showTeamDetails)
+            orig(instance, playerData, victoryType, showTeamDetails)
+            if m_genericCapture then
+                table.insert(GetCaptureTarget(m_genericCapture), {
+                    Kind = "player",
+                    PlayerData = playerData,
+                    Presentation = CaptureInstancePresentation(instance),
+                })
+            end
+        end)
+end
+
+if PopulateTradDomTeamInstance then
+    PopulateTradDomTeamInstance = WrapFunc(PopulateTradDomTeamInstance,
+        function(orig, instance, teamData, victoryType)
+            if not m_genericCapture then
+                orig(instance, teamData, victoryType)
+                return
+            end
+            local record = {
+                Kind = "team",
+                TeamData = teamData,
+                Children = {},
+            }
+            table.insert(GetCaptureTarget(m_genericCapture), record)
+            table.insert(m_genericCapture.ParentStack, record.Children)
+            orig(instance, teamData, victoryType)
+            table.remove(m_genericCapture.ParentStack)
+            record.Presentation = CaptureInstancePresentation(instance)
+        end)
+end
 
 local VIEW_CONTROL_TO_TAB = {
     { control = "OverallView",    label = CAI_TAB_OVERALL },
@@ -1734,18 +1804,24 @@ local function CreateGenericPlayerRow(playerData, victoryType, parentFocusPrefix
         end
     end
 
+    -- BBG's Traditional Domination rows already merge the domination progress
+    -- percentage with the requirement text in their captured Details. Re-deriving
+    -- requirement lines here would drop that percentage and duplicate the
+    -- requirement text, so defer entirely to the captured details for that victory.
     local requirementLines = {}
-    local pTeamID = Players[playerID]:GetTeam()
-    local requirementSetID = Game.GetVictoryRequirements(pTeamID, capturedVictoryType)
-    if requirementSetID and requirementSetID ~= -1 then
-        local innerReqs = GameEffects.GetRequirementSetInnerRequirements(requirementSetID)
-        if innerReqs then
-            for _, reqID in ipairs(innerReqs) do
-                local reqKey = GameEffects.GetRequirementTextKey(reqID, REQUIREMENT_CONTEXT)
-                if reqKey then
-                    local reqText = GameEffects.GetRequirementText(reqID, reqKey)
-                    if reqText and reqText ~= "" then
-                        table.insert(requirementLines, { ReqID = reqID, Text = reqText })
+    if not (m_isBBG and capturedVictoryType == BBG_TRAD_DOM_VICTORY) then
+        local pTeamID = Players[playerID]:GetTeam()
+        local requirementSetID = Game.GetVictoryRequirements(pTeamID, capturedVictoryType)
+        if requirementSetID and requirementSetID ~= -1 then
+            local innerReqs = GameEffects.GetRequirementSetInnerRequirements(requirementSetID)
+            if innerReqs then
+                for _, reqID in ipairs(innerReqs) do
+                    local reqKey = GameEffects.GetRequirementTextKey(reqID, REQUIREMENT_CONTEXT)
+                    if reqKey then
+                        local reqText = GameEffects.GetRequirementText(reqID, reqKey)
+                        if reqText and reqText ~= "" then
+                            table.insert(requirementLines, { ReqID = reqID, Text = reqText })
+                        end
                     end
                 end
             end
@@ -1910,7 +1986,15 @@ local function RebuildGenericTree(tree, victoryType)
 
     local victoryInfo = GameInfo.Victories[victoryType]
     if victoryInfo and victoryInfo.Description then
-        AddAdvisorLeaf(tree, Locale.Lookup(victoryInfo.Description))
+        local advisorText = Locale.Lookup(victoryInfo.Description)
+        if m_isBBG and victoryType == BBG_TRAD_DOM_VICTORY then
+            -- Mirror BBG's header, which appends the required domination threshold.
+            advisorText = advisorText
+                .. Locale.Lookup("LOC_WORLD_RANKINGS_TRADITIONAL_DOMINATION_DESC_LAST")
+                .. " [COLOR_RED]" .. tostring(GameConfiguration.GetValue("TRADITIONAL_DOMINATION_LEVEL"))
+                .. " %[ENDCOLOR]"
+        end
+        AddAdvisorLeaf(tree, advisorText)
     end
 
     mgr:RestoreFocus(tree, capture)
@@ -3167,6 +3251,12 @@ local function IdentifyGenericVictoryTypes()
                             tabDef.victoryType = vt
                             break
                         end
+                    elseif m_isBBG and vt == BBG_TRAD_DOM_VICTORY then
+                        -- BBG labels this tab with the button tooltip string, not row.Name.
+                        if tabDef.label == Locale.Lookup(BBG_TRAD_DOM_BUTTON_KEY) then
+                            tabDef.victoryType = vt
+                            break
+                        end
                     else
                         if tabDef.label == Locale.Lookup(row.Name) then
                             tabDef.victoryType = vt
@@ -3259,6 +3349,24 @@ if ViewDiplomatic then
     ViewDiplomatic = function(victoryType)
         m_currentGenericVictoryType = victoryType
         origViewDiplomatic(victoryType)
+        for i, tabDef in ipairs(m_capturedTabs) do
+            if tabDef.victoryType == victoryType then
+                ViewSync(i, victoryType)
+                break
+            end
+        end
+    end
+end
+
+-- BBG's Traditional Domination tab renders through ViewTraditionalDomination
+-- (not ViewGeneric), so drive the same capture + tab-sync path for it.
+if ViewTraditionalDomination then
+    local origViewTraditionalDomination = ViewTraditionalDomination
+    ViewTraditionalDomination = function(victoryType)
+        m_currentGenericVictoryType = victoryType
+        BeginGenericCapture(victoryType)
+        origViewTraditionalDomination(victoryType)
+        EndGenericCapture(victoryType)
         for i, tabDef in ipairs(m_capturedTabs) do
             if tabDef.victoryType == victoryType then
                 ViewSync(i, victoryType)

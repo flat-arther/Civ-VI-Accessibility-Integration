@@ -5228,6 +5228,9 @@
     <Replace Tag="LOC_CAI_REPORTS_SELECT_CITY" Language="fr_FR">
       <Text>Sélectionner une ville</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_OPEN_PRODUCTION" Language="fr_FR">
+      <Text>Sélectionner la ville et ouvrir la production</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_REPORTS_FILTER_PLAYER" Language="fr_FR">
       <Text>Filtrer par joueur</Text>
     </Replace>
@@ -7273,6 +7276,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_MODS_DISABLE_FAILED" Language="fr_FR">
       <Text>Le mod n'a pas pu être désactivé</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPLAY_GROUP_BY_VALUE" Language="fr_FR">
+      <Text>Regrouper par valeur</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPLAY_GROUP_BY_VALUE_TOOLTIP" Language="fr_FR">
+      <Text>Lorsque cochée, les données du graphique de relecture sont regroupées par valeur, et développer une valeur affiche les tours où elle a changé. Lorsque décochée, les données sont regroupées par tour, avec les valeurs qui ont changé à l'intérieur de chaque tour.</Text>
     </Replace>
   </LocalizedText>
 </GameData>

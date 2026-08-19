@@ -5242,6 +5242,9 @@
     <Row Tag="LOC_CAI_REPORTS_SELECT_CITY" Language="en_US">
       <Text>Select city</Text>
     </Row>
+    <Row Tag="LOC_CAI_REPORTS_OPEN_PRODUCTION" Language="en_US">
+      <Text>Select city and open production</Text>
+    </Row>
     <Row Tag="LOC_CAI_REPORTS_FILTER_PLAYER" Language="en_US">
       <Text>Filter by player</Text>
     </Row>
@@ -7292,6 +7295,12 @@
     </Row>
     <Row Tag="LOC_CAI_MODS_DISABLE_FAILED" Language="en_US">
       <Text>The mod could not be disabled</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPLAY_GROUP_BY_VALUE" Language="en_US">
+      <Text>Group by value</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPLAY_GROUP_BY_VALUE_TOOLTIP" Language="en_US">
+      <Text>When checked, replay graph data is grouped by value, and expanding a value lists the turns where it changed. When unchecked, data is grouped by turn, with the values that changed inside each turn.</Text>
     </Row>
   </LocalizedText>
 </GameData>

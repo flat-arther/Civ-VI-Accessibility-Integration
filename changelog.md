@@ -2,21 +2,33 @@
 
 ### Added
 
+- Added support for the Better Balanced Game mod (version 7.4.6). Note that better balanced game expanded also works, as it is a content mod only
 - You can now suspend and resume the accessibility mod during play with `Ctrl plus Shift plus F12`, which is useful for passing the keyboard between players in hotseat games. While suspended, speech, accessibility navigation, and the map cursor go quiet and the game behaves as it does without the mod; pressing the keys again resumes it. The mod tells you each time you suspend or resume, and remembers the setting between sessions.
-- Added a full Polish translation. All accessibility text, screen tutorials, spoken key names, and command descriptions now appear in Polish when the game is set to Polish.
+- Added full Polish localization
 - When you have more than one unit of the same type, each now reads with a number (for example "Warrior 1", "Warrior 2") so they can be told apart. Numbers are assigned when a unit is first seen and stay with that unit; if a unit is lost, its number becomes available for the next unit of that type. A unit that is the only one of its type reads with no number, and units you have given a custom name keep that name. This applies to your own units and to other players' units.
-- The city status report open action can be triggered with `Ctrl plus Backslash`. Requires key bindings reset
+- The city status report open action can be triggered with `Ctrl plus Backslash`. Requires key bindings reset. Does not overrite your existing bindings
+- Added mod settings to allow or prevent unit and city cycling from wrapping. Check under the gameplay section
+- Added spoken feedback for when you can't cycle cities or units
+- In the reports screen city status tab, pressing `Ctrl plus Enter` on a city (in either the list or the table view) selects that city and opens its production panel
+- On the graphs tab of the victory screen and the hall of fame game details, a "Group by value" checkbox lets you switch the replay data between grouping by turn (the default, showing the values that changed inside each turn) and grouping by value (showing, inside each value, the turns where it changed). The choice is remembered and shared between both screens.
 
 ### Changed
 
-- Cycling units in the world now follows the same order as the units panel ( defaults to ctrl u). `Comma` and `Period` still step through ready units and `Shift plus Comma` / `Shift plus Period` through all units, but they now move in the panel's sort order instead of the game's default order. You can disable this under the gameplay section in mod settings.
+- Cycling units in the world now follows the same order as the units panel ( default ctrl u). `Comma` and `Period` still step through ready units and `Shift plus Comma` / `Shift plus Period` through all units, but they now move in the panel's sort order instead of the game's default order. You can disable this under the gameplay section in mod settings.
 - The units panel now sorts by distance (nearest first) by default, and remembers your chosen sort after you close it.
 - Cycling cities in the world (`left bracket` and `right bracket`) follows the city status sort in the reports screen. 
 - The city status report now opens in its natural order (founding) by default and remembers your chosen sort after you close it.
+- In the city status report table, the production column is now the last column. `Shift plus end`, or left from the name column will land you on it
+- When using typeahead, matches closest to where you are come first. For example, if you are inside a group and type a word, a matching item in that group is chosen before a match elsewhere in the tree. The search only reaches farther out when nothing nearby matches.
+- While managing a city's tiles, moving the cursor now reads that tile's yields and specialist yields right after the tile's management info, so you no longer have to press the yield key (w) on each tile.
+- In the production panel, a district or wonder's bonuses and unlocks are now read in full within its tooltip instead of being collapsed groups you had to expand, and the tooltip no longer trims the list to a few entries. You can use the widget section reader to explore them one by one
+- In the research chooser, tech tree, civics tree, civics chooser, and the technology and civic completed popup, each unlock now reads its name and type, followed by its base production cost (for things you build), full description, and stats, read the same way as items in the production panel, instead of only a short summary line. This matches how vanilla shows them
 
 ### Fixed
 
+- In a leader conversation, all of the reply choices are now properly listed, each with its label, including replies that are unavailable (which read as unavailable along with the reason). Previously some replies could be missing or read without a name, and after a reply the "Goodbye" button could read as unavailable, forcing you to press Escape to leave the conversation.
 - The mod now works on the Epic Games Store version of Civilization VI. The installer places the mod in the correct folder, and the main menu, loading screen, game setup screens (single-player, scenario, tutorial, and host-a-multiplayer-game), lobby, and hall of fame screens should no longer fail to load. If you are an epic user and you encounter an issue with one of these screens, please report it.
+- In the research and civics choosers, when you have just finished a research or civic and are being asked to pick the next one, the completed item now reads as "Just completed" instead of appearing in the queue with a turn count
 
 ## [1.1.1] - 2026-08-13
 
