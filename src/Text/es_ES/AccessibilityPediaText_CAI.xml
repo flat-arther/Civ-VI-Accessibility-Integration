@@ -44,7 +44,7 @@
       <Text>Pulsa S o 5 del teclado numérico para las unidades. Pulsa W u 8 del teclado numérico para los rendimientos, el estado de trabajo, el agua dulce y la propiedad. Pulsa X o 2 del teclado numérico para la contaminación, el coste de movimiento, el modificador de defensa y el atractivo. Pulsa Mayús más S o Mayús más 5 del teclado numérico para las coordenadas relativas a tu capital original. Estas lecturas reflejan el estado actual de la casilla y de tu civilización.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_READING_GEOGRAPHY" Language="es_ES">
-      <Text>Pulsa B para la geografía y el contenido construido. El resultado puede incluir rutas, tierras bajas costeras, el estado de volcanes y desastres, el continente, el territorio político, los acantilados, los ríos, los parques nacionales, los distritos, los edificios y las grandes obras. La información pública específica de escenarios se incluye cuando sus reglas de divulgación lo permiten. La voz del movimiento normal es deliberadamente más corta que estas lecturas a petición.</Text>
+      <Text>Pulsa B para la geografía y el contenido construido. El resultado puede incluir rutas, bajíos costeros, el estado de volcanes y desastres, el continente, el territorio político, los acantilados, los ríos, los parques nacionales, los distritos, los edificios y las grandes obras. La información pública específica de escenarios se incluye cuando sus reglas de divulgación lo permiten. La voz del movimiento normal es deliberadamente más corta que estas lecturas a petición.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_INTERFACE" Language="es_ES">
       <Text>Pulsa Espacio para obtener información del objetivo activo de la interfaz en el cursor. Es especialmente útil en los modos de movimiento, previsión de combate, gestión de la ciudad, compra de casillas, colocación y otros modos de selección de objetivo. Pulsa Intro para la acción principal del modo. Pulsa Control más Intro para su acción secundaria cuando existe, como intercambiar una casilla en la gestión de la ciudad. La legalidad del objetivo viene de la operación u orden original activa del juego, no de suposiciones de accesibilidad.</Text>
@@ -176,10 +176,10 @@
       <Text>Lente de colono</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SETTLER" Language="es_ES">
-      <Text>La lente de colono evalúa el terreno para fundar una ciudad. La información del cursor dice agua dulce, agua costera, sin agua o no se puede asentar. Con Rise and Fall o Gathering Storm también da el cambio de lealtad esperado para una ciudad nueva. Con Gathering Storm identifica los riesgos de inundación, de volcanes y de tierras bajas costeras.</Text>
+      <Text>La lente de colono evalúa el terreno para fundar una ciudad. La información del cursor dice agua dulce, agua costera, sin agua o no se puede asentar. Con Rise and Fall o Gathering Storm también da el cambio de lealtad esperado para una ciudad nueva. Con Gathering Storm identifica los riesgos de inundación, de volcanes y de bajíos costeros.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_SETTLER_SCANNER" Language="es_ES">
-      <Text>El escáner de lente activa separa la disponibilidad de agua, la lealtad y las advertencias de desastres en subcategorías. Los grupos de agua son agua dulce, agua costera, sin agua y no se puede asentar. Los grupos de lealtad usan el cambio de lealtad esperado exacto. Los grupos de desastres distinguen las llanuras aluviales, los volcanes y los tres niveles de tierras bajas costeras.</Text>
+      <Text>El escáner de lente activa separa la disponibilidad de agua, la lealtad y las advertencias de desastres en subcategorías. Los grupos de agua son agua dulce, agua costera, sin agua y no se puede asentar. Los grupos de lealtad usan el cambio de lealtad esperado exacto. Los grupos de desastres distinguen los terrenos de aluvión, los volcanes y los tres niveles de bajíos costeros.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_LENSES_GOVERNMENT_TITLE" Language="es_ES">
       <Text>Lente de gobierno</Text>
@@ -282,7 +282,7 @@
       <Text>Tiempo, investigación y cultura</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_PROGRESS" Language="es_ES">
-      <Text>Pulsa T para el turno actual, la hora del reloj, la fecha de la partida y el temporizador de turno activo. Pulsa R para la ciencia por turno y el progreso de la tecnología actual. Pulsa P para la cultura por turno y el progreso del principio actual; durante la anarquía informa de la anarquía y sus turnos restantes en lugar de un mensaje de desbloqueo de gobierno. Pulsa Y para la puntuación de era, la edad, los umbrales y las conmemoraciones activas donde exista el sistema de edades.</Text>
+      <Text>Pulsa T para el turno actual, la hora del reloj, la fecha de la partida y el temporizador de turno activo. Pulsa R para la ciencia por turno y el progreso de la tecnología actual. Pulsa P para la cultura por turno y el progreso del principio actual; durante la anarquía informa de la anarquía y sus turnos restantes en lugar de un mensaje de desbloqueo de gobierno. Pulsa Y para la Puntuación de época, la época, los umbrales y las dedicaciones activas donde exista el sistema de épocas.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_EMPIRE_INFORMATION_YIELDS_TITLE" Language="es_ES">
       <Text>Tesorería, rendimientos y recursos</Text>
@@ -478,7 +478,7 @@
       <Text>Información del mundo</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_WORLD" Language="es_ES">
-      <Text>Pulsa F1 para la Civilopedia, F3 para los grandes personajes, F7 para las grandes obras, F8 para la clasificación mundial, F9 para el clima mundial, F10 para el progreso de la era y F11 para los momentos históricos. Pulsa F4 para la barra de diplomacia, Control más K para el Congreso Mundial, Control más W para las emergencias y competiciones activas, y Control más Mayús más T para los objetivos actuales del tutorial.</Text>
+      <Text>Pulsa F1 para la Civilopedia, F3 para los grandes personajes, F7 para las grandes obras, F8 para la clasificación mundial, F9 para el clima mundial, F10 para el progreso de época y F11 para los momentos históricos. Pulsa F4 para la barra de diplomacia, Control más K para el Congreso Mundial, Control más W para las emergencias y competiciones activas, y Control más Mayús más T para los objetivos actuales del tutorial.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_USER_INTERFACES_MAP_TITLE" Language="es_ES">
       <Text>Mapa y comunicación</Text>
@@ -581,7 +581,7 @@
       <Text>Pulsa Acento grave, también llamado Tilde, para un resumen de la unidad o ciudad seleccionada. Pulsa Mayús más un número del 1 al 0 para una sección concreta de la selección. Pulsa Espacio para obtener información de la interacción actual con el mundo.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_EMPIRE" Language="es_ES">
-      <Text>Pulsa Y para la era y la edad, O para los títulos de gobernador, T para la hora y el turno, R para la ciencia, P para la cultura, G para el oro, F para la fe, I para el turismo, V para la influencia, N para las armas nucleares, Control más Y para la lista de información de rendimientos, y K para el Congreso Mundial o el Favor diplomático.</Text>
+      <Text>Pulsa Y para la era y la época, O para los títulos de gobernador, T para la hora y el turno, R para la ciencia, P para la cultura, G para el oro, F para la fe, I para el turismo, V para la influencia, N para las armas nucleares, Control más Y para la lista de información de rendimientos, y K para el Congreso Mundial o el Favor diplomático.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_INFORMATION_PLOT" Language="es_ES">
       <Text>En el cursor de navegación, pulsa S o 5 del teclado numérico para las unidades; W u 8 del teclado numérico para los rendimientos, los trabajadores, el agua dulce y la propiedad; X o 2 del teclado numérico para las estadísticas de la casilla; Mayús más S o Mayús más 5 del teclado numérico para las coordenadas relativas a tu capital original; y B para la geografía.</Text>
@@ -599,7 +599,7 @@
       <Text>Interfaz de usuario</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_CORE" Language="es_ES">
-      <Text>Pulsa F1 para la Civilopedia, F2 para los informes, F3 para los grandes personajes, F4 para la diplomacia, F7 para las grandes obras, F8 para la clasificación, F9 para el clima, F10 para el progreso de la era y F11 para la cronología de momentos históricos.</Text>
+      <Text>Pulsa F1 para la Civilopedia, F2 para los informes, F3 para los grandes personajes, F4 para la diplomacia, F7 para las grandes obras, F8 para la clasificación, F9 para el clima, F10 para el progreso de época y F11 para la cronología de momentos históricos.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_KEY_BINDINGS_CATEGORY_UI_RESEARCH" Language="es_ES">
       <Text>Pulsa Control más R para Elegir investigación, Control más C para Elegir principio, Control más Mayús más R para el árbol de tecnologías, Control más Mayús más C para el árbol de principios, Control más P para el gobierno, Control más L para la religión y Control más O para los gobernadores.</Text>

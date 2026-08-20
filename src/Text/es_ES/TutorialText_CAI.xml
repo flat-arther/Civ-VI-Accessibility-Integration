@@ -100,7 +100,7 @@
       <Text>Tutorial de los resultados de la partida</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_ERA_PROGRESS_TITLE" Language="es_ES">
-      <Text>Tutorial del progreso de la era</Text>
+      <Text>Tutorial del progreso de época</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_TITLE" Language="es_ES">
       <Text>Tutorial del selector de espionaje</Text>
@@ -266,7 +266,7 @@
       <Text>Resultados de la partida</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_NAME_ERA_PROGRESS" Language="es_ES">
-      <Text>Progreso de la era</Text>
+      <Text>Progreso de época</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_NAME_ESPIONAGE_CHOOSER" Language="es_ES">
       <Text>Elegir misión de espionaje</Text>
@@ -415,7 +415,7 @@
       <Text>La vista general normal contiene un árbol de líderes seguido de una lista de acciones. Poner el foco en otro líder selecciona a ese líder en el juego y actualiza las acciones siguientes.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_FLOW" Language="es_ES">
-      <Text>Expande un líder para inspeccionar todas las secciones de información conocidas, incluidos la relación, el acceso, las agendas, los acuerdos, el chismorreo, las alianzas, las emergencias, los agravios, el gobierno y los datos de sociedades secretas cuando están disponibles. Algunas secciones de información tienen más desgloses expandibles y filas de referencia.</Text>
+      <Text>Expande un líder para inspeccionar todas las secciones de información conocidas, incluidos la relación, el acceso, las agendas, los acuerdos, el chismorreo, las alianzas, las emergencias, las quejas, el gobierno y los datos de sociedades secretas cuando están disponibles. Algunas secciones de información tienen más desgloses expandibles y filas de referencia.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_CONVERSATION" Language="es_ES">
       <Text>Cuando la diplomacia entra en modo de conversación, la vista general se oculta y se sustituye por una lista de conversación. Contiene la declaración del líder, su motivo y tus respuestas disponibles. Intro o Espacio activan una respuesta. Durante la cinemática de un líder, la interfaz espera en silencio hasta que los controles de conversación estén disponibles.</Text>
@@ -454,7 +454,7 @@
       <Text>Esta pantalla es un solo árbol. Escape la cierra.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_ERA_PROGRESS_LAYOUT" Language="es_ES">
-      <Text>El árbol empieza con un resumen de la puntuación de era y la información de la dedicación o edad anterior. Después contiene las secciones de umbrales y dedicaciones de Edad Oscura, Normal y Dorada cuando corresponde, seguidas de la información del estado de era de las civilizaciones conocidas.</Text>
+      <Text>El árbol empieza con un resumen de la Puntuación de época y la información de la dedicación o época anterior. Después contiene las secciones de umbrales y dedicaciones de época oscura, normal y edad de oro cuando corresponde, seguidas de la información del estado de época de las civilizaciones conocidas.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_ESPIONAGE_CHOOSER_MODES" Language="es_ES">
       <Text>El selector de espionaje tiene dos modos distintos, y solo el modo actual está disponible para la navegación. El modo de destino es un árbol para asignar el espía a una ciudad. El modo de misión es una lista para elegir qué hará un espía ya establecido en una ciudad. El panel anuncia el modo actual y mueve el foco al árbol o la lista correcta cuando cambia el modo.</Text>
@@ -571,7 +571,7 @@
       <Text>Esta pantalla es un solo árbol cronológico. Escape la cierra.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_HISTORIC_MOMENTS_LAYOUT" Language="es_ES">
-      <Text>Las filas principales son eras. Cada era contiene los grupos Momentos importantes y Momentos menores cuando existen. Sus elementos hijos son entradas de momentos de solo lectura con el título, la descripción, la fecha, la puntuación de era y otros detalles registrados.</Text>
+      <Text>Las filas principales son eras. Cada era contiene los grupos Momentos importantes y Momentos menores cuando existen. Sus elementos hijos son entradas de momentos de solo lectura con el título, la descripción, la fecha, la Puntuación de época y otros detalles registrados.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_MAP_PINS" Language="es_ES">
       <Text>Esta es una lista de todos los marcadores de mapa visibles para ti, incluidos los de otros jugadores cuando la visibilidad compartida lo permite.</Text>

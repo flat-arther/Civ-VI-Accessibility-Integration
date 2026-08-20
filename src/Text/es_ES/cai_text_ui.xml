@@ -1017,10 +1017,10 @@
       <Text>Abre el resumen de rutas comerciales</Text>
     </Replace>
     <Replace Tag="LOC_CAI_OPEN_ERA_PROGRESS" Language="es_ES">
-      <Text>Abrir Progreso de la era</Text>
+      <Text>Abrir Progreso de época</Text>
     </Replace>
     <Replace Tag="LOC_CAI_OPEN_ERA_PROGRESS_TOOLTIP" Language="es_ES">
-      <Text>Abre el panel de progreso de la era</Text>
+      <Text>Abre el panel de progreso de época</Text>
     </Replace>
     <Replace Tag="LOC_CAI_SPEAK_GOVERNMENT_TOOLTIP" Language="es_ES">
       <Text>Decir la información del gobierno</Text>
@@ -1209,16 +1209,16 @@
       <Text>{1_Count} elementos</Text>
     </Replace>
     <Replace Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE" Language="es_ES">
-      <Text>Leer la edad de la era</Text>
+      <Text>Leer la época de la era</Text>
     </Replace>
     <Replace Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE_TOOLTIP" Language="es_ES">
-      <Text>Lee la puntuación de era actual, la edad, los umbrales y las conmemoraciones activas</Text>
+      <Text>Lee la Puntuación de época actual, la época, los umbrales y las dedicaciones activas</Text>
     </Replace>
     <Replace Tag="LOC_CAI_ACTION_PANEL_ERA_NOT_AVAILABLE" Language="es_ES">
-      <Text>Las edades de era no están disponibles</Text>
+      <Text>Las épocas no están disponibles</Text>
     </Replace>
     <Replace Tag="LOC_CAI_ACTION_PANEL_ERA_THRESHOLDS" Language="es_ES">
-      <Text>Umbral de Edad Oscura: {1_Dark}, umbral de Edad Dorada: {2_Golden}</Text>
+      <Text>Umbral de época oscura: {1_Dark}, umbral de edad de oro: {2_Golden}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_ACTION_PANEL_DEDICATIONS" Language="es_ES">
       <Text>Dedicaciones</Text>
@@ -1315,10 +1315,10 @@
       <Text>No hay políticas disponibles</Text>
     </Replace>
     <Replace Tag="LOC_CAI_GOVERNMENT_DARK_AGE_POLICY" Language="es_ES">
-      <Text>Edad Oscura</Text>
+      <Text>Época oscura</Text>
     </Replace>
     <Replace Tag="LOC_CAI_GOVERNMENT_GOLDEN_AGE_POLICY" Language="es_ES">
-      <Text>Edad Dorada</Text>
+      <Text>Edad de oro</Text>
     </Replace>
     <Replace Tag="LOC_CAI_GOVERNMENT_CONGRESS_LOCKED" Language="es_ES">
       <Text>Bloqueado durante el Congreso Mundial</Text>
@@ -1667,19 +1667,19 @@
 
     <!-- Diplomacy intel: Grievances tab -->
     <Replace Tag="LOC_CAI_DIPLOMACY_GRIEVANCES_AGAINST_YOU" Language="es_ES">
-      <Text>Agravios contra ti: {1_Value}</Text>
+      <Text>Quejas contra ti: {1_Value}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_GRIEVANCES_AGAINST_THEM" Language="es_ES">
-      <Text>Agravios contra ellos: {1_Value}</Text>
+      <Text>Quejas contra ellos: {1_Value}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_PER_TURN" Language="es_ES">
       <Text>{1_Rate} por turno</Text>
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_BREAKDOWN" Language="es_ES">
-      <Text>Cambio de agravios por turno: {1_Rate}</Text>
+      <Text>Cambio de quejas por turno: {1_Rate}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_LOG" Language="es_ES">
-      <Text>Registro de agravios</Text>
+      <Text>Registro de quejas</Text>
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_LOG_ENTRY" Language="es_ES">
       <Text>Turno {1_Turn}: {2_Description} ({3_Amount}, {4_Actor})</Text>
@@ -3310,7 +3310,7 @@
       <Text>Leer geografía</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PLOT_READ_GEOGRAPHY_TOOLTIP" Language="es_ES">
-      <Text>Lee la información de rutas, tierras bajas, volcanes, desastres, continente, territorio, acantilados, ríos, parques nacionales, distritos, edificios y grandes obras de la casilla actual</Text>
+      <Text>Lee la información de rutas, bajíos costeros, volcanes, desastres, continente, territorio, acantilados, ríos, parques nacionales, distritos, edificios y grandes obras de la casilla actual</Text>
     </Replace>
 
     <!-- Tile info fallback messages -->
@@ -4441,16 +4441,16 @@
       <Text>Entrando en {1_EraName}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_ERA_HEROIC_AGE" Language="es_ES">
-      <Text>Edad Heroica</Text>
+      <Text>Época heroica</Text>
     </Replace>
     <Replace Tag="LOC_CAI_ERA_GOLDEN_AGE" Language="es_ES">
-      <Text>Edad Dorada</Text>
+      <Text>Edad de oro</Text>
     </Replace>
     <Replace Tag="LOC_CAI_ERA_DARK_AGE" Language="es_ES">
-      <Text>Edad Oscura</Text>
+      <Text>Época oscura</Text>
     </Replace>
     <Replace Tag="LOC_CAI_ERA_NORMAL_AGE" Language="es_ES">
-      <Text>Edad Normal</Text>
+      <Text>Época normal</Text>
     </Replace>
 
     <!-- Era Progress Panel -->
@@ -4467,7 +4467,7 @@
       <Text>previsto</Text>
     </Replace>
     <Replace Tag="LOC_CAI_ERA_PROGRESS_EFFECTS" Language="es_ES">
-      <Text>Efectos de la edad</Text>
+      <Text>Efectos de época</Text>
     </Replace>
 
     <!-- Timeline / Historic Moments -->
@@ -4481,7 +4481,7 @@
       <Text>Turno {1_Num}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TIMELINE_ERA_SCORE" Language="es_ES">
-      <Text>+{1_Num} de puntuación de era</Text>
+      <Text>+{1_Num} de Puntuación de época</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TIMELINE_COMMEMORATED" Language="es_ES">
       <Text>Conmemorado</Text>
@@ -5246,7 +5246,7 @@
 
     <!-- Climate Screen -->
     <Replace Tag="LOC_CAI_CLIMATE_TEMP_VALUE" Language="es_ES">
-      <Text>{1_Temp} grados Celsius desde la Era antigua</Text>
+      <Text>{1_Temp} grados Celsius desde la Antigüedad</Text>
     </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_FERTILE_TILES" Language="es_ES">
       <Text>{1_Num} {1_Num: plural 1?casilla ha ganado fertilidad; other?casillas han ganado fertilidad;}</Text>
