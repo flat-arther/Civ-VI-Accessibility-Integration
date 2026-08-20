@@ -26,7 +26,7 @@
       <Text>El cursor de navegación es un cursor de mapa independiente. Te permite explorar las casillas y actuar sobre ellas sin sustituir a la ciudad o unidad seleccionada. Civilization VI usa seis direcciones adyacentes en su mapa hexagonal, así que el cursor tiene órdenes de movimiento hacia el noroeste, el noreste, el oeste, el este, el suroeste y el sureste. Mover el cursor también mueve la cámara y anuncia la información conocida más importante de la casilla de destino.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_VISIBILITY" Language="es_ES">
-      <Text>La información del cursor respeta la visibilidad del jugador local. Una casilla sin revelar se anuncia como inexplorada en lugar de exponer su contenido; una casilla revelada puede conservar la geografía conocida, mientras que las unidades ocultas y demás información invisible en ese momento permanecen ocultas. La posición del cursor, las zonas geográficas recordadas y el estado del Topógrafo están aislados entre jugadores locales en las partidas de silla caliente.</Text>
+      <Text>La información del cursor respeta la visibilidad del jugador local. Una casilla sin revelar se anuncia como inexplorada en lugar de exponer su contenido; una casilla revelada puede conservar la geografía conocida, mientras que las unidades ocultas y demás información invisible en ese momento permanecen ocultas. La posición del cursor, las zonas geográficas recordadas y el estado del Topógrafo están aislados entre jugadores locales en las partidas de uno en uno ("hotseat").</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NAVIGATION_CURSOR_MOVING_TITLE" Language="es_ES">
       <Text>Mover el cursor</Text>
@@ -265,7 +265,7 @@
       <Text>Visibilidad en multijugador</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_MAP_TACS_SHARING" Language="es_ES">
-      <Text>En multijugador, el editor accesible de marcadores de mapa refleja las opciones de Visible para del juego y actualiza el marcador inmediatamente. El multijugador en red también puede ofrecer Enviar al chat para un marcador no privado visible para el destinatario actual del chat. La silla caliente admite los destinos de visibilidad de los marcadores, pero no el control de Enviar al chat en tiempo real.</Text>
+      <Text>En multijugador, el editor accesible de marcadores de mapa refleja las opciones de Visible para del juego y actualiza el marcador inmediatamente. El multijugador en red también puede ofrecer Enviar al chat para un marcador no privado visible para el destinatario actual del chat. El modo de uno en uno admite los destinos de visibilidad de los marcadores, pero no el control de Enviar al chat en tiempo real.</Text>
     </Replace>
 
     <!-- Gameplay: empire information -->
@@ -361,7 +361,7 @@
       <Text>Una línea de Revelado contiene las casillas recién exploradas y los objetos recién vistos. Una línea de Oculto nombra las unidades extranjeras que siguen existiendo pero han salido de tu vista. Una línea de Desaparecido informa de puestos bárbaros o aldeas tribales que antes se conocían y ahora están visiblemente ausentes. Las maravillas naturales, los puestos recién encontrados y las aldeas tribales recién encontradas usan sus propios anuncios del juego y no se repiten en la línea de Revelado normal.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_REVEALS_SETTINGS" Language="es_ES">
-      <Text>En la configuración de Eventos de F12, Anunciar cambios de visibilidad al empezar tu turno y Anunciar cambios de visibilidad durante el movimiento están activados de forma predeterminada. Anunciar cambios de visibilidad fuera de tu turno está desactivado de forma predeterminada y siempre se aplaza en silla caliente. Los anuncios producidos se guardan en la categoría Revelaciones del búfer de mensajes. En la configuración del búfer de mensajes de F12, Decir los mensajes de revelación controla si esas entradas nuevas del historial se dicen automáticamente; desactivarlo mantiene las entradas disponibles para repasarlas.</Text>
+      <Text>En la configuración de Eventos de F12, Anunciar cambios de visibilidad al empezar tu turno y Anunciar cambios de visibilidad durante el movimiento están activados de forma predeterminada. Anunciar cambios de visibilidad fuera de tu turno está desactivado de forma predeterminada y siempre se aplaza en las partidas de uno en uno. Los anuncios producidos se guardan en la categoría Revelaciones del búfer de mensajes. En la configuración del búfer de mensajes de F12, Decir los mensajes de revelación controla si esas entradas nuevas del historial se dicen automáticamente; desactivarlo mantiene las entradas disponibles para repasarlas.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_BUFFER_TITLE" Language="es_ES">
       <Text>Búfer de mensajes</Text>
@@ -376,7 +376,7 @@
       <Text>Historial de movimiento y voz</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_MOVEMENT" Language="es_ES">
-      <Text>El movimiento visible de las unidades registra la ruta de direcciones observada y la última casilla conocida. Por eso la orden de salto vuelve a la última ubicación observada en lugar de seguir a una unidad que ya no es visible. El movimiento recogido en silla caliente para otro observador local se anuncia solo cuando empieza el siguiente turno de ese observador.</Text>
+      <Text>El movimiento visible de las unidades registra la ruta de direcciones observada y la última casilla conocida. Por eso la orden de salto vuelve a la última ubicación observada en lugar de seguir a una unidad que ya no es visible. El movimiento recogido en las partidas de uno en uno para otro observador local se anuncia solo cuando empieza el siguiente turno de ese observador.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PEDIA_GAMEPLAY_NOTIFICATIONS_HISTORY_SETTINGS" Language="es_ES">
       <Text>La configuración de navegación elige de forma independiente si tus unidades, los compañeros de equipo, las civilizaciones hostiles, las civilizaciones neutrales, las ciudades-estado y los bárbaros anuncian unidades militares, civiles, ambas o ninguna. Solo el movimiento bárbaro está activado de forma predeterminada. La configuración del búfer de mensajes elige por separado qué categorías se dicen automáticamente y el número máximo de entradas conservadas; desactivar la voz no elimina las entradas del historial.</Text>

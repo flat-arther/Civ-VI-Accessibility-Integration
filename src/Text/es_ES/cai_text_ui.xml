@@ -6320,7 +6320,7 @@
       <Text>Observador</Text>
     </Replace>
     <Replace Tag="LOC_CAI_STAGING_HOTSEAT_EDIT" Language="es_ES">
-      <Text>Editar el jugador de silla caliente</Text>
+      <Text>Editar el jugador de la partida de uno en uno</Text>
     </Replace>
     <Replace Tag="LOC_CAI_STAGING_ADD_PLAYER" Language="es_ES">
       <Text>Añadir jugador</Text>
@@ -6661,7 +6661,7 @@
       <Text>Anunciar cambios de visibilidad fuera de tu turno</Text>
     </Replace>
     <Replace Tag="LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_OUTSIDE_TURN_TOOLTIP" Language="es_ES">
-      <Text>Anuncia los cambios de visibilidad que ocurren cuando no es tu turno activo. Nota: esto se desactiva automáticamente en el modo de silla caliente</Text>
+      <Text>Anuncia los cambios de visibilidad que ocurren cuando no es tu turno activo. Nota: esto se desactiva automáticamente en el modo de uno en uno ("hotseat")</Text>
     </Replace>
 
     <Replace Tag="LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_WHILE_MOVING" Language="es_ES">
