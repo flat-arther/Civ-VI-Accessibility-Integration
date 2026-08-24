@@ -12,6 +12,12 @@ else
     include("CityStates")
 end
 
+-- Shared city-state data readers (GetCityStateData / GetAllCityStatesData and
+-- their helpers) and unit-record helpers live here so the Better Report Screen
+-- tabs reuse the same implementation. Included after the vanilla CityStates base
+-- so the vanilla globals those readers call are already defined.
+include("inGameHelpers_CAI")
+
 local mgr                = ExposedMembers.CAI_UIManager
 
 local MODE               = {
@@ -158,146 +164,9 @@ end
 -- Live game-state readers
 -- ============================================================================
 
-local function GetRelationshipsWithPlayerIDs(cityStatePlayerID)
-    local relationships = GetRelationships(cityStatePlayerID)
-
-    local function AttachPlayerIDs(entries, playerIDs)
-        local entryIndex = 1
-        for _, playerID in ipairs(playerIDs) do
-            local diplomaticAI = Players[playerID]:GetDiplomaticAI()
-            if diplomaticAI:GetDiplomaticStateIndex(cityStatePlayerID) ~= -1 then
-                entries[entryIndex].PlayerID = playerID
-                entryIndex = entryIndex + 1
-            end
-        end
-    end
-
-    AttachPlayerIDs(relationships.CivRelationships, PlayerManager.GetAliveMajorIDs())
-    AttachPlayerIDs(relationships.CityStateRelationships, PlayerManager.GetAliveMinorIDs())
-    return relationships
-end
-
-local function GetCityStateData(playerID)
-    local localPlayerID = Game.GetLocalPlayer()
-    if localPlayerID == -1 then return nil end
-
-    local pLocalPlayer = Players[localPlayerID]
-    local pPlayer = Players[playerID]
-    if not pPlayer or not pPlayer:IsAlive() then return nil end
-
-    local pLocalDiplomacy = pLocalPlayer:GetDiplomacy()
-    local pLocalInfluence = pLocalPlayer:GetInfluence()
-    local pPlayerInfluence = pPlayer:GetInfluence()
-    if not pPlayerInfluence then return nil end
-
-    local pConfig = PlayerConfigurations[playerID]
-    local tokens = pPlayerInfluence:GetTokensReceived(localPlayerID)
-    local suzerainID = pPlayerInfluence:GetSuzerain()
-
-    local suzerainName = Locale.Lookup("LOC_CITY_STATES_NONE")
-    if suzerainID ~= -1 then
-        if suzerainID == localPlayerID then
-            suzerainName = Locale.Lookup("LOC_CITY_STATES_YOU")
-        elseif pLocalDiplomacy:HasMet(suzerainID) then
-            suzerainName = Locale.Lookup(PlayerConfigurations[suzerainID]:GetPlayerName())
-        else
-            suzerainName = Locale.Lookup("LOC_LOYALTY_PANEL_UNMET_CIV")
-        end
-    end
-
-    local cityStateType = GetCityStateType(playerID)
-    local iPlayerDiploState = pPlayer:GetDiplomaticAI():GetDiplomaticStateIndex(localPlayerID)
-    local diplomaticState = nil
-    if iPlayerDiploState ~= -1 then
-        diplomaticState = GameInfo.DiplomaticStates[iPlayerDiploState].StateType
-    end
-
-    local influence = {}
-    for _, iInfluencePlayer in ipairs(PlayerManager.GetAliveMajorIDs()) do
-        local received = pPlayerInfluence:GetTokensReceived(iInfluencePlayer)
-        if received > 0 then
-            influence[iInfluencePlayer] = received
-        end
-    end
-
-    -- Envoys needed to become suzerain, matching vanilla CityStates.lua: clamp to
-    -- the 3-envoy minimum, and if the local player is not already the suzerain,
-    -- require one more than the current leader (you must exceed, not tie).
-    local isBonusSuzerain = (suzerainID == localPlayerID)
-    local suzerainTokensNeeded = pPlayerInfluence:GetMostTokensReceived()
-    if suzerainTokensNeeded < 3 then
-        suzerainTokensNeeded = 3
-    elseif not isBonusSuzerain then
-        suzerainTokensNeeded = suzerainTokensNeeded + 1
-    end
-
-    return {
-        iPlayer               = playerID,
-        Name                  = pConfig:GetCivilizationShortDescription(),
-        Type                  = cityStateType,
-        Tokens                = tokens,
-        Influence             = influence,
-        SuzerainID            = suzerainID,
-        SuzerainName          = suzerainName,
-        SuzerainTokensNeeded  = suzerainTokensNeeded,
-        isAlive               = pPlayer:IsAlive(),
-        isHasMet              = pLocalDiplomacy:HasMet(playerID),
-        isAtWar               = pLocalDiplomacy:IsAtWarWith(playerID),
-        isBonus1              = (tokens >= 1),
-        isBonus3              = (tokens >= 3),
-        isBonus6              = (tokens >= 6),
-        isBonusSuzerain       = (suzerainID == localPlayerID),
-        IsLocalPlayerSuzerain = (suzerainID == localPlayerID),
-        CanDeclareWarOn       = pLocalDiplomacy:CanDeclareWarOn(playerID),
-        CanMakePeaceWith      = pLocalDiplomacy:CanMakePeaceWith(playerID),
-        CanLevyMilitary       = pLocalInfluence:CanLevyMilitary(playerID),
-        CanReceiveTokensFrom  = pLocalInfluence:CanGiveTokensToPlayer(playerID),
-        LevyMilitaryCost      = pLocalInfluence:GetLevyMilitaryCost(playerID),
-        LevyMilitaryTurnLimit = pPlayer:GetInfluence():GetLevyTurnLimit(),
-        HasLevyActive         = (pPlayer:GetInfluence():GetLevyTurnCounter() >= 0),
-        iTurnChanged          = pLocalDiplomacy:GetAtWarChangeTurn(playerID),
-        DiplomaticState       = diplomaticState,
-        Quests                = GetQuests(playerID),
-        Relationships         = GetRelationshipsWithPlayerIDs(playerID),
-        Bonuses               = {},
-        CivType               = pConfig:GetCivilizationTypeName(),
-    }
-end
-
-local function FillBonuses(kCS)
-    local title, details = GetBonusText(kCS.iPlayer, 1)
-    kCS.Bonuses[1] = { Title = title, Details = details }
-    title, details = GetBonusText(kCS.iPlayer, 3)
-    kCS.Bonuses[3] = { Title = title, Details = details }
-    title, details = GetBonusText(kCS.iPlayer, 6)
-    kCS.Bonuses[6] = { Title = title, Details = details }
-    details = GetSuzerainBonusText(kCS.iPlayer)
-    kCS.Bonuses["Suzerain"] = {
-        Title = Locale.Lookup("LOC_CITY_STATES_SUZERAIN_ENVOYS"),
-        Details = details,
-    }
-end
-
-local function GetAllCityStatesData()
-    local data = {}
-    local localPlayerID = Game.GetLocalPlayer()
-    if localPlayerID == -1 then return data end
-
-    for _, pPlayer in ipairs(PlayerManager.GetAliveMinors()) do
-        local playerID = pPlayer:GetID()
-        if playerID ~= localPlayerID then
-            local pInfluence = pPlayer:GetInfluence()
-            if pInfluence and pInfluence:CanReceiveInfluence() then
-                local kCS = GetCityStateData(playerID)
-                if kCS and kCS.isHasMet then
-                    FillBonuses(kCS)
-                    data[playerID] = kCS
-                end
-            end
-        end
-    end
-    return data
-end
+-- GetRelationshipsWithPlayerIDs, GetCityStateData, FillBonuses, and
+-- GetAllCityStatesData now live in inGameHelpers_CAI (shared with the Better
+-- Report Screen Minor tab). They are global there; call sites below are unchanged.
 
 local function GetSelectedCityState()
     if m_selectedPlayerID == -1 then return nil end

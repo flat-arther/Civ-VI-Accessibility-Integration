@@ -664,39 +664,9 @@ function CAI_GetUnitInfoAdjacentEnemies(data, unit)
     return Locale.Lookup("LOC_CAI_UNIT_ADJACENT_ENEMIES", CAI_CountAdjacentEnemies(unit))
 end
 
-function CAI_HasQueuedMovement(unit)
-    local destinationPlotId = unit ~= nil and UnitManager.GetQueuedDestination(unit) or nil
-    return destinationPlotId ~= nil and destinationPlotId ~= false and Map.IsPlot(destinationPlotId)
-end
-
-function CAI_GetUnitActivityStatus(unit)
-    if unit == nil then
-        return nil
-    end
-
-    local activityType = UnitManager.GetActivityType(unit)
-    if unit:IsEmbarked() then
-        return Locale.Lookup("LOC_CAI_UNIT_EMBARKED")
-    elseif unit:IsAutomated() then
-        return Locale.Lookup("LOC_UNITCOMMAND_AUTOMATE_DESCRIPTION")
-    elseif activityType == ActivityTypes.ACTIVITY_HEAL then
-        return Locale.Lookup("LOC_UNITFLAG_ACTIVITY_HEALING")
-    elseif activityType == ActivityTypes.ACTIVITY_SLEEP then
-        return Locale.Lookup("LOC_CAI_WORLDTRACKER_UNIT_SLEEP")
-    elseif activityType == ActivityTypes.ACTIVITY_HOLD then
-        return Locale.Lookup("LOC_UNITOPERATION_SKIP_TURN_DESCRIPTION")
-    elseif activityType ~= ActivityTypes.ACTIVITY_AWAKE and unit:GetFortifyTurns() > 0 then
-        return Locale.Lookup("LOC_CAI_WORLDTRACKER_UNIT_FORTIFIED")
-    elseif CAI_HasQueuedMovement(unit) then
-        return Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_MOVING")
-    end
-
-    -- Visible readiness is broader than raw movement. In particular, an
-    -- ongoing trade route may retain movement while not awaiting player input.
-    return Locale.Lookup(unit:IsReadyToMove()
-        and "LOC_READY_BUTTON"
-        or "LOC_NOT_READY")
-end
+-- CAI_HasQueuedMovement and CAI_GetUnitActivityStatus now live in
+-- inGameHelpers_CAI (shared with the Better Report Screen Units tab). They are
+-- global there; call sites below (and CAI_GetUnitActivitySortRank) are unchanged.
 
 -- Preserve Civ V's three-band shape while making each Civ VI band agree with
 -- the Activity text the player hears. Named activity states occupy the middle;
@@ -2759,51 +2729,24 @@ CAIUnitList = {
     },
 }
 
+-- Record build/resolve/categorize and select+jump activation are shared with the
+-- Better Report Screen Units tab via inGameHelpers_CAI; these delegate so there is
+-- one implementation. Activation passes RemoveUnitList as the teardown so the
+-- Ctrl+U list closes before the map selection/jump (the report passes its own).
 function CAIUnitList.RecordKey(record)
-    return UnitFocusKey(record.PlayerID, record.UnitID)
+    return UnitRecordFocusKey(record.PlayerID, record.UnitID)
 end
 
 function CAIUnitList.Resolve(record)
-    return record ~= nil and ResolveUnit(record.UnitID, record.PlayerID) or nil
+    return ResolveUnitRecord(record)
 end
 
 function CAIUnitList.GetCategory(unit)
-    if unit == nil then return nil end
-    local unitInfo = GameInfo.Units[unit:GetUnitType()]
-    if unitInfo == nil then return nil end
-    if unitInfo.MakeTradeRoute == true or unitInfo.MakeTradeRoute == 1 then return "trade" end
-    if unitInfo.Domain == "DOMAIN_AIR" then return "air" end
-    if unitInfo.Domain == "DOMAIN_SEA" then return "naval" end
-    if unitInfo.FormationClass == "FORMATION_CLASS_SUPPORT" then return "support" end
-    if unit:GetCombat() > 0 or unit:GetRangedCombat() > 0 then return "military" end
-    return "civilian"
+    return CategorizeUnit(unit)
 end
 
 function CAIUnitList.BuildRecords()
-    local playerID = Game.GetLocalPlayer()
-    local player = playerID ~= nil and playerID >= 0 and Players[playerID] or nil
-    local records = {}
-    if player == nil then return records end
-
-    for _, unit in player:GetUnits():Members() do
-        records[#records + 1] = {
-            PlayerID = playerID,
-            UnitID = unit:GetID(),
-            NaturalIndex = #records + 1,
-        }
-    end
-    table.sort(records, function(a, b)
-        local aUnit = CAIUnitList.Resolve(a)
-        local bUnit = CAIUnitList.Resolve(b)
-        local aInfo = aUnit ~= nil and GameInfo.Units[aUnit:GetUnitType()] or nil
-        local bInfo = bUnit ~= nil and GameInfo.Units[bUnit:GetUnitType()] or nil
-        local aType = aInfo ~= nil and aInfo.UnitType or ""
-        local bType = bInfo ~= nil and bInfo.UnitType or ""
-        if aType ~= bType then return aType < bType end
-        return a.UnitID < b.UnitID
-    end)
-    for index, record in ipairs(records) do record.NaturalIndex = index end
-    return records
+    return BuildLocalUnitRecords()
 end
 
 function CAIUnitList.GetFilteredRecords()
@@ -2990,37 +2933,15 @@ function CAIUnitList.GetTooltip(record)
 end
 
 function CAIUnitList.ActivateRecord(record)
-    local unit = CAIUnitList.Resolve(record)
-    if unit == nil then return true end
-    RemoveUnitList()
-    UI.SelectUnit(unit)
-    return true
+    return SelectUnitRecord(record, RemoveUnitList)
 end
 
 function CAIUnitList.JumpToRecord(record)
-    local unit = CAIUnitList.Resolve(record)
-    if unit == nil then
-        LogWarn("CAI UnitPanel unit-list cursor jump could not resolve unit " .. tostring(record.UnitID))
-        return true
-    end
-    local plot = Map.GetPlot(unit:GetX(), unit:GetY())
-    if plot == nil then
-        LogWarn("CAI UnitPanel unit-list cursor jump could not resolve unit plot: " ..
-            tostring(unit:GetX()) .. ", " .. tostring(unit:GetY()))
-        return true
-    end
-    LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
-    return true
+    return JumpToUnitRecord(record)
 end
 
 function CAIUnitList.OpenCivilopedia(record)
-    local unit = CAIUnitList.Resolve(record)
-    local unitInfo = unit ~= nil and GameInfo.Units[unit:GetUnitType()] or nil
-    if unitInfo ~= nil then
-        RemoveUnitList()
-        LuaEvents.OpenCivilopedia(unitInfo.UnitType)
-    end
-    return true
+    return OpenUnitRecordCivilopedia(record, RemoveUnitList)
 end
 
 function CAIUnitList.BuildColumns()

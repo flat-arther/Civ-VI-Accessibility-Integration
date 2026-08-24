@@ -230,6 +230,17 @@ local function DynamicLookup(tokenName)
         end
     end
 
+    -- Bare yield tokens without the YIELD_ prefix. Vanilla text uses mixed-case
+    -- yield icons (e.g. [ICON_Production]) that are covered by REPLACEMENTS, but
+    -- other content can emit the ALLCAPS form ([ICON_PRODUCTION], [ICON_GOLD]).
+    -- Resolve those against GameInfo.Yields so they speak instead of dropping.
+    if GameInfo.Yields then
+        local row = GameInfo.Yields["YIELD_" .. iconName]
+        if row then
+            return Locale.Lookup(row.Name)
+        end
+    end
+
     return nil
 end
 

@@ -101,6 +101,8 @@
 [x]Add support for detailed map tacs
 [x] Add support for better balanced game
 [x] Add support for better trade screen
-[ ] Add support for better reports, extended policy cards, quick deals, real Era Tracker
+[x] Add support for better reports screen
+[x] Add support for extended policy cards
+[ ] Add support for quick deals, real Era Tracker
 [ ] Look in to coastal raide yield reporting
 [ ] River flow direction reporting

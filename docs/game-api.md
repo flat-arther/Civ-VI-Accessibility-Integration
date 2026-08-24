@@ -418,6 +418,23 @@ Wrapper for `CAI.output`. Use this for all TTS output.
 
 ## Screen Investigation Notes
 
+### Extended Policy Cards mod (Aristos, UUID `382a187f-c8ba-4094-a6a7-0d5315661f33`)
+
+- Ships only a `GovernmentScreen.lua`/`.xml` replacement and depends on Better
+  Report Screen. Its sole functional change versus vanilla: when BRS is active it
+  computes each policy card's effect via `ExposedMembers.RMA.CalculateModifierEffect("Policy", policyType, ePlayerID, nil, nil)` (first return value is the readable Impact string), appends it to the card's `Draggable` tooltip, and shows it in a new `EffectContainer`/`Effect` label. It changes no data model.
+- `RMA.CalculateModifierEffect` is defined by BRS (`RealModifierAnalysis.lua`), not
+  by EPC; EPC only ensures `ExposedMembers.RMA` exists and consumes it. It returns
+  `Impact, Yields, ImpactToolTip, UnknownEffect`; CAI uses only the first (Impact
+  string) and passes `Game.GetLocalPlayer()` for the player id.
+- Because CAI's `<ReplaceUIScript LuaContext="GovernmentScreen">` outranks EPC, EPC's
+  script never runs when both are active. CAI re-surfaces the effect itself: detect
+  with `IsExtendedPolicyCardsActive()` (caiUtils), read RMA in `GetPolicyEffect()`,
+  and prepend it to `GetPolicyTooltip()` in `GovernmentScreen_CAI.lua`. When active,
+  the policy picker/viewer switches to the table+tree panel in
+  `GovernmentScreen_ExtendedPolicyCards_CAI.lua` (pulled by runtime `include()`,
+  registered in both the top-level `<File>` list and `<ImportFiles>`).
+
 ### Great People Popup
 
 - CAI formats the read-only Great Person biography edit box with the shared
@@ -2494,3 +2511,23 @@ The Epic build ships an OLDER game version than Steam and omits the online 2K Ch
   - The seven partial Production Panel items are exactly the seven IDs covered by `TutorialUIRoot_CAI`'s always-receive-input production hooks. Civics close and Government policy-tab selection also have targeted full-context hooks. The general `tutorialActivatedIds` routing table remains empty despite its input-handler comment and requires in-game verification.
   - `TutorialUIRoot_CAI.lua` includes only base `TutorialUIRoot`, not the XP1/XP2 replacement that extends non-player-turn listener eligibility. The base RAILS bank does not use those expansion listener names, but this remains a replacement-composition gap.
   - Full item/surface matrix and prioritized playthrough: `docs/tutorial-scenario-compatibility-audit.md`.
+
+## Better Report Screen (BRS) mod integration
+
+Build spec: `docs/brsSupport.md`. BRS (Infixo, UUID `6f2888d4-79dc-415f-a8ff-f9d81d7afb53`) and CAI both `ReplaceUIScript` the `ReportScreen` context; CAI's higher LoadOrder wins, so BRS's `reportscreen.lua` never runs and its data model (nine `View*Page`/`GetData*` functions, module globals like `m_kCityData`, `m_kResourceData`, `m_kPolicyData`, `m_kCurrentDeals`) is absent under the vanilla path. Plan: detect BRS at runtime (`IsBetterReportScreenActive()` in `caiUtils.lua`) and hand off to a dedicated `ReportScreen_BetterReportsScreen_CAI.lua` variant, mirroring `TradeOverview_BetterTradeScreen_CAI.lua`. BRS source is vendored under `decompiled/mods/BetterReportsScreen/` for reference.
+
+- Shared game-state readers (§8 #6): `inGameHelpers_CAI.lua` now hosts the unit-record helpers (`BuildLocalUnitRecords`/`ResolveUnitRecord`/`UnitRecordFocusKey`/`CategorizeUnit`, plus `SelectUnitRecord`/`JumpToUnitRecord`/`OpenUnitRecordCivilopedia` which take an injected teardown callback) and the city-state readers (`GetCityStateData`/`GetAllCityStatesData`/`GetRelationshipsWithPlayerIDs`/`FillBonuses`). `UnitPanel_CAI` (Ctrl+U list) and `CityStates_CAI` delegate to them; the report Units and Minor tabs will reuse them.
+- **Cross-context gotcha (Minor tab):** the city-state readers depend on vanilla globals defined only in the `CityStates` partial screen — `GetRelationships`, `GetCityStateType`, `GetQuests`, `GetBonusText`, `GetSuzerainBonusText` (in `decompiled/Assets/UI/PartialScreens/CityStates.lua`). These are present when the readers are called from the CityStates context but NOT in the ReportScreen context. Before the report Minor tab calls `GetCityStateData`, the report variant must make those vanilla helpers resolvable in-context (e.g. include the CityStates partial or vendor the needed helpers); the `~= nil` dispatcher guard does not cover this because it is a call-time global miss, not a load-time one. Resolve and verify in `Lua.log` when building the Minor tab.
+
+## Quick Deals (mod) integration
+
+Quick Deals (wltk, UUID `5aceed03-8639-4a81-8cbf-03f54d543502`, vendored at `decompiled/mods/QuickDeals/`) adds a launch-bar popup (`OpenQDPopup` action) that queries every met AI at once for their best gold offer. It has five UI contexts registered via `AddUserInterfaces` (context name = XML basename): `qd_dealpopup` (shell: a `TabSupport` tab bar over `TabContentContainer`), and `qd_popuptab_sale`/`qd_popuptab_purchase`/`qd_popuptab_exchange` (each ChangeParents itself into the shell's `TabContentContainer` on the `QD_PopupShowTab` LuaEvent). A separate gameplay-context engine (`qd_offerautomator.lua`) silently opens `DiplomacyManager` sessions with each AI and INSPECT/EQUALIZEs working deals via `DealManager`, driven by `Events.DiplomacyStatement`; it returns offers to the tabs through `QD_EndAIOfferFetch`/`QD_EndAIGoldExchange`/`QD_EndMultiTurnGoldUpdate`. Quick Deals exports every `ui/*.lua` via `<ImportFiles>` so other mods can `include()` them.
+
+- **Detection:** `IsQuickDealsActive()` in `caiUtils.lua`.
+- **DiplomacyActionView collision:** Quick Deals also `ReplaceUIScript`s `DiplomacyActionView` (LoadOrder 99999) only to wrap `OnDiplomacyStatement`/`LateInitialize` and close its popup + silent sessions on a surprise statement. CAI's LoadOrder (999999999) wins, so `DiplomacyActionView_CAI.lua` branches its base include to `include("diplomacyactionview_qd")` when QD is active (it re-includes the correct vanilla variant itself and installs QD's wraps), then CAI wraps on top.
+- **Hotkey:** `ModCompatibilityConfig_CAI.sql` rebinds `OpenQDPopup` from the bare `D` key (QD's `InsertOrIgnore` default) to Ctrl+D (`LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_D`).
+- **Accessibility architecture (shell-owns-all):** CAI wins the four popup contexts. `qd_dealpopup_CAI.lua` (shell) builds ALL widgets (one context = one input handler, no cross-context widget trees) and renders from a model that the three provider files (`qd_popuptab_*_CAI.lua`) publish into `ExposedMembers.CAIQuickDeals[tabKey]`, signalled by `LuaEvents.CAIQD_Changed(tabKey, kind)`. Providers `WrapFunc` their own context's populate functions to capture Quick Deals' per-offer data (the offer table is passed to `PopulateAIOffer(offer, control)`, so wrapping it captures the full offer without needing QD's file-locals) and expose action closures (accept, view deal, increase/decrease 30-turn gold, convert-all, edit amount, add-one/add-ten, remove) that run in their home context and call QD globals (`OnAcceptDeal`/`OnShowDealDetails`/`OnUpdateMultiTurnGold`/`AddResourceToOffer`/etc.). Filters drive fetches by firing the public `QD_StartAIOfferFetch`/`QD_StartAIGoldExchange` with CAI-owned filter state rather than mutating QD's base-file locals. Closures and table refs pass across contexts (Quick Deals itself threads control instances through its own LuaEvents, confirming references survive cross-context dispatch).
+
+## Movie/cinematic subtitles (SubtitleContext) — dead end
+
+`decompiled/Assets/UI/SubtitleContext.xml` is a pure-XML context (`Name="SubtitleContext"`, one `Label ID="SubtitleText"`) with no vanilla Lua, and nothing in the UI Lua references it. Attempted a same-base-name companion Lua imported via both `<ImportFiles>` blocks with a debug `Speak` on load: **it never fires**. The context is not instantiated during normal play (intro/menu tested), so a companion Lua cannot bind and this approach is a dead end. Do not retry it. Captions are driven entirely by the native movie player from the `.srt` files under `Assets/UI/Subtitles/<lang>/`.

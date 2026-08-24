@@ -1467,3 +1467,326 @@ function GetHostedAircraftUnitNames(unit)
 
     return names
 end
+
+-- ===========================================================================
+-- Shared local-player unit record helpers
+--
+-- A "unit record" is a lightweight, stable reference to one of the local
+-- player's units:
+--   { PlayerID = <owner>, UnitID = <unit id>, NaturalIndex = <build order> }
+-- Screens hold records (never live Unit handles) and re-resolve on demand, so a
+-- unit destroyed between rebuilds is handled gracefully. Shared by the Ctrl+U
+-- unit list (UnitPanel_CAI) and the Better Report Screen Units tab so both build,
+-- resolve, categorize, and act on units through one implementation.
+-- ===========================================================================
+
+---@param playerID number
+---@param unitID number
+---@return string
+function UnitRecordFocusKey(playerID, unitID)
+    return "unit:list:" .. tostring(playerID) .. ":" .. tostring(unitID)
+end
+
+---@param record table|nil
+---@return Unit|nil
+function ResolveUnitRecord(record)
+    if record == nil then return nil end
+    local lookupPlayerID = record.PlayerID
+    if lookupPlayerID == nil or lookupPlayerID == -1 then
+        lookupPlayerID = Game.GetLocalPlayer()
+    end
+    local player = Players[lookupPlayerID]
+    if player == nil then return nil end
+    return player:GetUnits():FindID(record.UnitID)
+end
+
+-- True when the unit has a multi-turn queued movement destination.
+---@param unit Unit|nil
+---@return boolean
+function CAI_HasQueuedMovement(unit)
+    local destinationPlotId = unit ~= nil and UnitManager.GetQueuedDestination(unit) or nil
+    return destinationPlotId ~= nil and destinationPlotId ~= false and Map.IsPlot(destinationPlotId)
+end
+
+-- Spoken activity/readiness of a unit. Readiness is broader than raw movement:
+-- IsReadyToMove() is false for a unit still executing an order (a spy on a
+-- mission, a trader on a route) even when it has movement left, so it correctly
+-- reports "not ready" instead of "ready".
+---@param unit Unit|nil
+---@return string|nil
+function CAI_GetUnitActivityStatus(unit)
+    if unit == nil then
+        return nil
+    end
+
+    local activityType = UnitManager.GetActivityType(unit)
+    if unit:IsEmbarked() then
+        return Locale.Lookup("LOC_CAI_UNIT_EMBARKED")
+    elseif unit:IsAutomated() then
+        return Locale.Lookup("LOC_UNITCOMMAND_AUTOMATE_DESCRIPTION")
+    elseif activityType == ActivityTypes.ACTIVITY_HEAL then
+        return Locale.Lookup("LOC_UNITFLAG_ACTIVITY_HEALING")
+    elseif activityType == ActivityTypes.ACTIVITY_SLEEP then
+        return Locale.Lookup("LOC_CAI_WORLDTRACKER_UNIT_SLEEP")
+    elseif activityType == ActivityTypes.ACTIVITY_HOLD then
+        return Locale.Lookup("LOC_UNITOPERATION_SKIP_TURN_DESCRIPTION")
+    elseif activityType ~= ActivityTypes.ACTIVITY_AWAKE and unit:GetFortifyTurns() > 0 then
+        return Locale.Lookup("LOC_CAI_WORLDTRACKER_UNIT_FORTIFIED")
+    elseif CAI_HasQueuedMovement(unit) then
+        return Locale.Lookup("LOC_CAI_UNIT_ACTIVITY_MOVING")
+    end
+
+    return Locale.Lookup(unit:IsReadyToMove()
+        and "LOC_READY_BUTTON"
+        or "LOC_NOT_READY")
+end
+
+-- Classify a unit into the report/list domain buckets used for filtering.
+---@param unit Unit|nil
+---@return string|nil
+function CategorizeUnit(unit)
+    if unit == nil then return nil end
+    local unitInfo = GameInfo.Units[unit:GetUnitType()]
+    if unitInfo == nil then return nil end
+    if unitInfo.MakeTradeRoute == true or unitInfo.MakeTradeRoute == 1 then return "trade" end
+    if unitInfo.Domain == "DOMAIN_AIR" then return "air" end
+    if unitInfo.Domain == "DOMAIN_SEA" then return "naval" end
+    if unitInfo.FormationClass == "FORMATION_CLASS_SUPPORT" then return "support" end
+    if unit:GetCombat() > 0 or unit:GetRangedCombat() > 0 then return "military" end
+    return "civilian"
+end
+
+-- Build the local player's unit records, sorted by unit type then unit id so the
+-- natural order is stable across rebuilds.
+---@return table[]
+function BuildLocalUnitRecords()
+    local playerID = Game.GetLocalPlayer()
+    local player = playerID ~= nil and playerID >= 0 and Players[playerID] or nil
+    local records = {}
+    if player == nil then return records end
+
+    for _, unit in player:GetUnits():Members() do
+        records[#records + 1] = {
+            PlayerID = playerID,
+            UnitID = unit:GetID(),
+            NaturalIndex = #records + 1,
+        }
+    end
+    table.sort(records, function(a, b)
+        local aUnit = ResolveUnitRecord(a)
+        local bUnit = ResolveUnitRecord(b)
+        local aInfo = aUnit ~= nil and GameInfo.Units[aUnit:GetUnitType()] or nil
+        local bInfo = bUnit ~= nil and GameInfo.Units[bUnit:GetUnitType()] or nil
+        local aType = aInfo ~= nil and aInfo.UnitType or ""
+        local bType = bInfo ~= nil and bInfo.UnitType or ""
+        if aType ~= bType then return aType < bType end
+        return a.UnitID < b.UnitID
+    end)
+    for index, record in ipairs(records) do record.NaturalIndex = index end
+    return records
+end
+
+-- Select the record's unit on the map. `onBeforeSelect` is the caller's teardown
+-- (the Ctrl+U list removes itself; the report closes first) run before selection
+-- so the map is in front when the unit is picked. Returns true (input handled).
+---@param record table|nil
+---@param onBeforeSelect fun()|nil
+---@return boolean
+function SelectUnitRecord(record, onBeforeSelect)
+    local unit = ResolveUnitRecord(record)
+    if unit == nil then return true end
+    if onBeforeSelect ~= nil then onBeforeSelect() end
+    UI.SelectUnit(unit)
+    return true
+end
+
+-- Move the world cursor to the record's unit without changing selection.
+---@param record table|nil
+---@return boolean
+function JumpToUnitRecord(record)
+    local unit = ResolveUnitRecord(record)
+    if unit == nil then
+        LogWarn("CAI unit-record cursor jump could not resolve unit " .. tostring(record and record.UnitID))
+        return true
+    end
+    local plot = Map.GetPlot(unit:GetX(), unit:GetY())
+    if plot == nil then
+        LogWarn("CAI unit-record cursor jump could not resolve unit plot: " ..
+            tostring(unit:GetX()) .. ", " .. tostring(unit:GetY()))
+        return true
+    end
+    LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
+    return true
+end
+
+-- Open the Civilopedia at the record's unit type. `onBeforeOpen` is the caller's
+-- teardown, run before the pedia opens.
+---@param record table|nil
+---@param onBeforeOpen fun()|nil
+---@return boolean
+function OpenUnitRecordCivilopedia(record, onBeforeOpen)
+    local unit = ResolveUnitRecord(record)
+    local unitInfo = unit ~= nil and GameInfo.Units[unit:GetUnitType()] or nil
+    if unitInfo ~= nil then
+        if onBeforeOpen ~= nil then onBeforeOpen() end
+        LuaEvents.OpenCivilopedia(unitInfo.UnitType)
+    end
+    return true
+end
+
+-- ===========================================================================
+-- Shared city-state data readers
+--
+-- Read live city-state (minor player) state into a plain table. Shared by the
+-- City-States screen (CityStates_CAI) and the Better Report Screen Minor tab.
+-- These depend on the vanilla CityStates partial-screen globals (GetRelationships,
+-- GetCityStateType, GetQuests, GetBonusText, GetSuzerainBonusText), so the calling
+-- context must have that base included before invoking them.
+-- ===========================================================================
+
+---@param cityStatePlayerID number
+---@return table
+function GetRelationshipsWithPlayerIDs(cityStatePlayerID)
+    local relationships = GetRelationships(cityStatePlayerID)
+
+    local function AttachPlayerIDs(entries, playerIDs)
+        local entryIndex = 1
+        for _, playerID in ipairs(playerIDs) do
+            local diplomaticAI = Players[playerID]:GetDiplomaticAI()
+            if diplomaticAI:GetDiplomaticStateIndex(cityStatePlayerID) ~= -1 then
+                entries[entryIndex].PlayerID = playerID
+                entryIndex = entryIndex + 1
+            end
+        end
+    end
+
+    AttachPlayerIDs(relationships.CivRelationships, PlayerManager.GetAliveMajorIDs())
+    AttachPlayerIDs(relationships.CityStateRelationships, PlayerManager.GetAliveMinorIDs())
+    return relationships
+end
+
+---@param playerID number
+---@return table|nil
+function GetCityStateData(playerID)
+    local localPlayerID = Game.GetLocalPlayer()
+    if localPlayerID == -1 then return nil end
+
+    local pLocalPlayer = Players[localPlayerID]
+    local pPlayer = Players[playerID]
+    if not pPlayer or not pPlayer:IsAlive() then return nil end
+
+    local pLocalDiplomacy = pLocalPlayer:GetDiplomacy()
+    local pLocalInfluence = pLocalPlayer:GetInfluence()
+    local pPlayerInfluence = pPlayer:GetInfluence()
+    if not pPlayerInfluence then return nil end
+
+    local pConfig = PlayerConfigurations[playerID]
+    local tokens = pPlayerInfluence:GetTokensReceived(localPlayerID)
+    local suzerainID = pPlayerInfluence:GetSuzerain()
+
+    local suzerainName = Locale.Lookup("LOC_CITY_STATES_NONE")
+    if suzerainID ~= -1 then
+        if suzerainID == localPlayerID then
+            suzerainName = Locale.Lookup("LOC_CITY_STATES_YOU")
+        elseif pLocalDiplomacy:HasMet(suzerainID) then
+            suzerainName = Locale.Lookup(PlayerConfigurations[suzerainID]:GetPlayerName())
+        else
+            suzerainName = Locale.Lookup("LOC_LOYALTY_PANEL_UNMET_CIV")
+        end
+    end
+
+    local cityStateType = GetCityStateType(playerID)
+    local iPlayerDiploState = pPlayer:GetDiplomaticAI():GetDiplomaticStateIndex(localPlayerID)
+    local diplomaticState = nil
+    if iPlayerDiploState ~= -1 then
+        diplomaticState = GameInfo.DiplomaticStates[iPlayerDiploState].StateType
+    end
+
+    local influence = {}
+    for _, iInfluencePlayer in ipairs(PlayerManager.GetAliveMajorIDs()) do
+        local received = pPlayerInfluence:GetTokensReceived(iInfluencePlayer)
+        if received > 0 then
+            influence[iInfluencePlayer] = received
+        end
+    end
+
+    -- Envoys needed to become suzerain, matching vanilla CityStates.lua: clamp to
+    -- the 3-envoy minimum, and if the local player is not already the suzerain,
+    -- require one more than the current leader (you must exceed, not tie).
+    local isBonusSuzerain = (suzerainID == localPlayerID)
+    local suzerainTokensNeeded = pPlayerInfluence:GetMostTokensReceived()
+    if suzerainTokensNeeded < 3 then
+        suzerainTokensNeeded = 3
+    elseif not isBonusSuzerain then
+        suzerainTokensNeeded = suzerainTokensNeeded + 1
+    end
+
+    return {
+        iPlayer               = playerID,
+        Name                  = pConfig:GetCivilizationShortDescription(),
+        Type                  = cityStateType,
+        Tokens                = tokens,
+        Influence             = influence,
+        SuzerainID            = suzerainID,
+        SuzerainName          = suzerainName,
+        SuzerainTokensNeeded  = suzerainTokensNeeded,
+        isAlive               = pPlayer:IsAlive(),
+        isHasMet              = pLocalDiplomacy:HasMet(playerID),
+        isAtWar               = pLocalDiplomacy:IsAtWarWith(playerID),
+        isBonus1              = (tokens >= 1),
+        isBonus3              = (tokens >= 3),
+        isBonus6              = (tokens >= 6),
+        isBonusSuzerain       = (suzerainID == localPlayerID),
+        IsLocalPlayerSuzerain = (suzerainID == localPlayerID),
+        CanDeclareWarOn       = pLocalDiplomacy:CanDeclareWarOn(playerID),
+        CanMakePeaceWith      = pLocalDiplomacy:CanMakePeaceWith(playerID),
+        CanLevyMilitary       = pLocalInfluence:CanLevyMilitary(playerID),
+        CanReceiveTokensFrom  = pLocalInfluence:CanGiveTokensToPlayer(playerID),
+        LevyMilitaryCost      = pLocalInfluence:GetLevyMilitaryCost(playerID),
+        LevyMilitaryTurnLimit = pPlayer:GetInfluence():GetLevyTurnLimit(),
+        HasLevyActive         = (pPlayer:GetInfluence():GetLevyTurnCounter() >= 0),
+        iTurnChanged          = pLocalDiplomacy:GetAtWarChangeTurn(playerID),
+        DiplomaticState       = diplomaticState,
+        Quests                = GetQuests(playerID),
+        Relationships         = GetRelationshipsWithPlayerIDs(playerID),
+        Bonuses               = {},
+        CivType               = pConfig:GetCivilizationTypeName(),
+    }
+end
+
+---@param kCS table
+function FillBonuses(kCS)
+    local title, details = GetBonusText(kCS.iPlayer, 1)
+    kCS.Bonuses[1] = { Title = title, Details = details }
+    title, details = GetBonusText(kCS.iPlayer, 3)
+    kCS.Bonuses[3] = { Title = title, Details = details }
+    title, details = GetBonusText(kCS.iPlayer, 6)
+    kCS.Bonuses[6] = { Title = title, Details = details }
+    details = GetSuzerainBonusText(kCS.iPlayer)
+    kCS.Bonuses["Suzerain"] = {
+        Title = Locale.Lookup("LOC_CITY_STATES_SUZERAIN_ENVOYS"),
+        Details = details,
+    }
+end
+
+---@return table
+function GetAllCityStatesData()
+    local data = {}
+    local localPlayerID = Game.GetLocalPlayer()
+    if localPlayerID == -1 then return data end
+
+    for _, pPlayer in ipairs(PlayerManager.GetAliveMinors()) do
+        local playerID = pPlayer:GetID()
+        if playerID ~= localPlayerID then
+            local pInfluence = pPlayer:GetInfluence()
+            if pInfluence and pInfluence:CanReceiveInfluence() then
+                local kCS = GetCityStateData(playerID)
+                if kCS and kCS.isHasMet then
+                    FillBonuses(kCS)
+                    data[playerID] = kCS
+                end
+            end
+        end
+    end
+    return data
+end

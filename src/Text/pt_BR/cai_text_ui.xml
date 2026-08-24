@@ -141,6 +141,9 @@
     <Replace Tag="LOC_CAI_SORT_ACTIVE_FIRST" Language="pt_BR">
       <Text>ativos primeiro</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_SORT_INACTIVE_FIRST" Language="pt_BR">
+      <Text>inativos primeiro</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_SORT_UNAVAILABLE_FIRST" Language="pt_BR">
       <Text>indisponíveis primeiro</Text>
     </Replace>
@@ -1297,6 +1300,9 @@
     </Replace>
     <Replace Tag="LOC_CAI_GOVERNMENT_NO_AVAILABLE_POLICIES" Language="pt_BR">
       <Text>Nenhuma política disponível</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GOVERNMENT_POLICY_SLOT_HEADER" Language="pt_BR">
+      <Text>Espaço</Text>
     </Replace>
     <Replace Tag="LOC_CAI_GOVERNMENT_DARK_AGE_POLICY" Language="pt_BR">
       <Text>Era das Trevas</Text>
@@ -5178,6 +5184,12 @@
     <Replace Tag="LOC_CAI_REPORTS_DAMAGE" Language="pt_BR">
       <Text>Dano {1_Amount}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_USABLE_POWER" Language="pt_BR">
+      <Text>Energia utilizável {1_Value}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_REQUIRED_POWER" Language="pt_BR">
+      <Text>Energia necessária {1_Value}</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_REPORTS_LOYALTY" Language="pt_BR">
       <Text>Lealdade {1_Current} de {2_Max} {3_Trend}</Text>
     </Replace>
@@ -7294,6 +7306,223 @@
     </Replace>
     <Replace Tag="LOC_CAI_REPLAY_GROUP_BY_VALUE_TOOLTIP" Language="pt_BR">
       <Text>Quando marcado, os dados do gráfico de replay são agrupados por valor, e expandir um valor mostra os turnos em que ele mudou. Quando desmarcado, os dados são agrupados por turno, com os valores que mudaram dentro de cada turno.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_DEALS_EMPTY" Language="pt_BR">
+      <Text>Nenhum acordo ativo</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_UNITS_EMPTY" Language="pt_BR">
+      <Text>Nenhuma unidade</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_POLICY_SLOTTED" Language="pt_BR">
+      <Text>Encaixada</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_CITIES2_POWER" Language="pt_BR">
+      <Text>Energia {1_Cur}/{2_Req}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_UNIT_MAINTENANCE" Language="pt_BR">
+      <Text>Manutenção</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_UNIT_FILTER" Language="pt_BR">
+      <Text>Filtrar por tipo</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_COL_CITY" Language="pt_BR">
+      <Text>Cidade mais próxima</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_COL_ALBUMS" Language="pt_BR">
+      <Text>Álbuns</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_COL_TURNS" Language="pt_BR">
+      <Text>Turnos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_COL_CATEGORY" Language="pt_BR">
+      <Text>Categoria</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_COL_TYPE" Language="pt_BR">
+      <Text>Tipo</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_COL_IMPACT" Language="pt_BR">
+      <Text>Impacto</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_COL_USABLE_POWER" Language="pt_BR">
+      <Text>Energia utilizável</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_REPORTS_COL_REQUIRED_POWER" Language="pt_BR">
+      <Text>Energia necessária</Text>
+    </Replace>
+    <!-- Quick Deals (mod) accessibility -->
+    <Replace Tag="LOC_CAI_QD_AI_OFFERS" Language="pt_BR">
+      <Text>Ofertas da IA</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_INVENTORY" Language="pt_BR">
+      <Text>Seus itens negociáveis</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_YOUR_OFFER" Language="pt_BR">
+      <Text>Sua oferta</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_EMPTY_INVENTORY" Language="pt_BR">
+      <Text>Você não tem itens para negociar.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_NO_OFFER_ITEMS" Language="pt_BR">
+      <Text>Sua oferta está vazia.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_CHECKING" Language="pt_BR">
+      <Text>Verificando ofertas.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_LEADER" Language="pt_BR">
+      <Text>Líder</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_ONE_TIME_GOLD" Language="pt_BR">
+      <Text>Ouro imediato</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_MULTI_TURN_GOLD" Language="pt_BR">
+      <Text>Ouro por 30 turnos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_ITEMS" Language="pt_BR">
+      <Text>Itens</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_ITEMS_NONE" Language="pt_BR">
+      <Text>Nenhum</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_GOLD_AMOUNT" Language="pt_BR">
+      <Text>{1_Amount} de ouro</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_INVENTORY_ITEM" Language="pt_BR">
+      <Text>{1_Name}, até {2_Amount}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_OFFER_ITEM" Language="pt_BR">
+      <Text>{1_Name}, {2_Amount}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_OFFER_ONE_TIME" Language="pt_BR">
+      <Text>{1_Amount} de ouro agora</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_OFFER_MULTI_TURN" Language="pt_BR">
+      <Text>{1_Amount} de ouro por 30 turnos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_OFFER_PER_UNIT" Language="pt_BR">
+      <Text>{1_Amount} de ouro por unidade</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_SWITCH_TO_TABLE" Language="pt_BR">
+      <Text>Mudar para visualização em tabela</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_SWITCH_TO_LIST" Language="pt_BR">
+      <Text>Mudar para visualização em lista</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_ACTION_INCREASE_MTG" Language="pt_BR">
+      <Text>Aumentar ouro por 30 turnos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_ACTION_DECREASE_MTG" Language="pt_BR">
+      <Text>Diminuir ouro por 30 turnos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_ACTION_INCREASE_AMOUNT" Language="pt_BR">
+      <Text>Aumentar valor da troca</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_ACTION_DECREASE_AMOUNT" Language="pt_BR">
+      <Text>Diminuir valor da troca</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_ACTION_CONVERT_ALL" Language="pt_BR">
+      <Text>Converter tudo em ouro por 30 turnos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_ACTION_EDIT_AMOUNT" Language="pt_BR">
+      <Text>Editar valor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_EDIT_AMOUNT_HEADER" Language="pt_BR">
+      <Text>Quantos? Máximo {1_Max}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_KB_BULK_ADD" Language="pt_BR">
+      <Text>Adicionar dez à oferta</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_KB_REMOVE" Language="pt_BR">
+      <Text>Remover da oferta</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_FILTER_ITEM_TYPE" Language="pt_BR">
+      <Text>Tipo de item</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_FILTER_GOLD_TYPE" Language="pt_BR">
+      <Text>Ouro que você dá</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_YOU_GIVE_MTG" Language="pt_BR">
+      <Text>Você dá {1_Amount} de ouro por 30 turnos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_YOU_GIVE_OTG" Language="pt_BR">
+      <Text>Você dá {1_Amount} de ouro agora</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_AI_PAYS_NOW" Language="pt_BR">
+      <Text>IA paga agora</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_AI_PAYS_TURNS" Language="pt_BR">
+      <Text>IA paga por 30 turnos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_YOU_PAY_NOW" Language="pt_BR">
+      <Text>Você paga agora</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_YOU_PAY_TURNS" Language="pt_BR">
+      <Text>Você paga por 30 turnos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_AI_GIVES_NOW" Language="pt_BR">
+      <Text>IA dá agora</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_AI_GIVES_TURNS" Language="pt_BR">
+      <Text>IA dá por 30 turnos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_GOLD_EACH" Language="pt_BR">
+      <Text>Ouro por unidade</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_RATIO" Language="pt_BR">
+      <Text>Proporção de ouro por turno</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_YOU_SELL" Language="pt_BR">
+      <Text>Você vende</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_YOU_RECEIVE" Language="pt_BR">
+      <Text>Você recebe</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_YOU_GIVE" Language="pt_BR">
+      <Text>Você dá</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_AI_GOLD" Language="pt_BR">
+      <Text>Ouro da IA</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_COL_TOTAL" Language="pt_BR">
+      <Text>Valor total</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_OFFER_BALANCE" Language="pt_BR">
+      <Text>{1_Amount} de ouro no tesouro</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_OFFER_TOTAL" Language="pt_BR">
+      <Text>{1_Amount} de ouro no total</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_OFFER_RATIO" Language="pt_BR">
+      <Text>{1_Amount} para 1 por turno</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_FILTER_RECOMMENDED_TYPE" Language="pt_BR">
+      <Text>Tipo de item da prévia</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_TT_INCREASE_MTG" Language="pt_BR">
+      <Text>Troque ouro imediato por mais 1 de ouro por turno, à taxa de 21 de ouro imediato por turno. A quantia exata adicionada depende de quanto a IA pode pagar.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_TT_DECREASE_MTG" Language="pt_BR">
+      <Text>Troque de volta 1 de ouro por turno por ouro imediato, à taxa de 21 de ouro imediato por turno. A quantia exata devolvida depende de quanto a IA pode pagar.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_TT_CONVERT_ALL" Language="pt_BR">
+      <Text>Converta o máximo possível do ouro imediato desta oferta em ouro por turno.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_TT_EXCHANGE_INCREASE" Language="pt_BR">
+      <Text>Aumente em um a quantidade de ouro que você troca.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_TT_EXCHANGE_DECREASE" Language="pt_BR">
+      <Text>Diminua em um a quantidade de ouro que você troca.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_TT_EDIT_AMOUNT" Language="pt_BR">
+      <Text>Digite a quantidade exata de ouro para trocar.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_OFFERS_AVAILABLE" Language="pt_BR">
+      <Text>{1_Count} ofertas disponíveis</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_OFFERS_AVAILABLE_ONE" Language="pt_BR">
+      <Text>1 oferta disponível</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_NO_OFFERS" Language="pt_BR">
+      <Text>Nenhuma oferta disponível</Text>
     </Replace>
   </LocalizedText>
 </GameData>

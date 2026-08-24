@@ -32,6 +32,14 @@ else
     include("GovernmentScreen")
 end
 
+-- When Extended Policy Cards is active, the policy picker/viewer becomes a
+-- table+tree panel (defined in this variant file, which exposes the global
+-- CAIGovPolicyPickerEPC). Pulled by include, so it is also registered under
+-- <ImportFiles> in CivViAccess.modinfo, mirroring the BRS/BTS variant files.
+if IsExtendedPolicyCardsActive() then
+    include("GovernmentScreen_ExtendedPolicyCards_CAI")
+end
+
 local mgr                   = ExposedMembers.CAI_UIManager
 
 local info                  = ExposedMembers.CAIInfo or {}
@@ -239,10 +247,75 @@ local function IsPolicyNewThisTurn(policyType)
     return false
 end
 
-local function GetPolicyTooltip(policyType)
+-- Extended Policy Cards surfaces each policy's computed gameplay effect through
+-- Better Report Screen's RMA. CAI wins the GovernmentScreen context, so we read
+-- that effect directly instead of letting EPC's suppressed script draw it.
+-- CalculateModifierEffect returns (impactString, yieldsTable, ...); we build our
+-- own summary from the yields table so the display matches the reports policy tab.
+-- Cached per policy type per panel open (RMA scans the modifier tables per call).
+local m_policyYieldsCache = {}
+
+local function ClearPolicyEffectCache()
+    m_policyYieldsCache = {}
+end
+
+local function GetPolicyYields(policyType)
+    if not policyType or not IsExtendedPolicyCardsActive() then return nil end
+    if m_policyYieldsCache[policyType] ~= nil then return m_policyYieldsCache[policyType] end
+    local RMA = ExposedMembers.RMA
+    if not RMA or not RMA.CalculateModifierEffect then return nil end
+    local _, yields = RMA.CalculateModifierEffect("Policy", policyType, Game.GetLocalPlayer(), nil, nil)
+    yields = yields or {}
+    m_policyYieldsCache[policyType] = yields
+    return yields
+end
+
+-- Matches Better Report Screen's toPlusMinusNoneString for non-zero values (that
+-- helper is not exposed on ExposedMembers.RMA, so we replicate it here).
+local function FormatPolicyYieldValue(value)
+    return Locale.ToNumber(math.floor((value * 10) + 0.5) / 10, "+#,###.#;-#,###.#")
+end
+
+-- Comma-separated per-yield summary, e.g. "+2 GOLD, +1 SCIENCE", mirroring the
+-- reports policy tab's PolicyYieldsSummary. Returns "" when EPC is inactive.
+local function GetPolicyEffect(policyType)
+    local yields = GetPolicyYields(policyType)
+    if not yields then return "" end
+    local parts = {}
+    for yield, value in pairs(yields) do
+        if value ~= 0 then
+            parts[#parts + 1] = FormatPolicyYieldValue(value) .. " " .. tostring(yield)
+        end
+    end
+    return table.concat(parts, ", ")
+end
+
+-- Summed yield magnitude, used only to sort impact high-to-low like the reports
+-- policy tab's PolicyImpactTotal.
+local function GetPolicyImpactTotal(policyType)
+    local yields = GetPolicyYields(policyType)
+    if not yields then return 0 end
+    local total = 0
+    for _, value in pairs(yields) do total = total + value end
+    return total
+end
+
+-- Slot, age, and description without the effect. Used where impact is shown
+-- separately (the Extended Policy Cards table has its own Impact column).
+local function GetPolicyTooltipBody(policyType)
     return JoinNonEmpty({
         GetPolicySlotLabel(policyType),
         GetPolicyAgeIndicator(policyType),
+        GetPolicyDescription(policyType),
+    }, "[NEWLINE]")
+end
+
+local function GetPolicyTooltip(policyType)
+    -- Impact reads after the slot (type) and age, before the flavor description.
+    return JoinNonEmpty({
+        GetPolicySlotLabel(policyType),
+        GetPolicyAgeIndicator(policyType),
+        GetPolicyEffect(policyType),
         GetPolicyDescription(policyType),
     }, "[NEWLINE]")
 end
@@ -610,6 +683,52 @@ local function CloseAllPolicies()
     m_ui.allPolicies = nil
 end
 
+-- Shared policy assignment used by both the default tree picker and the Extended
+-- Policy Cards table/tree panel. Returns true when the slot was filled so the
+-- caller can close its transient view.
+local function AssignPolicyToSlot(slotIndex, rowIndex, policyType)
+    if not IsPolicyAssignableToRow(policyType, rowIndex) then
+        Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_NO_LEGAL_SLOT", GetPolicyName(policyType)))
+        return false
+    end
+    SetActivePolicyAtSlotIndex(slotIndex, policyType)
+    m_state.slotPolicyTypes[slotIndex] = policyType
+    Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_POLICY_ASSIGNED", GetPolicyName(policyType), GetRowName(rowIndex)))
+    RefreshVanillaPolicyControlsOnly()
+    return true
+end
+
+-- Context handed to the Extended Policy Cards picker variant so it can build its
+-- table/tree without reaching into this file's locals (Civ VI Lua does not share
+-- included locals). It bundles this screen's private policy helpers plus the two
+-- transient-push ids the manager tracks in m_ui.
+local function BuildPickerContext()
+    -- RMA effect data can shift between opens (player/game state), so recompute.
+    ClearPolicyEffectCache()
+    return {
+        mgr                    = mgr,
+        PICKER_ID              = PICKER_ID,
+        ALL_POLICIES_ID        = ALL_POLICIES_ID,
+        IS_PIRATES_SCENARIO    = IS_PIRATES_SCENARIO,
+        CAI_ROW_ORDER          = CAI_ROW_ORDER,
+        GetPolicyName          = GetPolicyName,
+        GetPolicyTooltip       = GetPolicyTooltip,
+        GetPolicyTooltipBody   = GetPolicyTooltipBody,
+        GetPolicyEffect        = GetPolicyEffect,
+        GetPolicyImpactTotal   = GetPolicyImpactTotal,
+        GetPolicySlotLabel     = GetPolicySlotLabel,
+        GetPolicyData          = GetPolicyData,
+        GetRowName             = GetRowName,
+        GetRowIndexForSlotType = GetRowIndexForSlotType,
+        GetAllPolicyTypes      = GetAllAvailablePolicyTypes,
+        IsAssignableToRow      = IsPolicyAssignableToRow,
+        IsNewThisTurn          = IsPolicyNewThisTurn,
+        AssignPolicyToSlot     = AssignPolicyToSlot,
+        ClosePicker            = ClosePicker,
+        CloseAllPolicies       = CloseAllPolicies,
+    }
+end
+
 local function CreatePolicyTreeItem(policyType, action)
     local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovScreenPolicyItem"), "TreeItem", {
         Label   = function()
@@ -690,6 +809,14 @@ end
 local function CreatePolicyPicker(slotIndex, rowIndex)
     ClosePicker()
 
+    -- Extended Policy Cards swaps the slot picker for a table/tree effect panel.
+    if IsExtendedPolicyCardsActive() and CAIGovPolicyPickerEPC then
+        m_ui.picker = CAIGovPolicyPickerEPC.BuildSlotPicker(BuildPickerContext(), slotIndex, rowIndex)
+        UI.PlaySound("UI_Policies_Card_Take")
+        mgr:Push(m_ui.picker, PopupPriority.Current)
+        return true
+    end
+
     m_ui.picker = mgr:CreateWidget(PICKER_ID, "Tree", {
         Label = function() return Locale.Lookup("LOC_CAI_GOVERNMENT_CHOOSE_POLICY", GetRowName(rowIndex)) end,
     })
@@ -706,15 +833,9 @@ local function CreatePolicyPicker(slotIndex, rowIndex)
     })
 
     local function AssignPolicy(policyType)
-            if not IsPolicyAssignableToRow(policyType, rowIndex) then
-                Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_NO_LEGAL_SLOT", GetPolicyName(policyType)))
-                return
-            end
-            SetActivePolicyAtSlotIndex(slotIndex, policyType)
-            m_state.slotPolicyTypes[slotIndex] = policyType
-            Speak(Locale.Lookup("LOC_CAI_GOVERNMENT_POLICY_ASSIGNED", GetPolicyName(policyType), GetRowName(rowIndex)))
-            RefreshVanillaPolicyControlsOnly()
+        if AssignPolicyToSlot(slotIndex, rowIndex, policyType) then
             ClosePicker(true)
+        end
     end
 
     if IS_PIRATES_SCENARIO then
@@ -743,6 +864,13 @@ end
 
 local function OpenAllPoliciesTree()
     CloseAllPolicies()
+
+    -- Extended Policy Cards swaps the read-only viewer for a table/tree effect panel.
+    if IsExtendedPolicyCardsActive() and CAIGovPolicyPickerEPC then
+        m_ui.allPolicies = CAIGovPolicyPickerEPC.BuildAllPolicies(BuildPickerContext())
+        mgr:Push(m_ui.allPolicies, PopupPriority.Current)
+        return true
+    end
 
     m_ui.allPolicies = mgr:CreateWidget(ALL_POLICIES_ID, "Tree", {
         Label = function()

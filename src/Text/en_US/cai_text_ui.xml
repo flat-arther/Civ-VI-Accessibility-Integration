@@ -141,6 +141,9 @@
     <Row Tag="LOC_CAI_SORT_ACTIVE_FIRST" Language="en_US">
       <Text>active first</Text>
     </Row>
+    <Row Tag="LOC_CAI_SORT_INACTIVE_FIRST" Language="en_US">
+      <Text>inactive first</Text>
+    </Row>
     <Row Tag="LOC_CAI_SORT_UNAVAILABLE_FIRST" Language="en_US">
       <Text>unavailable first</Text>
     </Row>
@@ -1314,6 +1317,9 @@
     </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_NO_AVAILABLE_POLICIES" Language="en_US">
       <Text>No available policies</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNMENT_POLICY_SLOT_HEADER" Language="en_US">
+      <Text>Slot</Text>
     </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_DARK_AGE_POLICY" Language="en_US">
       <Text>Dark Age</Text>
@@ -5188,6 +5194,12 @@
     <Row Tag="LOC_CAI_REPORTS_DAMAGE" Language="en_US">
       <Text>Damage {1_Amount}</Text>
     </Row>
+    <Row Tag="LOC_CAI_REPORTS_USABLE_POWER" Language="en_US">
+      <Text>Usable power {1_Value}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_REQUIRED_POWER" Language="en_US">
+      <Text>Required power {1_Value}</Text>
+    </Row>
     <Row Tag="LOC_CAI_REPORTS_LOYALTY" Language="en_US">
       <Text>Loyalty {1_Current} of {2_Max} {3_Trend}</Text>
     </Row>
@@ -7301,6 +7313,224 @@
     </Row>
     <Row Tag="LOC_CAI_REPLAY_GROUP_BY_VALUE_TOOLTIP" Language="en_US">
       <Text>When checked, replay graph data is grouped by value, and expanding a value lists the turns where it changed. When unchecked, data is grouped by turn, with the values that changed inside each turn.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_DEALS_EMPTY" Language="en_US">
+      <Text>No active deals</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_UNITS_EMPTY" Language="en_US">
+      <Text>No units</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_POLICY_SLOTTED" Language="en_US">
+      <Text>Slotted</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_CITIES2_POWER" Language="en_US">
+      <Text>Power {1_Cur}/{2_Req}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_UNIT_MAINTENANCE" Language="en_US">
+      <Text>Maintenance</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_UNIT_FILTER" Language="en_US">
+      <Text>Filter by type</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_COL_CITY" Language="en_US">
+      <Text>Nearest city</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_COL_ALBUMS" Language="en_US">
+      <Text>Albums</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_COL_TURNS" Language="en_US">
+      <Text>Turns</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_COL_CATEGORY" Language="en_US">
+      <Text>Category</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_COL_TYPE" Language="en_US">
+      <Text>Type</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_COL_IMPACT" Language="en_US">
+      <Text>Impact</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_COL_USABLE_POWER" Language="en_US">
+      <Text>Usable power</Text>
+    </Row>
+    <Row Tag="LOC_CAI_REPORTS_COL_REQUIRED_POWER" Language="en_US">
+      <Text>Required power</Text>
+    </Row>
+
+    <!-- Quick Deals (mod) accessibility -->
+    <Row Tag="LOC_CAI_QD_AI_OFFERS" Language="en_US">
+      <Text>AI offers</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_INVENTORY" Language="en_US">
+      <Text>Your tradable items</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_YOUR_OFFER" Language="en_US">
+      <Text>Your offer</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_EMPTY_INVENTORY" Language="en_US">
+      <Text>You have no items to trade.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_NO_OFFER_ITEMS" Language="en_US">
+      <Text>Your offer is empty.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_CHECKING" Language="en_US">
+      <Text>Checking offers.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_LEADER" Language="en_US">
+      <Text>Leader</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_ONE_TIME_GOLD" Language="en_US">
+      <Text>One-time gold</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_MULTI_TURN_GOLD" Language="en_US">
+      <Text>Gold for 30 turns</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_ITEMS" Language="en_US">
+      <Text>Items</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_ITEMS_NONE" Language="en_US">
+      <Text>None</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_GOLD_AMOUNT" Language="en_US">
+      <Text>{1_Amount} gold</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_INVENTORY_ITEM" Language="en_US">
+      <Text>{1_Name}, up to {2_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_OFFER_ITEM" Language="en_US">
+      <Text>{1_Name}, {2_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_OFFER_ONE_TIME" Language="en_US">
+      <Text>{1_Amount} gold now</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_OFFER_MULTI_TURN" Language="en_US">
+      <Text>{1_Amount} gold for 30 turns</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_OFFER_PER_UNIT" Language="en_US">
+      <Text>{1_Amount} gold per unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_SWITCH_TO_TABLE" Language="en_US">
+      <Text>Switch to table view</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_SWITCH_TO_LIST" Language="en_US">
+      <Text>Switch to list view</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_ACTION_INCREASE_MTG" Language="en_US">
+      <Text>Increase gold for 30 turns</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_ACTION_DECREASE_MTG" Language="en_US">
+      <Text>Decrease gold for 30 turns</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_ACTION_INCREASE_AMOUNT" Language="en_US">
+      <Text>Increase exchange amount</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_ACTION_DECREASE_AMOUNT" Language="en_US">
+      <Text>Decrease exchange amount</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_ACTION_CONVERT_ALL" Language="en_US">
+      <Text>Convert all to gold for 30 turns</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_ACTION_EDIT_AMOUNT" Language="en_US">
+      <Text>Edit amount</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_EDIT_AMOUNT_HEADER" Language="en_US">
+      <Text>How many? Maximum {1_Max}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_KB_BULK_ADD" Language="en_US">
+      <Text>Add ten to offer</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_KB_REMOVE" Language="en_US">
+      <Text>Remove from offer</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_FILTER_ITEM_TYPE" Language="en_US">
+      <Text>Item type</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_FILTER_GOLD_TYPE" Language="en_US">
+      <Text>Gold you give</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_YOU_GIVE_MTG" Language="en_US">
+      <Text>You give {1_Amount} gold for 30 turns</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_YOU_GIVE_OTG" Language="en_US">
+      <Text>You give {1_Amount} gold now</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_AI_PAYS_NOW" Language="en_US">
+      <Text>AI pays now</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_AI_PAYS_TURNS" Language="en_US">
+      <Text>AI pays for 30 turns</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_YOU_PAY_NOW" Language="en_US">
+      <Text>You pay now</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_YOU_PAY_TURNS" Language="en_US">
+      <Text>You pay for 30 turns</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_AI_GIVES_NOW" Language="en_US">
+      <Text>AI gives now</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_AI_GIVES_TURNS" Language="en_US">
+      <Text>AI gives for 30 turns</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_GOLD_EACH" Language="en_US">
+      <Text>Gold per unit</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_RATIO" Language="en_US">
+      <Text>Gold ratio per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_YOU_SELL" Language="en_US">
+      <Text>You sell</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_YOU_RECEIVE" Language="en_US">
+      <Text>You receive</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_YOU_GIVE" Language="en_US">
+      <Text>You give</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_AI_GOLD" Language="en_US">
+      <Text>AI's gold</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_COL_TOTAL" Language="en_US">
+      <Text>Total value</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_OFFER_BALANCE" Language="en_US">
+      <Text>{1_Amount} gold in treasury</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_OFFER_TOTAL" Language="en_US">
+      <Text>{1_Amount} gold total</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_OFFER_RATIO" Language="en_US">
+      <Text>{1_Amount} to 1 per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_FILTER_RECOMMENDED_TYPE" Language="en_US">
+      <Text>Preview item type</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_TT_INCREASE_MTG" Language="en_US">
+      <Text>Trade one-time gold for 1 more gold per turn, at 21 one-time gold per turn. The exact amount added depends on how much the AI can pay.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_TT_DECREASE_MTG" Language="en_US">
+      <Text>Trade 1 gold per turn back for one-time gold, at 21 one-time gold per turn. The exact amount returned depends on how much the AI can pay.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_TT_CONVERT_ALL" Language="en_US">
+      <Text>Convert as much of this offer's one-time gold as possible into gold per turn.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_TT_EXCHANGE_INCREASE" Language="en_US">
+      <Text>Increase the amount of gold you exchange by one.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_TT_EXCHANGE_DECREASE" Language="en_US">
+      <Text>Decrease the amount of gold you exchange by one.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_TT_EDIT_AMOUNT" Language="en_US">
+      <Text>Type the exact amount of gold to exchange.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_OFFERS_AVAILABLE" Language="en_US">
+      <Text>{1_Count} offers available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_OFFERS_AVAILABLE_ONE" Language="en_US">
+      <Text>1 offer available</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_NO_OFFERS" Language="en_US">
+      <Text>No offers available</Text>
     </Row>
   </LocalizedText>
 </GameData>

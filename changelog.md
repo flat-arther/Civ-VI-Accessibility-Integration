@@ -1,5 +1,21 @@
 ## [Unreleased]
 
+### Added
+
+- Added support for the Quick Deals mod. Its popup, opened with `Ctrl plus D`, is now fully readable with three tabs: Sale (offer your items and see which AI pays the most), Purchase (see each AI's price for an item type you pick), and Exchange (swap one-time gold for gold over 30 turns). On the Sale tab, your tradable items are grouped in a tree where `Enter` adds one and `Ctrl plus Enter` adds ten, your current offer is a list where `Delete` removes an item and `Enter` changes an amount, and an item-type option previews which AIs would pay for a chosen kind of item before you add anything. Each tab lists the AI offers as a sortable table, with a matching list view and sort option; switch views with `Alt plus 1` for the table and `Alt plus 2` for the list. Table columns are labeled for each tab so it is clear who pays, who gives, and the exchange ratio, and the Sale and Exchange tabs also show each AI's current treasury and the total value of the offer. When offers finish loading, the number available is spoken. Actions on the offer you are reading, such as accepting it, adjusting the gold split, or converting to gold over 30 turns, appear as buttons after the table; they stay in place and simply disable when they don't apply, carry tooltips explaining what each one does, and speak the offer's new gold amounts after you press them.
+- In the city status tab of reports, added usable and required power to both table and list views when gathering storm is active. Usable power reads the city's power status and the sources that supply it, and required power reads what is drawing power
+- Added support for the Better Report Screen mod. 
+- Added support for the Extended Policy Cards mod. When it is active, each policy reads a summary of its actual effect (such as the yields it grants) after its slot in the description, and the policy picker and policy viewer become a panel you can switch between a table (with name, slot, and effect columns, shown by default) and the usual tree, with a sort option in tree view. The effect column and sort can order policies by highest or lowest effect. Switch views with the button or with `Alt plus 1` for table and `Alt plus 2` for tree.
+
+### Changed
+
+- Updated prism to the latest version. This should hopefully fix bugs related to UTF8 processing
+- On the loading screen, each of your unique abilities says whether it is a civilization ability or a leader ability before its description.
+
+### Fixed
+
+- Yield icons written in capital letters (such as the production or gold symbol) now read out their name instead of being dropped, so descriptions that use them are no longer cut short.
+
 ## [1.2.0] - 2026-08-19
 
 ### Added

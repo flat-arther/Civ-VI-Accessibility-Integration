@@ -14,7 +14,16 @@
 include("caiUtils")
 include("Civ6Common") -- IsExpansion1Active / IsExpansion2Active
 
-if IsExpansion2Active() then
+-- Quick Deals also replaces the DiplomacyActionView context, but only to wrap
+-- OnDiplomacyStatement/LateInitialize so it can close its popup and its silent
+-- diplomacy sessions when a surprise statement (e.g. a war declaration) arrives
+-- while the popup is open. CAI wins the ReplaceUIScript, so we would otherwise
+-- drop that cleanup. Quick Deals exports diplomacyactionview_qd via ImportFiles
+-- precisely so other mods can chain it; it re-includes the correct vanilla
+-- variant itself, then installs its wraps, which CAI then wraps on top of.
+if IsQuickDealsActive() then
+    include("diplomacyactionview_qd")
+elseif IsExpansion2Active() then
     include("DiplomacyActionView_Expansion2")
 elseif IsExpansion1Active() then
     include("DiplomacyActionView_Expansion1")

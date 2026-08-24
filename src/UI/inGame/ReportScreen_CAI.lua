@@ -136,17 +136,24 @@ local function IndexCityComponentPlots(cityData)
     end
 end
 
-local function RefreshCAIData()
+-- The active report variant (vanilla or Better Report Screen) sets this to the
+-- function that returns the five report data tables. Vanilla uses the base game's
+-- GetData(); the BRS variant assembles the same shape from BRS's data globals,
+-- because BRS removes vanilla GetData() from the report context.
+CAIReports_DataSource = nil
+
+function RefreshCAIData()
     m_localPlayerID = Game.GetLocalPlayer()
     if m_localPlayerID == -1 then return end
-    m_caiCityData, m_caiCityTotalData, m_caiResourceData, m_caiUnitData, m_caiDealData = GetData()
+    local dataSource = CAIReports_DataSource or GetData
+    m_caiCityData, m_caiCityTotalData, m_caiResourceData, m_caiUnitData, m_caiDealData = dataSource()
     table.sort(m_caiCityData, function(a, b) return a.Order < b.Order end)
     for _, cityData in ipairs(m_caiCityData) do
         IndexCityComponentPlots(cityData)
     end
 end
 
-local function GatherGossip()
+function GatherGossip()
     m_caiGossipLog = {}
     local playerID = m_localPlayerID
     if playerID == nil or playerID == -1 then return end
@@ -165,7 +172,7 @@ local function GatherGossip()
     table.sort(m_caiGossipLog, function(a, b) return a[2] > b[2] end)
 end
 
-local function FilterCAIGossip()
+function FilterCAIGossip()
     m_caiGossipFiltered = {}
     for _, kEntry in ipairs(m_caiGossipLog) do
         local kGossipData = GameInfo.Gossips[kEntry[3]]
@@ -696,7 +703,7 @@ end
 -- ============================================================================
 -- Yields Tab
 -- ============================================================================
-local function RebuildYieldsTree(tree)
+function RebuildYieldsTree(tree)
     local capture = mgr:CaptureFocusKey(tree)
     tree:ClearChildren()
 
@@ -1798,7 +1805,7 @@ local function BuildResourceItem(parent, eResourceType, kSingleResourceData)
     end
 end
 
-local function RebuildResourcesTree(tree)
+function RebuildResourcesTree(tree)
     local capture = mgr:CaptureFocusKey(tree)
     tree:ClearChildren()
 
@@ -1988,6 +1995,70 @@ local function CompareCityStatusByName(a, b)
     return a.City:GetID() < b.City:GetID()
 end
 
+-- Gathering Storm power figures for the City Status table, mirroring BRS's Cities2
+-- AppendXP2CityData: usable power is free + temporary; required is the demand. The
+-- cell tooltips carry the power status lines and the per-source breakdown.
+local function GetCityPowerObject(kCityData)
+    local city = kCityData and kCityData.City
+    return (city and city.GetPower) and city:GetPower() or nil
+end
+
+local function GetCityUsablePower(kCityData)
+    local p = GetCityPowerObject(kCityData)
+    if p == nil then return nil end
+    return (p:GetFreePower() or 0) + (p:GetTemporaryPower() or 0)
+end
+
+local function GetCityRequiredPower(kCityData)
+    local p = GetCityPowerObject(kCityData)
+    if p == nil then return nil end
+    return p:GetRequiredPower() or 0
+end
+
+-- Formats one power-source group as a single line ("Power sources: Hydroelectric: 6,
+-- Other: 3"), reusing the city overview power tab labels. Returns "" when empty.
+local function FormatPowerSourceLine(labelKey, sources)
+    local entries = {}
+    for _, inner in ipairs(sources or {}) do
+        local src, val = next(inner)
+        if src ~= nil then
+            entries[#entries + 1] = tostring(src) .. ": " .. Round(val, 1)
+        end
+    end
+    if #entries == 0 then return "" end
+    return Locale.Lookup(labelKey) .. ": " .. table.concat(entries, ", ")
+end
+
+local function GetCityUsablePowerTooltip(kCityData)
+    local p = GetCityPowerObject(kCityData)
+    if p == nil then return "" end
+    local statusName, statusDesc
+    if (p:GetRequiredPower() or 0) == 0 then
+        statusName = "LOC_POWER_STATUS_NO_POWER_NEEDED_NAME"
+        statusDesc = "LOC_POWER_STATUS_NO_POWER_NEEDED_DESCRIPTION"
+    elseif not p:IsFullyPowered() then
+        statusName = "LOC_POWER_STATUS_UNPOWERED_NAME"
+        statusDesc = "LOC_POWER_STATUS_UNPOWERED_DESCRIPTION"
+    else
+        statusName = "LOC_POWER_STATUS_POWERED_NAME"
+        statusDesc = "LOC_POWER_STATUS_POWERED_DESCRIPTION"
+    end
+    local lines = { Locale.Lookup(statusName), Locale.Lookup(statusDesc) }
+    -- Usable power is free + temporary, mirroring the city overview power tab.
+    local consumedSources = {}
+    for _, t in ipairs(p:GetFreePowerSources() or {}) do consumedSources[#consumedSources + 1] = t end
+    for _, t in ipairs(p:GetTemporaryPowerSources() or {}) do consumedSources[#consumedSources + 1] = t end
+    local sourcesLine = FormatPowerSourceLine("LOC_CAI_CITY_OV_POWER_SOURCES", consumedSources)
+    if sourcesLine ~= "" then lines[#lines + 1] = sourcesLine end
+    return table.concat(lines, "[NEWLINE]")
+end
+
+local function GetCityRequiredPowerTooltip(kCityData)
+    local p = GetCityPowerObject(kCityData)
+    if p == nil then return "" end
+    return FormatPowerSourceLine("LOC_CAI_CITY_OV_POWER_REQUIRED_BY", p:GetRequiredPowerSources())
+end
+
 local function BuildCityStatusTableColumns()
     local columns = {
         {
@@ -2100,6 +2171,34 @@ local function BuildCityStatusTableColumns()
             sortKey = GetCityStatusGovernorText,
             sortAscendingDescription = "LOC_CAI_SORT_A_TO_Z",
             sortDescendingDescription = "LOC_CAI_SORT_Z_TO_A",
+        })
+    end
+
+    -- Usable and required power sit just before the yields (Gathering Storm only).
+    if m_isExp2 then
+        table.insert(columns, {
+            key = "usable_power",
+            header = function() return Locale.Lookup("LOC_CAI_REPORTS_COL_USABLE_POWER") end,
+            getCell = function(kCityData)
+                local v = GetCityUsablePower(kCityData)
+                return v ~= nil and tostring(v) or ""
+            end,
+            getTooltip = GetCityUsablePowerTooltip,
+            sortKey = GetCityUsablePower,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
+        })
+        table.insert(columns, {
+            key = "required_power",
+            header = function() return Locale.Lookup("LOC_CAI_REPORTS_COL_REQUIRED_POWER") end,
+            getCell = function(kCityData)
+                local v = GetCityRequiredPower(kCityData)
+                return v ~= nil and tostring(v) or ""
+            end,
+            getTooltip = GetCityRequiredPowerTooltip,
+            sortKey = GetCityRequiredPower,
+            sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
+            sortDescendingDescription = "LOC_CAI_SORT_HIGHEST_FIRST",
         })
     end
 
@@ -2216,9 +2315,17 @@ local function RebuildCityStatusList(list)
             Tooltip = function()
                 local parts = {}
 
+                -- Order follows the City Status table columns, with two exceptions:
+                -- currently producing (the production column's tooltip) is pulled to
+                -- the front, and every yield is grouped at the very end.
                 local production = GetCityStatusProductionText(capturedCity)
                 if production ~= "" then
                     table.insert(parts, production)
+                end
+
+                -- Under-siege status belongs to the name column in the table view.
+                if capturedCity.IsUnderSiege then
+                    table.insert(parts, Locale.Lookup("LOC_HUD_REPORTS_STATUS_UNDER_SEIGE"))
                 end
 
                 table.insert(parts,
@@ -2240,11 +2347,6 @@ local function RebuildCityStatusList(list)
 
                 table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_DEFENSE", capturedCity.Defense))
 
-                for yield in GameInfo.Yields() do
-                    table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_CITY_YIELD",
-                        Locale.Lookup(yield.Name), GetCityStatusYield(capturedCity, yield.Index)))
-                end
-
                 local damage
                 if m_isExp1 or m_isExp2 then
                     damage = capturedCity.HitpointsTotal - capturedCity.HitpointsCurrent
@@ -2255,42 +2357,35 @@ local function RebuildCityStatusList(list)
                     table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_DAMAGE", damage))
                 end
 
-                if capturedCity.IsUnderSiege then
-                    table.insert(parts, Locale.Lookup("LOC_HUD_REPORTS_STATUS_UNDER_SEIGE"))
+                if m_isExp1 or m_isExp2 then
+                    local loyaltyText = GetCityStatusLoyaltyText(capturedCity)
+                    if loyaltyText ~= "" then
+                        table.insert(parts, loyaltyText)
+                    end
+                    table.insert(parts, GetCityStatusGovernorText(capturedCity))
                 end
 
-                if m_isExp1 or m_isExp2 then
-                    local pCulturalIdentity = capturedCity.City:GetCulturalIdentity()
-                    if pCulturalIdentity then
-                        local currentLoyalty = pCulturalIdentity:GetLoyalty()
-                        local maxLoyalty = pCulturalIdentity:GetMaxLoyalty()
-                        local loyaltyPerTurn = pCulturalIdentity:GetLoyaltyPerTurn()
-                        local trend
-                        if loyaltyPerTurn > 0 then
-                            trend = Locale.Lookup("LOC_CAI_REPORTS_LOYALTY_RISING")
-                        elseif loyaltyPerTurn < 0 then
-                            trend = Locale.Lookup("LOC_CAI_REPORTS_LOYALTY_FALLING")
-                        else
-                            trend = Locale.Lookup("LOC_CAI_REPORTS_LOYALTY_STABLE")
-                        end
-                        table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_LOYALTY",
-                            Round(currentLoyalty, 1), maxLoyalty, trend))
+                -- Usable power is followed by the power status and its source
+                -- breakdown; required power is followed by what requires it, matching
+                -- the city overview power tab.
+                if m_isExp2 then
+                    local usablePower = GetCityUsablePower(capturedCity)
+                    if usablePower ~= nil then
+                        table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_USABLE_POWER", usablePower))
+                        local usableTip = GetCityUsablePowerTooltip(capturedCity)
+                        if usableTip ~= "" then table.insert(parts, usableTip) end
                     end
+                    local requiredPower = GetCityRequiredPower(capturedCity)
+                    if requiredPower ~= nil then
+                        table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_REQUIRED_POWER", requiredPower))
+                        local requiredTip = GetCityRequiredPowerTooltip(capturedCity)
+                        if requiredTip ~= "" then table.insert(parts, requiredTip) end
+                    end
+                end
 
-                    local pAssignedGovernor = capturedCity.City:GetAssignedGovernor()
-                    if pAssignedGovernor then
-                        local eGovernorType = pAssignedGovernor:GetType()
-                        local governorDef = GameInfo.Governors[eGovernorType]
-                        local govName = Locale.Lookup(governorDef.Name)
-                        local established = pAssignedGovernor:IsEstablished()
-                        if established then
-                            table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_GOVERNOR_ASSIGNED", govName))
-                        else
-                            table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_GOVERNOR_TRAVELING", govName))
-                        end
-                    else
-                        table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_NO_GOVERNOR"))
-                    end
+                for yield in GameInfo.Yields() do
+                    table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_CITY_YIELD",
+                        Locale.Lookup(yield.Name), GetCityStatusYield(capturedCity, yield.Index)))
                 end
 
                 return table.concat(parts, "[NEWLINE]")
@@ -2457,7 +2552,7 @@ local function EnsureCityStatusControls(entry)
     })
 end
 
-local function RebuildCityStatusTab(entry)
+function RebuildCityStatusTab(entry)
     EnsureCityStatusControls(entry)
     local selectedExists = false
     for _, kCityData in ipairs(m_caiCityData) do
@@ -2505,11 +2600,14 @@ local function RebuildGossipList(list)
     mgr:RestoreFocus(list, capture)
 end
 
+-- Set by RebuildGossipTab so the gossip filter dropdowns can refresh their list
+-- without reaching into the variant-owned tab table.
+local m_sharedGossipTree = nil
+
 local function RefreshGossipListFromFilters()
-    local entry = m_trees[4]
-    if entry and entry.tree then
+    if m_sharedGossipTree then
         FilterCAIGossip()
-        RebuildGossipList(entry.tree)
+        RebuildGossipList(m_sharedGossipTree)
     end
 end
 
@@ -2591,88 +2689,13 @@ end
 
 
 -- ============================================================================
--- Tab Capture and Switching
+-- Shared Gossip Tab builder (used by both report variants)
 -- ============================================================================
-local m_capturedTabs = {}
-
-local TAB_LABELS = {
-    [1] = "LOC_HUD_REPORTS_TAB_YIELDS",
-    [2] = "LOC_HUD_REPORTS_TAB_RESOURCES",
-    [3] = "LOC_HUD_REPORTS_TAB_CITY_STATUS",
-    [4] = "LOC_HUD_REPORTS_TAB_GOSSIP",
-}
-
-local function DetectActiveTab()
-    return m_activeTab or 1
-end
-
-local function BuildPanel()
-    if m_panel then return end
-
-    m_localPlayerID = Game.GetLocalPlayer()
-    if m_localPlayerID == -1 then return end
-
-    m_panel = mgr:CreateWidget(PANEL_ID, "Panel", {
-        Label = function() return Locale.Lookup("LOC_HUD_REPORTS_TITLE") end,
-    })
-
-    m_tabs = mgr:CreateWidget(TABS_ID, "TabControl", {
-        FocusKey = "reports:tabs",
-    })
-    m_panel:AddChild(m_tabs)
-
-    local tabCount = 3
-    if GameCapabilities.HasCapability("CAPABILITY_GOSSIP_REPORT") then
-        tabCount = 4
-    end
-
-    for i = 1, tabCount do
-        local capturedI = i
-
-        local tree
-        if capturedI == 3 then
-            tree = mgr:CreateWidget(MakeId("CAIRPT_"), "List", {
-                FocusKey = "reports:tab:" .. capturedI .. ":list",
-                HiddenPredicate = function() return m_cityStatusViewMode ~= "list" end,
-            })
-        elseif capturedI == 4 then
-            tree = mgr:CreateWidget(MakeId("CAIRPT_"), "List", {
-                FocusKey = "reports:tab:" .. capturedI .. ":list",
-            })
-        else
-            tree = mgr:CreateWidget(MakeId("CAIRPT_"), "Tree", { FocusKey = "reports:tab:" .. capturedI .. ":tree" })
-        end
-
-        m_tabs:AddPage(function()
-            return Locale.Lookup(TAB_LABELS[capturedI])
-        end)
-
-        local page = m_tabs:GetPage(capturedI)
-        if page then
-            page:AddChild(tree)
-        end
-
-        m_trees[capturedI] = {
-            tree = tree,
-            page = page,
-            tabIndex = capturedI,
-        }
-    end
-
-    m_tabs:On("value_changed", function(w, pageIndex)
-        if m_isMirroringTab then return end
-        m_isMirroringTab = true
-
-        local btn = m_capturedTabs[pageIndex]
-        if btn then
-            btn:DoLeftClick()
-        end
-
-        m_isMirroringTab = false
-    end)
-end
-
-local function RebuildGossipTab(entry)
+-- Records the current gossip tree so the filter dropdowns can refresh the list
+-- without reaching into a variant-owned tab table, then (re)builds the list and
+-- the filter widgets.
+function RebuildGossipTab(entry)
+    m_sharedGossipTree = entry.tree
     RebuildGossipList(entry.tree)
 
     local page = entry.page
@@ -2684,167 +2707,15 @@ local function RebuildGossipTab(entry)
     end
 end
 
-local function RebuildActiveTab()
-    local activeTab = DetectActiveTab()
-    local entry = m_trees[activeTab]
-    if not entry then return end
-
-    if activeTab == 1 then
-        RebuildYieldsTree(entry.tree)
-    elseif activeTab == 2 then
-        RebuildResourcesTree(entry.tree)
-    elseif activeTab == 3 then
-        RebuildCityStatusTab(entry)
-    elseif activeTab == 4 then
-        RebuildGossipTab(entry)
-    end
+-- City Status view mode is shared state; the variant panels read it through this
+-- helper to decide whether the list-mode tree should be visible.
+function CAIReports_IsCityStatusListMode()
+    return m_cityStatusViewMode == "list"
 end
 
-local function PushPanel()
-    BuildPanel()
-    if not m_panel then return end
-    local activeTab = DetectActiveTab()
-
-    m_isMirroringTab = true
-    if m_tabs then
-        m_tabs:SetActivePage(activeTab)
-    end
-    m_isMirroringTab = false
-
-    RebuildActiveTab()
-    local options = { priority = PopupPriority.Medium }
-    if m_pendingOpenFocusKey ~= nil then
-        options.focus = m_pendingOpenFocusKey
-    end
-    m_pendingOpenFocusKey = nil
-    mgr:Push(m_panel, options)
-end
-
-local function PopPanel()
-    if mgr and m_panel and mgr:GetWidgetById(PANEL_ID) then
-        mgr:RemoveFromStack(PANEL_ID)
-    end
-    m_panel = nil
-    m_tabs = nil
-    m_trees = {}
-    m_gossipPlayerFilter = nil
-    m_gossipGroupFilter = nil
-end
-
-
 -- ============================================================================
--- View*Page Wraps
+-- World City Cycling (shared)
 -- ============================================================================
-ViewYieldsPage = WrapFunc(ViewYieldsPage, function(orig)
-    orig()
-    m_activeTab = 1
-    if not mgr or ContextPtr:IsHidden() then return end
-    if not m_isMirroringTab and m_tabs then
-        m_isMirroringTab = true
-        m_tabs:SetActivePage(1)
-        m_isMirroringTab = false
-    end
-    local entry = m_trees[1]
-    if entry then
-        RebuildYieldsTree(entry.tree)
-    end
-end)
-
-ViewResourcesPage = WrapFunc(ViewResourcesPage, function(orig)
-    orig()
-    m_activeTab = 2
-    if not mgr or ContextPtr:IsHidden() then return end
-    if not m_isMirroringTab and m_tabs then
-        m_isMirroringTab = true
-        m_tabs:SetActivePage(2)
-        m_isMirroringTab = false
-    end
-    local entry = m_trees[2]
-    if entry then
-        RebuildResourcesTree(entry.tree)
-    end
-end)
-
-ViewCityStatusPage = WrapFunc(ViewCityStatusPage, function(orig)
-    orig()
-    m_activeTab = 3
-    if not mgr or ContextPtr:IsHidden() then return end
-    if not m_isMirroringTab and m_tabs then
-        m_isMirroringTab = true
-        m_tabs:SetActivePage(3)
-        m_isMirroringTab = false
-    end
-    local entry = m_trees[3]
-    if entry then
-        RebuildCityStatusTab(entry)
-    end
-end)
-
-ViewGossipPage = WrapFunc(ViewGossipPage, function(orig)
-    orig()
-    m_activeTab = 4
-    if not mgr or ContextPtr:IsHidden() then return end
-    if not m_isMirroringTab and m_tabs then
-        m_isMirroringTab = true
-        m_tabs:SetActivePage(4)
-        m_isMirroringTab = false
-    end
-    local entry = m_trees[4]
-    if entry then
-        RebuildGossipTab(entry)
-    end
-end)
-
-AddTabSection = WrapFunc(AddTabSection, function(orig, name, populateCallback)
-    orig(name, populateCallback)
-    local children = Controls.TabContainer:GetChildren()
-    local lastChild = children[#children]
-    if lastChild then
-        table.insert(m_capturedTabs, lastChild)
-    end
-end)
-
-RefreshGossip = WrapFunc(RefreshGossip, function(orig)
-    orig()
-    if not mgr or ContextPtr:IsHidden() then return end
-    GatherGossip()
-    FilterCAIGossip()
-    local entry = m_trees[4]
-    if entry then
-        RebuildGossipTab(entry)
-    end
-end)
-
-
--- ============================================================================
--- Lifecycle
--- ============================================================================
-Open = WrapFunc(Open, function(orig, tabToOpen)
-    mgr = assert(ExposedMembers.CAI_UIManager,
-        "CAI Report Screen opened before the accessibility UI manager was available")
-
-    local reportsRequest = ExposedMembers.CAIReports
-    if not IsCAITutorialControlAllowed("LaunchBar_Hook_Reports") then
-        if reportsRequest then reportsRequest.PendingFocusKey = nil end
-        return
-    end
-    if reportsRequest and reportsRequest.PendingFocusKey then
-        m_pendingOpenFocusKey = reportsRequest.PendingFocusKey
-        reportsRequest.PendingFocusKey = nil
-    end
-
-    orig(tabToOpen)
-    RefreshCAIData()
-    GatherGossip()
-    FilterCAIGossip()
-    PushPanel()
-end)
-
-Close = WrapFunc(Close, function(orig)
-    PopPanel()
-    orig()
-end)
-
 local function CityKey(city)
     return city ~= nil and (tostring(city:GetOwner()) .. ":" .. tostring(city:GetID())) or nil
 end
@@ -2935,21 +2806,21 @@ local function OnCAICycleSelectedCity(direction)
 end
 LuaEvents.CAICycleSelectedCity.Add(OnCAICycleSelectedCity)
 
-local origOnInputHandler = OnInputHandler
-OnInputHandler = function(pInputStruct)
-    if mgr and m_panel and mgr:GetWidgetById(PANEL_ID) then
-        if mgr:GetTop() == m_panel then
-            local consumed = mgr:HandleInput(pInputStruct)
-            if consumed then
-                return true
-            end
-        end
-    end
-    return origOnInputHandler(pInputStruct)
-end
-ContextPtr:SetInputHandler(OnInputHandler, true)
 
-OnShutdown = WrapFunc(OnShutdown, function(orig)
-    PopPanel()
-    orig()
-end)
+-- ============================================================================
+-- Variant dispatch
+-- ============================================================================
+-- The shared builder infrastructure above is used by two accessibility variants
+-- that differ only in their data source and panel/tab layout:
+--   * ReportScreen_Vanilla_CAI       - the base game report (GetData()).
+--   * ReportScreen_BetterReportsScreen_CAI - the Better Report Screen mod, which
+--       replaces the ReportScreen context and removes vanilla GetData(); CAI then
+--       builds accessibility on BRS's data globals and exposes all of its tabs.
+-- BRS wins the ReplaceUIScript when active, so ViewDealsPage (a BRS-only global)
+-- is defined only when the BRS engine actually loaded into this context. Guarding
+-- on it keeps the vanilla path if the base include resolved to vanilla instead.
+if IsBetterReportScreenActive() and ViewDealsPage ~= nil then
+    include("ReportScreen_BetterReportsScreen_CAI")
+else
+    include("ReportScreen_Vanilla_CAI")
+end

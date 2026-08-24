@@ -550,16 +550,18 @@ m_CAIList:AddChild(mgr:CreateWidget("LeaderCivInfo", "StaticText", {
 	local leaderType = playerConfig:GetLeaderTypeName()
 	local civType = playerConfig:GetCivilizationTypeName()
 
-	local uniqueAbilities, uniqueUnits, uniqueBuildings = GetLeaderUniqueTraits(leaderType)
+	local leaderAbilities, uniqueUnits, uniqueBuildings = GetLeaderUniqueTraits(leaderType)
 	local civAbilities, civUnits, civBuildings = GetCivilizationUniqueTraits(civType)
-	for _, v in ipairs(civAbilities) do table.insert(uniqueAbilities, v) end
 	for _, v in ipairs(civUnits) do table.insert(uniqueUnits, v) end
 	for _, v in ipairs(civBuildings) do table.insert(uniqueBuildings, v) end
 
-	local function AddFeature(item)
+	local function AddFeature(item, categoryTag)
 		local parts = {}
 		if item.Name and item.Name ~= "NONE" then
 			table.insert(parts, Locale.Lookup(item.Name))
+		end
+		if categoryTag then
+			table.insert(parts, Locale.Lookup(categoryTag))
 		end
 		if item.Description and item.Description ~= "NONE" then
 			table.insert(parts, Locale.Lookup(item.Description))
@@ -572,7 +574,8 @@ m_CAIList:AddChild(mgr:CreateWidget("LeaderCivInfo", "StaticText", {
 		end
 	end
 
-	for _, item in ipairs(uniqueAbilities) do AddFeature(item) end
+	for _, item in ipairs(leaderAbilities) do AddFeature(item, "LOC_CAI_ADVANCED_SETUP_LEADER_ABILITY") end
+	for _, item in ipairs(civAbilities) do AddFeature(item, "LOC_CAI_ADVANCED_SETUP_CIV_ABILITY") end
 	for _, item in ipairs(uniqueUnits) do AddFeature(item) end
 	for _, item in ipairs(uniqueBuildings) do AddFeature(item) end
 	m_CAIList:AddChild(mgr:CreateWidget("EraInfo", "StaticText", {

@@ -10,6 +10,7 @@
     <CompatibleVersions>2.0</CompatibleVersions>
   </Properties>
   <Files>
+    <File>Platforms/Windows/Audio/English(US)/225557858.wem</File>
     <File>version_CAI.lua</File>
     <File>UI/Replacements/BlackDeathScenario/MinimapPanel_BlackDeathScenario.lua</File>
     <File>UI/Replacements/PiratesScenario/MinimapPanel_PiratesScenario_CAIBase.lua</File>
@@ -129,6 +130,10 @@
     <File>UI/inGame/TreatWithTribePopup_CAI.lua</File>
     <File>UI/inGame/DiplomacyActionView_CAI.lua</File>
     <File>UI/inGame/DiplomacyDealView_CAI.lua</File>
+    <File>UI/inGame/qd_dealpopup_CAI.lua</File>
+    <File>UI/inGame/qd_popuptab_sale_CAI.lua</File>
+    <File>UI/inGame/qd_popuptab_purchase_CAI.lua</File>
+    <File>UI/inGame/qd_popuptab_exchange_CAI.lua</File>
     <File>UI/inGame/GreatPeoplePopup_CAI.lua</File>
     <File>UI/inGame/GreatWorksOverview_CAI.lua</File>
     <File>UI/inGame/GreatWorkShowcase_CAI.lua</File>
@@ -213,6 +218,9 @@
     <File>UI/Replacements/BetterBalancedGame/TradeOverview_BetterBalancedGame_CAIBase.lua</File>
     <File>UI/inGame/GlobalResourcePopup_CAI.lua</File>
     <File>UI/inGame/ReportScreen_CAI.lua</File>
+    <File>UI/inGame/ReportScreen_Vanilla_CAI.lua</File>
+    <File>UI/inGame/ReportScreen_BetterReportsScreen_CAI.lua</File>
+    <File>UI/inGame/GovernmentScreen_ExtendedPolicyCards_CAI.lua</File>
     <File>UI/inGame/EraProgressPanel_CAI.lua</File>
     <File>UI/inGame/HistoricMoments_CAI.lua</File>
     <File>UI/inGame/ClimateScreen_CAI.lua</File>
@@ -411,6 +419,9 @@
       <File>UI/shared/Options.lua</File>
       <File>UI/shared/StateTransition.lua</File>
     </ImportFiles>
+    <UpdateAudio id="Expansion2Audio" criteria="Expansion2">
+      <File>Platforms/Windows/Audio/English(US)/225557858.wem</File>
+    </UpdateAudio>
   </FrontEndActions>
 
   <InGameActions>
@@ -626,6 +637,14 @@
            so the CAI layer rides that wildcard as an imported file. -->
       <File>UI/inGame/EndGameMenu_CAI.lua</File>
       <File>UI/inGame/dmt_mappinsubjectmanager.lua</File>
+      <!-- ReportScreen_CAI.lua is the shared builder infrastructure + dispatcher;
+           it pulls one of these two variants via a runtime include() (vanilla base
+           report, or the Better Report Screen mod layer), so both must be here. -->
+      <File>UI/inGame/ReportScreen_Vanilla_CAI.lua</File>
+      <File>UI/inGame/ReportScreen_BetterReportsScreen_CAI.lua</File>
+      <!-- GovernmentScreen_CAI.lua pulls this variant via a runtime include()
+           when the Extended Policy Cards mod is active, so it must be here. -->
+      <File>UI/inGame/GovernmentScreen_ExtendedPolicyCards_CAI.lua</File>
     </ImportFiles>
 
     <ReplaceUIScript id="CAI_WorldInput">
@@ -795,6 +814,41 @@
         <LoadOrder>999999999</LoadOrder>
         <LuaContext>InGameTopOptionsMenu</LuaContext>
         <LuaReplace>UI/inGame/InGameTopOptionsMenu_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <!-- Quick Deals (mod) accessibility: CAI wins the four Quick Deals contexts.
+         When Quick Deals is not installed these contexts do not exist, so the
+         replacements simply never load. -->
+    <ReplaceUIScript id="CAI_QuickDeals_Popup">
+      <Properties>
+        <LoadOrder>999999999</LoadOrder>
+        <LuaContext>qd_dealpopup</LuaContext>
+        <LuaReplace>UI/inGame/qd_dealpopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_QuickDeals_Sale">
+      <Properties>
+        <LoadOrder>999999999</LoadOrder>
+        <LuaContext>qd_popuptab_sale</LuaContext>
+        <LuaReplace>UI/inGame/qd_popuptab_sale_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_QuickDeals_Purchase">
+      <Properties>
+        <LoadOrder>999999999</LoadOrder>
+        <LuaContext>qd_popuptab_purchase</LuaContext>
+        <LuaReplace>UI/inGame/qd_popuptab_purchase_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_QuickDeals_Exchange">
+      <Properties>
+        <LoadOrder>999999999</LoadOrder>
+        <LuaContext>qd_popuptab_exchange</LuaContext>
+        <LuaReplace>UI/inGame/qd_popuptab_exchange_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

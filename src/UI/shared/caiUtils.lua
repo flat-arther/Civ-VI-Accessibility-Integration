@@ -180,6 +180,36 @@ function IsBetterTradeScreenActive()
     return Modding.IsModActive(BETTER_TRADE_SCREEN_UUID)
 end
 
+-- Better Report Screen (Infixo) fully replaces the vanilla ReportScreen context
+-- with a per-page API (GetDataYields/GetDataDeals/... plus ViewXxxPage renderers
+-- and Update*Data caches), so the report CAI screen branches on this. UUID from
+-- the mod's .modinfo. Mirrors the IsBetterTradeScreenActive pattern.
+local BETTER_REPORT_SCREEN_UUID = "6f2888d4-79dc-415f-a8ff-f9d81d7afb53"
+function IsBetterReportScreenActive()
+    return Modding.IsModActive(BETTER_REPORT_SCREEN_UUID)
+end
+
+-- Extended Policy Cards (Aristos) replaces the GovernmentScreen context to show
+-- each policy card's computed gameplay effect, sourced from Better Report Screen's
+-- ExposedMembers.RMA.CalculateModifierEffect. CAI wins the context, so it re-surfaces
+-- that effect itself and swaps the policy picker/viewer for a table+tree panel. UUID
+-- from the mod's .modinfo. Mirrors the IsBetterReportScreenActive pattern.
+local EXTENDED_POLICY_CARDS_UUID = "382a187f-c8ba-4094-a6a7-0d5315661f33"
+function IsExtendedPolicyCardsActive()
+    return Modding.IsModActive(EXTENDED_POLICY_CARDS_UUID)
+end
+
+-- Quick Deals (wltk) adds a launch-bar popup that queries every met AI for their
+-- best gold offer on your tradable items (Sale/Purchase/Exchange tabs) and lets
+-- you accept the best directly. Its popup is entirely custom UI with no built-in
+-- accessibility, and it also replaces the DiplomacyActionView context, so the CAI
+-- diplomacy/quick-deal screens branch on this. UUID from the mod's .modinfo.
+-- Mirrors the IsBetterReportScreenActive pattern.
+local QUICK_DEALS_UUID = "5aceed03-8639-4a81-8cbf-03f54d543502"
+function IsQuickDealsActive()
+    return Modding.IsModActive(QUICK_DEALS_UUID)
+end
+
 -- TutorialUIRoot_CAI publishes the current detailed item's enabled controls
 -- here. CAI-only hotkeys use this state to mirror the controls that vanilla's
 -- tutorial overlay permits instead of bypassing that overlay.
