@@ -1,0 +1,12 @@
+UPDATE LocalizedText SET Text = 'Guion bajo' WHERE Tag = 'LOC_OPTIONS_KEY_UNDERSCORE' AND Language = 'es_ES';
+UPDATE LocalizedText SET Text = 'Punto y coma' WHERE Tag = 'LOC_OPTIONS_KEY_SEMICOLON' AND Language = 'es_ES';
+UPDATE LocalizedText SET Text = 'Igual' WHERE Tag = 'LOC_OPTIONS_KEY_PLUS' AND Language = 'es_ES';
+UPDATE LocalizedText SET Text = 'Coma' WHERE Tag = 'LOC_OPTIONS_KEY_COMMA' AND Language = 'es_ES';
+UPDATE LocalizedText SET Text = 'Menos' WHERE Tag = 'LOC_OPTIONS_KEY_MINUS' AND Language = 'es_ES';
+UPDATE LocalizedText SET Text = 'Punto' WHERE Tag = 'LOC_OPTIONS_KEY_PERIOD' AND Language = 'es_ES';
+UPDATE LocalizedText SET Text = 'Barra' WHERE Tag = 'LOC_OPTIONS_KEY_SLASH' AND Language = 'es_ES';
+UPDATE LocalizedText SET Text = 'Tilde' WHERE Tag = 'LOC_OPTIONS_KEY_TILDE' AND Language = 'es_ES';
+UPDATE LocalizedText SET Text = 'Corchete izquierdo' WHERE Tag = 'LOC_OPTIONS_KEY_LBRACKET' AND Language = 'es_ES';
+UPDATE LocalizedText SET Text = 'Barra invertida' WHERE Tag = 'LOC_OPTIONS_KEY_BACKSLASH' AND Language = 'es_ES';
+UPDATE LocalizedText SET Text = 'Corchete derecho' WHERE Tag = 'LOC_OPTIONS_KEY_RBRACKET' AND Language = 'es_ES';
+UPDATE LocalizedText SET Text = 'Comillas' WHERE Tag = 'LOC_OPTIONS_KEY_QUOTE' AND Language = 'es_ES';
