@@ -666,6 +666,15 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_OCEANS" Language="zh_Hans_CN">
       <Text>海洋</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_DISASTERS" Language="zh_Hans_CN">
+      <Text>自然灾害</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_DROUGHT" Language="zh_Hans_CN">
+      <Text>{1_Label}，剩余{2_Turns}回合</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_ERUPTION" Language="zh_Hans_CN">
+      <Text>{1_Label}，喷发中</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BONUS" Language="zh_Hans_CN">
       <Text>加成资源</Text>
     </Replace>
@@ -746,6 +755,9 @@
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_ZONE_REVEALED_OF_TOTAL_TILES" Language="zh_Hans_CN">
       <Text>{1_Label}，已探索{2_Revealed}个，共{3_Total}{3_Total : plural 1?个单元格; other?个单元格;}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_ZONE_FULLY_REVEALED" Language="zh_Hans_CN">
+      <Text>{1_Label}，已完全探索</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_MOUNTAIN_RANGE" Language="zh_Hans_CN">
       <Text>山脉</Text>
@@ -7528,6 +7540,42 @@
     </Replace>
     <Replace Tag="LOC_CAI_QD_NO_OFFERS" Language="zh_Hans_CN">
       <Text>没有可用报价</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_LOG_EMPTY" Language="zh_Hans_CN">
+      <Text>无不满</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_GRIEVANCE_CHANGE" Language="zh_Hans_CN">
+      <Text>每回合不满变化</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_GRIEVANCES_AGAINST_YOU" Language="zh_Hans_CN">
+      <Text>针对您的不满</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_GRIEVANCES_AGAINST_THEM" Language="zh_Hans_CN">
+      <Text>针对他们的不满</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_EMERGENCY_PARTICIPATING" Language="zh_Hans_CN">
+      <Text>您参与的紧急状况</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_EMERGENCY_TARGETING" Language="zh_Hans_CN">
+      <Text>针对您的紧急状况</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_AGREEMENTS_NONE" Language="zh_Hans_CN">
+      <Text>无</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_GOSSIP_FILTER" Language="zh_Hans_CN">
+      <Text>筛选小道消息</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_GOSSIP_FILTER_ALL" Language="zh_Hans_CN">
+      <Text>所有小道消息</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SORT_FRIENDLIEST_FIRST" Language="zh_Hans_CN">
+      <Text>最友好优先</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SORT_MOST_HOSTILE_FIRST" Language="zh_Hans_CN">
+      <Text>最敌对优先</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_ALLIANCE" Language="zh_Hans_CN">
+      <Text>同盟</Text>
     </Replace>
   </LocalizedText>
 </GameData>

@@ -666,6 +666,15 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_OCEANS" Language="pl_PL">
       <Text>Oceany</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_DISASTERS" Language="pl_PL">
+      <Text>Klęski żywiołowe</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_DROUGHT" Language="pl_PL">
+      <Text>{1_Label}, pozostało tur: {2_Turns}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_ERUPTION" Language="pl_PL">
+      <Text>{1_Label}, erupcja</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BONUS" Language="pl_PL">
       <Text>Bonusowe</Text>
     </Replace>
@@ -746,6 +755,9 @@
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_ZONE_REVEALED_OF_TOTAL_TILES" Language="pl_PL">
       <Text>{1_Label}, zbadano {2_Revealed} z {3_Total} {3_Total : plural 1?pola; other?pól;}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_ZONE_FULLY_REVEALED" Language="pl_PL">
+      <Text>{1_Label}, w pełni zbadany</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_MOUNTAIN_RANGE" Language="pl_PL">
       <Text>Pasmo górskie</Text>
@@ -7523,6 +7535,42 @@
     </Replace>
     <Replace Tag="LOC_CAI_QD_NO_OFFERS" Language="pl_PL">
       <Text>Brak dostępnych ofert</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_LOG_EMPTY" Language="pl_PL">
+      <Text>Brak urazów</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_GRIEVANCE_CHANGE" Language="pl_PL">
+      <Text>Zmiana urazów na turę</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_GRIEVANCES_AGAINST_YOU" Language="pl_PL">
+      <Text>Urazy wobec ciebie</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_GRIEVANCES_AGAINST_THEM" Language="pl_PL">
+      <Text>Urazy wobec nich</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_EMERGENCY_PARTICIPATING" Language="pl_PL">
+      <Text>Kryzys, w którym uczestniczysz</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_EMERGENCY_TARGETING" Language="pl_PL">
+      <Text>Kryzys wymierzony w ciebie</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_AGREEMENTS_NONE" Language="pl_PL">
+      <Text>Brak</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_GOSSIP_FILTER" Language="pl_PL">
+      <Text>Filtruj plotki wg</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_GOSSIP_FILTER_ALL" Language="pl_PL">
+      <Text>Wszystkie plotki</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SORT_FRIENDLIEST_FIRST" Language="pl_PL">
+      <Text>najpierw najbardziej przyjazne</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SORT_MOST_HOSTILE_FIRST" Language="pl_PL">
+      <Text>najpierw najbardziej wrogie</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_ALLIANCE" Language="pl_PL">
+      <Text>Sojusz</Text>
     </Replace>
   </LocalizedText>
 </GameData>

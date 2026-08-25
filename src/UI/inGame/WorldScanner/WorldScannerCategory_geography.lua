@@ -7,21 +7,30 @@ local WATER_CLASS = GameInfo.TerrainClasses["TERRAIN_CLASS_WATER"]
 
 local SUBCATEGORY_LANDMASSES = "landmasses"
 local SUBCATEGORY_OCEANS = "oceans"
+local SUBCATEGORY_DISASTERS = "disasters"
 local GROUP_LANDMASSES = "landmasses"
 local GROUP_OCEANS = "oceans"
+local GROUP_DISASTERS = "disasters"
 
 local m_landPlotIndices = {}
 local m_oceanPlotIndices = {}
+-- keyed by disaster instance (storm/drought id or erupting volcano plot); each
+-- holds its kind, localized name, drought turns, and affected visible plots.
+local m_disasterGroups = {}
+-- Natural disasters are a Gathering Storm feature; GameClimate and the volcano
+-- eruption APIs do not exist without XP2, so the whole pass is gated on it.
+local m_disastersEnabled = false
 
 local subCategoryLabels = {
     [SUBCATEGORY_LANDMASSES] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_LANDMASSES",
     [SUBCATEGORY_OCEANS] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_OCEANS",
+    [SUBCATEGORY_DISASTERS] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_DISASTERS",
 }
 
 CAIWorldScannerCategory_Geography = {
     Id = "geography",
     LabelKey = "LOC_CAI_WORLD_SCANNER_CATEGORY_GEOGRAPHY",
-    SubCategoryOrder = { SUBCATEGORY_LANDMASSES, SUBCATEGORY_OCEANS },
+    SubCategoryOrder = { SUBCATEGORY_LANDMASSES, SUBCATEGORY_OCEANS, SUBCATEGORY_DISASTERS },
     SubCategoryLabels = subCategoryLabels,
     GroupLabelResolver = function(_, firstItem)
         return firstItem ~= nil and firstItem.GroupLabelKey or "LOC_CAI_WORLD_SCANNER_UNKNOWN"
@@ -159,6 +168,9 @@ local function DisambiguateLabels(entries, context, anchorX, anchorY)
             entry.ZonePlotIndices,
             context
         )
+        if ZoneUtils.IsAreaFullyRevealed(entry.ZonePlotIndices) then
+            entry.LabelKey = ZoneUtils.WithFullyRevealedSuffix(entry.LabelKey)
+        end
         entry.ZoneTileCountEmbedded = true
         counts[entry.LabelKey] = (counts[entry.LabelKey] or 0) + 1
     end
@@ -195,9 +207,105 @@ local function DisambiguateLabels(entries, context, anchorX, anchorY)
     end
 end
 
+-- Record any active natural disaster on a visible plot, grouped by instance so
+-- one storm/drought becomes one zone. Storms and droughts carry a RandomEvents
+-- type whose Name is the localized disaster name; erupting volcanoes are keyed
+-- per plot. Only what the plot tooltip already exposes is read.
+local function CollectDisaster(plotIndex, plot)
+    local x, y = plot:GetX(), plot:GetY()
+
+    local stormType = GameClimate.GetActiveStormTypeAtPlot(plot)
+    if stormType ~= nil and stormType >= 0 then
+        local key = "storm:" .. tostring(GameClimate.GetActiveStormIDAtPlot(x, y))
+        local group = m_disasterGroups[key]
+        if group == nil then
+            local eventInfo = GameInfo.RandomEvents[stormType]
+            group = {
+                kind = "storm",
+                name = eventInfo ~= nil and eventInfo.Name or "LOC_CAI_WORLD_SCANNER_UNKNOWN",
+                plots = {},
+            }
+            m_disasterGroups[key] = group
+        end
+        group.plots[#group.plots + 1] = plotIndex
+    end
+
+    local droughtType = GameClimate.GetActiveDroughtTypeAtPlot(plot)
+    if droughtType ~= nil and droughtType >= 0 then
+        local key = "drought:" .. tostring(GameClimate.GetActiveDroughtIDAtPlot(x, y))
+        local group = m_disasterGroups[key]
+        if group == nil then
+            local eventInfo = GameInfo.RandomEvents[droughtType]
+            group = {
+                kind = "drought",
+                name = eventInfo ~= nil and eventInfo.Name or "LOC_CAI_WORLD_SCANNER_UNKNOWN",
+                turns = 0,
+                plots = {},
+            }
+            m_disasterGroups[key] = group
+        end
+        local turns = GameClimate.GetDroughtTurnsAtPlot(plot) or 0
+        if turns > group.turns then
+            group.turns = turns
+        end
+        group.plots[#group.plots + 1] = plotIndex
+    end
+
+    if MapFeatureManager.IsVolcanoErupting(plot) then
+        m_disasterGroups["eruption:" .. tostring(plotIndex)] = {
+            kind = "eruption",
+            name = MapFeatureManager.GetVolcanoName(plot),
+            plots = { plotIndex },
+        }
+    end
+end
+
+local function DisasterItemLabel(group)
+    if group.kind == "drought" then
+        return Locale.Lookup(
+            "LOC_CAI_WORLD_SCANNER_DISASTER_DROUGHT",
+            Utils.ResolveText(group.name),
+            group.turns
+        )
+    end
+    if group.kind == "eruption" then
+        return Locale.Lookup(
+            "LOC_CAI_WORLD_SCANNER_DISASTER_ERUPTION",
+            Utils.ResolveText(group.name)
+        )
+    end
+    return Utils.ResolveText(group.name)
+end
+
+-- Live prune: a disaster member is valid only while the plot stays revealed and
+-- still carries that disaster. Storms and droughts move and expire; eruptions
+-- end. Revealed (not visible) matches the plot tooltip's own gating.
+local function MakeDisasterValidator(kind)
+    return function(_, plot, validateContext)
+        if not Utils.IsPlotRevealed(validateContext, plot) then
+            return false
+        end
+        if kind == "storm" then
+            local stormType = GameClimate.GetActiveStormTypeAtPlot(plot)
+            return stormType ~= nil and stormType >= 0
+        end
+        if kind == "drought" then
+            local droughtType = GameClimate.GetActiveDroughtTypeAtPlot(plot)
+            return droughtType ~= nil and droughtType >= 0
+        end
+        return MapFeatureManager.IsVolcanoErupting(plot)
+    end
+end
+
 function CAIWorldScannerCategory_Geography.BeginExtract()
     m_landPlotIndices = {}
     m_oceanPlotIndices = {}
+    m_disasterGroups = {}
+    m_disastersEnabled = IsExpansion2Active()
+        and GameClimate ~= nil
+        and GameClimate.GetActiveStormTypeAtPlot ~= nil
+        and MapFeatureManager ~= nil
+        and MapFeatureManager.IsVolcanoErupting ~= nil
 end
 
 function CAIWorldScannerCategory_Geography.PlotExtract(plotIndex, plot, _, _, isRevealed)
@@ -210,6 +318,13 @@ function CAIWorldScannerCategory_Geography.PlotExtract(plotIndex, plot, _, _, is
         end
     else
         m_landPlotIndices[#m_landPlotIndices + 1] = plotIndex
+    end
+
+    -- Match the plot tooltip, which shows a plot's active disaster on any
+    -- revealed tile (PlotToolTip gates on IsRevealed). We are already past the
+    -- isRevealed early-return above, so revealed gating is implicit here.
+    if m_disastersEnabled then
+        CollectDisaster(plotIndex, plot)
     end
 end
 
@@ -255,6 +370,23 @@ function CAIWorldScannerCategory_Geography.EndExtract(context, collect)
     DisambiguateLabels(entries, context, anchorX, anchorY)
     for _, entry in ipairs(entries) do
         collect(entry)
+    end
+
+    for key, group in pairs(m_disasterGroups) do
+        for _, zone in ipairs(ZoneUtils.PartitionPlotIndices(group.plots)) do
+            local kind = group.kind
+            collect({
+                Id = "geography:disaster:" .. key .. ":" .. tostring(zone.MinPlotIndex),
+                PlotIndex = zone.MinPlotIndex,
+                ZonePlotIndices = zone.PlotIndices,
+                ZoneTileCountEmbedded = true,
+                ZoneValidatePlot = MakeDisasterValidator(kind),
+                LabelKey = DisasterItemLabel(group),
+                SubCategoryId = SUBCATEGORY_DISASTERS,
+                GroupId = GROUP_DISASTERS,
+                GroupLabelKey = subCategoryLabels[SUBCATEGORY_DISASTERS],
+            })
+        end
     end
 end
 

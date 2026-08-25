@@ -454,11 +454,10 @@ function Surveyor.ReadResources()
             and playerResources ~= nil
             and playerResources:IsResourceVisible(resourceInfo.Hash) then
             local label = Locale.Lookup(resourceInfo.Name)
-            local count = plot:GetResourceCount()
-            if count == nil or count < 1 then
-                count = 1
-            end
-            buckets[label] = (buckets[label] or 0) + count
+            -- Count one per plot like vanilla ReportScreen. plot:GetResourceCount()
+            -- returns -1 (marshalled to ~65535) on revealed-but-fogged plots, which
+            -- team vision brings into range.
+            buckets[label] = (buckets[label] or 0) + 1
         end
     end
 

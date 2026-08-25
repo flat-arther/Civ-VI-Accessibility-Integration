@@ -2,10 +2,17 @@
 
 ### Added
 
-- Added support for the Quick Deals mod. Its popup, opened with `Ctrl plus D`, is now fully readable with three tabs: Sale (offer your items and see which AI pays the most), Purchase (see each AI's price for an item type you pick), and Exchange (swap one-time gold for gold over 30 turns). On the Sale tab, your tradable items are grouped in a tree where `Enter` adds one and `Ctrl plus Enter` adds ten, your current offer is a list where `Delete` removes an item and `Enter` changes an amount, and an item-type option previews which AIs would pay for a chosen kind of item before you add anything. Each tab lists the AI offers as a sortable table, with a matching list view and sort option; switch views with `Alt plus 1` for the table and `Alt plus 2` for the list. Table columns are labeled for each tab so it is clear who pays, who gives, and the exchange ratio, and the Sale and Exchange tabs also show each AI's current treasury and the total value of the offer. When offers finish loading, the number available is spoken. Actions on the offer you are reading, such as accepting it, adjusting the gold split, or converting to gold over 30 turns, appear as buttons after the table; they stay in place and simply disable when they don't apply, carry tooltips explaining what each one does, and speak the offer's new gold amounts after you press them.
+- The leader screen now has a table view of every leader you have met, so you can compare them side by side. Each row is a leader with sortable columns for relationship, access level, government, agendas, gossip (new-item count), foreign relationships, agreements, and, when the relevant modes are active, alliance, grievances (change per turn, against you, and against them), secret society, and emergencies (participating with you, and targeting you). The gossip and grievance cells are buttons: press `Enter` on a gossip button to open the full gossip log with a filter to narrow it to one kind of gossip, or `Enter` on any grievance button to open the full grievance log. Your own leader sits right before the table. Switch between the table and the older tree view with the button at the bottom, or with `Alt plus 1` for the table and `Alt plus 2` for the tree
+- The diplomacy screen's relationship section properly lists your active agreements with that leader (delegations, embassies, defensive pacts, open borders, research agreements, and joint wars).
+- You can now filter gossip in the diplomacy screen, similar to the way you can in reports. The dropdown appears in the gossip log in table view, and in the main panel when in treeview
+- The diplomacy screen now shows turns in gossip entries, similar to the gossip tab in reports
+- Added support for the Quick Deals mod. Its popup is opened with `Ctrl plus D`
 - In the city status tab of reports, added usable and required power to both table and list views when gathering storm is active. Usable power reads the city's power status and the sources that supply it, and required power reads what is drawing power
 - Added support for the Better Report Screen mod. 
 - Added support for the Extended Policy Cards mod. When it is active, each policy reads a summary of its actual effect (such as the yields it grants) after its slot in the description, and the policy picker and policy viewer become a panel you can switch between a table (with name, slot, and effect columns, shown by default) and the usual tree, with a sort option in tree view. The effect column and sort can order policies by highest or lowest effect. Switch views with the button or with `Alt plus 1` for table and `Alt plus 2` for tree.
+- Added Spanish localization. Thanks CodedByGoose for the contribution
+- In the world scanner, a landmass or ocean now says "fully revealed" once you have charted every tile of it. Fully mapped Pirates and Red Death regions say the same.
+- The world scanner's Geography category has a new Natural disasters section (Gathering Storm) listing the storms, droughts, and erupting volcanoes you can currently see
 
 ### Changed
 
@@ -15,6 +22,7 @@
 ### Fixed
 
 - Yield icons written in capital letters (such as the production or gold symbol) now read out their name instead of being dropped, so descriptions that use them are no longer cut short.
+- The Surveyor no longer reports a wildly wrong resource count (such as tens of thousands of crabs) for tiles revealed through a teammate's vision.
 
 ## [1.2.0] - 2026-08-19
 

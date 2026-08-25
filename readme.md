@@ -440,3 +440,4 @@ Special thanks to:
 - LordLundin for extensively testing the mod
 - Rashad for allowing me to steal from his Civilization V accessibility mod and for answering my numerous questions.
 - Woody52169 for the simplified Chinese localization
+- CodedByGoose for the Spanish localization

@@ -666,6 +666,15 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_OCEANS" Language="fr_FR">
       <Text>Océans</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_DISASTERS" Language="fr_FR">
+      <Text>Catastrophes naturelles</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_DROUGHT" Language="fr_FR">
+      <Text>{1_Label}, {2_Turns : plural 1?1 tour restant; other?{2_Turns} tours restants;}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_ERUPTION" Language="fr_FR">
+      <Text>{1_Label}, en éruption</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BONUS" Language="fr_FR">
       <Text>Bonus</Text>
     </Replace>
@@ -746,6 +755,9 @@
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_ZONE_REVEALED_OF_TOTAL_TILES" Language="fr_FR">
       <Text>{1_Label}, {2_Revealed} sur {3_Total} {3_Total : plural 1?case explorée; other?cases explorées;}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_ZONE_FULLY_REVEALED" Language="fr_FR">
+      <Text>{1_Label}, exploration complète</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_MOUNTAIN_RANGE" Language="fr_FR">
       <Text>Chaîne de montagnes</Text>
@@ -7511,6 +7523,42 @@
     </Replace>
     <Replace Tag="LOC_CAI_QD_NO_OFFERS" Language="fr_FR">
       <Text>Aucune offre disponible</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_LOG_EMPTY" Language="fr_FR">
+      <Text>Aucun grief</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_GRIEVANCE_CHANGE" Language="fr_FR">
+      <Text>Évolution des griefs par tour</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_GRIEVANCES_AGAINST_YOU" Language="fr_FR">
+      <Text>Griefs contre vous</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_GRIEVANCES_AGAINST_THEM" Language="fr_FR">
+      <Text>Griefs contre eux</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_EMERGENCY_PARTICIPATING" Language="fr_FR">
+      <Text>Urgence à laquelle vous participez</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_EMERGENCY_TARGETING" Language="fr_FR">
+      <Text>Urgence vous ciblant</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_AGREEMENTS_NONE" Language="fr_FR">
+      <Text>Aucun</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_GOSSIP_FILTER" Language="fr_FR">
+      <Text>Filtrer les rumeurs par</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_GOSSIP_FILTER_ALL" Language="fr_FR">
+      <Text>Toutes les rumeurs</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SORT_FRIENDLIEST_FIRST" Language="fr_FR">
+      <Text>les plus amicaux d'abord</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SORT_MOST_HOSTILE_FIRST" Language="fr_FR">
+      <Text>les plus hostiles d'abord</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_COLUMN_ALLIANCE" Language="fr_FR">
+      <Text>Alliance</Text>
     </Replace>
   </LocalizedText>
 </GameData>

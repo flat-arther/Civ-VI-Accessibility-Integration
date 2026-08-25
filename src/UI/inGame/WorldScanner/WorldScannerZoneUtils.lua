@@ -35,6 +35,29 @@ local function CountRevealedPlots(plotIndices, context)
     return count
 end
 
+---Wrap an already-built zone label with the fully-revealed suffix.
+---@param label string
+---@return string
+function ZoneUtils.WithFullyRevealedSuffix(label)
+    return Locale.Lookup("LOC_CAI_WORLD_SCANNER_ZONE_FULLY_REVEALED", label)
+end
+
+---True when every tile of the engine Area under a connected zone is revealed.
+---A geography cluster is a connected set of revealed plots inside one
+---contiguous Area (land or non-lake water); if the whole Area were revealed,
+---nothing would fog-split it and the cluster would hold every Area tile. So
+---revealed-completeness is exactly cluster size == Area plot count. The engine
+---total is only compared here, never spoken, so it leaks no hidden tile count.
+---@param plotIndices integer[]
+---@return boolean
+function ZoneUtils.IsAreaFullyRevealed(plotIndices)
+    if #plotIndices == 0 then
+        return false
+    end
+    local area = Map.GetPlotByIndex(plotIndices[1]):GetArea()
+    return #plotIndices >= area:GetPlotCount()
+end
+
 ---@param labelKey string
 ---@param plotIndices integer[]
 ---@param context WorldScannerContext|nil
@@ -52,12 +75,16 @@ function ZoneUtils.MakeTileCountLabel(labelKey, plotIndices, context, mode)
 
     local revealedCount = CountRevealedPlots(plotIndices, context)
     if mode == TILE_COUNT_REVEALED_OF_TOTAL then
-        return Locale.Lookup(
+        local label = Locale.Lookup(
             "LOC_CAI_WORLD_SCANNER_ZONE_REVEALED_OF_TOTAL_TILES",
             resolvedLabel,
             revealedCount,
             #plotIndices
         )
+        if revealedCount >= #plotIndices then
+            label = ZoneUtils.WithFullyRevealedSuffix(label)
+        end
+        return label
     end
 
     return Locale.Lookup(

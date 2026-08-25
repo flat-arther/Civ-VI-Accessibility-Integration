@@ -103,6 +103,7 @@
 [x] Add support for better trade screen
 [x] Add support for better reports screen
 [x] Add support for extended policy cards
-[ ] Add support for quick deals, real Era Tracker
+[x] Add support for quick deals
+[ ] Add support for real Era Tracker
 [ ] Look in to coastal raide yield reporting
 [ ] River flow direction reporting

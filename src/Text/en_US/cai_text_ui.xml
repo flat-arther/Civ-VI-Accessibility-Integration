@@ -666,6 +666,15 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_OCEANS" Language="en_US">
       <Text>Oceans</Text>
     </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_DISASTERS" Language="en_US">
+      <Text>Natural disasters</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_DISASTER_DROUGHT" Language="en_US">
+      <Text>{1_Label}, {2_Turns : plural 1?1 turn; other?{2_Turns} turns;} remaining</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_DISASTER_ERUPTION" Language="en_US">
+      <Text>{1_Label}, erupting</Text>
+    </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BONUS" Language="en_US">
       <Text>Bonus</Text>
     </Row>
@@ -746,6 +755,9 @@
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_ZONE_REVEALED_OF_TOTAL_TILES" Language="en_US">
       <Text>{1_Label}, {2_Revealed} of {3_Total} {3_Total : plural 1?tile; other?tiles;} explored</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_ZONE_FULLY_REVEALED" Language="en_US">
+      <Text>{1_Label}, fully revealed</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_MOUNTAIN_RANGE" Language="en_US">
       <Text>Mountain range</Text>
@@ -1690,8 +1702,44 @@
     <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_LOG" Language="en_US">
       <Text>Grievance log</Text>
     </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_LOG_EMPTY" Language="en_US">
+      <Text>No grievances</Text>
+    </Row>
     <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_LOG_ENTRY" Language="en_US">
       <Text>Turn {1_Turn}: {2_Description} ({3_Amount}, {4_Actor})</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_COLUMN_ALLIANCE" Language="en_US">
+      <Text>Alliance</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_COLUMN_GRIEVANCE_CHANGE" Language="en_US">
+      <Text>Grievance change per turn</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_COLUMN_GRIEVANCES_AGAINST_YOU" Language="en_US">
+      <Text>Grievances against you</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_COLUMN_GRIEVANCES_AGAINST_THEM" Language="en_US">
+      <Text>Grievances against them</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_COLUMN_EMERGENCY_PARTICIPATING" Language="en_US">
+      <Text>Participating with you in emergency</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_COLUMN_EMERGENCY_TARGETING" Language="en_US">
+      <Text>Targeting you with emergency</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_AGREEMENTS_NONE" Language="en_US">
+      <Text>None</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GOSSIP_FILTER" Language="en_US">
+      <Text>Filter gossip by</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_GOSSIP_FILTER_ALL" Language="en_US">
+      <Text>All gossip</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_FRIENDLIEST_FIRST" Language="en_US">
+      <Text>friendliest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SORT_MOST_HOSTILE_FIRST" Language="en_US">
+      <Text>most hostile first</Text>
     </Row>
     <Row Tag="LOC_CAI_DIPLOMACY_GRIEVANCE_BY_YOU" Language="en_US">
       <Text>caused by you</Text>

@@ -9,6 +9,7 @@
 ---@field getTooltip? fun(row:any):string
 ---@field getState? fun(row:any):string
 ---@field isDisabled? fun(row:any):boolean
+---@field onActivate? fun(row:any) Presence makes each data cell a Button that runs this on Enter/Space (instead of bubbling row_activate).
 ---@field sortKey? fun(row:any):any Presence makes the header sortable.
 ---@field sortAscendingDescription? string Localization tag describing ascending order.
 ---@field sortDescendingDescription? string Localization tag describing descending order.
@@ -161,6 +162,17 @@ local function makeCell(tableWidget, row, rowIndex, rowKey, column, columnIndex)
         if column.isDisabled then
             cell:SetDisabledPredicate(function() return column.isDisabled(row) == true end)
         end
+        -- An actionable column turns each of its data cells into a Button that
+        -- runs onActivate on Enter/Space. The cell announces its Button role
+        -- (unlike a plain silent TableCell) so the user knows it opens something.
+        if column.onActivate then
+            cell.Role = "Button"
+            cell.SpeechSettings = { Role = true }
+            cell:AddInputBindings({
+                { Key = Keys.VK_RETURN, MSG = KeyEvents.KeyUp, Description = "LOC_CAI_KB_ACTIVATE", Action = function(self) return self:Activate() end },
+                { Key = Keys.VK_SPACE, Description = "LOC_CAI_KB_ACTIVATE", Action = function(self) return self:Activate() end },
+            })
+        end
     end
 
     if rowIndex == 0 and column.sortKey then
@@ -185,6 +197,10 @@ end
 ---@return boolean
 function DataTableCellWidget:Activate()
     if self.RowIndex > 0 then
+        if self.Column.onActivate and not self:IsDisabled() then
+            self.Column.onActivate(self.Row)
+            return true
+        end
         return self.Parent and self.Parent:Activate() or true
     end
     if self:IsDisabled() then return true end
@@ -329,6 +345,7 @@ function DataTableWidget:SetColumns(columns)
         check(column.getTooltip == nil or type(column.getTooltip) == "function", "column getTooltip must be a function")
         check(column.getState == nil or type(column.getState) == "function", "column getState must be a function")
         check(column.isDisabled == nil or type(column.isDisabled) == "function", "column isDisabled must be a function")
+        check(column.onActivate == nil or type(column.onActivate) == "function", "column onActivate must be a function")
         check(column.sortKey == nil or type(column.sortKey) == "function", "column sortKey must be a function")
         if column.sortKey then
             check(type(column.sortAscendingDescription) == "string",
