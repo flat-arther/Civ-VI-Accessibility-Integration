@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [1.3.0] - 2026-08-25
+
 ### Added
 
 - The leader screen now has a table view of every leader you have met, so you can compare them side by side. Each row is a leader with sortable columns for relationship, access level, government, agendas, gossip (new-item count), foreign relationships, agreements, and, when the relevant modes are active, alliance, grievances (change per turn, against you, and against them), secret society, and emergencies (participating with you, and targeting you). The gossip and grievance cells are buttons: press `Enter` on a gossip button to open the full gossip log with a filter to narrow it to one kind of gossip, or `Enter` on any grievance button to open the full grievance log. Your own leader sits right before the table. Switch between the table and the older tree view with the button at the bottom, or with `Alt plus 1` for the table and `Alt plus 2` for the tree
