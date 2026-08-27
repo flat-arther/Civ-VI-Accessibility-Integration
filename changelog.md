@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [1.4.0] - 2026-08-27
+
 ### Added
 
 - When founding a religion, the icon picker now names each religion followed by its symbol description. Custom religions are numbered and named by their symbol, such as "Custom Religion 1, Crab", so you can tell them apart.
