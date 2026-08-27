@@ -1071,15 +1071,21 @@ local function CAI_BuildLeaderOptions(playerId)
 	local selectedIndex = 0
 	for i, value in ipairs(parameter.Values) do
 		local invalidReason = CAI_GetInvalidReason(value)
-		local label = value.Name or ""
+		local leaderName = value.Name or ""
+		local label = leaderName
+		local civName = ""
 		local info = value.Domain and value.Value and GetPlayerInfo(value.Domain, value.Value)
 		if info and info.CivilizationName then
-			label = label .. ", " .. Locale.Lookup(info.CivilizationName)
+			civName = Locale.Lookup(info.CivilizationName)
+			label = label .. ", " .. civName
 		end
 		table.insert(options, {
 			label = CAI_AppendExplanation(label, invalidReason),
 			tooltip = CAI_AppendExplanation(CAI_BuildLeaderTooltip(value.Domain, value.Value), invalidReason),
 			value = value,
+			leaderName = leaderName,
+			civName = civName,
+			leaderType = value.Value,
 		})
 		if selectedIndex == 0 and parameter.Value and value.Value == parameter.Value.Value then
 			selectedIndex = i
@@ -1089,30 +1095,36 @@ local function CAI_BuildLeaderOptions(playerId)
 	return options, selectedIndex
 end
 
+local function CAI_GetPlayerLeaderLabel(playerId)
+	local options, selectedIndex = CAI_BuildLeaderOptions(playerId)
+	local opt = selectedIndex > 0 and options[selectedIndex] or nil
+	return opt and opt.label or ""
+end
+
 local function CAI_MakeLeaderDropdown(playerId, label, focusKey, hiddenPredicate)
-	local dropdown = mgr:CreateWidget(mgr:GenerateWidgetId("CAIScenarioLeader"), "Dropdown", {
-		Label = label,
-		Tooltip = function() return CAI_GetPlayerLeaderTooltip(playerId) end,
-		HiddenPredicate = hiddenPredicate,
-		DisabledPredicate = function()
+	return mgr.WidgetHelpers.CreateLeaderPickerButton({
+		id = mgr:GenerateWidgetId("CAIScenarioLeaderPick"),
+		panelId = "CAIScenario_LeaderPicker",
+		label = label,
+		tooltip = function() return CAI_GetPlayerLeaderTooltip(playerId) end,
+		getSelectedLabel = function() return CAI_GetPlayerLeaderLabel(playerId) end,
+		getOptions = function() return CAI_BuildLeaderOptions(playerId) end,
+		onSelect = function(value)
+			local parameters = GetPlayerParameters(playerId)
+			local parameter = parameters and parameters.Parameters and parameters.Parameters.PlayerLeader
+			if parameter then
+				parameters:SetParameterValue(parameter, value)
+				Network.BroadcastGameConfig()
+			end
+		end,
+		focusKey = focusKey,
+		hiddenPredicate = hiddenPredicate,
+		disabledPredicate = function()
 			local parameter = CAI_GetPlayerLeaderParameter(playerId)
 			return parameter and parameter.Enabled == false
 		end,
-		FocusKey = focusKey,
+		focusSound = HOVER_SOUND,
 	})
-	local options, selectedIndex = CAI_BuildLeaderOptions(playerId)
-	dropdown:SetOptions(options)
-	if selectedIndex > 0 then dropdown:SetSelectedIndex(selectedIndex, true) end
-	dropdown:SetValueSetter(function(_, value)
-		local parameters = GetPlayerParameters(playerId)
-		local parameter = parameters and parameters.Parameters and parameters.Parameters.PlayerLeader
-		if parameter then
-			parameters:SetParameterValue(parameter, value)
-			Network.BroadcastGameConfig()
-		end
-	end)
-	dropdown:SetFocusSound(HOVER_SOUND)
-	return dropdown
 end
 
 local function CAI_BuildParameterOptions(parameterId, includeScenarioDescription, suppressTooltip)
@@ -1533,6 +1545,9 @@ local function CAI_BuildPanel()
 end
 
 local function CAI_ClosePanel()
+	if mgr and mgr.WidgetHelpers then
+		mgr.WidgetHelpers.RemoveLeaderPickerPanel("CAIScenario_LeaderPicker")
+	end
 	if mgr and mgr:GetWidgetById("CAIScenarioSetup_Panel") then
 		mgr:RemoveFromStack("CAIScenarioSetup_Panel")
 	end

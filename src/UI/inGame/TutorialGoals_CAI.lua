@@ -237,4 +237,7 @@ LuaEvents.CAI_TutorialGoalNotificationActivate.Add(OnCAITutorialGoalNotification
 
 Events.InputActionTriggered.Add(OnCAITutorialGoalsInputAction)
 
+LuaEvents.CAILaunchBarOpen_TutorialGoals.Remove(OpenGoalsList)
+LuaEvents.CAILaunchBarOpen_TutorialGoals.Add(OpenGoalsList)
+
 ContextPtr:SetInputHandler(OnCAITutorialGoalsInputHandler, true)

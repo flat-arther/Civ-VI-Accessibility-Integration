@@ -1466,7 +1466,24 @@ UIScreenManager = {}
 ---@class CAIWidgetHelpers
 ---@field MakeGeneralDialog fun(titleFn: fun():string, actionButtons: ButtonWidget[], contentRows?: UIWidget[], defaultActionIndex?: integer): DialogWidget|nil
 ---@field CreatePopupDialog fun(popup: table): DialogWidget|nil
+---@field CreateLeaderPickerButton fun(config: CAILeaderPickerConfig): ButtonWidget A button that opens a pushed leader-picker panel (sortable leader list + F2 descriptions).
+---@field RemoveLeaderPickerPanel fun(panelId: string) Remove an open leader-picker panel from the stack (screen teardown).
 CAIWidgetHelpers = {}
+
+---Config for CreateLeaderPickerButton. Each option in getOptions carries
+---leaderName/civName (sort keys) and leaderType (F2 description + row key).
+---@class CAILeaderPickerConfig
+---@field id string Button widget id.
+---@field panelId string Picker panel widget id (one panel open at a time per screen).
+---@field focusKey? string Button focus key.
+---@field label fun():string Button label / panel title.
+---@field tooltip fun():string Button tooltip.
+---@field getSelectedLabel? fun():string Spoken button value (selected leader).
+---@field getOptions fun():table[], integer Options and selected index.
+---@field onSelect fun(value: any) Commit the chosen leader value.
+---@field hiddenPredicate? fun():boolean
+---@field disabledPredicate? fun():boolean
+---@field focusSound? string
 
 ---Generate a unique widget id. Optional prefix; defaults to "CAIWidget".
 ---@param prefix? string
@@ -1682,11 +1699,13 @@ function CAIWidgetHelpers_DialogBuilder.CreatePopupDialog(mgr, popup) end
 ---@field LabelLength integer
 ---@field Proximity? integer Depth of the deepest ancestor shared with the type-to-find anchor; larger is closer. Used to prefer matches at the current tree depth.
 
----Lowercase ASCII A-Z only, leaving bytes >= 0x80 untouched. Locale-safe fold
----for type-to-find so multi-byte UTF-8 (e.g. CJK) is never corrupted.
+---Fold search text for type-to-find: lowercase ASCII A-Z and map accented Latin
+---letters (Latin-1 Supplement + Extended-A) to their base ASCII letter, so a
+---plain query letter matches every accented form (a == à/á/â/ä, c == ç, ...).
+---Locale-safe: bytes outside the listed Latin ranges (e.g. CJK) are untouched.
 ---@param s string
 ---@return string
-function CAIWidgetHelpers_Search.AsciiLower(s) end
+function CAIWidgetHelpers_Search.FoldText(s) end
 
 ---Classify one label against a query using the shared type-to-find tiers.
 ---@param label string

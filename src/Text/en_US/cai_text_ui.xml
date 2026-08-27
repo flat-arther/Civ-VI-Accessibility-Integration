@@ -669,11 +669,32 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_DISASTERS" Language="en_US">
       <Text>Natural disasters</Text>
     </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_DISASTER_GROUP_STORMS" Language="en_US">
+      <Text>Storms</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_DISASTER_GROUP_DROUGHTS" Language="en_US">
+      <Text>Droughts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_DISASTER_GROUP_VOLCANOES" Language="en_US">
+      <Text>Volcanoes</Text>
+    </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_DISASTER_DROUGHT" Language="en_US">
       <Text>{1_Label}, {2_Turns : plural 1?1 turn; other?{2_Turns} turns;} remaining</Text>
     </Row>
-    <Row Tag="LOC_CAI_WORLD_SCANNER_DISASTER_ERUPTION" Language="en_US">
-      <Text>{1_Label}, erupting</Text>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_DISASTER_VOLCANO_NAMED" Language="en_US">
+      <Text>Volcano {1_Name}, {2_Status}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_DISASTER_VOLCANO" Language="en_US">
+      <Text>Volcano, {1_Status}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_VOLCANO_STATUS_INACTIVE" Language="en_US">
+      <Text>inactive</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_VOLCANO_STATUS_ACTIVE" Language="en_US">
+      <Text>active</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_VOLCANO_STATUS_ERUPTING" Language="en_US">
+      <Text>erupting</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BONUS" Language="en_US">
       <Text>Bonus</Text>
@@ -945,6 +966,60 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT2_PREV_TOOLTIP" Language="en_US">
       <Text>Moves to the previous item in the subcategory bound to slot 2, sorted nearest first</Text>
     </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT3_ASSIGN" Language="en_US">
+      <Text>Bind subcategory to scanner slot 3</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT3_ASSIGN_TOOLTIP" Language="en_US">
+      <Text>Binds the current world scanner subcategory to slot 3 for quick access</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT3_NEXT" Language="en_US">
+      <Text>Next item in scanner slot 3</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT3_NEXT_TOOLTIP" Language="en_US">
+      <Text>Moves to the next item in the subcategory bound to slot 3, sorted nearest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT3_PREV" Language="en_US">
+      <Text>Previous item in scanner slot 3</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT3_PREV_TOOLTIP" Language="en_US">
+      <Text>Moves to the previous item in the subcategory bound to slot 3, sorted nearest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT4_ASSIGN" Language="en_US">
+      <Text>Bind subcategory to scanner slot 4</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT4_ASSIGN_TOOLTIP" Language="en_US">
+      <Text>Binds the current world scanner subcategory to slot 4 for quick access</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT4_NEXT" Language="en_US">
+      <Text>Next item in scanner slot 4</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT4_NEXT_TOOLTIP" Language="en_US">
+      <Text>Moves to the next item in the subcategory bound to slot 4, sorted nearest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT4_PREV" Language="en_US">
+      <Text>Previous item in scanner slot 4</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT4_PREV_TOOLTIP" Language="en_US">
+      <Text>Moves to the previous item in the subcategory bound to slot 4, sorted nearest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT5_ASSIGN" Language="en_US">
+      <Text>Bind subcategory to scanner slot 5</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT5_ASSIGN_TOOLTIP" Language="en_US">
+      <Text>Binds the current world scanner subcategory to slot 5 for quick access</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT5_NEXT" Language="en_US">
+      <Text>Next item in scanner slot 5</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT5_NEXT_TOOLTIP" Language="en_US">
+      <Text>Moves to the next item in the subcategory bound to slot 5, sorted nearest first</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT5_PREV" Language="en_US">
+      <Text>Previous item in scanner slot 5</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SLOT5_PREV_TOOLTIP" Language="en_US">
+      <Text>Moves to the previous item in the subcategory bound to slot 5, sorted nearest first</Text>
+    </Row>
 
     <!-- LaunchBar / PartialScreenHooks / Civilopedia screen shortcuts -->
     <Row Tag="LOC_CAI_OPEN_CIVILOPEDIA" Language="en_US">
@@ -976,6 +1051,27 @@
     </Row>
     <Row Tag="LOC_CAI_OPEN_TECH_TREE_TOOLTIP" Language="en_US">
       <Text>Open the Technology tree</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LAUNCH_BAR" Language="en_US">
+      <Text>Launch bar</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_LAUNCH_BAR" Language="en_US">
+      <Text>Open launch bar</Text>
+    </Row>
+    <Row Tag="LOC_CAI_OPEN_LAUNCH_BAR_TOOLTIP" Language="en_US">
+      <Text>Open a list of the game's screens and choose one to open.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LAUNCH_ATTENTION_PANTHEON" Language="en_US">
+      <Text>A pantheon can be founded</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LAUNCH_GOVERNOR_TITLES" Language="en_US">
+      <Text>Governor titles available: {1_Num}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LAUNCH_NO_NOTIFICATIONS" Language="en_US">
+      <Text>No notifications</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LAUNCH_NOTIFICATION_COUNT" Language="en_US">
+      <Text>Notifications: {1_Num}</Text>
     </Row>
     <Row Tag="LOC_CAI_OPEN_CIVICS_TREE" Language="en_US">
       <Text>Open Civics Tree</Text>
@@ -3943,7 +4039,7 @@
       <Text>Open lens list</Text>
     </Row>
     <Row Tag="LOC_CAI_MINIMAP_OPEN_LENS_LIST_TOOLTIP" Language="en_US">
-      <Text>Opens the accessible minimap lens list.</Text>
+      <Text>A list of map lenses that highlight tiles by a theme, such as the religion, appeal, loyalty, and owner lenses.</Text>
     </Row>
     <Row Tag="LOC_CAI_MINIMAP_LENS_LIST" Language="en_US">
       <Text>Lens list</Text>
@@ -4495,6 +4591,33 @@
     </Row>
     <Row Tag="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS_TOOLTIP" Language="en_US">
       <Text>Open the World Congress screen</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_ORDER_BY" Language="en_US">
+      <Text>Order leaders by</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_COL_CAPITAL" Language="en_US">
+      <Text>Capital</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_COL_SCORE" Language="en_US">
+      <Text>Score</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_COL_FAVOR" Language="en_US">
+      <Text>Favor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_COL_MILITARY" Language="en_US">
+      <Text>Military</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_COL_SCIENCE" Language="en_US">
+      <Text>Science</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_COL_CULTURE" Language="en_US">
+      <Text>Culture</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_COL_GOLD" Language="en_US">
+      <Text>Gold</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLO_RIBBON_COL_FAITH" Language="en_US">
+      <Text>Faith</Text>
     </Row>
 
     <!-- Era Complete Popup -->
@@ -7406,6 +7529,12 @@
     </Row>
 
     <!-- Quick Deals (mod) accessibility -->
+    <Row Tag="LOC_CAI_QD_LAUNCH_TOOLTIP" Language="en_US">
+      <Text>Sell, buy, or exchange items with every met leader at once.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_QD_NOT_YOUR_TURN" Language="en_US">
+      <Text>Only available on your turn</Text>
+    </Row>
     <Row Tag="LOC_CAI_QD_AI_OFFERS" Language="en_US">
       <Text>AI offers</Text>
     </Row>
@@ -7579,6 +7708,13 @@
     </Row>
     <Row Tag="LOC_CAI_QD_NO_OFFERS" Language="en_US">
       <Text>No offers available</Text>
+    </Row>
+    <!-- Leader-description keybinding + fallback (CAI) -->
+    <Row Tag="LOC_CAI_KB_LEADER_DESCRIPTION" Language="en_US">
+      <Text>Speak leader description</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_NONE" Language="en_US">
+      <Text>No description available for this leader.</Text>
     </Row>
   </LocalizedText>
 </GameData>

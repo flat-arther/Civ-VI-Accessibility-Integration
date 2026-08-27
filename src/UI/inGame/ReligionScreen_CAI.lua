@@ -55,6 +55,27 @@ local m_pendingBeliefs         = {} -- { [slotIndex] = beliefIndex }
 
 local m_beliefPickerActiveSlot = nil
 
+-- Build a religion icon label as "<name>, <symbol description>" (e.g.
+-- "Islam, Star and crescent"). Descriptions live in ReligionIconDescStrings_CAI.xml
+-- keyed by religion type (LOC_CAI_RELICON_<ReligionType>); a missing tag
+-- Locale.Lookups back to itself, so treat "result == tag" as absent.
+-- The custom religions all share the generic name "Custom Religion", so while it is
+-- still that placeholder we append the slot number ("Custom Religion 2") to keep each
+-- option distinct; a founded custom religion the player has already named keeps its name.
+local function AppendReligionIconDesc(name, religionTypeStr)
+    if not religionTypeStr then return name end
+    local customNum = religionTypeStr:match("^RELIGION_CUSTOM_(%d+)$")  -- ASCII type id, safe to pattern-match
+    if customNum and name == Locale.Lookup("LOC_RELIGION_CUSTOM") then
+        name = name .. " " .. customNum
+    end
+    local tag = "LOC_CAI_RELICON_" .. religionTypeStr
+    local desc = Locale.Lookup(tag)
+    if desc ~= nil and desc ~= "" and desc ~= tag then
+        return name .. ", " .. desc
+    end
+    return name
+end
+
 local function ResetPendingSelections()
     m_pendingIconRow         = nil
     m_pendingCustomName      = nil
@@ -902,7 +923,7 @@ local function CommitSetup()
     local summaryRows = {}
 
     if state == "RELIGION" and m_pendingIconRow then
-        local iconName = Locale.Lookup(m_pendingIconRow.Name)
+        local iconName = AppendReligionIconDesc(Locale.Lookup(m_pendingIconRow.Name), m_pendingIconRow.ReligionType)
         table.insert(summaryRows, mgr:CreateWidget(mgr:GenerateWidgetId("CAIRel_SumIcon"), "StaticText", {
             Label = function() return Locale.Lookup("LOC_CAI_RELIGION_SUMMARY_ICON", iconName) end,
         }))
@@ -992,14 +1013,15 @@ local function RebuildSetupPanel()
         end)
 
         if hasReligion then
-            iconDD:SetOptions({ { label = GetReligionName(cai.playerReligionType), value = cai.playerReligionType } })
+            local foundedRow = GameInfo.Religions[cai.playerReligionType]
+            iconDD:SetOptions({ { label = AppendReligionIconDesc(GetReligionName(cai.playerReligionType), foundedRow and foundedRow.ReligionType), value = cai.playerReligionType } })
             iconDD:SetSelectedIndex(1, true)
             iconDD:SetDisabledPredicate(function() return true end)
         else
             local options = {}
             for row in GameInfo.Religions() do
                 if row.Pantheon == false and not Game.GetReligion():HasBeenFounded(row.Index) then
-                    table.insert(options, { label = Locale.Lookup(row.Name), value = row })
+                    table.insert(options, { label = AppendReligionIconDesc(Locale.Lookup(row.Name), row.ReligionType), value = row })
                 end
             end
             iconDD:SetOptions(options)

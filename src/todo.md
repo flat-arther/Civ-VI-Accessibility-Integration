@@ -104,6 +104,7 @@
 [x] Add support for better reports screen
 [x] Add support for extended policy cards
 [x] Add support for quick deals
+[x] Add volcanos to disasters subcategory even if inactive
 [ ] Add support for real Era Tracker
 [ ] Look in to coastal raide yield reporting
 [ ] River flow direction reporting

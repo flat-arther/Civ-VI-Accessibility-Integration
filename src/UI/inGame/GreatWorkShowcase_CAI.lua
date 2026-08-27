@@ -10,6 +10,11 @@ local PANEL_ID = "CAIGreatWorkShowcase_Panel"
 
 local m_ui = { panel = nil, details = nil }
 
+-- Stable GreatWorkType string for the work on display (e.g. "GREATWORK_GOGH_2").
+-- Captured from the vanilla entry points so descriptions key off type, never the
+-- localized name. nil when no work is shown or the type could not be resolved.
+local m_currentGWType = nil
+
 -- ---------------------------------------------------------------------------
 -- Content helper — reads from vanilla controls after they are updated
 -- ---------------------------------------------------------------------------
@@ -43,7 +48,31 @@ local function GetWorkDetailsLabel()
     if createdDate  ~= "" then table.insert(parts, createdDate) end
     if createdPlace ~= "" then table.insert(parts, createdPlace) end
 
+    -- Append the accessibility image description for visual works (paintings,
+    -- sculptures, landscapes, religious art). Missing tags Lookup back to their
+    -- tag, so treat "result == tag" as "no description available".
+    if m_currentGWType then
+        local tag = "LOC_CAI_GWDESC_" .. m_currentGWType
+        local desc = Locale.Lookup(tag)
+        if desc ~= nil and desc ~= "" and desc ~= tag then
+            table.insert(parts, desc)
+        end
+    end
+
     return table.concat(parts, ". ")
+end
+
+-- Resolve the stable GreatWorkType string for a work by (city, index), mirroring
+-- vanilla: GetGreatWorkTypeFromIndex returns a GameInfo.GreatWorks row id.
+local function CaptureGreatWorkType(city, greatWorkIndex)
+    m_currentGWType = nil
+    if not city or greatWorkIndex == nil then return end
+    local bldgs = city.GetBuildings and city:GetBuildings()
+    if not bldgs then return end
+    local typeIdx = bldgs:GetGreatWorkTypeFromIndex(greatWorkIndex)
+    if not typeIdx then return end
+    local info = GameInfo.GreatWorks[typeIdx]
+    if info then m_currentGWType = info.GreatWorkType end
 end
 
 -- ---------------------------------------------------------------------------
@@ -172,6 +201,27 @@ end
 -- ---------------------------------------------------------------------------
 -- Vanilla wraps
 -- ---------------------------------------------------------------------------
+
+-- Capture the great work type for the description append. Two paths need
+-- covering, and they resolve their handler refs differently:
+--   * Prev/Next call OnViewGreatWork by global name internally, so wrapping the
+--     global intercepts them.
+--   * Overview-open and the created popup fire through Events/LuaEvents whose
+--     handlers were registered with the ORIGINAL refs at vanilla init, so the
+--     global wrap never sees them; we add capture-only listeners for those
+--     (capture is idempotent, so vanilla still runs exactly once).
+OnViewGreatWork = WrapFunc(OnViewGreatWork, function(orig, city, buildingID, greatWorkIndex)
+    CaptureGreatWorkType(city, greatWorkIndex)
+    orig(city, buildingID, greatWorkIndex)
+end)
+
+LuaEvents.GreatWorksOverview_ViewGreatWork.Add(function(city, buildingID, greatWorkIndex)
+    CaptureGreatWorkType(city, greatWorkIndex)
+end)
+
+Events.GreatWorkCreated.Add(function(playerID, creatorID, cityX, cityY, buildingID, greatWorkIndex)
+    CaptureGreatWorkType(Cities.GetCityInPlot(Map.GetPlotIndex(cityX, cityY)), greatWorkIndex)
+end)
 
 ShowScreen = WrapFunc(ShowScreen, function(orig)
     orig()

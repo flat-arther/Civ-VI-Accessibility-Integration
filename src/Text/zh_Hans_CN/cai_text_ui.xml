@@ -669,11 +669,32 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_DISASTERS" Language="zh_Hans_CN">
       <Text>自然灾害</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_GROUP_STORMS" Language="zh_Hans_CN">
+      <Text>风暴</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_GROUP_DROUGHTS" Language="zh_Hans_CN">
+      <Text>干旱</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_GROUP_VOLCANOES" Language="zh_Hans_CN">
+      <Text>火山</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_DROUGHT" Language="zh_Hans_CN">
       <Text>{1_Label}，剩余{2_Turns}回合</Text>
     </Replace>
-    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_ERUPTION" Language="zh_Hans_CN">
-      <Text>{1_Label}，喷发中</Text>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_VOLCANO_NAMED" Language="zh_Hans_CN">
+      <Text>火山{1_Name}，{2_Status}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_VOLCANO" Language="zh_Hans_CN">
+      <Text>火山，{1_Status}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_VOLCANO_STATUS_INACTIVE" Language="zh_Hans_CN">
+      <Text>非活跃</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_VOLCANO_STATUS_ACTIVE" Language="zh_Hans_CN">
+      <Text>活跃</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_VOLCANO_STATUS_ERUPTING" Language="zh_Hans_CN">
+      <Text>喷发中</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BONUS" Language="zh_Hans_CN">
       <Text>加成资源</Text>
@@ -945,6 +966,60 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT2_PREV_TOOLTIP" Language="zh_Hans_CN">
       <Text>移到绑定至槽位2的子类别中的上一个项目，按由近到远排序</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_ASSIGN" Language="zh_Hans_CN">
+      <Text>将子类别绑定到世界扫描器槽位3</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_ASSIGN_TOOLTIP" Language="zh_Hans_CN">
+      <Text>将当前世界扫描器子类别绑定到槽位3以便快速访问</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_NEXT" Language="zh_Hans_CN">
+      <Text>世界扫描器槽位3中的下一个项目</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_NEXT_TOOLTIP" Language="zh_Hans_CN">
+      <Text>移到绑定至槽位3的子类别中的下一个项目，按由近到远排序</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_PREV" Language="zh_Hans_CN">
+      <Text>世界扫描器槽位3中的上一个项目</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_PREV_TOOLTIP" Language="zh_Hans_CN">
+      <Text>移到绑定至槽位3的子类别中的上一个项目，按由近到远排序</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_ASSIGN" Language="zh_Hans_CN">
+      <Text>将子类别绑定到世界扫描器槽位4</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_ASSIGN_TOOLTIP" Language="zh_Hans_CN">
+      <Text>将当前世界扫描器子类别绑定到槽位4以便快速访问</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_NEXT" Language="zh_Hans_CN">
+      <Text>世界扫描器槽位4中的下一个项目</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_NEXT_TOOLTIP" Language="zh_Hans_CN">
+      <Text>移到绑定至槽位4的子类别中的下一个项目，按由近到远排序</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_PREV" Language="zh_Hans_CN">
+      <Text>世界扫描器槽位4中的上一个项目</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_PREV_TOOLTIP" Language="zh_Hans_CN">
+      <Text>移到绑定至槽位4的子类别中的上一个项目，按由近到远排序</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_ASSIGN" Language="zh_Hans_CN">
+      <Text>将子类别绑定到世界扫描器槽位5</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_ASSIGN_TOOLTIP" Language="zh_Hans_CN">
+      <Text>将当前世界扫描器子类别绑定到槽位5以便快速访问</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_NEXT" Language="zh_Hans_CN">
+      <Text>世界扫描器槽位5中的下一个项目</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_NEXT_TOOLTIP" Language="zh_Hans_CN">
+      <Text>移到绑定至槽位5的子类别中的下一个项目，按由近到远排序</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_PREV" Language="zh_Hans_CN">
+      <Text>世界扫描器槽位5中的上一个项目</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_PREV_TOOLTIP" Language="zh_Hans_CN">
+      <Text>移到绑定至槽位5的子类别中的上一个项目，按由近到远排序</Text>
+    </Replace>
 
     <!-- 启动栏、局部界面钩子与文明百科界面快捷键 -->
     <Replace Tag="LOC_CAI_OPEN_CIVILOPEDIA" Language="zh_Hans_CN">
@@ -976,6 +1051,27 @@
     </Replace>
     <Replace Tag="LOC_CAI_OPEN_TECH_TREE_TOOLTIP" Language="zh_Hans_CN">
       <Text>打开“科技树”</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LAUNCH_BAR" Language="zh_Hans_CN">
+      <Text>启动栏</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_OPEN_LAUNCH_BAR" Language="zh_Hans_CN">
+      <Text>打开启动栏</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_OPEN_LAUNCH_BAR_TOOLTIP" Language="zh_Hans_CN">
+      <Text>打开游戏各界面的列表，从中选择要打开的界面。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LAUNCH_ATTENTION_PANTHEON" Language="zh_Hans_CN">
+      <Text>可以创建万神殿</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LAUNCH_GOVERNOR_TITLES" Language="zh_Hans_CN">
+      <Text>可用总督头衔：{1_Num}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LAUNCH_NO_NOTIFICATIONS" Language="zh_Hans_CN">
+      <Text>无通知</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LAUNCH_NOTIFICATION_COUNT" Language="zh_Hans_CN">
+      <Text>通知：{1_Num}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_OPEN_CIVICS_TREE" Language="zh_Hans_CN">
       <Text>打开市政树</Text>
@@ -3906,7 +4002,7 @@
       <Text>打开滤镜列表</Text>
     </Replace>
     <Replace Tag="LOC_CAI_MINIMAP_OPEN_LENS_LIST_TOOLTIP" Language="zh_Hans_CN">
-      <Text>打开无障碍小地图滤镜列表。</Text>
+      <Text>按主题突出显示地块的地图滤镜列表，例如宗教、宜居度、忠诚度和归属滤镜。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_MINIMAP_LENS_LIST" Language="zh_Hans_CN">
       <Text>滤镜列表</Text>
@@ -4458,6 +4554,33 @@
     </Replace>
     <Replace Tag="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS_TOOLTIP" Language="zh_Hans_CN">
       <Text>打开世界议会界面</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_ORDER_BY" Language="zh_Hans_CN">
+      <Text>领袖排序方式</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_CAPITAL" Language="zh_Hans_CN">
+      <Text>首都</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_SCORE" Language="zh_Hans_CN">
+      <Text>得分</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_FAVOR" Language="zh_Hans_CN">
+      <Text>外交支持</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_MILITARY" Language="zh_Hans_CN">
+      <Text>军事</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_SCIENCE" Language="zh_Hans_CN">
+      <Text>科技</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_CULTURE" Language="zh_Hans_CN">
+      <Text>文化</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_GOLD" Language="zh_Hans_CN">
+      <Text>金币</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_FAITH" Language="zh_Hans_CN">
+      <Text>信仰</Text>
     </Replace>
 
     <!-- 时代完成弹窗 -->
@@ -7367,6 +7490,12 @@
       <Text>所需电力</Text>
     </Replace>
     <!-- Quick Deals (mod) accessibility -->
+    <Replace Tag="LOC_CAI_QD_LAUNCH_TOOLTIP" Language="zh_Hans_CN">
+      <Text>一次性与所有已会面的领袖出售、购买或交换物品。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_NOT_YOUR_TURN" Language="zh_Hans_CN">
+      <Text>仅在你的回合可用</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_QD_AI_OFFERS" Language="zh_Hans_CN">
       <Text>AI报价</Text>
     </Replace>
@@ -7576,6 +7705,13 @@
     </Replace>
     <Replace Tag="LOC_CAI_DIPLO_COLUMN_ALLIANCE" Language="zh_Hans_CN">
       <Text>同盟</Text>
+    </Replace>
+    <!-- Leader-description keybinding + fallback (CAI) -->
+    <Replace Tag="LOC_CAI_KB_LEADER_DESCRIPTION" Language="zh_Hans_CN">
+      <Text>朗读领袖描述</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_NONE" Language="zh_Hans_CN">
+      <Text>暂无此领袖的描述。</Text>
     </Replace>
   </LocalizedText>
 </GameData>

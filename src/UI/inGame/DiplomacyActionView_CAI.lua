@@ -248,6 +248,24 @@ local function GetSelectedPlayerConfig()
     return ms_SelectedPlayerID ~= nil and PlayerConfigurations[ms_SelectedPlayerID] or nil
 end
 
+-- F2 reads the accessibility portrait description for the currently selected
+-- leader. Descriptions live in LeaderDescStrings_CAI.xml keyed by leader type
+-- (e.g. LOC_CAI_LEADERDESC_LEADER_GANDHI). A missing tag Locale.Lookups back to
+-- itself, so treat "result == tag" as "no description available".
+local function SpeakSelectedLeaderDescription()
+    local playerConfig = GetSelectedPlayerConfig()
+    if not playerConfig then return end
+    local leaderType = playerConfig:GetLeaderTypeName()
+    if not leaderType then return end
+    local tag = "LOC_CAI_LEADERDESC_" .. leaderType
+    local desc = Locale.Lookup(tag)
+    if desc ~= nil and desc ~= "" and desc ~= tag then
+        Speak(desc)
+    else
+        Speak(Locale.Lookup("LOC_CAI_LEADERDESC_NONE"))
+    end
+end
+
 local function GetPanelLabel()
     local playerConfig = GetSelectedPlayerConfig()
     if playerConfig then
@@ -3250,6 +3268,17 @@ local function EnsureRootBuilt()
         Transparent = true,
     })
     m_ui.root:SetWrapAround(false)
+    -- F2 (from anywhere in the screen; bubbles up to root) speaks the selected
+    -- leader's portrait description. Note: F2 opens Empire Reports at world level,
+    -- but Reports is unreachable inside this modal, so the context override is safe.
+    m_ui.root:AddInputBindings({ {
+        Key = Keys.VK_F2,
+        Description = "LOC_CAI_KB_LEADER_DESCRIPTION",
+        Action = function()
+            SpeakSelectedLeaderDescription()
+            return true
+        end,
+    } })
     -- View panels are structural (the root carries the leader title and each
     -- inner tree/list has its own label), so they are Transparent — they must
     -- not announce a bare "panel" or re-speak the title on every focus change.

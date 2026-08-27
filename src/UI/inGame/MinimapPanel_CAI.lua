@@ -310,6 +310,19 @@ local function CloseVanillaMapSearch()
     end
 end
 
+-- Launch bar entry point: mirrors the UI_CAIOpenMapSearch hotkey path.
+local function OpenMapSearchFromLaunchBar()
+    if Game.GetLocalPlayer() == -1 then
+        Speak(Locale.Lookup("LOC_CAI_UI_MAP_SEARCH_UNAVAILABLE"))
+    elseif UI.GetInterfaceMode() == InterfaceModeTypes.DISTRICT_PLACEMENT then
+        Speak(Locale.Lookup("LOC_CAI_UI_MAP_SEARCH_DISTRICT_PLACEMENT"))
+    elseif GameConfiguration.IsWorldBuilderEditor() then
+        Speak(Locale.Lookup("LOC_CAI_UI_MAP_SEARCH_WORLD_BUILDER"))
+    elseif Controls.MapSearchPanel:IsHidden() then
+        ToggleMapSearchPanel()
+    end
+end
+
 OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     if m_caiOpenMapSearchId ~= nil and actionId == m_caiOpenMapSearchId then
         if Game.GetLocalPlayer() == -1 then
@@ -384,10 +397,13 @@ OnShutdown = WrapFunc(OnShutdown, function(orig)
     LuaEvents.CAIMinimapMapPinListToggle.Remove(ToggleAccessibleMapPinList)
     LuaEvents.CAIMapPinList_RequestClose.Remove(CloseMapPinList)
     LuaEvents.CAIMapSearch_RequestClose.Remove(CloseVanillaMapSearch)
+    LuaEvents.CAILaunchBarOpen_MapSearch.Remove(OpenMapSearchFromLaunchBar)
     CloseLensListWidget()
     orig()
 end)
 
+LuaEvents.CAILaunchBarOpen_MapSearch.Remove(OpenMapSearchFromLaunchBar)
+LuaEvents.CAILaunchBarOpen_MapSearch.Add(OpenMapSearchFromLaunchBar)
 LuaEvents.CAIMinimapLensListToggle.Remove(ToggleAccessibleLensList)
 LuaEvents.CAIMinimapLensListToggle.Add(ToggleAccessibleLensList)
 LuaEvents.CAIMinimapMapPinListToggle.Remove(ToggleAccessibleMapPinList)

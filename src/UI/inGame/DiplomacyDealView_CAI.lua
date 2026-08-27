@@ -1220,6 +1220,24 @@ end
 -- Build / lifecycle
 -- ============================================================================
 
+-- F2 reads the accessibility portrait description for the deal's other leader.
+-- Descriptions live in LeaderDescStrings_CAI.xml keyed by leader type; a missing
+-- tag Locale.Lookups back to itself, so treat "result == tag" as absent.
+local function SpeakOtherLeaderDescription()
+    if not m_players.other then return end
+    local config = PlayerConfigurations[m_players.other:GetID()]
+    if not config then return end
+    local leaderType = config:GetLeaderTypeName()
+    if not leaderType then return end
+    local tag = "LOC_CAI_LEADERDESC_" .. leaderType
+    local desc = Locale.Lookup(tag)
+    if desc ~= nil and desc ~= "" and desc ~= tag then
+        Speak(desc)
+    else
+        Speak(Locale.Lookup("LOC_CAI_LEADERDESC_NONE"))
+    end
+end
+
 local function EnsureRootBuilt()
     if m_state.built then return end
 
@@ -1232,6 +1250,16 @@ local function EnsureRootBuilt()
                 config:GetLeaderName(), config:GetCivilizationDescription())
         end,
     })
+
+    -- F2 (bubbles up to root) speaks the other leader's portrait description.
+    m_ui.root:AddInputBindings({ {
+        Key = Keys.VK_F2,
+        Description = "LOC_CAI_KB_LEADER_DESCRIPTION",
+        Action = function()
+            SpeakOtherLeaderDescription()
+            return true
+        end,
+    } })
 
     m_ui.tabs = mgr:CreateWidget(TABS_ID, "TabControl", {})
     MakeSidePage(SIDE_LOCAL, "LOC_DIPLOMACY_DEAL_MY_OFFER")

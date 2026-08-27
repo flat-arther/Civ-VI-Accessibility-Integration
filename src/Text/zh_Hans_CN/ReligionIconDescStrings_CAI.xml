@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+  <LocalizedText>
+    <!-- SIMPLIFIED CHINESE -->
+    <!-- Religion custom-icon symbol names (CAI). Keyed by religion type: LOC_CAI_RELICON_<ReligionType>. Appended to the religion icon picker. -->
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_BUDDHISM" Language="zh_Hans_CN">
+      <Text>法轮</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_CATHOLICISM" Language="zh_Hans_CN">
+      <Text>凯尔特十字</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_CONFUCIANISM" Language="zh_Hans_CN">
+      <Text>汉字</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_HINDUISM" Language="zh_Hans_CN">
+      <Text>唵字符</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_ISLAM" Language="zh_Hans_CN">
+      <Text>星月</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_JUDAISM" Language="zh_Hans_CN">
+      <Text>大卫之星</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_ORTHODOXY" Language="zh_Hans_CN">
+      <Text>东正教十字</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_PROTESTANTISM" Language="zh_Hans_CN">
+      <Text>拉丁十字</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_SHINTO" Language="zh_Hans_CN">
+      <Text>鸟居</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_SIKHISM" Language="zh_Hans_CN">
+      <Text>锡克教徽</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_TAOISM" Language="zh_Hans_CN">
+      <Text>阴阳</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_ZOROASTRIANISM" Language="zh_Hans_CN">
+      <Text>法拉瓦哈</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_1" Language="zh_Hans_CN">
+      <Text>螃蟹</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_2" Language="zh_Hans_CN">
+      <Text>公牛头</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_3" Language="zh_Hans_CN">
+      <Text>大象</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_4" Language="zh_Hans_CN">
+      <Text>狮子</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_5" Language="zh_Hans_CN">
+      <Text>双鱼</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_6" Language="zh_Hans_CN">
+      <Text>蝎子</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_7" Language="zh_Hans_CN">
+      <Text>眼镜蛇</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_8" Language="zh_Hans_CN">
+      <Text>树</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_9" Language="zh_Hans_CN">
+      <Text>波浪</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_10" Language="zh_Hans_CN">
+      <Text>孔雀</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_11" Language="zh_Hans_CN">
+      <Text>蝴蝶</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_12" Language="zh_Hans_CN">
+      <Text>海龟</Text>
+    </Replace>
+  </LocalizedText>
+</GameData>

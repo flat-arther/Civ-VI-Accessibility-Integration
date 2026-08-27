@@ -504,3 +504,76 @@ ContextPtr:SetShutdown(OnShutdown)
 InitializeWorldTrackerActions()
 Events.InputActionStarted.Add(OnWorldTrackerInputActionStarted)
 LuaEvents.CAIWorldTrackerShowChat.Add(ForceShowChatPanel)
+
+-- ===========================================================================
+-- #Accessibility integration: Civ Royale global ability -> Launch Bar (Shift+Tab)
+--
+-- The Red Death (Civ Royale) faction global ability lives on the world tracker
+-- and is otherwise only reachable through the tracker hotkey. Surface it as a
+-- Launch Bar row too, so it can be found alongside every other screen. The row
+-- carries the ability name, its official tooltip, and live charge/cooldown
+-- state, activates the ability, and rises to the top of the list whenever the
+-- ability is ready to use. Only the three factions that have a global ability
+-- expose the row at all.
+-- ===========================================================================
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+    local ROYALE_LAUNCH_ID = "civ_royale_global_ability"
+
+    local m_royaleLaunchDef = {
+        id = ROYALE_LAUNCH_ID,
+        action = "UI_OpenWorldCrisisTracker",
+        title = function()
+            local ability = GetGlobalAbilityData()
+            return ability and ability.Name or nil
+        end,
+        gate = function()
+            return PlayerHasGlobalAbility()
+        end,
+        -- Ready to use (not on cooldown / not already active).
+        attention = function()
+            local ability = GetGlobalAbilityData()
+            return ability ~= nil and ability.DisabledToolTip == nil
+        end,
+        -- When on cooldown the ability's own disabled tooltip is the reason; a
+        -- non-nil reason also disables the row so activation no-ops.
+        reason = function()
+            local ability = GetGlobalAbilityData()
+            if ability == nil then
+                return Locale.Lookup("LOC_CAI_CIV_ROYALE_GLOBAL_ABILITY_UNAVAILABLE")
+            end
+            if ability.DisabledToolTip ~= nil then
+                return ability.DisabledToolTip
+            end
+            return nil
+        end,
+        -- Live availability + remaining charges (when the ability uses charges).
+        dynamic = function()
+            local ability = GetGlobalAbilityData()
+            if ability == nil then return "" end
+            local lines = {}
+            if ability.DisabledToolTip == nil then
+                lines[#lines + 1] = Locale.Lookup("LOC_CIV_ROYALE_GLOBAL_ABILITY_AVAILABLE")
+            end
+            if ability.Charges ~= nil then
+                lines[#lines + 1] = Locale.Lookup("LOC_CIV_ROYALE_GLOBAL_ABILITY_CHARGES",
+                    ability.Charges, ability.MaxCharges)
+            end
+            return table.concat(lines, "[NEWLINE]")
+        end,
+        officialTooltip = function()
+            local ability = GetGlobalAbilityData()
+            if ability == nil or ability.ToolTip == nil then return "" end
+            return Locale.Lookup(ability.ToolTip)
+        end,
+        open = ActivateRoyaleGlobalAbility,
+    }
+
+    local function RegisterRoyaleLaunchAction()
+        LuaEvents.CAILaunchBar_RegisterAction(m_royaleLaunchDef)
+    end
+
+    -- Register now (the launch bar may already be listening) and again whenever
+    -- it asks add-ons to re-register (it may load after us).
+    LuaEvents.CAILaunchBar_RequestRegistrations.Add(RegisterRoyaleLaunchAction)
+    RegisterRoyaleLaunchAction()
+end

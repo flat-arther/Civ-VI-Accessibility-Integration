@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+  <LocalizedText>
+    <!-- SIMPLIFIED CHINESE -->
+    <!-- Great work image accessibility descriptions (CAI). Keyed by great work type: LOC_CAI_GWDESC_<GREATWORKTYPE>. Appended to the Great Work Showcase details. -->
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ANGUISSOLA_1" Language="zh_Hans_CN">
+      <Text>一幅油画肖像：三位衣着华丽的年轻女子围坐在花园里一张铺着地毯的桌旁的小棋盘四周，身后是羽状的树木与朦胧的蓝色远景。左侧的姐姐身着金色织锦长裙、配蕾丝领，刚刚落下一子，抬起一只手，回头看向他人。右侧红衣女子举手回应，而居中、身着深绿的最年幼者则朗然一笑，直望观者。她们身后，一位衣着朴素的年长女仆俯身观看。柔光下的面容栩栩如生，衣料的刺绣纤毫毕现。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ANGUISSOLA_2" Language="zh_Hans_CN">
+      <Text>一幅四分之三身的油画肖像：一位清瘦、神情严肃的男子立于素净的深色背景前。他身着西班牙国王的黑色宫廷礼服，颈间是硬挺的白色轮状皱领，佩戴金羊毛骑士团项链；短须与稀疏的头发衬出一张苍白而警觉的面孔。一手扶在椅背上，另一手握着念珠，串珠垂落。气氛肃穆庄重，黑色衣装几乎融入阴影般的背景。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ANGUISSOLA_3" Language="zh_Hans_CN">
+      <Text>一幅四分之三身的油画肖像：一位修士立于幽暗背景前。他身穿浅奶褐色的带帽会衣，风帽披在肩上，双手捧着一本翻开的书，一根手指夹在书页间。剃度的头顶裸露，微微低垂，脸转向一侧，沉浸于平静的内省。暖光掠过粗糙的羊毛褶皱，素净的背景令全部注意力都落在这安静的身影上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BEHZAD_1" Language="zh_Hans_CN">
+      <Text>一幅波斯细密画，画幅小巧、满是精细刻画。一场密集、翻卷的战斗填满画面：身披鲜红、蓝、橙铠甲与长袍的骑兵相互冲撞，战马腾跃翻倒，兵器在一片平坦、拥挤、毫无纵深的画面中闪烁。顶端耸起点缀金斑的岩山，几方波斯文字衬于蓝底之上。通幅色彩鲜艳、宝石般夺目。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BEHZAD_2" Language="zh_Hans_CN">
+      <Text>一幅波斯细密画，由一座高耸、多层的宫殿主宰画面，宫殿以平面的蓝、青与金色繁密瓷砖嵌板呈现，楼梯、门洞、阳台与一座小穹顶层层叠向画面上方，而非向纵深退去。一个身着绿袍的小人物在上层房间中穿行。每一处表面都布满精细纹样，整幅场景以纹饰与色彩熠熠生辉。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BEHZAD_3" Language="zh_Hans_CN">
+      <Text>一幅波斯细密画，描绘君王临朝。一位身着白衣、端坐的人物置于画面右上方一座华美的穹顶亭下，身着彩袍的朝臣在他四周站立、跪伏，场景是一座点缀着小花与开花树木的深绿花园。画中没有统一透视；众多细笔描出的小人物排布于一片辉映着纹样与色彩的画面之上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BOSCH_1" Language="zh_Hans_CN">
+      <Text>一幅巨大的油画三联屏，由三块相连的画板组成，满是细小的人物。狭窄的左幅描绘青翠的乐园：身披长袍的神在一座粉色喷泉旁、在奇兽之间将夏娃引见给亚当。宽阔的中幅是一座明亮如梦的花园，数百个小小的裸体人物骑着飞鸟与巨鱼、钻进超大的果实与浆果、在粉色奇异建筑环绕的水池中沐浴。右幅坠入幽暗的地狱：燃烧的废墟、狰狞的怪物与受刑的灵魂，在漆黑天空下被火光照亮。三幕场景的色调由柔嫩的绿意，转为欢腾的明丽，再化作烟熏般的黑暗。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BOSCH_2" Language="zh_Hans_CN">
+      <Text>一幅巨大的油画三联屏，拥挤的中幅与右幅翻涌着堕落者受刑的景象。从宽阔的中幅一直延伸到右幅，罪人们在坍塌的建筑与点点火光之间，被半人半兽的恶魔追逐、刺穿、吞噬，头顶是幽暗、烟雾弥漫的天空。中幅上方，一小群蒙福者与天使漂浮在遥远天国附近。狭窄的左幅较为明亮，描绘青翠的伊甸园与叛逆天使的坠落。无数细小的人物填满每一个角落，令人目光所及不断发现新的酷刑与细节。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BOSCH_3" Language="zh_Hans_CN">
+      <Text>一幅巨大的油画三联屏，围绕中央一个惊人的形象展开：一辆巨大的干草车滚滚向前，堆积的草垛被拥挤的人群争抢，人们成把地攫取干草，君王、教皇与平民则尾随其后。套在车前、狰狞的恶魔野兽将它拖向右幅敞开的燃烧地狱，那里更多魔鬼正砌起一座受刑之塔。左幅描绘伊甸园与人的堕落，从叛逆的天使直到亚当与夏娃被逐出。干草车高处，基督自云端俯视，却被下方贪婪的人群视而不见。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_CASSATT_1" Language="zh_Hans_CN">
+      <Text>一幅印象派油画：一位年轻女子坐在剧院包厢里，身体前倾，交叠的手臂搭在铺着红丝绒的栏边，下巴几乎贴着双手。她身着一袭浅色晚礼服，露出双肩，凝望着观众席。她身后，包厢镀金的弧形护栏与柔光下层层看台，以松动而温暖的笔触轻轻带出。光线在她的肌肤与缎面上流转，传达出演出进行中被悄然捕捉的一刻，亲切而自然。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_CASSATT_2" Language="zh_Hans_CN">
+      <Text>一幅印象派油画，以俯视的高角度描绘一位女子与一个幼儿。女子身着宽条纹连衣裙，坐着侧身俯下，一臂环抱膝上赤裸的幼儿；另一只手在放于地面的浅水盆里，轻轻为孩子洗脚。孩子胖乎乎的，安静地低头望着自己的脚。带花纹的地毯、印花墙纸与一只彩绘水罐在温暖的居家色调中围绕着两人，母子间温柔的亲密显然是整幅画的核心。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_CASSATT_3" Language="zh_Hans_CN">
+      <Text>一幅印象派油画：一位女子在明亮的客厅里品茶。她坐在扶手椅上，身着柔和的粉色荷叶边连衣裙、戴一顶小帽，将一只精致的茶杯连同茶碟举向唇边，戴手套的手托着它。身旁的桌上，条纹桌布上摆着一套锃亮的银茶具。墙纸与椅面以松动、羽状的玫瑰色与奶油色笔触绘成，整幅场景透着从容而有教养的宁静，凝聚在举杯这一安静的动作上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_COLLOT_1" Language="zh_Hans_CN">
+      <Text>一尊大理石青年男子胸像，止于胸部，立于一方小圆座上。他的头发松卷垂下，身着一件敞口、软领的外衣。头略偏向一侧，双唇微启，仿佛正要开口，令这莹白的抛光石料透出鲜活而随意的神气。石面光滑、雕琢精细，柔光掠过面颊与额头。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_COLLOT_2" Language="zh_Hans_CN">
+      <Text>一尊大理石女皇胸像，近乎侧面，立于底座之上。她的头发向后梳起，一幅衣褶依古典样式绕搭在一侧肩头。面容沉静而端庄，下颏微扬，透出从容的威仪。白色大理石打磨光润，盘起的发髻与织物褶皱刻画利落。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_COLLOT_3" Language="zh_Hans_CN">
+      <Text>一尊大理石青年女子胸像，止于肩下，立于底座之上。她的头发柔顺地向后梳起，衬托出一张温婉的鹅蛋脸，一幅轻薄衣褶覆盖胸前。神情温柔而端庄，头部端正，透着淡淡的沉思之静。浅色大理石打磨细腻，肌肤留作光润，与更具质感的衣褶相映。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_DONATELLO_1" Language="zh_Hans_CN">
+      <Text>一尊高大的白色大理石像：一位蓄须男子安然站立，本为置于壁龛而作。他身着长袍，衣褶深深垂成竖纹，将一本书抱在一侧胯旁；重心落在一条腿上，身躯因而微微倾斜。浓须之下的面容凝重而沉思，目光平稳地投向前方。雕工端庄内敛，衣袍赋予这身影挺拔有力的气度。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_DONATELLO_2" Language="zh_Hans_CN">
+      <Text>一座高大的青铜骑马像，矗立在高高的石座上。一位身披铠甲的统帅骑着一匹魁伟的战马缓步前行，一蹄抬起。他右手平举一根短权杖，腰侧配剑，剃净胡须的严峻面容目视前方，透着冷峻的号令之气。人马以厚重而肌肉感十足的写实手法塑造，深色青铜沿铠甲与骏马雄健的颈项闪着光。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_DONATELLO_3" Language="zh_Hans_CN">
+      <Text>一组青铜雕像，刻画一位即将挥剑的女子。神情坚决、身着深褶长袍的女子立于一名男子之上，男子醉倒、半裸，瘫在她脚下的软垫座上。她一手揪住他的头发把头往后拽，另一手将剑高高举起，面容坚毅镇定，正是致命一击前的一刻。深色青铜以繁复的衣褶与一方矮小、带纹饰的底座铸成，两个交缠的身影构成一座紧绷、竖立的金字塔。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_EOP_1" Language="zh_Hans_CN">
+      <Text>一幅朝鲜水墨淡设色画，描绘三位老者在野外相聚，争论谁的年岁最大。三位长着雪白长须、身着飘逸长袍的老人在山石之间、一株苍劲的老树下站立、挥手，神情激动，各自夸称自己年寿高不可及。人物以自由、灵动的笔触绘于纸的素色之上，仅点染寥寥数笔颜色。意趣诙谐而生动，是一幕老叟争龄的妙趣场景。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_EOP_2" Language="zh_Hans_CN">
+      <Text>一幅朝鲜水墨设色画：一只公鸡立于一根带叶的枝条之下。这只神气的公鸡有着鲜红的冠与肉髯、深色弯曲的尾羽和纤细勾描的羽毛，一足抬起，立于下方几只依稀可辨的母鸡与雏鸡之间。背景是绢地素净而温暖的本色，只有顶端垂下的一簇枝叶。每一根羽毛都以耐心而逼真的笔触绘出，整幅画面沉静而观察入微。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_EOP_3" Language="zh_Hans_CN">
+      <Text>一幅朝鲜水墨设色画，描绘两匹马与牵马之人。一位戴宽帽、蓄须的男子骑着一匹健壮的马，同时牵着或伴在另一匹马旁；两匹马一浅一深，体态圆实厚重，晕染细致。人物身着古朝鲜的袍服与冠帽，鞍辔与马蹄的细节都精准点出。背景留作纸的素色，令注意力全落在马与人身上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GIL_1" Language="zh_Hans_CN">
+      <Text>一幅现代油画：三位年轻的印度女子紧紧依偎，立于素净的深色背景前。她们身着深沉质朴色调的纱丽——一件浓红、一件赭黄、一件暗绿——或坐或立，肩挨着肩，形体被简化为平顺的块面。她们微微低头，一双双硕大的深色眼睛望向别处，透出静止、沉思、近乎忧郁的情绪。温暖的褐色肌肤与含蓄的色彩，构成一幅安静而庄重的群像。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GIL_2" Language="zh_Hans_CN">
+      <Text>一幅色调温暖的油画：一位新娘正被打扮，准备出嫁。年轻的新娘端坐正中，静止而内敛，几位女子围拢过来为她着装、佩饰，身体都被简化为圆润、扁平的块面。画面以肌肤、衣料与阴影的浓红、褐色和赭色为主，点缀着首饰与织物的几处明亮色彩。气氛亲密而静谧，众多人物被压入一处浅而发光的室内空间。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GIL_3" Language="zh_Hans_CN">
+      <Text>一幅年轻女子的油画自画像，取胸部以上，置于素净背景前。她一头深色头发向后梳起，肌肤是温暖的褐色，一双沉静的大眼睛直视观者。画面简洁而现代，面部以平顺的块面塑成、毫不繁琐，神情平和、严肃而自持。克制的色彩令注意力全然集中在她坦率而深思的目光上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GOGH_1" Language="zh_Hans_CN">
+      <Text>一幅旋涌的夜景，以厚重而充满力量的油画笔触绘成。深蓝的夜空翻卷着螺旋的气流，巨大的圆星裹着黄色光晕，右上方是一弯明亮的新月。下方是一座沉睡的小村，深色的房屋与一座高高的教堂尖顶，掩映在低缓的蓝色丘陵之间。左侧前景，一株巨大的深色柏树如一团绿黑的火焰，自地面直窜至天顶。整幅画面仿佛在流动翻滚，以蓝、黄、绿的富有节奏、盘卷的笔触绘出。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GOGH_2" Language="zh_Hans_CN">
+      <Text>一幅色彩明亮的夜间街景油画。一处咖啡馆露台在一大片被灯光照亮的黄色遮篷下熠熠生辉，暖金色的光泼洒在桌面与石铺路面上。小小的人影坐在圆桌旁，一名侍者立于其间，一条幽暗的石板街伸向蓝色的夜色，两旁是关着百叶窗的房屋。上方深蓝的天空缀满硕大而闪烁的星辰。画中全无黑色；连夜色也由种种蓝构成，明黄与之相衬，鲜活而富有生气。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GOGH_3" Language="zh_Hans_CN">
+      <Text>一幅紧张而刺目的室内油画。一间狭长的房间有着血红的墙壁与坚硬的黄色木地板，头顶是绿色天花板，一排悬挂的煤气灯亮着旋转的黄色光晕。房间中央立着一张巨大的绿色台球桌，投下长长的影子，桌旁站着一名身着白衣的侍者。几名孤零零的酒客瘫伏在靠墙的小桌上。红与绿的冲撞加上刺眼的灯光，使这房间透出躁动、失眠、近乎狂热的气息。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GRECO_1" Language="zh_Hans_CN">
+      <Text>一幅高大而富戏剧性的宗教油画，挤满了被拉长的人物。端坐的圣母与圣婴周围，簇拥着身着华彩长袍的三位君王，一人跪下献礼，他们的侍从与牲畜填满身后幽暗的马厩。人物躯体被反常地拉得又长又瘦，衣袍以红、金、绿闪烁跳动，一道超自然之光自圣婴身上迸发。构图带着躁动的力量向上涌动，众人的面孔与手都朝向这对圣者。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GRECO_2" Language="zh_Hans_CN">
+      <Text>一幅高耸、向上腾升的宗教油画。画面上端，圣母立于一弯苍白的新月之上升天，蓝与玫瑰色的衣袍鼓荡翻飞，一团被拉长的天使旋涌着将她托过金色的光。下方，一圈使徒挤在她空空的坟墓四周，扬起双臂，惊愕地目送她远去。每个人物都被拉得又细又高，整幅画在运动的奔涌与闪亮、超自然的色彩中被向上牵引。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GRECO_3" Language="zh_Hans_CN">
+      <Text>一幅阴郁的油画风景，尽是种种绿、灰与冷白。一座灰色塔楼、城墙与一座高耸大教堂尖顶的山城，沿着陡峭的绿色山脊铺展，一条蜿蜒的河流穿行其间。城上，翻腾的天空涌动着被苍白光线撕裂的暗色风暴云，仿佛闪电即将劈下。画中没有人；整幅景象充满张力、极具戏剧性，又诡异地透着生气，建筑在沉重的天空映衬下清晰发亮。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HOKUSAI_1" Language="zh_Hans_CN">
+      <Text>一幅日本木版画，以浓郁的普鲁士蓝与米白为主色。一道巨浪自左侧高高涌起，弧线横贯整个画面，浪尖碎裂成数十条如爪的浪花，向右伸展。浪下，几条满载船夫的狭长小舟显得渺小，即将被吞没。远处，在浪涛的卷曲之间，白雪覆顶的富士山静静矗立，小而安详。左上角是红色的题款方框与一列列日文文字。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HOKUSAI_2" Language="zh_Hans_CN">
+      <Text>一幅日本木版画，描绘一泓平静的湖水，用柔和的蓝与绿绘成。前景一道低低的沙嘴上，一株被风吹弯的孤松斜倚在静水之上，脚下有一座小神社与几块岩石。几叶小舟在浅色湖面上漂荡，远岸起伏为柔缓的蓝色丘陵。远处小而安详地矗立着积雪的富士山锥顶，天空由柔粉渐变为蔚蓝。整幅画面宁静、均衡而简净。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HOKUSAI_3" Language="zh_Hans_CN">
+      <Text>一幅大胆的日本木版画，由一座山峰主宰整个画面。富士山耸立为一座宽阔平滑的锥体，泛着深沉的红褐色光泽，近顶处黏附着道道白雪，下部山坡渐暗为绿色森林。其后，晴朗的蓝天上排布着一行行整齐、扁平的小白云。此外别无他物——没有人，没有水——只有这座巨大的三角形山峰几乎填满整幅画。简洁的形体与温暖的色彩，使它显得格外宁静而恢弘。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KANDINSKY_1" Language="zh_Hans_CN">
+      <Text>一幅大型抽象油画，全无可辨认的实物。在柔和的米白底上漂浮着数十个纯粹的几何形：清晰的圆（左上角一个大圆套着深紫与黑的环）、三角、弧线、棋盘格，以及横贯画布的直线与曲线。它们以清澈、均衡的色彩——蓝、紫、粉、黄与黑——绘成，排布得宛如一段视觉的音乐，精确而失重。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KANDINSKY_2" Language="zh_Hans_CN">
+      <Text>一幅表现主义油画，笔触松放而鲜活。一位裹着蓝衣的小骑手骑着白马奔驰过一片洒满阳光的绿色山坡，身随马势前倾，身后秋色的树木与蓝色阴影飞掠而过。画面以迅疾、宽阔的纯色块画成，而非工细的轮廓，因而人马几乎融入明亮的风景之中。整幅小画都透着疾速、欢快与满溢的动感。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KANDINSKY_3" Language="zh_Hans_CN">
+      <Text>一幅鲜烈、半抽象的油画，色彩旋转翻涌。浓烈的红、橙、蓝、绿的块面与斑点在画布上倾斜、翻滚，隐约透出建筑、人群与一整座绕着苍白发光中心旋转的城市，上方一道明亮的彩虹弧横跨。大胆的轮廓与冲突的色调赋予它巨大的能量，仿佛城市正旋转着崩解为纯粹的色与光。它徘徊在城市景观与彻底抽象之间。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KAUFFMAN_1" Language="zh_Hans_CN">
+      <Text>一幅新古典主义的双人肖像，置于户外的公园。一位身着飘逸白裙的女子与一位穿深色外套的男子并立于一棵宽大繁茂的树下，身后是一片舒缓的丘陵景致。一只小狗在他们脚边休憩或仰望，二人轻轻相倚，姿态从容而亲昵。柔和的光线、清冷的绿意与浅色的衣袍，赋予场景一种优雅而精致的静谧。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KAUFFMAN_2" Language="zh_Hans_CN">
+      <Text>一幅新古典主义肖像：一位学者坐在书桌前。身着绿色外套的男子写到中途停下，一手执笔悬在纸上，转过头去，仿佛正抬眼沉思，或被人轻轻打断。他面前摊着书籍与文稿，素净的背景保持着治学的沉静气氛。柔和均匀的光线塑出他深思的面容与外套的褶皱。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KAUFFMAN_3" Language="zh_Hans_CN">
+      <Text>一幅新古典主义肖像：一位女子被塑为音乐缪斯。她身着飘逸长裙而坐，一把大型里拉或竖琴般的乐器倚在身旁，一手靠近琴弦。她抬头仰望，双唇微启，仿佛被捕捉于歌唱或灵感涌现的一刻。柔软的衣袍、细腻的色彩与身后朦胧的风景，赋予这身影一种理想化的、诗意的优雅。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KLIMT_1" Language="zh_Hans_CN">
+      <Text>一幅著名的装饰性画作，几乎通体闪耀着金色。画面底部，一对恋人一同跪在一小片开满花的草地上，两人的身体融为一个高高的整体，裹在同一件流光溢彩的金色长袍里。头戴叶冠的男子俯下身，捧起女子的脸颊亲吻；她仰起头、闭着双眼，跪伏在他的怀抱中，双手搭在他的手上。他的袍上是黑白矩形的纹样，她的则缀满明艳的圆圈与花朵，他们身后与四周的整片背景都是平坦而辉煌的金色。整体华美、温柔而如梦似幻。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KLIMT_2" Language="zh_Hans_CN">
+      <Text>一幅近乎正方形的风景，描绘公园里一条笔直、夹道植树的林荫道。高大的树木在两侧耸立，浓密的绿色树冠几乎填满整幅画布，以无数细小的绿、金与深蓝笔点绘成一片闪烁的镶嵌。画面正中，林荫道引导目光望向一座半掩在枝叶间、沐浴阳光的浅色房屋。几乎不见天空，也没有人物；整体是一幅平面而发光的、由树叶与光构成的织锦。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KLIMT_3" Language="zh_Hans_CN">
+      <Text>一幅近乎正方形的画作，描绘一座繁密的乡村花园，花朵铺满每一寸边角。画面下半是一片明丽的小花地毯——白、红、蓝、粉——如散落的珠宝般簇拥，更高的花茎在其后升起，直到近顶处一丛深芯的金色大向日葵。几乎不见天空，也没有小径；整片画面是一堵闪烁而满布纹样的花叶之墙。整体丰盈、富有装饰性而欢愉。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KOBER_1" Language="zh_Hans_CN">
+      <Text>一幅文艺复兴时期的全身肖像，描绘一位年幼的公主，僵直地立于一道红色帷幔前，画面上方两角有拉丁文题字。她身着一件浅银白色礼服，衣袖与披肩以红金绣成，配一圈宽大的蕾丝皱领，发间与胸前缀满珠宝，手持一枚华美的十字架吊坠。每一颗珍珠、每一根丝线与纹样都以耐心而精准的笔法描出；气氛正式而如同玩偶。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KOBER_2" Language="zh_Hans_CN">
+      <Text>一幅文艺复兴时期的国王御容像，画中人蓄须。他身着黑色紧身上衣，配一圈高高的白色打褶皱领，肩披沉重的斑点毛皮斗篷，头戴镶宝石的深色帽，腰佩长剑，衬于深色背景与一道红色帷幔之前。他面容沉静庄重，毛皮、蕾丝与珠宝的精细刻画彰显其身份。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KOBER_3" Language="zh_Hans_CN">
+      <Text>一幅文艺复兴时期的肖像，描绘一位以孀妇装束出现的年迈女王。她身着朴素的黑色长袍，一幅长长的白色面纱如头巾般罩住头与双肩，胸前挂着一枚金链十字架，手持一副手套。深色背景下，她饱经岁月的面容凝重而沉静；整体肃穆、虔敬而庄重。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_LEWIS_1" Language="zh_Hans_CN">
+      <Text>一尊白色大理石像，刻画一位刚在王座上死去的女王。她瘫坐后仰，头歪向一侧，一臂无力垂落，死亡的瞬间被凝固在冰冷的石头里。她身着打褶的埃及长袍与头饰，高高的王座上雕着王室的纹饰。写实得惊人而令人不安——这不是一个安详的形象，而是一具正在瘫软的躯体——抛光的大理石让这份倒下显得沉重而不可挽回。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_LEWIS_2" Language="zh_Hans_CN">
+      <Text>一尊白色大理石雕塑，刻画一对并肩而立的美洲原住民恋人。一位青年男子与一位女子紧挨着，双手相牵，都身着带流苏的衣饰；他体格健壮，她身姿更为柔和，二人轻轻相倚，姿态温柔而带有仪式感。编发、串珠与流苏的细节被细心雕入浅色石料中。这组雕像沉静而庄重，是一幅无言的结合之像。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_LEWIS_3" Language="zh_Hans_CN">
+      <Text>一尊白色大理石像，刻画一位孤身而立、痛苦的女子。她挺身站立，身着贴体的长袍，双手在胸前紧扣，仰起头，面容满是苦楚或祈祷，仿佛被弃于荒野。她脚边放着一只小水罐。雕工光润而富表现力，整个纤细的身影都饱含着无声的苦难与坚忍。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MICHELANGELO_1" Language="zh_Hans_CN">
+      <Text>一幅宏大天顶壁画的局部，描绘创世的一刻。左侧，一名裸体男子斜卧在裸露的大地上，一膝抬起，慵懒地伸出手臂；右侧，一位蓄须之神裹在翻卷的斗篷里、被一群天使托举着，朝他俯冲而来，也伸出手回应。两人的指尖隔着一道窄窄的缝隙几乎相触，其间蓄满即将传递的生命火花。人物雄健而富雕塑感，衬于素净的天空之上，而两手之间那一小段空隙，正是整幅画的核心。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MICHELANGELO_2" Language="zh_Hans_CN">
+      <Text>一尊莹白大理石的巨型雕像，刻画一位从容站立的裸体青年。他的重心落在一条腿上，臀与肩因而在自然放松的姿态中微微倾侧，一副投石索搭在肩上，石块松松地握在垂下的手里。他的头猛然转向一侧，眉头紧锁，目光专注，仿佛正注视着远处的敌人、暗自蓄势。解剖结构理想而精准——血管、肌肉与卷发都雕琢入微——传达出一种沉着而警觉的力量，令人震撼。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MICHELANGELO_3" Language="zh_Hans_CN">
+      <Text>一尊白色大理石雕塑，刻画一位坐着的女子将一名死去男子横托在膝上。年轻的母亲身着深邃流动的衣袍而坐，怀抱着成年儿子近乎赤裸、软垂的身躯，一臂托住他的双肩，另一只手在无声的悲恸中张开。她的面容光洁、年轻而安详，只是轻轻俯向他，并不哭泣。抛光的石料从繁复的衣褶流向柔软而无生气的四肢，是一幅以惊人的细腻雕成的、温柔哀恸之像。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MONET_1" Language="zh_Hans_CN">
+      <Text>一幅印象派油画，垂直俯视一池睡莲的水面，画中看不到天空、堤岸或地平线。平展的绿色莲叶成簇漂浮在水上，点缀着柔和的粉白花朵。莲叶之间与之下，水面映着蓝天与垂柳的葱绿，倒影与水面因而彼此交融、难分。以蓝、绿、丁香紫与玫瑰色松动、破碎的笔点绘成，整幅画布化作一片闪烁、浮动的水与光之域。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MONET_2" Language="zh_Hans_CN">
+      <Text>一幅印象派油画，描绘拂晓时分雾气弥漫的海港。一轮小小的橙色太阳低悬在柔和的灰蓝薄雾中，在起伏的水面上投下一道断续的橙色倒影。前景两三只黑色小舟以剪影漂浮，身后桅杆、吊车与烟囱的幽影则隐没在雾里。整幅场景松动而富有氛围，由一层层稀薄的灰蓝晕染构成，只有太阳及其倒影那唯一一抹温暖的光。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MONET_3" Language="zh_Hans_CN">
+      <Text>一幅印象派油画，描绘乡间夏日的田野。前景一座圆圆的干草垛坐落在高高的草丛中，一片宽阔的红罂粟带为绿色草地缀上点点猩红。远处铺展着田地、一列树木与几处低矮的屋顶，头顶是柔和苍白的天空。颜料松动、以点触敷成，整幅场景温暖而洒满阳光，捕捉着明亮乡村午后流动的光。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ORLOVSKY_1" Language="zh_Hans_CN">
+      <Text>一尊青铜军事统帅像，立于高高的基座之上。他身着长款军大衣，一件披风自肩头垂下，稳稳站立，一臂向外挥出，仿佛正指挥部队，另一手在腰侧握着佩剑或权杖。他头部裸露、微微侧转，面容凝重而坚决。深色青铜塑出一位骄傲而威严的身影，仿佛正伫立于激战之中。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ORLOVSKY_2" Language="zh_Hans_CN">
+      <Text>一尊高大的带翼天使像，矗立于一根纪念柱之巅。天使身着流动的衣袍、巨翅收拢于背后，笔直站立，倚着一支长长的十字架，架脚踩压着脚下的一条蛇。一手扶在十字架上，另一手举向天空，安详而仰起的面容望向天际。它被铸成供人自高处、于云端映衬下仰望的形象，宁静、凯旋而威仪凛然。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ORLOVSKY_3" Language="zh_Hans_CN">
+      <Text>一尊帝王胸像，立于底座之上。像取胸部以上，身着高领、缀肩章的军装，短发向前梳理，剃净胡须的面容沉静而理想化。头部端正，或仅略微侧转，透出正式而官方的威仪。光润的石面与领口、绦带的清晰细节，标明他是一位君主。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_REMBRANDT_1" Language="zh_Hans_CN">
+      <Text>一幅男子全身油画肖像，他立于一根石柱旁。他从头到脚一身黑衣，配一片宽大扁平的白色领饰、一顶宽檐帽，一手拿着浅色手套，另一手叉在胯上。暖光将他的面孔、领饰与双手从四周深褐的阴影中托出。他的姿态自信、略微侧转，整幅肖像庄重而又朴素。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_REMBRANDT_2" Language="zh_Hans_CN">
+      <Text>一幅女子油画肖像，她站立着，仿佛倚在一扇窗前。她身着深色衣裙，配一片宽大的白色蕾丝领与相配的袖口，一手拿着合拢的折扇，另一手搭在一道横贯画面的绘制画框上，宛如从框内探出身来。温暖的金光洒在她沉静、直视的面孔与精致的蕾丝上。深深阴影的背景使她仿佛正轻轻前倾，亲近而鲜活。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_REMBRANDT_3" Language="zh_Hans_CN">
+      <Text>一幅极具戏剧性的宗教油画，一束光自深沉的黑暗中迸出照亮画面。一位年迈、蓄须的长者在献祭的一刻被止住：一位天使俯冲而下，抓住了他的手腕，刀正从他张开的手中滑落。他身下横卧着儿子，赤裸、被缚于祭坛之上，父亲一只大手捂住男孩仰起的脸。强光落在苍白的身躯与惊愕的面孔上，其余一切没入阴影，将这一幕定格在获救的瞬间。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RUBLEV_1" Language="zh_Hans_CN">
+      <Text>一幅拜占庭圣像，以蛋彩绘于闪亮的金色底上。左侧，一位高大的带翼天使阔步向前，一手举起致意；右侧，一位身着深红衣袍的女子坐着，带着惊讶、探问的姿态向他回身。两个被拉长的身影衬于纤细的塔楼与横系其间的一幅布帘之前。一切都平面、静止而庄严，金色底与浓郁的红为这小小的画板赋予肃穆而神圣的辉光。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RUBLEV_2" Language="zh_Hans_CN">
+      <Text>一幅拜占庭圣像，描绘荣耀中登位的基督。他端坐正中，处于一个叠在深色椭圆之上的巨大红色菱形光芒里，身着金边衣袍，一手举起祝福，另一手将一本翻开的书托在膝上。四周的角落里，出现四福音传道者带翼的象征——人、狮、牛与鹰——衬于金色底上。整幅图像平面、对称而辉煌，为静默的敬拜而作。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RUBLEV_3" Language="zh_Hans_CN">
+      <Text>一幅拜占庭升天圣像。画面上端，基督在一圈椭圆的光晕中升起，由天使托举，手举起祝福。下方，一群使徒聚集在居中、身披长袍的女子两侧，女子沉静而端正地站立，众人都仰起头、举起手，望向离去的身影。被拉长的形体、金色的底与辉映的色彩，构成一幅庄严、向上升腾、满含惊叹的图像。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_SAMOSTRZELNIK_1" Language="zh_Hans_CN">
+      <Text>一幅文艺复兴时期的泥金装饰细密画。一位主教身着奶金色法衣、头戴高冠，手持权杖，立于一面为其罩上光环的巨大金盘之前，脚下是华美的宝座。画幅虽小，却细节极密、以金、红与白浓艳设色，如一页珍本手稿般辉映。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_SAMOSTRZELNIK_2" Language="zh_Hans_CN">
+      <Text>一页奢华的泥金装饰手抄页。一位登座的主教圣人，身披金色斗篷、头戴主教冠、罩着光环，手持权杖，脚下聚着一群跪伏的小小神职者；身旁一面旗上升起一只红鹰。画面被一圈繁密、绘满花卉、果实与纹章的边饰环绕，每一处都细小而精确，闪耀着红、蓝、绿与金。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_SAMOSTRZELNIK_3" Language="zh_Hans_CN">
+      <Text>一页描绘圣母圣婴的泥金装饰手抄页。玛利亚身着深蓝长袍，怀抱圣婴基督，立于一圈璀璨的金色光环之中，整幅场景被一圈繁密、绘满花卉、果实、小天使与纹章的边饰环绕。画面细小而精确，闪耀着蓝、金、红与绿，宛如镶入书页的一枚珠宝。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TITIAN_1" Language="zh_Hans_CN">
+      <Text>一幅高大而辉煌的祭坛画，描绘圣母被接升天。下部，一群身着红绿衣袍的使徒扬起双臂，惊叹地仰望。他们上方，身着红裙、披蓝色斗篷的圣母立于一大片挤满小天使的云层上升起，双臂高举、面朝光明。最高处，圣父自一片金色荣光中俯身接引她。构图分为三段向上涌动，被炽烈的红与温暖的金光统一为一体。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TITIAN_2" Language="zh_Hans_CN">
+      <Text>一幅油画，描绘一位端着托盘、盘上盛着割下头颅的年轻女子。她衣着华丽，身着红白衣裙，向前迈步，高举一只金色大盘，盘上放着一名蓄须男子闭目的头颅。一名小侍女或孩童在她身旁俯身，一道深色帷幔衬出她莹润的肌肤与流光的丝绸。她的面容沉静、偏向一旁，令这骇人的战利品透出一种奇异而安详的美。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TITIAN_3" Language="zh_Hans_CN">
+      <Text>一幅气派的骑马油画肖像。一位身披铠甲的皇帝骑着黑马，以缓慢而有力的步伐前行，右手平端一支长枪，一条红色绶带斜挎在胸甲上。人马自阴影中步入一片低垂、泛红的傍晚天光，身后延展着朦胧的林野。深色的铠甲闪着光，绯红的绶带熊熊如焰，这孤身跨马的形象透出庄严而不可阻挡的号令之气。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TOHAKU_1" Language="zh_Hans_CN">
+      <Text>一对日本水墨屏风，简到近乎空无。一丛丛松树在浓浓的白雾中浮现又隐没，树干与针叶枝以柔和的灰黑墨色刷出，边缘处任其未尽，仿佛漂浮。大片素白的纸面留作空白，以代雾与空气。画面沉静、简净而富氛围，全无一色。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TOHAKU_2" Language="zh_Hans_CN">
+      <Text>一扇绘于闪亮金底上的日本折叠屏风。一株大树在屏面上舒展，枝条缀满繁叶，下方成丛的花草以绿、白与金铺陈。奢华的金色背景与浓丽的矿物色，使屏风显得富丽而具装饰性，与素净的水墨小品恰成对照。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TOHAKU_3" Language="zh_Hans_CN">
+      <Text>一扇绘于浅金底上的日本折叠屏风。一根粗大、虬曲盘绕的树枝横伸过屏面，枝上零星点缀着小鸟与花朵，四周大片留白。以水墨敷淡彩、运笔迅捷笃定绘成，意境细腻、疏朗而宁静。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_YING_1" Language="zh_Hans_CN">
+      <Text>一幅细笔淡设色的中国横卷手卷，供人展开、自右向左观读。卷中长长一路，优雅的宫廷仕女在殿堂、敞台、垂柳与园石之间漫步、闲坐、奏乐、料理日常。众多身着流动衣袍的小人物以精准均匀的线条描出，素净的绢地衬托着点点红、蓝、绿。画面雅致、热闹而含蓄地叙事，将一整日的宫廷生活铺陈于一条连绵的长带之中。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_YING_2" Language="zh_Hans_CN">
+      <Text>一幅淡设色的中国水墨山水。云雾中的群山以柔和、层叠的峰峦耸立于静水之上，山坡点缀着树木、半掩在云间。岸边芦苇与荷花丛生，几叶小渔舟在其间漂荡，舟上有细小的人影。大片留白的素绢代表烟霭与水面，令画面显得辽阔、静谧而幽远，正是文人归隐山水的理想。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_YING_3" Language="zh_Hans_CN">
+      <Text>一幅设色的中国江景水墨。陡峭、层叠的崖壁在一侧峻然耸起，临着一片开阔的平静水面，石壁以细密的皴笔皴出肌理、点缀着攀附的树木。崖下漂着一叶小舟，载着几位身着长袍的文士随波而行，在巍峨的山石前显得渺小。柔和的烟霭与苍茫的开阔水面填满其余画面，营造出诗意、沉思与人于自然前之渺小的意境。</Text>
+    </Replace>
+  </LocalizedText>
+</GameData>

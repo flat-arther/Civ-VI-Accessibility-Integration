@@ -4003,16 +4003,22 @@ local function CAI_BuildLeaderOptions(playerID)
 	local selectedIndex = 0
 	if parameter and parameter.Values then
 		for i, value in ipairs(parameter.Values) do
-			local label = value.Name or ""
+			local leaderName = value.Name or ""
+			local label = leaderName
+			local civName = ""
 			local info = value.Domain and value.Value and GetPlayerInfo(value.Domain, value.Value, playerID)
 			if info and info.CivilizationName then
-				label = label .. ", " .. Locale.Lookup(info.CivilizationName)
+				civName = Locale.Lookup(info.CivilizationName)
+				label = label .. ", " .. civName
 			end
 			local invalidReason = CAI_GetValueInvalidReason(value)
 			table.insert(options, {
 				label = CAI_FormatInvalidLabel(label, invalidReason),
 				tooltip = CAI_GetLeaderTooltip(value.Domain, value.Value),
 				value = value,
+				leaderName = leaderName,
+				civName = civName,
+				leaderType = value.Value,
 			})
 			if selectedIndex == 0 and parameter.Value and value.Value == parameter.Value.Value then
 				selectedIndex = i
@@ -4145,20 +4151,25 @@ local function CAI_MakeTeamDropdown(playerID, entry)
 end
 
 local function CAI_MakeLeaderDropdown(playerID, entry)
-	return CAI_MakeDropdown("CAIStagingRoom_PlayerLeader_" .. playerID, "LOC_CAI_STAGING_CIV_LEADER",
-		function() return CAI_GetLeaderSelectionTooltip(playerID) end,
-		function() return CAI_IsHidden(entry.PlayerPullDown) end,
-		function() return CAI_IsDisabled(entry.PlayerPullDown) end,
-		function()
-			return CAI_BuildLeaderOptions(playerID)
-		end,
-		function(value)
+	return mgr.WidgetHelpers.CreateLeaderPickerButton({
+		id = "CAIStagingRoom_PlayerLeader_" .. playerID,
+		panelId = "CAIStagingRoom_LeaderPicker",
+		focusKey = "CAIStagingRoom_PlayerLeader_" .. playerID,
+		label = function() return CAI_Lookup("LOC_CAI_STAGING_CIV_LEADER") end,
+		tooltip = function() return CAI_GetLeaderSelectionTooltip(playerID) end,
+		getSelectedLabel = function() return CAI_GetLeaderLabel(playerID) end,
+		getOptions = function() return CAI_BuildLeaderOptions(playerID) end,
+		onSelect = function(value)
 			CAI_SetPlayerParameter(playerID, "PlayerLeader", value)
 			local colorParam = CAI_GetPlayerParameter(playerID, "PlayerColorAlternate")
 			if colorParam then
 				CAI_SetPlayerParameter(playerID, "PlayerColorAlternate", 0)
 			end
-		end)
+		end,
+		hiddenPredicate = function() return CAI_IsHidden(entry.PlayerPullDown) end,
+		disabledPredicate = function() return CAI_IsDisabled(entry.PlayerPullDown) end,
+		focusSound = HOVER_SOUND,
+	})
 end
 
 local function CAI_MakeColorDropdown(playerID, entry)
@@ -4794,6 +4805,9 @@ local function CAI_PushPanel()
 end
 
 local function CAI_PopPanel()
+	if mgr and mgr.WidgetHelpers then
+		mgr.WidgetHelpers.RemoveLeaderPickerPanel("CAIStagingRoom_LeaderPicker")
+	end
 	if mgr and mgr:GetWidgetById(CAI_PANEL_ID) then
 		mgr:RemoveFromStack(CAI_PANEL_ID)
 	end

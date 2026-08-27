@@ -89,6 +89,15 @@ local ACTION_SCANNER_SLOT1_PREV = Input.GetActionId("WorldScannerSlot1Prev")
 local ACTION_SCANNER_SLOT2_ASSIGN = Input.GetActionId("WorldScannerSlot2Assign")
 local ACTION_SCANNER_SLOT2_NEXT = Input.GetActionId("WorldScannerSlot2Next")
 local ACTION_SCANNER_SLOT2_PREV = Input.GetActionId("WorldScannerSlot2Prev")
+local ACTION_SCANNER_SLOT3_ASSIGN = Input.GetActionId("WorldScannerSlot3Assign")
+local ACTION_SCANNER_SLOT3_NEXT = Input.GetActionId("WorldScannerSlot3Next")
+local ACTION_SCANNER_SLOT3_PREV = Input.GetActionId("WorldScannerSlot3Prev")
+local ACTION_SCANNER_SLOT4_ASSIGN = Input.GetActionId("WorldScannerSlot4Assign")
+local ACTION_SCANNER_SLOT4_NEXT = Input.GetActionId("WorldScannerSlot4Next")
+local ACTION_SCANNER_SLOT4_PREV = Input.GetActionId("WorldScannerSlot4Prev")
+local ACTION_SCANNER_SLOT5_ASSIGN = Input.GetActionId("WorldScannerSlot5Assign")
+local ACTION_SCANNER_SLOT5_NEXT = Input.GetActionId("WorldScannerSlot5Next")
+local ACTION_SCANNER_SLOT5_PREV = Input.GetActionId("WorldScannerSlot5Prev")
 local ACTION_MINIMAP_LENS_LIST = Input.GetActionId("UI_CAIMinimapOpenLensList")
 local ACTION_MINIMAP_MAP_PIN_LIST = Input.GetActionId("UI_CAIMinimapOpenMapPinList")
 local ACTION_PLACE_MAP_PIN = Input.GetActionId("CAIPlaceMapPin")
@@ -906,6 +915,60 @@ local SharedInputActions = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
 			CAIWorldScanner:CycleSlot(2, -1)
+		end,
+	},
+	[ACTION_SCANNER_SLOT3_ASSIGN] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			CAIWorldScanner:AssignSlot(3)
+		end,
+	},
+	[ACTION_SCANNER_SLOT3_NEXT] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			CAIWorldScanner:CycleSlot(3, 1)
+		end,
+	},
+	[ACTION_SCANNER_SLOT3_PREV] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			CAIWorldScanner:CycleSlot(3, -1)
+		end,
+	},
+	[ACTION_SCANNER_SLOT4_ASSIGN] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			CAIWorldScanner:AssignSlot(4)
+		end,
+	},
+	[ACTION_SCANNER_SLOT4_NEXT] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			CAIWorldScanner:CycleSlot(4, 1)
+		end,
+	},
+	[ACTION_SCANNER_SLOT4_PREV] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			CAIWorldScanner:CycleSlot(4, -1)
+		end,
+	},
+	[ACTION_SCANNER_SLOT5_ASSIGN] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			CAIWorldScanner:AssignSlot(5)
+		end,
+	},
+	[ACTION_SCANNER_SLOT5_NEXT] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			CAIWorldScanner:CycleSlot(5, 1)
+		end,
+	},
+	[ACTION_SCANNER_SLOT5_PREV] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			CAIWorldScanner:CycleSlot(5, -1)
 		end,
 	},
 	[ACTION_MINIMAP_LENS_LIST] = {

@@ -666,11 +666,32 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_DISASTERS" Language="es_ES">
       <Text>Desastres naturales</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_GROUP_STORMS" Language="es_ES">
+      <Text>Tormentas</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_GROUP_DROUGHTS" Language="es_ES">
+      <Text>Sequías</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_GROUP_VOLCANOES" Language="es_ES">
+      <Text>Volcanes</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_DROUGHT" Language="es_ES">
       <Text>{1_Label}, quedan {2_Turns : plural 1?1 turno; other?{2_Turns} turnos;}</Text>
     </Replace>
-    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_ERUPTION" Language="es_ES">
-      <Text>{1_Label}, en erupción</Text>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_VOLCANO_NAMED" Language="es_ES">
+      <Text>Volcán {1_Name}, {2_Status}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_VOLCANO" Language="es_ES">
+      <Text>Volcán, {1_Status}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_VOLCANO_STATUS_INACTIVE" Language="es_ES">
+      <Text>inactivo</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_VOLCANO_STATUS_ACTIVE" Language="es_ES">
+      <Text>activo</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_VOLCANO_STATUS_ERUPTING" Language="es_ES">
+      <Text>en erupción</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BONUS" Language="es_ES">
       <Text>Bonificación</Text>
@@ -942,6 +963,60 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT2_PREV_TOOLTIP" Language="es_ES">
       <Text>Pasa al elemento anterior de la subcategoría asignada a la posición 2, con los más cercanos primero</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_ASSIGN" Language="es_ES">
+      <Text>Asignar subcategoría a la posición 3 del escáner</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_ASSIGN_TOOLTIP" Language="es_ES">
+      <Text>Asigna la subcategoría actual del escáner del mundo a la posición 3 para acceder a ella rápidamente</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_NEXT" Language="es_ES">
+      <Text>Elemento siguiente de la posición 3 del escáner</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_NEXT_TOOLTIP" Language="es_ES">
+      <Text>Pasa al elemento siguiente de la subcategoría asignada a la posición 3, con los más cercanos primero</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_PREV" Language="es_ES">
+      <Text>Elemento anterior de la posición 3 del escáner</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_PREV_TOOLTIP" Language="es_ES">
+      <Text>Pasa al elemento anterior de la subcategoría asignada a la posición 3, con los más cercanos primero</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_ASSIGN" Language="es_ES">
+      <Text>Asignar subcategoría a la posición 4 del escáner</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_ASSIGN_TOOLTIP" Language="es_ES">
+      <Text>Asigna la subcategoría actual del escáner del mundo a la posición 4 para acceder a ella rápidamente</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_NEXT" Language="es_ES">
+      <Text>Elemento siguiente de la posición 4 del escáner</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_NEXT_TOOLTIP" Language="es_ES">
+      <Text>Pasa al elemento siguiente de la subcategoría asignada a la posición 4, con los más cercanos primero</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_PREV" Language="es_ES">
+      <Text>Elemento anterior de la posición 4 del escáner</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_PREV_TOOLTIP" Language="es_ES">
+      <Text>Pasa al elemento anterior de la subcategoría asignada a la posición 4, con los más cercanos primero</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_ASSIGN" Language="es_ES">
+      <Text>Asignar subcategoría a la posición 5 del escáner</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_ASSIGN_TOOLTIP" Language="es_ES">
+      <Text>Asigna la subcategoría actual del escáner del mundo a la posición 5 para acceder a ella rápidamente</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_NEXT" Language="es_ES">
+      <Text>Elemento siguiente de la posición 5 del escáner</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_NEXT_TOOLTIP" Language="es_ES">
+      <Text>Pasa al elemento siguiente de la subcategoría asignada a la posición 5, con los más cercanos primero</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_PREV" Language="es_ES">
+      <Text>Elemento anterior de la posición 5 del escáner</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_PREV_TOOLTIP" Language="es_ES">
+      <Text>Pasa al elemento anterior de la subcategoría asignada a la posición 5, con los más cercanos primero</Text>
+    </Replace>
 
     <!-- LaunchBar / PartialScreenHooks / Civilopedia screen shortcuts -->
     <Replace Tag="LOC_CAI_OPEN_CIVILOPEDIA" Language="es_ES">
@@ -973,6 +1048,27 @@
     </Replace>
     <Replace Tag="LOC_CAI_OPEN_TECH_TREE_TOOLTIP" Language="es_ES">
       <Text>Abre el árbol de tecnologías</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LAUNCH_BAR" Language="es_ES">
+      <Text>Barra de acceso</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_OPEN_LAUNCH_BAR" Language="es_ES">
+      <Text>Abrir barra de acceso</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_OPEN_LAUNCH_BAR_TOOLTIP" Language="es_ES">
+      <Text>Abre una lista de las pantallas del juego y elige cuál abrir.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LAUNCH_ATTENTION_PANTHEON" Language="es_ES">
+      <Text>Se puede fundar un panteón</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LAUNCH_GOVERNOR_TITLES" Language="es_ES">
+      <Text>Títulos de gobernador disponibles: {1_Num}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LAUNCH_NO_NOTIFICATIONS" Language="es_ES">
+      <Text>Sin notificaciones</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LAUNCH_NOTIFICATION_COUNT" Language="es_ES">
+      <Text>Notificaciones: {1_Num}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_OPEN_CIVICS_TREE" Language="es_ES">
       <Text>Abrir el árbol de principios</Text>
@@ -3895,7 +3991,7 @@
       <Text>Abrir la lista de lentes</Text>
     </Replace>
     <Replace Tag="LOC_CAI_MINIMAP_OPEN_LENS_LIST_TOOLTIP" Language="es_ES">
-      <Text>Abre la lista accesible de lentes del minimapa.</Text>
+      <Text>Una lista de lentes del mapa que resaltan casillas por un tema, como las lentes de religión, atractivo, lealtad y propietario.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_MINIMAP_LENS_LIST" Language="es_ES">
       <Text>Lista de lentes</Text>
@@ -4446,6 +4542,33 @@
     </Replace>
     <Replace Tag="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS_TOOLTIP" Language="es_ES">
       <Text>Abre la pantalla del Congreso Mundial</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_ORDER_BY" Language="es_ES">
+      <Text>Ordenar líderes por</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_CAPITAL" Language="es_ES">
+      <Text>Capital</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_SCORE" Language="es_ES">
+      <Text>Puntuación</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_FAVOR" Language="es_ES">
+      <Text>Favor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_MILITARY" Language="es_ES">
+      <Text>Militar</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_SCIENCE" Language="es_ES">
+      <Text>Ciencia</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_CULTURE" Language="es_ES">
+      <Text>Cultura</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_GOLD" Language="es_ES">
+      <Text>Oro</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_FAITH" Language="es_ES">
+      <Text>Fe</Text>
     </Replace>
 
     <!-- Era Complete Popup -->
@@ -7357,6 +7480,12 @@
       <Text>los inactivos primero</Text>
     </Replace>
     <!-- Quick Deals (mod) accessibility -->
+    <Replace Tag="LOC_CAI_QD_LAUNCH_TOOLTIP" Language="es_ES">
+      <Text>Vende, compra o intercambia objetos con todos los líderes conocidos a la vez.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_NOT_YOUR_TURN" Language="es_ES">
+      <Text>Solo disponible en tu turno</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_QD_AI_OFFERS" Language="es_ES">
       <Text>Ofertas de la IA</Text>
     </Replace>
@@ -7566,6 +7695,13 @@
     </Replace>
     <Replace Tag="LOC_CAI_DIPLO_COLUMN_ALLIANCE" Language="es_ES">
       <Text>Alianza</Text>
+    </Replace>
+    <!-- Leader-description keybinding + fallback (CAI) -->
+    <Replace Tag="LOC_CAI_KB_LEADER_DESCRIPTION" Language="es_ES">
+      <Text>Leer descripción del líder</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_NONE" Language="es_ES">
+      <Text>No hay descripción disponible para este líder.</Text>
     </Replace>
   </LocalizedText>
 </GameData>

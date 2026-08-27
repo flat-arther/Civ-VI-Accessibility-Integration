@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+  <LocalizedText>
+    <!-- PORTUGUESE (BRAZIL) -->
+    <!-- Leader portrait accessibility descriptions (CAI). Keyed by leader type: LOC_CAI_LEADERDESC_<LEADERTYPE>. Read on demand with F2 in the diplomacy and deal views. -->
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_GANDHI" Language="pt_BR">
+      <Text>Um homem idoso mostrado da cintura para cima sobre um fundo liso. É careca e muito magro, quase esquelético, com um bigode branco caído e pequenos óculos redondos de armação metálica apoiados na ponta do nariz. Tem o tronco nu e franzino; um pano de algodão branco cru cai sobre um ombro e cruza-lhe o peito, com um tecido escuro e simples enrolado à cintura. Inclina-se ligeiramente para a frente, as duas mãos frouxamente entrelaçadas à sua frente, com uma expressão calma e serena.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_BARBAROSSA" Language="pt_BR">
+      <Text>Um homem corpulento e de ombros largos, com reluzente armadura de placas de aço, ombreiras acobreadas e uma capa vermelha. Tem barba e cabelo ruivos e fartos sob uma coroa vermelha debruada a ouro, e empunha uma maça dourada; sua expressão é severa.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_CATHERINE_DE_MEDICI" Language="pt_BR">
+      <Text>Uma mulher pálida em um elaborado vestido preto renascentista de ombros tufados, uma alta gola de renda branca e um véu preto sobre os cabelos escuros presos por uma faixa enjoiada. Tachas em forma de cruz salpicam o corpete; suas mãos estão unidas e a expressão é fria e observadora.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_CLEOPATRA" Language="pt_BR">
+      <Text>Uma jovem com as insígnias reais egípcias: um toucado dourado de abutre encimado por uma naja ereta, uma peruca negra até o queixo e maquiagem carregada nos olhos, em roxo e preto. Usa um largo colar de turquesa e ouro sobre um vestido branco plissado com corpete alado enjoiado, e braceletes de ouro; suas mãos estão entrelaçadas.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_GILGAMESH" Language="pt_BR">
+      <Text>Um homem de compleição poderosa e espessa barba negra, com o peito desnudo sob uma túnica listrada em verde-azulado com barra bordada a ouro e uma faixa vermelha na cintura. Ombreiras douradas ornamentadas e uma faixa vermelha e dourada na cabeça completam o visual; sua postura é ampla e confiante.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_GORGO" Language="pt_BR">
+      <Text>Uma mulher guerreira em um quíton grego vermelho-escuro de um ombro só, com debrum dourado, um boldrié de couro cruzado ao peito e um bracelete de bronze. Os cabelos escuros estão presos para trás, usa um brinco de argola e segura uma lança alta na vertical.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_HARDRADA" Language="pt_BR">
+      <Text>Um rude guerreiro nórdico de longos cabelos escuros e barba trançada, em armadura de escamas sobre uma túnica, com uma capa vermelha presa ao ombro por um broche redondo de ouro. Um cinto largo e braçadeiras de couro completam o equipamento; seu olhar é duro e curtido.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_HOJO" Language="pt_BR">
+      <Text>Um alto senhor samurai japonês em uma sobreveste azul com emblemas triangulares brancos, atada por uma grossa faixa branca, sobre um quimono interno verde-oliva. Uma espada está enfiada na faixa e um antebraço traz uma guarda escura de armadura; sua expressão é calma.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_MONTEZUMA" Language="pt_BR">
+      <Text>Um governante asteca, de peito nu e magro, usando um imponente cocar de vibrantes penas verdes de quetzal e uma máscara-elmo de ouro com incrustações de turquesa. Um largo colar de ouro, braceletes dourados e um ornamento nasal de jade o adornam; ele segura um cajado emplumado.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_MVEMBA" Language="pt_BR">
+      <Text>Um rei africano esguio de cabelo bem curto, com o peito desnudo, um pano ocre sobre um ombro e colares de contas multicoloridos. Usa uma faixa de contas encimada por penas amarelas e laranja vivas e segura um alto cajado cerimonial rematado pelas mesmas penas.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_PEDRO" Language="pt_BR">
+      <Text>Um homem alto em um escuro uniforme militar de gala do século XIX, com pesadas dragonas de franjas douradas, uma faixa e medalhas em forma de estrela enjoiadas no peito. Tem cabelo castanho penteado para trás e barba e bigode castanhos e fartos; a testa está levemente franzida.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_PERICLES" Language="pt_BR">
+      <Text>Um idoso estadista grego de barba grisalha e farta, usando um elmo coríntio de bronze abaulado empurrado para trás na cabeça e uma toga branca drapeada com barra dourada de gregas. Uma correia de couro cruza-lhe o peito; sua expressão é digna e cansada.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_PETER_GREAT" Language="pt_BR">
+      <Text>Um homem alto de cabelo escuro penteado para trás e um bigode fino e retorcido, em uma casaca militar verde-escura com gola e punhos vermelhos bordados a ouro sobre um lenço e camisa brancos. Seu porte é ereto e imperioso.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_PHILIP_II" Language="pt_BR">
+      <Text>Um homem em escura armadura de corte espanhola, com alta gola de rufo branca, mangas tufadas cor de vinho e um peitoral canelado. Tem barba e bigode escuros e pontudos e um pingente de ouro; uma mão enluvada repousa perto do punho de uma espada, e ele esboça um leve sorriso.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_QIN" Language="pt_BR">
+      <Text>Um imperador chinês de longa barba e bigode negros, usando uma coroa achatada estilo mortarboard da qual pendem fios de contas, e vestes escuras com barras vermelhas e douradas sobre uma camada interna cor de ferrugem. Um fecho de dragão dourado adorna a faixa da cintura; sua expressão é imponente.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_T_ROOSEVELT" Language="pt_BR">
+      <Text>Um homem atarracado em um terno marrom-escuro com colete, gravata e um pequeno pin na lapela, usando óculos redondos, com um bigode escuro e cerdoso e cabelo repartido com esmero. Tem um ar direto e cordial.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_SALADIN" Language="pt_BR">
+      <Text>Um homem digno em amplas vestes claras com barras bordadas a ouro sobre uma túnica marrom, e um alto turbante branco enrolado em torno de um gorro pontudo com uma joia escura. Tem barba e bigode escuros e bem-aparados; suas mãos estão suavemente unidas.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_TOMYRIS" Language="pt_BR">
+      <Text>Uma rainha guerreira das estepes em armadura lamelar de escamas douradas sobrepostas sobre um manto azul-escuro e roxo, com gola vermelha. Usa um elmo dourado abaulado com cimeira em forma de peixe, longas tranças escuras e uma adaga embainhada; seu olhar é feroz.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_TRAJAN" Language="pt_BR">
+      <Text>Um imperador romano em couraça de aço anatômica, com ombreiras aladas douradas e uma túnica vermelha, sobre uma saia de tiras de couro cravejadas de tachas douradas. Uma coroa de louros cinge seu cabelo grisalho e ele segura uma espada; seu rosto é magro e sereno.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_VICTORIA" Language="pt_BR">
+      <Text>Uma jovem rainha em um vestido de baile creme de ombros de fora, com uma faixa azul cruzada sobre o corpete, um broche enjoiado e um colar de granadas. Uma pequena coroa de prata repousa sobre seu cabelo castanho repartido; suas mãos estão unidas e a expressão é serena.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_CHANDRAGUPTA" Language="pt_BR">
+      <Text>Um homem musculoso, de peito nu com uma faixa laranja drapeada, usando um grande turbante azul com uma joia vermelha e um largo colar de ouro com incrustações de gemas. Braceletes largos e enjoiados e um cinto com gemas completam as insígnias; seu rosto bigodudo é confiante.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_DIDO" Language="pt_BR">
+      <Text>Uma mulher em um vestido magenta sem mangas franzido na cintura por uma faixa cinza, com debrum dourado no decote e um pesado colar torques de ouro. Os cabelos escuros estão presos para trás, usa um brinco de argola e uma pulseira de ouro, e uma das mãos repousa no quadril com um meio sorriso astuto.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_ELEANOR_ENGLAND" Language="pt_BR">
+      <Text>Uma nobre loira em um vestido medieval de vermelho intenso e lavanda pálido, com debrum de ouro e gemas na gola e nos punhos, segurando um pequeno cálice de ouro. Uma coroa de rosas cor-de-rosa repousa sobre seus cabelos cacheados; sua expressão é gentil.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_ELEANOR_FRANCE" Language="pt_BR">
+      <Text>Uma nobre loira em um vestido medieval de vermelho intenso e lavanda pálido com debrum dourado enjoiado, segurando um pequeno cálice de ouro com a outra mão aberta em gesto de acolhimento. Uma coroa de ouro com uma joia azul repousa sobre seus longos cabelos ondulados; ela sorri calorosamente.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_GENGHIS_KHAN" Language="pt_BR">
+      <Text>Um senhor da guerra mongol com um cavanhaque escuro e ralo, usando um gorro debruado de pele e uma armadura lamelar em camadas com um largo colar cravejado e um disco redondo no peito, sobre um manto verde-escuro. Um cinto largo aperta sua cintura; seu olhar é firme e duro.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_JADWIGA" Language="pt_BR">
+      <Text>Uma jovem rainha em um vestido de dois tons, uma metade vermelho intenso e a outra roxa com padrão de flores-de-lis douradas, com um colar e cinto de ouro enjoiados e um colar de pérolas. Uma alta coroa de ouro encima seus cabelos castanhos e ela segura um cetro dourado rematado em flor de lótus.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_KRISTINA" Language="pt_BR">
+      <Text>Uma mulher de longos cachos castanhos em um escuro gibão de gola alta do século XVII, com punhos de renda e fileiras de tachas douradas, segurando junto ao corpo um grande livro de cantos dourados. Sua expressão é pensativa e segura de si.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_KUPE" Language="pt_BR">
+      <Text>Um navegante polinésio de compleição poderosa, com o rosto todo tatuado, peito nu, uma grossa capa de pele sobre os ombros e um pingente de osso entalhado no pescoço. Um pano tecido vermelho com franjas pendentes cobre sua cintura; um punho está erguido.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_LAURIER" Language="pt_BR">
+      <Text>Um idoso estadista de fartos cabelos brancos e ondulados, em uma casaca azul de fraque sobre um colete xadrez marrom e um lenço, segurando um par de óculos. Uma das mãos repousa no quadril; sua expressão é distinta e astuta.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_LAUTARO" Language="pt_BR">
+      <Text>Um jovem guerreiro mapuche, de peito nu e magro, com uma faixa tecida estampada na cabeça, um colar simples de cordão e enfaixamentos de couro nos braços. Uma faixa estampada e uma faca embainhada estão em sua cintura; os braços cruzados e um leve sorriso confiante.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_MANSA_MUSA" Language="pt_BR">
+      <Text>Um corpulento rei da África Ocidental com uma farta barba negra, em uma veste azul e dourada ricamente estampada, com largas barras bordadas e um gorro sem aba combinando. Braceletes de ouro e um anel de ouro adornam suas mãos, unidas sobre a barriga; ele sorri calorosamente.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_MATTHIAS_CORVINUS" Language="pt_BR">
+      <Text>Um homem de cabelo loiro ondulado e uma pequena coroa de louros, em polida armadura de placas gravada com um brasão de corvo, sobre uma túnica azul com uma capa forrada de pele. Ele apoia uma das mãos no punho de uma espada; sua expressão é levemente divertida.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_PACHACUTI" Language="pt_BR">
+      <Text>Um imperador inca com uma faixa dourada encimada por penas verdes, ostentando no peito um grande medalhão redondo de ouro com uma face solar sobre uma túnica em tons de terra e uma faixa vermelha. Braceletes largos de ouro e brincos de disco o adornam e ele segura uma maça; seu olhar é intenso.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_POUNDMAKER" Language="pt_BR">
+      <Text>Um chefe cree das planícies com cabelos escuros muito longos e tranças com penas azuis, em um casaco de camurça bege com franjas e trabalhos de contas e espinhos nos ombros sobre um colete escuro. Pintura facial risca suas faces; ele segura um cachimbo esguio e parece calmo.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_ROBERT_THE_BRUCE" Language="pt_BR">
+      <Text>Um robusto rei barbado em uma sobreveste amarela brasonada com um leão vermelho rompante, sobre uma cota de malha e uma capa de gola de pele, com uma coroa de ouro nos cabelos castanhos. Ele empunha o punho de uma espada no cinto; sua expressão é audaz.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_SEONDEOK" Language="pt_BR">
+      <Text>Uma rainha coreana em um manto de seda roxo e magenta com barras bordadas a ouro e um cinto enjoiado. Uma elaborada e alta coroa de ouro com pingentes de jade verde e brincos pendentes emoldura seu rosto; uma das mãos está erguida, e ela parece serena.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_SHAKA" Language="pt_BR">
+      <Text>Um alto e musculoso rei zulu, de peito nu, com uma faixa e um pano de cintura de pele de leopardo, braceletes e tornozeleiras de cordão vermelho, e um colar de contas com pingentes em forma de garra. Usa um cocar de penas vermelhas e laranja e segura um bastão com cabeça e um escudo; seu ar é imponente.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_SULEIMAN" Language="pt_BR">
+      <Text>Um sultão otomano de barba escura, em um cafetã de seda verde com alamares dourados e borda forrada de pele sobre calças douradas, cingido por uma faixa escura. Um turbante branco altíssimo com plumas e uma joia vermelha o coroa; ele ajusta a faixa com calma.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_TAMAR" Language="pt_BR">
+      <Text>Uma rainha georgiana de cabelos escuros trançados, em um vestido de brocado azul sob uma sobreveste creme enjoiada e um largo colar de ouro cravejado de gemas, com uma coroa de ouro. Punhos enjoiados cercam seus pulsos; uma das mãos está erguida em um leve punho e sua expressão é serena, mas firme.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_WILHELMINA" Language="pt_BR">
+      <Text>Uma mulher rechonchuda e alegre em um casaco de montaria vitoriano marrom sobre uma blusa branca de gola alta com um broche, e um chapéu largo e claro enfeitado com uma flor rosa. Ela segura o cabo curvo de um guarda-chuva e sorri radiante.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_ABRAHAM_LINCOLN" Language="pt_BR">
+      <Text>Um homem alto, magro e de pele clara, com o cabelo escuro repartido para um lado e uma barba em colar ao longo do maxilar, sem bigode. Sobrancelhas escuras e cerradas sombreiam olhos fundos e cansados, e a sua expressão é grave. Veste uma sobrecasaca preta formal com camisa branca e um laço escuro.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_AL_HAKAM_II" Language="pt_BR">
+      <Text>Mostrado como um busto escultórico e contido, num único tom terroso. Um homem idoso de rosto muito vincado e curtido, com uma barba longa e fina e um nariz proeminente e adunco, a cabeça envolta num turbante de pano. O ambiente é grave e austero.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_AMBIORIX" Language="pt_BR">
+      <Text>Um guerreiro feroz, de pele clara, com o cabelo ruivo, arrepiado para cima, e um longo bigode ruivo que cai para além do queixo. Olhos de um azul vivo fuzilam sob uma testa franzida, e um grosso torque de ouro retorcido rodeia o seu pescoço nu.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_BASIL_II" Language="pt_BR">
+      <Text>Um homem mais velho de cabelo grisalho e barba grisalha cerrada, coroado com um ornado diadema bizantino de ouro cravejado de joias azuis e vermelhas e do qual pendem pequenos pingentes. Veste uma armadura com um medalhão de ouro redondo ao peito; o aspeto é severo e imperial.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_BASIL" Language="pt_BR">
+      <Text>Um homem mais velho de cabelo grisalho e barba grisalha cerrada, coroado com um ornado diadema bizantino de ouro cravejado de joias azuis e vermelhas e do qual pendem pequenos pingentes. Veste uma armadura com um medalhão de ouro redondo ao peito; o aspeto é severo e imperial.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_CATHERINE_DE_MEDICI_ALT" Language="pt_BR">
+      <Text>Uma mulher cujo rosto se esconde por trás de uma elaborada máscara veneziana de carnaval, branca e dourada, adornada com uma pluma rosa, deixando visíveis apenas os lábios pintados e o queixo. Uma rígida gola de renda branca emoldura-lhe o pescoço e o cabelo escuro está preso; o efeito é ornamentado e misterioso.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_CHARLEMAGNE" Language="pt_BR">
+      <Text>Mostrado como um busto escultórico e contido, num único tom terroso. Um rei solene de longa barba bifurcada e cabelo até aos ombros, com uma coroa medieval. O tratamento monocromático, semelhante a uma estátua, dá-lhe uma presença monumental e austera.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_CLEOPATRA_ALT" Language="pt_BR">
+      <Text>Uma jovem rainha egípcia com um liso cabelo preto à altura do maxilar sob uma fita de ouro, uma dramática maquilhagem dos olhos em roxo e rosa, e um largo colar de ouro com brincos dourados e apontamentos azuis. A sua expressão é serena e sedutora.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_CNUT" Language="pt_BR">
+      <Text>Mostrado como um busto escultórico e contido, num único tom terroso. Um homem mais velho e magro, de rosto longo e estreito, olhos fundos e cabelo ralo penteado para trás a partir de uma testa alta. De faces encovadas e semblante severo.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_ELIZABETH" Language="pt_BR">
+      <Text>Uma mulher de pele clara com o cabelo ruivo encaracolado e preso sob uma pequena coroa cravejada de joias em ouro e azul, com brincos de pérola pendentes e uma altíssima gola de renda branca que se ergue em volta do pescoço. A sua expressão é fria e serena.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_HAMMURABI" Language="pt_BR">
+      <Text>Um homem cuja espessa barba escura cai em apertados caracóis à babilónica, com uma alta e ornada coroa cilíndrica de ouro e azulejos azuis e um único brinco de argola dourado. Os seus olhos são ferozes e intensos sob sobrancelhas cerradas.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_HARALD_ALT" Language="pt_BR">
+      <Text>Um rei nórdico de barba grisalha com um ornado elmo de guerra de bronze de pátina verde e ouro, munido de uma proteção facial sobre os olhos, usado sobre cota de malha e armadura. Tem um ar endurecido pela batalha e sombrio.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_JOAO_III" Language="pt_BR">
+      <Text>Um homem barbado com um barrete plano preto renascentista adornado com uma joia, cabelo escuro até ao maxilar, vestindo um casaco pesado com uma grossa gola de pele e uma corrente de ouro. O seu aspeto é digno e reservado.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_JOHN_CURTIN" Language="pt_BR">
+      <Text>Um homem do século XX de óculos redondos com armação de arame e um chapéu de feltro claro de aba mole, vestindo um fato cinzento com camisa às riscas e uma gravata vermelha. A sua expressão é branda e pensativa.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_JULIUS_CAESAR" Language="pt_BR">
+      <Text>Um homem magro e pálido, coroado com uma coroa de louros dourada sobre o cabelo curto, o rosto severo e ligeiramente franzido. Um manto vermelho está lançado sobre um ombro da sua armadura.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_KUBLAI_KHAN_CHINA" Language="pt_BR">
+      <Text>Um homem mais velho de cabelo grisalho e uma longa barba grisalha bifurcada com um bigode fino, com um pequeno barrete e uma túnica dourada sobre um fundo vermelho intenso. A sua expressão traz uma calma autoridade.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_LADY_SIX_SKY" Language="pt_BR">
+      <Text>Uma mulher maia de pele castanha, coroada com um elaborado toucado verde-jade encimado por um medalhão em forma de estrela e plumas verdes. Usa grandes ornamentos de jade nas orelhas, e uma linha azul está pintada ao longo da testa e do nariz.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_LADY_TRIEU" Language="pt_BR">
+      <Text>Uma mulher vietnamita de cabelo escuro puxado suavemente para trás sob um ornado toucado de padrão verde e dourado. As suas feições são calmas e serenas, e o punho dourado de uma espada repousa junto ao seu ombro.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_MENELIK" Language="pt_BR">
+      <Text>Um homem barbado de pele escura com um chapéu preto de aba larga, vestindo uma túnica ricamente bordada a ouro sob um manto escuro. O seu aspeto é majestoso e seguro.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_NADER_SHAH" Language="pt_BR">
+      <Text>Um homem de barba escura com uma alta coroa persa de ouro cravejada de uma grande esmeralda verde e fileiras de pérolas. O seu olhar é orgulhoso e marcial.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_NZINGA_MBANDE" Language="pt_BR">
+      <Text>Uma mulher de pele escura com um afro natural, coroada com uma coroa dourada de pontas. Usa brincos de argola dourados e um colar de ouro enfiado com contas verdes; a sua expressão é calma e confiante.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_OLOF" Language="pt_BR">
+      <Text>Mostrado como um busto escultórico e contido, num único tom terroso. Um viking com um elmo cónico e proteção nasal, uma longa barba trançada e pele nos ombros. Tem um ar curtido e sombrio.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_QIN_ALT" Language="pt_BR">
+      <Text>Um imperador chinês com um barrete de corte preto de asas, com uma longa e fina barba preta bifurcada, bigode e uma armadura dourada. O seu aspeto é astuto e imponente.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_RAMSES" Language="pt_BR">
+      <Text>Um faraó egípcio com um ornado toucado nemes às riscas azuis e douradas, ostentando uma cobra erguida e um disco solar redondo na testa, com um largo colar de ouro. Tem um ar jovem e orgulhoso.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_SALADIN_ALT" Language="pt_BR">
+      <Text>Um homem de barba escura com um elmo de aço pontiagudo debruado a ouro e uma coifa de malha em torno do rosto, os olhos muito abertos e atentos. Tem todo o aspeto de um sultão guerreiro.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_SIMON_BOLIVAR" Language="pt_BR">
+      <Text>Um homem de cabelo escuro, com suíças proeminentes e encaracoladas e sobrancelhas arqueadas e expressivas, vestindo uma túnica militar escura de gola alta e debrum vermelho. Um ligeiro sorriso confiante brinca-lhe nos lábios.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_TOKUGAWA" Language="pt_BR">
+      <Text>Um homem japonês mais velho com um coque grisalho e a frente da cabeça rapada, um bigode fino e uma pequena barba no queixo, a boca cerrada numa linha severa, vestindo uma túnica clara. O seu porte é severo e contido.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_T_ROOSEVELT_ROUGHRIDER" Language="pt_BR">
+      <Text>Um homem com um chapéu de cavalaria castanho de aba larga e óculos redondos, com um bigode farfalhudo, vestindo um uniforme militar caqui. Tem um ar rústico e cordial.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_VICTORIA_ALT" Language="pt_BR">
+      <Text>Uma mulher com um chapéu castanho de aba larga com uma fita e uma blusa clara de gola alta presa por um broche verde, o cabelo castanho preso. A sua expressão é fria e serena.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_WU_ZETIAN" Language="pt_BR">
+      <Text>Uma imperatriz chinesa com um elaborado toucado dourado de fénix cravejado de gemas vermelhas e do qual pendem fios de pérolas, um ornamento na testa e o rosto pintado. O seu aspeto é imperioso.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_YONGLE" Language="pt_BR">
+      <Text>Um imperador chinês com um barrete escuro de asas, um bigode e barba finos, vestindo uma túnica imperial amarela. A sua expressão é calma e serena.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_ALEXANDER" Language="pt_BR">
+      <Text>Um jovem escanhoado de longos cabelos castanho-claros penteados para trás, olhos azuis e um largo sorriso juvenil. Veste uma armadura polida, e o seu aspeto é entusiasmado e confiante.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_AMANITORE" Language="pt_BR">
+      <Text>Uma rainha núbia de pele escura e cabelo curto, com uma fita de ouro cravejada de uma joia triangular vermelha na testa e um largo colar de ouro, de feições quentes e sorridentes. O seu aspeto é gracioso e seguro.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_CYRUS" Language="pt_BR">
+      <Text>Um homem barbado de cabelo escuro cingido por um diadema de ouro, de armadura, os olhos intensos erguidos como para o horizonte. O seu porte é orgulhoso e imponente.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_GITARJA" Language="pt_BR">
+      <Text>Uma rainha indonésia de sorriso caloroso, com uma única flor branca de frangipani colocada sobre uma orelha e um ornado toucado de ouro cravejado de joias, com adornos de ouro nas orelhas. O seu aspeto é sereno e gracioso.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_JAYAVARMAN" Language="pt_BR">
+      <Text>Um homem mais velho, calvo e de pele castanha, com um sorriso suave e os ombros nus, usando um colar de contas verde e dourado ao pescoço. A sua expressão é calma e benevolente.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_LUDWIG" Language="pt_BR">
+      <Text>Um jovem de pele clara com o cabelo castanho-escuro ondulado, um pequeno bigode e uma pêra pontiaguda, vestindo uma túnica militar vermelha de gola alta debruada a ouro. O seu aspeto é requintado e sonhador.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_SEJONG" Language="pt_BR">
+      <Text>Um rei coreano com um barrete de corte preto de asas, um bigode fino e uma longa e estreita barba no queixo, vestindo uma túnica vermelha. A sua expressão é calma e erudita.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_SULEIMAN_ALT" Language="pt_BR">
+      <Text>Um homem mais velho e barbado com um grande turbante branco cravejado de uma grande esmeralda verde e joias azuis, a barba grisalha e cerrada e o olhar firme. Tem um aspeto digno e magnífico.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_SUNDIATA_KEITA" Language="pt_BR">
+      <Text>Um homem de pele escura com uma curta barba preta, usando um turbante roxo e dourado encimado por uma faixa de coroa dourada. O seu aspeto é calmo e digno.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_THEODORA" Language="pt_BR">
+      <Text>Uma imperatriz bizantina de cabelo escuro, com uma ornada coroa cravejada de joias e pendente de fios de pérolas e engastada de gemas vermelhas e verdes, e longos brincos de pérola e vermelho. O seu rosto pálido é sereno e régio.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_LEADER_KUBLAI_KHAN_MONGOLIA" Language="pt_BR">
+      <Text>Um homem mais velho de cabelo grisalho e uma longa barba grisalha bifurcada com um bigode fino, com um pequeno barrete e uma túnica dourada sobre um fundo vermelho intenso. A sua expressão traz uma calma autoridade.</Text>
+    </Replace>
+  </LocalizedText>
+</GameData>

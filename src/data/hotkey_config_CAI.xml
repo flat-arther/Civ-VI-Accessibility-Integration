@@ -60,7 +60,6 @@
     <Row ActionId="UI_TopPanelSpeakTourism" Name="LOC_CAI_TOP_PANEL_SPEAK_TOURISM" Description="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelSpeakInfluence" Name="LOC_CAI_TOP_PANEL_SPEAK_INFLUENCE" Description="LOC_CAI_TOP_PANEL_SPEAK_INFLUENCE_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelSpeakNukes" Name="LOC_CAI_TOP_PANEL_SPEAK_NUKES" Description="LOC_CAI_TOP_PANEL_SPEAK_NUKES_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
-    <Row ActionId="UI_TopPanelYieldInfoList" Name="LOC_CAI_TOP_PANEL_YIELD_INFO" Description="LOC_CAI_TOP_PANEL_YIELD_INFO_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotReadUnits" Name="LOC_CAI_PLOT_READ_UNITS" Description="LOC_CAI_PLOT_READ_UNITS_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotReadYieldRiverOwner" Name="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER" Description="LOC_CAI_PLOT_READ_YIELD_RIVER_OWNER_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="PlotReadStats" Name="LOC_CAI_PLOT_READ_STATS" Description="LOC_CAI_PLOT_READ_STATS_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
@@ -104,8 +103,18 @@
     <Row ActionId="WorldScannerSlot2Assign" Name="LOC_CAI_WORLD_SCANNER_SLOT2_ASSIGN" Description="LOC_CAI_WORLD_SCANNER_SLOT2_ASSIGN_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldScannerSlot2Next" Name="LOC_CAI_WORLD_SCANNER_SLOT2_NEXT" Description="LOC_CAI_WORLD_SCANNER_SLOT2_NEXT_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
     <Row ActionId="WorldScannerSlot2Prev" Name="LOC_CAI_WORLD_SCANNER_SLOT2_PREV" Description="LOC_CAI_WORLD_SCANNER_SLOT2_PREV_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSlot3Assign" Name="LOC_CAI_WORLD_SCANNER_SLOT3_ASSIGN" Description="LOC_CAI_WORLD_SCANNER_SLOT3_ASSIGN_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSlot3Next" Name="LOC_CAI_WORLD_SCANNER_SLOT3_NEXT" Description="LOC_CAI_WORLD_SCANNER_SLOT3_NEXT_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSlot3Prev" Name="LOC_CAI_WORLD_SCANNER_SLOT3_PREV" Description="LOC_CAI_WORLD_SCANNER_SLOT3_PREV_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSlot4Assign" Name="LOC_CAI_WORLD_SCANNER_SLOT4_ASSIGN" Description="LOC_CAI_WORLD_SCANNER_SLOT4_ASSIGN_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSlot4Next" Name="LOC_CAI_WORLD_SCANNER_SLOT4_NEXT" Description="LOC_CAI_WORLD_SCANNER_SLOT4_NEXT_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSlot4Prev" Name="LOC_CAI_WORLD_SCANNER_SLOT4_PREV" Description="LOC_CAI_WORLD_SCANNER_SLOT4_PREV_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSlot5Assign" Name="LOC_CAI_WORLD_SCANNER_SLOT5_ASSIGN" Description="LOC_CAI_WORLD_SCANNER_SLOT5_ASSIGN_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSlot5Next" Name="LOC_CAI_WORLD_SCANNER_SLOT5_NEXT" Description="LOC_CAI_WORLD_SCANNER_SLOT5_NEXT_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="WorldScannerSlot5Prev" Name="LOC_CAI_WORLD_SCANNER_SLOT5_PREV" Description="LOC_CAI_WORLD_SCANNER_SLOT5_PREV_TOOLTIP" CategoryId="CAI_WORLD_SCANNER" ContextId="World" LayoutType="PC"/>
 
     <!-- ===== CAI_UI: Open/toggle screens and panels ===== -->
+    <Row ActionId="UI_CAIOpenLaunchBar" Name="LOC_CAI_OPEN_LAUNCH_BAR" Description="LOC_CAI_OPEN_LAUNCH_BAR_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelOpenReports" Name="LOC_CAI_TOP_PANEL_OPEN_REPORTS" Description="LOC_CAI_TOP_PANEL_OPEN_REPORTS_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelOpenReportsResources" Name="LOC_CAI_TOP_PANEL_OPEN_REPORTS_RESOURCES" Description="LOC_CAI_TOP_PANEL_OPEN_REPORTS_RESOURCES_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelOpenReportsCityStatus" Name="LOC_CAI_TOP_PANEL_OPEN_REPORTS_CITY_STATUS" Description="LOC_CAI_TOP_PANEL_OPEN_REPORTS_CITY_STATUS_TOOLTIP" CategoryId="CAI_UI" ContextId="World" LayoutType="PC"/>
@@ -318,7 +327,6 @@
     <Row ActionId="UI_TopPanelSpeakTourism" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_I" />
     <Row ActionId="UI_TopPanelSpeakInfluence" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_V" />
     <Row ActionId="UI_TopPanelSpeakNukes" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_N" />
-    <Row ActionId="UI_TopPanelYieldInfoList" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_Y" />
     <Row ActionId="PlotReadUnits" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_S" />
     <Row ActionId="PlotReadUnits" Index="1" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_NP_5" />
     <Row ActionId="PlotReadYieldRiverOwner" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_W" />
@@ -374,6 +382,7 @@
     <Row ActionId="WorldScannerSlot2Prev" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_PLUS" />
 
     <!-- CAI_UI: Open/toggle screens -->
+    <Row ActionId="UI_CAIOpenLaunchBar" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_TAB" />
     <Row ActionId="UI_TopPanelOpenReports" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_F2" />
     <Row ActionId="UI_TopPanelOpenReportsCityStatus" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_BACKSLASH" />
     <Row ActionId="UI_WorldTrackerOpenResearchChooser" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_CONTROL+LOC_OPTIONS_KEY_R" />

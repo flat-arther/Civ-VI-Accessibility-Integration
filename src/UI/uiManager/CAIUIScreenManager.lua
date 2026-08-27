@@ -11,6 +11,7 @@ include("CAIWidgetHelpers_Search")
 include("CAIWidgetHelpers_Tree")
 include("CAIWidgetHelpers_EditBox")
 include("CAIWidgetHelpers_DialogBuilder")
+include("CAIWidgetHelpers_LeaderPicker")
 include("CAIWidgetHelpers_PediaLookup")
 include("CAIWidgetHelpers_Settings")
 include("CAIWidgetHelpers_InputHelp")
@@ -1034,7 +1035,7 @@ function UIScreenManager:AppendSearchChar(c)
     -- ASCII-only fold: string.lower is locale-sensitive on bytes >= 0x80 and
     -- would corrupt multi-byte UTF-8 characters (e.g. CJK), which have no case.
     -- Same fold as the matched labels/query so the buffer stays comparable.
-    self.SearchBuffer = (self.SearchBuffer or "") .. CAIWidgetHelpers_Search.AsciiLower(c)
+    self.SearchBuffer = (self.SearchBuffer or "") .. CAIWidgetHelpers_Search.FoldText(c)
     self:TouchSearchBufferTimer()
 end
 
@@ -1176,6 +1177,9 @@ function UIScreenManager:Init()
     mgr:InitializeAudioManager()
     if CAIWidgetHelpers_DialogBuilder and CAIWidgetHelpers_DialogBuilder.Install then
         CAIWidgetHelpers_DialogBuilder.Install(mgr)
+    end
+    if CAIWidgetHelpers_LeaderPicker and CAIWidgetHelpers_LeaderPicker.Install then
+        CAIWidgetHelpers_LeaderPicker.Install(mgr)
     end
     mgr:InitializeTutorialManager()
     if CAI and CAI.RegisterGlobalCharInputHandler then

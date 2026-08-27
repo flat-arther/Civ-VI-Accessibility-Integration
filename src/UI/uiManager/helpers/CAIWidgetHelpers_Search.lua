@@ -124,20 +124,98 @@ end
 
 --#region Type-to-find (widget tree prefix search)
 
----Lowercase ASCII A-Z only, leaving every byte >= 0x80 untouched. string.lower
----is locale-sensitive and can transform UTF-8 continuation/lead bytes that fall
----in the Latin-1 uppercase range (0xC0-0xDE), corrupting multi-byte characters
----(e.g. CJK). The [A-Z] pattern range is a literal byte range, not a %-class, so
----it is locale-independent. Query and label are folded through this same path so
----they stay byte-for-byte comparable.
+-- Accented Latin letters (Latin-1 Supplement + Latin Extended-A, both cases)
+-- mapped by Unicode CODE POINT to their base ASCII letter, so a plain query
+-- letter matches every accented form (a == a/à/á/â/ã/ä/å/ā, c == ç/č, n == ñ,
+-- ...). Keyed by integer code point, NOT by a byte-string: Civ VI's Lua does not
+-- reliably match bytes >= 0x80 through string patterns or look them up as string
+-- keys (the same locale/charset trap that makes %s corrupt UTF-8), so FoldText
+-- decodes each character to a number and looks it up here. Code points absent
+-- from this table -- ASCII, CJK, and any other script -- pass through untouched.
+-- Vietnamese/Latin Extended Additional (3-byte) is not folded.
+local CP_FOLD = {}
+do
+    local groups = {
+        a = { 0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5,
+              0x100, 0x101, 0x102, 0x103, 0x104, 0x105 },
+        c = { 0xC7, 0xE7, 0x106, 0x107, 0x108, 0x109, 0x10A, 0x10B, 0x10C, 0x10D },
+        d = { 0x10E, 0x10F, 0x110, 0x111 },
+        e = { 0xC8, 0xC9, 0xCA, 0xCB, 0xE8, 0xE9, 0xEA, 0xEB,
+              0x112, 0x113, 0x114, 0x115, 0x116, 0x117, 0x118, 0x119, 0x11A, 0x11B },
+        g = { 0x11C, 0x11D, 0x11E, 0x11F, 0x120, 0x121, 0x122, 0x123 },
+        i = { 0xCC, 0xCD, 0xCE, 0xCF, 0xEC, 0xED, 0xEE, 0xEF,
+              0x128, 0x129, 0x12A, 0x12B, 0x12C, 0x12D, 0x12E, 0x12F, 0x130, 0x131 },
+        l = { 0x139, 0x13A, 0x13B, 0x13C, 0x13D, 0x13E, 0x13F, 0x140, 0x141, 0x142 },
+        n = { 0xD1, 0xF1, 0x143, 0x144, 0x145, 0x146, 0x147, 0x148 },
+        o = { 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD8, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF8,
+              0x14C, 0x14D, 0x14E, 0x14F, 0x150, 0x151 },
+        r = { 0x154, 0x155, 0x156, 0x157, 0x158, 0x159 },
+        s = { 0x15A, 0x15B, 0x15C, 0x15D, 0x15E, 0x15F, 0x160, 0x161, 0x218, 0x219 },
+        t = { 0x162, 0x163, 0x164, 0x165, 0x166, 0x167, 0x21A, 0x21B },
+        u = { 0xD9, 0xDA, 0xDB, 0xDC, 0xF9, 0xFA, 0xFB, 0xFC,
+              0x168, 0x169, 0x16A, 0x16B, 0x16C, 0x16D, 0x16E, 0x16F, 0x170, 0x171, 0x172, 0x173 },
+        y = { 0xDD, 0xFD, 0xFF, 0x176, 0x177, 0x178 },
+        z = { 0x179, 0x17A, 0x17B, 0x17C, 0x17D, 0x17E },
+    }
+    for base, points in pairs(groups) do
+        for _, cp in ipairs(points) do
+            CP_FOLD[cp] = base
+        end
+    end
+end
+
+---Fold search text to a locale-safe comparison form: lowercase ASCII A-Z and map
+---accented Latin letters to their base ASCII letter. Implemented as a raw byte
+---scan using string.byte (integer comparisons only) instead of string patterns or
+---string.lower: Civ VI's Lua is locale/charset-sensitive on bytes >= 0x80 (it
+---misclassifies UTF-8 bytes in %-classes and does not reliably match them in
+---pattern sets), so anything pattern-based here silently fails and corrupts CJK.
+---Numeric byte handling is locale-independent. Query and label are folded through
+---this same path so they stay byte-for-byte comparable.
 ---@param s string
 ---@return string
-function S.AsciiLower(s)
-    return (s:gsub("[A-Z]", function(c)
-        return string.char(string.byte(c) + 32)
-    end))
+function S.FoldText(s)
+    local out = {}
+    local i = 1
+    local n = #s
+    while i <= n do
+        local b = string.byte(s, i)
+        if b >= 65 and b <= 90 then
+            -- ASCII A-Z -> lowercase.
+            out[#out + 1] = string.char(b + 32)
+            i = i + 1
+        elseif b >= 0xC2 and b <= 0xDF and i < n then
+            -- Any 2-byte UTF-8 lead (0xC2-0xDF) + continuation (0x80-0xBF).
+            -- Decode the code point numerically and fold it if it is a known
+            -- accented Latin letter; otherwise keep both bytes unchanged.
+            local b2 = string.byte(s, i + 1)
+            if b2 >= 0x80 and b2 <= 0xBF then
+                local cp = (b - 0xC0) * 0x40 + (b2 - 0x80)
+                local base = CP_FOLD[cp]
+                out[#out + 1] = base or string.sub(s, i, i + 1)
+                i = i + 2
+            else
+                -- Malformed sequence; copy the lead byte and continue.
+                out[#out + 1] = string.char(b)
+                i = i + 1
+            end
+        else
+            -- ASCII (non A-Z) or any byte of a 3-byte+ sequence (CJK, etc.):
+            -- copy verbatim so multi-byte scripts are never altered.
+            out[#out + 1] = string.char(b)
+            i = i + 1
+        end
+    end
+    return table.concat(out)
 end
-local AsciiLower = S.AsciiLower
+local FoldText = S.FoldText
+
+-- TEMP load-time self-test: proves accent folding is active in the live engine.
+-- Château = "Ch" .. \195\162(â) .. "teau"; expect "chateau". Remove once verified.
+if LogMessage then
+    LogMessage("Search helper fold self-test: FoldText('Ch\195\162teau')='"
+        .. FoldText("Ch\195\162teau") .. "'")
+end
 
 -- Array of common invalid search start chars
 local INVALID_SEARCH_START_CHARS = {
@@ -229,9 +307,9 @@ function S.MakeSearchCandidate(widget, label, bfsIndex, tooltip)
     return {
         Widget = widget,
         Label = label,
-        LabelLower = AsciiLower(label),
+        LabelLower = FoldText(label),
         Tooltip = tooltip,
-        TooltipLower = AsciiLower(tooltip),
+        TooltipLower = FoldText(tooltip),
         BFSIndex = bfsIndex,
     }
 end
@@ -252,49 +330,51 @@ function S.CollectSearchCandidates(root, maxDepth, includeTooltips)
 
     ---@type SearchCandidate[]
     local candidates = {}
-
-    local queue = {}
-
-    for _, child in ipairs(root.Children) do
-        queue[#queue + 1] = {
-            Widget = child,
-            Depth = 0,
-        }
-    end
-
-    local head = 1
     local bfsIndex = 1
 
-    while head <= #queue do
-        local current = queue[head]
-        head = head + 1
+    -- Breadth-first, one level at a time. This preserves the exact visitation
+    -- order (and therefore the BFSIndex tie-break ordering) of the previous
+    -- queue-based walk, but stores plain widget references per level instead of
+    -- allocating a { Widget, Depth } wrapper table for every node each keystroke.
+    --
+    -- Visibility: the previous walk called widget:IsHidden() on every node, which
+    -- re-climbs the entire ancestor chain per node -- O(N * depth) and repeated
+    -- game-control reads for the same ancestors. We only ever descend into
+    -- children of already-visible widgets, so a node's OWN _hiddenFn is
+    -- sufficient here: the ancestor chain is known visible. That is equivalent to
+    -- IsHidden() for this top-down traversal and collapses the check to O(N).
+    local level = {}
+    for _, child in ipairs(root.Children) do
+        level[#level + 1] = child
+    end
 
-        ---@type UIWidget
-        local widget = current.Widget
-        local depth = current.Depth
+    local depth = 0
+    while #level > 0 do
+        local nextLevel = {}
+        for _, widget in ipairs(level) do
+            local hiddenFn = widget._hiddenFn
+            if not (hiddenFn and hiddenFn(widget)) then
+                local label = widget:GetLabel()
 
-        if not widget:IsHidden() then
-            local label = widget:GetLabel()
+                if label and label ~= "" then
+                    local tooltip = ""
+                    if includeTooltips then
+                        tooltip = widget:GetTooltip() or ""
+                    end
+                    candidates[#candidates + 1] = S.MakeSearchCandidate(widget, label, bfsIndex, tooltip)
 
-            if label and label ~= "" then
-                local tooltip = ""
-                if includeTooltips then
-                    tooltip = widget:GetTooltip() or ""
+                    bfsIndex = bfsIndex + 1
                 end
-                candidates[#candidates + 1] = S.MakeSearchCandidate(widget, label, bfsIndex, tooltip)
 
-                bfsIndex = bfsIndex + 1
-            end
-
-            if depth < maxDepth and widget.Children then
-                for _, child in ipairs(widget.Children) do
-                    queue[#queue + 1] = {
-                        Widget = child,
-                        Depth = depth + 1,
-                    }
+                if depth < maxDepth and widget.Children then
+                    for _, child in ipairs(widget.Children) do
+                        nextLevel[#nextLevel + 1] = child
+                    end
                 end
             end
         end
+        level = nextLevel
+        depth = depth + 1
     end
 
     return candidates
@@ -329,7 +409,7 @@ local function SplitWords(text)
         if IsWordSeparator(ch) then
             if start then
                 words[#words + 1] = {
-                    Text = AsciiLower(text:sub(start, i - 1)),
+                    Text = FoldText(text:sub(start, i - 1)),
                     StartPos = start,
                 }
                 start = nil
@@ -341,7 +421,7 @@ local function SplitWords(text)
 
     if start then
         words[#words + 1] = {
-            Text = AsciiLower(text:sub(start)),
+            Text = FoldText(text:sub(start)),
             StartPos = start,
         }
     end
@@ -549,9 +629,9 @@ end
 ---@param b SearchResult
 ---@return boolean
 function S.CompareSearchResults(a, b)
-    -- Closer to the current tree depth wins first. Within a single proximity
-    -- bucket (the normal case after FindBestTierResults) these are equal, so the
-    -- remaining keys decide; the guard keeps ordering stable if buckets ever mix.
+    -- Closer to the current tree depth (the search anchor) sorts first; this only
+    -- orders the list, it never removes farther matches. When proximity ties, the
+    -- remaining keys (source, tier, position, length, BFS index) decide.
     local pa = a.Proximity or 0
     local pb = b.Proximity or 0
     if pa ~= pb then
@@ -666,70 +746,73 @@ local function CandidateProximity(widget, focusDepths)
     return -1
 end
 
+---Score one candidate's text (label or tooltip) at its best matching tier.
+---Returns the SearchResult with Proximity filled in, or nil when nothing matched.
+---@param candidate SearchCandidate
+---@param query string
+---@param textLower string
+---@param textLength integer
+---@param sourceRank integer
+---@param focusDepths? table<UIWidget, integer>
+---@return SearchResult|nil
+local function ScoreText(candidate, query, textLower, textLength, sourceRank, focusDepths)
+    if textLower == "" then return nil end
+    for _, tier in ipairs(SEARCH_ORDER) do
+        local result = S.ScoreSearchCandidate(candidate, query, tier, textLower, textLength, sourceRank)
+        if result then
+            result.Proximity = focusDepths
+                and CandidateProximity(candidate.Widget, focusDepths)
+                or 0
+            return result
+        end
+    end
+    return nil
+end
+
+---Score every candidate at its best matching tier and return them all, ranked.
+---Proximity, tier, match position, and length only ORDER the list (via
+---CompareSearchResults); nothing is dropped for "losing". A closer or stronger
+---match sorts to the front, but a weaker or farther match still appears further
+---down instead of vanishing, so every widget that matches the query is reachable.
+---
+---Single pass over the candidates: each is scored against its label first; only
+---when the label does not match is the tooltip scored. Label and tooltip hits go
+---to separate buckets, sorted independently, then concatenated (all label matches
+---ahead of all tooltip matches). This preserves the exact ordering of the former
+---two-pass form -- label results never interleave with tooltip results -- while
+---iterating the candidate list once instead of twice and dropping the
+---excluded-widgets bookkeeping (a label hit simply skips its own tooltip).
 ---@param candidates SearchCandidate[]
 ---@param query string
----@param useTooltip boolean
----@param excludedWidgets? table<UIWidget, boolean>
+---@param includeTooltips boolean
 ---@param focusDepths? table<UIWidget, integer>
----@return SearchResult[], table<UIWidget, boolean>
-local function FindBestTierResults(candidates, query, useTooltip, excludedWidgets, focusDepths)
-    -- Bucket matches by proximity first, then by tier within each proximity, so
-    -- the closest tree depth that has any match wins outright over stronger
-    -- matches further away; broaden outward only when nothing closer matched.
-    ---@type table<integer, table<integer, SearchResult[]>>
-    local byProximity = {}
-    local bestProximity
-    local matchedWidgets = {}
-    local sourceRank = useTooltip and 1 or 0
+---@return SearchResult[]
+local function FindRankedResults(candidates, query, includeTooltips, focusDepths)
+    ---@type SearchResult[]
+    local labelResults = {}
+    ---@type SearchResult[]
+    local tooltipResults = {}
 
     for _, candidate in ipairs(candidates) do
-        if not excludedWidgets or not excludedWidgets[candidate.Widget] then
-            local textLower = useTooltip and candidate.TooltipLower or candidate.LabelLower
-            local textLength = useTooltip and #candidate.Tooltip or #candidate.Label
-            if textLower ~= "" then
-                for _, tier in ipairs(SEARCH_ORDER) do
-                    local result = S.ScoreSearchCandidate(
-                        candidate,
-                        query,
-                        tier,
-                        textLower,
-                        textLength,
-                        sourceRank
-                    )
-                    if result then
-                        local proximity = focusDepths
-                            and CandidateProximity(candidate.Widget, focusDepths)
-                            or 0
-                        result.Proximity = proximity
-                        local tiers = byProximity[proximity]
-                        if not tiers then tiers = {}; byProximity[proximity] = tiers end
-                        if not tiers[tier] then tiers[tier] = {} end
-                        tiers[tier][#tiers[tier] + 1] = result
-                        matchedWidgets[candidate.Widget] = true
-                        if not bestProximity or proximity > bestProximity then
-                            bestProximity = proximity
-                        end
-                        break
-                    end
-                end
+        local labelResult = ScoreText(
+            candidate, query, candidate.LabelLower, #candidate.Label, 0, focusDepths)
+        if labelResult then
+            labelResults[#labelResults + 1] = labelResult
+        elseif includeTooltips then
+            local tooltipResult = ScoreText(
+                candidate, query, candidate.TooltipLower, #candidate.Tooltip, 1, focusDepths)
+            if tooltipResult then
+                tooltipResults[#tooltipResults + 1] = tooltipResult
             end
         end
     end
 
-    if not bestProximity then
-        return {}, matchedWidgets
+    table.sort(labelResults, S.CompareSearchResults)
+    table.sort(tooltipResults, S.CompareSearchResults)
+    for _, result in ipairs(tooltipResults) do
+        labelResults[#labelResults + 1] = result
     end
-
-    local tiers = byProximity[bestProximity]
-    for _, tier in ipairs(SEARCH_ORDER) do
-        local results = tiers[tier]
-        if results and #results > 0 then
-            table.sort(results, S.CompareSearchResults)
-            return results, matchedWidgets
-        end
-    end
-
-    return {}, matchedWidgets
+    return labelResults
 end
 
 ---Find all matching widgets sorted from best to worst.
@@ -757,16 +840,7 @@ function S.FindSearchResults(root, query, maxDepth)
     local anchor = mgr and (mgr:GetSearchAnchor() or mgr:GetFocusedWidget())
     local focusDepths = BuildFocusDepths(anchor, root)
 
-    local labelResults, labelMatches = FindBestTierResults(candidates, query, false, nil, focusDepths)
-
-    if includeTooltips then
-        local tooltipResults = FindBestTierResults(candidates, query, true, labelMatches, focusDepths)
-        for _, result in ipairs(tooltipResults) do
-            labelResults[#labelResults + 1] = result
-        end
-    end
-
-    return labelResults
+    return FindRankedResults(candidates, query, includeTooltips, focusDepths)
 end
 
 ---@param results SearchResult[]
@@ -815,10 +889,10 @@ function S.MatchSearchText(label, query)
 
     local candidate = {
         Label = label,
-        LabelLower = AsciiLower(label),
+        LabelLower = FoldText(label),
         BFSIndex = 0,
     }
-    local lowerQuery = AsciiLower(query)
+    local lowerQuery = FoldText(query)
 
     for _, tier in ipairs(SEARCH_ORDER) do
         local result = S.ScoreSearchCandidate(candidate, lowerQuery, tier)
@@ -896,6 +970,8 @@ function S.ApplyCurrentBuffer(root, maxDepth, repeatSearch)
     local results = S.FindSearchResults(root, mgr:GetSearchBuffer(), maxDepth or 5)
 
     if #results == 0 then
+        LogMessage("Search helper ApplyCurrentBuffer NO MATCH for buffer='"
+            .. mgr:GetSearchBuffer() .. "'")
         Speak(Locale.Lookup("LOC_CAI_SEARCH_NO_MATCH"))
         return false
     end
@@ -907,7 +983,8 @@ function S.ApplyCurrentBuffer(root, maxDepth, repeatSearch)
     end
 
     mgr:SetFocus(results[resultIndex].Candidate.Widget)
-    LogMessage("Search helper ApplyCurrentBuffer focused search result " .. tostring(resultIndex)
+    LogMessage("Search helper ApplyCurrentBuffer buffer='" .. mgr:GetSearchBuffer()
+        .. "' focused search result " .. tostring(resultIndex)
         .. " of " .. tostring(#results))
     return true
 end
@@ -942,9 +1019,9 @@ function S.HandleChar(root, char, maxDepth)
     end
 
     -- Same-letter cycling is a single-byte concept, so this comparison stays
-    -- false for multi-byte characters, which is correct. AsciiLower matches the
+    -- false for multi-byte characters, which is correct. FoldText matches the
     -- fold used when the buffer was built.
-    local repeatSearch = #prev == 1 and #char == 1 and prev == AsciiLower(char)
+    local repeatSearch = #prev == 1 and #char == 1 and prev == FoldText(char)
 
     if repeatSearch then
         -- Keep the buffer at the single letter; just refresh the timeout.

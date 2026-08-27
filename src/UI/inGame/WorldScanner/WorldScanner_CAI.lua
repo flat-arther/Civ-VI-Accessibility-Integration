@@ -74,7 +74,7 @@ local RegisteredCategoryDefinitions = {}
 
 local EMPTY_CATEGORY = false
 local SCANNER_SEARCH_CATEGORY_ID = "__searchResults"
-local SCANNER_SLOT_COUNT = 2
+local SCANNER_SLOT_COUNT = 5
 local SCANNER_SLOT_CONFIG_SECTION = "WorldScannerSlots"
 local FindCategorySlotById
 local AUTO_FOCUS_SETTING_BY_CATEGORY_ID = {
@@ -101,7 +101,7 @@ local m_PlayerState = PlayerStateManager.Init(function(playerID)
         SearchSnapshot = nil,
         SearchHistoryIndex = 0,
 
-        ScannerSlots = { {}, {} },
+        ScannerSlots = { {}, {}, {}, {}, {} },
     }
 end)
 

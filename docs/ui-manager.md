@@ -819,17 +819,26 @@ the focused row's sibling level. The helper module
   by the `SearchTimeout` setting when persistent result navigation is disabled.
 - Collects depth-limited candidates and applies the existing match-tier and
   relevance ordering before focusing the first result.
-- **Proximity bias**: results are grouped by how close each candidate sits to
-  the current tree depth, and the closest group that has any match wins outright
-  over stronger matches farther away — the search only broadens outward when
-  nothing closer matches. Closeness is the depth of the deepest ancestor a
-  candidate shares with the *anchor*: the widget focused when the current query
-  began (`Manager.SearchAnchor`, captured on the first character and held fixed
-  for the whole query so result cycling stays stable even as focus moves).
-  Within the winning proximity group, the usual match-tier / position / length /
-  BFS ordering decides. When there is no anchor inside `root` (e.g. focus is
-  elsewhere), proximity is uniform and ordering falls back to the plain global
-  behavior.
+- **Proximity bias (sort only, never a filter)**: every widget that matches the
+  query is kept; proximity only *orders* the results so the ones nearest where
+  you started typing are offered first. Candidates farther away still appear
+  further down the list and remain reachable by cycling — nothing is dropped for
+  being far or for matching at a weaker tier. Closeness is the depth of the
+  deepest ancestor a candidate shares with the *anchor*: the widget focused when
+  the current query began (`Manager.SearchAnchor`, captured on the first
+  character and held fixed for the whole query so result cycling stays stable
+  even as focus moves). `CompareSearchResults` uses proximity as its top sort
+  key, then match-tier / position / length / BFS. When there is no anchor inside
+  `root` (e.g. focus is elsewhere), proximity is uniform and ordering falls back
+  to the plain global behavior.
+- **Accent folding**: query and label text are folded through
+  `CAIWidgetHelpers_Search.FoldText`, which lowercases ASCII A–Z and maps
+  accented Latin letters (Latin-1 Supplement + Extended-A, both cases) to their
+  base ASCII letter, so typing a plain letter matches every accented form
+  (`a` matches à/á/â/ã/ä/å/ā, `c` matches ç/č, `n` matches ñ, …). This is how a
+  query like `chateau` reaches "Château". Bytes outside the listed Latin ranges
+  (e.g. CJK) are left untouched, so non-Latin scripts are never corrupted;
+  Vietnamese / Latin Extended Additional (3-byte) is not folded.
 - **Same-letter cycling**: pressing the same single letter again while that
   one-character search remains active doesn't extend the buffer. The next
   search starts after the focused

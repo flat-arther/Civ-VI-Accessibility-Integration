@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+  <LocalizedText>
+    <!-- ENGLISH -->
+    <!-- Leader portrait accessibility descriptions (CAI). Keyed by leader type: LOC_CAI_LEADERDESC_<LEADERTYPE>. Read on demand with F2 in the diplomacy and deal views. -->
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_GANDHI" Language="en_US">
+      <Text>An elderly man shown from the hips up against a plain background. He is bald and very lean, almost gaunt, with a drooping white walrus mustache and small round wire-rimmed spectacles resting low on his nose. His upper body is bare and thin-framed; a length of undyed white homespun cloth is draped over one shoulder and across his chest, with plain dark cloth wrapped at the waist. He leans slightly forward, both hands loosely clasped in front of him, wearing a calm, mild expression.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_BARBAROSSA" Language="en_US">
+      <Text>A stout, broad-shouldered man in gleaming steel plate armor with copper-toned shoulder guards and a red cape. He has a full red beard and hair beneath a red, gold-trimmed crown, and grips a golden mace; his expression is stern.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_CATHERINE_DE_MEDICI" Language="en_US">
+      <Text>A pale woman in an elaborate black Renaissance gown with puffed shoulders, a high white lace ruff, and a black veil over dark hair bound by a jeweled band. Cross-shaped studs dot the bodice; her hands are folded and her expression is cool and watchful.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_CLEOPATRA" Language="en_US">
+      <Text>A young woman in Egyptian royal regalia: a golden vulture headdress fronted by a rearing cobra, a chin-length black wig, and heavy purple-and-black eye makeup. She wears a broad turquoise-and-gold collar over a white pleated gown with a jeweled winged bodice, and gold armbands; her hands are clasped.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_GILGAMESH" Language="en_US">
+      <Text>A powerfully built man with a thick black beard, bare-chested beneath a teal striped tunic with a gold-embroidered border and a red waist sash. Ornate gold shoulder guards and a red-and-gold headband complete the look; his stance is broad and confident.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_GORGO" Language="en_US">
+      <Text>A warrior woman in a deep-red one-shouldered Greek chiton with gold trim, a leather baldric across the chest, and a bronze armband. Her dark hair is pulled back, she wears a hoop earring, and she holds a tall spear upright.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_HARDRADA" Language="en_US">
+      <Text>A rugged Norse warrior with long dark hair and a braided beard, in scale armor over a tunic with a red cloak clasped at the shoulder by a round gold brooch. A broad belt and leather bracers complete the gear; his look is hard and weathered.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_HOJO" Language="en_US">
+      <Text>A tall Japanese samurai lord in a blue overrobe bearing white triangular crest emblems, tied with a thick white sash, over an olive under-kimono. A sword is thrust through the sash and one forearm wears a dark armored guard; his expression is calm.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_MONTEZUMA" Language="en_US">
+      <Text>An Aztec ruler, bare-chested and lean, wearing a towering headdress of bright green quetzal feathers and a gold turquoise-inlaid helmet-mask. A wide gold collar, gold armbands, and a jade nose ornament adorn him; he holds a feathered staff.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_MVEMBA" Language="en_US">
+      <Text>A slender African king with close-cropped hair, bare-chested with an ochre wrap over one shoulder and beaded multicolored necklaces. He wears a beaded headband topped with bright yellow and orange feathers and holds a tall ceremonial staff tipped with the same plumes.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_PEDRO" Language="en_US">
+      <Text>A tall man in a dark 19th-century military dress uniform with heavy gold-fringed epaulettes, a sash, and jeweled star medals on the chest. He has swept-back brown hair and a full brown beard and mustache; his brow is slightly furrowed.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_PERICLES" Language="en_US">
+      <Text>An older Greek statesman with a full grey beard, wearing a domed bronze Corinthian helmet pushed back on his head and a draped white toga with a gold Greek-key border. A leather strap crosses his chest; his expression is dignified and weary.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_PETER_GREAT" Language="en_US">
+      <Text>A tall man with dark swept-back hair and a thin curled mustache, in a dark green military coat with a red gold-embroidered collar and cuffs over a white cravat and shirt. His bearing is upright and imperious.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_PHILIP_II" Language="en_US">
+      <Text>A man in dark Spanish court armor with a high white ruff collar, puffed maroon sleeves, and a fluted breastplate. He has a pointed dark beard and mustache and a gold pendant; a gauntleted hand rests near a sword hilt, and he wears a faint smile.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_QIN" Language="en_US">
+      <Text>A Chinese emperor with a long black beard and mustache, wearing a flat mortarboard-style crown hung with strings of beads, and dark robes with red and gold borders over a rust-red underlayer. A gold dragon clasp sits at the waist sash; his expression is imposing.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_T_ROOSEVELT" Language="en_US">
+      <Text>A stocky man in a dark brown suit with a waistcoat, tie, and a small lapel pin, wearing round spectacles, with a bristly dark mustache and neatly parted hair. He looks direct and genial.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_SALADIN" Language="en_US">
+      <Text>A dignified man in flowing pale robes with gold-embroidered borders over a brown tunic, and a tall white turban wrapped around a peaked cap set with a dark jewel. He has a neat dark beard and mustache; his hands are gently clasped.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_TOMYRIS" Language="en_US">
+      <Text>A steppe warrior queen in lamellar armor of overlapping golden scales over a deep blue and purple robe, with a red collar. She wears a domed gold helmet with a fish-shaped crest, long dark braids, and a sheathed dagger; her look is fierce.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_TRAJAN" Language="en_US">
+      <Text>A Roman emperor in a muscled steel cuirass with gilded winged shoulder guards and a red tunic, over a skirt of leather strips studded with gold bosses. A laurel wreath crowns his greying hair and he holds a sword; his face is lean and composed.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_VICTORIA" Language="en_US">
+      <Text>A young queen in an off-the-shoulder cream ball gown with a blue sash across the bodice, a jeweled brooch, and a garnet necklace. A small silver crown sits on her parted brown hair; her hands are folded and her expression is composed.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_CHANDRAGUPTA" Language="en_US">
+      <Text>A muscular man, bare-chested with a draped orange sash, wearing a large blue turban set with a red jewel and a broad gold collar necklace inlaid with gems. Wide jeweled armbands and a gemmed belt complete the regalia; his mustachioed face is confident.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_DIDO" Language="en_US">
+      <Text>A woman in a sleeveless magenta gown gathered at the waist with a grey sash, gold trim at the neckline, and a heavy gold torc necklace. Her dark hair is pulled back, she wears a gold hoop earring and bangle, and one hand rests on her hip with a sly half-smile.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_ELEANOR_ENGLAND" Language="en_US">
+      <Text>A blonde noblewoman in a medieval gown of deep red and pale lavender with gold-and-gem trim at the collar and cuffs, holding a small gold goblet. A crown of pink roses rests on her ringleted hair; her expression is gentle.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_ELEANOR_FRANCE" Language="en_US">
+      <Text>A blonde noblewoman in a medieval gown of deep red and pale lavender with jeweled gold trim, holding a small gold goblet with her other hand open in a welcoming gesture. A gold crown set with a blue jewel sits on her long wavy hair; she smiles warmly.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_GENGHIS_KHAN" Language="en_US">
+      <Text>A Mongol warlord with a thin dark goatee, wearing a fur-trimmed cap and layered lamellar armor with a broad studded collar and a round chest disc, over a dark green robe. A wide belt cinches his waist; his gaze is level and hard.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_JADWIGA" Language="en_US">
+      <Text>A young queen in a two-tone gown, one half deep red and the other purple patterned with gold fleurs-de-lis, with a jeweled gold collar and belt and a pearl necklace. A tall gold crown tops her brown hair and she holds a golden lotus-tipped scepter.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_KRISTINA" Language="en_US">
+      <Text>A woman with long brown ringlets in a dark high-collared 17th-century doublet with lace cuffs and rows of gold studs, cradling a large gilt-cornered book. Her expression is thoughtful and self-assured.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_KUPE" Language="en_US">
+      <Text>A powerfully built Polynesian voyager with full facial tattoos, bare-chested with a thick fur cloak over the shoulders and a carved bone pendant at the throat. A red woven wrap with hanging tassels covers his waist; one fist is raised.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_LAURIER" Language="en_US">
+      <Text>An elderly statesman with a full head of white wavy hair, in a blue tailcoat over a brown checked waistcoat and cravat, holding a pair of spectacles. One hand rests on his hip; his expression is genteel and shrewd.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_LAUTARO" Language="en_US">
+      <Text>A young Mapuche warrior, bare-chested and lean, with a patterned woven headband, a simple cord necklace, and leather arm wraps. A patterned sash and a sheathed knife sit at his waist; his arms are crossed and he wears a faint confident smile.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_MANSA_MUSA" Language="en_US">
+      <Text>A heavyset West African king with a full black beard, in a richly patterned blue and gold robe with wide embroidered borders and a matching brimless cap. Gold bangles and a gold ring adorn his hands, clasped over his belly; he smiles warmly.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_MATTHIAS_CORVINUS" Language="en_US">
+      <Text>A man with wavy blond hair and a small laurel crown, in polished plate armor engraved with a raven crest, worn over a blue tunic with a fur-lined cloak. He rests a hand on a sword hilt; his expression is faintly amused.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_PACHACUTI" Language="en_US">
+      <Text>An Inca emperor with a gold feather-topped headband and green plumes, wearing a large round gold sun-face medallion on his chest over an earth-toned tunic and red sash. Broad gold armbands and disc earrings adorn him and he holds a mace; his look is intense.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_POUNDMAKER" Language="en_US">
+      <Text>A Plains Cree chief with very long dark hair and blue-feathered braids, in a fringed tan buckskin coat with beaded and quilled shoulder work over a dark waistcoat. Face paint streaks his cheeks; he holds a slender pipe and looks calm.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_ROBERT_THE_BRUCE" Language="en_US">
+      <Text>A robust bearded king in a yellow surcoat emblazoned with a red rampant lion, worn over mail and a fur-collared cloak, with a gold crown on his brown hair. He grips a sword hilt at his belt; his expression is bold.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_SEONDEOK" Language="en_US">
+      <Text>A Korean queen in a purple and magenta silk robe with gold-embroidered borders and a jeweled belt. An elaborate tall gold crown with green jade drops and dangling earrings frames her face; one hand is raised, and she looks poised.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_SHAKA" Language="en_US">
+      <Text>A tall, muscular Zulu king, bare-chested with a leopard-skin sash and waist wrap, red cord armbands and anklets, and a beaded collar with claw pendants. He wears a red-and-orange feathered headdress and holds a knobbed club and a shield; his look is commanding.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_SULEIMAN" Language="en_US">
+      <Text>An Ottoman sultan with a dark beard, in a green silk kaftan with gold frogging and a fur-lined edge over gold trousers, cinched by a dark sash. A very tall white plumed turban set with a red jewel crowns him; he adjusts his sash calmly.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_TAMAR" Language="en_US">
+      <Text>A Georgian queen with dark braided hair, in a blue brocade gown beneath a cream jeweled surcoat and a wide gem-studded gold collar, with a gold crown. Jeweled cuffs ring her wrists; one hand is raised in a light fist and her expression is serene but firm.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_WILHELMINA" Language="en_US">
+      <Text>A plump, cheerful woman in a brown Victorian riding jacket over a high-collared white blouse with a brooch, and a wide pale hat trimmed with a pink flower. She holds the curved handle of an umbrella and smiles brightly.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_ABRAHAM_LINCOLN" Language="en_US">
+      <Text>A tall, gaunt, pale-skinned man with dark hair parted to one side and a chin-curtain beard running along his jaw with no mustache. Heavy dark brows shade deep-set, careworn eyes, and his expression is grave. He wears a black formal frock coat with a white shirt and a dark bow tie.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_AL_HAKAM_II" Language="en_US">
+      <Text>Shown as a muted, sculptural bust in a single earthy tone. An elderly man with a deeply lined, weathered face, a long thin beard and a prominent hooked nose, his head wrapped in a cloth turban. The mood is grave and austere.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_AMBIORIX" Language="en_US">
+      <Text>A fierce, pale-skinned warrior with wild, spiky ginger-red hair swept upward and a long red mustache drooping past his chin. Bright blue eyes glare from under a furrowed brow, and a thick twisted golden torc rings his bare neck.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_BASIL_II" Language="en_US">
+      <Text>An older man with grey hair and a full grey beard, crowned with an ornate gold Byzantine diadem set with blue and red jewels and hung with small pendants. He wears armour with a round gold medallion at the chest; the look is stern and imperial.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_BASIL" Language="en_US">
+      <Text>An older man with grey hair and a full grey beard, crowned with an ornate gold Byzantine diadem set with blue and red jewels and hung with small pendants. He wears armour with a round gold medallion at the chest; the look is stern and imperial.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_CATHERINE_DE_MEDICI_ALT" Language="en_US">
+      <Text>A woman whose face is hidden behind an elaborate gold-and-white Venetian masquerade mask trimmed with a pink feather, leaving only her painted lips and chin visible. A stiff white lace ruff frames her neck, and her dark hair is pinned up; the effect is ornate and mysterious.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_CHARLEMAGNE" Language="en_US">
+      <Text>Shown as a muted, sculptural bust in a single earthy tone. A solemn king with a long forked beard and shoulder-length hair, wearing a medieval crown. The monochrome, statue-like treatment gives him a monumental, austere presence.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_CLEOPATRA_ALT" Language="en_US">
+      <Text>A young Egyptian queen with a sleek black bob worn under a gold headband, dramatic purple and pink eye make-up, and a broad gold collar with gold earrings and blue accents. Her expression is poised and alluring.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_CNUT" Language="en_US">
+      <Text>Shown as a muted, sculptural bust in a single earthy tone. A gaunt older man with a long, narrow face, deep-set eyes and thin hair swept back from a high brow. Hollow-cheeked and severe.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_ELIZABETH" Language="en_US">
+      <Text>A pale woman with red hair curled and pinned up beneath a small jewelled crown of gold and blue, wearing pearl drop earrings and a very tall white lace ruff that stands out around her neck. Her expression is cool and composed.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_HAMMURABI" Language="en_US">
+      <Text>A man whose thick dark beard falls in tight Babylonian ringlets, wearing a tall ornate cylindrical crown of gold and blue tiles and a single gold hoop earring. His eyes are fierce and intense beneath heavy brows.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_HARALD_ALT" Language="en_US">
+      <Text>A grey-bearded Norse king in an ornate war helmet of green-patinated bronze and gold, fitted with a face guard over the eyes, worn over mail and armour. He looks battle-hardened and grim.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_JOAO_III" Language="en_US">
+      <Text>A bearded man in a black flat Renaissance cap set with a jewel, dark hair to the jaw, wearing a heavy coat with a thick fur collar and a gold chain. His look is dignified and reserved.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_JOHN_CURTIN" Language="en_US">
+      <Text>A twentieth-century man in round wire-rimmed glasses and a pale soft-brimmed fedora, wearing a grey suit with a striped shirt and a red tie. His expression is mild and thoughtful.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_JULIUS_CAESAR" Language="en_US">
+      <Text>A lean, pale man crowned with a golden laurel wreath over short hair, his face stern and slightly frowning. A red cloak is draped over one shoulder of his armour.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_KUBLAI_KHAN_CHINA" Language="en_US">
+      <Text>An older man with greying hair and a long, forked grey beard and thin mustache, wearing a small cap and a golden robe against a deep red ground. His expression carries calm authority.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_LADY_SIX_SKY" Language="en_US">
+      <Text>A Maya woman with brown skin, crowned with an elaborate jade-green headdress topped by a star-shaped medallion and green feathers. She wears large jade ear ornaments, and a blue line is painted down her forehead and nose.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_LADY_TRIEU" Language="en_US">
+      <Text>A Vietnamese woman with dark hair drawn smoothly back beneath an ornate green-and-gold patterned headpiece. Her features are calm and composed, and the gold hilt of a sword rests at her shoulder.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_MENELIK" Language="en_US">
+      <Text>A dark-skinned bearded man in a wide-brimmed black hat, wearing a richly gold-embroidered robe under a dark cloak. His look is stately and assured.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_NADER_SHAH" Language="en_US">
+      <Text>A dark-bearded man wearing a tall Persian crown of gold set with a large green emerald and rows of pearls. His gaze is proud and martial.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_NZINGA_MBANDE" Language="en_US">
+      <Text>A dark-skinned woman with a natural afro, crowned with a pointed gold crown. She wears gold hoop earrings and a gold necklace strung with green beads; her expression is calm and confident.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_OLOF" Language="en_US">
+      <Text>Shown as a muted, sculptural bust in a single earthy tone. A Viking with a conical helmet and nose-guard, a long braided beard and fur at the shoulders. He looks weathered and grim.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_QIN_ALT" Language="en_US">
+      <Text>A Chinese emperor wearing a black winged court cap, with a long, thin forked black beard and mustache and gilded armour. His look is shrewd and commanding.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_RAMSES" Language="en_US">
+      <Text>An Egyptian pharaoh in an ornate blue-and-gold striped nemes headcloth bearing a rearing cobra and a round sun disk at the brow, with a broad gold collar. He looks youthful and proud.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_SALADIN_ALT" Language="en_US">
+      <Text>A dark-bearded man in a pointed steel helmet trimmed with gold and a chainmail coif around the face, his eyes wide and alert. He looks every inch a warrior sultan.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_SIMON_BOLIVAR" Language="en_US">
+      <Text>A man with dark hair, prominent curling sideburns and expressive arched eyebrows, wearing a dark military tunic with a high collar and red trim. A faint, confident smile plays on his lips.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_TOKUGAWA" Language="en_US">
+      <Text>An older Japanese man with a grey, shaved-front topknot, a thin mustache and a small chin beard, his mouth set in a stern line, wearing a pale robe. His bearing is severe and controlled.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_T_ROOSEVELT_ROUGHRIDER" Language="en_US">
+      <Text>A man in a broad-brimmed brown cavalry hat and round spectacles, with a bushy mustache, wearing a khaki military uniform. He looks rugged and hearty.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_VICTORIA_ALT" Language="en_US">
+      <Text>A woman in a wide-brimmed brown hat with a ribbon and a pale high-necked blouse fastened with a green brooch, her brown hair pinned up. Her expression is cool and composed.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_WU_ZETIAN" Language="en_US">
+      <Text>A Chinese empress in an elaborate gold phoenix headdress set with red gems and hung with dangling strings of pearls, an ornament marking her forehead and her face painted. Her look is imperious.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_YONGLE" Language="en_US">
+      <Text>A Chinese emperor with a dark winged cap, a thin mustache and beard, wearing a yellow imperial robe. His expression is calm and composed.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_ALEXANDER" Language="en_US">
+      <Text>A young, clean-shaven man with long light-brown hair swept back from his face, blue eyes and a broad, boyish grin. He wears burnished armour, and his look is eager and confident.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_AMANITORE" Language="en_US">
+      <Text>A dark-skinned Nubian queen with short hair, wearing a gold headband set with a red triangular jewel at the brow and a broad gold collar, with warm, smiling features. Her look is gracious and assured.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_CYRUS" Language="en_US">
+      <Text>A bearded man with dark hair bound by a gold diadem, wearing armour, his intense eyes lifted as if to the horizon. His bearing is proud and commanding.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_GITARJA" Language="en_US">
+      <Text>An Indonesian queen with a warm smile, a single white frangipani flower tucked over one ear and an ornate gold, jewel-studded headdress, with gold ear ornaments. Her look is serene and gracious.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_JAYAVARMAN" Language="en_US">
+      <Text>An older, bald, brown-skinned man with a gentle smile and bare shoulders, wearing a beaded green-and-gold necklace at his throat. His expression is calm and benevolent.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_LUDWIG" Language="en_US">
+      <Text>A pale young man with wavy dark-brown hair, a small mustache and pointed goatee, wearing a red military tunic with a high gold-trimmed collar. His look is refined and dreamy.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_SEJONG" Language="en_US">
+      <Text>A Korean king in a black winged court cap, with a thin mustache and a long, narrow chin beard, wearing a red robe. His expression is calm and scholarly.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_SULEIMAN_ALT" Language="en_US">
+      <Text>An older bearded man in a large white turban set with a big green emerald and blue jewels, his grey-flecked beard full and his gaze steady. He looks dignified and magnificent.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_SUNDIATA_KEITA" Language="en_US">
+      <Text>A dark-skinned man with a short black beard, wearing a purple-and-gold turban topped with a gold crown band. His look is calm and dignified.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_THEODORA" Language="en_US">
+      <Text>A Byzantine empress with dark hair, wearing an ornate jewelled crown hung with strings of pearls and set with red and green gems, and long pearl-and-red earrings. Her pale face is composed and regal.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_LEADERDESC_LEADER_KUBLAI_KHAN_MONGOLIA" Language="en_US">
+      <Text>An older man with greying hair and a long, forked grey beard and thin mustache, wearing a small cap and a golden robe against a deep red ground. His expression carries calm authority.</Text>
+    </Row>
+  </LocalizedText>
+</GameData>

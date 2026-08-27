@@ -2035,16 +2035,22 @@ local function BuildLeaderDropdownOptions(playerId)
 	for i, v in ipairs(param.Values) do
 		local invalidReason = CAI_GetInvalidReasonText(v)
 		local tooltip = CAI_AppendExplanation(BuildLeaderTooltip(v.Domain, v.Value), invalidReason)
-		local label = v.Name or ""
+		local leaderName = v.Name or ""
+		local label = leaderName
+		local civName = ""
 		local info = v.Domain and v.Value and GetPlayerInfo(v.Domain, v.Value)
 		if info and info.CivilizationName then
-			label = label .. ", " .. Locale.Lookup(info.CivilizationName)
+			civName = Locale.Lookup(info.CivilizationName)
+			label = label .. ", " .. civName
 		end
 		label = CAI_AppendExplanation(label, invalidReason)
 		table.insert(options, {
 			label = label,
 			tooltip = tooltip,
 			value = v,
+			leaderName = leaderName,
+			civName = civName,
+			leaderType = v.Value,
 		})
 		if selectedIdx == 0 and param.Value and v.Value == param.Value.Value then
 			selectedIdx = i
@@ -2123,41 +2129,45 @@ local function LeaderTooltipForPlayer(playerId)
 	return CAI_AppendExplanation(tooltip, CAI_GetInvalidReasonText(lp.Value))
 end
 
-local function MakeLeaderDropdown()
-	local dd = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_LeaderDD"), "Dropdown", {
-		Label = function() return Locale.Lookup("LOC_SETUP_CIVILIZATION") end,
-		Tooltip = function() return LeaderTooltipForPlayer(m_singlePlayerID) end,
-	})
-	dd:SetHiddenPredicate(function()
-		return Controls.CreateGame_LocalPlayerContainer:IsHidden()
-			or (Controls.Basic_LocalPlayerPulldown and Controls.Basic_LocalPlayerPulldown.IsHidden
-				and Controls.Basic_LocalPlayerPulldown:IsHidden())
-	end)
-	dd:SetDisabledPredicate(function()
-		local ctrl = Controls.Basic_LocalPlayerPulldown
-		return ctrl and ctrl.IsDisabled and ctrl:IsDisabled()
-	end)
-	dd:SetFocusSound(HOVER_SOUND)
+local function LeaderLabelForPlayer(playerId)
+	local options, idx = BuildLeaderDropdownOptions(playerId)
+	local opt = idx > 0 and options[idx] or nil
+	return opt and opt.label or ""
+end
 
-	local options, idx = BuildLeaderDropdownOptions(m_singlePlayerID)
-	dd:SetOptions(options)
-	if idx > 0 then dd:SetSelectedIndex(idx, true) end
-
-	dd:SetValueSetter(function(_, val)
-		local parameters = GetPlayerParameters(m_singlePlayerID)
-		if parameters then
-			local param = parameters.Parameters and parameters.Parameters["PlayerLeader"]
-			if param then
-				parameters:SetParameterValue(param, val)
-				local colorParam = parameters.Parameters["PlayerColorAlternate"]
-				if colorParam then parameters:SetParameterValue(colorParam, 0) end
-				Network.BroadcastGameConfig()
-			end
+local function SetPlayerLeaderValue(playerId, val)
+	local parameters = GetPlayerParameters(playerId)
+	if parameters then
+		local param = parameters.Parameters and parameters.Parameters["PlayerLeader"]
+		if param then
+			parameters:SetParameterValue(param, val)
+			local colorParam = parameters.Parameters["PlayerColorAlternate"]
+			if colorParam then parameters:SetParameterValue(colorParam, 0) end
+			Network.BroadcastGameConfig()
 		end
-	end)
+	end
+end
 
-	m_basicDropdowns["PlayerLeader"] = dd
-	return dd
+local function MakeLeaderDropdown()
+	return mgr.WidgetHelpers.CreateLeaderPickerButton({
+		id = mgr:GenerateWidgetId("CAISetup_LeaderPick"),
+		panelId = "CAISetup_LeaderPicker",
+		label = function() return Locale.Lookup("LOC_SETUP_CIVILIZATION") end,
+		tooltip = function() return LeaderTooltipForPlayer(m_singlePlayerID) end,
+		getSelectedLabel = function() return LeaderLabelForPlayer(m_singlePlayerID) end,
+		getOptions = function() return BuildLeaderDropdownOptions(m_singlePlayerID) end,
+		onSelect = function(val) SetPlayerLeaderValue(m_singlePlayerID, val) end,
+		hiddenPredicate = function()
+			return Controls.CreateGame_LocalPlayerContainer:IsHidden()
+				or (Controls.Basic_LocalPlayerPulldown and Controls.Basic_LocalPlayerPulldown.IsHidden
+					and Controls.Basic_LocalPlayerPulldown:IsHidden())
+		end,
+		disabledPredicate = function()
+			local ctrl = Controls.Basic_LocalPlayerPulldown
+			return ctrl and ctrl.IsDisabled and ctrl:IsDisabled()
+		end,
+		focusSound = HOVER_SOUND,
+	})
 end
 
 -- ---------------------------------------------------------------------------
@@ -2311,37 +2321,27 @@ local function BuildAdvPlayerSection()
 	})
 	localItem:SetFocusSound(HOVER_SOUND)
 
-	-- Local leader dropdown
-	local locLeaderDD = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_LocLeaderDD"), "Dropdown", {
-		Label = function() return Locale.Lookup("LOC_SETUP_CIVILIZATION") end,
-		Tooltip = function() return LeaderTooltipForPlayer(m_singlePlayerID) end,
-		FocusKey = "player_local_leader",
+	-- Local leader picker
+	local locLeaderDD = mgr.WidgetHelpers.CreateLeaderPickerButton({
+		id = mgr:GenerateWidgetId("CAISetup_LocLeaderPick"),
+		panelId = "CAISetup_LeaderPicker",
+		label = function() return Locale.Lookup("LOC_SETUP_CIVILIZATION") end,
+		tooltip = function() return LeaderTooltipForPlayer(m_singlePlayerID) end,
+		getSelectedLabel = function() return LeaderLabelForPlayer(m_singlePlayerID) end,
+		getOptions = function() return BuildLeaderDropdownOptions(m_singlePlayerID) end,
+		onSelect = function(val) SetPlayerLeaderValue(m_singlePlayerID, val) end,
+		focusKey = "player_local_leader",
+		hiddenPredicate = function()
+			local ctrl = Controls.Advanced_LocalPlayerPulldown
+			return Controls.CreateGame_LocalPlayerContainer:IsHidden()
+				or (ctrl and ctrl.IsHidden and ctrl:IsHidden())
+		end,
+		disabledPredicate = function()
+			local ctrl = Controls.Advanced_LocalPlayerPulldown
+			return ctrl and ctrl.IsDisabled and ctrl:IsDisabled()
+		end,
+		focusSound = HOVER_SOUND,
 	})
-	locLeaderDD:SetHiddenPredicate(function()
-		local ctrl = Controls.Advanced_LocalPlayerPulldown
-		return Controls.CreateGame_LocalPlayerContainer:IsHidden()
-			or (ctrl and ctrl.IsHidden and ctrl:IsHidden())
-	end)
-	locLeaderDD:SetDisabledPredicate(function()
-		local ctrl = Controls.Advanced_LocalPlayerPulldown
-		return ctrl and ctrl.IsDisabled and ctrl:IsDisabled()
-	end)
-	locLeaderDD:SetFocusSound(HOVER_SOUND)
-	local lOpts, lIdx = BuildLeaderDropdownOptions(m_singlePlayerID)
-	locLeaderDD:SetOptions(lOpts)
-	if lIdx > 0 then locLeaderDD:SetSelectedIndex(lIdx, true) end
-	locLeaderDD:SetValueSetter(function(_, val)
-		local parameters = GetPlayerParameters(m_singlePlayerID)
-		if parameters then
-			local param = parameters.Parameters and parameters.Parameters["PlayerLeader"]
-			if param then
-				parameters:SetParameterValue(param, val)
-				local colorParam = parameters.Parameters["PlayerColorAlternate"]
-				if colorParam then parameters:SetParameterValue(colorParam, 0) end
-				Network.BroadcastGameConfig()
-			end
-		end
-	end)
 	localItem:AddChild(locLeaderDD)
 
 	-- Local color dropdown
@@ -2411,34 +2411,35 @@ local function BuildAdvPlayerSection()
 			local playerNum = aiIndex + 1
 			local playerConfig = PlayerConfigurations[pid]
 
-			local aiDD = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_AIDD"), "Dropdown", {
-				Label = function()
+			local aiDD = mgr.WidgetHelpers.CreateLeaderPickerButton({
+				id = mgr:GenerateWidgetId("CAISetup_AIPick"),
+				panelId = "CAISetup_LeaderPicker",
+				label = function()
 					return Locale.Lookup("LOC_CAI_PLAYER") .. " " .. playerNum
 				end,
-				Tooltip = function() return LeaderTooltipForPlayer(pid) end,
-				FocusKey = "player_ai_" .. pid,
-			})
-			aiDD:SetFocusSound(HOVER_SOUND)
-			local aiOpts, aiIdx = BuildLeaderDropdownOptions(pid)
-			aiDD:SetOptions(aiOpts)
-			if aiIdx > 0 then aiDD:SetSelectedIndex(aiIdx, true) end
-			aiDD:SetDisabledPredicate(function()
-				local params = GetPlayerParameters(pid)
-				local lp = params and params.Parameters and params.Parameters["PlayerLeader"]
-				return not lp or not lp.Enabled or not lp.Values or #lp.Values <= 1
-			end)
-			aiDD:SetValueSetter(function(_, val)
-				local params = GetPlayerParameters(pid)
-				if params then
-					local lp = params.Parameters and params.Parameters["PlayerLeader"]
-					if lp then
-						params:SetParameterValue(lp, val)
-						local colorParam = params.Parameters["PlayerColorAlternate"]
-						if colorParam then params:SetParameterValue(colorParam, 0) end
-						Network.BroadcastGameConfig()
+				tooltip = function() return LeaderTooltipForPlayer(pid) end,
+				getSelectedLabel = function() return LeaderLabelForPlayer(pid) end,
+				getOptions = function() return BuildLeaderDropdownOptions(pid) end,
+				onSelect = function(val)
+					local params = GetPlayerParameters(pid)
+					if params then
+						local lp = params.Parameters and params.Parameters["PlayerLeader"]
+						if lp then
+							params:SetParameterValue(lp, val)
+							local colorParam = params.Parameters["PlayerColorAlternate"]
+							if colorParam then params:SetParameterValue(colorParam, 0) end
+							Network.BroadcastGameConfig()
+						end
 					end
-				end
-			end)
+				end,
+				focusKey = "player_ai_" .. pid,
+				disabledPredicate = function()
+					local params = GetPlayerParameters(pid)
+					local lp = params and params.Parameters and params.Parameters["PlayerLeader"]
+					return not lp or not lp.Enabled or not lp.Values or #lp.Values <= 1
+				end,
+				focusSound = HOVER_SOUND,
+			})
 
 			if can_remove then
 				aiDD:AddInputBindings({
@@ -3101,6 +3102,7 @@ end)
 -- ---------------------------------------------------------------------------
 local function ClosePanel()
 	RemoveConflictDialog()
+	mgr.WidgetHelpers.RemoveLeaderPickerPanel("CAISetup_LeaderPicker")
 	if CAI_Panel then
 		mgr:RemoveFromStack(CAI_Panel:GetId())
 	end
@@ -3111,6 +3113,7 @@ end
 -- ---------------------------------------------------------------------------
 OnShow = WrapFunc(OnShow, function(orig)
 	RemoveConflictDialog()
+	mgr.WidgetHelpers.RemoveLeaderPickerPanel("CAISetup_LeaderPicker")
 	if CAI_Panel then
 		mgr:RemoveFromStack(CAI_Panel:GetId())
 		CAI_Panel:Destroy()

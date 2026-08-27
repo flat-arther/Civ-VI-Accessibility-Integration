@@ -669,11 +669,32 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_DISASTERS" Language="pl_PL">
       <Text>Klęski żywiołowe</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_GROUP_STORMS" Language="pl_PL">
+      <Text>Burze</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_GROUP_DROUGHTS" Language="pl_PL">
+      <Text>Susze</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_GROUP_VOLCANOES" Language="pl_PL">
+      <Text>Wulkany</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_DROUGHT" Language="pl_PL">
       <Text>{1_Label}, pozostało tur: {2_Turns}</Text>
     </Replace>
-    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_ERUPTION" Language="pl_PL">
-      <Text>{1_Label}, erupcja</Text>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_VOLCANO_NAMED" Language="pl_PL">
+      <Text>Wulkan {1_Name}, {2_Status}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_DISASTER_VOLCANO" Language="pl_PL">
+      <Text>Wulkan, {1_Status}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_VOLCANO_STATUS_INACTIVE" Language="pl_PL">
+      <Text>nieaktywny</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_VOLCANO_STATUS_ACTIVE" Language="pl_PL">
+      <Text>aktywny</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_VOLCANO_STATUS_ERUPTING" Language="pl_PL">
+      <Text>erupcja</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_BONUS" Language="pl_PL">
       <Text>Bonusowe</Text>
@@ -945,6 +966,60 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT2_PREV_TOOLTIP" Language="pl_PL">
       <Text>Przechodzi do poprzedniego elementu w podkategorii przypisanej do gniazda 2, posortowanej od najbliższych</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_ASSIGN" Language="pl_PL">
+      <Text>Przypisz podkategorię do gniazda skanera 3</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_ASSIGN_TOOLTIP" Language="pl_PL">
+      <Text>Przypisuje bieżącą podkategorię skanera świata do gniazda 3 w celu szybkiego dostępu</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_NEXT" Language="pl_PL">
+      <Text>Następny element w gnieździe skanera 3</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_NEXT_TOOLTIP" Language="pl_PL">
+      <Text>Przechodzi do następnego elementu w podkategorii przypisanej do gniazda 3, posortowanej od najbliższych</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_PREV" Language="pl_PL">
+      <Text>Poprzedni element w gnieździe skanera 3</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT3_PREV_TOOLTIP" Language="pl_PL">
+      <Text>Przechodzi do poprzedniego elementu w podkategorii przypisanej do gniazda 3, posortowanej od najbliższych</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_ASSIGN" Language="pl_PL">
+      <Text>Przypisz podkategorię do gniazda skanera 4</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_ASSIGN_TOOLTIP" Language="pl_PL">
+      <Text>Przypisuje bieżącą podkategorię skanera świata do gniazda 4 w celu szybkiego dostępu</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_NEXT" Language="pl_PL">
+      <Text>Następny element w gnieździe skanera 4</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_NEXT_TOOLTIP" Language="pl_PL">
+      <Text>Przechodzi do następnego elementu w podkategorii przypisanej do gniazda 4, posortowanej od najbliższych</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_PREV" Language="pl_PL">
+      <Text>Poprzedni element w gnieździe skanera 4</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT4_PREV_TOOLTIP" Language="pl_PL">
+      <Text>Przechodzi do poprzedniego elementu w podkategorii przypisanej do gniazda 4, posortowanej od najbliższych</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_ASSIGN" Language="pl_PL">
+      <Text>Przypisz podkategorię do gniazda skanera 5</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_ASSIGN_TOOLTIP" Language="pl_PL">
+      <Text>Przypisuje bieżącą podkategorię skanera świata do gniazda 5 w celu szybkiego dostępu</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_NEXT" Language="pl_PL">
+      <Text>Następny element w gnieździe skanera 5</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_NEXT_TOOLTIP" Language="pl_PL">
+      <Text>Przechodzi do następnego elementu w podkategorii przypisanej do gniazda 5, posortowanej od najbliższych</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_PREV" Language="pl_PL">
+      <Text>Poprzedni element w gnieździe skanera 5</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SLOT5_PREV_TOOLTIP" Language="pl_PL">
+      <Text>Przechodzi do poprzedniego elementu w podkategorii przypisanej do gniazda 5, posortowanej od najbliższych</Text>
+    </Replace>
 
     <!-- LaunchBar / PartialScreenHooks / Civilopedia screen shortcuts -->
     <Replace Tag="LOC_CAI_OPEN_CIVILOPEDIA" Language="pl_PL">
@@ -976,6 +1051,27 @@
     </Replace>
     <Replace Tag="LOC_CAI_OPEN_TECH_TREE_TOOLTIP" Language="pl_PL">
       <Text>Otwiera drzewo technologii</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LAUNCH_BAR" Language="pl_PL">
+      <Text>Pasek dostępu</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_OPEN_LAUNCH_BAR" Language="pl_PL">
+      <Text>Otwórz pasek dostępu</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_OPEN_LAUNCH_BAR_TOOLTIP" Language="pl_PL">
+      <Text>Otwiera listę ekranów gry, z której można wybrać jeden do otwarcia.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LAUNCH_ATTENTION_PANTHEON" Language="pl_PL">
+      <Text>Można założyć panteon</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LAUNCH_GOVERNOR_TITLES" Language="pl_PL">
+      <Text>Dostępne tytuły gubernatora: {1_Num}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LAUNCH_NO_NOTIFICATIONS" Language="pl_PL">
+      <Text>Brak powiadomień</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LAUNCH_NOTIFICATION_COUNT" Language="pl_PL">
+      <Text>Powiadomienia: {1_Num}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_OPEN_CIVICS_TREE" Language="pl_PL">
       <Text>Otwórz drzewo idei</Text>
@@ -3905,7 +4001,7 @@
       <Text>Otwórz listę soczewek</Text>
     </Replace>
     <Replace Tag="LOC_CAI_MINIMAP_OPEN_LENS_LIST_TOOLTIP" Language="pl_PL">
-      <Text>Otwiera dostępną listę soczewek minimapy.</Text>
+      <Text>Lista soczewek mapy, które wyróżniają pola według motywu, np. soczewki religii, atrakcyjności, lojalności i właściciela.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_MINIMAP_LENS_LIST" Language="pl_PL">
       <Text>Lista soczewek</Text>
@@ -4456,6 +4552,33 @@
     </Replace>
     <Replace Tag="LOC_CAI_DIPLO_RIBBON_OPEN_CONGRESS_TOOLTIP" Language="pl_PL">
       <Text>Otwiera ekran Kongresu Światowego</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_ORDER_BY" Language="pl_PL">
+      <Text>Sortuj przywódców według</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_CAPITAL" Language="pl_PL">
+      <Text>Stolica</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_SCORE" Language="pl_PL">
+      <Text>Wynik</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_FAVOR" Language="pl_PL">
+      <Text>Przychylność</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_MILITARY" Language="pl_PL">
+      <Text>Wojsko</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_SCIENCE" Language="pl_PL">
+      <Text>Nauka</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_CULTURE" Language="pl_PL">
+      <Text>Kultura</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_GOLD" Language="pl_PL">
+      <Text>Złoto</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLO_RIBBON_COL_FAITH" Language="pl_PL">
+      <Text>Wiara</Text>
     </Replace>
 
     <!-- Era Complete Popup -->
@@ -7362,6 +7485,12 @@
       <Text>Wymagana energia</Text>
     </Replace>
     <!-- Quick Deals (mod) accessibility -->
+    <Replace Tag="LOC_CAI_QD_LAUNCH_TOOLTIP" Language="pl_PL">
+      <Text>Sprzedawaj, kupuj lub wymieniaj przedmioty ze wszystkimi poznanymi przywódcami naraz.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_QD_NOT_YOUR_TURN" Language="pl_PL">
+      <Text>Dostępne tylko w twojej turze</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_QD_AI_OFFERS" Language="pl_PL">
       <Text>Oferty SI</Text>
     </Replace>
@@ -7571,6 +7700,13 @@
     </Replace>
     <Replace Tag="LOC_CAI_DIPLO_COLUMN_ALLIANCE" Language="pl_PL">
       <Text>Sojusz</Text>
+    </Replace>
+    <!-- Leader-description keybinding + fallback (CAI) -->
+    <Replace Tag="LOC_CAI_KB_LEADER_DESCRIPTION" Language="pl_PL">
+      <Text>Odczytaj opis przywódcy</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_LEADERDESC_NONE" Language="pl_PL">
+      <Text>Brak opisu tego przywódcy.</Text>
     </Replace>
   </LocalizedText>
 </GameData>

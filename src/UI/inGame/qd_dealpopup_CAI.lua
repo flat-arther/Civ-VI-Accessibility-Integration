@@ -841,4 +841,51 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
     end
     return orig(input)
 end)
+
+-- ===========================================================================
+--  Open hotkey: fire on input-action START, not the repeating TRIGGERED event
+--
+-- Quick Deals' base (QD_Initialize) opens the popup from
+-- Events.InputActionTriggered, which can fire repeatedly while the action is
+-- held. Match the CAI Launch Bar: retire the triggered registration and drive
+-- the vanilla open handler from Events.InputActionStarted so OpenQDPopup fires
+-- once. QD_Initialize already ran at include time, so the triggered handler is
+-- live and can be swapped here directly.
+-- ===========================================================================
+Events.InputActionTriggered.Remove(OnInputActionTriggered)
+Events.InputActionStarted.Add(OnInputActionTriggered)
+
+-- ===========================================================================
+--  Launch Bar registration (Shift+Tab)
+--
+-- Quick Deals is otherwise reachable only through its own OpenQDPopup hotkey.
+-- Add it to the CAI Launch Bar screen list so it can be found alongside every
+-- other screen. This context only loads when the Quick Deals mod is active, so
+-- the row is present exactly when Quick Deals is. The popup ignores opens
+-- outside the local player's turn, so the row is disabled then with a reason.
+-- ===========================================================================
+local m_qdLaunchDef = {
+    id     = "quick_deals",
+    title  = "LOC_QD_NAME",
+    action = "OpenQDPopup",
+    desc   = "LOC_CAI_QD_LAUNCH_TOOLTIP",
+    gate   = function() return true end,
+    reason = function()
+        local pid = Game.GetLocalPlayer()
+        if pid == nil or pid < 0 or not Players[pid]:IsTurnActive() then
+            return Locale.Lookup("LOC_CAI_QD_NOT_YOUR_TURN")
+        end
+        return nil
+    end,
+    open = function() LuaEvents.QD_ToggleDealPopup() end,
+}
+
+local function RegisterQuickDealsLaunchAction()
+    LuaEvents.CAILaunchBar_RegisterAction(m_qdLaunchDef)
+end
+
+-- Register now (the launch bar may already be listening) and again whenever it
+-- asks add-ons to re-register (it may load after us).
+LuaEvents.CAILaunchBar_RequestRegistrations.Add(RegisterQuickDealsLaunchAction)
+RegisterQuickDealsLaunchAction()
 ContextPtr:SetInputHandler(OnInputHandler, true)

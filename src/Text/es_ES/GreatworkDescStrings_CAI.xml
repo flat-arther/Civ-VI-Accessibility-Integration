@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+  <LocalizedText>
+    <!-- SPANISH -->
+    <!-- Great work image accessibility descriptions (CAI). Keyed by great work type: LOC_CAI_GWDESC_<GREATWORKTYPE>. Appended to the Great Work Showcase details. -->
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ANGUISSOLA_1" Language="es_ES">
+      <Text>Un retrato al óleo de tres jóvenes ricamente vestidas reunidas en torno a un pequeño tablero de ajedrez sobre una mesa cubierta con una alfombra, en un jardín, con árboles frondosos y un brumoso paisaje azul al fondo. La hermana de la izquierda, con vestido de brocado dorado y cuello de encaje, acaba de mover una pieza y alza una mano mientras vuelve la cabeza hacia las demás. La joven de la derecha, de rojo, levanta la mano en respuesta, mientras la más pequeña, en el centro y de verde oscuro, sonríe abiertamente al espectador. Detrás, una anciana sirvienta de ropas sencillas se inclina para mirar. Los rostros, suavemente iluminados, parecen vivos, y las telas están detalladas hasta el bordado.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ANGUISSOLA_2" Language="es_ES">
+      <Text>Un retrato al óleo de tres cuartos de un hombre enjuto y grave, de pie ante un fondo oscuro y liso. Viste el traje de corte negro de un rey español, una rígida gorguera blanca al cuello y el collar del Toisón de Oro; su barba corta y su cabello ralo enmarcan un rostro pálido y atento. Una mano descansa en el respaldo de una silla mientras la otra sostiene un rosario, cuyas cuentas cuelgan. El ambiente es austero y solemne, y la ropa negra se funde con el fondo sombrío.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ANGUISSOLA_3" Language="es_ES">
+      <Text>Un retrato al óleo de tres cuartos de un fraile de pie ante un fondo oscuro. Viste un hábito claro, de color crema y pardo, con capucha sobre los hombros, y sostiene un libro abierto con ambas manos, con un dedo marcando la página. Su cabeza tonsurada está descubierta y ligeramente inclinada, y su rostro, vuelto hacia un lado, refleja una reflexión serena e interior. Una luz cálida recorre los ásperos pliegues de la lana, y el fondo liso concentra toda la atención en la silenciosa figura.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BEHZAD_1" Language="es_ES">
+      <Text>Una miniatura persa, pequeña y repleta de detalle fino. Una batalla densa y arremolinada llena la página: guerreros a caballo con armaduras y túnicas de rojo, azul y naranja vivos chocan entre sí, los caballos se encabritan y ruedan, y las armas destellan en una masa plana y apretada sin perspectiva profunda. Unas colinas rocosas moteadas de oro se alzan arriba, donde algunos paneles de texto persa se recortan sobre azul. Los colores son vivos y como de joya en toda la obra.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BEHZAD_2" Language="es_ES">
+      <Text>Una miniatura persa dominada por un alto palacio de muchos pisos, mostrado como paneles planos de intrincada azulejería azul, turquesa y dorada, con escaleras, puertas, balcones y una pequeña cúpula apilados a lo alto de la página en lugar de retroceder en profundidad. Una pequeña figura con túnica verde se mueve por las estancias superiores. Cada superficie está cubierta de fino ornamento, y toda la escena resplandece de dibujo y color.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BEHZAD_3" Language="es_ES">
+      <Text>Una miniatura persa de un soberano celebrando audiencia. Una figura entronizada de blanco se sienta bajo un ornado pabellón con cúpula en la parte superior derecha, mientras cortesanos con túnicas de colores se yerguen y arrodillan a su alrededor, en un jardín verde oscuro salpicado de florecillas y árboles en flor. No hay una perspectiva única; las numerosas figuras pequeñas y finamente dibujadas se disponen sobre un campo resplandeciente de ornamento y color.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BOSCH_1" Language="es_ES">
+      <Text>Un gran tríptico al óleo de tres paneles unidos, repleto de diminutas figuras. El estrecho panel izquierdo muestra un Paraíso verde donde un Dios con túnica presenta a Eva ante Adán, entre bestias extrañas, junto a una fuente rosada. El amplio panel central es un jardín luminoso y onírico donde bullen cientos de pequeñas figuras desnudas que montan pájaros y peces gigantes, se meten en frutos y bayas descomunales y se bañan en estanques en torno a estructuras rosadas y fantásticas. El panel derecho se hunde en un infierno oscuro de ruinas ardientes, criaturas monstruosas y almas atormentadas, iluminado por hogueras contra un cielo negro. Los colores pasan del verde tierno al brillo festivo y a la oscuridad humeante a lo largo de las tres escenas.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BOSCH_2" Language="es_ES">
+      <Text>Un gran tríptico al óleo cuyos abarrotados paneles central y derecho hierven con el tormento de los condenados. A lo ancho del panel central y hasta el derecho, los pecadores son perseguidos, ensartados y devorados por demonios híbridos entre edificios en ruinas y pequeños fuegos, bajo un cielo oscuro y humeante. En lo alto del centro, un pequeño grupo de bienaventurados y ángeles flota cerca de un cielo lejano. El estrecho panel izquierdo es más luminoso y muestra el verde jardín del Edén y la caída de los ángeles rebeldes. Innumerables figuras diminutas llenan cada rincón, de modo que la mirada no deja de descubrir nuevas crueldades y detalles.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BOSCH_3" Language="es_ES">
+      <Text>Un gran tríptico al óleo construido en torno a una sola imagen sorprendente en el centro: un enorme carro de heno que avanza, cuya carga amontonada se disputa una multitud apretujada que arranca puñados de heno, mientras reyes, un papa y gente común los siguen detrás. Bestias demoníacas y grotescas, uncidas al carro, lo arrastran hacia un infierno ardiente que se abre en el panel derecho, donde más diablos levantan una torre de tormento. El panel izquierdo muestra el Edén y la caída del hombre, desde los ángeles rebeldes hasta la expulsión de Adán y Eva. Muy por encima del carro, Cristo mira desde una nube, ignorado por la codiciosa muchedumbre de abajo.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_CASSATT_1" Language="es_ES">
+      <Text>Un óleo impresionista de una joven sentada en un palco de teatro, inclinada hacia adelante con los brazos cruzados apoyados en la barandilla de felpa roja y el mentón casi sobre las manos. Lleva un vestido de noche claro que deja los hombros al descubierto y mira hacia el patio de butacas. Detrás de ella, el frente dorado y curvo del palco y los pisos del teatro, suavemente iluminados, se sugieren con pinceladas sueltas y cálidas. La luz brilla sobre su piel y el raso, dando una sensación íntima y espontánea de un instante captado en plena función.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_CASSATT_2" Language="es_ES">
+      <Text>Un óleo impresionista visto desde un ángulo alto, mirando hacia abajo a una mujer y un niño pequeño. La mujer, con un vestido de anchas rayas, está sentada e inclinada, con un brazo alrededor del niño desnudo en su regazo; con la otra mano lava con suavidad el pie del pequeño en una palangana poco honda apoyada en el suelo. El niño, rollizo y tranquilo, mira sus propios pies. Una alfombra estampada, un papel pintado de flores y un jarro de agua los rodean en cálidos colores domésticos, y el tierno vínculo entre ambos es el claro corazón de la escena.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_CASSATT_3" Language="es_ES">
+      <Text>Un óleo impresionista de una mujer tomando el té en un salón luminoso. Está sentada en una butaca, con un suave vestido rosa de volantes y un pequeño sombrero, y lleva hacia los labios una delicada taza con su platillo, sosteniéndola con una mano enguantada. En una mesa a su lado hay un reluciente juego de té de plata sobre un mantel de rayas. El papel pintado y la tapicería están pintados con pinceladas sueltas y plumosas de rosa y crema, y toda la escena respira una calma cómoda y refinada, centrada en el gesto sereno de alzar la taza.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_COLLOT_1" Language="es_ES">
+      <Text>Un busto de mármol de un joven, cortado a la altura del pecho y montado sobre una pequeña peana redonda. El cabello le cae en rizos sueltos y viste una casaca abierta con cuello blando. La cabeza gira ligeramente hacia un lado, con los labios entreabiertos como a punto de hablar, lo que da a la pulida piedra blanca un aire vivo e informal. La superficie es lisa y de fina labra, y recoge una luz suave sobre las mejillas y la frente.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_COLLOT_2" Language="es_ES">
+      <Text>Un busto de mármol de una emperatriz, mostrada casi de perfil y sobre una peana. Lleva el cabello recogido hacia atrás y un paño de ropaje cruzado sobre un hombro a la manera clásica. Las facciones son serenas y dignas, con el mentón alzado, lo que transmite una impresión de calma autoridad. El mármol blanco está pulido con suavidad, con detalle nítido en el cabello recogido y los pliegues de la tela.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_COLLOT_3" Language="es_ES">
+      <Text>Un busto de mármol de una joven, cortado bajo los hombros y sobre una peana. Su cabello está peinado hacia atrás con suavidad, enmarcando un rostro ovalado y dulce, y un ropaje ligero cubre el busto. La expresión es tierna y recatada, con la cabeza erguida y una leve calma pensativa. El mármol claro está finamente acabado, con la piel dejada brillante frente a los pliegues más texturados de la tela.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_DONATELLO_1" Language="es_ES">
+      <Text>Una alta estatua de mármol blanco de un hombre barbado de pie con calma, tallada para colocarse en una hornacina. Viste una larga túnica que cae en profundos pliegues verticales y sostiene un libro pegado a una cadera; su peso descansa en una pierna, de modo que el cuerpo se inclina suavemente. El rostro, pensativo y grave bajo una barba poblada, mira fijo al frente. La talla es digna y contenida, y el ropaje da a la figura una presencia fuerte y erguida.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_DONATELLO_2" Language="es_ES">
+      <Text>Una gran estatua ecuestre de bronce alzada sobre un alto pedestal de piedra. Un comandante con armadura monta un enorme caballo de guerra que avanza despacio, con un casco levantado. Sostiene un corto bastón extendido en la mano derecha y una espada al costado, y su rostro severo y afeitado mira al frente con fría autoridad. Caballo y jinete están modelados con un realismo pesado y musculoso, y el bronce oscuro recoge la luz a lo largo de la armadura y del poderoso cuello del caballo.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_DONATELLO_3" Language="es_ES">
+      <Text>Un grupo escultórico de bronce de una mujer a punto de golpear. Una mujer resuelta, con largas túnicas de profundos pliegues, se yergue sobre un hombre que se ha desplomado, ebrio y semidesnudo, en un asiento acolchado bajo ella. Le agarra el cabello con una mano para echarle la cabeza atrás y alza una espada en alto con la otra, con el rostro firme y sereno en el instante previo al golpe mortal. El bronce oscuro está labrado con un ropaje intrincado y una baja base decorada, y las dos figuras entrelazadas forman una pirámide tensa y erguida.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_EOP_1" Language="es_ES">
+      <Text>Una pintura coreana a tinta con color ligero, de tres ancianos reunidos al aire libre para discutir cuál de ellos es el mayor. Los tres viejos, de largas barbas blancas y túnicas fluidas, se yerguen y gesticulan con animación entre unas rocas, bajo un viejo árbol nudoso, cada uno defendiendo su pretensión de una edad imposible. Las figuras están trazadas con pincelada libre y viva sobre el tono desnudo del papel, con solo escasos toques de color. El ambiente es humorístico y vivaz, una ingeniosa escena de sabios ancianos en disputa.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_EOP_2" Language="es_ES">
+      <Text>Una pintura coreana a tinta y color de un gallo erguido bajo una rama frondosa. El orgulloso animal tiene una cresta y unas barbillas de rojo vivo, una cola oscura y curva y las plumas finamente trazadas, y se yergue con una pata levantada entre unas tenues gallinas y polluelos abajo. El fondo es el tono desnudo y cálido de la seda, con solo la fronda de hojas colgando en lo alto. Cada pluma está dibujada con detalle paciente y verosímil, y toda la escena es serena y de atenta observación.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_EOP_3" Language="es_ES">
+      <Text>Una pintura coreana a tinta y color de dos caballos y sus cuidadores. Un hombre barbado con un amplio sombrero monta un robusto caballo mientras conduce o está junto a un segundo; los animales, uno claro y otro más oscuro, están dibujados con cuerpos redondeados y sólidos y un sombreado cuidadoso. Las figuras visten las túnicas y tocados de la antigua Corea, y se detallan con precisión pequeños pormenores de arreos y pezuñas. El fondo se deja en el tono liso del papel, concentrando toda la atención en los caballos y los hombres.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GIL_1" Language="es_ES">
+      <Text>Una pintura moderna al óleo de tres jóvenes indias agrupadas muy juntas ante un fondo oscuro y liso. Visten saris de colores intensos y terrosos -uno rojo intenso, otro amarillo ocre, otro verde apagado- y se sientan o se apoyan pegadas unas a otras, con sus formas simplificadas en siluetas suaves y planas. Tienen la cabeza algo inclinada y sus grandes ojos oscuros miran hacia otro lado, lo que les da un aire quieto, pensativo, casi melancólico. La cálida piel morena y los colores apagados componen un retrato de grupo sereno y digno.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GIL_2" Language="es_ES">
+      <Text>Una cálida pintura al óleo de una novia que es preparada para su boda. La joven novia está sentada en el centro, quieta y ensimismada, mientras varias mujeres se apiñan a su alrededor para vestirla y adornarla, con los cuerpos simplificados en formas redondeadas y aplanadas. La paleta está dominada por los rojos intensos, los pardos y los ocres de la piel, la tela y la sombra, con unos pocos acentos vivos de joyas y tejidos. El ambiente es íntimo y silencioso, con las muchas figuras comprimidas en un interior poco profundo y resplandeciente.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GIL_3" Language="es_ES">
+      <Text>Un autorretrato al óleo de una joven, mostrada de pecho para arriba ante un fondo liso. Tiene el cabello oscuro recogido, la piel de un cálido moreno y unos grandes ojos oscuros y serenos que miran directamente al espectador. La pintura es sencilla y moderna, con el rostro modelado en planos suaves y sin recargamiento, y la expresión es tranquila, seria y dueña de sí. Los colores contenidos concentran toda la atención en su mirada franca y reflexiva.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GOGH_1" Language="es_ES">
+      <Text>Un paisaje nocturno en remolino, con gruesas y enérgicas pinceladas al óleo. Un cielo azul profundo se agita en corrientes espirales, con enormes estrellas redondas rodeadas de halos amarillos y una brillante luna creciente arriba a la derecha. Debajo se extiende un pequeño pueblo dormido, de casas oscuras y una alta aguja de iglesia, acurrucado entre bajas colinas azules. En primer plano, a la izquierda, un gran ciprés oscuro se alza como una llama verdinegra desde el suelo hasta lo alto del cielo. Toda la escena parece moverse y ondular, pintada con una pincelada rítmica y ondulante de azul, amarillo y verde.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GOGH_2" Language="es_ES">
+      <Text>Una escena callejera nocturna en vivo color al óleo. La terraza de un café resplandece bajo un gran toldo amarillo iluminado por la luz de las lámparas, cuyo cálido dorado se derrama sobre las mesas y los adoquines. Pequeñas figuras se sientan a mesas redondas y un camarero está entre ellas, mientras una oscura calle empedrada se aleja hacia la noche azul entre casas con las contraventanas cerradas. Arriba, un cielo azul profundo está salpicado de grandes estrellas titilantes. El cuadro no tiene nada de negro; hasta la noche está construida con azules, y el contraste del amarillo luminoso contra ellos resulta vívido y lleno de vida.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GOGH_3" Language="es_ES">
+      <Text>Un interior tenso y deslumbrante al óleo. Una larga sala tiene paredes de rojo sangre y un duro suelo de madera amarilla bajo un techo verde, iluminada por una hilera de lámparas de gas colgantes que arden con halos amarillos en remolino. En el centro se alza una gran mesa de billar verde que proyecta una larga sombra, con un empleado de blanco a su lado. Unos pocos bebedores solitarios se desploman sobre pequeñas mesas junto a las paredes. El choque del rojo y el verde y la luz áspera dan a la sala una sensación inquieta, insomne, casi febril.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GRECO_1" Language="es_ES">
+      <Text>Un alto y dramático óleo religioso, abarrotado de figuras alargadas. En torno a la Virgen sentada y al Niño Jesús se apiñan los tres reyes con túnicas de ricos colores, uno de ellos arrodillado para ofrecer un presente, mientras sus sirvientes y animales llenan el sombrío establo del fondo. Los cuerpos están estirados de forma antinatural, largos y esbeltos, el ropaje vibra en rojos, dorados y verdes, y una luz sobrenatural brota del Niño. La composición se eleva con energía inquieta, con rostros y manos vueltos hacia la sagrada pareja.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GRECO_2" Language="es_ES">
+      <Text>Un alto y ascendente óleo religioso. En lo alto, la Virgen sube al cielo de pie sobre una pálida luna creciente, con las vestiduras ondeando en azul y rosa mientras un remolino de ángeles alargados la eleva a través de una luz dorada. Abajo, un círculo de apóstoles se apiña en torno a su tumba vacía, alzando los brazos y siguiéndola con la mirada, atónitos. Cada figura está estirada, fina y alta, y todo el cuadro es arrastrado hacia arriba en un ímpetu de movimiento y de color brillante y antinatural.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GRECO_3" Language="es_ES">
+      <Text>Un sombrío paisaje al óleo, todo verdes, grises y blancos fríos. Una ciudad en la colina, de torres y murallas grises y una gran aguja de catedral, se asienta a lo largo de una escarpada loma verde, atravesada por un río sinuoso. Sobre ella, un cielo turbulento bulle con oscuras nubes de tormenta desgarradas por una luz pálida, como si un relámpago estuviera a punto de caer. No hay personas; toda la vista se siente cargada, dramática y extrañamente viva, con los edificios brillando nítidos contra el pesado cielo.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HOKUSAI_1" Language="es_ES">
+      <Text>Un grabado japonés en madera en tonos de azul de Prusia intenso y crema. Una única ola inmensa se alza desde la izquierda y describe un arco sobre toda la escena; su cresta se rompe en decenas de dedos de espuma que se estiran hacia la derecha. Debajo, unas barcas largas y estrechas repletas de remeros quedan empequeñecidas y a punto de ser engullidas. A lo lejos, pequeño y sereno entre los rizos de la ola, se alza el cono nevado del monte Fuji. Un cartucho rojo con el título y columnas de texto japonés recorren la esquina superior izquierda.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HOKUSAI_2" Language="es_ES">
+      <Text>Un grabado japonés en madera de un lago en calma, en suaves azules y verdes. En primer plano, una baja lengua de tierra sostiene un único pino curvado por el viento que se inclina sobre el agua quieta, con un pequeño santuario y rocas a su pie. Unas diminutas barcas se deslizan por el lago pálido, y la orilla lejana se alza en suaves colinas azules. Pequeño y sereno a lo lejos se asienta el cono nevado del monte Fuji, bajo un cielo que va del rosa suave al azul. Toda la escena es tranquila, equilibrada y austera.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HOKUSAI_3" Language="es_ES">
+      <Text>Un audaz grabado japonés en madera dominado por una sola montaña. El monte Fuji se alza como un cono ancho y liso que resplandece en un rojo pardo intenso, con vetas de nieve blanca aferradas cerca de la cumbre y las laderas bajas oscureciéndose en bosque verde. Detrás, un cielo azul despejado se decora con pulcras hileras de pequeñas nubes blancas y planas. No hay nada más -ni personas, ni agua-, solo la gran montaña triangular llenando casi todo el grabado. Las formas sencillas y el color cálido lo hacen sorprendentemente sereno y monumental.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KANDINSKY_1" Language="es_ES">
+      <Text>Una gran pintura abstracta al óleo, sin objeto reconocible. Sobre un suave fondo blanquecino flotan decenas de formas geométricas puras: nítidos círculos (uno grande arriba a la izquierda anillado en morado oscuro y negro), triángulos, arcos, cuadrículas de damero y líneas rectas y curvas que cruzan el lienzo como flechas. Están pintadas en colores claros y equilibrados -azules, morados, rosas, amarillos y negro-, dispuestas como una pieza de música visual, precisa e ingrávida.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KANDINSKY_2" Language="es_ES">
+      <Text>Una pintura expresionista al óleo, suelta y vívida. Un pequeño jinete envuelto en azul galopa sobre un caballo blanco por una ladera verde y soleada, inclinado hacia adelante con el movimiento, mientras árboles de color otoñal y sombras azules pasan como rayas por detrás. La escena está pintada con rápidas y anchas pinceladas de color puro en lugar de contornos cuidadosos, de modo que caballo y jinete casi se disuelven en el luminoso paisaje. Todo el pequeño cuadro se siente veloz, alegre y lleno de movimiento.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KANDINSKY_3" Language="es_ES">
+      <Text>Una vívida pintura al óleo semiabstracta que se arremolina de color. Bloques y manchas de rojo, naranja, azul y verde intensos se inclinan y se precipitan por el lienzo, sugiriendo edificios, multitudes y toda una ciudad que gira en torno a un centro pálido y luminoso, con un brillante arco de arcoíris curvándose por lo alto. Los contornos audaces y los tonos chocantes le dan una energía enorme, como si la ciudad se deshiciera girando en puro color y luz. Se mantiene entre un paisaje urbano y la abstracción total.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KAUFFMAN_1" Language="es_ES">
+      <Text>Un retrato doble neoclásico situado al aire libre en un parque. Una mujer con un fluido vestido blanco y un hombre con abrigo oscuro están juntos bajo un árbol ancho y frondoso, con un sereno paisaje de colinas abriéndose tras ellos. Un perrito descansa o alza la vista a sus pies, y la pareja se inclina suavemente el uno hacia el otro en una postura relajada y afectuosa. La luz tenue, los verdes fríos y el ropaje pálido dan a la escena una quietud grácil y refinada.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KAUFFMAN_2" Language="es_ES">
+      <Text>Un retrato neoclásico de un erudito sentado ante su mesa de escribir. Un hombre con abrigo verde se detiene en mitad de la escritura, con una pluma en una mano sobre una hoja de papel, y vuelve la cabeza como si alzara la mirada pensativo o lo interrumpieran con suavidad. Libros y papeles reposan ante él, y el fondo liso mantiene un ambiente estudioso y tranquilo. Una luz suave y uniforme modela su rostro reflexivo y los pliegues de su abrigo.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KAUFFMAN_3" Language="es_ES">
+      <Text>Un retrato neoclásico de una mujer representada como una musa de la música. Está sentada con un vestido fluido, con una gran lira o instrumento parecido a un arpa apoyado en ella y una mano cerca de las cuerdas. Tiene la cabeza alzada y vuelta hacia arriba, con los labios algo entreabiertos, como sorprendida en un instante de canto o de inspiración. El ropaje suave, el color delicado y un paisaje difuso tras ella dan a la figura una gracia idealizada y poética.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KLIMT_1" Language="es_ES">
+      <Text>Una célebre pintura decorativa que resplandece casi por completo en oro. Una pareja se arrodilla junta sobre un pequeño trozo de prado florido en la parte inferior, con los cuerpos fundidos en una única forma alta envuelta en un solo manto dorado y reluciente. El hombre, coronado de hojas, se inclina y sostiene el rostro de la mujer para besarle la mejilla; ella ladea la cabeza hacia arriba con los ojos cerrados, arrodillada en su abrazo, con las manos apoyadas en las de él. El manto de él lleva un estampado de rectángulos blancos y negros, el de ella de círculos vivos y flores, y detrás y en torno a ellos todo el fondo es oro liso y radiante. El efecto es recargado, tierno y onírico.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KLIMT_2" Language="es_ES">
+      <Text>Un paisaje casi cuadrado de una avenida recta y arbolada en un parque. Altos árboles se alzan a ambos lados y sus densas copas verdes llenan casi todo el lienzo, pintadas como un mosaico reluciente de innumerables pequeñas pinceladas de verde, oro y azul oscuro. Por el centro, la avenida guía la mirada hacia una pálida casa soleada, medio oculta entre el follaje. Apenas hay cielo y no hay figuras; el efecto es un tapiz plano y luminoso de hojas y luz.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KLIMT_3" Language="es_ES">
+      <Text>Una pintura casi cuadrada de un tupido jardín de casa de campo, repleto de flores de borde a borde. La mitad inferior es una brillante alfombra de pequeñas flores -blancas, rojas, azules y rosas- apiñadas como joyas dispersas, mientras tallos más altos se alzan tras ellas hacia un grupo de grandes girasoles dorados de centro oscuro cerca de la parte superior. Apenas hay cielo ni sendero; toda la superficie es un reluciente muro de flores y hojas lleno de dibujo. El efecto es rico, decorativo y alegre.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KOBER_1" Language="es_ES">
+      <Text>Un retrato renacentista de cuerpo entero de una joven princesa, de pie y rígida ante una cortina roja con una inscripción latina en las esquinas superiores. Viste un vestido de blanco plateado pálido con mangas y capa bordadas en rojo y oro y una amplia gorguera de encaje, joyas en el cabello y en el pecho, y sostiene un ornado colgante en forma de cruz. Cada perla, hilo y motivo está representado con paciente precisión; el ambiente es formal y como de muñeca.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KOBER_2" Language="es_ES">
+      <Text>Un retrato de estado renacentista de un rey barbado. Está de pie con un jubón negro, una alta gorguera blanca plisada y un pesado manto de piel moteada sobre los hombros, un gorro oscuro enjoyado en la cabeza y una espada al costado, ante un fondo oscuro con un cortinaje rojo. Su rostro es sereno y digno, y el fino detalle de la piel, el encaje y las joyas marca su rango.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KOBER_3" Language="es_ES">
+      <Text>Un retrato renacentista de una reina entrada en años vestida de viuda. Está de pie con un sencillo vestido negro y un largo velo blanco que le cubre la cabeza y los hombros a modo de toca, una cruz de oro en cadena sobre el pecho, sosteniendo un par de guantes. Su rostro surcado es grave y sereno ante un fondo oscuro; el efecto es austero, piadoso y digno.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_LEWIS_1" Language="es_ES">
+      <Text>Una estatua de mármol blanco de una reina que acaba de morir en su trono. Está sentada, desplomada hacia atrás, con la cabeza caída a un lado y un brazo colgando inerte, captado en la fría piedra el instante de la muerte. Viste un plisado atuendo egipcio y un tocado, y el alto trono está tallado con ornamento regio. El realismo es sobrecogedor e inquietante -no una figura apacible, sino un cuerpo que se rinde-, y el mármol pulido hace que el desplome se sienta pesado y definitivo.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_LEWIS_2" Language="es_ES">
+      <Text>Una escultura de mármol blanco de una pareja indígena de pie, uno junto al otro. Un joven y una mujer están muy juntos, unidos por las manos, ambos con prendas de flecos; la figura de él es robusta y la de ella más suave, y se inclinan con delicadeza el uno hacia el otro en una postura tierna y ceremonial. Detalles del cabello trenzado, los abalorios y los flecos están cuidadosamente tallados en la piedra clara. El grupo es sereno y digno, una imagen callada de unión.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_LEWIS_3" Language="es_ES">
+      <Text>Una estatua de mármol blanco de una mujer sola, de pie, angustiada. Se yergue erguida con largas túnicas ceñidas, las manos entrelazadas ante el pecho y la cabeza alzada, con el rostro lleno de angustia o de plegaria, como abandonada en el desierto. Un pequeño cántaro de agua reposa a sus pies. La talla es lisa y expresiva, y toda la esbelta figura está cargada de un sufrimiento y una entereza silenciosos.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MICHELANGELO_1" Language="es_ES">
+      <Text>Una sección de un vasto fresco de techo que muestra el momento de la creación. A la izquierda, un hombre desnudo se recuesta sobre la tierra desnuda, con una rodilla en alto, y extiende un brazo lánguido; a la derecha, un Dios barbado, envuelto en un manto ondeante y llevado por una multitud de ángeles, se abalanza hacia él y a su vez tiende la mano. Sus dedos casi se tocan a través de un estrecho hueco, cargado con la chispa de la vida a punto de pasar. Las figuras son poderosas y escultóricas, sobre un cielo liso, y el pequeño espacio entre ambas manos es el corazón de toda la imagen.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MICHELANGELO_2" Language="es_ES">
+      <Text>Una estatua colosal de reluciente mármol blanco de un joven desnudo de pie, en actitud relajada. Su peso descansa en una pierna, de modo que las caderas y los hombros se inclinan en una postura natural y distendida, y lleva una honda al hombro con la piedra sostenida sin tensión en la mano baja. Tiene la cabeza vuelta con brusquedad hacia un lado, el ceño fruncido y la mirada fija, como si observara a un enemigo lejano y se preparara. La anatomía es idealizada y precisa -venas, músculos y cabello rizado, todo finamente labrado-, lo que produce una abrumadora sensación de fuerza serena y alerta.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MICHELANGELO_3" Language="es_ES">
+      <Text>Una escultura de mármol blanco de una mujer sentada que sostiene a un hombre muerto sobre su regazo. La joven madre está sentada con túnicas profundas y fluidas y acuna el cuerpo inerte y casi desnudo de su hijo adulto, con un brazo sosteniéndole los hombros mientras la otra mano se abre en callado dolor. Su rostro es liso, juvenil y sereno, inclinado con suavidad sobre él en lugar de llorar. La piedra pulida fluye desde los intrincados pliegues de la tela hasta los miembros blandos y sin vida, una imagen de tierno duelo tallada con asombrosa delicadeza.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MONET_1" Language="es_ES">
+      <Text>Un óleo impresionista que mira directamente hacia abajo, a la superficie de un estanque de nenúfares, sin cielo, orilla ni horizonte a la vista. Planas hojas verdes de nenúfar flotan en grupos sobre el agua, salpicadas de suaves flores rosadas y blancas. Entre ellas y bajo ellas, el agua refleja un cielo azul y los verdes de los sauces que cuelgan encima, de modo que el reflejo y la superficie se difuminan juntos. Pintado con sueltas pinceladas rotas de azul, verde, lila y rosa, todo el lienzo se convierte en un reluciente campo flotante de agua y luz.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MONET_2" Language="es_ES">
+      <Text>Un óleo impresionista de un puerto brumoso al amanecer. Un pequeño sol anaranjado cuelga bajo en una suave neblina gris azulada y proyecta una entrecortada franja anaranjada de reflejo sobre el agua ondulante. Dos o tres barquitas oscuras se deslizan en silueta en primer plano, mientras las formas fantasmales de mástiles, grúas y chimeneas se desvanecen en la niebla del fondo. Toda la escena es suelta y atmosférica, construida con finas aguadas de gris azulado y el único resplandor cálido del sol y su reflejo.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MONET_3" Language="es_ES">
+      <Text>Un óleo impresionista de un campo estival en el campo. En primer plano, un almiar redondeado se asienta en la hierba alta, y una ancha franja de amapolas rojas motea el prado verde con puntos escarlata. Más allá se extienden campos, una hilera de árboles y unos pocos tejados bajo un cielo suave y pálido. La pintura es suelta y a toques, y toda la escena es cálida y soleada, captando la luz cambiante de una luminosa tarde rural.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ORLOVSKY_1" Language="es_ES">
+      <Text>Una estatua de bronce de un comandante militar de pie sobre un alto pedestal. Viste un largo abrigo de uniforme con una capa que le cuelga de los hombros, y se yergue con firmeza con un brazo extendido hacia afuera como dirigiendo a las tropas, mientras el otro sostiene una espada o un bastón al costado. Tiene la cabeza descubierta y algo vuelta, el rostro grave y resuelto. El bronce oscuro se lee como una figura orgullosa y autoritaria, dispuesta en plena batalla.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ORLOVSKY_2" Language="es_ES">
+      <Text>Una alta estatua de un ángel alado que corona una columna monumental. El ángel se yergue con túnicas fluidas, con las grandes alas plegadas a la espalda, y se apoya en una larga cruz cuyo pie aplasta a una serpiente a sus pies. Una mano descansa en la cruz mientras la otra se alza hacia el cielo, y el rostro sereno y vuelto hacia arriba mira al firmamento. Fundido para verse en lo alto contra las nubes, la figura es serena, victoriosa e imponente.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ORLOVSKY_3" Language="es_ES">
+      <Text>Un busto de un emperador sobre una peana. Se le muestra de pecho para arriba con un uniforme militar de cuello alto y charreteras, el cabello corto peinado hacia adelante y el rostro afeitado, sereno e idealizado. La cabeza se mantiene recta o apenas vuelta, lo que le confiere una dignidad formal y oficial. La superficie lisa y el detalle nítido del cuello y los galones lo señalan como un soberano.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_REMBRANDT_1" Language="es_ES">
+      <Text>Un retrato al óleo de cuerpo entero de un hombre de pie junto a una columna de piedra. Va vestido de negro de la cabeza a los pies, con un ancho cuello blanco y liso, un sombrero de ala ancha y una mano que sostiene un guante claro mientras la otra reposa en la cadera. Una luz cálida destaca su rostro, el cuello y las manos entre las profundas sombras pardas que lo rodean. Su postura es segura y algo girada, y todo el retrato resulta grandioso y a la vez sobrio.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_REMBRANDT_2" Language="es_ES">
+      <Text>Un retrato al óleo de una mujer de pie, como asomada a una ventana. Viste un vestido oscuro con un ancho cuello de encaje blanco y puños a juego, y sostiene un abanico plegado en una mano mientras la otra reposa sobre un marco pintado que cruza el cuadro, como si se asomara desde dentro de él. Una cálida luz dorada cae sobre su rostro sereno y directo y sobre el delicado encaje. El fondo, profundamente sombreado, hace que parezca inclinarse con suavidad hacia adelante, cercana y viva.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_REMBRANDT_3" Language="es_ES">
+      <Text>Un dramático óleo religioso iluminado por un estallido de luz que surge de la profunda oscuridad. Un anciano patriarca barbado es detenido en el instante mismo del sacrificio: un ángel ha bajado en picado y le ha agarrado la muñeca, y el cuchillo se le escapa de la mano que se abre. Bajo él yace su hijo, desnudo y atado sobre un altar, con la gran mano del padre cubriéndole el rostro vuelto hacia arriba. La luz intensa cae sobre el cuerpo pálido y los rostros sobresaltados mientras todo lo demás se hunde en la sombra, congelando la escena en el instante del rescate.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RUBLEV_1" Language="es_ES">
+      <Text>Un icono bizantino pintado al temple sobre un reluciente fondo dorado. A la izquierda, un alto ángel alado avanza con una mano alzada en saludo; a la derecha, una mujer con túnicas de rojo intenso está sentada y se vuelve hacia él con un gesto sobresaltado e interrogante. Las dos figuras alargadas se recortan contra esbeltas torres y un paño tendido entre ellas. Todo es plano, quieto y solemne, y el fondo dorado y los rojos intensos dan al pequeño panel un resplandor grave y sagrado.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RUBLEV_2" Language="es_ES">
+      <Text>Un icono bizantino de Cristo entronizado en gloria. Está sentado en el centro, dentro de un gran rombo rojo de luz superpuesto a un óvalo oscuro, vestido con túnicas ribeteadas de oro, con una mano alzada en bendición y la otra sosteniendo un libro abierto sobre la rodilla. En las esquinas a su alrededor aparecen los símbolos alados de los cuatro evangelistas -un hombre, un león, un buey y un águila- sobre un fondo dorado. La imagen es plana, simétrica y radiante, hecha para la callada devoción.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RUBLEV_3" Language="es_ES">
+      <Text>Un icono bizantino de la Ascensión. En lo alto, Cristo se eleva dentro de un halo oval de luz, sostenido por ángeles, con la mano alzada en bendición. Abajo, una multitud de apóstoles se reúne a ambos lados de una mujer central con túnica que permanece serena y erguida, todos ellos echando la cabeza hacia atrás y alzando las manos hacia la figura que asciende. Las formas alargadas, el fondo dorado y los colores resplandecientes componen una imagen solemne y ascendente, llena de asombro.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_SAMOSTRZELNIK_1" Language="es_ES">
+      <Text>Una miniatura iluminada renacentista. Un obispo está de pie con vestiduras de color crema y oro y una alta mitra, sosteniendo un báculo, ante un gran disco dorado que lo aureola, sobre un trono ornado. La pintura es pequeña pero intensamente detallada y de rico color en dorados, rojos y blancos, resplandeciente como una página de un manuscrito precioso.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_SAMOSTRZELNIK_2" Language="es_ES">
+      <Text>Una pródiga página de manuscrito iluminado. Un obispo santo entronizado, con capa pluvial y mitra doradas y aureolado, sostiene un báculo mientras pequeñas figuras de clero arrodilladas se reúnen a sus pies; un águila roja en un estandarte se alza a su lado. La escena está enmarcada por un tupido borde pintado de flores, frutos y escudos, con cada parte diminuta y exacta, resplandeciente de rojo, azul, verde y oro.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_SAMOSTRZELNIK_3" Language="es_ES">
+      <Text>Una página de manuscrito iluminado que muestra a la Virgen y el Niño. María, con una túnica de azul intenso, está de pie con el Niño Jesús dentro de una radiante mandorla dorada de luz, y toda la escena está rodeada por un tupido borde pintado de flores, frutos, pequeños querubines y un escudo. Diminuta y exacta, resplandece de azul, oro, rojo y verde como una joya engastada en un libro.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TITIAN_1" Language="es_ES">
+      <Text>Un alto y resplandeciente retablo de la Virgen llevada al cielo. En la zona inferior, una multitud de apóstoles con túnicas rojas y verdes alza los brazos y mira hacia arriba con asombro. Sobre ellos, la Virgen, con vestido rojo y manto azul, se eleva sobre un gran banco de nubes repleto de pequeños querubines, con los brazos alzados y el rostro vuelto hacia la luz. En lo más alto, Dios Padre se inclina desde una gloria dorada para recibirla. La composición se eleva en tres franjas, unificada por rojos ardientes y una cálida luz dorada.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TITIAN_2" Language="es_ES">
+      <Text>Un óleo de una joven que lleva una cabeza cortada en una bandeja. Va ricamente vestida con un traje rojo y blanco y avanza sosteniendo en alto una gran fuente dorada sobre la que reposa la cabeza de un hombre barbado, con los ojos cerrados. Una pequeña sirvienta o un niño se inclina a su lado, y una cortina oscura hace resaltar su piel luminosa y sus sedas relucientes. Su rostro está sereno y vuelto a un lado, lo que da al macabro trofeo una belleza extraña y apacible.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TITIAN_3" Language="es_ES">
+      <Text>Un grandioso retrato ecuestre al óleo. Un emperador con armadura cabalga un caballo oscuro a un paso lento y poderoso, con una larga lanza en ristre en la mano derecha y una banda roja cruzada sobre la coraza. Caballo y jinete pasan de la sombra a la luz de un cielo vespertino bajo y enrojecido, con un difuso paisaje boscoso extendiéndose detrás. La armadura oscura reluce, la banda carmesí resplandece, y la solitaria figura montada tiene un aire de mando solemne e imparable.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TOHAKU_1" Language="es_ES">
+      <Text>Un par de biombos japoneses a tinta, casi desnudos en su sencillez. Grupos de pinos surgen y se desvanecen entre una espesa niebla blanca; sus troncos y ramas cubiertas de agujas están pincelados en suave tinta gris-negra y quedan inacabados en los bordes, de modo que parecen flotar. Vastas zonas del pálido papel se dejan vacías para representar la niebla y el aire. El efecto es silencioso, austero y atmosférico, sin color alguno.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TOHAKU_2" Language="es_ES">
+      <Text>Un biombo japonés sobre un reluciente fondo de oro. Un gran árbol se extiende por los paneles, con las ramas cargadas de follaje, mientras plantas floridas y hierbas se agrupan abajo en verdes, blancos y oro. El pródigo fondo dorado y el rico color mineral hacen el biombo opulento y ornamental, lo contrario de un simple boceto a tinta.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TOHAKU_3" Language="es_ES">
+      <Text>Un biombo japonés sobre un fondo dorado pálido. Una gran rama de árbol, nudosa y retorcida, se extiende por los paneles, salpicada aquí y allá de pequeños pájaros y flores, mientras gran parte del fondo se deja abierto a su alrededor. Pintado a tinta con color ligero y una pincelada rápida y segura, el ambiente es delicado, espacioso y sereno.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_YING_1" Language="es_ES">
+      <Text>Un largo rollo de mano chino, horizontal, en fina tinta y color delicado, pensado para desenrollarse y leerse de derecha a izquierda. A lo largo de él, elegantes damas de la corte pasean, se sientan, tocan música y atienden la vida cotidiana entre salones palaciegos, terrazas abiertas, sauces y rocas de jardín. Las muchas figuras pequeñas de túnicas fluidas están trazadas con líneas precisas y uniformes, y la pálida seda realza toques de rojo, azul y verde. La escena es refinada, animada y suavemente narrativa: todo un día de la vida palaciega desplegado en una banda continua.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_YING_2" Language="es_ES">
+      <Text>Un paisaje chino a tinta, matizado con color ligero. Montañas brumosas se alzan en suaves picos superpuestos sobre aguas quietas, con las laderas salpicadas de árboles y medio ocultas entre nubes. A lo largo de las orillas crecen juncos y lotos, y unas pocas barcas de pesca se deslizan entre ellos, con diminutas figuras a bordo. Extensiones vacías de pálida seda representan la niebla y el agua, de modo que la escena se siente vasta, silenciosa y remota, un ideal de retiro erudito en la naturaleza.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_YING_3" Language="es_ES">
+      <Text>Un paisaje fluvial chino a tinta y color. Escarpados acantilados superpuestos se alzan abruptos a un lado, sobre una amplia extensión de agua en calma, con las paredes de roca texturadas por finas pinceladas y salpicadas de árboles aferrados. Una única barca pequeña flota debajo de ellos, llevando a unos pocos eruditos con túnica que se dejan llevar, diminutos frente a la roca imponente. La suave niebla y el pálido agua abierta llenan el resto de la escena, dando un ambiente de poesía, contemplación y de la pequeñez del ser humano ante la naturaleza.</Text>
+    </Replace>
+  </LocalizedText>
+</GameData>

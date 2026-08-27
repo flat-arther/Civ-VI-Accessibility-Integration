@@ -1155,6 +1155,14 @@ local function CAI_GetModPropertyText(handle, property)
 	return Modding.GetModText(handle, value) or Locale.Lookup(value) or value
 end
 
+-- Resolve a boolean mod property to a localized Yes/No. A missing property, or
+-- any value other than "0", reads as Yes (matching the vanilla details panel).
+local function CAI_ModPropertyYesNo(handle, property)
+	local value = Modding.GetModProperty(handle, property)
+	if value and tonumber(value) == 0 then return Locale.Lookup("LOC_MODS_NO") end
+	return Locale.Lookup("LOC_MODS_YES")
+end
+
 local function CAI_GetContentType(info)
 	if not info then return "" end
 	if info.Source == "Map" then
@@ -1245,114 +1253,88 @@ local function CAI_FinishPendingModAction()
 	end
 end
 
-local function CAI_AddDetail(parent, suffix, labelGetter, hiddenPredicate)
+-- Detail rows hold static mod metadata resolved once, here at tree-build time.
+-- Mod info does not change while a given tree exists -- every mod state change
+-- routes through RefreshListings, which rebuilds the whole tree -- so each label
+-- is a plain resolved string and rows that would be hidden are simply never
+-- created. This keeps type-to-find and navigation from calling back into the
+-- Modding manager per node per keystroke, which is what made the list lag.
+local function CAI_AddDetail(parent, suffix, label)
 	local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIModsDetail"), "MenuItem", {
-		Label = labelGetter,
+		Label = label,
 		FocusKey = parent.FocusKey .. ":detail:" .. suffix,
-		HiddenPredicate = hiddenPredicate,
 	})
 	parent:AddChild(row)
 	return row
 end
 
 local function CAI_AddModDetails(parent, handle)
-	CAI_AddDetail(parent, "content", function()
-		local info = Modding.GetModInfo(handle)
-		return Locale.Lookup("LOC_CAI_MODS_CONTENT_TYPE") .. ", " .. CAI_GetContentType(info)
-	end)
+	local info = Modding.GetModInfo(handle)
 
-	CAI_AddDetail(parent, "compatibility", function()
-		return Locale.Lookup("LOC_MODS_DETAILS_NOT_COMPATIBLE_WARNING")
-	end, function()
-		return Modding.IsModCompatible(handle)
-	end)
+	CAI_AddDetail(parent, "content",
+		Locale.Lookup("LOC_CAI_MODS_CONTENT_TYPE") .. ", " .. CAI_GetContentType(info))
 
-	CAI_AddDetail(parent, "id", function()
-		local info = Modding.GetModInfo(handle)
-		return Locale.Lookup("LOC_CAI_MODS_ID") .. ", " .. (info and info.Id or "")
-	end)
+	if not Modding.IsModCompatible(handle) then
+		CAI_AddDetail(parent, "compatibility", Locale.Lookup("LOC_MODS_DETAILS_NOT_COMPATIBLE_WARNING"))
+	end
 
-	CAI_AddDetail(parent, "filename", function()
-		local info = Modding.GetModInfo(handle)
-		return Locale.Lookup("LOC_CAI_LABEL_FILE_NAME") .. ", " .. (info and info.SourceFileName or "")
-	end, function()
-		local info = Modding.GetModInfo(handle)
-		return not info or info.Source ~= "Map" or info.SourceFileName == nil or info.SourceFileName == ""
-	end)
+	CAI_AddDetail(parent, "id",
+		Locale.Lookup("LOC_CAI_MODS_ID") .. ", " .. (info and info.Id or ""))
 
-	CAI_AddDetail(parent, "description", function()
-		local info = Modding.GetModInfo(handle)
-		local description = CAI_GetModPropertyText(handle, "Description")
-		if description == "" and info and info.Teaser then
+	if info and info.Source == "Map" and info.SourceFileName ~= nil and info.SourceFileName ~= "" then
+		CAI_AddDetail(parent, "filename",
+			Locale.Lookup("LOC_CAI_LABEL_FILE_NAME") .. ", " .. info.SourceFileName)
+	end
+
+	local descProp = CAI_GetModPropertyText(handle, "Description")
+	local hasTeaser = info and info.Teaser ~= nil and info.Teaser ~= ""
+	if descProp ~= "" or hasTeaser then
+		local description = descProp
+		if description == "" and hasTeaser then
 			description = Modding.GetModText(handle, info.Teaser) or Locale.Lookup(info.Teaser) or ""
 		end
-		return Locale.Lookup("LOC_CAI_MODS_DESCRIPTION") .. ", " .. description
-	end, function()
-		local info = Modding.GetModInfo(handle)
-		return CAI_GetModPropertyText(handle, "Description") == ""
-			and (not info or info.Teaser == nil or info.Teaser == "")
-	end)
+		CAI_AddDetail(parent, "description",
+			Locale.Lookup("LOC_CAI_MODS_DESCRIPTION") .. ", " .. description)
+	end
 
-	CAI_AddDetail(parent, "authors", function()
-		return Locale.Lookup("LOC_MODS_DETAILS_AUTHOR") .. ", " .. CAI_GetModPropertyText(handle, "Authors")
-	end, function()
-		return CAI_GetModPropertyText(handle, "Authors") == ""
-	end)
+	local authors = CAI_GetModPropertyText(handle, "Authors")
+	if authors ~= "" then
+		CAI_AddDetail(parent, "authors", Locale.Lookup("LOC_MODS_DETAILS_AUTHOR") .. ", " .. authors)
+	end
 
-	CAI_AddDetail(parent, "thanks", function()
-		return Locale.Lookup("LOC_MODS_DETAILS_SPECIAL_THANKS") .. ", "
-			.. CAI_GetModPropertyText(handle, "SpecialThanks")
-	end, function()
-		return CAI_GetModPropertyText(handle, "SpecialThanks") == ""
-	end)
+	local thanks = CAI_GetModPropertyText(handle, "SpecialThanks")
+	if thanks ~= "" then
+		CAI_AddDetail(parent, "thanks",
+			Locale.Lookup("LOC_MODS_DETAILS_SPECIAL_THANKS") .. ", " .. thanks)
+	end
 
-	CAI_AddDetail(parent, "created", function()
-		local info = Modding.GetModInfo(handle)
-		local created = info and info.Created
-		local value = created and Locale.Lookup("{1_Created : date long}", created) or ""
-		return Locale.Lookup("LOC_MODS_DETAILS_CREATED") .. ", " .. value
-	end, function()
-		local info = Modding.GetModInfo(handle)
-		return not info or info.Created == nil
-	end)
+	if info and info.Created ~= nil then
+		CAI_AddDetail(parent, "created",
+			Locale.Lookup("LOC_MODS_DETAILS_CREATED") .. ", "
+			.. Locale.Lookup("{1_Created : date long}", info.Created))
+	end
 
-	CAI_AddDetail(parent, "ownership", function()
-		local info = Modding.GetModInfo(handle)
-		local value = info and info.Allowance and Locale.Lookup("LOC_MODS_YES") or Locale.Lookup("LOC_MODS_NO")
-		return Locale.Lookup("LOC_MODS_DETAILS_OWNERSHIP") .. ", " .. value
-	end, function()
-		local info = Modding.GetModInfo(handle)
-		return not info or not info.Official or info.Allowance == nil
-	end)
+	if info and info.Official and info.Allowance ~= nil then
+		local value = info.Allowance and Locale.Lookup("LOC_MODS_YES") or Locale.Lookup("LOC_MODS_NO")
+		CAI_AddDetail(parent, "ownership", Locale.Lookup("LOC_MODS_DETAILS_OWNERSHIP") .. ", " .. value)
+	end
 
-	CAI_AddDetail(parent, "savedgames", function()
-		local value = Modding.GetModProperty(handle, "AffectsSavedGames")
-		local answer = value and tonumber(value) == 0
-			and Locale.Lookup("LOC_MODS_NO")
-			or Locale.Lookup("LOC_MODS_YES")
-		return Locale.Lookup("LOC_MODS_DETAILS_AFFECTS_SAVED_GAMES") .. ", " .. answer
-	end)
+	CAI_AddDetail(parent, "savedgames",
+		Locale.Lookup("LOC_MODS_DETAILS_AFFECTS_SAVED_GAMES") .. ", "
+		.. CAI_ModPropertyYesNo(handle, "AffectsSavedGames"))
 
-	CAI_AddDetail(parent, "singleplayer", function()
-		local value = Modding.GetModProperty(handle, "SupportsSinglePlayer")
-		local answer = value and tonumber(value) == 0
-			and Locale.Lookup("LOC_MODS_NO")
-			or Locale.Lookup("LOC_MODS_YES")
-		return Locale.Lookup("LOC_MODS_DETAILS_SINGLEPLAYER") .. ", " .. answer
-	end)
+	CAI_AddDetail(parent, "singleplayer",
+		Locale.Lookup("LOC_MODS_DETAILS_SINGLEPLAYER") .. ", "
+		.. CAI_ModPropertyYesNo(handle, "SupportsSinglePlayer"))
 
-	CAI_AddDetail(parent, "multiplayer", function()
-		local value = Modding.GetModProperty(handle, "SupportsMultiplayer")
-		local answer = value and tonumber(value) == 0
-			and Locale.Lookup("LOC_MODS_NO")
-			or Locale.Lookup("LOC_MODS_YES")
-		return Locale.Lookup("LOC_MODS_DETAILS_MULTIPLAYER") .. ", " .. answer
-	end)
+	CAI_AddDetail(parent, "multiplayer",
+		Locale.Lookup("LOC_MODS_DETAILS_MULTIPLAYER") .. ", "
+		.. CAI_ModPropertyYesNo(handle, "SupportsMultiplayer"))
 
 	local dependencies = Modding.GetModAssociations(handle)
 	if dependencies and #dependencies > 0 then
 		local dependencyNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIModsDependencies"), "TreeItem", {
-			Label = function() return Locale.Lookup("LOC_MODS_DETAILS_REFERENCES_DEPENDENCY") end,
+			Label = Locale.Lookup("LOC_MODS_DETAILS_REFERENCES_DEPENDENCY"),
 			FocusKey = parent.FocusKey .. ":dependencies",
 		})
 		local names = {}
@@ -1363,9 +1345,8 @@ local function CAI_AddModDetails(parent, handle)
 		end
 		table.sort(names, function(a, b) return Locale.Compare(a, b) == -1 end)
 		for index, name in ipairs(names) do
-			local dependencyName = name
 			dependencyNode:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAIModsDependency"), "MenuItem", {
-				Label = function() return dependencyName end,
+				Label = name,
 				FocusKey = dependencyNode.FocusKey .. ":" .. tostring(index),
 			}))
 		end
@@ -1427,8 +1408,8 @@ local function CAI_RebuildModsTree()
 		for _, listing in ipairs(g_ModListings) do
 			local handle = listing[1]
 			local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIMod"), "TreeItem", {
-				Label = function() return CAI_GetModLabel(handle) end,
-				Tooltip = function() return CAI_GetModTeaser(handle) end,
+				Label = CAI_GetModLabel(handle),
+				Tooltip = CAI_GetModTeaser(handle),
 				FocusKey = "mods:installed:" .. tostring(handle),
 			})
 			row:SetFocusSound("Main_Menu_Mouse_Over")

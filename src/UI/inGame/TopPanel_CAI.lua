@@ -26,7 +26,6 @@ local ACTION_SPEAK_FAITH = Input.GetActionId("UI_TopPanelSpeakFaith")
 local ACTION_SPEAK_TOURISM = Input.GetActionId("UI_TopPanelSpeakTourism")
 local ACTION_SPEAK_INFLUENCE = Input.GetActionId("UI_TopPanelSpeakInfluence")
 local ACTION_SPEAK_NUKES = Input.GetActionId("UI_TopPanelSpeakNukes")
-local ACTION_OPEN_YIELD_LIST = Input.GetActionId("UI_TopPanelYieldInfoList")
 local ACTION_OPEN_DIPLOMACY = Input.GetActionId("UI_TopPanelOpenDiplomacy")
 local ACTION_OPEN_REPORTS = Input.GetActionId("UI_TopPanelOpenReports")
 local ACTION_OPEN_REPORTS_RESOURCES = Input.GetActionId("UI_TopPanelOpenReportsResources")
@@ -35,8 +34,7 @@ local ACTION_OPEN_REPORTS_GOSSIP = Input.GetActionId("UI_TopPanelOpenReportsGoss
 local ACTION_OPEN_GLOBAL_RESOURCES = Input.GetActionId("UI_OpenGlobalResourcePopup")
 
 local function IsReportOpeningAction(actionId)
-    return actionId == ACTION_OPEN_YIELD_LIST
-        or actionId == ACTION_OPEN_REPORTS
+    return actionId == ACTION_OPEN_REPORTS
         or actionId == ACTION_OPEN_REPORTS_RESOURCES
         or actionId == ACTION_OPEN_REPORTS_CITY_STATUS
         or actionId == ACTION_OPEN_REPORTS_GOSSIP
@@ -784,14 +782,6 @@ local function OnCAITopPanelInputAction(actionId)
         SpeakFavor()
     elseif actionId == ACTION_SPEAK_NUKES then
         SpeakNukes()
-    elseif actionId == ACTION_OPEN_YIELD_LIST then
-        if GameCapabilities.HasCapability("CAPABILITY_REPORTS_LIST") then
-            ExposedMembers.CAIReports = ExposedMembers.CAIReports or {}
-            ExposedMembers.CAIReports.PendingFocusKey = "yield:economy"
-            LuaEvents.TopPanel_OpenReportsScreen()
-        else
-            Speak(Locale.Lookup("LOC_CAI_UI_REPORTS_UNAVAILABLE"))
-        end
     elseif actionId == ACTION_OPEN_DIPLOMACY then
         if GameCapabilities.HasCapability("CAPABILITY_DIPLOMACY") then
             LuaEvents.TopPanel_OpenDiplomacyActionView()

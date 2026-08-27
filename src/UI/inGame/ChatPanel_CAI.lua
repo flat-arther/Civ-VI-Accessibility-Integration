@@ -638,6 +638,10 @@ local function CAI_OnInputActionStarted(actionId)
     CAI_PushPanel()
 end
 
+local function CAI_OpenChatFromLaunchBar()
+    CAI_OnInputActionStarted(ACTION_OPEN_CHAT_PANEL)
+end
+
 local function CAI_HandleInput(input)
     if mgr and (mgr:GetWidgetById(CHAT_PANEL_ROOT_ID) or mgr:GetWidgetById(KICK_DIALOG_ID)) then
         if mgr:HandleInput(input) then
@@ -781,6 +785,8 @@ Controls.ChatEntry:RegisterCommitCallback(CAI_SendChat)
 CAI_UpdateVanillaTargetState()
 ContextPtr:SetInputHandler(CAI_HandleInput, true)
 Events.InputActionStarted.Add(CAI_OnInputActionStarted)
+LuaEvents.CAILaunchBarOpen_Chat.Remove(CAI_OpenChatFromLaunchBar)
+LuaEvents.CAILaunchBarOpen_Chat.Add(CAI_OpenChatFromLaunchBar)
 Events.PlayerInfoChanged.Add(CAI_OnPlayerInfoChanged)
 Events.MultiplayerPingTimesChanged.Add(CAI_OnPingTimesChanged)
 Events.KickVoteStarted.Remove(m_vanillaKickVoteStarted)
@@ -800,6 +806,7 @@ OnShutdown = WrapFunc(OnShutdown, function(orig)
     Events.KickVoteComplete.Remove(OnKickVoteComplete)
     LuaEvents.MapPinPopup_SendPinToChat.Remove(CAI_OnMapPinPopupSendPin)
     LuaEvents.MapPinPopup_RequestChatPlayerTarget.Remove(CAI_OnMapPinPopupRequestTarget)
+    LuaEvents.CAILaunchBarOpen_Chat.Remove(CAI_OpenChatFromLaunchBar)
     CAI_PopPanel()
     orig()
 end)

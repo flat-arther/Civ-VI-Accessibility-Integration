@@ -37,5 +37,13 @@ Close = WrapFunc(Close, function(orig)
     orig()
 end)
 
+OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
+    if mgr and m_dialog and mgr:GetTop() == m_dialog and not ContextPtr:IsHidden() then
+        local handled = mgr:HandleInput(pInputStruct)
+        if handled then return handled end
+    end
+    return orig(pInputStruct)
+end)
+ContextPtr:SetInputHandler(OnInputHandler, true)
 Controls.OpenGovernorsButton:RegisterCallback(Mouse.eLClick, OnOpenGovernorsButton);
 Controls.ContinueButton:RegisterCallback(Mouse.eLClick, OnContinueButton);

@@ -1,5 +1,30 @@
 ## [Unreleased]
 
+### Added
+
+- When founding a religion, the icon picker now names each religion followed by its symbol description. Custom religions are numbered and named by their symbol, such as "Custom Religion 1, Crab", so you can tell them apart.
+- In the diplomacy and deal screens, press `F2` to hear a description of a leader's appearance.
+- The great work viewer now reads a description of what each painting or sculpture depicts.
+- The diplomacy ribbon (`f4`) now has a table view and sorting. Switch views with `Alt 1 and 2` or the switch view button. The world congress button sits outside the leader list / table.
+- Added a launch bar list. Press `Shift plus Tab` to open a single list of the game's screens and choose one to open. Screens needing your attention come first
+- In the Red Death scenario, your faction's global ability appears in the launch bar list. Its tooltip reads the description, readiness, and charges, and choosing it activates the ability.
+- When the tutorial advisor tells you to open a screen, it now mentions the launch bar first and gives the direct shortcut as an alternative.
+- Added three more world scanner slots, for five in total. The new slots (3, 4, and 5) are unbound by default, so you can assign your own keys to them in options key bindings.
+
+### Changed
+
+- The world scanner's natural disasters list, under geography, now includes every revealed volcano, not just erupting ones. Each is read as "Volcano", its name if it has one, and its status: inactive, active, or erupting.
+- Disasters are now grouped by type in the natural disasters scanner subcategory
+- Removed the top panel's yield list shortcut (`Ctrl plus Y`), which was redundant with `F2` already opening the reports screen on the yields tab.
+- Choosing a leader in game setup, scenario setup, and the multiplayer staging room is now a button that opens a leader panel, containing a list and a sort dropdown. You can sort by leader or civilization name. Press `F2` on any leader to hear a description of their appearance.
+
+### Fixed
+
+- Fixed keyboard input on the Secret Society popup, which could stop working if another popup appeared underneath it.
+- Optimized typeahead to respond faster as you type each character. noticeable in large trees.
+- Typeahead now matches names with accents when you type the plain letters, so typing `chateau` finds Château, and typing an accented letter also matches its plain form.
+- Typeahead no longer hides matches farther from where you started typing. Every match now appears, with the nearest ones offered first.
+
 ## [1.3.0] - 2026-08-25
 
 ### Added

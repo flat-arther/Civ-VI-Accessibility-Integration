@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+  <LocalizedText>
+    <!-- ENGLISH -->
+    <!-- Religion custom-icon symbol names (CAI). Keyed by religion type: LOC_CAI_RELICON_<ReligionType>. Appended to the religion icon picker. -->
+    <Row Tag="LOC_CAI_RELICON_RELIGION_BUDDHISM" Language="en_US">
+      <Text>Dharma wheel</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_CATHOLICISM" Language="en_US">
+      <Text>Celtic cross</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_CONFUCIANISM" Language="en_US">
+      <Text>Chinese character</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_HINDUISM" Language="en_US">
+      <Text>Om symbol</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_ISLAM" Language="en_US">
+      <Text>Star and crescent</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_JUDAISM" Language="en_US">
+      <Text>Star of David</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_ORTHODOXY" Language="en_US">
+      <Text>Orthodox cross</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_PROTESTANTISM" Language="en_US">
+      <Text>Latin cross</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_SHINTO" Language="en_US">
+      <Text>Torii gate</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_SIKHISM" Language="en_US">
+      <Text>Khanda</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_TAOISM" Language="en_US">
+      <Text>Yin and yang</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_ZOROASTRIANISM" Language="en_US">
+      <Text>Faravahar</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_1" Language="en_US">
+      <Text>Crab</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_2" Language="en_US">
+      <Text>Bull's head</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_3" Language="en_US">
+      <Text>Elephant</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_4" Language="en_US">
+      <Text>Lion</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_5" Language="en_US">
+      <Text>Two fish</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_6" Language="en_US">
+      <Text>Scorpion</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_7" Language="en_US">
+      <Text>Cobra</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_8" Language="en_US">
+      <Text>Tree</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_9" Language="en_US">
+      <Text>Waves</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_10" Language="en_US">
+      <Text>Peacock</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_11" Language="en_US">
+      <Text>Butterfly</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RELICON_RELIGION_CUSTOM_12" Language="en_US">
+      <Text>Turtle</Text>
+    </Row>
+  </LocalizedText>
+</GameData>
