@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [1.4.1] - 2026-08-30
+
 ### Fixed
 
 - Fixed main menu options visually showing their text twice, overlapping, as you focused different menu items.
