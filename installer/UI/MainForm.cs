@@ -38,9 +38,9 @@ internal sealed class MainForm : Form
 
         var intro = new Label
         {
-            Text = "Install or update the accessibility mod. Full installation includes screen-reader integration. Sighted-only installs the mod without the integration DLLs.",
+            Text = "Install or update the accessibility mod. The full version enables screen-reader navigation. The sighted version installs everything but starts disabled and keeps your keyboard shortcuts; press Ctrl+Shift+F12 in game to turn it on.",
             Location = new Point(16, 50),
-            Size = new Size(688, 42),
+            Size = new Size(688, 48),
         };
 
         var gameLabel = new Label
@@ -73,7 +73,7 @@ internal sealed class MainForm : Form
 
         _full = new RadioButton
         {
-            Text = "Full version — install the mod and screen-reader integration",
+            Text = "Full version — enable the mod and screen-reader navigation",
             Location = new Point(14, 24),
             Size = new Size(650, 24),
             Checked = true,
@@ -81,7 +81,7 @@ internal sealed class MainForm : Form
 
         _sighted = new RadioButton
         {
-            Text = "Sighted-only version — install the mod without screen-reader integration",
+            Text = "Sighted version — install everything, but start disabled and keep my keyboard shortcuts",
             Location = new Point(14, 52),
             Size = new Size(650, 24),
         };
@@ -489,5 +489,5 @@ internal sealed class MainForm : Form
     }
 
     private static string ModeName(InstallMode mode) =>
-        mode == InstallMode.Full ? "full version" : "sighted-only version";
+        mode == InstallMode.Full ? "full version" : "sighted version";
 }

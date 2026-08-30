@@ -1987,15 +1987,33 @@ local function ShowCAIUpdateDialog()
 	if m_UpdateDialog then mgr:Push(m_UpdateDialog, PopupPriority.Current) end
 end
 
--- Vanilla highlight reuse: mirrors what mouse hover does in vanilla so the
--- sighted-mirror UI looks right while a CAI row is focused. Trigger from
--- focus_enter / focus_leave so highlights track focus rather than activation.
+-- Vanilla highlight reuse: mirrors the select/deselect visual vanilla runs in
+-- ToggleOption/DeselectOption so the sighted-mirror UI tracks the focused row.
+-- A root option layers two labels (ButtonLabel at rest, SelectedLabel in the
+-- selection overlay); the selection anim must fade SelectedLabel IN and
+-- ButtonLabel OUT together, or both render and the text appears doubled.
+-- Trigger from focus_enter / focus_leave so highlights track focus.
 local function HighlightMainOption(idx)
     if not m_currentOptions or not m_currentOptions[idx] then return end
     local ctrl = m_currentOptions[idx].control
     if not ctrl then return end
     ctrl.SelectionAnimAlpha:SetToBeginning(); ctrl.SelectionAnimAlpha:Play()
     ctrl.SelectionAnimSlide:SetToBeginning(); ctrl.SelectionAnimSlide:Play()
+    ctrl.LabelAlphaAnim:SetPauseTime(0)
+    ctrl.LabelAlphaAnim:SetSpeed(6)
+    ctrl.LabelAlphaAnim:Reverse()
+end
+
+local function ClearMainOption(idx)
+    if not m_currentOptions or not m_currentOptions[idx] then return end
+    local ctrl = m_currentOptions[idx].control
+    if not ctrl then return end
+    ctrl.LabelAlphaAnim:SetSpeed(1)
+    ctrl.LabelAlphaAnim:SetPauseTime(.4)
+    ctrl.SelectionAnimAlpha:Reverse()
+    ctrl.SelectionAnimSlide:Reverse()
+    ctrl.LabelAlphaAnim:SetToBeginning()
+    ctrl.LabelAlphaAnim:Play()
 end
 
 local function HighlightSubmenuInstance(uiOption)
@@ -2136,6 +2154,13 @@ local function RebuildMenuRows(menuOptions)
             row:On("focus_enter", function()
                 UI.PlaySound("Main_Menu_Mouse_Over")
                 HighlightMainOption(i)
+            end)
+            row:On("focus_leave", function()
+                -- Leave the expanded parent's highlight alone: vanilla keeps it
+                -- selected while its submenu is open, and clearing it here would
+                -- visually deselect an option that is still active.
+                if m_currentOptions[i] and m_currentOptions[i].isSelected then return end
+                ClearMainOption(i)
             end)
             m_MenuList:AddChild(row)
         end

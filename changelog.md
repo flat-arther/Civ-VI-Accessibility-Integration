@@ -1,5 +1,11 @@
 ## [Unreleased]
 
+### Fixed
+
+- Fixed main menu options visually showing their text twice, overlapping, as you moved through the menu.
+- Fixed visually duplicated text on the loading screen.
+- Fixed the sighted install so that it no longer causes lua errors and file mismatches in multiplayer games
+
 ## [1.4.0] - 2026-08-27
 
 ### Added

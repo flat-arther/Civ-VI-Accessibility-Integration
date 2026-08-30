@@ -640,15 +640,17 @@ function OnInputHandler( pInputStruct)
     return false
 end
 
-Events.LoadScreenContentReady.Remove(OnLoadScreenContentReady)
+-- Initialize() runs at the end of this file, after this block, and registers
+-- OnLoadScreenContentReady / OnLoadGameViewStateDone on their events exactly
+-- once. Only wrap the globals here so Initialize picks up the wrapped versions;
+-- do NOT Add them again, or each handler fires twice. For content-ready that
+-- means the feature list is built twice into FeaturesStack (doubled text).
 OnLoadScreenContentReady = WrapFunc(OnLoadScreenContentReady, function(orig, ...)
 	orig(...)
 	ContextPtr:SetInputHandler(OnInputHandler, true)
 	end)
-Events.LoadScreenContentReady.Add(OnLoadScreenContentReady)
 
 local spokeReady = false
-Events.LoadGameViewStateDone.Remove(OnLoadGameViewStateDone)
 OnLoadGameViewStateDone = WrapFunc(OnLoadGameViewStateDone, function(orig, ...)
 	orig(...)
 	if not spokeReady then
@@ -661,7 +663,6 @@ OnLoadGameViewStateDone = WrapFunc(OnLoadGameViewStateDone, function(orig, ...)
 	RegisterButtonCallbacks();
 	ContextPtr:SetInputHandler(OnInputHandler, true)
 end)
-Events.LoadGameViewStateDone.Add(OnLoadGameViewStateDone)
 
 function OnCAIUIManagerInitialized(manager)
 	mgr = manager

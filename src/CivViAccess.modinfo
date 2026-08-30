@@ -103,7 +103,7 @@
     <File>UI/shared/LoadSaveHelpers_CAI.lua</File>
     <File>UI/shared/LoadGameMenu.lua</File>
     <File>UI/shared/SaveGameMenu.lua</File>
-    <File>UI/shared/LoadScreen.lua</File>
+    <File>UI/frontEnd/LoadScreen.lua</File>
     <File>UI/shared/StateTransition.lua</File>
     <File>UI/shared/PopupDialog.lua</File>
     <File>UI/inGame/PlayerStateManager_CAI.lua</File>
@@ -449,7 +449,7 @@
       <File>UI/shared/LoadSaveHelpers_CAI.lua</File>
       <File>UI/shared/LoadGameMenu.lua</File>
       <File>UI/shared/SaveGameMenu.lua</File>
-      <File>UI/shared/LoadScreen.lua</File>
+      <File>UI/frontEnd/LoadScreen.lua</File>
       <File>UI/shared/PopupDialog.lua</File>
       <File>UI/shared/Options.lua</File>
       <File>UI/shared/StateTransition.lua</File>
@@ -614,7 +614,6 @@
       <File>UI/shared/LoadSaveHelpers_CAI.lua</File>
       <File>UI/shared/LoadGameMenu.lua</File>
       <File>UI/shared/SaveGameMenu.lua</File>
-      <File>UI/shared/LoadScreen.lua</File>
       <File>UI/shared/Options.lua</File>
       <File>UI/shared/StateTransition.lua</File>
       <File>UI/inGame/CityBannerManager_CAI.lua</File>
