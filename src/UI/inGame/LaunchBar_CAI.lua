@@ -937,6 +937,10 @@ local function OnCAILaunchBarInputHandler(input)
 end
 
 OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
+    if not IsCAIActive() then
+        orig(actionId)
+        return
+    end
     if m_caiOpenLaunchBarId and actionId == m_caiOpenLaunchBarId then
         ToggleLaunchBar()
         return

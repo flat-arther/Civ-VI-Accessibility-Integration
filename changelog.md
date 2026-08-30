@@ -2,9 +2,11 @@
 
 ### Fixed
 
-- Fixed main menu options visually showing their text twice, overlapping, as you moved through the menu.
+- Fixed main menu options visually showing their text twice, overlapping, as you focused different menu items.
 - Fixed visually duplicated text on the loading screen.
 - Fixed the sighted install so that it no longer causes lua errors and file mismatches in multiplayer games
+- On a sighted install, screen and menu shortcuts now behave exactly as in the base game instead of being redirected by the mod
+- While the accessibility layer is turned off, the options key-bindings list now shows the base game's key bindings again instead of hiding them
 
 ## [1.4.0] - 2026-08-27
 

@@ -392,7 +392,7 @@ function P.RunLookup(widget)
         WrapAround = true,
         TrapInput = true
     })
-    panel:On("focus_enter", function() Input.SetActiveContext(InputContext.Shell) end)
+    panel:On("focus_enter", function() mgr:SetInputContext(InputContext.Shell) end)
     local listId = panelId .. "_List"
     local list = mgr:CreateWidget(listId, "List", {
         Label = function() return Locale.Lookup("LOC_CAI_PEDIA_LOOKUP_RESULTS") end,

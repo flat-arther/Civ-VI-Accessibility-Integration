@@ -367,8 +367,14 @@ function UIScreenManager:SetCAIActive(active)
     Speak(Locale.Lookup(active and "LOC_CAI_MOD_RESUMED" or "LOC_CAI_MOD_SUSPENDED"), true, nil, true)
 
     -- Tear down CAI-only overlays before broadcasting, so other contexts'
-    -- listeners reconcile against an already-clean stack.
-    if not active then self:CloseSuspendModals() end
+    -- listeners reconcile against an already-clean stack. On resume, re-establish
+    -- the input context from current focus, since it was left untouched while
+    -- suspended and may have drifted from what CAI expects.
+    if not active then
+        self:CloseSuspendModals()
+    else
+        self:SyncInputContext()
+    end
 
     LogMessage("CAI mod " .. (active and "resumed" or "suspended"))
     LuaEvents.CAIStatusChanged(active)
@@ -376,6 +382,32 @@ end
 
 function UIScreenManager:ToggleCAIActive()
     self:SetCAIActive(not self:IsCAIActive())
+end
+
+---Central input-context setter. No-ops while the mod is suspended so CAI never
+---touches the vanilla input context when inactive. All widgets and helpers route
+---their context switches through here.
+---@param context number -- InputContext.World / InputContext.Shell
+function UIScreenManager:SetInputContext(context)
+    if not self:IsCAIActive() then return end
+    Input.SetActiveContext(context)
+end
+
+---Re-establish the vanilla input context from current focus: World when a
+---GameView or InterfaceMode widget is in the focus path, Shell otherwise. Used
+---on resume to sync the input context back up after the mod was suspended (while
+---suspended CAI leaves the context untouched, so it can drift out of sync).
+function UIScreenManager:SyncInputContext()
+    local context = InputContext.Shell
+    local path = self.CurrentPath or {}
+    for i = 1, #path do
+        local t = path[i].Type
+        if t == "GameView" or t == "InterfaceMode" then
+            context = InputContext.World
+            break
+        end
+    end
+    Input.SetActiveContext(context)
 end
 
 ---Register a close callback for a CAI-only overlay that maps to no vanilla UI

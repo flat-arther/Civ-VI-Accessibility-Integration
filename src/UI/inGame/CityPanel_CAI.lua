@@ -636,7 +636,7 @@ function GetCityChangeProductionTooltip()
 end
 
 function GetActionDescriptionIfDistinct(actionId)
-    if actionId == Input.GetActionId("CityChangeProduction") then
+    if actionId == SafeActionId("CityChangeProduction") then
         return GetCityChangeProductionTooltip()
     end
 
@@ -740,7 +740,7 @@ function GetCityCategoryActionIds()
     end
 
     local excluded = {
-        [Input.GetActionId("SelectionActions")] = true,
+        [SafeActionId("SelectionActions")] = true,
     }
 
     CityActionCategoryIds = {}
@@ -755,12 +755,12 @@ end
 
 function GetOrderedCityActionIds()
     local ordered = {
-        Input.GetActionId("CityChangeProduction"),
-        Input.GetActionId("CityManageCity"),
-        Input.GetActionId("CityPurchaseWithGold"),
-        Input.GetActionId("CityPurchaseWithFaith"),
-        Input.GetActionId("CityToggleOverview"),
-        Input.GetActionId("CityChangeCitizenYieldFocus"),
+        SafeActionId("CityChangeProduction"),
+        SafeActionId("CityManageCity"),
+        SafeActionId("CityPurchaseWithGold"),
+        SafeActionId("CityPurchaseWithFaith"),
+        SafeActionId("CityToggleOverview"),
+        SafeActionId("CityChangeCitizenYieldFocus"),
     }
 
     local seen = {}
@@ -1285,13 +1285,13 @@ end
 
 function InitializeCityActionMap()
     CityActionMap = {
-        [Input.GetActionId("SelectionActions")] = BuildCityActionData(
+        [SafeActionId("SelectionActions")] = BuildCityActionData(
             OpenCityActionList,
             function()
                 return UI.GetHeadSelectedCity() ~= nil and ContextPtr:IsHidden() == false
             end
         ),
-        [Input.GetActionId("CityToggleOverview")] = BuildCityActionData(
+        [SafeActionId("CityToggleOverview")] = BuildCityActionData(
             function()
                 ToggleCityPanelCheck(Controls.ToggleOverviewPanel)
             end,
@@ -1300,11 +1300,11 @@ function InitializeCityActionMap()
                     and IsCityPanelActionAvailable(Controls.ToggleOverviewPanel)
             end
         ),
-        [Input.GetActionId("CityManageCity")] = BuildCityActionData(
+        [SafeActionId("CityManageCity")] = BuildCityActionData(
             ToggleCombinedCityManagement,
             CanToggleCombinedCityManagement
         ),
-        [Input.GetActionId("CityPurchaseWithGold")] = BuildCityActionData(
+        [SafeActionId("CityPurchaseWithGold")] = BuildCityActionData(
             function()
                 ToggleCityPanelCheck(Controls.ProduceWithGoldCheck)
             end,
@@ -1313,7 +1313,7 @@ function InitializeCityActionMap()
                     and IsCityPanelActionAvailable(Controls.ProduceWithGoldCheck)
             end
         ),
-        [Input.GetActionId("CityChangeCitizenYieldFocus")] = BuildCityActionData(
+        [SafeActionId("CityChangeCitizenYieldFocus")] = BuildCityActionData(
             OpenCitizenYieldFocusList,
             function()
                 return UI.GetHeadSelectedCity() ~= nil
@@ -1323,7 +1323,7 @@ function InitializeCityActionMap()
                     and not Controls.YieldsArea:IsDisabled()
             end
         ),
-        [Input.GetActionId("CityPurchaseWithFaith")] = BuildCityActionData(
+        [SafeActionId("CityPurchaseWithFaith")] = BuildCityActionData(
             function()
                 ToggleCityPanelCheck(Controls.ProduceWithFaithCheck)
             end,
@@ -1331,7 +1331,7 @@ function InitializeCityActionMap()
                 return IsCityPanelActionAvailable(Controls.ProduceWithFaithCheck)
             end
         ),
-        [Input.GetActionId("CityChangeProduction")] = BuildCityActionData(
+        [SafeActionId("CityChangeProduction")] = BuildCityActionData(
             OpenOrToggleCityProduction,
             function()
                 return IsCityPanelActionAvailable(Controls.ChangeProductionCheck)
@@ -1342,17 +1342,17 @@ end
 
 function InitializeCityInfoActionMap()
     CityInfoActionMap = {
-        [Input.GetActionId("ReadSelectionSummary")] = CITY_INFO_BUCKETS.Summary,
-        [Input.GetActionId("ReadSelectionInfo1")] = CITY_INFO_BUCKETS.Info1,
-        [Input.GetActionId("ReadSelectionInfo2")] = CITY_INFO_BUCKETS.Info2,
-        [Input.GetActionId("ReadSelectionInfo3")] = CITY_INFO_BUCKETS.Info3,
-        [Input.GetActionId("ReadSelectionInfo4")] = CITY_INFO_BUCKETS.Info4,
-        [Input.GetActionId("ReadSelectionInfo5")] = CITY_INFO_BUCKETS.Info5,
-        [Input.GetActionId("ReadSelectionInfo6")] = CITY_INFO_BUCKETS.Info6,
-        [Input.GetActionId("ReadSelectionInfo7")] = CITY_INFO_BUCKETS.Info7,
-        [Input.GetActionId("ReadSelectionInfo8")] = CITY_INFO_BUCKETS.Info8,
-        [Input.GetActionId("ReadSelectionInfo9")] = CITY_INFO_BUCKETS.Info9,
-        [Input.GetActionId("ReadSelectionInfo10")] = CITY_INFO_BUCKETS.Info10,
+        [SafeActionId("ReadSelectionSummary")] = CITY_INFO_BUCKETS.Summary,
+        [SafeActionId("ReadSelectionInfo1")] = CITY_INFO_BUCKETS.Info1,
+        [SafeActionId("ReadSelectionInfo2")] = CITY_INFO_BUCKETS.Info2,
+        [SafeActionId("ReadSelectionInfo3")] = CITY_INFO_BUCKETS.Info3,
+        [SafeActionId("ReadSelectionInfo4")] = CITY_INFO_BUCKETS.Info4,
+        [SafeActionId("ReadSelectionInfo5")] = CITY_INFO_BUCKETS.Info5,
+        [SafeActionId("ReadSelectionInfo6")] = CITY_INFO_BUCKETS.Info6,
+        [SafeActionId("ReadSelectionInfo7")] = CITY_INFO_BUCKETS.Info7,
+        [SafeActionId("ReadSelectionInfo8")] = CITY_INFO_BUCKETS.Info8,
+        [SafeActionId("ReadSelectionInfo9")] = CITY_INFO_BUCKETS.Info9,
+        [SafeActionId("ReadSelectionInfo10")] = CITY_INFO_BUCKETS.Info10,
     }
 end
 
@@ -1384,7 +1384,7 @@ function OnSelectionInfoInputActionStarted(actionId)
     end
 
     local summary = table.concat(results, "[NEWLINE]")
-    if actionId == Input.GetActionId("ReadSelectionSummary") then
+    if actionId == SafeActionId("ReadSelectionSummary") then
         local cursor = ExposedMembers.CAICursor
         if cursor ~= nil then
             local cursorX, cursorY = cursor:GetCoords()

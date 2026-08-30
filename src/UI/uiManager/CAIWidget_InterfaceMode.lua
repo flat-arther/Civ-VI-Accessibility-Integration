@@ -18,8 +18,8 @@ function InterfaceModeWidget.Create(mgr, id, props)
     w.Role = "InterfaceMode"
     w.Manager = mgr
 
-    w:On("focus_enter", function() Input.SetActiveContext(InputContext.World) end)
-    w:On("focus_leave", function() Input.SetActiveContext(InputContext.Shell) end)
+    w:On("focus_enter", function() mgr:SetInputContext(InputContext.World) end)
+    w:On("focus_leave", function() mgr:SetInputContext(InputContext.Shell) end)
 
     CAIWidgetRegistry.ApplyProps(w, props)
     return w

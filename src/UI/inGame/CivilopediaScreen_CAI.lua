@@ -1282,6 +1282,10 @@ local m_caiOpenCivilopediaId = Input.GetActionId("UI_CAIOpenCivilopedia")
 local m_vanillaOpenCivilopedia = Input.GetActionId("OpenCivilopedia")
 Events.InputActionTriggered.Remove(OnInputActionTriggered)
 OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
+    if not IsCAIActive() then
+        orig(actionId)
+        return
+    end
     if m_caiOpenCivilopediaId and actionId == m_caiOpenCivilopediaId then
         orig(m_vanillaOpenCivilopedia)
         return

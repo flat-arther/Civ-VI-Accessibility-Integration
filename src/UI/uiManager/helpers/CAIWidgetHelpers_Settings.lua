@@ -333,7 +333,7 @@ function S.OpenSettings(mgr)
         TrapInput = true,
     })
     panel._settingsPreviousFocus = previousFocus
-    panel:On("focus_enter", function() Input.SetActiveContext(InputContext.Shell) end)
+    panel:On("focus_enter", function() mgr:SetInputContext(InputContext.Shell) end)
     local suspendToken = mgr:RegisterSuspendCloser(function() ClosePanel(mgr, panel) end)
     panel:On("destroy", function()
         g_settingsOpen = false

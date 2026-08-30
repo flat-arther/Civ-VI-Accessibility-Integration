@@ -399,6 +399,10 @@ end
 -- Input
 -- ===========================================================================
 OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
+    if not IsCAIActive() then
+        orig(actionId)
+        return
+    end
     if ContextPtr:IsHidden() then return end
 
     if actionId == CAI_SPEAK_TURN_BLOCKERS_ACTION then

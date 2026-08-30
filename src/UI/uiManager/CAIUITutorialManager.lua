@@ -403,7 +403,7 @@ function CAIUITutorialManager:Activate(item, owner, context)
         }
     )
     host:On("focus_enter", function()
-        Input.SetActiveContext(InputContext.Shell)
+        self.Manager:SetInputContext(InputContext.Shell)
     end)
     host:AddInputBinding({
         Key = Keys.VK_ESCAPE,

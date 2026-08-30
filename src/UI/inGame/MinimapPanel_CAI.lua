@@ -324,6 +324,10 @@ local function OpenMapSearchFromLaunchBar()
 end
 
 OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
+    if not IsCAIActive() then
+        orig(actionId)
+        return
+    end
     if m_caiOpenMapSearchId ~= nil and actionId == m_caiOpenMapSearchId then
         if Game.GetLocalPlayer() == -1 then
             Speak(Locale.Lookup("LOC_CAI_UI_MAP_SEARCH_UNAVAILABLE"))

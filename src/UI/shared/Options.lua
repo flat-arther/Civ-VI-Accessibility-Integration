@@ -1795,7 +1795,7 @@ function InitializeKeyBinding()
 		local count = Input.GetActionCount();
 		for i = 0, count - 1, 1 do
 			local action = Input.GetActionId(i);
-			if(Input.ShouldShowActionKeybinding(action) and not vanillaCategories[Input.GetActionCategory(action)]) then
+			if(Input.ShouldShowActionKeybinding(action) and (not IsCAIActive() or not vanillaCategories[Input.GetActionCategory(action)])) then
 				local info = {
 					action,
 					Locale.Lookup(Input.GetActionName(action)),
@@ -2293,7 +2293,7 @@ local function RebuildKeyBindingsTree()
     local count = Input.GetActionCount()
     for i = 0, count - 1 do
         local action = Input.GetActionId(i)
-        if Input.ShouldShowActionKeybinding(action) and not vanillaCategories[Input.GetActionCategory(action)] then
+        if Input.ShouldShowActionKeybinding(action) and (not IsCAIActive() or not vanillaCategories[Input.GetActionCategory(action)]) then
             table.insert(actions, {
                 id       = action,
                 name     = Locale.Lookup(Input.GetActionName(action)),

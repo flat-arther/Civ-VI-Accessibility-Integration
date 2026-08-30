@@ -29,10 +29,10 @@ local UNIT_SIMPLE_PROMOTION_LIST_ID = "CAIUnitPanelSimplePromotionList"
 local UNIT_NAME_PANEL_ID = "CAIUnitPanelNamePanel"
 local UNIT_NAME_EDIT_ID = "CAIUnitPanelNameEdit"
 
-local openUnitListAction = Input.GetActionId("UI_UnitPanelOpenUnitList")
-local unitViewAbilitiesAction = Input.GetActionId("UnitViewAbilities")
-local selectionActionsAction = Input.GetActionId("SelectionActions")
-local caiDeleteUnitAction = Input.GetActionId("CAIDeleteUnit")
+local openUnitListAction = SafeActionId("UI_UnitPanelOpenUnitList")
+local unitViewAbilitiesAction = SafeActionId("UnitViewAbilities")
+local selectionActionsAction = SafeActionId("SelectionActions")
+local caiDeleteUnitAction = SafeActionId("CAIDeleteUnit")
 local promoteActionHash = GameInfo.UnitCommands["UNITCOMMAND_PROMOTE"] ~= nil and
     GameInfo.UnitCommands["UNITCOMMAND_PROMOTE"].Hash or
     UnitCommandTypes.PROMOTE
@@ -259,6 +259,16 @@ end
 AddActionToTable = WrapFunc(AddActionToTable, function(orig, actionsTable, action, disabled, toolTipString,
                                                        actionHash, callbackFunc, callbackVoid1, callbackVoid2,
                                                        overrideIcon)
+    -- Unit operations can carry a CAI HotkeyId from the data config even on a
+    -- sighted install where the matching input action is not registered. In
+    -- that case vanilla AddActionToTable takes its error branch and builds a
+    -- UI.DataError string from action.IconId, which may be nil and crash the
+    -- whole unit refresh. Drop the unresolved hotkey so vanilla skips binding it
+    -- (the action stays usable through the UI; there is simply no hotkey).
+    if action ~= nil and action.HotkeyId ~= nil and Input.GetActionId(action.HotkeyId) == nil then
+        action.HotkeyId = nil
+    end
+
     local kind = nil
     local config = unitOperationResults[actionHash]
     if config ~= nil then
@@ -2159,7 +2169,7 @@ local function GetUnitActionInputActionId(action)
         return nil
     end
 
-    return Input.GetActionId(hotkeyId)
+    return SafeActionId(hotkeyId)
 end
 
 local function GetInputActionBindingText(actionId)
@@ -3479,7 +3489,11 @@ end
 
 Events.InputActionTriggered.Remove(OnInputActionTriggered)
 OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
-    if actionId == Input.GetActionId("DeleteUnit") or actionId == Input.GetActionId("Attack") then return end
+    if not IsCAIActive() then
+        orig(actionId)
+        return
+    end
+    if actionId == SafeActionId("DeleteUnit") or actionId == SafeActionId("Attack") then return end
     orig(actionId)
 end)
 
@@ -3490,17 +3504,17 @@ end
 
 function InitializeUnitInfoActionMap()
     UnitInfoActionMap = {
-        [Input.GetActionId("ReadSelectionSummary")] = { "Summary" },
-        [Input.GetActionId("ReadSelectionInfo1")] = { "Identity", "Health" },
-        [Input.GetActionId("ReadSelectionInfo2")] = { "Movement" },
-        [Input.GetActionId("ReadSelectionInfo3")] = { "Activity" },
-        [Input.GetActionId("ReadSelectionInfo4")] = { "Charges" },
-        [Input.GetActionId("ReadSelectionInfo5")] = { "Promotions" },
-        [Input.GetActionId("ReadSelectionInfo6")] = { "Stats" },
-        [Input.GetActionId("ReadSelectionInfo7")] = { "Abilities" },
-        [Input.GetActionId("ReadSelectionInfo8")] = { "SpecialInfo" },
-        [Input.GetActionId("ReadSelectionInfo9")] = { "QueuedPath" },
-        [Input.GetActionId("ReadSelectionInfo10")] = { "AdjacentEnemies" },
+        [SafeActionId("ReadSelectionSummary")] = { "Summary" },
+        [SafeActionId("ReadSelectionInfo1")] = { "Identity", "Health" },
+        [SafeActionId("ReadSelectionInfo2")] = { "Movement" },
+        [SafeActionId("ReadSelectionInfo3")] = { "Activity" },
+        [SafeActionId("ReadSelectionInfo4")] = { "Charges" },
+        [SafeActionId("ReadSelectionInfo5")] = { "Promotions" },
+        [SafeActionId("ReadSelectionInfo6")] = { "Stats" },
+        [SafeActionId("ReadSelectionInfo7")] = { "Abilities" },
+        [SafeActionId("ReadSelectionInfo8")] = { "SpecialInfo" },
+        [SafeActionId("ReadSelectionInfo9")] = { "QueuedPath" },
+        [SafeActionId("ReadSelectionInfo10")] = { "AdjacentEnemies" },
     }
 end
 
@@ -3527,7 +3541,7 @@ function OnUnitPanelSelectionInfoInputActionStarted(actionId)
     end
 
     local summary = table.concat(results, "[NEWLINE]")
-    if actionId == Input.GetActionId("ReadSelectionSummary") and CAICursor ~= nil then
+    if actionId == SafeActionId("ReadSelectionSummary") and CAICursor ~= nil then
         local cursorX, cursorY = CAICursor:GetCoords()
         if cursorX ~= nil and cursorY ~= nil then
             local direction = CAIHexCoordUtils.directionString(

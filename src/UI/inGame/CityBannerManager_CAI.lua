@@ -6,13 +6,13 @@ BANNERTYPE_INDUSTRY                  = UIManager:GetHash("BANNERTYPE_INDUSTRY");
 BANNERTYPE_CORPORATION               = UIManager:GetHash("BANNERTYPE_CORPORATION");
 local currentPlotId                  = -1
 local CITY_BANNER_INFO_UNAVAILABLE   = "LOC_CAI_CITY_BANNER_INFO_UNAVAILABLE"
-local ACTION_BANNER_IDENTITY_STATUS  = Input.GetActionId("CityBannerReadIdentityStatus")
-local ACTION_BANNER_GROWTH_INFLUENCE = Input.GetActionId("CityBannerReadGrowthInfluence")
-local ACTION_BANNER_RELIGION         = Input.GetActionId("CityBannerReadReligion")
-local ACTION_BANNER_DIPLOMACY        = Input.GetActionId("CityBannerReadDiplomacy")
-local ACTION_BANNER_LOYALTY_SUMMARY  = Input.GetActionId("CityBannerReadLoyaltySummary")
-local ACTION_BANNER_GOVERNOR         = Input.GetActionId("CityBannerReadGovernor")
-local ACTION_BANNER_POWER            = Input.GetActionId("CityBannerReadPower")
+local ACTION_BANNER_IDENTITY_STATUS  = SafeActionId("CityBannerReadIdentityStatus")
+local ACTION_BANNER_GROWTH_INFLUENCE = SafeActionId("CityBannerReadGrowthInfluence")
+local ACTION_BANNER_RELIGION         = SafeActionId("CityBannerReadReligion")
+local ACTION_BANNER_DIPLOMACY        = SafeActionId("CityBannerReadDiplomacy")
+local ACTION_BANNER_LOYALTY_SUMMARY  = SafeActionId("CityBannerReadLoyaltySummary")
+local ACTION_BANNER_GOVERNOR         = SafeActionId("CityBannerReadGovernor")
+local ACTION_BANNER_POWER            = SafeActionId("CityBannerReadPower")
 
 local function AppendResult(results, value)
     if value ~= nil and value ~= "" then

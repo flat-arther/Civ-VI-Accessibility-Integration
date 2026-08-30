@@ -320,6 +320,30 @@ function GetKeys(tbl)
     return list
 end
 
+-- ===========================================================================
+-- Safe action id lookup
+-- Custom CAI input actions are registered by data/hotkey_config_CAI.xml. On a
+-- sighted install that config is intentionally not loaded, so
+-- Input.GetActionId("<CAI action>") returns nil. A nil value is fatal when used
+-- as a table key (aborts the whole file load), so this returns a unique,
+-- negative sentinel instead. The sentinel is safe as a table key and can never
+-- equal a real dispatched action id, so `actionId == SafeActionId("X")`
+-- comparisons simply never match when the action is not registered.
+-- ===========================================================================
+local _cai_missingActionSeq = 0
+---Resolves an input action name to its id, or a unique non-nil sentinel when
+---the action is not registered. Pass action NAMES only, not numeric indices.
+---@param name string
+---@return number
+function SafeActionId(name)
+    local id = Input.GetActionId(name)
+    if id ~= nil then
+        return id
+    end
+    _cai_missingActionSeq = _cai_missingActionSeq - 1
+    return _cai_missingActionSeq
+end
+
 ---Returns a list of input action ids given a category string
 ---@param cat string
 ---@return number[]

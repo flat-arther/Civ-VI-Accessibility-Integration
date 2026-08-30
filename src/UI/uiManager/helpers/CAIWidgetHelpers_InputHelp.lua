@@ -401,7 +401,7 @@ function H.RunHelp(widget)
         WrapAround = true,
         TrapInput = true
     })
-    panel:On("focus_enter", function() Input.SetActiveContext(InputContext.Shell) end)
+    panel:On("focus_enter", function() mgr:SetInputContext(InputContext.Shell) end)
     local tree = mgr:CreateWidget(panelId .. "_Tree", "Tree", {
         Label = function() return Locale.Lookup("LOC_CAI_INPUT_HELP_TITLE") end,
     })

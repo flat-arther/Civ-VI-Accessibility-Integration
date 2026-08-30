@@ -1783,31 +1783,31 @@ end
 
 local function InitializePlotInfoActionRequestBuilders()
     PlotInfoActionRequestBuilders = {
-        [Input.GetActionId("PlotReadUnits")] = function(plot, data)
+        [SafeActionId("PlotReadUnits")] = function(plot, data)
             return {
                 keys = { "detailedUnits" },
                 emptyLoc = "LOC_CAI_PLOT_NO_UNITS",
             }
         end,
-        [Input.GetActionId("PlotReadYieldRiverOwner")] = function(plot, data)
+        [SafeActionId("PlotReadYieldRiverOwner")] = function(plot, data)
             return {
                 keys = BuildYieldInfoRequestKeys(data),
                 emptyLoc = "LOC_CAI_PLOT_NO_YIELD_RIVER_OWNER_INFO",
             }
         end,
-        [Input.GetActionId("PlotReadStats")] = function(plot, data)
+        [SafeActionId("PlotReadStats")] = function(plot, data)
             return {
                 keys = STATS_INFO_BUCKET,
                 emptyLoc = "LOC_CAI_PLOT_NO_PHYSICAL_INFO",
             }
         end,
-        [Input.GetActionId("PlotReadRelativeCoords")] = function(plot, data)
+        [SafeActionId("PlotReadRelativeCoords")] = function(plot, data)
             return {
                 keys = { "relativeCoords" },
                 emptyLoc = "LOC_CAI_PLOT_NO_COORDINATES",
             }
         end,
-        [Input.GetActionId("PlotReadGeography")] = function(plot, data)
+        [SafeActionId("PlotReadGeography")] = function(plot, data)
             return {
                 keys = GEOGRAPHY_INFO_BUCKET,
                 emptyLoc = "LOC_CAI_PLOT_NO_GEOGRAPHY_INFO",

@@ -58,6 +58,10 @@ end
 
 Events.InputActionTriggered.Remove(OnInputActionTriggered)
 OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
+    if not IsCAIActive() then
+        orig(actionId)
+        return
+    end
     if m_caiOpenCityStatesId and actionId == m_caiOpenCityStatesId then
         OnCAIOpenCityStates()
         return

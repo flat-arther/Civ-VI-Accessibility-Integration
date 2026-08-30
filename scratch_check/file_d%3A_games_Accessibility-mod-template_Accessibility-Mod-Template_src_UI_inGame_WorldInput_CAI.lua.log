@@ -1,0 +1,127 @@
+[18:05:54.485][info] [#0:C:/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server\main.lua:71]: Lua Lsp startup, root: 	C:/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server
+[18:05:54.486][info] [#0:C:/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server\main.lua:72]: ROOT:	C:/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server
+[18:05:54.486][info] [#0:C:/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server\main.lua:73]: LOGPATH:	scratch_check
+[18:05:54.486][info] [#0:C:/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server\main.lua:74]: METAPATH:	C:/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta
+[18:05:54.486][info] [#0:C:/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server\main.lua:75]: VERSION:	3.19.1
+[18:05:54.526][info] [#0:script\language.lua:137]: VSC language: nil
+[18:05:54.526][info] [#0:script\language.lua:138]: LS  language: en-us
+[18:05:54.526][info] [#0:script\client.lua:657]: Client init	{
+  capabilities = {
+    textDocument = {
+      completion = {
+        completionItem = {
+          tagSupport = {
+            valueSet = { 1, 2 }
+          }
+        }
+      }
+    },
+    workspace = {
+      configuration = true
+    }
+  },
+  initializationOptions = {
+    changeConfiguration = true,
+    trustByClient = true,
+    useSemanticByRange = true,
+    viewDocument = true
+  },
+  rootUri = "file:///d%3A/games/Accessibility-mod-template/Accessibility-Mod-Template/src/UI/inGame/WorldInput_CAI.lua"
+}
+[18:05:54.526][info] [#0:script\language.lua:137]: VSC language: nil
+[18:05:54.526][info] [#0:script\language.lua:138]: LS  language: en-us
+[18:05:54.526][info] [#0:script\workspace\workspace.lua:38]: Workspace init root: 	file:///d%3A/games/Accessibility-mod-template/Accessibility-Mod-Template/src/UI/inGame/WorldInput_CAI.lua
+[18:05:54.526][info] [#0:script\workspace\workspace.lua:42]: Log path: 	scratch_check/file_d%3A_games_Accessibility-mod-template_Accessibility-Mod-Template_src_UI_inGame_WorldInput_CAI.lua.log
+[18:05:54.551][info] [#0:script\workspace\workspace.lua:48]: Workspace create: 	file:///d%3A/games/Accessibility-mod-template/Accessibility-Mod-Template/src/UI/inGame/WorldInput_CAI.lua
+[18:05:54.552][warn] [#0:script\config\loader.lua:116]: No config?	nil
+[18:05:54.552][warn] [#0:script\config\loader.lua:116]: No config?	nil
+[18:05:54.552][info] [#0:script\provider\provider.lua:65]: Load config from client	fallback
+[18:05:54.552][info] [#0:script\provider\provider.lua:66]: nil
+[18:05:54.553][info] [#0:script\library.lua:216]: Init builtin library at:	file:///d%3A/games/Accessibility-mod-template/Accessibility-Mod-Template/src/UI/inGame/WorldInput_CAI.lua
+[18:05:54.596][info] [#0:script\library.lua:216]: Init builtin library at:	nil
+[18:05:54.620][warn] [#0:script\config\loader.lua:116]: No config?	nil
+[18:05:54.621][warn] [#0:script\config\loader.lua:116]: No config?	nil
+[18:05:54.621][info] [#0:script\provider\provider.lua:65]: Load config from client	fallback
+[18:05:54.621][info] [#0:script\provider\provider.lua:66]: nil
+[18:05:54.621][info] [#0:script\workspace\workspace.lua:340]: Preload start:	file:///d%3A/games/Accessibility-mod-template/Accessibility-Mod-Template/src/UI/inGame/WorldInput_CAI.lua
+[18:05:54.623][info] [#0:script\workspace\workspace.lua:346]: Scan files at:	file:///d%3A/games/Accessibility-mod-template/Accessibility-Mod-Template/src/UI/inGame/WorldInput_CAI.lua
+[18:05:54.623][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/string.lua
+[18:05:54.623][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/coroutine.lua
+[18:05:54.623][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/basic.lua
+[18:05:54.623][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/package.lua
+[18:05:54.623][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/builtin.lua
+[18:05:54.623][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/debug.lua
+[18:05:54.624][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/io.lua
+[18:05:54.624][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/os.lua
+[18:05:54.624][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/math.lua
+[18:05:54.624][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/utf8.lua
+[18:05:54.624][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/table.lua
+[18:05:54.624][info] [#0:script\workspace\workspace.lua:340]: Preload start:	<fallback>
+[18:05:54.626][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/string.lua
+[18:05:54.626][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/coroutine.lua
+[18:05:54.627][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/basic.lua
+[18:05:54.627][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/package.lua
+[18:05:54.627][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/builtin.lua
+[18:05:54.627][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/debug.lua
+[18:05:54.627][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/io.lua
+[18:05:54.627][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/os.lua
+[18:05:54.627][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/math.lua
+[18:05:54.628][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/utf8.lua
+[18:05:54.628][info] [#0:script\workspace\workspace.lua:369]: Scan library at:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/table.lua
+[18:05:54.628][info] [#0:script\workspace\workspace.lua:397]: Found 12 files at:	file:///d%3A/games/Accessibility-mod-template/Accessibility-Mod-Template/src/UI/inGame/WorldInput_CAI.lua
+[18:05:54.628][info] [#0:script\workspace\loading.lua:160]: Load files from disk:	file:///d%3A/games/Accessibility-mod-template/Accessibility-Mod-Template/src/UI/inGame/WorldInput_CAI.lua
+[18:05:54.628][info] [#0:script\workspace\loading.lua:100]: Preload file at: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/table.lua , size = 5.134 KB
+[18:05:54.632][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/table.lua
+[18:05:54.632][info] [#0:script\workspace\loading.lua:100]: Preload file at: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/utf8.lua , size = 2.448 KB
+[18:05:54.634][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/utf8.lua
+[18:05:54.634][info] [#0:script\workspace\loading.lua:100]: Preload file at: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/math.lua , size = 8.909 KB
+[18:05:54.638][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/math.lua
+[18:05:54.638][info] [#0:script\workspace\loading.lua:100]: Preload file at: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/os.lua , size = 5.872 KB
+[18:05:54.641][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/os.lua
+[18:05:54.641][info] [#0:script\workspace\loading.lua:100]: Preload file at: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/io.lua , size = 6.566 KB
+[18:05:54.644][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/io.lua
+[18:05:54.644][info] [#0:script\workspace\loading.lua:100]: Preload file at: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/debug.lua , size = 7.812 KB
+[18:05:54.650][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/debug.lua
+[18:05:54.650][info] [#0:script\workspace\loading.lua:100]: Preload file at: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/builtin.lua , size = 0.302 KB
+[18:05:54.651][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/builtin.lua
+[18:05:54.651][info] [#0:script\workspace\loading.lua:100]: Preload file at: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/package.lua , size = 3.050 KB
+[18:05:54.652][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/package.lua
+[18:05:54.652][info] [#0:script\workspace\loading.lua:100]: Preload file at: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/basic.lua , size = 17.708 KB
+[18:05:54.660][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/basic.lua
+[18:05:54.660][info] [#0:script\workspace\loading.lua:100]: Preload file at: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/coroutine.lua , size = 2.669 KB
+[18:05:54.662][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/coroutine.lua
+[18:05:54.662][info] [#0:script\workspace\loading.lua:100]: Preload file at: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/string.lua , size = 6.608 KB
+[18:05:54.665][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/string.lua
+[18:05:54.665][info] [#0:script\workspace\loading.lua:100]: Preload file at: file:///d%3A/games/Accessibility-mod-template/Accessibility-Mod-Template/src/UI/inGame/WorldInput_CAI.lua , size = 54.355 KB
+[18:05:54.693][info] [#0:script\workspace\loading.lua:172]: Loaded files takes [0.065] sec: file:///d%3A/games/Accessibility-mod-template/Accessibility-Mod-Template/src/UI/inGame/WorldInput_CAI.lua
+[18:05:54.693][info] [#0:script\workspace\loading.lua:181]: Compile files takes [0.000] sec: file:///d%3A/games/Accessibility-mod-template/Accessibility-Mod-Template/src/UI/inGame/WorldInput_CAI.lua
+[18:05:54.693][info] [#0:script\workspace\loading.lua:182]: Loaded finish:	file:///d%3A/games/Accessibility-mod-template/Accessibility-Mod-Template/src/UI/inGame/WorldInput_CAI.lua
+[18:05:54.693][info] [#0:script\workspace\workspace.lua:399]: Preload finish at:	file:///d%3A/games/Accessibility-mod-template/Accessibility-Mod-Template/src/UI/inGame/WorldInput_CAI.lua
+[18:05:54.697][info] [#0:script\workspace\workspace.lua:397]: Found 11 files at:	<fallback>
+[18:05:54.697][info] [#0:script\workspace\loading.lua:160]: Load files from disk:	<fallback>
+[18:05:54.697][info] [#0:script\workspace\loading.lua:88]: Skip loaded file: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/table.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/table.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:88]: Skip loaded file: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/utf8.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/utf8.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:88]: Skip loaded file: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/math.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/math.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:88]: Skip loaded file: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/os.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/os.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:88]: Skip loaded file: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/io.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/io.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:88]: Skip loaded file: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/debug.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/debug.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:88]: Skip loaded file: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/builtin.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/builtin.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:88]: Skip loaded file: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/package.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/package.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:88]: Skip loaded file: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/basic.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/basic.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:88]: Skip loaded file: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/coroutine.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/coroutine.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:88]: Skip loaded file: file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/string.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:112]: ++++As library of:	file:///c%3A/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta/Lua%205.4%20en-us%20utf8/string.lua
+[18:05:54.697][info] [#0:script\workspace\loading.lua:172]: Loaded files takes [0.000] sec: <fallback>
+[18:05:54.697][info] [#0:script\workspace\loading.lua:181]: Compile files takes [0.000] sec: <fallback>
+[18:05:54.697][info] [#0:script\workspace\loading.lua:182]: Loaded finish:	<fallback>
+[18:05:54.697][info] [#0:script\workspace\workspace.lua:399]: Preload finish at:	<fallback>

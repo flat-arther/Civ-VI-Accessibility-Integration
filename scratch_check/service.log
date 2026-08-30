@@ -1,0 +1,34 @@
+[18:05:54.485][info] [#0:C:/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server\main.lua:71]: Lua Lsp startup, root: 	C:/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server
+[18:05:54.486][info] [#0:C:/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server\main.lua:72]: ROOT:	C:/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server
+[18:05:54.486][info] [#0:C:/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server\main.lua:73]: LOGPATH:	scratch_check
+[18:05:54.486][info] [#0:C:/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server\main.lua:74]: METAPATH:	C:/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server/meta
+[18:05:54.486][info] [#0:C:/Users/amine/.vscode/extensions/sumneko.lua-3.19.1-win32-x64/server\main.lua:75]: VERSION:	3.19.1
+[18:05:54.526][info] [#0:script\language.lua:137]: VSC language: nil
+[18:05:54.526][info] [#0:script\language.lua:138]: LS  language: en-us
+[18:05:54.526][info] [#0:script\client.lua:657]: Client init	{
+  capabilities = {
+    textDocument = {
+      completion = {
+        completionItem = {
+          tagSupport = {
+            valueSet = { 1, 2 }
+          }
+        }
+      }
+    },
+    workspace = {
+      configuration = true
+    }
+  },
+  initializationOptions = {
+    changeConfiguration = true,
+    trustByClient = true,
+    useSemanticByRange = true,
+    viewDocument = true
+  },
+  rootUri = "file:///d%3A/games/Accessibility-mod-template/Accessibility-Mod-Template/src/UI/inGame/WorldInput_CAI.lua"
+}
+[18:05:54.526][info] [#0:script\language.lua:137]: VSC language: nil
+[18:05:54.526][info] [#0:script\language.lua:138]: LS  language: en-us
+[18:05:54.526][info] [#0:script\workspace\workspace.lua:38]: Workspace init root: 	file:///d%3A/games/Accessibility-mod-template/Accessibility-Mod-Template/src/UI/inGame/WorldInput_CAI.lua
+[18:05:54.526][info] [#0:script\workspace\workspace.lua:42]: Log path: 	scratch_check/file_d%3A_games_Accessibility-mod-template_Accessibility-Mod-Template_src_UI_inGame_WorldInput_CAI.lua.log
