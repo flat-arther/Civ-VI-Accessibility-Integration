@@ -7696,5 +7696,87 @@
     <Replace Tag="LOC_CAI_LEADERDESC_NONE" Language="fr_FR">
       <Text>Aucune description disponible pour ce dirigeant.</Text>
     </Replace>
+    <!-- World Builder tools picker (CAI) -->
+    <Replace Tag="LOC_CAI_WB_TOOLS_TITLE" Language="fr_FR">
+      <Text>Outils de l'Éditeur de monde</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MODE" Language="fr_FR">
+      <Text>Éditeur de monde</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_OPEN_TOOLS" Language="fr_FR">
+      <Text>Ouvrir les outils de l'Éditeur de monde</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PLACE" Language="fr_FR">
+      <Text>Placer sur le curseur</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_EDIT_TILE" Language="fr_FR">
+      <Text>Modifier la case du curseur</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_DELETE" Language="fr_FR">
+      <Text>Retirer du curseur</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_DELETE_TEXT" Language="fr_FR">
+      <Text>Supprimer l'entrée de texte</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MARK" Language="fr_FR">
+      <Text>Verrouiller ou déverrouiller le placement sur la case du curseur</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MARKED" Language="fr_FR">
+      <Text>Placement verrouillé sur la case</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_UNMARKED" Language="fr_FR">
+      <Text>Placement déverrouillé</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_FOOTPRINT_TILES" Language="fr_FR">
+      <Text>{1_Number} cases</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_VALID" Language="fr_FR">
+      <Text>Pinceau : {1_Number} sur {2_Number} valides</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_TT_START_POSITION" Language="fr_FR">
+      <Text>Position de départ : {1_Player}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_TYPE" Language="fr_FR">
+      <Text>Type</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH" Language="fr_FR">
+      <Text>Taille du pinceau</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_SMALL" Language="fr_FR">
+      <Text>Petit, 1 case</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_MEDIUM" Language="fr_FR">
+      <Text>Moyen, 7 cases</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_LARGE" Language="fr_FR">
+      <Text>Grand, 19 cases</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_ROTATION" Language="fr_FR">
+      <Text>Rotation</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_AMOUNT" Language="fr_FR">
+      <Text>Quantité de ressource</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_OWNER" Language="fr_FR">
+      <Text>Propriétaire</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PLAYER" Language="fr_FR">
+      <Text>Joueur</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_CONTINENT" Language="fr_FR">
+      <Text>Continent</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PILLAGED" Language="fr_FR">
+      <Text>Pillé</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GENERATE" Language="fr_FR">
+      <Text>Générer toutes les ressources</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_CLEAR" Language="fr_FR">
+      <Text>Effacer toutes les ressources</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_REVEAL_ALL" Language="fr_FR">
+      <Text>Tout révéler</Text>
+    </Replace>
   </LocalizedText>
 </GameData>

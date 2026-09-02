@@ -1143,12 +1143,49 @@ local function BuildTargetValidityInterfaceInfo(plot)
     return lines
 end
 
+-- World Builder placement preview. Every WB tool shares one interface mode
+-- (WB_SELECT_PLOT), so a single helper covers them all: it asks the placement
+-- context (via CAIInfo, since PlacementValid lives there) whether the current
+-- setup would place at this plot, and speaks Valid/Invalid plus the affected
+-- footprint and, for brush tools, how many brush tiles are valid. This is the
+-- accessible replacement for vanilla's green/red mouse-over highlight.
+local function BuildWorldBuilderInterfaceInfo(plot)
+    if plot == nil then return nil end
+
+    local api = ExposedMembers.CAIInfo
+    if api == nil or api.GetWorldBuilderPlacementValidity == nil then return nil end
+
+    local v = api.GetWorldBuilderPlacementValidity(plot:GetIndex())
+    if v == nil then return nil end
+
+    local lines = {}
+    if v.valid then
+        table.insert(lines, Locale.Lookup("LOC_CAI_PLOT_INTERFACE_VALID"))
+        if v.footprint ~= nil and v.footprint > 1 then
+            table.insert(lines, Locale.Lookup("LOC_CAI_WB_FOOTPRINT_TILES", v.footprint))
+        end
+    else
+        table.insert(lines, Locale.Lookup("LOC_CAI_PLOT_INTERFACE_INVALID"))
+    end
+
+    if v.brushTotal ~= nil and v.brushTotal > 1 then
+        table.insert(lines, Locale.Lookup("LOC_CAI_WB_BRUSH_VALID", v.brushValid or 0, v.brushTotal))
+    end
+
+    return lines
+end
+
 local function BuildCityManagementInterfaceInfo(plot)
     if plot == nil or CAICityManagementInterface == nil or CAICityManagementInterface.BuildSpeechTextOrInvalid == nil then
         return nil
     end
 
     return { CAICityManagementInterface.BuildSpeechTextOrInvalid(plot) }
+end
+
+-- All World Builder tools run in the single WB_SELECT_PLOT interface mode.
+if InterfaceModeTypes.WB_SELECT_PLOT ~= nil then
+    InterfaceInfoHelpers[InterfaceModeTypes.WB_SELECT_PLOT] = BuildWorldBuilderInterfaceInfo
 end
 
 InterfaceInfoHelpers[InterfaceModeTypes.MOVE_TO] = BuildMoveToInterfaceInfo

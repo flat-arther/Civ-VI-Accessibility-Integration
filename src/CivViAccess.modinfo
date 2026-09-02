@@ -160,6 +160,12 @@
     <File>UI/inGame/MapPinListPanel_CAI.lua</File>
     <File>UI/inGame/dmt_mappinsubjectmanager.lua</File>
     <File>UI/inGame/MapPinPopup_CAI.lua</File>
+    <File>UI/inGame/WorldBuilder_CAI.lua</File>
+    <File>UI/inGame/WorldBuilderToolsPalette_CAI.lua</File>
+    <File>UI/inGame/WorldBuilderPlacement_CAI.lua</File>
+    <File>UI/inGame/WorldBuilderRevealStore_CAI.lua</File>
+    <File>UI/inGame/WorldBuilderLaunchBar_CAI.lua</File>
+    <File>UI/inGame/WorldBuilderMapEditor_CAI.lua</File>
     <File>UI/inGame/Surveyor_CAI.lua</File>
     <File>UI/inGame/MessageBuffer_CAI.lua</File>
     <File>UI/inGame/RecommendationLogic_CAI.lua</File>
@@ -528,6 +534,10 @@
       <File>data/tutorial_civilopedia_CAI.xml</File>
     </UpdateDatabase>
 
+    <AddGameplayScripts id="CAI_WorldBuilderRevealStore">
+      <File>UI/inGame/WorldBuilderRevealStore_CAI.lua</File>
+    </AddGameplayScripts>
+
     <ImportFiles id="DramaticAges_GovernmentsScreen_CAI" criteria="DramaticAges_Expansion1_Mode">
       <File>UI/Replacements/Byzantium_Gaul/GovernmentScreen_Byzantium_Gaul_Expansion1_MODE.lua</File>
     </ImportFiles>
@@ -758,6 +768,46 @@
         <LoadOrder>999999999</LoadOrder>
         <LuaContext>MapPinPopup</LuaContext>
         <LuaReplace>UI/inGame/MapPinPopup_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WorldBuilder">
+      <Properties>
+        <LoadOrder>999999999</LoadOrder>
+        <LuaContext>WorldBuilder</LuaContext>
+        <LuaReplace>UI/inGame/WorldBuilder_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WorldBuilderToolsPalette">
+      <Properties>
+        <LoadOrder>999999999</LoadOrder>
+        <LuaContext>WorldBuilderToolsPalette</LuaContext>
+        <LuaReplace>UI/inGame/WorldBuilderToolsPalette_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WorldBuilderPlacement">
+      <Properties>
+        <LoadOrder>999999999</LoadOrder>
+        <LuaContext>WorldBuilderPlacement</LuaContext>
+        <LuaReplace>UI/inGame/WorldBuilderPlacement_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WorldBuilderLaunchBar">
+      <Properties>
+        <LoadOrder>999999999</LoadOrder>
+        <LuaContext>WorldBuilderLaunchBar</LuaContext>
+        <LuaReplace>UI/inGame/WorldBuilderLaunchBar_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WorldBuilderMapEditor">
+      <Properties>
+        <LoadOrder>999999999</LoadOrder>
+        <LuaContext>WorldBuilderMapEditor</LuaContext>
+        <LuaReplace>UI/inGame/WorldBuilderMapEditor_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

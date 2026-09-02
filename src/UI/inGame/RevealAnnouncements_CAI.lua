@@ -33,7 +33,10 @@ end)
 -- ===========================================================================
 
 local function GetActivePlayerID()
-    local playerID = Game.GetLocalPlayer()
+    -- Fall back to the observer (World Builder / spectator) so reveal state keys
+    -- and initializes cleanly. Under PlayerTypes.OBSERVER visibility is see-all,
+    -- so bootstrap marks everything revealed and nothing new is announced.
+    local playerID = GetViewingPlayerID and GetViewingPlayerID() or Game.GetLocalPlayer()
     if playerID == nil or playerID == -1 then
         return nil
     end

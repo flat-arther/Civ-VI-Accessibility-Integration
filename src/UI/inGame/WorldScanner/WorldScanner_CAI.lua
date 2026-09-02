@@ -153,7 +153,10 @@ end
 
 local function BuildScannerContext(scanner)
     return {
-        LocalPlayerID = Game.GetLocalPlayer(),
+        -- Viewing player, so the scanner works with no local player (World
+        -- Builder / observer). PlayerTypes.OBSERVER here collapses ownership to
+        -- neutral in the classifiers below.
+        LocalPlayerID = (GetViewingPlayerID and GetViewingPlayerID()) or Game.GetLocalPlayer(),
         ObserverID = Game.GetLocalObserver(),
         SortOriginX = scanner and scanner.SortOriginX or nil,
         SortOriginY = scanner and scanner.SortOriginY or nil,

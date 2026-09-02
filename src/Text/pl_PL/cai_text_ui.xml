@@ -7708,5 +7708,87 @@
     <Replace Tag="LOC_CAI_LEADERDESC_NONE" Language="pl_PL">
       <Text>Brak opisu tego przywódcy.</Text>
     </Replace>
+    <!-- World Builder tools picker (CAI) -->
+    <Replace Tag="LOC_CAI_WB_TOOLS_TITLE" Language="pl_PL">
+      <Text>Narzędzia Kreatora świata</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MODE" Language="pl_PL">
+      <Text>Kreator świata</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_OPEN_TOOLS" Language="pl_PL">
+      <Text>Otwórz narzędzia Kreatora świata</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PLACE" Language="pl_PL">
+      <Text>Umieść na kursorze</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_EDIT_TILE" Language="pl_PL">
+      <Text>Edytuj pole na kursorze</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_DELETE" Language="pl_PL">
+      <Text>Usuń na kursorze</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_DELETE_TEXT" Language="pl_PL">
+      <Text>Usuń wpis tekstowy</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MARK" Language="pl_PL">
+      <Text>Zablokuj lub odblokuj umieszczanie na polu kursora</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MARKED" Language="pl_PL">
+      <Text>Umieszczanie zablokowane na polu</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_UNMARKED" Language="pl_PL">
+      <Text>Umieszczanie odblokowane</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_FOOTPRINT_TILES" Language="pl_PL">
+      <Text>Pola: {1_Number}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_VALID" Language="pl_PL">
+      <Text>Pędzel: {1_Number} z {2_Number} prawidłowych</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_TT_START_POSITION" Language="pl_PL">
+      <Text>Pozycja startowa: {1_Player}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_TYPE" Language="pl_PL">
+      <Text>Typ</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH" Language="pl_PL">
+      <Text>Rozmiar pędzla</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_SMALL" Language="pl_PL">
+      <Text>Mały, 1 pole</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_MEDIUM" Language="pl_PL">
+      <Text>Średni, 7 pól</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_LARGE" Language="pl_PL">
+      <Text>Duży, 19 pól</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_ROTATION" Language="pl_PL">
+      <Text>Obrót</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_AMOUNT" Language="pl_PL">
+      <Text>Ilość surowca</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_OWNER" Language="pl_PL">
+      <Text>Właściciel</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PLAYER" Language="pl_PL">
+      <Text>Gracz</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_CONTINENT" Language="pl_PL">
+      <Text>Kontynent</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PILLAGED" Language="pl_PL">
+      <Text>Splądrowane</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GENERATE" Language="pl_PL">
+      <Text>Generuj wszystkie surowce</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_CLEAR" Language="pl_PL">
+      <Text>Wyczyść wszystkie surowce</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_REVEAL_ALL" Language="pl_PL">
+      <Text>Odkryj wszystko</Text>
+    </Replace>
   </LocalizedText>
 </GameData>

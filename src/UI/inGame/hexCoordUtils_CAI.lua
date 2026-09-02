@@ -281,6 +281,13 @@ function HexCoordUtils.joinStepSegments(segments)
 end
 
 function HexCoordUtils.coordinateString(x, y)
+    -- World Builder has no local player / capital to anchor relative coordinates
+    -- to, and the editor works in the map's absolute grid, so speak the game's
+    -- actual plot coordinates there instead of a capital-relative offset.
+    if WorldBuilder ~= nil and WorldBuilder.IsActive() then
+        return tostring(x) .. ", " .. tostring(y)
+    end
+
     local capitalX, capitalY = ActiveOriginalCapital()
     if capitalX == nil or capitalY == nil then
         return ""

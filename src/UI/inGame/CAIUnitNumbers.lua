@@ -66,6 +66,12 @@ end
 -- Persistence (per local player, saved with the game)
 -- ---------------------------------------------------------------------------
 function CAIUnitNumbers:_LocalPlayerConfig()
+    -- On the load path Events.LoadScreenClose can fire before the game object is
+    -- bound (the World Builder editor also has no game object), so Game is nil
+    -- here; there is no local-player config to read/write in that state.
+    if Game == nil then
+        return nil
+    end
     local localPlayerID = Game.GetLocalPlayer()
     if localPlayerID == nil or localPlayerID < 0 then
         return nil
@@ -181,6 +187,10 @@ end
 ---Used after load / a local-player change to catch units that predate this
 ---session's events. Existing numbers are preserved; only missing ones are added.
 function CAIUnitNumbers:BackfillLocalUnits()
+    -- Same load-path / editor boundary as _LocalPlayerConfig: Game may be nil.
+    if Game == nil then
+        return
+    end
     local localPlayerID = Game.GetLocalPlayer()
     if localPlayerID == nil or localPlayerID < 0 then
         return

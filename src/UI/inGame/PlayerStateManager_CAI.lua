@@ -11,6 +11,12 @@ function PlayerStateManager.Init(createDefaultState, onCreate)
     }
 
     function manager:GetActivePlayerID()
+        -- Fall back to the observer when there is no local player (World Builder,
+        -- observer/spectator, autoplay). PlayerTypes.OBSERVER (1000) is a stable
+        -- positive key, so Get() accepts it and per-player CAI state initializes.
+        if GetViewingPlayerID ~= nil then
+            return GetViewingPlayerID()
+        end
         return Game.GetLocalPlayer()
     end
 

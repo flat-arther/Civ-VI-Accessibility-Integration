@@ -79,6 +79,16 @@ end
 local function GetUnitCategoryId(context, unit)
     local ownerID = unit ~= nil and unit:GetOwner() or nil
     local localPlayerID = Utils.GetLocalPlayerID(context)
+    -- The observer owns nothing and has no diplomacy, so player-relative units
+    -- are neutral -- but barbarians are hostile to all by nature, so classify
+    -- them by what they are: enemy.
+    if localPlayerID == PlayerTypes.OBSERVER then
+        local ownerPlayer = ownerID ~= nil and ownerID ~= -1 and Players[ownerID] or nil
+        if ownerPlayer ~= nil and ownerPlayer:IsBarbarian() then
+            return CATEGORY_IDS.Enemy
+        end
+        return CATEGORY_IDS.Neutral
+    end
     if ownerID == nil or ownerID == -1 then
         return CATEGORY_IDS.Neutral
     end

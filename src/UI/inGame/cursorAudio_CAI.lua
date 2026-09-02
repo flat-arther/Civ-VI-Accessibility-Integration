@@ -145,7 +145,10 @@ end
 local function IsPlotRevealed(plot)
     if plot == nil then return false end
 
-    local playerID = Game.GetLocalPlayer()
+    -- The see-all observer (World Builder / spectator) has revealed everything.
+    if IsObserverView() then return true end
+
+    local playerID = GetViewingPlayerID()
     if playerID == nil or playerID < 0 then return false end
 
     local visibility = PlayersVisibility[playerID]
@@ -157,7 +160,10 @@ end
 local function IsPlotVisible(plot)
     if plot == nil then return false end
 
-    local playerID = Game.GetLocalPlayer()
+    -- The see-all observer has full visibility, so no plot is fogged.
+    if IsObserverView() then return true end
+
+    local playerID = GetViewingPlayerID()
     if playerID == nil or playerID < 0 then return false end
 
     local visibility = PlayersVisibility[playerID]

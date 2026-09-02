@@ -7703,5 +7703,87 @@
     <Replace Tag="LOC_CAI_LEADERDESC_NONE" Language="es_ES">
       <Text>No hay descripción disponible para este líder.</Text>
     </Replace>
+    <!-- World Builder tools picker (CAI) -->
+    <Replace Tag="LOC_CAI_WB_TOOLS_TITLE" Language="es_ES">
+      <Text>Herramientas del Editor de mundos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MODE" Language="es_ES">
+      <Text>Editor de mundos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_OPEN_TOOLS" Language="es_ES">
+      <Text>Abrir herramientas del Editor de mundos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PLACE" Language="es_ES">
+      <Text>Colocar en el cursor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_EDIT_TILE" Language="es_ES">
+      <Text>Editar la casilla del cursor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_DELETE" Language="es_ES">
+      <Text>Quitar del cursor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_DELETE_TEXT" Language="es_ES">
+      <Text>Eliminar entrada de texto</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MARK" Language="es_ES">
+      <Text>Fijar o liberar la colocación en la casilla del cursor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MARKED" Language="es_ES">
+      <Text>Colocación fijada en la casilla</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_UNMARKED" Language="es_ES">
+      <Text>Colocación liberada</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_FOOTPRINT_TILES" Language="es_ES">
+      <Text>{1_Number} casillas</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_VALID" Language="es_ES">
+      <Text>Pincel: {1_Number} de {2_Number} válidas</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_TT_START_POSITION" Language="es_ES">
+      <Text>Posición inicial: {1_Player}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_TYPE" Language="es_ES">
+      <Text>Tipo</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH" Language="es_ES">
+      <Text>Tamaño del pincel</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_SMALL" Language="es_ES">
+      <Text>Pequeño, 1 casilla</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_MEDIUM" Language="es_ES">
+      <Text>Mediano, 7 casillas</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_LARGE" Language="es_ES">
+      <Text>Grande, 19 casillas</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_ROTATION" Language="es_ES">
+      <Text>Rotación</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_AMOUNT" Language="es_ES">
+      <Text>Cantidad de recurso</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_OWNER" Language="es_ES">
+      <Text>Propietario</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PLAYER" Language="es_ES">
+      <Text>Jugador</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_CONTINENT" Language="es_ES">
+      <Text>Continente</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PILLAGED" Language="es_ES">
+      <Text>Saqueado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GENERATE" Language="es_ES">
+      <Text>Generar todos los recursos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_CLEAR" Language="es_ES">
+      <Text>Eliminar todos los recursos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_REVEAL_ALL" Language="es_ES">
+      <Text>Revelar todo</Text>
+    </Replace>
   </LocalizedText>
 </GameData>

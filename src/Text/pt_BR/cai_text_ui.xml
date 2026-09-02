@@ -7708,5 +7708,87 @@
     <Replace Tag="LOC_CAI_LEADERDESC_NONE" Language="pt_BR">
       <Text>Nenhuma descrição disponível para este líder.</Text>
     </Replace>
+    <!-- World Builder tools picker (CAI) -->
+    <Replace Tag="LOC_CAI_WB_TOOLS_TITLE" Language="pt_BR">
+      <Text>Ferramentas do Construtor de mundos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MODE" Language="pt_BR">
+      <Text>Construtor de mundos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_OPEN_TOOLS" Language="pt_BR">
+      <Text>Abrir ferramentas do Construtor de mundos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PLACE" Language="pt_BR">
+      <Text>Colocar no cursor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_EDIT_TILE" Language="pt_BR">
+      <Text>Editar o hexágono do cursor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_DELETE" Language="pt_BR">
+      <Text>Remover no cursor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_DELETE_TEXT" Language="pt_BR">
+      <Text>Excluir entrada de texto</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MARK" Language="pt_BR">
+      <Text>Travar ou destravar a colocação no hexágono do cursor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MARKED" Language="pt_BR">
+      <Text>Colocação travada no hexágono</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_UNMARKED" Language="pt_BR">
+      <Text>Colocação destravada</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_FOOTPRINT_TILES" Language="pt_BR">
+      <Text>{1_Number} hexágonos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_VALID" Language="pt_BR">
+      <Text>Pincel: {1_Number} de {2_Number} válidos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_TT_START_POSITION" Language="pt_BR">
+      <Text>Posição inicial: {1_Player}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_TYPE" Language="pt_BR">
+      <Text>Tipo</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH" Language="pt_BR">
+      <Text>Tamanho do pincel</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_SMALL" Language="pt_BR">
+      <Text>Pequeno, 1 hexágono</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_MEDIUM" Language="pt_BR">
+      <Text>Médio, 7 hexágonos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_LARGE" Language="pt_BR">
+      <Text>Grande, 19 hexágonos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_ROTATION" Language="pt_BR">
+      <Text>Rotação</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_AMOUNT" Language="pt_BR">
+      <Text>Quantidade de recurso</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_OWNER" Language="pt_BR">
+      <Text>Proprietário</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PLAYER" Language="pt_BR">
+      <Text>Jogador</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_CONTINENT" Language="pt_BR">
+      <Text>Continente</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PILLAGED" Language="pt_BR">
+      <Text>Saqueado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GENERATE" Language="pt_BR">
+      <Text>Gerar todos os recursos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_CLEAR" Language="pt_BR">
+      <Text>Limpar todos os recursos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_REVEAL_ALL" Language="pt_BR">
+      <Text>Revelar tudo</Text>
+    </Replace>
   </LocalizedText>
 </GameData>

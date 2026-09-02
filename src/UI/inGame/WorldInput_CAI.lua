@@ -45,6 +45,12 @@ local CITY_MANAGEMENT_WIDGET_ID = "CAIWorldInputCityManagement"
 
 local m_caiGameViewWidget = nil
 local m_caiCurrentInterfaceWidget = nil
+local m_caiWorldBuilderWidget = nil
+
+-- World Builder: an optional locked placement source. When set, place/edit/remove
+-- act on this plot instead of the live cursor, so the cursor can roam to inspect
+-- other tiles (e.g. read placement validity) without moving where edits land.
+local m_wbMarkedPlotId = nil
 
 
 local ACTION_MESSAGE_BUFFER_MOVETO = SafeActionId("MessageBufferMoveTo")
@@ -98,9 +104,6 @@ local ACTION_SCANNER_SLOT4_PREV = SafeActionId("WorldScannerSlot4Prev")
 local ACTION_SCANNER_SLOT5_ASSIGN = SafeActionId("WorldScannerSlot5Assign")
 local ACTION_SCANNER_SLOT5_NEXT = SafeActionId("WorldScannerSlot5Next")
 local ACTION_SCANNER_SLOT5_PREV = SafeActionId("WorldScannerSlot5Prev")
-local ACTION_MINIMAP_LENS_LIST = SafeActionId("UI_CAIMinimapOpenLensList")
-local ACTION_MINIMAP_MAP_PIN_LIST = SafeActionId("UI_CAIMinimapOpenMapPinList")
-local ACTION_PLACE_MAP_PIN = SafeActionId("CAIPlaceMapPin")
 local ACTION_SURVEYOR_GROW_RADIUS = SafeActionId("SurveyorGrowRadius")
 local ACTION_SURVEYOR_SHRINK_RADIUS = SafeActionId("SurveyorShrinkRadius")
 local ACTION_SURVEYOR_READ_YIELDS = SafeActionId("SurveyorReadYields")
@@ -971,27 +974,9 @@ local SharedInputActions = {
 			CAIWorldScanner:CycleSlot(5, -1)
 		end,
 	},
-	[ACTION_MINIMAP_LENS_LIST] = {
-		Type = INPUT_ACTION_STARTED,
-		Action = function()
-			LuaEvents.CAIMinimapLensListToggle()
-			return true
-		end,
-	},
-	[ACTION_MINIMAP_MAP_PIN_LIST] = {
-		Type = INPUT_ACTION_STARTED,
-		Action = function()
-			LuaEvents.CAIMinimapMapPinListToggle()
-			return true
-		end,
-	},
-	[ACTION_PLACE_MAP_PIN] = {
-		Type = INPUT_ACTION_STARTED,
-		Action = function()
-			PlaceMapPin()
-			return true
-		end,
-	},
+	-- Map-pin / minimap-list hotkeys (place pin, lens list, map-pin list) are
+	-- owned by the map-tacks UI (MapPinListPanel_CAI), not WorldInput, so they can
+	-- be gated off in World Builder and not collide with the WB cursor keys.
 	[ACTION_SURVEYOR_GROW_RADIUS] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
@@ -1420,6 +1405,9 @@ local function GetInterfaceWidgetData()
 end
 
 local function OnInterfaceChanged(oldMode, newMode)
+	-- World Builder stays in WB_SELECT_PLOT and uses its own root widget; none of
+	-- the gameplay targeting interface widgets apply.
+	if m_caiWorldBuilderWidget then return end
 	if not m_caiGameViewWidget then
 		LogError("CAI WorldInput interface change failed because game view widget is nil")
 		return
@@ -1467,12 +1455,13 @@ local function GetInputAction(actionId)
 end
 
 local function DispatchInputAction(actionId, actionType, ...)
-	if not m_caiGameViewWidget then return false end
+	local root = m_caiGameViewWidget or m_caiWorldBuilderWidget
+	if not root then return false end
 
 	local action = GetInputAction(actionId)
 	if not action or action.Type ~= actionType then return false end
 
-	action.Action(m_caiGameViewWidget, ...)
+	action.Action(root, ...)
 	return true
 end
 
@@ -1502,6 +1491,147 @@ local function CreateGameViewWidget()
 		LogError("CAI WorldInput failed to create game view widget")
 		return false
 	end
+
+	return true
+end
+
+-- ===========================================================================
+-- World Builder plot editing at the CAI cursor
+-- ===========================================================================
+-- Vanilla WorldBuilderPlacement.OnPlotSelected is a mouse-drag state machine
+-- whose (plotID, edge, lbutton, rbutton) args are really drag-state flags, not
+-- literal buttons. Replaying the exact LButton / RButton event sequences the
+-- vanilla WorldInput fires performs one clean, undo-consistent edit at the
+-- cursor plot. Brush size is read inside OnPlotSelected from placement's own
+-- state (driven by the CAI tools panel via the brush buttons), so a place
+-- honours the current brush automatically.
+-- The plot edits act on: the locked mark when set, otherwise the live cursor.
+local function WBPlacementSourcePlot()
+	if m_wbMarkedPlotId ~= nil and Map.IsPlot(m_wbMarkedPlotId) then
+		return m_wbMarkedPlotId
+	end
+	return GetCurrentCAICursorPlotId()
+end
+
+local function WBEditCursorPlot(bAdd)
+	local plotId = WBPlacementSourcePlot()
+	if plotId == nil or plotId < 0 or not Map.IsPlot(plotId) then return false end
+
+	-- New keypress = new placement: reset the status-line speech de-dupe so a
+	-- repeated identical result (e.g. the same failure) speaks again. Within this
+	-- one keypress a brush's repeated identical statuses still collapse.
+	LuaEvents.CAIWorldBuilderStatusBurstBegin()
+
+	local edge = UI.GetCursorNearestPlotEdge()
+	if bAdd then
+		-- LButtonUp pair: start undo block + PlacementFunc(add), then close it.
+		LuaEvents.WorldInput_WBSelectPlot(plotId, edge, true, false)
+		LuaEvents.WorldInput_WBSelectPlot(plotId, edge, false, false)
+	else
+		-- RButtonDown/RButtonUp pair: PlacementFunc(remove) on the up event.
+		LuaEvents.WorldInput_WBSelectPlot(plotId, edge, true, true)
+		LuaEvents.WorldInput_WBSelectPlot(plotId, edge, false, true)
+	end
+
+	-- The Set Visibility tool reveals (add) / hides (remove) this plot for its
+	-- selected player. The game exposes no getter for that state, so mirror the
+	-- edit into the CAI visibility shadow the plot tooltip reads.
+	local info = ExposedMembers.CAIInfo
+	if info ~= nil and info.GetWorldBuilderVisibilityPlayer ~= nil and info.SetWorldBuilderRevealed ~= nil then
+		local visPlayer = info.GetWorldBuilderVisibilityPlayer()
+		if visPlayer ~= nil then
+			info.SetWorldBuilderRevealed(visPlayer, plotId, bAdd)
+		end
+	end
+	return true
+end
+
+-- World Builder runs in a single WB_SELECT_PLOT interface mode for its whole
+-- lifetime, so instead of the gameplay game-view root we push a dedicated
+-- interface-mode widget. Tab from it opens the accessible tools panel; the
+-- primary / secondary / delete keys place, edit and remove at the cursor plot.
+local function CreateWorldBuilderWidget()
+	if not mgr then
+		LogError("CAI WorldInput could not create World Builder widget because ExposedMembers.CAI_UIManager is nil")
+		return false
+	end
+
+	m_caiWorldBuilderWidget = mgr:CreateWidget("CAIWorldBuilderMode", "InterfaceMode", {
+		Label = function() return Locale.Lookup("LOC_CAI_WB_MODE") end,
+	})
+	if not m_caiWorldBuilderWidget then
+		LogError("CAI WorldInput failed to create World Builder interface widget")
+		return false
+	end
+
+	m_caiWorldBuilderWidget:AddInputBindings({
+		{
+			Key = Keys.VK_TAB,
+			MSG = KeyEvents.KeyUp,
+			Description = "LOC_CAI_WB_OPEN_TOOLS",
+			Action = function()
+				LuaEvents.CAIWorldBuilderTools_Toggle()
+				return true
+			end,
+		},
+		-- Primary: place the armed tool's item at the cursor with the current brush.
+		{
+			Key = Keys.VK_RETURN,
+			MSG = KeyEvents.KeyUp,
+			Description = "LOC_CAI_WB_PLACE",
+			Action = function()
+				WBEditCursorPlot(true)
+				return true
+			end,
+		},
+		-- Secondary: open the single-tile Plot Editor for the source plot (marked
+		-- tile if locked, else the cursor). The CAI Plot Editor form is not built
+		-- yet; this raises the event it will consume.
+		{
+			Key = Keys.VK_RETURN,
+			MSG = KeyEvents.KeyUp,
+			IsControl = true,
+			Description = "LOC_CAI_WB_EDIT_TILE",
+			Action = function()
+				local plotId = WBPlacementSourcePlot()
+				if plotId ~= nil and plotId >= 0 and Map.IsPlot(plotId) then
+					LuaEvents.CAIWorldBuilderPlotEditor_Toggle(plotId)
+				end
+				return true
+			end,
+		},
+		-- Lock / unlock the placement source to the current cursor tile, so the
+		-- cursor can roam and inspect other tiles without moving where edits land.
+		{
+			Key = Keys.VK_M,
+			MSG = KeyEvents.KeyUp,
+			Description = "LOC_CAI_WB_MARK",
+			Action = function()
+				if m_wbMarkedPlotId ~= nil then
+					m_wbMarkedPlotId = nil
+					Speak(Locale.Lookup("LOC_CAI_WB_UNMARKED"))
+					return true
+				end
+				local plotId = GetCurrentCAICursorPlotId()
+				if plotId ~= nil and plotId >= 0 and Map.IsPlot(plotId) then
+					m_wbMarkedPlotId = plotId
+					Speak(Locale.Lookup("LOC_CAI_WB_MARKED"))
+				end
+				return true
+			end,
+		},
+		-- Delete: remove the armed tool's item at the cursor. Map-pin deletion (the
+		-- usual Delete binding) does not apply in World Builder.
+		{
+			Key = Keys.VK_DELETE,
+			MSG = KeyEvents.KeyUp,
+			Description = "LOC_CAI_WB_DELETE",
+			Action = function()
+				WBEditCursorPlot(false)
+				return true
+			end,
+		},
+	})
 
 	return true
 end
@@ -1580,7 +1710,7 @@ end
 
 local function CheckInput()
 	local focused = mgr:GetFocusedWidget()
-	if focused == m_caiCurrentInterfaceWidget or focused == m_caiGameViewWidget then
+	if focused == m_caiCurrentInterfaceWidget or focused == m_caiGameViewWidget or focused == m_caiWorldBuilderWidget then
 		if Input.GetActiveContext() ~= InputContext.World then mgr:SetInputContext(InputContext.World) end
 	end
 end
@@ -1634,6 +1764,9 @@ local function RegisterCAIEvents()
 	LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
 	LuaEvents.CAIAppendToMessageBuffer.Add(OnCAIAppendToMessageBuffer)
 	LuaEvents.CAI_TutorialWorldAnchorChanged.Add(OnCAITutorialWorldAnchorChanged)
+	-- PlaceMapPin is a vanilla WorldInput global that only exists in this context;
+	-- the map-tacks UI requests it across the context boundary via this LuaEvent.
+	LuaEvents.CAIRequestPlaceMapPin.Add(PlaceMapPin)
 	UnitMoveLog_CAI.Initialize()
 	CAICursorAudio.Initialize()
 	CAIRecommendationLogic.Initialize()
@@ -1653,6 +1786,7 @@ local function UnregisterCAIEvents()
 	LuaEvents.CAICursorMoved.Remove(OnCAICursorMoved)
 	LuaEvents.CAIAppendToMessageBuffer.Remove(OnCAIAppendToMessageBuffer)
 	LuaEvents.CAI_TutorialWorldAnchorChanged.Remove(OnCAITutorialWorldAnchorChanged)
+	LuaEvents.CAIRequestPlaceMapPin.Remove(PlaceMapPin)
 	UnitMoveLog_CAI.Shutdown()
 	CAICursorAudio.Shutdown()
 end
@@ -1660,10 +1794,17 @@ end
 
 
 local function InitializeCAIGameView()
+	if m_caiWorldBuilderWidget and mgr:GetWidgetById(m_caiWorldBuilderWidget:GetId()) then return end
 	if m_caiGameViewWidget and mgr:GetWidgetById(m_caiGameViewWidget:GetId()) then return end
-	if not CreateGameViewWidget() then return end
+
 	-- this needs to sit below everything else. Priority must be low
-	mgr:Push(m_caiGameViewWidget, PopupPriority.Low)
+	if WorldBuilder.IsActive() then
+		if not CreateWorldBuilderWidget() then return end
+		mgr:Push(m_caiWorldBuilderWidget, PopupPriority.Low)
+	else
+		if not CreateGameViewWidget() then return end
+		mgr:Push(m_caiGameViewWidget, PopupPriority.Low)
+	end
 
 	RegisterCAIEvents()
 	SnapCursorToInitialPosition()

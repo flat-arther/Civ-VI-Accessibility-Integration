@@ -276,6 +276,11 @@ local function IsKnownPlayer(playerID)
         return false
     end
 
+    -- The see-all observer has met everyone.
+    if IsObserverView() then
+        return true
+    end
+
     local localPlayerID = Game.GetLocalPlayer()
     if playerID == localPlayerID then
         return true
@@ -287,6 +292,11 @@ local function IsKnownPlayer(playerID)
 end
 
 local function IsOwnOrTeamUnit(unit)
+    -- The observer owns no units.
+    if IsObserverView() then
+        return false
+    end
+
     local localPlayerID = Game.GetLocalPlayer()
     local ownerID = unit:GetOwner()
     if ownerID == localPlayerID then
@@ -326,6 +336,14 @@ local function HasLocalMajorityReligion(unit, localPlayerID)
 end
 
 local function IsEnemyUnit(unit)
+    -- The observer has no diplomacy, but barbarians are hostile to all by nature
+    -- and stay enemy; every other owner is neutral to an observer.
+    if IsObserverView() then
+        local ownerID = unit:GetOwner()
+        local owner = ownerID ~= nil and ownerID ~= -1 and Players[ownerID] or nil
+        return owner ~= nil and owner:IsBarbarian()
+    end
+
     local ownerID = unit:GetOwner()
     local owner = Players[ownerID]
     if owner == nil then
@@ -357,6 +375,14 @@ local function IsEnemyUnit(unit)
 end
 
 local function IsNeutralUnit(unit)
+    -- The observer owns nothing and has no diplomacy, so every unit with a valid
+    -- owner reads as neutral -- except barbarians, which are enemy by nature.
+    if IsObserverView() then
+        local ownerID = unit:GetOwner()
+        local owner = ownerID ~= nil and ownerID ~= -1 and Players[ownerID] or nil
+        return owner ~= nil and not owner:IsBarbarian()
+    end
+
     if IsOwnOrTeamUnit(unit) then
         return false
     end
@@ -445,14 +471,17 @@ function Surveyor.ReadResources()
 
     local localPlayer = Players[Game.GetLocalPlayer()]
     local playerResources = localPlayer and localPlayer:GetResources()
+    -- The observer has no resource-visibility player, but sees every resource.
+    local observerSeesAll = IsObserverView()
     local buckets = {}
 
     for _, plot in ipairs(survey.Range.plots) do
         local resourceType = plot:GetResourceType()
         local resourceInfo = resourceType ~= nil and resourceType >= 0 and GameInfo.Resources[resourceType] or nil
         if resourceInfo ~= nil
-            and playerResources ~= nil
-            and playerResources:IsResourceVisible(resourceInfo.Hash) then
+            and (observerSeesAll
+                or (playerResources ~= nil
+                    and playerResources:IsResourceVisible(resourceInfo.Hash))) then
             local label = Locale.Lookup(resourceInfo.Name)
             -- Count one per plot like vanilla ReportScreen. plot:GetResourceCount()
             -- returns -1 (marshalled to ~65535) on revealed-but-fogged plots, which

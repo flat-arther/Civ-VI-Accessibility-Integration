@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Added
+
+- The World Builder's Map Editor is now accessible. Press `F1` on the map to open it (or use the launch bar's Map Editor button). It opens as two tabs: General, with the map's ID, size, ruleset, map script, reference image, and mod settings; and Text, where you edit the map and scenario's on-screen text. On the Text tab, pick a language, browse the list of entries, press Enter to edit an entry's tag and string, Delete to remove a custom entry, or use the Add button to create one.
+
 ### Fixed
 
 - Fixed main menu options visually showing their text twice, overlapping, as you focused different menu items.

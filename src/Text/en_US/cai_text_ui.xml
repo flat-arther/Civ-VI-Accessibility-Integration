@@ -7716,5 +7716,87 @@
     <Row Tag="LOC_CAI_LEADERDESC_NONE" Language="en_US">
       <Text>No description available for this leader.</Text>
     </Row>
+    <!-- World Builder tools picker (CAI) -->
+    <Row Tag="LOC_CAI_WB_TOOLS_TITLE" Language="en_US">
+      <Text>World Builder Tools</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_MODE" Language="en_US">
+      <Text>World Builder</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_OPEN_TOOLS" Language="en_US">
+      <Text>Open World Builder tools</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_PLACE" Language="en_US">
+      <Text>Place at cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_EDIT_TILE" Language="en_US">
+      <Text>Edit tile at cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_DELETE" Language="en_US">
+      <Text>Remove at cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_DELETE_TEXT" Language="en_US">
+      <Text>Delete text entry</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_MARK" Language="en_US">
+      <Text>Lock or unlock placement to cursor tile</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_MARKED" Language="en_US">
+      <Text>Placement locked to tile</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_UNMARKED" Language="en_US">
+      <Text>Placement unlocked</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_FOOTPRINT_TILES" Language="en_US">
+      <Text>{1_Number} tiles</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_VALID" Language="en_US">
+      <Text>Brush: {1_Number} of {2_Number} valid</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_TT_START_POSITION" Language="en_US">
+      <Text>Start position: {1_Player}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_TYPE" Language="en_US">
+      <Text>Type</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH" Language="en_US">
+      <Text>Brush size</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_SMALL" Language="en_US">
+      <Text>Small, 1 tile</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_MEDIUM" Language="en_US">
+      <Text>Medium, 7 tiles</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LARGE" Language="en_US">
+      <Text>Large, 19 tiles</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_ROTATION" Language="en_US">
+      <Text>Rotation</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_AMOUNT" Language="en_US">
+      <Text>Resource amount</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_OWNER" Language="en_US">
+      <Text>Owner</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_PLAYER" Language="en_US">
+      <Text>Player</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_CONTINENT" Language="en_US">
+      <Text>Continent</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_PILLAGED" Language="en_US">
+      <Text>Pillaged</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_GENERATE" Language="en_US">
+      <Text>Generate all resources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_CLEAR" Language="en_US">
+      <Text>Clear all resources</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_REVEAL_ALL" Language="en_US">
+      <Text>Reveal all</Text>
+    </Row>
   </LocalizedText>
 </GameData>

@@ -164,6 +164,9 @@ local function SpeakBookmarkDirection(slot)
 end
 
 local function OnMapPinInputActionStarted(actionID)
+    -- Map tacks do not exist in World Builder; skip so these hotkeys (Delete,
+    -- M, the bookmark keys) don't collide with the WB cursor/placement keys.
+    if GameConfiguration.IsWorldBuilderEditor() then return end
     local action = m_mapPinActions[actionID]
     if action ~= nil then action() end
 end
@@ -319,6 +322,24 @@ end
 local deleteMapTacActionID = Input.GetActionId("CAIDeleteMapTac")
 if deleteMapTacActionID ~= nil then
     m_mapPinActions[deleteMapTacActionID] = DeleteMapTacUnderCursor
+end
+
+-- Map-pin / minimap-list hotkeys, moved here from WorldInput_CAI so they live in
+-- the map-tacks UI and are gated off in World Builder with the rest.
+local placeMapPinActionID = Input.GetActionId("CAIPlaceMapPin")
+if placeMapPinActionID ~= nil then
+    -- PlaceMapPin is a vanilla WorldInput global; reach it across contexts.
+    m_mapPinActions[placeMapPinActionID] = function() LuaEvents.CAIRequestPlaceMapPin() end
+end
+
+local lensListActionID = Input.GetActionId("UI_CAIMinimapOpenLensList")
+if lensListActionID ~= nil then
+    m_mapPinActions[lensListActionID] = function() LuaEvents.CAIMinimapLensListToggle() end
+end
+
+local mapPinListActionID = Input.GetActionId("UI_CAIMinimapOpenMapPinList")
+if mapPinListActionID ~= nil then
+    m_mapPinActions[mapPinListActionID] = function() LuaEvents.CAIMinimapMapPinListToggle() end
 end
 
 -- ============================================================================

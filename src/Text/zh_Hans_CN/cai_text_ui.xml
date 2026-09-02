@@ -7713,5 +7713,87 @@
     <Replace Tag="LOC_CAI_LEADERDESC_NONE" Language="zh_Hans_CN">
       <Text>暂无此领袖的描述。</Text>
     </Replace>
+    <!-- World Builder tools picker (CAI) -->
+    <Replace Tag="LOC_CAI_WB_TOOLS_TITLE" Language="zh_Hans_CN">
+      <Text>世界构建器工具</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MODE" Language="zh_Hans_CN">
+      <Text>世界构建器</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_OPEN_TOOLS" Language="zh_Hans_CN">
+      <Text>打开世界构建器工具</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PLACE" Language="zh_Hans_CN">
+      <Text>在光标处放置</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_EDIT_TILE" Language="zh_Hans_CN">
+      <Text>编辑光标处地块</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_DELETE" Language="zh_Hans_CN">
+      <Text>在光标处移除</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_DELETE_TEXT" Language="zh_Hans_CN">
+      <Text>删除文本条目</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MARK" Language="zh_Hans_CN">
+      <Text>锁定或解锁放置到光标地块</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MARKED" Language="zh_Hans_CN">
+      <Text>放置已锁定到地块</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_UNMARKED" Language="zh_Hans_CN">
+      <Text>放置已解锁</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_FOOTPRINT_TILES" Language="zh_Hans_CN">
+      <Text>{1_Number} 个地块</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_VALID" Language="zh_Hans_CN">
+      <Text>笔刷：{2_Number} 个中 {1_Number} 个有效</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_TT_START_POSITION" Language="zh_Hans_CN">
+      <Text>起始位置：{1_Player}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_TYPE" Language="zh_Hans_CN">
+      <Text>类型</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH" Language="zh_Hans_CN">
+      <Text>笔刷大小</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_SMALL" Language="zh_Hans_CN">
+      <Text>小，1格</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_MEDIUM" Language="zh_Hans_CN">
+      <Text>中，7格</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_BRUSH_LARGE" Language="zh_Hans_CN">
+      <Text>大，19格</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_ROTATION" Language="zh_Hans_CN">
+      <Text>旋转</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_AMOUNT" Language="zh_Hans_CN">
+      <Text>资源数量</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_OWNER" Language="zh_Hans_CN">
+      <Text>所有者</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PLAYER" Language="zh_Hans_CN">
+      <Text>玩家</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_CONTINENT" Language="zh_Hans_CN">
+      <Text>大陆</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PILLAGED" Language="zh_Hans_CN">
+      <Text>已劫掠</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GENERATE" Language="zh_Hans_CN">
+      <Text>生成所有资源</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_CLEAR" Language="zh_Hans_CN">
+      <Text>清除所有资源</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_REVEAL_ALL" Language="zh_Hans_CN">
+      <Text>显示全部</Text>
+    </Replace>
   </LocalizedText>
 </GameData>

@@ -131,6 +131,7 @@ local CURSOR_MOVE_INFO_PRIORITY = {
     "cliff",
     "workers",
     "recommendation",
+    "wbStartPosition",
 }
 
 local PlotInfoActionRequestBuilders = {}
@@ -451,8 +452,31 @@ local function GetVolcanoString(data)
     return volcanoString
 end
 
+-- World Builder fog: while the Set Visibility tool is armed, plot info is gated
+-- on the selected player's revealed state, tracked in the CAI visibility shadow
+-- (the game exposes no getter). Returns (isWB, revealed). isWB false means "not
+-- in the WB visibility-tool context — use the normal observer path".
+local function GetWBRevealed(plotIndex)
+    if not (WorldBuilder ~= nil and WorldBuilder.IsActive()) then return false, false end
+    local api = ExposedMembers.CAIInfo
+    if api == nil or api.GetWorldBuilderVisibilityPlayer == nil or api.GetWorldBuilderRevealed == nil then
+        return false, false
+    end
+    local player = api.GetWorldBuilderVisibilityPlayer()
+    if player == nil then return false, false end
+    return true, api.GetWorldBuilderRevealed(player, plotIndex) == true
+end
+
+local function PlotIndexOf(plot)
+    return type(plot) == "number" and plot or plot:GetIndex()
+end
+
 function info.IsPlotVisible(plot)
     if not plot then return false end
+
+    local isWB, revealed = GetWBRevealed(PlotIndexOf(plot))
+    if isWB then return revealed end
+
     local observer = Game.GetLocalObserver()
     if observer == PlayerTypes.OBSERVER then return true end
     local vis = PlayersVisibility[observer]
@@ -462,6 +486,13 @@ end
 
 function info.IsPlotFogged(plot)
     if not plot then
+        return false
+    end
+
+    -- In the WB visibility tool a plot is simply revealed or not; there is no
+    -- "revealed but currently fogged" state, so it never reports as fog here.
+    local isWB = GetWBRevealed(PlotIndexOf(plot))
+    if isWB then
         return false
     end
 
@@ -1413,6 +1444,32 @@ info.PlotInfoHelpers = {
         )
     end,
 
+    -- World Builder: the plot's start position (Plot Editor field). Nil unless a
+    -- start position is set on this plot, or outside the editor.
+    wbStartPosition = function(data, plot)
+        if plot == nil or not GameConfiguration.IsWorldBuilderEditor() then return nil end
+        local pm = WorldBuilder.PlayerManager()
+        if pm == nil then return nil end
+
+        local startPos = pm:GetStartPositionInfo(plot:GetIndex())
+        if startPos == nil then return nil end
+
+        local who = nil
+        if startPos.Type == "Player" then
+            local cfg = pm:GetPlayerConfig(startPos.Player)
+            who = cfg ~= nil and cfg.Name ~= nil and Locale.Lookup(cfg.Name) or nil
+        elseif startPos.Type == "Leader" then
+            local leader = GameInfo.Leaders[startPos.Leader]
+            who = leader ~= nil and Locale.Lookup(leader.Name) or nil
+        elseif startPos.Type == "Civilization" then
+            local civ = GameInfo.Civilizations[startPos.Civilization]
+            who = civ ~= nil and Locale.Lookup(civ.Name) or nil
+        end
+        if who == nil then return nil end
+
+        return Locale.Lookup("LOC_CAI_WB_TT_START_POSITION", who)
+    end,
+
     interfaceInfo = function(data, plot)
         if plot == nil then return nil end
         return GetActiveInterfacePlotInfo(plot)
@@ -1631,6 +1688,7 @@ local DEFAULT_PLOT_INFO_BUCKET = {
     "units",
     "interfaceInfo",
     "lensInfo",
+    "wbStartPosition",
 }
 
 local CURSOR_MOVE_REQUEST_BUCKET = {
