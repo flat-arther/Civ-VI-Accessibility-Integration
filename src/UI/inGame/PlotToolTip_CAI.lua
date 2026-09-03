@@ -453,9 +453,9 @@ local function GetVolcanoString(data)
 end
 
 -- World Builder fog: while the Set Visibility tool is armed, plot info is gated
--- on the selected player's revealed state, tracked in the CAI visibility shadow
--- (the game exposes no getter). Returns (isWB, revealed). isWB false means "not
--- in the WB visibility-tool context — use the normal observer path".
+-- on the selected player's revealed state, read live from the loaded map
+-- database (RevealedPlots). Returns (isWB, revealed). isWB false means "not in
+-- the WB visibility-tool context — use the normal observer path".
 local function GetWBRevealed(plotIndex)
     if not (WorldBuilder ~= nil and WorldBuilder.IsActive()) then return false, false end
     local api = ExposedMembers.CAIInfo

@@ -283,24 +283,29 @@ local function MapValues()
     return WorldBuilder.ConfigurationManager():GetMapValues()
 end
 
--- Read-only "Label: value" line.
-local function AddReadOnly(page, labelTag, valueFn)
-    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWBME_RO"), "StaticText", {
-        Label = function()
-            return Locale.Lookup(labelTag) .. ": " .. tostring(valueFn())
-        end,
+-- Read-only field: a read-only always-edit EditBox (reads as a text field and
+-- lets the value be reviewed/copied), seeded once. Vanilla shows these as disabled
+-- edit boxes / labels; the value is refreshed explicitly when it can change (ID).
+local function AddReadOnly(page, labelTag, value)
+    local edit = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWBME_RO"), "EditBox", {
+        Label = function() return Locale.Lookup(labelTag) end,
     })
-    w:SetFocusSound(FOCUS_SOUND)
-    page:AddChild(w)
-    return w
+    edit:SetText(tostring(value), true)
+    edit:SetAlwaysEdit(true)
+    edit:SetReadOnly(true)
+    edit:SetFocusSound(FOCUS_SOUND)
+    page:AddChild(edit)
+    return edit
 end
 
--- Editable field driving one of the base's global On*Edited commit handlers.
+-- Editable field: an always-edit EditBox committing (on focus leave / Enter)
+-- through one of the base's global On*Edited handlers.
 local function AddEditField(page, labelTag, seedValue, commitFn)
     local edit = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWBME_Edit"), "EditBox", {
         Label = function() return Locale.Lookup(labelTag) end,
     })
     edit:SetText(seedValue or "", true)
+    edit:SetAlwaysEdit(true)
     edit:SetValueSetter(function(_, text) commitFn(text) end)
     edit:SetFocusSound(FOCUS_SOUND)
     page:AddChild(edit)
@@ -319,7 +324,7 @@ local function BuildGeneralPage(page)
     page:AddChild(isModCheck)
 
     -- ID (read-only) + Generate New ID
-    m_idText = AddReadOnly(page, "LOC_WORLDBUILDER_ATTRIBUTE_ID", function() return WorldBuilder.GetID() end)
+    m_idText = AddReadOnly(page, "LOC_WORLDBUILDER_ATTRIBUTE_ID", WorldBuilder.GetID())
 
     local genBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWBME_GenID"), "Button", {
         Label = function() return Locale.Lookup("LOC_WORLDBUILDER_GENERATE_NEW_ID") end,
@@ -327,13 +332,16 @@ local function BuildGeneralPage(page)
     genBtn:SetFocusSound(FOCUS_SOUND)
     genBtn:On("activate", function()
         WorldBuilder.SetID(WorldBuilder.GenerateID())
-        if m_idText then m_idText:Announce() end
+        if m_idText then
+            m_idText:SetText(WorldBuilder.GetID(), true)
+            m_idText:Announce()
+        end
     end)
     page:AddChild(genBtn)
 
     -- Width / Height (read-only)
-    AddReadOnly(page, "LOC_WORLDBUILDER_ATTRIBUTE_WIDTH",  function() return MapValues().Width end)
-    AddReadOnly(page, "LOC_WORLDBUILDER_ATTRIBUTE_HEIGHT", function() return MapValues().Height end)
+    AddReadOnly(page, "LOC_WORLDBUILDER_ATTRIBUTE_WIDTH",  MapValues().Width)
+    AddReadOnly(page, "LOC_WORLDBUILDER_ATTRIBUTE_HEIGHT", MapValues().Height)
 
     -- Ruleset / Map Script
     AddEditField(page, "LOC_WORLDBUILDER_ATTRIBUTE_RULESET", tostring(MapValues().Ruleset),

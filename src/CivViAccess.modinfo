@@ -163,7 +163,6 @@
     <File>UI/inGame/WorldBuilder_CAI.lua</File>
     <File>UI/inGame/WorldBuilderToolsPalette_CAI.lua</File>
     <File>UI/inGame/WorldBuilderPlacement_CAI.lua</File>
-    <File>UI/inGame/WorldBuilderRevealStore_CAI.lua</File>
     <File>UI/inGame/WorldBuilderLaunchBar_CAI.lua</File>
     <File>UI/inGame/WorldBuilderMapEditor_CAI.lua</File>
     <File>UI/inGame/Surveyor_CAI.lua</File>
@@ -533,10 +532,6 @@
       <File>data/notifications_CAI.xml</File>
       <File>data/tutorial_civilopedia_CAI.xml</File>
     </UpdateDatabase>
-
-    <AddGameplayScripts id="CAI_WorldBuilderRevealStore">
-      <File>UI/inGame/WorldBuilderRevealStore_CAI.lua</File>
-    </AddGameplayScripts>
 
     <ImportFiles id="DramaticAges_GovernmentsScreen_CAI" criteria="DramaticAges_Expansion1_Mode">
       <File>UI/Replacements/Byzantium_Gaul/GovernmentScreen_Byzantium_Gaul_Expansion1_MODE.lua</File>

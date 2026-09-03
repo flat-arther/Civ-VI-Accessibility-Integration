@@ -357,10 +357,9 @@ local function RebuildSettings()
         BuildPulldownDropdown(toolID, "LOC_CAI_WB_OWNER", DeriveCities(), Controls.OwnerPullDown)
     elseif toolID == WorldBuilderModes.SET_VISIBILITY then
         BuildPulldownDropdown(toolID, "LOC_CAI_WB_PLAYER", DerivePlayers(true), Controls.VisibilityPullDown)
-        BuildButtonField("LOC_CAI_WB_REVEAL_ALL", "VisibilityRevealAllButton", function()
-            local entry = Controls.VisibilityPullDown:GetSelectedEntry()
-            if entry ~= nil then info.SetWorldBuilderRevealedAll(entry.PlayerIndex) end
-        end)
+        -- Drives the vanilla Reveal All button; the revealed state is then read
+        -- live from the map database (RevealedPlots), so nothing to mirror here.
+        BuildButtonField("LOC_CAI_WB_REVEAL_ALL", "VisibilityRevealAllButton")
     end
     -- Rivers and Cliffs are edge tools: no item type and no parameters here.
 end
@@ -604,115 +603,16 @@ info.GetWorldBuilderPlacementValidity = function(plotId)
 end
 
 -- ===========================================================================
---  World Builder per-player visibility (shadow cache + Gameplay-context bridge)
+--  World Builder per-player visibility (live map-database read)
 -- ===========================================================================
--- The engine's visibility manager does not track the Set Visibility tool's
--- revealed state in the World Builder, so CAI shadows it in a live cache and
--- persists it through WorldBuilder.ConfigurationManager(), the store that holds
--- Ruleset/MapScript and is serialized into the .Civ6Map. That manager is a
--- Gameplay-context object: called from the UI context its custom keys read back
--- nil, so a companion Gameplay-context script (WorldBuilderRevealStore_CAI.lua)
--- owns the config I/O and bridges it to this UI context through ExposedMembers:
---   * ExposedMembers.CAI_WB_Reveal      -- table {[CAI_WB_REVEALED_P<n>]=string}
---                                          published from config on load.
---   * ExposedMembers.CAI_WB_SaveReveal  -- writer(player, serialized) that
---                                          persists from the Gameplay context.
--- Other stores ruled out by log: PlayerConfigurations (reset on WB reload),
--- MapConfiguration (pre-game setup, not in the map file), Plot properties (not
--- serialized into a .Civ6Map).
---
--- Per player: m_wbRevealedAll[player] (Reveal All used) and
--- m_wbRevealed[player][plotIndex] = true/false (per-tile overrides). Read is
--- override -> all -> false. Serialized form per player:
---   explicit set : "12;45;99"          (revealed plot indices)
---   reveal-all    : "A;-12;-45"         ("A" then hidden-tile exceptions)
-local MAX_PLAYERS = GameDefines.MAX_PLAYERS
-
--- The config key holding one player's serialized reveal state.
-local function RevealConfigKey(player)
-    return "CAI_WB_REVEALED_P" .. tostring(player)
-end
-
-local m_wbRevealed = {}      -- m_wbRevealed[player] = { [plotIndex] = bool }
-local m_wbRevealedAll = {}   -- m_wbRevealedAll[player] = true once Reveal All was used
-
--- Serialize one player's revealed state into a compact string.
-local function SerializeReveal(player)
-    local parts = {}
-    if m_wbRevealedAll[player] == true then
-        parts[#parts + 1] = "A"
-        local overrides = m_wbRevealed[player]
-        if overrides ~= nil then
-            for plotIndex, on in pairs(overrides) do
-                if on == false then parts[#parts + 1] = "-" .. tostring(plotIndex) end
-            end
-        end
-    else
-        local overrides = m_wbRevealed[player]
-        if overrides ~= nil then
-            for plotIndex, on in pairs(overrides) do
-                if on == true then parts[#parts + 1] = tostring(plotIndex) end
-            end
-        end
-    end
-    return table.concat(parts, ";")
-end
-
--- Persist one player's reveal string. Prefer the Gameplay-context writer (the
--- config manager only round-trips there); fall back to a direct UI write.
-local function SavePlayerReveal(player)
-    if player == nil or player < 0 then return end
-    local serialized = SerializeReveal(player)
-    if ExposedMembers.CAI_WB_SaveReveal ~= nil then
-        ExposedMembers.CAI_WB_SaveReveal(player, serialized)
-    else
-        local mgr = WorldBuilder.ConfigurationManager()
-        if mgr ~= nil then mgr:SetMapValue(RevealConfigKey(player), serialized) end
-        LogMessage("CAI WB reveal UI SAVE (no GP bridge) " .. RevealConfigKey(player) ..
-            " = '" .. serialized .. "'")
-    end
-end
-
--- Parse a serialized reveal string into the live cache for one player.
-local function ParseReveal(player, text)
-    if type(text) ~= "string" or text == "" then return end
-    local overrides = {}
-    for token in string.gmatch(text, "[^;]+") do
-        if token == "A" then
-            m_wbRevealedAll[player] = true
-        elseif string.sub(token, 1, 1) == "-" then
-            local idx = tonumber(string.sub(token, 2))
-            if idx ~= nil then overrides[idx] = false end
-        else
-            local idx = tonumber(token)
-            if idx ~= nil then overrides[idx] = true end
-        end
-    end
-    m_wbRevealed[player] = overrides
-end
-
--- Rebuild the whole cache from the Gameplay-context bridge (called on map load).
-local function LoadAllReveal()
-    LogMessage("CAI WB reveal LoadAllReveal fired (LoadGameViewStateDone)")
-    m_wbRevealed = {}
-    m_wbRevealedAll = {}
-    local published = ExposedMembers.CAI_WB_Reveal
-    if published == nil then
-        LogMessage("CAI WB reveal LOAD: ExposedMembers.CAI_WB_Reveal is nil (GP bridge missing)")
-        return
-    end
-    local n = 0
-    for player = 0, MAX_PLAYERS - 1 do
-        local text = published[RevealConfigKey(player)]
-        if type(text) == "string" and text ~= "" then
-            ParseReveal(player, text)
-            n = n + 1
-            LogMessage("CAI WB reveal LOAD " .. RevealConfigKey(player) .. " = '" .. text .. "'")
-        end
-    end
-    LogMessage("CAI WB reveal LOAD applied " .. n .. " players from bridge")
-end
-Events.LoadGameViewStateDone.Add(LoadAllReveal)
+-- The Set Visibility tool reveals / hides plots for a chosen player through the
+-- vanilla placement path, which records the state in the loaded map's SQLite
+-- database: the RevealedPlots table holds one (ID, Player) row per revealed
+-- plot, where ID is the 0-based plot index (matching Plots.ID / Map plot
+-- indices). While the World Builder is active that database is queryable from
+-- this context with DB.Query, so CAI reads the revealed state live instead of
+-- shadowing every edit in its own cache and persisting it through the config
+-- manager. A row's presence means "revealed for that player".
 
 -- The player the Set Visibility tool is currently pointed at, or nil when that
 -- tool is not the armed one.
@@ -724,28 +624,14 @@ info.GetWorldBuilderVisibilityPlayer = function()
     return entry.PlayerIndex
 end
 
-info.SetWorldBuilderRevealed = function(player, plotIndex, bAdd)
-    if player == nil or plotIndex == nil then return end
-    m_wbRevealed[player] = m_wbRevealed[player] or {}
-    m_wbRevealed[player][plotIndex] = bAdd == true
-    SavePlayerReveal(player)
-end
-
-info.SetWorldBuilderRevealedAll = function(player)
-    if player == nil then return end
-    m_wbRevealedAll[player] = true
-    m_wbRevealed[player] = {}
-    SavePlayerReveal(player)
-end
-
+-- Live per-player revealed lookup: true when the loaded map database holds a
+-- RevealedPlots row for this plot index and player.
 info.GetWorldBuilderRevealed = function(player, plotIndex)
     if player == nil or plotIndex == nil then return false end
-    local overrides = m_wbRevealed[player]
-    if overrides ~= nil and overrides[plotIndex] ~= nil then
-        return overrides[plotIndex]
-    end
-    if m_wbRevealedAll[player] == true then return true end
-    return false
+    local rows = DB.Query(
+        "SELECT 1 FROM RevealedPlots WHERE ID = ? AND Player = ? LIMIT 1",
+        plotIndex, player)
+    return rows ~= nil and #rows > 0
 end
 
 -- ===========================================================================

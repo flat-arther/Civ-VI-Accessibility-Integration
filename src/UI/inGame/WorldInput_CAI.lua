@@ -1534,15 +1534,9 @@ local function WBEditCursorPlot(bAdd)
 	end
 
 	-- The Set Visibility tool reveals (add) / hides (remove) this plot for its
-	-- selected player. The game exposes no getter for that state, so mirror the
-	-- edit into the CAI visibility shadow the plot tooltip reads.
-	local info = ExposedMembers.CAIInfo
-	if info ~= nil and info.GetWorldBuilderVisibilityPlayer ~= nil and info.SetWorldBuilderRevealed ~= nil then
-		local visPlayer = info.GetWorldBuilderVisibilityPlayer()
-		if visPlayer ~= nil then
-			info.SetWorldBuilderRevealed(visPlayer, plotId, bAdd)
-		end
-	end
+	-- selected player through the vanilla placement path above, which updates the
+	-- map database. The plot tooltip reads that revealed state live from
+	-- RevealedPlots, so there is nothing to mirror here.
 	return true
 end
 

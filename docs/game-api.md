@@ -2533,3 +2533,11 @@ Quick Deals (wltk, UUID `5aceed03-8639-4a81-8cbf-03f54d543502`, vendored at `dec
 ## Movie/cinematic subtitles (SubtitleContext) — dead end
 
 `decompiled/Assets/UI/SubtitleContext.xml` is a pure-XML context (`Name="SubtitleContext"`, one `Label ID="SubtitleText"`) with no vanilla Lua, and nothing in the UI Lua references it. Attempted a same-base-name companion Lua imported via both `<ImportFiles>` blocks with a debug `Speak` on load: **it never fires**. The context is not instantiated during normal play (intro/menu tested), so a companion Lua cannot bind and this approach is a dead end. Do not retry it. Captions are driven entirely by the native movie player from the `.srt` files under `Assets/UI/Subtitles/<lang>/`.
+
+## World Builder map database (DB.Query on the loaded map)
+
+While the World Builder is active, the loaded map's SQLite tables are queryable directly from the UI context with `DB.Query("SELECT ...", ...params)` (same API used for the gameplay database). Tables include `Plots`, `RevealedPlots`, `PlotFeatures`, `PlotImprovements`, `PlotResources`, `PlotRivers`, `PlotRoutes`, `PlotCliffs`, `PlotOwners`, `PlotAttributes`, `Cities`, `Districts`, `Buildings`, `Units`, `Players`, `StartPositions`, `NamedRiver`, `ModText`, and `Map` (Width/Height/WrapX/WrapY/MapSizeType).
+
+- **Plot indexing:** `Plots.ID` is the 0-based plot index, matching `Map.GetPlotByIndex` / `plot:GetIndex()` (range `0 .. Width*Height-1`).
+- **Per-player reveal:** `RevealedPlots(ID INTEGER, Player INTEGER)` holds one row per revealed plot; `ID` is the 0-based plot index, `Player` the player id. A row's presence means "revealed for that player". This is the live read path for the Set Visibility tool's state — read it instead of shadowing edits. Example: `DB.Query("SELECT 1 FROM RevealedPlots WHERE ID = ? AND Player = ? LIMIT 1", plotIndex, player)`.
+- The vanilla Set Visibility tool and its Reveal All button write reveal state through the normal placement path, which updates this database, so CAI drives the vanilla controls and reads `RevealedPlots` back live. Supersedes the earlier shadow-cache + gameplay-context config-bridge approach (removed): `PlayersVisibility:IsRevealed`, `MapManager:GetPlotValue`, `Plot:GetProperty`, and `WorldBuilder.ConfigurationManager():SetMapValue` custom keys were all dead ends for reading/persisting WB reveal.
