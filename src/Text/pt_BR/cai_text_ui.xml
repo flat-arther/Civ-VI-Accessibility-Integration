@@ -7730,6 +7730,27 @@
     <Replace Tag="LOC_CAI_WB_DELETE_TEXT" Language="pt_BR">
       <Text>Excluir entrada de texto</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WB_EDIT_LOCALIZATION" Language="pt_BR">
+      <Text>Editar localização</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MAP_METADATA" Language="pt_BR">
+      <Text>Metadados do mapa</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GENERATE_ID_TT" Language="pt_BR">
+      <Text>Ative para gerar um novo ID</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_ADDED" Language="pt_BR">
+      <Text>Adicionado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_NOT_ADDED" Language="pt_BR">
+      <Text>Não adicionado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_PILLAGED" Language="pt_BR">
+      <Text>Saqueado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_REMOVE" Language="pt_BR">
+      <Text>Remover</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WB_MARK" Language="pt_BR">
       <Text>Travar ou destravar a colocação no hexágono do cursor</Text>
     </Replace>

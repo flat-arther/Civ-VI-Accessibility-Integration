@@ -165,6 +165,7 @@
     <File>UI/inGame/WorldBuilderPlacement_CAI.lua</File>
     <File>UI/inGame/WorldBuilderLaunchBar_CAI.lua</File>
     <File>UI/inGame/WorldBuilderMapEditor_CAI.lua</File>
+    <File>UI/inGame/WorldBuilderPlayerEditor_CAI.lua</File>
     <File>UI/inGame/Surveyor_CAI.lua</File>
     <File>UI/inGame/MessageBuffer_CAI.lua</File>
     <File>UI/inGame/RecommendationLogic_CAI.lua</File>
@@ -803,6 +804,14 @@
         <LoadOrder>999999999</LoadOrder>
         <LuaContext>WorldBuilderMapEditor</LuaContext>
         <LuaReplace>UI/inGame/WorldBuilderMapEditor_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WorldBuilderPlayerEditor">
+      <Properties>
+        <LoadOrder>999999999</LoadOrder>
+        <LuaContext>WorldBuilderPlayerEditor</LuaContext>
+        <LuaReplace>UI/inGame/WorldBuilderPlayerEditor_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

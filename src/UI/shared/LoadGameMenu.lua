@@ -990,42 +990,6 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
 	return orig(input)
 end)
 
--- ---------------------------------------------------------------------------
--- Keep the accessibility mod alive when loading a World Builder map.
---
--- Editing an existing .Civ6Map normally funnels through OnLoadYes ->
--- Network.LoadGame, which rebuilds the enabled-mod set purely from the map file.
--- This mod is AffectsSavedGames=0, so it is never recorded in the file and gets
--- torn out on load (Modding.log shows the mod in the "Current" set but absent
--- from the "Target" set the load reconfigures toward).
---
--- Creating a NEW WB map keeps the mod because it enters through the setup/host
--- flow (Network.HostGame), which re-applies the current enabled-mod group. A
--- native .Civ6Map is itself a valid Map value (AdvancedSetup documents a
--- "{GUID}file.Civ6Map" / path as a Map script), so we can open the saved map the
--- same way: point MapConfiguration at the file and HostGame instead of LoadGame,
--- reusing the mod-group-preserving path. This keeps the mod enabled without
--- touching AffectsSavedGames, which would taint regular saves.
---
--- Only World Builder maps are rerouted; regular saves still use Network.LoadGame.
--- ---------------------------------------------------------------------------
-OnLoadYes = WrapFunc(OnLoadYes, function(orig, ...)
-	if g_GameType == SaveTypes.WORLDBUILDER_MAP and m_thisLoadFile ~= nil and m_thisLoadFile.Path ~= nil then
-		print("CAI: rerouting World Builder map load through HostGame to preserve enabled mods: " .. tostring(m_thisLoadFile.Path))
-		UITutorialManager:EnableOverlay(false)
-		UITutorialManager:HideAll()
-		m_kPopupDialog:Close()
-		Network.LeaveGame()
-		GameConfiguration.SetWorldBuilderEditor(true)
-		MapConfiguration.SetScript(m_thisLoadFile.Path)
-		if Events.SetGameEntryMethod then Events.SetGameEntryMethod("Load Saved Game") end
-		Network.HostGame(ServerType.SERVER_TYPE_NONE)
-		Controls.ActionButton:SetDisabled(true)
-		return
-	end
-	orig(...)
-end)
-
 Initialize = WrapFunc(Initialize, function(orig)
 	orig()
 	Events.InputActionTriggered.Remove(OnInputActionTriggered)

@@ -32,16 +32,18 @@ local mgr = ExposedMembers.CAI_UIManager
 local PANEL_ID   = "CAIWorldBuilderMapEditor_Panel"
 local FOCUS_SOUND = "Main_Menu_Mouse_Over"
 
--- Annotation tags per entry index, matching vanilla m_ItemAnnotations; index 5+
--- (custom "Additional Data") shares one tag. First custom index is 5, below which
--- vanilla disables Remove.
-local ANNOTATIONS = {
+-- Entries 1-4 are the fixed system strings, shown by their specific annotation.
+-- Entries 5+ are custom keys (vanilla disables Remove below index 5), shown by
+-- their localization tag; they all share the generic "for mod creator's use
+-- (optional)" annotation, which we surface as the Add button's tooltip instead.
+local SYSTEM_ANNOTATIONS = {
     "LOC_WORLDBUILDER_MAPEDIT_MODTITLE",
     "LOC_WORLDBUILDER_MAPEDIT_MODDESC",
     "LOC_WORLDBUILDER_MAPEDIT_MAPTITLE",
     "LOC_WORLDBUILDER_MAPEDIT_MAPDESC",
 }
 local FIRST_CUSTOM_INDEX = 5
+local ADDL_ANNOTATION    = "LOC_WORLDBUILDER_MAPEDIT_ADDLDATA"
 local MAX_TEXT_CHARS     = 64 -- vanilla SetMaxCharacters on both text fields
 
 -- ---------------------------------------------------------------------------
@@ -49,7 +51,7 @@ local MAX_TEXT_CHARS     = 64 -- vanilla SetMaxCharacters on both text fields
 -- ---------------------------------------------------------------------------
 local m_panel      = nil   -- pushed root Panel
 local m_tabs       = nil   -- TabControl
-local m_idText     = nil   -- General ID read-only StaticText (re-announced on generate)
+local m_idButton   = nil   -- General ID button (regenerates + re-announces on activate)
 local m_textList   = nil   -- Text tab entry List
 local m_langType   = nil   -- currently edited language locale (== curLang.Type)
 local m_dialog     = nil   -- open entry editor Dialog
@@ -58,10 +60,6 @@ local RefreshTextList
 -- ===========================================================================
 --  Text data helpers (drive WorldBuilder.ModManager() directly)
 -- ===========================================================================
-
-local function AnnotationTag(index)
-    return ANNOTATIONS[index] or "LOC_WORLDBUILDER_MAPEDIT_ADDLDATA"
-end
 
 -- Enumerate all key/string pairs for a language, mirroring vanilla's index walk.
 local function EnumerateEntries(lang)
@@ -110,9 +108,7 @@ local function OpenEntryEditor(entry)
     if m_dialog and mgr:GetWidgetById(m_dialog:GetId()) then return end
 
     local isNew   = entry == nil
-    local titleFn = function()
-        return Locale.Lookup(AnnotationTag(isNew and FIRST_CUSTOM_INDEX or entry.Index))
-    end
+    local titleFn = function() return Locale.Lookup("LOC_CAI_WB_EDIT_LOCALIZATION") end
 
     -- Live buffers mirrored from each AlwaysEdit box's text_changed, read on OK.
     local tagBuf = isNew and "" or (entry.Key or "")
@@ -144,19 +140,23 @@ local function OpenEntryEditor(entry)
         Label = function() return Locale.Lookup("LOC_OK") end,
     })
     okBtn:On("activate", function()
-        local focusKey = nil
         if isNew then
             -- An empty tag has nothing to key on; treat as cancel.
             if tagBuf ~= "" then
                 WorldBuilder.ModManager():SetString(tagBuf, strBuf, m_langType)
-                focusKey = "wbtext:" .. tagBuf
             end
+            -- Focus was on the Add button before the dialog; closing returns to it
+            -- and the rebuild does not steal focus, so Shift+Tab lands on the list.
+            CloseEntryDialog()
+            RefreshTextList()
         else
             WorldBuilder.ModManager():SetKeyStringPairByIndex(entry.Index, tagBuf, strBuf, m_langType)
-            focusKey = "wbtext:" .. tagBuf
+            -- Update the captured entry so the row's live label reflects the edit,
+            -- then just close: focus returns to that same row and announces it.
+            entry.Key = tagBuf
+            entry.Text = strBuf
+            CloseEntryDialog()
         end
-        CloseEntryDialog()
-        RefreshTextList({ focusKey = focusKey, announce = true })
     end)
 
     local cancelBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWBME_Cancel"), "Button", {
@@ -183,15 +183,14 @@ end
 local function DeleteEntry(entry)
     if entry == nil or entry.Index < FIRST_CUSTOM_INDEX then return end
     WorldBuilder.ModManager():RemoveString(entry.Key, m_langType)
-    RefreshTextList({ announce = true })
+    RefreshTextList()
 end
 
--- Rebuild the entry rows for the current language.
---   opts.focusKey - land on the row carrying this FocusKey (added/edited entry)
---   opts.announce - re-speak the resulting focus (user-initiated change); passive
---                   refreshes (language switch) leave it out so nothing interrupts.
-RefreshTextList = function(opts)
-    opts = opts or {}
+-- Rebuild the entry rows for the current language, restoring the captured
+-- position: when focus was inside the list (delete) that speaks the new landing
+-- once; when focus was outside it (Add button, language dropdown) focus is left
+-- untouched. Edits don't rebuild - they update the row's live label in place.
+RefreshTextList = function()
     if not m_textList then return end
 
     local capture = mgr:CaptureFocusKey(m_textList)
@@ -200,13 +199,21 @@ RefreshTextList = function(opts)
     for _, e in ipairs(EnumerateEntries(m_langType)) do
         local entry = e
         local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWBME_Entry"), "MenuItem", {
+            -- System entries (1-4) read their specific annotation; custom entries
+            -- (5+) read their localization tag (the unique key). The string
+            -- follows when present. The generic custom annotation is the Add tooltip.
             Label = function()
-                local annotation = Locale.Lookup(AnnotationTag(entry.Index))
+                local head
+                if entry.Index <= #SYSTEM_ANNOTATIONS then
+                    head = Locale.Lookup(SYSTEM_ANNOTATIONS[entry.Index])
+                else
+                    head = entry.Key
+                end
                 local text = entry.Text
                 if text ~= nil and text ~= "" then
-                    return annotation .. ": " .. text
+                    return head .. ": " .. text
                 end
-                return annotation
+                return head
             end,
             FocusKey = "wbtext:" .. entry.Key,
         })
@@ -227,12 +234,9 @@ RefreshTextList = function(opts)
         m_textList:AddChild(row)
     end
 
-    if opts.focusKey ~= nil then
-        mgr:RestoreFocus(m_textList, { key = opts.focusKey })
-    else
-        mgr:RestoreFocus(m_textList, capture)
-    end
-    if opts.announce then mgr:Refocus() end
+    -- Path/fallback restore already speaks the landing (delete); a nil capture
+    -- (focus outside the list) is a no-op that leaves focus where it was.
+    mgr:RestoreFocus(m_textList, capture)
 end
 
 local function BuildTextPage(page)
@@ -268,7 +272,8 @@ local function BuildTextPage(page)
     RefreshTextList()
 
     local addBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWBME_Add"), "Button", {
-        Label = function() return Locale.Lookup("LOC_WORLDBUILDER_ADD_BUTTON") end,
+        Label   = function() return Locale.Lookup("LOC_WORLDBUILDER_ADD_BUTTON") end,
+        Tooltip = function() return Locale.Lookup(ADDL_ANNOTATION) end,
     })
     addBtn:SetFocusSound(FOCUS_SOUND)
     addBtn:On("activate", function() OpenEntryEditor(nil) end)
@@ -276,43 +281,70 @@ local function BuildTextPage(page)
 end
 
 -- ===========================================================================
---  General tab: flat field sequence
+--  General tab: Map metadata list, then the Is Mod checkbox, then edit fields
 -- ===========================================================================
 
 local function MapValues()
     return WorldBuilder.ConfigurationManager():GetMapValues()
 end
 
--- Read-only field: a read-only always-edit EditBox (reads as a text field and
--- lets the value be reviewed/copied), seeded once. Vanilla shows these as disabled
--- edit boxes / labels; the value is refreshed explicitly when it can change (ID).
-local function AddReadOnly(page, labelTag, value)
-    local edit = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWBME_RO"), "EditBox", {
-        Label = function() return Locale.Lookup(labelTag) end,
+-- A read-only "Label: value" line as StaticText.
+local function AddMetaText(list, labelTag, value)
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWBME_Meta"), "StaticText", {
+        Label = function() return Locale.Lookup(labelTag) .. ": " .. tostring(value) end,
     })
-    edit:SetText(tostring(value), true)
-    edit:SetAlwaysEdit(true)
-    edit:SetReadOnly(true)
-    edit:SetFocusSound(FOCUS_SOUND)
-    page:AddChild(edit)
-    return edit
+    w:SetFocusSound(FOCUS_SOUND)
+    list:AddChild(w)
+    return w
 end
 
--- Editable field: an always-edit EditBox committing (on focus leave / Enter)
--- through one of the base's global On*Edited handlers.
+-- Editable field: an always-edit EditBox that commits only on Enter (not on focus
+-- leave), through one of the base's global On*Edited handlers. Matches vanilla,
+-- which puts no max-length or numeric restriction on these fields and validates
+-- Reference Alpha only on commit (tonumber + 0..1 range -> status line).
 local function AddEditField(page, labelTag, seedValue, commitFn)
     local edit = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWBME_Edit"), "EditBox", {
         Label = function() return Locale.Lookup(labelTag) end,
     })
     edit:SetText(seedValue or "", true)
     edit:SetAlwaysEdit(true)
-    edit:SetValueSetter(function(_, text) commitFn(text) end)
+    edit:SetCommitOnFocusLeave(false) -- Enter commits; moving focus away does not
+    edit:SetValueSetter(function(_, text)
+        -- Each commit is a fresh user action: reset the launch bar's status-line
+        -- de-dupe so committing the same value twice (e.g. a repeated "Reference
+        -- map file not found") is spoken every time, not swallowed as a repeat.
+        LuaEvents.CAIWorldBuilderStatusBurstBegin()
+        commitFn(text)
+    end)
     edit:SetFocusSound(FOCUS_SOUND)
     page:AddChild(edit)
     return edit
 end
 
 local function BuildGeneralPage(page)
+    -- Map metadata: read-only details grouped as a List. The ID row is a button
+    -- (activate = generate a new ID); Width / Height are static text.
+    local metaList = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWBME_MetaList"), "List", {
+        Label = function() return Locale.Lookup("LOC_CAI_WB_MAP_METADATA") end,
+    })
+
+    m_idButton = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWBME_ID"), "Button", {
+        Label   = function()
+            return Locale.Lookup("LOC_WORLDBUILDER_ATTRIBUTE_ID") .. ": " .. WorldBuilder.GetID()
+        end,
+        Tooltip = function() return Locale.Lookup("LOC_CAI_WB_GENERATE_ID_TT") end,
+    })
+    m_idButton:SetFocusSound(FOCUS_SOUND)
+    m_idButton:On("activate", function()
+        WorldBuilder.SetID(WorldBuilder.GenerateID())
+        m_idButton:Announce()
+    end)
+    metaList:AddChild(m_idButton)
+
+    AddMetaText(metaList, "LOC_WORLDBUILDER_ATTRIBUTE_WIDTH",  MapValues().Width)
+    AddMetaText(metaList, "LOC_WORLDBUILDER_ATTRIBUTE_HEIGHT", MapValues().Height)
+    page:AddChild(metaList)
+
     -- Is Mod
     local isModCheck = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWBME_IsMod"), "Checkbox", {
         Label = function() return Locale.Lookup("LOC_WORLDBUILDER_ATTRIBUTE_IS_MOD") end,
@@ -322,26 +354,6 @@ local function BuildGeneralPage(page)
     isModCheck:SetValueSetter(function(_, v) WorldBuilder.SetMod(v) end)
     isModCheck:SetFocusSound(FOCUS_SOUND)
     page:AddChild(isModCheck)
-
-    -- ID (read-only) + Generate New ID
-    m_idText = AddReadOnly(page, "LOC_WORLDBUILDER_ATTRIBUTE_ID", WorldBuilder.GetID())
-
-    local genBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWBME_GenID"), "Button", {
-        Label = function() return Locale.Lookup("LOC_WORLDBUILDER_GENERATE_NEW_ID") end,
-    })
-    genBtn:SetFocusSound(FOCUS_SOUND)
-    genBtn:On("activate", function()
-        WorldBuilder.SetID(WorldBuilder.GenerateID())
-        if m_idText then
-            m_idText:SetText(WorldBuilder.GetID(), true)
-            m_idText:Announce()
-        end
-    end)
-    page:AddChild(genBtn)
-
-    -- Width / Height (read-only)
-    AddReadOnly(page, "LOC_WORLDBUILDER_ATTRIBUTE_WIDTH",  MapValues().Width)
-    AddReadOnly(page, "LOC_WORLDBUILDER_ATTRIBUTE_HEIGHT", MapValues().Height)
 
     -- Ruleset / Map Script
     AddEditField(page, "LOC_WORLDBUILDER_ATTRIBUTE_RULESET", tostring(MapValues().Ruleset),
@@ -400,7 +412,7 @@ local function ClosePanel()
     if not m_panel then return end
     CloseEntryDialog()
     m_tabs     = nil
-    m_idText   = nil
+    m_idButton = nil
     m_textList = nil
     m_langType = nil
     mgr:RemoveFromStack(PANEL_ID)

@@ -7725,6 +7725,27 @@
     <Replace Tag="LOC_CAI_WB_DELETE_TEXT" Language="es_ES">
       <Text>Eliminar entrada de texto</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WB_EDIT_LOCALIZATION" Language="es_ES">
+      <Text>Editar localización</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MAP_METADATA" Language="es_ES">
+      <Text>Metadatos del mapa</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GENERATE_ID_TT" Language="es_ES">
+      <Text>Activa para generar un nuevo ID</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_ADDED" Language="es_ES">
+      <Text>Añadido</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_NOT_ADDED" Language="es_ES">
+      <Text>No añadido</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_PILLAGED" Language="es_ES">
+      <Text>Saqueado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_REMOVE" Language="es_ES">
+      <Text>Eliminar</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WB_MARK" Language="es_ES">
       <Text>Fijar o liberar la colocación en la casilla del cursor</Text>
     </Replace>

@@ -7718,6 +7718,27 @@
     <Replace Tag="LOC_CAI_WB_DELETE_TEXT" Language="fr_FR">
       <Text>Supprimer l'entrée de texte</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WB_EDIT_LOCALIZATION" Language="fr_FR">
+      <Text>Modifier la localisation</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MAP_METADATA" Language="fr_FR">
+      <Text>Métadonnées de la carte</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GENERATE_ID_TT" Language="fr_FR">
+      <Text>Activer pour générer un nouvel ID</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_ADDED" Language="fr_FR">
+      <Text>Ajouté</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_NOT_ADDED" Language="fr_FR">
+      <Text>Non ajouté</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_PILLAGED" Language="fr_FR">
+      <Text>Pillé</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_REMOVE" Language="fr_FR">
+      <Text>Retirer</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WB_MARK" Language="fr_FR">
       <Text>Verrouiller ou déverrouiller le placement sur la case du curseur</Text>
     </Replace>

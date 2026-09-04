@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+### Added
+
+- The World Builder Player Editor is now accessible. In advanced World Builder, press `F2` from the map to open it. It lists every player; add a human or AI player with the buttons below the list, and press `Delete` on a player to remove them. Open a player to edit their civilization, leader, civilization level, era, gold, and faith, and to grant or revoke technologies and civics.
+- Each player's cities appear as a tree you can expand: population, plus districts and buildings. Adding a city or a district takes you to the map to place it; buildings are added in place. Press `Delete` to remove a city, district, or building.
+
 ## [1.4.1] - 2026-08-30
 
 ### Fixed

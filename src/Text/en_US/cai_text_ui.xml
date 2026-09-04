@@ -7738,6 +7738,27 @@
     <Row Tag="LOC_CAI_WB_DELETE_TEXT" Language="en_US">
       <Text>Delete text entry</Text>
     </Row>
+    <Row Tag="LOC_CAI_WB_EDIT_LOCALIZATION" Language="en_US">
+      <Text>Edit localization</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_MAP_METADATA" Language="en_US">
+      <Text>Map metadata</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_GENERATE_ID_TT" Language="en_US">
+      <Text>Activate to generate a new ID</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_PE_ADDED" Language="en_US">
+      <Text>Added</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_PE_NOT_ADDED" Language="en_US">
+      <Text>Not added</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_PE_PILLAGED" Language="en_US">
+      <Text>Pillaged</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_PE_REMOVE" Language="en_US">
+      <Text>Remove</Text>
+    </Row>
     <Row Tag="LOC_CAI_WB_MARK" Language="en_US">
       <Text>Lock or unlock placement to cursor tile</Text>
     </Row>

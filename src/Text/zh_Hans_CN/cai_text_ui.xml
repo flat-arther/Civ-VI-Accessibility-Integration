@@ -7735,6 +7735,27 @@
     <Replace Tag="LOC_CAI_WB_DELETE_TEXT" Language="zh_Hans_CN">
       <Text>删除文本条目</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WB_EDIT_LOCALIZATION" Language="zh_Hans_CN">
+      <Text>编辑本地化</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MAP_METADATA" Language="zh_Hans_CN">
+      <Text>地图元数据</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GENERATE_ID_TT" Language="zh_Hans_CN">
+      <Text>激活以生成新的 ID</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_ADDED" Language="zh_Hans_CN">
+      <Text>已添加</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_NOT_ADDED" Language="zh_Hans_CN">
+      <Text>未添加</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_PILLAGED" Language="zh_Hans_CN">
+      <Text>已劫掠</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_REMOVE" Language="zh_Hans_CN">
+      <Text>移除</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WB_MARK" Language="zh_Hans_CN">
       <Text>锁定或解锁放置到光标地块</Text>
     </Replace>

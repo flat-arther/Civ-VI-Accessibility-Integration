@@ -255,6 +255,14 @@ function DropdownWidget:SetSelectedIndex(index, silent)
     self:SetValue(self._options[index].value, silent)
 end
 
+---Clear the selection so the dropdown reads as unset (mirrors a vanilla PullDown
+---set to index 0). The value getter returns "" while _selectedIndex is 0.
+---@param silent? boolean
+function DropdownWidget:ClearSelection(silent)
+    self._selectedIndex = 0
+    self:SetValue(nil, silent)
+end
+
 ---@return integer
 function DropdownWidget:GetSelectedIndex() return self._selectedIndex end
 

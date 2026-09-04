@@ -7730,6 +7730,27 @@
     <Replace Tag="LOC_CAI_WB_DELETE_TEXT" Language="pl_PL">
       <Text>Usuń wpis tekstowy</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WB_EDIT_LOCALIZATION" Language="pl_PL">
+      <Text>Edytuj lokalizację</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MAP_METADATA" Language="pl_PL">
+      <Text>Metadane mapy</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GENERATE_ID_TT" Language="pl_PL">
+      <Text>Aktywuj, aby wygenerować nowy identyfikator</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_ADDED" Language="pl_PL">
+      <Text>Dodano</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_NOT_ADDED" Language="pl_PL">
+      <Text>Nie dodano</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_PILLAGED" Language="pl_PL">
+      <Text>Splądrowane</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_REMOVE" Language="pl_PL">
+      <Text>Usuń</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WB_MARK" Language="pl_PL">
       <Text>Zablokuj lub odblokuj umieszczanie na polu kursora</Text>
     </Replace>
