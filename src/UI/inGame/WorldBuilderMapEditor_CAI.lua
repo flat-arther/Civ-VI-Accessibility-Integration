@@ -6,10 +6,10 @@
 --  The Mod tab is empty in vanilla (no controls in ViewMapModPage / ModInstance),
 --  so it is not exposed here. Two tabs are presented:
 --
---    * General - map-level metadata as a flat sequence of fields (no list):
---        Is Mod (checkbox), ID (read-only), Generate New ID (button),
---        Width / Height (read-only), Ruleset, Map Script, Reference Map,
---        Reference Alpha (edit boxes).
+--    * General - a Map metadata list (the ID as a button that generates a new
+--        ID on activate, then read-only Width / Height), followed by the Is Mod
+--        checkbox and edit boxes for Ruleset, Map Script, Reference Map, and
+--        Reference Alpha.
 --    * Text - the map/scenario localization editor: a language Dropdown, then a
 --        List of key/string entries. Delete removes the focused entry (system
 --        entries 1-4 cannot be removed, matching vanilla's disabled Remove).

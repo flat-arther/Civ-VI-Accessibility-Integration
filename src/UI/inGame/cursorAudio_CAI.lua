@@ -145,6 +145,10 @@ end
 local function IsPlotRevealed(plot)
     if plot == nil then return false end
 
+    -- World Builder Set Visibility tool: fog by the selected player's reveal.
+    local isGated, revealed = GetWorldBuilderRevealGate(plot)
+    if isGated then return revealed end
+
     -- The see-all observer (World Builder / spectator) has revealed everything.
     if IsObserverView() then return true end
 
@@ -159,6 +163,11 @@ end
 
 local function IsPlotVisible(plot)
     if plot == nil then return false end
+
+    -- World Builder Set Visibility tool: a revealed plot is perceivable (there is
+    -- no revealed-but-fogged state in the editor).
+    local isGated, revealed = GetWorldBuilderRevealGate(plot)
+    if isGated then return revealed end
 
     -- The see-all observer has full visibility, so no plot is fogged.
     if IsObserverView() then return true end

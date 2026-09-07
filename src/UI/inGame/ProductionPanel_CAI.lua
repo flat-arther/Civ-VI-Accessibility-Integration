@@ -727,12 +727,11 @@ end
 -- ===========================================================================
 -- Category nodes
 -- ===========================================================================
+-- Use the CAI category tag rather than the live vanilla header. Our category
+-- layout diverges from vanilla's on the Production tab (vanilla nests buildings
+-- under a single "Districts and Buildings" list, and its headers are uppercased),
+-- so borrowing the vanilla header would mislabel Districts and shout in all caps.
 local function GetVanillaCategoryLabel(tab, categoryKey, fallback)
-    local list = GetCategoryListForMode(GetListModeForTab(tab), categoryKey)
-    if list and list.Header and list.Header.GetText then
-        local t = list.Header:GetText()
-        if t and t ~= "" then return t end
-    end
     return Locale.Lookup(fallback)
 end
 
@@ -781,7 +780,9 @@ end
 
 local CATEGORY_SPECS = {
     [TAB.PRODUCTION] = {
+        { key = "repair",    label = "LOC_CAI_PRODUCTION_CATEGORY_REPAIR",    focusKey = "cat:repair" },
         { key = "districts", label = "LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS", focusKey = "cat:districts" },
+        { key = "buildings", label = "LOC_CAI_PRODUCTION_CATEGORY_BUILDINGS", focusKey = "cat:buildings" },
         { key = "wonders",   label = "LOC_CAI_PRODUCTION_CATEGORY_WONDERS",   focusKey = "cat:wonders" },
         { key = "projects",  label = "LOC_CAI_PRODUCTION_CATEGORY_PROJECTS",  focusKey = "cat:projects" },
         { key = "units",     label = "LOC_CAI_PRODUCTION_CATEGORY_UNITS",     focusKey = "cat:units" },
@@ -799,14 +800,24 @@ local CATEGORY_SPECS = {
 }
 
 local function GetItemsForTab(tab)
-    local out = { Districts = {}, Buildings = {}, Wonders = {}, Projects = {}, Units = {} }
+    local out = { Repair = {}, Districts = {}, Buildings = {}, Wonders = {}, Projects = {}, Units = {} }
     if not m_state.data then return out end
     if tab == TAB.PRODUCTION then
-        out.Districts = m_state.data.DistrictItems or {}
         out.Projects = m_state.data.ProjectItems or {}
         out.Units = m_state.data.UnitItems or {}
+        -- Pillaged districts/buildings can only be repaired, so collect them in a
+        -- dedicated Repair category instead of listing them under Districts/Buildings.
+        for _, d in ipairs(m_state.data.DistrictItems or {}) do
+            if d.Repair then
+                table.insert(out.Repair, d)
+            else
+                table.insert(out.Districts, d)
+            end
+        end
         for _, b in ipairs(m_state.data.BuildingItems or {}) do
-            if b.IsWonder then
+            if b.Repair then
+                table.insert(out.Repair, b)
+            elseif b.IsWonder then
                 table.insert(out.Wonders, b)
             else
                 table.insert(out.Buildings, b)
@@ -1026,8 +1037,8 @@ local function RebuildTreePage(tab)
     for _, spec in ipairs(CATEGORY_SPECS[tab] or {}) do
         local node = CreateCategoryNode(tab, spec.key, spec.label, spec.focusKey)
         local sourceKey = ({
-            districts = "Districts", wonders = "Wonders", projects = "Projects",
-            buildings = "Buildings", units = "Units",
+            repair = "Repair", districts = "Districts", wonders = "Wonders",
+            projects = "Projects", buildings = "Buildings", units = "Units",
         })[spec.key]
         local sourceItems = items[sourceKey] or {}
 
@@ -1035,11 +1046,6 @@ local function RebuildTreePage(tab)
             for _, u in ipairs(sourceItems) do AddUnitEntry(node, u, tab) end
         else
             for _, it in ipairs(sourceItems) do node:AddChild(CreateItemRow(it, tab, nil)) end
-            if tab == TAB.PRODUCTION and spec.key == "districts" then
-                for _, b in ipairs(items.Buildings or {}) do
-                    node:AddChild(CreateItemRow(b, tab, nil))
-                end
-            end
         end
 
         m_ui.categoryNodes[tab][spec.key] = node

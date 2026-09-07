@@ -204,6 +204,11 @@ end
 local function CanUpdateZonesForPlot(plot)
     if plot == nil then return false end
 
+    -- World Builder Set Visibility tool: gate zone reads on the selected player's
+    -- reveal so hidden tiles are treated as fogged.
+    local isGated, revealed = GetWorldBuilderRevealGate(plot)
+    if isGated then return revealed end
+
     local localPlayerID = Game.GetLocalPlayer()
     if localPlayerID == nil or localPlayerID < 0 then return false end
 

@@ -228,3 +228,71 @@ function MakeSimpleBtn(ctrl)
     btn:SetFocusSound("Main_Menu_Mouse_Over")
     return btn
 end
+
+-- ---------------------------------------------------------------------------
+-- World Builder map CAI dependency injection
+--
+-- Loading a saved World Builder map (.Civ6Map) rebuilds the session mod set from
+-- the map file's ModDependencies table and hard-overwrites the live enabled set.
+-- CAI (AffectsSavedGames=0) is never written to that table, so it is force-
+-- disabled for the session. A .Civ6Map is a plain SQLite database, so we inject
+-- CAI's ModDependencies row just before the load reads it, then strip it back
+-- out once the engine has consumed it (on load) and again after any save,
+-- keeping the on-disk map loadable by players who do not have CAI installed.
+-- These use the DLL SQLite bridge (ExposedMembers.CAI.OpenDatabase/Query/
+-- CloseDatabase); on an older DLL that lacks them we log and no-op.
+-- ---------------------------------------------------------------------------
+
+local CAI_MOD_GUID  = "9f4b5c2e-1a2b-4c3d-8e9f-123456789abc"
+local CAI_MOD_TITLE = '{"LOC_CAI_MOD_TITLE":[]}'
+
+-- Runs one write statement against the .Civ6Map at path. Returns the number of
+-- rows changed, or nil on failure. Wrapped in pcall because these are external
+-- DLL (SQLite) calls whose availability depends on the installed CAI DLL.
+local function RunMapDepWrite(path, sql, params)
+    local api = ExposedMembers.CAI
+    if not (api and api.OpenDatabase and api.Query and api.CloseDatabase) then
+        print("CAI WBMapDep: SQLite bridge unavailable (DLL too old); skipping")
+        return nil
+    end
+    local changed = nil
+    local ok, err = pcall(function()
+        local handle, openErr = api.OpenDatabase(path)
+        if not handle then
+            print("CAI WBMapDep: could not open '" .. tostring(path) .. "': " .. tostring(openErr))
+            return
+        end
+        local result, queryErr = api.Query(handle, sql, params)
+        if result then
+            changed = result.changed
+        else
+            print("CAI WBMapDep: query failed on '" .. tostring(path) .. "': " .. tostring(queryErr))
+        end
+        api.CloseDatabase(handle)
+    end)
+    if not ok then
+        print("CAI WBMapDep: exception on '" .. tostring(path) .. "': " .. tostring(err))
+    end
+    return changed
+end
+
+-- Inserts CAI into the map file's ModDependencies unless already present, so the
+-- load re-enables accessibility. Idempotent (ID is the table's primary key).
+function WBMapDepInject(path)
+    if not path or path == "" then return end
+    RunMapDepWrite(path,
+        "INSERT OR IGNORE INTO ModDependencies (ID, Title) VALUES (?, ?)",
+        { CAI_MOD_GUID, CAI_MOD_TITLE })
+    print("CAI WBMapDep: injected CAI dependency into '" .. tostring(path) .. "'")
+end
+
+-- Removes CAI from the map file's ModDependencies, keeping the shared/shipped
+-- file loadable without CAI. Returns rows removed (0 means the save serializer
+-- did not write CAI back, i.e. AffectsSavedGames=0 already excluded it).
+function WBMapDepStrip(path)
+    if not path or path == "" then return 0 end
+    local changed = RunMapDepWrite(path, "DELETE FROM ModDependencies WHERE ID = ?", { CAI_MOD_GUID })
+    print("CAI WBMapDep: stripped CAI dependency from '" .. tostring(path) ..
+        "' (rows removed: " .. tostring(changed) .. ")")
+    return changed or 0
+end

@@ -105,6 +105,12 @@
 [x] Add support for extended policy cards
 [x] Add support for quick deals
 [x] Add volcanos to disasters subcategory even if inactive
+[x] Split districts and buildings, as well as repairs in the production panel
 [ ] Add support for real Era Tracker
-[ ] Look in to coastal raide yield reporting
+[x] Group spies in the espionage screen by civ, copy trade route overview
+[ ] Food summary in the city details growth tooltip should show net per turn, not raw yield
+[ ] Different scanner categories should have different default sort, instead of always using distance. 
+[ ] Get rid of screen reader interrupt on widget push
+[ ] Cities should be reported as zones
 [ ] River flow direction reporting
+[ ] Look in to coastal raide yield reporting

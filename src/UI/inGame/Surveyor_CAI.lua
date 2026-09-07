@@ -262,6 +262,10 @@ local function GetSurveyRange()
 end
 
 local function IsVisiblePlot(plot)
+    -- World Builder Set Visibility tool: a revealed plot is perceivable.
+    local isGated, revealed = GetWorldBuilderRevealGate(plot)
+    if isGated then return revealed end
+
     local observer = Game.GetLocalObserver()
     if observer == PlayerTypes.OBSERVER then
         return true

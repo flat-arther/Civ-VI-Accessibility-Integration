@@ -729,17 +729,56 @@ mgr:Push(CAI_ConfirmDialog)
 end
 end
 
+-- World Builder map saves: if CAI is live in the session (e.g. it was injected
+-- into a loaded map), the save may re-materialize CAI into the new file's
+-- ModDependencies. Remember the file being written and strip CAI back out once
+-- the (asynchronous) save completes, so the saved map stays loadable without CAI.
+CAI_PendingWBSavePath = nil
+
+-- Full on-disk path for a brand-new WB save: current directory + the typed file
+-- name, with the .Civ6Map extension the engine appends.
+local function CAI_ResolveNewWBSavePath()
+	local name = Controls.FileName and Controls.FileName:GetText() or ""
+	if name == "" then return nil end
+	if string.sub(name, -8) ~= ".Civ6Map" then
+		name = name .. ".Civ6Map"
+	end
+	local dir = g_CurrentDirectoryPath or ""
+	if dir == "" then return name end
+	return dir .. "/" .. name
+end
+
+-- Saves are asynchronous; vanilla waits on Events.SaveComplete. Strip here.
+function OnCAIWBSaveComplete()
+	local path = CAI_PendingWBSavePath
+	CAI_PendingWBSavePath = nil
+	if path then
+		WBMapDepStrip(path)
+	end
+end
+
 OnDelete = WrapFunc(OnDelete, function(orig)
 	orig()
 	MakeConfirmDialog()
 end)
 
 OnActionButton = WrapFunc(OnActionButton, function(orig)
+	if g_GameType == SaveTypes.WORLDBUILDER_MAP then
+		CAI_PendingWBSavePath = CAI_ResolveNewWBSavePath()
+	end
 	orig()
 	MakeConfirmDialog()
 end)
 
 OnYes = WrapFunc(OnYes, function(orig)
+	-- Overwriting an existing WB map: the real target is the selected file.
+	if g_GameType == SaveTypes.WORLDBUILDER_MAP and not g_IsDeletingFile
+		and g_iSelectedFileEntry ~= -1 then
+		local entry = g_FileList and g_FileList[g_iSelectedFileEntry]
+		if entry and entry.Path then
+			CAI_PendingWBSavePath = entry.Path
+		end
+	end
 	orig()
 	RemoveCAIDialog()
 end)
@@ -794,6 +833,13 @@ end)
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
 	if mgr:HandleInput(input) then return true end
 	return orig(input)
+end)
+
+Initialize = WrapFunc(Initialize, function(orig)
+	orig()
+	-- Remove-then-Add keeps this single-subscribed across hotloads.
+	Events.SaveComplete.Remove(OnCAIWBSaveComplete)
+	Events.SaveComplete.Add(OnCAIWBSaveComplete)
 end)
 
 --#End of accessibility integration

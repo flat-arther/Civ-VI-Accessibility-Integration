@@ -796,5 +796,145 @@
     <Row Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_SUBMIT" Language="en_US">
       <Text>After the proposal list are the live submission and Pass buttons. Activate the submission button to send the checked proposal. Activate Pass only when you want to submit no proposal. If the special session begins, its separate ballot will later require every member to vote Support or Oppose.</Text>
     </Row>
+
+    <!-- World Builder screen names -->
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_WORLD_BUILDER" Language="en_US">
+      <Text>World Builder</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_WORLD_BUILDER_TOOLS" Language="en_US">
+      <Text>World Builder tools</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_WB_MAP_EDITOR" Language="en_US">
+      <Text>Map Editor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_WB_PLAYER_EDITOR" Language="en_US">
+      <Text>Player Editor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_WB_PLOT_EDITOR" Language="en_US">
+      <Text>Plot Editor</Text>
+    </Row>
+
+    <!-- World Builder screen titles -->
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TITLE" Language="en_US">
+      <Text>World Builder tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOLS_TITLE" Language="en_US">
+      <Text>World Builder tools tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_MAP_EDITOR_TITLE" Language="en_US">
+      <Text>Map Editor tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLAYER_EDITOR_TITLE" Language="en_US">
+      <Text>Player Editor tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLOT_EDITOR_TITLE" Language="en_US">
+      <Text>Plot Editor tutorial</Text>
+    </Row>
+
+    <!-- World Builder main interface -->
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_OVERVIEW" Language="en_US">
+      <Text>World Builder lets you edit the map directly. You are on the map itself; move the map cursor as you normally do, and edits apply to the tile under the cursor.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLACE" Language="en_US">
+      <Text>Press Enter to place the armed tool's item on the cursor tile. Press Delete to remove it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_LOCK" Language="en_US">
+      <Text>Press M to lock placement to the current tile so the cursor can roam and inspect other tiles while edits still land on the locked tile. Press M again to unlock.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLOT_EDITOR" Language="en_US">
+      <Text>Press F3 to open the Plot Editor for the cursor tile, or the locked tile when one is set, to change everything on that single tile.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_UNDO" Language="en_US">
+      <Text>Press Control plus Z to undo the last edit and Control plus Y to redo it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_GOTO" Language="en_US">
+      <Text>Press Control plus G to open a box that jumps the cursor to typed coordinates, either absolute or relative to the cursor.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_EDITORS" Language="en_US">
+      <Text>Press F1 to open the Map Editor and F2 to open the Player Editor.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOLS_PANEL" Language="en_US">
+      <Text>To switch tools, press Tab to open the tools panel, where you can browse every tool and its settings.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOL_NUMBERS" Language="en_US">
+      <Text>You can also select a tool directly without opening the panel. The number keys 1 through 0 select the first ten tools, and Shift plus 1 through Shift plus 6 select the remaining six.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLACEMENT" Language="en_US">
+      <Text>Placement works by arming a tool with an item type and settings such as brush size, then pressing Enter to apply it to the cursor tile. A larger brush covers a ring of tiles around the cursor rather than a single tile.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_QUICKNAV" Language="en_US">
+      <Text>You can change the armed tool and adjust its parameters straight from the map, without opening the panel. Left and Right move between parameters; the first parameter is the tool itself, and the rest are the armed tool's settings. Up and Down change the focused parameter's value, so on the first parameter they switch the armed tool. Holding Shift with these keys jumps to the first or last parameter, or to the first or last value.</Text>
+    </Row>
+
+    <!-- World Builder tools panel -->
+    <Row Tag="LOC_CAI_TUTORIAL_WB_TOOLS_OVERVIEW" Language="en_US">
+      <Text>The tools panel is where you choose which tool is armed and set its options. It opens with focus on the tool that is currently armed.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_TOOLS_LIST" Language="en_US">
+      <Text>The first control is a list of the sixteen placement tools, such as terrain, features, wonders, rivers, cliffs, resources, cities, districts, and improvements. Moving onto a tool arms it. Press Enter on a tool to close the panel and return to the map.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_TOOLS_SETTINGS" Language="en_US">
+      <Text>After the tool list is a settings area that changes to match the armed tool. It always begins with the item-type choice, followed by that tool's extra options, which can include brush size, feature direction, resource amount, owner, player, continent, or a pillaged checkbox.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_TOOLS_DROPDOWNS" Language="en_US">
+      <Text>Each option is a dropdown or a field, so moving through the choices never changes anything by accident. Only opening a dropdown and activating an option, or committing a field, applies the change.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_TOOLS_SCANNER" Language="en_US">
+      <Text>While World Builder is active, the World Scanner gains a World Builder category. It has a Starting positions section listing every placed start position grouped by type, and an Ownership section listing owned tiles grouped by owner.</Text>
+    </Row>
+
+    <!-- World Builder Map Editor -->
+    <Row Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_OVERVIEW" Language="en_US">
+      <Text>The Map Editor holds map-wide settings and text in a two-page tab control: General and Text.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_GENERAL" Language="en_US">
+      <Text>The General tab begins with a Map metadata list. Its rows are the map ID, the width, and the height; the map ID row is a button that generates a new ID when you press it, while width and height are read-only. After the list come an Is Mod checkbox and edit boxes for Ruleset, Map Script, Reference Map, and Reference Alpha.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_TEXT" Language="en_US">
+      <Text>The Text tab is the map's localization editor. It starts with a language dropdown, then a list of text entries, then an Add button below the list.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_TEXT_ACTIONS" Language="en_US">
+      <Text>In the entry list, Enter opens an editor with a tag and a string, and its OK button saves. Delete removes the focused entry, except the first four system entries, which cannot be removed. The Add button opens the same editor for a new entry.</Text>
+    </Row>
+
+    <!-- World Builder Player Editor -->
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_OVERVIEW" Language="en_US">
+      <Text>The Player Editor manages the players in the game. It has a player list followed by a four-page tab control, and the tabs always act on the player selected in the list.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_LIST" Language="en_US">
+      <Text>The player list has one row per player. Moving onto a player selects it and updates the tabs. At the bottom of the list are Add Player and Add AI rows, and Delete removes the focused player. Tab moves from the list to the tabs.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_GENERAL" Language="en_US">
+      <Text>The General tab sets the selected player's Civilization, Leader, Civilization Level, and Era dropdowns, and Gold and Faith number fields. Some fields stay disabled until the player is initialized, or when they do not apply, such as gold and faith for the Barbarian player.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_TECHS" Language="en_US">
+      <Text>The Techs tab is a checkbox list of every technology. Checking a box grants that technology to the player, and unchecking removes it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CIVICS" Language="en_US">
+      <Text>The Civics tab is a checkbox list of every civic, working the same way as the Techs tab.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES" Language="en_US">
+      <Text>The Cities tab is a tree of the selected player's cities. Each city expands into a Population value and Districts and Buildings subtrees.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES_DETAIL" Language="en_US">
+      <Text>Enter on Population opens an inline editor for the city's size. Under Districts and Buildings, each item reads its live state as added, not added, or pillaged. Enter on an item that is not added adds it, and Delete removes it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES_PLACEMENT" Language="en_US">
+      <Text>Adding a city, or a district that needs a tile, hands off to the map: the editor closes and arms the matching tool so you can place it on a tile. Buildings do not need a tile and are added directly. The Add City button sits below the city tree.</Text>
+    </Row>
+
+    <!-- World Builder Plot Editor -->
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_OVERVIEW" Language="en_US">
+      <Text>The Plot Editor changes everything on one tile, the cursor tile or the locked tile you opened it on. It is a single list, and Escape closes it and returns to the map.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_ROWS" Language="en_US">
+      <Text>The list holds, in order: Terrain, Features, Resources, Improvements, Districts, Routes, Start Positions, Owner, and, in Gathering Storm, Lowland.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_SUBMENUS" Language="en_US">
+      <Text>Terrain and Owner are single dropdowns. The others are expandable rows whose label summarizes the tile: Features adds a feature and its direction; Resources adds a resource and, for strategic resources, an amount; Improvements, Districts, and Routes each add their type with a Pillaged checkbox; Start Positions sets a start type and its player, leader, or civilization.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_COMMIT" Language="en_US">
+      <Text>Choosing a value writes it straight to the tile, so every game rule runs, such as a terrain change dropping an invalid feature or coast fixups. Undo with Control plus Z if a change cascades in a way you did not want.</Text>
+    </Row>
   </LocalizedText>
 </GameData>

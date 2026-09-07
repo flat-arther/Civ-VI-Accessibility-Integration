@@ -1,5 +1,6 @@
 include("caiUtils")
 include("hexCoordUtils_CAI")
+include("inGameHelpers_CAI")
 if GameConfiguration.GetValue("GAMEMODE_APOCALYPSE") then
     include("ClimateScreen_GranColombia_Maya")
 else
@@ -104,6 +105,201 @@ local function MakeNode(focusKey, labelFn, tooltipFn)
     local w = mgr:CreateWidget(MakeId("CAIClm_"), "TreeItem", props)
     w:SetFocusSound(HOVER_SOUND)
     return w
+end
+
+-- =========================================================================
+-- EVENT-HISTORY DETAIL  (from WorldClimateHistoryManager_CAI)
+-- =========================================================================
+local m_yieldNames = nil
+local function ClimateYieldName(yieldIndex)
+    if m_yieldNames == nil then
+        m_yieldNames = {}
+        for row in GameInfo.Yields() do
+            m_yieldNames[row.Index] = row.Name
+        end
+    end
+    local key = m_yieldNames[yieldIndex]
+    return key and Locale.Lookup(key) or ""
+end
+
+local function ClimateOwnerWord(ownerID, localPlayerID)
+    if ownerID == localPlayerID then
+        return Locale.Lookup("LOC_CAI_CLIMATE_OWNER_YOURS")
+    end
+    return GetPlayerOwnershipPrefix(ownerID) or ""
+end
+
+local function ClimateCity(ownerID, cityID)
+    if cityID == nil or cityID < 0 or ownerID == nil or ownerID < 0 then return nil end
+    local pPlayer = Players[ownerID]
+    if pPlayer == nil then return nil end
+    return pPlayer:GetCities():FindID(cityID)
+end
+
+local function ClimateCityName(ownerID, cityID)
+    local pCity = ClimateCity(ownerID, cityID)
+    return pCity and Locale.Lookup(pCity:GetName()) or nil
+end
+
+local function ClimateCityPlot(ownerID, cityID)
+    local pCity = ClimateCity(ownerID, cityID)
+    return pCity and Map.GetPlotIndex(pCity:GetX(), pCity:GetY()) or nil
+end
+
+local function ClimateObjectName(kind, def)
+    local info
+    if kind == 2 then
+        info = GameInfo.Districts[def]
+    elseif kind == 3 then
+        info = GameInfo.Features[def]
+    elseif kind == 4 then
+        info = GameInfo.Buildings[def]
+    elseif kind == 5 then
+        info = GameInfo.Resources[def]
+    else
+        info = GameInfo.Improvements[def]
+    end
+    return (info and info.Name) and Locale.Lookup(info.Name) or ""
+end
+
+local function ClimateUnitName(unitType)
+    local info = GameInfo.Units[unitType]
+    return (info and info.Name) and Locale.Lookup(info.Name) or ""
+end
+
+local function ClimateTerrainName(terrainIndex)
+    local info = GameInfo.Terrains[terrainIndex]
+    return (info and info.Name) and Locale.Lookup(info.Name) or ""
+end
+
+local function ClimateYieldDeltaString(deltas)
+    local order = {}
+    for yieldIndex in pairs(deltas) do
+        order[#order + 1] = yieldIndex
+    end
+    table.sort(order)
+    local parts = {}
+    for _, yieldIndex in ipairs(order) do
+        local amt = deltas[yieldIndex]
+        local signed = (amt > 0 and "+" or "") .. tostring(amt)
+        parts[#parts + 1] = Locale.Lookup("LOC_CAI_CLIMATE_YIELD_DELTA", signed, ClimateYieldName(yieldIndex))
+    end
+    return JoinNonEmpty(parts, ", ")
+end
+
+local function ClimateWithTurn(text, turn)
+    return Locale.Lookup("LOC_CAI_CLIMATE_INSTANCE_TURN", text, turn)
+end
+
+---A fertility tile carries either per-yield deltas or a lump amount (when no
+---before-state was available to split it).
+local function ClimateFertString(f)
+    if f.deltas ~= nil and next(f.deltas) ~= nil then
+        return ClimateYieldDeltaString(f.deltas)
+    end
+    if f.amount ~= nil then
+        local signed = (f.amount > 0 and "+" or "") .. tostring(f.amount)
+        return Locale.Lookup("LOC_CAI_CLIMATE_FERT_AMOUNT", signed)
+    end
+    return ""
+end
+
+---Add the Damaged tiles / Fertility / Population child nodes to an event node.
+local function BuildEventDetailChildren(node, record, localPlayerID)
+    local keyBase = "climate:det:" .. record.sp .. ":" .. record.ev
+
+    if #record.damagedTiles > 0 then
+        local dmgNode = MakeNode(keyBase .. ":dmg", function()
+            return Locale.Lookup("LOC_CAI_CLIMATE_DAMAGED_TILES", #record.damagedTiles)
+        end)
+        for i, d in ipairs(record.damagedTiles) do
+            local object = ClimateObjectName(d.kind, d.def)
+            local city = ClimateCityName(d.owner, d.city)
+            local text
+            if d.kind == 3 or d.kind == 5 then
+                -- feature/resource removal: not owned, so no owner word
+                if city then
+                    text = Locale.Lookup("LOC_CAI_CLIMATE_FEATURE_REMOVED_IN_CITY", object, city)
+                else
+                    text = Locale.Lookup("LOC_CAI_CLIMATE_FEATURE_REMOVED", object)
+                end
+            else
+                local owner = ClimateOwnerWord(d.owner, localPlayerID)
+                local inCityTag = d.destroyed and "LOC_CAI_CLIMATE_DESTROYED_IN_CITY" or "LOC_CAI_CLIMATE_PILLAGED_IN_CITY"
+                local plainTag = d.destroyed and "LOC_CAI_CLIMATE_DESTROYED" or "LOC_CAI_CLIMATE_PILLAGED"
+                if city then
+                    text = Locale.Lookup(inCityTag, owner, object, city)
+                else
+                    text = Locale.Lookup(plainTag, owner, object)
+                end
+            end
+            local dPlot = d.plot
+            dmgNode:AddChild(MakeActionLeaf(keyBase .. ":dmg:" .. i, "TreeItem",
+                function() return AppendRelativePlotLocation(text, dPlot) end, nil, dPlot))
+        end
+        node:AddChild(dmgNode)
+    end
+
+    if #record.fertilityTiles > 0 then
+        local fertNode = MakeNode(keyBase .. ":fert", function()
+            return Locale.Lookup("LOC_CAI_CLIMATE_FERTILITY_NODE", #record.fertilityTiles)
+        end)
+        for i, f in ipairs(record.fertilityTiles) do
+            local terrain = ClimateTerrainName(f.terrain)
+            local deltas = ClimateFertString(f)
+            local city = ClimateCityName(f.owner, f.city)
+            local text
+            if city then
+                text = Locale.Lookup("LOC_CAI_CLIMATE_FERT_IN_CITY", terrain, city, deltas)
+            else
+                text = Locale.Lookup("LOC_CAI_CLIMATE_FERT", terrain, deltas)
+            end
+            local fPlot = f.plot
+            fertNode:AddChild(MakeActionLeaf(keyBase .. ":fert:" .. i, "TreeItem",
+                function() return AppendRelativePlotLocation(text, fPlot) end, nil, fPlot))
+        end
+        node:AddChild(fertNode)
+    end
+
+    if #record.popLost > 0 then
+        local total = 0
+        for _, p in ipairs(record.popLost) do total = total + p.amount end
+        local popNode = MakeNode(keyBase .. ":pop", function()
+            return Locale.Lookup("LOC_CAI_CLIMATE_POP_LOST", total)
+        end)
+        for i, p in ipairs(record.popLost) do
+            local city = ClimateCityName(p.owner, p.city) or Locale.Lookup("LOC_CLIMATE_SCREEN_WATER")
+            local text = Locale.Lookup("LOC_CAI_CLIMATE_POP_LOST_CITY", city, p.amount)
+            local cityPlot = ClimateCityPlot(p.owner, p.city)
+            if cityPlot then
+                popNode:AddChild(MakeActionLeaf(keyBase .. ":pop:" .. i, "TreeItem",
+                    function() return AppendRelativePlotLocation(text, cityPlot) end, nil, cityPlot))
+            else
+                popNode:AddChild(MakeLeaf(keyBase .. ":pop:" .. i, function() return text end))
+            end
+        end
+        node:AddChild(popNode)
+    end
+
+    if #record.unitsLost > 0 then
+        local unitNode = MakeNode(keyBase .. ":units", function()
+            return Locale.Lookup("LOC_CAI_CLIMATE_UNITS_NODE", #record.unitsLost)
+        end)
+        for i, u in ipairs(record.unitsLost) do
+            local owner = ClimateOwnerWord(u.owner, localPlayerID)
+            local unitName = ClimateUnitName(u.utype)
+            local text
+            if u.killed then
+                text = Locale.Lookup("LOC_CAI_CLIMATE_UNIT_KILLED", owner, unitName)
+            else
+                text = Locale.Lookup("LOC_CAI_CLIMATE_UNIT_DAMAGED", owner, unitName, u.hp or 0)
+            end
+            local uPlot = u.plot
+            unitNode:AddChild(MakeActionLeaf(keyBase .. ":units:" .. i, "TreeItem",
+                function() return AppendRelativePlotLocation(text, uPlot) end, nil, uPlot))
+        end
+        node:AddChild(unitNode)
+    end
 end
 
 -- =========================================================================
@@ -723,11 +919,12 @@ end
 -- EVENT HISTORY TAB
 -- =========================================================================
 local function BuildEventHistoryList()
-    local list = mgr:CreateWidget(MakeId("CAIClm_"), "List", {})
+    local list = mgr:CreateWidget(MakeId("CAIClm_"), "Tree", {})
 
     local localPlayerID = Game.GetLocalPlayer()
     if localPlayerID < 0 then return list end
 
+    local historyMgr = ExposedMembers.CAI_WorldClimateHistoryManager
     local iCurrentTurn = Game.GetCurrentGameTurn()
     for i = iCurrentTurn, 0, -1 do
         local kEvent = GameRandomEvents.GetEventsForTurn(i)
@@ -827,10 +1024,21 @@ local function BuildEventHistoryList()
                         return JoinNonEmpty(parts, "[NEWLINE]")
                     end
 
+                    local record = (not capturedCC) and historyMgr
+                        and historyMgr:GetRecord(capturedEvent.StartLocation, capturedEvent.RandomEvent)
+                        or nil
+                    local hasDetail = record ~= nil and (#record.damagedTiles > 0
+                        or #record.fertilityTiles > 0 or #record.popLost > 0
+                        or #record.unitsLost > 0)
+
                     local eventWidget
-                    if historyPlotIndex then
+                    if hasDetail then
+                        eventWidget = MakeNode("climate:event:" .. capturedTurn,
+                            GetHistoryEventLabel, GetHistoryEventDetails)
+                        BuildEventDetailChildren(eventWidget, record, localPlayerID)
+                    elseif historyPlotIndex then
                         eventWidget = MakeActionLeaf("climate:event:" .. capturedTurn,
-                            "Button", GetHistoryEventLabel, GetHistoryEventDetails,
+                            "TreeItem", GetHistoryEventLabel, GetHistoryEventDetails,
                             historyPlotIndex)
                     else
                         eventWidget = MakeLeaf("climate:event:" .. capturedTurn,

@@ -796,5 +796,145 @@
     <Replace Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_SUBMIT" Language="fr_FR">
       <Text>Après la liste des propositions se trouvent les boutons de soumission et Passer en direct. Activez le bouton de soumission pour envoyer la proposition cochée. N'activez Passer que lorsque vous ne voulez soumettre aucune proposition. Si la session spéciale commence, son bulletin distinct exigera plus tard de chaque membre qu'il vote Soutenir ou S'opposer.</Text>
     </Replace>
+
+    <!-- World Builder screen names -->
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WORLD_BUILDER" Language="fr_FR">
+      <Text>Éditeur de monde</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WORLD_BUILDER_TOOLS" Language="fr_FR">
+      <Text>Outils de l'Éditeur de monde</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WB_MAP_EDITOR" Language="fr_FR">
+      <Text>Éditeur de cartes</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WB_PLAYER_EDITOR" Language="fr_FR">
+      <Text>Éditeur de joueur</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WB_PLOT_EDITOR" Language="fr_FR">
+      <Text>Éditeur de case</Text>
+    </Replace>
+
+    <!-- World Builder screen titles -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TITLE" Language="fr_FR">
+      <Text>Tutoriel : Éditeur de monde</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOLS_TITLE" Language="fr_FR">
+      <Text>Tutoriel : Outils de l'Éditeur de monde</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_MAP_EDITOR_TITLE" Language="fr_FR">
+      <Text>Tutoriel : Éditeur de cartes</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLAYER_EDITOR_TITLE" Language="fr_FR">
+      <Text>Tutoriel : Éditeur de joueur</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLOT_EDITOR_TITLE" Language="fr_FR">
+      <Text>Tutoriel : Éditeur de case</Text>
+    </Replace>
+
+    <!-- World Builder main interface -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_OVERVIEW" Language="fr_FR">
+      <Text>L'Éditeur de monde vous permet de modifier la carte directement. Vous êtes sur la carte elle-même ; déplacez le curseur de la carte comme d'habitude, et les modifications s'appliquent à la case sous le curseur.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLACE" Language="fr_FR">
+      <Text>Appuyez sur Entrée pour placer l'élément de l'outil sélectionné sur la case du curseur. Appuyez sur Suppr pour le retirer.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_LOCK" Language="fr_FR">
+      <Text>Appuyez sur M pour verrouiller le placement sur la case actuelle, afin que le curseur puisse se déplacer et inspecter d'autres cases pendant que les modifications continuent de s'appliquer sur la case verrouillée. Appuyez de nouveau sur M pour déverrouiller.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLOT_EDITOR" Language="fr_FR">
+      <Text>Appuyez sur F3 pour ouvrir l'Éditeur de case sur la case du curseur, ou sur la case verrouillée lorsqu'il y en a une, afin de modifier tout ce qui se trouve sur cette seule case.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_UNDO" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus Z pour annuler la dernière modification et Ctrl plus Y pour la rétablir.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_GOTO" Language="fr_FR">
+      <Text>Appuyez sur Ctrl plus G pour ouvrir une boîte qui amène le curseur aux coordonnées que vous tapez, absolues ou relatives au curseur.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_EDITORS" Language="fr_FR">
+      <Text>Appuyez sur F1 pour ouvrir l'Éditeur de cartes et sur F2 pour ouvrir l'Éditeur de joueur.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOLS_PANEL" Language="fr_FR">
+      <Text>Pour changer d'outil, appuyez sur Tab pour ouvrir le panneau d'outils, où vous pouvez parcourir tous les outils et leurs réglages.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOL_NUMBERS" Language="fr_FR">
+      <Text>Vous pouvez aussi sélectionner un outil directement sans ouvrir le panneau. Les touches 1 à 0 sélectionnent les dix premiers outils, et Maj plus 1 à Maj plus 6 sélectionnent les six restants.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLACEMENT" Language="fr_FR">
+      <Text>Le placement consiste à sélectionner un outil avec un type d'élément et des réglages comme la taille du pinceau, puis à appuyer sur Entrée pour l'appliquer à la case du curseur. Un pinceau plus grand couvre un anneau de cases autour du curseur plutôt qu'une seule case.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_QUICKNAV" Language="fr_FR">
+      <Text>Vous pouvez changer l'outil sélectionné et ajuster ses paramètres depuis la carte, sans ouvrir le panneau. Gauche et Droite se déplacent entre les paramètres ; le premier paramètre est l'outil lui-même, et les autres sont les réglages de l'outil sélectionné. Haut et Bas changent la valeur du paramètre ciblé, donc sur le premier paramètre ils changent l'outil sélectionné. Maintenir Maj avec ces touches saute au premier ou au dernier paramètre, ou à la première ou dernière valeur.</Text>
+    </Replace>
+
+    <!-- World Builder tools panel -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_OVERVIEW" Language="fr_FR">
+      <Text>Le panneau d'outils est l'endroit où vous choisissez quel outil est sélectionné et réglez ses options. Il s'ouvre avec le focus sur l'outil actuellement sélectionné.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_LIST" Language="fr_FR">
+      <Text>Le premier contrôle est une liste des seize outils de placement, comme terrain, caractéristiques, merveilles, rivières, falaises, ressources, villes, quartiers et aménagements. Se déplacer sur un outil le sélectionne. Appuyez sur Entrée sur un outil pour fermer le panneau et revenir à la carte.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_SETTINGS" Language="fr_FR">
+      <Text>Après la liste des outils se trouve une zone de réglages qui change selon l'outil sélectionné. Elle commence toujours par le choix du type d'élément, suivi des options supplémentaires de cet outil, qui peuvent inclure la taille du pinceau, la direction de la caractéristique, la quantité de ressource, le propriétaire, le joueur, le continent ou une case à cocher Pillé.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_DROPDOWNS" Language="fr_FR">
+      <Text>Chaque option est un menu déroulant ou un champ, si bien que parcourir les choix ne change jamais rien par accident. La modification n'est appliquée qu'en ouvrant un menu déroulant et en activant une option, ou en validant un champ.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_SCANNER" Language="fr_FR">
+      <Text>Tant que l'Éditeur de monde est actif, le scanner de monde gagne une catégorie Éditeur de monde. Elle comporte une section Positions de départ qui liste chaque position de départ placée, regroupée par type, et une section Propriété qui liste les cases possédées, regroupées par propriétaire.</Text>
+    </Replace>
+
+    <!-- World Builder Map Editor -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_OVERVIEW" Language="fr_FR">
+      <Text>L'Éditeur de cartes contient les réglages et le texte à l'échelle de la carte dans un contrôle à deux onglets : Général et Texte.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_GENERAL" Language="fr_FR">
+      <Text>L'onglet Général commence par une liste de métadonnées de la carte. Ses lignes sont l'ID de la carte, la largeur et la hauteur ; la ligne de l'ID est un bouton qui génère un nouvel ID quand vous l'activez, tandis que la largeur et la hauteur sont en lecture seule. Après la liste viennent une case à cocher Publier carte sous forme de mod et des champs d'édition pour les Règles, le Script carte, la Carte de référence et la Référence Alpha.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_TEXT" Language="fr_FR">
+      <Text>L'onglet Texte est l'éditeur de localisation de la carte. Il commence par un menu déroulant de langue, puis une liste d'entrées de texte, puis un bouton Ajouter sous la liste.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_TEXT_ACTIONS" Language="fr_FR">
+      <Text>Dans la liste des entrées, Entrée ouvre un éditeur avec une balise et une chaîne, et son bouton OK enregistre. Suppr retire l'entrée ciblée, sauf les quatre premières entrées système, qui ne peuvent pas être retirées. Le bouton Ajouter ouvre le même éditeur pour une nouvelle entrée.</Text>
+    </Replace>
+
+    <!-- World Builder Player Editor -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_OVERVIEW" Language="fr_FR">
+      <Text>L'Éditeur de joueur gère les joueurs de la partie. Il comporte une liste de joueurs suivie d'un contrôle à quatre onglets, et les onglets agissent toujours sur le joueur sélectionné dans la liste.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_LIST" Language="fr_FR">
+      <Text>La liste des joueurs comporte une ligne par joueur. Se déplacer sur un joueur le sélectionne et met à jour les onglets. Au bas de la liste se trouvent les lignes Ajouter joueur et Ajouter IA, et Suppr retire le joueur ciblé. Tab passe de la liste aux onglets.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_GENERAL" Language="fr_FR">
+      <Text>L'onglet Général règle les menus déroulants Civilisation, Dirigeant, Niveau de civilisation et Ère du joueur sélectionné, ainsi que les champs numériques Or et Foi. Certains champs restent désactivés tant que le joueur n'est pas initialisé, ou lorsqu'ils ne s'appliquent pas, comme l'or et la foi pour les Barbares.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_TECHS" Language="fr_FR">
+      <Text>L'onglet Technologies est une liste de cases à cocher de toutes les technologies. Cocher une case accorde cette technologie au joueur, et la décocher la retire.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CIVICS" Language="fr_FR">
+      <Text>L'onglet Doctrines est une liste de cases à cocher de toutes les doctrines, et fonctionne comme l'onglet Technologies.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES" Language="fr_FR">
+      <Text>L'onglet Villes est un arbre des villes du joueur sélectionné. Chaque ville se développe en une valeur Population et des sous-arbres Quartiers et Bâtiments.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES_DETAIL" Language="fr_FR">
+      <Text>Entrée sur Population ouvre un éditeur en ligne pour la taille de la ville. Sous Quartiers et Bâtiments, chaque élément indique son état actuel : ajouté, non ajouté ou pillé. Entrée sur un élément non ajouté l'ajoute, et Suppr le retire.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES_PLACEMENT" Language="fr_FR">
+      <Text>Ajouter une ville, ou un quartier qui nécessite une case, passe à la carte : l'éditeur se ferme et sélectionne l'outil correspondant pour que vous le placiez sur une case. Les bâtiments ne nécessitent pas de case et sont ajoutés directement. Le bouton Ajouter ville se trouve sous l'arbre des villes.</Text>
+    </Replace>
+
+    <!-- World Builder Plot Editor -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_OVERVIEW" Language="fr_FR">
+      <Text>L'Éditeur de case modifie tout ce qui se trouve sur une case, la case du curseur ou la case verrouillée sur laquelle vous l'avez ouvert. C'est une seule liste, et Échap la ferme et revient à la carte.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_ROWS" Language="fr_FR">
+      <Text>La liste contient, dans l'ordre : Terrain, Caractéristiques, Ressources, Aménagements, Quartiers, Routes, Positions de départ, Propriétaire et, dans Gathering Storm, Type de plaines.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_SUBMENUS" Language="fr_FR">
+      <Text>Terrain et Propriétaire sont de simples menus déroulants. Les autres sont des lignes développables dont l'intitulé résume la case : Caractéristiques ajoute une caractéristique et sa direction ; Ressources ajoute une ressource et, pour les ressources stratégiques, une quantité ; Aménagements, Quartiers et Routes ajoutent chacun leur type avec une case à cocher Pillé ; Positions de départ définit un type de position de départ et son joueur, dirigeant ou civilisation.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_COMMIT" Language="fr_FR">
+      <Text>Choisir une valeur l'écrit directement sur la case, de sorte que toutes les règles du jeu s'appliquent, comme un changement de terrain qui supprime une caractéristique invalide ou les corrections de côte. Annulez avec Ctrl plus Z si un changement provoque une cascade que vous ne vouliez pas.</Text>
+    </Replace>
   </LocalizedText>
 </GameData>

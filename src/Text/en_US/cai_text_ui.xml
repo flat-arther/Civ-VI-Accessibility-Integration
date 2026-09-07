@@ -564,6 +564,45 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_ACTIVE_LENS" Language="en_US">
       <Text>Active lens</Text>
     </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_WORLD_BUILDER" Language="en_US">
+      <Text>World Builder</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_WORLD_BUILDER" Language="en_US">
+      <Text>Only available in the World Builder. Contains placed starting positions, plot ownership zones, and river and cliff edges.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_STARTING_POSITIONS" Language="en_US">
+      <Text>Starting positions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_OWNERSHIP" Language="en_US">
+      <Text>Ownership</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_RIVERS_AND_CLIFFS" Language="en_US">
+      <Text>Rivers and cliffs</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_PLAYER" Language="en_US">
+      <Text>Player starts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_LEADER" Language="en_US">
+      <Text>Leader starts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_CIVILIZATION" Language="en_US">
+      <Text>Civilization starts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_RANDOM_MAJOR" Language="en_US">
+      <Text>Random player starts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_RANDOM_MINOR" Language="en_US">
+      <Text>Random city-state starts</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_WB_START_LABEL" Language="en_US">
+      <Text>{1_Type}: {2_Name}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_GROUP_RIVERS" Language="en_US">
+      <Text>Rivers</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_GROUP_CLIFFS" Language="en_US">
+      <Text>Cliffs</Text>
+    </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_RESOURCES" Language="en_US">
       <Text>Resources</Text>
     </Row>
@@ -2570,6 +2609,9 @@
     <Row Tag="LOC_CAI_PRODUCTION_CITY_YIELD" Language="en_US">
       <Text>{1_Yield}: {2_Amount}</Text>
     </Row>
+    <Row Tag="LOC_CAI_PRODUCTION_CATEGORY_REPAIR" Language="en_US">
+      <Text>Needs Repair</Text>
+    </Row>
     <Row Tag="LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS" Language="en_US">
       <Text>Districts</Text>
     </Row>
@@ -3654,6 +3696,9 @@
     <Row Tag="LOC_CAI_MOVEMENT_THIS_TURN" Language="en_US">
       <Text>This turn</Text>
     </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_NEXT_TURN" Language="en_US">
+      <Text>Next turn</Text>
+    </Row>
     <Row Tag="LOC_CAI_MOVEMENT_TURNS" Language="en_US">
       <Text>{1_Turns : plural 1?1 turn; other?{1_Turns} turns;}</Text>
     </Row>
@@ -3743,6 +3788,12 @@
     </Row>
     <Row Tag="LOC_CAI_MOVEMENT_RESULT_STOPPED_SHORT" Language="en_US">
       <Text>Stopped short</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_RESULT_QUEUED_TURNS" Language="en_US">
+      <Text>{1_Turns : plural 1?Movement queued, 1 turn till arrival; other?Movement queued, {1_Turns} turns till arrival;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_MOVEMENT_RESULT_QUEUED" Language="en_US">
+      <Text>Movement queued</Text>
     </Row>
     <Row Tag="LOC_CAI_INTERFACE_PRIMARY_ACTION" Language="en_US">
       <Text>Primary interface action</Text>
@@ -3869,6 +3920,12 @@
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TARGET_PLOTS" Language="en_US">
       <Text>Target tiles</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_WB_TARGET_VALID" Language="en_US">
+      <Text>Valid tiles</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_WB_TARGET_INVALID" Language="en_US">
+      <Text>Invalid tiles</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_WAYPOINT_TURN" Language="en_US">
       <Text>Waypoint, turn {1_Turn}</Text>
@@ -5456,6 +5513,57 @@
     </Row>
     <Row Tag="LOC_CAI_CLIMATE_AFFECTED_CITIES" Language="en_US">
       <Text>Affected cities: {1_Cities}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_OWNER_YOURS" Language="en_US">
+      <Text>Your</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_PILLAGED_IN_CITY" Language="en_US">
+      <Text>{1_Owner} {2_Object} in {3_City}: pillaged</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_PILLAGED" Language="en_US">
+      <Text>{1_Owner} {2_Object}: pillaged</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_DESTROYED_IN_CITY" Language="en_US">
+      <Text>{1_Owner} {2_Object} in {3_City}: destroyed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_DESTROYED" Language="en_US">
+      <Text>{1_Owner} {2_Object}: destroyed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_FEATURE_REMOVED_IN_CITY" Language="en_US">
+      <Text>{1_Feature} in {2_City}: removed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_FEATURE_REMOVED" Language="en_US">
+      <Text>{1_Feature}: removed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_UNIT_KILLED" Language="en_US">
+      <Text>{1_Owner} {2_Unit}: killed</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_UNIT_DAMAGED" Language="en_US">
+      <Text>{1_Owner} {2_Unit}: damaged, {3_HP} HP</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_UNITS_NODE" Language="en_US">
+      <Text>{1_Num} {1_Num: plural 1?unit; other?units;} affected</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_FERTILITY_NODE" Language="en_US">
+      <Text>{1_Num} {1_Num: plural 1?tile; other?tiles;} changed fertility</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_FERT_IN_CITY" Language="en_US">
+      <Text>{1_Terrain} in {2_City}: {3_Deltas}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_FERT" Language="en_US">
+      <Text>{1_Terrain}: {2_Deltas}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_YIELD_DELTA" Language="en_US">
+      <Text>{1_Delta} {2_Yield}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_FERT_AMOUNT" Language="en_US">
+      <Text>{1_Amount} fertility</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_POP_LOST_CITY" Language="en_US">
+      <Text>{1_City}: {2_Num} population lost</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_INSTANCE_TURN" Language="en_US">
+      <Text>{1_Text} (turn {2_Turn})</Text>
     </Row>
     <Row Tag="LOC_CAI_CLIMATE_TURN" Language="en_US">
       <Text>Turn {1_Turn}, {2_Date}</Text>
@@ -7726,6 +7834,9 @@
     <Row Tag="LOC_CAI_WB_OPEN_TOOLS" Language="en_US">
       <Text>Open World Builder tools</Text>
     </Row>
+    <Row Tag="LOC_CAI_WB_SELECT_TOOL" Language="en_US">
+      <Text>Select tool by number</Text>
+    </Row>
     <Row Tag="LOC_CAI_WB_PLACE" Language="en_US">
       <Text>Place at cursor</Text>
     </Row>
@@ -7734,6 +7845,21 @@
     </Row>
     <Row Tag="LOC_CAI_WB_DELETE" Language="en_US">
       <Text>Remove at cursor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_MAP_EDITOR" Language="en_US">
+      <Text>Open Map Editor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_PLAYER_EDITOR" Language="en_US">
+      <Text>Open Player Editor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_UNDO" Language="en_US">
+      <Text>Undo</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_REDO" Language="en_US">
+      <Text>Redo</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_PAUSE" Language="en_US">
+      <Text>Open menu</Text>
     </Row>
     <Row Tag="LOC_CAI_WB_DELETE_TEXT" Language="en_US">
       <Text>Delete text entry</Text>
@@ -7767,6 +7893,9 @@
     </Row>
     <Row Tag="LOC_CAI_WB_UNMARKED" Language="en_US">
       <Text>Placement unlocked</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_LOCKED_TILE" Language="en_US">
+      <Text>Locked placement tile</Text>
     </Row>
     <Row Tag="LOC_CAI_WB_FOOTPRINT_TILES" Language="en_US">
       <Text>{1_Number} tiles</Text>
@@ -7818,6 +7947,45 @@
     </Row>
     <Row Tag="LOC_CAI_WB_REVEAL_ALL" Language="en_US">
       <Text>Reveal all</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_DIRECTION" Language="en_US">
+      <Text>Direction</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_PARAM_TOOL" Language="en_US">
+      <Text>Tool</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_QN_PREV_PARAM" Language="en_US">
+      <Text>Previous parameter</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_QN_NEXT_PARAM" Language="en_US">
+      <Text>Next parameter</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_QN_VALUE_UP" Language="en_US">
+      <Text>Increase or next value</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_QN_VALUE_DOWN" Language="en_US">
+      <Text>Decrease or previous value</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_QN_FIRST_PARAM" Language="en_US">
+      <Text>First parameter</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_QN_LAST_PARAM" Language="en_US">
+      <Text>Last parameter</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_QN_FIRST_VALUE" Language="en_US">
+      <Text>First value</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_QN_LAST_VALUE" Language="en_US">
+      <Text>Last value</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_GOTO" Language="en_US">
+      <Text>Go to coordinates</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_GOTO_INVALID" Language="en_US">
+      <Text>Type a location as x then z separated by a space, such as 15 5. Type one number for x alone, or a space then a number for z alone. Put plus or minus before a number to move relative to the cursor, such as plus 2, or space minus 1.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_GOTO_OUT_OF_BOUNDS" Language="en_US">
+      <Text>Those coordinates are out of bounds.</Text>
     </Row>
   </LocalizedText>
 </GameData>

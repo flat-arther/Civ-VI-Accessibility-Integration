@@ -940,6 +940,46 @@ local function BuildPanel()
     CAI_Panel:AddChild(cloudCheck)
 end
 
+-- World Builder map loads rebuild the session mod set from the map file's
+-- ModDependencies, dropping CAI. Inject CAI's row into the map file just before
+-- the load consumes it, and stash the path so the in-game side (WorldInput_CAI
+-- OnLoadScreenClose) can strip it back out once loaded. WB maps go through two
+-- load paths: OnLoadYes -> Network.LoadGame (the main-menu "Load" flow, verified
+-- in-game) and OnActionButton -> SetImportFilename + HostGame (the TILED_MAP
+-- import branch). A WB map is identified by its .Civ6Map extension, so gate on
+-- that rather than g_GameType (which differs between the two paths).
+local function CAI_IsWBMapPath(path)
+	return type(path) == "string" and string.sub(path, -8) == ".Civ6Map"
+end
+
+local function CAI_InjectWBLoad(path)
+	if CAI_IsWBMapPath(path) then
+		WBMapDepInject(path)
+		ExposedMembers.CAI_WBInjectedMapPath = path
+	end
+end
+
+-- Main-menu "Load" flow: OnLoadYes runs Network.LoadGame on m_thisLoadFile.
+OnLoadYes = WrapFunc(OnLoadYes, function(orig)
+	if m_thisLoadFile and m_thisLoadFile.Path then
+		CAI_InjectWBLoad(m_thisLoadFile.Path)
+	end
+	orig()
+end)
+
+-- TILED_MAP import branch: OnActionButton runs SetImportFilename + HostGame
+-- directly (no OnLoadYes, no cancellable mod-compat dialog), so inject here only
+-- for that branch to avoid a stray row if the OnLoadYes flow's dialog is cancelled.
+OnActionButton = WrapFunc(OnActionButton, function(orig)
+	if g_GameType == SaveTypes.TILED_MAP and g_iSelectedFileEntry ~= -1 then
+		local entry = g_FileList and g_FileList[g_iSelectedFileEntry]
+		if entry and not entry.IsDirectory then
+			CAI_InjectWBLoad(entry.Path)
+		end
+	end
+	orig()
+end)
+
 RebuildFileList = WrapFunc(RebuildFileList, function(orig)
     orig()
 	if ContextPtr:IsVisible() then

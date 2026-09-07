@@ -6,11 +6,16 @@
 -- Set AlwaysEdit=true to enter edit mode on focus and never exit; pair with
 -- ReadOnly for navigable read-only viewers (used by StaticText-style hosts).
 
+-- NumericSymbols accepts digits plus the space, '+' and '-' symbols (e.g. for
+-- signed / relative coordinate entry). Callers in other Lua contexts cannot see
+-- this table (globals do not cross contexts), so they pass the numeric value 4
+-- directly to SetEditMode; keep the values stable.
 EditModes = {
     Normal = 0,
     LettersOnly = 1,
     NumbersOnly = 2,
     AlphanumericOnly = 3,
+    NumericSymbols = 4,
 }
 
 ---@class EditBoxWidget : ValueWidget
@@ -48,6 +53,7 @@ local function CharAllowed(mode, ch)
     if mode == EditModes.NumbersOnly then return ch:match("[0-9]") ~= nil end
     if mode == EditModes.LettersOnly then return ch:match("[%a]") ~= nil end
     if mode == EditModes.AlphanumericOnly then return ch:match("[%w]") ~= nil end
+    if mode == EditModes.NumericSymbols then return ch:match("[0-9%+%- ]") ~= nil end
     return true
 end
 

@@ -10,6 +10,24 @@ local m_readyForCombat = {
 
 local m_pendingMovementResult = nil
 local PENDING_MOVEMENT_WATCH_DELAY_FRAMES = 2
+-- Fallback ceiling (in active frames) for how long the "moved to" line waits for
+-- GetMovesRemaining to change from the pre-move value before it gives up and reads it
+-- live. The value normally changes far sooner; this only covers a zero-cost move where it
+-- never changes.
+local MOVEMENT_SETTLE_TIMEOUT_FRAMES = 120
+-- Once GetMovesRemaining has changed, wait this many active frames before speaking, and
+-- restart the wait whenever it changes again. Some moves commit movement in two steps --
+-- disembark shows the new land form's max, then drops to zero because disembarking ends
+-- the unit's turn -- so this lets the value settle before the last one is reported.
+local MOVEMENT_SETTLE_HOLD_FRAMES = 8
+-- When a move leaves the unit on its start plot, wait this many active frames before
+-- concluding it truly stayed put -- a "movement queued" result (unit could not reach even
+-- its first tile this turn). A real move announces immediately: UnitMoveComplete fires (or
+-- the plot changes) within a frame or two, resolving it before this window elapses. This
+-- window only needs to outlast that race, so it is kept short -- a genuinely stationary unit
+-- is the only thing that ever consumes it, and a long delay there both feels wrong and lets
+-- later speech cut off the announcement.
+local MOVEMENT_QUEUE_SETTLE_FRAMES = 12
 
 local function ParameterContainsValue(parameter, expectedValue)
     if parameter == nil then return false end
@@ -86,12 +104,23 @@ local function GetArrivalEstimate(unit, targetPlotId)
     return arrivalTurn ~= nil and math.max(0, arrivalTurn - 1) or nil
 end
 
-function MovementActions_CAI:BuildMovementResultSpeech(unit, reachedTarget, turnsToArrival)
+function MovementActions_CAI:BuildMovementResultSpeech(unit, reachedTarget, turnsToArrival, movesLeft, movedAny)
     if unit == nil then
         return nil
     end
 
     if reachedTarget ~= true then
+        -- The unit never left its start plot but has a queued path: it could not move at
+        -- all this turn (e.g. out of movement) and will travel over the coming turns.
+        -- Distinguish this from having moved and stopped part way.
+        if movedAny == false then
+            if turnsToArrival ~= nil and turnsToArrival > 0 then
+                return Locale.Lookup("LOC_CAI_MOVEMENT_RESULT_QUEUED_TURNS", turnsToArrival)
+            end
+
+            return Locale.Lookup("LOC_CAI_MOVEMENT_RESULT_QUEUED")
+        end
+
         if turnsToArrival ~= nil and turnsToArrival > 0 then
             return Locale.Lookup("LOC_CAI_MOVEMENT_RESULT_STOPPED_SHORT_TURNS", turnsToArrival)
         end
@@ -103,7 +132,9 @@ function MovementActions_CAI:BuildMovementResultSpeech(unit, reachedTarget, turn
         return Locale.Lookup("LOC_CAI_MOVEMENT_RESULT_STOPPED_SHORT_TURNS", turnsToArrival)
     end
 
-    local movesLeft = unit:GetMovesRemaining()
+    if movesLeft == nil then
+        movesLeft = unit:GetMovesRemaining()
+    end
     return Locale.Lookup("LOC_CAI_MOVEMENT_RESULT_MOVED_TO", movesLeft)
 end
 
@@ -123,8 +154,14 @@ function MovementActions_CAI:QueuePendingMovementResult(unit, targetPlotId)
         unitOwner = owner,
         unitId = unitId,
         startPlotId = unit:GetPlotId(),
+        startMovesRemaining = unit:GetMovesRemaining(),
         targetPlotId = targetPlotId,
         watchDelayFrames = PENDING_MOVEMENT_WATCH_DELAY_FRAMES,
+        settleTimeoutFrames = MOVEMENT_SETTLE_TIMEOUT_FRAMES,
+        queueSettleFrames = MOVEMENT_QUEUE_SETTLE_FRAMES,
+        settleHoldFrames = nil,
+        movesSettled = false,
+        lastMovesSeen = nil,
     }
     return true
 end
@@ -171,16 +208,69 @@ function MovementActions_CAI:ResolvePendingMovementResult(playerID, unitID, curr
         if queuedDestination ~= nil and queuedDestination ~= false and queuedDestination == targetPlotId then
             queuedToTarget = true
             turnsToArrival = GetArrivalEstimate(unit, targetPlotId)
+            -- Cache the queued observation. This result may not resolve until the queue-settle
+            -- window below elapses, and the live queued destination can clear before then (the
+            -- unit is deselected/auto-cycled after issuing the order), which would otherwise
+            -- lose the "movement queued" result entirely.
+            pending.sawQueuedToTarget = true
+            pending.cachedTurnsToArrival = turnsToArrival
         end
+    end
+
+    -- Fall back to the earlier queued observation if the live order has since cleared.
+    if not reachedTarget and not queuedToTarget and pending.sawQueuedToTarget then
+        queuedToTarget = true
+        turnsToArrival = pending.cachedTurnsToArrival
     end
 
     if not reachedTarget and not queuedToTarget then
         return false
     end
 
+    -- Did the unit actually leave its start plot this turn, or only queue a path? This is the
+    -- plain comparison: a move that advances at least one tile is "stopped short"; a move that
+    -- cannot reach even its first tile this turn (it costs more movement than the unit has and
+    -- is not eligible for the free-first-tile rule) stays put and is "movement queued".
+    local movedAny = currentPlotId ~= nil
+        and pending.startPlotId ~= nil
+        and currentPlotId ~= pending.startPlotId
+
+    -- A not-reached result still sitting on the start plot is ambiguous at this instant: it
+    -- may be a genuine queued order (no movement this turn) or a real move whose new position
+    -- has not committed yet, because the frame poll can run before the engine updates the
+    -- unit's plot. Wait out the queue-settle window before concluding it stayed put. A move
+    -- that does leave the start plot changes currentPlotId (or arrives via UnitMoveComplete)
+    -- and resolves immediately without waiting.
+    if not reachedTarget and not movedAny then
+        if pending.queueSettleFrames ~= nil and pending.queueSettleFrames > 0 then
+            return false
+        end
+    end
+
+    -- Only the "moved to, X movement left" line reports remaining movement. After a move
+    -- that triggers a blocking animation or popup (goody hut, natural wonder, embark or
+    -- disembark), the engine commits the movement-cost deduction only once the animation
+    -- settles, so a synchronous read here can return the stale pre-move value. The frame
+    -- poll (UpdatePendingMovementResult) watches GetMovesRemaining directly -- the same
+    -- value the unit panel shows -- and marks the result settled once it changes, holding
+    -- briefly so a multi-step commit lands on its final value. The value is always read
+    -- live at emit; movement-points events are not used because disembark fires one for
+    -- the land-form max without ever announcing the subsequent zeroing.
+    local reportsMovesRemaining = reachedTarget and (turnsToArrival == nil or turnsToArrival <= 0)
+    local movesLeft = nil
+    if reportsMovesRemaining then
+        local settled = pending.movesSettled
+            and (pending.settleHoldFrames == nil or pending.settleHoldFrames <= 0)
+        local timedOut = pending.settleTimeoutFrames ~= nil and pending.settleTimeoutFrames <= 0
+        if not settled and not timedOut then
+            return false
+        end
+        movesLeft = unit:GetMovesRemaining()
+    end
+
     m_pendingMovementResult = nil
     local plot = Map.GetPlotByIndex(targetPlotId)
-    local text = self:BuildMovementResultSpeech(unit, reachedTarget, turnsToArrival)
+    local text = self:BuildMovementResultSpeech(unit, reachedTarget, turnsToArrival, movesLeft, movedAny)
     if text ~= nil and text ~= "" then
         LuaEvents.CAIAppendToMessageBuffer(text, "movement", { x = plot:GetX(), y = plot:GetY() })
     end
@@ -219,6 +309,35 @@ function MovementActions_CAI:UpdatePendingMovementResult()
     if pending.watchDelayFrames ~= nil and pending.watchDelayFrames > 0 then
         pending.watchDelayFrames = pending.watchDelayFrames - 1
         return false
+    end
+
+    -- Count down the queue-settle window while the unit is still on its start plot. Once it
+    -- reaches zero, a still-unmoved unit is treated as a genuine queued order; a unit that
+    -- leaves the start plot before then resolves as a move instead.
+    if pending.queueSettleFrames ~= nil and pending.queueSettleFrames > 0
+        and unit:GetPlotId() == pending.startPlotId then
+        pending.queueSettleFrames = pending.queueSettleFrames - 1
+    end
+
+    -- Watch GetMovesRemaining directly (the value the unit panel shows). It stays at the
+    -- pre-move value while a blocking animation/popup defers the deduction, so wait for it
+    -- to change, then hold briefly -- restarted whenever it changes again -- so a
+    -- multi-step commit (e.g. disembark: land-form max, then zeroed as the turn ends)
+    -- settles on its final value before we speak.
+    local liveMoves = unit:GetMovesRemaining()
+    if not pending.movesSettled then
+        if pending.startMovesRemaining == nil or liveMoves ~= pending.startMovesRemaining then
+            pending.movesSettled = true
+            pending.lastMovesSeen = liveMoves
+            pending.settleHoldFrames = MOVEMENT_SETTLE_HOLD_FRAMES
+        elseif pending.settleTimeoutFrames ~= nil and pending.settleTimeoutFrames > 0 then
+            pending.settleTimeoutFrames = pending.settleTimeoutFrames - 1
+        end
+    elseif liveMoves ~= pending.lastMovesSeen then
+        pending.lastMovesSeen = liveMoves
+        pending.settleHoldFrames = MOVEMENT_SETTLE_HOLD_FRAMES
+    elseif pending.settleHoldFrames ~= nil and pending.settleHoldFrames > 0 then
+        pending.settleHoldFrames = pending.settleHoldFrames - 1
     end
 
     return self:ResolvePendingMovementResult(pending.unitOwner, pending.unitId, unit:GetPlotId())

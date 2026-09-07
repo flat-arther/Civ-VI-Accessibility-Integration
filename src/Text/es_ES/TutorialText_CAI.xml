@@ -796,5 +796,145 @@
     <Replace Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_SUBMIT" Language="es_ES">
       <Text>Después de la lista de propuestas están los botones de envío y Pasar. Activa el botón de envío para mandar la propuesta marcada. Activa Pasar solo cuando no quieras enviar ninguna propuesta. Si empieza la sesión especial, su votación aparte requerirá más tarde que todos los miembros voten Apoyar u Oponerse.</Text>
     </Replace>
+
+    <!-- World Builder screen names -->
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WORLD_BUILDER" Language="es_ES">
+      <Text>Editor de mundos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WORLD_BUILDER_TOOLS" Language="es_ES">
+      <Text>Herramientas del Editor de mundos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WB_MAP_EDITOR" Language="es_ES">
+      <Text>Editor de mapas</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WB_PLAYER_EDITOR" Language="es_ES">
+      <Text>Editor de jugador</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WB_PLOT_EDITOR" Language="es_ES">
+      <Text>Editor de casilla</Text>
+    </Replace>
+
+    <!-- World Builder screen titles -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TITLE" Language="es_ES">
+      <Text>Tutorial del Editor de mundos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOLS_TITLE" Language="es_ES">
+      <Text>Tutorial de las herramientas del Editor de mundos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_MAP_EDITOR_TITLE" Language="es_ES">
+      <Text>Tutorial del Editor de mapas</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLAYER_EDITOR_TITLE" Language="es_ES">
+      <Text>Tutorial del Editor de jugador</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLOT_EDITOR_TITLE" Language="es_ES">
+      <Text>Tutorial del Editor de casilla</Text>
+    </Replace>
+
+    <!-- World Builder main interface -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_OVERVIEW" Language="es_ES">
+      <Text>El Editor de mundos te permite editar el mapa directamente. Estás sobre el propio mapa; mueve el cursor del mapa como lo haces normalmente, y las ediciones se aplican a la casilla bajo el cursor.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLACE" Language="es_ES">
+      <Text>Pulsa Intro para colocar el elemento de la herramienta seleccionada en la casilla del cursor. Pulsa Suprimir para quitarlo.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_LOCK" Language="es_ES">
+      <Text>Pulsa M para fijar la colocación en la casilla actual, de modo que el cursor pueda desplazarse e inspeccionar otras casillas mientras las ediciones siguen aplicándose en la casilla fijada. Pulsa M de nuevo para liberarla.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLOT_EDITOR" Language="es_ES">
+      <Text>Pulsa F3 para abrir el Editor de casilla en la casilla del cursor, o en la casilla fijada cuando hay una, para cambiar todo lo de esa única casilla.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_UNDO" Language="es_ES">
+      <Text>Pulsa Control más Z para deshacer la última edición y Control más Y para rehacerla.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_GOTO" Language="es_ES">
+      <Text>Pulsa Control más G para abrir un cuadro que lleva el cursor a las coordenadas que escribas, ya sean absolutas o relativas al cursor.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_EDITORS" Language="es_ES">
+      <Text>Pulsa F1 para abrir el Editor de mapas y F2 para abrir el Editor de jugador.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOLS_PANEL" Language="es_ES">
+      <Text>Para cambiar de herramienta, pulsa Tab para abrir el panel de herramientas, donde puedes recorrer todas las herramientas y sus ajustes.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOL_NUMBERS" Language="es_ES">
+      <Text>También puedes seleccionar una herramienta directamente sin abrir el panel. Las teclas del 1 al 0 seleccionan las diez primeras herramientas, y Mayús más 1 hasta Mayús más 6 seleccionan las seis restantes.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLACEMENT" Language="es_ES">
+      <Text>La colocación funciona seleccionando una herramienta con un tipo de elemento y ajustes como el tamaño del pincel, y luego pulsando Intro para aplicarlo a la casilla del cursor. Un pincel más grande cubre un anillo de casillas alrededor del cursor en lugar de una sola casilla.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_QUICKNAV" Language="es_ES">
+      <Text>Puedes cambiar la herramienta seleccionada y ajustar sus parámetros desde el mapa, sin abrir el panel. Izquierda y Derecha se mueven entre los parámetros; el primer parámetro es la propia herramienta, y el resto son los ajustes de la herramienta seleccionada. Arriba y Abajo cambian el valor del parámetro con el foco, así que en el primer parámetro cambian la herramienta seleccionada. Mantener Mayús con estas teclas salta al primer o último parámetro, o al primer o último valor.</Text>
+    </Replace>
+
+    <!-- World Builder tools panel -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_OVERVIEW" Language="es_ES">
+      <Text>El panel de herramientas es donde eliges qué herramienta está seleccionada y ajustas sus opciones. Se abre con el foco en la herramienta que está seleccionada en ese momento.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_LIST" Language="es_ES">
+      <Text>El primer control es una lista de las dieciséis herramientas de colocación, como terreno, accidentes, maravillas, ríos, acantilados, recursos, ciudades, distritos y mejoras. Al moverte sobre una herramienta, esta queda seleccionada. Pulsa Intro en una herramienta para cerrar el panel y volver al mapa.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_SETTINGS" Language="es_ES">
+      <Text>Después de la lista de herramientas hay una zona de ajustes que cambia según la herramienta seleccionada. Siempre empieza por la elección del tipo de elemento, seguida de las opciones adicionales de esa herramienta, que pueden incluir el tamaño del pincel, la dirección del accidente, la cantidad de recurso, el propietario, el jugador, el continente o una casilla de verificación de saqueado.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_DROPDOWNS" Language="es_ES">
+      <Text>Cada opción es un desplegable o un campo, así que moverte por las opciones nunca cambia nada por accidente. Solo se aplica el cambio al abrir un desplegable y activar una opción, o al confirmar un campo.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_SCANNER" Language="es_ES">
+      <Text>Mientras el Editor de mundos está activo, el Escáner del mundo obtiene una categoría de Editor de mundos. Tiene una sección de Posiciones iniciales que enumera cada posición inicial colocada agrupada por tipo, y una sección de Propiedad que enumera las casillas en propiedad agrupadas por propietario.</Text>
+    </Replace>
+
+    <!-- World Builder Map Editor -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_OVERVIEW" Language="es_ES">
+      <Text>El Editor de mapas contiene los ajustes y el texto de todo el mapa en un control de dos pestañas: General y Texto.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_GENERAL" Language="es_ES">
+      <Text>La pestaña General empieza con una lista de metadatos del mapa. Sus filas son el identificador del mapa, el ancho y el alto; la fila del identificador es un botón que genera un nuevo identificador al pulsarlo, mientras que el ancho y el alto son de solo lectura. Después de la lista hay una casilla de verificación El paquete del mapa es un mod y campos de edición para el Reglamento, los Comandos del mapa, el Mapa de referencia y el Alfa de referencia.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_TEXT" Language="es_ES">
+      <Text>La pestaña Texto es el editor de localización del mapa. Empieza con un desplegable de idioma, luego una lista de entradas de texto, y después un botón Añadir bajo la lista.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_TEXT_ACTIONS" Language="es_ES">
+      <Text>En la lista de entradas, Intro abre un editor con una etiqueta y una cadena, y su botón Aceptar guarda. Suprimir quita la entrada con el foco, salvo las cuatro primeras entradas del sistema, que no se pueden quitar. El botón Añadir abre el mismo editor para una nueva entrada.</Text>
+    </Replace>
+
+    <!-- World Builder Player Editor -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_OVERVIEW" Language="es_ES">
+      <Text>El Editor de jugador gestiona los jugadores de la partida. Tiene una lista de jugadores seguida de un control de cuatro pestañas, y las pestañas siempre actúan sobre el jugador seleccionado en la lista.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_LIST" Language="es_ES">
+      <Text>La lista de jugadores tiene una fila por jugador. Al moverte sobre un jugador, este queda seleccionado y las pestañas se actualizan. Al final de la lista están las filas Añadir jugador y Añadir IA, y Suprimir quita el jugador con el foco. Tab pasa de la lista a las pestañas.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_GENERAL" Language="es_ES">
+      <Text>La pestaña General ajusta los desplegables de Civilización, Líder, Nivel de civilización y Época del jugador seleccionado, y los campos numéricos de Oro y Fe. Algunos campos permanecen desactivados hasta que el jugador está inicializado, o cuando no corresponden, como el oro y la fe para Terra Barbara.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_TECHS" Language="es_ES">
+      <Text>La pestaña Tecnologías es una lista de casillas de verificación de todas las tecnologías. Marcar una casilla concede esa tecnología al jugador, y desmarcarla la quita.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CIVICS" Language="es_ES">
+      <Text>La pestaña Principios es una lista de casillas de verificación de todos los principios, y funciona igual que la pestaña Tecnologías.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES" Language="es_ES">
+      <Text>La pestaña Ciudades es un árbol de las ciudades del jugador seleccionado. Cada ciudad se expande en un valor de Población y en subárboles de Distritos y Edificios.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES_DETAIL" Language="es_ES">
+      <Text>Intro en Población abre un editor en línea para el tamaño de la ciudad. Bajo Distritos y Edificios, cada elemento indica su estado actual: añadido, no añadido o saqueado. Intro en un elemento que no está añadido lo añade, y Suprimir lo quita.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES_PLACEMENT" Language="es_ES">
+      <Text>Añadir una ciudad, o un distrito que necesita una casilla, pasa al mapa: el editor se cierra y selecciona la herramienta correspondiente para que la coloques en una casilla. Los edificios no necesitan casilla y se añaden directamente. El botón Añadir ciudad está debajo del árbol de ciudades.</Text>
+    </Replace>
+
+    <!-- World Builder Plot Editor -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_OVERVIEW" Language="es_ES">
+      <Text>El Editor de casilla cambia todo lo de una casilla, la casilla del cursor o la casilla fijada en la que lo abriste. Es una sola lista, y Escape la cierra y vuelve al mapa.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_ROWS" Language="es_ES">
+      <Text>La lista contiene, en orden: Terreno, Accidentes, Recursos, Mejoras, Distritos, Rutas, Posiciones iniciales, Propietario y, en Gathering Storm, Tipo de bajío.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_SUBMENUS" Language="es_ES">
+      <Text>Terreno y Propietario son desplegables sencillos. Los demás son filas expandibles cuya etiqueta resume la casilla: Accidentes añade un accidente y su dirección; Recursos añade un recurso y, para los recursos estratégicos, una cantidad; Mejoras, Distritos y Rutas añaden cada uno su tipo con una casilla de verificación de saqueado; Posiciones iniciales fija un tipo de posición inicial y su jugador, líder o civilización.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_COMMIT" Language="es_ES">
+      <Text>Elegir un valor lo escribe directamente en la casilla, de modo que se aplican todas las reglas del juego, como que un cambio de terreno elimine un accidente no válido o los ajustes de costa. Deshaz con Control más Z si un cambio provoca una cascada que no querías.</Text>
+    </Replace>
   </LocalizedText>
 </GameData>

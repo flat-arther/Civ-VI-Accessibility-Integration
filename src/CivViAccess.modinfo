@@ -149,6 +149,7 @@
     <File>UI/inGame/ResearchChooser_CAI.lua</File>
     <File>UI/inGame/inGameHelpers_CAI.lua</File>
     <File>UI/inGame/CAIUnitNumbers.lua</File>
+    <File>UI/inGame/WorldClimateHistoryManager_CAI.lua</File>
     <File>UI/inGame/interfaceTargetHelpers_CAI.lua</File>
     <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>
     <File>UI/inGame/cityManagementInterfaceHelpers_CAI.lua</File>
@@ -166,6 +167,9 @@
     <File>UI/inGame/WorldBuilderLaunchBar_CAI.lua</File>
     <File>UI/inGame/WorldBuilderMapEditor_CAI.lua</File>
     <File>UI/inGame/WorldBuilderPlayerEditor_CAI.lua</File>
+    <File>UI/inGame/WorldBuilderPlotEditor_CAI.lua</File>
+    <File>UI/inGame/WorldBuilderMapTools_CAI.lua</File>
+    <File>UI/inGame/WorldBuilderVisManager_CAI.lua</File>
     <File>UI/inGame/Surveyor_CAI.lua</File>
     <File>UI/inGame/MessageBuffer_CAI.lua</File>
     <File>UI/inGame/RecommendationLogic_CAI.lua</File>
@@ -194,6 +198,7 @@
     <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_tutorial.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_mapTacs.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_worldBuilder.lua</File>
     <File>UI/inGame/CityStates_CAI.lua</File>
     <File>UI/inGame/ReligionScreen_CAI.lua</File>
     <File>UI/inGame/PantheonChooser_CAI.lua</File>
@@ -640,6 +645,7 @@
       <File>UI/inGame/GreatWorkShowcase_CAI.lua</File>
       <File>UI/inGame/inGameHelpers_CAI.lua</File>
       <File>UI/inGame/CAIUnitNumbers.lua</File>
+      <File>UI/inGame/WorldClimateHistoryManager_CAI.lua</File>
       <File>UI/inGame/ChatPanel_CAI.lua</File>
       <File>UI/inGame/interfaceTargetHelpers_CAI.lua</File>
       <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>
@@ -653,6 +659,7 @@
       <File>UI/inGame/MapSearchPanel_CAI.lua</File>
       <File>UI/inGame/MapPinListPanel_CAI.lua</File>
       <File>UI/inGame/MapPinPopup_CAI.lua</File>
+      <File>UI/inGame/WorldBuilderVisManager_CAI.lua</File>
       <File>UI/inGame/Surveyor_CAI.lua</File>
       <File>UI/inGame/MessageBuffer_CAI.lua</File>
       <File>UI/inGame/RecommendationLogic_CAI.lua</File>
@@ -681,6 +688,7 @@
       <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_tutorial.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_mapTacs.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_worldBuilder.lua</File>
       <File>UI/inGame/NaturalDisasterPopup_CAI.lua</File>
       <!-- Better Trade Screen variants are pulled by a runtime include() from
            the trade dispatchers, so they must be resolvable via ImportFiles. -->
@@ -812,6 +820,22 @@
         <LoadOrder>999999999</LoadOrder>
         <LuaContext>WorldBuilderPlayerEditor</LuaContext>
         <LuaReplace>UI/inGame/WorldBuilderPlayerEditor_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WorldBuilderPlotEditor">
+      <Properties>
+        <LoadOrder>999999999</LoadOrder>
+        <LuaContext>WorldBuilderPlotEditor</LuaContext>
+        <LuaReplace>UI/inGame/WorldBuilderPlotEditor_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WorldBuilderMapTools">
+      <Properties>
+        <LoadOrder>999999999</LoadOrder>
+        <LuaContext>WorldBuilderMapTools</LuaContext>
+        <LuaReplace>UI/inGame/WorldBuilderMapTools_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

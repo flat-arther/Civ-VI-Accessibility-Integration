@@ -796,5 +796,145 @@
     <Replace Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_SUBMIT" Language="pl_PL">
       <Text>Za listą propozycji znajdują się aktualne przyciski przesyłania i Pomiń. Aktywuj przycisk przesyłania, aby wysłać zaznaczoną propozycję. Aktywuj Pomiń tylko wtedy, gdy nie chcesz przesyłać żadnej propozycji. Jeśli sesja specjalna się rozpocznie, jej osobna karta do głosowania będzie później wymagać, aby każdy członek zagłosował za lub przeciw.</Text>
     </Replace>
+
+    <!-- World Builder screen names -->
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WORLD_BUILDER" Language="pl_PL">
+      <Text>Kreator świata</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WORLD_BUILDER_TOOLS" Language="pl_PL">
+      <Text>Narzędzia Kreatora świata</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WB_MAP_EDITOR" Language="pl_PL">
+      <Text>Edytor map</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WB_PLAYER_EDITOR" Language="pl_PL">
+      <Text>Edytor gracza</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WB_PLOT_EDITOR" Language="pl_PL">
+      <Text>Edytor pola</Text>
+    </Replace>
+
+    <!-- World Builder screen titles -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TITLE" Language="pl_PL">
+      <Text>Samouczek Kreatora świata</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOLS_TITLE" Language="pl_PL">
+      <Text>Samouczek narzędzi Kreatora świata</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_MAP_EDITOR_TITLE" Language="pl_PL">
+      <Text>Samouczek Edytora map</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLAYER_EDITOR_TITLE" Language="pl_PL">
+      <Text>Samouczek Edytora gracza</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLOT_EDITOR_TITLE" Language="pl_PL">
+      <Text>Samouczek Edytora pola</Text>
+    </Replace>
+
+    <!-- World Builder main interface -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_OVERVIEW" Language="pl_PL">
+      <Text>Kreator świata pozwala edytować mapę bezpośrednio. Jesteś na samej mapie; poruszaj kursorem mapy tak jak zwykle, a zmiany są nanoszone na pole pod kursorem.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLACE" Language="pl_PL">
+      <Text>Naciśnij Enter, aby umieścić element wybranego narzędzia na polu kursora. Naciśnij Delete, aby go usunąć.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_LOCK" Language="pl_PL">
+      <Text>Naciśnij M, aby zablokować umieszczanie na bieżącym polu, tak aby kursor mógł przemieszczać się i badać inne pola, podczas gdy zmiany wciąż trafiają na zablokowane pole. Naciśnij M ponownie, aby odblokować.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLOT_EDITOR" Language="pl_PL">
+      <Text>Naciśnij F3, aby otworzyć Edytor pola dla pola kursora, lub dla zablokowanego pola, gdy jest ustawione, aby zmienić wszystko na tym jednym polu.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_UNDO" Language="pl_PL">
+      <Text>Naciśnij Ctrl plus Z, aby cofnąć ostatnią zmianę, i Ctrl plus Y, aby ją powtórzyć.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_GOTO" Language="pl_PL">
+      <Text>Naciśnij Ctrl plus G, aby otworzyć pole, które przenosi kursor do wpisanych współrzędnych, bezwzględnych lub względnych wobec kursora.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_EDITORS" Language="pl_PL">
+      <Text>Naciśnij F1, aby otworzyć Edytor map, i F2, aby otworzyć Edytor gracza.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOLS_PANEL" Language="pl_PL">
+      <Text>Aby zmienić narzędzie, naciśnij Tab, aby otworzyć panel narzędzi, w którym możesz przeglądać wszystkie narzędzia i ich ustawienia.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOL_NUMBERS" Language="pl_PL">
+      <Text>Możesz też wybrać narzędzie bezpośrednio, bez otwierania panelu. Klawisze od 1 do 0 wybierają pierwszych dziesięć narzędzi, a Shift plus 1 do Shift plus 6 wybierają pozostałych sześć.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLACEMENT" Language="pl_PL">
+      <Text>Umieszczanie polega na wybraniu narzędzia wraz z typem elementu i ustawieniami, takimi jak rozmiar pędzla, a następnie naciśnięciu Enter, aby zastosować je na polu kursora. Większy pędzel obejmuje pierścień pól wokół kursora zamiast pojedynczego pola.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_QUICKNAV" Language="pl_PL">
+      <Text>Możesz zmienić wybrane narzędzie i dostosować jego parametry z poziomu mapy, bez otwierania panelu. W lewo i W prawo przechodzą między parametrami; pierwszy parametr to samo narzędzie, a pozostałe to ustawienia wybranego narzędzia. W górę i W dół zmieniają wartość aktywnego parametru, więc na pierwszym parametrze zmieniają wybrane narzędzie. Przytrzymanie Shift z tymi klawiszami przeskakuje do pierwszego lub ostatniego parametru albo do pierwszej lub ostatniej wartości.</Text>
+    </Replace>
+
+    <!-- World Builder tools panel -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_OVERVIEW" Language="pl_PL">
+      <Text>Panel narzędzi to miejsce, w którym wybierasz, które narzędzie jest wybrane, i ustawiasz jego opcje. Otwiera się z fokusem na narzędziu aktualnie wybranym.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_LIST" Language="pl_PL">
+      <Text>Pierwszą kontrolką jest lista szesnastu narzędzi umieszczania, takich jak teren, cechy, cuda, rzeki, klify, zasoby, miasta, dzielnice i ulepszenia. Przejście na narzędzie wybiera je. Naciśnij Enter na narzędziu, aby zamknąć panel i wrócić do mapy.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_SETTINGS" Language="pl_PL">
+      <Text>Po liście narzędzi znajduje się obszar ustawień, który zmienia się w zależności od wybranego narzędzia. Zawsze zaczyna się od wyboru typu elementu, po którym następują dodatkowe opcje danego narzędzia, mogące obejmować rozmiar pędzla, kierunek cechy, ilość surowca, właściciela, gracza, kontynent lub pole wyboru Splądrowane.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_DROPDOWNS" Language="pl_PL">
+      <Text>Każda opcja to lista rozwijana lub pole, więc przechodzenie między wyborami nigdy niczego nie zmienia przez przypadek. Zmiana jest stosowana tylko po otwarciu listy rozwijanej i aktywowaniu opcji lub po zatwierdzeniu pola.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_SCANNER" Language="pl_PL">
+      <Text>Gdy Kreator świata jest aktywny, Skaner świata zyskuje kategorię Kreatora świata. Ma ona sekcję Pozycje startowe, która wymienia każdą umieszczoną pozycję startową pogrupowaną według typu, oraz sekcję Własność, która wymienia posiadane pola pogrupowane według właściciela.</Text>
+    </Replace>
+
+    <!-- World Builder Map Editor -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_OVERVIEW" Language="pl_PL">
+      <Text>Edytor map zawiera ustawienia i tekst dla całej mapy w kontrolce z dwiema kartami: Ogólne i Tekst.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_GENERAL" Language="pl_PL">
+      <Text>Karta Ogólne zaczyna się listą metadanych mapy. Jej wierszami są ID mapy, szerokość i wysokość; wiersz ID mapy to przycisk, który po naciśnięciu generuje nowe ID, natomiast szerokość i wysokość są tylko do odczytu. Po liście znajdują się pole wyboru Spakuj mapę jako modyfikację oraz pola edycji dla Zestawu zasad, Skryptu mapy, Mapy odniesienia i Alfy odniesienia.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_TEXT" Language="pl_PL">
+      <Text>Karta Tekst to edytor lokalizacji mapy. Zaczyna się listą rozwijaną języka, potem listą wpisów tekstowych, a następnie przyciskiem Dodaj pod listą.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_TEXT_ACTIONS" Language="pl_PL">
+      <Text>Na liście wpisów Enter otwiera edytor ze znacznikiem i ciągiem tekstowym, a jego przycisk OK zapisuje. Delete usuwa aktywny wpis, z wyjątkiem pierwszych czterech wpisów systemowych, których nie można usunąć. Przycisk Dodaj otwiera ten sam edytor dla nowego wpisu.</Text>
+    </Replace>
+
+    <!-- World Builder Player Editor -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_OVERVIEW" Language="pl_PL">
+      <Text>Edytor gracza zarządza graczami w rozgrywce. Ma listę graczy, po której następuje kontrolka z czterema kartami, a karty zawsze działają na graczu wybranym na liście.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_LIST" Language="pl_PL">
+      <Text>Lista graczy ma jeden wiersz na gracza. Przejście na gracza wybiera go i aktualizuje karty. Na dole listy znajdują się wiersze Dodaj gracza i Dodaj SI, a Delete usuwa aktywnego gracza. Tab przechodzi z listy na karty.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_GENERAL" Language="pl_PL">
+      <Text>Karta Ogólne ustawia listy rozwijane Cywilizacja, Przywódca, Poziom cywilizacji i Epoka wybranego gracza oraz pola liczbowe Złoto i Wiara. Niektóre pola pozostają wyłączone, dopóki gracz nie zostanie zainicjowany, lub gdy nie mają zastosowania, jak złoto i wiara dla Barbarzyńców.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_TECHS" Language="pl_PL">
+      <Text>Karta Technologie to lista pól wyboru wszystkich technologii. Zaznaczenie pola przyznaje graczowi tę technologię, a odznaczenie ją odbiera.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CIVICS" Language="pl_PL">
+      <Text>Karta Idee to lista pól wyboru wszystkich idei, działająca tak samo jak karta Technologie.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES" Language="pl_PL">
+      <Text>Karta Miasta to drzewo miast wybranego gracza. Każde miasto rozwija się w wartość Populacja oraz poddrzewa Dzielnice i Budowle.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES_DETAIL" Language="pl_PL">
+      <Text>Enter na Populacji otwiera edytor w miejscu dla wielkości miasta. W Dzielnicach i Budowlach każdy element pokazuje swój bieżący stan: dodany, niedodany lub splądrowany. Enter na elemencie, który nie jest dodany, dodaje go, a Delete go usuwa.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES_PLACEMENT" Language="pl_PL">
+      <Text>Dodanie miasta lub dzielnicy, która potrzebuje pola, przechodzi do mapy: edytor zamyka się i wybiera odpowiednie narzędzie, abyś umieścił je na polu. Budowle nie potrzebują pola i są dodawane bezpośrednio. Przycisk Dodaj miasto znajduje się pod drzewem miast.</Text>
+    </Replace>
+
+    <!-- World Builder Plot Editor -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_OVERVIEW" Language="pl_PL">
+      <Text>Edytor pola zmienia wszystko na jednym polu, polu kursora lub zablokowanym polu, na którym go otworzyłeś. To pojedyncza lista, a Escape zamyka ją i wraca do mapy.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_ROWS" Language="pl_PL">
+      <Text>Lista zawiera, w kolejności: Teren, Cechy, Zasoby, Ulepszenia, Dzielnice, Szlaki, Pozycje startowe, Właściciel oraz, w Gathering Storm, Rodzaj niziny.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_SUBMENUS" Language="pl_PL">
+      <Text>Teren i Właściciel to proste listy rozwijane. Pozostałe to rozwijane wiersze, których etykieta podsumowuje pole: Cechy dodają cechę i jej kierunek; Zasoby dodają surowiec, a dla surowców strategicznych ilość; Ulepszenia, Dzielnice i Szlaki dodają swój typ wraz z polem wyboru Splądrowane; Pozycje startowe ustawiają typ pozycji startowej oraz jej gracza, przywódcę lub cywilizację.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_COMMIT" Language="pl_PL">
+      <Text>Wybór wartości zapisuje ją bezpośrednio na polu, więc uruchamiają się wszystkie reguły gry, takie jak usunięcie niepoprawnej cechy przy zmianie terenu lub poprawki wybrzeża. Cofnij za pomocą Ctrl plus Z, jeśli zmiana wywoła kaskadę, której nie chciałeś.</Text>
+    </Replace>
   </LocalizedText>
 </GameData>

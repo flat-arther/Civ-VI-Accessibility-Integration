@@ -564,6 +564,45 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_ACTIVE_LENS" Language="zh_Hans_CN">
       <Text>当前滤镜</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_WORLD_BUILDER" Language="zh_Hans_CN">
+      <Text>地图生成器</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_WORLD_BUILDER" Language="zh_Hans_CN">
+      <Text>仅在地图生成器中可用。包含已放置的起始位置、地块归属区域，以及河流和悬崖边缘。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_STARTING_POSITIONS" Language="zh_Hans_CN">
+      <Text>起始位置</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_OWNERSHIP" Language="zh_Hans_CN">
+      <Text>归属</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_RIVERS_AND_CLIFFS" Language="zh_Hans_CN">
+      <Text>河流与悬崖</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_PLAYER" Language="zh_Hans_CN">
+      <Text>玩家起始</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_LEADER" Language="zh_Hans_CN">
+      <Text>领袖起始</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_CIVILIZATION" Language="zh_Hans_CN">
+      <Text>文明起始</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_RANDOM_MAJOR" Language="zh_Hans_CN">
+      <Text>随机玩家起始</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_RANDOM_MINOR" Language="zh_Hans_CN">
+      <Text>随机城邦起始</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_LABEL" Language="zh_Hans_CN">
+      <Text>{1_Type}：{2_Name}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_GROUP_RIVERS" Language="zh_Hans_CN">
+      <Text>河流</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_GROUP_CLIFFS" Language="zh_Hans_CN">
+      <Text>悬崖</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_RESOURCES" Language="zh_Hans_CN">
       <Text>资源</Text>
     </Replace>
@@ -2534,6 +2573,9 @@
     <Replace Tag="LOC_CAI_PRODUCTION_CITY_YIELD" Language="zh_Hans_CN">
       <Text>{1_Yield}：{2_Amount}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_PRODUCTION_CATEGORY_REPAIR" Language="zh_Hans_CN">
+      <Text>需要修复</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS" Language="zh_Hans_CN">
       <Text>区域</Text>
     </Replace>
@@ -3618,6 +3660,9 @@
     <Replace Tag="LOC_CAI_MOVEMENT_THIS_TURN" Language="zh_Hans_CN">
       <Text>本回合</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_MOVEMENT_NEXT_TURN" Language="zh_Hans_CN">
+      <Text>下回合</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_MOVEMENT_TURNS" Language="zh_Hans_CN">
       <Text>{1_Turns : plural 1?1回合; other?{1_Turns}回合;}</Text>
     </Replace>
@@ -3707,6 +3752,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_MOVEMENT_RESULT_STOPPED_SHORT" Language="zh_Hans_CN">
       <Text>中途停止</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOVEMENT_RESULT_QUEUED_TURNS" Language="zh_Hans_CN">
+      <Text>{1_Turns : plural 1?移动已排队，距离抵达还有1回合; other?移动已排队，距离抵达还有{1_Turns}回合;}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOVEMENT_RESULT_QUEUED" Language="zh_Hans_CN">
+      <Text>移动已排队</Text>
     </Replace>
     <Replace Tag="LOC_CAI_INTERFACE_PRIMARY_ACTION" Language="zh_Hans_CN">
       <Text>主要界面行动</Text>
@@ -3833,6 +3884,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TARGET_PLOTS" Language="zh_Hans_CN">
       <Text>目标单元格</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_TARGET_VALID" Language="zh_Hans_CN">
+      <Text>有效单元格</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_TARGET_INVALID" Language="zh_Hans_CN">
+      <Text>无效单元格</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_WAYPOINT_TURN" Language="zh_Hans_CN">
       <Text>路径点，第{1_Turn}回合</Text>
@@ -5417,6 +5474,57 @@
     </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_AFFECTED_CITIES" Language="zh_Hans_CN">
       <Text>受影响城市：{1_Cities}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_OWNER_YOURS" Language="zh_Hans_CN">
+      <Text>你的</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_PILLAGED_IN_CITY" Language="zh_Hans_CN">
+      <Text>{1_Owner}{2_Object}（{3_City}）：已被劫掠</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_PILLAGED" Language="zh_Hans_CN">
+      <Text>{1_Owner}{2_Object}：已被劫掠</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_DESTROYED_IN_CITY" Language="zh_Hans_CN">
+      <Text>{1_Owner}{2_Object}（{3_City}）：已被摧毁</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_DESTROYED" Language="zh_Hans_CN">
+      <Text>{1_Owner}{2_Object}：已被摧毁</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FEATURE_REMOVED_IN_CITY" Language="zh_Hans_CN">
+      <Text>{1_Feature}（{2_City}）：已移除</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FEATURE_REMOVED" Language="zh_Hans_CN">
+      <Text>{1_Feature}：已移除</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_UNIT_KILLED" Language="zh_Hans_CN">
+      <Text>{1_Owner}{2_Unit}：阵亡</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_UNIT_DAMAGED" Language="zh_Hans_CN">
+      <Text>{1_Owner}{2_Unit}：受损，剩余生命 {3_HP}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_UNITS_NODE" Language="zh_Hans_CN">
+      <Text>{1_Num} 个单位受影响</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERTILITY_NODE" Language="zh_Hans_CN">
+      <Text>{1_Num} 个地块肥沃度改变</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERT_IN_CITY" Language="zh_Hans_CN">
+      <Text>{1_Terrain}（{2_City}）：{3_Deltas}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERT" Language="zh_Hans_CN">
+      <Text>{1_Terrain}：{2_Deltas}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_YIELD_DELTA" Language="zh_Hans_CN">
+      <Text>{1_Delta} {2_Yield}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERT_AMOUNT" Language="zh_Hans_CN">
+      <Text>{1_Amount} 肥沃度</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_POP_LOST_CITY" Language="zh_Hans_CN">
+      <Text>{1_City}：损失 {2_Num} 人口</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_INSTANCE_TURN" Language="zh_Hans_CN">
+      <Text>{1_Text}（第 {2_Turn} 回合）</Text>
     </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_TURN" Language="zh_Hans_CN">
       <Text>第{1_Turn}回合，{2_Date}</Text>
@@ -7723,6 +7831,9 @@
     <Replace Tag="LOC_CAI_WB_OPEN_TOOLS" Language="zh_Hans_CN">
       <Text>打开世界构建器工具</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WB_SELECT_TOOL" Language="zh_Hans_CN">
+      <Text>按数字选择工具</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WB_PLACE" Language="zh_Hans_CN">
       <Text>在光标处放置</Text>
     </Replace>
@@ -7731,6 +7842,21 @@
     </Replace>
     <Replace Tag="LOC_CAI_WB_DELETE" Language="zh_Hans_CN">
       <Text>在光标处移除</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MAP_EDITOR" Language="zh_Hans_CN">
+      <Text>打开地图编辑器</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PLAYER_EDITOR" Language="zh_Hans_CN">
+      <Text>打开玩家编辑器</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_UNDO" Language="zh_Hans_CN">
+      <Text>取消</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_REDO" Language="zh_Hans_CN">
+      <Text>恢复</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PAUSE" Language="zh_Hans_CN">
+      <Text>打开菜单</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WB_DELETE_TEXT" Language="zh_Hans_CN">
       <Text>删除文本条目</Text>
@@ -7764,6 +7890,9 @@
     </Replace>
     <Replace Tag="LOC_CAI_WB_UNMARKED" Language="zh_Hans_CN">
       <Text>放置已解锁</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_LOCKED_TILE" Language="zh_Hans_CN">
+      <Text>已锁定的放置地块</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WB_FOOTPRINT_TILES" Language="zh_Hans_CN">
       <Text>{1_Number} 个地块</Text>
@@ -7812,6 +7941,45 @@
     </Replace>
     <Replace Tag="LOC_CAI_WB_CLEAR" Language="zh_Hans_CN">
       <Text>清除所有资源</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_DIRECTION" Language="zh_Hans_CN">
+      <Text>方向</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PARAM_TOOL" Language="zh_Hans_CN">
+      <Text>工具</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_PREV_PARAM" Language="zh_Hans_CN">
+      <Text>上一个参数</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_NEXT_PARAM" Language="zh_Hans_CN">
+      <Text>下一个参数</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_VALUE_UP" Language="zh_Hans_CN">
+      <Text>增大或下一个值</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_VALUE_DOWN" Language="zh_Hans_CN">
+      <Text>减小或上一个值</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_FIRST_PARAM" Language="zh_Hans_CN">
+      <Text>第一个参数</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_LAST_PARAM" Language="zh_Hans_CN">
+      <Text>最后一个参数</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_FIRST_VALUE" Language="zh_Hans_CN">
+      <Text>第一个值</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_LAST_VALUE" Language="zh_Hans_CN">
+      <Text>最后一个值</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GOTO" Language="zh_Hans_CN">
+      <Text>跳转到坐标</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GOTO_INVALID" Language="zh_Hans_CN">
+      <Text>输入位置，格式为 x 和 z 用空格分隔，例如 15 5。只输入一个数字表示 x，或先按空格再输入数字表示仅设置 z。在数字前加加号或减号表示相对光标移动，例如 加号2，或 空格 减号1。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GOTO_OUT_OF_BOUNDS" Language="zh_Hans_CN">
+      <Text>这些坐标超出了地图范围。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WB_REVEAL_ALL" Language="zh_Hans_CN">
       <Text>显示全部</Text>

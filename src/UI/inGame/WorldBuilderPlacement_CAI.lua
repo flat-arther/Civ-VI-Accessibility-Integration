@@ -86,6 +86,20 @@ local ROTATION_STATES = {
     "LOC_WORLDBUILDER_DIRECTION_NORTHWEST",
 }
 
+-- Edge directions for the Rivers / Cliffs tools, ordered to match DirectionTypes
+-- (0 = NORTHEAST .. 5 = NORTHWEST) so the index doubles as the edge value passed
+-- to EditRiver / EditCliff. Vanilla picks the edge from the mouse-nearest plot
+-- edge; CAI has no cursor edge, so the direction is an explicit parameter here
+-- and is fed to placement through info.GetWorldBuilderEdgeDirection (below).
+local DIRECTION_TAGS = {
+    "LOC_WORLDBUILDER_DIRECTION_NORTHEAST",
+    "LOC_WORLDBUILDER_DIRECTION_EAST",
+    "LOC_WORLDBUILDER_DIRECTION_SOUTHEAST",
+    "LOC_WORLDBUILDER_DIRECTION_SOUTHWEST",
+    "LOC_WORLDBUILDER_DIRECTION_WEST",
+    "LOC_WORLDBUILDER_DIRECTION_NORTHWEST",
+}
+
 -- ---------------------------------------------------------------------------
 -- State
 -- ---------------------------------------------------------------------------
@@ -96,6 +110,8 @@ local m_settingsWidgets  = {}    -- current settings child widgets (for teardown
 local m_capture          = {}    -- per-grid-tool captured items: { idx, label, select, uiItem }
 local m_brushIndex       = 1     -- CAI-tracked brush size index into BRUSH_SIZES
 local m_rotationIndex    = 0     -- CAI-tracked rotation index into ROTATION_STATES (0-based; 0 = Auto-fit)
+local m_edgeIndex        = 0     -- CAI-tracked Rivers/Cliffs edge direction (0-based DirectionTypes; 0 = NE)
+local m_qnIndex          = 1     -- Quick-nav parameter cursor (1-based; 1 = the tool parameter)
 
 -- ===========================================================================
 --  Vanilla data re-derivation (for the pulldown-backed tools). Order mirrors
@@ -253,6 +269,26 @@ local function BuildRotationField()
     return dd
 end
 
+-- Edge-direction dropdown for the Rivers / Cliffs tools. Purely CAI state
+-- (m_edgeIndex); vanilla has no direction control. The chosen edge is read at
+-- placement time through info.GetWorldBuilderEdgeDirection.
+local function BuildDirectionField()
+    local options = {}
+    for i, tag in ipairs(DIRECTION_TAGS) do
+        options[i] = { label = Locale.Lookup(tag), value = i }
+    end
+    local dd = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWB_Direction"), "Dropdown", {
+        Label = function() return Locale.Lookup("LOC_CAI_WB_DIRECTION") end,
+    })
+    dd:SetOptions(options)
+    dd:SetSelectedIndex(m_edgeIndex + 1, true)
+    dd:On("value_changed", function(_, value)
+        m_edgeIndex = value - 1
+    end)
+    TrackSettingsWidget(dd)
+    return dd
+end
+
 -- Strategic resource amount. Hidden by vanilla for non-strategic resources; the
 -- hidden predicate lets navigation skip it live.
 local function BuildAmountField()
@@ -357,11 +393,22 @@ local function RebuildSettings()
         BuildPulldownDropdown(toolID, "LOC_CAI_WB_OWNER", DeriveCities(), Controls.OwnerPullDown)
     elseif toolID == WorldBuilderModes.SET_VISIBILITY then
         BuildPulldownDropdown(toolID, "LOC_CAI_WB_PLAYER", DerivePlayers(true), Controls.VisibilityPullDown)
-        -- Drives the vanilla Reveal All button; the revealed state is then read
-        -- live from the map database (RevealedPlots), so nothing to mirror here.
-        BuildButtonField("LOC_CAI_WB_REVEAL_ALL", "VisibilityRevealAllButton")
+        -- Drives the vanilla Reveal All button; that edit only reaches the map
+        -- database on save, so mirror the whole-map reveal into the visibility
+        -- model for the selected player so live readout updates immediately.
+        BuildButtonField("LOC_CAI_WB_REVEAL_ALL", "VisibilityRevealAllButton", function()
+            local visMgr = ExposedMembers.CAI_WBVisManager
+            if visMgr ~= nil and visMgr.SetRevealedAll ~= nil then
+                local visPlayer = info.GetWorldBuilderVisibilityPlayer()
+                if visPlayer ~= nil then
+                    visMgr.SetRevealedAll(visPlayer, true)
+                end
+            end
+        end)
+    elseif toolID == WorldBuilderModes.PLACE_RIVERS or toolID == WorldBuilderModes.PLACE_CLIFFS then
+        -- CAI-only direction parameter (vanilla uses the mouse-nearest edge).
+        BuildDirectionField()
     end
-    -- Rivers and Cliffs are edge tools: no item type and no parameters here.
 end
 
 -- ===========================================================================
@@ -446,11 +493,379 @@ local function BuildToolParamString(toolID)
         add(PulldownLabel(Controls.OwnerPullDown))
     elseif toolID == WorldBuilderModes.SET_VISIBILITY then
         add(PulldownLabel(Controls.VisibilityPullDown))
+    elseif toolID == WorldBuilderModes.PLACE_RIVERS or toolID == WorldBuilderModes.PLACE_CLIFFS then
+        add(Locale.Lookup(DIRECTION_TAGS[m_edgeIndex + 1]))
     end
-    -- Rivers and Cliffs are edge tools with no item type or parameters.
 
     if #parts == 0 then return nil end
     return table.concat(parts, ", ")
+end
+
+-- ===========================================================================
+--  Quick nav: arrow-key parameter cycling on the World Builder interface
+-- ===========================================================================
+-- An ambient, panel-free way to change the current tool and its parameters
+-- straight from the map (the interface widget in WorldInput_CAI binds the arrow
+-- keys and forwards them here as CAIWorldBuilderQuickNav). It shares all of its
+-- state and vanilla drivers with the pushed tools panel above, so the two stay
+-- in sync: Left / Right move between parameters (parameter 1 is always the tool,
+-- 2..N are the armed tool's parameters), Up / Down change the focused
+-- parameter's value, and Shift + arrow jumps to the first / last parameter or
+-- list value. Speech is one line: switching a parameter speaks name + value,
+-- changing a value speaks the new value.
+
+-- Live tool id from the vanilla placement pulldown (the authoritative source).
+local function CurrentToolID()
+    local mode = Controls.PlacementPullDown:GetSelectedEntry()
+    return mode ~= nil and mode.ID or nil
+end
+
+-- Localized name of a tool id, from the CAI_TOOLS table.
+local function ToolName(toolID)
+    for _, tool in ipairs(CAI_TOOLS) do
+        if tool.ID == toolID then return Locale.Lookup(tool.Text) end
+    end
+    return nil
+end
+
+-- Position of the currently armed tool within CAI_TOOLS (1-based; 1 on miss).
+local function CurrentToolPos()
+    local toolID = CurrentToolID()
+    for i, tool in ipairs(CAI_TOOLS) do
+        if tool.ID == toolID then return i end
+    end
+    return 1
+end
+
+-- Position of the captured grid item vanilla currently has selected (its Active
+-- overlay is shown), or nil when none is highlighted.
+local function GetSelectedTypePos()
+    for i, item in ipairs(m_capture) do
+        local ui = item.uiItem
+        if ui ~= nil and ui.Active ~= nil and not ui.Active:IsHidden() then
+            return i
+        end
+    end
+    return nil
+end
+
+-- True when a +/-1 step at 1-based position `old` in a ring of `n` crosses an
+-- end (used to fire the wrap sound). Callers with a 0-based index pass old + 1.
+local function StepWraps(old, delta, n)
+    if n <= 1 then return false end
+    local new = ((old - 1 + delta) % n) + 1
+    return (delta > 0 and new < old) or (delta < 0 and new > old)
+end
+
+-- Play the framework's list-wrap sound (the same one the manager plays for a
+-- navigation_wrap). mgr is the shared singleton, so this works cross-context.
+local function PlayWrapSound()
+    if mgr ~= nil and mgr.HandleNavigationWrap ~= nil then
+        mgr:HandleNavigationWrap()
+    end
+end
+
+-- ---------------------------------------------------------------------------
+-- Parameter descriptors. Each is { name, value, cycle(delta), jump(toLast)?,
+-- nameSep?, listLike? }: name/value return localized strings; cycle steps the
+-- value by delta and returns true when it wrapped past an end; jump (list-like
+-- params only) goes to the first / last value (Shift + Up / Down). listLike
+-- marks list / dropdown parameters, where Down advances and Up goes back (to
+-- match the tools panel's list navigation); on amount / checkbox parameters Up
+-- increases / turns on and Down decreases / turns off instead. nameSep is the
+-- separator spoken between the name and value on a parameter switch (": " for
+-- ordinary params; the tool parameter uses ", " because its value already reads
+-- "<tool>: <params>").
+-- ---------------------------------------------------------------------------
+
+local function ToolParam()
+    return {
+        listLike = true,
+        nameSep = ", ",
+        name = function() return Locale.Lookup("LOC_CAI_WB_PARAM_TOOL") end,
+        value = function()
+            local toolID = CurrentToolID()
+            local name = ToolName(toolID) or ""
+            local params = BuildToolParamString(toolID)
+            if params ~= nil then return name .. ": " .. params end
+            return name
+        end,
+        cycle = function(delta)
+            local n = #CAI_TOOLS
+            local oldPos = CurrentToolPos()
+            local newPos = ((oldPos - 1 + delta) % n) + 1
+            ArmTool(CAI_TOOLS[newPos].ID)
+            return StepWraps(oldPos, delta, n)
+        end,
+        jump = function(toLast)
+            ArmTool(CAI_TOOLS[toLast and #CAI_TOOLS or 1].ID)
+        end,
+    }
+end
+
+local function TypeParam()
+    return {
+        listLike = true,
+        name = function() return Locale.Lookup("LOC_CAI_WB_TYPE") end,
+        value = function() return SelectedTypeLabel() end,
+        cycle = function(delta)
+            local n = #m_capture
+            if n == 0 then return false end
+            local oldPos = GetSelectedTypePos() or 1
+            local newPos = ((oldPos - 1 + delta) % n) + 1
+            local item = m_capture[newPos]
+            if item ~= nil and item.select ~= nil then item.select(item.idx) end
+            return StepWraps(oldPos, delta, n)
+        end,
+        jump = function(toLast)
+            local n = #m_capture
+            if n == 0 then return end
+            local item = m_capture[toLast and n or 1]
+            if item ~= nil and item.select ~= nil then item.select(item.idx) end
+        end,
+    }
+end
+
+local function PulldownParam(labelTag, pulldown, deriveFn)
+    return {
+        listLike = true,
+        name = function() return Locale.Lookup(labelTag) end,
+        value = function() return PulldownLabel(pulldown) end,
+        cycle = function(delta)
+            local n = #deriveFn()
+            if n == 0 then return false end
+            local cur = pulldown:GetSelectedIndex() or 1
+            pulldown:SetSelectedIndex((((cur - 1) + delta) % n) + 1, true)
+            return StepWraps(cur, delta, n)
+        end,
+        jump = function(toLast)
+            local n = #deriveFn()
+            if n == 0 then return end
+            pulldown:SetSelectedIndex(toLast and n or 1, true)
+        end,
+    }
+end
+
+local function BrushParam()
+    return {
+        listLike = true,
+        name = function() return Locale.Lookup("LOC_CAI_WB_BRUSH") end,
+        value = function() return Locale.Lookup(BRUSH_SIZES[m_brushIndex].label) end,
+        cycle = function(delta)
+            local old = m_brushIndex
+            m_brushIndex = ((m_brushIndex - 1 + delta) % #BRUSH_SIZES) + 1
+            Controls[BRUSH_SIZES[m_brushIndex].button]:DoLeftClick()
+            return StepWraps(old, delta, #BRUSH_SIZES)
+        end,
+        jump = function(toLast)
+            m_brushIndex = toLast and #BRUSH_SIZES or 1
+            Controls[BRUSH_SIZES[m_brushIndex].button]:DoLeftClick()
+        end,
+    }
+end
+
+-- Rotation and Direction are advanced one step at a time through the vanilla
+-- OnRotateRight cycle (rotation) or by index (direction), so a jump replays the
+-- forward steps needed to reach the first / last state.
+local function RotationParam()
+    local function stepTo(target)
+        local n = #ROTATION_STATES
+        local steps = (target - m_rotationIndex) % n
+        for _ = 1, steps do OnRotateRight() end
+        m_rotationIndex = target
+    end
+    return {
+        listLike = true,
+        name = function() return Locale.Lookup("LOC_CAI_WB_ROTATION") end,
+        value = function() return Locale.Lookup(ROTATION_STATES[m_rotationIndex + 1]) end,
+        cycle = function(delta)
+            local old = m_rotationIndex
+            stepTo((m_rotationIndex + delta) % #ROTATION_STATES)
+            return StepWraps(old + 1, delta, #ROTATION_STATES)
+        end,
+        jump = function(toLast) stepTo(toLast and (#ROTATION_STATES - 1) or 0) end,
+    }
+end
+
+local function DirectionParam()
+    return {
+        listLike = true,
+        name = function() return Locale.Lookup("LOC_CAI_WB_DIRECTION") end,
+        value = function() return Locale.Lookup(DIRECTION_TAGS[m_edgeIndex + 1]) end,
+        cycle = function(delta)
+            local old = m_edgeIndex
+            m_edgeIndex = (m_edgeIndex + delta) % #DIRECTION_TAGS
+            return StepWraps(old + 1, delta, #DIRECTION_TAGS)
+        end,
+        jump = function(toLast) m_edgeIndex = toLast and (#DIRECTION_TAGS - 1) or 0 end,
+    }
+end
+
+-- Resource amount: an integer stepped by +/- 1 (no list jump). Committed by
+-- setting the vanilla edit box, which PlaceResource reads at placement time.
+local function AmountParam()
+    return {
+        name = function() return Locale.Lookup("LOC_CAI_WB_AMOUNT") end,
+        value = function() return Controls.ResourceAmount:GetText() or "" end,
+        cycle = function(delta)
+            local v = (tonumber(Controls.ResourceAmount:GetText()) or 0) + delta
+            if v < 0 then v = 0 end
+            Controls.ResourceAmount:SetText(tostring(v))
+        end,
+    }
+end
+
+-- Pillaged flag: Up = on, Down = off (no list jump). Drives the vanilla checkbox.
+local function PillagedParam(checkName)
+    local check = Controls[checkName]
+    return {
+        name = function() return Locale.Lookup("LOC_CAI_WB_PILLAGED") end,
+        value = function()
+            return check:IsChecked()
+                and Locale.Lookup("LOC_UIWidget_Checked")
+                or Locale.Lookup("LOC_UIWidget_Unchecked")
+        end,
+        cycle = function(delta)
+            local want = delta > 0
+            if check:IsChecked() ~= want then check:DoLeftClick() end
+        end,
+    }
+end
+
+-- The ordered parameter list for a tool. Mirrors RebuildSettings (minus the
+-- action buttons, which are not up/down values) so quick nav and the panel
+-- expose the same parameters. Rebuilt on every keypress so live vanilla state
+-- (e.g. the resource-amount field hidden for non-strategic resources) is honored.
+local function BuildQuickNavParams(toolID)
+    local params = { ToolParam() }
+    local function add(d) params[#params + 1] = d end
+
+    if toolID == WorldBuilderModes.PLACE_TERRAIN then
+        add(TypeParam()); add(BrushParam())
+    elseif toolID == WorldBuilderModes.PLACE_FEATURES then
+        add(TypeParam()); add(RotationParam())
+    elseif toolID == WorldBuilderModes.PLACE_WONDERS then
+        add(TypeParam()); add(RotationParam())
+    elseif toolID == WorldBuilderModes.PLACE_CONTINENTS then
+        add(PulldownParam("LOC_CAI_WB_CONTINENT", Controls.ContinentPullDown, DeriveContinents))
+        add(BrushParam())
+    elseif toolID == WorldBuilderModes.PLACE_RIVERS or toolID == WorldBuilderModes.PLACE_CLIFFS then
+        add(DirectionParam())
+    elseif toolID == WorldBuilderModes.PLACE_RESOURCES then
+        add(TypeParam())
+        if not Controls.ResourceAmountStack:IsHidden() then add(AmountParam()) end
+    elseif toolID == WorldBuilderModes.PLACE_IMPROVEMENTS then
+        add(TypeParam()); add(PillagedParam("ImprovementPillagedCheck"))
+    elseif toolID == WorldBuilderModes.PLACE_DISTRICTS then
+        add(TypeParam()); add(PillagedParam("DistrictPillagedCheck"))
+    elseif toolID == WorldBuilderModes.PLACE_BUILDINGS then
+        add(TypeParam())
+    elseif toolID == WorldBuilderModes.PLACE_UNITS then
+        add(TypeParam())
+        add(PulldownParam("LOC_CAI_WB_OWNER", Controls.UnitOwnerPullDown, function() return DerivePlayers(true) end))
+    elseif toolID == WorldBuilderModes.PLACE_ROUTES then
+        add(PulldownParam("LOC_CAI_WB_TYPE", Controls.RoutePullDown, DeriveRoutes))
+        add(PillagedParam("RoutePillagedCheck"))
+    elseif toolID == WorldBuilderModes.PLACE_CITIES then
+        add(PulldownParam("LOC_CAI_WB_OWNER", Controls.CityOwnerPullDown, function() return DerivePlayers(true) end))
+    elseif toolID == WorldBuilderModes.PLACE_START_POSITIONS then
+        add(PulldownParam("LOC_CAI_WB_PLAYER", Controls.StartPosPlayerPulldown, function() return DerivePlayers(false) end))
+    elseif toolID == WorldBuilderModes.PLACE_TERRAIN_OWNER then
+        add(PulldownParam("LOC_CAI_WB_OWNER", Controls.OwnerPullDown, DeriveCities))
+    elseif toolID == WorldBuilderModes.SET_VISIBILITY then
+        add(PulldownParam("LOC_CAI_WB_PLAYER", Controls.VisibilityPullDown, function() return DerivePlayers(true) end))
+    end
+
+    return params
+end
+
+-- Speak a parameter's name and current value (on a parameter switch).
+local function SpeakParamSwitch(param)
+    local name = param.name()
+    local value = param.value()
+    if value ~= nil and value ~= "" then
+        Speak(name .. (param.nameSep or ": ") .. value)
+    else
+        Speak(name)
+    end
+end
+
+-- Speak only a parameter's current value (after an Up / Down / jump change).
+local function SpeakParamValue(param)
+    local value = param.value()
+    if value ~= nil and value ~= "" then
+        Speak(value)
+    else
+        Speak(param.name())
+    end
+end
+
+-- Handle one arrow-key quick-nav action forwarded from the interface widget.
+local function OnQuickNav(action)
+    local toolID = CurrentToolID()
+    if toolID == nil then return end
+
+    local params = BuildQuickNavParams(toolID)
+    local n = #params
+    if n == 0 then return end
+    -- The parameter set can shrink (e.g. the amount field disappears); clamp.
+    if m_qnIndex < 1 then m_qnIndex = 1 elseif m_qnIndex > n then m_qnIndex = n end
+
+    if action == "next_param" then
+        local wrapped = (m_qnIndex == n)
+        m_qnIndex = (m_qnIndex % n) + 1
+        if wrapped then PlayWrapSound() end
+        SpeakParamSwitch(params[m_qnIndex])
+    elseif action == "prev_param" then
+        local wrapped = (m_qnIndex == 1)
+        m_qnIndex = ((m_qnIndex - 2 + n) % n) + 1
+        if wrapped then PlayWrapSound() end
+        SpeakParamSwitch(params[m_qnIndex])
+    elseif action == "first_param" then
+        m_qnIndex = 1
+        SpeakParamSwitch(params[1])
+    elseif action == "last_param" then
+        m_qnIndex = n
+        SpeakParamSwitch(params[n])
+    elseif action == "value_up" or action == "value_down" then
+        -- Changing the tool re-arms it; the cursor stays on the tool parameter
+        -- (index 1), so navigation resumes from the tool for the new tool set.
+        -- On list / dropdown parameters Down advances and Up goes back (to match
+        -- the tools panel's list navigation); on amount / checkbox parameters Up
+        -- increases / turns on and Down decreases / turns off.
+        local param = params[m_qnIndex]
+        local delta
+        if action == "value_up" then
+            delta = param.listLike and -1 or 1
+        else
+            delta = param.listLike and 1 or -1
+        end
+        if param.cycle(delta) then PlayWrapSound() end
+        SpeakParamValue(param)
+    elseif action == "first_value" or action == "last_value" then
+        local param = params[m_qnIndex]
+        if param.jump ~= nil then param.jump(action == "last_value") end
+        SpeakParamValue(param)
+    end
+end
+
+-- Arm a tool directly by its 1-based palette position, forwarded from the
+-- interface widget's number-key hotkeys (WorldInput_CAI). Speaks the tool name
+-- and its current parameters, and resets the quick-nav cursor to the tool
+-- parameter so arrow-key nav resumes from the newly armed tool. An out-of-range
+-- position (no such tool) is a no-op.
+local function OnSelectTool(pos)
+    local tool = CAI_TOOLS[pos]
+    if tool == nil then return end
+    ArmTool(tool.ID)
+    m_qnIndex = 1
+    local name = ToolName(tool.ID) or ""
+    local params = BuildToolParamString(tool.ID)
+    if params ~= nil then
+        Speak(name .. ": " .. params)
+    else
+        Speak(name)
+    end
 end
 
 local function BuildPanel()
@@ -496,8 +911,8 @@ local function BuildPanel()
         Transparent = true,
         WrapAround = false,
     })
-    -- Tools with no settings (Rivers, Cliffs) leave this empty; hide it so it is
-    -- skipped entirely instead of being a dead focus stop.
+    -- A tool with no settings leaves this empty; hide it so it is skipped
+    -- entirely instead of being a dead focus stop.
     m_settings:SetHiddenPredicate(function() return #m_settingsWidgets == 0 end)
     m_panel:AddChild(m_settings)
 end
@@ -602,6 +1017,36 @@ info.GetWorldBuilderPlacementValidity = function(plotId)
     return result
 end
 
+-- Per-plot placement validity for the current setup across the brush footprint
+-- at centerPlotId, for the scanner's Valid Targets listing. Mirrors
+-- GetWorldBuilderPlacementValidity's footprint rule: the brush footprint only
+-- for Terrain / Continents (where vanilla enables the brush), otherwise just the
+-- center plot. Returns an ordered list { { PlotIndex = , Valid = }, ... }, or
+-- nil when no tool is armed or the plot is invalid.
+info.GetWorldBuilderBrushTargets = function(centerPlotId)
+    if centerPlotId == nil or not Map.IsPlot(centerPlotId) then return nil end
+
+    local mode = Controls.PlacementPullDown:GetSelectedEntry()
+    if mode == nil then return nil end
+
+    local brushSize = (BRUSH_SIZES[m_brushIndex] and BRUSH_SIZES[m_brushIndex].size) or 1
+    local usesBrush = (mode.ID == WorldBuilderModes.PLACE_TERRAIN
+        or mode.ID == WorldBuilderModes.PLACE_CONTINENTS)
+
+    local plots
+    if usesBrush and brushSize > 1 then
+        plots = GatherBrushPlots(centerPlotId, brushSize)
+    else
+        plots = { centerPlotId }
+    end
+
+    local out = {}
+    for _, pid in ipairs(plots) do
+        out[#out + 1] = { PlotIndex = pid, Valid = PlacementValid(pid, mode) == true }
+    end
+    return out
+end
+
 -- ===========================================================================
 --  World Builder per-player visibility (live map-database read)
 -- ===========================================================================
@@ -624,14 +1069,28 @@ info.GetWorldBuilderVisibilityPlayer = function()
     return entry.PlayerIndex
 end
 
--- Live per-player revealed lookup: true when the loaded map database holds a
--- RevealedPlots row for this plot index and player.
+-- Per-player revealed lookup, delegated to the in-memory visibility manager
+-- (WorldBuilderVisManager_CAI). The map's RevealedPlots table lives only on disk
+-- and is written on save, so the manager seeds from the file at load and tracks
+-- Set Visibility edits and placed-unit sight live; this reads that model.
 info.GetWorldBuilderRevealed = function(player, plotIndex)
     if player == nil or plotIndex == nil then return false end
-    local rows = DB.Query(
-        "SELECT 1 FROM RevealedPlots WHERE ID = ? AND Player = ? LIMIT 1",
-        plotIndex, player)
-    return rows ~= nil and #rows > 0
+    local visMgr = ExposedMembers.CAI_WBVisManager
+    if visMgr == nil or visMgr.IsRevealed == nil then return false end
+    return visMgr.IsRevealed(player, plotIndex) == true
+end
+
+-- The edge direction (0-based DirectionTypes) the Rivers / Cliffs tool should
+-- place on, or nil when neither of those tools is armed. WorldInput_CAI feeds
+-- this to EditRiver / EditCliff in place of the mouse-nearest plot edge.
+info.GetWorldBuilderEdgeDirection = function()
+    local toolID = nil
+    local mode = Controls.PlacementPullDown:GetSelectedEntry()
+    if mode ~= nil then toolID = mode.ID end
+    if toolID ~= WorldBuilderModes.PLACE_RIVERS and toolID ~= WorldBuilderModes.PLACE_CLIFFS then
+        return nil
+    end
+    return m_edgeIndex
 end
 
 -- ===========================================================================
@@ -656,6 +1115,14 @@ end)
 
 -- External open/close hook (e.g. from a parent World Builder host context).
 LuaEvents.CAIWorldBuilderTools_Toggle.Add(TogglePanel)
+
+-- Arrow-key quick nav forwarded from the World Builder interface widget
+-- (WorldInput_CAI). Works ambiently on the map, independent of the tools panel.
+LuaEvents.CAIWorldBuilderQuickNav.Add(OnQuickNav)
+
+-- Number-key tool selection forwarded from the World Builder interface widget
+-- (WorldInput_CAI). Arms a tool by its palette position, panel-free on the map.
+LuaEvents.CAIWorldBuilderSelectTool.Add(OnSelectTool)
 
 -- ===========================================================================
 --  Input: while the panel is open, forward to the manager. The panel is opened

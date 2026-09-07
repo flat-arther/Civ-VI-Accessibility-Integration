@@ -31,6 +31,7 @@ local DEFAULT_ORDER = {
     "cityManagement",
     "validTargets",
     "activeLens",
+    "worldBuilder",
 }
 
 local TOOLTIP_KEYS = {
@@ -53,6 +54,7 @@ local TOOLTIP_KEYS = {
     cityManagement = "LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_CITY_MANAGEMENT",
     validTargets = "LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_VALID_TARGETS",
     activeLens = "LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_ACTIVE_LENS",
+    worldBuilder = "LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_WORLD_BUILDER",
 }
 
 local m_definitions = {}

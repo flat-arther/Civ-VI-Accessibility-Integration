@@ -130,6 +130,10 @@ function Utils.IsPlotRevealed(context, plot)
         return false
     end
 
+    -- World Builder Set Visibility tool: fog by the selected player's reveal.
+    local isGated, revealed = GetWorldBuilderRevealGate(plot)
+    if isGated then return revealed end
+
     local visibility = Utils.GetVisibility(context)
     if visibility == nil then
         return true
@@ -145,6 +149,10 @@ function Utils.IsPlotVisible(context, plot)
     if plot == nil then
         return false
     end
+
+    -- World Builder Set Visibility tool: a revealed plot is perceivable.
+    local isGated, revealed = GetWorldBuilderRevealGate(plot)
+    if isGated then return revealed end
 
     local visibility = Utils.GetVisibility(context)
     if visibility == nil then

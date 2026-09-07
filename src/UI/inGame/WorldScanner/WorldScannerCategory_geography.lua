@@ -8,8 +8,12 @@ local WATER_CLASS = GameInfo.TerrainClasses["TERRAIN_CLASS_WATER"]
 local SUBCATEGORY_LANDMASSES = "landmasses"
 local SUBCATEGORY_OCEANS = "oceans"
 local SUBCATEGORY_DISASTERS = "disasters"
+local SUBCATEGORY_RIVERS_CLIFFS = "riversAndCliffs"
 local GROUP_LANDMASSES = "landmasses"
 local GROUP_OCEANS = "oceans"
+-- Rivers and cliffs share one subcategory but stay in separate groups.
+local GROUP_RIVERS = "rivers"
+local GROUP_CLIFFS = "cliffs"
 -- Disasters split into one group per hazard type so storms, droughts, and
 -- volcanoes are not interleaved within the subcategory.
 local GROUP_DISASTER_STORMS = "disasters:storms"
@@ -30,6 +34,8 @@ local disasterGroupLabels = {
 
 local m_landPlotIndices = {}
 local m_oceanPlotIndices = {}
+local m_riverPlotIndices = {}
+local m_cliffPlotIndices = {}
 -- keyed by disaster instance (storm/drought id or volcano plot); each holds its
 -- kind, localized name, drought turns/volcano status, and affected plots.
 local m_disasterGroups = {}
@@ -48,12 +54,18 @@ local subCategoryLabels = {
     [SUBCATEGORY_LANDMASSES] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_LANDMASSES",
     [SUBCATEGORY_OCEANS] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_OCEANS",
     [SUBCATEGORY_DISASTERS] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_DISASTERS",
+    [SUBCATEGORY_RIVERS_CLIFFS] = "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_RIVERS_AND_CLIFFS",
+}
+
+local riverCliffGroupLabels = {
+    [GROUP_RIVERS] = "LOC_CAI_WORLD_SCANNER_GROUP_RIVERS",
+    [GROUP_CLIFFS] = "LOC_CAI_WORLD_SCANNER_GROUP_CLIFFS",
 }
 
 CAIWorldScannerCategory_Geography = {
     Id = "geography",
     LabelKey = "LOC_CAI_WORLD_SCANNER_CATEGORY_GEOGRAPHY",
-    SubCategoryOrder = { SUBCATEGORY_LANDMASSES, SUBCATEGORY_OCEANS, SUBCATEGORY_DISASTERS },
+    SubCategoryOrder = { SUBCATEGORY_LANDMASSES, SUBCATEGORY_OCEANS, SUBCATEGORY_DISASTERS, SUBCATEGORY_RIVERS_CLIFFS },
     SubCategoryLabels = subCategoryLabels,
     GroupOrderBySubCategory = {
         [SUBCATEGORY_DISASTERS] = {
@@ -61,6 +73,7 @@ CAIWorldScannerCategory_Geography = {
             GROUP_DISASTER_DROUGHTS,
             GROUP_DISASTER_VOLCANOES,
         },
+        [SUBCATEGORY_RIVERS_CLIFFS] = { GROUP_RIVERS, GROUP_CLIFFS },
     },
     GroupLabelResolver = function(_, firstItem)
         return firstItem ~= nil and firstItem.GroupLabelKey or "LOC_CAI_WORLD_SCANNER_UNKNOWN"
@@ -339,9 +352,17 @@ local function MakeDisasterValidator(kind)
     end
 end
 
+-- A plot "has a cliff" when any of its three owned edges is a cliff, matching
+-- the generic LOC_TOOLTIP_CLIFF line in vanilla PlotToolTip.lua.
+local function IsCliffPlot(plot)
+    return plot:IsNWOfCliff() or plot:IsWOfCliff() or plot:IsNEOfCliff()
+end
+
 function CAIWorldScannerCategory_Geography.BeginExtract()
     m_landPlotIndices = {}
     m_oceanPlotIndices = {}
+    m_riverPlotIndices = {}
+    m_cliffPlotIndices = {}
     m_disasterGroups = {}
     m_disastersEnabled = IsExpansion2Active()
         and GameClimate ~= nil
@@ -360,6 +381,15 @@ function CAIWorldScannerCategory_Geography.PlotExtract(plotIndex, plot, _, _, is
         end
     else
         m_landPlotIndices[#m_landPlotIndices + 1] = plotIndex
+    end
+
+    -- River-edge and cliff-edge plots, collected on revealed tiles (we are past
+    -- the isRevealed early-return); zoned into connected stretches in EndExtract.
+    if plot:IsRiver() then
+        m_riverPlotIndices[#m_riverPlotIndices + 1] = plotIndex
+    end
+    if IsCliffPlot(plot) then
+        m_cliffPlotIndices[#m_cliffPlotIndices + 1] = plotIndex
     end
 
     -- Match the plot tooltip, which shows a plot's active disaster on any
@@ -430,6 +460,36 @@ function CAIWorldScannerCategory_Geography.EndExtract(context, collect)
                 GroupLabelKey = disasterGroupLabels[groupId],
             })
         end
+    end
+
+    for _, zone in ipairs(ZoneUtils.PartitionPlotIndices(m_riverPlotIndices)) do
+        collect({
+            Id = "geography:river:" .. tostring(zone.MinPlotIndex),
+            PlotIndex = zone.MinPlotIndex,
+            ZonePlotIndices = zone.PlotIndices,
+            ZoneValidatePlot = function(_, plot, validateContext)
+                return Utils.IsPlotRevealed(validateContext, plot) and plot:IsRiver()
+            end,
+            LabelKey = "LOC_TOOLTIP_RIVER",
+            SubCategoryId = SUBCATEGORY_RIVERS_CLIFFS,
+            GroupId = GROUP_RIVERS,
+            GroupLabelKey = riverCliffGroupLabels[GROUP_RIVERS],
+        })
+    end
+
+    for _, zone in ipairs(ZoneUtils.PartitionPlotIndices(m_cliffPlotIndices)) do
+        collect({
+            Id = "geography:cliff:" .. tostring(zone.MinPlotIndex),
+            PlotIndex = zone.MinPlotIndex,
+            ZonePlotIndices = zone.PlotIndices,
+            ZoneValidatePlot = function(_, plot, validateContext)
+                return Utils.IsPlotRevealed(validateContext, plot) and IsCliffPlot(plot)
+            end,
+            LabelKey = "LOC_TOOLTIP_CLIFF",
+            SubCategoryId = SUBCATEGORY_RIVERS_CLIFFS,
+            GroupId = GROUP_CLIFFS,
+            GroupLabelKey = riverCliffGroupLabels[GROUP_CLIFFS],
+        })
     end
 end
 

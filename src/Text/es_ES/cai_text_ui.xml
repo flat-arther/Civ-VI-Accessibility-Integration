@@ -561,6 +561,45 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_ACTIVE_LENS" Language="es_ES">
       <Text>Lente activa</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_WORLD_BUILDER" Language="es_ES">
+      <Text>Creador de mundos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_WORLD_BUILDER" Language="es_ES">
+      <Text>Solo disponible en el Creador de mundos. Contiene las posiciones iniciales colocadas, las zonas de propiedad de las casillas y los bordes de ríos y acantilados.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_STARTING_POSITIONS" Language="es_ES">
+      <Text>Posiciones iniciales</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_OWNERSHIP" Language="es_ES">
+      <Text>Propiedad</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_RIVERS_AND_CLIFFS" Language="es_ES">
+      <Text>Ríos y acantilados</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_PLAYER" Language="es_ES">
+      <Text>Inicios de jugador</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_LEADER" Language="es_ES">
+      <Text>Inicios de líder</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_CIVILIZATION" Language="es_ES">
+      <Text>Inicios de civilización</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_RANDOM_MAJOR" Language="es_ES">
+      <Text>Inicios de jugador al azar</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_RANDOM_MINOR" Language="es_ES">
+      <Text>Inicios de ciudad-estado al azar</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_LABEL" Language="es_ES">
+      <Text>{1_Type}: {2_Name}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_GROUP_RIVERS" Language="es_ES">
+      <Text>Ríos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_GROUP_CLIFFS" Language="es_ES">
+      <Text>Acantilados</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_RESOURCES" Language="es_ES">
       <Text>Recursos</Text>
     </Replace>
@@ -2524,6 +2563,9 @@
     <Replace Tag="LOC_CAI_PRODUCTION_CITY_YIELD" Language="es_ES">
       <Text>{1_Yield}: {2_Amount}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_PRODUCTION_CATEGORY_REPAIR" Language="es_ES">
+      <Text>Necesita reparación</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS" Language="es_ES">
       <Text>Distritos</Text>
     </Replace>
@@ -3607,6 +3649,9 @@
     <Replace Tag="LOC_CAI_MOVEMENT_THIS_TURN" Language="es_ES">
       <Text>Este turno</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_MOVEMENT_NEXT_TURN" Language="es_ES">
+      <Text>Próximo turno</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_MOVEMENT_TURNS" Language="es_ES">
       <Text>{1_Turns : plural 1?1 turno; other?{1_Turns} turnos;}</Text>
     </Replace>
@@ -3696,6 +3741,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_MOVEMENT_RESULT_STOPPED_SHORT" Language="es_ES">
       <Text>Se ha detenido antes de llegar</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOVEMENT_RESULT_QUEUED_TURNS" Language="es_ES">
+      <Text>{1_Turns : plural 1?Movimiento en cola, 1 turno hasta llegar; other?Movimiento en cola, {1_Turns} turnos hasta llegar;}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOVEMENT_RESULT_QUEUED" Language="es_ES">
+      <Text>Movimiento en cola</Text>
     </Replace>
     <Replace Tag="LOC_CAI_INTERFACE_PRIMARY_ACTION" Language="es_ES">
       <Text>Acción principal de la interfaz</Text>
@@ -3822,6 +3873,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TARGET_PLOTS" Language="es_ES">
       <Text>Casillas objetivo</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_TARGET_VALID" Language="es_ES">
+      <Text>Casillas válidas</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_TARGET_INVALID" Language="es_ES">
+      <Text>Casillas no válidas</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_WAYPOINT_TURN" Language="es_ES">
       <Text>Punto de ruta, turno {1_Turn}</Text>
@@ -5400,6 +5457,57 @@
     </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_AFFECTED_CITIES" Language="es_ES">
       <Text>Ciudades afectadas: {1_Cities}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_OWNER_YOURS" Language="es_ES">
+      <Text>Tu</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_PILLAGED_IN_CITY" Language="es_ES">
+      <Text>{1_Owner} {2_Object} en {3_City}: saqueado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_PILLAGED" Language="es_ES">
+      <Text>{1_Owner} {2_Object}: saqueado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_DESTROYED_IN_CITY" Language="es_ES">
+      <Text>{1_Owner} {2_Object} en {3_City}: destruido</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_DESTROYED" Language="es_ES">
+      <Text>{1_Owner} {2_Object}: destruido</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FEATURE_REMOVED_IN_CITY" Language="es_ES">
+      <Text>{1_Feature} en {2_City}: eliminado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FEATURE_REMOVED" Language="es_ES">
+      <Text>{1_Feature}: eliminado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_UNIT_KILLED" Language="es_ES">
+      <Text>{1_Owner} {2_Unit}: eliminada</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_UNIT_DAMAGED" Language="es_ES">
+      <Text>{1_Owner} {2_Unit}: dañada, {3_HP} PV</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_UNITS_NODE" Language="es_ES">
+      <Text>{1_Num} {1_Num: plural 1?unidad afectada; other?unidades afectadas;}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERTILITY_NODE" Language="es_ES">
+      <Text>{1_Num} {1_Num: plural 1?casilla; other?casillas;} con fertilidad modificada</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERT_IN_CITY" Language="es_ES">
+      <Text>{1_Terrain} en {2_City}: {3_Deltas}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERT" Language="es_ES">
+      <Text>{1_Terrain}: {2_Deltas}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_YIELD_DELTA" Language="es_ES">
+      <Text>{1_Delta} {2_Yield}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERT_AMOUNT" Language="es_ES">
+      <Text>{1_Amount} de fertilidad</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_POP_LOST_CITY" Language="es_ES">
+      <Text>{1_City}: {2_Num} de población perdida</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_INSTANCE_TURN" Language="es_ES">
+      <Text>{1_Text} (turno {2_Turn})</Text>
     </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_TURN" Language="es_ES">
       <Text>Turno {1_Turn}, {2_Date}</Text>
@@ -7713,6 +7821,9 @@
     <Replace Tag="LOC_CAI_WB_OPEN_TOOLS" Language="es_ES">
       <Text>Abrir herramientas del Editor de mundos</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WB_SELECT_TOOL" Language="es_ES">
+      <Text>Seleccionar herramienta por número</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WB_PLACE" Language="es_ES">
       <Text>Colocar en el cursor</Text>
     </Replace>
@@ -7721,6 +7832,21 @@
     </Replace>
     <Replace Tag="LOC_CAI_WB_DELETE" Language="es_ES">
       <Text>Quitar del cursor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MAP_EDITOR" Language="es_ES">
+      <Text>Abrir editor de mapas</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PLAYER_EDITOR" Language="es_ES">
+      <Text>Abrir editor de jugador</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_UNDO" Language="es_ES">
+      <Text>Deshacer</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_REDO" Language="es_ES">
+      <Text>Rehacer</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PAUSE" Language="es_ES">
+      <Text>Abrir menú</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WB_DELETE_TEXT" Language="es_ES">
       <Text>Eliminar entrada de texto</Text>
@@ -7754,6 +7880,9 @@
     </Replace>
     <Replace Tag="LOC_CAI_WB_UNMARKED" Language="es_ES">
       <Text>Colocación liberada</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_LOCKED_TILE" Language="es_ES">
+      <Text>Casilla de colocación fijada</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WB_FOOTPRINT_TILES" Language="es_ES">
       <Text>{1_Number} casillas</Text>
@@ -7802,6 +7931,45 @@
     </Replace>
     <Replace Tag="LOC_CAI_WB_CLEAR" Language="es_ES">
       <Text>Eliminar todos los recursos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_DIRECTION" Language="es_ES">
+      <Text>Dirección</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PARAM_TOOL" Language="es_ES">
+      <Text>Herramienta</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_PREV_PARAM" Language="es_ES">
+      <Text>Parámetro anterior</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_NEXT_PARAM" Language="es_ES">
+      <Text>Parámetro siguiente</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_VALUE_UP" Language="es_ES">
+      <Text>Aumentar o valor siguiente</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_VALUE_DOWN" Language="es_ES">
+      <Text>Disminuir o valor anterior</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_FIRST_PARAM" Language="es_ES">
+      <Text>Primer parámetro</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_LAST_PARAM" Language="es_ES">
+      <Text>Último parámetro</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_FIRST_VALUE" Language="es_ES">
+      <Text>Primer valor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_LAST_VALUE" Language="es_ES">
+      <Text>Último valor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GOTO" Language="es_ES">
+      <Text>Ir a coordenadas</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GOTO_INVALID" Language="es_ES">
+      <Text>Escribe una ubicación como x y luego z separadas por un espacio, por ejemplo 15 5. Escribe un solo número para x sola, o un espacio y luego un número para z sola. Antepón más o menos a un número para moverte en relación con el cursor, por ejemplo más 2, o espacio menos 1.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GOTO_OUT_OF_BOUNDS" Language="es_ES">
+      <Text>Esas coordenadas están fuera de los límites.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WB_REVEAL_ALL" Language="es_ES">
       <Text>Revelar todo</Text>

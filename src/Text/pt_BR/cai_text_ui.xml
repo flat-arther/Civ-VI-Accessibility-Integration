@@ -546,6 +546,45 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_ACTIVE_LENS" Language="pt_BR">
       <Text>Lente ativa</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_WORLD_BUILDER" Language="pt_BR">
+      <Text>Construtor de Mundo</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_WORLD_BUILDER" Language="pt_BR">
+      <Text>Disponível apenas no Construtor de Mundo. Contém as posições iniciais colocadas, as zonas de propriedade dos hexágonos e as bordas de rios e penhascos.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_STARTING_POSITIONS" Language="pt_BR">
+      <Text>Posições iniciais</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_OWNERSHIP" Language="pt_BR">
+      <Text>Propriedade</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_RIVERS_AND_CLIFFS" Language="pt_BR">
+      <Text>Rios e penhascos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_PLAYER" Language="pt_BR">
+      <Text>Posições de jogador</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_LEADER" Language="pt_BR">
+      <Text>Posições de líder</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_CIVILIZATION" Language="pt_BR">
+      <Text>Posições de civilização</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_RANDOM_MAJOR" Language="pt_BR">
+      <Text>Posições de jogador aleatório</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_RANDOM_MINOR" Language="pt_BR">
+      <Text>Posições de cidade-estado aleatória</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_LABEL" Language="pt_BR">
+      <Text>{1_Type}: {2_Name}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_GROUP_RIVERS" Language="pt_BR">
+      <Text>Rios</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_GROUP_CLIFFS" Language="pt_BR">
+      <Text>Penhascos</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_RESOURCES" Language="pt_BR">
       <Text>Recursos</Text>
     </Replace>
@@ -2520,6 +2559,9 @@
     <Replace Tag="LOC_CAI_PRODUCTION_CITY_YIELD" Language="pt_BR">
       <Text>{1_Yield}: {2_Amount}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_PRODUCTION_CATEGORY_REPAIR" Language="pt_BR">
+      <Text>Precisa de reparo</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS" Language="pt_BR">
       <Text>Distritos</Text>
     </Replace>
@@ -3606,6 +3648,9 @@
     <Replace Tag="LOC_CAI_MOVEMENT_THIS_TURN" Language="pt_BR">
       <Text>Neste turno</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_MOVEMENT_NEXT_TURN" Language="pt_BR">
+      <Text>Próximo turno</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_MOVEMENT_TURNS" Language="pt_BR">
       <Text>{1_Turns : plural 1?1 turno; other?{1_Turns} turnos;}</Text>
     </Replace>
@@ -3696,6 +3741,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_MOVEMENT_RESULT_STOPPED_SHORT" Language="pt_BR">
       <Text>Parou antes</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOVEMENT_RESULT_QUEUED_TURNS" Language="pt_BR">
+      <Text>{1_Turns : plural 1?Movimento na fila, 1 turno até a chegada; other?Movimento na fila, {1_Turns} turnos até a chegada;}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOVEMENT_RESULT_QUEUED" Language="pt_BR">
+      <Text>Movimento na fila</Text>
     </Replace>
     <Replace Tag="LOC_CAI_INTERFACE_PRIMARY_ACTION" Language="pt_BR">
       <Text>Ação principal da interface</Text>
@@ -3822,6 +3873,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TARGET_PLOTS" Language="pt_BR">
       <Text>Hexágonos-alvo</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_TARGET_VALID" Language="pt_BR">
+      <Text>Hexágonos válidos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_TARGET_INVALID" Language="pt_BR">
+      <Text>Hexágonos inválidos</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_WAYPOINT_TURN" Language="pt_BR">
       <Text>Ponto de rota, turno {1_Turn}</Text>
@@ -5410,6 +5467,57 @@
     </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_AFFECTED_CITIES" Language="pt_BR">
       <Text>Cidades afetadas: {1_Cities}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_OWNER_YOURS" Language="pt_BR">
+      <Text>Sua</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_PILLAGED_IN_CITY" Language="pt_BR">
+      <Text>{1_Owner} {2_Object} em {3_City}: pilhado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_PILLAGED" Language="pt_BR">
+      <Text>{1_Owner} {2_Object}: pilhado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_DESTROYED_IN_CITY" Language="pt_BR">
+      <Text>{1_Owner} {2_Object} em {3_City}: destruído</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_DESTROYED" Language="pt_BR">
+      <Text>{1_Owner} {2_Object}: destruído</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FEATURE_REMOVED_IN_CITY" Language="pt_BR">
+      <Text>{1_Feature} em {2_City}: removido</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FEATURE_REMOVED" Language="pt_BR">
+      <Text>{1_Feature}: removido</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_UNIT_KILLED" Language="pt_BR">
+      <Text>{1_Owner} {2_Unit}: morta</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_UNIT_DAMAGED" Language="pt_BR">
+      <Text>{1_Owner} {2_Unit}: danificada, {3_HP} PV</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_UNITS_NODE" Language="pt_BR">
+      <Text>{1_Num : plural 1?{1_Num} unidade afetada; other?{1_Num} unidades afetadas;}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERTILITY_NODE" Language="pt_BR">
+      <Text>{1_Num} {1_Num: plural 1?casa; other?casas;} com fertilidade alterada</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERT_IN_CITY" Language="pt_BR">
+      <Text>{1_Terrain} em {2_City}: {3_Deltas}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERT" Language="pt_BR">
+      <Text>{1_Terrain}: {2_Deltas}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_YIELD_DELTA" Language="pt_BR">
+      <Text>{1_Delta} {2_Yield}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERT_AMOUNT" Language="pt_BR">
+      <Text>{1_Amount} de fertilidade</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_POP_LOST_CITY" Language="pt_BR">
+      <Text>{1_City}: {2_Num} de população perdida</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_INSTANCE_TURN" Language="pt_BR">
+      <Text>{1_Text} (turno {2_Turn})</Text>
     </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_TURN" Language="pt_BR">
       <Text>Turno {1_Turn}, {2_Date}</Text>
@@ -7718,6 +7826,9 @@
     <Replace Tag="LOC_CAI_WB_OPEN_TOOLS" Language="pt_BR">
       <Text>Abrir ferramentas do Construtor de mundos</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WB_SELECT_TOOL" Language="pt_BR">
+      <Text>Selecionar ferramenta por número</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WB_PLACE" Language="pt_BR">
       <Text>Colocar no cursor</Text>
     </Replace>
@@ -7726,6 +7837,21 @@
     </Replace>
     <Replace Tag="LOC_CAI_WB_DELETE" Language="pt_BR">
       <Text>Remover no cursor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MAP_EDITOR" Language="pt_BR">
+      <Text>Abrir editor de mapa</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PLAYER_EDITOR" Language="pt_BR">
+      <Text>Abrir editor de jogador</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_UNDO" Language="pt_BR">
+      <Text>Desfazer</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_REDO" Language="pt_BR">
+      <Text>Refazer</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PAUSE" Language="pt_BR">
+      <Text>Abrir menu</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WB_DELETE_TEXT" Language="pt_BR">
       <Text>Excluir entrada de texto</Text>
@@ -7759,6 +7885,9 @@
     </Replace>
     <Replace Tag="LOC_CAI_WB_UNMARKED" Language="pt_BR">
       <Text>Colocação destravada</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_LOCKED_TILE" Language="pt_BR">
+      <Text>Hexágono de colocação travado</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WB_FOOTPRINT_TILES" Language="pt_BR">
       <Text>{1_Number} hexágonos</Text>
@@ -7807,6 +7936,45 @@
     </Replace>
     <Replace Tag="LOC_CAI_WB_CLEAR" Language="pt_BR">
       <Text>Limpar todos os recursos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_DIRECTION" Language="pt_BR">
+      <Text>Direção</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PARAM_TOOL" Language="pt_BR">
+      <Text>Ferramenta</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_PREV_PARAM" Language="pt_BR">
+      <Text>Parâmetro anterior</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_NEXT_PARAM" Language="pt_BR">
+      <Text>Próximo parâmetro</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_VALUE_UP" Language="pt_BR">
+      <Text>Aumentar ou próximo valor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_VALUE_DOWN" Language="pt_BR">
+      <Text>Diminuir ou valor anterior</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_FIRST_PARAM" Language="pt_BR">
+      <Text>Primeiro parâmetro</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_LAST_PARAM" Language="pt_BR">
+      <Text>Último parâmetro</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_FIRST_VALUE" Language="pt_BR">
+      <Text>Primeiro valor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_LAST_VALUE" Language="pt_BR">
+      <Text>Último valor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GOTO" Language="pt_BR">
+      <Text>Ir para coordenadas</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GOTO_INVALID" Language="pt_BR">
+      <Text>Digite um local como x e depois z separados por um espaço, por exemplo 15 5. Digite um número para x sozinho, ou um espaço e depois um número para z sozinho. Coloque mais ou menos antes de um número para mover em relação ao cursor, por exemplo mais 2, ou espaço menos 1.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GOTO_OUT_OF_BOUNDS" Language="pt_BR">
+      <Text>Essas coordenadas estão fora dos limites.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WB_REVEAL_ALL" Language="pt_BR">
       <Text>Revelar tudo</Text>
