@@ -2,231 +2,523 @@
 <GameData>
   <LocalizedText>
     <!-- ENGLISH -->
-    <!-- Great work image accessibility descriptions (CAI). Keyed by great work type: LOC_CAI_GWDESC_<GREATWORKTYPE>. Appended to the Great Work Showcase details. -->
+    <!-- Great work image accessibility descriptions (CAI). Appended to the Great Work Showcase details.
+         Keys: LOC_CAI_GWDESC_GREATWORK_<TYPE> for paintings, sculptures and relics;
+         LOC_CAI_GWDESC_GREATWORKOBJECT_WRITING / _MUSIC for the shared backgrounds;
+         LOC_CAI_GWDESC_ARTIFACT_<1-25> for the artifact textures;
+         LOC_CAI_GWDESC_GREATWORK_HERO_EPIC for the shared hero epic image;
+         LOC_CAI_GWDESC_VOIDSINGER_RELIC_<1-3> for the three Secret Societies relic icons;
+         LOC_CAI_GWDESC_PRODUCT_<RESOURCE> for the Monopolies and Corporations product icons.
+         Authoring source and rules: docs/great-work-descriptions.md. Edit there first, then mirror here. -->
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_ANGUISSOLA_1" Language="en_US">
-      <Text>An oil portrait of three richly dressed young women gathered around a small chessboard set on a carpet-draped table in a garden, with feathery trees and a hazy blue landscape behind. The sister at the left, in a gold-brocade gown with a lace collar, has just moved a piece and lifts one hand as she turns her head toward the others. The girl at the right, in red, raises her hand in reply, while the youngest, at the center in dark green, grins openly out at the viewer. Behind them an older servant woman in plain clothes leans in to watch. The faces are softly lit and lifelike, the fabrics detailed down to the embroidery.</Text>
+      <Text>This painting is an Italian Renaissance oil of Anguissola's three younger sisters gathered around a chessboard on a carpeted table outdoors, with hazy hills behind. Lucia, the eldest, sits at the left and has just taken a piece, looking calmly outward. Minerva at the right raises her hand in protest, and the youngest, Europa, grins at her reaction from the middle. An elderly maidservant leans in from the right to watch.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_ANGUISSOLA_2" Language="en_US">
-      <Text>A three-quarter-length oil portrait of a lean, grave man standing against a plain dark background. He wears the black court dress of a Spanish king, a stiff white ruff at the throat and a chain of the Golden Fleece; his short beard and receding hair frame a pale, watchful face. One hand rests on the back of a chair while the other holds a rosary, its beads hanging down. The mood is austere and formal, the black clothing melting into the shadowed ground.</Text>
+      <Text>This portrait is an oil of King Philip II of Spain shown from the hips up against a plain gray background. He wears a tall black cap, a black doublet and cloak, and a white lace ruff, with the Golden Fleece hanging on a thin chain at his chest. His pale face and trimmed fair beard hold a level, guarded expression. One hand rests on the arm of a red chair while the other holds a string of rosary beads.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_ANGUISSOLA_3" Language="en_US">
-      <Text>A three-quarter-length oil portrait of a friar standing before a dark ground. He wears a pale, cream-brown hooded habit with a cowl over the shoulders, and holds an open book in both hands, a finger marking the page. His tonsured head is bare and slightly bowed, his face turned to one side in calm, inward thought. Warm light falls across the coarse folds of the wool, and the plain background keeps all attention on the quiet figure.</Text>
+      <Text>This portrait is a Renaissance oil of a young monk standing before a nearly black background. He wears a pale cream habit with a heavy cowl draped over his shoulders and a cord tied at the waist. His head is close-shaven, his face is calm and youthful, and he gazes off to the right rather than at the painter. His hands are clasped in front of him, and a long rosary with a small cross hangs down from them.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_BEHZAD_1" Language="en_US">
-      <Text>A Persian miniature painting, small and packed with fine detail. A dense, swirling battle fills the page: mounted warriors in bright red, blue and orange armour and robes collide, horses rear and tumble, and weapons flash in a flat, crowded mass with no deep perspective. Rocky gold-flecked hills rise at the top, where a few panels of Persian text sit against blue. The colours are vivid and jewel-like throughout.</Text>
+      <Text>This miniature is a Persian manuscript page from a chronicle of Timur's conquests, with panels of calligraphy above and below. A crowded cavalry battle between Timur's army and the forces of the Egyptian sultan fills the page, as horsemen in red, blue, and gold armor charge with lances and bows across a green ground broken by rocks and small orange trees. Trumpeters and drummers ride along the top beneath a blue sky, and banners rise on both sides. Fallen men and horses lie in the lower corners.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_BEHZAD_2" Language="en_US">
-      <Text>A Persian miniature dominated by a tall, many-storeyed palace shown as flat panels of intricate blue, turquoise and gold tilework, with staircases, doorways, balconies and a small dome stacked up the page rather than receding in depth. A small figure in a green robe moves through the upper rooms. Every surface is covered in fine ornament, and the whole scene glows with pattern and colour.</Text>
+      <Text>This miniature is a Persian manuscript page from Sa'di's Bustan, illustrating the story of Yusuf and Zulaikha, the Persian telling of Joseph and Potiphar's wife. The palace rises as a tall stack of flat rooms and staircases, every surface covered in blue tilework and bands of calligraphy. In a chamber near the top, Zulaikha in orange lunges from her couch to seize the cloak of Yusuf in green, who twists away with a flaming halo around his head. The figures are tiny against the dazzling architecture.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_BEHZAD_3" Language="en_US">
-      <Text>A Persian miniature of a ruler holding court. An enthroned figure in white sits beneath an ornate domed pavilion at the upper right, while courtiers in coloured robes stand and kneel around him, set in a dark green garden dotted with small flowers and flowering trees. There is no single perspective; the many small, finely drawn figures are arranged across a glowing field of ornament and colour.</Text>
+      <Text>This miniature is a Persian manuscript page of a royal audience held in a garden, on a dark green ground scattered with flowers. Timur sits cross-legged on a low throne beneath a domed tent of blue and white, in a pale green robe and crown. Courtiers in colored robes stand around him while attendants wait below. At the upper left two men sit beside a leashed hunting cheetah, and a flowering tree rises behind the tent.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_BOSCH_1" Language="en_US">
-      <Text>A large oil triptych of three joined panels, teeming with tiny figures. The narrow left panel shows a green Paradise where a robed God presents Eve to Adam among strange beasts around a pink fountain. The wide central panel is a bright, dreamlike garden swarming with hundreds of small nude figures who ride birds and giant fish, climb into oversized fruit and berries, and bathe in pools around fantastic pink structures. The right panel plunges into a dark hell of burning ruins, monstrous creatures and tormented souls, lit by fires against a black sky. The colours shift from tender green to festive brightness to smoky darkness across the three scenes.</Text>
+      <Text>This triptych is a Netherlandish oil on three joined wooden panels, teeming with hundreds of tiny figures. The left panel shows a green paradise where God presents Eve to Adam beside a pink fountain. The center panel is a bright garden where crowds of nude figures frolic among giant fruits and strange pink structures. The dark right panel is hell, lit by a burning city, where a hollow tree man and a bird-headed monster preside over torments.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_BOSCH_2" Language="en_US">
-      <Text>A large oil triptych whose crowded central and right panels seethe with the torment of the damned. Across the wide central panel and into the right, sinners are chased, speared and devoured by hybrid demons amid crumbling buildings and small fires under a dark, smoky sky. At the top of the center a small band of blessed figures and angels floats near a distant heaven. The narrow left panel is brighter, showing the green garden of Eden and the fall of the rebel angels. Countless tiny figures fill every corner, so the eye keeps discovering new cruelties and details.</Text>
+      <Text>This triptych is a Netherlandish oil with Eden on the left, judgment in the center, and hell on the right. On the left Eve is created, tempted, and driven out, while rebel angels fall from a glowing God above. In the center Christ sits in a small patch of blue sky, and below him a dark scorched landscape swarms with demons roasting, spearing, and torturing the damned. The right panel is a burning hellscape ruled by devils.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_BOSCH_3" Language="en_US">
-      <Text>A large oil triptych built around a single startling image in the center: an enormous hay wagon rolling forward, its heaped load fought over by a jostling crowd who grab fistfuls of hay, while kings, a pope and common folk follow behind. Grotesque demon-beasts harnessed to the wagon haul it toward a burning hell that opens in the right panel, where more devils build a tower of torment. The left panel shows Eden and the fall of man, from the rebel angels to Adam and Eve driven out. High above the wagon, Christ looks down from a cloud, unseen by the greedy throng below.</Text>
+      <Text>This triptych is a Netherlandish oil built around a single image: an enormous hay wagon rolling toward hell. In the center panel a crowd of popes, kings, and peasants scramble for hay while demons drag the wagon forward and lovers make music on top beneath a small Christ in the clouds. The left panel shows the creation and expulsion of Adam and Eve, and the right panel shows a burning hell where devils build a tower.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_CASSATT_1" Language="en_US">
-      <Text>An Impressionist oil of a young woman seated in a theatre box, leaning forward with her folded arms resting on the red-plush ledge and her chin almost on her hands. She wears a pale evening gown that leaves her shoulders bare, and gazes out across the auditorium. Behind her the gilded, curving front of the box and the softly lit tiers of the theatre are suggested with loose, warm brushstrokes. The light glows on her skin and the satin, giving an intimate, candid sense of a moment caught mid-performance.</Text>
+      <Text>This pastel, drawn in loose glowing strokes of yellow and green, is an Impressionist study of Cassatt's sister Lydia seated in a theater box. She leans forward with her folded arms resting on the plush red ledge, her bare shoulders rising from a pale evening gown. Her reddish hair is pinned up, and she turns her head to the side with a faint smile. A blazing chandelier and a mirror hang in the upper corner behind her.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_CASSATT_2" Language="en_US">
-      <Text>An Impressionist oil seen from a high angle, looking down on a woman and a small child. The woman, in a broad-striped dress, sits and leans in with one arm around the naked toddler on her lap; with her other hand she gently washes the child's foot in a shallow basin of water set on the floor. The child, plump and calm, looks down at its own feet. A patterned rug, floral wallpaper and a painted water pitcher surround them in warm, domestic colours, and the tender bond between the two is the clear heart of the scene.</Text>
+      <Text>This painting is an Impressionist oil of a mother and child seen from above. The woman wears a dress of green, pink, and white stripes and holds a naked toddler on her lap, one arm around the child while her other hand washes its feet in a white basin. The child, wrapped in a white towel, looks down at the water with her. A flowered pitcher and a patterned carpet fill the surrounding space.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_CASSATT_3" Language="en_US">
-      <Text>An Impressionist oil of a woman taking tea in a bright parlour. She sits in an armchair in a soft pink ruffled dress and a small hat, lifting a delicate cup and saucer toward her lips, one gloved hand cradling it. On a table beside her stands a gleaming silver tea service on a striped cloth. The wallpaper and upholstery are painted in loose, feathery strokes of rose and cream, and the whole scene has an easy, well-bred calm, centred on the quiet gesture of raising the cup.</Text>
+      <Text>This painting, worked in quick brushstrokes, is an Impressionist oil of Cassatt's sister Lydia taking tea in a bright room. She sits in profile in a dark striped armchair, dressed in a pink gown and bonnet with white fur trim at the collar. Her gloved hands lift a cup and saucer edged in gold toward her lips. Behind her a green planter holds white hyacinths against a pale wall.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_COLLOT_1" Language="en_US">
-      <Text>A marble portrait bust of a young man, cut off at the chest and set on a small round socle. His hair falls in loose curls, and he wears an open coat with a soft collar. The head turns slightly to one side, lips parted as if about to speak, giving the polished white stone a lively, informal air. The surface is smooth and finely worked, catching soft light across the cheeks and brow.</Text>
+      <Text>This bust is a plaster portrait of the painter Pierre-Etienne Falconet, Collot's husband, cut off below the shoulders and set on a round black base. His hair falls loosely to his ears, and he wears an open shirt collar beneath a simply folded coat. The head turns a little to one side with a direct, slightly wary gaze, and the modeling is soft and lifelike.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_COLLOT_2" Language="en_US">
-      <Text>A marble portrait bust of an empress, shown almost in profile and set on a socle. Her hair is drawn up and back, and a length of drapery is wrapped across one shoulder in the classical manner. The features are composed and dignified, the chin lifted, giving an impression of calm authority. The white marble is smoothly polished, with crisp detail in the coiled hair and the folds of cloth.</Text>
+      <Text>This bust is carved in white marble and shows Catherine the Great of Russia in profile facing left. Her hair is drawn smoothly back from her forehead, and a long veil falls from the crown of her head down over her shoulders in loose folds. The face is composed and slightly smiling, with a firm chin and a straight nose. The bust ends below the shoulders and rests on a small round socle.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_COLLOT_3" Language="en_US">
-      <Text>A marble portrait bust of a young woman, cut off below the shoulders and set on a socle. Her hair is smoothly drawn back from a soft, oval face, and light drapery covers the bust. The expression is gentle and modest, the head held straight with a faint, thoughtful calm. The pale marble is delicately finished, the skin left glossy against the more textured folds of cloth.</Text>
+      <Text>This bust is carved in white marble and shows Mary Cathcart, daughter of the British ambassador to Russia, with her head turned slightly to one side. Her hair is drawn back beneath a light head covering that falls behind her shoulders, and her calm face carries a small, private smile. The bust ends in a plain curved chest above a round socle, and the carving is smooth and delicate.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_DONATELLO_1" Language="en_US">
-      <Text>A tall white marble statue of a bearded man standing calmly, carved to stand in a niche. He wears a long robe that falls in deep vertical folds, and holds a book close against one hip; his weight rests on one leg so the body leans gently. The face is thoughtful and grave beneath a full beard, gazing steadily ahead. The carving is dignified and restrained, the drapery giving the figure a strong, upright presence.</Text>
+      <Text>This statue, carved for a niche on the Orsanmichele church in Florence, is an early Italian Renaissance marble figure of Saint Mark the Evangelist, shown standing alone. He wears a long draped robe that falls in deep folds and rests his weight on one leg, holding a closed book against his hip. His face is grave and thoughtful beneath a high forehead, and the statue stands on a plain low base.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_DONATELLO_2" Language="en_US">
-      <Text>A large bronze equestrian statue raised on a high stone pedestal. An armoured commander sits astride a massive warhorse that steps slowly forward, one hoof raised. He holds a short baton out in his right hand and a sword at his side, his stern, clean-shaven face gazing ahead with cold command. Horse and rider are modelled with heavy, muscular realism, the dark bronze catching light along the armour and the horse's powerful neck.</Text>
+      <Text>This statue, shown here without its pedestal, is a bronze equestrian monument of Erasmo da Narni, the mercenary captain nicknamed Gattamelata. The armored commander sits calmly astride a heavy warhorse that walks forward with one front hoof raised. He holds a baton of command out in his right hand and wears a long sword at his side. It is the first large bronze equestrian monument cast since ancient Rome.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_DONATELLO_3" Language="en_US">
-      <Text>A bronze statue group of a woman about to strike. A resolute woman in long, deeply folded robes stands over a man who has slumped, drunk and half-naked, onto a cushioned seat beneath her. She grips his hair with one hand to pull his head back and raises a sword high in the other, her face set and composed at the moment before the killing blow. The dark bronze is worked with intricate drapery and a low decorated base, and the two entwined figures form a tense, upright pyramid.</Text>
+      <Text>This statue is a bronze group of Judith at the moment of her killing, standing on a dark square base. The veiled heroine in heavy robes stands over the drunken Assyrian general Holofernes, who has slumped onto a cushion at her feet, one of his legs dangling limply. She grips his hair with one hand and raises a curved sword high in the other, ready to strike. The dark weathered bronze makes the figures stern and monumental.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_EOP_1" Language="en_US">
-      <Text>A Korean ink painting with light colour, of three old men gathered outdoors to argue over which of them is the oldest. The three elders, with long white beards and flowing robes, stand and gesture animatedly among rocks beneath a gnarled old tree, each pressing his claim to impossible age. The figures are drawn in free, lively brushwork against the bare tone of the paper, with only spare touches of colour. The mood is humorous and spirited, a witty scene of aged sages in debate.</Text>
+      <Text>This painting is a tall, narrow Korean hanging scroll in ink and light color, illustrating a Chinese tale of three old men who each boast of being the oldest. The three white-bearded elders in blue and orange robes stand talking beside a small deer on a rocky ledge above a sea of swirling clouds. Craggy blue-tinted peaks rise behind them, a pine tree spreads beneath the ledge, and a tiny pavilion sits far below at the lower left.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_EOP_2" Language="en_US">
-      <Text>A Korean ink-and-colour painting of a rooster standing beneath a leafy branch. The proud bird has a bright red comb and wattles, a dark curving tail and finely stroked feathers, and stands with one foot lifted among a few faint hens and chicks below. The background is the bare, warm tone of the silk, with only the overhanging spray of leaves at the top. Every feather is drawn with patient, lifelike detail, the whole scene calm and closely observed.</Text>
+      <Text>This painting is a detail from a tall Korean hanging scroll in ink and color on silk. A proud rooster stands in profile with a bright red comb and wattles, golden-brown neck feathers, and a long sweeping tail of glossy black plumes. A pale hen stands beneath him, and a small spider dangles on its thread from an ink-washed rock at the upper left. The brushwork is quick and lively against the bare tan silk.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_EOP_3" Language="en_US">
-      <Text>A Korean ink-and-colour painting of two horses and their handlers. A bearded man in a broad hat rides one sturdy horse while leading or standing beside a second; the animals, one pale and one darker, are drawn with rounded, solid bodies and careful shading. The figures wear the robes and headgear of old Korea, and small details of harness and hoof are picked out precisely. The background is left as the plain tone of the paper, keeping all attention on the horses and men.</Text>
+      <Text>This painting is the lower half of a tall Korean hanging scroll in ink and color on silk. A stout, smiling groom with a beard, a black cap, and a gray-blue robe stands between two horses and grips the bridle of one. The nearer horse is a stocky tan pony patched with white, and a darker, shaggier horse waits behind him at the left. The animals have thick, solid bodies against the plain tan silk.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_GIL_1" Language="en_US">
-      <Text>A modern oil painting of three young Indian women grouped closely together against a plain dark ground. They wear saris in deep, earthy colours - one rich red, one ochre-yellow, one dull green - and sit or stand pressed side by side, their forms simplified into smooth, flat shapes. Their heads are slightly bowed and their large dark eyes look away, giving them a still, pensive, almost melancholy mood. The warm brown skin and muted colours make a quiet, dignified group portrait.</Text>
+      <Text>This painting is a modern Indian oil of three young women seated close together against a bare brown wall. The girl at the left is wrapped in a pale green shawl, the one behind in orange-red, and the one at the right in deep crimson, their black hair drawn back beneath their coverings. All three look down and away with quiet, resigned faces, hands resting in their laps. The figures are simplified into broad flat areas of strong color.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_GIL_2" Language="en_US">
-      <Text>A warm oil painting of a bride being prepared for her wedding. The young bride sits at the center, still and inward, while several women crowd around her to dress and adorn her, their bodies simplified into rounded, flattened shapes. The palette is dominated by deep reds, browns and ochres of skin, cloth and shadow, with a few bright accents of jewellery and fabric. The mood is intimate and hushed, the many figures pressed into a shallow, glowing interior.</Text>
+      <Text>This painting, in warm earthy browns and reds, is a modern Indian oil of a young bride being made ready on her wedding day. The pale, bare-shouldered bride sits at the center with her black hair loose, while a woman at the left combs it and another at the right in a green blouse holds out a small bowl. Two children look on, and two red clay pots stand on the floor. The rounded, simplified figures recall Indian wall painting.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_GIL_3" Language="en_US">
-      <Text>A self-portrait in oil of a young woman, shown from the chest up against a plain ground. She has dark hair drawn back, warm brown skin and large, steady dark eyes that meet the viewer directly. The painting is simple and modern, the face modelled in smooth planes with little fuss, the expression calm, serious and self-possessed. The restrained colours keep all attention on her frank, thoughtful gaze.</Text>
+      <Text>This self-portrait is a modern oil of Amrita Sher-Gil at about eighteen, shown from the waist up in strict profile facing left. She wears a bright yellow beret over dark hair, a hoop earring, red lipstick, and a dark blue dress with a deep neckline. She leans on a table with a small brass bowl beside her hand. The background is a mottled wash of gray, blue, and green brushstrokes, and her expression is cool and self-possessed.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_GOGH_1" Language="en_US">
-      <Text>A swirling night landscape in thick, energetic oil strokes. A deep blue sky churns with spiralling currents, huge round stars ringed in yellow halos, and a bright crescent moon at the upper right. Below lies a small sleeping village of dark houses and a tall church spire, tucked among low blue hills. In the left foreground a great dark cypress rises like a green-black flame from the ground to the top of the sky. The whole scene seems to move and roll, painted in rhythmic, curling brushwork of blue, yellow and green.</Text>
+      <Text>This painting is a Post-Impressionist oil made during van Gogh's stay in the asylum at Saint-Remy in southern France, and it is one of the most recognized images in modern art. A churning night sky fills most of the canvas: stars blaze inside rings of light, a spiral current rolls through the middle, and a yellow moon glows at the upper right. A dark cypress flames up the left edge, and a small village with a pointed church steeple sleeps beneath the hills. Every form is built from thick, curling strokes of blue and yellow.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_GOGH_2" Language="en_US">
-      <Text>A night street scene in bright oil colour. A cafe terrace glows under a large yellow awning lit by lamplight, its warm gold spilling across the tables and the paving stones. Small figures sit at round tables and a waiter stands among them, while a dark cobbled street runs off into the blue night past shuttered houses. Above, a deep blue sky is scattered with big twinkling stars. The picture has no black at all; even the night is built from blues, and the contrast of glowing yellow against it feels vivid and alive.</Text>
+      <Text>This painting is a Post-Impressionist oil of a cafe terrace on the Place du Forum in Arles at night, lit from within by a glowing yellow awning and lamp. Small figures sit at round tables beneath the awning while a waiter in white stands among them, and a few people stroll down the dark blue street beyond. Above the rooftops the deep blue sky is scattered with large yellow stars. The painting uses no black at all, only warm yellows against cool blues.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_GOGH_3" Language="en_US">
-      <Text>A tense, glaring interior in oil. A long room has blood-red walls and a hard yellow wooden floor under a green ceiling, lit by a row of hanging gas lamps that burn with swirling yellow halos. At the center stands a large green billiard table casting a long shadow, an attendant in white beside it. A few solitary drinkers slump over small tables along the walls. The clashing red and green and the harsh light give the room a restless, sleepless, almost feverish feeling.</Text>
+      <Text>This painting is a Post-Impressionist oil of the inside of the Cafe de la Gare, a late-night cafe in Arles, in harsh clashing colors. Blood red walls and a green ceiling press down on a yellow wooden floor, and four hanging lamps blaze with halos of swirling yellow strokes. A green billiard table dominates the center, with the owner standing beside it in a pale suit, while a few customers slump at tables along the walls. A clock on the back wall reads past midnight.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_GRECO_1" Language="en_US">
-      <Text>A tall, dramatic religious oil crowded with elongated figures. Around the seated Virgin and the Christ Child press the three kings in richly coloured robes, one kneeling to offer a gift, their attendants and animals filling the shadowy stable behind. The bodies are stretched unnaturally long and lean, the drapery flickering in reds, golds and greens, and a supernatural light breaks from the Child. The composition surges upward with restless energy, faces and hands turned toward the holy pair.</Text>
+      <Text>This panel, painted in a bright Venetian manner while El Greco still worked in Crete, is a small early work in tempera. The Virgin sits between tall columns with the Christ Child on her lap, while three kings gather before her: one kneels in gold to take the child's hand, one leans in with a chalice, and a dark-skinned king in a red cloak bows at the right. Behind them a camel with its rider and a horse wait beneath a cloudy sky.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_GRECO_2" Language="en_US">
-      <Text>A tall, soaring religious oil. At the top the Virgin rises to heaven standing on a pale crescent moon, her robes billowing in blue and rose as a swirl of elongated angels lifts her through a golden light. Below, a ring of apostles crowds around her empty tomb, throwing up their arms and gazing after her in astonishment. Every figure is stretched thin and tall, the whole picture pulled upward in a rush of movement and shining, unnatural colour.</Text>
+      <Text>This altarpiece, painted for the church of Santo Domingo el Antiguo in Toledo, is a tall Spanish Renaissance oil four meters high, showing the Virgin carried up to heaven. In the upper half she rises on a pale crescent moon with arms outstretched, wearing a red gown and a billowing blue mantle among angels and winged cherub heads. Below, the twelve apostles crowd around her empty stone tomb, gesturing upward in astonishment. The figures are elongated and the colors cold and luminous.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_GRECO_3" Language="en_US">
-      <Text>A brooding landscape in oil, all greens, greys and cold whites. A hill town of grey towers, walls and a great cathedral spire rides along a steep green ridge, threaded by a winding river. Above it a turbulent sky boils with dark storm clouds torn by pale light, as if lightning were about to strike. There are no people; the whole view feels charged, dramatic and strangely alive, the buildings glowing sharply against the heavy sky.</Text>
+      <Text>This painting is a Spanish Renaissance oil, one of the earliest pure landscapes in Western art and one of the darkest. The Spanish city of Toledo rises on its hill of gray stone at the right beneath a violent storm sky, its cathedral spire and the Alcazar fortress lit by an eerie white light. Green hills roll down to a river crossed by an arched bridge, with small buildings scattered along the banks. The whole scene is painted in deep greens, blue-blacks, and cold whites.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_HOKUSAI_1" Language="en_US">
-      <Text>A Japanese woodblock print in deep Prussian blue and cream. A single enormous wave rears up from the left and arcs across the whole scene, its crest breaking into dozens of clawing foam-fingers that reach toward the right. Beneath it, long narrow boats packed with rowers are dwarfed and about to be swallowed. Far in the distance, small and calm between the wave's curls, sits the snow-capped cone of Mount Fuji. A red title cartouche and columns of Japanese text run down the upper-left corner.</Text>
+      <Text>This print belongs to the Thirty-six Views of Mount Fuji series and is the most famous image in Japanese art. An enormous deep-blue wave rears up on the left and curls over the whole scene, its crest breaking into claw-like fingers of white foam. Three long open boats full of rowers ride the troughs beneath it. Far in the distance, small at the center, sits the snow-capped cone of Mount Fuji.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_HOKUSAI_2" Language="en_US">
-      <Text>A Japanese woodblock print of a calm lake in soft blues and greens. In the foreground a low spit of land carries a single wind-bent pine leaning out over the still water, with a small shrine and rocks at its foot. A few tiny boats drift on the pale lake, and the far shore rises in gentle blue hills. Small and serene in the distance sits the snow-capped cone of Mount Fuji, beneath a sky graded from soft pink to blue. The whole scene is quiet, balanced and spare.</Text>
+      <Text>This print is a Japanese woodblock view of Lake Suwa at dawn in soft blues and greens and pink. Two tall pines with dark twisted branches rise from a rocky point in the foreground, sheltering a small thatched shrine with a straw roof. Beyond them the pale lake stretches to a shoreline of villages and blue hills. A tiny sailboat crosses the water on the left, and the white peak of Mount Fuji shows on the far horizon.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_HOKUSAI_3" Language="en_US">
-      <Text>A bold Japanese woodblock print dominated by a single mountain. Mount Fuji rises as a broad, smooth cone glowing deep red-brown, streaks of white snow clinging near its summit, its lower slopes darkening into green forest. Behind it a clear blue sky is patterned with neat rows of small, flat white clouds. There is nothing else - no people, no water - just the great triangular mountain filling almost the whole print. The simple shapes and warm colour make it strikingly calm and monumental.</Text>
+      <Text>This print, often called Red Fuji, is a Japanese woodblock view of Mount Fuji glowing red in early autumn light. The mountain rises as a broad smooth cone across the right two-thirds of the picture, its slope a warm reddish-brown with streaks of white snow clinging to the summit. A band of dark green forest runs along its base. Rows of small white clouds lie in flat streaks across a deep blue sky.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_KANDINSKY_1" Language="en_US">
-      <Text>A large abstract oil painting with no recognizable objects. Across a soft off-white ground float dozens of pure geometric shapes: crisp circles (one large one at the upper left ringed in dark purple and black), triangles, arcs, checkerboard grids and straight and curving lines that shoot across the canvas. They are painted in clear, balanced colours - blues, purples, pinks, yellows and black - arranged like a piece of visual music, precise and weightless.</Text>
+      <Text>This painting, made while Kandinsky taught at the Bauhaus, is an abstract oil with no recognizable objects, built entirely from geometry. Circles, triangles, checkerboards, and long straight lines float and cross over a pale cream ground. A large black and violet circle with a red halo at the upper left is the heaviest shape, balanced by a red disk beside it and small blue and yellow circles below. The colors are clean and bright, and the shapes seem to hang weightless in space.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_KANDINSKY_2" Language="en_US">
-      <Text>An Expressionist oil painting, loose and vivid. A small rider wrapped in blue gallops on a white horse across a sunlit green hillside, leaning forward with the motion, while autumn-coloured trees and blue shadows streak past behind. The scene is painted in quick, broad dabs of pure colour rather than careful outlines, so horse and rider almost dissolve into the bright landscape. The whole small picture feels fast, joyful and full of movement.</Text>
+      <Text>This painting is an early oil from before Kandinsky turned to abstraction, and it later gave its name to the Blue Rider group he founded in Munich. A small rider in a blue cloak gallops on a white horse across a rolling green meadow, leaning forward with the motion. Autumn trees in rust and gold stand on the hilltop behind, under a blue sky with two white clouds. The paint is laid on in thick dabs, so the field shimmers rather than sits still.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_KANDINSKY_3" Language="en_US">
-      <Text>A vivid, semi-abstract oil painting that swirls with colour. Blocks and patches of intense red, orange, blue and green tilt and tumble across the canvas, suggesting buildings, crowds and a whole city wheeling around a pale, glowing centre, with a bright rainbow arc curving over the top. Bold outlines and clashing hues give it enormous energy, as if the city were spinning apart into pure colour and light. It hovers between a townscape and total abstraction.</Text>
+      <Text>This painting, also titled Moscow I, is a near abstract oil of Moscow, Kandinsky's home city. Colored fragments of the city tumble around a glowing center: a white palace with dark windows, red and green onion domes, a rainbow, and a walking couple painted as tiny figures. Flocks of small black birds scatter across a sky of blue, pink, and yellow. The whole scene tilts and spins as if the city were seen in a dream.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_KAUFFMAN_1" Language="en_US">
-      <Text>A Neoclassical double portrait set outdoors in a park. A woman in a flowing white gown and a man in a dark coat stand together beneath a broad, leafy tree, a calm landscape of hills opening beyond them. A small dog rests or looks up at their feet, and the couple lean gently toward one another in an easy, affectionate pose. The soft light, cool greens and pale drapery give the scene a graceful, refined stillness.</Text>
+      <Text>This portrait, set in wooded countryside outside Rome, is a Neoclassical oil of Anna Maria Jenkins and her uncle Thomas Jenkins, an art dealer in the city. She stands at the left in a flowing white gown with a pink sash and a wide white hat, holding up a spray of white convolvulus. He sits beside her against a tree in a dark coat and pale breeches, lifting his hat in one hand and patting a black-and-white dog with the other. Distant hills and the Colosseum fill the background.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_KAUFFMAN_2" Language="en_US">
-      <Text>A Neoclassical portrait of a seated scholar at his writing table. A man in a green coat pauses in the middle of writing, a pen in one hand over a sheet of paper, and turns his head as if looked up in thought or gently interrupted. Books and papers lie before him, and the plain background keeps the mood studious and calm. Soft, even light models his thoughtful face and the folds of his coat.</Text>
+      <Text>This portrait is a Neoclassical oil of Johann Joachim Winckelmann, the German scholar who founded modern art history. He sits at a table in a loose gray coat and a mustard-yellow scarf, his hands folded over an open book and a quill pen held loosely between his fingers. His head turns to the side as if a thought has just interrupted his writing. Warm light falls on his face and hands out of a plain dark background.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_KAUFFMAN_3" Language="en_US">
-      <Text>A Neoclassical portrait of a woman posed as a muse of music. She sits in a flowing gown, a large lyre or harp-like instrument leaning against her, one hand near its strings. Her head is lifted and turned upward, lips slightly parted, as though caught in a moment of song or inspiration. Soft drapery, gentle colour and a dim landscape behind her lend the figure an idealized, poetic grace.</Text>
+      <Text>This portrait is a Neoclassical oil of the English singer Sarah Harrop posed as the muse of lyric poetry. She sits in a rose-pink gown with a green scarf over her shoulders and a wreath of small flowers in her powdered hair, looking calmly out of the picture. One arm rests on a gilded lyre while her other hand holds a rolled sheet of music. A stormy sky and a dark wooded cliff with a waterfall fill the background.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_KLIMT_1" Language="en_US">
-      <Text>A famous decorative painting glowing almost entirely in gold. A couple kneel together on a small patch of flowering meadow at the bottom, their bodies merged into one tall shape wrapped in a single shimmering gold robe. The man, crowned with leaves, bends down and cradles the woman's face to kiss her cheek; she tilts her head up with closed eyes, kneeling into his embrace, her hands resting on his. His robe is patterned with black-and-white rectangles, hers with bright circles and flowers, and behind and around them the whole background is flat, radiant gold. The effect is ornate, tender and dreamlike.</Text>
+      <Text>This painting, Klimt's most famous work, is a Viennese Art Nouveau oil layered with gold leaf. A couple kneels in an embrace on a flowered meadow, the man bending to kiss the woman's cheek as she tilts her face up with closed eyes. Their bodies merge into a single golden cloak, patterned with black-and-white rectangles on his side and bright colored circles on hers. Behind them lies a flat shimmering ground of gold.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_KLIMT_2" Language="en_US">
-      <Text>A near-square landscape of a straight, tree-lined avenue in a park. Tall trees rise on either side and their dense green crowns fill almost the whole canvas, painted as a shimmering mosaic of countless small dabs of green, gold and dark blue. Down the center the avenue leads the eye toward a pale, sunlit house half-hidden among the foliage. There is no sky to speak of and no figures; the effect is a flat, glowing tapestry of leaves and light.</Text>
+      <Text>This painting is a square oil landscape of the tree-lined avenue leading to Schloss Kammer, a country house on the Attersee in Austria. Tall trees with twisting blue-gray trunks line both sides of a paved path and meet overhead, so that a dense canopy of green leaves fills almost the whole picture. At the end of the avenue stands the yellow house with its red roof. The foliage is painted in thousands of tiny dabs of green, blue, and yellow.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_KLIMT_3" Language="en_US">
-      <Text>A near-square painting of a dense cottage garden packed edge to edge with flowers. The lower half is a bright carpet of small blossoms - white, red, blue and pink - massed together like scattered jewels, while taller stems rise behind them to a cluster of big golden sunflowers with dark centers near the top. There is almost no sky and no path; the whole surface is a shimmering, patterned wall of flowers and leaves. The effect is rich, decorative and joyful.</Text>
+      <Text>This painting is a square oil of a cottage garden so crowded with flowers that no ground shows through. Tall sunflowers with broad gray-green leaves rise on the right, their yellow heads nodding at the top. Below and around them spread masses of red, pink, and blue blossoms, scattered across the green like confetti. The picture has no sky and no horizon, only flowers from edge to edge.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_KOBER_1" Language="en_US">
-      <Text>A full-length Renaissance portrait of a young princess, standing stiffly against a red curtain with a Latin inscription in the upper corners. She wears a pale silver-white gown with red-and-gold embroidered sleeves and cape and a wide lace ruff, jewels in her hair and at her breast, and holds an ornate cross pendant. Every pearl, thread and pattern is rendered with patient precision; the mood is formal and doll-like.</Text>
+      <Text>This portrait is a Renaissance court oil of Anna Maria Vasa, a three-year-old Polish and Swedish princess, standing stiffly before a red curtain. She wears a silvery-white gown with red and gold embroidery, a tall white ruff, a jeweled cap on her fair hair, and a heavy gold cross set with gems on a chain. One tiny hand holds a folded handkerchief. Latin inscriptions in the upper corners give her name, her titles, and her age.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_KOBER_2" Language="en_US">
-      <Text>A Renaissance state portrait of a bearded king. He stands in a black doublet with a tall pleated white ruff and a heavy spotted-fur cloak over his shoulders, a jewelled dark cap on his head and a sword at his hip, against a dark ground with a red drape. His face is calm and dignified, and the fine detail of fur, lace and jewels marks his rank.</Text>
+      <Text>This portrait is a Renaissance state oil of Sigismund III Vasa, king of Poland and Sweden, shown from the knees up. He stands in a black doublet and a tall spiky white ruff, a black cap with jeweled badges on his head, and a spotted lynx fur cloak draped over his shoulders. One hand rests on a red-covered table while the other holds the hilt of a sword. A red curtain hangs behind him on the left against a dark background.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_KOBER_3" Language="en_US">
-      <Text>A Renaissance portrait of an older queen dressed as a widow. She stands in a plain black gown with a long white veil covering her head and shoulders like a wimple, a gold cross on a chain at her breast, holding a pair of gloves. Her lined face is grave and composed against a dark ground; the effect is austere, pious and dignified.</Text>
+      <Text>This portrait is a Renaissance oil of Anna Jagiellon, the elderly queen of Poland, in widow's dress. She stands in a plain black gown under a long white veil that falls from her head to below her waist, with a white band across her chin and throat. A gold cross hangs on a long chain at her breast, and she holds a small book in one hand. A green and gold brocade curtain is drawn back at the upper right.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_LEWIS_1" Language="en_US">
-      <Text>A white marble statue of a queen who has just died on her throne. She sits slumped back, her head fallen to one side and one arm hanging limp, the moment of death caught in cold stone. She wears a pleated Egyptian gown and headdress, and the tall throne is carved with royal ornament. The realism is striking and unsettling - not a peaceful figure but a body giving way - and the polished marble makes the collapse feel heavy and final.</Text>
+      <Text>This statue is a life-size white marble figure of Cleopatra in the moment after her death. She sits on a throne whose armrests are carved as sphinx heads, her body slumped back and her head fallen to one side with the eyes closed. She wears a pleated gown that leaves one breast bare and a royal headdress with a cobra at the brow. One hand rests limply in her lap while the other hangs over the arm of the throne.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_LEWIS_2" Language="en_US">
-      <Text>A white marble sculpture of a Native American couple standing side by side. A young man and woman stand close together, joined at the hands, both in fringed garments; his figure is sturdy and hers softer, and they lean gently toward one another in a tender, ceremonial pose. Details of braided hair, beadwork and fringe are carefully carved into the pale stone. The group is calm and dignified, a quiet image of union.</Text>
+      <Text>This sculpture is a small white marble group of Hiawatha and Minnehaha, the young Native American couple from Longfellow's poem, standing side by side. The man wears a feathered headdress and a fringed tunic, and the woman wears a headband and a draped shawl over a short dress. They clasp hands at the center and turn their faces toward each other with quiet smiles. The figures stand on a round base.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_LEWIS_3" Language="en_US">
-      <Text>A white marble statue of a lone woman standing in distress. She stands upright in long, clinging robes, her hands clasped together at her breast and her head lifted, her face full of anguish or prayer as though abandoned in the wilderness. A small water jar rests at her feet. The carving is smooth and expressive, the whole slender figure charged with quiet suffering and endurance.</Text>
+      <Text>This statue is a white marble figure of the biblical servant Hagar alone in the wilderness after her banishment. She stands with her hands clasped tightly at her chest and her face lifted upward in prayer, her long hair falling loose over her shoulders. Her gown slips from one shoulder and drapes in heavy folds to her bare feet. An overturned water jug lies empty on the base beside her foot.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_MICHELANGELO_1" Language="en_US">
-      <Text>A section of a vast ceiling fresco, showing the moment of creation. On the left a nude man reclines on bare earth, one knee raised, and stretches out a limp arm; on the right a bearded God, wrapped in a swirling cloak and carried by a crowd of angels, sweeps toward him and reaches out in return. Their fingers almost touch across a narrow gap, charged with the spark of life about to pass. The figures are powerful and sculptural, set against a plain sky, and the small space between the two hands is the heart of the whole image.</Text>
+      <Text>This fresco is the Creation of Adam, the best-known panel of the Sistine Chapel ceiling in the Vatican. On the left a nude Adam reclines on a green bank with one arm stretched out limply toward the right. God, an old bearded figure in a pale robe, sweeps in from the right inside a swirling red cloak crowded with angels, and reaches out with his forefinger. The two fingertips almost touch at the center of the picture.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_MICHELANGELO_2" Language="en_US">
-      <Text>A colossal statue in gleaming white marble of a nude young man standing at ease. His weight rests on one leg so the hips and shoulders tilt in a relaxed, natural pose, and a slingshot is slung over one shoulder with the stone held loosely in his lowered hand. His head is turned sharply to one side, the brow furrowed and the eyes intent, as if watching a distant enemy and gathering himself. The anatomy is idealized and precise - veins, muscles and curling hair all finely cut - giving an overwhelming sense of poised, alert strength.</Text>
+      <Text>This statue is a colossal white marble figure of David, over five meters tall, nude and alert before his fight with Goliath. He stands with his weight on the right leg, the head turned sharply to his left with a frowning, watchful gaze. A sling rests over his left shoulder and the stone sits in his lowered right hand. The figure stands alone on a low plain base.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_MICHELANGELO_3" Language="en_US">
-      <Text>A white marble sculpture of a seated woman holding a dead man across her lap. The young mother sits in deep, flowing robes and cradles the limp, near-naked body of her grown son, one arm supporting his shoulders while the other hand opens in quiet sorrow. Her face is smooth, youthful and calm, bowed gently over him rather than weeping. The polished stone flows from the intricate folds of cloth to the soft, lifeless limbs, an image of tender grief carved with astonishing delicacy.</Text>
+      <Text>This sculpture is a white marble group of the Virgin Mary seated with the dead body of Christ lying across her lap. She is a young woman with her head bowed, one hand supporting his shoulders while the other opens outward in a gesture of acceptance. Her robes spill in deep folds that support his limp, near-naked figure.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_MONET_1" Language="en_US">
-      <Text>An Impressionist oil looking straight down at the surface of a lily pond, with no sky, bank or horizon in sight. Flat green lily pads float in clusters across the water, dotted with soft pink and white blossoms. Between and beneath them the water mirrors a blue sky and the greens of overhanging willows, so reflection and surface blur together. Painted in loose, broken dabs of blue, green, lilac and rose, the whole canvas becomes a shimmering, floating field of water and light.</Text>
+      <Text>This painting is a large Impressionist oil that looks straight down onto Monet's lily pond at Giverny, with no bank or sky in view. Clusters of flat lily pads drift across turquoise and blue water, and a few pink blossoms and one white flower float among them. The water reflects tall grasses and trees as loose streaks of green and gold. The brushwork is soft and blurred, so everything seems to hover on the surface.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_MONET_2" Language="en_US">
-      <Text>An Impressionist oil of a hazy harbour at dawn. A small orange sun hangs low in a soft grey-blue mist, casting a broken orange streak of reflection down across the rippling water. Two or three little dark boats drift in silhouette in the foreground, while the ghostly shapes of masts, cranes and smokestacks fade into the fog behind. The whole scene is loose and atmospheric, built from thin washes of blue-grey with the single warm glow of the sun and its reflection.</Text>
+      <Text>This painting is an oil view of the harbor of Le Havre at dawn, and its title gave the Impressionist movement its name. A small orange sun hangs in a gray-blue mist and drops a broken streak of orange reflection down the water. Two small dark rowing boats drift in the foreground, while masts, cranes, and smoking chimneys of the port fade into the haze behind. The whole scene is painted in quick, thin strokes of blue, gray, and pink.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_MONET_3" Language="en_US">
-      <Text>An Impressionist oil of a summer field in the countryside. In the foreground a rounded haystack sits in tall grass, and a wide band of red poppies flecks the green meadow with dots of scarlet. Beyond stretch fields, a line of trees and a few small rooftops under a soft, pale sky. The paint is loose and dabbed, the whole scene warm and sunlit, catching the drifting light of a bright rural afternoon.</Text>
+      <Text>This painting is an Impressionist oil landscape of a single rounded haystack in a summer meadow near Monet's home at Giverny. A wide field of red poppies stretches behind it toward a row of farmhouses with red roofs and a dense line of dark green trees. Beyond the trees, low hills fade into a hazy pink and lavender sky. The paint is applied in soft dabs that blend the grass, flowers, and foliage together.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_ORLOVSKY_1" Language="en_US">
-      <Text>A bronze statue of a military commander standing on a tall pedestal. He wears a long uniform coat with a cloak hanging from his shoulders, and stands firmly with one arm sweeping outward as if directing troops, the other holding a sword or baton at his side. His head is bare and turned slightly, the face grave and resolute. The dark bronze reads as a proud, commanding figure poised in the middle of battle.</Text>
+      <Text>This statue, shown here without its pedestal, is a bronze figure of Mikhail Kutuzov, the field marshal who led Russia against Napoleon in 1812. He stands in a military uniform with epaulettes and a long cloak draped over one shoulder, and he raises a baton high in his right hand. His left hand holds a sword lowered at his side. The bronze has weathered to a dark green.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_ORLOVSKY_2" Language="en_US">
-      <Text>A tall statue of a winged angel that crowns a monumental column. The angel stands upright in flowing robes, great wings folded behind, and leans on a long cross whose foot presses down a serpent at its feet. One hand rests on the cross while the other lifts toward the sky, and the calm, upturned face gazes heavenward. Cast to be seen high against the clouds, the figure is serene, victorious and commanding.</Text>
+      <Text>This sculpture, shown here on its own, is the bronze angel that crowns the tall granite column in Palace Square in Saint Petersburg. The angel stands with large feathered wings folded behind and holds a tall cross in one hand, while the other hand points upward to heaven. A serpent lies crushed beneath the cross at the angel's feet, and the figure's head bows toward it. The whole figure is colored gold.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_ORLOVSKY_3" Language="en_US">
-      <Text>A portrait bust of an emperor set on a socle. He is shown from the chest up in a high-collared military uniform with epaulettes, his short hair combed forward and his clean-shaven face calm and idealized. The head is held straight or turned only slightly, giving a formal, official dignity. The smooth surface and crisp detail of collar and braid mark him out as a ruler.</Text>
+      <Text>This bust is a white marble portrait of Tsar Alexander I of Russia in the manner of an ancient Roman ruler. He wears a laurel wreath over short curled hair, and his clean-shaven face has a calm, faint smile. A heavy cloak is draped over armor at the shoulders and gathered across the chest. The bust rests on a small round marble socle.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_REMBRANDT_1" Language="en_US">
-      <Text>A full-length oil portrait of a man standing beside a stone column. He is dressed in black from head to foot, with a broad flat white collar, a wide-brimmed hat and one hand holding a pale glove while the other rests at his hip. Warm light picks out his face, collar and hands from the deep brown shadows around him. His pose is confident and slightly turned, the whole portrait grand yet plain.</Text>
+      <Text>This portrait is a full-length Dutch Golden Age oil of Andries de Graeff, a wealthy Amsterdam magistrate, standing in a stone doorway. He is dressed entirely in black with a broad flat white collar and a wide-brimmed hat, his long fair hair falling loosely to his shoulders. One hand rests on his hip, a cloak hangs from his arm, and one glove lies dropped on the floor at his feet. Warm light falls on the pale stone behind him.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_REMBRANDT_2" Language="en_US">
-      <Text>An oil portrait of a woman standing as if leaning at a window. She wears a dark dress with a broad white lace collar and matching cuffs, and holds a folded fan in one hand while the other rests on a painted frame that runs across the picture, as though she leans out from within it. Warm golden light falls on her calm, direct face and the delicate lace. The deep shadowed background makes her seem to lean gently forward, close and alive.</Text>
+      <Text>This portrait is a Dutch Golden Age oil of Agatha Bas, a young Amsterdam woman, standing inside a painted wooden frame along the picture's edges. She wears a black gown with a gold-embroidered bodice, a wide white lace collar, and pearls at her neck. One hand holds a folded fan, and the other rests on the edge of the frame so the thumb appears to reach out of the picture. Her pale face looks directly out from a dark background.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_REMBRANDT_3" Language="en_US">
-      <Text>A dramatic religious oil lit by a burst of light out of deep darkness. An old, bearded patriarch is halted at the very moment of sacrifice: an angel has swept down and seized his wrist, and the knife slips from his opening hand. Beneath him lies his son, stripped and bound across an altar, the father's large hand covering the boy's upturned face. The strong light falls on the pale body and the startled faces while everything else drops into shadow, freezing the scene at the instant of rescue.</Text>
+      <Text>This painting is a dramatic baroque oil of the moment an angel stops Abraham from sacrificing his son. The old bearded father presses his hand over the boy's face while a bright knife tumbles through the air, knocked from his grasp. The angel swoops in from the upper left, gripping his wrist with one hand and raising the other. Isaac lies bound and bare on the altar in the foreground, his body lit against the dark rocky landscape.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_RUBLEV_1" Language="en_US">
-      <Text>A Byzantine icon painted in tempera on a shining gold ground. On the left a tall winged angel strides forward, one hand raised in greeting; on the right a woman in deep red robes sits and turns toward him with a startled, questioning gesture. The two elongated figures are set against slender towers and a draped cloth strung between them. Everything is flat, still and formal, the gold background and rich reds giving the small panel a solemn, sacred glow.</Text>
+      <Text>This icon, painted for the Dormition Cathedral in Vladimir, is a Russian panel in egg tempera on wood. The archangel Gabriel strides in from the left in a blue-green robe with golden wings, a staff in one hand and the other raised toward Mary. She sits on a bench at the right in a dark cherry-red mantle and holds a strand of red yarn, turning her head toward him. Pale towers stand behind them under a red cloth strung between the rooftops.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_RUBLEV_2" Language="en_US">
-      <Text>A Byzantine icon of Christ enthroned in glory. He sits at the center within a large red diamond of light laid over a dark oval, dressed in gold-lined robes, one hand raised in blessing and the other holding an open book on his knee. In the corners around him appear the winged symbols of the four evangelists - a man, a lion, an ox and an eagle - against a gold ground. The image is flat, symmetrical and radiant, built for quiet devotion.</Text>
+      <Text>This icon, painted for the Dormition Cathedral in Vladimir, is a large Russian panel in tempera on wood, over three meters tall. Christ sits at the center in golden robes, one hand raised in blessing and an open book on his knee. Behind him a red diamond of light lies over a dark green oval crowded with faint angelic beings, and the faded corners hold the symbols of the four evangelists. Most of the paint has worn thin, so the figures show through a pale haze.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_RUBLEV_3" Language="en_US">
-      <Text>A Byzantine icon of the Ascension. At the top Christ rises within an oval halo of light, held aloft by angels, his hand raised in blessing. Below, a crowd of apostles is gathered on either side of a central robed woman who stands calm and upright, all of them tilting their heads back and lifting their hands toward the departing figure. The elongated forms, gold ground and glowing colours make a solemn, upward-reaching image of wonder.</Text>
+      <Text>This icon, painted for the Dormition Cathedral in Vladimir, is a Russian panel in tempera on wood. At the top Christ sits inside a round blue disk of light that angels carry upward over a pale gold ground. Mary stands at the center in a dark red mantle with her hands raised before her chest, flanked by two angels in white who point upward. Six apostles in colored robes gather on each side, some looking up and others turning to one another.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_SAMOSTRZELNIK_1" Language="en_US">
-      <Text>A Renaissance illuminated miniature. A bishop stands in cream-and-gold vestments and a tall mitre, holding a crozier, before a large gold disk that haloes him, on an ornate throne. The painting is small but intensely detailed and richly coloured in golds, reds and whites, glowing like a page from a precious manuscript.</Text>
+      <Text>This portrait is a Polish Renaissance panel painting of Piotr Tomicki, bishop of Krakow, shown full length. He stands in a tall white miter and a red and gold brocade cope, holding a gilded crozier and an open book. A gilded arch with small angels frames him against a green patterned hanging, and a second miter and a red hat rest on a table at the lower right. The face is painted with more care than the stiff body.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_SAMOSTRZELNIK_2" Language="en_US">
-      <Text>A lavish illuminated manuscript page. An enthroned bishop-saint in a gold cope and mitre, haloed, holds a crozier while small kneeling clergy and figures gather at his feet; a red eagle on a banner rises beside him. The scene is framed by a dense painted border of flowers, fruit and coats of arms, every part tiny and exact and glowing with red, blue, green and gold.</Text>
+      <Text>This miniature, painted in bright color and gold inside a floral border, is a full page from an illuminated catalogue of the archbishops of Gniezno. Saint Stanislaus, the patron saint of Poland, stands at the center in gold vestments and a jeweled miter, a crozier in his hand and two angels at his shoulders. Bishop Piotr Tomicki kneels at his left and King Sigismund I at his right beside a red banner with the white eagle of Poland. Two coats of arms hang in the foliage below.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_SAMOSTRZELNIK_3" Language="en_US">
-      <Text>An illuminated manuscript page showing the Virgin and Child. Mary, in a deep blue robe, stands with the infant Christ within a radiant golden mandorla of light, and the whole scene is surrounded by a dense painted border of flowers, fruit, small cherubs and a coat of arms. Tiny and exact, it glows with blue, gold, red and green like a jewel set into a book.</Text>
+      <Text>This miniature is a royal prayer book page in color and gold inside a floral border. Mary stands in a blazing golden sunburst with a crescent moon at her feet, in a red gown and blue mantle, as two angels lower a crown onto her loose golden hair. She holds the naked Christ child on her arm. King Sigismund I in a red robe kneels at the lower right above a shield bearing the white eagle of Poland.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_TITIAN_1" Language="en_US">
-      <Text>A tall, glowing altarpiece of the Virgin carried up to heaven. In the lower zone a crowd of apostles in red and green robes throw up their arms and gaze upward in amazement. Above them the Virgin, in a red gown and blue cloak, rises on a great bank of cloud crowded with small cherubs, her arms lifted and face turned to the light. At the very top God the Father leans down from a golden glory to receive her. The composition surges upward in three bands, unified by blazing reds and warm golden light.</Text>
+      <Text>This altarpiece, painted for the high altar of the Frari church in Venice, is a huge Renaissance panel in oil on wood, nearly seven meters tall and rounded at the top. The Virgin rises on a bank of clouds at the center in a red gown and blue mantle, arms spread wide and face lifted toward heaven. A ring of small angels bears her upward into a golden glow where God the Father hovers above. Below, the apostles crowd together in red and green robes, reaching up in wonder.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_TITIAN_2" Language="en_US">
-      <Text>An oil painting of a young woman carrying a severed head on a platter. She is richly dressed in a red and white gown and steps forward, holding up a large golden dish on which lies the head of a bearded man, his eyes closed. A small servant or child leans in at her side, and a dark curtain sets off her glowing skin and shimmering silks. Her face is calm and averted, giving the gruesome trophy a strange, serene beauty.</Text>
+      <Text>This painting is a Venetian Renaissance oil with figures shown close to half-length. Salome, in a full red dress and loose white sleeves, holds a large platter against her hip, and on it lies the severed head of John the Baptist. She looks down and to the side with a calm face. A serving girl gazes up at her from the left, and a small winged child perches on a wall at the upper right.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_TITIAN_3" Language="en_US">
-      <Text>A grand equestrian portrait in oil. An armoured emperor rides a dark horse at a slow, powerful walk, a long lance couched in his right hand and a red sash across his breastplate. Horse and rider move from shadow into the light of a low, reddening evening sky, a dim wooded landscape stretching behind. The dark armour gleams, the crimson sash blazes, and the lone mounted figure has an air of solemn, unstoppable command.</Text>
+      <Text>This portrait is a large Venetian Renaissance oil of Emperor Charles V riding out of a dark wood at dusk after his victory at Muhlberg. He sits upright on a black horse in polished plate armor, with a red sash across his chest and a long lance angled forward in his right hand. The horse wears a red and gold caparison and steps forward with one foreleg raised. A pale sunset breaks through gray clouds over a low river landscape at the right.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_TOHAKU_1" Language="en_US">
-      <Text>A pair of Japanese ink screens, almost bare in their simplicity. Clusters of pine trees loom and fade through thick white mist, their trunks and needled branches brushed in soft grey-black ink and left unfinished at the edges, so they seem to float. Vast areas of the pale paper are left blank to stand for fog and air. The effect is quiet, spare and atmospheric, with no colour at all.</Text>
+      <Text>This screen is one of a pair of six-panel Japanese folding screens painted in ink on paper. Clusters of pines stand in thick mist, some drawn in strong dark strokes and others fading to gray shadows. Two dark trunks rise near the left, a broad group fills the center, and a faint mountain peak shows at the upper right. Most of the paper is left empty, so the trees seem to drift in and out of fog.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_TOHAKU_2" Language="en_US">
-      <Text>A Japanese folding screen on a shimmering gold ground. A large tree spreads across the panels, its branches heavy with foliage, while flowering plants and grasses cluster below in greens, whites and gold. The lavish gold background and rich mineral colour make the screen opulent and decorative, the opposite of a plain ink sketch.</Text>
+      <Text>These panels, painted for the Chishaku-in temple in Kyoto, are a set of four Japanese sliding doors in color on gold leaf. A massive dark tree trunk climbs from the lower center and spreads its branches across all four panels, hung with maple leaves in red, green, and gold. Below it a bank of autumn plants, including white chrysanthemums and red cockscomb, blooms beside a stream painted in deep blue. The gold background glows behind every gap in the foliage.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_TOHAKU_3" Language="en_US">
-      <Text>A Japanese folding screen on a pale gold ground. A large, gnarled, twisting tree branch reaches out across the panels, touched here and there with small birds and blossoms, while much of the ground is left open around it. Painted in ink with light colour and quick, assured brushwork, the mood is delicate, spacious and serene.</Text>
+      <Text>This screen is a six-panel Japanese folding screen painted in ink and light color on faded gold paper. An old plum tree twists up from rocks at the left, its bark streaked with snow and its thin branches dotted with white blossoms. A pair of ducks perches on the trunk, green bamboo rises behind them, and a single small bird flies across the empty right side. Reeds and a few water plants trail along the bottom edge.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_YING_1" Language="en_US">
-      <Text>A long horizontal Chinese handscroll in fine ink and delicate colour, meant to be unrolled and read from right to left. Along its length, elegant court ladies stroll, sit, play music and tend to daily life among palace halls, open terraces, willow trees and garden rocks. The many small figures in flowing robes are drawn with precise, even lines, and the pale silk sets off touches of red, blue and green. The scene is refined, busy and gently narrative, a whole day of palace life laid out in a continuous band.</Text>
+      <Text>This scroll is one section of a long Chinese handscroll painted in ink and color on silk. Palace ladies in flowing robes of white, red, and green stroll across a courtyard, while others sit on a veranda at the upper left with musical instruments. A tree grows inside a tall red lattice fence at the center, and garden rocks stand on a stone terrace below. Green pillars and paper screens frame the halls in fine, even lines.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_YING_2" Language="en_US">
-      <Text>A Chinese ink landscape washed with light colour. Misty mountains rise in soft, layered peaks above still water, their slopes dotted with trees and half-hidden in cloud. Along the banks grow reeds and lotus, and a few small fishing boats drift among them, tiny figures aboard. Empty stretches of pale silk stand for mist and water, so the scene feels vast, quiet and remote, an ideal of scholarly retreat into nature.</Text>
+      <Text>This scroll is a tall Chinese hanging scroll painted in ink and color on silk that has aged to a warm gold. Blue-green mountains rise in soft layers through mist at the top, and a wide calm lake spreads across the middle. Terraced fields and a walled house sit among dark trees at the lower right, where two small figures stand by the water and a fishing boat is moored. Red collector seals run down the left edge.</Text>
     </Row>
     <Row Tag="LOC_CAI_GWDESC_GREATWORK_YING_3" Language="en_US">
-      <Text>A Chinese ink-and-colour river landscape. Steep, layered cliffs rise sharply on one side above a broad stretch of calm water, their rock faces textured with fine brushstrokes and dotted with clinging trees. A single small boat floats beneath them, carrying a few robed scholars who drift along, tiny against the towering rock. Soft mist and pale open water fill the rest of the scene, giving a mood of poetry, contemplation and the smallness of people before nature.</Text>
+      <Text>This scroll is a Chinese handscroll painted in ink and color on silk. A small boat carries the poet Su Shi, two companions, and a servant across calm water while a boatman stands at the bow with an oar. The Red Cliff rises steeply in green and ocher on the right, topped with dark pines and red-leafed trees, and pale mountains fade into the distance at the left. Red collector seals and a column of inscription mark the empty areas.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORKOBJECT_WRITING" Language="en_US">
+      <Text>A thick book with a dark brown cover lies open. Its two cream pages carry faded lines of small handwritten text arranged in paragraphs, curving gently up from the spine and glowing pale against a dark surround.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORKOBJECT_MUSIC" Language="en_US">
+      <Text>An open score rests on a wooden music stand. Two cream pages of handwritten sheet music sit on the stand's lip, their staves and notes faded to gray, and the stand itself is carved in ornate scrolls of golden-brown wood with a broad ledge below and a single column beneath.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_1" Language="en_US">
+      <Text>A mummified cat stands upright. Its head is a gilded bronze cat face with pointed ears, and its body is wrapped in crisscrossing bands of brown linen.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_2" Language="en_US">
+      <Text>A broken fragment of gray stone tablet is covered in rows of tiny wedge-shaped cuneiform signs. A deep crack runs across it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_3" Language="en_US">
+      <Text>A long thin spear has a slender wooden shaft and a narrow leaf-shaped iron point.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_4" Language="en_US">
+      <Text>A scroll lies open between two wooden rollers with brass ends. Lines of faded handwriting run across the pale parchment.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_5" Language="en_US">
+      <Text>An oval mask of dark brown wood has narrow slit eyes, a long nose, and a small mouth showing teeth. Two short horns rise from the top, and a row of white triangles runs along each edge.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_6" Language="en_US">
+      <Text>A tall slender clay amphora in dark red-brown has two small handles curving from its neck to its shoulders. It tapers to a pointed base.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_7" Language="en_US">
+      <Text>A fragment of floor mosaic sits on a broken plaster slab. Small cream, brown, and black tiles form a single eye with its brow and part of a face.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_8" Language="en_US">
+      <Text>A gilded halberd, a long pole weapon, carries a crescent axe blade on one side. A spike rises from the top, and a curved hook projects behind the blade.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_9" Language="en_US">
+      <Text>A round bronze shield has turned green with age. A raised pattern of petals radiates from a central boss.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_10" Language="en_US">
+      <Text>A gold armlet forms an open ring whose two ends are shaped as facing griffin heads. Their curled wings and beaks nearly meet at the gap.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_11" Language="en_US">
+      <Text>A tall brass chalice is tarnished and dented. Its flared cup sits on a stem with a rounded knob above a wide round foot.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_12" Language="en_US">
+      <Text>A small silver coin is worn smooth at the edges. A head in profile is faintly visible on its face.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_13" Language="en_US">
+      <Text>A long straight sword lies on a thin metal display stand. It has a plain cross guard, a round pommel, and a dark pitted blade.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_14" Language="en_US">
+      <Text>A steel breastplate comes with matching shoulder pieces. The dark gray plate is shaped to the chest and marked with faint engraved lines.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_15" Language="en_US">
+      <Text>A small gold ring is set with a flat red stone cut for use as a seal.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_16" Language="en_US">
+      <Text>A round brass astrolabe carries pierced rotating rings and a straight pointer over a disk engraved with scales and circles.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_17" Language="en_US">
+      <Text>A small gold coin is worn to a dull surface. A cross is faintly stamped on its face.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_18" Language="en_US">
+      <Text>A long pike has a wooden shaft that ends in a broad triangular iron head with small wings at the base of the blade.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_19" Language="en_US">
+      <Text>A fragment of wall painting on rough plaster has a scroll shape at the top. It shows a bearded man with a crown of thorns in a red robe, his eyes lifted upward.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_20" Language="en_US">
+      <Text>A pair of gold drop earrings hang from slender hooks. Each ends in a faceted diamond-shaped pendant.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_21" Language="en_US">
+      <Text>A tall grandfather clock stands in a carved case of dark brown wood. A round dial sits at the top, and a glass door below shows the pendulum.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_22" Language="en_US">
+      <Text>A folded old newspaper has yellowed with age. Its front page shows columns of small print and one picture.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_23" Language="en_US">
+      <Text>A flintlock pistol has a curved wooden stock and worn brass fittings. Its barrel and lock are dulled by rust.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_24" Language="en_US">
+      <Text>A torn old map on yellowed parchment curls at the edges. Faint coastlines and route lines cross its surface.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_ARTIFACT_25" Language="en_US">
+      <Text>A necklace of tan animal teeth or claws is strung on a dark cord. A small leather knot sits at the center of the strand.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_1" Language="en_US">
+      <Text>A golden chest rides on two long wooden poles that pass through rings at its corners. Two winged figures kneel on the lid facing each other with their wings raised.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_2" Language="en_US">
+      <Text>A round gold medallion bears a relief of a bearded man's face. A small clump of dark hair is set in an oval window at his chin.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_3" Language="en_US">
+      <Text>A folded white linen cloth with a fine woven edge is soaked through with large stains of red blood.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_4" Language="en_US">
+      <Text>An ancient papyrus scroll, brown and frayed, lies partly unrolled between its two rolls. Faint lines of writing show on the open section.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_5" Language="en_US">
+      <Text>A pale gray boulder has a human footprint pressed into its top. Small stones lie scattered around it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_6" Language="en_US">
+      <Text>A Japanese sword rests in a black lacquered scabbard with gold fittings. Its hilt is wrapped in dark cord.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_7" Language="en_US">
+      <Text>A small plain cup of hammered copper has a shallow bowl on a short stem and a simple round foot.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_8" Language="en_US">
+      <Text>A small gilded casket with a hinged lid is covered in filigree and set with green gems and pearls. A red stone forms the clasp at the front.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_9" Language="en_US">
+      <Text>A plain white robe hangs loose, tied at the waist with a sash. The cloth is worn and faintly stained.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_10" Language="en_US">
+      <Text>A brown human skull sits on a gilded stand set with small jewels. A round hole pierces the top of the skull.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_11" Language="en_US">
+      <Text>A pair of worn brown leather sandals with thin straps and small gold buckles lie side by side, toes pointing forward.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_12" Language="en_US">
+      <Text>A long strip of pale linen carries the faint brown imprint of a bearded man's face and body. Dark burn holes mark the cloth in a row.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_13" Language="en_US">
+      <Text>Narrow tattered strips of brown silk lie side by side. Columns of dark characters run down each strip.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_14" Language="en_US">
+      <Text>A small cross of dark wood is set in a gold frame. A pointed gold spike extends below its foot so it can stand upright.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_15" Language="en_US">
+      <Text>A rough rectangular block of reddish sandstone is chipped along its edges. An iron ring is fixed to one end.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_16" Language="en_US">
+      <Text>A tiny gold casket set with green stones stands with its lid open. A single tooth rests on red cloth inside.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_17" Language="en_US">
+      <Text>A large golden shrine is shaped like a church with a peaked roof. Rows of small standing figures fill the arches along its sides, and round bosses and jewels stud the roof.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_18" Language="en_US">
+      <Text>An iron chain lies coiled on a red cushion inside a tall gold-and-glass case. The case is shaped like a lantern with a small handle on top.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_19" Language="en_US">
+      <Text>A round bronze mirror is seen from the back, its surface green-blue with age. A ring of leaf shapes surrounds a raised boss at the center.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_20" Language="en_US">
+      <Text>A large silver cauldron has two heavy handles. Panels around its sides are embossed with staring faces and small figures.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_21" Language="en_US">
+      <Text>A small chest of gold and blue enamel with a sloping lid stands on four short feet. Panels of animals and winged figures decorate its sides, and a blue gem sits on top.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_22" Language="en_US">
+      <Text>A long narrow silver case with jeweled gold ends and engraved borders holds a gold cord coiled inside it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_23" Language="en_US">
+      <Text>Two grapevine branches bound together at the center form a cross. Strands of dark hair or cord tie the joint, and the ends of the branches droop downward.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_24" Language="en_US">
+      <Text>An iron spearhead has a broken tip. A gold sheath wrapped with wire covers the middle of the blade.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_ANANSI" Language="en_US">
+      <Text>Two tall African hand drums stand side by side. The taller one is pale wood laced with rope, and the shorter one is reddish-brown with a white skin head, both painted with bands of zigzags.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_ARTHUR" Language="en_US">
+      <Text>A tall golden chalice has a wide bowl. Red and green gems ring its rim and stem, and it stands on an ornate spreading foot.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_BEOWULF" Language="en_US">
+      <Text>A broad double-edged sword has a bright blade that widens toward the tip, and a curved gold crossguard sits above a leather-wrapped grip.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_HERCULES" Language="en_US">
+      <Text>A heavy wooden club has a thick end that bristles with bone spikes, and cord binds the narrow handle.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_HIMIKO" Language="en_US">
+      <Text>A gold circlet carries a fan of tall pointed rays rising from a round sun disk at the front. Scrolling lines are engraved across the band and rays.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_HIPPOLYTA" Language="en_US">
+      <Text>A wide belt of dark brown leather is set with round bronze discs. It is tied with a knotted thong that hangs loose.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_HUNAHPU" Language="en_US">
+      <Text>A pale cloth mantle hangs from a wooden bar. A collar of green feathers rings its neck, and the cloth falls in loose folds below.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_MAUI" Language="en_US">
+      <Text>A wooden torch has a bound head burning with a bright yellow flame that throws off sparks. A cord tassel with beads hangs from the handle.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_MULAN" Language="en_US">
+      <Text>A set of armor lies together: a dark cuirass of overlapping plates and a round helmet trimmed with a red plume. Red cords tie the pieces.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_OYA" Language="en_US">
+      <Text>A dagger has two parallel steel blades rising from a single hilt. The grip is wrapped in red-brown cord.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_SINBAD" Language="en_US">
+      <Text>A brass navigator's quadrant, a quarter circle with an engraved green face, hangs a plumb line with a small weight from its corner.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_WUKONG" Language="en_US">
+      <Text>A long dark staff is capped with gold bands at both ends. A red cord with small rings is tied near one end.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_GREATWORK_HERO_EPIC" Language="en_US">
+      <Text>A curling parchment scroll stands with a small lute leaning against it. Glowing musical notes float between the scroll and the strings.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_VOIDSINGER_RELIC_1" Language="en_US">
+      <Text>A curved gray tusk pitted with sucker-like marks is capped with jeweled gold bands. It hangs from a heavy iron chain with a small ringed pendant.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_VOIDSINGER_RELIC_2" Language="en_US">
+      <Text>A dark vessel with a fluted rim sprouts thick tentacles that rise and coil. It stands on a rounded base of the same dark metal.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_VOIDSINGER_RELIC_3" Language="en_US">
+      <Text>An open wooden chest with brass corners and a glass-paned lid holds rolled scrolls and old books. A bone skull sits at the front, and barnacles crust the edges.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_CITRUS" Language="en_US">
+      <Text>An open cardboard shipping box holds a whole orange with a green leaf on its stem.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_COCOA" Language="en_US">
+      <Text>An open cardboard shipping box holds a dark chocolate bar scored into squares.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_COFFEE" Language="en_US">
+      <Text>An open cardboard shipping box holds a burlap sack of roasted coffee beans with a metal scoop resting in it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_COTTON" Language="en_US">
+      <Text>An open cardboard shipping box holds a cotton branch with three white bolls.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_DIAMONDS" Language="en_US">
+      <Text>An open cardboard shipping box holds a single large cut diamond that sparkles white and blue.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_DYES" Language="en_US">
+      <Text>An open cardboard shipping box holds three glass bottles of dye in pink, purple, and blue.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_FURS" Language="en_US">
+      <Text>An open cardboard shipping box holds an orange fox standing inside it with its tail raised.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_HONEY" Language="en_US">
+      <Text>An open cardboard shipping box holds a piece of golden honeycomb with two bees on it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_GYPSUM" Language="en_US">
+      <Text>An open cardboard shipping box holds a cluster of pale pink and white crystals.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_INCENSE" Language="en_US">
+      <Text>An open cardboard shipping box holds a brass burner with a small flame and a curl of pale smoke rising from it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_IVORY" Language="en_US">
+      <Text>An open cardboard shipping box holds a gray elephant's head and tusks rising from it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_JADE" Language="en_US">
+      <Text>An open cardboard shipping box holds a carved green jade dragon.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_MARBLE" Language="en_US">
+      <Text>An open cardboard shipping box holds a white marble bust of a man with curled hair.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_MERCURY" Language="en_US">
+      <Text>An open cardboard shipping box holds three rounded beads of shiny liquid mercury.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_PEARLS" Language="en_US">
+      <Text>An open cardboard shipping box holds an open oyster shell with a white pearl inside.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_SALT" Language="en_US">
+      <Text>An open cardboard shipping box holds a glass salt shaker with a metal cap.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_SILK" Language="en_US">
+      <Text>An open cardboard shipping box holds a bolt of silk cloth unrolling in purple and red.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_SILVER" Language="en_US">
+      <Text>An open cardboard shipping box holds a polished silver pitcher with a curved handle.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_SPICES" Language="en_US">
+      <Text>An open cardboard shipping box holds heaps of green, red, and orange spices with two chili peppers.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_SUGAR" Language="en_US">
+      <Text>An open cardboard shipping box holds a blue bowl piled with white sugar cubes.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_TEA" Language="en_US">
+      <Text>An open cardboard shipping box holds a paper tea bag with its string and tag.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_TOBACCO" Language="en_US">
+      <Text>An open cardboard shipping box holds a wooden smoking pipe beside a brown tobacco leaf.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_TRUFFLES" Language="en_US">
+      <Text>An open cardboard shipping box holds a pink pig's head nosing at two dark truffles in earth.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_WINE" Language="en_US">
+      <Text>An open cardboard shipping box holds a bunch of purple grapes with leaves, a wine bottle, and a filled glass.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_WHALES" Language="en_US">
+      <Text>An open cardboard shipping box holds a blue whale lying across it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_AMBER" Language="en_US">
+      <Text>An open cardboard shipping box holds chunks of glowing orange amber.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_OLIVES" Language="en_US">
+      <Text>An open cardboard shipping box holds an olive branch with black olives and silver-green leaves.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GWDESC_PRODUCT_TURTLES" Language="en_US">
+      <Text>An open cardboard shipping box holds a green sea turtle climbing out of it.</Text>
     </Row>
   </LocalizedText>
 </GameData>

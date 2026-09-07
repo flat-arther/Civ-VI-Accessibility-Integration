@@ -1,5 +1,14 @@
 ## [Unreleased]
 
+### Changed
+
+- The great work viewer's painting and sculpture descriptions have been rewritten from the real artworks. Each one is now three or four plain sentences that name the medium and tradition, then the scene, then the look, and no longer repeats the title or artist. Translations of the new descriptions are pending, so other languages hear the English text for now.
+- The great work viewer now also describes the shared writing and music backgrounds, the artifact images, the relic images, the Heroes and Legends symbols and epics, the Secret Societies relics, and the Monopolies and Corporations products.
+
+### Fixed
+
+- Fixed factual errors in the great work descriptions, such as Andrei Rublev's icons being called Byzantine and details invented from thumbnails.
+
 ## [1.4.1] - 2026-08-30
 
 ### Fixed
