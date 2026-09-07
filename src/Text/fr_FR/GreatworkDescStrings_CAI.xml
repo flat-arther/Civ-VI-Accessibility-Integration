@@ -1,7 +1,518 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
-    <!-- fr_FR: great work image descriptions. Pending translation from docs/great-work-descriptions.md;
-         missing tags fall back to the English text in src/Text/en_US/GreatworkDescStrings_CAI.xml. -->
+    <!-- FRENCH -->
+    <!-- Great work image accessibility descriptions (CAI). Appended to the Great Work Showcase details.
+         Translated from docs/great-work-descriptions.md via src/Text/en_US/GreatworkDescStrings_CAI.xml; keep the tag set identical to en_US. -->
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ANGUISSOLA_1" Language="fr_FR">
+      <Text>Ce tableau est une huile de la Renaissance italienne montrant les trois sœurs cadettes d'Anguissola réunies autour d'un échiquier posé sur une table couverte d'un tapis, en plein air, avec des collines brumeuses en arrière-plan. Lucia, l'aînée, est assise à gauche et vient de prendre une pièce ; elle regarde calmement vers l'extérieur. Minerva, à droite, lève la main en signe de protestation, et la plus jeune, Europa, au milieu, sourit largement de sa réaction. Une vieille servante se penche depuis la droite pour observer la partie.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ANGUISSOLA_2" Language="fr_FR">
+      <Text>Ce portrait est une huile du roi Philippe II d'Espagne, représenté à partir des hanches sur un fond gris uni. Il porte une haute toque noire, un pourpoint et un manteau noirs et une fraise de dentelle blanche, la Toison d'or pendant à une fine chaîne sur sa poitrine. Son visage pâle et sa barbe blonde taillée affichent une expression posée et réservée. Une main repose sur le bras d'un fauteuil rouge tandis que l'autre tient un chapelet.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ANGUISSOLA_3" Language="fr_FR">
+      <Text>Ce portrait est une huile de la Renaissance représentant un jeune moine debout devant un fond presque noir. Il porte un habit crème pâle avec un lourd capuchon drapé sur les épaules et une corde nouée à la taille. Sa tête est rasée de près, son visage est calme et juvénile, et il regarde vers la droite plutôt que vers le peintre. Ses mains sont jointes devant lui, et un long chapelet terminé par une petite croix en pend.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BEHZAD_1" Language="fr_FR">
+      <Text>Cette miniature est une page de manuscrit persan tirée d'une chronique des conquêtes de Tamerlan, avec des panneaux de calligraphie en haut et en bas. Une bataille de cavalerie serrée entre l'armée de Tamerlan et les forces du sultan d'Égypte remplit la page : des cavaliers en armures rouges, bleues et dorées chargent avec des lances et des arcs sur un sol vert parsemé de rochers et de petits arbres orangés. Des trompettes et des tambours chevauchent le long du bord supérieur sous un ciel bleu, et des bannières se dressent des deux côtés. Des hommes et des chevaux tombés gisent dans les coins inférieurs.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BEHZAD_2" Language="fr_FR">
+      <Text>Cette miniature est une page de manuscrit persan tirée du Boustan de Saadi, illustrant l'histoire de Yusuf et Zuleykha, la version persane de Joseph et de la femme de Putiphar. Le palais s'élève comme un haut empilement de pièces plates et d'escaliers, chaque surface couverte de carreaux bleus et de bandes de calligraphie. Dans une chambre près du sommet, Zuleykha, en orange, s'élance de sa couche pour saisir le manteau de Yusuf, vêtu de vert, qui se dérobe en se tordant, une auréole de flammes autour de la tête. Les personnages sont minuscules face à cette architecture éblouissante.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BEHZAD_3" Language="fr_FR">
+      <Text>Cette miniature est une page de manuscrit persan représentant une audience royale tenue dans un jardin, sur un fond vert sombre parsemé de fleurs. Tamerlan est assis en tailleur sur un trône bas sous une tente à dôme bleue et blanche, en robe vert pâle et couronne. Des courtisans en robes colorées se tiennent autour de lui tandis que des serviteurs attendent en contrebas. En haut à gauche, deux hommes sont assis à côté d'un guépard de chasse tenu en laisse, et un arbre en fleurs s'élève derrière la tente.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BOSCH_1" Language="fr_FR">
+      <Text>Ce triptyque est une huile flamande sur trois panneaux de bois assemblés, grouillant de centaines de personnages minuscules. Le panneau de gauche montre un paradis verdoyant où Dieu présente Ève à Adam près d'une fontaine rose. Le panneau central est un jardin lumineux où des foules de personnages nus s'ébattent parmi des fruits géants et d'étranges structures roses. Le sombre panneau de droite est l'enfer, éclairé par une ville en flammes, où un homme-arbre creux et un monstre à tête d'oiseau président aux supplices.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BOSCH_2" Language="fr_FR">
+      <Text>Ce triptyque est une huile flamande avec l'Éden à gauche, le jugement au centre et l'enfer à droite. À gauche, Ève est créée, tentée puis chassée, tandis que les anges rebelles tombent depuis un Dieu rayonnant au-dessus. Au centre, le Christ siège dans une petite trouée de ciel bleu, et sous lui un paysage sombre et calciné grouille de démons qui rôtissent, embrochent et torturent les damnés. Le panneau de droite est un paysage infernal en flammes régi par des diables.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BOSCH_3" Language="fr_FR">
+      <Text>Ce triptyque est une huile flamande construite autour d'une seule image : une énorme charrette de foin qui roule vers l'enfer. Sur le panneau central, une foule de papes, de rois et de paysans se bousculent pour attraper du foin tandis que des démons tirent la charrette en avant et que des amoureux font de la musique à son sommet, sous un petit Christ dans les nuages. Le panneau de gauche montre la création et l'expulsion d'Adam et Ève, et le panneau de droite montre un enfer en flammes où des diables bâtissent une tour.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_CASSATT_1" Language="fr_FR">
+      <Text>Ce pastel, tracé en touches libres et lumineuses de jaune et de vert, est une étude impressionniste de Lydia, la sœur de Cassatt, assise dans une loge de théâtre. Elle se penche en avant, les bras croisés posés sur le rebord de velours rouge, ses épaules nues émergeant d'une robe de soirée pâle. Ses cheveux roux sont relevés, et elle tourne la tête de côté avec un léger sourire. Un lustre étincelant et un miroir sont suspendus dans le coin supérieur derrière elle.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_CASSATT_2" Language="fr_FR">
+      <Text>Ce tableau est une huile impressionniste d'une mère et de son enfant vus d'en haut. La femme porte une robe à rayures vertes, roses et blanches et tient sur ses genoux un jeune enfant nu, un bras autour de l'enfant tandis que son autre main lui lave les pieds dans une cuvette blanche. L'enfant, enveloppé dans une serviette blanche, regarde l'eau avec elle. Un pichet à fleurs et un tapis à motifs remplissent l'espace alentour.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_CASSATT_3" Language="fr_FR">
+      <Text>Ce tableau, exécuté en coups de pinceau rapides, est une huile impressionniste de Lydia, la sœur de Cassatt, prenant le thé dans une pièce lumineuse. Elle est assise de profil dans un fauteuil sombre à rayures, vêtue d'une robe rose et d'un bonnet garnis de fourrure blanche au col. Ses mains gantées portent à ses lèvres une tasse et une soucoupe bordées d'or. Derrière elle, une jardinière verte contient des jacinthes blanches devant un mur pâle.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_COLLOT_1" Language="fr_FR">
+      <Text>Ce buste est un portrait en plâtre du peintre Pierre-Étienne Falconet, l'époux de Collot, coupé sous les épaules et posé sur un socle rond noir. Ses cheveux tombent librement jusqu'aux oreilles, et il porte un col de chemise ouvert sous un manteau simplement replié. La tête se tourne légèrement de côté avec un regard direct et un peu méfiant, et le modelé est doux et vivant.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_COLLOT_2" Language="fr_FR">
+      <Text>Ce buste est sculpté dans le marbre blanc et montre Catherine la Grande de Russie de profil, tournée vers la gauche. Ses cheveux sont lissés en arrière depuis le front, et un long voile tombe du sommet de sa tête sur ses épaules en plis souples. Le visage est serein et légèrement souriant, avec un menton ferme et un nez droit. Le buste s'arrête sous les épaules et repose sur un petit socle rond.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_COLLOT_3" Language="fr_FR">
+      <Text>Ce buste est sculpté dans le marbre blanc et montre Mary Cathcart, fille de l'ambassadeur britannique en Russie, la tête légèrement tournée de côté. Ses cheveux sont tirés en arrière sous une légère coiffe qui retombe derrière ses épaules, et son visage calme porte un petit sourire intime. Le buste se termine par une poitrine lisse et arrondie au-dessus d'un socle rond, et la sculpture est douce et délicate.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_DONATELLO_1" Language="fr_FR">
+      <Text>Cette statue, sculptée pour une niche de l'église Orsanmichele à Florence, est une figure en marbre du début de la Renaissance italienne représentant saint Marc l'Évangéliste, debout et seul. Il porte une longue robe drapée qui tombe en plis profonds et fait reposer son poids sur une jambe, tenant un livre fermé contre sa hanche. Son visage est grave et pensif sous un front haut, et la statue se dresse sur un socle bas et uni.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_DONATELLO_2" Language="fr_FR">
+      <Text>Cette statue, montrée ici sans son piédestal, est un monument équestre en bronze d'Erasmo da Narni, le capitaine mercenaire surnommé Gattamelata. Le commandant en armure se tient calmement en selle sur un lourd cheval de guerre qui avance, un sabot avant levé. Il tend son bâton de commandement dans la main droite et porte une longue épée au côté. C'est le premier grand monument équestre en bronze coulé depuis la Rome antique.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_DONATELLO_3" Language="fr_FR">
+      <Text>Cette statue est un groupe en bronze représentant Judith à l'instant où elle tue, debout sur un socle carré sombre. L'héroïne voilée, en lourds vêtements, se dresse au-dessus du général assyrien Holopherne, ivre, affalé sur un coussin à ses pieds, une jambe pendant mollement. Elle lui empoigne les cheveux d'une main et lève haut de l'autre une épée courbe, prête à frapper. Le bronze sombre et patiné rend les figures sévères et monumentales.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_EOP_1" Language="fr_FR">
+      <Text>Ce tableau est un rouleau suspendu coréen, haut et étroit, à l'encre et couleurs légères, qui illustre un conte chinois de trois vieillards se vantant chacun d'être le plus âgé. Les trois anciens à barbe blanche, en robes bleues et orange, discutent debout à côté d'un petit cerf sur une corniche rocheuse dominant une mer de nuages tourbillonnants. Des pics escarpés aux teintes bleues s'élèvent derrière eux, un pin s'étend sous la corniche, et un minuscule pavillon se trouve loin en contrebas, en bas à gauche.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_EOP_2" Language="fr_FR">
+      <Text>Ce tableau est un détail d'un haut rouleau suspendu coréen à l'encre et couleurs sur soie. Un coq fier se tient de profil, avec une crête et des barbillons rouge vif, des plumes de cou brun doré et une longue queue ondoyante de plumes noires et luisantes. Une poule pâle se tient sous lui, et une petite araignée pend à son fil depuis un rocher lavé d'encre en haut à gauche. Le coup de pinceau est rapide et vif sur la soie nue de couleur fauve.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_EOP_3" Language="fr_FR">
+      <Text>Ce tableau est la moitié inférieure d'un haut rouleau suspendu coréen à l'encre et couleurs sur soie. Un palefrenier corpulent et souriant, avec une barbe, un bonnet noir et une robe gris-bleu, se tient entre deux chevaux et serre la bride de l'un d'eux. Le cheval le plus proche est un poney trapu de couleur fauve tacheté de blanc, et un cheval plus sombre et plus hirsute attend derrière lui, à gauche. Les animaux ont des corps épais et massifs sur la soie fauve unie.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GIL_1" Language="fr_FR">
+      <Text>Ce tableau est une huile indienne moderne représentant trois jeunes femmes assises tout près les unes des autres devant un mur brun nu. La jeune fille de gauche est enveloppée dans un châle vert pâle, celle de derrière dans un châle rouge orangé, et celle de droite dans un châle cramoisi profond, leurs cheveux noirs tirés en arrière sous leurs voiles. Toutes trois baissent les yeux et regardent ailleurs avec des visages silencieux et résignés, les mains posées sur les genoux. Les figures sont simplifiées en larges aplats de couleurs fortes.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GIL_2" Language="fr_FR">
+      <Text>Ce tableau, aux bruns et rouges chauds et terreux, est une huile indienne moderne représentant une jeune mariée que l'on prépare le jour de ses noces. La mariée pâle, les épaules nues, est assise au centre, ses cheveux noirs dénoués, tandis qu'une femme à gauche les peigne et qu'une autre à droite, en corsage vert, lui tend un petit bol. Deux enfants observent la scène, et deux pots d'argile rouge sont posés sur le sol. Les figures arrondies et simplifiées rappellent la peinture murale indienne.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GIL_3" Language="fr_FR">
+      <Text>Cet autoportrait est une huile moderne d'Amrita Sher-Gil vers dix-huit ans, représentée à partir de la taille, strictement de profil et tournée vers la gauche. Elle porte un béret jaune vif sur des cheveux sombres, une boucle d'oreille créole, du rouge à lèvres et une robe bleu foncé au décolleté profond. Elle s'appuie sur une table, un petit bol de laiton près de sa main. L'arrière-plan est un lavis moucheté de touches grises, bleues et vertes, et son expression est froide et assurée.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GOGH_1" Language="fr_FR">
+      <Text>Ce tableau est une huile postimpressionniste réalisée pendant le séjour de Van Gogh à l'asile de Saint-Rémy, dans le sud de la France, et c'est l'une des images les plus reconnaissables de l'art moderne. Un ciel nocturne tourbillonnant remplit la majeure partie de la toile : des étoiles flamboient dans des anneaux de lumière, un courant en spirale roule à travers le milieu, et une lune jaune luit en haut à droite. Un cyprès sombre s'élance comme une flamme le long du bord gauche, et un petit village avec un clocher pointu dort sous les collines. Chaque forme est construite en touches épaisses et ondulantes de bleu et de jaune.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GOGH_2" Language="fr_FR">
+      <Text>Ce tableau est une huile postimpressionniste d'une terrasse de café sur la place du Forum à Arles, la nuit, éclairée de l'intérieur par un auvent jaune lumineux et une lampe. De petits personnages sont assis à des tables rondes sous l'auvent tandis qu'un serveur en blanc se tient parmi eux, et quelques passants descendent la rue bleu sombre au-delà. Au-dessus des toits, le ciel bleu profond est parsemé de grandes étoiles jaunes. Le tableau n'emploie aucun noir, seulement des jaunes chauds contre des bleus froids.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GOGH_3" Language="fr_FR">
+      <Text>Ce tableau est une huile postimpressionniste de l'intérieur du Café de la Gare, un café de nuit d'Arles, dans des couleurs criardes et discordantes. Des murs rouge sang et un plafond vert pèsent sur un plancher de bois jaune, et quatre lampes suspendues flamboient avec des halos de touches jaunes tourbillonnantes. Un billard vert domine le centre, le patron debout à côté en costume pâle, tandis que quelques clients sont affalés à des tables le long des murs. Une horloge sur le mur du fond indique minuit passé.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GRECO_1" Language="fr_FR">
+      <Text>Ce panneau, peint dans une manière vénitienne lumineuse alors que le Greco travaillait encore en Crète, est une petite œuvre de jeunesse à la tempera. La Vierge est assise entre de hautes colonnes avec l'Enfant Jésus sur ses genoux, tandis que trois rois se rassemblent devant elle : l'un s'agenouille en habit d'or pour prendre la main de l'enfant, un autre se penche avec un calice, et un roi à la peau sombre en manteau rouge s'incline à droite. Derrière eux, un chameau avec son cavalier et un cheval attendent sous un ciel nuageux.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GRECO_2" Language="fr_FR">
+      <Text>Ce retable, peint pour l'église de Santo Domingo el Antiguo à Tolède, est une haute huile de la Renaissance espagnole de quatre mètres de haut, montrant la Vierge emportée au ciel. Dans la moitié supérieure, elle s'élève sur un pâle croissant de lune, les bras tendus, vêtue d'une robe rouge et d'un manteau bleu gonflé par le vent, parmi des anges et des têtes de chérubins ailés. En bas, les douze apôtres se pressent autour de son tombeau de pierre vide, les gestes tournés vers le haut, saisis d'étonnement. Les figures sont allongées et les couleurs froides et lumineuses.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GRECO_3" Language="fr_FR">
+      <Text>Ce tableau est une huile de la Renaissance espagnole, l'un des premiers paysages purs de l'art occidental et l'un des plus sombres. La ville espagnole de Tolède se dresse à droite sur sa colline de pierre grise sous un ciel d'orage violent, la flèche de sa cathédrale et la forteresse de l'Alcázar éclairées par une étrange lumière blanche. Des collines vertes descendent vers une rivière franchie par un pont en arc, avec de petits bâtiments dispersés le long des rives. Toute la scène est peinte en verts profonds, en noirs bleutés et en blancs froids.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HOKUSAI_1" Language="fr_FR">
+      <Text>Cette estampe appartient à la série des Trente-six vues du mont Fuji et c'est l'image la plus célèbre de l'art japonais. Une énorme vague bleu foncé se cabre à gauche et se recourbe au-dessus de toute la scène, sa crête se brisant en doigts d'écume blanche semblables à des griffes. Trois longues barques ouvertes remplies de rameurs chevauchent les creux sous elle. Loin dans le fond, petit, au centre, se dresse le cône enneigé du mont Fuji.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HOKUSAI_2" Language="fr_FR">
+      <Text>Cette estampe est une vue japonaise gravée sur bois du lac Suwa à l'aube, dans des bleus, des verts et un rose doux. Deux grands pins aux branches sombres et tordues s'élèvent d'une pointe rocheuse au premier plan, abritant un petit sanctuaire au toit de chaume. Au-delà, le lac pâle s'étend jusqu'à un rivage de villages et de collines bleues. Un minuscule voilier traverse l'eau à gauche, et le sommet blanc du mont Fuji apparaît sur l'horizon lointain.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HOKUSAI_3" Language="fr_FR">
+      <Text>Cette estampe, souvent appelée le Fuji rouge, est une vue japonaise gravée sur bois du mont Fuji rougeoyant dans la lumière du début de l'automne. La montagne s'élève en un large cône lisse sur les deux tiers droits de l'image, sa pente d'un brun rougeâtre chaud avec des traînées de neige blanche accrochées au sommet. Une bande de forêt vert sombre court le long de sa base. Des rangées de petits nuages blancs s'étirent en traînées plates sur un ciel bleu profond.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KANDINSKY_1" Language="fr_FR">
+      <Text>Ce tableau, réalisé alors que Kandinsky enseignait au Bauhaus, est une huile abstraite sans aucun objet reconnaissable, entièrement construite à partir de la géométrie. Des cercles, des triangles, des damiers et de longues lignes droites flottent et se croisent sur un fond crème pâle. Un grand cercle noir et violet cerné d'un halo rouge, en haut à gauche, est la forme la plus lourde ; il est contrebalancé par un disque rouge à côté de lui et par de petits cercles bleus et jaunes en dessous. Les couleurs sont nettes et vives, et les formes semblent suspendues en apesanteur dans l'espace.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KANDINSKY_2" Language="fr_FR">
+      <Text>Ce tableau est une huile de jeunesse antérieure au passage de Kandinsky à l'abstraction, et il a ensuite donné son nom au groupe du Cavalier bleu qu'il a fondé à Munich. Un petit cavalier en manteau bleu galope sur un cheval blanc à travers une prairie verte vallonnée, penché en avant dans le mouvement. Des arbres d'automne aux tons rouille et or se dressent sur la colline derrière lui, sous un ciel bleu avec deux nuages blancs. La peinture est posée en touches épaisses, si bien que le champ scintille au lieu de rester immobile.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KANDINSKY_3" Language="fr_FR">
+      <Text>Ce tableau, aussi intitulé Moscou I, est une huile presque abstraite de Moscou, la ville natale de Kandinsky. Des fragments colorés de la ville tourbillonnent autour d'un centre lumineux : un palais blanc aux fenêtres sombres, des bulbes rouges et verts, un arc-en-ciel et un couple en promenade peint en figures minuscules. Des vols de petits oiseaux noirs s'éparpillent dans un ciel bleu, rose et jaune. Toute la scène penche et tournoie comme si la ville était vue en rêve.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KAUFFMAN_1" Language="fr_FR">
+      <Text>Ce portrait, situé dans une campagne boisée aux environs de Rome, est une huile néoclassique d'Anna Maria Jenkins et de son oncle Thomas Jenkins, marchand d'art dans la ville. Elle se tient à gauche dans une robe blanche flottante avec une ceinture rose et un large chapeau blanc, tenant en l'air un rameau de liseron blanc. Il est assis à côté d'elle, adossé à un arbre, en habit sombre et culotte pâle, soulevant son chapeau d'une main et caressant de l'autre un chien noir et blanc. Des collines lointaines et le Colisée remplissent l'arrière-plan.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KAUFFMAN_2" Language="fr_FR">
+      <Text>Ce portrait est une huile néoclassique de Johann Joachim Winckelmann, l'érudit allemand qui a fondé l'histoire de l'art moderne. Il est assis à une table dans un ample manteau gris et une écharpe jaune moutarde, les mains croisées sur un livre ouvert et une plume d'oie tenue négligemment entre les doigts. Sa tête se tourne de côté comme si une pensée venait d'interrompre son écriture. Une lumière chaude tombe sur son visage et ses mains, qui se détachent d'un fond sombre et uni.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KAUFFMAN_3" Language="fr_FR">
+      <Text>Ce portrait est une huile néoclassique de la chanteuse anglaise Sarah Harrop posant en muse de la poésie lyrique. Elle est assise dans une robe rose, une écharpe verte sur les épaules et une couronne de petites fleurs dans ses cheveux poudrés, et regarde calmement hors du tableau. Un bras repose sur une lyre dorée tandis que son autre main tient une partition roulée. Un ciel d'orage et une falaise boisée sombre avec une cascade remplissent l'arrière-plan.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KLIMT_1" Language="fr_FR">
+      <Text>Ce tableau, l'œuvre la plus célèbre de Klimt, est une huile Art nouveau viennoise rehaussée de feuilles d'or. Un couple est agenouillé, enlacé, sur une prairie fleurie ; l'homme se penche pour embrasser la joue de la femme tandis qu'elle lève le visage, les yeux fermés. Leurs corps se fondent en un seul manteau doré, orné de rectangles noirs et blancs de son côté à lui et de cercles aux couleurs vives de son côté à elle. Derrière eux s'étend un fond plat et chatoyant d'or.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KLIMT_2" Language="fr_FR">
+      <Text>Ce tableau est un paysage carré à l'huile de l'allée bordée d'arbres menant au château de Kammer, une demeure de campagne au bord de l'Attersee, en Autriche. De grands arbres aux troncs gris-bleu tortueux bordent les deux côtés d'un chemin pavé et se rejoignent au-dessus, de sorte qu'une voûte dense de feuilles vertes remplit presque toute l'image. Au bout de l'allée se dresse la maison jaune au toit rouge. Le feuillage est peint en milliers de petites touches de vert, de bleu et de jaune.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KLIMT_3" Language="fr_FR">
+      <Text>Ce tableau est une huile carrée représentant un jardin de ferme si rempli de fleurs qu'aucun sol n'apparaît. De grands tournesols aux larges feuilles gris-vert se dressent à droite, leurs têtes jaunes penchées au sommet. En dessous et tout autour s'étalent des masses de fleurs rouges, roses et bleues, dispersées sur le vert comme des confettis. L'image n'a ni ciel ni horizon, seulement des fleurs d'un bord à l'autre.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KOBER_1" Language="fr_FR">
+      <Text>Ce portrait est une huile de cour de la Renaissance représentant Anne Marie Vasa, princesse polonaise et suédoise de trois ans, debout et raide devant un rideau rouge. Elle porte une robe blanc argenté aux broderies rouges et or, une haute fraise blanche, un bonnet orné de joyaux sur ses cheveux blonds et une lourde croix d'or sertie de pierres au bout d'une chaîne. Une main minuscule tient un mouchoir plié. Des inscriptions latines dans les coins supérieurs donnent son nom, ses titres et son âge.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KOBER_2" Language="fr_FR">
+      <Text>Ce portrait est une huile d'apparat de la Renaissance représentant Sigismond III Vasa, roi de Pologne et de Suède, à partir des genoux. Il se tient debout dans un pourpoint noir et une haute fraise blanche hérissée, une toque noire ornée d'insignes en joyaux sur la tête et un manteau de fourrure de lynx tachetée drapé sur les épaules. Une main repose sur une table couverte de rouge tandis que l'autre tient la garde d'une épée. Un rideau rouge pend derrière lui, à gauche, sur un fond sombre.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KOBER_3" Language="fr_FR">
+      <Text>Ce portrait est une huile de la Renaissance représentant Anna Jagellon, la reine âgée de Pologne, en habit de veuve. Elle se tient dans une robe noire unie sous un long voile blanc qui tombe de sa tête jusque sous sa taille, avec une bande blanche en travers du menton et de la gorge. Une croix d'or pend à une longue chaîne sur sa poitrine, et elle tient un petit livre dans une main. Un rideau de brocart vert et or est relevé en haut à droite.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_LEWIS_1" Language="fr_FR">
+      <Text>Cette statue est une figure de Cléopâtre en marbre blanc, grandeur nature, dans l'instant qui suit sa mort. Elle est assise sur un trône dont les accoudoirs sont sculptés en têtes de sphinx, le corps affaissé en arrière et la tête tombée de côté, les yeux clos. Elle porte une robe plissée qui laisse un sein nu et une coiffe royale avec un cobra sur le front. Une main repose mollement sur ses genoux tandis que l'autre pend par-dessus le bras du trône.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_LEWIS_2" Language="fr_FR">
+      <Text>Cette sculpture est un petit groupe en marbre blanc de Hiawatha et Minnehaha, le jeune couple amérindien du poème de Longfellow, debout côte à côte. L'homme porte une coiffe de plumes et une tunique à franges, et la femme un bandeau et un châle drapé sur une robe courte. Ils se tiennent les mains au centre et tournent leurs visages l'un vers l'autre avec des sourires paisibles. Les figures se dressent sur un socle rond.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_LEWIS_3" Language="fr_FR">
+      <Text>Cette statue est une figure en marbre blanc de Hagar, la servante biblique, seule dans le désert après son bannissement. Elle se tient debout, les mains étroitement jointes contre sa poitrine et le visage levé vers le ciel en prière, ses longs cheveux tombant librement sur ses épaules. Sa robe glisse d'une épaule et se drape en plis lourds jusqu'à ses pieds nus. Une cruche d'eau renversée et vide gît sur le socle à côté de son pied.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MICHELANGELO_1" Language="fr_FR">
+      <Text>Cette fresque est la Création d'Adam, le panneau le plus connu du plafond de la chapelle Sixtine, au Vatican. À gauche, Adam nu est étendu sur un talus vert, un bras tendu mollement vers la droite. Dieu, vieillard barbu en robe pâle, surgit de la droite dans un manteau rouge tourbillonnant rempli d'anges, et tend l'index. Les deux bouts des doigts se touchent presque au centre de l'image.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MICHELANGELO_2" Language="fr_FR">
+      <Text>Cette statue est une figure colossale de David en marbre blanc, de plus de cinq mètres de haut, nu et aux aguets avant son combat contre Goliath. Il se tient le poids sur la jambe droite, la tête tournée brusquement vers sa gauche avec un regard froncé et vigilant. Une fronde repose sur son épaule gauche et la pierre se trouve dans sa main droite baissée. La figure se dresse seule sur un socle bas et uni.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MICHELANGELO_3" Language="fr_FR">
+      <Text>Cette sculpture est un groupe en marbre blanc de la Vierge Marie assise avec le corps mort du Christ étendu en travers de ses genoux. C'est une jeune femme à la tête inclinée, une main soutenant ses épaules tandis que l'autre s'ouvre vers l'extérieur en un geste d'acceptation. Ses vêtements se répandent en plis profonds qui soutiennent son corps inerte et presque nu.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MONET_1" Language="fr_FR">
+      <Text>Ce tableau est une grande huile impressionniste qui plonge directement sur l'étang aux nymphéas de Monet à Giverny, sans rive ni ciel en vue. Des groupes de feuilles plates de nénuphars dérivent sur une eau turquoise et bleue, et quelques fleurs roses et une fleur blanche flottent parmi elles. L'eau reflète de hautes herbes et des arbres en traînées lâches de vert et d'or. Le coup de pinceau est doux et flou, si bien que tout semble planer à la surface.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MONET_2" Language="fr_FR">
+      <Text>Ce tableau est une vue à l'huile du port du Havre à l'aube, et son titre a donné son nom au mouvement impressionniste. Un petit soleil orange est suspendu dans une brume gris-bleu et laisse tomber sur l'eau une traînée brisée de reflet orange. Deux petites barques sombres dérivent au premier plan, tandis que les mâts, les grues et les cheminées fumantes du port s'estompent dans la brume derrière. Toute la scène est peinte en touches rapides et fines de bleu, de gris et de rose.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MONET_3" Language="fr_FR">
+      <Text>Ce tableau est un paysage impressionniste à l'huile représentant une seule meule arrondie dans une prairie d'été près de la maison de Monet à Giverny. Un large champ de coquelicots rouges s'étend derrière elle jusqu'à une rangée de fermes aux toits rouges et une ligne dense d'arbres vert sombre. Au-delà des arbres, des collines basses s'effacent dans un ciel brumeux rose et lavande. La peinture est appliquée en touches douces qui fondent ensemble l'herbe, les fleurs et le feuillage.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ORLOVSKY_1" Language="fr_FR">
+      <Text>Cette statue, montrée ici sans son piédestal, est une figure en bronze de Mikhaïl Koutouzov, le feld-maréchal qui a mené la Russie contre Napoléon en 1812. Il se tient debout en uniforme militaire à épaulettes, un long manteau drapé sur une épaule, et lève haut un bâton dans la main droite. Sa main gauche tient une épée abaissée le long du corps. Le bronze a pris avec le temps une patine vert sombre.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ORLOVSKY_2" Language="fr_FR">
+      <Text>Cette sculpture, montrée ici isolément, est l'ange de bronze qui couronne la haute colonne de granit de la place du Palais, à Saint-Pétersbourg. L'ange se tient debout, ses grandes ailes emplumées repliées derrière lui, et tient une haute croix d'une main, tandis que l'autre main pointe vers le ciel. Un serpent gît écrasé sous la croix aux pieds de l'ange, et la tête de la figure s'incline vers lui. Toute la figure est de couleur or.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ORLOVSKY_3" Language="fr_FR">
+      <Text>Ce buste est un portrait en marbre blanc du tsar Alexandre Ier de Russie à la manière d'un souverain de la Rome antique. Il porte une couronne de laurier sur des cheveux courts et bouclés, et son visage glabre affiche un léger sourire calme. Un lourd manteau est drapé sur une armure aux épaules et ramené sur la poitrine. Le buste repose sur un petit socle rond en marbre.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_REMBRANDT_1" Language="fr_FR">
+      <Text>Ce portrait est une huile en pied du Siècle d'or hollandais représentant Andries de Graeff, riche magistrat d'Amsterdam, debout dans une embrasure de pierre. Il est entièrement vêtu de noir avec un large col blanc plat et un chapeau à larges bords, ses longs cheveux blonds tombant librement sur ses épaules. Une main repose sur sa hanche, un manteau pend à son bras, et un gant est tombé sur le sol à ses pieds. Une lumière chaude tombe sur la pierre pâle derrière lui.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_REMBRANDT_2" Language="fr_FR">
+      <Text>Ce portrait est une huile du Siècle d'or hollandais représentant Agatha Bas, une jeune femme d'Amsterdam, debout dans un cadre de bois peint qui longe les bords du tableau. Elle porte une robe noire au corsage brodé d'or, un large col de dentelle blanche et des perles au cou. Une main tient un éventail plié, et l'autre repose sur le bord du cadre, de sorte que le pouce semble sortir du tableau. Son visage pâle regarde droit devant depuis un fond sombre.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_REMBRANDT_3" Language="fr_FR">
+      <Text>Ce tableau est une huile baroque dramatique de l'instant où un ange empêche Abraham de sacrifier son fils. Le vieux père barbu presse sa main sur le visage du garçon tandis qu'un couteau brillant tombe dans les airs, arraché de sa prise. L'ange fond depuis le coin supérieur gauche, lui saisissant le poignet d'une main et levant l'autre. Isaac est étendu, ligoté et nu, sur l'autel au premier plan, son corps éclairé contre le paysage rocheux et sombre.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RUBLEV_1" Language="fr_FR">
+      <Text>Cette icône, peinte pour la cathédrale de la Dormition de Vladimir, est un panneau russe à la tempera à l'œuf sur bois. L'archange Gabriel s'avance depuis la gauche dans une robe bleu-vert aux ailes dorées, un bâton dans une main et l'autre levée vers Marie. Elle est assise sur un banc à droite, dans un manteau rouge cerise foncé, et tient un brin de fil rouge, la tête tournée vers lui. Des tours pâles se dressent derrière eux sous une étoffe rouge tendue entre les toits.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RUBLEV_2" Language="fr_FR">
+      <Text>Cette icône, peinte pour la cathédrale de la Dormition de Vladimir, est un grand panneau russe à la tempera sur bois, de plus de trois mètres de haut. Le Christ siège au centre en robes dorées, une main levée en signe de bénédiction et un livre ouvert sur le genou. Derrière lui, un losange rouge de lumière recouvre un ovale vert sombre peuplé d'êtres angéliques à peine visibles, et les coins effacés portent les symboles des quatre évangélistes. La majeure partie de la peinture s'est usée, si bien que les figures apparaissent à travers une brume pâle.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RUBLEV_3" Language="fr_FR">
+      <Text>Cette icône, peinte pour la cathédrale de la Dormition de Vladimir, est un panneau russe à la tempera sur bois. En haut, le Christ siège dans un disque rond de lumière bleue que des anges emportent vers le haut sur un fond or pâle. Marie se tient au centre dans un manteau rouge sombre, les mains levées devant la poitrine, flanquée de deux anges en blanc qui pointent vers le haut. Six apôtres en robes colorées se rassemblent de chaque côté, certains levant les yeux et d'autres se tournant les uns vers les autres.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_SAMOSTRZELNIK_1" Language="fr_FR">
+      <Text>Ce portrait est une peinture sur panneau de la Renaissance polonaise représentant Piotr Tomicki, évêque de Cracovie, en pied. Il se tient debout avec une haute mitre blanche et une chape de brocart rouge et or, tenant une crosse dorée et un livre ouvert. Une arcade dorée ornée de petits anges l'encadre devant une tenture verte à motifs, et une seconde mitre et un chapeau rouge sont posés sur une table en bas à droite. Le visage est peint avec plus de soin que le corps raide.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_SAMOSTRZELNIK_2" Language="fr_FR">
+      <Text>Cette miniature, peinte en couleurs vives et en or dans une bordure florale, est une page entière d'un catalogue enluminé des archevêques de Gniezno. Saint Stanislas, le saint patron de la Pologne, se tient au centre en vêtements liturgiques d'or et mitre ornée de joyaux, une crosse à la main et deux anges à ses épaules. L'évêque Piotr Tomicki s'agenouille à sa gauche et le roi Sigismond Ier à sa droite, près d'une bannière rouge portant l'aigle blanc de Pologne. Deux blasons pendent dans le feuillage en dessous.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_SAMOSTRZELNIK_3" Language="fr_FR">
+      <Text>Cette miniature est une page d'un livre de prières royal, en couleurs et en or dans une bordure florale. Marie se tient dans un soleil rayonnant d'or flamboyant, un croissant de lune à ses pieds, en robe rouge et manteau bleu, tandis que deux anges abaissent une couronne sur ses cheveux d'or dénoués. Elle tient l'Enfant Jésus nu sur son bras. Le roi Sigismond Ier, en robe rouge, s'agenouille en bas à droite au-dessus d'un écu portant l'aigle blanc de Pologne.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TITIAN_1" Language="fr_FR">
+      <Text>Ce retable, peint pour le maître-autel de l'église des Frari à Venise, est un immense panneau de la Renaissance à l'huile sur bois, de près de sept mètres de haut et arrondi au sommet. La Vierge s'élève au centre sur un banc de nuages, en robe rouge et manteau bleu, les bras grands ouverts et le visage levé vers le ciel. Un cercle de petits anges la porte vers le haut dans une lueur dorée où Dieu le Père plane au-dessus. En bas, les apôtres se pressent en robes rouges et vertes, tendant les bras vers le haut, émerveillés.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TITIAN_2" Language="fr_FR">
+      <Text>Ce tableau est une huile de la Renaissance vénitienne dont les figures sont montrées presque à mi-corps. Salomé, dans une ample robe rouge aux manches blanches flottantes, tient un grand plateau contre sa hanche, sur lequel repose la tête tranchée de Jean-Baptiste. Elle regarde vers le bas et de côté, le visage calme. Une servante lève les yeux vers elle depuis la gauche, et un petit enfant ailé est perché sur un mur en haut à droite.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TITIAN_3" Language="fr_FR">
+      <Text>Ce portrait est une grande huile de la Renaissance vénitienne représentant l'empereur Charles Quint sortant à cheval d'un bois sombre au crépuscule après sa victoire à Mühlberg. Il se tient droit sur un cheval noir, en armure de plates polie, une écharpe rouge en travers de la poitrine et une longue lance pointée vers l'avant dans la main droite. Le cheval porte un caparaçon rouge et or et avance, une jambe antérieure levée. Un pâle coucher de soleil perce les nuages gris au-dessus d'un paysage fluvial bas, à droite.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TOHAKU_1" Language="fr_FR">
+      <Text>Ce paravent est l'un d'une paire de paravents japonais à six panneaux peints à l'encre sur papier. Des groupes de pins se dressent dans une brume épaisse, certains tracés en traits sombres et vigoureux, d'autres s'effaçant en ombres grises. Deux troncs sombres s'élèvent près de la gauche, un large groupe remplit le centre, et un pic de montagne à peine visible apparaît en haut à droite. La majeure partie du papier est laissée vide, si bien que les arbres semblent apparaître et disparaître dans le brouillard.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TOHAKU_2" Language="fr_FR">
+      <Text>Ces panneaux, peints pour le temple Chishaku-in à Kyoto, forment un ensemble de quatre portes coulissantes japonaises en couleurs sur feuille d'or. Un énorme tronc sombre monte depuis le bas au centre et étend ses branches sur les quatre panneaux, chargées de feuilles d'érable rouges, vertes et or. En dessous, un massif de plantes d'automne, dont des chrysanthèmes blancs et des crêtes-de-coq rouges, fleurit près d'un ruisseau peint en bleu profond. Le fond d'or luit derrière chaque trouée du feuillage.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TOHAKU_3" Language="fr_FR">
+      <Text>Ce paravent est un paravent japonais à six panneaux peint à l'encre et couleurs légères sur papier doré passé. Un vieux prunier se tord depuis des rochers à gauche, son écorce striée de neige et ses fines branches parsemées de fleurs blanches. Un couple de canards est perché sur le tronc, des bambous verts s'élèvent derrière eux, et un seul petit oiseau traverse en volant le côté droit vide. Des roseaux et quelques plantes aquatiques s'étirent le long du bord inférieur.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_YING_1" Language="fr_FR">
+      <Text>Ce rouleau est une section d'un long rouleau horizontal chinois peint à l'encre et couleurs sur soie. Des dames du palais en robes flottantes blanches, rouges et vertes se promènent dans une cour, tandis que d'autres sont assises sur une véranda en haut à gauche avec des instruments de musique. Un arbre pousse à l'intérieur d'une haute clôture rouge en treillis au centre, et des rochers de jardin se dressent sur une terrasse de pierre en dessous. Des piliers verts et des écrans de papier encadrent les salles en lignes fines et régulières.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_YING_2" Language="fr_FR">
+      <Text>Ce rouleau est un haut rouleau suspendu chinois peint à l'encre et couleurs sur une soie qui a pris avec l'âge une teinte d'or chaud. Des montagnes bleu-vert s'élèvent en couches douces à travers la brume en haut, et un large lac calme s'étend au milieu. Des champs en terrasses et une maison entourée de murs se nichent parmi des arbres sombres en bas à droite, où deux petits personnages se tiennent au bord de l'eau et où une barque de pêche est amarrée. Des sceaux rouges de collectionneurs descendent le long du bord gauche.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_YING_3" Language="fr_FR">
+      <Text>Ce rouleau est un rouleau horizontal chinois peint à l'encre et couleurs sur soie. Une petite barque transporte le poète Su Shi, deux compagnons et un serviteur sur une eau calme tandis qu'un batelier se tient à la proue avec une rame. La Falaise rouge s'élève à pic en vert et ocre à droite, couronnée de pins sombres et d'arbres aux feuilles rouges, et des montagnes pâles s'estompent au loin à gauche. Des sceaux rouges de collectionneurs et une colonne d'inscription marquent les zones vides.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORKOBJECT_WRITING" Language="fr_FR">
+      <Text>Un épais livre à la couverture brun foncé est ouvert. Ses deux pages crème portent des lignes effacées de petite écriture manuscrite disposées en paragraphes, qui s'incurvent doucement depuis la reliure et luisent d'une lueur pâle sur un pourtour sombre.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORKOBJECT_MUSIC" Language="fr_FR">
+      <Text>Une partition ouverte repose sur un pupitre de bois. Deux pages crème de musique manuscrite sont posées sur le rebord du pupitre, leurs portées et leurs notes délavées en gris, et le pupitre lui-même est sculpté de volutes ornementales en bois brun doré, avec une large tablette en dessous et une seule colonne au-dessous.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_1" Language="fr_FR">
+      <Text>Un chat momifié se tient dressé. Sa tête est un visage de chat en bronze doré aux oreilles pointues, et son corps est enveloppé de bandes de lin brun entrecroisées.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_2" Language="fr_FR">
+      <Text>Un fragment brisé de tablette de pierre grise est couvert de rangées de minuscules signes cunéiformes en forme de coins. Une fissure profonde le traverse.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_3" Language="fr_FR">
+      <Text>Une longue lance fine a une hampe de bois élancée et une pointe de fer étroite en forme de feuille.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_4" Language="fr_FR">
+      <Text>Un parchemin est déroulé entre deux rouleaux de bois aux embouts de laiton. Des lignes d'écriture effacée courent sur le parchemin pâle.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_5" Language="fr_FR">
+      <Text>Un masque ovale en bois brun foncé a des yeux en fentes étroites, un long nez et une petite bouche qui montre les dents. Deux courtes cornes s'élèvent du sommet, et une rangée de triangles blancs court le long de chaque bord.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_6" Language="fr_FR">
+      <Text>Une grande amphore élancée en argile brun-rouge foncé a deux petites anses qui s'incurvent de son col à ses épaules. Elle s'effile vers une base pointue.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_7" Language="fr_FR">
+      <Text>Un fragment de mosaïque de sol repose sur une dalle de plâtre brisée. De petites tesselles crème, brunes et noires forment un seul œil avec son sourcil et une partie d'un visage.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_8" Language="fr_FR">
+      <Text>Une hallebarde dorée, une longue arme d'hast, porte d'un côté une lame de hache en croissant. Une pointe s'élève du sommet, et un crochet recourbé fait saillie derrière la lame.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_9" Language="fr_FR">
+      <Text>Un bouclier rond en bronze a verdi avec l'âge. Un motif de pétales en relief rayonne depuis un umbo central.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_10" Language="fr_FR">
+      <Text>Un bracelet de bras en or forme un anneau ouvert dont les deux extrémités sont façonnées en têtes de griffons qui se font face. Leurs ailes recourbées et leurs becs se rejoignent presque au niveau de l'ouverture.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_11" Language="fr_FR">
+      <Text>Un grand calice en laiton est terni et cabossé. Sa coupe évasée repose sur une tige ornée d'un nœud arrondi, au-dessus d'un large pied rond.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_12" Language="fr_FR">
+      <Text>Une petite pièce d'argent est usée et lisse sur les bords. Une tête de profil se devine faiblement sur sa face.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_13" Language="fr_FR">
+      <Text>Une longue épée droite repose sur un fin présentoir en métal. Elle possède une garde en croix toute simple, un pommeau rond et une lame sombre et piquée.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_14" Language="fr_FR">
+      <Text>Un plastron en acier est accompagné d'épaulières assorties. La plaque gris foncé épouse la forme de la poitrine et porte de fines lignes gravées.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_15" Language="fr_FR">
+      <Text>Une petite bague en or est sertie d'une pierre rouge plate taillée pour servir de sceau.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_16" Language="fr_FR">
+      <Text>Un astrolabe rond en laiton porte des anneaux ajourés pivotants et une aiguille droite au-dessus d'un disque gravé d'échelles et de cercles.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_17" Language="fr_FR">
+      <Text>Une petite pièce d'or est usée jusqu'à en devenir mate. Une croix est faiblement frappée sur sa face.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_18" Language="fr_FR">
+      <Text>Une longue pique a une hampe en bois qui se termine par une large tête de fer triangulaire, avec de petites ailettes à la base de la lame.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_19" Language="fr_FR">
+      <Text>Un fragment de peinture murale sur un enduit grossier porte une forme de volute en haut. Il montre un homme barbu coiffé d'une couronne d'épines et vêtu d'une robe rouge, les yeux levés vers le haut.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_20" Language="fr_FR">
+      <Text>Une paire de pendants d'oreilles en or est suspendue à de fins crochets. Chacun se termine par un pendentif à facettes en forme de losange.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_21" Language="fr_FR">
+      <Text>Une haute horloge de parquet se dresse dans un boîtier sculpté en bois brun foncé. Un cadran rond occupe le sommet, et une porte vitrée en dessous laisse voir le balancier.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_22" Language="fr_FR">
+      <Text>Un vieux journal plié a jauni avec l'âge. Sa première page montre des colonnes de petits caractères et une seule image.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_23" Language="fr_FR">
+      <Text>Un pistolet à silex a une crosse en bois incurvée et des garnitures en laiton usées. Son canon et sa platine sont ternis par la rouille.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_24" Language="fr_FR">
+      <Text>Une vieille carte déchirée sur un parchemin jauni se recourbe sur les bords. Des côtes à peine visibles et des lignes de route parcourent sa surface.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_25" Language="fr_FR">
+      <Text>Un collier de dents ou de griffes d'animal de couleur fauve est enfilé sur une cordelette sombre. Un petit nœud de cuir se trouve au centre du rang.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_1" Language="fr_FR">
+      <Text>Un coffre doré repose sur deux longues barres de bois qui passent dans des anneaux fixés à ses angles. Deux figures ailées sont agenouillées sur le couvercle, face à face, les ailes dressées.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_2" Language="fr_FR">
+      <Text>Un médaillon rond en or porte en relief le visage d'un homme barbu. Une petite touffe de poils sombres est enchâssée dans une fenêtre ovale au niveau de son menton.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_3" Language="fr_FR">
+      <Text>Un linge de lin blanc plié, à la lisière finement tissée, est imbibé de larges taches de sang rouge.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_4" Language="fr_FR">
+      <Text>Un antique rouleau de papyrus, brun et effiloché, repose en partie déroulé entre ses deux cylindres. De faibles lignes d'écriture apparaissent sur la partie ouverte.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_5" Language="fr_FR">
+      <Text>Un rocher gris pâle porte une empreinte de pied humain imprimée sur son sommet. De petites pierres sont éparpillées autour de lui.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_6" Language="fr_FR">
+      <Text>Un sabre japonais repose dans un fourreau de laque noire aux garnitures dorées. Sa poignée est enveloppée d'un cordon sombre.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_7" Language="fr_FR">
+      <Text>Une petite coupe toute simple en cuivre martelé a un bol peu profond sur une courte tige et un pied rond sans ornement.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_8" Language="fr_FR">
+      <Text>Un petit coffret doré à couvercle articulé est couvert de filigrane et serti de gemmes vertes et de perles. Une pierre rouge forme le fermoir à l'avant.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_9" Language="fr_FR">
+      <Text>Une simple robe blanche pend librement, nouée à la taille par une ceinture d'étoffe. Le tissu est usé et légèrement taché.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_10" Language="fr_FR">
+      <Text>Un crâne humain brun repose sur un support doré serti de petits joyaux. Un trou rond perce le sommet du crâne.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_11" Language="fr_FR">
+      <Text>Une paire de sandales usées en cuir brun, à fines lanières et petites boucles dorées, est posée côte à côte, les pointes tournées vers l'avant.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_12" Language="fr_FR">
+      <Text>Une longue bande de lin pâle porte l'empreinte brune et légère du visage et du corps d'un homme barbu. Des trous de brûlure sombres marquent le tissu en une rangée.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_13" Language="fr_FR">
+      <Text>D'étroites bandes de soie brune en lambeaux sont posées côte à côte. Des colonnes de caractères sombres descendent le long de chaque bande.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_14" Language="fr_FR">
+      <Text>Une petite croix de bois sombre est sertie dans un cadre en or. Une pointe dorée dépasse sous son pied pour qu'elle puisse tenir debout.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_15" Language="fr_FR">
+      <Text>Un bloc rectangulaire grossier de grès rougeâtre est ébréché le long de ses arêtes. Un anneau de fer est fixé à l'une de ses extrémités.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_16" Language="fr_FR">
+      <Text>Un minuscule coffret en or serti de pierres vertes se tient le couvercle ouvert. Une seule dent repose à l'intérieur sur un tissu rouge.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_17" Language="fr_FR">
+      <Text>Une grande châsse dorée a la forme d'une église au toit pointu. Des rangées de petites figures debout remplissent les arcades le long de ses flancs, et des bossettes rondes et des joyaux constellent le toit.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_18" Language="fr_FR">
+      <Text>Une chaîne de fer repose enroulée sur un coussin rouge à l'intérieur d'un haut coffret d'or et de verre. Le coffret a la forme d'une lanterne surmontée d'une petite poignée.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_19" Language="fr_FR">
+      <Text>Un miroir rond en bronze est vu de dos, sa surface teintée de vert-bleu par l'âge. Un anneau de motifs en forme de feuilles entoure un bouton en relief au centre.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_20" Language="fr_FR">
+      <Text>Un grand chaudron d'argent a deux lourdes anses. Les panneaux qui entourent ses flancs sont repoussés de visages au regard fixe et de petites figures.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_21" Language="fr_FR">
+      <Text>Un petit coffre d'or et d'émail bleu au couvercle en pente repose sur quatre pieds courts. Des panneaux d'animaux et de figures ailées décorent ses côtés, et une gemme bleue se trouve au sommet.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_22" Language="fr_FR">
+      <Text>Un long étui étroit en argent, aux extrémités d'or serties de joyaux et aux bordures gravées, renferme un cordon d'or enroulé à l'intérieur.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_23" Language="fr_FR">
+      <Text>Deux branches de vigne liées ensemble en leur centre forment une croix. Des mèches de cheveux sombres ou de cordon attachent la jonction, et les extrémités des branches retombent vers le bas.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_24" Language="fr_FR">
+      <Text>Un fer de lance a la pointe brisée. Une gaine d'or entourée de fil métallique couvre le milieu de la lame.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_ANANSI" Language="fr_FR">
+      <Text>Deux grands tambours africains à mains se dressent côte à côte. Le plus haut est en bois pâle lacé de corde, et le plus bas est brun-rouge avec une peau blanche tendue sur le dessus, tous deux peints de bandes de zigzags.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_ARTHUR" Language="fr_FR">
+      <Text>Un grand calice doré a une large coupe. Des gemmes rouges et vertes cernent son bord et sa tige, et il repose sur un pied évasé richement orné.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_BEOWULF" Language="fr_FR">
+      <Text>Une large épée à double tranchant a une lame brillante qui s'élargit vers la pointe, et une garde d'or incurvée surmonte une poignée enveloppée de cuir.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_HERCULES" Language="fr_FR">
+      <Text>Une lourde massue de bois a une extrémité épaisse hérissée de pointes d'os, et une corde enserre le manche étroit.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_HIMIKO" Language="fr_FR">
+      <Text>Un diadème d'or porte un éventail de hauts rayons pointus qui s'élèvent d'un disque solaire rond à l'avant. Des lignes en volutes sont gravées sur le bandeau et les rayons.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_HIPPOLYTA" Language="fr_FR">
+      <Text>Une large ceinture de cuir brun foncé est sertie de disques ronds en bronze. Elle est nouée par une lanière à nœud qui pend librement.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_HUNAHPU" Language="fr_FR">
+      <Text>Un manteau d'étoffe pâle pend à une barre de bois. Un col de plumes vertes entoure son encolure, et le tissu retombe en plis lâches en dessous.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_MAUI" Language="fr_FR">
+      <Text>Une torche de bois a une tête liée qui brûle d'une flamme jaune vif projetant des étincelles. Un gland de cordon orné de perles pend au manche.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_MULAN" Language="fr_FR">
+      <Text>Un ensemble d'armure est réuni : une cuirasse sombre de plaques imbriquées et un casque rond orné d'un plumet rouge. Des cordons rouges attachent les pièces.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_OYA" Language="fr_FR">
+      <Text>Une dague a deux lames d'acier parallèles qui s'élèvent d'une seule poignée. La prise est enveloppée d'un cordon brun-rouge.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_SINBAD" Language="fr_FR">
+      <Text>Un quadrant de navigateur en laiton, un quart de cercle à la face gravée de vert, laisse pendre de son angle un fil à plomb muni d'un petit poids.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_WUKONG" Language="fr_FR">
+      <Text>Un long bâton sombre est coiffé de bandes d'or aux deux extrémités. Un cordon rouge orné de petits anneaux est noué près de l'une des extrémités.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_EPIC" Language="fr_FR">
+      <Text>Un rouleau de parchemin aux bords enroulés se tient debout, avec un petit luth appuyé contre lui. Des notes de musique lumineuses flottent entre le rouleau et les cordes.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_VOIDSINGER_RELIC_1" Language="fr_FR">
+      <Text>Une défense grise recourbée, piquée de marques semblables à des ventouses, est coiffée de bandes d'or serties de joyaux. Elle pend à une lourde chaîne de fer munie d'un petit pendentif annelé.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_VOIDSINGER_RELIC_2" Language="fr_FR">
+      <Text>Un vase sombre au bord cannelé laisse jaillir d'épais tentacules qui se dressent et s'enroulent. Il repose sur une base arrondie du même métal sombre.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_VOIDSINGER_RELIC_3" Language="fr_FR">
+      <Text>Un coffre de bois ouvert, aux coins de laiton et au couvercle à panneaux de verre, contient des rouleaux et de vieux livres. Un crâne d'os est posé à l'avant, et des bernacles incrustent les bords.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_CITRUS" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient une orange entière avec une feuille verte sur sa tige.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_COCOA" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient une tablette de chocolat noir divisée en carrés.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_COFFEE" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient un sac de toile de jute rempli de grains de café torréfiés, dans lequel repose une pelle en métal.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_COTTON" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient une branche de cotonnier portant trois capsules blanches.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_DIAMONDS" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient un seul gros diamant taillé qui scintille de blanc et de bleu.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_DYES" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient trois flacons de verre de teinture rose, violette et bleue.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_FURS" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient un renard orange qui se tient debout à l'intérieur, la queue dressée.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_HONEY" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient un morceau de rayon de miel doré sur lequel se trouvent deux abeilles.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_GYPSUM" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient un amas de cristaux rose pâle et blancs.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_INCENSE" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient un brûle-encens en laiton d'où s'élèvent une petite flamme et une volute de fumée pâle.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_IVORY" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient une tête d'éléphant grise dont les défenses s'en dressent.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_JADE" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient un dragon sculpté en jade vert.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_MARBLE" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient un buste en marbre blanc d'un homme aux cheveux bouclés.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_MERCURY" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient trois perles arrondies de mercure liquide et brillant.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_PEARLS" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient une coquille d'huître ouverte avec une perle blanche à l'intérieur.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_SALT" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient une salière en verre à bouchon métallique.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_SILK" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient un rouleau de soie qui se déroule en violet et en rouge.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_SILVER" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient un pichet d'argent poli à l'anse recourbée.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_SPICES" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient des tas d'épices vertes, rouges et orange, avec deux piments.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_SUGAR" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient un bol bleu rempli de morceaux de sucre blanc.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_TEA" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient un sachet de thé en papier avec sa ficelle et son étiquette.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_TOBACCO" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient une pipe en bois à côté d'une feuille de tabac brune.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_TRUFFLES" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient une tête de cochon rose qui fouille du groin deux truffes sombres dans la terre.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_WINE" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient une grappe de raisin violet avec ses feuilles, une bouteille de vin et un verre rempli.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_WHALES" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient une baleine bleue couchée en travers.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_AMBER" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient des morceaux d'ambre orange qui luisent.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_OLIVES" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient un rameau d'olivier avec des olives noires et des feuilles vert argenté.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_TURTLES" Language="fr_FR">
+      <Text>Une boîte d'expédition en carton ouverte contient une tortue de mer verte qui en sort en grimpant.</Text>
+    </Replace>
   </LocalizedText>
 </GameData>

@@ -1,7 +1,518 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
-    <!-- zh_Hans_CN: great work image descriptions. Pending translation from docs/great-work-descriptions.md;
-         missing tags fall back to the English text in src/Text/en_US/GreatworkDescStrings_CAI.xml. -->
+    <!-- SIMPLIFIED CHINESE -->
+    <!-- Great work image accessibility descriptions (CAI). Appended to the Great Work Showcase details.
+         Translated from docs/great-work-descriptions.md via src/Text/en_US/GreatworkDescStrings_CAI.xml; keep the tag set identical to en_US. -->
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ANGUISSOLA_1" Language="zh_Hans_CN">
+      <Text>这幅画是一件意大利文艺复兴时期的油画，描绘安圭索拉的三个妹妹在户外围坐在一张铺着地毯的桌旁下棋，身后是朦胧的山丘。最年长的卢西娅坐在左侧，刚刚吃掉一枚棋子，神情平静地望向画外。右侧的米涅瓦举起手表示抗议，中间最小的欧罗巴看着她的反应咧嘴而笑。一位年长的女仆从右侧探身观看。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ANGUISSOLA_2" Language="zh_Hans_CN">
+      <Text>这幅肖像是一件油画，描绘西班牙国王菲利普二世从腰部以上的形象，背景是素净的灰色。他头戴高高的黑帽，身穿黑色紧身上衣和斗篷，颈上是白色蕾丝皱领，胸前细链上挂着金羊毛勋章。他面色苍白，留着修剪整齐的浅色胡须，神情平稳而戒备。一只手搭在红色椅子的扶手上，另一只手握着一串念珠。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ANGUISSOLA_3" Language="zh_Hans_CN">
+      <Text>这幅肖像是一件文艺复兴时期的油画，描绘一位年轻修士站在近乎全黑的背景前。他身穿浅米色修士袍，厚重的兜帽披在肩上，腰间系着一根绳带。他的头发剃得很短，面容平静而年轻，目光望向右侧而不是看向画家。他双手在身前交握，一串带有小十字架的长念珠从手中垂下。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BEHZAD_1" Language="zh_Hans_CN">
+      <Text>这幅细密画是一页波斯手抄本插图，出自一部记述帖木儿征战的编年史，页面上下各有一栏书法。帖木儿的军队与埃及苏丹的部队之间的骑兵大战占满整页，身披红、蓝、金三色铠甲的骑手举着长矛和弓箭，冲过散布岩石和小橘树的绿色地面。号手和鼓手在蓝天下沿页面上方骑行，两侧都竖起旗帜。倒下的人和马躺在下方两角。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BEHZAD_2" Language="zh_Hans_CN">
+      <Text>这幅细密画是一页波斯手抄本插图，出自萨迪的《果园》，描绘优素福与祖莱哈的故事，也就是约瑟与波提乏之妻故事的波斯版本。宫殿以一层层平面房间和楼梯高高堆叠而起，每一处表面都覆盖着蓝色瓷砖和一条条书法饰带。在靠近顶部的一间房里，身穿橙色衣裳的祖莱哈从榻上扑出，去抓身穿绿衣的优素福的斗篷，优素福扭身躲开，头上环绕着一圈火焰光环。在这耀眼的建筑面前，人物显得极其渺小。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BEHZAD_3" Language="zh_Hans_CN">
+      <Text>这幅细密画是一页波斯手抄本插图，描绘一场在花园中举行的王室朝会，深绿色的地面上散布着花朵。帖木儿盘腿坐在一座低矮的宝座上，上方是一顶蓝白相间的圆顶帐篷，他身穿浅绿色长袍，头戴王冠。身穿彩色长袍的廷臣围站在他身边，侍从在下方等候。左上方有两名男子坐在一只拴着皮带的猎豹旁，一棵开花的树从帐篷后面升起。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BOSCH_1" Language="zh_Hans_CN">
+      <Text>这幅三联画是一件尼德兰油画，绘于三块拼接的木板上，画中密布着数百个小人物。左联描绘一座绿色的乐园，上帝在一座粉色喷泉旁将夏娃引见给亚当。中联是一座明亮的花园，成群的裸体人物在巨大的果实和奇异的粉色建筑之间嬉戏。昏暗的右联是地狱，被一座燃烧的城市照亮，一个空心的树人和一个鸟头怪物主宰着种种酷刑。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BOSCH_2" Language="zh_Hans_CN">
+      <Text>这幅三联画是一件尼德兰油画，左联是伊甸园，中联是审判，右联是地狱。左联中夏娃被创造、受诱惑并被逐出，叛逆的天使从上方发光的上帝身边坠落。中联里基督坐在一小片蓝天中，他下方是一片焦黑的暗色大地，成群的恶魔在其中炙烤、刺穿并折磨受罚的灵魂。右联是一片由魔鬼统治的燃烧地狱景象。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_BOSCH_3" Language="zh_Hans_CN">
+      <Text>这幅三联画是一件尼德兰油画，围绕一个单一的形象展开：一辆巨大的干草车正滚向地狱。中联里，教皇、国王和农民争抢干草，恶魔拖着大车前行，一对恋人在车顶奏乐，上方云中是一个小小的基督。左联描绘亚当与夏娃的创造和被逐，右联描绘一座燃烧的地狱，魔鬼们正在那里建造一座高塔。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_CASSATT_1" Language="zh_Hans_CN">
+      <Text>这幅粉彩画以松散而明亮的黄绿色笔触绘成，是一件印象派习作，描绘卡萨特的姐姐莉迪娅坐在剧院包厢里。她身体前倾，交叠的双臂搁在铺着红色绒布的栏杆上，裸露的双肩从浅色晚礼服中露出。她的红棕色头发盘起，头转向一侧，带着淡淡的微笑。她身后的上角挂着一盏光芒四射的吊灯和一面镜子。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_CASSATT_2" Language="zh_Hans_CN">
+      <Text>这幅画是一件印象派油画，从上方俯视一对母子。妇人身穿绿、粉、白三色条纹的裙子，把一个赤裸的幼儿抱在膝上，一只手臂搂着孩子，另一只手在白色盆中为孩子洗脚。孩子裹在白色毛巾里，和她一起低头看着水。一只花纹水壶和一块带图案的地毯填满周围的空间。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_CASSATT_3" Language="zh_Hans_CN">
+      <Text>这幅画以快速的笔触绘成，是一件印象派油画，描绘卡萨特的姐姐莉迪娅在一间明亮的房间里喝茶。她侧身坐在一把深色条纹扶手椅上，身穿粉色长裙，戴着领口镶白色毛皮的软帽。她戴着手套的双手正把一只镶金边的茶杯和茶碟举向唇边。她身后，一个绿色花盆里的白色风信子衬着浅色的墙壁。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_COLLOT_1" Language="zh_Hans_CN">
+      <Text>这尊半身像是一件石膏肖像，塑造的是科洛的丈夫、画家皮埃尔·艾蒂安·法尔科内，胸像在肩部以下截断，安放在一个圆形黑色底座上。他的头发松散地垂到耳边，敞开的衬衫领子外面是一件简单折叠的外衣。头部微微转向一侧，目光直视，略带戒备，塑形柔和而逼真。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_COLLOT_2" Language="zh_Hans_CN">
+      <Text>这尊半身像以白色大理石雕成，表现俄国的叶卡捷琳娜大帝面向左侧的侧面像。她的头发从前额平滑地向后梳起，一条长面纱从头顶垂下，以松散的褶皱覆过双肩。面容沉静，略带笑意，下巴坚定，鼻梁挺直。胸像在肩部以下截断，安放在一个小小的圆形基座上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_COLLOT_3" Language="zh_Hans_CN">
+      <Text>这尊半身像以白色大理石雕成，表现英国驻俄大使之女玛丽·卡思卡特，她的头微微转向一侧。她的头发向后梳起，罩在一块轻薄的头巾下，头巾垂落在肩后，平静的脸上带着一丝含蓄的微笑。胸像下端是一段平滑的弧形胸部，安放在圆形基座上，雕工光润而细腻。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_DONATELLO_1" Language="zh_Hans_CN">
+      <Text>这尊雕像是为佛罗伦萨奥尔圣米凯莱教堂的壁龛而雕，是一件意大利文艺复兴早期的大理石像，表现福音书作者圣马可独自站立的形象。他身穿垂着深深褶皱的长袍，重心落在一条腿上，把一本合起的书抵在髋部。他额头高耸，面容庄重而沉思，雕像立在一个朴素的低矮底座上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_DONATELLO_2" Language="zh_Hans_CN">
+      <Text>这尊雕像在此处不含基座，是一件青铜骑马纪念像，表现绰号加塔梅拉塔的雇佣兵首领埃拉斯莫·达·纳尔尼。这位身披铠甲的统帅从容地骑在一匹健壮的战马上，马向前行进，一只前蹄抬起。他右手向外持着一根指挥杖，身侧佩着一把长剑。这是自古罗马以来铸造的第一座大型青铜骑马纪念像。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_DONATELLO_3" Language="zh_Hans_CN">
+      <Text>这尊雕像是一组青铜群像，表现朱迪斯行刺的那一刻，立在一个深色的方形底座上。蒙着面纱、身穿厚重长袍的女英雄站在醉酒的亚述将军赫罗弗尼斯上方，他瘫倒在她脚边的垫子上，一条腿无力地垂着。她一手揪住他的头发，另一手高举一把弯刀，即将挥下。深色而风化的青铜使人物显得严峻而宏伟。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_EOP_1" Language="zh_Hans_CN">
+      <Text>这幅画是一幅高而窄的朝鲜立轴，以水墨淡彩绘成，描绘中国典故中三位老人各自夸口自己年纪最大的故事。三位白须老者身穿蓝色和橙色长袍，站在一片翻滚云海上方的岩石平台上交谈，身旁有一只小鹿。他们身后耸立着带蓝色调的嶙峋山峰，一棵松树在平台下方舒展枝叶，左下方远处坐落着一座小小的亭子。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_EOP_2" Language="zh_Hans_CN">
+      <Text>这幅画是一幅高大的朝鲜立轴的局部，以水墨设色绘于绢上。一只神气的公鸡侧身站立，鸡冠和肉垂鲜红，颈羽呈金棕色，长长的尾羽是一片油亮的黑色翎毛。一只浅色的母鸡站在它下方，左上方一块水墨渲染的岩石上垂下一只吊在丝线上的小蜘蛛。笔触快捷生动，衬着素净的褐色绢底。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_EOP_3" Language="zh_Hans_CN">
+      <Text>这幅画是一幅高大的朝鲜立轴的下半部分，以水墨设色绘于绢上。一个身材粗壮、面带笑容的马夫留着胡须，戴着黑帽，穿着灰蓝色长袍，站在两匹马之间，握着其中一匹的缰绳。近处的那匹是一头矮壮的黄褐色小马，身上带有白色斑块，另一匹颜色更深、毛更蓬乱的马在左后方等候。两匹马身躯厚实而敦实，衬着素净的褐色绢底。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GIL_1" Language="zh_Hans_CN">
+      <Text>这幅画是一件印度现代油画，描绘三位年轻女子紧挨着坐在一面光秃秃的棕色墙前。左边的女孩裹着浅绿色披巾，后面那位裹着橙红色披巾，右边那位裹着深红色披巾，她们的黑发在头巾下向后梳起。三人都垂眼望向别处，神情安静而认命，双手搁在膝上。人物被简化为大块平涂的浓烈色彩。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GIL_2" Language="zh_Hans_CN">
+      <Text>这幅画以温暖的土棕色和红色绘成，是一件印度现代油画，描绘一位年轻新娘在婚礼当天梳妆打扮。肤色白皙、裸露双肩的新娘坐在中央，黑发披散，左边一名女子为她梳头，右边一名身穿绿色上衣的女子捧出一只小碗。两个孩子在一旁观看，地上放着两只红色陶罐。圆润而简化的人物令人想起印度壁画。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GIL_3" Language="zh_Hans_CN">
+      <Text>这幅自画像是一件现代油画，描绘约十八岁的阿姆瑞塔·谢吉尔，从腰部以上以严格的侧面朝左呈现。她的深色头发上戴着一顶鲜黄色贝雷帽，戴着圆环耳环，涂着红色口红，身穿一件深蓝色低领连衣裙。她倚着一张桌子，手边放着一只小铜碗。背景是灰、蓝、绿三色笔触交织的斑驳色块，她的神情冷静而自持。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GOGH_1" Language="zh_Hans_CN">
+      <Text>这幅画是一件后印象派油画，作于梵高在法国南部圣雷米精神病院疗养期间，是现代艺术中最广为人知的图像之一。翻涌的夜空占据了画布的大部分：星星在一圈圈光环中燃烧，一道螺旋状的气流卷过中央，一轮黄色的月亮在右上方发光。一棵深色的柏树如火焰般沿左侧边缘升起，一座带尖顶教堂的小村庄在山丘下沉睡。每一个形体都由厚重卷曲的蓝色和黄色笔触构成。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GOGH_2" Language="zh_Hans_CN">
+      <Text>这幅画是一件后印象派油画，描绘夜晚阿尔勒论坛广场上的一家咖啡馆露台，黄色的遮篷和灯光从内部把它照亮。小小的人影坐在遮篷下的圆桌旁，一名身穿白衣的侍者站在他们之间，远处几个人沿着深蓝色的街道漫步。屋顶上方，深蓝的天空中散布着大颗的黄色星星。整幅画完全不用黑色，只有温暖的黄色衬着冷调的蓝色。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GOGH_3" Language="zh_Hans_CN">
+      <Text>这幅画是一件后印象派油画，描绘阿尔勒一家深夜营业的咖啡馆车站咖啡馆的室内，色彩刺眼而冲突。血红色的墙壁和绿色的天花板压向黄色的木地板，四盏吊灯放射出旋转的黄色笔触光晕。一张绿色的台球桌占据中央，店主身穿浅色西装站在桌旁，几位顾客瘫坐在沿墙的桌边。后墙上的时钟指向午夜过后。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GRECO_1" Language="zh_Hans_CN">
+      <Text>这块画板是埃尔·格列柯仍在克里特岛工作时以明亮的威尼斯风格绘成的，是一件蛋彩小幅早期作品。圣母坐在高大的圆柱之间，膝上抱着圣婴，三位国王聚在她面前：一位身穿金色衣袍跪下握住圣婴的手，一位手持圣杯俯身向前，右侧一位身披红色斗篷的深肤色国王躬身行礼。他们身后，一头驮着骑手的骆驼和一匹马在多云的天空下等候。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GRECO_2" Language="zh_Hans_CN">
+      <Text>这幅祭坛画是为托莱多的圣多明各古教堂而作，是一件高达四米的西班牙文艺复兴时期高大油画，描绘圣母被接升天。上半部分，她张开双臂立于一弯浅色的新月上升起，身穿红色长袍，蓝色斗篷飘扬，周围环绕着天使和带翼的小天使头像。下方，十二使徒围拥在她空空的石棺旁，惊愕地向上比划。人物被拉长，色彩冷冽而明亮。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_GRECO_3" Language="zh_Hans_CN">
+      <Text>这幅画是一件西班牙文艺复兴时期的油画，是西方艺术中最早的纯风景画之一，也是最阴暗的风景画之一。西班牙城市托莱多在右侧的灰色石山上耸立，头顶是狂暴的风雨天空，大教堂尖塔和阿尔卡萨城堡被一道诡异的白光照亮。绿色的山丘向下延伸到一条河，河上横跨一座拱桥，岸边散布着小小的房屋。整幅画面以深绿、蓝黑和冷白绘成。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HOKUSAI_1" Language="zh_Hans_CN">
+      <Text>这幅版画属于《富岳三十六景》系列，是日本艺术中最著名的图像。一道巨大的深蓝色海浪在左侧高高耸起，卷过整个画面，浪尖碎成爪子般的白色泡沫。三艘载满划手的细长敞篷船在浪下的波谷中颠簸。远处，画面中央小小的一点，是富士山覆着白雪的锥形山峰。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HOKUSAI_2" Language="zh_Hans_CN">
+      <Text>这幅版画是一幅日本木刻，以柔和的蓝、绿和粉色描绘黎明时分的诹访湖。前景中，两棵高大的松树从岩石岬角上升起，深色的枝干扭曲，庇护着一座覆着草顶的小小茅草神社。松树之外，浅色的湖面延伸到村庄和蓝色山丘构成的湖岸。一艘小帆船在左侧驶过水面，富士山的白色山顶显现在遥远的地平线上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HOKUSAI_3" Language="zh_Hans_CN">
+      <Text>这幅版画常被称为《赤富士》，是一幅日本木刻，描绘富士山在初秋的光线中泛出红光。山体呈宽阔平滑的锥形，横跨画面右侧三分之二，山坡是温暖的红棕色，一道道白雪附着在峰顶。一条深绿色的森林带沿山脚延伸。一排排小小的白云平铺成条，横过深蓝的天空。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KANDINSKY_1" Language="zh_Hans_CN">
+      <Text>这幅画作于康定斯基在包豪斯任教期间，是一件没有任何可辨认物体的抽象油画，完全由几何形构成。圆形、三角形、棋盘格和长长的直线在浅米色底子上漂浮、交错。左上方一个带红色光晕的黑紫色大圆是最沉重的形状，由旁边一个红色圆盘和下方几个蓝色和黄色的小圆加以平衡。色彩干净明亮，形状仿佛失重般悬在空间中。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KANDINSKY_2" Language="zh_Hans_CN">
+      <Text>这幅画是康定斯基转向抽象之前的一件早期油画，后来他在慕尼黑创立的蓝骑士团体便以此得名。一位身披蓝色斗篷的小小骑手骑着白马疾驰过起伏的绿色草地，身体随着动势前倾。后方的山顶上立着铁锈色和金色的秋树，蓝天上飘着两朵白云。颜料以厚厚的点触涂抹，田野因此闪烁摇曳而非静止不动。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KANDINSKY_3" Language="zh_Hans_CN">
+      <Text>这幅画又名《莫斯科一号》，是一件近乎抽象的油画，描绘康定斯基的故乡莫斯科。城市的彩色碎片围绕一个发光的中心翻滚：一座带深色窗户的白色宫殿、红色和绿色的洋葱形圆顶、一道彩虹，以及一对画成小小人影的散步情侣。成群的小黑鸟散落在蓝、粉、黄三色的天空中。整个场景倾斜旋转，仿佛这座城市是在梦中所见。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KAUFFMAN_1" Language="zh_Hans_CN">
+      <Text>这幅肖像以罗马郊外的林间乡野为背景，是一件新古典主义油画，描绘安娜·玛丽亚·詹金斯和她的叔叔、罗马城的艺术品商人托马斯·詹金斯。她站在左侧，身穿飘逸的白色长裙，系着粉色腰带，戴着宽大的白帽，举着一枝白色旋花。他坐在她身旁，倚着一棵树，身穿深色外衣和浅色马裤，一手举起帽子，另一手轻拍一只黑白花的狗。远处的山丘和罗马斗兽场填满背景。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KAUFFMAN_2" Language="zh_Hans_CN">
+      <Text>这幅肖像是一件新古典主义油画，描绘创立现代艺术史学的德国学者约翰·约阿希姆·温克尔曼。他坐在桌旁，身穿宽松的灰色外衣，围着芥末黄的围巾，双手交叠在一本摊开的书上，指间松松地夹着一支羽毛笔。他的头转向一侧，仿佛一个念头刚刚打断了他的写作。温暖的光线从素净的深色背景中落在他的脸和手上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KAUFFMAN_3" Language="zh_Hans_CN">
+      <Text>这幅肖像是一件新古典主义油画，描绘英国歌唱家萨拉·哈罗普扮作抒情诗的缪斯女神。她坐着，身穿玫瑰粉色长裙，肩上披着绿色围巾，扑粉的头发上戴着一顶小花花环，平静地望向画外。一只手臂搁在一架镀金的里拉琴上，另一只手拿着一卷乐谱。风雨欲来的天空和一道带瀑布的幽暗林木悬崖填满背景。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KLIMT_1" Language="zh_Hans_CN">
+      <Text>这幅画是克里姆特最著名的作品，是一件层层贴着金箔的维也纳新艺术运动油画。一对恋人跪在开满花朵的草地上相拥，男子俯身亲吻女子的脸颊，她闭着眼睛仰起脸。两人的身体融合成一件金色的长袍，他那一侧饰有黑白相间的长方形，她那一侧饰有鲜艳的彩色圆点。他们身后是一片平坦而闪烁的金色底子。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KLIMT_2" Language="zh_Hans_CN">
+      <Text>这幅画是一件方形油画风景，描绘通往卡默城堡的林荫道，那是奥地利阿特湖畔的一座乡间宅邸。高大的树木长着扭曲的蓝灰色树干，排列在一条铺砌小路的两侧，在头顶交汇，浓密的绿叶树冠几乎填满整幅画面。林荫道尽头立着那座黄色的房子，带着红色屋顶。树叶以成千上万个绿、蓝、黄的细小点触绘成。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KLIMT_3" Language="zh_Hans_CN">
+      <Text>这幅画是一件方形油画，描绘一座农舍花园，花朵密得连一点地面都看不见。高大的向日葵长着宽阔的灰绿色叶子，在右侧挺立，黄色的花盘在顶端低垂。它们下方和周围铺展着大片红色、粉色和蓝色的花朵，像彩纸屑般撒在绿色之中。画面没有天空，也没有地平线，从边到边只有花朵。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KOBER_1" Language="zh_Hans_CN">
+      <Text>这幅肖像是一件文艺复兴时期的宫廷油画，描绘三岁的波兰和瑞典公主安娜·玛利亚·瓦萨僵直地站在一幅红色帷幔前。她身穿一件带红色和金色刺绣的银白色长裙，戴着高高的白色皱领，浅色头发上戴着镶珠宝的帽子，链子上挂着一枚镶宝石的沉重金十字架。一只小手拿着一块叠好的手帕。上方两角的拉丁文题铭写明她的名字、头衔和年龄。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KOBER_2" Language="zh_Hans_CN">
+      <Text>这幅肖像是一件文艺复兴时期的国王御容油画，描绘波兰和瑞典国王齐格蒙特三世·瓦萨从膝盖以上的形象。他站立着，身穿黑色紧身上衣，戴着高耸尖挺的白色皱领，头上是一顶饰有珠宝徽章的黑帽，肩上披着一件带斑点的猞猁皮斗篷。一只手搭在铺着红布的桌上，另一只手握着剑柄。左侧一幅红色帷幔垂挂在他身后，衬着深色的背景。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_KOBER_3" Language="zh_Hans_CN">
+      <Text>这幅肖像是一件文艺复兴时期的油画，描绘年迈的波兰女王安娜·亚盖洛身穿寡妇服饰。她站立着，身穿朴素的黑色长裙，头上罩着一条从头顶垂到腰部以下的白色长面纱，一条白布横过她的下巴和喉咙。一枚金十字架挂在胸前的长链上，她一手拿着一本小书。右上方有一幅绿色和金色的织锦帷幔被拉开。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_LEWIS_1" Language="zh_Hans_CN">
+      <Text>这尊雕像是一件真人大小的白色大理石像，表现克利欧佩特拉死后的那一刻。她坐在一座扶手雕成狮身人面像头部的宝座上，身体向后瘫倒，头歪向一侧，双眼紧闭。她身穿一件露出一侧乳房的褶裙，戴着额前有眼镜蛇的王室头饰。一只手无力地搁在膝上，另一只手垂在宝座扶手外。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_LEWIS_2" Language="zh_Hans_CN">
+      <Text>这件雕塑是一组小型白色大理石群像，表现朗费罗长诗中那对年轻的美洲原住民夫妇海华沙与明妮哈哈并肩而立。男子戴着羽毛头饰，穿着带流苏的束腰外衣，女子戴着发带，短裙外披着一条垂坠的披肩。两人在中间握着手，面向彼此，带着安静的微笑。人物立在一个圆形底座上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_LEWIS_3" Language="zh_Hans_CN">
+      <Text>这尊雕像是一件白色大理石像，表现圣经中的女仆夏甲被逐后独自身处旷野。她站立着，双手紧紧交握在胸前，脸向上仰起祈祷，长发松散地披在肩上。她的长裙从一侧肩头滑落，以厚重的褶皱垂到赤裸的双脚。一只翻倒的水罐空空地躺在底座上她的脚旁。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MICHELANGELO_1" Language="zh_Hans_CN">
+      <Text>这幅壁画是《创造亚当》，是梵蒂冈西斯廷礼拜堂天顶画中最著名的一幅。左侧，赤裸的亚当斜倚在绿色的坡地上，一只手臂无力地向右伸出。上帝是一位身穿浅色长袍的白须老者，从右侧乘着一件挤满天使的旋转红色斗篷疾驰而来，伸出食指。两根指尖在画面中央几乎相触。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MICHELANGELO_2" Language="zh_Hans_CN">
+      <Text>这尊雕像是一件高逾五米的巨型白色大理石像，表现大卫在与歌利亚交战前赤身而警觉的形象。他站立着，重心落在右腿上，头猛地转向他的左侧，皱眉凝视，神情警惕。一副投石索搭在他的左肩上，石块握在他垂下的右手里。雕像独自立在一个低矮朴素的底座上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MICHELANGELO_3" Language="zh_Hans_CN">
+      <Text>这件雕塑是一组白色大理石群像，表现圣母玛利亚坐着，基督的遗体横卧在她膝上。她是一位低着头的年轻女子，一只手托着他的双肩，另一只手向外摊开，做出接受的姿态。她的长袍以深深的褶皱铺展，承托着他瘫软、近乎赤裸的身躯。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MONET_1" Language="zh_Hans_CN">
+      <Text>这幅画是一件大幅印象派油画，垂直俯视莫奈在吉维尼的睡莲池，画面中看不到岸边和天空。一簇簇平展的睡莲叶漂浮在青绿色和蓝色的水面上，几朵粉色花朵和一朵白花浮在其间。水面倒映着高高的水草和树木，化作松散的绿色和金色条痕。笔触柔和而朦胧，一切仿佛都悬浮在水面上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MONET_2" Language="zh_Hans_CN">
+      <Text>这幅画是一件油画，描绘黎明时分的勒阿弗尔港，它的标题赋予了印象派运动这一名称。一轮小小的橙色太阳悬在灰蓝色的薄雾中，在水面上投下一道断续的橙色倒影。两艘深色的小划艇在前景中漂荡，港口的桅杆、起重机和冒烟的烟囱在后方的雾霭中渐渐隐没。整个场景以蓝、灰、粉三色快速而稀薄的笔触绘成。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_MONET_3" Language="zh_Hans_CN">
+      <Text>这幅画是一件印象派油画风景，描绘莫奈吉维尼住所附近夏日草地上一个圆形的干草垛。一大片红色罂粟花田在它身后铺展，延伸到一排红顶农舍和一道浓密的深绿色树木。树木之外，低矮的山丘隐入朦胧的粉色和淡紫色天空。颜料以柔和的点触涂抹，将草地、花朵和树叶融为一体。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ORLOVSKY_1" Language="zh_Hans_CN">
+      <Text>这尊雕像在此处不含基座，是一件青铜像，表现1812年率领俄国抗击拿破仑的陆军元帅米哈伊尔·库图佐夫。他站立着，身穿带肩章的军服，一件长斗篷披在一侧肩上，右手高举一根指挥杖。左手握着一把垂在身侧的剑。青铜已风化成深绿色。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ORLOVSKY_2" Language="zh_Hans_CN">
+      <Text>这件雕塑在此处单独呈现，是矗立在圣彼得堡冬宫广场上那根高大花岗岩石柱顶端的青铜天使。天使站立着，宽大的羽翼收拢在身后，一手握着一支高高的十字架，另一只手指向天上。一条蛇被压碎在天使脚下的十字架下方，天使低头望向它。整个雕像呈金色。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_ORLOVSKY_3" Language="zh_Hans_CN">
+      <Text>这尊半身像是一件白色大理石肖像，以古罗马统治者的样式表现俄国沙皇亚历山大一世。他短短的卷发上戴着桂冠，刮净的脸上带着平静而淡淡的微笑。一件厚重的斗篷披在肩部的铠甲上，在胸前拢起。胸像安放在一个小小的圆形大理石基座上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_REMBRANDT_1" Language="zh_Hans_CN">
+      <Text>这幅肖像是一件荷兰黄金时代的全身油画，描绘富有的阿姆斯特丹市政官安德瑞斯·德·格雷夫站在一道石砌门口。他通身黑衣，戴着宽而平的白色衣领和宽檐帽，浅色长发松散地垂到肩上。一只手叉在腰间，一件斗篷挂在手臂上，一只手套掉落在他脚边的地上。温暖的光线落在他身后浅色的石墙上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_REMBRANDT_2" Language="zh_Hans_CN">
+      <Text>这幅肖像是一件荷兰黄金时代的油画，描绘阿姆斯特丹年轻女子阿加莎·巴斯站在一个沿画面边缘绘出的木框之内。她身穿黑色长裙，胸衣绣着金线，戴着宽大的白色蕾丝衣领，颈上挂着珍珠。一只手拿着一把折起的扇子，另一只手搭在画框边缘，拇指仿佛伸出了画面。她苍白的脸从深色背景中直视画外。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_REMBRANDT_3" Language="zh_Hans_CN">
+      <Text>这幅画是一件充满戏剧性的巴洛克油画，描绘天使阻止亚伯拉罕献祭儿子的那一刻。白须苍苍的老父亲用手按住男孩的脸，一把闪亮的刀被从他手中打落，正在空中翻转。天使从左上方俯冲而下，一手扣住他的手腕，另一手举起。以撒被捆绑着，赤身躺在前景的祭坛上，身体在幽暗的岩石风景前被照亮。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RUBLEV_1" Language="zh_Hans_CN">
+      <Text>这幅圣像是为弗拉基米尔的圣母安息大教堂而作，是一块以蛋彩绘于木板上的俄罗斯圣像板。大天使加百列身穿蓝绿色长袍，长着金色翅膀，从左侧大步走来，一手持杖，另一手朝玛利亚举起。她坐在右侧的长凳上，身披深樱桃红色的斗篷，手中拿着一缕红色纱线，转头望向他。他们身后立着浅色的塔楼，屋顶之间张挂着一块红布。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RUBLEV_2" Language="zh_Hans_CN">
+      <Text>这幅圣像是为弗拉基米尔的圣母安息大教堂而作，是一块高逾三米的大型俄罗斯圣像板，以蛋彩绘于木板上。基督身穿金色长袍坐在中央，一手举起祝福，膝上摊着一本打开的书。他身后，一个红色的菱形光芒覆在一个深绿色的椭圆上，椭圆中挤满了隐约的天使形象，褪色的四角绘有四位福音书作者的象征。大部分颜料已经磨损变薄，人物在一层淡淡的薄雾中显现。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RUBLEV_3" Language="zh_Hans_CN">
+      <Text>这幅圣像是为弗拉基米尔的圣母安息大教堂而作，是一块以蛋彩绘于木板上的俄罗斯圣像板。顶端，基督坐在一个圆形的蓝色光盘之中，天使们托着它在浅金色的底子上向上升起。玛利亚站在中央，身披深红色斗篷，双手举在胸前，两侧各有一位身穿白衣、指向上方的天使。每一侧都聚着六位身穿彩色长袍的使徒，有的仰望，有的相互转身交谈。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_SAMOSTRZELNIK_1" Language="zh_Hans_CN">
+      <Text>这幅肖像是一件波兰文艺复兴时期的板上画，描绘克拉科夫主教彼得·托米基的全身像。他站立着，头戴高高的白色主教冠，身披红色和金色的织锦长袍，手持镀金的牧杖和一本打开的书。一座饰有小天使的镀金拱门把他框在一幅绿色花纹挂帘前，右下方的桌上放着另一顶主教冠和一顶红帽。面部的描绘比僵硬的身体用心得多。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_SAMOSTRZELNIK_2" Language="zh_Hans_CN">
+      <Text>这幅细密画以明亮的色彩和金色绘于花卉边框之内，是一部格涅兹诺大主教图录彩饰手抄本中的整页插图。波兰的主保圣人圣斯坦尼斯瓦夫站在中央，身穿金色祭衣，戴着镶珠宝的主教冠，手持牧杖，两肩旁各有一位天使。主教彼得·托米基跪在他的左侧，国王齐格蒙特一世跪在他的右侧，旁边是一面绘有波兰白鹰的红色旗帜。两枚纹章悬在下方的枝叶间。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_SAMOSTRZELNIK_3" Language="zh_Hans_CN">
+      <Text>这幅细密画是一页王室祈祷书的插图，以彩色和金色绘于花卉边框之内。玛利亚站在一轮炽烈的金色光芒中，脚下是一弯新月，身穿红色长裙和蓝色斗篷，两位天使正把一顶王冠放到她披散的金发上。她手臂上抱着赤裸的圣婴基督。身穿红袍的国王齐格蒙特一世跪在右下方，下方是一面绘有波兰白鹰的盾牌。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TITIAN_1" Language="zh_Hans_CN">
+      <Text>这幅祭坛画是为威尼斯弗拉里教堂的主祭坛而作，是一块巨大的文艺复兴时期木板油画，高近七米，顶部呈圆弧形。圣母身穿红色长裙和蓝色斗篷，在中央的云团上升起，双臂大张，脸朝天堂仰起。一圈小天使托着她向上进入一片金色光辉，圣父上帝悬浮在上方。下方，身穿红色和绿色长袍的使徒们拥挤在一起，惊叹地向上伸手。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TITIAN_2" Language="zh_Hans_CN">
+      <Text>这幅画是一件威尼斯文艺复兴时期的油画，人物以接近半身的形式呈现。萨洛米身穿宽大的红色连衣裙，配着松垮的白色衣袖，把一只大盘子抵在髋部，盘上放着施洗者约翰被斩下的头颅。她面容平静，目光垂向一侧。一名侍女从左侧仰望着她，一个带翅膀的小孩栖在右上方的墙头上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TITIAN_3" Language="zh_Hans_CN">
+      <Text>这幅肖像是一件威尼斯文艺复兴时期的大幅油画，描绘皇帝查理五世在米尔贝格战役获胜后于黄昏时分骑马走出一片幽暗的树林。他身穿锃亮的板甲，挺直地骑在一匹黑马上，胸前斜挎红色饰带，右手持一支向前倾斜的长矛。马披着红色和金色的马衣，抬起一条前腿向前迈步。右侧，一抹淡淡的落日余晖穿过灰云，洒在低平的河畔风景上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TOHAKU_1" Language="zh_Hans_CN">
+      <Text>这件屏风是一对六曲日本折叠屏风之一，以水墨绘于纸上。一丛丛松树立在浓雾中，有的以浓重的深色笔触画出，有的淡成灰色的影子。两棵深色树干在靠左处升起，一大片松林填满中央，右上方隐约露出一座山峰。大部分纸面留白，树木仿佛在雾中时隐时现。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TOHAKU_2" Language="zh_Hans_CN">
+      <Text>这组画板是为京都智积院绘制的，是一组四扇日本隔扇画，以彩色绘于金箔之上。一根粗壮的深色树干从下方中央攀升，枝条横跨全部四扇，挂满红、绿、金三色的枫叶。树下，一片秋日草木，包括白色的菊花和红色的鸡冠花，在一条以深蓝色绘成的溪流旁盛开。金色的背景在枝叶的每一处间隙后面闪耀。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_TOHAKU_3" Language="zh_Hans_CN">
+      <Text>这件屏风是一架六曲日本折叠屏风，以水墨淡彩绘于褪色的金纸上。一株老梅从左侧的岩石间扭曲而上，树皮上带着一道道积雪，细枝上点缀着白色的花朵。一对鸭子栖在树干上，绿竹在它们身后升起，一只小鸟独自飞过空旷的右侧。芦苇和几株水草沿底边蔓延。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_YING_1" Language="zh_Hans_CN">
+      <Text>这幅卷轴是一幅中国长手卷的一段，以水墨设色绘于绢上。宫女们身穿白、红、绿三色的飘逸长袍在庭院中漫步，另一些则手持乐器坐在左上方的廊上。中央一株树生长在高高的红色格栅围栏内，下方的石台上立着园林假山。绿色的立柱和纸屏以精细匀整的线条勾勒出殿堂。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_YING_2" Language="zh_Hans_CN">
+      <Text>这幅卷轴是一幅高大的中国立轴，以水墨设色绘于绢上，绢面已泛出温暖的金黄色。青绿的山峦在顶端穿过云雾层层柔和地升起，一片开阔平静的湖面横贯中部。右下方，梯田和一座带院墙的宅院坐落在深色树木之间，两个小小的人影站在水边，一艘渔船系泊在那里。红色的收藏印沿左侧边缘排列而下。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_YING_3" Language="zh_Hans_CN">
+      <Text>这幅卷轴是一幅中国手卷，以水墨设色绘于绢上。一叶小舟载着诗人苏轼、两位友人和一名仆人渡过平静的水面，船夫持桨立在船头。赤壁在右侧以青绿和赭色陡然耸起，顶上是深色的松树和红叶的树木，浅色的远山在左侧隐入远方。红色的收藏印和一列题字标记着留白处。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORKOBJECT_WRITING" Language="zh_Hans_CN">
+      <Text>一本厚厚的深棕色封面的书摊开着。两页米色纸面上是一行行褪色的小字手写文字，排成段落，从书脊处微微向上弯起，在深色的四周衬托下泛着淡淡的光。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORKOBJECT_MUSIC" Language="zh_Hans_CN">
+      <Text>一本打开的乐谱搁在木制谱架上。两页手写的米色乐谱纸放在谱架的托边上，谱线和音符已褪成灰色，谱架本身以金棕色木材雕成华丽的卷草纹，下方是宽阔的托板，底下是一根独立的支柱。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_1" Language="zh_Hans_CN">
+      <Text>一只木乃伊猫直立着。它的头是一张镀金青铜猫脸，双耳尖尖，身体裹着交叉缠绕的棕色亚麻布带。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_2" Language="zh_Hans_CN">
+      <Text>一块灰色石碑的破碎残片上布满一行行细小的楔形文字符号。一道深深的裂缝横穿其间。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_3" Language="zh_Hans_CN">
+      <Text>一支细长的长矛有着纤细的木杆和狭窄的叶形铁尖。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_4" Language="zh_Hans_CN">
+      <Text>一卷卷轴在两根带黄铜端头的木轴之间摊开。一行行褪色的手写字迹横过浅色的羊皮纸。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_5" Language="zh_Hans_CN">
+      <Text>一张深棕色木质椭圆面具有着细长的缝隙眼、长长的鼻子和一张露出牙齿的小嘴。顶部竖起两只短角，每一侧边缘都排着一行白色三角形。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_6" Language="zh_Hans_CN">
+      <Text>一只高而细长的深红棕色陶制双耳瓶有两只小把手，从瓶颈弯曲延伸到瓶肩。瓶身向下收窄成尖底。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_7" Language="zh_Hans_CN">
+      <Text>一块地面马赛克残片放在一块破损的灰泥板上。米色、棕色和黑色的小瓷片拼出一只带眉毛的眼睛和一部分面孔。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_8" Language="zh_Hans_CN">
+      <Text>一把镀金的戟是一种长柄武器，一侧带有新月形斧刃。顶端竖起一根尖刺，一枚弯钩从斧刃后方突出。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_9" Language="zh_Hans_CN">
+      <Text>一面圆形青铜盾牌已因年久而泛出绿色。一圈凸起的花瓣纹样从中央的盾脐向外放射。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_10" Language="zh_Hans_CN">
+      <Text>一只金臂环呈开口的环形，两端各雕成一个相向的狮鹫头。它们卷曲的翅膀和喙在开口处几乎相触。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_11" Language="zh_Hans_CN">
+      <Text>一只高高的黄铜圣杯已经失去光泽，还带着凹痕。它外张的杯身立在带圆形节的杯柄上，下面是宽大的圆形底座。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_12" Language="zh_Hans_CN">
+      <Text>一枚小小的银币边缘已被磨得光滑。币面上隐约可见一个侧面头像。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_13" Language="zh_Hans_CN">
+      <Text>一把笔直的长剑横放在纤细的金属展示架上。它有朴素的十字形护手、圆形的剑柄头和一片深色的、布满蚀坑的剑刃。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_14" Language="zh_Hans_CN">
+      <Text>一件钢制胸甲配有相称的肩甲。深灰色的甲片依照胸部的形状打造，上面刻有淡淡的线条。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_15" Language="zh_Hans_CN">
+      <Text>一枚小小的金戒指上镶着一块扁平的红色宝石，宝石切割成印章的样式。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_16" Language="zh_Hans_CN">
+      <Text>一具圆形的黄铜星盘带有镂空的可旋转圆环和一根笔直的指针，下面是一块刻有刻度和圆圈的圆盘。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_17" Language="zh_Hans_CN">
+      <Text>一枚小小的金币已磨得表面暗淡。币面上隐约压印着一个十字。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_18" Language="zh_Hans_CN">
+      <Text>一杆长矛的木柄末端是宽阔的三角形铁矛头，矛刃根部带有小小的翼状突起。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_19" Language="zh_Hans_CN">
+      <Text>一块画在粗糙灰泥上的壁画残片顶部呈卷轴形状。画中是一个身穿红袍、头戴荆棘冠冕的胡须男子，他的双眼向上仰望。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_20" Language="zh_Hans_CN">
+      <Text>一对金质垂坠耳环挂在纤细的耳钩上。每只耳环的末端都是一枚带切面的菱形坠子。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_21" Language="zh_Hans_CN">
+      <Text>一座高大的落地摆钟立在深棕色木料的雕花钟壳里。顶部是一个圆形表盘，下方的玻璃门露出钟摆。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_22" Language="zh_Hans_CN">
+      <Text>一份折叠的旧报纸已因年久而发黄。头版上是一栏栏细小的印刷文字和一张图片。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_23" Language="zh_Hans_CN">
+      <Text>一把燧发手枪有着弯曲的木质枪托和磨损的黄铜配件。它的枪管和枪机已被锈迹蒙得暗淡。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_24" Language="zh_Hans_CN">
+      <Text>一张破损的旧地图画在发黄的羊皮纸上，边缘卷曲。淡淡的海岸线和航线交错穿过图面。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_ARTIFACT_25" Language="zh_Hans_CN">
+      <Text>一串项链由浅褐色的兽牙或兽爪穿在深色的绳子上。绳串正中有一个小小的皮革结。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_1" Language="zh_Hans_CN">
+      <Text>一只金色的柜子架在两根长木杆上，木杆穿过柜角的圆环。两个有翼的人像跪在柜盖上，彼此相对，翅膀高举。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_2" Language="zh_Hans_CN">
+      <Text>一枚圆形的金质圆牌上浮雕着一个胡须男子的面容。他下巴处的椭圆形小窗里嵌着一小撮深色的毛发。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_3" Language="zh_Hans_CN">
+      <Text>一块折叠的白色亚麻布带有精细的织边，上面浸透了大片红色的血迹。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_4" Language="zh_Hans_CN">
+      <Text>一卷古老的莎草纸颜色发褐，边缘磨损，在两根卷轴之间半展开地摊放着。展开的部分隐约显出几行文字。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_5" Language="zh_Hans_CN">
+      <Text>一块浅灰色的巨石顶部压出一个人的脚印。小石子散落在它周围。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_6" Language="zh_Hans_CN">
+      <Text>一把日本刀收在配有金色刀装的黑漆刀鞘里。它的刀柄缠着深色的绳子。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_7" Language="zh_Hans_CN">
+      <Text>一只小小的、朴素的锤打铜杯，浅浅的杯身立在短短的杯柄上，底下是简单的圆形底座。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_8" Language="zh_Hans_CN">
+      <Text>一只带铰链盖的小小镀金匣子表面布满金银丝饰，镶嵌着绿色宝石和珍珠。正面的搭扣是一块红色宝石。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_9" Language="zh_Hans_CN">
+      <Text>一件朴素的白色长袍松松地垂挂着，腰间系着一条腰带。布料已经磨旧，并有淡淡的污渍。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_10" Language="zh_Hans_CN">
+      <Text>一颗棕色的人类头骨放在镶有小宝石的镀金底座上。头骨顶部穿有一个圆孔。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_11" Language="zh_Hans_CN">
+      <Text>一双磨旧的棕色皮凉鞋并排放着，鞋尖朝前，鞋带纤细，配有小小的金扣。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_12" Language="zh_Hans_CN">
+      <Text>一条长长的浅色亚麻布上留有一个胡须男子面容和身体的淡褐色印痕。一排深色的烧痕孔洞留在布上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_13" Language="zh_Hans_CN">
+      <Text>几条窄窄的褐色残破丝帛并排放着。每条丝帛上都竖排着一列列深色的文字。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_14" Language="zh_Hans_CN">
+      <Text>一个深色木质的小十字架嵌在金色的框架中。底端下方伸出一根尖尖的金钉，好让它能直立起来。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_15" Language="zh_Hans_CN">
+      <Text>一块粗糙的长方形红砂岩石块边缘有多处缺口。一端固定着一个铁环。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_16" Language="zh_Hans_CN">
+      <Text>一只镶着绿色宝石的小小金匣敞开着盖子立着。里面的红布上放着一颗牙齿。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_17" Language="zh_Hans_CN">
+      <Text>一座巨大的金色圣龛形似一座有尖顶的教堂。一排排小小的立像填满了两侧的拱门，圆形的凸饰和宝石点缀在屋顶上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_18" Language="zh_Hans_CN">
+      <Text>一条铁链盘绕在红色软垫上，放在一个高高的金框玻璃匣里。匣子形似灯笼，顶部有一个小提手。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_19" Language="zh_Hans_CN">
+      <Text>一面圆形青铜镜从背面示人，镜身因年久呈青蓝色。一圈叶形纹样环绕着中央凸起的镜钮。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_20" Language="zh_Hans_CN">
+      <Text>一只巨大的银锅有两个粗重的提手。锅身四周的板面上压印着瞪视的面孔和小小的人像。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_21" Language="zh_Hans_CN">
+      <Text>一只金色与蓝色珐琅的小箱子有着倾斜的盖子，立在四只短足上。箱身两侧饰有动物和有翼人像的板面，顶部嵌着一颗蓝色宝石。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_22" Language="zh_Hans_CN">
+      <Text>一只细长的银匣两端镶有嵌珠宝的金饰，边缘刻有纹饰，里面盘放着一根金色的绳带。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_23" Language="zh_Hans_CN">
+      <Text>两根葡萄藤枝在中央绑在一起，构成一个十字架。几缕深色的头发或绳子系住接合处，藤枝的末端向下垂落。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_RELIC_24" Language="zh_Hans_CN">
+      <Text>一枚铁矛头的尖端已经断裂。一个缠着金属丝的金套包住刃身的中段。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_ANANSI" Language="zh_Hans_CN">
+      <Text>两面高高的非洲手鼓并排立着。较高的一面是浅色木料，用绳索绷紧，较矮的一面是红棕色，鼓面蒙着白色的皮，两面鼓上都绘有一道道锯齿纹。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_ARTHUR" Language="zh_Hans_CN">
+      <Text>一只高高的金色圣杯有着宽大的杯身。红色和绿色的宝石环绕着杯口和杯柄，它立在一个华丽的外展底座上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_BEOWULF" Language="zh_Hans_CN">
+      <Text>一把宽阔的双刃剑有着明亮的剑刃，剑身向剑尖处渐宽，弯曲的金色护手位于缠皮的握柄上方。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_HERCULES" Language="zh_Hans_CN">
+      <Text>一根沉重的木棒粗端布满骨刺，细窄的握柄处缠着绳索。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_HIMIKO" Language="zh_Hans_CN">
+      <Text>一顶金冠正面是一个圆形的太阳盘，上面升起一排扇形展开的高高尖芒。冠带和尖芒上刻满卷曲的线条。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_HIPPOLYTA" Language="zh_Hans_CN">
+      <Text>一条深棕色皮革的宽腰带上镶着圆形的青铜圆片。它用一根打了结的皮绳系住，绳端松松地垂着。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_HUNAHPU" Language="zh_Hans_CN">
+      <Text>一件浅色布料的斗篷挂在一根木杆上。领口环绕着一圈绿色羽毛，布料在下方垂成松松的褶皱。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_MAUI" Language="zh_Hans_CN">
+      <Text>一支木质火炬的捆扎火头燃着明亮的黄色火焰，火星四溅。一条缀有珠子的绳穗从手柄垂下。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_MULAN" Language="zh_Hans_CN">
+      <Text>一套铠甲放在一起：一件由层叠甲片制成的深色胸甲，和一顶饰有红色羽缨的圆盔。红色的绳子系着这些部件。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_OYA" Language="zh_Hans_CN">
+      <Text>一把匕首有两片平行的钢刃从同一个刀柄上伸出。握柄缠着红棕色的绳子。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_SINBAD" Language="zh_Hans_CN">
+      <Text>一具黄铜的航海象限仪呈四分之一圆形，表面为刻有纹饰的绿色，一根系着小重锤的铅垂线从它的一角垂下。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_SYMBOL_WUKONG" Language="zh_Hans_CN">
+      <Text>一根长长的深色棍棒两端都包着金箍。靠近一端系着一条带有小环的红绳。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_GREATWORK_HERO_EPIC" Language="zh_Hans_CN">
+      <Text>一卷卷曲的羊皮纸立着，一把小鲁特琴斜倚在它旁边。发光的音符漂浮在卷轴和琴弦之间。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_VOIDSINGER_RELIC_1" Language="zh_Hans_CN">
+      <Text>一根弯曲的灰色獠牙布满吸盘状的凹痕，末端包着镶有珠宝的金箍。它挂在一条沉重的铁链上，链上还有一个带环的小吊坠。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_VOIDSINGER_RELIC_2" Language="zh_Hans_CN">
+      <Text>一只深色的器皿有着带凹槽的边缘，粗大的触手从中伸出，向上盘绕。它立在同种深色金属制成的圆形底座上。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_VOIDSINGER_RELIC_3" Language="zh_Hans_CN">
+      <Text>一只敞开的木箱包着黄铜护角，盖子镶着玻璃格，里面装着成卷的卷轴和旧书。一颗白骨头骨放在最前面，藤壶结满了箱子的边缘。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_CITRUS" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一个完整的橙子，果柄上带着一片绿叶。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_COCOA" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一块划成小方格的黑巧克力。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_COFFEE" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一麻袋烘焙好的咖啡豆，袋里还搁着一把金属勺。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_COTTON" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一枝带有三朵白色棉桃的棉花枝。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_DIAMONDS" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一颗硕大的切割钻石，闪着白色和蓝色的光芒。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_DYES" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着三个玻璃瓶的染料，分别是粉色、紫色和蓝色。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_FURS" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里站着一只橙色的狐狸，尾巴翘起。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_HONEY" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一块金色的蜂巢，上面停着两只蜜蜂。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_GYPSUM" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一簇淡粉色和白色的晶体。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_INCENSE" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一只黄铜香炉，炉中燃着小小的火苗，一缕淡淡的烟从中升起。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_IVORY" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里探出一颗灰色大象的头和象牙。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_JADE" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一条雕刻而成的绿玉龙。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_MARBLE" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一尊卷发男子的白色大理石胸像。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_MERCURY" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着三颗闪亮的圆形液态水银珠。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_PEARLS" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一只张开的牡蛎壳，壳内有一颗白色的珍珠。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_SALT" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一只带金属盖的玻璃盐瓶。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_SILK" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一匹正在展开的丝绸，颜色为紫色和红色。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_SILVER" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一只带弯曲把手的抛光银壶。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_SPICES" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一堆堆绿色、红色和橙色的香料，还有两个辣椒。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_SUGAR" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一只堆满白色方糖的蓝色碗。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_TEA" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一个纸质茶包，连着线和标签。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_TOBACCO" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一支木制烟斗，旁边是一片棕色的烟草叶。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_TRUFFLES" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里有一颗粉色的猪头，正在泥土里嗅着两颗深色的松露。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_WINE" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一串带叶的紫葡萄、一瓶葡萄酒和一杯斟满的酒。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_WHALES" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里横躺着一头蓝色的鲸鱼。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_AMBER" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着几块发光的橙色琥珀。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_OLIVES" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里装着一枝橄榄枝，枝上带有黑色的橄榄和银绿色的叶子。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GWDESC_PRODUCT_TURTLES" Language="zh_Hans_CN">
+      <Text>一只敞开的纸板运输箱里有一只绿色的海龟正在爬出来。</Text>
+    </Replace>
   </LocalizedText>
 </GameData>

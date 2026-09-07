@@ -2,8 +2,8 @@
 
 ### Changed
 
-- The great work viewer's painting and sculpture descriptions have been rewritten from the real artworks. Each one is now three or four plain sentences that name the medium and tradition, then the scene, then the look, and no longer repeats the title or artist. Translations of the new descriptions are pending, so other languages hear the English text for now.
-- The leader descriptions read with `F2` in the diplomacy and deal screens and from the leader picker have been rewritten from the full diplomacy scene instead of the small portrait. Each now opens with the leader's full name and titles, then describes the setting, the person, their dress and regalia, any props, the background, and the light in one detailed paragraph, naming the real place the scene shows where it is known. Translations of the new descriptions are pending, so other languages hear the English text for now.
+- The great work viewer's painting and sculpture descriptions have been rewritten from the real artworks. Each one is now three or four plain sentences that name the medium and tradition, then the scene, then the look, and no longer repeats the title or artist.
+- The leader descriptions read with `F2` in the diplomacy and deal screens and from the leader picker have been rewritten from the full diplomacy scene instead of the small portrait. Each now opens with the leader's full name and titles, then describes the setting, the person, their dress and regalia, any props, the background, and the light in one detailed paragraph, naming the real place the scene shows where it is known.
 - The great work viewer now also describes the shared writing and music backgrounds, the artifact images, the relic images, the Heroes and Legends symbols and epics, the Secret Societies relics, and the Monopolies and Corporations products.
 
 ### Fixed
