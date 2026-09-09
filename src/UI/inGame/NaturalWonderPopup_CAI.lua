@@ -3,6 +3,21 @@ include("NaturalWonderPopup")
 local mgr = ExposedMembers.CAI_UIManager
 
 local m_dialog = nil ---@type UIWidget|nil
+local m_currentFeatureType = nil ---@type string|nil -- FeatureType of the wonder on display
+
+-- Speaks the accessibility description of the discovery movie (F2), keyed by
+-- FeatureType (LOC_CAI_WONDERDESC_<FeatureType>, docs/wonder-descriptions.md).
+-- Missing tags Lookup back to their tag, so "result == tag" means no description.
+local function SpeakWonderDescription()
+	if not m_currentFeatureType then return end
+	local tag = "LOC_CAI_WONDERDESC_" .. m_currentFeatureType
+	local desc = Locale.Lookup(tag)
+	if desc ~= nil and desc ~= "" and desc ~= tag then
+		Speak(desc)
+	else
+		Speak(Locale.Lookup("LOC_CAI_WONDERDESC_NONE"))
+	end
+end
 
 local function RemoveWonderDialog()
 	if not mgr or not m_dialog then return end
@@ -46,12 +61,21 @@ local function BuildWonderDialog()
 	)
 
 	if not m_dialog then return end
+	m_dialog:AddInputBindings({ {
+		Key = Keys.VK_F2,
+		Description = "LOC_CAI_KB_WONDER_DESCRIPTION",
+		Action = function()
+			SpeakWonderDescription()
+			return true
+		end,
+	} })
 	mgr:Push(m_dialog, { priority = PopupPriority.High })
 end
 
 
 ShowPopup = WrapFunc(ShowPopup, function(orig, kData)
 	orig(kData)
+	m_currentFeatureType = kData and kData.TypeName or nil
 	if not mgr then return end
 	BuildWonderDialog()
 end)

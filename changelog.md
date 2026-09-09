@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Added
+
+- The wonder built and natural wonder discovered popups now read a description of the wonder movie when you press `F2`: what the movie shows as the wonder is built or the landscape comes into view, with its real features named. Every world wonder and natural wonder in the game has one, in all the mod's languages.
+
 ### Changed
 
 - The great work viewer's painting and sculpture descriptions have been rewritten from the real artworks. Each one is now three or four plain sentences that name the medium and tradition, then the scene, then the look, and no longer repeats the title or artist.

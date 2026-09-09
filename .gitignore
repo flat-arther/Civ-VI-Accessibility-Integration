@@ -25,3 +25,6 @@ age-of-decadence-analyse.txt
 nul
 *.zip
 __pycache__/
+
+# Wonder movie clips downloaded by scripts/Extract-WonderVideos.py (large, regenerable)
+wonder-videos/

@@ -7713,6 +7713,12 @@
     <Row Tag="LOC_CAI_KB_LEADER_DESCRIPTION" Language="en_US">
       <Text>Speak leader description</Text>
     </Row>
+    <Row Tag="LOC_CAI_KB_WONDER_DESCRIPTION" Language="en_US">
+      <Text>Speak wonder movie description</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WONDERDESC_NONE" Language="en_US">
+      <Text>No description is available for this wonder.</Text>
+    </Row>
     <Row Tag="LOC_CAI_LEADERDESC_NONE" Language="en_US">
       <Text>No description available for this leader.</Text>
     </Row>
