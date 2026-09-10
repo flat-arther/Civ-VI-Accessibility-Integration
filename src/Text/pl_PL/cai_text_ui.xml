@@ -6664,6 +6664,41 @@
       <Text>Automatycznie przesuwa kursor nawigacji do pola jednostki, gdy jednostka zostanie wybrana.</Text>
     </Replace>
 
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET" Language="pl_PL">
+      <Text>Stały poziom przybliżenia kamery</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_TOOLTIP" Language="pl_PL">
+      <Text>Utrzymuje kamerę mapy na stałym poziomie przybliżenia przy każdym ruchu kursora. Każdy poziom uwydatnia inne dźwięki gry: blisko dla pobliskich zwierząt, obozów i szczegółów terenu, średnio dla tła terenu i miast, daleko dla wiatru i działań jednostek w całym regionie.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_OFF" Language="pl_PL">
+      <Text>Wyłączone</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_OFF_TOOLTIP" Language="pl_PL">
+      <Text>Nie zmienia poziomu przybliżenia. Kamera zachowuje przybliżenie ustawione ostatnio przez grę lub kółko myszy.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_CLOSE" Language="pl_PL">
+      <Text>Blisko</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_CLOSE_TOOLTIP" Language="pl_PL">
+      <Text>Maksymalne przybliżenie. Najlepsze dla dźwięków umiejscowionych: zwierząt surowcowych, ognisk, wiosek, łodzi i warstwy szczegółów tła terenu.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_MID" Language="pl_PL">
+      <Text>Średnio</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_MID_TOOLTIP" Language="pl_PL">
+      <Text>Około jednej czwartej oddalenia. Tło terenu i miast pozostaje wyraźne, ze środkowymi warstwami tła mapy i bez wiatru.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_FAR" Language="pl_PL">
+      <Text>Daleko</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_FAR_TOOLTIP" Language="pl_PL">
+      <Text>Maksymalne oddalenie. Dominuje wiatr, teren cichnie, a ruch i walka jednostek wyróżniają się w całym regionie.</Text>
+    </Replace>
+
     <Replace Tag="LOC_CAI_SETTING_SCANNER_BEACON_ENABLED" Language="pl_PL">
       <Text>Włącz sygnalizator skanera</Text>
     </Replace>

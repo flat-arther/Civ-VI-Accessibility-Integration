@@ -6662,6 +6662,41 @@
       <Text>Move automaticamente o cursor de navegação para o hexágono de uma unidade quando ela é selecionada.</Text>
     </Replace>
 
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET" Language="pt_BR">
+      <Text>Zoom predefinido da câmera</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_TOOLTIP" Language="pt_BR">
+      <Text>Mantém a câmera do mapa em um nível de zoom fixo sempre que o cursor se move. Cada nível destaca sons diferentes: perto para animais, acampamentos e detalhes do terreno próximos; médio para o ambiente do terreno e das cidades; longe para o vento e a ação das unidades por toda a região.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_OFF" Language="pt_BR">
+      <Text>Desativado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_OFF_TOOLTIP" Language="pt_BR">
+      <Text>Não altera o nível de zoom. A câmera mantém o zoom definido por último pelo jogo ou pela roda do mouse.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_CLOSE" Language="pt_BR">
+      <Text>Perto</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_CLOSE_TOOLTIP" Language="pt_BR">
+      <Text>Zoom máximo. Ideal para sons posicionados: animais de recursos, fogueiras, aldeias, barcos e a camada de detalhes do ambiente do terreno.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_MID" Language="pt_BR">
+      <Text>Médio</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_MID_TOOLTIP" Language="pt_BR">
+      <Text>Cerca de um quarto do afastamento. O ambiente do terreno e das cidades continua nítido, com as camadas intermediárias do ambiente do mapa e sem vento.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_FAR" Language="pt_BR">
+      <Text>Longe</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_FAR_TOOLTIP" Language="pt_BR">
+      <Text>Afastamento máximo. O vento domina, o terreno se atenua e o movimento e o combate das unidades se destacam por toda a região.</Text>
+    </Replace>
+
     <Replace Tag="LOC_CAI_SETTING_SCANNER_BEACON_ENABLED" Language="pt_BR">
       <Text>Ativar sinalizador do scanner</Text>
     </Replace>

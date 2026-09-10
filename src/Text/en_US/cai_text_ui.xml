@@ -6706,6 +6706,41 @@
       <Text>Automatically move the navigation cursor to a unit's tile when the unit is selected.</Text>
     </Row>
 
+    <Row Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET" Language="en_US">
+      <Text>Camera zoom preset</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_TOOLTIP" Language="en_US">
+      <Text>Keep the map camera at a fixed zoom level whenever the cursor moves. Each level brings out different game sounds: close for nearby animals, camps and terrain detail, middle for terrain and city ambience, far for wind and unit action across a region.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_OFF" Language="en_US">
+      <Text>Off</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_OFF_TOOLTIP" Language="en_US">
+      <Text>Leave the zoom level alone. The camera keeps whatever zoom the game or the mouse wheel last set.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_CLOSE" Language="en_US">
+      <Text>Close</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_CLOSE_TOOLTIP" Language="en_US">
+      <Text>Fully zoomed in. Best for positioned sounds: resource animals, campfires, villages, boats and the detail layer of the terrain ambience.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_MID" Language="en_US">
+      <Text>Middle</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_MID_TOOLTIP" Language="en_US">
+      <Text>About a quarter of the way out. Terrain and city ambience stay clear, with the middle layers of the map ambience and no wind.</Text>
+    </Row>
+
+    <Row Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_FAR" Language="en_US">
+      <Text>Far</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_FAR_TOOLTIP" Language="en_US">
+      <Text>Fully zoomed out. Wind takes over, terrain fades, and unit movement and combat stand out across the region.</Text>
+    </Row>
+
     <Row Tag="LOC_CAI_SETTING_SCANNER_BEACON_ENABLED" Language="en_US">
       <Text>Enable scanner beacon</Text>
     </Row>

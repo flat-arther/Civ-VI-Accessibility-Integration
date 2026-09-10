@@ -6652,6 +6652,41 @@
       <Text>Déplace automatiquement le curseur de navigation vers la case d'une unité lorsque l'unité est sélectionnée.</Text>
     </Replace>
 
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET" Language="fr_FR">
+      <Text>Zoom de caméra prédéfini</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_TOOLTIP" Language="fr_FR">
+      <Text>Maintient la caméra de la carte à un niveau de zoom fixe à chaque déplacement du curseur. Chaque niveau met en avant des sons différents : proche pour les animaux, les campements et les détails du terrain alentour, moyen pour l'ambiance du terrain et des villes, loin pour le vent et l'action des unités sur toute une région.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_OFF" Language="fr_FR">
+      <Text>Désactivé</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_OFF_TOOLTIP" Language="fr_FR">
+      <Text>Ne modifie pas le niveau de zoom. La caméra conserve le zoom défini en dernier par le jeu ou la molette de la souris.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_CLOSE" Language="fr_FR">
+      <Text>Proche</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_CLOSE_TOOLTIP" Language="fr_FR">
+      <Text>Zoom maximal. Idéal pour les sons positionnés : animaux des ressources, feux de camp, villages, bateaux et la couche de détail de l'ambiance du terrain.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_MID" Language="fr_FR">
+      <Text>Moyen</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_MID_TOOLTIP" Language="fr_FR">
+      <Text>Environ au quart du recul. L'ambiance du terrain et des villes reste nette, avec les couches intermédiaires de l'ambiance de la carte et sans vent.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_FAR" Language="fr_FR">
+      <Text>Loin</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_FAR_TOOLTIP" Language="fr_FR">
+      <Text>Recul maximal. Le vent domine, le terrain s'estompe et les déplacements et combats des unités ressortent sur toute la région.</Text>
+    </Replace>
+
     <Replace Tag="LOC_CAI_SETTING_SCANNER_BEACON_ENABLED" Language="fr_FR">
       <Text>Activer la balise du scanner</Text>
     </Replace>

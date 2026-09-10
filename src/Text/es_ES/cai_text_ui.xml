@@ -6645,6 +6645,41 @@
       <Text>Mueve automáticamente el cursor de navegación a la casilla de una unidad cuando se selecciona la unidad.</Text>
     </Replace>
 
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET" Language="es_ES">
+      <Text>Zoom de cámara predefinido</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_TOOLTIP" Language="es_ES">
+      <Text>Mantiene la cámara del mapa en un nivel de zoom fijo cada vez que se mueve el cursor. Cada nivel resalta sonidos distintos: cerca para animales, campamentos y detalles del terreno cercanos; medio para el ambiente del terreno y de las ciudades; lejos para el viento y la acción de las unidades en toda una región.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_OFF" Language="es_ES">
+      <Text>Desactivado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_OFF_TOOLTIP" Language="es_ES">
+      <Text>No cambia el nivel de zoom. La cámara conserva el zoom que el juego o la rueda del ratón hayan fijado por última vez.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_CLOSE" Language="es_ES">
+      <Text>Cerca</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_CLOSE_TOOLTIP" Language="es_ES">
+      <Text>Zoom máximo. Ideal para los sonidos posicionados: animales de recursos, hogueras, aldeas, barcos y la capa de detalle del ambiente del terreno.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_MID" Language="es_ES">
+      <Text>Medio</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_MID_TOOLTIP" Language="es_ES">
+      <Text>Aproximadamente a un cuarto del alejamiento. El ambiente del terreno y de las ciudades se mantiene claro, con las capas intermedias del ambiente del mapa y sin viento.</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_FAR" Language="es_ES">
+      <Text>Lejos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_FAR_TOOLTIP" Language="es_ES">
+      <Text>Alejamiento máximo. El viento domina, el terreno se atenúa y el movimiento y el combate de las unidades destacan en toda la región.</Text>
+    </Replace>
+
     <Replace Tag="LOC_CAI_SETTING_SCANNER_BEACON_ENABLED" Language="es_ES">
       <Text>Activar la baliza del escáner</Text>
     </Replace>

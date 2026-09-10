@@ -676,6 +676,8 @@ Wrapper for `CAI.output`. Use this for all TTS output.
 - Camera/map movement:
   - `WorldInput.lua` pans the map through `UI.PanMap(panX, panY)` from camera pan input actions and focuses plots through `UI.LookAtPlot(...)` in `SnapToPlot(plotId)`.
   - Minimap clicks call `UI.LookAtPosition(worldX, worldY)`. City and unit panels also call `UI.LookAtPlot(...)` for explicit recenter actions.
+  - `UI.LookAtPlot` signature, read from the engine binding (Mac binary, Sept 2026): `UI.LookAtPlot(plot)` or `UI.LookAtPlot(x, y)`, optionally followed by `zoom, duration, instant`. `zoom` is a float where any value `<= 0` means keep the current zoom (the engine only queues a zoom change when `zoom > 0`), so `UI.LookAtPlot(x, y, 0, 0, true)` is a pure instant recenter. `duration` is a float that is only applied when `> 0`. `instant` is a boolean; `true` snaps the camera instead of animating. Vanilla `NaturalWonderPopup.lua` and the Civ Royale minimap use the `(x, y, 0.0, 0.0, true)` form for the same snap-without-zoom purpose. Because `0` means "keep", fully zoomed in cannot be requested through `LookAtPlot`; use `UI.SetMapZoom(0.0, 0.0, 0.0)` (zoom, x, y floats; the binding rejects infinite values) for that. A positive zoom combined with `instant = true` snaps to the plot at that zoom in one call.
+  - CAI cursor follow (`OnCAICursorMoved` in `WorldInput_CAI.lua`) uses the instant no-zoom form for `step` moves and `UI.LookAtPlot(plot)` (animated, no zoom) otherwise, so cursor movement never changes zoom.
   - `WorldView/CameraManager.lua` is combat-specific despite its broad name: it listens to `Events.CombatVisBegin` / `Events.CombatVisEnd`, optionally calls `UI.LookAtPlot(combatMembers.x, combatMembers.y, zoom)` based on gameplay options, saves the previous zoom with `UI.SetRestoreMapZoom(prevZoom)`, and restores it with `UI.RestoreMapZoom()`. It does not manage normal selected unit/city camera sync.
   - Current camera focus can be read with `UI.GetMapLookAtWorldTarget()`, which returns world-space `x, y`. Vanilla `WorldInput.lua` uses it as the drag-start focus, and `Automation_ObserverCamera.lua` converts it to plot coordinates with `UI.GetPlotCoordFromWorld(wx, wy)`.
   - `Events.Camera_Updated` exists. Vanilla uses it for camera/zoom-sensitive world anchors, e.g. `CityPanel.lua` updates the border-growth anchor and `TourismBannerManager.lua` refreshes banner positions. It is not used by vanilla as the primary unit/city selection signal.
@@ -2032,6 +2034,31 @@ CAI implementation:
 
 - `UI.PlaySound(soundKey)` — plays a UI sound effect
   - `"Main_Menu_Mouse_Over"` — standard hover sound
+- `UI.SetSoundStateValue(group, state)` / `UI.SetSoundSwitchValue(group, value)` — set Wwise states and switches. Vanilla uses state group `Game_Views` with values `Normal_View`, `Main_Menu`, `Leader_Screen`; the Init bank also knows `Paused`, `Lens`, `EndGame`.
+- `UI.GetAmbienceClipDistance()` / `UI.SetAmbienceClipDistance(distance)` — engine-side cull radius for positioned ambience emitters (world units). Default not yet read; check in-game.
+- `Events.Camera_Updated(focusX, focusY, zoomLevel)` and `UI.GetMapZoom()` / `UI.SetMapZoom(zoom, 0, 0)` — zoom is `0.0` (fully in) to `1.0` (fully out); `WorldInput.lua` steps by `0.1` per key press.
+
+### Camera zoom and audio (static analysis of Camera.artdef and the Wwise banks, Sept 2026)
+
+Audio is Wwise 2021.1 (bank version 140). The engine feeds the camera into audio through two game parameters and one bus RTPC; the sound designers hung volume, low-pass and high-pass curves on them. All values below were decoded from the shipped banks (`Assets/Base/Platforms/Windows/audio/*.bnk`, identical on the Mac build).
+
+- **Camera height.** `Camera.artdef` (`DEFAULT_CAMERA`) maps zoom to camera height linearly: height 120 world units at zoom 0, 600 at zoom 1 (tilt 55° to 45°, FOV fixed 45°). The Wwise game parameter `CAMERA_HEIGHT` (default 119, range 119..600) mirrors it with a 4-second smoothing ramp, so audio reacts to a zoom change over several seconds rather than instantly. Rough zoom-to-height reference: zoom 0.2 is about 215, 0.25 about 240, 0.4 about 310, 0.5 about 360, 0.6 about 410, 0.8 about 500.
+- **Camera distance.** Game parameter `CAMERA_DISTANCE` (default 0, range 0..220, ramp 2 s up / 3 s down) is only used by the terrain/city ambience mixer. It is the engine-reported distance from the camera focus to the ambience emitter; volume is flat to about 60, then falls (about -1 dB at 100, -5 dB at 164, silent at 220) while a low-pass filter closes. Emitters more than 220 world units from the focus are inaudible regardless of zoom.
+- **Hex scale.** Not stored anywhere readable; from the camera geometry (3 hexes visible at height 120, 16 at height 600) one hex is roughly 40 world units. Verify in-game with `UI.GridToWorld(1,0)` minus `UI.GridToWorld(0,0)` before relying on it.
+
+What the height parameter does per sound family (fully zoomed in is 119, fully out is 600):
+
+- **Global map ambience** (`Play_Map_Ambience`, one 2D event, 12 layers): a close-up layer (heavy high-pass at 119, about -4 dB, fading to silence by 600); mid layers that peak between heights 215 and 260 and are silent by about 550; and a high-altitude wind layer that is silent below height 238, opens at about 300 and reaches full volume at 600. Net effect: zoomed in you hear detail, around 25 to 45 percent zoom the mid layers dominate, above about 60 percent only wind remains.
+- **Terrain and feature ambience beds** (`Play_Ambience_Coast/Ocean/Forest/Jungle/Desert/Tundra/Swamp`, positioned per emitter): shared mixer curve is about 0 dB at 119, -1.5 dB at 180, -4 dB at 230, -12 dB at 350, -20 dB at 600, with a low-pass that closes from height 200 and is fully closed (51 of 100) from 350. Coast is a bit louder when zoomed in (+2.4 dB) and is silent at 600. Forest also raises its output-bus level as you zoom out. Wwise attenuation on these emitters: flat to 300 units, silent at 600.
+- **City and district ambience** (`PLAY_AMBIENCE_CITY_EARLY`, `PLAY_AMBIENCE_DISTRICT_*`): same mixer as the terrain beds, plus an attenuation that is loudest at about 120 units, -6 dB at 180, -15 dB at 405 and silent from 500 (cone-attenuated, so direction matters).
+- **Resource animals** (`Resource_*_3D`, `HORSE_RESOURCE_SFX`): three attenuation classes with silence at 250, 450 or 500 units and cones; not tied to camera height directly, so they drop out purely by distance to the listener as you zoom out.
+- **Campfires, tribal villages, wave crashes** (`Feature_Campfire_3D`, `Feature_Goodyhut_3D`, `WAVE_CRASH_VFX`): silent from 180 units on one mixer, 360 on the other.
+- **Fishing boats and entertainment districts**: silent from about 251 units.
+- **Units** (`Unit_Bank_3D`): general unit mixers attenuate to -23 dB at 220 units (never fully silent by distance), impacts to 600, explosions and large events to 1400, nuke and a few VFX to 10000. Height only trims a secondary send by about 6 dB from zoomed in to zoomed out, and a shared mixer gains 16 dB as you zoom out, so unit action stays audible at any zoom.
+- **Reverb**: the environment reverb (`FxCustom` in Init.bnk) opens its low-pass and raises its send as height grows, so zoomed-out audio sounds more washed and distant.
+- **Ambience bus**: the Ambience Volume option drives `AMBIENCE_BUS_VOLUME` (0 to 100 percent, log curve, silent below 5).
+
+Strategic view (2D) is not a zoom state in Wwise. `Set_View_2D` unmutes and `Set_View_3D` mutes one looping container in `UI_Bank.bnk`; `Unit_Bank_2D` / `Resources_Features_2D` hold non-positioned variants (`Unit_Move_2D`, `Resource_Cattle_2D`) that the artdefs pair with the 3D ones via `XrefName` / `Xref3DName`. Whether the engine keeps updating `CAMERA_HEIGHT` in strategic view, and the default ambience clip distance, still need an in-game check.
 
 ## Modding
 

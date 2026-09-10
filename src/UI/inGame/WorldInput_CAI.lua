@@ -1548,6 +1548,28 @@ local function SnapCursorToInitialPosition()
 	end
 end
 
+-- Camera zoom presets. Zoom is 0.0 (fully in) to 1.0 (fully out); the game
+-- maps it linearly to camera height 120..600, which drives the ambience mix
+-- (see docs/game-api.md, "Camera zoom and audio"). Close keeps positioned
+-- emitters audible, mid sits where the map ambience's middle layers peak and
+-- the wind layer is still silent, far is wind plus the boosted unit mix.
+local CAMERA_ZOOM_PRESET_SETTING_ID = "CameraZoomPreset"
+local CAMERA_ZOOM_PRESETS = { close = 0.0, mid = 0.25, far = 1.0 }
+local CAMERA_ZOOM_EPSILON = 0.005
+
+local function GetCameraZoomPreset()
+	return CAMERA_ZOOM_PRESETS[CAISettings.GetString(CAMERA_ZOOM_PRESET_SETTING_ID)]
+end
+
+-- LookAtPlot treats a zoom of 0 as "keep the current zoom", so fully zoomed in
+-- can only be reached through SetMapZoom; use it for every preset.
+local function ApplyCameraZoomPreset()
+	local zoom = GetCameraZoomPreset()
+	if zoom == nil then return end
+	if math.abs(UI.GetMapZoom() - zoom) <= CAMERA_ZOOM_EPSILON then return end
+	UI.SetMapZoom(zoom, 0.0, 0.0)
+end
+
 local function OnCAICursorMoved(state)
 	local plotId = state.toPlotId
 	if plotId == nil or plotId < 0 or not Map.IsPlot(plotId) then
@@ -1566,6 +1588,12 @@ local function OnCAICursorMoved(state)
 	else
 		UI.LookAtPlot(plot)
 	end
+	ApplyCameraZoomPreset()
+end
+
+local function OnCAISettingsChanged(settingId)
+	if settingId ~= CAMERA_ZOOM_PRESET_SETTING_ID then return end
+	ApplyCameraZoomPreset()
 end
 
 local function OnUnitSelectionChanged(playerID, unitID, hexI, hexJ, hexK, isSelected, isEditable)
@@ -1632,6 +1660,7 @@ local function RegisterCAIEvents()
 	Events.LocalPlayerTurnBegin.Add(OnLocalPlayerTurnBegin)
 	Events.UnitSelectionChanged.Add(OnUnitSelectionChanged)
 	LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
+	LuaEvents.CAISettingsChanged.Add(OnCAISettingsChanged)
 	LuaEvents.CAIAppendToMessageBuffer.Add(OnCAIAppendToMessageBuffer)
 	LuaEvents.CAI_TutorialWorldAnchorChanged.Add(OnCAITutorialWorldAnchorChanged)
 	UnitMoveLog_CAI.Initialize()
@@ -1651,6 +1680,7 @@ local function UnregisterCAIEvents()
 	Events.LocalPlayerTurnBegin.Remove(OnLocalPlayerTurnBegin)
 	Events.UnitSelectionChanged.Remove(OnUnitSelectionChanged)
 	LuaEvents.CAICursorMoved.Remove(OnCAICursorMoved)
+	LuaEvents.CAISettingsChanged.Remove(OnCAISettingsChanged)
 	LuaEvents.CAIAppendToMessageBuffer.Remove(OnCAIAppendToMessageBuffer)
 	LuaEvents.CAI_TutorialWorldAnchorChanged.Remove(OnCAITutorialWorldAnchorChanged)
 	UnitMoveLog_CAI.Shutdown()

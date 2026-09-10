@@ -86,6 +86,9 @@ VALUES
     ('AutoMoveCursorToSelectedUnit', 'Cursor', 40, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_AUTO_MOVE_CURSOR_TO_SELECTED_UNIT', 'LOC_CAI_SETTING_AUTO_MOVE_CURSOR_TO_SELECTED_UNIT_TOOLTIP', NULL),
 
+    ('CameraZoomPreset', 'Cursor', 45, 'string', 'dropdown', 'off',
+     'LOC_CAI_SETTING_CAMERA_ZOOM_PRESET', 'LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_TOOLTIP', NULL),
+
     ('ScannerBeaconEnabled', 'WorldScanner', 10, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SCANNER_BEACON_ENABLED', 'LOC_CAI_SETTING_SCANNER_BEACON_ENABLED_TOOLTIP', NULL),
 
@@ -224,6 +227,22 @@ VALUES
     ('CursorCoordinates', 'prepend',
      'LOC_CAI_SETTING_CURSOR_COORDINATES_PREPEND',
      'LOC_CAI_SETTING_CURSOR_COORDINATES_PREPEND_TOOLTIP', 30),
+
+    ('CameraZoomPreset', 'off',
+     'LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_OFF',
+     'LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_OFF_TOOLTIP', 10),
+
+    ('CameraZoomPreset', 'close',
+     'LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_CLOSE',
+     'LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_CLOSE_TOOLTIP', 20),
+
+    ('CameraZoomPreset', 'mid',
+     'LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_MID',
+     'LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_MID_TOOLTIP', 30),
+
+    ('CameraZoomPreset', 'far',
+     'LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_FAR',
+     'LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_FAR_TOOLTIP', 40),
 
     ('ScannerCoordinates', 'disabled',
      'LOC_CAI_SETTING_SCANNER_COORDINATES_DISABLED',

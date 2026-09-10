@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Added
+
+- New Camera zoom preset setting in the Cursor section of the accessibility settings (`F12`): Off, Close, Middle or Far. With a preset chosen, the camera returns to that zoom every time the cursor moves, and changing the setting applies it at once. Each level favors different game sounds: Close for nearby animals, camps, villages and terrain detail, Middle for terrain and city ambience, Far for wind and unit movement and combat across a region.
+
 ## [1.4.1] - 2026-08-30
 
 ### Fixed

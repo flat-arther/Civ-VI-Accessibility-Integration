@@ -6667,6 +6667,41 @@
       <Text>选择单位时，自动将导航光标移至该单位所在单元格。</Text>
     </Replace>
 
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET" Language="zh_Hans_CN">
+      <Text>镜头缩放预设</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_TOOLTIP" Language="zh_Hans_CN">
+      <Text>每次移动光标时，将地图镜头保持在固定的缩放级别。每个级别突出不同的游戏声音：近景突出附近的动物、营地和地形细节，中景突出地形和城市环境音，远景突出风声和整个区域内的单位动态。</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_OFF" Language="zh_Hans_CN">
+      <Text>关闭</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_OFF_TOOLTIP" Language="zh_Hans_CN">
+      <Text>不改变缩放级别。镜头保持游戏或鼠标滚轮最后设置的缩放。</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_CLOSE" Language="zh_Hans_CN">
+      <Text>近景</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_CLOSE_TOOLTIP" Language="zh_Hans_CN">
+      <Text>完全拉近。最适合定位音效：资源动物、篝火、村庄、船只以及地形环境音的细节层。</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_MID" Language="zh_Hans_CN">
+      <Text>中景</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_MID_TOOLTIP" Language="zh_Hans_CN">
+      <Text>拉远约四分之一。地形和城市环境音保持清晰，带有地图环境音的中间层，没有风声。</Text>
+    </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_FAR" Language="zh_Hans_CN">
+      <Text>远景</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_CAMERA_ZOOM_PRESET_FAR_TOOLTIP" Language="zh_Hans_CN">
+      <Text>完全拉远。风声成为主导，地形声音淡出，单位的移动和战斗在整个区域内更加突出。</Text>
+    </Replace>
+
     <Replace Tag="LOC_CAI_SETTING_SCANNER_BEACON_ENABLED" Language="zh_Hans_CN">
       <Text>启用扫描器定位提示音</Text>
     </Replace>
