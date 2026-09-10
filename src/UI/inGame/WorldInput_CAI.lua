@@ -1583,12 +1583,20 @@ local function OnCAICursorMoved(state)
 		return
 	end
 
-	-- Always snap instantly. Jumps and selections used to take the animated
-	-- look-at, and arrow steps pressed while that pan was still running could
-	-- not take the camera over until it finished; zoomed in close the pan is
-	-- long enough for the camera to lag the cursor by several steps.
-	UI.LookAtPlot(plot:GetX(), plot:GetY(), 0, 0, true)
-	ApplyCameraZoomPreset()
+	-- With a zoom preset active every move snaps instantly: an arrow step
+	-- pressed while an animated pan is still running cannot take the camera
+	-- over until the pan ends, and zoomed in close that pan is long enough
+	-- for the camera to lag the cursor by several steps. With the preset off
+	-- the vanilla-like pan is kept for jumps, which a sighted viewer of a
+	-- stream will want, and only arrow steps snap.
+	if GetCameraZoomPreset() ~= nil then
+		UI.LookAtPlot(plot:GetX(), plot:GetY(), 0, 0, true)
+		ApplyCameraZoomPreset()
+	elseif state.reason == "step" then
+		UI.LookAtPlot(plot:GetX(), plot:GetY(), 0, 0, true)
+	else
+		UI.LookAtPlot(plot)
+	end
 end
 
 local function OnCAISettingsChanged(settingId)

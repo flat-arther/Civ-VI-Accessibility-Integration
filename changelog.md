@@ -6,7 +6,7 @@
 
 ### Changed
 
-- Every cursor move the mod makes, whether from the arrow keys, the map search, the world scanner, map pins, notifications, or unit and city selection, now snaps the camera to the cursor at once instead of panning there. Stepping right after a jump no longer leaves the camera trailing behind the cursor for a few tiles.
+- While a camera zoom preset is active, every cursor move the mod makes, whether from the arrow keys, the map search, the world scanner, map pins, notifications, or unit and city selection, snaps the camera to the cursor at once instead of panning there, so stepping right after a jump no longer leaves the camera trailing behind the cursor for a few tiles. With the preset Off, jumps keep the usual camera pan.
 
 ## [1.4.1] - 2026-08-30
 
