@@ -1583,11 +1583,11 @@ local function OnCAICursorMoved(state)
 		return
 	end
 
-	if state.reason == "step" then
-		UI.LookAtPlot(plot:GetX(), plot:GetY(), 0, 0, true)
-	else
-		UI.LookAtPlot(plot)
-	end
+	-- Always snap instantly. Jumps and selections used to take the animated
+	-- look-at, and arrow steps pressed while that pan was still running could
+	-- not take the camera over until it finished; zoomed in close the pan is
+	-- long enough for the camera to lag the cursor by several steps.
+	UI.LookAtPlot(plot:GetX(), plot:GetY(), 0, 0, true)
 	ApplyCameraZoomPreset()
 end
 
