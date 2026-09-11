@@ -10,10 +10,51 @@ local PANEL_ID = "CAIGreatWorkShowcase_Panel"
 
 local m_ui = { panel = nil, details = nil }
 
--- Stable GreatWorkType string for the work on display (e.g. "GREATWORK_GOGH_2").
--- Captured from the vanilla entry points so descriptions key off type, never the
--- localized name. nil when no work is shown or the type could not be resolved.
+-- Stable GreatWorkType string for the work on display (e.g. "GREATWORK_GOGH_2")
+-- and its GreatWorkObjectType (e.g. "GREATWORKOBJECT_PORTRAIT"). Captured from
+-- the vanilla entry points so descriptions key off type, never the localized
+-- name. nil when no work is shown or the type could not be resolved.
 local m_currentGWType = nil
+local m_currentGWObjectType = nil
+
+local NUM_ARTIFACT_TEXTURES = 25 -- mirrors vanilla GreatWorkShowcase NUM_ARIFACT_TEXTURES
+
+-- Locale tag of the image description for the work on display. Paintings,
+-- sculptures and relics key by GreatWorkType. Writing and music share one
+-- background each, keyed by object type. Artifacts cycle through 25 textures
+-- exactly as vanilla picks them, so the tag keys by texture index.
+local function GetDescriptionTag()
+    if not m_currentGWType then return nil end
+    if m_currentGWObjectType == "GREATWORKOBJECT_WRITING"
+        or m_currentGWObjectType == "GREATWORKOBJECT_MUSIC" then
+        return "LOC_CAI_GWDESC_" .. m_currentGWObjectType
+    end
+    if m_currentGWObjectType == "GREATWORKOBJECT_ARTIFACT" then
+        local id = tonumber((m_currentGWType:gsub("GREATWORK_ARTIFACT_", "")))
+        if not id then return nil end
+        return "LOC_CAI_GWDESC_ARTIFACT_" .. (((id - 1) % NUM_ARTIFACT_TEXTURES) + 1)
+    end
+    -- Monopolies and Corporations: the five products of a resource share that
+    -- resource's icon (vanilla strips "GREATWORK_PRODUCT_" and the "_N" suffix).
+    if m_currentGWObjectType == "GREATWORKOBJECT_PRODUCT" then
+        local resource = m_currentGWType:gsub("^GREATWORK_PRODUCT_", ""):gsub("_%d+$", "")
+        return "LOC_CAI_GWDESC_PRODUCT_" .. resource
+    end
+    -- Heroes and Legends: every hero epic shares one icon; symbols are per hero.
+    if m_currentGWObjectType == "GREATWORKOBJECT_HERO"
+        and m_currentGWType:find("^GREATWORK_HERO_EPIC_") then
+        return "LOC_CAI_GWDESC_GREATWORK_HERO_EPIC"
+    end
+    -- Secret Societies relics 25-48 share three icons (ICON_ATLAS_ETHIOPIA_RELICS_MODE
+    -- index 0/1/2 for 25-32, 33-40, 41-48 in the Ethiopia Icons XML).
+    if m_currentGWObjectType == "GREATWORKOBJECT_RELIC" then
+        local id = tonumber((m_currentGWType:gsub("GREATWORK_RELIC_", "")))
+        if id and id >= 25 then
+            return "LOC_CAI_GWDESC_VOIDSINGER_RELIC_" .. (math.floor((id - 25) / 8) + 1)
+        end
+    end
+    return "LOC_CAI_GWDESC_" .. m_currentGWType
+end
 
 -- ---------------------------------------------------------------------------
 -- Content helper — reads from vanilla controls after they are updated
@@ -48,11 +89,10 @@ local function GetWorkDetailsLabel()
     if createdDate  ~= "" then table.insert(parts, createdDate) end
     if createdPlace ~= "" then table.insert(parts, createdPlace) end
 
-    -- Append the accessibility image description for visual works (paintings,
-    -- sculptures, landscapes, religious art). Missing tags Lookup back to their
-    -- tag, so treat "result == tag" as "no description available".
-    if m_currentGWType then
-        local tag = "LOC_CAI_GWDESC_" .. m_currentGWType
+    -- Append the accessibility image description. Missing tags Lookup back to
+    -- their tag, so treat "result == tag" as "no description available".
+    local tag = GetDescriptionTag()
+    if tag then
         local desc = Locale.Lookup(tag)
         if desc ~= nil and desc ~= "" and desc ~= tag then
             table.insert(parts, desc)
@@ -66,13 +106,17 @@ end
 -- vanilla: GetGreatWorkTypeFromIndex returns a GameInfo.GreatWorks row id.
 local function CaptureGreatWorkType(city, greatWorkIndex)
     m_currentGWType = nil
+    m_currentGWObjectType = nil
     if not city or greatWorkIndex == nil then return end
     local bldgs = city.GetBuildings and city:GetBuildings()
     if not bldgs then return end
     local typeIdx = bldgs:GetGreatWorkTypeFromIndex(greatWorkIndex)
     if not typeIdx then return end
     local info = GameInfo.GreatWorks[typeIdx]
-    if info then m_currentGWType = info.GreatWorkType end
+    if info then
+        m_currentGWType = info.GreatWorkType
+        m_currentGWObjectType = info.GreatWorkObjectType
+    end
 end
 
 -- ---------------------------------------------------------------------------

@@ -286,21 +286,27 @@
     <File>Text/pt_BR/tutorial_advisor_text_CAI.sql</File>
     <File>Text/en_US/LeaderDescStrings_CAI.xml</File>
     <File>Text/en_US/GreatworkDescStrings_CAI.xml</File>
+    <File>Text/en_US/WonderDescStrings_CAI.xml</File>
     <File>Text/en_US/ReligionIconDescStrings_CAI.xml</File>
     <File>Text/zh_Hans_CN/LeaderDescStrings_CAI.xml</File>
     <File>Text/zh_Hans_CN/GreatworkDescStrings_CAI.xml</File>
+    <File>Text/zh_Hans_CN/WonderDescStrings_CAI.xml</File>
     <File>Text/zh_Hans_CN/ReligionIconDescStrings_CAI.xml</File>
     <File>Text/es_ES/LeaderDescStrings_CAI.xml</File>
     <File>Text/es_ES/GreatworkDescStrings_CAI.xml</File>
+    <File>Text/es_ES/WonderDescStrings_CAI.xml</File>
     <File>Text/es_ES/ReligionIconDescStrings_CAI.xml</File>
     <File>Text/pl_PL/LeaderDescStrings_CAI.xml</File>
     <File>Text/pl_PL/GreatworkDescStrings_CAI.xml</File>
+    <File>Text/pl_PL/WonderDescStrings_CAI.xml</File>
     <File>Text/pl_PL/ReligionIconDescStrings_CAI.xml</File>
     <File>Text/fr_FR/LeaderDescStrings_CAI.xml</File>
     <File>Text/fr_FR/GreatworkDescStrings_CAI.xml</File>
+    <File>Text/fr_FR/WonderDescStrings_CAI.xml</File>
     <File>Text/fr_FR/ReligionIconDescStrings_CAI.xml</File>
     <File>Text/pt_BR/LeaderDescStrings_CAI.xml</File>
     <File>Text/pt_BR/GreatworkDescStrings_CAI.xml</File>
+    <File>Text/pt_BR/WonderDescStrings_CAI.xml</File>
     <File>Text/pt_BR/ReligionIconDescStrings_CAI.xml</File>
     <!-- Localized mod metadata (Name/Teaser/Description/Authors) -->
     <File>Text/en_US/modinfo_CAI.xml</File>
@@ -493,21 +499,27 @@
       <File>Text/pt_BR/tutorial_advisor_text_CAI.sql</File>
       <File>Text/en_US/LeaderDescStrings_CAI.xml</File>
       <File>Text/en_US/GreatworkDescStrings_CAI.xml</File>
+      <File>Text/en_US/WonderDescStrings_CAI.xml</File>
       <File>Text/en_US/ReligionIconDescStrings_CAI.xml</File>
       <File>Text/zh_Hans_CN/LeaderDescStrings_CAI.xml</File>
       <File>Text/zh_Hans_CN/GreatworkDescStrings_CAI.xml</File>
+      <File>Text/zh_Hans_CN/WonderDescStrings_CAI.xml</File>
       <File>Text/zh_Hans_CN/ReligionIconDescStrings_CAI.xml</File>
       <File>Text/es_ES/LeaderDescStrings_CAI.xml</File>
       <File>Text/es_ES/GreatworkDescStrings_CAI.xml</File>
+      <File>Text/es_ES/WonderDescStrings_CAI.xml</File>
       <File>Text/es_ES/ReligionIconDescStrings_CAI.xml</File>
       <File>Text/pl_PL/LeaderDescStrings_CAI.xml</File>
       <File>Text/pl_PL/GreatworkDescStrings_CAI.xml</File>
+      <File>Text/pl_PL/WonderDescStrings_CAI.xml</File>
       <File>Text/pl_PL/ReligionIconDescStrings_CAI.xml</File>
       <File>Text/fr_FR/LeaderDescStrings_CAI.xml</File>
       <File>Text/fr_FR/GreatworkDescStrings_CAI.xml</File>
+      <File>Text/fr_FR/WonderDescStrings_CAI.xml</File>
       <File>Text/fr_FR/ReligionIconDescStrings_CAI.xml</File>
       <File>Text/pt_BR/LeaderDescStrings_CAI.xml</File>
       <File>Text/pt_BR/GreatworkDescStrings_CAI.xml</File>
+      <File>Text/pt_BR/WonderDescStrings_CAI.xml</File>
       <File>Text/pt_BR/ReligionIconDescStrings_CAI.xml</File>
       <File>Text/en_US/modinfo_CAI.xml</File>
       <File>Text/de_DE/modinfo_CAI.xml</File>
