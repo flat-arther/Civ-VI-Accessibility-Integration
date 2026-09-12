@@ -364,6 +364,73 @@ local function GroupOperativesByCity()
     return cityGroups, cityOrder
 end
 
+-- Group the per-city buckets under top-level categories: your own civ first,
+-- then one category per foreign major civ (in first-seen order), and the
+-- combined City-States category at the bottom.
+-- Returns an ordered list of category descriptors, each with a `kind`
+-- ("civ" | "citystates" | "own"), an optional `ownerID`, and its `cityKeys`.
+local function GroupCitiesByCiv(cityGroups, cityOrder)
+    local localPlayerID = Game.GetLocalPlayer()
+    local majorGroups = {}
+    local majorOrder = {}
+    local cityStatesGroup = nil
+    local ownGroup = nil
+
+    for _, key in ipairs(cityOrder) do
+        local ownerID = cityGroups[key].ownerID
+        local player = Players[ownerID]
+        if ownerID == localPlayerID then
+            if not ownGroup then
+                ownGroup = { kind = "own", ownerID = ownerID, cityKeys = {} }
+            end
+            table.insert(ownGroup.cityKeys, key)
+        elseif player and player:IsMajor() then
+            if not majorGroups[ownerID] then
+                majorGroups[ownerID] = { kind = "civ", ownerID = ownerID, cityKeys = {} }
+                majorOrder[#majorOrder + 1] = ownerID
+            end
+            table.insert(majorGroups[ownerID].cityKeys, key)
+        else
+            if not cityStatesGroup then
+                cityStatesGroup = { kind = "citystates", cityKeys = {} }
+            end
+            table.insert(cityStatesGroup.cityKeys, key)
+        end
+    end
+
+    local ordered = {}
+    if ownGroup then ordered[#ordered + 1] = ownGroup end
+    for _, ownerID in ipairs(majorOrder) do
+        ordered[#ordered + 1] = majorGroups[ownerID]
+    end
+    if cityStatesGroup then ordered[#ordered + 1] = cityStatesGroup end
+
+    return ordered
+end
+
+local function BuildCivCategoryLabel(civGroup, cityGroups)
+    local parts = {}
+
+    if civGroup.kind == "citystates" then
+        parts[#parts + 1] = Locale.Lookup("LOC_TRADE_OVERVIEW_CITY_STATES")
+    else
+        local ownerConfig = PlayerConfigurations[civGroup.ownerID]
+        if ownerConfig then
+            parts[#parts + 1] = Locale.Lookup(ownerConfig:GetCivilizationShortDescription())
+        end
+    end
+
+    local count = 0
+    for _, key in ipairs(civGroup.cityKeys) do
+        count = count + #cityGroups[key].entries
+    end
+    if count > 0 then
+        parts[#parts + 1] = Locale.Lookup("LOC_CAI_ESPIONAGE_OPERATIVE_COUNT", count)
+    end
+
+    return table.concat(parts, "[NEWLINE]")
+end
+
 local function BuildCityCategoryLabel(group)
     local city = group.city
     if not city then return "?" end
@@ -371,10 +438,7 @@ local function BuildCityCategoryLabel(group)
     local parts = {}
     parts[#parts + 1] = Locale.Lookup(city:GetName())
 
-    local ownerConfig = PlayerConfigurations[group.ownerID]
-    if ownerConfig then
-        parts[#parts + 1] = Locale.Lookup(ownerConfig:GetCivilizationShortDescription())
-    end
+    -- Civ name is now carried by the parent civ header; don't repeat it here.
 
     if city:IsCapital() and Players[group.ownerID]:IsMajor() then
         parts[#parts + 1] = Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL")
@@ -608,49 +672,64 @@ local function RebuildOperativesTree()
     end
 
     local cityGroups, cityOrder = GroupOperativesByCity()
-    for _, key in ipairs(cityOrder) do
-        local group = cityGroups[key]
-        local cityCat = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEspOv_City"), "TreeItem", {
-            Label = function() return BuildCityCategoryLabel(group) end,
-            Tooltip = function() return BuildCityCategoryTooltip(group) end,
-            FocusKey = "city:" .. key,
+    local civGroupList = GroupCitiesByCiv(cityGroups, cityOrder)
+    for _, civGroup in ipairs(civGroupList) do
+        local civCat = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEspOv_Civ"), "TreeItem", {
+            Label = function() return BuildCivCategoryLabel(civGroup, cityGroups) end,
+            FocusKey = "civ:" .. civGroup.kind .. ":" .. (civGroup.ownerID or "cs"),
         })
-        cityCat:SetFocusSound(HOVER_SOUND)
-        cityCat:AddInputBinding(CITY_DETAILS_BINDING)
-        cityCat:On("focus_enter", function()
-            m_focusedCityOwner = group.ownerID
-            m_focusedCityID = group.cityID
-        end)
-        cityCat:On("activate", function()
-            LookAtCity(group.ownerID, group.cityID)
-            local player = Players[group.ownerID]
-            if player then
-                local city = player:GetCities():FindID(group.cityID)
-                if city then
-                    local plot = Map.GetPlot(city:GetX(), city:GetY())
-                    if plot then
-                        LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
-                    end
-                end
-            end
+        civCat:SetFocusSound(HOVER_SOUND)
+        civCat:On("focus_enter", function()
+            m_focusedCityOwner = nil
+            m_focusedCityID = nil
         end)
 
-        for _, entry in ipairs(group.entries) do
-            local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEspOv_Spy"), "TreeItem", {
-                Label = function() return BuildSpyLabel(entry) end,
-                Tooltip = function() return BuildSpyTooltip(entry) end,
-                FocusKey = "spy:" .. entry.unitID,
+        for _, key in ipairs(civGroup.cityKeys) do
+            local group = cityGroups[key]
+            local cityCat = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEspOv_City"), "TreeItem", {
+                Label = function() return BuildCityCategoryLabel(group) end,
+                Tooltip = function() return BuildCityCategoryTooltip(group) end,
+                FocusKey = "city:" .. key,
             })
-            item:SetFocusSound(HOVER_SOUND)
-            item:AddInputBinding(CITY_DETAILS_BINDING)
-            item:On("focus_enter", function()
+            cityCat:SetFocusSound(HOVER_SOUND)
+            cityCat:AddInputBinding(CITY_DETAILS_BINDING)
+            cityCat:On("focus_enter", function()
                 m_focusedCityOwner = group.ownerID
                 m_focusedCityID = group.cityID
             end)
-            cityCat:AddChild(item)
+            cityCat:On("activate", function()
+                LookAtCity(group.ownerID, group.cityID)
+                local player = Players[group.ownerID]
+                if player then
+                    local city = player:GetCities():FindID(group.cityID)
+                    if city then
+                        local plot = Map.GetPlot(city:GetX(), city:GetY())
+                        if plot then
+                            LuaEvents.CAICursorMoveTo(plot:GetIndex(), "jump")
+                        end
+                    end
+                end
+            end)
+
+            for _, entry in ipairs(group.entries) do
+                local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEspOv_Spy"), "TreeItem", {
+                    Label = function() return BuildSpyLabel(entry) end,
+                    Tooltip = function() return BuildSpyTooltip(entry) end,
+                    FocusKey = "spy:" .. entry.unitID,
+                })
+                item:SetFocusSound(HOVER_SOUND)
+                item:AddInputBinding(CITY_DETAILS_BINDING)
+                item:On("focus_enter", function()
+                    m_focusedCityOwner = group.ownerID
+                    m_focusedCityID = group.cityID
+                end)
+                cityCat:AddChild(item)
+            end
+
+            civCat:AddChild(cityCat)
         end
 
-        m_opTree:AddChild(cityCat)
+        m_opTree:AddChild(civCat)
     end
 
     mgr:RestoreFocus(m_opTree, capture)

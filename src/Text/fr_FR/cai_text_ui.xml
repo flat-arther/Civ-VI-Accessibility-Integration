@@ -3851,6 +3851,12 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_CITY_MANAGEMENT" Language="fr_FR">
       <Text>Gestion de ville</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_YIELDS" Language="fr_FR">
+      <Text>Rendements</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_YIELDS" Language="fr_FR">
+      <Text>Apparaît pendant la gestion des citoyens et regroupe les cases exploitables de la ville par type de rendement. Chaque groupe de rendement liste les cases qui le produisent, de la plus élevée à la plus faible ; une case apparaît donc dans chaque rendement qu'elle produit.</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_LOCKED" Language="fr_FR">
       <Text>Cases verrouillées</Text>
     </Replace>

@@ -376,3 +376,87 @@ function CityManagement.ResolveSecondaryAction(plotOrPlotId, stateData)
 
     return nil
 end
+
+-- ===========================================================================
+-- TILE YIELD READOUT (shared by the city-management scanner label and the
+-- yields scanner category)
+-- ===========================================================================
+
+-- Fixed reading order: the four "primary" yields first, then the rarer
+-- culture/faith. Matches the plot readouts elsewhere in the mod.
+CityManagement.YieldOrder = {
+    "YIELD_FOOD",
+    "YIELD_PRODUCTION",
+    "YIELD_GOLD",
+    "YIELD_SCIENCE",
+    "YIELD_CULTURE",
+    "YIELD_FAITH",
+}
+
+-- "3[ICON_Food]Food" -- the icon token plus the yield name. Speak/ProcessText
+-- collapses the icon and the duplicate word into a single "3 Food" line, the
+-- same shape the plot tooltip uses, so raw text is passed straight through.
+function CityManagement.FormatYield(yieldType, amount)
+    local yieldInfo = GameInfo.Yields[yieldType]
+    if yieldInfo == nil or amount == nil then
+        return nil
+    end
+    return tostring(amount) .. Locale.Lookup(yieldInfo.IconString) .. Locale.Lookup(yieldInfo.Name)
+end
+
+-- Non-zero yields of a plot, in reading order, plus their total. Live data:
+-- read straight from the plot each call so the readout tracks improvements and
+-- policy/adjacency changes.
+function CityManagement.GetPlotYields(plotOrPlotId)
+    local plotId = plotOrPlotId
+    if type(plotOrPlotId) == "table" then
+        plotId = plotOrPlotId:GetIndex()
+    end
+
+    local plot = plotId ~= nil and Map.GetPlotByIndex(plotId) or nil
+    if plot == nil then
+        return nil
+    end
+
+    local out = { Entries = {}, Total = 0 }
+    for _, yieldType in ipairs(CityManagement.YieldOrder) do
+        local yieldInfo = GameInfo.Yields[yieldType]
+        if yieldInfo ~= nil then
+            local amount = plot:GetYield(yieldInfo.Index)
+            if amount ~= nil and amount > 0 then
+                out.Entries[#out.Entries + 1] = { YieldType = yieldType, Amount = amount }
+                out.Total = out.Total + amount
+            end
+        end
+    end
+    return out
+end
+
+-- Comma-joined "N Yield" string. When leadYieldType is set that yield heads the
+-- list (used by the yields category's named subs) and the rest follow in
+-- reading order; nil produces the default reading-order string.
+function CityManagement.BuildYieldSummary(plotOrPlotId, leadYieldType)
+    local yields = CityManagement.GetPlotYields(plotOrPlotId)
+    if yields == nil or #yields.Entries == 0 then
+        return nil
+    end
+
+    local parts = {}
+    if leadYieldType ~= nil then
+        for _, entry in ipairs(yields.Entries) do
+            if entry.YieldType == leadYieldType then
+                parts[#parts + 1] = CityManagement.FormatYield(entry.YieldType, entry.Amount)
+            end
+        end
+    end
+    for _, entry in ipairs(yields.Entries) do
+        if leadYieldType == nil or entry.YieldType ~= leadYieldType then
+            parts[#parts + 1] = CityManagement.FormatYield(entry.YieldType, entry.Amount)
+        end
+    end
+
+    if #parts == 0 then
+        return nil
+    end
+    return table.concat(parts, ", ")
+end

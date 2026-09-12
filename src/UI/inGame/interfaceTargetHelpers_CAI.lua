@@ -496,9 +496,47 @@ local function ResolvePlotTargetLabel(mode, plotIndex)
     return Locale.Lookup("LOC_CAI_VALID_TARGET_PLOT", plot:GetX(), plot:GetY())
 end
 
+-- Total adjacency yield a district would gain on this plot, summed across every
+-- yield. Drives the district valid-target ordering (highest adjacency first).
+-- Non-adjacency districts (e.g. neighborhoods) report 0 and fall back to the
+-- default distance ordering.
+local function GetDistrictAdjacencySortValue(plotIndex, city, eDistrict)
+    if not Map.IsPlot(plotIndex) or city == nil or eDistrict == nil then
+        return nil
+    end
+
+    local plot = Map.GetPlotByIndex(plotIndex)
+    if plot == nil or plot.GetAdjacencyYield == nil then
+        return nil
+    end
+
+    local playerID = city:GetOwner()
+    local cityID = city:GetID()
+    local total = 0
+    for row in GameInfo.Yields() do
+        total = total + (plot:GetAdjacencyYield(playerID, cityID, eDistrict, row.Index) or 0)
+    end
+    return total
+end
+
 local function AddPlotTargetItems(out, mode, targetPlots)
+    -- District placement ranks its valid tiles by adjacency bonus, so resolve
+    -- the placing city and district once for the whole batch.
+    local adjacencyCity, adjacencyDistrictIndex = nil, nil
+    if mode == InterfaceModeTypes.DISTRICT_PLACEMENT then
+        adjacencyCity = UI.GetHeadSelectedCity()
+        local districtHash = UI.GetInterfaceModeParameter(CityOperationTypes.PARAM_DISTRICT_TYPE)
+        local district = districtHash ~= nil and GameInfo.Districts[districtHash] or nil
+        adjacencyDistrictIndex = district ~= nil and district.Index or nil
+    end
+
     for plotIndex, targetValue in pairs(targetPlots) do
         local group = type(targetValue) == "string" and targetValue or "targetPlots"
+
+        local sortValue = nil
+        if adjacencyCity ~= nil and adjacencyDistrictIndex ~= nil then
+            sortValue = GetDistrictAdjacencySortValue(plotIndex, adjacencyCity, adjacencyDistrictIndex)
+        end
 
         out[#out + 1] = {
             Id        = "validTarget:" .. tostring(plotIndex),
@@ -506,6 +544,7 @@ local function AddPlotTargetItems(out, mode, targetPlots)
             PlotIndex = plotIndex,
             LabelKey  = ResolvePlotTargetLabel(mode, plotIndex),
             GroupId   = group,
+            SortValue = sortValue,
         }
     end
 end

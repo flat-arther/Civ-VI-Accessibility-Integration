@@ -3847,6 +3847,12 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_CITY_MANAGEMENT" Language="pt_BR">
       <Text>Gerenciamento de cidade</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_YIELDS" Language="pt_BR">
+      <Text>Rendimentos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_YIELDS" Language="pt_BR">
+      <Text>Aparece durante o gerenciamento de cidadãos e agrupa os tiles trabalháveis da cidade por tipo de rendimento. Cada grupo de rendimento lista os tiles que o produzem, do maior para o menor, então um tile aparece em cada rendimento que gera.</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_LOCKED" Language="pt_BR">
       <Text>Hexágonos bloqueados</Text>
     </Replace>

@@ -3857,6 +3857,12 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_CITY_MANAGEMENT" Language="pl_PL">
       <Text>Zarządzanie miastem</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_YIELDS" Language="pl_PL">
+      <Text>Plony</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_YIELDS" Language="pl_PL">
+      <Text>Pojawia się podczas zarządzania obywatelami i grupuje pola miasta możliwe do wykorzystania według rodzaju plonu. Każda grupa plonu wymienia pola, które go dają, od najwyższego, więc pole pojawia się w każdym plonie, który wytwarza.</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_LOCKED" Language="pl_PL">
       <Text>Zablokowane pola</Text>
     </Replace>

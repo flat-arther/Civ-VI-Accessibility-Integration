@@ -3847,6 +3847,12 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_CITY_MANAGEMENT" Language="es_ES">
       <Text>Gestión de la ciudad</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_YIELDS" Language="es_ES">
+      <Text>Rendimientos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_YIELDS" Language="es_ES">
+      <Text>Aparece durante la gestión de ciudadanos y agrupa las casillas trabajables de la ciudad por tipo de rendimiento. Cada grupo de rendimiento enumera las casillas que lo producen, de mayor a menor, por lo que una casilla aparece en cada rendimiento que genera.</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_LOCKED" Language="es_ES">
       <Text>Casillas bloqueadas</Text>
     </Replace>

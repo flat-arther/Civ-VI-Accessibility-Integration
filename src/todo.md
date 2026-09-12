@@ -106,11 +106,16 @@
 [x] Add support for quick deals
 [x] Add volcanos to disasters subcategory even if inactive
 [x] Split districts and buildings, as well as repairs in the production panel
-[ ] Add support for real Era Tracker
 [x] Group spies in the espionage screen by civ, copy trade route overview
-[ ] Food summary in the city details growth tooltip should show net per turn, not raw yield
-[ ] Different scanner categories should have different default sort, instead of always using distance. 
-[ ] Get rid of screen reader interrupt on widget push
+[x] Food summary in the city details growth tooltip should show net per turn, not raw yield
+[x] Sort the valid targets for districts by highest adjacency bonus. Add a yields category that sorts by highest
+[ ] Look in to handling forest fires in disaster history
+[ ] Move announce still reports wrong value when discovering wonders
+[ ] Move log announces wrong movement distances. Consider switching to a snapshot system
 [ ] Cities should be reported as zones
+[ ] Moving greatworks might be bugged, when trying to move from palace
+[ ] 0 build charges doesn't necessarily mean the unit does not support charges. Change the string
+[ ] Add support for real Era Tracker
+[ ] Get rid of screen reader interrupt on widget push
 [ ] River flow direction reporting
 [ ] Look in to coastal raide yield reporting

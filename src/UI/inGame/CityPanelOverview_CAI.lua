@@ -136,7 +136,7 @@ local function BuildCitizensTab(data, city)
         Tooltip = function()
             return JoinLines({
                 Locale.Lookup("LOC_CAI_CITY_OV_CITIZENS_OF_HOUSING", data.Population, math.floor(data.Housing)),
-                toPlusMinusString(data.FoodPerTurn) .. " " .. Locale.Lookup("LOC_HUD_CITY_FOOD_PER_TURN"),
+                toPlusMinusString(data.FoodSurplus) .. " " .. Locale.Lookup("LOC_HUD_CITY_FOOD_PER_TURN"),
                 Locale.ToNumber(data.GrowthThreshold, "#,###.#") .. " " ..
                     Locale.Lookup("LOC_HUD_CITY_FOOD_NEEDED_FOR_GROWTH"),
             })

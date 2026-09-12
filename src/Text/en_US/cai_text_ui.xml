@@ -3894,6 +3894,9 @@
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_CITY_MANAGEMENT" Language="en_US">
       <Text>City management</Text>
     </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_YIELDS" Language="en_US">
+      <Text>Yields</Text>
+    </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_LOCKED" Language="en_US">
       <Text>Locked tiles</Text>
     </Row>
@@ -7361,6 +7364,9 @@
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_MAP_TACS" Language="en_US">
       <Text>Contains map tacs visible to you, categorized by their owning player and label.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_YIELDS" Language="en_US">
+      <Text>Appears while managing city citizens, and groups the city's workable tiles by yield type. Each yield group lists the tiles that produce that yield, highest first, so a tile appears under every yield it makes.</Text>
     </Row>
     <Row Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_CITY_MANAGEMENT" Language="en_US">
       <Text>Appears while city citizen management, tile purchase, or tile swapping is active, and contains the tiles available in that mode.</Text>

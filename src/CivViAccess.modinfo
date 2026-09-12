@@ -194,6 +194,7 @@
     <File>UI/inGame/WorldScanner/WorldScannerCategory_civRoyale.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_pirates.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_yields.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_tutorial.lua</File>
@@ -684,6 +685,7 @@
       <File>UI/inGame/WorldScanner/WorldScannerCategory_civRoyale.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_pirates.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_yields.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_tutorial.lua</File>

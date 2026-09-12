@@ -3858,6 +3858,12 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_CITY_MANAGEMENT" Language="zh_Hans_CN">
       <Text>城市管理</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_YIELDS" Language="zh_Hans_CN">
+      <Text>产出</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_YIELDS" Language="zh_Hans_CN">
+      <Text>在管理城市市民时出现，按产出类型对城市可工作的地块进行分组。每个产出分组列出产生该产出的地块，从高到低排列，因此一个地块会出现在它所产生的每种产出中。</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_LOCKED" Language="zh_Hans_CN">
       <Text>已锁定单元格</Text>
     </Replace>
