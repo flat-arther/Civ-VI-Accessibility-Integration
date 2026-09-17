@@ -23,6 +23,7 @@ local CAI_END_TURN_ACTION = Input.GetActionId("ReplaceEndTurn_CAI")
 local CAI_SPEAK_TURN_BLOCKERS_ACTION = Input.GetActionId("ActionPanelSpeakTurnBlockers")
 local CAI_OPEN_TURN_BLOCKERS_ACTION = Input.GetActionId("ActionPanelOpenTurnBlockers")
 local CAI_SPEAK_ERA_AGE_ACTION = Input.GetActionId("ActionPanelSpeakEraAge")
+local CAI_SPEAK_ERA_SCORE_DETAILS_ACTION = Input.GetActionId("ActionPanelSpeakEraScoreDetails")
 local m_caiTutorialActionPanelAllowed = false
 local m_caiLastObservedActionTooltip = nil
 local IsTutorialActionPanelAllowed = nil
@@ -395,6 +396,34 @@ local function SpeakEraAge()
     Speak(table.concat(parts, "[NEWLINE]"))
 end
 
+local function SpeakEraScoreDetails()
+    local playerID = GetLocalPlayerID()
+    if playerID == nil then return end
+
+    local gameEras = Game.GetEras()
+    if gameEras == nil then return end
+
+    local parts = {
+        Locale.Lookup("LOC_ERA_SCORE_HEADER") .. " " .. gameEras:GetPlayerCurrentScore(playerID),
+    }
+
+    local previousTotal = 0
+    for _, source in ipairs(gameEras:GetPlayerPreviousEraScoreBreakdown(playerID)) do
+        for _, value in pairs(source) do previousTotal = previousTotal + value end
+    end
+    if previousTotal > 0 then
+        table.insert(parts, Locale.Lookup("LOC_ERAS_PREVIOUS_ERA_TOTAL_SCORE") .. ", " .. previousTotal)
+    end
+
+    for _, source in ipairs(gameEras:GetPlayerCurrentEraScoreBreakdown(playerID)) do
+        for sourceText, value in pairs(source) do
+            if value > 0 then table.insert(parts, sourceText .. ", " .. value) end
+        end
+    end
+
+    Speak(table.concat(parts, "[NEWLINE]"))
+end
+
 -- ===========================================================================
 -- Input
 -- ===========================================================================
@@ -420,6 +449,15 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
             Speak(Locale.Lookup("LOC_CAI_ACTION_PANEL_ERA_NOT_AVAILABLE"))
         else
             SpeakEraAge()
+        end
+        return
+    end
+
+    if actionId == CAI_SPEAK_ERA_SCORE_DETAILS_ACTION then
+        if not GameCapabilities.HasCapability("CAPABILITY_ERAS") then
+            Speak(Locale.Lookup("LOC_CAI_ACTION_PANEL_ERA_NOT_AVAILABLE"))
+        else
+            SpeakEraScoreDetails()
         end
         return
     end

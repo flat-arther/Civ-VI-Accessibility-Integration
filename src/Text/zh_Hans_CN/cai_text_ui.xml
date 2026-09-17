@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION" Language="zh_Hans_CN"><Text>朗读存在警告的城市数量</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION_TOOLTIP" Language="zh_Hans_CN"><Text>朗读您存在住房、宜居度、食物、忠诚度、电力、占领或围城警告的城市数量。</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION" Language="zh_Hans_CN"><Text>朗读所有城市警告</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION_TOOLTIP" Language="zh_Hans_CN"><Text>朗读每座受影响城市的名称及其住房、宜居度、食物、忠诚度、电力、占领和围城警告。</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_COUNT" Language="zh_Hans_CN"><Text>存在警告的城市：{1_Count}</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_NONE" Language="zh_Hans_CN"><Text>没有城市存在警告。</Text></Row>
     <!-- 简体中文 -->
 
     <!-- 控件角色 -->
@@ -1364,6 +1370,8 @@
     <Replace Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE_TOOLTIP" Language="zh_Hans_CN">
       <Text>读取当前时代得分、所处时代、门槛和生效中的纪念事项</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_SCORE_DETAILS" Language="zh_Hans_CN"><Text>阅读时代得分明细</Text></Replace>
+    <Replace Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_SCORE_DETAILS_TOOLTIP" Language="zh_Hans_CN"><Text>朗读当前时代得分的来源</Text></Replace>
     <Replace Tag="LOC_CAI_ACTION_PANEL_ERA_NOT_AVAILABLE" Language="zh_Hans_CN">
       <Text>时代状态不可用</Text>
     </Replace>
@@ -1642,6 +1650,8 @@
     <Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_NUKES_TOOLTIP" Language="zh_Hans_CN">
       <Text>读取核武器和热核武器的数量</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE_DETAILS" Language="zh_Hans_CN"><Text>阅读科技明细</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE_DETAILS_TOOLTIP" Language="zh_Hans_CN"><Text>朗读科技来源</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_CULTURE_DETAILS" Language="zh_Hans_CN"><Text>阅读文化明细</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_CULTURE_DETAILS_TOOLTIP" Language="zh_Hans_CN"><Text>朗读文化来源</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_GOLD_DETAILS" Language="zh_Hans_CN"><Text>阅读金币明细</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_GOLD_DETAILS_TOOLTIP" Language="zh_Hans_CN"><Text>朗读金币收入和支出来源</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_FAITH_DETAILS" Language="zh_Hans_CN"><Text>阅读信仰明细</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_FAITH_DETAILS_TOOLTIP" Language="zh_Hans_CN"><Text>朗读信仰来源</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_DETAILS" Language="zh_Hans_CN"><Text>阅读旅游业明细</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_DETAILS_TOOLTIP" Language="zh_Hans_CN"><Text>朗读旅游业来源</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_INFLUENCE_DETAILS" Language="zh_Hans_CN"><Text>阅读影响力明细</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_INFLUENCE_DETAILS_TOOLTIP" Language="zh_Hans_CN"><Text>朗读影响力进度</Text></Replace>
+    <Replace Tag="LOC_CAI_TOP_PANEL_NO_VALUE" Language="zh_Hans_CN"><Text>你没有{1_Name}</Text></Replace>
     <Replace Tag="LOC_CAI_TOP_PANEL_YIELD_INFO" Language="zh_Hans_CN">
       <Text>帝国经济报告</Text>
     </Replace>

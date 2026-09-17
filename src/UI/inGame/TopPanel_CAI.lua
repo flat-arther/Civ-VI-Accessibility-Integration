@@ -26,6 +26,12 @@ local ACTION_SPEAK_FAITH = Input.GetActionId("UI_TopPanelSpeakFaith")
 local ACTION_SPEAK_TOURISM = Input.GetActionId("UI_TopPanelSpeakTourism")
 local ACTION_SPEAK_INFLUENCE = Input.GetActionId("UI_TopPanelSpeakInfluence")
 local ACTION_SPEAK_NUKES = Input.GetActionId("UI_TopPanelSpeakNukes")
+local ACTION_SPEAK_CITY_WARNINGS = Input.GetActionId("UI_TopPanelSpeakCityWarnings")
+local ACTION_SPEAK_CITY_WARNINGS_DETAILS = Input.GetActionId("UI_TopPanelSpeakCityWarningsDetails")
+local ACTION_SPEAK_GOLD_DETAILS = Input.GetActionId("UI_TopPanelSpeakGoldDetails")
+local ACTION_SPEAK_FAITH_DETAILS = Input.GetActionId("UI_TopPanelSpeakFaithDetails")
+local ACTION_SPEAK_TOURISM_DETAILS = Input.GetActionId("UI_TopPanelSpeakTourismDetails")
+local ACTION_SPEAK_INFLUENCE_DETAILS = Input.GetActionId("UI_TopPanelSpeakInfluenceDetails")
 local ACTION_OPEN_DIPLOMACY = Input.GetActionId("UI_TopPanelOpenDiplomacy")
 local ACTION_OPEN_REPORTS = Input.GetActionId("UI_TopPanelOpenReports")
 local ACTION_OPEN_REPORTS_RESOURCES = Input.GetActionId("UI_TopPanelOpenReportsResources")
@@ -50,6 +56,103 @@ end
 
 local function FormatBalance(value)
     return Locale.ToNumber(value, "#,###.#")
+end
+
+-- Read city-wide warning states live, without opening or selecting a city.
+local function GetCityWarningParts(city, player)
+    local parts = {}
+    local function Add(tag, ...)
+        parts[#parts + 1] = Locale.Lookup(tag, ...)
+    end
+
+    if IsExpansion1Active() or IsExpansion2Active() then
+        local identity = city:GetCulturalIdentity()
+        if identity then
+            local level = GameInfo.LoyaltyLevels[identity:GetLoyaltyLevel()]
+            if level.GrowthChange < 1 or level.YieldChange < 0 then
+                Add(level.Name)
+            end
+            if identity:GetLoyaltyPerTurn() < 0 then
+                Add("LOC_CAI_LENS_LOYALTY_LOSING")
+            end
+        end
+    end
+
+    local growth = city:GetGrowth()
+    if growth:GetHappinessGrowthModifier() < 0 or growth:GetHappinessNonFoodYieldModifier() < 0 then
+        Add(GameInfo.Happinesses[growth:GetHappiness()].Name)
+    end
+    if growth:GetTurnsUntilStarvation() ~= -1 then
+        Add("LOC_HUD_REPORTS_STATUS_STARVING")
+    end
+    local housingMultiplier = growth:GetHousingGrowthModifier()
+    if housingMultiplier == 0 then
+        Add("LOC_HUD_CITY_POPULATION_GROWTH_HALTED")
+    elseif housingMultiplier <= 0.5 then
+        Add("LOC_HUD_CITY_POPULATION_GROWTH_SLOWED", (1 - housingMultiplier) * 100)
+    end
+
+    if IsExpansion2Active() then
+        local power = city:GetPower()
+        if power and power:GetRequiredPower() > 0 and not power:IsFullyPowered() then
+            Add("LOC_POWER_STATUS_UNPOWERED_NAME")
+        end
+    end
+    if city:IsOccupied() then
+        Add("LOC_CAI_CITY_STATUS_OCCUPIED")
+    end
+    local district = player:GetDistricts():FindID(city:GetDistrictID())
+    if district then
+        if district:IsUnderSiege() then
+            Add("LOC_HUD_REPORTS_STATUS_UNDER_SEIGE")
+        end
+    else
+        LogWarn("CityWarnings: City center district unavailable for city " .. tostring(city:GetID()))
+    end
+    return parts
+end
+
+local function SpeakCityWarnings(detailed)
+    local _, player = GetLocalPlayer()
+    if not player then
+        Speak(Locale.Lookup("LOC_CAI_CITY_BANNER_INFO_UNAVAILABLE"))
+        return
+    end
+    if player:GetCities():GetCount() == 0 then
+        Speak(Locale.Lookup("LOC_CAI_NO_CITIES"))
+        return
+    end
+
+    local warnings = {}
+    for _, city in player:GetCities():Members() do
+        local parts = GetCityWarningParts(city, player)
+        if #parts > 0 then
+            warnings[#warnings + 1] = {
+                name = Locale.Lookup(city:GetName()),
+                id = city:GetID(),
+                text = table.concat(parts, ", "),
+            }
+        end
+    end
+    if #warnings == 0 then
+        Speak(Locale.Lookup("LOC_CAI_CITY_WARNINGS_NONE"))
+        return
+    end
+
+    local summary = Locale.Lookup("LOC_CAI_CITY_WARNINGS_COUNT", #warnings)
+    if not detailed then
+        Speak(summary)
+        return
+    end
+    table.sort(warnings, function(a, b)
+        if a.name == b.name then return a.id < b.id end
+        return Locale.Compare(a.name, b.name) < 0
+    end)
+    local lines = { summary }
+    for _, warning in ipairs(warnings) do
+        lines[#lines + 1] = warning.name .. ", " .. warning.text
+    end
+    Speak(table.concat(lines, "[NEWLINE]"), true)
 end
 
 local function FormatRatePerTurn(value)
@@ -472,6 +575,83 @@ local function IsIndentedTooltipLine(text)
     return text ~= nil and string.match(text, "^%s") ~= nil
 end
 
+local function GetOuterTooltipLines(tooltip)
+    local lines = {}
+    for index, line in ipairs(SplitTooltipLines(tooltip)) do
+        if index > 1 and not IsIndentedTooltipLine(line) then
+            local cleanedLine = TrimLeadingWhitespace(line)
+            table.insert(lines, cleanedLine)
+        end
+    end
+    return lines
+end
+
+local function SpeakStatusDetails(label, tooltip, helpTooltip)
+    local parts = GetOuterTooltipLines(tooltip)
+    if #parts == 0 then
+        table.insert(parts, Locale.Lookup("LOC_CAI_TOP_PANEL_NO_VALUE", label))
+    else
+        parts[1] = label .. ": " .. parts[1]
+    end
+    if helpTooltip and helpTooltip ~= "" then table.insert(parts, helpTooltip) end
+    Speak(table.concat(parts, ", "))
+end
+
+local function SpeakGoldDetails()
+    local _, player = GetLocalPlayer()
+    if not player or not GameCapabilities.HasCapability("CAPABILITY_GOLD")
+        or not GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then return end
+    SpeakStatusDetails(Locale.Lookup("LOC_TOP_PANEL_GOLD"), GetGoldTooltip())
+end
+
+local function SpeakFaithDetails()
+    local _, player = GetLocalPlayer()
+    if not player or not GameCapabilities.HasCapability("CAPABILITY_FAITH")
+        or not GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then return end
+    local pantheonProgress = nil
+    local religion = player:GetReligion()
+    if religion:GetPantheon() < 0 and not religion:CanCreatePantheon() then
+        local requiredFaith = Game.GetReligion():GetMinimumFaithNextPantheon()
+        pantheonProgress = Locale.Lookup("LOC_UI_RELIGION_WORKING_TOWARDS_PANTHEON") .. ": "
+            .. FormatBalance(religion:GetFaithBalance()) .. " / " .. FormatBalance(requiredFaith) .. " "
+            .. Locale.Lookup("LOC_TOP_PANEL_FAITH")
+    end
+
+    local parts = GetOuterTooltipLines(GetFaithTooltip())
+    if pantheonProgress then table.insert(parts, 1, pantheonProgress) end
+    if #parts == 0 then
+        table.insert(parts, Locale.Lookup("LOC_CAI_TOP_PANEL_NO_VALUE", Locale.Lookup("LOC_TOP_PANEL_FAITH")))
+    elseif not pantheonProgress then
+        parts[1] = Locale.Lookup("LOC_TOP_PANEL_FAITH") .. ": " .. parts[1]
+    end
+    Speak(table.concat(parts, ", "))
+end
+
+local function SpeakTourismDetails()
+    local _, player = GetLocalPlayer()
+    if not player or not GameCapabilities.HasCapability("CAPABILITY_TOURISM")
+        or not GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then return end
+    local rate = Round(player:GetStats():GetTourism(), 1)
+    local tooltip = Locale.Lookup("LOC_WORLD_RANKINGS_OVERVIEW_CULTURE_TOURISM_RATE", rate)
+    local breakdown = player:GetStats():GetTourismToolTip()
+    if breakdown and breakdown ~= "" then tooltip = tooltip .. "[NEWLINE][NEWLINE]" .. breakdown end
+    SpeakStatusDetails(Locale.Lookup("LOC_TOP_PANEL_TOURISM"), tooltip)
+end
+
+local function SpeakInfluenceDetails()
+    local _, player = GetLocalPlayer()
+    if not player or not GameCapabilities.HasCapability("CAPABILITY_TOP_PANEL_ENVOYS") then return end
+    local influence = player:GetInfluence()
+    local tooltip = Locale.Lookup("LOC_TOP_PANEL_INFLUENCE_TOOLTIP_POINTS_THRESHOLD",
+        influence:GetTokensPerThreshold(), influence:GetPointsThreshold())
+        .. "[NEWLINE][NEWLINE]"
+        .. Locale.Lookup("LOC_TOP_PANEL_INFLUENCE_TOOLTIP_POINTS_BALANCE", Round(influence:GetPointsEarned(), 1))
+        .. "[NEWLINE]"
+        .. Locale.Lookup("LOC_TOP_PANEL_INFLUENCE_TOOLTIP_POINTS_RATE", Round(influence:GetPointsPerTurn(), 1))
+    SpeakStatusDetails(Locale.Lookup("LOC_TOP_PANEL_INFLUENCE"), tooltip,
+        Locale.Lookup("LOC_TOP_PANEL_INFLUENCE_TOOLTIP_SOURCES_HELP"))
+end
+
 local function AddBreakdownTree(parent, lines)
     local currentCategory = nil
     for _, line in ipairs(lines) do
@@ -772,14 +952,26 @@ local function OnCAITopPanelInputAction(actionId)
     end
     if actionId == ACTION_SPEAK_TURN_TIME_DATE then
         SpeakTurnTimeDate()
+    elseif actionId == ACTION_SPEAK_CITY_WARNINGS then
+        SpeakCityWarnings(false)
+    elseif actionId == ACTION_SPEAK_CITY_WARNINGS_DETAILS then
+        SpeakCityWarnings(true)
     elseif actionId == ACTION_SPEAK_GOLD then
         SpeakGold()
+    elseif actionId == ACTION_SPEAK_GOLD_DETAILS then
+        SpeakGoldDetails()
     elseif actionId == ACTION_SPEAK_FAITH then
         SpeakFaith()
+    elseif actionId == ACTION_SPEAK_FAITH_DETAILS then
+        SpeakFaithDetails()
     elseif actionId == ACTION_SPEAK_TOURISM then
         SpeakTourism()
+    elseif actionId == ACTION_SPEAK_TOURISM_DETAILS then
+        SpeakTourismDetails()
     elseif actionId == ACTION_SPEAK_INFLUENCE then
         SpeakFavor()
+    elseif actionId == ACTION_SPEAK_INFLUENCE_DETAILS then
+        SpeakInfluenceDetails()
     elseif actionId == ACTION_SPEAK_NUKES then
         SpeakNukes()
     elseif actionId == ACTION_OPEN_DIPLOMACY then

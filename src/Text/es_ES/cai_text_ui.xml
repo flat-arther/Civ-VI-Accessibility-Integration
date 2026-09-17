@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION" Language="es_ES"><Text>Leer el número de ciudades con avisos</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION_TOOLTIP" Language="es_ES"><Text>Lee cuántas de tus ciudades tienen avisos de alojamiento, servicios, alimentos, lealtad, energía, ocupación o asedio.</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION" Language="es_ES"><Text>Leer todos los avisos de ciudades</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION_TOOLTIP" Language="es_ES"><Text>Lee cada ciudad afectada y sus avisos de alojamiento, servicios, alimentos, lealtad, energía, ocupación y asedio.</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_COUNT" Language="es_ES"><Text>Ciudades con avisos: {1_Count}</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_NONE" Language="es_ES"><Text>No hay ciudades con avisos.</Text></Row>
     <!-- SPANISH -->
 
     <!-- Widget roles -->
@@ -1361,6 +1367,8 @@
     <Replace Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE_TOOLTIP" Language="es_ES">
       <Text>Lee la Puntuación de época actual, la época, los umbrales y las dedicaciones activas</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_SCORE_DETAILS" Language="es_ES"><Text>Leer desglose de puntuación de era</Text></Replace>
+    <Replace Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_SCORE_DETAILS_TOOLTIP" Language="es_ES"><Text>Lee las fuentes de tu puntuación de era actual</Text></Replace>
     <Replace Tag="LOC_CAI_ACTION_PANEL_ERA_NOT_AVAILABLE" Language="es_ES">
       <Text>Las épocas no están disponibles</Text>
     </Replace>
@@ -1634,6 +1642,8 @@
     <Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_NUKES_TOOLTIP" Language="es_ES">
       <Text>Lee el número de dispositivos nucleares y termonucleares</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE_DETAILS" Language="es_ES"><Text>Detalles de ciencia</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE_DETAILS_TOOLTIP" Language="es_ES"><Text>Lee las fuentes principales de ciencia</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_CULTURE_DETAILS" Language="es_ES"><Text>Detalles de cultura</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_CULTURE_DETAILS_TOOLTIP" Language="es_ES"><Text>Lee las fuentes principales de cultura</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_GOLD_DETAILS" Language="es_ES"><Text>Detalles de oro</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_GOLD_DETAILS_TOOLTIP" Language="es_ES"><Text>Lee las fuentes de ingresos y gastos de oro</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_FAITH_DETAILS" Language="es_ES"><Text>Detalles de fe</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_FAITH_DETAILS_TOOLTIP" Language="es_ES"><Text>Lee las fuentes principales de fe</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_DETAILS" Language="es_ES"><Text>Detalles de turismo</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_DETAILS_TOOLTIP" Language="es_ES"><Text>Lee las fuentes principales de turismo</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_INFLUENCE_DETAILS" Language="es_ES"><Text>Detalles de influencia</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_INFLUENCE_DETAILS_TOOLTIP" Language="es_ES"><Text>Lee el progreso de influencia</Text></Replace>
+    <Replace Tag="LOC_CAI_TOP_PANEL_NO_VALUE" Language="es_ES"><Text>No tienes {1_Name}</Text></Replace>
     <Replace Tag="LOC_CAI_TOP_PANEL_YIELD_INFO" Language="es_ES">
       <Text>Informe de economía del imperio</Text>
     </Replace>

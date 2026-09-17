@@ -94,9 +94,8 @@ local function GetArrivalEstimate(unit, targetPlotId)
         return 0
     end
 
-    local pathInfo = UnitManager.GetMoveToPathEx(unit, targetPlotId)
-    local turns = pathInfo ~= nil and pathInfo.turns or nil
-    local arrivalTurn = turns ~= nil and #turns > 0 and tonumber(turns[#turns]) or nil
+    local pathInfo = BuildMovementPathInfo(unit, targetPlotId, false, false)
+    local arrivalTurn = pathInfo ~= nil and pathInfo.hasPath and pathInfo.arrivalTurn or nil
     return arrivalTurn ~= nil and math.max(0, arrivalTurn - 1) or nil
 end
 

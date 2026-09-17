@@ -2,6 +2,8 @@
 
 ### Added
 
+- H reads the number of your cities with warnings. Shift+H lists each affected city and its housing, amenities, starvation, loyalty, power, occupation, and siege warnings.
+- Added key bindings for empire status keys that read the outer yield or stat breakdown, normally found in the reports screen. In addition, Shift+Y reads the sources contributing to the current era score. note that these are overall breakdowns. You can open the reports screen for details on individual sources
 - In the Climate Screen's Event History, a disaster that caused damage or changed fertility can now be expanded to view the specifics. Under it you will find the improvements, districts, and buildings that were pillaged or destroyed, features and resources that were removed, units that were killed or damaged, the tiles whose yields changed and by how much, and the cities that lost population. Each entry can be selected to move the map cursor to that tile. Storms and fires update changes on each turn as they move.
 - Added full accessibility to the world builder. Includes mod tutorials for screens and general usage
 - The world scanner has a new World Builder category, shown only while the World Builder is active. It has two subcategories: Starting positions lists each placed start, named by its assignment type and target, such as "Player: Rome", "Leader: Trajan", "Civilization: Rome", "Random Player", or "Random City-State", and grouped by that type; and Ownership lists owned tiles merged into zones per owner, like the political lens.
@@ -10,6 +12,7 @@
 
 ### Changed
 
+- In Gathering Storm, rivers in the world scanner's Geography category are now identified by their river names.
 - Units with no movement remaining can still use Move To (Alt M by default) or from the unit action list, and directional quick movement can queue an adjacent move for a later turn.
 - Pressing Escape in the multiplayer staging room now asks for confirmation before leaving.
 - Appointing a governor or joining a Secret Society from the Governors screen asks for confirmation before spending a governor title.
@@ -27,6 +30,7 @@
 
 ### Fixed
 
+- Movement previews now report next-turn arrival when a unit has already entered an enemy zone of control and would normally arrive this turn, instead of treating its displayed leftover movement as usable.
 - In observer mode (EG after losing in red death) Units, cities, districts, improvements, wonders, and other owned objects properly appear as neutral for the observer.
 - Saves can now be deleted from the Load Game menu with the Delete key.
 - Checking governer title count (O by default) right after earning a title and before opening the governers panel now reports the live value, instead of always saying 0

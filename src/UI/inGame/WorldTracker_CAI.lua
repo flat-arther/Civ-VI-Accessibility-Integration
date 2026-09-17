@@ -21,6 +21,8 @@ local ACTION_OPEN_RESEARCH_CHOOSER = Input.GetActionId("UI_WorldTrackerOpenResea
 local ACTION_OPEN_CIVICS_CHOOSER   = Input.GetActionId("UI_WorldTrackerOpenCivicsChooser")
 local ACTION_SPEAK_SCIENCE         = Input.GetActionId("UI_TopPanelSpeakScience")
 local ACTION_SPEAK_CULTURE         = Input.GetActionId("UI_TopPanelSpeakCulture")
+local ACTION_SPEAK_SCIENCE_DETAILS = Input.GetActionId("UI_TopPanelSpeakScienceDetails")
+local ACTION_SPEAK_CULTURE_DETAILS = Input.GetActionId("UI_TopPanelSpeakCultureDetails")
 local ACTION_OPEN_TRACKER          = Input.GetActionId("UI_OpenWorldCrisisTracker")
 
 local m_caiWorldTrackerActions     = {}
@@ -197,6 +199,55 @@ local function SpeakCultureDetails()
     if govInfo then table.insert(parts, govInfo) end
 
     Speak(table.concat(parts, "[NEWLINE]"))
+end
+
+local function SplitTooltipLines(tooltip)
+    local lines = {}
+    tooltip = string.gsub(tooltip or "", "%[NEWLINE%]", "\n") .. "\n"
+    for line in string.gmatch(tooltip, "(.-)\n") do
+        if line ~= "" then table.insert(lines, line) end
+    end
+    return lines
+end
+
+local function SpeakOuterYieldBreakdown(label, tooltip, value)
+    local lines = SplitTooltipLines(tooltip)
+    local parts = {}
+    for i, line in ipairs(lines) do
+        if i > 1 and string.match(line, "^%s") == nil and line ~= "" then
+            local cleanedLine = string.gsub(line, "^%s+", "")
+            table.insert(parts, cleanedLine)
+        end
+    end
+    if #parts > 0 then
+        Speak(label .. ": " .. table.concat(parts, ", "))
+    elseif value == 0 then
+        Speak(Locale.Lookup("LOC_CAI_TOP_PANEL_NO_VALUE", label))
+    else
+        Speak(label .. ": " .. FormatYieldPerTurn(value))
+    end
+end
+
+local function SpeakScienceBreakdown()
+    local _, player = GetLocalPlayer()
+    if player and GameCapabilities.HasCapability("CAPABILITY_SCIENCE")
+        and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+        local value = player:GetTechs():GetScienceYield()
+        SpeakOuterYieldBreakdown(Locale.Lookup("LOC_TOP_PANEL_SCIENCE"),
+            Locale.Lookup("LOC_TOP_PANEL_SCIENCE_YIELD") .. "[NEWLINE][NEWLINE]"
+            .. (player:GetTechs():GetScienceYieldToolTip() or ""), value)
+    end
+end
+
+local function SpeakCultureBreakdown()
+    local _, player = GetLocalPlayer()
+    if player and GameCapabilities.HasCapability("CAPABILITY_CULTURE")
+        and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
+        local value = player:GetCulture():GetCultureYield()
+        SpeakOuterYieldBreakdown(Locale.Lookup("LOC_TOP_PANEL_CULTURE"),
+            Locale.Lookup("LOC_TOP_PANEL_CULTURE_YIELD") .. "[NEWLINE][NEWLINE]"
+            .. (player:GetCulture():GetCultureYieldToolTip() or ""), value)
+    end
 end
 
 -- =============================================
@@ -463,6 +514,8 @@ local function InitializeWorldTrackerActions()
     end)
     RegisterWorldTrackerAction(ACTION_SPEAK_SCIENCE, SpeakScienceAndResearch)
     RegisterWorldTrackerAction(ACTION_SPEAK_CULTURE, SpeakCultureDetails)
+    RegisterWorldTrackerAction(ACTION_SPEAK_SCIENCE_DETAILS, SpeakScienceBreakdown)
+    RegisterWorldTrackerAction(ACTION_SPEAK_CULTURE_DETAILS, SpeakCultureBreakdown)
 
     if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
         RegisterWorldTrackerAction(ACTION_OPEN_TRACKER, ActivateRoyaleGlobalAbility)

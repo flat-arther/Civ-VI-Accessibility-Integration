@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION" Language="en_US"><Text>Read city warning count</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION_TOOLTIP" Language="en_US"><Text>Read the number of your cities with housing, amenities, food, loyalty, power, occupation, or siege warnings.</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION" Language="en_US"><Text>Read all city warnings</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION_TOOLTIP" Language="en_US"><Text>Read each affected city and its housing, amenities, food, loyalty, power, occupation, and siege warnings.</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_COUNT" Language="en_US"><Text>Cities with warnings: {1_Count}</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_NONE" Language="en_US"><Text>No cities with warnings.</Text></Row>
     <!-- ENGLISH -->
 
     <!-- Widget roles -->
@@ -1364,6 +1370,8 @@
     <Row Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE_TOOLTIP" Language="en_US">
       <Text>Reads the current era score, age, thresholds, and active commemorations</Text>
     </Row>
+    <Row Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_SCORE_DETAILS" Language="en_US"><Text>Read era score breakdown</Text></Row>
+    <Row Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_SCORE_DETAILS_TOOLTIP" Language="en_US"><Text>Reads the sources contributing to your current era score</Text></Row>
     <Row Tag="LOC_CAI_ACTION_PANEL_ERA_NOT_AVAILABLE" Language="en_US">
       <Text>Era ages are not available</Text>
     </Row>
@@ -1642,6 +1650,19 @@
     <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_NUKES_TOOLTIP" Language="en_US">
       <Text>Reads the count of nuclear and thermonuclear devices</Text>
     </Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE_DETAILS" Language="en_US"><Text>Read science breakdown</Text></Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE_DETAILS_TOOLTIP" Language="en_US"><Text>Reads the outer science sources from the Top Panel tooltip</Text></Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_CULTURE_DETAILS" Language="en_US"><Text>Read culture breakdown</Text></Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_CULTURE_DETAILS_TOOLTIP" Language="en_US"><Text>Reads the outer culture sources from the Top Panel tooltip</Text></Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_GOLD_DETAILS" Language="en_US"><Text>Read gold breakdown</Text></Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_GOLD_DETAILS_TOOLTIP" Language="en_US"><Text>Reads gold income and expense sources from the Top Panel tooltip</Text></Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_FAITH_DETAILS" Language="en_US"><Text>Read faith breakdown</Text></Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_FAITH_DETAILS_TOOLTIP" Language="en_US"><Text>Reads the outer faith sources from the Top Panel tooltip</Text></Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_DETAILS" Language="en_US"><Text>Read tourism breakdown</Text></Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_DETAILS_TOOLTIP" Language="en_US"><Text>Reads the outer tourism sources from the Top Panel tooltip</Text></Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_INFLUENCE_DETAILS" Language="en_US"><Text>Read influence details</Text></Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_SPEAK_INFLUENCE_DETAILS_TOOLTIP" Language="en_US"><Text>Reads influence progress and its help text</Text></Row>
+    <Row Tag="LOC_CAI_TOP_PANEL_NO_VALUE" Language="en_US"><Text>You have no {1_Name}</Text></Row>
     <Row Tag="LOC_CAI_TOP_PANEL_YIELD_INFO" Language="en_US">
       <Text>Empire economy report</Text>
     </Row>

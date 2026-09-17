@@ -31,6 +31,7 @@ local HexCoordUtils = CAIHexCoordUtils
 ---@field entrancePortals number[]
 ---@field exitPortals number[]
 ---@field arrivalTurn number
+---@field arrivalDelayedByCurrentZOC boolean
 ---@field movementCost number|nil
 ---@field arrivalMovesRemaining number|nil
 ---@field failureKind string|nil
@@ -593,6 +594,7 @@ local function FinalizeMovementAnalysis(unit, targetPlot, pathInfo)
     local turns = pathInfo.turns or {}
     local startPlot = Map.GetPlotByIndex(unit:GetPlotId())
     pathInfo.arrivalTurn = (#turns > 0 and turns[#turns]) or 1
+    pathInfo.arrivalDelayedByCurrentZOC = false
     pathInfo.usesPortal = HasPortal(pathInfo)
     pathInfo.combatAtEnd = false
     pathInfo.enemyCityAtEnd = false
@@ -609,7 +611,21 @@ local function FinalizeMovementAnalysis(unit, targetPlot, pathInfo)
             local cityOwnerID = GetCityOrDistrictOwner(targetPlot)
             pathInfo.enemyCityAtEnd = IsAtWarWithLocalPlayer(cityOwnerID)
         end
-        pathInfo.combatAtEnd = pathInfo.arrivalTurn <= 1 and IsAttackableCombatTarget(unit, targetPlot)
+        local isAttackableCombatTarget = IsAttackableCombatTarget(unit, targetPlot)
+        pathInfo.combatAtEnd = pathInfo.arrivalTurn <= 1 and isAttackableCombatTarget
+
+        -- GetMoveToPathEx can keep reporting a turn-1 route after the unit has entered
+        -- enemy ZOC, even though vanilla's movement-range logic permits no further move.
+        -- Preserve valid attacks, but defer an otherwise-current-turn move to next turn.
+        if pathInfo.arrivalTurn <= 1
+            and pathInfo.kind ~= "attack"
+            and pathInfo.kind ~= "swap"
+            and not isAttackableCombatTarget
+            and unit:HasMovedIntoZOC()
+            and not unit:IgnoresZOC() then
+            pathInfo.arrivalTurn = 2
+            pathInfo.arrivalDelayedByCurrentZOC = true
+        end
     end
 
     AnalyzePathFeatures(unit, targetPlot, pathInfo)
@@ -765,6 +781,7 @@ function BuildMovementPathInfo(unit, endPlotId, showQueuedPath, showDetails)
         entrancePortals        = {},
         exitPortals            = {},
         arrivalTurn            = 1,
+        arrivalDelayedByCurrentZOC = false,
         failureKind            = nil,
         visiblePathNodes       = nil,
         visiblePathText        = nil,

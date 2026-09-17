@@ -35,6 +35,7 @@ local disasterGroupLabels = {
 local m_landPlotIndices = {}
 local m_oceanPlotIndices = {}
 local m_riverPlotIndices = {}
+local m_namedRiverGroups = {}
 local m_cliffPlotIndices = {}
 -- keyed by disaster instance (storm/drought id or volcano plot); each holds its
 -- kind, localized name, drought turns/volcano status, and affected plots.
@@ -42,6 +43,7 @@ local m_disasterGroups = {}
 -- Natural disasters are a Gathering Storm feature; GameClimate and the volcano
 -- APIs do not exist without XP2, so the whole pass is gated on it.
 local m_disastersEnabled = false
+local m_namedRiversEnabled = false
 
 -- Maps a volcano's live state to the localized status word appended to its label.
 local VOLCANO_STATUS_LABELS = {
@@ -358,10 +360,56 @@ local function IsCliffPlot(plot)
     return plot:IsNWOfCliff() or plot:IsWOfCliff() or plot:IsNEOfCliff()
 end
 
+local function PlotHasRiverType(plot, riverType)
+    local riverTypes = RiverManager.GetRiverTypes(plot)
+    if riverTypes ~= nil then
+        for _, candidateType in pairs(riverTypes) do
+            if candidateType == riverType then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function CollectRiver(plotIndex, plot)
+    if not m_namedRiversEnabled then
+        m_riverPlotIndices[#m_riverPlotIndices + 1] = plotIndex
+        return
+    end
+
+    local foundNamedRiver = false
+    local riverTypes = RiverManager.GetRiverTypes(plot)
+    if riverTypes ~= nil then
+        for _, riverType in pairs(riverTypes) do
+            local group = m_namedRiverGroups[riverType]
+            if group == nil then
+                local riverName = RiverManager.GetRiverNameByType(riverType)
+                if riverName ~= nil and riverName ~= "" then
+                    group = {
+                        Name = riverName,
+                        PlotIndices = {},
+                    }
+                    m_namedRiverGroups[riverType] = group
+                end
+            end
+            if group ~= nil then
+                group.PlotIndices[#group.PlotIndices + 1] = plotIndex
+                foundNamedRiver = true
+            end
+        end
+    end
+
+    if not foundNamedRiver then
+        m_riverPlotIndices[#m_riverPlotIndices + 1] = plotIndex
+    end
+end
+
 function CAIWorldScannerCategory_Geography.BeginExtract()
     m_landPlotIndices = {}
     m_oceanPlotIndices = {}
     m_riverPlotIndices = {}
+    m_namedRiverGroups = {}
     m_cliffPlotIndices = {}
     m_disasterGroups = {}
     m_disastersEnabled = IsExpansion2Active()
@@ -369,6 +417,10 @@ function CAIWorldScannerCategory_Geography.BeginExtract()
         and GameClimate.GetActiveStormTypeAtPlot ~= nil
         and MapFeatureManager ~= nil
         and MapFeatureManager.IsVolcano ~= nil
+    m_namedRiversEnabled = IsExpansion2Active()
+        and RiverManager ~= nil
+        and RiverManager.GetRiverTypes ~= nil
+        and RiverManager.GetRiverNameByType ~= nil
 end
 
 function CAIWorldScannerCategory_Geography.PlotExtract(plotIndex, plot, _, _, isRevealed)
@@ -386,7 +438,7 @@ function CAIWorldScannerCategory_Geography.PlotExtract(plotIndex, plot, _, _, is
     -- River-edge and cliff-edge plots, collected on revealed tiles (we are past
     -- the isRevealed early-return); zoned into connected stretches in EndExtract.
     if plot:IsRiver() then
-        m_riverPlotIndices[#m_riverPlotIndices + 1] = plotIndex
+        CollectRiver(plotIndex, plot)
     end
     if IsCliffPlot(plot) then
         m_cliffPlotIndices[#m_cliffPlotIndices + 1] = plotIndex
@@ -475,6 +527,26 @@ function CAIWorldScannerCategory_Geography.EndExtract(context, collect)
             GroupId = GROUP_RIVERS,
             GroupLabelKey = riverCliffGroupLabels[GROUP_RIVERS],
         })
+    end
+
+    for riverType, group in pairs(m_namedRiverGroups) do
+        local capturedRiverType = riverType
+        for _, zone in ipairs(ZoneUtils.PartitionPlotIndices(group.PlotIndices)) do
+            collect({
+                Id = "geography:river:" .. tostring(capturedRiverType) .. ":" .. tostring(zone.MinPlotIndex),
+                PlotIndex = zone.MinPlotIndex,
+                ZonePlotIndices = zone.PlotIndices,
+                ZoneValidatePlot = function(_, plot, validateContext)
+                    return Utils.IsPlotRevealed(validateContext, plot)
+                        and plot:IsRiver()
+                        and PlotHasRiverType(plot, capturedRiverType)
+                end,
+                LabelKey = group.Name,
+                SubCategoryId = SUBCATEGORY_RIVERS_CLIFFS,
+                GroupId = GROUP_RIVERS,
+                GroupLabelKey = riverCliffGroupLabels[GROUP_RIVERS],
+            })
+        end
     end
 
     for _, zone in ipairs(ZoneUtils.PartitionPlotIndices(m_cliffPlotIndices)) do

@@ -46,6 +46,7 @@ local SWITCH_ID   = "CAIDiploRibbon_Switch"
 local ACTION_OPEN_LIST = Input.GetActionId("UI_DiplomacyRibbonOpenList")
 local ACTION_OPEN_CONGRESS = Input.GetActionId("UI_DiplomacyRibbonOpenWorldCongress")
 local ACTION_SPEAK_CONGRESS_INFO = Input.GetActionId("UI_DiplomacyRibbonSpeakWorldCongressInfo")
+local ACTION_SPEAK_CONGRESS_DETAILS = Input.GetActionId("UI_DiplomacyRibbonSpeakWorldCongressInfoDetails")
 
 -- Alliances are the highest form of relationship, so they rank above every
 -- diplomatic state. Everything else mirrors the friendliness order the
@@ -163,6 +164,40 @@ local function GetCongressTooltip()
         end
     end
     return JoinNonEmpty(parts, "[NEWLINE]")
+end
+
+local function SpeakCongressDetails()
+    local _, player = GetLocalPlayer()
+    if not player or not IsExpansion2Active() then return end
+    local favor = player:GetFavor()
+    local favorPerTurn = player:GetFavorPerTurn()
+    local tooltip = player:GetFavorPerTurnToolTip() or ""
+    tooltip = string.gsub(tooltip, "%[NEWLINE%]", "\n") .. "\n"
+    local parts = {}
+    local index = 0
+    for line in string.gmatch(tooltip, "(.-)\n") do
+        if line ~= "" then
+            index = index + 1
+            if index > 1 and string.match(line, "^%s") == nil then
+                local cleanedLine = string.gsub(line, "^%s+", "")
+                table.insert(parts, cleanedLine)
+            end
+        end
+    end
+    local favorLabel = Locale.Lookup("LOC_CAI_TOP_PANEL_FAVOR")
+    if #parts == 0 then
+        if favor == 0 and favorPerTurn == 0 then
+            table.insert(parts, Locale.Lookup("LOC_CAI_TOP_PANEL_NO_VALUE", favorLabel))
+        else
+            table.insert(parts, favorLabel .. ": "
+                .. Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
+                    FormatBalance(favor), FormatRatePerTurn(FormatValuePerTurn(favorPerTurn))))
+        end
+    else
+        parts[1] = favorLabel .. ": " .. parts[1]
+    end
+    table.insert(parts, Locale.Lookup("LOC_WORLD_CONGRESS_TOP_PANEL_FAVOR_TOOLTIP"))
+    Speak(table.concat(parts, ", "))
 end
 
 local function ActivateCongress()
@@ -864,6 +899,8 @@ local function OnInputActionStarted(actionId)
         if tt then
             Speak(tt)
         end
+    elseif actionId == ACTION_SPEAK_CONGRESS_DETAILS then
+        SpeakCongressDetails()
     end
 end
 
