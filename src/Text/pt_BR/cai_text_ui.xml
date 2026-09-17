@@ -7705,6 +7705,12 @@
     <Replace Tag="LOC_CAI_KB_LEADER_DESCRIPTION" Language="pt_BR">
       <Text>Ler descrição do líder</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_KB_WONDER_DESCRIPTION" Language="pt_BR">
+      <Text>Ler a descrição do filme da maravilha</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WONDERDESC_NONE" Language="pt_BR">
+      <Text>Não há descrição disponível para esta maravilha.</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_LEADERDESC_NONE" Language="pt_BR">
       <Text>Nenhuma descrição disponível para este líder.</Text>
     </Replace>

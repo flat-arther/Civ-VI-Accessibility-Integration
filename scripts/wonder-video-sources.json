@@ -1,0 +1,640 @@
+{
+ "_comment": "Source videos and verified time ranges for scripts/Extract-WonderVideos.py. Ranges are seconds into the YouTube video; a clip without start/end is the whole video. Every range was verified by OCR of the popup title on sampled frames (2026-09-09). The setting field is generated from the game's placement rules (terrain, features, coast, river, adjacent district) and states what is true around the wonder in every game.",
+ "sources": {
+  "GOBwCB8kXJ4": {
+   "title": "All World Wonders - Civilization 6 (Include DLC)",
+   "uploaded": "2024-08-21",
+   "notes": "53 world wonder movies in era order with the vanilla completion popup; 1080p60. Chapter times from the description were refined to the exact cut frame."
+  },
+  "V3bvZzC73Ns": {
+   "title": "CIV 6 - ALL 34 NATURAL WONDERS SHOWCASE [A TO Z] RISE AND FALL/GATHERING STORM DLC",
+   "uploaded": "2020-07-22",
+   "notes": "34 natural wonder discovery movies in alphabetical order separated by black frames; 1080p60. Carries a small uploader overlay naming the DLC and an IKIGA watermark."
+  },
+  "@LetsDylan": {
+   "title": "Natural Wonder Cutscene uploads by the channel LetsDylan",
+   "notes": "One clean 1080p recording per natural wonder with no overlays; used where available, the rest come from V3bvZzC73Ns."
+  }
+ },
+ "clips": {
+  "world": {
+   "BUILDING_GREAT_BATH": {
+    "name": "Great Bath",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 0.0,
+    "end": 23.307,
+    "chapter": "Great Bath",
+    "setting": "stands within a city, on a river floodplain"
+   },
+   "BUILDING_HANGING_GARDENS": {
+    "name": "Hanging Gardens",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 23.317,
+    "end": 44.79,
+    "chapter": "Hanging Garden",
+    "setting": "stands within a city, beside a river"
+   },
+   "BUILDING_STONEHENGE": {
+    "name": "Stonehenge",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 44.8,
+    "end": 66.923,
+    "chapter": "Stonehenge",
+    "setting": "stands within a city, on flat ground, next to a stone quarry"
+   },
+   "BUILDING_TEMPLE_ARTEMIS": {
+    "name": "Temple of Artemis",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 66.933,
+    "end": 89.473,
+    "chapter": "Temple of Artemis",
+    "setting": "stands within a city, next to a hunting camp"
+   },
+   "BUILDING_ETEMENANKI": {
+    "name": "Etemenanki",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 89.483,
+    "end": 112.207,
+    "chapter": "Etemenanki",
+    "setting": "stands within a city, on a river floodplain or marsh"
+   },
+   "BUILDING_PYRAMIDS": {
+    "name": "Pyramids",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 112.217,
+    "end": 132.757,
+    "chapter": "Pyramids",
+    "setting": "stands within a city, in desert, on a river floodplain"
+   },
+   "BUILDING_GREAT_LIGHTHOUSE": {
+    "name": "Great Lighthouse",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 132.767,
+    "end": 156.14,
+    "chapter": "Great Lighthouse",
+    "setting": "stands within a city, at the sea, on a coastal water tile beside the shore, next to the city's harbor"
+   },
+   "BUILDING_ORACLE": {
+    "name": "Oracle",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 156.15,
+    "end": 178.723,
+    "chapter": "Oracle",
+    "setting": "stands within a city, on hills"
+   },
+   "BUILDING_APADANA": {
+    "name": "Apadana",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 178.733,
+    "end": 197.14,
+    "chapter": "Apadana",
+    "setting": "stands within the capital city"
+   },
+   "BUILDING_COLOSSEUM": {
+    "name": "Colosseum",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 197.15,
+    "end": 218.523,
+    "chapter": "Colosseum",
+    "setting": "stands within a city, on flat ground, next to the city's entertainment district"
+   },
+   "BUILDING_COLOSSUS": {
+    "name": "Colossus",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 218.533,
+    "end": 241.99,
+    "chapter": "Colossus",
+    "setting": "stands within a city, at the sea, on a coastal water tile beside the shore, next to the city's harbor"
+   },
+   "BUILDING_GREAT_LIBRARY": {
+    "name": "Great Library",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 242.0,
+    "end": 263.64,
+    "chapter": "Great Library",
+    "setting": "stands within a city, on flat ground, next to the city's campus of scholarly buildings"
+   },
+   "BUILDING_JEBEL_BARKAL": {
+    "name": "Jebel Barkal",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 263.65,
+    "end": 284.423,
+    "chapter": "Jebel Barkal",
+    "setting": "stands within a city, on hills"
+   },
+   "BUILDING_MACHU_PICCHU": {
+    "name": "Machu Picchu",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 284.433,
+    "end": 308.023,
+    "chapter": "Macchu Picchu",
+    "setting": "stands within a city, on a mountain"
+   },
+   "BUILDING_MAHABODHI_TEMPLE": {
+    "name": "Mahabodhi Temple",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 308.033,
+    "end": 330.273,
+    "chapter": "Mahabodhi Temple",
+    "setting": "stands within a city, in forest, next to the city's holy site"
+   },
+   "BUILDING_HALICARNASSUS_MAUSOLEUM": {
+    "name": "Mausoleum at Halicarnassus",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 330.283,
+    "end": 350.673,
+    "chapter": "Mausoleum at Halicarnassus",
+    "setting": "stands within a city, next to the city's harbor"
+   },
+   "BUILDING_PETRA": {
+    "name": "Petra",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 350.683,
+    "end": 369.757,
+    "chapter": "Petra",
+    "setting": "stands within a city, in desert, on a river floodplain"
+   },
+   "BUILDING_STATUE_OF_ZEUS": {
+    "name": "Statue of Zeus",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 369.767,
+    "end": 391.44,
+    "chapter": "Statue of Zeus",
+    "setting": "stands within a city, on flat ground, next to the city's military encampment"
+   },
+   "BUILDING_TERRACOTTA_ARMY": {
+    "name": "Terracotta Army",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 391.45,
+    "end": 411.707,
+    "chapter": "Terracotta Army",
+    "setting": "stands within a city, on flat grassland or plains, next to the city's military encampment"
+   },
+   "BUILDING_ALHAMBRA": {
+    "name": "Alhambra",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 411.717,
+    "end": 431.907,
+    "chapter": "Alhambra",
+    "setting": "stands within a city, on hills, next to the city's military encampment"
+   },
+   "BUILDING_ANGKOR_WAT": {
+    "name": "Angkor Wat",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 431.917,
+    "end": 450.457,
+    "chapter": "Angkor Wat",
+    "setting": "stands within a city, next to the city's aqueduct"
+   },
+   "BUILDING_CHICHEN_ITZA": {
+    "name": "Chichen Itza",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 450.467,
+    "end": 471.307,
+    "chapter": "Chichen Itza",
+    "setting": "stands within a city, in rainforest"
+   },
+   "BUILDING_HAGIA_SOPHIA": {
+    "name": "Hagia Sophia",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 471.317,
+    "end": 493.323,
+    "chapter": "Hagia Sophia",
+    "setting": "stands within a city, on flat ground, next to the city's holy site"
+   },
+   "BUILDING_HUEY_TEOCALLI": {
+    "name": "Huey Teocalli",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 493.333,
+    "end": 512.84,
+    "chapter": "Huey Teocalli",
+    "setting": "stands within a city, on a lake next to the shore"
+   },
+   "BUILDING_KILWA_KISIWANI": {
+    "name": "Kilwa Kisiwani",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 512.85,
+    "end": 531.99,
+    "chapter": "Kilwa Kisiwani",
+    "setting": "stands within a city, on the coast"
+   },
+   "BUILDING_KOTOKU_IN": {
+    "name": "Kotoku-in",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 532.0,
+    "end": 552.04,
+    "chapter": "Kotoku-in",
+    "setting": "stands within a city, next to the city's holy site"
+   },
+   "BUILDING_MEENAKSHI_TEMPLE": {
+    "name": "Meenakshi Temple",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 552.05,
+    "end": 576.357,
+    "chapter": "Meenakshi Temple",
+    "setting": "stands within a city, next to the city's holy site"
+   },
+   "BUILDING_MONT_ST_MICHEL": {
+    "name": "Mont St. Michel",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 576.367,
+    "end": 599.19,
+    "chapter": "Mont St.Michel",
+    "setting": "stands within a city, on a river floodplain or marsh"
+   },
+   "BUILDING_UNIVERSITY_SANKORE": {
+    "name": "University of Sankore",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 599.2,
+    "end": 618.84,
+    "chapter": "University of Sankore",
+    "setting": "stands within a city, in desert, next to the city's campus of scholarly buildings"
+   },
+   "BUILDING_CASA_DE_CONTRATACION": {
+    "name": "Casa de Contratación",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 618.85,
+    "end": 639.573,
+    "chapter": "Casa de Contratacion",
+    "setting": "stands within a city, next to the city's government plaza"
+   },
+   "BUILDING_FORBIDDEN_CITY": {
+    "name": "Forbidden City",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 639.583,
+    "end": 658.223,
+    "chapter": "Forbidden City",
+    "setting": "stands within a city, on flat ground, next to the city center"
+   },
+   "BUILDING_GREAT_ZIMBABWE": {
+    "name": "Great Zimbabwe",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 658.233,
+    "end": 678.907,
+    "chapter": "Great Zimbabwe",
+    "setting": "stands within a city, next to grazing cattle, next to the city's commercial district"
+   },
+   "BUILDING_ORSZAGHAZ": {
+    "name": "Országház",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 678.917,
+    "end": 699.973,
+    "chapter": "Orszaghaz",
+    "setting": "stands within a city, beside a river"
+   },
+   "BUILDING_PANAMA_CANAL": {
+    "name": "Panama Canal",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 699.983,
+    "end": 720.357,
+    "chapter": "Panama Canal",
+    "setting": "stands within a city, on a narrow strip of land between two bodies of water"
+   },
+   "BUILDING_ST_BASILS_CATHEDRAL": {
+    "name": "St. Basil's Cathedral",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 720.367,
+    "end": 742.59,
+    "chapter": "St.Basil Cathedral",
+    "setting": "stands within a city, next to the city center"
+   },
+   "BUILDING_TAJ_MAHAL": {
+    "name": "Taj Mahal",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 742.6,
+    "end": 765.557,
+    "chapter": "Taj Mahal",
+    "setting": "stands within a city, beside a river"
+   },
+   "BUILDING_TORRE_DE_BELEM": {
+    "name": "Torre de Belém",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 765.567,
+    "end": 787.673,
+    "chapter": "Torre De Belem",
+    "setting": "stands within a city, at the sea, on a coastal water tile beside the shore, next to the city's harbor"
+   },
+   "BUILDING_VENETIAN_ARSENAL": {
+    "name": "Venetian Arsenal",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 787.683,
+    "end": 809.89,
+    "chapter": "Venetian Arsenal",
+    "setting": "stands within a city, at the sea, on a coastal water tile beside the shore, next to the city's industrial zone"
+   },
+   "BUILDING_POTALA_PALACE": {
+    "name": "Potala Palace",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 809.9,
+    "end": 831.107,
+    "chapter": "Potala Palace",
+    "setting": "stands within a city, on hills, next to mountains"
+   },
+   "BUILDING_BOLSHOI_THEATRE": {
+    "name": "Bolshoi Theatre",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 831.117,
+    "end": 850.907,
+    "chapter": "Bolshoi Theatre",
+    "setting": "stands within a city, on flat ground, next to the city's theater district"
+   },
+   "BUILDING_OXFORD_UNIVERSITY": {
+    "name": "Oxford University",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 850.917,
+    "end": 872.423,
+    "chapter": "Oxford University",
+    "setting": "stands within a city, on flat grassland or plains, next to the city's campus of scholarly buildings"
+   },
+   "BUILDING_RUHR_VALLEY": {
+    "name": "Ruhr Valley",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 872.433,
+    "end": 893.073,
+    "chapter": "Ruhr Valley",
+    "setting": "stands within a city, beside a river, next to the city's industrial zone"
+   },
+   "BUILDING_STATUE_LIBERTY": {
+    "name": "Statue of Liberty",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 893.083,
+    "end": 914.823,
+    "chapter": "Statue of Liberty",
+    "setting": "stands within a city, at the sea, on a coastal water tile beside the shore, next to the city's harbor"
+   },
+   "BUILDING_BIG_BEN": {
+    "name": "Big Ben",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 914.833,
+    "end": 937.04,
+    "chapter": "Big Ben",
+    "setting": "stands within a city, beside a river, next to the city's commercial district"
+   },
+   "BUILDING_HERMITAGE": {
+    "name": "Hermitage",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 937.05,
+    "end": 957.373,
+    "chapter": "Hermitage",
+    "setting": "stands within a city, beside a river"
+   },
+   "BUILDING_AMUNDSEN_SCOTT_RESEARCH_STATION": {
+    "name": "Amundsen-Scott Research Station",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 957.383,
+    "end": 978.973,
+    "chapter": "Amundsen-Scott Research Station",
+    "setting": "stands within a city, on snow, next to the city's campus of scholarly buildings"
+   },
+   "BUILDING_BROADWAY": {
+    "name": "Broadway",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 978.983,
+    "end": 1004.757,
+    "chapter": "Broadway",
+    "setting": "stands within a city, on flat ground, next to the city's theater district"
+   },
+   "BUILDING_CRISTO_REDENTOR": {
+    "name": "Cristo Redentor",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 1004.767,
+    "end": 1026.657,
+    "chapter": "Cristo Redentor",
+    "setting": "stands within a city, on hills"
+   },
+   "BUILDING_EIFFEL_TOWER": {
+    "name": "Eiffel Tower",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 1026.667,
+    "end": 1047.79,
+    "chapter": "Eiffel Tower",
+    "setting": "stands within a city, on flat ground, next to the city center"
+   },
+   "BUILDING_GOLDEN_GATE_BRIDGE": {
+    "name": "Golden Gate Bridge",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 1047.8,
+    "end": 1071.04,
+    "chapter": "Golden Gate Bridge",
+    "setting": "stands within a city, at the sea, on a coastal water tile beside the shore"
+   },
+   "BUILDING_BIOSPHERE": {
+    "name": "Biosphère",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 1071.05,
+    "end": 1091.273,
+    "chapter": "Biosphere",
+    "setting": "stands within a city, beside a river, next to a residential neighborhood"
+   },
+   "BUILDING_ESTADIO_DO_MARACANA": {
+    "name": "Estádio do Maracanã",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 1091.283,
+    "end": 1112.19,
+    "chapter": "Estadio Do Maracana",
+    "setting": "stands within a city, on flat ground, next to the city's entertainment district"
+   },
+   "BUILDING_SYDNEY_OPERA_HOUSE": {
+    "name": "Sydney Opera House",
+    "youtube": "GOBwCB8kXJ4",
+    "start": 1112.2,
+    "end": 1134,
+    "chapter": "Sydney Opera House",
+    "setting": "stands within a city, at the sea, on a coastal water tile beside the shore, next to the city's harbor"
+   }
+  },
+  "natural": {
+   "FEATURE_BARRIER_REEF": {
+    "name": "Great Barrier Reef",
+    "youtube": "hWQoOkIRgrY",
+    "setting": "covers two tiles, lies in shallow sea just off a coast"
+   },
+   "FEATURE_BERMUDA_TRIANGLE": {
+    "name": "Bermuda Triangle",
+    "youtube": "V3bvZzC73Ns",
+    "start": 1.317,
+    "end": 28.283,
+    "setting": "covers three tiles, lies in the open ocean"
+   },
+   "FEATURE_CHOCOLATEHILLS": {
+    "name": "Chocolate Hills",
+    "youtube": "uIhB4gGTW5Q",
+    "setting": "covers four tiles, lies inland"
+   },
+   "FEATURE_CLIFFS_DOVER": {
+    "name": "Cliffs of Dover",
+    "youtube": "9jfu4PJc6f4",
+    "setting": "covers two tiles, stands on the coast"
+   },
+   "FEATURE_CRATER_LAKE": {
+    "name": "Crater Lake",
+    "youtube": "blJBZYBzZi4",
+    "setting": "covers one tile, is itself a lake"
+   },
+   "FEATURE_DEAD_SEA": {
+    "name": "Dead Sea",
+    "youtube": "gFs3upj4BT0",
+    "setting": "covers two tiles, is itself a lake"
+   },
+   "FEATURE_DELICATE_ARCH": {
+    "name": "Delicate Arch",
+    "youtube": "V_UXjag2tmY",
+    "setting": "covers one tile, lies in desert"
+   },
+   "FEATURE_DEVILSTOWER": {
+    "name": "Mato Tipila",
+    "youtube": "PO1ExZDrTTI",
+    "setting": "covers one tile, lies inland"
+   },
+   "FEATURE_EVEREST": {
+    "name": "Mount Everest",
+    "youtube": "G334g2NTxuw",
+    "setting": "covers three tiles, rises as a mountain"
+   },
+   "FEATURE_EYE_OF_THE_SAHARA": {
+    "name": "Eye of the Sahara",
+    "youtube": "vhbya72hThQ",
+    "setting": "covers three tiles, lies in desert"
+   },
+   "FEATURE_EYJAFJALLAJOKULL": {
+    "name": "Eyjafjallajökull",
+    "youtube": "V3bvZzC73Ns",
+    "start": 99.867,
+    "end": 110.733,
+    "setting": "covers two tiles, lies in cold tundra or snow"
+   },
+   "FEATURE_FOUNTAIN_OF_YOUTH": {
+    "name": "Fountain of Youth",
+    "youtube": "V3bvZzC73Ns",
+    "start": 111.283,
+    "end": 132.2,
+    "setting": "covers one tile, lies inland"
+   },
+   "FEATURE_GALAPAGOS": {
+    "name": "Galápagos Islands",
+    "youtube": "tma6Med4AO0",
+    "setting": "covers two tiles, lies in shallow sea just off a coast"
+   },
+   "FEATURE_GIANTS_CAUSEWAY": {
+    "name": "Giant's Causeway",
+    "youtube": "V3bvZzC73Ns",
+    "start": 141.35,
+    "end": 153.6,
+    "setting": "covers two tiles, lies where land meets the sea"
+   },
+   "FEATURE_GOBUSTAN": {
+    "name": "Gobustan",
+    "youtube": "LGh5l6lQ-YI",
+    "setting": "covers three tiles, lies inland"
+   },
+   "FEATURE_HA_LONG_BAY": {
+    "name": "Hạ Long Bay",
+    "youtube": "V3bvZzC73Ns",
+    "start": 179.583,
+    "end": 193.967,
+    "setting": "covers two tiles, lies in shallow sea just off a coast"
+   },
+   "FEATURE_IKKIL": {
+    "name": "Ik-Kil",
+    "youtube": "clpDSfGOiUY",
+    "setting": "covers one tile, lies inland"
+   },
+   "FEATURE_KILIMANJARO": {
+    "name": "Mount Kilimanjaro",
+    "youtube": "diHiZLYakes",
+    "setting": "covers one tile, rises as a mountain"
+   },
+   "FEATURE_LAKE_RETBA": {
+    "name": "Lake Retba",
+    "youtube": "V3bvZzC73Ns",
+    "start": 207.133,
+    "end": 218.383,
+    "setting": "covers two tiles, is itself a lake"
+   },
+   "FEATURE_LYSEFJORDEN": {
+    "name": "Lysefjord",
+    "youtube": "V3bvZzC73Ns",
+    "start": 218.933,
+    "end": 237.067,
+    "setting": "covers three tiles, lies on a coast, opening to the sea"
+   },
+   "FEATURE_MATTERHORN": {
+    "name": "Matterhorn",
+    "youtube": "JLs2zjsZBno",
+    "setting": "covers one tile, rises as a mountain"
+   },
+   "FEATURE_PAITITI": {
+    "name": "Païtiti",
+    "youtube": "V3bvZzC73Ns",
+    "start": 337.4,
+    "end": 349.217,
+    "setting": "covers three tiles, lies inland"
+   },
+   "FEATURE_PAMUKKALE": {
+    "name": "Pamukkale",
+    "youtube": "w9u-ioKHY8E",
+    "setting": "covers two tiles, lies inland"
+   },
+   "FEATURE_PANTANAL": {
+    "name": "Pantanal",
+    "youtube": "nyG5SZoEkPo",
+    "setting": "covers four tiles, lies inland"
+   },
+   "FEATURE_PIOPIOTAHI": {
+    "name": "Piopiotahi",
+    "youtube": "_JSMsVsgMlU",
+    "setting": "covers three tiles, lies on a coast, opening to the sea"
+   },
+   "FEATURE_RORAIMA": {
+    "name": "Mount Roraima",
+    "youtube": "ZUz3nWtwDCE",
+    "note": "German game language; only the popup text differs",
+    "setting": "covers four tiles, lies inland"
+   },
+   "FEATURE_TORRES_DEL_PAINE": {
+    "name": "Torres del Paine",
+    "youtube": "V3bvZzC73Ns",
+    "start": 413.5,
+    "end": 422.8,
+    "setting": "covers two tiles, lies inland"
+   },
+   "FEATURE_TSINGY": {
+    "name": "Tsingy de Bemaraha",
+    "youtube": "MSu2QRHQnZU",
+    "setting": "covers one tile, lies inland"
+   },
+   "FEATURE_UBSUNUR_HOLLOW": {
+    "name": "Ubsunur Hollow",
+    "youtube": "3I2Z9T9Bpm8",
+    "setting": "covers four tiles, lies in cold tundra or snow"
+   },
+   "FEATURE_ULURU": {
+    "name": "Uluru",
+    "youtube": "V3bvZzC73Ns",
+    "start": 447.283,
+    "end": 457.183,
+    "setting": "covers one tile, lies in desert"
+   },
+   "FEATURE_VESUVIUS": {
+    "name": "Mount Vesuvius",
+    "youtube": "bRK-ntdrFcU",
+    "setting": "covers one tile, rises as a mountain"
+   },
+   "FEATURE_WHITEDESERT": {
+    "name": "Sahara el Beyda",
+    "youtube": "ocl1bHPaF8U",
+    "setting": "covers four tiles, lies in desert"
+   },
+   "FEATURE_YOSEMITE": {
+    "name": "Yosemite",
+    "youtube": "8uT1TCV5iF0",
+    "setting": "covers two tiles, lies inland"
+   },
+   "FEATURE_ZHANGYE_DANXIA": {
+    "name": "Zhangye Danxia",
+    "youtube": "umvYC_7ponY",
+    "setting": "covers three tiles, rises as a mountain"
+   }
+  }
+ }
+}

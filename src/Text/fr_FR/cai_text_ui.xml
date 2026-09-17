@@ -7693,6 +7693,12 @@
     <Replace Tag="LOC_CAI_KB_LEADER_DESCRIPTION" Language="fr_FR">
       <Text>Lire la description du dirigeant</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_KB_WONDER_DESCRIPTION" Language="fr_FR">
+      <Text>Lire la description du film de la merveille</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WONDERDESC_NONE" Language="fr_FR">
+      <Text>Aucune description n'est disponible pour cette merveille.</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_LEADERDESC_NONE" Language="fr_FR">
       <Text>Aucune description disponible pour ce dirigeant.</Text>
     </Replace>
