@@ -39,9 +39,9 @@ end
 -- ===========================================================================
 -- Viewing player / observer
 -- CAI keys per-player state (cursor, message buffer, scanner, reveal) and
--- ownership on the "viewing" player. Normally that is the local player; when
--- there is none -- World Builder, observer/spectator, autoplay -- it falls back
--- to the observer. PlayerTypes.OBSERVER (1000) is a positive sentinel that owns
+-- ownership on the "viewing" player. Normally that is the local player; World
+-- Builder/observer contexts may expose either no local player or the observer
+-- sentinel directly, and otherwise fall back to the observer. PlayerTypes.OBSERVER (1000) is a positive sentinel that owns
 -- nothing and sees everything, so it is safe as a state key (Players[1000] is
 -- nil) but callers must treat it as a neutral, see-all viewer, never a real
 -- player. Use IsObserverView() to collapse ownership to neutral in that mode.
@@ -53,6 +53,9 @@ end
 ---@return integer|nil
 function GetViewingPlayerID()
     local playerID = Game.GetLocalPlayer()
+    if playerID == PlayerTypes.OBSERVER then
+        return playerID
+    end
     if playerID ~= nil and playerID >= 0 then
         return playerID
     end
@@ -65,12 +68,15 @@ function GetViewingPlayerID()
     return nil
 end
 
----True when CAI is viewing as a generic observer that owns nothing: there is no
----local player and the observer is the see-all PlayerTypes.OBSERVER. In this
----mode ownership collapses to neutral and every unit/city reads as neutral.
+---True when CAI is viewing as a generic observer that owns nothing. Civ VI may
+---expose PlayerTypes.OBSERVER through either local-player or observer state,
+---depending on the context. In this mode ownership collapses to neutral.
 ---@return boolean
 function IsObserverView()
     local playerID = Game.GetLocalPlayer()
+    if playerID == PlayerTypes.OBSERVER then
+        return true
+    end
     if playerID ~= nil and playerID >= 0 then
         return false
     end

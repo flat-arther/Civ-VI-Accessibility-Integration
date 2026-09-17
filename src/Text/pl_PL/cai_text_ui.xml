@@ -3093,7 +3093,7 @@
       <Text>Brak statystyk jednostki</Text>
     </Replace>
     <Replace Tag="LOC_CAI_UNIT_NO_CHARGES" Language="pl_PL">
-      <Text>Ładunki nieobsługiwane dla tej jednostki</Text>
+      <Text>Ta jednostka nie ma ładunków</Text>
     </Replace>
     <Replace Tag="LOC_CAI_UNIT_NO_PROMOTIONS" Language="pl_PL">
       <Text>Brak dostępnych awansów</Text>
@@ -4770,6 +4770,12 @@
     <Replace Tag="LOC_CAI_GOVERNOR_PROMOTE_DESC" Language="pl_PL">
       <Text>Wykorzystać tytuł gubernatora, aby zdobyć {1_PromoName}? {2_Desc}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_GOVERNOR_APPOINT_CONFIRM" Language="pl_PL">
+      <Text>Mianować {1_GovName}?</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GOVERNOR_JOIN_CONFIRM" Language="pl_PL">
+      <Text>Dołączyć do {1_SocietyName}?</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_GOVERNOR_READONLY" Language="pl_PL">
       <Text>Tylko do odczytu: Kongres Światowy obraduje</Text>
     </Replace>
@@ -6212,6 +6218,9 @@
     <Replace Tag="LOC_CAI_KB_MOVE_UP" Language="pl_PL">
       <Text>Przesuń w górę</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_KB_DIRECTORY_UP" Language="pl_PL">
+      <Text>Katalog nadrzędny</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_KB_NAVIGATE_BACK" Language="pl_PL">
       <Text>Nawiguj wstecz</Text>
     </Replace>
@@ -6625,6 +6634,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_STAGING_INVITE_SENT" Language="pl_PL">
       <Text>Wysłano zaproszenie</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_STAGING_LEAVE_WARNING" Language="pl_PL">
+      <Text>Opuścić poczekalnię?</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_STAGING_LEAVE_HOST_TRANSFER" Language="pl_PL">
+      <Text>Uprawnienia gospodarza zostaną przekazane następnemu graczowi.</Text>
     </Replace>
 
     <!-- Mod settings -->

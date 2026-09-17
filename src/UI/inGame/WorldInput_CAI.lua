@@ -1,4 +1,5 @@
 include("caiUtils")
+include("Civ6Common")
 include("InputSupport")
 include("hexCoordUtils_CAI")
 include("CAIUIScreenManager")
@@ -13,7 +14,9 @@ include("Surveyor_CAI")
 include("WorldBuilderVisManager_CAI")
 include("RevealAnnouncements_CAI")
 include("CAIUnitNumbers")
-include("WorldClimateHistoryManager_CAI")
+if IsExpansion2Active() then
+	include("WorldClimateHistoryManager_CAI")
+end
 include("MessageBuffer_CAI")
 include("UnitMoveLog_CAI")
 include("EventSubs_CAI")
@@ -1169,9 +1172,6 @@ local interfaceWidgets = {
 	[InterfaceModeTypes.REBASE] = CreateTargetingWidgetData("LOC_CAI_REBASE_MODE", function()
 		AirUnitReBase()
 	end),
-	[InterfaceModeTypes.TELEPORT_TO_CITY] = CreateTargetingWidgetData("LOC_CAI_TELEPORT_TO_CITY_MODE", function()
-		TeleportToCity()
-	end),
 	[InterfaceModeTypes.FORM_CORPS] = CreateTargetingWidgetData("LOC_CAI_FORM_CORPS_MODE", function()
 		FormCorps()
 	end),
@@ -1546,6 +1546,22 @@ local function RefreshValidTargetsScanner()
 	end
 end
 
+-- World Builder ownership writes finish after the placement callback returns,
+-- and the editor does not reliably emit CityTileOwnershipChanged. Its localized
+-- success statuses are the stable completion signal; rebuild sight on the next
+-- update tick, when the live plot owner is queryable. This also covers native
+-- mouse use of the Owner tool because both paths publish the same status event.
+local m_wbSightRefreshPending = false
+local WB_OWNERSHIP_SET_STATUS = Locale.Lookup("LOC_WORLDBUILDER_OWNERSHIP_SET")
+local WB_OWNERSHIP_REMOVED_STATUS = Locale.Lookup("LOC_WORLDBUILDER_OWNERSHIP_REMOVED")
+
+local function OnWorldBuilderPlacementStatus(status)
+	if WorldBuilder.IsActive()
+		and (status == WB_OWNERSHIP_SET_STATUS or status == WB_OWNERSHIP_REMOVED_STATUS) then
+		m_wbSightRefreshPending = true
+	end
+end
+
 local function WBEditCursorPlot(bAdd)
 	local plotId = WBPlacementSourcePlot()
 	if plotId == nil or plotId < 0 or not Map.IsPlot(plotId) then return false end
@@ -1555,12 +1571,24 @@ local function WBEditCursorPlot(bAdd)
 	-- one keypress a brush's repeated identical statuses still collapse.
 	LuaEvents.CAIWorldBuilderStatusBurstBegin()
 
+	-- Set Visibility needs the operation's actual success result before its
+	-- shadow snapshot changes. The generic vanilla event bridge does not return
+	-- PlaceVisibility's SetRevealed result, so use the placement context's
+	-- result-aware equivalent for this tool.
+	local info = ExposedMembers.CAIInfo
+	if info ~= nil and info.GetWorldBuilderVisibilityPlayer ~= nil
+		and info.GetWorldBuilderVisibilityPlayer() ~= nil
+		and info.EditWorldBuilderVisibility ~= nil then
+		info.EditWorldBuilderVisibility(plotId, bAdd)
+		RefreshValidTargetsScanner()
+		return true
+	end
+
 	-- Rivers and Cliffs place on a plot edge. Vanilla derives the edge from the
 	-- mouse position; CAI has no cursor edge, so the placement context exposes the
 	-- direction chosen in the tools (its Direction parameter). Fall back to the
 	-- cursor-nearest edge for any tool that does not publish a direction.
 	local edge = UI.GetCursorNearestPlotEdge()
-	local info = ExposedMembers.CAIInfo
 	if info ~= nil and info.GetWorldBuilderEdgeDirection ~= nil then
 		local dir = info.GetWorldBuilderEdgeDirection()
 		if dir ~= nil then edge = dir end
@@ -1574,19 +1602,6 @@ local function WBEditCursorPlot(bAdd)
 		-- RButtonDown/RButtonUp pair: PlacementFunc(remove) on the up event.
 		LuaEvents.WorldInput_WBSelectPlot(plotId, edge, true, true)
 		LuaEvents.WorldInput_WBSelectPlot(plotId, edge, false, true)
-	end
-
-	-- The Set Visibility tool reveals (add) / hides (remove) this plot for its
-	-- selected player through the vanilla placement path above. That edit only
-	-- reaches the map database on save, so mirror it into the in-memory
-	-- visibility model now (add = reveal, remove = hide) for live readout.
-	local visMgr = ExposedMembers.CAI_WBVisManager
-	local caiInfo = ExposedMembers.CAIInfo
-	if visMgr ~= nil and caiInfo ~= nil and caiInfo.GetWorldBuilderVisibilityPlayer ~= nil then
-		local visPlayer = caiInfo.GetWorldBuilderVisibilityPlayer()
-		if visPlayer ~= nil then
-			visMgr.SetRevealed(visPlayer, plotId, bAdd)
-		end
 	end
 
 	-- A placement can change which footprint tiles are valid; refresh the scanner
@@ -1605,6 +1620,7 @@ local function WBUndoRedo(bRedo)
 	if bRedo then
 		if WorldBuilder.CanRedo() then
 			WorldBuilder.Redo()
+			m_wbSightRefreshPending = true
 			LuaEvents.WorldBuilder_SetPlacementStatus(Locale.Lookup("LOC_WORLDBUILDER_STATUS_REDO"))
 		else
 			LuaEvents.WorldBuilder_SetPlacementStatus(Locale.Lookup("LOC_WORLDBUILDER_STATUS_CANT_REDO"))
@@ -1612,6 +1628,7 @@ local function WBUndoRedo(bRedo)
 	else
 		if WorldBuilder.CanUndo() then
 			WorldBuilder.Undo()
+			m_wbSightRefreshPending = true
 			LuaEvents.WorldBuilder_SetPlacementStatus(Locale.Lookup("LOC_WORLDBUILDER_STATUS_UNDO"))
 		else
 			LuaEvents.WorldBuilder_SetPlacementStatus(Locale.Lookup("LOC_WORLDBUILDER_STATUS_CANT_UNDO"))
@@ -2109,6 +2126,13 @@ local function CheckInput()
 end
 
 local function OnUpdate()
+	if m_wbSightRefreshPending then
+		m_wbSightRefreshPending = false
+		local visMgr = ExposedMembers.CAI_WBVisManager
+		if visMgr ~= nil and visMgr.RecomputeSight ~= nil then
+			visMgr.RecomputeSight()
+		end
+	end
 	MovementActions_CAI:UpdatePendingMovementResult()
 	UnitMoveLog_CAI.Update()
 	RevealAnnouncements_CAI.UpdateVisibility()
@@ -2157,6 +2181,7 @@ local function RegisterCAIEvents()
 	LuaEvents.CAICursorMoved.Add(OnCAICursorMoved)
 	LuaEvents.CAIAppendToMessageBuffer.Add(OnCAIAppendToMessageBuffer)
 	LuaEvents.CAI_TutorialWorldAnchorChanged.Add(OnCAITutorialWorldAnchorChanged)
+	LuaEvents.WorldBuilder_SetPlacementStatus.Add(OnWorldBuilderPlacementStatus)
 	-- PlaceMapPin is a vanilla WorldInput global that only exists in this context;
 	-- the map-tacks UI requests it across the context boundary via this LuaEvent.
 	LuaEvents.CAIRequestPlaceMapPin.Add(PlaceMapPin)
@@ -2179,6 +2204,7 @@ local function UnregisterCAIEvents()
 	LuaEvents.CAICursorMoved.Remove(OnCAICursorMoved)
 	LuaEvents.CAIAppendToMessageBuffer.Remove(OnCAIAppendToMessageBuffer)
 	LuaEvents.CAI_TutorialWorldAnchorChanged.Remove(OnCAITutorialWorldAnchorChanged)
+	LuaEvents.WorldBuilder_SetPlacementStatus.Remove(OnWorldBuilderPlacementStatus)
 	LuaEvents.CAIRequestPlaceMapPin.Remove(PlaceMapPin)
 	UnitMoveLog_CAI.Shutdown()
 	CAICursorAudio.Shutdown()

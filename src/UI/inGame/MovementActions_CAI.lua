@@ -10,13 +10,9 @@ local m_readyForCombat = {
 
 local m_pendingMovementResult = nil
 local PENDING_MOVEMENT_WATCH_DELAY_FRAMES = 2
--- Fallback ceiling (in active frames) for how long the "moved to" line waits for
--- GetMovesRemaining to change from the pre-move value before it gives up and reads it
--- live. The value normally changes far sooner; this only covers a zero-cost move where it
--- never changes.
-local MOVEMENT_SETTLE_TIMEOUT_FRAMES = 120
--- Once GetMovesRemaining has changed, wait this many active frames before speaking, and
--- restart the wait whenever it changes again. Some moves commit movement in two steps --
+-- Once the engine reports a movement-points change, wait this many active frames before
+-- speaking, and restart the wait whenever the live value changes again. Some moves commit
+-- movement in two steps --
 -- disembark shows the new land form's max, then drops to zero because disembarking ends
 -- the unit's turn -- so this lets the value settle before the last one is reported.
 local MOVEMENT_SETTLE_HOLD_FRAMES = 8
@@ -154,13 +150,11 @@ function MovementActions_CAI:QueuePendingMovementResult(unit, targetPlotId)
         unitOwner = owner,
         unitId = unitId,
         startPlotId = unit:GetPlotId(),
-        startMovesRemaining = unit:GetMovesRemaining(),
         targetPlotId = targetPlotId,
         watchDelayFrames = PENDING_MOVEMENT_WATCH_DELAY_FRAMES,
-        settleTimeoutFrames = MOVEMENT_SETTLE_TIMEOUT_FRAMES,
         queueSettleFrames = MOVEMENT_QUEUE_SETTLE_FRAMES,
         settleHoldFrames = nil,
-        movesSettled = false,
+        movementPointsChanged = false,
         lastMovesSeen = nil,
     }
     return true
@@ -249,20 +243,20 @@ function MovementActions_CAI:ResolvePendingMovementResult(playerID, unitID, curr
 
     -- Only the "moved to, X movement left" line reports remaining movement. After a move
     -- that triggers a blocking animation or popup (goody hut, natural wonder, embark or
-    -- disembark), the engine commits the movement-cost deduction only once the animation
-    -- settles, so a synchronous read here can return the stale pre-move value. The frame
-    -- poll (UpdatePendingMovementResult) watches GetMovesRemaining directly -- the same
-    -- value the unit panel shows -- and marks the result settled once it changes, holding
-    -- briefly so a multi-step commit lands on its final value. The value is always read
-    -- live at emit; movement-points events are not used because disembark fires one for
-    -- the land-form max without ever announcing the subsequent zeroing.
+    -- disembark), the engine commits the movement-cost deduction only once event processing
+    -- resumes. UnitMovementPointsChanged wakes the settle watch at that point. Its numeric
+    -- argument is not authoritative: disembark can report the land-form max before the
+    -- engine subsequently zeroes the unit without another event. The frame poll therefore
+    -- watches GetMovesRemaining after the wake and holds briefly until that live value is
+    -- stable. Elapsed UI frames alone must never authorize a stale pre-move value while a
+    -- popup has engine processing locked.
     local reportsMovesRemaining = reachedTarget and (turnsToArrival == nil or turnsToArrival <= 0)
     local movesLeft = nil
     if reportsMovesRemaining then
-        local settled = pending.movesSettled
-            and (pending.settleHoldFrames == nil or pending.settleHoldFrames <= 0)
-        local timedOut = pending.settleTimeoutFrames ~= nil and pending.settleTimeoutFrames <= 0
-        if not settled and not timedOut then
+        local settled = pending.movementPointsChanged
+            and pending.settleHoldFrames ~= nil
+            and pending.settleHoldFrames <= 0
+        if not settled then
             return false
         end
         movesLeft = unit:GetMovesRemaining()
@@ -287,6 +281,25 @@ function MovementActions_CAI:OnUnitMoveComplete(playerID, unitID, x, y)
     local currentPlot = Map.GetPlot(x, y) or (unit ~= nil and Map.GetPlot(unit:GetX(), unit:GetY()) or nil)
     local currentPlotId = currentPlot ~= nil and currentPlot:GetIndex() or nil
     self:ResolvePendingMovementResult(playerID, unitID, currentPlotId)
+end
+
+function MovementActions_CAI:OnUnitMovementPointsChanged(playerID, unitID)
+    local pending = self:GetMatchingPendingMovementResult(playerID, unitID)
+    if pending == nil then
+        return
+    end
+
+    local unit = UnitManager.GetUnit(playerID, unitID)
+    if unit == nil then
+        m_pendingMovementResult = nil
+        return
+    end
+
+    -- Treat the event only as the engine-progress signal. Always take the value from the
+    -- live getter, then let the frame watch catch any unannounced follow-up adjustment.
+    pending.movementPointsChanged = true
+    pending.lastMovesSeen = unit:GetMovesRemaining()
+    pending.settleHoldFrames = MOVEMENT_SETTLE_HOLD_FRAMES
 end
 
 function MovementActions_CAI:UpdatePendingMovementResult()
@@ -319,25 +332,17 @@ function MovementActions_CAI:UpdatePendingMovementResult()
         pending.queueSettleFrames = pending.queueSettleFrames - 1
     end
 
-    -- Watch GetMovesRemaining directly (the value the unit panel shows). It stays at the
-    -- pre-move value while a blocking animation/popup defers the deduction, so wait for it
-    -- to change, then hold briefly -- restarted whenever it changes again -- so a
-    -- multi-step commit (e.g. disembark: land-form max, then zeroed as the turn ends)
-    -- settles on its final value before we speak.
-    local liveMoves = unit:GetMovesRemaining()
-    if not pending.movesSettled then
-        if pending.startMovesRemaining == nil or liveMoves ~= pending.startMovesRemaining then
-            pending.movesSettled = true
+    -- Do not begin settling until the engine says movement points changed. UI updates can
+    -- continue while a cinematic popup has game-event processing locked, so a frame-only
+    -- timeout can otherwise expire against the stale pre-move value.
+    if pending.movementPointsChanged then
+        local liveMoves = unit:GetMovesRemaining()
+        if liveMoves ~= pending.lastMovesSeen then
             pending.lastMovesSeen = liveMoves
             pending.settleHoldFrames = MOVEMENT_SETTLE_HOLD_FRAMES
-        elseif pending.settleTimeoutFrames ~= nil and pending.settleTimeoutFrames > 0 then
-            pending.settleTimeoutFrames = pending.settleTimeoutFrames - 1
+        elseif pending.settleHoldFrames ~= nil and pending.settleHoldFrames > 0 then
+            pending.settleHoldFrames = pending.settleHoldFrames - 1
         end
-    elseif liveMoves ~= pending.lastMovesSeen then
-        pending.lastMovesSeen = liveMoves
-        pending.settleHoldFrames = MOVEMENT_SETTLE_HOLD_FRAMES
-    elseif pending.settleHoldFrames ~= nil and pending.settleHoldFrames > 0 then
-        pending.settleHoldFrames = pending.settleHoldFrames - 1
     end
 
     return self:ResolvePendingMovementResult(pending.unitOwner, pending.unitId, unit:GetPlotId())
@@ -492,9 +497,15 @@ function MovementActions_CAI:TryQuickMoveDirection(direction)
         return false
     end
 
-    return self:TryActivateMoveTarget(unit, targetPlot:GetIndex(), false, true)
+    -- Match vanilla right-click movement: an otherwise valid adjacent path may be
+    -- retained by the engine for a later turn when the unit cannot move immediately.
+    return self:TryActivateMoveTarget(unit, targetPlot:GetIndex(), false, false)
 end
 
 Events.UnitMoveComplete.Add(function(playerID, unitID, x, y)
     MovementActions_CAI:OnUnitMoveComplete(playerID, unitID, x, y)
+end)
+
+Events.UnitMovementPointsChanged.Add(function(playerID, unitID)
+    MovementActions_CAI:OnUnitMovementPointsChanged(playerID, unitID)
 end)

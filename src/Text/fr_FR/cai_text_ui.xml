@@ -3087,7 +3087,7 @@
       <Text>Aucune statistique d'unité</Text>
     </Replace>
     <Replace Tag="LOC_CAI_UNIT_NO_CHARGES" Language="fr_FR">
-      <Text>Charges non prises en charge pour cette unité</Text>
+      <Text>Cette unité n'a aucune charge</Text>
     </Replace>
     <Replace Tag="LOC_CAI_UNIT_NO_PROMOTIONS" Language="fr_FR">
       <Text>Aucune promotion disponible</Text>
@@ -4764,6 +4764,12 @@
     <Replace Tag="LOC_CAI_GOVERNOR_PROMOTE_DESC" Language="fr_FR">
       <Text>Dépenser un titre de gouverneur pour obtenir {1_PromoName} ? {2_Desc}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_GOVERNOR_APPOINT_CONFIRM" Language="fr_FR">
+      <Text>Nommer {1_GovName} ?</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GOVERNOR_JOIN_CONFIRM" Language="fr_FR">
+      <Text>Rejoindre {1_SocietyName} ?</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_GOVERNOR_READONLY" Language="fr_FR">
       <Text>Lecture seule : le Congrès mondial est en session</Text>
     </Replace>
@@ -6201,6 +6207,9 @@
     <Replace Tag="LOC_CAI_KB_MOVE_UP" Language="fr_FR">
       <Text>Monter</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_KB_DIRECTORY_UP" Language="fr_FR">
+      <Text>Dossier parent</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_KB_NAVIGATE_BACK" Language="fr_FR">
       <Text>Naviguer en arrière</Text>
     </Replace>
@@ -6613,6 +6622,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_STAGING_INVITE_SENT" Language="fr_FR">
       <Text>Invitation envoyée</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_STAGING_LEAVE_WARNING" Language="fr_FR">
+      <Text>Quitter la salle d'attente ?</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_STAGING_LEAVE_HOST_TRANSFER" Language="fr_FR">
+      <Text>Les privilèges d'hôte seront transférés au joueur suivant.</Text>
     </Replace>
     <!-- Mod settings -->
     <Replace Tag="LOC_CAI_SETTINGS_TITLE" Language="fr_FR">

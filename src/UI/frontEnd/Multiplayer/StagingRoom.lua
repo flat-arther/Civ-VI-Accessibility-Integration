@@ -3388,6 +3388,9 @@ local CAI_PendingSwapFeedback = nil
 local CAI_RequestPlayerListRefresh
 local CAI_RebuildChatTarget
 
+CAI_StagingExitDialog = nil
+CAI_StagingExitDialogSuspendToken = nil
+
 local function CAI_Lookup(text, ...)
 	if text == nil then return "" end
 	return Locale.Lookup(text, ...)
@@ -4687,9 +4690,68 @@ local function CAI_RebuildFriendsList()
 	mgr:RestoreFocus(CAI_FriendsList, capture)
 end
 
+function CAI_RemoveStagingExitDialog(announce)
+	if mgr then mgr:UnregisterSuspendCloser(CAI_StagingExitDialogSuspendToken) end
+	CAI_StagingExitDialogSuspendToken = nil
+	if mgr and CAI_StagingExitDialog
+		and mgr:GetWidgetById(CAI_StagingExitDialog:GetId()) then
+		mgr:RemoveFromStack(CAI_StagingExitDialog:GetId(), announce)
+	end
+	CAI_StagingExitDialog = nil
+end
+
+function CAI_ShowStagingExitDialog()
+	if not mgr or CAI_StagingExitDialog then return end
+
+	local warning = mgr:CreateWidget(mgr:GenerateWidgetId("CAIStagingRoom_ExitWarning"), "StaticText", {
+		Label = function()
+			local text = CAI_Lookup("LOC_CAI_STAGING_LEAVE_WARNING")
+			if Network.IsGameHost() then
+				text = text .. "[NEWLINE]" .. CAI_Lookup("LOC_CAI_STAGING_LEAVE_HOST_TRANSFER")
+			end
+			return text
+		end,
+	})
+
+	local ok = mgr:CreateWidget(mgr:GenerateWidgetId("CAIStagingRoom_ExitOK"), "Button", {
+		Label = function() return CAI_Lookup("LOC_OK_BUTTON") end,
+	})
+	ok:On("activate", function()
+		CAI_RemoveStagingExitDialog(false)
+		Close()
+	end)
+
+	local cancel = mgr:CreateWidget(mgr:GenerateWidgetId("CAIStagingRoom_ExitCancel"), "Button", {
+		Label = function() return CAI_Lookup("LOC_CANCEL_BUTTON") end,
+	})
+	cancel:On("activate", function() CAI_RemoveStagingExitDialog() end)
+
+	CAI_StagingExitDialog = mgr.WidgetHelpers.MakeGeneralDialog(
+		function() return CAI_Lookup("LOC_GAME_MENU_QUIT_TITLE") end,
+		{ ok, cancel }, { warning }, 1)
+	CAI_StagingExitDialog:AddInputBinding({
+		Key = Keys.VK_ESCAPE,
+		Description = "LOC_CAI_KB_CLOSE",
+		Action = function()
+			CAI_RemoveStagingExitDialog()
+			return true
+		end,
+	})
+	mgr:Push(CAI_StagingExitDialog, { priority = PopupPriority.Current })
+	CAI_StagingExitDialogSuspendToken = mgr:RegisterSuspendCloser(CAI_RemoveStagingExitDialog)
+end
+
 local function CAI_BuildPanel()
 	CAI_Panel = mgr:CreateWidget(CAI_PANEL_ID, "Panel", {
 		Label = function() return CAI_ControlText(Controls.TitleLabel) end,
+	})
+	CAI_Panel:AddInputBinding({
+		Key = Keys.VK_ESCAPE,
+		Description = "LOC_MULTIPLAYER_BACK",
+		Action = function()
+			CAI_ShowStagingExitDialog()
+			return true
+		end,
 	})
 	CAI_PlayerList = mgr:CreateWidget("CAIStagingRoom_PlayerList", "List", {
 		Label = function() return CAI_Lookup("LOC_CAI_STAGING_PLAYER_SLOTS") end,
@@ -4805,6 +4867,7 @@ local function CAI_PushPanel()
 end
 
 local function CAI_PopPanel()
+	CAI_RemoveStagingExitDialog(false)
 	if mgr and mgr.WidgetHelpers then
 		mgr.WidgetHelpers.RemoveLeaderPickerPanel("CAIStagingRoom_LeaderPicker")
 	end

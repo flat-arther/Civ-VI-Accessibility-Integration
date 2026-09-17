@@ -1243,7 +1243,6 @@ InterfaceInfoHelpers[InterfaceModeTypes.DISTRICT_PLACEMENT] = BuildDistrictPlace
 InterfaceInfoHelpers[InterfaceModeTypes.BUILDING_PLACEMENT] = BuildWonderPlacementInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.DEPLOY] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.REBASE] = BuildTargetValidityInterfaceInfo
-InterfaceInfoHelpers[InterfaceModeTypes.TELEPORT_TO_CITY] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.BUILD_IMPROVEMENT_ADJACENT] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.FORM_CORPS] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.FORM_ARMY] = BuildTargetValidityInterfaceInfo

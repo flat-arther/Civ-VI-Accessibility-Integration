@@ -42,12 +42,140 @@ function GetEntryLabel(idx, entry)
     return ""
 end
 
-function IsDirectoryView()
-    if not g_FileList or #g_FileList == 0 then return false end
-    for _, entry in ipairs(g_FileList) do
-        if entry.IsDirectory then return true end
+-- Firaxis exposes filesystem browsing only for local World Builder maps and
+-- tiled-map import. Use the live control state rather than inferring the mode
+-- from the current results: a directory containing only files is still a
+-- directory browser.
+function IsDirectoryBrowser()
+    return Controls.DirectoryPullDown ~= nil and not Controls.DirectoryPullDown:IsHidden()
+end
+
+-- ---------------------------------------------------------------------------
+-- Directory navigation history
+-- ---------------------------------------------------------------------------
+function CreateDirectoryHistory()
+    return { Back = {}, Forward = {} }
+end
+
+local function PushDirectoryHistory(stack, path)
+    if path == nil or path == "" then return end
+    if stack[#stack] ~= path then
+        table.insert(stack, path)
+    end
+end
+
+-- Record an ordinary navigation (folder activation, parent, or quick jump).
+-- `navigate` preserves the caller's vanilla path when one exists.
+function DirectoryHistoryVisit(history, targetPath, navigate)
+    if history == nil or targetPath == nil or targetPath == "" then return false end
+    local currentPath = g_CurrentDirectoryPath or ""
+    if currentPath == targetPath then return false end
+
+    PushDirectoryHistory(history.Back, currentPath)
+    history.Forward = {}
+    if navigate then
+        navigate()
+    else
+        ChangeDirectoryTo(targetPath)
+    end
+    return true
+end
+
+function DirectoryHistoryUp(history)
+    local segments = g_CurrentDirectorySegments or {}
+    if #segments <= 1 then return false end
+    local level = #segments - 1
+    local targetPath = UI.TruncatePathLevels(
+        SaveLocations.LOCAL_STORAGE, g_CurrentDirectoryPath, level)
+    return DirectoryHistoryVisit(history, targetPath, function()
+        ChangeDirectoryLevelTo(level)
+    end)
+end
+
+function DirectoryHistoryBack(history)
+    if history == nil then return false end
+    local currentPath = g_CurrentDirectoryPath or ""
+    local targetPath = table.remove(history.Back)
+    while targetPath ~= nil and targetPath == currentPath do
+        targetPath = table.remove(history.Back)
+    end
+    if targetPath == nil then return false end
+
+    PushDirectoryHistory(history.Forward, currentPath)
+    ChangeDirectoryTo(targetPath)
+    return true
+end
+
+function DirectoryHistoryForward(history)
+    if history == nil then return false end
+    local currentPath = g_CurrentDirectoryPath or ""
+    local targetPath = table.remove(history.Forward)
+    while targetPath ~= nil and targetPath == currentPath do
+        targetPath = table.remove(history.Forward)
+    end
+    if targetPath == nil then return false end
+
+    PushDirectoryHistory(history.Back, currentPath)
+    ChangeDirectoryTo(targetPath)
+    return true
+end
+
+-- This runs before the manager because Alt+Up is normally the focused-widget
+-- reader shortcut and Backspace is normally search/edit input. The screen calls
+-- it only while its directory-browser panel owns focus; filename edit boxes are
+-- excluded by the caller so Backspace continues to edit text there.
+function HandleDirectoryHistoryInput(input, history)
+    if input:GetMessageType() ~= KeyEvents.KeyDown then return false end
+    if input:IsShiftDown() or input:IsControlDown() then return false end
+
+    local key = input:GetKey()
+    local isAlt = input:IsAltDown()
+    if not isAlt and key == Keys.VK_BACK then
+        DirectoryHistoryUp(history)
+        return true
+    elseif isAlt and key == Keys.VK_UP then
+        DirectoryHistoryUp(history)
+        return true
+    elseif isAlt and key == Keys.VK_LEFT then
+        DirectoryHistoryBack(history)
+        return true
+    elseif isAlt and key == Keys.VK_RIGHT then
+        DirectoryHistoryForward(history)
+        return true
     end
     return false
+end
+
+function AddDirectoryHistoryBindings(widget, history)
+    widget:AddInputBindings({
+        {
+            Key = Keys.VK_BACK,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_DIRECTORY_UP",
+            Action = function() DirectoryHistoryUp(history) return true end,
+        },
+        {
+            Key = Keys.VK_UP,
+            IsAlt = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_DIRECTORY_UP",
+            Action = function() DirectoryHistoryUp(history) return true end,
+        },
+        {
+            Key = Keys.VK_LEFT,
+            IsAlt = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_NAVIGATE_BACK",
+            Action = function() DirectoryHistoryBack(history) return true end,
+        },
+        {
+            Key = Keys.VK_RIGHT,
+            IsAlt = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_NAVIGATE_FORWARD",
+            Action = function() DirectoryHistoryForward(history) return true end,
+        },
+    })
 end
 
 -- ---------------------------------------------------------------------------
@@ -198,6 +326,17 @@ function BuildDirectoryOptions()
     end
 
     return options, selectedIdx
+end
+
+function RefreshDirectoryDropdown(dropdown)
+    if dropdown == nil then return end
+    local options, selectedIdx = BuildDirectoryOptions()
+    dropdown:SetOptions(options)
+    if selectedIdx > 0 then
+        dropdown:SetSelectedIndex(selectedIdx, true)
+    else
+        dropdown:ClearSelection(true)
+    end
 end
 
 -- ---------------------------------------------------------------------------

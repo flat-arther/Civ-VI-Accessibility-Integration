@@ -79,14 +79,9 @@ end
 local function GetUnitCategoryId(context, unit)
     local ownerID = unit ~= nil and unit:GetOwner() or nil
     local localPlayerID = Utils.GetLocalPlayerID(context)
-    -- The observer owns nothing and has no diplomacy, so player-relative units
-    -- are neutral -- but barbarians are hostile to all by nature, so classify
-    -- them by what they are: enemy.
-    if localPlayerID == PlayerTypes.OBSERVER then
-        local ownerPlayer = ownerID ~= nil and ownerID ~= -1 and Players[ownerID] or nil
-        if ownerPlayer ~= nil and ownerPlayer:IsBarbarian() then
-            return CATEGORY_IDS.Enemy
-        end
+    -- The observer owns nothing, so every unit resolves as neutral regardless
+    -- of its actual owner (including barbarians).
+    if Utils.IsObserverView(context) then
         return CATEGORY_IDS.Neutral
     end
     if ownerID == nil or ownerID == -1 then
@@ -165,8 +160,12 @@ local function BuildUnitScannerItems(context)
     local scanPlayers = {}
     local seenPlayers = {}
 
+    local observerView = Utils.IsObserverView(context)
+
     local function AddScanPlayer(player)
-        if player == nil or not player:IsAlive() then
+        -- World Builder players may be initialized without participating in a
+        -- running game, so IsAlive() is not a valid enumeration gate there.
+        if player == nil or (not observerView and not player:IsAlive()) then
             return
         end
 
@@ -183,9 +182,15 @@ local function BuildUnitScannerItems(context)
         AddScanPlayer(player)
     end
 
-    for _, player in ipairs(Players) do
-        if player ~= nil and player:IsBarbarian() then
-            AddScanPlayer(player)
+    if observerView then
+        for playerID = 0, GameDefines.MAX_PLAYERS - 1 do
+            AddScanPlayer(Players[playerID])
+        end
+    else
+        for _, player in ipairs(Players) do
+            if player ~= nil and player:IsBarbarian() then
+                AddScanPlayer(player)
+            end
         end
     end
 
@@ -200,7 +205,9 @@ local function BuildUnitScannerItems(context)
                     local plotIndex = unit:GetPlotId()
                     local plot = plotIndex ~= nil and plotIndex >= 0 and Map.GetPlotByIndex(plotIndex) or nil
                     local isLocal = ownerID == localPlayerID
-                    local isVisible = isLocal or (visibility ~= nil and visibility:IsUnitVisible(unit))
+                    local isVisible = observerView
+                        or isLocal
+                        or (visibility ~= nil and visibility:IsUnitVisible(unit))
                     if plot ~= nil
                         and Utils.IsPlotRevealed(context, plot)
                         and isVisible
@@ -222,7 +229,9 @@ local function BuildUnitScannerItems(context)
                                 GroupLabelKey = unitInfo.Name,
                                 Validate = function(item, validateContext)
                                     local validatePlayer = ownerID ~= nil and Players[ownerID] or nil
-                                    if validatePlayer == nil or not validatePlayer:IsAlive() then
+                                    if validatePlayer == nil
+                                        or (not Utils.IsObserverView(validateContext)
+                                            and not validatePlayer:IsAlive()) then
                                         return false
                                     end
 
@@ -238,7 +247,8 @@ local function BuildUnitScannerItems(context)
                                     end
 
                                     local validateVisibility = Utils.GetVisibility(validateContext)
-                                    local validateVisible = ownerID == Utils.GetLocalPlayerID(validateContext)
+                                    local validateVisible = Utils.IsObserverView(validateContext)
+                                        or ownerID == Utils.GetLocalPlayerID(validateContext)
                                         or (validateVisibility ~= nil and validateVisibility:IsUnitVisible(validateUnit))
                                     local validateUnitInfo = GameInfo.Units[validateUnit:GetUnitType()]
                                     return validateVisible

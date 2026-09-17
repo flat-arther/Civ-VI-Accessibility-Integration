@@ -20,16 +20,17 @@
 --    * Persistent events (storms, droughts): fire Occurred once at spawn but
 --      apply damage each turn while active (storms move), so they are POLLED on
 --      LocalPlayerTurnBegin.
+--    * Forest/jungle fires: callback-less nine-turn events whose burning, burnt,
+--      and regrowth stages are polled inside their radius-2 spread footprint.
 --
 --  The game exposes no per-tile / per-yield fertility, so we diff FULL TILE
 --  STATE (improvement + pillaged flag + feature + yields) against a snapshot
---  taken each turn over the revealed at-risk tiles (floodplains + volcano rings
---  + active footprints + a radius-2 buffer around storms, which move). The full
+--  taken each turn over the whole revealed map. The full
 --  state lets us tell damage apart from fertility: a pillaged/destroyed
 --  improvement is damage; a yield change on a tile whose improvement is
 --  unchanged is fertility (a gain always, a loss only when the feature is also
---  unchanged = desertification). The spawn turn of a storm has no before-state,
---  so its fertility falls back to the lump count from GetCurrentTurnEventAtPlot.
+--  unchanged = desertification). Fire stages merge their incremental food and
+--  production gains into one per-tile detail row.
 --
 --  Only tiles the local player has revealed are detailed. Serialized per local
 --  player via PlayerConfigurations:SetValue (UI-side, save-persisted, no
@@ -46,6 +47,7 @@ local CONFIG_KEY = "CAI_ClimateChanges"
 local CALLBACK_STORM   = "GetAffectedPlots_Storm"
 local CALLBACK_DROUGHT = "GetAffectedPlots_Drought"
 local NUCLEAR_ACCIDENT_TYPE = "NUCLEAR_ACCIDENT"
+local FIRE_EFFECT_TYPE = "FIRE"
 
 local KIND_IMPROVEMENT = 1
 local KIND_DISTRICT    = 2
@@ -120,6 +122,30 @@ local function GetPlotsInRange(centerPlot, range)
         frontier = nextFrontier
     end
     return result
+end
+
+local FIRE_FEATURES = nil
+local function EnsureFireFeatures()
+    if FIRE_FEATURES ~= nil then return end
+    FIRE_FEATURES = {}
+    local keys = {
+        "FEATURE_BURNING_FOREST", "FEATURE_BURNT_FOREST",
+        "FEATURE_BURNING_JUNGLE", "FEATURE_BURNT_JUNGLE",
+    }
+    for _, key in ipairs(keys) do
+        local row = GameInfo.Features[key]
+        if row ~= nil then FIRE_FEATURES[row.Index] = true end
+    end
+end
+
+---True while a plot is in, or has just left, a burning/burnt feature state.
+---This keeps the radius-two fire candidate area from attributing unrelated
+---yield changes to the fire.
+local function IsFireAffectedPlot(plot, prevState)
+    EnsureFireFeatures()
+    local currentFeature = plot:GetFeatureType()
+    return FIRE_FEATURES[currentFeature] == true
+        or (prevState ~= nil and FIRE_FEATURES[prevState.feat] == true)
 end
 
 local function IsPlotRevealedToLocal(plot)
@@ -262,7 +288,7 @@ local function NewRecord(startPlot, eType)
         popLost = {},
         unitsLost = {},
         _dmgSeen = {},
-        _fertSeen = {},
+        _fertEntry = {},
         _popSeen = {},
         _unitEntry = {},
     }
@@ -323,7 +349,7 @@ local function Deserialize(text)
                     end
                 end
                 r.fertilityTiles[#r.fertilityTiles + 1] = ft
-                r._fertSeen[ft.plot] = true
+                r._fertEntry[ft.plot] = ft
             elseif t == "P" and r ~= nil then
                 local p = {
                     city = tonumber(f[2]), owner = tonumber(f[3]),
@@ -405,9 +431,40 @@ local function AddDamage(record, plot, kind, def, destroyed, turn)
     return true
 end
 
+---Add a new per-tile fertility entry, or merge an incremental staged change
+---into the existing entry. Concrete yield deltas replace a prior lump fallback.
+local function AddFertilityDeltas(record, plot, deltas, turn, mergeExisting)
+    local idx = plot:GetIndex()
+    local entry = record._fertEntry[idx]
+    if entry ~= nil and not mergeExisting then return false end
+
+    if entry == nil then
+        entry = {
+            plot = idx, terrain = plot:GetTerrainType(), owner = plot:GetOwner(),
+            city = OwningCityID(idx), deltas = {}, turn = turn,
+        }
+        record.fertilityTiles[#record.fertilityTiles + 1] = entry
+        record._fertEntry[idx] = entry
+    elseif entry.amount ~= nil then
+        entry.amount = nil
+        entry.deltas = {}
+    end
+
+    local changed = false
+    for yi, amount in pairs(deltas) do
+        local old = entry.deltas[yi] or 0
+        local updated = old + amount
+        if updated ~= old then
+            entry.deltas[yi] = updated
+            changed = true
+        end
+    end
+    return changed
+end
+
 ---Inspect one plot against its before-state; record damage (pillage/destroy)
 ---and fertility (yield deltas). Returns true if the record changed.
-function WorldClimateHistoryManager:_CapturePlot(record, plot, turn, prevState)
+function WorldClimateHistoryManager:_CapturePlot(record, plot, turn, prevState, mergeFertility)
     if not IsPlotRevealedToLocal(plot) then return false end
     local cur = CaptureTileState(plot)
     local changed = false
@@ -462,7 +519,7 @@ function WorldClimateHistoryManager:_CapturePlot(record, plot, turn, prevState)
     -- fertility: only a yield change NOT caused by the improvement changing.
     -- Gains are always fertility; losses only count when the feature is also
     -- unchanged (pure desertification, not feature/improvement destruction).
-    if prevTile ~= nil and not record._fertSeen[plot:GetIndex()] then
+    if prevTile ~= nil and (mergeFertility or record._fertEntry[plot:GetIndex()] == nil) then
         local impUnchanged = (prevTile.imp == cur.imp) and (prevTile.impPill == cur.impPill)
         if impUnchanged then
             local deltas = {}
@@ -478,13 +535,9 @@ function WorldClimateHistoryManager:_CapturePlot(record, plot, turn, prevState)
             end
             local report = anyPos or (anyNeg and prevTile.feat == cur.feat)
             if report and next(deltas) ~= nil then
-                record._fertSeen[plot:GetIndex()] = true
-                local idx = plot:GetIndex()
-                record.fertilityTiles[#record.fertilityTiles + 1] = {
-                    plot = idx, terrain = plot:GetTerrainType(), owner = plot:GetOwner(),
-                    city = OwningCityID(idx), deltas = deltas, turn = turn,
-                }
-                changed = true
+                if AddFertilityDeltas(record, plot, deltas, turn, mergeFertility) then
+                    changed = true
+                end
             end
         end
     end
@@ -558,12 +611,13 @@ function WorldClimateHistoryManager:_RecordFertilityLump(record, plotIndex, amou
     if amount == nil or amount == 0 then return false end
     local plot = Map.GetPlotByIndex(plotIndex)
     if plot == nil or not IsPlotRevealedToLocal(plot) then return false end
-    if record._fertSeen[plotIndex] then return false end
-    record._fertSeen[plotIndex] = true
-    record.fertilityTiles[#record.fertilityTiles + 1] = {
+    if record._fertEntry[plotIndex] ~= nil then return false end
+    local entry = {
         plot = plotIndex, terrain = plot:GetTerrainType(), owner = plot:GetOwner(),
         city = OwningCityID(plotIndex), amount = amount, turn = turn,
     }
+    record.fertilityTiles[#record.fertilityTiles + 1] = entry
+    record._fertEntry[plotIndex] = entry
     return true
 end
 
@@ -661,6 +715,50 @@ function WorldClimateHistoryManager:_ResolveInstantPlots(callback, plotx, ploty)
     return plots
 end
 
+---Register a persistent forest/jungle fire. Fires have no presentation
+---callback but apply damage and fertility in stages across their Duration.
+function WorldClimateHistoryManager:_RegisterFire(eType, anchorIdx, startTurn, record)
+    local key = tostring(startTurn) .. ":" .. tostring(anchorIdx) .. ":" .. tostring(eType)
+    if self.activeFires[key] ~= nil then return end
+
+    local def = GameInfo.RandomEvents[eType]
+    local duration = (def ~= nil and tonumber(def.Duration)) or 9
+    local center = Map.GetPlotByIndex(anchorIdx)
+    if center == nil then return end
+
+    local plotIndices = {}
+    for _, plot in ipairs(GetPlotsInRange(center, 2)) do
+        plotIndices[#plotIndices + 1] = plot:GetIndex()
+    end
+    self.activeFires[key] = {
+        eventType = eType,
+        anchor = anchorIdx,
+        startTurn = startTurn,
+        endTurn = startTurn + duration,
+        record = record,
+        plots = plotIndices,
+    }
+end
+
+---Rebuild active fire tracking after loading a save. GameRandomEvents history
+---persists the start location and type even though there is no active-fire API.
+function WorldClimateHistoryManager:_RebuildActiveFires()
+    self.activeFires = {}
+    local currentTurn = Game.GetCurrentGameTurn()
+    for turn = currentTurn, math.max(0, currentTurn - 9), -1 do
+        local event = GameRandomEvents.GetEventsForTurn(turn)
+        if event ~= nil then
+            local def = GameInfo.RandomEvents[event.RandomEvent]
+            local duration = def ~= nil and tonumber(def.Duration) or 0
+            if def ~= nil and def.EffectOperatorType == FIRE_EFFECT_TYPE
+                and event.StartLocation ~= nil and currentTurn <= turn + duration then
+                local record = self:_GetOrCreateRecord(event.StartLocation, event.RandomEvent)
+                self:_RegisterFire(event.RandomEvent, event.StartLocation, turn, record)
+            end
+        end
+    end
+end
+
 function WorldClimateHistoryManager:_OnRandomEventOccurred(eType, severity, plotx, ploty, mitigationLevel, randomEventID)
     local def = GameInfo.RandomEvents[eType]
     if def == nil or def.EffectOperatorType == NUCLEAR_ACCIDENT_TYPE then
@@ -679,19 +777,29 @@ function WorldClimateHistoryManager:_OnRandomEventOccurred(eType, severity, plot
     local fertBefore = #record.fertilityTiles
     local affected = self:_ResolveInstantPlots(callback, plotx, ploty)
     for _, plot in ipairs(affected) do
-        if self:_CapturePlot(record, plot, turn, self.stateSnapshot[plot:GetIndex()]) then
+        local prev = self.stateSnapshot[plot:GetIndex()]
+        if (def.EffectOperatorType ~= FIRE_EFFECT_TYPE or IsFireAffectedPlot(plot, prev))
+            and self:_CapturePlot(record, plot, turn, prev, def.EffectOperatorType == FIRE_EFFECT_TYPE) then
             changed = true
         end
     end
 
     local ev = GameRandomEvents.GetCurrentTurnEventAtPlot(anchorIdx)
     if ev ~= nil then
-        if #record.fertilityTiles == fertBefore and ev.FertilityAdded ~= nil and ev.FertilityAdded ~= 0 then
+        if def.EffectOperatorType ~= FIRE_EFFECT_TYPE
+            and #record.fertilityTiles == fertBefore
+            and ev.FertilityAdded ~= nil and ev.FertilityAdded ~= 0 then
             if self:_RecordFertilityLump(record, anchorIdx, ev.FertilityAdded, turn) then changed = true end
         end
         if ev.PopLost ~= nil and ev.PopLost > 0 then
             if self:_RecordPop(record, anchorIdx, ev.PopLost, turn) then changed = true end
         end
+    end
+
+    if def.EffectOperatorType == FIRE_EFFECT_TYPE then
+        self:_RegisterFire(eType, anchorIdx, turn, record)
+        if changed then self:Save() end
+        return
     end
 
     -- Pillaging / destruction / unit losses are applied AFTER RandomEventOccurred
@@ -712,6 +820,42 @@ function WorldClimateHistoryManager:_OnRandomEventOccurred(eType, severity, plot
     }
 
     if changed then self:Save() end
+end
+
+---Poll each active fire before the turn snapshot is refreshed. Fire feature
+---transitions identify the affected tiles inside the radius-two candidate area;
+---incremental yield deltas merge into one readable fertility row per tile.
+function WorldClimateHistoryManager:_PollActiveFires(turn)
+    local changed = false
+    local keep = {}
+    for key, fire in pairs(self.activeFires) do
+        if turn <= fire.endTurn then
+            local affected = {}
+            for _, idx in ipairs(fire.plots) do
+                local plot = Map.GetPlotByIndex(idx)
+                local prev = self.stateSnapshot[idx]
+                if plot ~= nil and IsFireAffectedPlot(plot, prev) then
+                    affected[#affected + 1] = plot
+                    if self:_CapturePlot(fire.record, plot, turn, prev, true) then
+                        changed = true
+                    end
+                end
+            end
+
+            local ev = GameRandomEvents.GetCurrentTurnEventAtPlot(fire.anchor)
+            if ev ~= nil then
+                if ev.PopLost ~= nil and ev.PopLost > 0 then
+                    if self:_RecordPop(fire.record, fire.anchor, ev.PopLost, turn) then changed = true end
+                end
+                if self:_CaptureUnitCasualties(fire.record, affected, ev.UnitsLost or 0, turn) then
+                    changed = true
+                end
+            end
+            keep[key] = fire
+        end
+    end
+    self.activeFires = keep
+    return changed
 end
 
 ---Second-pass capture for instant events queued earlier: pillaging and unit
@@ -848,6 +992,8 @@ function WorldClimateHistoryManager:_OnLocalPlayerTurnBegin()
         end
     end
 
+    if self:_PollActiveFires(turn) then changed = true end
+
     -- Re-scan last turn's instant events for damage that lands after they fire.
     -- Must run before the snapshot is refreshed (it uses the old baseline).
     if self:_ProcessPendingInstant() then changed = true end
@@ -875,6 +1021,7 @@ function WorldClimateHistoryManager:_Register()
     -- fires on new games and save loads alike, before the first end-turn.
     Events.LoadScreenClose.Add(function()
         self:_RefreshSnapshot()
+        self:_RebuildActiveFires()
     end)
 end
 
@@ -886,6 +1033,7 @@ local instance = setmetatable({}, WorldClimateHistoryManager)
 instance.records = {}
 instance.activeStorms = {}      -- identity -> startPlot
 instance.activeDroughts = {}    -- identity -> startPlot
+instance.activeFires = {}       -- startTurn:anchor:type -> persistent fire
 instance.stateSnapshot = {}     -- plotIndex -> tile state
 instance.pendingInstant = {}    -- instant events awaiting a next-turn re-scan
 

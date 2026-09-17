@@ -3093,7 +3093,7 @@
       <Text>没有单位数值</Text>
     </Replace>
     <Replace Tag="LOC_CAI_UNIT_NO_CHARGES" Language="zh_Hans_CN">
-      <Text>此单位不支持使用次数</Text>
+      <Text>此单位没有使用次数</Text>
     </Replace>
     <Replace Tag="LOC_CAI_UNIT_NO_PROMOTIONS" Language="zh_Hans_CN">
       <Text>没有可用晋升</Text>
@@ -4773,6 +4773,12 @@
     <Replace Tag="LOC_CAI_GOVERNOR_PROMOTE_DESC" Language="zh_Hans_CN">
       <Text>要花费一个总督头衔来获得{1_PromoName}吗？{2_Desc}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_GOVERNOR_APPOINT_CONFIRM" Language="zh_Hans_CN">
+      <Text>任命{1_GovName}？</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GOVERNOR_JOIN_CONFIRM" Language="zh_Hans_CN">
+      <Text>加入{1_SocietyName}？</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_GOVERNOR_READONLY" Language="zh_Hans_CN">
       <Text>只读：世界议会正在召开</Text>
     </Replace>
@@ -6214,6 +6220,9 @@
     <Replace Tag="LOC_CAI_KB_MOVE_UP" Language="zh_Hans_CN">
       <Text>向上移动</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_KB_DIRECTORY_UP" Language="zh_Hans_CN">
+      <Text>上级目录</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_KB_NAVIGATE_BACK" Language="zh_Hans_CN">
       <Text>向后导航</Text>
     </Replace>
@@ -6627,6 +6636,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_STAGING_INVITE_SENT" Language="zh_Hans_CN">
       <Text>邀请已发送</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_STAGING_LEAVE_WARNING" Language="zh_Hans_CN">
+      <Text>离开准备房间？</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_STAGING_LEAVE_HOST_TRANSFER" Language="zh_Hans_CN">
+      <Text>主机权限将转移给下一位玩家。</Text>
     </Replace>
 
     <!-- 模组设置 -->

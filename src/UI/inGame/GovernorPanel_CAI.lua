@@ -42,6 +42,7 @@ local m_ui                            = {
     promoGrid         = nil,
     promoList          = nil,
     promoConfirmDialog = nil,
+    appointmentConfirmDialog = nil,
     switchView         = nil,
 }
 
@@ -66,6 +67,7 @@ local m_isReadOnly                    = false
 local m_cityBannerPlayerID            = -1
 local m_cityBannerCityID              = -1
 local m_liveGovernorRows              = {}
+local m_appointmentRequestPending     = false
 local m_pendingPromotionFocusKey      = nil
 local m_pendingPromotionGovernorIndex = -1
 local m_governorIndices               = {}
@@ -149,16 +151,10 @@ local function GetGovernerTitleCounts()
     return capturedAvailable, capturedSpent
 end
 
-local function GetTitleCountsText(fallbackAvailable, fallbackSpent)
-    local parts = {}
-    AppendIfNonEmpty(parts, ControlText(Controls.GovernorTitlesAvailable))
-    AppendIfNonEmpty(parts, ControlText(Controls.GovernorTitlesSpent))
-
-    if #parts == 0 and fallbackAvailable and fallbackSpent then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_GOVERNOR_SUMMARY", fallbackAvailable, fallbackSpent))
-    end
-
-    return JoinNonEmpty(parts, ", ")
+local function GetTitleCountsText()
+    local available, spent = GetGovernerTitleCounts()
+    if available == nil or spent == nil then return "" end
+    return Locale.Lookup("LOC_CAI_GOVERNOR_SUMMARY", available, spent)
 end
 
 local function CaptureLiveGovernorRow(governorDef, row)
@@ -528,6 +524,80 @@ local function GetPromotionCellTooltip(promoDef, governorDef, localPlayerID)
     end
 
     return JoinNonEmpty(parts, "[NEWLINE]")
+end
+
+-- ===========================================================================
+-- Appointment dialog
+-- ===========================================================================
+
+local g_appointmentDialogSuspendToken = nil
+
+local function RemoveAppointmentDialog()
+    if mgr then mgr:UnregisterSuspendCloser(g_appointmentDialogSuspendToken) end
+    g_appointmentDialogSuspendToken = nil
+    if mgr and m_ui.appointmentConfirmDialog
+            and mgr:GetWidgetById(m_ui.appointmentConfirmDialog:GetId()) then
+        mgr:RemoveFromStack(m_ui.appointmentConfirmDialog:GetId())
+    end
+    m_ui.appointmentConfirmDialog = nil
+end
+
+local function ShowAppointmentDialog(governorIndex)
+    if not mgr then return end
+
+    local governorDef = GameInfo.Governors[governorIndex]
+    if not governorDef then return end
+    local isSecretSociety = IsCannotAssign(governorDef)
+    local titleTag = isSecretSociety
+        and "LOC_CAI_GOVERNOR_JOIN_CONFIRM"
+        or "LOC_CAI_GOVERNOR_APPOINT_CONFIRM"
+
+    local titleFn = function()
+        return Locale.Lookup(titleTag, Locale.Lookup(governorDef.Name))
+    end
+
+    local confirmBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovAppointDlg_Confirm"), "Button", {
+        Label = function() return Locale.Lookup("LOC_CONFIRM") end,
+        DisabledPredicate = function() return m_appointmentRequestPending end,
+    })
+    confirmBtn:On("activate", function()
+        if m_appointmentRequestPending then return end
+        local localPlayerID = Game.GetLocalPlayer()
+        local pPlayer = Players[localPlayerID]
+        local playerGovernors = pPlayer and pPlayer:GetGovernors()
+        if not playerGovernors or m_isReadOnly
+                or playerGovernors:HasGovernor(governorDef.Hash)
+                or not playerGovernors:CanAppoint()
+                or not playerGovernors:CanEverAppointGovernor(governorDef.Hash) then
+            return
+        end
+
+        m_appointmentRequestPending = true
+        OnAppointGovernor(governorIndex)
+        -- The async GovernorAppointed event closes the dialog. Normal governors
+        -- then continue through vanilla into the assignment chooser.
+    end)
+
+    local cancelBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovAppointDlg_Cancel"), "Button", {
+        Label = function() return Locale.Lookup("LOC_CANCEL") end,
+        DisabledPredicate = function() return m_appointmentRequestPending end,
+    })
+    cancelBtn:On("activate", function()
+        if not m_appointmentRequestPending then RemoveAppointmentDialog() end
+    end)
+
+    m_ui.appointmentConfirmDialog = mgr.WidgetHelpers.MakeGeneralDialog(
+        titleFn, { confirmBtn, cancelBtn }, nil, 1)
+    m_ui.appointmentConfirmDialog:AddInputBinding({
+        Key = Keys.VK_ESCAPE,
+        Description = "LOC_CAI_KB_CLOSE",
+        Action = function()
+            if not m_appointmentRequestPending then RemoveAppointmentDialog() end
+            return true
+        end
+    })
+    mgr:Push(m_ui.appointmentConfirmDialog)
+    g_appointmentDialogSuspendToken = mgr:RegisterSuspendCloser(RemoveAppointmentDialog)
 end
 
 -- ===========================================================================
@@ -906,7 +976,7 @@ local function ActivateGovernor(governorIndex, localPlayerID)
     local governorDef = GameInfo.Governors[governorIndex]
     local governor = GetAppointedGovernor(localPlayerID, governorIndex)
     if not governor then
-        OnAppointGovernor(governorIndex)
+        ShowAppointmentDialog(governorIndex)
     elseif not IsCannotAssign(governorDef) then
         OnAssignButton(governorIndex, m_cityBannerPlayerID, m_cityBannerCityID)
     end
@@ -1214,7 +1284,7 @@ local function BuildPanel()
     m_treeSortOptions = BuildTreeSortOptions(m_governorColumns)
 
     m_ui.tableView = mgr:CreateWidget(TABLE_ID, "DataTable", {
-        Label = function() return GetTitleCountsText(GetGovernerTitleCounts()) end,
+        Label = GetTitleCountsText,
         HiddenPredicate = function() return m_viewMode ~= "table" end,
     })
     m_ui.tableView:SetColumns(m_governorColumns)
@@ -1257,7 +1327,7 @@ local function BuildPanel()
     m_ui.panel:AddChild(m_ui.treeSort)
 
     m_ui.tree = mgr:CreateWidget(TREE_ID, "Tree", {
-        Label = function() return GetTitleCountsText(GetGovernerTitleCounts()) end,
+        Label = GetTitleCountsText,
         HiddenPredicate = function() return m_viewMode ~= "tree" end,
     })
     m_ui.panel:AddChild(m_ui.tree)
@@ -1288,6 +1358,8 @@ local function PushPanel()
 end
 
 local function PopPanel()
+    RemoveAppointmentDialog()
+    RemovePromoDialog()
     if mgr and m_ui.panel then
         mgr:RemoveFromStack(PANEL_ID)
     end
@@ -1299,9 +1371,11 @@ local function PopPanel()
         promoGrid = nil,
         promoList = nil,
         promoConfirmDialog = nil,
+        appointmentConfirmDialog = nil,
         switchView = nil,
     }
     m_focusedGovernorIndex = -1
+    m_appointmentRequestPending = false
     m_liveGovernorRows = {}
     m_governorIndices = {}
 end
@@ -1348,6 +1422,8 @@ end)
 local function OnCAIGovernorAppointed(playerID, governorID)
     if playerID ~= Game.GetLocalPlayer() then return end
 
+    m_appointmentRequestPending = false
+    RemoveAppointmentDialog()
     local governorDef = GameInfo.Governors[governorID]
     local governorName = GetGovernorName(governorID)
     if governorName ~= "" then
@@ -1368,7 +1444,7 @@ local function OnCAIGovernorPromoted(playerID, governorID, promotionID)
 end
 
 local function SpeakGovTitles()
-    Speak(GetTitleCountsText(GetGovernerTitleCounts()))
+    Speak(GetTitleCountsText())
 end
 
 local function OnInputActionStarted(actionId)

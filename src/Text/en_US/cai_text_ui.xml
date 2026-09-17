@@ -3129,7 +3129,7 @@
       <Text>No unit statistics</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_NO_CHARGES" Language="en_US">
-      <Text>Charges not supported for this unit</Text>
+      <Text>This unit has no charges</Text>
     </Row>
     <Row Tag="LOC_CAI_UNIT_NO_PROMOTIONS" Language="en_US">
       <Text>No promotions available</Text>
@@ -4807,6 +4807,12 @@
     <Row Tag="LOC_CAI_GOVERNOR_PROMOTE_DESC" Language="en_US">
       <Text>Spend a governor title to earn {1_PromoName}? {2_Desc}</Text>
     </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_APPOINT_CONFIRM" Language="en_US">
+      <Text>Appoint {1_GovName}?</Text>
+    </Row>
+    <Row Tag="LOC_CAI_GOVERNOR_JOIN_CONFIRM" Language="en_US">
+      <Text>Join {1_SocietyName}?</Text>
+    </Row>
     <Row Tag="LOC_CAI_GOVERNOR_READONLY" Language="en_US">
       <Text>Read-only: World Congress is in session</Text>
     </Row>
@@ -6250,6 +6256,9 @@
     <Row Tag="LOC_CAI_KB_MOVE_UP" Language="en_US">
       <Text>Move up</Text>
     </Row>
+    <Row Tag="LOC_CAI_KB_DIRECTORY_UP" Language="en_US">
+      <Text>Parent directory</Text>
+    </Row>
     <Row Tag="LOC_CAI_KB_NAVIGATE_BACK" Language="en_US">
       <Text>Navigate back</Text>
     </Row>
@@ -6663,6 +6672,12 @@
     </Row>
     <Row Tag="LOC_CAI_STAGING_INVITE_SENT" Language="en_US">
       <Text>Invite sent</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_LEAVE_WARNING" Language="en_US">
+      <Text>Leave the staging room?</Text>
+    </Row>
+    <Row Tag="LOC_CAI_STAGING_LEAVE_HOST_TRANSFER" Language="en_US">
+      <Text>Host privileges will transfer to the next player.</Text>
     </Row>
 
     <!-- Mod settings -->

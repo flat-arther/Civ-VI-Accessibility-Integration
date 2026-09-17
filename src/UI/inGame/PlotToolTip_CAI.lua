@@ -118,7 +118,7 @@ local CURSOR_MOVE_INFO_PRIORITY = {
     "volcano",
     "storm",
     "drought",
-    "cityName",
+    "nationalPark",
     "wonderTitle",
     "districtTitle",
     "plotName",

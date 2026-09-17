@@ -70,6 +70,12 @@ function Utils.GetLocalPlayerID(context)
 end
 
 ---@param context WorldScannerContext|nil
+---@return boolean
+function Utils.IsObserverView(context)
+    return Utils.GetLocalPlayerID(context) == PlayerTypes.OBSERVER
+end
+
+---@param context WorldScannerContext|nil
 ---@return integer
 function Utils.GetLocalTeamID(context)
     local localPlayer = Utils.GetLocalPlayer(context)
@@ -172,7 +178,7 @@ function Utils.CanKnowPlayer(context, playerID)
 
     local localPlayerID = Utils.GetLocalPlayerID(context)
     -- The see-all observer has met everyone: every player is knowable.
-    if localPlayerID == PlayerTypes.OBSERVER then
+    if Utils.IsObserverView(context) then
         return true
     end
     if context == nil or localPlayerID == nil or localPlayerID == -1 then
@@ -196,13 +202,9 @@ function Utils.GetTeamStance(context, playerID)
     end
 
     local localPlayerID = Utils.GetLocalPlayerID(context)
-    -- The observer owns nothing and has no diplomacy: players are neutral, but
-    -- barbarians are hostile to all by nature and stay enemy.
-    if localPlayerID == PlayerTypes.OBSERVER then
-        local player = Players[playerID]
-        if player ~= nil and player.IsBarbarian and player:IsBarbarian() then
-            return "enemy"
-        end
+    -- Ownership is not player-relative in an observer context. Every object,
+    -- including barbarian-owned objects, therefore resolves as neutral.
+    if Utils.IsObserverView(context) then
         return "neutral"
     end
     if context == nil or localPlayerID == nil or localPlayerID == -1 then

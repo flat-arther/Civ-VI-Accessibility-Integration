@@ -73,8 +73,6 @@ local function BuildTargetCacheSignature(mode)
         AddSelectedUnitSignature(parts)
         if mode == InterfaceModeTypes.WMD_STRIKE then
             AddInterfaceParameterSignature(parts, UnitOperationTypes.PARAM_WMD_TYPE)
-        elseif mode == InterfaceModeTypes.TELEPORT_TO_CITY then
-            AddInterfaceParameterSignature(parts, UnitOperationTypes.PARAM_OPERATION_TYPE)
         elseif mode == InterfaceModeTypes.BUILD_IMPROVEMENT_ADJACENT then
             AddInterfaceParameterSignature(parts, UnitOperationTypes.PARAM_OPERATION_TYPE)
             AddInterfaceParameterSignature(parts, UnitOperationTypes.PARAM_IMPROVEMENT_TYPE)
@@ -202,13 +200,6 @@ local PLOT_TARGET_MODES = {
     [InterfaceModeTypes.COASTAL_RAID] = { Source = "unitOperation", Type = UnitOperationTypes.COASTAL_RAID },
     [InterfaceModeTypes.DEPLOY] = { Source = "unitOperation", Type = UnitOperationTypes.DEPLOY },
     [InterfaceModeTypes.REBASE] = { Source = "unitOperation", Type = UnitOperationTypes.REBASE },
-    [InterfaceModeTypes.TELEPORT_TO_CITY] = {
-        Source = "unitOperation",
-        GetType = function()
-            return UI
-                .GetInterfaceModeParameter(UnitOperationTypes.PARAM_OPERATION_TYPE)
-        end
-    },
     [InterfaceModeTypes.BUILD_IMPROVEMENT_ADJACENT] = {
         Source = "unitOperation",
         GetType = function() return UI.GetInterfaceModeParameter(UnitOperationTypes.PARAM_OPERATION_TYPE) end,
@@ -441,7 +432,6 @@ local PLOT_INFO_KEYS_BY_MODE = {
     [InterfaceModeTypes.COASTAL_RAID] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
     [InterfaceModeTypes.DEPLOY] = { "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
     [InterfaceModeTypes.REBASE] = { "cityName", "districtTitle", "plotName" },
-    [InterfaceModeTypes.TELEPORT_TO_CITY] = { "cityName", "districtTitle", "plotName" },
     [InterfaceModeTypes.BUILD_IMPROVEMENT_ADJACENT] = { "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
     [InterfaceModeTypes.SACRIFICE_SELECTION] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
     [InterfaceModeTypes.AIRLIFT] = { "cityName", "districtTitle", "plotName" },

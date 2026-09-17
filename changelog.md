@@ -2,7 +2,7 @@
 
 ### Added
 
-- In the Climate Screen's Event History, a disaster that caused damage or changed fertility can now be expanded to hear the specifics. Under it you will find the improvements, districts, and buildings that were pillaged or destroyed, features and resources that were removed, units that were killed or damaged, the tiles whose yields changed and by how much, and the cities that lost population. Each entry can be selected to move the map cursor to that tile. Storms report what they did on each turn as they move.
+- In the Climate Screen's Event History, a disaster that caused damage or changed fertility can now be expanded to view the specifics. Under it you will find the improvements, districts, and buildings that were pillaged or destroyed, features and resources that were removed, units that were killed or damaged, the tiles whose yields changed and by how much, and the cities that lost population. Each entry can be selected to move the map cursor to that tile. Storms and fires update changes on each turn as they move.
 - Added full accessibility to the world builder. Includes mod tutorials for screens and general usage
 - The world scanner has a new World Builder category, shown only while the World Builder is active. It has two subcategories: Starting positions lists each placed start, named by its assignment type and target, such as "Player: Rome", "Leader: Trajan", "Civilization: Rome", "Random Player", or "Random City-State", and grouped by that type; and Ownership lists owned tiles merged into zones per owner, like the political lens.
 - The world scanner's Geography category has a new Rivers and cliffs subcategory: revealed river-edge tiles and cliff-edge tiles, each merged into connected zones with their tile counts, kept in separate Rivers and Cliffs groups.
@@ -10,16 +10,28 @@
 
 ### Changed
 
+- Units with no movement remaining can still use Move To (Alt M by default) or from the unit action list, and directional quick movement can queue an adjacent move for a later turn.
+- Pressing Escape in the multiplayer staging room now asks for confirmation before leaving.
+- Appointing a governor or joining a Secret Society from the Governors screen asks for confirmation before spending a governor title.
+- Great People transfers now open a city destination list. Choosing a city performs the transfer directly, without opening a map-targeting interface or adding destinations to the world scanner.
+- Units without charges are now described as having no charges instead of saying that charges are unsupported.
+- Removed the history list widget from the civilopedia, it was redundant. You can still use alt left and alt right to navigate history
+- City names are treated as zones, instead of repeating each time you move the cursor.
+- National parks are no longer zones. They are instead repeated every time the cursor moves. This should make it easier to trace their shape
 - In the world scanner's City management category, each tile now reads its yields after its status, such as "Worked, 3 food, 2 production".
 - When placing a district, the world scanner's Valid targets now lists the candidate tiles from the highest adjacency bonus to the lowest.
-- In the Espionage Overview's Operatives tab, your active spies are now grouped by whose cities they are in, grouped into top-level categories: your own civilization first, then one category per foreign civilization, and a single City-States category at the bottom. Each category gives its name and how many operatives you have there; expand it to find the cities, and expand a city to reach the spies working in it.
+- In the Espionage Overview's Operatives tab, your active spies are now grouped by civ: your own civilization first, then one category per foreign civilization, and a single City-States category at the bottom. Each category gives its name and how many operatives you have there; expand it to find the cities, and expand a city to reach the spies working in it.
 - The Production panel's treeview is now split into more categories. On the Production tab, districts and buildings each have their own category instead of sharing one, and a Needs Repair category at the top gathers every pillaged district and building.
 - When a unit cannot reach its destination this turn, the movement announcement now tells you whether it moved as far as it could and stopped short, or could not move at all and simply has its journey queued. A unit that did not move now says "Movement queued" with the turns until arrival, instead of "Stopped short".
 - The movement preview says "Next turn" when a unit would arrive on the following turn, instead of "1 turn".
 
 ### Fixed
 
-- After moving a unit onto a tribal village, a discovered natural wonder, or into or out of the water, the movement announcement now reports the unit's actual remaining movement instead of its movement from before the move.
+- In observer mode (EG after losing in red death) Units, cities, districts, improvements, wonders, and other owned objects properly appear as neutral for the observer.
+- Saves can now be deleted from the Load Game menu with the Delete key.
+- Checking governer title count (O by default) right after earning a title and before opening the governers panel now reports the live value, instead of always saying 0
+- Fixed a bug with moving and swapping great-works, where the picker did not show all valid slots. This lead to issues such as not being able to swap works in the palace with others that did not match their types,, or directly moving works in to empty slots
+- After moving a unit onto a tribal village, discovering a natural wonder, or moving into or out of the water, the movement announcement waits for the game's movement update and reports the unit's actual remaining movement, instead of a stale value.
 - In the city overview panel's Citizens and growth summary, the food per turn figure is now the net food after consumption instead of the raw food yield.
 
 ## [1.4.1] - 2026-08-30

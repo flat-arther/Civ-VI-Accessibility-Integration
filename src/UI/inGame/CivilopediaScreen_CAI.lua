@@ -30,7 +30,6 @@ local m_state            = {
 local m_ui               = {
     panel = nil,
     sectionsTree = nil,
-    historyList = nil,
     articleTree = nil,
     pageNodes = {},
 }
@@ -797,31 +796,6 @@ local function CreateHistoryButton(entry)
     return btn
 end
 
-local function RefreshHistoryList()
-    if not m_ui.historyList then return end
-
-    m_ui.historyList:ClearChildren()
-
-    for index, page in ipairs(m_state.history.pages) do
-        local title = page.title
-        if title and title ~= "" then
-            local entry = {
-                index = index,
-                title = title,
-            }
-            m_ui.historyList:AddChild(CreateHistoryButton(entry))
-        end
-    end
-
-    -- Pre-position the remembered child so Tabbing into the history list lands
-    -- on the current crumb (the manager resolves DefaultIndex when entered).
-    if m_ui.historyList.Children and #m_ui.historyList.Children > 0 then
-        local focusIndex = m_state.history.pageIndex
-        if focusIndex < 1 then focusIndex = 1 end
-        if focusIndex > #m_ui.historyList.Children then focusIndex = #m_ui.historyList.Children end
-        m_ui.historyList:SetDefaultIndex(focusIndex)
-    end
-end
 
 local function MirrorHistoryNavigate(sectionId, pageId)
     local title = GetPageTitle(sectionId, pageId)
@@ -1006,10 +980,6 @@ local function EnsureRootBuilt()
     end)
     m_ui.sectionsTree:SetSearchQueryMode("raw")
 
-    m_ui.historyList = mgr:CreateWidget("CAIPediaHistoryList", "List", {
-        Label = function() return Locale.Lookup("LOC_CAI_PEDIA_HISTORY") end,
-        HiddenPredicate = function(w) return not w.Children or #w.Children < 2 end,
-    })
 
     m_ui.articleTree = mgr:CreateWidget("CAIPediaArticleTree", "Tree", {
         Label = function()
@@ -1026,10 +996,8 @@ local function EnsureRootBuilt()
 
     m_ui.panel:AddChild(m_ui.sectionsTree)
     m_ui.panel:AddChild(m_ui.articleTree)
-    m_ui.panel:AddChild(m_ui.historyList)
 
     BuildSectionsTree()
-    RefreshHistoryList()
 end
 
 -- Resolve the widget initial focus should land on when the panel is pushed.
@@ -1056,7 +1024,6 @@ local function PopPanel()
     end
     m_ui.panel = nil
     m_ui.articleTree = nil
-    m_ui.historyList = nil
     m_ui.sectionsTree = nil
     m_ui.pageNodes = {}
 end
@@ -1215,7 +1182,6 @@ NavigateTo = WrapFunc(NavigateTo, function(orig, sectionId, pageId)
     if pageChanged then
         MirrorHistoryNavigate(sectionId, pageId)
     end
-    RefreshHistoryList()
     RebuildArticleTree()
     ApplyNavigationFocus()
 end)
@@ -1231,7 +1197,6 @@ NavigateToPageTrailIndex = WrapFunc(NavigateToPageTrailIndex, function(orig, ind
     end
     orig(index, bUpdateScroll)
     MirrorHistoryJump(index)
-    RefreshHistoryList()
     RebuildArticleTree()
     ApplyNavigationFocus()
 end)

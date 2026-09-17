@@ -266,11 +266,11 @@ local function IsVisiblePlot(plot)
     local isGated, revealed = GetWorldBuilderRevealGate(plot)
     if isGated then return revealed end
 
-    local observer = Game.GetLocalObserver()
-    if observer == PlayerTypes.OBSERVER then
+    if IsObserverView() then
         return true
     end
 
+    local observer = Game.GetLocalObserver()
     local visibility = PlayersVisibility[observer]
     return visibility ~= nil and visibility:IsVisible(plot:GetIndex())
 end
@@ -340,12 +340,10 @@ local function HasLocalMajorityReligion(unit, localPlayerID)
 end
 
 local function IsEnemyUnit(unit)
-    -- The observer has no diplomacy, but barbarians are hostile to all by nature
-    -- and stay enemy; every other owner is neutral to an observer.
+    -- Ownership is not player-relative to an observer. Even barbarian units
+    -- resolve as neutral in this context.
     if IsObserverView() then
-        local ownerID = unit:GetOwner()
-        local owner = ownerID ~= nil and ownerID ~= -1 and Players[ownerID] or nil
-        return owner ~= nil and owner:IsBarbarian()
+        return false
     end
 
     local ownerID = unit:GetOwner()
@@ -379,12 +377,10 @@ local function IsEnemyUnit(unit)
 end
 
 local function IsNeutralUnit(unit)
-    -- The observer owns nothing and has no diplomacy, so every unit with a valid
-    -- owner reads as neutral -- except barbarians, which are enemy by nature.
+    -- Every unit resolves as neutral to an observer, including ownerless and
+    -- barbarian units placed in World Builder.
     if IsObserverView() then
-        local ownerID = unit:GetOwner()
-        local owner = ownerID ~= nil and ownerID ~= -1 and Players[ownerID] or nil
-        return owner ~= nil and not owner:IsBarbarian()
+        return unit ~= nil
     end
 
     if IsOwnOrTeamUnit(unit) then
@@ -406,11 +402,11 @@ local function IsUnitVisible(unit)
         return true
     end
 
-    local observer = Game.GetLocalObserver()
-    if observer == PlayerTypes.OBSERVER then
+    if IsObserverView() then
         return true
     end
 
+    local observer = Game.GetLocalObserver()
     local visibility = PlayersVisibility[observer]
     return visibility ~= nil and visibility:IsUnitVisible(unit)
 end

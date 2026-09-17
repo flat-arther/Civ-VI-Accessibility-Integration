@@ -687,7 +687,7 @@ dropdown's only child). The list is hidden via a hidden predicate keyed on
 `_isOpen`, so when closed the dropdown has no navigable children and arrow
 keys bubble to the enclosing list/panel.
 
-Enter on a closed dropdown calls `Open()`: unhides the list, focuses the
+Enter or Space on a closed dropdown calls `Open()`: unhides the list, focuses the
 MenuItem matching the committed selection, emits `opened`. Inside the open
 list the existing List navigation handles Up/Down/Home/End/PageUp/PageDown
 and type-to-find with wrap-around — no preview state to maintain. Activating
@@ -1575,7 +1575,7 @@ When migrating a screen from the old template-merged manager:
 | EditBox        | Enter → BeginEdit/Commit (EnterToCommit=false makes Enter bubble); Esc → Cancel; full text-editing set |
 | TabControl     | Ctrl+Tab / Ctrl+Shift+Tab → cycle pages                       |
 | Tab strip      | Left / Right (via HorizontalList) cycles tabs and switches    |
-| Dropdown       | Closed: Enter → open. Open: List nav on inner items;           |
+| Dropdown       | Closed: Enter/Space → open. Open: List nav on inner items;     |
 |                | Enter on item → commit + close; Esc → close without commit     |
 | Grid           | Up/Down → within tier; Left/Right → across tiers; Home/End →  |
 |                | tier edge; Ctrl+Home/End → grid edge; Ctrl+Left/Right → column |

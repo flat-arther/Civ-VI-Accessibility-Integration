@@ -125,9 +125,6 @@ VALUES
     ('SpeakContinentZone', 'Cursor', 80, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_CONTINENT_ZONE', 'LOC_CAI_SETTING_SPEAK_CONTINENT_ZONE_TOOLTIP', NULL),
 
-    ('SpeakNationalParkZone', 'Cursor', 90, 'bool', 'checkbox', 'true',
-     'LOC_CAI_SETTING_SPEAK_NATIONAL_PARK_ZONE', 'LOC_CAI_SETTING_SPEAK_NATIONAL_PARK_ZONE_TOOLTIP', NULL),
-
     ('AnnounceVisibilityChangesTurnStart', 'Events', 30, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_TURN_START', 'LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_TURN_START_TOOLTIP', NULL),
 

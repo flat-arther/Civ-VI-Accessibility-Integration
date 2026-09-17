@@ -1080,6 +1080,35 @@ info.GetWorldBuilderRevealed = function(player, plotIndex)
     return visMgr.IsRevealed(player, plotIndex) == true
 end
 
+-- Keyboard placement cannot observe vanilla PlaceVisibility's local success
+-- result through WorldInput_WBSelectPlot. Provide the same operation here so
+-- the in-memory snapshot is updated only after SetRevealed actually succeeds.
+-- The undo block, status text, and sounds mirror vanilla PlaceVisibility.
+info.EditWorldBuilderVisibility = function(plotIndex, revealed)
+    local entry = Controls.VisibilityPullDown:GetSelectedEntry()
+    if entry == nil then return false end
+
+    WorldBuilder.StartUndoBlock()
+    local succeeded = WorldBuilder.MapManager():SetRevealed(plotIndex, revealed, entry.PlayerIndex)
+    WorldBuilder.EndUndoBlock()
+
+    if succeeded then
+        local statusTag = revealed and "LOC_WORLDBUILDER_VIS_SET_OK" or "LOC_WORLDBUILDER_VIS_CLEAR_OK"
+        LuaEvents.WorldBuilder_SetPlacementStatus(Locale.Lookup(statusTag, entry.Text))
+        UI.PlaySound("UI_WB_Placement_Succeeded")
+
+        local visMgr = ExposedMembers.CAI_WBVisManager
+        if visMgr ~= nil and visMgr.SetRevealed ~= nil then
+            visMgr.SetRevealed(entry.PlayerIndex, plotIndex, revealed)
+        end
+    else
+        LuaEvents.WorldBuilder_SetPlacementStatus(Locale.Lookup("LOC_WORLDBUILDER_VIS_ERROR", entry.Text))
+        UI.PlaySound("UI_WB_Placement_Failed")
+    end
+
+    return succeeded
+end
+
 -- The edge direction (0-based DirectionTypes) the Rivers / Cliffs tool should
 -- place on, or nil when neither of those tools is armed. WorldInput_CAI feeds
 -- this to EditRiver / EditCliff in place of the mouse-nearest plot edge.

@@ -109,13 +109,13 @@
 [x] Group spies in the espionage screen by civ, copy trade route overview
 [x] Food summary in the city details growth tooltip should show net per turn, not raw yield
 [x] Sort the valid targets for districts by highest adjacency bonus. Add a yields category that sorts by highest
-[ ] Look in to handling forest fires in disaster history
-[ ] Move announce still reports wrong value when discovering wonders
-[ ] Move log announces wrong movement distances. Consider switching to a snapshot system
-[ ] Cities should be reported as zones
-[ ] Moving greatworks might be bugged, when trying to move from palace
-[ ] 0 build charges doesn't necessarily mean the unit does not support charges. Change the string
-[ ] Add support for real Era Tracker
+[x] Cities should be reported as zones
+[x] Moving greatworks might be bugged, when trying to move from palace
+[x] Look in to handling forest fires in disaster history
+[x] 0 build charges doesn't necessarily mean the unit does not support charges. Change the string
+[x] Transfer to city for great people should bring up a list similar to espionage and trade
+[x] Add confirmation dialogs for appointing governers and leaving mp staging room
 [ ] Get rid of screen reader interrupt on widget push
+[ ] Add support for real Era Tracker
 [ ] River flow direction reporting
 [ ] Look in to coastal raide yield reporting

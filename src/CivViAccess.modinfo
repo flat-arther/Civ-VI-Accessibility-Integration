@@ -78,6 +78,7 @@
     <File>UI/frontEnd/IntroScreen.lua</File>
     <File>UI/frontEnd/FrontEndPopup.lua</File>
     <File>UI/frontEnd/MainMenu.lua</File>
+    <File>UI/frontEnd/WorldBuilderMenu.lua</File>
     <File>UI/frontEnd/Mods.lua</File>
     <File>UI/frontEnd/CreditsScreen.lua</File>
     <File>UI/frontEnd/Multiplayer/Lobby.lua</File>
@@ -436,6 +437,7 @@
       <File>UI/frontEnd/FrontEndPopup.lua</File>
       <File>UI/frontEnd/FrontEnd.lua</File>
       <File>UI/frontEnd/MainMenu.lua</File>
+      <File>UI/frontEnd/WorldBuilderMenu.lua</File>
       <File>UI/frontEnd/Mods.lua</File>
       <File>UI/frontEnd/CreditsScreen.lua</File>
       <File>UI/frontEnd/Multiplayer/Lobby.lua</File>

@@ -11,12 +11,14 @@
 --               map's RevealedPlots table at load, then updated live as the Set
 --               Visibility tool reveals/hides plots (those edits do not reach
 --               disk until the next save).
---    * sight -- plots currently seen by placed units and cities, recomputed
---               from live placements with full line-of-sight whenever a unit or
---               city is added/removed/moved.
+--    * sight -- plots currently seen by placed units and owned territory,
+--               recomputed from live state when a unit, city, or tile owner
+--               changes.
 --
---  A plot is "revealed" for a player when it is in base OR sight. The manager is
---  published as ExposedMembers.CAI_WBVisManager and consumed by the cursor,
+--  World Builder visibility is binary, not gameplay's revealed/visible/mid-fog
+--  model. A plot is exposed when it is in base OR current sight; when sight
+--  leaves, it becomes hidden again unless Set Visibility explicitly revealed it.
+--  The manager is published as ExposedMembers.CAI_WBVisManager and consumed by the cursor,
 --  surveyor, world scanner, and plot tooltip through the shared reveal gate in
 --  caiUtils (GetWorldBuilderRevealGate), which activates only while the Set
 --  Visibility tool is armed on a player.
@@ -45,9 +47,7 @@ local VisManager = {}
 -- Rebuilt fresh each session (never guarded on a stale ExposedMembers value).
 local m_base = {}
 local m_sight = {}
-
--- Cities have no unit sight row; give the city centre a fixed reveal radius.
-local CITY_SIGHT_RANGE = 3
+local m_sightDirty = false
 
 -- ---------------------------------------------------------------------------
 -- Static sight data
@@ -239,9 +239,28 @@ local function AddSightFrom(plot, range, player)
     end
 end
 
--- Rebuild m_sight from every unit and city currently on the map.
+-- Normal Civ VI territory visibility is unconditional: a player can always
+-- see every plot inside their borders plus one tile beyond the border. This is
+-- separate from unit line of sight and applies even when a city owns a remote
+-- plot far outside its usual workable radius.
+local function AddTerritorySight(plot, player)
+    local set = EnsurePlayer(m_sight, player)
+    set[plot:GetIndex()] = true
+    local adjacent = Map.GetAdjacentPlots(plot:GetX(), plot:GetY())
+    if adjacent ~= nil then
+        for i = 1, 6 do
+            local adjacentPlot = adjacent[i]
+            if adjacentPlot ~= nil then
+                set[adjacentPlot:GetIndex()] = true
+            end
+        end
+    end
+end
+
+-- Rebuild m_sight from every unit and owned territory plot currently on the map.
 local function RecomputeAllSight()
     m_sight = {}
+    m_sightDirty = false
     if Map == nil or Map.GetPlotCount == nil then return end
 
     local count = Map.GetPlotCount()
@@ -257,14 +276,13 @@ local function RecomputeAllSight()
                     end
                 end
             end
-            if plot:IsCity() then
-                local owner = plot:GetOwner()
-                if owner ~= nil and owner >= 0 then
-                    AddSightFrom(plot, CITY_SIGHT_RANGE, owner)
-                end
+            local owner = plot:GetOwner()
+            if owner ~= nil and owner >= 0 then
+                AddTerritorySight(plot, owner)
             end
         end
     end
+
 end
 
 -- Only touch state while the World Builder is active.
@@ -327,25 +345,31 @@ end
 function VisManager.Reset()
     m_base = {}
     m_sight = {}
+    m_sightDirty = false
     m_tallDistricts = nil
 end
 
--- True when the plot is revealed for the player (seeded/manual base OR sighted).
+local function EnsureSightFresh()
+    if m_sightDirty and WBActive() then
+        RecomputeAllSight()
+    end
+end
+
+-- True when the plot is exposed for the player (seeded/manual base OR current
+-- sight). World Builder has no retained mid-fog state.
 function VisManager.IsRevealed(player, plotIndex)
     if player == nil or plotIndex == nil then return false end
+    EnsureSightFresh()
     local base = m_base[player]
     if base ~= nil and base[plotIndex] then return true end
     local sight = m_sight[player]
     return sight ~= nil and sight[plotIndex] == true
 end
 
--- True when the plot is currently sighted by one of the player's placements. In
--- the World Builder there is no fog memory, so consumers treat revealed and
--- visible alike; this is exposed for completeness.
+-- World Builder has only hidden and visible states, so this is deliberately the
+-- same query as IsRevealed. Manual/base reveals and live sight are both visible.
 function VisManager.IsVisible(player, plotIndex)
-    if player == nil or plotIndex == nil then return false end
-    local sight = m_sight[player]
-    return sight ~= nil and sight[plotIndex] == true
+    return VisManager.IsRevealed(player, plotIndex)
 end
 
 -- Set (or clear) a single plot's manual reveal for a player. Mirrors the Set
@@ -386,12 +410,21 @@ local function OnPlacementChanged()
     RecomputeAllSight()
 end
 
+local function OnCityPlacementChanged()
+    if not WBActive() then return end
+    -- CityAddedToMap can arrive before the new City Center is queryable. Mark
+    -- the cache dirty and rebuild on the next visibility read, after the event
+    -- and the World Builder creation call have completed.
+    m_sightDirty = true
+end
+
 Events.UnitAddedToMap.Add(OnPlacementChanged)
 Events.UnitRemovedFromMap.Add(OnPlacementChanged)
 Events.UnitMoved.Add(OnPlacementChanged)
 Events.UnitTeleported.Add(OnPlacementChanged)
-Events.CityAddedToMap.Add(OnPlacementChanged)
-Events.CityRemovedFromMap.Add(OnPlacementChanged)
+Events.CityAddedToMap.Add(OnCityPlacementChanged)
+Events.CityRemovedFromMap.Add(OnCityPlacementChanged)
+Events.CityTileOwnershipChanged.Add(OnCityPlacementChanged)
 
 -- Publish fresh each session per the ExposedMembers reload-staleness rule.
 ExposedMembers.CAI_WBVisManager = VisManager

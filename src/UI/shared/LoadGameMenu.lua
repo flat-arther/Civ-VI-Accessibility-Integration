@@ -596,6 +596,7 @@ local CAI_DirList = nil
 local CAI_DirDropdown = nil
 local CAI_SortDropdown = nil
 local CAI_QuickLoadDialog = nil
+local CAI_DirHistory = CreateDirectoryHistory()
 local m_CAIQuickloadId = Input.GetActionId("ReloadGame_CAI")
 CAI_LoadingFiles = false
 
@@ -678,6 +679,7 @@ local function ClosePanel()
     CAI_DirList = nil
     CAI_DirDropdown = nil
     CAI_SortDropdown = nil
+	CAI_DirHistory = CreateDirectoryHistory()
 end
 
 -- ---------------------------------------------------------------------------
@@ -686,7 +688,7 @@ end
 local function RebuildFileListAccessibility()
 	if not CAI_Panel then return end
 
-	local dirView = IsDirectoryView()
+	local dirView = IsDirectoryBrowser()
 
 	if CAI_SaveTree then
 		CAI_SaveTree:SetHiddenPredicate(function() return dirView end)
@@ -694,6 +696,7 @@ local function RebuildFileListAccessibility()
 	if CAI_DirList then
 		CAI_DirList:SetHiddenPredicate(function() return not dirView end)
 	end
+	RefreshDirectoryDropdown(CAI_DirDropdown)
 
 	local container = dirView and CAI_DirList or CAI_SaveTree
 	if not container then return end
@@ -720,8 +723,10 @@ local function RebuildFileListAccessibility()
 			})
 			child:SetFocusSound("Main_Menu_Mouse_Over")
 			child:On("activate", function()
-				SetSelected(idx)
-				OnActionButton()
+				DirectoryHistoryVisit(CAI_DirHistory, entry.Path, function()
+					SetSelected(idx)
+					OnActionButton()
+				end)
 			end)
 			container:AddChild(child)
 		else
@@ -762,7 +767,8 @@ local function RebuildFileListAccessibility()
 				end
 			end
 
-				local treeItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadSave"), "TreeItem", {
+			local itemType = dirView and "MenuItem" or "TreeItem"
+			local treeItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadSave"), itemType, {
 					Label = function() return GetEntryLabel(idx, entry) end,
 					Tooltip = function()
 						local parts = {}
@@ -796,18 +802,17 @@ local function RebuildFileListAccessibility()
 				Controls.ActionButton:DoLeftClick()
 				end)
 
-			PopulateTreeItemDetails(treeItem, entry)
+			if not dirView then
+				PopulateTreeItemDetails(treeItem, entry)
+			end
 
 			treeItem:AddInputBinding({
 				Key = Keys.VK_DELETE,
 				Description = "LOC_CAI_KB_DELETE_SAVE",
 				Action = function()
-					if not Controls.Delete:IsHidden() then
-						SetSelected(idx)
-						Controls.Delete:DoLeftClick()
-						return true
-					end
-					return false
+					SetSelected(idx)
+					Controls.Delete:DoLeftClick()
+					return true
 				end
 			})
 
@@ -817,13 +822,6 @@ local function RebuildFileListAccessibility()
 
 
 
-	if CAI_DirDropdown then
-		local options, selectedIdx = BuildDirectoryOptions()
-		CAI_DirDropdown:SetOptions(options)
-		if selectedIdx > 0 then
-			CAI_DirDropdown:SetSelectedIndex(selectedIdx, true)
-		end
-	end
 	mgr:RestoreFocus(container, capture)
 end
 
@@ -834,6 +832,9 @@ local function BuildPanel()
 	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenu"), "Panel", {
 		Label = function() return Controls.WindowHeader:GetText() end,
 	})
+	if IsDirectoryBrowser() then
+		AddDirectoryHistoryBindings(CAI_Panel, CAI_DirHistory)
+	end
 
 
 	-- 1. Directory dropdown (hidden when not applicable)
@@ -847,16 +848,24 @@ local function BuildPanel()
 	CAI_DirDropdown:On("value_changed", function(self, val)
 		if not val then return end
 		if val.type == "level" then
-			ChangeDirectoryLevelTo(val.level)
+			local targetPath = UI.TruncatePathLevels(
+				SaveLocations.LOCAL_STORAGE, g_CurrentDirectoryPath, val.level)
+			DirectoryHistoryVisit(CAI_DirHistory, targetPath, function()
+				ChangeDirectoryLevelTo(val.level)
+			end)
 		elseif val.type == "volume" then
-			ChangeVolumeTo(val.name)
+			DirectoryHistoryVisit(CAI_DirHistory, val.name, function()
+				ChangeVolumeTo(val.name)
+			end)
 		end
 	end)
+	RefreshDirectoryDropdown(CAI_DirDropdown)
 	CAI_Panel:AddChild(CAI_DirDropdown)
 
 	-- 2a. Save tree (shown when not in directory view)
 	CAI_SaveTree = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadSaves"), "Tree", {
 		Label = function() return Controls.WindowHeader:GetText() end,
+		HiddenPredicate = function() return IsDirectoryBrowser() end,
 	})
 
 	
@@ -865,7 +874,7 @@ local function BuildPanel()
 	-- 2b. Directory list (shown when in directory view)
 	CAI_DirList = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadDirs"), "List", {
 		Label = function() return Controls.WindowHeader:GetText() end,
-		HiddenPredicate = function() return true end,
+		HiddenPredicate = function() return not IsDirectoryBrowser() end,
 	})
 	CAI_Panel:AddChild(CAI_DirList)
 
@@ -1015,6 +1024,7 @@ OnShow = WrapFunc(OnShow, function(orig, ...)
 	CAI_DirList = nil
 	CAI_DirDropdown = nil
 	CAI_SortDropdown = nil
+	CAI_DirHistory = CreateDirectoryHistory()
 	BuildPanel()
 	UITutorialManager:AddControlToAlwaysReceiveInput(ContextPtr)
 end)
@@ -1026,6 +1036,14 @@ OnHide = WrapFunc(OnHide, function(orig, ...)
 end)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
+	if IsDirectoryBrowser() and mgr:GetTop() == CAI_Panel then
+		local focused = mgr:GetFocusedWidget()
+		local editingFileName = focused ~= nil and focused.Type == "EditBox"
+		if not (editingFileName and input:GetKey() == Keys.VK_BACK and not input:IsAltDown())
+			and HandleDirectoryHistoryInput(input, CAI_DirHistory) then
+			return true
+		end
+	end
 	if mgr:HandleInput(input) then return true end
 	return orig(input)
 end)

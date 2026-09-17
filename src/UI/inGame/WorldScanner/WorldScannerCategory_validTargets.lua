@@ -51,6 +51,7 @@ CAIWorldScannerCategory_ValidTargets = {
     end,
     CanScan = function()
         if WorldBuilderSourcePlot() ~= nil then return true end
+        if UI.GetInterfaceMode() == InterfaceModeTypes.TELEPORT_TO_CITY then return false end
         if CAIInterfaceTargets == nil then return false end
         if CAIInterfaceTargets.IsSupportedMode ~= nil and CAIInterfaceTargets.IsSupportedMode() then
             return true
@@ -128,6 +129,12 @@ function CAIWorldScannerCategory_ValidTargets.Scan(context)
     local sourcePlot = WorldBuilderSourcePlot()
     if sourcePlot ~= nil then
         return ScanWorldBuilderFootprint(sourcePlot)
+    end
+
+    -- Trader and Great Person city transfers use dedicated destination lists.
+    -- Suppress passive Great Person activation plots as well as active targets.
+    if UI.GetInterfaceMode() == InterfaceModeTypes.TELEPORT_TO_CITY then
+        return {}
     end
 
     local out = {}
