@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP" Language="zh_Hans_CN"><Text>首次进入时聚焦标签栏</Text></Row>
+    <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP_TOOLTIP" Language="zh_Hans_CN"><Text>首次进入标签控件时，将焦点置于当前标签而非页面内容。</Text></Row>
     <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION" Language="zh_Hans_CN"><Text>朗读存在警告的城市数量</Text></Row>
-    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION_TOOLTIP" Language="zh_Hans_CN"><Text>朗读您存在住房、宜居度、食物、忠诚度、电力、占领或围城警告的城市数量。</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION_TOOLTIP" Language="zh_Hans_CN"><Text>朗读您存在住房、宜居度、食物、忠诚度、电力或围城警告的城市数量。</Text></Row>
     <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION" Language="zh_Hans_CN"><Text>朗读所有城市警告</Text></Row>
-    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION_TOOLTIP" Language="zh_Hans_CN"><Text>朗读每座受影响城市的名称及其住房、宜居度、食物、忠诚度、电力、占领和围城警告。</Text></Row>
-    <Row Tag="LOC_CAI_CITY_WARNINGS_COUNT" Language="zh_Hans_CN"><Text>存在警告的城市：{1_Count}</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION_TOOLTIP" Language="zh_Hans_CN"><Text>朗读每座受影响城市的名称及其住房、宜居度、食物、忠诚度、电力和围城警告。</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_COUNT" Language="zh_Hans_CN"><Text>{1_Count}条城市警告</Text></Row>
     <Row Tag="LOC_CAI_CITY_WARNINGS_NONE" Language="zh_Hans_CN"><Text>没有城市存在警告。</Text></Row>
     <!-- 简体中文 -->
 
@@ -8015,5 +8017,11 @@
     <Replace Tag="LOC_CAI_WB_REVEAL_ALL" Language="zh_Hans_CN">
       <Text>显示全部</Text>
     </Replace>
+    <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS" Language="zh_Hans_CN">
+      <Text>在多人游戏中显示科技和市政弹窗</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS_TOOLTIP" Language="zh_Hans_CN">
+      <Text>在联网多人游戏中自动显示科技和市政完成以及尤里卡和鼓舞触发的弹窗。弹窗不会暂停回合计时器。</Text>
+    </Row>
   </LocalizedText>
 </GameData>

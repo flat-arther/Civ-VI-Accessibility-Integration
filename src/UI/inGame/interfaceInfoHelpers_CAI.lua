@@ -1367,18 +1367,6 @@ local function BuildSettlerLensPlotInfo(plot)
             lines[#lines + 1] = Locale.Lookup("LOC_CAI_WORLD_SCANNER_SETTLER_DISASTER_VOLCANO")
         end
 
-        if TerrainManager ~= nil and TerrainManager.GetCoastalLowlandType ~= nil and TerrainManager.IsProtected ~= nil then
-            if not TerrainManager.IsProtected(plot) then
-                local coastalLowlandType = TerrainManager.GetCoastalLowlandType(plot)
-                if coastalLowlandType == 0 then
-                    lines[#lines + 1] = Locale.Lookup("LOC_COASTAL_LOWLAND_1M_NAME")
-                elseif coastalLowlandType == 1 then
-                    lines[#lines + 1] = Locale.Lookup("LOC_COASTAL_LOWLAND_2M_NAME")
-                elseif coastalLowlandType == 2 then
-                    lines[#lines + 1] = Locale.Lookup("LOC_COASTAL_LOWLAND_3M_NAME")
-                end
-            end
-        end
     end
 
     return #lines > 0 and lines or nil

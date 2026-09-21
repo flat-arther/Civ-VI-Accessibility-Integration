@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP" Language="pt_BR"><Text>Focar as abas na primeira entrada</Text></Row>
+    <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP_TOOLTIP" Language="pt_BR"><Text>Ao entrar em um controle de abas pela primeira vez, foca a aba ativa em vez do conteúdo da página.</Text></Row>
     <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION" Language="pt_BR"><Text>Ler quantidade de cidades com avisos</Text></Row>
-    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION_TOOLTIP" Language="pt_BR"><Text>Lê quantas das suas cidades têm avisos de habitação, serviços, alimento, lealdade, energia, ocupação ou cerco.</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION_TOOLTIP" Language="pt_BR"><Text>Lê quantas das suas cidades têm avisos de habitação, serviços, alimento, lealdade, energia ou cerco.</Text></Row>
     <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION" Language="pt_BR"><Text>Ler todos os avisos das cidades</Text></Row>
-    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION_TOOLTIP" Language="pt_BR"><Text>Lê cada cidade afetada e seus avisos de habitação, serviços, alimento, lealdade, energia, ocupação e cerco.</Text></Row>
-    <Row Tag="LOC_CAI_CITY_WARNINGS_COUNT" Language="pt_BR"><Text>Cidades com avisos: {1_Count}</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION_TOOLTIP" Language="pt_BR"><Text>Lê cada cidade afetada e seus avisos de habitação, serviços, alimento, lealdade, energia e cerco.</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_COUNT" Language="pt_BR"><Text>{1_Count} avisos de cidades</Text></Row>
     <Row Tag="LOC_CAI_CITY_WARNINGS_NONE" Language="pt_BR"><Text>Nenhuma cidade com avisos.</Text></Row>
     <!-- PORTUGUESE (BRAZIL) -->
 
@@ -8010,5 +8012,11 @@
     <Replace Tag="LOC_CAI_WB_REVEAL_ALL" Language="pt_BR">
       <Text>Revelar tudo</Text>
     </Replace>
+    <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS" Language="pt_BR">
+      <Text>Mostrar janelas de pesquisa e cívicos no multijogador</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS_TOOLTIP" Language="pt_BR">
+      <Text>Mostra automaticamente as janelas de conclusão e de impulsos de tecnologias e cívicos em partidas multijogador em rede. As janelas não pausam o cronômetro do turno.</Text>
+    </Row>
   </LocalizedText>
 </GameData>

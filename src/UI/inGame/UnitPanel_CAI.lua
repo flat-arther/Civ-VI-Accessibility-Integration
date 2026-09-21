@@ -2319,15 +2319,23 @@ local function GetBuildUnitActionEntries(data)
 end
 
 local function CreateUnitActionMenuItem(currentAction)
+    local function IsAlreadyInMovementMode()
+        return currentAction.userTag == UnitOperationTypes.MOVE_TO
+            and UI.GetInterfaceMode() == InterfaceModeTypes.MOVE_TO
+    end
+
     local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitPanelMenuItem"), "MenuItem", {
         GetLabel = function()
             return GetUnitActionLabelWithBinding(currentAction)
         end,
         GetTooltip = function()
+            if IsAlreadyInMovementMode() then
+                return Locale.Lookup("LOC_CAI_UNIT_ALREADY_IN_MOVEMENT_MODE")
+            end
             return GetUnitActionTooltip(currentAction)
         end,
         DisabledPredicate = function()
-            return currentAction.Disabled == true
+            return currentAction.Disabled == true or IsAlreadyInMovementMode()
         end,
     })
     w:SetFocusSound("Main_Menu_Mouse_Over")

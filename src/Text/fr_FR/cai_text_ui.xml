@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP" Language="fr_FR"><Text>Placer le focus sur les onglets au premier accès</Text></Row>
+    <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP_TOOLTIP" Language="fr_FR"><Text>Au premier accès à un groupe d’onglets, place le focus sur l’onglet actif plutôt que sur le contenu de la page.</Text></Row>
     <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION" Language="fr_FR"><Text>Lire le nombre de villes avec des alertes</Text></Row>
-    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION_TOOLTIP" Language="fr_FR"><Text>Annonce le nombre de vos villes avec des alertes de logements, d'activités, de nourriture, de loyauté, d'électricité, d'occupation ou de siège.</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION_TOOLTIP" Language="fr_FR"><Text>Annonce le nombre de vos villes avec des alertes de logements, d'activités, de nourriture, de loyauté, d'électricité ou de siège.</Text></Row>
     <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION" Language="fr_FR"><Text>Lire toutes les alertes des villes</Text></Row>
-    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION_TOOLTIP" Language="fr_FR"><Text>Annonce chaque ville concernée et ses alertes de logements, d'activités, de nourriture, de loyauté, d'électricité, d'occupation et de siège.</Text></Row>
-    <Row Tag="LOC_CAI_CITY_WARNINGS_COUNT" Language="fr_FR"><Text>Villes avec des alertes : {1_Count}</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION_TOOLTIP" Language="fr_FR"><Text>Annonce chaque ville concernée et ses alertes de logements, d'activités, de nourriture, de loyauté, d'électricité et de siège.</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_COUNT" Language="fr_FR"><Text>{1_Count} alertes de villes</Text></Row>
     <Row Tag="LOC_CAI_CITY_WARNINGS_NONE" Language="fr_FR"><Text>Aucune ville avec des alertes.</Text></Row>
     <!-- FRENCH -->
 
@@ -7998,5 +8000,11 @@
     <Replace Tag="LOC_CAI_WB_GOTO_OUT_OF_BOUNDS" Language="fr_FR">
       <Text>Ces coordonnées sont hors limites.</Text>
     </Replace>
+    <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS" Language="fr_FR">
+      <Text>Afficher les fenêtres de recherche et de dogmes en multijoueur</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS_TOOLTIP" Language="fr_FR">
+      <Text>Affiche automatiquement les fenêtres de technologies et de dogmes terminés ainsi que leurs optimisations en multijoueur en réseau. Ces fenêtres ne mettent pas en pause le chronomètre du tour.</Text>
+    </Row>
   </LocalizedText>
 </GameData>

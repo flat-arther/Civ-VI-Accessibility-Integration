@@ -12,7 +12,7 @@ local m_bodySearchText    = {}
 
 local m_state            = {
     userSwitchedFocus = false,
-    isOpeningOnHistoryPage = false,
+    isOpeningWithoutTarget = false,
     pageHeader = "",
     pageSubHeader = "",
     chapters = {},
@@ -363,6 +363,7 @@ local function CreatePageNode(sectionId, pageId, label)
         mgr:GenerateWidgetId("CAIPediaPage"),
         "TreeItem",
         {
+            FocusKey = PageKey(sectionId, pageId),
             Label = function() return label or "" end,
         })
     node:SetFocusSound(HOVER_SOUND)
@@ -1002,11 +1003,14 @@ end
 
 -- Resolve the widget initial focus should land on when the panel is pushed.
 local function ResolveInitialFocus()
-    if not m_state.isOpeningOnHistoryPage and ArticleHasContent() then
-        return m_ui.articleTree
-    end
     local sid, pid = GetCurrentPage()
     local node = sid and pid and m_ui.pageNodes[PageKey(sid, pid)] or nil
+    if not m_state.isOpeningWithoutTarget and ArticleHasContent() then
+        if node then
+            mgr:PrepareFocus(m_ui.sectionsTree, node.FocusKey)
+        end
+        return m_ui.articleTree
+    end
     return node or m_ui.sectionsTree
 end
 
@@ -1015,7 +1019,7 @@ local function PushPanel()
         mgr:Push(m_ui.panel,
             { priority = PopupPriority.Current, focus = ResolveInitialFocus() })
     end
-    m_state.isOpeningOnHistoryPage = false
+    m_state.isOpeningWithoutTarget = false
 end
 
 local function PopPanel()
@@ -1228,7 +1232,7 @@ ContextPtr:SetInputHandler(OnInputHandler, true)
 local _origOnOpenCivilopedia = OnOpenCivilopedia
 OnOpenCivilopedia = WrapFunc(OnOpenCivilopedia, function(orig, sectionIdOrSearch, pageId)
     EnsureRootBuilt()
-    m_state.isOpeningOnHistoryPage = sectionIdOrSearch == nil and pageId == nil and #m_state.history.pages > 0
+    m_state.isOpeningWithoutTarget = sectionIdOrSearch == nil and pageId == nil
     orig(sectionIdOrSearch, pageId)
     PushPanel()
     UITutorialManager:AddControlToAlwaysReceiveInput(ContextPtr)

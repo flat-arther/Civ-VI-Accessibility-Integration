@@ -98,9 +98,6 @@ local function GetCityWarningParts(city, player)
             Add("LOC_POWER_STATUS_UNPOWERED_NAME")
         end
     end
-    if city:IsOccupied() then
-        Add("LOC_CAI_CITY_STATUS_OCCUPIED")
-    end
     local district = player:GetDistricts():FindID(city:GetDistrictID())
     if district then
         if district:IsUnderSiege() then

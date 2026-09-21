@@ -1017,9 +1017,12 @@ detached from the children list. `SetActivePage(i)` swaps slot 2.
 
 ### Navigation
 
-- First-time entry into the TabControl (no prior focus inside) lands on the
-  active page, not the tab strip. `GetDefaultChild` / `GetEntryChild` both
-  return the active page.
+- Programmatic entry defaults to the active page. The UI setting
+  `FocusTabStripOnFirstEntry` (default false) uses normal cached child resolution
+  instead: first entry lands on the strip, subsequent entries restore remembered
+  focus. History belongs to the widget instance; recreated controls start fresh.
+  Explicit focus targets still take precedence. Forward Tab enters the strip;
+  backward Shift+Tab enters the page regardless of this setting.
 - Left/Right within the strip cycles tabs and immediately activates the
   page (via the `focus_enter` → `_OnTabFocused` hook on each Tab).
 - `Ctrl+Tab` / `Ctrl+Shift+Tab` cycles tabs from anywhere inside the

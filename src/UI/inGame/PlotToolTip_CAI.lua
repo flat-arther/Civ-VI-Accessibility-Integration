@@ -1182,7 +1182,7 @@ info.PlotInfoHelpers = {
     end,
 
     districtSpecialistsHeader = function(data)
-        if not data.IsVisible or data.DistrictID == -1 or data.DistrictType == nil then return nil end
+        if not data.IsVisible or data.IsCity == true or data.DistrictID == -1 or data.DistrictType == nil then return nil end
         if GameInfo.Districts[data.DistrictType] == nil or GameInfo.Districts[data.DistrictType].InternalOnly then
             return nil
         end
@@ -1496,7 +1496,7 @@ info.PlotInfoHelpers = {
     end,
 
     districtSpecialistYields = function(data)
-        if not data.IsVisible or data.DistrictID == -1 or data.DistrictType == nil then return nil end
+        if not data.IsVisible or data.IsCity == true or data.DistrictID == -1 or data.DistrictType == nil then return nil end
         local districtInfo = GameInfo.Districts[data.DistrictType]
         if districtInfo == nil or districtInfo.InternalOnly or data.Owner ~= Game.GetLocalPlayer() then
             return nil
@@ -1510,7 +1510,7 @@ info.PlotInfoHelpers = {
     end,
 
     districtYields = function(data)
-        if not data.IsVisible or data.DistrictID == -1 or data.DistrictType == nil then return nil end
+        if not data.IsVisible or data.IsCity == true or data.DistrictID == -1 or data.DistrictType == nil then return nil end
         local districtInfo = GameInfo.Districts[data.DistrictType]
         if districtInfo == nil or districtInfo.InternalOnly then
             return nil
@@ -1569,7 +1569,8 @@ info.PlotInfoHelpers = {
 }
 
 local function HasDistrictDetails(data)
-    if data.DistrictID == -1 or data.DistrictType == nil then
+    -- Vanilla handles city centers before the mutually exclusive district branch.
+    if data.IsCity == true or data.DistrictID == -1 or data.DistrictType == nil then
         return false
     end
 

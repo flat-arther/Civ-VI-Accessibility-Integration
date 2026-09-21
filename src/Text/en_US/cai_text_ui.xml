@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_UNIT_ALREADY_IN_MOVEMENT_MODE" Language="en_US"><Text>Already in movement mode</Text></Row>
+    <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP" Language="en_US"><Text>Focus tab strip on first entry</Text></Row>
+    <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP_TOOLTIP" Language="en_US"><Text>When entering a tab control for the first time, focus its active tab instead of the page contents.</Text></Row>
     <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION" Language="en_US"><Text>Read city warning count</Text></Row>
-    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION_TOOLTIP" Language="en_US"><Text>Read the number of your cities with housing, amenities, food, loyalty, power, occupation, or siege warnings.</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION_TOOLTIP" Language="en_US"><Text>Read the number of your cities with housing, amenities, food, loyalty, power, or siege warnings.</Text></Row>
     <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION" Language="en_US"><Text>Read all city warnings</Text></Row>
-    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION_TOOLTIP" Language="en_US"><Text>Read each affected city and its housing, amenities, food, loyalty, power, occupation, and siege warnings.</Text></Row>
-    <Row Tag="LOC_CAI_CITY_WARNINGS_COUNT" Language="en_US"><Text>Cities with warnings: {1_Count}</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION_TOOLTIP" Language="en_US"><Text>Read each affected city and its housing, amenities, food, loyalty, power, and siege warnings.</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_COUNT" Language="en_US"><Text>{1_Count} city warnings</Text></Row>
     <Row Tag="LOC_CAI_CITY_WARNINGS_NONE" Language="en_US"><Text>No cities with warnings.</Text></Row>
     <!-- ENGLISH -->
 
@@ -8028,6 +8031,12 @@
     </Row>
     <Row Tag="LOC_CAI_WB_GOTO_OUT_OF_BOUNDS" Language="en_US">
       <Text>Those coordinates are out of bounds.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS" Language="en_US">
+      <Text>Show research and civic popups in multiplayer</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS_TOOLTIP" Language="en_US">
+      <Text>Automatically show technology and civic completion and boost popups in network multiplayer. Popups do not pause the turn timer.</Text>
     </Row>
   </LocalizedText>
 </GameData>

@@ -72,6 +72,10 @@ local function ShouldAutoSpeakCurrentAction()
     if IsBetweenTurns() then
         return CAISettings.GetBool("SpeakBetweenTurnsMessage")
     end
+    if NotificationManager.GetFirstEndTurnBlocking(Game.GetLocalPlayer())
+        == EndTurnBlockingTypes.ENDTURN_BLOCKING_UNIT_NEEDS_ORDERS then
+        return true
+    end
     return CAISettings.GetBool("SpeakTurnBlockers")
 end
 
@@ -464,7 +468,28 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
 
     if actionId == CAI_END_TURN_ACTION or actionId == END_TURN_ACTION then
         if not IsEndTurnActionEnabled() then return end
+        local playerID = Game.GetLocalPlayer()
+        local player = Players[playerID]
+        local blocker = NotificationManager.GetFirstEndTurnBlocking(playerID)
+        local selectsUnit = player ~= nil
+            and not (player:CanUnreadyTurn() and not UI.IsTurnTimerElapsed(playerID))
+            and not UI.IsProcessingMessages()
+            and (blocker == EndTurnBlockingTypes.ENDTURN_BLOCKING_UNIT_NEEDS_ORDERS
+                or blocker == EndTurnBlockingTypes.ENDTURN_BLOCKING_UNITS
+                or blocker == EndTurnBlockingTypes.ENDTURN_BLOCKING_STACKED_UNITS
+                or (blocker == EndTurnBlockingTypes.NO_ENDTURN_BLOCKING and CheckUnitsHaveMovesState()))
+        local selected = UI.GetHeadSelectedUnit()
+        local previousOwner = selected and selected:GetOwner()
+        local previousID = selected and selected:GetID()
         orig(END_TURN_ACTION)
+        if selectsUnit then
+            selected = UI.GetHeadSelectedUnit()
+            if selected == nil then
+                Speak(Locale.Lookup("LOC_CAI_NO_READY_UNITS"))
+            elseif selected:GetOwner() == previousOwner and selected:GetID() == previousID then
+                Speak(Locale.Lookup("LOC_CAI_NO_MORE_UNITS", Locale.Lookup(selected:GetName())))
+            end
+        end
         return
     end
 end)

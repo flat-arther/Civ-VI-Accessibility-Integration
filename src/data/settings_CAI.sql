@@ -47,6 +47,9 @@ VALUES
     ('SpeakRole', 'UI', 30, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_ROLE', 'LOC_CAI_SETTING_SPEAK_ROLE_TOOLTIP', NULL),
 
+    ('FocusTabStripOnFirstEntry', 'UI', 35, 'bool', 'checkbox', 'false',
+     'LOC_CAI_SETTING_FOCUS_TAB_STRIP', 'LOC_CAI_SETTING_FOCUS_TAB_STRIP_TOOLTIP', NULL),
+
     ('AutoFocusFirstSearchResult', 'UI', 40, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_AUTO_FOCUS_FIRST_SEARCH_RESULT', 'LOC_CAI_SETTING_AUTO_FOCUS_FIRST_SEARCH_RESULT_TOOLTIP', NULL),
 
@@ -189,7 +192,10 @@ VALUES
      'LOC_CAI_SETTING_WRAP_CITY_CYCLING', 'LOC_CAI_SETTING_WRAP_CITY_CYCLING_TOOLTIP', NULL),
 
     ('CityCyclingFollowReportSort', 'Gameplay', 40, 'bool', 'checkbox', 'true',
-     'LOC_CAI_SETTING_CITY_CYCLING_FOLLOW_SORT', 'LOC_CAI_SETTING_CITY_CYCLING_FOLLOW_SORT_TOOLTIP', NULL);
+     'LOC_CAI_SETTING_CITY_CYCLING_FOLLOW_SORT', 'LOC_CAI_SETTING_CITY_CYCLING_FOLLOW_SORT_TOOLTIP', NULL),
+
+    ('ShowResearchPopupsInMultiplayer', 'Gameplay', 50, 'bool', 'checkbox', 'false',
+     'LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS', 'LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS_TOOLTIP', NULL);
 
 INSERT OR REPLACE INTO CAI_Settings
     (SettingId, Section, SortIndex, ValueType, UIType, DefaultValue, Label, Tooltip,
