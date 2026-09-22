@@ -1,6 +1,6 @@
 -- CAIWidget_Dropdown.lua
 -- A dropdown whose options live in a child List of MenuItems. Closed by
--- default: arrow keys bubble; only Enter is consumed and it opens the
+-- default: arrow keys bubble; Enter or Space is consumed and opens the
 -- dropdown. Opening unhides the inner list and focuses the menu item that
 -- matches the committed selection. The list's label mirrors the dropdown
 -- label so re-entry announces context; its position-in-parent is suppressed
@@ -111,6 +111,13 @@ function DropdownWidget.Create(mgr, id, props)
             end,
         },
         {
+            Key = Keys.VK_SPACE,
+            Description = "LOC_CAI_KB_OPEN_DROPDOWN",
+            Action = function(self)
+                if self._isOpen then return false end
+                self:Open()
+                return true
+            end,
         },
     })
 
@@ -253,6 +260,14 @@ function DropdownWidget:SetSelectedIndex(index, silent)
     if index == 0 then return end
     self._selectedIndex = index
     self:SetValue(self._options[index].value, silent)
+end
+
+---Clear the selection so the dropdown reads as unset (mirrors a vanilla PullDown
+---set to index 0). The value getter returns "" while _selectedIndex is 0.
+---@param silent? boolean
+function DropdownWidget:ClearSelection(silent)
+    self._selectedIndex = 0
+    self:SetValue(nil, silent)
 end
 
 ---@return integer

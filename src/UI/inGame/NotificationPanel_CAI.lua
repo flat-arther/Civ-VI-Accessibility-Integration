@@ -29,6 +29,13 @@ local m_messageList                    = nil ---@type ListWidget|nil
 local m_tutorialAlwaysReceiveInput     = false
 local m_caiAnnouncedNotificationIDs    = {}
 local m_caiDeferedNotificationAnnounce = {}
+local m_researchNotifications = {}
+local RESEARCH_NOTIFICATION_TYPES = {
+    [NotificationTypes.TECH_DISCOVERED] = true,
+    [NotificationTypes.CIVIC_DISCOVERED] = true,
+    [NotificationTypes.TECH_BOOST] = true,
+    [NotificationTypes.CIVIC_BOOST] = true,
+}
 
 local function GetLocalPlayer()
     local playerID = Game.GetLocalPlayer()
@@ -564,7 +571,52 @@ local function DeferNotification(playerID, notificationID)
     end
 end
 
-local function SpeakNotificationAdded(playerID, notificationID)
+local function ResearchPopupsEnabled()
+    return IsCAIActive() and GameConfiguration.IsNetworkMultiplayer()
+        and CAISettings.GetBool("ShowResearchPopupsInMultiplayer")
+end
+
+local function GetResearchNotificationState(playerID, notificationID)
+    if playerID ~= GetLocalPlayer() then return nil end
+    local notification = GetLiveNotification(playerID, notificationID)
+    if not notification or not RESEARCH_NOTIFICATION_TYPES[notification:GetType()] then return nil end
+    local playerState = m_researchNotifications[playerID]
+    if not playerState then
+        playerState = {}
+        m_researchNotifications[playerID] = playerState
+    end
+    local state = playerState[notificationID]
+    if not state then
+        state = {}
+        playerState[notificationID] = state
+    end
+    return state
+end
+
+-- Keep automatic engine activation and CAI presentation on the same path.
+-- Explicit user activation must still allow reopening a notification.
+OnNotificationActivated = WrapFunc(OnNotificationActivated, function(orig, playerID, notificationID, activatedByUser)
+    local state = GetResearchNotificationState(playerID, notificationID)
+    if state and GetNotificationEntry(playerID, notificationID) ~= nil then
+        if not activatedByUser and state.presented and ResearchPopupsEnabled() then return end
+        state.presented = true
+    end
+    orig(playerID, notificationID, activatedByUser)
+end)
+
+-- Refresh replays existing notifications through OnNotificationAdded.
+OnNotificationRefreshRequested = WrapFunc(OnNotificationRefreshRequested, function(orig, ...)
+    local playerID = GetLocalPlayer()
+    if playerID ~= nil then
+        for _, notificationID in ipairs(NotificationManager.GetList(playerID) or {}) do
+            local state = GetResearchNotificationState(playerID, notificationID)
+            if state then state.added = true end
+        end
+    end
+    return orig(...)
+end)
+
+local function SpeakNotificationAdded(playerID, notificationID, shouldSpeak)
     if ContextPtr:IsHidden() then return end
     if playerID ~= GetLocalPlayer() then return end
     if m_caiAnnouncedNotificationIDs[notificationID] then return end
@@ -606,7 +658,7 @@ local function SpeakNotificationAdded(playerID, notificationID)
     end
     local location
     if x and y then location = { x = x, y = y } end
-    LuaEvents.CAIAppendToMessageBuffer(line, "notification", location)
+    LuaEvents.CAIAppendToMessageBuffer(line, "notification", location, shouldSpeak)
 end
 
 local function PlayDefaultNotificationSound(playerID, notificationID)
@@ -630,16 +682,28 @@ local function PlayDefaultNotificationSound(playerID, notificationID)
 end
 
 OnNotificationAdded = WrapFunc(OnNotificationAdded, function(orig, playerID, notificationID)
+    local state = GetResearchNotificationState(playerID, notificationID)
+    local isNewResearch = state ~= nil and not state.added
+    if state then state.added = true end
     orig(playerID, notificationID)
     PlayDefaultNotificationSound(playerID, notificationID)
     if playerID == GetLocalPlayer() and m_centerTree then
         RebuildNotificationTree()
     end
-    SpeakNotificationAdded(playerID, notificationID)
+    local showResearch = isNewResearch and m_IsGameStarted and ResearchPopupsEnabled()
+        and IsNotificationAvailable(GetLiveNotification(playerID, notificationID), notificationID, playerID)
+    SpeakNotificationAdded(playerID, notificationID, not showResearch)
+    if showResearch then
+        -- Dispatch locally through the composed vanilla handler. Do not simulate
+        -- a user click or change the notification's engine activation policy.
+        OnNotificationActivated(playerID, notificationID, false)
+    end
 end)
 
 OnNotificationDismissed = WrapFunc(OnNotificationDismissed, function(orig, playerID, notificationID)
     orig(playerID, notificationID)
+    local researchState = m_researchNotifications[playerID]
+    if researchState then researchState[notificationID] = nil end
     if playerID == GetLocalPlayer() then
         m_caiAnnouncedNotificationIDs[notificationID] = nil
         if m_centerTree then RebuildNotificationTree() end

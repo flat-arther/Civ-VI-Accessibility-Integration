@@ -126,6 +126,9 @@ mgr:RemoveFromStack("ModalRoot", false) -- parent refresh immediately chooses fi
   moves focus to the final destination; this prevents speaking an obsolete
   intermediate focus before the parent refresh completes.
 - The active root is always the top of the stack. Focus follows automatically.
+- Push, pop, removal, and other stack-driven root changes do not silence speech
+  already in progress. Their focus announcements use the normal non-interrupting
+  speech queue.
 
 ### Settings and replacement child views
 
@@ -687,7 +690,7 @@ dropdown's only child). The list is hidden via a hidden predicate keyed on
 `_isOpen`, so when closed the dropdown has no navigable children and arrow
 keys bubble to the enclosing list/panel.
 
-Enter on a closed dropdown calls `Open()`: unhides the list, focuses the
+Enter or Space on a closed dropdown calls `Open()`: unhides the list, focuses the
 MenuItem matching the committed selection, emits `opened`. Inside the open
 list the existing List navigation handles Up/Down/Home/End/PageUp/PageDown
 and type-to-find with wrap-around — no preview state to maintain. Activating
@@ -1017,9 +1020,12 @@ detached from the children list. `SetActivePage(i)` swaps slot 2.
 
 ### Navigation
 
-- First-time entry into the TabControl (no prior focus inside) lands on the
-  active page, not the tab strip. `GetDefaultChild` / `GetEntryChild` both
-  return the active page.
+- Programmatic entry defaults to the active page. The UI setting
+  `FocusTabStripOnFirstEntry` (default false) uses normal cached child resolution
+  instead: first entry lands on the strip, subsequent entries restore remembered
+  focus. History belongs to the widget instance; recreated controls start fresh.
+  Explicit focus targets still take precedence. Forward Tab enters the strip;
+  backward Shift+Tab enters the page regardless of this setting.
 - Left/Right within the strip cycles tabs and immediately activates the
   page (via the `focus_enter` → `_OnTabFocused` hook on each Tab).
 - `Ctrl+Tab` / `Ctrl+Shift+Tab` cycles tabs from anywhere inside the
@@ -1575,7 +1581,7 @@ When migrating a screen from the old template-merged manager:
 | EditBox        | Enter → BeginEdit/Commit (EnterToCommit=false makes Enter bubble); Esc → Cancel; full text-editing set |
 | TabControl     | Ctrl+Tab / Ctrl+Shift+Tab → cycle pages                       |
 | Tab strip      | Left / Right (via HorizontalList) cycles tabs and switches    |
-| Dropdown       | Closed: Enter → open. Open: List nav on inner items;           |
+| Dropdown       | Closed: Enter/Space → open. Open: List nav on inner items;     |
 |                | Enter on item → commit + close; Esc → close without commit     |
 | Grid           | Up/Down → within tier; Left/Right → across tiers; Home/End →  |
 |                | tier edge; Ctrl+Home/End → grid edge; Ctrl+Left/Right → column |

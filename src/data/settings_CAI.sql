@@ -47,6 +47,9 @@ VALUES
     ('SpeakRole', 'UI', 30, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_ROLE', 'LOC_CAI_SETTING_SPEAK_ROLE_TOOLTIP', NULL),
 
+    ('FocusTabStripOnFirstEntry', 'UI', 35, 'bool', 'checkbox', 'false',
+     'LOC_CAI_SETTING_FOCUS_TAB_STRIP', 'LOC_CAI_SETTING_FOCUS_TAB_STRIP_TOOLTIP', NULL),
+
     ('AutoFocusFirstSearchResult', 'UI', 40, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_AUTO_FOCUS_FIRST_SEARCH_RESULT', 'LOC_CAI_SETTING_AUTO_FOCUS_FIRST_SEARCH_RESULT_TOOLTIP', NULL),
 
@@ -125,9 +128,6 @@ VALUES
     ('SpeakContinentZone', 'Cursor', 80, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_SPEAK_CONTINENT_ZONE', 'LOC_CAI_SETTING_SPEAK_CONTINENT_ZONE_TOOLTIP', NULL),
 
-    ('SpeakNationalParkZone', 'Cursor', 90, 'bool', 'checkbox', 'true',
-     'LOC_CAI_SETTING_SPEAK_NATIONAL_PARK_ZONE', 'LOC_CAI_SETTING_SPEAK_NATIONAL_PARK_ZONE_TOOLTIP', NULL),
-
     ('AnnounceVisibilityChangesTurnStart', 'Events', 30, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_TURN_START', 'LOC_CAI_SETTING_ANNOUNCE_VISIBILITY_TURN_START_TOOLTIP', NULL),
 
@@ -192,7 +192,10 @@ VALUES
      'LOC_CAI_SETTING_WRAP_CITY_CYCLING', 'LOC_CAI_SETTING_WRAP_CITY_CYCLING_TOOLTIP', NULL),
 
     ('CityCyclingFollowReportSort', 'Gameplay', 40, 'bool', 'checkbox', 'true',
-     'LOC_CAI_SETTING_CITY_CYCLING_FOLLOW_SORT', 'LOC_CAI_SETTING_CITY_CYCLING_FOLLOW_SORT_TOOLTIP', NULL);
+     'LOC_CAI_SETTING_CITY_CYCLING_FOLLOW_SORT', 'LOC_CAI_SETTING_CITY_CYCLING_FOLLOW_SORT_TOOLTIP', NULL),
+
+    ('ShowResearchPopupsInMultiplayer', 'Gameplay', 50, 'bool', 'checkbox', 'false',
+     'LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS', 'LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS_TOOLTIP', NULL);
 
 INSERT OR REPLACE INTO CAI_Settings
     (SettingId, Section, SortIndex, ValueType, UIType, DefaultValue, Label, Tooltip,

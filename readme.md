@@ -19,6 +19,22 @@ Epic Games' default installation folder is: `C:\Program Files\Epic Games\SidMeie
 2. Copy the `CivVi-Accessibility-Integration` folder into: `%USERPROFILE%\Documents\My Games\Sid Meier's Civilization VI\Mods`. Note that sometimes the documents folder is in one drive. If the `Sid Meier's Civilization VI` folder does not exist, launch the game once and then close it. You may also create the folders yourself
 3. Launch Civilization VI. The mod is enabled automatically.
 
+## Supported mods
+
+All content mods work with CAI. This includes mods that add or change civilizations, leaders, units, buildings, technologies, civics, rules, maps, and other gameplay content, because CAI reads that content from the live game state.
+
+UI mods are different: they may replace the same interface screens as CAI and therefore require dedicated compatibility work. CAI explicitly supports these UI or UI-changing mods:
+
+- Better Balanced Game
+- Better Report Screen
+- Better Trade Screen
+- Detailed Map Tacks
+- Extended Policy Cards
+- Quick Deals
+- Yet not another maps pack
+
+Other UI mods may work, but they are not explicitly supported and can conflict with CAI when they replace the same screens.
+
 ## Using the UI
 
 The accessible interface is made from nested widgets. A screen is usually a panel containing several containers, such as a list of actions, a tree of information, and a row of buttons. Those containers may themselves contain other containers. For example, a panel may contain a tree, the tree may contain ceveral items, similar to a tipical windows treeview
@@ -209,6 +225,16 @@ When the cursor is on a city or district banner, the number row reads sections o
 - `6` — governor information, does not work in the standard ruleset
 - `7` — power information, only works in the gathering storm ruleset
 
+### Zoom and map audio
+
+`Alt+=` zooms in and `Alt+-` zooms out in 5-percentage-point steps. Each press announces the new zoom percentage. You can rebind these actions in the keyboard settings. Fully zoomed in is 100%; fully zoomed out is 0%. When a game starts or a save finishes loading with CAI active, zoom is set to 100%.
+
+Zoom changes which sounds stand out. These three reference levels describe the audio mix; you can choose any level between them:
+
+- **Close, 100%:** Nearby resource animals, campfires, tribal villages, fishing boats, and terrain details are easiest to hear.
+- **Middle, around 75%:** Terrain and city ambience remain clear, with the middle layers of map ambience and little or no high-altitude wind.
+- **Far, 0%:** Wind dominates and terrain ambience fades. Unit movement and combat stand out across a wider area.
+
 ### Surveyor
 
 The Surveyor summarizes a circular area centered on the navigation cursor. Its radius can be set from one to five tiles. It reports only information your player is allowed to know; unexplored or hidden information is not revealed.
@@ -237,10 +263,22 @@ Moving through the Scanner reads the current result and its direction and distan
 - `Shift+Page Up` / `Shift+Page Down` — previous / next subcategory
 - `Page Up` / `Page Down` — previous / next group
 - `Alt+Page Up` / `Alt+Page Down` — previous / next item
-- `Home` — move the navigation cursor to the current Scanner item or group
+- `Home` or `0` — move the navigation cursor to the current Scanner item or group
 - `Backspace` — return the navigation cursor to its position before the last Scanner jump
 - `End` — read the direction from the navigation cursor to the current Scanner item
 - `Ctrl+F` — search across all Scanner categories
+
+#### Quick Scanner slots
+
+The World Scanner has five quick-access slots. A slot stores the current Scanner subcategory, such as Strategic Resources or My Military Units, so you can scan that subcategory without navigating through the category, subcategory, and group levels again. Slot assignments persist across games. Each time you use a slot, CAI rebuilds its bound subcategory from the current game state, flattens its groups into one list, and sorts the results from nearest to farthest relative to the navigation cursor. The slot then moves forward or backward through that list and makes the announced result the current Scanner item, so the normal jump, return, and direction commands work with it.
+
+Slots 1 and 2 have default bindings:
+
+- `Ctrl+-` / `Ctrl+=` — bind the current subcategory to slot 1 / slot 2
+- `-` / `=` — move to the next item in slot 1 / slot 2
+- `Shift+-` / `Shift+=` — move to the previous item in slot 1 / slot 2
+
+Slots 3 through 5 have no default bindings. You can bind all slot actions, or change the defaults for slots 1 and 2, from the game's Key Bindings options.
 
 #### Managing Scanner categories
 
@@ -286,7 +324,7 @@ Assigning a bookmark on a tile that already contains one of your map tacs uses t
 
 ### Empire information
 
-Empire information commands read important totals and progress without opening the corresponding game screen. The information available depends on the active ruleset and on what's currently unlocked in your game. Most of these can be found in various screens
+Empire information commands read important totals and progress without opening the corresponding game screen. The information available depends on the active ruleset and on what's currently unlocked in your game. Most of these can be found in various screens. You may combine most of these with shift to get more detailed breakdowns
 
 #### Time, research, and culture
 
@@ -438,6 +476,6 @@ Special thanks to:
 - bsg-smoke and Nibar Sito for funding the project.
 - bsg-smoke again for the audio design
 - LordLundin for extensively testing the mod
-- Rashad for allowing me to steal from his Civilization V accessibility mod and for answering my numerous questions.
+- Rashad for allowing me to steal from his Civilization V accessibility mod, his contributions, and answering my numerous questions.
 - Woody52169 for the simplified Chinese localization
 - CodedByGoose for the Spanish localization

@@ -361,16 +361,16 @@
       <Text>After the envoy controls are View City-State, Declare War or Make Peace, Levy Military when available, and the view-switch button. Tree view begins with an Order city-states by dropdown, then one expandable row per city-state with relationship status plus bonus, influence, quest, and relationships sections. The dropdown offers natural order plus two explicitly described choices for every current table column, such as A to Z, at war first, or most first. Table headers use the same descriptions, and both views share the selected sort. Alt plus 1 selects table view and Alt plus 2 selects tree view; the selected view is remembered. Enter activates the focused button. Escape closes the screen.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER" Language="en_US">
-      <Text>The first tree contains the current civic and queued civics. The second tree contains available civics. Each civic expands into its unlocks. The final button opens the full Civics Tree.</Text>
+      <Text>The first tree contains available civics. The second tree contains the current civic and queued civics when the queue is nonempty. Each civic expands into its unlocks. The third control opens the full Civics Tree.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_ACTIONS" Language="en_US">
       <Text>Enter on an available civic makes it the current civic. Current and queued rows are read-only and inspectable; this chooser deliberately does not add a queue shortcut.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_BINDINGS" Language="en_US">
-      <Text>Shift plus Enter on a revealed civic opens its Civilopedia article. Use Tab to move from the queue tree to available civics and then to Open Civics Tree.</Text>
+      <Text>Shift plus Enter on a revealed civic opens its Civilopedia article. Use Tab to move from available civics to the queue tree and then to Open Civics Tree.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_LAYOUT" Language="en_US">
-      <Text>Controls appear in this order: the current and queued civics list when nonempty, a filter list, the active Grid, Graph, or Tree civic view, an Unlocks list in Grid and Graph views, a read-only government and slotted-policy summary, and the View dropdown.</Text>
+      <Text>Controls appear in this order: the active Grid, Graph, or Tree civic view, an Unlocks list in Grid and Graph views, a filter list, the current and queued civics list when nonempty, a government and slotted-policies tree, and the View dropdown.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_VIEWS" Language="en_US">
       <Text>The View dropdown contains Grid, Graph, and Tree in that order. Grid arranges eras as columns, prerequisite tiers from left to right, and civics vertically within each tier. Graph follows prerequisite connections directly. Tree presents an era, tier, civic hierarchy. Alt plus 1 selects Grid, Alt plus 2 selects Graph, and Alt plus 3 selects Tree. Switching views keeps the same civic focused when possible, and the selected view is remembered the next time the Civics Tree opens.</Text>
@@ -385,7 +385,7 @@
       <Text>Enter on a filter opens a temporary results list. In results, Enter closes the list and jumps to the civic, Control plus Enter queues it, Shift plus Enter opens the Civilopedia, and Escape closes results and clears the filter. Control plus F searches civics by the game's Civics search index from any main view.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_GOVERNMENT" Language="en_US">
-      <Text>In Grid or Graph View, focusing a civic rebuilds the sibling Unlocks list for that civic. The following read-only edit field summarizes the current government, slot counts, and every slotted policy.</Text>
+      <Text>In Grid or Graph View, focusing a civic rebuilds the sibling Unlocks list for that civic. The government tree label summarizes the current government and slot counts. Expand its Military, Economic, Diplomatic, and Wildcard rows to inspect every policy slot and slotted policy.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA" Language="en_US">
       <Text>The Civilopedia has three sibling controls: a Sections tree, an Article tree, and a History list. Tab moves between them.</Text>
@@ -409,7 +409,7 @@
       <Text>CO2 Levels is a tree grouped first by civilization and then by resource. It includes your resource contributions and known global contributors with live totals.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CLIMATE_HISTORY" Language="en_US">
-      <Text>Event History is a chronological list. Located, revealed events include their direction from the navigation cursor. Enter moves the cursor to the event's start location without closing the screen. Escape closes the Climate screen.</Text>
+      <Text>Event History is a chronological tree. Use Right to expand a disaster row and enter details showing exactly what was added, damaged, removed, changed, or lost. Press Enter on a disaster row to move the navigation cursor to the event's start tile, even when the row has expandable details. Press Enter on an affected entry to move the cursor to that entry's tile. These jumps do not close the screen. Located, revealed events include their direction from the cursor. Left collapses a row, and Escape closes the Climate screen.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_OVERVIEW" Language="en_US">
       <Text>The normal overview contains a Leaders tree followed by an Actions list. Focusing another leader selects that leader in the game and refreshes the actions that follow.</Text>
@@ -655,16 +655,16 @@
       <Text>Gossip contains a flat chronological list of every matching visible gossip entry, followed by Player and Type filter dropdowns. Change either dropdown to rebuild the list. Escape closes Reports.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_RESEARCH" Language="en_US">
-      <Text>The first tree contains current and queued technologies. The second tree contains available technologies. Each technology expands into its unlocks. The final button opens the full Technology Tree.</Text>
+      <Text>The first tree contains available technologies. The second tree contains current and queued technologies when the queue is nonempty. Each technology expands into its unlocks. The third control opens the full Technology Tree.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_RESEARCH_ACTIONS" Language="en_US">
       <Text>Enter on an available technology makes it current. Current and queued rows are read-only and inspectable; this chooser deliberately does not add a queue shortcut.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_RESEARCH_BINDINGS" Language="en_US">
-      <Text>Shift plus Enter on a revealed technology opens its Civilopedia article. Use Tab to move from the queue tree to available technologies and then to Open Technology Tree.</Text>
+      <Text>Shift plus Enter on a revealed technology opens its Civilopedia article. Use Tab to move from available technologies to the queue tree and then to Open Technology Tree.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_LAYOUT" Language="en_US">
-      <Text>Controls appear in this order: the current and queued technologies list when nonempty, a filter list, the active Grid, Graph, or Tree technology view, an Unlocks list in Grid and Graph views, and the View dropdown.</Text>
+      <Text>Controls appear in this order: the active Grid, Graph, or Tree technology view, an Unlocks list in Grid and Graph views, a filter list, the current and queued technologies list when nonempty, and the View dropdown.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_VIEWS" Language="en_US">
       <Text>The View dropdown contains Grid, Graph, and Tree in that order. Grid arranges eras as columns, prerequisite tiers from left to right, and technologies vertically within each tier. Graph follows prerequisite connections directly. Tree presents an era, tier, technology hierarchy. Alt plus 1 selects Grid, Alt plus 2 selects Graph, and Alt plus 3 selects Tree. Switching views keeps the same technology focused when possible, and the selected view is remembered the next time the Technology Tree opens.</Text>
@@ -679,7 +679,7 @@
       <Text>Enter on a filter opens a temporary results list. In results, Enter closes the list and jumps to the technology, Control plus Enter queues it, Shift plus Enter opens the Civilopedia, and Escape closes results and clears the filter. Control plus F searches the game's Technologies index from any main view.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_UNLOCKS" Language="en_US">
-      <Text>In Grid or Graph View, focusing a technology rebuilds the sibling Unlocks list for that technology. Tab reaches that list after the active view when it contains entries, then reaches the View dropdown.</Text>
+      <Text>In Grid or Graph View, focusing a technology rebuilds the sibling Unlocks list for that technology. Tab reaches it immediately after the active view, followed by the filters, the nonempty queue, and the View dropdown.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW" Language="en_US">
       <Text>The Trade Overview has My Routes, Routes to My Cities, and Available Routes tabs. Every page is a tree grouped by civilization, city-state, or other live route category.</Text>
@@ -795,6 +795,149 @@
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_SUBMIT" Language="en_US">
       <Text>After the proposal list are the live submission and Pass buttons. Activate the submission button to send the checked proposal. Activate Pass only when you want to submit no proposal. If the special session begins, its separate ballot will later require every member to vote Support or Oppose.</Text>
+    </Row>
+
+    <!-- World Builder screen names -->
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_WORLD_BUILDER" Language="en_US">
+      <Text>World Builder</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_WORLD_BUILDER_TOOLS" Language="en_US">
+      <Text>World Builder tools</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_WB_MAP_EDITOR" Language="en_US">
+      <Text>Map Editor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_WB_PLAYER_EDITOR" Language="en_US">
+      <Text>Player Editor</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_NAME_WB_PLOT_EDITOR" Language="en_US">
+      <Text>Plot Editor</Text>
+    </Row>
+
+    <!-- World Builder screen titles -->
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TITLE" Language="en_US">
+      <Text>World Builder tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOLS_TITLE" Language="en_US">
+      <Text>World Builder tools tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_MAP_EDITOR_TITLE" Language="en_US">
+      <Text>Map Editor tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLAYER_EDITOR_TITLE" Language="en_US">
+      <Text>Player Editor tutorial</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLOT_EDITOR_TITLE" Language="en_US">
+      <Text>Plot Editor tutorial</Text>
+    </Row>
+
+    <!-- World Builder main interface -->
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_OVERVIEW" Language="en_US">
+      <Text>World Builder lets you edit the map directly. You are on the map itself; move the map cursor as you normally do, and edits apply to the tile under the cursor.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLACE" Language="en_US">
+      <Text>Press Enter to place the armed tool's item on the cursor tile. Press Delete to remove it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_LOCK" Language="en_US">
+      <Text>Press M to lock placement to the current tile so the cursor can roam and inspect other tiles while edits still land on the locked tile. Press M again to unlock.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLOT_EDITOR" Language="en_US">
+      <Text>Press F3 to open the Plot Editor for the cursor tile, or the locked tile when one is set, to change everything on that single tile.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_UNDO" Language="en_US">
+      <Text>Press Control plus Z to undo the last edit and Control plus Y to redo it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_GOTO" Language="en_US">
+      <Text>Press Control plus G to open a box that jumps the cursor to typed coordinates, either absolute or relative to the cursor.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_EDITORS" Language="en_US">
+      <Text>Press F1 to open the Map Editor and F2 to open the Player Editor.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOLS_PANEL" Language="en_US">
+      <Text>To switch tools, press Tab to open the tools panel, where you can browse every tool and its settings.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOL_NUMBERS" Language="en_US">
+      <Text>You can also select a tool directly without opening the panel. The number keys 1 through 0 select the first ten tools, and Shift plus 1 through Shift plus 6 select the remaining six.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLACEMENT" Language="en_US">
+      <Text>Placement works by arming a tool with an item type and settings such as brush size, then pressing Enter to apply it to the cursor tile. A larger brush covers a ring of tiles around the cursor rather than a single tile.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_QUICKNAV" Language="en_US">
+      <Text>You can change the armed tool and adjust its parameters straight from the map, without opening the panel. Left and Right move between parameters; the first parameter is the tool itself, and the rest are the armed tool's settings. Up and Down change the focused parameter's value, so on the first parameter they switch the armed tool. Holding Shift with these keys jumps to the first or last parameter, or to the first or last value.</Text>
+    </Row>
+
+    <!-- World Builder tools panel -->
+    <Row Tag="LOC_CAI_TUTORIAL_WB_TOOLS_OVERVIEW" Language="en_US">
+      <Text>The tools panel is where you choose which tool is armed and set its options. It opens with focus on the tool that is currently armed.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_TOOLS_LIST" Language="en_US">
+      <Text>The first control is a list of the sixteen placement tools, such as terrain, features, wonders, rivers, cliffs, resources, cities, districts, and improvements. Moving onto a tool arms it. Press Enter on a tool to close the panel and return to the map.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_TOOLS_SETTINGS" Language="en_US">
+      <Text>After the tool list is a settings area that changes to match the armed tool. It always begins with the item-type choice, followed by that tool's extra options, which can include brush size, feature direction, resource amount, owner, player, continent, or a pillaged checkbox.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_TOOLS_DROPDOWNS" Language="en_US">
+      <Text>Each option is a dropdown or a field, so moving through the choices never changes anything by accident. Only opening a dropdown and activating an option, or committing a field, applies the change.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_TOOLS_SCANNER" Language="en_US">
+      <Text>While World Builder is active, the World Scanner gains a World Builder category. It has a Starting positions section listing every placed start position grouped by type, and an Ownership section listing owned tiles grouped by owner.</Text>
+    </Row>
+
+    <!-- World Builder Map Editor -->
+    <Row Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_OVERVIEW" Language="en_US">
+      <Text>The Map Editor holds map-wide settings and text in a two-page tab control: General and Text.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_GENERAL" Language="en_US">
+      <Text>The General tab begins with a Map metadata list. Its rows are the map ID, the width, and the height; the map ID row is a button that generates a new ID when you press it, while width and height are read-only. After the list come an Is Mod checkbox and edit boxes for Ruleset, Map Script, Reference Map, and Reference Alpha.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_TEXT" Language="en_US">
+      <Text>The Text tab is the map's localization editor. It starts with a language dropdown, then a list of text entries, then an Add button below the list.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_TEXT_ACTIONS" Language="en_US">
+      <Text>In the entry list, Enter opens an editor with a tag and a string, and its OK button saves. Delete removes the focused entry, except the first four system entries, which cannot be removed. The Add button opens the same editor for a new entry.</Text>
+    </Row>
+
+    <!-- World Builder Player Editor -->
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_OVERVIEW" Language="en_US">
+      <Text>The Player Editor manages the players in the game. It has a player list followed by a four-page tab control, and the tabs always act on the player selected in the list.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_LIST" Language="en_US">
+      <Text>The player list has one row per player. Moving onto a player selects it and updates the tabs. At the bottom of the list are Add Player and Add AI rows, and Delete removes the focused player. Tab moves from the list to the tabs.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_GENERAL" Language="en_US">
+      <Text>The General tab sets the selected player's Civilization, Leader, Civilization Level, and Era dropdowns, and Gold and Faith number fields. Some fields stay disabled until the player is initialized, or when they do not apply, such as gold and faith for the Barbarian player.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_TECHS" Language="en_US">
+      <Text>The Techs tab is a checkbox list of every technology. Checking a box grants that technology to the player, and unchecking removes it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CIVICS" Language="en_US">
+      <Text>The Civics tab is a checkbox list of every civic, working the same way as the Techs tab.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES" Language="en_US">
+      <Text>The Cities tab is a tree of the selected player's cities. Each city expands into a Population value and Districts and Buildings subtrees.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES_DETAIL" Language="en_US">
+      <Text>Enter on Population opens an inline editor for the city's size. Under Districts and Buildings, each item reads its live state as added, not added, or pillaged. Enter on an item that is not added adds it, and Delete removes it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES_PLACEMENT" Language="en_US">
+      <Text>Adding a city, or a district that needs a tile, hands off to the map: the editor closes and arms the matching tool so you can place it on a tile. Buildings do not need a tile and are added directly. The Add City button sits below the city tree.</Text>
+    </Row>
+
+    <!-- World Builder Plot Editor -->
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_OVERVIEW" Language="en_US">
+      <Text>The Plot Editor changes everything on one tile, the cursor tile or the locked tile you opened it on. It is a single list, and Escape closes it and returns to the map.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_ROWS" Language="en_US">
+      <Text>The list holds, in order: Terrain, Features, Resources, Improvements, Districts, Routes, Start Positions, Owner, and, in Gathering Storm, Lowland.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_SUBMENUS" Language="en_US">
+      <Text>Terrain and Owner are single dropdowns. The others are expandable rows whose label summarizes the tile: Features adds a feature and its direction; Resources adds a resource and, for strategic resources, an amount; Improvements, Districts, and Routes each add their type with a Pillaged checkbox; Start Positions sets a start type and its player, leader, or civilization.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_COMMIT" Language="en_US">
+      <Text>Choosing a value writes it straight to the tile, so every game rule runs, such as a terrain change dropping an invalid feature or coast fixups. Undo with Control plus Z if a change cascades in a way you did not want.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_BRUSH_LOCK" Language="en_US">
+      <Text>Press L to toggle brush lock. While on, each cursor move immediately applies the selected tool at the new coordinates with the current settings and brush size, even if M has locked another tile. Press L again to stop automatic placement.</Text>
     </Row>
   </LocalizedText>
 </GameData>

@@ -28,6 +28,7 @@ local UNIT_BUILD_IMPROVEMENTS_SUBMENU_ID = "CAIUnitBuildImprovementsSubMenu"
 local UNIT_SIMPLE_PROMOTION_LIST_ID = "CAIUnitPanelSimplePromotionList"
 local UNIT_NAME_PANEL_ID = "CAIUnitPanelNamePanel"
 local UNIT_NAME_EDIT_ID = "CAIUnitPanelNameEdit"
+local UNIT_DESTINATION_LIST_ID = "CAIUnitPanelDestinationList"
 
 local openUnitListAction = SafeActionId("UI_UnitPanelOpenUnitList")
 local unitViewAbilitiesAction = SafeActionId("UnitViewAbilities")
@@ -48,6 +49,7 @@ local UnitList = nil
 local SimplePromotionList = nil
 local UnitNamePanel = nil
 local UnitNameEdit = nil
+local UnitDestinationList = nil
 
 local UNIT_ACTION_INTENT_TIMEOUT = 5
 local pendingUnitActionIntents = {}
@@ -293,6 +295,50 @@ AddActionToTable = WrapFunc(AddActionToTable, function(orig, actionsTable, actio
         callbackVoid1, callbackVoid2, overrideIcon)
 end)
 
+local function HasUnitAction(actionsTable, actionHash)
+    for _, category in pairs(actionsTable) do
+        if type(category) == "table" then
+            for _, action in ipairs(category) do
+                if type(action) == "table" and action.userTag == actionHash then
+                    return true
+                end
+            end
+        end
+    end
+    return false
+end
+
+GetUnitActionsTable = WrapFunc(GetUnitActionsTable, function(orig, unit)
+    local actionsTable = orig(unit)
+    if actionsTable == nil or unit == nil or unit:GetMovesRemaining() > 0 then
+        return actionsTable
+    end
+
+    local unitInfo = GameInfo.Units[unit:GetUnitType()]
+    local moveOperation = GameInfo.UnitOperations[UnitOperationTypes.MOVE_TO]
+    local owner = unit:GetOwner()
+    local player = Players[owner]
+    if unitInfo == nil or unitInfo.IgnoreMoves or moveOperation == nil
+        or owner ~= Game.GetLocalPlayer() or player == nil or not player:IsTurnActive()
+        or HasUnitAction(actionsTable, UnitOperationTypes.MOVE_TO) then
+        return actionsTable
+    end
+
+    -- Vanilla WorldInput permits zero-movement units to submit MOVE_TO and lets the
+    -- engine retain the route for a later turn. UnitPanel hides it only because its
+    -- entire operation loop is gated on having movement left. Restore this one action
+    -- without exposing unrelated operations, while preserving tutorial disabledness.
+    AddActionToTable(
+        actionsTable,
+        moveOperation,
+        IsDisabledByTutorial(unitInfo.UnitType, UnitOperationTypes.MOVE_TO),
+        Locale.Lookup(moveOperation.Description),
+        UnitOperationTypes.MOVE_TO,
+        OnUnitActionClicked_MoveTo)
+
+    return actionsTable
+end)
+
 info = ExposedMembers.CAIInfo or {}
 ExposedMembers.CAIInfo = info
 
@@ -397,6 +443,13 @@ local function RemoveUnitNamePanel()
     end
     UnitNamePanel = nil
     UnitNameEdit = nil
+end
+
+local function RemoveUnitDestinationList()
+    if UnitDestinationList and mgr then
+        mgr:RemoveFromStack(UNIT_DESTINATION_LIST_ID)
+    end
+    UnitDestinationList = nil
 end
 
 local function ReadCurrentUnitData()
@@ -2266,15 +2319,23 @@ local function GetBuildUnitActionEntries(data)
 end
 
 local function CreateUnitActionMenuItem(currentAction)
+    local function IsAlreadyInMovementMode()
+        return currentAction.userTag == UnitOperationTypes.MOVE_TO
+            and UI.GetInterfaceMode() == InterfaceModeTypes.MOVE_TO
+    end
+
     local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitPanelMenuItem"), "MenuItem", {
         GetLabel = function()
             return GetUnitActionLabelWithBinding(currentAction)
         end,
         GetTooltip = function()
+            if IsAlreadyInMovementMode() then
+                return Locale.Lookup("LOC_CAI_UNIT_ALREADY_IN_MOVEMENT_MODE")
+            end
             return GetUnitActionTooltip(currentAction)
         end,
         DisabledPredicate = function()
-            return currentAction.Disabled == true
+            return currentAction.Disabled == true or IsAlreadyInMovementMode()
         end,
     })
     w:SetFocusSound("Main_Menu_Mouse_Over")
@@ -2714,6 +2775,126 @@ local function OpenUnitActionList()
         g_unitActionSuspendToken = mgr:RegisterSuspendCloser(CloseUnitActionList)
     else
         UnitActionList = nil
+    end
+end
+
+local function BuildUnitDestinationLabel(plotIndex)
+    local plot = Map.GetPlotByIndex(plotIndex)
+    if plot == nil then
+        return ""
+    end
+
+    local city = Cities.GetPlotPurchaseCity(plot) or Cities.GetCityInPlot(plot:GetX(), plot:GetY())
+    if city ~= nil then
+        return Locale.ToUpper(city:GetName())
+    end
+
+    LogWarn("CAI UnitPanel could not resolve destination city at plot " .. tostring(plotIndex))
+    return Locale.Lookup("LOC_CAI_VALID_TARGET_PLOT", plot:GetX(), plot:GetY())
+end
+
+local function ActivateUnitDestination(mode, unit, plotIndex, operationType)
+    local plot = Map.GetPlotByIndex(plotIndex)
+    if plot == nil then
+        return
+    end
+
+    if mode == InterfaceModeTypes.TELEPORT_TO_CITY then
+        local parameters = {
+            [UnitOperationTypes.PARAM_X] = plot:GetX(),
+            [UnitOperationTypes.PARAM_Y] = plot:GetY(),
+        }
+        if UnitManager.CanStartOperation(unit, operationType, nil, parameters) then
+            UnitManager.RequestOperation(unit, operationType, parameters)
+            UI.SetInterfaceMode(InterfaceModeTypes.SELECTION)
+            UI.PlaySound("Unit_Relocate")
+        else
+            Speak(Locale.Lookup("LOC_CAI_PLOT_INTERFACE_INVALID_TARGET"))
+        end
+    end
+end
+
+local function GetUnitDestinationPlots(mode, unit, operationType)
+    local results
+    local plots
+    if mode == InterfaceModeTypes.TELEPORT_TO_CITY then
+        results = UnitManager.GetOperationTargets(unit, operationType)
+        plots = results and results[UnitOperationResults.PLOTS] or nil
+    end
+    return plots or {}
+end
+
+local function OpenUnitDestinationList(mode)
+    RemoveUnitDestinationList()
+
+    local unit = GetSelectedUnit()
+    if mgr == nil or ContextPtr:IsHidden() or unit == nil then
+        return
+    end
+
+    if mode == InterfaceModeTypes.TELEPORT_TO_CITY then
+        local greatPerson = unit:GetGreatPerson()
+        if greatPerson == nil or not greatPerson:IsGreatPerson() then
+            return
+        end
+    end
+
+    local operationType = nil
+    local labelKey
+    if mode == InterfaceModeTypes.TELEPORT_TO_CITY then
+        operationType = UI.GetInterfaceModeParameter(UnitOperationTypes.PARAM_OPERATION_TYPE)
+        if operationType == nil then
+            LogWarn("CAI UnitPanel transfer destination list has no operation type")
+            return
+        end
+        labelKey = "LOC_UNITOPERATION_TELEPORT_TO_CITY_DESCRIPTION"
+    else
+        return
+    end
+
+    local plots = GetUnitDestinationPlots(mode, unit, operationType)
+    local list = mgr:CreateWidget(UNIT_DESTINATION_LIST_ID, "List", {
+        Label = function() return Locale.Lookup(labelKey) end,
+    })
+    list:AddInputBinding({
+        Key = Keys.VK_ESCAPE,
+        MSG = KeyEvents.KeyUp,
+        Description = "LOC_CAI_KB_CLOSE",
+        Action = function()
+            UI.SetInterfaceMode(InterfaceModeTypes.SELECTION)
+            return true
+        end,
+    })
+
+    for _, plotIndex in ipairs(plots) do
+        local destinationPlotIndex = plotIndex
+        local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIUnitDestination"), "Button", {
+            Label = function() return BuildUnitDestinationLabel(destinationPlotIndex) end,
+            FocusKey = "unit-destination:" .. tostring(destinationPlotIndex),
+        })
+        row:SetFocusSound("Main_Menu_Mouse_Over")
+        row:On("activate", function()
+            ActivateUnitDestination(mode, unit, destinationPlotIndex, operationType)
+        end)
+        list:AddChild(row)
+    end
+
+    if list.Children ~= nil and #list.Children > 0 then
+        UnitDestinationList = list
+        mgr:Push(UnitDestinationList, PopupPriority.Low)
+    else
+        list:Destroy()
+        LogWarn("CAI UnitPanel destination mode opened without available destinations")
+        UI.SetInterfaceMode(InterfaceModeTypes.SELECTION)
+    end
+end
+
+local function OnCAIInterfaceModeChanged(oldMode, newMode)
+    if oldMode == InterfaceModeTypes.TELEPORT_TO_CITY then
+        RemoveUnitDestinationList()
+    end
+    if newMode == InterfaceModeTypes.TELEPORT_TO_CITY then
+        OpenUnitDestinationList(newMode)
     end
 end
 
@@ -3907,6 +4088,7 @@ InitializeUnitInfoActionMap()
 Events.InputActionStarted.Add(OnUnitPanelSelectionInfoInputActionStarted)
 Events.InputActionStarted.Add(OnUnitPanelSelectionActionInputStarted)
 Events.LoadScreenClose.Add(OnLoadScreenClose)
+Events.InterfaceModeChanged.Add(OnCAIInterfaceModeChanged)
 Events.UnitSelectionChanged.Add(OnCAIUnitSelectionChanged)
 Events.UnitOperationStarted.Add(OnCAIUnitOperationStarted)
 Events.UnitOperationAdded.Add(OnCAIUnitOperationAdded)

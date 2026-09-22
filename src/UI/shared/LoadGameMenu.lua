@@ -596,6 +596,7 @@ local CAI_DirList = nil
 local CAI_DirDropdown = nil
 local CAI_SortDropdown = nil
 local CAI_QuickLoadDialog = nil
+local CAI_DirHistory = CreateDirectoryHistory()
 local m_CAIQuickloadId = Input.GetActionId("ReloadGame_CAI")
 CAI_LoadingFiles = false
 
@@ -678,6 +679,7 @@ local function ClosePanel()
     CAI_DirList = nil
     CAI_DirDropdown = nil
     CAI_SortDropdown = nil
+	CAI_DirHistory = CreateDirectoryHistory()
 end
 
 -- ---------------------------------------------------------------------------
@@ -686,7 +688,7 @@ end
 local function RebuildFileListAccessibility()
 	if not CAI_Panel then return end
 
-	local dirView = IsDirectoryView()
+	local dirView = IsDirectoryBrowser()
 
 	if CAI_SaveTree then
 		CAI_SaveTree:SetHiddenPredicate(function() return dirView end)
@@ -694,6 +696,7 @@ local function RebuildFileListAccessibility()
 	if CAI_DirList then
 		CAI_DirList:SetHiddenPredicate(function() return not dirView end)
 	end
+	RefreshDirectoryDropdown(CAI_DirDropdown)
 
 	local container = dirView and CAI_DirList or CAI_SaveTree
 	if not container then return end
@@ -720,8 +723,10 @@ local function RebuildFileListAccessibility()
 			})
 			child:SetFocusSound("Main_Menu_Mouse_Over")
 			child:On("activate", function()
-				SetSelected(idx)
-				OnActionButton()
+				DirectoryHistoryVisit(CAI_DirHistory, entry.Path, function()
+					SetSelected(idx)
+					OnActionButton()
+				end)
 			end)
 			container:AddChild(child)
 		else
@@ -762,7 +767,8 @@ local function RebuildFileListAccessibility()
 				end
 			end
 
-				local treeItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadSave"), "TreeItem", {
+			local itemType = dirView and "MenuItem" or "TreeItem"
+			local treeItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadSave"), itemType, {
 					Label = function() return GetEntryLabel(idx, entry) end,
 					Tooltip = function()
 						local parts = {}
@@ -796,18 +802,17 @@ local function RebuildFileListAccessibility()
 				Controls.ActionButton:DoLeftClick()
 				end)
 
-			PopulateTreeItemDetails(treeItem, entry)
+			if not dirView then
+				PopulateTreeItemDetails(treeItem, entry)
+			end
 
 			treeItem:AddInputBinding({
 				Key = Keys.VK_DELETE,
 				Description = "LOC_CAI_KB_DELETE_SAVE",
 				Action = function()
-					if not Controls.Delete:IsHidden() then
-						SetSelected(idx)
-						Controls.Delete:DoLeftClick()
-						return true
-					end
-					return false
+					SetSelected(idx)
+					Controls.Delete:DoLeftClick()
+					return true
 				end
 			})
 
@@ -817,13 +822,6 @@ local function RebuildFileListAccessibility()
 
 
 
-	if CAI_DirDropdown then
-		local options, selectedIdx = BuildDirectoryOptions()
-		CAI_DirDropdown:SetOptions(options)
-		if selectedIdx > 0 then
-			CAI_DirDropdown:SetSelectedIndex(selectedIdx, true)
-		end
-	end
 	mgr:RestoreFocus(container, capture)
 end
 
@@ -834,6 +832,9 @@ local function BuildPanel()
 	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadGameMenu"), "Panel", {
 		Label = function() return Controls.WindowHeader:GetText() end,
 	})
+	if IsDirectoryBrowser() then
+		AddDirectoryHistoryBindings(CAI_Panel, CAI_DirHistory)
+	end
 
 
 	-- 1. Directory dropdown (hidden when not applicable)
@@ -847,16 +848,24 @@ local function BuildPanel()
 	CAI_DirDropdown:On("value_changed", function(self, val)
 		if not val then return end
 		if val.type == "level" then
-			ChangeDirectoryLevelTo(val.level)
+			local targetPath = UI.TruncatePathLevels(
+				SaveLocations.LOCAL_STORAGE, g_CurrentDirectoryPath, val.level)
+			DirectoryHistoryVisit(CAI_DirHistory, targetPath, function()
+				ChangeDirectoryLevelTo(val.level)
+			end)
 		elseif val.type == "volume" then
-			ChangeVolumeTo(val.name)
+			DirectoryHistoryVisit(CAI_DirHistory, val.name, function()
+				ChangeVolumeTo(val.name)
+			end)
 		end
 	end)
+	RefreshDirectoryDropdown(CAI_DirDropdown)
 	CAI_Panel:AddChild(CAI_DirDropdown)
 
 	-- 2a. Save tree (shown when not in directory view)
 	CAI_SaveTree = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadSaves"), "Tree", {
 		Label = function() return Controls.WindowHeader:GetText() end,
+		HiddenPredicate = function() return IsDirectoryBrowser() end,
 	})
 
 	
@@ -865,7 +874,7 @@ local function BuildPanel()
 	-- 2b. Directory list (shown when in directory view)
 	CAI_DirList = mgr:CreateWidget(mgr:GenerateWidgetId("CAILoadDirs"), "List", {
 		Label = function() return Controls.WindowHeader:GetText() end,
-		HiddenPredicate = function() return true end,
+		HiddenPredicate = function() return not IsDirectoryBrowser() end,
 	})
 	CAI_Panel:AddChild(CAI_DirList)
 
@@ -940,6 +949,49 @@ local function BuildPanel()
     CAI_Panel:AddChild(cloudCheck)
 end
 
+-- World Builder map loads rebuild the session mod set from the map file's
+-- ModDependencies, dropping CAI. Inject CAI's row into the map file just before
+-- the load consumes it, and stash the path so the in-game side (WorldInput_CAI
+-- OnLoadScreenClose) can strip it back out once loaded. WB maps go through two
+-- load paths: OnLoadYes -> Network.LoadGame (the main-menu "Load" flow, verified
+-- in-game) and OnActionButton -> SetImportFilename + HostGame (the TILED_MAP
+-- import branch). A WB map is identified by its .Civ6Map extension, so gate on
+-- that rather than g_GameType (which differs between the two paths).
+local function CAI_IsWBMapPath(path)
+	return type(path) == "string" and string.sub(path, -8) == ".Civ6Map"
+end
+
+local function CAI_InjectWBLoad(path)
+	if CAI_IsWBMapPath(path) then
+		WBMapDepInject(path)
+		ExposedMembers.CAI_WBInjectedMapPath = path
+	end
+end
+
+-- Main-menu "Load" flow: OnLoadYes runs Network.LoadGame on m_thisLoadFile.
+OnLoadYes = WrapFunc(OnLoadYes, function(orig)
+	if m_thisLoadFile and m_thisLoadFile.Path then
+		CAI_InjectWBLoad(m_thisLoadFile.Path)
+	end
+	if mgr then
+		mgr:ShutDown()
+	end
+	orig()
+end)
+
+-- TILED_MAP import branch: OnActionButton runs SetImportFilename + HostGame
+-- directly (no OnLoadYes, no cancellable mod-compat dialog), so inject here only
+-- for that branch to avoid a stray row if the OnLoadYes flow's dialog is cancelled.
+OnActionButton = WrapFunc(OnActionButton, function(orig)
+	if g_GameType == SaveTypes.TILED_MAP and g_iSelectedFileEntry ~= -1 then
+		local entry = g_FileList and g_FileList[g_iSelectedFileEntry]
+		if entry and not entry.IsDirectory then
+			CAI_InjectWBLoad(entry.Path)
+		end
+	end
+	orig()
+end)
+
 RebuildFileList = WrapFunc(RebuildFileList, function(orig)
     orig()
 	if ContextPtr:IsVisible() then
@@ -975,6 +1027,7 @@ OnShow = WrapFunc(OnShow, function(orig, ...)
 	CAI_DirList = nil
 	CAI_DirDropdown = nil
 	CAI_SortDropdown = nil
+	CAI_DirHistory = CreateDirectoryHistory()
 	BuildPanel()
 	UITutorialManager:AddControlToAlwaysReceiveInput(ContextPtr)
 end)
@@ -986,44 +1039,16 @@ OnHide = WrapFunc(OnHide, function(orig, ...)
 end)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
+	if IsDirectoryBrowser() and mgr:GetTop() == CAI_Panel then
+		local focused = mgr:GetFocusedWidget()
+		local editingFileName = focused ~= nil and focused.Type == "EditBox"
+		if not (editingFileName and input:GetKey() == Keys.VK_BACK and not input:IsAltDown())
+			and HandleDirectoryHistoryInput(input, CAI_DirHistory) then
+			return true
+		end
+	end
 	if mgr:HandleInput(input) then return true end
 	return orig(input)
-end)
-
--- ---------------------------------------------------------------------------
--- Keep the accessibility mod alive when loading a World Builder map.
---
--- Editing an existing .Civ6Map normally funnels through OnLoadYes ->
--- Network.LoadGame, which rebuilds the enabled-mod set purely from the map file.
--- This mod is AffectsSavedGames=0, so it is never recorded in the file and gets
--- torn out on load (Modding.log shows the mod in the "Current" set but absent
--- from the "Target" set the load reconfigures toward).
---
--- Creating a NEW WB map keeps the mod because it enters through the setup/host
--- flow (Network.HostGame), which re-applies the current enabled-mod group. A
--- native .Civ6Map is itself a valid Map value (AdvancedSetup documents a
--- "{GUID}file.Civ6Map" / path as a Map script), so we can open the saved map the
--- same way: point MapConfiguration at the file and HostGame instead of LoadGame,
--- reusing the mod-group-preserving path. This keeps the mod enabled without
--- touching AffectsSavedGames, which would taint regular saves.
---
--- Only World Builder maps are rerouted; regular saves still use Network.LoadGame.
--- ---------------------------------------------------------------------------
-OnLoadYes = WrapFunc(OnLoadYes, function(orig, ...)
-	if g_GameType == SaveTypes.WORLDBUILDER_MAP and m_thisLoadFile ~= nil and m_thisLoadFile.Path ~= nil then
-		print("CAI: rerouting World Builder map load through HostGame to preserve enabled mods: " .. tostring(m_thisLoadFile.Path))
-		UITutorialManager:EnableOverlay(false)
-		UITutorialManager:HideAll()
-		m_kPopupDialog:Close()
-		Network.LeaveGame()
-		GameConfiguration.SetWorldBuilderEditor(true)
-		MapConfiguration.SetScript(m_thisLoadFile.Path)
-		if Events.SetGameEntryMethod then Events.SetGameEntryMethod("Load Saved Game") end
-		Network.HostGame(ServerType.SERVER_TYPE_NONE)
-		Controls.ActionButton:SetDisabled(true)
-		return
-	end
-	orig(...)
 end)
 
 Initialize = WrapFunc(Initialize, function(orig)

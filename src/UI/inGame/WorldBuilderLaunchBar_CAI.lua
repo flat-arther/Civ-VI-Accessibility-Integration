@@ -11,18 +11,21 @@
 include("caiUtils")
 include("WorldBuilderLaunchBar")
 
-local mgr = ExposedMembers.CAI_UIManager
-
--- Static id of the World Builder map interface widget (created in WorldInput_CAI).
--- F1 opens the Map Editor only while that widget is the focused one, so the
--- shortcut is inert whenever focus is inside any pushed CAI screen/panel.
-local WB_INTERFACE_ID = "CAIWorldBuilderMode"
-
 -- Collapse repeats within a single placement: a brush stroke drives many
--- identical status updates in one keypress, and queued duplicate speech would be
--- noise. WorldInput_CAI fires CAIWorldBuilderStatusBurstBegin at the start of
--- each place/delete keypress so the de-dupe resets and a repeated identical
--- result (e.g. pressing Enter twice on the same failure) still speaks each time.
+-- identical status updates in one keypress (vanilla WorldBuilderPlacement
+-- OnPlotSelected loops PlacementFunc over 7/19 ring hexes, and each PlacementFunc
+-- fires WorldBuilder_SetPlacementStatus), and queued duplicate speech would be
+-- noise, so identical text is spoken once until the de-dupe is reset.
+--
+-- CONTRACT: the de-dupe is scoped to a SINGLE user action. Any CAI code path that
+-- provokes a status line for a NEW, distinct user action must fire
+-- LuaEvents.CAIWorldBuilderStatusBurstBegin() first to reset m_lastStatus, or a
+-- repeat of the previous line is silently swallowed. Current callers that do this:
+--   * WorldInput_CAI WBEditCursorPlot  - once per place/delete keypress
+--   * WorldInput_CAI WBUndoRedo         - once per Ctrl+Z / Ctrl+Y keypress
+--   * WorldBuilderMapEditor_CAI edit fields - once per Enter commit (Reference
+--     Map / Alpha statuses)
+-- Add the reset to any future path that can re-emit an identical status line.
 local m_lastStatus = nil
 
 LuaEvents.CAIWorldBuilderStatusBurstBegin.Add(function()
@@ -46,19 +49,10 @@ end)
 
 LuaEvents.WorldBuilder_SetPlacementStatus.Add(OnSetPlacementStatus)
 
--- F1 opens the Map Editor (the same path as the launch bar's Map Editor button),
--- but only while the World Builder map interface is the focused widget so it
--- never fires from inside a pushed CAI panel/screen. The base launch bar has no
--- input handler, so this is the only one on the context.
-ContextPtr:SetInputHandler(function(pInputStruct)
-	if pInputStruct:GetMessageType() == KeyEvents.KeyUp
-		and pInputStruct:GetKey() == Keys.VK_F1
-		and mgr ~= nil then
-		local focused = mgr:GetFocusedWidget()
-		if focused ~= nil and focused:GetId() == WB_INTERFACE_ID then
-			OnOpenMapEditor()
-			return true
-		end
-	end
-	return false
-end, true)
+-- F1 opens the Map Editor and F2 opens the Player Editor (the same paths as the
+-- launch bar's buttons). The World Builder map interface widget (WorldInput_CAI)
+-- owns those key bindings and forwards the intent here through these events, so
+-- the shortcuts fire only while that widget is focused and stay inert inside any
+-- pushed CAI panel/screen. This context owns the vanilla editor panels/globals.
+LuaEvents.CAIWorldBuilderMapEditor_Toggle.Add(OnOpenMapEditor)
+LuaEvents.CAIWorldBuilderPlayerEditor_Toggle.Add(OnOpenPlayerEditor)

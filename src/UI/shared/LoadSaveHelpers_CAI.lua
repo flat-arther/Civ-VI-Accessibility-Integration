@@ -42,12 +42,140 @@ function GetEntryLabel(idx, entry)
     return ""
 end
 
-function IsDirectoryView()
-    if not g_FileList or #g_FileList == 0 then return false end
-    for _, entry in ipairs(g_FileList) do
-        if entry.IsDirectory then return true end
+-- Firaxis exposes filesystem browsing only for local World Builder maps and
+-- tiled-map import. Use the live control state rather than inferring the mode
+-- from the current results: a directory containing only files is still a
+-- directory browser.
+function IsDirectoryBrowser()
+    return Controls.DirectoryPullDown ~= nil and not Controls.DirectoryPullDown:IsHidden()
+end
+
+-- ---------------------------------------------------------------------------
+-- Directory navigation history
+-- ---------------------------------------------------------------------------
+function CreateDirectoryHistory()
+    return { Back = {}, Forward = {} }
+end
+
+local function PushDirectoryHistory(stack, path)
+    if path == nil or path == "" then return end
+    if stack[#stack] ~= path then
+        table.insert(stack, path)
+    end
+end
+
+-- Record an ordinary navigation (folder activation, parent, or quick jump).
+-- `navigate` preserves the caller's vanilla path when one exists.
+function DirectoryHistoryVisit(history, targetPath, navigate)
+    if history == nil or targetPath == nil or targetPath == "" then return false end
+    local currentPath = g_CurrentDirectoryPath or ""
+    if currentPath == targetPath then return false end
+
+    PushDirectoryHistory(history.Back, currentPath)
+    history.Forward = {}
+    if navigate then
+        navigate()
+    else
+        ChangeDirectoryTo(targetPath)
+    end
+    return true
+end
+
+function DirectoryHistoryUp(history)
+    local segments = g_CurrentDirectorySegments or {}
+    if #segments <= 1 then return false end
+    local level = #segments - 1
+    local targetPath = UI.TruncatePathLevels(
+        SaveLocations.LOCAL_STORAGE, g_CurrentDirectoryPath, level)
+    return DirectoryHistoryVisit(history, targetPath, function()
+        ChangeDirectoryLevelTo(level)
+    end)
+end
+
+function DirectoryHistoryBack(history)
+    if history == nil then return false end
+    local currentPath = g_CurrentDirectoryPath or ""
+    local targetPath = table.remove(history.Back)
+    while targetPath ~= nil and targetPath == currentPath do
+        targetPath = table.remove(history.Back)
+    end
+    if targetPath == nil then return false end
+
+    PushDirectoryHistory(history.Forward, currentPath)
+    ChangeDirectoryTo(targetPath)
+    return true
+end
+
+function DirectoryHistoryForward(history)
+    if history == nil then return false end
+    local currentPath = g_CurrentDirectoryPath or ""
+    local targetPath = table.remove(history.Forward)
+    while targetPath ~= nil and targetPath == currentPath do
+        targetPath = table.remove(history.Forward)
+    end
+    if targetPath == nil then return false end
+
+    PushDirectoryHistory(history.Back, currentPath)
+    ChangeDirectoryTo(targetPath)
+    return true
+end
+
+-- This runs before the manager because Alt+Up is normally the focused-widget
+-- reader shortcut and Backspace is normally search/edit input. The screen calls
+-- it only while its directory-browser panel owns focus; filename edit boxes are
+-- excluded by the caller so Backspace continues to edit text there.
+function HandleDirectoryHistoryInput(input, history)
+    if input:GetMessageType() ~= KeyEvents.KeyDown then return false end
+    if input:IsShiftDown() or input:IsControlDown() then return false end
+
+    local key = input:GetKey()
+    local isAlt = input:IsAltDown()
+    if not isAlt and key == Keys.VK_BACK then
+        DirectoryHistoryUp(history)
+        return true
+    elseif isAlt and key == Keys.VK_UP then
+        DirectoryHistoryUp(history)
+        return true
+    elseif isAlt and key == Keys.VK_LEFT then
+        DirectoryHistoryBack(history)
+        return true
+    elseif isAlt and key == Keys.VK_RIGHT then
+        DirectoryHistoryForward(history)
+        return true
     end
     return false
+end
+
+function AddDirectoryHistoryBindings(widget, history)
+    widget:AddInputBindings({
+        {
+            Key = Keys.VK_BACK,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_DIRECTORY_UP",
+            Action = function() DirectoryHistoryUp(history) return true end,
+        },
+        {
+            Key = Keys.VK_UP,
+            IsAlt = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_DIRECTORY_UP",
+            Action = function() DirectoryHistoryUp(history) return true end,
+        },
+        {
+            Key = Keys.VK_LEFT,
+            IsAlt = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_NAVIGATE_BACK",
+            Action = function() DirectoryHistoryBack(history) return true end,
+        },
+        {
+            Key = Keys.VK_RIGHT,
+            IsAlt = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_NAVIGATE_FORWARD",
+            Action = function() DirectoryHistoryForward(history) return true end,
+        },
+    })
 end
 
 -- ---------------------------------------------------------------------------
@@ -200,6 +328,17 @@ function BuildDirectoryOptions()
     return options, selectedIdx
 end
 
+function RefreshDirectoryDropdown(dropdown)
+    if dropdown == nil then return end
+    local options, selectedIdx = BuildDirectoryOptions()
+    dropdown:SetOptions(options)
+    if selectedIdx > 0 then
+        dropdown:SetSelectedIndex(selectedIdx, true)
+    else
+        dropdown:ClearSelection(true)
+    end
+end
+
 -- ---------------------------------------------------------------------------
 -- Sort dropdown helpers
 -- ---------------------------------------------------------------------------
@@ -227,4 +366,72 @@ function MakeSimpleBtn(ctrl)
     end)
     btn:SetFocusSound("Main_Menu_Mouse_Over")
     return btn
+end
+
+-- ---------------------------------------------------------------------------
+-- World Builder map CAI dependency injection
+--
+-- Loading a saved World Builder map (.Civ6Map) rebuilds the session mod set from
+-- the map file's ModDependencies table and hard-overwrites the live enabled set.
+-- CAI (AffectsSavedGames=0) is never written to that table, so it is force-
+-- disabled for the session. A .Civ6Map is a plain SQLite database, so we inject
+-- CAI's ModDependencies row just before the load reads it, then strip it back
+-- out once the engine has consumed it (on load) and again after any save,
+-- keeping the on-disk map loadable by players who do not have CAI installed.
+-- These use the DLL SQLite bridge (ExposedMembers.CAI.OpenDatabase/Query/
+-- CloseDatabase); on an older DLL that lacks them we log and no-op.
+-- ---------------------------------------------------------------------------
+
+local CAI_MOD_GUID  = "9f4b5c2e-1a2b-4c3d-8e9f-123456789abc"
+local CAI_MOD_TITLE = '{"LOC_CAI_MOD_TITLE":[]}'
+
+-- Runs one write statement against the .Civ6Map at path. Returns the number of
+-- rows changed, or nil on failure. Wrapped in pcall because these are external
+-- DLL (SQLite) calls whose availability depends on the installed CAI DLL.
+local function RunMapDepWrite(path, sql, params)
+    local api = ExposedMembers.CAI
+    if not (api and api.OpenDatabase and api.Query and api.CloseDatabase) then
+        print("CAI WBMapDep: SQLite bridge unavailable (DLL too old); skipping")
+        return nil
+    end
+    local changed = nil
+    local ok, err = pcall(function()
+        local handle, openErr = api.OpenDatabase(path)
+        if not handle then
+            print("CAI WBMapDep: could not open '" .. tostring(path) .. "': " .. tostring(openErr))
+            return
+        end
+        local result, queryErr = api.Query(handle, sql, params)
+        if result then
+            changed = result.changed
+        else
+            print("CAI WBMapDep: query failed on '" .. tostring(path) .. "': " .. tostring(queryErr))
+        end
+        api.CloseDatabase(handle)
+    end)
+    if not ok then
+        print("CAI WBMapDep: exception on '" .. tostring(path) .. "': " .. tostring(err))
+    end
+    return changed
+end
+
+-- Inserts CAI into the map file's ModDependencies unless already present, so the
+-- load re-enables accessibility. Idempotent (ID is the table's primary key).
+function WBMapDepInject(path)
+    if not path or path == "" then return end
+    RunMapDepWrite(path,
+        "INSERT OR IGNORE INTO ModDependencies (ID, Title) VALUES (?, ?)",
+        { CAI_MOD_GUID, CAI_MOD_TITLE })
+    print("CAI WBMapDep: injected CAI dependency into '" .. tostring(path) .. "'")
+end
+
+-- Removes CAI from the map file's ModDependencies, keeping the shared/shipped
+-- file loadable without CAI. Returns rows removed (0 means the save serializer
+-- did not write CAI back, i.e. AffectsSavedGames=0 already excluded it).
+function WBMapDepStrip(path)
+    if not path or path == "" then return 0 end
+    local changed = RunMapDepWrite(path, "DELETE FROM ModDependencies WHERE ID = ?", { CAI_MOD_GUID })
+    print("CAI WBMapDep: stripped CAI dependency from '" .. tostring(path) ..
+        "' (rows removed: " .. tostring(changed) .. ")")
+    return changed or 0
 end

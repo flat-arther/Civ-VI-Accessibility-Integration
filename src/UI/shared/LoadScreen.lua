@@ -645,14 +645,23 @@ end
 -- once. Only wrap the globals here so Initialize picks up the wrapped versions;
 -- do NOT Add them again, or each handler fires twice. For content-ready that
 -- means the feature list is built twice into FeaturesStack (doubled text).
+OnShow = WrapFunc(OnShow, function(orig, ...)
+	orig(...)
+	if GameConfiguration:IsWorldBuilderEditor() then
+		Speak(Controls.FallbackMessage:GetText())
+	end
+end)
+
 OnLoadScreenContentReady = WrapFunc(OnLoadScreenContentReady, function(orig, ...)
 	orig(...)
+	if GameConfiguration:IsWorldBuilderEditor() then return end
 	ContextPtr:SetInputHandler(OnInputHandler, true)
 	end)
 
 local spokeReady = false
 OnLoadGameViewStateDone = WrapFunc(OnLoadGameViewStateDone, function(orig, ...)
 	orig(...)
+	if GameConfiguration:IsWorldBuilderEditor() then return end
 	if not spokeReady then
 	Speak(Locale.Lookup("LOC_READY_LABEL"))
 	if m_CAIPanel then
@@ -665,6 +674,7 @@ OnLoadGameViewStateDone = WrapFunc(OnLoadGameViewStateDone, function(orig, ...)
 end)
 
 function OnCAIUIManagerInitialized(manager)
+	if GameConfiguration:IsWorldBuilderEditor() then return end
 	mgr = manager
 	if not m_CAIPanel or mgr:GetTop() ~= m_CAIPanel then
 	BuildPanel()

@@ -969,6 +969,9 @@ function DropdownWidget:SetOptions(options) end
 ---@param silent? boolean
 function DropdownWidget:SetSelectedIndex(index, silent) end
 
+---@param silent? boolean
+function DropdownWidget:ClearSelection(silent) end
+
 ---@param index integer
 ---@param silent? boolean
 function DropdownWidget:Commit(index, silent) end

@@ -404,9 +404,6 @@ local function RebuildPanel()
     RebuildTree(m_queueTree, m_queueRows, false)
     RebuildTree(m_availableTree, m_availableRows, true)
 
-    if m_panel then
-        m_panel.DefaultIndex = (#m_queueRows > 0) and 1 or 2
-    end
 end
 
 -- ===========================================================================
@@ -419,18 +416,18 @@ local function EnsurePanelBuilt()
         Label = function() return ControlText(Controls.Title) end,
     })
 
+    m_availableTree = mgr:CreateWidget(AVAILABLE_TREE_ID, "Tree", {
+        Label       = function() return Locale.Lookup("LOC_CAI_RESEARCH_AVAILABLE_LIST") end,
+        SearchDepth = 0,
+    })
+    m_panel:AddChild(m_availableTree)
+
     m_queueTree = mgr:CreateWidget(QUEUE_TREE_ID, "Tree", {
         Label           = function() return Locale.Lookup("LOC_CAI_RESEARCH_QUEUE_LIST") end,
         HiddenPredicate = function() return #m_queueRows == 0 end,
         SearchDepth     = 0,
     })
     m_panel:AddChild(m_queueTree)
-
-    m_availableTree = mgr:CreateWidget(AVAILABLE_TREE_ID, "Tree", {
-        Label       = function() return Locale.Lookup("LOC_CAI_RESEARCH_AVAILABLE_LIST") end,
-        SearchDepth = 0,
-    })
-    m_panel:AddChild(m_availableTree)
 
     local treeBtn = mgr:CreateWidget(OPEN_TREE_BUTTON_ID, "Button", {
         Label             = function() return ControlText(Controls.OpenTreeButton) end,
@@ -468,11 +465,7 @@ local function PushPanelWhenReady()
     m_tutorialControlsReady = false
     m_tutorialPushPending = false
 
-    local ePlayer = Game.GetLocalPlayer()
-    local playerTechs = ePlayer and ePlayer ~= -1 and Players[ePlayer]:GetTechs() or nil
-    local hasCurrent = playerTechs and playerTechs:GetResearchingTech() ~= -1
-    local focusChild = hasCurrent and m_queueTree or m_availableTree
-    mgr:Push(m_panel, { focus = focusChild, priority = PopupPriority.Low })
+    mgr:Push(m_panel, { priority = PopupPriority.Low })
 end
 
 local function OnPanelOpenedCAI()

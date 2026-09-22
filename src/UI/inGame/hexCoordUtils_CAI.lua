@@ -362,7 +362,14 @@ function HexCoordUtils.plotsInRange(centerX, centerY, radius)
             local col, row = CubeToOffset(ccx + dx, nil, ccz + dz)
             local plot = Map.GetPlot(col, row)
             if plot ~= nil then
-                local isRevealed = visibility == nil or visibility:IsRevealed(plot)
+                -- World Builder Set Visibility tool overrides the observer view.
+                local isGated, wbRevealed = GetWorldBuilderRevealGate(plot)
+                local isRevealed
+                if isGated then
+                    isRevealed = wbRevealed
+                else
+                    isRevealed = visibility == nil or visibility:IsRevealed(plot)
+                end
                 if isRevealed then
                     plots[#plots + 1] = plot
                 else

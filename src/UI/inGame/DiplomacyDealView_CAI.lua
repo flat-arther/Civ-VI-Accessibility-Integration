@@ -11,6 +11,7 @@
 -- override (e.g. KublaiKhan_Vietnam _MODE).
 
 include("caiUtils")
+include("DiplomacyStatementSupport")
 
 local mgr = ExposedMembers.CAI_UIManager
 local m_alwaysReceivesInput = false
@@ -1238,6 +1239,24 @@ local function SpeakOtherLeaderDescription()
     end
 end
 
+local MOOD_LOC_KEYS = {
+    [DiplomacyMoodTypes.HAPPY] = "LOC_CAI_DIPLOMACY_MOOD_HAPPY",
+    [DiplomacyMoodTypes.NEUTRAL] = "LOC_CAI_DIPLOMACY_MOOD_NEUTRAL",
+    [DiplomacyMoodTypes.UNHAPPY] = "LOC_CAI_DIPLOMACY_MOOD_UNHAPPY",
+}
+
+local function GetOtherLeaderMoodLabel()
+    local otherPlayer = m_players.other
+    if not otherPlayer or otherPlayer:IsHuman() then return "" end
+
+    local localPlayerID = m_players.local_ and m_players.local_:GetID() or Game.GetLocalPlayer()
+    if localPlayerID == nil or localPlayerID < 0 then return "" end
+
+    local mood = DiplomacySupport_GetPlayerMood(otherPlayer, localPlayerID)
+    local locKey = MOOD_LOC_KEYS[mood]
+    return locKey and Locale.Lookup(locKey) or ""
+end
+
 local function EnsureRootBuilt()
     if m_state.built then return end
 
@@ -1246,8 +1265,9 @@ local function EnsureRootBuilt()
             if not m_players.other then return "" end
             local config = PlayerConfigurations[m_players.other:GetID()]
             if not config then return "" end
-            return Locale.Lookup("LOC_DIPLOMACY_DEAL_PLAYER_PANEL_TITLE",
+            local identity = Locale.Lookup("LOC_DIPLOMACY_DEAL_PLAYER_PANEL_TITLE",
                 config:GetLeaderName(), config:GetCivilizationDescription())
+            return JoinNonEmpty({ identity, GetOtherLeaderMoodLabel() }, ", ")
         end,
     })
 

@@ -78,6 +78,7 @@
     <File>UI/frontEnd/IntroScreen.lua</File>
     <File>UI/frontEnd/FrontEndPopup.lua</File>
     <File>UI/frontEnd/MainMenu.lua</File>
+    <File>UI/frontEnd/WorldBuilderMenu.lua</File>
     <File>UI/frontEnd/Mods.lua</File>
     <File>UI/frontEnd/CreditsScreen.lua</File>
     <File>UI/frontEnd/Multiplayer/Lobby.lua</File>
@@ -103,7 +104,7 @@
     <File>UI/shared/LoadSaveHelpers_CAI.lua</File>
     <File>UI/shared/LoadGameMenu.lua</File>
     <File>UI/shared/SaveGameMenu.lua</File>
-    <File>UI/frontEnd/LoadScreen.lua</File>
+    <File>UI/shared/LoadScreen.lua</File>
     <File>UI/shared/StateTransition.lua</File>
     <File>UI/shared/PopupDialog.lua</File>
     <File>UI/inGame/PlayerStateManager_CAI.lua</File>
@@ -149,8 +150,10 @@
     <File>UI/inGame/ResearchChooser_CAI.lua</File>
     <File>UI/inGame/inGameHelpers_CAI.lua</File>
     <File>UI/inGame/CAIUnitNumbers.lua</File>
+    <File>UI/inGame/WorldClimateHistoryManager_CAI.lua</File>
     <File>UI/inGame/interfaceTargetHelpers_CAI.lua</File>
     <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>
+    <File>UI/inGame/districtNeighborBonuses_CAI.lua</File>
     <File>UI/inGame/cityManagementInterfaceHelpers_CAI.lua</File>
     <File>UI/inGame/hexCoordUtils_CAI.lua</File>
     <File>UI/inGame/RevealAnnouncements_CAI.lua</File>
@@ -165,6 +168,10 @@
     <File>UI/inGame/WorldBuilderPlacement_CAI.lua</File>
     <File>UI/inGame/WorldBuilderLaunchBar_CAI.lua</File>
     <File>UI/inGame/WorldBuilderMapEditor_CAI.lua</File>
+    <File>UI/inGame/WorldBuilderPlayerEditor_CAI.lua</File>
+    <File>UI/inGame/WorldBuilderPlotEditor_CAI.lua</File>
+    <File>UI/inGame/WorldBuilderMapTools_CAI.lua</File>
+    <File>UI/inGame/WorldBuilderVisManager_CAI.lua</File>
     <File>UI/inGame/Surveyor_CAI.lua</File>
     <File>UI/inGame/MessageBuffer_CAI.lua</File>
     <File>UI/inGame/RecommendationLogic_CAI.lua</File>
@@ -189,10 +196,12 @@
     <File>UI/inGame/WorldScanner/WorldScannerCategory_civRoyale.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_pirates.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_yields.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_tutorial.lua</File>
     <File>UI/inGame/WorldScanner/WorldScannerCategory_mapTacs.lua</File>
+    <File>UI/inGame/WorldScanner/WorldScannerCategory_worldBuilder.lua</File>
     <File>UI/inGame/CityStates_CAI.lua</File>
     <File>UI/inGame/ReligionScreen_CAI.lua</File>
     <File>UI/inGame/PantheonChooser_CAI.lua</File>
@@ -435,6 +444,7 @@
       <File>UI/frontEnd/FrontEndPopup.lua</File>
       <File>UI/frontEnd/FrontEnd.lua</File>
       <File>UI/frontEnd/MainMenu.lua</File>
+      <File>UI/frontEnd/WorldBuilderMenu.lua</File>
       <File>UI/frontEnd/Mods.lua</File>
       <File>UI/frontEnd/CreditsScreen.lua</File>
       <File>UI/frontEnd/Multiplayer/Lobby.lua</File>
@@ -460,7 +470,7 @@
       <File>UI/shared/LoadSaveHelpers_CAI.lua</File>
       <File>UI/shared/LoadGameMenu.lua</File>
       <File>UI/shared/SaveGameMenu.lua</File>
-      <File>UI/frontEnd/LoadScreen.lua</File>
+      <File>UI/shared/LoadScreen.lua</File>
       <File>UI/shared/PopupDialog.lua</File>
       <File>UI/shared/Options.lua</File>
       <File>UI/shared/StateTransition.lua</File>
@@ -571,6 +581,7 @@
       <File>UI/shared/caiUtils.lua</File>
       <File>UI/shared/CAISettings.lua</File>
       <File>UI/shared/audioManager_CAI.lua</File>
+      <File>UI/shared/LoadScreen.lua</File>
 
       <File>UI/uiManager/helpers/CAIWidgetHelpers_Settings.lua</File>
       <File>UI/uiManager/helpers/CAIWidgetHelpers_Navigation.lua</File>
@@ -651,9 +662,11 @@
       <File>UI/inGame/GreatWorkShowcase_CAI.lua</File>
       <File>UI/inGame/inGameHelpers_CAI.lua</File>
       <File>UI/inGame/CAIUnitNumbers.lua</File>
+      <File>UI/inGame/WorldClimateHistoryManager_CAI.lua</File>
       <File>UI/inGame/ChatPanel_CAI.lua</File>
       <File>UI/inGame/interfaceTargetHelpers_CAI.lua</File>
       <File>UI/inGame/interfaceInfoHelpers_CAI.lua</File>
+      <File>UI/inGame/districtNeighborBonuses_CAI.lua</File>
       <File>UI/inGame/cityManagementInterfaceHelpers_CAI.lua</File>
       <File>UI/inGame/hexCoordUtils_CAI.lua</File>
       <File>UI/inGame/RevealAnnouncements_CAI.lua</File>
@@ -664,6 +677,7 @@
       <File>UI/inGame/MapSearchPanel_CAI.lua</File>
       <File>UI/inGame/MapPinListPanel_CAI.lua</File>
       <File>UI/inGame/MapPinPopup_CAI.lua</File>
+      <File>UI/inGame/WorldBuilderVisManager_CAI.lua</File>
       <File>UI/inGame/Surveyor_CAI.lua</File>
       <File>UI/inGame/MessageBuffer_CAI.lua</File>
       <File>UI/inGame/RecommendationLogic_CAI.lua</File>
@@ -688,10 +702,12 @@
       <File>UI/inGame/WorldScanner/WorldScannerCategory_civRoyale.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_pirates.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_cityManagement.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_yields.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_waypoints.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_recommendations.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_tutorial.lua</File>
       <File>UI/inGame/WorldScanner/WorldScannerCategory_mapTacs.lua</File>
+      <File>UI/inGame/WorldScanner/WorldScannerCategory_worldBuilder.lua</File>
       <File>UI/inGame/NaturalDisasterPopup_CAI.lua</File>
       <!-- Better Trade Screen variants are pulled by a runtime include() from
            the trade dispatchers, so they must be resolvable via ImportFiles. -->
@@ -815,6 +831,30 @@
         <LoadOrder>999999999</LoadOrder>
         <LuaContext>WorldBuilderMapEditor</LuaContext>
         <LuaReplace>UI/inGame/WorldBuilderMapEditor_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WorldBuilderPlayerEditor">
+      <Properties>
+        <LoadOrder>999999999</LoadOrder>
+        <LuaContext>WorldBuilderPlayerEditor</LuaContext>
+        <LuaReplace>UI/inGame/WorldBuilderPlayerEditor_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WorldBuilderPlotEditor">
+      <Properties>
+        <LoadOrder>999999999</LoadOrder>
+        <LuaContext>WorldBuilderPlotEditor</LuaContext>
+        <LuaReplace>UI/inGame/WorldBuilderPlotEditor_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+
+    <ReplaceUIScript id="CAI_WorldBuilderMapTools">
+      <Properties>
+        <LoadOrder>999999999</LoadOrder>
+        <LuaContext>WorldBuilderMapTools</LuaContext>
+        <LuaReplace>UI/inGame/WorldBuilderMapTools_CAI.lua</LuaReplace>
       </Properties>
     </ReplaceUIScript>
 

@@ -560,6 +560,48 @@ local function OpenPicker(dstCityBldgs, dstBuildingIndex, dstSlotIndex)
     local buildingOrder = {}
     local candidateCount = 0
 
+    local function AddCandidateToGroups(candidate)
+        candidateCount = candidateCount + 1
+
+        local cityID = candidate.City:GetID()
+        local cityGroup = cityGroups[cityID]
+        if not cityGroup then
+            cityGroup = {
+                City = candidate.City,
+                Buildings = {},
+                BuildingOrder = {},
+            }
+            cityGroups[cityID] = cityGroup
+            table.insert(cityOrder, cityID)
+        end
+        local cityBuilding = cityGroup.Buildings[candidate.BuildingInfo.Index]
+        if not cityBuilding then
+            cityBuilding = { Info = candidate.BuildingInfo, Items = {} }
+            cityGroup.Buildings[candidate.BuildingInfo.Index] = cityBuilding
+            table.insert(cityGroup.BuildingOrder, candidate.BuildingInfo.Index)
+        end
+        table.insert(cityBuilding.Items, candidate)
+
+        local buildingIndex = candidate.BuildingInfo.Index
+        local buildingGroup = buildingGroups[buildingIndex]
+        if not buildingGroup then
+            buildingGroup = {
+                Info = candidate.BuildingInfo,
+                Cities = {},
+                CityOrder = {},
+            }
+            buildingGroups[buildingIndex] = buildingGroup
+            table.insert(buildingOrder, buildingIndex)
+        end
+        local buildingCity = buildingGroup.Cities[cityID]
+        if not buildingCity then
+            buildingCity = { City = candidate.City, Items = {} }
+            buildingGroup.Cities[cityID] = buildingCity
+            table.insert(buildingGroup.CityOrder, cityID)
+        end
+        table.insert(buildingCity.Items, candidate)
+    end
+
     for _, pCity in localPlayer:GetCities():Members() do
         if pCity and pCity:GetOwner() == Game.GetLocalPlayer() then
             local pCityBldgs = pCity:GetBuildings()
@@ -583,44 +625,23 @@ local function OpenPicker(dstCityBldgs, dstBuildingIndex, dstSlotIndex)
                                 BuildingInfo = buildingInfo,
                                 GreatWorkIndex = greatWorkIndex,
                             }
-                            candidateCount = candidateCount + 1
-
-                            local cityID = pCity:GetID()
-                            local cityGroup = cityGroups[cityID]
-                            if not cityGroup then
-                                cityGroup = {
-                                    City = pCity,
-                                    Buildings = {},
-                                    BuildingOrder = {},
-                                }
-                                cityGroups[cityID] = cityGroup
-                                table.insert(cityOrder, cityID)
-                            end
-                            local cityBuilding = cityGroup.Buildings[buildingInfo.Index]
-                            if not cityBuilding then
-                                cityBuilding = { Info = buildingInfo, Items = {} }
-                                cityGroup.Buildings[buildingInfo.Index] = cityBuilding
-                                table.insert(cityGroup.BuildingOrder, buildingInfo.Index)
-                            end
-                            table.insert(cityBuilding.Items, candidate)
-
-                            local buildingGroup = buildingGroups[buildingInfo.Index]
-                            if not buildingGroup then
-                                buildingGroup = {
-                                    Info = buildingInfo,
-                                    Cities = {},
-                                    CityOrder = {},
-                                }
-                                buildingGroups[buildingInfo.Index] = buildingGroup
-                                table.insert(buildingOrder, buildingInfo.Index)
-                            end
-                            local buildingCity = buildingGroup.Cities[cityID]
-                            if not buildingCity then
-                                buildingCity = { City = pCity, Items = {} }
-                                buildingGroup.Cities[cityID] = buildingCity
-                                table.insert(buildingGroup.CityOrder, cityID)
-                            end
-                            table.insert(buildingCity.Items, candidate)
+                            AddCandidateToGroups(candidate)
+                        elseif greatWorkIndex == -1
+                            and dstGWIndex ~= -1
+                            and CanMoveWorkAtAll(dstCityBldgs, dstBuildingIndex, dstSlotIndex)
+                            and CanMoveGreatWork(dstCityBldgs, dstBuildingIndex, dstSlotIndex,
+                                pCityBldgs, buildingInfo.Index, slotIndex)
+                        then
+                            AddCandidateToGroups({
+                                City = pCity,
+                                CityBldgs = pCityBldgs,
+                                BuildingInfo = buildingInfo,
+                                GreatWorkIndex = dstGWIndex,
+                                DestinationCity = pCity,
+                                DestinationBuildingInfo = buildingInfo,
+                                DestinationSlotIndex = slotIndex,
+                                IsEmptyDestination = true,
+                            })
                         end
                     end
                 end
@@ -634,21 +655,40 @@ local function OpenPicker(dstCityBldgs, dstBuildingIndex, dstSlotIndex)
         local item = mgr:CreateWidget(
             mgr:GenerateWidgetId("CAIGWPicker_Item"), "TreeItem", {
                 Label = function()
+                    if candidate.IsEmptyDestination then
+                        local slotType = candidate.CityBldgs:GetGreatWorkSlotType(
+                            candidate.BuildingInfo.Index, candidate.DestinationSlotIndex)
+                        local slotInfo = GameInfo.GreatWorkSlotTypes[slotType]
+                        return Locale.Lookup("LOC_CAI_GREAT_WORKS_EMPTY_SLOT",
+                            GetSlotTypeName(slotInfo.GreatWorkSlotType))
+                    end
                     return GetGreatWorkLabel(candidate.CityBldgs,
                         candidate.GreatWorkIndex)
                 end,
                 Tooltip = function()
+                    if candidate.IsEmptyDestination then return "" end
                     return GetGreatWorkDetail(candidate.CityBldgs,
                         candidate.GreatWorkIndex, candidate.BuildingInfo)
                 end,
-                FocusKey = "gw:" .. tostring(candidate.GreatWorkIndex),
+                FocusKey = candidate.IsEmptyDestination
+                    and ("slot:" .. tostring(candidate.City:GetID())
+                        .. ":" .. tostring(candidate.BuildingInfo.Index)
+                        .. ":" .. tostring(candidate.DestinationSlotIndex))
+                    or ("gw:" .. tostring(candidate.GreatWorkIndex)),
             })
         item:SetFocusSound("Main_Menu_Mouse_Over")
         item:On("activate", function()
             ClosePicker()
-            ExecuteMove(candidate.City:GetID(), candidate.BuildingInfo.Index,
-                candidate.GreatWorkIndex, dstCityID, dstBuildingIndex,
-                dstSlotIndex)
+            if candidate.IsEmptyDestination then
+                ExecuteMove(dstCityID, dstBuildingIndex, candidate.GreatWorkIndex,
+                    candidate.DestinationCity:GetID(),
+                    candidate.DestinationBuildingInfo.Index,
+                    candidate.DestinationSlotIndex)
+            else
+                ExecuteMove(candidate.City:GetID(), candidate.BuildingInfo.Index,
+                    candidate.GreatWorkIndex, dstCityID, dstBuildingIndex,
+                    dstSlotIndex)
+            end
         end)
         parent:AddChild(item)
     end

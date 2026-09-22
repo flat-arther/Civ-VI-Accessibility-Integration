@@ -519,11 +519,16 @@ local function IsUnitFlagVisible(flag, unit)
         return false
     end
 
-    if flag.m_IsForceHide then
+    if not flag.m_IsCurrentlyVisible then
         return false
     end
 
-    if flag.m_Instance == nil or flag.m_Instance.Anchor == nil or flag.m_Instance.Anchor:IsHidden() then
+    if flag.m_Instance == nil or flag.m_Instance.Anchor == nil then
+        return false
+    end
+
+    -- Combat hides the graphic without changing the unit's logical visibility.
+    if not flag.m_IsForceHide and flag.m_Instance.Anchor:IsHidden() then
         return false
     end
 

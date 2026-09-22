@@ -56,6 +56,15 @@ function CAIWorldScannerCategory_CityManagement.Scan(context)
     for plotId in pairs(stateData.ActivePlots or {}) do
         local subCategoryId = CAICityManagementInterface.GetScannerSubCategoryId(plotId, stateData)
         local label = CAICityManagementInterface.BuildSpeechText(plotId, stateData)
+        -- Append the tile's yields after the existing status text ("worked",
+        -- "locked", "specialists 1 of 3", ...) for citizen plots. Purchase plots
+        -- read their gold cost instead, so they are left untouched.
+        if label ~= nil and label ~= "" and stateData.CitizenPlots ~= nil and stateData.CitizenPlots[plotId] ~= nil then
+            local yieldSummary = CAICityManagementInterface.BuildYieldSummary(plotId)
+            if yieldSummary ~= nil then
+                label = label .. ", " .. yieldSummary
+            end
+        end
         if subCategoryId ~= nil and label ~= nil and label ~= "" then
             out[#out + 1] = {
                 Id = "cityManagement:" .. tostring(plotId),

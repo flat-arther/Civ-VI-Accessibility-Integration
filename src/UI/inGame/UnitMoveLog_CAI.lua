@@ -153,6 +153,11 @@ local function AppendEntry(observerID, state, text, bucket, unitCategory, x, y, 
         return
     end
 
+    -- Disabled categories must not enter history or the hotseat speech queue.
+    if GetAnnouncementMode(BUCKET_SETTINGS[bucket]) == "none" then
+        return
+    end
+
     local buffer = MessageBuffer.GetForPlayer(observerID)
     if buffer == nil then
         LogWarn("Unit move log could not get the message buffer for observer " .. tostring(observerID))

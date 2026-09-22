@@ -361,16 +361,16 @@
       <Text>Después de los controles de enviados están Ver ciudad-estado, Declarar la guerra o Hacer las paces, Contratar ejército cuando está disponible y el botón para cambiar de vista. La vista de árbol empieza con un desplegable Ordenar ciudades-estado por, y luego una fila expandible por ciudad-estado con el estado de la relación más secciones de bonificaciones, influencia, misiones y relaciones. El desplegable ofrece el orden natural más dos opciones descritas explícitamente por cada columna actual de la tabla, como de la A a la Z, las que están en guerra primero o las de mayor cantidad primero. Los encabezados de la tabla usan las mismas descripciones y ambas vistas comparten el orden seleccionado. Alt más 1 selecciona la vista de tabla y Alt más 2 la vista de árbol; la vista seleccionada se recuerda. Intro activa el botón con el foco. Escape cierra la pantalla.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER" Language="es_ES">
-      <Text>El primer árbol contiene el principio actual y los principios en cola. El segundo árbol contiene los principios disponibles. Cada principio se expande en sus desbloqueos. El botón final abre el árbol de principios completo.</Text>
+      <Text>El primer árbol contiene los principios disponibles. El segundo contiene el principio actual y los principios en cola cuando la cola no está vacía. Cada principio se expande en sus desbloqueos. El tercer control abre el árbol de principios completo.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_ACTIONS" Language="es_ES">
       <Text>Intro en un principio disponible lo convierte en el principio actual. Las filas del actual y de la cola son de solo lectura y se pueden inspeccionar; este selector no añade a propósito un atajo de cola.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_BINDINGS" Language="es_ES">
-      <Text>Mayús más Intro en un principio revelado abre su artículo de la Civilopedia. Usa Tab para pasar del árbol de la cola a los principios disponibles y luego a Abrir el árbol de principios.</Text>
+      <Text>Mayús más Intro en un principio revelado abre su artículo de la Civilopedia. Usa Tab para pasar de los principios disponibles al árbol de la cola y luego a Abrir el árbol de principios.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_LAYOUT" Language="es_ES">
-      <Text>Los controles aparecen en este orden: la lista del principio actual y los principios en cola cuando no está vacía, una lista de filtros, la vista activa de principios en Cuadrícula, Grafo o Árbol, una lista de desbloqueos en las vistas de cuadrícula y grafo, un resumen de solo lectura del gobierno y las políticas asignadas, y el desplegable Vista.</Text>
+      <Text>Los controles aparecen en este orden: la vista activa de principios en Cuadrícula, Grafo o Árbol, una lista de desbloqueos en las vistas de cuadrícula y grafo, una lista de filtros, la lista del principio actual y los principios en cola cuando no está vacía, un árbol del gobierno y las políticas asignadas, y el desplegable Vista.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_VIEWS" Language="es_ES">
       <Text>El desplegable Vista contiene Cuadrícula, Grafo y Árbol, en ese orden. La cuadrícula organiza las eras como columnas, los niveles de requisitos de izquierda a derecha y los principios en vertical dentro de cada nivel. El grafo sigue directamente las conexiones de requisitos. El árbol presenta una jerarquía de era, nivel y principio. Alt más 1 selecciona Cuadrícula, Alt más 2 selecciona Grafo y Alt más 3 selecciona Árbol. Al cambiar de vista se mantiene el foco en el mismo principio cuando es posible, y la vista seleccionada se recuerda la próxima vez que se abre el árbol de principios.</Text>
@@ -385,7 +385,7 @@
       <Text>Intro en un filtro abre una lista temporal de resultados. En los resultados, Intro cierra la lista y salta al principio, Control más Intro lo añade a la cola, Mayús más Intro abre la Civilopedia y Escape cierra los resultados y limpia el filtro. Control más F busca principios con el índice de búsqueda de principios del juego desde cualquier vista principal.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_GOVERNMENT" Language="es_ES">
-      <Text>En la vista de cuadrícula o grafo, poner el foco en un principio reconstruye la lista de desbloqueos contigua para ese principio. El campo de edición de solo lectura que sigue resume el gobierno actual, el número de ranuras y todas las políticas asignadas.</Text>
+      <Text>En la vista de cuadrícula o grafo, poner el foco en un principio reconstruye la lista de desbloqueos contigua. La etiqueta del árbol de gobierno resume el gobierno actual y el número de ranuras. Expande las filas Militar, Económica, Diplomática y Comodín para consultar cada ranura y política asignada.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA" Language="es_ES">
       <Text>La Civilopedia tiene tres controles contiguos: un árbol de secciones, un árbol de artículo y una lista de historial. Tab se mueve entre ellos.</Text>
@@ -409,7 +409,7 @@
       <Text>Niveles de CO2 es un árbol agrupado primero por civilización y luego por recurso. Incluye tus contribuciones por recurso y los contribuyentes globales conocidos con totales en tiempo real.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CLIMATE_HISTORY" Language="es_ES">
-      <Text>Historial de eventos es una lista cronológica. Los eventos localizados y revelados incluyen su dirección desde el cursor de navegación. Intro mueve el cursor a la ubicación inicial del evento sin cerrar la pantalla. Escape cierra la pantalla del clima.</Text>
+      <Text>Historial de eventos es un árbol cronológico. Usa Derecha para expandir una fila de desastre y entrar en los detalles que muestran exactamente qué se añadió, dañó, eliminó, cambió o perdió. Pulsa Intro en una fila de desastre para mover el cursor de navegación a la casilla inicial del evento, aunque la fila tenga detalles expandibles. Pulsa Intro en una entrada afectada para mover el cursor a la casilla de esa entrada. Estos saltos no cierran la pantalla. Los eventos localizados y revelados incluyen su dirección desde el cursor. Izquierda contrae una fila y Escape cierra la pantalla del clima.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_OVERVIEW" Language="es_ES">
       <Text>La vista general normal contiene un árbol de líderes seguido de una lista de acciones. Poner el foco en otro líder selecciona a ese líder en el juego y actualiza las acciones siguientes.</Text>
@@ -655,16 +655,16 @@
       <Text>Chismorreo contiene una lista cronológica simple de todas las entradas de chismorreo visibles que coinciden, seguida de los desplegables de filtro por jugador y por tipo. Cambia cualquiera de los dos desplegables para reconstruir la lista. Escape cierra los informes.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH" Language="es_ES">
-      <Text>El primer árbol contiene las tecnologías actual y en cola. El segundo árbol contiene las tecnologías disponibles. Cada tecnología se expande en sus desbloqueos. El botón final abre el árbol de tecnologías completo.</Text>
+      <Text>El primer árbol contiene las tecnologías disponibles. El segundo contiene las tecnologías actual y en cola cuando la cola no está vacía. Cada tecnología se expande en sus desbloqueos. El tercer control abre el árbol de tecnologías completo.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH_ACTIONS" Language="es_ES">
       <Text>Intro en una tecnología disponible la convierte en la actual. Las filas de la actual y de la cola son de solo lectura y se pueden inspeccionar; este selector no añade a propósito un atajo de cola.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH_BINDINGS" Language="es_ES">
-      <Text>Mayús más Intro en una tecnología revelada abre su artículo de la Civilopedia. Usa Tab para pasar del árbol de la cola a las tecnologías disponibles y luego a Abrir el árbol de tecnologías.</Text>
+      <Text>Mayús más Intro en una tecnología revelada abre su artículo de la Civilopedia. Usa Tab para pasar de las tecnologías disponibles al árbol de la cola y luego a Abrir el árbol de tecnologías.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_LAYOUT" Language="es_ES">
-      <Text>Los controles aparecen en este orden: la lista de tecnologías actual y en cola cuando no está vacía, una lista de filtros, la vista activa de tecnologías en Cuadrícula, Grafo o Árbol, una lista de desbloqueos en las vistas de cuadrícula y grafo, y el desplegable Vista.</Text>
+      <Text>Los controles aparecen en este orden: la vista activa de tecnologías en Cuadrícula, Grafo o Árbol, una lista de desbloqueos en las vistas de cuadrícula y grafo, una lista de filtros, la lista de tecnologías actual y en cola cuando no está vacía, y el desplegable Vista.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_VIEWS" Language="es_ES">
       <Text>El desplegable Vista contiene Cuadrícula, Grafo y Árbol, en ese orden. La cuadrícula organiza las eras como columnas, los niveles de requisitos de izquierda a derecha y las tecnologías en vertical dentro de cada nivel. El grafo sigue directamente las conexiones de requisitos. El árbol presenta una jerarquía de era, nivel y tecnología. Alt más 1 selecciona Cuadrícula, Alt más 2 selecciona Grafo y Alt más 3 selecciona Árbol. Al cambiar de vista se mantiene el foco en la misma tecnología cuando es posible, y la vista seleccionada se recuerda la próxima vez que se abre el árbol de tecnologías.</Text>
@@ -679,7 +679,7 @@
       <Text>Intro en un filtro abre una lista temporal de resultados. En los resultados, Intro cierra la lista y salta a la tecnología, Control más Intro la añade a la cola, Mayús más Intro abre la Civilopedia y Escape cierra los resultados y limpia el filtro. Control más F busca en el índice de tecnologías del juego desde cualquier vista principal.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_UNLOCKS" Language="es_ES">
-      <Text>En la vista de cuadrícula o grafo, poner el foco en una tecnología reconstruye la lista de desbloqueos contigua para esa tecnología. Tab llega a esa lista después de la vista activa cuando contiene entradas, y luego llega al desplegable Vista.</Text>
+      <Text>En la vista de cuadrícula o grafo, poner el foco en una tecnología reconstruye su lista de desbloqueos contigua. Tab llega a ella inmediatamente después de la vista activa, seguida por los filtros, la cola no vacía y el desplegable Vista.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW" Language="es_ES">
       <Text>El resumen de comercio tiene las pestañas Mis rutas, Rutas a mis ciudades y Rutas disponibles. Todas las páginas son árboles agrupados por civilización, ciudad-estado u otra categoría de ruta.</Text>
@@ -796,5 +796,148 @@
     <Replace Tag="LOC_CAI_TUTORIAL_WC_SPECIAL_SUBMIT" Language="es_ES">
       <Text>Después de la lista de propuestas están los botones de envío y Pasar. Activa el botón de envío para mandar la propuesta marcada. Activa Pasar solo cuando no quieras enviar ninguna propuesta. Si empieza la sesión especial, su votación aparte requerirá más tarde que todos los miembros voten Apoyar u Oponerse.</Text>
     </Replace>
+
+    <!-- World Builder screen names -->
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WORLD_BUILDER" Language="es_ES">
+      <Text>Editor de mundos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WORLD_BUILDER_TOOLS" Language="es_ES">
+      <Text>Herramientas del Editor de mundos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WB_MAP_EDITOR" Language="es_ES">
+      <Text>Editor de mapas</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WB_PLAYER_EDITOR" Language="es_ES">
+      <Text>Editor de jugador</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_NAME_WB_PLOT_EDITOR" Language="es_ES">
+      <Text>Editor de casilla</Text>
+    </Replace>
+
+    <!-- World Builder screen titles -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TITLE" Language="es_ES">
+      <Text>Tutorial del Editor de mundos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOLS_TITLE" Language="es_ES">
+      <Text>Tutorial de las herramientas del Editor de mundos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_MAP_EDITOR_TITLE" Language="es_ES">
+      <Text>Tutorial del Editor de mapas</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLAYER_EDITOR_TITLE" Language="es_ES">
+      <Text>Tutorial del Editor de jugador</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLOT_EDITOR_TITLE" Language="es_ES">
+      <Text>Tutorial del Editor de casilla</Text>
+    </Replace>
+
+    <!-- World Builder main interface -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_OVERVIEW" Language="es_ES">
+      <Text>El Editor de mundos te permite editar el mapa directamente. Estás sobre el propio mapa; mueve el cursor del mapa como lo haces normalmente, y las ediciones se aplican a la casilla bajo el cursor.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLACE" Language="es_ES">
+      <Text>Pulsa Intro para colocar el elemento de la herramienta seleccionada en la casilla del cursor. Pulsa Suprimir para quitarlo.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_LOCK" Language="es_ES">
+      <Text>Pulsa M para fijar la colocación en la casilla actual, de modo que el cursor pueda desplazarse e inspeccionar otras casillas mientras las ediciones siguen aplicándose en la casilla fijada. Pulsa M de nuevo para liberarla.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLOT_EDITOR" Language="es_ES">
+      <Text>Pulsa F3 para abrir el Editor de casilla en la casilla del cursor, o en la casilla fijada cuando hay una, para cambiar todo lo de esa única casilla.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_UNDO" Language="es_ES">
+      <Text>Pulsa Control más Z para deshacer la última edición y Control más Y para rehacerla.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_GOTO" Language="es_ES">
+      <Text>Pulsa Control más G para abrir un cuadro que lleva el cursor a las coordenadas que escribas, ya sean absolutas o relativas al cursor.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_EDITORS" Language="es_ES">
+      <Text>Pulsa F1 para abrir el Editor de mapas y F2 para abrir el Editor de jugador.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOLS_PANEL" Language="es_ES">
+      <Text>Para cambiar de herramienta, pulsa Tab para abrir el panel de herramientas, donde puedes recorrer todas las herramientas y sus ajustes.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_TOOL_NUMBERS" Language="es_ES">
+      <Text>También puedes seleccionar una herramienta directamente sin abrir el panel. Las teclas del 1 al 0 seleccionan las diez primeras herramientas, y Mayús más 1 hasta Mayús más 6 seleccionan las seis restantes.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_PLACEMENT" Language="es_ES">
+      <Text>La colocación funciona seleccionando una herramienta con un tipo de elemento y ajustes como el tamaño del pincel, y luego pulsando Intro para aplicarlo a la casilla del cursor. Un pincel más grande cubre un anillo de casillas alrededor del cursor en lugar de una sola casilla.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_QUICKNAV" Language="es_ES">
+      <Text>Puedes cambiar la herramienta seleccionada y ajustar sus parámetros desde el mapa, sin abrir el panel. Izquierda y Derecha se mueven entre los parámetros; el primer parámetro es la propia herramienta, y el resto son los ajustes de la herramienta seleccionada. Arriba y Abajo cambian el valor del parámetro con el foco, así que en el primer parámetro cambian la herramienta seleccionada. Mantener Mayús con estas teclas salta al primer o último parámetro, o al primer o último valor.</Text>
+    </Replace>
+
+    <!-- World Builder tools panel -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_OVERVIEW" Language="es_ES">
+      <Text>El panel de herramientas es donde eliges qué herramienta está seleccionada y ajustas sus opciones. Se abre con el foco en la herramienta que está seleccionada en ese momento.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_LIST" Language="es_ES">
+      <Text>El primer control es una lista de las dieciséis herramientas de colocación, como terreno, accidentes, maravillas, ríos, acantilados, recursos, ciudades, distritos y mejoras. Al moverte sobre una herramienta, esta queda seleccionada. Pulsa Intro en una herramienta para cerrar el panel y volver al mapa.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_SETTINGS" Language="es_ES">
+      <Text>Después de la lista de herramientas hay una zona de ajustes que cambia según la herramienta seleccionada. Siempre empieza por la elección del tipo de elemento, seguida de las opciones adicionales de esa herramienta, que pueden incluir el tamaño del pincel, la dirección del accidente, la cantidad de recurso, el propietario, el jugador, el continente o una casilla de verificación de saqueado.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_DROPDOWNS" Language="es_ES">
+      <Text>Cada opción es un desplegable o un campo, así que moverte por las opciones nunca cambia nada por accidente. Solo se aplica el cambio al abrir un desplegable y activar una opción, o al confirmar un campo.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_TOOLS_SCANNER" Language="es_ES">
+      <Text>Mientras el Editor de mundos está activo, el Escáner del mundo obtiene una categoría de Editor de mundos. Tiene una sección de Posiciones iniciales que enumera cada posición inicial colocada agrupada por tipo, y una sección de Propiedad que enumera las casillas en propiedad agrupadas por propietario.</Text>
+    </Replace>
+
+    <!-- World Builder Map Editor -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_OVERVIEW" Language="es_ES">
+      <Text>El Editor de mapas contiene los ajustes y el texto de todo el mapa en un control de dos pestañas: General y Texto.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_GENERAL" Language="es_ES">
+      <Text>La pestaña General empieza con una lista de metadatos del mapa. Sus filas son el identificador del mapa, el ancho y el alto; la fila del identificador es un botón que genera un nuevo identificador al pulsarlo, mientras que el ancho y el alto son de solo lectura. Después de la lista hay una casilla de verificación El paquete del mapa es un mod y campos de edición para el Reglamento, los Comandos del mapa, el Mapa de referencia y el Alfa de referencia.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_TEXT" Language="es_ES">
+      <Text>La pestaña Texto es el editor de localización del mapa. Empieza con un desplegable de idioma, luego una lista de entradas de texto, y después un botón Añadir bajo la lista.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_MAP_EDITOR_TEXT_ACTIONS" Language="es_ES">
+      <Text>En la lista de entradas, Intro abre un editor con una etiqueta y una cadena, y su botón Aceptar guarda. Suprimir quita la entrada con el foco, salvo las cuatro primeras entradas del sistema, que no se pueden quitar. El botón Añadir abre el mismo editor para una nueva entrada.</Text>
+    </Replace>
+
+    <!-- World Builder Player Editor -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_OVERVIEW" Language="es_ES">
+      <Text>El Editor de jugador gestiona los jugadores de la partida. Tiene una lista de jugadores seguida de un control de cuatro pestañas, y las pestañas siempre actúan sobre el jugador seleccionado en la lista.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_LIST" Language="es_ES">
+      <Text>La lista de jugadores tiene una fila por jugador. Al moverte sobre un jugador, este queda seleccionado y las pestañas se actualizan. Al final de la lista están las filas Añadir jugador y Añadir IA, y Suprimir quita el jugador con el foco. Tab pasa de la lista a las pestañas.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_GENERAL" Language="es_ES">
+      <Text>La pestaña General ajusta los desplegables de Civilización, Líder, Nivel de civilización y Época del jugador seleccionado, y los campos numéricos de Oro y Fe. Algunos campos permanecen desactivados hasta que el jugador está inicializado, o cuando no corresponden, como el oro y la fe para Terra Barbara.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_TECHS" Language="es_ES">
+      <Text>La pestaña Tecnologías es una lista de casillas de verificación de todas las tecnologías. Marcar una casilla concede esa tecnología al jugador, y desmarcarla la quita.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CIVICS" Language="es_ES">
+      <Text>La pestaña Principios es una lista de casillas de verificación de todos los principios, y funciona igual que la pestaña Tecnologías.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES" Language="es_ES">
+      <Text>La pestaña Ciudades es un árbol de las ciudades del jugador seleccionado. Cada ciudad se expande en un valor de Población y en subárboles de Distritos y Edificios.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES_DETAIL" Language="es_ES">
+      <Text>Intro en Población abre un editor en línea para el tamaño de la ciudad. Bajo Distritos y Edificios, cada elemento indica su estado actual: añadido, no añadido o saqueado. Intro en un elemento que no está añadido lo añade, y Suprimir lo quita.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLAYER_EDITOR_CITIES_PLACEMENT" Language="es_ES">
+      <Text>Añadir una ciudad, o un distrito que necesita una casilla, pasa al mapa: el editor se cierra y selecciona la herramienta correspondiente para que la coloques en una casilla. Los edificios no necesitan casilla y se añaden directamente. El botón Añadir ciudad está debajo del árbol de ciudades.</Text>
+    </Replace>
+
+    <!-- World Builder Plot Editor -->
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_OVERVIEW" Language="es_ES">
+      <Text>El Editor de casilla cambia todo lo de una casilla, la casilla del cursor o la casilla fijada en la que lo abriste. Es una sola lista, y Escape la cierra y vuelve al mapa.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_ROWS" Language="es_ES">
+      <Text>La lista contiene, en orden: Terreno, Accidentes, Recursos, Mejoras, Distritos, Rutas, Posiciones iniciales, Propietario y, en Gathering Storm, Tipo de bajío.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_SUBMENUS" Language="es_ES">
+      <Text>Terreno y Propietario son desplegables sencillos. Los demás son filas expandibles cuya etiqueta resume la casilla: Accidentes añade un accidente y su dirección; Recursos añade un recurso y, para los recursos estratégicos, una cantidad; Mejoras, Distritos y Rutas añaden cada uno su tipo con una casilla de verificación de saqueado; Posiciones iniciales fija un tipo de posición inicial y su jugador, líder o civilización.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_COMMIT" Language="es_ES">
+      <Text>Elegir un valor lo escribe directamente en la casilla, de modo que se aplican todas las reglas del juego, como que un cambio de terreno elimine un accidente no válido o los ajustes de costa. Deshaz con Control más Z si un cambio provoca una cascada que no querías.</Text>
+    </Replace>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_BRUSH_LOCK" Language="es_ES">
+      <Text>Pulsa L para alternar el bloqueo del pincel. Mientras esté activado, cada movimiento del cursor aplica inmediatamente la herramienta seleccionada en las nuevas coordenadas con los ajustes y el tamaño del pincel actuales, aunque M haya fijado otra casilla. Pulsa L de nuevo para detener la colocación automática.</Text>
+    </Row>
   </LocalizedText>
 </GameData>

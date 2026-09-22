@@ -225,6 +225,11 @@ function MovementCost_CAI.Calculate(unit, pathInfo)
     local remaining = isFormation and unit:GetFormationMovesRemaining()
         or unit:GetMovementMovesRemaining()
     local maxMoves = isFormation and unit:GetFormationMaxMoves() or unit:GetMaxMoves()
+    if pathInfo.arrivalDelayedByCurrentZOC then
+        local startPlot = Map.GetPlotByIndex(unit:GetPlotId())
+        maxMoves = GetFutureMaxMoves(unit, startPlot)
+        remaining = maxMoves
+    end
     local activeTurn = 1
 
     for i = 2, #pathInfo.plots do

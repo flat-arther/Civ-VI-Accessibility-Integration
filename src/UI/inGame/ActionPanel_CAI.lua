@@ -23,6 +23,7 @@ local CAI_END_TURN_ACTION = Input.GetActionId("ReplaceEndTurn_CAI")
 local CAI_SPEAK_TURN_BLOCKERS_ACTION = Input.GetActionId("ActionPanelSpeakTurnBlockers")
 local CAI_OPEN_TURN_BLOCKERS_ACTION = Input.GetActionId("ActionPanelOpenTurnBlockers")
 local CAI_SPEAK_ERA_AGE_ACTION = Input.GetActionId("ActionPanelSpeakEraAge")
+local CAI_SPEAK_ERA_SCORE_DETAILS_ACTION = Input.GetActionId("ActionPanelSpeakEraScoreDetails")
 local m_caiTutorialActionPanelAllowed = false
 local m_caiLastObservedActionTooltip = nil
 local IsTutorialActionPanelAllowed = nil
@@ -70,6 +71,10 @@ end
 local function ShouldAutoSpeakCurrentAction()
     if IsBetweenTurns() then
         return CAISettings.GetBool("SpeakBetweenTurnsMessage")
+    end
+    if NotificationManager.GetFirstEndTurnBlocking(Game.GetLocalPlayer())
+        == EndTurnBlockingTypes.ENDTURN_BLOCKING_UNIT_NEEDS_ORDERS then
+        return true
     end
     return CAISettings.GetBool("SpeakTurnBlockers")
 end
@@ -395,6 +400,34 @@ local function SpeakEraAge()
     Speak(table.concat(parts, "[NEWLINE]"))
 end
 
+local function SpeakEraScoreDetails()
+    local playerID = GetLocalPlayerID()
+    if playerID == nil then return end
+
+    local gameEras = Game.GetEras()
+    if gameEras == nil then return end
+
+    local parts = {
+        Locale.Lookup("LOC_ERA_SCORE_HEADER") .. " " .. gameEras:GetPlayerCurrentScore(playerID),
+    }
+
+    local previousTotal = 0
+    for _, source in ipairs(gameEras:GetPlayerPreviousEraScoreBreakdown(playerID)) do
+        for _, value in pairs(source) do previousTotal = previousTotal + value end
+    end
+    if previousTotal > 0 then
+        table.insert(parts, Locale.Lookup("LOC_ERAS_PREVIOUS_ERA_TOTAL_SCORE") .. ", " .. previousTotal)
+    end
+
+    for _, source in ipairs(gameEras:GetPlayerCurrentEraScoreBreakdown(playerID)) do
+        for sourceText, value in pairs(source) do
+            if value > 0 then table.insert(parts, sourceText .. ", " .. value) end
+        end
+    end
+
+    Speak(table.concat(parts, "[NEWLINE]"))
+end
+
 -- ===========================================================================
 -- Input
 -- ===========================================================================
@@ -424,9 +457,39 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
         return
     end
 
+    if actionId == CAI_SPEAK_ERA_SCORE_DETAILS_ACTION then
+        if not GameCapabilities.HasCapability("CAPABILITY_ERAS") then
+            Speak(Locale.Lookup("LOC_CAI_ACTION_PANEL_ERA_NOT_AVAILABLE"))
+        else
+            SpeakEraScoreDetails()
+        end
+        return
+    end
+
     if actionId == CAI_END_TURN_ACTION or actionId == END_TURN_ACTION then
         if not IsEndTurnActionEnabled() then return end
+        local playerID = Game.GetLocalPlayer()
+        local player = Players[playerID]
+        local blocker = NotificationManager.GetFirstEndTurnBlocking(playerID)
+        local selectsUnit = player ~= nil
+            and not (player:CanUnreadyTurn() and not UI.IsTurnTimerElapsed(playerID))
+            and not UI.IsProcessingMessages()
+            and (blocker == EndTurnBlockingTypes.ENDTURN_BLOCKING_UNIT_NEEDS_ORDERS
+                or blocker == EndTurnBlockingTypes.ENDTURN_BLOCKING_UNITS
+                or blocker == EndTurnBlockingTypes.ENDTURN_BLOCKING_STACKED_UNITS
+                or (blocker == EndTurnBlockingTypes.NO_ENDTURN_BLOCKING and CheckUnitsHaveMovesState()))
+        local selected = UI.GetHeadSelectedUnit()
+        local previousOwner = selected and selected:GetOwner()
+        local previousID = selected and selected:GetID()
         orig(END_TURN_ACTION)
+        if selectsUnit then
+            selected = UI.GetHeadSelectedUnit()
+            if selected == nil then
+                Speak(Locale.Lookup("LOC_CAI_NO_READY_UNITS"))
+            elseif selected:GetOwner() == previousOwner and selected:GetID() == previousID then
+                Speak(Locale.Lookup("LOC_CAI_NO_MORE_UNITS", Locale.Lookup(selected:GetName())))
+            end
+        end
         return
     end
 end)

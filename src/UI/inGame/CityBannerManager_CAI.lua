@@ -1166,6 +1166,14 @@ info.CityBannerInfo = {
 
         return nil
     end,
+    productionYield = function(ctx)
+        if ctx == nil or ctx.kind ~= "city" or ctx.city == nil then
+            return nil
+        end
+
+        local production = math.floor(ctx.city:GetYield(YieldTypes.PRODUCTION) * 10) / 10
+        return "[ICON_Production]" .. toPlusMinusString(production)
+    end,
     production = function(ctx)
         if ctx == nil or ctx.kind ~= "city" then
             return nil
@@ -1584,6 +1592,7 @@ local BannerBucketActions = {
         city = {
             "growthState",
             { key = "foodSurplus", when = HasPopulationGrowthTooltip },
+            { key = "productionYield", when = IsOwnCityContext },
             "production",
             "productionTurns",
             "productionProgress",

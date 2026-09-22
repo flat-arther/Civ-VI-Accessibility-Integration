@@ -74,15 +74,18 @@ function TabControlWidget.Create(mgr, id, props)
     return w
 end
 
----Programmatic focus (no direction) lands on the active page.
+---Programmatic entry optionally starts on the strip, then restores remembered focus.
 ---@return UIWidget|nil
 function TabControlWidget:GetDefaultChild()
+    if CAISettings.GetBool("FocusTabStripOnFirstEntry") then
+        return Nav.DefaultChild(self)
+    end
     return self:GetActivePage() or self._tabStrip
 end
 
 ---Directional entry: Tab (direction=1) lands on the tab strip so the user
 ---sees which tab is active; Shift+Tab (direction=-1) lands on the page's
----last child. No direction → default to page.
+---last child. No direction follows the configured default.
 ---@param direction 1|-1|0|nil
 ---@return UIWidget|nil
 function TabControlWidget:GetEntryChild(direction)
@@ -92,7 +95,7 @@ function TabControlWidget:GetEntryChild(direction)
     if direction == -1 then
         return self:GetActivePage() or self._tabStrip
     end
-    return self:GetActivePage() or self._tabStrip
+    return self:GetDefaultChild()
 end
 
 --#region Focus location helpers

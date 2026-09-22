@@ -68,6 +68,19 @@ end
 
 local function SortItems(items)
     table.sort(items, function(a, b)
+        -- SortValue is an optional per-item override (higher first) used by
+        -- resort categories such as yields and the district valid-target list,
+        -- where the natural order is a game metric (yield amount, adjacency
+        -- bonus) rather than distance. Items without it keep distance ordering.
+        local aSort, bSort = a.SortValue, b.SortValue
+        if aSort ~= nil or bSort ~= nil then
+            aSort = aSort or -math.huge
+            bSort = bSort or -math.huge
+            if aSort ~= bSort then
+                return aSort > bSort
+            end
+        end
+
         if a.Distance ~= b.Distance then
             return a.Distance < b.Distance
         end
@@ -154,6 +167,7 @@ local function BuildLeafItems(items)
             Item = item,
             Distance = item._CAIDistance,
             ResolvedLabel = item._CAIResolvedLabel,
+            SortValue = item.SortValue,
         }
     end
 

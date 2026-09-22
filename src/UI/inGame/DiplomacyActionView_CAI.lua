@@ -266,12 +266,40 @@ local function SpeakSelectedLeaderDescription()
     end
 end
 
+local MOOD_LOC_KEYS = {
+    [DiplomacyMoodTypes.HAPPY] = "LOC_CAI_DIPLOMACY_MOOD_HAPPY",
+    [DiplomacyMoodTypes.NEUTRAL] = "LOC_CAI_DIPLOMACY_MOOD_NEUTRAL",
+    [DiplomacyMoodTypes.UNHAPPY] = "LOC_CAI_DIPLOMACY_MOOD_UNHAPPY",
+}
+
+local function GetLeaderMoodLabel(playerID)
+    if playerID == nil or playerID == ms_LocalPlayerID then return "" end
+    local player = Players[playerID]
+    if not player or player:IsHuman() then return "" end
+
+    local localPlayerID = ms_LocalPlayerID or Game.GetLocalPlayer()
+    if localPlayerID == nil or localPlayerID < 0 then return "" end
+
+    local mood = DiplomacySupport_GetPlayerMood(player, localPlayerID)
+    local locKey = MOOD_LOC_KEYS[mood]
+    return locKey and Locale.Lookup(locKey) or ""
+end
+
+local function GetLeaderIdentityLabel(playerID)
+    local playerConfig = PlayerConfigurations[playerID]
+    if not playerConfig then return "" end
+    return Locale.Lookup("LOC_DIPLOMACY_DEAL_PLAYER_PANEL_TITLE",
+        playerConfig:GetLeaderName(),
+        playerConfig:GetCivilizationDescription())
+end
+
 local function GetPanelLabel()
     local playerConfig = GetSelectedPlayerConfig()
     if playerConfig then
-        return Locale.Lookup("LOC_DIPLOMACY_DEAL_PLAYER_PANEL_TITLE",
-            playerConfig:GetLeaderName(),
-            playerConfig:GetCivilizationDescription())
+        return JoinNonEmpty({
+            GetLeaderIdentityLabel(ms_SelectedPlayerID),
+            GetLeaderMoodLabel(ms_SelectedPlayerID),
+        }, ", ")
     end
 
     local playerName = ControlText(Controls.PlayerNameText)
@@ -280,11 +308,10 @@ local function GetPanelLabel()
 end
 
 local function GetLeaderRowLabel(playerID)
-    local playerConfig = PlayerConfigurations[playerID]
-    if not playerConfig then return "" end
-    return Locale.Lookup("LOC_DIPLOMACY_DEAL_PLAYER_PANEL_TITLE",
-        playerConfig:GetLeaderName(),
-        playerConfig:GetCivilizationDescription())
+    return JoinNonEmpty({
+        GetLeaderIdentityLabel(playerID),
+        GetLeaderMoodLabel(playerID),
+    }, ", ")
 end
 
 local function GetLeaderIDs()
@@ -3427,11 +3454,7 @@ local function EnsureRootBuilt()
     m_ui.conversationPanel:SetWrapAround(false)
     m_ui.conversationList = mgr:CreateWidget(CONVERSATION_LIST_ID, "List", {
         SpeechSettings = { Position = false },
-        Label          = function()
-            local title = ControlText(Controls.LeaderResponseName)
-            if title ~= "" then return title end
-            return GetPanelLabel()
-        end,
+        Label          = function() return GetPanelLabel() end,
     })
     m_ui.conversationPanel:AddChild(m_ui.conversationList)
 

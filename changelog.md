@@ -2,6 +2,7 @@
 
 ### Added
 
+<<<<<<< HEAD
 - The wonder built and natural wonder discovered popups now read a description of the wonder movie when you press `F2`: what the movie shows as the wonder is built or the landscape comes into view, with its real features named. Every world wonder and natural wonder in the game has one, in all the mod's languages.
 
 ### Changed
@@ -13,10 +14,65 @@
 ### Fixed
 
 - Fixed factual errors in the great work descriptions, such as Andrei Rublev's icons being called Byzantine and details invented from thumbnails.
+=======
+- Diplomacy leader labels now read the leader and civilization followed by the leader's current Happy, Neutral, or Unhappy mood. This is available in the diplomacy action and deal screens for AI leaders.
+- Alt+ equals zooms in and Alt+ minus zooms out in 5% steps. With CAI active, games now start fully zoomed in at 100 percent after the loading screen closes, to ensure that all ambient sounds are heard
+- While placing a district, cursor information now includes adjacency bonus changes for neighboring districts, after the new district's own bonuses.
+- Added a mod setting under Gameplay to automatically display technology and civic completion and boost popups in network multiplayer. It is off by default.
+- Added full accessibility to the world builder. Includes mod tutorials for screens and general usage
+- In the Climate Screen's Event History, a disaster that caused damage or changed fertility can now be expanded to view the specifics. Under it you will find the improvements, districts, and buildings that were pillaged or destroyed, features and resources that were removed, units that were killed or damaged, the tiles whose yields changed and by how much, and the cities that lost population. Press Enter on the disaster itself to move the map cursor to its starting tile, or on an affected entry to move to that tile. Storms and fires update changes on each turn as they move. Only works for revealed storms
+- Added key bindings for empire status keys that read the outer yield or stat breakdown, normally found in the reports screen. In addition, Shift+Y reads the sources contributing to the current era score. note that these are overall breakdowns. You can open the reports screen for details on individual sources
+- H reads the number of your cities with warnings. Shift+H lists each affected city and its housing, amenities, starvation, loyalty, power, and siege warnings.
+- The world scanner's Geography category has a new Rivers and cliffs subcategory: revealed river-edge tiles and cliff-edge tiles, each merged into connected zones with their tile counts, kept in separate Rivers and Cliffs groups.
+- The world scanner has a new Yields category, shown while managing a city's citizens and placed right after City management. It has a group for each yield type (food, production, gold, science, culture, and faith); each group lists the workable tiles that produce that yield, highest first, so a tile appears under every yield it makes. Each tile reads its yields, such as "3 production, 2 food".
+- The world scanner has a new World Builder category, shown only while the World Builder is active. It has two subcategories: Starting positions lists each placed start, named by its assignment type and target, such as "Player: Rome", "Leader: Trajan", "Civilization: Rome", "Random Player", or "Random City-State", and grouped by that type; and Ownership lists owned tiles merged into zones per owner, like the political lens.
+- Added a UI setting to focus the active tab instead of page contents when first entering a tab control. Note that some screens may still override this
+
+### Changed
+
+- Opening, closing, or otherwise changing accessible screen layers no longer cuts off speech already in progress. Advisor popups still interrupt speech
+- Research and civic screens now always open on their main available-items view
+- The Civics Tree presents the current government and slotted policies summary as an expandable tree grouped by policy type.
+- Move To in the unit action list is disabled while movement mode is already active, with an explanatory tooltip.
+- Unit needs orders is now announced even when automatic turn-blocker announcements are disabled. Ctrl+Space now reports when there are no other ready units to select instead of staying silent.
+- Opening Civilopedia normally now focuses the sections tree even on the first open. Opening a specific article still focuses its body.
+- The city banner's 2 shortcut now reads your city's production yield before its current production item.
+- Units with no movement remaining can still use Move To (Alt M by default) or from the unit action list, and directional quick movement can queue an adjacent move for a later turn.
+- Pressing Escape in the multiplayer staging room now asks for confirmation before leaving.
+- Appointing a governor or joining a Secret Society from the Governors screen asks for confirmation before spending a governor title.
+- Great People transfers now open a city destination list. Choosing a city performs the transfer directly, without opening a map-targeting interface or adding destinations to the world scanner.
+- Units without charges are now described as having no charges instead of saying that charges are unsupported.
+- Removed the history list widget from the civilopedia, it was redundant. You can still use alt left and alt right to navigate history
+- City names are treated as zones, instead of repeating each time you move the cursor.
+- National parks are no longer zones. They are instead repeated every time the cursor moves. This should make it easier to trace their shape
+- In the world scanner's City management category, each tile now reads its yields after its status, such as "Worked, 3 food, 2 production".
+- District placement targets are sorted by their displayed bonuses, highest first, including housing for Preserves and Neighborhoods. Equal bonuses use distance.
+- In the Espionage Overview's Operatives tab, your active spies are now grouped by civ: your own civilization first, then one category per foreign civilization, and a single City-States category at the bottom. Each category gives its name and how many operatives you have there; expand it to find the cities, and expand a city to reach the spies working in it.
+- The Production panel's treeview is now split into more categories. On the Production tab, districts and buildings each have their own category instead of sharing one, and a Needs Repair category at the top gathers every pillaged district and building.
+- When a unit cannot reach its destination this turn, the movement announcement now tells you whether it moved as far as it could and stopped short, or could not move at all and simply has its journey queued. A unit that did not move now says "Movement queued" with the turns until arrival, instead of "Stopped short".
+- The movement preview says "Next turn" when a unit would arrive on the following turn, instead of "1 turn".
+
+### Fixed
+
+- After opening a specific Civilopedia article, Shift+Tab from its body now properly lands on that article in the sections tree, instead of focusing the first section.
+- Fixed an issue with units vanishing while in combat animations
+- Coastal lowlands are no longer announced twice when moving the cursor with the Settler lens active.
+- City-centre yields are no longer read twice or incorrectly announced as specialist yields by W and citizen-management cursor speech.
+- Unit movement categories set to None no longer add messages to the message buffer.
+- Movement previews now report next-turn arrival when a unit has already entered an enemy zone of control and would normally arrive this turn, instead of treating its leftover movement as usable.
+- In observer mode (EG after losing in red death) Units, cities, districts, improvements, wonders, and other owned objects properly appear as neutral for the observer.
+- Saves can now be deleted from the Load Game menu with the Delete key.
+- Checking governer title count (O by default) right after earning a title and before opening the governers panel now reports the live value, instead of always saying 0
+- Fixed a bug with moving and swapping great-works, where the picker did not show all valid slots. This lead to issues such as not being able to swap works in the palace with others that did not match their types,, or directly moving works in to empty slots
+- After moving a unit onto a tribal village, discovering a natural wonder, or moving into or out of the water, the movement announcement waits for the game's movement update and reports the unit's actual remaining movement, instead of a stale value.
+- In the city overview panel's Citizens and growth summary, the food per turn figure is now the net food after consumption instead of the raw food yield.
+>>>>>>> beta
 
 ## [1.4.1] - 2026-08-30
 
 ### Fixed
+
+- Zoom shortcuts announce the requested zoom level instead of the previous level.
 
 - Fixed main menu options visually showing their text twice, overlapping, as you focused different menu items.
 - Fixed visually duplicated text on the loading screen.
@@ -46,6 +102,8 @@
 
 ### Fixed
 
+- Zoom shortcuts announce the requested zoom level instead of the previous level.
+
 - Fixed keyboard input on the Secret Society popup, which could stop working if another popup appeared underneath it.
 - Optimized typeahead to respond faster as you type each character. noticeable in large trees.
 - Typeahead now matches names with accents when you type the plain letters, so typing `chateau` finds Château, and typing an accented letter also matches its plain form.
@@ -73,6 +131,8 @@
 - On the loading screen, each of your unique abilities says whether it is a civilization ability or a leader ability before its description.
 
 ### Fixed
+
+- Zoom shortcuts announce the requested zoom level instead of the previous level.
 
 - Yield icons written in capital letters (such as the production or gold symbol) now read out their name instead of being dropped, so descriptions that use them are no longer cut short.
 - The Surveyor no longer reports a wildly wrong resource count (such as tens of thousands of crabs) for tiles revealed through a teammate's vision.
@@ -105,6 +165,8 @@
 
 ### Fixed
 
+- Zoom shortcuts announce the requested zoom level instead of the previous level.
+
 - In a leader conversation, all of the reply choices are now properly listed, each with its label, including replies that are unavailable (which read as unavailable along with the reason). Previously some replies could be missing or read without a name, and after a reply the "Goodbye" button could read as unavailable, forcing you to press Escape to leave the conversation.
 - The mod now works on the Epic Games Store version of Civilization VI. The installer places the mod in the correct folder, and the main menu, loading screen, game setup screens (single-player, scenario, tutorial, and host-a-multiplayer-game), lobby, and hall of fame screens should no longer fail to load. If you are an epic user and you encounter an issue with one of these screens, please report it.
 - In the research and civics choosers, when you have just finished a research or civic and are being asked to pick the next one, the completed item now reads as "Just completed" instead of appearing in the queue with a turn count
@@ -112,6 +174,8 @@
 ## [1.1.1] - 2026-08-13
 
 ### Fixed
+
+- Zoom shortcuts announce the requested zoom level instead of the previous level.
 
 - With the Better Trade Screen mod enabled, selecting a city in the trade unit's change-origin panel now moves the trade unit to that city instead of doing nothing.
 
@@ -144,6 +208,8 @@
 - In tables, moving past the first or last column with the Left and Right arrows now wraps around to the other end instead of stopping
 
 ### Fixed
+
+- Zoom shortcuts announce the requested zoom level instead of the previous level.
 
 - Fixed an issue with espionage choosers opening on top of espionage popups, steeling focus and causing errors
 - The Surveyor's enemy units reading (`Shift plus D`) now includes hostile religious units, matching how the world scanner's enemies category lists them.
@@ -193,6 +259,8 @@
 
 ### Fixed
 
+- Zoom shortcuts announce the requested zoom level instead of the previous level.
+
 - Fixed a bug where the diplomacy screen could prematurely exit tutorial dialogs by moving focus to the conversation list.
 - Fixed the Recall with Faith button on the Heroes screen.
 - Fixed ascending table sorting producing inconsistent row order.
@@ -200,6 +268,8 @@
 ## [0.9.1] - 2026-08-02
 
 ### Fixed
+
+- Zoom shortcuts announce the requested zoom level instead of the previous level.
 
 - Completing ordinary district or wonder placement no longer leaves the accessible Production Panel open after the visual panel closes.
 
@@ -234,6 +304,8 @@
 - The tooltip for the great people hotkey now menntions the heroes tab appearing in Heroes & Legends mode
 
 ### Fixed
+
+- Zoom shortcuts announce the requested zoom level instead of the previous level.
 
 - The Production Panel no longer remains open after the visual panel closes for City Management or another modal view. Cancelling district or wonder placement returns to the same production item.
 - Returning from Hall of Fame game details now properly refreshes the accessible ruleset, tab, sort method, Overview, and History. Focus moves directly to Overview. This is a vanilla design choice, and it was previously causing desync issues
@@ -280,6 +352,8 @@
 
 ### Fixed
 
+- Zoom shortcuts announce the requested zoom level instead of the previous level.
+
 - Civilopedia lookup recognizes article names after colon-prefixed labels, including technology and civic completion popups.
 - Espionage mission dialogs no longer open and close repeatedly or briefly announce the placeholder mission title.
 - The Climate Screen matches vanilla event visibility, identifies affected-city owners and CO2-contributing leaders, and announces recent polar-ice and sea-level updates.
@@ -320,6 +394,8 @@
 - Documented the search panel and type ahead in the readme
 
 ### Fixed
+
+- Zoom shortcuts announce the requested zoom level instead of the previous level.
 
 - Fixed an issue with mod sounds no longer playing after the computer wakes from sleep
 - Map-tac buttons in the chat history now move the navigation cursor to the tac, and chat entries for map tacs retain their location for message-buffer jumping.
@@ -363,6 +439,8 @@
 
 ### Fixed
 
+- Zoom shortcuts announce the requested zoom level instead of the previous level.
+
 - World Congress navigation now returns to the previously focused resolution after leaving and re-entering the resolution tree.
 - Multiplayer join failures restore accessibility mod before displaying their error dialog, including missing-content and failed content-configuration cases. This should solve the mod failing to read localized text or any UI widget roles
 - Map tacs now properly speak direction in the map-tacs list. This was broken
@@ -394,6 +472,8 @@
 
 ### Fixed
 
+- Zoom shortcuts announce the requested zoom level instead of the previous level.
+
 - - Interface information, spoken on cursor move or via space (default binding), now says that an area is uncharted without revealing hidden tile details.
 - Queued paths, waypoints, and unit-action targets in the World Scanner once again announce their tile information instead of the `No tile` debug message.
 - Formation movement is now tracked correctly in the unit-movement log and movement-cost previews.
@@ -409,6 +489,8 @@
 - The World Scanner Terrain category now includes all hidden tiles under the new Unexplored sub-category.
 
 ### Fixed
+
+- Zoom shortcuts announce the requested zoom level instead of the previous level.
 
 - World Scanner item navigation now plays the wrapping sound when crossing the first or last item.
 - Optimized the scanner so that it performs better on bigger maps
@@ -430,6 +512,8 @@
 
 ### Fixed
 
+- Zoom shortcuts announce the requested zoom level instead of the previous level.
+
 - Movement arriving next turn is now announced as taking 1 turn instead of 2 turns.
 
 ## [0.2.0] - 2026-07-12
@@ -444,6 +528,8 @@
 - civilopedia lookup now opens using ctrl + i
 
 ### Fixed
+
+- Zoom shortcuts announce the requested zoom level instead of the previous level.
 
 - Unit movement no longer asks for combat confirmation when entering hostile territory or a non-attackable district without an attackable target.
 - Fixed modifier-based input actions not registering when the modifier was released too early.

@@ -73,8 +73,6 @@ local function BuildTargetCacheSignature(mode)
         AddSelectedUnitSignature(parts)
         if mode == InterfaceModeTypes.WMD_STRIKE then
             AddInterfaceParameterSignature(parts, UnitOperationTypes.PARAM_WMD_TYPE)
-        elseif mode == InterfaceModeTypes.TELEPORT_TO_CITY then
-            AddInterfaceParameterSignature(parts, UnitOperationTypes.PARAM_OPERATION_TYPE)
         elseif mode == InterfaceModeTypes.BUILD_IMPROVEMENT_ADJACENT then
             AddInterfaceParameterSignature(parts, UnitOperationTypes.PARAM_OPERATION_TYPE)
             AddInterfaceParameterSignature(parts, UnitOperationTypes.PARAM_IMPROVEMENT_TYPE)
@@ -202,13 +200,6 @@ local PLOT_TARGET_MODES = {
     [InterfaceModeTypes.COASTAL_RAID] = { Source = "unitOperation", Type = UnitOperationTypes.COASTAL_RAID },
     [InterfaceModeTypes.DEPLOY] = { Source = "unitOperation", Type = UnitOperationTypes.DEPLOY },
     [InterfaceModeTypes.REBASE] = { Source = "unitOperation", Type = UnitOperationTypes.REBASE },
-    [InterfaceModeTypes.TELEPORT_TO_CITY] = {
-        Source = "unitOperation",
-        GetType = function()
-            return UI
-                .GetInterfaceModeParameter(UnitOperationTypes.PARAM_OPERATION_TYPE)
-        end
-    },
     [InterfaceModeTypes.BUILD_IMPROVEMENT_ADJACENT] = {
         Source = "unitOperation",
         GetType = function() return UI.GetInterfaceModeParameter(UnitOperationTypes.PARAM_OPERATION_TYPE) end,
@@ -441,7 +432,6 @@ local PLOT_INFO_KEYS_BY_MODE = {
     [InterfaceModeTypes.COASTAL_RAID] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
     [InterfaceModeTypes.DEPLOY] = { "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
     [InterfaceModeTypes.REBASE] = { "cityName", "districtTitle", "plotName" },
-    [InterfaceModeTypes.TELEPORT_TO_CITY] = { "cityName", "districtTitle", "plotName" },
     [InterfaceModeTypes.BUILD_IMPROVEMENT_ADJACENT] = { "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
     [InterfaceModeTypes.SACRIFICE_SELECTION] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
     [InterfaceModeTypes.AIRLIFT] = { "cityName", "districtTitle", "plotName" },
@@ -496,9 +486,46 @@ local function ResolvePlotTargetLabel(mode, plotIndex)
     return Locale.Lookup("LOC_CAI_VALID_TARGET_PLOT", plot:GetX(), plot:GetY())
 end
 
+-- Match the bonuses shown by vanilla GetAdjacentYieldBonusString. Housing
+-- replaces the yield preview; otherwise sum only the displayed positive yields.
+local function GetDistrictDisplayedBonus(plot, city, district)
+    local housing = district.Housing
+    local appeal = plot:GetAppeal()
+    for row in GameInfo.AppealHousingChanges() do
+        if row.DistrictType == district.DistrictType and appeal >= row.MinimumValue then
+            return housing + row.AppealChange
+        end
+    end
+    if housing ~= 0 then return housing end
+
+    local total = 0
+    if district.OnePerCity then
+        for yieldIndex = GameInfo.Yields.YIELD_FOOD.Index, GameInfo.Yields.YIELD_FAITH.Index do
+            local bonus = plot:GetAdjacencyYield(city:GetOwner(), city:GetID(), district.Index, yieldIndex)
+            if bonus > 0 then total = total + bonus end
+        end
+    end
+    return total
+end
+
 local function AddPlotTargetItems(out, mode, targetPlots)
+    local placementCity, placementDistrict = nil, nil
+    if mode == InterfaceModeTypes.DISTRICT_PLACEMENT then
+        local city = UI.GetHeadSelectedCity()
+        local districtHash = UI.GetInterfaceModeParameter(CityOperationTypes.PARAM_DISTRICT_TYPE)
+        local district = districtHash ~= nil and GameInfo.Districts[districtHash] or nil
+        if city ~= nil and district ~= nil then
+            placementCity, placementDistrict = city, district
+        end
+    end
+
     for plotIndex, targetValue in pairs(targetPlots) do
         local group = type(targetValue) == "string" and targetValue or "targetPlots"
+
+        local sortValue = nil
+        if placementDistrict ~= nil then
+            sortValue = GetDistrictDisplayedBonus(Map.GetPlotByIndex(plotIndex), placementCity, placementDistrict)
+        end
 
         out[#out + 1] = {
             Id        = "validTarget:" .. tostring(plotIndex),
@@ -506,6 +533,7 @@ local function AddPlotTargetItems(out, mode, targetPlots)
             PlotIndex = plotIndex,
             LabelKey  = ResolvePlotTargetLabel(mode, plotIndex),
             GroupId   = group,
+            SortValue = sortValue,
         }
     end
 end

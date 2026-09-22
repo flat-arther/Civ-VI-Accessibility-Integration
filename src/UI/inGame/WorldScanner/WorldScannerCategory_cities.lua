@@ -82,7 +82,7 @@ function CAIWorldScannerCategory_Cities.PlotExtract(plotIndex, plot, context, co
 
     m_seenCities[uniqueKey] = true
     local subCategoryId
-    if IsCityState(ownerID) then
+    if not Utils.IsObserverView(context) and IsCityState(ownerID) then
         subCategoryId = "cityStates"
     else
         subCategoryId = Utils.GetTeamStance(context, ownerID)
@@ -113,7 +113,7 @@ function CAIWorldScannerCategory_Cities.PlotExtract(plotIndex, plot, context, co
             end
 
             local validateSubCategory
-            if IsCityState(ownerID) then
+            if not Utils.IsObserverView(validateContext) and IsCityState(ownerID) then
                 validateSubCategory = "cityStates"
             else
                 validateSubCategory = Utils.GetTeamStance(validateContext, ownerID)

@@ -29,8 +29,10 @@ local DEFAULT_ORDER = {
     "queuedPath",
     "mapTacs",
     "cityManagement",
+    "yields",
     "validTargets",
     "activeLens",
+    "worldBuilder",
 }
 
 local TOOLTIP_KEYS = {
@@ -51,8 +53,10 @@ local TOOLTIP_KEYS = {
     queuedPath = "LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_QUEUED_PATH",
     mapTacs = "LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_MAP_TACS",
     cityManagement = "LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_CITY_MANAGEMENT",
+    yields = "LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_YIELDS",
     validTargets = "LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_VALID_TARGETS",
     activeLens = "LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_ACTIVE_LENS",
+    worldBuilder = "LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_WORLD_BUILDER",
 }
 
 local m_definitions = {}
@@ -261,12 +265,20 @@ local function ReconcileOrder()
             seen[id] = true
         end
     end
+    -- New built-in categories added after a user already saved an order are
+    -- otherwise appended at the very end. These keep a few of them next to the
+    -- category they logically follow, matching the default layout.
+    local INSERT_AFTER = {
+        geography = "terrain",
+        yields = "cityManagement",
+    }
     for _, definition in ipairs(OrderedDefinitions()) do
         if not seen[definition.Id] then
             local inserted = false
-            if definition.Id == "geography" then
+            local anchorId = INSERT_AFTER[definition.Id]
+            if anchorId ~= nil then
                 for index, id in ipairs(reconciled) do
-                    if id == "terrain" then
+                    if id == anchorId then
                         table.insert(reconciled, index + 1, definition.Id)
                         inserted = true
                         break

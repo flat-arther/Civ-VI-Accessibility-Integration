@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_ZOOM_IN" Language="es_ES"><Text>Acercar</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_OUT" Language="es_ES"><Text>Alejar</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_IN_TOOLTIP" Language="es_ES"><Text>Acercar y anunciar el porcentaje de zoom.</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_OUT_TOOLTIP" Language="es_ES"><Text>Alejar y anunciar el porcentaje de zoom.</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_LEVEL" Language="es_ES"><Text>Zoom {1_Percent} por ciento</Text></Row>
+    <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_BONUSES" Language="es_ES"><Text>Bonificaciones de {1_District}: {2_Yields}</Text></Row>
+    <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_YIELD_CHANGE" Language="es_ES"><Text>{1_Amount : number +#.#;-#.#} {2_Yield}</Text></Row>
+    <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP" Language="es_ES"><Text>Enfocar las pestañas al entrar por primera vez</Text></Row>
+    <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP_TOOLTIP" Language="es_ES"><Text>Al entrar por primera vez en un control de pestañas, enfoca la pestaña activa en lugar del contenido de la página.</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION" Language="es_ES"><Text>Leer el número de ciudades con avisos</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION_TOOLTIP" Language="es_ES"><Text>Lee cuántas de tus ciudades tienen avisos de alojamiento, servicios, alimentos, lealtad, energía o asedio.</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION" Language="es_ES"><Text>Leer todos los avisos de ciudades</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION_TOOLTIP" Language="es_ES"><Text>Lee cada ciudad afectada y sus avisos de alojamiento, servicios, alimentos, lealtad, energía y asedio.</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_COUNT" Language="es_ES"><Text>{1_Count} avisos de ciudades</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_NONE" Language="es_ES"><Text>No hay ciudades con avisos.</Text></Row>
     <!-- SPANISH -->
 
     <!-- Widget roles -->
@@ -560,6 +575,45 @@
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_ACTIVE_LENS" Language="es_ES">
       <Text>Lente activa</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_WORLD_BUILDER" Language="es_ES">
+      <Text>Creador de mundos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_WORLD_BUILDER" Language="es_ES">
+      <Text>Solo disponible en el Creador de mundos. Contiene las posiciones iniciales colocadas, las zonas de propiedad de las casillas y los bordes de ríos y acantilados.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_STARTING_POSITIONS" Language="es_ES">
+      <Text>Posiciones iniciales</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_OWNERSHIP" Language="es_ES">
+      <Text>Propiedad</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_RIVERS_AND_CLIFFS" Language="es_ES">
+      <Text>Ríos y acantilados</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_PLAYER" Language="es_ES">
+      <Text>Inicios de jugador</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_LEADER" Language="es_ES">
+      <Text>Inicios de líder</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_CIVILIZATION" Language="es_ES">
+      <Text>Inicios de civilización</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_RANDOM_MAJOR" Language="es_ES">
+      <Text>Inicios de jugador al azar</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_RANDOM_MINOR" Language="es_ES">
+      <Text>Inicios de ciudad-estado al azar</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_LABEL" Language="es_ES">
+      <Text>{1_Type}: {2_Name}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_GROUP_RIVERS" Language="es_ES">
+      <Text>Ríos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_GROUP_CLIFFS" Language="es_ES">
+      <Text>Acantilados</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_RESOURCES" Language="es_ES">
       <Text>Recursos</Text>
@@ -1322,6 +1376,8 @@
     <Replace Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE_TOOLTIP" Language="es_ES">
       <Text>Lee la Puntuación de época actual, la época, los umbrales y las dedicaciones activas</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_SCORE_DETAILS" Language="es_ES"><Text>Leer desglose de puntuación de era</Text></Replace>
+    <Replace Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_SCORE_DETAILS_TOOLTIP" Language="es_ES"><Text>Lee las fuentes de tu puntuación de era actual</Text></Replace>
     <Replace Tag="LOC_CAI_ACTION_PANEL_ERA_NOT_AVAILABLE" Language="es_ES">
       <Text>Las épocas no están disponibles</Text>
     </Replace>
@@ -1595,6 +1651,8 @@
     <Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_NUKES_TOOLTIP" Language="es_ES">
       <Text>Lee el número de dispositivos nucleares y termonucleares</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE_DETAILS" Language="es_ES"><Text>Detalles de ciencia</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE_DETAILS_TOOLTIP" Language="es_ES"><Text>Lee las fuentes principales de ciencia</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_CULTURE_DETAILS" Language="es_ES"><Text>Detalles de cultura</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_CULTURE_DETAILS_TOOLTIP" Language="es_ES"><Text>Lee las fuentes principales de cultura</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_GOLD_DETAILS" Language="es_ES"><Text>Detalles de oro</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_GOLD_DETAILS_TOOLTIP" Language="es_ES"><Text>Lee las fuentes de ingresos y gastos de oro</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_FAITH_DETAILS" Language="es_ES"><Text>Detalles de fe</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_FAITH_DETAILS_TOOLTIP" Language="es_ES"><Text>Lee las fuentes principales de fe</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_DETAILS" Language="es_ES"><Text>Detalles de turismo</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_DETAILS_TOOLTIP" Language="es_ES"><Text>Lee las fuentes principales de turismo</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_INFLUENCE_DETAILS" Language="es_ES"><Text>Detalles de influencia</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_INFLUENCE_DETAILS_TOOLTIP" Language="es_ES"><Text>Lee el progreso de influencia</Text></Replace>
+    <Replace Tag="LOC_CAI_TOP_PANEL_NO_VALUE" Language="es_ES"><Text>No tienes {1_Name}</Text></Replace>
     <Replace Tag="LOC_CAI_TOP_PANEL_YIELD_INFO" Language="es_ES">
       <Text>Informe de economía del imperio</Text>
     </Replace>
@@ -1684,6 +1742,15 @@
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_ACTIONS" Language="es_ES">
       <Text>Acciones</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_HAPPY" Language="es_ES">
+      <Text>Feliz</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_NEUTRAL" Language="es_ES">
+      <Text>Neutral</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_UNHAPPY" Language="es_ES">
+      <Text>Descontento</Text>
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_NO_ACTIONS" Language="es_ES">
       <Text>No hay acciones de diplomacia disponibles</Text>
@@ -2524,6 +2591,9 @@
     <Replace Tag="LOC_CAI_PRODUCTION_CITY_YIELD" Language="es_ES">
       <Text>{1_Yield}: {2_Amount}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_PRODUCTION_CATEGORY_REPAIR" Language="es_ES">
+      <Text>Necesita reparación</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS" Language="es_ES">
       <Text>Distritos</Text>
     </Replace>
@@ -3040,7 +3110,7 @@
       <Text>Sin estadísticas de unidad</Text>
     </Replace>
     <Replace Tag="LOC_CAI_UNIT_NO_CHARGES" Language="es_ES">
-      <Text>Esta unidad no admite cargas</Text>
+      <Text>Esta unidad no tiene cargas</Text>
     </Replace>
     <Replace Tag="LOC_CAI_UNIT_NO_PROMOTIONS" Language="es_ES">
       <Text>No hay ascensos disponibles</Text>
@@ -3607,6 +3677,9 @@
     <Replace Tag="LOC_CAI_MOVEMENT_THIS_TURN" Language="es_ES">
       <Text>Este turno</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_MOVEMENT_NEXT_TURN" Language="es_ES">
+      <Text>Próximo turno</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_MOVEMENT_TURNS" Language="es_ES">
       <Text>{1_Turns : plural 1?1 turno; other?{1_Turns} turnos;}</Text>
     </Replace>
@@ -3696,6 +3769,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_MOVEMENT_RESULT_STOPPED_SHORT" Language="es_ES">
       <Text>Se ha detenido antes de llegar</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOVEMENT_RESULT_QUEUED_TURNS" Language="es_ES">
+      <Text>{1_Turns : plural 1?Movimiento en cola, 1 turno hasta llegar; other?Movimiento en cola, {1_Turns} turnos hasta llegar;}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOVEMENT_RESULT_QUEUED" Language="es_ES">
+      <Text>Movimiento en cola</Text>
     </Replace>
     <Replace Tag="LOC_CAI_INTERFACE_PRIMARY_ACTION" Language="es_ES">
       <Text>Acción principal de la interfaz</Text>
@@ -3796,6 +3875,12 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_CITY_MANAGEMENT" Language="es_ES">
       <Text>Gestión de la ciudad</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_YIELDS" Language="es_ES">
+      <Text>Rendimientos</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_YIELDS" Language="es_ES">
+      <Text>Aparece durante la gestión de ciudadanos y agrupa las casillas trabajables de la ciudad por tipo de rendimiento. Cada grupo de rendimiento enumera las casillas que lo producen, de mayor a menor, por lo que una casilla aparece en cada rendimiento que genera.</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_LOCKED" Language="es_ES">
       <Text>Casillas bloqueadas</Text>
     </Replace>
@@ -3822,6 +3907,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TARGET_PLOTS" Language="es_ES">
       <Text>Casillas objetivo</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_TARGET_VALID" Language="es_ES">
+      <Text>Casillas válidas</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_TARGET_INVALID" Language="es_ES">
+      <Text>Casillas no válidas</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_WAYPOINT_TURN" Language="es_ES">
       <Text>Punto de ruta, turno {1_Turn}</Text>
@@ -4698,6 +4789,12 @@
     <Replace Tag="LOC_CAI_GOVERNOR_PROMOTE_DESC" Language="es_ES">
       <Text>¿Gastar un título de gobernador para obtener {1_PromoName}? {2_Desc}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_GOVERNOR_APPOINT_CONFIRM" Language="es_ES">
+      <Text>¿Nombrar a {1_GovName}?</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GOVERNOR_JOIN_CONFIRM" Language="es_ES">
+      <Text>¿Unirse a {1_SocietyName}?</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_GOVERNOR_READONLY" Language="es_ES">
       <Text>Solo lectura: el Congreso Mundial está reunido</Text>
     </Replace>
@@ -5392,6 +5489,12 @@
     <Replace Tag="LOC_CAI_CLIMATE_DAMAGED_TILES" Language="es_ES">
       <Text>{1_Num} {1_Num: plural 1?casilla dañada; other?casillas dañadas;}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_IMPROVEMENTS_ADDED_NODE" Language="es_ES">
+      <Text>{1_Num} {1_Num: plural 1?mejora añadida; other?mejoras añadidas;}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_IMPROVEMENT_ADDED" Language="es_ES">
+      <Text>{1_Improvement}: añadida</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_UNITS_LOST" Language="es_ES">
       <Text>{1_Num} {1_Num: plural 1?unidad eliminada; other?unidades eliminadas;}</Text>
     </Replace>
@@ -5400,6 +5503,57 @@
     </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_AFFECTED_CITIES" Language="es_ES">
       <Text>Ciudades afectadas: {1_Cities}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_OWNER_YOURS" Language="es_ES">
+      <Text>Tu</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_PILLAGED_IN_CITY" Language="es_ES">
+      <Text>{1_Owner} {2_Object} en {3_City}: saqueado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_PILLAGED" Language="es_ES">
+      <Text>{1_Owner} {2_Object}: saqueado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_DESTROYED_IN_CITY" Language="es_ES">
+      <Text>{1_Owner} {2_Object} en {3_City}: destruido</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_DESTROYED" Language="es_ES">
+      <Text>{1_Owner} {2_Object}: destruido</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FEATURE_REMOVED_IN_CITY" Language="es_ES">
+      <Text>{1_Feature} en {2_City}: eliminado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FEATURE_REMOVED" Language="es_ES">
+      <Text>{1_Feature}: eliminado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_UNIT_KILLED" Language="es_ES">
+      <Text>{1_Owner} {2_Unit}: eliminada</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_UNIT_DAMAGED" Language="es_ES">
+      <Text>{1_Owner} {2_Unit}: dañada, {3_HP} PV</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_UNITS_NODE" Language="es_ES">
+      <Text>{1_Num} {1_Num: plural 1?unidad afectada; other?unidades afectadas;}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERTILITY_NODE" Language="es_ES">
+      <Text>{1_Num} {1_Num: plural 1?casilla; other?casillas;} con fertilidad modificada</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERT_IN_CITY" Language="es_ES">
+      <Text>{1_Terrain} en {2_City}: {3_Deltas}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERT" Language="es_ES">
+      <Text>{1_Terrain}: {2_Deltas}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_YIELD_DELTA" Language="es_ES">
+      <Text>{1_Delta} {2_Yield}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERT_AMOUNT" Language="es_ES">
+      <Text>{1_Amount} de fertilidad</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_POP_LOST_CITY" Language="es_ES">
+      <Text>{1_City}: {2_Num} de población perdida</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_INSTANCE_TURN" Language="es_ES">
+      <Text>{1_Text} (turno {2_Turn})</Text>
     </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_TURN" Language="es_ES">
       <Text>Turno {1_Turn}, {2_Date}</Text>
@@ -6080,6 +6234,9 @@
     <Replace Tag="LOC_CAI_KB_MOVE_UP" Language="es_ES">
       <Text>Mover arriba</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_KB_DIRECTORY_UP" Language="es_ES">
+      <Text>Directorio superior</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_KB_NAVIGATE_BACK" Language="es_ES">
       <Text>Navegar hacia atrás</Text>
     </Replace>
@@ -6492,6 +6649,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_STAGING_INVITE_SENT" Language="es_ES">
       <Text>Invitación enviada</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_STAGING_LEAVE_WARNING" Language="es_ES">
+      <Text>¿Salir de la sala de espera?</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_STAGING_LEAVE_HOST_TRANSFER" Language="es_ES">
+      <Text>Los privilegios de anfitrión se transferirán al siguiente jugador.</Text>
     </Replace>
     <!-- Mod settings -->
     <Replace Tag="LOC_CAI_SETTINGS_TITLE" Language="es_ES">
@@ -7719,6 +7882,9 @@
     <Replace Tag="LOC_CAI_WB_OPEN_TOOLS" Language="es_ES">
       <Text>Abrir herramientas del Editor de mundos</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WB_SELECT_TOOL" Language="es_ES">
+      <Text>Seleccionar herramienta por número</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WB_PLACE" Language="es_ES">
       <Text>Colocar en el cursor</Text>
     </Replace>
@@ -7728,8 +7894,44 @@
     <Replace Tag="LOC_CAI_WB_DELETE" Language="es_ES">
       <Text>Quitar del cursor</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WB_MAP_EDITOR" Language="es_ES">
+      <Text>Abrir editor de mapas</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PLAYER_EDITOR" Language="es_ES">
+      <Text>Abrir editor de jugador</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_UNDO" Language="es_ES">
+      <Text>Deshacer</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_REDO" Language="es_ES">
+      <Text>Rehacer</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PAUSE" Language="es_ES">
+      <Text>Abrir menú</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WB_DELETE_TEXT" Language="es_ES">
       <Text>Eliminar entrada de texto</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_EDIT_LOCALIZATION" Language="es_ES">
+      <Text>Editar localización</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MAP_METADATA" Language="es_ES">
+      <Text>Metadatos del mapa</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GENERATE_ID_TT" Language="es_ES">
+      <Text>Activa para generar un nuevo ID</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_ADDED" Language="es_ES">
+      <Text>Añadido</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_NOT_ADDED" Language="es_ES">
+      <Text>No añadido</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_PILLAGED" Language="es_ES">
+      <Text>Saqueado</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_REMOVE" Language="es_ES">
+      <Text>Eliminar</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WB_MARK" Language="es_ES">
       <Text>Fijar o liberar la colocación en la casilla del cursor</Text>
@@ -7739,6 +7941,9 @@
     </Replace>
     <Replace Tag="LOC_CAI_WB_UNMARKED" Language="es_ES">
       <Text>Colocación liberada</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_LOCKED_TILE" Language="es_ES">
+      <Text>Casilla de colocación fijada</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WB_FOOTPRINT_TILES" Language="es_ES">
       <Text>{1_Number} casillas</Text>
@@ -7788,8 +7993,62 @@
     <Replace Tag="LOC_CAI_WB_CLEAR" Language="es_ES">
       <Text>Eliminar todos los recursos</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WB_DIRECTION" Language="es_ES">
+      <Text>Dirección</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PARAM_TOOL" Language="es_ES">
+      <Text>Herramienta</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_PREV_PARAM" Language="es_ES">
+      <Text>Parámetro anterior</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_NEXT_PARAM" Language="es_ES">
+      <Text>Parámetro siguiente</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_VALUE_UP" Language="es_ES">
+      <Text>Aumentar o valor siguiente</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_VALUE_DOWN" Language="es_ES">
+      <Text>Disminuir o valor anterior</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_FIRST_PARAM" Language="es_ES">
+      <Text>Primer parámetro</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_LAST_PARAM" Language="es_ES">
+      <Text>Último parámetro</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_FIRST_VALUE" Language="es_ES">
+      <Text>Primer valor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_LAST_VALUE" Language="es_ES">
+      <Text>Último valor</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GOTO" Language="es_ES">
+      <Text>Ir a coordenadas</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GOTO_INVALID" Language="es_ES">
+      <Text>Escribe una ubicación como x y luego z separadas por un espacio, por ejemplo 15 5. Escribe un solo número para x sola, o un espacio y luego un número para z sola. Antepón más o menos a un número para moverte en relación con el cursor, por ejemplo más 2, o espacio menos 1.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GOTO_OUT_OF_BOUNDS" Language="es_ES">
+      <Text>Esas coordenadas están fuera de los límites.</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WB_REVEAL_ALL" Language="es_ES">
       <Text>Revelar todo</Text>
     </Replace>
+    <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS" Language="es_ES">
+      <Text>Mostrar ventanas de investigación y principios en multijugador</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS_TOOLTIP" Language="es_ES">
+      <Text>Muestra automáticamente las ventanas de tecnologías y principios completados y de sus mejoras en partidas multijugador en red. Estas ventanas no pausan el temporizador de turno.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK" Language="es_ES">
+      <Text>Alternar bloqueo del pincel</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK_ON" Language="es_ES">
+      <Text>Bloqueo del pincel activado</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK_OFF" Language="es_ES">
+      <Text>Bloqueo del pincel desactivado</Text>
+    </Row>
   </LocalizedText>
 </GameData>

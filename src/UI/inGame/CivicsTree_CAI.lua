@@ -22,7 +22,7 @@ local MAIN_TREE_ID        = "CAICivicsTree_MainTree"
 local GRID_VIEW_ID        = "CAICivicsTree_GridView"
 local GRAPH_VIEW_ID       = "CAICivicsTree_GraphView"
 local UNLOCKS_LIST_ID     = "CAICivicsTree_UnlocksList"
-local GOV_EDIT_ID         = "CAICivicsTree_GovEdit"
+local GOV_TREE_ID         = "CAICivicsTree_GovTree"
 local CHANGE_VIEW_ID      = "CAICivicsTree_ChangeView"
 local FILTER_RESULTS_ID   = "CAICivicsTree_FilterResults"
 local VIEW_SETTING_SECTION = "UI"
@@ -64,7 +64,7 @@ local m_mainTree          = nil ---@type UIWidget|nil
 local m_gridView          = nil ---@type UIWidget|nil
 local m_graphView         = nil ---@type GraphWidget|nil
 local m_unlocksList       = nil ---@type UIWidget|nil
-local m_govEdit           = nil ---@type UIWidget|nil
+local m_govTree           = nil ---@type UIWidget|nil
 local m_viewDropdown      = nil ---@type DropdownWidget|nil
 local m_filterResults     = nil ---@type UIWidget|nil
 
@@ -85,7 +85,6 @@ local m_activeFilterEntry = nil ---@type table|nil
 local m_activeFilterFunc  = nil ---@type function|nil
 local m_lastPlayerData    = nil ---@type table|nil
 local m_modifierCache     = nil ---@type table|nil
-local m_govEditBuffer     = ""
 
 -- Breadcrumb stack of civicTypes the user navigated *away from* via a ref
 -- link. Backspace in the main tree pops the most recent one and jumps back.
@@ -1254,44 +1253,105 @@ local function BuildFilterList()
 end
 
 -- ===========================================================================
--- GOVERNMENT SUMMARY (read-only EditBox)
+-- GOVERNMENT AND SLOTTED POLICIES TREE
 -- ===========================================================================
 
-local function BuildGovernmentText()
-    local function Count(ctrl) return tonumber(ControlText(ctrl)) or 0 end
-    local parts = {}
-    table.insert(parts, Locale.Lookup("LOC_CAI_GOVERNMENT_SUMMARY",
+local function GetGovernmentSummary()
+    local function Count(control) return tonumber(ControlText(control)) or 0 end
+    return Locale.Lookup("LOC_CAI_GOVERNMENT_SUMMARY",
         ControlText(Controls.GovernmentTitle),
         Count(Controls.DiplomaticIconCount),
         Count(Controls.EconomicIconCount),
         Count(Controls.MilitaryIconCount),
-        Count(Controls.WildcardIconCount)))
-
-    if m_lastPlayerData and m_lastPlayerData[DATA_FIELD_GOVERNMENT] then
-        local kGov = m_lastPlayerData[DATA_FIELD_GOVERNMENT]
-        local function AddPolicies(ids, slotLabel)
-            for _, policyId in ipairs(ids or {}) do
-                if policyId ~= -1 then
-                    local row = GameInfo.Policies[policyId]
-                    if row then
-                        table.insert(parts, slotLabel .. ": " .. Locale.Lookup(row.Name))
-                    end
-                end
-            end
-        end
-        AddPolicies(kGov["DIPLOMATICPOLICIES"], Locale.Lookup("LOC_CAI_POLICY_SLOT_DIPLOMATIC"))
-        AddPolicies(kGov["ECONOMICPOLICIES"], Locale.Lookup("LOC_CAI_POLICY_SLOT_ECONOMIC"))
-        AddPolicies(kGov["MILITARYPOLICIES"], Locale.Lookup("LOC_CAI_POLICY_SLOT_MILITARY"))
-        AddPolicies(kGov["WILDCARDPOLICIES"], Locale.Lookup("LOC_CAI_POLICY_SLOT_WILDCARD"))
-    end
-
-    return table.concat(parts, "\n")
+        Count(Controls.WildcardIconCount))
 end
 
-local function RefreshGovernmentEdit()
-    if not m_govEdit then return end
-    m_govEditBuffer = BuildGovernmentText()
-    m_govEdit:SetText(m_govEditBuffer, true)
+local GOVERNMENT_POLICY_ROWS = {
+    {
+        Key = "military",
+        DataField = "MILITARYPOLICIES",
+        Label = "LOC_CAI_POLICY_SLOT_MILITARY",
+        Empty = "LOC_GOVT_NO_MILITARY_SLOTS",
+    },
+    {
+        Key = "economic",
+        DataField = "ECONOMICPOLICIES",
+        Label = "LOC_CAI_POLICY_SLOT_ECONOMIC",
+        Empty = "LOC_GOVT_NO_ECONOMIC_SLOTS",
+    },
+    {
+        Key = "diplomatic",
+        DataField = "DIPLOMATICPOLICIES",
+        Label = "LOC_CAI_POLICY_SLOT_DIPLOMATIC",
+        Empty = "LOC_GOVT_NO_DIPLOMACY_SLOTS",
+    },
+    {
+        Key = "wildcard",
+        DataField = "WILDCARDPOLICIES",
+        Label = "LOC_CAI_POLICY_SLOT_WILDCARD",
+        Empty = "LOC_GOVT_NO_WILDCARD_SLOTS",
+    },
+}
+
+local function BuildGovernmentTree()
+    if not m_govTree then return end
+    local government = m_lastPlayerData and m_lastPlayerData[DATA_FIELD_GOVERNMENT] or nil
+
+    for _, rowData in ipairs(GOVERNMENT_POLICY_ROWS) do
+        local rowKey = rowData.Key
+        local rowLabel = rowData.Label
+        local emptyLabel = rowData.Empty
+        local policyIDs = government and government[rowData.DataField] or {}
+        local used = 0
+        for _, policyID in ipairs(policyIDs or {}) do
+            if policyID ~= -1 then used = used + 1 end
+        end
+
+        local category = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreePolicyRow"), "TreeItem", {
+            Label = function() return Locale.Lookup(rowLabel) end,
+            Tooltip = function()
+                return Locale.Lookup("LOC_CAI_GOVERNMENT_SLOTS_USED", used, #(policyIDs or {}))
+            end,
+            FocusKey = "government-policy-row:" .. rowKey,
+        })
+
+        if #(policyIDs or {}) == 0 then
+            category:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreePolicyEmpty"), "TreeItem", {
+                Label = function() return Locale.Lookup(emptyLabel) end,
+                FocusKey = "government-policy-empty:" .. rowKey,
+            }))
+        else
+            for slotOrdinal, policyID in ipairs(policyIDs) do
+                local capturedID = policyID
+                local capturedOrdinal = slotOrdinal
+                category:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreePolicy"), "TreeItem", {
+                    Label = function()
+                        if capturedID == -1 then
+                            return Locale.Lookup("LOC_CAI_GOVERNMENT_EMPTY_SLOT", capturedOrdinal)
+                        end
+                        local policy = GameInfo.Policies[capturedID]
+                        return Locale.Lookup(policy.Name)
+                    end,
+                    Tooltip = function()
+                        if capturedID == -1 then return "" end
+                        local policy = GameInfo.Policies[capturedID]
+                        return GetUnlockDescription(policy.PolicyType) or ""
+                    end,
+                    FocusKey = "government-policy:" .. rowKey .. ":" .. tostring(capturedOrdinal),
+                }))
+            end
+        end
+
+        m_govTree:AddChild(category)
+    end
+end
+
+local function RefreshGovernmentTree()
+    if not m_govTree then return end
+    local capture = mgr:CaptureFocusKey(m_govTree)
+    m_govTree:ClearChildren()
+    BuildGovernmentTree()
+    mgr:RestoreFocus(m_govTree, capture)
 end
 
 -- ===========================================================================
@@ -1355,23 +1415,20 @@ local function EnsurePanelBuilt()
         },
     })
 
-    -- 1) Queue list (hidden when empty)
+    -- Queue list (hidden when empty)
     m_queueList = mgr:CreateWidget(QUEUE_LIST_ID, "List", {
         Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_QUEUE_LIST") end,
         HiddenPredicate = function(w) return not w.Children or #w.Children == 0 end,
         SearchDepth     = 0,
     })
-    m_panel:AddChild(m_queueList)
-
-    -- 2) Filter buttons list (between queue and main tree)
+    -- Filter buttons list
     m_filterList = mgr:CreateWidget(FILTER_LIST_ID, "List", {
         Label       = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_FILTER") end,
         SearchDepth = 0,
     })
-    m_panel:AddChild(m_filterList)
     BuildFilterList()
 
-    -- 3) Main tree (hidden in grid mode)
+    -- Main tree (hidden outside tree mode)
     m_mainTree = mgr:CreateWidget(MAIN_TREE_ID, "Tree", {
         Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_MAIN_LIST") end,
         HiddenPredicate = function() return m_viewMode ~= "tree" end,
@@ -1395,7 +1452,7 @@ local function EnsurePanelBuilt()
     })
     m_panel:AddChild(m_mainTree)
 
-    -- 4) Grid view (hidden in tree mode): eras = columns, tiers = Column-groups
+    -- Grid view (hidden outside grid mode): eras = columns, tiers = Column-groups
     m_gridView = mgr:CreateWidget(GRID_VIEW_ID, "Grid", {
         Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_MAIN_LIST") end,
         HiddenPredicate = function() return m_viewMode ~= "grid" end,
@@ -1403,7 +1460,7 @@ local function EnsurePanelBuilt()
     m_gridView:SetSearchQueryHandler(CivicsSearchHandler)
     m_panel:AddChild(m_gridView)
 
-    -- 5) Graph view (hidden outside graph mode): Left/Right follows
+    -- Graph view (hidden outside graph mode): Left/Right follows
     --    prerequisite edges and Up/Down moves among traversal alternatives.
     m_graphView = mgr:CreateWidget(GRAPH_VIEW_ID, "Graph", {
         Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_MAIN_LIST") end,
@@ -1412,7 +1469,7 @@ local function EnsurePanelBuilt()
     m_graphView:SetSearchQueryHandler(CivicsSearchHandler)
     m_panel:AddChild(m_graphView)
 
-    -- 6) Unlocks list beside the grid or graph; mirrors the focused civic and
+    -- Unlocks list follows the active view; it mirrors the focused civic in grid or graph
     --    appears only when the focused civic has described unlocks.
     m_unlocksList = mgr:CreateWidget(UNLOCKS_LIST_ID, "List", {
         Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_UNLOCKS") end,
@@ -1424,15 +1481,17 @@ local function EnsurePanelBuilt()
     })
     m_panel:AddChild(m_unlocksList)
 
-    -- 7) Government summary (read-only edit)
-    m_govEdit = mgr:CreateWidget(GOV_EDIT_ID, "EditBox", {
-        Label      = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_GOVERNMENT") end,
-        AlwaysEdit = true,
-        ReadOnly   = true,
-    })
-    m_panel:AddChild(m_govEdit)
+    m_panel:AddChild(m_filterList)
+    m_panel:AddChild(m_queueList)
 
-    -- 8) View selector remains the last child and uses the Alt+1-3 order.
+    -- Government summary and slotted policies.
+    m_govTree = mgr:CreateWidget(GOV_TREE_ID, "Tree", {
+        Label = GetGovernmentSummary,
+        SearchDepth = 0,
+    })
+    m_panel:AddChild(m_govTree)
+
+    -- View selector remains the last child and uses the Alt+1-3 order.
     m_viewDropdown = mgr:CreateWidget(CHANGE_VIEW_ID, "Dropdown", {
         Label = function() return Locale.Lookup("LOC_CAI_TREE_VIEW_MODE") end,
         FocusKey = "civics-tree:view",
@@ -1448,7 +1507,7 @@ local function EnsurePanelBuilt()
 
     RebuildCivicsViews()
     RebuildQueueList()
-    RefreshGovernmentEdit()
+    RefreshGovernmentTree()
 end
 
 local function PushPanel()
@@ -1456,11 +1515,7 @@ local function PushPanel()
     EnsurePanelBuilt()
     if not m_panel or mgr:GetWidgetById(PANEL_ID) then return end
 
-    local playerCulture = GetLocalPlayerCulture()
-    local hasCurrent = playerCulture and playerCulture:GetProgressingCivic() ~= -1
-    local activeView = GetActiveCivicView()
-    local focusChild = hasCurrent and m_queueList or activeView
-    mgr:Push(m_panel, { focus = focusChild })
+    mgr:Push(m_panel)
 end
 
 local function OnPanelClosedCAI()
@@ -1475,7 +1530,7 @@ local function OnPanelClosedCAI()
     m_gridView          = nil
     m_graphView         = nil
     m_unlocksList       = nil
-    m_govEdit           = nil
+    m_govTree           = nil
     m_viewDropdown      = nil
     m_filterResults     = nil
     m_treeCivics        = {}
@@ -1490,7 +1545,6 @@ local function OnPanelClosedCAI()
     m_activeFilterEntry = nil
     m_activeFilterFunc  = nil
     m_modifierCache     = nil
-    m_govEditBuffer     = ""
     m_breadcrumbs       = {}
 end
 
@@ -1507,7 +1561,7 @@ View = WrapFunc(View, function(orig, playerData)
     orig(playerData)
     if m_panel then
         RebuildQueueList()
-        RefreshGovernmentEdit()
+        RefreshGovernmentTree()
     end
 end)
 
@@ -1578,8 +1632,7 @@ Events.CultureYieldChanged.Add(RefocusIfCivicRow)
 
 local function RefreshGovIfOpen()
     if IsPanelOnStack() then
-        Speak(BuildGovernmentText())
-        RefreshGovernmentEdit()
+        RefreshGovernmentTree()
     end
 end
 

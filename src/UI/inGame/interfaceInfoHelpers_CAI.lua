@@ -2,6 +2,7 @@ include("caiUtils")
 include("AdjacencyBonusSupport")
 include("hexCoordUtils_CAI")
 include("MovementCost_CAI")
+include("districtNeighborBonuses_CAI")
 -- ===========================================================================
 -- Unit movement helpers (extracted from vanilla WorldInput so other contexts
 -- can reuse path-info / movement-speech without depending on WorldInput state).
@@ -31,6 +32,7 @@ local HexCoordUtils = CAIHexCoordUtils
 ---@field entrancePortals number[]
 ---@field exitPortals number[]
 ---@field arrivalTurn number
+---@field arrivalDelayedByCurrentZOC boolean
 ---@field movementCost number|nil
 ---@field arrivalMovesRemaining number|nil
 ---@field failureKind string|nil
@@ -593,6 +595,7 @@ local function FinalizeMovementAnalysis(unit, targetPlot, pathInfo)
     local turns = pathInfo.turns or {}
     local startPlot = Map.GetPlotByIndex(unit:GetPlotId())
     pathInfo.arrivalTurn = (#turns > 0 and turns[#turns]) or 1
+    pathInfo.arrivalDelayedByCurrentZOC = false
     pathInfo.usesPortal = HasPortal(pathInfo)
     pathInfo.combatAtEnd = false
     pathInfo.enemyCityAtEnd = false
@@ -609,7 +612,21 @@ local function FinalizeMovementAnalysis(unit, targetPlot, pathInfo)
             local cityOwnerID = GetCityOrDistrictOwner(targetPlot)
             pathInfo.enemyCityAtEnd = IsAtWarWithLocalPlayer(cityOwnerID)
         end
-        pathInfo.combatAtEnd = pathInfo.arrivalTurn <= 1 and IsAttackableCombatTarget(unit, targetPlot)
+        local isAttackableCombatTarget = IsAttackableCombatTarget(unit, targetPlot)
+        pathInfo.combatAtEnd = pathInfo.arrivalTurn <= 1 and isAttackableCombatTarget
+
+        -- GetMoveToPathEx can keep reporting a turn-1 route after the unit has entered
+        -- enemy ZOC, even though vanilla's movement-range logic permits no further move.
+        -- Preserve valid attacks, but defer an otherwise-current-turn move to next turn.
+        if pathInfo.arrivalTurn <= 1
+            and pathInfo.kind ~= "attack"
+            and pathInfo.kind ~= "swap"
+            and not isAttackableCombatTarget
+            and unit:HasMovedIntoZOC()
+            and not unit:IgnoresZOC() then
+            pathInfo.arrivalTurn = 2
+            pathInfo.arrivalDelayedByCurrentZOC = true
+        end
     end
 
     AnalyzePathFeatures(unit, targetPlot, pathInfo)
@@ -636,6 +653,9 @@ local function FormatArrivalTurn(turn)
     turn = turn or 1
     if turn <= 1 then
         return Locale.Lookup("LOC_CAI_MOVEMENT_THIS_TURN")
+    end
+    if turn == 2 then
+        return Locale.Lookup("LOC_CAI_MOVEMENT_NEXT_TURN")
     end
     return Locale.Lookup("LOC_CAI_MOVEMENT_TURNS", turn - 1)
 end
@@ -762,6 +782,7 @@ function BuildMovementPathInfo(unit, endPlotId, showQueuedPath, showDetails)
         entrancePortals        = {},
         exitPortals            = {},
         arrivalTurn            = 1,
+        arrivalDelayedByCurrentZOC = false,
         failureKind            = nil,
         visiblePathNodes       = nil,
         visiblePathText        = nil,
@@ -1090,6 +1111,9 @@ local function BuildDistrictPlacementInterfaceInfo(plot)
         else
             table.insert(lines, Locale.Lookup("LOC_CAI_PLOT_NO_PLACEMENT_BONUS"))
         end
+        for _, line in ipairs(CAIDistrictNeighborBonuses.GetLines(city, plot, district)) do
+            table.insert(lines, line)
+        end
         if requiredText ~= nil and requiredText ~= "" then
             table.insert(lines, requiredText)
         end
@@ -1153,8 +1177,50 @@ local function BuildWorldBuilderInterfaceInfo(plot)
     if plot == nil then return nil end
 
     local api = ExposedMembers.CAIInfo
-    if api == nil or api.GetWorldBuilderPlacementValidity == nil then return nil end
+    if api == nil then return nil end
 
+    -- Locked mode: the readout is anchored to the locked tile's footprint, not
+    -- the cursor's. As the cursor roams the locked footprint each tile reports
+    -- its own validity; off the footprint there is no validity readout; on the
+    -- locked tile itself the readout is prefixed as the locked placement tile and
+    -- carries the whole-footprint valid count. The locked plot is published on the
+    -- shared CAIInfo table since this helper runs in the PlotToolTip context, not
+    -- the WorldInput context that owns the mark.
+    local lockedPlot = nil
+    if api.GetWorldBuilderMarkedPlot ~= nil then
+        lockedPlot = api.GetWorldBuilderMarkedPlot()
+    end
+    if lockedPlot ~= nil then
+        if api.GetWorldBuilderBrushTargets == nil then return nil end
+        local targets = api.GetWorldBuilderBrushTargets(lockedPlot)
+        if targets == nil then return nil end
+
+        local cursorIdx = plot:GetIndex()
+        local entry, validCount = nil, 0
+        for _, t in ipairs(targets) do
+            if t.Valid then validCount = validCount + 1 end
+            if t.PlotIndex == cursorIdx then entry = t end
+        end
+        -- Cursor outside the locked footprint: say nothing about validity.
+        if entry == nil then return nil end
+
+        local lines = {}
+        if cursorIdx == lockedPlot then
+            table.insert(lines, Locale.Lookup("LOC_CAI_WB_LOCKED_TILE"))
+        end
+        table.insert(lines, entry.Valid
+            and Locale.Lookup("LOC_CAI_PLOT_INTERFACE_VALID")
+            or Locale.Lookup("LOC_CAI_PLOT_INTERFACE_INVALID"))
+        -- Whole-footprint valid count, only at the locked tile and only for a
+        -- multi-tile footprint (brush tools).
+        if cursorIdx == lockedPlot and #targets > 1 then
+            table.insert(lines, Locale.Lookup("LOC_CAI_WB_BRUSH_VALID", validCount, #targets))
+        end
+        return lines
+    end
+
+    -- Unlocked: cursor-perspective placement preview.
+    if api.GetWorldBuilderPlacementValidity == nil then return nil end
     local v = api.GetWorldBuilderPlacementValidity(plot:GetIndex())
     if v == nil then return nil end
 
@@ -1198,7 +1264,6 @@ InterfaceInfoHelpers[InterfaceModeTypes.DISTRICT_PLACEMENT] = BuildDistrictPlace
 InterfaceInfoHelpers[InterfaceModeTypes.BUILDING_PLACEMENT] = BuildWonderPlacementInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.DEPLOY] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.REBASE] = BuildTargetValidityInterfaceInfo
-InterfaceInfoHelpers[InterfaceModeTypes.TELEPORT_TO_CITY] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.BUILD_IMPROVEMENT_ADJACENT] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.FORM_CORPS] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.FORM_ARMY] = BuildTargetValidityInterfaceInfo
@@ -1242,6 +1307,10 @@ end
 
 local function IsActiveInterfacePlotRevealed(plot)
     if plot == nil then return false end
+
+    -- World Builder Set Visibility tool: fog by the selected player's reveal.
+    local isGated, revealed = GetWorldBuilderRevealGate(plot)
+    if isGated then return revealed end
 
     local observer = Game.GetLocalObserver()
     if observer == PlayerTypes.OBSERVER then
@@ -1302,18 +1371,6 @@ local function BuildSettlerLensPlotInfo(plot)
             lines[#lines + 1] = Locale.Lookup("LOC_CAI_WORLD_SCANNER_SETTLER_DISASTER_VOLCANO")
         end
 
-        if TerrainManager ~= nil and TerrainManager.GetCoastalLowlandType ~= nil and TerrainManager.IsProtected ~= nil then
-            if not TerrainManager.IsProtected(plot) then
-                local coastalLowlandType = TerrainManager.GetCoastalLowlandType(plot)
-                if coastalLowlandType == 0 then
-                    lines[#lines + 1] = Locale.Lookup("LOC_COASTAL_LOWLAND_1M_NAME")
-                elseif coastalLowlandType == 1 then
-                    lines[#lines + 1] = Locale.Lookup("LOC_COASTAL_LOWLAND_2M_NAME")
-                elseif coastalLowlandType == 2 then
-                    lines[#lines + 1] = Locale.Lookup("LOC_COASTAL_LOWLAND_3M_NAME")
-                end
-            end
-        end
     end
 
     return #lines > 0 and lines or nil

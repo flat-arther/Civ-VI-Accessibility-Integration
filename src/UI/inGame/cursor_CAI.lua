@@ -12,7 +12,7 @@ local m_PlayerState = PlayerStateManager.Init(function(playerID)
         lastContinentZone = nil,
         lastTerritoryZone = nil,
         lastVolcanoZone = nil,
-        lastNationalParkZone = nil,
+        lastCityZone = nil,
         lastCivRoyaleZone = nil,
     }
 end)
@@ -145,15 +145,17 @@ local function GetOwnerZoneText(plot)
         return Locale.Lookup("LOC_MINIMAP_UNCLAIMED_TOOLTIP")
     end
 
-    local localPlayerID = Game.GetLocalPlayer()
-    if localPlayerID == nil or localPlayerID < 0 then return nil end
+    if not IsObserverView() then
+        local localPlayerID = Game.GetLocalPlayer()
+        if localPlayerID == nil or localPlayerID < 0 then return nil end
 
-    local localPlayer = Players[localPlayerID]
-    if localPlayer == nil then return nil end
+        local localPlayer = Players[localPlayerID]
+        if localPlayer == nil then return nil end
 
-    local diplomacy = localPlayer:GetDiplomacy()
-    if diplomacy ~= nil and ownerID ~= localPlayerID and not diplomacy:HasMet(ownerID) then
-        return nil
+        local diplomacy = localPlayer:GetDiplomacy()
+        if diplomacy ~= nil and ownerID ~= localPlayerID and not diplomacy:HasMet(ownerID) then
+            return nil
+        end
     end
 
     local playerConfig = PlayerConfigurations[ownerID]
@@ -201,8 +203,21 @@ local function GetNationalParkZoneText(plot)
     return Locale.Lookup("LOC_CAI_NAV_CURSOR_NATIONAL_PARK_ZONE")
 end
 
+local function GetCityZoneText(plot)
+    if plot == nil then return end
+    return table.concat(ExposedMembers.CAIInfo:RequestPlotInfo(plot:GetIndex(), { "cityName" }), "")
+end
+
 local function CanUpdateZonesForPlot(plot)
     if plot == nil then return false end
+
+    -- World Builder Set Visibility tool: gate zone reads on the selected player's
+    -- reveal so hidden tiles are treated as fogged.
+    local isGated, revealed = GetWorldBuilderRevealGate(plot)
+    if isGated then return revealed end
+
+    -- World Builder and see-all observers have no PlayersVisibility object.
+    if IsObserverView() then return true end
 
     local localPlayerID = Game.GetLocalPlayer()
     if localPlayerID == nil or localPlayerID < 0 then return false end
@@ -301,11 +316,11 @@ function CAICursor:UpdateZones()
     --end
     --state.lastVolcanoZone = volcanoZone
 
-    local nationalParkZone = GetNationalParkZoneText(plot)
-    if nationalParkZone ~= nil and CAISettings.GetBool("SpeakNationalParkZone") and nationalParkZone ~= state.lastNationalParkZone then
-        Speak(nationalParkZone)
+    local cityZone = GetCityZoneText(plot)
+    if cityZone ~= nil and cityZone ~= state.lastCityZone then
+        Speak(cityZone)
     end
-    state.lastNationalParkZone = nationalParkZone
+    state.lastCityZone = cityZone
 end
 
 function CAICursor:SetCoords(x, y)

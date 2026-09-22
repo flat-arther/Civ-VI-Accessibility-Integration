@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_ZOOM_IN" Language="zh_Hans_CN"><Text>放大</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_OUT" Language="zh_Hans_CN"><Text>缩小</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_IN_TOOLTIP" Language="zh_Hans_CN"><Text>放大并读出缩放百分比。</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_OUT_TOOLTIP" Language="zh_Hans_CN"><Text>缩小并读出缩放百分比。</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_LEVEL" Language="zh_Hans_CN"><Text>缩放百分之{1_Percent}</Text></Row>
+    <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_BONUSES" Language="zh_Hans_CN"><Text>{1_District}加成：{2_Yields}</Text></Row>
+    <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_YIELD_CHANGE" Language="zh_Hans_CN"><Text>{1_Amount : number +#.#;-#.#} {2_Yield}</Text></Row>
+    <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP" Language="zh_Hans_CN"><Text>首次进入时聚焦标签栏</Text></Row>
+    <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP_TOOLTIP" Language="zh_Hans_CN"><Text>首次进入标签控件时，将焦点置于当前标签而非页面内容。</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION" Language="zh_Hans_CN"><Text>朗读存在警告的城市数量</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION_TOOLTIP" Language="zh_Hans_CN"><Text>朗读您存在住房、宜居度、食物、忠诚度、电力或围城警告的城市数量。</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION" Language="zh_Hans_CN"><Text>朗读所有城市警告</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION_TOOLTIP" Language="zh_Hans_CN"><Text>朗读每座受影响城市的名称及其住房、宜居度、食物、忠诚度、电力和围城警告。</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_COUNT" Language="zh_Hans_CN"><Text>{1_Count}条城市警告</Text></Row>
+    <Row Tag="LOC_CAI_CITY_WARNINGS_NONE" Language="zh_Hans_CN"><Text>没有城市存在警告。</Text></Row>
     <!-- 简体中文 -->
 
     <!-- 控件角色 -->
@@ -563,6 +578,45 @@
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_ACTIVE_LENS" Language="zh_Hans_CN">
       <Text>当前滤镜</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_WORLD_BUILDER" Language="zh_Hans_CN">
+      <Text>地图生成器</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_WORLD_BUILDER" Language="zh_Hans_CN">
+      <Text>仅在地图生成器中可用。包含已放置的起始位置、地块归属区域，以及河流和悬崖边缘。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_STARTING_POSITIONS" Language="zh_Hans_CN">
+      <Text>起始位置</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_OWNERSHIP" Language="zh_Hans_CN">
+      <Text>归属</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_RIVERS_AND_CLIFFS" Language="zh_Hans_CN">
+      <Text>河流与悬崖</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_PLAYER" Language="zh_Hans_CN">
+      <Text>玩家起始</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_LEADER" Language="zh_Hans_CN">
+      <Text>领袖起始</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_CIVILIZATION" Language="zh_Hans_CN">
+      <Text>文明起始</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_RANDOM_MAJOR" Language="zh_Hans_CN">
+      <Text>随机玩家起始</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_GROUP_RANDOM_MINOR" Language="zh_Hans_CN">
+      <Text>随机城邦起始</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_START_LABEL" Language="zh_Hans_CN">
+      <Text>{1_Type}：{2_Name}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_GROUP_RIVERS" Language="zh_Hans_CN">
+      <Text>河流</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_GROUP_CLIFFS" Language="zh_Hans_CN">
+      <Text>悬崖</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_RESOURCES" Language="zh_Hans_CN">
       <Text>资源</Text>
@@ -1325,6 +1379,8 @@
     <Replace Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_AGE_TOOLTIP" Language="zh_Hans_CN">
       <Text>读取当前时代得分、所处时代、门槛和生效中的纪念事项</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_SCORE_DETAILS" Language="zh_Hans_CN"><Text>阅读时代得分明细</Text></Replace>
+    <Replace Tag="LOC_CAI_ACTION_PANEL_SPEAK_ERA_SCORE_DETAILS_TOOLTIP" Language="zh_Hans_CN"><Text>朗读当前时代得分的来源</Text></Replace>
     <Replace Tag="LOC_CAI_ACTION_PANEL_ERA_NOT_AVAILABLE" Language="zh_Hans_CN">
       <Text>时代状态不可用</Text>
     </Replace>
@@ -1603,6 +1659,8 @@
     <Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_NUKES_TOOLTIP" Language="zh_Hans_CN">
       <Text>读取核武器和热核武器的数量</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE_DETAILS" Language="zh_Hans_CN"><Text>阅读科技明细</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_SCIENCE_DETAILS_TOOLTIP" Language="zh_Hans_CN"><Text>朗读科技来源</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_CULTURE_DETAILS" Language="zh_Hans_CN"><Text>阅读文化明细</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_CULTURE_DETAILS_TOOLTIP" Language="zh_Hans_CN"><Text>朗读文化来源</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_GOLD_DETAILS" Language="zh_Hans_CN"><Text>阅读金币明细</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_GOLD_DETAILS_TOOLTIP" Language="zh_Hans_CN"><Text>朗读金币收入和支出来源</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_FAITH_DETAILS" Language="zh_Hans_CN"><Text>阅读信仰明细</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_FAITH_DETAILS_TOOLTIP" Language="zh_Hans_CN"><Text>朗读信仰来源</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_DETAILS" Language="zh_Hans_CN"><Text>阅读旅游业明细</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_TOURISM_DETAILS_TOOLTIP" Language="zh_Hans_CN"><Text>朗读旅游业来源</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_INFLUENCE_DETAILS" Language="zh_Hans_CN"><Text>阅读影响力明细</Text></Replace><Replace Tag="LOC_CAI_TOP_PANEL_SPEAK_INFLUENCE_DETAILS_TOOLTIP" Language="zh_Hans_CN"><Text>朗读影响力进度</Text></Replace>
+    <Replace Tag="LOC_CAI_TOP_PANEL_NO_VALUE" Language="zh_Hans_CN"><Text>你没有{1_Name}</Text></Replace>
     <Replace Tag="LOC_CAI_TOP_PANEL_YIELD_INFO" Language="zh_Hans_CN">
       <Text>帝国经济报告</Text>
     </Replace>
@@ -1692,6 +1750,15 @@
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_ACTIONS" Language="zh_Hans_CN">
       <Text>行动</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_HAPPY" Language="zh_Hans_CN">
+      <Text>愉快</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_NEUTRAL" Language="zh_Hans_CN">
+      <Text>中立</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_UNHAPPY" Language="zh_Hans_CN">
+      <Text>不悦</Text>
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_NO_ACTIONS" Language="zh_Hans_CN">
       <Text>没有可用的外交行动</Text>
@@ -2534,6 +2601,9 @@
     <Replace Tag="LOC_CAI_PRODUCTION_CITY_YIELD" Language="zh_Hans_CN">
       <Text>{1_Yield}：{2_Amount}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_PRODUCTION_CATEGORY_REPAIR" Language="zh_Hans_CN">
+      <Text>需要修复</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_PRODUCTION_CATEGORY_DISTRICTS" Language="zh_Hans_CN">
       <Text>区域</Text>
     </Replace>
@@ -3051,7 +3121,7 @@
       <Text>没有单位数值</Text>
     </Replace>
     <Replace Tag="LOC_CAI_UNIT_NO_CHARGES" Language="zh_Hans_CN">
-      <Text>此单位不支持使用次数</Text>
+      <Text>此单位没有使用次数</Text>
     </Replace>
     <Replace Tag="LOC_CAI_UNIT_NO_PROMOTIONS" Language="zh_Hans_CN">
       <Text>没有可用晋升</Text>
@@ -3618,6 +3688,9 @@
     <Replace Tag="LOC_CAI_MOVEMENT_THIS_TURN" Language="zh_Hans_CN">
       <Text>本回合</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_MOVEMENT_NEXT_TURN" Language="zh_Hans_CN">
+      <Text>下回合</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_MOVEMENT_TURNS" Language="zh_Hans_CN">
       <Text>{1_Turns : plural 1?1回合; other?{1_Turns}回合;}</Text>
     </Replace>
@@ -3707,6 +3780,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_MOVEMENT_RESULT_STOPPED_SHORT" Language="zh_Hans_CN">
       <Text>中途停止</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOVEMENT_RESULT_QUEUED_TURNS" Language="zh_Hans_CN">
+      <Text>{1_Turns : plural 1?移动已排队，距离抵达还有1回合; other?移动已排队，距离抵达还有{1_Turns}回合;}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_MOVEMENT_RESULT_QUEUED" Language="zh_Hans_CN">
+      <Text>移动已排队</Text>
     </Replace>
     <Replace Tag="LOC_CAI_INTERFACE_PRIMARY_ACTION" Language="zh_Hans_CN">
       <Text>主要界面行动</Text>
@@ -3807,6 +3886,12 @@
     <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_CITY_MANAGEMENT" Language="zh_Hans_CN">
       <Text>城市管理</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_YIELDS" Language="zh_Hans_CN">
+      <Text>产出</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_CATEGORY_TOOLTIP_YIELDS" Language="zh_Hans_CN">
+      <Text>在管理城市市民时出现，按产出类型对城市可工作的地块进行分组。每个产出分组列出产生该产出的地块，从高到低排列，因此一个地块会出现在它所产生的每种产出中。</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_CITY_MANAGEMENT_LOCKED" Language="zh_Hans_CN">
       <Text>已锁定单元格</Text>
     </Replace>
@@ -3833,6 +3918,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_SUBCATEGORY_TARGET_PLOTS" Language="zh_Hans_CN">
       <Text>目标单元格</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_TARGET_VALID" Language="zh_Hans_CN">
+      <Text>有效单元格</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WORLD_SCANNER_WB_TARGET_INVALID" Language="zh_Hans_CN">
+      <Text>无效单元格</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WORLD_SCANNER_WAYPOINT_TURN" Language="zh_Hans_CN">
       <Text>路径点，第{1_Turn}回合</Text>
@@ -4710,6 +4801,12 @@
     <Replace Tag="LOC_CAI_GOVERNOR_PROMOTE_DESC" Language="zh_Hans_CN">
       <Text>要花费一个总督头衔来获得{1_PromoName}吗？{2_Desc}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_GOVERNOR_APPOINT_CONFIRM" Language="zh_Hans_CN">
+      <Text>任命{1_GovName}？</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_GOVERNOR_JOIN_CONFIRM" Language="zh_Hans_CN">
+      <Text>加入{1_SocietyName}？</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_GOVERNOR_READONLY" Language="zh_Hans_CN">
       <Text>只读：世界议会正在召开</Text>
     </Replace>
@@ -5409,6 +5506,12 @@
     <Replace Tag="LOC_CAI_CLIMATE_DAMAGED_TILES" Language="zh_Hans_CN">
       <Text>{1_Num}{1_Num: plural 1?个单元格; other?个单元格;}受损</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_IMPROVEMENTS_ADDED_NODE" Language="zh_Hans_CN">
+      <Text>新增 {1_Num} 个改良设施</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_IMPROVEMENT_ADDED" Language="zh_Hans_CN">
+      <Text>{1_Improvement}：已添加</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_UNITS_LOST" Language="zh_Hans_CN">
       <Text>{1_Num}{1_Num: plural 1?个单位; other?个单位;}阵亡</Text>
     </Replace>
@@ -5417,6 +5520,57 @@
     </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_AFFECTED_CITIES" Language="zh_Hans_CN">
       <Text>受影响城市：{1_Cities}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_OWNER_YOURS" Language="zh_Hans_CN">
+      <Text>你的</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_PILLAGED_IN_CITY" Language="zh_Hans_CN">
+      <Text>{1_Owner}{2_Object}（{3_City}）：已被劫掠</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_PILLAGED" Language="zh_Hans_CN">
+      <Text>{1_Owner}{2_Object}：已被劫掠</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_DESTROYED_IN_CITY" Language="zh_Hans_CN">
+      <Text>{1_Owner}{2_Object}（{3_City}）：已被摧毁</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_DESTROYED" Language="zh_Hans_CN">
+      <Text>{1_Owner}{2_Object}：已被摧毁</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FEATURE_REMOVED_IN_CITY" Language="zh_Hans_CN">
+      <Text>{1_Feature}（{2_City}）：已移除</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FEATURE_REMOVED" Language="zh_Hans_CN">
+      <Text>{1_Feature}：已移除</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_UNIT_KILLED" Language="zh_Hans_CN">
+      <Text>{1_Owner}{2_Unit}：阵亡</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_UNIT_DAMAGED" Language="zh_Hans_CN">
+      <Text>{1_Owner}{2_Unit}：受损，剩余生命 {3_HP}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_UNITS_NODE" Language="zh_Hans_CN">
+      <Text>{1_Num} 个单位受影响</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERTILITY_NODE" Language="zh_Hans_CN">
+      <Text>{1_Num} 个地块肥沃度改变</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERT_IN_CITY" Language="zh_Hans_CN">
+      <Text>{1_Terrain}（{2_City}）：{3_Deltas}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERT" Language="zh_Hans_CN">
+      <Text>{1_Terrain}：{2_Deltas}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_YIELD_DELTA" Language="zh_Hans_CN">
+      <Text>{1_Delta} {2_Yield}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_FERT_AMOUNT" Language="zh_Hans_CN">
+      <Text>{1_Amount} 肥沃度</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_POP_LOST_CITY" Language="zh_Hans_CN">
+      <Text>{1_City}：损失 {2_Num} 人口</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_INSTANCE_TURN" Language="zh_Hans_CN">
+      <Text>{1_Text}（第 {2_Turn} 回合）</Text>
     </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_TURN" Language="zh_Hans_CN">
       <Text>第{1_Turn}回合，{2_Date}</Text>
@@ -6100,6 +6254,9 @@
     <Replace Tag="LOC_CAI_KB_MOVE_UP" Language="zh_Hans_CN">
       <Text>向上移动</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_KB_DIRECTORY_UP" Language="zh_Hans_CN">
+      <Text>上级目录</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_KB_NAVIGATE_BACK" Language="zh_Hans_CN">
       <Text>向后导航</Text>
     </Replace>
@@ -6513,6 +6670,12 @@
     </Replace>
     <Replace Tag="LOC_CAI_STAGING_INVITE_SENT" Language="zh_Hans_CN">
       <Text>邀请已发送</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_STAGING_LEAVE_WARNING" Language="zh_Hans_CN">
+      <Text>离开准备房间？</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_STAGING_LEAVE_HOST_TRANSFER" Language="zh_Hans_CN">
+      <Text>主机权限将转移给下一位玩家。</Text>
     </Replace>
 
     <!-- 模组设置 -->
@@ -7729,6 +7892,9 @@
     <Replace Tag="LOC_CAI_WB_OPEN_TOOLS" Language="zh_Hans_CN">
       <Text>打开世界构建器工具</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WB_SELECT_TOOL" Language="zh_Hans_CN">
+      <Text>按数字选择工具</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WB_PLACE" Language="zh_Hans_CN">
       <Text>在光标处放置</Text>
     </Replace>
@@ -7738,8 +7904,44 @@
     <Replace Tag="LOC_CAI_WB_DELETE" Language="zh_Hans_CN">
       <Text>在光标处移除</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WB_MAP_EDITOR" Language="zh_Hans_CN">
+      <Text>打开地图编辑器</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PLAYER_EDITOR" Language="zh_Hans_CN">
+      <Text>打开玩家编辑器</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_UNDO" Language="zh_Hans_CN">
+      <Text>取消</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_REDO" Language="zh_Hans_CN">
+      <Text>恢复</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PAUSE" Language="zh_Hans_CN">
+      <Text>打开菜单</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WB_DELETE_TEXT" Language="zh_Hans_CN">
       <Text>删除文本条目</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_EDIT_LOCALIZATION" Language="zh_Hans_CN">
+      <Text>编辑本地化</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_MAP_METADATA" Language="zh_Hans_CN">
+      <Text>地图元数据</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GENERATE_ID_TT" Language="zh_Hans_CN">
+      <Text>激活以生成新的 ID</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_ADDED" Language="zh_Hans_CN">
+      <Text>已添加</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_NOT_ADDED" Language="zh_Hans_CN">
+      <Text>未添加</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_PILLAGED" Language="zh_Hans_CN">
+      <Text>已劫掠</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PE_REMOVE" Language="zh_Hans_CN">
+      <Text>移除</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WB_MARK" Language="zh_Hans_CN">
       <Text>锁定或解锁放置到光标地块</Text>
@@ -7749,6 +7951,9 @@
     </Replace>
     <Replace Tag="LOC_CAI_WB_UNMARKED" Language="zh_Hans_CN">
       <Text>放置已解锁</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_LOCKED_TILE" Language="zh_Hans_CN">
+      <Text>已锁定的放置地块</Text>
     </Replace>
     <Replace Tag="LOC_CAI_WB_FOOTPRINT_TILES" Language="zh_Hans_CN">
       <Text>{1_Number} 个地块</Text>
@@ -7798,8 +8003,62 @@
     <Replace Tag="LOC_CAI_WB_CLEAR" Language="zh_Hans_CN">
       <Text>清除所有资源</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_WB_DIRECTION" Language="zh_Hans_CN">
+      <Text>方向</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_PARAM_TOOL" Language="zh_Hans_CN">
+      <Text>工具</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_PREV_PARAM" Language="zh_Hans_CN">
+      <Text>上一个参数</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_NEXT_PARAM" Language="zh_Hans_CN">
+      <Text>下一个参数</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_VALUE_UP" Language="zh_Hans_CN">
+      <Text>增大或下一个值</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_VALUE_DOWN" Language="zh_Hans_CN">
+      <Text>减小或上一个值</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_FIRST_PARAM" Language="zh_Hans_CN">
+      <Text>第一个参数</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_LAST_PARAM" Language="zh_Hans_CN">
+      <Text>最后一个参数</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_FIRST_VALUE" Language="zh_Hans_CN">
+      <Text>第一个值</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_QN_LAST_VALUE" Language="zh_Hans_CN">
+      <Text>最后一个值</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GOTO" Language="zh_Hans_CN">
+      <Text>跳转到坐标</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GOTO_INVALID" Language="zh_Hans_CN">
+      <Text>输入位置，格式为 x 和 z 用空格分隔，例如 15 5。只输入一个数字表示 x，或先按空格再输入数字表示仅设置 z。在数字前加加号或减号表示相对光标移动，例如 加号2，或 空格 减号1。</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_WB_GOTO_OUT_OF_BOUNDS" Language="zh_Hans_CN">
+      <Text>这些坐标超出了地图范围。</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_WB_REVEAL_ALL" Language="zh_Hans_CN">
       <Text>显示全部</Text>
     </Replace>
+    <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS" Language="zh_Hans_CN">
+      <Text>在多人游戏中显示科技和市政弹窗</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS_TOOLTIP" Language="zh_Hans_CN">
+      <Text>在联网多人游戏中自动显示科技和市政完成以及尤里卡和鼓舞触发的弹窗。弹窗不会暂停回合计时器。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK" Language="zh_Hans_CN">
+      <Text>切换笔刷锁定</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK_ON" Language="zh_Hans_CN">
+      <Text>笔刷锁定已开启</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK_OFF" Language="zh_Hans_CN">
+      <Text>笔刷锁定已关闭</Text>
+    </Row>
   </LocalizedText>
 </GameData>
