@@ -48,6 +48,8 @@ local CALLBACK_STORM   = "GetAffectedPlots_Storm"
 local CALLBACK_DROUGHT = "GetAffectedPlots_Drought"
 local NUCLEAR_ACCIDENT_TYPE = "NUCLEAR_ACCIDENT"
 local FIRE_EFFECT_TYPE = "FIRE"
+local METEOR_EFFECT_TYPE = "METEOR_SHOWER"
+local METEOR_IMPROVEMENT_TYPE = "IMPROVEMENT_METEOR_GOODY"
 
 local KIND_IMPROVEMENT = 1
 local KIND_DISTRICT    = 2
@@ -256,6 +258,10 @@ local function Serialize(data)
             items[#items + 1] = table.concat(
                 { "D", d.plot, d.kind, d.def, d.owner, d.city, d.turn, d.destroyed and 1 or 0 }, "|")
         end
+        for _, a in ipairs(r.addedImprovements) do
+            items[#items + 1] = table.concat(
+                { "A", a.plot, a.def, a.owner, a.city, a.turn }, "|")
+        end
         for _, f in ipairs(r.fertilityTiles) do
             local parts = { "F", f.plot, f.terrain, f.owner, f.city, f.turn }
             if f.deltas ~= nil and next(f.deltas) ~= nil then
@@ -284,10 +290,12 @@ local function NewRecord(startPlot, eType)
         sp = startPlot,
         ev = eType,
         damagedTiles = {},
+        addedImprovements = {},
         fertilityTiles = {},
         popLost = {},
         unitsLost = {},
         _dmgSeen = {},
+        _addedSeen = {},
         _fertEntry = {},
         _popSeen = {},
         _unitEntry = {},
@@ -334,6 +342,13 @@ local function Deserialize(text)
                 }
                 r.damagedTiles[#r.damagedTiles + 1] = d
                 r._dmgSeen[DamageKey(d.plot, d.kind, d.def)] = true
+            elseif t == "A" and r ~= nil then
+                local a = {
+                    plot = tonumber(f[2]), def = tonumber(f[3]), owner = tonumber(f[4]),
+                    city = tonumber(f[5]), turn = tonumber(f[6]),
+                }
+                r.addedImprovements[#r.addedImprovements + 1] = a
+                r._addedSeen[a.plot] = true
             elseif t == "F" and r ~= nil then
                 local ft = {
                     plot = tonumber(f[2]), terrain = tonumber(f[3]), owner = tonumber(f[4]),
@@ -462,6 +477,19 @@ local function AddFertilityDeltas(record, plot, deltas, turn, mergeExisting)
     return changed
 end
 
+---Record the meteor goody improvement placed by a meteor shower. The engine
+---reports this through FertilityAdded even though the event has no yield rows.
+local function AddMeteorImprovement(record, plot, improvementType, turn)
+    local idx = plot:GetIndex()
+    if record._addedSeen[idx] then return false end
+    record._addedSeen[idx] = true
+    record.addedImprovements[#record.addedImprovements + 1] = {
+        plot = idx, def = improvementType, owner = plot:GetOwner(),
+        city = OwningCityID(idx), turn = turn,
+    }
+    return true
+end
+
 ---Inspect one plot against its before-state; record damage (pillage/destroy)
 ---and fertility (yield deltas). Returns true if the record changed.
 function WorldClimateHistoryManager:_CapturePlot(record, plot, turn, prevState, mergeFertility)
@@ -473,6 +501,16 @@ function WorldClimateHistoryManager:_CapturePlot(record, plot, turn, prevState, 
     -- diffs below need a full before-state, so fall back to nil for those.
     local prevTile = prevState
     if prevTile ~= nil and prevTile.y == nil then prevTile = nil end
+
+    local eventDef = GameInfo.RandomEvents[record.ev]
+    local isMeteor = eventDef ~= nil and eventDef.EffectOperatorType == METEOR_EFFECT_TYPE
+    if isMeteor then
+        local meteorImprovement = GameInfo.Improvements[METEOR_IMPROVEMENT_TYPE]
+        if meteorImprovement ~= nil and cur.imp == meteorImprovement.Index
+            and (prevTile == nil or prevTile.imp ~= cur.imp) then
+            if AddMeteorImprovement(record, plot, cur.imp, turn) then changed = true end
+        end
+    end
 
     -- improvement damage
     if cur.imp >= 0 and cur.impPill then
@@ -519,7 +557,8 @@ function WorldClimateHistoryManager:_CapturePlot(record, plot, turn, prevState, 
     -- fertility: only a yield change NOT caused by the improvement changing.
     -- Gains are always fertility; losses only count when the feature is also
     -- unchanged (pure desertification, not feature/improvement destruction).
-    if prevTile ~= nil and (mergeFertility or record._fertEntry[plot:GetIndex()] == nil) then
+    if not isMeteor and prevTile ~= nil
+        and (mergeFertility or record._fertEntry[plot:GetIndex()] == nil) then
         local impUnchanged = (prevTile.imp == cur.imp) and (prevTile.impPill == cur.impPill)
         if impUnchanged then
             local deltas = {}
@@ -787,6 +826,7 @@ function WorldClimateHistoryManager:_OnRandomEventOccurred(eType, severity, plot
     local ev = GameRandomEvents.GetCurrentTurnEventAtPlot(anchorIdx)
     if ev ~= nil then
         if def.EffectOperatorType ~= FIRE_EFFECT_TYPE
+            and def.EffectOperatorType ~= METEOR_EFFECT_TYPE
             and #record.fertilityTiles == fertBefore
             and ev.FertilityAdded ~= nil and ev.FertilityAdded ~= 0 then
             if self:_RecordFertilityLump(record, anchorIdx, ev.FertilityAdded, turn) then changed = true end

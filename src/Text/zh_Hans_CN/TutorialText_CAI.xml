@@ -361,16 +361,16 @@
       <Text>使者控件之后依次是“查看城邦”、“宣战”或“讲和”、可用时的“征用军队”，以及切换视图按钮。树视图以“城邦排序方式”下拉框开始，之后每个城邦各有一个可展开行，其中包含关系状态、加成、影响力、任务和关系区域。对于当前表格的每一列，下拉框都会提供自然顺序和两个明确说明的排序方向，例如 A 到 Z、交战者优先或数量最多者优先。表头使用相同说明，两个视图共享所选排序。Alt 加 1 选择表格视图，Alt 加 2 选择树视图；所选视图会被记住。Enter 激活焦点按钮。Escape 关闭界面。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER" Language="zh_Hans_CN">
-      <Text>第一棵树包含当前市政和队列中的市政。第二棵树包含可用市政。每项市政都可展开查看其解锁内容。最后一个按钮会打开完整的市政树。</Text>
+      <Text>第一棵树包含可用市政。第二棵树在队列非空时包含当前市政和队列中的市政。每项市政都可展开查看其解锁内容。第三个控件会打开完整的市政树。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_ACTIONS" Language="zh_Hans_CN">
       <Text>在可用市政上按 Enter，会将其设为当前市政。当前市政和队列行可以查看但为只读；此选择器特意没有添加队列快捷键。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_BINDINGS" Language="zh_Hans_CN">
-      <Text>在已揭示市政上按 Shift 加 Enter，可打开对应的文明百科文章。使用 Tab 从队列树移到可用市政，再移到“打开市政树”。</Text>
+      <Text>在已揭示市政上按 Shift 加 Enter，可打开对应的文明百科文章。使用 Tab 从可用市政移到队列树，再移到“打开市政树”。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_LAYOUT" Language="zh_Hans_CN">
-      <Text>控件按以下顺序排列：非空时显示的当前及队列市政列表、筛选列表、当前启用的市政网格、关系图或树视图、网格和关系图视图中的“解锁”列表、只读的当前政体与已插入政策摘要，以及“视图”下拉框。</Text>
+      <Text>控件按以下顺序排列：当前启用的市政网格、关系图或树视图、网格和关系图视图中的“解锁”列表、筛选列表、非空时显示的当前及队列市政列表、当前政体与已插入政策树，以及“视图”下拉框。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_VIEWS" Language="zh_Hans_CN">
       <Text>“视图”下拉框依次包含“网格”“关系图”和“树视图”。网格将时代排列成列，将前置层级从左到右排列，并在每个层级内纵向排列市政。关系图直接沿前置条件连接导航。树视图呈现时代、层级、市政的层次结构。Alt 加 1 选择网格，Alt 加 2 选择关系图，Alt 加 3 选择树视图。切换视图时会尽可能保持焦点位于同一市政；下次打开市政树时还会记住所选视图。</Text>
@@ -385,7 +385,7 @@
       <Text>在筛选器上按 Enter 会打开临时结果列表。在结果中，Enter 关闭列表并跳到对应市政，Control 加 Enter 将其加入队列，Shift 加 Enter 打开文明百科，Escape 关闭结果并清除筛选器。在任意主要视图中按 Control 加 F，都会使用游戏的市政搜索索引查找市政。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_GOVERNMENT" Language="zh_Hans_CN">
-      <Text>在网格或关系图视图中，将焦点移到市政，会为该市政重新生成相邻的“解锁”列表。之后的只读编辑框会概述当前政体、政策槽数量和每项已插入政策。</Text>
+      <Text>在网格或关系图视图中，将焦点移到市政，会重新生成相邻的“解锁”列表。政体树标签概述当前政体和政策槽数量。展开军事、经济、外交和通配政策行，可查看每个政策槽和已插入政策。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA" Language="zh_Hans_CN">
       <Text>文明百科包含三个同级控件：“章节”树、“文章”树和“历史”列表。使用 Tab 在它们之间移动。</Text>
@@ -409,7 +409,7 @@
       <Text>“二氧化碳水平”是一棵先按文明、再按资源分组的树。它包含你的各项资源贡献，以及已知全球贡献者的实时总量。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CLIMATE_HISTORY" Language="zh_Hans_CN">
-      <Text>“事件历史”是按时间顺序排列的列表。已定位且已揭示的事件会包含其相对于导航光标的方向。按 Enter 将光标移到事件起始位置，但不会关闭界面。Escape 关闭气候界面。</Text>
+      <Text>“事件历史”是按时间顺序排列的树。按右方向键可展开灾害行并进入详情，查看究竟添加、损坏、移除、改变或损失了什么。在灾害行上按 Enter，会将导航光标移到事件的起始单元格，即使该行包含可展开的详情也一样。在受影响的项目上按 Enter，会将光标移到该项目的单元格。这些跳转不会关闭界面。已定位且已揭示的事件会说明其相对于光标的方向。按左方向键折叠行，按 Escape 关闭气候界面。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_OVERVIEW" Language="zh_Hans_CN">
       <Text>普通概览包含“领袖”树，之后是“行动”列表。将焦点移到另一位领袖，会在游戏中选中该领袖并刷新之后的行动。</Text>
@@ -655,16 +655,16 @@
       <Text>“传闻”包含一个按时间顺序排列的平面列表，其中列出所有符合条件且可见的传闻条目，后面是“玩家”和“类型”筛选下拉框。更改任一下拉框都会重新构建列表。Escape 可关闭“报告”。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH" Language="zh_Hans_CN">
-      <Text>第一个树视图包含当前研究和已加入队列的科技。第二个树视图包含可用科技。每项科技均可展开以显示其解锁项。最后一个按钮会打开完整的“科技树”。</Text>
+      <Text>第一个树视图包含可用科技。第二个树视图在队列非空时包含当前研究和已加入队列的科技。每项科技均可展开以显示其解锁项。第三个控件会打开完整的“科技树”。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH_ACTIONS" Language="zh_Hans_CN">
       <Text>在可用科技上按 Enter 会将其设为当前研究。当前研究和队列中的行均为只读，但可供查看；此选择器特意没有添加加入队列的快捷键。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH_BINDINGS" Language="zh_Hans_CN">
-      <Text>在已揭示科技上按 Shift 加 Enter，可打开其“文明百科”条目。使用 Tab 从队列树视图移到可用科技，再移到“打开科技树”。</Text>
+      <Text>在已揭示科技上按 Shift 加 Enter，可打开其“文明百科”条目。使用 Tab 从可用科技移到队列树视图，再移到“打开科技树”。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_LAYOUT" Language="zh_Hans_CN">
-      <Text>控件按以下顺序显示：非空时的当前研究与队列科技列表、筛选器列表、当前启用的科技“网格”“关系图”或“树视图”、在“网格”和“关系图”视图中显示的“解锁项”列表，以及“视图”下拉框。</Text>
+      <Text>控件按以下顺序显示：当前启用的科技“网格”“关系图”或“树视图”、在“网格”和“关系图”视图中显示的“解锁项”列表、筛选器列表、非空时的当前研究与队列科技列表，以及“视图”下拉框。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_VIEWS" Language="zh_Hans_CN">
       <Text>“视图”下拉框依次包含“网格”“关系图”和“树视图”。“网格”以时代为列，从左到右排列前置层级，并在各层级内纵向排列科技。“关系图”直接沿前置科技连接排列。“树视图”以时代、层级、科技的层次呈现。按 Alt 加 1 选择“网格”，Alt 加 2 选择“关系图”，Alt 加 3 选择“树视图”。切换视图时会尽可能保持焦点位于同一项科技；下次打开“科技树”时，系统会记住所选视图。</Text>
@@ -679,7 +679,7 @@
       <Text>在筛选器上按 Enter 会打开临时结果列表。在结果中，Enter 会关闭列表并跳转到相应科技，Control 加 Enter 会将其加入队列，Shift 加 Enter 会打开“文明百科”，Escape 会关闭结果并清除筛选器。在任一主要视图中按 Control 加 F，均可搜索游戏的科技索引。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_UNLOCKS" Language="zh_Hans_CN">
-      <Text>在“网格”或“关系图”视图中，聚焦一项科技会为该科技重新构建相邻的“解锁项”列表。列表包含条目时，按 Tab 会从当前视图移到该列表，再移到“视图”下拉框。</Text>
+      <Text>在“网格”或“关系图”视图中，聚焦一项科技会重新构建相邻的“解锁项”列表。按 Tab 会在当前视图后立即到达该列表，然后依次移到筛选器、非空队列和“视图”下拉框。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW" Language="zh_Hans_CN">
       <Text>“贸易概览”包含“我的路线”“通往我方城市的路线”和“可用路线”选项卡。每个页面都是按文明、城邦或其他当前路线类别分组的树视图。</Text>
@@ -936,5 +936,8 @@
     <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_COMMIT" Language="zh_Hans_CN">
       <Text>选择一个值会将其直接写入地块，因此会触发所有游戏规则，例如更改地形会移除无效地貌，或进行海岸修正。如果某项更改引发了你不希望的连锁变化，用 Control 加 Z 撤销。</Text>
     </Replace>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_BRUSH_LOCK" Language="zh_Hans_CN">
+      <Text>按L切换笔刷锁定。开启后，每次移动光标都会立即在新坐标处使用当前设置和笔刷大小应用所选工具，即使已用M锁定其他单元格也不例外。再次按L停止自动放置。</Text>
+    </Row>
   </LocalizedText>
 </GameData>

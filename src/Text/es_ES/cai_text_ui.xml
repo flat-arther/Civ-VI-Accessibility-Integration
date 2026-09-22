@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_ZOOM_IN" Language="es_ES"><Text>Acercar</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_OUT" Language="es_ES"><Text>Alejar</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_IN_TOOLTIP" Language="es_ES"><Text>Acercar y anunciar el porcentaje de zoom.</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_OUT_TOOLTIP" Language="es_ES"><Text>Alejar y anunciar el porcentaje de zoom.</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_LEVEL" Language="es_ES"><Text>Zoom {1_Percent} por ciento</Text></Row>
+    <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_BONUSES" Language="es_ES"><Text>Bonificaciones de {1_District}: {2_Yields}</Text></Row>
+    <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_YIELD_CHANGE" Language="es_ES"><Text>{1_Amount : number +#.#;-#.#} {2_Yield}</Text></Row>
     <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP" Language="es_ES"><Text>Enfocar las pestañas al entrar por primera vez</Text></Row>
     <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP_TOOLTIP" Language="es_ES"><Text>Al entrar por primera vez en un control de pestañas, enfoca la pestaña activa en lugar del contenido de la página.</Text></Row>
     <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION" Language="es_ES"><Text>Leer el número de ciudades con avisos</Text></Row>
@@ -1735,6 +1742,15 @@
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_ACTIONS" Language="es_ES">
       <Text>Acciones</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_HAPPY" Language="es_ES">
+      <Text>Feliz</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_NEUTRAL" Language="es_ES">
+      <Text>Neutral</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_UNHAPPY" Language="es_ES">
+      <Text>Descontento</Text>
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_NO_ACTIONS" Language="es_ES">
       <Text>No hay acciones de diplomacia disponibles</Text>
@@ -5473,6 +5489,12 @@
     <Replace Tag="LOC_CAI_CLIMATE_DAMAGED_TILES" Language="es_ES">
       <Text>{1_Num} {1_Num: plural 1?casilla dañada; other?casillas dañadas;}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_IMPROVEMENTS_ADDED_NODE" Language="es_ES">
+      <Text>{1_Num} {1_Num: plural 1?mejora añadida; other?mejoras añadidas;}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_IMPROVEMENT_ADDED" Language="es_ES">
+      <Text>{1_Improvement}: añadida</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_UNITS_LOST" Language="es_ES">
       <Text>{1_Num} {1_Num: plural 1?unidad eliminada; other?unidades eliminadas;}</Text>
     </Replace>
@@ -8012,6 +8034,15 @@
     </Row>
     <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS_TOOLTIP" Language="es_ES">
       <Text>Muestra automáticamente las ventanas de tecnologías y principios completados y de sus mejoras en partidas multijugador en red. Estas ventanas no pausan el temporizador de turno.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK" Language="es_ES">
+      <Text>Alternar bloqueo del pincel</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK_ON" Language="es_ES">
+      <Text>Bloqueo del pincel activado</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK_OFF" Language="es_ES">
+      <Text>Bloqueo del pincel desactivado</Text>
     </Row>
   </LocalizedText>
 </GameData>

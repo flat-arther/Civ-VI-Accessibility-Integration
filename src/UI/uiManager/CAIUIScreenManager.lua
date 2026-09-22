@@ -231,7 +231,6 @@ function UIScreenManager:Push(w, opts)
     local willFocusTarget = target ~= nil and newTop == w
 
     if willFocusTarget then
-        if CAI and CAI.Silence then CAI.Silence() end
         self:SetFocus(target)
     elseif newTop ~= oldTop or not self.CurrentPath or self.CurrentPath[1] ~= newTop then
         local announce = opts.announce
@@ -262,10 +261,6 @@ function UIScreenManager:UpdateRootFocus(announce)
         local target = active and (active.Dialog or active.Host)
 
         if target then
-            if CAI and CAI.Silence then
-                CAI.Silence()
-            end
-
             self:SetFocus(target, {
                 announce = announce ~= false,
             })
@@ -276,10 +271,6 @@ function UIScreenManager:UpdateRootFocus(announce)
 
     if self.CurrentPath[1] == top then
         return
-    end
-
-    if CAI and CAI.Silence then
-        CAI.Silence()
     end
 
     self:SetFocus(top, {

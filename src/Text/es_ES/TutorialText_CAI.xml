@@ -361,16 +361,16 @@
       <Text>Después de los controles de enviados están Ver ciudad-estado, Declarar la guerra o Hacer las paces, Contratar ejército cuando está disponible y el botón para cambiar de vista. La vista de árbol empieza con un desplegable Ordenar ciudades-estado por, y luego una fila expandible por ciudad-estado con el estado de la relación más secciones de bonificaciones, influencia, misiones y relaciones. El desplegable ofrece el orden natural más dos opciones descritas explícitamente por cada columna actual de la tabla, como de la A a la Z, las que están en guerra primero o las de mayor cantidad primero. Los encabezados de la tabla usan las mismas descripciones y ambas vistas comparten el orden seleccionado. Alt más 1 selecciona la vista de tabla y Alt más 2 la vista de árbol; la vista seleccionada se recuerda. Intro activa el botón con el foco. Escape cierra la pantalla.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER" Language="es_ES">
-      <Text>El primer árbol contiene el principio actual y los principios en cola. El segundo árbol contiene los principios disponibles. Cada principio se expande en sus desbloqueos. El botón final abre el árbol de principios completo.</Text>
+      <Text>El primer árbol contiene los principios disponibles. El segundo contiene el principio actual y los principios en cola cuando la cola no está vacía. Cada principio se expande en sus desbloqueos. El tercer control abre el árbol de principios completo.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_ACTIONS" Language="es_ES">
       <Text>Intro en un principio disponible lo convierte en el principio actual. Las filas del actual y de la cola son de solo lectura y se pueden inspeccionar; este selector no añade a propósito un atajo de cola.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_BINDINGS" Language="es_ES">
-      <Text>Mayús más Intro en un principio revelado abre su artículo de la Civilopedia. Usa Tab para pasar del árbol de la cola a los principios disponibles y luego a Abrir el árbol de principios.</Text>
+      <Text>Mayús más Intro en un principio revelado abre su artículo de la Civilopedia. Usa Tab para pasar de los principios disponibles al árbol de la cola y luego a Abrir el árbol de principios.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_LAYOUT" Language="es_ES">
-      <Text>Los controles aparecen en este orden: la lista del principio actual y los principios en cola cuando no está vacía, una lista de filtros, la vista activa de principios en Cuadrícula, Grafo o Árbol, una lista de desbloqueos en las vistas de cuadrícula y grafo, un resumen de solo lectura del gobierno y las políticas asignadas, y el desplegable Vista.</Text>
+      <Text>Los controles aparecen en este orden: la vista activa de principios en Cuadrícula, Grafo o Árbol, una lista de desbloqueos en las vistas de cuadrícula y grafo, una lista de filtros, la lista del principio actual y los principios en cola cuando no está vacía, un árbol del gobierno y las políticas asignadas, y el desplegable Vista.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_VIEWS" Language="es_ES">
       <Text>El desplegable Vista contiene Cuadrícula, Grafo y Árbol, en ese orden. La cuadrícula organiza las eras como columnas, los niveles de requisitos de izquierda a derecha y los principios en vertical dentro de cada nivel. El grafo sigue directamente las conexiones de requisitos. El árbol presenta una jerarquía de era, nivel y principio. Alt más 1 selecciona Cuadrícula, Alt más 2 selecciona Grafo y Alt más 3 selecciona Árbol. Al cambiar de vista se mantiene el foco en el mismo principio cuando es posible, y la vista seleccionada se recuerda la próxima vez que se abre el árbol de principios.</Text>
@@ -385,7 +385,7 @@
       <Text>Intro en un filtro abre una lista temporal de resultados. En los resultados, Intro cierra la lista y salta al principio, Control más Intro lo añade a la cola, Mayús más Intro abre la Civilopedia y Escape cierra los resultados y limpia el filtro. Control más F busca principios con el índice de búsqueda de principios del juego desde cualquier vista principal.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_GOVERNMENT" Language="es_ES">
-      <Text>En la vista de cuadrícula o grafo, poner el foco en un principio reconstruye la lista de desbloqueos contigua para ese principio. El campo de edición de solo lectura que sigue resume el gobierno actual, el número de ranuras y todas las políticas asignadas.</Text>
+      <Text>En la vista de cuadrícula o grafo, poner el foco en un principio reconstruye la lista de desbloqueos contigua. La etiqueta del árbol de gobierno resume el gobierno actual y el número de ranuras. Expande las filas Militar, Económica, Diplomática y Comodín para consultar cada ranura y política asignada.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA" Language="es_ES">
       <Text>La Civilopedia tiene tres controles contiguos: un árbol de secciones, un árbol de artículo y una lista de historial. Tab se mueve entre ellos.</Text>
@@ -409,7 +409,7 @@
       <Text>Niveles de CO2 es un árbol agrupado primero por civilización y luego por recurso. Incluye tus contribuciones por recurso y los contribuyentes globales conocidos con totales en tiempo real.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CLIMATE_HISTORY" Language="es_ES">
-      <Text>Historial de eventos es una lista cronológica. Los eventos localizados y revelados incluyen su dirección desde el cursor de navegación. Intro mueve el cursor a la ubicación inicial del evento sin cerrar la pantalla. Escape cierra la pantalla del clima.</Text>
+      <Text>Historial de eventos es un árbol cronológico. Usa Derecha para expandir una fila de desastre y entrar en los detalles que muestran exactamente qué se añadió, dañó, eliminó, cambió o perdió. Pulsa Intro en una fila de desastre para mover el cursor de navegación a la casilla inicial del evento, aunque la fila tenga detalles expandibles. Pulsa Intro en una entrada afectada para mover el cursor a la casilla de esa entrada. Estos saltos no cierran la pantalla. Los eventos localizados y revelados incluyen su dirección desde el cursor. Izquierda contrae una fila y Escape cierra la pantalla del clima.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_OVERVIEW" Language="es_ES">
       <Text>La vista general normal contiene un árbol de líderes seguido de una lista de acciones. Poner el foco en otro líder selecciona a ese líder en el juego y actualiza las acciones siguientes.</Text>
@@ -655,16 +655,16 @@
       <Text>Chismorreo contiene una lista cronológica simple de todas las entradas de chismorreo visibles que coinciden, seguida de los desplegables de filtro por jugador y por tipo. Cambia cualquiera de los dos desplegables para reconstruir la lista. Escape cierra los informes.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH" Language="es_ES">
-      <Text>El primer árbol contiene las tecnologías actual y en cola. El segundo árbol contiene las tecnologías disponibles. Cada tecnología se expande en sus desbloqueos. El botón final abre el árbol de tecnologías completo.</Text>
+      <Text>El primer árbol contiene las tecnologías disponibles. El segundo contiene las tecnologías actual y en cola cuando la cola no está vacía. Cada tecnología se expande en sus desbloqueos. El tercer control abre el árbol de tecnologías completo.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH_ACTIONS" Language="es_ES">
       <Text>Intro en una tecnología disponible la convierte en la actual. Las filas de la actual y de la cola son de solo lectura y se pueden inspeccionar; este selector no añade a propósito un atajo de cola.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH_BINDINGS" Language="es_ES">
-      <Text>Mayús más Intro en una tecnología revelada abre su artículo de la Civilopedia. Usa Tab para pasar del árbol de la cola a las tecnologías disponibles y luego a Abrir el árbol de tecnologías.</Text>
+      <Text>Mayús más Intro en una tecnología revelada abre su artículo de la Civilopedia. Usa Tab para pasar de las tecnologías disponibles al árbol de la cola y luego a Abrir el árbol de tecnologías.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_LAYOUT" Language="es_ES">
-      <Text>Los controles aparecen en este orden: la lista de tecnologías actual y en cola cuando no está vacía, una lista de filtros, la vista activa de tecnologías en Cuadrícula, Grafo o Árbol, una lista de desbloqueos en las vistas de cuadrícula y grafo, y el desplegable Vista.</Text>
+      <Text>Los controles aparecen en este orden: la vista activa de tecnologías en Cuadrícula, Grafo o Árbol, una lista de desbloqueos en las vistas de cuadrícula y grafo, una lista de filtros, la lista de tecnologías actual y en cola cuando no está vacía, y el desplegable Vista.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_VIEWS" Language="es_ES">
       <Text>El desplegable Vista contiene Cuadrícula, Grafo y Árbol, en ese orden. La cuadrícula organiza las eras como columnas, los niveles de requisitos de izquierda a derecha y las tecnologías en vertical dentro de cada nivel. El grafo sigue directamente las conexiones de requisitos. El árbol presenta una jerarquía de era, nivel y tecnología. Alt más 1 selecciona Cuadrícula, Alt más 2 selecciona Grafo y Alt más 3 selecciona Árbol. Al cambiar de vista se mantiene el foco en la misma tecnología cuando es posible, y la vista seleccionada se recuerda la próxima vez que se abre el árbol de tecnologías.</Text>
@@ -679,7 +679,7 @@
       <Text>Intro en un filtro abre una lista temporal de resultados. En los resultados, Intro cierra la lista y salta a la tecnología, Control más Intro la añade a la cola, Mayús más Intro abre la Civilopedia y Escape cierra los resultados y limpia el filtro. Control más F busca en el índice de tecnologías del juego desde cualquier vista principal.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_UNLOCKS" Language="es_ES">
-      <Text>En la vista de cuadrícula o grafo, poner el foco en una tecnología reconstruye la lista de desbloqueos contigua para esa tecnología. Tab llega a esa lista después de la vista activa cuando contiene entradas, y luego llega al desplegable Vista.</Text>
+      <Text>En la vista de cuadrícula o grafo, poner el foco en una tecnología reconstruye su lista de desbloqueos contigua. Tab llega a ella inmediatamente después de la vista activa, seguida por los filtros, la cola no vacía y el desplegable Vista.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW" Language="es_ES">
       <Text>El resumen de comercio tiene las pestañas Mis rutas, Rutas a mis ciudades y Rutas disponibles. Todas las páginas son árboles agrupados por civilización, ciudad-estado u otra categoría de ruta.</Text>
@@ -936,5 +936,8 @@
     <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_COMMIT" Language="es_ES">
       <Text>Elegir un valor lo escribe directamente en la casilla, de modo que se aplican todas las reglas del juego, como que un cambio de terreno elimine un accidente no válido o los ajustes de costa. Deshaz con Control más Z si un cambio provoca una cascada que no querías.</Text>
     </Replace>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_BRUSH_LOCK" Language="es_ES">
+      <Text>Pulsa L para alternar el bloqueo del pincel. Mientras esté activado, cada movimiento del cursor aplica inmediatamente la herramienta seleccionada en las nuevas coordenadas con los ajustes y el tamaño del pincel actuales, aunque M haya fijado otra casilla. Pulsa L de nuevo para detener la colocación automática.</Text>
+    </Row>
   </LocalizedText>
 </GameData>

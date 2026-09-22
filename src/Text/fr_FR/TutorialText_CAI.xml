@@ -361,16 +361,16 @@
       <Text>Après les contrôles d'émissaires se trouvent Voir la cité-État, Déclarer la guerre ou Faire la paix, Levée de troupes quand elle est disponible, et le bouton de changement de vue. La vue arbre commence par un menu déroulant Classer les cités-États par, puis une ligne développable par cité-État avec le statut de relation ainsi que les sections bonus, influence, quête et relations. Le menu déroulant propose l'ordre naturel plus deux choix explicitement décrits pour chaque colonne actuelle du tableau, comme de A à Z, en guerre en premier, ou le plus grand nombre en premier. Les en-têtes du tableau utilisent les mêmes descriptions, et les deux vues partagent le tri sélectionné. Alt plus 1 sélectionne la vue tableau et Alt plus 2 la vue arbre ; la vue sélectionnée est mémorisée. Entrée active le bouton ciblé. Échap ferme l'écran.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER" Language="fr_FR">
-      <Text>Le premier arbre contient le dogme actuel et les dogmes en file d'attente. Le second arbre contient les dogmes disponibles. Chaque dogme se développe en ses déblocages. Le dernier bouton ouvre l'arbre des dogmes complet.</Text>
+      <Text>Le premier arbre contient les dogmes disponibles. Le second contient le dogme actuel et les dogmes en file d'attente lorsque celle-ci n'est pas vide. Chaque dogme se développe en ses déblocages. Le troisième contrôle ouvre l'arbre des dogmes complet.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_ACTIONS" Language="fr_FR">
       <Text>Entrée sur un dogme disponible en fait le dogme actuel. Les lignes du dogme actuel et de la file d'attente sont en lecture seule et consultables ; ce sélecteur n'ajoute délibérément pas de raccourci de file d'attente.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_BINDINGS" Language="fr_FR">
-      <Text>Maj plus Entrée sur un dogme révélé ouvre son article de la Civilopédia. Utilisez Tab pour passer de l'arbre de file d'attente aux dogmes disponibles, puis à Ouvrir l'arbre des dogmes.</Text>
+      <Text>Maj plus Entrée sur un dogme révélé ouvre son article de la Civilopédia. Utilisez Tab pour passer des dogmes disponibles à l'arbre de file d'attente, puis à Ouvrir l'arbre des dogmes.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_LAYOUT" Language="fr_FR">
-      <Text>Les contrôles apparaissent dans cet ordre : la liste des dogmes actuel et en file d'attente lorsqu'elle n'est pas vide, une liste de filtres, la vue de dogmes active Grille, Graphe ou Arbre, une liste Déblocages dans les vues Grille et Graphe, un résumé en lecture seule du gouvernement et des doctrines équipées, et le menu déroulant Vue.</Text>
+      <Text>Les contrôles apparaissent dans cet ordre : la vue de dogmes active Grille, Graphe ou Arbre, une liste Déblocages dans les vues Grille et Graphe, une liste de filtres, la liste des dogmes actuel et en file d'attente lorsqu'elle n'est pas vide, un arbre du gouvernement et des doctrines équipées, et le menu déroulant Vue.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_VIEWS" Language="fr_FR">
       <Text>Le menu déroulant Vue contient Grille, Graphe et Arbre dans cet ordre. Grille dispose les ères en colonnes, les paliers de prérequis de gauche à droite, et les dogmes verticalement au sein de chaque palier. Graphe suit directement les connexions de prérequis. Arbre présente une hiérarchie ère, palier, dogme. Alt plus 1 sélectionne Grille, Alt plus 2 sélectionne Graphe, et Alt plus 3 sélectionne Arbre. Changer de vue garde le même dogme ciblé lorsque c'est possible, et la vue sélectionnée est mémorisée pour la prochaine ouverture de l'arbre des dogmes.</Text>
@@ -385,7 +385,7 @@
       <Text>Entrée sur un filtre ouvre une liste de résultats temporaire. Dans les résultats, Entrée ferme la liste et saute au dogme, Ctrl plus Entrée le met en file d'attente, Maj plus Entrée ouvre la Civilopédia, et Échap ferme les résultats et efface le filtre. Ctrl plus F recherche les dogmes via l'index de recherche des dogmes du jeu depuis n'importe quelle vue principale.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_GOVERNMENT" Language="fr_FR">
-      <Text>En vue Grille ou Graphe, cibler un dogme reconstruit la liste Déblocages voisine pour ce dogme. Le champ d'édition en lecture seule qui suit résume le gouvernement actuel, le nombre d'emplacements et chaque doctrine équipée.</Text>
+      <Text>En vue Grille ou Graphe, cibler un dogme reconstruit sa liste Déblocages voisine. L'étiquette de l'arbre du gouvernement résume le gouvernement actuel et le nombre d'emplacements. Développez les lignes Militaire, Économique, Diplomatique et Joker pour consulter chaque emplacement et doctrine équipée.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA" Language="fr_FR">
       <Text>La Civilopédia a trois contrôles voisins : un arbre Sections, un arbre Article et une liste Historique. Tab passe de l'un à l'autre.</Text>
@@ -409,7 +409,7 @@
       <Text>Niveaux de CO2 est un arbre groupé d'abord par civilisation puis par ressource. Il inclut vos contributions par ressource et les contributeurs mondiaux connus avec des totaux en direct.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CLIMATE_HISTORY" Language="fr_FR">
-      <Text>Historique des événements est une liste chronologique. Les événements localisés et révélés incluent leur direction depuis le curseur de navigation. Entrée déplace le curseur vers le lieu de départ de l'événement sans fermer l'écran. Échap ferme l'écran Climat.</Text>
+      <Text>Historique des événements est un arbre chronologique. Utilisez Droite pour développer une ligne de catastrophe et accéder aux détails indiquant précisément ce qui a été ajouté, endommagé, supprimé, modifié ou perdu. Appuyez sur Entrée sur une ligne de catastrophe pour déplacer le curseur de navigation vers la case de départ de l'événement, même si la ligne contient des détails développables. Appuyez sur Entrée sur un élément affecté pour déplacer le curseur vers sa case. Ces sauts ne ferment pas l'écran. Les événements localisés et révélés indiquent leur direction depuis le curseur. Gauche réduit une ligne et Échap ferme l'écran Climat.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_OVERVIEW" Language="fr_FR">
       <Text>L'aperçu normal contient un arbre Dirigeants suivi d'une liste Actions. Cibler un autre dirigeant le sélectionne dans le jeu et actualise les actions qui suivent.</Text>
@@ -655,16 +655,16 @@
       <Text>Rumeurs contient une liste chronologique simple de chaque entrée de rumeur visible correspondante, suivie des menus déroulants de filtre Joueur et Type. Changez l'un ou l'autre menu déroulant pour reconstruire la liste. Échap ferme Rapports.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH" Language="fr_FR">
-      <Text>Le premier arbre contient les technologies actuelle et en file d'attente. Le second arbre contient les technologies disponibles. Chaque technologie se développe en ses déblocages. Le dernier bouton ouvre l'arbre technologique complet.</Text>
+      <Text>Le premier arbre contient les technologies disponibles. Le second contient les technologies actuelle et en file d'attente lorsque celle-ci n'est pas vide. Chaque technologie se développe en ses déblocages. Le troisième contrôle ouvre l'arbre technologique complet.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH_ACTIONS" Language="fr_FR">
       <Text>Entrée sur une technologie disponible en fait la technologie actuelle. Les lignes de la technologie actuelle et de la file d'attente sont en lecture seule et consultables ; ce sélecteur n'ajoute délibérément pas de raccourci de file d'attente.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH_BINDINGS" Language="fr_FR">
-      <Text>Maj plus Entrée sur une technologie révélée ouvre son article de la Civilopédia. Utilisez Tab pour passer de l'arbre de file d'attente aux technologies disponibles, puis à Ouvrir l'arbre technologique.</Text>
+      <Text>Maj plus Entrée sur une technologie révélée ouvre son article de la Civilopédia. Utilisez Tab pour passer des technologies disponibles à l'arbre de file d'attente, puis à Ouvrir l'arbre technologique.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_LAYOUT" Language="fr_FR">
-      <Text>Les contrôles apparaissent dans cet ordre : la liste des technologies actuelle et en file d'attente lorsqu'elle n'est pas vide, une liste de filtres, la vue technologique active Grille, Graphe ou Arbre, une liste Déblocages dans les vues Grille et Graphe, et le menu déroulant Vue.</Text>
+      <Text>Les contrôles apparaissent dans cet ordre : la vue technologique active Grille, Graphe ou Arbre, une liste Déblocages dans les vues Grille et Graphe, une liste de filtres, la liste des technologies actuelle et en file d'attente lorsqu'elle n'est pas vide, et le menu déroulant Vue.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_VIEWS" Language="fr_FR">
       <Text>Le menu déroulant Vue contient Grille, Graphe et Arbre dans cet ordre. Grille dispose les ères en colonnes, les paliers de prérequis de gauche à droite, et les technologies verticalement au sein de chaque palier. Graphe suit directement les connexions de prérequis. Arbre présente une hiérarchie ère, palier, technologie. Alt plus 1 sélectionne Grille, Alt plus 2 sélectionne Graphe, et Alt plus 3 sélectionne Arbre. Changer de vue garde la même technologie ciblée lorsque c'est possible, et la vue sélectionnée est mémorisée pour la prochaine ouverture de l'arbre technologique.</Text>
@@ -679,7 +679,7 @@
       <Text>Entrée sur un filtre ouvre une liste de résultats temporaire. Dans les résultats, Entrée ferme la liste et saute à la technologie, Ctrl plus Entrée la met en file d'attente, Maj plus Entrée ouvre la Civilopédia, et Échap ferme les résultats et efface le filtre. Ctrl plus F recherche dans l'index des technologies du jeu depuis n'importe quelle vue principale.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_UNLOCKS" Language="fr_FR">
-      <Text>En vue Grille ou Graphe, cibler une technologie reconstruit la liste Déblocages voisine pour cette technologie. Tab atteint cette liste après la vue active lorsqu'elle contient des entrées, puis atteint le menu déroulant Vue.</Text>
+      <Text>En vue Grille ou Graphe, cibler une technologie reconstruit sa liste Déblocages voisine. Tab l'atteint immédiatement après la vue active, puis atteint les filtres, la file d'attente non vide et le menu déroulant Vue.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW" Language="fr_FR">
       <Text>L'aperçu du commerce a les onglets Mes routes, Routes vers mes villes et Routes disponibles. Chaque page est un arbre groupé par civilisation, cité-État ou autre catégorie de route en direct.</Text>
@@ -936,5 +936,8 @@
     <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_COMMIT" Language="fr_FR">
       <Text>Choisir une valeur l'écrit directement sur la case, de sorte que toutes les règles du jeu s'appliquent, comme un changement de terrain qui supprime une caractéristique invalide ou les corrections de côte. Annulez avec Ctrl plus Z si un changement provoque une cascade que vous ne vouliez pas.</Text>
     </Replace>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_BRUSH_LOCK" Language="fr_FR">
+      <Text>Appuyez sur L pour activer ou désactiver le verrouillage du pinceau. Chaque déplacement du curseur applique alors immédiatement l'outil sélectionné aux nouvelles coordonnées avec les réglages et la taille du pinceau actuels, même si M a verrouillé une autre case. Appuyez à nouveau sur L pour arrêter le placement automatique.</Text>
+    </Row>
   </LocalizedText>
 </GameData>

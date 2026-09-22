@@ -15,6 +15,8 @@
   </InputCategories>
 
   <InputActions>
+    <Row ActionId="CAIZoomIn" Name="LOC_CAI_ZOOM_IN" Description="LOC_CAI_ZOOM_IN_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
+    <Row ActionId="CAIZoomOut" Name="LOC_CAI_ZOOM_OUT" Description="LOC_CAI_ZOOM_OUT_TOOLTIP" CategoryId="CAI_GLOBAL" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelSpeakCityWarnings" Name="LOC_CAI_CITY_WARNINGS_ACTION" Description="LOC_CAI_CITY_WARNINGS_ACTION_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <Row ActionId="UI_TopPanelSpeakCityWarningsDetails" Name="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION" Description="LOC_CAI_CITY_WARNINGS_DETAILS_ACTION_TOOLTIP" CategoryId="CAI_INFORMATION" ContextId="World" LayoutType="PC"/>
     <!-- ===== CAI: Accessibility — cursor, scanner, surveyor, plot/yield reading, widget interaction, buffer ===== -->
@@ -278,6 +280,8 @@
   </InputActions>
 
   <InputActionDefaultGestures>
+    <Row ActionId="CAIZoomIn" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_PLUS" />
+    <Row ActionId="CAIZoomOut" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_ALT+LOC_OPTIONS_KEY_MINUS" />
     <Row ActionId="UI_TopPanelSpeakCityWarnings" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_H" />
     <Row ActionId="UI_TopPanelSpeakCityWarningsDetails" Index="0" GestureType="KBMouse" GestureData="LOC_OPTIONS_KEY_SHIFT+LOC_OPTIONS_KEY_H" />
     <!-- CAI: Accessibility -->

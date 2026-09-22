@@ -115,7 +115,8 @@
 [x] 0 build charges doesn't necessarily mean the unit does not support charges. Change the string
 [x] Transfer to city for great people should bring up a list similar to espionage and trade
 [x] Add confirmation dialogs for appointing governers and leaving mp staging room
-[ ] Get rid of screen reader interrupt on widget push
+[x] add dragging to world builder
+[x] Get rid of screen reader interrupt on widget push
 [ ] Add support for real Era Tracker
 [ ] River flow direction reporting
 [ ] Look in to coastal raide yield reporting

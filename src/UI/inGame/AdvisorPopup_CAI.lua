@@ -44,9 +44,11 @@ ShowAdvisorPopup = WrapFunc(ShowAdvisorPopup, function(orig, advisorData)
         end
         return Controls.MetaTitleText:GetText() or ""
     end
+
     m_tutorialPanel = mgr.WidgetHelpers.MakeGeneralDialog(GetTitle, buttonRow, { bodyWidget })
     m_tutorialPanel:SetDefaultIndex(isPortrait and 2 or 1)
     if not m_tutorialPanel then return end
+    CAI.Silence()
     mgr:Push(m_tutorialPanel, { priority = PopupPriority.Tutorial })
 end)
 

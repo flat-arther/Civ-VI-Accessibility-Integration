@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_ZOOM_IN" Language="pl_PL"><Text>Przybliż</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_OUT" Language="pl_PL"><Text>Oddal</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_IN_TOOLTIP" Language="pl_PL"><Text>Przybliż i odczytaj procent powiększenia.</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_OUT_TOOLTIP" Language="pl_PL"><Text>Oddal i odczytaj procent powiększenia.</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_LEVEL" Language="pl_PL"><Text>Powiększenie {1_Percent} procent</Text></Row>
+    <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_BONUSES" Language="pl_PL"><Text>Premie dzielnicy {1_District}: {2_Yields}</Text></Row>
+    <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_YIELD_CHANGE" Language="pl_PL"><Text>{1_Amount : number +#.#;-#.#} {2_Yield}</Text></Row>
     <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP" Language="pl_PL"><Text>Ustaw fokus na kartach przy pierwszym wejściu</Text></Row>
     <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP_TOOLTIP" Language="pl_PL"><Text>Przy pierwszym wejściu do kontrolki kart ustawia fokus na aktywnej karcie zamiast na zawartości strony.</Text></Row>
     <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION" Language="pl_PL"><Text>Odczytaj liczbę miast z ostrzeżeniami</Text></Row>
@@ -1743,6 +1750,15 @@
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_ACTIONS" Language="pl_PL">
       <Text>Działania</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_HAPPY" Language="pl_PL">
+      <Text>Szczęśliwy</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_NEUTRAL" Language="pl_PL">
+      <Text>Neutralny</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_UNHAPPY" Language="pl_PL">
+      <Text>Niezadowolony</Text>
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_NO_ACTIONS" Language="pl_PL">
       <Text>Brak dostępnych działań dyplomatycznych</Text>
@@ -5489,6 +5505,12 @@
     <Replace Tag="LOC_CAI_CLIMATE_DAMAGED_TILES" Language="pl_PL">
       <Text>{1_Num} {1_Num: plural 1?pole uszkodzone; other?pól uszkodzonych;}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_IMPROVEMENTS_ADDED_NODE" Language="pl_PL">
+      <Text>Dodano {1_Num} {1_Num: plural 1?ulepszenie; few?ulepszenia; other?ulepszeń;}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_IMPROVEMENT_ADDED" Language="pl_PL">
+      <Text>{1_Improvement}: dodano</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_UNITS_LOST" Language="pl_PL">
       <Text>{1_Num} {1_Num: plural 1?jednostka zniszczona; other?jednostek zniszczonych;}</Text>
     </Replace>
@@ -8017,6 +8039,15 @@
     </Row>
     <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS_TOOLTIP" Language="pl_PL">
       <Text>Automatycznie pokazuj okna ukończenia technologii i idei oraz ich przyspieszeń w sieciowej grze wieloosobowej. Okna nie zatrzymują licznika czasu tury.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK" Language="pl_PL">
+      <Text>Przełącz blokadę pędzla</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK_ON" Language="pl_PL">
+      <Text>Blokada pędzla włączona</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK_OFF" Language="pl_PL">
+      <Text>Blokada pędzla wyłączona</Text>
     </Row>
   </LocalizedText>
 </GameData>

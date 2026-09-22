@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_ZOOM_IN" Language="en_US"><Text>Zoom in</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_OUT" Language="en_US"><Text>Zoom out</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_IN_TOOLTIP" Language="en_US"><Text>Zoom in and announce the zoom percentage.</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_OUT_TOOLTIP" Language="en_US"><Text>Zoom out and announce the zoom percentage.</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_LEVEL" Language="en_US"><Text>Zoom {1_Percent} percent</Text></Row>
+    <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_BONUSES" Language="en_US"><Text>{1_District} bonuses: {2_Yields}</Text></Row>
+    <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_YIELD_CHANGE" Language="en_US"><Text>{1_Amount : number +#.#;-#.#} {2_Yield}</Text></Row>
     <Row Tag="LOC_CAI_UNIT_ALREADY_IN_MOVEMENT_MODE" Language="en_US"><Text>Already in movement mode</Text></Row>
     <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP" Language="en_US"><Text>Focus tab strip on first entry</Text></Row>
     <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP_TOOLTIP" Language="en_US"><Text>When entering a tab control for the first time, focus its active tab instead of the page contents.</Text></Row>
@@ -1755,6 +1762,15 @@
     </Row>
     <Row Tag="LOC_CAI_DIPLOMACY_ACTIONS" Language="en_US">
       <Text>Actions</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_MOOD_HAPPY" Language="en_US">
+      <Text>Happy</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_MOOD_NEUTRAL" Language="en_US">
+      <Text>Neutral</Text>
+    </Row>
+    <Row Tag="LOC_CAI_DIPLOMACY_MOOD_UNHAPPY" Language="en_US">
+      <Text>Unhappy</Text>
     </Row>
     <Row Tag="LOC_CAI_DIPLOMACY_NO_ACTIONS" Language="en_US">
       <Text>No available diplomacy actions</Text>
@@ -5538,6 +5554,12 @@
     <Row Tag="LOC_CAI_CLIMATE_DAMAGED_TILES" Language="en_US">
       <Text>{1_Num} {1_Num: plural 1?tile; other?tiles;} damaged</Text>
     </Row>
+    <Row Tag="LOC_CAI_CLIMATE_IMPROVEMENTS_ADDED_NODE" Language="en_US">
+      <Text>{1_Num} {1_Num: plural 1?improvement; other?improvements;} added</Text>
+    </Row>
+    <Row Tag="LOC_CAI_CLIMATE_IMPROVEMENT_ADDED" Language="en_US">
+      <Text>{1_Improvement}: added</Text>
+    </Row>
     <Row Tag="LOC_CAI_CLIMATE_UNITS_LOST" Language="en_US">
       <Text>{1_Num} {1_Num: plural 1?unit; other?units;} killed</Text>
     </Row>
@@ -8037,6 +8059,15 @@
     </Row>
     <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS_TOOLTIP" Language="en_US">
       <Text>Automatically show technology and civic completion and boost popups in network multiplayer. Popups do not pause the turn timer.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK" Language="en_US">
+      <Text>Toggle brush lock</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK_ON" Language="en_US">
+      <Text>Brush lock on</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK_OFF" Language="en_US">
+      <Text>Brush lock off</Text>
     </Row>
   </LocalizedText>
 </GameData>

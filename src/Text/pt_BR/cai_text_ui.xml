@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_ZOOM_IN" Language="pt_BR"><Text>Aproximar</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_OUT" Language="pt_BR"><Text>Afastar</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_IN_TOOLTIP" Language="pt_BR"><Text>Aproximar e anunciar a porcentagem de zoom.</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_OUT_TOOLTIP" Language="pt_BR"><Text>Afastar e anunciar a porcentagem de zoom.</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_LEVEL" Language="pt_BR"><Text>Zoom {1_Percent} por cento</Text></Row>
+    <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_BONUSES" Language="pt_BR"><Text>Bônus de {1_District}: {2_Yields}</Text></Row>
+    <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_YIELD_CHANGE" Language="pt_BR"><Text>{1_Amount : number +#.#;-#.#} {2_Yield}</Text></Row>
     <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP" Language="pt_BR"><Text>Focar as abas na primeira entrada</Text></Row>
     <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP_TOOLTIP" Language="pt_BR"><Text>Ao entrar em um controle de abas pela primeira vez, foca a aba ativa em vez do conteúdo da página.</Text></Row>
     <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION" Language="pt_BR"><Text>Ler quantidade de cidades com avisos</Text></Row>
@@ -1727,6 +1734,15 @@
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_ACTIONS" Language="pt_BR">
       <Text>Ações</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_HAPPY" Language="pt_BR">
+      <Text>Feliz</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_NEUTRAL" Language="pt_BR">
+      <Text>Neutro</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_UNHAPPY" Language="pt_BR">
+      <Text>Descontente</Text>
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_NO_ACTIONS" Language="pt_BR">
       <Text>Nenhuma ação de diplomacia disponível</Text>
@@ -5483,6 +5499,12 @@
     <Replace Tag="LOC_CAI_CLIMATE_DAMAGED_TILES" Language="pt_BR">
       <Text>{1_Num : plural 1?{1_Num} hexágono danificado; other?{1_Num} hexágonos danificados;}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_IMPROVEMENTS_ADDED_NODE" Language="pt_BR">
+      <Text>{1_Num : plural 1?{1_Num} melhoria adicionada; other?{1_Num} melhorias adicionadas;}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_IMPROVEMENT_ADDED" Language="pt_BR">
+      <Text>{1_Improvement}: adicionada</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_UNITS_LOST" Language="pt_BR">
       <Text>{1_Num : plural 1?{1_Num} unidade morta; other?{1_Num} unidades mortas;}</Text>
     </Replace>
@@ -8017,6 +8039,15 @@
     </Row>
     <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS_TOOLTIP" Language="pt_BR">
       <Text>Mostra automaticamente as janelas de conclusão e de impulsos de tecnologias e cívicos em partidas multijogador em rede. As janelas não pausam o cronômetro do turno.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK" Language="pt_BR">
+      <Text>Alternar bloqueio do pincel</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK_ON" Language="pt_BR">
+      <Text>Bloqueio do pincel ativado</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK_OFF" Language="pt_BR">
+      <Text>Bloqueio do pincel desativado</Text>
     </Row>
   </LocalizedText>
 </GameData>

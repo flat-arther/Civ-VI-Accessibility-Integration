@@ -973,6 +973,9 @@ OnLoadYes = WrapFunc(OnLoadYes, function(orig)
 	if m_thisLoadFile and m_thisLoadFile.Path then
 		CAI_InjectWBLoad(m_thisLoadFile.Path)
 	end
+	if mgr then
+		mgr:ShutDown()
+	end
 	orig()
 end)
 

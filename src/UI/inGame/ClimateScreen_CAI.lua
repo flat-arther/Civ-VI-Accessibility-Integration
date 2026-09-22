@@ -162,6 +162,11 @@ local function ClimateObjectName(kind, def)
     return (info and info.Name) and Locale.Lookup(info.Name) or ""
 end
 
+local function MeteorImprovementName()
+    local info = GameInfo.Improvements["IMPROVEMENT_METEOR_GOODY"]
+    return (info and info.Name) and Locale.Lookup(info.Name) or ""
+end
+
 local function ClimateUnitName(unitType)
     local info = GameInfo.Units[unitType]
     return (info and info.Name) and Locale.Lookup(info.Name) or ""
@@ -204,9 +209,23 @@ local function ClimateFertString(f)
     return ""
 end
 
----Add the Damaged tiles / Fertility / Population child nodes to an event node.
+---Add the Added improvements / Damaged tiles / Fertility / Population child nodes to an event node.
 local function BuildEventDetailChildren(node, record, localPlayerID)
     local keyBase = "climate:det:" .. record.sp .. ":" .. record.ev
+
+    if #record.addedImprovements > 0 then
+        local addedNode = MakeNode(keyBase .. ":added", function()
+            return Locale.Lookup("LOC_CAI_CLIMATE_IMPROVEMENTS_ADDED_NODE", #record.addedImprovements)
+        end)
+        for i, a in ipairs(record.addedImprovements) do
+            local object = ClimateObjectName(1, a.def)
+            local text = Locale.Lookup("LOC_CAI_CLIMATE_IMPROVEMENT_ADDED", object)
+            local aPlot = a.plot
+            addedNode:AddChild(MakeActionLeaf(keyBase .. ":added:" .. i, "TreeItem",
+                function() return AppendRelativePlotLocation(text, aPlot) end, nil, aPlot))
+        end
+        node:AddChild(addedNode)
+    end
 
     if #record.damagedTiles > 0 then
         local dmgNode = MakeNode(keyBase .. ":dmg", function()
@@ -406,10 +425,14 @@ local function BuildOverviewTree()
 
                 if bIsEventVisible then
                     local isCometStrike = kCurrentEventDef.RandomEventType == "RANDOM_EVENT_COMET_STRIKE"
+                    local isMeteorShower = kCurrentEventDef.EffectOperatorType == "METEOR_SHOWER"
                     if kCurrentEvent.FertilityAdded and kCurrentEvent.FertilityAdded > 0 then
                         if isCometStrike then
                             table.insert(parts,
                                 Locale.Lookup("LOC_CAI_CLIMATE_DAMAGED_TILES", kCurrentEvent.FertilityAdded))
+                        elseif isMeteorShower then
+                            table.insert(parts, Locale.Lookup("LOC_CAI_CLIMATE_IMPROVEMENT_ADDED",
+                                MeteorImprovementName()))
                         else
                             table.insert(parts,
                                 Locale.Lookup("LOC_CAI_CLIMATE_FERTILE_TILES", kCurrentEvent.FertilityAdded))
@@ -997,10 +1020,14 @@ local function BuildEventHistoryList()
                             table.insert(parts, Locale.Lookup(capturedDef.EffectString))
                         end
                         local isCometStrike = capturedDef.RandomEventType == "RANDOM_EVENT_COMET_STRIKE"
+                        local isMeteorShower = capturedDef.EffectOperatorType == "METEOR_SHOWER"
                         if capturedEvent.FertilityAdded and capturedEvent.FertilityAdded > 0 then
                             if isCometStrike then
                                 table.insert(parts,
                                     Locale.Lookup("LOC_CAI_CLIMATE_DAMAGED_TILES", capturedEvent.FertilityAdded))
+                            elseif isMeteorShower then
+                                table.insert(parts, Locale.Lookup("LOC_CAI_CLIMATE_IMPROVEMENT_ADDED",
+                                    MeteorImprovementName()))
                             else
                                 table.insert(parts,
                                     Locale.Lookup("LOC_CAI_CLIMATE_FERTILE_TILES", capturedEvent.FertilityAdded))
@@ -1027,7 +1054,8 @@ local function BuildEventHistoryList()
                     local record = (not capturedCC) and historyMgr
                         and historyMgr:GetRecord(capturedEvent.StartLocation, capturedEvent.RandomEvent)
                         or nil
-                    local hasDetail = record ~= nil and (#record.damagedTiles > 0
+                    local hasDetail = record ~= nil and (#record.addedImprovements > 0
+                        or #record.damagedTiles > 0
                         or #record.fertilityTiles > 0 or #record.popLost > 0
                         or #record.unitsLost > 0)
 
@@ -1035,6 +1063,11 @@ local function BuildEventHistoryList()
                     if hasDetail then
                         eventWidget = MakeNode("climate:event:" .. capturedTurn,
                             GetHistoryEventLabel, GetHistoryEventDetails)
+                        if historyPlotIndex then
+                            eventWidget:On("activate", function()
+                                MoveCursorToEvent(historyPlotIndex)
+                            end)
+                        end
                         BuildEventDetailChildren(eventWidget, record, localPlayerID)
                     elseif historyPlotIndex then
                         eventWidget = MakeActionLeaf("climate:event:" .. capturedTurn,

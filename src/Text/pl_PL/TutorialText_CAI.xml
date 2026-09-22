@@ -361,16 +361,16 @@
       <Text>Za kontrolkami wysłanników znajdują się Wyświetl miasto-państwo, Wypowiedz wojnę lub Zawrzyj pokój, Zaciągnij wojsko (gdy dostępne) oraz przycisk przełączania widoku. Widok drzewa zaczyna się od menu rozwijanego Sortuj miasta-państwa według, a następnie po jednym rozwijalnym wierszu na miasto-państwo ze statusem relacji oraz sekcjami bonusów, wpływów, zadań i relacji. Menu rozwijane oferuje kolejność naturalną oraz dwa jawnie opisane wybory dla każdej bieżącej kolumny tabeli, takie jak od A do Z, od będących w stanie wojny czy od największej liczby. Nagłówki tabeli używają tych samych opisów, a oba widoki współdzielą wybrane sortowanie. Alt plus 1 wybiera widok tabeli, a Alt plus 2 wybiera widok drzewa; wybrany widok jest zapamiętywany. Enter aktywuje aktywny przycisk. Escape zamyka ekran.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER" Language="pl_PL">
-      <Text>Pierwsze drzewo zawiera bieżącą ideę i zakolejkowane idee. Drugie drzewo zawiera dostępne idee. Każda idea rozwija się na swoje odblokowania. Ostatni przycisk otwiera pełne drzewo idei.</Text>
+      <Text>Pierwsze drzewo zawiera dostępne idee. Drugie zawiera bieżącą ideę i zakolejkowane idee, gdy kolejka nie jest pusta. Każda idea rozwija się na swoje odblokowania. Trzecia kontrolka otwiera pełne drzewo idei.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_ACTIONS" Language="pl_PL">
       <Text>Enter na dostępnej idei czyni ją bieżącą ideą. Wiersze bieżące i zakolejkowane są tylko do odczytu i można je sprawdzić; to okno wyboru celowo nie dodaje skrótu do kolejki.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_BINDINGS" Language="pl_PL">
-      <Text>Shift plus Enter na odsłoniętej idei otwiera jej artykuł w Civilopedii. Użyj Tab, aby przejść z drzewa kolejki do dostępnych idei, a następnie do Otwórz drzewo idei.</Text>
+      <Text>Shift plus Enter na odsłoniętej idei otwiera jej artykuł w Civilopedii. Użyj Tab, aby przejść od dostępnych idei do drzewa kolejki, a następnie do Otwórz drzewo idei.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_LAYOUT" Language="pl_PL">
-      <Text>Kontrolki pojawiają się w tej kolejności: lista bieżących i zakolejkowanych idei (gdy niepusta), lista filtrów, aktywny widok idei Siatka, Graf lub Drzewo, lista Odblokowania w widokach Siatki i Grafu, tylko do odczytu podsumowanie ustroju i wstawionych doktryn oraz menu rozwijane Widok.</Text>
+      <Text>Kontrolki pojawiają się w tej kolejności: aktywny widok idei Siatka, Graf lub Drzewo, lista Odblokowania w widokach Siatki i Grafu, lista filtrów, lista bieżących i zakolejkowanych idei (gdy niepusta), drzewo ustroju i wstawionych doktryn oraz menu rozwijane Widok.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_VIEWS" Language="pl_PL">
       <Text>Menu rozwijane Widok zawiera Siatkę, Graf i Drzewo w tej kolejności. Siatka układa ery jako kolumny, poziomy wymogów od lewej do prawej, a idee pionowo w obrębie każdego poziomu. Graf podąża bezpośrednio za połączeniami wymogów. Drzewo prezentuje hierarchię ery, poziomu i idei. Alt plus 1 wybiera Siatkę, Alt plus 2 wybiera Graf, a Alt plus 3 wybiera Drzewo. Przełączanie widoków zachowuje w miarę możliwości fokus na tej samej idei, a wybrany widok jest zapamiętywany przy następnym otwarciu drzewa idei.</Text>
@@ -385,7 +385,7 @@
       <Text>Enter na filtrze otwiera tymczasową listę wyników. W wynikach Enter zamyka listę i przeskakuje do idei, Ctrl plus Enter dodaje ją do kolejki, Shift plus Enter otwiera Civilopedię, a Escape zamyka wyniki i czyści filtr. Ctrl plus F wyszukuje idee według indeksu wyszukiwania idei w grze z dowolnego głównego widoku.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_GOVERNMENT" Language="pl_PL">
-      <Text>W widoku Siatki lub Grafu ustawienie fokusu na idei odbudowuje siostrzaną listę Odblokowania dla tej idei. Następujące po niej pole edycji tylko do odczytu podsumowuje bieżący ustrój, liczby gniazd i każdą wstawioną doktrynę.</Text>
+      <Text>W widoku Siatki lub Grafu ustawienie fokusu na idei odbudowuje jej siostrzaną listę Odblokowania. Etykieta drzewa ustroju podsumowuje bieżący ustrój i liczby gniazd. Rozwiń wiersze Wojskowe, Gospodarcze, Dyplomatyczne i Wieloznaczne, aby sprawdzić każde gniazdo i wstawioną doktrynę.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA" Language="pl_PL">
       <Text>Civilopedia ma trzy siostrzane kontrolki: drzewo Sekcje, drzewo Artykuł i listę Historia. Tab przechodzi między nimi.</Text>
@@ -409,7 +409,7 @@
       <Text>Poziomy CO2 to drzewo pogrupowane najpierw według cywilizacji, a następnie według zasobu. Zawiera twój wkład zasobów oraz znanych globalnych współtwórców z aktualnymi sumami.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CLIMATE_HISTORY" Language="pl_PL">
-      <Text>Historia wydarzeń to lista chronologiczna. Zlokalizowane, odsłonięte wydarzenia zawierają swój kierunek od kursora nawigacji. Enter przesuwa kursor do lokalizacji początkowej wydarzenia bez zamykania ekranu. Escape zamyka ekran Klimatu.</Text>
+      <Text>Historia wydarzeń to drzewo chronologiczne. Użyj klawisza W prawo, aby rozwinąć wiersz katastrofy i wejść do szczegółów pokazujących dokładnie, co zostało dodane, uszkodzone, usunięte, zmienione lub utracone. Naciśnij Enter na wierszu katastrofy, aby przenieść kursor nawigacji na pole początkowe wydarzenia, nawet jeśli wiersz zawiera rozwijalne szczegóły. Naciśnij Enter na elemencie dotkniętym katastrofą, aby przenieść kursor na jego pole. Te skoki nie zamykają ekranu. Zlokalizowane, odsłonięte wydarzenia podają kierunek od kursora. W lewo zwija wiersz, a Escape zamyka ekran Klimatu.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_OVERVIEW" Language="pl_PL">
       <Text>Zwykły przegląd zawiera drzewo Przywódcy, po którym następuje lista Działania. Ustawienie fokusu na innym przywódcy wybiera tego przywódcę w grze i odświeża następujące po nim działania.</Text>
@@ -655,16 +655,16 @@
       <Text>Plotki zawierają prostą, chronologiczną listę każdego pasującego widocznego wpisu plotki, po której następują menu rozwijane filtrów Gracz i Typ. Zmień jedno z menu rozwijanych, aby odbudować listę. Escape zamyka Raporty.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH" Language="pl_PL">
-      <Text>Pierwsze drzewo zawiera bieżące i zakolejkowane technologie. Drugie drzewo zawiera dostępne technologie. Każda technologia rozwija się na swoje odblokowania. Ostatni przycisk otwiera pełne drzewo technologii.</Text>
+      <Text>Pierwsze drzewo zawiera dostępne technologie. Drugie zawiera bieżące i zakolejkowane technologie, gdy kolejka nie jest pusta. Każda technologia rozwija się na swoje odblokowania. Trzecia kontrolka otwiera pełne drzewo technologii.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH_ACTIONS" Language="pl_PL">
       <Text>Enter na dostępnej technologii czyni ją bieżącą. Wiersze bieżące i zakolejkowane są tylko do odczytu i można je sprawdzić; to okno wyboru celowo nie dodaje skrótu do kolejki.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH_BINDINGS" Language="pl_PL">
-      <Text>Shift plus Enter na odsłoniętej technologii otwiera jej artykuł w Civilopedii. Użyj Tab, aby przejść z drzewa kolejki do dostępnych technologii, a następnie do Otwórz drzewo technologii.</Text>
+      <Text>Shift plus Enter na odsłoniętej technologii otwiera jej artykuł w Civilopedii. Użyj Tab, aby przejść od dostępnych technologii do drzewa kolejki, a następnie do Otwórz drzewo technologii.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_LAYOUT" Language="pl_PL">
-      <Text>Kontrolki pojawiają się w tej kolejności: lista bieżących i zakolejkowanych technologii (gdy niepusta), lista filtrów, aktywny widok technologii Siatka, Graf lub Drzewo, lista Odblokowania w widokach Siatki i Grafu oraz menu rozwijane Widok.</Text>
+      <Text>Kontrolki pojawiają się w tej kolejności: aktywny widok technologii Siatka, Graf lub Drzewo, lista Odblokowania w widokach Siatki i Grafu, lista filtrów, lista bieżących i zakolejkowanych technologii (gdy niepusta) oraz menu rozwijane Widok.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_VIEWS" Language="pl_PL">
       <Text>Menu rozwijane Widok zawiera Siatkę, Graf i Drzewo w tej kolejności. Siatka układa ery jako kolumny, poziomy wymogów od lewej do prawej, a technologie pionowo w obrębie każdego poziomu. Graf podąża bezpośrednio za połączeniami wymogów. Drzewo prezentuje hierarchię ery, poziomu i technologii. Alt plus 1 wybiera Siatkę, Alt plus 2 wybiera Graf, a Alt plus 3 wybiera Drzewo. Przełączanie widoków zachowuje w miarę możliwości fokus na tej samej technologii, a wybrany widok jest zapamiętywany przy następnym otwarciu drzewa technologii.</Text>
@@ -679,7 +679,7 @@
       <Text>Enter na filtrze otwiera tymczasową listę wyników. W wynikach Enter zamyka listę i przeskakuje do technologii, Ctrl plus Enter dodaje ją do kolejki, Shift plus Enter otwiera Civilopedię, a Escape zamyka wyniki i czyści filtr. Ctrl plus F wyszukuje w indeksie Technologii gry z dowolnego głównego widoku.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_UNLOCKS" Language="pl_PL">
-      <Text>W widoku Siatki lub Grafu ustawienie fokusu na technologii odbudowuje siostrzaną listę Odblokowania dla tej technologii. Tab dociera do tej listy po aktywnym widoku, gdy zawiera ona wpisy, a następnie dociera do menu rozwijanego Widok.</Text>
+      <Text>W widoku Siatki lub Grafu ustawienie fokusu na technologii odbudowuje jej siostrzaną listę Odblokowania. Tab dociera do niej bezpośrednio po aktywnym widoku, a następnie do filtrów, niepustej kolejki i menu rozwijanego Widok.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW" Language="pl_PL">
       <Text>Przegląd handlu ma karty Moje szlaki, Szlaki do moich miast oraz Dostępne szlaki. Każda strona to drzewo pogrupowane według cywilizacji, miasta-państwa lub innej aktualnej kategorii szlaku.</Text>
@@ -936,5 +936,8 @@
     <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_COMMIT" Language="pl_PL">
       <Text>Wybór wartości zapisuje ją bezpośrednio na polu, więc uruchamiają się wszystkie reguły gry, takie jak usunięcie niepoprawnej cechy przy zmianie terenu lub poprawki wybrzeża. Cofnij za pomocą Ctrl plus Z, jeśli zmiana wywoła kaskadę, której nie chciałeś.</Text>
     </Replace>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_BRUSH_LOCK" Language="pl_PL">
+      <Text>Naciśnij L, aby przełączyć blokadę pędzla. Gdy jest włączona, każdy ruch kursora natychmiast stosuje wybrane narzędzie na nowych współrzędnych z bieżącymi ustawieniami i rozmiarem pędzla, nawet jeśli klawiszem M zablokowano inne pole. Naciśnij L ponownie, aby zatrzymać automatyczne umieszczanie.</Text>
+    </Row>
   </LocalizedText>
 </GameData>

@@ -1345,13 +1345,10 @@ local function EnsurePanelBuilt()
         HiddenPredicate = function(w) return not w.Children or #w.Children == 0 end,
         SearchDepth     = 0,
     })
-    m_panel:AddChild(m_queueList)
-
     m_filterList = mgr:CreateWidget(FILTER_LIST_ID, "List", {
         Label       = function() return Locale.Lookup("LOC_CAI_TECH_TREE_FILTER") end,
         SearchDepth = 0,
     })
-    m_panel:AddChild(m_filterList)
     BuildFilterList()
 
     -- Main tree (hidden in grid mode)
@@ -1393,7 +1390,7 @@ local function EnsurePanelBuilt()
     m_graphView:SetSearchQueryHandler(TechSearchHandler)
     m_panel:AddChild(m_graphView)
 
-    -- Unlocks list beside the grid or graph; mirrors the focused tech and
+    -- Unlocks list follows the active view; it mirrors the focused tech in grid or graph
     -- appears only when the focused tech has described unlocks.
     m_unlocksList = mgr:CreateWidget(UNLOCKS_LIST_ID, "List", {
         Label           = function() return Locale.Lookup("LOC_CAI_TECH_TREE_UNLOCKS") end,
@@ -1404,6 +1401,9 @@ local function EnsurePanelBuilt()
         SearchDepth     = 0,
     })
     m_panel:AddChild(m_unlocksList)
+
+    m_panel:AddChild(m_filterList)
+    m_panel:AddChild(m_queueList)
 
     -- View selector remains the last child and uses the Alt+1-3 order.
     m_viewDropdown = mgr:CreateWidget(CHANGE_VIEW_ID, "Dropdown", {
@@ -1428,11 +1428,7 @@ local function PushPanel()
     EnsurePanelBuilt()
     if not m_panel or mgr:GetWidgetById(PANEL_ID) then return end
 
-    local playerTechs = GetLocalPlayerTechs()
-    local hasCurrent = playerTechs and playerTechs:GetResearchingTech() ~= -1
-    local activeView = GetActiveTechView()
-    local focusChild = hasCurrent and m_queueList or activeView
-    mgr:Push(m_panel, { focus = focusChild })
+    mgr:Push(m_panel)
 end
 
 local function OnPanelClosedCAI()

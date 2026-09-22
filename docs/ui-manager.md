@@ -126,6 +126,9 @@ mgr:RemoveFromStack("ModalRoot", false) -- parent refresh immediately chooses fi
   moves focus to the final destination; this prevents speaking an obsolete
   intermediate focus before the parent refresh completes.
 - The active root is always the top of the stack. Focus follows automatically.
+- Push, pop, removal, and other stack-driven root changes do not silence speech
+  already in progress. Their focus announcements use the normal non-interrupting
+  speech queue.
 
 ### Settings and replacement child views
 

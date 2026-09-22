@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_ZOOM_IN" Language="zh_Hans_CN"><Text>放大</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_OUT" Language="zh_Hans_CN"><Text>缩小</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_IN_TOOLTIP" Language="zh_Hans_CN"><Text>放大并读出缩放百分比。</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_OUT_TOOLTIP" Language="zh_Hans_CN"><Text>缩小并读出缩放百分比。</Text></Row>
+    <Row Tag="LOC_CAI_ZOOM_LEVEL" Language="zh_Hans_CN"><Text>缩放百分之{1_Percent}</Text></Row>
+    <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_BONUSES" Language="zh_Hans_CN"><Text>{1_District}加成：{2_Yields}</Text></Row>
+    <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_YIELD_CHANGE" Language="zh_Hans_CN"><Text>{1_Amount : number +#.#;-#.#} {2_Yield}</Text></Row>
     <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP" Language="zh_Hans_CN"><Text>首次进入时聚焦标签栏</Text></Row>
     <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP_TOOLTIP" Language="zh_Hans_CN"><Text>首次进入标签控件时，将焦点置于当前标签而非页面内容。</Text></Row>
     <Row Tag="LOC_CAI_CITY_WARNINGS_ACTION" Language="zh_Hans_CN"><Text>朗读存在警告的城市数量</Text></Row>
@@ -1743,6 +1750,15 @@
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_ACTIONS" Language="zh_Hans_CN">
       <Text>行动</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_HAPPY" Language="zh_Hans_CN">
+      <Text>愉快</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_NEUTRAL" Language="zh_Hans_CN">
+      <Text>中立</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_DIPLOMACY_MOOD_UNHAPPY" Language="zh_Hans_CN">
+      <Text>不悦</Text>
     </Replace>
     <Replace Tag="LOC_CAI_DIPLOMACY_NO_ACTIONS" Language="zh_Hans_CN">
       <Text>没有可用的外交行动</Text>
@@ -5490,6 +5506,12 @@
     <Replace Tag="LOC_CAI_CLIMATE_DAMAGED_TILES" Language="zh_Hans_CN">
       <Text>{1_Num}{1_Num: plural 1?个单元格; other?个单元格;}受损</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_IMPROVEMENTS_ADDED_NODE" Language="zh_Hans_CN">
+      <Text>新增 {1_Num} 个改良设施</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_CLIMATE_IMPROVEMENT_ADDED" Language="zh_Hans_CN">
+      <Text>{1_Improvement}：已添加</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_CLIMATE_UNITS_LOST" Language="zh_Hans_CN">
       <Text>{1_Num}{1_Num: plural 1?个单位; other?个单位;}阵亡</Text>
     </Replace>
@@ -8022,6 +8044,15 @@
     </Row>
     <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS_TOOLTIP" Language="zh_Hans_CN">
       <Text>在联网多人游戏中自动显示科技和市政完成以及尤里卡和鼓舞触发的弹窗。弹窗不会暂停回合计时器。</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK" Language="zh_Hans_CN">
+      <Text>切换笔刷锁定</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK_ON" Language="zh_Hans_CN">
+      <Text>笔刷锁定已开启</Text>
+    </Row>
+    <Row Tag="LOC_CAI_WB_BRUSH_LOCK_OFF" Language="zh_Hans_CN">
+      <Text>笔刷锁定已关闭</Text>
     </Row>
   </LocalizedText>
 </GameData>

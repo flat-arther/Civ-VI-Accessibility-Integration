@@ -2,6 +2,7 @@ include("caiUtils")
 include("AdjacencyBonusSupport")
 include("hexCoordUtils_CAI")
 include("MovementCost_CAI")
+include("districtNeighborBonuses_CAI")
 -- ===========================================================================
 -- Unit movement helpers (extracted from vanilla WorldInput so other contexts
 -- can reuse path-info / movement-speech without depending on WorldInput state).
@@ -1109,6 +1110,9 @@ local function BuildDistrictPlacementInterfaceInfo(plot)
             table.insert(lines, bonusTooltip)
         else
             table.insert(lines, Locale.Lookup("LOC_CAI_PLOT_NO_PLACEMENT_BONUS"))
+        end
+        for _, line in ipairs(CAIDistrictNeighborBonuses.GetLines(city, plot, district)) do
+            table.insert(lines, line)
         end
         if requiredText ~= nil and requiredText ~= "" then
             table.insert(lines, requiredText)

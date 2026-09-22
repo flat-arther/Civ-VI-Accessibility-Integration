@@ -47,6 +47,8 @@ include("MovementActions_CAI")
 local INPUT_ACTION_STARTED = "Started"
 local INPUT_ACTION_TRIGGERED = "Triggered"
 local CITY_MANAGEMENT_WIDGET_ID = "CAIWorldInputCityManagement"
+local CURSOR_LONG_JUMP_HEXES = 5
+local CAMERA_WHOOSH_SOUND = "Camera_Whoosh"
 
 local m_caiGameViewWidget = nil
 local m_caiCurrentInterfaceWidget = nil
@@ -56,6 +58,7 @@ local m_caiWorldBuilderWidget = nil
 -- act on this plot instead of the live cursor, so the cursor can roam to inspect
 -- other tiles (e.g. read placement validity) without moving where edits land.
 local m_wbMarkedPlotId = nil
+local m_wbBrushLocked = false
 
 
 local ACTION_MESSAGE_BUFFER_MOVETO = SafeActionId("MessageBufferMoveTo")
@@ -579,10 +582,43 @@ local function OnPlotSecondaryAction()
 	return false
 end
 
+local function SetCAIMapZoom(zoom)
+	UI.SetMapZoom(zoom, 0.0, 0.0)
+	local plotId = UI.GetCursorPlotID()
+	local plot = plotId and Map.GetPlotByIndex(plotId)
+	if plot == nil then
+		LogWarn("CAI cannot recenter after zoom: cursor plot is unavailable")
+		return
+	end
+	-- Snap to the current cursor tile to refresh positioned audio; zero preserves zoom.
+	UI.LookAtPlot(plot:GetX(), plot:GetY(), 0, 0, true)
+end
+
+local function ChangeCAIMapZoom(delta)
+	-- Native zoom increases away from the map; report closeness as a percentage.
+	local zoom = math.max(0, math.min(1, UI.GetMapZoom() + delta))
+	SetCAIMapZoom(zoom)
+	UI.PlaySound("Play_UI_Click")
+	-- The camera readback still reports the previous level immediately after setting it.
+	Speak(Locale.Lookup("LOC_CAI_ZOOM_LEVEL", math.floor((1 - zoom) * 100 + 0.5)), true)
+end
+
 ---Input actions that are common to all interface widgets should go here.
 ---Action functions are passed the game view widget, then any event arguments.
 ---@type table<number, { Type: string, Action: fun(w:UIWidget, ...):boolean|nil }>
 local SharedInputActions = {
+	[SafeActionId("CAIZoomIn")] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			ChangeCAIMapZoom(-0.05)
+		end,
+	},
+	[SafeActionId("CAIZoomOut")] = {
+		Type = INPUT_ACTION_STARTED,
+		Action = function()
+			ChangeCAIMapZoom(0.05)
+		end,
+	},
 	[ACTION_MESSAGE_BUFFER_MOVETO] = {
 		Type = INPUT_ACTION_STARTED,
 		Action = function()
@@ -1562,11 +1598,11 @@ local function OnWorldBuilderPlacementStatus(status)
 	end
 end
 
-local function WBEditCursorPlot(bAdd)
-	local plotId = WBPlacementSourcePlot()
+local function WBEditCursorPlot(bAdd, plotId)
+	plotId = plotId or WBPlacementSourcePlot()
 	if plotId == nil or plotId < 0 or not Map.IsPlot(plotId) then return false end
 
-	-- New keypress = new placement: reset the status-line speech de-dupe so a
+	-- New edit = new placement: reset the status-line speech de-dupe so a
 	-- repeated identical result (e.g. the same failure) speaks again. Within this
 	-- one keypress a brush's repeated identical statuses still collapse.
 	LuaEvents.CAIWorldBuilderStatusBurstBegin()
@@ -1814,6 +1850,16 @@ local function CreateWorldBuilderWidget()
 	end
 
 	m_caiWorldBuilderWidget:AddInputBindings({
+		{
+			Key = Keys.L,
+			MSG = KeyEvents.KeyUp,
+			Description = "LOC_CAI_WB_BRUSH_LOCK",
+			Action = function()
+				m_wbBrushLocked = not m_wbBrushLocked
+				Speak(Locale.Lookup(m_wbBrushLocked and "LOC_CAI_WB_BRUSH_LOCK_ON" or "LOC_CAI_WB_BRUSH_LOCK_OFF"))
+				return true
+			end,
+		},
 		{
 			Key = Keys.VK_TAB,
 			MSG = KeyEvents.KeyDown,
@@ -2101,10 +2147,16 @@ local function OnCAICursorMoved(state)
 		return
 	end
 
-	if state.reason == "step" then
-		UI.LookAtPlot(plot:GetX(), plot:GetY(), 0, 0, true)
-	else
-		UI.LookAtPlot(plot)
+	if m_wbBrushLocked and WorldBuilder.IsActive() and ExposedMembers.CAI_Active ~= false
+		and state.fromPlotId ~= plotId then
+		-- Brush lock follows the cursor even when M has marked a source tile.
+		WBEditCursorPlot(true, plotId)
+	end
+
+	-- Keep every cursor move instantaneous so jumps behave like directional steps.
+	UI.LookAtPlot(plot:GetX(), plot:GetY(), 0, 0, true)
+	if state.distance > CURSOR_LONG_JUMP_HEXES then
+		UI.PlaySound(CAMERA_WHOOSH_SOUND)
 	end
 end
 
@@ -2274,6 +2326,9 @@ OnLoadScreenClose = WrapFunc(OnLoadScreenClose, function(orig)
 		ExposedMembers.CAI_WBVisManager.Seed(injectedPath)
 	end
 	InitializeCAIGameView()
+	if ExposedMembers.CAI_Active ~= false then
+		SetCAIMapZoom(0.0)
+	end
 end)
 
 -- ===========================================================================

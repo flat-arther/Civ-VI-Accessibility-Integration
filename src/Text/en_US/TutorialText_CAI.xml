@@ -361,16 +361,16 @@
       <Text>After the envoy controls are View City-State, Declare War or Make Peace, Levy Military when available, and the view-switch button. Tree view begins with an Order city-states by dropdown, then one expandable row per city-state with relationship status plus bonus, influence, quest, and relationships sections. The dropdown offers natural order plus two explicitly described choices for every current table column, such as A to Z, at war first, or most first. Table headers use the same descriptions, and both views share the selected sort. Alt plus 1 selects table view and Alt plus 2 selects tree view; the selected view is remembered. Enter activates the focused button. Escape closes the screen.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER" Language="en_US">
-      <Text>The first tree contains the current civic and queued civics. The second tree contains available civics. Each civic expands into its unlocks. The final button opens the full Civics Tree.</Text>
+      <Text>The first tree contains available civics. The second tree contains the current civic and queued civics when the queue is nonempty. Each civic expands into its unlocks. The third control opens the full Civics Tree.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_ACTIONS" Language="en_US">
       <Text>Enter on an available civic makes it the current civic. Current and queued rows are read-only and inspectable; this chooser deliberately does not add a queue shortcut.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_BINDINGS" Language="en_US">
-      <Text>Shift plus Enter on a revealed civic opens its Civilopedia article. Use Tab to move from the queue tree to available civics and then to Open Civics Tree.</Text>
+      <Text>Shift plus Enter on a revealed civic opens its Civilopedia article. Use Tab to move from available civics to the queue tree and then to Open Civics Tree.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_LAYOUT" Language="en_US">
-      <Text>Controls appear in this order: the current and queued civics list when nonempty, a filter list, the active Grid, Graph, or Tree civic view, an Unlocks list in Grid and Graph views, a read-only government and slotted-policy summary, and the View dropdown.</Text>
+      <Text>Controls appear in this order: the active Grid, Graph, or Tree civic view, an Unlocks list in Grid and Graph views, a filter list, the current and queued civics list when nonempty, a government and slotted-policies tree, and the View dropdown.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_VIEWS" Language="en_US">
       <Text>The View dropdown contains Grid, Graph, and Tree in that order. Grid arranges eras as columns, prerequisite tiers from left to right, and civics vertically within each tier. Graph follows prerequisite connections directly. Tree presents an era, tier, civic hierarchy. Alt plus 1 selects Grid, Alt plus 2 selects Graph, and Alt plus 3 selects Tree. Switching views keeps the same civic focused when possible, and the selected view is remembered the next time the Civics Tree opens.</Text>
@@ -385,7 +385,7 @@
       <Text>Enter on a filter opens a temporary results list. In results, Enter closes the list and jumps to the civic, Control plus Enter queues it, Shift plus Enter opens the Civilopedia, and Escape closes results and clears the filter. Control plus F searches civics by the game's Civics search index from any main view.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_GOVERNMENT" Language="en_US">
-      <Text>In Grid or Graph View, focusing a civic rebuilds the sibling Unlocks list for that civic. The following read-only edit field summarizes the current government, slot counts, and every slotted policy.</Text>
+      <Text>In Grid or Graph View, focusing a civic rebuilds the sibling Unlocks list for that civic. The government tree label summarizes the current government and slot counts. Expand its Military, Economic, Diplomatic, and Wildcard rows to inspect every policy slot and slotted policy.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA" Language="en_US">
       <Text>The Civilopedia has three sibling controls: a Sections tree, an Article tree, and a History list. Tab moves between them.</Text>
@@ -409,7 +409,7 @@
       <Text>CO2 Levels is a tree grouped first by civilization and then by resource. It includes your resource contributions and known global contributors with live totals.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_CLIMATE_HISTORY" Language="en_US">
-      <Text>Event History is a chronological list. Located, revealed events include their direction from the navigation cursor. Enter moves the cursor to the event's start location without closing the screen. Escape closes the Climate screen.</Text>
+      <Text>Event History is a chronological tree. Use Right to expand a disaster row and enter details showing exactly what was added, damaged, removed, changed, or lost. Press Enter on a disaster row to move the navigation cursor to the event's start tile, even when the row has expandable details. Press Enter on an affected entry to move the cursor to that entry's tile. These jumps do not close the screen. Located, revealed events include their direction from the cursor. Left collapses a row, and Escape closes the Climate screen.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_OVERVIEW" Language="en_US">
       <Text>The normal overview contains a Leaders tree followed by an Actions list. Focusing another leader selects that leader in the game and refreshes the actions that follow.</Text>
@@ -655,16 +655,16 @@
       <Text>Gossip contains a flat chronological list of every matching visible gossip entry, followed by Player and Type filter dropdowns. Change either dropdown to rebuild the list. Escape closes Reports.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_RESEARCH" Language="en_US">
-      <Text>The first tree contains current and queued technologies. The second tree contains available technologies. Each technology expands into its unlocks. The final button opens the full Technology Tree.</Text>
+      <Text>The first tree contains available technologies. The second tree contains current and queued technologies when the queue is nonempty. Each technology expands into its unlocks. The third control opens the full Technology Tree.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_RESEARCH_ACTIONS" Language="en_US">
       <Text>Enter on an available technology makes it current. Current and queued rows are read-only and inspectable; this chooser deliberately does not add a queue shortcut.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_RESEARCH_BINDINGS" Language="en_US">
-      <Text>Shift plus Enter on a revealed technology opens its Civilopedia article. Use Tab to move from the queue tree to available technologies and then to Open Technology Tree.</Text>
+      <Text>Shift plus Enter on a revealed technology opens its Civilopedia article. Use Tab to move from available technologies to the queue tree and then to Open Technology Tree.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_LAYOUT" Language="en_US">
-      <Text>Controls appear in this order: the current and queued technologies list when nonempty, a filter list, the active Grid, Graph, or Tree technology view, an Unlocks list in Grid and Graph views, and the View dropdown.</Text>
+      <Text>Controls appear in this order: the active Grid, Graph, or Tree technology view, an Unlocks list in Grid and Graph views, a filter list, the current and queued technologies list when nonempty, and the View dropdown.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_VIEWS" Language="en_US">
       <Text>The View dropdown contains Grid, Graph, and Tree in that order. Grid arranges eras as columns, prerequisite tiers from left to right, and technologies vertically within each tier. Graph follows prerequisite connections directly. Tree presents an era, tier, technology hierarchy. Alt plus 1 selects Grid, Alt plus 2 selects Graph, and Alt plus 3 selects Tree. Switching views keeps the same technology focused when possible, and the selected view is remembered the next time the Technology Tree opens.</Text>
@@ -679,7 +679,7 @@
       <Text>Enter on a filter opens a temporary results list. In results, Enter closes the list and jumps to the technology, Control plus Enter queues it, Shift plus Enter opens the Civilopedia, and Escape closes results and clears the filter. Control plus F searches the game's Technologies index from any main view.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_TECH_TREE_UNLOCKS" Language="en_US">
-      <Text>In Grid or Graph View, focusing a technology rebuilds the sibling Unlocks list for that technology. Tab reaches that list after the active view when it contains entries, then reaches the View dropdown.</Text>
+      <Text>In Grid or Graph View, focusing a technology rebuilds the sibling Unlocks list for that technology. Tab reaches it immediately after the active view, followed by the filters, the nonempty queue, and the View dropdown.</Text>
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW" Language="en_US">
       <Text>The Trade Overview has My Routes, Routes to My Cities, and Available Routes tabs. Every page is a tree grouped by civilization, city-state, or other live route category.</Text>
@@ -935,6 +935,9 @@
     </Row>
     <Row Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_COMMIT" Language="en_US">
       <Text>Choosing a value writes it straight to the tile, so every game rule runs, such as a terrain change dropping an invalid feature or coast fixups. Undo with Control plus Z if a change cascades in a way you did not want.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_BRUSH_LOCK" Language="en_US">
+      <Text>Press L to toggle brush lock. While on, each cursor move immediately applies the selected tool at the new coordinates with the current settings and brush size, even if M has locked another tile. Press L again to stop automatic placement.</Text>
     </Row>
   </LocalizedText>
 </GameData>

@@ -363,16 +363,16 @@
       <Text>Após os controles de emissário estão Ver Cidade-Estado, Declarar Guerra ou Fazer as Pazes, Arregimentar Militares quando disponível, e o botão de troca de visualização. A visualização em árvore começa com um menu suspenso Ordenar cidades-estado por, depois uma linha expansível por cidade-estado com o status de relação mais as seções de bônus, influência, missão e relações. O menu suspenso oferece a ordem natural mais duas opções explicitamente descritas para cada coluna atual da tabela, como A a Z, em guerra primeiro, ou maior quantidade primeiro. Os cabeçalhos da tabela usam as mesmas descrições, e ambas as visualizações compartilham a ordenação selecionada. Alt mais 1 seleciona a visualização em tabela e Alt mais 2 seleciona a visualização em árvore; a visualização selecionada é lembrada. Enter ativa o botão em foco. Esc fecha a tela.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER" Language="pt_BR">
-      <Text>A primeira árvore contém o cívico atual e os cívicos na fila. A segunda árvore contém os cívicos disponíveis. Cada cívico se expande em seus desbloqueios. O botão final abre a Árvore Cívica completa.</Text>
+      <Text>A primeira árvore contém os cívicos disponíveis. A segunda contém o cívico atual e os cívicos na fila quando ela não está vazia. Cada cívico se expande em seus desbloqueios. O terceiro controle abre a Árvore Cívica completa.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_ACTIONS" Language="pt_BR">
       <Text>Enter em um cívico disponível o torna o cívico atual. As linhas de cívico atual e na fila são somente leitura e inspecionáveis; este seletor deliberadamente não adiciona um atalho de fila.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_CHOOSER_BINDINGS" Language="pt_BR">
-      <Text>Shift mais Enter em um cívico revelado abre seu artigo da Civilopédia. Use Tab para ir da árvore da fila para os cívicos disponíveis e depois para Abrir Árvore Cívica.</Text>
+      <Text>Shift mais Enter em um cívico revelado abre seu artigo da Civilopédia. Use Tab para ir dos cívicos disponíveis para a árvore da fila e depois para Abrir Árvore Cívica.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_LAYOUT" Language="pt_BR">
-      <Text>Os controles aparecem nesta ordem: a lista de cívicos atuais e na fila quando não vazia, uma lista de filtros, a visualização de cívicos ativa em Grade, Gráfico ou Árvore, uma lista de Desbloqueios nas visualizações em Grade e Gráfico, um resumo somente leitura do governo e das políticas nos espaços, e o menu suspenso Visualização.</Text>
+      <Text>Os controles aparecem nesta ordem: a visualização de cívicos ativa em Grade, Gráfico ou Árvore, uma lista de Desbloqueios nas visualizações em Grade e Gráfico, uma lista de filtros, a lista de cívicos atuais e na fila quando não vazia, uma árvore do governo e das políticas nos espaços, e o menu suspenso Visualização.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_VIEWS" Language="pt_BR">
       <Text>O menu suspenso Visualização contém Grade, Gráfico e Árvore nessa ordem. Grade dispõe as eras como colunas, os níveis de pré-requisito da esquerda para a direita, e os cívicos verticalmente dentro de cada nível. Gráfico segue as conexões de pré-requisito diretamente. Árvore apresenta uma hierarquia de era, nível e cívico. Alt mais 1 seleciona Grade, Alt mais 2 seleciona Gráfico e Alt mais 3 seleciona Árvore. Mudar de visualização mantém o mesmo cívico em foco quando possível, e a visualização selecionada é lembrada na próxima vez que a Árvore Cívica abrir.</Text>
@@ -387,7 +387,7 @@
       <Text>Enter em um filtro abre uma lista de resultados temporária. Nos resultados, Enter fecha a lista e salta para o cívico, Ctrl mais Enter o coloca na fila, Shift mais Enter abre a Civilopédia, e Esc fecha os resultados e limpa o filtro. Ctrl mais F busca os cívicos pelo índice de busca de Cívicos do jogo a partir de qualquer visualização principal.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVICS_TREE_GOVERNMENT" Language="pt_BR">
-      <Text>Na visualização em Grade ou Gráfico, focar um cívico reconstrói a lista Desbloqueios irmã para aquele cívico. O campo de edição somente leitura seguinte resume o governo atual, as contagens de espaços e cada política nos espaços.</Text>
+      <Text>Na visualização em Grade ou Gráfico, focar um cívico reconstrói sua lista Desbloqueios irmã. O rótulo da árvore de governo resume o governo atual e as contagens de espaços. Expanda as linhas Militar, Econômica, Diplomática e Coringa para consultar cada espaço e política atribuída.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CIVILOPEDIA" Language="pt_BR">
       <Text>A Civilopédia tem três controles irmãos: uma árvore de Seções, uma árvore de Artigo e uma lista de Histórico. Tab alterna entre eles.</Text>
@@ -412,7 +412,7 @@
       <Text>Níveis de CO2 é uma árvore agrupada primeiro por civilização e depois por recurso. Ela inclui suas contribuições de recursos e os contribuidores globais conhecidos com totais ativos.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_CLIMATE_HISTORY" Language="pt_BR">
-      <Text>Histórico de Eventos é uma lista cronológica. Os eventos localizados e revelados incluem sua direção a partir do cursor de navegação. Enter move o cursor para o local inicial do evento sem fechar a tela. Esc fecha a tela de Clima.</Text>
+      <Text>Histórico de Eventos é uma árvore cronológica. Use Direita para expandir uma linha de desastre e entrar nos detalhes que mostram exatamente o que foi adicionado, danificado, removido, alterado ou perdido. Pressione Enter em uma linha de desastre para mover o cursor de navegação até o bloco inicial do evento, mesmo quando a linha tiver detalhes expansíveis. Pressione Enter em uma entrada afetada para mover o cursor até o bloco dessa entrada. Esses saltos não fecham a tela. Os eventos localizados e revelados incluem sua direção a partir do cursor. Esquerda recolhe uma linha, e Esc fecha a tela de Clima.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_DIPLOMACY_ACTION_OVERVIEW" Language="pt_BR">
       <Text>A visão geral normal contém uma árvore de Líderes seguida por uma lista de Ações. Focar outro líder seleciona esse líder no jogo e atualiza as ações que seguem.</Text>
@@ -658,16 +658,16 @@
       <Text>Fofocas contém uma lista cronológica simples de cada entrada de fofoca visível correspondente, seguida por menus suspensos de filtro por Jogador e por Tipo. Altere qualquer um dos menus suspensos para reconstruir a lista. Esc fecha os Relatórios.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH" Language="pt_BR">
-      <Text>A primeira árvore contém as tecnologias atuais e na fila. A segunda árvore contém as tecnologias disponíveis. Cada tecnologia se expande em seus desbloqueios. O botão final abre a Árvore de Tecnologias completa.</Text>
+      <Text>A primeira árvore contém as tecnologias disponíveis. A segunda contém as tecnologias atuais e na fila quando ela não está vazia. Cada tecnologia se expande em seus desbloqueios. O terceiro controle abre a Árvore de Tecnologias completa.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH_ACTIONS" Language="pt_BR">
       <Text>Enter em uma tecnologia disponível a torna atual. As linhas de tecnologia atual e na fila são somente leitura e inspecionáveis; este seletor deliberadamente não adiciona um atalho de fila.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_RESEARCH_BINDINGS" Language="pt_BR">
-      <Text>Shift mais Enter em uma tecnologia revelada abre seu artigo da Civilopédia. Use Tab para ir da árvore da fila para as tecnologias disponíveis e depois para Abrir Árvore de Tecnologias.</Text>
+      <Text>Shift mais Enter em uma tecnologia revelada abre seu artigo da Civilopédia. Use Tab para ir das tecnologias disponíveis para a árvore da fila e depois para Abrir Árvore de Tecnologias.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_LAYOUT" Language="pt_BR">
-      <Text>Os controles aparecem nesta ordem: a lista de tecnologias atuais e na fila quando não vazia, uma lista de filtros, a visualização de tecnologia ativa em Grade, Gráfico ou Árvore, uma lista de Desbloqueios nas visualizações em Grade e Gráfico, e o menu suspenso Visualização.</Text>
+      <Text>Os controles aparecem nesta ordem: a visualização de tecnologia ativa em Grade, Gráfico ou Árvore, uma lista de Desbloqueios nas visualizações em Grade e Gráfico, uma lista de filtros, a lista de tecnologias atuais e na fila quando não vazia, e o menu suspenso Visualização.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_VIEWS" Language="pt_BR">
       <Text>O menu suspenso Visualização contém Grade, Gráfico e Árvore nessa ordem. Grade dispõe as eras como colunas, os níveis de pré-requisito da esquerda para a direita, e as tecnologias verticalmente dentro de cada nível. Gráfico segue as conexões de pré-requisito diretamente. Árvore apresenta uma hierarquia de era, nível e tecnologia. Alt mais 1 seleciona Grade, Alt mais 2 seleciona Gráfico e Alt mais 3 seleciona Árvore. Mudar de visualização mantém a mesma tecnologia em foco quando possível, e a visualização selecionada é lembrada na próxima vez que a Árvore de Tecnologias abrir.</Text>
@@ -682,7 +682,7 @@
       <Text>Enter em um filtro abre uma lista de resultados temporária. Nos resultados, Enter fecha a lista e salta para a tecnologia, Ctrl mais Enter a coloca na fila, Shift mais Enter abre a Civilopédia, e Esc fecha os resultados e limpa o filtro. Ctrl mais F busca no índice de Tecnologias do jogo a partir de qualquer visualização principal.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TECH_TREE_UNLOCKS" Language="pt_BR">
-      <Text>Na visualização em Grade ou Gráfico, focar uma tecnologia reconstrói a lista Desbloqueios irmã para aquela tecnologia. Tab chega a essa lista após a visualização ativa quando ela contém entradas, e depois chega ao menu suspenso Visualização.</Text>
+      <Text>Na visualização em Grade ou Gráfico, focar uma tecnologia reconstrói sua lista Desbloqueios irmã. Tab chega a ela imediatamente após a visualização ativa, seguida pelos filtros, pela fila não vazia e pelo menu suspenso Visualização.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_TUTORIAL_TRADE_OVERVIEW" Language="pt_BR">
       <Text>A Visão Geral de Comércio tem as abas Minhas Rotas, Rotas para Minhas Cidades e Rotas Disponíveis. Cada página é uma árvore agrupada por civilização, cidade-estado ou outra categoria de rota ativa.</Text>
@@ -939,5 +939,8 @@
     <Replace Tag="LOC_CAI_TUTORIAL_WB_PLOT_EDITOR_COMMIT" Language="pt_BR">
       <Text>Escolher um valor o grava diretamente no hexágono, de modo que todas as regras do jogo são aplicadas, como uma mudança de terreno que remove uma característica inválida ou correções de costa. Desfaça com Ctrl mais Z se uma mudança gerar uma cascata que você não queria.</Text>
     </Replace>
+    <Row Tag="LOC_CAI_TUTORIAL_WORLD_BUILDER_BRUSH_LOCK" Language="pt_BR">
+      <Text>Pressione L para alternar o bloqueio do pincel. Enquanto estiver ativado, cada movimento do cursor aplica imediatamente a ferramenta selecionada nas novas coordenadas com as configurações e o tamanho do pincel atuais, mesmo que M tenha fixado outra célula. Pressione L novamente para parar a colocação automática.</Text>
+    </Row>
   </LocalizedText>
 </GameData>
