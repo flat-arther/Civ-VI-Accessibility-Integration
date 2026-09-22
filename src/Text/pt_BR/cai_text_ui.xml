@@ -6,6 +6,7 @@
     <Row Tag="LOC_CAI_ZOOM_IN_TOOLTIP" Language="pt_BR"><Text>Aproximar e anunciar a porcentagem de zoom.</Text></Row>
     <Row Tag="LOC_CAI_ZOOM_OUT_TOOLTIP" Language="pt_BR"><Text>Afastar e anunciar a porcentagem de zoom.</Text></Row>
     <Row Tag="LOC_CAI_ZOOM_LEVEL" Language="pt_BR"><Text>Zoom {1_Percent} por cento</Text></Row>
+    <Row Tag="LOC_CAI_UNIT_ALREADY_IN_MOVEMENT_MODE" Language="pt_BR"><Text>Já está no modo de movimento</Text></Row>
     <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_BONUSES" Language="pt_BR"><Text>Bônus de {1_District}: {2_Yields}</Text></Row>
     <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_YIELD_CHANGE" Language="pt_BR"><Text>{1_Amount : number +#.#;-#.#} {2_Yield}</Text></Row>
     <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP" Language="pt_BR"><Text>Focar as abas na primeira entrada</Text></Row>

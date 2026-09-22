@@ -2654,20 +2654,10 @@ Quick Deals (wltk, UUID `5aceed03-8639-4a81-8cbf-03f54d543502`, vendored at `dec
 
 `decompiled/Assets/UI/SubtitleContext.xml` is a pure-XML context (`Name="SubtitleContext"`, one `Label ID="SubtitleText"`) with no vanilla Lua, and nothing in the UI Lua references it. Attempted a same-base-name companion Lua imported via both `<ImportFiles>` blocks with a debug `Speak` on load: **it never fires**. The context is not instantiated during normal play (intro/menu tested), so a companion Lua cannot bind and this approach is a dead end. Do not retry it. Captions are driven entirely by the native movie player from the `.srt` files under `Assets/UI/Subtitles/<lang>/`.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-## World Builder map database (DB.Query on the loaded map)
-=======
-## World Builder map database (.Civ6Map SQLite — ON DISK ONLY, written on save)
->>>>>>> beta
+## World Builder startup diagnostics
 
 - **Playable-map startup diagnostics:** `GameCore.log` reports World Builder leader resolution and start assignment even when `Lua.log` never creates a gameplay context. A too-small distinct leader pool produces `Unable to find any unused civilizations` and a duplicate assignment, but correcting the pool can still leave the generic `SCRIPT_PROCESSING` startup failure; do not treat that message alone as causal. In the observed persistent failure, `LoadGameViewState.log` reaches `GAMECORE_NEW_GAME End`, `net_message_debug.log` then reports `early exit of the game state`, and no gameplay Lua error is logged. `GameCore.log` also reports each configured city-state without a predefined start and says those players will be removed. Whether an all/mostly removed minor roster triggers the later early exit still needs an isolated test with the Advanced Setup city-state count set to zero. Note that these log files may report zero byte length through filesystem metadata while `Get-Content` can still read thousands of lines; read them directly rather than using size as an emptiness test.
 
-<<<<<<< HEAD
-- **Plot indexing:** `Plots.ID` is the 0-based plot index, matching `Map.GetPlotByIndex` / `plot:GetIndex()` (range `0 .. Width*Height-1`).
-- **Per-player reveal:** `RevealedPlots(ID INTEGER, Player INTEGER)` holds one row per revealed plot; `ID` is the 0-based plot index, `Player` the player id. A row's presence means "revealed for that player". This is the live read path for the Set Visibility tool's state — read it instead of shadowing edits. Example: `DB.Query("SELECT 1 FROM RevealedPlots WHERE ID = ? AND Player = ? LIMIT 1", plotIndex, player)`.
-- The vanilla Set Visibility tool and its Reveal All button write reveal state through the normal placement path, which updates this database, so CAI drives the vanilla controls and reads `RevealedPlots` back live. Supersedes the earlier shadow-cache + gameplay-context config-bridge approach (removed): `PlayersVisibility:IsRevealed`, `MapManager:GetPlotValue`, `Plot:GetProperty`, and `WorldBuilder.ConfigurationManager():SetMapValue` custom keys were all dead ends for reading/persisting WB reveal.
-=======
 ## Wonder movies (world wonders and natural wonders) — engine-rendered, no video files
 
 - Neither kind of wonder movie exists as a video file. The only `.bk2` (Bink) movies in the install are the intro, tutorial, logo, title background and victory/defeat clips under `Base/Platforms/Windows/Movies` and the Expansion1/Expansion2/GranColombia_Maya `Movies` folders (the Mac Aspyr build ships the same `Platforms/Windows` tree). Every other DLC `Movies` folder holds only a README.
@@ -2708,8 +2698,9 @@ Survey of art that could take spoken descriptions, beyond leaders and great work
 - Era paintings `Era_<Name>` (eight, 1137x572, `UI_Eras.blp`) and the tech/civic tree era backgrounds (`TechTree_BG<Era>`, `CivicsTree_BG<Era>`, `UI_TreeBG.blp`) are decorative; no Lua or XML under the UI folders references `Era_<Name>` by name.
 - Great People have no individual art: `GreatPeoplePopup` uses `ICON_GENERIC_GREAT_PERSON_INDIVIDUAL_<CLASS>` (nine class portraits). Natural wonders and world wonders are icon plus video.
 - `scripts/Extract-GreatWorksBlp.py` parses `Governors.blp`, `UI_Government.blp`, `UI_Emergencies.blp`, `UI_WorldCongress.blp`, `UI_EndGame.blp`, `UI_Leaders.blp`, `Shell_Loading.blp`, `UI_Eras.blp` and the base `Icons.blp`, but the parse is slow on the 100 MB plus packages (`PrideMoments.blp`, `Icons.blp` take well over ten minutes).
->>>>>>> 1dd2d53f88f6ea017f5f77b5cfb5c54af38f8632
-=======
+
+## World Builder map database (.Civ6Map SQLite — ON DISK ONLY, written on save)
+
 A saved `.Civ6Map` is a plain SQLite database whose tables include `Plots`, `RevealedPlots`, `PlotFeatures`, `PlotImprovements`, `PlotResources`, `PlotRivers`, `PlotRoutes`, `PlotCliffs`, `PlotOwners`, `PlotAttributes`, `Cities`, `Districts`, `Buildings`, `Units`, `Players`, `StartPositions`, `NamedRiver`, `ModText`, and `Map` (Width/Height/WrapX/WrapY/MapSizeType).
 
 - **Observer identity and ownership:** World Builder may expose `PlayerTypes.OBSERVER` (`1000`) from `Game.GetLocalPlayer()` rather than only from `Game.GetLocalObserver()`. Observer detection must accept either form. The observer owns nothing, so CAI ownership/stance classification is neutral for every map object, including barbarian units and city-states. Factual owner names may still be read, but there is no observer-relative own/enemy grouping. World Builder unit discovery must scan `Players[0 .. GameDefines.MAX_PLAYERS - 1]` and must not require `Player:IsAlive()`; initialized editor players can own placed units without being alive in the gameplay sense. With the see-all observer, unit visibility must not depend on a `PlayersVisibility` object.
@@ -2785,4 +2776,3 @@ Tooltip breakdown strings can legitimately be empty when a yield/stat is zero. E
 # Tab-control initial focus setting (2026-09-21)
 
 - `FocusTabStripOnFirstEntry` is a default-disabled UI checkbox in `settings_CAI.sql`. `TabControlWidget:GetDefaultChild()` uses `CAIWidgetHelpers_Navigation.DefaultChild` when enabled: child 1 is the strip, and the manager's existing child/key cache restores subsequent focus. History is per widget instance, not persisted per screen. Explicit descendant focus and directional Tab/Shift+Tab entry retain their existing behavior. No vanilla API or input bindings change.
->>>>>>> beta

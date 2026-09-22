@@ -6,6 +6,7 @@
     <Row Tag="LOC_CAI_ZOOM_IN_TOOLTIP" Language="zh_Hans_CN"><Text>放大并读出缩放百分比。</Text></Row>
     <Row Tag="LOC_CAI_ZOOM_OUT_TOOLTIP" Language="zh_Hans_CN"><Text>缩小并读出缩放百分比。</Text></Row>
     <Row Tag="LOC_CAI_ZOOM_LEVEL" Language="zh_Hans_CN"><Text>缩放百分之{1_Percent}</Text></Row>
+    <Row Tag="LOC_CAI_UNIT_ALREADY_IN_MOVEMENT_MODE" Language="zh_Hans_CN"><Text>已处于移动模式</Text></Row>
     <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_BONUSES" Language="zh_Hans_CN"><Text>{1_District}加成：{2_Yields}</Text></Row>
     <Row Tag="LOC_CAI_DISTRICT_NEIGHBOR_YIELD_CHANGE" Language="zh_Hans_CN"><Text>{1_Amount : number +#.#;-#.#} {2_Yield}</Text></Row>
     <Row Tag="LOC_CAI_SETTING_FOCUS_TAB_STRIP" Language="zh_Hans_CN"><Text>首次进入时聚焦标签栏</Text></Row>

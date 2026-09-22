@@ -12,7 +12,7 @@ function OnImportWorldBuilderMap()
 	UIManager:QueuePopup(advancedSetup, PopupPriority.Current);
 	Controls.SwitchPopup:SetHide(true);
 end
-Controls.WBAConfirmButton:RegisterCallback( Mouse.eLClick, OnImportWorldBuilderMap ); 
+Controls.WBAConfirmButton:RegisterCallback( Mouse.eLClick, OnImportWorldBuilderMap );
 Controls.WBAConfirmButton:RegisterCallback( Mouse.eMouseEnter, function() UI.PlaySound("Main_Menu_Mouse_Over"); end);
 
 function OnCancelImport()

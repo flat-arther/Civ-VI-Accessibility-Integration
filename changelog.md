@@ -2,19 +2,7 @@
 
 ### Added
 
-<<<<<<< HEAD
 - The wonder built and natural wonder discovered popups now read a description of the wonder movie when you press `F2`: what the movie shows as the wonder is built or the landscape comes into view, with its real features named. Every world wonder and natural wonder in the game has one, in all the mod's languages.
-
-### Changed
-
-- The great work viewer's painting and sculpture descriptions have been rewritten from the real artworks. Each one is now three or four plain sentences that name the medium and tradition, then the scene, then the look, and no longer repeats the title or artist.
-- The leader descriptions read with `F2` in the diplomacy and deal screens and from the leader picker have been rewritten from the full diplomacy scene instead of the small portrait. Each now opens with the leader's full name and titles, then describes the setting, the person, their dress and regalia, any props, the background, and the light in one detailed paragraph, naming the real place the scene shows where it is known.
-- The great work viewer now also describes the shared writing and music backgrounds, the artifact images, the relic images, the Heroes and Legends symbols and epics, the Secret Societies relics, and the Monopolies and Corporations products.
-
-### Fixed
-
-- Fixed factual errors in the great work descriptions, such as Andrei Rublev's icons being called Byzantine and details invented from thumbnails.
-=======
 - Diplomacy leader labels now read the leader and civilization followed by the leader's current Happy, Neutral, or Unhappy mood. This is available in the diplomacy action and deal screens for AI leaders.
 - Alt+ equals zooms in and Alt+ minus zooms out in 5% steps. With CAI active, games now start fully zoomed in at 100 percent after the loading screen closes, to ensure that all ambient sounds are heard
 - While placing a district, cursor information now includes adjacency bonus changes for neighboring districts, after the new district's own bonuses.
@@ -30,6 +18,9 @@
 
 ### Changed
 
+- The great work viewer's painting and sculpture descriptions have been rewritten from the real artworks. Each one is now three or four plain sentences that name the medium and tradition, then the scene, then the look, and no longer repeats the title or artist.
+- The leader descriptions read with `F2` in the diplomacy and deal screens and from the leader picker have been rewritten from the full diplomacy scene instead of the small portrait. Each now opens with the leader's full name and titles, then describes the setting, the person, their dress and regalia, any props, the background, and the light in one detailed paragraph, naming the real place the scene shows where it is known.
+- The great work viewer now also describes the shared writing and music backgrounds, the artifact images, the relic images, the Heroes and Legends symbols and epics, the Secret Societies relics, and the Monopolies and Corporations products.
 - Opening, closing, or otherwise changing accessible screen layers no longer cuts off speech already in progress. Advisor popups still interrupt speech
 - Research and civic screens now always open on their main available-items view
 - The Civics Tree presents the current government and slotted policies summary as an expandable tree grouped by policy type.
@@ -54,6 +45,7 @@
 
 ### Fixed
 
+- Fixed factual errors in the great work descriptions, such as Andrei Rublev's icons being called Byzantine and details invented from thumbnails.
 - After opening a specific Civilopedia article, Shift+Tab from its body now properly lands on that article in the sections tree, instead of focusing the first section.
 - Fixed an issue with units vanishing while in combat animations
 - Coastal lowlands are no longer announced twice when moving the cursor with the Settler lens active.
@@ -66,7 +58,6 @@
 - Fixed a bug with moving and swapping great-works, where the picker did not show all valid slots. This lead to issues such as not being able to swap works in the palace with others that did not match their types,, or directly moving works in to empty slots
 - After moving a unit onto a tribal village, discovering a natural wonder, or moving into or out of the water, the movement announcement waits for the game's movement update and reports the unit's actual remaining movement, instead of a stale value.
 - In the city overview panel's Citizens and growth summary, the food per turn figure is now the net food after consumption instead of the raw food yield.
->>>>>>> beta
 
 ## [1.4.1] - 2026-08-30
 
