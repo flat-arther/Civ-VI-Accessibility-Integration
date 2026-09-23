@@ -496,9 +496,8 @@ function MovementActions_CAI:TryQuickMoveDirection(direction)
         return false
     end
 
-    -- Match vanilla right-click movement: an otherwise valid adjacent path may be
-    -- retained by the engine for a later turn when the unit cannot move immediately.
-    return self:TryActivateMoveTarget(unit, targetPlot:GetIndex(), false, false)
+    -- Quick movement must be reachable this turn; Move To remains available for queued paths.
+    return self:TryActivateMoveTarget(unit, targetPlot:GetIndex(), false, true)
 end
 
 Events.UnitMoveComplete.Add(function(playerID, unitID, x, y)

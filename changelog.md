@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Fixed
+
+- Directional quick movement now says "Not enough movement" when the adjacent tile cannot be reached this turn, without queueing a move.
+
 ## [1.5.0] - 2026-09-22
 
 ### Added
@@ -30,7 +34,7 @@
 - Unit needs orders is now announced even when automatic turn-blocker announcements are disabled. Ctrl+Space now reports when there are no other ready units to select instead of staying silent.
 - Opening Civilopedia normally now focuses the sections tree even on the first open. Opening a specific article still focuses its body.
 - The city banner's 2 shortcut now reads your city's production yield before its current production item.
-- Units with no movement remaining can still use Move To (Alt M by default) or from the unit action list, and directional quick movement can queue an adjacent move for a later turn.
+- Units with no movement remaining can still use Move To (Alt M by default) or from the unit action list to queue a move for a later turn.
 - Pressing Escape in the multiplayer staging room now asks for confirmation before leaving.
 - Appointing a governor or joining a Secret Society from the Governors screen asks for confirmation before spending a governor title.
 - Great People transfers now open a city destination list. Choosing a city performs the transfer directly, without opening a map-targeting interface or adding destinations to the world scanner.
