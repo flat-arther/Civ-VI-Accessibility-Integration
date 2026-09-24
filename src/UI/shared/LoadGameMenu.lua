@@ -968,16 +968,67 @@ local function CAI_InjectWBLoad(path)
 	end
 end
 
+local m_CAICloudSaveLoadPending = false
+local CAI_MOD_ID = "9f4b5c2e-1a2b-4c3d-8e9f-123456789abc"
+
+local function CAI_CloudConfigHasMod(caiHandle)
+	for _, enabledMod in ipairs(GameConfiguration.GetEnabledMods()) do
+		if enabledMod.Handle == caiHandle
+			or (type(enabledMod.Id) == "string" and string.lower(enabledMod.Id) == CAI_MOD_ID) then
+			return true
+		end
+	end
+	return false
+end
+
+local function CAI_CloudSaveLoadedToStaging()
+	if not m_CAICloudSaveLoadPending then return end
+	m_CAICloudSaveLoadPending = false
+
+	local caiHandle = Modding.GetModHandle(CAI_MOD_ID)
+	if caiHandle == nil then
+		print("CAI cloud save recovery failed: mod handle is unavailable.")
+		return
+	end
+
+	if not Modding.IsModEnabled(CAI_MOD_ID) then
+		Modding.EnableMod(caiHandle, true)
+	end
+	if not Modding.IsModEnabled(CAI_MOD_ID) then
+		print("CAI cloud save recovery failed: mod remains disabled.")
+		return
+	end
+
+	if CAI_CloudConfigHasMod(caiHandle) then
+		print("CAI cloud save recovery: mod already in loaded game configuration.")
+		return
+	end
+
+	GameConfiguration.AddEnabledMods(caiHandle, true)
+	if CAI_CloudConfigHasMod(caiHandle) then
+		print("CAI cloud save recovery: added mod to loaded game configuration.")
+	else
+		print("CAI cloud save recovery failed: mod is absent from loaded game configuration.")
+	end
+end
+
 -- Main-menu "Load" flow: OnLoadYes runs Network.LoadGame on m_thisLoadFile.
 OnLoadYes = WrapFunc(OnLoadYes, function(orig)
 	if m_thisLoadFile and m_thisLoadFile.Path then
 		CAI_InjectWBLoad(m_thisLoadFile.Path)
 	end
-	if mgr then
+	m_CAICloudSaveLoadPending = serverType == ServerType.SERVER_TYPE_FIRAXIS_CLOUD
+		and g_FileType == SaveFileTypes.GAME_STATE
+	-- Configuration loads return to setup, tiled maps are imported there, and
+	-- multiplayer saves open the staging room before the game can launch.
+	if mgr and serverType == ServerType.SERVER_TYPE_NONE
+		and g_FileType == SaveFileTypes.GAME_STATE and g_GameType ~= SaveTypes.TILED_MAP then
 		mgr:ShutDown()
 	end
 	orig()
 end)
+
+LuaEvents.JoiningRoom_ShowStagingRoom.Add(CAI_CloudSaveLoadedToStaging)
 
 -- TILED_MAP import branch: OnActionButton runs SetImportFilename + HostGame
 -- directly (no OnLoadYes, no cancellable mod-compat dialog), so inject here only

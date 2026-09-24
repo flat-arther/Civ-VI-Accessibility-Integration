@@ -2,6 +2,8 @@
 
 ### Fixed
 
+- Creating a Play By Cloud game from a save now restores CAI when the loaded game reaches the staging room.
+- Loading a game configuration, importing a tiled map, or loading a multiplayer save now keeps menu accessibility available in setup or the staging room.
 - Directional quick movement now says "Not enough movement" when the adjacent tile cannot be reached this turn, without queueing a move.
 
 ## [1.5.0] - 2026-09-22
