@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [1.5.1] - 2026-09-24
+
 ### Fixed
 
 - Creating a Play By Cloud game from a save now restores CAI when the loaded game reaches the staging room.
