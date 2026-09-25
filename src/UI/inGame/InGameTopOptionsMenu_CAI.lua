@@ -177,6 +177,11 @@ local function PushPausePanel()
     end
 end
 
+OnExitGameAskAreYouSure = WrapFunc(OnExitGameAskAreYouSure, function(orig)
+    CAI.Silence()
+    orig()
+end)
+
 OnInput = WrapFunc(OnInput, function(orig, input)
     if Controls.PauseWindow and Controls.PauseWindow:IsHidden() then
         return false

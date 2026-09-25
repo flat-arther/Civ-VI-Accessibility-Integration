@@ -1983,7 +1983,10 @@ local function ShowCAIUpdateDialog()
 		RemoveCAIUpdateDialog()
 	end)
 	m_UpdateDialog = mgr.WidgetHelpers.MakeGeneralDialog(function() return Locale.Lookup("LOC_CAI_UPDATE_AVAILABLE_TITLE") end, {btn}, {txt})
-	if m_UpdateDialog then mgr:Push(m_UpdateDialog, PopupPriority.Current) end
+	if m_UpdateDialog then 
+		CAI.Silence()
+		mgr:Push(m_UpdateDialog, PopupPriority.Current)
+		end
 end
 
 -- Vanilla highlight reuse: mirrors the select/deselect visual vanilla runs in
