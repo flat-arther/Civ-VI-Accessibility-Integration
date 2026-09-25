@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [1.5.2] - 2026-09-25
+
 ### Fixed
 
 - Heroes now open the city destination list when using Transfer to Another City.
