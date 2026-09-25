@@ -3626,6 +3626,9 @@
     <Row Tag="LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS" Language="en_US">
       <Text>{1_RiverText}, {2_Directions}</Text>
     </Row>
+    <Row Tag="LOC_CAI_PLOT_UNEXPLORED" Language="en_US">
+      <Text>Unexplored</Text>
+    </Row>
     <Row Tag="LOC_CAI_PLOT_CLIFF_WITH_DIRECTIONS" Language="en_US">
       <Text>{1_CliffText}, {2_Directions}</Text>
     </Row>

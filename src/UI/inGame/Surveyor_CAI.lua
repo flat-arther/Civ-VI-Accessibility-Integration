@@ -82,76 +82,6 @@ local function IsDatabaseTrue(value)
     return value == true or value == 1 or value == "true" or value == "1"
 end
 
-local function GetOnlySetValue(values)
-    local onlyValue = nil
-    for value in pairs(values) do
-        if onlyValue ~= nil then
-            return nil
-        end
-        onlyValue = value
-    end
-    return onlyValue
-end
-
--- Cache the active ruleset's terrain relationships once. Feature validity
--- rows include expansion and mod data, so suppression follows live content.
-local function BuildTerrainShapeMetadata()
-    local terrainClassByType = {}
-    for terrainClass in GameInfo.TerrainClass_Terrains() do
-        terrainClassByType[terrainClass.TerrainType] = terrainClass.TerrainClassType
-    end
-
-    local flatTerrainByClass = {}
-    for terrainInfo in GameInfo.Terrains() do
-        local terrainClassType = terrainClassByType[terrainInfo.TerrainType]
-        if terrainClassType ~= nil
-            and not IsDatabaseTrue(terrainInfo.Hills)
-            and not IsDatabaseTrue(terrainInfo.Mountain)
-            and flatTerrainByClass[terrainClassType] == nil then
-            flatTerrainByClass[terrainClassType] = terrainInfo
-        end
-    end
-
-    local validFactsByFeature = {}
-    for validTerrain in GameInfo.Feature_ValidTerrains() do
-        local terrainInfo = GameInfo.Terrains[validTerrain.TerrainType]
-        local featureFacts = validFactsByFeature[validTerrain.FeatureType]
-        if featureFacts == nil then
-            featureFacts = {
-                BaseClasses = {},
-                Elevations = {},
-            }
-            validFactsByFeature[validTerrain.FeatureType] = featureFacts
-        end
-
-        local terrainClassType = terrainClassByType[terrainInfo.TerrainType]
-        if terrainClassType ~= nil then
-            featureFacts.BaseClasses[terrainClassType] = true
-        end
-
-        local elevation = "flat"
-        if IsDatabaseTrue(terrainInfo.Mountain) then
-            elevation = "mountain"
-        elseif IsDatabaseTrue(terrainInfo.Hills) then
-            elevation = "hills"
-        end
-        featureFacts.Elevations[elevation] = true
-    end
-
-    local suppressionsByFeature = {}
-    for featureType, featureFacts in pairs(validFactsByFeature) do
-        local elevation = GetOnlySetValue(featureFacts.Elevations)
-        suppressionsByFeature[featureType] = {
-            BaseClass = GetOnlySetValue(featureFacts.BaseClasses),
-            Elevation = elevation ~= "flat" and elevation or nil,
-        }
-    end
-
-    return flatTerrainByClass, suppressionsByFeature, terrainClassByType
-end
-
-local m_FlatTerrainByClass, m_TerrainSuppressionsByFeature, m_TerrainClassByType = BuildTerrainShapeMetadata()
-
 local function AppendUnexplored(body, unexplored)
     if unexplored <= 0 then
         return body
@@ -508,48 +438,18 @@ function Surveyor.ReadTerrain()
     end
 
     for _, plot in ipairs(survey.Range.plots) do
-        local terrainInfo = GameInfo.Terrains[plot:GetTerrainType()]
-        local featureInfo = GameInfo.Features[plot:GetFeatureType()]
-
-        -- Natural wonders replace the ordinary terrain-shape description.
-        if featureInfo ~= nil and IsDatabaseTrue(featureInfo.NaturalWonder) then
-            AddBucket(featureInfo.Name)
-        else
-            local suppression = featureInfo ~= nil
-                and m_TerrainSuppressionsByFeature[featureInfo.FeatureType] or nil
-            if featureInfo ~= nil then
-                AddBucket(featureInfo.Name)
-            end
-
-            if plot:IsLake() then
-                AddBucket("LOC_TOOLTIP_LAKE")
-            elseif plot:IsMountain() then
-                if suppression == nil or suppression.Elevation ~= "mountain" then
-                    AddBucket("LOC_CAI_SURVEYOR_MOUNTAINS")
-                end
-            else
-                local terrainClassType = terrainInfo ~= nil
-                    and m_TerrainClassByType[terrainInfo.TerrainType] or nil
-                if terrainInfo ~= nil
-                    and (suppression == nil or suppression.BaseClass ~= terrainClassType) then
-                    local baseTerrainInfo = plot:IsHills()
-                        and m_FlatTerrainByClass[terrainClassType] or terrainInfo
-                    if baseTerrainInfo == nil then
-                        baseTerrainInfo = terrainInfo
-                    end
-
-                    if baseTerrainInfo.TerrainType == "TERRAIN_COAST" then
-                        AddBucket("LOC_TOOLTIP_COAST")
-                    else
-                        AddBucket(baseTerrainInfo.Name)
-                    end
-                end
-
-                if plot:IsHills()
-                    and (suppression == nil or suppression.Elevation ~= "hills") then
-                    AddBucket("LOC_CAI_SURVEYOR_HILLS")
-                end
-            end
+        local shape = GetTerrainShape(plot)
+        if shape.Feature ~= nil then
+            AddBucket(shape.Feature.Name)
+        end
+        if shape.Mountain then
+            AddBucket("LOC_CAI_SURVEYOR_MOUNTAINS")
+        end
+        if shape.BaseName ~= nil then
+            AddBucket(shape.BaseName)
+        end
+        if shape.Hills then
+            AddBucket("LOC_CAI_SURVEYOR_HILLS")
         end
 
         if plot:IsFreshWater() then
