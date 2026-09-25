@@ -11,8 +11,7 @@ local function BuildQueuedPathScannerLabel(plotIndex)
 
     local parts = info:RequestPlotInfo(plotIndex, {
         "waypoint",
-        "plotName",
-        "feature",
+        "terrainShape",
         "cityName",
         "districtTitle",
         "cityDistrictTitle",

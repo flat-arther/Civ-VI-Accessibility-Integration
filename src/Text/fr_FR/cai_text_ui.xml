@@ -3572,6 +3572,9 @@
     <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS" Language="fr_FR">
       <Text>{1_RiverText}, {2_Directions}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_PLOT_UNEXPLORED" Language="fr_FR">
+      <Text>Inexploré</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_PLOT_CLIFF_WITH_DIRECTIONS" Language="fr_FR">
       <Text>{1_CliffText}, {2_Directions}</Text>
     </Replace>

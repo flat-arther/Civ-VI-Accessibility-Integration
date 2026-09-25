@@ -3578,6 +3578,9 @@
     <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS" Language="pl_PL">
       <Text>{1_RiverText}, {2_Directions}</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_PLOT_UNEXPLORED" Language="pl_PL">
+      <Text>Niezbadane</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_PLOT_CLIFF_WITH_DIRECTIONS" Language="pl_PL">
       <Text>{1_CliffText}, {2_Directions}</Text>
     </Replace>

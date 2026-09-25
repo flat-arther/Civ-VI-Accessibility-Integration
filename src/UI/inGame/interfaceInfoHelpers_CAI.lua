@@ -1747,7 +1747,7 @@ function SpeakActiveInterfacePlotInfo(plot)
     end
 
     if not IsActiveInterfacePlotRevealed(resolvedPlot) then
-        Speak(Locale.Lookup("LOC_MINIMAP_FOG_OF_WAR_TOOLTIP"))
+        Speak(Locale.Lookup("LOC_CAI_PLOT_UNEXPLORED"))
         return true
     end
 
