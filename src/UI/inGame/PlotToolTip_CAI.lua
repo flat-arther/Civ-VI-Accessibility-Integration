@@ -121,8 +121,7 @@ local CURSOR_MOVE_INFO_PRIORITY = {
     "nationalPark",
     "wonderTitle",
     "districtTitle",
-    "plotName",
-    "feature",
+    "terrainShape",
     "resource",
     "improvement",
     "routeName",
@@ -217,6 +216,29 @@ local function GetPlotFeatureInfo(data)
         return nil
     end
     return GameInfo.Features[data.FeatureType]
+end
+
+-- Feature name plus the old-growth / second-growth suffix once the feature's
+-- AddCivic (Conservation for woods) is known.
+local function GetFeatureString(data, featureInfo)
+    local featureString = Locale.Lookup(featureInfo.Name)
+    local localPlayer = Players[Game.GetLocalPlayer()]
+    local addCivicName = featureInfo.AddCivic
+
+    if localPlayer ~= nil and addCivicName ~= nil then
+        local civicInfo = GameInfo.Civics[addCivicName]
+        if civicInfo ~= nil and localPlayer:GetCulture():HasCivic(civicInfo.Index) then
+            local additionalString
+            if not data.FeatureAdded then
+                additionalString = Locale.Lookup("LOC_TOOLTIP_PLOT_WOODS_OLD_GROWTH")
+            else
+                additionalString = Locale.Lookup("LOC_TOOLTIP_PLOT_WOODS_SECONDARY")
+            end
+            featureString = featureString .. " " .. additionalString
+        end
+    end
+
+    return featureString
 end
 
 local function GetPlotResourceContext(data)
@@ -928,7 +950,7 @@ info.PlotInfoHelpers = {
 
     plotName = function(data)
         if not data.IsVisible then
-            return Locale.Lookup("LOC_MINIMAP_FOG_OF_WAR_TOOLTIP")
+            return Locale.Lookup("LOC_CAI_PLOT_UNEXPLORED")
         end
         if data.IsLake then
             return Locale.Lookup("LOC_TOOLTIP_LAKE")
@@ -986,24 +1008,31 @@ info.PlotInfoHelpers = {
             return nil
         end
 
-        local featureString = Locale.Lookup(featureInfo.Name)
-        local localPlayer = Players[Game.GetLocalPlayer()]
-        local addCivicName = featureInfo.AddCivic
+        return GetFeatureString(data, featureInfo)
+    end,
 
-        if localPlayer ~= nil and addCivicName ~= nil then
-            local civicInfo = GameInfo.Civics[addCivicName]
-            if civicInfo ~= nil and localPlayer:GetCulture():HasCivic(civicInfo.Index) then
-                local additionalString
-                if not data.FeatureAdded then
-                    additionalString = Locale.Lookup("LOC_TOOLTIP_PLOT_WOODS_OLD_GROWTH")
-                else
-                    additionalString = Locale.Lookup("LOC_TOOLTIP_PLOT_WOODS_SECONDARY")
-                end
-                featureString = featureString .. " " .. additionalString
-            end
+    -- Feature first, then mountain or hills, then the base terrain, dropping
+    -- whatever the feature already implies (see GetTerrainShape).
+    terrainShape = function(data, plot)
+        if not data.IsVisible then
+            return Locale.Lookup("LOC_CAI_PLOT_UNEXPLORED")
         end
 
-        return featureString
+        local shape = GetTerrainShape(plot)
+        local parts = {}
+        if shape.Feature ~= nil then
+            table.insert(parts, GetFeatureString(data, shape.Feature))
+        end
+        if shape.Mountain then
+            table.insert(parts, Locale.Lookup("LOC_HUD_MAP_SEARCH_TERMS_MOUNTAIN"))
+        end
+        if shape.Hills then
+            table.insert(parts, Locale.Lookup("LOC_HUD_MAP_SEARCH_TERMS_HILL"))
+        end
+        if shape.BaseName ~= nil then
+            table.insert(parts, Locale.Lookup(shape.BaseName))
+        end
+        return parts
     end,
 
     nationalPark = function(data)
@@ -1638,7 +1667,7 @@ local function AppendPlotInfoBucketKeys(results, data, definitions)
 end
 
 local DEFAULT_PLOT_INFO_BUCKET = {
-    "plotName",
+    "terrainShape",
     "civRoyaleZone",
     "civRoyaleObjects",
     "piratesTreasureSearch",
@@ -1647,7 +1676,6 @@ local DEFAULT_PLOT_INFO_BUCKET = {
     "piratesTreasureOwner",
     "mapTac",
     "owner",
-    "feature",
     "nationalPark",
     "resource",
     "volcano",

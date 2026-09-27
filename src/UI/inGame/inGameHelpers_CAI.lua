@@ -1790,3 +1790,136 @@ function GetAllCityStatesData()
     end
     return data
 end
+
+-- Terrain shape: the feature / hills / base-terrain description shared by the
+-- cursor readout and the surveyor. A feature whose Feature_ValidTerrains rows
+-- allow only one base terrain class (marsh, oasis, floodplains, reef, ice) or
+-- one elevation (volcano) already implies that fact, so it is not repeated.
+-- Validity rows include expansion and mod data, so this follows live content.
+local m_TerrainShapeMetadata = nil
+
+local function IsTerrainDatabaseTrue(value)
+    return value == true or value == 1 or value == "true" or value == "1"
+end
+
+local function GetOnlySetValue(values)
+    local onlyValue = nil
+    for value in pairs(values) do
+        if onlyValue ~= nil then
+            return nil
+        end
+        onlyValue = value
+    end
+    return onlyValue
+end
+
+local function GetTerrainShapeMetadata()
+    if m_TerrainShapeMetadata ~= nil then
+        return m_TerrainShapeMetadata
+    end
+
+    local terrainClassByType = {}
+    for terrainClass in GameInfo.TerrainClass_Terrains() do
+        terrainClassByType[terrainClass.TerrainType] = terrainClass.TerrainClassType
+    end
+
+    local flatTerrainByClass = {}
+    for terrainInfo in GameInfo.Terrains() do
+        local terrainClassType = terrainClassByType[terrainInfo.TerrainType]
+        if terrainClassType ~= nil
+            and not IsTerrainDatabaseTrue(terrainInfo.Hills)
+            and not IsTerrainDatabaseTrue(terrainInfo.Mountain)
+            and flatTerrainByClass[terrainClassType] == nil then
+            flatTerrainByClass[terrainClassType] = terrainInfo
+        end
+    end
+
+    local validFactsByFeature = {}
+    for validTerrain in GameInfo.Feature_ValidTerrains() do
+        local terrainInfo = GameInfo.Terrains[validTerrain.TerrainType]
+        local featureFacts = validFactsByFeature[validTerrain.FeatureType]
+        if featureFacts == nil then
+            featureFacts = {
+                BaseClasses = {},
+                Elevations = {},
+            }
+            validFactsByFeature[validTerrain.FeatureType] = featureFacts
+        end
+
+        local terrainClassType = terrainClassByType[terrainInfo.TerrainType]
+        if terrainClassType ~= nil then
+            featureFacts.BaseClasses[terrainClassType] = true
+        end
+
+        local elevation = "flat"
+        if IsTerrainDatabaseTrue(terrainInfo.Mountain) then
+            elevation = "mountain"
+        elseif IsTerrainDatabaseTrue(terrainInfo.Hills) then
+            elevation = "hills"
+        end
+        featureFacts.Elevations[elevation] = true
+    end
+
+    local suppressionsByFeature = {}
+    for featureType, featureFacts in pairs(validFactsByFeature) do
+        local elevation = GetOnlySetValue(featureFacts.Elevations)
+        suppressionsByFeature[featureType] = {
+            BaseClass = GetOnlySetValue(featureFacts.BaseClasses),
+            Elevation = elevation ~= "flat" and elevation or nil,
+        }
+    end
+
+    m_TerrainShapeMetadata = {
+        TerrainClassByType = terrainClassByType,
+        FlatTerrainByClass = flatTerrainByClass,
+        SuppressionsByFeature = suppressionsByFeature,
+    }
+    return m_TerrainShapeMetadata
+end
+
+---Describes a plot's terrain shape. Callers speak it as feature, mountain,
+---hills, then base terrain. A natural wonder returns only its Feature row.
+---@param plot table
+---@return { Feature: table|nil, Mountain: boolean, Hills: boolean, BaseName: string|nil }
+function GetTerrainShape(plot)
+    local metadata = GetTerrainShapeMetadata()
+    local featureInfo = GameInfo.Features[plot:GetFeatureType()]
+    local shape = {
+        Feature = featureInfo,
+        Mountain = false,
+        Hills = false,
+        BaseName = nil,
+    }
+
+    if featureInfo ~= nil and IsTerrainDatabaseTrue(featureInfo.NaturalWonder) then
+        return shape
+    end
+
+    if plot:IsLake() then
+        shape.BaseName = "LOC_TOOLTIP_LAKE"
+        return shape
+    end
+
+    local suppression = featureInfo ~= nil
+        and metadata.SuppressionsByFeature[featureInfo.FeatureType] or nil
+
+    if plot:IsMountain() then
+        shape.Mountain = suppression == nil or suppression.Elevation ~= "mountain"
+        return shape
+    end
+
+    local terrainInfo = GameInfo.Terrains[plot:GetTerrainType()]
+    local terrainClassType = metadata.TerrainClassByType[terrainInfo.TerrainType]
+    if terrainClassType == nil or suppression == nil or suppression.BaseClass ~= terrainClassType then
+        local baseTerrainInfo = plot:IsHills()
+            and metadata.FlatTerrainByClass[terrainClassType] or terrainInfo
+        if baseTerrainInfo.TerrainType == "TERRAIN_COAST" then
+            shape.BaseName = "LOC_TOOLTIP_COAST"
+        else
+            shape.BaseName = baseTerrainInfo.Name
+        end
+    end
+
+    shape.Hills = plot:IsHills() and (suppression == nil or suppression.Elevation ~= "hills")
+    return shape
+end

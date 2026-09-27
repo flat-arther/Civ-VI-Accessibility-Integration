@@ -425,34 +425,34 @@ end
 --  LABEL AND VALUE REFLECTION (Data-Driven Translation Bridge)
 -- ===========================================================================
 local PLOT_INFO_KEYS_BY_MODE = {
-    [InterfaceModeTypes.RANGE_ATTACK] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
-    [InterfaceModeTypes.CITY_RANGE_ATTACK] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
-    [InterfaceModeTypes.DISTRICT_RANGE_ATTACK] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
-    [InterfaceModeTypes.AIR_ATTACK] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
-    [InterfaceModeTypes.COASTAL_RAID] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
-    [InterfaceModeTypes.DEPLOY] = { "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
-    [InterfaceModeTypes.REBASE] = { "cityName", "districtTitle", "plotName" },
-    [InterfaceModeTypes.BUILD_IMPROVEMENT_ADJACENT] = { "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
-    [InterfaceModeTypes.SACRIFICE_SELECTION] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
-    [InterfaceModeTypes.AIRLIFT] = { "cityName", "districtTitle", "plotName" },
-    [InterfaceModeTypes.PARADROP] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
-    [InterfaceModeTypes.PRIORITY_TARGET] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
-    [InterfaceModeTypes.MOVE_JUMP] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
-    [InterfaceModeTypes.KILL_WEAKER_UNIT] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
-    [InterfaceModeTypes.TRANSFORM_UNIT] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
-    [InterfaceModeTypes.RESTORE_UNIT_MOVES] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
-    [InterfaceModeTypes.NAVAL_GOLD_RAID] = { "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName" },
+    [InterfaceModeTypes.RANGE_ATTACK] = { "units", "cityName", "districtTitle", "improvement", "resource", "terrainShape" },
+    [InterfaceModeTypes.CITY_RANGE_ATTACK] = { "units", "cityName", "districtTitle", "improvement", "resource", "terrainShape" },
+    [InterfaceModeTypes.DISTRICT_RANGE_ATTACK] = { "units", "cityName", "districtTitle", "improvement", "resource", "terrainShape" },
+    [InterfaceModeTypes.AIR_ATTACK] = { "units", "cityName", "districtTitle", "improvement", "resource", "terrainShape" },
+    [InterfaceModeTypes.COASTAL_RAID] = { "units", "cityName", "districtTitle", "improvement", "resource", "terrainShape" },
+    [InterfaceModeTypes.DEPLOY] = { "cityName", "districtTitle", "improvement", "resource", "terrainShape" },
+    [InterfaceModeTypes.REBASE] = { "cityName", "districtTitle", "terrainShape" },
+    [InterfaceModeTypes.BUILD_IMPROVEMENT_ADJACENT] = { "cityName", "districtTitle", "improvement", "resource", "terrainShape" },
+    [InterfaceModeTypes.SACRIFICE_SELECTION] = { "units", "cityName", "districtTitle", "improvement", "resource", "terrainShape" },
+    [InterfaceModeTypes.AIRLIFT] = { "cityName", "districtTitle", "terrainShape" },
+    [InterfaceModeTypes.PARADROP] = { "units", "cityName", "districtTitle", "improvement", "resource", "terrainShape" },
+    [InterfaceModeTypes.PRIORITY_TARGET] = { "units", "cityName", "districtTitle", "improvement", "resource", "terrainShape" },
+    [InterfaceModeTypes.MOVE_JUMP] = { "units", "cityName", "districtTitle", "improvement", "resource", "terrainShape" },
+    [InterfaceModeTypes.KILL_WEAKER_UNIT] = { "units", "cityName", "districtTitle", "improvement", "resource", "terrainShape" },
+    [InterfaceModeTypes.TRANSFORM_UNIT] = { "units", "cityName", "districtTitle", "improvement", "resource", "terrainShape" },
+    [InterfaceModeTypes.RESTORE_UNIT_MOVES] = { "units", "cityName", "districtTitle", "improvement", "resource", "terrainShape" },
+    [InterfaceModeTypes.NAVAL_GOLD_RAID] = { "units", "cityName", "districtTitle", "improvement", "resource", "terrainShape" },
 }
 
 if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
     PLOT_INFO_KEYS_BY_MODE[0x1D7FAB3F] = {
-        "civRoyaleZone", "civRoyaleObjects", "improvement", "resource", "feature", "plotName"
+        "civRoyaleZone", "civRoyaleObjects", "improvement", "resource", "terrainShape"
     }
 end
 
 if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
     local piratesPlotInfoKeys = {
-        "units", "cityName", "districtTitle", "improvement", "resource", "feature", "plotName"
+        "units", "cityName", "districtTitle", "improvement", "resource", "terrainShape"
     }
     for _, mode in ipairs(PIRATES_TARGET_MODES) do
         PLOT_INFO_KEYS_BY_MODE[mode] = piratesPlotInfoKeys

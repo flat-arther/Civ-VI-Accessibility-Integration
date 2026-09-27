@@ -67,8 +67,8 @@ CAIWorldScannerCategory_ValidTargets = {
 -- fields the action-plot targets use); falls back to bare coordinates.
 local function ResolveFootprintLabel(plotIndex)
     if ExposedMembers.CAIInfo ~= nil and ExposedMembers.CAIInfo.RequestPlotInfo ~= nil then
-        local requestedKeys = { "units", "cityName", "districtTitle", "improvement", "resource", "feature",
-            "plotName" }
+        local requestedKeys = { "units", "cityName", "districtTitle", "improvement", "resource",
+            "terrainShape" }
         local results = ExposedMembers.CAIInfo:RequestPlotInfo(plotIndex, requestedKeys)
         if results ~= nil and #results > 0 then
             return table.concat(results, ", ")
@@ -154,8 +154,8 @@ function CAIWorldScannerCategory_ValidTargets.Scan(context)
             local label = "LOC_CAI_WORLD_SCANNER_UNKNOWN"
 
             if ExposedMembers.CAIInfo ~= nil and ExposedMembers.CAIInfo.RequestPlotInfo ~= nil then
-                local requestedKeys = { "units", "cityName", "districtTitle", "improvement", "resource", "feature",
-                    "plotName" }
+                local requestedKeys = { "units", "cityName", "districtTitle", "improvement", "resource",
+                    "terrainShape" }
                 local results = ExposedMembers.CAIInfo:RequestPlotInfo(action.PlotIndex, requestedKeys)
                 if results ~= nil and #results > 0 then
                     label = table.concat(results, ", ")
