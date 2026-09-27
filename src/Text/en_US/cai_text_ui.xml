@@ -6815,7 +6815,7 @@
       <Text>Simplify tree navigation</Text>
     </Row>
     <Row Tag="LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION_TOOLTIP" Language="en_US">
-      <Text>Right expands a tree item and moves to its first child in one press. Left from a child returns to its parent and collapses it.</Text>
+      <Text>Right or Enter expands a tree item and moves to its first child in one press. Left from a child returns to its parent and collapses it.</Text>
     </Row>
     <Row Tag="LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT" Language="en_US">
       <Text>Read tree item count</Text>

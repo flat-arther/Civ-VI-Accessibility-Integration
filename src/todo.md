@@ -117,7 +117,7 @@
 [x] Add confirmation dialogs for appointing governers and leaving mp staging room
 [x] add dragging to world builder
 [x] Get rid of screen reader interrupt on widget push
-[ ] Add a setting for simplified treeview navigation
+[x] Add a setting for simplified treeview navigation
 [ ] Add support for real Era Tracker
 [ ] River flow direction reporting
 [ ] Look in to coastal raide yield reporting

@@ -6768,7 +6768,7 @@
       <Text>简化树视图导航</Text>
     </Replace>
     <Replace Tag="LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION_TOOLTIP" Language="zh_Hans_CN">
-      <Text>按一次右箭头键即可展开项目并移至其第一个子项目。从子项目按左箭头键可返回父项目并将其折叠。</Text>
+      <Text>按一次右箭头键或回车键即可展开项目并移至其第一个子项目。从子项目按左箭头键可返回父项目并将其折叠。</Text>
     </Replace>
     <Replace Tag="LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT" Language="zh_Hans_CN">
       <Text>朗读树项目数量</Text>

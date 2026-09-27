@@ -6753,7 +6753,7 @@
       <Text>Simplifier la navigation dans l'arborescence</Text>
     </Replace>
     <Replace Tag="LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION_TOOLTIP" Language="fr_FR">
-      <Text>Droite développe un élément et va à son premier enfant en une seule pression. Gauche depuis un enfant revient à son parent et le réduit.</Text>
+      <Text>Droite ou Entrée développe un élément et va à son premier enfant en une seule pression. Gauche depuis un enfant revient à son parent et le réduit.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT" Language="fr_FR">
       <Text>Lire le nombre d'éléments de l'arborescence</Text>

@@ -6746,7 +6746,7 @@
       <Text>Simplificar la navegación por el árbol</Text>
     </Replace>
     <Replace Tag="LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION_TOOLTIP" Language="es_ES">
-      <Text>Derecha expande un elemento y va a su primer hijo con una sola pulsación. Izquierda desde un hijo vuelve al padre y lo contrae.</Text>
+      <Text>Derecha o Intro expande un elemento y va a su primer hijo con una sola pulsación. Izquierda desde un hijo vuelve al padre y lo contrae.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT" Language="es_ES">
       <Text>Leer el número de elementos del árbol</Text>

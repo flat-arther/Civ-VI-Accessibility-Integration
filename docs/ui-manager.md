@@ -538,8 +538,10 @@ cached/default child on entry.
 - `ValueWidget:SetValue(v)` (non-silent) speaks the value element after firing
   `value_changed`.
 - `TreeItemWidget:Expand/Collapse` speak the value element on toggle so the
-  user hears "expanded, 5 items" / "collapsed", and focus speech announces the
-  same state on every node as the user navigates (the standard tree readout).
+  user hears "expanded, 5 items" / "collapsed" in standard navigation, and
+  focus speech announces the same state as the user navigates. In simplified
+  navigation, Right and Enter skip the expansion speech when they immediately enter the
+  first child; focusing the expanded item still announces its value.
   The crucial rule: **only user-driven toggles speak**. Both methods take a
   `silent` flag (`Expand(true)` / `Collapse(true)`) that suppresses **both** the
   `expanded`/`collapsed` event and the speech — every automatic or programmatic
@@ -811,12 +813,14 @@ the focused row's sibling level. The helper module
   child if already expanded.
 - `CollapseOrAscend(root)` — Left key: collapse if expanded; jump to parent
   TreeItem if collapsed.
-- `ToggleFocused(root)` — Enter key on Tree: toggle focused item's expand
-  state. Bubbles only when the focused item has no `activate` listener.
-- `SimplifyTreeNavigation` (default off) makes Right expand and enter the first
+- `ToggleFocused(root)` — Enter key on Tree: follows Right in simplified
+  navigation and toggles the focused item's expand state in standard navigation.
+  Bubbles only when the focused item has no `activate` listener.
+- `SimplifyTreeNavigation` (default off) makes Right and Enter expand and enter the first
   visible child in one press. Left from a child returns to and collapses its
   parent; Left on an expanded focused item collapses that item. The collapse
-  event still fires, and the returned-to parent is announced once.
+  event still fires, and the returned-to parent is announced once. Right and
+  Enter skip the expanded-state announcement when they also enter the first child.
 - `SpeakTreeItemCount` (default on) controls whether an expanded TreeItem's
   value includes its visible-child count on focus and expansion.
 

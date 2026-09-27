@@ -131,7 +131,7 @@ function CAIWorldScannerCategory_ValidTargets.Scan(context)
         return ScanWorldBuilderFootprint(sourcePlot)
     end
 
-    -- Trader and Great Person city transfers use dedicated destination lists.
+    -- City transfers use dedicated destination lists.
     -- Suppress passive Great Person activation plots as well as active targets.
     if UI.GetInterfaceMode() == InterfaceModeTypes.TELEPORT_TO_CITY then
         return {}

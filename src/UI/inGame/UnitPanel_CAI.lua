@@ -2824,26 +2824,6 @@ local function GetUnitDestinationPlots(mode, unit, operationType)
     return plots or {}
 end
 
-local function IsCityTransferListUnit(unit)
-    local greatPerson = unit:GetGreatPerson()
-    if greatPerson ~= nil and greatPerson:IsGreatPerson() then
-        return true
-    end
-
-    if GameInfo.HeroClasses ~= nil then
-        local unitInfo = GameInfo.Units[unit:GetUnitType()]
-        if unitInfo ~= nil then
-            for heroClass in GameInfo.HeroClasses() do
-                if heroClass.UnitType == unitInfo.UnitType then
-                    return true
-                end
-            end
-        end
-    end
-
-    return false
-end
-
 local function OpenUnitDestinationList(mode)
     RemoveUnitDestinationList()
 
@@ -2853,7 +2833,9 @@ local function OpenUnitDestinationList(mode)
     end
 
     if mode == InterfaceModeTypes.TELEPORT_TO_CITY then
-        if not IsCityTransferListUnit(unit) then
+        -- Vanilla TradeOriginChooser owns transfer for units that make trade routes.
+        local unitInfo = GameInfo.Units[unit:GetUnitType()]
+        if unitInfo.MakeTradeRoute then
             return
         end
     end

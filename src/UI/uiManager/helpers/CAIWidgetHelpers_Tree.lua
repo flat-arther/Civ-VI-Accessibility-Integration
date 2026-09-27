@@ -246,8 +246,9 @@ function T.ExpandOrDescend(root)
         return false
     end
     if not item.IsExpanded then
-        item:Expand()
-        if not CAISettings.GetBool("SimplifyTreeNavigation") then return true end
+        local simplify = CAISettings.GetBool("SimplifyTreeNavigation")
+        item:Expand(false, simplify)
+        if not simplify then return true end
     end
     local first
     for _, c in ipairs(item.Children) do
@@ -287,11 +288,14 @@ function T.CollapseOrAscend(root)
     return true
 end
 
----Toggle expand/collapse on the focused item (used by Enter on Tree). No-op when
----the focused widget is not a TreeItem (a plain leaf) or is a leaf TreeItem.
+---Enter follows Right in simplified navigation. In standard navigation it
+---toggles the focused TreeItem. Plain leaves and leaf TreeItems have no action.
 ---@param root UIWidget
 ---@return boolean
 function T.ToggleFocused(root)
+    if CAISettings.GetBool("SimplifyTreeNavigation") then
+        return T.ExpandOrDescend(root)
+    end
     local item = root.Manager:GetFocusedWidget()
     if not item or not item.IsTreeItem or item:IsLeaf() then
         LogMessage("Tree helper ToggleFocused ignored because focused widget is not a toggleable tree item")

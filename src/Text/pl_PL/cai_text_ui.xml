@@ -6766,7 +6766,7 @@
       <Text>Uprość nawigację po drzewie</Text>
     </Replace>
     <Replace Tag="LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION_TOOLTIP" Language="pl_PL">
-      <Text>Strzałka w prawo rozwija element i przechodzi do jego pierwszego dziecka jednym naciśnięciem. Strzałka w lewo z dziecka wraca do rodzica i zwija go.</Text>
+      <Text>Strzałka w prawo lub Enter rozwija element i przechodzi do jego pierwszego dziecka jednym naciśnięciem. Strzałka w lewo z dziecka wraca do rodzica i zwija go.</Text>
     </Replace>
     <Replace Tag="LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT" Language="pl_PL">
       <Text>Odczytuj liczbę elementów drzewa</Text>

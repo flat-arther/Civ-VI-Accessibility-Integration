@@ -3,7 +3,7 @@
 -- state via the value element. The toggle itself is spoken only on the
 -- user-driven Expand/Collapse path; automatic/programmatic calls pass
 -- silent=true. Enter activates if there are "activate" listeners; otherwise it
--- bubbles up to the parent Tree which toggles expand/collapse.
+-- bubbles up to the parent Tree for its navigation-mode-specific behavior.
 
 ---@class TreeItemWidget : ContainerWidget
 ---@field IsExpanded boolean
@@ -32,18 +32,15 @@ function TreeItemWidget.Create(mgr, id, props)
     w.IsTreeItem = true
     w.SpeechSettings = { IgnoreWhenNotFocused = true, Role = false }
 
-    -- Focus speech announces expand/collapse state (and item count when open)
-    -- on every node, the standard tree-item readout. The toggle itself is
-    -- announced by the user-driven Expand/Collapse path; automatic/programmatic
-    -- expands and collapses pass silent=true so only navigation and deliberate
-    -- toggles ever speak the state.
+    -- Focus speech announces expand/collapse state (and optionally the count).
+    -- User-driven toggles announce the state separately; automatic/programmatic
+    -- expands and collapses pass silent=true to suppress their announcements.
     w:SetValueGetter(function(self)
         if self:IsLeaf() then return "" end
         if self.IsExpanded then
-            local n = #self:GetVisibleChildren()
             local expanded = Locale.Lookup("LOC_CAI_TREEVIEW_EXPANDED")
             if CAISettings.GetBool("SpeakTreeItemCount") then
-                return expanded .. ", " .. Locale.Lookup("LOC_CAI_TREEVIEW_ITEM_COUNT", n)
+                return expanded .. ", " .. Locale.Lookup("LOC_CAI_TREEVIEW_ITEM_COUNT", #self:GetVisibleChildren())
             end
             return expanded
         end
@@ -60,7 +57,7 @@ function TreeItemWidget.Create(mgr, id, props)
                     self:Emit("activate")
                     return true
                 end
-                return false -- bubble to Tree -> toggle expand/collapse
+                return false -- bubble to Tree navigation
             end,
         },
     })
@@ -89,16 +86,18 @@ end
 
 ---Expand this node. `silent` suppresses both the `expanded` event and speech
 ---(use it for seeding initial state or auto-expanding focus ancestors); the
----default user-driven path emits and announces.
+---default user-driven path emits and announces. `skipAnnouncement` keeps the
+---event while focus immediately moves to a child in simplified navigation.
 ---@param silent? boolean
+---@param skipAnnouncement? boolean
 ---@return boolean
-function TreeItemWidget:Expand(silent)
+function TreeItemWidget:Expand(silent, skipAnnouncement)
     if self.IsExpanded then return false end
     if self:IsLeaf() then return false end
     self.IsExpanded = true
     if not silent then
         self:Emit("expanded")
-        self:SpeakElements({ "value" })
+        if not skipAnnouncement then self:SpeakElements({ "value" }) end
     end
     return true
 end
