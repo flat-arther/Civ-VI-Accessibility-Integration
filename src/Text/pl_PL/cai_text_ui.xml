@@ -6761,6 +6761,19 @@
     <Replace Tag="LOC_CAI_SETTING_TREE_HOME_END_CURRENT_DEPTH_TOOLTIP" Language="pl_PL">
       <Text>Gdy włączone, Home i End przechodzą do pierwszego i ostatniego widocznego elementu na bieżącej głębokości drzewa. Gdy wyłączone, przechodzą do początku i widocznego końca całego drzewa.</Text>
     </Replace>
+
+    <Replace Tag="LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION" Language="pl_PL">
+      <Text>Uprość nawigację po drzewie</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION_TOOLTIP" Language="pl_PL">
+      <Text>Strzałka w prawo rozwija element i przechodzi do jego pierwszego dziecka jednym naciśnięciem. Strzałka w lewo z dziecka wraca do rodzica i zwija go.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT" Language="pl_PL">
+      <Text>Odczytuj liczbę elementów drzewa</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT_TOOLTIP" Language="pl_PL">
+      <Text>Podaje liczbę widocznych dzieci podczas odczytywania rozwiniętego elementu drzewa.</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH" Language="pl_PL">
       <Text>Długość podziału fragmentu</Text>
     </Replace>

@@ -56,6 +56,12 @@ VALUES
     ('TreeHomeEndCurrentDepth', 'UI', 50, 'bool', 'checkbox', 'true',
      'LOC_CAI_SETTING_TREE_HOME_END_CURRENT_DEPTH', 'LOC_CAI_SETTING_TREE_HOME_END_CURRENT_DEPTH_TOOLTIP', NULL),
 
+    ('SimplifyTreeNavigation', 'UI', 52, 'bool', 'checkbox', 'false',
+     'LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION', 'LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION_TOOLTIP', NULL),
+
+    ('SpeakTreeItemCount', 'UI', 54, 'bool', 'checkbox', 'true',
+     'LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT', 'LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT_TOOLTIP', NULL),
+
     ('TokenSplitLength', 'UI', 60, 'number', 'editbox', '75',
      'LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH', 'LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH_TOOLTIP', 'NumbersOnly'),
 

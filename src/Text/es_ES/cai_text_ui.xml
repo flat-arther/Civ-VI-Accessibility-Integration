@@ -6742,6 +6742,19 @@
       <Text>Cuando está activado, Inicio y Fin van al primer y al último elemento visible del nivel actual del árbol. Cuando está desactivado, van al principio y al final visible del árbol completo.</Text>
     </Replace>
 
+    <Replace Tag="LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION" Language="es_ES">
+      <Text>Simplificar la navegación por el árbol</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION_TOOLTIP" Language="es_ES">
+      <Text>Derecha expande un elemento y va a su primer hijo con una sola pulsación. Izquierda desde un hijo vuelve al padre y lo contrae.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT" Language="es_ES">
+      <Text>Leer el número de elementos del árbol</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT_TOOLTIP" Language="es_ES">
+      <Text>Incluye el número de hijos visibles al anunciar un elemento expandido del árbol.</Text>
+    </Replace>
+
     <Replace Tag="LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH" Language="es_ES">
       <Text>Longitud de división del texto</Text>
     </Replace>

@@ -6811,6 +6811,19 @@
       <Text>When enabled, Home and End move to the first and last visible item at the current tree depth. When disabled, they move to the beginning and visible end of the full tree.</Text>
     </Row>
 
+    <Row Tag="LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION" Language="en_US">
+      <Text>Simplify tree navigation</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION_TOOLTIP" Language="en_US">
+      <Text>Right expands a tree item and moves to its first child in one press. Left from a child returns to its parent and collapses it.</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT" Language="en_US">
+      <Text>Read tree item count</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT_TOOLTIP" Language="en_US">
+      <Text>Include the number of visible child items when an expanded tree item is announced.</Text>
+    </Row>
+
     <Row Tag="LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH" Language="en_US">
       <Text>Token split length</Text>
     </Row>

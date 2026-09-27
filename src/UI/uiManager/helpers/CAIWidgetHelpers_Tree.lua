@@ -234,9 +234,9 @@ function T.NavigateTreeLast(root)
     return true
 end
 
----Right key behavior on the focused item: expand if collapsed node; descend if
----already expanded. A focused widget that is not itself a TreeItem (a plain leaf
----placed inside the tree) is a leaf by default, so Right is a no-op on it.
+---Right key behavior on the focused item: expand if collapsed, then descend
+---immediately in simplified mode or on the next press in default mode.
+---A plain leaf inside the tree has no Right action.
 ---@param root UIWidget
 ---@return boolean
 function T.ExpandOrDescend(root)
@@ -247,7 +247,7 @@ function T.ExpandOrDescend(root)
     end
     if not item.IsExpanded then
         item:Expand()
-        return true
+        if not CAISettings.GetBool("SimplifyTreeNavigation") then return true end
     end
     local first
     for _, c in ipairs(item.Children) do
@@ -258,13 +258,13 @@ function T.ExpandOrDescend(root)
         return false
     end
     root.Manager:ClearSearchBuffer(false)
+    ClearDescent(first)
     root.Manager:SetFocus(first)
     return true
 end
 
----Left key behavior on the focused item: collapse if it is an expanded TreeItem;
----otherwise jump to the parent TreeItem. A focused non-TreeItem leaf is treated as
----a leaf, so Left ascends to its enclosing TreeItem rather than collapsing it.
+---Left key behavior on the focused item: collapse an expanded TreeItem; otherwise
+---jump to its parent TreeItem, also collapsing that parent in simplified mode.
 ---@param root UIWidget
 ---@return boolean
 function T.CollapseOrAscend(root)
@@ -278,6 +278,9 @@ function T.CollapseOrAscend(root)
     if not parent then
         LogMessage("Tree helper CollapseOrAscend could not find parent tree item")
         return false
+    end
+    if CAISettings.GetBool("SimplifyTreeNavigation") then
+        parent:Collapse(false, true)
     end
     ClearDescent(parent)
     root.Manager:SetFocus(parent)

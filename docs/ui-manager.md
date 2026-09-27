@@ -813,6 +813,12 @@ the focused row's sibling level. The helper module
   TreeItem if collapsed.
 - `ToggleFocused(root)` — Enter key on Tree: toggle focused item's expand
   state. Bubbles only when the focused item has no `activate` listener.
+- `SimplifyTreeNavigation` (default off) makes Right expand and enter the first
+  visible child in one press. Left from a child returns to and collapses its
+  parent; Left on an expanded focused item collapses that item. The collapse
+  event still fires, and the returned-to parent is announced once.
+- `SpeakTreeItemCount` (default on) controls whether an expanded TreeItem's
+  value includes its visible-child count on focus and expansion.
 
 ### Type-to-find search
 

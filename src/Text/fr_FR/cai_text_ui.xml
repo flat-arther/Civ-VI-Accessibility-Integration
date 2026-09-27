@@ -6749,6 +6749,19 @@
       <Text>Lorsque activé, Début et Fin vont au premier et au dernier élément visible de la profondeur actuelle de l'arborescence. Lorsque désactivé, ils vont au début et à la fin visible de toute l'arborescence.</Text>
     </Replace>
 
+    <Replace Tag="LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION" Language="fr_FR">
+      <Text>Simplifier la navigation dans l'arborescence</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION_TOOLTIP" Language="fr_FR">
+      <Text>Droite développe un élément et va à son premier enfant en une seule pression. Gauche depuis un enfant revient à son parent et le réduit.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT" Language="fr_FR">
+      <Text>Lire le nombre d'éléments de l'arborescence</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT_TOOLTIP" Language="fr_FR">
+      <Text>Annonce le nombre d'enfants visibles lorsqu'un élément développé de l'arborescence est lu.</Text>
+    </Replace>
+
     <Replace Tag="LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH" Language="fr_FR">
       <Text>Longueur de découpage</Text>
     </Replace>

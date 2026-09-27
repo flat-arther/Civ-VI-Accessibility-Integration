@@ -41,8 +41,11 @@ function TreeItemWidget.Create(mgr, id, props)
         if self:IsLeaf() then return "" end
         if self.IsExpanded then
             local n = #self:GetVisibleChildren()
-            return Locale.Lookup("LOC_CAI_TREEVIEW_EXPANDED")
-                .. ", " .. Locale.Lookup("LOC_CAI_TREEVIEW_ITEM_COUNT", n)
+            local expanded = Locale.Lookup("LOC_CAI_TREEVIEW_EXPANDED")
+            if CAISettings.GetBool("SpeakTreeItemCount") then
+                return expanded .. ", " .. Locale.Lookup("LOC_CAI_TREEVIEW_ITEM_COUNT", n)
+            end
+            return expanded
         end
         return Locale.Lookup("LOC_CAI_TREEVIEW_COLLAPSED")
     end)
@@ -104,15 +107,16 @@ end
 ---are always silent; `silent` controls whether this node emits `collapsed` and
 ---speaks.
 ---@param silent? boolean
+---@param skipAnnouncement? boolean Keep the collapsed event while focus moves to this item.
 ---@return boolean
-function TreeItemWidget:Collapse(silent)
+function TreeItemWidget:Collapse(silent, skipAnnouncement)
     if not self.IsExpanded then return false end
     self.IsExpanded = false
     self._lastFocusedChild = nil
     CollapseDescendants(self)
     if not silent then
         self:Emit("collapsed")
-        self:SpeakElements({ "value" })
+        if not skipAnnouncement then self:SpeakElements({ "value" }) end
     end
     return true
 end

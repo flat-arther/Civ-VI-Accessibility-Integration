@@ -6759,6 +6759,19 @@
       <Text>Quando ativado, Home e End vão para o primeiro e o último item visível na profundidade atual da árvore. Quando desativado, vão para o início e o fim visível da árvore completa.</Text>
     </Replace>
 
+    <Replace Tag="LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION" Language="pt_BR">
+      <Text>Simplificar a navegação na árvore</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_SIMPLIFY_TREE_NAVIGATION_TOOLTIP" Language="pt_BR">
+      <Text>Direita expande um item e vai ao primeiro filho com uma tecla. Esquerda a partir de um filho volta ao pai e o recolhe.</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT" Language="pt_BR">
+      <Text>Ler a quantidade de itens da árvore</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_SETTING_SPEAK_TREE_ITEM_COUNT_TOOLTIP" Language="pt_BR">
+      <Text>Inclui a quantidade de filhos visíveis ao anunciar um item expandido da árvore.</Text>
+    </Replace>
+
     <Replace Tag="LOC_CAI_SETTING_TOKEN_SPLIT_LENGTH" Language="pt_BR">
       <Text>Comprimento de divisão de trecho</Text>
     </Replace>
