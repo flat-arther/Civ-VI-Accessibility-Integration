@@ -1475,7 +1475,7 @@
       <Text>已使用{1_Used}个槽位，共{2_Total}个</Text>
     </Replace>
     <Replace Tag="LOC_CAI_GOVERNMENT_CHOOSE_POLICY" Language="zh_Hans_CN">
-      <Text>选择{1_Category}政策</Text>
+      <Text>选择{1_Type}政策</Text>
     </Replace>
     <Replace Tag="LOC_CAI_GOVERNMENT_VIEW_ALL_POLICIES" Language="zh_Hans_CN">
       <Text>查看所有政策</Text>
@@ -3575,6 +3575,15 @@
     </Replace>
     <Replace Tag="LOC_CAI_PLOT_NO_AMBIENT_INFO" Language="zh_Hans_CN">
       <Text>没有其他信息</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_EDGE_FLOW" Language="zh_Hans_CN">
+      <Text>{1_Edge}侧，流向{2_Flow}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_EDGE" Language="zh_Hans_CN">
+      <Text>{1_Edge}侧</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_FLOW" Language="zh_Hans_CN">
+      <Text>{1_RiverText}。{2_Directions}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS" Language="zh_Hans_CN">
       <Text>{1_RiverText}，{2_Directions}</Text>
@@ -8062,6 +8071,12 @@
     <Replace Tag="LOC_CAI_WB_REVEAL_ALL" Language="zh_Hans_CN">
       <Text>显示全部</Text>
     </Replace>
+    <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM" Language="zh_Hans_CN">
+      <Text>按上游到下游顺序朗读地理信息中的河段</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM_TOOLTIP" Language="zh_Hans_CN">
+      <Text>启用风云变幻时，在地理信息中按上游到下游顺序排列相连的河段。地理信息默认绑定到B键。关闭此选项后，使用默认的顺时针边缘顺序。此设置仅影响地理信息。</Text>
+    </Row>
     <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS" Language="zh_Hans_CN">
       <Text>在多人游戏中显示科技和市政弹窗</Text>
     </Row>
@@ -8076,6 +8091,9 @@
     </Row>
     <Row Tag="LOC_CAI_WB_BRUSH_LOCK_OFF" Language="zh_Hans_CN">
       <Text>笔刷锁定已关闭</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_CHARGE_COST" Language="zh_Hans_CN">
+      <Text>消耗使用次数：{1_Amount}</Text>
     </Row>
   </LocalizedText>
 </GameData>

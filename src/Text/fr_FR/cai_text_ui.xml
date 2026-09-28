@@ -1473,7 +1473,7 @@
       <Text>{1_Used} emplacements utilisés sur {2_Total}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_GOVERNMENT_CHOOSE_POLICY" Language="fr_FR">
-      <Text>Choisir une doctrine {1_Category}</Text>
+      <Text>Choisir une doctrine : {1_Type}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_GOVERNMENT_VIEW_ALL_POLICIES" Language="fr_FR">
       <Text>Voir toutes les doctrines</Text>
@@ -3568,6 +3568,15 @@
     </Replace>
     <Replace Tag="LOC_CAI_PLOT_NO_AMBIENT_INFO" Language="fr_FR">
       <Text>Aucune information supplémentaire</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_EDGE_FLOW" Language="fr_FR">
+      <Text>Bord {1_Edge}, courant vers le {2_Flow}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_EDGE" Language="fr_FR">
+      <Text>Bord {1_Edge}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_FLOW" Language="fr_FR">
+      <Text>{1_RiverText}. {2_Directions}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS" Language="fr_FR">
       <Text>{1_RiverText}, {2_Directions}</Text>
@@ -8045,6 +8054,12 @@
     <Replace Tag="LOC_CAI_WB_GOTO_OUT_OF_BOUNDS" Language="fr_FR">
       <Text>Ces coordonnées sont hors limites.</Text>
     </Replace>
+    <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM" Language="fr_FR">
+      <Text>Lire les segments de rivière de la géographie de l’amont vers l’aval</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM_TOOLTIP" Language="fr_FR">
+      <Text>Avec Gathering Storm, lit les segments de rivière connectés de l’amont vers l’aval dans les informations géographiques, associées à B par défaut. Désactivez cette option pour utiliser l’ordre des bords par défaut, dans le sens horaire. Ce réglage concerne uniquement les informations géographiques.</Text>
+    </Row>
     <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS" Language="fr_FR">
       <Text>Afficher les fenêtres de recherche et de dogmes en multijoueur</Text>
     </Row>
@@ -8059,6 +8074,9 @@
     </Row>
     <Row Tag="LOC_CAI_WB_BRUSH_LOCK_OFF" Language="fr_FR">
       <Text>Verrouillage du pinceau désactivé</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_CHARGE_COST" Language="fr_FR">
+      <Text>Coûte {1_Amount} {1_Amount : plural 1?charge; other?charges;}</Text>
     </Row>
   </LocalizedText>
 </GameData>

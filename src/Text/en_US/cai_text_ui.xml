@@ -1475,7 +1475,7 @@
       <Text>{1_Used} out of {2_Total} slots used</Text>
     </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_CHOOSE_POLICY" Language="en_US">
-      <Text>Choose {1_Category} policy</Text>
+      <Text>Choose {1_Type} policy</Text>
     </Row>
     <Row Tag="LOC_CAI_GOVERNMENT_VIEW_ALL_POLICIES" Language="en_US">
       <Text>View all policies</Text>
@@ -3622,6 +3622,15 @@
     </Row>
     <Row Tag="LOC_CAI_PLOT_NO_AMBIENT_INFO" Language="en_US">
       <Text>No additional information</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_RIVER_EDGE_FLOW" Language="en_US">
+      <Text>{1_Edge} edge, flowing {2_Flow}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_RIVER_EDGE" Language="en_US">
+      <Text>{1_Edge} edge</Text>
+    </Row>
+    <Row Tag="LOC_CAI_PLOT_RIVER_WITH_FLOW" Language="en_US">
+      <Text>{1_RiverText}. {2_Directions}</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS" Language="en_US">
       <Text>{1_RiverText}, {2_Directions}</Text>
@@ -8076,6 +8085,12 @@
     <Row Tag="LOC_CAI_WB_GOTO_OUT_OF_BOUNDS" Language="en_US">
       <Text>Those coordinates are out of bounds.</Text>
     </Row>
+    <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM" Language="en_US">
+      <Text>Order geography river segments upstream to downstream</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM_TOOLTIP" Language="en_US">
+      <Text>With Gathering Storm active, order connected river segments from upstream to downstream in Geography info, bound to B by default. Turn off to use the default clockwise edge order. This setting only affects Geography info.</Text>
+    </Row>
     <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS" Language="en_US">
       <Text>Show research and civic popups in multiplayer</Text>
     </Row>
@@ -8090,6 +8105,9 @@
     </Row>
     <Row Tag="LOC_CAI_WB_BRUSH_LOCK_OFF" Language="en_US">
       <Text>Brush lock off</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_CHARGE_COST" Language="en_US">
+      <Text>Costs {1_Amount} {1_Amount : plural 1?charge; other?charges;}</Text>
     </Row>
   </LocalizedText>
 </GameData>

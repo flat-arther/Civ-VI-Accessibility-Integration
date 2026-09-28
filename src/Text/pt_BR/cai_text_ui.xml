@@ -1458,7 +1458,7 @@
       <Text>{1_Used} de {2_Total} espaços usados</Text>
     </Replace>
     <Replace Tag="LOC_CAI_GOVERNMENT_CHOOSE_POLICY" Language="pt_BR">
-      <Text>Escolher política {1_Category}</Text>
+      <Text>Escolher política: {1_Type}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_GOVERNMENT_VIEW_ALL_POLICIES" Language="pt_BR">
       <Text>Ver todas as políticas</Text>
@@ -3563,6 +3563,15 @@
     </Replace>
     <Replace Tag="LOC_CAI_PLOT_NO_AMBIENT_INFO" Language="pt_BR">
       <Text>Nenhuma informação adicional</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_EDGE_FLOW" Language="pt_BR">
+      <Text>Borda {1_Edge}, fluindo para o {2_Flow}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_EDGE" Language="pt_BR">
+      <Text>Borda {1_Edge}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_FLOW" Language="pt_BR">
+      <Text>{1_RiverText}. {2_Directions}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS" Language="pt_BR">
       <Text>{1_RiverText}, {2_Directions}</Text>
@@ -8057,6 +8066,12 @@
     <Replace Tag="LOC_CAI_WB_REVEAL_ALL" Language="pt_BR">
       <Text>Revelar tudo</Text>
     </Replace>
+    <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM" Language="pt_BR">
+      <Text>Ordenar os trechos de rio da geografia de montante a jusante</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM_TOOLTIP" Language="pt_BR">
+      <Text>Com Gathering Storm ativo, ordena os trechos de rio conectados de montante a jusante nas informações geográficas, vinculadas a B por padrão. Desative para usar a ordem padrão das bordas, no sentido horário. Esta configuração afeta apenas as informações geográficas.</Text>
+    </Row>
     <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS" Language="pt_BR">
       <Text>Mostrar janelas de pesquisa e cívicos no multijogador</Text>
     </Row>
@@ -8071,6 +8086,9 @@
     </Row>
     <Row Tag="LOC_CAI_WB_BRUSH_LOCK_OFF" Language="pt_BR">
       <Text>Bloqueio do pincel desativado</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_CHARGE_COST" Language="pt_BR">
+      <Text>Custa {1_Amount} {1_Amount : plural 1?carga; other?cargas;}</Text>
     </Row>
   </LocalizedText>
 </GameData>

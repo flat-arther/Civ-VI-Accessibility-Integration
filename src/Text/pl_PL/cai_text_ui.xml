@@ -1475,7 +1475,7 @@
       <Text>Wykorzystano {1_Used} z {2_Total} gniazd</Text>
     </Replace>
     <Replace Tag="LOC_CAI_GOVERNMENT_CHOOSE_POLICY" Language="pl_PL">
-      <Text>Wybierz doktrynę: {1_Category}</Text>
+      <Text>Wybierz doktrynę: {1_Type}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_GOVERNMENT_VIEW_ALL_POLICIES" Language="pl_PL">
       <Text>Pokaż wszystkie doktryny</Text>
@@ -3574,6 +3574,15 @@
     </Replace>
     <Replace Tag="LOC_CAI_PLOT_NO_AMBIENT_INFO" Language="pl_PL">
       <Text>Brak dodatkowych informacji</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_EDGE_FLOW" Language="pl_PL">
+      <Text>Krawędź: {1_Edge}, kierunek przepływu: {2_Flow}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_EDGE" Language="pl_PL">
+      <Text>Krawędź: {1_Edge}</Text>
+    </Replace>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_FLOW" Language="pl_PL">
+      <Text>{1_RiverText}. {2_Directions}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS" Language="pl_PL">
       <Text>{1_RiverText}, {2_Directions}</Text>
@@ -8057,6 +8066,12 @@
     <Replace Tag="LOC_CAI_WB_REVEAL_ALL" Language="pl_PL">
       <Text>Odkryj wszystko</Text>
     </Replace>
+    <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM" Language="pl_PL">
+      <Text>Czytaj odcinki rzek w geografii zgodnie z nurtem</Text>
+    </Row>
+    <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM_TOOLTIP" Language="pl_PL">
+      <Text>Gdy dodatek Gathering Storm jest aktywny, porządkuje połączone odcinki rzek od górnego do dolnego biegu w informacjach geograficznych, domyślnie przypisanych do klawisza B. Wyłącz, aby używać domyślnej kolejności krawędzi zgodnej z ruchem wskazówek zegara. Ustawienie dotyczy wyłącznie informacji geograficznych.</Text>
+    </Row>
     <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS" Language="pl_PL">
       <Text>Pokazuj okna badań i idei w trybie wieloosobowym</Text>
     </Row>
@@ -8071,6 +8086,9 @@
     </Row>
     <Row Tag="LOC_CAI_WB_BRUSH_LOCK_OFF" Language="pl_PL">
       <Text>Blokada pędzla wyłączona</Text>
+    </Row>
+    <Row Tag="LOC_CAI_UNIT_ACTION_CHARGE_COST" Language="pl_PL">
+      <Text>Koszt w ładunkach: {1_Amount}</Text>
     </Row>
   </LocalizedText>
 </GameData>

@@ -568,14 +568,15 @@ local function CacheGreatWorks(data)
 end
 
 local RIVER_SELF_EDGES = {
-    { dir = "LOC_CAI_DIR_E",  hasRiver = function(p) return p ~= nil and p:IsWOfRiver() end },
-    { dir = "LOC_CAI_DIR_SE", hasRiver = function(p) return p ~= nil and p:IsNWOfRiver() end },
-    { dir = "LOC_CAI_DIR_SW", hasRiver = function(p) return p ~= nil and p:IsNEOfRiver() end },
+    { dir = "LOC_CAI_DIR_E",  flowGetter = "GetRiverEFlowDirection", hasRiver = function(p) return p ~= nil and p:IsWOfRiver() end },
+    { dir = "LOC_CAI_DIR_SE", flowGetter = "GetRiverSEFlowDirection", hasRiver = function(p) return p ~= nil and p:IsNWOfRiver() end },
+    { dir = "LOC_CAI_DIR_SW", flowGetter = "GetRiverSWFlowDirection", hasRiver = function(p) return p ~= nil and p:IsNEOfRiver() end },
 }
 
 local RIVER_NEIGHBOR_EDGES = {
     {
         dir = "LOC_CAI_DIR_W",
+        flowGetter = "GetRiverEFlowDirection",
         neighborDir = DirectionTypes.DIRECTION_WEST,
         hasRiver = function(p)
             return p ~= nil and p:IsWOfRiver()
@@ -583,6 +584,7 @@ local RIVER_NEIGHBOR_EDGES = {
     },
     {
         dir = "LOC_CAI_DIR_NW",
+        flowGetter = "GetRiverSEFlowDirection",
         neighborDir = DirectionTypes.DIRECTION_NORTHWEST,
         hasRiver = function(p)
             return p ~= nil and p:IsNWOfRiver()
@@ -590,6 +592,7 @@ local RIVER_NEIGHBOR_EDGES = {
     },
     {
         dir = "LOC_CAI_DIR_NE",
+        flowGetter = "GetRiverSWFlowDirection",
         neighborDir = DirectionTypes.DIRECTION_NORTHEAST,
         hasRiver = function(p)
             return p ~= nil and p:IsNEOfRiver()
@@ -722,6 +725,148 @@ local function GetRiverDirectionString(plot)
     return table.concat(directions, " ")
 end
 
+local RIVER_EDGE_DIRECTION_TAGS = {
+    LOC_CAI_DIR_NE = "LOC_DIRECTION_NORTH_EAST",
+    LOC_CAI_DIR_E = "LOC_DIRECTION_EAST",
+    LOC_CAI_DIR_SE = "LOC_DIRECTION_SOUTH_EAST",
+    LOC_CAI_DIR_SW = "LOC_DIRECTION_SOUTH_WEST",
+    LOC_CAI_DIR_W = "LOC_DIRECTION_WEST",
+    LOC_CAI_DIR_NW = "LOC_DIRECTION_NORTH_WEST",
+}
+
+local missingRiverFlowGetters = {}
+
+-- Corners run clockwise: top, upper-right, lower-right, bottom, lower-left, upper-left.
+local RIVER_EDGE_CORNERS = {
+    LOC_CAI_DIR_NE = { first = 1, last = 2, forward = "FLOWDIRECTION_SOUTHEAST", reverse = "FLOWDIRECTION_NORTHWEST" },
+    LOC_CAI_DIR_E = { first = 2, last = 3, forward = "FLOWDIRECTION_SOUTH", reverse = "FLOWDIRECTION_NORTH" },
+    LOC_CAI_DIR_SE = { first = 3, last = 4, forward = "FLOWDIRECTION_SOUTHWEST", reverse = "FLOWDIRECTION_NORTHEAST" },
+    LOC_CAI_DIR_SW = { first = 4, last = 5, forward = "FLOWDIRECTION_NORTHWEST", reverse = "FLOWDIRECTION_SOUTHEAST" },
+    LOC_CAI_DIR_W = { first = 5, last = 6, forward = "FLOWDIRECTION_NORTH", reverse = "FLOWDIRECTION_SOUTH" },
+    LOC_CAI_DIR_NW = { first = 6, last = 1, forward = "FLOWDIRECTION_NORTHEAST", reverse = "FLOWDIRECTION_SOUTHWEST" },
+}
+
+local function OrderRiverFlowSegments(segments)
+    local visited = {}
+    local chains = {}
+
+    local function AppendChain(segment)
+        local texts = {}
+        while segment ~= nil and not visited[segment] do
+            visited[segment] = true
+            table.insert(texts, segment.text)
+            local nextSegment
+            if segment.endCorner ~= nil then
+                for _, candidate in ipairs(segments) do
+                    if not visited[candidate] and candidate.startCorner == segment.endCorner then
+                        nextSegment = candidate
+                        break
+                    end
+                end
+            end
+            segment = nextSegment
+        end
+        table.insert(chains, table.concat(texts, "; "))
+    end
+
+    for _, segment in ipairs(segments) do
+        local hasPredecessor = false
+        if segment.startCorner ~= nil then
+            for _, candidate in ipairs(segments) do
+                if candidate.endCorner == segment.startCorner then
+                    hasPredecessor = true
+                    break
+                end
+            end
+        end
+        if not hasPredecessor and not visited[segment] then
+            AppendChain(segment)
+        end
+    end
+
+    -- Retain every segment even for an unexpected closed loop.
+    for _, segment in ipairs(segments) do
+        if not visited[segment] then
+            AppendChain(segment)
+        end
+    end
+    return table.concat(chains, ". ")
+end
+
+local function GetRiverFlowDirectionString(plot)
+    if plot == nil or not plot:IsRiver() then
+        return nil
+    end
+
+    local flowTags = {
+        [FlowDirectionTypes.FLOWDIRECTION_NORTH] = "LOC_DIRECTION_NORTH",
+        [FlowDirectionTypes.FLOWDIRECTION_NORTHEAST] = "LOC_DIRECTION_NORTH_EAST",
+        [FlowDirectionTypes.FLOWDIRECTION_SOUTHEAST] = "LOC_DIRECTION_SOUTH_EAST",
+        [FlowDirectionTypes.FLOWDIRECTION_SOUTH] = "LOC_DIRECTION_SOUTH",
+        [FlowDirectionTypes.FLOWDIRECTION_SOUTHWEST] = "LOC_DIRECTION_SOUTH_WEST",
+        [FlowDirectionTypes.FLOWDIRECTION_NORTHWEST] = "LOC_DIRECTION_NORTH_WEST",
+    }
+    local presentEdges = {}
+    local function AddEdge(owner, edge)
+        if not edge.hasRiver(owner) then
+            return
+        end
+
+        local edgeText = Locale.Lookup(RIVER_EDGE_DIRECTION_TAGS[edge.dir])
+        local getter = owner[edge.flowGetter]
+        local flowTag
+        local flowDirection
+        if getter ~= nil then
+            flowDirection = getter(owner)
+            flowTag = flowTags[flowDirection]
+        elseif not missingRiverFlowGetters[edge.flowGetter] then
+            print("CAI river flow getter unavailable in UI: " .. edge.flowGetter)
+            missingRiverFlowGetters[edge.flowGetter] = true
+        end
+
+        local segment = {}
+        if flowTag ~= nil then
+            segment.text = Locale.Lookup("LOC_CAI_PLOT_RIVER_EDGE_FLOW", edgeText, Locale.Lookup(flowTag))
+        else
+            segment.text = Locale.Lookup("LOC_CAI_PLOT_RIVER_EDGE", edgeText)
+        end
+        local corners = RIVER_EDGE_CORNERS[edge.dir]
+        if flowDirection == FlowDirectionTypes[corners.forward] then
+            segment.startCorner, segment.endCorner = corners.first, corners.last
+        elseif flowDirection == FlowDirectionTypes[corners.reverse] then
+            segment.startCorner, segment.endCorner = corners.last, corners.first
+        end
+        presentEdges[edge.dir] = segment
+    end
+
+    for _, edge in ipairs(RIVER_SELF_EDGES) do
+        AddEdge(plot, edge)
+    end
+    local x, y = plot:GetX(), plot:GetY()
+    for _, edge in ipairs(RIVER_NEIGHBOR_EDGES) do
+        -- The neighboring owner reports the same absolute downstream flow.
+        AddEdge(Map.GetAdjacentPlot(x, y, edge.neighborDir), edge)
+    end
+
+    local segments = {}
+    for _, dirTag in ipairs(RIVER_SPOKEN_ORDER) do
+        if presentEdges[dirTag] ~= nil then
+            table.insert(segments, presentEdges[dirTag])
+        end
+    end
+    if #segments == 0 then
+        return nil
+    end
+    if CAISettings.GetBool("OrderGeographyRiversDownstream") then
+        return OrderRiverFlowSegments(segments)
+    end
+    local directions = {}
+    for _, segment in ipairs(segments) do
+        table.insert(directions, segment.text)
+    end
+    return table.concat(directions, "; ")
+end
+
 local function LogRiverDebug(plot, data, directionString)
     if plot == nil then
         return
@@ -787,7 +932,7 @@ local function LogRiverDebug(plot, data, directionString)
     ))
 end
 
-local function FormatNamedRiverString(riverNames, directionString)
+local function FormatNamedRiverString(riverNames, directionString, sharedDirections)
     if riverNames == nil then
         return nil
     end
@@ -797,7 +942,7 @@ local function FormatNamedRiverString(riverNames, directionString)
         for _, riverName in pairs(riverNames) do
             if riverName ~= nil and riverName ~= "" then
                 local riverText = Locale.Lookup("LOC_RIVER_TOOLTIP_STRING", riverName)
-                if directionString ~= nil and directionString ~= "" then
+                if not sharedDirections and directionString ~= nil and directionString ~= "" then
                     riverText = Locale.Lookup("LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS", riverText, directionString)
                 end
                 table.insert(localizedNames, riverText)
@@ -805,7 +950,7 @@ local function FormatNamedRiverString(riverNames, directionString)
         end
     else
         local riverText = Locale.Lookup("LOC_RIVER_TOOLTIP_STRING", riverNames)
-        if directionString ~= nil and directionString ~= "" then
+        if not sharedDirections and directionString ~= nil and directionString ~= "" then
             riverText = Locale.Lookup("LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS", riverText, directionString)
         end
         table.insert(localizedNames, riverText)
@@ -815,6 +960,13 @@ local function FormatNamedRiverString(riverNames, directionString)
         return nil
     end
 
+    if sharedDirections then
+        local riverText = table.concat(localizedNames, "; ")
+        if directionString ~= nil then
+            return Locale.Lookup("LOC_CAI_PLOT_RIVER_WITH_FLOW", riverText, directionString)
+        end
+        return riverText
+    end
     return table.concat(localizedNames, "[NEWLINE]")
 end
 
@@ -839,11 +991,17 @@ local function GetNamedRiverString(data, plot)
         return nil
     end
 
-    local directionString = GetRiverDirectionString(plot)
+    local includeFlow = IsExpansion2Active()
+    local directionString
+    if includeFlow then
+        directionString = GetRiverFlowDirectionString(plot)
+    else
+        directionString = GetRiverDirectionString(plot)
+    end
     LogRiverDebug(plot, data, directionString)
 
     if IS_XP2_TOOLTIP and data.RiverNames then
-        local riverString = FormatNamedRiverString(data.RiverNames, directionString)
+        local riverString = FormatNamedRiverString(data.RiverNames, directionString, includeFlow)
         if riverString ~= nil then
             return riverString
         end
@@ -851,6 +1009,9 @@ local function GetNamedRiverString(data, plot)
 
     local riverString = Locale.Lookup("LOC_TOOLTIP_RIVER")
     if directionString ~= nil then
+        if includeFlow then
+            return Locale.Lookup("LOC_CAI_PLOT_RIVER_WITH_FLOW", riverString, directionString)
+        end
         return Locale.Lookup("LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS", riverString, directionString)
     end
 

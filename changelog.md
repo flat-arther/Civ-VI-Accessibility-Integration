@@ -2,15 +2,20 @@
 
 ### Added
 
+- Builder improvement, harvest, feature removal and planting actions, and national park creation now state their charge cost at the start of the action tooltip.
+- With Gathering Storm active, B's river readout now gives the flow direction along each edge of the tile.
+- Added a Gameplay setting to read connected river segments upstream to downstream in geography information, default B. It is on by default; turning it off restores clockwise edge order.
 - Added UI settings to enter a tree item with one Right press and leave and collapse it with one Left press, and to control whether expanded tree items read their item count. Simplified navigation is off by default; item counts are on by default.
 
 ### Changed
 
+- The city-management scanner's Yields category includes purchasable tiles
 - The tile readout now names the feature first, says "Hill" or "Mountain" as a separate word, and leaves out the terrain when the feature already implies it. For example, "Grassland (Hills), Woods" is now "Woods, Hill, Grassland", "Grassland, Marsh" is now "Marsh", and a natural wonder is named on its own. Waypoint and target labels follow the same wording.
 - Unexplored tiles are now called "Unexplored" instead of "Uncharted Territory".
 
 ### Fixed
 
+- With Extended Policy Cards, the government policy picker and viewer now use Name, Type, and Impact columns matching Better Reports, omit repeated table/tree titles and policy labels, and read impact alongside policy names in tree view. The picker is properly labeled
 - Modded units that can transfer to another city now show the city destination list.
 
 ## [1.5.2] - 2026-09-25

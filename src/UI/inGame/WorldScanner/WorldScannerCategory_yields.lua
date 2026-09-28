@@ -1,6 +1,6 @@
 include("cityManagementInterfaceHelpers_CAI")
 
--- Scanner category: every workable tile of the head-selected city, grouped by
+-- Scanner category: workable and purchasable tiles of the head-selected city, grouped by
 -- yield type and ranked within each type. It answers "what is my best food /
 -- production / gold tile". Only active while citizen management is open (the
 -- same context that drives the city management category), and it sits right
@@ -67,8 +67,8 @@ local function BuildValidator()
 
         local validateStateData = CAICityManagementInterface.GetStateData()
         return validateStateData ~= nil
-            and validateStateData.CitizenPlots ~= nil
-            and validateStateData.CitizenPlots[item.PlotIndex] ~= nil
+            and validateStateData.ActivePlots ~= nil
+            and validateStateData.ActivePlots[item.PlotIndex] ~= nil
     end
 end
 
@@ -82,11 +82,11 @@ function CAIWorldScannerCategory_Yields.Scan(context)
     end
 
     local stateData = CAICityManagementInterface.GetStateData()
-    if stateData == nil or stateData.CitizenPlots == nil then
+    if stateData == nil or stateData.ActivePlots == nil then
         return out
     end
 
-    for plotId in pairs(stateData.CitizenPlots) do
+    for plotId in pairs(stateData.ActivePlots) do
         local yields = CAICityManagementInterface.GetPlotYields(plotId)
         if yields ~= nil and #yields.Entries > 0 then
             -- One row per non-zero yield: the tile is filed under every yield it

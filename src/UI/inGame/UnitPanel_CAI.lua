@@ -2166,6 +2166,42 @@ GetUnitActionLabel = function(action)
     return Locale.Lookup("LOC_OPTIONS_HOTKEY_CATEGORY_UNIT")
 end
 
+local function GetMissingUnitActionChargeCost(action)
+    local unit = GetSelectedUnit()
+    if unit == nil then
+        return nil
+    end
+
+    local unitInfo = GameInfo.Units[unit:GetUnitType()]
+    local actionHash = action.userTag
+    if actionHash == UnitOperationTypes.DESIGNATE_PARK then
+        return unitInfo.ParkCharges > 0 and 1 or nil
+    end
+
+    if unitInfo.BuildCharges <= 0 then
+        return nil
+    end
+
+    if IsBuildingImprovement(actionHash) then
+        local improvement = GameInfo.Improvements[action.CallbackVoid1]
+        for row in GameInfo.Improvement_ValidBuildUnits() do
+            if row.ImprovementType == improvement.ImprovementType and row.UnitType == unitInfo.UnitType then
+                return (row.ConsumesCharge == true or row.ConsumesCharge == 1) and 1 or nil
+            end
+        end
+        -- A custom action may allow a build without a matching database rule.
+        LogWarn("CAI UnitPanel charge cost has no build rule for " .. unitInfo.UnitType .. ": " .. improvement.ImprovementType)
+        return nil
+    end
+
+    if actionHash == UnitOperationTypes.HARVEST_RESOURCE
+        or actionHash == UnitOperationTypes.REMOVE_FEATURE
+        or actionHash == UnitOperationTypes.PLANT_FOREST then
+        return 1
+    end
+    return nil
+end
+
 GetUnitActionTooltip = function(action)
     if action == nil then
         return ""
@@ -2177,6 +2213,12 @@ GetUnitActionTooltip = function(action)
         tooltip = ""
     else
         tooltip = tooltip:gsub(label, "")
+    end
+
+    local chargeCost = GetMissingUnitActionChargeCost(action)
+    if chargeCost ~= nil then
+        local costText = Locale.Lookup("LOC_CAI_UNIT_ACTION_CHARGE_COST", chargeCost)
+        tooltip = tooltip == "" and costText or costText .. "[NEWLINE]" .. tooltip
     end
 
     if action.IsActive ~= nil then

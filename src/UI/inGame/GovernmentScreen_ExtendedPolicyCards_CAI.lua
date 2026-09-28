@@ -25,34 +25,44 @@ local function LoadViewMode()
 end
 
 -- ---------------------------------------------------------------------------
--- Shared column definitions: Name, Slot, Impact. No status column -- every
+-- Shared column definitions: Name, Type, Impact. No status column -- every
 -- policy shown on the Government screen is available/active, unlike the reports
--- policy tab, so status would be noise. Impact is free-form effect text from RMA
--- and has no meaningful order, so only Name and Slot are sortable.
+-- policy tab, so status would be noise. Impact uses the same yield summary and
+-- summed-yield sort as the reports policy tab.
 -- ---------------------------------------------------------------------------
+local function PolicyLabel(ctx, pt)
+    local name = ctx.GetPolicyName(pt)
+    if ctx.IsNewThisTurn(pt) then
+        return name .. ", " .. Locale.Lookup("LOC_CAI_GOVERNMENT_NEW_POLICY")
+    end
+    return name
+end
+
+local function PolicyTypeLabel(ctx, pt)
+    local policy = ctx.GetPolicyData(pt)
+    if not policy then return "" end
+    if policy.SlotType == "SLOT_GREAT_PERSON" then
+        return Locale.Lookup("LOC_PEDIA_GOVERNMENTS_PAGEGROUP_GREATPEOPLE_POLICIES_NAME")
+    end
+    return Locale.Lookup((policy.SlotType:gsub("SLOT_", "LOC_GOVT_POLICY_TYPE_")))
+end
+
 local function BuildColumns(ctx)
     return {
         {
             key = "name",
             header = function() return Locale.Lookup("LOC_CAI_REPORTS_SORT_NAME") end,
-            getCell = function(pt)
-                local name = ctx.GetPolicyName(pt)
-                if ctx.IsNewThisTurn(pt) then
-                    return name .. ", " .. Locale.Lookup("LOC_CAI_GOVERNMENT_NEW_POLICY")
-                end
-                return name
-            end,
-            -- Impact has its own column here, so keep it out of the row tooltip.
-            getTooltip = function(pt) return ctx.GetPolicyTooltipBody(pt) end,
+            getCell = function(pt) return PolicyLabel(ctx, pt) end,
+            getTooltip = function(pt) return ctx.GetPolicyDescription(pt) end,
             sortKey = function(pt) return ctx.GetPolicyName(pt) end,
             sortAscendingDescription = "LOC_CAI_SORT_A_TO_Z",
             sortDescendingDescription = "LOC_CAI_SORT_Z_TO_A",
         },
         {
-            key = "slot",
-            header = function() return Locale.Lookup("LOC_CAI_GOVERNMENT_POLICY_SLOT_HEADER") end,
-            getCell = function(pt) return ctx.GetPolicySlotLabel(pt) end,
-            sortKey = function(pt) return ctx.GetPolicySlotLabel(pt) end,
+            key = "type",
+            header = function() return Locale.Lookup("LOC_CAI_REPORTS_COL_TYPE") end,
+            getCell = function(pt) return PolicyTypeLabel(ctx, pt) end,
+            sortKey = function(pt) return PolicyTypeLabel(ctx, pt) end,
             sortAscendingDescription = "LOC_CAI_SORT_A_TO_Z",
             sortDescendingDescription = "LOC_CAI_SORT_Z_TO_A",
         },
@@ -68,12 +78,11 @@ local function BuildColumns(ctx)
 end
 
 -- Sort dropdown offers only the sortable columns whose order the tree does not
--- already imply. The tree groups by slot, so "sort by slot" is dropped, leaving
--- Name ascending/descending.
+-- already imply. The tree groups by type, so "sort by type" is dropped.
 local function BuildSortOptions(columns)
     local options = {}
     for _, column in ipairs(columns) do
-        if column.sortKey and column.key ~= "slot" then
+        if column.sortKey and column.key ~= "type" then
             local header = column.header()
             options[#options + 1] = {
                 label = header .. ", " .. Locale.Lookup(column.sortAscendingDescription),
@@ -137,13 +146,12 @@ local function BuildPanel(ctx, opts)
     -- --- Table view ---------------------------------------------------------
     -- Named dataTable, not table, to avoid shadowing Lua's table library.
     local dataTable = mgr:CreateWidget(opts.id .. "_Table", "DataTable", {
-        Label = opts.title,
         HiddenPredicate = function() return viewMode ~= "table" end,
     })
     dataTable:SetColumns(columns)
     dataTable:SetRowsProvider(GetRows)
     dataTable:SetRowKeyGetter(function(pt) return tostring(pt) end)
-    dataTable:SetRowLabelGetter(function(pt) return ctx.GetPolicyName(pt) end)
+    dataTable:SetRowLabelGetter(function(pt) return PolicyLabel(ctx, pt) end)
     dataTable:SetDefaultSort({ column = sort.column, ascending = sort.ascending })
     dataTable:On("sort_changed", function(_, columnKey, ascending)
         sort = { column = columnKey or "name", ascending = ascending == true }
@@ -167,20 +175,18 @@ local function BuildPanel(ctx, opts)
 
     -- --- Tree view ----------------------------------------------------------
     local tree = mgr:CreateWidget(opts.id .. "_Tree", "Tree", {
-        Label = opts.title,
         HiddenPredicate = function() return viewMode ~= "tree" end,
     })
 
     local function AddLeaf(parent, pt)
         local leaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovEPCPolicy"), "TreeItem", {
             Label = function()
-                local name = ctx.GetPolicyName(pt)
-                if ctx.IsNewThisTurn(pt) then
-                    return name .. ", " .. Locale.Lookup("LOC_CAI_GOVERNMENT_NEW_POLICY")
-                end
-                return name
+                local parts = { PolicyLabel(ctx, pt) }
+                local impact = ctx.GetPolicyEffect(pt)
+                if impact ~= "" then parts[#parts + 1] = impact end
+                return table.concat(parts, ", ")
             end,
-            Tooltip = function() return ctx.GetPolicyTooltip(pt) end,
+            Tooltip = function() return ctx.GetPolicyDescription(pt) end,
             FocusKey = "epcpol:" .. tostring(pt),
         })
         leaf:SetFocusSound("Main_Menu_Mouse_Over")
@@ -337,7 +343,7 @@ CAIGovPolicyPickerEPC = {}
 function CAIGovPolicyPickerEPC.BuildSlotPicker(ctx, slotIndex, rowIndex)
     return BuildPanel(ctx, {
         id       = ctx.PICKER_ID,
-        title    = function() return Locale.Lookup("LOC_CAI_GOVERNMENT_CHOOSE_POLICY", ctx.GetRowName(rowIndex)) end,
+        title    = function() return Locale.Lookup("LOC_CAI_GOVERNMENT_CHOOSE_POLICY", ctx.GetRowTypeName(rowIndex)) end,
         rowIndex = rowIndex,
         emptyLoc = "LOC_CAI_GOVERNMENT_NO_AVAILABLE_POLICIES",
         close    = function() ctx.ClosePicker(true) end,

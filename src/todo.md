@@ -88,7 +88,6 @@
 [x] Fix issue with tutorials losing focus in diplomacy
 [x] Item pos should only be spoken in containers
 [x] Mod tutorials interrupt focus even when tutorial widget is not the top. 
-[ ] Tutorial text that is too long should be split in to multiple rows
 [x] Add amenities to the city banners
 [x] Builders allow you to form escort formations in tutorial. Disable this when not in free roam
 [x] Add scanner category quick slot bindings
@@ -118,6 +117,6 @@
 [x] add dragging to world builder
 [x] Get rid of screen reader interrupt on widget push
 [x] Add a setting for simplified treeview navigation
+[x] River flow direction reporting
 [ ] Add support for real Era Tracker
-[ ] River flow direction reporting
 [ ] Look in to coastal raide yield reporting

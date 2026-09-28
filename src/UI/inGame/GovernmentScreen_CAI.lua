@@ -163,6 +163,11 @@ local function GetRowName(rowIndex)
     return Locale.Lookup(row.Tooltip)
 end
 
+local function GetRowTypeName(rowIndex)
+    local row = GetRowInfo(rowIndex)
+    return Locale.Lookup((row.SlotType:gsub("SLOT_", "LOC_GOVT_FILTER_")))
+end
+
 local function GetEmptyRowText(rowIndex)
     local row = GetRowInfo(rowIndex)
     if not row then return "" end
@@ -298,16 +303,6 @@ local function GetPolicyImpactTotal(policyType)
     local total = 0
     for _, value in pairs(yields) do total = total + value end
     return total
-end
-
--- Slot, age, and description without the effect. Used where impact is shown
--- separately (the Extended Policy Cards table has its own Impact column).
-local function GetPolicyTooltipBody(policyType)
-    return JoinNonEmpty({
-        GetPolicySlotLabel(policyType),
-        GetPolicyAgeIndicator(policyType),
-        GetPolicyDescription(policyType),
-    }, "[NEWLINE]")
 end
 
 local function GetPolicyTooltip(policyType)
@@ -712,13 +707,12 @@ local function BuildPickerContext()
         IS_PIRATES_SCENARIO    = IS_PIRATES_SCENARIO,
         CAI_ROW_ORDER          = CAI_ROW_ORDER,
         GetPolicyName          = GetPolicyName,
-        GetPolicyTooltip       = GetPolicyTooltip,
-        GetPolicyTooltipBody   = GetPolicyTooltipBody,
+        GetPolicyDescription   = GetPolicyDescription,
         GetPolicyEffect        = GetPolicyEffect,
         GetPolicyImpactTotal   = GetPolicyImpactTotal,
-        GetPolicySlotLabel     = GetPolicySlotLabel,
         GetPolicyData          = GetPolicyData,
         GetRowName             = GetRowName,
+        GetRowTypeName         = GetRowTypeName,
         GetRowIndexForSlotType = GetRowIndexForSlotType,
         GetAllPolicyTypes      = GetAllAvailablePolicyTypes,
         IsAssignableToRow      = IsPolicyAssignableToRow,
@@ -818,7 +812,7 @@ local function CreatePolicyPicker(slotIndex, rowIndex)
     end
 
     m_ui.picker = mgr:CreateWidget(PICKER_ID, "Tree", {
-        Label = function() return Locale.Lookup("LOC_CAI_GOVERNMENT_CHOOSE_POLICY", GetRowName(rowIndex)) end,
+        Label = function() return Locale.Lookup("LOC_CAI_GOVERNMENT_CHOOSE_POLICY", GetRowTypeName(rowIndex)) end,
     })
     m_ui.picker:AddInputBindings({
         {
