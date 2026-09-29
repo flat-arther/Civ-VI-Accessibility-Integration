@@ -3576,14 +3576,11 @@
     <Replace Tag="LOC_CAI_PLOT_NO_AMBIENT_INFO" Language="zh_Hans_CN">
       <Text>没有其他信息</Text>
     </Replace>
-    <Replace Tag="LOC_CAI_PLOT_RIVER_EDGE_FLOW" Language="zh_Hans_CN">
-      <Text>{1_Edge}侧，流向{2_Flow}</Text>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_FLOW" Language="zh_Hans_CN">
+      <Text>{1_RiverEdges}，流向{2_Flow}</Text>
     </Replace>
-    <Replace Tag="LOC_CAI_PLOT_RIVER_EDGE" Language="zh_Hans_CN">
-      <Text>{1_Edge}侧</Text>
-    </Replace>
-    <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_FLOW" Language="zh_Hans_CN">
-      <Text>{1_RiverText}。{2_Directions}</Text>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_FLOW_FROM_TO" Language="zh_Hans_CN">
+      <Text>{1_RiverEdges}，从{2_Upstream}流向{3_Downstream}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS" Language="zh_Hans_CN">
       <Text>{1_RiverText}，{2_Directions}</Text>
@@ -8072,10 +8069,10 @@
       <Text>显示全部</Text>
     </Replace>
     <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM" Language="zh_Hans_CN">
-      <Text>按上游到下游顺序朗读地理信息中的河段</Text>
+      <Text>在地理信息中按从上游到下游的顺序排列河流段</Text>
     </Row>
     <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM_TOOLTIP" Language="zh_Hans_CN">
-      <Text>启用风云变幻时，在地理信息中按上游到下游顺序排列相连的河段。地理信息默认绑定到B键。关闭此选项后，使用默认的顺时针边缘顺序。此设置仅影响地理信息。</Text>
+      <Text>启用风云变幻时，在地理信息中按从上游到下游的顺序列出相连的河流边缘，默认快捷键为B。关闭后按顺时针顺序排列边缘。</Text>
     </Row>
     <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS" Language="zh_Hans_CN">
       <Text>在多人游戏中显示科技和市政弹窗</Text>

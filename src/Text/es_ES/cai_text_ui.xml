@@ -3565,14 +3565,11 @@
     <Replace Tag="LOC_CAI_PLOT_NO_AMBIENT_INFO" Language="es_ES">
       <Text>Sin información adicional</Text>
     </Replace>
-    <Replace Tag="LOC_CAI_PLOT_RIVER_EDGE_FLOW" Language="es_ES">
-      <Text>Borde {1_Edge}, fluye hacia el {2_Flow}</Text>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_FLOW" Language="es_ES">
+      <Text>{1_RiverEdges}, fluye hacia {2_Flow}</Text>
     </Replace>
-    <Replace Tag="LOC_CAI_PLOT_RIVER_EDGE" Language="es_ES">
-      <Text>Borde {1_Edge}</Text>
-    </Replace>
-    <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_FLOW" Language="es_ES">
-      <Text>{1_RiverText}. {2_Directions}</Text>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_FLOW_FROM_TO" Language="es_ES">
+      <Text>{1_RiverEdges}, fluye de {2_Upstream} hacia {3_Downstream}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS" Language="es_ES">
       <Text>{1_RiverText}, {2_Directions}</Text>
@@ -8062,10 +8059,10 @@
       <Text>Revelar todo</Text>
     </Replace>
     <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM" Language="es_ES">
-      <Text>Ordenar los tramos de río de geografía de aguas arriba a aguas abajo</Text>
+      <Text>Ordenar los segmentos de río de aguas arriba a aguas abajo en la información geográfica</Text>
     </Row>
     <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM_TOOLTIP" Language="es_ES">
-      <Text>Con Gathering Storm activo, ordena los tramos de río conectados de aguas arriba a aguas abajo en la información geográfica, asignada a B por defecto. Desactiva esta opción para usar el orden predeterminado de los bordes, en sentido horario. Este ajuste solo afecta a la información geográfica.</Text>
+      <Text>Con Gathering Storm activo, enumera los bordes de río conectados de aguas arriba a aguas abajo en la información geográfica, asignada a B por defecto. Desactívalo para usar el orden horario.</Text>
     </Row>
     <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS" Language="es_ES">
       <Text>Mostrar ventanas de investigación y principios en multijugador</Text>

@@ -3623,14 +3623,11 @@
     <Row Tag="LOC_CAI_PLOT_NO_AMBIENT_INFO" Language="en_US">
       <Text>No additional information</Text>
     </Row>
-    <Row Tag="LOC_CAI_PLOT_RIVER_EDGE_FLOW" Language="en_US">
-      <Text>{1_Edge} edge, flowing {2_Flow}</Text>
+    <Row Tag="LOC_CAI_PLOT_RIVER_FLOW" Language="en_US">
+      <Text>{1_RiverEdges}, flows {2_Flow}</Text>
     </Row>
-    <Row Tag="LOC_CAI_PLOT_RIVER_EDGE" Language="en_US">
-      <Text>{1_Edge} edge</Text>
-    </Row>
-    <Row Tag="LOC_CAI_PLOT_RIVER_WITH_FLOW" Language="en_US">
-      <Text>{1_RiverText}. {2_Directions}</Text>
+    <Row Tag="LOC_CAI_PLOT_RIVER_FLOW_FROM_TO" Language="en_US">
+      <Text>{1_RiverEdges}, flows from {2_Upstream} to {3_Downstream}</Text>
     </Row>
     <Row Tag="LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS" Language="en_US">
       <Text>{1_RiverText}, {2_Directions}</Text>
@@ -8089,7 +8086,7 @@
       <Text>Order geography river segments upstream to downstream</Text>
     </Row>
     <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM_TOOLTIP" Language="en_US">
-      <Text>With Gathering Storm active, order connected river segments from upstream to downstream in Geography info, bound to B by default. Turn off to use the default clockwise edge order. This setting only affects Geography info.</Text>
+      <Text>With Gathering Storm active, list connected river edges upstream to downstream in Geography info, bound to B by default. Turn off for clockwise edge order.</Text>
     </Row>
     <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS" Language="en_US">
       <Text>Show research and civic popups in multiplayer</Text>

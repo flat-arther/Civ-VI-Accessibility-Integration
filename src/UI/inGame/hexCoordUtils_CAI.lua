@@ -384,3 +384,167 @@ function HexCoordUtils.plotsInRange(centerX, centerY, radius)
         unexplored = unexplored,
     }
 end
+
+-- River continuation uses the same hex adjacency as cursor navigation.
+do
+
+local EDGE_INDEX = {
+    LOC_CAI_DIR_NE = 1, LOC_CAI_DIR_E = 2, LOC_CAI_DIR_SE = 3,
+    LOC_CAI_DIR_SW = 4, LOC_CAI_DIR_W = 5, LOC_CAI_DIR_NW = 6,
+}
+
+local CURSOR_DIRECTION_TAGS = {
+    [DirectionTypes.DIRECTION_NORTHEAST] = "LOC_DIRECTION_NORTH_EAST",
+    [DirectionTypes.DIRECTION_EAST] = "LOC_DIRECTION_EAST",
+    [DirectionTypes.DIRECTION_SOUTHEAST] = "LOC_DIRECTION_SOUTH_EAST",
+    [DirectionTypes.DIRECTION_SOUTHWEST] = "LOC_DIRECTION_SOUTH_WEST",
+    [DirectionTypes.DIRECTION_WEST] = "LOC_DIRECTION_WEST",
+    [DirectionTypes.DIRECTION_NORTHWEST] = "LOC_DIRECTION_NORTH_WEST",
+}
+
+-- The third edge at each corner lies between these two neighbouring plots.
+-- Its owner and outgoing flow follow vanilla RiversLakes.DoRiver transitions.
+local CORNER_CONTINUATION = {
+    { a = DirectionTypes.DIRECTION_NORTHWEST, b = DirectionTypes.DIRECTION_NORTHEAST,
+      aTag = "LOC_CAI_DIR_NW", bTag = "LOC_CAI_DIR_NE", ownerIsA = true,
+      has = "IsWOfRiver", getter = "GetRiverEFlowDirection",
+      outgoing = "FLOWDIRECTION_NORTH", incoming = "FLOWDIRECTION_SOUTH" },
+    { a = DirectionTypes.DIRECTION_NORTHEAST, b = DirectionTypes.DIRECTION_EAST,
+      aTag = "LOC_CAI_DIR_NE", bTag = "LOC_CAI_DIR_E", ownerIsA = true,
+      has = "IsNWOfRiver", getter = "GetRiverSEFlowDirection",
+      outgoing = "FLOWDIRECTION_NORTHEAST", incoming = "FLOWDIRECTION_SOUTHWEST" },
+    { a = DirectionTypes.DIRECTION_EAST, b = DirectionTypes.DIRECTION_SOUTHEAST,
+      aTag = "LOC_CAI_DIR_E", bTag = "LOC_CAI_DIR_SE", ownerIsA = true,
+      has = "IsNEOfRiver", getter = "GetRiverSWFlowDirection",
+      outgoing = "FLOWDIRECTION_SOUTHEAST", incoming = "FLOWDIRECTION_NORTHWEST" },
+    { a = DirectionTypes.DIRECTION_SOUTHEAST, b = DirectionTypes.DIRECTION_SOUTHWEST,
+      aTag = "LOC_CAI_DIR_SE", bTag = "LOC_CAI_DIR_SW", ownerIsA = false,
+      has = "IsWOfRiver", getter = "GetRiverEFlowDirection",
+      outgoing = "FLOWDIRECTION_SOUTH", incoming = "FLOWDIRECTION_NORTH" },
+    { a = DirectionTypes.DIRECTION_SOUTHWEST, b = DirectionTypes.DIRECTION_WEST,
+      aTag = "LOC_CAI_DIR_SW", bTag = "LOC_CAI_DIR_W", ownerIsA = false,
+      has = "IsNWOfRiver", getter = "GetRiverSEFlowDirection",
+      outgoing = "FLOWDIRECTION_SOUTHWEST", incoming = "FLOWDIRECTION_NORTHEAST" },
+    { a = DirectionTypes.DIRECTION_WEST, b = DirectionTypes.DIRECTION_NORTHWEST,
+      aTag = "LOC_CAI_DIR_W", bTag = "LOC_CAI_DIR_NW", ownerIsA = false,
+      has = "IsNEOfRiver", getter = "GetRiverSWFlowDirection",
+      outgoing = "FLOWDIRECTION_NORTHWEST", incoming = "FLOWDIRECTION_SOUTHEAST" },
+}
+
+local function ReadCornerContinuation(plot, corner, canInspect)
+    local rule = CORNER_CONTINUATION[corner]
+    local a = Map.GetAdjacentPlot(plot:GetX(), plot:GetY(), rule.a)
+    local b = Map.GetAdjacentPlot(plot:GetX(), plot:GetY(), rule.b)
+    if a == nil or b == nil then
+        return { status = "map_edge" }
+    end
+    -- Do not inspect flow beyond the observer's revealed area.
+    if not canInspect(a) or not canInspect(b) then
+        return { status = "unrevealed" }
+    end
+    local owner = rule.ownerIsA and a or b
+    if not owner[rule.has](owner) then
+        return { status = "absent" }
+    end
+    local getter = owner[rule.getter]
+    if getter == nil then
+        return { status = "unknown_flow" }
+    end
+    local flow = getter(owner)
+    if flow == FlowDirectionTypes[rule.incoming] then
+        return { status = "incoming", a = a, b = b, rule = rule }
+    elseif flow ~= FlowDirectionTypes[rule.outgoing] then
+        return { status = "unknown_flow" }
+    end
+    return { status = "outgoing", a = a, b = b, rule = rule }
+end
+
+local function FindPerimeterContinuation(perimeter, segment, upstream)
+    local corner = upstream and segment.startCorner or segment.endCorner
+    local outgoing
+    for _, candidate in ipairs(perimeter) do
+        if candidate ~= segment then
+            local edgeIndex = EDGE_INDEX[candidate.dir]
+            if edgeIndex == corner or edgeIndex % 6 + 1 == corner then
+                if candidate.startCorner == nil or candidate.endCorner == nil then
+                    return nil, "unknown_flow"
+                elseif (upstream and candidate.endCorner or candidate.startCorner) == corner then
+                    if outgoing ~= nil then
+                        return nil, "ambiguous"
+                    end
+                    outgoing = candidate
+                end
+            end
+        end
+    end
+    return outgoing, "known"
+end
+
+local function FindNextRiverPlot(plot, segment, perimeter, canInspect, upstream)
+    local continuationStatus = upstream and "incoming" or "outgoing"
+    local visited = {}
+    while true do
+        if visited[segment] then
+            return { status = "cycle" }
+        end
+        visited[segment] = true
+        if segment.startCorner == nil or segment.endCorner == nil then
+            return { status = "unknown_flow" }
+        end
+
+        local nextSegment, perimeterStatus = FindPerimeterContinuation(perimeter, segment, upstream)
+        if perimeterStatus ~= "known" then
+            return { status = perimeterStatus }
+        end
+        local corner = upstream and segment.startCorner or segment.endCorner
+        local continuation = ReadCornerContinuation(plot, corner, canInspect)
+        if continuation.status ~= "outgoing" and continuation.status ~= "incoming"
+            and continuation.status ~= "absent" then
+            return continuation
+        end
+        if nextSegment ~= nil then
+            if continuation.status == continuationStatus then
+                return { status = "ambiguous" }
+            end
+            -- Trace actual directed connections, including across river-name changes.
+            segment = nextSegment
+        elseif continuation.status == continuationStatus then
+            local rule = continuation.rule
+            local result = { status = "continuation" }
+            -- Stay on this bank: avoid stepping across the segment being traced.
+            if segment.dir == rule.aTag then
+                result.plot, result.direction = continuation.b, rule.b
+                result.alternate = continuation.a
+            elseif segment.dir == rule.bTag then
+                result.plot, result.direction = continuation.a, rule.a
+                result.alternate = continuation.b
+            else
+                error("River segment does not touch its traced corner")
+            end
+            result.directionTag = CURSOR_DIRECTION_TAGS[result.direction]
+            return result
+        else
+            -- This is an absence of reported continuation, not a claim about the whole river.
+            return { status = "no_continuation" }
+        end
+    end
+end
+
+---@param plot Plot
+---@param segment table Directed starting segment with dir/startCorner/endCorner.
+---@param perimeter table[] All reported river segments around this plot, regardless of river name.
+---@param canInspect fun(plot:Plot):boolean Observer reveal check, including World Builder visibility.
+---@return table result Contains status; a continuation also has plot, direction, directionTag and alternate.
+function HexCoordUtils.FindNextDownstreamPlot(plot, segment, perimeter, canInspect)
+    return FindNextRiverPlot(plot, segment, perimeter, canInspect, false)
+end
+
+---@param plot Plot
+---@param segment table Directed starting segment with dir/startCorner/endCorner.
+---@param perimeter table[] All reported river segments around this plot, regardless of river name.
+---@param canInspect fun(plot:Plot):boolean Observer reveal check, including World Builder visibility.
+---@return table result Contains status; a continuation also has plot, direction, directionTag and alternate.
+function HexCoordUtils.FindNextUpstreamPlot(plot, segment, perimeter, canInspect)
+    return FindNextRiverPlot(plot, segment, perimeter, canInspect, true)
+end
+end

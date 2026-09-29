@@ -3569,14 +3569,11 @@
     <Replace Tag="LOC_CAI_PLOT_NO_AMBIENT_INFO" Language="fr_FR">
       <Text>Aucune information supplémentaire</Text>
     </Replace>
-    <Replace Tag="LOC_CAI_PLOT_RIVER_EDGE_FLOW" Language="fr_FR">
-      <Text>Bord {1_Edge}, courant vers le {2_Flow}</Text>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_FLOW" Language="fr_FR">
+      <Text>{1_RiverEdges}, coule vers {2_Flow}</Text>
     </Replace>
-    <Replace Tag="LOC_CAI_PLOT_RIVER_EDGE" Language="fr_FR">
-      <Text>Bord {1_Edge}</Text>
-    </Replace>
-    <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_FLOW" Language="fr_FR">
-      <Text>{1_RiverText}. {2_Directions}</Text>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_FLOW_FROM_TO" Language="fr_FR">
+      <Text>{1_RiverEdges}, coule de {2_Upstream} vers {3_Downstream}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS" Language="fr_FR">
       <Text>{1_RiverText}, {2_Directions}</Text>
@@ -8055,10 +8052,10 @@
       <Text>Ces coordonnées sont hors limites.</Text>
     </Replace>
     <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM" Language="fr_FR">
-      <Text>Lire les segments de rivière de la géographie de l’amont vers l’aval</Text>
+      <Text>Lire les segments de rivière en amont vers l’aval dans les informations géographiques</Text>
     </Row>
     <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM_TOOLTIP" Language="fr_FR">
-      <Text>Avec Gathering Storm, lit les segments de rivière connectés de l’amont vers l’aval dans les informations géographiques, associées à B par défaut. Désactivez cette option pour utiliser l’ordre des bords par défaut, dans le sens horaire. Ce réglage concerne uniquement les informations géographiques.</Text>
+      <Text>Avec Gathering Storm actif, liste les bords de rivière reliés en amont vers l’aval dans les informations géographiques, touche B par défaut. Désactivez pour un ordre horaire.</Text>
     </Row>
     <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS" Language="fr_FR">
       <Text>Afficher les fenêtres de recherche et de dogmes en multijoueur</Text>

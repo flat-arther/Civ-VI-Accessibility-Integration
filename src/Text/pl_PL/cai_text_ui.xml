@@ -3575,14 +3575,11 @@
     <Replace Tag="LOC_CAI_PLOT_NO_AMBIENT_INFO" Language="pl_PL">
       <Text>Brak dodatkowych informacji</Text>
     </Replace>
-    <Replace Tag="LOC_CAI_PLOT_RIVER_EDGE_FLOW" Language="pl_PL">
-      <Text>Krawędź: {1_Edge}, kierunek przepływu: {2_Flow}</Text>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_FLOW" Language="pl_PL">
+      <Text>{1_RiverEdges}, płynie w kierunku {2_Flow}</Text>
     </Replace>
-    <Replace Tag="LOC_CAI_PLOT_RIVER_EDGE" Language="pl_PL">
-      <Text>Krawędź: {1_Edge}</Text>
-    </Replace>
-    <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_FLOW" Language="pl_PL">
-      <Text>{1_RiverText}. {2_Directions}</Text>
+    <Replace Tag="LOC_CAI_PLOT_RIVER_FLOW_FROM_TO" Language="pl_PL">
+      <Text>{1_RiverEdges}, płynie od {2_Upstream} do {3_Downstream}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS" Language="pl_PL">
       <Text>{1_RiverText}, {2_Directions}</Text>
@@ -8067,10 +8064,10 @@
       <Text>Odkryj wszystko</Text>
     </Replace>
     <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM" Language="pl_PL">
-      <Text>Czytaj odcinki rzek w geografii zgodnie z nurtem</Text>
+      <Text>Porządkuj odcinki rzek zgodnie z nurtem w informacjach geograficznych</Text>
     </Row>
     <Row Tag="LOC_CAI_SETTING_GEOGRAPHY_RIVERS_DOWNSTREAM_TOOLTIP" Language="pl_PL">
-      <Text>Gdy dodatek Gathering Storm jest aktywny, porządkuje połączone odcinki rzek od górnego do dolnego biegu w informacjach geograficznych, domyślnie przypisanych do klawisza B. Wyłącz, aby używać domyślnej kolejności krawędzi zgodnej z ruchem wskazówek zegara. Ustawienie dotyczy wyłącznie informacji geograficznych.</Text>
+      <Text>Gdy Gathering Storm jest aktywne, wymienia połączone krawędzie rzek zgodnie z nurtem w informacjach geograficznych, domyślnie pod klawiszem B. Wyłącz, aby użyć kolejności zgodnej z ruchem wskazówek zegara.</Text>
     </Row>
     <Row Tag="LOC_CAI_SETTING_MULTIPLAYER_RESEARCH_POPUPS" Language="pl_PL">
       <Text>Pokazuj okna badań i idei w trybie wieloosobowym</Text>
