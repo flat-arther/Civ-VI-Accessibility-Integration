@@ -400,12 +400,13 @@ local function SpeakEraAge()
     Speak(table.concat(parts, "[NEWLINE]"))
 end
 
-local function SpeakEraScoreDetails()
+-- Kept global so optional mod integrations can extend the same readout.
+function GetEraScoreDetailsLines()
     local playerID = GetLocalPlayerID()
-    if playerID == nil then return end
+    if playerID == nil then return {} end
 
     local gameEras = Game.GetEras()
-    if gameEras == nil then return end
+    if gameEras == nil then return {} end
 
     local parts = {
         Locale.Lookup("LOC_ERA_SCORE_HEADER") .. " " .. gameEras:GetPlayerCurrentScore(playerID),
@@ -425,7 +426,16 @@ local function SpeakEraScoreDetails()
         end
     end
 
-    Speak(table.concat(parts, "[NEWLINE]"))
+    return parts
+end
+
+if Modding.IsModActive("11B9FBBE-25BD-7E24-3909-67A060B2456C") then
+    include("ActionPanel_RealEraTracker_CAI")
+end
+
+local function SpeakEraScoreDetails()
+    local parts = GetEraScoreDetailsLines()
+    if #parts > 0 then Speak(table.concat(parts, "[NEWLINE]")) end
 end
 
 -- ===========================================================================

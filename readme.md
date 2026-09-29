@@ -31,9 +31,12 @@ UI mods are different: they may replace the same interface screens as CAI and th
 - Detailed Map Tacks
 - Extended Policy Cards
 - Quick Deals
+- Real Era Tracker
 - Yet not another maps pack
 
 Other UI mods may work, but they are not explicitly supported and can conflict with CAI when they replace the same screens.
+
+With Real Era Tracker enabled, open Era Tracker from the CAI launch bar (`Shift+Tab`). Its combined historic-moment table supports sorting on every column. Use `Alt+2` for the category tree with a sort dropdown, or `Alt+1` to return to the table. Earned moments expand to show each occurrence, newest first; the table's status tooltip reads the same history. Enter toggles a moment's favored state. `Shift+Y` reads the era-score breakdown followed by your favored moments and their earning conditions. Score, status, and era-availability filters are available below the results. Escape closes the panel.
 
 ## Using the UI
 
@@ -332,6 +335,7 @@ Empire information commands read important totals and progress without opening t
 - `R` — read science per turn and progress on the technology currently being researched
 - `P` — read culture per turn and progress on the civic currently being researched
 - `Y` — read era score, the current age, thresholds for the next age, and active commemorations
+- `Shift+Y` — read the era-score breakdown; with Real Era Tracker, also read favored moments and their earning conditions
 
 #### Treasury, yields, and resources
 

@@ -1,6 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_RET_EARNED_WORLD_FIRST" Language="fr_FR"><Text>Obtenu en première mondiale</Text></Row>
+    <Row Tag="LOC_CAI_RET_FAVORED_CONFIRM" Language="fr_FR"><Text>Ajouté aux favoris : {1_Moment}</Text></Row>
+    <Row Tag="LOC_CAI_RET_UNFAVORED_CONFIRM" Language="fr_FR"><Text>Retiré des favoris : {1_Moment}</Text></Row>
+    <Row Tag="LOC_CAI_RET_MOMENT" Language="fr_FR"><Text>Moment historique</Text></Row>
+    <Row Tag="LOC_CAI_RET_CATEGORY" Language="fr_FR"><Text>Catégorie</Text></Row>
+    <Row Tag="LOC_CAI_RET_NOT_EARNED" Language="fr_FR"><Text>Non obtenu</Text></Row>
+    <Row Tag="LOC_CAI_RET_EARNED" Language="fr_FR"><Text>Obtenu</Text></Row>
+    <Row Tag="LOC_CAI_RET_UNAVAILABLE" Language="fr_FR"><Text>Indisponible</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERA_RANGE" Language="fr_FR"><Text>De {1_First} à {2_Last}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERA_FROM" Language="fr_FR"><Text>À partir de {1_Era}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERA_UNTIL" Language="fr_FR"><Text>Jusqu'à {1_Era}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ANY_ERA" Language="fr_FR"><Text>Toute ère</Text></Row>
+    <Row Tag="LOC_CAI_RET_SCORE" Language="fr_FR"><Text>Score d'ère {1_Score}</Text></Row>
+    <Row Tag="LOC_CAI_RET_TURN" Language="fr_FR"><Text>Tour {1_Turn}</Text></Row>
+    <Row Tag="LOC_CAI_RET_TIMES" Language="fr_FR"><Text>Obtenu {1_Count} fois</Text></Row>
+    <Row Tag="LOC_CAI_RET_WORLD_FIRST_DETAIL" Language="fr_FR"><Text>Première réalisation mondiale : {1_Civilization}</Text></Row>
+    <Row Tag="LOC_CAI_RET_APPLIES_DETAIL" Language="fr_FR"><Text>S'applique à : {1_Object}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERAS_DETAIL" Language="fr_FR"><Text>Ères disponibles : {1_Eras}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERAS" Language="fr_FR"><Text>Ères disponibles</Text></Row>
+    <Row Tag="LOC_CAI_RET_EARLIEST_FIRST" Language="fr_FR"><Text>Les plus anciens d'abord</Text></Row>
+    <Row Tag="LOC_CAI_RET_LATEST_FIRST" Language="fr_FR"><Text>Les plus récents d'abord</Text></Row>
+    <Row Tag="LOC_CAI_RET_TURN_EARNED" Language="fr_FR"><Text>Tour d'obtention</Text></Row>
+    <Row Tag="LOC_CAI_RET_TIMES_EARNED" Language="fr_FR"><Text>Nombre d'obtentions</Text></Row>
+    <Row Tag="LOC_CAI_RET_WORLD_FIRST" Language="fr_FR"><Text>Première réalisation mondiale</Text></Row>
+    <Row Tag="LOC_CAI_RET_ALL_SCORES" Language="fr_FR"><Text>Tous les scores d'ère</Text></Row>
+    <Row Tag="LOC_CAI_RET_SCORE_FILTER" Language="fr_FR"><Text>Filtre de score d'ère</Text></Row>
+    <Row Tag="LOC_CAI_RET_LAUNCH_TOOLTIP" Language="fr_FR"><Text>Parcourir les moments historiques, leurs conditions et les objectifs favoris.</Text></Row>
     <Row Tag="LOC_CAI_ZOOM_IN" Language="fr_FR"><Text>Zoom avant</Text></Row>
     <Row Tag="LOC_CAI_ZOOM_OUT" Language="fr_FR"><Text>Zoom arrière</Text></Row>
     <Row Tag="LOC_CAI_ZOOM_IN_TOOLTIP" Language="fr_FR"><Text>Zoomer et annoncer le pourcentage de zoom.</Text></Row>
@@ -8074,6 +8101,18 @@
     </Row>
     <Row Tag="LOC_CAI_UNIT_ACTION_CHARGE_COST" Language="fr_FR">
       <Text>Coûte {1_Amount} {1_Amount : plural 1?charge; other?charges;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RIVER_WITH_DESTINATION" Language="fr_FR">
+      <Text>{1_Name}: {2_Destination}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RIVER_DESTINATION_COAST" Language="fr_FR">
+      <Text>mène à la côte</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RIVER_DESTINATION_LAKE" Language="fr_FR">
+      <Text>mène à un lac</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RIVER_DESCRIPTION_WITH_DESTINATION" Language="fr_FR">
+      <Text>{1_Description}, {2_Destination}</Text>
     </Row>
   </LocalizedText>
 </GameData>

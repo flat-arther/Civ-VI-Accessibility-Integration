@@ -372,6 +372,16 @@ local function PlotHasRiverType(plot, riverType)
     return false
 end
 
+local function UpdateRiverZoneLabel(item, context)
+    local destination = HexCoordUtils.GetRiverZoneDestination(item.ZonePlotIndices, item.RiverType,
+        function(plot) return Utils.IsPlotRevealed(context, plot) end)
+    local name = item.RiverType ~= nil and RiverManager.GetRiverNameByType(item.RiverType)
+        or "LOC_TOOLTIP_RIVER"
+    item.LabelKey = ZoneUtils.MakeTileCountLabel(
+        HexCoordUtils.FormatRiverDestination(Utils.ResolveText(name), destination),
+        item.ZonePlotIndices, context)
+end
+
 local function CollectRiver(plotIndex, plot)
     if not m_namedRiversEnabled then
         m_riverPlotIndices[#m_riverPlotIndices + 1] = plotIndex
@@ -523,6 +533,7 @@ function CAIWorldScannerCategory_Geography.EndExtract(context, collect)
                 return Utils.IsPlotRevealed(validateContext, plot) and plot:IsRiver()
             end,
             LabelKey = "LOC_TOOLTIP_RIVER",
+            ZoneUpdateLabel = UpdateRiverZoneLabel,
             SubCategoryId = SUBCATEGORY_RIVERS_CLIFFS,
             GroupId = GROUP_RIVERS,
             GroupLabelKey = riverCliffGroupLabels[GROUP_RIVERS],
@@ -542,6 +553,8 @@ function CAIWorldScannerCategory_Geography.EndExtract(context, collect)
                         and PlotHasRiverType(plot, capturedRiverType)
                 end,
                 LabelKey = group.Name,
+                RiverType = capturedRiverType,
+                ZoneUpdateLabel = UpdateRiverZoneLabel,
                 SubCategoryId = SUBCATEGORY_RIVERS_CLIFFS,
                 GroupId = GROUP_RIVERS,
                 GroupLabelKey = riverCliffGroupLabels[GROUP_RIVERS],

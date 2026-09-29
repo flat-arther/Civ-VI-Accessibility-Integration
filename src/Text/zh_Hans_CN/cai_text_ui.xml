@@ -1,6 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_RET_EARNED_WORLD_FIRST" Language="zh_Hans_CN"><Text>作为世界首次成就获得</Text></Row>
+    <Row Tag="LOC_CAI_RET_FAVORED_CONFIRM" Language="zh_Hans_CN"><Text>已收藏{1_Moment}</Text></Row>
+    <Row Tag="LOC_CAI_RET_UNFAVORED_CONFIRM" Language="zh_Hans_CN"><Text>已取消收藏{1_Moment}</Text></Row>
+    <Row Tag="LOC_CAI_RET_MOMENT" Language="zh_Hans_CN"><Text>历史时刻</Text></Row>
+    <Row Tag="LOC_CAI_RET_CATEGORY" Language="zh_Hans_CN"><Text>类别</Text></Row>
+    <Row Tag="LOC_CAI_RET_NOT_EARNED" Language="zh_Hans_CN"><Text>未获得</Text></Row>
+    <Row Tag="LOC_CAI_RET_EARNED" Language="zh_Hans_CN"><Text>已获得</Text></Row>
+    <Row Tag="LOC_CAI_RET_UNAVAILABLE" Language="zh_Hans_CN"><Text>不可获得</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERA_RANGE" Language="zh_Hans_CN"><Text>从{1_First}到{2_Last}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERA_FROM" Language="zh_Hans_CN"><Text>从{1_Era}开始</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERA_UNTIL" Language="zh_Hans_CN"><Text>截至{1_Era}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ANY_ERA" Language="zh_Hans_CN"><Text>任意时代</Text></Row>
+    <Row Tag="LOC_CAI_RET_SCORE" Language="zh_Hans_CN"><Text>时代得分{1_Score}</Text></Row>
+    <Row Tag="LOC_CAI_RET_TURN" Language="zh_Hans_CN"><Text>第{1_Turn}回合</Text></Row>
+    <Row Tag="LOC_CAI_RET_TIMES" Language="zh_Hans_CN"><Text>获得{1_Count}次</Text></Row>
+    <Row Tag="LOC_CAI_RET_WORLD_FIRST_DETAIL" Language="zh_Hans_CN"><Text>世界首次成就：{1_Civilization}</Text></Row>
+    <Row Tag="LOC_CAI_RET_APPLIES_DETAIL" Language="zh_Hans_CN"><Text>适用于：{1_Object}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERAS_DETAIL" Language="zh_Hans_CN"><Text>可获得时代：{1_Eras}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERAS" Language="zh_Hans_CN"><Text>可获得时代</Text></Row>
+    <Row Tag="LOC_CAI_RET_EARLIEST_FIRST" Language="zh_Hans_CN"><Text>最早优先</Text></Row>
+    <Row Tag="LOC_CAI_RET_LATEST_FIRST" Language="zh_Hans_CN"><Text>最晚优先</Text></Row>
+    <Row Tag="LOC_CAI_RET_TURN_EARNED" Language="zh_Hans_CN"><Text>获得回合</Text></Row>
+    <Row Tag="LOC_CAI_RET_TIMES_EARNED" Language="zh_Hans_CN"><Text>获得次数</Text></Row>
+    <Row Tag="LOC_CAI_RET_WORLD_FIRST" Language="zh_Hans_CN"><Text>世界首次成就</Text></Row>
+    <Row Tag="LOC_CAI_RET_ALL_SCORES" Language="zh_Hans_CN"><Text>所有时代得分</Text></Row>
+    <Row Tag="LOC_CAI_RET_SCORE_FILTER" Language="zh_Hans_CN"><Text>时代得分筛选</Text></Row>
+    <Row Tag="LOC_CAI_RET_LAUNCH_TOOLTIP" Language="zh_Hans_CN"><Text>浏览历史时刻、获得条件和收藏的目标。</Text></Row>
     <Row Tag="LOC_CAI_ZOOM_IN" Language="zh_Hans_CN"><Text>放大</Text></Row>
     <Row Tag="LOC_CAI_ZOOM_OUT" Language="zh_Hans_CN"><Text>缩小</Text></Row>
     <Row Tag="LOC_CAI_ZOOM_IN_TOOLTIP" Language="zh_Hans_CN"><Text>放大并读出缩放百分比。</Text></Row>
@@ -8091,6 +8118,18 @@
     </Row>
     <Row Tag="LOC_CAI_UNIT_ACTION_CHARGE_COST" Language="zh_Hans_CN">
       <Text>消耗使用次数：{1_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RIVER_WITH_DESTINATION" Language="zh_Hans_CN">
+      <Text>{1_Name}: {2_Destination}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RIVER_DESTINATION_COAST" Language="zh_Hans_CN">
+      <Text>流向海岸</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RIVER_DESTINATION_LAKE" Language="zh_Hans_CN">
+      <Text>流向湖泊</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RIVER_DESCRIPTION_WITH_DESTINATION" Language="zh_Hans_CN">
+      <Text>{1_Description}, {2_Destination}</Text>
     </Row>
   </LocalizedText>
 </GameData>

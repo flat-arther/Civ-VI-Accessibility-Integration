@@ -118,5 +118,5 @@
 [x] Get rid of screen reader interrupt on widget push
 [x] Add a setting for simplified treeview navigation
 [x] River flow direction reporting
-[ ] Add support for real Era Tracker
+[x] Add support for real Era Tracker
 [ ] Look in to coastal raide yield reporting

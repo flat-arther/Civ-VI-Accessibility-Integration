@@ -144,6 +144,9 @@
     <File>UI/inGame/WorldTracker_CAI.lua</File>
     <File>UI/inGame/ChatPanel_CAI.lua</File>
     <File>UI/inGame/TopPanel_CAI.lua</File>
+    <File>UI/inGame/RealEraTracker_CAI.lua</File>
+    <File>UI/inGame/ActionPanel_RealEraTracker_CAI.lua</File>
+    <File>UI/Replacements/RealEraTracker/RealEraTracker_CAIBase.lua</File>
     <File>UI/inGame/NotificationPanel_CAI.lua</File>
     <File>UI/inGame/StatusMessagePanel_CAI.lua</File>
     <File>UI/inGame/GovernmentScreen_CAI.lua</File>
@@ -736,7 +739,18 @@
       <!-- GovernmentScreen_CAI.lua pulls this variant via a runtime include()
            when the Extended Policy Cards mod is active, so it must be here. -->
       <File>UI/inGame/GovernmentScreen_ExtendedPolicyCards_CAI.lua</File>
+      <!-- RET does not import its original UI script; use the versioned base. -->
+      <File>UI/Replacements/RealEraTracker/RealEraTracker_CAIBase.lua</File>
+      <File>UI/inGame/ActionPanel_RealEraTracker_CAI.lua</File>
     </ImportFiles>
+
+    <ReplaceUIScript id="CAI_RealEraTracker">
+      <Properties>
+        <LoadOrder>999999999</LoadOrder>
+        <LuaContext>RealEraTracker</LuaContext>
+        <LuaReplace>UI/inGame/RealEraTracker_CAI.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
 
     <ReplaceUIScript id="CAI_WorldInput">
       <Properties>

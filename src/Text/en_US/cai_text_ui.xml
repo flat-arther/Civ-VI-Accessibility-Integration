@@ -1,6 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_RET_EARNED_WORLD_FIRST" Language="en_US"><Text>Earned as a world first</Text></Row>
+    <Row Tag="LOC_CAI_RET_FAVORED_CONFIRM" Language="en_US"><Text>Favored {1_Moment}</Text></Row>
+    <Row Tag="LOC_CAI_RET_UNFAVORED_CONFIRM" Language="en_US"><Text>Unfavored {1_Moment}</Text></Row>
+    <Row Tag="LOC_CAI_RET_MOMENT" Language="en_US"><Text>Historic moment</Text></Row>
+    <Row Tag="LOC_CAI_RET_CATEGORY" Language="en_US"><Text>Category</Text></Row>
+    <Row Tag="LOC_CAI_RET_NOT_EARNED" Language="en_US"><Text>Not earned</Text></Row>
+    <Row Tag="LOC_CAI_RET_EARNED" Language="en_US"><Text>Earned</Text></Row>
+    <Row Tag="LOC_CAI_RET_UNAVAILABLE" Language="en_US"><Text>Unavailable</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERA_RANGE" Language="en_US"><Text>{1_First} to {2_Last}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERA_FROM" Language="en_US"><Text>From {1_Era}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERA_UNTIL" Language="en_US"><Text>Until {1_Era}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ANY_ERA" Language="en_US"><Text>Any era</Text></Row>
+    <Row Tag="LOC_CAI_RET_SCORE" Language="en_US"><Text>Era score {1_Score}</Text></Row>
+    <Row Tag="LOC_CAI_RET_TURN" Language="en_US"><Text>Turn {1_Turn}</Text></Row>
+    <Row Tag="LOC_CAI_RET_TIMES" Language="en_US"><Text>Earned {1_Count} times</Text></Row>
+    <Row Tag="LOC_CAI_RET_WORLD_FIRST_DETAIL" Language="en_US"><Text>First world achievement: {1_Civilization}</Text></Row>
+    <Row Tag="LOC_CAI_RET_APPLIES_DETAIL" Language="en_US"><Text>Applies to: {1_Object}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERAS_DETAIL" Language="en_US"><Text>Available eras: {1_Eras}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERAS" Language="en_US"><Text>Available eras</Text></Row>
+    <Row Tag="LOC_CAI_RET_EARLIEST_FIRST" Language="en_US"><Text>Earliest first</Text></Row>
+    <Row Tag="LOC_CAI_RET_LATEST_FIRST" Language="en_US"><Text>Latest first</Text></Row>
+    <Row Tag="LOC_CAI_RET_TURN_EARNED" Language="en_US"><Text>Turn earned</Text></Row>
+    <Row Tag="LOC_CAI_RET_TIMES_EARNED" Language="en_US"><Text>Times earned</Text></Row>
+    <Row Tag="LOC_CAI_RET_WORLD_FIRST" Language="en_US"><Text>First world achievement</Text></Row>
+    <Row Tag="LOC_CAI_RET_ALL_SCORES" Language="en_US"><Text>All era scores</Text></Row>
+    <Row Tag="LOC_CAI_RET_SCORE_FILTER" Language="en_US"><Text>Era score filter</Text></Row>
+    <Row Tag="LOC_CAI_RET_LAUNCH_TOOLTIP" Language="en_US"><Text>Browse historic moments, earning conditions, and favored goals.</Text></Row>
     <Row Tag="LOC_CAI_ZOOM_IN" Language="en_US"><Text>Zoom in</Text></Row>
     <Row Tag="LOC_CAI_ZOOM_OUT" Language="en_US"><Text>Zoom out</Text></Row>
     <Row Tag="LOC_CAI_ZOOM_IN_TOOLTIP" Language="en_US"><Text>Zoom in and announce the zoom percentage.</Text></Row>
@@ -8105,6 +8132,18 @@
     </Row>
     <Row Tag="LOC_CAI_UNIT_ACTION_CHARGE_COST" Language="en_US">
       <Text>Costs {1_Amount} {1_Amount : plural 1?charge; other?charges;}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RIVER_WITH_DESTINATION" Language="en_US">
+      <Text>{1_Name}: {2_Destination}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RIVER_DESTINATION_COAST" Language="en_US">
+      <Text>leads to coast</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RIVER_DESTINATION_LAKE" Language="en_US">
+      <Text>leads to lake</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RIVER_DESCRIPTION_WITH_DESTINATION" Language="en_US">
+      <Text>{1_Description}, {2_Destination}</Text>
     </Row>
   </LocalizedText>
 </GameData>

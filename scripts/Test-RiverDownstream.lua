@@ -28,6 +28,7 @@ local function getPlot(q,r)
  function p:GetX() return self.q end
  function p:GetY() return self.r end
  function p:IsWater() return self.water end
+ function p:IsLake() return self.lake or false end
  function p:IsWOfRiver() return self.flags.E or false end
  function p:IsNWOfRiver() return self.flags.SE or false end
  function p:IsNEOfRiver() return self.flags.SW or false end
@@ -38,6 +39,7 @@ local function getPlot(q,r)
  return p
 end
 Map={GetAdjacentPlot=function(q,r,d) local v=deltas[d+1];return getPlot(q+v[1],r+v[2]) end}
+Map.GetPlotByIndex=function(index) for _,plot in pairs(world)do if plot.index==index then return plot end end end
 local function setRiver(p,name,present,flow)
  p.flags[name]=present;p.flows[name]=flow
  writes[#writes+1]={owner=p,edge=name,flow=flow}
@@ -311,6 +313,10 @@ local function TestRiverReadout()
  Locale={Lookup=function(tag,a,b,c)
   if labels[tag] then return labels[tag] end
   if tag=='LOC_RIVER_TOOLTIP_STRING' then return a end
+  if tag=='LOC_CAI_RIVER_DESTINATION_COAST' then return 'leads to coast' end
+  if tag=='LOC_CAI_RIVER_DESTINATION_LAKE' then return 'leads to lake' end
+  if tag=='LOC_CAI_RIVER_WITH_DESTINATION' then return a..': '..b end
+  if tag=='LOC_CAI_RIVER_DESCRIPTION_WITH_DESTINATION' then return a..', '..b end
   if tag=='LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS' then return a..', '..b end
   if tag=='LOC_CAI_PLOT_RIVER_FLOW' then return a..', flows '..b end
   if tag=='LOC_CAI_PLOT_RIVER_FLOW_FROM_TO' then return a..', flows from '..b..' to '..c end
@@ -346,7 +352,9 @@ local function TestRiverReadout()
  local riverFunctions='local HexCoordUtils=CAIHexCoordUtils\nlocal IS_XP2_TOOLTIP=true\n'..tooltipSource:sub(begin,finish-1)..'\nreturn GetNamedRiverString'
  local GetNamedRiverString=assert(load(riverFunctions,'@PlotToolTip_CAI river functions','t',_ENV))()
  local data={IsVisible=true,IsRiver=true,RiverNames={'River 1'}}
- local function equal(actual,expected)check(actual==expected,tostring(actual)..' != '..expected)end
+ local function equal(actual,expected)
+  check(actual==expected,tostring(actual)..' != '..expected)
+ end
  reset();local p=getPlot(0,0)
  p.flags.SE=true;p.flows.SE=FlowDirectionTypes.FLOWDIRECTION_SOUTHWEST
  p.flags.SW=true;p.flows.SW=FlowDirectionTypes.FLOWDIRECTION_NORTHWEST
@@ -393,10 +401,10 @@ local function TestRiverReadout()
  p.flags.E=true;p.flows.E=FlowDirectionTypes.FLOWDIRECTION_NORTH
  Map.GetAdjacentPlot(0,0,DirectionTypes.DIRECTION_NORTHEAST).water=true
  Map.GetAdjacentPlot(0,0,DirectionTypes.DIRECTION_EAST).water=true
- equal(GetNamedRiverString(data,p),'River 1, E, flows north')
+ equal(GetNamedRiverString(data,p),'River 1, E, flows north, leads to coast')
  local e=Map.GetAdjacentPlot(0,0,DirectionTypes.DIRECTION_EAST)
  e.flags.SW=true;e.flows.SW=FlowDirectionTypes.FLOWDIRECTION_NORTHWEST
- equal(GetNamedRiverString(data,p),'River 1, E, flows from southeast to north')
+ equal(GetNamedRiverString(data,p),'River 1, E, flows from southeast to north, leads to coast')
  e.revealed=false
  e.IsNEOfRiver=function()error('Hidden upstream edge was inspected')end
  equal(GetNamedRiverString(data,p),'River 1, E, flows north')
@@ -414,7 +422,119 @@ local function TestRiverReadout()
  -- Visibility callback is the existing observer/World Builder-aware plot check.
  info.IsPlotVisible=function()return false end
  check(GetNamedRiverString(data,p):find('River 1, NE, flows southeast',1,true)~=nil,'Hidden continuation must retain the actual segment flow')
- print('Full Geography/B formatter integration checks passed')
+ -- Every bearing and bank must identify the downstream mouth, never nearby source water.
+ info.IsPlotVisible=canInspect
+ local cornerDirections={{5,0},{0,1},{1,2},{2,3},{3,4},{4,5}}
+ for edgeIndex=1,6 do
+  for _,forward in ipairs({true,false})do
+   for _,lake in ipairs({false,true})do
+    reset()
+    local p=getPlot(0,0)
+    local neighbor=Map.GetAdjacentPlot(0,0,edgeIndex-1)
+    local canonical=({4,2,3,4,2,3})[edgeIndex]
+    local owner=(edgeIndex==1 or edgeIndex>=5)and neighbor or p
+    local edge=edgeNames[canonical]
+    owner.flags[edge]=true;owner.flows[edge]=forward and flowForward[edgeIndex]or flowReverse[edgeIndex]
+    local segment={dir='LOC_CAI_DIR_'..edgeNames[edgeIndex],startCorner=forward and edgeIndex or edgeIndex%6+1,endCorner=forward and edgeIndex%6+1 or edgeIndex}
+    check(CAIHexCoordUtils.GetRiverDestination(p,segment,canInspect)=='unknown','Dry endpoint is not a known destination')
+    local directions=cornerDirections[segment.endCorner]
+    local mouth=Map.GetAdjacentPlot(0,0,directions[1])
+    mouth.water=true;mouth.lake=lake
+    local kind=lake and 'lake'or 'coast'
+    check(CAIHexCoordUtils.GetRiverDestination(p,segment,canInspect)==kind,'Mouth mismatch for edge '..edgeIndex)
+    check(CAIHexCoordUtils.GetRiverZoneDestination({p.index},1,canInspect)==kind,'Named scanner destination must match B')
+    check(CAIHexCoordUtils.GetRiverZoneDestination({p.index},nil,canInspect)==kind,'Generic scanner destination must match B')
+    check(CAIHexCoordUtils.GetRiverZoneDestination({p.index},99,canInspect)=='unknown','Another named river must not inherit this mouth')
+    -- Poison hidden APIs: reveal gates must run before any state read.
+    mouth.revealed=false
+    mouth.IsWater=function()error('Hidden mouth water was inspected')end
+    mouth.IsLake=function()error('Hidden mouth lake was inspected')end
+    mouth.IsWOfRiver=function()error('Hidden mouth river was inspected')end
+    mouth.IsNWOfRiver=mouth.IsWOfRiver;mouth.IsNEOfRiver=mouth.IsWOfRiver
+    check(CAIHexCoordUtils.GetRiverDestination(p,segment,canInspect)=='unknown','Hidden mouth must stay unknown')
+    check(CAIHexCoordUtils.GetRiverZoneDestination({p.index},1,canInspect)=='unknown','Scanner must hide an unrevealed mouth')
+   end
+  end
+ end
+ -- Trace a bend using two actual vanilla mutations, from either bank of the first edge.
+ for flow=0,5 do
+  for _,turn in ipairs({-1,1})do
+   reset()
+   local recursiveStart=VanillaFirstRiverStep(getPlot(0,0),flow,flow,1)
+   local incoming=writes[#writes]
+   VanillaFirstRiverStep(recursiveStart,(flow+turn+6)%6,flow,1)
+   local outgoing=writes[#writes]
+   local outSegment=incomingRelativeTo(outgoing.owner,outgoing)
+   local directions=cornerDirections[outSegment.endCorner]
+   -- The third plot at the downstream corner is not either bank of the last edge.
+   local canonical=({E=2,SE=3,SW=4})[outgoing.edge]
+   local third=directions[1]==canonical-1 and directions[2]or directions[1]
+   Map.GetAdjacentPlot(outgoing.owner.q,outgoing.owner.r,third).water=true
+   for _,bank in ipairs({incoming.owner,Map.GetAdjacentPlot(incoming.owner.q,incoming.owner.r,({E=1,SE=2,SW=3})[incoming.edge])})do
+    local segment=incomingRelativeTo(bank,incoming)
+    segment.dir='LOC_CAI_DIR_'..edgeNames[segment.edgeIndex]
+    segment.startCorner=segment.endCorner==segment.edgeIndex and segment.edgeIndex%6+1 or segment.edgeIndex
+    check(CAIHexCoordUtils.GetRiverDestination(bank,segment,canInspect)=='coast','Vanilla bend must reach its mouth')
+   end
+  end
+ end
+ -- Uncertain topology must not become a destination just because water is nearby.
+ reset()
+ local p=getPlot(0,0)
+ local segment={dir='LOC_CAI_DIR_E',startCorner=3,endCorner=2}
+ p.flags.E=true;p.flows.E=FlowDirectionTypes.FLOWDIRECTION_NORTH
+ local ne=Map.GetAdjacentPlot(0,0,DirectionTypes.DIRECTION_NORTHEAST)
+ ne.flags.SW=true;ne.flows.SW=FlowDirectionTypes.FLOWDIRECTION_NORTHWEST
+ ne.flags.SE=true;ne.flows.SE=FlowDirectionTypes.FLOWDIRECTION_NORTHEAST
+ ne.water=true
+ check(CAIHexCoordUtils.GetRiverDestination(p,segment,canInspect)=='unknown','Outgoing fork remains unknown beside water')
+ reset();p=getPlot(0,0)
+ for edgeIndex=1,6 do
+  local neighbor=Map.GetAdjacentPlot(0,0,edgeIndex-1)
+  local owner=(edgeIndex==1 or edgeIndex>=5)and neighbor or p
+  local edge=edgeNames[({4,2,3,4,2,3})[edgeIndex]]
+  owner.flags[edge]=true;owner.flows[edge]=flowForward[edgeIndex]
+ end
+ segment={dir='LOC_CAI_DIR_E',startCorner=2,endCorner=3}
+ check(CAIHexCoordUtils.GetRiverDestination(p,segment,canInspect)=='unknown','Directed cycle must stop without claiming a destination')
+ reset();p=getPlot(0,0)
+ p.flags.E=true;p.flows.E=FlowDirectionTypes.FLOWDIRECTION_NORTH
+ Map.GetAdjacentPlot(0,0,DirectionTypes.DIRECTION_NORTHEAST).water=true
+ p.GetRiverEFlowDirection=nil
+ segment={dir='LOC_CAI_DIR_E',startCorner=3,endCorner=2}
+ check(CAIHexCoordUtils.GetRiverDestination(p,segment,canInspect)=='unknown','Missing flow getter cannot infer a water destination')
+ reset();wrapWidth=8;p=getPlot(7,0)
+ p.flags.E=true;p.flows.E=FlowDirectionTypes.FLOWDIRECTION_NORTH
+ Map.GetAdjacentPlot(7,0,DirectionTypes.DIRECTION_EAST).water=true
+ check(CAIHexCoordUtils.GetRiverDestination(p,segment,canInspect)=='coast','Destination tracing must honor horizontal wrapping')
+ -- Validate the scanner's live label hook, including tile counts and reveal changes.
+ reset()
+ local p=getPlot(0,0)
+ p.flags.E=true;p.flows.E=FlowDirectionTypes.FLOWDIRECTION_NORTH
+ local mouth=Map.GetAdjacentPlot(0,0,DirectionTypes.DIRECTION_NORTHEAST)
+ mouth.water=true;mouth.lake=true
+ RiverManager.GetRiverNameByType=function(id)assert(id==1);return 'River 1'end
+ local scannerFile=assert(io.open('src/UI/inGame/WorldScanner/WorldScannerCategory_geography.lua','rb'))
+ local scannerSource=scannerFile:read('*a');scannerFile:close()
+ local first=assert(scannerSource:find('local function UpdateRiverZoneLabel(',1,true))
+ local last=assert(scannerSource:find('local function CollectRiver(',first,true))
+ local env=setmetatable({HexCoordUtils=CAIHexCoordUtils,
+  Utils={IsPlotRevealed=function(_,plot)return canInspect(plot)end,ResolveText=function(text)return text end},
+  ZoneUtils={MakeTileCountLabel=function(label,indices)return label..', '..#indices..' tiles'end}}, {__index=_ENV})
+ local updateLabel=assert(load(scannerSource:sub(first,last-1)..'return UpdateRiverZoneLabel','@Scanner river label','t',env))()
+ local item={ZonePlotIndices={p.index},RiverType=1}
+ updateLabel(item,{})
+ check(item.LabelKey=='River 1: leads to lake, 1 tiles','Scanner destination follows the name before tile count')
+ check(GetNamedRiverString(data,p)=='River 1, E, flows north, leads to lake','B must append a lake destination after flow directions')
+ mouth.revealed=false;updateLabel(item,{})
+ check(item.LabelKey=='River 1, 1 tiles','Scanner must omit an unknown destination without leaving punctuation')
+ check(GetNamedRiverString(data,p)=='River 1, E, flows north','B must omit an unknown destination without leaving punctuation')
+ mouth.revealed=true;mouth.lake=false;updateLabel(item,{})
+ check(item.LabelKey=='River 1: leads to coast, 1 tiles','Scanner label must recalculate water state')
+ IsExpansion2Active=function()return false end
+ check(GetNamedRiverString({IsVisible=true,IsRiver=true},p)=='River, E, leads to coast','Generic non-XP2 geography must append the destination after directions')
+ IsExpansion2Active=function()return true end
+ print('Full Geography/B formatter, destination and live scanner integration checks passed')
 end
 TestRiverReadout()
 

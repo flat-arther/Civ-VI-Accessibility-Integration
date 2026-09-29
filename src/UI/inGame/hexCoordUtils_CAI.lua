@@ -547,4 +547,148 @@ end
 function HexCoordUtils.FindNextUpstreamPlot(plot, segment, perimeter, canInspect)
     return FindNextRiverPlot(plot, segment, perimeter, canInspect, true)
 end
+
+local EDGE_TAGS = { "LOC_CAI_DIR_NE", "LOC_CAI_DIR_E", "LOC_CAI_DIR_SE",
+    "LOC_CAI_DIR_SW", "LOC_CAI_DIR_W", "LOC_CAI_DIR_NW" }
+local EDGE_DIRECTIONS = { DirectionTypes.DIRECTION_NORTHEAST, DirectionTypes.DIRECTION_EAST,
+    DirectionTypes.DIRECTION_SOUTHEAST, DirectionTypes.DIRECTION_SOUTHWEST,
+    DirectionTypes.DIRECTION_WEST, DirectionTypes.DIRECTION_NORTHWEST }
+local EDGE_HAS = { "IsNEOfRiver", "IsWOfRiver", "IsNWOfRiver",
+    "IsNEOfRiver", "IsWOfRiver", "IsNWOfRiver" }
+local EDGE_GETTERS = { "GetRiverSWFlowDirection", "GetRiverEFlowDirection", "GetRiverSEFlowDirection",
+    "GetRiverSWFlowDirection", "GetRiverEFlowDirection", "GetRiverSEFlowDirection" }
+local EDGE_FORWARD = { "FLOWDIRECTION_SOUTHEAST", "FLOWDIRECTION_SOUTH", "FLOWDIRECTION_SOUTHWEST",
+    "FLOWDIRECTION_NORTHWEST", "FLOWDIRECTION_NORTH", "FLOWDIRECTION_NORTHEAST" }
+local EDGE_REVERSE = { "FLOWDIRECTION_NORTHWEST", "FLOWDIRECTION_NORTH", "FLOWDIRECTION_NORTHEAST",
+    "FLOWDIRECTION_SOUTHEAST", "FLOWDIRECTION_SOUTH", "FLOWDIRECTION_SOUTHWEST" }
+
+-- Hidden bordering plots produce unknown segments without querying their river state.
+local function ReadDestinationPerimeter(plot, canInspect)
+    local segments = {}
+    for index, direction in ipairs(EDGE_DIRECTIONS) do
+        local neighbor = Map.GetAdjacentPlot(plot:GetX(), plot:GetY(), direction)
+        local owner = (index == 1 or index >= 5) and neighbor or plot
+        local revealed = neighbor ~= nil and canInspect(neighbor)
+        if not revealed or owner[EDGE_HAS[index]](owner) then
+            local segment = { dir = EDGE_TAGS[index], neighbor = neighbor }
+            if revealed then
+                local getter = owner[EDGE_GETTERS[index]]
+                local flow = getter ~= nil and getter(owner) or nil
+                if flow == FlowDirectionTypes[EDGE_FORWARD[index]] then
+                    segment.startCorner, segment.endCorner = index, index % 6 + 1
+                elseif flow == FlowDirectionTypes[EDGE_REVERSE[index]] then
+                    segment.startCorner, segment.endCorner = index % 6 + 1, index
+                end
+            end
+            segments[#segments + 1] = segment
+        end
+    end
+    return segments
+end
+
+---Trace live directed edges to a revealed water mouth. A missing land continuation is unknown.
+---@param plot Plot
+---@param segment table
+---@param canInspect fun(plot:Plot):boolean
+---@param cache table|nil Per-read cache only; never retained across reveal or map changes.
+---@return string destination "coast", "lake", or "unknown"
+function HexCoordUtils.GetRiverDestination(plot, segment, canInspect, cache)
+    cache = cache or {}
+    local visited, path = {}, {}
+    local function Finish(destination)
+        for _, key in ipairs(path) do cache[key] = destination end
+        return destination
+    end
+    while true do
+        if not canInspect(plot) or segment.endCorner == nil then return Finish("unknown") end
+        local neighbor = Map.GetAdjacentPlot(plot:GetX(), plot:GetY(), EDGE_DIRECTIONS[EDGE_INDEX[segment.dir]])
+        if neighbor == nil or not canInspect(neighbor) then return Finish("unknown") end
+        local a, b = plot:GetIndex(), neighbor:GetIndex()
+        local key = tostring(math.min(a, b)) .. ":" .. tostring(math.max(a, b))
+        if cache[key] ~= nil then return Finish(cache[key]) end
+        if visited[key] then return Finish("unknown") end
+        visited[key], path[#path + 1] = true, key
+
+        local perimeter = ReadDestinationPerimeter(plot, canInspect)
+        -- Use the freshly read segment so identity comparisons exclude the incoming edge.
+        for _, candidate in ipairs(perimeter) do
+            if candidate.dir == segment.dir then segment = candidate; break end
+        end
+        if segment.endCorner == nil then return Finish("unknown") end
+        local nextSegment, status = FindPerimeterContinuation(perimeter, segment, false)
+        if status ~= "known" then return Finish("unknown") end
+        local corner = segment.endCorner
+        local external = ReadCornerContinuation(plot, corner, canInspect)
+        if external.status ~= "outgoing" and external.status ~= "incoming"
+            and external.status ~= "absent" then return Finish("unknown") end
+        if nextSegment ~= nil then
+            if external.status == "outgoing" then return Finish("unknown") end
+            segment = nextSegment
+        elseif external.status == "outgoing" then
+            plot = external.a
+            for _, candidate in ipairs(ReadDestinationPerimeter(plot, canInspect)) do
+                if candidate.neighbor == external.b then segment = candidate; break end
+            end
+        else
+            local rule = CORNER_CONTINUATION[corner]
+            local destination
+            for _, mouthPlot in ipairs({ plot,
+                Map.GetAdjacentPlot(plot:GetX(), plot:GetY(), rule.a),
+                Map.GetAdjacentPlot(plot:GetX(), plot:GetY(), rule.b) }) do
+                if mouthPlot:IsWater() then
+                    local kind = mouthPlot:IsLake() and "lake" or "coast"
+                    if destination ~= nil and destination ~= kind then return Finish("unknown") end
+                    destination = kind
+                end
+            end
+            return Finish(destination or "unknown")
+        end
+    end
+end
+
+---Resolve a scanner river from its revealed member plots, including a separately revealed mouth.
+---@param plotIndices integer[]
+---@param riverType integer|nil Named identity, or nil for generic river zones.
+---@param canInspect fun(plot:Plot):boolean
+---@return string
+function HexCoordUtils.GetRiverZoneDestination(plotIndices, riverType, canInspect)
+    local cache, destination = {}, nil
+    for _, plotIndex in ipairs(plotIndices) do
+        local plot = Map.GetPlotByIndex(plotIndex)
+        if plot ~= nil and canInspect(plot) then
+            local namedNeighbors = {}
+            if riverType ~= nil then
+                for _, river in pairs(RiverManager.EnumerateRivers(plotIndex) or {}) do
+                    if river.TypeID == riverType then
+                        for _, pair in ipairs(river.Edges) do
+                            if pair[1] == plotIndex then namedNeighbors[pair[2]] = true
+                            elseif pair[2] == plotIndex then namedNeighbors[pair[1]] = true end
+                        end
+                    end
+                end
+            end
+            for _, segment in ipairs(ReadDestinationPerimeter(plot, canInspect)) do
+                if segment.endCorner ~= nil and (riverType == nil
+                    or namedNeighbors[segment.neighbor:GetIndex()]) then
+                    local kind = HexCoordUtils.GetRiverDestination(plot, segment, canInspect, cache)
+                    if kind ~= "unknown" then
+                        if destination ~= nil and destination ~= kind then return "unknown" end
+                        destination = kind
+                    end
+                end
+            end
+        end
+    end
+    return destination or "unknown"
+end
+
+---@param name string Localized river name.
+---@param destination string
+---@param formatTag string|nil Localized format; defaults to the scanner name/destination format.
+---@return string
+function HexCoordUtils.FormatRiverDestination(name, destination, formatTag)
+    if destination == "unknown" then return name end
+    local tags = { coast = "LOC_CAI_RIVER_DESTINATION_COAST", lake = "LOC_CAI_RIVER_DESTINATION_LAKE" }
+    return Locale.Lookup(formatTag or "LOC_CAI_RIVER_WITH_DESTINATION", name, Locale.Lookup(tags[destination]))
+end
 end

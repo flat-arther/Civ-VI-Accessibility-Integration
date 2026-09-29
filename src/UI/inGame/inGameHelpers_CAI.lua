@@ -1113,12 +1113,7 @@ function BuildMapTacLabelWithDMT(mapPinCfg, playerID, localPlayerID)
         return label
     end
 
-    -- DMT compatibility.
-    -- DMT only maintains MapPinSubjects for the local player's pins.
-    if playerID ~= localPlayerID then
-        return label
-    end
-
+    -- DMT broadcasts owner-calculated subjects for shared pins.
     if ExposedMembers.CAIInfo == nil or ExposedMembers.CAIInfo.GetMapPinSubject == nil then
         return label
     end

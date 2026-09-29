@@ -832,12 +832,15 @@ local function FormatRiverFlowChain(plot, perimeter, chain, orderDownstream)
     end
     if flowTag ~= nil then
         if upstream.status == "continuation" then
-            return Locale.Lookup("LOC_CAI_PLOT_RIVER_FLOW_FROM_TO", edgeText,
+            edgeText = Locale.Lookup("LOC_CAI_PLOT_RIVER_FLOW_FROM_TO", edgeText,
                 Locale.Lookup(upstream.directionTag), Locale.Lookup(flowTag))
+        else
+            edgeText = Locale.Lookup("LOC_CAI_PLOT_RIVER_FLOW", edgeText, Locale.Lookup(flowTag))
         end
-        return Locale.Lookup("LOC_CAI_PLOT_RIVER_FLOW", edgeText, Locale.Lookup(flowTag))
     end
-    return edgeText
+    return HexCoordUtils.FormatRiverDestination(edgeText,
+        HexCoordUtils.GetRiverDestination(plot, first, info.IsPlotVisible),
+        "LOC_CAI_RIVER_DESCRIPTION_WITH_DESTINATION")
 end
 
 local function GetRiverFlowDirectionString(plot)
@@ -1052,12 +1055,14 @@ local function GetNamedRiverString(data, plot)
         end
     end
 
+    local destination = HexCoordUtils.GetRiverZoneDestination({ plot:GetIndex() }, nil, info.IsPlotVisible)
     local riverString = Locale.Lookup("LOC_TOOLTIP_RIVER")
     if directionString ~= nil then
-        return Locale.Lookup("LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS", riverString, directionString)
+        riverString = Locale.Lookup("LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS", riverString, directionString)
     end
 
-    return riverString
+    return HexCoordUtils.FormatRiverDestination(riverString, destination,
+        "LOC_CAI_RIVER_DESCRIPTION_WITH_DESTINATION")
 end
 
 

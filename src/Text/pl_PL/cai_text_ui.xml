@@ -1,6 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <GameData>
   <LocalizedText>
+    <Row Tag="LOC_CAI_RET_EARNED_WORLD_FIRST" Language="pl_PL"><Text>Zdobyto jako pierwsze na świecie</Text></Row>
+    <Row Tag="LOC_CAI_RET_FAVORED_CONFIRM" Language="pl_PL"><Text>Dodano do ulubionych: {1_Moment}</Text></Row>
+    <Row Tag="LOC_CAI_RET_UNFAVORED_CONFIRM" Language="pl_PL"><Text>Usunięto z ulubionych: {1_Moment}</Text></Row>
+    <Row Tag="LOC_CAI_RET_MOMENT" Language="pl_PL"><Text>Moment historyczny</Text></Row>
+    <Row Tag="LOC_CAI_RET_CATEGORY" Language="pl_PL"><Text>Kategoria</Text></Row>
+    <Row Tag="LOC_CAI_RET_NOT_EARNED" Language="pl_PL"><Text>Nie zdobyto</Text></Row>
+    <Row Tag="LOC_CAI_RET_EARNED" Language="pl_PL"><Text>Zdobyto</Text></Row>
+    <Row Tag="LOC_CAI_RET_UNAVAILABLE" Language="pl_PL"><Text>Niedostępne</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERA_RANGE" Language="pl_PL"><Text>Od {1_First} do {2_Last}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERA_FROM" Language="pl_PL"><Text>Od {1_Era}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERA_UNTIL" Language="pl_PL"><Text>Do {1_Era}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ANY_ERA" Language="pl_PL"><Text>Dowolna epoka</Text></Row>
+    <Row Tag="LOC_CAI_RET_SCORE" Language="pl_PL"><Text>Punkty epoki: {1_Score}</Text></Row>
+    <Row Tag="LOC_CAI_RET_TURN" Language="pl_PL"><Text>Tura {1_Turn}</Text></Row>
+    <Row Tag="LOC_CAI_RET_TIMES" Language="pl_PL"><Text>Zdobyto {1_Count} razy</Text></Row>
+    <Row Tag="LOC_CAI_RET_WORLD_FIRST_DETAIL" Language="pl_PL"><Text>Pierwsze osiągnięcie na świecie: {1_Civilization}</Text></Row>
+    <Row Tag="LOC_CAI_RET_APPLIES_DETAIL" Language="pl_PL"><Text>Dotyczy: {1_Object}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERAS_DETAIL" Language="pl_PL"><Text>Dostępne epoki: {1_Eras}</Text></Row>
+    <Row Tag="LOC_CAI_RET_ERAS" Language="pl_PL"><Text>Dostępne epoki</Text></Row>
+    <Row Tag="LOC_CAI_RET_EARLIEST_FIRST" Language="pl_PL"><Text>Od najwcześniejszych</Text></Row>
+    <Row Tag="LOC_CAI_RET_LATEST_FIRST" Language="pl_PL"><Text>Od najpóźniejszych</Text></Row>
+    <Row Tag="LOC_CAI_RET_TURN_EARNED" Language="pl_PL"><Text>Tura zdobycia</Text></Row>
+    <Row Tag="LOC_CAI_RET_TIMES_EARNED" Language="pl_PL"><Text>Liczba zdobyć</Text></Row>
+    <Row Tag="LOC_CAI_RET_WORLD_FIRST" Language="pl_PL"><Text>Pierwsze osiągnięcie na świecie</Text></Row>
+    <Row Tag="LOC_CAI_RET_ALL_SCORES" Language="pl_PL"><Text>Wszystkie punkty epoki</Text></Row>
+    <Row Tag="LOC_CAI_RET_SCORE_FILTER" Language="pl_PL"><Text>Filtr punktów epoki</Text></Row>
+    <Row Tag="LOC_CAI_RET_LAUNCH_TOOLTIP" Language="pl_PL"><Text>Przeglądaj momenty historyczne, warunki ich zdobycia i ulubione cele.</Text></Row>
     <Row Tag="LOC_CAI_ZOOM_IN" Language="pl_PL"><Text>Przybliż</Text></Row>
     <Row Tag="LOC_CAI_ZOOM_OUT" Language="pl_PL"><Text>Oddal</Text></Row>
     <Row Tag="LOC_CAI_ZOOM_IN_TOOLTIP" Language="pl_PL"><Text>Przybliż i odczytaj procent powiększenia.</Text></Row>
@@ -8086,6 +8113,18 @@
     </Row>
     <Row Tag="LOC_CAI_UNIT_ACTION_CHARGE_COST" Language="pl_PL">
       <Text>Koszt w ładunkach: {1_Amount}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RIVER_WITH_DESTINATION" Language="pl_PL">
+      <Text>{1_Name}: {2_Destination}</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RIVER_DESTINATION_COAST" Language="pl_PL">
+      <Text>prowadzi do wybrzeża</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RIVER_DESTINATION_LAKE" Language="pl_PL">
+      <Text>prowadzi do jeziora</Text>
+    </Row>
+    <Row Tag="LOC_CAI_RIVER_DESCRIPTION_WITH_DESTINATION" Language="pl_PL">
+      <Text>{1_Description}, {2_Destination}</Text>
     </Row>
   </LocalizedText>
 </GameData>

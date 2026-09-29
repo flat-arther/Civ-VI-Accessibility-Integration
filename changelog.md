@@ -2,8 +2,10 @@
 
 ### Added
 
-- Builder improvement, harvest, feature removal and planting actions, and national park creation now state their charge cost at the start of the action tooltip.
+- Added support for the real era tracker mod. Open the UI from the launch-bar (shift + tab)
+- Geography scanner rivers and B's geography information now say whether a river leads to coast or lake when its destination is known.
 - With Gathering Storm active, B's River readouts include flow direction summaries, from the upstream cursor direction to the downstream direction.
+- Builder improvement, harvest, feature removal and planting actions, and national park creation now state their charge cost at the start of the action tooltip.
 - Added a Gameplay setting to list river edges upstream to downstream or clockwise in geography information, default B. It is on by default
 - Added UI settings to enter a tree item with one Right press and leave and collapse it with one Left press, and to control whether expanded tree items read their item count. Simplified navigation is off by default; item counts are on by default.
 
@@ -15,9 +17,7 @@
 
 ### Fixed
 
-- Restored Geography speech after the downstream river readout caused an error.
-
-- River flow summaries now report the downstream travel direction without an inferred starting direction.
+- With Detailed Map Tacks, shared tacks from other players in multiplayer read their yield details and placement warnings in the tile readout and scanner.
 - With Extended Policy Cards, the government policy picker and viewer now use Name, Type, and Impact columns matching Better Reports, omit repeated table/tree titles and policy labels, and read impact alongside policy names in tree view. The picker is properly labeled
 - Modded units that can transfer to another city now show the city destination list.
 
