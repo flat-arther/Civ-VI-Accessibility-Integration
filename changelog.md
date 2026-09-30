@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [1.6.0] - 2026-09-30
+
 ### Added
 
 - In the imbed spy screen, added dropdowns for sorting and filtering destinations
