@@ -3626,6 +3626,9 @@
     <Row Tag="LOC_CAI_PLOT_UNOWNED" Language="en_US">
       <Text>Unowned</Text>
     </Row>
+    <Row Tag="LOC_CAI_PLOT_CITY_CENTER_TITLE" Language="en_US">
+      <Text>{1_City} {2_District}</Text>
+    </Row>
     <Row Tag="LOC_CAI_NAV_CURSOR_CONTINENT_ZONE" Language="en_US">
       <Text>The continent of {1_Name}</Text>
     </Row>
@@ -5011,6 +5014,13 @@
     </Row>
 
     <!-- Espionage Chooser -->
+    <Row Tag="LOC_CAI_ESPIONAGE_ORDER_BY" Language="en_US"><Text>Order destinations by</Text></Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_SORT_TRAVEL" Language="en_US"><Text>Travel time</Text></Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_SORT_ESTABLISH" Language="en_US"><Text>Establish time</Text></Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_SORT_MISSIONS" Language="en_US"><Text>Available missions</Text></Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_SORT_DISTRICTS" Language="en_US"><Text>Districts</Text></Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_FILTER_BY_MISSION" Language="en_US"><Text>Filter by mission</Text></Row>
+    <Row Tag="LOC_CAI_ESPIONAGE_FILTER_ALL_MISSIONS" Language="en_US"><Text>All missions</Text></Row>
     <Row Tag="LOC_CAI_ESPIONAGE_CONFIRM_TITLE" Language="en_US">
       <Text>Confirm Spy Placement</Text>
     </Row>

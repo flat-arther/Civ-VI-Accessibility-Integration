@@ -204,14 +204,20 @@ local function ActivateNotification(playerID, notificationID)
 
     CloseNotificationCenter()
 
-    -- Mirror vanilla rail left-click: route through the registered TryActivate
-    -- handler so Events.NotificationActivated dispatches to the right Activate.
+    -- The tree leaf names a specific notification. Vanilla's rail TryActivate
+    -- instead uses the currently selected index in its shared type entry.
+    -- Keep that index aligned for type handlers that read the active entry.
     local notificationEntry = GetVanillaNotificationEntry(playerID, notificationID)
-    if notificationEntry and notificationEntry.m_kHandlers and notificationEntry.m_kHandlers.TryActivate then
-        notificationEntry.m_kHandlers.TryActivate(notificationEntry)
-    else
-        notification:Activate(true)
+    if notificationEntry then
+        for index, entryID in ipairs(notificationEntry.m_IDs) do
+            if entryID == notificationID then
+                notificationEntry.m_Index = index
+                RealizeStandardNotification(playerID, notificationID)
+                break
+            end
+        end
     end
+    notification:Activate(true)
     return true
 end
 

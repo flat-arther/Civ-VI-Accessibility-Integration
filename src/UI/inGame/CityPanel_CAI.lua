@@ -78,7 +78,11 @@ function GetCityInfoName(data)
         return nil
     end
 
-    return (data.IsCapital and "[ICON_Capital]" or "") .. Locale.ToUpper(Locale.Lookup(data.CityName))
+    local cityName = Locale.Lookup(data.CityName)
+    if data.IsCapital then
+        return cityName .. "[NEWLINE]" .. Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL")
+    end
+    return cityName
 end
 
 function GetCityInfoPopulation(data)

@@ -50,7 +50,11 @@ end
 
 local function BuildRouteLabel(city)
     local parts = {}
-    table.insert(parts, Locale.ToUpper(city:GetName()))
+    local cityName = Locale.ToUpper(city:GetName())
+    if city:IsCapital() and Players[city:GetOwner()]:IsMajor() then
+        cityName = cityName .. ", " .. Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL")
+    end
+    table.insert(parts, cityName)
 
     local originCity = GetOriginCity()
     if originCity then

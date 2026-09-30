@@ -998,13 +998,20 @@ include("interfaceTargetHelpers_CAI")
 include("cityManagementInterfaceHelpers_CAI")
 
 InterfaceInfoHelpers = InterfaceInfoHelpers or {}
+local function BuildSimpleTargetValidityInterfaceInfo(plot)
+    if plot == nil then return nil end
+    local target = CAIInterfaceTargets.GetTargetAtPlot(plot)
+    return { Locale.Lookup(target ~= nil and "LOC_CAI_PLOT_INTERFACE_VALID"
+        or "LOC_CAI_PLOT_INTERFACE_INVALID_TARGET") }
+end
+
 local function BuildCombatPreviewInterfaceInfo(plot, isExplicitSpeech)
     if isExplicitSpeech then
         LuaEvents.CAISpeakCombatPreview()
         return false
     end
 
-    return nil
+    return BuildSimpleTargetValidityInterfaceInfo(plot)
 end
 
 local function BuildMoveToInterfaceInfo(plot, isExplicitSpeech)
@@ -1013,91 +1020,17 @@ local function BuildMoveToInterfaceInfo(plot, isExplicitSpeech)
     return BuildMovementSpeech(BuildMovementPathInfo(unit, plot:GetIndex(), false, true), isExplicitSpeech, true)
 end
 
-local function GetDistrictPlacementTargets(city, districtHash)
-    if city == nil or districtHash == nil then return nil, nil, nil end
-
-    local district = GameInfo.Districts[districtHash]
-    if district == nil then return nil, nil, nil end
-
-    local validOwned = {}
-    local buildParams = {
-        [CityOperationTypes.PARAM_DISTRICT_TYPE] = districtHash,
-    }
-    local buildResults = CityManager.GetOperationTargets(city, CityOperationTypes.BUILD, buildParams)
-    local buildPlots = buildResults and buildResults[CityOperationResults.PLOTS]
-    if buildPlots ~= nil then
-        for _, plotId in ipairs(buildPlots) do
-            validOwned[plotId] = true
-        end
-    end
-
-    local validPurchasable = {}
-    local purchaseParams = {
-        [CityCommandTypes.PARAM_PLOT_PURCHASE] = UI.GetInterfaceModeParameter(CityCommandTypes.PARAM_PLOT_PURCHASE),
-    }
-    local purchaseResults = CityManager.GetCommandTargets(city, CityCommandTypes.PURCHASE, purchaseParams)
-    local purchasePlots = purchaseResults and purchaseResults[CityCommandResults.PLOTS]
-    if purchasePlots ~= nil then
-        for _, plotId in ipairs(purchasePlots) do
-            local plot = Map.GetPlotByIndex(plotId)
-            if plot ~= nil and not validOwned[plotId] and
-                plot:CanHaveDistrict(district.Index, city:GetOwner(), city:GetID()) then
-                validPurchasable[plotId] = true
-            end
-        end
-    end
-
-    return district, validOwned, validPurchasable
-end
-
-local function GetWonderPlacementTargets(city, buildingHash)
-    if city == nil or buildingHash == nil then return nil, nil, nil end
-
-    local building = GameInfo.Buildings[buildingHash]
-    if building == nil then return nil, nil, nil end
-
-    local validOwned = {}
-    local buildParams = {
-        [CityOperationTypes.PARAM_BUILDING_TYPE] = buildingHash,
-    }
-    local buildResults = CityManager.GetOperationTargets(city, CityOperationTypes.BUILD, buildParams)
-    local buildPlots = buildResults and buildResults[CityOperationResults.PLOTS]
-    if buildPlots ~= nil then
-        for _, plotId in ipairs(buildPlots) do
-            validOwned[plotId] = true
-        end
-    end
-
-    local validPurchasable = {}
-    local purchaseParams = {
-        [CityCommandTypes.PARAM_PLOT_PURCHASE] = UI.GetInterfaceModeParameter(CityCommandTypes.PARAM_PLOT_PURCHASE),
-    }
-    local purchaseResults = CityManager.GetCommandTargets(city, CityCommandTypes.PURCHASE, purchaseParams)
-    local purchasePlots = purchaseResults and purchaseResults[CityCommandResults.PLOTS]
-    if purchasePlots ~= nil then
-        for _, plotId in ipairs(purchasePlots) do
-            local plot = Map.GetPlotByIndex(plotId)
-            if plot ~= nil and not validOwned[plotId] and
-                plot:CanHaveWonder(building.Index, city:GetOwner(), city:GetID()) then
-                validPurchasable[plotId] = true
-            end
-        end
-    end
-
-    return building, validOwned, validPurchasable
-end
-
 local function BuildDistrictPlacementInterfaceInfo(plot)
     if plot == nil then return nil end
 
     local city = UI.GetHeadSelectedCity()
     local districtHash = UI.GetInterfaceModeParameter(CityOperationTypes.PARAM_DISTRICT_TYPE)
-    local district, validOwned, validPurchasable = GetDistrictPlacementTargets(city, districtHash)
-    if district == nil or validOwned == nil or validPurchasable == nil then return nil end
+    local district = districtHash ~= nil and GameInfo.Districts[districtHash] or nil
+    if city == nil or district == nil then return nil end
 
-    local plotId = plot:GetIndex()
-    local isOwnedValid = validOwned[plotId] == true
-    local isPurchasableValid = validPurchasable[plotId] == true
+    local target = CAIInterfaceTargets.GetTargetAtPlot(plot)
+    local isOwnedValid = target ~= nil and target.GroupId == "Buildable"
+    local isPurchasableValid = target ~= nil and target.GroupId == "Purchasable"
 
     local lines = {}
     if isOwnedValid or isPurchasableValid then
@@ -1129,12 +1062,12 @@ local function BuildWonderPlacementInterfaceInfo(plot)
 
     local city = UI.GetHeadSelectedCity()
     local buildingHash = UI.GetInterfaceModeParameter(CityOperationTypes.PARAM_BUILDING_TYPE)
-    local building, validOwned, validPurchasable = GetWonderPlacementTargets(city, buildingHash)
-    if building == nil or validOwned == nil or validPurchasable == nil then return nil end
+    local building = buildingHash ~= nil and GameInfo.Buildings[buildingHash] or nil
+    if city == nil or building == nil then return nil end
 
-    local plotId = plot:GetIndex()
-    local isOwnedValid = validOwned[plotId] == true
-    local isPurchasableValid = validPurchasable[plotId] == true
+    local target = CAIInterfaceTargets.GetTargetAtPlot(plot)
+    local isOwnedValid = target ~= nil and target.GroupId == "Buildable"
+    local isPurchasableValid = target ~= nil and target.GroupId == "Purchasable"
 
     local lines = {}
     if isOwnedValid or isPurchasableValid then
@@ -1260,6 +1193,9 @@ InterfaceInfoHelpers[InterfaceModeTypes.RANGE_ATTACK] = BuildCombatPreviewInterf
 InterfaceInfoHelpers[InterfaceModeTypes.CITY_RANGE_ATTACK] = BuildCombatPreviewInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.DISTRICT_RANGE_ATTACK] = BuildCombatPreviewInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.AIR_ATTACK] = BuildCombatPreviewInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.WMD_STRIKE] = BuildSimpleTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.ICBM_STRIKE] = BuildSimpleTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.COASTAL_RAID] = BuildSimpleTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.DISTRICT_PLACEMENT] = BuildDistrictPlacementInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.BUILDING_PLACEMENT] = BuildWonderPlacementInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.DEPLOY] = BuildTargetValidityInterfaceInfo
@@ -1276,6 +1212,10 @@ InterfaceInfoHelpers[InterfaceModeTypes.KILL_WEAKER_UNIT] = BuildTargetValidityI
 InterfaceInfoHelpers[InterfaceModeTypes.TRANSFORM_UNIT] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.RESTORE_UNIT_MOVES] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.NAVAL_GOLD_RAID] = BuildTargetValidityInterfaceInfo
+
+if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+    InterfaceInfoHelpers[InterfaceModeTypes.GRIEVING_GIFT] = BuildSimpleTargetValidityInterfaceInfo
+end
 
 if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
     InterfaceInfoHelpers[DB.MakeHash("INTERFACEMODE_CAPTURE_BOAT")] = BuildTargetValidityInterfaceInfo

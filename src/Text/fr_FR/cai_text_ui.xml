@@ -3572,6 +3572,9 @@
     <Replace Tag="LOC_CAI_PLOT_UNOWNED" Language="fr_FR">
       <Text>Sans propriétaire</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_PLOT_CITY_CENTER_TITLE" Language="fr_FR">
+      <Text>{2_District} de {1_City}</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_NAV_CURSOR_CONTINENT_ZONE" Language="fr_FR">
       <Text>Le continent de {1_Name}</Text>
     </Replace>
@@ -4955,6 +4958,13 @@
     </Replace>
 
     <!-- Espionage Chooser -->
+    <Replace Tag="LOC_CAI_ESPIONAGE_ORDER_BY" Language="fr_FR"><Text>Trier les destinations par</Text></Replace>
+    <Replace Tag="LOC_CAI_ESPIONAGE_SORT_TRAVEL" Language="fr_FR"><Text>Temps de trajet</Text></Replace>
+    <Replace Tag="LOC_CAI_ESPIONAGE_SORT_ESTABLISH" Language="fr_FR"><Text>Temps d'établissement</Text></Replace>
+    <Replace Tag="LOC_CAI_ESPIONAGE_SORT_MISSIONS" Language="fr_FR"><Text>Missions disponibles</Text></Replace>
+    <Replace Tag="LOC_CAI_ESPIONAGE_SORT_DISTRICTS" Language="fr_FR"><Text>Quartiers</Text></Replace>
+    <Replace Tag="LOC_CAI_ESPIONAGE_FILTER_BY_MISSION" Language="fr_FR"><Text>Filtrer par mission</Text></Replace>
+    <Replace Tag="LOC_CAI_ESPIONAGE_FILTER_ALL_MISSIONS" Language="fr_FR"><Text>Toutes les missions</Text></Replace>
     <Replace Tag="LOC_CAI_ESPIONAGE_CONFIRM_TITLE" Language="fr_FR">
       <Text>Confirmer le placement de l'espion</Text>
     </Replace>

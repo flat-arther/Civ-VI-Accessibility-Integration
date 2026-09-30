@@ -92,7 +92,11 @@ local function BuildRouteLabel(routeInfo)
     local destCity = ResolveDestCity(routeInfo)
     if not destCity then return "?" end
 
-    local parts = { Locale.ToUpper(destCity:GetName()) }
+    local cityName = Locale.ToUpper(destCity:GetName())
+    if destCity:IsCapital() and Players[destCity:GetOwner()]:IsMajor() then
+        cityName = cityName .. ", " .. Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL")
+    end
+    local parts = { cityName }
 
     -- Turns to complete is Better Trade Screen's headline improvement over the
     -- vanilla distance readout, so lead the destination with it.

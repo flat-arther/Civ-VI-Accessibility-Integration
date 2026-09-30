@@ -3579,6 +3579,9 @@
     <Replace Tag="LOC_CAI_PLOT_UNOWNED" Language="zh_Hans_CN">
       <Text>无主</Text>
     </Replace>
+    <Replace Tag="LOC_CAI_PLOT_CITY_CENTER_TITLE" Language="zh_Hans_CN">
+      <Text>{1_City}{2_District}</Text>
+    </Replace>
     <Replace Tag="LOC_CAI_NAV_CURSOR_CONTINENT_ZONE" Language="zh_Hans_CN">
       <Text>{1_Name}大陆</Text>
     </Replace>
@@ -4964,6 +4967,13 @@
     </Replace>
 
     <!-- 间谍活动选择器 -->
+    <Replace Tag="LOC_CAI_ESPIONAGE_ORDER_BY" Language="zh_Hans_CN"><Text>目的地排序依据</Text></Replace>
+    <Replace Tag="LOC_CAI_ESPIONAGE_SORT_TRAVEL" Language="zh_Hans_CN"><Text>旅行时间</Text></Replace>
+    <Replace Tag="LOC_CAI_ESPIONAGE_SORT_ESTABLISH" Language="zh_Hans_CN"><Text>建立情报网时间</Text></Replace>
+    <Replace Tag="LOC_CAI_ESPIONAGE_SORT_MISSIONS" Language="zh_Hans_CN"><Text>可用任务</Text></Replace>
+    <Replace Tag="LOC_CAI_ESPIONAGE_SORT_DISTRICTS" Language="zh_Hans_CN"><Text>区域</Text></Replace>
+    <Replace Tag="LOC_CAI_ESPIONAGE_FILTER_BY_MISSION" Language="zh_Hans_CN"><Text>按任务筛选</Text></Replace>
+    <Replace Tag="LOC_CAI_ESPIONAGE_FILTER_ALL_MISSIONS" Language="zh_Hans_CN"><Text>所有任务</Text></Replace>
     <Replace Tag="LOC_CAI_ESPIONAGE_CONFIRM_TITLE" Language="zh_Hans_CN">
       <Text>确认间谍部署</Text>
     </Replace>

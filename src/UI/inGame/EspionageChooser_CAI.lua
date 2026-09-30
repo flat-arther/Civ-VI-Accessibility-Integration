@@ -13,10 +13,17 @@ local mgr                    = ExposedMembers.CAI_UIManager
 
 local PANEL_ID               = "CAIEspionageChooser_Panel"
 local DEST_TREE_ID           = "CAIEspionageChooser_DestinationTree"
+local SORT_ID                = "CAIEspionageChooser_DestinationSort"
+local MISSION_FILTER_ID      = "CAIEspionageChooser_MissionFilter"
 local MISSION_LIST_ID        = "CAIEspionageChooser_MissionList"
 
 local m_panel                = nil ---@type UIWidget|nil
 local m_destTree             = nil ---@type UIWidget|nil
+local m_sort                 = nil ---@type UIWidget|nil
+local m_missionFilter        = nil ---@type UIWidget|nil
+local m_catYourCities        = nil ---@type UIWidget|nil
+local m_catOtherCivs         = nil ---@type UIWidget|nil
+local m_catCityStates        = nil ---@type UIWidget|nil
 local m_missionList          = nil ---@type UIWidget|nil
 local m_dialog               = nil ---@type UIWidget|nil
 
@@ -26,6 +33,16 @@ local m_capturedMissions     = {} ---@type table[]
 local m_caiCity              = nil
 local m_caiSpy               = nil
 local m_caiIsDestinationMode = true
+local m_sortColumn           = nil
+local m_sortAscending        = true
+local m_missionFilterHash    = nil
+
+local SORT_COLUMNS = {
+    { key = "transitTime", label = "LOC_CAI_ESPIONAGE_SORT_TRAVEL" },
+    { key = "establishTime", label = "LOC_CAI_ESPIONAGE_SORT_ESTABLISH" },
+    { key = "missionCount", label = "LOC_CAI_ESPIONAGE_SORT_MISSIONS" },
+    { key = "districtCount", label = "LOC_CAI_ESPIONAGE_SORT_DISTRICTS" },
+}
 
 -- ============================================================================
 -- Helpers
@@ -239,9 +256,9 @@ end
 local function BuildDestinationLabel(cap)
     local city = cap.city
     local ownerName = GetCivName(city:GetOwner())
-    local cityName = Locale.ToUpper(city:GetName())
+    local cityName = Locale.Lookup(city:GetName())
     if city:IsCapital() and Players[city:GetOwner()]:IsMajor() then
-        cityName = "[ICON_Capital] " .. cityName
+        cityName = cityName .. ", " .. Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL")
     end
     if ownerName ~= "" then
         return cityName .. ", " .. ownerName
@@ -351,40 +368,128 @@ end
 -- Widget Building
 -- ============================================================================
 
-local function RebuildDestinationTree()
+local function RebuildMissionFilter()
+    local operations = {}
+    for _, cap in ipairs(m_capturedDestinations) do
+        for _, mission in ipairs(cap.missions) do
+            if not mission.disabled then
+                operations[mission.operation.Hash] = mission.operation
+            end
+        end
+    end
+
+    local sortedOperations = {}
+    for _, operation in pairs(operations) do
+        table.insert(sortedOperations, operation)
+    end
+    table.sort(sortedOperations, function(a, b)
+        local comparison = Locale.Compare(Locale.Lookup(a.Description), Locale.Lookup(b.Description))
+        if comparison ~= 0 then return comparison < 0 end
+        return a.Hash < b.Hash
+    end)
+
+    local selectionReset = m_missionFilterHash and not operations[m_missionFilterHash]
+    if selectionReset then
+        m_missionFilterHash = nil
+    end
+
+    local options = {
+        { label = Locale.Lookup("LOC_CAI_ESPIONAGE_FILTER_ALL_MISSIONS"), value = nil },
+    }
+    local selectedIndex = 1
+    for _, operation in ipairs(sortedOperations) do
+        table.insert(options, { label = Locale.Lookup(operation.Description), value = operation.Hash })
+        if operation.Hash == m_missionFilterHash then selectedIndex = #options end
+    end
+
+    local capture = mgr:CaptureFocusKey(m_missionFilter)
+    m_missionFilter:SetOptions(options)
+    m_missionFilter:SetSelectedIndex(selectedIndex, true)
+    if capture and selectionReset then
+        capture = { key = m_missionFilter.FocusKey, path = {} }
+    end
+    mgr:RestoreFocus(m_missionFilter, capture)
+end
+
+local function RebuildDestinationTree(refreshGameData)
     if not mgr or not m_destTree then return end
 
     local capture = mgr:CaptureFocusKey(m_destTree)
-    m_destTree:ClearChildren()
+    m_catYourCities:ClearChildren()
+    m_catOtherCivs:ClearChildren()
+    m_catCityStates:ClearChildren()
 
-    for i, cap in ipairs(m_capturedDestinations) do
-        local idx = i
-        local city = cap.city
-        local focusKey = "destination:" .. city:GetOwner() .. ":" .. city:GetID()
-
-        local missions = ComputeMissionsForCity(city, m_caiSpy)
-        cap.missionCount = #missions
-
-        local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEspionage_Dest"), "TreeItem", {
-            Label = function() return BuildDestinationLabel(m_capturedDestinations[idx]) end,
-            Tooltip = function() return BuildDestinationTooltip(m_capturedDestinations[idx]) end,
-            FocusKey = focusKey,
-        })
-
-        for mi, mis in ipairs(missions) do
-            local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEspionage_MissionChild"), "TreeItem", {
-                Label = function() return BuildMissionLabel(mis) end,
-                Tooltip = function() return BuildMissionTooltip(mis) end,
-                FocusKey = "dest:" .. tostring(idx) .. ":mission:" .. tostring(mi),
-            })
-            row:AddChild(child)
+    local groups = { {}, {}, {} }
+    if refreshGameData ~= false then
+        for i, cap in ipairs(m_capturedDestinations) do
+            cap.naturalIndex = i
+            cap.missions = ComputeMissionsForCity(cap.city, m_caiSpy)
+            cap.missionCount = 0
+            for _, mission in ipairs(cap.missions) do
+                if not mission.disabled then cap.missionCount = cap.missionCount + 1 end
+            end
+            cap.districtCount = #cap.districts
         end
+        RebuildMissionFilter()
+    end
 
-        row:On("activate", function()
-            OpenConfirmDialog(idx)
-        end)
+    for _, cap in ipairs(m_capturedDestinations) do
+        local matchesMission = m_missionFilterHash == nil
+        if not matchesMission then
+            for _, mission in ipairs(cap.missions) do
+                if not mission.disabled and mission.operation.Hash == m_missionFilterHash then
+                    matchesMission = true
+                    break
+                end
+            end
+        end
+        if matchesMission then
+            local owner = cap.city:GetOwner()
+            local influence = Players[owner]:GetInfluence()
+            local group = owner == Game.GetLocalPlayer() and 1
+                or (influence and influence:CanReceiveInfluence()) and 3 or 2
+            table.insert(groups[group], cap)
+        end
+    end
 
-        m_destTree:AddChild(row)
+    local categories = { m_catYourCities, m_catOtherCivs, m_catCityStates }
+    for groupIndex, category in ipairs(categories) do
+        local entries = groups[groupIndex]
+        if m_sortColumn then
+            table.sort(entries, function(a, b)
+                local av, bv = a[m_sortColumn], b[m_sortColumn]
+                if av == bv then return a.naturalIndex < b.naturalIndex end
+                if m_sortAscending then return av < bv end
+                return av > bv
+            end)
+        end
+        category:SetHiddenPredicate(function() return #entries == 0 end)
+        for _, cap in ipairs(entries) do
+            local city = cap.city
+            local focusKey = "destination:" .. city:GetOwner() .. ":" .. city:GetID()
+
+            local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEspionage_Dest"), "TreeItem", {
+                Label = function() return BuildDestinationLabel(cap) end,
+                Tooltip = function() return BuildDestinationTooltip(cap) end,
+                FocusKey = focusKey,
+            })
+
+            for mi, mis in ipairs(cap.missions) do
+                local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEspionage_MissionChild"), "TreeItem", {
+                    Label = function() return BuildMissionLabel(mis) end,
+                    Tooltip = function() return BuildMissionTooltip(mis) end,
+                    FocusKey = focusKey .. ":mission:" .. tostring(mis.operation.Hash) .. ":" ..
+                        tostring(mis.districtPlotID or (mis.targetPlot and mis.targetPlot:GetIndex()) or mi),
+                })
+                row:AddChild(child)
+            end
+
+            row:On("activate", function()
+                OpenConfirmDialog(cap.naturalIndex)
+            end)
+
+            category:AddChild(row)
+        end
     end
 
     mgr:RestoreFocus(m_destTree, capture)
@@ -481,7 +586,67 @@ local function BuildPanel()
         end,
         HiddenPredicate = function() return not m_caiIsDestinationMode end,
     })
+    m_catYourCities = mgr:CreateWidget("CAIEspionageChooser_CatYour", "TreeItem", {
+        Label = function() return Locale.Lookup("LOC_CAI_TRADE_ROUTE_YOUR_CITIES") end,
+        FocusKey = "cat:your_cities",
+    })
+    m_catOtherCivs = mgr:CreateWidget("CAIEspionageChooser_CatOther", "TreeItem", {
+        Label = function() return Locale.Lookup("LOC_CAI_TRADE_ROUTE_OTHER_CIVS") end,
+        FocusKey = "cat:other_civs",
+    })
+    m_catCityStates = mgr:CreateWidget("CAIEspionageChooser_CatCityStates", "TreeItem", {
+        Label = function() return Locale.Lookup("LOC_CAI_TRADE_ROUTE_CITY_STATES") end,
+        FocusKey = "cat:city_states",
+    })
+    m_destTree:AddChild(m_catYourCities)
+    m_destTree:AddChild(m_catOtherCivs)
+    m_destTree:AddChild(m_catCityStates)
     m_panel:AddChild(m_destTree)
+
+    m_sort = mgr:CreateWidget(SORT_ID, "Dropdown", {
+        Label = function() return Locale.Lookup("LOC_CAI_ESPIONAGE_ORDER_BY") end,
+        FocusKey = "espionage:destination-sort",
+        HiddenPredicate = function() return not m_caiIsDestinationMode end,
+    })
+    local options = { { label = Locale.Lookup("LOC_CAI_DATATABLE_SORT_NATURAL"),
+        value = { column = nil, ascending = true } } }
+    for _, column in ipairs(SORT_COLUMNS) do
+        local label = Locale.Lookup(column.label)
+        local isTime = column.key == "transitTime" or column.key == "establishTime"
+        local ascendingDescription = isTime and "LOC_CAI_SORT_FASTEST_FIRST" or "LOC_CAI_SORT_FEWEST_FIRST"
+        local descendingDescription = isTime and "LOC_CAI_SORT_SLOWEST_FIRST" or "LOC_CAI_SORT_MOST_FIRST"
+        table.insert(options, { label = label .. "[NEWLINE]" .. Locale.Lookup(ascendingDescription),
+            value = { column = column.key, ascending = true } })
+        table.insert(options, { label = label .. "[NEWLINE]" .. Locale.Lookup(descendingDescription),
+            value = { column = column.key, ascending = false } })
+    end
+    m_sort:SetOptions(options)
+    local selectedIndex = 1
+    for i, option in ipairs(options) do
+        if option.value.column == m_sortColumn and
+            (m_sortColumn == nil or option.value.ascending == m_sortAscending) then
+            selectedIndex = i
+            break
+        end
+    end
+    m_sort:SetSelectedIndex(selectedIndex, true)
+    m_sort:On("value_changed", function(_, sort)
+        m_sortColumn = sort.column
+        m_sortAscending = sort.ascending
+        RebuildDestinationTree(false)
+    end)
+    m_panel:AddChild(m_sort)
+
+    m_missionFilter = mgr:CreateWidget(MISSION_FILTER_ID, "Dropdown", {
+        Label = function() return Locale.Lookup("LOC_CAI_ESPIONAGE_FILTER_BY_MISSION") end,
+        FocusKey = "espionage:mission-filter",
+        HiddenPredicate = function() return not m_caiIsDestinationMode end,
+    })
+    m_missionFilter:On("value_changed", function(_, missionHash)
+        m_missionFilterHash = missionHash
+        RebuildDestinationTree(false)
+    end)
+    m_panel:AddChild(m_missionFilter)
 
     m_missionList = mgr:CreateWidget(MISSION_LIST_ID, "List", {
         Label = function() return Locale.Lookup("LOC_ESPIONAGECHOOSER_CHOOSE_MISSION") end,
@@ -519,6 +684,11 @@ local function PopPanel()
     end
     m_panel = nil
     m_destTree = nil
+    m_sort = nil
+    m_missionFilter = nil
+    m_catYourCities = nil
+    m_catOtherCivs = nil
+    m_catCityStates = nil
     m_missionList = nil
     m_capturedDestinations = {}
     m_capturedMissions = {}

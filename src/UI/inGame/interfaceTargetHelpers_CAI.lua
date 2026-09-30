@@ -148,6 +148,40 @@ end
 -- ===========================================================================
 --  NATIVE ENGINE INTERFACE CONFIGURATIONS
 -- ===========================================================================
+local function GetPlacementTargets(typeParameter, gameInfo, canPlace)
+    local out = {}
+    local city = UI.GetHeadSelectedCity()
+    if city == nil or UI.IsGameCoreBusy() then return out end
+
+    local typeHash = UI.GetInterfaceModeParameter(typeParameter)
+    local definition = typeHash ~= nil and gameInfo[typeHash] or nil
+    if definition == nil then return out end
+
+    local results = CityManager.GetOperationTargets(city, CityOperationTypes.BUILD, {
+        [typeParameter] = typeHash,
+    })
+    local buildPlots = results and results[CityOperationResults.PLOTS]
+    if buildPlots ~= nil then
+        for _, plotId in ipairs(buildPlots) do out[plotId] = "Buildable" end
+    end
+
+    local purchaseResults = CityManager.GetCommandTargets(city, CityCommandTypes.PURCHASE, {
+        [CityCommandTypes.PARAM_PLOT_PURCHASE] = UI.GetInterfaceModeParameter(CityCommandTypes.PARAM_PLOT_PURCHASE),
+    })
+    local purchasePlots = purchaseResults and purchaseResults[CityCommandResults.PLOTS]
+    if purchasePlots ~= nil then
+        for _, plotId in ipairs(purchasePlots) do
+            if out[plotId] == nil then
+                local plot = Map.GetPlotByIndex(plotId)
+                if plot ~= nil and canPlace(plot, definition.Index, city) then
+                    out[plotId] = "Purchasable"
+                end
+            end
+        end
+    end
+    return out
+end
+
 local PLOT_TARGET_MODES = {
     [InterfaceModeTypes.RANGE_ATTACK] = { Source = "unitOperation", Type = UnitOperationTypes.RANGE_ATTACK, RequireTargetModifier = true },
     [InterfaceModeTypes.CITY_RANGE_ATTACK] = {
@@ -220,79 +254,21 @@ local PLOT_TARGET_MODES = {
     [InterfaceModeTypes.RESTORE_UNIT_MOVES] = { Source = "unitCommand", Type = UnitCommandTypes.RESTORE_UNIT_MOVES },
     [InterfaceModeTypes.NAVAL_GOLD_RAID] = { Source = "unitCommand", Type = UnitCommandTypes.NAVAL_GOLD_RAID },
 
-    -- District Placement Interface
     [InterfaceModeTypes.DISTRICT_PLACEMENT] = {
         CustomGetTargets = function()
-            local out = {}
-            local pSelectedCity = UI.GetHeadSelectedCity()
-            if pSelectedCity == nil or UI.IsGameCoreBusy() then return out end
-
-            local districtHash = UI.GetInterfaceModeParameter(CityOperationTypes.PARAM_DISTRICT_TYPE)
-            local district = GameInfo.Districts[districtHash]
-            if district == nil then return out end
-
-            local tParameters = { [CityOperationTypes.PARAM_DISTRICT_TYPE] = districtHash }
-            local tResults = CityManager.GetOperationTargets(pSelectedCity, CityOperationTypes.BUILD, tParameters)
-            if tResults and tResults[CityOperationResults.PLOTS] then
-                for _, plotId in ipairs(tResults[CityOperationResults.PLOTS]) do
-                    out[plotId] = "Buildable"
-                end
-            end
-
-            tParameters = {
-                [CityCommandTypes.PARAM_PLOT_PURCHASE] = UI.GetInterfaceModeParameter(CityCommandTypes
-                    .PARAM_PLOT_PURCHASE)
-            }
-            local tPurchaseResults = CityManager.GetCommandTargets(pSelectedCity, CityCommandTypes.PURCHASE, tParameters)
-            if tPurchaseResults and tPurchaseResults[CityCommandResults.PLOTS] then
-                for _, plotId in ipairs(tPurchaseResults[CityCommandResults.PLOTS]) do
-                    local kPlot = Map.GetPlotByIndex(plotId)
-                    if kPlot and kPlot:CanHaveDistrict(district.Index, pSelectedCity:GetOwner(), pSelectedCity:GetID()) then
-                        if not out[plotId] then
-                            out[plotId] = "Purchasable"
-                        end
-                    end
-                end
-            end
-            return out
+            return GetPlacementTargets(CityOperationTypes.PARAM_DISTRICT_TYPE, GameInfo.Districts,
+                function(plot, index, city)
+                    return plot:CanHaveDistrict(index, city:GetOwner(), city:GetID())
+                end)
         end
     },
 
-    -- Wonder / Building Placement Interface
     [InterfaceModeTypes.BUILDING_PLACEMENT] = {
         CustomGetTargets = function()
-            local out = {}
-            local pSelectedCity = UI.GetHeadSelectedCity()
-            if pSelectedCity == nil or UI.IsGameCoreBusy() then return out end
-
-            local buildingHash = UI.GetInterfaceModeParameter(CityOperationTypes.PARAM_BUILDING_TYPE)
-            local building = GameInfo.Buildings[buildingHash]
-            if building == nil then return out end
-
-            local tParameters = { [CityOperationTypes.PARAM_BUILDING_TYPE] = buildingHash }
-            local tResults = CityManager.GetOperationTargets(pSelectedCity, CityOperationTypes.BUILD, tParameters)
-            if tResults and tResults[CityOperationResults.PLOTS] then
-                for _, plotId in ipairs(tResults[CityOperationResults.PLOTS]) do
-                    out[plotId] = "Buildable"
-                end
-            end
-
-            tParameters = {
-                [CityCommandTypes.PARAM_PLOT_PURCHASE] = UI.GetInterfaceModeParameter(CityCommandTypes
-                    .PARAM_PLOT_PURCHASE)
-            }
-            local tPurchaseResults = CityManager.GetCommandTargets(pSelectedCity, CityCommandTypes.PURCHASE, tParameters)
-            if tPurchaseResults and tPurchaseResults[CityCommandResults.PLOTS] then
-                for _, plotId in ipairs(tPurchaseResults[CityCommandResults.PLOTS]) do
-                    local kPlot = Map.GetPlotByIndex(plotId)
-                    if kPlot and kPlot:CanHaveWonder(building.Index, pSelectedCity:GetOwner(), pSelectedCity:GetID()) then
-                        if not out[plotId] then
-                            out[plotId] = "Purchasable"
-                        end
-                    end
-                end
-            end
-            return out
+            return GetPlacementTargets(CityOperationTypes.PARAM_BUILDING_TYPE, GameInfo.Buildings,
+                function(plot, index, city)
+                    return plot:CanHaveWonder(index, city:GetOwner(), city:GetID())
+                end)
         end
     }
 }
@@ -531,7 +507,7 @@ local function AddPlotTargetItems(out, mode, targetPlots)
             Id        = "validTarget:" .. tostring(plotIndex),
             Kind      = TARGET_KIND_PLOT,
             PlotIndex = plotIndex,
-            LabelKey  = ResolvePlotTargetLabel(mode, plotIndex),
+            LabelKey  = nil,
             GroupId   = group,
             SortValue = sortValue,
         }
@@ -592,12 +568,22 @@ local function BuildTargetCache()
         end
     end
 
-    return {
+    local cache = {
         Mode = mode,
         Signature = BuildTargetCacheSignature(mode),
         Items = items,
         ByPlotIndex = byPlotIndex,
     }
+
+    -- Placement labels request interface info, which consults this target map.
+    -- Publish the lookup before rendering labels to avoid rebuilding recursively.
+    m_targetCache = cache
+    for _, item in ipairs(items) do
+        if item.Kind == TARGET_KIND_PLOT then
+            item.LabelKey = ResolvePlotTargetLabel(mode, item.PlotIndex)
+        end
+    end
+    return cache
 end
 
 -- ===========================================================================
@@ -623,10 +609,33 @@ function CAIInterfaceTargets.GetActiveTargetItems()
     return m_targetCache.Items
 end
 
-function CAIInterfaceTargets.GetTargetAtPlot(plot)
+function CAIInterfaceTargets.GetTargetAtPlot(plot, refresh)
     if plot == nil then return nil end
 
     local mode = UI.GetInterfaceMode()
+    if refresh == true then
+        local plotConfig = PLOT_TARGET_MODES[mode]
+        if plotConfig ~= nil then
+            local target = GetPlotTargetsForConfig(plotConfig)[plot:GetIndex()]
+            if target == nil then return nil end
+            return {
+                Kind = TARGET_KIND_PLOT,
+                PlotIndex = plot:GetIndex(),
+                GroupId = type(target) == "string" and target or "targetPlots",
+            }
+        end
+
+        local commandType = UNIT_TARGET_MODES[mode]
+        if commandType ~= nil then
+            for _, unit in ipairs(GetCommandTargetUnits(commandType)) do
+                if unit:GetPlotId() == plot:GetIndex() then
+                    return { Kind = TARGET_KIND_UNIT, PlotIndex = plot:GetIndex() }
+                end
+            end
+        end
+        return nil
+    end
+
     local signature = BuildTargetCacheSignature(mode)
     local plotConfig = PLOT_TARGET_MODES[mode]
     local requiresLiveTargets = plotConfig ~= nil and plotConfig.LiveCustomTargets == true

@@ -2,21 +2,29 @@
 
 ### Added
 
+- In the imbed spy screen, added dropdowns for sorting and filtering destinations
 - Added support for the real era tracker mod. Open the UI from the launch-bar (shift + tab)
 - Geography scanner rivers and B's geography information now say whether a river leads to coast or lake when its destination is known.
 - With Gathering Storm active, B's River readouts include flow direction summaries, from the upstream cursor direction to the downstream direction.
-- Builder improvement, harvest, feature removal and planting actions, and national park creation now state their charge cost at the start of the action tooltip.
 - Added a Gameplay setting to list river edges upstream to downstream or clockwise in geography information, default B. It is on by default
+- Builder improvement, harvest, feature removal and planting actions, and national park creation now state their charge cost at the start of the action tooltip.
 - Added UI settings to enter a tree item with one Right press and leave and collapse it with one Left press, and to control whether expanded tree items read their item count. Simplified navigation is off by default; item counts are on by default.
 
 ### Changed
 
+- Targeting modes now say whether the cursor tile is a valid target immediately after Fog while moving across the map.
+- Trade route destinations now identify capital cities after the city name.
+- Spy destinations are grouped by your cities, other civilizations, and city-states, with missions under each city.
+- City-center district readouts now include the city name.
 - The city-management scanner's Yields category includes purchasable tiles
 - The tile readout now names the feature first, says "Hill" or "Mountain" as a separate word, and leaves out the terrain when the feature already implies it. For example, "Grassland (Hills), Woods" is now "Woods, Hill, Grassland", "Grassland, Marsh" is now "Marsh", and a natural wonder is named on its own. Waypoint and target labels follow the same wording.
 - Unexplored tiles are now called "Unexplored" instead of "Uncharted Territory".
 
 ### Fixed
 
+- Selecting a notification in the Notification Center activates that selected item, even when several notifications share one stack.
+- Enter on an invalid target now says "Invalid target" and keeps the targeting or placement mode open, including ranged attacks.
+- Selecting a capital city now says the city name followed by “Capital” instead of running the words together.
 - With Detailed Map Tacks, shared tacks from other players in multiplayer read their yield details and placement warnings in the tile readout and scanner.
 - With Extended Policy Cards, the government policy picker and viewer now use Name, Type, and Impact columns matching Better Reports, omit repeated table/tree titles and policy labels, and read impact alongside policy names in tree view. The picker is properly labeled
 - Modded units that can transfer to another city now show the city destination list.

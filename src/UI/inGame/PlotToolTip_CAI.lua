@@ -101,9 +101,9 @@ local STATIC_INFO_PRIORITY = {
 local CURSOR_MOVE_INFO_PRIORITY = {
     "piratesFocusName",
     "isFog",
+    "interfaceInfo",
     "units",
     "mapTac",
-    "interfaceInfo",
     "lensInfo",
     "waypoint",
     "civRoyaleSafeZoneCenter",
@@ -120,6 +120,7 @@ local CURSOR_MOVE_INFO_PRIORITY = {
     "drought",
     "nationalPark",
     "wonderTitle",
+    "cityDistrictTitle",
     "districtTitle",
     "terrainShape",
     "resource",
@@ -1410,7 +1411,10 @@ info.PlotInfoHelpers = {
     cityDistrictTitle = function(data)
         if not data.IsVisible or not data.IsCity or data.DistrictType == nil then return nil end
         local districtInfo = GameInfo.Districts[data.DistrictType]
-        return districtInfo ~= nil and Locale.Lookup(districtInfo.Name) or nil
+        if districtInfo == nil then return nil end
+        local districtName = Locale.Lookup(districtInfo.Name)
+        if data.OwningCityName == nil or data.OwningCityName == "" then return districtName end
+        return Locale.Lookup("LOC_CAI_PLOT_CITY_CENTER_TITLE", Locale.Lookup(data.OwningCityName), districtName)
     end,
 
     cityResourceExtraction = function(data, plot)
@@ -1430,7 +1434,7 @@ info.PlotInfoHelpers = {
     end,
 
     districtTitle = function(data)
-        if not data.IsVisible or data.DistrictID == -1 or data.DistrictType == nil then return nil end
+        if not data.IsVisible or data.IsCity == true or data.DistrictID == -1 or data.DistrictType == nil then return nil end
 
         local districtInfo = GameInfo.Districts[data.DistrictType]
         if districtInfo == nil or districtInfo.InternalOnly then
