@@ -22,7 +22,7 @@
 
 ### Fixed
 
-- Selecting a notification in the Notification Center activates that selected item, even when several notifications share one stack.
+- Selecting a notification in the Notification Center activates that selected item, even when several notifications share one stack. This should fix the problem with multiplayer notifications, where selecting a diplomacy notification always opens the first one
 - Enter on an invalid target now says "Invalid target" and keeps the targeting or placement mode open, including ranged attacks.
 - Selecting a capital city now says the city name followed by “Capital” instead of running the words together.
 - With Detailed Map Tacks, shared tacks from other players in multiplayer read their yield details and placement warnings in the tile readout and scanner.

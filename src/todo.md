@@ -121,6 +121,6 @@
 [x] Add support for real Era Tracker
 [x] prepend city name to City center
 [x] Redo the targetting interfaces, prevent interfaces from closing when pressing enter on an invalid tile
-[ ] Look in to stacked multiplayer notifications
+[x] Look in to stacked multiplayer notifications
 [ ] Add support for top panel extension pro, prehistoric era
 [ ] Look in to coastal raide yield reporting
