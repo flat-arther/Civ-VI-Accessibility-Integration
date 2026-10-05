@@ -91,3 +91,14 @@ Run with vanilla Reports and Better Reports where available.
 - [ ] With BBG, check Traditional Domination percentage, captured details/tooltips and the configured victory threshold.
 - [ ] Where available, check a custom victory or scenario Score view. Confirm native objectives and player/team entries remain present.
 - [ ] Smoke-check Overall, Science, Culture, Domination and Religion tabs and tutorial-controlled closing.
+
+## ProductionPanel queue
+
+Run with ordinary ProductionPanel and with BBG/Babylon content where available.
+
+- [ ] Open Queue with current production and several queued units, buildings, districts and projects. Check names and current-production details, including an empty queue.
+- [ ] Use Shift+Up/Down to reorder queued items and exchange the first item with current production. Check first/last feedback and focus after each refresh.
+- [ ] Delete a queued item and current production; confirm the intended item is removed once and focus remains usable. Repeat quick reorder/delete inputs as the queue updates.
+- [ ] Close/reopen, switch cities and switch between Production, Gold, Faith and Queue. Confirm fresh queue contents and no focus jump left over from an earlier operation.
+- [ ] Smoke-check ordinary production, corps/army choices, gold/faith purchases and Ctrl+Enter queueing. Place/cancel a district or wonder and confirm the normal panel/focus return behavior.
+- [ ] In the tutorial, confirm only the allowed production choices are exposed and successful production still closes the panel normally.

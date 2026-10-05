@@ -1959,3 +1959,17 @@ function CAIWidgetHelpers_Search.MakeSearchCandidate(widget, label, bfsIndex, to
 
 ---@class CAIRankingsGenericPresenter
 ---@field RebuildTree fun(tree:UIWidget,victoryType:string)
+
+---@class CAIProductionQueueContext
+---@field GetCity fun():City|nil Live panel city; absent before data arrives or after close.
+---@field GetList fun():ListWidget|nil Live queue page; absent in tutorial mode or after close.
+---@field HasCurrentProduction fun():boolean
+---@field ReadCurrentName fun():string Live native control text.
+---@field ReadCurrentLabel fun():string
+---@field ReadCurrentTooltip fun():string
+---@field RemoveQueueItem fun(index:integer) Captured native callback; zero means current production.
+---@field SwapQueueItem fun(source:integer,destination:integer) Captured native callback.
+
+---@class CAIProductionQueueController
+---@field Rebuild fun() Rebuilds rows and restores stable or operation-specific positional focus.
+---@field Reset fun() Discards pending positional focus when the host closes.
