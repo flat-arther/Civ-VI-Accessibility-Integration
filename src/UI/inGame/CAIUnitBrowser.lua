@@ -651,18 +651,6 @@ function CAIUnitBrowser.Create(dependencies)
         return Locale.Lookup("LOC_CAI_UNIT_CAT_ALL")
     end
 
-    function CAIUnitList.SyncSortDropdown()
-        if CAIUnitList.SortDropdown == nil then return end
-        for index, option in ipairs(CAIUnitList.SortOptions or {}) do
-            local value = option.value
-            if value.column == CAIUnitList.SortColumn
-                and (value.column == nil or value.ascending == CAIUnitList.SortAscending) then
-                CAIUnitList.SortDropdown:SetSelectedIndex(index, true)
-                return
-            end
-        end
-    end
-
     function CAIUnitList.BuildPanel()
         local playerID = Game.GetLocalPlayer()
         if playerID == nil or playerID < 0 or Players[playerID] == nil then return nil end
@@ -699,7 +687,7 @@ function CAIUnitBrowser.Create(dependencies)
         CAIUnitList.Table:On("sort_changed", function(_, columnKey, ascending)
             CAIUnitList.SortColumn = columnKey
             CAIUnitList.SortAscending = ascending == true
-            CAIUnitList.SyncSortDropdown()
+            CAIColumns.SyncSortSelection(CAIUnitList.SortDropdown, CAIUnitList.SortOptions or {}, CAIUnitList.SortColumn, CAIUnitList.SortAscending)
         end)
         CAIUnitList.Table:AddInputBindings({
             {
@@ -759,7 +747,7 @@ function CAIUnitBrowser.Create(dependencies)
             natural = { ascending = false }, separator = ", ", includeColumn = function(column) return column.sortKey ~= nil end,
         })
         CAIUnitList.SortDropdown:SetOptions(CAIUnitList.SortOptions)
-        CAIUnitList.SyncSortDropdown()
+        CAIColumns.SyncSortSelection(CAIUnitList.SortDropdown, CAIUnitList.SortOptions or {}, CAIUnitList.SortColumn, CAIUnitList.SortAscending)
         CAIUnitList.SortDropdown:On("value_changed", function(_, sort)
             CAIUnitList.SortColumn = sort.column
             CAIUnitList.SortAscending = sort.ascending == true

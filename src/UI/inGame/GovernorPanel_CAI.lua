@@ -1047,18 +1047,6 @@ local function BuildNaturalGovernorIndices()
     return indices
 end
 
-local function SyncTreeSortDropdown()
-    if not m_ui.treeSort then return end
-    for index, option in ipairs(m_treeSortOptions) do
-        local sort = option.value
-        if sort.column == m_treeSortColumn and
-            (sort.column == nil or sort.ascending == m_treeSortAscending) then
-            m_ui.treeSort:SetSelectedIndex(index, true)
-            return
-        end
-    end
-end
-
 local function GetOrderedGovernorIndices()
     local ordered = {}
     for _, governorIndex in ipairs(m_governorIndices) do ordered[#ordered + 1] = governorIndex end
@@ -1218,7 +1206,7 @@ local function BuildPanel()
     m_ui.tableView:On("sort_changed", function(_, columnKey, ascending)
         m_treeSortColumn = columnKey
         m_treeSortAscending = ascending == true
-        SyncTreeSortDropdown()
+        CAIColumns.SyncSortSelection(m_ui.treeSort, m_treeSortOptions, m_treeSortColumn, m_treeSortAscending)
         RebuildTree()
     end)
     m_ui.panel:AddChild(m_ui.tableView)
@@ -1229,7 +1217,7 @@ local function BuildPanel()
         HiddenPredicate = function() return m_viewMode ~= "tree" end,
     })
     m_ui.treeSort:SetOptions(m_treeSortOptions)
-    SyncTreeSortDropdown()
+    CAIColumns.SyncSortSelection(m_ui.treeSort, m_treeSortOptions, m_treeSortColumn, m_treeSortAscending)
     m_ui.treeSort:On("value_changed", function(_, sort)
         m_treeSortColumn = sort.column
         m_treeSortAscending = sort.ascending == true

@@ -2276,17 +2276,6 @@ end
 -- Tree/table share one sort. The dropdown lists natural order plus, for each
 -- sortable column, its two directions labelled by the same semantic tags the
 -- header speaks.
-local function SyncSortDropdown()
-    if not m_ui.treeSort then return end
-    for index, option in ipairs(m_sortOptions) do
-        local sort = option.value
-        if sort.column == m_sortColumn and (sort.column == nil or sort.ascending == m_sortAscending) then
-            m_ui.treeSort:SetSelectedIndex(index, true)
-            return
-        end
-    end
-end
-
 -- Complete set of gossip groups, so the filter is stable regardless of which
 -- leader is in view. LOC_HUD_REPORTS_FILTER_<GroupType> is the vanilla label.
 local function BuildGossipGroupOptions()
@@ -2356,7 +2345,7 @@ local function EnsureTableStructure()
     if m_ui.treeSort then
         local capture = mgr:CaptureFocusKey(m_ui.treeSort)
         m_ui.treeSort:SetOptions(m_sortOptions)
-        SyncSortDropdown()
+        CAIColumns.SyncSortSelection(m_ui.treeSort, m_sortOptions, m_sortColumn, m_sortAscending)
         if capture then mgr:RestoreFocus(m_ui.treeSort, capture) end
     end
 end
@@ -2882,7 +2871,7 @@ local function EnsureRootBuilt()
         HiddenPredicate = function() return m_viewMode ~= "tree" end,
     })
     m_ui.treeSort:SetOptions(m_sortOptions)
-    SyncSortDropdown()
+    CAIColumns.SyncSortSelection(m_ui.treeSort, m_sortOptions, m_sortColumn, m_sortAscending)
     m_ui.treeSort:On("value_changed", function(_, sort)
         m_sortColumn = sort.column
         m_sortAscending = sort.ascending == true
@@ -2932,7 +2921,7 @@ local function EnsureRootBuilt()
     m_ui.table:On("sort_changed", function(_, columnKey, ascending)
         m_sortColumn = columnKey
         m_sortAscending = ascending == true
-        SyncSortDropdown()
+        CAIColumns.SyncSortSelection(m_ui.treeSort, m_sortOptions, m_sortColumn, m_sortAscending)
         EnsureLeadersTreeStructure()
     end)
 

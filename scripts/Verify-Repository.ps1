@@ -125,7 +125,7 @@ if (-not (Test-Path -LiteralPath $LuaPath -PathType Leaf)) {
 $LuaPath = (Resolve-Path -LiteralPath $LuaPath).Path
 Push-Location $repoRoot
 try {
-    foreach ($test in @('Test-TextProcessing.lua', 'Test-SharedUtilities.lua', 'Test-GameState.lua', 'Test-ResearchChooser.lua', 'Test-ResearchTrees.lua', 'Test-ResearchData.lua', 'Test-DescriptorColumns.lua', 'Test-TradeData.lua', 'Test-TradeScreens.lua', 'Test-MinimapLens.lua', 'Test-UnitBrowser.lua', 'Test-StagingLifecycle.lua', 'Test-RealEraTracker.lua', 'Test-RiverDownstream.lua')) {
+    foreach ($test in @('Test-TextProcessing.lua', 'Test-SharedUtilities.lua', 'Test-GameState.lua', 'Test-ResearchChooser.lua', 'Test-ResearchTrees.lua', 'Test-ResearchData.lua', 'Test-DescriptorColumns.lua', 'Test-ViewLifecycle.lua', 'Test-TradeData.lua', 'Test-TradeScreens.lua', 'Test-MinimapLens.lua', 'Test-UnitBrowser.lua', 'Test-StagingLifecycle.lua', 'Test-RealEraTracker.lua', 'Test-RiverDownstream.lua')) {
         $testArgs = @()
         if ($test -eq 'Test-TextProcessing.lua') {
             $testArgs = @(Get-ChildItem -LiteralPath (Join-Path $sourceRoot 'UI') -Recurse -Filter '*.lua' |

@@ -376,18 +376,6 @@ local function BuildTreeSortOptions()
     })
 end
 
-local function SyncTreeSortDropdown()
-    if not m_treeSort then return end
-    for index, option in ipairs(m_treeSortOptions) do
-        local sort = option.value
-        if sort.column == m_treeSortColumn
-            and (sort.column == nil or sort.ascending == m_treeSortAscending) then
-            m_treeSort:SetSelectedIndex(index, true)
-            return
-        end
-    end
-end
-
 -- ============================================================================
 -- Panel lifecycle
 -- ============================================================================
@@ -479,7 +467,7 @@ local function BuildPanel()
             or string.find(columnKey, "player:", 1, true) == 1 then
             m_treeSortColumn = columnKey
             m_treeSortAscending = ascending == true
-            SyncTreeSortDropdown()
+            CAIColumns.SyncSortSelection(m_treeSort, m_treeSortOptions, m_treeSortColumn, m_treeSortAscending)
             BuildTree()
         end
     end)
@@ -505,7 +493,7 @@ local function BuildPanel()
         HiddenPredicate = function() return m_viewMode ~= "tree" end,
     })
     m_treeSort:SetOptions(m_treeSortOptions)
-    SyncTreeSortDropdown()
+    CAIColumns.SyncSortSelection(m_treeSort, m_treeSortOptions, m_treeSortColumn, m_treeSortAscending)
     m_treeSort:On("value_changed", function(_, sort)
         m_treeSortColumn = sort.column
         m_treeSortAscending = sort.ascending == true

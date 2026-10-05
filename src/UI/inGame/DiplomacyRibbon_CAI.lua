@@ -580,18 +580,6 @@ end
 -- Sort dropdown
 -- ============================================================================
 
-local function SyncSortDropdown()
-    if not m_sort then return end
-    for index, option in ipairs(m_sortOptions) do
-        local sort = option.value
-        if sort.column == m_sortColumn and
-            (sort.column == nil or sort.ascending == m_sortAscending) then
-            m_sort:SetSelectedIndex(index, true)
-            return
-        end
-    end
-end
-
 -- ============================================================================
 -- List population
 -- ============================================================================
@@ -735,7 +723,7 @@ local function EnsurePanelBuilt()
         m_table:On("sort_changed", function(_, columnKey, ascending)
             m_sortColumn = columnKey
             m_sortAscending = ascending == true
-            SyncSortDropdown()
+            CAIColumns.SyncSortSelection(m_sort, m_sortOptions, m_sortColumn, m_sortAscending)
             RebuildListView()
         end)
         m_panel:AddChild(m_table)
@@ -794,7 +782,7 @@ local function CAI_RebuildViews()
         })
         if m_sort then
             m_sort:SetOptions(m_sortOptions)
-            SyncSortDropdown()
+            CAIColumns.SyncSortSelection(m_sort, m_sortOptions, m_sortColumn, m_sortAscending)
         end
         m_table:Rebuild()
     end

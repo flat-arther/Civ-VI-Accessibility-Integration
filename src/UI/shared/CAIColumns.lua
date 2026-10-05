@@ -3,6 +3,23 @@ include("textProcessing")
 -- Column metadata utilities. Screens own records, sorting and widget state.
 CAIColumns = {}
 
+-- Refresh an existing sort dropdown without firing its user-change callback.
+-- Natural order uses a nil column and ignores the remembered direction.
+---@param dropdown DropdownWidget|nil Absent while the screen is not built.
+---@param options table[] Existing dropdown options; this does not replace them.
+---@param columnKey string|nil
+---@param ascending boolean
+function CAIColumns.SyncSortSelection(dropdown, options, columnKey, ascending)
+    if not dropdown then return end
+    for index, option in ipairs(options) do
+        local sort = option.value
+        if sort.column == columnKey and (sort.column == nil or sort.ascending == ascending) then
+            dropdown:SetSelectedIndex(index, true)
+            return
+        end
+    end
+end
+
 ---@param columns DataTableColumn[]
 ---@param key string|nil
 ---@return DataTableColumn|nil

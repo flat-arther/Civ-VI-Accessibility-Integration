@@ -27,6 +27,7 @@ Run the common checks with vanilla trade screens and with Better Trade Screen wh
 - [ ] In Reports, check city sorting. With Better Reports installed, check unit, policy and city-state sorting; policy type and city-state category should remain grouping choices rather than redundant sort choices.
 - [ ] With Extended Policy Cards installed, check sorting in the policy picker/viewer. With Quick Deals installed, check its sort choices and return to natural order.
 - [ ] After a live data change, reopen or refresh an affected list and check updated column labels, usable focus and retained sort selection.
+- [ ] In City-States, diplomacy, Governors, Great People/Heroes, Global Resources and the unit browser, change sort direction and switch views or refresh. Confirm the sort dropdown follows the current sort without extra speech or stealing focus. Return to natural order where available.
 
 ## Other outstanding game checks
 

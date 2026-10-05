@@ -602,18 +602,6 @@ local function BuildOverviewColumns(allData)
     return columns
 end
 
-local function SyncTreeSortDropdown()
-    if not m_ui.treeSort then return end
-    for index, option in ipairs(m_treeSortOptions) do
-        local sort = option.value
-        if sort.column == m_treeSortColumn and
-            (sort.column == nil or sort.ascending == m_treeSortAscending) then
-            m_ui.treeSort:SetSelectedIndex(index, true)
-            return
-        end
-    end
-end
-
 local function GetOrderedTreePlayers()
     local ordered = {}
     for _, entry in ipairs(m_treePlayerEntries) do
@@ -1130,7 +1118,7 @@ CAI_RebuildViews = function(preferredPlayerID)
     if m_ui.treeSort then
         local dropdownCapture = mgr:CaptureFocusKey(m_ui.treeSort)
         m_ui.treeSort:SetOptions(m_treeSortOptions)
-        SyncTreeSortDropdown()
+        CAIColumns.SyncSortSelection(m_ui.treeSort, m_treeSortOptions, m_treeSortColumn, m_treeSortAscending)
         if dropdownCapture then
             if resetSort then
                 dropdownCapture = { key = m_ui.treeSort.FocusKey, path = {} }
@@ -1246,7 +1234,7 @@ local function EnsurePanelBuilt()
     m_ui.overview:On("sort_changed", function(_, columnKey, ascending)
         m_treeSortColumn = columnKey
         m_treeSortAscending = ascending == true
-        SyncTreeSortDropdown()
+        CAIColumns.SyncSortSelection(m_ui.treeSort, m_treeSortOptions, m_treeSortColumn, m_treeSortAscending)
         RebuildTreeView(GetOrderedTreePlayers())
     end)
     m_ui.overview:AddInputBindings({
@@ -1288,7 +1276,7 @@ local function EnsurePanelBuilt()
         HiddenPredicate = function() return m_viewMode ~= "tree" end,
     })
     m_ui.treeSort:SetOptions(m_treeSortOptions)
-    SyncTreeSortDropdown()
+    CAIColumns.SyncSortSelection(m_ui.treeSort, m_treeSortOptions, m_treeSortColumn, m_treeSortAscending)
     m_ui.treeSort:On("value_changed", function(_, sort)
         m_treeSortColumn = sort.column
         m_treeSortAscending = sort.ascending == true

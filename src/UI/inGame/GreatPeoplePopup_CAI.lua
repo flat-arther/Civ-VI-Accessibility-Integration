@@ -421,18 +421,6 @@ local function BuildGPTableColumns()
     return columns
 end
 
-local function SyncGPSortDropdown()
-    if not m_ui.gpSort then return end
-    for index, option in ipairs(m_gpSortOptions) do
-        local sort = option.value
-        if sort.column == m_gpSortColumn
-            and (sort.column == nil or sort.ascending == m_gpSortAscending) then
-            m_ui.gpSort:SetSelectedIndex(index, true)
-            return
-        end
-    end
-end
-
 local function SortTreeProgress(pointsByPlayer)
     local entriesByPlayerID = {}
     for _, points in ipairs(pointsByPlayer) do
@@ -555,7 +543,7 @@ local function BuildGPTable()
     if m_ui.gpSort then
         local dropdownCapture = mgr:CaptureFocusKey(m_ui.gpSort)
         m_ui.gpSort:SetOptions(m_gpSortOptions)
-        SyncGPSortDropdown()
+        CAIColumns.SyncSortSelection(m_ui.gpSort, m_gpSortOptions, m_gpSortColumn, m_gpSortAscending)
         if dropdownCapture then
             if resetSort then
                 dropdownCapture = { key = m_ui.gpSort.FocusKey, path = {} }
@@ -1095,18 +1083,6 @@ local function GetOrderedHeroRecords()
     return ordered
 end
 
-local function SyncHeroSortDropdown()
-    if not m_ui.heroSort then return end
-    for index, option in ipairs(m_heroSortOptions) do
-        local sort = option.value
-        if sort.column == m_heroSortColumn
-            and (sort.column == nil or sort.ascending == m_heroSortAscending) then
-            m_ui.heroSort:SetSelectedIndex(index, true)
-            return
-        end
-    end
-end
-
 local function GetFocusedHero()
     return m_focusedHero
 end
@@ -1294,7 +1270,7 @@ local function BuildPanel()
     m_ui.gpTable:On("sort_changed", function(_, columnKey, ascending)
         m_gpSortColumn = columnKey
         m_gpSortAscending = ascending == true
-        SyncGPSortDropdown()
+        CAIColumns.SyncSortSelection(m_ui.gpSort, m_gpSortOptions, m_gpSortColumn, m_gpSortAscending)
     end)
     m_ui.gpTable:AddInputBindings({
         {
@@ -1328,7 +1304,7 @@ local function BuildPanel()
         HiddenPredicate = function() return m_viewMode ~= "tree" end,
     })
     m_ui.gpSort:SetOptions(m_gpSortOptions)
-    SyncGPSortDropdown()
+    CAIColumns.SyncSortSelection(m_ui.gpSort, m_gpSortOptions, m_gpSortColumn, m_gpSortAscending)
     m_ui.gpSort:On("value_changed", function(_, sort)
         m_gpSortColumn = sort.column
         m_gpSortAscending = sort.ascending == true
@@ -1531,7 +1507,7 @@ local function BuildPanel()
         m_ui.heroTable:On("sort_changed", function(_, columnKey, ascending)
             m_heroSortColumn = columnKey
             m_heroSortAscending = ascending == true
-            SyncHeroSortDropdown()
+            CAIColumns.SyncSortSelection(m_ui.heroSort, m_heroSortOptions, m_heroSortColumn, m_heroSortAscending)
             BuildHeroesList()
         end)
         if GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_CIVPEDIA") then
@@ -1557,7 +1533,7 @@ local function BuildPanel()
             HiddenPredicate = function() return m_heroViewMode ~= "list" end,
         })
         m_ui.heroSort:SetOptions(m_heroSortOptions)
-        SyncHeroSortDropdown()
+        CAIColumns.SyncSortSelection(m_ui.heroSort, m_heroSortOptions, m_heroSortColumn, m_heroSortAscending)
         m_ui.heroSort:On("value_changed", function(_, sort)
             m_heroSortColumn = sort.column
             m_heroSortAscending = sort.ascending == true
