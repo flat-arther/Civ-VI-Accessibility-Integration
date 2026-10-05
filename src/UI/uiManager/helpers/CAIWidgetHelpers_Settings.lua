@@ -221,11 +221,11 @@ end
 local function ClosePanel(mgr, panel, restoreOwnerFocus)
     if panel == nil then return end
     local ownerRoot = panel.Parent
-    local previousFocus = panel._settingsPreviousFocus
+    local returnFocus = panel._settingsReturnFocus
     panel:Destroy()
     if ownerRoot ~= nil and mgr:GetTop() == ownerRoot then
-        if restoreOwnerFocus ~= false and previousFocus ~= nil then
-            mgr:SetFocus(previousFocus)
+        if restoreOwnerFocus ~= false then
+            mgr:RestoreReturnFocus(ownerRoot, returnFocus)
         else
             mgr:SetFocus(ownerRoot)
         end
@@ -297,9 +297,7 @@ function S.GetSettingsReturnFocus(mgr)
     if mgr == nil then return nil end
     local panel = mgr:GetWidgetById(SETTINGS_PANEL_ID, true)
     if panel == nil then return nil end
-    return {
-        PreviousFocus = panel._settingsPreviousFocus,
-    }
+    return panel._settingsReturnFocus
 end
 
 function S.CloseSettings(mgr, restoreOwnerFocus)
@@ -320,7 +318,7 @@ function S.OpenSettings(mgr)
         LogError("Settings helper OpenSettings failed because there is no active root")
         return false
     end
-    local previousFocus = mgr:GetFocusedWidget()
+    local returnFocus = mgr:CaptureReturnFocus(ownerRoot)
     local tree = S.BuildSettingsTree(mgr)
     if not tree then
         LogError("Settings helper OpenSettings failed because tree creation returned nil")
@@ -332,7 +330,7 @@ function S.OpenSettings(mgr)
         WrapAround = true,
         TrapInput = true,
     })
-    panel._settingsPreviousFocus = previousFocus
+    panel._settingsReturnFocus = returnFocus
     panel:On("focus_enter", function() mgr:SetInputContext(InputContext.Shell) end)
     local suspendToken = mgr:RegisterSuspendCloser(function() ClosePanel(mgr, panel) end)
     panel:On("destroy", function()

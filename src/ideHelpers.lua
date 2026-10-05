@@ -314,6 +314,11 @@ EditModes = {}
 ---@field key? string
 ---@field path integer[]
 
+---Opaque return destination for a transient child view. Only the manager reads it.
+---@class UIReturnFocusCapture
+---@field root UIWidget
+---@field path {key: string|nil, widget: UIWidget}[]
+
 ---@class CAIAudioPlayOptions
 ---@field SkipIfPlaying? boolean Suppress playback when the sound handle is already playing.
 ---@field ListenerPlot? integer|table Explicit listener plot id or Plot; defaults to the current CAI cursor.
@@ -1556,6 +1561,18 @@ function UIScreenManager:FindByFocusKey(root, key) end
 ---@param root UIWidget
 ---@return FocusCapture|nil
 function UIScreenManager:CaptureFocusKey(root) end
+
+---Capture active focus or an inactive stack root's default descent without moving focus.
+---@param root UIWidget
+---@return UIReturnFocusCapture|nil
+function UIScreenManager:CaptureReturnFocus(root) end
+
+---Return after transient teardown, using sibling keys then live identities. Missing
+---targets fall back to an ancestor's default; another stack top is never interrupted.
+---@param root UIWidget
+---@param capture UIReturnFocusCapture|nil
+---@return boolean
+function UIScreenManager:RestoreReturnFocus(root, capture) end
 
 ---Restore focus inside root from a capture token. Tries FocusKey, then index
 ---path, then first visible child.

@@ -10,9 +10,7 @@ local m_mgr = nil
 local m_root = nil
 local m_list = nil
 local m_parentRoot = nil
-local m_parentPreviousFocus = nil
-local m_parentLastFocusedKey = nil
-local m_parentLastFocusedChild = nil
+local m_parentReturnFocus = nil
 local m_deleteDialog = nil
 local m_deletePreviousFocus = nil
 local m_resetDialog = nil
@@ -555,9 +553,7 @@ function M.Close()
     FlushChanged()
     local manager = m_mgr
     local parentRoot = m_parentRoot
-    local previousFocus = m_parentPreviousFocus
-    local lastFocusedKey = m_parentLastFocusedKey
-    local lastFocusedChild = m_parentLastFocusedChild
+    local returnFocus = m_parentReturnFocus
     if m_deleteDialog ~= nil and m_deleteDialog.Parent ~= nil then
         m_deleteDialog:Destroy()
     end
@@ -572,13 +568,7 @@ function M.Close()
         m_root:Destroy()
     end
     if manager ~= nil and parentRoot ~= nil and manager:GetTop() == parentRoot then
-        if previousFocus ~= nil then
-            manager:SetFocus(previousFocus)
-        else
-            parentRoot._lastFocusedKey = lastFocusedKey
-            parentRoot._lastFocusedChild = lastFocusedChild
-            manager:SetFocus(parentRoot)
-        end
+        manager:RestoreReturnFocus(parentRoot, returnFocus)
     end
 end
 
@@ -587,14 +577,7 @@ function M.Open(manager, parentRoot, returnFocus)
     if m_root ~= nil and m_root.Parent ~= nil then return true end
     m_mgr = manager
     m_parentRoot = parentRoot
-    m_parentPreviousFocus = returnFocus and returnFocus.PreviousFocus or nil
-    if returnFocus ~= nil and returnFocus.PreviousFocus == nil then
-        m_parentLastFocusedKey = returnFocus.LastFocusedKey
-        m_parentLastFocusedChild = returnFocus.LastFocusedChild
-    else
-        m_parentLastFocusedKey = parentRoot._lastFocusedKey
-        m_parentLastFocusedChild = parentRoot._lastFocusedChild
-    end
+    m_parentReturnFocus = returnFocus or manager:CaptureReturnFocus(parentRoot)
     m_root = m_mgr:CreateWidget(ROOT_ID, "Panel", {
         Label = function() return Locale.Lookup("LOC_CAI_WORLD_SCANNER_CATEGORY_MANAGER") end,
         FocusKey = "scanner-category-manager",
@@ -608,9 +591,7 @@ function M.Open(manager, parentRoot, returnFocus)
         m_root = nil
         m_list = nil
         m_parentRoot = nil
-        m_parentPreviousFocus = nil
-        m_parentLastFocusedKey = nil
-        m_parentLastFocusedChild = nil
+        m_parentReturnFocus = nil
         m_deleteDialog = nil
         m_deletePreviousFocus = nil
         m_resetDialog = nil

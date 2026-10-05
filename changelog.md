@@ -2,6 +2,9 @@
 
 ### Fixed
 
+- Closing Settings or scanner category management restores usable focus when the original item has been rebuilt or removed.
+- Map tack labels remain available if Detailed Map Tacks fails to supply its extra information.
+
 - Creating a Play By Cloud game from a save restores accessibility while retaining the save's other content, and waits for loading to finish before opening the player lobby.
 - Lobby player lists keep current controls and preserve navigation when map size or player slots change.
 

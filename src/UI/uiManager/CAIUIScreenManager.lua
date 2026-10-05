@@ -833,6 +833,66 @@ function UIScreenManager:CaptureFocusKey(root)
     return { key = key, path = indices }
 end
 
+---Capture a return destination before attaching a transient child to a stack
+---root. Unlike rebuild captures, this also records an inactive root's default
+---descent and represents focus on the root itself. Tokens are opaque and bound
+---to the original root; capturing never moves focus or opens ancestors.
+---@param root UIWidget
+---@return UIReturnFocusCapture|nil
+function UIScreenManager:CaptureReturnFocus(root)
+    if not root then return nil end
+    local chain = {}
+    local node = self:GetFocusedWidget()
+    while node and node ~= root do
+        table.insert(chain, 1, node)
+        node = node.Parent
+    end
+    if node ~= root then
+        chain = {}
+        node = root
+        while node.GetDefaultChild do
+            local child = node:GetDefaultChild()
+            if not child or child:IsHidden() then break end
+            chain[#chain + 1] = child
+            node = child
+        end
+    end
+    local path = {}
+    for _, child in ipairs(chain) do
+        path[#path + 1] = { key = child.FocusKey, widget = child }
+    end
+    return { root = root, path = path }
+end
+
+---Return from a transient child after destroying it. Resolve stable keys among
+---siblings first, then surviving object identities. Missing/hidden destinations
+---fall back through the nearest surviving ancestor's normal default descent.
+---Never steal focus from another stack root; explicit returns announce normally.
+---@param root UIWidget
+---@param capture UIReturnFocusCapture|nil
+---@return boolean
+function UIScreenManager:RestoreReturnFocus(root, capture)
+    if not root or not capture or capture.root ~= root or self:GetTop() ~= root then return false end
+    local node = root
+    for _, entry in ipairs(capture.path) do
+        local match
+        for _, child in ipairs(node.Children or {}) do
+            if entry.key and child.FocusKey == entry.key and not child:IsHidden() then
+                match = child
+                break
+            end
+        end
+        if not match and entry.widget.Parent == node and not entry.widget:IsHidden() then
+            match = entry.widget
+        end
+        node._lastFocusedKey = match and match.FocusKey or nil
+        node._lastFocusedChild = match
+        if not match then break end
+        node = match
+    end
+    return self:SetFocus(node)
+end
+
 ---Restore focus inside `root` from a capture token. Scoped to the rebuilt
 ---subtree: a nil capture means focus was not inside root at capture time, so
 ---this is a no-op (the caller's rebuild should not steal focus from elsewhere

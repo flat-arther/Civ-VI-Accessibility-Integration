@@ -134,11 +134,11 @@ mgr:RemoveFromStack("ModalRoot", false) -- parent refresh immediately chooses fi
 
 Mod Settings belongs to the current accessible screen instead of becoming
 another stack root. Follow the Input Help and Civilopedia lookup pattern:
-`OpenSettings(mgr)` saves `mgr:GetFocusedWidget()`, creates a transparent,
+`OpenSettings(mgr)` saves `mgr:CaptureReturnFocus(ownerRoot)`, creates a transparent,
 wrapping, input-trapping Panel containing `CAISettingsTree`, adds the Panel to
 the current root, and focuses the Tree directly. The Panel owns Escape and
 switches to the Shell input context on focus. Ordinary closure destroys the
-Panel and focuses the saved widget directly. Any code that must rediscover
+Panel and calls `mgr:RestoreReturnFocus(ownerRoot, token)`. Any code that must rediscover
 these child widgets through the manager uses `GetWidgetById(id, true)`;
 the default nonrecursive lookup checks stack roots only.
 
@@ -148,7 +148,24 @@ screen focus through `GetSettingsReturnFocus(mgr)`. Add the replacement panel
 to that root and call `mgr:PrepareFocus(ownerRoot, initialChild)` before calling
 `CloseSettings(mgr, false)`. The `false` preserves the replacement's prepared
 focus rather than restoring the screen immediately. The replacement should
-trap input and owns the saved widget so it can focus that widget when it closes.
+trap input and retain the opaque token; after teardown it calls
+`mgr:RestoreReturnFocus(ownerRoot, token)`.
+
+### Returning from transient child views
+
+`CaptureReturnFocus(root)` captures the focused descendant chain, or the default
+child descent when that stack root is inactive. It also represents focus on an
+empty root. Capture does not move focus, open ancestors or announce anything.
+Keep the token opaque and capture before attaching the transient view.
+
+After destroying the transient view, call `RestoreReturnFocus(root, token)`.
+Each path step resolves a visible sibling with the same `FocusKey`, then the
+surviving widget identity. A missing or hidden step falls back through the nearest
+surviving ancestor's normal default descent. Explicit returns announce normally.
+A nil token, different root, or root that is not the current stack top is a no-op.
+This operation is distinct from `CaptureFocusKey` / `RestoreFocus`, which remain
+scoped to rebuilds of the currently focused subtree and restore matching keys silently.
+Scanner model selection continues to use its own category/group/item identities.
 
 ### Event-driven tutorials
 

@@ -1066,11 +1066,16 @@ function BuildMapTacLabelWithDMT(mapPinCfg, playerID, localPlayerID)
         return label
     end
 
-    local subject = ExposedMembers.CAIInfo.GetMapPinSubject(
+    local ok, subject = pcall(ExposedMembers.CAIInfo.GetMapPinSubject,
         playerID,
         mapPinCfg:GetHexX(),
         mapPinCfg:GetHexY()
     )
+
+    if not ok then
+        LogWarn("Detailed Map Tacks subject lookup failed: " .. tostring(subject))
+        return label
+    end
 
     if subject == nil then
         return label

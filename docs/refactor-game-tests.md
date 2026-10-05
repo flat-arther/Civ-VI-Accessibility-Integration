@@ -64,3 +64,11 @@ These existing checks are retained alongside the refactor checklist so they are 
 - [ ] Place/cancel districts and wonders, including purchases and tutorial restrictions. Check city-management navigation and city-scope position after leaving placement.
 - [ ] Change interface mode while a popup is open; confirm old targeting widgets close and focus/input remain usable. World Builder should retain its own map widget.
 - [ ] Where available, check Red Death Grieving Gift and Pirates targeting abilities, including invalid targets and Escape cancellation.
+
+## Scanner and return-focus contracts
+
+- [ ] Open/close Settings and scanner category management from the map and from a menu. Confirm the original item is announced and usable on return; repeat after that menu refreshes or removes the original item.
+- [ ] Change enabled categories and custom category rules, close management, and confirm scanner ordering and selected items remain usable. Check search, quick slots and return-from-jump.
+- [ ] Check ordinary categories, Valid Targets and hidden/revealed tiles, then change local player where available. Confirm no stale items or reveal leaks.
+- [ ] With Detailed Map Tacks available, check pin names, yields and placement information. Without it, check ordinary map tack labels.
+- [ ] Open another popup while Settings/category management is open; closing the underlying view should not steal the popup's focus. Repeat suspend/resume and reopen Settings.
