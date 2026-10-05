@@ -1847,3 +1847,7 @@ function CAIWidgetHelpers_Search.MakeSearchCandidate(widget, label, bfsIndex, to
 ---@field Open fun()
 ---@field Close fun()
 ---@field HandleInput fun(input:table):boolean
+
+---@class CAIWorldInputModesController
+---@field GetData fun(mode:integer):table|nil Descriptor including Properties and optional InputActions.
+---@field Build fun(mode:integer):InterfaceModeWidget|false|nil Constructs without pushing; context owns lifecycle.

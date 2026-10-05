@@ -55,3 +55,12 @@ These existing checks are retained alongside the refactor checklist so they are 
 - [ ] In a multiplayer client lobby, have the host change map size while focus is on a player slot, slot submenu and dropdown. Check updated controls and retained usable focus.
 - [ ] Listen to a message-buffer location entry and its history entry; confirm the localized equivalent of “at” introduces the direction/distance naturally.
 - [ ] Press B on a tile touching multiple named rivers; confirm one “Rivers” header followed by each river's edges and flow.
+
+## WorldInput interface modes
+
+- [ ] Enter/cancel Move To and confirm valid movement, including combat/war confirmation and cancellation. Verify movement readiness clears on mode exit.
+- [ ] Check valid and invalid unit, city and district ranged targets; invalid targets should announce rejection without attacking.
+- [ ] Check available air/rebase/deploy, formation, special ability and WMD/ICBM modes. Confirm the intended target once, preserve native confirmation dialogs, then cancel normally.
+- [ ] Place/cancel districts and wonders, including purchases and tutorial restrictions. Check city-management navigation and city-scope position after leaving placement.
+- [ ] Change interface mode while a popup is open; confirm old targeting widgets close and focus/input remain usable. World Builder should retain its own map widget.
+- [ ] Where available, check Red Death Grieving Gift and Pirates targeting abilities, including invalid targets and Escape cancellation.

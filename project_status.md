@@ -2,6 +2,8 @@
 
 ## Current focus
 
+- Interface-mode stage complete (2026-10-05): CAIWorldInputModes owns descriptors/construction with explicit native and scenario dependencies. WorldInput retains dispatch, widget lifecycle and city-scope ordering. All 824 checks pass for extracted and pre-extraction implementations; full repository verification passes (119,094 assertions, 343 VFS files). Game checks remain deferred.
+
 - Commit workflow updated (2026-10-05): commit each completed, verified stage to `beta`; include the commit ID and a short explanation of the next stage in its summary, then wait for direction. The first checkpoint includes the accumulated completed refactor work and fixes, which were previously uncommitted; local Claude settings are excluded. No push requested.
 - Workflow updated by the user (2026-10-04): defer all user game tests until the whole refactor is finished. Maintain docs/refactor-game-tests.md as the consolidated checklist; pending game tests do not block implementation. Continue automated checks during each stage. After every completed stage, summarize changes, verification, limitations and the proposed next stage, then wait for the user to say continue or redirect. This replaces earlier per-stage game-test gates.
 
@@ -32,7 +34,7 @@
 
 - On 2026-10-01 the user confirmed: "everything is tested and working, feel free to close every pending". All previously pending in-game tests, retests, regressions, optional fixture checks, and result requests are closed as successful based on that confirmation.
 - No historical game test remains pending. Future implementation creates its own focused verification requirements.
-- Verification passes: 57 XML files, 342 VFS files, 93 replacements, 12 locale directories; 210 formatting/syntax + 89 shared utility/caller + 31 game-state + 51 research chooser + 72 research tree + 54 research data + 28 descriptor/column + 142 view lifecycle + 41 plot interaction + 74 World Builder input + 30 trade data/dropdown + 84 trade screen + 16 Minimap/manager + 40 browser + 74 staging lifecycle + 161 RET + 117,073 river assertions (118,270 total). Remaining UnitPanel compiles. Local Lua 5.4.8 lives under ignored `obj/test-lua`. The fixture-free river mode has 116,809 assertions; GitHub Actions itself has not run. Details: `docs/verification.md`.
+- Verification passes: 57 XML files, 343 VFS files, 93 replacements, 12 locale directories; 210 formatting/syntax + 89 shared utility/caller + 31 game-state + 51 research chooser + 72 research tree + 54 research data + 28 descriptor/column + 142 view lifecycle + 41 plot interaction + 74 World Builder input + 824 interface-mode + 30 trade data/dropdown + 84 trade screen + 16 Minimap/manager + 40 browser + 74 staging lifecycle + 161 RET + 117,073 river assertions (119,094 total). Remaining UnitPanel compiles. Local Lua 5.4.8 lives under ignored `obj/test-lua`. The fixture-free river mode has 116,809 assertions; GitHub Actions itself has not run. Details: `docs/verification.md`.
 - Minimap repair confirmed working in game by the user on 2026-10-01; its pending check is closed.
 - Browser extraction and formatting consolidation confirmed working by the user on 2026-10-02; their pending game checks are closed.
 
@@ -52,7 +54,7 @@
 - Combined technology/civics in-game test confirmed successful by the user on 2026-10-04: "All works well." The research batch is implemented and game-verified; its pending checklist is closed.
 - Trade implementation finished: CAITradeOrigin, CAITradeOverview and CAITradeData are registered in-game; generic CAICapturedDropdown is registered in both contexts. Thirty helper checks and 84 screen checks pass; the same 84 screen checks pass against pre-refactor adapters, with all 201 snapshot lines identical. Remaining repeated tooltip/dialog closures are small dependency/state adapters, documented in docs/utility-audit.md.
 - Trade game validation is deferred to the end of the full refactor. The complete trade checklist and other outstanding game checks are maintained in docs/refactor-game-tests.md; none is marked passed by deferral.
-- Next refactor stage, awaiting user direction: separate interface-mode widget descriptions and construction from WorldInput with explicit native callback dependencies. Preserve target validation, city-management actions, placement confirmation/cancellation and scenario behavior; keep native dispatch and the existing target resolver authoritative. Scanner/focus contracts and justified Reports/Rankings extractions remain later stages in docs/refactor-plan.md. Complete each feature-family stage, report its outcome, and wait for direction; hand over accumulated game tests only after the full refactor. Use scripts/Audit-LuaUtilities.ps1 as a candidate inventory, not proof of interchangeable behavior.
+- Next refactor stage, awaiting user direction: audit scanner/focus contracts (Phase 5). Replace private manager focus access with a public return-focus operation where needed, cover destroyed/rebuilt targets and inactive parents, and audit scanner error boundaries without changing category ordering, reveal rules or slot behavior. Reports/Rankings remain later review stages. Complete and commit each stage to beta, then wait for direction; hand over accumulated game tests only after the full refactor.
 
 ## Durable decisions
 

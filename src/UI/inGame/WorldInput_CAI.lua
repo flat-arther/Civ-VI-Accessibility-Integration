@@ -1,3 +1,4 @@
+include("CAIWorldInputModes")
 include("CAIWorldBuilderInput")
 include("CAIPlotInteractions")
 include("caiUtils")
@@ -751,275 +752,51 @@ local SharedInputActions = {
 -- ===========================================================================
 -- Interface mode widgets
 -- ===========================================================================
-local function RunVanillaPlacementCancel()
-	OnPlacementKeyUp({
-		GetKey = function()
-			return Keys.VK_ESCAPE
-		end,
-	})
-end
-
-local function CreateModeWidgetData(config)
-	return {
-		WidgetId = config.WidgetId or "CAIWorldInputTargetingMode",
-		Properties = {
-			GetLabel = function()
-				if type(config.Label) == "function" then return config.Label() end
-				return Locale.Lookup(config.Label)
-			end,
-			OnDestroy = function()
-				Speak(Locale.Lookup(config.ExitLabel or "LOC_CAI_EXITED_TARGETING_MODE"))
-			end,
-			RegisterInputs = {
-				{
-					Key = Keys.VK_ESCAPE,
-					MSG = KeyEvents.KeyUp,
-					Description = config.CancelDescription or "LOC_CAI_KB_CANCEL_TARGETING",
-					Action = function()
-						if config.Cancel ~= nil then
-							config.Cancel()
-						else
-							RunVanillaPlacementCancel()
-						end
-						return true
-					end,
-				},
-			},
-		},
-		InputActions = config.Activate ~= nil and {
-			[ACTION_INTERFACE_PRIMARY] = {
-				Type = INPUT_ACTION_TRIGGERED,
-				Action = function()
-					local plotId = CAICursor:GetPlotId()
-					local plot = Map.IsPlot(plotId) and Map.GetPlotByIndex(plotId) or nil
-					local target = plot ~= nil and CAIInterfaceTargets.GetTargetAtPlot(plot, true) or nil
-					if target == nil or (config.CanActivate ~= nil and not config.CanActivate(plot)) then
-						Speak(Locale.Lookup("LOC_CAI_PLOT_INTERFACE_INVALID_TARGET"))
-						return true
-					end
-					config.Activate()
-					return true
-				end,
-			},
-		} or nil,
-	}
-end
-
-local function CreateTargetingWidgetData(labelKey, primaryAction, cancelAction)
-	return CreateModeWidgetData({ Label = labelKey, Activate = primaryAction, Cancel = cancelAction })
-end
-
-local function CanUnitRangeAttack(plot)
-	local unit = UI.GetHeadSelectedUnit()
-	if unit == nil then return false end
-	return UnitManager.CanStartOperation(unit, UnitOperationTypes.RANGE_ATTACK, nil, {
-		[UnitOperationTypes.PARAM_X] = plot:GetX(),
-		[UnitOperationTypes.PARAM_Y] = plot:GetY(),
-	})
-end
-
-local function CanCityRangeAttack(subject, plot)
-	if subject == nil then return false end
-	return CityManager.CanStartCommand(subject, CityCommandTypes.RANGE_ATTACK, {
-		[UnitOperationTypes.PARAM_X] = plot:GetX(),
-		[UnitOperationTypes.PARAM_Y] = plot:GetY(),
-	})
-end
-
-local interfaceWidgets = {
-	[InterfaceModeTypes.MOVE_TO] = {
-		WidgetId = "CAIWorldInputMoveToMode",
-		Properties = {
-			GetLabel = function()
-				return Locale.Lookup("LOC_CAI_MOVEMENT_MODE")
-			end,
-			OnDestroy = function()
-				Speak(Locale.Lookup("LOC_CAI_EXITED_MOVEMENT_MODE"))
-			end,
-			RegisterInputs = {
-				{
-					Key = Keys.VK_ESCAPE,
-					MSG = KeyEvents.KeyUp,
-					Description = "LOC_CAI_KB_CANCEL_MOVEMENT",
-					Action = function()
-						MovementActions_CAI:ClearReadyForCombat()
-						OnMouseMoveToCancel()
-						return true
-					end,
-				},
-			},
-		},
-		InputActions = {
-			[ACTION_INTERFACE_PRIMARY] = {
-				Type = INPUT_ACTION_TRIGGERED,
-				Action = function()
-					return ActivateCurrentMoveTarget()
-				end,
-			},
-		},
-	},
-	[InterfaceModeTypes.RANGE_ATTACK] = CreateModeWidgetData({
-		Label = "LOC_CAI_RANGE_ATTACK_MODE", Activate = OnMouseUnitRangeAttack, CanActivate = CanUnitRangeAttack,
-	}),
-	[InterfaceModeTypes.CITY_RANGE_ATTACK] = CreateModeWidgetData({
-		Label = "LOC_CAI_CITY_RANGE_ATTACK_MODE", Activate = CityRangeAttack,
-		CanActivate = function(plot) return CanCityRangeAttack(UI.GetHeadSelectedCity(), plot) end,
-	}),
-	[InterfaceModeTypes.DISTRICT_RANGE_ATTACK] = CreateModeWidgetData({
-		Label = "LOC_CAI_DISTRICT_RANGE_ATTACK_MODE", Activate = DistrictRangeAttack,
-		CanActivate = function(plot) return CanCityRangeAttack(UI.GetHeadSelectedDistrict(), plot) end,
-	}),
-	[InterfaceModeTypes.AIR_ATTACK] = CreateTargetingWidgetData("LOC_CAI_AIR_ATTACK_MODE", UnitAirAttack),
-	[InterfaceModeTypes.WMD_STRIKE] = CreateTargetingWidgetData("LOC_CAI_WMD_STRIKE_MODE", OnWMDStrikeEnd),
-	[InterfaceModeTypes.ICBM_STRIKE] = CreateTargetingWidgetData("LOC_CAI_ICBM_STRIKE_MODE", OnICBMStrikeEnd),
-	[InterfaceModeTypes.COASTAL_RAID] = CreateTargetingWidgetData("LOC_CAI_COASTAL_RAID_MODE", CoastalRaid),
-	[InterfaceModeTypes.DEPLOY] = CreateTargetingWidgetData("LOC_CAI_DEPLOY_MODE", AirUnitDeploy),
-	[InterfaceModeTypes.REBASE] = CreateTargetingWidgetData("LOC_CAI_REBASE_MODE", AirUnitReBase),
-	[InterfaceModeTypes.FORM_CORPS] = CreateTargetingWidgetData("LOC_CAI_FORM_CORPS_MODE", FormCorps),
-	[InterfaceModeTypes.FORM_ARMY] = CreateTargetingWidgetData("LOC_CAI_FORM_ARMY_MODE", FormArmy),
-	[InterfaceModeTypes.AIRLIFT] = CreateTargetingWidgetData("LOC_CAI_AIRLIFT_MODE", UnitAirlift),
-	[InterfaceModeTypes.PARADROP] = CreateTargetingWidgetData("LOC_CAI_PARADROP_MODE", UnitParadrop),
-	[InterfaceModeTypes.PRIORITY_TARGET] = CreateTargetingWidgetData("LOC_CAI_PRIORITY_TARGET_MODE", PriorityTarget),
-	[InterfaceModeTypes.SACRIFICE_SELECTION] = CreateTargetingWidgetData("LOC_CAI_SACRIFICE_SELECTION_MODE", DOSacrificeSelection),
-	[InterfaceModeTypes.KILL_WEAKER_UNIT] = CreateTargetingWidgetData("LOC_CAI_KILL_WEAKER_UNIT_MODE", PerformKillWeakerUnit),
-	[InterfaceModeTypes.TRANSFORM_UNIT] = CreateTargetingWidgetData("LOC_CAI_TRANSFORM_UNIT_MODE", PerformTransformUnit),
-	[InterfaceModeTypes.RESTORE_UNIT_MOVES] = CreateTargetingWidgetData("LOC_CAI_RESTORE_UNIT_MOVES_MODE", PerformRestoreUnitMoves),
-	[InterfaceModeTypes.NAVAL_GOLD_RAID] = CreateTargetingWidgetData("LOC_CAI_NAVAL_GOLD_RAID_MODE", PerformNavalGoldRaid),
-	[InterfaceModeTypes.BUILD_IMPROVEMENT_ADJACENT] = CreateTargetingWidgetData(
-		"LOC_CAI_BUILD_IMPROVEMENT_ADJACENT_MODE",
-		BuildImprovementAdjacent),
-	[InterfaceModeTypes.MOVE_JUMP] = CreateTargetingWidgetData("LOC_CAI_MOVE_JUMP_MODE", MoveJump),
-	[InterfaceModeTypes.CITY_MANAGEMENT] = CreateModeWidgetData({
-		WidgetId = CITY_MANAGEMENT_WIDGET_ID, Label = "LOC_HUD_CITY_MANAGE_CITIZENS",
-	}),
-	[InterfaceModeTypes.DISTRICT_PLACEMENT] = CreateModeWidgetData({
-		WidgetId = "CAIWorldInputDistrictPlacementMode",
-		Label = "LOC_CAI_DISTRICT_PLACEMENT_MODE",
-		ExitLabel = "LOC_CAI_EXITED_DISTRICT_PLACEMENT_MODE",
-		CancelDescription = "LOC_CAI_KB_CANCEL_PLACEMENT",
-		Cancel = OnMouseDistrictPlacementCancel,
-		Activate = OnMouseDistrictPlacementEnd,
-		CanActivate = function(plot) return IsSelectionAllowedAt(plot:GetIndex()) end,
-	}),
-	[InterfaceModeTypes.BUILDING_PLACEMENT] = CreateModeWidgetData({
-		WidgetId = "CAIWorldInputBuildingPlacementMode",
-		Label = "LOC_CAI_WONDER_PLACEMENT_MODE",
-		ExitLabel = "LOC_CAI_EXITED_WONDER_PLACEMENT_MODE",
-		CancelDescription = "LOC_CAI_KB_CANCEL_PLACEMENT",
-		Cancel = OnMouseBuildingPlacementCancel,
-		Activate = OnMouseBuildingPlacementEnd,
-		CanActivate = function(plot) return IsSelectionAllowedAt(plot:GetIndex()) end,
-	}),
-}
-
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
-	interfaceWidgets[InterfaceModeTypes.GRIEVING_GIFT] =
-		CreateTargetingWidgetData("LOC_GRIEVING_GIFT_NAME", function()
-			local plotId = CAICursor:GetPlotId()
-			if not IsSelectionAllowedAt(plotId) then
-				Speak(Locale.Lookup("LOC_CAI_PLOT_INTERFACE_INVALID_TARGET"))
-				return
-			end
-
-			local plot = Map.GetPlotByIndex(plotId)
-			local unit = UI.GetHeadSelectedUnit()
-			if plot == nil or unit == nil then
-				Speak(Locale.Lookup("LOC_CAI_PLOT_INTERFACE_INVALID_TARGET"))
-				return
-			end
-
-			local parameters = {
-				[UnitCommandTypes.PARAM_X] = plot:GetX(),
-				[UnitCommandTypes.PARAM_Y] = plot:GetY(),
-				[UnitCommandTypes.PARAM_NAME] = "ScenarioCommand_GrievingGift",
-				CommandSubType = "GrievingGift",
-			}
-			UnitManager.RequestCommand(unit, UnitCommandTypes.EXECUTE_SCRIPT, parameters)
-			UI.SetInterfaceMode(InterfaceModeTypes.SELECTION)
-		end)
-end
-
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
-	local function GetPiratesModeLabel(tag)
-		local tooltip = Locale.Lookup(tag)
-		return tooltip:match("^(.-)%[NEWLINE%]") or tooltip
-	end
-
-	local function ActivatePiratesTarget(eventName, commandSubType)
-		local plotId = CAICursor:GetPlotId()
-		if not Map.IsPlot(plotId)
-			or not IsSelectionAllowedAt(plotId)
-			or not IsTargetPlot(plotId) then
-			Speak(Locale.Lookup("LOC_CAI_PLOT_INTERFACE_INVALID_TARGET"))
-			return
-		end
-
-		local plot = Map.GetPlotByIndex(plotId)
-		local unit = UI.GetHeadSelectedUnit()
-		if plot == nil or unit == nil then
-			Speak(Locale.Lookup("LOC_CAI_PLOT_INTERFACE_INVALID_TARGET"))
-			return
-		end
-
-		local parameters = {
-			[UnitCommandTypes.PARAM_X] = plot:GetX(),
-			[UnitCommandTypes.PARAM_Y] = plot:GetY(),
-			[UnitCommandTypes.PARAM_NAME] = eventName,
-			CommandSubType = commandSubType,
-		}
-		UnitManager.RequestCommand(unit, UnitCommandTypes.EXECUTE_SCRIPT, parameters)
-		UI.SetInterfaceMode(InterfaceModeTypes.SELECTION)
-	end
-
-	local piratesModes = {
-		{
-			Mode = INTERFACEMODE_CAPTURE_BOAT,
-			Label = "LOC_CAPTURE_BOAT_TOOLTIP",
-			Event = "ScenarioCommand_CaptureBoat",
-			SubType = g_unitCommandSubTypeNames.CAPTURE_BOAT,
-		},
-		{
-			Mode = INTERFACEMODE_SHORE_PARTY,
-			Label = "LOC_SHORE_PARTY_TOOLTIP",
-			Event = "ScenarioCommand_ShoreParty",
-			SubType = g_unitCommandSubTypeNames.SHORE_PARTY,
-		},
-		{
-			Mode = INTERFACEMODE_SHORE_PARTY_EMBARK,
-			Label = "LOC_SHORE_PARTY_EMBARK_TOOLTIP",
-			Event = "ScenarioCommand_ShorePartyEmbark",
-			SubType = g_unitCommandSubTypeNames.SHORE_PARTY_EMBARK,
-		},
-		{
-			Mode = INTERFACEMODE_DREAD_PIRATE_ACTIVE,
-			Label = "LOC_DREAD_PIRATE_UNIT_ACTIVE_TOOLTIP",
-			Event = "ScenarioCommand_DreadPirateActive",
-			SubType = g_unitCommandSubTypeNames.DREAD_PIRATE_ACTIVE,
-		},
-		{
-			Mode = INTERFACEMODE_PRIVATEER_ACTIVE,
-			Label = "LOC_PRIVATEER_UNIT_ACTIVE_TOOLTIP",
-			Event = "ScenarioCommand_PrivateerActive",
-			SubType = g_unitCommandSubTypeNames.PRIVATEER_ACTIVE,
-		},
-		{
-			Mode = INTERFACEMODE_HOARDER_ACTIVE,
-			Label = "LOC_HOARDER_UNIT_ACTIVE_TOOLTIP",
-			Event = "ScenarioCommand_HoarderActive",
-			SubType = g_unitCommandSubTypeNames.HOARDER_ACTIVE,
-		},
-	}
-
-	for _, config in ipairs(piratesModes) do
-		local current = config
-		interfaceWidgets[current.Mode] = CreateTargetingWidgetData(
-			function() return GetPiratesModeLabel(current.Label) end,
-			function() ActivatePiratesTarget(current.Event, current.SubType) end)
-	end
-end
+local interfaceModes = CAIWorldInputModes.Create(mgr, {
+	ACTION_INTERFACE_PRIMARY = ACTION_INTERFACE_PRIMARY,
+	INPUT_ACTION_TRIGGERED = INPUT_ACTION_TRIGGERED,
+	CITY_MANAGEMENT_WIDGET_ID = CITY_MANAGEMENT_WIDGET_ID,
+	ActivateCurrentMoveTarget = ActivateCurrentMoveTarget,
+	OnPlacementKeyUp = OnPlacementKeyUp,
+	OnMouseMoveToCancel = OnMouseMoveToCancel,
+	OnMouseUnitRangeAttack = OnMouseUnitRangeAttack,
+	CityRangeAttack = CityRangeAttack,
+	DistrictRangeAttack = DistrictRangeAttack,
+	UnitAirAttack = UnitAirAttack,
+	OnWMDStrikeEnd = OnWMDStrikeEnd,
+	OnICBMStrikeEnd = OnICBMStrikeEnd,
+	CoastalRaid = CoastalRaid,
+	AirUnitDeploy = AirUnitDeploy,
+	AirUnitReBase = AirUnitReBase,
+	FormCorps = FormCorps,
+	FormArmy = FormArmy,
+	UnitAirlift = UnitAirlift,
+	UnitParadrop = UnitParadrop,
+	PriorityTarget = PriorityTarget,
+	DOSacrificeSelection = DOSacrificeSelection,
+	PerformKillWeakerUnit = PerformKillWeakerUnit,
+	PerformTransformUnit = PerformTransformUnit,
+	PerformRestoreUnitMoves = PerformRestoreUnitMoves,
+	PerformNavalGoldRaid = PerformNavalGoldRaid,
+	BuildImprovementAdjacent = BuildImprovementAdjacent,
+	MoveJump = MoveJump,
+	OnMouseDistrictPlacementCancel = OnMouseDistrictPlacementCancel,
+	OnMouseDistrictPlacementEnd = OnMouseDistrictPlacementEnd,
+	OnMouseBuildingPlacementCancel = OnMouseBuildingPlacementCancel,
+	OnMouseBuildingPlacementEnd = OnMouseBuildingPlacementEnd,
+	IsSelectionAllowedAt = IsSelectionAllowedAt,
+	IsTargetPlot = IsTargetPlot,
+	INTERFACEMODE_CAPTURE_BOAT = INTERFACEMODE_CAPTURE_BOAT,
+	INTERFACEMODE_SHORE_PARTY = INTERFACEMODE_SHORE_PARTY,
+	INTERFACEMODE_SHORE_PARTY_EMBARK = INTERFACEMODE_SHORE_PARTY_EMBARK,
+	INTERFACEMODE_DREAD_PIRATE_ACTIVE = INTERFACEMODE_DREAD_PIRATE_ACTIVE,
+	INTERFACEMODE_PRIVATEER_ACTIVE = INTERFACEMODE_PRIVATEER_ACTIVE,
+	INTERFACEMODE_HOARDER_ACTIVE = INTERFACEMODE_HOARDER_ACTIVE,
+	g_unitCommandSubTypeNames = g_unitCommandSubTypeNames,
+})
 
 local function GetInterfaceWidgetData()
-	return interfaceWidgets[UI.GetInterfaceMode()]
+	return interfaceModes.GetData(UI.GetInterfaceMode())
 end
 
 local function OnInterfaceChanged(oldMode, newMode)
@@ -1044,11 +821,7 @@ local function OnInterfaceChanged(oldMode, newMode)
 
 	CAICursor:InvalidateCityScope()
 
-	local newData = interfaceWidgets[newMode]
-	if not newData then return end
-
-	local widgetId = newData.WidgetId or "CAIWorldInputInterfaceMode"
-	local mode = mgr:CreateWidget(widgetId, "InterfaceMode", newData.Properties)
+	local mode = interfaceModes.Build(newMode)
 	if not mode then return end
 
 	m_caiCurrentInterfaceWidget = mode
