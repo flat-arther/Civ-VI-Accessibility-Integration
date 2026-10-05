@@ -815,6 +815,7 @@ function Initialize()
 	m_kPopupDialog = PopupDialog:new( "InGameTopOptionsMenu" );
 end
 --#Accessibility integration
+include("CAISetupParameters")
 include("CAIControl")
 include("caiUtils")
 
@@ -850,12 +851,6 @@ local function CAI_Lookup(text, ...)
 	return Locale.Lookup(text, ...)
 end
 
-local function CAI_SortParams(a, b)
-	if (a.SortIndex or 0) ~= (b.SortIndex or 0) then
-		return (a.SortIndex or 0) < (b.SortIndex or 0)
-	end
-	return Locale.Compare(a.Name or "", b.Name or "") == -1
-end
 
 local function CAI_GetParameter(paramId)
 	return g_GameParameters and g_GameParameters.Parameters and g_GameParameters.Parameters[paramId]
@@ -889,14 +884,6 @@ local function CAI_BroadcastConfig()
 	end
 end
 
-local function CAI_ValueMatches(a, b)
-	if a == b then return true end
-	if type(a) ~= "table" or type(b) ~= "table" then return false end
-	if a.QueryId ~= nil or b.QueryId ~= nil then
-		return a.QueryId == b.QueryId and a.QueryIndex == b.QueryIndex
-	end
-	return a.Value == b.Value
-end
 
 local function CAI_BuildDropdownOptions(paramId)
 	local param = CAI_GetParameter(paramId)
@@ -910,7 +897,7 @@ local function CAI_BuildDropdownOptions(paramId)
 			tooltip = value.Description or CAI_Lookup(value.RawDescription) or "",
 			value = value,
 		})
-		if selectedIndex == 0 and CAI_ValueMatches(value, param.Value) then
+		if selectedIndex == 0 and CAISetupParameters.ValueMatches(value, param.Value) then
 			selectedIndex = i
 		end
 	end
@@ -1121,7 +1108,7 @@ local function CAI_RebuildOptions()
 			table.insert(params, parameter)
 		end
 	end
-	table.sort(params, CAI_SortParams)
+	table.sort(params, CAISetupParameters.Compare)
 
 	for _, parameter in ipairs(params) do
 		local sectionKey = kGroupToSection[parameter.GroupId]

@@ -114,8 +114,6 @@ end
 CAIReports_DataSource = nil
 
 function RefreshCAIData()
-    mgr = assert(ExposedMembers.CAI_UIManager,
-        "CAI Report Screen refreshed before the accessibility UI manager was available")
     m_localPlayerID = Game.GetLocalPlayer()
     if m_localPlayerID == -1 then return end
     local dataSource = CAIReports_DataSource or GetData
@@ -126,8 +124,7 @@ function RefreshCAIData()
     end
 end
 
-local gossipReport = CAIReportGossip.Create({
-    GetManager = function() return mgr end,
+local gossipReport = CAIReportGossip.Create(mgr, {
     GetLocalPlayerID = function() return m_localPlayerID end,
 })
 
@@ -1428,8 +1425,7 @@ end
 -- ============================================================================
 -- Resources Tab
 -- ============================================================================
-local resourceReport = CAIReportResources.Create({
-    GetManager = function() return mgr end,
+local resourceReport = CAIReportResources.Create(mgr, {
     GetLocalPlayerID = function() return m_localPlayerID end,
     GetResourceData = function() return m_caiResourceData end,
     IsExpansion2 = m_isExp2,

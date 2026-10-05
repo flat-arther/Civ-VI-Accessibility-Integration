@@ -1506,31 +1506,13 @@ local m_graphsTree      = nil
 local m_graphsGroupCheckbox = nil
 local m_isDetailBuilt   = false
 
-local function MakeId(prefix)
-    return mgr:GenerateWidgetId(prefix)
-end
 
-local function LoadGraphGroupByValueSetting()
-    if CAI == nil or CAI.GetConfigValue == nil then return false end
-    local stored = CAI.GetConfigValue(
-        GRAPH_GROUP_SETTING_SECTION, GRAPH_GROUP_SETTING_ID, "false")
-    if stored == nil then return false end
-    local normalized = tostring(stored):lower()
-    if normalized == "true" or normalized == "1"
-        or normalized == "yes" or normalized == "on" then
-        return true
-    end
-    return false
-end
 
-local function SaveGraphGroupByValueSetting(value)
-    if CAI ~= nil and CAI.SetConfigValue ~= nil then
-        CAI.SetConfigValue(GRAPH_GROUP_SETTING_SECTION, GRAPH_GROUP_SETTING_ID,
-            value and "true" or "false")
-    end
-end
 
-local m_graphGroupByValue = LoadGraphGroupByValueSetting()
+
+
+
+local m_graphGroupByValue = CAISettings.ReadConfigBool(GRAPH_GROUP_SETTING_SECTION, GRAPH_GROUP_SETTING_ID)
 
 -- ============================================================================
 -- Overview tab: statistics tree
@@ -1571,7 +1553,7 @@ local function BuildStatsForDatapoints(parentNode, datapoints, idPrefix)
     for _, cat in ipairs(g_Categories or {}) do
         local stats = statistics_by_category[cat.Category]
         if not cat.IsHidden and stats and #stats > 0 then
-            local catNode = mgr:CreateWidget(MakeId("CAIHoFD_stat_"), "TreeItem", {
+            local catNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_stat_"), "TreeItem", {
                 Label = function() return cat.Name end,
                 FocusKey = idPrefix .. ":statcat:" .. cat.Category,
             })
@@ -1584,7 +1566,7 @@ local function BuildStatsForDatapoints(parentNode, datapoints, idPrefix)
                     statLabel = statLabel .. " (" .. stat.Annotation .. ")"
                 end
                 local capLabel = statLabel
-                local statLeaf = mgr:CreateWidget(MakeId("CAIHoFD_stat_"), "StaticText", {
+                local statLeaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_stat_"), "StaticText", {
                     Label = function() return capLabel end,
                     FocusKey = idPrefix .. ":stat:" .. cat.Category .. ":" .. si,
                 })
@@ -1609,7 +1591,7 @@ local function RebuildDetailOverview()
 
     -- Overall category: game-level statistics and game modes
     local overallLabel = Locale.Lookup("LOC_GAMESUMMARY_CONTEXT_GLOBAL")
-    local overallNode = mgr:CreateWidget(MakeId("CAIHoFD_ov_"), "TreeItem", {
+    local overallNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_ov_"), "TreeItem", {
         Label = function() return overallLabel end,
         FocusKey = "hofdetail:overview:overall",
     })
@@ -1623,7 +1605,7 @@ local function RebuildDetailOverview()
     if enabledGameModesStr and enabledGameModesStr ~= "" and Modding and Modding.GetGameModesFromConfigurationString then
         local modeNames = Modding.GetGameModesFromConfigurationString(enabledGameModesStr)
         if modeNames and #modeNames > 0 then
-            local modesNode = mgr:CreateWidget(MakeId("CAIHoFD_gm_"), "TreeItem", {
+            local modesNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_gm_"), "TreeItem", {
                 Label = function() return Locale.Lookup("LOC_GAMESUMMARY_CATEGORY_ENABLED_GAMEMODES") end,
                 FocusKey = "hofdetail:overview:gamemodes",
             })
@@ -1633,7 +1615,7 @@ local function RebuildDetailOverview()
             table.sort(modeNames, function(a, b) return Locale.Compare(a.Name, b.Name) == -1 end)
             for mi, mode in ipairs(modeNames) do
                 local capName = mode.Name
-                local modeLeaf = mgr:CreateWidget(MakeId("CAIHoFD_gm_"), "StaticText", {
+                local modeLeaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_gm_"), "StaticText", {
                     Label = function() return capName end,
                     FocusKey = "hofdetail:overview:gamemode:" .. mi,
                 })
@@ -1674,7 +1656,7 @@ local function RebuildDetailOverview()
         end
         local capLabel = table.concat(parts, "[NEWLINE]")
 
-        local playerNode = mgr:CreateWidget(MakeId("CAIHoFD_pl_"), "TreeItem", {
+        local playerNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_pl_"), "TreeItem", {
             Label = function() return capLabel end,
             FocusKey = "hofdetail:overview:player:" .. pi,
         })
@@ -1699,12 +1681,6 @@ end
 --   Group by turn (default): player -> changed turn -> changed graph values
 --   Group by value:          player -> graph value -> turns where it changed
 -- ============================================================================
-local function FormatGraphValue(value)
-    if type(value) == "number" then
-        return Locale.ToNumber(value, "#,###.##")
-    end
-    return tostring(value)
-end
 
 -- Build player -> turn -> value leaves (default grouping).
 local function BuildGraphTurnGroups(playerNode, entry)
@@ -1727,7 +1703,7 @@ local function BuildGraphTurnGroups(playerNode, entry)
             return Locale.Compare(a.Prefix, b.Prefix) == -1
         end)
         local turnLabel = Locale.Lookup("LOC_CAI_TIMELINE_TURN", turn)
-        local turnNode = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
+        local turnNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_graph_"), "TreeItem", {
             Label = function() return turnLabel end,
             FocusKey = "hofdetail:graph:player:" .. entry.ObjectId .. ":turn:" .. turn,
         })
@@ -1735,8 +1711,8 @@ local function BuildGraphTurnGroups(playerNode, entry)
         playerNode:AddChild(turnNode)
 
         for _, pt in ipairs(turnEntry.Points) do
-            local messageLabel = pt.Prefix .. ": " .. FormatGraphValue(pt.Value)
-            local messageNode = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
+            local messageLabel = pt.Prefix .. ": " .. CAIText.FormatNumberOrText(pt.Value)
+            local messageNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_graph_"), "TreeItem", {
                 Label = function() return messageLabel end,
                 FocusKey = "hofdetail:graph:player:" .. entry.ObjectId ..
                     ":turn:" .. turn .. ":message:" .. pt.KeySuffix,
@@ -1767,7 +1743,7 @@ local function BuildGraphValueGroups(playerNode, entry)
     for _, valueEntry in ipairs(valueOrder) do
         table.sort(valueEntry.Points, function(a, b) return a.Turn < b.Turn end)
         local valueLabel = valueEntry.Prefix
-        local valueNode = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
+        local valueNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_graph_"), "TreeItem", {
             Label = function() return valueLabel end,
             FocusKey = "hofdetail:graph:player:" .. entry.ObjectId ..
                 ":value:" .. valueEntry.Prefix,
@@ -1777,8 +1753,8 @@ local function BuildGraphValueGroups(playerNode, entry)
 
         for _, pt in ipairs(valueEntry.Points) do
             local turnLabel = Locale.Lookup("LOC_CAI_TIMELINE_TURN", pt.Turn)
-            local leafLabel = turnLabel .. ": " .. FormatGraphValue(pt.Value)
-            local leaf = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
+            local leafLabel = turnLabel .. ": " .. CAIText.FormatNumberOrText(pt.Value)
+            local leaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_graph_"), "TreeItem", {
                 Label = function() return leafLabel end,
                 FocusKey = "hofdetail:graph:player:" .. entry.ObjectId ..
                     ":value:" .. valueEntry.Prefix .. ":turn:" .. pt.Turn ..
@@ -1795,7 +1771,7 @@ local function RebuildGraphsTree()
 
     -- Re-read the shared preference so a toggle made in the End Game screen is
     -- honored here, and keep the checkbox in sync with it.
-    m_graphGroupByValue = LoadGraphGroupByValueSetting()
+    m_graphGroupByValue = CAISettings.ReadConfigBool(GRAPH_GROUP_SETTING_SECTION, GRAPH_GROUP_SETTING_ID)
     if m_graphsGroupCheckbox then
         m_graphsGroupCheckbox:SetChecked(m_graphGroupByValue, true)
     end
@@ -1804,7 +1780,7 @@ local function RebuildGraphsTree()
     m_graphsTree:ClearChildren()
 
     if not g_Graphs or #g_Graphs == 0 then
-        local noData = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "StaticText", {
+        local noData = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_graph_"), "StaticText", {
             Label = function() return Locale.Lookup("LOC_GAMESUMMARY_NOGRAPHDATA") end,
             FocusKey = "hofdetail:graph:nodata",
         })
@@ -1890,7 +1866,7 @@ local function RebuildGraphsTree()
     end
 
     if #playersWithData == 0 then
-        local noData = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "StaticText", {
+        local noData = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_graph_"), "StaticText", {
             Label = function() return Locale.Lookup("LOC_GAMESUMMARY_NOGRAPHDATA") end,
             FocusKey = "hofdetail:graph:nodata",
         })
@@ -1902,7 +1878,7 @@ local function RebuildGraphsTree()
 
     for _, entry in ipairs(playersWithData) do
         local playerName = entry.Name
-        local playerNode = mgr:CreateWidget(MakeId("CAIHoFD_graph_"), "TreeItem", {
+        local playerNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_graph_"), "TreeItem", {
             Label = function() return playerName end,
             FocusKey = "hofdetail:graph:player:" .. entry.ObjectId,
         })
@@ -1928,7 +1904,7 @@ local function RebuildReportsTree()
     m_reportsTree:ClearChildren()
 
     if not g_Reports or #g_Reports == 0 then
-        local noData = mgr:CreateWidget(MakeId("CAIHoFD_rep_"), "StaticText", {
+        local noData = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_rep_"), "StaticText", {
             Label = function() return Locale.Lookup("LOC_GAMESUMMARY_NOREPORTDATA") end,
             FocusKey = "hofdetail:report:nodata",
         })
@@ -1944,7 +1920,7 @@ local function RebuildReportsTree()
         local contextNode = nil
         if not skipContextLevel then
             local contextName = group.Name or ""
-            contextNode = mgr:CreateWidget(MakeId("CAIHoFD_rep_"), "TreeItem", {
+            contextNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_rep_"), "TreeItem", {
                 Label = function() return contextName end,
                 FocusKey = "hofdetail:report:ctx:" .. gi,
             })
@@ -1956,7 +1932,7 @@ local function RebuildReportsTree()
 
         for rpi, report in ipairs(group) do
             local reportName = report.Name or Locale.Lookup("LOC_GAMESUMMARY_UNKNOWN")
-            local reportNode = mgr:CreateWidget(MakeId("CAIHoFD_rep_"), "TreeItem", {
+            local reportNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_rep_"), "TreeItem", {
                 Label = function() return reportName end,
                 FocusKey = "hofdetail:report:" .. gi .. ":" .. rpi,
             })
@@ -1985,14 +1961,14 @@ local function RebuildReportsTree()
                         table.insert(parts, cp.name .. ": " .. cp.value)
                     end
                     local capLabel = table.concat(parts, "[NEWLINE]")
-                    local rowLeaf = mgr:CreateWidget(MakeId("CAIHoFD_rep_"), "StaticText", {
+                    local rowLeaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_rep_"), "StaticText", {
                         Label = function() return capLabel end,
                         FocusKey = "hofdetail:report:" .. gi .. ":" .. rpi .. ":r:" .. ri,
                     })
                     rowLeaf:SetFocusSound(HOVER_SOUND)
                     reportNode:AddChild(rowLeaf)
                 else
-                    local rowNode = mgr:CreateWidget(MakeId("CAIHoFD_rep_"), "TreeItem", {
+                    local rowNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_rep_"), "TreeItem", {
                         Label = function() return rowName end,
                         FocusKey = "hofdetail:report:" .. gi .. ":" .. rpi .. ":r:" .. ri,
                     })
@@ -2001,7 +1977,7 @@ local function RebuildReportsTree()
 
                     for _, cp in ipairs(cellParts) do
                         local capCellLabel = cp.name .. ": " .. cp.value
-                        local cellLeaf = mgr:CreateWidget(MakeId("CAIHoFD_rep_"), "StaticText", {
+                        local cellLeaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_rep_"), "StaticText", {
                             Label = function() return capCellLabel end,
                             FocusKey = "hofdetail:report:" .. gi .. ":" .. rpi .. ":r:" .. ri .. ":c:" .. cp.colIndex,
                         })
@@ -2047,32 +2023,32 @@ local function BuildDetailPanel()
     })
 
     -- Tabs
-    m_detailTabs = mgr:CreateWidget(MakeId("CAIHoFD_tabs_"), "TabControl", {})
+    m_detailTabs = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_tabs_"), "TabControl", {})
     m_detailPanel:AddChild(m_detailTabs)
 
     -- Tab 1: Overview
     local overviewPage = m_detailTabs:AddPage(function() return Locale.Lookup("LOC_GAMESUMMARY_OVERVIEW") end)
-    m_overviewTree = mgr:CreateWidget(MakeId("CAIHoFD_ov_"), "Tree", {})
+    m_overviewTree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_ov_"), "Tree", {})
     overviewPage:AddChild(m_overviewTree)
 
     -- Tab 2: Reports
     local reportsPage = m_detailTabs:AddPage(function() return Locale.Lookup("LOC_GAMESUMMARY_REPORTS") end)
-    m_reportsTree = mgr:CreateWidget(MakeId("CAIHoFD_rept_"), "Tree", {})
+    m_reportsTree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_rept_"), "Tree", {})
     reportsPage:AddChild(m_reportsTree)
 
     -- Tab 3: Graphs
     local graphsPage = m_detailTabs:AddPage(function() return Locale.Lookup("LOC_GAMESUMMARY_GRAPHS") end)
 
-    m_graphsTree = mgr:CreateWidget(MakeId("CAIHoFD_grt_"), "Tree", {})
+    m_graphsTree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_grt_"), "Tree", {})
     graphsPage:AddChild(m_graphsTree)
 
-    m_graphsGroupCheckbox = mgr:CreateWidget(MakeId("CAIHoFD_grgroup_"), "Checkbox", {
+    m_graphsGroupCheckbox = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoFD_grgroup_"), "Checkbox", {
         Label = function() return Locale.Lookup("LOC_CAI_REPLAY_GROUP_BY_VALUE") end,
         Tooltip = function() return Locale.Lookup("LOC_CAI_REPLAY_GROUP_BY_VALUE_TOOLTIP") end,
         FocusKey = "hofdetail:graph:groupbyvalue",
     })
     m_graphsGroupCheckbox:SetValueSetter(function(_, value)
-        SaveGraphGroupByValueSetting(value)
+        CAISettings.WriteConfigBool(GRAPH_GROUP_SETTING_SECTION, GRAPH_GROUP_SETTING_ID, value)
         m_graphGroupByValue = value and true or false
         RebuildGraphsTree()
     end)

@@ -1,9 +1,10 @@
 -- Shared Gossip report section; owns collection, filter state and list construction.
 CAIReportGossip = {}
 
+---@param mgr UIScreenManager
 ---@param context CAIReportGossipContext
 ---@return CAIReportGossipController
-function CAIReportGossip.Create(context)
+function CAIReportGossip.Create(mgr, context)
     local m_caiGossipLog = {}
     local m_caiGossipFiltered = {}
     local m_caiLeaderFilter = -1
@@ -46,7 +47,7 @@ function CAIReportGossip.Create(context)
 
 
     local function RebuildGossipList(list)
-        local capture = context.GetManager():CaptureFocusKey(list)
+        local capture = mgr:CaptureFocusKey(list)
         list:ClearChildren()
 
         if m_caiGossipFiltered == nil then return end
@@ -54,7 +55,7 @@ function CAIReportGossip.Create(context)
         for gi, kGossipEntry in ipairs(m_caiGossipFiltered) do
             local capturedEntry = kGossipEntry
             local capturedGI = gi
-            local entryWidget = context.GetManager():CreateWidget(context.GetManager():GenerateWidgetId("CAIRPT_"), "StaticText", {
+            local entryWidget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "StaticText", {
                 Label = function()
                     local description = capturedEntry[1]
                     local turn = capturedEntry[2]
@@ -70,7 +71,7 @@ function CAIReportGossip.Create(context)
             list:AddChild(entryWidget)
         end
 
-        context.GetManager():RestoreFocus(list, capture)
+        mgr:RestoreFocus(list, capture)
     end
 
     -- Set by RebuildGossipTab so the gossip filter dropdowns can refresh their list
@@ -106,7 +107,7 @@ function CAIReportGossip.Create(context)
             table.insert(playerDropdownOptions, { label = opt.Label, value = opt.Value })
         end
 
-        m_gossipPlayerFilter = context.GetManager():CreateWidget(context.GetManager():GenerateWidgetId("CAIRPT_"), "Dropdown", {
+        m_gossipPlayerFilter = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "Dropdown", {
             Label = function() return Locale.Lookup("LOC_CAI_REPORTS_FILTER_PLAYER") end,
             FocusKey = "gossip:filter:player",
         })
@@ -143,7 +144,7 @@ function CAIReportGossip.Create(context)
             table.insert(groupDropdownOptions, { label = opt.Label, value = opt.Value })
         end
 
-        m_gossipGroupFilter = context.GetManager():CreateWidget(context.GetManager():GenerateWidgetId("CAIRPT_"), "Dropdown", {
+        m_gossipGroupFilter = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "Dropdown", {
             Label = function() return Locale.Lookup("LOC_CAI_REPORTS_FILTER_TYPE") end,
             FocusKey = "gossip:filter:type",
         })

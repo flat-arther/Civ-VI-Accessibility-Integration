@@ -177,34 +177,12 @@ end
 --   Group by turn (default): player -> non-empty turn -> recorded values
 --   Group by value:          player -> value -> turns where it changed
 -- ============================================================================
-local function FormatReplayValue(value)
-    if type(value) == "number" then
-        return Locale.ToNumber(value, "#,###.##")
-    end
-    return tostring(value)
-end
 
-local function LoadGraphGroupByValueSetting()
-    if CAI == nil or CAI.GetConfigValue == nil then return false end
-    local stored = CAI.GetConfigValue(
-        GRAPH_GROUP_SETTING_SECTION, GRAPH_GROUP_SETTING_ID, "false")
-    if stored == nil then return false end
-    local normalized = tostring(stored):lower()
-    if normalized == "true" or normalized == "1"
-        or normalized == "yes" or normalized == "on" then
-        return true
-    end
-    return false
-end
 
-local function SaveGraphGroupByValueSetting(value)
-    if CAI ~= nil and CAI.SetConfigValue ~= nil then
-        CAI.SetConfigValue(GRAPH_GROUP_SETTING_SECTION, GRAPH_GROUP_SETTING_ID,
-            value and "true" or "false")
-    end
-end
 
-local m_graphGroupByValue = LoadGraphGroupByValueSetting()
+
+
+local m_graphGroupByValue = CAISettings.ReadConfigBool(GRAPH_GROUP_SETTING_SECTION, GRAPH_GROUP_SETTING_ID)
 
 -- Build player -> turn -> value leaves (default grouping).
 local function BuildTurnGroups(playerNode, playerId, points)
@@ -230,7 +208,7 @@ local function BuildTurnGroups(playerNode, playerId, points)
         playerNode:AddChild(turnNode)
 
         for _, pt in ipairs(turnMap[turn]) do
-            local valueLabel = pt.display .. ": " .. FormatReplayValue(pt.value)
+            local valueLabel = pt.display .. ": " .. CAIText.FormatNumberOrText(pt.value)
             local leaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_graph_"), "TreeItem", {
                 Label = function() return valueLabel end,
                 FocusKey = "endgame:graph:player:" .. playerId ..
@@ -273,7 +251,7 @@ local function BuildValueGroups(playerNode, playerId, points)
             local turnLabel = Locale.Lookup("LOC_CAI_TIMELINE_TURN", pt.turn)
             local leaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_graph_"), "TreeItem", {
                 Label = function()
-                    return turnLabel .. ": " .. FormatReplayValue(pt.value)
+                    return turnLabel .. ": " .. CAIText.FormatNumberOrText(pt.value)
                 end,
                 FocusKey = "endgame:graph:player:" .. playerId ..
                     ":dataset:" .. dsName .. ":turn:" .. pt.turn,
@@ -289,7 +267,7 @@ local function RebuildGraphsTree()
 
     -- Re-read the shared preference so a toggle made in the Hall of Fame screen
     -- is honored here, and keep the checkbox in sync with it.
-    m_graphGroupByValue = LoadGraphGroupByValueSetting()
+    m_graphGroupByValue = CAISettings.ReadConfigBool(GRAPH_GROUP_SETTING_SECTION, GRAPH_GROUP_SETTING_ID)
     if m_graphsGroupCheckbox then
         m_graphsGroupCheckbox:SetChecked(m_graphGroupByValue, true)
     end
@@ -732,7 +710,7 @@ local function BuildPanel()
         FocusKey = "endgame:graph:groupbyvalue",
     })
     m_graphsGroupCheckbox:SetValueSetter(function(_, value)
-        SaveGraphGroupByValueSetting(value)
+        CAISettings.WriteConfigBool(GRAPH_GROUP_SETTING_SECTION, GRAPH_GROUP_SETTING_ID, value)
         m_graphGroupByValue = value and true or false
         RebuildGraphsTree()
     end)

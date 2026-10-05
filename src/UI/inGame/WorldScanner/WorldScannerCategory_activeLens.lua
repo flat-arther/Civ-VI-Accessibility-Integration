@@ -1,3 +1,4 @@
+include("CAIGameState")
 include("Civ6Common")
 
 local Utils = CAIWorldScannerUtils
@@ -724,21 +725,7 @@ end
 
 local GROUP_RELIGION_NO_MAJORITY = "religion:noMajority"
 
-local function GetReligionName(religionType)
-    if religionType == nil or religionType < 0 then
-        return nil
-    end
 
-    local gameReligion = Game.GetReligion ~= nil and Game.GetReligion() or nil
-    if gameReligion ~= nil and gameReligion.GetName ~= nil then
-        local name = gameReligion:GetName(religionType)
-        if name ~= nil and name ~= "" then
-            return Locale.Lookup(name)
-        end
-    end
-
-    return nil
-end
 
 local function ScanReligionLens(context)
     local out = {}
@@ -772,7 +759,7 @@ local function ScanReligionLens(context)
         local groupLabel
 
         if majorityType ~= nil and majorityType >= 0 then
-            local religionName = GetReligionName(majorityType)
+            local religionName = CAIGameState.GetReligionName(majorityType)
             if religionName == nil then
                 return
             end

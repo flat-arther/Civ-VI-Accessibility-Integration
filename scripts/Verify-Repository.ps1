@@ -25,7 +25,7 @@ $registered = @{}
 $replacementCount = 0
 if ($null -ne $manifest) {
     foreach ($context in @('CAIFrontEnd', 'CAIInGame')) {
-        foreach ($helper in @('CAIControl.lua', 'CAICollection.lua', 'CAIModSupport.lua', 'CAICapturedDropdown.lua', 'CAIDescriptors.lua', 'CAIColumns.lua', 'textProcessing.lua')) {
+        foreach ($helper in @('CAIControl.lua', 'CAICollection.lua', 'CAISetupParameters.lua', 'CAIModSupport.lua', 'CAICapturedDropdown.lua', 'CAIDescriptors.lua', 'CAIColumns.lua', 'textProcessing.lua')) {
             $imports = $manifest.SelectNodes("//ImportFiles[@id='$context']/File")
             if (@($imports | Where-Object { $_.InnerText.Trim() -eq "UI/shared/$helper" }).Count -ne 1) {
                 Fail "Shared helper must be imported exactly once in ${context}: $helper"
@@ -125,7 +125,7 @@ if (-not (Test-Path -LiteralPath $LuaPath -PathType Leaf)) {
 $LuaPath = (Resolve-Path -LiteralPath $LuaPath).Path
 Push-Location $repoRoot
 try {
-    foreach ($test in @('Test-TextProcessing.lua', 'Test-SharedUtilities.lua', 'Test-GameState.lua', 'Test-ResearchChooser.lua', 'Test-ResearchTrees.lua', 'Test-ResearchData.lua', 'Test-DescriptorColumns.lua', 'Test-ViewLifecycle.lua', 'Test-PlotInteractions.lua', 'Test-WorldBuilderInput.lua', 'Test-WorldInputModes.lua', 'Test-ScannerContracts.lua', 'Test-ScannerCore.lua', 'Test-ReportSections.lua', 'Test-WorldRankings.lua', 'Test-ProductionQueue.lua', 'Test-TradeData.lua', 'Test-TradeScreens.lua', 'Test-MinimapLens.lua', 'Test-UnitBrowser.lua', 'Test-StagingLifecycle.lua', 'Test-RealEraTracker.lua', 'Test-RiverDownstream.lua')) {
+    foreach ($test in @('Test-TextProcessing.lua', 'Test-SharedUtilities.lua', 'Test-GameState.lua', 'Test-ResearchChooser.lua', 'Test-ResearchTrees.lua', 'Test-ResearchData.lua', 'Test-DescriptorColumns.lua', 'Test-ViewLifecycle.lua', 'Test-PlotInteractions.lua', 'Test-WorldBuilderInput.lua', 'Test-WorldInputModes.lua', 'Test-ScannerContracts.lua', 'Test-ScannerCore.lua', 'Test-ReportSections.lua', 'Test-WorldRankings.lua', 'Test-ProductionQueue.lua', 'Test-FinalUtilityAudit.lua', 'Test-TradeData.lua', 'Test-TradeScreens.lua', 'Test-MinimapLens.lua', 'Test-UnitBrowser.lua', 'Test-StagingLifecycle.lua', 'Test-RealEraTracker.lua', 'Test-RiverDownstream.lua')) {
         $testArgs = @()
         if ($test -eq 'Test-TextProcessing.lua') {
             $testArgs = @(Get-ChildItem -LiteralPath (Join-Path $sourceRoot 'UI') -Recurse -Filter '*.lua' |

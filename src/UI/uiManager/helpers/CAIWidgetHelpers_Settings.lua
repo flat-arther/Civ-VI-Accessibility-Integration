@@ -21,9 +21,6 @@ local EDITBOX_EDIT_MODES = {
 -- Small helpers
 -- ===========================================================================
 
-local function SafeId(s)
-    return tostring(s or ""):gsub("[^%w_]", "_")
-end
 
 local function Lookup(tag)
     if tag == nil or tag == "" then return "" end
@@ -66,7 +63,7 @@ end
 -- ===========================================================================
 
 local function CreateCheckbox(mgr, row)
-    local w = mgr:CreateWidget("CAISetting_" .. SafeId(row.SettingId), "Checkbox", {
+    local w = mgr:CreateWidget("CAISetting_" .. CAIText.SafeKey(row.SettingId), "Checkbox", {
         Label = SettingLabel(row),
         Tooltip = SettingTooltip(row),
         FocusKey = "setting:" .. row.SettingId,
@@ -82,7 +79,7 @@ local function CreateCheckbox(mgr, row)
 end
 
 local function CreateSlider(mgr, row)
-    local w = mgr:CreateWidget("CAISetting_" .. SafeId(row.SettingId), "Slider", {
+    local w = mgr:CreateWidget("CAISetting_" .. CAIText.SafeKey(row.SettingId), "Slider", {
         Label = SettingLabel(row),
         Tooltip = SettingTooltip(row),
         FocusKey = "setting:" .. row.SettingId,
@@ -103,7 +100,7 @@ local function CreateSlider(mgr, row)
 end
 
 local function CreateDropdown(mgr, row)
-    local w = mgr:CreateWidget("CAISetting_" .. SafeId(row.SettingId), "Dropdown", {
+    local w = mgr:CreateWidget("CAISetting_" .. CAIText.SafeKey(row.SettingId), "Dropdown", {
         Label = SettingLabel(row),
         Tooltip = SettingTooltip(row),
         FocusKey = "setting:" .. row.SettingId,
@@ -154,7 +151,7 @@ local function CreateDropdown(mgr, row)
 end
 
 local function CreateText(mgr, row)
-    local w = mgr:CreateWidget("CAISetting_" .. SafeId(row.SettingId), "EditBox", {
+    local w = mgr:CreateWidget("CAISetting_" .. CAIText.SafeKey(row.SettingId), "EditBox", {
         Label = SettingLabel(row),
         Tooltip = SettingTooltip(row),
         FocusKey = "setting:" .. row.SettingId,
@@ -177,7 +174,7 @@ local function IsInGame()
 end
 
 local function CreateButton(mgr, row)
-    local w = mgr:CreateWidget("CAISetting_" .. SafeId(row.SettingId), "Button", {
+    local w = mgr:CreateWidget("CAISetting_" .. CAIText.SafeKey(row.SettingId), "Button", {
         Label = SettingLabel(row),
         Tooltip = SettingTooltip(row),
         FocusKey = "setting:" .. row.SettingId,
@@ -263,7 +260,7 @@ function S.BuildSettingsTree(mgr)
         local category = categories[section]
 
         if category == nil then
-            category = mgr:CreateWidget("CAISettingsCategory_" .. SafeId(section), "TreeItem", {
+            category = mgr:CreateWidget("CAISettingsCategory_" .. CAIText.SafeKey(section), "TreeItem", {
                 Label = CategoryLabel(section),
                 FocusKey = "setting_section:" .. section,
             })

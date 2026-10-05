@@ -67,10 +67,7 @@ for _,brs in ipairs({false,true}) do
    elseif name=='ReportScreen' or name=='ReportScreen_Expansion1' or name=='ReportScreen_Expansion2' or name=='hexCoordUtils_CAI' or name=='inGameHelpers_CAI' then return
    else nativeInclude(name) end
   end
-  -- Current implementation must tolerate context creation before manager publication.
-  if not arg[1] or arg[3]=='--late' then ExposedMembers.CAI_UIManager=nil end
   run(arg[1] or 'src/UI/inGame/ReportScreen_CAI.lua')
-  ExposedMembers.CAI_UIManager=mgr
   if brs then CAIReports_DataSource=provider end -- engine data mocked; copied routine remains unchanged
   Open(2)
   check(nativeOpens==1 and providerCalls==1,'native open and data provider called once')

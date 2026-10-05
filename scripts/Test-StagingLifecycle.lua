@@ -1,3 +1,4 @@
+dofile("src/UI/shared/CAISetupParameters.lua")
 -- Production frontend accessibility blocks, with engine boundaries mocked.
 local h = dofile("scripts/test-support/WidgetHarness.lua")
 local assertions = 0

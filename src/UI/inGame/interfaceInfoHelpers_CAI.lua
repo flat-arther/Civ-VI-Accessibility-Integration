@@ -1,3 +1,4 @@
+include("CAIGameState")
 include("caiUtils")
 include("AdjacencyBonusSupport")
 include("hexCoordUtils_CAI")
@@ -1512,21 +1513,7 @@ local function BuildLoyaltyLensPlotInfo(plot)
     return #lines > 0 and lines or nil
 end
 
-local function GetReligionName(religionType)
-    if religionType == nil or religionType < 0 then
-        return nil
-    end
 
-    local gameReligion = Game.GetReligion ~= nil and Game.GetReligion() or nil
-    if gameReligion ~= nil and gameReligion.GetName ~= nil then
-        local name = gameReligion:GetName(religionType)
-        if name ~= nil and name ~= "" then
-            return Locale.Lookup(name)
-        end
-    end
-
-    return nil
-end
 
 local function BuildReligionLensPlotInfo(plot)
     local city = Cities.GetPlotPurchaseCity(plot)
@@ -1554,7 +1541,7 @@ local function BuildReligionLensPlotInfo(plot)
         local relType = entry.Religion
         local followers = entry.Followers or 0
         if relType ~= nil and relType >= 0 and followers > 0 then
-            local relName = GetReligionName(relType)
+            local relName = CAIGameState.GetReligionName(relType)
             if relName ~= nil then
                 sorted[#sorted + 1] = { type = relType, name = relName, followers = followers }
             end

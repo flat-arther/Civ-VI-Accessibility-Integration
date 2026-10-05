@@ -98,3 +98,19 @@ function CAIGameState.HasMetCityState(player)
     end
     return false
 end
+
+function CAIGameState.GetReligionName(religionType)
+    if religionType == nil or religionType < 0 then
+        return nil
+    end
+
+    local gameReligion = Game.GetReligion ~= nil and Game.GetReligion() or nil
+    if gameReligion ~= nil and gameReligion.GetName ~= nil then
+        local name = gameReligion:GetName(religionType)
+        if name ~= nil and name ~= "" then
+            return Locale.Lookup(name)
+        end
+    end
+
+    return nil
+end

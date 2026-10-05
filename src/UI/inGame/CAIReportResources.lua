@@ -1,9 +1,10 @@
 -- Shared Resources report section. The screen supplies its live data and widget factories.
 CAIReportResources = {}
 
+---@param mgr UIScreenManager
 ---@param context CAIReportResourcesContext
 ---@return CAIReportResourcesController
-function CAIReportResources.Create(context)
+function CAIReportResources.Create(mgr, context)
     local MakeTreeItem = context.MakeTreeItem
     local MakeStaticText = context.MakeStaticText
     local AddLeaf = context.AddLeaf
@@ -272,7 +273,7 @@ function CAIReportResources.Create(context)
     end
 
     local function Rebuild(tree)
-        local capture = context.GetManager():CaptureFocusKey(tree)
+        local capture = mgr:CaptureFocusKey(tree)
         tree:ClearChildren()
 
         local strategic = {}
@@ -360,7 +361,7 @@ function CAIReportResources.Create(context)
             end
         end
 
-        context.GetManager():RestoreFocus(tree, capture)
+        mgr:RestoreFocus(tree, capture)
     end
 
 

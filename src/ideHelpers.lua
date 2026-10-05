@@ -1900,7 +1900,6 @@ function CAIWidgetHelpers_Search.MakeSearchCandidate(widget, label, bfsIndex, to
 ---@alias CAIReportsDataSource fun():CAIReportCityData[],CAIReportCityTotals,table<integer,CAIReportResourceData>,table<string,table>,table[]
 
 ---@class CAIReportGossipContext
----@field GetManager fun():UIScreenManager
 ---@field GetLocalPlayerID fun():integer|nil
 
 ---@class CAIReportGossipController

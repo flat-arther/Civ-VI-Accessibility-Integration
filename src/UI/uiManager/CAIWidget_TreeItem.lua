@@ -71,18 +71,6 @@ function TreeItemWidget:IsLeaf()
     return #self:GetVisibleChildren() == 0
 end
 
--- Recursively collapse every descendant in place — no speech, no events.
--- Collapsing a node tears down its whole subtree so a later re-expand reveals
--- a single clean level rather than whatever deep state was left behind.
-local function CollapseDescendants(node)
-    for _, child in ipairs(node.Children or {}) do
-        if child.IsExpanded then
-            child.IsExpanded = false
-            child._lastFocusedChild = nil
-        end
-        CollapseDescendants(child)
-    end
-end
 
 ---Expand this node. `silent` suppresses both the `expanded` event and speech
 ---(use it for seeding initial state or auto-expanding focus ancestors); the
@@ -112,7 +100,7 @@ function TreeItemWidget:Collapse(silent, skipAnnouncement)
     if not self.IsExpanded then return false end
     self.IsExpanded = false
     self._lastFocusedChild = nil
-    CollapseDescendants(self)
+    CAIWidgetHelpers_Tree.CollapseDescendants(self)
     if not silent then
         self:Emit("collapsed")
         if not skipAnnouncement then self:SpeakElements({ "value" }) end

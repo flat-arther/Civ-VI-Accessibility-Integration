@@ -27,12 +27,9 @@ local function NormalizePath(path)
     return tostring(path or ""):gsub("\\", "/")
 end
 
-local function NormalizeTagKey(tag)
-    return tostring(tag or ""):gsub("[^%w_]", "_")
-end
 
 local function BuildTagSettingId(prefix, tag)
-    return prefix .. "_" .. NormalizeTagKey(tag)
+    return prefix .. "_" .. CAIText.SafeKey(tag)
 end
 
 local function ClampVolumeScalar(volume)
@@ -47,7 +44,7 @@ end
 
 local function GetTagCandidates(tag)
     local candidates = {}
-    local current = NormalizeTagKey(tag)
+    local current = CAIText.SafeKey(tag)
     if current == "" then
         return candidates
     end

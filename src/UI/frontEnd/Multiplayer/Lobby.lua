@@ -1605,9 +1605,7 @@ local CAI_MirroringTab = false
 local CAI_GameListRebuiltBySortDisplay = false
 local CAI_GameListRefreshPending = false
 
-local function CAI_Lookup(tag, ...)
-	return Locale.Lookup(tag, ...)
-end
+
 
 local function CAI_IsOpen()
 	return ContextPtr ~= nil and not ContextPtr:IsHidden()
@@ -1676,7 +1674,7 @@ local function CAI_BuildSortOptions()
 		if option ~= nil and option.Button ~= nil then
 			local label = CAIControl.Text(option.Button)
 			if label == "" then label = CAIControl.Tooltip(option.Button) end
-			if label == "" then label = CAI_Lookup("LOC_CAI_LOBBY_SORT_" .. option.Column) end
+			if label == "" then label = Locale.Lookup("LOC_CAI_LOBBY_SORT_" .. option.Column) end
 			table.insert(options, {
 				label = label,
 				value = option,
@@ -1691,8 +1689,8 @@ end
 
 local function CAI_BuildDirectionOptions()
 	return {
-		{ label = CAI_Lookup("LOC_CAI_LOBBY_SORT_ASCENDING"), value = "asc" },
-		{ label = CAI_Lookup("LOC_CAI_LOBBY_SORT_DESCENDING"), value = "desc" },
+		{ label = Locale.Lookup("LOC_CAI_LOBBY_SORT_ASCENDING"), value = "asc" },
+		{ label = Locale.Lookup("LOC_CAI_LOBBY_SORT_DESCENDING"), value = "desc" },
 	}
 end
 
@@ -1721,14 +1719,14 @@ local function CAI_GetGameLabel(listing)
 	elseif listing.UnseenComplete == true then
 		CAIText.AppendIfNonEmpty(status, gameUnseenCompleteTooltip)
 	elseif listing.CloudTurnPlayerName ~= nil and listing.CloudTurnPlayerName ~= "" then
-		CAIText.AppendIfNonEmpty(status, CAI_Lookup("LOC_LOBBY_GAME_CLOUD_PLAYER_TURN_TOOLTIP", listing.CloudTurnPlayerName))
+		CAIText.AppendIfNonEmpty(status, Locale.Lookup("LOC_LOBBY_GAME_CLOUD_PLAYER_TURN_TOOLTIP", listing.CloudTurnPlayerName))
 	elseif listing.SavedGame == 1 and (not IsUsingPlayByCloudGameList() or m_browserMode == LIST_PUBLIC_GAMES) then
 		CAIText.AppendIfNonEmpty(status, gameLoadingSaveTooltip)
 	elseif listing.GameStarted == 1 and not IsUsingPlayByCloudGameList() then
 		CAIText.AppendIfNonEmpty(status, gameStartedTooltip)
 	end
 	if #status > 0 then
-		return CAI_Lookup("LOC_CAI_LOBBY_GAME_ROW_LABEL", name, table.concat(status, "[NEWLINE]"))
+		return Locale.Lookup("LOC_CAI_LOBBY_GAME_ROW_LABEL", name, table.concat(status, "[NEWLINE]"))
 	end
 	return name
 end
@@ -1741,10 +1739,10 @@ local function CAI_GetGameTooltip(listing)
 	if IsPlayByCloudJoinsDisabled() then
 		CAIText.AppendIfNonEmpty(parts, playByCloudJoinsDisabled)
 	end
-	CAIText.AppendIfNonEmpty(parts, CAI_Lookup("LOC_CAI_LOBBY_RULESET_VALUE", listing.RuleSetName or CAI_Lookup("LOC_MULTIPLAYER_UNKNOWN")))
-	CAIText.AppendIfNonEmpty(parts, CAI_Lookup("LOC_CAI_LOBBY_MAP_VALUE", listing.MapName or CAI_Lookup("LOC_MULTIPLAYER_UNKNOWN"), listing.MapSizeName or ""))
-	CAIText.AppendIfNonEmpty(parts, CAI_Lookup("LOC_CAI_LOBBY_SPEED_VALUE", listing.GameSpeedName or CAI_Lookup("LOC_MULTIPLAYER_UNKNOWN")))
-	CAIText.AppendIfNonEmpty(parts, CAI_Lookup("LOC_CAI_LOBBY_PLAYERS_VALUE", listing.MembersLabelCaption or ""))
+	CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_LOBBY_RULESET_VALUE", listing.RuleSetName or Locale.Lookup("LOC_MULTIPLAYER_UNKNOWN")))
+	CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_LOBBY_MAP_VALUE", listing.MapName or Locale.Lookup("LOC_MULTIPLAYER_UNKNOWN"), listing.MapSizeName or ""))
+	CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_LOBBY_SPEED_VALUE", listing.GameSpeedName or Locale.Lookup("LOC_MULTIPLAYER_UNKNOWN")))
+	CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_LOBBY_PLAYERS_VALUE", listing.MembersLabelCaption or ""))
 	CAIText.AppendIfNonEmpty(parts, listing.MembersLabelToolTip)
 	return table.concat(parts, "[NEWLINE]")
 end
@@ -1761,14 +1759,14 @@ local function CAI_BuildModGroups(listing)
 				if Modding.GetModHandle(mod.ModId) then
 					if Modding.IsJoinGameAllowed(mod.ModId) then
 						isOwned = true
-						label = CAI_Lookup("LOC_CAI_LOBBY_CONTENT_OWNED", label)
+						label = Locale.Lookup("LOC_CAI_LOBBY_CONTENT_OWNED", label)
 					else
-						label = CAI_Lookup("LOC_CAI_LOBBY_CONTENT_MISSING", label)
+						label = Locale.Lookup("LOC_CAI_LOBBY_CONTENT_MISSING", label)
 					end
 				elseif mod.SubscriptionId and #mod.SubscriptionId > 0 then
-					label = CAI_Lookup("LOC_CAI_LOBBY_CONTENT_DOWNLOAD", label)
+					label = Locale.Lookup("LOC_CAI_LOBBY_CONTENT_DOWNLOAD", label)
 				else
-					label = CAI_Lookup("LOC_CAI_LOBBY_CONTENT_MISSING", label)
+					label = Locale.Lookup("LOC_CAI_LOBBY_CONTENT_MISSING", label)
 				end
 				if Modding.IsModOfficial(mod.ModId) then
 					table.insert(official.entries, label)
@@ -1784,7 +1782,7 @@ local function CAI_BuildModGroups(listing)
 		local gameModes = Modding.GetGameModesFromConfigurationString(listing.EnabledGameModeNames)
 		if gameModes then
 			for _, gameMode in pairs(gameModes) do
-				table.insert(official.entries, CAI_Lookup("LOC_CAI_LOBBY_CONTENT_OWNED", gameMode.Name or ""))
+				table.insert(official.entries, Locale.Lookup("LOC_CAI_LOBBY_CONTENT_OWNED", gameMode.Name or ""))
 				official.owned = official.owned + 1
 			end
 		end
@@ -1806,12 +1804,12 @@ end
 
 local function CAI_AddContentGroup(parent, labelTag, groupData, focusKey)
 	local group = mgr:CreateWidget(mgr:GenerateWidgetId("CAILobbyContent"), "TreeItem", {
-		Label = function() return CAI_Lookup(labelTag) end,
+		Label = function() return Locale.Lookup(labelTag) end,
 		Tooltip = function()
 			if #groupData.entries == 0 then
-				return CAI_Lookup("LOC_CAI_LOBBY_NO_CONTENT")
+				return Locale.Lookup("LOC_CAI_LOBBY_NO_CONTENT")
 			end
-			return CAI_Lookup("LOC_CAI_LOBBY_CONTENT_COUNTS", groupData.owned, groupData.required)
+			return Locale.Lookup("LOC_CAI_LOBBY_CONTENT_COUNTS", groupData.owned, groupData.required)
 		end,
 		FocusKey = focusKey,
 	})
@@ -1825,7 +1823,7 @@ end
 
 local function CAI_GetFriendStatusText(friend)
 	local status = friend.PlayingCiv and friend.RichPresence or "LOC_PRESENCE_ONLINE"
-	return CAI_Lookup(status)
+	return Locale.Lookup(status)
 end
 
 local function CAI_BuildFriendActionWidgets(friend, submenu)
@@ -1835,8 +1833,8 @@ local function CAI_BuildFriendActionWidgets(friend, submenu)
 	BuildFriendActionList(actions, false)
 	for actionIndex, action in ipairs(actions) do
 		local child = mgr:CreateWidget(mgr:GenerateWidgetId("CAILobbyFriendAction"), "Button", {
-			Label = function() return CAI_Lookup(action.name) end,
-			Tooltip = function() return CAI_Lookup(action.tooltip) end,
+			Label = function() return Locale.Lookup(action.name) end,
+			Tooltip = function() return Locale.Lookup(action.tooltip) end,
 			FocusKey = "friend:" .. tostring(friend.ID) .. ":action:" .. tostring(actionIndex),
 		})
 		child:SetFocusSound("Main_Menu_Mouse_Over")
@@ -1849,7 +1847,7 @@ local function CAI_BuildFriendActionWidgets(friend, submenu)
 
 	if count == 0 then
 		submenu:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAILobbyFriendNoActions"), "StaticText", {
-			Label = function() return CAI_Lookup("LOC_CAI_LOBBY_NO_FRIEND_ACTIONS") end,
+			Label = function() return Locale.Lookup("LOC_CAI_LOBBY_NO_FRIEND_ACTIONS") end,
 			FocusKey = "friend:" .. tostring(friend.ID) .. ":none",
 		}))
 	end
@@ -1866,7 +1864,7 @@ local function CAI_RebuildFriendsList()
 		for _, friend in ipairs(friends) do
 			local submenu = mgr:CreateWidget(mgr:GenerateWidgetId("CAILobbyFriend"), "SubMenu", {
 				Label = function()
-					return CAI_Lookup("LOC_CAI_LOBBY_FRIEND_ROW_LABEL", friend.PlayerName or "", CAI_GetFriendStatusText(friend))
+					return Locale.Lookup("LOC_CAI_LOBBY_FRIEND_ROW_LABEL", friend.PlayerName or "", CAI_GetFriendStatusText(friend))
 				end,
 				Tooltip = function() return CAI_GetFriendStatusText(friend) end,
 				FocusKey = "friend:" .. tostring(friend.ID),
@@ -1878,7 +1876,7 @@ local function CAI_RebuildFriendsList()
 		end
 	else
 		CAI_FriendsList:AddChild(mgr:CreateWidget("CAILobbyNoFriends", "MenuItem", {
-			Label = function() return CAI_Lookup("LOC_CAI_LOBBY_NO_FRIENDS") end,
+			Label = function() return Locale.Lookup("LOC_CAI_LOBBY_NO_FRIENDS") end,
 			FocusKey = "friends:none",
 			HiddenPredicate = function() return Controls.FriendsButton:IsHidden() end,
 		}))
@@ -1944,8 +1942,8 @@ local function CAI_RebuildGamesTree(tree)
 	else
 		local isRefreshing = CAI_IsGameListRefreshPending()
 		local emptyLabel = isRefreshing
-			and CAI_Lookup("LOC_CAI_LOBBY_REFRESHING")
-			or CAI_Lookup("LOC_CAI_LOBBY_NO_GAMES")
+			and Locale.Lookup("LOC_CAI_LOBBY_REFRESHING")
+			or Locale.Lookup("LOC_CAI_LOBBY_NO_GAMES")
 		local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAILobbyEmpty"), "TreeItem", {
 			Label = function() return emptyLabel end,
 			FocusKey = isRefreshing and "empty:refreshing" or "empty:none",
@@ -2044,7 +2042,7 @@ local function CAI_BuildPanel()
 	CAI_BuildGamesArea(CAI_Panel)
 
 	CAI_SortDropdown = mgr:CreateWidget("CAILobbySort", "Dropdown", {
-		Label = function() return CAI_Lookup("LOC_CAI_LABEL_SORT_BY") end,
+		Label = function() return Locale.Lookup("LOC_CAI_LABEL_SORT_BY") end,
 		HiddenPredicate = function() return IsOffsetScrolling() end,
 	})
 	CAI_SortDropdown:On("value_changed", function(_, value)
@@ -2053,7 +2051,7 @@ local function CAI_BuildPanel()
 	CAI_Panel:AddChild(CAI_SortDropdown)
 
 	CAI_DirectionDropdown = mgr:CreateWidget("CAILobbySortDirection", "Dropdown", {
-		Label = function() return CAI_Lookup("LOC_CAI_LOBBY_SORT_DIRECTION") end,
+		Label = function() return Locale.Lookup("LOC_CAI_LOBBY_SORT_DIRECTION") end,
 		HiddenPredicate = function() return IsOffsetScrolling() end,
 	})
 	CAI_DirectionDropdown:On("value_changed", function(_, value)
@@ -2063,10 +2061,10 @@ local function CAI_BuildPanel()
 	CAI_Panel:AddChild(CAI_DirectionDropdown)
 
 	CAI_RefreshButton = mgr:CreateWidget("CAILobbyRefresh", "Button", {
-		Label = function() return CAI_Lookup("LOC_CAI_LOBBY_REFRESH_LIST") end,
+		Label = function() return Locale.Lookup("LOC_CAI_LOBBY_REFRESH_LIST") end,
 		Tooltip = function()
 			if Matchmaking.IsRefreshingGameList() then
-				return CAI_Lookup("LOC_CAI_LOBBY_REFRESHING")
+				return Locale.Lookup("LOC_CAI_LOBBY_REFRESHING")
 			end
 			return CAIControl.Tooltip(Controls.RefreshButton)
 		end,
@@ -2105,7 +2103,7 @@ local function CAI_BuildPanel()
 	CAI_Panel:AddChild(hostButton)
 
 	CAI_FriendsList = mgr:CreateWidget("CAILobbyFriends", "List", {
-		Label = function() return CAI_Lookup("LOC_MULTIPLAYER_FRIENDS") end,
+		Label = function() return Locale.Lookup("LOC_MULTIPLAYER_FRIENDS") end,
 		HiddenPredicate = function() return Controls.FriendsButton:IsHidden() end,
 	})
 	CAI_Panel:AddChild(CAI_FriendsList)

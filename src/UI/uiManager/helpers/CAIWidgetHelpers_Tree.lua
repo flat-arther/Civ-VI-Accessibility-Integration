@@ -304,3 +304,15 @@ function T.ToggleFocused(root)
     if item.IsExpanded then item:Collapse() else item:Expand() end
     return true
 end
+
+-- Collapse descendants silently without changing the root or saved focus keys.
+---@param node UIWidget
+function CAIWidgetHelpers_Tree.CollapseDescendants(node)
+    for _, child in ipairs(node.Children or {}) do
+        if child.IsExpanded then
+            child.IsExpanded = false
+            child._lastFocusedChild = nil
+        end
+        CAIWidgetHelpers_Tree.CollapseDescendants(child)
+    end
+end

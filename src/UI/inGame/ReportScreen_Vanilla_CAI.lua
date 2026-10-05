@@ -238,8 +238,6 @@ end)
 -- Lifecycle
 -- ============================================================================
 Open = WrapFunc(Open, function(orig, tabToOpen)
-    mgr = assert(ExposedMembers.CAI_UIManager,
-        "CAI Report Screen opened before the accessibility UI manager was available")
 
     local reportsRequest = ExposedMembers.CAIReports
     if not IsCAITutorialControlAllowed("LaunchBar_Hook_Reports") then

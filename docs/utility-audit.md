@@ -4,7 +4,7 @@
 
 The earlier passes were too narrow: they matched familiar helper names and left equivalent operations under other names and inside larger functions. This pass inspected authored in-game Lua recursively, searched generic operations as well as names, and compared normalized private-function bodies. The user expanded the scope to repeated frontend/shared utilities. Edits to frontend/shared screen replacements are restricted to their accessibility blocks; standalone utility modules such as caiUtils and textProcessing remain explicitly in scope. Vendored integrations are not rewritten wholesale.
 
-Run `scripts/Audit-LuaUtilities.ps1` for the remaining repeated-body candidates. It currently inventories 2,915 private helper definitions and reports 66 groups. This is a review aid, not a parser or an extraction approval: identical source can capture different local state. Additional searches covered public helpers, nested functions, inline append/filter loops, string patterns, and direct concatenation. Ordinary `table.concat` or collection insertion is not itself a duplicate utility implementation.
+Run `scripts/Audit-LuaUtilities.ps1` for the remaining repeated-body candidates. The final pass inventories 3,124 private helper definitions and reports 29 groups; review dispositions are recorded below. This is a review aid, not a parser or an extraction approval: identical source can capture different local state. Additional searches covered public helpers, nested functions, inline append/filter loops, string patterns, and direct concatenation. Ordinary `table.concat` or collection insertion is not itself a duplicate utility implementation.
 
 ## Corrected in this pass
 
@@ -29,7 +29,7 @@ Run `scripts/Audit-LuaUtilities.ps1` for the remaining repeated-body candidates.
 
 ## Remaining refactor work exposed by the broader audit
 
-These are open work, not a declaration that utility consolidation or the refactor is complete.
+The implementation families below are complete. The final audit disposition and remaining game-validation limits are recorded at the end of this document.
 
 1. **Research coordination: implemented.** CAIResearchTree, CAIResearchData and CAIResearchChooser now share the reusable chooser/tree/grid/graph/data/filter/navigation contracts. Domain adapters retain vanilla callbacks, technology columns, civic government/modifiers, and distinct tooltip/action semantics. See the completion audit below; the user confirmed the combined in-game check on 2026-10-04.
 2. **Trade integrations: implemented.** CAITradeOrigin, CAITradeOverview and CAITradeData own matching navigation/data contracts; shared CAICapturedDropdown handles native capture synchronization. Integration-specific callbacks and actions stay local. See completion audit below; combined game validation is pending.
@@ -122,7 +122,7 @@ The audit script prints exact filenames and function names for the repeated-body
 - Extracted the existing shared Resources section into CAIReportResources and Gossip collection/filter/list ownership into CAIReportGossip. Dependencies are live manager/player/resource readers and existing report widget factories; no generic section configuration language was introduced.
 - Removed nine declaration-only shared-host leftovers: PANEL_ID, TABS_ID, m_panel, m_tabs, m_trees, m_capturedTabs, m_isMirroringTab, m_activeTab and m_pendingOpenFocusKey. Their live counterparts remain in each variant. Six gossip state locals moved to the gossip owner.
 - Retained Yields/City Status and their city-cycling/sort/data relationships in the host. Retained BRS-specific tab logic, its copied vanilla provider and native lifecycle wrappers; these express different data/callback contracts rather than duplicate Resources/Gossip implementations.
-- Formalized the five-return CAIReportsDataSource contract in ideHelpers.lua and corrected the shared provider comment. Delayed manager publication is handled by shared RefreshCAIData as well as variant Open. Automated variant/section tests and old-source comparisons pass; engine validation remains deferred.
+- Formalized the five-return CAIReportsDataSource contract in ideHelpers.lua and corrected the shared provider comment. The later final audit removed the unnecessary delayed-manager protections in shared RefreshCAIData and both variant Open wrappers; WorldInput initializes the manager first. Automated variant/section tests and old-source comparisons pass; engine validation remains deferred.
 
 ## World Rankings ownership review (2026-10-05)
 
@@ -136,3 +136,18 @@ The audit script prints exact filenames and function names for the repeated-body
 - Kept queue rows, native delete/reorder dispatch, pending positional focus and rebuilding in ProductionPanel. Reversed the unnecessary single-screen controller extraction at the user's direction; removed its callback interface, annotations and VFS registrations. Retained the local helper for duplicate current/queued keyboard bindings.
 - Kept purchase/production item construction and actions, Ctrl+Enter queue opening, category synchronization, city selection, tutorial restrictions, scenario includes and placement/tab lifecycle local. Those depend on shared native capture and panel state; file size alone does not justify separating them. ProductionManager/multi-queue remains outside this stage.
 - Full verification passes (119,455 assertions; 347 VFS files). All 45 queue checks also pass against the previous host's extracted blocks. Tests execute the real panel queue and teardown blocks with production widgets; native callbacks/game state are mocked. Purchase/scenario/context integration remains on the deferred game checklist. No intentional player-facing behavior change or changelog entry.
+
+## Final audit disposition (2026-10-05)
+
+The planned implementation stages are complete; deferred game validation remains. The final inventory reports 3,124 top-level private definitions and 29 repeated-body groups, down from 41 at the start of this pass. This heuristic does not parse every nested function or prove the repository duplicate-free.
+
+- Removed two declaration-only private helpers (AdvancedSetup.BuildLeaderInfoSections and textProcessing.IsWordChar). Removed the three pure forwarding helpers in GameSummaries, GameSummaries_GameDetails and Lobby. Repository searches found no exports, callback registrations or debug-local/upvalue lookup for the dead helpers.
+- Shared setup sorting, value identity and Advanced/Scenario invalid-reason fallback in CAISetupParameters, with four real frontend consumers. Staging's no-fallback invalid-reason behavior remains local, using one reader for both parameter/value records.
+- Reused CAIText.SafeKey in audio/settings; centralized replay numeric text and raw replay preference persistence in existing text/settings owners. Shared optional religion-name lookup and silent descendant collapse with their existing game-state/tree owners.
+- Removed Reports manager refresh/assert logic in all three hosts and the artificial delayed-publication test. Resources/Gossip receive the initialized manager directly. Removed the unsupported changelog claim and corrected verification/API documentation.
+- Retained nil-only versus nil-or-empty localization adapters and friend-status adapters: their input contracts differ (Lobby now calls Locale directly, Staging retains nil handling). Retained setup root/parameter/control readers and unique-icon classification bound to screen-owned native tables and leader descriptors.
+- Retained dialog/panel teardown, push, input and view-toggle adapters. They manage private references, current roots, priorities and native callbacks; previous lifecycle audit already covers the common manager behavior. Moving them would add callbacks/state plumbing without removing an independent duplicated algorithm.
+- Retained research live-node/data/cache readers and open hooks, cursor/surveyor state readers, tutorial always-receive-input adapters, reveal event callbacks and static-text factories. They capture different context-owned data, cache lifetimes, event identities or widget factories.
+- Retained BTS tooltip adapters because their yield builders depend on each native context; shared tooltip composition already lives in CAITradeData. Retained unit-movement and climate record keys: identical colon concatenation encodes unrelated domain identities.
+
+Verification: the full repository gate passes 119,519 assertions with 348 VFS files. The new suite contributes 60 ordinary assertions and passes 649 assertions in optional baseline mode, including the removed setup helper bodies and preservation of vanilla source outside all seven changed frontend accessibility blocks. Reports retains 98 assertions and identical 84-line snapshots. Engine callbacks and optional mod loading are mocked; use the consolidated game checklist. The known missing audio packaging asset remains unresolved and is not a refactor regression.

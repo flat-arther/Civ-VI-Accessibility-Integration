@@ -1746,6 +1746,7 @@ function Initialize()
 	Resize();
 end
 --#Accessibility integration
+include("CAISetupParameters")
 include("textProcessing")
 include("CAIControl")
 include("caiUtils")
@@ -1780,22 +1781,12 @@ local kNumberKeys = {
 	Keys["6"], Keys["7"], Keys["8"], Keys["9"], Keys["0"],
 }
 
-local function CAI_SortParams(a, b)
-	if (a.SortIndex or 0) ~= (b.SortIndex or 0) then
-		return (a.SortIndex or 0) < (b.SortIndex or 0)
-	end
-	return Locale.Compare(a.Name or "", b.Name or "") == -1
-end
 
 local function CAI_Lookup(text, ...)
 	if text == nil or text == "" then return "" end
 	return Locale.Lookup(text, ...)
 end
 
-local function CAI_GetInvalidReasonText(value)
-	if not value or not value.Invalid then return "" end
-	return CAI_Lookup(value.InvalidReason or "LOC_SETUP_ERROR_INVALID_OPTION")
-end
 
 local function CAI_GetLiveParameter(paramId, fallback)
 	return g_GameParameters and g_GameParameters.Parameters
@@ -1808,8 +1799,8 @@ local function CAI_GetParameterTooltip(parameter, value)
 	if description == "" and parameter then
 		description = parameter.Description or ""
 	end
-	description = CAIText.AppendLine(description, CAI_GetInvalidReasonText(parameter))
-	return CAIText.AppendLine(description, CAI_GetInvalidReasonText(value))
+	description = CAIText.AppendLine(description, CAISetupParameters.InvalidReason(parameter))
+	return CAIText.AppendLine(description, CAISetupParameters.InvalidReason(value))
 end
 
 local function CAI_GetParameterControl(paramId)
@@ -1931,55 +1922,6 @@ end
 -- ---------------------------------------------------------------------------
 -- Leader info sections for number-key readout
 -- ---------------------------------------------------------------------------
-local function BuildLeaderInfoSections(domain, leaderType)
-	local sections = {}
-	if not domain or not leaderType then return sections end
-	if leaderType == "RANDOM" or leaderType == "RANDOM_POOL1" or leaderType == "RANDOM_POOL2" then
-		return sections
-	end
-	local info = GetPlayerInfo(domain, leaderType)
-	if not info then return sections end
-
-	local names = Locale.Lookup(info.LeaderName or "")
-	if info.CivilizationName then
-		names = names .. ", " .. Locale.Lookup(info.CivilizationName)
-	end
-	table.insert(sections, { text = names })
-
-	if info.CivilizationAbility then
-		local ab = info.CivilizationAbility
-		table.insert(sections, { text = Locale.Lookup(ab.Name) .. ": " .. Locale.Lookup(ab.Description) })
-	end
-	if info.LeaderAbility then
-		local ab = info.LeaderAbility
-		table.insert(sections, { text = Locale.Lookup(ab.Name) .. ": " .. Locale.Lookup(ab.Description) })
-	end
-	if info.Uniques then
-		local grouped = {}
-		local ungrouped = {}
-		for _, u in ipairs(info.Uniques) do
-			local typeIdx = GetUniqueTypeIndex(u.Icon)
-			if typeIdx then
-				if not grouped[typeIdx] then grouped[typeIdx] = {} end
-				table.insert(grouped[typeIdx], u)
-			else
-				table.insert(ungrouped, u)
-			end
-		end
-		for i, entry in ipairs(kUniqueTypeKeys) do
-			if grouped[i] then
-				local headerKey = #grouped[i] > 1 and entry.plural or entry.singular
-				for _, u in ipairs(grouped[i]) do
-					table.insert(sections, { text = Locale.Lookup(headerKey) .. ": " .. Locale.Lookup(u.Name) .. ": " .. Locale.Lookup(u.Description) })
-				end
-			end
-		end
-		for _, u in ipairs(ungrouped) do
-			table.insert(sections, { text = Locale.Lookup(u.Name) .. ": " .. Locale.Lookup(u.Description) })
-		end
-	end
-	return sections
-end
 
 -- ---------------------------------------------------------------------------
 -- Build Dropdown options + selected index from a game parameter
@@ -1992,7 +1934,7 @@ local function BuildParamDropdownOptions(parameterId)
 	local options = {}
 	local selectedIdx = 0
 	for i, v in ipairs(param.Values) do
-		local invalidReason = CAI_GetInvalidReasonText(v)
+		local invalidReason = CAISetupParameters.InvalidReason(v)
 		table.insert(options, {
 			label = CAIText.AppendLine(v.Name or "", invalidReason),
 			tooltip = CAIText.AppendLine(v.Description or Locale.Lookup(v.RawDescription or ""), invalidReason),
@@ -2020,7 +1962,7 @@ local function BuildLeaderDropdownOptions(playerId)
 	local options = {}
 	local selectedIdx = 0
 	for i, v in ipairs(param.Values) do
-		local invalidReason = CAI_GetInvalidReasonText(v)
+		local invalidReason = CAISetupParameters.InvalidReason(v)
 		local tooltip = CAIText.AppendLine(BuildLeaderTooltip(v.Domain, v.Value), invalidReason)
 		local leaderName = v.Name or ""
 		local label = leaderName
@@ -2111,9 +2053,9 @@ local function LeaderTooltipForPlayer(playerId)
 	if not lp or not lp.Value then return "" end
 	local tooltip = CAIText.AppendLine(
 		BuildLeaderTooltip(lp.Value.Domain, lp.Value.Value),
-		CAI_GetInvalidReasonText(lp)
+		CAISetupParameters.InvalidReason(lp)
 	)
-	return CAIText.AppendLine(tooltip, CAI_GetInvalidReasonText(lp.Value))
+	return CAIText.AppendLine(tooltip, CAISetupParameters.InvalidReason(lp.Value))
 end
 
 local function LeaderLabelForPlayer(playerId)
@@ -2708,7 +2650,7 @@ local function PopulateAdvancedList()
 				table.insert(sorted, param)
 			end
 		end
-		table.sort(sorted, CAI_SortParams)
+		table.sort(sorted, CAISetupParameters.Compare)
 		for _, param in ipairs(sorted) do
 			local sectionKey = kGroupToSection[param.GroupId]
 			CreateAdvParamWidget(param, m_advSections[sectionKey])

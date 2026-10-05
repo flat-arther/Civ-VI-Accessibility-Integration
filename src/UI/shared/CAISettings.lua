@@ -77,6 +77,18 @@ function CAISettings.GetDefinition(settingId)
     return GetDefinition(settingId)
 end
 
+-- Raw config flags have no CAI_Settings metadata and emit no setting events.
+function CAISettings.ReadConfigBool(section, key)
+    if CAI == nil or CAI.GetConfigValue == nil then return false end
+    return ToBool(CAI.GetConfigValue(section, key, "false"))
+end
+
+function CAISettings.WriteConfigBool(section, key, value)
+    if CAI ~= nil and CAI.SetConfigValue ~= nil then
+        CAI.SetConfigValue(section, key, value and "true" or "false")
+    end
+end
+
 function CAISettings.GetDefinitions()
     return DB.ConfigurationQuery([[
         SELECT *

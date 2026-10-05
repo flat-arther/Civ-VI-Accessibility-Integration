@@ -1037,9 +1037,7 @@ local m_sortFunctions  = {
     History_SortByLastPlayed,
 }
 
-local function MakeId(prefix)
-    return mgr:GenerateWidgetId(prefix)
-end
+
 
 -- ============================================================================
 -- Overview tab: merged Tree with Victory Progress + Leader Progress categories
@@ -1050,7 +1048,7 @@ local function RebuildOverviewTree()
     m_overviewTree:ClearChildren()
 
     -- Category 1: Victory Progress
-    local victoryNode = mgr:CreateWidget(MakeId("CAIHoF_vp_"), "TreeItem", {
+    local victoryNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoF_vp_"), "TreeItem", {
         Label = function() return Locale.Lookup("LOC_GAMESUMMARY_VICTORYPROGRESS") end,
         FocusKey = "hof:overview:victories",
     })
@@ -1074,7 +1072,7 @@ local function RebuildOverviewTree()
             end
             local capturedLabel = labelStr
             local capturedTip = tipStr
-            local leaf = mgr:CreateWidget(MakeId("CAIHoF_vp_"), "StaticText", {
+            local leaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoF_vp_"), "StaticText", {
                 Label = function() return capturedLabel end,
                 Tooltip = capturedTip and function() return capturedTip end or nil,
                 FocusKey = "hof:overview:victory:" .. i,
@@ -1101,7 +1099,7 @@ local function RebuildOverviewTree()
                 end
                 local capLabel = badgeLabel
                 local capTip = badgeTip
-                local badgeLeaf = mgr:CreateWidget(MakeId("CAIHoF_vp_"), "StaticText", {
+                local badgeLeaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoF_vp_"), "StaticText", {
                     Label = function() return capLabel end,
                     Tooltip = capTip and function() return capTip end or nil,
                     FocusKey = "hof:overview:badge:" .. challengeId,
@@ -1113,7 +1111,7 @@ local function RebuildOverviewTree()
     end
 
     -- Category 2: Leader Progress
-    local leaderNode = mgr:CreateWidget(MakeId("CAIHoF_lp_"), "TreeItem", {
+    local leaderNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoF_lp_"), "TreeItem", {
         Label = function() return Locale.Lookup("LOC_GAMESUMMARY_LEADERPROGRESS") end,
         FocusKey = "hof:overview:leaders",
     })
@@ -1162,7 +1160,7 @@ local function RebuildOverviewTree()
                 table.insert(parts, Locale.Lookup("LOC_GAMESUMMARY_LEADERPROGRESS_PLAYCOUNT", v.PlayCount))
             end
             local capturedLabel = table.concat(parts, "[NEWLINE]")
-            local leaf = mgr:CreateWidget(MakeId("CAIHoF_lp_"), "StaticText", {
+            local leaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoF_lp_"), "StaticText", {
                 Label = function() return capturedLabel end,
                 FocusKey = "hof:overview:leader:" .. idx,
             })
@@ -1218,7 +1216,7 @@ local function RebuildOverviewTree()
         for _, cat in ipairs(g_Categories or {}) do
             local stats = statistics_by_category[cat.Category]
             if not cat.IsHidden and stats and #stats > 0 then
-                local catNode = mgr:CreateWidget(MakeId("CAIHoF_stat_"), "TreeItem", {
+                local catNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoF_stat_"), "TreeItem", {
                     Label = function() return cat.Name end,
                     FocusKey = "hof:overview:statcat:" .. cat.Category,
                 })
@@ -1231,7 +1229,7 @@ local function RebuildOverviewTree()
                         statLabel = statLabel .. " (" .. stat.Annotation .. ")"
                     end
                     local capLabel = statLabel
-                    local statLeaf = mgr:CreateWidget(MakeId("CAIHoF_stat_"), "StaticText", {
+                    local statLeaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoF_stat_"), "StaticText", {
                         Label = function() return capLabel end,
                         FocusKey = "hof:overview:stat:" .. cat.Category .. ":" .. si,
                     })
@@ -1311,7 +1309,7 @@ local function RebuildHistoryList()
         local capturedTip = #tipParts > 0 and table.concat(tipParts, "[NEWLINE]") or nil
         local capturedGameId = game.GameId
 
-        local row = mgr:CreateWidget(MakeId("CAIHoF_game_"), "Button", {
+        local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoF_game_"), "Button", {
             Label = function() return capturedLabel end,
             Tooltip = capturedTip and function() return capturedTip end or nil,
             FocusKey = "hof:history:game:" .. i,
@@ -1325,7 +1323,7 @@ local function RebuildHistoryList()
     end
 
     if #(g_Games or {}) == 0 then
-        local empty = mgr:CreateWidget(MakeId("CAIHoF_game_"), "StaticText", {
+        local empty = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoF_game_"), "StaticText", {
             Label = function() return Locale.Lookup("LOC_CAI_HOF_NO_GAMES") end,
             FocusKey = "hof:history:empty",
         })
@@ -1347,7 +1345,7 @@ local function BuildHoFPanel()
     })
 
     -- Ruleset dropdown
-    m_rulesetDropdown = mgr:CreateWidget(MakeId("CAIHoF_rs_"), "Dropdown", {
+    m_rulesetDropdown = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoF_rs_"), "Dropdown", {
         Label = function() return Locale.Lookup("LOC_CAI_HOF_RULESET") end,
         FocusKey = "hof:ruleset",
     })
@@ -1358,21 +1356,21 @@ local function BuildHoFPanel()
     m_hofPanel:AddChild(m_rulesetDropdown)
 
     -- Tabs
-    m_hofTabs = mgr:CreateWidget(MakeId("CAIHoF_tabs_"), "TabControl", {})
+    m_hofTabs = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoF_tabs_"), "TabControl", {})
     m_hofPanel:AddChild(m_hofTabs)
 
     -- Tab 1: Overview
     local overviewPage = m_hofTabs:AddPage(function() return Locale.Lookup("LOC_GAMESUMMARY_OVERVIEW") end)
-    m_overviewTree = mgr:CreateWidget(MakeId("CAIHoF_ov_"), "Tree", {})
+    m_overviewTree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoF_ov_"), "Tree", {})
     overviewPage:AddChild(m_overviewTree)
 
     -- Tab 2: History
     local historyPage = m_hofTabs:AddPage(function() return Locale.Lookup("LOC_GAMESUMMARY_HISTORY") end)
 
-    m_historyList = mgr:CreateWidget(MakeId("CAIHoF_hist_"), "List", {})
+    m_historyList = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoF_hist_"), "List", {})
     historyPage:AddChild(m_historyList)
 
-    m_sortDropdown = mgr:CreateWidget(MakeId("CAIHoF_sort_"), "Dropdown", {
+    m_sortDropdown = mgr:CreateWidget(mgr:GenerateWidgetId("CAIHoF_sort_"), "Dropdown", {
         Label = function() return Locale.Lookup("LOC_CAI_HOF_SORT_BY") end,
         FocusKey = "hof:sort",
     })

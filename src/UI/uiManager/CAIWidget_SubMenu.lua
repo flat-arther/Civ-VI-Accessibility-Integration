@@ -10,17 +10,6 @@ SubMenuWidget.__index = SubMenuWidget
 
 local Nav = CAIWidgetHelpers_Navigation
 
--- Recursively collapse every descendant in place — no events. Mirrors the
--- TreeItem rule so collapsing tears down the whole subtree beneath it.
-local function CollapseDescendants(node)
-    for _, child in ipairs(node.Children or {}) do
-        if child.IsExpanded then
-            child.IsExpanded = false
-            child._lastFocusedChild = nil
-        end
-        CollapseDescendants(child)
-    end
-end
 
 -- Enter (expand + focus first child) only from the collapsed node. Once
 -- expanded the user is *inside* the submenu, so a bubbled Right/Enter from a
@@ -102,7 +91,7 @@ function SubMenuWidget:Collapse(silent)
     if not self.IsExpanded then return false end
     self.IsExpanded = false
     self._lastFocusedChild = nil
-    CollapseDescendants(self)
+    CAIWidgetHelpers_Tree.CollapseDescendants(self)
     if not silent then self:Emit("collapsed") end
     return true
 end

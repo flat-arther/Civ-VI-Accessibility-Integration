@@ -819,6 +819,7 @@ function Initialize()
 	Resize();
 end
 --#Accessibility integration
+include("CAISetupParameters")
 include("textProcessing")
 include("CAIControl")
 include("caiUtils")
@@ -866,12 +867,6 @@ local function CAI_Lookup(text, ...)
 	return Locale.Lookup(text, ...)
 end
 
-local function CAI_SortParameters(a, b)
-	if (a.SortIndex or 0) ~= (b.SortIndex or 0) then
-		return (a.SortIndex or 0) < (b.SortIndex or 0)
-	end
-	return Locale.Compare(a.Name or "", b.Name or "") == -1
-end
 
 local function CAI_GetParameter(parameterId)
 	return g_GameParameters and g_GameParameters.Parameters
@@ -939,10 +934,6 @@ local function CAI_IsParameterDisabled(parameterId, preferLast)
 	return false
 end
 
-local function CAI_GetInvalidReason(value)
-	if not value or not value.Invalid then return "" end
-	return CAI_Lookup(value.InvalidReason or "LOC_SETUP_ERROR_INVALID_OPTION")
-end
 
 local function CAI_GetLocalizedError(errorValue)
 	if type(errorValue) == "table" then
@@ -954,14 +945,6 @@ local function CAI_GetLocalizedError(errorValue)
 	return ""
 end
 
-local function CAI_ValueMatches(a, b)
-	if a == b then return true end
-	if type(a) ~= "table" or type(b) ~= "table" then return false end
-	if a.QueryId ~= nil or b.QueryId ~= nil then
-		return a.QueryId == b.QueryId and a.QueryIndex == b.QueryIndex
-	end
-	return a.Value == b.Value
-end
 
 local function CAI_GetScenarioDescription(value)
 	if not value then return "" end
@@ -1046,7 +1029,7 @@ local function CAI_GetPlayerLeaderTooltip(playerId)
 	if not parameter or not parameter.Value then return "" end
 	return CAIText.AppendDistinctLine(
 		CAI_BuildLeaderTooltip(parameter.Value.Domain, parameter.Value.Value),
-		CAI_GetInvalidReason(parameter.Value)
+		CAISetupParameters.InvalidReason(parameter.Value)
 	)
 end
 
@@ -1057,7 +1040,7 @@ local function CAI_BuildLeaderOptions(playerId)
 	local options = {}
 	local selectedIndex = 0
 	for i, value in ipairs(parameter.Values) do
-		local invalidReason = CAI_GetInvalidReason(value)
+		local invalidReason = CAISetupParameters.InvalidReason(value)
 		local leaderName = value.Name or ""
 		local label = leaderName
 		local civName = ""
@@ -1121,7 +1104,7 @@ local function CAI_BuildParameterOptions(parameterId, includeScenarioDescription
 	local options = {}
 	local selectedIndex = 0
 	for i, value in ipairs(parameter.Values) do
-		local invalidReason = CAI_GetInvalidReason(value)
+		local invalidReason = CAISetupParameters.InvalidReason(value)
 		local tooltip = suppressTooltip and "" or (value.Description or CAI_Lookup(value.RawDescription))
 		if includeScenarioDescription then
 			tooltip = CAIText.AppendDistinctLine(tooltip, CAI_GetScenarioDescription(value))
@@ -1131,7 +1114,7 @@ local function CAI_BuildParameterOptions(parameterId, includeScenarioDescription
 			tooltip = suppressTooltip and "" or CAIText.AppendDistinctLine(tooltip, invalidReason),
 			value = value,
 		})
-		if selectedIndex == 0 and CAI_ValueMatches(value, parameter.Value) then
+		if selectedIndex == 0 and CAISetupParameters.ValueMatches(value, parameter.Value) then
 			selectedIndex = i
 		end
 	end
@@ -1246,7 +1229,7 @@ local function CAI_MakeParameterWidget(parameter, options)
 				if includeScenarioDescription then
 					tooltip = CAIText.AppendDistinctLine(tooltip, CAI_GetScenarioDescription(live.Value))
 				end
-				return CAIText.AppendDistinctLine(tooltip, CAI_GetInvalidReason(live.Value))
+				return CAIText.AppendDistinctLine(tooltip, CAISetupParameters.InvalidReason(live.Value))
 			end,
 			HiddenPredicate = IsHidden,
 			DisabledPredicate = IsDisabled,
@@ -1346,7 +1329,7 @@ local function CAI_RebuildBasicPage()
 			end
 		end
 	end
-	table.sort(extraParameters, CAI_SortParameters)
+	table.sort(extraParameters, CAISetupParameters.Compare)
 	for _, parameter in ipairs(extraParameters) do
 		local widget = CAI_MakeParameterWidget(parameter, {
 			focusKey = "basic:param:" .. tostring(parameter.ParameterId),
@@ -1415,7 +1398,7 @@ local function CAI_RebuildAdvancedParameters()
 			if kGroupToSection[parameter.GroupId] then table.insert(parameters, parameter) end
 		end
 	end
-	table.sort(parameters, CAI_SortParameters)
+	table.sort(parameters, CAISetupParameters.Compare)
 	for _, parameter in ipairs(parameters) do
 		local section = CAI_Sections[kGroupToSection[parameter.GroupId]]
 		local widget = CAI_MakeParameterWidget(parameter, {

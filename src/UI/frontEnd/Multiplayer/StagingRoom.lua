@@ -3362,6 +3362,7 @@ function Initialize()
 end
 
 --#Accessibility integration
+include("CAISetupParameters")
 include("textProcessing")
 include("CAIControl")
 include("caiUtils")
@@ -3479,13 +3480,6 @@ local function CAI_GetParameterInvalidReason(parameter)
 	return ""
 end
 
-local function CAI_GetValueInvalidReason(value)
-	if value == nil then return "" end
-	if value.Invalid and value.InvalidReason then
-		return CAI_Lookup(value.InvalidReason)
-	end
-	return ""
-end
 
 local function CAI_GetParameterDescription(parameter)
 	if parameter == nil then return "" end
@@ -3978,14 +3972,6 @@ CAI_SetPlayerParameter = function(playerID, paramId, value)
 	end
 end
 
-local function CAI_ValueMatches(a, b)
-	if a == b then return true end
-	if type(a) ~= "table" or type(b) ~= "table" then return false end
-	if a.QueryId ~= nil or b.QueryId ~= nil then
-		return a.QueryId == b.QueryId and a.QueryIndex == b.QueryIndex
-	end
-	return a.Value == b.Value
-end
 
 local function CAI_MakeDropdown(id, labelTag, tooltipFn, hiddenFn, disabledFn, optionsFn, setterFn)
 	local widget = mgr:CreateWidget(id, "Dropdown", {
@@ -4020,13 +4006,13 @@ local function CAI_BuildParameterOptions(parameter)
 	local selectedIndex = 0
 	if parameter and parameter.Values then
 		for i, value in ipairs(parameter.Values) do
-			local invalidReason = CAI_GetValueInvalidReason(value)
+			local invalidReason = CAI_GetParameterInvalidReason(value)
 			table.insert(options, {
 				label = CAI_FormatInvalidLabel(value.Name or "", invalidReason),
 				tooltip = value.Description or CAI_Lookup(value.RawDescription) or "",
 				value = value,
 			})
-			if selectedIndex == 0 and CAI_ValueMatches(value, parameter.Value) then
+			if selectedIndex == 0 and CAISetupParameters.ValueMatches(value, parameter.Value) then
 				selectedIndex = i
 			end
 		end
@@ -4049,7 +4035,7 @@ local function CAI_BuildLeaderOptions(playerID)
 				civName = Locale.Lookup(info.CivilizationName)
 				label = label .. ", " .. civName
 			end
-			local invalidReason = CAI_GetValueInvalidReason(value)
+			local invalidReason = CAI_GetParameterInvalidReason(value)
 			table.insert(options, {
 				label = CAI_FormatInvalidLabel(label, invalidReason),
 				tooltip = CAI_GetLeaderTooltip(value.Domain, value.Value),

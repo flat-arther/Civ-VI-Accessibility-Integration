@@ -102,3 +102,14 @@ Run with ordinary ProductionPanel and with BBG/Babylon content where available.
 - [ ] Close/reopen, switch cities and switch between Production, Gold, Faith and Queue. Confirm fresh queue contents and no focus jump left over from an earlier operation.
 - [ ] Smoke-check ordinary production, corps/army choices, gold/faith purchases and Ctrl+Enter queueing. Place/cancel a district or wonder and confirm the normal panel/focus return behavior.
 - [ ] In the tutorial, confirm only the allowed production choices are exposed and successful production still closes the panel normally.
+
+## Final utility audit
+
+- [ ] In Advanced Setup, Scenario Setup, Host Game and multiplayer staging, check parameter order, selected dropdown values and invalid-option reasons. Change a setting that rebuilds available options and confirm selection and focus stay usable.
+- [ ] Check leader descriptions in Advanced/Scenario Setup, game summaries and Lobby friend-status text.
+- [ ] In game-summary and end-game replay graphs, check numeric values, toggle grouping and reopen; confirm the grouping preference is retained.
+- [ ] Open Settings, change an audio-tag setting, close/reopen and confirm its saved value is retained.
+- [ ] Expand several nested tree/submenu levels, collapse the parent and reopen it; confirm descendants start collapsed and navigation remains usable.
+- [ ] Check religion lens plot information and scanner religion labels, including unnamed/unavailable religion data where possible.
+
+Implementation stages finished on 2026-10-05. This is the complete deferred checklist for handoff; unchecked items remain unverified. The known missing audio manifest asset is a separate packaging decision.

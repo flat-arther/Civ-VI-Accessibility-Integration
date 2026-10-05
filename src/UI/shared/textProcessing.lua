@@ -40,6 +40,13 @@ function CAIText.SafeKey(value)
     return (tostring(value or ""):gsub("[^%w_]", "_"))
 end
 
+function CAIText.FormatNumberOrText(value)
+    if type(value) == "number" then
+        return Locale.ToNumber(value, "#,###.##")
+    end
+    return tostring(value)
+end
+
 function CAIText.FormatBalance(value)
     return Locale.ToNumber(value, "#,###.#")
 end
@@ -552,13 +559,6 @@ local function ResolveEntry(tokenName)
     return "", lookupKey, false
 end
 
-local function IsWordChar(byte)
-    if not byte then return false end
-    return (byte >= 65 and byte <= 90)
-        or (byte >= 97 and byte <= 122)
-        or (byte >= 48 and byte <= 57)
-        or byte == 95
-end
 
 local function SkipFormatting(text, pos)
     while true do
