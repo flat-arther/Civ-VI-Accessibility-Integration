@@ -82,3 +82,12 @@ Run with vanilla Reports and Better Reports where available.
 - [ ] Refresh Resources while focused on an expanded detail; confirm usable focus and updated amounts.
 - [ ] Filter Gossip by player and type, refresh it, then close/reopen. Check the retained filters, newest-first entries and dropdown focus.
 - [ ] Smoke-check Yields, City Status and city cycling; with Better Reports also visit its Deals, Units, Policies and City-States tabs.
+
+## World Rankings presenters
+
+- [ ] Check Score in tree and table views, including team totals, player/category contributions and sorting. Switch views while focused on a competitor and confirm the same team remains selected.
+- [ ] Refresh, close and reopen Rankings; confirm focus remains usable and native player/team ordering is respected. Check unmet-player names and multiplayer team membership.
+- [ ] In Gathering Storm, check diplomatic points and requirement details, including changed progress after a refresh.
+- [ ] With BBG, check Traditional Domination percentage, captured details/tooltips and the configured victory threshold.
+- [ ] Where available, check a custom victory or scenario Score view. Confirm native objectives and player/team entries remain present.
+- [ ] Smoke-check Overall, Science, Culture, Domination and Religion tabs and tutorial-controlled closing.

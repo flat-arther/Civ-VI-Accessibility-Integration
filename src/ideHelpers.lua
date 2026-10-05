@@ -1918,3 +1918,44 @@ function CAIWidgetHelpers_Search.MakeSearchCandidate(widget, label, bfsIndex, to
 
 ---@class CAIReportResourcesController
 ---@field Rebuild fun(tree:UIWidget) Uses the current report data and player resource flow.
+
+---@class CAIRankingsPresentation
+---@field Values string[]
+---@field Details string[]
+---@field Tooltips string[]
+
+---@class CAIRankingsCapturedRecord
+---@field Kind 'player'|'team'
+---@field PlayerData? table
+---@field TeamData? table
+---@field Children? CAIRankingsCapturedRecord[] Team records contain nested native population results.
+---@field Presentation? CAIRankingsPresentation
+
+---@class CAIRankingsPresenterContext
+---@field MakeTreeItem fun(props:table):TreeItemWidget
+---@field MakeStaticText fun(props:table):StaticTextWidget
+---@field AddLeaf fun(parent:UIWidget,key:string,label:fun():string):UIWidget
+---@field AddAdvisorLeaf fun(parent:UIWidget,text:string)
+---@field GetRankingsPlayerLabel fun(playerID:integer):string
+---@field GetRankingsTeamLabel fun(teamID:integer):string
+
+---@class CAIRankingsScoreContext : CAIRankingsPresenterContext
+---@field GetCapturedRows fun():CAIRankingsCapturedRecord[]|nil Reads the latest completed native score capture.
+---@field GatherScoreData fun():table[] Native context fallback; preserves scenario-specific data.
+---@field FormatContribution fun(playerID:integer,value:any):string
+---@field MakeCompetitorColumn fun():table
+---@field ConfigureRankingTable fun(view:DataTableWidget,columns:table[],rows:table[],defaultSort:table)
+
+---@class CAIRankingsScorePresenter
+---@field RebuildTree fun(tree:UIWidget)
+---@field RebuildTable fun(view:DataTableWidget)
+
+---@class CAIRankingsGenericContext : CAIRankingsPresenterContext
+---@field IsExpansion2 boolean
+---@field IsBBG boolean
+---@field TraditionalDominationVictory string
+---@field GetGenericVictoryRows fun(victoryType:string):CAIRankingsCapturedRecord[]|nil Host owns optional external adapter protection.
+---@field GatherGenericData fun():table[] Native context fallback.
+
+---@class CAIRankingsGenericPresenter
+---@field RebuildTree fun(tree:UIWidget,victoryType:string)

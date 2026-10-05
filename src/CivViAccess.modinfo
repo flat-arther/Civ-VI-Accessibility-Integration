@@ -248,6 +248,8 @@
     <File>UI/inGame/TradeOverview_CAI.lua</File>
     <File>UI/inGame/TradeOverview_BetterTradeScreen_CAI.lua</File>
     <File>UI/inGame/WorldRankings_CAI.lua</File>
+    <File>UI/inGame/CAIRankingsScore.lua</File>
+    <File>UI/inGame/CAIRankingsGeneric.lua</File>
     <File>UI/Replacements/BetterBalancedGame/WorldRankings_BetterBalancedGame_CAIBase.lua</File>
     <File>UI/Replacements/BetterBalancedGame/ProductionPanel_BetterBalancedGame_CAIBase.lua</File>
     <File>UI/Replacements/BetterBalancedGame/TradeOverview_BetterBalancedGame_CAIBase.lua</File>
@@ -763,6 +765,8 @@
            <ImportFiles>, so a runtime include() cannot reach it. We vendor a
            verbatim copy and import it here; WorldRankings_CAI.lua includes it
            when BBG is active. -->
+      <File>UI/inGame/CAIRankingsScore.lua</File>
+      <File>UI/inGame/CAIRankingsGeneric.lua</File>
       <File>UI/Replacements/BetterBalancedGame/WorldRankings_BetterBalancedGame_CAIBase.lua</File>
       <!-- Same vendoring rationale for BBG's ProductionPanel (GetData override)
            and TradeOverview (ViewAvailableRoutes override); ProductionPanel_CAI.lua
