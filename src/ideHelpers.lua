@@ -1790,6 +1790,18 @@ function CAIWidgetHelpers_Search.MakeSearchCandidate(widget, label, bfsIndex, to
 ---@field Statuses table<string,integer>
 ---@field Text table<string,string> Unrevealed, Cost, Turns, Progress, Researched, Current, Blocked, HiddenStatus localization keys.
 
+---@class CAIWorldBuilderInputAdapter
+---@field GetPlotId fun():integer|nil
+---@field GetCursor fun():table Live cursor object, including coordinate reads and MoveTo.
+---@field GetScanner fun():table|nil Live scanner, absent before initialization if applicable.
+
+---@class CAIWorldBuilderInputController
+---@field Build fun():InterfaceModeWidget|false
+---@field GetMarkedPlot fun():integer|nil
+---@field OnPlacementStatus fun(status:string)
+---@field OnCursorMoved fun(state:table) Called after WorldInput validates the destination.
+---@field Update fun() Consumes pending sight refresh before other WorldInput updates.
+
 ---@class CAIPlotInteractionsAdapter
 ---@field GetPlotId fun():integer|nil Live CAI cursor with the existing native fallback.
 ---@field HasInterfaceWidget fun():boolean

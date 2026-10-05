@@ -37,6 +37,17 @@ Run the common checks with vanilla trade screens and with Better Trade Screen wh
 - [ ] Where available, inspect a revealed barbarian clan, city/district strike actions and missile-silo targeting choices. Check that targeting opens with the intended source and cancel it normally.
 - [ ] During an active targeting mode or tutorial restriction, confirm plot actions do not take over the mode or offer prohibited selections.
 
+## World Builder input
+
+- [ ] Place and remove using Enter/Delete with single-tile and larger brushes. Check river/cliff direction where applicable and that undo reverses the intended edit.
+- [ ] Mark a source with M, move the cursor, and confirm manual placement and F3 still use the mark. Unmark and confirm they follow the cursor again.
+- [ ] Toggle brush lock with L and move/jump the cursor. Confirm automatic painting follows the destination even with another tile marked; stationary events and suspended accessibility should not paint.
+- [ ] Check Ctrl+Z/Ctrl+Y with available and unavailable history. After owner changes or successful undo/redo, check visibility and Valid Targets refresh correctly.
+- [ ] With Set Visibility armed, add/remove visibility for the selected player and confirm the readout follows successful edits.
+- [ ] Use Ctrl+G with absolute, relative and mixed coordinates, including an omitted first coordinate. Check invalid/out-of-bounds feedback, correction, Escape cancellation and a single jump on Enter.
+- [ ] Check number-row/Shift tool selection, arrow quick navigation, Tab tools, F1/F2/F3 editors and Escape pause. Confirm map editing shortcuts stay inactive while another panel owns focus.
+- [ ] Reload a World Builder map and confirm an old marked tile is not retained by the scanner or tooltip.
+
 ## Other outstanding game checks
 
 These existing checks are retained alongside the refactor checklist so they are not lost. Cloud-save recovery itself is already user-confirmed.

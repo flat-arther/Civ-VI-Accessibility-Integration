@@ -141,4 +141,4 @@ Review verification: source inspection and repository searches only; no game ses
 ## Feature extraction progress (2026-10-05)
 
 - WorldInput selection-mode plot interactions now live in CAIPlotInteractions with explicit live context readers. Native input dispatch, target resolution and scenario selection remain in WorldInput. Automated baseline comparisons pass; game checks are deferred per the current user workflow.
-- Next feature boundary: World Builder commands/editor UI and their marked-tile state. Preserve next-tick ownership/visibility refresh and existing placement source contracts. Mode descriptors remain a later extraction.
+- World Builder commands/editor UI and marked-tile state now live in CAIWorldBuilderInput. Context event registration, camera work and update order remain in WorldInput; next-tick sight and placement-source contracts are preserved and tested. Next boundary: interface-mode descriptors/construction with explicit native callback dependencies.
