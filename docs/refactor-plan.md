@@ -137,3 +137,8 @@ Exit: every extraction preserves its screen's live controls, vanilla actions, fo
 Start with Phase 1, then the unit-browser pilot. Keep the existing widget architecture and scanner decomposition. The expected payoff is narrower change scope, clearer dependencies, and reliable regression checks; runtime speed improvements require measurement and are a separate decision.
 
 Review verification: source inspection and repository searches only; no game session or Lua suite was executed during this review. Historical in-game acceptance is the user's confirmation. The resulting documentation changes are checked with `git diff --check`.
+
+## Feature extraction progress (2026-10-05)
+
+- WorldInput selection-mode plot interactions now live in CAIPlotInteractions with explicit live context readers. Native input dispatch, target resolution and scenario selection remain in WorldInput. Automated baseline comparisons pass; game checks are deferred per the current user workflow.
+- Next feature boundary: World Builder commands/editor UI and their marked-tile state. Preserve next-tick ownership/visibility refresh and existing placement source contracts. Mode descriptors remain a later extraction.

@@ -29,6 +29,14 @@ Run the common checks with vanilla trade screens and with Better Trade Screen wh
 - [ ] After a live data change, reopen or refresh an affected list and check updated column labels, usable focus and retained sort selection.
 - [ ] In City-States, diplomacy, Governors, Great People/Heroes, Global Resources and the unit browser, change sort direction and switch views or refresh. Confirm the sort dropdown follows the current sort without extra speech or stealing focus. Return to natural order where available.
 
+## WorldInput plot interactions
+
+- [ ] In selection mode, use Enter on a tile with one owned unit, an owned city and multiple available actions. Confirm direct selection for one action and the correct choices for multiple actions.
+- [ ] Close a plot-action list with Escape, reopen it, and select an action. Check return focus and that the action runs once. Suspend/resume accessibility while the list is open and confirm it closes cleanly.
+- [ ] On met foreign cities, check diplomacy/city-state actions. Where espionage visibility permits city inspection, check the view-city choice and Ctrl+Enter shortcut.
+- [ ] Where available, inspect a revealed barbarian clan, city/district strike actions and missile-silo targeting choices. Check that targeting opens with the intended source and cancel it normally.
+- [ ] During an active targeting mode or tutorial restriction, confirm plot actions do not take over the mode or offer prohibited selections.
+
 ## Other outstanding game checks
 
 These existing checks are retained alongside the refactor checklist so they are not lost. Cloud-save recovery itself is already user-confirmed.

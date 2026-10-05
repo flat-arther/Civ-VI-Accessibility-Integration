@@ -1790,6 +1790,17 @@ function CAIWidgetHelpers_Search.MakeSearchCandidate(widget, label, bfsIndex, to
 ---@field Statuses table<string,integer>
 ---@field Text table<string,string> Unrevealed, Cost, Turns, Progress, Researched, Current, Blocked, HiddenStatus localization keys.
 
+---@class CAIPlotInteractionsAdapter
+---@field GetPlotId fun():integer|nil Live CAI cursor with the existing native fallback.
+---@field HasInterfaceWidget fun():boolean
+---@field IsPlotSelectionAllowed fun(plotId:integer):boolean
+---@field FormatUnitName fun(unit:table):string|nil
+---@field SetAlwaysReceiveInput fun(enabled:boolean) WorldInput context tutorial registration.
+
+---@class CAIPlotInteractionsController
+---@field Primary fun():boolean
+---@field Secondary fun():boolean
+
 ---@class CAITradeOriginAdapter
 ---@field GetControls fun():table Live context controls.
 ---@field Activate fun(city:table, button:table|nil) Vanilla clicks the control; BTS relocates directly.

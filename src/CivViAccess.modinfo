@@ -21,6 +21,7 @@
     <File>UI/inGame/CAIResearchTree.lua</File>
     <File>UI/inGame/CAIResearchData.lua</File>
     <File>UI/inGame/CAITradeData.lua</File>
+    <File>UI/inGame/CAIPlotInteractions.lua</File>
     <File>UI/inGame/CAITradeOrigin.lua</File>
     <File>UI/inGame/CAITradeOverview.lua</File>
     <File>UI/inGame/CAIUnitBrowser.lua</File>
@@ -604,6 +605,7 @@
       <File>UI/inGame/CAIResearchTree.lua</File>
       <File>UI/inGame/CAIResearchData.lua</File>
       <File>UI/inGame/CAITradeData.lua</File>
+      <File>UI/inGame/CAIPlotInteractions.lua</File>
       <File>UI/inGame/CAITradeOrigin.lua</File>
       <File>UI/inGame/CAITradeOverview.lua</File>
       <File>UI/inGame/CAIUnitBrowser.lua</File>
