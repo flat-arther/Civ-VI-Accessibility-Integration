@@ -249,7 +249,7 @@ function SpeakLines(lines, interrupt, processTokens) end
 ---@param text any
 ---@param maxLength? integer Defaults to the configured token split length.
 ---@return string[]
-function SplitTextIntoLines(text, maxLength) end
+function CAIText.SplitTextIntoLines(text, maxLength) end
 
 ---Names of events emitted by widgets via UIWidget:Emit(name, ...).
 ---@alias CAIWidgetEvent
@@ -1321,6 +1321,14 @@ function GraphWidget:GetTypeToFindCandidates(includeTooltips) end
 ---@field sortKey? fun(row:any):any Presence makes the header sortable.
 ---@field sortAscendingDescription? string Localization tag describing ascending order.
 ---@field sortDescendingDescription? string Localization tag describing descending order.
+---@field sortLabel? string|fun():string Optional spoken sort label; caller opts into its use.
+
+---@class CAIColumnSortPolicy
+---@field separator string Existing speech separator between heading and direction.
+---@field natural? {column?:string, ascending:boolean} Optional first natural-order choice.
+---@field descendingFirst? boolean Default is ascending first.
+---@field preferSortLabel? boolean Use sortLabel before header when supplied.
+---@field includeColumn? fun(column:DataTableColumn):boolean Overrides the default truthy sortKey filter.
 
 ---@class DataTableSort
 ---@field column string Stable DataTableColumn key.
@@ -1723,3 +1731,96 @@ function CAIWidgetHelpers_Search.MatchSearchText(label, query) end
 ---@param tooltip? string
 ---@return SearchCandidate
 function CAIWidgetHelpers_Search.MakeSearchCandidate(widget, label, bfsIndex, tooltip) end
+
+-- Research screen adapters keep vanilla context captures and domain operations local.
+---@class CAIResearchTreeAdapter
+---@field IdPrefix string
+---@field GridIdPrefix string
+---@field NodeSuffix string
+---@field DebugName string
+---@field SettingID string
+---@field ViewFocusKey string
+---@field FocusPrefix string
+---@field SearchContext string
+---@field PrereqStart string
+---@field Text table<string,string> QueueAction, BackAction, Jump, Current, FilterResults, QueueList, Filter, MainList, Unlocks, Prerequisites, LeadsTo, Path localization keys.
+---@field FilterDefinitions string[][] Ordered vanilla filter name/localization key pairs.
+---@field GetEntries fun():table<string,table>
+---@field GetEras fun():table
+---@field GetFilters fun():table|nil
+---@field GetTitle fun():string
+---@field GetColumn fun(itemType:string, entry:table):number
+---@field GetTypeForIndex fun(index:integer):string|nil
+---@field GetName fun(itemType:string):string
+---@field GetRelatedLabel fun(itemType:string, eraType:string|nil):string
+---@field GetUiNode fun(itemType:string):table|nil
+---@field FormatLabel fun(itemType:string):string
+---@field FormatTooltip fun(itemType:string):string
+---@field CanResearch fun(itemType:string):boolean
+---@field IsRevealed fun(itemType:string):boolean
+---@field SetCurrent fun(itemType:string)
+---@field AppendToQueue fun(itemType:string)
+---@field GetUnlocks fun(itemType:string):table[]
+---@field GetLeadsTo fun(itemType:string):string[]|nil
+---@field GetPath fun(hash:integer):integer[]|nil
+---@field ReadQueue fun():integer|nil, integer[]|nil
+---@field ApplyFilter fun(entry:table)
+---@field Prepare fun()
+---@field ResetData fun()
+---@field AddExtraPanels? fun(panel:UIWidget) Optional domain-owned siblings, before the view selector.
+---@field RefreshExtra? fun() Refresh optional domain siblings on initial construction.
+
+---@class CAIResearchTreeController
+---@field Open fun()
+---@field Close fun()
+---@field IsOpen fun():boolean|nil
+---@field HasPanel fun():boolean
+---@field RebuildViews fun()
+---@field RebuildQueue fun()
+---@field RefocusRow fun()
+
+---@class CAIResearchDataAdapter
+---@field GetLiveData fun(itemType:string):table|nil
+---@field GetUiNode fun(itemType:string):table|nil
+---@field GetRow fun(itemType:string):table|nil
+---@field GetStatic fun(itemType:string):table|nil
+---@field GetEra fun(eraType:string):table|nil
+---@field GetTier fun(itemType:string):integer|nil
+---@field GetQueue fun():integer[]|nil
+---@field Statuses table<string,integer>
+---@field Text table<string,string> Unrevealed, Cost, Turns, Progress, Researched, Current, Blocked, HiddenStatus localization keys.
+
+---@class CAITradeOriginAdapter
+---@field GetControls fun():table Live context controls.
+---@field Activate fun(city:table, button:table|nil) Vanilla clicks the control; BTS relocates directly.
+---@field OnClose fun()
+
+---@class CAITradeOriginController
+---@field AddCity fun(city:table)
+---@field BeginRefresh fun():FocusCapture|nil Capture focus before resetting captured rows.
+---@field EndRefresh fun(capture:FocusCapture|nil)
+---@field Open fun()
+---@field Close fun()
+---@field HandleInput fun(input:table):boolean
+
+---@class CAITradeOverviewAdapter
+---@field GetEntries fun():table[] Native capture order; schemas stay with each integration.
+---@field HeaderProps fun(entry:table):table|nil Nil for non-header entries.
+---@field CreateRouteRow fun(entry:table):TreeItemWidget
+---@field SelectUnit fun(unit:table)
+---@field IsHidden fun():boolean
+---@field CloseScreen fun()
+---@field GetTitle fun():string
+---@field TabLabels (string|fun():string)[] My Routes, Routes To Cities, Available Routes.
+---@field ClickTab fun(index:integer) One-based accessible page mapped to native callback.
+---@field AddExtras? fun(panel:UIWidget)
+---@field RefreshExtras? fun()
+---@field ClearExtras? fun()
+
+---@class CAITradeOverviewController
+---@field GetCurrentTab fun():integer Zero-based native tab enum.
+---@field SetCurrentTab fun(index:integer)
+---@field Refresh fun()
+---@field Open fun()
+---@field Close fun()
+---@field HandleInput fun(input:table):boolean

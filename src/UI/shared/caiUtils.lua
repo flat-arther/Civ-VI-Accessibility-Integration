@@ -2,6 +2,8 @@
 CAI = ExposedMembers.CAI
 
 include("textProcessing")
+include("CAIControl")
+include("CAICollection")
 include("CAISettings")
 include("CAI_logging")
 
@@ -137,71 +139,6 @@ function SpeakLines(lines, interrupt, processTokens)
             Speak(line, interrupt and i == 1, processTokens)
         end
     end
-end
-
-local DEFAULT_LINE_LENGTH = 75
-
-local function GetConfiguredLineLength()
-    return math.max(1, math.floor(tonumber(CAISettings.GetNumber("TokenSplitLength")) or DEFAULT_LINE_LENGTH))
-end
-
-local function TrimText(text)
-    -- Explicit ASCII whitespace only. %s is locale-sensitive in Civ VI Lua and
-    -- classifies UTF-8 byte 0xA0 as whitespace under Simplified Chinese, which
-    -- would trim a byte off multibyte characters (e.g. 张) and corrupt them.
-    return (text:gsub("^[ \t\r\n]+", ""):gsub("[ \t\r\n]+$", ""))
-end
-
-local function IsSentenceEnd(word)
-    return word:match("[%.%!%?][\"')%]]*$") ~= nil
-end
-
----Splits text into natural spoken lines. Existing newlines are preserved as
----boundaries. Complete sentences are grouped up to the character target. A
----sentence longer than the target remains intact on its own line.
----@param text any
----@param maxLength? integer
----@return string[]
-function SplitTextIntoLines(text, maxLength)
-    local lines = {}
-    if text == nil then return lines end
-
-    maxLength = math.max(1, math.floor(tonumber(maxLength) or GetConfiguredLineLength()))
-    local normalized = tostring(text):gsub("\r\n", "\n"):gsub("\r", "\n")
-    normalized = normalized:gsub("%[NEWLINE%]", "\n")
-
-    for paragraph in (normalized .. "\n"):gmatch("(.-)\n") do
-        paragraph = TrimText(paragraph)
-        if paragraph ~= "" then
-            local sentenceWords = {}
-            local pendingLine = ""
-
-            local function FlushSentence()
-                if #sentenceWords == 0 then return end
-                local sentence = table.concat(sentenceWords, " ")
-                local combined = pendingLine == "" and sentence or pendingLine .. " " .. sentence
-                if pendingLine == "" or #combined <= maxLength then
-                    pendingLine = combined
-                else
-                    lines[#lines + 1] = pendingLine
-                    pendingLine = sentence
-                end
-                sentenceWords = {}
-            end
-
-            -- Split on ASCII whitespace only; %S is locale-sensitive and would
-            -- break on byte 0xA0 inside multibyte characters. Scripts without
-            -- spaces (e.g. Chinese) stay whole, which is fine for speech.
-            for word in paragraph:gmatch("[^ \t\r\n]+") do
-                sentenceWords[#sentenceWords + 1] = word
-                if IsSentenceEnd(word) then FlushSentence() end
-            end
-            FlushSentence()
-            if pendingLine ~= "" then lines[#lines + 1] = pendingLine end
-        end
-    end
-
-    return lines
 end
 
 ---@param msg any
@@ -381,18 +318,6 @@ function HijackTable(originalTable, overrides)
     return proxy
 end
 
----Returns an array of keys from the table arg
----@param tbl table
----@return any[]
-function GetKeys(tbl)
-    if not tbl then return {} end
-    local list = {}
-    for k in pairs(tbl) do
-        table.insert(list, k)
-    end
-    return list
-end
-
 -- ===========================================================================
 -- Safe action id lookup
 -- Custom CAI input actions are registered by data/hotkey_config_CAI.xml. On a
@@ -431,12 +356,4 @@ function GetInputActionsByCategory(cat)
         end
     end
     return actions
-end
-
-function SwapPairs(tbl)
-    local swapped = {}
-    for k, v in pairs(tbl) do
-        swapped[v] = k
-    end
-    return swapped
 end

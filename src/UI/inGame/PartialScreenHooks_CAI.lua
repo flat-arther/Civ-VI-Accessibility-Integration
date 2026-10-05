@@ -1,3 +1,4 @@
+include("CAIGameState")
 include("caiUtils")
 include("Civ6Common")
 local m_isAustraliaScenario = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_AUSTRALIA"
@@ -26,28 +27,13 @@ local m_vanillaToggleTradeRoutes = Input.GetActionId("ToggleTradeRoutes")
 
 local m_caiOpenEraProgressId = Input.GetActionId("UI_CAIOpenEraProgress")
 
-local function GetLocalPlayer()
-    local playerID = Game.GetLocalPlayer()
-    if playerID == nil or playerID < 0 then return nil end
-    return Players[playerID]
-end
-
-local function HasMetCityState(player)
-    if player == nil then return false end
-    local diplomacy = player:GetDiplomacy()
-    for _, minor in ipairs(PlayerManager.GetAliveMinors()) do
-        if diplomacy:HasMet(minor:GetID()) then return true end
-    end
-    return false
-end
-
 local function OnCAIOpenCityStates()
-    local player = GetLocalPlayer()
+    local player = CAIGameState.GetLocalPlayerObject()
     if not IsCAITutorialControlAllowed("CityStatesButton") then
         Speak(Locale.Lookup("LOC_CAI_UI_BLOCKED_BY_TUTORIAL"))
     elseif not GameCapabilities.HasCapability("CAPABILITY_CITY_STATES_VIEW") then
         Speak(Locale.Lookup("LOC_CAI_UI_UNAVAILABLE_IN_CURRENT_GAME"))
-    elseif not HasMetCityState(player) then
+    elseif not CAIGameState.HasMetCityState(player) then
         Speak(Locale.Lookup("LOC_CAI_UI_NO_CITY_STATES_MET"))
     else
         CheckCityStatesUnlocked(player)
@@ -67,7 +53,7 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
         return
     end
     if m_caiOpenEspionageId and actionId == m_caiOpenEspionageId then
-        local player = GetLocalPlayer()
+        local player = CAIGameState.GetLocalPlayerObject()
         if not IsCAITutorialControlAllowed("EspionageButton") then
             Speak(Locale.Lookup("LOC_CAI_UI_BLOCKED_BY_TUTORIAL"))
         elseif m_isAustraliaScenario or m_isVikingsScenario then
@@ -94,7 +80,7 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
         return
     end
     if m_caiOpenTradeOverviewId and actionId == m_caiOpenTradeOverviewId then
-        local player = GetLocalPlayer()
+        local player = CAIGameState.GetLocalPlayerObject()
         if not IsCAITutorialControlAllowed("TradeRoutesButton") then
             Speak(Locale.Lookup("LOC_CAI_UI_BLOCKED_BY_TUTORIAL"))
         elseif not GameCapabilities.HasCapability("CAPABILITY_TRADE_VIEW") then

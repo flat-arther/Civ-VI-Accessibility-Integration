@@ -65,7 +65,7 @@ end
 ---@param widget UIWidget
 function R.CacheSections(widget)
     local content = BuildReaderContent(widget)
-    widget._focusedWidgetReaderSections = SplitTextIntoLines(content)
+    widget._focusedWidgetReaderSections = CAIText.SplitTextIntoLines(content, CAISettings.GetNumber("TokenSplitLength"))
     widget._focusedWidgetReaderSection = 1
 end
 

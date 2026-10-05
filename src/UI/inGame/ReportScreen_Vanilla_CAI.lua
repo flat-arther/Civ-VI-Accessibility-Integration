@@ -14,10 +14,6 @@ local mgr                  = ExposedMembers.CAI_UIManager
 local PANEL_ID             = "CAIReports_Panel"
 local TABS_ID              = "CAIReports_Tabs"
 
-local function MakeId(prefix)
-    return mgr:GenerateWidgetId(prefix)
-end
-
 -- Panel/tab state owned by this variant (the shared file no longer references it).
 local m_panel              = nil
 local m_tabs               = nil
@@ -64,16 +60,16 @@ local function BuildPanel()
 
         local tree
         if capturedI == 3 then
-            tree = mgr:CreateWidget(MakeId("CAIRPT_"), "List", {
+            tree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "List", {
                 FocusKey = "reports:tab:" .. capturedI .. ":list",
                 HiddenPredicate = function() return not CAIReports_IsCityStatusListMode() end,
             })
         elseif capturedI == 4 then
-            tree = mgr:CreateWidget(MakeId("CAIRPT_"), "List", {
+            tree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "List", {
                 FocusKey = "reports:tab:" .. capturedI .. ":list",
             })
         else
-            tree = mgr:CreateWidget(MakeId("CAIRPT_"), "Tree", { FocusKey = "reports:tab:" .. capturedI .. ":tree" })
+            tree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "Tree", { FocusKey = "reports:tab:" .. capturedI .. ":tree" })
         end
 
         m_tabs:AddPage(function()

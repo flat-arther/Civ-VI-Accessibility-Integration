@@ -122,5 +122,7 @@
 [x] prepend city name to City center
 [x] Redo the targetting interfaces, prevent interfaces from closing when pressing enter on an invalid tile
 [x] Look in to stacked multiplayer notifications
+[x] The location appended to movement log strings is confusing. Change the separator.
 [ ] Add support for top panel extension pro, prehistoric era
+[ ] You keep forgetting about the online pause panel. Stop forgetting
 [ ] Look in to coastal raide yield reporting

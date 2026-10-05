@@ -203,7 +203,7 @@ local function BuildPinLabel(mapPinCfg)
     end
 
     local parts = { BuildMapTacLabel(mapPinCfg) }
-    if dirText ~= "" then table.insert(parts, dirText) end
+    CAIText.AppendIfNonEmpty(parts, dirText)
     return table.concat(parts, "[NEWLINE]")
 end
 

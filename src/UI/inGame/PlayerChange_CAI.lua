@@ -1,3 +1,4 @@
+include("CAIControl")
 include("caiUtils")
 include("PlayerChange")
 
@@ -5,20 +6,6 @@ local mgr = ExposedMembers.CAI_UIManager
 
 local m_dialog = nil ---@type UIWidget|nil
 local m_passwordEdit = nil ---@type UIWidget|nil
-
-local function GetControlText(control)
-    if control and control.GetText then
-        return control:GetText() or ""
-    end
-    return ""
-end
-
-local function GetControlTooltip(control)
-    if control and control.GetToolTipString then
-        return control:GetToolTipString() or ""
-    end
-    return ""
-end
 
 local function RemoveDialog()
     if mgr and m_dialog and mgr:GetWidgetById(m_dialog:GetId()) then
@@ -38,15 +25,15 @@ end
 
 local function GetDialogTitle()
     if IsWaitMode() then
-        return GetControlText(Controls.PlayerChangingText)
+        return CAIControl.Text(Controls.PlayerChangingText)
     end
-    return GetControlText(Controls.TitleText)
+    return CAIControl.Text(Controls.TitleText)
 end
 
 local function MakePasswordEdit()
     local edit = mgr:CreateWidget("CAIPlayerChangePassword", "EditBox", {
         Label = function()
-            return GetControlText(Controls.PasswordText)
+            return CAIControl.Text(Controls.PasswordText)
         end,
         DisabledPredicate = function()
             return Controls.PasswordEntry:IsDisabled()
@@ -65,17 +52,17 @@ local function MakePasswordEdit()
     edit:On("value_changed", function()
         OnPasswordEntryCommit()
     end)
-    edit:SetText(GetControlText(Controls.PasswordEntry), true)
+    edit:SetText(CAIControl.Text(Controls.PasswordEntry), true)
     return edit
 end
 
 local function MakeButton(id, native, focusKey, onActivate)
     local button = mgr:CreateWidget(id, "Button", {
         Label = function()
-            return GetControlText(native)
+            return CAIControl.Text(native)
         end,
         Tooltip = function()
-            return GetControlTooltip(native)
+            return CAIControl.Tooltip(native)
         end,
         HiddenPredicate = function()
             return native and native.IsHidden and native:IsHidden() or false
@@ -133,7 +120,7 @@ local function BuildButtons()
 
     local menuButton = mgr:CreateWidget("CAIPlayerChange_Menu", "Button", {
         Label = function()
-            return GetControlTooltip(Controls.MenuButton)
+            return CAIControl.Tooltip(Controls.MenuButton)
         end,
         HiddenPredicate = function()
             return Controls.MenuButton:IsHidden()

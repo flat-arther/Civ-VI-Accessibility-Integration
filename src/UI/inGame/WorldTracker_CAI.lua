@@ -1,3 +1,5 @@
+include("CAIGameState")
+include("CAIControl")
 include("caiUtils")
 include("Civ6Common")
 if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
@@ -32,30 +34,6 @@ local m_caiCivicsTrackerControl    = nil
 local CRISIS_LIST_ID               = "CAICrisisTracker_List"
 local HOVER_SOUND                  = "Main_Menu_Mouse_Over"
 local m_crisisList                 = nil
-
-local function ControlIsHidden(control)
-    return control and control.IsHidden and control:IsHidden() or false
-end
-
-local function ControlIsDisabled(control)
-    return control and control.IsDisabled and control:IsDisabled() or false
-end
-
-local function GetLocalPlayer()
-    local playerID = Game.GetLocalPlayer()
-    if playerID == nil or playerID < 0 then return nil, nil end
-
-    local player = Players[playerID]
-    if player == nil then return nil, nil end
-
-    return playerID, player
-end
-
-local function AppendIfText(parts, text)
-    if text ~= nil and text ~= "" then
-        table.insert(parts, text)
-    end
-end
 
 local function GetCurrentResearchData(playerID, player)
     local techs = player:GetTechs()
@@ -116,7 +94,7 @@ end
 local function AppendResearchSummary(parts, playerID, player)
     local data = GetCurrentResearchData(playerID, player)
     if data == nil then
-        AppendIfText(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_RESEARCH_LINE",
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_RESEARCH_LINE",
             Locale.Lookup("LOC_WORLD_TRACKER_CHOOSE_RESEARCH")))
         return
     end
@@ -126,20 +104,20 @@ local function AppendResearchSummary(parts, playerID, player)
         table.insert(inner, Locale.Lookup("LOC_CAI_WORLDTRACKER_TURNS_REMAINING", data.TurnsLeft))
     end
 
-    AppendIfText(inner, GetBoostText(data))
+    CAIText.AppendIfNonEmpty(inner, GetBoostText(data))
 
     local allianceText = GetAllianceResearchText(data)
     if allianceText then
         table.insert(inner, allianceText)
     end
 
-    AppendIfText(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_RESEARCH_LINE", table.concat(inner, "[NEWLINE]")))
+    CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_RESEARCH_LINE", table.concat(inner, "[NEWLINE]")))
 end
 
 local function AppendCivicSummary(parts, playerID, player)
     local data = GetCurrentCivicData(playerID, player)
     if data == nil then
-        AppendIfText(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_CIVIC_LINE",
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_CIVIC_LINE",
             Locale.Lookup("LOC_WORLD_TRACKER_CHOOSE_CIVIC")))
         return
     end
@@ -149,20 +127,13 @@ local function AppendCivicSummary(parts, playerID, player)
         table.insert(inner, Locale.Lookup("LOC_CAI_WORLDTRACKER_TURNS_REMAINING", data.TurnsLeft))
     end
 
-    AppendIfText(inner, GetBoostText(data))
+    CAIText.AppendIfNonEmpty(inner, GetBoostText(data))
 
-    AppendIfText(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_CIVIC_LINE", table.concat(inner, "[NEWLINE]")))
-end
-
-local function FormatYieldPerTurn(value)
-    if value == 0 then
-        return Locale.ToNumber(value)
-    end
-    return Locale.Lookup("{1: number +#,###.#;-#,###.#}", value)
+    CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_WORLDTRACKER_CIVIC_LINE", table.concat(inner, "[NEWLINE]")))
 end
 
 local function SpeakScienceAndResearch()
-    local playerID, player = GetLocalPlayer()
+    local playerID, player = CAIGameState.GetExistingLocalPlayer()
     if playerID == nil or player == nil then return end
 
     if IsExpansion1Active() or IsExpansion2Active() then
@@ -175,23 +146,23 @@ local function SpeakScienceAndResearch()
     if GameCapabilities.HasCapability("CAPABILITY_SCIENCE")
         and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
         local techs = player:GetTechs()
-        AppendIfText(parts, Locale.Lookup("LOC_TOP_PANEL_SCIENCE") .. ": "
-            .. Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", FormatYieldPerTurn(techs:GetScienceYield())))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_TOP_PANEL_SCIENCE") .. ": "
+            .. Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", CAIText.FormatSignedValue(techs:GetScienceYield())))
     end
     AppendResearchSummary(parts, playerID, player)
     Speak(table.concat(parts, "[NEWLINE]"))
 end
 
 local function SpeakCultureDetails()
-    local playerID, player = GetLocalPlayer()
+    local playerID, player = CAIGameState.GetExistingLocalPlayer()
     if playerID == nil or player == nil then return end
 
     local parts = {}
     if GameCapabilities.HasCapability("CAPABILITY_CULTURE")
         and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
         local culture = player:GetCulture()
-        AppendIfText(parts, Locale.Lookup("LOC_TOP_PANEL_CULTURE") .. ": "
-            .. Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", FormatYieldPerTurn(culture:GetCultureYield())))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_TOP_PANEL_CULTURE") .. ": "
+            .. Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", CAIText.FormatSignedValue(culture:GetCultureYield())))
     end
     AppendCivicSummary(parts, playerID, player)
 
@@ -201,17 +172,8 @@ local function SpeakCultureDetails()
     Speak(table.concat(parts, "[NEWLINE]"))
 end
 
-local function SplitTooltipLines(tooltip)
-    local lines = {}
-    tooltip = string.gsub(tooltip or "", "%[NEWLINE%]", "\n") .. "\n"
-    for line in string.gmatch(tooltip, "(.-)\n") do
-        if line ~= "" then table.insert(lines, line) end
-    end
-    return lines
-end
-
 local function SpeakOuterYieldBreakdown(label, tooltip, value)
-    local lines = SplitTooltipLines(tooltip)
+    local lines = CAIText.SplitLines(tooltip, { normalizeCarriageReturns = false })
     local parts = {}
     for i, line in ipairs(lines) do
         if i > 1 and string.match(line, "^%s") == nil and line ~= "" then
@@ -224,12 +186,12 @@ local function SpeakOuterYieldBreakdown(label, tooltip, value)
     elseif value == 0 then
         Speak(Locale.Lookup("LOC_CAI_TOP_PANEL_NO_VALUE", label))
     else
-        Speak(label .. ": " .. FormatYieldPerTurn(value))
+        Speak(label .. ": " .. CAIText.FormatSignedValue(value))
     end
 end
 
 local function SpeakScienceBreakdown()
-    local _, player = GetLocalPlayer()
+    local _, player = CAIGameState.GetExistingLocalPlayer()
     if player and GameCapabilities.HasCapability("CAPABILITY_SCIENCE")
         and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
         local value = player:GetTechs():GetScienceYield()
@@ -240,7 +202,7 @@ local function SpeakScienceBreakdown()
 end
 
 local function SpeakCultureBreakdown()
-    local _, player = GetLocalPlayer()
+    local _, player = CAIGameState.GetExistingLocalPlayer()
     if player and GameCapabilities.HasCapability("CAPABILITY_CULTURE")
         and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
         local value = player:GetCulture():GetCultureYield()
@@ -253,28 +215,6 @@ end
 -- =============================================
 -- Crisis tracker (expansion only)
 -- =============================================
-
-local function GetPlayerName(playerID)
-    if playerID < 0 then return "" end
-    local localPlayerID = Game.GetLocalPlayer()
-    if localPlayerID < 0 then return "" end
-    local pConfig = PlayerConfigurations[playerID]
-    if not pConfig then return "" end
-    local isMP = GameConfiguration.IsAnyMultiplayer()
-    local isMet = (playerID == localPlayerID)
-    if not isMet then
-        local pDip = Players[localPlayerID]:GetDiplomacy()
-        isMet = pDip:HasMet(playerID)
-    end
-    if not isMet and not (isMP and pConfig:IsHuman()) then
-        return Locale.Lookup("LOC_DIPLOPANEL_UNMET_PLAYER")
-    end
-    local name = Locale.Lookup(pConfig:GetLeaderName())
-    if isMP and pConfig:IsHuman() then
-        name = name .. " (" .. pConfig:GetPlayerName() .. ")"
-    end
-    return name
-end
 
 local function GetCrisisGoalCounts(crisis)
     local goalsCompleted = 0
@@ -332,7 +272,7 @@ local function BuildCrisisTooltip(crisis, localPlayerID)
     local _, bNoTarget = GetCrisisXP2Metadata(crisis)
 
     if not bNoTarget then
-        local targetName = GetPlayerName(crisis.TargetID)
+        local targetName = CAIGameState.GetKnownPlayerName(crisis.TargetID)
         if targetName ~= "" then
             table.insert(parts, Locale.Lookup("LOC_CAI_CRISIS_TARGET") .. " " .. targetName)
         end
@@ -450,11 +390,11 @@ end
 
 local function IsTrackerChooserControlEnabled(control)
     if control == nil then return true end
-    return not ControlIsHidden(control.MainPanel)
-        and not ControlIsHidden(control.IconButton)
-        and not ControlIsDisabled(control.MainPanel)
-        and not ControlIsDisabled(control.IconButton)
-        and not ControlIsDisabled(control.TitleButton)
+    return not CAIControl.IsHidden(control.MainPanel)
+        and not CAIControl.IsHidden(control.IconButton)
+        and not CAIControl.IsDisabled(control.MainPanel)
+        and not CAIControl.IsDisabled(control.IconButton)
+        and not CAIControl.IsDisabled(control.TitleButton)
 end
 
 local function ActivateRoyaleGlobalAbility()

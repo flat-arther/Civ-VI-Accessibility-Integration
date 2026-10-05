@@ -1,50 +1,10 @@
+include("CAIControl")
 include("caiUtils")
 include("EspionageEscape")
 
 local mgr = ExposedMembers.CAI_UIManager
 
 local m_dialog = nil ---@type UIWidget|nil
-
-local function Visible(control)
-    return control ~= nil and (not control.IsHidden or not control:IsHidden())
-end
-
-local function Text(control)
-    if control and control.GetText then
-        local value = control:GetText()
-        if value and value ~= "" then
-            return value
-        end
-    end
-    return nil
-end
-
-local function Tooltip(control)
-    if control and control.GetToolTipString then
-        local value = control:GetToolTipString()
-        if value and value ~= "" then
-            return value
-        end
-    end
-    return nil
-end
-
-local function JoinNonEmpty(parts)
-    local out = {}
-    for _, part in ipairs(parts or {}) do
-        if part and part ~= "" then
-            table.insert(out, part)
-        end
-    end
-    return table.concat(out, "[NEWLINE]")
-end
-
-local function LabelValue(label, value)
-    if label and label ~= "" and value and value ~= "" then
-        return label .. " " .. value
-    end
-    return label or value
-end
 
 local function MakeTextRow(idPrefix, getText)
     return mgr:CreateWidget(mgr:GenerateWidgetId(idPrefix), "StaticText", {
@@ -60,8 +20,8 @@ end
 
 local function MakeRouteButton(nativeButton, nativeLabel, idPrefix)
     local btn = mgr:CreateWidget(mgr:GenerateWidgetId(idPrefix), "Button", {
-        Label = function() return Text(nativeButton) or "" end,
-        Tooltip = function() return JoinNonEmpty({ Text(nativeLabel), Tooltip(nativeButton) }) end,
+        Label = function() return CAIControl.ReadText(nativeButton) or "" end,
+        Tooltip = function() return CAIText.JoinLines({ CAIControl.ReadText(nativeLabel), CAIControl.ReadTooltip(nativeButton) }) end,
         HiddenPredicate = function() return nativeButton == nil or nativeButton:IsHidden() end,
         DisabledPredicate = function() return nativeButton ~= nil and nativeButton:IsDisabled() end,
     })
@@ -74,19 +34,19 @@ local function MakeRouteButton(nativeButton, nativeLabel, idPrefix)
 end
 
 local function BuildDetailsRow()
-    return JoinNonEmpty({
-        LabelValue(Text(Controls.AgentLabel), Text(Controls.AgentDetails)),
-        LabelValue(Text(Controls.LootLabel), Text(Controls.LootDetails)),
-        LabelValue(Text(Controls.PursuitLabel), Text(Controls.PursuitDetails)),
+    return CAIText.JoinLines({
+        CAIText.LabelValue(CAIControl.ReadText(Controls.AgentLabel), CAIControl.ReadText(Controls.AgentDetails), " "),
+        CAIText.LabelValue(CAIControl.ReadText(Controls.LootLabel), CAIControl.ReadText(Controls.LootDetails), " "),
+        CAIText.LabelValue(CAIControl.ReadText(Controls.PursuitLabel), CAIControl.ReadText(Controls.PursuitDetails), " "),
     })
 end
 
 local function BuildContentRow()
     return MakeTextRow("CAIEspionageEscapeChoiceHeader", function()
-        local choice = Text(Controls.ChoiceHeader) or ""
-        local city = Text(Controls.CityHeader) or ""
+        local choice = CAIControl.ReadText(Controls.ChoiceHeader) or ""
+        local city = CAIControl.ReadText(Controls.CityHeader) or ""
         local details = BuildDetailsRow()
-        return JoinNonEmpty({ choice, city, details })
+        return CAIText.JoinLines({ choice, city, details })
     end)
 end
 
@@ -103,7 +63,7 @@ local function BuildDialog()
     RemoveDialog()
     if not mgr or ContextPtr:IsHidden() then return end
     m_dialog = mgr.WidgetHelpers.MakeGeneralDialog(
-        function() return Text(Controls.PanelHeader) or "" end,
+        function() return CAIControl.ReadText(Controls.PanelHeader) or "" end,
         BuildButtons(),
         { BuildContentRow() },
         1

@@ -1,3 +1,5 @@
+include("CAIColumns")
+include("CAICollection")
 include("caiUtils")
 include("Civ6Common")
 include("hexCoordUtils_CAI")
@@ -76,23 +78,6 @@ local m_cityCycleOrigin = nil
 local m_cityCycleAnchorKey = nil
 local m_cityCycleDistanceOrigin = nil
 local m_pendingOpenFocusKey = nil
-
-local function GetRelativePlotLocation(plotIndex)
-    if plotIndex == nil then return "" end
-    local plot = Map.GetPlotByIndex(plotIndex)
-    if plot == nil then return "" end
-    CAICursor = CAICursor or ExposedMembers.CAICursor
-    if CAICursor == nil then return "" end
-    local cursorX, cursorY = CAICursor:GetCoords()
-    if cursorX == nil or cursorY == nil then return "" end
-    return HexCoordUtils.directionString(cursorX, cursorY, plot:GetX(), plot:GetY())
-end
-
-local function AppendRelativePlotLocation(label, plotIndex)
-    local location = GetRelativePlotLocation(plotIndex)
-    if location == "" then return label end
-    return label .. ", " .. location
-end
 
 local function IndexCityComponentPlots(cityData)
     local city = cityData.City
@@ -187,24 +172,20 @@ function FilterCAIGossip()
 end
 
 
-local function MakeId(prefix)
-    return mgr:GenerateWidgetId(prefix)
-end
-
 local function MakeTreeItem(props)
-    local item = mgr:CreateWidget(MakeId("CAIRPT_"), "TreeItem", props)
+    local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "TreeItem", props)
     item:SetFocusSound(HOVER_SOUND)
     return item
 end
 
 local function MakeButton(props)
-    local btn = mgr:CreateWidget(MakeId("CAIRPT_"), "Button", props)
+    local btn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "Button", props)
     btn:SetFocusSound(HOVER_SOUND)
     return btn
 end
 
 local function MakeStaticText(props)
-    local text = mgr:CreateWidget(MakeId("CAIRPT_"), "StaticText", props)
+    local text = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "StaticText", props)
     text:SetFocusSound(HOVER_SOUND)
     return text
 end
@@ -221,56 +202,6 @@ local function AddLeaf(parent, focusKey, labelFn, tooltipFn, activateFn)
     return item
 end
 
-local function JoinLines(parts)
-    local filtered = {}
-    for _, part in ipairs(parts) do
-        if part ~= nil and part ~= "" then
-            table.insert(filtered, part)
-        end
-    end
-    return table.concat(filtered, "[NEWLINE]")
-end
-
-local function FormatBalance(value)
-    return Locale.ToNumber(value, "#,###.#")
-end
-
-local function FormatValuePerTurn(value)
-    if value == 0 then
-        return Locale.ToNumber(value)
-    end
-    return Locale.Lookup("{1: number +#,###.#;-#,###.#}", value)
-end
-
-local function FormatRatePerTurn(value)
-    return Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", value)
-end
-
-local function NormalizeTooltipNewlines(tooltip)
-    if tooltip == nil or tooltip == "" then return "" end
-    tooltip = string.gsub(tooltip, "%[NEWLINE%]", "\n")
-    tooltip = string.gsub(tooltip, "\r\n", "\n")
-    return string.gsub(tooltip, "\r", "\n")
-end
-
-local function SplitTooltipLines(tooltip)
-    local lines = {}
-    tooltip = NormalizeTooltipNewlines(tooltip)
-    if tooltip == "" then return lines end
-
-    for line in string.gmatch(tooltip .. "\n", "(.-)\n") do
-        if line ~= "" then
-            table.insert(lines, line)
-        end
-    end
-    return lines
-end
-
-local function TrimLeadingWhitespace(text)
-    if text == nil then return "" end
-    return string.gsub(text, "^%s+", "")
-end
-
 local function AddBreakdownRows(parent, lines, focusKeyPrefix, enhancers)
     local roots = {}
     local stack = {}
@@ -278,7 +209,7 @@ local function AddBreakdownRows(parent, lines, focusKeyPrefix, enhancers)
         local whitespace = string.match(line, "^%s*") or ""
         local normalizedWhitespace = string.gsub(whitespace, "\t", "    ")
         local row = {
-            label = TrimLeadingWhitespace(line),
+            label = CAIText.TrimStart(line),
             indent = string.len(normalizedWhitespace),
             children = {},
         }
@@ -343,7 +274,7 @@ local function AddBreakdownRows(parent, lines, focusKeyPrefix, enhancers)
 end
 
 local function AddBreakdownNode(parent, focusKey, label, detailText, tooltipFn, enhancers)
-    local lines = SplitTooltipLines(detailText)
+    local lines = CAIText.SplitLines(detailText)
     if #lines == 0 and enhancers == nil then
         return AddLeaf(parent, focusKey, function() return label end, tooltipFn), {}
     end
@@ -422,7 +353,7 @@ local function BuildCityComponentDecorators(cityData)
             end,
             Decorate = function(node, label)
                 node:SetLabel(function()
-                    return AppendRelativePlotLocation(label, plotIndex)
+                    return HexCoordUtils.appendRelativePlotLocation(label, plotIndex)
                 end)
                 node:On("activate", function() ActivatePlot(plotIndex) end)
             end,
@@ -449,13 +380,13 @@ local function AddCityYieldRows(parent, focusPrefix, amountField, tooltipField)
             local capturedCity = cityData
             local cityID = capturedCity.City:GetID()
             local cityFocusKey = focusPrefix .. ":city:" .. cityID
-            local tooltipLines = tooltipField and SplitTooltipLines(capturedCity[tooltipField]) or {}
+            local tooltipLines = tooltipField and CAIText.SplitLines(capturedCity[tooltipField]) or {}
             local cityNode = MakeTreeItem({
                 Label = function()
                     local label = Locale.Lookup("LOC_CAI_REPORTS_YIELD_FROM_CITY",
-                        FormatValuePerTurn(capturedCity[amountField] or 0),
+                        CAIText.FormatSignedValue(capturedCity[amountField] or 0),
                         Locale.Lookup(capturedCity.CityName))
-                    return AppendRelativePlotLocation(label, capturedCity.CAIPlotIndex)
+                    return HexCoordUtils.appendRelativePlotLocation(label, capturedCity.CAIPlotIndex)
                 end,
                 FocusKey = cityFocusKey,
             })
@@ -725,10 +656,8 @@ function RebuildYieldsTree(tree)
                     table.insert(parts, Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL"))
                 end
                 local production = GetCityStatusProductionText(capturedCity)
-                if production ~= "" then
-                    table.insert(parts, production)
-                end
-                return AppendRelativePlotLocation(JoinLines(parts), capturedCity.CAIPlotIndex)
+                CAIText.AppendIfNonEmpty(parts, production)
+                return HexCoordUtils.appendRelativePlotLocation(CAIText.JoinLines(parts), capturedCity.CAIPlotIndex)
             end,
             Tooltip = function()
                 return FormatYields(
@@ -762,10 +691,8 @@ function RebuildYieldsTree(tree)
                         capturedDistrict.Production, capturedDistrict.Food,
                         capturedDistrict.Gold, capturedDistrict.Faith,
                         capturedDistrict.Science, capturedDistrict.Culture, nil)
-                    if yieldStr ~= "" then
-                        table.insert(parts, yieldStr)
-                    end
-                    return AppendRelativePlotLocation(JoinLines(parts), capturedDistrict.CAIPlotIndex)
+                    CAIText.AppendIfNonEmpty(parts, yieldStr)
+                    return HexCoordUtils.appendRelativePlotLocation(CAIText.JoinLines(parts), capturedDistrict.CAIPlotIndex)
                 end,
                 Tooltip = districtHasChildren and function()
                     return BuildDistrictTotalTooltip(capturedDistrict, greatWorks)
@@ -783,7 +710,7 @@ function RebuildYieldsTree(tree)
                     AddLeaf(districtItem,
                         "yield:city:" .. cityID .. ":dist:" .. tostring(capturedDistrict.Type) .. ":adj",
                         function()
-                            return JoinLines({
+                            return CAIText.JoinLines({
                                 Locale.Lookup("LOC_HUD_REPORTS_ADJACENCY_BONUS"),
                                 FormatYields(
                                     capturedAdj.Production, capturedAdj.Food,
@@ -803,11 +730,9 @@ function RebuildYieldsTree(tree)
                                 capturedBuilding.ProductionPerTurn, capturedBuilding.FoodPerTurn,
                                 capturedBuilding.GoldPerTurn, capturedBuilding.FaithPerTurn,
                                 capturedBuilding.SciencePerTurn, capturedBuilding.CulturePerTurn, nil)
-                            if yieldStr ~= "" then
-                                table.insert(parts, yieldStr)
-                            end
-                            return AppendRelativePlotLocation(
-                                JoinLines(parts), capturedBuilding.CAIPlotIndex)
+                            CAIText.AppendIfNonEmpty(parts, yieldStr)
+                            return HexCoordUtils.appendRelativePlotLocation(
+                                CAIText.JoinLines(parts), capturedBuilding.CAIPlotIndex)
                         end,
                         nil,
                         function() ActivatePlot(capturedBuilding.CAIPlotIndex) end)
@@ -832,7 +757,7 @@ function RebuildYieldsTree(tree)
                                     end
                                     local text = Locale.Lookup(capturedGW.Name)
                                     if #gwYields > 0 then
-                                        text = JoinLines({ text, table.concat(gwYields, "[NEWLINE]") })
+                                        text = CAIText.JoinLines({ text, table.concat(gwYields, "[NEWLINE]") })
                                     end
                                     return text
                                 end)
@@ -862,9 +787,9 @@ function RebuildYieldsTree(tree)
                             end
                             local text = Locale.Lookup(capturedWonder.Name)
                             if #parts > 0 then
-                                text = JoinLines({ text, table.concat(parts, "[NEWLINE]") })
+                                text = CAIText.JoinLines({ text, table.concat(parts, "[NEWLINE]") })
                             end
-                            return AppendRelativePlotLocation(text, capturedWonder.CAIPlotIndex)
+                            return HexCoordUtils.appendRelativePlotLocation(text, capturedWonder.CAIPlotIndex)
                         end,
                         FocusKey = "yield:city:" .. cityID .. ":wonder:" .. tostring(capturedWonder.Type),
                     })
@@ -894,7 +819,7 @@ function RebuildYieldsTree(tree)
                                     end
                                     local text = Locale.Lookup(capturedGW.Name)
                                     if #gwYields > 0 then
-                                        text = JoinLines({ text, table.concat(gwYields, "[NEWLINE]") })
+                                        text = CAIText.JoinLines({ text, table.concat(gwYields, "[NEWLINE]") })
                                     end
                                     return text
                                 end)
@@ -926,7 +851,7 @@ function RebuildYieldsTree(tree)
                             end
                             local text = Locale.Lookup("LOC_HUD_REPORTS_TRADE_WITH", destName)
                             if #routeYields > 0 then
-                                text = JoinLines({ text, table.concat(routeYields, "[NEWLINE]") })
+                                text = CAIText.JoinLines({ text, table.concat(routeYields, "[NEWLINE]") })
                             end
                             return text
                         end)
@@ -937,7 +862,7 @@ function RebuildYieldsTree(tree)
         AddLeaf(cityItem,
             "yield:city:" .. cityID .. ":worked",
             function()
-                return JoinLines({
+                return CAIText.JoinLines({
                     Locale.Lookup("LOC_HUD_REPORTS_WORKED_TILES"),
                     FormatYields(
                         capturedCity.WorkedTileYields["YIELD_PRODUCTION"],
@@ -958,7 +883,7 @@ function RebuildYieldsTree(tree)
                     "yield:city:" .. cityID .. ":amenity",
                     function()
                         local iYieldPercent = (Round(1 + (amenityMod / 100), 2) * .1)
-                        return JoinLines({
+                        return CAIText.JoinLines({
                             Locale.Lookup("LOC_HUD_REPORTS_HEADER_AMENITIES"),
                             FormatYields(
                                 capturedCityForAmenity.WorkedTileYields["YIELD_PRODUCTION"] * iYieldPercent,
@@ -980,7 +905,7 @@ function RebuildYieldsTree(tree)
             AddLeaf(cityItem,
                 "yield:city:" .. cityID .. ":popculture",
                 function()
-                    return JoinLines({
+                    return CAIText.JoinLines({
                         Locale.Lookup("LOC_HUD_CITY_POPULATION"),
                         Locale.Lookup("LOC_CAI_REPORTS_YIELD_CULTURE", Round(popCulture, 1))
                     })
@@ -1104,7 +1029,7 @@ function RebuildYieldsTree(tree)
                             trade:GetNumOutgoingRoutes(), capacity))
                     end
                 end
-                return JoinLines(parts)
+                return CAIText.JoinLines(parts)
             end,
             FocusKey = "yield:economy",
         })
@@ -1116,7 +1041,7 @@ function RebuildYieldsTree(tree)
             local scienceYield = techs:GetScienceYield()
             local scienceTooltip = techs:GetScienceYieldToolTip()
             local scienceLabel = Locale.Lookup("LOC_TOP_PANEL_SCIENCE") .. ": "
-                .. FormatRatePerTurn(FormatValuePerTurn(Round(scienceYield, 1)))
+                .. CAIText.FormatRatePerTurn(CAIText.FormatSignedValue(Round(scienceYield, 1)))
             AddYieldWithCityBreakdown(economyGroup, "yield:economy:science", scienceLabel, scienceTooltip,
                 "LOC_PLAYER_YIELD_SCIENCE_FROM_CITIES",
                 cityYieldTotals.Science,
@@ -1128,7 +1053,7 @@ function RebuildYieldsTree(tree)
             local culture = localPlayer:GetCulture()
             AddYieldWithCityBreakdown(economyGroup, "yield:economy:culture",
                 Locale.Lookup("LOC_TOP_PANEL_CULTURE") .. ": "
-                    .. FormatRatePerTurn(FormatValuePerTurn(Round(culture:GetCultureYield(), 1))),
+                    .. CAIText.FormatRatePerTurn(CAIText.FormatSignedValue(Round(culture:GetCultureYield(), 1))),
                 culture:GetCultureYieldToolTip(),
                 "LOC_PLAYER_YIELD_CULTURE_FROM_CITIES",
                 cityYieldTotals.Culture,
@@ -1140,8 +1065,8 @@ function RebuildYieldsTree(tree)
             local treasury = localPlayer:GetTreasury()
             local goldYield = treasury:GetGoldYield() - treasury:GetTotalMaintenance()
             local goldValue = Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
-                FormatBalance(math.floor(treasury:GetGoldBalance())),
-                FormatRatePerTurn(FormatValuePerTurn(Round(goldYield, 1))))
+                CAIText.FormatBalance(math.floor(treasury:GetGoldBalance())),
+                CAIText.FormatRatePerTurn(CAIText.FormatSignedValue(Round(goldYield, 1))))
             local goldNode = MakeTreeItem({
                 Label = function() return Locale.Lookup("LOC_TOP_PANEL_GOLD") .. ": " .. goldValue end,
                 FocusKey = "yield:economy:gold",
@@ -1175,7 +1100,7 @@ function RebuildYieldsTree(tree)
                         local capturedDealIndex = dealIndex
                         AddLeaf(parent, focusPrefix .. ":" .. capturedDealIndex, function()
                             local amount = capturedDeal.IsOutgoing and -capturedDeal.Amount or capturedDeal.Amount
-                            return JoinLines({
+                            return CAIText.JoinLines({
                                 capturedDeal.Name,
                                 Locale.Lookup("LOC_REPORTS_NUMBER_OF_TURNS", capturedDeal.Duration),
                                 Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", amount)
@@ -1246,7 +1171,7 @@ function RebuildYieldsTree(tree)
                     local capturedKey = typeEntry.key
                     local typeItem = MakeTreeItem({
                         Label = function()
-                            return JoinLines({
+                            return CAIText.JoinLines({
                                 Locale.Lookup(capturedData.Name),
                                 Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -capturedData.Total)
                             })
@@ -1261,11 +1186,11 @@ function RebuildYieldsTree(tree)
                         AddLeaf(typeItem,
                             focusPrefix .. ":type:" .. capturedKey .. ":city:" .. capturedEntryIndex,
                             function()
-                                local label = JoinLines({
+                                local label = CAIText.JoinLines({
                                     Locale.Lookup(capturedEntry.CityName),
                                     Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -capturedEntry.Maintenance)
                                 })
-                                return AppendRelativePlotLocation(label, capturedEntry.PlotIndex)
+                                return HexCoordUtils.appendRelativePlotLocation(label, capturedEntry.PlotIndex)
                             end,
                             nil,
                             function() ActivatePlot(capturedEntry.PlotIndex) end)
@@ -1356,7 +1281,7 @@ function RebuildYieldsTree(tree)
                         local instances = unitInstancesByType[capturedType] or {}
                         local unitTypeNode = MakeTreeItem({
                             Label = function()
-                                return JoinLines({
+                                return CAIText.JoinLines({
                                     Locale.Lookup(capturedUnit.Name),
                                     Locale.Lookup("LOC_CAI_REPORTS_UNIT_COUNT", capturedUnit.Count),
                                     Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -capturedUnit.Maintenance)
@@ -1373,11 +1298,11 @@ function RebuildYieldsTree(tree)
                                 "yield:economy:gold:expense:units:type:" .. capturedType
                                     .. ":unit:" .. capturedInstance.UnitID,
                                 function()
-                                    local label = JoinLines({
+                                    local label = CAIText.JoinLines({
                                         capturedInstance.Name,
                                         Locale.Lookup("LOC_CAI_REPORTS_YIELD_GOLD", -instanceMaintenance)
                                     })
-                                    return AppendRelativePlotLocation(label,
+                                    return HexCoordUtils.appendRelativePlotLocation(label,
                                         GetUnitPlotIndex(capturedInstance.PlayerID, capturedInstance.UnitID))
                                 end,
                                 nil,
@@ -1424,12 +1349,12 @@ function RebuildYieldsTree(tree)
             and GameCapabilities.HasCapability("CAPABILITY_DISPLAY_TOP_PANEL_YIELDS") then
             local religion = localPlayer:GetReligion()
             local faithValue = Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
-                FormatBalance(religion:GetFaithBalance()),
-                FormatRatePerTurn(FormatValuePerTurn(Round(GetDisplayedFaithYield(localPlayer), 1))))
+                CAIText.FormatBalance(religion:GetFaithBalance()),
+                CAIText.FormatRatePerTurn(CAIText.FormatSignedValue(Round(GetDisplayedFaithYield(localPlayer), 1))))
             local faithDetails = religion:GetFaithYieldToolTip()
             if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH"
                 and GetDisplayedFaithYield(localPlayer) ~= religion:GetFaithYield() then
-                faithDetails = JoinLines({ faithDetails,
+                faithDetails = CAIText.JoinLines({ faithDetails,
                     Locale.Lookup("LOC_GOVT_PAPAL_SLOT_FAITH_TT", -BLACK_DEATH_PAPAL_SLOT_UPKEEP) })
             end
             AddYieldWithCityBreakdown(economyGroup, "yield:economy:faith",
@@ -1454,22 +1379,22 @@ function RebuildYieldsTree(tree)
                         if math.abs(otherCityTourism) >= 0.05 then
                             AddLeaf(tourismCities, "yield:economy:tourism:cities:other", function()
                                 return Locale.Lookup("LOC_CAI_REPORTS_OTHER_CITY_YIELD",
-                                    FormatValuePerTurn(otherCityTourism))
+                                    CAIText.FormatSignedValue(otherCityTourism))
                             end)
                         end
                     end,
                 }
                 AddBreakdownNode(economyGroup, "yield:economy:tourism",
                     Locale.Lookup("LOC_TOP_PANEL_TOURISM") .. ": "
-                        .. FormatRatePerTurn(FormatBalance(tourismRate)),
+                        .. CAIText.FormatRatePerTurn(CAIText.FormatBalance(tourismRate)),
                     localPlayer:GetStats():GetTourismToolTip(), nil, tourismEnhancers)
             end
         end
 
         if m_isExp2 then
             local favorValue = Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
-                FormatBalance(localPlayer:GetFavor()),
-                FormatRatePerTurn(FormatValuePerTurn(localPlayer:GetFavorPerTurn())))
+                CAIText.FormatBalance(localPlayer:GetFavor()),
+                CAIText.FormatRatePerTurn(CAIText.FormatSignedValue(localPlayer:GetFavorPerTurn())))
             AddBreakdownNode(economyGroup, "yield:economy:favor",
                 Locale.Lookup("LOC_CAI_TOP_PANEL_FAVOR") .. ": " .. favorValue,
                 localPlayer:GetFavorPerTurnToolTip(), function()
@@ -1576,9 +1501,7 @@ local function FormatResourceEntryLabel(kEntry)
     local source = Locale.Lookup(kEntry.EntryText)
     local control = kEntry.ControlText ~= "-" and Locale.Lookup(kEntry.ControlText) or nil
     local parts = { source }
-    if control ~= nil and control ~= "" then
-        table.insert(parts, control)
-    end
+    CAIText.AppendIfNonEmpty(parts, control)
     table.insert(parts, toPlusMinus(kEntry.Amount))
     return table.concat(parts, "[NEWLINE]")
 end
@@ -1621,7 +1544,7 @@ local function BuildResourceItem(parent, eResourceType, kSingleResourceData)
                 local text = Locale.Lookup("LOC_CAI_REPORTS_RESOURCE_STOCKPILE",
                     name, capturedResData.Stockpile, capturedResData.Maximum or 0)
                 if flow then
-                    text = JoinLines({ text, Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", toPlusMinus(flow.Delta)) })
+                    text = CAIText.JoinLines({ text, Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", toPlusMinus(flow.Delta)) })
                 end
                 return text
             else
@@ -1642,7 +1565,7 @@ local function BuildResourceItem(parent, eResourceType, kSingleResourceData)
                             table.insert(cityNames, Locale.Lookup(pCity:GetName()))
                         end
                     end
-                    return JoinLines({
+                    return CAIText.JoinLines({
                         Locale.Lookup("LOC_CAI_REPORTS_AMENITIES_PROVIDED", numCities),
                         table.concat(cityNames, "[NEWLINE]")
                     })
@@ -1794,7 +1717,7 @@ local function BuildResourceItem(parent, eResourceType, kSingleResourceData)
             local baseLabel = resItem:GetLabel()
             local tooltip = resItem:GetTooltip()
             if tooltip ~= nil and tooltip ~= "" then
-                return JoinLines({ baseLabel, tooltip })
+                return CAIText.JoinLines({ baseLabel, tooltip })
             end
             return baseLabel
         end
@@ -1879,7 +1802,7 @@ function RebuildResourcesTree(tree)
             local capturedCat = cat
             local catGroup = MakeTreeItem({
                 Label = function()
-                    return JoinLines({
+                    return CAIText.JoinLines({
                         Locale.Lookup(capturedCat.label),
                         Locale.Lookup("LOC_CAI_REPORTS_RESOURCE_COUNT", #capturedCat.items)
                     })
@@ -1930,7 +1853,7 @@ local function GetCityStatusDistance(kCityData)
 end
 
 local function GetCityStatusDirection(kCityData)
-    return GetRelativePlotLocation(kCityData.CAIPlotIndex)
+    return HexCoordUtils.relativePlotLocation(kCityData.CAIPlotIndex)
 end
 
 local function GetCityStatusDamage(kCityData)
@@ -2049,7 +1972,7 @@ local function GetCityUsablePowerTooltip(kCityData)
     for _, t in ipairs(p:GetFreePowerSources() or {}) do consumedSources[#consumedSources + 1] = t end
     for _, t in ipairs(p:GetTemporaryPowerSources() or {}) do consumedSources[#consumedSources + 1] = t end
     local sourcesLine = FormatPowerSourceLine("LOC_CAI_CITY_OV_POWER_SOURCES", consumedSources)
-    if sourcesLine ~= "" then lines[#lines + 1] = sourcesLine end
+    CAIText.AppendIfNonEmpty(lines, sourcesLine)
     return table.concat(lines, "[NEWLINE]")
 end
 
@@ -2212,7 +2135,7 @@ local function BuildCityStatusTableColumns()
             key = yield.YieldType,
             header = function() return Locale.Lookup(yieldName) end,
             getCell = function(kCityData)
-                return FormatBalance(GetCityStatusYield(kCityData, yieldIndex))
+                return CAIText.FormatBalance(GetCityStatusYield(kCityData, yieldIndex))
             end,
             sortKey = function(kCityData)
                 return GetCityStatusYield(kCityData, yieldIndex)
@@ -2242,22 +2165,6 @@ local function GetCityStatusColumns()
     return m_cityStatusColumns
 end
 
-local function FindCityStatusColumn(key)
-    for _, column in ipairs(GetCityStatusColumns()) do
-        if column.key == key then return column end
-    end
-    return nil
-end
-
-local function CompareCityStatusColumnValues(av, bv)
-    if av == bv then return 0 end
-    if av == nil then return 1 end
-    if bv == nil then return -1 end
-    if type(av) == "number" and type(bv) == "number" then return av < bv and -1 or 1 end
-    if type(av) == "boolean" and type(bv) == "boolean" then return av and 1 or -1 end
-    return Locale.Compare(tostring(av), tostring(bv))
-end
-
 -- sortColumn/sortAscending default to the table's remembered sort. World city
 -- cycling passes an override; passing "natural" keeps m_caiCityData's own order
 -- (already sorted by .Order), which is the cycling default when not following
@@ -2272,7 +2179,7 @@ local function GetSortedCityData(sortColumn, sortAscending)
     if sortColumn == "natural" then
         return sorted
     end
-    local column = FindCityStatusColumn(sortColumn)
+    local column = CAIColumns.Find(GetCityStatusColumns(), sortColumn)
     if not column or not column.sortKey then
         table.sort(sorted, CompareCityStatusByName)
         return sorted
@@ -2287,7 +2194,7 @@ local function GetSortedCityData(sortColumn, sortAscending)
             if av == bv then return CompareCityStatusByName(a, b) end
             return bv == nil
         end
-        local comparison = CompareCityStatusColumnValues(av, bv)
+        local comparison = CAICollection.CompareTypedValues(av, bv)
         if comparison == 0 then return CompareCityStatusByName(a, b) end
         if ascending then return comparison < 0 end
         return comparison > 0
@@ -2310,7 +2217,7 @@ local function RebuildCityStatusList(list)
                 if capturedCity.IsCapital then
                     table.insert(parts, Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL"))
                 end
-                return AppendRelativePlotLocation(JoinLines(parts), capturedCity.CAIPlotIndex)
+                return HexCoordUtils.appendRelativePlotLocation(CAIText.JoinLines(parts), capturedCity.CAIPlotIndex)
             end,
             Tooltip = function()
                 local parts = {}
@@ -2319,9 +2226,7 @@ local function RebuildCityStatusList(list)
                 -- currently producing (the production column's tooltip) is pulled to
                 -- the front, and every yield is grouped at the very end.
                 local production = GetCityStatusProductionText(capturedCity)
-                if production ~= "" then
-                    table.insert(parts, production)
-                end
+                CAIText.AppendIfNonEmpty(parts, production)
 
                 -- Under-siege status belongs to the name column in the table view.
                 if capturedCity.IsUnderSiege then
@@ -2359,9 +2264,7 @@ local function RebuildCityStatusList(list)
 
                 if m_isExp1 or m_isExp2 then
                     local loyaltyText = GetCityStatusLoyaltyText(capturedCity)
-                    if loyaltyText ~= "" then
-                        table.insert(parts, loyaltyText)
-                    end
+                    CAIText.AppendIfNonEmpty(parts, loyaltyText)
                     table.insert(parts, GetCityStatusGovernorText(capturedCity))
                 end
 
@@ -2373,13 +2276,13 @@ local function RebuildCityStatusList(list)
                     if usablePower ~= nil then
                         table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_USABLE_POWER", usablePower))
                         local usableTip = GetCityUsablePowerTooltip(capturedCity)
-                        if usableTip ~= "" then table.insert(parts, usableTip) end
+                        CAIText.AppendIfNonEmpty(parts, usableTip)
                     end
                     local requiredPower = GetCityRequiredPower(capturedCity)
                     if requiredPower ~= nil then
                         table.insert(parts, Locale.Lookup("LOC_CAI_REPORTS_REQUIRED_POWER", requiredPower))
                         local requiredTip = GetCityRequiredPowerTooltip(capturedCity)
-                        if requiredTip ~= "" then table.insert(parts, requiredTip) end
+                        CAIText.AppendIfNonEmpty(parts, requiredTip)
                     end
                 end
 
@@ -2494,7 +2397,7 @@ local function EnsureCityStatusControls(entry)
         end
     end
 
-    entry.sortDropdown = mgr:CreateWidget(MakeId("CAIRPT_"), "Dropdown", {
+    entry.sortDropdown = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "Dropdown", {
         Label = function() return Locale.Lookup("LOC_CAI_REPORTS_SORT_BY") end,
         FocusKey = "status:sort",
         HiddenPredicate = function() return m_cityStatusViewMode ~= "list" end,
@@ -2512,7 +2415,7 @@ local function EnsureCityStatusControls(entry)
     end)
     page:AddChild(entry.sortDropdown)
 
-    entry.switchView = mgr:CreateWidget(MakeId("CAIRPT_"), "Button", {
+    entry.switchView = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "Button", {
         Label = function()
             return Locale.Lookup(m_cityStatusViewMode == "table"
                 and "LOC_CAI_REPORTS_SWITCH_TO_LIST"
@@ -2581,7 +2484,7 @@ local function RebuildGossipList(list)
     for gi, kGossipEntry in ipairs(m_caiGossipFiltered) do
         local capturedEntry = kGossipEntry
         local capturedGI = gi
-        local entryWidget = mgr:CreateWidget(MakeId("CAIRPT_"), "StaticText", {
+        local entryWidget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "StaticText", {
             Label = function()
                 local description = capturedEntry[1]
                 local turn = capturedEntry[2]
@@ -2633,7 +2536,7 @@ local function BuildGossipFilters(page, entry)
         table.insert(playerDropdownOptions, { label = opt.Label, value = opt.Value })
     end
 
-    m_gossipPlayerFilter = mgr:CreateWidget(MakeId("CAIRPT_"), "Dropdown", {
+    m_gossipPlayerFilter = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "Dropdown", {
         Label = function() return Locale.Lookup("LOC_CAI_REPORTS_FILTER_PLAYER") end,
         FocusKey = "gossip:filter:player",
     })
@@ -2670,7 +2573,7 @@ local function BuildGossipFilters(page, entry)
         table.insert(groupDropdownOptions, { label = opt.Label, value = opt.Value })
     end
 
-    m_gossipGroupFilter = mgr:CreateWidget(MakeId("CAIRPT_"), "Dropdown", {
+    m_gossipGroupFilter = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "Dropdown", {
         Label = function() return Locale.Lookup("LOC_CAI_REPORTS_FILTER_TYPE") end,
         FocusKey = "gossip:filter:type",
     })

@@ -1,5 +1,18 @@
 ## [Unreleased]
 
+### Fixed
+
+- Creating a Play By Cloud game from a save restores accessibility while retaining the save's other content, and waits for loading to finish before opening the player lobby.
+- Lobby player lists keep current controls and preserve navigation when map size or player slots change.
+
+- The B geography readout says "Rivers:" once before listing river names, edges, and flow, instead of repeating "River(s):" for each river.
+
+- Message buffer entries introduce locations with "at" or its equivalent in every supported UI language.
+
+- Scanner search and category names, and crisis detail cleanup, preserve non-Latin characters when trimming whitespace.
+- Leading whitespace cleanup in report and top-panel readouts preserves non-Latin characters across game languages.
+- The accessible lens list can be closed by pressing its opening shortcut again without an error.
+
 ## [1.6.0] - 2026-09-30
 
 ### Added

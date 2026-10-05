@@ -131,10 +131,6 @@ function CAIWorldScanner:RegisterCategoryDefinition(definition)
     table.insert(RegisteredCategoryDefinitions, definition)
 end
 
-local function SpeakPositionedLabel(labelKey, index, total)
-    Speak(Utils.ResolveText(labelKey) .. ", " .. Utils.MakePositionText(index, total))
-end
-
 local function GetCategory(scanner)
     return Core.GetCategory(scanner)
 end
@@ -389,9 +385,7 @@ local function BuildItemEntryText(item, itemIndex, itemTotal)
         table.insert(parts, 1, coordsText)
     end
 
-    if directionText ~= nil and directionText ~= "" then
-        parts[#parts + 1] = directionText
-    end
+    CAIText.AppendIfNonEmpty(parts, directionText)
 
     parts[#parts + 1] = Utils.MakePositionText(itemIndex, itemTotal)
 
@@ -1395,10 +1389,6 @@ local function BuildSearchSnapshot(scanner)
     return snapshot
 end
 
-local function TrimSearchQuery(query)
-    return (query or ""):match("^%s*(.-)%s*$")
-end
-
 local function CloneSearchLeaf(entry)
     local leaf = entry.item
     return {
@@ -1528,7 +1518,7 @@ local function BuildSearchSubCategories(hits)
 end
 
 local function CommitSearch(rawQuery)
-    local query = TrimSearchQuery(rawQuery)
+    local query = CAIText.TrimWhitespace(rawQuery)
     if query == "" then
         Speak(Locale.Lookup("LOC_CAI_WORLD_SCANNER_SEARCH_NO_RESULTS"))
         return

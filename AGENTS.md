@@ -21,7 +21,7 @@ New project / greeting / "hallo":
 Continuing / "weiter":
 
 1. Read `project_status.md`.
-2. If it lists pending tests or user-result questions, ask for those results before continuing.
+2. Check pending tests and user-result questions. During the current refactor, user game tests are deferred until the entire refactor is complete; maintain `docs/refactor-game-tests.md` instead of asking for results between stages.
 3. Suggest next steps from `project_status.md` or ask what to work on.
 
 Always treat `project_status.md` as the central working memory. Update it after meaningful progress and before ending a session.
@@ -41,12 +41,12 @@ Before implementation work:
 1. Read `project_status.md` for current focus, pending tests, and known gaps.
 2. Check `docs/game-api.md` for documented Civ VI APIs, safe keys, and discovered screen patterns.
 3. If key bindings or input actions are involved, confirm the key/action is documented under safe mod keys or existing action patterns in `docs/game-api.md`.
-4. Check `docs/Civ6Docs.md` for known Civ VI keys, methods, and patterns.
+4. Check `docs/Civ-6-Documentation/Civ6Docs.html` and `docs/civ6 ide helpers/` for known Civ VI keys, methods, and patterns.
 5. Verify uncertain game behavior against actual Lua under `decompiled/` or the Steam install. Do not guess class, method, event, or control names.
 6. For files over 500 lines, use targeted search first instead of reading the whole file.
 7. Look in the docs/Civ6 IDE helpers for Lua annotations when signatures or globals are unclear.
 
-If `project_status.md` says a user test is pending, ask for that result before layering more code on the same area.
+During the current refactor, pending user game tests do not block further work. Keep the consolidated checklist in `docs/refactor-game-tests.md` current and continue automated verification during implementation. Outside this deferred refactor workflow, ask for pending user results before layering more code on the same area.
 
 ## File Creation Rules
 
@@ -127,6 +127,9 @@ The UI manager is a class-based widget framework rebuilt on the `UIManagerRework
 Patterns: `docs/ACCESSIBILITY_MODDING_GUIDE.md`
 
 ## Session Management
+
+- Commit workflow (user instruction, 2026-10-05): after finishing and verifying each refactor stage, update documentation and commit its changes to `beta`. Include the commit ID and a short explanation of the proposed next stage in the summary, then wait for user direction. Do not include unrelated local settings or push unless requested.
+- Current refactor workflow (user instruction, 2026-10-04): finish each authorized stage, run appropriate automated checks, update the consolidated deferred game-test checklist and project status, then give a stage summary and wait for the user's direction before starting another stage. Summarize changes, verification, remaining limitations and the proposed next stage. Do not request game testing between stages; hand over the complete checklist when the whole refactor is finished.
 
 - If a feature is done, the conversation is long, or context is getting heavy, update `project_status.md` and suggest a new conversation.
 - If a problem persists after three attempts, stop, explain what was tried, suggest alternatives, and ask the user how to proceed.

@@ -340,6 +340,7 @@ function Initialize()
 	AdjustScreenSize();
 end
 --#Accessibility integration
+include("CAIControl")
 include("caiUtils")
 
 local mgr = ExposedMembers.CAI_UIManager
@@ -351,6 +352,63 @@ local m_CAI_LastStatusText = nil
 local m_CAI_RecoveryPending = false
 local m_CAI_WaitingForRecoveryConfigure = false
 local m_CAI_PendingFailurePopup = nil
+local m_CAI_WaitingForCloudConfigure = false
+local m_CAI_CloudSavedContent = nil
+
+-- Temporary cloud-save investigation. Read-only and independent of CAI_Settings,
+-- which can be absent while content is being configured.
+local function CAI_TraceCloudConfiguration(phase)
+	if not CAILogging.ShouldLog("message") then return end
+	print("[CAI][CLOUD-DIAG] phase=" .. phase
+		.. ", ruleset=" .. tostring(GameConfiguration.GetRuleSet())
+		.. ", gameState=" .. tostring(GameConfiguration.GetGameState())
+		.. ", dbRevision=" .. tostring(DB.ConfigurationChanges())
+		.. ", enabled=" .. tostring(Modding.IsModEnabled(caiId)))
+	for _, mod in ipairs(GameConfiguration.GetEnabledMods()) do
+		print("[CAI][CLOUD-DIAG] mod id=" .. tostring(mod.Id) .. ", handle=" .. tostring(mod.Handle))
+	end
+	local domains = DB.ConfigurationQuery("SELECT Domain, COUNT(*) AS RowCount FROM Players GROUP BY Domain")
+	print("[CAI][CLOUD-DIAG] playerDomains=" .. tostring(domains and #domains))
+	for _, row in ipairs(domains or {}) do
+		print("[CAI][CLOUD-DIAG] domain=" .. tostring(row.Domain) .. ", rows=" .. tostring(row.RowCount))
+	end
+end
+
+local function CAI_ClearCloudRecovery()
+	ExposedMembers.CAI_CloudSaveLoadPending = nil
+	m_CAI_WaitingForCloudConfigure = false
+	m_CAI_CloudSavedContent = nil
+end
+
+local function CAI_CloudSavedContentPreserved()
+	local current = GameConfiguration.GetEnabledMods()
+	for _, saved in ipairs(m_CAI_CloudSavedContent) do
+		local found = false
+		for _, mod in ipairs(current) do
+			if (type(saved.Id) == "string" and type(mod.Id) == "string" and string.lower(saved.Id) == string.lower(mod.Id))
+				or (saved.Handle ~= nil and saved.Handle == mod.Handle) then
+				found = true
+				break
+			end
+		end
+		if not found then
+			print("CAI cloud save recovery failed: saved content removed, id=" .. tostring(saved.Id) .. ", handle=" .. tostring(saved.Handle))
+			return false
+		end
+	end
+	print("CAI cloud save recovery: preserved " .. tostring(#m_CAI_CloudSavedContent) .. " saved content entries.")
+	return true
+end
+
+local function CAI_CloudConfigHasMod(caiHandle)
+	for _, enabledMod in ipairs(GameConfiguration.GetEnabledMods()) do
+		if enabledMod.Handle == caiHandle
+			or (type(enabledMod.Id) == "string" and string.lower(enabledMod.Id) == caiId) then
+			return true
+		end
+	end
+	return false
+end
 
 local function CAI_RecoverAccessibilityMod(phase)
 	local caiHandle = Modding.GetModHandle(caiId)
@@ -371,7 +429,11 @@ local function CAI_RecoverAccessibilityMod(phase)
 end
 
 local function CAI_OnLeaveGameComplete()
+	-- OnLoadYes leaves the old session before Network.LoadGame. That completion
+	-- is not cancellation of the pending cloud load. Only terminal failure
+	-- recovery belongs here; explicit cancel/invite handlers clear cloud state.
 	if not m_CAI_RecoveryPending then return end
+	CAI_ClearCloudRecovery()
 	m_CAI_RecoveryPending = false
 
 	-- Network.LeaveGame rolls the failed remote content configuration back after
@@ -425,21 +487,14 @@ local function CAI_GetAbandonedFailurePopup(eReason)
 	return "LOC_GAME_ABANDONED_JOIN_FAILED", "LOC_GAME_ABANDONED_JOIN_FAILED_TITLE"
 end
 
-local function CAI_GetControlText(control)
-	if control and control.GetText then
-		return control:GetText() or ""
-	end
-	return ""
-end
-
 local function CAI_BuildDialog()
 	m_CAI_StatusText = mgr:CreateWidget(mgr:GenerateWidgetId("CAIJoiningRoomStatus"), "StaticText", {
-		Label = function() return CAI_GetControlText(Controls.JoiningLabel) end,
+		Label = function() return CAIControl.Text(Controls.JoiningLabel) end,
 		FocusKey = "status",
 	})
 
 	local cancelButton = mgr:CreateWidget(mgr:GenerateWidgetId("CAIJoiningRoomCancel"), "Button", {
-		Label = function() return CAI_GetControlText(Controls.CancelButton) end,
+		Label = function() return CAIControl.Text(Controls.CancelButton) end,
 		FocusKey = "cancel",
 	})
 	cancelButton:On("activate", function()
@@ -451,7 +506,7 @@ local function CAI_BuildDialog()
 	end)
 
 	m_CAI_Dialog = mgr.WidgetHelpers.MakeGeneralDialog(
-		function() return CAI_GetControlText(Controls.TitleLabel) end,
+		function() return CAIControl.Text(Controls.TitleLabel) end,
 		{ cancelButton },
 		{ m_CAI_StatusText },
 		1
@@ -468,6 +523,7 @@ local function CAI_PopDialog()
 end
 
 local function CAI_DeferFailurePopup(popupText, popupTitle)
+	CAI_ClearCloudRecovery()
 	m_CAI_RecoveryPending = true
 	m_CAI_PendingFailurePopup = {
 		Text = popupText,
@@ -487,14 +543,15 @@ local function CAI_PushDialog()
 	CAI_BuildDialog()
 	if not m_CAI_Dialog then return end
 	mgr:Push(m_CAI_Dialog, { priority = PopupPriority.JoiningScreen})
-	m_CAI_LastStatusText = CAI_GetControlText(Controls.JoiningLabel)
+	m_CAI_LastStatusText = CAIControl.Text(Controls.JoiningLabel)
 end
 
 local function CAI_SpeakStatusIfChanged()
 	if ContextPtr:IsHidden() then return end
+	if m_CAI_WaitingForCloudConfigure then return end
 	if not m_CAI_Dialog or not m_CAI_StatusText then return end
 	if not mgr:GetWidgetById(m_CAI_Dialog:GetId()) then return end
-	local statusText = CAI_GetControlText(Controls.JoiningLabel)
+	local statusText = CAIControl.Text(Controls.JoiningLabel)
 	if statusText ~= "" and statusText ~= m_CAI_LastStatusText then
 		m_CAI_LastStatusText = statusText
 		m_CAI_StatusText:Announce({ "label" })
@@ -507,11 +564,49 @@ OnShow = WrapFunc(OnShow, function(orig)
 end)
 
 HandleExitRequest = WrapFunc(HandleExitRequest, function(orig)
+	CAI_ClearCloudRecovery()
 	CAI_PopDialog()
 	orig()
 end)
 
 DoTransitionToStagingRoom = WrapFunc(DoTransitionToStagingRoom, function(orig)
+	if m_CAI_WaitingForCloudConfigure then return end
+	if ExposedMembers.CAI_CloudSaveLoadPending then
+		ExposedMembers.CAI_CloudSaveLoadPending = nil
+		-- Copy identities before either mod operation; engine-owned records may
+		-- change during configuration. Never substitute the user's global mod set.
+		m_CAI_CloudSavedContent = {}
+		for _, mod in ipairs(GameConfiguration.GetEnabledMods()) do
+			table.insert(m_CAI_CloudSavedContent, { Id = mod.Id, Handle = mod.Handle })
+		end
+		CAI_TraceCloudConfiguration("before_recovery")
+		local caiHandle = Modding.GetModHandle(caiId)
+		if caiHandle == nil then
+			print("CAI cloud save recovery failed: mod handle is unavailable.")
+			CAI_DeferFailurePopup("LOC_MP_JOIN_FAILED", "LOC_MP_JOIN_FAILED_TITLE")
+			return
+		end
+		local wasEnabled = Modding.IsModEnabled(caiId)
+		if not wasEnabled then Modding.EnableMod(caiHandle, true) end
+		if not Modding.IsModEnabled(caiId) then
+			print("CAI cloud save recovery failed: mod remains disabled.")
+			CAI_DeferFailurePopup("LOC_MP_JOIN_FAILED", "LOC_MP_JOIN_FAILED_TITLE")
+			return
+		end
+		if not wasEnabled or not CAI_CloudConfigHasMod(caiHandle) then
+			-- Membership changes before the configuration database is ready. Keep
+			-- JoiningRoom and its focus alive until the completion event arrives.
+			m_CAI_WaitingForCloudConfigure = true
+			Controls.JoiningLabel:SetText(Locale.ToUpper(Locale.Lookup("LOC_MULTIPLAYER_CONFIGURING_CONTENT")))
+			print("CAI cloud save recovery: waiting for content configuration.")
+			-- Match CAI's tutorial integration: true replaced the loaded content
+			-- with CAI alone in the captured cloud-save log. Verify preservation
+			-- at completion rather than relying solely on this flag's semantics.
+			GameConfiguration.AddEnabledMods(caiHandle, false)
+			return
+		end
+	end
+	m_CAI_CloudSavedContent = nil
 	CAI_PopDialog()
 	orig()
 end)
@@ -527,6 +622,23 @@ OnJoinGameComplete = WrapFunc(OnJoinGameComplete, function(orig, ...)
 end)
 
 OnFinishedGameplayContentConfigure = WrapFunc(OnFinishedGameplayContentConfigure, function(orig, kEvent)
+	if m_CAI_WaitingForCloudConfigure then
+		m_CAI_WaitingForCloudConfigure = false
+		if ContextPtr:IsHidden() then return end
+		local caiHandle = Modding.GetModHandle(caiId)
+		if kEvent.Success ~= true or caiHandle == nil
+			or not Modding.IsModEnabled(caiId) or not CAI_CloudConfigHasMod(caiHandle)
+			or not CAI_CloudSavedContentPreserved() then
+			print("CAI cloud save recovery failed: content configuration did not restore CAI.")
+			CAI_DeferFailurePopup("LOC_MP_JOIN_FAILED", "LOC_MP_JOIN_FAILED_TITLE")
+			return
+		end
+		CAI_TraceCloudConfiguration("recovery_completed")
+		print("CAI cloud save recovery complete: opening staging room.")
+		g_waitingForContentConfigure = false
+		CheckTransitionToStagingRoom()
+		return
+	end
 	orig(kEvent)
 	if m_CAI_WaitingForRecoveryConfigure and kEvent.Success == true then
 		CAI_ShowPendingFailurePopup()
@@ -578,6 +690,7 @@ OnMultiplayerGameAbandoned = WrapFunc(OnMultiplayerGameAbandoned, function(orig,
 end)
 
 OnBeforeMultiplayerInviteProcessing = WrapFunc(OnBeforeMultiplayerInviteProcessing, function(orig, ...)
+	CAI_ClearCloudRecovery()
 	CAI_PopDialog()
 	orig(...)
 end)

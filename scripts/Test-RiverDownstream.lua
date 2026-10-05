@@ -2,6 +2,11 @@
 -- Tests the production resolver with a mocked map; changes no game state.
 -- Mocked map/visibility APIs validate the resolver against vanilla DoRiver transitions.
 -- The live readout still requires in-game verification.
+dofile("src/UI/shared/textProcessing.lua")
+include = function(name)
+ assert(name == "textProcessing", "Unexpected geometry dependency: " .. name)
+ dofile("src/UI/shared/textProcessing.lua")
+end
 
 FlowDirectionTypes={FLOWDIRECTION_NORTH=0,FLOWDIRECTION_NORTHEAST=1,FLOWDIRECTION_SOUTHEAST=2,FLOWDIRECTION_SOUTH=3,FLOWDIRECTION_SOUTHWEST=4,FLOWDIRECTION_NORTHWEST=5,NO_FLOWDIRECTION=-1}
 DirectionTypes={DIRECTION_NORTHEAST=0,DIRECTION_EAST=1,DIRECTION_SOUTHEAST=2,DIRECTION_SOUTHWEST=3,DIRECTION_WEST=4,DIRECTION_NORTHWEST=5}
@@ -47,20 +52,27 @@ end
 TerrainBuilder={SetWOfRiver=function(p,b,f)setRiver(p,'E',b,f)end,SetNWOfRiver=function(p,b,f)setRiver(p,'SE',b,f)end,SetNEOfRiver=function(p,b,f)setRiver(p,'SW',b,f)end}
 local function reset() world={};writes={};missing={};_rivers={};nextRiverID=1;wrapWidth=nil;nextPlotIndex=0 end
 -- Extract the actual mutation/recursive-start stage from the checked-in vanilla source.
+local withoutVanilla=arg and arg[1]=='--without-vanilla'
+local VanillaFirstRiverStep
+if withoutVanilla then
+ print('SKIP: vanilla-source transition checks (--without-vanilla); production geometry/readout checks still run')
+else
 local file=assert(io.open('decompiled/Assets/Maps/Utility/RiversLakes.lua','rb'))
 local source=file:read('*a');file:close()
 local first=assert(source:find('function DoRiver(',1,true))
 local last=assert(source:find('-- Storing X,Y positions as locals',first,true))
 local chunk=source:sub(first,last-1):gsub('function DoRiver%(', 'local function VanillaFirstRiverStep(',1)
-local VanillaFirstRiverStep=assert(load(chunk..'\nreturn riverPlot\nend\nreturn VanillaFirstRiverStep'))()
+VanillaFirstRiverStep=assert(load(chunk..'\nreturn riverPlot\nend\nreturn VanillaFirstRiverStep'))()
+end
 
 -- Exercise the tooltip's actual initial includes against the already registered VFS.
--- A newly added helper must not be needed to initialize the river resolver.
+-- Descriptor expansion is shared; the river resolver still lives in hexCoordUtils.
 local bootstrapFile=assert(io.open('src/UI/inGame/PlotToolTip_CAI.lua','rb'))
 local bootstrapSource=bootstrapFile:read('*a');bootstrapFile:close()
 local bootstrapEnd=assert(bootstrapSource:find('local function IsBarbarianClansModeActive()',1,true))
 local bootstrapEnv=setmetatable({include=function(name)
  if name=='hexCoordUtils_CAI' then dofile('src/UI/inGame/hexCoordUtils_CAI.lua')
+ elseif name=='CAIDescriptors' then dofile('src/UI/shared/CAIDescriptors.lua')
  else assert(name=='caiUtils' or name=='interfaceInfoHelpers_CAI' or name=='inGameHelpers_CAI' or name=='Civ6Common' or name=='CivRoyaleMapInfo_CAI','Unexpected new VFS dependency: '..name) end
 end},{__index=_ENV})
 local loadedHex=assert(load(bootstrapSource:sub(1,bootstrapEnd-1)..'\nreturn HexCoordUtils','@PlotToolTip_CAI bootstrap','t',bootstrapEnv))()
@@ -100,6 +112,7 @@ local function check(v,message) checks=checks+1;assert(v,message) end
 local canInspect=function(p)return p.revealed end
 -- Use vanilla DoRiver's actual first-step mutation/returned recursive start.
 -- For each travel bearing, test both legal turns and both sides' roles.
+if VanillaFirstRiverStep then
 for flow=0,5 do
  for _,turn in ipairs({-1,1}) do
   reset()
@@ -159,6 +172,7 @@ for flow=0,5 do
  end
 end
 -- Exact SE/SW example: next external edge is W neighbour's SE flowing SW.
+end
 reset()
 local current=getPlot(0,0)
 local west=Map.GetAdjacentPlot(0,0,DirectionTypes.DIRECTION_WEST)
@@ -308,11 +322,11 @@ local function TestRiverReadout()
  IsExpansion2Active=function()return true end
  local IS_XP2_TOOLTIP=true
  LogMessage=function()end
- local labels={LOC_TOOLTIP_RIVER='River',LOC_DIRECTION_NORTH='north',LOC_DIRECTION_NORTH_EAST='northeast',LOC_DIRECTION_EAST='east',LOC_DIRECTION_SOUTH_EAST='southeast',LOC_DIRECTION_SOUTH='south',LOC_DIRECTION_SOUTH_WEST='southwest',LOC_DIRECTION_WEST='west',LOC_DIRECTION_NORTH_WEST='northwest'}
+ local labels={LOC_CAI_WORLD_SCANNER_GROUP_RIVERS='Rivers',LOC_TOOLTIP_RIVER='River',LOC_DIRECTION_NORTH='north',LOC_DIRECTION_NORTH_EAST='northeast',LOC_DIRECTION_EAST='east',LOC_DIRECTION_SOUTH_EAST='southeast',LOC_DIRECTION_SOUTH='south',LOC_DIRECTION_SOUTH_WEST='southwest',LOC_DIRECTION_WEST='west',LOC_DIRECTION_NORTH_WEST='northwest'}
  for _,name in ipairs(edgeNames)do labels['LOC_CAI_DIR_'..name]=name end
  Locale={Lookup=function(tag,a,b,c)
   if labels[tag] then return labels[tag] end
-  if tag=='LOC_RIVER_TOOLTIP_STRING' then return a end
+  if tag:match('^River %d+$') then return tag end
   if tag=='LOC_CAI_RIVER_DESTINATION_COAST' then return 'leads to coast' end
   if tag=='LOC_CAI_RIVER_DESTINATION_LAKE' then return 'leads to lake' end
   if tag=='LOC_CAI_RIVER_WITH_DESTINATION' then return a..': '..b end
@@ -324,7 +338,11 @@ local function TestRiverReadout()
  end}
  RiverManager={EnumerateRivers=function(index)
   local records={}
-  for _,owner in pairs(world)do
+  -- Adjacent-plot lookups create mock plots. Snapshot before those lookups so
+  -- adding hash keys cannot skip existing river owners during pairs traversal.
+  local owners={}
+  for _,owner in pairs(world)do owners[#owners+1]=owner end
+  for _,owner in ipairs(owners)do
    for _,entry in ipairs({{'E',1},{'SE',2},{'SW',3}})do
     if owner.flags[entry[1]] then
      local other=Map.GetAdjacentPlot(owner.q,owner.r,entry[2])
@@ -362,24 +380,24 @@ local function TestRiverReadout()
  w.flags.SE=true;w.flows.SE=FlowDirectionTypes.FLOWDIRECTION_SOUTHWEST
  local e=Map.GetAdjacentPlot(0,0,DirectionTypes.DIRECTION_EAST)
  e.flags.SW=true;e.flows.SW=FlowDirectionTypes.FLOWDIRECTION_NORTHWEST
- equal(GetNamedRiverString(data,p),'River 1, SE SW, flows from east to west')
+ equal(GetNamedRiverString(data,p),'Rivers: River 1, SE SW, flows from east to west')
  orderDownstream=false
- equal(GetNamedRiverString(data,p),'River 1, SE SW, flows from east to west')
+ equal(GetNamedRiverString(data,p),'Rivers: River 1, SE SW, flows from east to west')
  e.flags.SW=false
  w.revealed=false
- equal(GetNamedRiverString(data,p),'River 1, SE SW, flows northwest')
+ equal(GetNamedRiverString(data,p),'Rivers: River 1, SE SW, flows northwest')
  w.revealed=true;w.flows.SE=FlowDirectionTypes.FLOWDIRECTION_NORTHEAST
- equal(GetNamedRiverString(data,p),'River 1, SE SW, flows northwest')
+ equal(GetNamedRiverString(data,p),'Rivers: River 1, SE SW, flows northwest')
  w.flows.SE=-1
- equal(GetNamedRiverString(data,p),'River 1, SE SW, flows northwest')
+ equal(GetNamedRiverString(data,p),'Rivers: River 1, SE SW, flows northwest')
  reset();p=getPlot(0,0)
  p.flags.SE=true;p.flows.SE=FlowDirectionTypes.FLOWDIRECTION_NORTHEAST
  p.flags.E=true;p.flows.E=FlowDirectionTypes.FLOWDIRECTION_NORTH
  local ne=Map.GetAdjacentPlot(0,0,DirectionTypes.DIRECTION_NORTHEAST)
  ne.flags.SE=true;ne.flows.SE=FlowDirectionTypes.FLOWDIRECTION_NORTHEAST
- equal(GetNamedRiverString(data,p),'River 1, E SE, flows northeast')
+ equal(GetNamedRiverString(data,p),'Rivers: River 1, E SE, flows northeast')
  orderDownstream=true
- equal(GetNamedRiverString(data,p),'River 1, SE E, flows northeast')
+ equal(GetNamedRiverString(data,p),'Rivers: River 1, SE E, flows northeast')
  -- Reported four-edge bend: the cursor continuation replaces segment southwest.
  reset();p=getPlot(0,0)
  p.flags.SE=true;p.flows.SE=FlowDirectionTypes.FLOWDIRECTION_NORTHEAST
@@ -389,25 +407,25 @@ local function TestRiverReadout()
  local nw=Map.GetAdjacentPlot(0,0,DirectionTypes.DIRECTION_NORTHWEST)
  nw.flags.SE=true;nw.flows.SE=FlowDirectionTypes.FLOWDIRECTION_SOUTHWEST
  nw.flags.SW=true;nw.flows.SW=FlowDirectionTypes.FLOWDIRECTION_NORTHWEST
- equal(GetNamedRiverString(data,p),'River 1, SE E NE NW, flows west')
+ equal(GetNamedRiverString(data,p),'Rivers: River 1, SE E NE NW, flows west')
  local sw=Map.GetAdjacentPlot(0,0,DirectionTypes.DIRECTION_SOUTHWEST)
  sw.flags.E=true;sw.flows.E=FlowDirectionTypes.FLOWDIRECTION_NORTH
- equal(GetNamedRiverString(data,p),'River 1, SE E NE NW, flows from southwest to west')
+ equal(GetNamedRiverString(data,p),'Rivers: River 1, SE E NE NW, flows from southwest to west')
  orderDownstream=false
- equal(GetNamedRiverString(data,p),'River 1, NE E SE NW, flows from southwest to west')
+ equal(GetNamedRiverString(data,p),'Rivers: River 1, NE E SE NW, flows from southwest to west')
  orderDownstream=true
  -- A mouth without an outgoing edge keeps the final game-provided flow.
  reset();p=getPlot(0,0)
  p.flags.E=true;p.flows.E=FlowDirectionTypes.FLOWDIRECTION_NORTH
  Map.GetAdjacentPlot(0,0,DirectionTypes.DIRECTION_NORTHEAST).water=true
  Map.GetAdjacentPlot(0,0,DirectionTypes.DIRECTION_EAST).water=true
- equal(GetNamedRiverString(data,p),'River 1, E, flows north, leads to coast')
+ equal(GetNamedRiverString(data,p),'Rivers: River 1, E, flows north, leads to coast')
  local e=Map.GetAdjacentPlot(0,0,DirectionTypes.DIRECTION_EAST)
  e.flags.SW=true;e.flows.SW=FlowDirectionTypes.FLOWDIRECTION_NORTHWEST
- equal(GetNamedRiverString(data,p),'River 1, E, flows from southeast to north, leads to coast')
+ equal(GetNamedRiverString(data,p),'Rivers: River 1, E, flows from southeast to north, leads to coast')
  e.revealed=false
  e.IsNEOfRiver=function()error('Hidden upstream edge was inspected')end
- equal(GetNamedRiverString(data,p),'River 1, E, flows north')
+ equal(GetNamedRiverString(data,p),'Rivers: River 1, E, flows north')
  -- A distinct incoming named river joins the main river before leaving this plot.
  reset();p=getPlot(0,0)
  ne=Map.GetAdjacentPlot(0,0,DirectionTypes.DIRECTION_NORTHEAST)
@@ -416,7 +434,7 @@ local function TestRiverReadout()
  p.flags.SE=true;p.flows.SE=FlowDirectionTypes.FLOWDIRECTION_SOUTHWEST;p.riverTypes.SE=2
  local sw=Map.GetAdjacentPlot(0,0,DirectionTypes.DIRECTION_SOUTHWEST)
  sw.flags.E=true;sw.flows.E=FlowDirectionTypes.FLOWDIRECTION_SOUTH;sw.riverTypes.E=2
- equal(GetNamedRiverString(data,p),'River 1, NE, flows southwest. River 2, E SE, flows southwest')
+ equal(GetNamedRiverString(data,p),'Rivers: River 1, NE, flows southwest. River 2, E SE, flows southwest')
  ne.flags.SE=true;ne.flows.SE=FlowDirectionTypes.FLOWDIRECTION_NORTHEAST;ne.riverTypes.SE=1
  check(GetNamedRiverString(data,p):find('River 1, NE, flows southeast',1,true)~=nil,'A fork must retain the actual segment flow without choosing a cursor direction')
  -- Visibility callback is the existing observer/World Builder-aware plot check.
@@ -457,6 +475,7 @@ local function TestRiverReadout()
   end
  end
  -- Trace a bend using two actual vanilla mutations, from either bank of the first edge.
+ if VanillaFirstRiverStep then
  for flow=0,5 do
   for _,turn in ipairs({-1,1})do
    reset()
@@ -477,6 +496,7 @@ local function TestRiverReadout()
     check(CAIHexCoordUtils.GetRiverDestination(bank,segment,canInspect)=='coast','Vanilla bend must reach its mouth')
    end
   end
+ end
  end
  -- Uncertain topology must not become a destination just because water is nearby.
  reset()
@@ -525,10 +545,10 @@ local function TestRiverReadout()
  local item={ZonePlotIndices={p.index},RiverType=1}
  updateLabel(item,{})
  check(item.LabelKey=='River 1: leads to lake, 1 tiles','Scanner destination follows the name before tile count')
- check(GetNamedRiverString(data,p)=='River 1, E, flows north, leads to lake','B must append a lake destination after flow directions')
+ check(GetNamedRiverString(data,p)=='Rivers: River 1, E, flows north, leads to lake','B must append a lake destination after flow directions')
  mouth.revealed=false;updateLabel(item,{})
  check(item.LabelKey=='River 1, 1 tiles','Scanner must omit an unknown destination without leaving punctuation')
- check(GetNamedRiverString(data,p)=='River 1, E, flows north','B must omit an unknown destination without leaving punctuation')
+ check(GetNamedRiverString(data,p)=='Rivers: River 1, E, flows north','B must omit an unknown destination without leaving punctuation')
  mouth.revealed=true;mouth.lake=false;updateLabel(item,{})
  check(item.LabelKey=='River 1: leads to coast, 1 tiles','Scanner label must recalculate water state')
  IsExpansion2Active=function()return false end
@@ -538,4 +558,22 @@ local function TestRiverReadout()
 end
 TestRiverReadout()
 
-print('Production upstream/downstream navigation checks passed: '..checks..' assertions against vanilla transitions and edge cases')
+-- The shared location reader must use live cursor state across context changes.
+local savedMembers, savedLookup, savedDirection = ExposedMembers, Map.GetPlotByIndex, CAIHexCoordUtils.directionString
+ExposedMembers = {}
+Map.GetPlotByIndex = function(id)
+ if id == 7 then return { GetX=function()return 3 end, GetY=function()return 4 end } end
+end
+CAIHexCoordUtils.directionString = function(x,y,tx,ty)return x..':'..y..'>'..tx..':'..ty end
+check(CAIHexCoordUtils.relativePlotLocation(nil)=='','missing location id')
+check(CAIHexCoordUtils.relativePlotLocation(9)=='','missing location plot')
+check(CAIHexCoordUtils.relativePlotLocation(7)=='','cursor not initialized')
+check(CAIHexCoordUtils.appendRelativePlotLocation('city',7)=='city','no direction leaves label unchanged')
+ExposedMembers.CAICursor={GetCoords=function()return 1,2 end}
+check(CAIHexCoordUtils.relativePlotLocation(7)=='1:2>3:4','cursor becomes available')
+ExposedMembers.CAICursor={GetCoords=function()return 5,6 end}
+check(CAIHexCoordUtils.appendRelativePlotLocation('city',7)=='city, 5:6>3:4','replacement cursor read live')
+ExposedMembers.CAICursor={GetCoords=function()return nil,nil end}
+check(CAIHexCoordUtils.relativePlotLocation(7)=='','cursor coordinates not initialized')
+ExposedMembers, Map.GetPlotByIndex, CAIHexCoordUtils.directionString = savedMembers, savedLookup, savedDirection
+print('Production upstream/downstream navigation checks passed: '..checks..' assertions'..(withoutVanilla and ' (vanilla-source checks skipped)' or ' against vanilla transitions and edge cases'))

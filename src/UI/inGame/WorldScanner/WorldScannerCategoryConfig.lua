@@ -1,3 +1,4 @@
+include("textProcessing")
 -- Persistent scanner category layout and Civ V-style custom category model.
 
 CAIWorldScannerCategoryConfig = {}
@@ -81,29 +82,11 @@ local function ToBool(value, defaultValue)
     return normalized == "true" or normalized == "1" or normalized == "yes" or normalized == "on"
 end
 
-local function Trim(value)
-    return tostring(value or ""):match("^%s*(.-)%s*$")
-end
-
 local function NormalizeCategoryId(id)
     return CATEGORY_ID_ALIASES[id] or id
 end
 
-local function Split(value, separator)
-    local out = {}
-    value = tostring(value or "")
-    if value == "" then return out end
-    local pattern = "([^" .. separator .. "]+)"
-    for part in value:gmatch(pattern) do out[#out + 1] = part end
-    return out
-end
-
-local function Join(values, separator)
-    return table.concat(values or {}, separator)
-end
-
-local function SafeKey(value) return tostring(value or ""):gsub("[^%w_]", "_") end
-local function EnabledKey(id) return "Enabled_" .. SafeKey(id) end
+local function EnabledKey(id) return "Enabled_" .. CAIText.SafeKey(id) end
 local function CustomActiveKey(id) return "CustomActive_" .. tostring(id) end
 local function CustomNameKey(id) return "CustomName_" .. tostring(id) end
 local function SelectorCountKey(id) return "CustomSelectorCount_" .. tostring(id) end
@@ -114,7 +97,7 @@ local function TermKey(id, kind, index)
 end
 
 local function SaveOrder()
-    SetValue(ORDER_KEY, Join(m_order, ","))
+    SetValue(ORDER_KEY, table.concat(m_order or {}, ","))
 end
 
 local function FindOrderIndex(id)
@@ -151,8 +134,8 @@ local function ReadTerms(id, kind)
     local out = {}
     local count = tonumber(GetValue(TermCountKey(id, kind), "0")) or 0
     for index = 1, count do
-        local term = Trim(GetValue(TermKey(id, kind, index), ""))
-        if term ~= "" then out[#out + 1] = term end
+        local term = CAIText.TrimWhitespace(GetValue(TermKey(id, kind, index), ""))
+        CAIText.AppendIfNonEmpty(out, term)
     end
     return out
 end
@@ -258,7 +241,7 @@ end
 local function ReconcileOrder()
     local reconciled = {}
     local seen = {}
-    for _, savedId in ipairs(Split(GetValue(ORDER_KEY, ""), ",")) do
+    for _, savedId in ipairs(CAIText.SplitNonEmpty(GetValue(ORDER_KEY, ""), ",")) do
         local id = NormalizeCategoryId(savedId)
         if not seen[id] and (m_definitionsById[id] ~= nil or m_customsById[id] ~= nil) then
             reconciled[#reconciled + 1] = id
@@ -496,7 +479,7 @@ end
 
 function C.RenameCustom(id, name)
     local custom = m_customsById[id]
-    local trimmed = Trim(name)
+    local trimmed = CAIText.TrimWhitespace(name)
     if custom == nil or trimmed == "" then return false end
     custom.Name = trimmed
     SetValue(CustomNameKey(custom.NumericId), trimmed)
@@ -548,7 +531,7 @@ end
 
 function C.ValidateTerm(customId, kind, value)
     local custom = m_customsById[customId]
-    local term = Trim(value)
+    local term = CAIText.TrimWhitespace(value)
     local terms = custom and custom[kind] or nil
     if terms == nil or term == "" then return false, "empty" end
     local lower = term:lower()
@@ -562,7 +545,7 @@ function C.AddTerm(customId, kind, value)
     local valid = C.ValidateTerm(customId, kind, value)
     if not valid then return false end
     local custom = m_customsById[customId]
-    local term = Trim(value)
+    local term = CAIText.TrimWhitespace(value)
     local terms = custom[kind]
     terms[#terms + 1] = term
     SaveTerms(custom, kind)

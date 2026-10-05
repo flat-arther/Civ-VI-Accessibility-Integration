@@ -283,7 +283,7 @@ function S.BuildSettingsTree(mgr)
 
     LogMessage("Settings helper built settings tree, rows="
         .. tostring(rowCount) .. ", widgets=" .. tostring(widgetCount)
-        .. ", sections=" .. tostring(GetKeys(categories) and #GetKeys(categories) or 0))
+        .. ", sections=" .. tostring(CAICollection.Keys(categories) and #CAICollection.Keys(categories) or 0))
     return tree
 end
 

@@ -74,18 +74,12 @@ function Initialize()
 end
 
 --#Accessibility integration
+include("CAIControl")
 include("caiUtils")
 
 local mgr = ExposedMembers.CAI_UIManager
 
 local m_CAI_Dialog = nil
-
-local function CAI_GetControlText(control)
-	if control and control.GetText then
-		return control:GetText() or ""
-	end
-	return ""
-end
 
 local function CAI_RemoveDialog()
 	if not mgr or not m_CAI_Dialog then
@@ -98,7 +92,7 @@ end
 local function CAI_BuildDialog()
 	local remindText = mgr:CreateWidget(mgr:GenerateWidgetId("CAIPBCNotifyRemindText"), "StaticText", {
 		Label = function()
-			return CAI_GetControlText(Controls.RemindText)
+			return CAIControl.Text(Controls.RemindText)
 		end,
 		FocusKey = "remind:text",
 	})
@@ -118,7 +112,7 @@ local function CAI_BuildDialog()
 
 	local optionsButton = mgr:CreateWidget(mgr:GenerateWidgetId("CAIPBCNotifyRemindOptions"), "Button", {
 		Label = function()
-			return CAI_GetControlText(Controls.OptionsButton)
+			return CAIControl.Text(Controls.OptionsButton)
 		end,
 		FocusKey = "remind:options",
 	})
@@ -128,7 +122,7 @@ local function CAI_BuildDialog()
 
 	local acceptButton = mgr:CreateWidget(mgr:GenerateWidgetId("CAIPBCNotifyRemindAccept"), "Button", {
 		Label = function()
-			return CAI_GetControlText(Controls.AcceptButton)
+			return CAIControl.Text(Controls.AcceptButton)
 		end,
 		FocusKey = "remind:accept",
 	})
@@ -138,7 +132,7 @@ local function CAI_BuildDialog()
 
 	m_CAI_Dialog = mgr.WidgetHelpers.MakeGeneralDialog(
 		function()
-			return CAI_GetControlText(Controls.RemindTitle)
+			return CAIControl.Text(Controls.RemindTitle)
 		end,
 		{ optionsButton, acceptButton },
 		{ remindText, doNotRemind },

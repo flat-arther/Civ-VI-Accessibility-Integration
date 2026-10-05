@@ -1,3 +1,6 @@
+include("CAIColumns")
+include("CAIControl")
+include("CAICollection")
 -- DiplomacyActionView_CAI.lua
 --
 -- Accessibility layer for the diplomacy action view (the leader screen: intel,
@@ -136,16 +139,8 @@ local function PlayHoverSound(widget)
     widget:SetFocusSound("Main_Menu_Mouse_Over")
 end
 
-local function ControlIsHidden(control)
-    return control and control.IsHidden and control:IsHidden() or false
-end
-
-local function ControlIsDisabled(control)
-    return control and control.IsDisabled and control:IsDisabled() or false
-end
-
 local function ControlText(control)
-    if not control or ControlIsHidden(control) then return "" end
+    if not control or CAIControl.IsHidden(control) then return "" end
     if control.GetText then
         local text = control:GetText()
         if text and text ~= "" then return text end
@@ -154,7 +149,7 @@ local function ControlText(control)
 end
 
 local function ControlTooltip(control)
-    if not control or ControlIsHidden(control) or not control.GetToolTipString then return "" end
+    if not control or CAIControl.IsHidden(control) or not control.GetToolTipString then return "" end
     return control:GetToolTipString() or ""
 end
 
@@ -179,53 +174,6 @@ local function ControlButtonText(control)
     return ""
 end
 
-local function NormalizeText(text)
-    -- Color/tag stripping happens centrally in Speak()/ProcessText; keep only
-    -- nil-safety here. SplitLines still splits on newlines (ASCII-safe) below.
-    if not text then return "" end
-    return tostring(text)
-end
-
-local function SplitLines(text)
-    local lines = {}
-    text = NormalizeText(text or "")
-    text = string.gsub(text, "%[NEWLINE%]", "\n")
-    text = string.gsub(text, "\r\n", "\n")
-    text = string.gsub(text, "\r", "\n")
-    text = text .. "\n"
-    for line in string.gmatch(text, "(.-)\n") do
-        if line ~= "" then
-            table.insert(lines, line)
-        end
-    end
-    return lines
-end
-
-local function JoinNonEmpty(parts, separator)
-    local out = {}
-    for _, part in ipairs(parts) do
-        if part and part ~= "" then
-            table.insert(out, part)
-        end
-    end
-    return table.concat(out, separator)
-end
-
-
-local function JoinTooltipLines(text)
-    if not text or text == "" then return text end
-    return table.concat(SplitLines(text), "[NEWLINE]")
-end
-
-local function CountEntries(list)
-    local count = 0
-    if not list then return count end
-    for _ in pairs(list) do
-        count = count + 1
-    end
-    return count
-end
-
 local function CreateReadOnlyNode(id, label, tooltip)
     return mgr:CreateWidget(id, "TreeItem", {
         Label   = function() return label end,
@@ -234,7 +182,7 @@ local function CreateReadOnlyNode(id, label, tooltip)
 end
 
 local function CreateReadOnlyText(id, label, details)
-    local fullLabel = JoinNonEmpty({ label, details }, "[NEWLINE]")
+    local fullLabel = CAIText.JoinNonEmpty({ label, details }, "[NEWLINE]")
     return mgr:CreateWidget(id, "StaticText", {
         Label = function() return fullLabel end,
     })
@@ -296,7 +244,7 @@ end
 local function GetPanelLabel()
     local playerConfig = GetSelectedPlayerConfig()
     if playerConfig then
-        return JoinNonEmpty({
+        return CAIText.JoinNonEmpty({
             GetLeaderIdentityLabel(ms_SelectedPlayerID),
             GetLeaderMoodLabel(ms_SelectedPlayerID),
         }, ", ")
@@ -304,11 +252,11 @@ local function GetPanelLabel()
 
     local playerName = ControlText(Controls.PlayerNameText)
     local civName = ControlText(Controls.CivNameText)
-    return JoinNonEmpty({ playerName, civName }, ": ")
+    return CAIText.JoinNonEmpty({ playerName, civName }, ": ")
 end
 
 local function GetLeaderRowLabel(playerID)
-    return JoinNonEmpty({
+    return CAIText.JoinNonEmpty({
         GetLeaderIdentityLabel(playerID),
         GetLeaderMoodLabel(playerID),
     }, ", ")
@@ -361,17 +309,13 @@ end
 -- container state keeps the overview navigable without a separate view flag,
 -- empty-list, or focus-visibility check.
 local function IsConversationContainerShown()
-    return not ControlIsHidden(Controls.ConversationContainer)
+    return not CAIControl.IsHidden(Controls.ConversationContainer)
 end
 
 local function HasConversationChildren()
     return m_ui.conversationList
         and m_ui.conversationList.Children
         and #m_ui.conversationList.Children > 0
-end
-
-local function IsConversationActive()
-    return IsConversationContainerShown() and HasConversationChildren()
 end
 
 -- True when the live focus leaf already sits inside the overview panel. When a
@@ -463,7 +407,7 @@ local function CreateActionButton(entry)
     local btn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDiplomacyActionButton"), "Button", {
         Label             = function() return ControlText(entry.LabelControl) end,
         Tooltip           = function() return ControlTooltip(entry.Button) end,
-        DisabledPredicate = function() return ControlIsDisabled(entry.Button) end,
+        DisabledPredicate = function() return CAIControl.IsDisabled(entry.Button) end,
         FocusKey          = GetActionFocusKey(entry, "btn"),
     })
     PlayHoverSound(btn)
@@ -480,7 +424,7 @@ local function CreateActionSubMenu(entry)
     local sub = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDiplomacyActionSubMenu"), "SubMenu", {
         Label             = function() return ControlText(entry.LabelControl) end,
         Tooltip           = function() return ControlTooltip(entry.Button) end,
-        DisabledPredicate = function() return ControlIsDisabled(entry.Button) end,
+        DisabledPredicate = function() return CAIControl.IsDisabled(entry.Button) end,
         FocusKey          = GetActionFocusKey(entry, "sub"),
     })
     PlayHoverSound(sub)
@@ -503,7 +447,7 @@ local function CreateActionSubMenu(entry)
             local callback = subEntry.Callback
             local label    = ControlText(subEntry.LabelControl)
             local tooltip  = ControlTooltip(subEntry.Button)
-            local disabled = ControlIsDisabled(subEntry.Button)
+            local disabled = CAIControl.IsDisabled(subEntry.Button)
             local child    = mgr:CreateWidget(
                 mgr:GenerateWidgetId("CAIDiplomacySubActionButton"), "Button", {
                     Label             = function() return label end,
@@ -575,39 +519,6 @@ end
 -- Intel: hand-authored readers (clean output for the well-known vanilla tabs).
 -- These read the live game state / captured typed instances, matching vanilla.
 -- ============================================================================
-
-local function AddTextLineChildren(parent, text)
-    for _, line in ipairs(SplitLines(text)) do
-        parent:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyLine"), line, nil))
-    end
-end
-
-local function JoinLines(lines)
-    local out = {}
-    for _, line in ipairs(lines or {}) do
-        local normalized = NormalizeText(line)
-        if normalized ~= "" then
-            table.insert(out, normalized)
-        end
-    end
-    return table.concat(out, "[NEWLINE]")
-end
-
-local function AppendSectionLines(lines, title, entries)
-    if not entries or #entries == 0 then
-        return
-    end
-
-    if title and title ~= "" then
-        table.insert(lines, title)
-    end
-    for _, entry in ipairs(entries) do
-        local normalized = NormalizeText(entry)
-        if normalized ~= "" then
-            table.insert(lines, normalized)
-        end
-    end
-end
 
 local function GetRelationshipData(targetID)
     local selectedID = targetID or ms_SelectedPlayerID
@@ -689,7 +600,7 @@ local function BuildRelationshipReasonLines(targetID)
         for _, tip in ipairs(toolTips) do
             if tip.Score ~= 0 and tip.Text then
                 local scoreText = Locale.Lookup("{1_Score : number +#,###.##;-#,###.##}", tip.Score)
-                table.insert(lines, JoinNonEmpty({ scoreText, Locale.Lookup(tip.Text) }, " "))
+                table.insert(lines, CAIText.JoinNonEmpty({ scoreText, Locale.Lookup(tip.Text) }, " "))
             end
         end
     end
@@ -789,57 +700,20 @@ end
 
 local function BuildAccessSectionTooltip(targetID)
     local lines = {}
-    AppendSectionLines(lines, Locale.Lookup("LOC_CAI_DIPLOMACY_ACTIVE_SOURCES"), BuildActiveVisibilitySourceLines(targetID))
-    AppendSectionLines(lines, Locale.Lookup("LOC_DIPLOMACY_INTEL_INFORMATION_SHARED_HEADER"),
+    CAIText.AppendSection(lines, Locale.Lookup("LOC_CAI_DIPLOMACY_ACTIVE_SOURCES"), BuildActiveVisibilitySourceLines(targetID))
+    CAIText.AppendSection(lines, Locale.Lookup("LOC_DIPLOMACY_INTEL_INFORMATION_SHARED_HEADER"),
         BuildInformationSharedLines(0, targetID))
     if GameCapabilities.HasCapability("CAPABILITY_DIPLOMACY_ACCESS_LEVEL_INFO") then
-        AppendSectionLines(lines, Locale.Lookup("LOC_DIPLOMACY_INTEL_NEXT_ACCESS_LEVEL_HEADER"),
+        CAIText.AppendSection(lines, Locale.Lookup("LOC_DIPLOMACY_INTEL_NEXT_ACCESS_LEVEL_HEADER"),
             BuildInformationSharedLines(1, targetID))
     end
-    AppendSectionLines(lines, Locale.Lookup("LOC_DIPLOMACY_INTEL_GAIN_ACCESS_LEVEL_HEADER"), BuildAccessAdvisorLines(targetID))
-    return JoinLines(lines)
+    CAIText.AppendSection(lines, Locale.Lookup("LOC_DIPLOMACY_INTEL_GAIN_ACCESS_LEVEL_HEADER"), BuildAccessAdvisorLines(targetID))
+    return CAIText.JoinTextLines(lines)
 end
 
 local function BuildRelationshipSectionTooltip(targetID)
     local relationship = GetRelationshipData(targetID)
-    return relationship and JoinTooltipLines(relationship.Tooltip or "") or ""
-end
-
-local function BuildGossipSectionTooltip(targetID)
-    local selectedID = targetID or ms_SelectedPlayerID
-    local gossipManager = Game.GetGossipManager()
-    local currentTurn = Game.GetCurrentGameTurn()
-    local earliestTurn = currentTurn - 100
-    local gossipItems = gossipManager and gossipManager.GetRecentVisibleGossipStrings and
-        gossipManager:GetRecentVisibleGossipStrings(earliestTurn, ms_LocalPlayerID, selectedID) or {}
-    local recentLines = {}
-    local olderLines = {}
-
-    for _, gossipItem in ipairs(gossipItems) do
-        local gossipText = gossipItem[1]
-        local gossipTurn = gossipItem[2]
-        if gossipText then
-            local label = gossipText
-            if gossipTurn and (currentTurn - 1) <= gossipTurn then
-                label = "[ICON_New] " .. label
-            end
-
-            if gossipTurn and (currentTurn - gossipTurn) <= 10 then
-                table.insert(recentLines, label)
-            else
-                table.insert(olderLines, label)
-            end
-        end
-    end
-
-    if #recentLines == 0 then
-        table.insert(recentLines, Locale.Lookup("LOC_DIPLOMACY_GOSSIP_ITEM_NO_RECENT"))
-    end
-
-    local lines = {}
-    AppendSectionLines(lines, Locale.Lookup("LOC_DIPLOMACY_INTEL_LAST_TEN_TURNS"), recentLines)
-    AppendSectionLines(lines, Locale.Lookup("LOC_DIPLOMACY_INTEL_OLDER"), olderLines)
-    return JoinLines(lines)
+    return relationship and CAIText.JoinTooltipLines(relationship.Tooltip or "") or ""
 end
 
 local function BuildAgendaSummaryLines(playerID, selectedPlayer)
@@ -962,7 +836,7 @@ local function BuildLeaderOverviewTooltip(playerID)
     end
     table.insert(lines, Locale.Lookup("LOC_DIPLOMACY_OVERVIEW_GOVERNMENT") .. ": " .. governmentText)
 
-    local gossipCount = CountEntries(Game.GetGossipManager():GetRecentVisibleGossipStrings(
+    local gossipCount = CAICollection.CountEntries(Game.GetGossipManager():GetRecentVisibleGossipStrings(
         Game.GetCurrentGameTurn() - 1,
         ms_LocalPlayerID,
         playerID))
@@ -995,7 +869,7 @@ local function BuildLeaderOverviewTooltip(playerID)
         end
     end
 
-    return JoinLines(lines)
+    return CAIText.JoinTextLines(lines)
 end
 
 local function BuildSelfLeaderTooltip(playerID)
@@ -1052,7 +926,7 @@ local function BuildSelfLeaderTooltip(playerID)
         end
     end
 
-    return JoinLines(lines)
+    return CAIText.JoinTextLines(lines)
 end
 
 local function IsSelectedPlayerInCrisis(crisis)
@@ -1061,288 +935,6 @@ local function IsSelectedPlayerInCrisis(crisis)
         if memberID == ms_SelectedPlayerID then return true end
     end
     return false
-end
-
-local function AddOverviewChildren(node)
-    local gossipCount = CountEntries(Game.GetGossipManager():GetRecentVisibleGossipStrings(
-        Game.GetCurrentGameTurn() - 1,
-        ms_LocalPlayerID,
-        ms_SelectedPlayerID))
-    local gossipText = gossipCount > 0
-        and Locale.Lookup("LOC_DIPLOMACY_GOSSIP_ITEM_COUNT", gossipCount)
-        or Locale.Lookup("LOC_DIPLOMACY_GOSSIP_ITEM_NONE_THIS_TURN")
-    node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyOverviewGossip"),
-        Locale.Lookup("LOC_DIPLOMACY_OVERVIEW_GOSSIP") .. ": " .. gossipText, nil))
-
-    local localPlayerDiplomacy = ms_LocalPlayer and ms_LocalPlayer.GetDiplomacy and ms_LocalPlayer:GetDiplomacy() or nil
-    local accessLevel = localPlayerDiplomacy and localPlayerDiplomacy:GetVisibilityOn(ms_SelectedPlayerID) or -1
-    local accessName = accessLevel >= 0 and GameInfo.Visibilities[accessLevel]
-        and Locale.Lookup(GameInfo.Visibilities[accessLevel].Name) or ""
-    node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyOverviewAccess"),
-        Locale.Lookup("LOC_DIPLOMACY_OVERVIEW_ACCESS_LEVEL") .. ": " .. accessName, nil))
-
-    local governmentText = Locale.Lookup("LOC_DIPLOMACY_GOVERNMENT_NONE")
-    local selectedCulture = ms_SelectedPlayer and ms_SelectedPlayer.GetCulture and ms_SelectedPlayer:GetCulture() or nil
-    local selectedGovernment = selectedCulture and selectedCulture:GetCurrentGovernment() or -1
-    if selectedGovernment ~= -1 and GameInfo.Governments[selectedGovernment] then
-        governmentText = Locale.Lookup(GameInfo.Governments[selectedGovernment].Name)
-    elseif selectedCulture and selectedCulture:IsInAnarchy() then
-        governmentText = Locale.Lookup("LOC_GOVERNMENT_ANARCHY_TURNS",
-            selectedCulture:GetAnarchyEndTurn() - Game.GetCurrentGameTurn())
-    end
-    node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyOverviewGovernment"),
-        Locale.Lookup("LOC_DIPLOMACY_OVERVIEW_GOVERNMENT") .. ": " .. governmentText, nil))
-
-    if not PlayerConfigurations[ms_SelectedPlayerID]:IsHuman() then
-        local agendasNode = CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyOverviewAgendas"),
-            Locale.Lookup("LOC_DIPLOMACY_OVERVIEW_AGENDAS"), nil)
-
-        local leaderType = PlayerConfigurations[ms_SelectedPlayerID]:GetLeaderTypeName()
-        for row in GameInfo.HistoricalAgendas() do
-            if row.LeaderType == leaderType then
-                local agenda = GameInfo.Agendas[row.AgendaType]
-                if agenda then
-                    agendasNode:AddChild(CreateReadOnlyNode(
-                        mgr:GenerateWidgetId("CAIDiplomacyOverviewAgendaEntry"),
-                        Locale.Lookup(agenda.Name),
-                        Locale.Lookup(agenda.Description)))
-                    break
-                end
-            end
-        end
-
-        local revealRandom = false
-        if localPlayerDiplomacy then
-            for row in GameInfo.Visibilities() do
-                if row.Index <= accessLevel and row.RevealAgendas == true then
-                    revealRandom = true
-                end
-            end
-        end
-
-        local agendaTypes = ms_SelectedPlayer:GetAgendaTypes() or {}
-        table.remove(agendaTypes, 1)
-        local randomCount = CountEntries(agendaTypes)
-        if randomCount > 0 then
-            if revealRandom then
-                for _, agendaType in ipairs(agendaTypes) do
-                    local agenda = GameInfo.Agendas[agendaType]
-                    if agenda then
-                        agendasNode:AddChild(CreateReadOnlyNode(
-                            mgr:GenerateWidgetId("CAIDiplomacyOverviewAgendaEntry"),
-                            Locale.Lookup(agenda.Name),
-                            Locale.Lookup(agenda.Description)))
-                    end
-                end
-            else
-                agendasNode:AddChild(CreateReadOnlyNode(
-                    mgr:GenerateWidgetId("CAIDiplomacyOverviewAgendaEntry"),
-                    Locale.Lookup("LOC_DIPLOMACY_HIDDEN_AGENDAS", randomCount, randomCount > 1),
-                    Locale.Lookup("LOC_DIPLOMACY_HIDDEN_AGENDAS_TT")))
-            end
-        elseif randomCount == 0 then
-            agendasNode:AddChild(CreateReadOnlyNode(
-                mgr:GenerateWidgetId("CAIDiplomacyOverviewAgendaEntry"),
-                Locale.Lookup("LOC_DIPLOMACY_RANDOM_AGENDA_NONE"),
-                nil))
-        end
-
-        if agendasNode.Children and #agendasNode.Children > 0 then
-            node:AddChild(agendasNode)
-        end
-    end
-
-    if localPlayerDiplomacy then
-        local agreementsNode = CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyOverviewAgreements"),
-            Locale.Lookup("LOC_DIPLOMACY_OVERVIEW_AGREEMENTS"), nil)
-        local agreements = {}
-
-        if localPlayerDiplomacy:HasDelegationAt(ms_SelectedPlayer:GetID()) then
-            table.insert(agreements, Locale.Lookup("LOC_DIPLO_MODIFIER_DELEGATION"))
-        end
-        if localPlayerDiplomacy:HasEmbassyAt(ms_SelectedPlayer:GetID()) then
-            table.insert(agreements, Locale.Lookup("LOC_DIPLO_MODIFIER_RESIDENT_EMBASSY"))
-        end
-        if localPlayerDiplomacy:HasDefensivePact(ms_SelectedPlayer:GetID()) then
-            table.insert(agreements, Locale.Lookup("LOC_DIPLO_MODIFIER_DEFENSIVE_PACT"))
-        end
-        if localPlayerDiplomacy:HasOpenBordersFrom(ms_SelectedPlayer:GetID()) then
-            table.insert(agreements, Locale.Lookup("LOC_DIPLO_MODIFIER_RECEIVED_OPEN_BORDERS"))
-        end
-        if ms_SelectedPlayer:GetDiplomacy():HasOpenBordersFrom(ms_LocalPlayer:GetID()) then
-            table.insert(agreements, Locale.Lookup("LOC_DIPLO_MODIFIER_GAVE_OPEN_BORDERS"))
-        end
-        if localPlayerDiplomacy:GetResearchAgreementTech(ms_SelectedPlayer:GetID()) ~= -1 then
-            table.insert(agreements, Locale.Lookup("LOC_DIPLOACTION_RESEARCH_AGREEMENT_NAME"))
-        end
-        if localPlayerDiplomacy:IsFightingAnyJointWarWith(ms_SelectedPlayer:GetID()) then
-            table.insert(agreements, Locale.Lookup("LOC_DIPLOACTION_JOINT_WAR_NAME"))
-        end
-
-        for _, label in ipairs(agreements) do
-            agreementsNode:AddChild(CreateReadOnlyNode(
-                mgr:GenerateWidgetId("CAIDiplomacyOverviewAgreementEntry"),
-                label,
-                label))
-        end
-
-        if agreementsNode.Children and #agreementsNode.Children > 0 then
-            node:AddChild(agreementsNode)
-        end
-    end
-
-    if not PlayerConfigurations[ms_SelectedPlayerID]:IsHuman() then
-        local selectedPlayerDiplomaticAI = ms_SelectedPlayer:GetDiplomaticAI()
-        local stateIndex = selectedPlayerDiplomaticAI:GetDiplomaticStateIndex(ms_LocalPlayerID)
-        local relationshipLabel = Locale.Lookup(GameInfo.DiplomaticStates[stateIndex].Name)
-        if Players[ms_LocalPlayerID]:GetTeam() == Players[ms_SelectedPlayerID]:GetTeam() then
-            relationshipLabel = "(" ..
-                Locale.Lookup("LOC_WORLD_RANKINGS_TEAM", Players[ms_LocalPlayerID]:GetTeam()) ..
-                ") " .. relationshipLabel
-        end
-
-        local relationshipTooltip = nil
-        if localPlayerDiplomacy and GameInfo.DiplomaticStates[stateIndex].StateType == "DIPLO_STATE_DENOUNCED" then
-            local ourDenounceTurn = localPlayerDiplomacy:GetDenounceTurn(ms_SelectedPlayerID)
-            local theirDenounceTurn = Players[ms_SelectedPlayerID]:GetDiplomacy():GetDenounceTurn(ms_LocalPlayerID)
-            local playerOrderAdjustment = 0
-            if theirDenounceTurn >= ourDenounceTurn then
-                if ms_SelectedPlayerID > ms_LocalPlayerID then
-                    playerOrderAdjustment = 1
-                end
-            elseif ms_LocalPlayerID > ms_SelectedPlayerID then
-                playerOrderAdjustment = 1
-            end
-
-            local remainingTurns
-            if ourDenounceTurn >= theirDenounceTurn then
-                remainingTurns = 1 + ourDenounceTurn + Game.GetGameDiplomacy():GetDenounceTimeLimit()
-                    - Game.GetCurrentGameTurn() + playerOrderAdjustment
-                relationshipTooltip = Locale.Lookup("LOC_DIPLOMACY_DENOUNCED_TOOLTIP",
-                    PlayerConfigurations[ms_LocalPlayerID]:GetCivilizationShortDescription(),
-                    PlayerConfigurations[ms_SelectedPlayerID]:GetCivilizationShortDescription())
-            else
-                remainingTurns = 1 + theirDenounceTurn + Game.GetGameDiplomacy():GetDenounceTimeLimit()
-                    - Game.GetCurrentGameTurn() + playerOrderAdjustment
-                relationshipTooltip = Locale.Lookup("LOC_DIPLOMACY_DENOUNCED_TOOLTIP",
-                    PlayerConfigurations[ms_SelectedPlayerID]:GetCivilizationShortDescription(),
-                    PlayerConfigurations[ms_LocalPlayerID]:GetCivilizationShortDescription())
-            end
-
-            relationshipTooltip = relationshipTooltip .. " ["
-                .. Locale.Lookup("LOC_ESPIONAGEPOPUP_TURNS_REMAINING", remainingTurns) .. "]"
-        elseif localPlayerDiplomacy and GameInfo.DiplomaticStates[stateIndex].StateType == "DIPLO_STATE_DECLARED_FRIEND" then
-            local friendshipTurn = localPlayerDiplomacy:GetDeclaredFriendshipTurn(ms_SelectedPlayerID)
-            local remainingTurns = friendshipTurn + Game.GetGameDiplomacy():GetDenounceTimeLimit() -
-                Game.GetCurrentGameTurn()
-            relationshipTooltip = Locale.Lookup("LOC_DIPLOMACY_DECLARED_FRIENDSHIP_TOOLTIP",
-                PlayerConfigurations[ms_LocalPlayerID]:GetCivilizationShortDescription(),
-                PlayerConfigurations[ms_SelectedPlayerID]:GetCivilizationShortDescription(),
-                remainingTurns)
-        end
-
-        node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyOverviewOurRelationship"),
-            Locale.Lookup("LOC_DIPLOMACY_OVERVIEW_OUR_RELATIONSHIP") .. ": " .. relationshipLabel,
-            relationshipTooltip))
-    end
-
-    local relationshipsNode = CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyOverviewOtherRelationships"),
-        Locale.Lookup("LOC_DIPLOMACY_OVERVIEW_OTHER_RELATIONSHIPS"), nil)
-    local selectedPlayerDiplomacy = ms_SelectedPlayer and ms_SelectedPlayer.GetDiplomacy and
-        ms_SelectedPlayer:GetDiplomacy() or nil
-    if localPlayerDiplomacy and selectedPlayerDiplomacy then
-        for _, player in ipairs(PlayerManager.GetAliveMajors()) do
-            local playerID = player:GetID()
-            if player:IsMajor()
-                and playerID ~= ms_LocalPlayerID
-                and playerID ~= ms_SelectedPlayer:GetID()
-                and selectedPlayerDiplomacy:HasMet(playerID) then
-                local relationState = player:GetDiplomaticAI():GetDiplomaticStateIndex(ms_SelectedPlayer:GetID())
-                local relationInfo = GameInfo.DiplomaticStates[relationState]
-                if relationInfo and relationInfo.Hash ~= DiplomaticStates.NEUTRAL then
-                    local isHumanRelation = not (ms_SelectedPlayer:IsAI() or player:IsAI())
-                    local relationType = relationInfo.StateType
-                    local isValid = (isHumanRelation and Relationship.IsValidWithHuman(relationType))
-                        or ((not isHumanRelation) and Relationship.IsValidWithAI(relationType))
-                    if isValid then
-                        local otherConfig = PlayerConfigurations[playerID]
-                        local civLabel
-                        if localPlayerDiplomacy:HasMet(playerID) then
-                            civLabel = Locale.Lookup("LOC_DIPLOMACY_DEAL_PLAYER_PANEL_TITLE",
-                                otherConfig:GetLeaderName(),
-                                otherConfig:GetCivilizationDescription())
-                        else
-                            civLabel = Locale.Lookup("LOC_DIPLOPANEL_UNMET_PLAYER")
-                        end
-                        local relationLabel = Locale.Lookup(relationInfo.Name)
-                        relationshipsNode:AddChild(CreateReadOnlyNode(
-                            mgr:GenerateWidgetId("CAIDiplomacyOtherRelationshipEntry"),
-                            civLabel .. ": " .. relationLabel,
-                            relationLabel))
-                    end
-                end
-            end
-        end
-    end
-    if relationshipsNode.Children and #relationshipsNode.Children > 0 then
-        node:AddChild(relationshipsNode)
-    end
-
-    if IsExpansion1Active() then
-        local emergencyMgr = Game.GetEmergencyManager()
-        local crisisData = emergencyMgr and emergencyMgr.GetEmergencyInfoTable
-            and emergencyMgr:GetEmergencyInfoTable(ms_LocalPlayerID) or {}
-        local emergencyNames = {}
-        for _, crisis in ipairs(crisisData) do
-            if crisis.HasBegun and IsSelectedPlayerInCrisis(crisis) then
-                local localInvolved = crisis.TargetID == ms_LocalPlayerID
-                if not localInvolved then
-                    for _, memberID in ipairs(crisis.MemberIDs) do
-                        if memberID == ms_LocalPlayerID then
-                            localInvolved = true
-                            break
-                        end
-                    end
-                end
-                if localInvolved then
-                    table.insert(emergencyNames, Locale.Lookup(crisis.NameText))
-                end
-            end
-        end
-        if #emergencyNames > 0 then
-            node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyOverviewEmergency"),
-                Locale.Lookup("LOC_CAI_DIPLOMACY_OVERVIEW_EMERGENCY",
-                    table.concat(emergencyNames, "[NEWLINE]")), nil))
-        end
-    end
-
-    -- Secret Society (Ethiopia game mode). Vanilla injects this as an overview ROW
-    -- via DiploScene_RefreshOverviewRows (DiplomacyActionView_SecretSocietyRow), not
-    -- as an intel tab, so it lives here rather than as its own reader. That addon is
-    -- a separate context whose Controls we cannot read, so rebuild from the governors
-    -- API. The vanilla row checks awareness against the SELECTED player's own governors
-    -- (a leader is always aware of their own society), so the real society name shows
-    -- on screen once a leader has joined one; replicated here for screen parity.
-    if IsSecretSocietiesActive() then
-        local selectedGovernors = ms_SelectedPlayer and ms_SelectedPlayer.GetGovernors
-            and ms_SelectedPlayer:GetGovernors() or nil
-        if selectedGovernors and selectedGovernors.GetSecretSociety then
-            local society = selectedGovernors:GetSecretSociety()
-            local label, tooltip
-            if society ~= -1 then
-                if selectedGovernors:IsAwareOfSecretSociety(society) and GameInfo.SecretSocieties[society] then
-                    label = Locale.Lookup(GameInfo.SecretSocieties[society].Name)
-                else
-                    label = Locale.Lookup("LOC_SECRETSOCIETY_DIPLO_UNKNOWN_NAME")
-                    tooltip = Locale.Lookup("LOC_SECRETSOCIETY_DIPLO_UNKNOWN_DESCRIPTION")
-                end
-            else
-                label = Locale.Lookup("LOC_SECRETSOCIETY_DIPLO_NONE_NAME")
-            end
-            node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyOverviewSecretSociety"),
-                Locale.Lookup("LOC_SECRETSOCIETY") .. ": " .. label, tooltip))
-        end
-    end
 end
 
 -- Format one gossip line with its turn (and leader), reusing the reports screen's
@@ -1507,47 +1099,47 @@ local function AddAccessChildren(node)
     if #sourceLines > 0 then
         node:AddChild(CreateReadOnlyText(mgr:GenerateWidgetId("CAIDiplomacyAccessSources"),
             Locale.Lookup("LOC_CAI_DIPLOMACY_ACTIVE_SOURCES"),
-            JoinLines(sourceLines)))
+            CAIText.JoinTextLines(sourceLines)))
     end
 
     local sharedLines = BuildInformationSharedLines(0)
     if #sharedLines > 0 then
         node:AddChild(CreateReadOnlyText(mgr:GenerateWidgetId("CAIDiplomacyAccessShared"),
             Locale.Lookup("LOC_DIPLOMACY_INTEL_INFORMATION_SHARED_HEADER"),
-            JoinLines(sharedLines)))
+            CAIText.JoinTextLines(sharedLines)))
     end
 
     local nextLines = BuildInformationSharedLines(1)
     if GameCapabilities.HasCapability("CAPABILITY_DIPLOMACY_ACCESS_LEVEL_INFO") and #nextLines > 0 then
         node:AddChild(CreateReadOnlyText(mgr:GenerateWidgetId("CAIDiplomacyAccessNext"),
             Locale.Lookup("LOC_DIPLOMACY_INTEL_NEXT_ACCESS_LEVEL_HEADER"),
-            JoinLines(nextLines)))
+            CAIText.JoinTextLines(nextLines)))
     end
 
     local advisorLines = BuildAccessAdvisorLines()
     if #advisorLines > 0 then
         node:AddChild(CreateReadOnlyText(mgr:GenerateWidgetId("CAIDiplomacyAccessAdvisor"),
             Locale.Lookup("LOC_DIPLOMACY_INTEL_GAIN_ACCESS_LEVEL_HEADER"),
-            JoinLines(advisorLines)))
+            CAIText.JoinTextLines(advisorLines)))
     end
 end
 
 local function AddRelationshipChildren(node)
     node:AddChild(CreateReadOnlyText(mgr:GenerateWidgetId("CAIDiplomacyRelationshipReasons"),
         Locale.Lookup("LOC_DIPLOMACY_INTEL_RELATIONSHIP_REASONS"),
-        JoinLines(BuildRelationshipReasonLines())))
+        CAIText.JoinTextLines(BuildRelationshipReasonLines())))
 
     if GameCapabilities.HasCapability("CAPABILITY_DIPLOMACY_RELATIONSHIP_INFO") then
         local raiseLines, lowerLines = BuildRelationshipAdvisorLines()
         if #raiseLines > 0 then
             node:AddChild(CreateReadOnlyText(mgr:GenerateWidgetId("CAIDiplomacyRelationshipRaise"),
                 Locale.Lookup("LOC_DIPLOMACY_INTEL_TO_RAISE_RELATIONSHIP"),
-                JoinLines(raiseLines)))
+                CAIText.JoinTextLines(raiseLines)))
         end
         if #lowerLines > 0 then
             node:AddChild(CreateReadOnlyText(mgr:GenerateWidgetId("CAIDiplomacyRelationshipLower"),
                 Locale.Lookup("LOC_DIPLOMACY_INTEL_TO_LOWER_RELATIONSHIP"),
-                JoinLines(lowerLines)))
+                CAIText.JoinTextLines(lowerLines)))
         end
     end
 
@@ -1586,7 +1178,7 @@ local function CollectControlText(control, out, seen)
     if control.GetText then
         local t = control:GetText()
         if t and t ~= "" then
-            local norm = NormalizeText(t)
+            local norm = CAIText.ToString(t)
             if norm ~= "" and not seen[norm] then
                 seen[norm] = true
                 table.insert(out, norm)
@@ -1597,15 +1189,6 @@ local function CollectControlText(control, out, seen)
         for _, child in ipairs(control:GetChildren()) do
             CollectControlText(child, out, seen)
         end
-    end
-end
-
-local function AddGenericPanelChildren(node, panel)
-    if not panel then return end
-    local lines, seen = {}, {}
-    CollectControlText(panel, lines, seen)
-    for _, line in ipairs(lines) do
-        node:AddChild(CreateReadOnlyNode(mgr:GenerateWidgetId("CAIDiplomacyGenericLine"), line, nil))
     end
 end
 
@@ -1680,7 +1263,7 @@ local function AddAllianceChildren(node)
         pointsTooltip = Locale.Lookup("LOC_DIPLOMACY_NEED_ALLIANCE_TO_GAIN_POINTS_TT", pointsTooltip)
     end
     node:AddChild(CreateReadOnlyText(mgr:GenerateWidgetId("CAIDiplomacyAlliancePoints"),
-        pointsLine, JoinTooltipLines(pointsTooltip)))
+        pointsLine, CAIText.JoinTooltipLines(pointsTooltip)))
 
     -- Benefits of every alliance type at the relevant level (next when allied and
     -- below cap, otherwise current), matching vanilla's possible-alliance list.
@@ -1787,7 +1370,7 @@ local function AddGrievancesChildren(node)
     local perTurn = gameDiplomacy:GetGrievanceChangePerTurn(ms_SelectedPlayerID, ms_LocalPlayerID)
     -- The per-turn tooltip is a multi-line breakdown ("Grievances per turn from:
     -- ...") surfaced below as its own expandable category, not as a flat tooltip.
-    local breakdownLines = SplitLines(gameDiplomacy:GetGrievanceChangeTooltip(ms_SelectedPlayerID, ms_LocalPlayerID))
+    local breakdownLines = CAIText.SplitLines(gameDiplomacy:GetGrievanceChangeTooltip(ms_SelectedPlayerID, ms_LocalPlayerID))
 
     -- Sign follows vanilla: >0 favors the local player (grievances against them),
     -- <0 favors the selected player (grievances against you).
@@ -1865,16 +1448,16 @@ local function TooltipRelationship(targetID)
     local lines = {}
     local data = GetRelationshipData(targetID)
     if data and data.Tooltip and data.Tooltip ~= "" then
-        table.insert(lines, JoinTooltipLines(data.Tooltip))
+        table.insert(lines, CAIText.JoinTooltipLines(data.Tooltip))
     end
-    AppendSectionLines(lines, Locale.Lookup("LOC_DIPLOMACY_INTEL_RELATIONSHIP_REASONS"),
+    CAIText.AppendSection(lines, Locale.Lookup("LOC_DIPLOMACY_INTEL_RELATIONSHIP_REASONS"),
         BuildRelationshipReasonLines(targetID))
     if GameCapabilities.HasCapability("CAPABILITY_DIPLOMACY_RELATIONSHIP_INFO") then
         local raiseLines, lowerLines = BuildRelationshipAdvisorLines(targetID)
-        AppendSectionLines(lines, Locale.Lookup("LOC_DIPLOMACY_INTEL_TO_RAISE_RELATIONSHIP"), raiseLines)
-        AppendSectionLines(lines, Locale.Lookup("LOC_DIPLOMACY_INTEL_TO_LOWER_RELATIONSHIP"), lowerLines)
+        CAIText.AppendSection(lines, Locale.Lookup("LOC_DIPLOMACY_INTEL_TO_RAISE_RELATIONSHIP"), raiseLines)
+        CAIText.AppendSection(lines, Locale.Lookup("LOC_DIPLOMACY_INTEL_TO_LOWER_RELATIONSHIP"), lowerLines)
     end
-    return JoinLines(lines)
+    return CAIText.JoinTextLines(lines)
 end
 
 local function RelationshipSortKey(targetID)
@@ -1892,18 +1475,10 @@ local function GetAccessLevelValue(targetID)
 end
 
 -- Agendas ----------------------------------------------------------------------
-local function CellAgendas(targetID)
-    local selectedID = targetID or ms_SelectedPlayerID
-    local parts = {}
-    for _, line in ipairs(BuildAgendaSummaryLines(selectedID, Players[selectedID])) do
-        table.insert(parts, string.match(line, "^(.-): ") or line)
-    end
-    return table.concat(parts, "; ")
-end
 
 local function TooltipAgendas(targetID)
     local selectedID = targetID or ms_SelectedPlayerID
-    return JoinLines(BuildAgendaSummaryLines(selectedID, Players[selectedID]))
+    return CAIText.JoinTextLines(BuildAgendaSummaryLines(selectedID, Players[selectedID]))
 end
 
 local function AgendaSortKey(targetID)
@@ -1914,7 +1489,7 @@ end
 -- Gossip -----------------------------------------------------------------------
 local function GetGossipNewCount(targetID)
     local selectedID = targetID or ms_SelectedPlayerID
-    return CountEntries(Game.GetGossipManager():GetRecentVisibleGossipStrings(
+    return CAICollection.CountEntries(Game.GetGossipManager():GetRecentVisibleGossipStrings(
         Game.GetCurrentGameTurn() - 1, ms_LocalPlayerID, selectedID))
 end
 
@@ -1946,12 +1521,6 @@ local function CellForeignRelations(targetID)
     return table.concat(parts, "; ")
 end
 
-local function TooltipForeignRelations(targetID)
-    local parts = {}
-    for _, entry in ipairs(GetForeignRelationsEntries(targetID)) do parts[#parts + 1] = entry.label end
-    return table.concat(parts, "[NEWLINE]")
-end
-
 local function ForeignRelationsSortKey(targetID)
     local _, score = GetForeignRelationsEntries(targetID)
     return score
@@ -1962,10 +1531,6 @@ local function CellAgreements(targetID)
     local list = GetAgreementsList(targetID)
     if #list == 0 then return Locale.Lookup("LOC_CAI_DIPLOMACY_AGREEMENTS_NONE") end
     return table.concat(list, "; ")
-end
-
-local function TooltipAgreements(targetID)
-    return table.concat(GetAgreementsList(targetID), "[NEWLINE]")
 end
 
 local function AgreementsSortKey(targetID)
@@ -2002,7 +1567,7 @@ end
 local function CellAlliance(targetID)
     local info = GetAllianceInfo(targetID)
     if not info then return "" end
-    return JoinNonEmpty({
+    return CAIText.JoinNonEmpty({
         info.typeName,
         Locale.Lookup("LOC_CAI_DIPLOMACY_ALLIANCE_LEVEL", info.level),
         info.pointsLine,
@@ -2020,7 +1585,7 @@ local function TooltipAlliance(targetID)
     if allianceType == -1 then
         pointsTooltip = Locale.Lookup("LOC_DIPLOMACY_NEED_ALLIANCE_TO_GAIN_POINTS_TT", pointsTooltip)
     end
-    table.insert(lines, JoinTooltipLines(pointsTooltip))
+    table.insert(lines, CAIText.JoinTooltipLines(pointsTooltip))
 
     local benefitsHeaderKey, levelToShow
     if allianceType ~= -1 then
@@ -2043,7 +1608,7 @@ local function TooltipAlliance(targetID)
             table.insert(lines, detail)
         end
     end
-    return JoinLines(lines)
+    return CAIText.JoinTextLines(lines)
 end
 
 local function AllianceSortKey(targetID)
@@ -2060,7 +1625,7 @@ local function GetGrievanceInfo(targetID)
     local targetName = PlayerConfigurations[selectedID]:GetCivilizationShortDescription()
     local totalGrievances = localPlayerDiplomacy:GetGrievancesAgainst(selectedID)
     local perTurn = gameDiplomacy:GetGrievanceChangePerTurn(selectedID, ms_LocalPlayerID)
-    local breakdownLines = SplitLines(gameDiplomacy:GetGrievanceChangeTooltip(selectedID, ms_LocalPlayerID))
+    local breakdownLines = CAIText.SplitLines(gameDiplomacy:GetGrievanceChangeTooltip(selectedID, ms_LocalPlayerID))
     local againstThem, againstYou = 0, 0
     local favorLine, descriptionLine
     if totalGrievances == 0 then
@@ -2094,7 +1659,7 @@ local function TooltipGrievanceChange(targetID)
         -- Skip header lines ("... per turn from:"); the value is already stated.
         if not string.match(line, ":[ \t\r\n]*$") then table.insert(lines, line) end
     end
-    return JoinLines(lines)
+    return CAIText.JoinTextLines(lines)
 end
 
 local function GetGrievanceLogEntriesForPlayer(targetID)
@@ -2188,7 +1753,7 @@ local function CellEmergencies(targetID, mode)
         table.insert(lines, Locale.Lookup("LOC_CAI_DIPLOMACY_EMERGENCY_ENTRY", e.name, e.status))
         if e.detail and e.detail ~= "" then table.insert(lines, e.detail) end
     end
-    return JoinLines(lines)
+    return CAIText.JoinTextLines(lines)
 end
 
 local function GetKnownReaders()
@@ -2212,14 +1777,6 @@ end
 
 -- The currently-shown intel panel (ShowPanel hides all the others). Used as the
 -- generic-fallback source for an unknown tab, resolved when that tab is shown.
-local function VisibleIntelPanelChild()
-    local panel = ms_IntelPanel
-    if not panel or not panel.IntelPanelContainer then return nil end
-    for _, child in ipairs(panel.IntelPanelContainer:GetChildren()) do
-        if not ControlIsHidden(child) then return child end
-    end
-    return nil
-end
 
 local function PopulateSectionChildren(sectionNode, tab)
     local reader = GetKnownReaders()[tab.Header]
@@ -2232,7 +1789,7 @@ local function CreateIntelSection(tab)
     local section = mgr:CreateWidget(mgr:GenerateWidgetId("CAIDiplomacyIntelSection"), "TreeItem", {
         Label = function()
             if tab.Header == Locale.ToUpper("LOC_DIPLOMACY_INTEL_REPORT_GOSSIP") then
-                local gossipCount = CountEntries(Game.GetGossipManager():GetRecentVisibleGossipStrings(
+                local gossipCount = CAICollection.CountEntries(Game.GetGossipManager():GetRecentVisibleGossipStrings(
                     Game.GetCurrentGameTurn() - 1,
                     ms_LocalPlayerID,
                     ms_SelectedPlayerID))
@@ -2274,7 +1831,7 @@ local function CreateIntelSection(tab)
                 if allianceType ~= -1 and GameInfo.Alliances[allianceType] then
                     currentAllianceText = Locale.Lookup(GameInfo.Alliances[allianceType].Name)
                 end
-                return JoinLines({
+                return CAIText.JoinTextLines({
                     Locale.Lookup("LOC_CAI_DIPLOMACY_CURRENT_ALLIANCE") .. ": " .. currentAllianceText,
                     pointsLine,
                     Locale.Lookup("LOC_CAI_DIPLOMACY_ALLIANCE_LEVEL", allianceLevel),
@@ -2312,7 +1869,7 @@ local function CreateIntelSection(tab)
                     againstThemLine = againstThemLine ..
                     ", " .. Locale.Lookup("LOC_CAI_DIPLOMACY_GRIEVANCE_PER_TURN", perTurnText)
                 end
-                return JoinLines({
+                return CAIText.JoinTextLines({
                     favorLine,
                     descriptionLine,
                     againstYouLine,
@@ -2414,7 +1971,7 @@ local function BindIntelButtons(tabs)
     local overviewTooltip = Locale.Lookup("LOC_DIPLOMACY_INTEL_OVERVIEW_COLON_TOOLTIP")
     for _, button in ipairs(panel.IntelTabButtonStack:GetChildren()) do
         local tooltip = button.GetToolTipString and button:GetToolTipString() or ""
-        if not ControlIsHidden(button) and tooltip ~= overviewTooltip and tooltip ~= "" then
+        if not CAIControl.IsHidden(button) and tooltip ~= overviewTooltip and tooltip ~= "" then
             buttonsByTooltip[tooltip] = button
         end
     end
@@ -2509,7 +2066,7 @@ local function GossipRecentTooltip(targetID)
         end
     end
     if not added then lines[#lines + 1] = Locale.Lookup("LOC_DIPLOMACY_GOSSIP_ITEM_NO_RECENT") end
-    return JoinLines(lines)
+    return CAIText.JoinTextLines(lines)
 end
 
 local SORT_HIGH = "LOC_CAI_SORT_HIGHEST_FIRST"
@@ -2518,15 +2075,6 @@ local SORT_MOST = "LOC_CAI_SORT_MOST_FIRST"
 local SORT_FEW  = "LOC_CAI_SORT_FEWEST_FIRST"
 local SORT_AZ   = "LOC_CAI_SORT_A_TO_Z"
 local SORT_ZA   = "LOC_CAI_SORT_Z_TO_A"
-
-local function CompareSortValues(a, b)
-    if a == b then return 0 end
-    if a == nil then return 1 end
-    if b == nil then return -1 end
-    if type(a) == "number" and type(b) == "number" then return a < b and -1 or 1 end
-    if type(a) == "boolean" and type(b) == "boolean" then return a and 1 or -1 end
-    return Locale.Compare(tostring(a), tostring(b))
-end
 
 -- Table rows are every met major except the local player (who sits in the
 -- separate local-leader widget above the table).
@@ -2719,46 +2267,15 @@ local function BuildTableColumns(leaderIDs)
     return columns
 end
 
-local function ResolveColumnHeader(column)
-    return type(column.header) == "function" and column.header() or column.header or ""
-end
-
 local function ColumnsSignature(columns)
     local keys = {}
     for _, column in ipairs(columns) do keys[#keys + 1] = column.key end
     return table.concat(keys, ",")
 end
 
-local function GetActiveColumn(key)
-    for _, column in ipairs(m_activeColumns) do
-        if column.key == key then return column end
-    end
-    return nil
-end
-
 -- Tree/table share one sort. The dropdown lists natural order plus, for each
 -- sortable column, its two directions labelled by the same semantic tags the
 -- header speaks.
-local function BuildSortOptions(columns)
-    local options = {
-        { label = Locale.Lookup("LOC_CAI_DATATABLE_SORT_NATURAL"), value = { column = nil, ascending = false } },
-    }
-    for _, column in ipairs(columns) do
-        if column.sortKey then
-            local header = ResolveColumnHeader(column)
-            table.insert(options, {
-                label = header .. "[NEWLINE]" .. Locale.Lookup(column.sortDescendingDescription),
-                value = { column = column.key, ascending = false },
-            })
-            table.insert(options, {
-                label = header .. "[NEWLINE]" .. Locale.Lookup(column.sortAscendingDescription),
-                value = { column = column.key, ascending = true },
-            })
-        end
-    end
-    return options
-end
-
 local function SyncSortDropdown()
     if not m_ui.treeSort then return end
     for index, option in ipairs(m_sortOptions) do
@@ -2804,11 +2321,13 @@ local function EnsureTableStructure()
     local leaderIDs = GetTableLeaderIDs()
     local columns = BuildTableColumns(leaderIDs)
     m_activeColumns = columns
-    m_sortOptions = BuildSortOptions(columns)
+    m_sortOptions = CAIColumns.BuildSortOptions(columns, {
+        natural = { ascending = false }, separator = "[NEWLINE]", descendingFirst = true,
+    })
 
     -- A dynamic column can drop out (era regress is impossible, but emergencies
     -- end and secret societies stay); clear a sort that points at a gone column.
-    if m_sortColumn and not GetActiveColumn(m_sortColumn) then
+    if m_sortColumn and not CAIColumns.Find(m_activeColumns, m_sortColumn) then
         m_sortColumn = nil
         m_sortAscending = false
     end
@@ -2848,14 +2367,14 @@ local function GetSortedTreeLeaderIDs()
     for _, id in ipairs(GetLeaderIDs()) do
         if id == ms_LocalPlayerID then localID = id else others[#others + 1] = id end
     end
-    local column = m_sortColumn and GetActiveColumn(m_sortColumn) or nil
+    local column = m_sortColumn and CAIColumns.Find(m_activeColumns, m_sortColumn) or nil
     if column and column.sortKey then
         local decorated = {}
         for i, pid in ipairs(others) do
             decorated[i] = { pid = pid, idx = i, value = column.sortKey(pid) }
         end
         table.sort(decorated, function(x, y)
-            local cmp = CompareSortValues(x.value, y.value)
+            local cmp = CAICollection.CompareTypedValues(x.value, y.value)
             if cmp == 0 then return x.idx < y.idx end
             if m_sortAscending then return cmp < 0 end
             return cmp > 0
@@ -2917,7 +2436,7 @@ function OpenGossipPanel(playerID)
     -- into one flow governed by the panel's wrap).
     local panel = mgr:CreateWidget(GOSSIP_PANEL_ID, "Panel", {
         Label = function()
-            return JoinNonEmpty({ Locale.Lookup("LOC_DIPLOMACY_OVERVIEW_GOSSIP"), GetLeaderRowLabel(playerID) }, ", ")
+            return CAIText.JoinNonEmpty({ Locale.Lookup("LOC_DIPLOMACY_OVERVIEW_GOSSIP"), GetLeaderRowLabel(playerID) }, ", ")
         end,
     })
 
@@ -2992,7 +2511,7 @@ function OpenGrievanceLog(playerID)
     local entries = GetGrievanceLogEntriesForPlayer(playerID)
     local list = mgr:CreateWidget(GRIEVANCE_LOG_ID, "List", {
         Label = function()
-            return JoinNonEmpty({ Locale.Lookup("LOC_CAI_DIPLOMACY_GRIEVANCE_LOG"), GetLeaderRowLabel(playerID) }, ", ")
+            return CAIText.JoinNonEmpty({ Locale.Lookup("LOC_CAI_DIPLOMACY_GRIEVANCE_LOG"), GetLeaderRowLabel(playerID) }, ", ")
         end,
     })
     if #entries == 0 then
@@ -3209,7 +2728,7 @@ local function RefreshConversationPanel()
         or {}
     local liveButtons = {}
     for _, button in ipairs(rawButtons) do
-        if not ControlIsHidden(button) then
+        if not CAIControl.IsHidden(button) then
             table.insert(liveButtons, button)
         end
     end
@@ -3258,7 +2777,7 @@ local function RefreshConversationPanel()
                     return currentSelection and GetConversationSelectionTooltip(currentSelection) or ""
                 end,
                 DisabledPredicate = function()
-                    return ControlIsDisabled(buttonControl)
+                    return CAIControl.IsDisabled(buttonControl)
                 end,
             })
         PlayHoverSound(choice)
@@ -3311,7 +2830,7 @@ local function EnsureRootBuilt()
     -- not announce a bare "panel" or re-speak the title on every focus change.
     m_ui.overviewPanel = mgr:CreateWidget(OVERVIEW_PANEL_ID, "Panel", {
         SpeechSettings = { Position = false },
-        HiddenPredicate = function() return ControlIsHidden(Controls.OverviewContainer) end,
+        HiddenPredicate = function() return CAIControl.IsHidden(Controls.OverviewContainer) end,
         Label = function() return GetPanelLabel() end,
     })
     -- Alt+1 / Alt+2 switch view from anywhere in the overview (input bubbles up).
@@ -3449,7 +2968,7 @@ local function EnsureRootBuilt()
 
     m_ui.conversationPanel = mgr:CreateWidget(CONVERSATION_PANEL_ID, "Panel", {
         Transparent     = true,
-        HiddenPredicate = function() return ControlIsHidden(Controls.ConversationContainer) end,
+        HiddenPredicate = function() return CAIControl.IsHidden(Controls.ConversationContainer) end,
     })
     m_ui.conversationPanel:SetWrapAround(false)
     m_ui.conversationList = mgr:CreateWidget(CONVERSATION_LIST_ID, "List", {

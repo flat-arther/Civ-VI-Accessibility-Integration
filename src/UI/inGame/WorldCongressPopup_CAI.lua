@@ -107,12 +107,12 @@ local function CollectCrisisText(stackCtrl)
             for _, sub in ipairs(child:GetChildren() or {}) do
                 if sub.GetText then
                     local t = sub:GetText()
-                    if t and t ~= "" then table.insert(parts, t) end
+                    CAIText.AppendIfNonEmpty(parts, t)
                 end
             end
         else
             local t = lbl:GetText()
-            if t and t ~= "" then table.insert(parts, t) end
+            CAIText.AppendIfNonEmpty(parts, t)
         end
     end
     return table.concat(parts, "[NEWLINE]")
@@ -518,11 +518,11 @@ local function BuildVotingBody()
                         local parts = {}
                         if descriptionCtrl then
                             local d = descriptionCtrl:GetText()
-                            if d and d ~= "" then table.insert(parts, d) end
+                            CAIText.AppendIfNonEmpty(parts, d)
                         end
                         if moreInfoCtrl and not moreInfoCtrl:IsHidden() then
                             local tip = moreInfoCtrl:GetToolTipString()
-                            if tip and tip ~= "" then table.insert(parts, tip) end
+                            CAIText.AppendIfNonEmpty(parts, tip)
                         end
                         return table.concat(parts, "[NEWLINE]")
                     end,
@@ -608,7 +608,7 @@ local function BuildVotingBody()
                 local function BuildResVoteTooltip(vanillaBtn)
                     local parts = {}
                     local tip = vanillaBtn and vanillaBtn:GetToolTipString() or ""
-                    if tip ~= "" then table.insert(parts, tip) end
+                    CAIText.AppendIfNonEmpty(parts, tip)
                     local votes, cost = GetResVoteState()
                     if votes > 0 then
                         table.insert(parts, Locale.Lookup("LOC_CAI_WC_CURRENT_VOTES", votes, cost))
@@ -792,8 +792,8 @@ local function BuildVotingBody()
                         Tooltip = function()
                             local parts = {}
                             local d = descriptionCtrl and descriptionCtrl:GetText() or ""
-                            if d ~= "" then table.insert(parts, d) end
-                            if emergencyTip ~= "" then table.insert(parts, emergencyTip) end
+                            CAIText.AppendIfNonEmpty(parts, d)
+                            CAIText.AppendIfNonEmpty(parts, emergencyTip)
                             return table.concat(parts, "[NEWLINE]")
                         end,
                     })
@@ -844,7 +844,7 @@ local function BuildVotingBody()
                             Tooltip = function()
                                 local parts = {}
                                 local tip = voteUpBtn:GetToolTipString() or ""
-                                if tip ~= "" then table.insert(parts, tip) end
+                                CAIText.AppendIfNonEmpty(parts, tip)
                                 local votes, cost, dir = GetPropVoteState()
                                 if dir == DIRECTION_SUPPORT and votes > 0 then
                                     table.insert(parts, Locale.Lookup("LOC_CAI_WC_CURRENT_VOTES", votes, cost))
@@ -879,7 +879,7 @@ local function BuildVotingBody()
                             Tooltip = function()
                                 local parts = {}
                                 local tip = voteDownBtn:GetToolTipString() or ""
-                                if tip ~= "" then table.insert(parts, tip) end
+                                CAIText.AppendIfNonEmpty(parts, tip)
                                 local votes, cost, dir = GetPropVoteState()
                                 if dir == DIRECTION_OPPOSE and votes > 0 then
                                     table.insert(parts, Locale.Lookup("LOC_CAI_WC_CURRENT_VOTES", votes, cost))
@@ -928,8 +928,8 @@ local function BuildVotingBody()
                         Tooltip = function()
                             local parts = {}
                             local stip = selectBox:GetToolTipString() or ""
-                            if stip ~= "" then table.insert(parts, stip) end
-                            if emergencyTip ~= "" then table.insert(parts, emergencyTip) end
+                            CAIText.AppendIfNonEmpty(parts, stip)
+                            CAIText.AppendIfNonEmpty(parts, emergencyTip)
                             return table.concat(parts, "[NEWLINE]")
                         end,
                     })
@@ -1149,14 +1149,14 @@ local function PopulateReviewResolutions(parent)
                         Tooltip = function()
                             local parts = {}
                             local cl = choiceLabel and choiceLabel:GetText() or ""
-                            if cl ~= "" then table.insert(parts, cl) end
+                            CAIText.AppendIfNonEmpty(parts, cl)
                             local tgt = chosenThing and chosenThing:GetText() or ""
                             if tgt ~= "" then
                                 local tl = targetLabel and targetLabel:GetText() or ""
                                 table.insert(parts, tl .. " " .. tgt)
                             end
                             local desc = descCtrl and descCtrl:GetText() or ""
-                            if desc ~= "" then table.insert(parts, desc) end
+                            CAIText.AppendIfNonEmpty(parts, desc)
                             return table.concat(parts, "[NEWLINE]")
                         end,
                     })
@@ -1231,11 +1231,11 @@ local function PopulateReviewResolutions(parent)
                                 local parts = {}
                                 if hasDown and downVoteIcon then
                                     local t = downVoteIcon:GetToolTipString()
-                                    if t and t ~= "" then table.insert(parts, t) end
+                                    CAIText.AppendIfNonEmpty(parts, t)
                                 end
                                 if hasUp and upVoteIcon then
                                     local t = upVoteIcon:GetToolTipString()
-                                    if t and t ~= "" then table.insert(parts, t) end
+                                    CAIText.AppendIfNonEmpty(parts, t)
                                 end
                                 return table.concat(parts, "[NEWLINE]")
                             end,
@@ -1263,9 +1263,7 @@ local function PopulateReviewResolutions(parent)
                                                     "LOC_WORLD_CONGRESS_REVIEW_B_VOTES_PLAYER_TT",
                                                     playerName, votes))
                                             end
-                                            if targetText ~= "" then
-                                                table.insert(parts, targetText)
-                                            end
+                                            CAIText.AppendIfNonEmpty(parts, targetText)
                                             return table.concat(parts, " ")
                                         end,
                                     })
@@ -1344,8 +1342,8 @@ local function PopulateReviewProposals(parent)
                             Tooltip = function()
                                 local parts = {}
                                 local desc = descCtrl and descCtrl:GetText() or ""
-                                if desc ~= "" then table.insert(parts, desc) end
-                                if emergencyTip ~= "" then table.insert(parts, emergencyTip) end
+                                CAIText.AppendIfNonEmpty(parts, desc)
+                                CAIText.AppendIfNonEmpty(parts, emergencyTip)
                                 return table.concat(parts, "[NEWLINE]")
                             end,
                         })
@@ -1370,8 +1368,8 @@ local function PopulateReviewProposals(parent)
                             Tooltip = function()
                                 local parts = {}
                                 local desc = descCtrl and descCtrl:GetText() or ""
-                                if desc ~= "" then table.insert(parts, desc) end
-                                if emergencyTip ~= "" then table.insert(parts, emergencyTip) end
+                                CAIText.AppendIfNonEmpty(parts, desc)
+                                CAIText.AppendIfNonEmpty(parts, emergencyTip)
                                 return table.concat(parts, "[NEWLINE]")
                             end,
                         })
@@ -1384,11 +1382,11 @@ local function PopulateReviewProposals(parent)
                                     local parts = {}
                                     if hasUp and upVoteIcon then
                                         local t = upVoteIcon:GetToolTipString()
-                                        if t and t ~= "" then table.insert(parts, t) end
+                                        CAIText.AppendIfNonEmpty(parts, t)
                                     end
                                     if hasDown and downVoteIcon then
                                         local t = downVoteIcon:GetToolTipString()
-                                        if t and t ~= "" then table.insert(parts, t) end
+                                        CAIText.AppendIfNonEmpty(parts, t)
                                     end
                                     return table.concat(parts, "[NEWLINE]")
                                 end,
@@ -1414,15 +1412,15 @@ local function PopulateReviewProposals(parent)
                                                             local parts = {}
                                                             if vUpVoteStack and not vUpVoteStack:IsHidden() and vUpVoteIcon then
                                                                 local t = vUpVoteIcon:GetToolTipString()
-                                                                if t and t ~= "" then table.insert(parts, t) end
+                                                                CAIText.AppendIfNonEmpty(parts, t)
                                                             end
                                                             if vDownVoteStack and not vDownVoteStack:IsHidden() and vDownVoteIcon then
                                                                 local t = vDownVoteIcon:GetToolTipString()
-                                                                if t and t ~= "" then table.insert(parts, t) end
+                                                                CAIText.AppendIfNonEmpty(parts, t)
                                                             end
                                                             if vReason then
                                                                 local r = vReason:GetText()
-                                                                if r and r ~= "" then table.insert(parts, r) end
+                                                                CAIText.AppendIfNonEmpty(parts, r)
                                                             end
                                                             return table.concat(parts, "[NEWLINE]")
                                                         end,
@@ -1515,10 +1513,10 @@ local function BuildProposalsPage(page)
                             Tooltip = function()
                                 local parts = {}
                                 local desc = descCtrl and descCtrl:GetText() or ""
-                                if desc ~= "" then table.insert(parts, desc) end
-                                if emergencyTip ~= "" then table.insert(parts, emergencyTip) end
+                                CAIText.AppendIfNonEmpty(parts, desc)
+                                CAIText.AppendIfNonEmpty(parts, emergencyTip)
                                 local stip = selectBox:GetToolTipString() or ""
-                                if stip ~= "" then table.insert(parts, stip) end
+                                CAIText.AppendIfNonEmpty(parts, stip)
                                 return table.concat(parts, "[NEWLINE]")
                             end,
                         })

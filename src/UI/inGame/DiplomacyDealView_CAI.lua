@@ -1,3 +1,4 @@
+include("CAIControl")
 -- DiplomacyDealView_CAI.lua
 --
 -- Accessibility layer for the diplomacy deal/demand screen.
@@ -79,32 +80,6 @@ local m_players = {
 -- ============================================================================
 -- Control helpers
 -- ============================================================================
-
-local function ControlIsHidden(control)
-    return control and control.IsHidden and control:IsHidden() or false
-end
-
-local function ControlIsDisabled(control)
-    return control and control.IsDisabled and control:IsDisabled() or false
-end
-
-local function ControlText(control)
-    if not control or not control.GetText then return "" end
-    return control:GetText() or ""
-end
-
-local function ControlTooltip(control)
-    if not control or not control.GetToolTipString then return "" end
-    return control:GetToolTipString() or ""
-end
-
-local function JoinNonEmpty(parts, sep)
-    local out = {}
-    for _, part in ipairs(parts) do
-        if part and part ~= "" then table.insert(out, part) end
-    end
-    return table.concat(out, sep)
-end
 
 local function IsFocusInside(widget)
     if not widget or not mgr then return false end
@@ -346,7 +321,7 @@ local function GetDealItemLabel(pDealItem)
         if valueName and valueName ~= "" then
             local secondary = Locale.Lookup(valueName)
             if secondary ~= "" and secondary ~= name then
-                label = JoinNonEmpty({ label, secondary }, " - ")
+                label = CAIText.JoinNonEmpty({ label, secondary }, " - ")
             end
         end
     elseif DealItemTypes.FAVOR and itemType == DealItemTypes.FAVOR then
@@ -710,9 +685,7 @@ local function CreateOfferItem(side, pDealItem)
             -- itself is intentionally left out of the text.
             Tooltip  = function()
                 local parts = {}
-                if offerTooltip ~= "" then
-                    table.insert(parts, offerTooltip)
-                end
+                CAIText.AppendIfNonEmpty(parts, offerTooltip)
                 if CanStopAsking(dealItemID) then
                     table.insert(parts, Locale.Lookup("LOC_DIPLO_DEAL_MARK_UNACCEPTABLE"))
                 end
@@ -1076,17 +1049,17 @@ end
 -- ============================================================================
 
 local function GetLeaderLineText()
-    local dialog = ControlText(Controls.LeaderDialog)
-    local effect = ControlText(Controls.LeaderEffect)
-    return JoinNonEmpty({ dialog, effect }, " ")
+    local dialog = CAIControl.Text(Controls.LeaderDialog)
+    local effect = CAIControl.Text(Controls.LeaderEffect)
+    return CAIText.JoinNonEmpty({ dialog, effect }, " ")
 end
 
 local function CreateActionButton(focusKey, idHint, control)
     local btn = mgr:CreateWidget(mgr:GenerateWidgetId(idHint), "Button", {
-        Label             = function() return ControlText(control) end,
-        Tooltip           = function() return ControlTooltip(control) end,
-        HiddenPredicate   = function() return ControlIsHidden(control) end,
-        DisabledPredicate = function() return ControlIsDisabled(control) end,
+        Label             = function() return CAIControl.Text(control) end,
+        Tooltip           = function() return CAIControl.Tooltip(control) end,
+        HiddenPredicate   = function() return CAIControl.IsHidden(control) end,
+        DisabledPredicate = function() return CAIControl.IsDisabled(control) end,
         FocusKey          = focusKey,
     })
     btn:SetFocusSound("Main_Menu_Mouse_Over")
@@ -1267,7 +1240,7 @@ local function EnsureRootBuilt()
             if not config then return "" end
             local identity = Locale.Lookup("LOC_DIPLOMACY_DEAL_PLAYER_PANEL_TITLE",
                 config:GetLeaderName(), config:GetCivilizationDescription())
-            return JoinNonEmpty({ identity, GetOtherLeaderMoodLabel() }, ", ")
+            return CAIText.JoinNonEmpty({ identity, GetOtherLeaderMoodLabel() }, ", ")
         end,
     })
 

@@ -1,3 +1,4 @@
+include("CAIControl")
 include("inGameHelpers_CAI")
 
 local function GetCurrentRuleSet()
@@ -14,10 +15,6 @@ end
 
 local function IsRuleSetActive(ruleSetType)
     return GetCurrentRuleSet() == ruleSetType
-end
-
-local function IsBarbarianClansModeActive()
-    return GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS")
 end
 
 local function IsPiratesScenarioActive()
@@ -37,7 +34,7 @@ local function GetUnitFlagManagerIncludeName()
         return "UnitFlagManager_PiratesScenario"
     end
 
-    if IsBarbarianClansModeActive() then
+    if GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS") then
         return "UnitFlagManager_BarbarianClansMode"
     end
 
@@ -70,41 +67,6 @@ local OWNED_UNIT_PANEL_DETAIL_KEYS = {
     "Promotions",
     "UpgradeHint",
 }
-
-local function AppendUnitFlagInfo(parts, value)
-    if type(value) == "table" then
-        for _, innerValue in ipairs(value) do
-            AppendUnitFlagInfo(parts, innerValue)
-        end
-        return
-    end
-
-    if value ~= nil and value ~= "" then
-        table.insert(parts, value)
-    end
-end
-
-local function GetControlText(control)
-    if control ~= nil and control.GetText ~= nil then
-        local text = control:GetText()
-        if text ~= nil and text ~= "" then
-            return text
-        end
-    end
-
-    return nil
-end
-
-local function GetControlTooltip(control)
-    if control ~= nil and control.GetToolTipString ~= nil then
-        local tooltip = control:GetToolTipString()
-        if tooltip ~= nil and tooltip ~= "" then
-            return tooltip
-        end
-    end
-
-    return nil
-end
 
 local function FormatUnitFlagDisplayName(unit, count)
     if unit == nil then
@@ -178,12 +140,12 @@ local function GetEnemyUnitCombatInfo(unit)
     local rangedCombat = unit:GetRangedCombat()
     local range = unit:GetRange()
 
-    AppendUnitFlagInfo(results,
+    CAIText.AppendFragments(results,
         combat > 0 and Locale.Lookup("LOC_HUD_UNIT_PANEL_STRENGTH") .. ", " .. tostring(combat) or nil)
-    AppendUnitFlagInfo(results,
+    CAIText.AppendFragments(results,
         rangedCombat > 0 and
         Locale.Lookup("LOC_HUD_UNIT_PANEL_RANGED_STRENGTH") .. ", " .. tostring(rangedCombat) or nil)
-    AppendUnitFlagInfo(results,
+    CAIText.AppendFragments(results,
         range > 0 and Locale.Lookup("LOC_CAI_ICON_RANGE_ALIAS") .. ", " .. tostring(range) or nil)
 
     return #results > 0 and results or nil
@@ -200,7 +162,7 @@ local function GetOwnedUnitAircraftInfo(unit)
     }
     local aircraftNames = GetHostedAircraftUnitNames(unit)
     if aircraftNames ~= nil and #aircraftNames > 0 then
-        AppendUnitFlagInfo(results,
+        CAIText.AppendFragments(results,
             Locale.Lookup("LOC_CAI_UNIT_CARRIER_STATIONED_AIRCRAFT", table.concat(aircraftNames, "[NEWLINE]")))
     end
 
@@ -214,12 +176,12 @@ local function GetOwnedUnitFlagDetails(unit, count)
         Locale.Lookup("LOC_CAI_UNIT_MOVES", unit:GetMovementMovesRemaining(), unit:GetMaxMoves()),
     }
     if unit:GetMovesRemaining() <= 0 then
-        AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_OUT_OF_MOVES"))
+        CAIText.AppendFragments(results, Locale.Lookup("LOC_CAI_UNIT_OUT_OF_MOVES"))
     end
-    AppendUnitFlagInfo(results, GetUnitFlagStatus(unit))
-    AppendUnitFlagInfo(results, GetOwnedUnitAircraftInfo(unit))
+    CAIText.AppendFragments(results, GetUnitFlagStatus(unit))
+    CAIText.AppendFragments(results, GetOwnedUnitAircraftInfo(unit))
     if info.RequestUnitInfo ~= nil then
-        AppendUnitFlagInfo(results,
+        CAIText.AppendFragments(results,
             info:RequestUnitInfo(unit:GetID(), OWNED_UNIT_PANEL_DETAIL_KEYS, unit:GetOwner()))
     end
     return #results > 0 and results or nil
@@ -246,15 +208,15 @@ end
 local function GetForeignUnitFlagDetails(unit, count)
     local results = {}
     if unit:IsEmbarked() then
-        AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_EMBARKED"))
+        CAIText.AppendFragments(results, Locale.Lookup("LOC_CAI_UNIT_EMBARKED"))
     end
-    AppendUnitFlagInfo(results, FormatUnitFlagDisplayName(unit, count))
-    AppendUnitFlagInfo(results, GetUnitFlagPolandInvasion(unit))
-    AppendUnitFlagInfo(results, GetUnitFlagHealth(unit))
+    CAIText.AppendFragments(results, FormatUnitFlagDisplayName(unit, count))
+    CAIText.AppendFragments(results, GetUnitFlagPolandInvasion(unit))
+    CAIText.AppendFragments(results, GetUnitFlagHealth(unit))
     if not unit:IsEmbarked() and unit:GetFortifyTurns() > 0 then
-        AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_WORLDTRACKER_UNIT_FORTIFIED"))
+        CAIText.AppendFragments(results, Locale.Lookup("LOC_CAI_WORLDTRACKER_UNIT_FORTIFIED"))
     end
-    AppendUnitFlagInfo(results, GetEnemyUnitCombatInfo(unit))
+    CAIText.AppendFragments(results, GetEnemyUnitCombatInfo(unit))
     return #results > 0 and results or nil
 end
 
@@ -298,7 +260,7 @@ local function GetUnitFlagReligion(unit, flag)
 
     local religionName = nil
     if flag ~= nil and flag.m_Instance ~= nil then
-        religionName = GetControlTooltip(flag.m_Instance.ReligionIconBacking)
+        religionName = CAIControl.ReadTooltip(flag.m_Instance.ReligionIconBacking)
     end
 
     if religionName == nil and unit.GetReligiousStrength ~= nil and unit:GetReligiousStrength() > 0 then
@@ -327,7 +289,7 @@ local function GetUnitFlagArchaeology(unit)
         local owner = Players[unit:GetOwner()]
         local city = owner ~= nil and owner:GetCities() ~= nil and owner:GetCities():FindID(homeCityID) or nil
         if city ~= nil then
-            AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_HOME_CITY_SHORT", city:GetName()))
+            CAIText.AppendFragments(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_HOME_CITY_SHORT", city:GetName()))
         end
 
         local greatWorkIndex = unit:GetGreatWorkIndex()
@@ -337,7 +299,7 @@ local function GetUnitFlagArchaeology(unit)
             local greatWorkInfo = greatWorkType ~= nil and GameInfo.GreatWorks[greatWorkType] or nil
             local ownerConfig = greatWorkOwner ~= nil and PlayerConfigurations[greatWorkOwner] or nil
             if greatWorkInfo ~= nil and greatWorkInfo.Name ~= nil and ownerConfig ~= nil then
-                AppendUnitFlagInfo(results,
+                CAIText.AppendFragments(results,
                     Locale.Lookup("LOC_CAI_UNIT_FLAG_ARTIFACT_SHORT",
                         Locale.Lookup(greatWorkInfo.Name),
                         ownerConfig:GetPlayerName()))
@@ -360,8 +322,8 @@ local function GetUnitFlagAircraftCapacity(unit, flag)
 
     if flag ~= nil and flag.m_Instance ~= nil and flag.m_Instance.AirUnitInstance ~= nil then
         local instance = flag.m_Instance.AirUnitInstance
-        local currentText = GetControlText(instance.CurrentUnitCount)
-        local maxText = GetControlText(instance.MaxUnitCount)
+        local currentText = CAIControl.ReadText(instance.CurrentUnitCount)
+        local maxText = CAIControl.ReadText(instance.MaxUnitCount)
         local aircraftData = GetHostedAircraftData(unit)
         local currentCount = tonumber(currentText) or (aircraftData ~= nil and aircraftData.CurrentCount or 0)
         local maxAirSlots = tonumber(maxText) or (aircraftData ~= nil and aircraftData.MaxSlots or 0)
@@ -398,15 +360,15 @@ local function GetUnitFlagMarkers(unit, flag)
     local results = {}
 
     if IsHeroUnit(unit) or (flag ~= nil and flag.m_Instance ~= nil and flag.m_Instance.HeroGlowInstance ~= nil) then
-        AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_HERO_SHORT"))
+        CAIText.AppendFragments(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_HERO_SHORT"))
     end
 
     if flag ~= nil and flag.bHasAttentionMarker == true then
-        AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_THREAT_SHORT"))
+        CAIText.AppendFragments(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_THREAT_SHORT"))
     end
 
     if IsPiratesScenarioActive() and unit:GetMaxDamage() > 100 then
-        AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_FLAGSHIP_SHORT"))
+        CAIText.AppendFragments(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_FLAGSHIP_SHORT"))
     end
 
     return #results > 0 and results or nil
@@ -418,7 +380,7 @@ local function GetBarbarianClanPlayerName(playerID)
 end
 
 local function GetUnitFlagBarbarianClan(unit)
-    if unit == nil or not IsBarbarianClansModeActive() then
+    if unit == nil or not GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS") then
         return nil
     end
 
@@ -440,7 +402,7 @@ local function GetUnitFlagBarbarianClan(unit)
     local tribeNameType = barbarianManager:GetTribeNameType(tribeIndex)
     local tribeInfo = tribeNameType ~= nil and tribeNameType >= 0 and GameInfo.BarbarianTribeNames[tribeNameType] or nil
     if tribeInfo ~= nil and tribeInfo.TribeDisplayName ~= nil then
-        AppendUnitFlagInfo(results,
+        CAIText.AppendFragments(results,
             Locale.Lookup("LOC_CAI_UNIT_FLAG_CLAN_SHORT", Locale.Lookup(tribeInfo.TribeDisplayName)))
     end
 
@@ -451,7 +413,7 @@ local function GetUnitFlagBarbarianClan(unit)
 
     local bribedTurnsRemaining = barbarianManager:GetTribeBribeTurnsRemaining(tribeIndex, localPlayerID)
     if bribedTurnsRemaining ~= nil and bribedTurnsRemaining > 0 then
-        AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_BRIBED_SHORT", bribedTurnsRemaining))
+        CAIText.AppendFragments(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_BRIBED_SHORT", bribedTurnsRemaining))
         return #results > 0 and results or nil
     end
 
@@ -460,17 +422,17 @@ local function GetUnitFlagBarbarianClan(unit)
         if inciteTargetID == localPlayerID then
             local inciteSourceName = GetBarbarianClanPlayerName(barbarianManager:GetTribeInciteSourcePlayer(tribeIndex))
             if inciteSourceName ~= nil and inciteSourceName ~= "" then
-                AppendUnitFlagInfo(results,
+                CAIText.AppendFragments(results,
                     Locale.Lookup("LOC_CAI_UNIT_FLAG_INCITED_AGAINST_YOU_SHORT", inciteSourceName))
             else
-                AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_INCITED_AGAINST_YOU_UNKNOWN_SHORT"))
+                CAIText.AppendFragments(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_INCITED_AGAINST_YOU_UNKNOWN_SHORT"))
             end
         else
             local inciteSourceID = barbarianManager:GetTribeInciteSourcePlayer(tribeIndex)
             if inciteSourceID == localPlayerID then
                 local inciteTargetName = GetBarbarianClanPlayerName(inciteTargetID)
                 if inciteTargetName ~= nil and inciteTargetName ~= "" then
-                    AppendUnitFlagInfo(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_INCITED_BY_YOU_SHORT", inciteTargetName))
+                    CAIText.AppendFragments(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_INCITED_BY_YOU_SHORT", inciteTargetName))
                 end
             end
         end
@@ -558,18 +520,18 @@ local function GetUnitFlagSignature(unit, flag)
     local pirates = GetUnitFlagPiratesText(unit)
 
     local parts = {}
-    AppendUnitFlagInfo(parts, name)
-    AppendUnitFlagInfo(parts, queuedMovement)
-    AppendUnitFlagInfo(parts, health)
-    AppendUnitFlagInfo(parts, status)
-    AppendUnitFlagInfo(parts, promotionOrLevy)
-    AppendUnitFlagInfo(parts, religion)
-    AppendUnitFlagInfo(parts, archaeology)
-    AppendUnitFlagInfo(parts, aircraftCapacity)
-    AppendUnitFlagInfo(parts, markers)
-    AppendUnitFlagInfo(parts, barbarianClan)
-    AppendUnitFlagInfo(parts, polandInvasion)
-    AppendUnitFlagInfo(parts, pirates)
+    CAIText.AppendFragments(parts, name)
+    CAIText.AppendFragments(parts, queuedMovement)
+    CAIText.AppendFragments(parts, health)
+    CAIText.AppendFragments(parts, status)
+    CAIText.AppendFragments(parts, promotionOrLevy)
+    CAIText.AppendFragments(parts, religion)
+    CAIText.AppendFragments(parts, archaeology)
+    CAIText.AppendFragments(parts, aircraftCapacity)
+    CAIText.AppendFragments(parts, markers)
+    CAIText.AppendFragments(parts, barbarianClan)
+    CAIText.AppendFragments(parts, polandInvasion)
+    CAIText.AppendFragments(parts, pirates)
 
     return table.concat(parts, " ")
 end
@@ -673,7 +635,7 @@ function info:RequestUnitFlagInfo(playerID, unitID, requestedKeys)
     for _, key in ipairs(keys) do
         local helper = self.UnitFlagInfo[key]
         if helper ~= nil then
-            AppendUnitFlagInfo(results, helper(unit, flag))
+            CAIText.AppendFragments(results, helper(unit, flag))
         end
     end
 
@@ -687,14 +649,14 @@ end
 local function GetMatchingVisibleDetailedUnitCount(unit)
     local plot = Map.GetPlot(unit:GetX(), unit:GetY())
     local signatureParts = {}
-    AppendUnitFlagInfo(signatureParts, GetDefaultUnitFlagDetails(unit))
+    CAIText.AppendFragments(signatureParts, GetDefaultUnitFlagDetails(unit))
     local signature = table.concat(signatureParts, "[NEWLINE]")
     local matchingCount = 0
 
     for _, otherUnit in ipairs(Units.GetUnitsInPlotLayerID(plot:GetX(), plot:GetY(), MapLayers.ANY)) do
         local otherFlag = GetUnitFlag(otherUnit:GetOwner(), otherUnit:GetID())
         local otherParts = {}
-        AppendUnitFlagInfo(otherParts, GetDefaultUnitFlagDetails(otherUnit))
+        CAIText.AppendFragments(otherParts, GetDefaultUnitFlagDetails(otherUnit))
         if IsUnitFlagVisible(otherFlag, otherUnit) and table.concat(otherParts, "[NEWLINE]") == signature then
             matchingCount = matchingCount + 1
         end
@@ -712,7 +674,7 @@ function info:RequestDetailedUnitFlagInfo(playerID, unitID)
 
     local results = {}
     local matchingCount = GetMatchingVisibleDetailedUnitCount(unit)
-    AppendUnitFlagInfo(results, GetDefaultUnitFlagDetails(unit, matchingCount))
+    CAIText.AppendFragments(results, GetDefaultUnitFlagDetails(unit, matchingCount))
     return #results > 0 and table.concat(results, "[NEWLINE]") or nil
 end
 

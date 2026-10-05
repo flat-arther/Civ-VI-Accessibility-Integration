@@ -9,7 +9,6 @@ local BODY_SEARCH_CONTEXT = "CAI_CivilopediaBody"
 local BODY_PREVIEW_RADIUS = 180
 local m_bodySearchText    = {}
 
-
 local m_state            = {
     userSwitchedFocus = false,
     isOpeningWithoutTarget = false,
@@ -101,7 +100,7 @@ local function PopulateBodySearchData()
         end
         if type(value) ~= "string" or value == "" then return end
         local text = Locale.StripTags(LookupOrEmpty(value))
-        if text and text ~= "" then body[#body + 1] = text end
+        CAIText.AppendIfNonEmpty(body, text)
     end
 
     local function noOp() end
@@ -607,9 +606,7 @@ local function CreateStatBoxNode(box)
                 local m = box.entries[j].method
                 if m == "AddLabel" or m == "AddSmallLabel" then
                     local extraText = LookupOrEmpty(box.entries[j].args[1])
-                    if extraText ~= "" then
-                        table.insert(extras, extraText)
-                    end
+                    CAIText.AppendIfNonEmpty(extras, extraText)
                     j = j + 1
                 else
                     break
@@ -778,25 +775,6 @@ end
 -- ===========================================================================
 -- History / crumbs
 -- ===========================================================================
-local function CreateHistoryButton(entry)
-    local btn = mgr:CreateWidget(
-        mgr:GenerateWidgetId("CAIPediaHistoryButton"),
-        "Button",
-        {
-            Label = function() return entry.title end,
-            ValueGetter = function()
-                if entry.index == m_state.history.pageIndex then
-                    return Locale.Lookup("LOC_CAI_STATE_SELECTED")
-                end
-            end,
-        })
-    btn:SetFocusSound(HOVER_SOUND)
-    btn:On("activate", function()
-        NavigateToPageTrailIndex(entry.index, false)
-    end)
-    return btn
-end
-
 
 local function MirrorHistoryNavigate(sectionId, pageId)
     local title = GetPageTitle(sectionId, pageId)
@@ -929,14 +907,14 @@ local function EnsureRootBuilt()
             for _, section in ipairs(GetSections() or {}) do
                 if section.SectionId == sectionId then
                     local sectionName = LookupOrEmpty(section.TabName or section.Name)
-                    if sectionName ~= "" then labelParts[#labelParts + 1] = sectionName end
+                    CAIText.AppendIfNonEmpty(labelParts, sectionName)
                     break
                 end
             end
             if page.PageGroupId then
                 local group = GetPageGroup(sectionId, page.PageGroupId)
                 local groupName = group and LookupOrEmpty(group.TabName or group.Name) or ""
-                if groupName ~= "" then labelParts[#labelParts + 1] = groupName end
+                CAIText.AppendIfNonEmpty(labelParts, groupName)
             end
             results[#results + 1] = {
                 key = k,
@@ -980,7 +958,6 @@ local function EnsureRootBuilt()
         return results
     end)
     m_ui.sectionsTree:SetSearchQueryMode("raw")
-
 
     m_ui.articleTree = mgr:CreateWidget("CAIPediaArticleTree", "Tree", {
         Label = function()
@@ -1261,7 +1238,6 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     end
 end)
 
-
 Events.InputActionStarted.Add(OnInputActionStarted)
 
 Shutdown = WrapFunc(Shutdown, function(orig)
@@ -1271,6 +1247,5 @@ end)
 ContextPtr:SetShutdown(Shutdown)
 
 PopulateBodySearchData()
-
 
 Controls.WindowCloseButton:RegisterCallback(Mouse.eLClick, OnClose)

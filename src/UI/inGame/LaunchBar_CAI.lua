@@ -1,3 +1,4 @@
+include("CAIGameState")
 include("caiUtils")
 include("Civ6Common")
 if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
@@ -144,12 +145,6 @@ local function ResolveTitleTag(entry)
     return t
 end
 
-local function GetLaunchPlayer()
-    local playerID = Game.GetLocalPlayer()
-    if playerID == nil or playerID < 0 then return nil, nil end
-    return playerID, Players[playerID]
-end
-
 -- Vanilla launch-bar and partial-screen tooltips lead with the screen name on
 -- its own line (e.g. "Government[NEWLINE]View or manage..."). The row label
 -- already names the screen, so drop that redundant first line. Splitting on the
@@ -177,19 +172,10 @@ local function BindingText(actionName)
     local parts = {}
     local g1 = Input.GetGestureDisplayString(actionId, 0)
     local g2 = Input.GetGestureDisplayString(actionId, 1)
-    if g1 and g1 ~= "" then table.insert(parts, g1) end
-    if g2 and g2 ~= "" then table.insert(parts, g2) end
+    CAIText.AppendIfNonEmpty(parts, g1)
+    CAIText.AppendIfNonEmpty(parts, g2)
     if #parts == 0 then return nil end
     return table.concat(parts, "[NEWLINE]")
-end
-
-local function HasMetCityState(player)
-    if player == nil then return false end
-    local diplomacy = player:GetDiplomacy()
-    for _, minor in ipairs(PlayerManager.GetAliveMinors()) do
-        if diplomacy:HasMet(minor:GetID()) then return true end
-    end
-    return false
 end
 
 -- ---------------------------------------------------------------------------
@@ -197,7 +183,7 @@ end
 -- ---------------------------------------------------------------------------
 
 local function CurrentResearchLine()
-    local _, player = GetLaunchPlayer()
+    local _, player = CAIGameState.GetLocalPlayer()
     if player == nil then return "" end
     local techs = player:GetTechs()
     local techID = techs and techs:GetResearchingTech() or -1
@@ -215,7 +201,7 @@ local function CurrentResearchLine()
 end
 
 local function CurrentCivicLine()
-    local _, player = GetLaunchPlayer()
+    local _, player = CAIGameState.GetLocalPlayer()
     if player == nil then return "" end
     local culture = player:GetCulture()
     local civicID = culture and culture:GetProgressingCivic() or -1
@@ -235,7 +221,7 @@ end
 -- Free policy change available -- the same signal the launch bar's free-policy
 -- indicator uses. Anarchy is already surfaced as the unavailable reason.
 local function GovernmentAttention()
-    local _, player = GetLaunchPlayer()
+    local _, player = CAIGameState.GetLocalPlayer()
     if player == nil then return "" end
     local culture = player:GetCulture()
     if culture == nil or culture:IsInAnarchy() then return "" end
@@ -247,7 +233,7 @@ local function GovernmentAttention()
 end
 
 local function ReligionAttention()
-    local _, player = GetLaunchPlayer()
+    local _, player = CAIGameState.GetLocalPlayer()
     if player == nil then return "" end
     local religion = player:GetReligion()
     if religion == nil then return "" end
@@ -259,7 +245,7 @@ end
 
 local function GovernorsAttention()
     if not (IsExpansion1Active() or IsExpansion2Active()) then return "" end
-    local _, player = GetLaunchPlayer()
+    local _, player = CAIGameState.GetLocalPlayer()
     if player == nil then return "" end
     local governors = player:GetGovernors()
     if governors == nil then return "" end
@@ -374,16 +360,6 @@ local function BlockingLine(...)
     return ""
 end
 
--- Join non-empty fragments with a line break (skips blanks so a missing blocker
--- line never leaves a leading/trailing separator).
-local function JoinLines(...)
-    local parts = {}
-    for _, s in ipairs({ ... }) do
-        if s and s ~= "" then parts[#parts + 1] = s end
-    end
-    return table.concat(parts, "[NEWLINE]")
-end
-
 -- World Congress helpers (mirrors DiplomacyRibbon_CAI so the launch bar reports
 -- congress state "as if K were pressed").
 local function CongressHasButton()
@@ -476,7 +452,7 @@ local function BuildBuiltinEntries()
                 "LOC_CAI_UI_TECH_TREE_UNAVAILABLE")
         end,
         dynamic = function()
-            return JoinLines(BlockingLine(EndTurnBlockingTypes.ENDTURN_BLOCKING_RESEARCH), CurrentResearchLine())
+            return CAIText.JoinLines({ BlockingLine(EndTurnBlockingTypes.ENDTURN_BLOCKING_RESEARCH), CurrentResearchLine() })
         end,
         attention = function() return HasEndTurnBlocking(EndTurnBlockingTypes.ENDTURN_BLOCKING_RESEARCH) end,
         open = function() OnOpenResearch() end,
@@ -490,7 +466,7 @@ local function BuildBuiltinEntries()
                 "LOC_CAI_UI_CIVICS_TREE_UNAVAILABLE")
         end,
         dynamic = function()
-            return JoinLines(BlockingLine(EndTurnBlockingTypes.ENDTURN_BLOCKING_CIVIC), CurrentCivicLine())
+            return CAIText.JoinLines({ BlockingLine(EndTurnBlockingTypes.ENDTURN_BLOCKING_CIVIC), CurrentCivicLine() })
         end,
         attention = function() return HasEndTurnBlocking(EndTurnBlockingTypes.ENDTURN_BLOCKING_CIVIC) end,
         open = function() OnOpenCulture() end,
@@ -504,10 +480,10 @@ local function BuildBuiltinEntries()
                 GetFeatureUnavailableTag("CAPABILITY_GOVERNMENTS_VIEW", "LOC_CAI_UI_GOVERNMENT_LOCKED"))
         end,
         dynamic = function()
-            return JoinLines(
+            return CAIText.JoinLines({
                 BlockingLine(EndTurnBlockingTypes.ENDTURN_BLOCKING_CONSIDER_GOVERNMENT_CHANGE,
                     EndTurnBlockingTypes.ENDTURN_BLOCKING_FILL_CIVIC_SLOT),
-                GovernmentAttention())
+                GovernmentAttention() })
         end,
         attention = function()
             return GovernmentAttention() ~= ""
@@ -525,11 +501,11 @@ local function BuildBuiltinEntries()
                 GetFeatureUnavailableTag("CAPABILITY_RELIGION_VIEW", "LOC_CAI_UI_RELIGION_LOCKED"))
         end,
         dynamic = function()
-            return JoinLines(
+            return CAIText.JoinLines({
                 BlockingLine(EndTurnBlockingTypes.ENDTURN_BLOCKING_PANTHEON,
                     EndTurnBlockingTypes.ENDTURN_BLOCKING_RELIGION,
                     EndTurnBlockingTypes.ENDTURN_BLOCKING_BELIEF),
-                ReligionAttention())
+                ReligionAttention() })
         end,
         attention = function()
             return ReligionAttention() ~= ""
@@ -597,8 +573,8 @@ local function BuildBuiltinEntries()
         reason = function()
             local tut = TutorialReason("CityStatesButton")
             if tut then return tut end
-            local _, player = GetLaunchPlayer()
-            if not HasMetCityState(player) then
+            local _, player = CAIGameState.GetLocalPlayer()
+            if not CAIGameState.HasMetCityState(player) then
                 return Locale.Lookup("LOC_CAI_UI_NO_CITY_STATES_MET")
             end
             return nil
@@ -614,7 +590,7 @@ local function BuildBuiltinEntries()
         reason = function()
             local tut = TutorialReason("EspionageButton")
             if tut then return tut end
-            local _, player = GetLaunchPlayer()
+            local _, player = CAIGameState.GetLocalPlayer()
             if player == nil or player:GetDiplomacy():GetSpyCapacity() <= 0 then
                 return Locale.Lookup("LOC_CAI_UI_NO_SPY_CAPACITY")
             end
@@ -636,7 +612,7 @@ local function BuildBuiltinEntries()
         reason = function()
             local tut = TutorialReason("TradeRoutesButton")
             if tut then return tut end
-            local _, player = GetLaunchPlayer()
+            local _, player = CAIGameState.GetLocalPlayer()
             if player == nil or player:GetTrade():GetOutgoingRouteCapacity() <= 0 then
                 return Locale.Lookup("LOC_CAI_UI_NO_TRADE_ROUTE_CAPACITY")
             end
@@ -679,7 +655,7 @@ local function BuildBuiltinEntries()
         desc = "LOC_CAI_DIPLO_RIBBON_OPEN_LIST_TOOLTIP",
         gate = function() return true end,
         reason = function()
-            local _, player = GetLaunchPlayer()
+            local _, player = CAIGameState.GetLocalPlayer()
             if player == nil then return Locale.Lookup("LOC_CAI_UI_DIPLOMACY_UNAVAILABLE") end
             return nil
         end,
@@ -846,7 +822,7 @@ local function EntryTooltip(entry)
         table.insert(parts, reason)
     else
         local dyn = entry.dynamic and entry.dynamic() or ""
-        if dyn ~= "" then table.insert(parts, dyn) end
+        CAIText.AppendIfNonEmpty(parts, dyn)
     end
     local official = EntryOfficialTooltip(entry)
     -- A disabled control's reason is often its own live tooltip; don't repeat it.

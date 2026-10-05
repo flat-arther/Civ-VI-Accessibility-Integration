@@ -1,0 +1,308 @@
+CityStates_CAI:BuildTreeSortOptions:1:initial
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+initial:name[NEWLINE]loc:up:name	name	true
+initial:name[NEWLINE]loc:down:name	name	false
+initial:type[NEWLINE]loc:up:type	type	true
+initial:type[NEWLINE]loc:down:type	type	false
+initial:category[NEWLINE]loc:up:category	category	true
+initial:category[NEWLINE]loc:down:category	category	false
+initial:number[NEWLINE]loc:up:number	number	true
+initial:number[NEWLINE]loc:down:number	number	false
+CityStates_CAI:BuildTreeSortOptions:1:changed
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+changed:name[NEWLINE]loc:up:name	name	true
+changed:name[NEWLINE]loc:down:name	name	false
+changed:type[NEWLINE]loc:up:type	type	true
+changed:type[NEWLINE]loc:down:type	type	false
+changed:category[NEWLINE]loc:up:category	category	true
+changed:category[NEWLINE]loc:down:category	category	false
+changed:number[NEWLINE]loc:up:number	number	true
+changed:number[NEWLINE]loc:down:number	number	false
+CityStates_CAI:BuildTreeSortOptions:1:empty
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+DiplomacyRibbon_CAI:BuildSortOptions:1:initial
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+initial:name[NEWLINE]loc:up:name	name	true
+initial:name[NEWLINE]loc:down:name	name	false
+initial:type[NEWLINE]loc:up:type	type	true
+initial:type[NEWLINE]loc:down:type	type	false
+initial:category[NEWLINE]loc:up:category	category	true
+initial:category[NEWLINE]loc:down:category	category	false
+initial:number[NEWLINE]loc:up:number	number	true
+initial:number[NEWLINE]loc:down:number	number	false
+DiplomacyRibbon_CAI:BuildSortOptions:1:changed
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+changed:name[NEWLINE]loc:up:name	name	true
+changed:name[NEWLINE]loc:down:name	name	false
+changed:type[NEWLINE]loc:up:type	type	true
+changed:type[NEWLINE]loc:down:type	type	false
+changed:category[NEWLINE]loc:up:category	category	true
+changed:category[NEWLINE]loc:down:category	category	false
+changed:number[NEWLINE]loc:up:number	number	true
+changed:number[NEWLINE]loc:down:number	number	false
+DiplomacyRibbon_CAI:BuildSortOptions:1:empty
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+DiplomacyActionView_CAI:BuildSortOptions:1:initial
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+initial:name[NEWLINE]loc:down:name	name	false
+initial:name[NEWLINE]loc:up:name	name	true
+initial:type[NEWLINE]loc:down:type	type	false
+initial:type[NEWLINE]loc:up:type	type	true
+initial:category[NEWLINE]loc:down:category	category	false
+initial:category[NEWLINE]loc:up:category	category	true
+initial:number[NEWLINE]loc:down:number	number	false
+initial:number[NEWLINE]loc:up:number	number	true
+DiplomacyActionView_CAI:BuildSortOptions:1:changed
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+changed:name[NEWLINE]loc:down:name	name	false
+changed:name[NEWLINE]loc:up:name	name	true
+changed:type[NEWLINE]loc:down:type	type	false
+changed:type[NEWLINE]loc:up:type	type	true
+changed:category[NEWLINE]loc:down:category	category	false
+changed:category[NEWLINE]loc:up:category	category	true
+changed:number[NEWLINE]loc:down:number	number	false
+changed:number[NEWLINE]loc:up:number	number	true
+DiplomacyActionView_CAI:BuildSortOptions:1:empty
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+GovernorPanel_CAI:BuildTreeSortOptions:1:initial
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+initial:name, loc:up:name	name	true
+initial:name, loc:down:name	name	false
+initial:type, loc:up:type	type	true
+initial:type, loc:down:type	type	false
+initial:category, loc:up:category	category	true
+initial:category, loc:down:category	category	false
+initial:number, loc:up:number	number	true
+initial:number, loc:down:number	number	false
+GovernorPanel_CAI:BuildTreeSortOptions:1:changed
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+changed:name, loc:up:name	name	true
+changed:name, loc:down:name	name	false
+changed:type, loc:up:type	type	true
+changed:type, loc:down:type	type	false
+changed:category, loc:up:category	category	true
+changed:category, loc:down:category	category	false
+changed:number, loc:up:number	number	true
+changed:number, loc:down:number	number	false
+GovernorPanel_CAI:BuildTreeSortOptions:1:empty
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+GovernmentScreen_ExtendedPolicyCards_CAI:BuildSortOptions:1:initial
+initial:name, loc:up:name	name	true
+initial:name, loc:down:name	name	false
+initial:category, loc:up:category	category	true
+initial:category, loc:down:category	category	false
+initial:number, loc:up:number	number	true
+initial:number, loc:down:number	number	false
+GovernmentScreen_ExtendedPolicyCards_CAI:BuildSortOptions:1:changed
+changed:name, loc:up:name	name	true
+changed:name, loc:down:name	name	false
+changed:category, loc:up:category	category	true
+changed:category, loc:down:category	category	false
+changed:number, loc:up:number	number	true
+changed:number, loc:down:number	number	false
+GovernmentScreen_ExtendedPolicyCards_CAI:BuildSortOptions:1:empty
+GreatPeoplePopup_CAI:BuildGPSortOptions:1:initial
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+sort:initial:name, loc:up:name	name	true
+sort:initial:name, loc:down:name	name	false
+sort:initial:type, loc:up:type	type	true
+sort:initial:type, loc:down:type	type	false
+sort:initial:category, loc:up:category	category	true
+sort:initial:category, loc:down:category	category	false
+sort:initial:number, loc:up:number	number	true
+sort:initial:number, loc:down:number	number	false
+GreatPeoplePopup_CAI:BuildGPSortOptions:1:changed
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+sort:changed:name, loc:up:name	name	true
+sort:changed:name, loc:down:name	name	false
+sort:changed:type, loc:up:type	type	true
+sort:changed:type, loc:down:type	type	false
+sort:changed:category, loc:up:category	category	true
+sort:changed:category, loc:down:category	category	false
+sort:changed:number, loc:up:number	number	true
+sort:changed:number, loc:down:number	number	false
+GreatPeoplePopup_CAI:BuildGPSortOptions:1:empty
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+GreatPeoplePopup_CAI:BuildHeroSortOptions:2:initial
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+initial:name, loc:up:name	name	true
+initial:name, loc:down:name	name	false
+initial:type, loc:up:type	type	true
+initial:type, loc:down:type	type	false
+initial:category, loc:up:category	category	true
+initial:category, loc:down:category	category	false
+initial:plain, loc:up:plain	plain	true
+initial:plain, loc:down:plain	plain	false
+initial:false, loc:up:false	false	true
+initial:false, loc:down:false	false	false
+initial:number, loc:up:number	number	true
+initial:number, loc:down:number	number	false
+GreatPeoplePopup_CAI:BuildHeroSortOptions:2:changed
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+changed:name, loc:up:name	name	true
+changed:name, loc:down:name	name	false
+changed:type, loc:up:type	type	true
+changed:type, loc:down:type	type	false
+changed:category, loc:up:category	category	true
+changed:category, loc:down:category	category	false
+changed:plain, loc:up:plain	plain	true
+changed:plain, loc:down:plain	plain	false
+changed:false, loc:up:false	false	true
+changed:false, loc:down:false	false	false
+changed:number, loc:up:number	number	true
+changed:number, loc:down:number	number	false
+GreatPeoplePopup_CAI:BuildHeroSortOptions:2:empty
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+ReportScreen_BetterReportsScreen_CAI:BuildUnitSortOptions:1:initial
+initial:name, loc:up:name	name	true
+initial:name, loc:down:name	name	false
+initial:type, loc:up:type	type	true
+initial:type, loc:down:type	type	false
+initial:category, loc:up:category	category	true
+initial:category, loc:down:category	category	false
+initial:number, loc:up:number	number	true
+initial:number, loc:down:number	number	false
+ReportScreen_BetterReportsScreen_CAI:BuildUnitSortOptions:1:changed
+changed:name, loc:up:name	name	true
+changed:name, loc:down:name	name	false
+changed:type, loc:up:type	type	true
+changed:type, loc:down:type	type	false
+changed:category, loc:up:category	category	true
+changed:category, loc:down:category	category	false
+changed:number, loc:up:number	number	true
+changed:number, loc:down:number	number	false
+ReportScreen_BetterReportsScreen_CAI:BuildUnitSortOptions:1:empty
+ReportScreen_BetterReportsScreen_CAI:BuildPolicySortOptions:2:initial
+initial:name, loc:up:name	name	true
+initial:name, loc:down:name	name	false
+initial:category, loc:up:category	category	true
+initial:category, loc:down:category	category	false
+initial:number, loc:up:number	number	true
+initial:number, loc:down:number	number	false
+ReportScreen_BetterReportsScreen_CAI:BuildPolicySortOptions:2:changed
+changed:name, loc:up:name	name	true
+changed:name, loc:down:name	name	false
+changed:category, loc:up:category	category	true
+changed:category, loc:down:category	category	false
+changed:number, loc:up:number	number	true
+changed:number, loc:down:number	number	false
+ReportScreen_BetterReportsScreen_CAI:BuildPolicySortOptions:2:empty
+ReportScreen_BetterReportsScreen_CAI:BuildPolicySortOptions:3:initial
+initial:name, loc:up:name	name	true
+initial:name, loc:down:name	name	false
+initial:category, loc:up:category	category	true
+initial:category, loc:down:category	category	false
+initial:number, loc:up:number	number	true
+initial:number, loc:down:number	number	false
+ReportScreen_BetterReportsScreen_CAI:BuildPolicySortOptions:3:changed
+changed:name, loc:up:name	name	true
+changed:name, loc:down:name	name	false
+changed:category, loc:up:category	category	true
+changed:category, loc:down:category	category	false
+changed:number, loc:up:number	number	true
+changed:number, loc:down:number	number	false
+ReportScreen_BetterReportsScreen_CAI:BuildPolicySortOptions:3:empty
+ReportScreen_BetterReportsScreen_CAI:BuildMinorSortOptions:4:initial
+initial:name, loc:up:name	name	true
+initial:name, loc:down:name	name	false
+initial:type, loc:up:type	type	true
+initial:type, loc:down:type	type	false
+initial:number, loc:up:number	number	true
+initial:number, loc:down:number	number	false
+ReportScreen_BetterReportsScreen_CAI:BuildMinorSortOptions:4:changed
+changed:name, loc:up:name	name	true
+changed:name, loc:down:name	name	false
+changed:type, loc:up:type	type	true
+changed:type, loc:down:type	type	false
+changed:number, loc:up:number	number	true
+changed:number, loc:down:number	number	false
+ReportScreen_BetterReportsScreen_CAI:BuildMinorSortOptions:4:empty
+ReportScreen_BetterReportsScreen_CAI:BuildMinorSortOptions:5:initial
+initial:name, loc:up:name	name	true
+initial:name, loc:down:name	name	false
+initial:type, loc:up:type	type	true
+initial:type, loc:down:type	type	false
+initial:number, loc:up:number	number	true
+initial:number, loc:down:number	number	false
+ReportScreen_BetterReportsScreen_CAI:BuildMinorSortOptions:5:changed
+changed:name, loc:up:name	name	true
+changed:name, loc:down:name	name	false
+changed:type, loc:up:type	type	true
+changed:type, loc:down:type	type	false
+changed:number, loc:up:number	number	true
+changed:number, loc:down:number	number	false
+ReportScreen_BetterReportsScreen_CAI:BuildMinorSortOptions:5:empty
+qd_dealpopup_CAI:BuildSortOptions:1:initial
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	natural	true
+initial:name, loc:up:name	name	true
+initial:name, loc:down:name	name	false
+initial:type, loc:up:type	type	true
+initial:type, loc:down:type	type	false
+initial:category, loc:up:category	category	true
+initial:category, loc:down:category	category	false
+initial:number, loc:up:number	number	true
+initial:number, loc:down:number	number	false
+qd_dealpopup_CAI:BuildSortOptions:1:changed
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	natural	true
+changed:name, loc:up:name	name	true
+changed:name, loc:down:name	name	false
+changed:type, loc:up:type	type	true
+changed:type, loc:down:type	type	false
+changed:category, loc:up:category	category	true
+changed:category, loc:down:category	category	false
+changed:number, loc:up:number	number	true
+changed:number, loc:down:number	number	false
+qd_dealpopup_CAI:BuildSortOptions:1:empty
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	natural	true
+GlobalResourcePopup_CAI:BuildTreeSortOptions:1:initial
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+sort:initial:name, loc:up:name	name	true
+sort:initial:name, loc:down:name	name	false
+sort:initial:category, loc:up:category	category	true
+sort:initial:category, loc:down:category	category	false
+sort:initial:plain, loc:up:plain	plain	true
+sort:initial:plain, loc:down:plain	plain	false
+sort:initial:false, loc:up:false	false	true
+sort:initial:false, loc:down:false	false	false
+sort:initial:number, loc:up:number	number	true
+sort:initial:number, loc:down:number	number	false
+GlobalResourcePopup_CAI:BuildTreeSortOptions:1:changed
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+sort:changed:name, loc:up:name	name	true
+sort:changed:name, loc:down:name	name	false
+sort:changed:category, loc:up:category	category	true
+sort:changed:category, loc:down:category	category	false
+sort:changed:plain, loc:up:plain	plain	true
+sort:changed:plain, loc:down:plain	plain	false
+sort:changed:false, loc:up:false	false	true
+sort:changed:false, loc:down:false	false	false
+sort:changed:number, loc:up:number	number	true
+sort:changed:number, loc:down:number	number	false
+GlobalResourcePopup_CAI:BuildTreeSortOptions:1:empty
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+CAIUnitBrowser:CAIUnitList.BuildSortOptions:1:initial
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+initial:name, loc:up:name	name	true
+initial:name, loc:down:name	name	false
+initial:type, loc:up:type	type	true
+initial:type, loc:down:type	type	false
+initial:category, loc:up:category	category	true
+initial:category, loc:down:category	category	false
+initial:false, loc:up:false	false	true
+initial:false, loc:down:false	false	false
+initial:number, loc:up:number	number	true
+initial:number, loc:down:number	number	false
+CAIUnitBrowser:CAIUnitList.BuildSortOptions:1:changed
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false
+changed:name, loc:up:name	name	true
+changed:name, loc:down:name	name	false
+changed:type, loc:up:type	type	true
+changed:type, loc:down:type	type	false
+changed:category, loc:up:category	category	true
+changed:category, loc:down:category	category	false
+changed:false, loc:up:false	false	true
+changed:false, loc:down:false	false	false
+changed:number, loc:up:number	number	true
+changed:number, loc:down:number	number	false
+CAIUnitBrowser:CAIUnitList.BuildSortOptions:1:empty
+loc:LOC_CAI_DATATABLE_SORT_NATURAL	nil	false

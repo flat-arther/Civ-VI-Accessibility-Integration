@@ -203,9 +203,7 @@ local function BuildPathText(pending)
     local segments = {}
     for _, directions in ipairs(pending.segments) do
         local text = CAIHexCoordUtils.stepListString(directions)
-        if text ~= "" then
-            segments[#segments + 1] = text
-        end
+        CAIText.AppendIfNonEmpty(segments, text)
     end
 
     return CAIHexCoordUtils.joinStepSegments(segments)

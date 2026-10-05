@@ -217,14 +217,6 @@ local function SelIdx(pulldown)
     return math.max(1, pulldown:GetSelectedIndex())
 end
 
-local function Join(parts)
-    local kept = {}
-    for _, s in ipairs(parts) do
-        if s ~= nil and s ~= "" then kept[#kept + 1] = s end
-    end
-    return table.concat(kept, ", ")
-end
-
 -- ===========================================================================
 --  Field builders. Each is added to a parent (the List or a SubMenu) and
 --  registers a reseeder so cascades reflect in the CAI widget.
@@ -314,11 +306,11 @@ local function BuildList()
     -- Features: Feature + Feature Direction
     local features = MakeSubMenu(function()
         local featurePresent = Controls.FeaturePullDown:GetSelectedIndex() > 1
-        return Join({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_WORLDBUILDER_PLACEMENT_MODE_FEATURES"),
             PLabel(Controls.FeaturePullDown),
             featurePresent and PLabel(Controls.FeatureDirectionPulldown) or nil,
-        })
+        }, ", ")
     end)
     -- Vanilla grays features only when the tile's current feature has no direction
     -- (plotDir == -1), using the live Feature Direction selection as the direction.
@@ -336,11 +328,11 @@ local function BuildList()
 
     -- Resources: Resource + strategic Amount
     local resources = MakeSubMenu(function()
-        return Join({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_WORLDBUILDER_PLACEMENT_MODE_RESOURCES"),
             PLabel(Controls.ResourcePullDown),
             (not Controls.ResourceAmount:IsHidden()) and Controls.ResourceAmount:GetText() or nil,
-        })
+        }, ", ")
     end)
     local resourceOpts = ApplyValidity(DeriveResources(), function(row)
         return function()
@@ -353,12 +345,12 @@ local function BuildList()
 
     -- Improvements: Improvement + Pillaged
     local improvements = MakeSubMenu(function()
-        return Join({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_WORLDBUILDER_PLACEMENT_MODE_IMPROVEMENTS"),
             PLabel(Controls.ImprovementPullDown),
             Controls.ImprovementPillagedButton:IsSelected()
                 and Locale.Lookup("LOC_WORLDBUILDER_ATTRIBUTE_IMPROVEMENT_PILLAGED") or nil,
-        })
+        }, ", ")
     end)
     local improvementOpts = ApplyValidity(DeriveWithNone("LOC_WORLDBUILDER_NO_IMPROVEMENT", GameInfo.Improvements()), function(row)
         return function()
@@ -372,12 +364,12 @@ local function BuildList()
 
     -- Districts: District + Pillaged
     local districts = MakeSubMenu(function()
-        return Join({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_WORLDBUILDER_PLACEMENT_MODE_DISTRICTS"),
             PLabel(Controls.DistrictPullDown),
             Controls.DistrictPillagedButton:IsSelected()
                 and Locale.Lookup("LOC_WORLDBUILDER_ATTRIBUTE_DISTRICT_PILLAGED") or nil,
-        })
+        }, ", ")
     end)
     -- Vanilla UpdateDistrictInfo grays a district unless the tile's owning city can
     -- start a BUILD operation for it (needs an owner city + a valid district plot).
@@ -401,12 +393,12 @@ local function BuildList()
 
     -- Routes: Route + Pillaged
     local routes = MakeSubMenu(function()
-        return Join({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_WORLDBUILDER_PLACEMENT_MODE_ROUTES"),
             PLabel(Controls.RoutePullDown),
             Controls.RoutePillagedButton:IsSelected()
                 and Locale.Lookup("LOC_WORLDBUILDER_ATTRIBUTE_ROUTE_PILLAGED") or nil,
-        })
+        }, ", ")
     end)
     AddDropdown(routes, "LOC_WORLDBUILDER_ATTRIBUTE_ROUTE", DeriveWithNone("LOC_WORLDBUILDER_NO_ROUTE", GameInfo.Routes()), Controls.RoutePullDown)
     AddPillagedField(routes, "LOC_WORLDBUILDER_ATTRIBUTE_ROUTE_PILLAGED", Controls.RoutePillagedButton, OnRoutePillagedButton)
@@ -420,11 +412,11 @@ local function BuildList()
         if     t == "Player"       then sub = PLabel(Controls.StartPosPlayerPulldown)
         elseif t == "Leader"       then sub = PLabel(Controls.StartPosLeaderPulldown)
         elseif t == "Civilization" then sub = PLabel(Controls.StartPosCivPulldown) end
-        return Join({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_WORLDBUILDER_PLACEMENT_MODE_START_POSITIONS"),
             PLabel(Controls.StartPosPulldown),
             sub,
-        })
+        }, ", ")
     end)
     AddDropdown(startPos, "LOC_WORLDBUILDER_START_POSITION", DeriveStartPosTypes(), Controls.StartPosPulldown)
     local playerDD = AddDropdown(startPos, "LOC_WORLDBUILDER_PLAYER", DeriveStartPlayers(), Controls.StartPosPlayerPulldown)
@@ -458,7 +450,7 @@ local function OpenList()
     m_reseeders = {}
     m_list = mgr:CreateWidget(LIST_ID, "List", {
         Label = function()
-            return Join({ Locale.Lookup("LOC_WORLDBUILDER_SELECT_TOOL"), PlotCoords() })
+            return CAIText.JoinNonEmpty({ Locale.Lookup("LOC_WORLDBUILDER_SELECT_TOOL"), PlotCoords() }, ", ")
         end,
     })
     m_list:AddInputBinding({

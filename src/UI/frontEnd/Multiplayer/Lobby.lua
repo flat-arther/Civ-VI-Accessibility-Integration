@@ -1587,6 +1587,8 @@ function Initialize()
 	m_kPopupDialog:SetInstanceNames(nil, nil, nil, nil, nil, nil, nil, nil, nil, Controls.LobbyPopupEditboxInstance);
 end
 --#Accessibility integration
+include("textProcessing")
+include("CAIControl")
 local mgr = ExposedMembers.CAI_UIManager
 
 local CAI_PANEL_ID = "CAILobbyPanel"
@@ -1611,28 +1613,8 @@ local function CAI_IsOpen()
 	return ContextPtr ~= nil and not ContextPtr:IsHidden()
 end
 
-local function CAI_ControlText(control)
-	if control and control.GetText then
-		return control:GetText() or ""
-	end
-	return ""
-end
-
-local function CAI_ControlTooltip(control)
-	if control and control.GetToolTipString then
-		return control:GetToolTipString() or ""
-	end
-	return ""
-end
-
 local function CAI_IsGameListRefreshPending()
 	return CAI_GameListRefreshPending or Matchmaking.IsRefreshingGameList()
-end
-
-local function CAI_AddPart(parts, value)
-	if value ~= nil and value ~= "" then
-		table.insert(parts, value)
-	end
 end
 
 local function CAI_SplitNewlines(value)
@@ -1657,7 +1639,7 @@ end
 
 local function CAI_GetPlayerNames(listing)
 	local controlTable = CAI_GetGameControl(listing.ServerID)
-	local tooltip = controlTable and CAI_ControlTooltip(controlTable.MembersLabel) or ""
+	local tooltip = controlTable and CAIControl.Tooltip(controlTable.MembersLabel) or ""
 	if tooltip == "" then tooltip = listing.MembersLabelToolTip or "" end
 	return CAI_SplitNewlines(tooltip)
 end
@@ -1692,8 +1674,8 @@ local function CAI_BuildSortOptions()
 	local selectedIndex = 1
 	for i, option in ipairs(g_SortOptions) do
 		if option ~= nil and option.Button ~= nil then
-			local label = CAI_ControlText(option.Button)
-			if label == "" then label = CAI_ControlTooltip(option.Button) end
+			local label = CAIControl.Text(option.Button)
+			if label == "" then label = CAIControl.Tooltip(option.Button) end
 			if label == "" then label = CAI_Lookup("LOC_CAI_LOBBY_SORT_" .. option.Column) end
 			table.insert(options, {
 				label = label,
@@ -1732,18 +1714,18 @@ end
 
 local function CAI_GetGameLabel(listing)
 	local controlTable = CAI_GetGameControl(listing.ServerID)
-	local name = controlTable and CAI_ControlText(controlTable.ServerNameLabel) or listing.ServerName or ""
+	local name = controlTable and CAIControl.Text(controlTable.ServerNameLabel) or listing.ServerName or ""
 	local status = {}
 	if listing.CloudNotify ~= nil and listing.CloudNotify ~= CloudNotifyTypes.CLOUDNOTIFY_NONE then
-		CAI_AddPart(status, GetCloudNotifyString(listing.CloudNotify))
+		CAIText.AppendIfNonEmpty(status, GetCloudNotifyString(listing.CloudNotify))
 	elseif listing.UnseenComplete == true then
-		CAI_AddPart(status, gameUnseenCompleteTooltip)
+		CAIText.AppendIfNonEmpty(status, gameUnseenCompleteTooltip)
 	elseif listing.CloudTurnPlayerName ~= nil and listing.CloudTurnPlayerName ~= "" then
-		CAI_AddPart(status, CAI_Lookup("LOC_LOBBY_GAME_CLOUD_PLAYER_TURN_TOOLTIP", listing.CloudTurnPlayerName))
+		CAIText.AppendIfNonEmpty(status, CAI_Lookup("LOC_LOBBY_GAME_CLOUD_PLAYER_TURN_TOOLTIP", listing.CloudTurnPlayerName))
 	elseif listing.SavedGame == 1 and (not IsUsingPlayByCloudGameList() or m_browserMode == LIST_PUBLIC_GAMES) then
-		CAI_AddPart(status, gameLoadingSaveTooltip)
+		CAIText.AppendIfNonEmpty(status, gameLoadingSaveTooltip)
 	elseif listing.GameStarted == 1 and not IsUsingPlayByCloudGameList() then
-		CAI_AddPart(status, gameStartedTooltip)
+		CAIText.AppendIfNonEmpty(status, gameStartedTooltip)
 	end
 	if #status > 0 then
 		return CAI_Lookup("LOC_CAI_LOBBY_GAME_ROW_LABEL", name, table.concat(status, "[NEWLINE]"))
@@ -1754,16 +1736,16 @@ end
 local function CAI_GetGameTooltip(listing)
 	local parts = {}
 	if not CheckServerVersion(listing.ServerID) then
-		CAI_AddPart(parts, joinDisabledVersionMismatch)
+		CAIText.AppendIfNonEmpty(parts, joinDisabledVersionMismatch)
 	end
 	if IsPlayByCloudJoinsDisabled() then
-		CAI_AddPart(parts, playByCloudJoinsDisabled)
+		CAIText.AppendIfNonEmpty(parts, playByCloudJoinsDisabled)
 	end
-	CAI_AddPart(parts, CAI_Lookup("LOC_CAI_LOBBY_RULESET_VALUE", listing.RuleSetName or CAI_Lookup("LOC_MULTIPLAYER_UNKNOWN")))
-	CAI_AddPart(parts, CAI_Lookup("LOC_CAI_LOBBY_MAP_VALUE", listing.MapName or CAI_Lookup("LOC_MULTIPLAYER_UNKNOWN"), listing.MapSizeName or ""))
-	CAI_AddPart(parts, CAI_Lookup("LOC_CAI_LOBBY_SPEED_VALUE", listing.GameSpeedName or CAI_Lookup("LOC_MULTIPLAYER_UNKNOWN")))
-	CAI_AddPart(parts, CAI_Lookup("LOC_CAI_LOBBY_PLAYERS_VALUE", listing.MembersLabelCaption or ""))
-	CAI_AddPart(parts, listing.MembersLabelToolTip)
+	CAIText.AppendIfNonEmpty(parts, CAI_Lookup("LOC_CAI_LOBBY_RULESET_VALUE", listing.RuleSetName or CAI_Lookup("LOC_MULTIPLAYER_UNKNOWN")))
+	CAIText.AppendIfNonEmpty(parts, CAI_Lookup("LOC_CAI_LOBBY_MAP_VALUE", listing.MapName or CAI_Lookup("LOC_MULTIPLAYER_UNKNOWN"), listing.MapSizeName or ""))
+	CAIText.AppendIfNonEmpty(parts, CAI_Lookup("LOC_CAI_LOBBY_SPEED_VALUE", listing.GameSpeedName or CAI_Lookup("LOC_MULTIPLAYER_UNKNOWN")))
+	CAIText.AppendIfNonEmpty(parts, CAI_Lookup("LOC_CAI_LOBBY_PLAYERS_VALUE", listing.MembersLabelCaption or ""))
+	CAIText.AppendIfNonEmpty(parts, listing.MembersLabelToolTip)
 	return table.concat(parts, "[NEWLINE]")
 end
 
@@ -2006,7 +1988,7 @@ local function CAI_BuildGamesArea(parent)
 		local tabModes = { LIST_PERSONAL_GAMES, LIST_COMPLETED_GAMES }
 		for _, browserMode in ipairs(tabModes) do
 			local tab = g_TabInstances and g_TabInstances[browserMode]
-			local label = tab and CAI_ControlText(tab.Button) or (browserMode == LIST_COMPLETED_GAMES and LOC_LOBBY_COMPLETED_GAMES or LOC_LOBBY_MY_GAMES)
+			local label = tab and CAIControl.Text(tab.Button) or (browserMode == LIST_COMPLETED_GAMES and LOC_LOBBY_COMPLETED_GAMES or LOC_LOBBY_MY_GAMES)
 			local page = CAI_Tabs:AddPage(function() return label end)
 			local tree = mgr:CreateWidget("CAILobbyGamesTree" .. tostring(browserMode), "Tree", {
 				Label = function() return label end,
@@ -2086,7 +2068,7 @@ local function CAI_BuildPanel()
 			if Matchmaking.IsRefreshingGameList() then
 				return CAI_Lookup("LOC_CAI_LOBBY_REFRESHING")
 			end
-			return CAI_ControlTooltip(Controls.RefreshButton)
+			return CAIControl.Tooltip(Controls.RefreshButton)
 		end,
 		DisabledPredicate = function() return Matchmaking.IsRefreshingGameList() end,
 	})
@@ -2097,7 +2079,7 @@ local function CAI_BuildPanel()
 
 	local joinCodeButton = mgr:CreateWidget("CAILobbyJoinCode", "Button", {
 		Label = function() return Controls.JoinCodeButton:GetText() end,
-		Tooltip = function() return CAI_ControlTooltip(Controls.JoinCodeButton) end,
+		Tooltip = function() return CAIControl.Tooltip(Controls.JoinCodeButton) end,
 		DisabledPredicate = function() return Controls.JoinCodeButton:IsDisabled() end,
 		HiddenPredicate = function() return Controls.JoinCodeButton:IsHidden() end,
 	})
@@ -2106,7 +2088,7 @@ local function CAI_BuildPanel()
 
 	local loadButton = mgr:CreateWidget("CAILobbyLoad", "Button", {
 		Label = function() return Controls.LoadGameButton:GetText() end,
-		Tooltip = function() return CAI_ControlTooltip(Controls.LoadGameButton) end,
+		Tooltip = function() return CAIControl.Tooltip(Controls.LoadGameButton) end,
 		DisabledPredicate = function() return Controls.LoadGameButton:IsDisabled() end,
 		HiddenPredicate = function() return Controls.LoadGameButton:IsHidden() end,
 	})
@@ -2115,7 +2097,7 @@ local function CAI_BuildPanel()
 
 	local hostButton = mgr:CreateWidget("CAILobbyHost", "Button", {
 		Label = function() return Controls.HostButton:GetText() end,
-		Tooltip = function() return CAI_ControlTooltip(Controls.HostButton) end,
+		Tooltip = function() return CAIControl.Tooltip(Controls.HostButton) end,
 		DisabledPredicate = function() return Controls.HostButton:IsDisabled() end,
 		HiddenPredicate = function() return Controls.HostButton:IsHidden() end,
 	})

@@ -1,3 +1,4 @@
+include("CAIGameState")
 include("caiUtils")
 include("WorldCrisisPopup")
 
@@ -6,28 +7,6 @@ local DIALOG_ID    = "CAICrisisPopup_Dialog"
 local HOVER_SOUND  = "Main_Menu_Mouse_Over"
 local m_dialog     = nil
 local m_cachedKData = nil
-
-local function NormalizeText(text)
-    if not text then return "" end
-    text = tostring(text)
-    text = string.gsub(text, "%[ENDCOLOR%]", "")
-    text = string.gsub(text, "%[COLOR_[^%]]+%]", "")
-    text = string.gsub(text, "%[COLOR:%s*[^%]]+%]", "")
-    text = string.gsub(text, "%[NEWLINE%]", ", ")
-    text = string.gsub(text, "%[ICON_[^%]]+%]", "")
-    text = string.gsub(text, "[,%s]+,", ",")
-    text = string.gsub(text, "^[,%s]+", "")
-    text = string.gsub(text, "[,%s]+$", "")
-    return text
-end
-
-local function JoinNonEmpty(parts, sep)
-    local out = {}
-    for _, p in ipairs(parts) do
-        if p and p ~= "" then table.insert(out, p) end
-    end
-    return table.concat(out, sep or "[NEWLINE]")
-end
 
 local function RemoveDialog()
     if not mgr or not m_dialog then return end
@@ -56,7 +35,7 @@ local function BuildDetailLines(detailsTable)
     end
 
     for _, line in ipairs(detailsTable) do
-        local text = NormalizeText(line.string)
+        local text = CAIText.PlainInlineText(line.string)
         if text ~= "" then
             if line.align == "center" or line.align == "large" or line.align == "solo" then
                 FlushGroup()
@@ -70,34 +49,12 @@ local function BuildDetailLines(detailsTable)
     return lines
 end
 
-local function GetPlayerName(playerID)
-    if playerID < 0 then return "" end
-    local localPlayerID = Game.GetLocalPlayer()
-    if localPlayerID < 0 then return "" end
-    local pConfig = PlayerConfigurations[playerID]
-    if not pConfig then return "" end
-    local isMP = GameConfiguration.IsAnyMultiplayer()
-    local isMet = (playerID == localPlayerID)
-    if not isMet then
-        local pDip = Players[localPlayerID]:GetDiplomacy()
-        isMet = pDip:HasMet(playerID)
-    end
-    if not isMet and not (isMP and pConfig:IsHuman()) then
-        return Locale.Lookup("LOC_DIPLOPANEL_UNMET_PLAYER")
-    end
-    local name = Locale.Lookup(pConfig:GetLeaderName())
-    if isMP and pConfig:IsHuman() then
-        name = name .. " (" .. pConfig:GetPlayerName() .. ")"
-    end
-    return name
-end
-
 local function BuildParticipantsText(kData)
     if not kData.participantPlayers then return "" end
     local names = {}
     for _, playerID in ipairs(kData.participantPlayers) do
         if playerID ~= -1 then
-            local pName = GetPlayerName(playerID)
+            local pName = CAIGameState.GetKnownPlayerName(playerID)
             if kData.participantScores and kData.participantScores[playerID] then
                 pName = pName .. " (" .. tostring(kData.participantScores[playerID]) .. ")"
             end
@@ -115,7 +72,7 @@ local function BuildDialog()
     local localPlayerID = Game.GetLocalPlayer()
 
     m_dialog = mgr:CreateWidget(DIALOG_ID, "Dialog", {
-        Label = NormalizeText(Locale.Lookup(kData.titleString)),
+        Label = CAIText.PlainInlineText(Locale.Lookup(kData.titleString)),
         _focusSound = HOVER_SOUND,
     })
 
@@ -129,32 +86,32 @@ local function BuildDialog()
 
     local placeParts = {}
     if kData.placeString and kData.placeString ~= "" then
-        table.insert(placeParts, NormalizeText(kData.placeString))
+        table.insert(placeParts, CAIText.PlainInlineText(kData.placeString))
     end
     local participants = BuildParticipantsText(kData)
     if participants ~= "" then
         table.insert(placeParts, Locale.Lookup("LOC_CAI_CRISIS_PARTICIPANTS") .. " " .. participants)
     end
-    local placeRow = JoinNonEmpty(placeParts, ", ")
+    local placeRow = CAIText.JoinLines(placeParts, ", ")
     if placeRow ~= "" then
         AddRow("StaticText", { Label = placeRow })
     end
 
     local targetParts = {}
-    local targetTitle = NormalizeText(kData.crisisTargetTitle)
-    if targetTitle ~= "" then table.insert(targetParts, targetTitle) end
-    local cityName = NormalizeText(kData.targetCityName)
-    if cityName ~= "" then table.insert(targetParts, cityName) end
-    local trinket = NormalizeText(kData.trinketString)
-    if trinket ~= "" then table.insert(targetParts, trinket) end
-    local targetRow = JoinNonEmpty(targetParts, ", ")
+    local targetTitle = CAIText.PlainInlineText(kData.crisisTargetTitle)
+    CAIText.AppendIfNonEmpty(targetParts, targetTitle)
+    local cityName = CAIText.PlainInlineText(kData.targetCityName)
+    CAIText.AppendIfNonEmpty(targetParts, cityName)
+    local trinket = CAIText.PlainInlineText(kData.trinketString)
+    CAIText.AppendIfNonEmpty(targetParts, trinket)
+    local targetRow = CAIText.JoinLines(targetParts, ", ")
     if targetRow ~= "" then
         AddRow("StaticText", { Label = targetRow })
     end
 
     local detailParts = {}
-    local goalTitle = NormalizeText(kData.crisisTrinketTitle)
-    if goalTitle ~= "" then table.insert(detailParts, goalTitle) end
+    local goalTitle = CAIText.PlainInlineText(kData.crisisTrinketTitle)
+    CAIText.AppendIfNonEmpty(detailParts, goalTitle)
     if kData.timeRemaining then
         if kData.timeRemaining >= 0 then
             if kData.timeRemaining == 1 then
@@ -168,10 +125,10 @@ local function BuildDialog()
     end
 
     if kData.timeRemaining and kData.timeRemaining < 0 then
-        local victorTitle = NormalizeText(Controls.VictorTitle and Controls.VictorTitle:GetText() or "")
-        local victorTier = NormalizeText(Controls.VictorTier and Controls.VictorTier:GetText() or "")
-        if victorTitle ~= "" then table.insert(detailParts, victorTitle) end
-        if victorTier ~= "" then table.insert(detailParts, victorTier) end
+        local victorTitle = CAIText.PlainInlineText(Controls.VictorTitle and Controls.VictorTitle:GetText() or "")
+        local victorTier = CAIText.PlainInlineText(Controls.VictorTier and Controls.VictorTier:GetText() or "")
+        CAIText.AppendIfNonEmpty(detailParts, victorTitle)
+        CAIText.AppendIfNonEmpty(detailParts, victorTier)
     end
 
     local detailLines = BuildDetailLines(kData.crisisDetails)
@@ -179,7 +136,7 @@ local function BuildDialog()
         table.insert(detailParts, line)
     end
 
-    local detailRow = JoinNonEmpty(detailParts, ", ")
+    local detailRow = CAIText.JoinLines(detailParts, ", ")
     if detailRow ~= "" then
         AddRow("StaticText", { Label = detailRow })
     end
@@ -189,7 +146,7 @@ local function BuildDialog()
     for _, line in ipairs(rewardLines) do
         table.insert(rewardParts, line)
     end
-    local rewardRow = JoinNonEmpty(rewardParts, ", ")
+    local rewardRow = CAIText.JoinLines(rewardParts, ", ")
     if rewardRow ~= "" then
         AddRow("StaticText", { Label = rewardRow })
     end

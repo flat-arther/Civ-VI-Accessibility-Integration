@@ -1,3 +1,6 @@
+include("CAIResearchData")
+include("CAIResearchTree")
+include("CAIControl")
 include("caiUtils")
 include("inGameHelpers_CAI")
 include("ToolTipHelper")
@@ -13,86 +16,13 @@ else
     include("CivicsTree")
 end
 
-local mgr                 = ExposedMembers.CAI_UIManager
-
-local PANEL_ID            = "CAICivicsTree_Panel"
-local QUEUE_LIST_ID       = "CAICivicsTree_QueueList"
-local FILTER_LIST_ID      = "CAICivicsTree_FilterList"
-local MAIN_TREE_ID        = "CAICivicsTree_MainTree"
-local GRID_VIEW_ID        = "CAICivicsTree_GridView"
-local GRAPH_VIEW_ID       = "CAICivicsTree_GraphView"
-local UNLOCKS_LIST_ID     = "CAICivicsTree_UnlocksList"
-local GOV_TREE_ID         = "CAICivicsTree_GovTree"
-local CHANGE_VIEW_ID      = "CAICivicsTree_ChangeView"
-local FILTER_RESULTS_ID   = "CAICivicsTree_FilterResults"
-local VIEW_SETTING_SECTION = "UI"
-local VIEW_SETTING_ID      = "CivicsTreeViewMode"
-local VIEW_MODES           = { "grid", "graph", "tree" }
-
----@param viewMode string
----@return integer|nil
-local function GetViewModeIndex(viewMode)
-    for index, mode in ipairs(VIEW_MODES) do
-        if mode == viewMode then return index end
-    end
-    return nil
-end
-
----@return string
-local function LoadViewModeSetting()
-    local stored = tostring(CAI.GetConfigValue(
-        VIEW_SETTING_SECTION, VIEW_SETTING_ID, "grid")):lower()
-    if GetViewModeIndex(stored) then return stored end
-    LogWarn("Civics Tree ignored invalid saved view mode " .. tostring(stored))
-    return "grid"
-end
-
----@param viewMode string
-local function SaveViewModeSetting(viewMode)
-    if not CAI.SetConfigValue(VIEW_SETTING_SECTION, VIEW_SETTING_ID, viewMode) then
-        LogError("Civics Tree failed to save view mode " .. tostring(viewMode))
-    end
-end
-
--- ===========================================================================
--- MODULE STATE
--- ===========================================================================
-local m_panel             = nil ---@type UIWidget|nil
-local m_queueList         = nil ---@type UIWidget|nil
-local m_filterList        = nil ---@type UIWidget|nil
-local m_mainTree          = nil ---@type UIWidget|nil
-local m_gridView          = nil ---@type UIWidget|nil
-local m_graphView         = nil ---@type GraphWidget|nil
-local m_unlocksList       = nil ---@type UIWidget|nil
-local m_govTree           = nil ---@type UIWidget|nil
-local m_viewDropdown      = nil ---@type DropdownWidget|nil
-local m_filterResults     = nil ---@type UIWidget|nil
-
--- "grid" (default), "graph", or "tree". The inactive views are hidden so
--- navigation skips them.
-local m_viewMode          = LoadViewModeSetting()
-
-local m_treeCivics        = {} ---@type table<string, UIWidget> civicType -> tree node
-local m_gridCivics        = {} ---@type table<string, UIWidget> civicType -> grid cell
-local m_graphCivics       = {} ---@type table<string, UIWidget> civicType -> graph node
-local m_lastFocusedCivic  = nil ---@type string|nil
-local m_leadsToByType     = {} ---@type table<string, string[]>
-local m_civicIndexToType  = {} ---@type table<integer, string>
-local m_civicTierByType   = {} ---@type table<string, integer> civicType -> tier number within its era
-
-local m_filterEntries     = nil ---@type table|nil
-local m_activeFilterEntry = nil ---@type table|nil
-local m_activeFilterFunc  = nil ---@type function|nil
-local m_lastPlayerData    = nil ---@type table|nil
-local m_modifierCache     = nil ---@type table|nil
-
--- Breadcrumb stack of civicTypes the user navigated *away from* via a ref
--- link. Backspace in the main tree pops the most recent one and jumps back.
-local m_breadcrumbs       = {} ---@type string[]
-
--- ===========================================================================
--- LIVE-CONTROL ACCESSORS
--- ===========================================================================
+local mgr = ExposedMembers.CAI_UIManager
+local tree
+local m_leadsToByType = {}
+local m_civicIndexToType = {}
+local m_civicTierByType = {}
+local m_lastPlayerData
+local m_modifierCache, m_govTree
 
 local function GetLocalPlayerCulture()
     local ePlayer = Game.GetLocalPlayer()
@@ -106,23 +36,35 @@ local function GetUiNode(civicType)
     return g_uiNodes and g_uiNodes[civicType] or nil
 end
 
-local function ControlText(ctrl)
-    if ctrl and ctrl.GetText then
-        local t = ctrl:GetText()
-        if t and t ~= "" then return t end
-    end
-    return ""
-end
-
-local function ControlIsHidden(ctrl)
-    return ctrl and ctrl.IsHidden and ctrl:IsHidden() or false
-end
-
 local function GetLiveData(civicType)
     if not m_lastPlayerData then return nil end
     local liveTable = m_lastPlayerData[DATA_FIELD_LIVEDATA]
     return liveTable and liveTable[civicType] or nil
 end
+
+local data = CAIResearchData.Create({
+    GetLiveData = GetLiveData,
+    GetUiNode = GetUiNode,
+    GetRow = function(itemType) return GameInfo.Civics[itemType] end,
+    GetStatic = function(itemType) return g_kItemDefaults[itemType] end,
+    GetEra = function(eraType) return g_kEras and g_kEras[eraType] end,
+    GetTier = function(itemType) return m_civicTierByType[itemType] end,
+    GetQueue = function()
+        local player = GetLocalPlayerCulture()
+        return player and player:GetCivicQueue() or nil
+    end,
+    Statuses = ITEM_STATUS,
+    Text = {
+        Unrevealed = "LOC_CIVICS_TREE_NOT_REVEALED_CIVIC",
+        Cost = "LOC_CAI_CIVIC_COST",
+        Turns = "LOC_CAI_CIVIC_TURNS",
+        Progress = "LOC_CAI_CIVIC_PROGRESS",
+        Researched = "LOC_CAI_CIVIC_STATUS_RESEARCHED",
+        Current = "LOC_CAI_CIVIC_STATUS_CURRENT",
+        Blocked = "LOC_CAI_CIVIC_STATUS_BLOCKED",
+        HiddenStatus = "LOC_CAI_CIVIC_STATUS_UNREVEALED",
+    },
+})
 
 local function GetModifierCache()
     if not m_modifierCache and TechAndCivicSupport_BuildCivicModifierCache then
@@ -131,198 +73,22 @@ local function GetModifierCache()
     return m_modifierCache or {}
 end
 
--- ===========================================================================
--- ROW DATA
--- ===========================================================================
-
-local function GetCivicName(civicType)
-    -- Unrevealed civics hide their identity in vanilla (the node shows
-    -- "Not revealed"); never leak the real name through labels or ref links.
-    local kLive = GetLiveData(civicType)
-    if kLive and not kLive.IsRevealed then
-        return Locale.Lookup("LOC_CIVICS_TREE_NOT_REVEALED_CIVIC")
-    end
-    local node = GetUiNode(civicType)
-    local name = ControlText(node and node.NodeName)
-    if name ~= "" then return name end
-    local row = GameInfo.Civics[civicType]
-    if row and row.Name then return Locale.Lookup(row.Name) end
-    return civicType
-end
-
-local function GetCivicCostText(civicType)
-    local kLive = GetLiveData(civicType)
-    if kLive and kLive.Cost and kLive.Cost > 0 then
-        return Locale.Lookup("LOC_CAI_CIVIC_COST", kLive.Cost)
-    end
-    return nil
-end
-
-local function GetCivicTurnsText(civicType)
-    local node = GetUiNode(civicType)
-    if node and not ControlIsHidden(node.Turns) then
-        local raw = ControlText(node.Turns)
-        local n = string.match(raw, "%[ICON_Turn%](%d+)")
-        if n then return Locale.Lookup("LOC_CAI_CIVIC_TURNS", tonumber(n)) end
-        if raw ~= "" then return raw end
-    end
-    local kLive = GetLiveData(civicType)
-    if kLive and kLive.TurnsLeft and kLive.TurnsLeft >= 0 then
-        return Locale.Lookup("LOC_CAI_CIVIC_TURNS", kLive.TurnsLeft)
-    end
-    return nil
-end
-
-local function GetCivicProgressText(civicType)
-    local kLive = GetLiveData(civicType)
-    if not kLive or not kLive.Progress or not kLive.Cost or kLive.Cost <= 0 then
-        return nil
-    end
-    local pct = math.floor((kLive.Progress / kLive.Cost) * 100 + 0.5)
-    if pct <= 0 then return nil end
-    return Locale.Lookup("LOC_CAI_CIVIC_PROGRESS", pct)
-end
-
-local function GetCivicDescriptionText(civicType)
-    local row = GameInfo.Civics[civicType]
-    local desc = row and row.Description or nil
-    if desc and desc ~= "" then
-        local text = Locale.Lookup(desc)
-        if text and text ~= "" then return text end
-    end
-    return nil
-end
-
-local function GetCivicBoostText(civicType)
-    local kStatic = g_kItemDefaults[civicType]
-    if not kStatic or not kStatic.IsBoostable then return nil end
-    local kLive = GetLiveData(civicType)
-    local prefix = Locale.Lookup((kLive and kLive.IsBoosted)
-        and "LOC_BOOST_BOOSTED" or "LOC_BOOST_TO_BOOST")
-    local trigger = kStatic.BoostText or ""
-    if trigger == "" then return prefix end
-    return prefix .. " " .. trigger
-end
-
-local function GetCivicStatusLabel(kLive)
-    if not kLive then return nil end
-    local status = kLive.IsRevealed and kLive.Status or ITEM_STATUS.UNREVEALED
-    if status == ITEM_STATUS.RESEARCHED then
-        return Locale.Lookup("LOC_CAI_CIVIC_STATUS_RESEARCHED")
-    elseif status == ITEM_STATUS.CURRENT then
-        return Locale.Lookup("LOC_CAI_CIVIC_STATUS_CURRENT")
-    elseif status == ITEM_STATUS.BLOCKED then
-        return Locale.Lookup("LOC_CAI_CIVIC_STATUS_BLOCKED")
-    elseif status == ITEM_STATUS.UNREVEALED then
-        return Locale.Lookup("LOC_CAI_CIVIC_STATUS_UNREVEALED")
-    end
-    return nil
-end
-
-local function GetCivicQueuePosition(civicType)
-    local row = GameInfo.Civics[civicType]
-    if not row then return nil end
-    local playerCulture = GetLocalPlayerCulture()
-    if not playerCulture then return nil end
-    local queue = playerCulture:GetCivicQueue()
-    if not queue then return nil end
-    for i, id in ipairs(queue) do
-        if id == row.Index then return i end
-    end
-    return nil
-end
-
 local function CivicKData(civicType)
     return { CivicType = civicType, Type = civicType }
 end
 
--- ===========================================================================
--- RELATED-CIVIC NAMING (prereqs / leads-to)
--- An unrevealed civic hides its name but its connector line is still drawn, so
--- we convey its tree location instead: "<era>, Tier N" (era omitted when it
--- matches the civic we're listing from). These run at speak time, after
--- BuildStaticMaps has populated m_civicTierByType.
--- ===========================================================================
-
-local function IsCivicHidden(civicType)
-    local kLive = GetLiveData(civicType)
-    return kLive ~= nil and kLive.IsRevealed == false
-end
-
----@return string[] prefix parts ("<era>", "Tier N"), possibly empty
-local function UnrevealedLocationPrefix(civicType, currentEraType)
-    local parts = {}
-    local kEntry = g_kItemDefaults[civicType]
-    if kEntry and kEntry.EraType and kEntry.EraType ~= currentEraType then
-        local era = g_kEras and g_kEras[kEntry.EraType]
-        if era and era.Description then table.insert(parts, Locale.Lookup(era.Description)) end
-    end
-    local tier = m_civicTierByType[civicType]
-    if tier then table.insert(parts, Locale.Lookup("LOC_CAI_TREE_TIER", tier)) end
-    return parts
-end
-
--- Per-entry label (used for the individually focusable ref-link rows).
-local function GetRelatedCivicLabel(civicType, currentEraType)
-    if not IsCivicHidden(civicType) then return GetCivicName(civicType) end
-    local prefix = UnrevealedLocationPrefix(civicType, currentEraType)
-    local notRevealed = Locale.Lookup("LOC_CIVICS_TREE_NOT_REVEALED_CIVIC")
-    if #prefix > 0 then return table.concat(prefix, "[NEWLINE]") .. " " .. notRevealed end
-    return notRevealed
-end
-
--- Comma-list for the tooltip: revealed civics by name, unrevealed grouped by
--- location, e.g. "Craftsmanship, Future Era, Tier 1: Not revealed, Not revealed".
-local function FormatRelatedCivicNames(civicTypes, currentEraType)
-    local out, groupOrder, groups = {}, {}, {}
-    for _, ct in ipairs(civicTypes) do
-        if not IsCivicHidden(ct) then
-            table.insert(out, GetCivicName(ct))
-        else
-            local prefix = UnrevealedLocationPrefix(ct, currentEraType)
-            local key = table.concat(prefix, "|")
-            local g = groups[key]
-            if not g then
-                g = { prefix = prefix, count = 0 }
-                groups[key] = g
-                table.insert(groupOrder, g)
-            end
-            g.count = g.count + 1
-        end
-    end
-    local notRevealed = Locale.Lookup("LOC_CIVICS_TREE_NOT_REVEALED_CIVIC")
-    for _, g in ipairs(groupOrder) do
-        local prefixStr = table.concat(g.prefix, "[NEWLINE]")
-        if g.count == 1 then
-            -- "Future Era, Tier 1 Not revealed"
-            table.insert(out, prefixStr ~= "" and (prefixStr .. " " .. notRevealed) or notRevealed)
-        else
-            -- "Tier 1: Not revealed, Not revealed"
-            local items = {}
-            for _ = 1, g.count do table.insert(items, notRevealed) end
-            local joined = table.concat(items, "[NEWLINE]")
-            table.insert(out, prefixStr ~= "" and (prefixStr .. ": " .. joined) or joined)
-        end
-    end
-    return out
-end
-
--- ===========================================================================
--- LABEL / TOOLTIP
--- ===========================================================================
-
 local function FormatRowLabel(civicType)
     local kLive = GetLiveData(civicType)
     if kLive and not kLive.IsRevealed then
-        return GetCivicName(civicType)
+        return data.Name(civicType)
     end
     local parts = {}
-    AppendIfNonEmpty(parts, GetCivicName(civicType))
-    AppendIfNonEmpty(parts, GetCivicStatusLabel(kLive))
-    AppendIfNonEmpty(parts, GetRecommendedPart(kLive, false))
-    local qpos = GetCivicQueuePosition(civicType)
+    CAIText.AppendIfNonEmpty(parts, data.Name(civicType))
+    CAIText.AppendIfNonEmpty(parts, data.Status(kLive))
+    CAIText.AppendIfNonEmpty(parts, GetRecommendedPart(kLive, false))
+    local qpos = data.QueuePosition(civicType)
     if qpos then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_QUEUE_POSITION", qpos))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_QUEUE_POSITION", qpos))
     end
     return table.concat(parts, "[NEWLINE]")
 end
@@ -338,14 +104,14 @@ local function FormatRowTooltip(civicType)
     local parts = {}
 
     if revealed then
-        AppendIfNonEmpty(parts, GetCivicCostText(civicType))
-        AppendIfNonEmpty(parts, GetCivicTurnsText(civicType))
-        AppendIfNonEmpty(parts, GetCivicProgressText(civicType))
-        AppendIfNonEmpty(parts, GetCivicDescriptionText(civicType))
-        AppendIfNonEmpty(parts, GetCivicBoostText(civicType))
+        CAIText.AppendIfNonEmpty(parts, data.Cost(civicType))
+        CAIText.AppendIfNonEmpty(parts, data.Turns(civicType))
+        CAIText.AppendIfNonEmpty(parts, data.Progress(civicType))
+        CAIText.AppendIfNonEmpty(parts, data.Description(civicType))
+        CAIText.AppendIfNonEmpty(parts, data.Boost(civicType))
         local obsoletes = GetObsoletePolicyNames(CivicKData(civicType))
         if #obsoletes > 0 then
-            AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_OBSOLETES_HEADER", table.concat(obsoletes, "[NEWLINE]")))
+            CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_OBSOLETES_HEADER", table.concat(obsoletes, "[NEWLINE]")))
         end
     end
 
@@ -357,14 +123,14 @@ local function FormatRowTooltip(civicType)
         if pt ~= PREREQ_ID_TREE_START then table.insert(prereqTypes, pt) end
     end
     if #prereqTypes > 0 then
-        local names = FormatRelatedCivicNames(prereqTypes, currentEraType)
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_PREREQS_HEADER", table.concat(names, "[NEWLINE]")))
+        local names = data.RelatedNames(prereqTypes, currentEraType)
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_PREREQS_HEADER", table.concat(names, "[NEWLINE]")))
     end
 
     local leadsTo = m_leadsToByType[civicType]
     if leadsTo and #leadsTo > 0 then
-        local names = FormatRelatedCivicNames(leadsTo, currentEraType)
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_LEADS_TO_HEADER", table.concat(names, "[NEWLINE]")))
+        local names = data.RelatedNames(leadsTo, currentEraType)
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_LEADS_TO_HEADER", table.concat(names, "[NEWLINE]")))
     end
 
     if revealed then
@@ -372,95 +138,20 @@ local function FormatRowTooltip(civicType)
         if #unlocks > 0 then
             local names = {}
             for _, u in ipairs(unlocks) do table.insert(names, u.Name) end
-            AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_UNLOCKS_HEADER", table.concat(names, "[NEWLINE]")))
+            CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_UNLOCKS_HEADER", table.concat(names, "[NEWLINE]")))
         end
-        AppendIfNonEmpty(parts, GetCivicAwardsText(GetAwardNames(GetModifierCache()[civicType])))
+        CAIText.AppendIfNonEmpty(parts, GetCivicAwardsText(GetAwardNames(GetModifierCache()[civicType])))
     end
 
     return table.concat(parts, "[NEWLINE]")
 end
 
--- ===========================================================================
--- FILTER
--- ===========================================================================
-
-local function EnsureFilterEntries()
-    if m_filterEntries then return end
-    m_filterEntries = {}
-    if not g_TechFilters then return end
-    local defs = {
-        { "TECHFILTER_FOOD",         "LOC_TECH_FILTER_FOOD" },
-        { "TECHFILTER_SCIENCE",      "LOC_TECH_FILTER_SCIENCE" },
-        { "TECHFILTER_PRODUCTION",   "LOC_TECH_FILTER_PRODUCTION" },
-        { "TECHFILTER_CULTURE",      "LOC_TECH_FILTER_CULTURE" },
-        { "TECHFILTER_GOLD",         "LOC_TECH_FILTER_GOLD" },
-        { "TECHFILTER_UNITS",        "LOC_TECH_FILTER_UNITS" },
-        { "TECHFILTER_IMPROVEMENTS", "LOC_TECH_FILTER_IMPROVEMENTS" },
-        { "TECHFILTER_WONDERS",      "LOC_TECH_FILTER_WONDERS" },
-    }
-    for _, pair in ipairs(defs) do
-        local fn = g_TechFilters[pair[1]]
-        if fn then
-            table.insert(m_filterEntries, {
-                Label        = Locale.Lookup(pair[2]),
-                Func         = fn,
-                VanillaEntry = { Func = fn, Description = pair[2] },
-            })
-        end
-    end
-end
-
-local function FilterMatchesCivic(civicType)
-    if not m_activeFilterFunc then return true end
-    return m_activeFilterFunc(civicType) == true
-end
-
--- ===========================================================================
--- STATIC DATA
--- ===========================================================================
-
 local function BuildStaticMaps()
-    m_leadsToByType    = {}
-    m_civicIndexToType = {}
-    m_civicTierByType  = {}
-
-    -- Collect each era's distinct Column values so we can rank a civic's tier
-    -- (1-based position of its Column among the era's columns). Mirrors the
-    -- Column grouping used when building the tree/grid tiers.
-    local eraColumnSet = {} ---@type table<string, table<integer, boolean>>
-    for civicType, kEntry in pairs(g_kItemDefaults) do
-        local row = GameInfo.Civics[civicType]
-        if row then m_civicIndexToType[row.Index] = civicType end
-        for _, prereqType in ipairs(kEntry.Prereqs or {}) do
-            if prereqType ~= PREREQ_ID_TREE_START then
-                m_leadsToByType[prereqType] = m_leadsToByType[prereqType] or {}
-                table.insert(m_leadsToByType[prereqType], civicType)
-            end
-        end
-        if kEntry.EraType then
-            eraColumnSet[kEntry.EraType] = eraColumnSet[kEntry.EraType] or {}
-            eraColumnSet[kEntry.EraType][kEntry.Column or 0] = true
-        end
-    end
-
-    local tierByEraColumn = {} ---@type table<string, table<integer, integer>>
-    for eraType, colSet in pairs(eraColumnSet) do
-        local cols = {}
-        for c in pairs(colSet) do table.insert(cols, c) end
-        table.sort(cols)
-        local rank = {}
-        for i, c in ipairs(cols) do rank[c] = i end
-        tierByEraColumn[eraType] = rank
-    end
-    for civicType, kEntry in pairs(g_kItemDefaults) do
-        local rank = kEntry.EraType and tierByEraColumn[kEntry.EraType]
-        m_civicTierByType[civicType] = rank and rank[kEntry.Column or 0] or nil
-    end
+    m_leadsToByType, m_civicIndexToType, m_civicTierByType =
+        CAIResearchData.BuildMaps(g_kItemDefaults,
+            function(itemType) return GameInfo.Civics[itemType] end,
+            function(itemType, entry) return entry.Column or 0 end, PREREQ_ID_TREE_START)
 end
-
--- ===========================================================================
--- CIVIC ACTIONS
--- ===========================================================================
 
 local function SpeakProgressSummary(civicType)
     local kStatic = g_kItemDefaults[civicType]
@@ -479,16 +170,13 @@ local function SpeakProgressSummary(civicType)
     Speak(Locale.Lookup("LOC_CAI_CIVIC_QUEUE_ADDED", count, totalCost))
 end
 
--- Set-current path: prefer vanilla DoLeftClick on the live node button so any
--- vanilla hooks fire; fall back to a direct player operation when the node UI
--- isn't materialized (filter results list, queue list, etc.).
 local function ActivateSetCurrent(civicType)
     local node = GetUiNode(civicType)
     local clicked = false
-    if node and node.NodeButton and node.NodeButton.DoLeftClick and not ControlIsHidden(node.NodeButton) then
+    if node and node.NodeButton and node.NodeButton.DoLeftClick and not CAIControl.IsHidden(node.NodeButton) then
         node.NodeButton:DoLeftClick()
         clicked = true
-    elseif node and node.OtherStates and node.OtherStates.DoLeftClick and not ControlIsHidden(node.OtherStates) then
+    elseif node and node.OtherStates and node.OtherStates.DoLeftClick and not CAIControl.IsHidden(node.OtherStates) then
         node.OtherStates:DoLeftClick()
         clicked = true
     end
@@ -505,9 +193,6 @@ local function ActivateSetCurrent(civicType)
     SpeakProgressSummary(civicType)
 end
 
--- Append path: vanilla only fires append via the Shift-Click branch inside
--- SetCurrentNode; we can't safely toggle its m_shiftDown from here, so route
--- the operation directly.
 local function ActivateAppendToQueue(civicType)
     local kStatic = g_kItemDefaults[civicType]
     local playerCulture, ePlayer = GetLocalPlayerCulture()
@@ -520,746 +205,11 @@ local function ActivateAppendToQueue(civicType)
     SpeakProgressSummary(civicType)
 end
 
-local function CanResearch(civicType)
-    local kLive = GetLiveData(civicType)
-    if not kLive or not kLive.IsRevealed then return false end
-    return kLive.Status == ITEM_STATUS.READY
-        or kLive.Status == ITEM_STATUS.BLOCKED
-end
-
-local function IsCivicRevealed(civicType)
-    local kLive = GetLiveData(civicType)
-    return kLive ~= nil and kLive.IsRevealed == true
-end
-
--- ===========================================================================
--- JUMP-TO-NODE (ref links, queue rows, filter results all funnel through this)
--- ===========================================================================
-
--- Walk the focus path from leaf upward, returning the civicType of the
--- innermost civic-row currently in focus (FocusKey "civic:<type>"), or nil.
-local function GetFocusedCivicType()
-    local path = mgr and mgr.CurrentPath or nil
-    if not path then return nil end
-    for i = #path, 1, -1 do
-        local w = path[i]
-        local key = w and w.FocusKey or nil
-        if key and string.sub(key, 1, 6) == "civic:" then
-            return string.sub(key, 7)
-        end
-    end
-    return nil
-end
-
--- The focusable widget for a civic in the currently active view.
-local function GetActiveCivicWidget(civicType)
-    if m_viewMode == "grid" then return m_gridCivics[civicType] end
-    if m_viewMode == "graph" then return m_graphCivics[civicType] end
-    return m_treeCivics[civicType]
-end
-
-local function GetActiveCivicView()
-    if m_viewMode == "grid" then return m_gridView end
-    if m_viewMode == "graph" then return m_graphView end
-    return m_mainTree
-end
-
--- Walk a widget's ancestor chain for the enclosing tree era and tier nodes
--- (identified by their FocusKey prefixes). Returns nil for widgets outside the
--- tree (queue/filter rows), which the caller treats as "everything diverges".
-local function GetEnclosingEraTier(widget)
-    local era, tier
-    local node = widget
-    while node do
-        local key = node.FocusKey
-        if key then
-            if not tier and string.sub(key, 1, 5) == "tier:" then tier = node end
-            if not era and string.sub(key, 1, 4) == "era:" then era = node end
-        end
-        node = node.Parent
-    end
-    return era, tier
-end
-
-local function JumpToCivic(civicType, recordBreadcrumb)
-    local target = GetActiveCivicWidget(civicType)
-    if not target then return end
-
-    if recordBreadcrumb then
-        local source = GetFocusedCivicType()
-        if source and source ~= civicType then
-            table.insert(m_breadcrumbs, source)
-        end
-    end
-
-    -- Tree mode: era/tier nodes are IgnoreWhenNotFocused, so focus speech won't
-    -- mention them on a jump. Fold the diverging era/tier into the spoken line,
-    -- announcing only what actually changed (compared by widget, so Tier 1 of a
-    -- different era still counts as different). Grid mode gets the era for free
-    -- via the column header's natural focus speech, so it just says the civic.
-    local parts = { GetCivicName(civicType) or "" }
-    if m_viewMode == "tree" then
-        local srcEra, srcTier = GetEnclosingEraTier(mgr:GetFocusedWidget())
-        local tgtEra, tgtTier = GetEnclosingEraTier(target)
-        if tgtTier and tgtTier ~= srcTier then AppendIfNonEmpty(parts, tgtTier:GetLabel()) end
-        if tgtEra and tgtEra ~= srcEra then AppendIfNonEmpty(parts, tgtEra:GetLabel()) end
-    end
-
-    Speak(Locale.Lookup("LOC_CAI_CIVICS_TREE_JUMPING", table.concat(parts, "[NEWLINE]")), true)
-    mgr:SetFocus(target)
-end
-
--- ===========================================================================
--- REFERENCE LINKS + DETAIL CHILDREN
--- ===========================================================================
-
-local function CreateRefLink(parentWidget, civicType, currentEraType)
-    local capturedType = civicType
-    local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreeRef"), "TreeItem", {
-        Label             = function() return GetRelatedCivicLabel(capturedType, currentEraType) end,
-        HiddenPredicate   = function() return m_treeCivics[capturedType] == nil end,
-        DisabledPredicate = function() return not IsCivicRevealed(capturedType) end,
-        FocusKey          = "ref:" .. tostring(capturedType),
-    })
-    item:On("activate", function(w)
-        if w:IsDisabled() then return end
-        JumpToCivic(capturedType, true)
-    end)
-    item:AddInputBindings({
-        {
-            Key         = Keys.VK_RETURN,
-            IsShift     = true,
-            MSG         = KeyEvents.KeyUp,
-            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action      = function(w)
-                if w:IsDisabled() then return true end
-                if IsTutorialRunning and IsTutorialRunning() then return true end
-                LuaEvents.OpenCivilopedia(capturedType)
-                return true
-            end,
-        },
-    })
-    parentWidget:AddChild(item)
-    return item
-end
-
-local function AddCivicDetailChildren(civicItem, civicType)
-    -- Unlocks (and the Path bucket) are hidden for unrevealed civics, but the
-    -- prereq/leads-to buckets mirror the connector lines vanilla always draws,
-    -- so they stay regardless of reveal status.
-    local kStatic = g_kItemDefaults[civicType]
-    local currentEraType = kStatic and kStatic.EraType
-
-    -- 1) Unlocks bucket (revealed only) — only entries with descriptions get
-    --    their own child; each child has Shift+Enter Civilopedia.
-    if IsCivicRevealed(civicType) then
-        local unlockChildren = {}
-        for _, unlock in ipairs(GetCivicUnlockObjects(CivicKData(civicType))) do
-            if unlock.Description then
-                table.insert(unlockChildren, unlock)
-            end
-        end
-        if #unlockChildren > 0 then
-            local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreeUnlocks"), "TreeItem", {
-                Label = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_UNLOCKS") end,
-            })
-            for _, unlock in ipairs(unlockChildren) do
-                node:AddChild(CreateUnlockChild(mgr, unlock, "CAICivicsTreeUnlock"))
-            end
-            civicItem:AddChild(node)
-        end
-    end
-
-    -- 2) Prerequisites
-    local prereqTypes = {}
-    for _, pt in ipairs(kStatic and kStatic.Prereqs or {}) do
-        if pt ~= PREREQ_ID_TREE_START then table.insert(prereqTypes, pt) end
-    end
-    if #prereqTypes > 0 then
-        local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreePrereqs"), "TreeItem", {
-            Label = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_PREREQS") end,
-        })
-        for _, pt in ipairs(prereqTypes) do CreateRefLink(node, pt, currentEraType) end
-        civicItem:AddChild(node)
-    end
-
-    -- 3) Leads to
-    local leadsTo = m_leadsToByType[civicType]
-    if leadsTo and #leadsTo > 0 then
-        local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreeLeadsTo"), "TreeItem", {
-            Label = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_LEADS_TO") end,
-        })
-        for _, lt in ipairs(leadsTo) do CreateRefLink(node, lt, currentEraType) end
-        civicItem:AddChild(node)
-    end
-
-    -- 4) Full path (only when researchable and the path has > 1 step)
-    if CanResearch(civicType) and kStatic then
-        local playerCulture = GetLocalPlayerCulture()
-        local path = playerCulture and playerCulture:GetCivicPath(kStatic.Hash) or nil
-        if path and #path > 1 then
-            local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreePath"), "TreeItem", {
-                Label = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_PATH_IF_SELECTED") end,
-            })
-            for i = 1, #path - 1 do
-                local ct = m_civicIndexToType[path[i]]
-                if ct then CreateRefLink(node, ct, currentEraType) end
-            end
-            civicItem:AddChild(node)
-        end
-    end
-end
-
--- ===========================================================================
--- CIVIC NODE FACTORY
--- ===========================================================================
-
-local function BuildCivicNode(civicType)
-    local capturedType = civicType
-    local civicItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreeCivic"), "TreeItem", {
-        Label             = function() return FormatRowLabel(capturedType) end,
-        Tooltip           = function() return FormatRowTooltip(capturedType) end,
-        DisabledPredicate = function()
-            local node = GetUiNode(capturedType)
-            if node and node.Top and node.Top:IsDisabled() then return true end
-            return not CanResearch(capturedType)
-        end,
-        FocusKey          = "civic:" .. tostring(capturedType),
-    })
-    civicItem:SetFocusSound("Main_Menu_Mouse_Over")
-
-    civicItem:On("focus_enter", function(w)
-        m_lastFocusedCivic = capturedType
-    end)
-
-    civicItem:On("activate", function(w)
-        if w:IsDisabled() then return end
-        ActivateSetCurrent(capturedType)
-    end)
-
-    civicItem:AddInputBindings({
-        {
-            Key         = Keys.VK_RETURN,
-            IsControl   = true,
-            MSG         = KeyEvents.KeyUp,
-            Description = "LOC_CAI_KB_ADD_TO_QUEUE",
-            Action      = function()
-                if not CanResearch(capturedType) then return true end
-                ActivateAppendToQueue(capturedType)
-                return true
-            end,
-        },
-        {
-            Key         = Keys.VK_RETURN,
-            IsShift     = true,
-            MSG         = KeyEvents.KeyUp,
-            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action      = function()
-                if not IsCivicRevealed(capturedType) then return true end
-                if IsTutorialRunning and IsTutorialRunning() then return true end
-                LuaEvents.OpenCivilopedia(capturedType)
-                return true
-            end,
-        },
-    })
-
-    AddCivicDetailChildren(civicItem, capturedType)
-    return civicItem
-end
-
--- ===========================================================================
--- MAIN TREE
--- ===========================================================================
-
-local function RebuildMainTree()
-    if not m_mainTree then return end
-
-    local capture = mgr:CaptureFocusKey(m_mainTree)
-    m_mainTree:ClearChildren()
-    m_treeCivics = {}
-
-    for _, era in ipairs(g_kEras) do
-        -- Group this era's filtered civics by tree Column; each distinct Column
-        -- is one prereq tier (a Column-N civic's prereqs sit in Column N-1), so
-        -- tier 1 holds the era's root civics, tier 2 their leads-to, and so on.
-        local byColumn, colValues = {}, {}
-        for civicType, kEntry in pairs(g_kItemDefaults) do
-            if kEntry.EraType == era.EraType and FilterMatchesCivic(civicType) then
-                local col = kEntry.Column or 0
-                if not byColumn[col] then
-                    byColumn[col] = {}; table.insert(colValues, col)
-                end
-                table.insert(byColumn[col], { civicType = civicType, row = kEntry.UITreeRow or 0 })
-            end
-        end
-        if #colValues > 0 then
-            table.sort(colValues)
-
-            local capturedDescription = era.Description
-            local eraItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreeEra"), "TreeItem", {
-                Label    = function() return Locale.Lookup(capturedDescription) end,
-                FocusKey = "era:" .. tostring(era.EraType),
-            })
-
-            for tierIndex, colVal in ipairs(colValues) do
-                local tierNumber = tierIndex
-                local tierItem = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreeTier"), "TreeItem", {
-                    Label    = function() return Locale.Lookup("LOC_CAI_TREE_TIER", tierNumber) end,
-                    FocusKey = "tier:" .. tostring(era.EraType) .. ":" .. tostring(colVal),
-                })
-
-                local tierCivics = byColumn[colVal]
-                table.sort(tierCivics, function(a, b) return a.row < b.row end)
-                for _, entry in ipairs(tierCivics) do
-                    local widget = BuildCivicNode(entry.civicType)
-                    m_treeCivics[entry.civicType] = widget
-                    tierItem:AddChild(widget)
-                end
-
-                -- Auto-expanded: expanding the era reveals each tier's civics
-                -- directly, without a separate expand step per tier.
-                tierItem:Expand(true)
-                eraItem:AddChild(tierItem)
-            end
-
-            -- Whenever the era is (re-)expanded, force every tier open. This
-            -- keeps tiers visible even after a recursive collapse closes them.
-            eraItem:On("expanded", function(self)
-                for _, tier in ipairs(self.Children) do
-                    tier:Expand(true)
-                end
-            end)
-
-            m_mainTree:AddChild(eraItem)
-        end
-    end
-
-    mgr:RestoreFocus(m_mainTree, capture)
-end
-
--- ===========================================================================
--- TABLE VIEW (eras = columns, tier = a Column-group within an era, cells =
--- civic Buttons stacked by UITreeRow). A sibling unlocks list mirrors the
--- focused civic's described unlocks.
--- ===========================================================================
-
--- Rebuild the unlocks list to mirror the focused civic. Focus stays on the
--- grid cell; the list is a passive sibling, so no capture/restore is needed.
-local function RebuildUnlocksList(civicType)
-    if not m_unlocksList then return end
-    m_unlocksList:ClearChildren()
-    if not civicType then return end
-    if not IsCivicRevealed(civicType) then return end
-    for _, unlock in ipairs(GetCivicUnlockObjects(CivicKData(civicType))) do
-        if unlock.Description then
-            m_unlocksList:AddChild(CreateUnlockChild(mgr, unlock, "CAICivicsGridUnlock"))
-        end
-    end
-end
-
-local function BuildCivicCell(civicType)
-    local capturedType = civicType
-    local cell = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsGridCivic"), "Button", {
-        Label             = function() return FormatRowLabel(capturedType) end,
-        Tooltip           = function() return FormatRowTooltip(capturedType) end,
-        DisabledPredicate = function()
-            local node = GetUiNode(capturedType)
-            if node and node.Top and node.Top:IsDisabled() then return true end
-            return not CanResearch(capturedType)
-        end,
-        FocusKey          = "civic:" .. tostring(capturedType),
-    })
-    cell:SetFocusSound("Main_Menu_Mouse_Over")
-
-    cell:On("activate", function(w)
-        if w:IsDisabled() then return end
-        ActivateSetCurrent(capturedType)
-    end)
-
-    -- Keep the unlocks list in step with the focused civic.
-    cell:On("focus_enter", function(w)
-        m_lastFocusedCivic = capturedType
-        RebuildUnlocksList(capturedType)
-    end)
-
-    cell:AddInputBindings({
-        {
-            Key         = Keys.VK_RETURN,
-            IsControl   = true,
-            MSG         = KeyEvents.KeyUp,
-            Description = "LOC_CAI_KB_ADD_TO_QUEUE",
-            Action      = function()
-                if not CanResearch(capturedType) then return true end
-                ActivateAppendToQueue(capturedType)
-                return true
-            end,
-        },
-        {
-            Key         = Keys.VK_RETURN,
-            IsShift     = true,
-            MSG         = KeyEvents.KeyUp,
-            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action      = function()
-                if not IsCivicRevealed(capturedType) then return true end
-                if IsTutorialRunning and IsTutorialRunning() then return true end
-                LuaEvents.OpenCivilopedia(capturedType)
-                return true
-            end,
-        },
-    })
-    return cell
-end
-
-local function MakeGridSpacer()
-    return mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicGridSpacer"), "StaticText", {
-        HiddenPredicate = function() return true end,
-    })
-end
-
-local function RebuildGridView()
-    if not m_gridView then return end
-
-    local capture = mgr:CaptureFocusKey(m_gridView)
-    m_gridView:ClearChildren()
-    m_gridCivics = {}
-
-    for _, era in ipairs(g_kEras) do
-        -- Group this era's filtered civics by their tree Column; each distinct
-        -- Column becomes one side-by-side tier, ordered left to right.
-        local byColumn, colValues = {}, {}
-        local rowMin, rowMax = 0, 0
-        for civicType, kEntry in pairs(g_kItemDefaults) do
-            if kEntry.EraType == era.EraType and FilterMatchesCivic(civicType) then
-                local col = kEntry.Column or 0
-                if not byColumn[col] then
-                    byColumn[col] = {}; table.insert(colValues, col)
-                end
-                local row = kEntry.UITreeRow or 0
-                table.insert(byColumn[col], { civicType = civicType, row = row })
-                if row < rowMin then rowMin = row end
-                if row > rowMax then rowMax = row end
-            end
-        end
-        if #colValues > 0 then
-            table.sort(colValues)
-            local capturedDescription = era.Description
-            local column = m_gridView:AddColumn({
-                header = function() return Locale.Lookup(capturedDescription) end,
-                width  = #colValues,
-            })
-            for tierIndex, colVal in ipairs(colValues) do
-                local tierCivics = byColumn[colVal]
-                -- Build a sparse map from row -> entry
-                local byRow = {}
-                for _, entry in ipairs(tierCivics) do byRow[entry.row] = entry end
-                -- Fill every slot from rowMin to rowMax; real cells at occupied
-                -- rows, hidden spacers elsewhere so indices align across tiers.
-                for r = rowMin, rowMax do
-                    local entry = byRow[r]
-                    if entry then
-                        local cell = BuildCivicCell(entry.civicType)
-                        m_gridCivics[entry.civicType] = cell
-                        m_gridView:AddItem(column, tierIndex, cell)
-                    else
-                        m_gridView:AddItem(column, tierIndex, MakeGridSpacer())
-                    end
-                end
-            end
-        end
-    end
-
-    mgr:RestoreFocus(m_gridView, capture)
-end
-
-local function RebuildGraphView()
-    if not m_graphView then return end
-
-    local capture = mgr:CaptureFocusKey(m_graphView)
-    m_graphView:ClearGraph()
-    m_graphCivics = {}
-
-    for _, era in ipairs(g_kEras) do
-        local eraCivics = {}
-        for civicType, kEntry in pairs(g_kItemDefaults) do
-            if kEntry.EraType == era.EraType and FilterMatchesCivic(civicType) then
-                eraCivics[#eraCivics + 1] = {
-                    civicType = civicType,
-                    column = kEntry.Column or 0,
-                    row = kEntry.UITreeRow or 0,
-                }
-            end
-        end
-        table.sort(eraCivics, function(a, b)
-            if a.column ~= b.column then return a.column < b.column end
-            if a.row ~= b.row then return a.row < b.row end
-            return a.civicType < b.civicType
-        end)
-        if #eraCivics > 0 then
-            local capturedDescription = era.Description
-            m_graphView:AddGroup({
-                key = era.EraType,
-                label = function() return Locale.Lookup(capturedDescription) end,
-            })
-            for _, entry in ipairs(eraCivics) do
-                local node = BuildCivicCell(entry.civicType)
-                m_graphCivics[entry.civicType] = node
-                m_graphView:AddNode(entry.civicType, node, { group = era.EraType })
-            end
-        end
-    end
-
-    for civicType, kEntry in pairs(g_kItemDefaults) do
-        if m_graphCivics[civicType] then
-            for _, prereqType in ipairs(kEntry.Prereqs or {}) do
-                if prereqType ~= PREREQ_ID_TREE_START and m_graphCivics[prereqType] then
-                    m_graphView:AddEdge(prereqType, civicType)
-                end
-            end
-        end
-    end
-
-    mgr:RestoreFocus(m_graphView, capture)
-end
-
--- Rebuild every civic view, keeping them in sync with game/filter
--- state so jumps land correctly regardless of the active mode.
-local function RebuildCivicsViews()
-    RebuildMainTree()
-    RebuildGridView()
-    RebuildGraphView()
-end
-
----@param viewMode string
----@return boolean
-local function SetViewMode(viewMode)
-    local selectedIndex = GetViewModeIndex(viewMode)
-    assert(selectedIndex ~= nil, "Civics Tree received invalid view mode " .. tostring(viewMode))
-
-    if m_viewMode ~= viewMode then
-        m_viewMode = viewMode
-        SaveViewModeSetting(viewMode)
-    end
-    if m_viewDropdown and m_viewDropdown:GetSelectedIndex() ~= selectedIndex then
-        m_viewDropdown:SetSelectedIndex(selectedIndex, true)
-    end
-    local active = GetActiveCivicView()
-    local target = m_lastFocusedCivic and GetActiveCivicWidget(m_lastFocusedCivic) or nil
-    if target then mgr:SetFocus(target) elseif active then mgr:SetFocus(active) end
-    return true
-end
-
--- ===========================================================================
--- QUEUE LIST (flat list of Buttons; activate jumps to main-tree node)
--- ===========================================================================
-
-local function CreateQueueButton(civicType, isCurrent)
-    local capturedType = civicType
-    local btn = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreeQueueRow"), "Button", {
-        Label    = function()
-            if isCurrent then
-                return Locale.Lookup("LOC_CAI_CIVIC_CURRENT", FormatRowLabel(capturedType))
-            end
-            return FormatRowLabel(capturedType)
-        end,
-        Tooltip  = function() return FormatRowTooltip(capturedType) end,
-        FocusKey = (isCurrent and "queue:current:" or "queue:") .. tostring(capturedType),
-    })
-    btn:SetFocusSound("Main_Menu_Mouse_Over")
-    btn:On("activate", function() JumpToCivic(capturedType) end)
-    btn:AddInputBindings({
-        {
-            Key         = Keys.VK_RETURN,
-            IsShift     = true,
-            MSG         = KeyEvents.KeyUp,
-            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action      = function()
-                if not IsCivicRevealed(capturedType) then return true end
-                if IsTutorialRunning and IsTutorialRunning() then return true end
-                LuaEvents.OpenCivilopedia(capturedType)
-                return true
-            end,
-        },
-    })
-    return btn
-end
-
-local function RebuildQueueList()
-    if not m_queueList then return end
-
-    local capture = mgr:CaptureFocusKey(m_queueList)
-    m_queueList:ClearChildren()
-
-    local playerCulture = GetLocalPlayerCulture()
-    if playerCulture then
-        local currentIdx = playerCulture:GetProgressingCivic()
-        if currentIdx and currentIdx ~= -1 then
-            local ct = m_civicIndexToType[currentIdx]
-            if ct then m_queueList:AddChild(CreateQueueButton(ct, true)) end
-        end
-        local queue = playerCulture:GetCivicQueue()
-        if queue then
-            for _, civicID in ipairs(queue) do
-                local ct = m_civicIndexToType[civicID]
-                if ct and ct ~= m_civicIndexToType[currentIdx or -1] then
-                    m_queueList:AddChild(CreateQueueButton(ct, false))
-                end
-            end
-        end
-    end
-
-    mgr:RestoreFocus(m_queueList, capture)
-end
-
--- ===========================================================================
--- FILTER LIST + RESULTS SUBLIST
--- ===========================================================================
-
-local function ResetFilterToNone()
-    m_activeFilterEntry = nil
-    m_activeFilterFunc  = nil
-    -- Vanilla's "no filter" entry is the one with Func=nil and the
-    -- LOC_TECH_FILTER_NONE description; reproduce it here for OnFilterClicked.
-    if OnFilterClicked then
-        OnFilterClicked({ Func = nil, Description = "LOC_TECH_FILTER_NONE" })
-    end
-    RebuildCivicsViews()
-end
-
-local function CreateFilterResultButton(civicType)
-    local capturedType = civicType
-    local btn = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreeFilterResult"), "Button", {
-        Label             = function() return FormatRowLabel(capturedType) end,
-        Tooltip           = function() return FormatRowTooltip(capturedType) end,
-        DisabledPredicate = function()
-            local node = GetUiNode(capturedType)
-            if node and node.Top and node.Top:IsDisabled() then return true end
-            return false
-        end,
-        FocusKey          = "filterResult:" .. tostring(capturedType),
-    })
-    btn:SetFocusSound("Main_Menu_Mouse_Over")
-    btn:On("activate", function()
-        -- Activate jumps to the node in the main tree. The results list is
-        -- popped (its destroy listener resets the filter), so focus lands on
-        -- a fully revealed main tree.
-        mgr:RemoveFromStack(FILTER_RESULTS_ID)
-        JumpToCivic(capturedType)
-    end)
-    btn:AddInputBindings({
-        {
-            Key         = Keys.VK_RETURN,
-            IsControl   = true,
-            MSG         = KeyEvents.KeyUp,
-            Description = "LOC_CAI_KB_ADD_TO_QUEUE",
-            Action      = function()
-                if not CanResearch(capturedType) then return true end
-                ActivateAppendToQueue(capturedType)
-                return true
-            end,
-        },
-        {
-            Key         = Keys.VK_RETURN,
-            IsShift     = true,
-            MSG         = KeyEvents.KeyUp,
-            Description = "LOC_CAI_KB_OPEN_CIVILOPEDIA",
-            Action      = function()
-                if not IsCivicRevealed(capturedType) then return true end
-                if IsTutorialRunning and IsTutorialRunning() then return true end
-                LuaEvents.OpenCivilopedia(capturedType)
-                return true
-            end,
-        },
-    })
-    return btn
-end
-
-local function OpenFilterResults(entry)
-    if not entry or not entry.Func then return end
-
-    m_activeFilterEntry = entry
-    m_activeFilterFunc  = entry.Func
-    if OnFilterClicked then OnFilterClicked(entry.VanillaEntry) end
-    RebuildCivicsViews()
-
-    m_filterResults = mgr:CreateWidget(FILTER_RESULTS_ID, "List", {
-        Label = function()
-            return Locale.Lookup("LOC_CAI_CIVICS_TREE_FILTER_RESULTS", entry.Label)
-        end,
-    })
-
-    -- Pre-order pass through eras matches the visual ordering of the main tree.
-    for _, era in ipairs(g_kEras) do
-        local eraCivics = {}
-        for civicType, kEntry in pairs(g_kItemDefaults) do
-            if kEntry.EraType == era.EraType and FilterMatchesCivic(civicType) then
-                table.insert(eraCivics, { civicType = civicType, col = kEntry.Column or 0, row = kEntry.UITreeRow or 0 })
-            end
-        end
-        table.sort(eraCivics, function(a, b)
-            if a.col ~= b.col then return a.col < b.col end
-            return a.row < b.row
-        end)
-        for _, e in ipairs(eraCivics) do
-            m_filterResults:AddChild(CreateFilterResultButton(e.civicType))
-        end
-    end
-
-    -- Escape pops the results list (and the destroy listener below resets the
-    -- filter). Without this, the input bubbles up to vanilla which closes the
-    -- whole tree screen.
-    m_filterResults:AddInputBindings({
-        {
-            Key         = Keys.VK_ESCAPE,
-            MSG         = KeyEvents.KeyUp,
-            Description = "LOC_CAI_KB_CLOSE",
-            Action      = function()
-                mgr:RemoveFromStack(FILTER_RESULTS_ID)
-                return true
-            end,
-        },
-    })
-
-    -- Always reset the vanilla + CAI filter when the results list goes away —
-    -- whether the user picked a result (we already removed it from the stack)
-    -- or pressed Escape.
-    m_filterResults:On("destroy", function()
-        m_filterResults = nil
-        ResetFilterToNone()
-    end)
-
-    mgr:Push(m_filterResults)
-end
-
-local function BuildFilterList()
-    EnsureFilterEntries()
-    m_filterList:ClearChildren()
-    if not m_filterEntries then return end
-    for _, entry in ipairs(m_filterEntries) do
-        local capturedEntry = entry
-        local btn = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsTreeFilterBtn"), "Button", {
-            Label    = function() return capturedEntry.Label end,
-            FocusKey = "filter:" .. tostring(capturedEntry.Label),
-        })
-        btn:SetFocusSound("Main_Menu_Mouse_Over")
-        btn:On("activate", function()
-            if capturedEntry.Func then
-                OpenFilterResults(capturedEntry)
-            else
-                ResetFilterToNone()
-            end
-        end)
-        m_filterList:AddChild(btn)
-    end
-end
-
--- ===========================================================================
--- GOVERNMENT AND SLOTTED POLICIES TREE
--- ===========================================================================
 
 local function GetGovernmentSummary()
-    local function Count(control) return tonumber(ControlText(control)) or 0 end
+    local function Count(control) return tonumber(CAIControl.Text(control)) or 0 end
     return Locale.Lookup("LOC_CAI_GOVERNMENT_SUMMARY",
-        ControlText(Controls.GovernmentTitle),
+        CAIControl.Text(Controls.GovernmentTitle),
         Count(Controls.DiplomaticIconCount),
         Count(Controls.EconomicIconCount),
         Count(Controls.MilitaryIconCount),
@@ -1354,213 +304,92 @@ local function RefreshGovernmentTree()
     mgr:RestoreFocus(m_govTree, capture)
 end
 
--- ===========================================================================
--- SEARCH
--- ===========================================================================
-
-local function CivicsSearchHandler(query, maxResults)
-    local results = {}
-    local seen = {}
-    if not Search.HasContext("Civics") then return results end
-    local raw = Search.Search("Civics", query)
-    if not raw then return results end
-    for _, hit in ipairs(raw) do
-        local civicType = hit[1]
-        if not seen[civicType] then
-            seen[civicType] = true
-            local label = FormatRowLabel(civicType)
-            if label and label ~= "" then
-                local tooltip = FormatRowTooltip(civicType)
-                results[#results + 1] = {
-                    key        = civicType,
-                    label      = label,
-                    tooltip    = tooltip ~= "" and tooltip or nil,
-                    onActivate = function() JumpToCivic(civicType, false) end,
-                }
-            end
-            if #results >= maxResults then break end
-        end
-    end
-    return results
-end
-
--- ===========================================================================
--- PANEL LIFECYCLE
--- ===========================================================================
-
-local function EnsurePanelBuilt()
-    if m_panel or not mgr then return end
-
-    BuildStaticMaps()
-    EnsureFilterEntries()
-
-    m_panel = mgr:CreateWidget(PANEL_ID, "Panel", {
-        Label = function() return ControlText(Controls.ModalScreenTitle) end,
-    })
-    m_panel:AddInputBindings({
-        {
-            Key = Keys["1"], IsAlt = true, MSG = KeyEvents.KeyDown,
-            Description = "LOC_CAI_TREE_SWITCH_TO_GRID",
-            Action = function() return SetViewMode("grid") end,
-        },
-        {
-            Key = Keys["2"], IsAlt = true, MSG = KeyEvents.KeyDown,
-            Description = "LOC_CAI_TREE_SWITCH_TO_GRAPH",
-            Action = function() return SetViewMode("graph") end,
-        },
-        {
-            Key = Keys["3"], IsAlt = true, MSG = KeyEvents.KeyDown,
-            Description = "LOC_CAI_TREE_SWITCH_TO_TREE",
-            Action = function() return SetViewMode("tree") end,
-        },
-    })
-
-    -- Queue list (hidden when empty)
-    m_queueList = mgr:CreateWidget(QUEUE_LIST_ID, "List", {
-        Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_QUEUE_LIST") end,
-        HiddenPredicate = function(w) return not w.Children or #w.Children == 0 end,
-        SearchDepth     = 0,
-    })
-    -- Filter buttons list
-    m_filterList = mgr:CreateWidget(FILTER_LIST_ID, "List", {
-        Label       = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_FILTER") end,
-        SearchDepth = 0,
-    })
-    BuildFilterList()
-
-    -- Main tree (hidden outside tree mode)
-    m_mainTree = mgr:CreateWidget(MAIN_TREE_ID, "Tree", {
-        Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_MAIN_LIST") end,
-        HiddenPredicate = function() return m_viewMode ~= "tree" end,
-        SearchDepth     = 3,
-    })
-    m_mainTree:SetSearchQueryHandler(CivicsSearchHandler)
-    m_mainTree:AddInputBindings({
-        {
-            Key         = Keys.VK_BACK,
-            MSG         = KeyEvents.KeyUp,
-            Description = "LOC_CAI_KB_NAVIGATE_BACK",
-            Action      = function()
-                local source = table.remove(m_breadcrumbs)
-                if not source then return false end
-                -- Don't push the current civic onto the stack — Backspace is
-                -- navigation back, not another forward hop.
-                JumpToCivic(source, false)
-                return true
-            end,
-        },
-    })
-    m_panel:AddChild(m_mainTree)
-
-    -- Grid view (hidden outside grid mode): eras = columns, tiers = Column-groups
-    m_gridView = mgr:CreateWidget(GRID_VIEW_ID, "Grid", {
-        Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_MAIN_LIST") end,
-        HiddenPredicate = function() return m_viewMode ~= "grid" end,
-    })
-    m_gridView:SetSearchQueryHandler(CivicsSearchHandler)
-    m_panel:AddChild(m_gridView)
-
-    -- Graph view (hidden outside graph mode): Left/Right follows
-    --    prerequisite edges and Up/Down moves among traversal alternatives.
-    m_graphView = mgr:CreateWidget(GRAPH_VIEW_ID, "Graph", {
-        Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_MAIN_LIST") end,
-        HiddenPredicate = function() return m_viewMode ~= "graph" end,
-    })
-    m_graphView:SetSearchQueryHandler(CivicsSearchHandler)
-    m_panel:AddChild(m_graphView)
-
-    -- Unlocks list follows the active view; it mirrors the focused civic in grid or graph
-    --    appears only when the focused civic has described unlocks.
-    m_unlocksList = mgr:CreateWidget(UNLOCKS_LIST_ID, "List", {
-        Label           = function() return Locale.Lookup("LOC_CAI_CIVICS_TREE_UNLOCKS") end,
-        HiddenPredicate = function(w)
-            return (m_viewMode ~= "grid" and m_viewMode ~= "graph")
-                or not w.Children or #w.Children == 0
-        end,
-        SearchDepth     = 0,
-    })
-    m_panel:AddChild(m_unlocksList)
-
-    m_panel:AddChild(m_filterList)
-    m_panel:AddChild(m_queueList)
-
-    -- Government summary and slotted policies.
-    m_govTree = mgr:CreateWidget(GOV_TREE_ID, "Tree", {
-        Label = GetGovernmentSummary,
-        SearchDepth = 0,
-    })
-    m_panel:AddChild(m_govTree)
-
-    -- View selector remains the last child and uses the Alt+1-3 order.
-    m_viewDropdown = mgr:CreateWidget(CHANGE_VIEW_ID, "Dropdown", {
-        Label = function() return Locale.Lookup("LOC_CAI_TREE_VIEW_MODE") end,
-        FocusKey = "civics-tree:view",
-    })
-    m_viewDropdown:SetOptions({
-        { label = Locale.Lookup("LOC_CAI_TREE_VIEW_GRID"), value = "grid" },
-        { label = Locale.Lookup("LOC_CAI_TREE_VIEW_GRAPH"), value = "graph" },
-        { label = Locale.Lookup("LOC_CAI_TREE_VIEW_TREE"), value = "tree" },
-    })
-    m_viewDropdown:SetSelectedIndex(GetViewModeIndex(m_viewMode), true)
-    m_viewDropdown:On("value_changed", function(_, viewMode) SetViewMode(viewMode) end)
-    m_panel:AddChild(m_viewDropdown)
-
-    RebuildCivicsViews()
-    RebuildQueueList()
-    RefreshGovernmentTree()
-end
-
-local function PushPanel()
-    if not mgr then return end
-    EnsurePanelBuilt()
-    if not m_panel or mgr:GetWidgetById(PANEL_ID) then return end
-
-    mgr:Push(m_panel)
-end
-
-local function OnPanelClosedCAI()
-    if mgr and m_panel then
-        mgr:RemoveFromStack(FILTER_RESULTS_ID)
-        mgr:RemoveFromStack(PANEL_ID)
-    end
-    m_panel             = nil
-    m_queueList         = nil
-    m_filterList        = nil
-    m_mainTree          = nil
-    m_gridView          = nil
-    m_graphView         = nil
-    m_unlocksList       = nil
-    m_govTree           = nil
-    m_viewDropdown      = nil
-    m_filterResults     = nil
-    m_treeCivics        = {}
-    m_gridCivics        = {}
-    m_graphCivics       = {}
-    m_lastFocusedCivic  = nil
-    m_leadsToByType     = {}
-    m_civicIndexToType  = {}
-    m_civicTierByType   = {}
-    m_lastPlayerData    = nil
-    m_filterEntries     = nil
-    m_activeFilterEntry = nil
-    m_activeFilterFunc  = nil
-    m_modifierCache     = nil
-    m_breadcrumbs       = {}
-end
-
-local function IsPanelOnStack()
-    return m_panel and mgr and mgr:GetWidgetById(PANEL_ID) ~= nil
-end
-
--- ===========================================================================
--- WRAPS
--- ===========================================================================
+tree = CAIResearchTree.Create(mgr, {
+    IdPrefix = "CAICivicsTree",
+    GridIdPrefix = "CAICivicsGrid",
+    NodeSuffix = "Civic",
+    DebugName = "CivicsTree",
+    SettingID = "CivicsTreeViewMode",
+    ViewFocusKey = "civics-tree:view",
+    FocusPrefix = "civic:",
+    SearchContext = "Civics",
+    PrereqStart = PREREQ_ID_TREE_START,
+    GetEntries = function() return g_kItemDefaults end,
+    GetEras = function() return g_kEras end,
+    GetFilters = function() return g_TechFilters end,
+    GetTitle = function() return CAIControl.Text(Controls.ModalScreenTitle) end,
+    GetColumn = function(itemType, entry) return entry.Column or 0 end,
+    GetTypeForIndex = function(index) return m_civicIndexToType[index] end,
+    GetName = data.Name,
+    GetRelatedLabel = data.RelatedLabel,
+    GetUiNode = GetUiNode,
+    FormatLabel = FormatRowLabel,
+    FormatTooltip = FormatRowTooltip,
+    CanResearch = data.CanResearch,
+    IsRevealed = data.IsRevealed,
+    SetCurrent = ActivateSetCurrent,
+    AppendToQueue = ActivateAppendToQueue,
+    GetUnlocks = function(itemType) return GetCivicUnlockObjects(CivicKData(itemType)) end,
+    GetLeadsTo = function(itemType) return m_leadsToByType[itemType] end,
+    GetPath = function(hash)
+        local player = GetLocalPlayerCulture()
+        return player and player:GetCivicPath(hash) or nil
+    end,
+    Prepare = BuildStaticMaps,
+    ReadQueue = function()
+        local player = GetLocalPlayerCulture()
+        if not player then return nil, nil end
+        return player:GetProgressingCivic(), player:GetCivicQueue()
+    end,
+    ApplyFilter = function(entry)
+        if OnFilterClicked then OnFilterClicked(entry) end
+    end,
+    ResetData = function()
+        m_leadsToByType = {}
+        m_civicIndexToType = {}
+        m_civicTierByType = {}
+        m_lastPlayerData = nil
+        m_modifierCache, m_govTree = nil, nil
+    end,
+    AddExtraPanels = function(panel)
+        m_govTree = mgr:CreateWidget("CAICivicsTree_GovTree", "Tree", {
+            Label = GetGovernmentSummary,
+            SearchDepth = 0,
+        })
+        panel:AddChild(m_govTree)
+    end,
+    RefreshExtra = RefreshGovernmentTree,
+    FilterDefinitions = {
+        { "TECHFILTER_FOOD",         "LOC_TECH_FILTER_FOOD" },
+        { "TECHFILTER_SCIENCE",      "LOC_TECH_FILTER_SCIENCE" },
+        { "TECHFILTER_PRODUCTION",   "LOC_TECH_FILTER_PRODUCTION" },
+        { "TECHFILTER_CULTURE",      "LOC_TECH_FILTER_CULTURE" },
+        { "TECHFILTER_GOLD",         "LOC_TECH_FILTER_GOLD" },
+        { "TECHFILTER_UNITS",        "LOC_TECH_FILTER_UNITS" },
+        { "TECHFILTER_IMPROVEMENTS", "LOC_TECH_FILTER_IMPROVEMENTS" },
+        { "TECHFILTER_WONDERS",      "LOC_TECH_FILTER_WONDERS" },
+    },
+    Text = {
+        Prerequisites = "LOC_CAI_CIVICS_TREE_PREREQS",
+        LeadsTo = "LOC_CAI_CIVICS_TREE_LEADS_TO",
+        Path = "LOC_CAI_CIVICS_TREE_PATH_IF_SELECTED",
+        QueueAction = "LOC_CAI_KB_ADD_TO_QUEUE",
+        BackAction = "LOC_CAI_KB_NAVIGATE_BACK",
+        Jump = "LOC_CAI_CIVICS_TREE_JUMPING",
+        Current = "LOC_CAI_CIVIC_CURRENT",
+        FilterResults = "LOC_CAI_CIVICS_TREE_FILTER_RESULTS",
+        QueueList = "LOC_CAI_CIVICS_TREE_QUEUE_LIST",
+        Filter = "LOC_CAI_CIVICS_TREE_FILTER",
+        MainList = "LOC_CAI_CIVICS_TREE_MAIN_LIST",
+        Unlocks = "LOC_CAI_CIVICS_TREE_UNLOCKS",
+    },
+})
 
 View = WrapFunc(View, function(orig, playerData)
     m_lastPlayerData = playerData
     orig(playerData)
-    if m_panel then
-        RebuildQueueList()
+    if tree.HasPanel() then
+        tree.RebuildQueue()
         RefreshGovernmentTree()
     end
 end)
@@ -1568,7 +397,7 @@ end)
 local _origOnOpen = OnOpen
 OnOpen = WrapFunc(OnOpen, function(orig)
     orig()
-    PushPanel()
+    tree.Open()
 end)
 LuaEvents.CivicsChooser_RaiseCivicsTree.Remove(_origOnOpen)
 LuaEvents.LaunchBar_RaiseCivicsTree.Remove(_origOnOpen)
@@ -1576,12 +405,12 @@ LuaEvents.CivicsChooser_RaiseCivicsTree.Add(OnOpen)
 LuaEvents.LaunchBar_RaiseCivicsTree.Add(OnOpen)
 
 Close = WrapFunc(Close, function(orig)
-    OnPanelClosedCAI()
+    tree.Close()
     orig()
 end)
 
 OnInputHandler = WrapFunc(OnInputHandler, function(orig, pInputStruct)
-    if mgr and IsPanelOnStack() then
+    if mgr and tree.IsOpen() then
         if mgr:HandleInput(pInputStruct) then return true end
     end
     if IsCAIEscapeKeyUp(pInputStruct)
@@ -1597,41 +426,30 @@ ContextPtr:SetInputHandler(OnInputHandler, true)
 -- EVENTS
 -- ===========================================================================
 
-local function RefocusIfCivicRow()
-    if not IsPanelOnStack() then return end
-    local focused = mgr:GetFocusedWidget()
-    if not focused or not focused.FocusKey then return end
-    local key = focused.FocusKey
-    if string.sub(key, 1, 6) == "civic:"
-        or string.sub(key, 1, 6) == "queue:" then
-        mgr:Refocus()
-    end
-end
-
 Events.CivicChanged.Add(function(ePlayer)
-    if ePlayer == Game.GetLocalPlayer() and IsPanelOnStack() then
-        RebuildQueueList()
-        RefocusIfCivicRow()
+    if ePlayer == Game.GetLocalPlayer() and tree.IsOpen() then
+        tree.RebuildQueue()
+        tree.RefocusRow()
     end
 end)
 
 Events.CivicQueueChanged.Add(function(ePlayer)
-    if ePlayer == Game.GetLocalPlayer() and IsPanelOnStack() then
-        RebuildQueueList()
-        RefocusIfCivicRow()
+    if ePlayer == Game.GetLocalPlayer() and tree.IsOpen() then
+        tree.RebuildQueue()
+        tree.RefocusRow()
     end
 end)
 
 Events.CivicCompleted.Add(function(ePlayer)
-    if ePlayer ~= Game.GetLocalPlayer() or not IsPanelOnStack() then return end
-    RebuildCivicsViews()
-    RebuildQueueList()
+    if ePlayer ~= Game.GetLocalPlayer() or not tree.IsOpen() then return end
+    tree.RebuildViews()
+    tree.RebuildQueue()
 end)
 
-Events.CultureYieldChanged.Add(RefocusIfCivicRow)
+Events.CultureYieldChanged.Add(tree.RefocusRow)
 
 local function RefreshGovIfOpen()
-    if IsPanelOnStack() then
+    if tree.IsOpen() then
         RefreshGovernmentTree()
     end
 end
@@ -1649,9 +467,9 @@ Events.GovernmentPolicyObsoleted.Add(function(ePlayer)
 end)
 
 Events.LocalPlayerTurnBegin.Add(function(ePlayer)
-    if ePlayer == Game.GetLocalPlayer() and IsPanelOnStack() then
-        RebuildQueueList()
+    if ePlayer == Game.GetLocalPlayer() and tree.IsOpen() then
+        tree.RebuildQueue()
     end
 end)
 
-Events.LocalPlayerChanged.Add(function() OnPanelClosedCAI() end)
+Events.LocalPlayerChanged.Add(function() tree.Close() end)

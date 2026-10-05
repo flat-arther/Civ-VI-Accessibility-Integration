@@ -24,15 +24,11 @@ local function BuildDialog()
     local parts = {}
 
     local name = Controls.DisasterName:GetText()
-    if name and name ~= "" then
-        table.insert(parts, name)
-    end
+    CAIText.AppendIfNonEmpty(parts, name)
 
     if not Controls.DisasterDescriptionContainer:IsHidden() then
         local desc = Controls.DisasterDescription:GetText()
-        if desc and desc ~= "" then
-            table.insert(parts, desc)
-        end
+        CAIText.AppendIfNonEmpty(parts, desc)
     end
 
     if not Controls.MitigatedLabel:IsHidden() then

@@ -1,3 +1,4 @@
+include("textProcessing")
 -- Accessible scanner category management UI.
 
 CAIWorldScannerCategoryManager = {}
@@ -21,10 +22,6 @@ local m_dirty = false
 
 local RebuildUI
 local RebuildListForDialog
-
-local function SafeId(value)
-    return tostring(value or ""):gsub("[^%w_]", "_")
-end
 
 local function NotifyChanged()
     m_dirty = true
@@ -69,7 +66,7 @@ end
 
 local function CreateSettingCheckbox(settingId)
     local checkbox = m_mgr:CreateWidget(
-        m_mgr:GenerateWidgetId("CAIScannerCategorySetting_" .. SafeId(settingId)),
+        m_mgr:GenerateWidgetId("CAIScannerCategorySetting_" .. CAIText.SafeKey(settingId)),
         "Checkbox",
         {
             Label = function() return CAISettings.GetLabel(settingId) end,
@@ -86,7 +83,7 @@ end
 
 local function CreateEnabledCheckbox(entry)
     local checkbox = m_mgr:CreateWidget(
-        m_mgr:GenerateWidgetId("CAIScannerCategoryEnabled_" .. SafeId(entry.Id)),
+        m_mgr:GenerateWidgetId("CAIScannerCategoryEnabled_" .. CAIText.SafeKey(entry.Id)),
         "Checkbox",
         {
             Label = function() return Locale.Lookup("LOC_CAI_WORLD_SCANNER_CATEGORY_ENABLED") end,
@@ -106,7 +103,7 @@ local function CreateTermEditor(entry, kind)
     local custom = entry.Custom
     local keyPrefix = "category-term:" .. custom.Id .. ":" .. kind
     local submenu = m_mgr:CreateWidget(
-        m_mgr:GenerateWidgetId("CAIScannerCategoryTerms_" .. SafeId(custom.Id .. kind)),
+        m_mgr:GenerateWidgetId("CAIScannerCategoryTerms_" .. CAIText.SafeKey(custom.Id .. kind)),
         "SubMenu",
         {
             Label = function()
@@ -121,7 +118,7 @@ local function CreateTermEditor(entry, kind)
         local capturedIndex = index
         local capturedTerm = term
         local remove = m_mgr:CreateWidget(
-            m_mgr:GenerateWidgetId("CAIScannerCategoryRemoveTerm_" .. SafeId(custom.Id .. kind)),
+            m_mgr:GenerateWidgetId("CAIScannerCategoryRemoveTerm_" .. CAIText.SafeKey(custom.Id .. kind)),
             "Button",
             {
                 Label = function()
@@ -145,7 +142,7 @@ local function CreateTermEditor(entry, kind)
     end
 
     local edit = m_mgr:CreateWidget(
-        m_mgr:GenerateWidgetId("CAIScannerCategoryAddTerm_" .. SafeId(custom.Id .. kind)),
+        m_mgr:GenerateWidgetId("CAIScannerCategoryAddTerm_" .. CAIText.SafeKey(custom.Id .. kind)),
         "EditBox",
         {
             Label = function() return Locale.Lookup("LOC_CAI_WORLD_SCANNER_CUSTOM_ADD_TERM") end,
@@ -184,7 +181,7 @@ local function CreateSourceSelector(entry, definition)
     local categoryId = definition.Id
     local keyPrefix = "category-source:" .. custom.Id .. ":" .. categoryId
     local submenu = m_mgr:CreateWidget(
-        m_mgr:GenerateWidgetId("CAIScannerCategorySource_" .. SafeId(custom.Id .. categoryId)),
+        m_mgr:GenerateWidgetId("CAIScannerCategorySource_" .. CAIText.SafeKey(custom.Id .. categoryId)),
         "SubMenu",
         {
             Label = function()
@@ -197,7 +194,7 @@ local function CreateSourceSelector(entry, definition)
     )
 
     local allCheckbox = m_mgr:CreateWidget(
-        m_mgr:GenerateWidgetId("CAIScannerCategorySourceAll_" .. SafeId(custom.Id .. categoryId)),
+        m_mgr:GenerateWidgetId("CAIScannerCategorySourceAll_" .. CAIText.SafeKey(custom.Id .. categoryId)),
         "Checkbox",
         {
             Label = function() return Locale.Lookup("LOC_CAI_WORLD_SCANNER_SUBCATEGORY_ALL") end,
@@ -222,7 +219,7 @@ local function CreateSourceSelector(entry, definition)
     for _, subCategoryId in ipairs(definition.SubCategoryOrder or {}) do
         local capturedSubCategoryId = subCategoryId
         local checkbox = m_mgr:CreateWidget(
-            m_mgr:GenerateWidgetId("CAIScannerCategorySourceSub_" .. SafeId(custom.Id .. categoryId)),
+            m_mgr:GenerateWidgetId("CAIScannerCategorySourceSub_" .. CAIText.SafeKey(custom.Id .. categoryId)),
             "Checkbox",
             {
                 Label = function()
@@ -314,7 +311,7 @@ end
 local function CreateCustomChildren(entry, row)
     local custom = entry.Custom
     local nameEdit = m_mgr:CreateWidget(
-        m_mgr:GenerateWidgetId("CAIScannerCategoryName_" .. SafeId(custom.Id)),
+        m_mgr:GenerateWidgetId("CAIScannerCategoryName_" .. CAIText.SafeKey(custom.Id)),
         "EditBox",
         {
             Label = function() return Locale.Lookup("LOC_CAI_WORLD_SCANNER_CUSTOM_NAME") end,
@@ -334,7 +331,7 @@ local function CreateCustomChildren(entry, row)
     row:AddChild(nameEdit)
 
     local sources = m_mgr:CreateWidget(
-        m_mgr:GenerateWidgetId("CAIScannerCategorySources_" .. SafeId(custom.Id)),
+        m_mgr:GenerateWidgetId("CAIScannerCategorySources_" .. CAIText.SafeKey(custom.Id)),
         "SubMenu",
         {
             Label = function() return Locale.Lookup("LOC_CAI_WORLD_SCANNER_CUSTOM_SOURCES") end,
@@ -349,7 +346,7 @@ local function CreateCustomChildren(entry, row)
     row:AddChild(CreateTermEditor(entry, "Exclude"))
 
     local deleteButton = m_mgr:CreateWidget(
-        m_mgr:GenerateWidgetId("CAIScannerCategoryDelete_" .. SafeId(custom.Id)),
+        m_mgr:GenerateWidgetId("CAIScannerCategoryDelete_" .. CAIText.SafeKey(custom.Id)),
         "Button",
         {
             Label = function() return Locale.Lookup("LOC_CAI_WORLD_SCANNER_CUSTOM_DELETE") end,
@@ -367,7 +364,7 @@ local function CreateBuiltInChildren(entry, row)
     end
 
     local duplicate = m_mgr:CreateWidget(
-        m_mgr:GenerateWidgetId("CAIScannerCategoryDuplicate_" .. SafeId(entry.Id)),
+        m_mgr:GenerateWidgetId("CAIScannerCategoryDuplicate_" .. CAIText.SafeKey(entry.Id)),
         "Button",
         {
             Label = function() return Locale.Lookup("LOC_CAI_WORLD_SCANNER_CREATE_CUSTOM_FROM_CATEGORY") end,
@@ -382,7 +379,7 @@ local function CreateBuiltInChildren(entry, row)
     row:AddChild(duplicate)
 
     local moveDefault = m_mgr:CreateWidget(
-        m_mgr:GenerateWidgetId("CAIScannerCategoryMoveDefault_" .. SafeId(entry.Id)),
+        m_mgr:GenerateWidgetId("CAIScannerCategoryMoveDefault_" .. CAIText.SafeKey(entry.Id)),
         "Button",
         {
             Label = function() return Locale.Lookup("LOC_CAI_WORLD_SCANNER_MOVE_DEFAULT_POSITION") end,
@@ -400,7 +397,7 @@ end
 
 local function CreateCategoryRow(entry)
     local row = m_mgr:CreateWidget(
-        m_mgr:GenerateWidgetId("CAIScannerCategoryRow_" .. SafeId(entry.Id)),
+        m_mgr:GenerateWidgetId("CAIScannerCategoryRow_" .. CAIText.SafeKey(entry.Id)),
         "SubMenu",
         {
             Label = function()

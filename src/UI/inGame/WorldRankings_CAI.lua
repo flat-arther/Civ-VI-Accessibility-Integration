@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("caiUtils")
 include("Civ6Common")
 
@@ -6,17 +7,6 @@ include("Civ6Common")
 -- Only one ReplaceUIScript wins per context, so when BBG is active we chain-include
 -- its file instead of vanilla and layer CAI accessibility on top of it. BBG has
 -- shipped under three historical mod IDs.
-local BBG_MOD_IDS = {
-    "cb84075d-5007-4207-b662-c35a5f7be240", -- iElden (current)
-    "cb84075d-5007-4207-b662-c35a5f7be217", -- codenaugh
-    "cb84075d-5007-4207-b662-c35a5f7be231", -- beta
-}
-local function IsBBGActive()
-    for _, id in ipairs(BBG_MOD_IDS) do
-        if Modding.IsModActive(id) then return true end
-    end
-    return false
-end
 
 if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_WARMACHINE" then
     include("WorldRankings_WarMachineScenario")
@@ -34,7 +24,7 @@ elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_ALEXANDER" then
     include("WorldRankings_AlexanderScenario")
 elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_NUBIA" then
     include("WorldRankings_NubiaScenario")
-elseif IsBBGActive() then
+elseif CAIModSupport.IsBBGActive() then
     -- BBG registers worldrankings_bbg.lua only in <Files> and a losing
     -- <ReplaceUIScript>, never in <ImportFiles>, so a runtime include() cannot
     -- resolve BBG's own copy. We instead include CAI's vendored verbatim copy
@@ -105,7 +95,7 @@ end
 local m_viewMode                  = LoadViewModeSetting()
 
 local m_isExp2                    = (IsExpansion2Active ~= nil and IsExpansion2Active())
-local m_isBBG                     = IsBBGActive()
+local m_isBBG                     = CAIModSupport.IsBBGActive()
 
 -- BBG's Traditional Domination custom victory. Its tab label is the button tooltip
 -- string (not the victory Name), so it needs bespoke matching like diplomatic does.
@@ -115,18 +105,14 @@ local BBG_TRAD_DOM_BUTTON_KEY     = "LOC_TOOLTIP_TRADITIONAL_DOMINATION_BUTTON"
 -- ============================================================================
 -- Helpers
 -- ============================================================================
-local function MakeId(prefix)
-    return mgr:GenerateWidgetId(prefix)
-end
-
 local function MakeTreeItem(props)
-    local item = mgr:CreateWidget(MakeId("CAIWR_"), "TreeItem", props)
+    local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWR_"), "TreeItem", props)
     item:SetFocusSound(HOVER_SOUND)
     return item
 end
 
 local function MakeStaticText(props)
-    local item = mgr:CreateWidget(MakeId("CAIWR_"), "StaticText", props)
+    local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIWR_"), "StaticText", props)
     item:SetFocusSound(HOVER_SOUND)
     return item
 end
@@ -142,16 +128,6 @@ end
 
 local function AddAdvisorLeaf(tree, text)
     AddLeaf(tree, "advisor", function() return text end)
-end
-
-local function JoinLines(parts)
-    local filtered = {}
-    for _, part in ipairs(parts) do
-        if part and part ~= "" then
-            table.insert(filtered, part)
-        end
-    end
-    return table.concat(filtered, "[NEWLINE]")
 end
 
 local function AddUniqueText(target, seen, text)
@@ -485,11 +461,11 @@ local function GetRankingsPlayerLabel(playerID)
             table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_LOCAL_PLAYER"))
         end
     end
-    return JoinLines(parts)
+    return CAIText.JoinLines(parts)
 end
 
 local function GetRankingsTeamLabel(teamID)
-    return JoinLines({
+    return CAIText.JoinLines({
         Locale.Lookup("LOC_WORLD_RANKINGS_TEAM", teamID + 1),
         IsLocalPlayerOnTeam(teamID) and Locale.Lookup("LOC_CAI_WORLD_RANKINGS_YOUR_TEAM") or nil,
     })
@@ -512,7 +488,7 @@ local function GetCompetitorTooltip(competitor)
     for _, playerID in ipairs(competitor.PlayerIDs) do
         table.insert(names, GetRankingsPlayerLabel(playerID))
     end
-    return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TEAM_MEMBERS", JoinLines(names))
+    return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TEAM_MEMBERS", CAIText.JoinLines(names))
 end
 
 local function GetAliveCompetitors()
@@ -637,7 +613,7 @@ local function RebuildOverallTree(tree)
         end)
 
         AddLeaf(tree, "vikings:scoring", function()
-            return JoinLines({
+            return CAIText.JoinLines({
                 Locale.Lookup("LOC_VIKING_SCENARIO_SCORING_DESCRIPTION1", 25, 10, 50, 25, 10),
                 Locale.Lookup("LOC_VIKING_SCENARIO_SCORING_DESCRIPTION2", 1000, 500, 300, 100),
                 Locale.Lookup("LOC_VIKING_SCENARIO_SCORING_DESCRIPTION3", 50, 50, 1, 10, 1, 5),
@@ -650,7 +626,7 @@ local function RebuildOverallTree(tree)
 
     if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_POLAND" then
         AddLeaf(tree, "poland:overall", function()
-            return JoinLines({
+            return CAIText.JoinLines({
                 Locale.Lookup("LOC_PEDIA_CITYSTATES_PAGE_CIVILIZATION_VIENNA_CHAPTER_HISTORY_PARA_1"),
                 Locale.Lookup("LOC_PEDIA_CITYSTATES_PAGE_CIVILIZATION_VIENNA_CHAPTER_HISTORY_PARA_2"),
                 Locale.Lookup("LOC_PEDIA_UNITS_PAGE_UNIT_OTTOMAN_JANISSARY_CHAPTER_HISTORY_PARA_1"),
@@ -664,7 +640,7 @@ local function RebuildOverallTree(tree)
 
     if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_INDONESIA_KHMER" then
         AddLeaf(tree, "indonesia-khmer:rules", function()
-            return JoinLines({
+            return CAIText.JoinLines({
                 Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_1"),
                 Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_2"),
                 Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_3"),
@@ -674,7 +650,7 @@ local function RebuildOverallTree(tree)
             })
         end)
         AddLeaf(tree, "indonesia-khmer:scoring", function()
-            return JoinLines({
+            return CAIText.JoinLines({
                 Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_6"),
                 Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_7", 1, 1),
                 Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_8", 20, 20),
@@ -692,7 +668,7 @@ local function RebuildOverallTree(tree)
         end)
 
         AddLeaf(tree, "australia:outback", function()
-            return JoinLines({
+            return CAIText.JoinLines({
                 Locale.Lookup("LOC_SCENARIO_AUSTRALIA_OUTBACK_TITLE"),
                 Locale.Lookup("LOC_SCENARIO_AUSTRALIA_OUTBACK_EFFECTS"),
             })
@@ -703,7 +679,7 @@ local function RebuildOverallTree(tree)
                 Label = function()
                     local playerConfig = PlayerConfigurations[Game.GetLocalPlayer()]
                     local difficulty = GameInfo.Difficulties[playerConfig:GetHandicapTypeID()]
-                    return JoinLines({
+                    return CAIText.JoinLines({
                         Locale.Lookup("LOC_SCENARIO_AUSTRALIA_CURRENT_GAME_DIFFICULTY",
                             Locale.Lookup(difficulty.Name)),
                         Locale.Lookup("LOC_SCENARIO_AUSTRALIA_SINGLE_PLAYER_SCORE",
@@ -729,7 +705,7 @@ local function RebuildOverallTree(tree)
 
     if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_ALEXANDER" then
         AddLeaf(tree, "alexander:rules", function()
-            return JoinLines({
+            return CAIText.JoinLines({
                 Locale.Lookup("LOC_ALEXANDER_SCENARIO_WORLD_RANKING_1"),
                 Locale.Lookup("LOC_ALEXANDER_SCENARIO_WORLD_RANKING_2"),
                 Locale.Lookup("LOC_ALEXANDER_SCENARIO_WORLD_RANKING_3"),
@@ -737,7 +713,7 @@ local function RebuildOverallTree(tree)
         end)
 
         AddLeaf(tree, "alexander:rewards", function()
-            return JoinLines({
+            return CAIText.JoinLines({
                 Locale.Lookup("LOC_ALEXANDER_SCENARIO_WORLD_RANKING_4"),
                 Locale.Lookup("LOC_ALEXANDER_SCENARIO_WORLD_RANKING_5"),
             })
@@ -745,7 +721,7 @@ local function RebuildOverallTree(tree)
 
         AddLeaf(tree, "alexander:progress", function()
             local enemyCities, ownedCities = GetAlexanderCityCounts()
-            return JoinLines({
+            return CAIText.JoinLines({
                 Locale.Lookup("LOC_ALEXANDER_SCENARIO_WORLD_RANKING_6", enemyCities),
                 Locale.Lookup("LOC_ALEXANDER_SCENARIO_WORLD_RANKING_8", ownedCities * 5),
                 Locale.Lookup("LOC_ALEXANDER_ENDGAME_RANKING_LEADER_QUOTE"),
@@ -842,7 +818,7 @@ local function RebuildOverallTree(tree)
 
         for _, playerData in ipairs(teamData.PlayerData) do
             if playerData.PlayerID == playerID then
-                return JoinLines({
+                return CAIText.JoinLines({
                     playerData.FirstSummary,
                     playerData.SecondSummary ~= playerData.FirstSummary
                     and playerData.SecondSummary or nil,
@@ -876,7 +852,7 @@ local function RebuildOverallTree(tree)
         if #teamData == 0 then
             tree:AddChild(MakeStaticText({
                 Label = function()
-                    return JoinLines({
+                    return CAIText.JoinLines({
                         displayName,
                         Locale.Lookup("LOC_WORLD_RANKINGS_VICTORY_DISABLED"),
                     })
@@ -890,7 +866,7 @@ local function RebuildOverallTree(tree)
             Label = function()
                 local currentData = GatherOverallVictoryData(victoryType)
                 if #currentData == 0 then
-                    return JoinLines({
+                    return CAIText.JoinLines({
                         displayName,
                         Locale.Lookup("LOC_WORLD_RANKINGS_VICTORY_DISABLED"),
                     })
@@ -916,7 +892,7 @@ local function RebuildOverallTree(tree)
                         end
                     end
                 end
-                return JoinLines(parts)
+                return CAIText.JoinLines(parts)
             end,
             FocusKey = fk,
         })
@@ -928,7 +904,7 @@ local function RebuildOverallTree(tree)
                 local teamItem = MakeTreeItem({
                     Label = function()
                         local liveEntry, liveRank = FindOverallTeam(victoryType, capturedTeamID)
-                        return JoinLines({
+                        return CAIText.JoinLines({
                             GetRankingsTeamLabel(capturedTeamID),
                             GetOverallPlace(liveRank or capturedRank),
                             liveEntry and GetOverallProgress(liveEntry.Progress) or nil,
@@ -953,7 +929,7 @@ local function RebuildOverallTree(tree)
                 victoryItem:AddChild(MakeStaticText({
                     Label = function()
                         local liveEntry, liveRank = FindOverallTeam(victoryType, capturedTeamID)
-                        return JoinLines({
+                        return CAIText.JoinLines({
                             GetOverallPlayerLabel(capturedPlayerID),
                             GetOverallPlace(liveRank or capturedRank),
                             liveEntry and GetOverallProgress(liveEntry.Progress) or nil,
@@ -994,7 +970,7 @@ local function CreateScorePlayerRow(playerData, parentFocusPrefix)
 
     local item = rowFactory({
         Label = function()
-            return JoinLines({
+            return CAIText.JoinLines({
                 GetRankingsPlayerLabel(playerID),
                 tostring(playerData.PlayerScore),
             })
@@ -1027,7 +1003,7 @@ local function RebuildScoreTree(tree)
                 local teamData = record.TeamData
                 local teamItem = MakeTreeItem({
                     Label = function()
-                        return JoinLines({
+                        return CAIText.JoinLines({
                             GetRankingsTeamLabel(teamData.TeamID),
                             tostring(teamData.TeamScore),
                         })
@@ -1059,7 +1035,7 @@ local function RebuildScoreTree(tree)
                 table.sort(teamData.PlayerData, function(a, b) return a.PlayerScore > b.PlayerScore end)
                 local teamItem = MakeTreeItem({
                     Label = function()
-                        return JoinLines({
+                        return CAIText.JoinLines({
                             GetRankingsTeamLabel(teamData.TeamID),
                             tostring(teamData.TeamScore),
                         })
@@ -1077,7 +1053,7 @@ local function RebuildScoreTree(tree)
         end
     end
 
-    AddAdvisorLeaf(tree, JoinLines({
+    AddAdvisorLeaf(tree, CAIText.JoinLines({
         Locale.Lookup("LOC_WORLD_RANKINGS_SCORE_DETAILS"),
         Locale.Lookup("LOC_WORLD_RANKINGS_SCORE_CONDITION", Game.GetMaxGameTurns())
     }))
@@ -1279,7 +1255,7 @@ local function CreateSciencePlayerRow(sciData, parentFocusPrefix)
 
     local item = MakeTreeItem({
         Label = function()
-            return JoinLines({
+            return CAIText.JoinLines({
                 GetRankingsPlayerLabel(playerID),
                 Locale.Lookup("LOC_CAI_WORLD_RANKINGS_MILESTONES_DONE",
                     sciData.CompletedCount, sciData.TotalMilestones),
@@ -1321,7 +1297,7 @@ local function CreateSciencePlayerRow(sciData, parentFocusPrefix)
             if sciData.LightYearsRate and sciData.LightYearsRate > 0 then
                 table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_LIGHT_YEARS_RATE", sciData.LightYearsRate))
             end
-            return JoinLines(parts)
+            return CAIText.JoinLines(parts)
         end)
     end
 
@@ -1425,7 +1401,7 @@ local function RebuildCultureTree(tree)
             local teamItem = MakeTreeItem({
                 Label = function()
                     local liveTeamData = CAIGetCultureTeamData(capturedTeamID)
-                    return JoinLines({
+                    return CAIText.JoinLines({
                         GetRankingsTeamLabel(capturedTeamID),
                         Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TOURISTS",
                             liveTeamData.BestNumVisitingUs, liveTeamData.BestNumRequiredTourists),
@@ -1443,7 +1419,7 @@ local function RebuildCultureTree(tree)
         end
     end
 
-    AddAdvisorLeaf(tree, JoinLines({
+    AddAdvisorLeaf(tree, CAIText.JoinLines({
         Locale.Lookup("LOC_WORLD_RANKINGS_CULTURE_VICTORY_DETAILS"),
         Locale.Lookup("LOC_WORLD_RANKINGS_CULTURE_DETAILS_DOMESTIC_TOURISTS"),
         Locale.Lookup("LOC_WORLD_RANKINGS_CULTURE_DETAILS_VISITING_TOURISTS"),
@@ -1504,7 +1480,7 @@ function CreateCulturePlayerRow(playerData, allPlayerData, parentFocusPrefix)
     local props = {
         Label = function()
             local liveData = CAIGetCulturePlayerData(capturedPlayerID)
-            return JoinLines({
+            return CAIText.JoinLines({
                 GetRankingsPlayerLabel(capturedPlayerID),
                 Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TOURISTS",
                     liveData.NumVisitingUs, liveData.NumRequiredTourists),
@@ -1519,7 +1495,7 @@ function CreateCulturePlayerRow(playerData, allPlayerData, parentFocusPrefix)
                 table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TURNS_VICTORY",
                     liveData.TurnsTillCulturalVictory))
             end
-            return JoinLines(parts)
+            return CAIText.JoinLines(parts)
         end,
         FocusKey = fk,
     }
@@ -1535,7 +1511,7 @@ function CreateCulturePlayerRow(playerData, allPlayerData, parentFocusPrefix)
             local visitLeaf = MakeStaticText({
                 Label = function()
                     local pCulture = g_LocalPlayer:GetCulture()
-                    return JoinLines({
+                    return CAIText.JoinLines({
                         GetPlayerLabel(capturedSourceID),
                         Locale.Lookup("LOC_CAI_WORLD_RANKINGS_VISITING_US",
                             pCulture:GetTouristsFrom(capturedSourceID)),
@@ -1548,9 +1524,7 @@ function CreateCulturePlayerRow(playerData, allPlayerData, parentFocusPrefix)
                     local lines = {}
                     for segment in (tt .. "[NEWLINE]"):gmatch("(.-)%[NEWLINE%]") do
                         local trimmed = segment:match("^%s*(.-)%s*$")
-                        if trimmed and trimmed ~= "" then
-                            table.insert(lines, trimmed)
-                        end
+                        CAIText.AppendIfNonEmpty(lines, trimmed)
                     end
                     if #lines >= 2 then
                         local current = lines[1]:match("[%d,%.]+")
@@ -1641,7 +1615,7 @@ local function CreateDominationPlayerRow(playerData, parentFocusPrefix)
             else
                 table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_LOST_CAPITAL"))
             end
-            return JoinLines(parts)
+            return CAIText.JoinLines(parts)
         end,
         FocusKey = fk,
     })
@@ -1666,7 +1640,7 @@ local function RebuildDominationTree(tree)
         if #teamData.PlayerData > 1 then
             local teamItem = MakeTreeItem({
                 Label = function()
-                    return JoinLines({
+                    return CAIText.JoinLines({
                         GetRankingsTeamLabel(teamData.TeamID),
                         Locale.Lookup("LOC_CAI_WORLD_RANKINGS_CAPITALS_CAPTURED", teamData.TotalCapturedCapitals),
                     })
@@ -1699,7 +1673,7 @@ local function CreateReligionPlayerRow(playerData, totalCivs, parentFocusPrefix)
 
     local item = rowFactory({
         Label = function()
-            return JoinLines({
+            return CAIText.JoinLines({
                 GetRankingsPlayerLabel(playerID),
                 Locale.Lookup("LOC_WORLD_RANKINGS_RELIGION_CONVERT_SUMMARY",
                     #playerData.ConvertedCivs .. "/" .. totalCivs, religionName),
@@ -1752,7 +1726,7 @@ local function RebuildReligionTree(tree)
 
             local teamItem = MakeTreeItem({
                 Label = function()
-                    return JoinLines({
+                    return CAIText.JoinLines({
                         GetRankingsTeamLabel(teamData.TeamID),
                         Locale.Lookup("LOC_WORLD_RANKINGS_RELIGION_CONVERT_SUMMARY",
                             #teamData.ConvertedCivs .. "/" .. totalCivs,
@@ -1795,9 +1769,7 @@ local function CreateGenericPlayerRow(playerData, victoryType, parentFocusPrefix
                 if tt and tt ~= "" then
                     for segment in (tt .. "[NEWLINE]"):gmatch("(.-)%[NEWLINE%]") do
                         local trimmed = segment:match("^%s*(.-)%s*$")
-                        if trimmed and trimmed ~= "" then
-                            table.insert(diploLines, trimmed)
-                        end
+                        CAIText.AppendIfNonEmpty(diploLines, trimmed)
                     end
                 end
             end
@@ -1851,10 +1823,10 @@ local function CreateGenericPlayerRow(playerData, victoryType, parentFocusPrefix
                     table.insert(parts, Locale.Lookup("LOC_CAI_WORLD_RANKINGS_DIPLO_POINTS", current, total))
                 end
             end
-            return JoinLines(parts)
+            return CAIText.JoinLines(parts)
         end,
         Tooltip = presentation and #presentation.Tooltips > 0
-            and function() return JoinLines(presentation.Tooltips) end or nil,
+            and function() return CAIText.JoinLines(presentation.Tooltips) end or nil,
         FocusKey = fk,
     })
 
@@ -1907,10 +1879,10 @@ local function CreateCapturedGenericRecord(record, victoryType, parentFocusPrefi
             elseif teamData.TeamScore ~= nil then
                 table.insert(parts, tostring(teamData.TeamScore))
             end
-            return JoinLines(parts)
+            return CAIText.JoinLines(parts)
         end,
         Tooltip = presentation and #presentation.Tooltips > 0
-            and function() return JoinLines(presentation.Tooltips) end or nil,
+            and function() return CAIText.JoinLines(presentation.Tooltips) end or nil,
         FocusKey = fk,
     })
 
@@ -2104,7 +2076,7 @@ local function RebuildOverallTable(tableView)
                 local entry = competitor.Overall[capturedVictoryType]
                 if not entry then return Locale.Lookup("LOC_CAI_WORLD_RANKINGS_NOT_AVAILABLE") end
                 local place = Locale.Lookup("LOC_WORLD_RANKINGS_" .. entry.Rank .. "_PLACE")
-                return JoinLines({
+                return CAIText.JoinLines({
                     Locale.Lookup("LOC_CAI_WORLD_RANKINGS_PLACE", place),
                     Locale.Lookup("LOC_CAI_WORLD_RANKINGS_VICTORY_PROGRESS",
                         Round(math.max(0, math.min(entry.Progress, 1)) * 100, 1)),
@@ -2116,7 +2088,7 @@ local function RebuildOverallTable(tableView)
                 if #competitor.PlayerIDs <= 1 then
                     local pd = entry.PlayerData[1]
                     if not pd or not IsPlayerKnownToLocal(pd.PlayerID) then return nil end
-                    return JoinLines({
+                    return CAIText.JoinLines({
                         pd.FirstSummary,
                         pd.SecondSummary ~= pd.FirstSummary and pd.SecondSummary or nil,
                         pd.AdditionalSummary,
@@ -2125,7 +2097,7 @@ local function RebuildOverallTable(tableView)
                 local lines = {}
                 for _, playerData in ipairs(entry.PlayerData) do
                     if IsPlayerKnownToLocal(playerData.PlayerID) then
-                        local details = JoinLines({
+                        local details = CAIText.JoinLines({
                             playerData.FirstSummary,
                             playerData.SecondSummary ~= playerData.FirstSummary
                                 and playerData.SecondSummary or nil,
@@ -2134,7 +2106,7 @@ local function RebuildOverallTable(tableView)
                         table.insert(lines, FormatContribution(playerData.PlayerID, details))
                     end
                 end
-                return JoinLines(lines)
+                return CAIText.JoinLines(lines)
             end,
             sortKey = function(competitor)
                 local entry = competitor.Overall[capturedVictoryType]
@@ -2218,7 +2190,7 @@ local function GetScoreContributionTooltip(competitor, categoryID)
         end
         table.insert(lines, FormatContribution(playerData.PlayerID, value))
     end
-    return JoinLines(lines)
+    return CAIText.JoinLines(lines)
 end
 
 local function RebuildScoreTable(tableView)
@@ -2303,7 +2275,7 @@ local function GetScienceContributionTooltip(row, getter)
     for _, scienceData in ipairs(row.SciencePlayers) do
         table.insert(lines, FormatContribution(scienceData.PlayerID, getter(scienceData)))
     end
-    return #row.SciencePlayers > 1 and JoinLines(lines) or nil
+    return #row.SciencePlayers > 1 and CAIText.JoinLines(lines) or nil
 end
 
 local function RebuildScienceTable(tableView)
@@ -2316,7 +2288,7 @@ local function RebuildScienceTable(tableView)
             getCell = function(row) return GetScienceProgressText(row.ScienceLeader) end,
             getTooltip = function(row)
                 local leader = row.ScienceLeader
-                return JoinLines({
+                return CAIText.JoinLines({
                     GetScienceContributionTooltip(row, GetScienceProgressText),
                     leader.PlayerID == g_LocalPlayerID and leader.NextStep
                         and Locale.Lookup("LOC_CAI_WORLD_RANKINGS_NEXT_STEP", leader.NextStep) or nil,
@@ -2375,9 +2347,9 @@ local function RebuildScienceTable(tableView)
                         milestone.ProjectInfos,
                         milestone.IncludeSpaceport and scienceData.HasSpaceport or nil,
                         milestone.FinishedProjects)
-                    table.insert(lines, JoinLines({ contribution, details }))
+                    table.insert(lines, CAIText.JoinLines({ contribution, details }))
                 end
-                return JoinLines(lines)
+                return CAIText.JoinLines(lines)
             end,
             sortKey = function(row) return row.ScienceLeader.Milestones[capturedIndex].Percent end,
             sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
@@ -2469,7 +2441,7 @@ local function GetCultureContributionTooltip(row, getter)
     for _, playerData in ipairs(row.PlayerData) do
         table.insert(lines, FormatContribution(playerData.PlayerID, getter(playerData)))
     end
-    return #row.PlayerData > 1 and JoinLines(lines) or nil
+    return #row.PlayerData > 1 and CAIText.JoinLines(lines) or nil
 end
 
 local function RebuildCultureTable(tableView)
@@ -2518,16 +2490,16 @@ local function RebuildCultureTable(tableView)
                     local sourceLines = {}
                     for _, sourceData in ipairs(allPlayerData) do
                         if sourceData.PlayerID ~= g_LocalPlayerID then
-                            table.insert(sourceLines, FormatContribution(sourceData.PlayerID, JoinLines({
+                            table.insert(sourceLines, FormatContribution(sourceData.PlayerID, CAIText.JoinLines({
                                 Locale.Lookup("LOC_CAI_WORLD_RANKINGS_VISITING_US",
                                     culture:GetTouristsFrom(sourceData.PlayerID)),
                                 culture:GetTouristsFromTooltip(sourceData.PlayerID),
                             })))
                         end
                     end
-                    table.insert(parts, JoinLines(sourceLines))
+                    table.insert(parts, CAIText.JoinLines(sourceLines))
                 end
-                return JoinLines(parts)
+                return CAIText.JoinLines(parts)
             end,
             sortKey = function(row) return row.CultureLeader.NumVisitingUs end,
             sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
@@ -2591,7 +2563,7 @@ local function GetDominationCapturedTooltip(row)
         end
     end
     if #captured == 0 then return nil end
-    if #row.PlayerData <= 1 then return JoinLines(captured) end
+    if #row.PlayerData <= 1 then return CAIText.JoinLines(captured) end
     local lines = {}
     for _, playerData in ipairs(row.PlayerData) do
         local playerCaptured = {}
@@ -2599,10 +2571,10 @@ local function GetDominationCapturedTooltip(row)
             table.insert(playerCaptured, GetPlayerLabel(playerID))
         end
         local value = tostring(#playerData.CapturedCapitals)
-        if #playerCaptured > 0 then value = JoinLines({ value, JoinLines(playerCaptured) }) end
+        if #playerCaptured > 0 then value = CAIText.JoinLines({ value, CAIText.JoinLines(playerCaptured) }) end
         table.insert(lines, FormatContribution(playerData.PlayerID, value))
     end
-    return JoinLines(lines)
+    return CAIText.JoinLines(lines)
 end
 
 local function GetDominationContributionTooltip(row)
@@ -2614,7 +2586,7 @@ local function GetDominationContributionTooltip(row)
             or "LOC_CAI_WORLD_RANKINGS_LOST_CAPITAL")
         table.insert(lines, FormatContribution(playerData.PlayerID, value))
     end
-    return JoinLines(lines)
+    return CAIText.JoinLines(lines)
 end
 
 local function RebuildDominationTable(tableView)
@@ -2642,7 +2614,7 @@ local function RebuildDominationTable(tableView)
             end,
             getTooltip = function(row)
                 if #row.PlayerData <= 1 then return nil end
-                return JoinLines({
+                return CAIText.JoinLines({
                     GetDominationContributionTooltip(row),
                     GetDominationCapturedTooltip(row),
                 })
@@ -2681,7 +2653,7 @@ local function GetReligionNames(row)
     for _, religionType in ipairs(row.ReligionTypes) do
         table.insert(names, Game.GetReligion():GetName(religionType))
     end
-    return JoinLines(names)
+    return CAIText.JoinLines(names)
 end
 
 local function GetReligionTooltip(row)
@@ -2693,7 +2665,7 @@ local function GetReligionTooltip(row)
                 Game.GetReligion():GetName(playerData.ReligionType)))
         end
     end
-    return JoinLines(lines)
+    return CAIText.JoinLines(lines)
 end
 
 local function GetReligionConversionTooltip(row)
@@ -2704,7 +2676,7 @@ local function GetReligionConversionTooltip(row)
         for _, playerID in ipairs(pd.ConvertedCivs) do
             table.insert(converted, GetPlayerLabel(playerID))
         end
-        return JoinLines(converted)
+        return CAIText.JoinLines(converted)
     end
     local lines = {}
     for _, playerData in ipairs(row.PlayerData) do
@@ -2714,10 +2686,10 @@ local function GetReligionConversionTooltip(row)
                 table.insert(converted, GetPlayerLabel(playerID))
             end
             table.insert(lines, FormatContribution(playerData.PlayerID,
-                JoinLines({ tostring(#playerData.ConvertedCivs), JoinLines(converted) })))
+                CAIText.JoinLines({ tostring(#playerData.ConvertedCivs), CAIText.JoinLines(converted) })))
         end
     end
-    return JoinLines(lines)
+    return CAIText.JoinLines(lines)
 end
 
 local function RebuildReligionTable(tableView)
@@ -2810,11 +2782,9 @@ local function RebuildDiplomaticTable(tableView, victoryType)
         local lines = {}
         for segment in (tt .. "[NEWLINE]"):gmatch("(.-)%[NEWLINE%]") do
             local trimmed = segment:match("^%s*(.-)%s*$")
-            if trimmed and trimmed ~= "" then
-                table.insert(lines, trimmed)
-            end
+            CAIText.AppendIfNonEmpty(lines, trimmed)
         end
-        return #lines > 0 and JoinLines(lines) or nil
+        return #lines > 0 and CAIText.JoinLines(lines) or nil
     end
     local columns = {
         MakeCompetitorColumn(),
@@ -2831,7 +2801,7 @@ local function RebuildDiplomaticTable(tableView, victoryType)
                 for _, playerID in ipairs(row.PlayerIDs) do
                     table.insert(lines, FormatContribution(playerID, row.Points[playerID]))
                 end
-                return JoinLines(lines)
+                return CAIText.JoinLines(lines)
             end,
             sortKey = function(row) return row.Progress end,
             sortAscendingDescription = "LOC_CAI_SORT_FARTHEST_FROM_VICTORY_FIRST",
@@ -2852,9 +2822,9 @@ local function RebuildDiplomaticTable(tableView, victoryType)
                 for _, playerID in ipairs(row.PlayerIDs) do
                     local breakdown = GetDiploBreakdown(playerID)
                     table.insert(lines, FormatContribution(playerID,
-                        JoinLines({ tostring(row.Points[playerID]), breakdown })))
+                        CAIText.JoinLines({ tostring(row.Points[playerID]), breakdown })))
                 end
-                return JoinLines(lines)
+                return CAIText.JoinLines(lines)
             end,
             sortKey = function(row) return row.BestPoints end,
             sortAscendingDescription = "LOC_CAI_SORT_LOWEST_FIRST",
@@ -2900,7 +2870,7 @@ end
 
 local function GetTableAdvisorText(entry)
     if entry.tableKind == "score" then
-        return JoinLines({
+        return CAIText.JoinLines({
             Locale.Lookup("LOC_WORLD_RANKINGS_SCORE_DETAILS"),
             Locale.Lookup("LOC_WORLD_RANKINGS_SCORE_CONDITION", Game.GetMaxGameTurns()),
         })
@@ -2917,9 +2887,9 @@ local function GetTableAdvisorText(entry)
             table.insert(parts, Locale.Lookup("LOC_WORLD_RANKINGS_SCIENCE_REQUIREMENT_FINAL",
                 g_LocalPlayer:GetStats():GetScienceVictoryPointsTotalNeeded()))
         end
-        return JoinLines(parts)
+        return CAIText.JoinLines(parts)
     elseif entry.tableKind == "culture" then
-        return JoinLines({
+        return CAIText.JoinLines({
             Locale.Lookup("LOC_WORLD_RANKINGS_CULTURE_VICTORY_DETAILS"),
             Locale.Lookup("LOC_WORLD_RANKINGS_CULTURE_DETAILS_DOMESTIC_TOURISTS"),
             Locale.Lookup("LOC_WORLD_RANKINGS_CULTURE_DETAILS_VISITING_TOURISTS"),
@@ -3048,7 +3018,7 @@ local function BuildPanel()
         local treeId = "CAIWorldRank_Tree" .. i
         entry.tree = mgr:CreateWidget(treeId, "Tree", {
             Label = function()
-                return JoinLines({
+                return CAIText.JoinLines({
                     tabDef.label,
                     entry.tableKind == nil and m_viewMode == "table"
                         and Locale.Lookup("LOC_CAI_WORLD_RANKINGS_TABLE_UNAVAILABLE") or nil,

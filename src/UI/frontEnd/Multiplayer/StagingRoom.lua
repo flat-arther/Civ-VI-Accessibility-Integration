@@ -3362,6 +3362,8 @@ function Initialize()
 end
 
 --#Accessibility integration
+include("textProcessing")
+include("CAIControl")
 include("caiUtils")
 
 local mgr = ExposedMembers.CAI_UIManager
@@ -3381,6 +3383,7 @@ local CAI_ChatLines = {}
 local CAI_LastReadySpeech = { label = "", tooltip = "" }
 local CAI_LastKnownLocalPlayerID = nil
 local CAI_PlayerListRefreshQueued = false
+local CAI_PlayerListFocusCapture = nil
 local CAI_ChatTargetRefreshQueued = false
 local CAI_PendingSwapFocusKey = nil
 local CAI_PendingSwapFocusWithinList = false
@@ -3388,34 +3391,34 @@ local CAI_PendingSwapFeedback = nil
 local CAI_RequestPlayerListRefresh
 local CAI_RebuildChatTarget
 
+-- Vanilla recycles these instances when map size or player slots change.
+-- Keep only player IDs/control names in widget closures, never an instance.
+local function CAI_GetSlotEntry(playerID)
+	if g_isBuildingPlayerList then return nil end
+	return g_PlayerEntries[playerID]
+end
+
+local function CAI_GetSlotControl(playerID, name)
+	local entry = CAI_GetSlotEntry(playerID)
+	return entry and entry[name]
+end
+
+local function CAI_IsSlotControlHidden(playerID, name)
+	local control = CAI_GetSlotControl(playerID, name)
+	return control == nil or control:IsHidden()
+end
+
+local function CAI_IsSlotControlDisabled(playerID, name)
+	local control = CAI_GetSlotControl(playerID, name)
+	return control == nil or control:IsDisabled()
+end
+
 CAI_StagingExitDialog = nil
 CAI_StagingExitDialogSuspendToken = nil
 
 local function CAI_Lookup(text, ...)
 	if text == nil then return "" end
 	return Locale.Lookup(text, ...)
-end
-
-local function CAI_ControlText(control)
-	if control and control.GetText then
-		return control:GetText() or ""
-	end
-	return ""
-end
-
-local function CAI_ControlTooltip(control)
-	if control and control.GetToolTipString then
-		return control:GetToolTipString() or ""
-	end
-	return ""
-end
-
-local function CAI_IsHidden(control)
-	return control and control.IsHidden and control:IsHidden()
-end
-
-local function CAI_IsDisabled(control)
-	return control and control.IsDisabled and control:IsDisabled()
 end
 
 local function CAI_IsDescendantOf(widget, root)
@@ -3438,45 +3441,13 @@ local function CAI_AddDetail(lines, labelTag, value)
 	end
 end
 
-local function CAI_JoinLines(lines)
-	return table.concat(lines, "[NEWLINE]")
-end
 
-local function CAI_SplitNewlines(text)
-	local lines = {}
-	if text == nil or text == "" then return lines end
-	text = text .. "[NEWLINE]"
-	for line in text:gmatch("(.-)%[NEWLINE%]") do
-		if line ~= "" then table.insert(lines, line) end
-	end
-	return lines
-end
-
-local function CAI_StripFormatting(text)
-	if text == nil then return "" end
-	text = tostring(text)
-	text = text:gsub("%[COLOR[^%]]*%]", "")
-	text = text:gsub("%[ENDCOLOR%]", "")
-	return text
-end
-
-local function CAI_NormalizeText(text)
-	text = CAI_StripFormatting(text)
-	text = text:gsub("%[NEWLINE%]", "\n")
-	text = text:gsub("\r", "")
-	text = text:gsub("[ \t]+", " ")
-	text = text:gsub(" *\n *", "\n")
-	-- ASCII whitespace only; %s is locale-sensitive and corrupts UTF-8 (0xA0).
-	text = text:gsub("^[ \t\r\n]+", "")
-	text = text:gsub("[ \t\r\n]+$", "")
-	return text
-end
 
 local function CAI_GetExplanationTooltip(text, ...)
 	local excluded = {}
 	for i = 1, select("#", ...) do
 		local value = select(i, ...)
-		local normalized = CAI_NormalizeText(value)
+		local normalized = CAIText.NormalizeMultiline(value)
 		if normalized ~= "" then
 			excluded[normalized] = true
 		end
@@ -3484,31 +3455,16 @@ local function CAI_GetExplanationTooltip(text, ...)
 
 	local lines = {}
 	local seen = {}
-	for _, line in ipairs(CAI_SplitNewlines(text)) do
-		local normalized = CAI_NormalizeText(line)
+	for _, line in ipairs(CAIText.SplitTokenLines(text)) do
+		local normalized = CAIText.NormalizeMultiline(line)
 		if normalized ~= "" and not excluded[normalized] and not seen[normalized] then
 			seen[normalized] = true
 			table.insert(lines, line)
 		end
 	end
-	return CAI_JoinLines(lines)
+	return CAIText.ConcatLines(lines)
 end
 
-local function CAI_AppendUniqueLine(text, line)
-	if line == nil or line == "" then return text or "" end
-	local existing = text or ""
-	local normalizedLine = CAI_NormalizeText(line)
-	if normalizedLine == "" then return existing end
-	local normalizedExisting = CAI_NormalizeText(existing)
-	if normalizedExisting == normalizedLine then return existing end
-	for _, existingLine in ipairs(CAI_SplitNewlines(existing)) do
-		if CAI_NormalizeText(existingLine) == normalizedLine then
-			return existing
-		end
-	end
-	if existing == "" then return line end
-	return existing .. "[NEWLINE]" .. line
-end
 
 local function CAI_FormatInvalidLabel(label, invalidReason)
 	if invalidReason == "" then return label end
@@ -3565,8 +3521,8 @@ end
 local function CAI_GetRoleStatus(entry)
 	local seen = {}
 	local texts = {
-		CAI_ControlText(entry and entry.PlayerStatus),
-		CAI_ControlText(entry and entry.AlternateStatus),
+		CAIControl.Text(entry and entry.PlayerStatus),
+		CAIControl.Text(entry and entry.AlternateStatus),
 	}
 	for _, text in ipairs(texts) do
 		if text ~= "" and not seen[text] then
@@ -3577,14 +3533,15 @@ local function CAI_GetRoleStatus(entry)
 	return ""
 end
 
-local function CAI_GetPlayerName(playerID, entry)
+local function CAI_GetPlayerName(playerID)
+	local entry = CAI_GetSlotEntry(playerID)
 	local candidates = {
 		entry and entry.PlayerName,
 		entry and entry.AlternateName,
 	}
 	for _, control in ipairs(candidates) do
-		local text = CAI_ControlText(control)
-		if text ~= "" and not CAI_IsHidden(control) then
+		local text = CAIControl.Text(control)
+		if text ~= "" and not CAIControl.IsHidden(control) then
 			return text
 		end
 	end
@@ -3592,9 +3549,10 @@ local function CAI_GetPlayerName(playerID, entry)
 	return cfg and CAI_Lookup(cfg:GetPlayerName()) or CAI_Lookup("LOC_CAI_STAGING_SLOT", playerID + 1)
 end
 
-local function CAI_GetReadyStatus(playerID, entry)
-	local status = CAI_ControlText(entry and entry.StatusLabel)
-	if status ~= "" and not CAI_IsHidden(entry and entry.StatusLabel) then
+local function CAI_GetReadyStatus(playerID)
+	local entry = CAI_GetSlotEntry(playerID)
+	local status = CAIControl.Text(entry and entry.StatusLabel)
+	if status ~= "" and not CAIControl.IsHidden(entry and entry.StatusLabel) then
 		return status
 	end
 	local cfg = PlayerConfigurations[playerID]
@@ -3604,18 +3562,19 @@ local function CAI_GetReadyStatus(playerID, entry)
 	return NotReadyStatusStr
 end
 
-local function CAI_GetSlotLabel(playerID, entry)
+local function CAI_GetSlotLabel(playerID)
+	local entry = CAI_GetSlotEntry(playerID)
 	local roleStatus = CAI_GetRoleStatus(entry)
 	if GameConfiguration.IsHotseat() then
 		if roleStatus ~= "" then
-			return CAI_Lookup("LOC_CAI_STAGING_SLOT_LABEL_WITH_ROLE", CAI_GetPlayerName(playerID, entry), CAI_GetPlayerTypeLabel(playerID), roleStatus)
+			return CAI_Lookup("LOC_CAI_STAGING_SLOT_LABEL_WITH_ROLE", CAI_GetPlayerName(playerID), CAI_GetPlayerTypeLabel(playerID), roleStatus)
 		end
-		return CAI_Lookup("LOC_CAI_STAGING_SLOT_LABEL_SIMPLE", CAI_GetPlayerName(playerID, entry), CAI_GetPlayerTypeLabel(playerID))
+		return CAI_Lookup("LOC_CAI_STAGING_SLOT_LABEL_SIMPLE", CAI_GetPlayerName(playerID), CAI_GetPlayerTypeLabel(playerID))
 	end
 	if roleStatus ~= "" then
-		return CAI_Lookup("LOC_CAI_STAGING_SLOT_LABEL_WITH_STATUS", CAI_GetPlayerName(playerID, entry), CAI_GetReadyStatus(playerID, entry), CAI_GetPlayerTypeLabel(playerID), roleStatus)
+		return CAI_Lookup("LOC_CAI_STAGING_SLOT_LABEL_WITH_STATUS", CAI_GetPlayerName(playerID), CAI_GetReadyStatus(playerID), CAI_GetPlayerTypeLabel(playerID), roleStatus)
 	end
-	return CAI_Lookup("LOC_CAI_STAGING_SLOT_LABEL", CAI_GetPlayerName(playerID, entry), CAI_GetReadyStatus(playerID, entry), CAI_GetPlayerTypeLabel(playerID))
+	return CAI_Lookup("LOC_CAI_STAGING_SLOT_LABEL", CAI_GetPlayerName(playerID), CAI_GetReadyStatus(playerID), CAI_GetPlayerTypeLabel(playerID))
 end
 
 local function CAI_GetPullText(pullDown)
@@ -3624,12 +3583,12 @@ local function CAI_GetPullText(pullDown)
 		if button then
 			local scrollText = button.GetParent and button:GetParent()
 			scrollText = scrollText and scrollText.ScrollText
-			local scrolled = CAI_ControlText(scrollText)
+			local scrolled = CAIControl.Text(scrollText)
 			if scrolled ~= "" then return scrolled end
 			local textControl = button.GetTextControl and button:GetTextControl()
-			local text = CAI_ControlText(textControl)
+			local text = CAIControl.Text(textControl)
 			if text ~= "" then return text end
-			return CAI_ControlText(button)
+			return CAIControl.Text(button)
 		end
 	end
 	return ""
@@ -3733,22 +3692,41 @@ local CAI_GetColorSelectionColors
 local CAI_GetColorOptionTooltip
 local CAI_GetColorTooltip
 
+local CAI_MissingColorRows = {}
+local function CAI_GetPlayerColorType(playerID)
+	local parameter = CAI_GetPlayerParameter(playerID, "PlayerLeader")
+	local value = parameter and parameter.Value
+	if not value or not value.Domain or not value.Value then return nil end
+	if value.Value == "RANDOM" or value.Value == "RANDOM_POOL1" or value.Value == "RANDOM_POOL2" then
+		return nil
+	end
+	-- GetPlayerIcons assumes row 1 exists. During content/parameter refreshes
+	-- a real lookup miss is possible, and optional colour speech must survive it.
+	local rows = CachedQuery("SELECT PlayerColor FROM Players WHERE Domain = ? AND LeaderType = ? LIMIT 1", value.Domain, value.Value)
+	local row = rows and rows[1]
+	local key = value.Domain .. ":" .. value.Value
+	if not row then
+		if not CAI_MissingColorRows[key] then
+			print("CAI staging colour unavailable: player=" .. tostring(playerID) .. ", leader=" .. key)
+			CAI_MissingColorRows[key] = true
+		end
+		return nil
+	end
+	CAI_MissingColorRows[key] = nil
+	return row.PlayerColor or value.Value
+end
+
 local function CAI_BuildColorOptions(playerID)
 	local options = {}
 	local selectedIndex = 0
-	local leaderParam = CAI_GetPlayerParameter(playerID, "PlayerLeader")
 	local colorParam = CAI_GetPlayerParameter(playerID, "PlayerColorAlternate")
-	local leaderValue = leaderParam and leaderParam.Value
-	if not leaderValue or not leaderValue.Domain or not leaderValue.Value then
-		return options, selectedIndex
-	end
-	local icons = GetPlayerIcons(leaderValue.Domain, leaderValue.Value)
-	if not icons or not icons.PlayerColor then
+	local colorType = CAI_GetPlayerColorType(playerID)
+	if not colorType then
 		return options, selectedIndex
 	end
 	local currentValue = colorParam and colorParam.Value or 0
 	for j = 0, 3 do
-		local backColor, frontColor = UI.GetPlayerColorValues(icons.PlayerColor, j)
+		local backColor, frontColor = UI.GetPlayerColorValues(colorType, j)
 		if backColor and frontColor and backColor ~= 0 and frontColor ~= 0 then
 			table.insert(options, {
 				label = Locale.Lookup("LOC_CAI_COLOR") .. " " .. tostring(j + 1),
@@ -3791,16 +3769,9 @@ CAI_HasColorConflict = function(playerID)
 end
 
 CAI_GetColorSelectionColors = function(playerID, value)
-	local leaderParam = CAI_GetPlayerParameter(playerID, "PlayerLeader")
-	local leaderValue = leaderParam and leaderParam.Value
-	if not leaderValue or not leaderValue.Domain or not leaderValue.Value then
-		return nil
-	end
-	local icons = GetPlayerIcons(leaderValue.Domain, leaderValue.Value)
-	if not icons or not icons.PlayerColor then
-		return nil
-	end
-	local primary, secondary = UI.GetPlayerColorValues(icons.PlayerColor, value)
+	local colorType = CAI_GetPlayerColorType(playerID)
+	if not colorType then return nil end
+	local primary, secondary = UI.GetPlayerColorValues(colorType, value)
 	if primary and secondary and primary ~= 0 and secondary ~= 0 then
 		return { primary, secondary }
 	end
@@ -3811,10 +3782,11 @@ CAI_GetColorOptionTooltip = function(playerID, value)
 	return ""
 end
 
-CAI_GetColorTooltip = function(playerID, entry)
-	local tooltip = CAI_ControlTooltip(entry and entry.ColorPullDown)
+CAI_GetColorTooltip = function(playerID)
+	local entry = CAI_GetSlotEntry(playerID)
+	local tooltip = CAIControl.Tooltip(entry and entry.ColorPullDown)
 	if CAI_HasColorConflict(playerID) then
-		tooltip = CAI_AppendUniqueLine(tooltip, CAI_Lookup("LOC_SETUP_PLAYER_COLOR_COLLISION"))
+		tooltip = CAIText.AppendUniqueLine(tooltip, CAI_Lookup("LOC_SETUP_PLAYER_COLOR_COLLISION"))
 	end
 	return tooltip
 end
@@ -3889,22 +3861,23 @@ local function CAI_GetSwapButtonLabel(playerID)
 	return CAI_Lookup("LOC_CAI_STAGING_SWAP_OFF")
 end
 
-local function CAI_GetSlotTooltip(playerID, entry)
+local function CAI_GetSlotTooltip(playerID)
+	local entry = CAI_GetSlotEntry(playerID)
 	local lines = {}
 	CAI_AddDetail(lines, "LOC_CAI_STAGING_CIV_LEADER", CAI_GetLeaderLabel(playerID))
 	CAI_AddDetail(lines, "LOC_CAI_STAGING_TEAM", CAI_GetTeamLabel(playerID))
 	CAI_AddDetail(lines, "LOC_CAI_STAGING_DIFFICULTY", CAI_GetPullText(entry and entry.HandicapPullDown))
 	CAI_AddDetail(lines, "LOC_CAI_COLOR", CAI_GetColorLabel(playerID))
-	local details = CAI_JoinLines(lines)
-	local label = CAI_GetSlotLabel(playerID, entry)
+	local details = CAIText.ConcatLines(lines)
+	local label = CAI_GetSlotLabel(playerID)
 	local rowTooltip
 	if GameConfiguration.IsHotseat() then
-		rowTooltip = CAI_GetExplanationTooltip(CAI_ControlTooltip(entry and entry.StatusLabel), label)
+		rowTooltip = CAI_GetExplanationTooltip(CAIControl.Tooltip(entry and entry.StatusLabel), label)
 	else
-		local status = CAI_GetReadyStatus(playerID, entry)
-		rowTooltip = CAI_GetExplanationTooltip(CAI_ControlTooltip(entry and entry.StatusLabel), label, status)
+		local status = CAI_GetReadyStatus(playerID)
+		rowTooltip = CAI_GetExplanationTooltip(CAIControl.Tooltip(entry and entry.StatusLabel), label, status)
 	end
-	return CAI_AppendUniqueLine(details, rowTooltip)
+	return CAIText.AppendUniqueLine(details, rowTooltip)
 end
 
 local function CAI_IsSlotEditable(entry)
@@ -3920,7 +3893,7 @@ local function CAI_IsSlotEditable(entry)
 		entry.HotseatEditButton,
 	}
 	for _, control in ipairs(controls) do
-		if control and not CAI_IsHidden(control) and not CAI_IsDisabled(control) then
+		if control and not CAIControl.IsHidden(control) and not CAIControl.IsDisabled(control) then
 			return true
 		end
 	end
@@ -3931,6 +3904,68 @@ CAI_GetPlayerParameter = function(playerID, paramId)
 	local parameters = GetPlayerParameters(playerID)
 	return parameters and parameters.Parameters and parameters.Parameters[paramId]
 end
+
+-- Temporary, read-only diagnostics for the vanilla PlayerLeader nil failure.
+-- Log before vanilla can throw; deduplicate frequent UpdatePlayerEntry calls.
+local CAI_PlayerSetupTrace = {}
+local function CAI_TracePlayerSetup(phase, playerID)
+	if not CAILogging.ShouldLog("message") or not GameConfiguration.IsPlayByCloud() then return end
+	local cfg = PlayerConfigurations[playerID]
+	local parameters = GetPlayerParameters(playerID)
+	local parameter = parameters and parameters.Parameters and parameters.Parameters.PlayerLeader
+	local value = parameter and parameter.Value
+	local selected = type(value) == "table" and value or nil
+	local leader = cfg and cfg:GetLeaderTypeName()
+	local line = "phase=" .. phase .. ", player=" .. tostring(playerID)
+		.. ", ruleset=" .. tostring(GameConfiguration.GetRuleSet())
+		.. ", gameState=" .. tostring(GameConfiguration.GetGameState())
+		.. ", dbRevision=" .. tostring(DB.ConfigurationChanges())
+		.. ", slotStatus=" .. tostring(cfg and cfg:GetSlotStatus())
+		.. ", configLeader=" .. tostring(leader)
+		.. ", configDomain=" .. tostring(cfg and cfg:GetValue("LEADER_DOMAIN"))
+		.. ", configValueDomain=" .. tostring(cfg and cfg:GetValue("LEADER_VALUE_DOMAIN"))
+		.. ", parameters=" .. type(parameters)
+		.. ", parameterTable=" .. type(parameters and parameters.Parameters)
+		.. ", PlayerLeader=" .. type(parameter)
+		.. ", parameterDomain=" .. tostring(parameter and parameter.Domain)
+		.. ", possibleValues=" .. tostring(parameter and parameter.Values and #parameter.Values)
+		.. ", invalid=" .. tostring(parameter and parameter.Invalid)
+		.. ", valueType=" .. type(value)
+		.. ", selectedDomain=" .. tostring(selected and selected.Domain)
+		.. ", selectedLeader=" .. tostring(selected and selected.Value)
+	local key = phase .. ":" .. tostring(playerID)
+	if CAI_PlayerSetupTrace[key] == line then return end
+	CAI_PlayerSetupTrace[key] = line
+	print("[CAI][CLOUD-DIAG] " .. line)
+	local definitions = DB.ConfigurationQuery("SELECT Key1, Key2, Domain, ConfigurationGroup, SupportsPlayByCloud FROM Parameters WHERE ParameterId = 'PlayerLeader'")
+	print("[CAI][CLOUD-DIAG] player=" .. tostring(playerID) .. ", leaderDefinitions=" .. tostring(definitions and #definitions))
+	for _, row in ipairs(definitions or {}) do
+		print("[CAI][CLOUD-DIAG] definition key1=" .. tostring(row.Key1) .. ", key2=" .. tostring(row.Key2)
+			.. ", domain=" .. tostring(row.Domain) .. ", group=" .. tostring(row.ConfigurationGroup)
+			.. ", supportsCloud=" .. tostring(row.SupportsPlayByCloud))
+	end
+	-- Query uncached rows for both the engine configuration and selected value;
+	-- their domains can differ after loading a save with different content.
+	local function traceLeader(leaderType)
+		if leaderType == nil then return end
+		local rows = DB.ConfigurationQuery("SELECT Domain, LeaderType, PlayerColor FROM Players WHERE LeaderType = ?", leaderType)
+		print("[CAI][CLOUD-DIAG] player=" .. tostring(playerID) .. ", lookupLeader=" .. tostring(leaderType)
+			.. ", matchingRows=" .. tostring(rows and #rows))
+		for _, row in ipairs(rows or {}) do
+			print("[CAI][CLOUD-DIAG] leader=" .. tostring(row.LeaderType)
+				.. ", domain=" .. tostring(row.Domain) .. ", color=" .. tostring(row.PlayerColor))
+		end
+	end
+	traceLeader(leader)
+	if selected and selected.Value ~= leader then traceLeader(selected.Value) end
+end
+
+CreatePlayerParameters = WrapFunc(CreatePlayerParameters, function(orig, playerID, ...)
+	CAI_TracePlayerSetup("before_create", playerID)
+	local result = orig(playerID, ...)
+	CAI_TracePlayerSetup("after_create", playerID)
+	return result
+end)
 
 CAI_SetPlayerParameter = function(playerID, paramId, value)
 	local parameters = GetPlayerParameters(playerID)
@@ -4032,7 +4067,7 @@ local function CAI_BuildLeaderOptions(playerID)
 	return options, selectedIndex
 end
 
-local function CAI_MakeSlotTypeDropdown(playerID, entry)
+local function CAI_MakeSlotTypeDropdown(playerID)
 	local function buildOptions()
 		local options = {}
 		local selectedIndex = 0
@@ -4066,8 +4101,10 @@ local function CAI_MakeSlotTypeDropdown(playerID, entry)
 	end
 	return CAI_MakeDropdown("CAIStagingRoom_SlotType_" .. playerID, "LOC_CAI_STAGING_SLOT_TYPE",
 		function() return CAI_GetSlotTypeTooltip(playerID) end,
-		function() return CAI_IsHidden(entry.SlotTypePulldown) and CAI_IsHidden(entry.AlternateSlotTypePulldown) end,
+		function() return CAI_IsSlotControlHidden(playerID, "SlotTypePulldown") and CAI_IsSlotControlHidden(playerID, "AlternateSlotTypePulldown") end,
 		function()
+			if CAI_IsSlotControlDisabled(playerID, "SlotTypePulldown")
+				and CAI_IsSlotControlDisabled(playerID, "AlternateSlotTypePulldown") then return true end
 			local options = select(1, buildOptions())
 			local hasRealOption = false
 			for _, option in ipairs(options) do
@@ -4076,8 +4113,7 @@ local function CAI_MakeSlotTypeDropdown(playerID, entry)
 					break
 				end
 			end
-			return (CAI_IsDisabled(entry.SlotTypePulldown) and CAI_IsDisabled(entry.AlternateSlotTypePulldown))
-				or not hasRealOption
+			return not hasRealOption
 		end,
 		buildOptions,
 		function(id)
@@ -4087,11 +4123,11 @@ local function CAI_MakeSlotTypeDropdown(playerID, entry)
 		end)
 end
 
-local function CAI_MakeTeamDropdown(playerID, entry)
+local function CAI_MakeTeamDropdown(playerID)
 	return CAI_MakeDropdown("CAIStagingRoom_Team_" .. playerID, "LOC_CAI_STAGING_TEAM",
 		function() return CAI_GetTeamTooltip(playerID) end,
-		function() return CAI_IsHidden(entry.TeamPullDown) end,
-		function() return CAI_IsDisabled(entry.TeamPullDown) end,
+		function() return CAI_IsSlotControlHidden(playerID, "TeamPullDown") end,
+		function() return CAI_IsSlotControlDisabled(playerID, "TeamPullDown") end,
 		function()
 			local options = {}
 			local selectedIndex = 0
@@ -4153,7 +4189,7 @@ local function CAI_MakeTeamDropdown(playerID, entry)
 		end)
 end
 
-local function CAI_MakeLeaderDropdown(playerID, entry)
+local function CAI_MakeLeaderDropdown(playerID)
 	return mgr.WidgetHelpers.CreateLeaderPickerButton({
 		id = "CAIStagingRoom_PlayerLeader_" .. playerID,
 		panelId = "CAIStagingRoom_LeaderPicker",
@@ -4169,33 +4205,29 @@ local function CAI_MakeLeaderDropdown(playerID, entry)
 				CAI_SetPlayerParameter(playerID, "PlayerColorAlternate", 0)
 			end
 		end,
-		hiddenPredicate = function() return CAI_IsHidden(entry.PlayerPullDown) end,
-		disabledPredicate = function() return CAI_IsDisabled(entry.PlayerPullDown) end,
+		hiddenPredicate = function() return CAI_IsSlotControlHidden(playerID, "PlayerPullDown") end,
+		disabledPredicate = function() return CAI_IsSlotControlDisabled(playerID, "PlayerPullDown") end,
 		focusSound = HOVER_SOUND,
 	})
 end
 
-local function CAI_MakeColorDropdown(playerID, entry)
+local function CAI_MakeColorDropdown(playerID)
 	return CAI_MakeDropdown("CAIStagingRoom_PlayerColor_" .. playerID, "LOC_CAI_COLOR",
-		function() return CAI_GetColorTooltip(playerID, entry) end,
-		function() return CAI_IsHidden(entry.ColorPullDown) end,
-		function() return CAI_IsDisabled(entry.ColorPullDown) end,
+		function() return CAI_GetColorTooltip(playerID) end,
+		function() return CAI_IsSlotControlHidden(playerID, "ColorPullDown") end,
+		function() return CAI_IsSlotControlDisabled(playerID, "ColorPullDown") end,
 		function()
 			return CAI_BuildColorOptions(playerID)
 		end,
 		function(value)
-			local leaderParam = CAI_GetPlayerParameter(playerID, "PlayerLeader")
-			local leaderValue = leaderParam and leaderParam.Value
-			local icons = leaderValue and GetPlayerIcons(leaderValue.Domain, leaderValue.Value)
-			if icons and icons.PlayerColor then
-				local primary, secondary = UI.GetPlayerColorValues(icons.PlayerColor, value)
-				m_teamColors[playerID] = {primary, secondary}
-			end
+			local colors = CAI_GetColorSelectionColors(playerID, value)
+			if not colors then return end
+			m_teamColors[playerID] = colors
 			CAI_SetPlayerParameter(playerID, "PlayerColorAlternate", value)
 		end)
 end
 
-local function CAI_MakeParameterDropdown(playerID, entry, paramId, labelTag, control)
+local function CAI_MakeParameterDropdown(playerID, paramId, labelTag, controlName)
 	return CAI_MakeDropdown("CAIStagingRoom_" .. paramId .. "_" .. playerID, labelTag,
 		function()
 			local parameter = CAI_GetPlayerParameter(playerID, paramId)
@@ -4203,8 +4235,8 @@ local function CAI_MakeParameterDropdown(playerID, entry, paramId, labelTag, con
 			local value = parameter and parameter.Value and parameter.Value.Name or ""
 			return CAI_GetExplanationTooltip(tooltip, value)
 		end,
-		function() return CAI_IsHidden(control) end,
-		function() return CAI_IsDisabled(control) end,
+		function() return CAI_IsSlotControlHidden(playerID, controlName) end,
+		function() return CAI_IsSlotControlDisabled(playerID, controlName) end,
 		function()
 			return CAI_BuildParameterOptions(CAI_GetPlayerParameter(playerID, paramId))
 		end,
@@ -4219,21 +4251,21 @@ local function CAI_MakeParameterDropdown(playerID, entry, paramId, labelTag, con
 		end)
 end
 
-local function CAI_MakeSlotButton(id, labelTag, control, fallback)
+local function CAI_MakeSlotButton(id, playerID, labelTag, controlName, fallback)
 	local widget = mgr:CreateWidget(id, "Button", {
 		Label = function()
-			local text = CAI_ControlText(control)
+			local text = CAIControl.Text(CAI_GetSlotControl(playerID, controlName))
 			if text ~= "" then return text end
 			return CAI_Lookup(labelTag)
 		end,
-		Tooltip = function() return CAI_ControlTooltip(control) end,
-		HiddenPredicate = function() return CAI_IsHidden(control) end,
-		DisabledPredicate = function() return CAI_IsDisabled(control) end,
+		Tooltip = function() return CAIControl.Tooltip(CAI_GetSlotControl(playerID, controlName)) end,
+		HiddenPredicate = function() return CAI_IsSlotControlHidden(playerID, controlName) end,
+		DisabledPredicate = function() return CAI_IsSlotControlDisabled(playerID, controlName) end,
 		FocusKey = id,
 	})
 	widget:SetFocusSound(HOVER_SOUND)
 	widget:On("activate", function()
-		CAI_DoLeftClick(control, fallback)
+		CAI_DoLeftClick(CAI_GetSlotControl(playerID, controlName), fallback)
 	end)
 	return widget
 end
@@ -4264,87 +4296,98 @@ local function CAI_MakeSwapButton(playerID)
 	return widget
 end
 
-local function CAI_BuildSlotChildren(parent, playerID, entry)
-	parent:AddChild(CAI_MakeSlotTypeDropdown(playerID, entry))
-	parent:AddChild(CAI_MakeTeamDropdown(playerID, entry))
-	parent:AddChild(CAI_MakeLeaderDropdown(playerID, entry))
-	parent:AddChild(CAI_MakeParameterDropdown(playerID, entry, "PlayerDifficulty", "LOC_CAI_STAGING_DIFFICULTY", entry.HandicapPullDown))
-	parent:AddChild(CAI_MakeColorDropdown(playerID, entry))
+local function CAI_BuildSlotChildren(parent, playerID)
+	parent:AddChild(CAI_MakeSlotTypeDropdown(playerID))
+	parent:AddChild(CAI_MakeTeamDropdown(playerID))
+	parent:AddChild(CAI_MakeLeaderDropdown(playerID))
+	parent:AddChild(CAI_MakeParameterDropdown(playerID, "PlayerDifficulty", "LOC_CAI_STAGING_DIFFICULTY", "HandicapPullDown"))
+	parent:AddChild(CAI_MakeColorDropdown(playerID))
 	parent:AddChild(CAI_MakeSwapButton(playerID))
-	parent:AddChild(CAI_MakeSlotButton("CAIStagingRoom_HotseatEdit_" .. playerID, "LOC_CAI_STAGING_HOTSEAT_EDIT", entry.HotseatEditButton, function()
+	parent:AddChild(CAI_MakeSlotButton("CAIStagingRoom_HotseatEdit_" .. playerID, playerID, "LOC_CAI_STAGING_HOTSEAT_EDIT", "HotseatEditButton", function()
 		UIManager:PushModal(Controls.EditHotseatPlayer, true)
 		LuaEvents.StagingRoom_SetPlayerID(playerID)
 	end))
-	parent:AddChild(CAI_MakeSlotButton("CAIStagingRoom_Kick_" .. playerID, "LOC_MP_KICK_PLAYER", entry.KickButton, function() OnKickButton(playerID) end))
+	parent:AddChild(CAI_MakeSlotButton("CAIStagingRoom_Kick_" .. playerID, playerID, "LOC_MP_KICK_PLAYER", "KickButton", function() OnKickButton(playerID) end))
 end
 
 local function CAI_RebuildPlayerList()
 	if not CAI_PlayerList then return end
 	local capture = mgr:CaptureFocusKey(CAI_PlayerList)
-	CAI_PlayerList:ClearChildren()
-	local addPlayerEntry = nil
+	if not capture and CAI_IsFocusWithin(CAI_PlayerList) then capture = CAI_PlayerListFocusCapture end
+	-- Construct detached rows first. A failed read must not erase the current
+	-- accessible list or its focus path before a replacement is ready.
+	local rows = {}
+	local addPlayerID = nil
 	for _, playerID in ipairs(GameConfiguration.GetMultiplayerPlayerIDs()) do
 		local entry = g_PlayerEntries[playerID]
 		if entry and entry.Root and not entry.Root:IsHidden() then
-			if entry.AddPlayerButton and not CAI_IsHidden(entry.AddPlayerButton) then
-				addPlayerEntry = { playerID = playerID, entry = entry }
+			if entry.AddPlayerButton and not CAIControl.IsHidden(entry.AddPlayerButton) then
+				addPlayerID = playerID
 			end
 			if CAI_IsSlotEditable(entry) then
 				local slot = mgr:CreateWidget("CAIStagingRoom_Player_" .. playerID, "SubMenu", {
-					Label = function() return CAI_GetSlotLabel(playerID, entry) end,
-					Tooltip = function() return CAI_GetSlotTooltip(playerID, entry) end,
+					Label = function() return CAI_GetSlotLabel(playerID) end,
+					Tooltip = function() return CAI_GetSlotTooltip(playerID) end,
 					FocusKey = "slot:" .. playerID,
+					HiddenPredicate = function() return CAI_IsSlotControlHidden(playerID, "Root") end,
 				})
 				slot:SetFocusSound(HOVER_SOUND)
-				CAI_BuildSlotChildren(slot, playerID, entry)
-				CAI_PlayerList:AddChild(slot)
+				CAI_BuildSlotChildren(slot, playerID)
+				table.insert(rows, slot)
 			else
 				local item = mgr:CreateWidget("CAIStagingRoom_Player_" .. playerID, "MenuItem", {
-					Label = function() return CAI_GetSlotLabel(playerID, entry) end,
-					Tooltip = function() return CAI_GetSlotTooltip(playerID, entry) end,
+					Label = function() return CAI_GetSlotLabel(playerID) end,
+					Tooltip = function() return CAI_GetSlotTooltip(playerID) end,
 					FocusKey = "slot:" .. playerID,
+					HiddenPredicate = function() return CAI_IsSlotControlHidden(playerID, "Root") end,
 				})
 				item:SetFocusSound(HOVER_SOUND)
-				CAI_PlayerList:AddChild(item)
+				table.insert(rows, item)
 			end
 		end
 	end
-	if addPlayerEntry then
-		local playerID = addPlayerEntry.playerID
-		local entry = addPlayerEntry.entry
+	if addPlayerID then
+		local playerID = addPlayerID
 		local addPlayer = mgr:CreateWidget("CAIStagingRoom_AddPlayerBottom", "Button", {
 			Label = function()
-				local text = CAI_ControlText(entry.AddPlayerButton)
+				local text = CAIControl.Text(CAI_GetSlotControl(playerID, "AddPlayerButton"))
 				if text ~= "" then return text end
 				return CAI_Lookup("LOC_CAI_STAGING_ADD_PLAYER")
 			end,
 			Tooltip = function()
-				local tooltip = CAI_ControlTooltip(entry.AddPlayerButton)
+				local tooltip = CAIControl.Tooltip(CAI_GetSlotControl(playerID, "AddPlayerButton"))
 				if tooltip ~= "" then return tooltip end
 				return ""
 			end,
 			FocusKey = "action:addPlayer",
+			HiddenPredicate = function() return CAI_IsSlotControlHidden(playerID, "AddPlayerButton") end,
+			DisabledPredicate = function() return CAI_IsSlotControlDisabled(playerID, "AddPlayerButton") end,
 		})
 		addPlayer:SetFocusSound(HOVER_SOUND)
 		addPlayer:On("activate", function() OnAddPlayer(playerID) end)
-		CAI_PlayerList:AddChild(addPlayer)
+		table.insert(rows, addPlayer)
 	end
+	CAI_PlayerList:ClearChildren()
+	CAI_PlayerList:AddChildren(rows)
 	mgr:RestoreFocus(CAI_PlayerList, capture)
+	CAI_PlayerListFocusCapture = nil
 end
 
 local function CAI_FlushDeferredRefresh()
 	ContextPtr:ClearUpdate()
-	if CAI_ChatTargetRefreshQueued then
-		CAI_ChatTargetRefreshQueued = false
-		if CAI_Panel then
-			CAI_RebuildChatTarget()
-		end
-	end
 	if CAI_PlayerListRefreshQueued then
-		CAI_PlayerListRefreshQueued = false
 		if CAI_Panel then
 			CAI_RebuildPlayerList()
 		end
+		CAI_PlayerListRefreshQueued = false
+	end
+	if CAI_ChatTargetRefreshQueued then
+		if CAI_Panel then
+			local capture = mgr:CaptureFocusKey(CAI_ChatTarget)
+			CAI_RebuildChatTarget()
+			mgr:RestoreFocus(CAI_ChatTarget, capture)
+		end
+		CAI_ChatTargetRefreshQueued = false
 	end
 	if CAI_PendingSwapFeedback then
 		local feedback = CAI_PendingSwapFeedback
@@ -4383,23 +4426,23 @@ local function CAI_GetReadyButtonLabel()
 end
 
 CAI_GetReadyButtonStatus = function()
-	local buttonText = CAI_ControlText(Controls.ReadyButton)
-	if buttonText ~= "" and not CAI_IsHidden(Controls.ReadyButton) then return buttonText end
-	local labelText = CAI_ControlText(Controls.StartLabel)
+	local buttonText = CAIControl.Text(Controls.ReadyButton)
+	if buttonText ~= "" and not CAIControl.IsHidden(Controls.ReadyButton) then return buttonText end
+	local labelText = CAIControl.Text(Controls.StartLabel)
 	if labelText ~= "" then return labelText end
-	return CAI_ControlText(Controls.ReadyCheck)
+	return CAIControl.Text(Controls.ReadyCheck)
 end
 
 local function CAI_GetReadyButtonTooltip()
 	local status = CAI_GetReadyButtonStatus()
-	local tooltip = CAI_ControlTooltip(Controls.ReadyButton)
+	local tooltip = CAIControl.Tooltip(Controls.ReadyButton)
 	if tooltip ~= "" and tooltip ~= status then
 		if status ~= "" and m_countdownType ~= CountdownTypes.None then
 			return CAI_Lookup("LOC_CAI_STAGING_READY_TOOLTIP_WITH_STATUS", status, tooltip)
 		end
 		return CAI_GetExplanationTooltip(tooltip, status)
 	end
-	tooltip = CAI_ControlTooltip(Controls.ReadyCheck)
+	tooltip = CAIControl.Tooltip(Controls.ReadyCheck)
 	if tooltip ~= "" and tooltip ~= status then
 		if status ~= "" and m_countdownType ~= CountdownTypes.None then
 			return CAI_Lookup("LOC_CAI_STAGING_READY_TOOLTIP_WITH_STATUS", status, tooltip)
@@ -4417,8 +4460,8 @@ end
 
 local function CAI_GetReadyCountdownSpeech()
 	if m_countdownType == CountdownTypes.None then return "" end
-	local buttonText = CAI_ControlText(Controls.ReadyButton)
-	if buttonText ~= "" and not CAI_IsHidden(Controls.ReadyButton) then
+	local buttonText = CAIControl.Text(Controls.ReadyButton)
+	if buttonText ~= "" and not CAIControl.IsHidden(Controls.ReadyButton) then
 		return buttonText
 	end
 	return ""
@@ -4448,7 +4491,7 @@ local function CAI_RecordChatLine(line)
 end
 
 local function CAI_SpeakChatLine(line)
-	local lines = CAI_SplitNewlines(line)
+	local lines = CAIText.SplitTokenLines(line)
 	if #lines > 1 then
 		SpeakLines(lines, false)
 	else
@@ -4486,7 +4529,7 @@ local function CAI_IsSystemChatMessage(text)
 end
 
 local function CAI_GetChatInputTooltip()
-	local tooltip = CAI_ControlTooltip(Controls.ChatEntry)
+	local tooltip = CAIControl.Tooltip(Controls.ChatEntry)
 	if tooltip ~= "" then return tooltip end
 	return CAI_Lookup("LOC_CHAT_HELP_COMMAND_HINT")
 end
@@ -4548,9 +4591,9 @@ end
 local function CAI_RebuildGameSummary()
 	if not CAI_GameSummary then return end
 	local lines = {}
-	CAI_AddDetail(lines, "LOC_CAI_STAGING_STATUS", CAI_ControlText(Controls.GameStateText))
-	if not CAI_IsHidden(Controls.JoinCodeRoot) then
-		CAI_AddDetail(lines, "LOC_STAGING_ROOM_JOIN_CODE", CAI_ControlText(Controls.JoinCodeText))
+	CAI_AddDetail(lines, "LOC_CAI_STAGING_STATUS", CAIControl.Text(Controls.GameStateText))
+	if not CAIControl.IsHidden(Controls.JoinCodeRoot) then
+		CAI_AddDetail(lines, "LOC_STAGING_ROOM_JOIN_CODE", CAIControl.Text(Controls.JoinCodeText))
 	end
 	if g_GameParameters and g_GameParameters.Parameters then
 		local params = {}
@@ -4569,16 +4612,16 @@ local function CAI_RebuildGameSummary()
 		end)
 		for _, parameter in ipairs(params) do
 			local control = g_GameParameters.Controls[parameter.ParameterId]
-			local value = CAI_ControlText(control and control.Control and control.Control.Value)
+			local value = CAIControl.Text(control and control.Control and control.Control.Value)
 			if value == "" then value = tostring(parameter.Value or parameter.DefaultValue or "") end
 			local detail = value
 			local invalidReason = CAI_GetParameterInvalidReason(parameter)
-			local tooltip = control and control.Control and control.Control.Root and CAI_ControlTooltip(control.Control.Root) or ""
+			local tooltip = control and control.Control and control.Control.Root and CAIControl.Tooltip(control.Control.Root) or ""
 			local explanation = CAI_GetExplanationTooltip(tooltip, parameter.Name, value, invalidReason)
 			if invalidReason ~= "" then
-				detail = CAI_AppendUniqueLine(detail, invalidReason)
+				detail = CAIText.AppendUniqueLine(detail, invalidReason)
 			end
-			detail = CAI_AppendUniqueLine(detail, explanation)
+			detail = CAIText.AppendUniqueLine(detail, explanation)
 			CAI_AddDetail(lines, parameter.Name, detail)
 		end
 	end
@@ -4588,7 +4631,7 @@ local function CAI_RebuildGameSummary()
 			CAI_AddDetail(lines, "LOC_CAI_STAGING_ADDITIONAL_CONTENT", curMod.Title)
 		end
 	end
-	CAI_GameSummary:SetText(CAI_JoinLines(lines), true)
+	CAI_GameSummary:SetText(CAIText.ConcatLines(lines), true)
 end
 
 local function CAI_MakeActionButton(id, labelTag, control, fallback, hiddenFn, opts)
@@ -4597,21 +4640,21 @@ local function CAI_MakeActionButton(id, labelTag, control, fallback, hiddenFn, o
 	local tooltipControl = opts.TooltipControl or control
 	local button = mgr:CreateWidget(id, "Button", {
 		Label = function()
-			local text = CAI_ControlText(labelControl)
+			local text = CAIControl.Text(labelControl)
 			if text ~= "" then return text end
 			return CAI_Lookup(labelTag)
 		end,
 		Tooltip = function()
-			local tooltip = CAI_ControlTooltip(tooltipControl)
-			local label = CAI_ControlText(labelControl)
+			local tooltip = CAIControl.Tooltip(tooltipControl)
+			local label = CAIControl.Text(labelControl)
 			if tooltip ~= "" and tooltip ~= label then return tooltip end
 			if opts.TooltipTag then
 				return CAI_Lookup(opts.TooltipTag)
 			end
 			return ""
 		end,
-		HiddenPredicate = hiddenFn or function() return CAI_IsHidden(control) end,
-		DisabledPredicate = function() return CAI_IsDisabled(control) end,
+		HiddenPredicate = hiddenFn or function() return CAIControl.IsHidden(control) end,
+		DisabledPredicate = function() return CAIControl.IsDisabled(control) end,
 		FocusKey = id,
 	})
 	button:SetFocusSound(HOVER_SOUND)
@@ -4743,7 +4786,7 @@ end
 
 local function CAI_BuildPanel()
 	CAI_Panel = mgr:CreateWidget(CAI_PANEL_ID, "Panel", {
-		Label = function() return CAI_ControlText(Controls.TitleLabel) end,
+		Label = function() return CAIControl.Text(Controls.TitleLabel) end,
 	})
 	CAI_Panel:AddInputBinding({
 		Key = Keys.VK_ESCAPE,
@@ -4762,7 +4805,7 @@ local function CAI_BuildPanel()
 	CAI_ReadyButton = mgr:CreateWidget("CAIStagingRoom_Ready", "Button", {
 		Label = CAI_GetReadyButtonLabel,
 		Tooltip = CAI_GetReadyButtonTooltip,
-		DisabledPredicate = function() return CAI_IsDisabled(Controls.ReadyButton) or CAI_IsDisabled(Controls.ReadyCheck) end,
+		DisabledPredicate = function() return CAIControl.IsDisabled(Controls.ReadyButton) or CAIControl.IsDisabled(Controls.ReadyCheck) end,
 		FocusKey = "action:ready",
 	})
 	CAI_ReadyButton:SetFocusSound(HOVER_SOUND)
@@ -4777,8 +4820,8 @@ local function CAI_BuildPanel()
 		HighlightOnEdit = true,
 		EnterToCommit = true,
 		MaxCharacters = 250,
-		HiddenPredicate = function() return CAI_IsHidden(Controls.ChatContainer) end,
-		DisabledPredicate = function() return CAI_IsDisabled(Controls.ChatEntry) end,
+		HiddenPredicate = function() return CAIControl.IsHidden(Controls.ChatContainer) end,
+		DisabledPredicate = function() return CAIControl.IsDisabled(Controls.ChatEntry) end,
 		FocusKey = "chat:input",
 	})
 	CAI_ChatInput:SetValueSetter(function(widget, text)
@@ -4791,7 +4834,7 @@ local function CAI_BuildPanel()
 
 	CAI_ChatTarget = mgr:CreateWidget("CAIStagingRoom_ChatTarget", "Dropdown", {
 		Label = function() return CAI_Lookup("LOC_CAI_STAGING_CHAT_TARGET") end,
-		HiddenPredicate = function() return CAI_IsHidden(Controls.ChatContainer) end,
+		HiddenPredicate = function() return CAIControl.IsHidden(Controls.ChatContainer) end,
 		FocusKey = "chat:target",
 	})
 	CAI_ChatTarget:SetFocusSound(HOVER_SOUND)
@@ -4810,7 +4853,7 @@ local function CAI_BuildPanel()
 
 	CAI_ChatHistory = mgr:CreateWidget("CAIStagingRoom_ChatHistory", "List", {
 		Label = function() return CAI_Lookup("LOC_CAI_ENDGAME_CHAT_HISTORY") end,
-		HiddenPredicate = function() return CAI_IsHidden(Controls.ChatContainer) end,
+		HiddenPredicate = function() return CAIControl.IsHidden(Controls.ChatContainer) end,
 		FocusKey = "chat:history",
 	})
 	CAI_Panel:AddChild(CAI_ChatHistory)
@@ -4831,7 +4874,7 @@ local function CAI_BuildPanel()
 		"LOC_CAI_STAGING_COPY_JOIN_CODE",
 		Controls.JoinCodeText,
 		OnClickToCopy,
-		function() return CAI_IsHidden(Controls.JoinCodeRoot) end,
+		function() return CAIControl.IsHidden(Controls.JoinCodeRoot) end,
 		{
 			TooltipControl = Controls.JoinCodeText,
 			TooltipTag = "LOC_CAI_STAGING_COPY_JOIN_CODE_TT",
@@ -4886,6 +4929,7 @@ local function CAI_PopPanel()
 	CAI_LastReadySpeech = { label = "", tooltip = "", countdown = "" }
 	CAI_LastKnownLocalPlayerID = nil
 	CAI_PlayerListRefreshQueued = false
+	CAI_PlayerListFocusCapture = nil
 	CAI_ChatTargetRefreshQueued = false
 	CAI_PendingSwapFocusKey = nil
 	CAI_PendingSwapFocusWithinList = false
@@ -4900,9 +4944,24 @@ OnShow = WrapFunc(OnShow, function(orig, ...)
 end)
 
 BuildPlayerList = WrapFunc(BuildPlayerList, function(orig, ...)
+	CAI_PlayerSetupTrace = {}
+	-- A picker owns parameter option objects from the old player setup. Close
+	-- it before vanilla releases those parameters and restores its slot focus.
+	if mgr:GetWidgetById("CAIStagingRoom_LeaderPicker") then
+		mgr.WidgetHelpers.RemoveLeaderPickerPanel("CAIStagingRoom_LeaderPicker")
+	end
+	if CAI_PlayerList then
+		CAI_PlayerListFocusCapture = mgr:CaptureFocusKey(CAI_PlayerList)
+	end
 	local result = orig(...)
 	CAI_RequestPlayerListRefresh(false)
 	CAI_RebuildFriendsList()
+	return result
+end)
+
+OnGameConfigChanged = WrapFunc(OnGameConfigChanged, function(orig, ...)
+	local result = orig(...)
+	CAI_RequestPlayerListRefresh(false)
 	return result
 end)
 
@@ -4943,6 +5002,7 @@ UpdateReadyButton = WrapFunc(UpdateReadyButton, function(orig, ...)
 end)
 
 UpdatePlayerEntry = WrapFunc(UpdatePlayerEntry, function(orig, playerID, ...)
+	CAI_TracePlayerSetup("before_update", playerID)
 	local oldReady = g_PlayerReady[playerID]
 	local hadReadyState = oldReady ~= nil
 	local result = orig(playerID, ...)
@@ -4951,7 +5011,7 @@ UpdatePlayerEntry = WrapFunc(UpdatePlayerEntry, function(orig, playerID, ...)
 		local slotStatus = cfg:GetSlotStatus()
 		local newReady = cfg:GetReady()
 		if (slotStatus == SlotStatus.SS_TAKEN or slotStatus == SlotStatus.SS_OBSERVER) and newReady ~= oldReady then
-			local playerName = CAI_GetPlayerName(playerID, g_PlayerEntries[playerID])
+			local playerName = CAI_GetPlayerName(playerID)
 			Speak(CAI_Lookup(newReady and "LOC_CAI_STAGING_PLAYER_READY" or "LOC_CAI_STAGING_PLAYER_UNREADY", playerName), false)
 		end
 	end

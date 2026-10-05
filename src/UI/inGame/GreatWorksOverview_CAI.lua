@@ -6,7 +6,6 @@ include("caiUtils")
 include("hexCoordUtils_CAI")
 
 local mgr                      = ExposedMembers.CAI_UIManager
-local CAICursor                = ExposedMembers.CAICursor
 local HexCoordUtils            = CAIHexCoordUtils
 
 local PANEL_ID                 = "CAIGreatWorksOverview_Panel"
@@ -59,23 +58,6 @@ m_groupByBuildings = LoadGroupByBuildingsSetting()
 -- ---------------------------------------------------------------------------
 -- Data helpers
 -- ---------------------------------------------------------------------------
-
-local function GetRelativePlotLocation(plotIndex)
-    if plotIndex == nil then return "" end
-    local plot = Map.GetPlotByIndex(plotIndex)
-    if plot == nil then return "" end
-    CAICursor = CAICursor or ExposedMembers.CAICursor
-    if CAICursor == nil then return "" end
-    local cursorX, cursorY = CAICursor:GetCoords()
-    if cursorX == nil or cursorY == nil then return "" end
-    return HexCoordUtils.directionString(cursorX, cursorY, plot:GetX(), plot:GetY())
-end
-
-local function AppendRelativePlotLocation(label, plotIndex)
-    local location = GetRelativePlotLocation(plotIndex)
-    if location == "" then return label end
-    return label .. ", " .. location
-end
 
 local function IndexBuildingPlots(pCity)
     local plotIndices = {}
@@ -862,7 +844,7 @@ local function BuildCityFirstTree(tree, localPlayer, buildingPlotsByCity)
                         local buildingItem = mgr:CreateWidget(
                             mgr:GenerateWidgetId("CAIGW_Building"), "TreeItem", {
                                 Label = function()
-                                    return AppendRelativePlotLocation(
+                                    return HexCoordUtils.appendRelativePlotLocation(
                                         GetBuildingLabel(cityBuildingInfo, cityBuildings),
                                         buildingPlotIndex)
                                 end,
@@ -915,7 +897,7 @@ local function BuildBuildingFirstTree(tree, localPlayer, buildingPlotsByCity)
                         local cityItem = mgr:CreateWidget(
                             mgr:GenerateWidgetId("CAIGW_BuildingCity"), "TreeItem", {
                                 Label = function()
-                                    return AppendRelativePlotLocation(
+                                    return HexCoordUtils.appendRelativePlotLocation(
                                         Locale.Lookup(city:GetName()), buildingPlotIndex)
                                 end,
                                 Tooltip = function()

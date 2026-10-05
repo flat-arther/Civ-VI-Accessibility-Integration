@@ -289,6 +289,7 @@ function Initialize()
 	
 end
 --#Accessibility integration
+include("textProcessing")
 include("caiUtils")
 local mgr = ExposedMembers.CAI_UIManager
 
@@ -316,13 +317,6 @@ local m_caiClosing = false
 
 local BASE_OnInputHandler = OnInputHandler
 
-local function CAI_TrimCreditText(text)
-	text = tostring(text or "")
-	text = string.gsub(text, "\194\160", " ")
-	-- ASCII whitespace only; %s is locale-sensitive and corrupts UTF-8 (0xA0).
-	return (text:gsub("^[ \t\r\n]+", ""):gsub("[ \t\r\n]+$", ""))
-end
-
 local function CAI_IsFocusWithin(widget)
 	local focused = mgr:GetFocusedWidget()
 	while focused do
@@ -344,7 +338,7 @@ local function CAI_ParseCredits(credits)
 			kind = string.upper(string.sub(rawLine, 2, 2))
 			text = string.sub(rawLine, 4)
 		end
-		text = CAI_TrimCreditText(text)
+		text = CAIText.TrimNonbreakingWhitespace(text)
 
 		local weightKey = kind
 		if text == "" then weightKey = "BLANK" end

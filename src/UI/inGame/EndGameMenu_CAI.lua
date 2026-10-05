@@ -41,10 +41,6 @@ local m_chatTargetState = {
 -- ============================================================================
 -- Helpers
 -- ============================================================================
-local function MakeId(prefix)
-    return mgr:GenerateWidgetId(prefix)
-end
-
 local function SafeGetText(control)
     if control and not control:IsHidden() then
         local text = control:GetText()
@@ -81,7 +77,7 @@ local function RebuildResultsList()
         if #parts > 0 then
             local label = table.concat(parts, "[NEWLINE]")
             local blurb = SafeGetText(Controls.VictoryBlurb)
-            local item = mgr:CreateWidget(MakeId("CAIEG_res_"), "StaticText", {
+            local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_res_"), "StaticText", {
                 Label = function() return label end,
                 Tooltip = blurb and function() return blurb end or nil,
                 FocusKey = "endgame:result:winner",
@@ -99,7 +95,7 @@ local function RebuildResultsList()
         if playerName then table.insert(parts, playerName) end
         if #parts > 0 then
             local label = table.concat(parts, "[NEWLINE]")
-            local item = mgr:CreateWidget(MakeId("CAIEG_res_"), "StaticText", {
+            local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_res_"), "StaticText", {
                 Label = function() return label end,
                 FocusKey = "endgame:result:defeated",
             })
@@ -155,7 +151,7 @@ local function RebuildRankingList()
     local titleText = SafeGetText(Controls.RankingTitle)
     if titleText then
         local headerLabel = titleText .. ", " .. playerRank .. " / " .. totalRankings
-        local header = mgr:CreateWidget(MakeId("CAIEG_rank_"), "StaticText", {
+        local header = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_rank_"), "StaticText", {
             Label = function() return headerLabel end,
             FocusKey = "endgame:rank:title",
         })
@@ -166,7 +162,7 @@ local function RebuildRankingList()
     for _, r in ipairs(rows) do
         local capturedQuote = r.quote
         local capturedLabel = r.label
-        local item = mgr:CreateWidget(MakeId("CAIEG_rank_"), "StaticText", {
+        local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_rank_"), "StaticText", {
             Label = function() return capturedLabel end,
             Tooltip = capturedQuote and function() return capturedQuote end or nil,
             FocusKey = "endgame:rank:" .. r.key,
@@ -226,7 +222,7 @@ local function BuildTurnGroups(playerNode, playerId, points)
 
     for _, turn in ipairs(turnOrder) do
         local turnLabel = Locale.Lookup("LOC_CAI_TIMELINE_TURN", turn)
-        local turnNode = mgr:CreateWidget(MakeId("CAIEG_graph_"), "TreeItem", {
+        local turnNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_graph_"), "TreeItem", {
             Label = function() return turnLabel end,
             FocusKey = "endgame:graph:player:" .. playerId .. ":turn:" .. turn,
         })
@@ -235,7 +231,7 @@ local function BuildTurnGroups(playerNode, playerId, points)
 
         for _, pt in ipairs(turnMap[turn]) do
             local valueLabel = pt.display .. ": " .. FormatReplayValue(pt.value)
-            local leaf = mgr:CreateWidget(MakeId("CAIEG_graph_"), "TreeItem", {
+            local leaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_graph_"), "TreeItem", {
                 Label = function() return valueLabel end,
                 FocusKey = "endgame:graph:player:" .. playerId ..
                     ":turn:" .. turn .. ":dataset:" .. pt.dataSetName,
@@ -266,7 +262,7 @@ local function BuildValueGroups(playerNode, playerId, points)
     for _, dsName in ipairs(dsOrder) do
         local bucket = dsMap[dsName]
         local valueDisplay = bucket.display
-        local valueNode = mgr:CreateWidget(MakeId("CAIEG_graph_"), "TreeItem", {
+        local valueNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_graph_"), "TreeItem", {
             Label = function() return valueDisplay end,
             FocusKey = "endgame:graph:player:" .. playerId .. ":dataset:" .. dsName,
         })
@@ -275,7 +271,7 @@ local function BuildValueGroups(playerNode, playerId, points)
 
         for _, pt in ipairs(bucket.points) do
             local turnLabel = Locale.Lookup("LOC_CAI_TIMELINE_TURN", pt.turn)
-            local leaf = mgr:CreateWidget(MakeId("CAIEG_graph_"), "TreeItem", {
+            local leaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_graph_"), "TreeItem", {
                 Label = function()
                     return turnLabel .. ": " .. FormatReplayValue(pt.value)
                 end,
@@ -306,7 +302,7 @@ local function RebuildGraphsTree()
     local playerInfos = g_PlayerInfos or {}
 
     if #playerInfos == 0 then
-        local noData = mgr:CreateWidget(MakeId("CAIEG_graph_"), "StaticText", {
+        local noData = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_graph_"), "StaticText", {
             Label = function() return Locale.Lookup("LOC_UI_ENDGAME_REPLAY_NOGRAPHDATA") end,
             FocusKey = "endgame:graph:nodata",
         })
@@ -368,7 +364,7 @@ local function RebuildGraphsTree()
     end
 
     if #playersWithData == 0 then
-        local noData = mgr:CreateWidget(MakeId("CAIEG_graph_"), "StaticText", {
+        local noData = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_graph_"), "StaticText", {
             Label = function() return Locale.Lookup("LOC_UI_ENDGAME_REPLAY_NOGRAPHDATA") end,
             FocusKey = "endgame:graph:nodata",
         })
@@ -382,7 +378,7 @@ local function RebuildGraphsTree()
         local pInfo = playerEntry.info
         local pName = pInfo.Name and Locale.Lookup(pInfo.Name)
             or (Locale.Lookup("LOC_CAI_PLAYER") .. " " .. tostring(pInfo.Id))
-        local playerNode = mgr:CreateWidget(MakeId("CAIEG_graph_"), "TreeItem", {
+        local playerNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_graph_"), "TreeItem", {
             Label = function() return pName end,
             FocusKey = "endgame:graph:player:" .. pInfo.Id,
         })
@@ -562,7 +558,7 @@ local function RebuildChatTab()
     m_chatHistory:ClearChildren()
 
     for _, entry in ipairs(m_chatEntries) do
-        local item = mgr:CreateWidget(MakeId("CAIEG_chat_"), "StaticText", {
+        local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_chat_"), "StaticText", {
             Label = function() return entry.Label end,
             FocusKey = "endgame:chat:" .. tostring(entry.Id),
         })
@@ -612,7 +608,7 @@ end
 local function AddActionButtons()
     if not m_panel then return end
 
-    local actionsPanel = mgr:CreateWidget(MakeId("CAIEG_acts_"), "Panel", { Transparent = true, WrapAround = false })
+    local actionsPanel = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_acts_"), "Panel", { Transparent = true, WrapAround = false })
     m_panel:AddChild(actionsPanel)
 
     local buttons = {
@@ -637,7 +633,7 @@ local function AddActionButtons()
         local ctrl = def.control
         if ctrl then
             local capturedCtrl = ctrl
-            local btn = mgr:CreateWidget(MakeId("CAIEG_act_"), "Button", {
+            local btn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_act_"), "Button", {
                 Label = function()
                     return capturedCtrl:GetText() or ""
                 end,
@@ -668,7 +664,7 @@ local function PushMoviePanel()
         Label = function() return Locale.Lookup("LOC_CAI_ENDGAME_MOVIE_PLAYING") end,
     })
 
-    local skipBtn = mgr:CreateWidget(MakeId("CAIEG_movie_"), "Button", {
+    local skipBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_movie_"), "Button", {
         Label = function() return Locale.Lookup("LOC_CAI_ENDGAME_MOVIE_SKIP") end,
         FocusKey = "endgame:movie:skip",
     })
@@ -709,7 +705,7 @@ local function BuildPanel()
     -- Tab 1: Results
     tabIndex = tabIndex + 1
     local resultsPage = m_tabs:AddPage(function() return Locale.Lookup("LOC_UI_ENDGAME_VICTORY_INFO") end)
-    m_resultsList = mgr:CreateWidget(MakeId("CAIEG_"), "List", {})
+    m_resultsList = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_"), "List", {})
     resultsPage:AddChild(m_resultsList)
     vanillaTabButtons[tabIndex] = Controls.InfoButton
 
@@ -718,7 +714,7 @@ local function BuildPanel()
     if hasRankings then
         tabIndex = tabIndex + 1
         local rankingPage = m_tabs:AddPage(function() return Locale.Lookup("LOC_UI_ENDGAME_RANKING") end)
-        m_rankingList = mgr:CreateWidget(MakeId("CAIEG_"), "List", {})
+        m_rankingList = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_"), "List", {})
         rankingPage:AddChild(m_rankingList)
         vanillaTabButtons[tabIndex] = Controls.RankingButton
     end
@@ -727,10 +723,10 @@ local function BuildPanel()
     tabIndex = tabIndex + 1
     local graphsPage = m_tabs:AddPage(function() return Locale.Lookup("LOC_UI_ENDGAME_REPLAY") end)
 
-    m_graphsTree = mgr:CreateWidget(MakeId("CAIEG_"), "Tree", {})
+    m_graphsTree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_"), "Tree", {})
     graphsPage:AddChild(m_graphsTree)
 
-    m_graphsGroupCheckbox = mgr:CreateWidget(MakeId("CAIEG_graphgroup_"), "Checkbox", {
+    m_graphsGroupCheckbox = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_graphgroup_"), "Checkbox", {
         Label = function() return Locale.Lookup("LOC_CAI_REPLAY_GROUP_BY_VALUE") end,
         Tooltip = function() return Locale.Lookup("LOC_CAI_REPLAY_GROUP_BY_VALUE_TOOLTIP") end,
         FocusKey = "endgame:graph:groupbyvalue",
@@ -755,7 +751,7 @@ local function BuildPanel()
 
         SyncLocalChatTargetFromVanilla()
 
-        m_chatInput = mgr:CreateWidget(MakeId("CAIEG_chat_"), "EditBox", {
+        m_chatInput = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_chat_"), "EditBox", {
             Label = function() return Locale.Lookup("LOC_CAI_ENDGAME_CHAT_INPUT") end,
             Tooltip = GetChatInputTooltip,
             AlwaysEdit = true,
@@ -773,7 +769,7 @@ local function BuildPanel()
         end)
         chatPage:AddChild(m_chatInput)
 
-        m_chatTarget = mgr:CreateWidget(MakeId("CAIEG_chat_"), "Dropdown", {
+        m_chatTarget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_chat_"), "Dropdown", {
             Label = function() return Locale.Lookup("LOC_CAI_STAGING_CHAT_TARGET") end,
             FocusKey = "endgame:chat:target",
         })
@@ -788,7 +784,7 @@ local function BuildPanel()
         end)
         chatPage:AddChild(m_chatTarget)
 
-        m_chatHistory = mgr:CreateWidget(MakeId("CAIEG_chat_"), "List", {
+        m_chatHistory = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEG_chat_"), "List", {
             Label = function() return Locale.Lookup("LOC_CAI_ENDGAME_CHAT_HISTORY") end,
             FocusKey = "endgame:chat:history",
         })

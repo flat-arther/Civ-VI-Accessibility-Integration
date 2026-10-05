@@ -457,44 +457,43 @@ end
 -- Ordered list of the armed tool's selected-parameter strings (nil if none).
 local function BuildToolParamString(toolID)
     local parts = {}
-    local function add(s) if s ~= nil and s ~= "" then parts[#parts + 1] = s end end
 
     if toolID == WorldBuilderModes.PLACE_TERRAIN then
-        add(SelectedTypeLabel())
-        add(Locale.Lookup(BRUSH_SIZES[m_brushIndex].label))
+        CAIText.AppendIfNonEmpty(parts, SelectedTypeLabel())
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup(BRUSH_SIZES[m_brushIndex].label))
     elseif toolID == WorldBuilderModes.PLACE_FEATURES or toolID == WorldBuilderModes.PLACE_WONDERS then
-        add(SelectedTypeLabel())
-        add(Locale.Lookup(ROTATION_STATES[m_rotationIndex + 1]))
+        CAIText.AppendIfNonEmpty(parts, SelectedTypeLabel())
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup(ROTATION_STATES[m_rotationIndex + 1]))
     elseif toolID == WorldBuilderModes.PLACE_RESOURCES then
-        add(SelectedTypeLabel())
-        if not Controls.ResourceAmountStack:IsHidden() then add(Controls.ResourceAmount:GetText()) end
+        CAIText.AppendIfNonEmpty(parts, SelectedTypeLabel())
+        if not Controls.ResourceAmountStack:IsHidden() then CAIText.AppendIfNonEmpty(parts, Controls.ResourceAmount:GetText()) end
     elseif toolID == WorldBuilderModes.PLACE_IMPROVEMENTS then
-        add(SelectedTypeLabel())
-        if Controls.ImprovementPillagedCheck:IsChecked() then add(Locale.Lookup("LOC_CAI_WB_PILLAGED")) end
+        CAIText.AppendIfNonEmpty(parts, SelectedTypeLabel())
+        if Controls.ImprovementPillagedCheck:IsChecked() then CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_WB_PILLAGED")) end
     elseif toolID == WorldBuilderModes.PLACE_DISTRICTS then
-        add(SelectedTypeLabel())
-        if Controls.DistrictPillagedCheck:IsChecked() then add(Locale.Lookup("LOC_CAI_WB_PILLAGED")) end
+        CAIText.AppendIfNonEmpty(parts, SelectedTypeLabel())
+        if Controls.DistrictPillagedCheck:IsChecked() then CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_WB_PILLAGED")) end
     elseif toolID == WorldBuilderModes.PLACE_BUILDINGS then
-        add(SelectedTypeLabel())
+        CAIText.AppendIfNonEmpty(parts, SelectedTypeLabel())
     elseif toolID == WorldBuilderModes.PLACE_UNITS then
-        add(SelectedTypeLabel())
-        add(PulldownLabel(Controls.UnitOwnerPullDown))
+        CAIText.AppendIfNonEmpty(parts, SelectedTypeLabel())
+        CAIText.AppendIfNonEmpty(parts, PulldownLabel(Controls.UnitOwnerPullDown))
     elseif toolID == WorldBuilderModes.PLACE_CONTINENTS then
-        add(PulldownLabel(Controls.ContinentPullDown))
-        add(Locale.Lookup(BRUSH_SIZES[m_brushIndex].label))
+        CAIText.AppendIfNonEmpty(parts, PulldownLabel(Controls.ContinentPullDown))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup(BRUSH_SIZES[m_brushIndex].label))
     elseif toolID == WorldBuilderModes.PLACE_ROUTES then
-        add(PulldownLabel(Controls.RoutePullDown))
-        if Controls.RoutePillagedCheck:IsChecked() then add(Locale.Lookup("LOC_CAI_WB_PILLAGED")) end
+        CAIText.AppendIfNonEmpty(parts, PulldownLabel(Controls.RoutePullDown))
+        if Controls.RoutePillagedCheck:IsChecked() then CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_WB_PILLAGED")) end
     elseif toolID == WorldBuilderModes.PLACE_CITIES then
-        add(PulldownLabel(Controls.CityOwnerPullDown))
+        CAIText.AppendIfNonEmpty(parts, PulldownLabel(Controls.CityOwnerPullDown))
     elseif toolID == WorldBuilderModes.PLACE_START_POSITIONS then
-        add(PulldownLabel(Controls.StartPosPlayerPulldown))
+        CAIText.AppendIfNonEmpty(parts, PulldownLabel(Controls.StartPosPlayerPulldown))
     elseif toolID == WorldBuilderModes.PLACE_TERRAIN_OWNER then
-        add(PulldownLabel(Controls.OwnerPullDown))
+        CAIText.AppendIfNonEmpty(parts, PulldownLabel(Controls.OwnerPullDown))
     elseif toolID == WorldBuilderModes.SET_VISIBILITY then
-        add(PulldownLabel(Controls.VisibilityPullDown))
+        CAIText.AppendIfNonEmpty(parts, PulldownLabel(Controls.VisibilityPullDown))
     elseif toolID == WorldBuilderModes.PLACE_RIVERS or toolID == WorldBuilderModes.PLACE_CLIFFS then
-        add(Locale.Lookup(DIRECTION_TAGS[m_edgeIndex + 1]))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup(DIRECTION_TAGS[m_edgeIndex + 1]))
     end
 
     if #parts == 0 then return nil end

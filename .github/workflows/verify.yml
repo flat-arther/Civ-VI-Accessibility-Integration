@@ -1,0 +1,22 @@
+name: Verify
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build pinned Lua test interpreter
+        shell: pwsh
+        run: ./scripts/Install-TestLua.ps1
+      - name: Verify repository and production regressions
+        shell: pwsh
+        # Decompiled Firaxis sources are local-only and are not redistributed in CI.
+        run: ./scripts/Verify-Repository.ps1 -WithoutVanillaRiverFixture

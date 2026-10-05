@@ -190,19 +190,6 @@ local function GetVolcanoZoneText(plot)
     return Locale.Lookup("LOC_CAI_NAV_CURSOR_VOLCANO_ZONE", name)
 end
 
-local function GetNationalParkZoneText(plot)
-    if plot == nil then return nil end
-
-    local nationalParks = Game.GetNationalParks()
-    if nationalParks == nil or nationalParks.IsNationalPark == nil then return nil end
-
-    if not nationalParks:IsNationalPark(plot:GetIndex()) then
-        return nil
-    end
-
-    return Locale.Lookup("LOC_CAI_NAV_CURSOR_NATIONAL_PARK_ZONE")
-end
-
 local function GetCityZoneText(plot)
     if plot == nil then return end
     return table.concat(ExposedMembers.CAIInfo:RequestPlotInfo(plot:GetIndex(), { "cityName" }), "")

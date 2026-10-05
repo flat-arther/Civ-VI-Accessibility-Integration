@@ -1,3 +1,4 @@
+include("CAIDescriptors")
 include("caiUtils")
 include("Civ6Common")
 local info                           = ExposedMembers.CAIInfo or {}
@@ -14,56 +15,12 @@ local ACTION_BANNER_LOYALTY_SUMMARY  = SafeActionId("CityBannerReadLoyaltySummar
 local ACTION_BANNER_GOVERNOR         = SafeActionId("CityBannerReadGovernor")
 local ACTION_BANNER_POWER            = SafeActionId("CityBannerReadPower")
 
-local function AppendResult(results, value)
-    if value ~= nil and value ~= "" then
-        table.insert(results, value)
-    end
-end
-
-local function TrimString(value)
-    if value == nil then
-        return nil
-    end
-
-    -- ASCII whitespace only; %s is locale-sensitive and corrupts UTF-8 (0xA0).
-    local trimmed = tostring(value):gsub("^[ \t\r\n]+", ""):gsub("[ \t\r\n]+$", "")
-    if trimmed == "" then
-        return nil
-    end
-
-    return trimmed
-end
-
-local function NormalizeBannerText(value)
-    if value == nil then
-        return nil
-    end
-
-    return TrimString(tostring(value))
-end
-
-local function SplitBannerLines(value)
-    if value == nil then
-        return {}
-    end
-    local cleanValue = tostring(value):gsub("%[NEWLINE%]", "\n")
-    local lines = {}
-    for line in cleanValue:gmatch("[^\n]+") do
-        local trimmed = TrimString(line)
-        if trimmed ~= nil then
-            table.insert(lines, trimmed)
-        end
-    end
-
-    return lines
-end
-
 local function GetControlText(control)
     if control == nil or control.GetText == nil then
         return nil
     end
 
-    return NormalizeBannerText(control:GetText())
+    return CAIText.TrimOptional(control:GetText())
 end
 
 local function GetControlTooltip(control)
@@ -71,7 +28,7 @@ local function GetControlTooltip(control)
         return nil
     end
 
-    return NormalizeBannerText(control:GetToolTipString())
+    return CAIText.TrimOptional(control:GetToolTipString())
 end
 
 local function GetFirstAllocatedInstance(instanceManager)
@@ -121,16 +78,6 @@ local function GetAllocatedInstances(instanceManager)
     return results
 end
 
-local function AppendUniqueText(results, seen, value)
-    local normalized = NormalizeBannerText(value)
-    if normalized == nil or seen[normalized] then
-        return
-    end
-
-    seen[normalized] = true
-    table.insert(results, normalized)
-end
-
 local function GetInstanceTooltip(instance, ...)
     if instance == nil then
         return nil
@@ -153,7 +100,7 @@ local function CollectInstanceTooltips(instanceManager, ...)
     local seen = {}
     local instances = GetAllocatedInstances(instanceManager)
     for i = 1, #instances do
-        AppendUniqueText(results, seen, GetInstanceTooltip(instances[i], ...))
+        CAIText.AppendUnique(results, seen, GetInstanceTooltip(instances[i], ...))
     end
 
     return results
@@ -271,10 +218,6 @@ end
 
 local function HasGovernorExpansion()
     return HasLoyaltyExpansion()
-end
-
-local function IsBarbarianClansModeActive()
-    return GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS")
 end
 
 local m_LocalBarbarianTribeBanners = {}
@@ -558,7 +501,7 @@ local function GetPopulationGrowthLines(ctx)
             or GetControlTooltip(populationInstance and populationInstance.Button)
     end
 
-    local lines = SplitBannerLines(tooltip)
+    local lines = CAIText.SplitFormattedLines(tooltip)
     if #lines <= 1 then
         return {}
     end
@@ -581,7 +524,7 @@ local function GetProductionTooltipLines(ctx)
         tooltip = GetControlTooltip(productionInstance and productionInstance.Button)
     end
 
-    return SplitBannerLines(tooltip)
+    return CAIText.SplitFormattedLines(tooltip)
 end
 
 local function GetDistrictTooltipLines(ctx)
@@ -589,7 +532,7 @@ local function GetDistrictTooltipLines(ctx)
         return {}
     end
 
-    return SplitBannerLines(GetControlTooltip(ctx.instance.DistrictIcon))
+    return CAIText.SplitFormattedLines(GetControlTooltip(ctx.instance.DistrictIcon))
 end
 
 local function GetBannerMeterPercent(control)
@@ -701,7 +644,7 @@ local function GetReligionFollowerTooltip(ctx)
         end
     end
 
-    return NormalizeBannerText(tooltip)
+    return CAIText.TrimOptional(tooltip)
 end
 
 local function GetDetailedReligionPressure(ctx)
@@ -874,7 +817,7 @@ local function GetPressureValueText(value)
 end
 
 local function GetLoyaltyBucketLabel(control)
-    local lines = SplitBannerLines(GetControlTooltip(control))
+    local lines = CAIText.SplitFormattedLines(GetControlTooltip(control))
     if #lines > 0 then
         return lines[1]
     end
@@ -1000,7 +943,7 @@ GetPowerSummaryText = function(ctx)
         powerTooltip = Locale.Lookup("LOC_CITY_BANNER_UNPOWERED_CITY", requiredPower, freePower, temporaryPower)
     end
 
-    return NormalizeBannerText(powerTooltip)
+    return CAIText.TrimOptional(powerTooltip)
 end
 
 info.CityBannerInfo = {
@@ -1072,7 +1015,7 @@ info.CityBannerInfo = {
             return nil
         end
 
-        local lines = SplitBannerLines(GetControlTooltip(ctx.instance.CityHealthBarBacking) or
+        local lines = CAIText.SplitFormattedLines(GetControlTooltip(ctx.instance.CityHealthBarBacking) or
             GetControlTooltip(ctx.instance.EncampmentBannerContainer))
         if #lines > 0 then
             return lines[1]
@@ -1085,7 +1028,7 @@ info.CityBannerInfo = {
             return nil
         end
 
-        local lines = SplitBannerLines(GetControlTooltip(ctx.instance.CityHealthBarBacking) or
+        local lines = CAIText.SplitFormattedLines(GetControlTooltip(ctx.instance.CityHealthBarBacking) or
             GetControlTooltip(ctx.instance.EncampmentBannerContainer))
         if #lines > 1 then
             return lines[2]
@@ -1284,7 +1227,7 @@ info.CityBannerInfo = {
 
         local questHeader = Locale.Lookup("LOC_CITY_STATES_QUESTS")
         return GetDetailStatusTooltip(ctx, function(tooltip)
-            local lines = SplitBannerLines(tooltip)
+            local lines = CAIText.SplitFormattedLines(tooltip)
             return #lines > 0 and lines[1] == questHeader
         end)
     end,
@@ -1503,36 +1446,13 @@ local function IsCityGovernorContext(ctx)
     return ctx ~= nil and ctx.kind == "city" and HasGovernorExpansion()
 end
 
-local function AppendBucketKeys(results, ctx, definitions)
-    if definitions == nil then
-        return results
-    end
-
-    for _, entry in ipairs(definitions) do
-        if type(entry) == "string" then
-            table.insert(results, entry)
-        elseif type(entry) == "table" then
-            local include = entry.when == nil or entry.when(ctx)
-            if include then
-                if entry.key ~= nil then
-                    table.insert(results, entry.key)
-                elseif entry.keys ~= nil then
-                    AppendBucketKeys(results, ctx, entry.keys)
-                end
-            end
-        end
-    end
-
-    return results
-end
-
 local function BuildBucketKeys(ctx, action)
     if action == nil or ctx == nil then
         return {}
     end
 
     if ctx.kind == "city" then
-        return AppendBucketKeys({}, ctx, action.city)
+        return CAIDescriptors.AppendKeys({}, ctx, action.city)
     end
 
     local districtDefinitions = action.district
@@ -1548,7 +1468,7 @@ local function BuildBucketKeys(ctx, action)
         definition = districtDefinitions[ctx.bannerType] or districtDefinitions.default
     end
 
-    return AppendBucketKeys({}, ctx, definition)
+    return CAIDescriptors.AppendKeys({}, ctx, definition)
 end
 
 local BannerBucketActions = {
@@ -1674,7 +1594,7 @@ function info:RequestCityBannerInfo(requestedKeys)
     for _, key in ipairs(keys) do
         local helper = self.CityBannerInfo[key]
         if helper ~= nil then
-            AppendResult(results, helper(ctx))
+            CAIText.AppendIfNonEmpty(results, helper(ctx))
         end
     end
 
@@ -1733,7 +1653,7 @@ end
 
 Initialize = WrapFunc(Initialize, function(orig)
     orig()
-    if IsBarbarianClansModeActive() then
+    if GameConfiguration.GetValue("GAMEMODE_BARBARIAN_CLANS") then
         CreateBarbarianTribeBanner = WrapFunc(CreateBarbarianTribeBanner, CAI_CreateBarbarianTribeBanner)
         OnImprovementRemovedFromMap = WrapFunc(OnImprovementRemovedFromMap, CAI_OnImprovementRemovedFromMap)
     end

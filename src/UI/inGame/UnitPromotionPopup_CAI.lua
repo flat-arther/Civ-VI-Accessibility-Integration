@@ -20,14 +20,6 @@ local m_model           = nil
 local m_gridPromotions = {}
 local m_treePromotions  = {}
 
-local function JoinNonEmpty(parts, sep)
-    local out = {}
-    for _, part in ipairs(parts) do
-        if part ~= nil and part ~= "" then out[#out + 1] = part end
-    end
-    return table.concat(out, sep)
-end
-
 local function BuildSet(values)
     local set = {}
     if values then
@@ -63,13 +55,6 @@ local function GetPromotionLabel(promo)
     return Locale.Lookup("LOC_CAI_UNIT_PROMOTION_LABEL", GetPromotionName(promo), GetPromotionStatus(promo))
 end
 
-local function FormatPromotionList(names, conjunctionTag)
-    if #names <= 1 then return table.concat(names) end
-
-    local finalName = table.remove(names)
-    return table.concat(names, "[NEWLINE]") .. ", " .. Locale.Lookup(conjunctionTag) .. " " .. finalName
-end
-
 local function FormatPromotionPrereqs(types)
     local names = {}
     if types then
@@ -78,7 +63,7 @@ local function FormatPromotionPrereqs(types)
             if promo then names[#names + 1] = GetPromotionName(promo) end
         end
     end
-    return FormatPromotionList(names, "LOC_CAI_OR")
+    return CAIText.JoinWithConjunction(names, "LOC_CAI_OR")
 end
 
 local function FormatPromotionLeadTos(types)
@@ -89,7 +74,7 @@ local function FormatPromotionLeadTos(types)
             if promo then names[#names + 1] = GetPromotionName(promo) end
         end
     end
-    return FormatPromotionList(names, "LOC_CAI_AND")
+    return CAIText.JoinWithConjunction(names, "LOC_CAI_AND")
 end
 
 local function GetPromotionTooltip(promo, includeLinks)
@@ -110,7 +95,7 @@ local function GetPromotionTooltip(promo, includeLinks)
         end
     end
 
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function SortPromotionTypesByLayout(types, model)

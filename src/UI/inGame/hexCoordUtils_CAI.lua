@@ -1,6 +1,24 @@
+include("textProcessing")
 CAIHexCoordUtils = CAIHexCoordUtils or {}
 
 local HexCoordUtils = CAIHexCoordUtils
+
+function HexCoordUtils.relativePlotLocation(plotIndex)
+    if plotIndex == nil then return "" end
+    local plot = Map.GetPlotByIndex(plotIndex)
+    if plot == nil then return "" end
+    local cursor = ExposedMembers.CAICursor
+    if cursor == nil then return "" end
+    local cursorX, cursorY = cursor:GetCoords()
+    if cursorX == nil or cursorY == nil then return "" end
+    return HexCoordUtils.directionString(cursorX, cursorY, plot:GetX(), plot:GetY())
+end
+
+function HexCoordUtils.appendRelativePlotLocation(label, plotIndex)
+    local location = HexCoordUtils.relativePlotLocation(plotIndex)
+    if location == "" then return label end
+    return label .. ", " .. location
+end
 
 local OUTPUT_ORDER = {
     { dir = "E",  key = "LOC_CAI_DIR_E" },
@@ -268,9 +286,7 @@ function HexCoordUtils.joinStepSegments(segments)
 
     local nonEmpty = {}
     for _, segment in ipairs(segments) do
-        if segment ~= nil and segment ~= "" then
-            nonEmpty[#nonEmpty + 1] = segment
-        end
+        CAIText.AppendIfNonEmpty(nonEmpty, segment)
     end
 
     if #nonEmpty == 0 then

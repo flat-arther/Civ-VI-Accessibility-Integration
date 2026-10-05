@@ -1,3 +1,5 @@
+include("CAIColumns")
+include("CAICollection")
 include("caiUtils")
 include("Civ6Common")
 include("GameCapabilities")
@@ -97,30 +99,6 @@ local m_caiIsLocalTurn   = true
 -- Helpers
 -- ============================================================================
 
-local function NormalizeText(text)
-    -- Tags and whitespace are filtered centrally in Speak()/ProcessText; keep
-    -- only nil-safety here so composed strings never concatenate a nil.
-    if not text then return "" end
-    return tostring(text)
-end
-
-local function JoinNonEmpty(parts, separator)
-    local out = {}
-    for _, part in ipairs(parts) do
-        if part and part ~= "" then
-            table.insert(out, part)
-        end
-    end
-    return table.concat(out, separator)
-end
-
-local function CountTable(t)
-    local n = 0
-    if not t then return n end
-    for _ in pairs(t) do n = n + 1 end
-    return n
-end
-
 local function IsSendEnvoysMode()
     return m_caiMode == MODE.SendEnvoys
 end
@@ -183,7 +161,7 @@ end
 local function GetDiploLong(kCityState)
     if not kCityState.DiplomaticState then return "" end
     local info = DIPLO_PIP_INFO[kCityState.DiplomaticState]
-    if info then return NormalizeText(Locale.Lookup(info.Tooltip)) end
+    if info then return CAIText.ToString(Locale.Lookup(info.Tooltip)) end
     return ""
 end
 
@@ -208,7 +186,7 @@ local function GetSuzerainUniqueBonusAndResources(playerID)
                         entry = entry .. " " .. Locale.Lookup("LOC_CITY_STATE_PANEL_UNIQUE_SUZERAIN_BONUS_DISABLED")
                     end
                 end
-                table.insert(parts, NormalizeText(entry))
+                table.insert(parts, CAIText.ToString(entry))
             end
         end
     end
@@ -259,7 +237,7 @@ local function GetBonusBreakdownParts(kCS)
             if active then
                 label = label .. " (" .. Locale.Lookup("LOC_CAI_CITYSTATES_BONUS_ACTIVE") .. ")"
             end
-            table.insert(parts, label .. "[NEWLINE]" .. NormalizeText(bonus.Details))
+            table.insert(parts, label .. "[NEWLINE]" .. CAIText.ToString(bonus.Details))
         end
     end
 
@@ -269,8 +247,8 @@ local function GetBonusBreakdownParts(kCS)
         if kCS.isBonusSuzerain then
             label = label .. " (" .. Locale.Lookup("LOC_CAI_CITYSTATES_BONUS_ACTIVE") .. ")"
         end
-        local details = NormalizeText(suzerainBonus.Details)
-        table.insert(parts, JoinNonEmpty({ label, details }, "[NEWLINE]"))
+        local details = CAIText.ToString(suzerainBonus.Details)
+        table.insert(parts, CAIText.JoinNonEmpty({ label, details }, "[NEWLINE]"))
     end
     return parts
 end
@@ -286,15 +264,15 @@ end
 
 local function GetQuestEntryLabel(kQuest)
     local reward = kQuest.Reward and kQuest.Reward ~= "" and
-        (Locale.Lookup("LOC_CITY_STATES_REWARD") .. " " .. NormalizeText(kQuest.Reward)) or ""
-    return JoinNonEmpty({ kQuest.Name, NormalizeText(kQuest.Description), reward }, "[NEWLINE]")
+        (Locale.Lookup("LOC_CITY_STATES_REWARD") .. " " .. CAIText.ToString(kQuest.Reward)) or ""
+    return CAIText.JoinNonEmpty({ kQuest.Name, CAIText.ToString(kQuest.Description), reward }, "[NEWLINE]")
 end
 
 local function GetRelationshipEntryLabel(entry)
     local name = Locale.Lookup(entry.PlayerName)
     local pipInfo = DIPLO_PIP_INFO[entry.DiploState]
     local statusText = pipInfo and Locale.Lookup(pipInfo.Short) or ""
-    return JoinNonEmpty({ name, statusText }, "[NEWLINE]")
+    return CAIText.JoinNonEmpty({ name, statusText }, "[NEWLINE]")
 end
 
 local function ShouldIncludeRelationshipEntry(entry, cityStatePlayerID, isCityStateRelationship)
@@ -348,7 +326,7 @@ local function GetForeignRelationshipsCell(playerID)
     if #entries == 0 then return Locale.Lookup("LOC_CITY_STATES_NONE") end
     local parts = {}
     for _, entry in ipairs(entries) do table.insert(parts, entry.label) end
-    return JoinNonEmpty(parts, "; ")
+    return CAIText.JoinNonEmpty(parts, "; ")
 end
 
 local function GetAmbassadorForPlayer(cityStatePlayerID, majorPlayerID)
@@ -398,7 +376,7 @@ local function GetEnvoyCell(playerID)
     if governorName ~= "" then
         table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_AMBASSADOR_ASSIGNED", governorName))
     end
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function GetBonusesCell(playerID)
@@ -409,7 +387,7 @@ local function GetBonusesCell(playerID)
     for _, bonus in ipairs(GetBonusBreakdownParts(kCS)) do
         table.insert(parts, bonus)
     end
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function GetInfluenceCell(playerID, majorPlayerID)
@@ -417,7 +395,7 @@ local function GetInfluenceCell(playerID, majorPlayerID)
     if not kCS then return "" end
     local influence = kCS.Influence[majorPlayerID] or 0
     local governorName = GetGovernorName(playerID, majorPlayerID)
-    return JoinNonEmpty({ Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", influence), governorName }, "[NEWLINE]")
+    return CAIText.JoinNonEmpty({ Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS", influence), governorName }, "[NEWLINE]")
 end
 
 local function GetUnmetInfluence(playerID)
@@ -538,18 +516,18 @@ local function BuildOverviewColumns(allData)
             getCell = function(playerID)
                 local kCS = GetCityStateData(playerID)
                 if not kCS then return "" end
-                local parts = { Locale.Lookup("LOC_CAI_CITYSTATES_ACTIVE", CountTable(kCS.Quests)) }
+                local parts = { Locale.Lookup("LOC_CAI_CITYSTATES_ACTIVE", CAICollection.CountEntries(kCS.Quests)) }
                 local quests = {}
                 for _, kQuest in pairs(kCS.Quests) do
-                    table.insert(quests, NormalizeText(kQuest.Description))
+                    table.insert(quests, CAIText.ToString(kQuest.Description))
                 end
                 table.sort(quests, function(a, b) return Locale.Compare(a, b) < 0 end)
                 for _, quest in ipairs(quests) do table.insert(parts, quest) end
-                return JoinNonEmpty(parts, "; ")
+                return CAIText.JoinNonEmpty(parts, "; ")
             end,
             sortKey = function(playerID)
                 local kCS = GetCityStateData(playerID)
-                return kCS and CountTable(kCS.Quests) or nil
+                return kCS and CAICollection.CountEntries(kCS.Quests) or nil
             end,
             sortAscendingDescription = "LOC_CAI_SORT_FEWEST_FIRST",
             sortDescendingDescription = "LOC_CAI_SORT_MOST_FIRST",
@@ -624,33 +602,6 @@ local function BuildOverviewColumns(allData)
     return columns
 end
 
-local function ResolveColumnHeader(column)
-    return type(column.header) == "function" and column.header() or column.header or ""
-end
-
-local function BuildTreeSortOptions(columns)
-    local options = {
-        {
-            label = Locale.Lookup("LOC_CAI_DATATABLE_SORT_NATURAL"),
-            value = { column = nil, ascending = false },
-        },
-    }
-    for _, column in ipairs(columns) do
-        if column.sortKey then
-            local header = ResolveColumnHeader(column)
-            table.insert(options, {
-                label = header .. "[NEWLINE]" .. Locale.Lookup(column.sortAscendingDescription),
-                value = { column = column.key, ascending = true },
-            })
-            table.insert(options, {
-                label = header .. "[NEWLINE]" .. Locale.Lookup(column.sortDescendingDescription),
-                value = { column = column.key, ascending = false },
-            })
-        end
-    end
-    return options
-end
-
 local function SyncTreeSortDropdown()
     if not m_ui.treeSort then return end
     for index, option in ipairs(m_treeSortOptions) do
@@ -661,15 +612,6 @@ local function SyncTreeSortDropdown()
             return
         end
     end
-end
-
-local function CompareTreeSortValues(a, b)
-    if a == b then return 0 end
-    if a == nil then return 1 end
-    if b == nil then return -1 end
-    if type(a) == "number" and type(b) == "number" then return a < b and -1 or 1 end
-    if type(a) == "boolean" and type(b) == "boolean" then return a and 1 or -1 end
-    return Locale.Compare(tostring(a), tostring(b))
 end
 
 local function GetOrderedTreePlayers()
@@ -701,7 +643,7 @@ local function GetOrderedTreePlayers()
             if a.value == b.value then return a.naturalIndex < b.naturalIndex end
             return a.value ~= nil
         end
-        local comparison = CompareTreeSortValues(a.value, b.value)
+        local comparison = CAICollection.CompareTypedValues(a.value, b.value)
         if comparison == 0 then return a.naturalIndex < b.naturalIndex end
         if m_treeSortAscending then return comparison < 0 end
         return comparison > 0
@@ -738,10 +680,10 @@ local function FormatTreeRowLabel(playerID)
     if governorName ~= "" then
         table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_AMBASSADOR_ASSIGNED", governorName))
     end
-    if CountTable(kCS.Quests) > 0 then
+    if CAICollection.CountEntries(kCS.Quests) > 0 then
         table.insert(parts, Locale.Lookup("LOC_CAI_CITYSTATES_QUEST_AVAILABLE"))
     end
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function FormatTreeRowTooltip(playerID)
@@ -753,14 +695,14 @@ local function FormatTreeRowTooltip(playerID)
         local bonus = kCS.Bonuses[tier]
         if bonus then
             table.insert(parts,
-                Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_TIER", tier) .. "[NEWLINE]" .. NormalizeText(bonus.Details))
+                Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_TIER", tier) .. "[NEWLINE]" .. CAIText.ToString(bonus.Details))
         end
     end
     local uniqueBonusAndResources = GetSuzerainUniqueBonusAndResources(playerID)
     if uniqueBonusAndResources ~= "" then
         table.insert(parts, Locale.Lookup("LOC_CITY_STATES_SUZERAIN") .. "[NEWLINE]" .. uniqueBonusAndResources)
     end
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 -- ============================================================================
@@ -782,7 +724,7 @@ local function BuildBonusesSection(parent, playerID)
                 label = label .. " (" .. Locale.Lookup("LOC_CAI_CITYSTATES_BONUS_ACTIVE") .. ")"
             end
             local tooltip = Locale.Lookup("LOC_CAI_CITYSTATES_REQUIRES_ENVOYS", tier) ..
-                "[NEWLINE]" .. NormalizeText(bonus.Details)
+                "[NEWLINE]" .. CAIText.ToString(bonus.Details)
             parent:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStates_Bonus"), "StaticText", {
                 Label   = function() return label end,
                 Tooltip = function() return tooltip end,
@@ -798,7 +740,7 @@ local function BuildBonusesSection(parent, playerID)
             label = label .. " (" .. Locale.Lookup("LOC_CAI_CITYSTATES_BONUS_ACTIVE") .. ")"
         end
         local tooltip = Locale.Lookup("LOC_CAI_CITYSTATES_REQUIRES_SUZERAIN") ..
-            "[NEWLINE]" .. NormalizeText(suzerainBonus.Details)
+            "[NEWLINE]" .. CAIText.ToString(suzerainBonus.Details)
         local uniqueBonusAndResources = GetSuzerainUniqueBonusAndResources(playerID)
         if uniqueBonusAndResources ~= "" then
             tooltip = tooltip .. "[NEWLINE]" .. uniqueBonusAndResources
@@ -1077,7 +1019,7 @@ local function CreateTreeViewCityStateRow(playerID)
     AddLazyTreeSection(row, function()
         local kCS = GetCityStateData(playerID)
         return Locale.Lookup("LOC_CITY_STATES_INFLUENCED_BY") .. "[NEWLINE]" ..
-            Locale.Lookup("LOC_CITY_STATES_CIVILIZATIONS", kCS and CountTable(kCS.Influence) or 0)
+            Locale.Lookup("LOC_CITY_STATES_CIVILIZATIONS", kCS and CAICollection.CountEntries(kCS.Influence) or 0)
     end, prefix .. ":influence", function(parent)
         BuildInfluenceSection(parent, playerID)
     end)
@@ -1085,7 +1027,7 @@ local function CreateTreeViewCityStateRow(playerID)
     AddLazyTreeSection(row, function()
         local kCS = GetCityStateData(playerID)
         return Locale.Lookup("LOC_CITY_STATES_QUESTS") .. "[NEWLINE]" ..
-            Locale.Lookup("LOC_CAI_CITYSTATES_ACTIVE", kCS and CountTable(kCS.Quests) or 0)
+            Locale.Lookup("LOC_CAI_CITYSTATES_ACTIVE", kCS and CAICollection.CountEntries(kCS.Quests) or 0)
     end, prefix .. ":quests", function(parent)
         BuildQuestsSection(parent, playerID)
     end)
@@ -1121,7 +1063,7 @@ local function GetInfoBoxLines()
     local lines = {}
     table.insert(lines, Locale.Lookup("LOC_CAI_CITYSTATES_INFO_ENVOYS_AVAILABLE", available))
     table.insert(lines,
-        NormalizeText(Locale.Lookup("LOC_CAI_CITYSTATES_INFO_INFLUENCE", balance, threshold, rate, envoysPerThreshold)))
+        CAIText.ToString(Locale.Lookup("LOC_CAI_CITYSTATES_INFO_INFLUENCE", balance, threshold, rate, envoysPerThreshold)))
     return lines
 end
 
@@ -1182,7 +1124,9 @@ CAI_RebuildViews = function(preferredPlayerID)
     end
     m_treeSortColumn = sortColumn
     m_treeSortAscending = sortAscending == true
-    m_treeSortOptions = BuildTreeSortOptions(columns)
+    m_treeSortOptions = CAIColumns.BuildSortOptions(columns, {
+        natural = { ascending = false }, separator = "[NEWLINE]",
+    })
     if m_ui.treeSort then
         local dropdownCapture = mgr:CaptureFocusKey(m_ui.treeSort)
         m_ui.treeSort:SetOptions(m_treeSortOptions)
@@ -1277,7 +1221,7 @@ local function EnsurePanelBuilt()
             if #m_overviewPlayerIDs == 0 then
                 table.insert(lines, Locale.Lookup("LOC_CITY_STATES_NONE_MET"))
             end
-            return JoinNonEmpty(lines, ", ")
+            return CAIText.JoinNonEmpty(lines, ", ")
         end,
         HiddenPredicate = function() return m_viewMode ~= "table" end,
     })
@@ -1357,7 +1301,7 @@ local function EnsurePanelBuilt()
     m_ui.panel:AddChild(m_ui.treeSort)
 
     m_ui.treeView = mgr:CreateWidget(TREE_VIEW_ID, "Tree", {
-        Label = function() return JoinNonEmpty(GetInfoBoxLines(), ", ") end,
+        Label = function() return CAIText.JoinNonEmpty(GetInfoBoxLines(), ", ") end,
         HiddenPredicate = function() return m_viewMode ~= "tree" end,
     })
     m_ui.panel:AddChild(m_ui.treeView)
@@ -1370,10 +1314,10 @@ local function EnsurePanelBuilt()
             local kCS = GetSelectedCityState()
             if not kCS then return "" end
             if not kCS.isAlive then
-                return NormalizeText(Locale.Lookup("LOC_CITY_STATES_DESTROYED_LONG"))
+                return CAIText.ToString(Locale.Lookup("LOC_CITY_STATES_DESTROYED_LONG"))
             end
             if kCS.isAtWar and not kCS.CanReceiveTokensFrom then
-                return NormalizeText(Locale.Lookup("LOC_CITY_STATES_CURRENTLY_AT_WAR"))
+                return CAIText.ToString(Locale.Lookup("LOC_CITY_STATES_CURRENTLY_AT_WAR"))
             end
             return ""
         end,
@@ -1446,7 +1390,7 @@ local function EnsurePanelBuilt()
         end,
         Tooltip = function()
             if m_selectedPlayerID == -1 then return "" end
-            return NormalizeText(Controls.PeaceWarButton:GetToolTipString() or "")
+            return CAIText.ToString(Controls.PeaceWarButton:GetToolTipString() or "")
         end,
         HiddenPredicate = function()
             if m_selectedPlayerID == -1 then return true end
@@ -1478,7 +1422,7 @@ local function EnsurePanelBuilt()
         end,
         Tooltip = function()
             if m_selectedPlayerID == -1 then return "" end
-            return NormalizeText(Controls.LevyMilitaryButton:GetToolTipString() or "")
+            return CAIText.ToString(Controls.LevyMilitaryButton:GetToolTipString() or "")
         end,
         HiddenPredicate = function()
             if m_selectedPlayerID == -1 then return true end

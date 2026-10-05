@@ -1,3 +1,4 @@
+include("CAIGameState")
 include("caiUtils")
 include("Civ6Common")
 
@@ -36,12 +37,6 @@ local RESEARCH_NOTIFICATION_TYPES = {
     [NotificationTypes.TECH_BOOST] = true,
     [NotificationTypes.CIVIC_BOOST] = true,
 }
-
-local function GetLocalPlayer()
-    local playerID = Game.GetLocalPlayer()
-    if playerID == nil or playerID < 0 then return nil end
-    return playerID
-end
 
 RegisterHandlers = WrapFunc(RegisterHandlers, function(orig)
     orig()
@@ -380,7 +375,7 @@ end
 
 local function RebuildNotificationTree()
     if not m_centerTree then return end
-    local playerID = GetLocalPlayer()
+    local playerID = CAIGameState.GetLocalPlayerID()
     if not playerID then return end
 
     local capture = mgr:CaptureFocusKey(m_centerTree)
@@ -514,7 +509,7 @@ local function OpenNotificationCenter()
     if not mgr then return end
     CloseNotificationCenter()
 
-    local playerID = GetLocalPlayer()
+    local playerID = CAIGameState.GetLocalPlayerID()
     if not playerID then
         Speak(Locale.Lookup("LOC_CAI_NOTIFICATION_UNAVAILABLE"))
         return
@@ -583,7 +578,7 @@ local function ResearchPopupsEnabled()
 end
 
 local function GetResearchNotificationState(playerID, notificationID)
-    if playerID ~= GetLocalPlayer() then return nil end
+    if playerID ~= CAIGameState.GetLocalPlayerID() then return nil end
     local notification = GetLiveNotification(playerID, notificationID)
     if not notification or not RESEARCH_NOTIFICATION_TYPES[notification:GetType()] then return nil end
     local playerState = m_researchNotifications[playerID]
@@ -612,7 +607,7 @@ end)
 
 -- Refresh replays existing notifications through OnNotificationAdded.
 OnNotificationRefreshRequested = WrapFunc(OnNotificationRefreshRequested, function(orig, ...)
-    local playerID = GetLocalPlayer()
+    local playerID = CAIGameState.GetLocalPlayerID()
     if playerID ~= nil then
         for _, notificationID in ipairs(NotificationManager.GetList(playerID) or {}) do
             local state = GetResearchNotificationState(playerID, notificationID)
@@ -624,7 +619,7 @@ end)
 
 local function SpeakNotificationAdded(playerID, notificationID, shouldSpeak)
     if ContextPtr:IsHidden() then return end
-    if playerID ~= GetLocalPlayer() then return end
+    if playerID ~= CAIGameState.GetLocalPlayerID() then return end
     if m_caiAnnouncedNotificationIDs[notificationID] then return end
     if not m_IsGameStarted then
         DeferNotification(playerID, notificationID)
@@ -668,7 +663,7 @@ local function SpeakNotificationAdded(playerID, notificationID, shouldSpeak)
 end
 
 local function PlayDefaultNotificationSound(playerID, notificationID)
-    if playerID ~= GetLocalPlayer() then return end
+    if playerID ~= CAIGameState.GetLocalPlayerID() then return end
     if not m_IsGameStarted then return end
 
     local playerConfig = PlayerConfigurations[playerID]
@@ -693,7 +688,7 @@ OnNotificationAdded = WrapFunc(OnNotificationAdded, function(orig, playerID, not
     if state then state.added = true end
     orig(playerID, notificationID)
     PlayDefaultNotificationSound(playerID, notificationID)
-    if playerID == GetLocalPlayer() and m_centerTree then
+    if playerID == CAIGameState.GetLocalPlayerID() and m_centerTree then
         RebuildNotificationTree()
     end
     local showResearch = isNewResearch and m_IsGameStarted and ResearchPopupsEnabled()
@@ -710,7 +705,7 @@ OnNotificationDismissed = WrapFunc(OnNotificationDismissed, function(orig, playe
     orig(playerID, notificationID)
     local researchState = m_researchNotifications[playerID]
     if researchState then researchState[notificationID] = nil end
-    if playerID == GetLocalPlayer() then
+    if playerID == CAIGameState.GetLocalPlayerID() then
         m_caiAnnouncedNotificationIDs[notificationID] = nil
         if m_centerTree then RebuildNotificationTree() end
     end

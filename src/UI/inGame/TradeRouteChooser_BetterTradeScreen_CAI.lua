@@ -1,3 +1,5 @@
+include("CAICapturedDropdown")
+include("CAITradeData")
 -- Accessibility layer for the Make Trade Route screen as rewritten by the
 -- Better Trade Screen mod (astog). Included by TradeRouteChooser_CAI.lua when
 -- that mod is active. The base context script (BTS TradeRouteChooser) and its
@@ -47,55 +49,20 @@ local MovePriority
 -- Data helpers
 -- ============================================================================
 
-local function HasTradeQuest(cityOwnerID)
-    local questsManager = Game.GetQuestsManager()
-    local localPlayerID = Game.GetLocalPlayer()
-    if not questsManager or not localPlayerID then return false end
-    local tradeQuestInfo = GameInfo.Quests["QUEST_SEND_TRADE_ROUTE"]
-    if not tradeQuestInfo then return false end
-    return questsManager:HasActiveQuestFromPlayer(localPlayerID, cityOwnerID, tradeQuestInfo.Index)
-end
-
-local function ResolveOriginCity(routeInfo)
-    local player = Players[routeInfo.OriginCityPlayer]
-    return player and player:GetCities():FindID(routeInfo.OriginCityID) or nil
-end
-
-local function ResolveDestCity(routeInfo)
-    local player = Players[routeInfo.DestinationCityPlayer]
-    return player and player:GetCities():FindID(routeInfo.DestinationCityID) or nil
-end
-
 local function YieldName(yieldType)
     local yieldInfo = GameInfo.Yields[yieldType]
     return yieldInfo and Locale.Lookup(yieldInfo.Name) or yieldType
 end
 
 -- BTS returns per-yield value and pre-formatted tooltip arrays keyed START..END.
-local function BuildYieldSummary(routeInfo, forDest)
-    local yields, tooltips
-    if forDest then
-        yields, tooltips = GetYieldsForDestinationCity(routeInfo, true)
-    else
-        yields, tooltips = GetYieldsForOriginCity(routeInfo, true)
-    end
-    local parts = {}
-    for yieldIndex = START_INDEX, END_INDEX do
-        if yields[yieldIndex] and yields[yieldIndex] > 0 then
-            table.insert(parts, tooltips[yieldIndex])
-        end
-    end
-    return table.concat(parts, "[NEWLINE]")
-end
+local BuildYieldSummary = CAITradeData.CreateYieldSummary(
+    GetYieldsForOriginCity, GetYieldsForDestinationCity, START_INDEX, END_INDEX)
 
 local function BuildRouteLabel(routeInfo)
-    local destCity = ResolveDestCity(routeInfo)
+    local destCity = CAITradeData.ResolveCity(routeInfo.DestinationCityPlayer, routeInfo.DestinationCityID)
     if not destCity then return "?" end
 
-    local cityName = Locale.ToUpper(destCity:GetName())
-    if destCity:IsCapital() and Players[destCity:GetOwner()]:IsMajor() then
-        cityName = cityName .. ", " .. Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL")
-    end
+    local cityName = CAITradeData.DestinationName(destCity)
     local parts = { cityName }
 
     -- Turns to complete is Better Trade Screen's headline improvement over the
@@ -109,7 +76,7 @@ local function BuildRouteLabel(routeInfo)
         table.insert(parts, Locale.Lookup("LOC_CAI_TRADE_ROUTE_HAS_TRADING_POST"))
     end
 
-    if HasTradeQuest(routeInfo.DestinationCityPlayer) then
+    if CAITradeData.HasTradeQuest(routeInfo.DestinationCityPlayer) then
         table.insert(parts, Locale.Lookup("LOC_CITY_STATES_QUESTS"))
     end
 
@@ -117,30 +84,11 @@ local function BuildRouteLabel(routeInfo)
 end
 
 local function BuildRouteTooltip(routeInfo)
-    local originCity = ResolveOriginCity(routeInfo)
-    local destCity = ResolveDestCity(routeInfo)
+    local originCity = CAITradeData.ResolveCity(routeInfo.OriginCityPlayer, routeInfo.OriginCityID)
+    local destCity = CAITradeData.ResolveCity(routeInfo.DestinationCityPlayer, routeInfo.DestinationCityID)
     if not originCity or not destCity then return "" end
-
-    local parts = {}
-
-    local dist = Map.GetPlotDistance(originCity:GetX(), originCity:GetY(), destCity:GetX(), destCity:GetY())
-    table.insert(parts, Locale.Lookup("LOC_CAI_TRADE_ROUTE_DISTANCE", dist))
-
-    local originAgg = BuildYieldSummary(routeInfo, false)
-    if originAgg ~= "" then
-        table.insert(parts,
-            Locale.Lookup("LOC_ROUTECHOOSER_RECEIVES_RESOURCE", Locale.Lookup(originCity:GetName())) ..
-            " " .. originAgg)
-    end
-
-    local destAgg = BuildYieldSummary(routeInfo, true)
-    if destAgg ~= "" then
-        table.insert(parts,
-            Locale.Lookup("LOC_ROUTECHOOSER_RECEIVES_RESOURCE", Locale.Lookup(destCity:GetName())) ..
-            " " .. destAgg)
-    end
-
-    return table.concat(parts, "[NEWLINE]")
+    return CAITradeData.RouteTooltip(originCity, destCity,
+        BuildYieldSummary(routeInfo, false), BuildYieldSummary(routeInfo, true))
 end
 
 -- ============================================================================
@@ -310,7 +258,7 @@ function CreateRouteItem(routeInfo)
 
     local originAgg = BuildYieldSummary(capturedInfo, false)
     if originAgg ~= "" then
-        local originCity = ResolveOriginCity(capturedInfo)
+        local originCity = CAITradeData.ResolveCity(capturedInfo.OriginCityPlayer, capturedInfo.OriginCityID)
         item:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAITradeRoute_OriginYields"), "StaticText", {
             Label = function()
                 return Locale.Lookup("LOC_ROUTECHOOSER_RECEIVES_RESOURCE", Locale.Lookup(originCity:GetName())) ..
@@ -321,7 +269,7 @@ function CreateRouteItem(routeInfo)
 
     local destAgg = BuildYieldSummary(capturedInfo, true)
     if destAgg ~= "" then
-        local destCity = ResolveDestCity(capturedInfo)
+        local destCity = CAITradeData.ResolveCity(capturedInfo.DestinationCityPlayer, capturedInfo.DestinationCityID)
         item:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAITradeRoute_DestYields"), "StaticText", {
             Label = function()
                 return Locale.Lookup("LOC_ROUTECHOOSER_RECEIVES_RESOURCE", Locale.Lookup(destCity:GetName())) ..
@@ -444,20 +392,6 @@ local function BuildDirectionButton()
 end
 
 -- ============================================================================
--- Filter dropdown
--- ============================================================================
-
-local function RebuildFilter()
-    if not m_filter then return end
-    local options = {}
-    for i, entry in ipairs(m_caiFilterEntries) do
-        table.insert(options, { label = entry.text, value = i })
-    end
-    m_filter:SetOptions(options)
-    m_filter:SetSelectedIndex(m_caiFilterSelected, true)
-end
-
--- ============================================================================
 -- Panel
 -- ============================================================================
 
@@ -466,7 +400,7 @@ local function BuildPanel()
 
     m_panel = mgr:CreateWidget(PANEL_ID, "Panel", {
         Label = function()
-            local originCity = m_caiCaptured[1] and ResolveOriginCity(m_caiCaptured[1]) or nil
+            local originCity = m_caiCaptured[1] and CAITradeData.ResolveCity(m_caiCaptured[1].OriginCityPlayer, m_caiCaptured[1].OriginCityID) or nil
             if originCity then
                 return Locale.Lookup("LOC_ROUTECHOOSER_TO_DESTINATION", Locale.ToUpper(originCity:GetName()))
             end
@@ -517,7 +451,7 @@ end
 
 local function PushPanel()
     BuildPanel()
-    RebuildFilter()
+    CAICapturedDropdown.Sync(m_filter, m_caiFilterEntries, m_caiFilterSelected)
     ApplySort()
     mgr:Push(m_panel, PopupPriority.Low)
 end
@@ -542,12 +476,7 @@ end
 AddFilter = WrapFunc(AddFilter, function(orig, filterName, filterFunction)
     local countBefore = #m_caiFilterEntries
     orig(filterName, filterFunction)
-    for i = 1, countBefore do
-        if m_caiFilterEntries[i].text == filterName then
-            return
-        end
-    end
-    table.insert(m_caiFilterEntries, { text = filterName })
+    CAICapturedDropdown.AddUniqueText(m_caiFilterEntries, filterName, countBefore)
 end)
 
 AddRouteToDestinationStack = WrapFunc(AddRouteToDestinationStack, function(orig, routeInfo)
@@ -583,16 +512,9 @@ RefreshFilters = WrapFunc(RefreshFilters, function(orig)
     m_caiFilterEntries = {}
     orig()
     local selectedText = Controls.FilterButton:GetText()
-    if selectedText then
-        for i, entry in ipairs(m_caiFilterEntries) do
-            if entry.text == selectedText then
-                m_caiFilterSelected = i
-                break
-            end
-        end
-    end
+    m_caiFilterSelected = CAICapturedDropdown.FindSelection(m_caiFilterEntries, selectedText, m_caiFilterSelected)
     if m_filter and m_panel then
-        RebuildFilter()
+        CAICapturedDropdown.Sync(m_filter, m_caiFilterEntries, m_caiFilterSelected)
     end
 end)
 

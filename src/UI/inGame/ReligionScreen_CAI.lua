@@ -108,14 +108,6 @@ local function GetPendingBeliefCount()
     return count
 end
 
-local function GetSelectedBeliefIndices()
-    local indices = {}
-    for _, idx in pairs(m_pendingBeliefs) do
-        table.insert(indices, idx)
-    end
-    return indices
-end
-
 local function CAI_UpdatePlayerData()
     local displayPlayerID = GetDisplayPlayerID()
     if displayPlayerID == -1 then return end
@@ -181,13 +173,6 @@ end
 -- ============================================================================
 -- Helpers
 -- ============================================================================
-
-local function NormalizeText(text)
-    -- Tags and whitespace are filtered centrally in Speak()/ProcessText; keep
-    -- only nil-safety here so composed strings never concatenate a nil.
-    if not text then return "" end
-    return tostring(text)
-end
 
 local function IsObserverMode()
     return Game.GetLocalObserver() == PlayerTypes.OBSERVER
@@ -433,7 +418,7 @@ local function BuildBeliefsSection(parent, religion, religionType)
         if belief then
             local bName = Locale.Lookup(belief.Name)
             local bClass = Locale.Lookup("LOC_" .. belief.BeliefClassType .. "_NAME")
-            local bDesc = NormalizeText(Locale.Lookup(belief.Description))
+            local bDesc = CAIText.ToString(Locale.Lookup(belief.Description))
             parent:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAIRel_Belief"), "StaticText", {
                 Label    = function() return bName .. ": " .. bClass end,
                 Tooltip  = function() return bDesc end,
@@ -478,7 +463,7 @@ local function BuildCityRows(parent, religionType, filter)
                 if cityData.pantheon >= 0 then
                     local pantheonBelief = GameInfo.Beliefs[cityData.pantheon]
                     if pantheonBelief then
-                        table.insert(parts, NormalizeText(Locale.Lookup(pantheonBelief.Description)))
+                        table.insert(parts, CAIText.ToString(Locale.Lookup(pantheonBelief.Description)))
                     end
                 else
                     table.insert(parts, Locale.Lookup("LOC_UI_RELIGION_NO_PANTHEON_BELIEF"))
@@ -564,13 +549,13 @@ local function BuildUnitsSection(parent, religion, religionType)
                 if canProduce then
                     ttip = Locale.Lookup("LOC_CAI_RELIGION_UNIT_CAN_PRODUCE")
                     if CAI_UNIT_TOOLTIPS and CAI_UNIT_TOOLTIPS[row.UnitType] and CAI_UNIT_TOOLTIPS[row.UnitType].canProduce then
-                        ttip = ttip .. ", " .. NormalizeText(Locale.Lookup(CAI_UNIT_TOOLTIPS[row.UnitType].canProduce))
+                        ttip = ttip .. ", " .. CAIText.ToString(Locale.Lookup(CAI_UNIT_TOOLTIPS[row.UnitType].canProduce))
                     end
                 else
                     ttip = Locale.Lookup("LOC_CAI_RELIGION_UNIT_CANNOT_PRODUCE")
                     if CAI_UNIT_TOOLTIPS and CAI_UNIT_TOOLTIPS[row.UnitType] and CAI_UNIT_TOOLTIPS[row.UnitType].cannotProduce then
                         ttip = ttip ..
-                            ", " .. NormalizeText(Locale.Lookup(CAI_UNIT_TOOLTIPS[row.UnitType].cannotProduce))
+                            ", " .. CAIText.ToString(Locale.Lookup(CAI_UNIT_TOOLTIPS[row.UnitType].cannotProduce))
                     end
                 end
 
@@ -599,7 +584,7 @@ local function AppendPantheonTooltipParts(parts, playerID)
     if not belief then return end
 
     table.insert(parts, Locale.Lookup("LOC_CAI_RELIGION_PANTHEON_LINE", Locale.Lookup(belief.Name)))
-    table.insert(parts, NormalizeText(Locale.Lookup(belief.Description)))
+    table.insert(parts, CAIText.ToString(Locale.Lookup(belief.Description)))
 end
 
 -- ============================================================================
@@ -946,7 +931,7 @@ local function CommitSetup()
                 local beliefName = Locale.Lookup(belief.Name)
                 table.insert(summaryRows, mgr:CreateWidget(mgr:GenerateWidgetId("CAIRel_SumBelief"), "StaticText", {
                     Label   = function() return Locale.Lookup("LOC_CAI_RELIGION_SUMMARY_BELIEF", className, beliefName) end,
-                    Tooltip = function() return NormalizeText(Locale.Lookup(belief.Description)) end,
+                    Tooltip = function() return CAIText.ToString(Locale.Lookup(belief.Description)) end,
                 }))
             end
         end
@@ -1095,7 +1080,7 @@ local function RebuildSetupPanel()
             Tooltip = function()
                 if m_pendingBeliefs[1] then
                     local b = GameInfo.Beliefs[m_pendingBeliefs[1]]
-                    if b then return NormalizeText(Locale.Lookup(b.Description)) end
+                    if b then return CAIText.ToString(Locale.Lookup(b.Description)) end
                 end
                 return ""
             end,
@@ -1115,7 +1100,7 @@ local function RebuildSetupPanel()
                     Label = function()
                         return Locale.Lookup(belief.Name) .. ", " .. Locale.Lookup("LOC_BELIEF_CLASS_PANTHEON_NAME")
                     end,
-                    Tooltip = function() return NormalizeText(Locale.Lookup(belief.Description)) end,
+                    Tooltip = function() return CAIText.ToString(Locale.Lookup(belief.Description)) end,
                 })
                 item:SetFocusSound(HOVER_SOUND)
                 item:On("activate", function()
@@ -1160,7 +1145,7 @@ local function RebuildSetupPanel()
                         return Locale.Lookup("LOC_BELIEF_CLASS_PANTHEON_NAME") .. ": "
                             .. Locale.Lookup(belief.Name)
                     end,
-                    Tooltip = function() return NormalizeText(Locale.Lookup(belief.Description)) end,
+                    Tooltip = function() return CAIText.ToString(Locale.Lookup(belief.Description)) end,
                     FocusKey = "rel:setup:belief:pantheon",
                 })
                 panReview:SetFocusSound(HOVER_SOUND)
@@ -1179,7 +1164,7 @@ local function RebuildSetupPanel()
                         return Locale.Lookup("LOC_CAI_RELIGION_BELIEF_SLOT", i) .. ": "
                             .. Locale.Lookup(belief.Name) .. ", " .. className
                     end,
-                    Tooltip = function() return NormalizeText(Locale.Lookup(belief.Description)) end,
+                    Tooltip = function() return CAIText.ToString(Locale.Lookup(belief.Description)) end,
                     FocusKey = "rel:setup:eq:" .. i,
                 })
                 eqSlot:SetFocusSound(HOVER_SOUND)
@@ -1218,7 +1203,7 @@ local function RebuildSetupPanel()
                 Tooltip = function()
                     if m_pendingBeliefs[capturedSlot] then
                         local b = GameInfo.Beliefs[m_pendingBeliefs[capturedSlot]]
-                        if b then return NormalizeText(Locale.Lookup(b.Description)) end
+                        if b then return CAIText.ToString(Locale.Lookup(b.Description)) end
                     end
                     return ""
                 end,
@@ -1274,7 +1259,7 @@ local function RebuildSetupPanel()
                         local beliefIndex = belief.Index
                         local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRel_BPick"), "TreeItem", {
                             Label = function() return Locale.Lookup(belief.Name) end,
-                            Tooltip = function() return NormalizeText(Locale.Lookup(belief.Description)) end,
+                            Tooltip = function() return CAIText.ToString(Locale.Lookup(belief.Description)) end,
                         })
                         item:SetFocusSound(HOVER_SOUND)
                         item:On("activate", function()

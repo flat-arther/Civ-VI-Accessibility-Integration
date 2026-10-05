@@ -23,9 +23,9 @@ local function BuildRockBandDialog()
             local level = Controls.TierLevel:GetText() or ""
             local desc = Controls.TierDescription:GetText() or ""
 
-            if title ~= "" then table.insert(parts, title) end
-            if level ~= "" then table.insert(parts, level) end
-            if desc ~= "" then table.insert(parts, desc) end
+            CAIText.AppendIfNonEmpty(parts, title)
+            CAIText.AppendIfNonEmpty(parts, level)
+            CAIText.AppendIfNonEmpty(parts, desc)
 
             return table.concat(parts, "[NEWLINE]")
         end,

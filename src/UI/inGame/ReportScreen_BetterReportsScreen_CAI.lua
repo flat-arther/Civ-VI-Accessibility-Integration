@@ -1,3 +1,4 @@
+include("CAIColumns")
 -- Better Report Screen (Infixo) accessibility layer. Included by ReportScreen_CAI.lua
 -- (the shared builder infrastructure) when the Better Report Screen mod is active
 -- and its engine loaded into this context (ViewDealsPage defined).
@@ -21,10 +22,6 @@ local PANEL_ID             = "CAIReports_Panel"
 local TABS_ID              = "CAIReports_Tabs"
 local HOVER_SOUND          = "Main_Menu_Mouse_Over"
 
-local function MakeId(prefix)
-    return mgr:GenerateWidgetId(prefix)
-end
-
 -- Vendored verbatim from the base game ReportScreen.lua GetData() (BRS removes it),
 function CAIBRS_GetData()
 	local kResources	:table = {};
@@ -36,7 +33,6 @@ function CAIBRS_GetData()
 		Treasury= {}
 	};
 	local kUnitData		:table = {};
-
 
 	kCityTotalData.Income[YieldTypes.CULTURE]	= 0;
 	kCityTotalData.Income[YieldTypes.FAITH]		= 0;
@@ -90,8 +86,6 @@ function CAIBRS_GetData()
 		end
 	end
 
-
-
 	kCityTotalData.Expenses[YieldTypes.GOLD] = pTreasury:GetTotalMaintenance();
 
 	-- NET = Income - Expense
@@ -104,7 +98,6 @@ function CAIBRS_GetData()
 	kCityTotalData.Treasury[YieldTypes.GOLD]		= Round( pTreasury:GetGoldBalance(), 0 );
 	kCityTotalData.Treasury[YieldTypes.SCIENCE]		= Round( pScience:GetScienceYield(), 0 );
 	kCityTotalData.Treasury["TOURISM"]				= Round( kCityTotalData.Income["TOURISM"], 0 );
-
 
 	-- Units (TODO: Group units by promotion class and determine total maintenance cost)
 	local MaintenanceDiscountPerUnit:number = pTreasury:GetMaintDiscountPerUnit();
@@ -340,7 +333,7 @@ local function RebuildDealsTab(entry)
         if #playerDeals.Deals > 0 then
             shown = shown + 1
             local capturedDeals = playerDeals
-            local node = mgr:CreateWidget(MakeId("CAIRPT_Deal"), "TreeItem", {
+            local node = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_Deal"), "TreeItem", {
                 Label = function()
                     local parts = { capturedDeals.WithCivilization ..
                         " (" .. tostring(#capturedDeals.Deals) .. ")" }
@@ -363,7 +356,7 @@ local function RebuildDealsTab(entry)
             for di, deal in ipairs(playerDeals.Deals) do
                 local capturedDeal = deal
                 local capturedDI = di
-                local leaf = mgr:CreateWidget(MakeId("CAIRPT_DealItem"), "TreeItem", {
+                local leaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_DealItem"), "TreeItem", {
                     Label = function()
                         local parts = {}
                         if capturedDeal.Incoming ~= "" then
@@ -390,7 +383,7 @@ local function RebuildDealsTab(entry)
     end
 
     if shown == 0 then
-        local empty = mgr:CreateWidget(MakeId("CAIRPT_DealEmpty"), "TreeItem", {
+        local empty = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_DealEmpty"), "TreeItem", {
             Label = function() return Locale.Lookup("LOC_CAI_REPORTS_DEALS_EMPTY") end,
             FocusKey = "deals:empty",
         })
@@ -558,10 +551,6 @@ local function UnitHealthText(unit)
     return tostring(UnitHealthValue(unit)) .. "/" .. tostring(maximum)
 end
 
-local function UnitBuildCharges(unit)
-    return unit and (unit:GetBuildCharges() or 0) or 0
-end
-
 local function UnitAlbums(unit)
     if unit == nil or not bIsGatheringStorm then return 0 end
     local info = GameInfo.Units[unit:GetUnitType()]
@@ -577,10 +566,6 @@ local function UnitGreatPersonClass(unit)
     if gp == nil or not gp:IsGreatPerson() then return "" end
     local classInfo = GameInfo.GreatPersonClasses[gp:GetClass()]
     return classInfo and Locale.Lookup(classInfo.Name) or ""
-end
-
-local function UnitSpreadCharges(unit)
-    return unit and (unit:GetSpreadCharges() or 0) or 0
 end
 
 local function UnitReligiousStrength(unit)
@@ -883,13 +868,6 @@ local function GetUnitColumns()
     return ColumnsForFilter(m_unitFilterKey)
 end
 
-local function FindUnitColumn(key)
-    for _, column in ipairs(GetUnitColumns()) do
-        if column.key == key then return column end
-    end
-    return nil
-end
-
 local function GetFilteredUnitRecords()
     local records = {}
     for _, record in ipairs(BuildLocalUnitRecords()) do
@@ -903,7 +881,7 @@ end
 
 local function GetSortedUnitRecords()
     local records = GetFilteredUnitRecords()
-    local column = FindUnitColumn(m_unitSort.column) or FindUnitColumn("name")
+    local column = CAIColumns.Find(GetUnitColumns(), m_unitSort.column) or CAIColumns.Find(GetUnitColumns(), "name")
     if column and column.sortKey then
         local ascending = m_unitSort.ascending
         table.sort(records, function(a, b)
@@ -989,7 +967,7 @@ local function RebuildUnitsList(list)
     local records = GetSortedUnitRecords()
     for _, record in ipairs(records) do
         local capturedRecord = record
-        local item = mgr:CreateWidget(MakeId("CAIRPT_Unit"), "Button", {
+        local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_Unit"), "Button", {
             Label = function() return UnitListItemLabel(capturedRecord) end,
             Tooltip = function() return UnitFullTooltip(capturedRecord) end,
             FocusKey = UnitRecordFocusKey(record.PlayerID, record.UnitID),
@@ -1000,31 +978,13 @@ local function RebuildUnitsList(list)
     end
 
     if #records == 0 then
-        list:AddChild(mgr:CreateWidget(MakeId("CAIRPT_UnitEmpty"), "StaticText", {
+        list:AddChild(mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_UnitEmpty"), "StaticText", {
             Label = function() return Locale.Lookup("LOC_CAI_REPORTS_UNITS_EMPTY") end,
             FocusKey = "units:empty",
         }))
     end
 
     mgr:RestoreFocus(list, capture)
-end
-
-local function BuildUnitSortOptions()
-    local options = {}
-    for _, column in ipairs(GetUnitColumns()) do
-        if column.sortKey then
-            local header = column.header()
-            options[#options + 1] = {
-                label = header .. ", " .. Locale.Lookup(column.sortAscendingDescription),
-                value = { column = column.key, ascending = true },
-            }
-            options[#options + 1] = {
-                label = header .. ", " .. Locale.Lookup(column.sortDescendingDescription),
-                value = { column = column.key, ascending = false },
-            }
-        end
-    end
-    return options
 end
 
 local function SetUnitViewMode(entry, viewMode)
@@ -1040,7 +1000,7 @@ end
 
 local function SyncUnitSortDropdown(entry)
     if entry.sortDropdown == nil then return end
-    local options = BuildUnitSortOptions()
+    local options = CAIColumns.BuildSortOptions(GetUnitColumns(), { separator = ", " })
     entry.sortDropdown:SetOptions(options)
     for i, opt in ipairs(options) do
         if opt.value.column == m_unitSort.column and opt.value.ascending == m_unitSort.ascending then
@@ -1085,7 +1045,7 @@ local function EnsureUnitControls(entry)
     for _, filter in ipairs(UNIT_FILTERS) do
         filterOptions[#filterOptions + 1] = { label = Locale.Lookup(filter.label), value = filter.key }
     end
-    entry.filter = mgr:CreateWidget(MakeId("CAIRPT_UnitFilter"), "Dropdown", {
+    entry.filter = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_UnitFilter"), "Dropdown", {
         Label = function() return Locale.Lookup("LOC_CAI_REPORTS_UNIT_FILTER") end,
         FocusKey = "units:filter",
     })
@@ -1095,7 +1055,7 @@ local function EnsureUnitControls(entry)
     end
     entry.filter:On("value_changed", function(_, value)
         m_unitFilterKey = value
-        if FindUnitColumn(m_unitSort.column) == nil then
+        if CAIColumns.Find(GetUnitColumns(), m_unitSort.column) == nil then
             m_unitSort = { column = "name", ascending = true }
         end
         if entry.table then
@@ -1109,7 +1069,7 @@ local function EnsureUnitControls(entry)
     page:AddChild(entry.filter)
 
     -- Sort dropdown (list mode only; the table sorts via its column headers).
-    entry.sortDropdown = mgr:CreateWidget(MakeId("CAIRPT_UnitSort"), "Dropdown", {
+    entry.sortDropdown = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_UnitSort"), "Dropdown", {
         Label = function() return Locale.Lookup("LOC_CAI_REPORTS_SORT_BY") end,
         FocusKey = "units:sort",
         HiddenPredicate = function() return m_unitViewMode ~= "list" end,
@@ -1125,7 +1085,7 @@ local function EnsureUnitControls(entry)
     page:AddChild(entry.sortDropdown)
 
     -- Switch view button.
-    entry.switchView = mgr:CreateWidget(MakeId("CAIRPT_UnitSwitch"), "Button", {
+    entry.switchView = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_UnitSwitch"), "Button", {
         Label = function()
             return Locale.Lookup(m_unitViewMode == "table"
                 and "LOC_CAI_REPORTS_SWITCH_TO_LIST" or "LOC_CAI_REPORTS_SWITCH_TO_TABLE")
@@ -1270,13 +1230,6 @@ local function GetPolicyColumns()
     return m_policyColumns
 end
 
-local function FindPolicyColumn(key)
-    for _, column in ipairs(GetPolicyColumns()) do
-        if column.key == key then return column end
-    end
-    return nil
-end
-
 local function PolicyPasses(policy, hideInactive, hideNoImpact)
     local passInactive = (not hideInactive) or policy.IsActive
     local passImpact = (not hideNoImpact) or policy.IsImpact
@@ -1317,7 +1270,7 @@ local function RebuildPolicyTree(tree)
     local hideInactive, hideNoImpact = PolicyFilters()
 
     -- Policies within each slot group are ordered by the shared sort selection.
-    local sortColumn = FindPolicyColumn(m_policySort.column) or FindPolicyColumn("name")
+    local sortColumn = CAIColumns.Find(GetPolicyColumns(), m_policySort.column) or CAIColumns.Find(GetPolicyColumns(), "name")
     local function sortPolicies(list)
         if not (sortColumn and sortColumn.sortKey) then return end
         local ascending = m_policySort.ascending
@@ -1335,7 +1288,7 @@ local function RebuildPolicyTree(tree)
     for _, slot in ipairs(SortedPolicySlots(data)) do
         local policies = data[slot]
         if policies and #policies > 0 then
-            local groupNode = mgr:CreateWidget(MakeId("CAIRPT_PolGroup"), "TreeItem", {
+            local groupNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_PolGroup"), "TreeItem", {
                 Label = function() return PolicyGroupName(slot) end,
                 FocusKey = "policy:group:" .. slot,
             })
@@ -1349,11 +1302,11 @@ local function RebuildPolicyTree(tree)
             for _, policy in ipairs(sorted) do
                 if PolicyPasses(policy, hideInactive, hideNoImpact) then
                     local capturedPolicy = policy
-                    local leaf = mgr:CreateWidget(MakeId("CAIRPT_Policy"), "TreeItem", {
+                    local leaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_Policy"), "TreeItem", {
                         Label = function()
                             local parts = { capturedPolicy.Name, PolicyStatusText(capturedPolicy) }
                             local yields = PolicyYieldsSummary(capturedPolicy)
-                            if yields ~= "" then parts[#parts + 1] = yields end
+                            CAIText.AppendIfNonEmpty(parts, yields)
                             return table.concat(parts, ", ")
                         end,
                         -- BRS's ImpactToolTip is a raw modifier/effect dump it only
@@ -1388,29 +1341,9 @@ local function RebuildPolicyTab(entry)
     if entry.table then entry.table:Rebuild() end
 end
 
-local function BuildPolicySortOptions()
-    local options = {}
-    for _, column in ipairs(GetPolicyColumns()) do
-        -- The tree already groups by type, so a "sort by type" option in the
-        -- tree-only dropdown would do nothing useful; skip it.
-        if column.sortKey and column.key ~= "type" then
-            local header = column.header()
-            options[#options + 1] = {
-                label = header .. ", " .. Locale.Lookup(column.sortAscendingDescription),
-                value = { column = column.key, ascending = true },
-            }
-            options[#options + 1] = {
-                label = header .. ", " .. Locale.Lookup(column.sortDescendingDescription),
-                value = { column = column.key, ascending = false },
-            }
-        end
-    end
-    return options
-end
-
 local function SyncPolicySortDropdown(entry)
     if entry.sortDropdown == nil then return end
-    for i, opt in ipairs(BuildPolicySortOptions()) do
+    for i, opt in ipairs(CAIColumns.BuildSortOptions(GetPolicyColumns(), { separator = ", ", includeColumn = function(column) return column.sortKey and column.key ~= "type" end })) do
         if opt.value.column == m_policySort.column and opt.value.ascending == m_policySort.ascending then
             entry.sortDropdown:SetSelectedIndex(i, true)
             return
@@ -1422,7 +1355,7 @@ function BuildPolicyFilters(page, entry)
     if entry.filtersBuilt then return end
     entry.filtersBuilt = true
 
-    local hideInactive = mgr:CreateWidget(MakeId("CAIRPT_PolHideInactive"), "Checkbox", {
+    local hideInactive = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_PolHideInactive"), "Checkbox", {
         Label = function() return Locale.Lookup("LOC_BRS_CHECKBOX_HIDE_INACTIVE_POLICIES") end,
         FocusKey = "policy:filter:inactive",
     })
@@ -1437,7 +1370,7 @@ function BuildPolicyFilters(page, entry)
     hideInactive:SetFocusSound(HOVER_SOUND)
     page:AddChild(hideInactive)
 
-    local hideNoImpact = mgr:CreateWidget(MakeId("CAIRPT_PolHideNoImpact"), "Checkbox", {
+    local hideNoImpact = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_PolHideNoImpact"), "Checkbox", {
         Label = function() return Locale.Lookup("LOC_BRS_CHECKBOX_HIDE_NO_IMPACT_POLICIES") end,
         FocusKey = "policy:filter:noimpact",
     })
@@ -1477,12 +1410,12 @@ local function EnsurePolicyControls(entry)
     page:AddChild(entry.table)
 
     -- Sort dropdown for the tree view (the table sorts via its own column headers).
-    entry.sortDropdown = mgr:CreateWidget(MakeId("CAIRPT_PolicySort"), "Dropdown", {
+    entry.sortDropdown = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_PolicySort"), "Dropdown", {
         Label = function() return Locale.Lookup("LOC_CAI_REPORTS_SORT_BY") end,
         FocusKey = "policy:sort",
         HiddenPredicate = function() return m_policyViewMode ~= "tree" end,
     })
-    entry.sortDropdown:SetOptions(BuildPolicySortOptions())
+    entry.sortDropdown:SetOptions(CAIColumns.BuildSortOptions(GetPolicyColumns(), { separator = ", ", includeColumn = function(column) return column.sortKey and column.key ~= "type" end }))
     SyncPolicySortDropdown(entry)
     entry.sortDropdown:On("value_changed", function(_, value)
         m_policySort = { column = value.column, ascending = value.ascending }
@@ -1493,7 +1426,7 @@ local function EnsurePolicyControls(entry)
     end)
     page:AddChild(entry.sortDropdown)
 
-    entry.switchView = mgr:CreateWidget(MakeId("CAIRPT_PolicySwitch"), "Button", {
+    entry.switchView = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_PolicySwitch"), "Button", {
         Label = function()
             return Locale.Lookup(m_policyViewMode == "tree"
                 and "LOC_CAI_TREE_SWITCH_TO_TABLE" or "LOC_CAI_TREE_SWITCH_TO_TREE")
@@ -1726,13 +1659,6 @@ local function GetMinorColumns()
     return m_minorColumns
 end
 
-local function FindMinorColumn(key)
-    for _, column in ipairs(GetMinorColumns()) do
-        if column.key == key then return column end
-    end
-    return nil
-end
-
 local function RebuildMinorTree(tree)
     local capture = mgr:CaptureFocusKey(tree)
     tree:ClearChildren()
@@ -1741,7 +1667,7 @@ local function RebuildMinorTree(tree)
     local hideNotMet, hideNoImpact = MinorFilters()
 
     -- City-states within each category are ordered by the shared sort selection.
-    local sortColumn = FindMinorColumn(m_minorSort.column) or FindMinorColumn("name")
+    local sortColumn = CAIColumns.Find(GetMinorColumns(), m_minorSort.column) or CAIColumns.Find(GetMinorColumns(), "name")
     local function sortCities(cities)
         if not (sortColumn and sortColumn.sortKey) then return end
         local ascending = m_minorSort.ascending
@@ -1762,7 +1688,7 @@ local function RebuildMinorTree(tree)
         for _, city in ipairs(cities) do AnnotateMinorImpact(city, tiers) end
         sortCities(cities)
 
-        local groupNode = mgr:CreateWidget(MakeId("CAIRPT_MinorCat"), "TreeItem", {
+        local groupNode = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_MinorCat"), "TreeItem", {
             Label = function() return MinorCategoryName(capturedCategory) end,
             Tooltip = function() return MinorCategoryTooltip(tiers) end,
             FocusKey = "minor:cat:" .. category,
@@ -1773,12 +1699,12 @@ local function RebuildMinorTree(tree)
         for _, city in ipairs(cities) do
             if MinorCityPasses(city, hideNotMet, hideNoImpact) then
                 local capturedCity = city
-                local leaf = mgr:CreateWidget(MakeId("CAIRPT_Minor"), "TreeItem", {
+                local leaf = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_Minor"), "TreeItem", {
                     Label = function()
                         local parts = { capturedCity.Name }
                         parts[#parts + 1] = Locale.Lookup("LOC_CAI_CITYSTATES_ENVOYS_TIER", capturedCity.Influence)
                         local status = MinorStatusText(capturedCity)
-                        if status ~= "" then parts[#parts + 1] = status end
+                        CAIText.AppendIfNonEmpty(parts, status)
                         if capturedCity._impactText and capturedCity._impactText ~= "" then
                             parts[#parts + 1] = Locale.Lookup("LOC_CAI_REPORTS_COL_IMPACT") ..
                                 " " .. capturedCity._impactText
@@ -1813,29 +1739,9 @@ local function RebuildMinorTab(entry)
     if entry.table then entry.table:Rebuild() end
 end
 
-local function BuildMinorSortOptions()
-    local options = {}
-    for _, column in ipairs(GetMinorColumns()) do
-        -- The tree already groups by category, so offering "sort by category" in the
-        -- tree-only dropdown would do nothing useful; skip it.
-        if column.sortKey and column.key ~= "category" then
-            local header = column.header()
-            options[#options + 1] = {
-                label = header .. ", " .. Locale.Lookup(column.sortAscendingDescription),
-                value = { column = column.key, ascending = true },
-            }
-            options[#options + 1] = {
-                label = header .. ", " .. Locale.Lookup(column.sortDescendingDescription),
-                value = { column = column.key, ascending = false },
-            }
-        end
-    end
-    return options
-end
-
 local function SyncMinorSortDropdown(entry)
     if entry.sortDropdown == nil then return end
-    for i, opt in ipairs(BuildMinorSortOptions()) do
+    for i, opt in ipairs(CAIColumns.BuildSortOptions(GetMinorColumns(), { separator = ", ", includeColumn = function(column) return column.sortKey and column.key ~= "category" end })) do
         if opt.value.column == m_minorSort.column and opt.value.ascending == m_minorSort.ascending then
             entry.sortDropdown:SetSelectedIndex(i, true)
             return
@@ -1865,12 +1771,12 @@ local function EnsureMinorControls(entry)
     page:AddChild(entry.table)
 
     -- Sort dropdown for the tree view (the table sorts via its own column headers).
-    entry.sortDropdown = mgr:CreateWidget(MakeId("CAIRPT_MinorSort"), "Dropdown", {
+    entry.sortDropdown = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_MinorSort"), "Dropdown", {
         Label = function() return Locale.Lookup("LOC_CAI_REPORTS_SORT_BY") end,
         FocusKey = "minor:sort",
         HiddenPredicate = function() return m_minorViewMode ~= "tree" end,
     })
-    entry.sortDropdown:SetOptions(BuildMinorSortOptions())
+    entry.sortDropdown:SetOptions(CAIColumns.BuildSortOptions(GetMinorColumns(), { separator = ", ", includeColumn = function(column) return column.sortKey and column.key ~= "category" end }))
     SyncMinorSortDropdown(entry)
     entry.sortDropdown:On("value_changed", function(_, value)
         m_minorSort = { column = value.column, ascending = value.ascending }
@@ -1881,7 +1787,7 @@ local function EnsureMinorControls(entry)
     end)
     page:AddChild(entry.sortDropdown)
 
-    entry.switchView = mgr:CreateWidget(MakeId("CAIRPT_MinorSwitch"), "Button", {
+    entry.switchView = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_MinorSwitch"), "Button", {
         Label = function()
             return Locale.Lookup(m_minorViewMode == "tree"
                 and "LOC_CAI_TREE_SWITCH_TO_TABLE" or "LOC_CAI_TREE_SWITCH_TO_TREE")
@@ -1913,7 +1819,7 @@ function BuildMinorFilters(page, entry)
     if entry.filtersBuilt then return end
     entry.filtersBuilt = true
 
-    local hideNotMet = mgr:CreateWidget(MakeId("CAIRPT_MinHideNotMet"), "Checkbox", {
+    local hideNotMet = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_MinHideNotMet"), "Checkbox", {
         Label = function() return Locale.Lookup("LOC_BRS_CHECKBOX_HIDE_NOT_MET_MINORS") end,
         FocusKey = "minor:filter:notmet",
     })
@@ -1928,7 +1834,7 @@ function BuildMinorFilters(page, entry)
     hideNotMet:SetFocusSound(HOVER_SOUND)
     page:AddChild(hideNotMet)
 
-    local hideNoImpact = mgr:CreateWidget(MakeId("CAIRPT_MinHideNoImpact"), "Checkbox", {
+    local hideNoImpact = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_MinHideNoImpact"), "Checkbox", {
         Label = function() return Locale.Lookup("LOC_BRS_CHECKBOX_HIDE_NO_IMPACT_MINORS") end,
         FocusKey = "minor:filter:noimpact",
     })
@@ -1961,7 +1867,7 @@ local function RebuildCities2Tab(entry)
 
     for _, name in ipairs(cityNames) do
         local capturedCity = data[name]
-        local item = mgr:CreateWidget(MakeId("CAIRPT_City2"), "StaticText", {
+        local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_City2"), "StaticText", {
             Label = function()
                 local city = capturedCity.City
                 local cityName = city and Locale.Lookup(city:GetName()) or ""
@@ -2003,31 +1909,31 @@ local function BuildPanel()
         local capturedDef = def
         local tree
         if def.kind == "citystatus" then
-            tree = mgr:CreateWidget(MakeId("CAIRPT_"), "List", {
+            tree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "List", {
                 FocusKey = "reports:tab:" .. i .. ":list",
                 HiddenPredicate = function() return not CAIReports_IsCityStatusListMode() end,
             })
         elseif def.kind == "units" then
-            tree = mgr:CreateWidget(MakeId("CAIRPT_"), "List", {
+            tree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "List", {
                 FocusKey = "reports:tab:" .. i .. ":list",
                 HiddenPredicate = function() return m_unitViewMode ~= "list" end,
             })
         elseif def.kind == "minor" then
-            tree = mgr:CreateWidget(MakeId("CAIRPT_"), "Tree", {
+            tree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "Tree", {
                 FocusKey = "reports:tab:" .. i .. ":tree",
                 HiddenPredicate = function() return m_minorViewMode ~= "tree" end,
             })
         elseif def.key == "policy" then
-            tree = mgr:CreateWidget(MakeId("CAIRPT_"), "Tree", {
+            tree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "Tree", {
                 FocusKey = "reports:tab:" .. i .. ":tree",
                 HiddenPredicate = function() return m_policyViewMode ~= "tree" end,
             })
         elseif def.kind == "gossip" or def.kind == "list" then
-            tree = mgr:CreateWidget(MakeId("CAIRPT_"), "List", {
+            tree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "List", {
                 FocusKey = "reports:tab:" .. i .. ":list",
             })
         else
-            tree = mgr:CreateWidget(MakeId("CAIRPT_"), "Tree", {
+            tree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "Tree", {
                 FocusKey = "reports:tab:" .. i .. ":tree",
             })
         end

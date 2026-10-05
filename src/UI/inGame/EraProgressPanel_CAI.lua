@@ -1,3 +1,4 @@
+include("CAIGameState")
 include("caiUtils")
 include("EraProgressPanel")
 
@@ -9,18 +10,6 @@ local HOVER_SOUND = "Main_Menu_Mouse_Over"
 
 local m_panel     = nil
 local m_tree      = nil
-
-local function GetPlayerAgeKey(gameEras, playerID)
-    if gameEras:HasHeroicGoldenAge(playerID) then
-        return "LOC_ERA_PROGRESS_HEROIC_AGE"
-    elseif gameEras:HasGoldenAge(playerID) then
-        return "LOC_ERA_PROGRESS_GOLDEN_AGE"
-    elseif gameEras:HasDarkAge(playerID) then
-        return "LOC_ERA_PROGRESS_DARK_AGE"
-    else
-        return "LOC_ERA_PROGRESS_NORMAL_AGE"
-    end
-end
 
 local function GetNextEraTypeLabel(gameEras, playerID)
     local score = gameEras:GetPlayerCurrentScore(playerID)
@@ -36,29 +25,8 @@ local function GetNextEraTypeLabel(gameEras, playerID)
     end
 end
 
-local function NormalizeText(text)
-    -- Tags and whitespace are filtered centrally in Speak()/ProcessText; keep
-    -- only nil-safety here so composed strings never concatenate a nil.
-    if not text then return "" end
-    return tostring(text)
-end
-
-local function JoinNonEmpty(parts, separator)
-    local out = {}
-    for _, part in ipairs(parts) do
-        if part and part ~= "" then
-            table.insert(out, part)
-        end
-    end
-    return table.concat(out, separator)
-end
-
-local function MakeId(prefix)
-    return mgr:GenerateWidgetId(prefix)
-end
-
 local function MakeLeaf(focusKey, labelFn)
-    local w = mgr:CreateWidget(MakeId("CAIEraP_"), "StaticText", {
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEraP_"), "StaticText", {
         FocusKey = focusKey,
         Label = labelFn,
     })
@@ -67,7 +35,7 @@ local function MakeLeaf(focusKey, labelFn)
 end
 
 local function MakeNode(focusKey, labelFn)
-    local w = mgr:CreateWidget(MakeId("CAIEraP_"), "TreeItem", {
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEraP_"), "TreeItem", {
         FocusKey = focusKey,
         Label = labelFn,
     })
@@ -90,7 +58,7 @@ local function AddThresholdChildren(parent, breakdownFn)
     for _, source in ipairs(breakdown) do
         for sourceString, sourceValue in pairs(source) do
             local prefix = sourceValue >= 0 and "+" or ""
-            local child = MakeLeaf(MakeId("era:breakdown:"), function()
+            local child = MakeLeaf(mgr:GenerateWidgetId("era:breakdown:"), function()
                 return sourceString .. ", " .. prefix .. sourceValue
             end)
             parent:AddChild(child)
@@ -128,7 +96,7 @@ local function BuildPanel()
         local eraIdx = pGameEras:GetCurrentEra()
         local eraDef = GameInfo.Eras[eraIdx]
         local eraName = Locale.Lookup("LOC_ERA_PROGRESS_THE_ERA", eraDef.Name)
-        local ageName = Locale.Lookup(GetPlayerAgeKey(pGameEras, pid))
+        local ageName = Locale.Lookup(CAIGameState.GetPlayerAgeKey(pGameEras, pid))
         local score = pGameEras:GetPlayerCurrentScore(pid)
 
         local parts = { eraName, ageName, Locale.Lookup("LOC_CAI_ERA_PROGRESS_SCORE", score) }
@@ -155,7 +123,7 @@ local function BuildPanel()
             end
         end
 
-        return JoinNonEmpty(parts, ", ")
+        return CAIText.JoinNonEmpty(parts, ", ")
     end)
     summaryNode:SetTooltip(function()
         local text = Controls.EraEffects:GetText()

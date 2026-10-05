@@ -1,3 +1,4 @@
+include("CAIControl")
 include("caiUtils")
 include("Civ6Common")
 if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
@@ -50,20 +51,8 @@ local function CAI_Lookup(text, ...)
     return Locale.Lookup(text, ...)
 end
 
-local function CAI_IsHidden(control)
-    return control and control.IsHidden and control:IsHidden() or false
-end
-
 local function CAI_IsDisabled(control)
     return control and control.IsDisabled and control:IsDisabled() or false
-end
-
-local function CAI_ControlText(control)
-    if control and control.GetText then
-        local text = control:GetText()
-        if text and text ~= "" then return text end
-    end
-    return ""
 end
 
 local function CAI_ControlTooltip(control)
@@ -72,16 +61,6 @@ local function CAI_ControlTooltip(control)
         if text and text ~= "" then return text end
     end
     return ""
-end
-
-local function CAI_JoinNonEmpty(parts, separator)
-    local results = {}
-    for _, part in ipairs(parts) do
-        if part ~= nil and part ~= "" then
-            table.insert(results, part)
-        end
-    end
-    return table.concat(results, separator or "[NEWLINE]")
 end
 
 local function CAI_GetChatInputTooltip()
@@ -96,7 +75,7 @@ local function CAI_UpdateVanillaTargetState()
     UpdatePlayerTargetEditBox(Controls.ChatEntry, m_caiPlayerTarget)
     UpdatePlayerTargetIcon(Controls.ChatIcon, m_caiPlayerTarget)
 
-    local label = CAI_ControlText(Controls.ChatPull:GetButton():GetTextControl())
+    local label = CAIControl.Text(Controls.ChatPull:GetButton():GetTextControl())
     if label ~= "" then
         Controls.ChatPull:SetToolTipString(label)
     end
@@ -331,10 +310,10 @@ local function CAI_GetPlayerEntrySummary(playerID)
     local playerEntry = GetPlayerListEntry(playerID)
     local cfg = PlayerConfigurations[playerID]
     if playerEntry ~= nil then
-        local name = CAI_ControlText(playerEntry.PlayerName)
-        local status = CAI_ControlText(playerEntry.ConnectionLabel)
-        if name ~= "" then table.insert(parts, name) end
-        if status ~= "" then table.insert(parts, status) end
+        local name = CAIControl.Text(playerEntry.PlayerName)
+        local status = CAIControl.Text(playerEntry.ConnectionLabel)
+        CAIText.AppendIfNonEmpty(parts, name)
+        CAIText.AppendIfNonEmpty(parts, status)
         if Players[playerID] and Players[playerID]:IsTurnActive() then
             table.insert(parts, Locale.Lookup("LOC_CAI_DIPLO_RIBBON_ACTIVE_TURN"))
         end
@@ -343,7 +322,7 @@ local function CAI_GetPlayerEntrySummary(playerID)
             table.insert(parts, CAI_Lookup(cfg:GetSlotName()))
         end
     end
-    return CAI_JoinNonEmpty(parts, ", ")
+    return CAIText.JoinLines(parts, ", ")
 end
 
 local function CAI_GetPlayerEntryTooltip(playerID)

@@ -1,3 +1,6 @@
+include("CAIResearchData")
+include("CAIResearchChooser")
+include("CAIControl")
 include("caiUtils")
 include("inGameHelpers_CAI")
 include("ToolTipHelper")
@@ -34,71 +37,18 @@ end
 -- ===========================================================================
 -- Control helpers
 -- ===========================================================================
-local function ControlIsHidden(c)
-    return c and c.IsHidden and c:IsHidden() or false
-end
-
-local function ControlIsDisabled(c)
-    return c and c.IsDisabled and c:IsDisabled() or false
-end
-
-local function ControlText(c)
-    if not c then return "" end
-    if c.GetText then
-        local t = c:GetText()
-        if t and t ~= "" then return t end
-    end
-    return ""
-end
+local rowControls = CAIResearchChooser.CreateControls(
+    function() return m_instanceByHash end,
+    function() return m_currentControl or Controls end)
 
 local function GetChildren(c)
     if c and c.GetChildren then return c:GetChildren() or {} end
     return {}
 end
 
-local function InstanceFor(kData)
-    if not kData or not kData.Hash then return nil end
-    return m_instanceByHash[kData.Hash]
-end
-
-local function DisplayControl(kData)
-    local inst = InstanceFor(kData)
-    if inst then return inst end
-    if kData and kData.IsCurrent then return m_currentControl or Controls end
-    return nil
-end
-
-local function RowIsHidden(kData)
-    local inst = InstanceFor(kData)
-    if not inst then return false end
-    return ControlIsHidden(inst.TopContainer) or ControlIsHidden(inst.Top)
-end
-
-local function RowIsDisabled(kData)
-    local inst = InstanceFor(kData)
-    if not inst then return false end
-    return ControlIsDisabled(inst.Top)
-end
-
 -- ===========================================================================
 -- Data extraction
 -- ===========================================================================
-local function HasQueuePosition(kData)
-    if not kData or kData.IsCurrent then return false end
-    local p = kData.ResearchQueuePosition
-    return p ~= nil and p ~= -1 and p ~= 99
-end
-
-local function IsQueuedOrCurrent(kData)
-    return kData.IsCurrent or HasQueuePosition(kData)
-end
-
--- The just-completed civic is captured through RealizeCurrentCivic (like the
--- active one) but is not being progressed anymore; vanilla labels it "Just
--- completed!" rather than showing turns.
-local function IsJustCompleted(kData)
-    return kData and kData.IsLastCompleted and not kData.IsCurrent or false
-end
 
 -- Progress-aware remaining turns for the active civic. Vanilla fills the row
 -- control (and kData.TurnsLeft) from GetTurnsToProgressCivic, a from-scratch
@@ -108,60 +58,6 @@ local function GetCurrentTurnsLeft()
     local ePlayer = Game.GetLocalPlayer()
     local culture = ePlayer and ePlayer ~= -1 and Players[ePlayer]:GetCulture() or nil
     return culture and culture:GetTurnsLeft() or nil
-end
-
-local function GetTurnsText(kData)
-    -- A just-completed civic has no remaining turns; reporting a count reads as
-    -- a still-pending queue item.
-    if IsJustCompleted(kData) then return nil end
-    if kData.IsCurrent then
-        local n = GetCurrentTurnsLeft()
-        if n and n >= 0 then return Locale.Lookup("LOC_CAI_RESEARCH_TURNS", n) end
-    end
-    local inst = DisplayControl(kData)
-    if inst then
-        local t = ControlText(inst.TurnsLeft)
-        local n = string.match(t, "%[ICON_Turn%](%d+)")
-        if n then return Locale.Lookup("LOC_CAI_RESEARCH_TURNS", tonumber(n)) end
-        if t ~= "" then return t end
-    end
-    if kData.TurnsLeft and kData.TurnsLeft >= 0 then
-        return Locale.Lookup("LOC_CAI_RESEARCH_TURNS", kData.TurnsLeft)
-    end
-    return nil
-end
-
-local function GetProgressText(kData)
-    if not kData or not kData.Progress then return nil end
-    local pct = math.floor(kData.Progress * 100 + 0.5)
-    if pct <= 0 then return nil end
-    return Locale.Lookup("LOC_CAI_CIVIC_PROGRESS", pct)
-end
-
-local function GetCostText(kData)
-    local cost = kData.Cost
-    if cost and cost > 0 then
-        return Locale.Lookup("LOC_CAI_CIVIC_COST", cost)
-    end
-    return nil
-end
-
-local function GetDescriptionText(kData)
-    local civicRow = kData.CivicType and GameInfo.Civics[kData.CivicType] or nil
-    local desc = civicRow and civicRow.Description or nil
-    if desc and desc ~= "" then
-        local text = Locale.Lookup(desc)
-        if text and text ~= "" then return text end
-    end
-    return nil
-end
-
-local function GetBoostText(kData)
-    if not kData or not kData.Boostable then return nil end
-    local trigger = kData.TriggerDesc and Locale.Lookup(kData.TriggerDesc) or ""
-    local prefix = Locale.Lookup(kData.BoostTriggered and "LOC_BOOST_BOOSTED" or "LOC_BOOST_TO_BOOST")
-    if trigger == "" then return prefix end
-    return prefix .. " " .. trigger
 end
 
 local function GetUnlocksText(unlocks)
@@ -221,30 +117,30 @@ end
 local function FormatLabel(kData)
     local parts = {}
     if kData.IsCurrent then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_CURRENT", kData.Name))
-    elseif IsJustCompleted(kData) then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_JUST_COMPLETED", kData.Name))
-    elseif HasQueuePosition(kData) then
-        AppendIfNonEmpty(parts, kData.Name)
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_QUEUE_POSITION", kData.ResearchQueuePosition))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_CURRENT", kData.Name))
+    elseif CAIResearchChooser.IsJustCompleted(kData) then
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_JUST_COMPLETED", kData.Name))
+    elseif CAIResearchChooser.HasQueuePosition(kData) then
+        CAIText.AppendIfNonEmpty(parts, kData.Name)
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CIVIC_QUEUE_POSITION", kData.ResearchQueuePosition))
     else
-        AppendIfNonEmpty(parts, kData.Name)
+        CAIText.AppendIfNonEmpty(parts, kData.Name)
     end
-    AppendIfNonEmpty(parts, GetRecommendedPart(kData, RowIsDisabled(kData)))
+    CAIText.AppendIfNonEmpty(parts, GetRecommendedPart(kData, rowControls.RowIsDisabled(kData)))
     return table.concat(parts, "[NEWLINE]")
 end
 
 local function FormatTooltip(kData, unlocks, obsoleteNames, awardNames)
     local parts = {}
-    AppendIfNonEmpty(parts, GetCostText(kData))
-    AppendIfNonEmpty(parts, GetTurnsText(kData))
-    AppendIfNonEmpty(parts, GetProgressText(kData))
-    AppendIfNonEmpty(parts, GetDescriptionText(kData))
-    AppendIfNonEmpty(parts, GetBoostText(kData))
-    AppendIfNonEmpty(parts, GetObsoletesText(obsoleteNames))
-    AppendIfNonEmpty(parts, GetLeadsToText(kData))
-    AppendIfNonEmpty(parts, GetUnlocksText(unlocks))
-    AppendIfNonEmpty(parts, GetCivicAwardsText(awardNames))
+    CAIText.AppendIfNonEmpty(parts, CAIResearchData.CostText(kData.Cost, "LOC_CAI_CIVIC_COST"))
+    CAIText.AppendIfNonEmpty(parts, CAIResearchChooser.GetTurnsText(kData, GetCurrentTurnsLeft, rowControls.DisplayControl))
+    CAIText.AppendIfNonEmpty(parts, CAIResearchData.ProgressText(kData.Progress, "LOC_CAI_CIVIC_PROGRESS"))
+    CAIText.AppendIfNonEmpty(parts, CAIResearchData.DescriptionText(kData.CivicType and GameInfo.Civics[kData.CivicType]))
+    CAIText.AppendIfNonEmpty(parts, CAIResearchChooser.GetBoostText(kData))
+    CAIText.AppendIfNonEmpty(parts, GetObsoletesText(obsoleteNames))
+    CAIText.AppendIfNonEmpty(parts, GetLeadsToText(kData))
+    CAIText.AppendIfNonEmpty(parts, GetUnlocksText(unlocks))
+    CAIText.AppendIfNonEmpty(parts, GetCivicAwardsText(awardNames))
     return table.concat(parts, "[NEWLINE]")
 end
 
@@ -259,8 +155,8 @@ local function CreateRow(kData, interactive)
     local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAICivicsChooserRow"), "TreeItem", {
         Label             = function() return FormatLabel(kData) end,
         Tooltip           = function() return FormatTooltip(kData, unlocks, obsoleteNames, awardNames) end,
-        HiddenPredicate   = function() return RowIsHidden(kData) end,
-        DisabledPredicate = function() return interactive and RowIsDisabled(kData) or false end,
+        HiddenPredicate   = function() return rowControls.RowIsHidden(kData) end,
+        DisabledPredicate = function() return interactive and rowControls.RowIsDisabled(kData) or false end,
         FocusKey          = "civic:" .. tostring(kData.Hash),
     })
     row:SetFocusSound("Main_Menu_Mouse_Over")
@@ -268,7 +164,7 @@ local function CreateRow(kData, interactive)
     if interactive then
         row:On("activate", function(w)
             if w:IsDisabled() then return end
-            local inst = InstanceFor(kData)
+            local inst = rowControls.InstanceFor(kData)
             if inst and inst.Top and inst.Top.DoLeftClick then
                 inst.Top:DoLeftClick()
             else
@@ -303,48 +199,11 @@ end
 -- ===========================================================================
 -- Rebuild
 -- ===========================================================================
-local function RebuildTree(tree, rows, interactive)
-    if not tree then return end
-    local capture = mgr:CaptureFocusKey(tree)
-    tree:ClearChildren()
-    for _, kData in ipairs(rows) do
-        tree:AddChild(CreateRow(kData, interactive))
-    end
-    mgr:RestoreFocus(tree, capture)
-end
 
 local function RebuildPanel()
-    m_queueRows = {}
-    m_availableRows = {}
-    for _, kData in ipairs(m_rowData) do
-        if IsQueuedOrCurrent(kData) then
-            table.insert(m_queueRows, kData)
-        else
-            table.insert(m_availableRows, kData)
-        end
-    end
-    table.sort(m_queueRows, function(a, b)
-        if a.IsCurrent ~= b.IsCurrent then return a.IsCurrent == true end
-        return (a.ResearchQueuePosition or 0) < (b.ResearchQueuePosition or 0)
-    end)
-    -- Vanilla View routes non-Repeatable current civic through
-    -- RealizeCurrentCivic (not AddAvailableCivic), so it never lands in
-    -- m_rowData. Our RealizeCurrentCivic wrap captures it; splice it in at
-    -- the head of the queue.
-    if m_currentData then
-        local already = false
-        for _, r in ipairs(m_queueRows) do
-            if r.Hash == m_currentData.Hash then
-                already = true
-                break
-            end
-        end
-        if not already then table.insert(m_queueRows, 1, m_currentData) end
-    end
-
-    RebuildTree(m_queueTree, m_queueRows, false)
-    RebuildTree(m_availableTree, m_availableRows, true)
-
+    m_queueRows, m_availableRows = CAIResearchChooser.PartitionRows(m_rowData, m_currentData)
+    CAIResearchChooser.RebuildTree(mgr, m_queueTree, m_queueRows, false, CreateRow)
+    CAIResearchChooser.RebuildTree(mgr, m_availableTree, m_availableRows, true, CreateRow)
 end
 
 -- ===========================================================================
@@ -354,7 +213,7 @@ local function EnsurePanelBuilt()
     if m_panel then return end
 
     m_panel = mgr:CreateWidget(PANEL_ID, "Panel", {
-        Label = function() return ControlText(Controls.Title) end,
+        Label = function() return CAIControl.Text(Controls.Title) end,
     })
 
     m_availableTree = mgr:CreateWidget(AVAILABLE_TREE_ID, "Tree", {
@@ -371,10 +230,10 @@ local function EnsurePanelBuilt()
     m_panel:AddChild(m_queueTree)
 
     local treeBtn = mgr:CreateWidget(OPEN_TREE_BUTTON_ID, "Button", {
-        Label             = function() return ControlText(Controls.OpenTreeButton) end,
-        HiddenPredicate   = function() return ControlIsHidden(Controls.OpenTreeButton) end,
+        Label             = function() return CAIControl.Text(Controls.OpenTreeButton) end,
+        HiddenPredicate   = function() return CAIControl.IsHidden(Controls.OpenTreeButton) end,
         DisabledPredicate = function()
-            return ControlIsDisabled(Controls.OpenTreeButton)
+            return CAIControl.IsDisabled(Controls.OpenTreeButton)
                 or not IsCAITutorialControlAllowed("OpenTreeButton")
         end,
     })

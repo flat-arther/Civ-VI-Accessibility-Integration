@@ -87,20 +87,13 @@ local function AddLeaf(parent, focusKey, labelFn, tooltipFn)
     return item
 end
 
-local function FlattenNewlines(text)
-    if not text or text == "" then return "" end
-    text = text:gsub("%[NEWLINE%]", "[NEWLINE]")
-    text = text:gsub("\n", "[NEWLINE]")
-    return text
-end
-
 local function StripTooltipHeader(tip)
     if not tip or tip == "" then return "" end
     local _, pos = tip:find("^.-%[NEWLINE%].-%[NEWLINE%]")
     if pos then
         tip = tip:sub(pos + 1)
     end
-    return FlattenNewlines(tip)
+    return CAIText.ToNewlineTokens(tip)
 end
 
 local function FormatSourceLine(locKey, value)
@@ -114,16 +107,6 @@ local function FormatNegativeSourceLine(locKey, value)
     return Locale.Lookup(locKey) .. ": " .. Locale.ToNumber(-value)
 end
 
-local function JoinLines(parts)
-    local filtered = {}
-    for _, part in ipairs(parts) do
-        if part and part ~= "" then
-            table.insert(filtered, part)
-        end
-    end
-    return table.concat(filtered, "[NEWLINE]")
-end
-
 -- ===========================================================================
 -- Citizens and Growth tab
 -- ===========================================================================
@@ -134,7 +117,7 @@ local function BuildCitizensTab(data, city)
             return Locale.Lookup("LOC_CAI_CITY_ACTION_CITIZENS_GROWTH")
         end,
         Tooltip = function()
-            return JoinLines({
+            return CAIText.JoinLines({
                 Locale.Lookup("LOC_CAI_CITY_OV_CITIZENS_OF_HOUSING", data.Population, math.floor(data.Housing)),
                 toPlusMinusString(data.FoodSurplus) .. " " .. Locale.Lookup("LOC_HUD_CITY_FOOD_PER_TURN"),
                 Locale.ToNumber(data.GrowthThreshold, "#,###.#") .. " " ..
@@ -164,7 +147,7 @@ local function BuildCitizensTab(data, city)
             else
                 growth = Locale.Lookup("LOC_HUD_CITY_TURNS_UNTIL_CITIZEN_LOST", math.abs(data.TurnsUntilGrowth))
             end
-            return JoinLines({
+            return CAIText.JoinLines({
                 Locale.Lookup("LOC_CAI_CITY_OV_FOOD_CONSUMPTION") .. ": " .. consumption,
                 Locale.Lookup("LOC_CAI_CITY_OV_NET_FOOD") .. ": " .. netFood,
                 growth,
@@ -237,7 +220,7 @@ local function BuildCitizensTab(data, city)
     local amenitiesItem = MakeTreeItem({
         Label = function()
             local mood = Locale.Lookup(GameInfo.Happinesses[data.Happiness].Name)
-            return JoinLines({
+            return CAIText.JoinLines({
                 Locale.Lookup("LOC_HUD_CITY_AMENITIES") .. ": " .. mood,
                 tostring(data.AmenitiesNum) .. "/" .. tostring(data.AmenitiesRequiredNum),
             })
@@ -320,7 +303,7 @@ local function BuildCitizensTab(data, city)
     end
     if not IsEspionageView() and data.AmenityAdvice and data.AmenityAdvice ~= "" then
         AddLeaf(amenitiesItem, "amenity:advice", function()
-            return FlattenNewlines(data.AmenityAdvice)
+            return CAIText.ToNewlineTokens(data.AmenityAdvice)
         end)
     end
 
@@ -338,7 +321,7 @@ local function BuildCitizensTab(data, city)
             else
                 status = Locale.Lookup("LOC_HUD_CITY_POPULATION_GROWTH_NORMAL")
             end
-            return JoinLines({
+            return CAIText.JoinLines({
                 Locale.Lookup("LOC_HUD_CITY_HOUSING") .. ": " .. tostring(data.Housing),
                 status,
             })
@@ -380,7 +363,7 @@ local function BuildCitizensTab(data, city)
     end
     if not IsEspionageView() and data.HousingAdvice and data.HousingAdvice ~= "" then
         AddLeaf(housingItem, "housing:advice", function()
-            return FlattenNewlines(data.HousingAdvice)
+            return CAIText.ToNewlineTokens(data.HousingAdvice)
         end)
     end
 
@@ -543,7 +526,7 @@ local function BuildBuildingsTab(data, city)
             for _, name in ipairs(names) do
                 table.insert(parts, name)
             end
-            return JoinLines(parts)
+            return CAIText.JoinLines(parts)
         end)
     end
 
@@ -733,7 +716,7 @@ local function BuildLoyaltyTab(data, city)
                 local turnsLeft = pGovernor:GetTurnsToEstablish() - pGovernor:GetTurnsOnSite()
                 status = Locale.Lookup("LOC_HUD_CITY_GOVERNOR_TURNS", turnsLeft)
             end
-            return JoinLines({ name, title, status })
+            return CAIText.JoinLines({ name, title, status })
         end, function()
             if govDef then
                 return Locale.Lookup(govDef.Description)
@@ -811,7 +794,7 @@ local function BuildLoyaltyTab(data, city)
         local advice = city:GetLoyaltyAdvice()
         if advice and advice ~= "" then
             AddLeaf(tabItem, "loyalty:advice", function()
-                return FlattenNewlines(advice)
+                return CAIText.ToNewlineTokens(advice)
             end)
         end
     end
@@ -917,7 +900,7 @@ local function BuildPowerTab(data, city)
         local advice = city:GetPowerAdvice()
         if advice and advice ~= "" then
             AddLeaf(tabItem, "power:advice", function()
-                return FlattenNewlines(advice)
+                return CAIText.ToNewlineTokens(advice)
             end)
         end
     end

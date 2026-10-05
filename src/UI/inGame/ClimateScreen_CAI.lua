@@ -8,7 +8,6 @@ else
 end
 
 local mgr              = ExposedMembers.CAI_UIManager
-local CAICursor        = ExposedMembers.CAICursor
 local HexCoordUtils    = CAIHexCoordUtils
 
 local PANEL_ID         = "CAIClimate_Panel"
@@ -17,44 +16,6 @@ local HOVER_SOUND      = "Main_Menu_Mouse_Over"
 local m_panel          = nil
 local m_tabControl     = nil
 local m_isMirroringTab = false
-
-local function NormalizeText(text)
-    -- Tags and whitespace are filtered centrally in Speak()/ProcessText; keep
-    -- only nil-safety here so composed strings never concatenate a nil.
-    if not text then return "" end
-    return tostring(text)
-end
-
-local function JoinNonEmpty(parts, sep)
-    local out = {}
-    for _, p in ipairs(parts) do
-        if p and p ~= "" then
-            table.insert(out, p)
-        end
-    end
-    return table.concat(out, sep)
-end
-
-local function MakeId(prefix)
-    return mgr:GenerateWidgetId(prefix)
-end
-
-local function GetRelativePlotLocation(plotIndex)
-    if plotIndex == nil then return "" end
-    local plot = Map.GetPlotByIndex(plotIndex)
-    if plot == nil then return "" end
-    CAICursor = CAICursor or ExposedMembers.CAICursor
-    if CAICursor == nil then return "" end
-    local cursorX, cursorY = CAICursor:GetCoords()
-    if cursorX == nil or cursorY == nil then return "" end
-    return HexCoordUtils.directionString(cursorX, cursorY, plot:GetX(), plot:GetY())
-end
-
-local function AppendRelativePlotLocation(label, plotIndex)
-    local location = GetRelativePlotLocation(plotIndex)
-    if location == "" then return label end
-    return label .. ", " .. location
-end
 
 local function MoveCursorToEvent(plotIndex)
     if plotIndex == nil or Map.GetPlotByIndex(plotIndex) == nil then
@@ -68,7 +29,7 @@ local function MakeLeaf(focusKey, labelFn, tooltipFn)
     local props = { FocusKey = focusKey }
     if tooltipFn then
         props.Label = function()
-            return JoinNonEmpty({
+            return CAIText.JoinNonEmpty({
                 labelFn and labelFn() or "",
                 tooltipFn(),
             }, "[NEWLINE]")
@@ -76,13 +37,13 @@ local function MakeLeaf(focusKey, labelFn, tooltipFn)
     else
         props.Label = labelFn
     end
-    local w = mgr:CreateWidget(MakeId("CAIClm_"), "StaticText", props)
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIClm_"), "StaticText", props)
     w:SetFocusSound(HOVER_SOUND)
     return w
 end
 
 local function MakeActionLeaf(focusKey, widgetType, labelFn, tooltipFn, plotIndex)
-    local w = mgr:CreateWidget(MakeId("CAIClm_"), widgetType, {
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIClm_"), widgetType, {
         FocusKey = focusKey,
         Label = labelFn,
         Tooltip = tooltipFn,
@@ -102,7 +63,7 @@ local function MakeNode(focusKey, labelFn, tooltipFn)
     if tooltipFn then
         props.Tooltip = tooltipFn
     end
-    local w = mgr:CreateWidget(MakeId("CAIClm_"), "TreeItem", props)
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIClm_"), "TreeItem", props)
     w:SetFocusSound(HOVER_SOUND)
     return w
 end
@@ -189,11 +150,7 @@ local function ClimateYieldDeltaString(deltas)
         local signed = (amt > 0 and "+" or "") .. tostring(amt)
         parts[#parts + 1] = Locale.Lookup("LOC_CAI_CLIMATE_YIELD_DELTA", signed, ClimateYieldName(yieldIndex))
     end
-    return JoinNonEmpty(parts, ", ")
-end
-
-local function ClimateWithTurn(text, turn)
-    return Locale.Lookup("LOC_CAI_CLIMATE_INSTANCE_TURN", text, turn)
+    return CAIText.JoinNonEmpty(parts, ", ")
 end
 
 ---A fertility tile carries either per-yield deltas or a lump amount (when no
@@ -222,7 +179,7 @@ local function BuildEventDetailChildren(node, record, localPlayerID)
             local text = Locale.Lookup("LOC_CAI_CLIMATE_IMPROVEMENT_ADDED", object)
             local aPlot = a.plot
             addedNode:AddChild(MakeActionLeaf(keyBase .. ":added:" .. i, "TreeItem",
-                function() return AppendRelativePlotLocation(text, aPlot) end, nil, aPlot))
+                function() return HexCoordUtils.appendRelativePlotLocation(text, aPlot) end, nil, aPlot))
         end
         node:AddChild(addedNode)
     end
@@ -254,7 +211,7 @@ local function BuildEventDetailChildren(node, record, localPlayerID)
             end
             local dPlot = d.plot
             dmgNode:AddChild(MakeActionLeaf(keyBase .. ":dmg:" .. i, "TreeItem",
-                function() return AppendRelativePlotLocation(text, dPlot) end, nil, dPlot))
+                function() return HexCoordUtils.appendRelativePlotLocation(text, dPlot) end, nil, dPlot))
         end
         node:AddChild(dmgNode)
     end
@@ -275,7 +232,7 @@ local function BuildEventDetailChildren(node, record, localPlayerID)
             end
             local fPlot = f.plot
             fertNode:AddChild(MakeActionLeaf(keyBase .. ":fert:" .. i, "TreeItem",
-                function() return AppendRelativePlotLocation(text, fPlot) end, nil, fPlot))
+                function() return HexCoordUtils.appendRelativePlotLocation(text, fPlot) end, nil, fPlot))
         end
         node:AddChild(fertNode)
     end
@@ -292,7 +249,7 @@ local function BuildEventDetailChildren(node, record, localPlayerID)
             local cityPlot = ClimateCityPlot(p.owner, p.city)
             if cityPlot then
                 popNode:AddChild(MakeActionLeaf(keyBase .. ":pop:" .. i, "TreeItem",
-                    function() return AppendRelativePlotLocation(text, cityPlot) end, nil, cityPlot))
+                    function() return HexCoordUtils.appendRelativePlotLocation(text, cityPlot) end, nil, cityPlot))
             else
                 popNode:AddChild(MakeLeaf(keyBase .. ":pop:" .. i, function() return text end))
             end
@@ -315,7 +272,7 @@ local function BuildEventDetailChildren(node, record, localPlayerID)
             end
             local uPlot = u.plot
             unitNode:AddChild(MakeActionLeaf(keyBase .. ":units:" .. i, "TreeItem",
-                function() return AppendRelativePlotLocation(text, uPlot) end, nil, uPlot))
+                function() return HexCoordUtils.appendRelativePlotLocation(text, uPlot) end, nil, uPlot))
         end
         node:AddChild(unitNode)
     end
@@ -325,7 +282,7 @@ end
 -- OVERVIEW TAB
 -- =========================================================================
 local function BuildOverviewTree()
-    local tree = mgr:CreateWidget(MakeId("CAIClm_"), "Tree", {})
+    local tree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIClm_"), "Tree", {})
 
     local localPlayerID = Game.GetLocalPlayer()
     if localPlayerID < 0 then return tree end
@@ -403,16 +360,16 @@ local function BuildOverviewTree()
                     local dirText = GetDirectionText(kCurrentEvent.CurrentDirection)
                     if dirText and dirText ~= "" then
                         table.insert(parts,
-                            NormalizeText(Locale.Lookup("LOC_CLIMATE_SCREEN_LOCATION_DIRECTION", location,
+                            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_SCREEN_LOCATION_DIRECTION", location,
                                 Locale.Lookup(dirText))))
                     else
-                        table.insert(parts, NormalizeText(Locale.Lookup("LOC_CLIMATE_SCREEN_LOCATION", location)))
+                        table.insert(parts, CAIText.ToString(Locale.Lookup("LOC_CLIMATE_SCREEN_LOCATION", location)))
                     end
                 end
 
-                local label = JoinNonEmpty(parts, "[NEWLINE]")
+                local label = CAIText.JoinNonEmpty(parts, "[NEWLINE]")
                 if currentEventPlotIndex then
-                    label = AppendRelativePlotLocation(label, currentEventPlotIndex)
+                    label = HexCoordUtils.appendRelativePlotLocation(label, currentEventPlotIndex)
                 end
                 return label
             end
@@ -464,7 +421,7 @@ local function BuildOverviewTree()
                             local pCity = pOwner:GetCities():FindID(ac.CityID)
                             if pCity then
                                 local pOwnerConfig = PlayerConfigurations[ac.CityOwner]
-                                table.insert(cityNames, JoinNonEmpty({
+                                table.insert(cityNames, CAIText.JoinNonEmpty({
                                     Locale.Lookup(pCity:GetName()),
                                     Locale.Lookup(pOwnerConfig:GetCivilizationDescription()),
                                 }, ", "))
@@ -477,7 +434,7 @@ local function BuildOverviewTree()
                     end
                 end
 
-                return JoinNonEmpty(parts, "[NEWLINE]")
+                return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
             end
 
             local eventLeaf
@@ -547,7 +504,7 @@ local function BuildOverviewTree()
                     table.insert(parts, Locale.Lookup(capturedDef.LongDescription))
                 end
 
-                return JoinNonEmpty(parts, "[NEWLINE]")
+                return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
             end)
             phaseNode:AddChild(child)
         end
@@ -570,15 +527,15 @@ local function BuildOverviewTree()
     end
 
     local co2Leaf = MakeLeaf("climate:co2", function()
-        return JoinNonEmpty({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_CLIMATE_CO2_LEVELS"),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM", CO2Total)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM", CO2Total)),
         }, "[NEWLINE]")
     end, function()
-        return JoinNonEmpty({
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_TOP_CONTRIBUTOR_NUM", topContributorName)),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_MY_CONTRIBUTION_NUM", CO2Player)),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_CO2_TOTAL_TOOLTIP", CO2Modifier)),
+        return CAIText.JoinNonEmpty({
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_TOP_CONTRIBUTOR_NUM", topContributorName)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_MY_CONTRIBUTION_NUM", CO2Player)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_CO2_TOTAL_TOOLTIP", CO2Modifier)),
         }, "[NEWLINE]")
     end)
     contributingNode:AddChild(co2Leaf)
@@ -590,14 +547,14 @@ local function BuildOverviewTree()
     local co2Mod = GameClimate.GetCO2FootprintModifier()
 
     local tempLeaf = MakeLeaf("climate:temp", function()
-        return JoinNonEmpty({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_CLIMATE_GLOBAL_TEMPERATURE"),
             Locale.Lookup("LOC_CAI_CLIMATE_TEMP_VALUE", tempText),
         }, "[NEWLINE]")
     end, function()
         if deforestationType >= 0 then
             local kDef = GameInfo.DeforestationLevels[deforestationType]
-            return NormalizeText(Locale.Lookup("LOC_CLIMATE_TEMPERATURE_TOOLTIP", kDef.Name, kDef.Description, co2Mod))
+            return CAIText.ToString(Locale.Lookup("LOC_CLIMATE_TEMPERATURE_TOOLTIP", kDef.Name, kDef.Description, co2Mod))
         end
         return ""
     end)
@@ -629,12 +586,12 @@ local function BuildOverviewTree()
     end, function()
         local parts = {}
         if worldAgeName then
-            table.insert(parts, NormalizeText(Locale.Lookup("LOC_CLIMATE_WORLD_AGE", worldAgeName)))
+            table.insert(parts, CAIText.ToString(Locale.Lookup("LOC_CLIMATE_WORLD_AGE", worldAgeName)))
         end
         if realismName then
-            table.insert(parts, NormalizeText(Locale.Lookup("LOC_CLIMATE_REALISM", realismName)))
+            table.insert(parts, CAIText.ToString(Locale.Lookup("LOC_CLIMATE_REALISM", realismName)))
         end
-        return JoinNonEmpty(parts, "[NEWLINE]")
+        return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
     end)
     contributingNode:AddChild(settingsLeaf)
 
@@ -649,14 +606,14 @@ local function BuildOverviewTree()
     local stormChance = GameClimate.GetStormPercentChance()
     local stormIncrease = GameClimate.GetStormClimateIncreasedChance()
     forecastNode:AddChild(MakeLeaf("climate:forecast:storm", function()
-        return JoinNonEmpty({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_CLIMATE_CHANCE_OF_STORMS"),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", stormChance)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", stormChance)),
         }, "[NEWLINE]")
     end, function()
-        return JoinNonEmpty({
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_AMOUNT_FROM_CLIMATE_CHANGE", stormIncrease)),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_STORM_EVENT_DESCRIPTION_TOOLTIP")),
+        return CAIText.JoinNonEmpty({
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_AMOUNT_FROM_CLIMATE_CHANGE", stormIncrease)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_STORM_EVENT_DESCRIPTION_TOOLTIP")),
         }, "[NEWLINE]")
     end))
 
@@ -664,14 +621,14 @@ local function BuildOverviewTree()
     local floodChance = GameClimate.GetFloodPercentChance()
     local floodIncrease = GameClimate.GetFloodClimateIncreasedChance()
     forecastNode:AddChild(MakeLeaf("climate:forecast:flood", function()
-        return JoinNonEmpty({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_CLIMATE_CHANCE_OF_RIVER_FLOOD"),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", floodChance)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", floodChance)),
         }, "[NEWLINE]")
     end, function()
-        return JoinNonEmpty({
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_AMOUNT_FROM_CLIMATE_CHANGE", floodIncrease)),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_RIVER_FLOOD_EVENT_DESCRIPTION_TOOLTIP")),
+        return CAIText.JoinNonEmpty({
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_AMOUNT_FROM_CLIMATE_CHANGE", floodIncrease)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_RIVER_FLOOD_EVENT_DESCRIPTION_TOOLTIP")),
         }, "[NEWLINE]")
     end))
 
@@ -679,14 +636,14 @@ local function BuildOverviewTree()
     local droughtChance = GameClimate.GetDroughtPercentChance()
     local droughtIncrease = GameClimate.GetDroughtClimateIncreasedChance()
     forecastNode:AddChild(MakeLeaf("climate:forecast:drought", function()
-        return JoinNonEmpty({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_CLIMATE_DROUGHTS"),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", droughtChance)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", droughtChance)),
         }, "[NEWLINE]")
     end, function()
-        return JoinNonEmpty({
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_AMOUNT_FROM_CLIMATE_CHANGE", droughtIncrease)),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_DROUGHT_EVENT_DESCRIPTION_TOOLTIP")),
+        return CAIText.JoinNonEmpty({
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_AMOUNT_FROM_CLIMATE_CHANGE", droughtIncrease)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_DROUGHT_EVENT_DESCRIPTION_TOOLTIP")),
         }, "[NEWLINE]")
     end))
 
@@ -697,17 +654,17 @@ local function BuildOverviewTree()
     local volcanoEruptionsNum = MapFeatureManager.GetNumEruptions()
     local volcanoNaturalWonder = MapFeatureManager.GetNumNaturalWonderVolcanoes()
     forecastNode:AddChild(MakeLeaf("climate:forecast:volcano", function()
-        return JoinNonEmpty({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_CLIMATE_VOLCANIC_ACTIVITY"),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", volcanoEruptChance)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", volcanoEruptChance)),
         }, "[NEWLINE]")
     end, function()
-        return JoinNonEmpty({
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_VOLCANO_ACTIVE_NUM", volcanoActiveNum)),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_VOLCANO_INACTIVE_NUM", volcanoTotalNum - volcanoActiveNum)),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_VOLCANO_ERUPTED_NUM", volcanoEruptionsNum)),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_VOLCANO_VOLATILE_NUM", volcanoNaturalWonder)),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_VOLCANO_EVENT_DESCRIPTION_TOOLTIP")),
+        return CAIText.JoinNonEmpty({
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_VOLCANO_ACTIVE_NUM", volcanoActiveNum)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_VOLCANO_INACTIVE_NUM", volcanoTotalNum - volcanoActiveNum)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_VOLCANO_ERUPTED_NUM", volcanoEruptionsNum)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_VOLCANO_VOLATILE_NUM", volcanoNaturalWonder)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_VOLCANO_EVENT_DESCRIPTION_TOOLTIP")),
         }, "[NEWLINE]")
     end))
 
@@ -716,14 +673,14 @@ local function BuildOverviewTree()
         local fireChance = GameClimate.GetFirePercentChance()
         local fireIncrease = GameClimate.GetFireClimateIncreasedChance()
         forecastNode:AddChild(MakeLeaf("climate:forecast:fire", function()
-            return JoinNonEmpty({
+            return CAIText.JoinNonEmpty({
                 Locale.Lookup("LOC_CLIMATE_FOREST_FIRE"),
-                NormalizeText(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", fireChance)),
+                CAIText.ToString(Locale.Lookup("LOC_CLIMATE_PERCENT_CHANCE", fireChance)),
             }, "[NEWLINE]")
         end, function()
-            return JoinNonEmpty({
-                NormalizeText(Locale.Lookup("LOC_CLIMATE_AMOUNT_FROM_CLIMATE_CHANGE", fireIncrease)),
-                NormalizeText(Locale.Lookup("LOC_CLIMATE_FOREST_FIRE_EVENT_DESCRIPTION_TOOLTIP")),
+            return CAIText.JoinNonEmpty({
+                CAIText.ToString(Locale.Lookup("LOC_CLIMATE_AMOUNT_FROM_CLIMATE_CHANGE", fireIncrease)),
+                CAIText.ToString(Locale.Lookup("LOC_CLIMATE_FOREST_FIRE_EVENT_DESCRIPTION_TOOLTIP")),
             }, "[NEWLINE]")
         end))
     end
@@ -740,19 +697,19 @@ local function BuildOverviewTree()
     tree:AddChild(MakeLeaf("climate:ice", function()
         local parts = {
             Locale.Lookup("LOC_CLIMATE_POLAR_ICE"),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_LOST", iIceLoss)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_LOST", iIceLoss)),
         }
         if isCurrentSeaLevelEvent then
             table.insert(parts, Locale.Lookup("LOC_CLIMATE_POLAR_ICE_MELT_ALERT_TOOLTIP"))
         end
-        return JoinNonEmpty(parts, "[NEWLINE]")
+        return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
     end, function()
         local parts = {}
         if nextIceLostTurns > 0 and currentSeaLevelPhase < 7 then
-            table.insert(parts, NormalizeText(Locale.Lookup("LOC_CLIMATE_POLAR_ICE_MELT_X_TURNS", nextIceLostTurns)))
+            table.insert(parts, CAIText.ToString(Locale.Lookup("LOC_CLIMATE_POLAR_ICE_MELT_X_TURNS", nextIceLostTurns)))
         end
-        table.insert(parts, NormalizeText(Locale.Lookup("LOC_CLIMATE_POLAR_ICE_MELT_DESCRIPTION_TOOLTIP")))
-        return JoinNonEmpty(parts, "[NEWLINE]")
+        table.insert(parts, CAIText.ToString(Locale.Lookup("LOC_CLIMATE_POLAR_ICE_MELT_DESCRIPTION_TOOLTIP")))
+        return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
     end))
 
     -- 6. Sea Level
@@ -767,22 +724,22 @@ local function BuildOverviewTree()
     tree:AddChild(MakeLeaf("climate:sea", function()
         local parts = {
             Locale.Lookup("LOC_CLIMATE_SEA_LEVEL"),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_SEA_LEVEL_RISE", Locale.Lookup(szSeaLevel))),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_SEA_LEVEL_RISE", Locale.Lookup(szSeaLevel))),
         }
         if isCurrentSeaLevelEvent then
             table.insert(parts, Locale.Lookup("LOC_CLIMATE_SEA_LEVEL_RISE_ALERT_TOOLTIP"))
         end
-        return JoinNonEmpty(parts, "[NEWLINE]")
+        return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
     end, function()
         local parts = {
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_COASTAL_TILES_FLOODED_NUM", tilesFlooded)),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_COASTAL_TILES_SUBMERGED_NUM", tilesSubmerged)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_COASTAL_TILES_FLOODED_NUM", tilesFlooded)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_COASTAL_TILES_SUBMERGED_NUM", tilesSubmerged)),
         }
         if nextSeaRiseTurns > 0 and currentSeaLevelPhase < 7 then
-            table.insert(parts, NormalizeText(Locale.Lookup("LOC_CLIMATE_SEA_LEVEL_RISE_X_TURNS", nextSeaRiseTurns)))
+            table.insert(parts, CAIText.ToString(Locale.Lookup("LOC_CLIMATE_SEA_LEVEL_RISE_X_TURNS", nextSeaRiseTurns)))
         end
-        table.insert(parts, NormalizeText(Locale.Lookup("LOC_CLIMATE_SEA_LEVEL_RISE_DESCRIPTION_TOOLTIP", szSeaLevel)))
-        return JoinNonEmpty(parts, "[NEWLINE]")
+        table.insert(parts, CAIText.ToString(Locale.Lookup("LOC_CLIMATE_SEA_LEVEL_RISE_DESCRIPTION_TOOLTIP", szSeaLevel)))
+        return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
     end))
 
     return tree
@@ -792,7 +749,7 @@ end
 -- CO2 LEVELS TAB
 -- =========================================================================
 local function BuildCO2Tree()
-    local tree = mgr:CreateWidget(MakeId("CAIClm_"), "Tree", {})
+    local tree = mgr:CreateWidget(mgr:GenerateWidgetId("CAIClm_"), "Tree", {})
 
     local localPlayerID = Game.GetLocalPlayer()
     if localPlayerID < 0 then return tree end
@@ -805,17 +762,17 @@ local function BuildCO2Tree()
     local globalByCivNode = MakeNode("co2:global:civ", function()
         local sTotal
         if CO2Modifier ~= 0 then
-            sTotal = NormalizeText(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM_W_MOD", CO2Total, CO2Modifier))
+            sTotal = CAIText.ToString(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM_W_MOD", CO2Total, CO2Modifier))
         else
-            sTotal = NormalizeText(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM", CO2Total))
+            sTotal = CAIText.ToString(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM", CO2Total))
         end
-        return JoinNonEmpty({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_CLIMATE_TAB_CO2_BY_CIVILIZATION"),
             sTotal,
         }, "[NEWLINE]")
     end, function()
         if CO2Modifier ~= 0 then
-            return NormalizeText(Locale.Lookup("LOC_CLIMATE_CO2_TOTAL_TOOLTIP", CO2Modifier))
+            return CAIText.ToString(Locale.Lookup("LOC_CLIMATE_CO2_TOTAL_TOOLTIP", CO2Modifier))
         end
         return ""
     end)
@@ -826,13 +783,13 @@ local function BuildCO2Tree()
 
     -- Your contribution first (expandable, with per-resource breakdown)
     local yourNode = MakeNode("co2:yours", function()
-        return JoinNonEmpty({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_CLIMATE_YOUR_CO2_CONTRIBUTION"),
-            JoinNonEmpty({
+            CAIText.JoinNonEmpty({
                 Locale.Lookup(pLocalPlayerConfig:GetLeaderName()),
                 Locale.Lookup(pLocalPlayerConfig:GetCivilizationDescription()),
             }, ", "),
-            NormalizeText(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM", CO2Player)),
+            CAIText.ToString(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM", CO2Player)),
         }, "[NEWLINE]")
     end)
     local pResources = pLocalPlayer:GetResources()
@@ -849,9 +806,9 @@ local function BuildCO2Tree()
                 local capturedResLT = resourceLastTurn
                 local capturedAmtLT = amountLastTurn
                 yourNode:AddChild(MakeLeaf("co2:yours:" .. kResourceInfo.ResourceType, function()
-                    return JoinNonEmpty({ capturedName, capturedAmount }, "[NEWLINE]")
+                    return CAIText.JoinNonEmpty({ capturedName, capturedAmount }, "[NEWLINE]")
                 end, function()
-                    return NormalizeText(Locale.Lookup("LOC_CLIMATE_RESOURCE_CONSUMED_LAST_TURN",
+                    return CAIText.ToString(Locale.Lookup("LOC_CLIMATE_RESOURCE_CONSUMED_LAST_TURN",
                         capturedResLT, capturedName, capturedAmtLT))
                 end))
             end
@@ -868,7 +825,7 @@ local function BuildCO2Tree()
             if not pPlayerDiplomacy:HasMet(playerID) then
                 civName = Locale.Lookup("LOC_WORLD_RANKING_UNMET_PLAYER")
             else
-                civName = JoinNonEmpty({
+                civName = CAIText.JoinNonEmpty({
                     Locale.Lookup(pPlayerConfig:GetLeaderName()),
                     Locale.Lookup(pPlayerConfig:GetCivilizationDescription()),
                 }, ", ")
@@ -876,7 +833,7 @@ local function BuildCO2Tree()
             local capturedName = civName
             local capturedFootprint = footprint
             globalByCivNode:AddChild(MakeLeaf("co2:civ:" .. playerID, function()
-                return JoinNonEmpty({ capturedName, capturedFootprint }, "[NEWLINE]")
+                return CAIText.JoinNonEmpty({ capturedName, capturedFootprint }, "[NEWLINE]")
             end))
         end
     end
@@ -886,17 +843,17 @@ local function BuildCO2Tree()
     local globalByResNode = MakeNode("co2:global:res", function()
         local sTotal
         if CO2Modifier ~= 0 then
-            sTotal = NormalizeText(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM_W_MOD", CO2Total, CO2Modifier))
+            sTotal = CAIText.ToString(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM_W_MOD", CO2Total, CO2Modifier))
         else
-            sTotal = NormalizeText(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM", CO2Total))
+            sTotal = CAIText.ToString(Locale.Lookup("LOC_CLIMATE_TOTAL_NUM", CO2Total))
         end
-        return JoinNonEmpty({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_CLIMATE_TAB_CO2_BY_RESOURCE"),
             sTotal,
         }, "[NEWLINE]")
     end, function()
         if CO2Modifier ~= 0 then
-            return NormalizeText(Locale.Lookup("LOC_CLIMATE_CO2_TOTAL_TOOLTIP", CO2Modifier))
+            return CAIText.ToString(Locale.Lookup("LOC_CLIMATE_CO2_TOTAL_TOOLTIP", CO2Modifier))
         end
         return ""
     end)
@@ -925,9 +882,9 @@ local function BuildCO2Tree()
                 local capturedAmtLT = totalAmountLastTurn
 
                 globalByResNode:AddChild(MakeLeaf("co2:res:" .. kResourceInfo.ResourceType, function()
-                    return JoinNonEmpty({ capturedName, capturedAmount }, "[NEWLINE]")
+                    return CAIText.JoinNonEmpty({ capturedName, capturedAmount }, "[NEWLINE]")
                 end, function()
-                    return NormalizeText(Locale.Lookup("LOC_CLIMATE_RESOURCE_CONSUMED_LAST_TURN_GLOBAL",
+                    return CAIText.ToString(Locale.Lookup("LOC_CLIMATE_RESOURCE_CONSUMED_LAST_TURN_GLOBAL",
                         capturedResLT, capturedName, capturedAmtLT))
                 end))
             end
@@ -942,7 +899,7 @@ end
 -- EVENT HISTORY TAB
 -- =========================================================================
 local function BuildEventHistoryList()
-    local list = mgr:CreateWidget(MakeId("CAIClm_"), "Tree", {})
+    local list = mgr:CreateWidget(mgr:GenerateWidgetId("CAIClm_"), "Tree", {})
 
     local localPlayerID = Game.GetLocalPlayer()
     if localPlayerID < 0 then return list end
@@ -1005,9 +962,9 @@ local function BuildEventHistoryList()
                             end
                         end
 
-                        local label = JoinNonEmpty(parts, "[NEWLINE]")
+                        local label = CAIText.JoinNonEmpty(parts, "[NEWLINE]")
                         if historyPlotIndex then
-                            label = AppendRelativePlotLocation(label, historyPlotIndex)
+                            label = HexCoordUtils.appendRelativePlotLocation(label, historyPlotIndex)
                         end
                         return label
                     end
@@ -1048,7 +1005,7 @@ local function BuildEventHistoryList()
                         if capturedEvent.PopLost and capturedEvent.PopLost > 0 then
                             table.insert(parts, Locale.Lookup("LOC_CAI_CLIMATE_POP_LOST", capturedEvent.PopLost))
                         end
-                        return JoinNonEmpty(parts, "[NEWLINE]")
+                        return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
                     end
 
                     local record = (not capturedCC) and historyMgr
@@ -1110,7 +1067,7 @@ local function BuildPanel()
         end,
     })
 
-    m_tabControl = mgr:CreateWidget(MakeId("CAIClm_"), "TabControl", {})
+    m_tabControl = mgr:CreateWidget(mgr:GenerateWidgetId("CAIClm_"), "TabControl", {})
 
     -- Overview tab
     m_tabControl:AddPage(function() return Locale.Lookup("LOC_CLIMATE_TAB_OVERVIEW") end)

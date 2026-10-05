@@ -1,3 +1,5 @@
+include("CAICapturedDropdown")
+include("CAITradeData")
 include("caiUtils")
 include("TradeRouteChooser")
 
@@ -34,15 +36,6 @@ local m_caiCapturedCities = {}
 -- Helpers
 -- ============================================================================
 
-local function HasTradeQuest(cityOwnerID)
-    local questsManager = Game.GetQuestsManager()
-    local localPlayerID = Game.GetLocalPlayer()
-    if not questsManager or not localPlayerID then return false end
-    local tradeQuestInfo = GameInfo.Quests["QUEST_SEND_TRADE_ROUTE"]
-    if not tradeQuestInfo then return false end
-    return questsManager:HasActiveQuestFromPlayer(localPlayerID, cityOwnerID, tradeQuestInfo.Index)
-end
-
 local function IsCityState(ownerID)
     local pPlayerInfluence = Players[ownerID]:GetInfluence()
     return pPlayerInfluence and pPlayerInfluence:CanReceiveInfluence()
@@ -50,10 +43,7 @@ end
 
 local function BuildRouteLabel(city)
     local parts = {}
-    local cityName = Locale.ToUpper(city:GetName())
-    if city:IsCapital() and Players[city:GetOwner()]:IsMajor() then
-        cityName = cityName .. ", " .. Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL")
-    end
+    local cityName = CAITradeData.DestinationName(city)
     table.insert(parts, cityName)
 
     local originCity = GetOriginCity()
@@ -67,61 +57,19 @@ local function BuildRouteLabel(city)
         end
     end
 
-    if HasTradeQuest(city:GetOwner()) then
+    if CAITradeData.HasTradeQuest(city:GetOwner()) then
         table.insert(parts, Locale.Lookup("LOC_CITY_STATES_QUESTS"))
     end
 
     return table.concat(parts, "[NEWLINE]")
 end
 
-local function BuildAggregateYields(kRouteInfo)
-    local yields = {}
-    for yieldIndex = 1, #kRouteInfo.kYieldValues do
-        local val = kRouteInfo.kYieldValues[yieldIndex]
-        if val ~= 0 then
-            local yInfo = GameInfo.Yields[yieldIndex - 1]
-            if yInfo then
-                local sign = val >= 0 and "+" or ""
-                table.insert(yields, sign .. Round(val, 1) .. " " .. Locale.Lookup(yInfo.Name))
-            end
-        end
-    end
-    if kRouteInfo.MajorityReligion > 0 and kRouteInfo.ReligionPressure > 0 then
-        local relInfo = GameInfo.Religions[kRouteInfo.MajorityReligion]
-        if relInfo then
-            local relName = Game.GetReligion():GetName(relInfo.Index)
-            table.insert(yields,
-                Locale.Lookup("LOC_CAI_TRADE_ROUTE_RELIGION_PRESSURE", kRouteInfo.ReligionPressure, relName))
-        end
-    end
-    return table.concat(yields, "[NEWLINE]")
-end
-
 local function BuildRouteTooltip(city)
     local originCity = GetOriginCity()
     if not originCity then return "" end
-    local parts = {}
-
-    local dist = Map.GetPlotDistance(originCity:GetX(), originCity:GetY(), city:GetX(), city:GetY())
-    table.insert(parts, Locale.Lookup("LOC_CAI_TRADE_ROUTE_DISTANCE", dist))
-
-    local kOriginInfo = GetYieldsForRoute(originCity, city)
-    local originAgg = BuildAggregateYields(kOriginInfo)
-    if originAgg ~= "" then
-        table.insert(parts,
-            Locale.Lookup("LOC_ROUTECHOOSER_RECEIVES_RESOURCE", Locale.Lookup(originCity:GetName())) ..
-            " " .. originAgg)
-    end
-
-    local kDestInfo = GetYieldsForRoute(originCity, city, true)
-    local destAgg = BuildAggregateYields(kDestInfo)
-    if destAgg ~= "" then
-        table.insert(parts,
-            Locale.Lookup("LOC_ROUTECHOOSER_RECEIVES_RESOURCE", Locale.Lookup(city:GetName())) ..
-            " " .. destAgg)
-    end
-
-    return table.concat(parts, "[NEWLINE]")
+    return CAITradeData.RouteTooltip(originCity, city,
+        CAITradeData.BuildAggregateYields(GetYieldsForRoute(originCity, city)),
+        CAITradeData.BuildAggregateYields(GetYieldsForRoute(originCity, city, true)))
 end
 
 -- ============================================================================
@@ -280,20 +228,6 @@ local function RefreshTreeContent()
 end
 
 -- ============================================================================
--- Filter Dropdown
--- ============================================================================
-
-local function RebuildFilter()
-    if not m_filter then return end
-    local options = {}
-    for i, entry in ipairs(m_caiFilterEntries) do
-        table.insert(options, { label = entry.text, value = i })
-    end
-    m_filter:SetOptions(options)
-    m_filter:SetSelectedIndex(m_caiFilterSelected, true)
-end
-
--- ============================================================================
 -- Panel
 -- ============================================================================
 
@@ -352,7 +286,7 @@ end
 
 local function PushPanel()
     BuildPanel()
-    RebuildFilter()
+    CAICapturedDropdown.Sync(m_filter, m_caiFilterEntries, m_caiFilterSelected)
     RefreshTreeContent()
     mgr:Push(m_panel, PopupPriority.Low)
 end
@@ -378,12 +312,7 @@ end
 AddFilter = WrapFunc(AddFilter, function(orig, filterName, filterFunction)
     local countBefore = #m_caiFilterEntries
     orig(filterName, filterFunction)
-    for i = 1, countBefore do
-        if m_caiFilterEntries[i].text == filterName then
-            return
-        end
-    end
-    table.insert(m_caiFilterEntries, { text = filterName })
+    CAICapturedDropdown.AddUniqueText(m_caiFilterEntries, filterName, countBefore)
 end)
 
 AddCityToDestinationStack = WrapFunc(AddCityToDestinationStack, function(orig, city)
@@ -420,16 +349,9 @@ RefreshFilters = WrapFunc(RefreshFilters, function(orig)
     m_caiFilterEntries = {}
     orig()
     local selectedText = Controls.FilterButton:GetText()
-    if selectedText then
-        for i, entry in ipairs(m_caiFilterEntries) do
-            if entry.text == selectedText then
-                m_caiFilterSelected = i
-                break
-            end
-        end
-    end
+    m_caiFilterSelected = CAICapturedDropdown.FindSelection(m_caiFilterEntries, selectedText, m_caiFilterSelected)
     if m_filter and m_panel then
-        RebuildFilter()
+        CAICapturedDropdown.Sync(m_filter, m_caiFilterEntries, m_caiFilterSelected)
     end
 end)
 

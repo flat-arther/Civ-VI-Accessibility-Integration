@@ -1,3 +1,4 @@
+include("CAIControl")
 include("caiUtils")
 include("Civ6Common")
 if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
@@ -75,17 +76,6 @@ local function ControlText(control)
             if text ~= nil and text ~= "" then
                 return text
             end
-        end
-    end
-
-    return ""
-end
-
-local function ControlTooltip(control)
-    if control ~= nil and control.GetToolTipString ~= nil then
-        local tooltip = control:GetToolTipString()
-        if tooltip ~= nil and tooltip ~= "" then
-            return tooltip
         end
     end
 
@@ -199,7 +189,7 @@ local function GetLensEntryLabel(entry)
         return text
     end
 
-    local tooltip = ControlTooltip(control)
+    local tooltip = CAIControl.Tooltip(control)
     if tooltip ~= "" then
         return tooltip
     end
@@ -212,7 +202,7 @@ local function OpenLensListWidget()
         return false
     end
 
-    if m_caiLensList ~= nil and mgr ~= nil and mgr:HasWidget(m_caiLensList) then
+    if m_caiLensList ~= nil and mgr:GetWidgetById(LENS_LIST_WIDGET_ID) == m_caiLensList then
         return true
     end
 
@@ -239,7 +229,7 @@ local function OpenLensListWidget()
                 return GetLensEntryLabel(capturedEntry)
             end,
             Tooltip = function()
-                return ControlTooltip(capturedEntry.GetControl())
+                return CAIControl.Tooltip(capturedEntry.GetControl())
             end,
             State = function()
                 local control = capturedEntry.GetControl()
@@ -292,7 +282,7 @@ local function ToggleAccessibleLensList()
         return false
     end
 
-    if m_caiLensList ~= nil and mgr ~= nil and mgr:HasWidget(m_caiLensList) then
+    if m_caiLensList ~= nil and mgr:GetWidgetById(LENS_LIST_WIDGET_ID) == m_caiLensList then
         CloseLensListWidget()
         return true
     end

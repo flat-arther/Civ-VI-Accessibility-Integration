@@ -55,24 +55,6 @@ end
 
 --#City Info Formatting
 
-function AppendCityInfo(results, value)
-    if value ~= nil and value ~= "" then
-        table.insert(results, value)
-    end
-end
-
-function JoinCityInfo(parts, separator)
-    local results = {}
-
-    for _, part in ipairs(parts) do
-        if part ~= nil and part ~= "" then
-            table.insert(results, part)
-        end
-    end
-
-    return table.concat(results, separator or "[NEWLINE]")
-end
-
 function GetCityInfoName(data)
     if data == nil or data.CityName == nil then
         return nil
@@ -227,12 +209,12 @@ end
 function GetCityInfoVisibleYields(data)
     local results = {}
 
-    AppendCityInfo(results, GetCityInfoYieldEntry(data, data.CulturePerTurn, "[ICON_Culture]"))
-    AppendCityInfo(results, GetCityInfoYieldEntry(data, data.FoodPerTurn, "[ICON_Food]"))
-    AppendCityInfo(results, GetCityInfoYieldEntry(data, data.ProductionPerTurn, "[ICON_Production]"))
-    AppendCityInfo(results, GetCityInfoYieldEntry(data, data.SciencePerTurn, "[ICON_Science]"))
-    AppendCityInfo(results, GetCityInfoYieldEntry(data, data.FaithPerTurn, "[ICON_Faith]"))
-    AppendCityInfo(results, GetCityInfoYieldEntry(data, data.GoldPerTurn, "[ICON_Gold]"))
+    CAIText.AppendIfNonEmpty(results, GetCityInfoYieldEntry(data, data.CulturePerTurn, "[ICON_Culture]"))
+    CAIText.AppendIfNonEmpty(results, GetCityInfoYieldEntry(data, data.FoodPerTurn, "[ICON_Food]"))
+    CAIText.AppendIfNonEmpty(results, GetCityInfoYieldEntry(data, data.ProductionPerTurn, "[ICON_Production]"))
+    CAIText.AppendIfNonEmpty(results, GetCityInfoYieldEntry(data, data.SciencePerTurn, "[ICON_Science]"))
+    CAIText.AppendIfNonEmpty(results, GetCityInfoYieldEntry(data, data.FaithPerTurn, "[ICON_Faith]"))
+    CAIText.AppendIfNonEmpty(results, GetCityInfoYieldEntry(data, data.GoldPerTurn, "[ICON_Gold]"))
 
     return results
 end
@@ -256,10 +238,10 @@ function GetCityInfoFilteredYields(data, filterState)
         local yieldState = GetCityInfoYieldState(data, yieldData.Type)
         if filterState == nil then
             if yieldState ~= YIELD_STATE.FAVORED and yieldState ~= YIELD_STATE.IGNORED then
-                AppendCityInfo(results, GetCityInfoYieldEntry(data, yieldData.Value, yieldData.Icon))
+                CAIText.AppendIfNonEmpty(results, GetCityInfoYieldEntry(data, yieldData.Value, yieldData.Icon))
             end
         elseif yieldState == filterState then
-            AppendCityInfo(results, GetCityInfoYieldEntry(data, yieldData.Value, yieldData.Icon))
+            CAIText.AppendIfNonEmpty(results, GetCityInfoYieldEntry(data, yieldData.Value, yieldData.Icon))
         end
     end
 
@@ -322,25 +304,25 @@ function GetCityInfoGrowth(data)
         return nil
     end
 
-    local progressText = JoinCityInfo({
+    local progressText = CAIText.JoinLines({
         GetCityInfoCurrentProgressText(data.CurrentFoodPercent),
         GetCityInfoNextTurnProgressText(data.FoodPercentNextTurn),
     }, ", ")
 
     if data.Occupied then
-        return JoinCityInfo({
+        return CAIText.JoinLines({
             tostring(math.abs(data.TurnsUntilGrowth)) ..
             " " .. Locale.ToUpper(Locale.Lookup("LOC_HUD_CITY_GROWTH_OCCUPIED")),
             progressText,
         }, ", ")
     elseif data.TurnsUntilGrowth >= 0 then
-        return JoinCityInfo({
+        return CAIText.JoinLines({
             tostring(math.abs(data.TurnsUntilGrowth)) ..
             " " .. Locale.ToUpper(Locale.Lookup("LOC_HUD_CITY_TURNS_UNTIL_GROWTH", data.TurnsUntilGrowth)),
             progressText,
         }, ", ")
     else
-        return JoinCityInfo({
+        return CAIText.JoinLines({
             tostring(math.abs(data.TurnsUntilGrowth)) ..
             " " .. Locale.ToUpper(Locale.Lookup("LOC_HUD_CITY_TURNS_UNTIL_LOSS", math.abs(data.TurnsUntilGrowth))),
             progressText,
@@ -373,7 +355,7 @@ function GetCityBorderGrowthStoredRequiredText(currentCulture, cost)
         return nil
     end
 
-    return JoinCityInfo({
+    return CAIText.JoinLines({
         Locale.Lookup("LOC_CAI_CITY_TOTAL_CULTURE") .. ": " .. currentCultureText,
         Locale.Lookup("LOC_HUD_CITY_REQUIRED") .. ": " .. costText,
     }, ", ")
@@ -431,7 +413,7 @@ function GetCityBorderGrowth(data, city)
     local nextTurnGrowth = math.max(math.min((currentCulture + currentYield) / cost, 1.0), 0)
     local turnsRemaining = cityCulture:GetTurnsUntilExpansion()
 
-    return JoinCityInfo({
+    return CAIText.JoinLines({
         Locale.Lookup("LOC_HUD_CITY_BORDER_EXPANSION", turnsRemaining),
         GetCityBorderGrowthDirectionText(city, nextGrowthPlot),
         GetCityBorderGrowthStoredRequiredText(currentCulture, cost),
@@ -453,7 +435,7 @@ function GetCityInfoProduction(data)
         return Locale.ToUpper(Locale.Lookup("LOC_HUD_CITY_NOTHING_PRODUCED"))
     end
 
-    return JoinCityInfo({
+    return CAIText.JoinLines({
         data.CurrentProductionName,
         tostring(data.CurrentTurnsLeft) ..
         " " .. Locale.ToUpper(Locale.Lookup("LOC_HUD_CITY_TURNS_UNTIL_COMPLETED", data.CurrentTurnsLeft)),
@@ -610,12 +592,8 @@ function GetActionBindingText(actionId)
     local bindings = {}
     local g1 = Input.GetGestureDisplayString(actionId, 0)
     local g2 = Input.GetGestureDisplayString(actionId, 1)
-    if g1 ~= nil and g1 ~= "" then
-        table.insert(bindings, g1)
-    end
-    if g2 ~= nil and g2 ~= "" then
-        table.insert(bindings, g2)
-    end
+    CAIText.AppendIfNonEmpty(bindings, g1)
+    CAIText.AppendIfNonEmpty(bindings, g2)
 
     if #bindings == 0 then
         return nil
@@ -1483,10 +1461,10 @@ function info:RequestCityInfo(cityID, requestedKeys, playerID)
             local output = helper(data, city)
             if type(output) == "table" then
                 for _, value in ipairs(output) do
-                    AppendCityInfo(results, value)
+                    CAIText.AppendIfNonEmpty(results, value)
                 end
             else
-                AppendCityInfo(results, output)
+                CAIText.AppendIfNonEmpty(results, output)
             end
         end
     end

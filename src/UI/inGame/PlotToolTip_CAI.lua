@@ -1,3 +1,4 @@
+include("CAIDescriptors")
 include("caiUtils")
 include("interfaceInfoHelpers_CAI")
 include("inGameHelpers_CAI")
@@ -139,23 +140,6 @@ local PlotInfoBucketHelpers = {}
 
 local function GetCurrentCursorPlot()
     return Map.GetPlotByIndex(currentPlot)
-end
-
-local function AddIfPresent(results, value)
-    if value == nil then
-        return
-    end
-
-    if type(value) == "table" then
-        for _, innerValue in ipairs(value) do
-            AddIfPresent(results, innerValue)
-        end
-        return
-    end
-
-    if value ~= "" then
-        table.insert(results, value)
-    end
 end
 
 local function HasEntries(t)
@@ -822,7 +806,7 @@ local function FormatRiverFlowChain(plot, perimeter, chain, orderDownstream)
     local first, last = chain[1], chain[#chain]
     local riverText = Locale.Lookup("LOC_TOOLTIP_RIVER")
     if first.river ~= nil then
-        riverText = Locale.Lookup("LOC_RIVER_TOOLTIP_STRING", first.river.Name)
+        riverText = Locale.Lookup(first.river.Name)
     end
     local edgeText = Locale.Lookup("LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS", riverText, table.concat(directions, " "))
     local upstream = HexCoordUtils.FindNextUpstreamPlot(plot, first, perimeter, info.IsPlotVisible)
@@ -993,7 +977,7 @@ local function FormatNamedRiverString(riverNames, directionString)
     if type(riverNames) == "table" then
         for _, riverName in pairs(riverNames) do
             if riverName ~= nil and riverName ~= "" then
-                local riverText = Locale.Lookup("LOC_RIVER_TOOLTIP_STRING", riverName)
+                local riverText = Locale.Lookup(riverName)
                 if directionString ~= nil and directionString ~= "" then
                     riverText = Locale.Lookup("LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS", riverText, directionString)
                 end
@@ -1001,7 +985,7 @@ local function FormatNamedRiverString(riverNames, directionString)
             end
         end
     else
-        local riverText = Locale.Lookup("LOC_RIVER_TOOLTIP_STRING", riverNames)
+        local riverText = Locale.Lookup(riverNames)
         if directionString ~= nil and directionString ~= "" then
             riverText = Locale.Lookup("LOC_CAI_PLOT_RIVER_WITH_DIRECTIONS", riverText, directionString)
         end
@@ -1046,13 +1030,13 @@ local function GetNamedRiverString(data, plot)
     LogRiverDebug(plot, data, directionString)
 
     if includeFlow and directionString ~= nil then
-        return directionString
+        return CAIText.LabelValue(Locale.Lookup("LOC_CAI_WORLD_SCANNER_GROUP_RIVERS"), directionString)
     end
 
     if IS_XP2_TOOLTIP and data.RiverNames then
         local riverString = FormatNamedRiverString(data.RiverNames, directionString)
         if riverString ~= nil then
-            return riverString
+            return CAIText.LabelValue(Locale.Lookup("LOC_CAI_WORLD_SCANNER_GROUP_RIVERS"), riverString)
         end
     end
 
@@ -1670,9 +1654,7 @@ info.PlotInfoHelpers = {
         for _, entry in ipairs(mapTacs) do
             local label = entry.LabelWithOwner or entry.Label
 
-            if label ~= nil and label ~= "" then
-                table.insert(labels, label)
-            end
+            CAIText.AppendIfNonEmpty(labels, label)
         end
 
         if #labels == 0 then
@@ -1731,7 +1713,7 @@ info.PlotInfoHelpers = {
 
         local results = {}
         for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
-            AddIfPresent(results, GetYieldLine(yieldType, data.Yields[yieldType]))
+            CAIText.AppendFragments(results, GetYieldLine(yieldType, data.Yields[yieldType]))
         end
         return #results > 0 and results or nil
     end,
@@ -1745,7 +1727,7 @@ info.PlotInfoHelpers = {
 
         local results = {}
         for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
-            AddIfPresent(results, GetYieldLine(yieldType, data.Yields[yieldType]))
+            CAIText.AppendFragments(results, GetYieldLine(yieldType, data.Yields[yieldType]))
         end
         return #results > 0 and results or nil
     end,
@@ -1759,7 +1741,7 @@ info.PlotInfoHelpers = {
 
         local results = {}
         for _, yieldType in ipairs(GetOrderedYieldTypes(data.DistrictYields)) do
-            AddIfPresent(results, GetYieldLine(yieldType, data.DistrictYields[yieldType]))
+            CAIText.AppendFragments(results, GetYieldLine(yieldType, data.DistrictYields[yieldType]))
         end
         return #results > 0 and results or nil
     end,
@@ -1778,7 +1760,7 @@ info.PlotInfoHelpers = {
 
         local results = {}
         for _, yieldType in ipairs(GetOrderedYieldTypes(data.Yields)) do
-            AddIfPresent(results, GetYieldLine(yieldType, data.Yields[yieldType]))
+            CAIText.AppendFragments(results, GetYieldLine(yieldType, data.Yields[yieldType]))
         end
         return #results > 0 and results or nil
     end,
@@ -1848,34 +1830,6 @@ end
 
 PlotInfoBucketHelpers.plotYields = function(data)
     return { "plotYields" }
-end
-
-local function AppendPlotInfoBucketKeys(results, data, definitions)
-    if definitions == nil then
-        return results
-    end
-
-    for _, entry in ipairs(definitions) do
-        if type(entry) == "string" then
-            table.insert(results, entry)
-        elseif type(entry) == "table" then
-            local include = entry.when == nil or entry.when(data)
-            if include then
-                if entry.key ~= nil then
-                    table.insert(results, entry.key)
-                elseif entry.keys ~= nil then
-                    AppendPlotInfoBucketKeys(results, data, entry.keys)
-                elseif entry.bucket ~= nil then
-                    local helper = PlotInfoBucketHelpers[entry.bucket]
-                    if helper ~= nil then
-                        AppendPlotInfoBucketKeys(results, data, helper(data))
-                    end
-                end
-            end
-        end
-    end
-
-    return results
 end
 
 local DEFAULT_PLOT_INFO_BUCKET = {
@@ -2020,7 +1974,7 @@ local GEOGRAPHY_INFO_BUCKET = {
 }
 
 local function BuildPlotInfoBucket(data, definitions)
-    return AppendPlotInfoBucketKeys({}, data, definitions)
+    return CAIDescriptors.AppendKeys({}, data, definitions, PlotInfoBucketHelpers)
 end
 
 local function ResolvePlotInfoHelper(key)
@@ -2039,7 +1993,7 @@ local function RequestPlotInfoFromData(plot, data, requestedKeys)
     for _, key in ipairs(keys) do
         local helper, arg = ResolvePlotInfoHelper(key)
         if helper ~= nil then
-            AddIfPresent(results, helper(data, plot, arg))
+            CAIText.AppendFragments(results, helper(data, plot, arg))
         end
     end
 

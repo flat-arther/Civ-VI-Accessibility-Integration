@@ -48,12 +48,6 @@ local SORT_COLUMNS = {
 -- Helpers
 -- ============================================================================
 
-local function AppendIfNonEmpty(parts, value)
-    if value and value ~= "" then
-        parts[#parts + 1] = value
-    end
-end
-
 local function GetStackChildren(stack)
     if not stack then return {} end
     return stack:GetChildren() or {}
@@ -270,27 +264,27 @@ local function BuildDestinationTooltip(cap)
     local parts = {}
     local travelText = Locale.Lookup("LOC_ESPIONAGECHOOSER_TRAVEL_TIME_TOOLTIP", cap.transitTime, cap.establishTime)
     travelText = string.gsub(travelText, "%[NEWLINE%]", ", ")
-    AppendIfNonEmpty(parts, travelText)
+    CAIText.AppendIfNonEmpty(parts, travelText)
     if cap.missionCount then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_AVAILABLE_MISSIONS", cap.missionCount))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_AVAILABLE_MISSIONS", cap.missionCount))
     end
     if #cap.districts > 0 then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_CITY_DISTRICTS", table.concat(cap.districts, "[NEWLINE]")))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_CITY_DISTRICTS", table.concat(cap.districts, "[NEWLINE]")))
     end
     return table.concat(parts, "[NEWLINE]")
 end
 
 local function BuildMissionLabel(mis)
     local parts = {}
-    AppendIfNonEmpty(parts, Locale.Lookup(mis.operation.Description))
+    CAIText.AppendIfNonEmpty(parts, Locale.Lookup(mis.operation.Description))
     if mis.districtName then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_MISSION_DISTRICT", mis.districtName))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_MISSION_DISTRICT", mis.districtName))
     end
     if mis.turnsToComplete then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_MISSION_TURNS", tostring(mis.turnsToComplete)))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_MISSION_TURNS", tostring(mis.turnsToComplete)))
     end
     if mis.probability then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_MISSION_PROBABILITY", mis.probability .. "%"))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_MISSION_PROBABILITY", mis.probability .. "%"))
     end
     return table.concat(parts, "[NEWLINE]")
 end

@@ -815,6 +815,7 @@ function Initialize()
 	m_kPopupDialog = PopupDialog:new( "InGameTopOptionsMenu" );
 end
 --#Accessibility integration
+include("CAIControl")
 include("caiUtils")
 
 local mgr = ExposedMembers.CAI_UIManager
@@ -843,20 +844,6 @@ local kGroupToSection = {
 	Victories = "Victories",
 	AdvancedOptions = "AdvancedOptions",
 }
-
-local function CAI_ControlText(control)
-	if control and control.GetText then
-		return control:GetText() or ""
-	end
-	return ""
-end
-
-local function CAI_ControlTooltip(control)
-	if control and control.GetToolTipString then
-		return control:GetToolTipString() or ""
-	end
-	return ""
-end
 
 local function CAI_Lookup(text, ...)
 	if text == nil then return "" end
@@ -954,8 +941,8 @@ end
 
 local function CAI_MakeActionButton(id, control)
 	local button = mgr:CreateWidget(id, "Button", {
-		Label = function() return CAI_ControlText(control) end,
-		Tooltip = function() return CAI_ControlTooltip(control) end,
+		Label = function() return CAIControl.Text(control) end,
+		Tooltip = function() return CAIControl.Tooltip(control) end,
 		HiddenPredicate = function() return control and control.IsHidden and control:IsHidden() end,
 		DisabledPredicate = function() return control and control.IsDisabled and control:IsDisabled() end,
 		FocusKey = id,
@@ -1152,11 +1139,11 @@ end
 
 local function CAI_BuildPanel()
 	CAI_Panel = mgr:CreateWidget(CAI_PANEL_ID, "Panel", {
-		Label = function() return CAI_ControlText(Controls.TitleLabel) end,
+		Label = function() return CAIControl.Text(Controls.TitleLabel) end,
 	})
 
 	CAI_OptionsList = mgr:CreateWidget("CAIHostGame_Options", "List", {
-		Label = function() return CAI_ControlText(Controls.TitleLabel) end,
+		Label = function() return CAIControl.Text(Controls.TitleLabel) end,
 	})
 	CAI_Panel:AddChild(CAI_OptionsList)
 

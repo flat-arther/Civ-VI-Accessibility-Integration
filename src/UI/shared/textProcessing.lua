@@ -28,11 +28,289 @@
 --    Example: "+5 [ICON_Strength] Combat Strength" -> "+5 Melee Strength"
 --    ("Combat Strength" is the generic label; "Melee Strength" is specific.)
 
--- Values are either:
---   "LOC_*" string -> looked up via Locale.Lookup at call time
---   any other string -> returned directly as the replacement text
---   "" -> token is silently removed (decorative, no dedup needed)
---   false -> token bypasses dedup and produces fixed output (see DIRECT_OUTPUT)
+-- Generic composition helpers preserve markup; ProcessText remains the final
+-- speech filter. Screen-specific choice of content stays with its owning screen.
+CAIText = {}
+
+function CAIText.ResolveLabel(value)
+    return type(value) == "function" and value() or value or ""
+end
+
+function CAIText.SafeKey(value)
+    return (tostring(value or ""):gsub("[^%w_]", "_"))
+end
+
+function CAIText.FormatBalance(value)
+    return Locale.ToNumber(value, "#,###.#")
+end
+
+function CAIText.FormatRatePerTurn(value)
+    return Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", value)
+end
+
+function CAIText.FormatSignedValue(value)
+    if value == 0 then return Locale.ToNumber(value) end
+    return Locale.Lookup("{1: number +#,###.#;-#,###.#}", value)
+end
+
+-- Consumes the final element, matching the existing promotion-list contract.
+function CAIText.JoinWithConjunction(names, conjunctionTag)
+    if #names <= 1 then return table.concat(names) end
+    local finalName = table.remove(names)
+    return table.concat(names, "[NEWLINE]") .. ", " .. Locale.Lookup(conjunctionTag) .. " " .. finalName
+end
+
+---@param value any
+---@return string
+function CAIText.ToString(value)
+    if not value then return "" end
+    return tostring(value)
+end
+
+---@param parts table
+---@param value string|number|nil
+function CAIText.AppendIfNonEmpty(parts, value)
+    if value and value ~= "" then parts[#parts + 1] = value end
+end
+
+---@param parts table
+---@param separator string|nil Defaults to an empty separator, matching table.concat.
+---@return string
+function CAIText.JoinNonEmpty(parts, separator)
+    local filtered = {}
+    for _, part in ipairs(parts) do
+        CAIText.AppendIfNonEmpty(filtered, part)
+    end
+    return table.concat(filtered, separator)
+end
+
+---@param parts table|nil
+---@param separator string|nil Defaults to Civ VI's newline token.
+---@return string
+function CAIText.JoinLines(parts, separator)
+    return CAIText.JoinNonEmpty(parts or {}, separator or "[NEWLINE]")
+end
+
+-- Preserve intentional empty lines in already assembled text.
+function CAIText.ConcatLines(parts)
+    return table.concat(parts, "[NEWLINE]")
+end
+
+function CAIText.SplitTokenLines(text)
+    return CAIText.SplitNonEmpty(text, "[NEWLINE]")
+end
+
+function CAIText.AppendLine(text, line)
+    local base, extra = text or "", line or ""
+    if extra == "" then return base end
+    if base == "" then return extra end
+    return base .. "[NEWLINE]" .. extra
+end
+
+function CAIText.AppendDistinctLine(text, line)
+    if line == text then return text or "" end
+    return CAIText.AppendLine(text, line)
+end
+
+function CAIText.TrimNonbreakingWhitespace(text)
+    return CAIText.TrimAscii((tostring(text or ""):gsub("\194\160", " ")))
+end
+
+function CAIText.LabelValue(label, value, separator)
+    if label and label ~= "" and value and value ~= "" then
+        return label .. (separator or ": ") .. value
+    end
+    return label or value
+end
+
+function CAIText.AppendText(parts, value)
+    CAIText.AppendIfNonEmpty(parts, CAIText.ToString(value))
+end
+
+-- Flatten nested readout fragments while preserving their order and values.
+function CAIText.AppendFragments(parts, value)
+    if type(value) == "table" then
+        for _, innerValue in ipairs(value) do CAIText.AppendFragments(parts, innerValue) end
+    elseif value ~= nil and value ~= "" then
+        parts[#parts + 1] = value
+    end
+end
+
+function CAIText.AppendUnique(parts, seen, value)
+    local text = CAIText.TrimOptional(value)
+    if text == nil or seen[text] then return end
+    seen[text] = true
+    parts[#parts + 1] = text
+end
+
+function CAIText.AppendSection(lines, title, entries)
+    if not entries or #entries == 0 then return end
+    CAIText.AppendIfNonEmpty(lines, title)
+    for _, entry in ipairs(entries) do CAIText.AppendText(lines, entry) end
+end
+
+-- Accept values needing tostring conversion as well as preformatted strings.
+function CAIText.JoinTextLines(parts)
+    local converted = {}
+    for _, part in ipairs(parts or {}) do CAIText.AppendText(converted, part) end
+    return CAIText.JoinLines(converted)
+end
+
+---@param text string|nil
+---@return string
+function CAIText.NormalizeFormattedText(text)
+    text = string.gsub(text or "", "%[NEWLINE%]", ", ")
+    return (string.gsub(text, "[ \t\r\n]+", " "))
+end
+
+---@param text string|nil
+---@return string
+function CAIText.TrimAscii(text)
+    return (string.gsub(text or "", "^[ \t\r\n]*(.-)[ \t\r\n]*$", "%1"))
+end
+
+function CAIText.TrimStart(text)
+    return (string.gsub(text or "", "^[ \t\r\n\v\f]+", ""))
+end
+
+-- Includes vertical tab/form feed for callers previously using Lua's %s class.
+function CAIText.TrimWhitespace(value)
+    return (CAIText.ToString(value):gsub("^[ \t\r\n\v\f]*(.-)[ \t\r\n\v\f]*$", "%1"))
+end
+
+function CAIText.CollapseWhitespace(text)
+    return (string.gsub(text or "", "[ \t\r\n]+", " "))
+end
+
+function CAIText.ToNewlineTokens(text)
+    return (string.gsub(text or "", "\n", "[NEWLINE]"))
+end
+
+-- One pass intentionally collapses pairs, preserving the prior tooltip layout.
+function CAIText.CollapseNewlinePairs(text)
+    return (string.gsub(text or "", "%[NEWLINE%][ \t\r\n]*%[NEWLINE%]", "[NEWLINE]"))
+end
+
+-- Comparison form only: bracket tokens are separators, not spoken labels.
+function CAIText.ComparisonText(text)
+    text = string.gsub(text or "", "%[[^%]]*%]", " ")
+    return CAIText.TrimAscii(CAIText.CollapseWhitespace(text))
+end
+
+-- Preserve the existing icon-free inline presentation used by crisis details.
+function CAIText.PlainInlineText(value)
+    local text = CAIText.ToString(value)
+    text = text:gsub("%[ENDCOLOR%]", ""):gsub("%[COLOR_[^%]]+%]", "")
+    text = text:gsub("%[COLOR:[ \t\r\n\v\f]*[^%]]+%]", "")
+    text = text:gsub("%[NEWLINE%]", ", "):gsub("%[ICON_[^%]]+%]", "")
+    text = text:gsub("[, \t\r\n\v\f]+,", ",")
+    return (text:gsub("^[, \t\r\n\v\f]+", ""):gsub("[, \t\r\n\v\f]+$", ""))
+end
+
+-- Literal separator, omitting empty fields; suitable for stored delimited text.
+function CAIText.SplitNonEmpty(value, separator)
+    assert(separator ~= "", "Separator must not be empty")
+    local text, parts, start = CAIText.ToString(value), {}, 1
+    while true do
+        local first, last = string.find(text, separator, start, true)
+        if not first then
+            CAIText.AppendIfNonEmpty(parts, string.sub(text, start))
+            return parts
+        end
+        CAIText.AppendIfNonEmpty(parts, string.sub(text, start, first - 1))
+        start = last + 1
+    end
+end
+
+-- Horizontal trimming deliberately preserves line breaks and a nil input.
+---@param text string|nil
+---@return string|nil
+function CAIText.TrimHorizontal(text)
+    if text == nil then return nil end
+    text = string.gsub(text, "^[ \t]+", "")
+    return (string.gsub(text, "[ \t]+$", ""))
+end
+
+-- Optional control text: whitespace-only values represent absent content.
+function CAIText.TrimOptional(value)
+    if value == nil then return nil end
+    local text = CAIText.TrimAscii(tostring(value))
+    if text ~= "" then return text end
+end
+
+-- Split on LF and Civ VI newline tokens; trim each line and discard blanks.
+-- Embedded CR is whitespace within a line, not a separate line boundary.
+---@param text string|nil
+---@return string[]
+function CAIText.SplitFormattedLines(text)
+    return CAIText.SplitLines(text, { trim = true, normalizeCarriageReturns = false })
+end
+
+---@param text string|nil
+---@return string
+function CAIText.NormalizeNewlines(text)
+    text = string.gsub(text or "", "%[NEWLINE%]", "\n")
+    text = string.gsub(text, "\r\n", "\n")
+    return (string.gsub(text, "\r", "\n"))
+end
+
+-- Preserve indentation and whitespace-only lines; discard only empty lines.
+---@param text string|nil
+---@param options? { trim?: boolean, normalizeCarriageReturns?: boolean }
+---@return string[]
+function CAIText.SplitLines(text, options)
+    local lines = {}
+    local normalized
+    if options and options.normalizeCarriageReturns == false then
+        normalized = string.gsub(text or "", "%[NEWLINE%]", "\n")
+    else
+        normalized = CAIText.NormalizeNewlines(text)
+    end
+    for line in string.gmatch(normalized .. "\n", "(.-)\n") do
+        if options and options.trim then line = CAIText.TrimAscii(line) end
+        CAIText.AppendIfNonEmpty(lines, line)
+    end
+    return lines
+end
+
+function CAIText.JoinTooltipLines(text)
+    if not text or text == "" then return text end
+    return CAIText.JoinLines(CAIText.SplitLines(text))
+end
+
+-- Blank lines delimit sections; indentation remains part of each line.
+function CAIText.SplitSections(text)
+    local sections, current = {}, {}
+    for line in string.gmatch(CAIText.NormalizeNewlines(text) .. "\n", "(.-)\n") do
+        if line == "" then
+            if #current > 0 then sections[#sections + 1] = current; current = {} end
+        else
+            current[#current + 1] = line
+        end
+    end
+    if #current > 0 then sections[#sections + 1] = current end
+    return sections
+end
+
+-- Literal-token splitting preserves empty fields and all native line endings.
+---@param text string
+---@return string[]
+function CAIText.SplitNewlineToken(text)
+    local lines = {}
+    local pos = 1
+    while true do
+        local first, last = string.find(text, "[NEWLINE]", pos, true)
+        if not first then
+            lines[#lines + 1] = string.sub(text, pos)
+            return lines
+        end
+        lines[#lines + 1] = string.sub(text, pos, first - 1)
+        pos = last + 1
+    end
+end
+
+-- Values are localized keys, literal replacements, empty decorative tokens,
+-- or false for fixed output handled by DIRECT_OUTPUT.
 local REPLACEMENTS = {
     -- Unit stat large icons (FontIcon names from CitySupport.lua)
     ["Strength_Large"]       = "LOC_HUD_UNIT_PANEL_STRENGTH",
@@ -431,4 +709,86 @@ function ProcessText(text, tidy)
         processed = NormalizeSpeechText(processed)
     end
     return processed
+end
+
+local function IsSentenceEnd(word)
+    return word:match("[%.%!%?][\"')%]]*$") ~= nil
+end
+
+function CAIText.SplitTextIntoLines(text, maxLength)
+    local lines = {}
+    if text == nil then return lines end
+
+    maxLength = math.max(1, math.floor(tonumber(maxLength) or 75))
+    local normalized = tostring(text):gsub("\r\n", "\n"):gsub("\r", "\n")
+    normalized = normalized:gsub("%[NEWLINE%]", "\n")
+
+    for paragraph in (normalized .. "\n"):gmatch("(.-)\n") do
+        paragraph = CAIText.TrimAscii(paragraph)
+        if paragraph ~= "" then
+            local sentenceWords = {}
+            local pendingLine = ""
+
+            local function FlushSentence()
+                if #sentenceWords == 0 then return end
+                local sentence = table.concat(sentenceWords, " ")
+                local combined = pendingLine == "" and sentence or pendingLine .. " " .. sentence
+                if pendingLine == "" or #combined <= maxLength then
+                    pendingLine = combined
+                else
+                    lines[#lines + 1] = pendingLine
+                    pendingLine = sentence
+                end
+                sentenceWords = {}
+            end
+
+            -- Split on ASCII whitespace only; %S is locale-sensitive and would
+            -- break on byte 0xA0 inside multibyte characters. Scripts without
+            -- spaces (e.g. Chinese) stay whole, which is fine for speech.
+            for word in paragraph:gmatch("[^ \t\r\n]+") do
+                sentenceWords[#sentenceWords + 1] = word
+                if IsSentenceEnd(word) then FlushSentence() end
+            end
+            FlushSentence()
+            if pendingLine ~= "" then lines[#lines + 1] = pendingLine end
+        end
+    end
+
+    return lines
+end
+
+function CAIText.AppendUniqueLine(text, line)
+	if line == nil or line == "" then return text or "" end
+	local existing = text or ""
+	local normalizedLine = CAIText.NormalizeMultiline(line)
+	if normalizedLine == "" then return existing end
+	local normalizedExisting = CAIText.NormalizeMultiline(existing)
+	if normalizedExisting == normalizedLine then return existing end
+	for _, existingLine in ipairs(CAIText.SplitTokenLines(existing)) do
+		if CAIText.NormalizeMultiline(existingLine) == normalizedLine then
+			return existing
+		end
+	end
+	if existing == "" then return line end
+	return existing .. "[NEWLINE]" .. line
+end
+
+function CAIText.NormalizeMultiline(text)
+	text = CAIText.StripColors(text)
+	text = text:gsub("%[NEWLINE%]", "\n")
+	text = text:gsub("\r", "")
+	text = text:gsub("[ \t]+", " ")
+	text = text:gsub(" *\n *", "\n")
+	-- ASCII whitespace only; %s is locale-sensitive and corrupts UTF-8 (0xA0).
+	text = text:gsub("^[ \t\r\n]+", "")
+	text = text:gsub("[ \t\r\n]+$", "")
+	return text
+end
+
+function CAIText.StripColors(text)
+	if text == nil then return "" end
+	text = tostring(text)
+	text = text:gsub("%[COLOR[^%]]*%]", "")
+	text = text:gsub("%[ENDCOLOR%]", "")
+	return text
 end

@@ -1,3 +1,4 @@
+include("CAIGameState")
 include("caiUtils")
 include("TutorialGoals")
 
@@ -21,12 +22,6 @@ local m_caiGoalOrder = {} -- ordered array of goalIds for stable list order
 -- notification back to a goal by matching notification:GetMessage() against
 -- goal.Text -- both are loc tags, so it's a direct equality check.
 
-
-local function GetLocalPlayerID()
-    local playerID = Game.GetLocalPlayer()
-    if playerID == nil or playerID < 0 then return nil end
-    return playerID
-end
 
 local function CloseGoalsList()
     if mgr then
@@ -114,7 +109,7 @@ local function OpenGoalsListFocusedOn(goalId)
 end
 
 local function SendGoalNotification(goalId, notificationType)
-    local playerID = GetLocalPlayerID()
+    local playerID = CAIGameState.GetLocalPlayerID()
     if playerID == nil then return end
     local goal = m_caiGoals[goalId]
     if goal == nil then return end
@@ -193,7 +188,7 @@ end
 --#Notification activation
 
 local function OnCAITutorialGoalNotificationActivate(playerID, notificationID)
-    if playerID ~= GetLocalPlayerID() then return end
+    if playerID ~= CAIGameState.GetLocalPlayerID() then return end
     local notification = NotificationManager.Find(playerID, notificationID)
     if notification == nil then return end
 

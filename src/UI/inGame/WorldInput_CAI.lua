@@ -1623,13 +1623,6 @@ local m_gotoTarget = nil
 
 -- Trim ASCII spaces/tabs from both ends. Never %s: it is locale-sensitive and
 -- corrupts UTF-8 under Simplified Chinese.
-local function TrimAscii(s)
-	if s == nil then return nil end
-	s = string.gsub(s, "^[ \t]+", "")
-	s = string.gsub(s, "[ \t]+$", "")
-	return s
-end
-
 -- Classify one coordinate field: "rel"/"abs" plus its numeric value, or nil for
 -- anything that is not a bare or signed integer.
 local function ClassifyGotoField(tok)
@@ -1656,8 +1649,8 @@ local function ParseGoto(text)
 		xRaw = text
 	end
 
-	local xTok = TrimAscii(xRaw)
-	local zTok = TrimAscii(zRaw)
+	local xTok = CAIText.TrimHorizontal(xRaw)
+	local zTok = CAIText.TrimHorizontal(zRaw)
 	local xProvided = xTok ~= nil and xTok ~= ""
 	local zProvided = zTok ~= nil and zTok ~= ""
 	if not xProvided and not zProvided then

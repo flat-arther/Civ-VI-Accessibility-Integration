@@ -1,3 +1,4 @@
+include("CAIColumns")
 -- ===========================================================================
 -- GovernmentScreen accessibility variant for the Extended Policy Cards mod
 -- (Aristos). Pulled by include() from GovernmentScreen_CAI.lua only when the mod
@@ -77,26 +78,6 @@ local function BuildColumns(ctx)
     }
 end
 
--- Sort dropdown offers only the sortable columns whose order the tree does not
--- already imply. The tree groups by type, so "sort by type" is dropped.
-local function BuildSortOptions(columns)
-    local options = {}
-    for _, column in ipairs(columns) do
-        if column.sortKey and column.key ~= "type" then
-            local header = column.header()
-            options[#options + 1] = {
-                label = header .. ", " .. Locale.Lookup(column.sortAscendingDescription),
-                value = { column = column.key, ascending = true },
-            }
-            options[#options + 1] = {
-                label = header .. ", " .. Locale.Lookup(column.sortDescendingDescription),
-                value = { column = column.key, ascending = false },
-            }
-        end
-    end
-    return options
-end
-
 -- ---------------------------------------------------------------------------
 -- Panel builder shared by the slot picker and the read-only viewer.
 --   opts.id        stack id (ctx.PICKER_ID or ctx.ALL_POLICIES_ID)
@@ -122,13 +103,6 @@ local function BuildPanel(ctx, opts)
             end
         end
         return rows
-    end
-
-    local function FindColumn(key)
-        for _, column in ipairs(columns) do
-            if column.key == key then return column end
-        end
-        return columns[1]
     end
 
     -- Category (slot) index for a policy, used to group tree items.
@@ -183,7 +157,7 @@ local function BuildPanel(ctx, opts)
             Label = function()
                 local parts = { PolicyLabel(ctx, pt) }
                 local impact = ctx.GetPolicyEffect(pt)
-                if impact ~= "" then parts[#parts + 1] = impact end
+                CAIText.AppendIfNonEmpty(parts, impact)
                 return table.concat(parts, ", ")
             end,
             Tooltip = function() return ctx.GetPolicyDescription(pt) end,
@@ -210,7 +184,7 @@ local function BuildPanel(ctx, opts)
         local capture = mgr:CaptureFocusKey(tree)
         tree:ClearChildren()
 
-        local column = FindColumn(sort.column)
+        local column = (CAIColumns.Find(columns, sort.column) or columns[1])
         local ascending = sort.ascending
         local function SortPolicies(list)
             table.sort(list, function(a, b)
@@ -271,7 +245,10 @@ local function BuildPanel(ctx, opts)
         FocusKey = "epc:sort",
         HiddenPredicate = function() return viewMode ~= "tree" end,
     })
-    local sortOptions = BuildSortOptions(columns)
+    -- The tree already groups by type, so omit that redundant sort choice.
+    local sortOptions = CAIColumns.BuildSortOptions(columns, {
+        separator = ", ", includeColumn = function(column) return column.sortKey and column.key ~= "type" end,
+    })
     sortDropdown:SetOptions(sortOptions)
     for i, opt in ipairs(sortOptions) do
         if opt.value.column == sort.column and opt.value.ascending == sort.ascending then

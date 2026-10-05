@@ -1,3 +1,4 @@
+include("CAIColumns")
 -- qd_dealpopup_CAI.lua
 --
 -- Accessibility shell for the Quick Deals mod (wltk). Quick Deals replaces the
@@ -202,27 +203,6 @@ local function BuildOfferColumns(tabKey)
 end
 
 -- Sort dropdown options mirror the sortable columns (Reports pattern).
-local function BuildSortOptions(tabKey)
-    local options = {
-        { label = Locale.Lookup("LOC_CAI_DATATABLE_SORT_NATURAL"),
-          value = { column = "natural", ascending = true } },
-    }
-    for _, column in ipairs(BuildOfferColumns(tabKey)) do
-        if column.sortKey then
-            local header = column.header()
-            table.insert(options, {
-                label = header .. ", " .. Locale.Lookup(column.sortAscendingDescription),
-                value = { column = column.key, ascending = true },
-            })
-            table.insert(options, {
-                label = header .. ", " .. Locale.Lookup(column.sortDescendingDescription),
-                value = { column = column.key, ascending = false },
-            })
-        end
-    end
-    return options
-end
-
 -- ===========================================================================
 --  Inline amount editor (Sale offer edit / Exchange amount edit)
 -- ===========================================================================
@@ -512,7 +492,9 @@ local function BuildOfferSection(page, tabKey)
         FocusKey = tabKey .. ":sort",
         HiddenPredicate = function() return m_viewMode ~= "list" end,
     })
-    local sortOptions = BuildSortOptions(tabKey)
+    local sortOptions = CAIColumns.BuildSortOptions(BuildOfferColumns(tabKey), {
+        natural = { column = "natural", ascending = true }, separator = ", ",
+    })
     ui.sortDropdown:SetOptions(sortOptions)
     -- Start on Natural order (option 1) so the dropdown isn't blank; natural is the
     -- order Quick Deals already sorts offers into (its default per-unit ranking).

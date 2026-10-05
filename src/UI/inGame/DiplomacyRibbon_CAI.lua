@@ -1,3 +1,6 @@
+include("CAIColumns")
+include("CAIGameState")
+include("CAICollection")
 include("caiUtils")
 include("Civ6Common")
 local info             = ExposedMembers.CAIInfo or {}
@@ -75,36 +78,12 @@ local m_columns = {}
 local m_sortOptions = {}
 
 
-local function GetLocalPlayer()
-    local playerID = Game.GetLocalPlayer()
-    if playerID == nil or playerID < 0 then return nil, nil end
-    return playerID, Players[playerID]
-end
-
 local function FormatValuePerTurn(value)
     if value == 0 then
         return Locale.ToNumber(value)
     else
         return Locale.Lookup("{1: number +#,###.#;-#,###.#}", value)
     end
-end
-
-local function FormatBalance(value)
-    return Locale.ToNumber(value, "#,###.#")
-end
-
-local function FormatRatePerTurn(value)
-    return Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", value)
-end
-
-local function JoinNonEmpty(parts, separator)
-    local result = {}
-    for _, v in ipairs(parts) do
-        if v and v ~= "" then
-            table.insert(result, v)
-        end
-    end
-    return table.concat(result, separator)
 end
 
 local function HasCongressButton()
@@ -139,7 +118,7 @@ end
 
 local function GetCongressTooltip()
     local parts = {}
-    local _, player = GetLocalPlayer()
+    local _, player = CAIGameState.GetLocalPlayer()
     if not player then return end
 
     if not IsExpansion2Active() then return end
@@ -147,8 +126,8 @@ local function GetCongressTooltip()
     local favorPerTurn = player:GetFavorPerTurn()
     table.insert(parts, Locale.Lookup("LOC_CAI_TOP_PANEL_FAVOR") .. ": "
         .. Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
-            FormatBalance(playerFavor),
-            FormatRatePerTurn(FormatValuePerTurn(favorPerTurn))))
+            CAIText.FormatBalance(playerFavor),
+            CAIText.FormatRatePerTurn(FormatValuePerTurn(favorPerTurn))))
 
     if HasCongressButton() then
         if IsCongressInSession() then
@@ -163,11 +142,11 @@ local function GetCongressTooltip()
             table.insert(parts, Locale.Lookup("LOC_WORLD_CONGRESS_HUD_BAR_TIME_UNTIL_NEXT_SESSION", turnsLeft))
         end
     end
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function SpeakCongressDetails()
-    local _, player = GetLocalPlayer()
+    local _, player = CAIGameState.GetLocalPlayer()
     if not player or not IsExpansion2Active() then return end
     local favor = player:GetFavor()
     local favorPerTurn = player:GetFavorPerTurn()
@@ -191,7 +170,7 @@ local function SpeakCongressDetails()
         else
             table.insert(parts, favorLabel .. ": "
                 .. Locale.Lookup("LOC_CAI_TOP_PANEL_BALANCE_AND_RATE",
-                    FormatBalance(favor), FormatRatePerTurn(FormatValuePerTurn(favorPerTurn))))
+                    CAIText.FormatBalance(favor), CAIText.FormatRatePerTurn(FormatValuePerTurn(favorPerTurn))))
         end
     else
         parts[1] = favorLabel .. ": " .. parts[1]
@@ -269,7 +248,7 @@ local function GetLeaderLabel(playerID, localPlayerID, includeRelationship)
         if Players[playerID]:IsTurnActive() then
             table.insert(parts, Locale.Lookup("LOC_CAI_DIPLO_RIBBON_ACTIVE_TURN"))
         end
-        return JoinNonEmpty(parts, ", ")
+        return CAIText.JoinNonEmpty(parts, ", ")
     end
 
     local parts = {}
@@ -305,7 +284,7 @@ local function GetLeaderLabel(playerID, localPlayerID, includeRelationship)
         table.insert(parts, Locale.Lookup("LOC_HUD_RIBBON_REDDEATH_ELIMINATED"))
     end
 
-    return JoinNonEmpty(parts, ", ")
+    return CAIText.JoinNonEmpty(parts, ", ")
 end
 
 local function GetLeaderTooltip(playerID, localPlayerID)
@@ -319,7 +298,7 @@ local function GetLeaderTooltip(playerID, localPlayerID)
                 Locale.Lookup(category.Name), pPlayer:GetCategoryScore(category.Index)))
         end
         table.insert(parts, Locale.Lookup("LOC_CAI_DIPLO_RIBBON_SCORE", Round(pPlayer:GetScore())))
-        return JoinNonEmpty(parts, "[NEWLINE]")
+        return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
     end
 
     if IsMaskedPlayer(playerID, localPlayerID) then return "" end
@@ -365,7 +344,7 @@ local function GetLeaderTooltip(playerID, localPlayerID)
         table.insert(parts, Locale.Lookup("LOC_CAI_DIPLO_RIBBON_FAITH", Round(pPlayer:GetReligion():GetFaithBalance())))
     end
 
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 -- ============================================================================
@@ -409,15 +388,6 @@ local function RelationshipSortKey(playerID, localPlayerID)
         end
     end
     return rank
-end
-
-local function CompareSortValues(a, b)
-    if a == b then return 0 end
-    if a == nil then return 1 end
-    if b == nil then return -1 end
-    if type(a) == "number" and type(b) == "number" then return a < b and -1 or 1 end
-    if type(a) == "boolean" and type(b) == "boolean" then return a and 1 or -1 end
-    return Locale.Compare(tostring(a), tostring(b))
 end
 
 -- ============================================================================
@@ -598,7 +568,7 @@ local function GetOrderedListPlayers()
         naturalIndex[playerID] = index
     end
     table.sort(ordered, function(a, b)
-        local cmp = CompareSortValues(keys[a], keys[b])
+        local cmp = CAICollection.CompareTypedValues(keys[a], keys[b])
         if not m_sortAscending then cmp = -cmp end
         if cmp ~= 0 then return cmp < 0 end
         return naturalIndex[a] < naturalIndex[b]
@@ -609,29 +579,6 @@ end
 -- ============================================================================
 -- Sort dropdown
 -- ============================================================================
-
-local function BuildSortOptions(columns)
-    local options = {
-        {
-            label = Locale.Lookup("LOC_CAI_DATATABLE_SORT_NATURAL"),
-            value = { column = nil, ascending = false },
-        },
-    }
-    for _, column in ipairs(columns) do
-        if column.sortKey then
-            local header = type(column.header) == "function" and column.header() or column.header or ""
-            table.insert(options, {
-                label = header .. "[NEWLINE]" .. Locale.Lookup(column.sortAscendingDescription),
-                value = { column = column.key, ascending = true },
-            })
-            table.insert(options, {
-                label = header .. "[NEWLINE]" .. Locale.Lookup(column.sortDescendingDescription),
-                value = { column = column.key, ascending = false },
-            })
-        end
-    end
-    return options
-end
 
 local function SyncSortDropdown()
     if not m_sort then return end
@@ -842,7 +789,9 @@ local function CAI_RebuildViews()
         end
         m_sortColumn = sortColumn
         m_sortAscending = sortAscending == true
-        m_sortOptions = BuildSortOptions(m_columns)
+        m_sortOptions = CAIColumns.BuildSortOptions(m_columns, {
+            natural = { ascending = false }, separator = "[NEWLINE]",
+        })
         if m_sort then
             m_sort:SetOptions(m_sortOptions)
             SyncSortDropdown()
@@ -861,7 +810,7 @@ end
 
 local function OpenPanel()
     if not mgr then return end
-    local _, player = GetLocalPlayer()
+    local _, player = CAIGameState.GetLocalPlayer()
     if not player then
         Speak(Locale.Lookup("LOC_CAI_UI_DIPLOMACY_UNAVAILABLE"))
         return

@@ -40,20 +40,6 @@ local m_cachedMissions      = {}
 -- Helpers
 -- ============================================================================
 
-local function AppendIfNonEmpty(parts, value)
-    if value and value ~= "" then
-        parts[#parts + 1] = value
-    end
-end
-
-local function JoinNonEmpty(parts, sep)
-    local out = {}
-    for _, part in ipairs(parts) do
-        if part and part ~= "" then out[#out + 1] = part end
-    end
-    return table.concat(out, sep)
-end
-
 local function GetCityForSpy(spy)
     local spyPlot = Map.GetPlot(spy:GetX(), spy:GetY())
     if spyPlot then
@@ -230,14 +216,14 @@ local function BuildSpyTooltip(entry)
     if entry.operationType ~= -1 and entry.operationInfo then
         if entry.city then
             if IsCounterspyOperation(entry.operationType) then
-                AppendIfNonEmpty(parts, Locale.Lookup("LOC_ESPIONAGECHOOSER_COUNTERSPY", entry.districtName or ""))
+                CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_ESPIONAGECHOOSER_COUNTERSPY", entry.districtName or ""))
             else
-                AppendIfNonEmpty(parts, GetFormattedOperationDetailText(entry.operationInfo, spy, entry.city))
+                CAIText.AppendIfNonEmpty(parts, GetFormattedOperationDetailText(entry.operationInfo, spy, entry.city))
             end
         end
 
         if entry.districtName then
-            AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_MISSION_DISTRICT", entry.districtName))
+            CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_MISSION_DISTRICT", entry.districtName))
         end
 
         local turnsRemaining = spy:GetSpyOperationEndTurn() - Game.GetCurrentGameTurn()
@@ -251,7 +237,7 @@ local function BuildSpyTooltip(entry)
         end
     end
 
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function BuildOffMapLabel(entry)
@@ -281,13 +267,13 @@ end
 
 local function BuildCapturedOwnTooltip(entry)
     local parts = {}
-    AppendIfNonEmpty(parts, entry.capturingCivName)
+    CAIText.AppendIfNonEmpty(parts, entry.capturingCivName)
     if entry.tradeDisabled then
-        AppendIfNonEmpty(parts, entry.disabledReason)
+        CAIText.AppendIfNonEmpty(parts, entry.disabledReason)
     else
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_ESPIONAGEOVERVIEW_ASK_FOR_TRADE"))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_ESPIONAGEOVERVIEW_ASK_FOR_TRADE"))
     end
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function BuildCapturedEnemyLabel(entry)
@@ -325,12 +311,12 @@ end
 local function BuildMissionTooltip(entry)
     local parts = {}
     if entry.outcome then
-        AppendIfNonEmpty(parts, entry.outcome.Description)
+        CAIText.AppendIfNonEmpty(parts, entry.outcome.Description)
         if entry.outcome.SpyStatus ~= "" then
-            AppendIfNonEmpty(parts, entry.outcome.SpyStatus)
+            CAIText.AppendIfNonEmpty(parts, entry.outcome.SpyStatus)
         end
     end
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 -- ============================================================================
@@ -521,7 +507,7 @@ local function BuildCityCategoryTooltip(group)
             " " .. table.concat(otherDistricts, "[NEWLINE]")
     end
 
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 -- ============================================================================

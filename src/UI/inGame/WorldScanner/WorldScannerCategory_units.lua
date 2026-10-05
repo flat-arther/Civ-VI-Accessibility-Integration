@@ -1,3 +1,4 @@
+include("CAIGameState")
 include("inGameHelpers_CAI")
 
 local Utils = CAIWorldScannerUtils
@@ -52,30 +53,6 @@ CAIWorldScannerCategory_NeutralUnits = CreateUnitsCategory(CATEGORY_IDS.Neutral,
 CAIWorldScannerCategory_EnemyUnits = CreateUnitsCategory(CATEGORY_IDS.Enemy, "LOC_CAI_WORLD_SCANNER_CATEGORY_ENEMY_UNITS")
 
 
-local function IsReligiousUnit(unit)
-    return unit ~= nil and unit:GetReligiousStrength() > 0
-end
-
-local function IsReligiousAlliance(diplomacy, ownerID)
-    local religiousAlliance = GameInfo.Alliances ~= nil
-        and GameInfo.Alliances["ALLIANCE_RELIGIOUS"] or nil
-    return religiousAlliance ~= nil
-        and diplomacy ~= nil
-        and diplomacy:GetAllianceType(ownerID) == religiousAlliance.Index
-end
-
-local function HasLocalMajorityReligion(unit, localPlayerID)
-    local localPlayer = localPlayerID ~= nil and Players[localPlayerID] or nil
-    local localReligion = localPlayer ~= nil and localPlayer:GetReligion() or nil
-    if localReligion == nil then
-        return false
-    end
-
-    local religionType = unit:GetReligionType()
-    local localReligionType = localReligion:GetReligionInMajorityOfCities()
-    return religionType ~= nil and religionType >= 0 and religionType == localReligionType
-end
-
 local function GetUnitCategoryId(context, unit)
     local ownerID = unit ~= nil and unit:GetOwner() or nil
     local localPlayerID = Utils.GetLocalPlayerID(context)
@@ -107,9 +84,9 @@ local function GetUnitCategoryId(context, unit)
     end
 
     local diplomacy = Utils.GetDiplomacy(context)
-    if IsReligiousUnit(unit) then
-        if IsReligiousAlliance(diplomacy, ownerID)
-            or HasLocalMajorityReligion(unit, localPlayerID) then
+    if CAIGameState.IsReligiousUnit(unit) then
+        if CAIGameState.IsReligiousAlliance(diplomacy, ownerID)
+            or CAIGameState.HasLocalMajorityReligion(unit, localPlayerID) then
             return CATEGORY_IDS.Neutral
         end
 

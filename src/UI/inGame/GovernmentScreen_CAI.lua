@@ -114,22 +114,9 @@ local function ControlText(control)
     return ""
 end
 
-local function JoinNonEmpty(parts, separator)
-    local out = {}
-    for _, part in ipairs(parts) do
-        if part and part ~= "" then table.insert(out, part) end
-    end
-    return table.concat(out, separator)
-end
-
-local function CollapseTooltipNewlines(text)
-    if not text or text == "" then return "" end
-    return (text:gsub("%[NEWLINE%][ \t\r\n]*%[NEWLINE%]", "[NEWLINE]"))
-end
-
 local function ComparableText(text)
     -- ASCII whitespace only; %s is locale-sensitive and corrupts UTF-8 (0xA0).
-    return CollapseTooltipNewlines(text):gsub("[ \t\r\n]+", " "):gsub("^[ \t\r\n]+", ""):gsub("[ \t\r\n]+$", "")
+    return CAIText.TrimAscii(CAIText.CollapseWhitespace(CAIText.CollapseNewlinePairs(text)))
 end
 
 local function GetLocalPlayerCulture()
@@ -307,7 +294,7 @@ end
 
 local function GetPolicyTooltip(policyType)
     -- Impact reads after the slot (type) and age, before the flavor description.
-    return JoinNonEmpty({
+    return CAIText.JoinNonEmpty({
         GetPolicySlotLabel(policyType),
         GetPolicyAgeIndicator(policyType),
         GetPolicyEffect(policyType),
@@ -557,7 +544,7 @@ local function GetGovernmentDetailParts(governmentType)
     if government.BonusAccumulatedText and government.BonusAccumulatedText ~= "" then
         local shortText = Locale.Lookup(government.BonusAccumulatedText)
         local fullText = government.BonusAccumulatedTooltip and
-            CollapseTooltipNewlines(Locale.Lookup(government.BonusAccumulatedTooltip)) or ""
+            CAIText.CollapseNewlinePairs(Locale.Lookup(government.BonusAccumulatedTooltip)) or ""
         local displayText = shortText
         if fullText ~= "" and ComparableText(fullText) ~= ComparableText(shortText) then
             displayText = fullText
@@ -566,7 +553,7 @@ local function GetGovernmentDetailParts(governmentType)
     end
     if government.StatsTooltip and government.StatsTooltip ~= "" then
         table.insert(parts,
-            Locale.Lookup("LOC_CAI_GOVERNMENT_STATS", CollapseTooltipNewlines(government.StatsTooltip)))
+            Locale.Lookup("LOC_CAI_GOVERNMENT_STATS", CAIText.CollapseNewlinePairs(government.StatsTooltip)))
     elseif government.StatsText and government.StatsText ~= "" then
         table.insert(parts, Locale.Lookup("LOC_CAI_GOVERNMENT_STATS", government.StatsText))
     end
@@ -918,7 +905,7 @@ local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
             if IS_PIRATES_SCENARIO then
                 return Locale.Lookup("LOC_CAI_PIRATES_RELIC_SLOT", slotOrdinal, policyLabel)
             elseif IsBlackDeathPapalSlot(slotIndex) then
-                return JoinNonEmpty({
+                return CAIText.JoinNonEmpty({
                     Locale.Lookup("LOC_GOVT_PAPAL_SLOT_NAME"),
                     policyLabel,
                 }, "[NEWLINE]")
@@ -934,7 +921,7 @@ local function CreatePolicySlotWidget(slotIndex, rowIndex, slotOrdinal)
             if policyType ~= CAI_EMPTY_POLICY_TYPE then
                 table.insert(parts, GetPolicyTooltip(policyType))
             end
-            return JoinNonEmpty(parts, "[NEWLINE]")
+            return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
         end,
         FocusKey = "slot:" .. tostring(slotIndex),
     })
@@ -1440,7 +1427,7 @@ function info.GetGovernmentInfo()
     end
 
     if #lines > 0 then
-        return JoinNonEmpty(lines, "[NEWLINE]")
+        return CAIText.JoinNonEmpty(lines, "[NEWLINE]")
     end
 end
 

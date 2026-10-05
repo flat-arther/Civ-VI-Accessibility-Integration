@@ -1,3 +1,4 @@
+include("CAIControl")
 include("caiUtils")
 include("EspionagePopup")
 
@@ -7,42 +8,11 @@ local m_dialog = nil ---@type UIWidget|nil
 local m_caiOutcomeLines = {}
 local m_spyCanPromote = false
 
-local function Visible(control)
-    return control ~= nil and (not control.IsHidden or not control:IsHidden())
-end
-
-local function Text(control)
-    if control and control.GetText then
-        local value = control:GetText()
-        if value and value ~= "" then
-            return value
-        end
-    end
-    return nil
-end
-
-local function JoinNonEmpty(parts)
-    local out = {}
-    for _, part in ipairs(parts or {}) do
-        if part and part ~= "" then
-            table.insert(out, part)
-        end
-    end
-    return table.concat(out, "[NEWLINE]")
-end
-
-local function LabelValue(label, value)
-    if label and label ~= "" and value and value ~= "" then
-        return label .. ": " .. value
-    end
-    return label or value
-end
-
 local function AddRow(rows, idPrefix, label, parts)
-    local line = JoinNonEmpty(parts)
+    local line = CAIText.JoinLines(parts)
     if line == "" then return end
 
-    local fullLine = JoinNonEmpty({ label, line })
+    local fullLine = CAIText.JoinLines({ label, line })
     if fullLine == "" then return end
 
     table.insert(rows, mgr:CreateWidget(mgr:GenerateWidgetId(idPrefix), "StaticText", {
@@ -60,7 +30,7 @@ end
 
 local function MakeButton(native, idPrefix)
     local btn = mgr:CreateWidget(mgr:GenerateWidgetId(idPrefix), "Button", {
-        Label = function() return Text(native) or "" end,
+        Label = function() return CAIControl.ReadText(native) or "" end,
         HiddenPredicate = function() return native == nil or native:IsHidden() end,
         DisabledPredicate = function() return native ~= nil and native:IsDisabled() end,
     })
@@ -73,18 +43,18 @@ local function MakeButton(native, idPrefix)
 end
 
 local function AddVisibleButton(buttons, native, idPrefix)
-    if Visible(native) then
+    if CAIControl.IsVisible(native) then
         table.insert(buttons, MakeButton(native, idPrefix))
     end
 end
 
 local function BuildObjectiveDurationRow(rows)
     local parts = {}
-    if Visible(Controls.MissionObjectiveContainer) then
-        table.insert(parts, Text(Controls.MissionObjectiveLabel))
+    if CAIControl.IsVisible(Controls.MissionObjectiveContainer) then
+        table.insert(parts, CAIControl.ReadText(Controls.MissionObjectiveLabel))
     end
-    if Visible(Controls.MissionDurationContainer) then
-        table.insert(parts, Text(Controls.MissionDurationLabel))
+    if CAIControl.IsVisible(Controls.MissionDurationContainer) then
+        table.insert(parts, CAIControl.ReadText(Controls.MissionDurationLabel))
     end
 
     AddRow(
@@ -96,7 +66,7 @@ local function BuildObjectiveDurationRow(rows)
 end
 
 local function BuildPossibleOutcomesRow(rows)
-    if not Visible(Controls.PossibleOutcomesContainer) then return end
+    if not CAIControl.IsVisible(Controls.PossibleOutcomesContainer) then return end
     AddRow(
         rows,
         "CAIEspionagePopupOutcomes",
@@ -106,29 +76,29 @@ local function BuildPossibleOutcomesRow(rows)
 end
 
 local function BuildMissionOutcomeRow(rows)
-    if not Visible(Controls.MissionOutcomeContainer) then return end
+    if not CAIControl.IsVisible(Controls.MissionOutcomeContainer) then return end
     AddRow(
         rows,
         "CAIEspionagePopupOutcome",
         Locale.Lookup("LOC_ESPIONAGEPOPUP_MISSION_OUTCOME"),
         {
-            Text(Controls.MissionOutcomeLabel),
-            Text(Controls.MissionOutcomeDescription),
+            CAIControl.ReadText(Controls.MissionOutcomeLabel),
+            CAIControl.ReadText(Controls.MissionOutcomeDescription),
         }
     )
 end
 
 local function BuildRewardsRow(rows)
-    if not Visible(Controls.MissionRewardsContainer) then return end
+    if not CAIControl.IsVisible(Controls.MissionRewardsContainer) then return end
 
     local parts = {}
 
     if m_spyCanPromote then
-        table.insert(parts, LabelValue(Text(Controls.SpyPromotionLabel), Text(Controls.SpyPromotionDescription)))
+        table.insert(parts, CAIText.LabelValue(CAIControl.ReadText(Controls.SpyPromotionLabel), CAIControl.ReadText(Controls.SpyPromotionDescription)))
     end
 
-    if Visible(Controls.SpyLootGrid) then
-        table.insert(parts, LabelValue(Text(Controls.SpyLootRewardLabel), Text(Controls.SpyLootRewardDescription)))
+    if CAIControl.IsVisible(Controls.SpyLootGrid) then
+        table.insert(parts, CAIText.LabelValue(CAIControl.ReadText(Controls.SpyLootRewardLabel), CAIControl.ReadText(Controls.SpyLootRewardDescription)))
     end
 
     AddRow(
@@ -140,14 +110,14 @@ local function BuildRewardsRow(rows)
 end
 
 local function BuildConsequencesRow(rows)
-    if not Visible(Controls.MissionConsequencesContainer) then return end
+    if not CAIControl.IsVisible(Controls.MissionConsequencesContainer) then return end
 
     local parts = {
-        LabelValue(Text(Controls.RelationshipDamageTitle), Text(Controls.RelationshipDamageDescription)),
+        CAIText.LabelValue(CAIControl.ReadText(Controls.RelationshipDamageTitle), CAIControl.ReadText(Controls.RelationshipDamageDescription)),
     }
 
-    if Visible(Controls.LostAgentGrid) then
-        table.insert(parts, LabelValue(Text(Controls.LostAgentTitle), Text(Controls.LostAgentDescription)))
+    if CAIControl.IsVisible(Controls.LostAgentGrid) then
+        table.insert(parts, CAIText.LabelValue(CAIControl.ReadText(Controls.LostAgentTitle), CAIControl.ReadText(Controls.LostAgentDescription)))
     end
 
     AddRow(
@@ -159,24 +129,24 @@ local function BuildConsequencesRow(rows)
 end
 
 local function BuildRenewableMissionRow(rows)
-    if not Visible(Controls.RenewableMissionContainer) then return end
+    if not CAIControl.IsVisible(Controls.RenewableMissionContainer) then return end
 
     local parts = {
-        Text(Controls.RenewableMissionDetails),
+        CAIControl.ReadText(Controls.RenewableMissionDetails),
     }
 
-    local districtName = Text(Controls.MissionDistrictName)
+    local districtName = CAIControl.ReadText(Controls.MissionDistrictName)
     if districtName then
         table.insert(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_MISSION_DISTRICT", districtName))
     end
 
-    local turns = Text(Controls.TurnsToCompleteLabel)
+    local turns = CAIControl.ReadText(Controls.TurnsToCompleteLabel)
     if turns then
         table.insert(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_MISSION_TURNS", turns))
     end
 
-    local probability = Text(Controls.ProbabilityLabel)
-    if Visible(Controls.ProbabilityGrid) and probability then
+    local probability = CAIControl.ReadText(Controls.ProbabilityLabel)
+    if CAIControl.IsVisible(Controls.ProbabilityGrid) and probability then
         table.insert(parts, Locale.Lookup("LOC_CAI_ESPIONAGE_MISSION_PROBABILITY", probability))
     end
 
@@ -218,7 +188,7 @@ local function BuildDialog()
     if #buttons == 0 then return end
 
     m_dialog = mgr.WidgetHelpers.MakeGeneralDialog(
-        function() return Text(Controls.MissionTitle) or "" end,
+        function() return CAIControl.ReadText(Controls.MissionTitle) or "" end,
         buttons,
         BuildContentRows(),
         1
@@ -244,16 +214,14 @@ AddOutcomePercent = WrapFunc(AddOutcomePercent, function(orig, percent, percentL
     orig(percent, percentLabel)
 
     local label = percentLabel and Locale.Lookup(percentLabel) or nil
-    table.insert(m_caiOutcomeLines, JoinNonEmpty({ tostring(percent) .. "%", label }))
+    table.insert(m_caiOutcomeLines, CAIText.JoinLines({ tostring(percent) .. "%", label }))
 end)
 
 AddOutcomeLabel = WrapFunc(AddOutcomeLabel, function(orig, labelString)
     orig(labelString)
 
     local label = labelString and Locale.Lookup(labelString) or nil
-    if label and label ~= "" then
-        table.insert(m_caiOutcomeLines, label)
-    end
+    CAIText.AppendIfNonEmpty(m_caiOutcomeLines, label)
 end)
 
 local function FindSpyByName(playerID, spyName)

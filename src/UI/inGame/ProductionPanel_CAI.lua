@@ -1,3 +1,5 @@
+include("CAIModSupport")
+include("CAIControl")
 include("caiUtils")
 include("inGameHelpers_CAI")
 
@@ -11,18 +13,7 @@ include("inGameHelpers_CAI")
 -- include() cannot resolve BBG's own copy; we include CAI's vendored verbatim copy
 -- (registered in CAI's <Files> + <ImportFiles>), which internally includes vanilla
 -- ProductionPanel just like BBG's original.
-local BBG_MOD_IDS = {
-    "cb84075d-5007-4207-b662-c35a5f7be240", -- iElden (current)
-    "cb84075d-5007-4207-b662-c35a5f7be217", -- codenaugh
-    "cb84075d-5007-4207-b662-c35a5f7be231", -- beta
-}
-local function IsBBGActive()
-    for _, id in ipairs(BBG_MOD_IDS) do
-        if Modding.IsModActive(id) then return true end
-    end
-    return false
-end
-if IsBBGActive() then
+if CAIModSupport.IsBBGActive() then
     include("ProductionPanel_BetterBalancedGame_CAIBase")
 else
     include("ProductionPanel")
@@ -89,13 +80,6 @@ local m_vanilla      = {
 -- ===========================================================================
 -- Helpers
 -- ===========================================================================
-local function ControlIsHidden(c) return c and c.IsHidden and c:IsHidden() or false end
-local function ControlIsDisabled(c) return c and c.IsDisabled and c:IsDisabled() or false end
-local function ControlText(c)
-    if c and c.GetText then return c:GetText() or "" end
-    return ""
-end
-
 function PlayMenuHover() UI.PlaySound("Main_Menu_Mouse_Over") end
 
 function WithFormationSuffix(name, formation)
@@ -163,18 +147,18 @@ local function IsItemRowDisabled(item, tab, formation)
     if formation == "corps" then d = item and item.CorpsDisabled or false end
     if formation == "army" then d = item and item.ArmyDisabled or false end
     local inst = GetInstanceForItem(item, tab)
-    return d or ControlIsDisabled(GetInstanceActionControl(inst, formation))
+    return d or CAIControl.IsDisabled(GetInstanceActionControl(inst, formation))
 end
 
 local function IsItemRowHidden(item, tab, formation)
     local inst = GetInstanceForItem(item, tab)
     if not inst then return false end
     if formation == "corps" then
-        return ControlIsHidden(inst.CorpsButtonContainer)
+        return CAIControl.IsHidden(inst.CorpsButtonContainer)
     elseif formation == "army" then
-        return ControlIsHidden(inst.ArmyButtonContainer)
+        return CAIControl.IsHidden(inst.ArmyButtonContainer)
     end
-    return ControlIsHidden(inst.Root) or ControlIsHidden(inst.Button)
+    return CAIControl.IsHidden(inst.Root) or CAIControl.IsHidden(inst.Button)
 end
 
 local function IsProductionTutorialMode()
@@ -338,11 +322,10 @@ local function ExtractFailureReasons(item)
     for reason in string.gmatch(item.ToolTip, "%[COLOR:Red%](.-)%[ENDCOLOR%]") do
         local t = string.gsub(reason, "%[NEWLINE%]", " ")
         t = string.gsub(t, "^[ \t\r\n]*(.-)[ \t\r\n]*$", "%1")
-        if t ~= "" then table.insert(out, t) end
+        CAIText.AppendIfNonEmpty(out, t)
     end
     return out
 end
-
 
 local function BuildItemDetail(item, formation, tab)
     local class = GetProductionItemClass(item)
@@ -459,10 +442,10 @@ end
 
 local function FormatRowLabel(item, formation, tab)
     local parts = {}
-    AppendIfNonEmpty(parts, WithFormationSuffix(ReadRowName(item, formation), formation))
+    CAIText.AppendIfNonEmpty(parts, WithFormationSuffix(ReadRowName(item, formation), formation))
     if not formation and m_state.recommended[item.Hash]
         and not IsItemRowDisabled(item, tab, formation) then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_RECOMMENDED"))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_RESEARCH_RECOMMENDED"))
     end
     return table.concat(parts, "[NEWLINE]")
 end
@@ -630,7 +613,7 @@ local function ReadCurrentProductionLabel(readTurns, city)
     if city then
         name = item and Locale.Lookup(item.Name or "") or ""
     else
-        name = ControlText(Controls.CurrentProductionName)
+        name = CAIControl.Text(Controls.CurrentProductionName)
     end
     if name == "" then return Locale.Lookup("LOC_PRODUCTION_MANAGER_NO_CURRENT_PRODUCTION") end
     name = Locale.Lookup("LOC_CITY_BANNER_PRODUCING", name)
@@ -645,7 +628,7 @@ local function ReadCurrentProductionLabel(readTurns, city)
     end
     local str = name
     if not city then
-        local status = ControlText(Controls.CurrentProductionStatus)
+        local status = CAIControl.Text(Controls.CurrentProductionStatus)
         if status ~= "" then str = str .. ", " .. status end
     end
     if turns then
@@ -686,42 +669,12 @@ end
 
 local function RemoveCurrentProductionFromQueue()
     if not HasActiveCurrentProduction() then return true end
-    local name = ControlText(Controls.CurrentProductionName)
+    local name = CAIControl.Text(Controls.CurrentProductionName)
     if name == "" then return true end
     UI.PlaySound("Play_UI_Click")
     Speak(Locale.Lookup("LOC_CAI_PRODUCTION_CURRENT_REMOVED", name))
     RemoveQueueItem(0)
     return true
-end
-
-local function CreateCurrentProductionRow()
-    local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIProductionPanelCurrent"), "TreeItem", {
-        Label             = function() return ReadCurrentProductionLabel() end,
-        Tooltip           = ReadCurrentProductionTooltip,
-        HiddenPredicate   = function()
-            return ControlIsHidden(Controls.CurrentProductionContainer)
-                or ControlIsHidden(Controls.CurrentProductionButton)
-        end,
-        DisabledPredicate = function() return ControlIsDisabled(Controls.CurrentProductionButton) end,
-        FocusKey          = "current",
-    })
-    row:SetFocusSound("Main_Menu_Mouse_Over")
-    row:On("activate", function(w)
-        if w:IsDisabled() then return end
-        if ControlIsDisabled(Controls.CurrentProductionButton) then return end
-        if Controls.CurrentProductionButton.DoLeftClick then
-            Controls.CurrentProductionButton:DoLeftClick()
-        end
-    end)
-    row:AddInputBindings({
-        {
-            Key         = Keys.VK_DELETE,
-            MSG         = KeyEvents.KeyUp,
-            Description = "LOC_CAI_KB_REMOVE_FROM_QUEUE",
-            Action      = RemoveCurrentProductionFromQueue,
-        },
-    })
-    return row
 end
 
 -- ===========================================================================
@@ -946,7 +899,7 @@ local function CreateQueueRow(queueIndex, name)
 end
 
 local function CreateQueueCurrentRow()
-    local currentName = ControlText(Controls.CurrentProductionName)
+    local currentName = CAIControl.Text(Controls.CurrentProductionName)
     local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIProductionPanelQueueCurrent"), "MenuItem", {
         Label    = function() return ReadCurrentProductionLabel() end,
         Tooltip  = ReadCurrentProductionTooltip,
@@ -1396,7 +1349,6 @@ local function OnPanelOpenedCAI()
     if mgr:GetWidgetById(PANEL_ID) then return end
 end
 
-
 local function OnVanillaListModeChangedCAI(listMode)
     local tab = GetTabForListMode(listMode)
     SetCAITabSilent(tab)
@@ -1414,7 +1366,6 @@ local function OnVanillaListModeChangedCAI(listMode)
         m_state.openPending = false
     end
 end
-
 
 local function CapturePlacementFocus()
     if not m_ui.panel or not mgr then return end

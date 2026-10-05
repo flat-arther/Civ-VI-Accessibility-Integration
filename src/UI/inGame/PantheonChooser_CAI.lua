@@ -13,13 +13,6 @@ local m_vanillaButtons = {}
 
 -- ============================================================================
 
-local function NormalizeText(text)
-    -- Tags and whitespace are filtered centrally in Speak()/ProcessText; keep
-    -- only nil-safety here so composed strings never concatenate a nil.
-    if not text then return "" end
-    return tostring(text)
-end
-
 -- ============================================================================
 
 local function CloseConfirmDialog()
@@ -35,7 +28,7 @@ local function OpenConfirmDialog(beliefRow, vanillaButton)
     vanillaButton:DoLeftClick()
 
     local name = Locale.Lookup(beliefRow.Name)
-    local desc = NormalizeText(Locale.Lookup(beliefRow.Description))
+    local desc = CAIText.ToString(Locale.Lookup(beliefRow.Description))
 
     local confirmBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIPan_Confirm"), "Button", {
         Label = function() return Locale.Lookup("LOC_CAI_PANTHEON_CONFIRM") end,
@@ -101,7 +94,7 @@ local function BuildPanel()
             local beliefRow = row
             local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAIPan_Belief"), "MenuItem", {
                 Label    = function() return Locale.Lookup(beliefRow.Name) end,
-                Tooltip  = function() return NormalizeText(Locale.Lookup(beliefRow.Description)) end,
+                Tooltip  = function() return CAIText.ToString(Locale.Lookup(beliefRow.Description)) end,
                 FocusKey = "pantheon:" .. tostring(beliefRow.Index),
             })
             w:On("activate", function()

@@ -566,10 +566,10 @@
       <Text>{1_Message}，{2_Turn}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_MESSAGE_BUFFER_LIST_ENTRY_WITH_LOCATION" Language="zh_Hans_CN">
-      <Text>{1_Message}，{2_Location}，{3_Turn}</Text>
+      <Text>{1_Message}，在{2_Location}，{3_Turn}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_MESSAGE_BUFFER_MESSAGE_WITH_LOCATION" Language="zh_Hans_CN">
-      <Text>{1_Message}，{2_Location}</Text>
+      <Text>{1_Message}，在{2_Location}</Text>
     </Replace>
     <Replace Tag="LOC_CAI_MESSAGE_BUFFER_TURN" Language="zh_Hans_CN">
       <Text>第{1_Turn}回合</Text>

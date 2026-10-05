@@ -1,3 +1,4 @@
+include("CAICollection")
 include("caiUtils")
 include("inGameHelpers_CAI")
 include("PlayerStateManager_CAI")
@@ -77,15 +78,6 @@ end
 
 local function LogVisibilityError(message)
     LogWarn("Reveal announcements: " .. tostring(message))
-end
-
-local function CountKeys(map)
-    local count = 0
-    for _ in pairs(map or {}) do
-        count = count + 1
-    end
-
-    return count
 end
 
 local function GetVisibilityForPlayer(playerID)
@@ -408,7 +400,7 @@ local function BootstrapKnownRevealedPlots(localPlayerID, state)
     end
 
     LogMessage("Reveal announcements bootstrapped revealed plots for player "
-        .. tostring(localPlayerID) .. ", count=" .. tostring(CountKeys(state.knownRevealedPlots)))
+        .. tostring(localPlayerID) .. ", count=" .. tostring(CAICollection.CountEntries(state.knownRevealedPlots)))
 end
 
 local function BootstrapSpecialImprovementSnapshot(localPlayerID, state, visibleOnly)
@@ -439,7 +431,7 @@ local function BootstrapSpecialImprovementSnapshot(localPlayerID, state, visible
 
     LogMessage("Reveal announcements bootstrapped special improvements for player "
         .. tostring(localPlayerID) .. ", visibleOnly=" .. tostring(visibleOnly)
-        .. ", trackedPlots=" .. tostring(CountKeys(state.specialImprovementKinds)))
+        .. ", trackedPlots=" .. tostring(CAICollection.CountEntries(state.specialImprovementKinds)))
 end
 
 -- ===========================================================================
@@ -464,9 +456,9 @@ local function EnsurePlayerInitialized(playerID, state)
     state.lastEventTime = nil
     state.initialized = true
     LogMessage("Reveal announcements initialized player " .. tostring(playerID)
-        .. " revealedPlots=" .. tostring(CountKeys(state.knownRevealedPlots))
-        .. " visibleForeignUnits=" .. tostring(CountKeys(state.previousVisibleUnits))
-        .. " trackedSpecialImprovements=" .. tostring(CountKeys(state.specialImprovementKinds)))
+        .. " revealedPlots=" .. tostring(CAICollection.CountEntries(state.knownRevealedPlots))
+        .. " visibleForeignUnits=" .. tostring(CAICollection.CountEntries(state.previousVisibleUnits))
+        .. " trackedSpecialImprovements=" .. tostring(CAICollection.CountEntries(state.specialImprovementKinds)))
 end
 
 local function ClearState(state)
@@ -544,12 +536,6 @@ local function OnDistrictVisibilityChanged()
     TouchTimer(state)
 end
 
-local function AppendLabel(list, label)
-    if label ~= nil and label ~= "" then
-        list[#list + 1] = label
-    end
-end
-
 local function CollectRevealPayload(localPlayerID, state)
     local enemyUnits, otherUnits = {}, {}
     local enemyHidden, otherHidden = {}, {}
@@ -563,10 +549,10 @@ local function CollectRevealPayload(localPlayerID, state)
             revealedCount = revealedCount + 1
 
             if not ShouldSkipRevealPayload(plot) then
-                AppendLabel(cities, GetForeignCityLabel(localPlayerID, plot))
-                AppendLabel(resources, GetVisibleResourceLabel(localPlayerID, plot))
-                AppendLabel(districts, GetForeignDistrictLabel(localPlayerID, plot))
-                AppendLabel(improvements, GetForeignImprovementLabel(localPlayerID, plot))
+                CAIText.AppendIfNonEmpty(cities, GetForeignCityLabel(localPlayerID, plot))
+                CAIText.AppendIfNonEmpty(resources, GetVisibleResourceLabel(localPlayerID, plot))
+                CAIText.AppendIfNonEmpty(districts, GetForeignDistrictLabel(localPlayerID, plot))
+                CAIText.AppendIfNonEmpty(improvements, GetForeignImprovementLabel(localPlayerID, plot))
             end
         end
     end
@@ -626,23 +612,23 @@ local function CollectRevealPayload(localPlayerID, state)
     end
 
     local revealSections = {}
-    AppendLabel(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_ENEMY", enemyUnits))
-    AppendLabel(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_UNITS", otherUnits))
-    AppendLabel(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_CITIES", cities))
-    AppendLabel(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_RESOURCES", resources))
-    AppendLabel(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_DISTRICTS", districts))
-    AppendLabel(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_IMPROVEMENTS", improvements))
+    CAIText.AppendIfNonEmpty(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_ENEMY", enemyUnits))
+    CAIText.AppendIfNonEmpty(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_UNITS", otherUnits))
+    CAIText.AppendIfNonEmpty(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_CITIES", cities))
+    CAIText.AppendIfNonEmpty(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_RESOURCES", resources))
+    CAIText.AppendIfNonEmpty(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_DISTRICTS", districts))
+    CAIText.AppendIfNonEmpty(revealSections, BuildLabeledSection("LOC_CAI_REVEAL_IMPROVEMENTS", improvements))
 
     local hiddenSections = {}
-    AppendLabel(hiddenSections, BuildLabeledSection("LOC_CAI_REVEAL_ENEMY", enemyHidden))
-    AppendLabel(hiddenSections, BuildLabeledSection("LOC_CAI_REVEAL_UNITS", otherHidden))
+    CAIText.AppendIfNonEmpty(hiddenSections, BuildLabeledSection("LOC_CAI_REVEAL_ENEMY", enemyHidden))
+    CAIText.AppendIfNonEmpty(hiddenSections, BuildLabeledSection("LOC_CAI_REVEAL_UNITS", otherHidden))
 
     local goneSections = {}
     if goneOutposts > 0 then
-        AppendLabel(goneSections, Locale.Lookup("LOC_CAI_GONE_OUTPOST_PART", goneOutposts))
+        CAIText.AppendIfNonEmpty(goneSections, Locale.Lookup("LOC_CAI_GONE_OUTPOST_PART", goneOutposts))
     end
     if goneVillages > 0 then
-        AppendLabel(goneSections, Locale.Lookup("LOC_CAI_GONE_TRIBAL_VILLAGE_PART", goneVillages))
+        CAIText.AppendIfNonEmpty(goneSections, Locale.Lookup("LOC_CAI_GONE_TRIBAL_VILLAGE_PART", goneVillages))
     end
 
     return {
@@ -727,9 +713,9 @@ local function FlushAnnouncementsForPlayer(localPlayerID, reason)
     end
 
     local lines = {}
-    AppendLabel(lines, BuildRevealLine(payload))
-    AppendLabel(lines, BuildHiddenLine(payload))
-    AppendLabel(lines, BuildGoneLine(payload))
+    CAIText.AppendIfNonEmpty(lines, BuildRevealLine(payload))
+    CAIText.AppendIfNonEmpty(lines, BuildHiddenLine(payload))
+    CAIText.AppendIfNonEmpty(lines, BuildGoneLine(payload))
 
     for _, line in ipairs(lines) do
         LuaEvents.CAIAppendToMessageBuffer(line, "reveal")

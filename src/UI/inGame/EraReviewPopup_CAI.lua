@@ -1,3 +1,4 @@
+include("CAIGameState")
 include("caiUtils")
 include("EraReviewPopup")
 local mgr = ExposedMembers.CAI_UIManager
@@ -8,18 +9,6 @@ local function RemoveDialog()
     if not mgr or not m_dialog then return end
     mgr:RemoveFromStack(m_dialog:GetId())
     m_dialog = nil
-end
-
-local function GetPlayerAgeKey(gameEras, playerID)
-    if gameEras:HasHeroicGoldenAge(playerID) then
-        return "LOC_ERA_PROGRESS_HEROIC_AGE"
-    elseif gameEras:HasGoldenAge(playerID) then
-        return "LOC_ERA_PROGRESS_GOLDEN_AGE"
-    elseif gameEras:HasDarkAge(playerID) then
-        return "LOC_ERA_PROGRESS_DARK_AGE"
-    else
-        return "LOC_ERA_PROGRESS_NORMAL_AGE"
-    end
 end
 
 local function BuildDialog()
@@ -47,7 +36,7 @@ local function BuildDialog()
             if isMet then
                 local leaderName = Locale.Lookup(playerConfig:GetLeaderName())
                 local civName = Locale.Lookup(playerConfig:GetCivilizationDescription())
-                local ageName = Locale.Lookup(GetPlayerAgeKey(gameEras, playerID))
+                local ageName = Locale.Lookup(CAIGameState.GetPlayerAgeKey(gameEras, playerID))
                 local label = Locale.Lookup("LOC_DIPLOMACY_DEAL_PLAYER_PANEL_TITLE", leaderName, civName) .. ", " .. ageName
                 local civRow = mgr:CreateWidget(mgr:GenerateWidgetId("CAIEraReviewCiv"), "StaticText", {
                     Label = label,

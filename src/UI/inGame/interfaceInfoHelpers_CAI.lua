@@ -406,9 +406,7 @@ local function BuildTurnSegmentedPathText(plotIds, turns, endIndex)
             if segmentStart < i - 1 then
                 local segmentNodes = PlotIdsToPathNodes(plotIds, segmentStart, i - 1)
                 local segmentText = HexCoordUtils.stepListFromPath(segmentNodes)
-                if segmentText ~= "" then
-                    segments[#segments + 1] = segmentText
-                end
+                CAIText.AppendIfNonEmpty(segments, segmentText)
             end
             segmentStart = i - 1
             lastTurn = turn
@@ -417,9 +415,7 @@ local function BuildTurnSegmentedPathText(plotIds, turns, endIndex)
 
     local finalNodes = PlotIdsToPathNodes(plotIds, segmentStart, endIndex)
     local finalText = HexCoordUtils.stepListFromPath(finalNodes)
-    if finalText ~= "" then
-        segments[#segments + 1] = finalText
-    end
+    CAIText.AppendIfNonEmpty(segments, finalText)
 
     local text = HexCoordUtils.joinStepSegments(segments)
     if text == "" then
@@ -640,12 +636,6 @@ local function FinalizeMovementAnalysis(unit, targetPlot, pathInfo)
     if pathInfo.kind == "bad" then
         pathInfo.failureKind = DiagnoseMoveTarget(unit, startPlot, targetPlot, pathInfo)
         LogMovementFailure(pathInfo, startPlot, targetPlot, unit)
-    end
-end
-
-local function AddLine(lines, value)
-    if value ~= nil and value ~= "" then
-        lines[#lines + 1] = value
     end
 end
 
@@ -925,54 +915,54 @@ function BuildMovementSpeech(pathInfo, isExplicitSpeech, includeMovementCost)
     end
 
     if pathInfo.kind == "bad" then
-        AddLine(out, FormatFailure(pathInfo))
+        CAIText.AppendIfNonEmpty(out, FormatFailure(pathInfo))
         if not pathInfo.hasPath then
             return out
         end
     elseif pathInfo.kind == "queue" then
-        AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_QUEUED"))
+        CAIText.AppendIfNonEmpty(out, Locale.Lookup("LOC_CAI_MOVEMENT_QUEUED"))
     end
 
     if pathInfo.kind ~= "bad" then
-        AddLine(out, FormatArrivalTurn(pathInfo.arrivalTurn))
+        CAIText.AppendIfNonEmpty(out, FormatArrivalTurn(pathInfo.arrivalTurn))
         if includeMovementCost then
-            AddLine(out, FormatMovementCost(pathInfo))
-            AddLine(out, FormatArrivalMovesRemaining(pathInfo))
+            CAIText.AppendIfNonEmpty(out, FormatMovementCost(pathInfo))
+            CAIText.AppendIfNonEmpty(out, FormatArrivalMovesRemaining(pathInfo))
         end
     end
 
-    AddLine(out, FormatObstacleCount(pathInfo.obstacles and #pathInfo.obstacles or 0))
+    CAIText.AppendIfNonEmpty(out, FormatObstacleCount(pathInfo.obstacles and #pathInfo.obstacles or 0))
 
     if pathInfo.usesPortal then
-        AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_USES_TUNNEL"))
+        CAIText.AppendIfNonEmpty(out, Locale.Lookup("LOC_CAI_MOVEMENT_USES_TUNNEL"))
     end
 
     if pathInfo.endsInZOC then
-        AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_ENDS_AT_ZOC"))
+        CAIText.AppendIfNonEmpty(out, Locale.Lookup("LOC_CAI_MOVEMENT_ENDS_AT_ZOC"))
     elseif pathInfo.intersectsZOC then
-        AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_INTERSECTS_ZOC"))
+        CAIText.AppendIfNonEmpty(out, Locale.Lookup("LOC_CAI_MOVEMENT_INTERSECTS_ZOC"))
     end
 
     if pathInfo.willDeclareWar then
-        AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_WILL_DECLARE_WAR"))
+        CAIText.AppendIfNonEmpty(out, Locale.Lookup("LOC_CAI_MOVEMENT_WILL_DECLARE_WAR"))
     end
 
-    AddLine(out, FormatAttackAfterMove(pathInfo))
+    CAIText.AppendIfNonEmpty(out, FormatAttackAfterMove(pathInfo))
 
     if HasImmediateCombat(pathInfo) then
-        AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_ENEMY_AT_DESTINATION"))
+        CAIText.AppendIfNonEmpty(out, Locale.Lookup("LOC_CAI_MOVEMENT_ENEMY_AT_DESTINATION"))
     end
 
     if pathInfo.isRestricted then
-        AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_BLOCKED"))
+        CAIText.AppendIfNonEmpty(out, Locale.Lookup("LOC_CAI_MOVEMENT_BLOCKED"))
     end
 
     if isExplicitSpeech
         and pathInfo.kind == "fow" then
         if pathInfo.entersUnrevealed then
-            AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_UNEXPLORED"))
+            CAIText.AppendIfNonEmpty(out, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_UNEXPLORED"))
         else
-            AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_FOG"))
+            CAIText.AppendIfNonEmpty(out, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_FOG"))
         end
     end
 
@@ -980,11 +970,11 @@ function BuildMovementSpeech(pathInfo, isExplicitSpeech, includeMovementCost)
         and (not HasImmediateCombat(pathInfo) and (not HasDelayedCombat(pathInfo) or pathInfo.isQueued))
         and pathInfo.visiblePathText ~= nil
         and pathInfo.visiblePathText ~= "" then
-        AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_STEPS", pathInfo.visiblePathText))
+        CAIText.AppendIfNonEmpty(out, Locale.Lookup("LOC_CAI_MOVEMENT_PATH_STEPS", pathInfo.visiblePathText))
     end
 
     if isExplicitSpeech and pathInfo.entersUnrevealed then
-        AddLine(out, Locale.Lookup("LOC_CAI_MOVEMENT_THEN_UNEXPLORED"))
+        CAIText.AppendIfNonEmpty(out, Locale.Lookup("LOC_CAI_MOVEMENT_THEN_UNEXPLORED"))
     end
 
     return out
@@ -1047,9 +1037,7 @@ local function BuildDistrictPlacementInterfaceInfo(plot)
         for _, line in ipairs(CAIDistrictNeighborBonuses.GetLines(city, plot, district)) do
             table.insert(lines, line)
         end
-        if requiredText ~= nil and requiredText ~= "" then
-            table.insert(lines, requiredText)
-        end
+        CAIText.AppendIfNonEmpty(lines, requiredText)
     else
         table.insert(lines, Locale.Lookup("LOC_CAI_PLOT_INTERFACE_INVALID"))
     end
@@ -1406,25 +1394,6 @@ local function GetTourismStrengthLabel(tourismValue)
     return Locale.Lookup("LOC_CAI_TOURISM_STRENGTH_LOW")
 end
 
-local function SplitTourismTooltipLines(tooltip)
-    local lines = {}
-    if tooltip == nil or tooltip == "" then
-        return lines
-    end
-
-    local normalized = string.gsub(tooltip, "%[NEWLINE%]", "\n")
-    normalized = string.gsub(normalized, "\r\n", "\n")
-    normalized = string.gsub(normalized, "\r", "\n")
-    for line in string.gmatch(normalized .. "\n", "(.-)\n") do
-        local trimmed = string.gsub(line, "^[ \t\r\n]*(.-)[ \t\r\n]*$", "%1")
-        if trimmed ~= "" then
-            lines[#lines + 1] = trimmed
-        end
-    end
-
-    return lines
-end
-
 local function BuildTourismLensPlotInfo(plot, detailed)
     local localPlayerID = Game.GetLocalPlayer()
     if localPlayerID == nil or localPlayerID < 0 then
@@ -1459,7 +1428,7 @@ local function BuildTourismLensPlotInfo(plot, detailed)
     end
 
     local lines = { summary }
-    local tooltipLines = SplitTourismTooltipLines(culture:GetTourismTooltipAt(plotIndex))
+    local tooltipLines = CAIText.SplitLines(culture:GetTourismTooltipAt(plotIndex), { trim = true })
     for _, line in ipairs(tooltipLines) do
         lines[#lines + 1] = line
     end

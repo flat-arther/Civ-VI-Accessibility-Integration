@@ -26,10 +26,6 @@ local storedView = CAI.GetConfigValue("UI", "RealEraTrackerViewMode", "table")
 local m_viewMode = storedView == "tree" and "tree" or "table"
 local RefreshViews, SetViewMode
 
-local function Lookup(tag, ...)
-    return Locale.Lookup(tag, ...)
-end
-
 local function Moment(key)
     return m_kMoments[key]
 end
@@ -39,12 +35,12 @@ local function TracksOthers()
 end
 
 local function Category(key)
-    return Lookup(CATEGORY_TAGS[Moment(key).Category])
+    return Locale.Lookup(CATEGORY_TAGS[Moment(key).Category])
 end
 
 local function Status(key)
-    if Moment(key).EarnedAsWorldFirst then return Lookup("LOC_CAI_RET_EARNED_WORLD_FIRST") end
-    return Lookup(STATUS_TAGS[Moment(key).Status])
+    if Moment(key).EarnedAsWorldFirst then return Locale.Lookup("LOC_CAI_RET_EARNED_WORLD_FIRST") end
+    return Locale.Lookup(STATUS_TAGS[Moment(key).Status])
 end
 
 local function HistoryRecord(id)
@@ -53,7 +49,7 @@ end
 
 local function HistoryLabel(id)
     local record = HistoryRecord(id)
-    return Lookup("LOC_CAI_RET_TURN", record.Turn) .. ": " .. record.InstanceDescription
+    return Locale.Lookup("LOC_CAI_RET_TURN", record.Turn) .. ": " .. record.InstanceDescription
 end
 
 local function HistoryTooltip(key)
@@ -115,38 +111,38 @@ end
 local function AvailableEras(key)
     local moment = Moment(key)
     if moment.MinEra and moment.MaxEra then
-        return Lookup("LOC_CAI_RET_ERA_RANGE", Lookup(GameInfo.Eras[moment.MinEra].Name),
-            Lookup(GameInfo.Eras[moment.MaxEra].Name))
+        return Locale.Lookup("LOC_CAI_RET_ERA_RANGE", Locale.Lookup(GameInfo.Eras[moment.MinEra].Name),
+            Locale.Lookup(GameInfo.Eras[moment.MaxEra].Name))
     elseif moment.MinEra then
-        return Lookup("LOC_CAI_RET_ERA_FROM", Lookup(GameInfo.Eras[moment.MinEra].Name))
+        return Locale.Lookup("LOC_CAI_RET_ERA_FROM", Locale.Lookup(GameInfo.Eras[moment.MinEra].Name))
     elseif moment.MaxEra then
-        return Lookup("LOC_CAI_RET_ERA_UNTIL", Lookup(GameInfo.Eras[moment.MaxEra].Name))
+        return Locale.Lookup("LOC_CAI_RET_ERA_UNTIL", Locale.Lookup(GameInfo.Eras[moment.MaxEra].Name))
     end
-    return Lookup("LOC_CAI_RET_ANY_ERA")
+    return Locale.Lookup("LOC_CAI_RET_ANY_ERA")
 end
 
 local function WorldFirst(key)
     local moment = Moment(key)
     local first = WorldMoment(key)
     if first == nil then return "" end -- Some moments have no world-first counterpart.
-    if first.Status == 0 then return Lookup("LOC_CAI_RET_NOT_EARNED") end
-    return first.Player ~= "" and first.Player or Lookup("LOC_MULTIPLAYER_UNKNOWN")
+    if first.Status == 0 then return Locale.Lookup("LOC_CAI_RET_NOT_EARNED") end
+    return first.Player ~= "" and first.Player or Locale.Lookup("LOC_MULTIPLAYER_UNKNOWN")
 end
 
 local function TableName(key)
     local moment = Moment(key)
-    return moment.Favored and (Lookup("LOC_RET_FAVORED") .. ", " .. moment.Description) or moment.Description
+    return moment.Favored and (Locale.Lookup("LOC_RET_FAVORED") .. ", " .. moment.Description) or moment.Description
 end
 
 local function TreeLabel(key)
     local moment = Moment(key)
     local parts = { moment.Description }
-    if moment.Favored then parts[#parts + 1] = Lookup("LOC_RET_FAVORED") end
-    parts[#parts + 1] = Lookup("LOC_CAI_RET_SCORE", Score(key))
+    if moment.Favored then parts[#parts + 1] = Locale.Lookup("LOC_RET_FAVORED") end
+    parts[#parts + 1] = Locale.Lookup("LOC_CAI_RET_SCORE", Score(key))
     parts[#parts + 1] = Status(key)
     if moment.Status == 1 then
-        parts[#parts + 1] = Lookup("LOC_CAI_RET_TURN", moment.Turn)
-        parts[#parts + 1] = Lookup("LOC_CAI_RET_TIMES", moment.Count)
+        parts[#parts + 1] = Locale.Lookup("LOC_CAI_RET_TURN", moment.Turn)
+        parts[#parts + 1] = Locale.Lookup("LOC_CAI_RET_TIMES", moment.Count)
     end
     return table.concat(parts, ", ")
 end
@@ -156,11 +152,11 @@ local function TreeTooltip(key)
     local parts = {}
     if TracksOthers() then
         local first = WorldFirst(key)
-        if first ~= "" then parts[#parts + 1] = Lookup("LOC_CAI_RET_WORLD_FIRST_DETAIL", first) end
+        if first ~= "" then parts[#parts + 1] = Locale.Lookup("LOC_CAI_RET_WORLD_FIRST_DETAIL", first) end
     end
     parts[#parts + 1] = moment.LongDesc
-    if moment.Object ~= "" then parts[#parts + 1] = Lookup("LOC_CAI_RET_APPLIES_DETAIL", moment.Object) end
-    parts[#parts + 1] = Lookup("LOC_CAI_RET_ERAS_DETAIL", AvailableEras(key))
+    if moment.Object ~= "" then parts[#parts + 1] = Locale.Lookup("LOC_CAI_RET_APPLIES_DETAIL", moment.Object) end
+    parts[#parts + 1] = Locale.Lookup("LOC_CAI_RET_ERAS_DETAIL", AvailableEras(key))
     return table.concat(parts, "[NEWLINE]")
 end
 
@@ -224,7 +220,7 @@ end
 local function BuildColumns()
     local function Column(key, tag, getCell, sortKey, ascending, descending, tooltip)
         return {
-            key = key, header = function() return Lookup(tag) end,
+            key = key, header = function() return Locale.Lookup(tag) end,
             getCell = getCell, sortKey = sortKey, getTooltip = tooltip,
             sortAscendingDescription = ascending or "LOC_CAI_SORT_A_TO_Z",
             sortDescendingDescription = descending or "LOC_CAI_SORT_Z_TO_A",
@@ -277,7 +273,7 @@ local function ToggleFavored(key)
     moment.Favored = not moment.Favored
     m_selectedKey = key
     ViewMomentsPage()
-    Speak(Lookup(moment.Favored and "LOC_CAI_RET_FAVORED_CONFIRM" or "LOC_CAI_RET_UNFAVORED_CONFIRM",
+    Speak(Locale.Lookup(moment.Favored and "LOC_CAI_RET_FAVORED_CONFIRM" or "LOC_CAI_RET_UNFAVORED_CONFIRM",
         moment.Description), true)
 end
 
@@ -298,7 +294,7 @@ local function RebuildTree()
     local categories = { 1, 2, 3 }
     if m_sortColumn == "category" then
         table.sort(categories, function(a, b)
-            local comparison = Locale.Compare(Lookup(CATEGORY_TAGS[a]), Lookup(CATEGORY_TAGS[b]))
+            local comparison = Locale.Compare(Locale.Lookup(CATEGORY_TAGS[a]), Locale.Lookup(CATEGORY_TAGS[b]))
             if m_sortAscending then return comparison < 0 end
             return comparison > 0
         end)
@@ -307,7 +303,7 @@ local function RebuildTree()
         if groups[category] then
             local focusKey = "ret:category:" .. category
             local group = mgr:CreateWidget(mgr:GenerateWidgetId("RETCategory"), "TreeItem", {
-                Label = function() return Lookup(CATEGORY_TAGS[category]) end, FocusKey = focusKey,
+                Label = function() return Locale.Lookup(CATEGORY_TAGS[category]) end, FocusKey = focusKey,
             })
             for _, key in ipairs(groups[category]) do
                 local leaf = mgr:CreateWidget(mgr:GenerateWidgetId("RETMoment"), "TreeItem", {
@@ -384,7 +380,7 @@ end
 local function BuildPanel()
     m_building = true
     m_ui = {}
-    m_ui.panel = mgr:CreateWidget(PANEL_ID, "Panel", { Label = function() return Lookup("LOC_RET_WINDOW_TITLE") end })
+    m_ui.panel = mgr:CreateWidget(PANEL_ID, "Panel", { Label = function() return Locale.Lookup("LOC_RET_WINDOW_TITLE") end })
     m_ui.panel:AddInputBindings({
         { Key = Keys["1"], IsAlt = true, MSG = KeyEvents.KeyDown, Description = "LOC_CAI_TREE_SWITCH_TO_TABLE",
             Action = function() return SetViewMode("table") end },
@@ -412,17 +408,17 @@ local function BuildPanel()
     m_ui.panel:AddChild(m_ui.table)
     m_ui.tree = mgr:CreateWidget(TREE_ID, "Tree", { HiddenPredicate = function() return m_viewMode ~= "tree" end })
     m_ui.panel:AddChild(m_ui.tree)
-    m_sortOptions = { { label = Lookup("LOC_CAI_DATATABLE_SORT_NATURAL"), value = { column = nil, ascending = false } } }
+    m_sortOptions = { { label = Locale.Lookup("LOC_CAI_DATATABLE_SORT_NATURAL"), value = { column = nil, ascending = false } } }
     for _, column in ipairs(m_columns) do
         for _, ascending in ipairs({ true, false }) do
             m_sortOptions[#m_sortOptions + 1] = {
-                label = column.header() .. "[NEWLINE]" .. Lookup(ascending and column.sortAscendingDescription or column.sortDescendingDescription),
+                label = column.header() .. "[NEWLINE]" .. Locale.Lookup(ascending and column.sortAscendingDescription or column.sortDescendingDescription),
                 value = { column = column.key, ascending = ascending },
             }
         end
     end
     m_ui.sort = mgr:CreateWidget("CAIRET_Sort", "Dropdown", {
-        Label = function() return Lookup("LOC_CAI_REPORTS_SORT_BY") end,
+        Label = function() return Locale.Lookup("LOC_CAI_REPORTS_SORT_BY") end,
         FocusKey = "ret:sort", HiddenPredicate = function() return m_viewMode ~= "tree" end,
     })
     m_ui.sort:SetOptions(m_sortOptions)
@@ -434,12 +430,12 @@ local function BuildPanel()
     end)
     m_ui.panel:AddChild(m_ui.sort)
     local scoreControls = { Controls.EraScore1Checkbox, Controls.EraScore2Checkbox, Controls.EraScore3Checkbox, Controls.EraScore4Checkbox }
-    local scoreOptions = { { label = Lookup("LOC_CAI_RET_ALL_SCORES"), value = 0 } }
+    local scoreOptions = { { label = Locale.Lookup("LOC_CAI_RET_ALL_SCORES"), value = 0 } }
     for index, control in ipairs(scoreControls) do
         scoreOptions[#scoreOptions + 1] = { label = control:GetText(), value = index }
     end
     m_ui.score = mgr:CreateWidget("CAIRET_ScoreFilter", "Dropdown", {
-        Label = function() return Lookup("LOC_CAI_RET_SCORE_FILTER") end, FocusKey = "ret:score-filter",
+        Label = function() return Locale.Lookup("LOC_CAI_RET_SCORE_FILTER") end, FocusKey = "ret:score-filter",
     })
     m_ui.score:SetOptions(scoreOptions)
     m_ui.score:SetSelectedIndex(m_scoreFilter + 1, true)
@@ -465,7 +461,7 @@ local function BuildPanel()
         m_ui.panel:AddChild(check)
     end
     local switch = mgr:CreateWidget("CAIRET_SwitchView", "Button", {
-        Label = function() return Lookup(m_viewMode == "table" and "LOC_CAI_TREE_SWITCH_TO_TREE" or "LOC_CAI_TREE_SWITCH_TO_TABLE") end,
+        Label = function() return Locale.Lookup(m_viewMode == "table" and "LOC_CAI_TREE_SWITCH_TO_TREE" or "LOC_CAI_TREE_SWITCH_TO_TABLE") end,
     })
     switch:On("activate", function() SetViewMode(m_viewMode == "table" and "tree" or "table") end)
     m_ui.panel:AddChild(switch)
@@ -475,7 +471,7 @@ end
 
 Open = WrapFunc(Open, function(orig, ...)
     if not SyncLocalPlayer() then
-        Speak(Lookup("LOC_CAI_UI_UNAVAILABLE_WHILE_OBSERVING"))
+        Speak(Locale.Lookup("LOC_CAI_UI_UNAVAILABLE_WHILE_OBSERVING"))
         return
     end
     orig(...)
@@ -524,7 +520,7 @@ local function RegisterLaunchAction()
         id = "real_era_tracker", title = "LOC_RET_BUTTON_LABEL", desc = "LOC_CAI_RET_LAUNCH_TOOLTIP",
         reason = function()
             local playerID = Game.GetLocalPlayer()
-            if playerID == nil or playerID < 0 then return Lookup("LOC_CAI_UI_UNAVAILABLE_WHILE_OBSERVING") end
+            if playerID == nil or playerID < 0 then return Locale.Lookup("LOC_CAI_UI_UNAVAILABLE_WHILE_OBSERVING") end
         end,
         open = function() LuaEvents.ReportsList_OpenEraTracker() end,
     })

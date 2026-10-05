@@ -819,6 +819,8 @@ function Initialize()
 	Resize();
 end
 --#Accessibility integration
+include("textProcessing")
+include("CAIControl")
 include("caiUtils")
 
 local mgr = ExposedMembers.CAI_UIManager
@@ -862,21 +864,6 @@ local kGroupToSection = {
 local function CAI_Lookup(text, ...)
 	if text == nil or text == "" then return "" end
 	return Locale.Lookup(text, ...)
-end
-
-local function CAI_AppendExplanation(baseText, extraText)
-	local base = baseText or ""
-	local extra = extraText or ""
-	if extra == "" or extra == base then return base end
-	if base == "" then return extra end
-	return base .. "[NEWLINE]" .. extra
-end
-
-local function CAI_ControlTooltip(control)
-	if control and control.GetToolTipString then
-		return control:GetToolTipString() or ""
-	end
-	return ""
 end
 
 local function CAI_SortParameters(a, b)
@@ -1057,7 +1044,7 @@ end
 local function CAI_GetPlayerLeaderTooltip(playerId)
 	local parameter = CAI_GetPlayerLeaderParameter(playerId)
 	if not parameter or not parameter.Value then return "" end
-	return CAI_AppendExplanation(
+	return CAIText.AppendDistinctLine(
 		CAI_BuildLeaderTooltip(parameter.Value.Domain, parameter.Value.Value),
 		CAI_GetInvalidReason(parameter.Value)
 	)
@@ -1080,8 +1067,8 @@ local function CAI_BuildLeaderOptions(playerId)
 			label = label .. ", " .. civName
 		end
 		table.insert(options, {
-			label = CAI_AppendExplanation(label, invalidReason),
-			tooltip = CAI_AppendExplanation(CAI_BuildLeaderTooltip(value.Domain, value.Value), invalidReason),
+			label = CAIText.AppendDistinctLine(label, invalidReason),
+			tooltip = CAIText.AppendDistinctLine(CAI_BuildLeaderTooltip(value.Domain, value.Value), invalidReason),
 			value = value,
 			leaderName = leaderName,
 			civName = civName,
@@ -1137,11 +1124,11 @@ local function CAI_BuildParameterOptions(parameterId, includeScenarioDescription
 		local invalidReason = CAI_GetInvalidReason(value)
 		local tooltip = suppressTooltip and "" or (value.Description or CAI_Lookup(value.RawDescription))
 		if includeScenarioDescription then
-			tooltip = CAI_AppendExplanation(tooltip, CAI_GetScenarioDescription(value))
+			tooltip = CAIText.AppendDistinctLine(tooltip, CAI_GetScenarioDescription(value))
 		end
 		table.insert(options, {
-			label = CAI_AppendExplanation(value.Name or "", invalidReason),
-			tooltip = suppressTooltip and "" or CAI_AppendExplanation(tooltip, invalidReason),
+			label = CAIText.AppendDistinctLine(value.Name or "", invalidReason),
+			tooltip = suppressTooltip and "" or CAIText.AppendDistinctLine(tooltip, invalidReason),
 			value = value,
 		})
 		if selectedIndex == 0 and CAI_ValueMatches(value, parameter.Value) then
@@ -1257,9 +1244,9 @@ local function CAI_MakeParameterWidget(parameter, options)
 				if suppressTooltip then return "" end
 				local tooltip = live.Value.Description or CAI_Lookup(live.Value.RawDescription)
 				if includeScenarioDescription then
-					tooltip = CAI_AppendExplanation(tooltip, CAI_GetScenarioDescription(live.Value))
+					tooltip = CAIText.AppendDistinctLine(tooltip, CAI_GetScenarioDescription(live.Value))
 				end
-				return CAI_AppendExplanation(tooltip, CAI_GetInvalidReason(live.Value))
+				return CAIText.AppendDistinctLine(tooltip, CAI_GetInvalidReason(live.Value))
 			end,
 			HiddenPredicate = IsHidden,
 			DisabledPredicate = IsDisabled,
@@ -1450,15 +1437,15 @@ local function CAI_RebuildAll()
 end
 
 local function CAI_GetStartTooltip()
-	local tooltip = CAI_ControlTooltip(Controls.StartButton)
+	local tooltip = CAIControl.Tooltip(Controls.StartButton)
 	local gameError = GetGameParametersError()
-	tooltip = CAI_AppendExplanation(tooltip, CAI_GetLocalizedError(gameError))
+	tooltip = CAIText.AppendDistinctLine(tooltip, CAI_GetLocalizedError(gameError))
 	for ordinal, playerId in ipairs(GameConfiguration.GetParticipatingPlayerIDs()) do
 		local playerError = GetPlayerParameterError(playerId)
 		if playerError then
 			local reason = CAI_GetLocalizedError(playerError)
 			if reason ~= "" then
-				tooltip = CAI_AppendExplanation(tooltip,
+				tooltip = CAIText.AppendDistinctLine(tooltip,
 					Locale.Lookup("LOC_CAI_PLAYER") .. " " .. tostring(ordinal) .. ": " .. reason)
 			end
 		end
@@ -1469,7 +1456,7 @@ end
 local function CAI_MakeActionButton(id, control, tooltipGetter)
 	local button = mgr:CreateWidget(id, "Button", {
 		Label = function() return control:GetText() or "" end,
-		Tooltip = tooltipGetter or function() return CAI_ControlTooltip(control) end,
+		Tooltip = tooltipGetter or function() return CAIControl.Tooltip(control) end,
 		HiddenPredicate = function() return control.IsHidden and control:IsHidden() end,
 		DisabledPredicate = function() return control.IsDisabled and control:IsDisabled() end,
 		FocusKey = id,

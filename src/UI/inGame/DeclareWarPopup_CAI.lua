@@ -1,3 +1,4 @@
+include("CAIControl")
 -- DeclareWarPopup_CAI.lua
 -- Accessibility replacement for the declare-war confirmation popup.
 --
@@ -36,12 +37,8 @@ local CONSEQUENCE_STACKS = {
     "DealsStack",
 }
 
-local function IsVisible(control)
-    return control ~= nil and (not control.IsHidden or not control:IsHidden())
-end
-
 local function GetControlText(control)
-    if not IsVisible(control) then return nil end
+    if not CAIControl.IsVisible(control) then return nil end
     return control.GetText and control:GetText() or nil
 end
 
@@ -84,11 +81,9 @@ local function GetTargetLine()
 
     local names = {}
     for _, native in ipairs(Controls.Targets:GetChildren() or {}) do
-        if IsVisible(native) then
+        if CAIControl.IsVisible(native) then
             local name = GetItemText(native)
-            if name and name ~= "" then
-                table.insert(names, name)
-            end
+            CAIText.AppendIfNonEmpty(names, name)
         end
     end
 
@@ -109,9 +104,9 @@ local function BuildContentRows()
 
     for _, stackId in ipairs(CONSEQUENCE_STACKS) do
         local stack = Controls[stackId]
-        if IsVisible(stack) then
+        if CAIControl.IsVisible(stack) then
             for _, native in ipairs(stack:GetChildren() or {}) do
-                if IsVisible(native) then
+                if CAIControl.IsVisible(native) then
                     table.insert(rows, MakeTextRow(function() return GetItemText(native) or "" end))
                 end
             end

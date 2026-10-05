@@ -13,29 +13,8 @@ local MIN_INTEREST_LEVEL_CAI = 1
 local m_panel                = nil
 local m_tree                 = nil
 
-local function NormalizeText(text)
-    -- Tags and whitespace are filtered centrally in Speak()/ProcessText; keep
-    -- only nil-safety here so composed strings never concatenate a nil.
-    if not text then return "" end
-    return tostring(text)
-end
-
-local function JoinNonEmpty(parts, sep)
-    local out = {}
-    for _, p in ipairs(parts) do
-        if p and p ~= "" then
-            table.insert(out, p)
-        end
-    end
-    return table.concat(out, sep)
-end
-
-local function MakeId(prefix)
-    return mgr:GenerateWidgetId(prefix)
-end
-
 local function MakeLeaf(focusKey, labelFn)
-    local w = mgr:CreateWidget(MakeId("CAITl_"), "StaticText", {
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAITl_"), "StaticText", {
         FocusKey = focusKey,
         Label = labelFn,
     })
@@ -44,7 +23,7 @@ local function MakeLeaf(focusKey, labelFn)
 end
 
 local function MakeNode(focusKey, labelFn)
-    local w = mgr:CreateWidget(MakeId("CAITl_"), "TreeItem", {
+    local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAITl_"), "TreeItem", {
         FocusKey = focusKey,
         Label = labelFn,
     })
@@ -59,10 +38,10 @@ local function FormatMomentLabel(momentData)
     if momentInfo then
         local genDesc = Locale.Lookup(momentInfo.Description)
         if genDesc and genDesc ~= "" then
-            table.insert(parts, NormalizeText(genDesc))
+            table.insert(parts, CAIText.ToString(genDesc))
         end
     end
-    return JoinNonEmpty(parts, ", ")
+    return CAIText.JoinNonEmpty(parts, ", ")
 end
 
 local function FormatMomentTooltip(momentData)
@@ -84,9 +63,9 @@ local function FormatMomentTooltip(momentData)
         local momentInfo = GameInfo.Moments[momentData.Type]
         desc = momentInfo and Locale.Lookup(momentInfo.Name) or ""
     end
-    table.insert(parts, NormalizeText(desc))
+    table.insert(parts, CAIText.ToString(desc))
 
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function PopPanel()

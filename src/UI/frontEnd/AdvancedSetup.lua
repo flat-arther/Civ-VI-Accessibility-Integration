@@ -1746,6 +1746,8 @@ function Initialize()
 	Resize();
 end
 --#Accessibility integration
+include("textProcessing")
+include("CAIControl")
 include("caiUtils")
 local mgr = ExposedMembers.CAI_UIManager
 
@@ -1790,24 +1792,9 @@ local function CAI_Lookup(text, ...)
 	return Locale.Lookup(text, ...)
 end
 
-local function CAI_ControlTooltip(control)
-	if control and control.GetToolTipString then
-		return control:GetToolTipString() or ""
-	end
-	return ""
-end
-
 local function CAI_GetInvalidReasonText(value)
 	if not value or not value.Invalid then return "" end
 	return CAI_Lookup(value.InvalidReason or "LOC_SETUP_ERROR_INVALID_OPTION")
-end
-
-local function CAI_AppendExplanation(baseText, extraText)
-	local base = baseText or ""
-	local extra = extraText or ""
-	if extra == "" then return base end
-	if base == "" then return extra end
-	return base .. "[NEWLINE]" .. extra
 end
 
 local function CAI_GetLiveParameter(paramId, fallback)
@@ -1821,8 +1808,8 @@ local function CAI_GetParameterTooltip(parameter, value)
 	if description == "" and parameter then
 		description = parameter.Description or ""
 	end
-	description = CAI_AppendExplanation(description, CAI_GetInvalidReasonText(parameter))
-	return CAI_AppendExplanation(description, CAI_GetInvalidReasonText(value))
+	description = CAIText.AppendLine(description, CAI_GetInvalidReasonText(parameter))
+	return CAIText.AppendLine(description, CAI_GetInvalidReasonText(value))
 end
 
 local function CAI_GetParameterControl(paramId)
@@ -2007,8 +1994,8 @@ local function BuildParamDropdownOptions(parameterId)
 	for i, v in ipairs(param.Values) do
 		local invalidReason = CAI_GetInvalidReasonText(v)
 		table.insert(options, {
-			label = CAI_AppendExplanation(v.Name or "", invalidReason),
-			tooltip = CAI_AppendExplanation(v.Description or Locale.Lookup(v.RawDescription or ""), invalidReason),
+			label = CAIText.AppendLine(v.Name or "", invalidReason),
+			tooltip = CAIText.AppendLine(v.Description or Locale.Lookup(v.RawDescription or ""), invalidReason),
 			value = v,
 		})
 		if selectedIdx == 0 and param.Value
@@ -2034,7 +2021,7 @@ local function BuildLeaderDropdownOptions(playerId)
 	local selectedIdx = 0
 	for i, v in ipairs(param.Values) do
 		local invalidReason = CAI_GetInvalidReasonText(v)
-		local tooltip = CAI_AppendExplanation(BuildLeaderTooltip(v.Domain, v.Value), invalidReason)
+		local tooltip = CAIText.AppendLine(BuildLeaderTooltip(v.Domain, v.Value), invalidReason)
 		local leaderName = v.Name or ""
 		local label = leaderName
 		local civName = ""
@@ -2043,7 +2030,7 @@ local function BuildLeaderDropdownOptions(playerId)
 			civName = Locale.Lookup(info.CivilizationName)
 			label = label .. ", " .. civName
 		end
-		label = CAI_AppendExplanation(label, invalidReason)
+		label = CAIText.AppendLine(label, invalidReason)
 		table.insert(options, {
 			label = label,
 			tooltip = tooltip,
@@ -2122,11 +2109,11 @@ local function LeaderTooltipForPlayer(playerId)
 	if not params then return "" end
 	local lp = params.Parameters and params.Parameters["PlayerLeader"]
 	if not lp or not lp.Value then return "" end
-	local tooltip = CAI_AppendExplanation(
+	local tooltip = CAIText.AppendLine(
 		BuildLeaderTooltip(lp.Value.Domain, lp.Value.Value),
 		CAI_GetInvalidReasonText(lp)
 	)
-	return CAI_AppendExplanation(tooltip, CAI_GetInvalidReasonText(lp.Value))
+	return CAIText.AppendLine(tooltip, CAI_GetInvalidReasonText(lp.Value))
 end
 
 local function LeaderLabelForPlayer(playerId)
@@ -2222,7 +2209,7 @@ end
 local function MakeActionButton(label, ctrl, isHiddenFn)
 	local w = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_Btn"), "Button", {
 		Label = function() return ctrl:GetText() end,
-		Tooltip = function() return CAI_ControlTooltip(ctrl) end,
+		Tooltip = function() return CAIControl.Tooltip(ctrl) end,
 		DisabledPredicate = function()
 			return ctrl and ctrl.IsDisabled and ctrl:IsDisabled()
 		end,
@@ -2286,7 +2273,7 @@ local function MakeConflictDialog()
 	})
 	local confirm = mgr:CreateWidget(mgr:GenerateWidgetId("CAISetup_ConflictConfirm"), "Button", {
 		Label = function() return Controls.ConflictConfirmButton:GetText() end,
-		Tooltip = function() return CAI_ControlTooltip(Controls.ConflictConfirmButton) end,
+		Tooltip = function() return CAIControl.Tooltip(Controls.ConflictConfirmButton) end,
 	})
 	confirm:SetFocusSound(HOVER_SOUND)
 	confirm:On("activate", function()

@@ -1,3 +1,5 @@
+include("CAIColumns")
+include("CAICollection")
 include("caiUtils")
 include("Civ6Common")
 if GameConfiguration.GetValue("GAMEMODE_MONOPOLIES") then
@@ -66,12 +68,8 @@ local m_viewMode = LoadViewModeSetting()
 -- ============================================================================
 -- Helpers
 -- ============================================================================
-local function MakeId(prefix)
-    return mgr:GenerateWidgetId(prefix)
-end
-
 local function MakeTreeItem(props)
-    local item = mgr:CreateWidget(MakeId("CAIGR_"), "TreeItem", props)
+    local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGR_"), "TreeItem", props)
     item:SetFocusSound(HOVER_SOUND)
     return item
 end
@@ -258,25 +256,10 @@ local function BuildTableColumns()
     return columns
 end
 
-local function CompareSortValues(a, b)
-    if a == b then return 0 end
-    if a == nil then return 1 end
-    if b == nil then return -1 end
-    if type(a) == "number" and type(b) == "number" then return a < b and -1 or 1 end
-    return Locale.Compare(tostring(a), tostring(b))
-end
-
-local function GetColumn(columnKey)
-    for _, column in ipairs(m_tableColumns) do
-        if column.key == columnKey then return column end
-    end
-    return nil
-end
-
 local function GetOrderedTreeResources()
     local ordered = {}
     for _, kResourceData in ipairs(m_visibleResources) do ordered[#ordered + 1] = kResourceData end
-    local column = GetColumn(m_treeSortColumn)
+    local column = CAIColumns.Find(m_tableColumns, m_treeSortColumn)
     if not column or not column.sortKey then return ordered end
 
     local decorated = {}
@@ -288,7 +271,7 @@ local function GetOrderedTreeResources()
         }
     end
     table.sort(decorated, function(a, b)
-        local comparison = CompareSortValues(a.value, b.value)
+        local comparison = CAICollection.CompareValues(a.value, b.value)
         if comparison == 0 then return a.naturalIndex < b.naturalIndex end
         if m_treeSortAscending then return comparison < 0 end
         return comparison > 0
@@ -384,28 +367,13 @@ local function BuildTree()
 end
 
 local function BuildTreeSortOptions()
-    local options = {
-        {
-            label = Locale.Lookup("LOC_CAI_DATATABLE_SORT_NATURAL"),
-            value = { column = nil, ascending = false },
-        },
-    }
-
+    -- The resource icon column is not a spoken sort choice.
     local sortableColumns = { m_tableColumns[1], m_tableColumns[3] }
     for index = 4, #m_tableColumns do sortableColumns[#sortableColumns + 1] = m_tableColumns[index] end
-    for _, column in ipairs(sortableColumns) do
-        local label = column.sortLabel or column.header
-        local header = type(label) == "function" and label() or label or ""
-        options[#options + 1] = {
-            label = header .. ", " .. Locale.Lookup(column.sortAscendingDescription),
-            value = { column = column.key, ascending = true },
-        }
-        options[#options + 1] = {
-            label = header .. ", " .. Locale.Lookup(column.sortDescendingDescription),
-            value = { column = column.key, ascending = false },
-        }
-    end
-    return options
+    return CAIColumns.BuildSortOptions(sortableColumns, {
+        natural = { ascending = false }, separator = ", ", preferSortLabel = true,
+        includeColumn = function() return true end,
+    })
 end
 
 local function SyncTreeSortDropdown()

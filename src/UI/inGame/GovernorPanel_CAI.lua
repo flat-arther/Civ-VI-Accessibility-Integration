@@ -1,3 +1,6 @@
+include("CAIColumns")
+include("CAIControl")
+include("CAICollection")
 -- GovernorPanel_CAI.lua
 --
 -- Accessibility layer for the Governor Panel.
@@ -26,7 +29,6 @@ local PROMO_LIST_ID    = "CAIGovernorPanel_PromoList"
 local SWITCH_VIEW_ID   = "CAIGovernorPanel_SwitchView"
 local VIEW_SETTING_SECTION = "UI"
 local VIEW_SETTING_ID      = "GovernorPanelViewMode"
-
 
 local HOVER_SOUND                     = "Main_Menu_Mouse_Over"
 
@@ -81,57 +83,6 @@ local m_viewMode                      = LoadViewModeSetting()
 -- Helpers
 -- ===========================================================================
 
-local function JoinNonEmpty(parts, sep)
-    local out = {}
-    for _, part in ipairs(parts) do
-        if part and part ~= "" then out[#out + 1] = part end
-    end
-    return table.concat(out, sep)
-end
-
-local function FormatPromotionList(names, conjunctionTag)
-    if #names <= 1 then return table.concat(names) end
-
-    local finalName = table.remove(names)
-    return table.concat(names, "[NEWLINE]") .. ", " .. Locale.Lookup(conjunctionTag) .. " " .. finalName
-end
-
-local function NormalizeText(text)
-    -- Tags and whitespace are filtered centrally in Speak()/ProcessText; keep
-    -- only nil-safety here so composed strings never concatenate a nil.
-    if not text then return "" end
-    return tostring(text)
-end
-
-local function AppendIfNonEmpty(parts, value)
-    local normalized = NormalizeText(value)
-    if normalized ~= "" then parts[#parts + 1] = normalized end
-end
-
-local function ControlText(control)
-    if not control then return "" end
-    return tostring(control:GetText() or "")
-end
-
-local function ControlTooltip(control)
-    if not control then return "" end
-    return tostring(control:GetToolTipString() or "")
-end
-
-local function TooltipWithValue(control, valueControl, fallbackLabel)
-    local label = ControlTooltip(control)
-    if label == "" and fallbackLabel then
-        label = Locale.Lookup(fallbackLabel)
-    end
-
-    local value = ControlText(valueControl)
-    if label ~= "" and value ~= "" then
-        return label .. ": " .. value
-    end
-    if value ~= "" then return value end
-    return label
-end
-
 local function GetPanelTitle()
     return Locale.Lookup("LOC_GOVERNORS_TITLE")
 end
@@ -170,10 +121,10 @@ end
 local function GetLiveGovernorStatHeader(controlName, fallbackTag)
     for _, liveRow in pairs(m_liveGovernorRows) do
         local control = liveRow and liveRow[controlName]
-        local tooltip = ControlTooltip(control)
-        if tooltip ~= "" then return NormalizeText(tooltip) end
+        local tooltip = CAIText.ToString(control and control:GetToolTipString())
+        if tooltip ~= "" then return CAIText.ToString(tooltip) end
     end
-    return NormalizeText(Locale.Lookup(fallbackTag))
+    return CAIText.ToString(Locale.Lookup(fallbackTag))
 end
 
 local function GetEstablishSpeedHeader()
@@ -190,12 +141,6 @@ local function GetGovernorName(governorIndex)
     local governorDef = GameInfo.Governors[governorIndex]
     if not governorDef then return "" end
     return Locale.Lookup(governorDef.Name)
-end
-
-local function GetPromotionName(promotionIndex)
-    local promoDef = GameInfo.GovernorPromotions[promotionIndex]
-    if not promoDef then return "" end
-    return Locale.Lookup(promoDef.Name)
 end
 
 local function GetHiddenPromotionLabel()
@@ -227,7 +172,7 @@ local function GetGovernorBaseAbilityTooltip(governorDef, localPlayerID)
             if promoDef and promoDef.BaseAbility then
                 local name, description = GetPromotionNameAndDescription(
                     promoDef, localPlayerID, governorDef.Index)
-                abilities[#abilities + 1] = JoinNonEmpty({ name, description }, ": ")
+                abilities[#abilities + 1] = CAIText.JoinNonEmpty({ name, description }, ": ")
             end
         end
     end
@@ -239,7 +184,7 @@ end
 local function GetGovernorNameTooltip(governorIndex)
     local governorDef, _, _, localPlayerID = GetGovernorData(governorIndex)
     if not governorDef then return "" end
-    return JoinNonEmpty({
+    return CAIText.JoinNonEmpty({
         Locale.Lookup(governorDef.Title),
         Locale.Lookup(governorDef.Description),
         GetGovernorBaseAbilityTooltip(governorDef, localPlayerID),
@@ -257,7 +202,7 @@ local function GetEarnedPromotions(governorIndex)
             if promoDef and not promoDef.BaseAbility and governor:HasPromotion(promoDef.Hash) then
                 local name, description = GetPromotionNameAndDescription(
                     promoDef, localPlayerID, governorIndex)
-                earned[#earned + 1] = JoinNonEmpty({ name, description }, ": ")
+                earned[#earned + 1] = CAIText.JoinNonEmpty({ name, description }, ": ")
             end
         end
     end
@@ -288,7 +233,7 @@ local function GetGovernorStatusData(governorIndex)
 
     local neutralizedTurns = governor:GetNeutralizedTurns()
     if neutralizedTurns > 0 then
-        return JoinNonEmpty({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_GOVERNORS_SCREEN_NEUTRALIZED"),
             Locale.Lookup("LOC_GOVERNORS_SCREEN_NEUTRALIZED_TURNS_REMAINING", neutralizedTurns),
         }, ", "), 500000 + neutralizedTurns
@@ -301,14 +246,14 @@ local function GetGovernorStatusData(governorIndex)
 
     local cityName = Locale.Lookup(city:GetName())
     if governor:IsEstablished() then
-        return JoinNonEmpty({
+        return CAIText.JoinNonEmpty({
             Locale.Lookup("LOC_GOVERNORS_SCREEN_GOVERNOR_ESTABLISHED_IN"),
             cityName,
         }, " "), 100000
     end
 
     local remainingTurns = governor:GetTurnsToEstablish() - governor:GetTurnsOnSite()
-    return JoinNonEmpty({
+    return CAIText.JoinNonEmpty({
         Locale.Lookup("LOC_GOVERNORS_SCREEN_GOVERNOR_TRANSITIONING_TO"),
         Locale.Lookup("LOC_GOVERNORS_SCREEN_GOVERNOR_NAME_WITH_TURNS", cityName, remainingTurns),
     }, " "), 300000 + remainingTurns
@@ -390,15 +335,15 @@ local function GetGovernorRowLabel(governorDef, governor, playerGovernors)
     local liveRow = GetLiveGovernorRow(governorDef.Index)
     if liveRow then
         local parts = {}
-        AppendIfNonEmpty(parts, ControlText(liveRow.GovernorName))
-        AppendIfNonEmpty(parts, ControlText(liveRow.GovernorStatus))
-        AppendIfNonEmpty(parts, ControlText(liveRow.GovernorStatusDetails))
+        CAIText.AppendText(parts, CAIText.ToString(liveRow.GovernorName and liveRow.GovernorName:GetText()))
+        CAIText.AppendText(parts, CAIText.ToString(liveRow.GovernorStatus and liveRow.GovernorStatus:GetText()))
+        CAIText.AppendText(parts, CAIText.ToString(liveRow.GovernorStatusDetails and liveRow.GovernorStatusDetails:GetText()))
 
         if governor and playerGovernors:CanPromoteGovernor(governorDef.Hash) then
-            AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_GOVERNOR_CAN_PROMOTE"))
+            CAIText.AppendText(parts, Locale.Lookup("LOC_CAI_GOVERNOR_CAN_PROMOTE"))
         end
 
-        local liveLabel = JoinNonEmpty(parts, ", ")
+        local liveLabel = CAIText.JoinNonEmpty(parts, ", ")
         if liveLabel ~= "" then return liveLabel end
     end
 
@@ -406,9 +351,9 @@ local function GetGovernorRowLabel(governorDef, governor, playerGovernors)
     parts[#parts + 1] = Locale.Lookup(governorDef.Name)
 
     local status, statusDetails = GetGovernorStatus(governorDef, governor)
-    local statusText = NormalizeText(status)
+    local statusText = CAIText.ToString(status)
     if statusDetails and statusDetails ~= "" then
-        statusText = statusText .. " " .. NormalizeText(statusDetails)
+        statusText = statusText .. " " .. CAIText.ToString(statusDetails)
     end
     parts[#parts + 1] = statusText
 
@@ -416,7 +361,7 @@ local function GetGovernorRowLabel(governorDef, governor, playerGovernors)
         parts[#parts + 1] = Locale.Lookup("LOC_CAI_GOVERNOR_CAN_PROMOTE")
     end
 
-    return JoinNonEmpty(parts, ", ")
+    return CAIText.JoinNonEmpty(parts, ", ")
 end
 
 local function GetGovernorRowTooltip(governorDef, governor, playerGovernors, localPlayerID)
@@ -425,23 +370,23 @@ local function GetGovernorRowTooltip(governorDef, governor, playerGovernors, loc
     local liveRow = GetLiveGovernorRow(governorDef.Index)
 
     if liveRow then
-        AppendIfNonEmpty(parts, ControlText(liveRow.GovernorTitle))
+        CAIText.AppendText(parts, CAIText.ToString(liveRow.GovernorTitle and liveRow.GovernorTitle:GetText()))
         if not isSecret then
-            local turnsToEstablish = tonumber(ControlText(liveRow.TransitionStrengthLabel))
+            local turnsToEstablish = tonumber(CAIText.ToString(liveRow.TransitionStrengthLabel and liveRow.TransitionStrengthLabel:GetText()))
             if turnsToEstablish then
-                local establishmentDescription = ControlTooltip(liveRow.TransitionStrengthLabel)
+                local establishmentDescription = CAIText.ToString(liveRow.TransitionStrengthLabel and liveRow.TransitionStrengthLabel:GetToolTipString())
                 if establishmentDescription == "" then
                     establishmentDescription = Locale.Lookup("LOC_GOVERNOR_TRANSITION_STRENGTH_TOOLTIP")
                 end
-                AppendIfNonEmpty(parts, establishmentDescription .. " "
+                CAIText.AppendText(parts, establishmentDescription .. " "
                     .. Locale.Lookup("LOC_GOVERNORS_SCREEN_GOVERNOR_TRANSITION_TURNS", turnsToEstablish))
             end
-            AppendIfNonEmpty(parts,
-                TooltipWithValue(liveRow.IdentityPressureLabel, liveRow.IdentityPressureLabel,
+            CAIText.AppendText(parts,
+                CAIControl.TooltipWithValue(liveRow.IdentityPressureLabel, liveRow.IdentityPressureLabel,
                     "LOC_GOVERNOR_IDENTITY_PRESSURE_TOOLTIP"))
         end
-        AppendIfNonEmpty(parts, ControlTooltip(liveRow.AssignButton))
-        AppendIfNonEmpty(parts, ControlTooltip(liveRow.AppointButton))
+        CAIText.AppendText(parts, CAIText.ToString(liveRow.AssignButton and liveRow.AssignButton:GetToolTipString()))
+        CAIText.AppendText(parts, CAIText.ToString(liveRow.AppointButton and liveRow.AppointButton:GetToolTipString()))
     end
 
     if #parts == 0 then
@@ -451,7 +396,7 @@ local function GetGovernorRowTooltip(governorDef, governor, playerGovernors, loc
     if governor then
         local neutralized = governor:GetNeutralizedTurns()
         if neutralized > 0 then
-            parts[#parts + 1] = NormalizeText(Locale.Lookup("LOC_GOVERNORS_GOVERNOR_NEUTRALIZED"))
+            parts[#parts + 1] = CAIText.ToString(Locale.Lookup("LOC_GOVERNORS_GOVERNOR_NEUTRALIZED"))
             parts[#parts + 1] = Locale.Lookup("LOC_GOVERNORS_SCREEN_GOVERNOR_TRANSITION_TURNS", neutralized)
         end
     end
@@ -462,7 +407,7 @@ local function GetGovernorRowTooltip(governorDef, governor, playerGovernors, loc
             playerGovernors:GetTurnsToEstablish(governorDef.Hash))
     end
 
-    AppendIfNonEmpty(parts, governorDef.Description and Locale.Lookup(governorDef.Description) or "")
+    CAIText.AppendText(parts, governorDef.Description and Locale.Lookup(governorDef.Description) or "")
 
     local earnedNames = {}
     for promotionSet in GameInfo.GovernorPromotionSets() do
@@ -471,7 +416,7 @@ local function GetGovernorRowTooltip(governorDef, governor, playerGovernors, loc
             if promoDef then
                 if governor and governor:HasPromotion(promoDef.Hash) then
                     local name = GetPromotionNameAndDescription(promoDef, localPlayerID, governorDef.Index)
-                    AppendIfNonEmpty(earnedNames, name)
+                    CAIText.AppendText(earnedNames, name)
                 end
             end
         end
@@ -480,7 +425,7 @@ local function GetGovernorRowTooltip(governorDef, governor, playerGovernors, loc
         parts[#parts + 1] = Locale.Lookup("LOC_CAI_GOVERNOR_EARNED_PROMOS", table.concat(earnedNames, "[NEWLINE]"))
     end
 
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function GetPromotionCellTooltip(promoDef, governorDef, localPlayerID)
@@ -492,7 +437,7 @@ local function GetPromotionCellTooltip(promoDef, governorDef, localPlayerID)
     parts[#parts + 1] = Locale.Lookup(promoDef.Description)
 
     if IsCannotAssign(governorDef) then
-        return JoinNonEmpty(parts, "[NEWLINE]")
+        return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
     end
 
     local prereqNames = {}
@@ -506,7 +451,7 @@ local function GetPromotionCellTooltip(promoDef, governorDef, localPlayerID)
     end
     if #prereqNames > 0 then
         parts[#parts + 1] = Locale.Lookup("LOC_CAI_UNIT_PROMOTION_PREREQS_HEADER",
-            FormatPromotionList(prereqNames, "LOC_CAI_OR"))
+            CAIText.JoinWithConjunction(prereqNames, "LOC_CAI_OR"))
     end
 
     local leadsToNames = {}
@@ -520,10 +465,10 @@ local function GetPromotionCellTooltip(promoDef, governorDef, localPlayerID)
     end
     if #leadsToNames > 0 then
         parts[#parts + 1] = Locale.Lookup("LOC_CAI_UNIT_PROMOTION_LEADS_TO_HEADER",
-            FormatPromotionList(leadsToNames, "LOC_CAI_AND"))
+            CAIText.JoinWithConjunction(leadsToNames, "LOC_CAI_AND"))
     end
 
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 -- ===========================================================================
@@ -1102,30 +1047,6 @@ local function BuildNaturalGovernorIndices()
     return indices
 end
 
-
-local function BuildTreeSortOptions(columns)
-    local options = {
-        {
-            label = Locale.Lookup("LOC_CAI_DATATABLE_SORT_NATURAL"),
-            value = { column = nil, ascending = false },
-        },
-    }
-    for _, column in ipairs(columns) do
-        if column.sortKey then
-            local header = type(column.header) == "function" and column.header() or column.header or ""
-            options[#options + 1] = {
-                label = header .. ", " .. Locale.Lookup(column.sortAscendingDescription),
-                value = { column = column.key, ascending = true },
-            }
-            options[#options + 1] = {
-                label = header .. ", " .. Locale.Lookup(column.sortDescendingDescription),
-                value = { column = column.key, ascending = false },
-            }
-        end
-    end
-    return options
-end
-
 local function SyncTreeSortDropdown()
     if not m_ui.treeSort then return end
     for index, option in ipairs(m_treeSortOptions) do
@@ -1136,14 +1057,6 @@ local function SyncTreeSortDropdown()
             return
         end
     end
-end
-
-local function CompareSortValues(a, b)
-    if a == b then return 0 end
-    if a == nil then return 1 end
-    if b == nil then return -1 end
-    if type(a) == "number" and type(b) == "number" then return a < b and -1 or 1 end
-    return Locale.Compare(tostring(a), tostring(b))
 end
 
 local function GetOrderedGovernorIndices()
@@ -1173,7 +1086,7 @@ local function GetOrderedGovernorIndices()
             if a.value == b.value then return a.naturalIndex < b.naturalIndex end
             return a.value ~= nil
         end
-        local comparison = CompareSortValues(a.value, b.value)
+        local comparison = CAICollection.CompareValues(a.value, b.value)
         if comparison == 0 then return a.naturalIndex < b.naturalIndex end
         if m_treeSortAscending then return comparison < 0 end
         return comparison > 0
@@ -1281,7 +1194,9 @@ local function BuildPanel()
             return not CanActivateGovernor(governorIndex, Game.GetLocalPlayer())
         end
     end
-    m_treeSortOptions = BuildTreeSortOptions(m_governorColumns)
+    m_treeSortOptions = CAIColumns.BuildSortOptions(m_governorColumns, {
+        natural = { ascending = false }, separator = ", ",
+    })
 
     m_ui.tableView = mgr:CreateWidget(TABLE_ID, "DataTable", {
         Label = GetTitleCountsText,

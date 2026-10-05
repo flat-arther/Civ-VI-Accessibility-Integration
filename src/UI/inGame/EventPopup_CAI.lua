@@ -50,7 +50,7 @@ local function BuildUnlockText(titleControl, unlocks)
 
 	local lines = {}
 	local title = titleControl:GetText() or ""
-	if title ~= "" then table.insert(lines, title) end
+	CAIText.AppendIfNonEmpty(lines, title)
 	for _, tooltip in ipairs(unlocks) do
 		table.insert(lines, tooltip)
 	end

@@ -35,40 +35,12 @@ function InstallUIOverrides()
     })
 end
 
--- Shared in-game CAI formatting and widget helpers used by ResearchChooser_CAI,
+-- Shared in-game CAI data and widget helpers used by ResearchChooser_CAI,
 -- TechTree_CAI, CivicsChooser_CAI, CivicsTree_CAI, and ProductionPanel_CAI.
 --
 -- Widget builders take `mgr` as their first arg (the caller's
 -- ExposedMembers.CAI_UIManager) so they work in any screen context regardless
 -- of which local `mgr` variable is in scope.
-
--- ===========================================================================
--- Pure string utilities
--- ===========================================================================
-
-function AppendIfNonEmpty(parts, text)
-    if text and text ~= "" then table.insert(parts, text) end
-end
-
-function NormalizeFormattedText(text)
-    text = text or ""
-    text = string.gsub(text, "%[NEWLINE%]", ", ")
-    text = string.gsub(text, "[ \t\r\n]+", " ") -- ASCII only; %s corrupts UTF-8 (0xA0)
-    return text
-end
-
-function SplitFormattedLines(text)
-    local lines = {}
-    text = text or ""
-    text = string.gsub(text, "%[NEWLINE%]", "\n")
-    for line in string.gmatch(text, "([^\n]+)") do
-        local trimmed = string.gsub(line, "^[ \t\r\n]*(.-)[ \t\r\n]*$", "%1")
-        if trimmed ~= "" then
-            table.insert(lines, trimmed)
-        end
-    end
-    return lines
-end
 
 -- ===========================================================================
 -- Advisor / recommendation (shared between ResearchChooser and CivicsChooser)
@@ -589,50 +561,50 @@ end
 
 function FormatTooltip(detail)
     local parts = {}
-    AppendIfNonEmpty(parts, FormatCostLine(detail))
+    CAIText.AppendIfNonEmpty(parts, FormatCostLine(detail))
     if detail.turnsLeft and detail.turnsLeft > 0 then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_TURNS", detail.turnsLeft))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_TURNS", detail.turnsLeft))
     end
     if detail.progressPct then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_PROGRESS", detail.progressPct))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_PROGRESS", detail.progressPct))
     end
-    AppendIfNonEmpty(parts, detail.maintenance)
-    AppendIfNonEmpty(parts, detail.resourceUpkeep)
-    AppendIfNonEmpty(parts, detail.description)
+    CAIText.AppendIfNonEmpty(parts, detail.maintenance)
+    CAIText.AppendIfNonEmpty(parts, detail.resourceUpkeep)
+    CAIText.AppendIfNonEmpty(parts, detail.description)
 
-    if detail.repairNeeded then AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_REPAIR_NEEDED")) end
-    for _, s in ipairs(detail.stats) do AppendIfNonEmpty(parts, s) end
+    if detail.repairNeeded then CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_REPAIR_NEEDED")) end
+    for _, s in ipairs(detail.stats) do CAIText.AppendIfNonEmpty(parts, s) end
 
     if #detail.citizenYields > 0 then
         if detail.citizenYieldsHeader then
-            AppendIfNonEmpty(parts, Locale.Lookup(detail.citizenYieldsHeader))
+            CAIText.AppendIfNonEmpty(parts, Locale.Lookup(detail.citizenYieldsHeader))
         end
-        for _, c in ipairs(detail.citizenYields) do AppendIfNonEmpty(parts, c) end
+        for _, c in ipairs(detail.citizenYields) do CAIText.AppendIfNonEmpty(parts, c) end
     end
 
     if #detail.requirements > 0 then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_TOOLTIP_BUILDING_REQUIRES"))
-        for _, r in ipairs(detail.requirements) do AppendIfNonEmpty(parts, r) end
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_TOOLTIP_BUILDING_REQUIRES"))
+        for _, r in ipairs(detail.requirements) do CAIText.AppendIfNonEmpty(parts, r) end
     end
 
-    if detail.cannotAfford then AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_CANNOT_AFFORD")) end
+    if detail.cannotAfford then CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_CANNOT_AFFORD")) end
     if #detail.failures > 0 then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_FAILURE_REASONS_LABEL"))
-        for _, f in ipairs(detail.failures) do AppendIfNonEmpty(parts, f) end
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_FAILURE_REASONS_LABEL"))
+        for _, f in ipairs(detail.failures) do CAIText.AppendIfNonEmpty(parts, f) end
     end
 
-    AppendIfNonEmpty(parts, detail.promotionClass)
+    CAIText.AppendIfNonEmpty(parts, detail.promotionClass)
 
     if #detail.bonuses > 0 then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_BONUSES_LABEL"))
-        for _, b in ipairs(detail.bonuses) do AppendIfNonEmpty(parts, b) end
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_BONUSES_LABEL"))
+        for _, b in ipairs(detail.bonuses) do CAIText.AppendIfNonEmpty(parts, b) end
     end
 
     if #detail.policyUnlocks > 0 then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_UNLOCKS_LABEL"))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_PRODUCTION_UNLOCKS_LABEL"))
         for _, u in ipairs(detail.policyUnlocks) do
-            AppendIfNonEmpty(parts, u.name)
-            AppendIfNonEmpty(parts, u.description)
+            CAIText.AppendIfNonEmpty(parts, u.name)
+            CAIText.AppendIfNonEmpty(parts, u.description)
         end
     end
 
@@ -641,24 +613,6 @@ end
 
 -- Split on the literal [NEWLINE] token (plain find; not a Lua pattern) so we
 -- never touch the locale-sensitive %s class on multibyte text.
-local function SplitNewlineToken(text)
-    local lines = {}
-    local pos = 1
-    while true do
-        local s, e = string.find(text, "[NEWLINE]", pos, true)
-        if not s then
-            lines[#lines + 1] = string.sub(text, pos)
-            return lines
-        end
-        lines[#lines + 1] = string.sub(text, pos, s - 1)
-        pos = e + 1
-    end
-end
-
-local function TrimAscii(s)
-    return (string.gsub(s or "", "^[ \t\r\n]*(.-)[ \t\r\n]*$", "%1"))
-end
-
 -- The category word vanilla puts on the tooltip's second line for each unlock
 -- kind ("Policy", "Building", ...). Built lazily and cached; used to lift the
 -- category into the widget label and drop it from the spoken tooltip body.
@@ -684,12 +638,6 @@ end
 -- duplicated lines, never for display, so token stripping here is safe (the
 -- central ProcessText still handles display text). ASCII-only sets avoid the
 -- locale-sensitive %s pitfall on multibyte text.
-local function NormalizeForCompare(s)
-    s = string.gsub(s or "", "%[[^%]]*%]", " ")
-    s = string.gsub(s, "[ \t\r\n]+", " ")
-    return TrimAscii(s)
-end
-
 -- Some vanilla improvement descriptions restate the improvement's base yields in
 -- prose, and GetImprovementToolTip then appends those same yields again as
 -- separate stat lines (e.g. Offshore Wind Farm reads "... +2 Production ..." and
@@ -699,10 +647,10 @@ end
 local function DropDuplicateLines(body)
     local out = {}
     for i, line in ipairs(body) do
-        local norm = NormalizeForCompare(line)
+        local norm = CAIText.ComparisonText(line)
         local dup = false
         if norm ~= "" and i > 1 then
-            local earlier = NormalizeForCompare(table.concat(body, " ", 1, i - 1))
+            local earlier = CAIText.ComparisonText(table.concat(body, " ", 1, i - 1))
             if string.find(earlier, norm, 1, true) then dup = true end
         end
         if not dup then out[#out + 1] = line end
@@ -721,13 +669,13 @@ local function BuildUnlockDisplayFromVanilla(typeName, name, playerID, kind)
         return name, GetUnlockDescription(typeName) or ""
     end
 
-    local lines = SplitNewlineToken(tip)
+    local lines = CAIText.SplitNewlineToken(tip)
     -- Line 1 is the upper-cased name; only policies append a "(Slot)" suffix.
-    local slot = string.match(TrimAscii(lines[1]), "%(([^()]*)%)$")
+    local slot = string.match(CAIText.TrimAscii(lines[1]), "%(([^()]*)%)$")
 
     -- Line 2 is the category for every generator we care about, except unique
     -- variants whose line reads "replaces X"; keep those in the body instead.
-    local category = TrimAscii(lines[2])
+    local category = CAIText.TrimAscii(lines[2])
     local bodyStart = 2
     if UnlockCategorySet()[category] then
         bodyStart = 3
@@ -741,7 +689,7 @@ local function BuildUnlockDisplayFromVanilla(typeName, name, playerID, kind)
 
     local body = {}
     for i = bodyStart, #lines do
-        if TrimAscii(lines[i]) ~= "" then body[#body + 1] = lines[i] end
+        if CAIText.TrimAscii(lines[i]) ~= "" then body[#body + 1] = lines[i] end
     end
 
     -- Improvement descriptions often restate their base yields, which vanilla
@@ -1049,8 +997,8 @@ function BuildMapTacLabel(mapPinCfg)
     end
 
     local parts = {}
-    AppendIfNonEmpty(parts, GetMapTacName(mapPinCfg))
-    AppendIfNonEmpty(parts, GetMapTacIconLabel(mapPinCfg:GetIconName()))
+    CAIText.AppendIfNonEmpty(parts, GetMapTacName(mapPinCfg))
+    CAIText.AppendIfNonEmpty(parts, GetMapTacIconLabel(mapPinCfg:GetIconName()))
     return #parts > 0 and table.concat(parts, ", ") or nil
 end
 
@@ -1302,7 +1250,7 @@ function FormatOwnedName(ownerPrefix, name, suffix)
     end
 
     local formatted = Locale.Lookup("LOC_CAI_UNIT_FLAG_NAME_PATTERN", ownerPrefix or "", name, suffix or "")
-    local normalized = NormalizeFormattedText(formatted)
+    local normalized = CAIText.NormalizeFormattedText(formatted)
     normalized = string.gsub(normalized, "^[ \t\r\n]*(.-)[ \t\r\n]*$", "%1")
     if normalized == "" then
         return nil
@@ -1451,9 +1399,7 @@ function GetHostedAircraftUnitNames(unit)
     local names = {}
     for _, hostedUnit in ipairs(aircraftData.AirUnits) do
         local name = FormatOwnedUnitDisplayName(hostedUnit)
-        if name ~= nil and name ~= "" then
-            table.insert(names, name)
-        end
+        CAIText.AppendIfNonEmpty(names, name)
     end
 
     if #names == 0 then
@@ -1793,7 +1739,7 @@ end
 -- Validity rows include expansion and mod data, so this follows live content.
 local m_TerrainShapeMetadata = nil
 
-local function IsTerrainDatabaseTrue(value)
+function CAIIsDatabaseTrue(value)
     return value == true or value == 1 or value == "true" or value == "1"
 end
 
@@ -1822,8 +1768,8 @@ local function GetTerrainShapeMetadata()
     for terrainInfo in GameInfo.Terrains() do
         local terrainClassType = terrainClassByType[terrainInfo.TerrainType]
         if terrainClassType ~= nil
-            and not IsTerrainDatabaseTrue(terrainInfo.Hills)
-            and not IsTerrainDatabaseTrue(terrainInfo.Mountain)
+            and not CAIIsDatabaseTrue(terrainInfo.Hills)
+            and not CAIIsDatabaseTrue(terrainInfo.Mountain)
             and flatTerrainByClass[terrainClassType] == nil then
             flatTerrainByClass[terrainClassType] = terrainInfo
         end
@@ -1847,9 +1793,9 @@ local function GetTerrainShapeMetadata()
         end
 
         local elevation = "flat"
-        if IsTerrainDatabaseTrue(terrainInfo.Mountain) then
+        if CAIIsDatabaseTrue(terrainInfo.Mountain) then
             elevation = "mountain"
-        elseif IsTerrainDatabaseTrue(terrainInfo.Hills) then
+        elseif CAIIsDatabaseTrue(terrainInfo.Hills) then
             elevation = "hills"
         end
         featureFacts.Elevations[elevation] = true
@@ -1886,7 +1832,7 @@ function GetTerrainShape(plot)
         BaseName = nil,
     }
 
-    if featureInfo ~= nil and IsTerrainDatabaseTrue(featureInfo.NaturalWonder) then
+    if featureInfo ~= nil and CAIIsDatabaseTrue(featureInfo.NaturalWonder) then
         return shape
     end
 

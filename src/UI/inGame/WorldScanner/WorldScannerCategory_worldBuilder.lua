@@ -1,3 +1,4 @@
+include("CAIGameState")
 include("Civ6Common")
 
 -- World Builder-only scanner category. It only surfaces while the World Builder
@@ -57,12 +58,6 @@ local subCategoryLabels = {
 local m_playerManager = nil
 local m_ownerBuckets = {}
 
-local function IsWorldBuilderActive()
-    return WorldBuilder ~= nil
-        and WorldBuilder.IsActive ~= nil
-        and WorldBuilder.IsActive()
-end
-
 CAIWorldScannerCategory_WorldBuilder = {
     Id = "worldBuilder",
     LabelKey = "LOC_CAI_WORLD_SCANNER_CATEGORY_WORLD_BUILDER",
@@ -85,7 +80,7 @@ CAIWorldScannerCategory_WorldBuilder = {
         return firstItem ~= nil and firstItem.GroupLabelKey or "LOC_CAI_WORLD_SCANNER_UNKNOWN"
     end,
     CanScan = function()
-        return IsWorldBuilderActive()
+        return CAIGameState.IsWorldBuilderActive()
     end,
 }
 
@@ -125,7 +120,7 @@ local function ResolveStartPosition(info)
 end
 
 function CAIWorldScannerCategory_WorldBuilder.BeginExtract()
-    m_playerManager = IsWorldBuilderActive() and WorldBuilder.PlayerManager() or nil
+    m_playerManager = CAIGameState.IsWorldBuilderActive() and WorldBuilder.PlayerManager() or nil
     m_ownerBuckets = {}
 end
 

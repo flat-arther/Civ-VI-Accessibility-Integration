@@ -183,6 +183,8 @@ function Initialize()
 	end);
 end
 --#Accessibility integration
+include("textProcessing")
+include("CAIControl")
 include("caiUtils")
 
 local mgr = ExposedMembers.CAI_UIManager
@@ -192,27 +194,6 @@ local m_CAI_PasswordEdit ---@type EditBoxWidget|nil
 local m_CAI_PasswordVerifyEdit ---@type EditBoxWidget|nil
 local m_CAI_AcceptButton ---@type UIWidget|nil
 local m_CAI_HasValidData:boolean = false
-
-local function CAI_GetControlText(control)
-	if control and control.GetText then
-		return control:GetText() or ""
-	end
-	return ""
-end
-
-local function CAI_GetControlTooltip(control)
-	if control and control.GetToolTipString then
-		return control:GetToolTipString() or ""
-	end
-	return ""
-end
-
-local function CAI_JoinLines(lines)
-	if #lines == 0 then
-		return ""
-	end
-	return table.concat(lines, "[NEWLINE]")
-end
 
 local function CAI_ClearDialogRefs()
 	m_CAI_Dialog = nil
@@ -233,22 +214,22 @@ local function CAI_GetAcceptTooltip()
 	local lines = {}
 	local mismatch = ""
 	if not Controls.HotseatPasswordsMatchLabel:IsHidden() then
-		mismatch = CAI_GetControlText(Controls.HotseatPasswordsMatchLabel)
+		mismatch = CAIControl.Text(Controls.HotseatPasswordsMatchLabel)
 		if mismatch ~= "" then
 			table.insert(lines, mismatch)
 		end
 	end
-	local tooltip = CAI_GetControlTooltip(Controls.AcceptButton)
+	local tooltip = CAIControl.Tooltip(Controls.AcceptButton)
 	if tooltip ~= "" and tooltip ~= mismatch then
 		table.insert(lines, tooltip)
 	end
-	return CAI_JoinLines(lines)
+	return CAIText.ConcatLines(lines)
 end
 
 local function CAI_MakeEdit(id, labelControl, editControl, onTextChanged, isPassword)
 	local edit = mgr:CreateWidget(id, "EditBox", {
 		Label = function()
-			return CAI_GetControlText(labelControl)
+			return CAIControl.Text(labelControl)
 		end,
 		DisabledPredicate = function()
 			return editControl ~= nil and editControl:IsDisabled()
@@ -270,13 +251,13 @@ end
 
 local function CAI_SyncDialogFromControls()
 	if m_CAI_NameEdit then
-		m_CAI_NameEdit:SetText(CAI_GetControlText(Controls.HotseatPlayerNameEntry), true)
+		m_CAI_NameEdit:SetText(CAIControl.Text(Controls.HotseatPlayerNameEntry), true)
 	end
 	if m_CAI_PasswordEdit then
-		m_CAI_PasswordEdit:SetText(CAI_GetControlText(Controls.HotseatPasswordEntry), true)
+		m_CAI_PasswordEdit:SetText(CAIControl.Text(Controls.HotseatPasswordEntry), true)
 	end
 	if m_CAI_PasswordVerifyEdit then
-		m_CAI_PasswordVerifyEdit:SetText(CAI_GetControlText(Controls.HotseatPasswordVerifyEntry), true)
+		m_CAI_PasswordVerifyEdit:SetText(CAIControl.Text(Controls.HotseatPasswordVerifyEntry), true)
 	end
 end
 
@@ -316,10 +297,10 @@ local function CAI_PushDialog()
 
 	local cancelButton = mgr:CreateWidget("CAIEditHotseatPlayer_Cancel", "Button", {
 		Label = function()
-			return CAI_GetControlText(Controls.CancelButton)
+			return CAIControl.Text(Controls.CancelButton)
 		end,
 		Tooltip = function()
-			return CAI_GetControlTooltip(Controls.CancelButton)
+			return CAIControl.Tooltip(Controls.CancelButton)
 		end,
 		FocusKey = "action:cancel",
 	})
@@ -330,7 +311,7 @@ local function CAI_PushDialog()
 
 	m_CAI_AcceptButton = mgr:CreateWidget("CAIEditHotseatPlayer_Accept", "Button", {
 		Label = function()
-			return CAI_GetControlText(Controls.AcceptButton)
+			return CAIControl.Text(Controls.AcceptButton)
 		end,
 		Tooltip = CAI_GetAcceptTooltip,
 		DisabledPredicate = function()
@@ -345,7 +326,7 @@ local function CAI_PushDialog()
 
 	m_CAI_Dialog = mgr.WidgetHelpers.MakeGeneralDialog(
 		function()
-			return CAI_GetControlText(Controls.DialogTitle)
+			return CAIControl.Text(Controls.DialogTitle)
 		end,
 		{ cancelButton, m_CAI_AcceptButton },
 		{ m_CAI_NameEdit, m_CAI_PasswordEdit, m_CAI_PasswordVerifyEdit },

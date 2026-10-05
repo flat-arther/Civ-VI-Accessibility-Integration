@@ -1,3 +1,4 @@
+include("CAIGameState")
 include("interfaceTargetHelpers_CAI")
 
 local SUBCATEGORY_TARGET_PLOTS = "targetPlots"
@@ -13,17 +14,11 @@ local WB_GROUP_LABEL_KEYS = {
     [GROUP_WB_INVALID] = "LOC_CAI_WORLD_SCANNER_WB_TARGET_INVALID",
 }
 
-local function IsWorldBuilderActive()
-    return WorldBuilder ~= nil
-        and WorldBuilder.IsActive ~= nil
-        and WorldBuilder.IsActive()
-end
-
 -- The locked World Builder placement plot, or nil when no tile is locked. The
 -- source lives in the WorldInput context, the same context the scanner runs in,
 -- so its global is read directly. Only a locked tile drives the footprint list.
 local function WorldBuilderSourcePlot()
-    if not IsWorldBuilderActive() then return nil end
+    if not CAIGameState.IsWorldBuilderActive() then return nil end
     if CAIWorldBuilderScannerSourcePlot == nil then return nil end
     return CAIWorldBuilderScannerSourcePlot()
 end

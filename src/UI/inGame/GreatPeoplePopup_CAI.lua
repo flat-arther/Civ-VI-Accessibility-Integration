@@ -1,3 +1,5 @@
+include("CAIColumns")
+include("CAICollection")
 -- GreatPeoplePopup_CAI.lua
 --
 -- Accessibility layer for the Great People popup.
@@ -133,14 +135,6 @@ local m_vanillaTabCount   = 0
 -- Control helpers
 -- ===========================================================================
 
-local function JoinNonEmpty(parts, sep)
-    local out = {}
-    for _, part in ipairs(parts) do
-        if part and part ~= "" then out[#out + 1] = part end
-    end
-    return table.concat(out, sep)
-end
-
 -- ===========================================================================
 -- Tab 1: Great People — label/tooltip helpers
 -- ===========================================================================
@@ -216,7 +210,7 @@ local function FormatPersonTooltip(kPerson)
         parts[#parts + 1] = kPerson.EarnConditions
     end
 
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function FormatProgressLabel(kPlayerPoints, recruitCost)
@@ -266,7 +260,7 @@ local function GetBiographyText(kPerson)
     end
     local text = table.concat(kPerson.BiographyTextTable, "[NEWLINE][NEWLINE]")
     if text == "" then return Locale.Lookup("LOC_CAI_GP_NO_BIOGRAPHY") end
-    return table.concat(SplitTextIntoLines(text), "[NEWLINE]")
+    return table.concat(CAIText.SplitTextIntoLines(text, CAISettings.GetNumber("TokenSplitLength")), "[NEWLINE]")
 end
 
 -- ===========================================================================
@@ -316,7 +310,7 @@ local function FormatTablePersonHeader(kPerson)
     if kPerson.EarnConditions and kPerson.EarnConditions ~= "" then
         parts[#parts + 1] = kPerson.EarnConditions
     end
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function ReindexProgressData()
@@ -427,34 +421,6 @@ local function BuildGPTableColumns()
     return columns
 end
 
-local function ResolveColumnSortLabel(column)
-    local label = column.sortLabel or column.header
-    return type(label) == "function" and label() or label or ""
-end
-
-local function BuildGPSortOptions(columns)
-    local options = {
-        {
-            label = Locale.Lookup("LOC_CAI_DATATABLE_SORT_NATURAL"),
-            value = { column = nil, ascending = false },
-        },
-    }
-    for _, column in ipairs(columns) do
-        if column.sortKey then
-            local header = ResolveColumnSortLabel(column)
-            options[#options + 1] = {
-                label = header .. ", " .. Locale.Lookup(column.sortAscendingDescription),
-                value = { column = column.key, ascending = true },
-            }
-            options[#options + 1] = {
-                label = header .. ", " .. Locale.Lookup(column.sortDescendingDescription),
-                value = { column = column.key, ascending = false },
-            }
-        end
-    end
-    return options
-end
-
 local function SyncGPSortDropdown()
     if not m_ui.gpSort then return end
     for index, option in ipairs(m_gpSortOptions) do
@@ -465,14 +431,6 @@ local function SyncGPSortDropdown()
             return
         end
     end
-end
-
-local function CompareGPSortValues(a, b)
-    if a == b then return 0 end
-    if a == nil then return 1 end
-    if b == nil then return -1 end
-    if type(a) == "number" and type(b) == "number" then return a < b and -1 or 1 end
-    return Locale.Compare(tostring(a), tostring(b))
 end
 
 local function SortTreeProgress(pointsByPlayer)
@@ -526,7 +484,7 @@ local function SortTreeProgress(pointsByPlayer)
             if a.value == b.value then return a.naturalIndex < b.naturalIndex end
             return a.value ~= nil
         end
-        local comparison = CompareGPSortValues(a.value, b.value)
+        local comparison = CAICollection.CompareValues(a.value, b.value)
         if comparison == 0 then return a.naturalIndex < b.naturalIndex end
         if m_gpSortAscending then return comparison < 0 end
         return comparison > 0
@@ -591,7 +549,9 @@ local function BuildGPTable()
     m_ui.gpTable:SetDefaultSort(m_gpSortColumn
         and { column = m_gpSortColumn, ascending = m_gpSortAscending }
         or nil)
-    m_gpSortOptions = BuildGPSortOptions(columns)
+    m_gpSortOptions = CAIColumns.BuildSortOptions(columns, {
+        natural = { ascending = false }, separator = ", ", preferSortLabel = true,
+    })
     if m_ui.gpSort then
         local dropdownCapture = mgr:CaptureFocusKey(m_ui.gpSort)
         m_ui.gpSort:SetOptions(m_gpSortOptions)
@@ -756,7 +716,7 @@ local function FormatPastAbilities(kPerson)
         actionText = actionText .. ": " .. kPerson.ActionEffectText
         parts[#parts + 1] = actionText
     end
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function BuildPastList(data)
@@ -785,14 +745,10 @@ local function BuildPastList(data)
         end
 
         local recruiter = FormatPastRecruiter(kPerson)
-        if recruiter ~= "" then
-            parts[#parts + 1] = recruiter
-        end
+        CAIText.AppendIfNonEmpty(parts, recruiter)
 
         local abilities = FormatPastAbilities(kPerson)
-        if abilities ~= "" then
-            parts[#parts + 1] = abilities
-        end
+        CAIText.AppendIfNonEmpty(parts, abilities)
 
         local label = table.concat(parts, "[NEWLINE]")
         local focusKey = kPerson.IndividualID and ("past:" .. tostring(kPerson.IndividualID)) or nil
@@ -974,7 +930,7 @@ local function FormatHeroEffects(entries)
         end
         parts[#parts + 1] = text
     end
-    return JoinNonEmpty(parts, ", ")
+    return CAIText.JoinNonEmpty(parts, ", ")
 end
 
 local function FormatHeroTooltip(hero)
@@ -1001,7 +957,7 @@ local function FormatHeroTooltip(hero)
         statParts[#statParts + 1] = Locale.Lookup("LOC_HUD_UNIT_PANEL_CHARGES") .. ": " .. tostring(kStats.Charges)
     end
     if #statParts > 0 then
-        parts[#parts + 1] = JoinNonEmpty(statParts, "[NEWLINE]")
+        parts[#parts + 1] = CAIText.JoinNonEmpty(statParts, "[NEWLINE]")
     end
 
     if #hero.abilities > 0 then
@@ -1014,7 +970,7 @@ local function FormatHeroTooltip(hero)
         parts[#parts + 1] = FormatHeroEffects(hero.commands)
     end
 
-    return JoinNonEmpty(parts, "[NEWLINE]")
+    return CAIText.JoinNonEmpty(parts, "[NEWLINE]")
 end
 
 local function BuildHeroRecords()
@@ -1104,17 +1060,10 @@ local function BuildHeroColumns()
     }
 end
 
-local function GetHeroColumn(columnKey)
-    for _, column in ipairs(m_heroColumns) do
-        if column.key == columnKey then return column end
-    end
-    return nil
-end
-
 local function GetOrderedHeroRecords()
     local ordered = {}
     for _, hero in ipairs(m_heroRecords) do ordered[#ordered + 1] = hero end
-    local column = GetHeroColumn(m_heroSortColumn)
+    local column = CAIColumns.Find(m_heroColumns, m_heroSortColumn)
     if not column or not column.sortKey then return ordered end
 
     local decorated = {}
@@ -1144,24 +1093,6 @@ local function GetOrderedHeroRecords()
     ordered = {}
     for _, entry in ipairs(decorated) do ordered[#ordered + 1] = entry.hero end
     return ordered
-end
-
-local function BuildHeroSortOptions()
-    local options = {
-        { label = Locale.Lookup("LOC_CAI_DATATABLE_SORT_NATURAL"), value = { column = nil, ascending = false } },
-    }
-    for _, column in ipairs(m_heroColumns) do
-        local header = type(column.header) == "function" and column.header() or column.header
-        options[#options + 1] = {
-            label = header .. ", " .. Locale.Lookup(column.sortAscendingDescription),
-            value = { column = column.key, ascending = true },
-        }
-        options[#options + 1] = {
-            label = header .. ", " .. Locale.Lookup(column.sortDescendingDescription),
-            value = { column = column.key, ascending = false },
-        }
-    end
-    return options
 end
 
 local function SyncHeroSortDropdown()
@@ -1577,7 +1508,9 @@ local function BuildPanel()
         end)
 
         m_heroColumns = BuildHeroColumns()
-        m_heroSortOptions = BuildHeroSortOptions()
+        m_heroSortOptions = CAIColumns.BuildSortOptions(m_heroColumns, {
+            natural = { ascending = false }, separator = ", ", includeColumn = function() return true end,
+        })
 
         m_ui.heroTable = mgr:CreateWidget(HEROES_TABLE_ID, "DataTable", {
             Label = function() return Locale.Lookup("LOC_CAI_GP_HEROES_LIST") end,

@@ -105,9 +105,7 @@ local function GetPlotLabel(plotIndex)
         local cursorX, cursorY = CAICursor:GetCoords()
         if cursorX ~= nil and cursorY ~= nil then
             local dir = HexCoordUtils.directionString(cursorX, cursorY, plot:GetX(), plot:GetY())
-            if dir ~= "" then
-                parts[#parts + 1] = dir
-            end
+            CAIText.AppendIfNonEmpty(parts, dir)
         end
     end
 

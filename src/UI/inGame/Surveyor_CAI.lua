@@ -1,3 +1,4 @@
+include("CAIGameState")
 include("caiUtils")
 include("hexCoordUtils_CAI")
 include("inGameHelpers_CAI")
@@ -76,10 +77,6 @@ local function ResolveText(labelKey)
         return Locale.Lookup(value)
     end
     return value
-end
-
-local function IsDatabaseTrue(value)
-    return value == true or value == 1 or value == "true" or value == "1"
 end
 
 local function AppendUnexplored(body, unexplored)
@@ -245,30 +242,6 @@ end
 -- Religious units are treated as hostile unless a religious alliance protects
 -- their owner or they already spread the local player's majority religion. This
 -- mirrors the World Scanner's enemy classification so both tools agree.
-local function IsReligiousUnit(unit)
-    return unit ~= nil and unit:GetReligiousStrength() > 0
-end
-
-local function IsReligiousAlliance(diplomacy, ownerID)
-    local religiousAlliance = GameInfo.Alliances ~= nil
-        and GameInfo.Alliances["ALLIANCE_RELIGIOUS"] or nil
-    return religiousAlliance ~= nil
-        and diplomacy ~= nil
-        and diplomacy:GetAllianceType(ownerID) == religiousAlliance.Index
-end
-
-local function HasLocalMajorityReligion(unit, localPlayerID)
-    local localPlayer = localPlayerID ~= nil and Players[localPlayerID] or nil
-    local localReligion = localPlayer ~= nil and localPlayer:GetReligion() or nil
-    if localReligion == nil then
-        return false
-    end
-
-    local religionType = unit:GetReligionType()
-    local localReligionType = localReligion:GetReligionInMajorityOfCities()
-    return religionType ~= nil and religionType >= 0 and religionType == localReligionType
-end
-
 local function IsEnemyUnit(unit)
     -- Ownership is not player-relative to an observer. Even barbarian units
     -- resolve as neutral in this context.
@@ -295,9 +268,9 @@ local function IsEnemyUnit(unit)
         return false
     end
 
-    if IsReligiousUnit(unit) then
-        if IsReligiousAlliance(diplomacy, ownerID)
-            or HasLocalMajorityReligion(unit, localPlayerID) then
+    if CAIGameState.IsReligiousUnit(unit) then
+        if CAIGameState.IsReligiousAlliance(diplomacy, ownerID)
+            or CAIGameState.HasLocalMajorityReligion(unit, localPlayerID) then
             return false
         end
         return true
@@ -505,8 +478,8 @@ function Surveyor.ReadImprovements()
         local improvementInfo = improvementType ~= nil and improvementType >= 0
             and GameInfo.Improvements[improvementType] or nil
         if improvementInfo ~= nil
-            and not IsDatabaseTrue(improvementInfo.BarbarianCamp)
-            and not IsDatabaseTrue(improvementInfo.Goody) then
+            and not CAIIsDatabaseTrue(improvementInfo.BarbarianCamp)
+            and not CAIIsDatabaseTrue(improvementInfo.Goody) then
             local label = Locale.Lookup(improvementInfo.Name)
             buckets[label] = (buckets[label] or 0) + 1
         end
@@ -531,7 +504,7 @@ function Surveyor.ReadDistricts()
         local districtInfo = districtType ~= nil and districtType >= 0
             and GameInfo.Districts[districtType] or nil
         if districtInfo ~= nil
-            and not IsDatabaseTrue(districtInfo.InternalOnly)
+            and not CAIIsDatabaseTrue(districtInfo.InternalOnly)
             and districtInfo.DistrictType ~= "DISTRICT_CITY_CENTER" then
             local label = Locale.Lookup(districtInfo.Name)
             buckets[label] = (buckets[label] or 0) + 1

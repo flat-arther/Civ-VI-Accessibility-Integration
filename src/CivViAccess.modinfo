@@ -10,6 +10,20 @@
     <CompatibleVersions>2.0</CompatibleVersions>
   </Properties>
   <Files>
+    <File>UI/shared/CAIModSupport.lua</File>
+    <File>UI/shared/CAIControl.lua</File>
+    <File>UI/shared/CAICapturedDropdown.lua</File>
+    <File>UI/shared/CAICollection.lua</File>
+    <File>UI/shared/CAIDescriptors.lua</File>
+    <File>UI/shared/CAIColumns.lua</File>
+    <File>UI/inGame/CAIGameState.lua</File>
+    <File>UI/inGame/CAIResearchChooser.lua</File>
+    <File>UI/inGame/CAIResearchTree.lua</File>
+    <File>UI/inGame/CAIResearchData.lua</File>
+    <File>UI/inGame/CAITradeData.lua</File>
+    <File>UI/inGame/CAITradeOrigin.lua</File>
+    <File>UI/inGame/CAITradeOverview.lua</File>
+    <File>UI/inGame/CAIUnitBrowser.lua</File>
     <File>Platforms/Windows/Audio/English(US)/225557858.wem</File>
     <File>version_CAI.lua</File>
     <File>UI/Replacements/BlackDeathScenario/MinimapPanel_BlackDeathScenario.lua</File>
@@ -470,6 +484,12 @@
       <File>UI/frontEnd/GameSummaries_GameDetails.lua</File>
       <File>UI/FiraxisLive/My2K.lua</File>
       <File>UI/shared/textProcessing.lua</File>
+      <File>UI/shared/CAIModSupport.lua</File>
+      <File>UI/shared/CAIControl.lua</File>
+      <File>UI/shared/CAICapturedDropdown.lua</File>
+      <File>UI/shared/CAICollection.lua</File>
+      <File>UI/shared/CAIDescriptors.lua</File>
+      <File>UI/shared/CAIColumns.lua</File>
       <File>UI/shared/LoadSaveHelpers_CAI.lua</File>
       <File>UI/shared/LoadGameMenu.lua</File>
       <File>UI/shared/SaveGameMenu.lua</File>
@@ -579,6 +599,14 @@
       <Properties>
         <LoadOrder>999999999</LoadOrder>
       </Properties>
+      <File>UI/inGame/CAIGameState.lua</File>
+      <File>UI/inGame/CAIResearchChooser.lua</File>
+      <File>UI/inGame/CAIResearchTree.lua</File>
+      <File>UI/inGame/CAIResearchData.lua</File>
+      <File>UI/inGame/CAITradeData.lua</File>
+      <File>UI/inGame/CAITradeOrigin.lua</File>
+      <File>UI/inGame/CAITradeOverview.lua</File>
+      <File>UI/inGame/CAIUnitBrowser.lua</File>
       <File>version_CAI.lua</File>
       <File>UI/shared/CAI_logging.lua</File>
       <File>UI/shared/caiUtils.lua</File>
@@ -641,6 +669,12 @@
       <File>UI/inGame/MovementCost_CAI.lua</File>
       <File>UI/inGame/UnitWaypoints_CAI.lua</File>
       <File>UI/shared/textProcessing.lua</File>
+      <File>UI/shared/CAIModSupport.lua</File>
+      <File>UI/shared/CAIControl.lua</File>
+      <File>UI/shared/CAICapturedDropdown.lua</File>
+      <File>UI/shared/CAICollection.lua</File>
+      <File>UI/shared/CAIDescriptors.lua</File>
+      <File>UI/shared/CAIColumns.lua</File>
       <File>UI/shared/PopupDialog.lua</File>
       <File>UI/shared/LoadSaveHelpers_CAI.lua</File>
       <File>UI/shared/LoadGameMenu.lua</File>

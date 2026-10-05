@@ -1,3 +1,5 @@
+include("CAIGameState")
+include("CAIControl")
 include("caiUtils")
 include("Civ6Common")
 
@@ -29,30 +31,6 @@ local m_caiLastObservedActionTooltip = nil
 local IsTutorialActionPanelAllowed = nil
 
 
-local function ControlIsHidden(control)
-    return control and control.IsHidden and control:IsHidden() or false
-end
-
-local function ControlIsDisabled(control)
-    return control and control.IsDisabled and control:IsDisabled() or false
-end
-
-local function ControlText(control)
-    if control and control.GetText then
-        local text = control:GetText()
-        if text and text ~= "" then return text end
-    end
-    return ""
-end
-
-local function ControlTooltip(control)
-    if control and control.GetToolTipString then
-        local text = control:GetToolTipString()
-        if text and text ~= "" then return text end
-    end
-    return ""
-end
-
 local function CanSpeakCurrentAction()
     if ContextPtr:IsHidden() then return false end
     if IsTutorialActionPanelAllowed ~= nil and not IsTutorialActionPanelAllowed() then return false end
@@ -82,7 +60,7 @@ end
 local function SpeakCurrentActionTooltip(force, onDemand)
     if not CanSpeakCurrentAction() then return end
 
-    local tooltip = ControlTooltip(Controls.EndTurnButton)
+    local tooltip = CAIControl.Tooltip(Controls.EndTurnButton)
     if tooltip == "" then return end
     if not force and tooltip == m_caiLastObservedActionTooltip then return end
 
@@ -101,20 +79,14 @@ end
 
 local function IsActionPanelInputEnabled()
     return IsTutorialActionPanelAllowed()
-        and ControlIsHidden(Controls.TutorialSlowTurnEnableAnim)
+        and CAIControl.IsHidden(Controls.TutorialSlowTurnEnableAnim)
 end
 
 local function IsEndTurnActionEnabled()
     return not ContextPtr:IsHidden()
         and IsActionPanelInputEnabled()
-        and not ControlIsDisabled(Controls.EndTurnButton)
-        and not ControlIsDisabled(Controls.EndTurnButtonLabel)
-end
-
-local function GetLocalPlayerID()
-    local playerID = Game.GetLocalPlayer()
-    if playerID == nil or playerID < 0 then return nil end
-    return playerID
+        and not CAIControl.IsDisabled(Controls.EndTurnButton)
+        and not CAIControl.IsDisabled(Controls.EndTurnButtonLabel)
 end
 
 local function CloseTurnBlockerList()
@@ -124,7 +96,7 @@ local function CloseTurnBlockerList()
 end
 
 local function CountBlockerType(blockerType)
-    local playerID = GetLocalPlayerID()
+    local playerID = CAIGameState.GetLocalPlayerID()
     if playerID == nil then return 0 end
 
     local count = 0
@@ -161,7 +133,7 @@ end
 local function AddPrimaryAction(list, activeBlocker)
     MakeActionButton(list, {
         Label = function()
-            local text = ControlText(Controls.EndTurnText)
+            local text = CAIControl.Text(Controls.EndTurnText)
             if text ~= "" then return text end
 
             local info = activeBlocker and g_kMessageInfo and g_kMessageInfo[activeBlocker] or nil
@@ -170,7 +142,7 @@ local function AddPrimaryAction(list, activeBlocker)
             return Locale.Lookup("LOC_ACTION_PANEL_END_TURN")
         end,
         Tooltip = function()
-            return ControlTooltip(Controls.EndTurnButton)
+            return CAIControl.Tooltip(Controls.EndTurnButton)
         end,
         Value = function()
             if activeBlocker == nil then return "" end
@@ -186,8 +158,8 @@ local function AddPrimaryAction(list, activeBlocker)
                 or not IsActionPanelInputEnabled()
         end,
         DisabledPredicate = function()
-            return ControlIsDisabled(Controls.EndTurnButton)
-                or ControlIsDisabled(Controls.EndTurnButtonLabel)
+            return CAIControl.IsDisabled(Controls.EndTurnButton)
+                or CAIControl.IsDisabled(Controls.EndTurnButtonLabel)
         end,
         OnActivate = function()
             DoEndTurn()
@@ -206,7 +178,7 @@ local function AddBlockerAction(list, blockerType, backingControl)
             return tostring(capturedType)
         end,
         Tooltip = function()
-            local tooltip = ControlTooltip(capturedControl)
+            local tooltip = CAIControl.Tooltip(capturedControl)
             if tooltip ~= "" then return tooltip end
 
             local info = g_kMessageInfo and g_kMessageInfo[capturedType] or nil
@@ -225,7 +197,7 @@ local function AddBlockerAction(list, blockerType, backingControl)
                 or not IsActionPanelInputEnabled()
         end,
         DisabledPredicate = function()
-            return capturedControl ~= nil and ControlIsDisabled(capturedControl)
+            return capturedControl ~= nil and CAIControl.IsDisabled(capturedControl)
         end,
         OnActivate = function()
             DoEndTurn(capturedType)
@@ -236,7 +208,7 @@ end
 local function BuildTurnBlockerList()
     if not mgr then return nil end
 
-    local playerID = GetLocalPlayerID()
+    local playerID = CAIGameState.GetLocalPlayerID()
     if playerID == nil then return nil end
 
     local list = mgr:CreateWidget(ACTION_PANEL_LIST_ID, "List", {
@@ -305,7 +277,7 @@ local function GetEraName()
         local kEraData = GameInfo.Eras[currentEra]
         if kEraData then return Locale.Lookup(kEraData.Name) end
     else
-        local playerID = GetLocalPlayerID()
+        local playerID = CAIGameState.GetLocalPlayerID()
         if playerID == nil then return nil end
         local player = Players[playerID]
         if player == nil then return nil end
@@ -320,7 +292,7 @@ local function GetEraName()
 end
 
 local function SpeakEraAge()
-    local playerID = GetLocalPlayerID()
+    local playerID = CAIGameState.GetLocalPlayerID()
     if playerID == nil then return end
 
     local parts = {}
@@ -402,7 +374,7 @@ end
 
 -- Kept global so optional mod integrations can extend the same readout.
 function GetEraScoreDetailsLines()
-    local playerID = GetLocalPlayerID()
+    local playerID = CAIGameState.GetLocalPlayerID()
     if playerID == nil then return {} end
 
     local gameEras = Game.GetEras()

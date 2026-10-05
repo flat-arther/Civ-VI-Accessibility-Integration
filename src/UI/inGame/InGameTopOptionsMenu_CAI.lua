@@ -1,3 +1,4 @@
+include("CAIControl")
 include("caiUtils")
 include("Civ6Common")
 
@@ -44,20 +45,13 @@ local function StripVersionHeader(text)
     return text
 end
 
-local function ControlTooltip(control)
-    if control and control.GetToolTipString then
-        return control:GetToolTipString() or ""
-    end
-    return ""
-end
-
 local function BuildDetailsText()
     local parts = {
-        ControlTooltip(Controls.CivIcon),
-        ControlTooltip(Controls.LeaderIcon),
-        ControlTooltip(Controls.GameDifficulty),
-        ControlTooltip(Controls.GameSpeed),
-        StripVersionHeader(ControlTooltip(Controls.VersionLabel)),
+        CAIControl.Tooltip(Controls.CivIcon),
+        CAIControl.Tooltip(Controls.LeaderIcon),
+        CAIControl.Tooltip(Controls.GameDifficulty),
+        CAIControl.Tooltip(Controls.GameSpeed),
+        StripVersionHeader(CAIControl.Tooltip(Controls.VersionLabel)),
     }
     -- EditBox SetText normalizes [NEWLINE] to \n; no manual replacement needed.
     return table.concat(parts, "[NEWLINE]")
@@ -73,8 +67,8 @@ local function BuildModsText()
         -- actually sits between two real entries.
         if text == " " then
             if #lines > 0 then table.insert(lines, "") end
-        elseif text ~= "" then
-            table.insert(lines, text)
+        else
+            CAIText.AppendIfNonEmpty(lines, text)
         end
     end
     -- A trailing spacer (no mod names after it) would leave a blank last line.

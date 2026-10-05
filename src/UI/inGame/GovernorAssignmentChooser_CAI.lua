@@ -1,3 +1,4 @@
+include("CAIControl")
 include("caiUtils")
 include("GovernorAssignmentChooser")
 
@@ -12,20 +13,6 @@ local m_dialog = nil ---@type UIWidget|nil
 local m_liveRows = {} ---@type table[]
 
 -- ===========================================================================
-
-local function AppendIfNonEmpty(parts, value)
-    if value and value ~= "" then
-        parts[#parts + 1] = value
-    end
-end
-
-local function ControlText(control)
-    return tostring(control:GetText() or "")
-end
-
-local function ControlTooltip(control)
-    return tostring(control:GetToolTipString() or "")
-end
 
 local function ControlIsHidden(control)
     return control:IsHidden()
@@ -74,23 +61,10 @@ local function GetRowParts(top)
     }
 end
 
-local function TooltipWithValue(control, valueControl, fallbackLabel)
-    local label = ControlTooltip(control)
-    if label == "" and fallbackLabel then
-        label = Locale.Lookup(fallbackLabel)
-    end
-    local value = ControlText(valueControl)
-    if label ~= "" and value ~= "" then
-        return label .. ": " .. value
-    end
-    if value ~= "" then return value end
-    return label
-end
-
 local function BuildRowLabel(row)
-    local parts = { ControlText(row.CityName) }
+    local parts = { CAIText.ToString(row.CityName:GetText()) }
     if not ControlIsHidden(row.CapitalIcon) then
-        AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL"))
+        CAIText.AppendIfNonEmpty(parts, Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL"))
     end
     return table.concat(parts, "[NEWLINE]")
 end
@@ -98,16 +72,16 @@ end
 local function BuildRowTooltip(row)
     local parts = {}
     if not ControlIsHidden(row.GovernorIcon) then
-        AppendIfNonEmpty(parts, ControlTooltip(row.GovernorIcon))
+        CAIText.AppendIfNonEmpty(parts, CAIText.ToString(row.GovernorIcon:GetToolTipString()))
     end
-    AppendIfNonEmpty(parts,
-        TooltipWithValue(row.IdentityPressureBefore, row.IdentityPressureBefore,
-            "LOC_GOVERNOR_ASSIGNMENT_CURRENT_IDENTITY_PRESSURE_TOOLTIP"))
-    AppendIfNonEmpty(parts,
-        TooltipWithValue(row.IdentityPressureAfter, row.IdentityPressureAfter,
-            "LOC_GOVERNOR_ASSIGNMENT_FUTURE_IDENTITY_PRESSURE_TOOLTIP"))
-    AppendIfNonEmpty(parts, TooltipWithValue(row.EstablishTurns, row.EstablishTurns, "LOC_GOVERNOR_TURNS_TO_ESTABLISH"))
-    AppendIfNonEmpty(parts, ControlTooltip(row.Button))
+    CAIText.AppendIfNonEmpty(parts,
+        CAIControl.TooltipWithValue(row.IdentityPressureBefore, row.IdentityPressureBefore,
+            "LOC_GOVERNOR_ASSIGNMENT_CURRENT_IDENTITY_PRESSURE_TOOLTIP", true))
+    CAIText.AppendIfNonEmpty(parts,
+        CAIControl.TooltipWithValue(row.IdentityPressureAfter, row.IdentityPressureAfter,
+            "LOC_GOVERNOR_ASSIGNMENT_FUTURE_IDENTITY_PRESSURE_TOOLTIP", true))
+    CAIText.AppendIfNonEmpty(parts, CAIControl.TooltipWithValue(row.EstablishTurns, row.EstablishTurns, "LOC_GOVERNOR_TURNS_TO_ESTABLISH", true))
+    CAIText.AppendIfNonEmpty(parts, CAIText.ToString(row.Button:GetToolTipString()))
     return table.concat(parts, "[NEWLINE]")
 end
 
@@ -115,16 +89,16 @@ local function BuildGovernorPreviewText(governorInst)
     if not governorInst then return "" end
 
     local parts = {}
-    AppendIfNonEmpty(parts, ControlText(governorInst.GovernorName))
+    CAIText.AppendIfNonEmpty(parts, CAIText.ToString(governorInst.GovernorName:GetText()))
     if not ControlIsHidden(governorInst.IdentityPressureContainer) then
-        AppendIfNonEmpty(parts,
-            TooltipWithValue(governorInst.GovernorIdentityPressure, governorInst.GovernorIdentityPressure,
-                "LOC_GOVERNOR_IDENTITY_PRESSURE_TOOLTIP"))
+        CAIText.AppendIfNonEmpty(parts,
+            CAIControl.TooltipWithValue(governorInst.GovernorIdentityPressure, governorInst.GovernorIdentityPressure,
+                "LOC_GOVERNOR_IDENTITY_PRESSURE_TOOLTIP", true))
     end
     if not ControlIsHidden(governorInst.TurnsToEstablishIcon) then
-        AppendIfNonEmpty(parts,
-            TooltipWithValue(governorInst.TurnsToEstablish, governorInst.TurnsToEstablish,
-                "LOC_GOVERNOR_TURNS_TO_ESTABLISH"))
+        CAIText.AppendIfNonEmpty(parts,
+            CAIControl.TooltipWithValue(governorInst.TurnsToEstablish, governorInst.TurnsToEstablish,
+                "LOC_GOVERNOR_TURNS_TO_ESTABLISH", true))
     end
 
     if governorInst.GovernorPromotionStack and governorInst.GovernorPromotionStack.GetChildren then
@@ -133,12 +107,12 @@ local function BuildGovernorPreviewText(governorInst)
         if children then
             for _, child in ipairs(children) do
                 if child and child.PromotionIcon then
-                    AppendIfNonEmpty(promoTips, ControlTooltip(child.PromotionIcon))
+                    CAIText.AppendIfNonEmpty(promoTips, CAIText.ToString(child.PromotionIcon:GetToolTipString()))
                 end
             end
         end
         if #promoTips > 0 then
-            AppendIfNonEmpty(parts, table.concat(promoTips, "[NEWLINE]"))
+            CAIText.AppendIfNonEmpty(parts, table.concat(promoTips, "[NEWLINE]"))
         end
     end
 
@@ -185,7 +159,7 @@ local function OpenConfirmDialog(rowIndex)
 
     local summaryWidgets = {}
 
-    local cityText = ControlText(Controls.CityName)
+    local cityText = CAIText.ToString(Controls.CityName:GetText())
     if not ControlIsHidden(Controls.CapitalIcon) then
         cityText = table.concat({ cityText, Locale.Lookup("LOC_CAI_CITY_STATUS_CAPITAL") }, "[NEWLINE]")
     end
@@ -225,7 +199,7 @@ local function OpenConfirmDialog(rowIndex)
 
     local confirmBtn = mgr:CreateWidget(mgr:GenerateWidgetId("CAIGovAssign_Confirm"), "Button", {
         Label = function()
-            local text = ControlText(Controls.ConfirmLabel)
+            local text = CAIText.ToString(Controls.ConfirmLabel:GetText())
             if text ~= "" then return text end
             return Locale.Lookup("LOC_CONFIRM")
         end,
@@ -299,11 +273,11 @@ end
 
 local function BuildPanel()
     m_panel = mgr:CreateWidget(PANEL_ID, "Panel", {
-        Label = function() return ControlText(Controls.Header_OriginText) end,
+        Label = function() return CAIText.ToString(Controls.Header_OriginText:GetText()) end,
     })
 
     m_list = mgr:CreateWidget(LIST_ID, "List", {
-        Label = function() return ControlText(Controls.Header_OriginText) end,
+        Label = function() return CAIText.ToString(Controls.Header_OriginText:GetText()) end,
     })
     m_panel:AddChild(m_list)
 

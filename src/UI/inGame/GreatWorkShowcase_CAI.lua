@@ -66,28 +66,28 @@ local function GetWorkDetailsLabel()
     if not Controls.MusicDetails:IsHidden() then
         local name   = Controls.MusicName:GetText() or ""
         local author = Controls.MusicAuthor:GetText() or ""
-        if name   ~= "" then table.insert(parts, name) end
-        if author ~= "" then table.insert(parts, author) end
+        CAIText.AppendIfNonEmpty(parts, name)
+        CAIText.AppendIfNonEmpty(parts, author)
     elseif not Controls.WritingDetails:IsHidden() then
         local name = Controls.WritingName:GetText() or ""
-        if name ~= "" then table.insert(parts, name) end
+        CAIText.AppendIfNonEmpty(parts, name)
         if not Controls.WritingQuote:IsHidden() then
             local quote  = Controls.WritingQuote:GetText() or ""
             local author = Controls.WritingAuthor:GetText() or ""
-            if quote  ~= "" then table.insert(parts, quote) end
-            if author ~= "" then table.insert(parts, author) end
+            CAIText.AppendIfNonEmpty(parts, quote)
+            CAIText.AppendIfNonEmpty(parts, author)
         end
     elseif not Controls.GreatWorkBanner:IsHidden() then
         local name = Controls.GreatWorkName:GetText() or ""
-        if name ~= "" then table.insert(parts, name) end
+        CAIText.AppendIfNonEmpty(parts, name)
     end
 
     local createdBy    = Controls.CreatedBy:GetText() or ""
     local createdDate  = Controls.CreatedDate:GetText() or ""
     local createdPlace = Controls.CreatedPlace:GetText() or ""
-    if createdBy    ~= "" then table.insert(parts, createdBy) end
-    if createdDate  ~= "" then table.insert(parts, createdDate) end
-    if createdPlace ~= "" then table.insert(parts, createdPlace) end
+    CAIText.AppendIfNonEmpty(parts, createdBy)
+    CAIText.AppendIfNonEmpty(parts, createdDate)
+    CAIText.AppendIfNonEmpty(parts, createdPlace)
 
     -- Append the accessibility image description. Missing tags Lookup back to
     -- their tag, so treat "result == tag" as "no description available".
