@@ -2,7 +2,7 @@
 
 ## Current focus
 
-- ProductionPanel stage complete (2026-10-05): queue rows, reorder/delete actions and rebuild/focus state extracted into CAIProductionQueue; duplicate row bindings consolidated. Native production/purchase callbacks, includes, tutorial and placement lifecycle remain in the host. All 45 queue checks pass against current and previous implementations; full verification passes (119,455 assertions, 348 VFS files). Game checks remain deferred.
+- ProductionPanel correction complete (2026-10-05): reversed the unnecessary queue extraction at the user's direction. Queue behavior and state remain private to ProductionPanel; retained local binding deduplication and 45 regression checks, also passing against the original implementation. Full verification passes (119,455 assertions, 347 VFS files). Game checks remain deferred.
 
 - World Rankings stage complete (2026-10-05): Score tree/table and generic/custom tree presenters extracted with explicit dependencies. Native captures, external adapters, tab/view lifecycle and scenario includes remain in the host. Full verification passes (119,410 assertions, 347 VFS files); all 130 Rankings checks and 196 snapshot lines match the prior host. Game checks remain deferred.
 
@@ -44,7 +44,7 @@
 
 - On 2026-10-01 the user confirmed: "everything is tested and working, feel free to close every pending". All previously pending in-game tests, retests, regressions, optional fixture checks, and result requests are closed as successful based on that confirmation.
 - No historical game test remains pending. Future implementation creates its own focused verification requirements.
-- Verification passes: 57 XML files, 348 VFS files, 93 replacements, 12 locale directories; 213 formatting/syntax + 89 shared utility/caller + 31 game-state + 51 research chooser + 72 research tree + 54 research data + 28 descriptor/column + 142 view lifecycle + 41 plot interaction + 74 World Builder input + 824 interface-mode + 85 scanner/focus + 98 report sections + 130 Rankings + 45 production queue + 30 trade data/dropdown + 84 trade screen + 16 Minimap/manager + 40 browser + 74 staging lifecycle + 161 RET + 117,073 river assertions (119,455 total). Remaining UnitPanel compiles. Local Lua 5.4.8 lives under ignored `obj/test-lua`. The fixture-free river mode has 116,809 assertions; GitHub Actions itself has not run. Details: `docs/verification.md`.
+- Verification passes: 57 XML files, 347 VFS files, 93 replacements, 12 locale directories; 213 formatting/syntax + 89 shared utility/caller + 31 game-state + 51 research chooser + 72 research tree + 54 research data + 28 descriptor/column + 142 view lifecycle + 41 plot interaction + 74 World Builder input + 824 interface-mode + 85 scanner/focus + 98 report sections + 130 Rankings + 45 production queue + 30 trade data/dropdown + 84 trade screen + 16 Minimap/manager + 40 browser + 74 staging lifecycle + 161 RET + 117,073 river assertions (119,455 total). Remaining UnitPanel compiles. Local Lua 5.4.8 lives under ignored `obj/test-lua`. The fixture-free river mode has 116,809 assertions; GitHub Actions itself has not run. Details: `docs/verification.md`.
 - Minimap repair confirmed working in game by the user on 2026-10-01; its pending check is closed.
 - Browser extraction and formatting consolidation confirmed working by the user on 2026-10-02; their pending game checks are closed.
 
@@ -67,6 +67,8 @@
 - Next refactor stage, awaiting user direction: finish the remaining duplication/dead-code audit, including the queued removal of unnecessary Reports manager-initialization protection and its artificial test/claims. ProductionPanel review is complete; ProductionManager/multi-queue remains separate scope. Keep DiplomacyActionView together. Complete and commit each stage to beta, then wait for direction; hand over accumulated game tests only after the full refactor.
 
 ## Durable decisions
+
+- Keep screen-specific code together unless demonstrated reuse or a concrete maintenance benefit justifies extraction. A separate responsibility or shorter host file alone is insufficient; the ProductionPanel queue extraction was reversed on this basis.
 
 - `docs/ui-manager.md` defines the class-based framework; `src/ideHelpers.lua` defines annotations. Retired template APIs stay retired. Manager owns focus; screens use widget events, stable FocusKey identities, and public capture/restore operations.
 - Preserve vanilla callbacks, input contexts, dialogs, DLC/scenario wrappers, live control text, and game state changes. Cross-context/local include behavior and VFS registrations constrain module extraction.

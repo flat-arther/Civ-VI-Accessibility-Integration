@@ -1,6 +1,5 @@
 include("CAIModSupport")
 include("CAIControl")
-include("CAIProductionQueue")
 include("caiUtils")
 include("inGameHelpers_CAI")
 
@@ -42,6 +41,7 @@ local PAGE_QUEUE_ID  = "CAIProductionPanel_PageQueue"
 
 local LISTMODE       = { PRODUCTION = 1, PURCHASE_GOLD = 2, PURCHASE_FAITH = 3, PROD_QUEUE = 4 }
 local TAB            = { PRODUCTION = 1, PURCHASE_GOLD = 2, PURCHASE_FAITH = 3, QUEUE = 4 }
+local MAX_QUEUE_SIZE = 7
 
 local m_state        = {
     activeTab                   = TAB.PRODUCTION,
@@ -50,6 +50,7 @@ local m_state        = {
     data                        = nil, ---@type table|nil
     recommended                 = {}, ---@type table<number, string|nil>
     isQueueActionActive         = false,
+    queueFocusIndexAfterRebuild = nil, ---@type integer|nil
     citySortIndex               = 1,
     cityFocusKeyAfterSelection  = nil, ---@type string|nil
     queueTutorialPending        = false,
@@ -666,6 +667,16 @@ local function ReadCurrentProductionTooltip()
     return FormatTooltip(BuildItemDetail(item, formation, TAB.PRODUCTION))
 end
 
+local function RemoveCurrentProductionFromQueue()
+    if not HasActiveCurrentProduction() then return true end
+    local name = CAIControl.Text(Controls.CurrentProductionName)
+    if name == "" then return true end
+    UI.PlaySound("Play_UI_Click")
+    Speak(Locale.Lookup("LOC_CAI_PRODUCTION_CURRENT_REMOVED", name))
+    RemoveQueueItem(0)
+    return true
+end
+
 -- ===========================================================================
 -- Category nodes
 -- ===========================================================================
@@ -783,16 +794,127 @@ end
 -- ===========================================================================
 -- Queue rows
 -- ===========================================================================
-local queue = CAIProductionQueue.Create(mgr, {
-    GetCity = function() return m_state.data and m_state.data.City end,
-    GetList = function() return m_ui.pageTrees[TAB.QUEUE] end,
-    HasCurrentProduction = HasActiveCurrentProduction,
-    ReadCurrentName = function() return CAIControl.Text(Controls.CurrentProductionName) end,
-    ReadCurrentLabel = ReadCurrentProductionLabel,
-    ReadCurrentTooltip = ReadCurrentProductionTooltip,
-    RemoveQueueItem = RemoveQueueItem,
-    SwapQueueItem = SwapQueueItem,
-})
+local function MakeQueueEntryDescription(entry)
+    if not entry then return "" end
+    if entry.Directive == CityProductionDirectives.TRAIN and entry.UnitType then
+        local def = GameInfo.Units[entry.UnitType]; if def then return Locale.Lookup(def.Name) end
+    elseif entry.Directive == CityProductionDirectives.CONSTRUCT and entry.BuildingType then
+        local def = GameInfo.Buildings[entry.BuildingType]; if def then return Locale.Lookup(def.Name) end
+    elseif entry.Directive == CityProductionDirectives.ZONE and entry.DistrictType then
+        local def = GameInfo.Districts[entry.DistrictType]; if def then return Locale.Lookup(def.Name) end
+    elseif entry.Directive == CityProductionDirectives.PROJECT and entry.ProjectType then
+        local def = GameInfo.Projects[entry.ProjectType]; if def then return Locale.Lookup(def.Name) end
+    end
+    return ""
+end
+
+local function GetQueueRowCount()
+    if not m_state.data or not m_state.data.City then return 0 end
+    local pBQ = m_state.data.City:GetBuildQueue(); if not pBQ then return 0 end
+    local count = 0
+    for i = 1, MAX_QUEUE_SIZE do
+        if pBQ:GetAt(i) ~= nil then count = i end
+    end
+    return count
+end
+
+local function GetFocusedQueueRow()
+    local f = mgr and mgr:GetFocusedWidget() or nil
+    if f and f._caiQueueIndex then return f end
+    return nil
+end
+
+local function GetFocusedQueueListIndex()
+    local list = m_ui.pageTrees[TAB.QUEUE]
+    if not list or not list.Children then return nil end
+    local focused = mgr:GetFocusedWidget()
+    for i, child in ipairs(list.Children) do
+        if child == focused then return i end
+    end
+    return nil
+end
+
+local function RemoveFocusedQueueItem()
+    local row = GetFocusedQueueRow()
+    if not row or not row._caiQueueIndex then return false end
+    m_state.queueFocusIndexAfterRebuild = GetFocusedQueueListIndex()
+    UI.PlaySound("Play_UI_Click")
+    Speak(Locale.Lookup("LOC_CAI_PRODUCTION_QUEUE_REMOVED", row._caiQueueName or ""))
+    RemoveQueueItem(row._caiQueueIndex)
+    return true
+end
+
+local function MoveQueueSelection(direction)
+    local row = GetFocusedQueueRow()
+    local idx = row and row._caiQueueIndex or -1
+    local name = row and row._caiQueueName or ""
+    if idx == -1 then return false end
+
+    local target = idx + direction
+    if target < 0 or target > GetQueueRowCount() then
+        if name ~= "" then
+            local key = direction < 0 and "LOC_CAI_PRODUCTION_QUEUE_ALREADY_FIRST" or
+                "LOC_CAI_PRODUCTION_QUEUE_ALREADY_LAST"
+            Speak(Locale.Lookup(key, name))
+        end
+        return true
+    end
+
+    local queueOffset = HasActiveCurrentProduction() and 1 or 0
+    m_state.queueFocusIndexAfterRebuild = target + queueOffset
+    SwapQueueItem(idx, target)
+    if name ~= "" then
+        local key = direction < 0 and "LOC_CAI_PRODUCTION_QUEUE_MOVED_UP" or "LOC_CAI_PRODUCTION_QUEUE_MOVED_DOWN"
+        Speak(Locale.Lookup(key, name))
+    end
+    return true
+end
+
+local function AddQueueBindings(row, removeAction)
+    row:AddInputBindings({
+        { Key = Keys.VK_DELETE, MSG = KeyEvents.KeyUp, Description = "LOC_CAI_KB_REMOVE_FROM_QUEUE", Action = removeAction },
+        {
+            Key = Keys.VK_UP,
+            IsShift = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_MOVE_QUEUE_UP",
+            Action = function() return MoveQueueSelection(-1) end,
+        },
+        {
+            Key = Keys.VK_DOWN,
+            IsShift = true,
+            MSG = KeyEvents.KeyDown,
+            Description = "LOC_CAI_KB_MOVE_QUEUE_DOWN",
+            Action = function() return MoveQueueSelection(1) end,
+        },
+    })
+end
+
+local function CreateQueueRow(queueIndex, name)
+    local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIProductionPanelQueueRow"), "MenuItem", {
+        Label    = function() return name end,
+        FocusKey = "queue:" .. tostring(queueIndex),
+    })
+    row:SetFocusSound("Main_Menu_Mouse_Over")
+    row._caiQueueIndex = queueIndex
+    row._caiQueueName = name
+    AddQueueBindings(row, RemoveFocusedQueueItem)
+    return row
+end
+
+local function CreateQueueCurrentRow()
+    local currentName = CAIControl.Text(Controls.CurrentProductionName)
+    local row = mgr:CreateWidget(mgr:GenerateWidgetId("CAIProductionPanelQueueCurrent"), "MenuItem", {
+        Label    = function() return ReadCurrentProductionLabel() end,
+        Tooltip  = ReadCurrentProductionTooltip,
+        FocusKey = "current",
+    })
+    row:SetFocusSound("Main_Menu_Mouse_Over")
+    row._caiQueueIndex = 0
+    row._caiQueueName = currentName
+    AddQueueBindings(row, RemoveCurrentProductionFromQueue)
+    return row
+end
 
 -- ===========================================================================
 -- City list
@@ -874,9 +996,41 @@ local function RebuildTreePage(tab)
     mgr:RestoreFocus(tree, capture)
 end
 
+local function RebuildQueuePage()
+    local list = m_ui.pageTrees[TAB.QUEUE]; if not list then return end
+    local capture = mgr:CaptureFocusKey(list)
+    list:ClearChildren()
+
+    if m_state.data and m_state.data.City then
+        if HasActiveCurrentProduction() then
+            list:AddChild(CreateQueueCurrentRow())
+        end
+        local pBQ = m_state.data.City:GetBuildQueue()
+        if pBQ then
+            for i = 1, MAX_QUEUE_SIZE do
+                local e = pBQ:GetAt(i)
+                if e then
+                    local desc = MakeQueueEntryDescription(e)
+                    if desc ~= "" then list:AddChild(CreateQueueRow(i, desc)) end
+                end
+            end
+        end
+    end
+
+    if m_state.queueFocusIndexAfterRebuild then
+        local idx = m_state.queueFocusIndexAfterRebuild
+        m_state.queueFocusIndexAfterRebuild = nil
+        if list.Children and list.Children[idx] then
+            mgr:SetFocus(list.Children[idx])
+            return
+        end
+    end
+    mgr:RestoreFocus(list, capture)
+end
+
 local function RefreshActivePage()
     if m_state.activeTab == TAB.QUEUE then
-        queue.Rebuild()
+        RebuildQueuePage()
     else
         RebuildTreePage(m_state.activeTab)
     end
@@ -885,7 +1039,7 @@ end
 local function RefreshAllPages()
     for tab, _ in pairs(m_ui.pageTrees) do
         if tab == TAB.QUEUE then
-            queue.Rebuild()
+            RebuildQueuePage()
         else
             RebuildTreePage(tab)
         end
@@ -1118,7 +1272,7 @@ local function RemovePanelCAI()
     m_state.openPending = false
     m_state.recommended = {}
     m_state.isQueueActionActive = false
-    queue.Reset()
+    m_state.queueFocusIndexAfterRebuild = nil
     m_state.cityFocusKeyAfterSelection = nil
     m_state.queueTutorialPending = false
     m_state.placementRetained = false

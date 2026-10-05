@@ -22,7 +22,6 @@
     <File>UI/inGame/CAIResearchData.lua</File>
     <File>UI/inGame/CAITradeData.lua</File>
     <File>UI/inGame/CAIPlotInteractions.lua</File>
-    <File>UI/inGame/CAIProductionQueue.lua</File>
     <File>UI/inGame/CAIWorldInputModes.lua</File>
     <File>UI/inGame/CAIWorldBuilderInput.lua</File>
     <File>UI/inGame/CAITradeOrigin.lua</File>
@@ -613,7 +612,6 @@
       <File>UI/inGame/CAIResearchData.lua</File>
       <File>UI/inGame/CAITradeData.lua</File>
       <File>UI/inGame/CAIPlotInteractions.lua</File>
-      <File>UI/inGame/CAIProductionQueue.lua</File>
       <File>UI/inGame/CAIWorldInputModes.lua</File>
       <File>UI/inGame/CAIWorldBuilderInput.lua</File>
       <File>UI/inGame/CAITradeOrigin.lua</File>
