@@ -253,6 +253,8 @@
     <File>UI/Replacements/BetterBalancedGame/TradeOverview_BetterBalancedGame_CAIBase.lua</File>
     <File>UI/inGame/GlobalResourcePopup_CAI.lua</File>
     <File>UI/inGame/ReportScreen_CAI.lua</File>
+    <File>UI/inGame/CAIReportResources.lua</File>
+    <File>UI/inGame/CAIReportGossip.lua</File>
     <File>UI/inGame/ReportScreen_Vanilla_CAI.lua</File>
     <File>UI/inGame/ReportScreen_BetterReportsScreen_CAI.lua</File>
     <File>UI/inGame/GovernmentScreen_ExtendedPolicyCards_CAI.lua</File>
@@ -774,6 +776,8 @@
       <!-- ReportScreen_CAI.lua is the shared builder infrastructure + dispatcher;
            it pulls one of these two variants via a runtime include() (vanilla base
            report, or the Better Report Screen mod layer), so both must be here. -->
+      <File>UI/inGame/CAIReportResources.lua</File>
+      <File>UI/inGame/CAIReportGossip.lua</File>
       <File>UI/inGame/ReportScreen_Vanilla_CAI.lua</File>
       <File>UI/inGame/ReportScreen_BetterReportsScreen_CAI.lua</File>
       <!-- GovernmentScreen_CAI.lua pulls this variant via a runtime include()

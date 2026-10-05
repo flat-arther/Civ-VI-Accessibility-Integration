@@ -72,3 +72,13 @@ These existing checks are retained alongside the refactor checklist so they are 
 - [ ] Check ordinary categories, Valid Targets and hidden/revealed tiles, then change local player where available. Confirm no stale items or reveal leaks.
 - [ ] With Detailed Map Tacks available, check pin names, yields and placement information. Without it, check ordinary map tack labels.
 - [ ] Open another popup while Settings/category management is open; closing the underlying view should not steal the popup's focus. Repeat suspend/resume and reopen Settings.
+
+## Reports sections
+
+Run with vanilla Reports and Better Reports where available.
+
+- [ ] Open Reports after loading a game, then close/reopen and visit Resources and Gossip. Check tab selection and return to the map.
+- [ ] Check ordinary resource totals and amenity recipients. In Gathering Storm, check stockpile-only resources, accumulation, reserve, unit/power consumption, named sources and miscellaneous amounts.
+- [ ] Refresh Resources while focused on an expanded detail; confirm usable focus and updated amounts.
+- [ ] Filter Gossip by player and type, refresh it, then close/reopen. Check the retained filters, newest-first entries and dropdown focus.
+- [ ] Smoke-check Yields, City Status and city cycling; with Better Reports also visit its Deals, Units, Policies and City-States tabs.

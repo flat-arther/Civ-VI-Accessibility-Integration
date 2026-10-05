@@ -2,6 +2,7 @@
 
 ### Fixed
 
+- Reports can open when their screen loaded before the accessibility manager was ready.
 - Closing Settings or scanner category management restores usable focus when the original item has been rebuilt or removed.
 - Map tack labels remain available if Detailed Map Tacks fails to supply its extra information.
 

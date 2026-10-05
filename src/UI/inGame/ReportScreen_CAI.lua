@@ -1,3 +1,5 @@
+include("CAIReportResources")
+include("CAIReportGossip")
 include("CAIColumns")
 include("CAICollection")
 include("caiUtils")
@@ -16,8 +18,6 @@ local mgr                  = ExposedMembers.CAI_UIManager
 local CAICursor            = ExposedMembers.CAICursor
 local HexCoordUtils        = CAIHexCoordUtils
 
-local PANEL_ID             = "CAIReports_Panel"
-local TABS_ID              = "CAIReports_Tabs"
 local CITY_STATUS_TABLE_ID = "CAIReports_CityStatusTable"
 local HOVER_SOUND          = "Main_Menu_Mouse_Over"
 local BLACK_DEATH_PAPAL_SLOT_INDEX = 2
@@ -41,29 +41,15 @@ local function SaveCityStatusViewMode(viewMode)
     end
 end
 
-local m_panel              = nil
-local m_tabs               = nil
-local m_trees              = {}
 local m_isExp1             = (IsExpansion1Active ~= nil and IsExpansion1Active())
 local m_isExp2             = (IsExpansion2Active ~= nil and IsExpansion2Active())
 local m_localPlayerID      = nil
-
-local m_capturedTabs       = {}
-local m_isMirroringTab     = false
-local m_activeTab          = 1
-
-local m_gossipPlayerFilter = nil
-local m_gossipGroupFilter  = nil
 
 local m_caiCityData        = {}
 local m_caiCityTotalData   = {}
 local m_caiResourceData    = {}
 local m_caiUnitData        = {}
 local m_caiDealData        = {}
-local m_caiGossipLog       = {}
-local m_caiGossipFiltered  = {}
-local m_caiLeaderFilter    = -1
-local m_caiGroupFilter     = "ALL"
 -- "natural" keeps the report's own city order (m_caiCityData sorted by .Order).
 -- Sort state lives on these module locals and is written back from the table's
 -- sort_changed handler so it survives closing and reopening the report.
@@ -77,7 +63,6 @@ local m_cityStatusSelectedCityID = nil
 local m_cityCycleOrigin = nil
 local m_cityCycleAnchorKey = nil
 local m_cityCycleDistanceOrigin = nil
-local m_pendingOpenFocusKey = nil
 
 local function IndexCityComponentPlots(cityData)
     local city = cityData.City
@@ -123,11 +108,14 @@ end
 
 -- The active report variant (vanilla or Better Report Screen) sets this to the
 -- function that returns the five report data tables. Vanilla uses the base game's
--- GetData(); the BRS variant assembles the same shape from BRS's data globals,
--- because BRS removes vanilla GetData() from the report context.
+-- GetData(); the BRS variant uses its vendored vanilla data routine because BRS
+-- removes vanilla GetData() from the report context. Return order is unchanged.
+---@type CAIReportsDataSource|nil
 CAIReports_DataSource = nil
 
 function RefreshCAIData()
+    mgr = assert(ExposedMembers.CAI_UIManager,
+        "CAI Report Screen refreshed before the accessibility UI manager was available")
     m_localPlayerID = Game.GetLocalPlayer()
     if m_localPlayerID == -1 then return end
     local dataSource = CAIReports_DataSource or GetData
@@ -138,39 +126,13 @@ function RefreshCAIData()
     end
 end
 
-function GatherGossip()
-    m_caiGossipLog = {}
-    local playerID = m_localPlayerID
-    if playerID == nil or playerID == -1 then return end
-    local pLocalPlayerDiplomacy = Players[playerID]:GetDiplomacy()
-    if pLocalPlayerDiplomacy == nil then return end
+local gossipReport = CAIReportGossip.Create({
+    GetManager = function() return mgr end,
+    GetLocalPlayerID = function() return m_localPlayerID end,
+})
 
-    for targetID, kPlayer in pairs(Players) do
-        if targetID ~= playerID and kPlayer:IsMajor() and pLocalPlayerDiplomacy:HasMet(targetID) then
-            local kAppendTable = Game.GetGossipManager():GetRecentVisibleGossipStrings(0, playerID, targetID)
-            for _, entry in pairs(kAppendTable) do
-                table.insert(m_caiGossipLog, entry)
-            end
-        end
-    end
-
-    table.sort(m_caiGossipLog, function(a, b) return a[2] > b[2] end)
-end
-
-function FilterCAIGossip()
-    m_caiGossipFiltered = {}
-    for _, kEntry in ipairs(m_caiGossipLog) do
-        local kGossipData = GameInfo.Gossips[kEntry[3]]
-        if kGossipData then
-            local passLeader = (m_caiLeaderFilter == -1 or kEntry[4] == m_caiLeaderFilter)
-            local passGroup = (m_caiGroupFilter == "ALL" or m_caiGroupFilter == kGossipData.GroupType)
-            if passLeader and passGroup then
-                table.insert(m_caiGossipFiltered, kEntry)
-            end
-        end
-    end
-end
-
+function GatherGossip() gossipReport.Gather() end
+function FilterCAIGossip() gossipReport.Filter() end
 
 local function MakeTreeItem(props)
     local item = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "TreeItem", props)
@@ -1466,360 +1428,20 @@ end
 -- ============================================================================
 -- Resources Tab
 -- ============================================================================
-local function GetXP2ResourceFlowData(eResourceType)
-    local localPlayer = Players[m_localPlayerID]
-    if not localPlayer then return nil end
-    local pResources = localPlayer:GetResources()
-    if not pResources then return nil end
-    local kResource = GameInfo.Resources[eResourceType]
-    if not kResource then return nil end
-
-    local resourceType = kResource.ResourceType
-    local extracted = pResources:GetResourceAccumulationPerTurn(resourceType)
-    local imports = pResources:GetResourceImportPerTurn(resourceType)
-    local bonus = pResources:GetBonusResourcePerTurn(resourceType)
-    local unitCost = pResources:GetUnitResourceDemandPerTurn(resourceType)
-    local powerCost = pResources:GetPowerResourceDemandPerTurn(resourceType)
-    local reserved = pResources:GetReservedResourceAmount(resourceType)
-    local accumulation = extracted + imports + bonus
-    local consumption = unitCost + powerCost
-
-    return {
-        Accumulation = accumulation,
-        Extracted = extracted,
-        Imports = imports,
-        Bonus = bonus,
-        UnitCost = unitCost,
-        PowerCost = powerCost,
-        Consumption = consumption,
-        Reserved = reserved,
-        Delta = accumulation - consumption,
-    }
-end
-
-local function FormatResourceEntryLabel(kEntry)
-    local source = Locale.Lookup(kEntry.EntryText)
-    local control = kEntry.ControlText ~= "-" and Locale.Lookup(kEntry.ControlText) or nil
-    local parts = { source }
-    CAIText.AppendIfNonEmpty(parts, control)
-    table.insert(parts, toPlusMinus(kEntry.Amount))
-    return table.concat(parts, "[NEWLINE]")
-end
-
-local function BuildResourceItem(parent, eResourceType, kSingleResourceData)
-    local capturedResType = eResourceType
-    local capturedResData = kSingleResourceData
-    local kResource = GameInfo.Resources[capturedResType]
-    local flow = m_isExp2 and capturedResData.IsStrategic and GetXP2ResourceFlowData(capturedResType) or nil
-    local extractionEntries = {}
-    local cityStateEntries = {}
-    local fallbackEntries = {}
-    local namedExtractionTotal = 0
-    local namedCityStateTotal = 0
-
-    if flow then
-        for ei, kEntry in ipairs(capturedResData.EntryList or {}) do
-            local classifiedEntry = { Entry = kEntry, Index = ei }
-            if kEntry.ControlText == "LOC_HUD_REPORTS_TRADE_OWNED" then
-                table.insert(extractionEntries, classifiedEntry)
-                namedExtractionTotal = namedExtractionTotal + kEntry.Amount
-            elseif kEntry.ControlText == "LOC_CITY_STATES_SUZERAIN" then
-                table.insert(cityStateEntries, classifiedEntry)
-                namedCityStateTotal = namedCityStateTotal + kEntry.Amount
-            elseif kEntry.EntryText ~= "LOC_PRODUCTION_PANEL_UNITS_TOOLTIP"
-                and kEntry.EntryText ~= "LOC_UI_PEDIA_POWER_COST"
-                and kEntry.EntryText ~= "LOC_RESOURCE_REPORTS_ITEM_IN_RESERVE"
-                and kEntry.EntryText ~= "LOC_RESOURCE_REPORTS_CITY_STATES"
-                and kEntry.EntryText ~= "LOC_HUD_REPORTS_MISC_RESOURCE_SOURCE"
-                and not (kEntry.EntryText == "" and kEntry.ControlText == "" and kEntry.Amount == 0) then
-                table.insert(fallbackEntries, classifiedEntry)
-            end
-        end
-    end
-
-    local resItem = MakeTreeItem({
-        Label = function()
-            local name = Locale.Lookup(kResource.Name)
-            if m_isExp2 and capturedResData.IsStrategic and capturedResData.Stockpile then
-                local text = Locale.Lookup("LOC_CAI_REPORTS_RESOURCE_STOCKPILE",
-                    name, capturedResData.Stockpile, capturedResData.Maximum or 0)
-                if flow then
-                    text = CAIText.JoinLines({ text, Locale.Lookup("LOC_HUD_REPORTS_PER_TURN", toPlusMinus(flow.Delta)) })
-                end
-                return text
-            else
-                return Locale.Lookup("LOC_CAI_REPORTS_RESOURCE_TOTAL", name, capturedResData.Total)
-            end
-        end,
-        Tooltip = function()
-            local localPlayer = Players[m_localPlayerID]
-            if localPlayer then
-                local citiesProvidedTo = localPlayer:GetResources():GetResourceAllocationCities(kResource.Index)
-                local numCities = table.count(citiesProvidedTo)
-                if numCities > 0 then
-                    local cityNames = {}
-                    local playerCities = localPlayer:GetCities()
-                    for _, city in ipairs(citiesProvidedTo) do
-                        local pCity = playerCities:FindID(city.CityID)
-                        if pCity then
-                            table.insert(cityNames, Locale.Lookup(pCity:GetName()))
-                        end
-                    end
-                    return CAIText.JoinLines({
-                        Locale.Lookup("LOC_CAI_REPORTS_AMENITIES_PROVIDED", numCities),
-                        table.concat(cityNames, "[NEWLINE]")
-                    })
-                end
-            end
-            return nil
-        end,
-        FocusKey = "res:" .. tostring(capturedResType),
-    })
-    local resourceHasChildren = #(capturedResData.EntryList or {}) > 0 or flow ~= nil
-    if resourceHasChildren then
-        parent:AddChild(resItem)
-
-        if flow then
-            if flow.Reserved > 0 then
-                AddLeaf(resItem, "res:" .. tostring(capturedResType) .. ":reserved", function()
-                    return "-" .. flow.Reserved .. " " .. Locale.Lookup("LOC_RESOURCE_ITEM_IN_RESERVE")
-                end)
-            end
-
-            local hasAccumulationDetails = flow.Extracted > 0 or flow.Imports > 0 or flow.Bonus > 0
-            if hasAccumulationDetails then
-                local accumulationNode = MakeTreeItem({
-                    Label = function()
-                        return Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN", flow.Accumulation)
-                    end,
-                    FocusKey = "res:" .. tostring(capturedResType) .. ":accumulation",
-                })
-                resItem:AddChild(accumulationNode)
-                if flow.Extracted > 0 then
-                    local miscellaneousExtraction = math.max(0, flow.Extracted - namedExtractionTotal)
-                    if #extractionEntries > 0 or miscellaneousExtraction > 0 then
-                        local extractionNode = MakeTreeItem({
-                            Label = function()
-                                return Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN_EXTRACTED", flow.Extracted)
-                            end,
-                            FocusKey = "res:" .. tostring(capturedResType) .. ":accumulation:extracted",
-                        })
-                        accumulationNode:AddChild(extractionNode)
-                        for _, classifiedEntry in ipairs(extractionEntries) do
-                            local capturedEntry = classifiedEntry.Entry
-                            local capturedEI = classifiedEntry.Index
-                            AddLeaf(extractionNode,
-                                "res:" .. tostring(capturedResType) .. ":entry:" .. capturedEI,
-                                function() return FormatResourceEntryLabel(capturedEntry) end)
-                        end
-                        if miscellaneousExtraction > 0 then
-                            AddLeaf(extractionNode,
-                                "res:" .. tostring(capturedResType) .. ":accumulation:extracted:misc",
-                                function()
-                                    return Locale.Lookup("LOC_HUD_REPORTS_MISC_RESOURCE_SOURCE")
-                                        .. "[NEWLINE]" .. toPlusMinus(miscellaneousExtraction)
-                                end)
-                        end
-                    else
-                        AddLeaf(accumulationNode,
-                            "res:" .. tostring(capturedResType) .. ":accumulation:extracted",
-                            function()
-                                return Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN_EXTRACTED", flow.Extracted)
-                            end)
-                    end
-                end
-                if flow.Imports > 0 then
-                    local miscellaneousCityStates = math.max(0, flow.Imports - namedCityStateTotal)
-                    if #cityStateEntries > 0 then
-                        local cityStateNode = MakeTreeItem({
-                            Label = function()
-                                return Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN_FROM_CITY_STATES", flow.Imports)
-                            end,
-                            FocusKey = "res:" .. tostring(capturedResType) .. ":accumulation:imports",
-                        })
-                        accumulationNode:AddChild(cityStateNode)
-                        for _, classifiedEntry in ipairs(cityStateEntries) do
-                            local capturedEntry = classifiedEntry.Entry
-                            local capturedEI = classifiedEntry.Index
-                            AddLeaf(cityStateNode,
-                                "res:" .. tostring(capturedResType) .. ":entry:" .. capturedEI,
-                                function() return FormatResourceEntryLabel(capturedEntry) end)
-                        end
-                        if miscellaneousCityStates > 0 then
-                            AddLeaf(cityStateNode,
-                                "res:" .. tostring(capturedResType) .. ":accumulation:imports:misc",
-                                function()
-                                    return Locale.Lookup("LOC_HUD_REPORTS_MISC_RESOURCE_SOURCE")
-                                        .. "[NEWLINE]" .. toPlusMinus(miscellaneousCityStates)
-                                end)
-                        end
-                    else
-                        AddLeaf(accumulationNode,
-                            "res:" .. tostring(capturedResType) .. ":accumulation:imports",
-                            function()
-                                return Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN_FROM_CITY_STATES", flow.Imports)
-                            end)
-                    end
-                end
-                if flow.Bonus > 0 then
-                    AddLeaf(accumulationNode, "res:" .. tostring(capturedResType) .. ":accumulation:bonus",
-                        function()
-                            return Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN_FROM_BONUS_SOURCES", flow.Bonus)
-                        end)
-                end
-            else
-                AddLeaf(resItem, "res:" .. tostring(capturedResType) .. ":accumulation", function()
-                    return Locale.Lookup("LOC_RESOURCE_ACCUMULATION_PER_TURN", flow.Accumulation)
-                end)
-            end
-
-            if flow.Consumption > 0 then
-                local consumptionNode = MakeTreeItem({
-                    Label = function() return Locale.Lookup("LOC_RESOURCE_CONSUMPTION", flow.Consumption) end,
-                    FocusKey = "res:" .. tostring(capturedResType) .. ":consumption",
-                })
-                resItem:AddChild(consumptionNode)
-                if flow.UnitCost > 0 then
-                    AddLeaf(consumptionNode, "res:" .. tostring(capturedResType) .. ":consumption:units",
-                        function()
-                            return Locale.Lookup("LOC_RESOURCE_UNIT_CONSUMPTION_PER_TURN", flow.UnitCost)
-                        end)
-                end
-                if flow.PowerCost > 0 then
-                    AddLeaf(consumptionNode, "res:" .. tostring(capturedResType) .. ":consumption:power",
-                        function()
-                            return Locale.Lookup("LOC_RESOURCE_POWER_CONSUMPTION_PER_TURN", flow.PowerCost)
-                        end)
-                end
-            end
-        end
-
-        local detailEntries = flow and fallbackEntries or capturedResData.EntryList or {}
-        if #detailEntries > 0 then
-            local detailsNode = MakeTreeItem({
-                Label = function() return Locale.Lookup("LOC_CAI_REPORTS_RESOURCE_DETAILS") end,
-                FocusKey = "res:" .. tostring(capturedResType) .. ":details",
-            })
-            resItem:AddChild(detailsNode)
-
-            for ei, detailEntry in ipairs(detailEntries) do
-                local capturedEntry = flow and detailEntry.Entry or detailEntry
-                local capturedEI = flow and detailEntry.Index or ei
-                local detail = MakeStaticText({
-                    Label = function() return FormatResourceEntryLabel(capturedEntry) end,
-                    FocusKey = "res:" .. tostring(capturedResType) .. ":entry:" .. capturedEI,
-                })
-                detailsNode:AddChild(detail)
-            end
-        end
-    else
-        local leafLabel = function()
-            local baseLabel = resItem:GetLabel()
-            local tooltip = resItem:GetTooltip()
-            if tooltip ~= nil and tooltip ~= "" then
-                return CAIText.JoinLines({ baseLabel, tooltip })
-            end
-            return baseLabel
-        end
-        parent:AddChild(MakeStaticText({
-            Label = leafLabel,
-            FocusKey = "res:" .. tostring(capturedResType),
-        }))
-    end
-end
+local resourceReport = CAIReportResources.Create({
+    GetManager = function() return mgr end,
+    GetLocalPlayerID = function() return m_localPlayerID end,
+    GetResourceData = function() return m_caiResourceData end,
+    IsExpansion2 = m_isExp2,
+    MakeTreeItem = MakeTreeItem,
+    MakeStaticText = MakeStaticText,
+    AddLeaf = AddLeaf,
+    FormatSigned = toPlusMinus,
+})
 
 function RebuildResourcesTree(tree)
-    local capture = mgr:CaptureFocusKey(tree)
-    tree:ClearChildren()
-
-    local strategic = {}
-    local luxury = {}
-    local bonus = {}
-
-    local includedResourceTypes = {}
-    for eResourceType, kSingleResourceData in pairs(m_caiResourceData) do
-        local flow = m_isExp2 and kSingleResourceData.IsStrategic and GetXP2ResourceFlowData(eResourceType) or nil
-        local hasStrategicFlow = flow ~= nil
-            and (flow.Accumulation ~= 0 or flow.Consumption ~= 0 or flow.Reserved ~= 0)
-        if next(kSingleResourceData.EntryList) or
-            (m_isExp2 and kSingleResourceData.IsStrategic
-                and ((kSingleResourceData.Stockpile and kSingleResourceData.Stockpile > 0) or hasStrategicFlow)) then
-            includedResourceTypes[eResourceType] = true
-            if kSingleResourceData.IsStrategic then
-                table.insert(strategic, { type = eResourceType, data = kSingleResourceData })
-            elseif kSingleResourceData.IsLuxury then
-                table.insert(luxury, { type = eResourceType, data = kSingleResourceData })
-            else
-                table.insert(bonus, { type = eResourceType, data = kSingleResourceData })
-            end
-        end
-    end
-
-    if m_isExp2 then
-        local localPlayer = Players[m_localPlayerID]
-        local playerResources = localPlayer and localPlayer:GetResources() or nil
-        if playerResources then
-            for resource in GameInfo.Resources() do
-                if resource.ResourceClassType == "RESOURCECLASS_STRATEGIC"
-                    and not includedResourceTypes[resource.Index] then
-                    local flow = GetXP2ResourceFlowData(resource.Index)
-                    local stockpile = playerResources:GetResourceAmount(resource.ResourceType)
-                    if stockpile > 0 or (flow and (flow.Accumulation ~= 0 or flow.Consumption ~= 0
-                        or flow.Reserved ~= 0)) then
-                        table.insert(strategic, {
-                            type = resource.Index,
-                            data = {
-                                EntryList = {},
-                                IsStrategic = true,
-                                IsLuxury = false,
-                                IsBonus = false,
-                                Total = flow and flow.Delta or 0,
-                                Maximum = playerResources:GetResourceStockpileCap(resource.ResourceType),
-                                Stockpile = stockpile,
-                            },
-                        })
-                    end
-                end
-            end
-        end
-    end
-
-    local function sortByName(a, b)
-        return Locale.Lookup(GameInfo.Resources[a.type].Name) < Locale.Lookup(GameInfo.Resources[b.type].Name)
-    end
-    table.sort(strategic, sortByName)
-    table.sort(luxury, sortByName)
-    table.sort(bonus, sortByName)
-
-    local categories = {
-        { key = "strategic", label = "LOC_RESOURCECLASS_STRATEGIC_NAME", items = strategic },
-        { key = "luxury",    label = "LOC_RESOURCECLASS_LUXURY_NAME",    items = luxury },
-        { key = "bonus",     label = "LOC_RESOURCECLASS_BONUS_NAME",     items = bonus },
-    }
-
-    for _, cat in ipairs(categories) do
-        if #cat.items > 0 then
-            local capturedCat = cat
-            local catGroup = MakeTreeItem({
-                Label = function()
-                    return CAIText.JoinLines({
-                        Locale.Lookup(capturedCat.label),
-                        Locale.Lookup("LOC_CAI_REPORTS_RESOURCE_COUNT", #capturedCat.items)
-                    })
-                end,
-                FocusKey = "res:group:" .. capturedCat.key,
-            })
-            tree:AddChild(catGroup)
-
-            for _, entry in ipairs(capturedCat.items) do
-                BuildResourceItem(catGroup, entry.type, entry.data)
-            end
-        end
-    end
-
-    mgr:RestoreFocus(tree, capture)
+    resourceReport.Rebuild(tree)
 end
-
 
 -- ============================================================================
 -- City Status Tab
@@ -2475,139 +2097,8 @@ end
 -- ============================================================================
 -- Gossip Tab
 -- ============================================================================
-local function RebuildGossipList(list)
-    local capture = mgr:CaptureFocusKey(list)
-    list:ClearChildren()
-
-    if m_caiGossipFiltered == nil then return end
-
-    for gi, kGossipEntry in ipairs(m_caiGossipFiltered) do
-        local capturedEntry = kGossipEntry
-        local capturedGI = gi
-        local entryWidget = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "StaticText", {
-            Label = function()
-                local description = capturedEntry[1]
-                local turn = capturedEntry[2]
-                local targetPlayerID = capturedEntry[4]
-                local leaderName = ""
-                if targetPlayerID and PlayerConfigurations[targetPlayerID] then
-                    leaderName = Locale.Lookup(PlayerConfigurations[targetPlayerID]:GetLeaderName())
-                end
-                return Locale.Lookup("LOC_CAI_REPORTS_GOSSIP_ENTRY", turn, leaderName, description)
-            end,
-            FocusKey = "gossip:" .. capturedGI,
-        })
-        list:AddChild(entryWidget)
-    end
-
-    mgr:RestoreFocus(list, capture)
-end
-
--- Set by RebuildGossipTab so the gossip filter dropdowns can refresh their list
--- without reaching into the variant-owned tab table.
-local m_sharedGossipTree = nil
-
-local function RefreshGossipListFromFilters()
-    if m_sharedGossipTree then
-        FilterCAIGossip()
-        RebuildGossipList(m_sharedGossipTree)
-    end
-end
-
-local function BuildGossipFilters(page, entry)
-    -- Player filter dropdown
-    local playerOptions = {}
-    table.insert(playerOptions, { Label = Locale.Lookup("LOC_HUD_REPORTS_PLAYER_FILTER_ALL"), Value = -1 })
-
-    local pLocalPlayerDiplomacy = Players[m_localPlayerID]:GetDiplomacy()
-    if pLocalPlayerDiplomacy then
-        for targetID, kPlayer in pairs(Players) do
-            if targetID ~= m_localPlayerID and kPlayer:IsMajor() and pLocalPlayerDiplomacy:HasMet(targetID) then
-                table.insert(playerOptions, {
-                    Label = Locale.Lookup(PlayerConfigurations[targetID]:GetLeaderName()),
-                    Value = targetID,
-                })
-            end
-        end
-    end
-
-    local playerDropdownOptions = {}
-    for _, opt in ipairs(playerOptions) do
-        table.insert(playerDropdownOptions, { label = opt.Label, value = opt.Value })
-    end
-
-    m_gossipPlayerFilter = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "Dropdown", {
-        Label = function() return Locale.Lookup("LOC_CAI_REPORTS_FILTER_PLAYER") end,
-        FocusKey = "gossip:filter:player",
-    })
-    m_gossipPlayerFilter:SetOptions(playerDropdownOptions)
-    for si, opt in ipairs(playerDropdownOptions) do
-        if opt.value == m_caiLeaderFilter then
-            m_gossipPlayerFilter:SetSelectedIndex(si, true); break
-        end
-    end
-    m_gossipPlayerFilter:On("value_changed", function(w, val)
-        m_caiLeaderFilter = val
-        RefreshGossipListFromFilters()
-    end)
-    page:AddChild(m_gossipPlayerFilter)
-
-    -- Group filter dropdown
-    local groupOptions = {}
-    table.insert(groupOptions, { Label = Locale.Lookup("LOC_HUD_REPORTS_FILTER_ALL"), Value = "ALL" })
-
-    local seenGroups = {}
-    for _, kEntry in ipairs(m_caiGossipLog) do
-        local kGossipData = GameInfo.Gossips[kEntry[3]]
-        if kGossipData and not seenGroups[kGossipData.GroupType] then
-            seenGroups[kGossipData.GroupType] = true
-            table.insert(groupOptions, {
-                Label = Locale.Lookup("LOC_HUD_REPORTS_FILTER_" .. kGossipData.GroupType),
-                Value = kGossipData.GroupType,
-            })
-        end
-    end
-
-    local groupDropdownOptions = {}
-    for _, opt in ipairs(groupOptions) do
-        table.insert(groupDropdownOptions, { label = opt.Label, value = opt.Value })
-    end
-
-    m_gossipGroupFilter = mgr:CreateWidget(mgr:GenerateWidgetId("CAIRPT_"), "Dropdown", {
-        Label = function() return Locale.Lookup("LOC_CAI_REPORTS_FILTER_TYPE") end,
-        FocusKey = "gossip:filter:type",
-    })
-    m_gossipGroupFilter:SetOptions(groupDropdownOptions)
-    for si, opt in ipairs(groupDropdownOptions) do
-        if opt.value == m_caiGroupFilter then
-            m_gossipGroupFilter:SetSelectedIndex(si, true); break
-        end
-    end
-    m_gossipGroupFilter:On("value_changed", function(w, val)
-        m_caiGroupFilter = val
-        RefreshGossipListFromFilters()
-    end)
-    page:AddChild(m_gossipGroupFilter)
-end
-
-
--- ============================================================================
--- Shared Gossip Tab builder (used by both report variants)
--- ============================================================================
--- Records the current gossip tree so the filter dropdowns can refresh the list
--- without reaching into a variant-owned tab table, then (re)builds the list and
--- the filter widgets.
 function RebuildGossipTab(entry)
-    m_sharedGossipTree = entry.tree
-    RebuildGossipList(entry.tree)
-
-    local page = entry.page
-    if not page then return end
-
-    if not entry.filtersBuilt then
-        BuildGossipFilters(page, entry)
-        entry.filtersBuilt = true
-    end
+    gossipReport.Rebuild(entry)
 end
 
 -- City Status view mode is shared state; the variant panels read it through this

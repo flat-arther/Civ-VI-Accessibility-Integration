@@ -1868,3 +1868,53 @@ function CAIWidgetHelpers_Search.MakeSearchCandidate(widget, label, bfsIndex, to
 ---@class CAIWorldInputModesController
 ---@field GetData fun(mode:integer):table|nil Descriptor including Properties and optional InputActions.
 ---@field Build fun(mode:integer):InterfaceModeWidget|false|nil Constructs without pushing; context owns lifecycle.
+
+---Vanilla/BRS shared report records retain engine-specific fields in addition to these.
+---@class CAIReportCityData : table
+---@field City table
+---@field Order number
+---@field CAIPlotIndex? integer Added by shared refresh.
+---@field CAIBuildingPlotIndices table<string,integer> Added by shared refresh.
+
+---@class CAIReportCityTotals
+---@field Income table<integer|string,number>
+---@field Expenses table<integer|string,number>
+---@field Net table<integer|string,number>
+---@field Treasury table<integer|string,number>
+
+---@class CAIReportResourceEntry
+---@field EntryText string
+---@field ControlText string
+---@field Amount number
+
+---@class CAIReportResourceData
+---@field EntryList CAIReportResourceEntry[]
+---@field Total number
+---@field IsStrategic boolean
+---@field IsLuxury boolean
+---@field IsBonus boolean
+---@field Stockpile? number Gathering Storm stockpile.
+---@field Maximum? number Gathering Storm cap.
+
+---Five positional returns preserve the vanilla GetData contract; BRS supplies its copied provider.
+---@alias CAIReportsDataSource fun():CAIReportCityData[],CAIReportCityTotals,table<integer,CAIReportResourceData>,table<string,table>,table[]
+
+---@class CAIReportGossipContext
+---@field GetManager fun():UIScreenManager
+---@field GetLocalPlayerID fun():integer|nil
+
+---@class CAIReportGossipController
+---@field Gather fun() Reads visible gossip from met major players.
+---@field Filter fun() Applies the current player/group selections.
+---@field Rebuild fun(entry:table) Rebuilds entry.tree and builds filters on entry.page once per entry.
+
+---@class CAIReportResourcesContext : CAIReportGossipContext
+---@field GetResourceData fun():table<integer,CAIReportResourceData>
+---@field IsExpansion2 boolean
+---@field MakeTreeItem fun(props:table):TreeItemWidget
+---@field MakeStaticText fun(props:table):StaticTextWidget
+---@field AddLeaf fun(parent:UIWidget,key:string,label:fun():string,tooltip?:fun():string,activate?:function):UIWidget
+---@field FormatSigned fun(value:number|nil):string
+
+---@class CAIReportResourcesController
+---@field Rebuild fun(tree:UIWidget) Uses the current report data and player resource flow.
