@@ -31,7 +31,7 @@ CAIWorldScannerCategory_Pirates = {
         [SUB_INFAMOUS] = { "infamousSearch", "enemy" },
     },
     ExtractHiddenPlots = true,
-    CanScan = function() return MapInfo.IsActive() end,
+    CanScan = function() return CAIModSupport.IsPiratesScenarioActive() end,
     GroupLabelResolver = function(_, firstItem)
         return firstItem ~= nil and firstItem.GroupLabelKey or "LOC_CAI_WORLD_SCANNER_UNKNOWN"
     end,

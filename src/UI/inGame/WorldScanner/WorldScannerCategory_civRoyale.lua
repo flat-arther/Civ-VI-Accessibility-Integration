@@ -1,3 +1,5 @@
+include("CAIModSupport")
+
 local MapInfo = CAICivRoyaleMapInfo
 local ZoneUtils = CAIWorldScannerZoneUtils
 
@@ -29,7 +31,7 @@ CAIWorldScannerCategory_CivRoyale = {
     SubCategoryLabels = subCategoryLabels,
     ExtractHiddenPlots = true,
     CanScan = function()
-        return MapInfo.IsActive()
+        return CAIModSupport.IsCivRoyaleScenarioActive()
     end,
     GroupLabelResolver = function(_, firstItem)
         return firstItem ~= nil and firstItem.GroupLabelKey or "LOC_CAI_WORLD_SCANNER_UNKNOWN"

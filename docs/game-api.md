@@ -3018,6 +3018,10 @@ Sources: `decompiled/mods/RealEraTracker/RealEraTracker.lua`, `RealEraTracker.xm
 - WorldInput retains action dispatch, current widget ownership, World Builder exclusion, movement cleanup, stack removal/destruction and city-scope invalidation/repositioning. The controller returns no widget for unsupported modes; city management deliberately has no primary action override.
 - Verified vanilla `OnPlacementKeyUp` consumes Escape and returns to SELECTION; district/building modes retain their dedicated native cancellation callbacks. Pirates retains `IsTargetPlot` and script command subtypes from its native replacement. These contracts were checked against decompiled WorldInput and WorldInput_PiratesScenario; no bindings or engine behavior were added.
 
+### Scanner scenario eligibility regression (2026-10-06)
+
+- Live Lua.log traced empty scanner results and failed category-management opening to `WorldScannerCategory_civRoyale.CanScan` calling the removed `MapInfo.IsActive`. Pirates retained the same stale call. Both category adapters must query `CAIModSupport` directly. A bundled CanScan error aborts the whole rebuild; management also rebuilds before opening. Test-ModSupport now loads both complete adapters without compatibility aliases and executes their eligibility callbacks across base, expansions and both scenarios.
+
 ### Scanner focus and callback contracts (2026-10-05)
 
 - Settings and scanner category management now exchange the manager's opaque `CaptureReturnFocus` token. It captures active descendants or an inactive stack root's default descent without moving focus. `RestoreReturnFocus` resolves sibling stable keys, then surviving identities, falls back through the nearest surviving ancestor, and only focuses the original root when it is the current stack top. This replaces the scanner's private focus-cache reads/writes and handles rebuilt settings return destinations.

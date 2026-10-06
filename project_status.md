@@ -2,6 +2,7 @@
 
 ## Current focus
 
+- Scanner regression repaired (2026-10-06): user reports other tested behavior appears in order, but scanner entries/navigation/category management fail. Live Lua.log identifies stale `MapInfo.IsActive` calls after scenario query consolidation; both Red Death and Pirates adapters now query CAIModSupport. Full verification passes 119,954 assertions (267 mod-support checks). Reload and scanner retest remain pending; unspecified scenario/mod variants are not presumed tested.
 - Refactor implementation is complete as of 2026-10-06, including the final CAI namespace and scenario/supported-mod query stages. Final handoff: use `docs/refactor-game-tests.md` for all outstanding game validation; address reported regressions before claiming in-game acceptance.
 - Final implementation commit: `253896d` (scenario/mod queries), following `0670a9a` (CAI namespace) and `3c7565e` (final utility audit). No game validation is implied by automated results.
 - Final handoff verification passed on 2026-10-06: 119,941 assertions, 57 XML files, 348 VFS files, 93 replacements and 12 locale directories. The known missing audio asset remains a separate packaging-source decision; ProductionManager/multi-queue remains separate feature scope.

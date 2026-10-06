@@ -30,6 +30,7 @@ Use `-LuaPath C:/path/to/lua.exe` for an existing Lua 5.4 interpreter. `-StaticO
 
 ## Coverage
 
+- Scanner regression repair (2026-10-06): full verification passes 119,954 assertions. Twelve additional mod-support checks load the complete Red Death/Pirates category adapters without retired MapInfo activation aliases and exercise CanScan across standard, both expansions and both scenarios. One additional authored-file syntax check comes from the Red Death adapter's explicit shared-module include. Live scanner reload/navigation/search/settings retest remains pending.
 - XML parsing across `src`, modinfo file existence, duplicate VFS entries, action-file registration, and required replacement properties.
 - Localization Row/Replace uniqueness, language attributes, English tag counterparts, numbered placeholder identities, and full tag parity for the six complete locale directories. Metadata-only locales are checked for their existing entries, without requiring a complete translation.
 - Retired manager calls in registered authored in-game Lua. This is a targeted guard, not a full Lua type checker or dead-code detector.

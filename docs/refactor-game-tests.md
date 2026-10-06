@@ -6,6 +6,10 @@ Unchecked means unverified in game, not failed. Add or revise checks as later st
 
 ## Final handoff (2026-10-06)
 
+User feedback on 2026-10-06: everything tested appears in order except the scanner, which has no entries, no Ctrl+PageUp/PageDown response, and cannot open category management. Specific scenario/mod coverage was not supplied. The log-confirmed stale scenario eligibility calls are repaired and automated checks pass.
+
+- [ ] Reload the game, confirm scanner entries and Ctrl+PageUp/PageDown category navigation, run a search, and open/close Manage Scanner Categories from Settings. Check Red Death and Pirates scanner categories when those scenarios are available.
+
 All authorized implementation stages are complete, including CAI namespace and scenario/mod query consolidation. This document is the complete outstanding game checklist. Automated verification does not mark any item passed.
 
 Start with the CAI namespace checks for startup, speech, loading and cross-context state. Then work through ordinary gameplay sections, followed by World Builder, multiplayer, scenarios and supported mods where available. Previously confirmed browser, formatting, game-state and research checks remain closed; later cross-cutting checks here still apply.

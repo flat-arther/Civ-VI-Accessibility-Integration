@@ -104,4 +104,23 @@ active = {}
 check(includes('src/UI/inGame/WorldRankings_CAI.lua').WorldRankings, 'base rankings selected')
 Modding.IsModActive=function() error('registry failed') end
 check(not pcall(CAIModSupport.IsQuickDealsActive), 'registry errors propagate')
+-- Load complete category adapters without the retired MapInfo.IsActive aliases.
+for _, scenario in ipairs({'CivRoyale', 'Pirates'}) do
+    local registered
+    local env = setmetatable({
+        include=function() end,
+        CAICivRoyaleMapInfo={}, CAIPiratesMapInfo={},
+        CAIWorldScanner={RegisterCategoryDefinition=function(_, definition) registered=definition end},
+    }, {__index=_ENV})
+    rule = 'RULESET_SCENARIO_'..scenarios[scenario]
+    local filename = scenario == 'CivRoyale' and 'civRoyale' or 'pirates'
+    assert(loadfile('src/UI/inGame/WorldScanner/WorldScannerCategory_'..filename..'.lua', 't', env))()
+    check(registered ~= nil, scenario..' category registered')
+    for _, ruleset in ipairs({'RULESET_STANDARD', 'RULESET_EXPANSION_1', 'RULESET_EXPANSION_2',
+        'RULESET_SCENARIO_CIV_ROYALE', 'RULESET_SCENARIO_PIRATES'}) do
+        rule = ruleset
+        check(registered.CanScan() == (ruleset == 'RULESET_SCENARIO_'..scenarios[scenario]),
+            scenario..' scanner eligibility in '..ruleset)
+    end
+end
 print('Mod support: '..count..' assertions passed')
