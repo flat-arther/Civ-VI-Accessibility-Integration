@@ -2,6 +2,25 @@
 
 Run from PowerShell on Windows. No game deployment or global PATH change is required.
 
+## UI priority experiment (2026-10-07)
+
+Full repository verification passed with 120,074 assertions, 57 XML files,
+348 VFS files, 93 replacements and 12 locale directories. Changed Lua also passed
+targeted syntax checks; all six changed frontend files preserve native code
+outside accessibility integration blocks. The known audio packaging exception
+remains unrelated to this change.
+
+`Test-UILayering.lua` adds 120 behavioral assertions using the production manager,
+all six vanilla/Better Trade Screen origin/route/overview adapters, and the four
+frontend picker accessibility blocks. It checks popup-first and panel-first
+arrival, focused input routing, close restoration, unchanged CAI-only inheritance,
+owned picker Tab/input trapping, temporary hiding/rebuild under a popup, reopen
+and return to the opening control. It also opens all four directly shown native
+dialogs above owners at 99 and Current, checking inherited priority/focus and
+restoration. WidgetHarness now uses the real Low=100 and
+Medium=500 enum values, with High/Current available for these cases. Native
+controls/lifecycle are mocked; in-game acceptance is recorded separately.
+
 ## Setup
 
 Install Visual Studio or Visual Studio Build Tools with the Desktop development with C++ workload. Then run:

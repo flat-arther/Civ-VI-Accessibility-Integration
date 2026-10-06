@@ -371,6 +371,8 @@ end
 include("caiUtils")
 local mgr = CAI:GetUIManager()
 local CAI_Panel = nil
+local m_pickerReturnFocus = nil
+local m_intentionalClose = false
 local CAI_ItemList = nil
 local CAI_SortDD = nil
 local CAI_Slider = nil
@@ -438,6 +440,8 @@ end
 
 local function BuildPanel()
 	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAICityStatePickerPanel"), "Panel", {
+		FocusKey = "setup:city-state-picker",
+		TrapInput = true,
 		Label = function() return Controls.WindowTitle:GetText() end,
 		Tooltip = function() return Controls.TopDescription:GetText() end,
 	})
@@ -522,13 +526,21 @@ end
 
 local function ClosePanel()
 	if CAI_Panel then
-		mgr:RemoveFromStack(CAI_Panel:GetId())
+		local owner = CAI_Panel.Parent
+		CAI_Panel:Destroy()
+		mgr:RestoreReturnFocus(owner, m_pickerReturnFocus)
+		m_pickerReturnFocus = nil
 	end
 	CAI_Panel = nil
 	CAI_ItemList = nil
 	CAI_SortDD = nil
 	CAI_Slider = nil
 end
+
+Close = WrapFunc(Close, function(orig)
+	m_intentionalClose = true
+	orig()
+end)
 
 ParameterInitialize = WrapFunc(ParameterInitialize, function(orig, kParameter, pGameParameters)
 	orig(kParameter, pGameParameters)
@@ -567,13 +579,18 @@ SetAllItems = WrapFunc(SetAllItems, function(orig, bState)
 end)
 
 ContextPtr:SetShowHandler(function()
+	local owner = CAI_Panel and CAI_Panel.Parent or mgr:GetTop()
+	if not CAI_Panel or not CAI_Panel.Parent then
+		m_pickerReturnFocus = mgr:CaptureReturnFocus(owner)
+	end
 	if CAI_Panel then
-		mgr:RemoveFromStack(CAI_Panel:GetId())
+		CAI_Panel:Destroy()
 	end
 	CAI_Panel = nil
 	CAI_ItemList = nil
 	CAI_SortDD = nil
 	CAI_Slider = nil
+	m_intentionalClose = false
 	BuildPanel()
 	RebuildItemList()
 	ContextPtr:SetInputHandler(function(input)
@@ -584,11 +601,16 @@ ContextPtr:SetShowHandler(function()
 		end
 		return true
 	end, true)
-	mgr:Push(CAI_Panel)
+	owner:AddChild(CAI_Panel)
+	mgr:PrepareFocus(owner, CAI_Panel.FocusKey)
+	if mgr:GetTop() == owner then mgr:SetFocus(CAI_Panel) end
 end)
 
 ContextPtr:SetHideHandler(function()
-	ClosePanel()
+	if m_intentionalClose then
+		ClosePanel()
+		m_intentionalClose = false
+	end
 end)
 --#End of accessibility integration
 Initialize();

@@ -405,7 +405,7 @@ end
 local function OpenPanel()
     if m_panel or not mgr then return end
     BuildPanel()
-    mgr:Push(m_panel, { focus = m_tabs })
+    mgr:Push(m_panel, { priority = 99, focus = m_tabs })
 end
 
 local function ClosePanel()

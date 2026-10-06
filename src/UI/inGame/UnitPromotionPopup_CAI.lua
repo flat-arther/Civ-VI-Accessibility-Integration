@@ -446,7 +446,7 @@ local function PushPanel()
     BuildPanel()
     if not m_panel then return end
 
-    mgr:Push(m_panel)
+    mgr:Push(m_panel, { priority = PopupPriority.Low })
 end
 
 OnPromoteUnitPopup = WrapFunc(OnPromoteUnitPopup, function(orig)

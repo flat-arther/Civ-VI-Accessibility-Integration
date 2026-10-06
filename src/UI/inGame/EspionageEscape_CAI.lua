@@ -69,7 +69,7 @@ local function BuildDialog()
         1
     )
     if not m_dialog then return end
-    mgr:Push(m_dialog, { priority = PopupPriority.Low })
+    mgr:Push(m_dialog)
 end
 
 local function IsDialogActive()

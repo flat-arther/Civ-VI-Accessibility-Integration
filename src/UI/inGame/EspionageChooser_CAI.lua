@@ -666,9 +666,9 @@ end
 local function PushPanel()
     BuildPanel()
     -- If a mission-completed espionage popup is already up, sit below it rather
-    -- than covering it; both stay at Low priority.
+    -- than covering it. The native chooser stays below popup priority.
     local belowId = ExposedMembers and CAI.EspionagePopupDialogId or nil
-    mgr:Push(m_panel, { priority = PopupPriority.Low, below = belowId })
+    mgr:Push(m_panel, { priority = 99, below = belowId })
 end
 
 local function PopPanel()

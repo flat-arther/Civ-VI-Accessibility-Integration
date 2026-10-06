@@ -50,7 +50,7 @@ local function BuildDialog()
     )
     if not m_dialog then return end
 
-    mgr:Push(m_dialog, { priority = PopupPriority.Medium })
+    mgr:Push(m_dialog)
 end
 
 LuaEvents.NotificationPanel_OpenDisloyalCityChooser.Remove(OnOpen)

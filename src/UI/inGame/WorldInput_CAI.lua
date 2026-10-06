@@ -1077,14 +1077,14 @@ local function InitializeCAIGameView()
 	if m_caiWorldBuilderWidget and mgr:GetWidgetById(m_caiWorldBuilderWidget:GetId()) then return end
 	if m_caiGameViewWidget and mgr:GetWidgetById(m_caiGameViewWidget:GetId()) then return end
 
-	-- this needs to sit below everything else. Priority must be low
+	-- Native map input stays below the lowest popup priority (100).
 	if WorldBuilder.IsActive() then
 		m_caiWorldBuilderWidget = worldBuilderInput.Build()
 		if not m_caiWorldBuilderWidget then return end
-		mgr:Push(m_caiWorldBuilderWidget, PopupPriority.Low)
+		mgr:Push(m_caiWorldBuilderWidget, { priority = 99 })
 	else
 		if not CreateGameViewWidget() then return end
-		mgr:Push(m_caiGameViewWidget, PopupPriority.Low)
+		mgr:Push(m_caiGameViewWidget, { priority = 99 })
 	end
 
 	RegisterCAIEvents()

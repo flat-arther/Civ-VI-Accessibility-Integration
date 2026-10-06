@@ -6,6 +6,20 @@ Unchecked means unverified in game, not failed. Add or revise checks as later st
 
 ## Final handoff (2026-10-06)
 
+## UI priority experiment (2026-10-07)
+
+- [ ] With a Low popup already open (for example espionage or research completion), allow an ordinary chooser/panel to finish opening. Confirm popup speech/navigation/Enter/Escape stay together, then confirm closing it restores the panel. Also check the opposite opening order and rapid close/reopen.
+- [ ] Open Governor Panel, Governor Assignment and Climate normally and across popup interruptions; confirm they restore usable focus and Governor Assignment no longer covers higher-priority popups merely because CAI used Current.
+- [ ] Open and close research/production/trade panels, including Better Trade Screen where available; test city overview, City-States, Great Works/showcase, World Rankings, era progress, chat, map search/tack list and World Builder editors. Confirm they receive focus above the map and return to it when closed.
+- [ ] Where available, check the directly shown artifact, disloyal-city, spy-escape and barbarian-clan dialogs, including opening from a UI above 99: each must stay above its opener and restore it on close. Check explicit-priority promotion/secret-society/corporation/map-pin popups too.
+- [ ] In Advanced Setup, open each native LeaderPicker, CityStatePicker, MapSelect and MultiSelectWindow. Confirm Tab stays inside, selection/confirmation/Escape work, closure returns to the opening control, and reopening or a popup interruption leaves no stale view. Check EULA/main-menu startup where available.
+- [ ] Smoke-check diplomacy and Quick Deals, plus CAI-only Settings/search/notification center/unit/lens/action lists. Their own push policies are unchanged; confirm the new underlying panel priorities cause no unwanted stacking.
+
+Automated coverage uses production trade adapters and frontend accessibility
+blocks with mocked native boundaries; it does not establish native engine order.
+
+## Outstanding final-handoff checks
+
 - [ ] Pirates load isolation after the 2026-10-06 report: restart Civ VI and launch with CAI plus required official content, disabling other community mods for this test, especially Better Balanced Game and BBG Expanded 2.1. The recorded attempt aborts gameplay database configuration with missing expansion tables and invalid references, before Pirates UI initialization. Once the map loads, verify Pirates appears in Manage Scanner Categories. Its absence outside Pirates is expected. If loading still fails, inspect the new Database.log and Modding.log before attributing it to Lua initialization.
 
 User feedback on 2026-10-06: everything tested appears in order except the scanner, which has no entries, no Ctrl+PageUp/PageDown response, and cannot open category management. Specific scenario/mod coverage was not supplied. The log-confirmed stale scenario eligibility calls are repaired and automated checks pass.

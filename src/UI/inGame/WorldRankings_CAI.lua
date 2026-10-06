@@ -2736,7 +2736,7 @@ local function PushPanel()
         RebuildActiveEntry(entry, vt or entry.victoryType)
     end
 
-    mgr:Push(m_panel, PopupPriority.Low)
+    mgr:Push(m_panel, { priority = 99 })
 end
 
 local function PopPanel()

@@ -279,7 +279,7 @@ local function PushPanel()
     end
 
     BuildPanel()
-    mgr:Push(m_panel, { focus = m_nameEdit or m_iconDD })
+    mgr:Push(m_panel, { priority = PopupPriority.Current, focus = m_nameEdit or m_iconDD })
 end
 
 local function PopPanel()

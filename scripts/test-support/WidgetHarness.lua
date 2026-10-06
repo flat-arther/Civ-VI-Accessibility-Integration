@@ -49,7 +49,7 @@ function Harness.CreateManager(ignoredIncludes)
     InputContext = { Shell = 1, World = 2 }
     Input = { SetActiveContext = function() end, GetActionId = function(name) return name end }
     Mouse = { eLClick = 1 }
-    PopupPriority = { Low = 1, Medium = 50 }
+    PopupPriority = { Low = 100, Medium = 500, High = 1000, Current = 9999 }
     Automation = { GetTime = function() return 1 end }
     CAISettings = { GetBool = function() return false end, GetNumber = function() return 1 end }
     CAI = { IsImeComposing = function() return false end, Silence = function() end }

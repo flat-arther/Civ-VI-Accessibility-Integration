@@ -113,7 +113,7 @@ function CAITradeOrigin.Create(mgr, adapter)
 
         BuildPanel()
         PopulateList(nil)
-        mgr:Push(m_panel, { priority = PopupPriority.Low })
+        mgr:Push(m_panel, { priority = 99 })
     end
 
     local function PopPanel()

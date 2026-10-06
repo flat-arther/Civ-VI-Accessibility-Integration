@@ -593,6 +593,7 @@ local function CAI_PushPanel()
     end
 
     mgr:Push(m_caiPanel, {
+        priority = 99,
         focus = "chat:input",
     })
 end

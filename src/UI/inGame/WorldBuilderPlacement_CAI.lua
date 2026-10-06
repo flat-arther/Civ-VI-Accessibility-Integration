@@ -928,7 +928,7 @@ function OpenPanel()
     if mode ~= nil then
         focusTarget = "caiwb:tool:" .. tostring(mode.ID)
     end
-    mgr:Push(m_panel, { focus = focusTarget })
+    mgr:Push(m_panel, { priority = 99, focus = focusTarget })
 end
 
 function ClosePanel()

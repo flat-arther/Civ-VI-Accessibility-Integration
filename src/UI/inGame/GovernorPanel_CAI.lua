@@ -1256,7 +1256,7 @@ local function PushPanel()
     if not m_ui.panel then return end
     RebuildViews()
     if not mgr:GetWidgetById(PANEL_ID) then
-        mgr:Push(m_ui.panel, { focus = GetActiveGovernorView() })
+        mgr:Push(m_ui.panel, { priority = PopupPriority.Low, focus = GetActiveGovernorView() })
     end
 end
 

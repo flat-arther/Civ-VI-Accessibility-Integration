@@ -741,7 +741,7 @@ function CAIResearchTree.Create(mgr, adapter)
         EnsurePanelBuilt()
         if not m_panel or mgr:GetWidgetById(PANEL_ID) then return end
 
-        mgr:Push(m_panel)
+        mgr:Push(m_panel, { priority = 99 })
     end
 
     local function OnPanelClosedCAI()

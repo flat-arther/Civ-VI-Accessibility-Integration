@@ -1,6 +1,43 @@
 # CAI priorities for UI outside elevated native popups
 
-Inventory: 2026-10-06. No priority or input behavior changed.
+## Current policy (2026-10-07)
+
+User-directed priority experiment implemented:
+
+- Standalone native screen roots without a native popup priority use explicit **99**.
+  This covers ResearchChooser, CivicsChooser, ProductionPanel, trade origin/route/
+  overview (including Better Trade Screen), PantheonChooser, EspionageChooser/
+  Overview, WorldRankings, GreatWorksOverview/Showcase, EraProgressPanel, map input,
+  TechTree/CivicsTree, CityStates, CityPanelOverview, ChatPanel, MapPinListPanel,
+  MapSearchPanel, all four World Builder editor/placement screens and Intro EULA.
+- Owner-relative ChooseArtifact, DisloyalCityChooser, EspionageEscape and
+  TreatWithTribePopup dialogs inherit their opener's priority, per the user's
+  follow-up clarification. They must not sit below an opener above 99.
+  DeclareWarPopup remains a diplomacy exception.
+- GovernorPanel, GovernorAssignmentChooser and ClimateScreen use native Low
+  (100). GovernorPanel also reparents to `/InGame/Screens`; its explicit native
+  queue priority still supplies the CAI priority.
+- Previously inherited native popup roots now use their native priority:
+  UnitPromotionPopup and SecretSocietyPopup Low (100), CreateCorporationPopup
+  High (1000), and MapPinPopup Current (9999). MainMenu explicitly uses native Low.
+- Frontend LeaderPicker, CityStatePicker, MapSelect and MultiSelectWindow are
+  input-trapping child views of the active setup root, with opaque return-focus
+  capture. They have no independent stack priority. This preserves their native
+  ownership above queued setup without inheriting a separate root priority.
+- Diplomacy, existing explicit popup priorities and CAI-only views are unchanged.
+  Notification Center/message buffer is CAI-only, despite being listed with
+  ordinary roots in the original inventory below. Quick Deals retains inheritance
+  because its native opening explicitly reparents the context.
+
+No manager sorting/input architecture was changed. These are explicit priorities
+and a frontend picker ownership adjustment; game acceptance remains unverified.
+Inheritance remains appropriate for owned pickers/dialogs/modal views, not only
+native reparenting. Ordinary standalone screens stay explicit.
+
+## Original inventory (2026-10-06, before the experiment)
+
+The remainder records the pre-change priorities and source anchors for comparison;
+the current policy above supersedes them. No behavior had changed at that time.
 
 The primary list covers accessible screen roots shown through the ordinary native
 hierarchy, rather than QueuePopup or PushModal. Native dialogs shown directly and

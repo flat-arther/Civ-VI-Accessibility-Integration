@@ -147,7 +147,7 @@ OnShow = WrapFunc(OnShow, function(orig)
 	m_LastShownTimer = Automation.GetTime()
 	orig()
 	BuildEulaPanel()
-	mgr:Push(m_eulaPanel)
+	mgr:Push(m_eulaPanel, { priority = 99 })
 end)
 
 function OnHandleInput(pInputStruct)

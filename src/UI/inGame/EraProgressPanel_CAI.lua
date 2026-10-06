@@ -313,7 +313,7 @@ local function PushPanel()
     if not mgr then return end
     if not m_panel then BuildPanel() end
     if not m_panel then return end
-    mgr:Push(m_panel, PopupPriority.Low)
+    mgr:Push(m_panel, { priority = 99 })
 end
 
 -- ============================================================================

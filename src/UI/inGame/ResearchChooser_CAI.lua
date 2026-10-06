@@ -309,7 +309,7 @@ local function PushPanelWhenReady()
     m_tutorialControlsReady = false
     m_tutorialPushPending = false
 
-    mgr:Push(m_panel, { priority = PopupPriority.Low })
+    mgr:Push(m_panel, { priority = 99 })
 end
 
 local function OnPanelOpenedCAI()

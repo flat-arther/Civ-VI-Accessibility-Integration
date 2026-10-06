@@ -464,7 +464,7 @@ local function OpenList()
         end,
     })
     BuildList()
-    mgr:Push(m_list, { focus = m_list })
+    mgr:Push(m_list, { priority = 99, focus = m_list })
 end
 
 local function CloseList()

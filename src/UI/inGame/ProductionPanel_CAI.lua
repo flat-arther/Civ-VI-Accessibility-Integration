@@ -1250,7 +1250,7 @@ local function PushPanelIfNeeded()
     local selectedCity = UI.GetHeadSelectedCity and UI.GetHeadSelectedCity() or nil
     if selectedCity then PrepareCityListFocus(selectedCity) end
     mgr:Push(m_ui.panel, {
-        priority = PopupPriority.Low,
+        priority = 99,
         focus = m_ui.pageTrees[m_state.activeTab]
     })
     ScheduleQueueTutorial()

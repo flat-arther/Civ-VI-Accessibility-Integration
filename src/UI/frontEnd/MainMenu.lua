@@ -2196,7 +2196,7 @@ BuildMenu = WrapFunc(BuildMenu, function(orig, menuOptions)
 
     -- Push exactly once. Subsequent BuildMenu rebuilds reuse the mounted panel.
     if mgr:GetWidgetById(MAIN_PANEL_ID) ~= m_MainPanel then
-        mgr:Push(m_MainPanel)
+        mgr:Push(m_MainPanel, { priority = PopupPriority.Low })
     end
     tutorialMgr:Check(MAIN_MENU_TUTORIAL_EVENT, m_MainPanel)
 	local isUpdateAvailable = CheckForCAIUpdate()

@@ -109,7 +109,7 @@ function CAITradeOverview.Create(mgr, adapter)
             if not panel then BuildPanel() end
             RebuildTree()
             if adapter.RefreshExtras then adapter.RefreshExtras() end
-            if not mgr:GetWidgetById(panelID) then mgr:Push(panel, { priority = PopupPriority.Low }) end
+            if not mgr:GetWidgetById(panelID) then mgr:Push(panel, { priority = 99 }) end
         end,
         Close = function()
             if mgr and panel and mgr:GetWidgetById(panelID) then mgr:RemoveFromStack(panelID) end

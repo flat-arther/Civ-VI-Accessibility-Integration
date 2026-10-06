@@ -1108,7 +1108,7 @@ local function BuildPanel()
         },
     })
 
-    mgr:Push(m_panel)
+    mgr:Push(m_panel, { priority = PopupPriority.Low })
 end
 
 -- Wrap Open

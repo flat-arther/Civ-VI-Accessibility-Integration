@@ -444,7 +444,7 @@ end
 local function PushPanel()
     if m_panel then return end
     BuildPanel()
-    mgr:Push(m_panel)
+    mgr:Push(m_panel, { priority = 99 })
 end
 
 local function PopPanel()

@@ -26,7 +26,7 @@ Open = WrapFunc(Open, function(orig)
     m_dialog = mgr.WidgetHelpers.MakeGeneralDialog(function() return Controls.EventTitle:GetText() or "" end,
         { govBtn, okBtn }, { evDesc })
     if m_dialog then
-        mgr:Push(m_dialog)
+        mgr:Push(m_dialog, { priority = PopupPriority.Low })
     end
 end)
 

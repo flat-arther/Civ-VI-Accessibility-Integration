@@ -756,7 +756,7 @@ OpenPanel = function()
     m_panel:AddChild(m_tabs)
 
     RefreshPlayerList()
-    mgr:Push(m_panel, { focus = m_playerList })
+    mgr:Push(m_panel, { priority = 99, focus = m_playerList })
 end
 
 CloseAll = function()

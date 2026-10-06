@@ -1,5 +1,12 @@
 # Native UI layering and CAI synchronization
 
+Follow-up, 2026-10-07: the user chose an explicit-priority experiment before a
+larger resolver. Native screens without popup priority now use 99, native popup
+roots use explicit priorities, and frontend setup pickers are owned child views.
+Diplomacy and CAI-only views are excluded. See `non-popup-ui-priorities.md` for
+the current policy; the investigation/design below describes the original state
+and a possible future approach, not an authorized next implementation stage.
+
 Investigation completed 2026-10-06 using checked-in vanilla/DLC Lua, XML,
 Forge documentation and IDE stubs. This is a design investigation, not a runtime
 fix. The configured Steam installation path was unavailable in this environment;

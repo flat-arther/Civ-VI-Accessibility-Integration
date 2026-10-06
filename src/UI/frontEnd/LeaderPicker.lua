@@ -351,6 +351,7 @@ include("caiUtils")
 local mgr = CAI:GetUIManager()
 
 local CAI_Panel = nil
+local m_pickerReturnFocus = nil
 local CAI_ItemList = nil
 local CAI_PresetDD = nil
 local m_intentionalClose = false
@@ -408,6 +409,8 @@ end
 
 local function BuildPanel()
 	CAI_Panel = mgr:CreateWidget(mgr:GenerateWidgetId("CAILeaderPickerPanel"), "Panel", {
+		FocusKey = "setup:leader-picker",
+		TrapInput = true,
 		Label = function() return Controls.WindowTitle:GetText() end,
 	})
 	CAI_Panel:AddInputBinding({Key = Keys.VK_ESCAPE, Description = "LOC_CAI_KB_CLOSE", Action = function()
@@ -453,7 +456,11 @@ end
 
 local function ClosePanel()
 	if CAI_Panel then
-		mgr:RemoveFromStack(CAI_Panel:GetId())
+		local owner = CAI_Panel.Parent
+		CAI_Panel:Destroy()
+		CAI_Panel = nil
+		mgr:RestoreReturnFocus(owner, m_pickerReturnFocus)
+		m_pickerReturnFocus = nil
 	end
 end
 
@@ -491,8 +498,12 @@ SelectLeadersWithNoWins = WrapFunc(SelectLeadersWithNoWins, function(orig)
 end)
 
 ContextPtr:SetShowHandler(function()
+	local owner = CAI_Panel and CAI_Panel.Parent or mgr:GetTop()
+	if not CAI_Panel or not CAI_Panel.Parent then
+		m_pickerReturnFocus = mgr:CaptureReturnFocus(owner)
+	end
 	if CAI_Panel then
-		mgr:RemoveFromStack(CAI_Panel:GetId())
+		CAI_Panel:Destroy()
 	end
 	CAI_Panel = nil
 	CAI_ItemList = nil
@@ -508,7 +519,9 @@ ContextPtr:SetShowHandler(function()
 		end
 		return true
 	end, true)
-	mgr:Push(CAI_Panel)
+	owner:AddChild(CAI_Panel)
+	mgr:PrepareFocus(owner, CAI_Panel.FocusKey)
+	if mgr:GetTop() == owner then mgr:SetFocus(CAI_Panel) end
 end)
 
 ContextPtr:SetHideHandler(function()

@@ -1064,7 +1064,7 @@ local function PushPanel()
     BuildTree()
 
     if not mgr:GetWidgetById(PANEL_ID) then
-        mgr:Push(m_ui.panel, { focus = m_caiSelectedTab })
+        mgr:Push(m_ui.panel, { priority = 99, focus = m_caiSelectedTab })
     end
 end
 

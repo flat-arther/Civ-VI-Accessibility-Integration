@@ -453,7 +453,7 @@ local function PushPanel()
     BuildPanel()
     CAICapturedDropdown.Sync(m_filter, m_caiFilterEntries, m_caiFilterSelected)
     ApplySort()
-    mgr:Push(m_panel, PopupPriority.Low)
+    mgr:Push(m_panel, { priority = 99 })
 end
 
 local function PopPanel()

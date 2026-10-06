@@ -496,7 +496,7 @@ local function OpenSearchPanel()
     m_container = container
     mgr._searchPanel = panel
 
-    mgr:Push(container, { focus = panel._editBox })
+    mgr:Push(container, { priority = 99, focus = panel._editBox })
 end
 
 --#endregion

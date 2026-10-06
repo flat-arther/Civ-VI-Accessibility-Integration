@@ -2,6 +2,8 @@
 
 ### Fixed
 
+- Popups retain accessibility focus when ordinary panels open afterward.
+- Closing frontend setup pickers returns focus to their opening controls.
 - Restored World Scanner entries, category navigation, search, and category management after loading a game.
 - The production panel loads Heroes support only when the Babylon pack and Heroes mode are active.
 - Closing Settings or scanner category management restores usable focus when the original item has been rebuilt or removed.

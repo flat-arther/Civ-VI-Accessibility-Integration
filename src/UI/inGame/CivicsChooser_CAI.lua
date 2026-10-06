@@ -255,7 +255,7 @@ local function PushPanelWhenReady()
     if mgr:GetWidgetById(PANEL_ID) then return end
     m_openPending = false
 
-    mgr:Push(m_panel, { priority = PopupPriority.Low })
+    mgr:Push(m_panel, { priority = 99 })
 end
 
 local function OnPanelOpenedCAI()

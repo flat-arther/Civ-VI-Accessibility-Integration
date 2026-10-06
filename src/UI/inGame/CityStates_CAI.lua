@@ -1450,9 +1450,9 @@ local function PushPanel(focusPlayerID)
         local focusKey = m_viewMode == "tree"
             and GetTreeCityStateFocusKey(focusPlayerID)
             or GetCityStateFocusKey(focusPlayerID)
-        mgr:Push(m_ui.panel, { focus = focusKey })
+        mgr:Push(m_ui.panel, { priority = 99, focus = focusKey })
     else
-        mgr:Push(m_ui.panel, { focus = GetActiveView() })
+        mgr:Push(m_ui.panel, { priority = 99, focus = GetActiveView() })
     end
 end
 

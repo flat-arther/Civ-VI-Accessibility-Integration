@@ -16,7 +16,7 @@ end
 local function PushDialog()
     if not mgr then return end
     if m_dialog then
-        mgr:Push(m_dialog)
+        mgr:Push(m_dialog, { priority = PopupPriority.High })
     end
 end
 

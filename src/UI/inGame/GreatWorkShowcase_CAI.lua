@@ -233,7 +233,7 @@ end
 local function PushPanel()
     if not mgr or not m_ui.panel then return end
     if not mgr:GetWidgetById(PANEL_ID) then
-        mgr:Push(m_ui.panel, PopupPriority.Low)
+        mgr:Push(m_ui.panel, { priority = 99 })
     end
 end
 

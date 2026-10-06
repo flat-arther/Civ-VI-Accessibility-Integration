@@ -49,7 +49,7 @@ local function BuildArtifactDialog()
 	)
 
 	if not m_dialog then return end
-	mgr:Push(m_dialog, { priority = PopupPriority.High })
+	mgr:Push(m_dialog)
 end
 LuaEvents.NotificationPanel_OpenArtifactPanel.Remove(OnOpen);
 OnOpen = WrapFunc(OnOpen, function(orig)
