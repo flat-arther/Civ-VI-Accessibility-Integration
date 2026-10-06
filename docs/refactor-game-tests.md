@@ -6,6 +6,8 @@ Unchecked means unverified in game, not failed. Add or revise checks as later st
 
 ## Final handoff (2026-10-06)
 
+- [ ] Pirates load isolation after the 2026-10-06 report: restart Civ VI and launch with CAI plus required official content, disabling other community mods for this test, especially Better Balanced Game and BBG Expanded 2.1. The recorded attempt aborts gameplay database configuration with missing expansion tables and invalid references, before Pirates UI initialization. Once the map loads, verify Pirates appears in Manage Scanner Categories. Its absence outside Pirates is expected. If loading still fails, inspect the new Database.log and Modding.log before attributing it to Lua initialization.
+
 User feedback on 2026-10-06: everything tested appears in order except the scanner, which has no entries, no Ctrl+PageUp/PageDown response, and cannot open category management. Specific scenario/mod coverage was not supplied. The log-confirmed stale scenario eligibility calls are repaired and automated checks pass.
 
 - [ ] Reload the game, confirm scanner entries and Ctrl+PageUp/PageDown category navigation, run a search, and open/close Manage Scanner Categories from Settings. Check Red Death and Pirates scanner categories when those scenarios are available.
