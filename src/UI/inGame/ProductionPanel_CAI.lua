@@ -19,14 +19,7 @@ else
     include("ProductionPanel")
 end
 
-local BABYLON_MOD_ID = "1B28771A-C749-434B-9053-D1380C553DE9"
-local function HasBabylon()
-    for _, v in ipairs(Modding.GetActiveMods() or {}) do
-        if v.Id == BABYLON_MOD_ID then return true end
-    end
-    return false
-end
-if HasBabylon() then include("ProductionPanel_Babylon_Heroes") end
+if CAIModSupport.IsHeroesModeActive() then include("ProductionPanel_Babylon_Heroes") end
 
 local mgr            = CAI:GetUIManager()
 

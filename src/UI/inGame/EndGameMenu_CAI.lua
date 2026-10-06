@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("caiUtils")
 
 local mgr            = CAI:GetUIManager()
@@ -10,7 +11,7 @@ local PANEL_ID       = "CAIEndGame_Panel"
 local MOVIE_PANEL_ID = "CAIEndGame_Movie"
 local TABS_ID        = "CAIEndGame_Tabs"
 local HOVER_SOUND    = "Main_Menu_Mouse_Over"
-local IS_CIV_ROYALE  = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE"
+local IS_CIV_ROYALE  = CAIModSupport.IsCivRoyaleScenarioActive()
 
 -- Shared with the Hall of Fame game-details screen so the replay graph grouping
 -- preference carries between the victory screen and the front-end summaries.

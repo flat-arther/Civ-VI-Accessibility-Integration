@@ -1,15 +1,16 @@
+include("CAIModSupport")
 include("CAIGameState")
 include("caiUtils")
 include("Civ6Common")
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+if CAIModSupport.IsPiratesScenarioActive() then
     include("PiratesScenario_PropKeys")
     include("TopPanel_PiratesScenario")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+elseif CAIModSupport.IsCivRoyaleScenarioActive() then
     include("TopPanel_CivRoyaleScenario_CAIBase")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_WARMACHINE" then
+elseif CAIModSupport.IsWarMachineScenarioActive() then
     include("TopPanel_WarMachineScenario")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+elseif CAIModSupport.IsBlackDeathScenarioActive() then
     include("TopPanel_BlackDeathScenario")
 elseif IsExpansion2Active() then
     include("TopPanel_Expansion2")
@@ -144,7 +145,7 @@ end
 
 local function GetDisplayedFaithYield(player)
     local faithYield = player:GetReligion():GetFaithYield()
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH"
+    if CAIModSupport.IsBlackDeathScenarioActive()
         and IsFranceLocalPlayer ~= nil and IsFranceLocalPlayer()
         and RULES ~= nil and RULES.IsPapalSlotFilled ~= nil and RULES.IsPapalSlotFilled() then
         faithYield = faithYield - RULES.PapalSlotUpkeep
@@ -365,7 +366,7 @@ local function GetRoyaleAbilityParts(playerID, player)
 end
 
 local function AddRoyaleTurnInfo(parts)
-    if GameConfiguration.GetRuleSet() ~= "RULESET_SCENARIO_CIV_ROYALE" then return end
+    if not CAIModSupport.IsCivRoyaleScenarioActive() then return end
 
     local currentTurn = Game.GetCurrentGameTurn()
     local nextSafeZoneTurn = Game:GetProperty(g_ObjectStateKeys.NextSafeZoneTurn)
@@ -396,7 +397,7 @@ local function AddRoyaleTurnInfo(parts)
 end
 
 local function AddPiratesTurnInfo(parts)
-    if GameConfiguration.GetRuleSet() ~= "RULESET_SCENARIO_PIRATES" then return end
+    if not CAIModSupport.IsPiratesScenarioActive() then return end
 
     local _, player = CAIGameState.GetLocalPlayer()
     if player == nil then return end
@@ -441,7 +442,7 @@ local function BuildTurnTimeDateParts(includeClock)
     local parts = {}
     table.insert(parts, Locale.Lookup("LOC_TOP_PANEL_CURRENT_TURN") .. " " .. Controls.Turns:GetText())
 
-    if GameConfiguration.GetRuleSet() ~= "RULESET_SCENARIO_CIV_ROYALE" then
+    if not CAIModSupport.IsCivRoyaleScenarioActive() then
         local timerStr = GetTurnTimerString()
         if timerStr then
             table.insert(parts, timerStr)

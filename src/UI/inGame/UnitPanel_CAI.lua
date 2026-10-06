@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("caiUtils")
 include("inGameHelpers_CAI")
 include("CAIUnitBrowser")
@@ -5,11 +6,11 @@ include("interfaceInfoHelpers_CAI")
 include("hexCoordUtils_CAI")
 include("Civ6Common")
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+if CAIModSupport.IsPiratesScenarioActive() then
     include("UnitPanel_PiratesScenario")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+elseif CAIModSupport.IsCivRoyaleScenarioActive() then
     include("UnitPanel_CivRoyaleScenario")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+elseif CAIModSupport.IsBlackDeathScenarioActive() then
     include("UnitPanel_BlackDeathScenario")
 elseif IsExpansion2Active ~= nil and IsExpansion2Active() then
     include("UnitPanel_Expansion2")
@@ -588,7 +589,7 @@ local function GetUnitInfoStats(data, unit)
     CAIText.AppendIfNonEmpty(results,
         (data.Range or 0) > 0 and Locale.Lookup("LOC_CAI_ICON_RANGE_ALIAS") .. "[NEWLINE]" .. tostring(data.Range) or nil)
 
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
+    if CAIModSupport.IsPiratesScenarioActive()
         and unit ~= nil and g_unitPropertyKeys ~= nil and g_unitPropertyKeys.Crew ~= nil then
         local crew = unit:GetProperty(g_unitPropertyKeys.Crew)
         if crew ~= nil then
@@ -724,7 +725,7 @@ local function GetUnitInfoCharges(data, unit)
         parkCharges ~= nil and parkCharges > 0 and
         Locale.Lookup("LOC_HUD_UNIT_PANEL_PARK_CHARGES") .. "[NEWLINE]" .. tostring(parkCharges) or nil)
 
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" and unit ~= nil
+    if CAIModSupport.IsBlackDeathScenarioActive() and unit ~= nil
         and g_PropertyKeys ~= nil and g_PropertyKeys.Charges ~= nil and g_PropertyKeys.MaxCharges ~= nil then
         local usedCharges = unit:GetProperty(g_PropertyKeys.Charges)
         local maxCharges = unit:GetProperty(g_PropertyKeys.MaxCharges)
@@ -2669,7 +2670,7 @@ local function BuildUnitActionList(data)
     AddSyntheticPromoteActionIfNeeded(actions, data)
 
     for _, action in ipairs(actions) do
-        local hidePiratesNavalRepair = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
+        local hidePiratesNavalRepair = CAIModSupport.IsPiratesScenarioActive()
             and selectedUnit ~= nil
             and GameInfo.Units[selectedUnit:GetUnitType()] ~= nil
             and GameInfo.Units[selectedUnit:GetUnitType()].Domain == "DOMAIN_SEA"

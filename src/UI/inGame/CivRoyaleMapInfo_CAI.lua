@@ -1,7 +1,7 @@
+include("CAIModSupport")
 CAICivRoyaleMapInfo = CAICivRoyaleMapInfo or {}
 
-local RULESET = "RULESET_SCENARIO_CIV_ROYALE"
-local isActive = GameConfiguration.GetRuleSet() == RULESET
+local isActive = CAIModSupport.IsCivRoyaleScenarioActive()
 
 if isActive then
     include("CivRoyaleScenario_PropKeys")
@@ -75,10 +75,6 @@ local function IsZombieHungerTarget(plot, playerID, refresh)
         CAICivRoyaleMapInfo.RefreshHungerTargets(playerID)
     end
     return hungerTargetsByPlayer[playerID][plot:GetIndex()] == true
-end
-
-function CAICivRoyaleMapInfo.IsActive()
-    return isActive
 end
 
 function CAICivRoyaleMapInfo.GetSafeZoneCenterPlot()

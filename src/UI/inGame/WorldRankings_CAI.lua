@@ -10,21 +10,21 @@ include("Civ6Common")
 -- its file instead of vanilla and layer CAI accessibility on top of it. BBG has
 -- shipped under three historical mod IDs.
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_WARMACHINE" then
+if CAIModSupport.IsWarMachineScenarioActive() then
     include("WorldRankings_WarMachineScenario")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_VIKINGS" then
+elseif CAIModSupport.IsVikingsScenarioActive() then
     include("WorldRankings_VikingsScenario")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_POLAND" then
+elseif CAIModSupport.IsPolandScenarioActive() then
     include("WorldRankings_PolandScenario")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_INDONESIA_KHMER" then
+elseif CAIModSupport.IsIndonesiaKhmerScenarioActive() then
     include("WorldRankings_Indonesia_KhmerScenario")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+elseif CAIModSupport.IsBlackDeathScenarioActive() then
     include("WorldRankings_BlackDeathScenario")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_AUSTRALIA" then
+elseif CAIModSupport.IsAustraliaScenarioActive() then
     include("WorldRankings_AustraliaScenario")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_ALEXANDER" then
+elseif CAIModSupport.IsAlexanderScenarioActive() then
     include("WorldRankings_AlexanderScenario")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_NUBIA" then
+elseif CAIModSupport.IsNubiaScenarioActive() then
     include("WorldRankings_NubiaScenario")
 elseif CAIModSupport.IsBBGActive() then
     -- BBG registers worldrankings_bbg.lua only in <Files> and a losing
@@ -591,7 +591,7 @@ local function RebuildOverallTree(tree)
     local capture = mgr:CaptureFocusKey(tree)
     tree:ClearChildren()
 
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_WARMACHINE" then
+    if CAIModSupport.IsWarMachineScenarioActive() then
         AddLeaf(tree, "war-machine:description", function()
             return Locale.Lookup("LOC_WARMACHINE_SCENARIO_ERA_INDUSTRIAL_DESCRIPTION")
         end)
@@ -604,7 +604,7 @@ local function RebuildOverallTree(tree)
         return
     end
 
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_VIKINGS" then
+    if CAIModSupport.IsVikingsScenarioActive() then
         AddLeaf(tree, "vikings:description", function()
             return Locale.Lookup("LOC_VIKING_SCENARIO_DESCRIPTION")
         end)
@@ -625,7 +625,7 @@ local function RebuildOverallTree(tree)
         return
     end
 
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_POLAND" then
+    if CAIModSupport.IsPolandScenarioActive() then
         AddLeaf(tree, "poland:overall", function()
             return CAIText.JoinLines({
                 Locale.Lookup("LOC_PEDIA_CITYSTATES_PAGE_CIVILIZATION_VIENNA_CHAPTER_HISTORY_PARA_1"),
@@ -639,7 +639,7 @@ local function RebuildOverallTree(tree)
         return
     end
 
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_INDONESIA_KHMER" then
+    if CAIModSupport.IsIndonesiaKhmerScenarioActive() then
         AddLeaf(tree, "indonesia-khmer:rules", function()
             return CAIText.JoinLines({
                 Locale.Lookup("LOC_INDONESIAKHMER_SCENARIO_WORLD_RANKING_1"),
@@ -663,7 +663,7 @@ local function RebuildOverallTree(tree)
         return
     end
 
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_AUSTRALIA" then
+    if CAIModSupport.IsAustraliaScenarioActive() then
         AddLeaf(tree, "australia:description", function()
             return Locale.Lookup("LOC_AUSTRALIA_SCENARIO_DESCRIPTION")
         end)
@@ -704,7 +704,7 @@ local function RebuildOverallTree(tree)
         return
     end
 
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_ALEXANDER" then
+    if CAIModSupport.IsAlexanderScenarioActive() then
         AddLeaf(tree, "alexander:rules", function()
             return CAIText.JoinLines({
                 Locale.Lookup("LOC_ALEXANDER_SCENARIO_WORLD_RANKING_1"),
@@ -2446,13 +2446,12 @@ end
 
 local function GetTableKind(tabDef)
     if tabDef.label == CAI_TAB_OVERALL then
-        local ruleset = GameConfiguration.GetRuleSet()
-        if ruleset == "RULESET_SCENARIO_WARMACHINE"
-            or ruleset == "RULESET_SCENARIO_VIKINGS"
-            or ruleset == "RULESET_SCENARIO_POLAND"
-            or ruleset == "RULESET_SCENARIO_INDONESIA_KHMER"
-            or ruleset == "RULESET_SCENARIO_AUSTRALIA"
-            or ruleset == "RULESET_SCENARIO_ALEXANDER" then
+        if CAIModSupport.IsWarMachineScenarioActive()
+            or CAIModSupport.IsVikingsScenarioActive()
+            or CAIModSupport.IsPolandScenarioActive()
+            or CAIModSupport.IsIndonesiaKhmerScenarioActive()
+            or CAIModSupport.IsAustraliaScenarioActive()
+            or CAIModSupport.IsAlexanderScenarioActive() then
             return nil
         end
         return "overall"

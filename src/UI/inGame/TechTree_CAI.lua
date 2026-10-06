@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("CAIResearchData")
 include("CAIResearchTree")
 include("CAIControl")
@@ -11,7 +12,7 @@ include("Civ6Common")
 -- alliance research icon/tooltip); XP2 includes XP1 and adds revealed-only
 -- search. CAI replaces the screen context outright, so it must load the exact
 -- variant vanilla would.
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_AUSTRALIA" then
+if CAIModSupport.IsAustraliaScenarioActive() then
     include("TechTree_AustraliaScenario")
 elseif IsExpansion2Active and IsExpansion2Active() then
     include("TechTree_Expansion2")

@@ -124,3 +124,10 @@ Implementation stages finished on 2026-10-05. This is the complete deferred chec
 - [ ] Where available, check Quick Deals, Real Era Tracker favored moments, Detailed Map Tacks labels and climate event history. Confirm their shared data reaches the relevant screens after reloading.
 
 This additional namespace migration was implemented on 2026-10-06. Its game checks remain unverified alongside the earlier checklist.
+
+## Scenario and supported-mod queries
+
+- [ ] Open the relevant HUD, map tooltips, panels and World Rankings in Pirates, Red Death, War Machine, Black Death, Indonesia/Khmer, Poland, Vikings, Australia, Alexander and Nubia. Confirm scenario-specific content and native actions remain available.
+- [ ] With each available supported mod (BTS, BRS, EPC, Quick Deals, Detailed Map Tacks, Real Era Tracker and BBG), confirm its existing CAI integration is selected; repeat a base-game session without them. Check scenario include precedence when BBG is also enabled.
+- [ ] Open ProductionPanel with Babylon and Heroes mode enabled, then with Heroes mode disabled. Confirm hero production is available only in the appropriate mode, including with BBG. Check a Rise and Fall session without Babylon for normal production loading.
+- [ ] Start the tutorial and confirm ResearchChooser still delays its initial push and honors tutorial progression/control restrictions.

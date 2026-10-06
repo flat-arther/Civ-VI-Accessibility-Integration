@@ -1,3 +1,4 @@
+include("CAIModSupport")
 -- Interface-mode descriptors and construction with explicit native context dependencies.
 CAIWorldInputModes = {}
 
@@ -204,7 +205,7 @@ function CAIWorldInputModes.Create(mgr, context)
 		}),
 	}
 
-	if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+	if CAIModSupport.IsCivRoyaleScenarioActive() then
 		interfaceWidgets[InterfaceModeTypes.GRIEVING_GIFT] =
 			CreateTargetingWidgetData("LOC_GRIEVING_GIFT_NAME", function()
 				local plotId = CAICursor:GetPlotId()
@@ -231,7 +232,7 @@ function CAIWorldInputModes.Create(mgr, context)
 			end)
 	end
 
-	if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+	if CAIModSupport.IsPiratesScenarioActive() then
 		local function GetPiratesModeLabel(tag)
 			local tooltip = Locale.Lookup(tag)
 			return tooltip:match("^(.-)%[NEWLINE%]") or tooltip

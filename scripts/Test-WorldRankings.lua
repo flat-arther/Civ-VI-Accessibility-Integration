@@ -15,7 +15,7 @@ for _,mode in ipairs({'base','xp2','bbg','warmachine'}) do
  local setting='tree'
  Locale.Lookup=function(tag,...) local p={tostring(tag)}; for _,v in ipairs({...}) do p[#p+1]=tostring(v) end; return table.concat(p,':') end
  CAI.GetConfigValue=function() return setting end; CAI.SetConfigValue=function(_,_,v) setting=v; return true end
- CAIModSupport={IsBBGActive=function() return bbg end}
+ Modding={IsModActive=function(id) return bbg and id=='cb84075d-5007-4207-b662-c35a5f7be240' end}
  IsExpansion2Active=function() return xp2 end
  GameConfiguration={GetRuleSet=function() return rule end,IsAnyMultiplayer=function() return true end,GetValue=function() return 60 end}
  local playerID=0
@@ -94,7 +94,6 @@ for _,mode in ipairs({'base','xp2','bbg','warmachine'}) do
  local nativeInclude=include; local included
  include=function(name)
   if name=='CAIRankingsScore' or name=='CAIRankingsGeneric' then run('src/UI/inGame/'..name..'.lua')
-  elseif name=='CAIModSupport' then return
   elseif name:match('^WorldRankings') then included=name
   else nativeInclude(name) end
  end

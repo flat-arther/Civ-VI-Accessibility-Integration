@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("inGameHelpers_CAI")
 
 CAIInterfaceTargets = CAIInterfaceTargets or {}
@@ -273,7 +274,7 @@ local PLOT_TARGET_MODES = {
     }
 }
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+if CAIModSupport.IsCivRoyaleScenarioActive() then
     PLOT_TARGET_MODES[0x1D7FAB3F] = {
         CustomGetTargets = function()
             local out = {}
@@ -296,7 +297,7 @@ local PIRATES_TARGET_MODES = {
     DB.MakeHash("INTERFACEMODE_HOARDER_ACTIVE"),
 }
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+if CAIModSupport.IsPiratesScenarioActive() then
     for _, mode in ipairs(PIRATES_TARGET_MODES) do
         PLOT_TARGET_MODES[mode] = {
             LiveCustomTargets = true,
@@ -420,13 +421,13 @@ local PLOT_INFO_KEYS_BY_MODE = {
     [InterfaceModeTypes.NAVAL_GOLD_RAID] = { "units", "cityName", "districtTitle", "improvement", "resource", "terrainShape" },
 }
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+if CAIModSupport.IsCivRoyaleScenarioActive() then
     PLOT_INFO_KEYS_BY_MODE[0x1D7FAB3F] = {
         "civRoyaleZone", "civRoyaleObjects", "improvement", "resource", "terrainShape"
     }
 end
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+if CAIModSupport.IsPiratesScenarioActive() then
     local piratesPlotInfoKeys = {
         "units", "cityName", "districtTitle", "improvement", "resource", "terrainShape"
     }

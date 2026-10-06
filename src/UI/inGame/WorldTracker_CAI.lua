@@ -1,10 +1,11 @@
+include("CAIModSupport")
 include("CAIGameState")
 include("CAIControl")
 include("caiUtils")
 include("Civ6Common")
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+if CAIModSupport.IsPiratesScenarioActive() then
     include("WorldTracker_PiratesScenario")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+elseif CAIModSupport.IsCivRoyaleScenarioActive() then
     include("WorldTracker_CivRoyaleScenario_CAIBase")
 elseif IsExpansion2Active() then
     include("WorldTracker_Expansion1")
@@ -457,7 +458,7 @@ local function InitializeWorldTrackerActions()
     RegisterWorldTrackerAction(ACTION_SPEAK_SCIENCE_DETAILS, SpeakScienceBreakdown)
     RegisterWorldTrackerAction(ACTION_SPEAK_CULTURE_DETAILS, SpeakCultureBreakdown)
 
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+    if CAIModSupport.IsCivRoyaleScenarioActive() then
         RegisterWorldTrackerAction(ACTION_OPEN_TRACKER, ActivateRoyaleGlobalAbility)
     elseif IsExpansion1Active() or IsExpansion2Active() then
         RegisterWorldTrackerAction(ACTION_OPEN_TRACKER, ToggleCrisisList)
@@ -509,7 +510,7 @@ LuaEvents.CAIWorldTrackerShowChat.Add(ForceShowChatPanel)
 -- ability is ready to use. Only the three factions that have a global ability
 -- expose the row at all.
 -- ===========================================================================
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+if CAIModSupport.IsCivRoyaleScenarioActive() then
     local ROYALE_LAUNCH_ID = "civ_royale_global_ability"
 
     local m_royaleLaunchDef = {

@@ -62,6 +62,7 @@ During the current refactor, pending user game tests do not block further work. 
 - All user-facing strings must be localized. Never use literal strings for user-facing text; only debug prints may use literals.
 - Prefer existing control text and tooltips through `control:GetText()` and `control:GetToolTipString()`.
 - Use `Locale.Lookup()` when no existing control exposes the text or for CAI-specific localization tags. Add new `LOC_CAI_` tags to `src/Text/en_US/cai_text_ui.xml` when vanilla has no suitable key.
+- Scenario and supported-mod activation queries belong in `CAIModSupport.lua`. Include it before querying; keep screen-specific native include priority and behavior in the screen.
 - TTS output must always go through `Speak()` in `caiUtils.lua`; never call `CAI.output` directly.
 - Work with vanilla game mechanics. Preserve vanilla callbacks, events, input contexts, dialogs, and state changes where possible.
 - Do not override vanilla game keys casually. Use safe mod keys or bindable input actions.

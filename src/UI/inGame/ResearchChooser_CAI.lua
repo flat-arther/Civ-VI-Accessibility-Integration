@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("CAIResearchData")
 include("CAIResearchChooser")
 include("CAIControl")
@@ -24,8 +25,6 @@ local QUEUE_TREE_ID           = "CAIResearchChooser_QueueTree"
 local AVAILABLE_TREE_ID       = "CAIResearchChooser_AvailableTree"
 local OPEN_TREE_BUTTON_ID     = "CAIResearchChooser_OpenTreeButton"
 
-local TUTORIAL_MOD_ID         = "17462E0F-1EE1-4819-AAAA-052B5896B02A"
-
 local m_panel                 = nil ---@type UIWidget|nil
 local m_queueTree             = nil ---@type UIWidget|nil
 local m_availableTree         = nil ---@type UIWidget|nil
@@ -48,13 +47,7 @@ local m_tutorialPushPending   = false
 -- ===========================================================================
 local function IsCAITutorial()
     if m_isTutorial ~= nil then return m_isTutorial end
-    m_isTutorial = false
-    for _, v in ipairs(Modding.GetActiveMods()) do
-        if v.Id == TUTORIAL_MOD_ID then
-            m_isTutorial = true
-            break
-        end
-    end
+    m_isTutorial = CAIModSupport.IsTutorialActive()
     return m_isTutorial
 end
 

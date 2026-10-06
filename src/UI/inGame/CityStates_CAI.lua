@@ -1,10 +1,11 @@
+include("CAIModSupport")
 include("CAIColumns")
 include("CAICollection")
 include("caiUtils")
 include("Civ6Common")
 include("GameCapabilities")
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_INDONESIA_KHMER" then
+if CAIModSupport.IsIndonesiaKhmerScenarioActive() then
     include("CityStates_Indonesia_KhmerScenario")
 elseif IsExpansion2Active() then
     include("CityStates_Expansion2")

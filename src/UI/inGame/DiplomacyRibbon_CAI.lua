@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("CAIColumns")
 include("CAIGameState")
 include("CAICollection")
@@ -6,9 +7,9 @@ include("Civ6Common")
 local info             = CAI:GetInfo() or {}
 CAI.Info = info
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+if CAIModSupport.IsPiratesScenarioActive() then
     include("DiplomacyRibbon_PiratesScenario")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+elseif CAIModSupport.IsCivRoyaleScenarioActive() then
     include("DiplomacyRibbon_CivRoyaleScenario_CAIBase")
 elseif IsExpansion2Active() then
     include("DiplomacyRibbon_Expansion2")
@@ -19,7 +20,7 @@ else
 end
 
 local mgr = CAI:GetUIManager()
-local IS_PIRATES_SCENARIO = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
+local IS_PIRATES_SCENARIO = CAIModSupport.IsPiratesScenarioActive()
 -- The Pirates scenario replaces leaders with custom score categories that do not
 -- map onto the diplomacy columns, so it keeps the flat list-only presentation.
 local SCENARIO_LIST_ONLY = IS_PIRATES_SCENARIO
@@ -279,7 +280,7 @@ local function GetLeaderLabel(playerID, localPlayerID, includeRelationship)
     if Players[playerID]:IsTurnActive() then
         table.insert(parts, Locale.Lookup("LOC_CAI_DIPLO_RIBBON_ACTIVE_TURN"))
     end
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE"
+    if CAIModSupport.IsCivRoyaleScenarioActive()
         and not pConfig:IsAlive() then
         table.insert(parts, Locale.Lookup("LOC_HUD_RIBBON_REDDEATH_ELIMINATED"))
     end
@@ -404,7 +405,7 @@ local function BuildNaturalPlayers()
     local localPlayer = Players[localPlayerID]
     local localDiplomacy = IS_PIRATES_SCENARIO and nil or localPlayer:GetDiplomacy()
 
-    local kPlayers = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE"
+    local kPlayers = CAIModSupport.IsCivRoyaleScenarioActive()
         and PlayerManager.GetWasEverAliveMajors()
         or PlayerManager.GetAliveMajors()
     if IS_PIRATES_SCENARIO then
@@ -425,7 +426,7 @@ local function BuildNaturalPlayers()
                 local pConfig = PlayerConfigurations[playerID]
                 local isHumanMP = GameConfiguration.IsAnyMultiplayer() and pConfig:IsHuman()
                 if isMet or isHumanMP
-                    or (GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE"
+                    or (CAIModSupport.IsCivRoyaleScenarioActive()
                         and not pConfig:IsAlive()) then
                     table.insert(ordered, playerID)
                 end

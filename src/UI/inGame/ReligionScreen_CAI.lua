@@ -1,5 +1,6 @@
+include("CAIModSupport")
 include("caiUtils")
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_INDONESIA_KHMER" then
+if CAIModSupport.IsIndonesiaKhmerScenarioActive() then
     include("ReligionScreen_Indonesia_KhmerScenario")
 else
     include("ReligionScreen")
@@ -179,8 +180,7 @@ local function IsObserverMode()
 end
 
 local function GetSetupState()
-    local ruleSet = GameConfiguration.GetRuleSet()
-    if ruleSet == "RULESET_SCENARIO_POLAND" or ruleSet == "RULESET_SCENARIO_VIKINGS" then
+    if CAIModSupport.IsPolandScenarioActive() or CAIModSupport.IsVikingsScenarioActive() then
         return nil
     end
 
@@ -393,8 +393,7 @@ local function GetBeliefSlotCount(religion, religionType)
 end
 
 local function GetMaximumFoundedReligions()
-    local ruleSet = GameConfiguration.GetRuleSet()
-    if ruleSet == "RULESET_SCENARIO_POLAND" or ruleSet == "RULESET_SCENARIO_VIKINGS" then
+    if CAIModSupport.IsPolandScenarioActive() or CAIModSupport.IsVikingsScenarioActive() then
         return 2
     end
 

@@ -1,7 +1,8 @@
+include("CAIModSupport")
 include("CAIGameState")
 include("caiUtils")
 include("Civ6Common")
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+if CAIModSupport.IsPiratesScenarioActive() then
     include("LaunchBar_PiratesScenario")
 elseif IsExpansion2Active() then
     include("LaunchBar_Expansion2")

@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("caiUtils")
 
 CAICityManagementInterface = CAICityManagementInterface or {}
@@ -7,7 +8,7 @@ local LENS_CITIZEN_MANAGEMENT = UILens.CreateLensLayerHash("Citizen_Management")
 local LENS_PURCHASE_PLOT = UILens.CreateLensLayerHash("Purchase_Plot")
 
 local function IsBlackDeathEngland()
-    if GameConfiguration.GetRuleSet() ~= "RULESET_SCENARIO_BLACKDEATH" then
+    if not CAIModSupport.IsBlackDeathScenarioActive() then
         return false
     end
 

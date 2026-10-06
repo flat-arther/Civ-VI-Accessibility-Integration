@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("CAIColumns")
 include("CAIControl")
 include("CAICollection")
@@ -24,7 +25,7 @@ include("Civ6Common") -- IsExpansion1Active / IsExpansion2Active
 -- drop that cleanup. Quick Deals exports diplomacyactionview_qd via ImportFiles
 -- precisely so other mods can chain it; it re-includes the correct vanilla
 -- variant itself, then installs its wraps, which CAI then wraps on top of.
-if IsQuickDealsActive() then
+if CAIModSupport.IsQuickDealsActive() then
     include("diplomacyactionview_qd")
 elseif IsExpansion2Active() then
     include("DiplomacyActionView_Expansion2")

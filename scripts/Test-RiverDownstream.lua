@@ -73,6 +73,7 @@ local bootstrapEnd=assert(bootstrapSource:find('local function IsBarbarianClansM
 local bootstrapEnv=setmetatable({include=function(name)
  if name=='hexCoordUtils_CAI' then dofile('src/UI/inGame/hexCoordUtils_CAI.lua')
  elseif name=='CAIDescriptors' then dofile('src/UI/shared/CAIDescriptors.lua')
+ elseif name=='CAIModSupport' then dofile('src/UI/shared/CAIModSupport.lua')
  else assert(name=='caiUtils' or name=='interfaceInfoHelpers_CAI' or name=='inGameHelpers_CAI' or name=='Civ6Common' or name=='CivRoyaleMapInfo_CAI','Unexpected new VFS dependency: '..name) end
 end},{__index=_ENV})
 local loadedHex=assert(load(bootstrapSource:sub(1,bootstrapEnd-1)..'\nreturn HexCoordUtils','@PlotToolTip_CAI bootstrap','t',bootstrapEnv))()

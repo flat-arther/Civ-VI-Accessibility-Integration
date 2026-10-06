@@ -1,12 +1,13 @@
+include("CAIModSupport")
 include("CAIControl")
 include("caiUtils")
 include("Civ6Common")
 
 local function GetInGameTopOptionsMenuIncludeName()
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+    if CAIModSupport.IsPiratesScenarioActive() then
         return "InGameTopOptionsMenu_PiratesScenario"
     end
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+    if CAIModSupport.IsCivRoyaleScenarioActive() then
         return "InGameTopOptionsMenu_CivRoyaleScenario_CAIBase"
     end
     if IsExpansion2Active ~= nil and IsExpansion2Active() then

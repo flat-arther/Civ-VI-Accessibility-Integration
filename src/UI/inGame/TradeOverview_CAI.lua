@@ -10,7 +10,7 @@ include("caiUtils")
 -- vendored verbatim copy instead of vanilla and layer CAI accessibility on top of
 -- it. CAI wraps CreatePlayerHeader/CreateCityStateHeader/AddRoute, which BBG's
 -- ViewAvailableRoutes calls, so the accessibility layer captures BBG's grouping.
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_INDONESIA_KHMER" then
+if CAIModSupport.IsIndonesiaKhmerScenarioActive() then
     include("TradeOverview_Indonesia_KhmerScenario")
 elseif CAIModSupport.IsBBGActive() then
     include("TradeOverview_BetterBalancedGame_CAIBase")
@@ -23,7 +23,7 @@ end
 -- Hand off to the mod-specific accessibility layer when it is active. The
 -- AddRouteInstanceFromRouteInfo guard keeps the vanilla path for the rare case
 -- where a scenario ruleset base was included instead of BTS's rewrite.
-if IsBetterTradeScreenActive() and AddRouteInstanceFromRouteInfo ~= nil then
+if CAIModSupport.IsBetterTradeScreenActive() and AddRouteInstanceFromRouteInfo ~= nil then
     include("TradeOverview_BetterTradeScreen_CAI")
     return
 end

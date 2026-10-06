@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("CAICapturedDropdown")
 include("CAITradeData")
 include("caiUtils")
@@ -6,7 +7,7 @@ include("TradeRouteChooser")
 -- Better Trade Screen (astog) replaces this context with a different API. When it
 -- is active, hand off to the mod-specific accessibility layer and skip the
 -- vanilla wrappers below.
-if IsBetterTradeScreenActive() then
+if CAIModSupport.IsBetterTradeScreenActive() then
     include("TradeRouteChooser_BetterTradeScreen_CAI")
     return
 end

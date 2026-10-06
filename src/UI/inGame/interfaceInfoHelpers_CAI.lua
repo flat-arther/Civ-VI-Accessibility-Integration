@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("CAIGameState")
 include("caiUtils")
 include("AdjacencyBonusSupport")
@@ -1202,11 +1203,11 @@ InterfaceInfoHelpers[InterfaceModeTypes.TRANSFORM_UNIT] = BuildTargetValidityInt
 InterfaceInfoHelpers[InterfaceModeTypes.RESTORE_UNIT_MOVES] = BuildTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.NAVAL_GOLD_RAID] = BuildTargetValidityInterfaceInfo
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+if CAIModSupport.IsCivRoyaleScenarioActive() then
     InterfaceInfoHelpers[InterfaceModeTypes.GRIEVING_GIFT] = BuildSimpleTargetValidityInterfaceInfo
 end
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+if CAIModSupport.IsPiratesScenarioActive() then
     InterfaceInfoHelpers[DB.MakeHash("INTERFACEMODE_CAPTURE_BOAT")] = BuildTargetValidityInterfaceInfo
     InterfaceInfoHelpers[DB.MakeHash("INTERFACEMODE_SHORE_PARTY")] = BuildTargetValidityInterfaceInfo
     InterfaceInfoHelpers[DB.MakeHash("INTERFACEMODE_SHORE_PARTY_EMBARK")] = BuildTargetValidityInterfaceInfo

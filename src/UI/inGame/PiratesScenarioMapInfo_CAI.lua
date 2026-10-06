@@ -8,10 +8,6 @@ local FLOATING_TREASURE = GameInfo.Improvements["IMPROVEMENT_FLOATING_TREASURE"]
 local DOWSING_ROD = GameInfo.Policies["POLICY_RELIC_DOWSING_ROD"].Index
 local ENGLISH_POINTER = GameInfo.Policies["POLICY_RELIC_ENGLISH_POINTER"].Index
 
-function M.IsActive()
-    return GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
-end
-
 function M.IsTreasureSearchPlot(plot, playerID)
     local player = Players[playerID]
     if player == nil then return false end

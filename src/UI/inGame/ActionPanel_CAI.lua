@@ -1,13 +1,14 @@
+include("CAIModSupport")
 include("CAIGameState")
 include("CAIControl")
 include("caiUtils")
 include("Civ6Common")
 
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+if CAIModSupport.IsCivRoyaleScenarioActive() then
     include("ActionPanel_CivRoyaleScenario")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_WARMACHINE" then
+elseif CAIModSupport.IsWarMachineScenarioActive() then
     include("ActionPanel_WarMachineScenario")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+elseif CAIModSupport.IsBlackDeathScenarioActive() then
     include("ActionPanel_BlackDeathScenario")
 elseif IsExpansion2Active() then
     include("ActionPanel_Expansion2")
@@ -401,7 +402,7 @@ function GetEraScoreDetailsLines()
     return parts
 end
 
-if Modding.IsModActive("11B9FBBE-25BD-7E24-3909-67A060B2456C") then
+if CAIModSupport.IsRealEraTrackerActive() then
     include("ActionPanel_RealEraTracker_CAI")
 end
 

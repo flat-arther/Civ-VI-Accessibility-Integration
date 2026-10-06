@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("CAIColumns")
 -- Owns the accessible unit browser and the sorting used by world unit cycling.
 -- UnitPanel supplies context-local reads and owns engine/Lua event subscriptions.
@@ -281,7 +282,7 @@ function CAIUnitBrowser.Create(dependencies)
             unit:GetActionCharges() or 0,
             greatPerson ~= nil and (greatPerson:GetActionCharges() or 0) or 0,
             GetParkCharges(unit) or 0)
-        if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH"
+        if CAIModSupport.IsBlackDeathScenarioActive()
             and g_PropertyKeys ~= nil and g_PropertyKeys.Charges ~= nil and g_PropertyKeys.MaxCharges ~= nil then
             local usedCharges = unit:GetProperty(g_PropertyKeys.Charges)
             local maxCharges = unit:GetProperty(g_PropertyKeys.MaxCharges)

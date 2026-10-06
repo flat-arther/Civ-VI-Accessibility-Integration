@@ -1,8 +1,9 @@
+include("CAIModSupport")
 include("CAIGameState")
 include("caiUtils")
 include("Civ6Common")
-local m_isAustraliaScenario = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_AUSTRALIA"
-local m_isVikingsScenario = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_VIKINGS"
+local m_isAustraliaScenario = CAIModSupport.IsAustraliaScenarioActive()
+local m_isVikingsScenario = CAIModSupport.IsVikingsScenarioActive()
 
 if m_isVikingsScenario then
     include("PartialScreenHooks_VikingsScenario")

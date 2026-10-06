@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("caiUtils")
 include("ExpansionIntro")
 local mgr               = CAI:GetUIManager()
@@ -5,8 +6,8 @@ local m_CAI_DIALOG      = nil ---@ type UIWidget
 local m_CurrentPriority = PopupPriority.TutorialHigh
 local OPTIONS_HIDE_KEY  = "HideXP2FeaturesScreen";
 local m_IsGameStarted   = false
-local m_IsCivRoyale = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE"
-local m_IsPirates = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
+local m_IsCivRoyale = CAIModSupport.IsCivRoyaleScenarioActive()
+local m_IsPirates = CAIModSupport.IsPiratesScenarioActive()
 local m_IsScenarioIntro = m_IsCivRoyale or m_IsPirates
 
 local function RemoveDialog()

@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("CAITradeOrigin")
 include("caiUtils")
 include("TradeOriginChooser")
@@ -5,7 +6,7 @@ include("TradeOriginChooser")
 -- Better Trade Screen (astog) replaces this context with a different API
 -- (notably AddCity takes a city id, not a city table). Hand off to the
 -- mod-specific accessibility layer and skip the vanilla wrappers below.
-if IsBetterTradeScreenActive() then
+if CAIModSupport.IsBetterTradeScreenActive() then
     include("TradeOriginChooser_BetterTradeScreen_CAI")
     return
 end

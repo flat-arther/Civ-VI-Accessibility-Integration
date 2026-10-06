@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("CAIGameState")
 include("Civ6Common")
 
@@ -954,7 +955,7 @@ local supportedLenses = {
     {
         Id = LENS_PLAGUE,
         IsActive = function()
-            return GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH"
+            return CAIModSupport.IsBlackDeathScenarioActive()
                 and CAI.PlagueLensActive == true
         end,
         Scan = ScanPlagueLens,

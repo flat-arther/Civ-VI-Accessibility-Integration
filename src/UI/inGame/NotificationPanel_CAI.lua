@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("CAIGameState")
 include("caiUtils")
 include("Civ6Common")
@@ -149,7 +150,7 @@ LookAtNotification = WrapFunc(LookAtNotification, function(orig, pNotification)
 end)
 
 local function MoveCursorToPiratesInfamousZone(notification)
-    if GameConfiguration.GetRuleSet() ~= "RULESET_SCENARIO_PIRATES"
+    if not CAIModSupport.IsPiratesScenarioActive()
         or notification == nil
         or g_NotificationsData == nil
         or notification:GetType() ~= g_NotificationsData.NewInfamousPirate.Type then

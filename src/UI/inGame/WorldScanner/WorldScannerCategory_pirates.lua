@@ -1,4 +1,5 @@
-if GameConfiguration.GetRuleSet() ~= "RULESET_SCENARIO_PIRATES" then return end
+include("CAIModSupport")
+if not CAIModSupport.IsPiratesScenarioActive() then return end
 include("PiratesScenarioMapInfo_CAI")
 
 local MapInfo = CAIPiratesMapInfo

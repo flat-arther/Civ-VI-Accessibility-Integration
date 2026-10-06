@@ -67,9 +67,11 @@ function T.Create(kind, bts, sourceRoot, ruleset, bbg)
         "AvailableRoutesTabLabel","AvailableRoutesTabSelectedLabel","OverviewFilterButton","OverviewGroupByButton"}) do Controls[name]=control(name) end
     Controls.FilterButton.text, Controls.OverviewFilterButton.text, Controls.OverviewGroupByButton.text = "All", "All", "Player"
     s.children = {}; Controls.CityStack = {GetChildren=function() return s.children end}
-    IsBetterTradeScreenActive=function() return bts end
+    Modding={IsModActive=function(id)
+        return (bts and id=='8d4fa23a-ef43-440c-8422-2bec11f8f5d7')
+            or (bbg and id=='cb84075d-5007-4207-b662-c35a5f7be240')
+    end}
     GameConfiguration = {GetRuleSet=function() return ruleset or "RULESET_STANDARD" end}
-    CAIModSupport = {IsBBGActive=function() return bbg end}
     local noop = function() end
     Close=function() s.hidden=true end
     OnClose=function() Close() end
@@ -146,7 +148,6 @@ function T.Create(kind, bts, sourceRoot, ruleset, bbg)
     local baseInclude=include
     include=function(name)
         s.includes[name]=true
-        if name=="CAIModSupport" then return end
         if name=="CAICapturedDropdown" then H.Run("src/UI/shared/" .. name .. ".lua")
         elseif name:match("^CAITrade") then H.Run("src/UI/inGame/" .. name .. ".lua")
         elseif name:match("_BetterTradeScreen_CAI$") then H.Run((sourceRoot or "src/UI/inGame") .. "/" .. name .. ".lua")

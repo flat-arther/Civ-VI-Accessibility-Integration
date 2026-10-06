@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("CAIDescriptors")
 include("caiUtils")
 include("Civ6Common")
@@ -417,7 +418,7 @@ local function GetStatusList(ctx)
     AddStatus(instance.CityHousingInsufficientIcon, "LOC_CITY_BANNER_HOUSING_INSUFFICIENT")
     AddStatus(instance.CityAmenitiesInsufficientIcon, "LOC_CITY_BANNER_AMENITIES_INSUFFICIENT")
 
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+    if CAIModSupport.IsPiratesScenarioActive() then
         if IsControlVisible(instance.TavernIndicator) then
             AddStatus(instance.VisitTavernIcon)
         end

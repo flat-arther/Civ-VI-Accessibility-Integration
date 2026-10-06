@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("CAIReportResources")
 include("CAIReportGossip")
 include("CAIColumns")
@@ -382,7 +383,7 @@ end
 
 local function GetDisplayedFaithYield(localPlayer)
     local faithYield = localPlayer:GetReligion():GetFaithYield()
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+    if CAIModSupport.IsBlackDeathScenarioActive() then
         local playerConfig = PlayerConfigurations[m_localPlayerID]
         local isFrance = playerConfig ~= nil
             and playerConfig:GetCivilizationTypeName() == "CIVILIZATION_BLACKDEATH_SCENARIO_FRANCE"
@@ -1311,7 +1312,7 @@ function RebuildYieldsTree(tree)
                 CAIText.FormatBalance(religion:GetFaithBalance()),
                 CAIText.FormatRatePerTurn(CAIText.FormatSignedValue(Round(GetDisplayedFaithYield(localPlayer), 1))))
             local faithDetails = religion:GetFaithYieldToolTip()
-            if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH"
+            if CAIModSupport.IsBlackDeathScenarioActive()
                 and GetDisplayedFaithYield(localPlayer) ~= religion:GetFaithYield() then
                 faithDetails = CAIText.JoinLines({ faithDetails,
                     Locale.Lookup("LOC_GOVT_PAPAL_SLOT_FAITH_TT", -BLACK_DEATH_PAPAL_SLOT_UPKEEP) })
@@ -2209,7 +2210,7 @@ LuaEvents.CAICycleSelectedCity.Add(OnCAICycleSelectedCity)
 -- BRS wins the ReplaceUIScript when active, so ViewDealsPage (a BRS-only global)
 -- is defined only when the BRS engine actually loaded into this context. Guarding
 -- on it keeps the vanilla path if the base include resolved to vanilla instead.
-if IsBetterReportScreenActive() and ViewDealsPage ~= nil then
+if CAIModSupport.IsBetterReportScreenActive() and ViewDealsPage ~= nil then
     include("ReportScreen_BetterReportsScreen_CAI")
 else
     include("ReportScreen_Vanilla_CAI")

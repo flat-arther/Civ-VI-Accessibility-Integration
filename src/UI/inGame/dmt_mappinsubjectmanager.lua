@@ -1,3 +1,4 @@
+include("CAIModSupport")
 -- =======================================================================
 -- Cache MapPinSubjects in the following format inside player configuration:
 -- {
@@ -8,7 +9,7 @@
 --      }
 -- }
 -- =======================================================================
-if not Modding.IsModActive("4ecfcc62-5471-4435-b295-590df213e8d8") then return end
+if not CAIModSupport.IsDetailedMapTacksActive() then return end
 -- =======================================================================
 -- Imports
 -- =======================================================================

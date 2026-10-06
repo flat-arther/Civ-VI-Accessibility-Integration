@@ -2,6 +2,7 @@
 
 ### Fixed
 
+- The production panel loads Heroes support only when the Babylon pack and Heroes mode are active.
 - Closing Settings or scanner category management restores usable focus when the original item has been rebuilt or removed.
 - Map tack labels remain available if Detailed Map Tacks fails to supply its extra information.
 

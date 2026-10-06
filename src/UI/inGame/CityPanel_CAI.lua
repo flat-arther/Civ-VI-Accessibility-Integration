@@ -1,9 +1,10 @@
+include("CAIModSupport")
 include("caiUtils")
 include("hexCoordUtils_CAI")
 include("Civ6Common")
 
 local function GetCityPanelIncludeName()
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+    if CAIModSupport.IsBlackDeathScenarioActive() then
         return "CityPanel_BlackDeathScenario"
     end
 

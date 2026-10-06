@@ -1,7 +1,8 @@
+include("CAIModSupport")
 include("caiUtils")
 include("inGameHelpers_CAI")
 include("ToolTipHelper")
-local IS_PIRATES_SCENARIO = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
+local IS_PIRATES_SCENARIO = CAIModSupport.IsPiratesScenarioActive()
 if IS_PIRATES_SCENARIO then
     include("TechCivicCompletedPopup_PiratesScenario")
 else

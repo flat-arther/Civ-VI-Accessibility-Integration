@@ -1,11 +1,12 @@
+include("CAIModSupport")
 include("CAIControl")
 include("caiUtils")
 include("Civ6Common")
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+if CAIModSupport.IsPiratesScenarioActive() then
     include("MinimapPanel_PiratesScenario_CAIBase")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+elseif CAIModSupport.IsCivRoyaleScenarioActive() then
     include("MinimapPanel_CivRoyaleScenario_CAIBase")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+elseif CAIModSupport.IsBlackDeathScenarioActive() then
     include("MinimapPanel_BlackDeathScenario")
 elseif IsExpansion2Active() then
     include("MinimapPanel_Expansion2")
@@ -19,7 +20,7 @@ local mgr = CAI:GetUIManager()
 
 local LENS_LIST_WIDGET_ID = "CAIMinimapLensList"
 local m_caiLensList = nil ---@type UIWidget|nil
-local m_isBlackDeathScenario = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH"
+local m_isBlackDeathScenario = CAIModSupport.IsBlackDeathScenarioActive()
 
 CAI.PlagueLensActive = false
 

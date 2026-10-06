@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("CAIDescriptors")
 include("caiUtils")
 include("interfaceInfoHelpers_CAI")
@@ -13,10 +14,10 @@ local function IsBarbarianClansModeActive()
 end
 
 local function GetPlotToolTipIncludeName()
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+    if CAIModSupport.IsPiratesScenarioActive() then
         return "PlotToolTip_PiratesScenario"
     end
-    if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+    if CAIModSupport.IsBlackDeathScenarioActive() then
         return "PlotToolTip_BlackDeathScenario"
     end
 
@@ -43,7 +44,7 @@ local IS_BARBARIAN_CLANS_TOOLTIP = PLOT_TOOLTIP_INCLUDE == "PlotToolTip_Barbaria
 
 include(PLOT_TOOLTIP_INCLUDE)
 
-local IS_PIRATES_TOOLTIP = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
+local IS_PIRATES_TOOLTIP = CAIModSupport.IsPiratesScenarioActive()
 if IS_PIRATES_TOOLTIP then
     include("PiratesScenarioMapInfo_CAI")
 end
@@ -1585,7 +1586,7 @@ info.PlotInfoHelpers = {
     end,
 
     fallout = function(data)
-        if CAICivRoyaleMapInfo.IsActive() then return nil end
+        if CAIModSupport.IsCivRoyaleScenarioActive() then return nil end
         if not data.IsVisible or data.Fallout <= 0 then return nil end
         return Locale.Lookup("LOC_TOOLTIP_PLOT_CONTAMINATED_TEXT", data.Fallout)
     end,

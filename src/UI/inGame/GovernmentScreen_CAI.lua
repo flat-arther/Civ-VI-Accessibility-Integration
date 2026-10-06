@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("caiUtils")
 include("Civ6Common") -- IsExpansion1Active / IsExpansion2Active
 
@@ -6,7 +7,7 @@ local function IsDramaticAgesActive()
     return false
 end
 
-local IS_PIRATES_SCENARIO = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
+local IS_PIRATES_SCENARIO = CAIModSupport.IsPiratesScenarioActive()
 
 -- CAI replaces the GovernmentScreen context outright, so it must re-include the
 -- exact vanilla script that would otherwise win; otherwise a sighted hotseat
@@ -14,7 +15,7 @@ local IS_PIRATES_SCENARIO = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_
 
 if IS_PIRATES_SCENARIO then
     include("GovernmentScreen_PiratesScenario")
-elseif GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+elseif CAIModSupport.IsBlackDeathScenarioActive() then
     include("GovernmentScreen_BlackDeathScenario")
 elseif IsExpansion2Active() then
     if IsDramaticAgesActive() then
@@ -36,7 +37,7 @@ end
 -- table+tree panel (defined in this variant file, which exposes the global
 -- CAIGovPolicyPickerEPC). Pulled by include, so it is also registered under
 -- <ImportFiles> in CivViAccess.modinfo, mirroring the BRS/BTS variant files.
-if IsExtendedPolicyCardsActive() then
+if CAIModSupport.IsExtendedPolicyCardsActive() then
     include("GovernmentScreen_ExtendedPolicyCards_CAI")
 end
 
@@ -252,7 +253,7 @@ local function ClearPolicyEffectCache()
 end
 
 local function GetPolicyYields(policyType)
-    if not policyType or not IsExtendedPolicyCardsActive() then return nil end
+    if not policyType or not CAIModSupport.IsExtendedPolicyCardsActive() then return nil end
     if m_policyYieldsCache[policyType] ~= nil then return m_policyYieldsCache[policyType] end
     local RMA = ExposedMembers.RMA
     if not RMA or not RMA.CalculateModifierEffect then return nil end
@@ -303,7 +304,7 @@ local function GetPolicyTooltip(policyType)
 end
 
 local function IsBlackDeathPapalSlot(slotIndex)
-    if GameConfiguration.GetRuleSet() ~= "RULESET_SCENARIO_BLACKDEATH"
+    if not CAIModSupport.IsBlackDeathScenarioActive()
         or RULES == nil or RULES.PapalSlotIndex == nil then
         return false
     end
@@ -791,7 +792,7 @@ local function CreatePolicyPicker(slotIndex, rowIndex)
     ClosePicker()
 
     -- Extended Policy Cards swaps the slot picker for a table/tree effect panel.
-    if IsExtendedPolicyCardsActive() and CAIGovPolicyPickerEPC then
+    if CAIModSupport.IsExtendedPolicyCardsActive() and CAIGovPolicyPickerEPC then
         m_ui.picker = CAIGovPolicyPickerEPC.BuildSlotPicker(BuildPickerContext(), slotIndex, rowIndex)
         UI.PlaySound("UI_Policies_Card_Take")
         mgr:Push(m_ui.picker, PopupPriority.Current)
@@ -847,7 +848,7 @@ local function OpenAllPoliciesTree()
     CloseAllPolicies()
 
     -- Extended Policy Cards swaps the read-only viewer for a table/tree effect panel.
-    if IsExtendedPolicyCardsActive() and CAIGovPolicyPickerEPC then
+    if CAIModSupport.IsExtendedPolicyCardsActive() and CAIGovPolicyPickerEPC then
         m_ui.allPolicies = CAIGovPolicyPickerEPC.BuildAllPolicies(BuildPickerContext())
         mgr:Push(m_ui.allPolicies, PopupPriority.Current)
         return true

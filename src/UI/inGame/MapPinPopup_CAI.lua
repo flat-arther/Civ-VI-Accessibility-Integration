@@ -1,5 +1,6 @@
+include("CAIModSupport")
 include("caiUtils")
-if Modding.IsModActive("4ecfcc62-5471-4435-b295-590df213e8d8") then
+if CAIModSupport.IsDetailedMapTacksActive() then
     include("mappinpopup_dmt")
 else
     include("MapPinPopup")

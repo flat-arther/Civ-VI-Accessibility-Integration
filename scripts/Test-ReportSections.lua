@@ -21,7 +21,7 @@ for _,brs in ipairs({false,true}) do
   table.count=function(t) local n=0; for _ in pairs(t) do n=n+1 end; return n end
   CAI.GetConfigValue=function(_,_,default) return default end
   IsExpansion2Active=function() return xp2 end
-  IsBetterReportScreenActive=function() return brs end
+  Modding={IsModActive=function(id) return brs and id=='6f2888d4-79dc-415f-a8ff-f9d81d7afb53' end}
   IsCAITutorialControlAllowed=function() return true end
   GameCapabilities={HasCapability=function() return true end}
   local hidden=true; local nativeOpens,nativeCloses,providerCalls=0,0,0

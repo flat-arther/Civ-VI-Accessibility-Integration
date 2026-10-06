@@ -1,36 +1,13 @@
+include("CAIModSupport")
 include("CAIControl")
 include("inGameHelpers_CAI")
 
-local function GetCurrentRuleSet()
-    if GameConfiguration.GetRuleSet ~= nil then
-        return GameConfiguration.GetRuleSet()
-    end
-
-    if GameConfiguration.GetValue ~= nil then
-        return GameConfiguration.GetValue("RULESET")
-    end
-
-    return nil
-end
-
-local function IsRuleSetActive(ruleSetType)
-    return GetCurrentRuleSet() == ruleSetType
-end
-
-local function IsPiratesScenarioActive()
-    return IsRuleSetActive("RULESET_SCENARIO_PIRATES")
-end
-
-local function IsCivRoyaleScenarioActive()
-    return IsRuleSetActive("RULESET_SCENARIO_CIV_ROYALE")
-end
-
 local function GetUnitFlagManagerIncludeName()
-    if IsCivRoyaleScenarioActive() then
+    if CAIModSupport.IsCivRoyaleScenarioActive() then
         return "UnitFlagManager_CivRoyaleScenario"
     end
 
-    if IsPiratesScenarioActive() then
+    if CAIModSupport.IsPiratesScenarioActive() then
         return "UnitFlagManager_PiratesScenario"
     end
 
@@ -188,7 +165,7 @@ local function GetOwnedUnitFlagDetails(unit, count)
 end
 
 local function GetUnitFlagPolandInvasion(unit)
-    if unit == nil or not IsRuleSetActive("RULESET_SCENARIO_POLAND") then
+    if unit == nil or not CAIModSupport.IsPolandScenarioActive() then
         return nil
     end
 
@@ -367,7 +344,7 @@ local function GetUnitFlagMarkers(unit, flag)
         CAIText.AppendFragments(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_THREAT_SHORT"))
     end
 
-    if IsPiratesScenarioActive() and unit:GetMaxDamage() > 100 then
+    if CAIModSupport.IsPiratesScenarioActive() and unit:GetMaxDamage() > 100 then
         CAIText.AppendFragments(results, Locale.Lookup("LOC_CAI_UNIT_FLAG_FLAGSHIP_SHORT"))
     end
 
@@ -442,7 +419,7 @@ local function GetUnitFlagBarbarianClan(unit)
 end
 
 local function GetUnitFlagPiratesText(unit)
-    if unit == nil or not IsPiratesScenarioActive() then
+    if unit == nil or not CAIModSupport.IsPiratesScenarioActive() then
         return nil
     end
 

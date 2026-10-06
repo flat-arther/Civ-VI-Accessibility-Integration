@@ -68,7 +68,7 @@ function Harness.CreateManager(ignoredIncludes)
         if loaded[name] then return end
         loaded[name] = true
         if ignored[name] then return end
-        if name == "CAIControl" or name == "CAICollection" or name == "CAIColumns" or name == "CAIDescriptors" or name == "textProcessing" then
+        if name == "CAIModSupport" or name == "CAIControl" or name == "CAICollection" or name == "CAIColumns" or name == "CAIDescriptors" or name == "textProcessing" then
             Harness.Run("src/UI/shared/" .. name .. ".lua")
             return
         end

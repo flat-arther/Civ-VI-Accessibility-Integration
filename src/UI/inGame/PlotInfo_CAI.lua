@@ -1,6 +1,7 @@
+include("CAIModSupport")
 include("caiUtils")
 include("cityManagementInterfaceHelpers_CAI")
-if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH" then
+if CAIModSupport.IsBlackDeathScenarioActive() then
     include("PlotInfo_BlackDeathScenario")
 else
     include("PlotInfo")

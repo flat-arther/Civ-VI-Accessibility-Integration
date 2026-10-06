@@ -1,3 +1,4 @@
+include("CAIModSupport")
 include("CAIWorldInputModes")
 include("CAIWorldBuilderInput")
 include("CAIPlotInteractions")
@@ -27,10 +28,10 @@ include("Civ6Common")
 
 local mgr = CAI:GetUIManager()
 local function GetWorldInputIncludeName()
-	if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
+	if CAIModSupport.IsPiratesScenarioActive() then
 		return "WorldInput_PiratesScenario"
 	end
-	if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_CIV_ROYALE" then
+	if CAIModSupport.IsCivRoyaleScenarioActive() then
 		return "WorldInput_CivRoyaleScenario"
 	end
 	if IsExpansion2Active ~= nil and IsExpansion2Active() then
