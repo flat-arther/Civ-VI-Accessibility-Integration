@@ -136,7 +136,7 @@ for _,mode in ipairs({'base','xp2','bbg','warmachine'}) do
   check(req:GetLabel():find('INCOMPLETE_REQ',1,true),'unmet requirement'); reqMet=true
   check(req:GetLabel():find('COMPLETE_REQ',1,true) and not req:GetLabel():find('INCOMPLETE_REQ',1,true),'live requirement state')
  end
- local api=ExposedMembers.CAIWorldRankings
+ local api=CAI.WorldRankings
  check(api.RegisterGenericVictoryAdapter(vt,{GetRows=function(_,captured) check(#captured==2,'adapter receives captured rows'); return {} end}),'adapter registered')
  if bbg then ViewTraditionalDomination(vt) else ViewGeneric(vt) end
  check(#generic.Children==1,'empty adapter result overrides captured rows')

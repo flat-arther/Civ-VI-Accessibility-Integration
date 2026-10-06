@@ -53,7 +53,9 @@ function Harness.CreateManager(ignoredIncludes)
     Automation = { GetTime = function() return 1 end }
     CAISettings = { GetBool = function() return false end, GetNumber = function() return 1 end }
     CAI = { IsImeComposing = function() return false end, Silence = function() end }
-    ExposedMembers = { CAI_Active = true }
+    dofile('scripts/test-support/CAIAccessors.lua')(CAI)
+    CAI.Active = true
+    ExposedMembers = { CAI = CAI }
     IsCAIActive = function() return true end
     IsExpansion1Active, IsExpansion2Active = function() return false end, function() return false end
 
@@ -88,7 +90,7 @@ function Harness.CreateManager(ignoredIncludes)
         return result
     end)
     local mgr = UIScreenManager:New()
-    ExposedMembers.CAI_UIManager = mgr
+    CAI.UIManager = mgr
     return mgr
 end
 

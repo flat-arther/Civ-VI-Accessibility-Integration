@@ -11,7 +11,7 @@ include("CAITradeData")
 -- with the global SortTradeRoutes. The route list is presented flat and sorted;
 -- priority is the position of each checked key in the sort list.
 
-local mgr                = ExposedMembers.CAI_UIManager
+local mgr                = CAI:GetUIManager()
 
 local PANEL_ID           = "CAITradeRoute_Panel"
 local FILTER_ID          = "CAITradeRoute_Filter"

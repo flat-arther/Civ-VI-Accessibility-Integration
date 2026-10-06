@@ -2,7 +2,7 @@ include("CAIControl")
 include("caiUtils")
 include("GovernorAssignmentChooser")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local PANEL_ID = "CAIGovernorAssignmentChooser_Panel"
 local LIST_ID = "CAIGovernorAssignmentChooser_List"

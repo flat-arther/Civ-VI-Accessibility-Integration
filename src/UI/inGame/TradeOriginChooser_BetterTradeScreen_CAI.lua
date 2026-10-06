@@ -12,7 +12,7 @@ include("CAITradeOrigin")
 -- Everything else (the Controls.CityStack button scan, Refresh/Open/Close
 -- lifecycle, TeleportToCity) matches the vanilla CAI layer.
 
-local origin = CAITradeOrigin.Create(ExposedMembers.CAI_UIManager, {
+local origin = CAITradeOrigin.Create(CAI:GetUIManager(), {
     GetControls = function() return Controls end,
     OnClose = function() OnClose() end,
     -- BTS button clicks mark a pending origin; preserve CAI's direct relocation.
@@ -37,7 +37,7 @@ end)
 
 Open = WrapFunc(Open, function(orig)
     orig()
-    if ExposedMembers.CAI_UIManager and not ContextPtr:IsHidden() then origin.Open() end
+    if CAI:GetUIManager() and not ContextPtr:IsHidden() then origin.Open() end
 end)
 
 Close = WrapFunc(Close, function(orig)

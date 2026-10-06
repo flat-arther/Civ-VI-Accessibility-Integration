@@ -33,7 +33,7 @@
 include("caiUtils")
 include("WorldBuilderPlayerEditor")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local PANEL_ID    = "CAIWorldBuilderPlayerEditor_Panel"
 local FOCUS_SOUND = "Main_Menu_Mouse_Over"

@@ -2,7 +2,7 @@ include("CAIGameState")
 include("caiUtils")
 include("WorldCrisisPopup")
 
-local mgr          = ExposedMembers.CAI_UIManager
+local mgr          = CAI:GetUIManager()
 local DIALOG_ID    = "CAICrisisPopup_Dialog"
 local HOVER_SOUND  = "Main_Menu_Mouse_Over"
 local m_dialog     = nil

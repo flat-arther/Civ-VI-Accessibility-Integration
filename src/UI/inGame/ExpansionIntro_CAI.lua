@@ -1,6 +1,6 @@
 include("caiUtils")
 include("ExpansionIntro")
-local mgr               = ExposedMembers.CAI_UIManager
+local mgr               = CAI:GetUIManager()
 local m_CAI_DIALOG      = nil ---@ type UIWidget
 local m_CurrentPriority = PopupPriority.TutorialHigh
 local OPTIONS_HIDE_KEY  = "HideXP2FeaturesScreen";

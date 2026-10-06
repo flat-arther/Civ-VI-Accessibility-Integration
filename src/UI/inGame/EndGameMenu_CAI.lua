@@ -1,6 +1,6 @@
 include("caiUtils")
 
-local mgr            = ExposedMembers.CAI_UIManager
+local mgr            = CAI:GetUIManager()
 
 -- ============================================================================
 -- Constants

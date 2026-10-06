@@ -3,8 +3,8 @@ include("CAIGameState")
 include("CAICollection")
 include("caiUtils")
 include("Civ6Common")
-local info             = ExposedMembers.CAIInfo or {}
-ExposedMembers.CAIInfo = info
+local info             = CAI:GetInfo() or {}
+CAI.Info = info
 
 if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
     include("DiplomacyRibbon_PiratesScenario")
@@ -18,7 +18,7 @@ else
     include("DiplomacyRibbon")
 end
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local IS_PIRATES_SCENARIO = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES"
 -- The Pirates scenario replaces leaders with custom score categories that do not
 -- map onto the diplomacy columns, so it keeps the flat list-only presentation.

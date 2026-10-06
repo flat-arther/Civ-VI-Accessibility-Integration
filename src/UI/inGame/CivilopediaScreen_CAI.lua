@@ -1,7 +1,7 @@
 include("caiUtils")
 include("CivilopediaScreen")
 
-local mgr                 = ExposedMembers.CAI_UIManager
+local mgr                 = CAI:GetUIManager()
 
 local PANEL_ID            = "CAIPediaPanel"
 local HOVER_SOUND         = "Main_Menu_Mouse_Over"

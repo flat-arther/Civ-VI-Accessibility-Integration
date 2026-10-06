@@ -192,7 +192,7 @@ end
 
 local function GetCityZoneText(plot)
     if plot == nil then return end
-    return table.concat(ExposedMembers.CAIInfo:RequestPlotInfo(plot:GetIndex(), { "cityName" }), "")
+    return table.concat(CAI:GetInfo():RequestPlotInfo(plot:GetIndex(), { "cityName" }), "")
 end
 
 local function CanUpdateZonesForPlot(plot)
@@ -436,4 +436,4 @@ LuaEvents.CAICursorMoveDirection.Add(function(direction)
     CAICursor:MoveDirection(direction)
 end)
 
-ExposedMembers.CAICursor = CAICursor
+CAI.Cursor = CAICursor

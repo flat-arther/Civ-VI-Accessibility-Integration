@@ -7,7 +7,7 @@ if IS_PIRATES_SCENARIO then
 else
     include("TechCivicCompletedPopup")
 end
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local m_dialog = nil ---@type UIWidget|nil
 local m_currentCivicType = nil ---@type string|nil

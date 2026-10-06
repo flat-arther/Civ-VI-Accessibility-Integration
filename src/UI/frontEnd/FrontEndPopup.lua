@@ -92,7 +92,7 @@ end
 Initialize();
 --#Accessibility integration
 include ("caiUtils")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 ---Mainly here to set the input handler for frontend popups, since popup dialogs don't necessarily have their own context. 
 	ContextPtr:SetInputHandler(function(input)
 		local handled = mgr:HandleInput(input)

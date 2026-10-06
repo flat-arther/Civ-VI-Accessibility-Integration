@@ -14,10 +14,10 @@ else
     include("WorldTracker")
 end
 
-local mgr                          = ExposedMembers.CAI_UIManager
+local mgr                          = CAI:GetUIManager()
 
-local info                         = ExposedMembers.CAIInfo or {}
-ExposedMembers.CAIInfo             = info
+local info                         = CAI:GetInfo() or {}
+CAI.Info             = info
 
 local ACTION_OPEN_RESEARCH_CHOOSER = Input.GetActionId("UI_WorldTrackerOpenResearchChooser")
 local ACTION_OPEN_CIVICS_CHOOSER   = Input.GetActionId("UI_WorldTrackerOpenCivicsChooser")

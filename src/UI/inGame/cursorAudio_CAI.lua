@@ -18,14 +18,7 @@ local CURSOR_AUDIO_TAGS = {
     "CURSOR_STINGERS",
 }
 
-local function GetAudioManager()
-    local uiMgr = ExposedMembers.CAI_UIManager
-    if uiMgr ~= nil and uiMgr.GetAudioManager ~= nil then
-        return uiMgr:GetAudioManager()
-    end
 
-    return ExposedMembers.CAI_AudioManager
-end
 
 -- ===========================================================================
 -- Sound mappings
@@ -95,7 +88,7 @@ end
 -- ===========================================================================
 
 local function StopCursorTags()
-    local audio = GetAudioManager()
+    local audio = CAI:GetAudioManager()
     if audio == nil then
         LogWarn("CAICursorAudio.StopCursorTags: CAI_AudioManager is unavailable")
         return
@@ -111,7 +104,7 @@ end
 local function QueueSound(soundId, delaySeconds)
     if soundId == nil or soundId == "" then return end
 
-    local audio = GetAudioManager()
+    local audio = CAI:GetAudioManager()
     if audio == nil then
         LogWarn("CAICursorAudio.QueueSound: CAI_AudioManager is unavailable for " .. tostring(soundId))
         return
@@ -314,7 +307,7 @@ function CAICursorAudio.PlayPlot(plot, prevPlot, moveReason)
 end
 
 function CAICursorAudio.PlayPlotById(plotId, prevPlotId, moveReason)
-    local audio = GetAudioManager()
+    local audio = CAI:GetAudioManager()
     if audio ~= nil and not audio:IsTagEnabled("CURSOR") then
         return
     end
@@ -340,7 +333,7 @@ end
 local function OnCAISettingsChanged(settingId)
     if settingId ~= CURSOR_VOLUME_SETTING_ID then return end
 
-    local audio = GetAudioManager()
+    local audio = CAI:GetAudioManager()
     if audio == nil then
         LogWarn("CAICursorAudio.OnCAISettingsChanged: CAI_AudioManager is unavailable")
         return

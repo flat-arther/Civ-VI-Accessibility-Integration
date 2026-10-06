@@ -1,7 +1,7 @@
 include("caiUtils")
 include("WorldCongressPopup")
 
-local mgr                = ExposedMembers.CAI_UIManager
+local mgr                = CAI:GetUIManager()
 
 -- =========================================================================
 -- Constants

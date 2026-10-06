@@ -2,7 +2,7 @@ local SUBCATEGORY_LOCATIONS = "locations"
 local GROUP_LOCATIONS = "tutorialLocations"
 
 local function GetTutorialWorldAnchor()
-    local anchor = ExposedMembers.CAI_TutorialWorldAnchor
+    local anchor = CAI:GetTutorialWorldAnchor()
     if anchor == nil
         or type(anchor.Header) ~= "string"
         or anchor.Header == ""

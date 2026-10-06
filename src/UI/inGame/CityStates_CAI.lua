@@ -20,7 +20,7 @@ end
 -- so the vanilla globals those readers call are already defined.
 include("inGameHelpers_CAI")
 
-local mgr                = ExposedMembers.CAI_UIManager
+local mgr                = CAI:GetUIManager()
 
 local MODE               = {
     Overview      = "Overview",
@@ -1558,7 +1558,7 @@ local baseOnRaiseMinorCivicsPanel = OnRaiseMinorCivicsPanel
 LuaEvents.CityBannerManager_RaiseMinorCivPanel.Remove(baseOnRaiseMinorCivicsPanel)
 local function CAI_OnRaiseMinorCivicsPanel(playerID)
     -- Suspended: let the vanilla banner click open its own detailed view.
-    if ExposedMembers.CAI_Active == false then
+    if CAI.Active == false then
         baseOnRaiseMinorCivicsPanel(playerID)
         return
     end

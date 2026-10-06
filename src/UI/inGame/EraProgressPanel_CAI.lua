@@ -2,7 +2,7 @@ include("CAIGameState")
 include("caiUtils")
 include("EraProgressPanel")
 
-local mgr         = ExposedMembers.CAI_UIManager
+local mgr         = CAI:GetUIManager()
 
 local PANEL_ID    = "CAIEraProgress_Panel"
 local TREE_ID     = "CAIEraProgress_Tree"

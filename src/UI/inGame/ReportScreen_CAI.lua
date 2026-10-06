@@ -14,8 +14,8 @@ else
     include("ReportScreen")
 end
 
-local mgr                  = ExposedMembers.CAI_UIManager
-local CAICursor            = ExposedMembers.CAICursor
+local mgr                  = CAI:GetUIManager()
+local CAICursor            = CAI:GetCursor()
 local HexCoordUtils        = CAIHexCoordUtils
 
 local CITY_STATUS_TABLE_ID = "CAIReports_CityStatusTable"
@@ -1462,7 +1462,7 @@ local function GetCityStatusDistance(kCityData)
     if m_cityCycleDistanceOrigin ~= nil then
         originX, originY = m_cityCycleDistanceOrigin.X, m_cityCycleDistanceOrigin.Y
     else
-        CAICursor = CAICursor or ExposedMembers.CAICursor
+        CAICursor = CAICursor or CAI:GetCursor()
         if not CAICursor then return nil end
         originX, originY = CAICursor:GetCoords()
     end

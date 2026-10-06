@@ -91,7 +91,7 @@ local TutorialItemHooks    = { ---@type table<string,TutItemEvents>
     },
 }
 
-local mgr                  = ExposedMembers.CAI_UIManager
+local mgr                  = CAI:GetUIManager()
 local activeItem           = nil
 local detailedItem         = nil
 local tutorialLoaded       = false
@@ -210,8 +210,8 @@ local function GetAdvisorCalloutLocation(advisorInfo)
 end
 
 local function ClearTutorialWorldAnchor()
-    if ExposedMembers.CAI_TutorialWorldAnchor == nil then return end
-    ExposedMembers.CAI_TutorialWorldAnchor = nil
+    if CAI:GetTutorialWorldAnchor() == nil then return end
+    CAI.TutorialWorldAnchor = nil
     LuaEvents.CAI_TutorialWorldAnchorChanged()
 end
 
@@ -222,7 +222,7 @@ local function SetTutorialWorldAnchor(header, location)
         return
     end
 
-    ExposedMembers.CAI_TutorialWorldAnchor = {
+    CAI.TutorialWorldAnchor = {
         Header = header,
         x = location.x,
         y = location.y,
@@ -482,7 +482,7 @@ local function PublishTutorialState()
             end
         end
     end
-    ExposedMembers.CAI_TutorialState = state
+    CAI.TutorialState = state
 end
 
 local function HasUITrigger(item, triggerName)

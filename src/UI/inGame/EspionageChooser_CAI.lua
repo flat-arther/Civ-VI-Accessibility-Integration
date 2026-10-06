@@ -9,7 +9,7 @@ else
     include("EspionageChooser")
 end
 
-local mgr                    = ExposedMembers.CAI_UIManager
+local mgr                    = CAI:GetUIManager()
 
 local PANEL_ID               = "CAIEspionageChooser_Panel"
 local DEST_TREE_ID           = "CAIEspionageChooser_DestinationTree"
@@ -667,7 +667,7 @@ local function PushPanel()
     BuildPanel()
     -- If a mission-completed espionage popup is already up, sit below it rather
     -- than covering it; both stay at Low priority.
-    local belowId = ExposedMembers and ExposedMembers.CAI_EspionagePopupDialogId or nil
+    local belowId = ExposedMembers and CAI.EspionagePopupDialogId or nil
     mgr:Push(m_panel, { priority = PopupPriority.Low, below = belowId })
 end
 

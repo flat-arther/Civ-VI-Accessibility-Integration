@@ -14,7 +14,7 @@ include("CAIControl")
 include("caiUtils")
 include("DiplomacyStatementSupport")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local m_alwaysReceivesInput = false
 
 local function SetAlwaysReceivesInput(enabled)

@@ -1,7 +1,7 @@
 include("caiUtils")
 include("HistoricMoments")
 
-local mgr                    = ExposedMembers.CAI_UIManager
+local mgr                    = CAI:GetUIManager()
 
 local PANEL_ID               = "CAITimeline_Panel"
 local TREE_ID                = "CAITimeline_Tree"

@@ -36,7 +36,7 @@
 --  player via PlayerConfigurations:SetValue (UI-side, save-persisted, no
 --  gameplay-simulation involvement -> no desync), storing ids/numbers only;
 --  localized names resolve live at render. Singleton on
---  ExposedMembers.CAI_WorldClimateHistoryManager, built fresh each session,
+--  CAI:GetWorldClimateHistoryManager(), built fresh each session,
 --  initialized from WorldInput_CAI.
 -- ===========================================================================
 
@@ -1080,6 +1080,6 @@ instance.pendingInstant = {}    -- instant events awaiting a next-turn re-scan
 instance:Load()
 instance:_Register()
 
-ExposedMembers.CAI_WorldClimateHistoryManager = instance
+CAI.WorldClimateHistoryManager = instance
 
 return instance

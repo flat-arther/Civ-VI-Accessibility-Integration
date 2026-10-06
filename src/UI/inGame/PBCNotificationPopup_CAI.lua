@@ -1,6 +1,6 @@
 include("caiUtils")
 include("PBCNotificationPopup")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 -- Not needed for any UI accessibility integration, that is already handled by popup dialog. However, we still need to set an input handler
 
 function OnInputHandler(pInputStruct)

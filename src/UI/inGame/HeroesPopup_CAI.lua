@@ -1,6 +1,6 @@
 include("caiUtils")
 include("HeroesPopup")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local m_dialog = nil ---@type DialogWidget|nil
 
 local m_CachedHeroClass = -1

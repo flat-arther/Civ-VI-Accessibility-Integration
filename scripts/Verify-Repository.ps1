@@ -108,6 +108,15 @@ foreach ($file in Get-ChildItem -LiteralPath (Join-Path $sourceRoot 'UI/inGame')
         }
     }
 }
+# CAI owns its shared state beneath ExposedMembers.CAI. External mod bridges keep
+# their published names; only CAI-prefixed top-level fields are retired here.
+foreach ($file in Get-ChildItem -LiteralPath (Join-Path $sourceRoot 'UI') -Recurse -Filter '*.lua') {
+    if ($file.FullName -match '[\\/]Replacements[\\/]') { continue }
+    $source = [System.IO.File]::ReadAllText($file.FullName)
+    if ($source -match 'ExposedMembers\s*(?:\.\s*CAI\w+|\[\s*["'']CAI\w+["'']\s*\])') {
+        Fail "CAI state must live under CAI, not a top-level ExposedMembers field: $($file.FullName)"
+    }
+}
 if ($failures.Count -gt 0) {
     foreach ($failure in $failures | Select-Object -First 20) { Write-Host "FAIL: $failure" }
     if ($failures.Count -gt 20) { Write-Host "... $($failures.Count - 20) additional failures." }
@@ -125,11 +134,11 @@ if (-not (Test-Path -LiteralPath $LuaPath -PathType Leaf)) {
 $LuaPath = (Resolve-Path -LiteralPath $LuaPath).Path
 Push-Location $repoRoot
 try {
-    foreach ($test in @('Test-TextProcessing.lua', 'Test-SharedUtilities.lua', 'Test-GameState.lua', 'Test-ResearchChooser.lua', 'Test-ResearchTrees.lua', 'Test-ResearchData.lua', 'Test-DescriptorColumns.lua', 'Test-ViewLifecycle.lua', 'Test-PlotInteractions.lua', 'Test-WorldBuilderInput.lua', 'Test-WorldInputModes.lua', 'Test-ScannerContracts.lua', 'Test-ScannerCore.lua', 'Test-ReportSections.lua', 'Test-WorldRankings.lua', 'Test-ProductionQueue.lua', 'Test-FinalUtilityAudit.lua', 'Test-TradeData.lua', 'Test-TradeScreens.lua', 'Test-MinimapLens.lua', 'Test-UnitBrowser.lua', 'Test-StagingLifecycle.lua', 'Test-RealEraTracker.lua', 'Test-RiverDownstream.lua')) {
+    foreach ($test in @('Test-TextProcessing.lua', 'Test-SharedUtilities.lua', 'Test-GameState.lua', 'Test-ResearchChooser.lua', 'Test-ResearchTrees.lua', 'Test-ResearchData.lua', 'Test-DescriptorColumns.lua', 'Test-ViewLifecycle.lua', 'Test-PlotInteractions.lua', 'Test-WorldBuilderInput.lua', 'Test-WorldInputModes.lua', 'Test-ScannerContracts.lua', 'Test-ScannerCore.lua', 'Test-ReportSections.lua', 'Test-WorldRankings.lua', 'Test-ProductionQueue.lua', 'Test-FinalUtilityAudit.lua', 'Test-CAINamespace.lua', 'Test-TradeData.lua', 'Test-TradeScreens.lua', 'Test-MinimapLens.lua', 'Test-UnitBrowser.lua', 'Test-StagingLifecycle.lua', 'Test-RealEraTracker.lua', 'Test-RiverDownstream.lua')) {
         $testArgs = @()
         if ($test -eq 'Test-TextProcessing.lua') {
             $testArgs = @(Get-ChildItem -LiteralPath (Join-Path $sourceRoot 'UI') -Recurse -Filter '*.lua' |
-                Where-Object { [System.IO.File]::ReadAllText($_.FullName) -match 'CAI(Text|Control|Collection|GameState|ModSupport|ResearchChooser|ResearchTree|ResearchData|TradeData|TradeOrigin|TradeOverview|CapturedDropdown|Descriptors|Columns|PlotInteractions|WorldBuilderInput)\.' } |
+                Where-Object { [System.IO.File]::ReadAllText($_.FullName) -match 'CAI(Text|Control|Collection|GameState|ModSupport|ResearchChooser|ResearchTree|ResearchData|TradeData|TradeOrigin|TradeOverview|CapturedDropdown|Descriptors|Columns|PlotInteractions|WorldBuilderInput)\.|CAI:Get[A-Z]' } |
                 ForEach-Object { $_.FullName })
         }
         if ($test -eq 'Test-RiverDownstream.lua' -and $WithoutVanillaRiverFixture) { $testArgs += '--without-vanilla' }

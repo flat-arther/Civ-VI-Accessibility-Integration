@@ -17,7 +17,7 @@ else
     include("ResearchChooser")
 end
 
-local mgr                     = ExposedMembers.CAI_UIManager
+local mgr                     = CAI:GetUIManager()
 
 local PANEL_ID                = "CAIResearchChooser_Panel"
 local QUEUE_TREE_ID           = "CAIResearchChooser_QueueTree"

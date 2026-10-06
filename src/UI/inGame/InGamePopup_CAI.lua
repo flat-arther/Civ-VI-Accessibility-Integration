@@ -1,7 +1,7 @@
 include("InGamePopup")
 include("Civ6Common")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 OnPopupOpen = WrapFunc(OnPopupOpen, function(orig, uniqueStringName, options)
     orig(uniqueStringName, options)

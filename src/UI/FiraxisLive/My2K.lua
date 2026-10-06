@@ -904,7 +904,7 @@ LuaEvents.UpdateFiraxisLiveState.Add(OnUpdateFiraxisLiveState);
 
 --#Accessibility integration
 include("caiUtils")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local CAI_My2KDialog ---@type UIWidget
 
 local function RemoveCurrentDialog()

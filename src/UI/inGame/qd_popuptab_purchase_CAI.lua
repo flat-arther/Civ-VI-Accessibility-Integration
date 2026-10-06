@@ -3,7 +3,7 @@
 -- Accessibility data provider for the Quick Deals Purchase tab (each AI's asking
 -- price to sell you a chosen item type). CAI wins this context, includes the
 -- Quick Deals base, wraps its populate functions, and publishes a live model +
--- action closures into ExposedMembers.CAIQuickDeals.purchase for the shell.
+-- action closures into CAI:GetQuickDeals().purchase for the shell.
 --
 -- CAI owns the filter state instead of Quick Deals' base-file locals: the item
 -- type (and strategic/great-work subtype) is chosen through one dropdown here,
@@ -14,8 +14,8 @@ include("caiUtils")
 include("qd_utils")
 include("qd_popuptab_purchase")
 
-ExposedMembers.CAIQuickDeals = ExposedMembers.CAIQuickDeals or {}
-local QD = ExposedMembers.CAIQuickDeals
+CAI.QuickDeals = CAI:GetQuickDeals() or {}
+local QD = CAI:GetQuickDeals()
 QD.purchase = QD.purchase or { offers = {} }
 
 local m_capturing = false

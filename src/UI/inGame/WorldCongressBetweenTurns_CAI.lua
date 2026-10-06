@@ -1,8 +1,8 @@
 include("caiUtils")
 include("WorldCongressBetweenTurns")
 
-local info = ExposedMembers.CAIInfo or {}
-ExposedMembers.CAIInfo = info
+local info = CAI:GetInfo() or {}
+CAI.Info = info
 
 local m_CAICongressRoster = {}
 

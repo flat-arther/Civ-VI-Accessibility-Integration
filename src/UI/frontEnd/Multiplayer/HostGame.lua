@@ -819,7 +819,7 @@ include("CAISetupParameters")
 include("CAIControl")
 include("caiUtils")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local CAI_PANEL_ID = "CAIHostGame_Panel"
 local HOVER_SOUND = "Main_Menu_Mouse_Over"

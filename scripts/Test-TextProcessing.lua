@@ -97,12 +97,11 @@ lines(names, { "a", "b" }, "conjunction consumes last name")
 for _, path in ipairs(arg) do
     local file = assert(io.open(path, "rb"))
     local source = file:read("a"); file:close()
-    -- Frontend replacements retain annotated Firaxis code. Check the authored
+    source = source:gsub("^\239\187\191", "")
+    -- Full replacements retain annotated Firaxis code. Check the authored
     -- accessibility block without pretending to transpile every vanilla dialect.
-    if path:find("frontEnd", 1, true) then
-        local integration = source:find("--#Accessibility integration", 1, true)
-        if integration then source = source:sub(integration) end
-    end
+    local integration = source:find("--#Accessibility integration", 1, true)
+    if integration then source = source:sub(integration) end
     for _, kind in ipairs({ "table", "number", "string", "boolean", "ifunction", "object" }) do
         source = source:gsub("([%w_]+)%s*:%s*" .. kind .. "(%s*[,)=;])", "%1%2")
         source = source:gsub("([%w_]+)%s*:%s*" .. kind .. "(%s+in%s+)", "%1%2")

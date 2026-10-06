@@ -343,7 +343,7 @@ end
 include("CAIControl")
 include("caiUtils")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local caiId = "9f4b5c2e-1a2b-4c3d-8e9f-123456789abc"
 
 local m_CAI_Dialog = nil
@@ -375,7 +375,7 @@ local function CAI_TraceCloudConfiguration(phase)
 end
 
 local function CAI_ClearCloudRecovery()
-	ExposedMembers.CAI_CloudSaveLoadPending = nil
+	CAI.CloudSaveLoadPending = nil
 	m_CAI_WaitingForCloudConfigure = false
 	m_CAI_CloudSavedContent = nil
 end
@@ -571,8 +571,8 @@ end)
 
 DoTransitionToStagingRoom = WrapFunc(DoTransitionToStagingRoom, function(orig)
 	if m_CAI_WaitingForCloudConfigure then return end
-	if ExposedMembers.CAI_CloudSaveLoadPending then
-		ExposedMembers.CAI_CloudSaveLoadPending = nil
+	if CAI.CloudSaveLoadPending then
+		CAI.CloudSaveLoadPending = nil
 		-- Copy identities before either mod operation; engine-owned records may
 		-- change during configuration. Never substitute the user's global mod set.
 		m_CAI_CloudSavedContent = {}

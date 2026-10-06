@@ -9,7 +9,7 @@ else
     include("EspionageOverview")
 end
 
-local mgr                   = ExposedMembers.CAI_UIManager
+local mgr                   = CAI:GetUIManager()
 
 local PANEL_ID              = "CAIEspOv_Panel"
 local TABS_ID               = "CAIEspOv_Tabs"

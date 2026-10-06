@@ -1,7 +1,7 @@
 include("caiUtils")
 include("UnitPromotionPopup")
 
-local mgr               = ExposedMembers.CAI_UIManager
+local mgr               = CAI:GetUIManager()
 
 local PANEL_ID          = "CAIUnitPromotionPopup_Panel"
 local GRID_ID           = "CAIUnitPromotionPopup_Grid"

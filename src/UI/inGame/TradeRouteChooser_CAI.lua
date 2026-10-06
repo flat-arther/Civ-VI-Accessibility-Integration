@@ -11,7 +11,7 @@ if IsBetterTradeScreenActive() then
     return
 end
 
-local mgr                 = ExposedMembers.CAI_UIManager
+local mgr                 = CAI:GetUIManager()
 
 local PANEL_ID            = "CAITradeRoute_Panel"
 local FILTER_ID           = "CAITradeRoute_Filter"

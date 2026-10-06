@@ -41,7 +41,7 @@ else
     include("WorldRankings")
 end
 
-local mgr                         = ExposedMembers.CAI_UIManager
+local mgr                         = CAI:GetUIManager()
 local CAI_TAB_SCORE               = TAB_SCORE or Locale.Lookup("LOC_WORLD_RANKINGS_SCORE_TAB")
 local CAI_TAB_OVERALL             = TAB_OVERALL or Locale.Lookup("LOC_WORLD_RANKINGS_OVERALL_TAB")
 local CAI_TAB_SCIENCE             = TAB_SCIENCE or Locale.Lookup("LOC_WORLD_RANKINGS_SCIENCE_TAB")
@@ -268,8 +268,8 @@ local function GetGenericVictoryRows(victoryType)
     return rows
 end
 
-ExposedMembers.CAIWorldRankings = ExposedMembers.CAIWorldRankings or {}
-ExposedMembers.CAIWorldRankings.RegisterGenericVictoryAdapter = RegisterGenericVictoryAdapter
+CAI.WorldRankings = CAI:GetWorldRankings() or {}
+CAI:GetWorldRankings().RegisterGenericVictoryAdapter = RegisterGenericVictoryAdapter
 
 PopulateGenericInstance = WrapFunc(PopulateGenericInstance,
     function(orig, instance, playerData, victoryType, showTeamDetails)

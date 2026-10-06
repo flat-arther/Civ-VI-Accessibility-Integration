@@ -28,7 +28,7 @@ local function HasBabylon()
 end
 if HasBabylon() then include("ProductionPanel_Babylon_Heroes") end
 
-local mgr            = ExposedMembers.CAI_UIManager
+local mgr            = CAI:GetUIManager()
 
 local PANEL_ID       = "CAIProductionPanel_Panel"
 local TABS_ID        = "CAIProductionPanel_Tabs"
@@ -191,7 +191,7 @@ end
 
 local function IsTutorialProductionItemAllowed(item)
     if not IsProductionTutorialMode() then return true end
-    local tutorialState = ExposedMembers.CAI_TutorialState
+    local tutorialState = CAI:GetTutorialState()
     if not tutorialState or not tutorialState.HasDetailedItem then return true end
     if not item then return false end
     if item.Type and IsCAITutorialControlAllowed(item.Type) then return true end

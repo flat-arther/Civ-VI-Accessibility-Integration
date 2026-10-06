@@ -16,7 +16,7 @@ include("CAIColumns")
 -- does not share included locals. We expose a single global builder table.
 -- ===========================================================================
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local VIEW_SETTING_ID = "GovPolicyPickerViewMode"
 

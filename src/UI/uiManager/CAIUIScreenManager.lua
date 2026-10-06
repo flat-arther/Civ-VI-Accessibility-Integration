@@ -309,7 +309,7 @@ function UIScreenManager:RemoveFromStack(id, announce)
     -- handlers against a stale local reference.
     -- ExposedMembers itself can be nil in a foreign context whose shutdown runs
     -- after the manager's owning context has already torn down.
-    if ExposedMembers == nil or ExposedMembers.CAI_UIManager ~= self then return nil end
+    if ExposedMembers == nil or CAI:GetUIManager() ~= self then return nil end
     if not id or id == "" then return nil end
     for i = #self.Stack, 1, -1 do
         local w = self.Stack[i]
@@ -340,7 +340,7 @@ function UIScreenManager:IsEmpty() return #self.Stack == 0 end
 
 ---@return boolean -- true when the accessibility mod is active (not suspended)
 function UIScreenManager:IsCAIActive()
-    return ExposedMembers.CAI_Active ~= false
+    return CAI.Active ~= false
 end
 
 ---Set the active/suspended state, persist it, announce the change (the
@@ -351,7 +351,7 @@ function UIScreenManager:SetCAIActive(active)
     active = active and true or false
     if self:IsCAIActive() == active then return end
 
-    ExposedMembers.CAI_Active = active
+    CAI.Active = active
     SaveCAISuspendedFlag(not active)
 
     -- Toggle confirmation is the one line that must speak while suspended.
@@ -1227,7 +1227,7 @@ function UIScreenManager:InitializeAudioManager()
     end
 
     self.AudioManager:Initialize(self)
-    ExposedMembers.CAI_AudioManager = self.AudioManager
+    CAI.AudioManager = self.AudioManager
     LogMessage("UI manager audio manager initialized")
 end
 
@@ -1241,22 +1241,22 @@ end
 function UIScreenManager:ShutdownAudioManager()
     local audio = self:GetAudioManager()
     if audio == nil then
-        ExposedMembers.CAI_AudioManager = nil
+        CAI.AudioManager = nil
         return
     end
 
     audio:Shutdown()
     self.AudioManager = nil
-    ExposedMembers.CAI_AudioManager = nil
+    CAI.AudioManager = nil
     LogMessage("UI manager audio manager shut down")
 end
 
 function UIScreenManager:Init()
     -- Seed the shared active flag from the persisted suspend setting so state
     -- survives restarts. Reseed every Init to stay consistent with the store.
-    ExposedMembers.CAI_Active = not LoadCAISuspendedFlag()
-    ExposedMembers.CAI_UIManager = self:New()
-    local mgr = ExposedMembers.CAI_UIManager
+    CAI.Active = not LoadCAISuspendedFlag()
+    CAI.UIManager = self:New()
+    local mgr = CAI:GetUIManager()
     mgr:InitializeAudioManager()
     if CAIWidgetHelpers_DialogBuilder and CAIWidgetHelpers_DialogBuilder.Install then
         CAIWidgetHelpers_DialogBuilder.Install(mgr)
@@ -1280,7 +1280,7 @@ function UIScreenManager:ShutDown(unregCharInput, preserveAudio)
         self:ShutdownAudioManager()
     end
     if preserveAudio ~= true then
-        ExposedMembers.CAI_UIManager = nil
+        CAI.UIManager = nil
     end
     if unregCharInput == nil then unregCharInput = true end
     if unregCharInput and CAI and CAI.UnregisterGlobalCharInputHandler then

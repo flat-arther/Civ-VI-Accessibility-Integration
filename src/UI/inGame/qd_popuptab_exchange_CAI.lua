@@ -3,7 +3,7 @@
 -- Accessibility data provider for the Quick Deals Exchange tab (swap one-time gold
 -- for 30-turn gold, or vice versa, with each AI at their accepted ratio). CAI wins
 -- this context, includes the Quick Deals base, wraps its populate functions, and
--- publishes a live model + action closures into ExposedMembers.CAIQuickDeals.exchange.
+-- publishes a live model + action closures into CAI:GetQuickDeals().exchange.
 --
 -- The table columns read the AI's offered gold (one-time or 30-turn) plus the
 -- ratio; the "items" text says what you give. The editable amount and the
@@ -14,8 +14,8 @@ include("caiUtils")
 include("qd_utils")
 include("qd_popuptab_exchange")
 
-ExposedMembers.CAIQuickDeals = ExposedMembers.CAIQuickDeals or {}
-local QD = ExposedMembers.CAIQuickDeals
+CAI.QuickDeals = CAI:GetQuickDeals() or {}
+local QD = CAI:GetQuickDeals()
 QD.exchange = QD.exchange or { offers = {} }
 
 local m_capturing = false

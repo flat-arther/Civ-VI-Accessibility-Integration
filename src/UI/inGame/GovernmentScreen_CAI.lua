@@ -40,10 +40,10 @@ if IsExtendedPolicyCardsActive() then
     include("GovernmentScreen_ExtendedPolicyCards_CAI")
 end
 
-local mgr                   = ExposedMembers.CAI_UIManager
+local mgr                   = CAI:GetUIManager()
 
-local info                  = ExposedMembers.CAIInfo or {}
-ExposedMembers.CAIInfo      = info
+local info                  = CAI:GetInfo() or {}
+CAI.Info      = info
 
 local PANEL_ID              = "CAIGovernmentScreen_Panel"
 local TABS_ID               = "CAIGovernmentScreen_Tabs"
@@ -1318,7 +1318,7 @@ if SwitchTabToMyGovernment then
         orig()
         -- Suspended: let vanilla stay on My Government; just remember the drift
         -- so resume can collapse it into the Governments tab.
-        if ExposedMembers.CAI_Active == false then
+        if CAI.Active == false then
             m_state.onVanillaMyGovernment = true
             return
         end

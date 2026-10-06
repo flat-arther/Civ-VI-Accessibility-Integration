@@ -23,10 +23,10 @@ CAICursor={GetCoords=function() if s.cursor==nil then return end; return s.curso
     MoveTo=function(_,id,reason) s.cursor=id; record("move",id,reason) end}
 GetCurrentCAICursorPlotId=function() return s.cursor end
 CAIWorldScanner={GetActiveState=function() if s.scanner then return {} end end,RebuildCategory=function(_,name) record("scan",name) end}
-ExposedMembers.CAIInfo={GetWorldBuilderVisibilityPlayer=function() return s.visibility end,
+CAI.Info={GetWorldBuilderVisibilityPlayer=function() return s.visibility end,
     EditWorldBuilderVisibility=function(id,add) record("visibility",id,add) end,
     GetWorldBuilderEdgeDirection=function() return s.edge end}
-ExposedMembers.CAI_WBVisManager={RecomputeSight=function() s.sight=s.sight+1; s.seenOwner=s.owner end}
+CAI.WorldBuilderVisibilityManager={RecomputeSight=function() s.sight=s.sight+1; s.seenOwner=s.owner end}
 for _,event in ipairs({"CAIWorldBuilderStatusBurstBegin","WorldInput_WBSelectPlot","WorldBuilder_SetPlacementStatus",
     "CAIWorldBuilderTools_Toggle","CAIWorldBuilderPlotEditor_Toggle","CAIWorldBuilderMapEditor_Toggle",
     "CAIWorldBuilderPlayerEditor_Toggle","InGame_OpenInGameOptionsMenu","CAIWorldBuilderQuickNav","CAIWorldBuilderSelectTool"}) do
@@ -66,8 +66,8 @@ press(Keys.L,{Message=KeyEvents.KeyUp}); reset()
 controller.OnCursorMoved({fromPlotId=12,toPlotId=23})
 check(trace():find("WBSelectPlot:23:2",1,true)~=nil,"brush lock uses explicit destination over marked source")
 reset(); controller.OnCursorMoved({fromPlotId=23,toPlotId=23}); check(trace()=="","stationary event does not paint")
-ExposedMembers.CAI_Active=false; controller.OnCursorMoved({fromPlotId=12,toPlotId=23}); check(trace()=="","suspended accessibility does not paint")
-ExposedMembers.CAI_Active=true; s.active=false; controller.OnCursorMoved({fromPlotId=12,toPlotId=23}); check(trace()=="","inactive World Builder does not paint")
+CAI.Active=false; controller.OnCursorMoved({fromPlotId=12,toPlotId=23}); check(trace()=="","suspended accessibility does not paint")
+CAI.Active=true; s.active=false; controller.OnCursorMoved({fromPlotId=12,toPlotId=23}); check(trace()=="","inactive World Builder does not paint")
 s.active=true; press(Keys.L,{Message=KeyEvents.KeyUp}); reset(); controller.OnCursorMoved({fromPlotId=12,toPlotId=23}); check(trace()=="","unlocked brush does not paint")
 press(Keys.M); check(controller.GetMarkedPlot()==nil,"unmark clears scanner source")
 s.visibility=0; reset(); press(Keys.VK_RETURN)
@@ -149,9 +149,9 @@ local start=assert(world:find('local worldBuilderInput = CAIWorldBuilderInput.Cr
 local finish=assert(world:find('local function FindInitialPlotId()',start,true))
 local env=setmetatable({mgr=mgr},{__index=_G})
 local fresh=assert(load(world:sub(start,finish-1) .. '\nreturn worldBuilderInput',"@WorldInput WB bridge","t",env))()
-check(fresh.GetMarkedPlot()==nil and ExposedMembers.CAIInfo.GetWorldBuilderMarkedPlot()==nil,"reload publishes fresh empty mark")
+check(fresh.GetMarkedPlot()==nil and CAI.Info.GetWorldBuilderMarkedPlot()==nil,"reload publishes fresh empty mark")
 local freshRoot=assert(fresh.Build()); mgr:RemoveFromStack(root:GetId()); mgr:Push(freshRoot)
 s.cursor=44; press(Keys.M)
-check(ExposedMembers.CAIInfo.GetWorldBuilderMarkedPlot()==44 and env.CAIWorldBuilderScannerSourcePlot()==44,"both bridges read new controller mark")
+check(CAI.Info.GetWorldBuilderMarkedPlot()==44 and env.CAIWorldBuilderScannerSourcePlot()==44,"both bridges read new controller mark")
 check(controller.GetMarkedPlot()==33,"new mark does not mutate old controller state")
 print("World Builder input: " .. count .. " assertions passed (mocked placement, production widgets).")

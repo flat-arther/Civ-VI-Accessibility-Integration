@@ -7,7 +7,7 @@ include("ToolTipHelper")
 include("Civ6Common")
 include("CivicsChooser")
 
-local mgr                 = ExposedMembers.CAI_UIManager
+local mgr                 = CAI:GetUIManager()
 
 local PANEL_ID            = "CAICivicsChooser_Panel"
 local QUEUE_TREE_ID       = "CAICivicsChooser_QueueTree"

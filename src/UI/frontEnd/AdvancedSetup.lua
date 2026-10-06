@@ -1750,7 +1750,7 @@ include("CAISetupParameters")
 include("textProcessing")
 include("CAIControl")
 include("caiUtils")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local CAI_Panel = nil ---@type PanelWidget
 local CAI_Tabs = nil ---@type TabControlWidget

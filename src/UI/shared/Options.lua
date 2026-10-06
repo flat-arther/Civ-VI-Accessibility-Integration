@@ -2,7 +2,7 @@
 --	Options
 -- ===========================================================================
 if UI.IsInFrontEnd() then
-include("CAIUIScreenManager") -- self-runs UIScreenManager:Init() and populates ExposedMembers.CAI_UIManager
+include("CAIUIScreenManager") -- self-runs UIScreenManager:Init() and publishes CAI.UIManager
 end
 
 include("Civ6Common");
@@ -2142,7 +2142,7 @@ end
 -- ===========================================================================
 include("caiUtils")
 
-local mgr             = ExposedMembers.CAI_UIManager
+local mgr             = CAI:GetUIManager()
 local optionsRoot     ---@type UIWidget|nil
 local tabs            ---@type UIWidget|nil
 local keysTree        ---@type UIWidget|nil
@@ -2370,7 +2370,7 @@ local function OpenKeysResetDialog()
     })
     okBtn:On("activate", function()
         CloseKeysResetDialog()
-        if ExposedMembers.CAI.ResetInputBindings() then
+        if CAI.ResetInputBindings() then
             Speak(Locale.Lookup("LOC_CAI_KEYBINDS_RESET_DONE"))
         else
             Speak(Locale.Lookup("LOC_CAI_KEYBINDS_RESET_FAILED"))

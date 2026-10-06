@@ -824,7 +824,7 @@ include("textProcessing")
 include("CAIControl")
 include("caiUtils")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local HOVER_SOUND = "Main_Menu_Mouse_Over"
 
 local CAI_Panel = nil ---@type PanelWidget

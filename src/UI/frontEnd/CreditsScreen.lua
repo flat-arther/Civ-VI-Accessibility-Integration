@@ -291,7 +291,7 @@ end
 --#Accessibility integration
 include("textProcessing")
 include("caiUtils")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local CAI_PANEL_ID = "CAICredits_Panel"
 local CAI_HOVER_SOUND = "Main_Menu_Mouse_Over"

@@ -28,14 +28,14 @@ include("caiUtils")
 include("Civ6Common") -- IsExpansion2Active
 include("WorldBuilderPlacement")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 -- Shared CAI cross-context query table. interfaceInfoHelpers_CAI runs in the
 -- WorldInput context and cannot reach PlacementValid / the placement pulldown
 -- (both live in this context), so the placement-validity query is published here
 -- for it to call. Reassigned fresh each load per [[project_exposedmembers_reload_stale]].
-local info = ExposedMembers.CAIInfo or {}
-ExposedMembers.CAIInfo = info
+local info = CAI:GetInfo() or {}
+CAI.Info = info
 
 local PANEL_ID = "CAIWorldBuilderTools_Panel"
 
@@ -397,7 +397,7 @@ local function RebuildSettings()
         -- database on save, so mirror the whole-map reveal into the visibility
         -- model for the selected player so live readout updates immediately.
         BuildButtonField("LOC_CAI_WB_REVEAL_ALL", "VisibilityRevealAllButton", function()
-            local visMgr = ExposedMembers.CAI_WBVisManager
+            local visMgr = CAI:GetWorldBuilderVisibilityManager()
             if visMgr ~= nil and visMgr.SetRevealedAll ~= nil then
                 local visPlayer = info.GetWorldBuilderVisibilityPlayer()
                 if visPlayer ~= nil then
@@ -1074,7 +1074,7 @@ end
 -- Set Visibility edits and placed-unit sight live; this reads that model.
 info.GetWorldBuilderRevealed = function(player, plotIndex)
     if player == nil or plotIndex == nil then return false end
-    local visMgr = ExposedMembers.CAI_WBVisManager
+    local visMgr = CAI:GetWorldBuilderVisibilityManager()
     if visMgr == nil or visMgr.IsRevealed == nil then return false end
     return visMgr.IsRevealed(player, plotIndex) == true
 end
@@ -1096,7 +1096,7 @@ info.EditWorldBuilderVisibility = function(plotIndex, revealed)
         LuaEvents.WorldBuilder_SetPlacementStatus(Locale.Lookup(statusTag, entry.Text))
         UI.PlaySound("UI_WB_Placement_Succeeded")
 
-        local visMgr = ExposedMembers.CAI_WBVisManager
+        local visMgr = CAI:GetWorldBuilderVisibilityManager()
         if visMgr ~= nil and visMgr.SetRevealed ~= nil then
             visMgr.SetRevealed(entry.PlayerIndex, plotIndex, revealed)
         end

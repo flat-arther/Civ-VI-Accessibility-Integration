@@ -17,8 +17,8 @@ else
     include("UnitPanel")
 end
 
-local mgr = ExposedMembers.CAI_UIManager
-local CAICursor = ExposedMembers.CAICursor
+local mgr = CAI:GetUIManager()
+local CAICursor = CAI:GetCursor()
 local m_IsGameStarted = false
 
 local UNIT_ACTION_LIST_ID = "CAIUnitPanelActionList"
@@ -338,8 +338,8 @@ GetUnitActionsTable = WrapFunc(GetUnitActionsTable, function(orig, unit)
     return actionsTable
 end)
 
-info = ExposedMembers.CAIInfo or {}
-ExposedMembers.CAIInfo = info
+info = CAI:GetInfo() or {}
+CAI.Info = info
 
 UnitInfoPriority = {
     "Summary",

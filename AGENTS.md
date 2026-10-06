@@ -57,6 +57,7 @@ During the current refactor, pending user game tests do not block further work. 
 
 ## Coding Rules
 
+- Store all CAI-owned cross-context state under the always-present `CAI` table, aliased from `ExposedMembers.CAI` by `caiUtils`. Consumers use its system getters, such as `CAI:GetUIManager()`, `CAI:GetAudioManager()` and `CAI:GetInfo()`; owners publish/clear the corresponding CAI fields. Do not add top-level `ExposedMembers.CAI...` fields or compatibility aliases. External mod bridges such as `ExposedMembers.RMA` retain their contracts.
 - Logs and code comments are English.
 - All user-facing strings must be localized. Never use literal strings for user-facing text; only debug prints may use literals.
 - Prefer existing control text and tooltips through `control:GetText()` and `control:GetToolTipString()`.

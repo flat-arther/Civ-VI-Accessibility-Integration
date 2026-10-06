@@ -1,6 +1,6 @@
 include("caiUtils")
 include("WonderBuiltPopup")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local m_dialog = nil ---@type UIWidget|nil
 local m_currentBuildingType = nil ---@type string|nil -- BuildingType of the wonder on display

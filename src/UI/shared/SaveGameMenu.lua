@@ -407,7 +407,7 @@ function Initialize()
 end
 --#Accessibility integration
 include("caiUtils")
-mgr = ExposedMembers.CAI_UIManager
+mgr = CAI:GetUIManager()
 include("LoadSaveHelpers_CAI")
 
 

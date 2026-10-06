@@ -15,7 +15,7 @@ local playerID, selected, cursorX = 0, nil, 0
 local followSort, wrap = false, false
 local roster = {}
 local cursor = { GetCoords = function() return cursorX, 0 end }
-ExposedMembers.CAICursor = cursor
+CAI.Cursor = cursor
 Game = { GetLocalPlayer = function() return playerID end }
 GameConfiguration = { GetRuleSet = function() return "RULESET_STANDARD" end }
 MilitaryFormationTypes = { CORPS_FORMATION = 1, ARMY_FORMATION = 2 }

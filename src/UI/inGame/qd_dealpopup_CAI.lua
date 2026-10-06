@@ -11,7 +11,7 @@ include("CAIColumns")
 -- one manager panel, no cross-context widget trees). The three tab contexts
 -- (qd_popuptab_sale/purchase/exchange_CAI) are pure providers: each includes its
 -- Quick Deals base, wraps that context's populate functions, and publishes a live
--- model plus action closures into ExposedMembers.CAIQuickDeals[tabKey], then fires
+-- model plus action closures into CAI:GetQuickDeals()[tabKey], then fires
 -- LuaEvents.CAIQD_Changed(tabKey, kind). The shell renders that model. Action
 -- closures are invoked from here but carry their home context, so they mutate the
 -- correct Quick Deals state. Reference passing across contexts is exactly what
@@ -22,7 +22,7 @@ include("caiUtils")
 include("qd_utils")     -- TAB_TYPE, GOLD_RATIO, option tables, IsNotificationOptedOut
 include("qd_dealpopup") -- base shell: Open/Close/CloseSilently/OnInputHandler + tab bar
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 -- ===========================================================================
 --  Shared state
@@ -31,8 +31,8 @@ local PANEL_ID  = "CAIQuickDeals_Panel"
 local VIEW_SETTING_SECTION = "UI"
 local VIEW_SETTING_ID      = "QuickDealsViewMode"
 
-ExposedMembers.CAIQuickDeals = ExposedMembers.CAIQuickDeals or {}
-local QD = ExposedMembers.CAIQuickDeals
+CAI.QuickDeals = CAI:GetQuickDeals() or {}
+local QD = CAI:GetQuickDeals()
 QD.sale     = QD.sale     or { offers = {} }
 QD.purchase = QD.purchase or { offers = {} }
 QD.exchange = QD.exchange or { offers = {} }

@@ -2,6 +2,8 @@
 
 ## Current focus
 
+- CAI namespace stage complete (2026-10-06): all 18 CAI-owned top-level ExposedMembers fields now live under CAI; caiUtils provides 14 colon-style getters, including UI manager, audio, cursor, shared info and the active-player message buffer. Publishers, consumers and test mocks migrated with no compatibility aliases; native CAI and external RMA contracts preserved. Full verification passes (119,681 assertions, 348 VFS files), including 94 namespace checks. Deferred game checklist extended; no in-game verification performed.
+
 - Final implementation audit complete (2026-10-05): removed unnecessary Reports manager protections/artificial test/claim; removed confirmed dead helpers and forwarding wrappers; consolidated setup, replay, identifier, religion and descendant-collapse utilities with actual shared callers. Full verification passes (119,519 assertions, 348 VFS files); new suite passes 60 checks, or 649 with baseline comparisons. Seven frontend files preserve source outside accessibility blocks. Planned implementation stages are complete; the full deferred checklist is ready in docs/refactor-game-tests.md. No game validation is implied.
 
 - ProductionPanel correction complete (2026-10-05): reversed the unnecessary queue extraction at the user's direction. Queue behavior and state remain private to ProductionPanel; retained local binding deduplication and 45 regression checks, also passing against the original implementation. Full verification passes (119,455 assertions, 347 VFS files). Game checks remain deferred.
@@ -46,7 +48,7 @@
 
 - On 2026-10-01 the user confirmed: "everything is tested and working, feel free to close every pending". All previously pending in-game tests, retests, regressions, optional fixture checks, and result requests are closed as successful based on that confirmation.
 - No historical game test remains pending. Future implementation creates its own focused verification requirements.
-- Verification passes: 57 XML files, 348 VFS files, 93 replacements, 12 locale directories; 217 formatting/syntax + 89 shared utility/caller + 31 game-state + 51 research chooser + 72 research tree + 54 research data + 28 descriptor/column + 142 view lifecycle + 41 plot interaction + 74 World Builder input + 824 interface-mode + 85 scanner/focus + 98 report sections + 130 Rankings + 45 production queue + 60 final audit + 30 trade data/dropdown + 84 trade screen + 16 Minimap/manager + 40 browser + 74 staging lifecycle + 161 RET + 117,073 river assertions (119,519 total). Remaining UnitPanel compiles. Local Lua 5.4.8 lives under ignored `obj/test-lua`. The fixture-free river mode has 116,809 assertions; GitHub Actions itself has not run. Details: `docs/verification.md`.
+- Verification passes: 57 XML files, 348 VFS files, 93 replacements, 12 locale directories; 285 formatting/syntax + 89 shared utility/caller + 31 game-state + 51 research chooser + 72 research tree + 54 research data + 28 descriptor/column + 142 view lifecycle + 41 plot interaction + 74 World Builder input + 824 interface-mode + 85 scanner/focus + 98 report sections + 130 Rankings + 45 production queue + 60 final audit + 94 namespace + 30 trade data/dropdown + 84 trade screen + 16 Minimap/manager + 40 browser + 74 staging lifecycle + 161 RET + 117,073 river assertions (119,681 total). Remaining UnitPanel compiles. Local Lua 5.4.8 lives under ignored `obj/test-lua`. The fixture-free river mode has 116,809 assertions; GitHub Actions itself has not run. Details: `docs/verification.md`.
 - Minimap repair confirmed working in game by the user on 2026-10-01; its pending check is closed.
 - Browser extraction and formatting consolidation confirmed working by the user on 2026-10-02; their pending game checks are closed.
 
@@ -69,6 +71,8 @@
 - Next step: complete the consolidated game validation in docs/refactor-game-tests.md, then address observed regressions. Planned refactor implementation stages are finished; 29 remaining repeated-body candidate groups have explicit retention reasons in docs/utility-audit.md. ProductionManager/multi-queue and the missing audio packaging-source decision remain separate scope. No push requested.
 
 ## Durable decisions
+
+- CAI owns all mod cross-context systems and state. caiUtils aliases ExposedMembers.CAI and supplies colon-style system getters; owners publish/clear CAI fields. Do not restore top-level CAI-prefixed ExposedMembers fields. External mod bridges retain their original contracts.
 
 - Keep screen-specific code together unless demonstrated reuse or a concrete maintenance benefit justifies extraction. A separate responsibility or shorter host file alone is insufficient; the ProductionPanel queue extraction was reversed on this basis.
 

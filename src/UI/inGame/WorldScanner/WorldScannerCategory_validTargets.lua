@@ -61,10 +61,10 @@ CAIWorldScannerCategory_ValidTargets = {
 -- Description of a footprint tile, using the shared plot-info bridge (the same
 -- fields the action-plot targets use); falls back to bare coordinates.
 local function ResolveFootprintLabel(plotIndex)
-    if ExposedMembers.CAIInfo ~= nil and ExposedMembers.CAIInfo.RequestPlotInfo ~= nil then
+    if CAI:GetInfo() ~= nil and CAI:GetInfo().RequestPlotInfo ~= nil then
         local requestedKeys = { "units", "cityName", "districtTitle", "improvement", "resource",
             "terrainShape" }
-        local results = ExposedMembers.CAIInfo:RequestPlotInfo(plotIndex, requestedKeys)
+        local results = CAI:GetInfo():RequestPlotInfo(plotIndex, requestedKeys)
         if results ~= nil and #results > 0 then
             return table.concat(results, ", ")
         end
@@ -97,7 +97,7 @@ end
 -- placement context (which owns the brush and PlacementValid) via CAIInfo.
 local function ScanWorldBuilderFootprint(sourcePlot)
     local out = {}
-    local info = ExposedMembers.CAIInfo
+    local info = CAI:GetInfo()
     if info == nil or info.GetWorldBuilderBrushTargets == nil then return out end
 
     local targets = info.GetWorldBuilderBrushTargets(sourcePlot)
@@ -148,10 +148,10 @@ function CAIWorldScannerCategory_ValidTargets.Scan(context)
         for _, action in ipairs(actionPlots) do
             local label = "LOC_CAI_WORLD_SCANNER_UNKNOWN"
 
-            if ExposedMembers.CAIInfo ~= nil and ExposedMembers.CAIInfo.RequestPlotInfo ~= nil then
+            if CAI:GetInfo() ~= nil and CAI:GetInfo().RequestPlotInfo ~= nil then
                 local requestedKeys = { "units", "cityName", "districtTitle", "improvement", "resource",
                     "terrainShape" }
-                local results = ExposedMembers.CAIInfo:RequestPlotInfo(action.PlotIndex, requestedKeys)
+                local results = CAI:GetInfo():RequestPlotInfo(action.PlotIndex, requestedKeys)
                 if results ~= nil and #results > 0 then
                     label = table.concat(results, ", ")
                 end

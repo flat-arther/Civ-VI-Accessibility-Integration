@@ -2,7 +2,7 @@
 GetEraScoreDetailsLines = WrapFunc(GetEraScoreDetailsLines, function(orig)
     local lines = orig()
     if #lines == 0 then return lines end
-    local tracker = ExposedMembers.CAIRealEraTracker
+    local tracker = CAI:GetRealEraTracker()
     if tracker == nil then
         LogWarn("Real Era Tracker readout provider is not initialized")
         return lines

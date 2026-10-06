@@ -144,7 +144,7 @@ end
 local function CollectPlotTerms(plot)
     if not plot then return {} end
 
-    local info = ExposedMembers.CAIInfo
+    local info = CAI:GetInfo()
 
     local eObserverPlayerID = Game.GetLocalObserver()
     if eObserverPlayerID ~= PlayerTypes.OBSERVER then
@@ -321,7 +321,7 @@ end
 
 function P.CollectTerms(widget)
     if FindAncestorType(widget) then
-        local cursor = ExposedMembers.CAICursor
+        local cursor = CAI:GetCursor()
         if not cursor then return {} end
         local plotId = cursor:GetPlotId()
         if not plotId or plotId < 0 then return {} end

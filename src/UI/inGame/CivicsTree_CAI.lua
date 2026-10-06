@@ -16,7 +16,7 @@ else
     include("CivicsTree")
 end
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local tree
 local m_leadsToByType = {}
 local m_civicIndexToType = {}

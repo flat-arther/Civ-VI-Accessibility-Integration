@@ -1,6 +1,6 @@
 include("caiUtils")
 include("AdvisorPopup")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local m_tutorialPanel = nil ---@type UIWidget|nil
 

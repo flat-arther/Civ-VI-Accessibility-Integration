@@ -72,13 +72,13 @@ local a=assert(helper:find('function BuildMapTacLabelWithDMT(',1,true)); local b
 assert(load(helper:sub(a,b-1),'DMT label helper'))()
 BuildMapTacLabel=function() return 'pin' end
 local pin={GetHexX=function() return 3 end,GetHexY=function() return 4 end}
-ExposedMembers.CAIInfo=nil; check(BuildMapTacLabelWithDMT(pin,2,2)=='pin','absent DMT')
+CAI.Info=nil; check(BuildMapTacLabelWithDMT(pin,2,2)=='pin','absent DMT')
 local warnings={}; LogWarn=function(s) warnings[#warnings+1]=s end
-ExposedMembers.CAIInfo={GetMapPinSubject=function(p,x,y) check(p==2 and x==3 and y==4,'DMT arguments'); error('external failure') end}
+CAI.Info={GetMapPinSubject=function(p,x,y) check(p==2 and x==3 and y==4,'DMT arguments'); error('external failure') end}
 check(BuildMapTacLabelWithDMT(pin,2,2)=='pin' and #warnings==1,'external failure retains pin and logs')
-ExposedMembers.CAIInfo.GetMapPinSubject=function() return {YieldToolTip='yield',CanPlace=false,CanPlaceToolTip='blocked'} end
+CAI.Info.GetMapPinSubject=function() return {YieldToolTip='yield',CanPlace=false,CanPlaceToolTip='blocked'} end
 check(BuildMapTacLabelWithDMT(pin,2,2)=='pin[NEWLINE]yield[NEWLINE]blocked','DMT successful payload')
-ExposedMembers.CAIInfo.GetMapPinSubject=function() return nil end
+CAI.Info.GetMapPinSubject=function() return nil end
 check(BuildMapTacLabelWithDMT(pin,2,2)=='pin','DMT cache miss')
 BuildMapTacLabel=function() error('internal label failure') end
 local ok,err=pcall(BuildMapTacLabelWithDMT,pin,2,2); check(not ok and err:find('internal label failure',1,true),'internal label errors propagate')

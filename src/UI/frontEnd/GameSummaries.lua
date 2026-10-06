@@ -1017,7 +1017,7 @@ end
 
 --#Accessibility integration
 include("caiUtils")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local HOF_PANEL_ID   = "CAIHoF_Panel"
 local HOVER_SOUND    = "Main_Menu_Mouse_Over"

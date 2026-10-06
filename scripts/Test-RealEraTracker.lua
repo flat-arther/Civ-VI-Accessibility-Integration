@@ -63,7 +63,7 @@ SpeakLines = function(lines) for _, line in ipairs(lines) do Speak(line) end end
 LogMessage, LogWarn = function() end, function() end
 LogError = function(message) error(message) end
 ProcessText = function(value) return value end
-IsCAIActive = function() return ExposedMembers.CAI_Active ~= false end
+IsCAIActive = function() return CAI.Active ~= false end
 WrapFunc = function(orig, wrapper) return function(...) return wrapper(orig, ...) end end
 Keys = setmetatable({}, { __index = function(t, key) rawset(t, key, key); return key end })
 KeyEvents = { KeyUp = 1, KeyDown = 2, Char = 3 }
@@ -80,7 +80,9 @@ CAI = {
     IsImeComposing = function() return false end,
     Silence = function() end,
 }
-ExposedMembers = { CAI_Active = true }
+dofile('scripts/test-support/CAIAccessors.lua')(CAI)
+CAI.Active = true
+ExposedMembers = { CAI = CAI }
 UI = { PlaySound = function() end }
 local pid, tajCount, xp1, xp2 = 0, 0, false, true
 IsExpansion1Active = function() return xp1 end
@@ -232,7 +234,7 @@ run("src/UI/uiManager/CAIUIScreenManager.lua", function(source)
     return source:gsub("UIScreenManager:Init%(%)%s*%-%-#endregion%s*$", "-- Test owns manager initialization.")
 end)
 local mgr = UIScreenManager:New()
-ExposedMembers.CAI_UIManager = mgr
+CAI.UIManager = mgr
 local launch
 LuaEvents.CAILaunchBar_RegisterAction.Add(function(def) launch = def end)
 run("src/UI/inGame/RealEraTracker_CAI.lua")
@@ -266,13 +268,13 @@ check(keyAt(1) == "MOMENT_REPEAT", "favorites first")
 check(nameCell("MOMENT_REPEAT"):GetLabel() == "Favored, Repeat goal", "table favorite before name")
 check(#speech == speechBeforeToggle + 1 and speech[#speech] == "Favored Repeat goal",
     "table favorite confirmation is one short phrase")
-check(#ExposedMembers.CAIRealEraTracker.GetFavoredLines(pid) == 1, "favorite reader populated")
+check(#CAI.RealEraTracker.GetFavoredLines(pid) == 1, "favorite reader populated")
 speechBeforeToggle = #speech
 tableView():Emit("row_activate", "MOMENT_REPEAT")
 check(not m_kMoments.MOMENT_REPEAT.Favored, "table Enter unfavorites")
 check(#speech == speechBeforeToggle + 1 and speech[#speech] == "Unfavored Repeat goal",
     "table unfavorite confirmation is one short phrase")
-check(#ExposedMembers.CAIRealEraTracker.GetFavoredLines(pid) == 0, "unfavorite removed from reader")
+check(#CAI.RealEraTracker.GetFavoredLines(pid) == 0, "unfavorite removed from reader")
 local function keyInput(message, key)
     return {
         GetMessageType = function() return message end, GetKey = function() return key end,
@@ -461,10 +463,10 @@ check(lines[1] == originalLines[1] and lines[2] == originalLines[2], "Shift+Y pr
 check(lines[3] == "Repeat goal, Repeat this goal.", "Shift+Y appends name then conditions")
 tableView():Emit("row_activate", "MOMENT_REPEAT")
 check(#GetEraScoreDetailsLines() == 2, "Shift+Y removes unfavored moment")
-local provider = ExposedMembers.CAIRealEraTracker
-ExposedMembers.CAIRealEraTracker = nil
+local provider = CAI.RealEraTracker
+CAI.RealEraTracker = nil
 check(#GetEraScoreDetailsLines() == 2, "early provider absence preserves original details")
-ExposedMembers.CAIRealEraTracker = provider
+CAI.RealEraTracker = provider
 pid = -1
 check(launch.reason() ~= nil, "observer launch has unavailable reason")
 check(#provider.GetFavoredLines(pid) == 0, "observer favorites rejected")

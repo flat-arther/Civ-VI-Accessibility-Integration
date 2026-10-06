@@ -105,7 +105,7 @@ end
 -- which the UI manager already turns into a no-op on activation.
 -- ===========================================================================
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local LAUNCHBAR_LIST_ID = "CAILaunchBar_List"
 

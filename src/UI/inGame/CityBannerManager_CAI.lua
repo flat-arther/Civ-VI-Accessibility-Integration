@@ -1,8 +1,8 @@
 include("CAIDescriptors")
 include("caiUtils")
 include("Civ6Common")
-local info                           = ExposedMembers.CAIInfo or {}
-ExposedMembers.CAIInfo               = info
+local info                           = CAI:GetInfo() or {}
+CAI.Info               = info
 BANNERTYPE_INDUSTRY                  = UIManager:GetHash("BANNERTYPE_INDUSTRY");
 BANNERTYPE_CORPORATION               = UIManager:GetHash("BANNERTYPE_CORPORATION");
 local currentPlotId                  = -1

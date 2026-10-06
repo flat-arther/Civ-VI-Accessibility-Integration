@@ -565,7 +565,7 @@ function PopupDialogInGame:ShowYesNoDialog( text:string, callbackOk:ifunction, c
 end
 --#Accessibility integration
 include ("caiUtils")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local DialogWidget = nil ---@type UIWidget|nil
 
 PopupDialog.Open = WrapFunc(PopupDialog.Open, function(orig, self, optionalID)

@@ -2,7 +2,7 @@ include("CAIControl")
 include("caiUtils")
 include("PlayerChange")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local m_dialog = nil ---@type UIWidget|nil
 local m_passwordEdit = nil ---@type UIWidget|nil

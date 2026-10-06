@@ -121,7 +121,7 @@ end
 --#Accessibility integration
 include("caiUtils")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 Initialize = WrapFunc(Initialize, function(orig)
 	orig()

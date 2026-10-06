@@ -113,3 +113,14 @@ Run with ordinary ProductionPanel and with BBG/Babylon content where available.
 - [ ] Check religion lens plot information and scanner religion labels, including unnamed/unavailable religion data where possible.
 
 Implementation stages finished on 2026-10-05. This is the complete deferred checklist for handoff; unchecked items remain unverified. The known missing audio manifest asset is a separate packaging decision.
+
+## CAI namespace migration
+
+- [ ] Start the game, navigate the main menu, open/close Options, then load a save. Confirm navigation, speech and audio work across frontend/world transitions.
+- [ ] Suspend/resume accessibility, close/reopen a game and load another save. Confirm active state and manager/audio behavior remain usable.
+- [ ] Check cursor movement, plot/city/unit information, scanner navigation and message history, including hotseat player changes where available.
+- [ ] Check notifications, tutorial restrictions and tutorial scanner markers, Reports and World Rankings.
+- [ ] Load a World Builder map through the main menu and check reveal information and editing; also repeat the cloud-save loading flow.
+- [ ] Where available, check Quick Deals, Real Era Tracker favored moments, Detailed Map Tacks labels and climate event history. Confirm their shared data reaches the relevant screens after reloading.
+
+This additional namespace migration was implemented on 2026-10-06. Its game checks remain unverified alongside the earlier checklist.

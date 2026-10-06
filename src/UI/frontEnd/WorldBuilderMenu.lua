@@ -49,7 +49,7 @@ Controls.SwitchPopup:SetHide(false);
 --#Accessibility integration
 include("caiUtils")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local m_CAI_Dialog ---@type DialogWidget
 
 local function CAI_RemoveDialog()

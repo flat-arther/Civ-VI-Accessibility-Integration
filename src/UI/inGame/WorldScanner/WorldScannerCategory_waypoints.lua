@@ -4,7 +4,7 @@ local GROUP_FULL_PATH = "fullPath"
 local GROUP_WAYPOINTS = "waypoints"
 
 local function BuildQueuedPathScannerLabel(plotIndex)
-    local info = ExposedMembers.CAIInfo
+    local info = CAI:GetInfo()
     if info == nil or info.RequestPlotInfo == nil then
         return "LOC_CAI_WORLD_SCANNER_UNKNOWN"
     end
@@ -32,7 +32,7 @@ local function BuildFullPathItem(entry, index)
         SubCategoryId = SUBCATEGORY_FULL_PATH,
         GroupId = GROUP_FULL_PATH,
         Validate = function(item)
-            local liveInfo = ExposedMembers.CAIInfo
+            local liveInfo = CAI:GetInfo()
             return liveInfo ~= nil
                 and liveInfo.IsQueuedPathPlot ~= nil
                 and liveInfo:IsQueuedPathPlot(item.PlotIndex)
@@ -48,7 +48,7 @@ local function BuildWaypointItem(entry, index)
         SubCategoryId = SUBCATEGORY_WAYPOINTS,
         GroupId = GROUP_WAYPOINTS,
         Validate = function(item)
-            local liveInfo = ExposedMembers.CAIInfo
+            local liveInfo = CAI:GetInfo()
             return liveInfo ~= nil
                 and liveInfo.IsWaypointPlot ~= nil
                 and liveInfo:IsWaypointPlot(item.PlotIndex)
@@ -73,7 +73,7 @@ CAIWorldScannerCategory_Waypoints = {
         return "LOC_CAI_WORLD_SCANNER_SUBCATEGORY_FULL_PATH"
     end,
     CanScan = function()
-        local info = ExposedMembers.CAIInfo
+        local info = CAI:GetInfo()
         if info == nil or info.GetQueuedPath == nil then
             return false
         end
@@ -85,7 +85,7 @@ CAIWorldScannerCategory_Waypoints = {
 
 function CAIWorldScannerCategory_Waypoints.Scan(context)
     local out = {}
-    local info = ExposedMembers.CAIInfo
+    local info = CAI:GetInfo()
     if info == nil or info.GetQueuedPath == nil then
         return out
     end

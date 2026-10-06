@@ -1844,7 +1844,7 @@ end
 --#Accessibility integration
 include("caiUtils")
 include("version_CAI")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local MAIN_PANEL_ID    = "CAIMainMenu_Panel"
 local MENU_LIST_ID     = "CAIMainMenu_MenuList"

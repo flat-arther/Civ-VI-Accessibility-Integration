@@ -1,7 +1,7 @@
 CAIRecommendationLogic = CAIRecommendationLogic or {}
 
-local info = ExposedMembers.CAIInfo or {}
-ExposedMembers.CAIInfo = info
+local info = CAI:GetInfo() or {}
+CAI.Info = info
 
 local m_cachedImprovementRecommendations = {}
 local m_cachedSettlementRecommendations = {}

@@ -585,7 +585,7 @@ function Initialize()
 end
 --#Accessibility integration
 include("caiUtils")
-mgr = ExposedMembers.CAI_UIManager
+mgr = CAI:GetUIManager()
 include("LoadSaveHelpers_CAI")
 g_MenuType = LOAD_GAME
 
@@ -964,7 +964,7 @@ end
 local function CAI_InjectWBLoad(path)
 	if CAI_IsWBMapPath(path) then
 		WBMapDepInject(path)
-		ExposedMembers.CAI_WBInjectedMapPath = path
+		CAI.WorldBuilderInjectedMapPath = path
 	end
 end
 
@@ -975,7 +975,7 @@ OnLoadYes = WrapFunc(OnLoadYes, function(orig)
 	end
 	-- JoiningRoom owns recovery and its content-completion barrier, before it
 	-- dispatches the staging-show event to any frontend context.
-	ExposedMembers.CAI_CloudSaveLoadPending = serverType == ServerType.SERVER_TYPE_FIRAXIS_CLOUD
+	CAI.CloudSaveLoadPending = serverType == ServerType.SERVER_TYPE_FIRAXIS_CLOUD
 		and g_FileType == SaveFileTypes.GAME_STATE
 	-- Configuration loads return to setup, tiled maps are imported there, and
 	-- multiplayer saves open the staging room before the game can launch.

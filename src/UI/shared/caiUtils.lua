@@ -1,6 +1,26 @@
 -- global access to the 'CAI' table, lives on 'ExposedMembers' and created by the dll
 CAI = ExposedMembers.CAI
 
+-- Shared services are published by their owning contexts. Read through self so
+-- replacement instances and teardown are visible across all Lua contexts.
+function CAI:GetUIManager() return self.UIManager end
+function CAI:GetAudioManager() return self.AudioManager end
+function CAI:GetCursor() return self.Cursor end
+function CAI:GetInfo() return self.Info end
+function CAI:GetWorldBuilderVisibilityManager() return self.WorldBuilderVisibilityManager end
+function CAI:GetWorldClimateHistoryManager() return self.WorldClimateHistoryManager end
+function CAI:GetUnitNumbers() return self.UnitNumbers end
+function CAI:GetRealEraTracker() return self.RealEraTracker end
+function CAI:GetQuickDeals() return self.QuickDeals end
+function CAI:GetReports() return self.Reports end
+function CAI:GetWorldRankings() return self.WorldRankings end
+function CAI:GetTutorialState() return self.TutorialState end
+function CAI:GetTutorialWorldAnchor() return self.TutorialWorldAnchor end
+function CAI:GetMessageBuffer()
+    if self.MessageBuffer == nil then return nil end
+    return self.MessageBuffer.GetActive()
+end
+
 include("textProcessing")
 include("CAIControl")
 include("CAICollection")
@@ -9,8 +29,8 @@ include("CAI_logging")
 
 -- ===========================================================================
 -- Mod suspend/resume (hotseat)
--- The authoritative live flag lives on ExposedMembers so every Lua context
--- reads one shared value; ExposedMembers.CAI_Active == false means suspended.
+-- The authoritative live flag lives on CAI so every Lua context
+-- reads one shared value; CAI.Active == false means suspended.
 -- Persistence is the raw CAI config store (the same backend CAISettings uses).
 -- ===========================================================================
 local CAI_SUSPEND_SECTION = "CAI"
@@ -20,7 +40,7 @@ local CAI_SUSPEND_KEY = "Suspended"
 ---active when the flag has never been set.
 ---@return boolean
 function IsCAIActive()
-    return ExposedMembers.CAI_Active ~= false
+    return CAI.Active ~= false
 end
 
 ---Reads the persisted suspend flag from the CAI config store.
@@ -99,8 +119,8 @@ end
 function GetWorldBuilderRevealGate(plot)
     if plot == nil then return false, false end
     if WorldBuilder == nil or not WorldBuilder.IsActive() then return false, false end
-    local visMgr = ExposedMembers.CAI_WBVisManager
-    local info = ExposedMembers.CAIInfo
+    local visMgr = CAI:GetWorldBuilderVisibilityManager()
+    local info = CAI:GetInfo()
     if visMgr == nil or visMgr.IsRevealed == nil
         or info == nil or info.GetWorldBuilderVisibilityPlayer == nil then
         return false, false
@@ -117,7 +137,7 @@ end
 ---@param processTokens? boolean -- run ProcessText on text before speaking. True by default
 ---@param force? boolean -- speak even while the mod is suspended (toggle confirmations only)
 function Speak(text, interrupt, processTokens, force)
-    if not force and ExposedMembers.CAI_Active == false then return end
+    if not force and CAI.Active == false then return end
     if CAI and CAI.Output then
         local out = tostring(text)
         if processTokens ~= false then out = ProcessText(out) end
@@ -225,7 +245,7 @@ end
 -- tutorial overlay permits instead of bypassing that overlay.
 function IsCAITutorialControlAllowed(controlId)
     if not IsTutorialRunning or not IsTutorialRunning() then return true end
-    local state = ExposedMembers.CAI_TutorialState
+    local state = CAI:GetTutorialState()
     if not state then return false end
     if state.HasDetailedItem then
         if state.EnabledControlIds and state.EnabledControlIds[controlId] then return true end
@@ -237,7 +257,7 @@ end
 
 function IsCAITutorialControlHashAllowed(controlHash)
     if not IsTutorialRunning or not IsTutorialRunning() then return true end
-    local state = ExposedMembers.CAI_TutorialState
+    local state = CAI:GetTutorialState()
     if not state then return false end
     if state.HasDetailedItem then
         return state.EnabledControlHashes ~= nil
@@ -248,7 +268,7 @@ end
 
 function IsCAITutorialDetailedItem(itemId)
     if not IsTutorialRunning or not IsTutorialRunning() then return false end
-    local state = ExposedMembers.CAI_TutorialState
+    local state = CAI:GetTutorialState()
     return state ~= nil and state.DetailedItemId == itemId
 end
 
@@ -260,7 +280,7 @@ end
 ---@return boolean
 function IsCAITutorialScreenCloseAllowed(...)
     if not IsTutorialRunning or not IsTutorialRunning() then return true end
-    local state = ExposedMembers.CAI_TutorialState
+    local state = CAI:GetTutorialState()
     if not state then return false end
     if state.ActiveItemId == nil then return true end
     if not state.HasDetailedItem then return false end

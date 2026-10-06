@@ -389,7 +389,7 @@ local CAI_MOD_TITLE = '{"LOC_CAI_MOD_TITLE":[]}'
 -- rows changed, or nil on failure. Wrapped in pcall because these are external
 -- DLL (SQLite) calls whose availability depends on the installed CAI DLL.
 local function RunMapDepWrite(path, sql, params)
-    local api = ExposedMembers.CAI
+    local api = CAI
     if not (api and api.OpenDatabase and api.Query and api.CloseDatabase) then
         print("CAI WBMapDep: SQLite bridge unavailable (DLL too old); skipping")
         return nil

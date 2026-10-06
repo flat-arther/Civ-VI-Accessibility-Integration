@@ -292,7 +292,7 @@ function MessageBuffer:GetEntryLocationText(entry)
         return nil
     end
 
-    local cursor = ExposedMembers.CAICursor
+    local cursor = CAI:GetCursor()
     if not cursor or not cursor.GetCoords then
         LogError("MessageBuffer: CAI cursor is unavailable while resolving an entry location")
         return nil
@@ -410,4 +410,4 @@ function MessageBuffer.ClearActive()
     end
 end
 
-ExposedMembers.CAI.GetMessageBuffer = MessageBuffer.GetActive
+CAI.MessageBuffer = MessageBuffer

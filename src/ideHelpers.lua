@@ -15,7 +15,55 @@
 
 ---@class CAI
 ---@field AttenuationModel CAIAttenuationModel
+---@field UIManager? UIScreenManager
+---@field AudioManager? CAIAudioManager
+---@field Cursor? CAICursor
+---@field Info? table
+---@field WorldBuilderVisibilityManager? table
+---@field WorldClimateHistoryManager? table
+---@field UnitNumbers? table
+---@field RealEraTracker? table
+---@field QuickDeals? table
+---@field Reports? table
+---@field WorldRankings? table
+---@field TutorialState? table
+---@field TutorialWorldAnchor? table
+---@field MessageBuffer? table MessageBuffer provider; use GetMessageBuffer for the active player's instance.
+---@field Active? boolean False means suspended; unset means active.
+---@field CloudSaveLoadPending? boolean
+---@field WorldBuilderInjectedMapPath? string
+---@field EspionagePopupDialogId? string
+---@field PlagueLensActive? boolean
 CAI = {}
+
+---@return UIScreenManager|nil
+function CAI:GetUIManager() end
+---@return CAIAudioManager|nil
+function CAI:GetAudioManager() end
+---@return CAICursor|nil
+function CAI:GetCursor() end
+---@return table|nil
+function CAI:GetInfo() end
+---@return table|nil
+function CAI:GetWorldBuilderVisibilityManager() end
+---@return table|nil
+function CAI:GetWorldClimateHistoryManager() end
+---@return table|nil
+function CAI:GetUnitNumbers() end
+---@return table|nil
+function CAI:GetRealEraTracker() end
+---@return table|nil
+function CAI:GetQuickDeals() end
+---@return table|nil
+function CAI:GetReports() end
+---@return table|nil
+function CAI:GetWorldRankings() end
+---@return table|nil
+function CAI:GetTutorialState() end
+---@return table|nil
+function CAI:GetTutorialWorldAnchor() end
+---@return MessageBuffer|nil
+function CAI:GetMessageBuffer() end
 
 ---@param section string
 ---@param key string
@@ -1461,7 +1509,7 @@ function SearchPanelWidget:SetResults(results) end
 -- UIScreenManager
 -- -----------------------------------------------------------------------------
 
----Manager singleton. Lives at ExposedMembers.CAI_UIManager.
+---Manager singleton. Lives at CAI:GetUIManager().
 ---@class UIScreenManager
 ---@field Stack UIWidget[]
 ---@field CurrentPath UIWidget[]

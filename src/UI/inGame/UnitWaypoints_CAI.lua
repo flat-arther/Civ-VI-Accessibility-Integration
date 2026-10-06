@@ -1,5 +1,5 @@
-local info = ExposedMembers.CAIInfo or {}
-ExposedMembers.CAIInfo = info
+local info = CAI:GetInfo() or {}
+CAI.Info = info
 
 ---@class QueuedPathEntry
 ---@field PlotId integer

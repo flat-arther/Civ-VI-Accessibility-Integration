@@ -21,7 +21,7 @@ else
     include("DeclareWarPopup")
 end
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local m_caiDialog = nil ---@type UIWidget|nil
 local m_opening = false
 

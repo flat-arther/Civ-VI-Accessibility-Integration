@@ -3,8 +3,8 @@ include("MapPinListPanel")
 include("inGameHelpers_CAI")
 include("hexCoordUtils_CAI")
 
-local mgr                    = ExposedMembers.CAI_UIManager
-local CAICursor              = ExposedMembers.CAICursor
+local mgr                    = CAI:GetUIManager()
+local CAICursor              = CAI:GetCursor()
 local HexCoordUtils          = CAIHexCoordUtils
 
 local PANEL_ID               = "CAIMapPin_Panel"

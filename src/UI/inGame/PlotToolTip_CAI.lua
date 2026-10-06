@@ -49,8 +49,8 @@ if IS_PIRATES_TOOLTIP then
 end
 
 local currentPlot = -1
-local info = ExposedMembers.CAIInfo or {}
-ExposedMembers.CAIInfo = info
+local info = CAI:GetInfo() or {}
+CAI.Info = info
 
 
 local STATIC_INFO_PRIORITY = {
@@ -465,7 +465,7 @@ end
 -- the WB visibility-tool context — use the normal observer path".
 local function GetWBRevealed(plotIndex)
     if not (WorldBuilder ~= nil and WorldBuilder.IsActive()) then return false, false end
-    local api = ExposedMembers.CAIInfo
+    local api = CAI:GetInfo()
     if api == nil or api.GetWorldBuilderVisibilityPlayer == nil or api.GetWorldBuilderRevealed == nil then
         return false, false
     end

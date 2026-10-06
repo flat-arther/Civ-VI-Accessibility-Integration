@@ -10,9 +10,9 @@
 include("caiUtils")
 include("hexCoordUtils_CAI")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local HexCoordUtils = CAIHexCoordUtils
-local CAICursor = ExposedMembers.CAICursor
+local CAICursor = CAI:GetCursor()
 
 local CAI_PLOTS_PER_FRAME = 35
 local DEBOUNCE_FRAMES = 20
@@ -109,7 +109,7 @@ local function GetPlotLabel(plotIndex)
         end
     end
 
-    local plotInfo = ExposedMembers.CAIInfo
+    local plotInfo = CAI:GetInfo()
     if plotInfo and plotInfo.RequestCursorMovePlotInfo then
         local infoParts = plotInfo:RequestCursorMovePlotInfo(nil, plotIndex)
         if infoParts then

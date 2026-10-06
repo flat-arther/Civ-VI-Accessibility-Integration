@@ -102,7 +102,7 @@ end
 --#Accessibility integration
 include ("caiUtils")
 include("CAIUIScreenManager")
-local mgr             = ExposedMembers.CAI_UIManager
+local mgr             = CAI:GetUIManager()
 
 local m_eulaPanel = nil
 

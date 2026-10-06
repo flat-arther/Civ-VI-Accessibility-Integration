@@ -438,7 +438,7 @@ end
 local function ResolvePlotTargetLabel(mode, plotIndex)
     if not Map.IsPlot(plotIndex) then return nil end
 
-    local plotInfo = ExposedMembers.CAIInfo
+    local plotInfo = CAI:GetInfo()
     if plotInfo == nil or plotInfo.RequestPlotInfo == nil then
         local plot = Map.GetPlotByIndex(plotIndex)
         if plot == nil then return nil end

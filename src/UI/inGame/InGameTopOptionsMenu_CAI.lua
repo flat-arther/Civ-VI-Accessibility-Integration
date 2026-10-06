@@ -20,7 +20,7 @@ end
 
 include(GetInGameTopOptionsMenuIncludeName())
 
-local mgr             = ExposedMembers.CAI_UIManager
+local mgr             = CAI:GetUIManager()
 local isOpening       = false
 
 local PANEL_ID        = "CAIInGameTopOptionsMenu_Panel"

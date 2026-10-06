@@ -2,7 +2,7 @@ include("CAIGameState")
 include("caiUtils")
 include("Civ6Common")
 
-local mgr                              = ExposedMembers.CAI_UIManager
+local mgr                              = CAI:GetUIManager()
 
 local NOTIFICATION_CENTER_ID           = "CAINotificationCenter_Panel"
 local NOTIFICATION_TABS_ID             = "CAINotificationCenter_Tabs"
@@ -384,13 +384,7 @@ local function RebuildNotificationTree()
     mgr:RestoreFocus(m_centerTree, capture)
 end
 
-local function GetMessageBuffer()
-    if not CAI or not CAI.GetMessageBuffer then
-        LogError("NotificationPanel: message buffer getter is unavailable")
-        return nil
-    end
-    return CAI.GetMessageBuffer()
-end
+
 
 local function FormatMessageTurn(turn)
     return Locale.Lookup("LOC_CAI_MESSAGE_BUFFER_TURN", turn)
@@ -453,7 +447,7 @@ end
 
 local function RebuildMessageList()
     if not m_messageList then return end
-    local buffer = GetMessageBuffer()
+    local buffer = CAI:GetMessageBuffer()
     if not buffer then return end
 
     local capture = mgr:CaptureFocusKey(m_messageList)
@@ -539,7 +533,7 @@ local function OpenNotificationCenter()
     local messagesPage = tabs:AddPage(function()
         return Locale.Lookup("LOC_CAI_MESSAGE_BUFFER")
     end)
-    local buffer = GetMessageBuffer()
+    local buffer = CAI:GetMessageBuffer()
     if buffer then
         local messageList = mgr:CreateWidget(MESSAGE_LIST_ID, "List", {})
         messagesPage:AddChild(messageList)

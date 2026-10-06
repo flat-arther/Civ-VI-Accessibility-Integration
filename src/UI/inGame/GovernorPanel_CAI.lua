@@ -13,7 +13,7 @@ include("caiUtils")
 include("GameCapabilities")
 include("GovernorPanel")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 if not HasCapability("CAPABILITY_GOVERNORS") then return end
 
 -- ===========================================================================

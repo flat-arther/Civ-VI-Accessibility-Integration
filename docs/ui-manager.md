@@ -12,7 +12,7 @@ matching LuaLS annotations live in `src/ideHelpers.lua`.
 The manager has four layers:
 
 1. **Manager** (`CAIUIScreenManager.lua`) — singleton hung off
-   `ExposedMembers.CAI_UIManager`. Owns the widget stack, the canonical focus
+   `CAI.UIManager`, read through `CAI:GetUIManager()`. Owns the widget stack, the canonical focus
    path, input dispatch, and speech announcement on focus change.
 2. **Base classes** — `UIWidget` → `ContainerWidget` and `ValueWidget`. Real
    class inheritance via metatable chains; not the old template-merging model.

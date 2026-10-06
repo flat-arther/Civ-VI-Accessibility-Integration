@@ -143,7 +143,7 @@ end
 --#Accessibility integration
 include("caiUtils")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local m_CAI_Dialog = nil
 
 local function CAI_RemoveDialog()

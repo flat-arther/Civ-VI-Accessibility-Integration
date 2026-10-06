@@ -25,7 +25,7 @@ include("UnitMoveLog_CAI")
 include("EventSubs_CAI")
 include("Civ6Common")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local function GetWorldInputIncludeName()
 	if GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_PIRATES" then
 		return "WorldInput_PiratesScenario"
@@ -858,13 +858,13 @@ end
 
 local function OnCAIInputActionStarted(actionId, x, y)
 	-- Suspended: CAI world actions stop reacting so the key falls to vanilla.
-	if ExposedMembers.CAI_Active == false then return false end
+	if CAI.Active == false then return false end
 	if CAI then CAI.Silence() end
 	return DispatchInputAction(actionId, INPUT_ACTION_STARTED, x, y)
 end
 
 function OnInputActionTriggered(actionId)
-	if ExposedMembers.CAI_Active == false then return end
+	if CAI.Active == false then return end
 	DispatchInputAction(actionId, INPUT_ACTION_TRIGGERED)
 end
 
@@ -873,7 +873,7 @@ end
 -- ===========================================================================
 local function CreateGameViewWidget()
 	if not mgr then
-		LogError("CAI WorldInput could not create game view widget because ExposedMembers.CAI_UIManager is nil")
+		LogError("CAI WorldInput could not create game view widget because CAI:GetUIManager() is nil")
 		return false
 	end
 
@@ -907,8 +907,8 @@ local worldBuilderInput = CAIWorldBuilderInput.Create(mgr, {
 function CAIWorldBuilderScannerSourcePlot()
 	return worldBuilderInput.GetMarkedPlot()
 end
-ExposedMembers.CAIInfo = ExposedMembers.CAIInfo or {}
-ExposedMembers.CAIInfo.GetWorldBuilderMarkedPlot = worldBuilderInput.GetMarkedPlot
+CAI.Info = CAI:GetInfo() or {}
+CAI:GetInfo().GetWorldBuilderMarkedPlot = worldBuilderInput.GetMarkedPlot
 
 local function FindInitialPlotId()
 	local playerID = Game.GetLocalPlayer()
@@ -1102,10 +1102,10 @@ OnLoadScreenClose = WrapFunc(OnLoadScreenClose, function(orig)
 	-- the on-disk map loadable by players without CAI. WBMapDepStrip lives in
 	-- LoadSaveHelpers_CAI, which is not loaded in this context, so reach it
 	-- through the SQLite bridge directly.
-	local injectedPath = ExposedMembers.CAI_WBInjectedMapPath
+	local injectedPath = CAI.WorldBuilderInjectedMapPath
 	if injectedPath then
-		ExposedMembers.CAI_WBInjectedMapPath = nil
-		local api = ExposedMembers.CAI
+		CAI.WorldBuilderInjectedMapPath = nil
+		local api = CAI
 		if api and api.OpenDatabase and api.Query and api.CloseDatabase then
 			local ok, err = pcall(function()
 				local handle, openErr = api.OpenDatabase(injectedPath)
@@ -1131,11 +1131,11 @@ OnLoadScreenClose = WrapFunc(OnLoadScreenClose, function(orig)
 	-- a nil path (fresh map / uncaptured path) seeds an empty reveal set and
 	-- relies on the Set Visibility tool + placed-unit sight instead. Also picks
 	-- up any units/cities already on the loaded map for the sight computation.
-	if WorldBuilder.IsActive() and ExposedMembers.CAI_WBVisManager then
-		ExposedMembers.CAI_WBVisManager.Seed(injectedPath)
+	if WorldBuilder.IsActive() and CAI:GetWorldBuilderVisibilityManager() then
+		CAI:GetWorldBuilderVisibilityManager().Seed(injectedPath)
 	end
 	InitializeCAIGameView()
-	if ExposedMembers.CAI_Active ~= false then
+	if CAI.Active ~= false then
 		SetCAIMapZoom(0.0)
 	end
 end)
@@ -1168,8 +1168,8 @@ OnShutdown = WrapFunc(OnShutdown, function(orig)
 	CAIRecommendationLogic.Shutdown()
 	CAIWorldScanner:ClearScanner()
 	RevealAnnouncements_CAI.Shutdown()
-	if ExposedMembers.CAI_WBVisManager ~= nil then
-		ExposedMembers.CAI_WBVisManager.Reset()
+	if CAI:GetWorldBuilderVisibilityManager() ~= nil then
+		CAI:GetWorldBuilderVisibilityManager().Reset()
 	end
 	if mgr then
 		mgr:ShutDown()

@@ -17,7 +17,7 @@
 --      so numbers persist across save/load. Keying by the local player also
 --      keeps hotseat players' views separate (each sees their own numbers).
 --
---  Shared singleton on ExposedMembers.CAIUnitNumbers; created once and reused by
+--  Shared singleton on CAI:GetUnitNumbers(); created once and reused by
 --  every screen that speaks a unit name (see inGameHelpers_CAI.lua).
 -- ===========================================================================
 
@@ -306,4 +306,4 @@ instance:Load()
 -- LocalPlayerChanged handle later loads and hotseat swaps. All idempotent.
 instance:BackfillLocalUnits()
 instance:_Register()
-ExposedMembers.CAIUnitNumbers = instance
+CAI.UnitNumbers = instance

@@ -21,13 +21,13 @@ end
 include(GetCityPanelIncludeName())
 
 --#State
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local m_IsGameStarted = false
 local CITY_ACTION_CATEGORY = "LOC_OPTIONS_HOTKEY_CATEGORY_CITY"
 local HexCoordUtils = CAIHexCoordUtils
 
-info = ExposedMembers.CAIInfo or {}
-ExposedMembers.CAIInfo = info
+info = CAI:GetInfo() or {}
+CAI.Info = info
 
 local CITY_INFO_BUCKETS = {
     Summary = { "Name", "Population", "Health", "Production", "Growth" },
@@ -269,7 +269,7 @@ function GetCityInfoReligionFollowers(data)
 end
 
 -- Shared amenities summary matching the city overview panel, e.g. "Amenities: Content, 6/4".
--- Exposed on info (ExposedMembers.CAIInfo) so the city panel and city banner stay in sync.
+-- Exposed on info (CAI:GetInfo()) so the city panel and city banner stay in sync.
 function info.GetCityAmenitiesSummary(city)
     if city == nil then
         return nil
@@ -1367,7 +1367,7 @@ function OnSelectionInfoInputActionStarted(actionId)
 
     local summary = table.concat(results, "[NEWLINE]")
     if actionId == SafeActionId("ReadSelectionSummary") then
-        local cursor = ExposedMembers.CAICursor
+        local cursor = CAI:GetCursor()
         if cursor ~= nil then
             local cursorX, cursorY = cursor:GetCoords()
             if cursorX ~= nil and cursorY ~= nil then

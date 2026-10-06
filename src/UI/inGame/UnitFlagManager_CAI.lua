@@ -43,8 +43,8 @@ end
 
 include(GetUnitFlagManagerIncludeName())
 
-local info = ExposedMembers.CAIInfo or {}
-ExposedMembers.CAIInfo = info
+local info = CAI:GetInfo() or {}
+CAI.Info = info
 
 local UNIT_FLAG_INFO_DEFAULT_KEYS = {
     "unitCount",

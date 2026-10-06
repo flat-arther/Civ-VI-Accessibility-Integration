@@ -309,7 +309,7 @@ function Initialize()
 end
 --#Accessibility integration
 include ("caiUtils")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local caiId = "9f4b5c2e-1a2b-4c3d-8e9f-123456789abc"
 local CAI_MOVIE_PANEL_ID = "CAITutorialSetupMovie"
 local HOVER_SOUND = "Main_Menu_Mouse_Over"

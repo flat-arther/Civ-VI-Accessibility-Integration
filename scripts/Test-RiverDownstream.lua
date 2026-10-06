@@ -559,8 +559,9 @@ end
 TestRiverReadout()
 
 -- The shared location reader must use live cursor state across context changes.
-local savedMembers, savedLookup, savedDirection = ExposedMembers, Map.GetPlotByIndex, CAIHexCoordUtils.directionString
-ExposedMembers = {}
+local savedCAI, savedMembers, savedLookup, savedDirection = CAI, ExposedMembers, Map.GetPlotByIndex, CAIHexCoordUtils.directionString
+CAI = dofile('scripts/test-support/CAIAccessors.lua')({})
+ExposedMembers = { CAI = CAI }
 Map.GetPlotByIndex = function(id)
  if id == 7 then return { GetX=function()return 3 end, GetY=function()return 4 end } end
 end
@@ -569,11 +570,11 @@ check(CAIHexCoordUtils.relativePlotLocation(nil)=='','missing location id')
 check(CAIHexCoordUtils.relativePlotLocation(9)=='','missing location plot')
 check(CAIHexCoordUtils.relativePlotLocation(7)=='','cursor not initialized')
 check(CAIHexCoordUtils.appendRelativePlotLocation('city',7)=='city','no direction leaves label unchanged')
-ExposedMembers.CAICursor={GetCoords=function()return 1,2 end}
+CAI.Cursor={GetCoords=function()return 1,2 end}
 check(CAIHexCoordUtils.relativePlotLocation(7)=='1:2>3:4','cursor becomes available')
-ExposedMembers.CAICursor={GetCoords=function()return 5,6 end}
+CAI.Cursor={GetCoords=function()return 5,6 end}
 check(CAIHexCoordUtils.appendRelativePlotLocation('city',7)=='city, 5:6>3:4','replacement cursor read live')
-ExposedMembers.CAICursor={GetCoords=function()return nil,nil end}
+CAI.Cursor={GetCoords=function()return nil,nil end}
 check(CAIHexCoordUtils.relativePlotLocation(7)=='','cursor coordinates not initialized')
-ExposedMembers, Map.GetPlotByIndex, CAIHexCoordUtils.directionString = savedMembers, savedLookup, savedDirection
+CAI, ExposedMembers, Map.GetPlotByIndex, CAIHexCoordUtils.directionString = savedCAI, savedMembers, savedLookup, savedDirection
 print('Production upstream/downstream navigation checks passed: '..checks..' assertions'..(withoutVanilla and ' (vanilla-source checks skipped)' or ' against vanilla transitions and edge cases'))

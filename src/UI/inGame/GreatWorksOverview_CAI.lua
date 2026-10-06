@@ -5,7 +5,7 @@
 include("caiUtils")
 include("hexCoordUtils_CAI")
 
-local mgr                      = ExposedMembers.CAI_UIManager
+local mgr                      = CAI:GetUIManager()
 local HexCoordUtils            = CAIHexCoordUtils
 
 local PANEL_ID                 = "CAIGreatWorksOverview_Panel"

@@ -69,7 +69,7 @@ function CAIWorldBuilderInput.Create(mgr, adapter)
 		-- shadow snapshot changes. The generic vanilla event bridge does not return
 		-- PlaceVisibility's SetRevealed result, so use the placement context's
 		-- result-aware equivalent for this tool.
-		local info = ExposedMembers.CAIInfo
+		local info = CAI:GetInfo()
 		if info ~= nil and info.GetWorldBuilderVisibilityPlayer ~= nil
 			and info.GetWorldBuilderVisibilityPlayer() ~= nil
 			and info.EditWorldBuilderVisibility ~= nil then
@@ -288,7 +288,7 @@ function CAIWorldBuilderInput.Create(mgr, adapter)
 	-- the number row selects tools directly.
 	local function CreateWorldBuilderWidget()
 		if not mgr then
-			LogError("CAI WorldInput could not create World Builder widget because ExposedMembers.CAI_UIManager is nil")
+			LogError("CAI WorldInput could not create World Builder widget because CAI:GetUIManager() is nil")
 			return false
 		end
 
@@ -545,7 +545,7 @@ function CAIWorldBuilderInput.Create(mgr, adapter)
 
 	local function OnCursorMoved(state)
 		local plotId = state.toPlotId
-		if m_wbBrushLocked and WorldBuilder.IsActive() and ExposedMembers.CAI_Active ~= false
+		if m_wbBrushLocked and WorldBuilder.IsActive() and CAI.Active ~= false
 			and state.fromPlotId ~= plotId then
 			-- Brush lock follows the cursor even when M has marked a source tile.
 			WBEditCursorPlot(true, plotId)
@@ -555,7 +555,7 @@ function CAIWorldBuilderInput.Create(mgr, adapter)
 	local function Update()
 		if m_wbSightRefreshPending then
 			m_wbSightRefreshPending = false
-			local visMgr = ExposedMembers.CAI_WBVisManager
+			local visMgr = CAI:GetWorldBuilderVisibilityManager()
 			if visMgr ~= nil and visMgr.RecomputeSight ~= nil then
 				visMgr.RecomputeSight()
 			end

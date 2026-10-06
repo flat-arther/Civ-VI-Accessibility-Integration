@@ -17,7 +17,7 @@ else
     include("ActionPanel")
 end
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local ACTION_PANEL_LIST_ID = "CAIActionPanelTurnBlockerList"
 local END_TURN_ACTION = Input.GetActionId("EndTurn")

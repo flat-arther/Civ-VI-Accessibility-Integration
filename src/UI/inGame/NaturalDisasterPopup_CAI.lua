@@ -5,7 +5,7 @@ else
     include("NaturalDisasterPopup")
 end
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local NUCLEAR_OPERATOR_TYPE = "NUCLEAR_ACCIDENT"
 

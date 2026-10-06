@@ -1,6 +1,6 @@
 include("caiUtils")
 include("NaturalWonderPopup")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local m_dialog = nil ---@type UIWidget|nil
 local m_currentFeatureType = nil ---@type string|nil -- FeatureType of the wonder on display

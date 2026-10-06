@@ -1,6 +1,6 @@
 include("caiUtils")
 include("SecretSocietyPopup")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local m_dialog = nil ---@type UIWidget|nil
 Open = WrapFunc(Open, function(orig)
     orig()

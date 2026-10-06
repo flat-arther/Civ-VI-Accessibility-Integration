@@ -7,7 +7,7 @@ end
 include("MapTacks")
 include("inGameHelpers_CAI")
 
-local mgr                         = ExposedMembers.CAI_UIManager
+local mgr                         = CAI:GetUIManager()
 
 local PANEL_ID                    = "CAIMapPinPopup_Panel"
 

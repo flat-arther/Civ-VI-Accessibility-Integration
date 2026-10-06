@@ -3,7 +3,7 @@
 -- Accessibility data provider for the Quick Deals Sale tab. CAI wins this context
 -- and includes the Quick Deals base, then wraps its populate functions to publish
 -- a live model (inventory groups, staged offer, AI offers) plus action closures
--- into ExposedMembers.CAIQuickDeals.sale. The shell (qd_dealpopup_CAI) renders it.
+-- into CAI:GetQuickDeals().sale. The shell (qd_dealpopup_CAI) renders it.
 -- Every closure here runs in this context, so it drives Quick Deals' own state.
 
 include("caiUtils")
@@ -12,8 +12,8 @@ include("qd_popuptab_sale")   -- base tab (also pulls qd_dealmanager)
 
 local BULK_ADD = 10
 
-ExposedMembers.CAIQuickDeals = ExposedMembers.CAIQuickDeals or {}
-local QD = ExposedMembers.CAIQuickDeals
+CAI.QuickDeals = CAI:GetQuickDeals() or {}
+local QD = CAI:GetQuickDeals()
 QD.sale = QD.sale or { offers = {} }
 
 local m_capturing = false

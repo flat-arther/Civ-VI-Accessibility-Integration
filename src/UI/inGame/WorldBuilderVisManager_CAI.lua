@@ -18,7 +18,7 @@
 --  World Builder visibility is binary, not gameplay's revealed/visible/mid-fog
 --  model. A plot is exposed when it is in base OR current sight; when sight
 --  leaves, it becomes hidden again unless Set Visibility explicitly revealed it.
---  The manager is published as ExposedMembers.CAI_WBVisManager and consumed by the cursor,
+--  The manager is published as CAI:GetWorldBuilderVisibilityManager() and consumed by the cursor,
 --  surveyor, world scanner, and plot tooltip through the shared reveal gate in
 --  caiUtils (GetWorldBuilderRevealGate), which activates only while the Set
 --  Visibility tool is armed on a player.
@@ -303,7 +303,7 @@ function VisManager.Seed(path)
     m_tallDistricts = nil
 
     if path ~= nil and path ~= "" then
-        local api = ExposedMembers.CAI
+        local api = CAI
         if api and api.OpenDatabase and api.Query and api.CloseDatabase then
             local seeded = 0
             local ok, err = pcall(function()
@@ -427,6 +427,6 @@ Events.CityRemovedFromMap.Add(OnCityPlacementChanged)
 Events.CityTileOwnershipChanged.Add(OnCityPlacementChanged)
 
 -- Publish fresh each session per the ExposedMembers reload-staleness rule.
-ExposedMembers.CAI_WBVisManager = VisManager
+CAI.WorldBuilderVisibilityManager = VisManager
 
 return VisManager

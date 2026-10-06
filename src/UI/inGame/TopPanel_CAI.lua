@@ -19,7 +19,7 @@ else
     include("TopPanel")
 end
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local ACTION_SPEAK_TURN_TIME_DATE = Input.GetActionId("UI_TopPanelSpeakTurnTimeDate")
 local ACTION_SPEAK_GOLD = Input.GetActionId("UI_TopPanelSpeakGold")

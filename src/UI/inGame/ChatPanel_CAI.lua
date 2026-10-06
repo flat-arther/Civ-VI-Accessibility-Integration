@@ -8,7 +8,7 @@ else
 end
 include("InGameHelpers_CAI")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local ACTION_OPEN_CHAT_PANEL = Input.GetActionId("UI_OpenChatPanel")
 local CHAT_PANEL_ROOT_ID = "CAIChatPanel_Root"

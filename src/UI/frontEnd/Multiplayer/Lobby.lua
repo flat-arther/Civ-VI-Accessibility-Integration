@@ -1589,7 +1589,7 @@ end
 --#Accessibility integration
 include("textProcessing")
 include("CAIControl")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local CAI_PANEL_ID = "CAILobbyPanel"
 

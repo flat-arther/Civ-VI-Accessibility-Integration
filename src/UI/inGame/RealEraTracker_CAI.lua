@@ -2,7 +2,7 @@ include("caiUtils")
 include("Civ6Common")
 include("RealEraTracker_CAIBase")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local PANEL_ID = "CAIRealEraTracker_Panel"
 local TABLE_ID = "CAIRealEraTracker_Table"
 local TREE_ID = "CAIRealEraTracker_Tree"
@@ -494,7 +494,7 @@ OnInputHandler = WrapFunc(OnInputHandler, function(orig, input)
     return orig(input)
 end)
 
-ExposedMembers.CAIRealEraTracker = {
+CAI.RealEraTracker = {
     GetFavoredLines = function(playerID)
         if playerID ~= Game.GetLocalPlayer() or not SyncLocalPlayer() then
             LogWarn("Real Era Tracker cannot read favorites without the current local player")

@@ -1,7 +1,7 @@
 include("caiUtils")
 include("EventPopup")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local m_dialog = nil ---@type DialogWidget|nil
 local m_isCapturingUnlocks = false

@@ -27,7 +27,7 @@ local function cloud(options)
     local state = { enabled = options.enabled == true, mods = {{Handle=7}}, transitions=0, adds=0, pops=0, leaves=0, diagnostics={} }
     if options.present then state.mods[#state.mods+1] = {Handle=42} end
     local env = {
-        ExposedMembers = { CAI_CloudSaveLoadPending = options.pending ~= false },
+        CAI = dofile('scripts/test-support/CAIAccessors.lua')({ CloudSaveLoadPending = options.pending ~= false }),
         print = function(line) state.diagnostics[#state.diagnostics+1]=line end,
         CAILogging = { ShouldLog=function() return options.diagnostics == true end },
         DB = { ConfigurationChanges=function() return 12 end, ConfigurationQuery=function() return {} end },
@@ -47,7 +47,7 @@ local function cloud(options)
         OnBeforeMultiplayerInviteProcessing = function() state.hidden=true end,
         DoTransitionToStagingRoom = function() state.transitions=state.transitions+1; state.hidden=true end,
     }
-    env.ExposedMembers.CAI_UIManager = { RemoveFromStack = function() state.pops=state.pops+1 end }
+    env.CAI.UIManager = { RemoveFromStack = function() state.pops=state.pops+1 end }
     env.GameConfiguration.AddEnabledMods = function(handle, replace)
         check(handle == 42, "cloud recovery must add only CAI")
         state.adds=state.adds+1
@@ -86,7 +86,7 @@ assert(load(assert(loadSource:match("(function OnLoadYes%(%)\n.-\nend)")), "vani
 local loadWrapper = assert(loadSource:match("(OnLoadYes = WrapFunc%(OnLoadYes, function%(orig%).-)\n%-%- TILED_MAP"))
 assert(load(loadWrapper, "CAI load marker", "t", env))()
 env.OnLoadYes()
-check(state.loads==1 and env.ExposedMembers.CAI_CloudSaveLoadPending==true,
+check(state.loads==1 and env.CAI.CloudSaveLoadPending==true,
     "preparatory leave must preserve the cloud recovery marker")
 env.DoTransitionToStagingRoom()
 check(state.transitions==0 and state.pops==0, "must retain joining dialog/focus while configuring")
@@ -138,7 +138,7 @@ for _, cancel in ipairs({"HandleExitRequest", "OnBeforeMultiplayerInviteProcessi
     env, state = cloud()
     env.DoTransitionToStagingRoom(); env[cancel]()
     env.OnFinishedGameplayContentConfigure({Success=true})
-    check(state.transitions==0 and env.ExposedMembers.CAI_CloudSaveLoadPending==nil, "cancelled load must not resume")
+    check(state.transitions==0 and env.CAI.CloudSaveLoadPending==nil, "cancelled load must not resume")
 end
 for _, options in ipairs({{missing=true}, {enableFails=true}, {omitMembership=true}, {}}) do
     env, state = cloud(options)

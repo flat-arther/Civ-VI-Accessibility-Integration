@@ -1,7 +1,7 @@
 include("caiUtils")
 include("UnitCaptured")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local function OnInputHandler(input)
     if mgr and mgr:HandleInput(input) then

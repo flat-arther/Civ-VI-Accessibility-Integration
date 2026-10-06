@@ -5,7 +5,7 @@ if IsExpansion2Active() then
 else
     include("RazeCity")
 end
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local m_dialog = nil ---@type UIWidget|nil
 local m_keepIndex = 1

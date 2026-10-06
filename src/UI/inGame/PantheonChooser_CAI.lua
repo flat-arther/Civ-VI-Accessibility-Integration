@@ -1,7 +1,7 @@
 include("caiUtils")
 include("PantheonChooser")
 
-local mgr              = ExposedMembers.CAI_UIManager
+local mgr              = CAI:GetUIManager()
 
 local PANEL_ID         = "CAIPantheon_Panel"
 local LIST_ID          = "CAIPantheon_List"

@@ -187,7 +187,7 @@ function Initialize()
 end
 --#Accessibility integration
 include("caiUtils")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local CAI_Panel = nil
 local CAI_ItemList = nil

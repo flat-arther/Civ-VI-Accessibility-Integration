@@ -12,7 +12,7 @@ include("CAITradeData")
 -- We capture that emit sequence and rebuild a per-tab tree, plus expose the
 -- filter and group-by dropdowns and the cancel-automation action.
 
-local mgr                  = ExposedMembers.CAI_UIManager
+local mgr                  = CAI:GetUIManager()
 local overview
 
 local FILTER_ID            = "CAITradeOv_Filter"

@@ -7,7 +7,7 @@ else
     include("ClimateScreen")
 end
 
-local mgr              = ExposedMembers.CAI_UIManager
+local mgr              = CAI:GetUIManager()
 local HexCoordUtils    = CAIHexCoordUtils
 
 local PANEL_ID         = "CAIClimate_Panel"
@@ -904,7 +904,7 @@ local function BuildEventHistoryList()
     local localPlayerID = Game.GetLocalPlayer()
     if localPlayerID < 0 then return list end
 
-    local historyMgr = ExposedMembers.CAI_WorldClimateHistoryManager
+    local historyMgr = CAI:GetWorldClimateHistoryManager()
     local iCurrentTurn = Game.GetCurrentGameTurn()
     for i = iCurrentTurn, 0, -1 do
         local kEvent = GameRandomEvents.GetEventsForTurn(i)

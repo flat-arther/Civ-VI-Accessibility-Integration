@@ -219,8 +219,8 @@ function DeepCompare( table1, table2 )
 end
 
 --#Accessibility integration
-local info = ExposedMembers.CAIInfo or {}
-ExposedMembers.CAIInfo = info
+local info = CAI:GetInfo() or {}
+CAI.Info = info
 
 local DMT_GetMapPinSubject = GetMapPinSubject;
 

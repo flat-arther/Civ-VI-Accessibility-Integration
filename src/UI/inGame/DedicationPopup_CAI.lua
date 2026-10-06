@@ -1,6 +1,6 @@
 include("caiUtils")
 include("DedicationPopup")
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local m_dialog = nil ---@type UIWidget|nil
 local m_caiEntries = {} ---@type table[] -- { cb: CheckboxWidget, selectCheck: control }

@@ -955,7 +955,7 @@ local supportedLenses = {
         Id = LENS_PLAGUE,
         IsActive = function()
             return GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH"
-                and ExposedMembers.CAIPlagueLensActive == true
+                and CAI.PlagueLensActive == true
         end,
         Scan = ScanPlagueLens,
     },

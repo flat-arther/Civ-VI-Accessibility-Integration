@@ -15,20 +15,20 @@ else
     include("MinimapPanel")
 end
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local LENS_LIST_WIDGET_ID = "CAIMinimapLensList"
 local m_caiLensList = nil ---@type UIWidget|nil
 local m_isBlackDeathScenario = GameConfiguration.GetRuleSet() == "RULESET_SCENARIO_BLACKDEATH"
 
-ExposedMembers.CAIPlagueLensActive = false
+CAI.PlagueLensActive = false
 
 local function PublishPlagueLensState(isActive)
-    if ExposedMembers.CAIPlagueLensActive == isActive then
+    if CAI.PlagueLensActive == isActive then
         return
     end
 
-    ExposedMembers.CAIPlagueLensActive = isActive
+    CAI.PlagueLensActive = isActive
     LuaEvents.CAIPlagueLensChanged(isActive)
 end
 

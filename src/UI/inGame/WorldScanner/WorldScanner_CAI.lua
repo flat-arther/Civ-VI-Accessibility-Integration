@@ -67,7 +67,7 @@ local Core = CAIWorldScannerCore
 local Utils = CAIWorldScannerUtils
 local CategoryConfig = CAIWorldScannerCategoryConfig
 local CategoryManager = CAIWorldScannerCategoryManager
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 ---@type WorldScannerCategoryDefinition[]
 local RegisteredCategoryDefinitions = {}
@@ -431,7 +431,7 @@ local function PlayCurrentItemBeacon(scanner)
         return false
     end
 
-    local audio = ExposedMembers.CAI_UIManager:GetAudioManager()
+    local audio = CAI:GetAudioManager()
     local listenerPlotIndex = CAICursor and CAICursor.GetPlotId and CAICursor:GetPlotId() or -1
     local options = nil
     if listenerPlotIndex ~= nil and listenerPlotIndex >= 0 then
@@ -451,7 +451,7 @@ local function PlayBeaconVolumePreview()
         return false
     end
 
-    local audio = ExposedMembers.CAI_UIManager:GetAudioManager()
+    local audio = CAI:GetAudioManager()
     audio:ApplySettings()
     return audio:PlayAtPlot("SCANNER_BEACON", cursorPlotIndex, {
         ListenerPlot = cursorPlotIndex,
@@ -998,7 +998,7 @@ function CAIWorldScanner:CycleCategory(step)
     local wrapped = step > 0 and targetPosition <= previousPosition
         or step < 0 and targetPosition >= previousPosition
     if wrapped then
-        ExposedMembers.CAI_UIManager:HandleNavigationWrap(self, step)
+        CAI:GetUIManager():HandleNavigationWrap(self, step)
     end
 end
 
@@ -1058,7 +1058,7 @@ function CAIWorldScanner:CycleSubCategory(step)
         SpeakLines({ line1 })
     end
     if wrapped then
-        ExposedMembers.CAI_UIManager:HandleNavigationWrap(self, step)
+        CAI:GetUIManager():HandleNavigationWrap(self, step)
     end
 end
 
@@ -1104,7 +1104,7 @@ function CAIWorldScanner:CycleGroup(step)
     local wrapped = previousIndex ~= 0 and (step > 0 and scanner.GroupIndex <= previousIndex
         or step < 0 and scanner.GroupIndex >= previousIndex)
     if wrapped then
-        ExposedMembers.CAI_UIManager:HandleNavigationWrap(self, step)
+        CAI:GetUIManager():HandleNavigationWrap(self, step)
     end
 end
 
@@ -1147,7 +1147,7 @@ function CAIWorldScanner:CycleItem(step)
     local wrapped = previousIndex ~= 0 and (step > 0 and scanner.ItemIndex <= previousIndex
         or step < 0 and scanner.ItemIndex >= previousIndex)
     if wrapped then
-        ExposedMembers.CAI_UIManager:HandleNavigationWrap(self, step)
+        CAI:GetUIManager():HandleNavigationWrap(self, step)
     end
 end
 
@@ -1266,7 +1266,7 @@ function CAIWorldScanner:CycleSlot(slotIndex, step)
     local wrapped = previousPosition ~= nil and (step > 0 and position <= previousPosition
         or step < 0 and position >= previousPosition)
     if wrapped then
-        ExposedMembers.CAI_UIManager:HandleNavigationWrap(self, step)
+        CAI:GetUIManager():HandleNavigationWrap(self, step)
     end
 end
 

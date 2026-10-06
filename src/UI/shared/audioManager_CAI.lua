@@ -309,7 +309,7 @@ function CAIAudioManager:ResolvePlot(plotOrId)
 end
 
 function CAIAudioManager:GetDefaultListenerPlot()
-    local cursor = ExposedMembers.CAICursor
+    local cursor = CAI:GetCursor()
     if cursor == nil then
         return nil, nil
     end
@@ -372,7 +372,7 @@ function CAIAudioManager:StopAllSoundsForFocusMute()
 end
 
 function CAIAudioManager:Play(soundId, options)
-    if ExposedMembers.CAI_Active == false then return false end
+    if CAI.Active == false then return false end
     local record = self:GetSound(soundId)
     if record == nil then
         LogWarn("Audio manager Play: unknown or unloaded sound " .. tostring(soundId))
@@ -401,7 +401,7 @@ function CAIAudioManager:Play(soundId, options)
 end
 
 function CAIAudioManager:PlayAtPlot(soundId, sourcePlotOrId, options)
-    if ExposedMembers.CAI_Active == false then return false end
+    if CAI.Active == false then return false end
     local record = self:GetSound(soundId)
     if record == nil then
         LogWarn("Audio manager PlayAtPlot: unknown or unloaded sound " .. tostring(soundId))
@@ -462,7 +462,7 @@ function CAIAudioManager:PlayAtPlot(soundId, sourcePlotOrId, options)
 end
 
 function CAIAudioManager:QueueSound(soundId, delaySeconds, options)
-    if ExposedMembers.CAI_Active == false then return false end
+    if CAI.Active == false then return false end
     local record = self:GetSound(soundId)
     if record == nil then
         LogWarn("Audio manager QueueSound: unknown or unloaded sound " .. tostring(soundId))
@@ -486,7 +486,7 @@ function CAIAudioManager:QueueSound(soundId, delaySeconds, options)
 end
 
 function CAIAudioManager:QueueSoundAtPlot(soundId, sourcePlotOrId, delaySeconds, options)
-    if ExposedMembers.CAI_Active == false then return false end
+    if CAI.Active == false then return false end
     local record = self:GetSound(soundId)
     if record == nil then
         LogWarn("Audio manager QueueSoundAtPlot: unknown or unloaded sound " .. tostring(soundId))

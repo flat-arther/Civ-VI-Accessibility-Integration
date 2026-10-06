@@ -10,7 +10,7 @@ if IsBetterTradeScreenActive() then
     return
 end
 
-local origin = CAITradeOrigin.Create(ExposedMembers.CAI_UIManager, {
+local origin = CAITradeOrigin.Create(CAI:GetUIManager(), {
     GetControls = function() return Controls end,
     OnClose = function() OnClose() end,
     Activate = function(city, button)
@@ -36,7 +36,7 @@ end)
 
 Open = WrapFunc(Open, function(orig)
     orig()
-    if ExposedMembers.CAI_UIManager and not ContextPtr:IsHidden() then origin.Open() end
+    if CAI:GetUIManager() and not ContextPtr:IsHidden() then origin.Open() end
 end)
 
 Close = WrapFunc(Close, function(orig)

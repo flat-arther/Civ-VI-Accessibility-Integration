@@ -16,7 +16,7 @@ else
     include("CityPanelOverview")
 end
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 if not mgr then return end
 
 -- ===========================================================================

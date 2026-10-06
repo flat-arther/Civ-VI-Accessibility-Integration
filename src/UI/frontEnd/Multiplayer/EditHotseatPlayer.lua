@@ -187,7 +187,7 @@ include("textProcessing")
 include("CAIControl")
 include("caiUtils")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 local m_CAI_Dialog ---@type UIWidget|nil
 local m_CAI_NameEdit ---@type EditBoxWidget|nil
 local m_CAI_PasswordEdit ---@type EditBoxWidget|nil

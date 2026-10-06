@@ -1098,7 +1098,7 @@ end
 local function BuildWorldBuilderInterfaceInfo(plot)
     if plot == nil then return nil end
 
-    local api = ExposedMembers.CAIInfo
+    local api = CAI:GetInfo()
     if api == nil then return nil end
 
     -- Locked mode: the readout is anchored to the locked tile's footprint, not

@@ -2,14 +2,14 @@ include("caiUtils")
 include("hexCoordUtils_CAI")
 include("MapTacks")
 -- Shared function for overriding the base game's GetCursorPlot functions
-local CAICursor = ExposedMembers.CAICursor
+local CAICursor = CAI:GetCursor()
 -- Vanilla implementations captured before hijacking, so queries fall back to
 -- the real cursor position while the mod is suspended.
 local originalGetCursorPlotID
 local originalGetCursorPlotCoord
 
 local function GetCAICursorPlotId()
-    if ExposedMembers.CAI_Active == false and originalGetCursorPlotID then
+    if CAI.Active == false and originalGetCursorPlotID then
         return originalGetCursorPlotID()
     end
     if not CAICursor then return -1 end
@@ -17,7 +17,7 @@ local function GetCAICursorPlotId()
 end
 
 local function GetCAICursorPlotCoord()
-    if ExposedMembers.CAI_Active == false and originalGetCursorPlotCoord then
+    if CAI.Active == false and originalGetCursorPlotCoord then
         return originalGetCursorPlotCoord()
     end
     local plotId = GetCAICursorPlotId()
@@ -39,7 +39,7 @@ end
 -- TechTree_CAI, CivicsChooser_CAI, CivicsTree_CAI, and ProductionPanel_CAI.
 --
 -- Widget builders take `mgr` as their first arg (the caller's
--- ExposedMembers.CAI_UIManager) so they work in any screen context regardless
+-- CAI:GetUIManager()) so they work in any screen context regardless
 -- of which local `mgr` variable is in scope.
 
 -- ===========================================================================
@@ -1062,11 +1062,11 @@ function BuildMapTacLabelWithDMT(mapPinCfg, playerID, localPlayerID)
     end
 
     -- DMT broadcasts owner-calculated subjects for shared pins.
-    if ExposedMembers.CAIInfo == nil or ExposedMembers.CAIInfo.GetMapPinSubject == nil then
+    if CAI:GetInfo() == nil or CAI:GetInfo().GetMapPinSubject == nil then
         return label
     end
 
-    local ok, subject = pcall(ExposedMembers.CAIInfo.GetMapPinSubject,
+    local ok, subject = pcall(CAI:GetInfo().GetMapPinSubject,
         playerID,
         mapPinCfg:GetHexX(),
         mapPinCfg:GetHexY()
@@ -1274,7 +1274,7 @@ end
 ---@param unit Unit
 ---@return number|nil
 local function GetUnitDisplayNumber(unit)
-    local registry = ExposedMembers.CAIUnitNumbers
+    local registry = CAI:GetUnitNumbers()
     if registry == nil then
         return nil
     end

@@ -2,7 +2,7 @@ include("CAIControl")
 include("caiUtils")
 include("EspionagePopup")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local m_dialog = nil ---@type UIWidget|nil
 local m_caiOutcomeLines = {}
@@ -25,7 +25,7 @@ local function RemoveDialog()
     mgr:RemoveFromStack(m_dialog:GetId())
     m_dialog = nil
     -- Stop advertising this popup as a "keep above me" target for the chooser.
-    if ExposedMembers then ExposedMembers.CAI_EspionagePopupDialogId = nil end
+    if ExposedMembers then CAI.EspionagePopupDialogId = nil end
 end
 
 local function MakeButton(native, idPrefix)
@@ -198,7 +198,7 @@ local function BuildDialog()
     mgr:Push(m_dialog, { priority = PopupPriority.Low })
     -- Advertise this popup so a later-opening EspionageChooser drops below it
     -- instead of covering it (mission-completed popup opens before the chooser).
-    if ExposedMembers then ExposedMembers.CAI_EspionagePopupDialogId = m_dialog:GetId() end
+    if ExposedMembers then CAI.EspionagePopupDialogId = m_dialog:GetId() end
 end
 
 local function IsDialogActive()

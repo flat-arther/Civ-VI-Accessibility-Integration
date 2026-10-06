@@ -2,7 +2,7 @@ include("CAIGameState")
 include("caiUtils")
 include("TutorialGoals")
 
-local mgr = ExposedMembers.CAI_UIManager
+local mgr = CAI:GetUIManager()
 
 local TUTORIAL_GOALS_LIST_ID = "CAITutorialGoalsList"
 local CAI_OPEN_TUTORIAL_GOALS_ACTION = Input.GetActionId("UI_TutorialGoalsOpenList")

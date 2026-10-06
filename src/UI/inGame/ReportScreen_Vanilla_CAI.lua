@@ -9,7 +9,7 @@
 -- and the four Rebuild* tab builders. City cycling and the gossip data helpers are
 -- registered/owned by the shared file.
 
-local mgr                  = ExposedMembers.CAI_UIManager
+local mgr                  = CAI:GetUIManager()
 
 local PANEL_ID             = "CAIReports_Panel"
 local TABS_ID              = "CAIReports_Tabs"
@@ -239,7 +239,7 @@ end)
 -- ============================================================================
 Open = WrapFunc(Open, function(orig, tabToOpen)
 
-    local reportsRequest = ExposedMembers.CAIReports
+    local reportsRequest = CAI:GetReports()
     if not IsCAITutorialControlAllowed("LaunchBar_Hook_Reports") then
         if reportsRequest then reportsRequest.PendingFocusKey = nil end
         return

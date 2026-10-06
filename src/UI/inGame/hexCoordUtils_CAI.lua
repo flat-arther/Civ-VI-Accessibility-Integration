@@ -7,7 +7,7 @@ function HexCoordUtils.relativePlotLocation(plotIndex)
     if plotIndex == nil then return "" end
     local plot = Map.GetPlotByIndex(plotIndex)
     if plot == nil then return "" end
-    local cursor = ExposedMembers.CAICursor
+    local cursor = CAI:GetCursor()
     if cursor == nil then return "" end
     local cursorX, cursorY = cursor:GetCoords()
     if cursorX == nil or cursorY == nil then return "" end
