@@ -45,7 +45,13 @@ The tests load production Lua against narrow game/control mocks. Minimap and bro
 
 `src/CivViAccess.modinfo` still lists `Platforms/Windows/Audio/English(US)/225557858.wem`, which is absent from this checkout. The verifier warns for exactly this path. Other missing registered files fail verification. The existing reference is retained until its intended source or removal is established; verification success does not mean a complete audio package. Once resolved, remove this exception from the verifier and this document.
 
-## Current results (2026-10-04)
+## Final handoff results (2026-10-06)
+
+`./scripts/Verify-Repository.ps1` passed again on the final implementation commit `253896d`: 119,941 assertions; 57 XML files, 348 VFS files, 93 replacements and 12 locale directories. The existing missing-audio exception was reported. Expected external-adapter failure diagnostics are test cases, not suite failures.
+
+This run includes the local vanilla river fixture. It does not establish engine behavior, scenario/mod load order or in-game acceptance. All outstanding game checks are consolidated in `docs/refactor-game-tests.md`. No runtime code changed during the handoff; GitHub Actions was not run by this session.
+
+## Historical results (2026-10-04 onward)
 
 - Static checks passed: 57 XML files, 342 VFS files, 93 replacements, 12 locale directories.
 - Minimap/manager: 16 assertions; unit browser: 40; staging lifecycle: 74; Real Era Tracker: 161; full river suite: 117,073. Text formatting and caller syntax: 210. Shared utilities and caller checks: 89. Game-state helpers: 31. Research chooser: 51; research trees: 72; research data: 54. Trade data/dropdowns: 30; trade screens: 84. Descriptor/column helpers: 28. View lifecycle: 142. Plot interactions: 41. World Builder input: 74. Total: 118,270. The complete repository suite passed after the initial staging fixes (then 54 lifecycle assertions). After the engine retest exposed the preparatory-leave regression, the corrected lifecycle suite passed all 55 assertions. The subsequent diagnostics-only addition passes 66 lifecycle assertions, including disabled logging without queries, missing parameter versus missing value, deduplication, preserved constructor returns and original exceptions. The subsequent content-preservation fix passes 74 lifecycle assertions, modeling destructive true-mode behavior and checking GUID-only/case-insensitive membership and copied identities. The user confirmed the repaired cloud-save flow works in game on 2026-10-04; no new log was inspected for exact content counts. Unrelated suites were not repeated.

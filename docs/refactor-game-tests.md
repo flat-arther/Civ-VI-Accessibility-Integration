@@ -4,6 +4,16 @@ User instruction, 2026-10-04: collect game tests here until the entire refactor 
 
 Unchecked means unverified in game, not failed. Add or revise checks as later stages change the same area. Previously confirmed tests remain closed unless a subsequent change warrants another check.
 
+## Final handoff (2026-10-06)
+
+All authorized implementation stages are complete, including CAI namespace and scenario/mod query consolidation. This document is the complete outstanding game checklist. Automated verification does not mark any item passed.
+
+Start with the CAI namespace checks for startup, speech, loading and cross-context state. Then work through ordinary gameplay sections, followed by World Builder, multiplayer, scenarios and supported mods where available. Previously confirmed browser, formatting, game-state and research checks remain closed; later cross-cutting checks here still apply.
+
+For results, identify the section/check, game expansion or scenario, enabled supported mods, and whether it passed, failed or was unavailable. For failures, include the action sequence, expected and actual speech/behavior, and relevant Lua.log errors when available. Unavailable variants remain unverified, not passed.
+
+The pre-existing missing audio manifest asset and ProductionManager/multi-queue are separate scope.
+
 ## Trade consolidation
 
 Run the common checks with vanilla trade screens and with Better Trade Screen where available.
@@ -112,7 +122,7 @@ Run with ordinary ProductionPanel and with BBG/Babylon content where available.
 - [ ] Expand several nested tree/submenu levels, collapse the parent and reopen it; confirm descendants start collapsed and navigation remains usable.
 - [ ] Check religion lens plot information and scanner religion labels, including unnamed/unavailable religion data where possible.
 
-Implementation stages finished on 2026-10-05. This is the complete deferred checklist for handoff; unchecked items remain unverified. The known missing audio manifest asset is a separate packaging decision.
+The main implementation audit finished on 2026-10-05; the two additional stages below finished on 2026-10-06. All unchecked items remain unverified.
 
 ## CAI namespace migration
 
