@@ -23,6 +23,13 @@ controls/lifecycle are mocked; in-game acceptance is recorded separately.
 
 ## Setup
 
+Coastal raid description experiment (2026-10-07): full repository verification
+passed. `Test-WorldInputModes.lua` now passes 843 assertions, including 19 added
+checks for cursor coordinates, selected unit, query flags, localized engine
+description order, absent results/descriptions, invalid targets and live reward
+updates. These use mocked operation results; native coastal raid reward support
+remains an in-game check in `docs/refactor-game-tests.md`.
+
 Install Visual Studio or Visual Studio Build Tools with the Desktop development with C++ workload. Then run:
 
 ```powershell

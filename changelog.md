@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Added
+
+- Coastal raid interface information includes target descriptions supplied by the game, including rewards when available.
+
 ### Fixed
 
 - Popups retain accessibility focus when ordinary panels open afterward.

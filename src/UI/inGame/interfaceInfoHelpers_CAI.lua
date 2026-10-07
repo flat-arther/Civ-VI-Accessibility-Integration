@@ -997,6 +997,36 @@ local function BuildSimpleTargetValidityInterfaceInfo(plot)
         or "LOC_CAI_PLOT_INTERFACE_INVALID_TARGET") }
 end
 
+local function BuildCoastalRaidInterfaceInfo(plot)
+    local lines = BuildSimpleTargetValidityInterfaceInfo(plot)
+    if lines == nil or CAIInterfaceTargets.GetTargetAtPlot(plot) == nil then return lines end
+
+    local unit = UI.GetHeadSelectedUnit()
+    if unit == nil then
+        print("CAI: Coastal raid interface info has no selected unit")
+        return lines
+    end
+
+    local parameters = {
+        [UnitOperationTypes.PARAM_X] = plot:GetX(),
+        [UnitOperationTypes.PARAM_Y] = plot:GetY(),
+    }
+    -- Read the engine's live description for this target, as UnitPanel does
+    -- for normal pillaging. Do not calculate or cache reward amounts.
+    local _, results = UnitManager.CanStartOperation(unit, UnitOperationTypes.COASTAL_RAID,
+        nil, parameters, OperationResultsTypes.NO_TARGETS)
+    if results == nil then return lines end
+
+    local actionName = results[UnitOperationResults.ACTION_NAME]
+    if actionName ~= nil and actionName ~= "" then
+        table.insert(lines, Locale.Lookup(actionName))
+    end
+    for _, description in ipairs(results[UnitOperationResults.ADDITIONAL_DESCRIPTION] or {}) do
+        table.insert(lines, Locale.Lookup(description))
+    end
+    return lines
+end
+
 local function BuildCombatPreviewInterfaceInfo(plot, isExplicitSpeech)
     if isExplicitSpeech then
         LuaEvents.CAISpeakCombatPreview()
@@ -1185,7 +1215,7 @@ InterfaceInfoHelpers[InterfaceModeTypes.DISTRICT_RANGE_ATTACK] = BuildCombatPrev
 InterfaceInfoHelpers[InterfaceModeTypes.AIR_ATTACK] = BuildCombatPreviewInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.WMD_STRIKE] = BuildSimpleTargetValidityInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.ICBM_STRIKE] = BuildSimpleTargetValidityInterfaceInfo
-InterfaceInfoHelpers[InterfaceModeTypes.COASTAL_RAID] = BuildSimpleTargetValidityInterfaceInfo
+InterfaceInfoHelpers[InterfaceModeTypes.COASTAL_RAID] = BuildCoastalRaidInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.DISTRICT_PLACEMENT] = BuildDistrictPlacementInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.BUILDING_PLACEMENT] = BuildWonderPlacementInterfaceInfo
 InterfaceInfoHelpers[InterfaceModeTypes.DEPLOY] = BuildTargetValidityInterfaceInfo
