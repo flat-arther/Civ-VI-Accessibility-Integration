@@ -4,25 +4,18 @@
 
 - Coastal raid interface information announces the target's pillage reward type without amounts.
 
-### Fixed
-
-- Popups retain accessibility focus when ordinary panels open afterward.
-- Closing frontend setup pickers returns focus to their opening controls.
-- Restored World Scanner entries, category navigation, search, and category management after loading a game.
-- The production panel loads Heroes support only when the Babylon pack and Heroes mode are active.
-- Closing Settings or scanner category management restores usable focus when the original item has been rebuilt or removed.
-- Map tack labels remain available if Detailed Map Tacks fails to supply its extra information.
-
-- Creating a Play By Cloud game from a save restores accessibility while retaining the save's other content, and waits for loading to finish before opening the player lobby.
-- Lobby player lists keep current controls and preserve navigation when map size or player slots change.
-
-- The B geography readout says "Rivers:" once before listing river names, edges, and flow, instead of repeating "River(s):" for each river.
+### Changed
 
 - Message buffer entries introduce locations with "at" or its equivalent in every supported UI language.
 
-- Scanner search and category names, and crisis detail cleanup, preserve non-Latin characters when trimming whitespace.
-- Leading whitespace cleanup in report and top-panel readouts preserves non-Latin characters across game languages.
-- The accessible lens list can be closed by pressing its opening shortcut again without an error.
+### Fixed
+
+- The production panel loads Heroes support only when the Babylon pack and Heroes mode are active.
+- Closing Settings or scanner category management restores usable focus when the original item has been rebuilt or removed.
+- Map tack labels remain available if Detailed Map Tacks fails to supply its extra information.
+- Creating a Play By Cloud game from a save restores accessibility while retaining the save's other content, and waits for loading to finish before opening the player lobby.
+- Lobby player lists keep current controls and preserve navigation when map size or player slots change.
+- The B geography readout says "Rivers:" once before listing river names, edges, and flow, instead of repeating "River(s):" for each river.
 
 ## [1.6.0] - 2026-09-30
 
