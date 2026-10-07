@@ -2,7 +2,7 @@
 
 ### Added
 
-- Coastal raid interface information includes target descriptions supplied by the game, including rewards when available.
+- Coastal raid interface information announces the target's pillage reward type without amounts.
 
 ### Fixed
 

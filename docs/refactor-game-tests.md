@@ -88,7 +88,7 @@ These existing checks are retained alongside the refactor checklist so they are 
 
 ## WorldInput interface modes
 
-- [ ] Coastal raid: read interface info on several valid targets and check whether the game supplies reward amounts. Compare the announced description with the result of raiding, including policy/promotion bonuses where available. Move between targets to check live updates; invalid targets must retain their validity readout without stale rewards. Confirm normal raid execution, war confirmation and cancellation still work. Engine reward-description support remains unverified.
+- [ ] Coastal raid category readout: interface info should announce the target's pillage reward type (Gold, Faith, Science, Culture or healing) without amounts. Check improvement/district targets, moving between targets, and invalid/already pillaged targets without stale rewards; confirm raid execution, war confirmation and cancellation still work. The previous engine-description experiment was unsuccessful per user report. Actual amounts/world-view announcements are deferred.
 - [ ] Enter/cancel Move To and confirm valid movement, including combat/war confirmation and cancellation. Verify movement readiness clears on mode exit.
 - [ ] Check valid and invalid unit, city and district ranged targets; invalid targets should announce rejection without attacking.
 - [ ] Check available air/rebase/deploy, formation, special ability and WMD/ICBM modes. Confirm the intended target once, preserve native confirmation dialogs, then cancel normally.

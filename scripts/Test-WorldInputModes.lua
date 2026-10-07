@@ -68,46 +68,51 @@ for _,rule in ipairs({'standard','RULESET_SCENARIO_CIV_ROYALE','RULESET_SCENARIO
  end
 end
 assert(loadfile('src/UI/inGame/WorldInput_CAI.lua'))
--- Exercise the production coastal raid reader with target-specific engine results.
+-- Exercise the production coastal raid reader with live target definitions.
 do
  local helperSource=read('src/UI/inGame/interfaceInfoHelpers_CAI.lua')
  local first=assert(helperSource:find('local function BuildSimpleTargetValidityInterfaceInfo',1,true))
  local last=assert(helperSource:find('local function BuildCombatPreviewInterfaceInfo',first,true))
- local targetValid, selected, results=true, {}, nil
- local queries=0
- local plot={GetX=function() return 12 end,GetY=function() return 7 end}
+ local targetValid, improvement, district, pillaged=true, -1, -1, false
+ local plot={GetImprovementType=function() return improvement end,
+  GetDistrictType=function() return district end,IsImprovementPillaged=function() return pillaged end}
+ local definitions={Improvements={},Districts={},Yields={}}
+ for _,name in ipairs({'GOLD','FAITH','SCIENCE','CULTURE'}) do
+  definitions.Yields['YIELD_'..name]={Name='LOC_'..name}
+ end
  local env=setmetatable({
   CAIInterfaceTargets={GetTargetAtPlot=function() return targetValid and {} or nil end},
-  UI={GetHeadSelectedUnit=function() return selected end},
-  UnitOperationTypes={COASTAL_RAID='raid',PARAM_X='x',PARAM_Y='y'},
-  UnitOperationResults={ACTION_NAME='name',ADDITIONAL_DESCRIPTION='description'},
-  OperationResultsTypes={NO_TARGETS='noTargets'},
+  GameInfo=definitions,
   Locale={Lookup=function(text) return 'localized:'..text end},
-  UnitManager={CanStartOperation=function(unit,operation,target,parameters,flags)
-   queries=queries+1
-   check(unit==selected and operation=='raid','raid queries selected unit')
-   check(target==nil and parameters.x==12 and parameters.y==7,'raid queries cursor coordinates')
-   check(flags=='noTargets','raid requests description without target enumeration')
-   return true,results
-  end},
+  UnitManager={CanStartOperation=function() error('reward reader must not query operation descriptions') end},
  },{__index=_G})
  local build=assert(load(helperSource:sub(first,last-1)..'\nreturn BuildCoastalRaidInterfaceInfo',
   '@coastal raid interface reader','t',env))()
- check(build(nil)==nil and queries==0,'nil plot skips query')
+ check(build(nil)==nil,'nil plot has no interface info')
  targetValid=false
- check(build(plot)[1]=='localized:LOC_CAI_PLOT_INTERFACE_INVALID_TARGET' and queries==0,'invalid plot skips rewards')
+ check(build(plot)[1]=='localized:LOC_CAI_PLOT_INTERFACE_INVALID_TARGET','invalid plot retains validity')
  targetValid=true
  local lines=build(plot)
- check(#lines==1 and lines[1]=='localized:LOC_CAI_PLOT_INTERFACE_VALID','missing results retains validity')
- results={name='Raid',description={'100 Gold','50 Faith'}}
- lines=build(plot)
- check(#lines==4 and lines[2]=='localized:Raid' and lines[3]=='localized:100 Gold'
-  and lines[4]=='localized:50 Faith','engine name and reward lines localized in order')
- results={description={'175 Gold'}}
- lines=build(plot)
- check(#lines==2 and lines[2]=='localized:175 Gold','reward reread live without action name')
- results={name=''}
- check(#build(plot)==1,'empty name and absent descriptions retain validity')
+ check(#lines==1 and lines[1]=='localized:LOC_CAI_PLOT_INTERFACE_VALID','capture-only target has no pillage yield')
+ improvement=1
+ for _,name in ipairs({'GOLD','FAITH','SCIENCE','CULTURE'}) do
+  definitions.Improvements[1]={PlunderType='PLUNDER_'..name,PlunderAmount=999}
+  lines=build(plot)
+  check(#lines==2 and lines[2]=='localized:LOC_'..name,'live improvement reward type without amount: '..name)
+ end
+ definitions.Improvements[1]={PlunderType='PLUNDER_HEAL'}
+ check(build(plot)[2]=='localized:LOC_TYPE_TRAIT_PILLAGE_AWARD_HEALING','healing reward localized')
+ pillaged=true
+ check(#build(plot)==1,'pillaged improvement has no reward')
+ improvement=-1; district=2
+ definitions.Districts[2]={PlunderType='PLUNDER_SCIENCE'}
+ check(build(plot)[2]=='localized:LOC_SCIENCE','district reward type read live')
+ definitions.Districts[2]={PlunderType='NO_PLUNDER'}
+ check(#build(plot)==1,'no-plunder target has no yield')
+ definitions.Districts[2]={}
+ check(#build(plot)==1,'absent plunder type has no yield')
+ district=-1; improvement=1; pillaged=false; targetValid=false
+ check(#build(plot)==1,'invalid target never announces reward')
  check(helperSource:find('InterfaceInfoHelpers[InterfaceModeTypes.COASTAL_RAID] = BuildCoastalRaidInterfaceInfo',1,true)~=nil,
   'coastal mode uses reward reader')
 end

@@ -21,14 +21,18 @@ restoration. WidgetHarness now uses the real Low=100 and
 Medium=500 enum values, with High/Current available for these cases. Native
 controls/lifecycle are mocked; in-game acceptance is recorded separately.
 
-## Setup
+## Coastal raid reward categories (2026-10-07)
 
-Coastal raid description experiment (2026-10-07): full repository verification
-passed. `Test-WorldInputModes.lua` now passes 843 assertions, including 19 added
-checks for cursor coordinates, selected unit, query flags, localized engine
-description order, absent results/descriptions, invalid targets and live reward
-updates. These use mocked operation results; native coastal raid reward support
-remains an in-game check in `docs/refactor-game-tests.md`.
+The engine-description experiment was unsuccessful in the user's game and has
+been replaced by live improvement/district `PlunderType` categories. The focused
+tests cover each supported yield, healing, already pillaged improvements,
+capture-only/no-plunder targets, invalid targets and live category changes,
+without amounts or operation-description queries. Game validation is recorded
+in `docs/refactor-game-tests.md`; actual reward amounts/world-view speech are deferred.
+Full repository verification passed, including 838 interface-mode assertions
+(14 category-reader checks), Lua syntax and manifest/XML checks.
+
+## Setup
 
 Install Visual Studio or Visual Studio Build Tools with the Desktop development with C++ workload. Then run:
 

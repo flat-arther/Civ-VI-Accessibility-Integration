@@ -1001,28 +1001,29 @@ local function BuildCoastalRaidInterfaceInfo(plot)
     local lines = BuildSimpleTargetValidityInterfaceInfo(plot)
     if lines == nil or CAIInterfaceTargets.GetTargetAtPlot(plot) == nil then return lines end
 
-    local unit = UI.GetHeadSelectedUnit()
-    if unit == nil then
-        print("CAI: Coastal raid interface info has no selected unit")
-        return lines
+    -- Use the same reward categories as the Civilopedia. Amounts and extra
+    -- rewards granted by abilities/scripts are left to post-raid announcements.
+    local improvementType = plot:GetImprovementType()
+    local districtType = plot:GetDistrictType()
+    local definition
+    if improvementType ~= -1 and not plot:IsImprovementPillaged() then
+        definition = GameInfo.Improvements[improvementType]
+    elseif districtType ~= -1 then
+        definition = GameInfo.Districts[districtType]
     end
+    if definition == nil then return lines end
 
-    local parameters = {
-        [UnitOperationTypes.PARAM_X] = plot:GetX(),
-        [UnitOperationTypes.PARAM_Y] = plot:GetY(),
-    }
-    -- Read the engine's live description for this target, as UnitPanel does
-    -- for normal pillaging. Do not calculate or cache reward amounts.
-    local _, results = UnitManager.CanStartOperation(unit, UnitOperationTypes.COASTAL_RAID,
-        nil, parameters, OperationResultsTypes.NO_TARGETS)
-    if results == nil then return lines end
-
-    local actionName = results[UnitOperationResults.ACTION_NAME]
-    if actionName ~= nil and actionName ~= "" then
-        table.insert(lines, Locale.Lookup(actionName))
-    end
-    for _, description in ipairs(results[UnitOperationResults.ADDITIONAL_DESCRIPTION] or {}) do
-        table.insert(lines, Locale.Lookup(description))
+    local plunderType = definition.PlunderType
+    if plunderType == "PLUNDER_HEAL" then
+        table.insert(lines, Locale.Lookup("LOC_TYPE_TRAIT_PILLAGE_AWARD_HEALING"))
+    elseif plunderType ~= nil and plunderType ~= "NO_PLUNDER" then
+        local yieldType = plunderType:gsub("^PLUNDER_", "YIELD_")
+        local yield = GameInfo.Yields[yieldType]
+        if yield ~= nil then
+            table.insert(lines, Locale.Lookup(yield.Name))
+        else
+            print("CAI: Unknown coastal raid reward type: " .. plunderType)
+        end
     end
     return lines
 end
