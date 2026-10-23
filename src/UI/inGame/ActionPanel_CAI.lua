@@ -24,9 +24,7 @@ local CAI_SPEAK_TURN_BLOCKERS_ACTION = Input.GetActionId("ActionPanelSpeakTurnBl
 local CAI_OPEN_TURN_BLOCKERS_ACTION = Input.GetActionId("ActionPanelOpenTurnBlockers")
 local CAI_SPEAK_ERA_AGE_ACTION = Input.GetActionId("ActionPanelSpeakEraAge")
 local CAI_SPEAK_ERA_SCORE_DETAILS_ACTION = Input.GetActionId("ActionPanelSpeakEraScoreDetails")
-local m_caiTutorialActionPanelAllowed = false
 local m_caiLastObservedActionTooltip = nil
-local IsTutorialActionPanelAllowed = nil
 
 
 local function ControlIsHidden(control)
@@ -53,9 +51,24 @@ local function ControlTooltip(control)
     return ""
 end
 
+-- TutorialUIRoot_CAI publishes whether the active tutorial item permits Action
+-- Panel input. A missing state stays closed during tutorial initialization.
+local function IsTutorialActionPanelAllowed()
+    if not IsTutorialRunning() then return true end
+    local state = ExposedMembers.CAI_TutorialState
+    return state ~= nil and state.ActionPanelAllowed == true
+end
+
+-- Hotkey paths announce the tutorial block instead of failing silently.
+local function CheckTutorialActionPanelAllowed()
+    if IsTutorialActionPanelAllowed() then return true end
+    Speak(Locale.Lookup("LOC_CAI_UI_BLOCKED_BY_TUTORIAL"))
+    return false
+end
+
 local function CanSpeakCurrentAction()
     if ContextPtr:IsHidden() then return false end
-    if IsTutorialActionPanelAllowed ~= nil and not IsTutorialActionPanelAllowed() then return false end
+    if not IsTutorialActionPanelAllowed() then return false end
 
     local playerID = Game.GetLocalPlayer()
     if playerID == nil or playerID < 0 then return false end
@@ -90,13 +103,6 @@ local function SpeakCurrentActionTooltip(force, onDemand)
     if onDemand or ShouldAutoSpeakCurrentAction() then
         Speak(tooltip)
     end
-end
-
-IsTutorialActionPanelAllowed = function()
-    if type(IsTutorialRunning) == "function" and IsTutorialRunning() then
-        return m_caiTutorialActionPanelAllowed
-    end
-    return true
 end
 
 local function IsActionPanelInputEnabled()
@@ -449,11 +455,13 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     if ContextPtr:IsHidden() then return end
 
     if actionId == CAI_SPEAK_TURN_BLOCKERS_ACTION then
+        if not CheckTutorialActionPanelAllowed() then return end
         SpeakCurrentActionTooltip(true, true)
         return
     end
 
     if actionId == CAI_OPEN_TURN_BLOCKERS_ACTION then
+        if not CheckTutorialActionPanelAllowed() then return end
         OpenTurnBlockerList()
         return
     end
@@ -477,6 +485,7 @@ OnInputActionStarted = WrapFunc(OnInputActionTriggered, function(orig, actionId)
     end
 
     if actionId == CAI_END_TURN_ACTION or actionId == END_TURN_ACTION then
+        if not CheckTutorialActionPanelAllowed() then return end
         if not IsEndTurnActionEnabled() then return end
         local playerID = Game.GetLocalPlayer()
         local player = Players[playerID]
@@ -516,10 +525,6 @@ function OnCAIActionPanelInputHandler(inputStruct)
     end
     return false
 end
-
-LuaEvents.CAI_TutorialActionPanelAllowed.Add(function(isAllowed)
-    m_caiTutorialActionPanelAllowed = isAllowed == true
-end)
 
 LateInitialize = WrapFunc(LateInitialize, function(orig, ...)
     orig(...)
