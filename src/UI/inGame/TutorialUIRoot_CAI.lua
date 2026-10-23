@@ -32,12 +32,16 @@ local function EnableWarriorFreeRoamActions()
     EnableUnitAction("UNITCOMMAND_CANCEL", "UNIT_WARRIOR")
 end
 
+-- The action restriction disables the Unit Panel button; the map restriction
+-- blocks keyboard map movement, which follows vanilla WorldInput's map rules.
 local function DisableFirstSettlerMovement()
     DisableUnitAction("UNITOPERATION_MOVE_TO", "UNIT_SETTLER")
+    AddMapUnitMoveRestriction("UNIT_SETTLER")
 end
 
 local function EnableFirstSettlerMovement()
     EnableUnitAction("UNITOPERATION_MOVE_TO", "UNIT_SETTLER")
+    RemoveMapUnitMoveRestriction("UNIT_SETTLER")
 end
 
 local function EnableBuilderFormation()
@@ -460,11 +464,32 @@ local function RegisterNativeTutorialCallouts()
     )
 end
 
+local function HasUITrigger(item, triggerName)
+    if not item or not item.UITriggers then return false end
+
+    for _, trigger in ipairs(item.UITriggers) do
+        if trigger == triggerName then
+            return true
+        end
+    end
+
+    return false
+end
+
+-- Action Panel input is allowed with no active item, or when the active item
+-- shows the Action Panel. Published with the rest of the state so ActionPanel
+-- reads it live, including after loading a tutorial save with no active item.
+local function IsActionPanelAllowed()
+    if activeItem == nil or #activeItem.UITriggers == 0 then return true end
+    return HasUITrigger(activeItem, "ActionPanel")
+end
+
 local function PublishTutorialState()
     local state = {
         ActiveItemId = activeItem and activeItem.ID or nil,
         DetailedItemId = detailedItem and detailedItem.ID or nil,
         HasDetailedItem = detailedItem ~= nil,
+        ActionPanelAllowed = IsActionPanelAllowed(),
         UITriggers = {},
         EnabledControlIds = {},
         EnabledControlHashes = {},
@@ -485,28 +510,6 @@ local function PublishTutorialState()
     ExposedMembers.CAI_TutorialState = state
 end
 
-local function HasUITrigger(item, triggerName)
-    if not item or not item.UITriggers then return false end
-
-    for _, trigger in ipairs(item.UITriggers) do
-        if trigger == triggerName then
-            return true
-        end
-    end
-
-    return false
-end
-
-local function NotifyActionPanelAllowed()
-    local allowed = false
-    if activeItem ~= nil and #activeItem.UITriggers > 0 then
-        if HasUITrigger(activeItem, "ActionPanel") then allowed = true end
-    else
-        allowed = true
-    end
-    LuaEvents.CAI_TutorialActionPanelAllowed(allowed)
-end
-
 ActivateItem = WrapFunc(ActivateItem, function(orig, item)
     ClearScreenCallouts()
     ClearDetailedInputRegistration()
@@ -521,7 +524,6 @@ ActivateItem = WrapFunc(ActivateItem, function(orig, item)
     orig(item)
     local hook = TutorialItemHooks[item.ID]
     if hook and hook.OnActivate then hook.OnActivate() end
-    NotifyActionPanelAllowed()
 end)
 
 DeActivateItem = WrapFunc(DeActivateItem, function(orig, item)
@@ -537,7 +539,6 @@ DeActivateItem = WrapFunc(DeActivateItem, function(orig, item)
         activeItem = nil
         detailedItem = nil
         PublishTutorialState()
-        NotifyActionPanelAllowed()
     end
 end)
 
@@ -548,7 +549,6 @@ RaiseDetailedTutorial = WrapFunc(RaiseDetailedTutorial, function(orig, item)
     local result = orig(item)
     isRaisingDetailedTutorial = false
     if activeItem ~= item then return result end
-    NotifyActionPanelAllowed()
     LuaEvents.CAI_TutorialDetailedControlsReady()
     BufferAdvisorCallout(item)
     FlushPendingControlCallouts()

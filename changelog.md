@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+### Fixed
+
+- After loading a tutorial save, End Turn and the turn blocker keys work again. When the tutorial blocks them, they now say so instead of staying silent.
+- In the tutorial, units can be moved with the keyboard wherever mouse movement is allowed. Warriors could previously become impossible to move for the rest of the tutorial.
+
 ## [1.6.0] - 2026-09-30
 
 ### Added
